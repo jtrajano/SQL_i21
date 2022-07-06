@@ -33,7 +33,8 @@ BEGIN CATCH
 			@ErrorMessage nvarchar(4000),
 			@ErrorState INT,
 			@ErrorLine  INT,
-			@ErrorProc nvarchar(200);
+			@ErrorProc nvarchar(200),
+			@dtmCurrentDate DATETIME = GETUTCDATE()
 
 	-- Grab error information from SQL functions
 	SET @ErrorSeverity = ERROR_SEVERITY()
@@ -54,14 +55,20 @@ BEGIN CATCH
 	IF (XACT_STATE()) = -1
 	BEGIN
 		ROLLBACK TRANSACTION
+		INSERT INTO tblICBackup (dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, dtmEnd, strItemNo, strCategoryCode, ysnFailed) 
+		SELECT @dtmCurrentDate, @intEntityUserId, 'Rebuild Inventory', 'Rebuild Failed', 0, @dtmCurrentDate, @dtmCurrentDate, @strItemNo, @strCategoryCode, 1
 	END
 	ELSE IF (XACT_STATE()) = 1 AND @@TRANCOUNT = 0
 	BEGIN
 		ROLLBACK TRANSACTION
+		INSERT INTO tblICBackup (dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, dtmEnd, strItemNo, strCategoryCode, ysnFailed) 
+		SELECT @dtmCurrentDate, @intEntityUserId, 'Rebuild Inventory', 'Rebuild Failed', 0, @dtmCurrentDate, @dtmCurrentDate, @strItemNo, @strCategoryCode, 1
 	END
 	ELSE IF (XACT_STATE()) = 1 AND @@TRANCOUNT > 0
 	BEGIN
 		ROLLBACK TRANSACTION  
+		INSERT INTO tblICBackup (dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, dtmEnd, strItemNo, strCategoryCode, ysnFailed) 
+		SELECT @dtmCurrentDate, @intEntityUserId, 'Rebuild Inventory', 'Rebuild Failed', 0, @dtmCurrentDate, @dtmCurrentDate, @strItemNo, @strCategoryCode, 1
 	END
 
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)

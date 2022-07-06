@@ -48,7 +48,7 @@ SET @dtmDateFromLocal			= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 
 --GET COMPANY DETAILS
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
+		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS
@@ -72,7 +72,7 @@ CREATE TABLE #CUSTOMERS (
 	, dblCreditAvailable			NUMERIC(18, 6)
 	, dblARBalance					NUMERIC(18, 6)
 	, ysnStatementCreditLimit		BIT
-	, strComment					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	, strComment					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 )
 CREATE TABLE #STATEMENTREPORT (
 	   intEntityCustomerId			INT NULL
@@ -103,7 +103,7 @@ CREATE TABLE #STATEMENTREPORT (
 	 , dblBudgetPastDue				NUMERIC(18, 6) NULL DEFAULT 0
 	 , dblBudgetNowDue				NUMERIC(18, 6) NULL DEFAULT 0
 	 , ysnStatementCreditLimit		BIT
-	 , strComment					NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL
+	 , strComment					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 )
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_BUDGETREMINDER] ON [#STATEMENTREPORT]([intEntityCustomerId], [intInvoiceId], [strTransactionType], [strType])
 CREATE TABLE #GLACCOUNTS (intAccountId	INT	NOT NULL PRIMARY KEY)
@@ -254,7 +254,7 @@ IF @strLocationNameLocal IS NOT NULL
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry 
+SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 

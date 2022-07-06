@@ -1259,7 +1259,115 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		121,
 		   [strPrefix]						=		N'SCH'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Agronomy')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
+	SELECT [intModuleId]					=		122,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Agronomy',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		122,
+		   [strPrefix]						=		N'AG'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Power BI')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
+	SELECT [intModuleId]					=		123,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Power BI',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		123,
+		   [strPrefix]						=		N'PBI'
 	
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing'
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'IDP')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
+	SELECT [intModuleId]					=		125,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'IDP',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		123,
+		   [strPrefix]						=		N'IDP'
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021')
+		DELETE FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021'
+	
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Language Translation')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Language Translation'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Multi-Language')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		126,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Multi-Language',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		124,
+		   [strPrefix]						=		N'ML',
+		   [ysnAddonComponent]              =       1
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Transaction Traceability')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		127,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Transaction Traceability',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		125,
+		   [strPrefix]						=		N'TT',
+		   [ysnAddonComponent]              =       1
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Report Hierarchy')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		128,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Report Hierarchy',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		126,
+		   [strPrefix]						=		N'RH',
+		   [ysnAddonComponent]              =       1
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Automated Quoting')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		129,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Automated Quoting',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		127,
+		   [strPrefix]						=		N'AQ',
+		   [ysnAddonComponent]              =       1
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'iSite')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		130,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'iSite',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		128,
+		   [strPrefix]						=		N'IS',
+		   [ysnAddonComponent]              =       1
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Trade Finance')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		131,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Trade Finance',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		129,
+		   [strPrefix]						=		N'TRF',
+		   [ysnAddonComponent]              =       0
+
+
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO

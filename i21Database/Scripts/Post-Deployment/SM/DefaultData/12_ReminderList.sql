@@ -1512,5 +1512,102 @@ ELSE
 GO
 --END RESPONSIBLE PARTY TASK
 
+-- BEGIN Inventory Reminders
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Imported' AND [strType] = N'Inventory Receipt')
+BEGIN 
+	DECLARE @intMaxSortOrder INT
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		, [strType]
+		, [strMessage]
+		, [strQuery]
+		, [strNamespace]
+		, [intSort]
+	)
+	SELECT 
+		[strReminder] = 'Imported'
+		, [strType] = 'Inventory Receipt'
+		, [strMessage] = '{0} imported.'
+		, [strQuery] = 
+'SELECT 
+	r.strReceiptNumber, r.ysnPosted, r.dtmDateCreated
+FROM 
+	tblICInventoryReceipt r INNER JOIN tblSMCompanyLocation cl 
+		ON r.intLocationId = cl.intCompanyLocationId 
+	CROSS APPLY (
+		SELECT 
+			u.strUserName, u.intEntityId 
+		FROM  
+			tblSMUserSecurity u 
+		WHERE 
+			u.intEntityId = {0} 
+			and u.ysnStoreManager = 1 
+			and u.intCompanyLocationId = cl.intCompanyLocationId 
+	) u
+WHERE 
+	r.strDataSource = ''EdiGenerateReceipt'' 
+	AND (r.ysnPosted = 0 OR r.ysnPosted IS NULL)
+'
+		, [strNamespace] = 'Inventory.view.InventoryReceipt?showSearch=true&searchCommand=reminderSearchConfig'
+		, [intSort] = ISNULL(@intMaxSortOrder, 0) + 1
+END 
 
 GO
+-- END Inventory Reminders
+
+-- BEGIN Bank Transfer Reminders
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMReminderList WHERE strReminder='Unposted' AND strType='Forex Bank Transfer')
+BEGIN
+	DECLARE @intMaxSortOrder INT 
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	INSERT INTO tblSMReminderList(strQuery, strReminder,strType, strMessage, strParameter,intSort, strNamespace)
+	VALUES('SELECT intTransactionId from vyuCMBTNotifyPosting  where intEntityId={0}'
+	,'Unposted'
+	,'Forex Bank Transfer'
+	,'{0} {1} {2} Unposted'
+	,'intEntityId'
+	,@intMaxSortOrder
+	,'CashManagement.view.BankTransfer?activeTab=For Accrual Posting&showSearch=true&intEntityId={0}')
+END
+ELSE
+	UPDATE tblSMReminderList
+	set strQuery = 'select intTransactionId from vyuCMBTNotifyPosting where intEntityId={0}'
+	, strReminder = 'Unposted'
+	, strType = 'Forex Bank Transfer'
+	, strMessage = '{0} {1} {2} Unposted'
+	, strParameter = 'intEntityId'
+	, strNamespace = 'CashManagement.view.BankTransfer?activeTab=For Accrual Posting&showSearch=true&intEntityId={0}'
+	WHERE strType = 'Forex Bank Transfer'
+GO
+
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMReminderList WHERE strReminder='Unposted' AND strType='Forex Bank Transfer Swap')
+BEGIN
+	DECLARE @intMaxSortOrder INT 
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	INSERT INTO tblSMReminderList(strQuery, strReminder,strType, strMessage, strParameter,intSort, strNamespace)
+	VALUES('SELECT intBankSwapId from vyuCMBTNotifySwapPosting  where intEntityId={0}'
+	,'Unposted'
+	,'Forex Bank Transfer Swap'
+	,'{0} {1} {2} Unposted'
+	,'intEntityId'
+	,@intMaxSortOrder
+	,'CashManagement.view.BankSwap?activeTab=For Accrual Posting&showSearch=true&intEntityId={0}')
+	
+END
+ELSE
+	UPDATE tblSMReminderList
+	set strQuery = 'select intBankSwapId from vyuCMBTNotifySwapPosting where intEntityId={0}'
+	, strReminder = 'Unposted'
+	, strType = 'Forex Bank Transfer Swap'
+	, strMessage = '{0} {1} {2} Unposted'
+	, strParameter = 'intEntityId'
+	, strNamespace = 'CashManagement.view.BankSwap?activeTab=For Accrual Posting&showSearch=true&intEntityId={0}'
+	WHERE strType = 'Forex Bank Transfer Swap'
+
+GO
+-- END Bank Transfer Reminders
+

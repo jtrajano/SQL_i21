@@ -21,6 +21,11 @@
     [intUnitMeasureId] INT NULL, 
     [strMarketValuation] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,  
 	[intM2MBasisDetailRefId] INT NULL,
+	[intOriginPortId] INT NULL,
+	[intDestinationPortId] INT NULL,
+	[intCropYearId] INT NULL,
+	[intStorageLocationId] INT NULL,
+	[intStorageUnitId] INT NULL,
     CONSTRAINT [PK_tblRKM2MBasisDetail_intM2MBasisDetailId] PRIMARY KEY (intM2MBasisDetailId),
 	CONSTRAINT [FK_tblRKM2MBasisDetail_tblRKM2MBasis_intM2MBasisId] FOREIGN KEY([intM2MBasisId])REFERENCES [dbo].[tblRKM2MBasis] ([intM2MBasisId]) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblRKM2MBasisDetail_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),  
@@ -30,5 +35,10 @@
 	CONSTRAINT [FK_tblRKM2MBasisDetail_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY(intCompanyLocationId)REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId),
 	CONSTRAINT [FK_tblRKM2MBasisDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY(intMarketZoneId)REFERENCES [dbo].[tblARMarketZone] (intMarketZoneId),
 	CONSTRAINT [FK_tblRKM2MBasisDetail_tblSMCurrency_intCurrencyId] FOREIGN KEY(intCurrencyId)REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
-	CONSTRAINT [FK_tblRKM2MBasisDetail_tblCTContractType_intContractTypeId] FOREIGN KEY(intContractTypeId)REFERENCES [dbo].[tblCTContractType] (intContractTypeId)
+	CONSTRAINT [FK_tblRKM2MBasisDetail_tblCTContractType_intContractTypeId] FOREIGN KEY(intContractTypeId)REFERENCES [dbo].[tblCTContractType] (intContractTypeId),
+	CONSTRAINT [FK_tblRKM2MBasisDetail_tblSMCity_intOriginPortId] FOREIGN KEY (intOriginPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
+	CONSTRAINT [FK_tblRKM2MBasisDetail_tblSMCity_intDestinationPortId] FOREIGN KEY (intDestinationPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
+	CONSTRAINT [FK_tblRKM2MBasisDetail_tblCTCropYear_intCropYearId] FOREIGN KEY (intCropYearId) REFERENCES [dbo].[tblCTCropYear] (intCropYearId),
+	CONSTRAINT [FK_tblRKM2MBasisDetail_tblSMCompanyLocationSubLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] (intCompanyLocationSubLocationId),
+	CONSTRAINT [FK_tblRKM2MBasisDetail_tblICStorageLocation_intStorageUnitId] FOREIGN KEY (intStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId)
 )

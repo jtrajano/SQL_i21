@@ -186,6 +186,27 @@ GO
 PRINT('Finished removing Voided prefix in check numbers')
 GO
 
+
+PRINT('Begin correcting unposted bdep with wrong dblamount')
+GO
+--GL-7580
+ 
+	;WITH C AS(
+		SELECT  strTransactionId,(dblAmount + dblShortAmount) dblAmount, dblShortAmount, ysnPosted,
+		SUM(dblCredit-dblDebit) dblAmountDetail
+		FROM
+		tblCMBankTransaction CM JOIN tblCMBankTransactionDetail D ON D.intTransactionId = CM.intTransactionId
+		WHERE intBankTransactionTypeId=1 AND ysnPosted  = 0
+		GROUP BY strTransactionId,dblAmount,dblShortAmount,ysnPosted
+		)
+		UPDATE CM set dblAmount = dblAmountDetail - a.dblShortAmount from C a join tblCMBankTransaction CM 
+		ON a.strTransactionId = CM.strTransactionId 
+		WHERE a.dblAmount <> dblAmountDetail
+	GO
+
+PRINT('Finished correcting unposted bdep with wrong dblamount')
+GO
+
 PRINT('Begin linking CM transactions to AP')
 GO
 UPDATE CM SET intAPPaymentId = AP.intPaymentId
@@ -212,6 +233,35 @@ AND CHARINDEX('defaultSort', strGridLayoutFields   ) = 0
 GO
 
 PRINT ('Finished removing Grid Layouts in Process Payments archive grid without batch id column')
+GO
+
+
+declare @i int, @s nvarchar(500)
+select @i = max(intBatchId)+ 1 from tblCMBankFileGenerationLog
+select @i = ISNULL(@i, 1)
+
+if not exists(select 1  from sys.sequences where name = 'sqCMACHBatchId')
+begin 
+
+set @s =
+'CREATE SEQUENCE [dbo].[sqCMACHBatchId] 
+ AS [int]
+ START WITH ' + cast(@i as nvarchar(9)) + '
+ INCREMENT BY 1
+ MINVALUE ' + cast(@i as nvarchar(9)) + '
+ MAXVALUE 999999999
+ CACHE 
+'
+exec (@s)
+
+end
+else
+begin 
+
+SET @s = 'alter sequence [sqCMACHBatchId] minvalue ' + CAST(@i as nvarchar(9)) + ' restart with ' + CAST(@i as nvarchar(9));
+EXEC (@s);
+end
+
 GO
 
 PRINT('/*******************  END Cash Management Data Fixess *******************/')

@@ -2,7 +2,8 @@
 CREATE PROCEDURE uspCMReconcileBankRecords
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL,
-	@intUserId AS INT
+	@intUserId AS INT,
+	@dtmDateEntered AS DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -35,7 +36,10 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
-
+		,@IMPORT_STATUS_UNPROCESSED AS INT = 0
+        ,@IMPORT_STATUS_MATCHFOUND AS INT = 1
+        ,@IMPORT_STATUS_NOMATCHFOUND AS INT = 2
+		,@IMPORT_STATUS_MULTIPLEENTRY AS INT = 3
 		-- Declare the local variables. 
 		,@dtmLog AS DATETIME 
 		
@@ -102,8 +106,14 @@ IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 --IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 
 -- Mark all CM transactions as cleared.
-UPDATE	[dbo].[tblCMBankTransaction]
-SET		dtmDateReconciled = @dtmDate
+
+--UPDATE	[dbo].[tblCMBankTransaction]
+--SET		dtmDateReconciled = @dtmDateEntered
+DECLARE @Id Id
+
+INSERT INTO @Id
+SELECT intTransactionId
+FROM tblCMBankTransaction
 WHERE	intBankAccountId = @intBankAccountId
 		AND ysnPosted = 1
 		AND ysnClr = 1
@@ -111,6 +121,23 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
 		--AND dbo.fnIsDepositEntry(strLink) = 0
 		AND strLink NOT IN (SELECT strLink COLLATE Latin1_General_CI_AS  FROM #tmpOriginDepositTransaction) --This is to improved the query by not using fnIsDespositEntry
+
+UPDATE t
+SET dtmDateReconciled =  @dtmDate
+FROM  tblCMBankTransaction t 
+JOIN @Id i on i.intId = t.intTransactionId
+
+UPDATE t
+SET dtmDateReconciled =  @dtmDate
+FROM  tblCMABRActivityMatched t 
+JOIN @Id i on i.intId = t.intTransactionId
+
+--MOVED TO DELETE
+IF EXISTS(SELECT 1 FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId AND ysnABREnable = 1)
+BEGIN
+	UPDATE tblCMABRActivity SET intImportStatus = @IMPORT_STATUS_UNPROCESSED  
+	WHERE dtmClear<=@dtmDate AND intBankAccountId=@intBankAccountId AND intImportStatus = @IMPORT_STATUS_NOMATCHFOUND
+END
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
 --=====================================================================================================================================

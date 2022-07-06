@@ -1,55 +1,26 @@
-﻿CREATE VIEW [dbo].[vyuCMBankLoan]
-as
-SELECT 
-L.strBankLoanId,
-L.intBankLoanId,
-L.dtmOpened,
-L.dtmMaturity,
-L.dtmEntered,
-L.decAnnualInterest,
-L.ysnOpen,
-L.strComments,
-L.intConcurrencyId,
-dblLoanAmount = V.dblBalance,
-V.intBankAccountId,
-V.strTransactionId,
-V.strBankAccountNo,
-U.dblBalance,
-intGLLoanAccountId = V.intGLAccountId,
-strGLLoanAccountId = V.strAccountId,
-V.strBankName,
-V.strCurrency,
-T.intCurrencyId,
-strStatus = CASE WHEN L.ysnOpen = 1 THEN  'Open' ELSE 'Closed' END COLLATE Latin1_General_CI_AS ,
-T.ysnPosted
-from tblCMBankLoan L 
-JOIN tblCMBankTransaction T
-ON L.intBankLoanId = T.intBankLoanId
-AND intBankTransactionTypeId = 52
-
-
-
-CROSS APPLY
-(
-	SELECT SUM(BB.dblDebit - BB.dblCredit) dblBalance 
-	from tblCMBankTransaction AA join tblCMBankTransactionDetail BB
-	on AA.intTransactionId = BB.intTransactionId
-	WHERE intBankLoanId = L.intBankLoanId 
-)U
-CROSS APPLY
-(
-	SELECT SUM(DD.dblDebit - DD.dblCredit) dblBalance, FF.strAccountId, EE.strBankAccountNo, CC.intBankAccountId, CC.strTransactionId, EE.strBankName
-	,EE.strCurrency, EE.intCurrencyId,DD.intGLAccountId
-	from tblCMBankTransaction CC 
-	join tblCMBankTransactionDetail DD	on CC.intTransactionId = DD.intTransactionId
-	join vyuCMBankAccount EE on EE.intBankAccountId = CC.intBankAccountId
-	join tblGLAccount FF on DD.intGLAccountId = FF.intAccountId
-	
-	 WHERE intBankLoanId = L.intBankLoanId 
-	 AND CC.intBankTransactionTypeId = 52
-	 GROUP BY CC.intBankAccountId,EE.strBankAccountNo,DD.intGLAccountId, FF.strAccountId, CC.strTransactionId,EE.strCurrency, EE.intCurrencyId, EE.strBankName
-)V
-
-
-GO
-
+﻿CREATE VIEW [dbo].[vyuCMBankLoan]  
+AS
+SELECT   
+L.*,
+BA.strBankAccountNo,  
+BA.strBankName,  
+BA.strCurrency,  
+BA.intBankId,
+strStatus = CASE WHEN L.ysnOpen = 1 THEN  'Open' ELSE 'Closed' END COLLATE Latin1_General_CI_AS,  
+strLimitType=
+CASE 
+  WHEN intLimitTypeId =1 THEN 'Contract'
+  WHEN intLimitTypeId =2 THEN 'Logistics'
+  WHEN intLimitTypeId =3 THEN 'Payables'
+  WHEN intLimitTypeId =4 THEN 'Receivables'
+  WHEN intLimitTypeId =5 THEN 'Total'
+END,
+strLoanType=
+CASE 
+  WHEN intLoanTypeId = 1 THEN 'Bank Loan'
+  WHEN intLoanTypeId = 2 THEN 'Trade Limit'
+END,
+strBorrowingFacilityId
+FROM tblCMBankLoan L
+LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = L.intBorrowingFacilityId

@@ -131,6 +131,9 @@ USING
 		,A.dtmExportedDate
 		,A.dtmDateCreated
 		,CASE WHEN GETDATE() < A.dtmDate THEN A.dtmDate ELSE GETDATE() END AS dtmOrigDateDeleted
+		,A.ysnOverrideCashFlow
+		,A.dtmCashFlowDate
+		,A.dblAverageExchangeRate
 	FROM tblAPBill A
 	OUTER APPLY (
 		SELECT TOP 1 MAX(P.dtmDatePaid) AS dtmDateDeleted
@@ -235,6 +238,7 @@ INSERT
 	,dtmExportedDate
 	,dtmDateCreated
 	,dtmOrigDateDeleted
+	,dblAverageExchangeRate
 )
 VALUES
 (
@@ -328,6 +332,7 @@ VALUES
 	,SourceData.dtmExportedDate
 	,SourceData.dtmDateCreated
 	,SourceData.dtmOrigDateDeleted
+	,SourceData.dblAverageExchangeRate
 );
 
 MERGE INTO tblAPBillDetailArchive AS destination
@@ -360,6 +365,8 @@ USING
 		,A.intLoadDetailId
 		,A.intLoadShipmentCostId
 		,A.intLoadId
+		,A.intWeightClaimId
+		,A.intWeightClaimDetailId
 		,A.intScaleTicketId
 		,A.intCCSiteDetailId
 		,A.intPrepayTypeId
@@ -447,6 +454,8 @@ INSERT
 	,intLoadDetailId
 	,intLoadShipmentCostId
 	,intLoadId
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId
 	,intCCSiteDetailId
 	,intPrepayTypeId
@@ -529,6 +538,8 @@ VALUES
 	,SourceData.intLoadDetailId
 	,SourceData.intLoadShipmentCostId
 	,SourceData.intLoadId
+	,SourceData.intWeightClaimId
+	,SourceData.intWeightClaimDetailId
 	,SourceData.intScaleTicketId
 	,SourceData.intCCSiteDetailId
 	,SourceData.intPrepayTypeId

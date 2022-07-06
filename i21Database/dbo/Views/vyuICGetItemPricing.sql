@@ -27,6 +27,7 @@ SELECT
 	ItemUOM.ysnAllowPurchase,
 	ItemUOM.ysnAllowSale,
 	ItemUOM.dblUnitQty,
+	ItemUOM.dblStandardWeight,
 	dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0),
 	dblSalePrice = ISNULL(ItemPricing.dblSalePrice * ItemUOM.dblUnitQty, 0),
 	dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice * ItemUOM.dblUnitQty, 0),

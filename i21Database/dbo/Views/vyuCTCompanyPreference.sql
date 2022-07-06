@@ -16,6 +16,7 @@ AS
 			,CP.intCleanCostCurrencyId
 			,CP.intCleanCostUOMId
 			,CP.strDefaultContractReport
+			,CP.strDefaultContractReportFuture
 			,CP.ysnShowReportLangaugeSelection
 			,CP.strDefaultAmendmentReport
 			,CP.strDefaultPricingConfirmation
@@ -74,6 +75,11 @@ AS
 			,CP.ysnDocumentByBookAndSubBook
 			,CP.ysnUpdatedAvailabilityPurchase
 			,CP.ysnUpdatedAvailabilitySales
+			,CP.ysnAllowFutureTypeContractsPurchase
+			,CP.ysnAllowFutureTypeContractsSales
+			,CP.ysnAllowAutoShortCloseFutureTypeContracts
+			,CP.strDefaultReleaseReport
+			,CP.ysnEnableReleaseInstructionsTab
 			,strCleanCostUOM = U1.strUnitMeasure
 			,strCleanCostCurrency = C1.strCurrency
 			,strDefContractStatus = CS.strContractStatus
@@ -98,19 +104,51 @@ AS
 			,CP.ysnAutoCompleteDPDeliveryDate
 			,CP.intPricingDecimals
 			,CP.strContractApprovalIncrements
+			,CP.ysnListAllCustomerVendorLocations -- CT-5315
 			,CP.ysnAllowBasisSequencePriceChangeWhenPartiallyPriced
 			,CP.ysnStayAsDraftContractUntilApproved
+			,CP.ysnCalculatePlannedAvailabilityPurchase
+			,CP.ysnCalculatePlannedAvailabilitySale
 			,CP.ysnPricingAsAmendment
 			,CP.ysnEnableHTAMultiplePricing
 			,CP.ysnAllowHeaderSaveWithNoSequence
-	FROM	tblCTCompanyPreference		CP LEFT
-	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT
-	JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId	LEFT
-	JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CP.intDefContractStatusId	LEFT
-	JOIN	tblLGContainerType			CT	ON	CT.intContainerTypeId		=	CP.intDefContainerTypeId	LEFT
-	JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CP.intDefSalespersonId		LEFT
-	JOIN	tblICItem					VI	ON	VI.intItemId				=	CP.intVoucherItemId			LEFT
-	JOIN	tblICItem					II	ON	II.intItemId				=	CP.intInvoiceItemId			LEFT
-	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId	LEFT    
-	JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule LEFT
-	JOIN	tblICItem					FB	ON	FB.intItemId				=	CP.intFreightBasisCostItemId
+			,CP.ysnCompanyLocationInContractHeader
+			,CP.ysnCalculateQualityPremium
+			,CP.ysnOptionalityPremiumDiscount
+			,CP.ysnDefaultShipperCargillFrontingDetails			
+			,CP.ysnFreightTermCost
+			,CP.ysnAutoCalculateFreightTermCost
+			,CP.intDefaultFreightItemId
+			,strDefaultFreightItem = DFI.strItemNo
+			,CP.intDefaultInsuranceItemId
+			,strDefaultInsuranceItem = DII.strItemNo
+			,CP.ysnAllowCropYearOverlap
+			,CP.ysnEnableFXFieldInContractPricing
+			,CP.ysnEnableItemQualityFields
+			,CP.intFinanceCostId
+			,CP.ysnEnableFXForwardRequestOnSequence
+			,strFinanceCost = FCI.strItemNo
+			,CP.ysnEnableBudgetForBasisPricing
+			,CP.ysnEnableVendorCertificationProgram
+			,CP.ysnEnablePackingWeightAdjustment
+			,CP.ysnEnableLetterOfCredit
+			,CP.ysnEnableOutrightPricing
+			,CP.ysnEnableDerivativeInArbitrage
+			,CP.ysnEnableFutureMonthChange
+			,CP.ysnCheckForMissingItemBookInAOPScreen
+			,CP.ysnEnableAdditionalFieldsOnSliceScreen
+			,CP.intQualityDecimals
+	FROM	tblCTCompanyPreference		CP
+	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
+	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId
+	LEFT JOIN	tblCTContractStatus			CS	ON	CS.intContractStatusId		=	CP.intDefContractStatusId
+	LEFT JOIN	tblLGContainerType			CT	ON	CT.intContainerTypeId		=	CP.intDefContainerTypeId
+	LEFT JOIN	tblEMEntity					EY	ON	EY.intEntityId				=	CP.intDefSalespersonId
+	LEFT JOIN	tblICItem					VI	ON	VI.intItemId				=	CP.intVoucherItemId
+	LEFT JOIN	tblICItem					II	ON	II.intItemId				=	CP.intInvoiceItemId
+	LEFT JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId
+	LEFT JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
+	LEFT JOIN	tblICItem					FB	ON	FB.intItemId				=	CP.intFreightBasisCostItemId
+	LEFT JOIN	tblICItem					FCI	ON	FCI.intItemId				=	CP.intFinanceCostId
+	LEFT JOIN	tblICItem					DFI	ON	DFI.intItemId				=	CP.intDefaultFreightItemId
+	LEFT JOIN	tblICItem					DII	ON	DII.intItemId				=	CP.intDefaultInsuranceItemId

@@ -35,14 +35,16 @@ BEGIN
 		,@strTransactionId = strSourceTransactionId
 		FROM #tmpACHFromCustomer ORDER BY intUndepositedFundId ASC
 	
-		UPDATE tblCMUndepositedFund SET strReferenceNo = @intEFTNextNo WHERE intUndepositedFundId = @intTransactionId AND ISNULL(strReferenceNo,'') = ''
+		--UPDATE tblCMUndepositedFund SET strReferenceNo = @intEFTNextNo WHERE intUndepositedFundId = @intTransactionId AND ISNULL(strReferenceNo,'') = ''
+
+		SELECT  @intEFTNextNo = strReferenceNo FROM  tblCMUndepositedFund WHERE intUndepositedFundId = @intTransactionId
 		
 		--Update the reference no of other module's transaction (AR Transaction)
 		UPDATE tblARPayment SET intCurrentStatus = 5 WHERE strRecordNumber = @strTransactionId
 		UPDATE tblARPayment SET strPaymentInfo = @intEFTNextNo WHERE strRecordNumber = @strTransactionId
 		UPDATE tblARPayment SET intCurrentStatus = NULL WHERE strRecordNumber = @strTransactionId
 		
-		SET @intEFTNextNo =  @intEFTNextNo + 1
+		--SET @intEFTNextNo =  @intEFTNextNo + 1
 		DELETE FROM #tmpACHFromCustomer WHERE intUndepositedFundId = @intTransactionId
 	END
 
@@ -52,7 +54,6 @@ BEGIN
 	SELECT * INTO #tmpCMBankTransactions 
 	FROM tblCMBankTransaction 
 	WHERE intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-		AND ISNULL(strReferenceNo,'') = ''
 
 	WHILE EXISTS (SELECT 1 FROM #tmpCMBankTransactions) 
 	BEGIN
@@ -63,8 +64,8 @@ BEGIN
 		,@intBankTransactionTypeId = intBankTransactionTypeId
 		FROM #tmpCMBankTransactions ORDER BY intTransactionId ASC
 	
-		UPDATE tblCMBankTransaction SET strReferenceNo = @intEFTNextNo WHERE intTransactionId = @intTransactionId AND ISNULL(strReferenceNo,'') = ''
-		
+		--UPDATE tblCMBankTransaction SET strReferenceNo = @intEFTNextNo WHERE intTransactionId = @intTransactionId AND ISNULL(strReferenceNo,'') = ''
+		SELECT  @intEFTNextNo = strReferenceNo FROM  tblCMBankTransaction WHERE intTransactionId = @intTransactionId
 		--Update the reference no of other module's transaction
 		IF @intBankTransactionTypeId = 22 OR @intBankTransactionTypeId = 122
 		BEGIN
@@ -75,7 +76,7 @@ BEGIN
 			UPDATE tblPRPaycheck SET strReferenceNo = @intEFTNextNo, ysnPrinted = 1 WHERE strPaycheckId = @strTransactionId
 		END
 
-		SET @intEFTNextNo =  @intEFTNextNo + 1
+		--SET @intEFTNextNo =  @intEFTNextNo + 1
 
 		DELETE FROM #tmpCMBankTransactions WHERE intTransactionId = @intTransactionId
 	END
@@ -83,4 +84,4 @@ BEGIN
 END
 
 --Update the Bank Account's Next EFT No.
-UPDATE tblCMBankAccount SET intEFTNextNo = @intEFTNextNo WHERE intBankAccountId = @intBankAccountId
+--UPDATE tblCMBankAccount SET intEFTNextNo = @intEFTNextNo WHERE intBankAccountId = @intBankAccountId

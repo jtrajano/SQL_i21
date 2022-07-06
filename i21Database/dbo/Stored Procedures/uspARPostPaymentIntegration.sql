@@ -16,6 +16,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal    DECIMAL(18,6) = 0
 DECLARE @ZeroBit        BIT = CAST(0 AS BIT)
 DECLARE @OneBit         BIT = CAST(1 AS BIT)
+DECLARE @strSessionId   NVARCHAR(50) = NEWID()
 
 DECLARE @PaymentIds AS Id
 DECLARE @NonZeroPaymentIds AS Id
@@ -169,7 +170,27 @@ BEGIN
     )
 
 	EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 0
-						
+
+  --DELETE INVENTORY LINK 
+	DECLARE @tblPaymentLink   Id
+
+  INSERT INTO @tblPaymentLink
+  SELECT DISTINCT intId FROM @PaymentIds
+
+  WHILE EXISTS (SELECT TOP 1 NULL FROM @tblPaymentLink)
+    BEGIN
+      DECLARE @intPaymentId     INT = NULL
+            , @strRecordNumber  NVARCHAR(100) = NULL
+
+      SELECT TOP 1 @intPaymentId    = P.intPaymentId
+                 , @strRecordNumber = P.strRecordNumber
+      FROM @tblPaymentLink PL
+      INNER JOIN tblARPayment P ON PL.intId = P.intPaymentId
+
+      EXEC dbo.[uspICDeleteTransactionLinks] @intPaymentId, @strRecordNumber, 'Receive Payment', 'Accounts Receivable'
+
+      DELETE FROM @tblPaymentLink WHERE intId = @intPaymentId
+    END
 END
 ELSE
 BEGIN
@@ -304,6 +325,141 @@ BEGIN
     WHERE ISNULL(P.[ysnInvoicePrepayment],0) = 0	
 
     EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 1
+
+    --INSERT TO TRANSACTION LINKS
+  DECLARE @tblTransactionLinks    udtICTransactionLinks
+  DECLARE @refundInvoiceId INT, @refundInvoiceNumber VARCHAR(25)
+  DECLARE @PaymentId TABLE  (intId INT)
+
+  INSERT INTO @PaymentId
+  SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [intTransactionId] IS NOT NULL
+
+  WHILE EXISTS(SELECT 1 FROM @PaymentId)
+  BEGIN
+  DECLARE @intId INT
+  SELECT @intId = intId FROM @PaymentId
+ --Refund
+  INSERT INTO @tblTransactionLinks (
+       intSrcId
+     , strSrcTransactionNo
+     , strSrcTransactionType
+     , strSrcModuleName
+     , intDestId
+     , strDestTransactionNo
+     , strDestTransactionType
+     , strDestModuleName
+     , strOperation
+   )
+  SELECT intSrcId				 = SRC.intTransactionId
+		, strSrcTransactionNo       = SRC.strTransactionNumber
+		, strSrcTransactionType     = SRC.strTransactionType
+		, strSrcModuleName          = SRC.strModuleName
+		, intDestId                 = SRC.intDestId
+		, strDestTransactionNo      = SRC.strDestTransactionNo
+		, strDestTransactionType    = 'Invoice'
+		, strDestModuleName         = 'Accounts Receivable'
+		, strOperation              = 'Process'
+	  FROM tblARPayment PAYMENT
+  INNER JOIN #ARPostPaymentHeader PH ON PAYMENT.intPaymentId = PH.intTransactionId
+	  CROSS APPLY (
+   SELECT intTransactionId	 = ARI.intInvoiceId
+	  , strTransactionNumber	 = ARI.strInvoiceNumber
+	  , strTransactionType		 = 'Invoice'
+	  , strModuleName        	 = 'Accounts Receivable'
+	  , intDestId                 = PAYMENT.intPaymentId
+	  , strDestTransactionNo      = PAYMENT.strRecordNumber
+	FROM tblARInvoice INVOICE
+	INNER JOIN tblARPaymentDetail PD ON INVOICE.intInvoiceId = PD.intInvoiceId
+	INNER JOIN tblARInvoiceDetail INVOICEDETAIL ON  INVOICE.intInvoiceId=INVOICEDETAIL.intInvoiceId
+	INNER JOIN tblARPOS POS ON POS.strReceiptNumber =  INVOICEDETAIL.strDocumentNumber
+	INNER JOIN tblARPOS POSORIGIN ON POS.intOriginalPOSTransactionId =  POSORIGIN.intPOSId
+	INNER JOIN tblARInvoice ARI ON ARI.strInvoiceNumber = POSORIGIN.strInvoiceNumber
+	INNER JOIN tblARPaymentDetail PDORIGIN ON  PDORIGIN.strTransactionNumber=ARI.strInvoiceNumber
+	INNER JOIN tblARPayment    PAYMENT  ON PAYMENT.intPaymentId=PDORIGIN.intPaymentId
+		WHERE PD.intInvoiceId IS NOT NULL
+		     AND PD.intPaymentId = @intId
+	  ) SRC
+
+	UNION ALL
+
+	SELECT intSrcId				 = SRC.intTransactionId
+		, strSrcTransactionNo       = SRC.strTransactionNumber
+		, strSrcTransactionType     = SRC.strTransactionType
+		, strSrcModuleName          = SRC.strModuleName
+		, intDestId                 = SRC.intDestId
+		, strDestTransactionNo      = SRC.strDestTransactionNo
+		, strDestTransactionType    = 'Invoice'
+		, strDestModuleName         = 'Accounts Receivable'
+		, strOperation              = 'Process'
+	  FROM tblARPayment PAYMENT
+    INNER JOIN #ARPostPaymentHeader PH ON PAYMENT.intPaymentId = PH.intTransactionId
+	  CROSS APPLY (
+		  SELECT intTransactionId	 = PAYMENT.intPaymentId
+		  , strTransactionNumber	 = PAYMENT.strRecordNumber
+		  , strTransactionType		 = 'Receive Payment'
+		  , strModuleName        	 = 'Accounts Receivable'
+		  , intDestId                 = INVOICE.intInvoiceId
+		  , strDestTransactionNo      = INVOICE.strInvoiceNumber
+		FROM tblARInvoice INVOICE
+		INNER JOIN tblARPaymentDetail PD ON INVOICE.intInvoiceId = PD.intInvoiceId
+		INNER JOIN tblARInvoiceDetail INVOICEDETAIL ON  INVOICE.intInvoiceId=INVOICEDETAIL.intInvoiceId
+		INNER JOIN tblARPOS POS ON POS.strReceiptNumber =  INVOICEDETAIL.strDocumentNumber
+		INNER JOIN tblARPOS POSORIGIN ON POS.intOriginalPOSTransactionId =  POSORIGIN.intPOSId
+		INNER JOIN tblARInvoice ARI ON ARI.strInvoiceNumber = POSORIGIN.strInvoiceNumber
+		INNER JOIN tblARPaymentDetail PDORIGIN ON  PDORIGIN.strTransactionNumber=ARI.strInvoiceNumber
+		INNER JOIN tblARPayment    PAYMENT  ON PAYMENT.intPaymentId=PDORIGIN.intPaymentId
+		WHERE PD.intInvoiceId IS NOT NULL
+			 AND PD.intPaymentId = @intId
+	  ) SRC
+
+
+  UNION ALL
+
+  SELECT intSrcId				= SRC.intTransactionId
+    , strSrcTransactionNo       = SRC.strTransactionNumber
+    , strSrcTransactionType     = SRC.strTransactionType
+    , strSrcModuleName          = SRC.strModuleName
+    , intDestId                 = PAYMENT.intPaymentId
+    , strDestTransactionNo      = PAYMENT.strRecordNumber
+    , strDestTransactionType    = 'Receive Payment'
+    , strDestModuleName         = 'Accounts Receivable'
+    , strOperation              = 'Process'
+  FROM tblARPayment PAYMENT
+    INNER JOIN #ARPostPaymentHeader PH ON PAYMENT.intPaymentId = PH.intTransactionId
+  CROSS APPLY (
+    --INVOICES
+    SELECT intTransactionId		= INVOICE.intInvoiceId
+      , strTransactionNumber	= INVOICE.strInvoiceNumber
+      , strTransactionType	  = 'Invoice'
+      , strModuleName        	= 'Accounts Receivable'
+    FROM tblARInvoice INVOICE
+    INNER JOIN tblARPaymentDetail PD ON INVOICE.intInvoiceId = PD.intInvoiceId
+    WHERE PD.intInvoiceId IS NOT NULL
+      AND PD.intPaymentId = PAYMENT.intPaymentId
+    
+    UNION ALL
+
+    --VOUCHERS
+    SELECT intTransactionId		= BILL.intBillId
+      , strTransactionNumber	= BILL.strBillId
+      , strTransactionType	  = 'Voucher'
+      , strModuleName        	= 'Purchasing'
+    FROM tblAPBill BILL
+    INNER JOIN tblARPaymentDetail PD ON BILL.intBillId = PD.intBillId
+    WHERE PD.intBillId IS NOT NULL
+      AND PD.intPaymentId = PAYMENT.intPaymentId
+  ) SRC
+
+  SELECT  @refundInvoiceId = intSrcId, @refundInvoiceNumber=strSrcTransactionNo 
+  FROM  @tblTransactionLinks   WHERE intDestId != @intId
+
+  EXEC dbo.[uspICDeleteTransactionLinks] @refundInvoiceId, @refundInvoiceNumber, 'Invoice', 'Accounts Receivable'
+  EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+
+  DELETE FROM @PaymentId WHERE intId = @intId
+
+  END
+
 END
 
 -- UPDATE PAYMENT HEADER INVOICE
@@ -456,7 +612,14 @@ INSERT INTO @PaymentStaging(intId, intInvoiceId, dblBasePayment, strTransactionN
 SELECT A.[intTransactionId], A.[intInvoiceId], A.[dblBaseAmountPaid], A.[strTransactionId], '0', '0', 1, 1, 1, getdate(), 1, 1
 FROM #ARPostPaymentDetail A 
 
-EXEC dbo.uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging
+EXEC dbo.uspARPaymentIntegration @InvoiceId, @Post, @PaymentStaging, @strSessionId
+
+
+INSERT INTO @InvoiceId(intHeaderId) 
+SELECT intHeaderId = intInvoiceId
+FROM @PaymentStaging
+
+EXEC dbo.uspARProcessTradeFinanceLog @InvoiceId, @UserId, 'Payment', 0, @Post, 1
 
 IF @Post = 0
 	BEGIN			
@@ -510,7 +673,6 @@ ELSE
 		END				
 									
 	END			
-
 
 RETURN 1
 END

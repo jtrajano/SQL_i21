@@ -26,11 +26,11 @@ SET ANSI_WARNINGS OFF;
 			,strType = a.strTransactionType
 		from
 			tblSOSalesOrder a
-			,tblEMEntity c
+			inner join tblEMEntity c on c.intEntityId = a.intEntitySalespersonId
 		where
 			a.intEntitySalespersonId is not null
 			and a.intSalesOrderId in (select b.intSalesOrderId from tblCRMOpportunityQuote b)
-			and c.intEntityId = a.intEntitySalespersonId
+			
 	),
 	activity as
 	(
@@ -41,13 +41,11 @@ SET ANSI_WARNINGS OFF;
 			,intDate = convert(int, convert(nvarchar(8), c.dtmCreated, 112))
 		from
 			tblCRMOpportunity a
-			,tblSMTransaction b
-			,tblSMActivity c
+			inner join tblSMTransaction b on b.intRecordId = a.intOpportunityId
+			inner join tblSMActivity c on c.intTransactionId = b.intTransactionId
 		where
 			a.intInternalSalesPerson is not null
-			and b.intRecordId = a.intOpportunityId
 			and b.intScreenId = (select top 1 d.intScreenId from tblSMScreen d where d.strNamespace = 'CRM.view.Opportunity')
-			and c.intTransactionId = b.intTransactionId
 	)
 	INSERT INTO tblCRMSalesRepSummaryResult
            (

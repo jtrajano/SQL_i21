@@ -1384,7 +1384,7 @@ BEGIN
 							'S'
 							,'OS'
 							)
-					ORDER BY 1
+					ORDER BY intRecordId
 				ELSE
 					SELECT TOP 1 @intId = intLotId
 						,@strType1 = strType

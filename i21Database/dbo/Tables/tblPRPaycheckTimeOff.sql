@@ -10,6 +10,7 @@
     [dblRateFactor] NUMERIC(18, 6) NULL DEFAULT ((1)), 
     [dblMaxEarned] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblMaxCarryover] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblMaxBalance] NUMERIC (18, 6) NULL,
     [dblHoursAccrued] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblHoursUsed] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblHoursYTD] NUMERIC(18, 6) NULL DEFAULT ((0)), 

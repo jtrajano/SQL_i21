@@ -1,14 +1,16 @@
-﻿-- Declare the Tax Authority Code that will be used all throughout North Carolina Default Data
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'NC')
+BEGIN
+	PRINT ('Deploying North Carolina Tax Forms')
+END
+GO
+
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'NC'
 		, @TaxAuthorityId INT
 	
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
-BEGIN
-	
-	PRINT ('Deploying North Carolina Tax Forms')
-		
+BEGIN	
 -- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
 select strQuery = 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId AS NVARCHAR(10)) 

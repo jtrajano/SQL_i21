@@ -99,6 +99,7 @@ BEGIN TRY
 		JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId AND S.intContractDetailId = @intContractDetailId
 		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		CROSS APPLY tblLGCompanyPreference LP
+		WHERE S.intTypeId = 1
 
 	END
 	ELSE IF @strGrid = 'vyuCTContStsAllocationSummary'

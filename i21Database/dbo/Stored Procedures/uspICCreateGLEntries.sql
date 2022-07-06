@@ -268,6 +268,7 @@ WITH ForGLEntries_CTE (
 	,strRateType
 	,intSourceEntityId
 	,intCommodityId
+	,strLotNumber 
 )
 AS 
 (
@@ -292,15 +293,18 @@ AS
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,lot.strLotNumber
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
-				ON i.intItemId = t.intItemId
+				ON i.intItemId = t.intItemId			
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			LEFT JOIN tblICLot lot
+				ON lot.intLotId = t.intLotId
 	WHERE	t.strBatchId = @strBatchId
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 			--AND t.intFobPointId IS NULL -- If there is a value in intFobPointId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp. 
@@ -318,7 +322,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= DebitUnit.Value
 		,dblCreditUnit				= CreditUnit.Value 
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -393,7 +397,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -471,7 +475,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= DebitUnit.Value 
 		,dblCreditUnit				= CreditUnit.Value 
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IAV'
 		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -542,7 +546,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= CreditUnit.Value 
 		,dblCreditUnit				= DebitUnit.Value 
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IAV' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -616,7 +620,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= DebitUnit.Value 
 		,dblCreditUnit				= CreditUnit.Value 
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -687,7 +691,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= CreditUnit.Value 
 		,dblCreditUnit				= DebitUnit.Value 
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber) 
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId

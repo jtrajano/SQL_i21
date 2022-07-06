@@ -12,7 +12,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 --SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 BEGIN TRY
 
@@ -41,10 +41,13 @@ BEGIN
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 			AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+			AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
+			AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND C.ysnStage = 1
@@ -86,6 +89,8 @@ BEGIN
 			,[intContractHeaderId]				=	A.intContractHeaderId
 			,[intContractDetailId]				=	A.intContractDetailId
 			,[intPriceFixationDetailId]			=	A.intPriceFixationDetailId
+			,[intInsuranceChargeDetailId]		=	A.intInsuranceChargeDetailId
+			,[intStorageChargeId]				=	A.intStorageChargeId
 			,[intContractSeqId]					=	A.intContractSeqId
 			,[intContractCostId]				=	A.intContractCostId
 			,[strContractNumber]				=	ctDetail.strContractNumber
@@ -98,6 +103,8 @@ BEGIN
 			,[intLoadShipmentId]				=	A.intLoadShipmentId
 			,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 			,[intLoadShipmentCostId]			=	A.intLoadShipmentCostId
+			,[intWeightClaimId]					=	A.intWeightClaimId
+			,[intWeightClaimDetailId]			=	A.intWeightClaimDetailId
 			,[intCustomerStorageId]				=	A.intCustomerStorageId
 			,[intSettleStorageId]				=	A.intSettleStorageId
 			,[intTicketDistributionAllocationId]=	A.intTicketDistributionAllocationId
@@ -238,6 +245,7 @@ BEGIN
 			,[strTerm]							=	CASE WHEN contractTerm.intTermID IS NOT NULL THEN contractTerm.strTerm
 														ELSE term.strTerm END
 			,[intFreightTermId]					=	A.intFreightTermId
+			,[strFreightTerm]					=	freightTerm.strFreightTerm
 			,[strBillOfLading]					=	A.strBillOfLading
 			,[int1099Form]						=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 																AND A.intItemId > 0
@@ -273,6 +281,12 @@ BEGIN
 			,[intSubLocationId]					=	A.intSubLocationId
 			,[strSubLocationName]				=	subLoc.strSubLocationName
 			,[intLineNo]						=	A.intLineNo
+			,[intBookId]						=	A.intBookId
+			,[intSubBookId]						=	A.intSubBookId
+			,[intComputeTotalOption]			=	ISNULL(item.intComputeItemTotalOption, 0)
+			,[intLotId]							=	A.intLotId
+			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
+			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -285,6 +299,7 @@ BEGIN
 		LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 		LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 		LEFT JOIN tblSMTerm term ON term.intTermID = A.intTermId
+		LEFT JOIN tblSMFreightTerms freightTerm ON freightTerm.intFreightTermId = A.intFreightTermId
 		LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = A.intShipViaId
 		LEFT JOIN tblSMCurrency tranCur ON A.intCurrencyId = tranCur.intCurrencyID
 		LEFT JOIN tblSMCurrency costCur ON A.intCostCurrencyId = costCur.intCurrencyID
@@ -309,6 +324,7 @@ BEGIN
 		LEFT JOIN tblICStorageLocation storageLoc ON storageLoc.intStorageLocationId = A.intStorageLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON subLoc.intCompanyLocationSubLocationId = A.intSubLocationId
 		LEFT JOIN tblSMTaxGroup taxGroup ON taxGroup.intTaxGroupId = A.intPurchaseTaxGroupId
+		LEFT JOIN vyuCMBankAccount bankAccount ON bankAccount.intBankAccountId = A.intPayFromBankAccountId
 		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
@@ -332,7 +348,9 @@ BEGIN
 		,[strPurchaseOrderNumber]		
 		,[intContractHeaderId]			
 		,[intContractDetailId]
-		,[intPriceFixationDetailId]			
+		,[intPriceFixationDetailId]	
+		,[intStorageChargeId]		
+		,[intInsuranceChargeDetailId]		
 		,[intContractSeqId]		
 		,[intContractCostId]		
 		,[strContractNumber]				
@@ -345,6 +363,8 @@ BEGIN
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
 		,[intLoadShipmentCostId]	
+		,[intWeightClaimId]
+		,[intWeightClaimDetailId]
 		,[intCustomerStorageId]	
 		,[intSettleStorageId]
 		,[intItemId]						
@@ -388,6 +408,7 @@ BEGIN
 		,[intTermId]						
 		,[strTerm]	
 		,[intFreightTermId]					
+		,[strFreightTerm]					
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				
@@ -398,6 +419,12 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
+		,[intComputeTotalOption]
+		,[intLotId]
+		,[intPayFromBankAccountId]
+		,[strPayFromBankAccount]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -418,7 +445,9 @@ BEGIN
 		,[strPurchaseOrderNumber]		
 		,[intContractHeaderId]			
 		,[intContractDetailId]	
-		,[intPriceFixationDetailId]		
+		,[intPriceFixationDetailId]	
+		,[intStorageChargeId]		
+		,[intInsuranceChargeDetailId]			
 		,[intContractSeqId]		
 		,[intContractCostId]		
 		,[strContractNumber]				
@@ -430,7 +459,9 @@ BEGIN
 		,[intInventoryShipmentChargeId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]	
-		,[intLoadShipmentCostId]		
+		,[intLoadShipmentCostId]	
+		,[intWeightClaimId]				
+		,[intWeightClaimDetailId]	
 		,[intCustomerStorageId]
 		,[intSettleStorageId]
 		,[intItemId]						
@@ -474,6 +505,7 @@ BEGIN
 		,[intTermId]						
 		,[strTerm]		
 		,[intFreightTermId]				
+		,[strFreightTerm]
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				
@@ -484,6 +516,12 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
+		,[intComputeTotalOption]
+		,[intLotId]
+		,[intPayFromBankAccountId]
+		,[strPayFromBankAccount]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

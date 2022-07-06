@@ -138,7 +138,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('DeliveryOrder','DeliveryOrder2','DeliveryOrder3'))
+	ELSE IF (@strReportName LIKE 'DeliveryOrder%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
@@ -256,15 +256,28 @@ BEGIN
 		WHERE intEntityId = @intEntityId
 
 
-		SELECT @strIds = STUFF((
-					SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
-					FROM vyuCTEntityToContact
-					WHERE intEntityId = @intEntityId
-					AND           ISNULL(strEmail,'') <> ''
-					FOR XML PATH('')
-					), 1, 3, '')
-		FROM vyuCTEntityToContact CH
-		WHERE intEntityId = @intEntityId
+		IF EXISTS(SELECT 1 FROM vyuCTEntityToContact WHERE intEntityId = @intEntityId AND LOWER(strEmailDistributionOption) = 'warehouse in-store letter')
+			SELECT @strIds = STUFF((
+						SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
+						FROM vyuCTEntityToContact
+						WHERE intEntityId = @intEntityId
+						AND LOWER(strEmailDistributionOption) = 'warehouse in-store letter'
+						AND ISNULL(strEmail,'') <> ''
+						FOR XML PATH('')
+						), 1, 3, '')
+			FROM vyuCTEntityToContact CH
+			WHERE intEntityId = @intEntityId
+			AND LOWER(strEmailDistributionOption) = 'warehouse in-store letter'
+		ELSE
+			SELECT @strIds = STUFF((
+						SELECT DISTINCT '|^|' + LTRIM(intEntityContactId)
+						FROM vyuCTEntityToContact
+						WHERE intEntityId = @intEntityId
+						AND ISNULL(strEmail,'') <> ''
+						FOR XML PATH('')
+						), 1, 3, '')
+			FROM vyuCTEntityToContact CH
+			WHERE intEntityId = @intEntityId
 
         SET @Subject = 'Load/Shipment Schedule - ' + CASE WHEN @strInstoreTo = 'Warehouse' THEN 'In Store Letter' ELSE 'Release Order' END + ' - ' + @strLoadNumber
         SET @body += '<!DOCTYPE html>'
@@ -289,10 +302,17 @@ BEGIN
 		FROM tblLGLoad
 		WHERE intLoadId = @intTransactionId
 
-		SELECT @intEntityId = (SELECT TOP 1 CASE @intPurchaseSaleId 
+		IF(@strInstoreTo = 'Hauler')
+		BEGIN
+			SELECT @intEntityId = intHaulerEntityId FROM tblLGLoad WHERE intLoadId = @intTransactionId		
+		END
+		ELSE 
+		BEGIN
+			SELECT @intEntityId = (SELECT TOP 1 CASE @intPurchaseSaleId 
 												WHEN 1 THEN intVendorEntityId 
 												WHEN 2 THEN intCustomerEntityId 
 												WHEN 3 THEN intCustomerEntityId END FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId)
+		END
 
 		SELECT @strEntityName = strName
 		FROM tblEMEntity

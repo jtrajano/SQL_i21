@@ -40,8 +40,9 @@ SELECT
 	,EMP.strGender
 	,strWorkCompCode = WCC.strWCCode
 	,EMP.strEthnicity
-	,strSocialSecurity = CASE WHEN ISNULL(EMP.strSocialSecurity, '') = '' THEN '' 
-							ELSE 'xxx-xx-' + SUBSTRING(EMP.strSocialSecurity, LEN(EMP.strSocialSecurity) - 3, 4) END
+	,strSocialSecurity = CASE WHEN ISNULL(EMP.strSocialSecurity, '') = '' THEN ''   
+       ELSE 'xxx-xx-' + SUBSTRING(dbo.fnAESDecryptASym(EMP.strSocialSecurity), LEN(dbo.fnAESDecryptASym(EMP.strSocialSecurity)) - 3, 4) END  
+    ,strSocialSecurityDecrypted = dbo.fnAESDecryptASym(EMP.strSocialSecurity)
 	,EMP.strTerminatedReason
 	,EMP.ysn1099Employee
 	,strTimeEntryPassword = CASE WHEN ISNULL(EMP.strTimeEntryPassword, '') = '' THEN '' 

@@ -26,6 +26,7 @@ ItemUOM.intItemUOMId
 , ItemUOM.intVolumeUOMId
 , strVolumeUOM = VolumeUOM.strUnitMeasure
 , ItemUOM.dblMaxQty
+, ItemUOM.dblStandardWeight
 , ItemUOM.intSort
 FROM tblICItemUOM ItemUOM
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId

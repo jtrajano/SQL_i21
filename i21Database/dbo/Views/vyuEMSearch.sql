@@ -28,6 +28,7 @@ SELECT
 		Trucker,
 		Insurer,
 		ShipVia,
+		Applicator,
 		VendorOrCustomer =  Vendor + Customer,
 		b.strFederalTaxId,
 		strDefaultEntityType = ET.strType
@@ -44,7 +45,8 @@ SELECT
 								CASE WHEN [Shipping Line] IS NOT NULL THEN 1 ELSE 0 END AS  ShippingLine,
 								CASE WHEN [Trucker] IS NOT NULL THEN 1 ELSE 0 END AS  Trucker,
 								CASE WHEN [Insurer] IS NOT NULL THEN 1 ELSE 0 END AS  Insurer,
-								CASE WHEN [Ship Via] IS NOT NULL THEN 1 ELSE 0 END AS  ShipVia
+								CASE WHEN [Ship Via] IS NOT NULL THEN 1 ELSE 0 END AS  ShipVia,
+								CASE WHEN [Applicator] IS NOT NULL THEN 1 ELSE 0 END AS  Applicator
 			FROM
 			(
 				select A.intEntityId, strType
@@ -67,7 +69,8 @@ SELECT
 						[Shipping Line],
 						[Trucker],
 						[Insurer],
-						[Ship Via]
+						[Ship Via],
+						[Applicator]
 					)
 			) AS PivotTable
 		) a

@@ -10,7 +10,6 @@
 		,tblCRMOpportunity.intCustomerId
 	from
 		tblCRMOpportunity
-		,tblEMEntity
+		inner join tblEMEntity on tblEMEntity.intEntityId = tblCRMOpportunity.intCustomerId
 	where
 		tblCRMOpportunity.dtmWinLossDate is not null
-		and tblEMEntity.intEntityId = tblCRMOpportunity.intCustomerId

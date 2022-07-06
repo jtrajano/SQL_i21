@@ -1,69 +1,49 @@
 {
 	// See http://go.microsoft.com/fwlink/?LinkId=733558
 	// for the documentation about the tasks.json format
-	"version": "0.1.0",
+	"version": "2.0.0",
 	"command": "cmd",
 	"args": [
 		// Ask msbuild to generate full paths for file names.
 		// "/t:rebuild"		
 	],
 	"taskSelector": "/t:",
-	"showOutput": "silent",
 	"tasks": [
-		// {
-		// 	"taskName": "build",
-		// 	// Show the output window only if unrecognized errors occur.
-		// 	"showOutput": "silent",
-		// 	// Use the standard MS compiler pattern to detect errors, warnings and infos
-		// 	"problemMatcher": "$msCompile",
-		// 	"args": [
-		// 		// "i21.sln",
-		// 		//"/t:Integration:Rebuild",				
-		// 		"/t:Integration:Rebuild;i21PreDeployment:Rebuild;i21Database:Rebuild",
-		// 		"/p:msbuildemitsolution=1"
-		// 	]
-		// },
-		// {
-		// 	"taskName": "buildintegration",
-		// 	// Show the output window only if unrecognized errors occur.
-		// 	"showOutput": "silent",
-		// 	// Use the standard MS compiler pattern to detect errors, warnings and infos
-		// 	"problemMatcher": "$msCompile",
-		// 	"args": [
-		// 		// "i21.sln",
-		// 		"/t:Integration/Integration.sqlproj:Rebuild:Clean",
-		// 		"/p:msbuildemitsolution=1"
-				
-				
-		// 	]
-		// }
 		{
-			"taskName": "buildintegration",
+			"label": "buildintegration",
+			"command": "cmd",
 			"args": [
-				// "i21.sln",
-				"/c shell_integration.bat"				
-			]
+				"/t:buildintegration",
+				"/c shell_integration.bat"
+			],
+			"problemMatcher": []
 		},
 		{
-			"taskName": "buildpredeploy",
+			"label": "buildpredeploy",
+			"command": "cmd",
 			"args": [
-				// "i21.sln",
-				"/c shell_predeployment.bat"				
-			]
+				"/t:buildpredeploy",
+				"/c shell_predeployment.bat"
+			],
+			"problemMatcher": []
 		},
 		{
-			"taskName": "builddeploy",
+			"label": "builddeploy",
+			"command": "cmd",
 			"args": [
-				// "i21.sln",
-				"/c shell_deploy.bat"				
-			]
+				"/t:builddeploy",
+				"/c shell_deploy.bat"
+			],
+			"problemMatcher": []
 		},
 		{
-			"taskName": "buildall",
+			"label": "buildall",
+			"command": "cmd",
 			"args": [
-				// "i21.sln",
-				"/c shell_buildall.bat"				
-			]
+				"/t:buildall",
+				"/c shell_buildall.bat"
+			],
+			"problemMatcher": []
 		}
 	]
 }

@@ -241,6 +241,7 @@ BEGIN TRY
 
 	SELECT @intShiftSequence = MIN(intShiftSequence)
 	FROM tblMFShift
+	WHERE intLocationId = @intLocationId
 
 	WHILE (@intShiftSequence > 0)
 	BEGIN
@@ -261,6 +262,7 @@ BEGIN TRY
 			,@intEndOffset = intEndOffset
 		FROM dbo.tblMFShift
 		WHERE intShiftSequence = @intShiftSequence
+			AND intLocationId = @intLocationId
 
 		SELECT @intNextShiftId = NULL
 			,@strNextShiftName = NULL
@@ -279,6 +281,7 @@ BEGIN TRY
 			,@intNextEndOffset = intEndOffset
 		FROM dbo.tblMFShift
 		WHERE intShiftSequence = @intShiftSequence + 1
+			AND intLocationId = @intLocationId
 
 		IF @dtmNextShiftStartTime IS NOT NULL
 		BEGIN
@@ -297,6 +300,7 @@ BEGIN TRY
 		SELECT @intShiftSequence = MIN(intShiftSequence)
 		FROM tblMFShift
 		WHERE intShiftSequence > @intShiftSequence
+			AND intLocationId = @intLocationId
 	END
 
 	INSERT INTO dbo.tblMFShiftDetail (

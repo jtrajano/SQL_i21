@@ -40,8 +40,26 @@ RETURNS @returntable TABLE
     [intStoreLocationId]	INT NULL , 
     [intContactId]			INT NULL , 
     [intOrderById]			INT NULL , 
+	[intBookId]				INT NULL ,
+	[intSubBookId]			INT NULL ,
     [intCurrencyId]			INT NOT NULL,
-	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1
+	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1,
+	--Payment Info
+	[intPayFromBankAccountId]		INT NULL,
+	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intPayToBankAccountId]		INT NULL,
+	--Trade Finance Info
+	[strFinanceTradeNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBankId] 						INT NULL,
+	[intBankAccountId] 					INT NULL,
+	[intBorrowingFacilityId] 			INT NULL,
+	[strBankReferenceNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBorrowingFacilityLimitId] 		INT NULL,
+	[intBorrowingFacilityLimitDetailId] INT NULL,
+	[strReferenceNo] 					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBankValuationRuleId] 			INT NULL,
+	[strComments] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -139,8 +157,24 @@ BEGIN
 		[intStoreLocationId]	,
 		[intContactId]			,
 		[intOrderById]			,
+		[intBookId]				,
+		[intSubBookId]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]	
+		[intSubCurrencyCents]	,
+		[intPayFromBankAccountId],
+		[strFinancingSourcedFrom],
+		[strFinancingTransactionNumber]		,
+		[intPayToBankAccountId]				,
+		[strFinanceTradeNo]					,
+		[intBankId]							,
+		[intBankAccountId]					,
+		[intBorrowingFacilityId]			,
+		[strBankReferenceNo]				,
+		[intBorrowingFacilityLimitId]		,
+		[intBorrowingFacilityLimitDetailId]	,
+		[strReferenceNo]					,
+		[intBankValuationRuleId]			,
+		[strComments]
 	)
 	SELECT
 		[intPartitionId]		=	A.intPartitionId,
@@ -214,10 +248,26 @@ BEGIN
 		[intStoreLocationId]	=	CASE WHEN A.intLocationId > 0 THEN A.intLocationId ELSE userCompLoc.intCompanyLocationId END,
 		[intContactId]			=	C.intEntityContactId,
 		[intOrderById]			=	@userId,
+		[intBookId]				=	ISNULL(A.intBookId,ctBookEntities.intBookId),
+		[intSubBookId]			=	ISNULL(A.intSubBookId,ctBookEntities.intSubBookId),
 		[intCurrencyId]			=	CASE WHEN A.intCurrencyId > 0 THEN A.intCurrencyId 
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
-									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END
+									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END,
+		[intPayFromBankAccountId]	= A.intPayFromBankAccountId,
+		[strFinancingSourcedFrom] 	= ISNULL(A.strFinancingSourcedFrom, 'Not Provided'),
+		[strFinancingTransactionNumber] 	= A.strFinancingTransactionNumber,
+		[intPayToBankAccountId]				= EFT.intEntityEFTInfoId,
+		[strFinanceTradeNo]					= A.strFinanceTradeNo,
+		[intBankId]							= A.intBankId,
+		[intBankAccountId]					= A.intBankAccountId,
+		[intBorrowingFacilityId]			= A.intBorrowingFacilityId,
+		[strBankReferenceNo]				= A.strBankReferenceNo,
+		[intBorrowingFacilityLimitId]		= A.intBorrowingFacilityLimitId,
+		[intBorrowingFacilityLimitDetailId]	= A.intBorrowingFacilityLimitDetailId,
+		[strReferenceNo]					= A.strReferenceNo,
+		[intBankValuationRuleId]			= A.intBankValuationRuleId,
+		[strComments]						= A.strComments 
 	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
 	-- LEFT JOIN tblEMEntityLocation B ON vendor.intEntityId = B.intEntityId AND B.ysnDefaultLocation = 1--vendor default location
@@ -228,7 +278,8 @@ BEGIN
 	LEFT JOIN tblSMCompanyLocation payableLoc ON A.intLocationId = payableLoc.intCompanyLocationId
 	LEFT JOIN tblSMUserSecurity userData ON userData.intEntityId = @userId
 	LEFT JOIN tblSMCompanyLocation userCompLoc ON userData.intCompanyLocationId = userCompLoc.intCompanyLocationId
-	LEFT JOIN tblSMCurrency subCur ON subCur.intMainCurrencyId = A.intCurrencyId AND subCur.ysnSubCurrency = 1
+	LEFT JOIN tblSMCurrency subCur ON subCur.intMainCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId) AND subCur.ysnSubCurrency = 1
+	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = vendor.intEntityId AND EFT.intCurrencyId = ISNULL(A.intCurrencyId, vendor.intCurrencyId) AND EFT.ysnDefaultAccount = 1
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM (
@@ -305,7 +356,45 @@ BEGIN
 			WHERE defaultTerm.intTermID = vendor.intTermsId
 		) termHeirarchy
 	) termData
+	OUTER APPLY (
+		SELECT TOP 1
+			bookEntity.intEntityId
+			,bookEntity.intBookId
+			,ctbook.strBook
+			,bookEntity.intSubBookId
+			,ctsubbook.strSubBook
+		FROM tblCTBookVsEntity bookEntity
+		INNER JOIN tblCTBook ctbook ON bookEntity.intBookId = ctbook.intBookId
+		INNER JOIN tblCTSubBook ctsubbook ON bookEntity.intSubBookId = ctsubbook.intSubBookId
+		WHERE bookEntity.intEntityId = A.intEntityVendorId
+	) ctBookEntities
 	WHERE A.intCountId = 1
+
+	--UPDATE PAY FROM BANK ACCOUNT
+	UPDATE A
+	SET A.intPayFromBankAccountId = ISNULL(B.intPayFromBankAccountId, ISNULL(C.intPayFromBankAccountId, ISNULL(D.intPayFromBankAccountId, NULL))),
+		A.strFinancingSourcedFrom = ISNULL(B.strSourcedFrom, ISNULL(C.strSourcedFrom, ISNULL(D.strSourcedFrom, 'None')))
+	FROM @returntable A
+	OUTER APPLY (
+		SELECT VANL.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom
+		FROM tblAPVendor V
+		INNER JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = V.intEntityId
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = VANL.intPayFromBankAccountId
+		WHERE V.intEntityId = A.intEntityVendorId AND VANL.intCompanyLocationId = A.intShipToId AND BA.intCurrencyId = A.intCurrencyId
+	) B
+	OUTER APPLY (
+		SELECT V.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom
+		FROM tblAPVendor V
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = V.intPayFromBankAccountId
+		WHERE V.intEntityId = A.intEntityVendorId AND BA.intCurrencyId = A.intCurrencyId
+	) C
+	OUTER APPLY (
+		SELECT DPFBA.intBankAccountId intPayFromBankAccountId, 'Company Default' strSourcedFrom
+		FROM tblAPDefaultPayFromBankAccount DPFBA
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = DPFBA.intBankAccountId
+		WHERE DPFBA.intCurrencyId = A.intCurrencyId
+	) D
+	WHERE A.intPayFromBankAccountId IS NULL
 
 	-- UPDATE A
 	-- SET A.dtmDate = deferredInterest.dtmPaymentPostDate,

@@ -12,11 +12,15 @@ BEGIN
 	--USE msdb;  
 
 	-- Turn On Agent XPs --
+	/*
+	-- do this part outside this SP. We should not do server setting changes outside the customer's knowledge.
+	-- this also fails in Azure SQL
 	EXEC sp_configure'SHOW ADVANCE',1
 	RECONFIGURE
 	EXEC sp_configure'AGENT XPs',1
 	RECONFIGURE
 
+	*/
 	BEGIN TRANSACTION
 	DECLARE @ReturnCode INT
 	SELECT @ReturnCode = 0

@@ -34,13 +34,17 @@ SELECT
 	strCheckPayeeAddress = CASE WHEN B.intBillToId > 0 
 			THEN ISNULL(dbo.fnConvertToFullAddress(C2.strAddress, C2.strCity, C2.strState, C.strZipCode), '')
 			ELSE ISNULL(dbo.fnConvertToFullAddress(C.strAddress, C.strCity, C.strState, C.strZipCode), '')
-		END COLLATE Latin1_General_CI_AS,
+		END,
 	intBookId,
 	strBook,
 	intSubBookId,
 	strSubBook,
 	B.intShipFromId,
-	SF.strLocationName as strShipFromName
+	SF.strLocationName as strShipFromName,
+	B.intPayFromBankAccountId,
+	BA.strBankAccountNo strPayFromBankAccount,
+	EFT.intEntityEFTInfoId,
+	EFT.strAccountNumber
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -83,7 +87,8 @@ FROM
 		INNER JOIN tblCTSubBook ctsubbook ON bookEntity.intSubBookId = ctsubbook.intSubBookId
 		WHERE bookEntity.intEntityId = A.intEntityId
 	) ctBookEntities
-
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intPayFromBankAccountId
+	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = B.intEntityId AND EFT.intCurrencyId = ISNULL(C.intDefaultCurrencyId, B.intCurrencyId) AND EFT.ysnDefaultAccount = 1
 GO
 
 

@@ -25,6 +25,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Card Fueling"
 																											-- "POS"
 																											-- "Store Checkout"
+																											-- "Agronomy"
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
 																											-- 1. "Sales Order"
@@ -40,11 +41,12 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 11. "Consumption Site"
 																											-- 12. "Meter Billing"
 																											-- 13. "Load/Shipment Schedules"
-																											-- 14. "Credit Card Reconciliation"
+																											-- 14. "Credit Card Reconciliation" / "Dealer Credit Card"
 																											-- 15. "Sales Contract"
 																											-- 16. "Load Schedule"
 																											-- 17. "CF Invoice"
 																											-- 18. "Ticket Management"
+																											-- 19. "Agronomy"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
@@ -127,7 +129,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 1. "Amount"
 																											-- 2. "Percentage"	
 	,[dblItemWeight]						NUMERIC(38, 20)									NULL
-	,[intItemWeightUOMId]					INT												NULL	
+	,[intItemWeightUOMId]					INT												NULL
+	,[dblStandardWeight]					NUMERIC(38, 20)									NULL		-- The Item UOM Standard weight
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
 	,[dblUnitPrice]							NUMERIC(18, 6)									NULL		-- The line item unit price
     ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
@@ -206,4 +209,20 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
     ,[ysnAddonParent]                       BIT                                             NULL
     ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                 NULL
 	,[intPriceFixationDetailId]				INT												NULL
+	,[dblQualityPremium]					NUMERIC(18, 6)									NULL		-- tblLGLoadDetail.[dblQualityPremium] Logistics
+	,[dblOptionalityPremium]				NUMERIC(18, 6)									NULL		-- tblLGLoadDetail.[dblOptionalityPremium] Logistics
+	,[intBankId]							INT												NULL		-- Key Value from tblCMBank (Bank)
+	,[intBankAccountId]						INT												NULL		-- Key Value from tblCMBankAccount (Bank Account)
+	,[intBorrowingFacilityId]				INT												NULL		-- Key Value from tblCMBorrowingFacility
+	,[intBorrowingFacilityLimitId]			INT												NULL		-- Key Value from tblCMBorrowingFacilityLimit
+	,[strTradeFinanceNo]					NVARCHAR(50)									NULL
+	,[intFacilityId]						INT												NULL
+	,[intLoanLimitId]						INT												NULL
+	,[strBankReferenceNo]					NVARCHAR(100)									NULL
+	,[strBankTransactionId]					NVARCHAR(100)									NULL
+	,[dblLoanAmount]						NUMERIC(18, 6)									NULL
+	,[intBankValuationRuleId]				INT												NULL
+	,[strTradeFinanceComments]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS		NULL
+	,[strGoodsStatus]						NVARCHAR(100) COLLATE Latin1_General_CI_AS		NULL
+	,[dblComputedGrossPrice]				NUMERIC(18, 6)									NULL
 )

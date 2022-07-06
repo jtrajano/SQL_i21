@@ -429,3 +429,23 @@ BEGIN
 	WHERE CHARINDEX(''Voided'', strReferenceNo) > 0
 	')
 END
+
+IF EXISTS(select TOP 1 1 FROM tblPREmployee WHERE LEN(ISNULL(dbo.fnAESDecryptASym(strSocialSecurity),'')) <= 0) 
+BEGIN
+	--Trigger will do the encryption
+	UPDATE tblPREmployee 
+	SET strSocialSecurity = strSocialSecurity 
+	--SELECT * FROM  tblPREmployee
+	WHERE LEN(ISNULL(dbo.fnAESDecryptASym(strSocialSecurity),'')) <= 0
+	AND strSocialSecurity IS NOT NULL
+	AND LTRIM(RTRIM(strSocialSecurity)) <> ''
+END
+
+/*
+* PR Companyconfiguration
+* SET Default value for newly added OT configurations
+*/
+IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strOvertimeCalculation' AND OBJECT_ID = OBJECT_ID(N'tblPRCompanyPreference'))
+BEGIN
+	EXEC ('IF EXISTS(SELECT TOP 1 1 FROM tblPRCompanyPreference WHERE strOvertimeCalculation IS NULL) UPDATE tblPRCompanyPreference SET strOvertimeCalculation = ''Weekly'',dblRegularHoursThreshold = 40 ')
+END

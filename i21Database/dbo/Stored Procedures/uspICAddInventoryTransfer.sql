@@ -159,6 +159,12 @@ BEGIN
 				,ysnPosted				= 0
 				,intEntityId			= @intEntityUserSecurityId
 				,strActualCostId		= IntegrationData.strActualCostId
+				,intBrokerId			= IntegrationData.intBrokerId
+				,strBolNumber			= IntegrationData.strBolNumber
+				,dtmBolDate				= IntegrationData.dtmBolDate
+				,dtmBolReceivedDate		= IntegrationData.dtmBolReceivedDate
+				,strTrailerId			= IntegrationData.strTrailerId
+				,strERPTransferNo		= IntegrationData.strERPTransferNo
 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -177,6 +183,12 @@ BEGIN
 				,ysnPosted			
 				,intEntityId
 				,strActualCostId
+				,intBrokerId
+				,strBolNumber
+				,dtmBolDate
+				,dtmBolReceivedDate
+				,strTrailerId
+				,strERPTransferNo
 			)
 			VALUES (
 				/*strTransferNo*/			@inventoryTransferNumber		
@@ -194,6 +206,12 @@ BEGIN
 				/*ysnPosted*/				,0
 				/*intEntityId*/				,@intEntityUserSecurityId
 				/*strActualCostId*/			,IntegrationData.strActualCostId
+				/*intBrokerId*/				,IntegrationData.intBrokerId
+				/*strBolNumber*/			,IntegrationData.strBolNumber
+				/*dtmBolDate*/				,IntegrationData.dtmBolDate
+				/*dtmBolReceivedDate*/		,IntegrationData.dtmBolReceivedDate
+				/*strTrailerId*/			,IntegrationData.strTrailerId
+				/*strERPTransferNo*/		,IntegrationData.strERPTransferNo
 			)			
 		;
 				
@@ -311,6 +329,12 @@ BEGIN
 					ON InvTransfer.intInventoryTransferId = InvDetail.intInventoryTransferId
 		WHERE	InvTransfer.intInventoryTransferId = @inventoryTransferId
 
+		-- Link Inventory Transfer Transaction
+		BEGIN
+			EXEC dbo.uspICLinkInventoryTransferTransaction
+				@inventoryTransferId,
+				true
+		END
 		-- Create an Audit Log
 		BEGIN 
 			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Transfer'

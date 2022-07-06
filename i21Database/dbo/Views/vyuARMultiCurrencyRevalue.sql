@@ -26,6 +26,8 @@ SELECT DISTINCT
 	,dblUnrealizedCreditGain	= 0 --Calcuate By GL
 	,dblDebit					= 0 --Calcuate By GL
 	,dblCredit					= 0 --Calcuate By GL
+	,intAccountId				= ISNULL(ARID.intSalesAccountId, ARID.intAccountId)
+	,intCompanyLocationId 		= ARI.intCompanyLocationId
 FROM 
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -61,3 +63,5 @@ LEFT JOIN
 WHERE
 	ARI.ysnPosted = 1 
 	AND ARI.ysnPaid = 0
+
+

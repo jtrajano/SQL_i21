@@ -13,4 +13,4 @@
 FROM tblGRDiscountScheduleCode Dcode  
 JOIN tblICItem Item on Dcode.intItemId=Item.intItemId  
 JOIN tblGRDiscountSchedule DSch on DSch.intDiscountScheduleId=Dcode.intDiscountScheduleId 
-ORDER BY 4
+ORDER BY strDiscountDescription

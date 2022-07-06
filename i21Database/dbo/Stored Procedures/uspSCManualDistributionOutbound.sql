@@ -640,6 +640,7 @@ END
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 
+	exec uspSCAddTransactionLinks @intTransactionType = 3, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
 	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution

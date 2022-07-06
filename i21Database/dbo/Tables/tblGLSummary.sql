@@ -11,8 +11,8 @@
     [dblCreditUnit]    NUMERIC (20, 6) NULL,
     [strCode]          NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT             DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblGLSummary] PRIMARY KEY CLUSTERED ([intSummaryId] ASC),
-    CONSTRAINT [FK_tblGLSummary_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+    CONSTRAINT [PK_tblGLSummary] PRIMARY KEY CLUSTERED ([intSummaryId] ASC)
+    --CONSTRAINT [FK_tblGLSummary_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
 GO
 

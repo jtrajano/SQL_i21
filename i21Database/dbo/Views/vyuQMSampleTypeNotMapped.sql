@@ -7,6 +7,12 @@ SELECT ST.intSampleTypeId
 	,L2.strSecondaryStatus AS strRejectionLotStatus
 	,L3.strSecondaryStatus AS strBondedApprovalLotStatus
 	,L4.strSecondaryStatus AS strBondedRejectionLotStatus
+	,CAST(ISNULL((
+				SELECT TOP 1 1
+				FROM tblQMSample
+				WHERE intSampleTypeId = ST.intSampleTypeId
+					AND ST.ysnMultipleContractSeq = 1
+				), 0) AS BIT) AS ysnSampleExists
 FROM tblQMSampleType ST
 JOIN tblQMControlPoint CP ON CP.intControlPointId = ST.intControlPointId
 LEFT JOIN tblQMSampleLabel SL ON SL.intSampleLabelId = ST.intSampleLabelId

@@ -7,23 +7,26 @@
 		,c.intTicketId
 		,c.strTicketNumber
 		,d.strKey
-		,d.strTypeIconUrl
+		,REPLACE(d.strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
 		,d.strSummary
 		,strOriginalEstimate
 		,d.strReporter
 		,d.strAssignee
 		,d.strFixedBy
-		,d.strPriorityIconUrl
-		,d.strStatusIconUrl
+		,REPLACE(d.strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
+		,REPLACE(d.strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
 		,d.dtmJiraCreated
 		,d.dtmJiraUpdated
 		,d.strFixedVersion
 		,a.intConcurrencyId
 		,intOriginalProjectId = a1.intProjectId
 		,strOriginalProjectName = a1.strProjectName
-	from tblHDProject a, tblHDProjectTask b, tblHDTicket c, tblHDTicketJIRAIssue d, tblHDProjectTask b1, tblHDProject a1
+	from 
+		tblHDProject a
+		inner join tblHDProjectTask b on 1=1
+		inner join tblHDTicket c on c.intTicketId = b.intTicketId
+		inner join tblHDTicketJIRAIssue d on d.intTicketId = c.intTicketId
+		inner join tblHDProjectTask b1 on b1.intTicketId = c.intTicketId
+		inner join tblHDProject a1 on a1.intProjectId = b1.intProjectId
 	where (b.intProjectId = a.intProjectId or b.intProjectId in (select aa.intDetailProjectId from  tblHDProjectDetail aa where aa.intProjectId = a.intProjectId))
-	and c.intTicketId = b.intTicketId
-	and d.intTicketId = c.intTicketId
-	and b1.intTicketId = c.intTicketId
-	and a1.intProjectId = b1.intProjectId
+GO

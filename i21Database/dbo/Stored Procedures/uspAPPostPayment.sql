@@ -961,6 +961,7 @@ ELSE
 			,[strDescription]
 			,[strJournalLineDescription]
 			,[strReference]	
+			,[intCurrencyId]
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
@@ -990,6 +991,7 @@ ELSE
 			,A.[strDescription]
 			,A.[strJournalLineDescription]
 			,A.[strReference]	
+			,A.[intCurrencyId]
 			,A.[dtmTransactionDate]
 			,Debit.Value--[dblDebit]
 			,Credit.Value--[dblCredit]
@@ -1033,6 +1035,11 @@ BEGIN
 		DELETE FROM tblAPPaymentDetail
 		WHERE intPaymentId IN (SELECT intId FROM @payments)
 		AND dblPayment = 0
+
+		SELECT @paymentIds = COALESCE(@paymentIds + ', ', '') + CONVERT(VARCHAR(12), intId) FROM @payments
+
+		EXEC uspAPAddTransactionLinks 2, @paymentIds, 2, @userId, 1
+		EXEC uspAPAddTransactionLinks 2, @paymentIds, 1, @userId, 1
 	END
 
 	DECLARE @voucherHistory AS Id

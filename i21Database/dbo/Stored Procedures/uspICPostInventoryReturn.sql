@@ -49,6 +49,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strCurrencyId AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@intEntityVendorId AS INT 
+		,@strMissingLotBatchId AS NVARCHAR(50) 
 		
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -367,8 +368,11 @@ BEGIN
 							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
 						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
 							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
-				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
-				GROUP BY AggregrateLot.intInventoryReceiptItemId
+				WHERE	
+					tblICInventoryReceipt.strReceiptNumber = @strTransactionId
+					AND AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed')
+				GROUP BY 
+					AggregrateLot.intInventoryReceiptItemId
 			) ItemLot
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
@@ -465,8 +469,8 @@ BEGIN
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 	DECLARE @CompanyOwnedItemsForPost AS ItemCostingTableType  
-	DECLARE @ReturnItemsForPost AS ItemCostingTableType  
 	DECLARE @NonInventoryItemsForPost AS ItemCostingTableType  
+	DECLARE @MissingLotsForPost AS ItemCostingTableType  
 
 	DECLARE @StorageItemsForPost AS ItemCostingTableType  
 
@@ -545,6 +549,7 @@ BEGIN
 				,intSourceEntityId
 				,strBOLNumber 
 				,intTicketId
+				,strCondition
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -647,6 +652,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										/ Header.intSubCurrencyCents 
 
@@ -678,6 +685,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 
@@ -709,6 +718,7 @@ BEGIN
 				,intSourceEntityId = Header.intEntityVendorId
 				,strBOLNumber = Header.strBillOfLading 
 				,intTicketId = CASE WHEN Header.intSourceType = 1 THEN DetailItem.intSourceId ELSE NULL END 
+				,DetailItemLot.strCondition
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN tblICItem Item 
@@ -745,7 +755,7 @@ BEGIN
 					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
-				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own		
 
 		-- Get the non-inventory items
 		BEGIN 
@@ -891,6 +901,7 @@ BEGIN
 					,strSourceNumber
 					,strBOLNumber
 					,intTicketId
+					,strCondition
 			)
 			SELECT 
 					intItemId  
@@ -919,9 +930,142 @@ BEGIN
 					,strSourceNumber
 					,strBOLNumber
 					,intTicketId
+					,strCondition
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
-		
+
+			-- Get the missing lots to post. 
+			BEGIN 
+				INSERT INTO @MissingLotsForPost (
+					[intItemId] 
+					,[intItemLocationId] 
+					,[intItemUOMId] 
+					,[dtmDate] 
+					,[dblQty] 
+					,[dblUOMQty] 
+					,[dblCost] 
+					,[dblValue]
+					,[dblSalesPrice] 
+					,[intCurrencyId] 
+					,[dblExchangeRate] 
+					,[intTransactionId] 
+					,[intTransactionDetailId] 
+					,[strTransactionId] 
+					,[intTransactionTypeId] 
+					,[intLotId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
+					,[ysnIsStorage] 
+					,[strActualCostId] 
+					,[intSourceTransactionId] 
+					,[strSourceTransactionId] 
+					,[intInTransitSourceLocationId] 
+					,[intForexRateTypeId] 
+					,[dblForexRate] 
+					,[intStorageScheduleTypeId] 
+					,[dblUnitRetail] 
+					,[intCategoryId] 
+					,[dblAdjustCostValue] 
+					,[dblAdjustRetailValue] 
+					,[intCostingMethod] 
+					,[ysnAllowVoucher] 
+					,[strSourceType]
+					,[strSourceNumber]
+					,[strBOLNumber]
+					,[intTicketId]
+				)
+				SELECT 
+					itemsToPost.intItemId
+					,itemsToPost.intItemLocationId
+					,itemsToPost.intItemUOMId
+					,itemsToPost.dtmDate
+					,dblQty = itemsToPost.dblQty
+					,itemsToPost.dblUOMQty
+					,itemsToPost.dblCost
+					,itemsToPost.dblValue
+					,itemsToPost.dblSalesPrice
+					,itemsToPost.intCurrencyId
+					,itemsToPost.dblExchangeRate
+					,itemsToPost.intTransactionId
+					,itemsToPost.intTransactionDetailId
+					,itemsToPost.strTransactionId
+					,itemsToPost.intTransactionTypeId
+					,itemsToPost.intLotId
+					,itemsToPost.intSubLocationId
+					,itemsToPost.intStorageLocationId
+					,itemsToPost.ysnIsStorage
+					,itemsToPost.strActualCostId
+					,itemsToPost.intSourceTransactionId
+					,itemsToPost.strSourceTransactionId
+					,itemsToPost.intInTransitSourceLocationId
+					,itemsToPost.intForexRateTypeId
+					,itemsToPost.dblForexRate
+					,itemsToPost.intStorageScheduleTypeId
+					,itemsToPost.dblUnitRetail
+					,itemsToPost.intCategoryId
+					,itemsToPost.dblAdjustCostValue
+					,itemsToPost.dblAdjustRetailValue
+					,itemsToPost.intCostingMethod
+					,itemsToPost.ysnAllowVoucher
+					,itemsToPost.strSourceType
+					,itemsToPost.strSourceNumber
+					,itemsToPost.strBOLNumber
+					,itemsToPost.intTicketId
+				FROM	
+					@ItemsForPost itemsToPost INNER JOIN tblICItem i 
+						ON itemsToPost.intItemId = i.intItemId
+				WHERE
+					i.strType <> 'Non-Inventory'
+					AND itemsToPost.strCondition = 'Missing'
+					AND dblQty > 0 
+			END 	
+
+			-- Process the GL entries for Missing Stocks. Re-add it in the system before returning it. 
+			IF EXISTS (SELECT TOP 1 1 FROM @MissingLotsForPost)
+			BEGIN 			
+				SET @strMissingLotBatchId = @strBatchId + '1'
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]	
+						,[dblDebitReport]	
+						,[dblCreditForeign]	
+						,[dblCreditReport]	
+						,[dblReportingRate]	
+						,[dblForeignRate]
+						,[strRateType]
+						,[intSourceEntityId]
+						,[intCommodityId]
+				)
+				EXEC	@intReturnValue = dbo.uspICPostMissingLot
+						@MissingLotsToPost = @MissingLotsForPost
+						,@strBatchId = @strMissingLotBatchId
+						,@intEntityUserSecurityId = @intEntityUserSecurityId	
+			END 
+
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
 			BEGIN 
@@ -931,14 +1075,6 @@ BEGIN
 				END
 
 				-- Do the inventory valuation
-				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
-						@CompanyOwnedItemsForPost  
-						,@strBatchId  
-						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-						,@intEntityUserSecurityId
-
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
-
 				-- Create the GL entries specific for Inventory Return 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
@@ -976,12 +1112,13 @@ BEGIN
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
-				EXEC	@intReturnValue = uspICCreateReturnGLEntries
-						@strBatchId 
+				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
+						@CompanyOwnedItemsForPost  
+						,@strBatchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@intEntityUserSecurityId
 
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				IF @intReturnValue < 0 GOTO With_Rollback_Exit							
 			END
 		END
 	END 
@@ -1113,6 +1250,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										/ Header.intSubCurrencyCents 
 
@@ -1144,6 +1283,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 
@@ -1354,7 +1495,26 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 
-END   
+	-- Correct the batch id used by the Missing Lots 
+	IF @strMissingLotBatchId IS NOT NULL 
+	BEGIN 
+		UPDATE t
+		SET 
+			t.strBatchId = @strBatchId
+		FROM
+			tblICInventoryTransaction t 
+		WHERE
+			t.strBatchId = @strMissingLotBatchId
+
+		UPDATE gd
+		SET 
+			gd.strBatchId = @strBatchId
+		FROM 
+			@GLEntries gd
+		WHERE
+			gd.strBatchId = @strMissingLotBatchId		
+	END
+END   		
 
 --------------------------------------------------------------------------------------------  
 -- If UNPOST, call the Unpost routines  
@@ -1571,6 +1731,102 @@ BEGIN
 					ON Lot.intLotId = ItemLot.intLotId
 		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
 				AND Receipt.strReceiptNumber = @strTransactionId				
+
+		-- Unpost the IC-AP-Clearing
+		BEGIN 
+			INSERT INTO tblICAPClearing (
+				[intTransactionId]
+				,[strTransactionId]
+				,[intTransactionType]
+				,[strReferenceNumber]
+				,[dtmDate]
+				,[intEntityVendorId]
+				,[intLocationId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptItemTaxId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptChargeTaxId]
+				,[intInventoryShipmentChargeId]
+				,[intInventoryShipmentChargeTaxId]
+				,[intAccountId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[dblQuantity]
+				,[dblAmount]
+				,[strBatchId]
+			)
+			SELECT 
+				[intTransactionId]
+				,[strTransactionId]
+				,[intTransactionType]
+				,[strReferenceNumber]
+				,[dtmDate]
+				,[intEntityVendorId]
+				,[intLocationId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptItemTaxId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptChargeTaxId]
+				,[intInventoryShipmentChargeId]
+				,[intInventoryShipmentChargeTaxId]
+				,[intAccountId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[dblQuantity]
+				,[dblAmount]
+				,[strBatchId] = @strBatchId
+			FROM 
+				tblICAPClearing
+			WHERE
+				strTransactionId = @strTransactionId
+				AND ysnIsUnposted = 0 
+		END 
+		
+		-- Update the Missing Lot's Qty and Weights. 
+		-- The Lot Qty should not be zero for Missing Lots so that it can be used to track insurance claims. 
+		BEGIN 
+			UPDATE	Lot 
+			SET		Lot.dblQty =	
+						dbo.fnCalculateLotQty(
+							Lot.intItemUOMId
+							, rtnItem.intUnitMeasureId
+							, Lot.dblQty
+							, Lot.dblWeight
+							, rtnLot.dblQuantity
+							, Lot.dblWeightPerQty
+						)
+					,Lot.dblWeight = 
+						dbo.fnCalculateLotWeight(
+							Lot.intItemUOMId
+							, Lot.intWeightUOMId
+							, rtnItem.intUnitMeasureId
+							, Lot.dblWeight
+							, rtnLot.dblQuantity
+							, Lot.dblWeightPerQty
+						)						
+			FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceiptItem rtnItem
+						ON rtn.intInventoryReceiptId = rtnItem.intInventoryReceiptId
+					INNER JOIN tblICInventoryReceiptItemLot rtnLot
+						ON rtnLot.intInventoryReceiptItemId = rtnItem.intInventoryReceiptItemId
+					INNER JOIN tblICLot Lot
+						ON Lot.intLotId = rtnLot.intLotId 
+						AND Lot.intItemId = rtnItem.intItemId 
+			WHERE
+					rtnLot.strCondition = 'Missing'
+
+			UPDATE	Lot 
+			SET		Lot.dblTare = dbo.fnMultiply(Lot.dblQty, Lot.dblTarePerQty) 
+					,Lot.dblGrossWeight = dbo.fnMultiply(Lot.dblQty, Lot.dblTarePerQty) + Lot.dblWeight
+			FROM	tblICInventoryReceipt rtn INNER JOIN tblICInventoryReceiptItem rtnItem
+						ON rtn.intInventoryReceiptId = rtnItem.intInventoryReceiptId
+					INNER JOIN tblICInventoryReceiptItemLot rtnLot
+						ON rtnLot.intInventoryReceiptItemId = rtnItem.intInventoryReceiptItemId
+					INNER JOIN tblICLot Lot
+						ON Lot.intLotId = rtnLot.intLotId 
+						AND Lot.intItemId = rtnItem.intItemId 
+			WHERE
+					rtnLot.strCondition = 'Missing'
+		END 
 	END
 END   
 
@@ -1636,6 +1892,86 @@ BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 
 	
+	-- Add the AP Clearing
+	BEGIN 
+		DECLARE @APClearing AS APClearing
+
+		INSERT INTO @APClearing (
+			[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionType]
+			,[strReferenceNumber]
+			,[dtmDate]
+			,[intEntityVendorId]
+			,[intLocationId]
+			,[intTransactionDetailId]
+			,[intAccountId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[dblQuantity]
+			,[dblAmount]	
+			,[strCode]
+		)
+		SELECT DISTINCT 
+			[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionType]
+			,[strReferenceNumber]
+			,[dtmDate]
+			,[intEntityVendorId]
+			,[intLocationId]
+			,[intTransactionDetailId] = 
+				COALESCE(
+					intInventoryReceiptItemId
+					,intInventoryReceiptChargeId
+				)
+			,[intAccountId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[dblQuantity]
+			,[dblAmount] = g.dblAmount 
+			,[strCode] = 'RTN'
+		FROM 
+			tblICAPClearing ap
+			CROSS APPLY (
+				SELECT 
+					dblAmount = SUM(g.dblAmount) 
+				FROM
+					tblICAPClearing g
+				WHERE
+					g.strBatchId = @strBatchId
+					AND (
+						(g.intInventoryReceiptItemId = ap.intInventoryReceiptItemId AND ap.intInventoryReceiptItemId IS NOT NULL)
+						OR (g.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId AND ap.intInventoryReceiptChargeId IS NOT NULL)
+					)
+			) g
+		WHERE
+			strBatchId = @strBatchId
+
+		EXEC dbo.uspAPClearing
+			@APClearing
+			,@ysnPost
+
+		-- Update the IC-AP Clearing when unposting the transaction. 
+		IF @ysnPost = 0 
+		BEGIN 			
+			UPDATE tblICAPClearing
+			SET 				
+				dblQuantity = -dblQuantity -- Negate the Quantity
+				,dblAmount = -dblAmount -- Negate the Amount 
+			WHERE 
+				strTransactionId = @strTransactionId
+				AND strBatchId = @strBatchId
+
+			UPDATE tblICAPClearing
+			SET 
+				ysnIsUnposted = 1 -- Flag the AP Clearing as unposted. 
+			WHERE 
+				strTransactionId = @strTransactionId
+				AND ysnIsUnposted = 0 
+		END 
+	END 
+
 	-- Reuse this sp for Inventory Return 
 	EXEC dbo.uspICPostInventoryReceiptIntegrations 
 		@ysnPost

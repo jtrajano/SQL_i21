@@ -44,7 +44,9 @@ BEGIN
 		, strPricingType NVARCHAR(100)
 		, strItemNo NVARCHAR(100)
 		, strCurrency NVARCHAR(100)
-		, strUnitMeasure NVARCHAR(100))
+		, strUnitMeasure NVARCHAR(100)
+		, strFutureMarket NVARCHAR(100)
+		, strFutureMonth NVARCHAR(100))
 	
 	INSERT INTO @GetStandardQty(intRowNum
 		, intContractDetailId
@@ -76,7 +78,9 @@ BEGIN
 		, strPricingType
 		, strItemNo
 		, strCurrency
-		, strUnitMeasure)
+		, strUnitMeasure
+		, strFutureMarket
+		, strFutureMonth)
 	EXEC [uspRKSourcingReportByProductTypeDetail] @dtmFromDate = @dtmFromDate
 		, @dtmToDate = @dtmToDate
 		, @intCommodityId = @intCommodityId

@@ -7,7 +7,7 @@
 	,strShortName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,strCommodity NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,strItemStatus NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemArchive_strItemStatus] DEFAULT(('Active'))
+	,strItemStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemArchive_strItemStatus] DEFAULT(('Active'))
 	,strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,strItemControl NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strStockUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
@@ -84,5 +84,16 @@
 	,strLoggedOnUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemArchive_strLoggedOnUserName] DEFAULT((HOST_NAME()))
 	,dtmTransactionDate DATETIME NULL CONSTRAINT [DF_tblMFItemArchive_dtmTransactionDate] DEFAULT((getdate()))
 	,strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,intTrxSequenceNo BIGINT
+	,strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS
+	,intActionId INT
+	,ysnFairTradeCompliance BIT DEFAULT 0
+	,ysnOrganicItem BIT DEFAULT 0
+	,ysnRainForestCertified BIT DEFAULT 0
+	,strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,ysnOtherChargeItem BIT DEFAULT 0
+	,ysnMailSent BIT DEFAULT 0
+
 	,CONSTRAINT [PK_tblIPItemArchive_intStageItemId] PRIMARY KEY ([intStageItemId]) 
 )

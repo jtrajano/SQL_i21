@@ -40,6 +40,26 @@ SELECT
 	, so.intConcurrencyId
 	, strFooterComments = dbo.fnStripHtml(so.strFooterComments)
 	, strHeaderComments = dbo.fnStripHtml(so.strComments)
+	, intCustomerId = vso.intEntityCustomerId
+	, intLocationId = vso.intCompanyLocationId
+	, intCurrencyid = vso.intCurrencyId
+	, intBillToId = so.intBillToLocationId
+	, intShipToId = so.intShipToLocationId
+	, intShipViaId = so.intShipViaId
+	, intFreightTermId = so.intFreightTermId
+	, intLineOfBusinessId = so.intLineOfBusinessId
+	, intTermId = so.intTermId
+	, intOpportunityId = so.intOpportunityId
+	, intApplicatorId = so.intEntityApplicatorId
+	, intSalespersonId = so.intEntitySalespersonId
+	, intContactId = so.intEntityContactId
+	, intTemplateId = so.intQuoteTemplateId
+	, intSplitId = so.intSplitId
+	, intOrderedById = so.intOrderedById
+	, vso.strTemplateName
+	, vso.strSplitNumber
+	, so.ysnProcessed
+	, vso.dtmDueDate
 FROM vyuSOSalesOrderSearch vso
 LEFT JOIN tblSOSalesOrder so ON so.intSalesOrderId = vso.intSalesOrderId
 LEFT JOIN tblCRMOpportunity op ON op.intOpportunityId = so.intOpportunityId

@@ -19,7 +19,7 @@ INSERT INTO tblICCategory (
 	strCategoryCode
 	,strDescription
 	,strMaterialFee
-	,strInventoryType
+	--,strInventoryType
 	,intCostingMethod
 	,strInventoryTracking
 	,intConcurrencyId
@@ -28,9 +28,9 @@ INSERT INTO tblICCategory (
 SELECT RTRIM(ptcls_class)
 	,RTRIM(ptcls_desc)
 	,RTRIM(ptcls_amf_yn)
---** Class cannot be classified into different types of Inventory Type. 
---   Hence all classes 'Inventory Type' is marked as 'Inventory' and when required this can be changed manually. **
-	,'Inventory'			
+	--** Class cannot be classified into different types of Inventory Type. 
+	--   Hence all classes 'Inventory Type' is marked as 'Inventory' and when required this can be changed manually. **
+	--,'Inventory'			
 	,'1'
 	,'Item Level'
 	,1

@@ -23,6 +23,7 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
 		,@SOURCE_TYPE_TRANSPORT AS INT = 3
 		,@SOURCE_TYPE_DELIVERY_SHEET AS INT = 5
+		,@SOURCE_TYPE_TRANSFER_SHIPMENT AS INT = 9
 		-- Item Ownership types
 		,@OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_Storage AS INT = 2
@@ -100,6 +101,12 @@ BEGIN
 	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
 	BEGIN 
 		EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId, @ysnPost
+	END
+
+	-- Insert records in staging table to check and set the lot status
+	IF @ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT
+	BEGIN
+		EXEC dbo.uspIPPreStageReceipt @intTransactionId, @intEntityUserSecurityId, @ysnPost
 	END
 
 	-- Update the received quantities back to the Contract Management (Inventory Return)
@@ -197,7 +204,7 @@ END
 IF ISNULL(@ReceiptType, @RECEIPT_TYPE_DIRECT) <> @RECEIPT_TYPE_INVENTORY_RETURN 
 BEGIN 
 	-- Update the received quantities back to Inbound Shipment 
-	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
+	IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) IN (@SOURCE_TYPE_INBOUND_SHIPMENT, @SOURCE_TYPE_TRANSFER_SHIPMENT) 
 	BEGIN 
 		EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 		EXEC uspICLinkInboundShipmentReceiptWithVoucher DEFAULT, @intTransactionId
@@ -220,6 +227,63 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspSCDeliverySheetReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
 	END
+END 
+ 
+-- Update the released lots
+BEGIN
+	DECLARE @LotsToRelease AS LotReleaseTableType 
+
+	INSERT INTO @LotsToRelease (
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[dblQty] 
+		,[intTransactionId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intOwnershipTypeId] 
+		,[dtmDate] 
+	)
+	SELECT 
+		[intItemId] = ri.intItemId
+		,[intItemLocationId] = il.intItemLocationId
+		,[intItemUOMId] = ril.intItemUnitMeasureId
+		,[intLotId] = ril.intLotId
+		,[intSubLocationId] = ril.intSubLocationId
+		,[intStorageLocationId] = ril.intStorageLocationId
+		,[dblQty] = ril.dblQuantity
+		,[intTransactionId] = r.intInventoryReceiptId
+		,[strTransactionId] = r.strReceiptNumber
+		,[intTransactionTypeId] = 4
+		,[intOwnershipTypeId] = ri.intOwnershipType
+		,[dtmDate] = r.dtmReceiptDate
+	FROM 
+		tblICInventoryReceipt r 
+		INNER JOIN tblICInventoryReceiptItem ri
+			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		INNER JOIN tblICInventoryReceiptItemLot ril 
+			ON ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId		
+		INNER JOIN tblICItemLocation il
+			ON il.intItemId = ri.intItemId
+			AND il.intLocationId = r.intLocationId
+		LEFT JOIN tblICWarrantStatus warrantStatus
+			ON warrantStatus.intWarrantStatus = ril.intWarrantStatus	
+	WHERE
+		r.intInventoryReceiptId = @intTransactionId
+		AND r.ysnPosted = 1
+		AND (
+			ril.strCondition NOT IN ('Missing', 'Swept', 'Skimmed')
+			OR ril.strCondition IS NULL
+		)
+
+	EXEC [uspICCreateLotRelease]
+		@LotsToRelease = @LotsToRelease 
+		,@intTransactionId = @intTransactionId
+		,@intTransactionTypeId = 4
+		,@intUserId = @intEntityUserSecurityId
 END 
 
 _Exit: 

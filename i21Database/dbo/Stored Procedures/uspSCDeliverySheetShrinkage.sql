@@ -10,17 +10,20 @@ set nocount on
 
 --return 
 
+
 declare @DeliverySheetNumber nvarchar(100)
 declare @DPOwned BIT = 1
 declare @StorageCost decimal(18, 6)
 declare @dblDSShrink NUMERIC(38, 20)
 declare @dblTotalDSShrink NUMERIC(38, 20)
 declare @CurrentDate datetime
+DECLARE @APClearing AS APClearing;
+
 
 select @DeliverySheetNumber =  strDeliverySheetNumber 
 		,@dblDSShrink = dblShrink		
 	from tblSCDeliverySheet  DeliverySheet		
-		where intDeliverySheetId = @DeliverySheetId
+	where intDeliverySheetId = @DeliverySheetId
 
 select @StorageCost = isnull(dblBasis, 0) + isnull(dblSettlementPrice, 0)
 	from tblGRCustomerStorage 
@@ -41,9 +44,9 @@ delete
 if @ysnPost = 1
 begin
 
+	
 	if @DPOwned = 1 
 	begin
-
 		insert into tblSCDeliverySheetShrinkReceiptDistribution
 		( intDeliverySheetId, intInventoryReceiptId, intInventoryReceiptItemId,  dblDSShrink, dblIRNet, dblComputedShrinkPerIR)
 		select 
@@ -62,7 +65,7 @@ begin
 				on Ticket.intTicketId = Split.intTicketId
 			join tblGRStorageType StorageType
 				on Split.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId
-					and StorageType.ysnDPOwnedType = 1
+					and StorageType.ysnDPOwnedType = 1						
 			join tblICInventoryReceiptItem ReceiptItem
 				on ReceiptItem.intSourceId = Ticket.intTicketId
 					and ReceiptItem.intOwnershipType = 1
@@ -88,12 +91,78 @@ begin
 				)
 
 			end
+
+			INSERT INTO @APClearing
+			(
+				[intTransactionId],			--TRANSACTION ID
+				[strTransactionId],			--TRANSACTION NUMBER E.G. IR-XXXX, PAT-XXXX
+				[intTransactionType],		--TRANSACTION TYPE (DESIGNATED TRANSACTION NUMBERS ARE LISTED BELOW)
+				[strReferenceNumber],		--TRANSACTION REFERENCE E.G. BOL NUMBER, INVOICE NUMBER
+				[dtmDate],					--TRANSACTION POST DATE
+				[intEntityVendorId],		--TRANSACTION VENDOR ID
+				[intLocationId],			--TRANSACTION LOCATION ID
+				--DETAIL
+				[intTransactionDetailId],	--TRANSACTION DETAIL ID
+				[intAccountId],				--TRANSACTION ACCOUNT ID
+				[intItemId],				--TRANSACTION ITEM ID
+				[intItemUOMId],				--TRANSACTION ITEM UOM ID
+				[dblQuantity],				--TRANSACTION QUANTITY (WE CAN DIRECTLY PUT THE QUANTITY OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+				[dblAmount],				--TRANSACTION TOTAL (WE CAN DIRECTLY PUT THE AMOUNT OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+				--OFFSET TRANSACTION DETAILS
+				[intOffsetId],				--TRANSACTION ID
+				[strOffsetId],				--TRANSACTION NUMBER E.G. BL-XXXX
+				[intOffsetDetailId],		--TRANSACTION DETAIL ID
+				[intOffsetDetailTaxId],		--TRANSACTION DETAIL TAX ID
+				--OTHER INFORMATION
+				[strCode],					--TRANSACTION SOURCE MODULE E.G. IR, AP
+				strRemarks					
+			)
+			select 
+				Receipt.intInventoryReceiptId,											--TRANSACTION ID
+				Receipt.strReceiptNumber,												--TRANSACTION NUMBER E.G. IR-XXXX, PAT-XXXX
+				1 as [intTransactionType],												--TRANSACTION TYPE (DESIGNATED TRANSACTION NUMBERS ARE LISTED BELOW)
+				DeliverySheet.strDeliverySheetNumber as [strReferenceNumber],			--TRANSACTION REFERENCE E.G. BOL NUMBER, INVOICE NUMBER
+				DeliverySheet.dtmDeliverySheetDate as [dtmDate],						--TRANSACTION POST DATE
+				Receipt.intEntityVendorId as [intEntityVendorId],						--TRANSACTION VENDOR ID
+				DeliverySheet.intCompanyLocationId as [intLocationId],					--TRANSACTION LOCATION ID
+				--DETAIL
+				ReceiptItem.[intInventoryReceiptItemId] as [intTransactionDetailId],	--TRANSACTION DETAIL ID
+				APC.intAccountId as [intAccountId],										--TRANSACTION ACCOUNT ID
+				ReceiptItem.intItemId as [intItemId],									--TRANSACTION ITEM ID
+				ReceiptItem.intUnitMeasureId as [intItemUOMId],							--TRANSACTION ITEM UOM ID
+				Shrink.dblComputedShrinkPerIR * -1 as [dblQuantity],							--TRANSACTION QUANTITY (WE CAN DIRECTLY PUT THE QUANTITY OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+				Shrink.dblComputedShrinkPerIR * ReceiptItem.dblUnitCost * -1 as [dblAmount],	--TRANSACTION TOTAL (WE CAN DIRECTLY PUT THE AMOUNT OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+				--OFFSET TRANSACTION DETAILS
+				DeliverySheet.intDeliverySheetId as [intOffsetId],					--TRANSACTION ID
+				DeliverySheet.strDeliverySheetNumber as [strOffsetId],				--TRANSACTION NUMBER E.G. BL-XXXX
+				null as [intOffsetDetailId],		--TRANSACTION DETAIL ID
+				null as [intOffsetDetailTaxId],		--TRANSACTION DETAIL TAX ID
+				--OTHER INFORMATION
+				'SC' as [strCode],					--TRANSACTION SOURCE MODULE E.G. IR, AP
+				'DS SHRINK' AS strRemarks
+		
+			from tblSCDeliverySheetShrinkReceiptDistribution Shrink
+				join tblSCDeliverySheet DeliverySheet
+					on Shrink.intDeliverySheetId = DeliverySheet.intDeliverySheetId				
+				join tblICInventoryReceipt Receipt
+					on Receipt.intInventoryReceiptId = Shrink.intInventoryReceiptId
+				join tblICInventoryReceiptItem ReceiptItem
+					on ReceiptItem.intInventoryReceiptItemId = Shrink.intInventoryReceiptItemId
+				join tblGRCustomerStorage CustomerStorage
+					on CustomerStorage.intDeliverySheetId = DeliverySheet.intDeliverySheetId
+						and CustomerStorage.ysnTransferStorage = 0
+						and Receipt.intEntityVendorId = CustomerStorage.intEntityId
+
+			OUTER APPLY (
+				SELECT [intAccountId] = dbo.fnGetItemGLAccount(DeliverySheet.intItemId, DeliverySheet.intCompanyLocationId, 'AP Clearing')
+			) APC
+			where DeliverySheet.intDeliverySheetId = @DeliverySheetId
+
+			EXEC uspAPClearing @APClearing = @APClearing, @post = 1;
+
 	end
 
-
 	
-
-
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 			,@InventoryTransactionTypeId_AutoNegative AS INT = 1
 			,@InventoryTransactionTypeId_WriteOffSold AS INT = 2
@@ -377,7 +446,73 @@ begin
 end
 else 
 begin
-	
+	if @DPOwned = 1 
+	begin	
+		declare @strCode nvarchar(2) = 'SC'
+		delete from @APClearing
+		INSERT INTO @APClearing
+		(
+			[intTransactionId],			--TRANSACTION ID
+			[strTransactionId],			--TRANSACTION NUMBER E.G. IR-XXXX, PAT-XXXX
+			[intTransactionType],		--TRANSACTION TYPE (DESIGNATED TRANSACTION NUMBERS ARE LISTED BELOW)
+			[strReferenceNumber],		--TRANSACTION REFERENCE E.G. BOL NUMBER, INVOICE NUMBER
+			[dtmDate],					--TRANSACTION POST DATE
+			[intEntityVendorId],		--TRANSACTION VENDOR ID
+			[intLocationId],			--TRANSACTION LOCATION ID
+			--DETAIL
+			[intTransactionDetailId],	--TRANSACTION DETAIL ID
+			[intAccountId],				--TRANSACTION ACCOUNT ID
+			[intItemId],				--TRANSACTION ITEM ID
+			[intItemUOMId],				--TRANSACTION ITEM UOM ID
+			[dblQuantity],				--TRANSACTION QUANTITY (WE CAN DIRECTLY PUT THE QUANTITY OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+			[dblAmount],				--TRANSACTION TOTAL (WE CAN DIRECTLY PUT THE AMOUNT OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+			--OFFSET TRANSACTION DETAILS
+			[intOffsetId],				--TRANSACTION ID
+			[strOffsetId],				--TRANSACTION NUMBER E.G. BL-XXXX
+			[intOffsetDetailId],		--TRANSACTION DETAIL ID
+			[intOffsetDetailTaxId],		--TRANSACTION DETAIL TAX ID
+			--OTHER INFORMATION
+			[strCode],					--TRANSACTION SOURCE MODULE E.G. IR, AP
+			strRemarks
+		)
+		-- APC Entries for Item
+		SELECT
+			[intTransactionId],			--TRANSACTION ID
+			[strTransactionId],			--TRANSACTION NUMBER E.G. IR-XXXX, PAT-XXXX
+			[intTransactionType],		--TRANSACTION TYPE (DESIGNATED TRANSACTION NUMBERS ARE LISTED BELOW)
+			[strReferenceNumber],		--TRANSACTION REFERENCE E.G. BOL NUMBER, INVOICE NUMBER
+			[dtmDate],					--TRANSACTION POST DATE
+			[intEntityVendorId],		--TRANSACTION VENDOR ID
+			[intLocationId],			--TRANSACTION LOCATION ID
+			--DETAIL
+			[intTransactionDetailId],	--TRANSACTION DETAIL ID
+			[intAccountId],				--TRANSACTION ACCOUNT ID
+			[intItemId],				--TRANSACTION ITEM ID
+			[intItemUOMId],				--TRANSACTION ITEM UOM ID
+			[dblQuantity],				--TRANSACTION QUANTITY (WE CAN DIRECTLY PUT THE QUANTITY OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+			[dblAmount],				--TRANSACTION TOTAL (WE CAN DIRECTLY PUT THE AMOUNT OF THE TRANSACTION, uspAPClearing WILL AUTOMATICALLY NEGATE IT IF @post = 0)
+			--OFFSET TRANSACTION DETAILS
+			[intOffsetId],				--TRANSACTION ID
+			[strOffsetId],				--TRANSACTION NUMBER E.G. BL-XXXX
+			[intOffsetDetailId],		--TRANSACTION DETAIL ID
+			[intOffsetDetailTaxId],		--TRANSACTION DETAIL TAX ID
+			--OTHER INFORMATION
+			[strCode],					--TRANSACTION SOURCE MODULE E.G. IR, AP
+			'DS SHRINK' AS strRemarks
+		FROM tblAPClearing
+		WHERE       
+			(intOffsetId = @DeliverySheetId
+				AND strOffsetId = @DeliverySheetNumber
+				and strCode = @strCode
+				and strRemarks = 'DS SHRINK'
+			)
+    
+		EXEC uspAPClearing @APClearing = @APClearing, @post = 0;
+	end
+
+
+
+
 	if exists(select top 1 1 from tblGLDetail 
 					where strTransactionId = @DeliverySheetNumber 
 						and ysnIsUnposted = 0 

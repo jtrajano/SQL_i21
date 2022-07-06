@@ -4,7 +4,8 @@
     [ysnActive]                        BIT            DEFAULT 1 NOT NULL,
     [intGLAccountId]                   INT            NOT NULL,
     [intCurrencyId]                    INT            NULL,
-    [intBankAccountType]               INT            DEFAULT 1 NOT NULL,
+    [intBankAccountTypeId]             INT            DEFAULT 1 NOT NULL,
+    [intBrokerageAccountId]            INT            NULL,
     [strContact]                       NVARCHAR (150) COLLATE Latin1_General_CI_AS NULL,
 	[strBankAccountHolder]             NVARCHAR (150) COLLATE Latin1_General_CI_AS NULL,
     [strBankAccountNo]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -18,8 +19,10 @@
     [strFax]                           NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [strWebsite]                       NVARCHAR (125) COLLATE Latin1_General_CI_AS NULL,
     [strEmail]                         NVARCHAR (225) COLLATE Latin1_General_CI_AS NULL,
-	[strIBAN]                          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strSWIFT]                         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strIBAN]                          NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
+	[strSWIFT]                         NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
+    [strBICCode]                       NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
+	[strBranchCode]                    NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
     [intCheckStartingNo]               INT            DEFAULT 0 NOT NULL,
     [intCheckEndingNo]                 INT            DEFAULT 0 NOT NULL,
     [intCheckNextNo]                   INT            DEFAULT 0 NOT NULL,
@@ -83,13 +86,21 @@
     [strCbkNo]                         NVARCHAR (2)   COLLATE Latin1_General_CI_AS NOT NULL,
     [intConcurrencyId]                 INT            DEFAULT 1 NOT NULL,
     [intPayToDown]                     INT            DEFAULT 0 NULL,
+    [strACHClientId]                   NVARCHAR(30)   COLLATE Latin1_General_CI_AS NULL,
     [intResponsibleEntityId]           INT            NULL,
+    [strPaymentInstructions]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strCorrespondingBank]             NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL,
+    --Advance Bank Recon fields
+    [ysnABREnable]                     BIT            NULL,
+    [intABRDaysNoRef]                  INT            NULL,
+    --Advance Bank Recon fields
     CONSTRAINT [PK_tblCMBankAccount] PRIMARY KEY CLUSTERED ([intBankAccountId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
     CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_EFT] FOREIGN KEY ([intEFTBankFileFormatId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
 	CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_BankStatement] FOREIGN KEY ([intBankStatementImportId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
     CONSTRAINT [FK_tblCMBanktblCMBankAccount] FOREIGN KEY ([intBankId]) REFERENCES [dbo].[tblCMBank] ([intBankId]),
-    CONSTRAINT [FK_tblGLAccounttblCMBankAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+    CONSTRAINT [FK_tblGLAccounttblCMBankAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblCMBankAccount_tblRKBrokerageAccount] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [dbo].[tblRKBrokerageAccount]([intBrokerageAccountId])
 );
 
 

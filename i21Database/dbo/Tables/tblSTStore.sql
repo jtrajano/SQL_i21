@@ -117,6 +117,7 @@
 	[guidStoreAppConnectionId] UNIQUEIDENTIFIER NULL, 
 	[strStoreAppMacAddress] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmStoreAppLastDateLog] DATETIME NULL,
+	[strStoreAppFileVersion] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	--[strHandheldScannerServerFolderPath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
 
 	-- ATM
@@ -132,6 +133,12 @@
 	[intChangeFundBegBalanceItemId]	INT NULL, 
 
     [ysnLotterySetupMode]           BIT NULL, 
+    [ysnActive]						BIT NULL DEFAULT 1, 
+    [ysnConsignmentStore] BIT NOT NULL DEFAULT 0,
+    [ysnConsStopAutoProcessIfValuesDontMatch] BIT NOT NULL DEFAULT 0,
+    [ysnConsMeterReadingsForDollars] BIT NOT NULL DEFAULT 1,
+    [ysnConsAddOutsideFuelDiscounts] BIT NOT NULL DEFAULT 1,
+    [dblConsCommissionPerGallonOfDealer] DECIMAL(18,6) NOT NULL DEFAULT 0,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
@@ -148,7 +155,7 @@
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intLoyaltyDiscountMopId] FOREIGN KEY ([intLoyaltyDiscountMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intRemovePropCardMopId] FOREIGN KEY ([intRemovePropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intAddPropCardMopId] FOREIGN KEY ([intAddPropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
-	CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
+	--CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblSTStore_tblEMEntity_intCheckoutCustomerId] FOREIGN KEY ([intCheckoutCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerChargesItemId] FOREIGN KEY ([intCustomerChargesItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intOverShortItemId] FOREIGN KEY ([intOverShortItemId]) REFERENCES [tblICItem]([intItemId])

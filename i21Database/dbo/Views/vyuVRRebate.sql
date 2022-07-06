@@ -24,6 +24,7 @@ SELECT
 	, customer.strCustomerNumber
 	, program.strProgram
 	, vendorSetup.intVendorSetupId
+	, vendorSetup.strDataFileTemplate
 	, strVendorNumber = vendor.strVendorId
 	, strVendorName = vendorEntity.strName
 	, companyLocation.strLocationName

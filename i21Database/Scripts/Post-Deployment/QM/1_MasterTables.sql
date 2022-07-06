@@ -1173,6 +1173,15 @@ BEGIN
 	VALUES('Offer Sample Label','OfferSampleLabel',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strReportName = 'SampleLabelMP')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	SELECT 'Sample Label - MP','SampleLabelMP',intControlPointId,1
+	FROM tblQMControlPoint
+	WHERE intControlPointId NOT IN (3, 11, 12, 13, 14)
+	ORDER BY intControlPointId
+END
+GO
 
 UPDATE tblQMSampleType
 SET ysnAdjustInventoryQtyBySampleQty = 0
@@ -1203,6 +1212,10 @@ UPDATE tblQMCompanyPreference
 SET ysnAllowReversalSampleEntry = 0
 WHERE ysnAllowReversalSampleEntry IS NULL
 GO
+UPDATE tblQMCompanyPreference
+SET ysnEnableAssignContractsInSample = 0
+WHERE ysnEnableAssignContractsInSample IS NULL
+GO
 
 GO
 UPDATE tblQMSample
@@ -1218,4 +1231,89 @@ GO
 UPDATE tblQMSample
 SET ysnIgnoreContract = 0
 WHERE ysnIgnoreContract IS NULL
+GO
+
+UPDATE tblQMSampleType
+SET ysnMultipleContractSeq = 0
+WHERE ysnMultipleContractSeq IS NULL
+GO
+
+
+UPDATE tblQMCompanyPreference
+SET strSampleInstructionReport = 'SampleInstruction_WaMa'
+WHERE ISNULL(strSampleInstructionReport,'') = ''
+GO
+
+IF NOT EXISTS(SELECT 1 FROM tblQMComponentMap)
+BEGIN
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component1',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component2',1
+	
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component3',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component4',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component5',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component6',1
+	
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component7',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component8',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component9',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component10',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component11',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component12',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component13',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component14',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component15',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component16',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component17',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component18',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component19',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component20',1
+END
+GO
+
+UPDATE tblQMSample
+SET ysnImpactPricing = 0
+WHERE ysnImpactPricing IS NULL
+GO
+
+UPDATE tblQMCompanyPreference
+SET ysnSetDefaultReceivedDateInSampleScreen = 1
+WHERE ysnSetDefaultReceivedDateInSampleScreen IS NULL
 GO

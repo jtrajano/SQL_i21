@@ -58,6 +58,7 @@ SELECT
 
 	,LC.intLoadContainerId
 	,LC.strComments
+	,LC.strContainerId
 	,LC.strContainerNumber
 	,LC.dtmUnloading
 	,LC.strCustomsComments
@@ -83,13 +84,18 @@ SELECT
 	,WRMH.strServiceContractNo
 	,intEntityId = CLSL.intVendorId 
 	,strShippingLine = ShippingLine.strName
-	,strTransactionType = CASE L.intPurchaseSale
+	,strTransactionType = CASE L.intPurchaseSale 
 		WHEN 1 THEN 'Inbound'
 		WHEN 2 THEN 'Outbound'
 		WHEN 3 THEN 'Drop Ship'
-		ELSE '' END COLLATE Latin1_General_CI_AS
+		WHEN 4 THEN 'Transfer'
+		END COLLATE Latin1_General_CI_AS
 	,strShipmentStatus = CASE L.intShipmentStatus
-		WHEN 1 THEN 'Scheduled'
+		WHEN 1 THEN 
+			CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
+						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
+				THEN 'Expired'
+				ELSE 'Scheduled' END
 		WHEN 2 THEN 'Dispatched'
 		WHEN 3 THEN 
 			CASE WHEN (L.ysnDocumentsApproved = 1 
@@ -126,6 +132,7 @@ SELECT
 		WHEN 9 THEN 'Full Shipment Created'
 		WHEN 10 THEN 'Cancelled'
 		WHEN 11 THEN 'Invoiced'
+		WHEN 12 THEN 'Rejected'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,L.intShipmentType
 	,strShipmentType = CASE L.intShipmentType
@@ -137,6 +144,7 @@ SELECT
 		WHEN 1 THEN 'Truck'
 		WHEN 2 THEN 'Ocean Vessel'
 		WHEN 3 THEN 'Rail'
+		WHEN 4 THEN 'Multimodal'
 		END COLLATE Latin1_General_CI_AS
 	,LWSB.strBillId
 	,LWSB.intBillId

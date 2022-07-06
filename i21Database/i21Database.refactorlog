@@ -7665,4 +7665,81 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[uspGRModifyTicketDiscountItemInfo]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0d013dd7-f2ac-4ff8-b00d-45fad727b921" ChangeDateTime="11/22/2021 02:50:12">
+    <Property Name="ElementName" Value="[dbo].[tblFAFixedAsset].[intAccuitent]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblFAFixedAsset]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLegacyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ab5d7c1c-3b3a-4365-ae5d-a3e39658a35a" ChangeDateTime="12/07/2021 00:40:56">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankAccount].[intBankAccountType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intBankAccountTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="610c2d03-3953-4e99-93ff-a2211b13d875" ChangeDateTime="12/14/2021 08:48:03">
+    <Property Name="ElementName" Value="[dbo].[uspCMGetTotalCashForecastReport]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[uspCMGenerateCMCashFlow]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b26f4d7a-ec65-45a8-8b6e-8f3f8735924d" ChangeDateTime="12/20/2021 07:21:26">
+    <Property Name="ElementName" Value="[dbo].[fnCMGetPostedBankTransactionFromDate]" />
+    <Property Name="ElementType" Value="SqlInlineTableValuedFunction" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="fnCMCashFlowTransactions" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="803be954-da98-4f43-b4fe-8ccc88ff1df3" ChangeDateTime="03/10/2022 01:22:18">
+    <Property Name="ElementName" Value="[dbo].[tblLGInsurancePremiumFactor].[dtmDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGInsurancePremiumFactor]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmValidFrom" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4b17dd2f-eb7a-4b43-a6c5-314ddd32ffc2" ChangeDateTime="03/11/2022 03:32:27">
+    <Property Name="ElementName" Value="[dbo].[tblCTCompanyPreference].[intFinanceCost]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFinanceCostId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="21c7ea42-662b-4867-91fd-fe31ca28404f" ChangeDateTime="03/17/2022 01:06:54">
+    <Property Name="ElementName" Value="[dbo].[tblCTValuationGroup].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTValuationGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intValuationGroupId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="908b42ea-35ef-4766-99b6-d8bf17297ad3" ChangeDateTime="03/17/2022 01:09:23">
+    <Property Name="ElementName" Value="[dbo].[tblCTValuationGroupDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTValuationGroupDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intValuationGroupDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7ff4cdb5-aec6-408f-9eeb-29e30887fef1" ChangeDateTime="03/17/2022 01:19:16">
+    <Property Name="ElementName" Value="[dbo].[tblLGInsurancePremiumFactorSale].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGInsurancePremiumFactorSale]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInsurancePremiumFactorSaleId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="af83f672-eab8-40ab-992a-f51169a14ba4" ChangeDateTime="03/17/2022 01:19:48">
+    <Property Name="ElementName" Value="[dbo].[tblLGInsurancePremiumFactorPurchase].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGInsurancePremiumFactorPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInsurancePremiumFactorPurchaseId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="111cb895-6bf1-4095-a75a-cfb058ef0c79" ChangeDateTime="03/26/2022 02:11:08">
+    <Property Name="ElementName" Value="[dbo].[tblCTTermCostDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTTermCostDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTermCostDetailId" />
+  </Operation>
 </Operations>

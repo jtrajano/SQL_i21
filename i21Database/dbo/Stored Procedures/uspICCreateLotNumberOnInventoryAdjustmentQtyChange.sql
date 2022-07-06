@@ -42,6 +42,14 @@ BEGIN
 			,[dblWeight]
 			,[dblGrossWeight]
 			,[dblWeightPerQty]
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
+			,[dblTare]
+			,[dblTarePerQty]
+			,[strWarrantNo]
+			,[intWarrantStatus]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -61,20 +69,31 @@ BEGIN
 													Detail.intLotId is null then Detail.intItemUOMId else Detail.intNewWeightUOMId end
 			,[dblWeightQty]             = case when 
 													isnull(Detail.strNewLotNumber, '') <> '' and 
-													dblWeight  is null and 
+													Detail.dblWeight  is null and 
 													Detail.intLotId is null then Detail.dblNewWeight else Detail.dblWeight end
 			,[dblGrossWeight]           = case when 
 													isnull(Detail.strNewLotNumber, '') <> '' and 
-													dblWeight  is null and 
+													Detail.dblWeight  is null and 
 													Detail.intLotId is null then Detail.dblNewWeight else Detail.dblWeight end
 			,[dblWeightPerQty]          = case when 
 													isnull(Detail.strNewLotNumber, '') <> '' and 
-													dblWeightPerQty is null and 
+													Detail.dblWeightPerQty is null and 
 													Detail.intLotId is null then Detail.dblNewWeightPerQty else Detail.dblWeightPerQty end
+			,intContractHeaderId		= SourceLot.intContractHeaderId
+			,intContractDetailId		= SourceLot.intContractDetailId
+			,ysnWeighed					= SourceLot.ysnWeighed
+			,strSealNo					= SourceLot.strSealNo
+			,[dblTare]					= SourceLot.dblTare
+			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+			,[strWarrantNo]				= SourceLot.strWarrantNo
+			,[intWarrantStatus]			= SourceLot.intWarrantStatus
+
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId
 			AND ItemLocation.intLocationId = Header.intLocationId
+		LEFT JOIN tblICLot SourceLot
+			ON SourceLot.intLotId = Detail.intLotId
 	WHERE Header.intInventoryAdjustmentId = @intTransactionId
 		AND NULLIF(Detail.strNewLotNumber, '') IS NOT NULL
         AND Detail.intLotId IS NULL

@@ -54,3 +54,4 @@ LEFT JOIN dbo.tblQMReportCuppingPropertyMapping AS Property_bulk_map ON UPPER(Pr
 LEFT JOIN dbo.tblQMProperty AS Property_bulk ON UPPER(Property_bulk.strPropertyName) = UPPER(Property_bulk_map.strActualPropertyName)
 LEFT JOIN dbo.tblQMTestResult AS Result_bulk ON Result_bulk.intSampleId = S.intSampleId
 	AND Result_bulk.intPropertyId = Property_bulk.intPropertyId
+WHERE S.intTypeId = 1

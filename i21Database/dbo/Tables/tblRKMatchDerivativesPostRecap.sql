@@ -28,6 +28,7 @@
 	[intSourceUOMId] INT NULL,
 	[intCommodityId] INT NOT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)),
+	[strSourceTransactionNo] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 		
 	CONSTRAINT [PK_tblRKMatchDerivativesPostRecap] PRIMARY KEY CLUSTERED ([intMatchDerivativesPostRecapId] ASC)
 );

@@ -6,7 +6,10 @@ AS
 
 BEGIN TRY
 	
-	DECLARE	@ErrMsg	NVARCHAR(MAX)
+	DECLARE
+		@ErrMsg	NVARCHAR(MAX)
+		,@ysnEnableFXFieldInContractPricing bit = 0
+		;
 	
 		--DECLARE @temp AS TABLE
 		--(
@@ -81,6 +84,7 @@ BEGIN TRY
 			DROP TABLE #MultiPriceFixation					
 
 		SELECT * INTO #tblCTPriceFixation FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId
+		select @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing from tblCTCompanyPreference;
 
 		--INSERT INTO @temp 
 
@@ -111,6 +115,8 @@ BEGIN TRY
 				PF.dblFinalPrice,
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
+				PF.dblFX,
+				PF.dblSequenceFX,
 
 				(SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE CD.intContractDetailId IN (intContractDetailId)) AS dblQuantity, -- ,intSplitFromId
 				CD.strPriceUOM,
@@ -127,6 +133,7 @@ BEGIN TRY
 				CD.strContractNumber,
 				CASE 
 					WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis
+					WHEN @ysnEnableFXFieldInContractPricing = 1 and CD.intCurrencyId <> CD.intInvoiceCurrencyId and isnull(CD.intMainCurrencyId,0) <> CD.intInvoiceCurrencyId then CD.dblBasis * CD.dblRate
 					ELSE
 						dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
 						CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
@@ -159,8 +166,15 @@ BEGIN TRY
 				CD.dblFutures,
 				CD.intContractStatusId,
 				ysnLoad = isnull(CH.ysnLoad	,0),
-				intHeaderPricingTypeId = CH.intPricingTypeId
-		
+				intHeaderPricingTypeId = CH.intPricingTypeId,
+				ICC.strItemNo,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -168,11 +182,11 @@ BEGIN TRY
 		JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId		=	MA.intUnitMeasureId	
-LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD.intCommodityId 
+		LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD.intCommodityId 
 												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
-LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
-LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
-
+		LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
+		LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
+		LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
 
 		--INSERT INTO @temp 
 
@@ -203,6 +217,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				PF.dblFinalPrice,
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
+				PF.dblFX,
+				PF.dblSequenceFX,
 
 				CH.dblQuantity,
 				PM.strUnitMeasure		AS	strPriceUOM,
@@ -211,7 +227,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CH.intFutureMarketId,
 				MA.strFutMarketName		AS	strFutureMarket,
 				CH.intFutureMonthId,
-				MO.strFutureMonth,
+				strFutureMonth = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') '),
 				CAST(NULL AS INT)		AS	intContractSeq,
 				CT.strContractType,
 				CH.intEntityId,
@@ -242,8 +258,15 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.dblFutures,
 				CD.intContractStatusId,
 				ysnLoad = isnull(CH.ysnLoad	,0),
-				intHeaderPricingTypeId = CH.intPricingTypeId
-
+				intHeaderPricingTypeId = CH.intPricingTypeId,
+				ICC.strItemNo,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine
 		INTO	#MultiPriceFixation
 		FROM	#tblCTPriceFixation			PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
@@ -262,6 +285,7 @@ LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId
 LEFT	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId			=	CH.intSubBookId	
 LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
+		LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = SI.intItemId
 		WHERE	ISNULL(CH.ysnMultiplePriceFixation,0) = 1
 	
 	SELECT * FROM #NonMultiPriceFixation

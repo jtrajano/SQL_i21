@@ -7,6 +7,7 @@
     [dtmValidFromDate] DATETIME NOT NULL, 
 	[strSource] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmCreatedDate] DATETIME NULL, 
+	[dtmCreatedDateUTC] DATETIME NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMCurrencyExchangeRateDetail_tblSMCurrencyExchangeRate] FOREIGN KEY (intCurrencyExchangeRateId) REFERENCES tblSMCurrencyExchangeRate(intCurrencyExchangeRateId) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMCurrencyExchangeRateDetail_tblSMCurrencyExchangeRateType] FOREIGN KEY (intRateTypeId) REFERENCES tblSMCurrencyExchangeRateType(intCurrencyExchangeRateTypeId), 

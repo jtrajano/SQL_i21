@@ -49,6 +49,7 @@ Declare @intMinHeader				INT,
 		@strWeightUOM				NVARCHAR(50),
 		@dtmETAPOL					DATETIME,
 		@dtmETAPOD					DATETIME,
+		@dtmPlannedAvailabilityDate DATETIME,
 		@strAddressXml				NVARCHAR(MAX),
 		@strHeaderSubLocation		NVARCHAR(50),
 		@strHeaderUOM				NVARCHAR(50),
@@ -66,7 +67,8 @@ Declare @intMinHeader				INT,
 		@strMVoyageNumber			NVARCHAR(200),
 		@intPositionId				INT,
 		@strPositionType			NVARCHAR(50),
-		@str10Zeros					NVARCHAR(50)='0000000000'
+		@str10Zeros					NVARCHAR(50)='0000000000',
+		@ysnPosted BIT
 
 Declare @tblDetail AS Table
 (
@@ -153,9 +155,15 @@ Begin
 
 	Set @intPositionId=NULL
 
+	SELECT @ysnPosted = NULL
+
 	Select TOP 1 @strPackingDesc=ct.strPackingDescription,@intPositionId=ch.intPositionId From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
 	Join tblCTContractHeader ch on ch.intContractHeaderId=ct.intContractHeaderId
 	Where ld.intLoadId=@intLoadId
+
+	SELECT @dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate,@ysnPosted = ISNULL(ysnPosted, 0) FROM tblLGLoad WHERE intLoadId = @intLoadId
+
+	Update tblLGLoadLSPStg Set dtmPlannedAvailabilityDate=@dtmPlannedAvailabilityDate Where intLoadStgId=@intLoadStgId
 
 	Set @strPositionType=''
 	Select TOP 1 @strPositionType=strPositionType From tblCTPosition Where intPositionId=@intPositionId
@@ -185,6 +193,21 @@ Begin
 	Begin
 		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='It is a Spot Contract' Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
+	End
+
+	IF UPPER(@strHeaderRowState) <> 'DELETE' AND ISNULL(@ysnPosted, 0) = 0
+	Begin
+		Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='LS is not yet posted' Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+
+	If UPPER(@strHeaderRowState) = 'DELETE'
+	Begin
+		If NOT EXISTS (Select TOP 1 1 from tblLGLoadLSPStg where intLoadId = @intLoadId AND intLoadStgId < @intLoadStgId AND ISNULL(strFeedStatus,'') = 'Awt Ack')
+		Begin
+			Update tblLGLoadLSPStg Set strFeedStatus='NA',strMessage='No LS feed were sent earlier' Where intLoadStgId=@intLoadStgId
+			GOTO NEXT_SHIPMENT
+		End
 	End
 
 	If ISNULL(@strExternalDeliveryNumber,'')=''
@@ -309,7 +332,7 @@ Begin
 	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')								+ '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ dbo.fnEscapeXML(ISNULL(@strShippingLine,''))				+ '</TRAID>'
 	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')									+ '</LIFEX>'
-	Set @strXml += '<PODAT>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')			+ '</PODAT>'
+	Set @strXml += '<PODAT>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')			+ '</PODAT>'
 
 	Set @strXml += '<E1EDL22 SEGMENT="1">'
 	Set @strXml += '<VSTEL_BEZ>'	+ ISNULL(@strLocation,'')								+ '</VSTEL_BEZ>'
@@ -320,7 +343,7 @@ Begin
 	Set @strXml += '<QUALF>'	+ '007'			+ '</QUALF>'
 	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOL,112),'')		+ '</NTANF>'
 	Set @strXml += '<NTANZ>'	+ '000000'		+ '</NTANZ>'
-	Set @strXml += '<NTEND>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</NTEND>'
+	Set @strXml += '<NTEND>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')		+ '</NTEND>'
 	Set @strXml += '<NTENZ>'	+ '000000'		+ '</NTENZ>'
 	Set @strXml += '<ISDD>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETSPOL,112),'')		+ '</ISDD>'
 	Set @strXml +=	'</E1EDT13>'

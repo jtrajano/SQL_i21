@@ -186,6 +186,9 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[dblWeight]				NUMERIC(38, 20) NULL DEFAULT ((0))
 	,[intWeightUOMId]			INT NULL
 	,[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0))
+	,[dblTare]					NUMERIC(38,20) NULL DEFAULT ((0))
+	,[dblTarePerQty]			NUMERIC(38,20) NULL DEFAULT ((0))
+	,[dblNetWeight]				NUMERIC(38,20) NULL DEFAULT ((0))
 	,[intOriginId]				INT NULL
 	,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
 	,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 		
@@ -223,5 +226,13 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strCertificateId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strTrackingNumber]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL	 
 	,[strWarehouseRefNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strCargoNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strWarrantNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intWarrantStatus]			TINYINT NULL
 	,[intSourceType]			INT NULL 
+	,[intContractHeaderId]		INT NULL -- Contract Header Id
+	,[intContractDetailId]		INT NULL -- Contract Detail Id
+	,[ysnWeighed]				BIT DEFAULT((0))
+	,[strSealNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[intTradeFinanceId]		INT NULL 
 )

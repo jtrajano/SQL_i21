@@ -20,7 +20,7 @@ CREATE TABLE [dbo].[tblGLConsolidateLog](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[tblGLConsolidateLog]  WITH CHECK ADD  CONSTRAINT [FK_tblGLConsolidateLog_tblGLSubsidiaryCompany] FOREIGN KEY([intSubsidiaryCompanyId])
+ALTER TABLE [dbo].[tblGLConsolidateLog] ADD  CONSTRAINT [FK_tblGLConsolidateLog_tblGLSubsidiaryCompany] FOREIGN KEY([intSubsidiaryCompanyId])
 REFERENCES [dbo].[tblGLSubsidiaryCompany] ([intSubsidiaryCompanyId])
 GO
 

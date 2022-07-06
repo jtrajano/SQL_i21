@@ -34,6 +34,7 @@
 	strComment NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	intCurrencyId INT NULL,
 	ysnAllowInvoice BIT NULL,
+	intSort INT NULL, 
 
 	-- Details
 	-- Required Field for Details

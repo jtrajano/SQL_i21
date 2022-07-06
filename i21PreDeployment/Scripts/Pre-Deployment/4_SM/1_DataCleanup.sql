@@ -31,6 +31,13 @@ GO
 		SET strMenuName = ''System Manager'', strDescription = ''System Manager''
 		WHERE strMenuName = ''Admin'' AND strModuleName = ''System Manager'' AND intParentMenuID = 0'
 	)
+
+GO
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMBUILDNUMBER')
+	EXEC 
+	(
+		'DELETE FROM tblSMBuildNumber WHERE strVersionNo = '''' OR strVersionNo = NULL'
+	)
 	
 GO
 

@@ -25,7 +25,9 @@ select id=1, name='Primary' union all
 select id=2, name='Divider' union all
 select id=3, name='Location' union all
 select id=4, name='Segment' union all
-select id=5, name='Line Of Business'
+select id=5, name='Line Of Business' union all
+select id=6, name='Company'
+
 ) AS SegmentTypeCodedValues
 		ON  SegmentTypeTable.intSegmentTypeId = SegmentTypeCodedValues.id
 WHEN MATCHED THEN 

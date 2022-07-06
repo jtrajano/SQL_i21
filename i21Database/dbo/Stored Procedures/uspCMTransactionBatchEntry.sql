@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCMTransactionBatchEntry]
+﻿CREATE PROCEDURE [dbo].[uspCMTransactionBatchEntry]
 	@intBankTransactionTypeId INT,
 	@intBankAccountId INT,
 	@intCurrencyId INT,
@@ -31,15 +30,22 @@ DECLARE @intTransactionId INT
 		,@strName NVARCHAR(50)
 		,@dblDebit DECIMAL(18,6)
 		,@dblCredit DECIMAL(18,6)
+		,@dblAmount DECIMAL(18,6)
+		,@dblDebitForeign DECIMAL(18,6)
+		,@dblCreditForeign DECIMAL(18,6)
+		,@dblExchangeRate DECIMAL(18,6)
+		,@intCurrencyExchangeRateTypeId INT
 		,@strRowState NVARCHAR(20)
 		,@intConcurrencyId INT
 		,@detailCount INT
 		,@intBankLoanId INT
 
 
+
 SELECT  *
 INTO	#tmpBankTransactionBatchDetailEntries
 FROM @BankTransactionBatchDetailEntries 
+
 --ORDER BY intTransactionId DESC
 
 
@@ -72,8 +78,13 @@ FROM @BankTransactionBatchDetailEntries
 				,@intBankLoanId			= intBankLoanId
 				,@strDescriptionDetail	= strDescription
 				,@strName				= strName
-				,@dblDebit				= dblDebit
-				,@dblCredit				= dblCredit
+				,@dblAmount				= dblAmount
+				,@dblDebit				= ROUND(dblDebit,2)
+				,@dblCredit				= ROUND(dblCredit,2)
+				,@intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+				,@dblExchangeRate 		= dblExchangeRate
+				,@dblDebitForeign		= dblDebitForeign
+				,@dblCreditForeign		= dblCreditForeign
 				,@strRowState			= strRowState
 				,@intConcurrencyId		= intConcurrencyId
 			FROM #tmpBankTransactionBatchDetailEntries --ORDER BY intTransactionId DESC
@@ -138,7 +149,7 @@ FROM @BankTransactionBatchDetailEntries
 					,@intBankLoanId
 					,@intCurrencyId--[intCurrencyId]
 					,1--[dblExchangeRate]
-					,@dtmBatchDate--[dtmDate]
+					,@dtmDate--[dtmDate]
 					,@strName--[strPayee]
 					,NULL--[intPayeeId]
 					,NULL--[strAddress]
@@ -146,10 +157,10 @@ FROM @BankTransactionBatchDetailEntries
 					,NULL--[strCity]
 					,NULL--[strState]
 					,NULL--[strCountry]
-					,@dblCredit--[dblAmount]
+					,@dblAmount--[dblAmount]
 					,0--[dblShortAmount]
 					,NULL--[intShortGLAccountId]
-					,dbo.fnConvertNumberToWord(@dblCredit)--[strAmountInWords]
+					,dbo.fnConvertNumberToWord(@dblAmount)--[strAmountInWords]
 					,@strDescription--[strMemo]
 					,''--[strReferenceNo]
 					,NULL --[dtmCheckPrinted]
@@ -191,6 +202,10 @@ FROM @BankTransactionBatchDetailEntries
 					,[strDescription]
 					,[dblDebit]
 					,[dblCredit]
+					,[dblExchangeRate]
+					,[dblDebitForeign]
+					,[dblCreditForeign]
+					,[intCurrencyExchangeRateTypeId]
 					,[intUndepositedFundId]
 					,[intEntityId]
 					,[intCreatedUserId]
@@ -205,6 +220,10 @@ FROM @BankTransactionBatchDetailEntries
 					,@strDescriptionDetail	
 					,@dblDebit			
 					,@dblCredit			
+					,@dblExchangeRate
+					,@dblDebitForeign
+					,@dblCreditForeign
+					,@intCurrencyExchangeRateTypeId		
 					,NULL--[intUndepositedFundId]
 					,@intEntityUserId--[intEntityId]
 					,@intEntityUserId--[intCreatedUserId]
@@ -226,10 +245,10 @@ FROM @BankTransactionBatchDetailEntries
 						,[intBankAccountId] = @intBankAccountId
 						,[intBankLoanId] = @intBankLoanId
 						,[intCurrencyId] = @intCurrencyId
-						,[dtmDate] = @dtmBatchDate
+						,[dtmDate] = @dtmDate
 						,[strPayee] = @strName
-						,[dblAmount] = @dblCredit
-						,[strAmountInWords] = dbo.fnConvertNumberToWord(@dblCredit)
+						,[dblAmount] = @dblAmount
+						,[strAmountInWords] = dbo.fnConvertNumberToWord(@dblAmount)
 						,[strMemo] = @strDescription
 						,[intCompanyLocationId] = @intCompanyLocationId
 						,[intLastModifiedUserId] = @intEntityUserId
@@ -248,6 +267,10 @@ FROM @BankTransactionBatchDetailEntries
 						,[strDescription] = @strDescriptionDetail
 						,[dblDebit] = @dblDebit
 						,[dblCredit] = @dblCredit
+						,[intCurrencyExchangeRateTypeId] = @intCurrencyExchangeRateTypeId
+						,[dblExchangeRate] 		= @dblExchangeRate
+						,[dblDebitForeign]		= @dblDebitForeign
+						,[dblCreditForeign]		= @dblCreditForeign
 						,[intLastModifiedUserId] = @intEntityUserId
 						,[dtmLastModified] = GETDATE()
 						,[intConcurrencyId] = intConcurrencyId + 1

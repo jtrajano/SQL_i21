@@ -9,7 +9,7 @@ SELECT
 	,strPaymentNo				    = strPaymentNo
 	,InboundNetWeight			    = SUM(InboundNetWeight)
 	,InboundGrossDollars		    = SUM(InboundGrossDollars)
-	,InboundTax					    = SUM(InboundTax) + isnull(AdditionalTax.dblTax,0)
+	,InboundTax					    = SUM(InboundTax) --+ isnull(AdditionalTax.dblTax,0)
 	,InboundDiscount			    = SUM(InboundDiscount)
 	,InboundNetDue				    = SUM(InboundNetDue)
 	,OutboundNetWeight			    = OutboundNetWeight		

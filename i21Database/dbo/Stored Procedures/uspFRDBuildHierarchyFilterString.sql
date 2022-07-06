@@ -24,7 +24,9 @@ CREATE TABLE #TempFRDHierarchy (
 	[strFilterString]				NVARCHAR(MAX),
 	[intParentGroupId]				INT,
 	[intSort]						INT,
-	[intConcurrencyId]				INT
+	[intConcurrencyId]				INT,
+	[strDescription]				NVARCHAR(MAX),
+	[dtmEndDate]					DATETIME
 );
 
 -- +++++++++++++++++++++++++++++

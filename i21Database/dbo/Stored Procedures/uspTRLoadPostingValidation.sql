@@ -41,6 +41,7 @@ BEGIN TRY
 		, @dblGross DECIMAL(18, 6) = 0
 		, @dblUnitCost DECIMAL(18, 6) = 0
 		, @dblFreight DECIMAL(18, 6) = 0
+		, @dblComboFreightRate DECIMAL(18, 6) = 0
 		, @dblSurcharge DECIMAL(18, 6) = 0
 		, @GrossorNet NVARCHAR(50)
 		, @intDistributionItemId INT
@@ -64,6 +65,8 @@ BEGIN TRY
 		, @dblNonBlendedDistributedQuantity DECIMAL(18, 6) = 0
 		, @strFreightCostMethod NVARCHAR(20) = NULL
 		, @strFreightBilledBy NVARCHAR(30) = NULL
+		, @ysnComboFreight BIT
+		, @dblComboSurcharge DECIMAL(18, 6) = 0
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -93,7 +96,7 @@ BEGIN TRY
 	END
 
 
-	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0) FROM tblTRCompanyPreference
 	SELECT @strFreightBilledBy = strFreightBilledBy FROM tblSMShipVia where intEntityId = @intShipVia
 
 	--IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
@@ -441,6 +444,8 @@ BEGIN TRY
 		, dblSurcharge = DD.dblDistSurcharge
 		, DD.strReceiptLink
 		, DD.ysnBlendedItem
+		, dblComboFreightRate = DD.dblComboFreightRate
+		, DD.dblComboSurcharge
 	INTO #DistributionDetailTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -458,6 +463,8 @@ BEGIN TRY
 			, @dblSurcharge = DD.dblSurcharge
 			, @ReceiptLink = DD.strReceiptLink
 			, @BlendedItem = DD.ysnBlendedItem
+			, @dblComboFreightRate = DD.dblComboFreightRate
+			, @dblComboSurcharge = DD.dblComboSurcharge
 		FROM #DistributionDetailTable DD
 		WHERE intLoadHeaderId = @intLoadHeaderId
 		
@@ -496,6 +503,13 @@ BEGIN TRY
 			ELSE IF (ISNULL(@dblFreight, 0) = 0  AND ISNULL(@intFreightItemId, '') != '')
 			BEGIN
 				IF (ISNULL(@dblSurcharge, 0) > 0 )
+				BEGIN
+					RAISERROR('Transports Load has a Surcharge. You must input the Freight rate or zero-out the Surcharge in both Receipt and Distribution Detail.', 16, 1)
+				END
+			END
+			ELSE IF(ISNULL(@dblComboFreightRate, 0) = 0  AND ISNULL(@intFreightItemId, '') != '')
+			BEGIN
+				IF (ISNULL(@dblComboSurcharge, 0) > 0 )
 				BEGIN
 					RAISERROR('Transports Load has a Surcharge. You must input the Freight rate or zero-out the Surcharge in both Receipt and Distribution Detail.', 16, 1)
 					--RAISERROR('Transport load has surcharge. You must input freight rate or zero out the surcharge.', 16, 1)
@@ -547,6 +561,35 @@ BEGIN TRY
 		END
 		
 		DELETE FROM #DistributionDetailTable WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+	END
+	
+	-- Validate Different Combo Freight Rate - Receipt
+	DECLARE @receiptRowCount INT = NULL
+	SELECT dblComboFreightRate 
+	FROM tblTRLoadHeader LH
+	INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
+	WHERE LH.intLoadHeaderId = @intLoadHeaderId
+	GROUP BY dblComboFreightRate
+
+	SET @receiptRowCount = @@ROWCOUNT;
+	IF(@receiptRowCount > 1)
+	BEGIN
+		RAISERROR('Receipt Combo Freight Rate should be the same!', 16, 1)
+	END
+
+	-- Validate Different Combo Freight Rate - Distribution
+	DECLARE @distributionRowCount INT = NULL
+	SELECT dblComboFreightRate 
+	FROM tblTRLoadHeader LH
+	INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+	INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	WHERE LH.intLoadHeaderId = @intLoadHeaderId
+	GROUP BY dblComboFreightRate
+
+	SET @distributionRowCount = @@ROWCOUNT;
+	IF(@distributionRowCount > 1)
+	BEGIN
+		RAISERROR('Distribution Combo Freight Rate should be the same!', 16, 1)
 	END
 
 	-- Validate the BOL of Receipt and Distribution

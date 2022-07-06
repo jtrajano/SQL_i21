@@ -77,12 +77,10 @@ begin try
 				,@intContractSeq = cd.intContractSeq
 			from
 				tblCTContractDetail cd
-				,tblCTContractHeader ch
-				,tblCTContractStatus cs
+				inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+				inner join tblCTContractStatus cs on cs.intContractStatusId = cd.intContractStatusId
 			where
 				cd.intContractDetailId = @intActiveContractDetailId
-				and ch.intContractHeaderId = cd.intContractHeaderId
-				and cs.intContractStatusId = cd.intContractStatusId
 
 			if (@ysnDestinationWeightsAndGrades = 0)
 			begin

@@ -365,7 +365,6 @@ BEGIN
 			BEGIN 
 				UPDATE	t
 				SET		t.intTransactionTypeId = @INV_TRANS_TYPE_Revalue_Sold
-					, t.dtmDateModified = GETUTCDATE()
 				FROM	tblICInventoryTransaction t
 				WHERE	t.intInventoryTransactionId = @InventoryTransactionIdentityId
 						AND @intInventoryTransactionEscalateId IS NULL 

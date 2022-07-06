@@ -1,13 +1,16 @@
-﻿DECLARE @TaxAuthorityCode NVARCHAR(10) = 'WA'
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'WA')
+BEGIN
+	PRINT ('Deploying Washington Tax Forms')
+END
+GO
+
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'WA'
 	, @TaxAuthorityId INT
 
-SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
-
-	PRINT ('Deploying Washington Tax Forms')
-
 -- Product Codes
 /* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
 select 'UNION ALL SELECT intProductCodeId = ' + CAST(0 AS NVARCHAR(10)) 
@@ -100,8 +103,8 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '2A', strScheduleName = 'Gallons Received from WA Terminal/Refinery, Tax Exempt', strType = 'Motor Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 30, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472651, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '2A', strScheduleName = 'Gallons Received from WA Terminal/Refinery, Tax Exempt', strType = 'Special Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 40, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472652, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '2A', strScheduleName = 'Gallons Received from WA Terminal/Refinery, Tax Exempt', strType = 'Dyed Special Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 50, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472653, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '2B', strScheduleName = 'Gallosn Received, Tax Exempt Blend Stock', strType = 'Motor Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 60, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472654, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '2B', strScheduleName = 'Gallosn Received, Tax Exempt Blend Stock', strType = 'Special Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 70, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472655, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '2B', strScheduleName = 'Gallons Received, Tax Exempt Blend Stock', strType = 'Motor Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 60, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472654, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '2B', strScheduleName = 'Gallons Received, Tax Exempt Blend Stock', strType = 'Special Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 70, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472655, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '3', strScheduleName = 'Gallons Imported Below Terminal', strType = 'Motor Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 80, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472656, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '3', strScheduleName = 'Gallons Imported Below Terminal', strType = 'Special Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 90, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472657, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Supplier', strFormName = 'WA Supplier Return', strScheduleCode = '3', strScheduleName = 'Gallons Imported Below Terminal', strType = 'Dyed Special Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 100, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 472658, intComponentTypeId = 1

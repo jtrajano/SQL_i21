@@ -24,6 +24,7 @@
 	,@CurrencyId					INT				= NULL
 	,@CurrencyExchangeRateTypeId	INT				= NULL
 	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
+	,@FOB							NVARCHAR(100)	= NULL
 )
 RETURNS @returntable TABLE
 (
@@ -97,7 +98,7 @@ BEGIN
 			
 			
 	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId)		
+		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @CompanyLocationId, @ItemId, @CustomerLocationId, @SiteId, @FreightTermId, @FOB)
 		
 	IF ISNULL(@SiteId,0) <> 0 AND  ISNULL(@TaxGroupId, 0) <> 0
 		SELECT 	@IsCustomerSiteTaxable = ISNULL(ysnTaxable,0) FROM tblTMSite WHERE intSiteID = @SiteId

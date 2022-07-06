@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuAPMultiCurrencyRevalue]
 AS
 SELECT DISTINCT
-	strTransactionType		=	'Voucher' COLLATE Latin1_General_CI_AS,
+	strTransactionType		=	'Voucher',
 	strTransactionId		=	A.strBillId,
 	strTransactionDate		=	A.dtmDate,
 	strTransactionDueDate	=	A.dtmDueDate,
@@ -9,7 +9,7 @@ SELECT DISTINCT
 	strCommodity			=	CC.strDescription,
 	strLineOfBusiness		=	CT.strDescription,
 	strLocation				=	EL.strLocationName,
-	strTicket				=	'' COLLATE Latin1_General_CI_AS,
+	strTicket				=	'',
 	strContractNumber		=	CH.strContractNumber,
 	strItemId				=	strName,
 	dblQuantity				=	BD.dblQtyReceived,
@@ -25,7 +25,9 @@ SELECT DISTINCT
     dblUnrealizedDebitGain  =    0, --Calcuate By GL
     dblUnrealizedCreditGain =    0, --Calcuate By GL
     dblDebit                =    0, --Calcuate By GL
-    dblCredit               =    0  --Calcuate By GL
+    dblCredit               =    0,  --Calcuate By GL
+	intAccountId			= 	 A.intAccountId,
+	intCompanyLocationId	=	 A.intShipToId
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail BD
 	ON BD.intBillId = A.intBillId

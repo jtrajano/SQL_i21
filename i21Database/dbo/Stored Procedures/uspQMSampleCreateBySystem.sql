@@ -120,6 +120,7 @@ BEGIN TRY
 			JOIN tblICLot L ON L.intLotId = WIL.intLotId
 			JOIN tblQMSample S ON S.strLotNumber = L.strLotNumber
 				AND S.intProductTypeId = @intProductTypeId
+				AND S.intTypeId = 1
 			WHERE WIL.intWorkOrderId = @intWorkOrderId
 			) t
 		WHERE t.intRowNo = 1
@@ -144,6 +145,7 @@ BEGIN TRY
 			JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN tblQMSample S ON S.strLotNumber = PL.strParentLotNumber
 				AND S.intProductTypeId = @intProductTypeId
+				AND S.intTypeId = 1
 			WHERE WIL.intWorkOrderId = @intWorkOrderId
 			) t
 		WHERE t.intRowNo = 1

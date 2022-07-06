@@ -89,6 +89,7 @@ IF @Unship = 1
 				BEGIN
 					DECLARE @InventoryShipment Id
 					DECLARE @intInventoryShipmentId INT
+					DECLARE @strSalesOrderNumber	NVARCHAR(100) = NULL
 
 					INSERT INTO @InventoryShipment
 					SELECT DISTINCT ISH.intInventoryShipmentId
@@ -116,8 +117,13 @@ IF @Unship = 1
 				END
 			
 				UPDATE tblSOSalesOrder 
-				SET ysnShipped = CASE WHEN ISNULL(@PostedShipmentNos, '') <> '' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END 
+				SET ysnShipped 				= CASE WHEN ISNULL(@PostedShipmentNos, '') <> '' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END 
+				  , @strSalesOrderNumber	= strSalesOrderNumber
 				WHERE intSalesOrderId = @SalesOrderId
+
+				--DELETE FROM INVENTORY LINK
+				EXEC dbo.[uspICDeleteTransactionLinks] @SalesOrderId, @strSalesOrderNumber, 'Sales Order', 'Accounts Receivable'
+
 				RETURN 1
 			END
 	END
@@ -383,6 +389,43 @@ ELSE
 		  , ysnProcessed   = 1
 		  , ysnShipped     = 1
 		WHERE intSalesOrderId = @SalesOrderId
+
+		--INSERT TO TRANSACTION LINKS
+		DECLARE @tblTransactionLinks    udtICTransactionLinks
+
+		INSERT INTO @tblTransactionLinks (
+              intSrcId
+            , strSrcTransactionNo
+            , strSrcTransactionType
+            , strSrcModuleName
+            , intDestId
+            , strDestTransactionNo
+            , strDestTransactionType
+            , strDestModuleName
+            , strOperation
+        )
+        SELECT intSrcId					= SO.intSalesOrderId
+            , strSrcTransactionNo       = SO.strSalesOrderNumber
+            , strSrcTransactionType     = 'Sales Order'
+            , strSrcModuleName          = 'Accounts Receivable'
+            , intDestId                 = SHIPMENT.intInventoryShipmentId
+            , strDestTransactionNo      = SHIPMENT.strShipmentNumber
+            , strDestTransactionType    = 'Inventory Shipment'
+            , strDestModuleName         = 'Inventory'
+            , strOperation              = 'Process'
+        FROM tblSOSalesOrder SO
+		INNER JOIN (
+			SELECT DISTINCT SHIPD.intOrderId
+				 , SHIP.strShipmentNumber 
+				 , SHIP.intInventoryShipmentId
+			FROM tblICInventoryShipmentItem SHIPD
+			INNER JOIN tblICInventoryShipment SHIP ON SHIPD.intInventoryShipmentId = SHIP.intInventoryShipmentId
+			WHERE SHIP.intOrderType = 2
+		) SHIPMENT ON SO.intSalesOrderId = SHIPMENT.intOrderId
+        WHERE SO.intSalesOrderId = @SalesOrderId
+          AND SO.strTransactionType = 'Order'
+
+        EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
 
 		RETURN 1
 	END 

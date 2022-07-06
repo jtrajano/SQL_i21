@@ -1,5 +1,4 @@
 ﻿CREATE VIEW [dbo].[vyuCTGetPriceContractSequence]
-
 AS
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractSeq ASC) AS INT) intUniqueId,
@@ -70,8 +69,15 @@ AS
 				CD.strBook,
 				CD.strSubBook,
 				CD.dblFutures,
-				CD.ysnReadOnlyInterCoContract
-
+				CD.ysnReadOnlyInterCoContract,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine,
+				ICC.strItemNo
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 												AND	CD.dblNoOfLots IS NOT NULL		 
@@ -86,7 +92,7 @@ LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId	=	CD.intCommodityId
 												AND BU.intUnitMeasureId =	CD.intBasisUnitMeasureId
 LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
-
+LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
 		UNION ALL
 
 		SELECT 	CH.intContractHeaderId,
@@ -125,8 +131,15 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				BK.strBook,
 				SB.strSubBook,
 				CD.dblFutures,
-				CH.ysnReadOnlyInterCoContract
-
+				CH.ysnReadOnlyInterCoContract,
+				ICC.strOrigin,
+				ICC.strProductType,
+				ICC.strGrade,
+				ICC.strRegion,
+				ICC.strSeason,
+				ICC.strClass,
+				ICC.strProductLine,
+				ICC.strItemNo
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 												AND	ISNULL(ysnMultiplePriceFixation,0) = 1
@@ -147,4 +160,8 @@ LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CH.intCommodityId
 												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
 LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
+LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = SC.intItemId
 	)t
+GO
+
+

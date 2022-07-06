@@ -158,6 +158,7 @@ BEGIN TRY
 		, UserSignature = @userSignature
 		, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 		, supplier.strName AS strSupplier
+		, strUpdateAvailabilityDate = LEFT(DATENAME(DAY,  CD.dtmUpdatedAvailabilityDate), 2) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLaguageId, LEFT(DATENAME(MONTH,  CD.dtmUpdatedAvailabilityDate), 3)), LEFT(DATENAME(MONTH,  CD.dtmUpdatedAvailabilityDate), 3)) + ' ' + LEFT(DATENAME(YEAR, CD.dtmUpdatedAvailabilityDate), 4)
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH WITH(NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN vyuCTEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId

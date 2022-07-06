@@ -50,6 +50,8 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@intPerformanceLogId			AS INT = NULL
 		,@strReportLogId				AS NVARCHAR(MAX)
 		,@blbLogo						AS VARBINARY(MAX)
+		,@strCurrency					AS NVARCHAR(40)
+		,@strReportComment				AS NVARCHAR(MAX)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -174,6 +176,14 @@ SELECT @strRequestId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strRequestId'
 
+SELECT @strCurrency = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCurrency'
+
+SELECT @strReportComment = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strReportComment'
+
 IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 BEGIN
 	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
@@ -200,7 +210,7 @@ BEGIN
 	SET @strStatementSP = CASE WHEN @strStatementFormat = 'Balance Forward' THEN 'uspARCustomerStatementBalanceForwardReport'
 							   WHEN @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer') THEN 'uspARCustomerStatementReport'
 							   WHEN @strStatementFormat = 'Payment Activity' THEN 'uspARCustomerStatementPaymentActivityReport'
-							   WHEN @strStatementFormat = 'Full Details - No Card Lock' THEN 'uspARCustomerStatementFullDetailReport'
+							   WHEN @strStatementFormat IN ('Full Details - No Card Lock', 'AR Detail Statement') THEN 'uspARCustomerStatementFullDetailReport'
 							   WHEN @strStatementFormat = 'Budget Reminder' THEN 'uspARCustomerStatementBudgetReminderReport'
 							   WHEN @strStatementFormat = 'Budget Reminder Alternate 2' THEN 'uspARCustomerStatementBudgetReminderAlternate2Report'
 							   WHEN @strStatementFormat = 'Honstein Oil' THEN 'uspARCustomerStatementHonsteinReport'
@@ -215,7 +225,7 @@ BEGIN
 		SELECT TOP 1 U.blbFile
 		FROM tblSMUpload U
 		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-		WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+		WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
 		  AND A.strComment = 'Header'
 		ORDER BY A.intAttachmentId DESC
 	) A 
@@ -223,8 +233,8 @@ BEGIN
 		SELECT TOP 1 U.blbFile
 		FROM tblSMUpload U
 		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-		WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-		  AND (A.strComment = 'Stretch Header' OR A.strComment = 'Stretched Header')
+		WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference')
+		  AND A.strComment IN ('Stretch Header', 'Stretched Header')
 		ORDER BY A.intAttachmentId DESC
 	) S
 	
@@ -287,7 +297,7 @@ BEGIN
 				, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
 		END
-	ELSE IF @strStatementFormat = 'Full Details - No Card Lock'
+	ELSE IF @strStatementFormat IN ('Full Details - No Card Lock', 'AR Detail Statement')
 		BEGIN
 			EXEC dbo.uspARCustomerStatementFullDetailReport
 				  @dtmDateTo					= @dtmDateTo
@@ -305,6 +315,9 @@ BEGIN
 				, @ysnEmailOnly					= @ysnEmailOnly
 				, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
+				, @strStatementFormat			= @strStatementFormat
+				, @strCurrency					= @strCurrency
+				, @strReportComment				= @strReportComment
 		END
 	ELSE IF @strStatementFormat = 'Budget Reminder'
 		BEGIN

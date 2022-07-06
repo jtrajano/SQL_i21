@@ -27,7 +27,7 @@ SELECT
 		c.strGender,
 		strWorkCompCode = h.strWCCode,
 		c.strEthnicity,
-		strSocialSecurity = case when c.strSocialSecurity is null or c.strSocialSecurity = '' then '' else 'xxx-xx-' + substring(c.strSocialSecurity, len(c.strSocialSecurity) - 3, 4) end,
+		strSocialSecurity = case when c.strSocialSecurity is null or c.strSocialSecurity = '' then '' else 'xxx-xx-' + substring(dbo.[fnAESDecryptASym](c.strSocialSecurity), len(dbo.[fnAESDecryptASym](c.strSocialSecurity)) - 3, 4) end,
 		c.strTerminatedReason,
 		c.ysn1099Employee,
 		strTimeEntryPassword = CASE WHEN c.strTimeEntryPassword IS NULL or c.strTimeEntryPassword = '' then '' else '****************' end COLLATE Latin1_General_CI_AS,

@@ -172,7 +172,7 @@ BEGIN
 		WHEN @msgId = 80156 THEN 'Item UOM Id is invalid or missing for lot %s.'
 		WHEN @msgId = 80157 THEN 'Lot ID %s is invalid for lot %s.'
 		WHEN @msgId = 80158 THEN 'The Qty to Return for %s is %f. Total Lot Quantity is %f. The difference is %f.'
-		WHEN @msgId = 80159 THEN 'Item: %s, Qty: %s, Cost: %s'
+		WHEN @msgId = 80159 THEN 'Item: %s, Lot: %s, Qty: %s, Cost: %s'
 		WHEN @msgId = 80160 THEN 'Transaction not saved. Stocks for %s will have an over-return.'
 		WHEN @msgId = 80161 THEN 'Return no longer allowed. All of the stocks are returned.'
 		WHEN @msgId = 80162 THEN '%s is using a foreign currency. %s is missing a forex rate. Please review the Currency Exchange Rates and check if %s to %s for %s has a valid effective date and forex rate.'
@@ -192,7 +192,7 @@ BEGIN
 		WHEN @msgId = 80176 THEN 'Not enough stocks for %s. Reserved stocks is %f while Lot Qty is %f.'
 		WHEN @msgId = 80177 THEN 'Fiscal month is already closed. Please open the fiscal month for %d to continue.'
 		WHEN @msgId = 80178 THEN 'Fiscal month is already closed for %s module. Please open the fiscal month for %d to continue.'
-		WHEN @msgId = 80179 THEN 'Item: %s'
+		WHEN @msgId = 80179 THEN 'Item: %s, Lot: %s'
 		WHEN @msgId = 80180 THEN 'Receiver id is invalid. It must be a User type Entity.'
 		WHEN @msgId = 80181 THEN 'Unable to Post %s. The total is negative.'
 		WHEN @msgId = 80182 THEN 'Unable to create the Inventory Receipt. The total is going to be negative.'
@@ -279,6 +279,11 @@ BEGIN
 		WHEN @msgId = 80263 THEN 'Category changed for item %s.'
 		WHEN @msgId = 80264 THEN 'The item type for %s is not "stockable". Costing is not allowed.'
 		WHEN @msgId = 80265 THEN 'Cost adjustment for %s is missing. Stock rebuild will abort.'
+		WHEN @msgId = 80266 THEN 'Invoice Control Total and Receipt Total does not match. Unable to post.'
+		WHEN @msgId = 80267 THEN 'The Receipt Qty for %s is %f. Total Lot Quantity is %f. The difference is %f.'
+		WHEN @msgId = 80268 THEN '%s is a missing lot it should not have a negative quantity.'
+		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
+		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
 	END 
 
 	RETURN @msg

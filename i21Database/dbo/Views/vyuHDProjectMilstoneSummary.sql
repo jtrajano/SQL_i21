@@ -9,22 +9,18 @@
 			,e.intPriority
 		from
 			tblHDProject a
-			,tblHDProjectTask b
-			,tblHDTicket c
-			,tblHDTicketStatus d
-			,tblHDMilestone e
-		where
-			b.intProjectId = a.intProjectId
-			and c.intTicketId = b.intTicketId
-			and d.intTicketStatusId = c.intTicketStatusId
-			and e.intMilestoneId = c.intMilestoneId
+			inner join tblHDProjectTask b on b.intProjectId = a.intProjectId
+			inner join tblHDTicket c on c.intTicketId = b.intTicketId
+			inner join tblHDTicketStatus d on d.intTicketStatusId = c.intTicketStatusId
+			inner join tblHDMilestone e on e.intMilestoneId = c.intMilestoneId
 		),
 		estimatedHours as (
 			select a.intMilestoneId, d.intProjectId, dblEstimatedHours = sum(isnull(c.dblEstimatedHours, 0.00))
-			from tblHDMilestone a, tblHDTicket b, tblHDTicketHoursWorked c, tblHDProjectTask d
-			where b.intMilestoneId = a.intMilestoneId
-			and c.intTicketId = b.intTicketId
-			and d.intTicketId = b.intTicketId
+			from 
+				tblHDMilestone a
+				inner join tblHDTicket b on b.intMilestoneId = a.intMilestoneId
+				inner join tblHDTicketHoursWorked c on c.intTicketId = b.intTicketId
+				inner join tblHDProjectTask d on d.intTicketId = b.intTicketId
 			group by a.intMilestoneId,d.intProjectId
 		)
 
@@ -41,7 +37,7 @@
 			--,dblQuotedHours = isnull(sum(b.dblQuotedHours),0.00)
 			,dblQuotedHours = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
 			,dblActualHours = isnull(sum(b.dblActualHours),0.00)
-			,dblOverShort = isnull(sum(b.dblActualHours),0.00) - isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
+			,dblOverShort = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00) - isnull(sum(b.dblActualHours),0.00)
 		from
 			tblHDMilestone a
 			join tblHDTicket b on b.intMilestoneId = a.intMilestoneId

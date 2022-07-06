@@ -31,7 +31,7 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
+WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0
 UNION ALL --Taxes, Separate the tax and use the detail tax to match with GL calculation
 SELECT 
 	A.dtmDate	
@@ -64,7 +64,7 @@ INNER JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 --INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
-WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
+WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0 AND B.dblTax != 0
 UNION ALL   
 SELECT  A.dtmDatePaid AS dtmDate,    
 	 C.intBillId,   
@@ -153,7 +153,7 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 LEFT JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
+WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0
 UNION ALL --Taxes, Separate the tax and use the detail tax to match with GL calculation
 SELECT 
 	A.dtmDateDeleted	
@@ -186,4 +186,4 @@ INNER JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 --INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
-WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
+WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13, 15)  AND A.ysnOrigin = 0 AND B.dblTax != 0

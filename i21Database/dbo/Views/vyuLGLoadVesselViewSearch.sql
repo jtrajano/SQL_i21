@@ -15,6 +15,7 @@ SELECT  L.intLoadId
 	   ,L.strMVoyageNumber
 	   ,L.strFVessel
 	   ,L.strFVoyageNumber
+	   ,L.strIMONumber
 	   ,L.dblInsuranceValue
 	   ,L.strShippingMode
 	   ,L.intNumberOfContainers
@@ -30,6 +31,7 @@ SELECT  L.intLoadId
 	   ,L.dtmISFFiledDate
 	   ,L.dtmStuffingDate
 	   ,L.dtmDocsToBroker
+	   ,L.dtmInsuranceDeclaration
 	   ,L.ysnArrivedInPort
 	   ,L.ysnDocumentsApproved
 	   ,L.ysnCustomsReleased
@@ -41,6 +43,7 @@ SELECT  L.intLoadId
 	   ,[strShippingLine] =  ShippingLine.strName
 	   ,[strForwardingAgent] = ForwardingAgent.strName
 	   ,[strInsurer] = Insurer.strName
+	   ,[strInsuranceItem] = INS.strItemNo
 	   ,[strInsuranceCurrency] = Currency.strCurrency
 	   ,[strContainerType] = CT.strContainerType
 	   ,L.intLoadShippingInstructionId
@@ -52,7 +55,11 @@ SELECT  L.intLoadId
 			WHEN 3 THEN 'Vessel Nomination'
 			ELSE '' END COLLATE Latin1_General_CI_AS
 		,strShipmentStatus = CASE L.intShipmentStatus
-			WHEN 1 THEN 'Scheduled'
+			WHEN 1 THEN 
+				CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
+						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
+				THEN 'Expired'
+				ELSE 'Scheduled' END
 			WHEN 2 THEN 'Dispatched'
 			WHEN 3 THEN 
 				CASE WHEN (L.ysnDocumentsApproved = 1 
@@ -89,19 +96,25 @@ SELECT  L.intLoadId
 			WHEN 9 THEN 'Full Shipment Created'
 			WHEN 10 THEN 'Cancelled'
 			WHEN 11 THEN 'Invoiced'
+			WHEN 12 THEN 'Rejected'
 			ELSE '' END COLLATE Latin1_General_CI_AS
 	   ,L.intBookId
 	   ,BO.strBook
 	   ,L.intSubBookId
 	   ,SB.strSubBook
+	   ,strVendor = VEN.strName
+	   ,LD.intVendorEntityId
 FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
 LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
+LEFT JOIN tblICItem INS ON INS.intItemId = L.intInsuranceItemId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LD.intVendorEntityId
 WHERE ISNULL(L.strBLNumber,'') <> ''

@@ -29,6 +29,15 @@ ALTER TABLE tblARPaymentDetail DISABLE TRIGGER trg_tblARPaymentDetailUpdate
 UPDATE tblARPayment SET dblAmountPaid = 0 WHERE dblAmountPaid IS NULL
 UPDATE tblARPayment SET dtmDatePaid = CAST(dtmDatePaid AS DATE) WHERE CAST(dtmDatePaid AS TIME) <> '00:00:00.0000000'
 
+UPDATE P
+SET strCreditCardNote	= CASE WHEN P.ysnPosted = 1 THEN 'The transaction was approved.' ELSE CASE WHEN P.ysnProcessCreditCard = 1 THEN 'The transaction was declined.' ELSE NULL END END
+  , strCreditCardStatus = CASE WHEN P.ysnPosted = 1 THEN 'Success' ELSE CASE WHEN P.ysnProcessCreditCard = 1 THEN 'Failed' ELSE 'Ready' END END
+FROM tblARPayment P
+WHERE P.intEntityCardInfoId IS NOT NULL
+  AND P.intPaymentMethodId = 11
+  AND P.strCreditCardNote IS NULL
+  AND P.strCreditCardStatus IS NULL
+
 GO
 print('/*******************  BEGIN Update tblARPayment  *******************/')
 

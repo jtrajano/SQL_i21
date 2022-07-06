@@ -33,6 +33,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @ysnPrintOnlyOverCreditLimit	BIT
 	  , @ysnRollCredits					BIT
 	  , @ysnExcludeAccountStatus		BIT
+	  , @ysnOverrideCashFlow			BIT = 0
 	  , @intEntityUserId				INT
 	  , @strReportLogId					NVARCHAR(MAX)
 	  , @intNewPerformanceLogId			INT 
@@ -260,6 +261,10 @@ SELECT	@ysnRollCredits = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'ysnRollCredits'
 
+SELECT	@ysnOverrideCashFlow = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE 1 END
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'ysnOverrideCashFlow'
+
 SELECT	@intEntityUserId = [from]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'intSrCurrentUserId'
@@ -304,6 +309,7 @@ BEGIN
 												  , @ysnInclude120Days			= 0
 												  , @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
 												  , @intEntityUserId			= @intEntityUserId
+												  , @ysnOverrideCashFlow		= @ysnOverrideCashFlow
 												  , @strReportLogId				= @strReportLogId
 
 	IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)

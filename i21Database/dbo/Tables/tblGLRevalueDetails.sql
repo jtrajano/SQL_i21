@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[intConsolidationDetailId] [int] IDENTITY(1,1) NOT NULL,
 	[intConsolidationId] [int] NOT NULL,
-	[strTransactionType] [nvarchar](30) COLLATE Latin1_General_CI_AS,
+	[strTransactionType] [nvarchar](50) COLLATE Latin1_General_CI_AS,
 	[strTransactionId] [nvarchar](30) COLLATE Latin1_General_CI_AS,
 	[dtmDate] [date] NULL,
 	[dtmDueDate] [date] NULL,
@@ -21,10 +21,15 @@ CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[dblHistoricAmount] [numeric](18, 6) NOT NULL,
 	[dblNewForexRate] [numeric](18, 6) NOT NULL,
 	[dblNewAmount] [numeric](18, 6) NOT NULL,
+	[dblAmountDifference] [numeric](18, 6) NULL,
 	[dblUnrealizedGain] [numeric](18, 6) NOT NULL,
 	[dblUnrealizedLoss] [numeric](18, 6) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[strType] [nvarchar](50) COLLATE Latin1_General_CI_AS,
+	intAccountIdOverride INT,
+    intLocationSegmentOverrideId INT,
+    intLOBSegmentOverrideId INT,
+    intCompanySegmentOverrideId INT,
  CONSTRAINT [PK_tblGLRevalueDetails] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidationDetailId] ASC
@@ -51,7 +56,7 @@ GO
 ALTER TABLE [dbo].[tblGLRevalueDetails] ADD  CONSTRAINT [DF_tblGLRevalueDetails_dblUnrealizedLoss]  DEFAULT ((0)) FOR [dblUnrealizedLoss]
 GO
 
-ALTER TABLE [dbo].[tblGLRevalueDetails]  WITH CHECK ADD  CONSTRAINT [FK_tblGLRevalueDetails_tblGLRevalue] FOREIGN KEY([intConsolidationId])
+ALTER TABLE [dbo].[tblGLRevalueDetails] ADD  CONSTRAINT [FK_tblGLRevalueDetails_tblGLRevalue] FOREIGN KEY([intConsolidationId])
 REFERENCES [dbo].[tblGLRevalue] ([intConsolidationId])
 ON DELETE CASCADE
 GO

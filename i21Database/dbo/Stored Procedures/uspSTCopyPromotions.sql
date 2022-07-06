@@ -10,12 +10,13 @@ BEGIN TRY
 	         @idoc				          INT,
 	     	 @intFromStoreId              INT,
 	         @ToStore                     NVARCHAR(MAX),
-			 @intBeginningComboID         INT,
-			 @intEndingComboID            INT,
-             @intBeginingMixMatchID       INT,
-			 @intEndingMixMatchID         INT,
-			 @intBeginningItemsListNo     INT,
-			 @intEndingItemsListNo        INT,
+	         @ToStoreGroup                NVARCHAR(MAX),
+			@intBeginningComboID         NVARCHAR(MAX),
+			 --@intEndingComboID            INT,
+             @intBeginingMixMatchID       NVARCHAR(MAX),
+			 --@intEndingMixMatchID         INT,
+			 @intBeginningItemsListNo     NVARCHAR(MAX),
+			-- @intEndingItemsListNo        INT,
 	  		 @ReplaceDuplicateRecordsysn  NVARCHAR(1),
 			 @intUserEntityId			  INT,
 
@@ -43,15 +44,16 @@ BEGIN TRY
 
     EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 
-    SELECT	
+     SELECT	
 			@intFromStoreId		            =	FromStore,
             @ToStore						=   ToStore,
+            @ToStoreGroup					=   ToStoreGroup,
 			@intBeginningComboID            =   BeginingCombo,
-			@intEndingComboID               =   EndingCombo,
+			--@intEndingComboID               =   EndingCombo,
             @intBeginingMixMatchID          =   BeginingMixMatchID,
-            @intEndingMixMatchID            =   EndingMixMatchID,
+            --@intEndingMixMatchID            =   EndingMixMatchID,
 			@intBeginningItemsListNo        =   BeginingItemsList,
-			@intEndingItemsListNo           =   EndingItemsList,
+			--@intEndingItemsListNo           =   EndingItemsList,
 			@ReplaceDuplicateRecordsysn     =   ReplaceDuplicateRecordsysn,
 			@intUserEntityId			    =   intUserEntityId
 			
@@ -61,17 +63,18 @@ BEGIN TRY
 	(
 			FromStore		              INT,
 			ToStore	     	              NVARCHAR(MAX),
-			BeginingCombo		          INT,
-			EndingCombo	     	          INT,
-			BeginingMixMatchID	     	  INT,
-			EndingMixMatchID	     	  INT,
-			BeginingItemsList	          INT,
-			EndingItemsList               INT,
+			ToStoreGroup	     	      NVARCHAR(MAX),
+			BeginingCombo		           NVARCHAR(MAX),
+			--EndingCombo	     	          INT,
+			BeginingMixMatchID	     	   NVARCHAR(MAX),
+			--EndingMixMatchID	     	  INT,
+			BeginingItemsList	           NVARCHAR(MAX),
+			--EndingItemsList               INT,
 			ReplaceDuplicateRecordsysn    NVARCHAR(1),
 			intUserEntityId				  INT
-			
-	)  
-     
+
+	)
+
 	  SET @intItemListAddedCount = 0
 	  SET @Itlreplaced = 0
 	  SET @intComboListAddedCount = 0
@@ -113,6 +116,24 @@ BEGIN TRY
 											intPrimaryID INT IDENTITY(1, 1),
 											intPromoMixMatchSalesId INT 
 										 );
+
+										  -- MIX-MATCH LIST ID 
+	 DECLARE @temptblPromoMIXMATCHListID TABLE (
+											intPrimaryID INT IDENTITY(1, 1),
+											intPromoMixMatchSalesId INT 
+										 );
+
+	 -- MIX-MATCH LIST ID
+	 DECLARE @temptblPromoCOMBOListID TABLE (
+											intPrimaryID INT IDENTITY(1, 1),
+											intPromoComboSalesId INT 
+											 );
+	-- ITEM LIST ID
+	 DECLARE @temptblPromoITEMListID TABLE (
+											intPrimaryID INT IDENTITY(1, 1),
+											intPromoItemListId INT,
+											intPromoItemListNo INT
+											 );
 	 -- =========================================================================
 	 -- [END] - Create Temporary Tables
 	 -- =========================================================================
@@ -137,20 +158,67 @@ BEGIN TRY
 			 SELECT [intID] AS intStoreId
 			 FROM [dbo].[fnGetRowsFromDelimitedValues](@ToStore)
 		END
+		
+	 IF(@ToStoreGroup != '')
+		BEGIN
+			-- Insert all intStoreId's to a temp table
+			 INSERT INTO @temptblStore 
+			 (
+				intStoreId
+			 )
+			SELECT DISTINCT st.intStoreId AS intLocationId
+			FROM [dbo].[fnGetRowsFromDelimitedValues](@ToStoreGroup)
+			INNER JOIN tblSTStoreGroup sg
+				ON sg.intStoreGroupId = intID
+			INNER JOIN tblSTStoreGroupDetail sgt
+				ON sgt.intStoreGroupId = sg.intStoreGroupId
+			INNER JOIN tblSTStore st
+				ON st.intStoreId = sgt.intStoreId
+			WHERE st.intStoreId != @intFromStoreId
+		END
 
-	
-	
-	 -- Insert All Promotion COMBO to temp table
+		 --INSERT TO THE TEMP table all the promo combo ID
+		IF (@intBeginningComboID != '')
+			BEGIN
+				INSERT INTO @temptblPromoCOMBOListID
+				(
+					intPromoComboSalesId
+				)SELECT [intID] AS intPromoComboSalesId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@intBeginningComboID)
+
+		END
+
+		 --INSERT TO THE TEMP table all the promo MIX ID
+	 IF (@intBeginingMixMatchID != '')
+		BEGIN
+			INSERT INTO @temptblPromoMIXMATCHListID
+			 (
+				intPromoMixMatchSalesId
+			 )SELECT [intID] AS intPromoMixMatchSalesId
+			 FROM [dbo].[fnGetRowsFromDelimitedValues](@intBeginingMixMatchID)
+		END
+
+	 --INSERT TO THE TEMP Promotion ID ITEM to temp table.
+	  IF (@intBeginningItemsListNo != '')
+		BEGIN
+			INSERT INTO @temptblPromoITEMListID
+			 (
+				intPromoItemListNo
+			 )SELECT [intID] AS intPromoItemListNo
+			 FROM [dbo].[fnGetRowsFromDelimitedValues](@intBeginningItemsListNo)
+		END
+	 
+	  -- Insert All Promotion COMBO to temp table
 	 INSERT INTO @temptblPromoCOMBOList 
 	 (
 		intPromoComboSalesId
 	 )
 	 SELECT intPromoSalesId 
 	 FROM tblSTPromotionSalesList 
-	 WHERE  intPromoSalesId BETWEEN @intBeginningComboID AND @intEndingComboID
+	 --WHERE  intPromoSalesId BETWEEN @intBeginningComboID AND @intEndingComboID
+	 WHERE  intPromoSalesListId IN (SELECT intPromoComboSalesId FROM @temptblPromoCOMBOListID) 
 			AND intStoreId = @intFromStoreId 
 			AND strPromoType = 'C'
-	
 
 	 -- Insert All Promotion MIX-MATCH to temp table
 	 INSERT INTO @temptblPromoMIXMATCHList 
@@ -159,9 +227,11 @@ BEGIN TRY
 	 )
 	 SELECT intPromoSalesId 
 	 FROM tblSTPromotionSalesList 
-	 WHERE intPromoSalesId BETWEEN @intBeginingMixMatchID AND @intEndingMixMatchID
+	 --WHERE intPromoSalesId BETWEEN @intBeginingMixMatchID AND @intEndingMixMatchID
+	 WHERE intPromoSalesId IN (SELECT intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHListID)
 		AND intStoreId = @intFromStoreId 
 		AND strPromoType = 'M'
+
 		
 	 -- Insert All Promotion ITEM to temp table
 	 INSERT INTO @temptblPromoITEMList 
@@ -172,7 +242,8 @@ BEGIN TRY
 	 SELECT intPromoItemListId
 			, intPromoItemListNo
 	 FROM tblSTPromotionItemList 
-	 WHERE intPromoItemListNo BETWEEN @intBeginningItemsListNo AND @intEndingItemsListNo
+	 --WHERE intPromoItemListNo BETWEEN @intBeginningItemsListNo AND @intEndingItemsListNo
+	 WHERE intPromoItemListNo IN (SELECT intPromoItemListNo FROM  @temptblPromoITEMListID) 
 		--AND intPromoItemListId IN (SELECT intPromoItemListId FROM tblSTPromotionSalesList WHERE intPromoSalesId IN (SELECT intPromoComboSalesId FROM @temptblPromoCOMBOList))
 		--AND intPromoItemListId IN (SELECT intPromoItemListId FROM tblSTPromotionSalesList WHERE intPromoSalesId IN (SELECT intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList))
 		AND intStoreId = @intFromStoreId
@@ -844,6 +915,7 @@ BEGIN TRY
 							   (
 									intPromoSalesListId
 									, intPromoItemListId
+									, dblCost
 									, intQuantity
 									, dblPrice
 									, intConcurrencyId
@@ -851,6 +923,7 @@ BEGIN TRY
 							   SELECT DISTINCT
 									 @intNewPromotionCOMBOListId AS intPromoSalesListId
 									 , ItemListTwo.intPromoItemListId
+									 , SalesListDetail.dblCost
 									 , SalesListDetail.intQuantity
 									 , SalesListDetail.dblPrice
 									 , SalesListDetail.intConcurrencyId
@@ -951,26 +1024,26 @@ BEGIN TRY
 									, ysnSentToRuby
 									, dtmLastUpdateDate
 									, ysnWeekDayPromotionSunday
-									, ysnWeekDayPromotionMonday
-									, ysnWeekDayPromotionTuesday
-									, ysnWeekDayPromotionWednesday
-									, ysnWeekDayPromotionThursday
-									, ysnWeekDayPromotionFriday
-									, ysnWeekDayPromotionSaturday
-									, dtmStartTimePromotionSunday
-									, dtmStartTimePromotionMonday
-									, dtmStartTimePromotionTuesday
-									, dtmStartTimePromotionWednesday
-									, dtmStartTimePromotionThursday
-									, dtmStartTimePromotionFriday
-									, dtmStartTimePromotionSaturday
-									, dtmEndTimePromotionSunday
-									, dtmEndTimePromotionMonday
-									, dtmEndTimePromotionTuesday
-									, dtmEndTimePromotionWednesday
-									, dtmEndTimePromotionThursday
-									, dtmEndTimePromotionFriday
-									, dtmEndTimePromotionSaturday
+                                    , ysnWeekDayPromotionMonday
+                                    , ysnWeekDayPromotionTuesday
+                                    , ysnWeekDayPromotionWednesday
+                                    , ysnWeekDayPromotionThursday
+                                    , ysnWeekDayPromotionFriday
+                                    , ysnWeekDayPromotionSaturday
+                                    , dtmStartTimePromotionSunday
+                                    , dtmStartTimePromotionMonday
+                                    , dtmStartTimePromotionTuesday
+                                    , dtmStartTimePromotionWednesday
+                                    , dtmStartTimePromotionThursday
+                                    , dtmStartTimePromotionFriday
+                                    , dtmStartTimePromotionSaturday
+                                    , dtmEndTimePromotionSunday
+                                    , dtmEndTimePromotionMonday
+                                    , dtmEndTimePromotionTuesday
+                                    , dtmEndTimePromotionWednesday
+                                    , dtmEndTimePromotionThursday
+                                    , dtmEndTimePromotionFriday
+                                    , dtmEndTimePromotionSaturday
 									, intConcurrencyId
 								) 
 								SELECT 
@@ -1006,26 +1079,26 @@ BEGIN TRY
 									, ysnSentToRuby
 									, dtmLastUpdateDate
 									, ysnWeekDayPromotionSunday
-									, ysnWeekDayPromotionMonday
-									, ysnWeekDayPromotionTuesday
-									, ysnWeekDayPromotionWednesday
-									, ysnWeekDayPromotionThursday
-									, ysnWeekDayPromotionFriday
-									, ysnWeekDayPromotionSaturday
-									, dtmStartTimePromotionSunday
-									, dtmStartTimePromotionMonday
-									, dtmStartTimePromotionTuesday
-									, dtmStartTimePromotionWednesday
-									, dtmStartTimePromotionThursday
-									, dtmStartTimePromotionFriday
-									, dtmStartTimePromotionSaturday
-									, dtmEndTimePromotionSunday
-									, dtmEndTimePromotionMonday
-									, dtmEndTimePromotionTuesday
-									, dtmEndTimePromotionWednesday
-									, dtmEndTimePromotionThursday
-									, dtmEndTimePromotionFriday
-									, dtmEndTimePromotionSaturday
+                                    , ysnWeekDayPromotionMonday
+                                    , ysnWeekDayPromotionTuesday
+                                    , ysnWeekDayPromotionWednesday
+                                    , ysnWeekDayPromotionThursday
+                                    , ysnWeekDayPromotionFriday
+                                    , ysnWeekDayPromotionSaturday
+                                    , dtmStartTimePromotionSunday
+                                    , dtmStartTimePromotionMonday
+                                    , dtmStartTimePromotionTuesday
+                                    , dtmStartTimePromotionWednesday
+                                    , dtmStartTimePromotionThursday
+                                    , dtmStartTimePromotionFriday
+                                    , dtmStartTimePromotionSaturday
+                                    , dtmEndTimePromotionSunday
+                                    , dtmEndTimePromotionMonday
+                                    , dtmEndTimePromotionTuesday
+                                    , dtmEndTimePromotionWednesday
+                                    , dtmEndTimePromotionThursday
+                                    , dtmEndTimePromotionFriday
+                                    , dtmEndTimePromotionSaturday
 									, intConcurrencyId
 								FROM tblSTPromotionSalesList 
 								WHERE intPromoSalesId = @intPromotionMixMatchListId 
@@ -1074,6 +1147,7 @@ BEGIN TRY
 								(
 									intPromoSalesListId
 									, intPromoItemListId
+									, dblCost
 									, intQuantity
 									, dblPrice
 									, intConcurrencyId
@@ -1081,6 +1155,7 @@ BEGIN TRY
 								SELECT DISTINCT
 										@intNewPromotionMIXMATCHListId AS intPromoSalesListId
 										, ItemListTwo.intPromoItemListId
+										, SalesListDetail.dblCost
 										, SalesListDetail.intQuantity
 										, SalesListDetail.dblPrice
 										, SalesListDetail.intConcurrencyId

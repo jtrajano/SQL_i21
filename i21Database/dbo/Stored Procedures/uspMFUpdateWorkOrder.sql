@@ -45,6 +45,9 @@ BEGIN TRY
 		,@dtmPrevPlannedDate DATETIME
 		,@intSalesOrderLineItemId INT
 		,@intLoadId INT
+		,@intWarehouseRateMatrixHeaderId INT
+		,@intMachineId INT
+		,@intStatusId INT
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -85,6 +88,8 @@ BEGIN TRY
 		,@intDepartmentId = intDepartmentId
 		,@intSalesOrderLineItemId = intSalesOrderLineItemId
 		,@intLoadId = intLoadId
+		,@intWarehouseRateMatrixHeaderId = intWarehouseRateMatrixHeaderId
+		,@intMachineId = intMachineId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -118,6 +123,8 @@ BEGIN TRY
 			,intDepartmentId INT
 			,intSalesOrderLineItemId INT
 			,intLoadId INT
+			,intWarehouseRateMatrixHeaderId INT
+			,intMachineId INT
 			)
 
 	IF EXISTS (
@@ -139,6 +146,7 @@ BEGIN TRY
 		,@intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 		,@intBlendRequirementId = intBlendRequirementId
 		,@dtmPrevPlannedDate = dtmPlannedDate
+		,@intStatusId = intStatusId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -230,10 +238,35 @@ BEGIN TRY
 		,ysnIngredientAvailable = @ysnIngredientAvailable
 		,intDepartmentId = @intDepartmentId
 		,intLoadId = @intLoadId
+		,intWarehouseRateMatrixHeaderId = @intWarehouseRateMatrixHeaderId
+		,intMachineId = @intMachineId
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId = @intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	IF @intStatusId IN (
+			9
+			,10
+			)
+	BEGIN
+		DELETE
+		FROM tblMFWorkOrderPreStage
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND strRowState = 'Modified'
+			AND intStatusId IS NULL
+
+		INSERT INTO dbo.tblMFWorkOrderPreStage (
+			intWorkOrderId
+			,intWorkOrderStatusId
+			,intUserId
+			,strRowState
+			)
+		SELECT @intWorkOrderId
+			,9
+			,@intUserId
+			,'Modified'
+	END
 
 	INSERT INTO dbo.tblMFWorkOrderProductSpecification (
 		intWorkOrderId
@@ -280,6 +313,81 @@ BEGIN TRY
 				AND x.strRowState = 'DELETE'
 			)
 
+	INSERT INTO dbo.tblMFWorkOrderWarehouseRateMatrixDetail (
+		intWorkOrderId
+		,intWarehouseRateMatrixDetailId
+		,dblQuantity
+		,dblProcessedQty
+		,dblEstimatedAmount
+		,dblActualAmount
+		,dblDifference
+		,dtmCreated
+		,intCreatedUserId
+		,dtmLastModified
+		,intLastModifiedUserId
+		,intConcurrencyId
+		)
+	SELECT @intWorkOrderId
+		,intWarehouseRateMatrixDetailId
+		,dblQuantity
+		,dblProcessedQty
+		,dblEstimatedAmount
+		,dblActualAmount
+		,dblDifference
+		,@dtmCurrentDate
+		,intUserId
+		,@dtmCurrentDate
+		,intUserId
+		,1 intConcurrencyId
+	FROM OPENXML(@idoc, 'root/WarehouseRateMatrixDetails/WarehouseRateMatrixDetail', 2) WITH (
+			intWorkOrderWarehouseRateMatrixDetailId INT
+			,intWarehouseRateMatrixDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,dblProcessedQty NUMERIC(18, 6)
+			,dblEstimatedAmount NUMERIC(18, 6)
+			,dblActualAmount NUMERIC(18, 6)
+			,dblDifference NUMERIC(18, 6)
+			,intUserId INT
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intWorkOrderWarehouseRateMatrixDetailId = 0
+		AND x.strRowState = 'ADDED'
+
+	UPDATE dbo.tblMFWorkOrderWarehouseRateMatrixDetail
+	SET dblQuantity = x.dblQuantity
+		,dblProcessedQty = x.dblProcessedQty
+		,dblEstimatedAmount = x.dblEstimatedAmount
+		,dblActualAmount = x.dblActualAmount
+		,dblDifference = x.dblDifference
+		,dtmLastModified = @dtmCurrentDate
+		,intLastModifiedUserId = x.intUserId
+		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+	FROM OPENXML(@idoc, 'root/WarehouseRateMatrixDetails/WarehouseRateMatrixDetail', 2) WITH (
+			intWorkOrderWarehouseRateMatrixDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,dblProcessedQty NUMERIC(18, 6)
+			,dblEstimatedAmount NUMERIC(18, 6)
+			,dblActualAmount NUMERIC(18, 6)
+			,dblDifference NUMERIC(18, 6)
+			,intUserId INT
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intWorkOrderWarehouseRateMatrixDetailId = tblMFWorkOrderWarehouseRateMatrixDetail.intWorkOrderWarehouseRateMatrixDetailId
+		AND x.strRowState = 'MODIFIED'
+
+	DELETE
+	FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/WarehouseRateMatrixDetails/WarehouseRateMatrixDetail', 2) WITH (
+					intWorkOrderWarehouseRateMatrixDetailId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intWorkOrderWarehouseRateMatrixDetailId = tblMFWorkOrderWarehouseRateMatrixDetail.intWorkOrderWarehouseRateMatrixDetailId
+				AND x.strRowState = 'DELETE'
+			)
+
 	IF @intBlendRequirementId IS NOT NULL
 	BEGIN
 		SELECT @intUnitMeasureId = intUnitMeasureId
@@ -321,6 +429,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-GO
-
-

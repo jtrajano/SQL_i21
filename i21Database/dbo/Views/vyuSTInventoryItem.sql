@@ -13,7 +13,7 @@ SELECT
 	, subFamily.strSubcategoryId	AS strFamily
 	, IL.intClassId
 	, subClass.strSubcategoryId		AS strClass
-	, IP.dblSalePrice
+	, itemPricing.dblSalePrice 
 	, UM.strUnitMeasure
 	, UOM.strUpcCode
 	, UOM.strLongUPCCode
@@ -36,6 +36,10 @@ INNER JOIN dbo.tblSMCompanyLocation AS CL
 	ON IL.intLocationId = CL.intCompanyLocationId 
 INNER JOIN dbo.tblSTStore AS ST 
 	ON CL.intCompanyLocationId = ST.intCompanyLocationId 
-INNER JOIN dbo.tblICItemPricing AS IP 
-	ON I.intItemId = IP.intItemId 
-	AND IL.intItemLocationId = IP.intItemLocationId
+JOIN vyuSTItemHierarchyPricing itemPricing
+	ON I.intItemId = itemPricing.intItemId
+	AND IL.intItemLocationId = itemPricing.intItemLocationId
+	AND UOM.intItemUOMId = itemPricing.intItemUOMId
+GO
+
+

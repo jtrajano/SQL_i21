@@ -44,7 +44,11 @@ IF NOT EXISTS(
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
+			AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+			AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
+			AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -64,8 +68,12 @@ IF NOT EXISTS(
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
+			AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+			AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
+			AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -90,6 +98,8 @@ SELECT TOP 100 PERCENT
 												THEN ROW_NUMBER() OVER(PARTITION BY A.intBillId ORDER BY A.intBillId)
 											ELSE A.intLineNo END
 	,intStorageLocationId				=	A.intStorageLocationId
+	,intStorageChargeId					=	A.intStorageChargeId
+	,intInsuranceChargeDetailId			=	A.intInsuranceChargeDetailId
 	,intSubLocationId					=	A.intSubLocationId
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				=	A.intDeferredVoucherId
@@ -105,6 +115,8 @@ SELECT TOP 100 PERCENT
 	,intLoadDetailId					=	A.intLoadShipmentDetailId
 	,intLoadId							=	A.intLoadShipmentId
 	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
+	,intWeightClaimId					=	A.intWeightClaimId
+	,intWeightClaimDetailId				=	A.intWeightClaimDetailId
 	,intScaleTicketId					=	A.intScaleTicketId
 	,intTicketId						=	A.intTicketId
 	,intCCSiteDetailId					=	A.intCCSiteDetailId
@@ -117,6 +129,8 @@ SELECT TOP 100 PERCENT
 	,intPriceFixationDetailId			=	A.intPriceFixationDetailId
 	,intContractSeq						=	ctDetail.intContractSeq
 	,intLinkingId						=	A.intLinkingId
+	,intComputeTotalOption				=	ISNULL(item.intComputeItemTotalOption, 0)
+	,intLotId							=	A.intLotId
 	,intTicketDistributionAllocationId	=	A.intTicketDistributionAllocationId
 	/*Prepaid info*/					
 	,dblPrepayPercentage				=	A.dblPrepayPercentage
@@ -139,14 +153,16 @@ SELECT TOP 100 PERCENT
 	,dblNetWeight						=	A.dblNetWeight
 	,dblWeight							=	A.dblWeight
 	/*Cost info*/						
-	,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
-											ELSE A.intCostUOMId END
-	,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
-											ELSE A.dblCostUnitQty END
+	,intCostUOMId						=	A.intCostUOMId
+	-- ,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- 											THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
+	-- 										ELSE A.intCostUOMId END
+	-- ,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- 											THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
+	-- 										ELSE A.dblCostUnitQty END
+	,dblCostUnitQty						=	A.dblCostUnitQty
 	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
-	,dblCost							=	A.dblCost
+	,dblCost							=	A.dblCost + ISNULL(A.dblQualityPremium, 0) + ISNULL(A.dblOptionalityPremium, 0)
 	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
 	-- 													THEN ctDetail.dblSeqPrice
@@ -197,6 +213,10 @@ SELECT TOP 100 PERCENT
 													WHEN entity.str1099Form = '1099-MISC' THEN 1
 													WHEN entity.str1099Form = '1099-INT' THEN 2
 													WHEN entity.str1099Form = '1099-B' THEN 3
+													WHEN entity.str1099Form = '1099-PATR' THEN 4
+													WHEN entity.str1099Form = '1099-DIV' THEN 5
+													WHEN entity.str1099Form = '1099-K' THEN 6
+													WHEN entity.str1099Form = '1099-NEC' THEN 7
 												ELSE 0 END)
 											) ELSE 0 END
 	,int1099Category					=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
@@ -209,7 +229,17 @@ SELECT TOP 100 PERCENT
 														AND item.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
 														THEN 3
-												ELSE ISNULL(category1099.int1099CategoryId, 0) END
+												ELSE
+													CASE
+														WHEN entity.str1099Form = '1099-MISC' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-INT' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-B' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-PATR' THEN ISNULL(categoryPATR.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-DIV' THEN ISNULL(categoryDIV.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-K' THEN ISNULL(category1099K.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-NEC' THEN ISNULL(category1099.int1099CategoryId, 0) 
+													ELSE 0 END
+												END
 											) ELSE 0 END
 	,dbl1099							=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
 											THEN ISNULL(A.dbl1099, 0) ELSE 0 END
@@ -243,6 +273,9 @@ SELECT TOP 100 PERCENT
 	,dblBundleUnitQty					=	0
 	,intFreightTermId					=	A.intFreightTermId
 	,ysnStage							=	A.ysnStage
+	,dblCashPrice 						= 	A.dblCost
+	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
+	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -273,6 +306,9 @@ OUTER APPLY (
 ) prepayRec
 LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
+LEFT JOIN tblAP1099KCategory category1099K ON LTRIM(entity.str1099Type) = category1099K.strCategory
+LEFT JOIN tblAP1099PATRCategory categoryPATR ON entity.str1099Type = categoryPATR.strCategory
+LEFT JOIN tblAP1099DIVCategory categoryDIV ON entity.str1099Type = categoryDIV.strCategory
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
 LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
@@ -368,7 +404,9 @@ INSERT
 	,ysnSubCurrency	
 	,intCurrencyId					
 	,intLineNo							
-	,intStorageLocationId				
+	,intStorageLocationId		
+	,intStorageChargeId		
+	,intInsuranceChargeDetailId
 	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
@@ -383,7 +421,9 @@ INSERT
 	,intLocationId						
 	,intLoadDetailId
 	,intLoadShipmentCostId					
-	,intLoadId							
+	,intLoadId	
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					
@@ -396,6 +436,8 @@ INSERT
 	,intPriceFixationDetailId			
 	,intContractSeq						
 	,intLinkingId	
+	,intComputeTotalOption
+	,intLotId
 	,intTicketDistributionAllocationId				
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
@@ -449,7 +491,10 @@ INSERT
 	,dblQtyBundleReceived				
 	,dblBundleUnitQty		
 	,intFreightTermId	
-	,ysnStage		
+	,ysnStage	
+	,dblCashPrice
+	,dblQualityPremium
+	,dblOptionalityPremium
 )
 VALUES
 (
@@ -461,7 +506,9 @@ VALUES
 	,ysnSubCurrency		
 	,intCurrencyId				
 	,intLineNo		
-	,intStorageLocationId						
+	,intStorageLocationId	
+	,intStorageChargeId			
+	,intInsuranceChargeDetailId		
 	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
@@ -476,7 +523,9 @@ VALUES
 	,intLocationId						
 	,intLoadDetailId	
 	,intLoadShipmentCostId				
-	,intLoadId							
+	,intLoadId				
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					
@@ -489,6 +538,8 @@ VALUES
 	,intPriceFixationDetailId			
 	,intContractSeq						
 	,intLinkingId	
+	,intComputeTotalOption
+	,intLotId
 	,intTicketDistributionAllocationId		
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
@@ -543,6 +594,9 @@ VALUES
 	,dblBundleUnitQty		
 	,intFreightTermId
 	,ysnStage
+	,dblCashPrice
+	,dblQualityPremium
+	,dblOptionalityPremium
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 

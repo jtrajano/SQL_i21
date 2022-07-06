@@ -101,8 +101,8 @@ LEFT JOIN tblSMCompanyLocation loc
 	ON STE.intLocationId = loc.intCompanyLocationId
 LEFT JOIN tblTMWorkOrderCategory CAT
 	ON WRK.intWorkOrderCategoryId = CAT.intWorkOrderCategoryId
-,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
-,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) A 
+LEFT JOIN (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z on 1=1
+LEFT JOIN (SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) A on 1=1
 WHERE STE.ysnActive = 1  AND CUS.vwcus_active_yn = 'Y' 
 
 GO

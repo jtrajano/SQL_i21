@@ -4,9 +4,11 @@
     [intDefaultLocationId]       INT            NULL,
     [intDefaultContactId]        INT            NULL,
     [intCurrencyId]             INT            NULL,
+	[intPayFromBankAccountId]   INT            NULL,
     [strVendorPayToId]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intPaymentMethodId]        INT            NULL,
     [intTaxCodeId]              INT            NULL,
+	[strVATNo]					NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
     [intGLAccountExpenseId]     INT            NULL ,
     [intVendorType]             INT            NOT NULL,
     [strVendorId]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
@@ -53,7 +55,7 @@
 	[intChainAccountNumber] INT NULL,--
 	[intCsvFormat] INT NULL,
 	[ysnMatchVendorCost] BIT DEFAULT 0 NULL,
-
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL, 
 	--store
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,

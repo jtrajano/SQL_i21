@@ -5,6 +5,9 @@ CREATE TABLE [dbo].[tblCTCropYear](
 	[strCropYear] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmStartDate] [datetime] NOT NULL,
 	[dtmEndDate] [datetime] NOT NULL,
+	intCurrencyId INT NULL,
+	intCommodityUOMId INT NULL,
+	dblPremiumDiscount NUMERIC(18, 6) NULL DEFAULT((0)),
 	[ysnActive] [bit] NOT NULL,
  CONSTRAINT [PK_tblCMCropYear_intCropYearId] PRIMARY KEY CLUSTERED 
 (

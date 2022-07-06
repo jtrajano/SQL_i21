@@ -14,6 +14,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intPriceUOMId						= INV.intPriceUOMId
 	 , dblItemWeight						= INV.dblItemWeight
 	 , intItemWeightUOMId					= INV.intItemWeightUOMId
+	 , dblStandardWeight					= INV.dblStandardWeight
 	 , dblDiscount							= INV.dblDiscount
 	 , dblItemTermDiscount					= INV.dblItemTermDiscount
 	 , strItemTermDiscountBy				= INV.strItemTermDiscountBy
@@ -129,7 +130,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strSiteNumber						= ISNULL(CSITE.strSiteNumber, '') COLLATE Latin1_General_CI_AS
      , strContractNumber					= ISNULL(CT.strContractNumber, '')	 
 	 , intContractSeq						= CT.intContractSeq
-	 , strItemContractNumber				= ISNULL(ICTH.strContractNumber, '')
+	 , strItemContractNumber				= ISNULL(ARICNS.strItemContractNumber, '')
 	 , intItemContractSeq					= ICT.intLineNo
      , dblOriginalQty						= INV.dblQtyShipped
      , dblOriginalPrice						= INV.dblPrice
@@ -179,7 +180,16 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strBinNumber							= INV.strBinNumber
 	 , strGroupNumber						= INV.strGroupNumber
 	 , strFeedDiet							= INV.strFeedDiet
+	 , strItemContractCategory				= ARICNS.strContractCategoryId
+	 , strItemContractCategoryCode			= ARICNS.strCategory
 	 , intTicketLoadDetailId				= ISNULL(TICKET.intLoadDetailId, 0)
+	 , dblRounding							= INV.dblRounding
+	 , dblBaseRounding						= INV.dblBaseRounding
+	 , dblQualityPremium					= INV.dblQualityPremium
+	 , dblOptionalityPremium				= INV.dblOptionalityPremium
+	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
+	 , strReasonablenessComment				= INV.strReasonablenessComment
+	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -242,9 +252,11 @@ LEFT JOIN (
 ) ICT ON INV.intItemContractDetailId = ICT.intItemContractDetailId
 LEFT JOIN (
 	SELECT intItemContractHeaderId
-		 , strContractNumber
-	FROM tblCTItemContractHeader
-) ICTH ON INV.intItemContractHeaderId = ICTH.intItemContractHeaderId
+		 , strItemContractNumber
+		 , strContractCategoryId
+		 , strCategory
+	FROM vyuARItemContractNumberSearch
+) ARICNS ON INV.intItemContractHeaderId = ARICNS.intItemContractHeaderId
 LEFT JOIN ( 
 	SELECT intTaxGroupId
 		 , strTaxGroup
@@ -339,3 +351,4 @@ LEFT JOIN (
 	WHERE intInvoiceDetailId IS NOT NULL
 	GROUP BY intInvoiceDetailId
 ) APAR ON INV.intInvoiceDetailId = APAR.intInvoiceDetailId
+GO

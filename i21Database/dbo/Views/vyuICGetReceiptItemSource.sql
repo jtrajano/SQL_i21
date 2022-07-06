@@ -4,7 +4,11 @@ AS
 SELECT 
 	  ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.intInventoryReceiptItemId
-	, ReceiptItem.intOrderId
+	, intOrderId = 
+		CASE 
+			WHEN Receipt.intSourceType = 3 THEN COALESCE(ReceiptItem.intOrderId, LoadReceipt.intLoadHeaderId) 
+			ELSE COALESCE(ReceiptItem.intOrderId, ReceiptItem.intSourceId)
+		END 
 	, Receipt.strReceiptType
 	, Receipt.intSourceType
 	, dblAvailableQty = [Contract].dblAvailableQty
@@ -24,6 +28,7 @@ SELECT
 			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
 			WHEN Receipt.intSourceType = 6 THEN 'Purchase Order'
 			WHEN Receipt.intSourceType = 7 THEN 'Store'
+			WHEN Receipt.intSourceType = 9 THEN 'Transfer Shipment'
 		END COLLATE Latin1_General_CI_AS
 	, strOrderNumber = 
 		CASE
@@ -55,6 +60,8 @@ SELECT
 			-- Purchase Order
 			WHEN Receipt.intSourceType = 6 THEN
 				CASE WHEN PurchaseOrder.intPurchaseId = ReceiptItem.intSourceId THEN PurchaseOrder.strPurchaseOrderNumber ELSE NULL END
+			-- Transfer Shipment
+			WHEN Receipt.intSourceType = 9 THEN ISNULL(Logistics.strLoadNumber, '')
 			ELSE NULL
 		END
 	, dblOrdered =
@@ -71,6 +78,8 @@ SELECT
 					WHEN Receipt.intSourceType = 2 THEN ISNULL(Logistics.dblQuantity, 0.00)
 					-- Transport
 					WHEN Receipt.intSourceType = 3 THEN ISNULL(LoadReceipt.dblOrderedQuantity, 0.00)
+					-- Transfer Shipment
+					WHEN Receipt.intSourceType = 9 THEN ISNULL(Logistics.dblQuantity, 0.00)
 					ELSE NULL
 				END
 			WHEN Receipt.strReceiptType = 'Purchase Order' THEN ISNULL(PurchaseOrder.dblQtyOrdered, 0.00)
@@ -91,6 +100,9 @@ SELECT
 					WHEN Receipt.intSourceType = 2 THEN ISNULL(Logistics.dblDeliveredQuantity, 0.00)
 					-- Transport
 					WHEN Receipt.intSourceType = 3 THEN LoadReceipt.dblReceivedQuantity
+					-- Transfer Shipment
+					WHEN Receipt.intSourceType = 9 THEN ISNULL(Logistics.dblDeliveredQuantity, 0.00)
+
 					ELSE NULL
 				END
 			WHEN Receipt.strReceiptType = 'Purchase Order' THEN ISNULL(PurchaseOrder.dblQtyReceived, 0.00)
@@ -110,6 +122,8 @@ SELECT
 					WHEN Receipt.intSourceType = 2 THEN Logistics.strUnitMeasure
 					-- Transport
 					WHEN Receipt.intSourceType = 3 THEN 'Transport'
+					-- Transfer Shipment
+					WHEN Receipt.intSourceType = 9 THEN Logistics.strUnitMeasure
 					ELSE NULL
 				END
 			WHEN Receipt.strReceiptType = 'Purchase Order' THEN PurchaseOrder.strUOM
@@ -131,6 +145,9 @@ SELECT
 					WHEN Receipt.intSourceType = 3 THEN 0.0
 					-- Purchase Order
 					WHEN Receipt.intSourceType = 6 THEN PurchaseOrder.dblItemUOMCF
+					-- Transfer Shipment
+					WHEN Receipt.intSourceType = 9 THEN ISNULL(Logistics.dblItemUOMCF, 0)
+
 					ELSE NULL
 				END
 			WHEN Receipt.strReceiptType = 'Purchase Order' THEN PurchaseOrder.dblItemUOMCF
@@ -165,6 +182,8 @@ SELECT
 				CASE
 					-- Inbound Shipment
 					WHEN Receipt.intSourceType = 2 THEN Logistics.intWeightUOMId
+					-- Transfer Shipment
+					WHEN Receipt.intSourceType = 9 THEN Logistics.intWeightUOMId
 					ELSE 0.00
 				END
 			ELSE NULL
@@ -176,6 +195,8 @@ SELECT
 				CASE
 					-- Inbound Shipment
 					WHEN Receipt.intSourceType = 2 THEN Logistics.dblContainerWeightPerQty
+					-- Transfer Shipment
+					WHEN Receipt.intSourceType = 9 THEN Logistics.dblContainerWeightPerQty
 					ELSE 0.00
 				END
 			ELSE NULL
@@ -187,6 +208,8 @@ SELECT
 				CASE
 					-- Inbound Shipment
 					WHEN Receipt.intSourceType = 2 THEN Logistics.dblFranchise
+					-- Transfer Shipment 
+					WHEN Receipt.intSourceType = 9 THEN Logistics.dblFranchise
 					ELSE 0.00
 				END
 			ELSE NULL
@@ -198,6 +221,22 @@ SELECT
 				CASE
 					-- Inbound Shipment
 					WHEN Receipt.intSourceType = 2 THEN Logistics.strContainerNumber
+					-- Transfer Shipment 
+					WHEN Receipt.intSourceType = 9 THEN Logistics.strContainerNumber
+
+					ELSE NULL
+				END
+			ELSE NULL
+		END
+	, strMarkings =
+		CASE
+			-- Purchase Contract
+			WHEN Receipt.strReceiptType = 'Purchase Contract' THEN
+				CASE
+					-- Inbound Shipment
+					WHEN Receipt.intSourceType = 2 THEN Logistics.strMarks
+					-- Transfer Shipment 
+					WHEN Receipt.intSourceType = 9 THEN Logistics.strMarks
 					ELSE NULL
 				END
 			ELSE NULL
@@ -266,14 +305,18 @@ FROM tblICInventoryReceiptItem ReceiptItem
 			, LogisticsLookup.dblContainerWeightPerQty
 			, LogisticsLookup.dblFranchise
 			, LogisticsLookup.strContainerNumber
+			, LogisticsLookup.strMarks
 		FROM vyuICLoadContainers LogisticsLookup
-		WHERE LogisticsLookup.intLoadDetailId = ReceiptItem.intSourceId 
+		WHERE 
+			LogisticsLookup.intLoadDetailId = ReceiptItem.intSourceId 
 			AND LogisticsLookup.intLoadContainerId = ReceiptItem.intContainerId
-			AND Receipt.intSourceType = 2
-			AND (Receipt.strReceiptType = 'Purchase Contract'
-				OR (Receipt.strReceiptType = 'Inventory Return'
-					AND InventoryReturn.strReceiptType = 'Purchase Contract'))
+			AND Receipt.intSourceType IN (2, 9)
+			--AND (
+			--	Receipt.strReceiptType = 'Purchase Contract'
+			--	OR (Receipt.strReceiptType = 'Inventory Return' AND InventoryReturn.strReceiptType = 'Purchase Contract')
+			--)
 	) Logistics
+
 	OUTER APPLY (
 		SELECT strDeliverySheetNumber 
 		FROM tblSCDeliverySheet 
@@ -313,8 +356,9 @@ FROM tblICInventoryReceiptItem ReceiptItem
 			OUTER APPLY (
 				SELECT TOP 1 strSourceNumber = CAST(ISNULL(s2.intTrackingNumber, 'Inbound Shipment not found!') AS NVARCHAR(50))
 				FROM tblLGShipment s2
-				WHERE s2.intShipmentId = td.intSourceId
-					AND t.intSourceType = 2
+				WHERE 
+					s2.intShipmentId = td.intSourceId
+					AND t.intSourceType IN (2, 9)
 			) LGShipmentSource
 			OUTER APPLY (
 				SELECT TOP 1 strSourceNumber = CAST(ISNULL(s3header.strTransaction, 'Transport not found!') AS NVARCHAR(50))
@@ -324,11 +368,12 @@ FROM tblICInventoryReceiptItem ReceiptItem
 					AND t.intSourceType = 3
 			) transportSource
 
-	) InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
+	) InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = (COALESCE(ReceiptItem.intInventoryTransferDetailId, ReceiptItem.intOrderId))
 		AND Receipt.strReceiptType = 'Transfer Order'
 	OUTER APPLY (
 		SELECT
-			  LoadHeader.strTransaction
+			  LoadHeader.intLoadHeaderId
+			, LoadHeader.strTransaction
 			, dblOrderedQuantity = 
 				CASE
 					WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Net' THEN LoadReceipt.dblNet

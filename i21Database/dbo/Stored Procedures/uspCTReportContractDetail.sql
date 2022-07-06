@@ -6,9 +6,9 @@
 AS
 
 BEGIN TRY
-	
+	DECLARE @ysnExternal BIT 
 	DECLARE	@ErrMsg NVARCHAR(MAX)
-
+	DECLARE @space NVARCHAR(100)
 	
 	DECLARE @TotalQuantity DECIMAL(24,10),
 			@TotalNetQuantity DECIMAL(24,10),
@@ -19,8 +19,7 @@ BEGIN TRY
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
 			@strAmendedColumns NVARCHAR(MAX),
-			@intContractDetailId INT,
-			@ysnExternal BIT
+			@intContractDetailId INT
 
 	DECLARE @Amend TABLE (intContractDetailId INT, strAmendedColumns NVARCHAR(MAX))
 
@@ -33,6 +32,12 @@ BEGIN TRY
 
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
 
+	SELECT @ysnExternal = (CASE WHEN intBookVsEntityId > 0 THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END)		
+	FROM tblCTContractHeader CH
+	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
+	WHERE CH.intContractHeaderId = @intContractHeaderId
+
+	SET @space = '                      '
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		SELECT @strAmendedColumns = ''
@@ -59,10 +64,7 @@ BEGIN TRY
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 	
-	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
-	FROM tblCTContractHeader CH
-	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
-	WHERE CH.intContractHeaderId = @intContractHeaderId
+
 
 	SELECT	intContractHeaderId		= CD.intContractHeaderId,
 			intContractSeq			= CD.intContractSeq,
@@ -140,8 +142,21 @@ BEGIN TRY
 			 								ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		= CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)),
-			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)
+			strStraussShipment		= CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+										   WHEN SM.strReportDateFormat = 'M/d/yy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+										   WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+									  ELSE  CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101))
+									  END,
+			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end),
+			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',
+			strWalterOrigin			= dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin'),
+			strWalterPricing		= 'To be fixed at ' + CASE WHEN ISNULL(CD.strFixationBy,'') <> '' THEN CD.strFixationBy +'''s Call, against '  ELSE '' END
+									   +  MA.strFutMarketName +	' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + '-' + CAST(MO.intYear AS NVARCHAR) + ' '
+									   +  CASE	WHEN CD.intPricingTypeId IN (6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure 
+												WHEN CD.intPricingTypeId in (1,2) AND CD.dblBasis > 0	  THEN '  +' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure  ELSE '     ' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure END + ''	
+									   +  CASE WHEN CD.intPricingTypeId = 2 AND CO.strCommodityCode != 'Cocoa' THEN @space+'(Lots to be fixed:' + LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots)) +')'
+											   ELSE '' END
+											
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
 	JOIN	tblCTContractHeader	CH	WITH (NOLOCK) ON	CH.intContractHeaderId	=	CD.intContractHeaderId	

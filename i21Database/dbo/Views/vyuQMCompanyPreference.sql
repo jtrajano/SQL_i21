@@ -18,8 +18,23 @@ SELECT CP.intCompanyPreferenceId
 	,CP.strTestReportComments
 	,CP.strSampleImportDateTimeFormat
 	,CP.ysnCaptureItemInProperty
+	,CP.ysnEnableAssignContractsInSample
 	,LS.strSecondaryStatus AS strApprovalLotStatus
 	,LS1.strSecondaryStatus AS strRejectionLotStatus
+	,CP.ysnEnableContractSequencesTabInSampleSearchScreen
+	,CP.strSampleInstructionReport
+	,CP.intDefaultSampleStatusId
+	,QMSS.strStatus AS strDefaultSampleStatus
+	,ISNULL(CP.intDefaultSampleStatusId, QMSS1.intSampleStatusId) AS intBlankDefaultSampleStatusId
+	,ISNULL(QMSS.strStatus, QMSS1.strStatus) AS strBlankDefaultSampleStatus
+	,CP.ysnSetDefaultReceivedDateInSampleScreen
+	,CP.intCuppingSessionLimit
 FROM tblQMCompanyPreference CP
 LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = CP.intApproveLotStatus
 LEFT JOIN tblICLotStatus LS1 ON LS1.intLotStatusId = CP.intRejectLotStatus
+LEFT JOIN tblQMSampleStatus QMSS ON CP.intDefaultSampleStatusId = QMSS.intSampleStatusId
+OUTER APPLY (
+	SELECT TOP 1 intSampleStatusId, strStatus
+	FROM tblQMSampleStatus
+	WHERE strStatus = 'Received'
+) QMSS1

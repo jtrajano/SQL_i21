@@ -2,6 +2,7 @@ CREATE FUNCTION dbo.fnICGeneratePayables (
 	@intReceiptId INT
 	, @ysnPosted BIT
 	, @ysnForVoucher BIT = 0
+	, @strType NVARCHAR(50) = NULL 
 )
 RETURNS @table TABLE
 (
@@ -14,9 +15,9 @@ RETURNS @table TABLE
 , [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseDetailId]				INT NULL 
 , [intItemId]						INT NULL 
-, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strMiscDescription]				NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strDescription]					NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL 
 , [intPurchaseTaxGroupId]			INT NULL 
 , [dblOrderQty]						NUMERIC(38, 20) NULL 
 , [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
@@ -96,6 +97,26 @@ RETURNS @table TABLE
 , [intLoadShipmentId]				INT NULL	
 , [intLoadShipmentDetailId]			INT NULL	
 , [intLoadShipmentCostId]			INT NULL	
+, [intBookId]						INT NULL
+, [intSubBookId]					INT NULL
+, [intLotId]						INT NULL 
+
+/*Payment Info*/
+, [intPayFromBankAccountId]			INT NULL --DEFAULT PAY FROM BANK ACCOUNT
+, [strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --MODULE OR PROCESS WHERE THE INFORMATION CAME FROM E.G. LOGISTICS
+, [strFinancingTransactionNumber]	NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --TRANSACTION WHERE THE INFORMATION CAME FORM E.G. LS-0001
+/*Trade Finance Info*/
+, [strFinanceTradeNo]				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --TRANSACTION NUMBER
+, [intBankId]						INT NULL --BANK NAME
+, [intBankAccountId]				INT NULL --BANK ACCOUNT NO.
+, [intBorrowingFacilityId]			INT NULL --FACILITY
+, [strBankReferenceNo]				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --BANK REFERENCE NO.
+, [intBorrowingFacilityLimitId]		INT NULL --LIMIT
+, [intBorrowingFacilityLimitDetailId] INT NULL --SUBLIMIT
+, [strReferenceNo]					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --BANK TRADE REFERENCE NO.
+, [intBankValuationRuleId]			INT NULL --OVERRIDE FACILITY VALUATION
+, [strComments]						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --COMMENTS
+
 )
 AS
 BEGIN
@@ -104,6 +125,7 @@ BEGIN
 DECLARE @SourceType_STORE AS INT = 7		 
 	, @type_Voucher AS INT = 1
 	, @type_DebitMemo AS INT = 3
+	, @type_ProvisionalVoucher AS INT = 16
 	, @billTypeToUse INT
 	, @intVoucherInvoiceNoOption TINYINT
 	,	@voucherInvoiceOption_Blank TINYINT = 1 
@@ -134,7 +156,15 @@ FROM tblAPCompanyPreference
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1) END 
+	,[intTransactionType]		=	
+		CASE 
+			WHEN @strType = 'provisional voucher' THEN 
+				@type_ProvisionalVoucher
+			WHEN A.strReceiptType = 'Inventory Return' THEN 
+				@type_DebitMemo 
+			ELSE 
+				ISNULL(@billTypeToUse, @type_Voucher) 
+		END 
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
@@ -332,7 +362,25 @@ SELECT DISTINCT
 	,[intLoadShipmentId]			 = B.intLoadShipmentId
 	,[intLoadShipmentDetailId]	     = B.intLoadShipmentDetailId
 	,[intLoadShipmentCostId]	     = NULL 
+	,[intBookId] = A.intBookId
+	,[intSubBookId] = A.intSubBookId
+	,[intLotId] = Lot.intLotId
 
+	/*Payment Info*/
+	, [intPayFromBankAccountId]		= A.intBankAccountId
+	, [strFinancingSourcedFrom] 	= 'Inventory Receipt'
+	, [strFinancingTransactionNumber] = A.strReceiptNumber 
+	/*Trade Finance Info*/
+	, [strFinanceTradeNo]			= A.strTradeFinanceNumber
+	, [intBankId]					= A.intBankId 
+	, [intBankAccountId]			= A.intBankAccountId 
+	, [intBorrowingFacilityId]		= A.intBorrowingFacilityId
+	, [strBankReferenceNo]			= A.strBankReferenceNo
+	, [intBorrowingFacilityLimitId]	= A.intLimitTypeId
+	, [intBorrowingFacilityLimitDetailId] = A.intSublimitTypeId
+	, [strReferenceNo]					= A.strReferenceNo
+	, [intBankValuationRuleId]			= A.intOverrideFacilityValuation
+	, [strComments]						= A.strComments
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C 
@@ -472,7 +520,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		WHERE 
 			billDetail.intInventoryReceiptItemId = B.intInventoryReceiptItemId 
 			AND billDetail.intInventoryReceiptChargeId IS NULL
-			AND bill.intTransactionType NOT IN (13)  
+			AND bill.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'
@@ -532,6 +580,17 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			AND po.intPurchaseDetailId = ISNULL(rtn.intLineNo, B.intLineNo) 
 	) PurchaseOrder
 
+	OUTER APPLY (
+		SELECT TOP 1 
+			ril.intLotId 
+		FROM 
+			tblICInventoryReceiptItemLot ril
+			INNER JOIN tblICCompanyPreference p
+				ON p.strSingleOrMultipleLots = 'Single'
+		WHERE
+			ril.intInventoryReceiptItemId = B.intInventoryReceiptItemId		
+	) Lot
+
 WHERE 
 	A.intInventoryReceiptId = @intReceiptId
 	AND A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
@@ -558,6 +617,7 @@ WHERE
 	)
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
+		AND @strType != 'provisional voucher'
 		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
 		AND ISNULL(Contracts.intPricingStatus, 0) = 0 -- NOT IN (1, 2) -- 1 is Partially Priced, 2 is Fully Priced. 
 	)
@@ -576,7 +636,8 @@ WHERE
 					FROM tblAPVoucherPayable 
 					WHERE intEntityVendorId = A.intEntityVendorId 
 					AND intContractDetailId = Contracts.intContractDetailId
-					AND strSourceNumber <> A.strReceiptNumber
+					--AND strSourceNumber <> A.strReceiptNumber
+					AND strSourceNumber IN (LogisticsView2.strLoadNumber, LogisticsView.strLoadNumber)
 					AND intInventoryReceiptItemId IS NULL
 					AND intInventoryReceiptChargeId IS NULL 
 					AND intInventoryShipmentChargeId IS NULL
@@ -769,6 +830,24 @@ SELECT DISTINCT
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
 		,[intLoadShipmentDetailId]	     			= NULL 
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
+		,[intBookId]								= A.intBookId
+		,[intSubBookId]								= A.intSubBookId
+		,[intLotId]									= NULL 
+		/*Payment Info*/
+		, [intPayFromBankAccountId]		= A.[intPayFromBankAccountId]
+		, [strFinancingSourcedFrom] 	= A.[strFinancingSourcedFrom]
+		, [strFinancingTransactionNumber] = A.[strFinancingTransactionNumber] 
+		/*Trade Finance Info*/
+		, [strFinanceTradeNo]			= A.[strFinanceTradeNo]
+		, [intBankId]					= A.[intBankId] 
+		, [intBankAccountId]			= A.[intBankAccountId] 
+		, [intBorrowingFacilityId]		= A.[intBorrowingFacilityId]
+		, [strBankReferenceNo]			= A.[strBankReferenceNo]
+		, [intBorrowingFacilityLimitId]	= A.[intBorrowingFacilityLimitId]
+		, [intBorrowingFacilityLimitDetailId] = A.[intBorrowingFacilityLimitDetailId]
+		, [strReferenceNo]					= A.[strReferenceNo]
+		, [intBankValuationRuleId]			= A.[intBankValuationRuleId]
+		, [strComments]						= A.[strComments]
 FROM 
 	[vyuICChargesForBilling] A
 	INNER JOIN (
@@ -817,7 +896,7 @@ FROM
 				ON BD.intBillId = B.intBillId
 		WHERE 
 			BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-			AND B.intTransactionType NOT IN (13)  
+			AND B.intTransactionType NOT IN (13, 16)  -- ('Basis Advance', 'Provisional Voucher')
 			/*
 				CASE A.intTransactionType
 						WHEN 1 THEN 'Voucher'
@@ -918,7 +997,8 @@ WHERE
 						FROM tblAPVoucherPayable 
 						WHERE intEntityVendorId = A.intEntityVendorId 
 						AND intContractDetailId = CD.intContractDetailId
-						AND strSourceNumber <> A.strSourceNumber
+						--AND strSourceNumber <> A.strSourceNumber
+						AND strSourceNumber IN (A.strLoadNumber)
 						AND intInventoryReceiptItemId IS NULL 
 						AND intInventoryReceiptChargeId IS NULL 
 						AND intInventoryShipmentChargeId IS NULL						

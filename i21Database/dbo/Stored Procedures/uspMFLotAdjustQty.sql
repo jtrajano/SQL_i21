@@ -7,6 +7,9 @@
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
 	,@ysnBulkChange BIT = 0
+	,@strReferenceNo NVARCHAR(50) = NULL
+	,@intAdjustmentId INT = NULL OUTPUT
+	,@ysnDifferenceQty BIT = 0
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -26,18 +29,31 @@ BEGIN TRY
 		,@intShiftId INT
 		,@dblWeightPerQty NUMERIC(38, 20)
 		,@intWeightUOMId INT
-		,@intItemStockUOMId INT
 		,@dblWeight NUMERIC(38, 20)
 		,@dblLotReservedQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
-		,@strNote1 NVARCHAR(MAX)
+		--,@strNote1 NVARCHAR(MAX)
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
-	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
+	IF IsNULL(@strReferenceNo, '') <> ''
+	BEGIN
+		IF IsNULL(@strNotes, '') <> ''
+		BEGIN
+			SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, '') + ' Ref: ' + isNULL(@strReferenceNo, ''))
+		END
+		ELSE
+		BEGIN
+			SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' Ref: ' + isNULL(@strReferenceNo, ''))
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
+	END
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 	FROM tblMFCompanyPreference
@@ -66,20 +82,22 @@ BEGIN TRY
 				END
 			)
 
-	IF @intItemUOMId = @intAdjustItemUOMId
-		AND @intWeightUOMId IS NOT NULL
+	IF @ysnDifferenceQty =0
 	BEGIN
-		SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotQty
+		IF @intItemUOMId = @intAdjustItemUOMId
+			AND @intWeightUOMId IS NOT NULL
+		BEGIN
+			SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotQty
+		END
+		ELSE
+		BEGIN
+			SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotAvailableQty
+		END
 	END
 	ELSE
 	BEGIN
-		SELECT @dblAdjustByQuantity = @dblNewLotQty - @dblLotAvailableQty
+		SELECT @dblAdjustByQuantity = @dblNewLotQty
 	END
-
-	SELECT @intItemStockUOMId = intItemUOMId
-	FROM dbo.tblICItemUOM
-	WHERE intItemId = @intItemId
-		AND ysnStockUnit = 1
 
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation
@@ -108,7 +126,7 @@ BEGIN TRY
 	END
 
 	IF @dblNewLotQty = 0
-		AND @intWeightUOMId IS NOT NULL
+		AND @intWeightUOMId IS NOT NULL and @ysnDifferenceQty=0
 	BEGIN
 		SELECT @dblAdjustByQuantity = - @dblWeight
 
@@ -138,7 +156,7 @@ BEGIN TRY
 				ELSE @dblLotAvailableQty
 				END
 			) = @dblNewLotQty
-		AND @blnValidateLotReservation = 0
+		AND @blnValidateLotReservation = 0 and @ysnDifferenceQty =0
 	BEGIN
 		RETURN
 	END
@@ -150,7 +168,7 @@ BEGIN TRY
 					THEN @dblLotQty
 				ELSE @dblLotAvailableQty
 				END
-			) = @dblNewLotQty
+			) = @dblNewLotQty and @ysnDifferenceQty =0
 	BEGIN
 		IF @ysnBulkChange = 1
 		BEGIN
@@ -164,6 +182,24 @@ BEGIN TRY
 				)
 	END
 
+	IF @strReasonCode = 'Production reversal adjustment' and @ysnDifferenceQty =0
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder
+				WHERE strWorkOrderNo = @strReferenceNo
+				)
+		BEGIN
+			RAISERROR (
+					'Invalid Reference No.'
+					,11
+					,1
+					)
+
+			RETURN
+		END
+	END
+
 	--IF @strReasonCode IS NULL
 	--	OR @strReasonCode = ''
 	--BEGIN
@@ -173,38 +209,37 @@ BEGIN TRY
 	--			,1
 	--			)
 	--END
-	IF EXISTS (
-			SELECT 1
-			FROM tblWHSKU
-			WHERE intLotId = @intLotId
-			)
-	BEGIN
-		RAISERROR (
-				'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
-				,11
-				,1
-				)
-	END
-
+	--IF EXISTS (
+	--		SELECT 1
+	--		FROM tblWHSKU
+	--		WHERE intLotId = @intLotId
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
+	--			,11
+	--			,1
+	--			)
+	--END
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	SET @strNote1 = isNULL(@strReasonCode, '') + ' ' + IsNULL(@strNotes, '')
+	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
+		,@dtmDate = @dtmDate
+		,@intLocationId = @intLocationId
+		,@intSubLocationId = @intSubLocationId
+		,@intStorageLocationId = @intStorageLocationId
+		,@strLotNumber = @strLotNumber
+		,@dblAdjustByQuantity = @dblAdjustByQuantity
+		,@dblNewUnitCost = @dblNewUnitCost
+		,@intItemUOMId = @intAdjustItemUOMId
+		,@intSourceId = @intSourceId
+		,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+		,@intEntityUserSecurityId = @intUserId
+		,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+		,@strDescription = @strDescription
 
-	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId=@intItemId
-		,@dtmDate=@dtmDate
-		,@intLocationId=@intLocationId
-		,@intSubLocationId=@intSubLocationId
-		,@intStorageLocationId=@intStorageLocationId
-		,@strLotNumber=@strLotNumber
-		,@dblAdjustByQuantity=@dblAdjustByQuantity
-		,@dblNewUnitCost=@dblNewUnitCost
-		,@intItemUOMId=@intAdjustItemUOMId
-		,@intSourceId=@intSourceId
-		,@intSourceTransactionTypeId=@intSourceTransactionTypeId
-		,@intEntityUserSecurityId=@intUserId
-		,@intInventoryAdjustmentId=@intInventoryAdjustmentId OUTPUT
-		,@strDescription=@strDescription
+	SELECT @intAdjustmentId = @intInventoryAdjustmentId
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 10
@@ -223,6 +258,7 @@ BEGIN TRY
 		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+		,@strReferenceNo = @strReferenceNo
 
 	IF EXISTS (
 			SELECT TOP 1 *
@@ -313,20 +349,20 @@ BEGIN TRY
 
 		SELECT @dblAdjustByQuantity = - @dblResidueWeight
 
-		EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId=@intItemId
-			,@dtmDate=@dtmDate
-			,@intLocationId=@intLocationId
-			,@intSubLocationId=@intSubLocationId
-			,@intStorageLocationId=@intStorageLocationId
-			,@strLotNumber=@strLotNumber
-			,@dblAdjustByQuantity=@dblAdjustByQuantity
-			,@dblNewUnitCost=@dblNewUnitCost
-			,@intItemUOMId=@intAdjustItemUOMId
-			,@intSourceId=@intSourceId
-			,@intSourceTransactionTypeId=@intSourceTransactionTypeId
-			,@intEntityUserSecurityId=@intUserId
-			,@intInventoryAdjustmentId=@intInventoryAdjustmentId OUTPUT
-			,@strDescription=@strDescription
+		EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
+			,@dtmDate = @dtmDate
+			,@intLocationId = @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			,@dblAdjustByQuantity = @dblAdjustByQuantity
+			,@dblNewUnitCost = @dblNewUnitCost
+			,@intItemUOMId = @intAdjustItemUOMId
+			,@intSourceId = @intSourceId
+			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,@intEntityUserSecurityId = @intUserId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+			,@strDescription = @strDescription
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 			,@intTransactionTypeId = 10

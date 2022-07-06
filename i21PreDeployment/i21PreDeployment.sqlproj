@@ -88,6 +88,7 @@
     <Folder Include="Scripts\Pre-Deployment\24_SC" />
     <Folder Include="Scripts\Pre-Deployment\25_ST" />
     <Folder Include="Scripts\Pre-Deployment\26_LG" />
+    <Folder Include="Scripts\Pre-Deployment\27_SCH" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -168,6 +169,9 @@
     <None Include="Scripts\Pre-Deployment\22_PAT\6_VolumeSchemaFix.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\CreatePricingInvoiceLink.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\23_DeleteDuplicateEntityMobileNumber.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\DROPAxxisTable.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\2120_DropAxxisTempTables.sql" />
+    <None Include="Scripts\Pre-Deployment\27_SCH\1_FixOrphanDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -186,10 +190,10 @@
     <None Include="Scripts\Pre-Deployment\4_SM\8_TransactionManagement.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\1730_PaymentMethod.sql" />
     <None Include="Scripts\Pre-Deployment\6_GL\5_1710.sql" />
+    <None Include="Scripts\Pre-Deployment\6_GL\7_2110.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\11_FixSalesOrderNullysnQuote.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\1910_BasisComponent.sql" />
-    <None Include="Scripts\Pre-Deployment\7_AR\13_FixCustomerBillToShipTo.sql" />
-    <None Include="Scripts\Pre-Deployment\7_AR\14_RefreshARTempTables.sql" />
+    <None Include="Scripts\Pre-Deployment\7_AR\13_FixCustomerBillToShipTo.sql" />    
     <None Include="Scripts\Pre-Deployment\4_SM\2010_Kill_State_Error_Fix.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -200,6 +204,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\2_CM\1_CM.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\2_CM\2_DataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\3_DB\1_1340_to_1410.sql" />
@@ -408,6 +415,31 @@
     <None Include="Scripts\Pre-Deployment\14_CT\DropIndexes.sql" />
   </ItemGroup>  
   <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\19_MF\DropConstraints.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\15_FixtblARCustomer_MissingColumn.sql" />
     <None Include="Scripts\Pre-Deployment\20_CF\CardFuelingDeleteObject.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\9_FRD\4_2110_to_2120.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\AddEffectiveItemPriceUOMColumn.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\AddEffectiveItemPriceUOMColumn.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\UpdateEDIPricebookWithCaseRetailPrice.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\RenameAndAlterCashRegisterDepartment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\RemoveUPCIndependentUniqueIndexes.sql" />
   </ItemGroup>
 </Project>

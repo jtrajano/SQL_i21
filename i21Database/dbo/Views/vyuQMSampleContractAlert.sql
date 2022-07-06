@@ -42,6 +42,7 @@ FROM (
 		LEFT JOIN tblSMCountry C ON C.intCountryID = CA.intCountryID
 		LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intProductTypeId
 			AND CA1.strType = 'ProductType'
+		WHERE S.intTypeId = 1
 		GROUP BY S.intSampleId
 			,S.strSampleNumber
 			,ST.strSampleTypeName
@@ -63,6 +64,6 @@ FROM (
 		AND a.intSampleStatusId <> 3
 		AND a.intSampleStatusId <> 4
 	) t
-	,tblCTEvent EV
+	inner join tblCTEvent EV on 1=1
 WHERE EV.strEventName = 'Unapproved Contract Samples'
 	AND t.dtmDate < (GETDATE() - EV.intDaysToRemind)

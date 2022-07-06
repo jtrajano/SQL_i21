@@ -2,6 +2,8 @@
 	 @ysnPost BIT = 0
 	,@strTransactionId NVARCHAR(40) = NULL
 	,@intEntityUserSecurityId AS INT = NULL
+	,@ysnRecap BIT = 0
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -16,29 +18,21 @@ SET ANSI_WARNINGS ON
 DECLARE @TransactionName AS VARCHAR(500) = 'Outbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 -- Constants  
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 46
-DECLARE @ysnRecap AS INT = 0
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ENABLE_ACCRUALS_FOR_OUTBOUND BIT = 0
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
-	,@OWNERSHIP_TYPE_OWN AS INT = 1
-	,@OWNERSHIP_TYPE_STORAGE AS INT = 2
-	,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
-	,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
--- Get the default currency ID
+
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 -- Get the Inventory Shipment batch number
-DECLARE @strBatchId AS NVARCHAR(40)
-	,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 	,@ysnAllowBlankGLEntries AS BIT = 1
 	,@intItemId AS INT
-DECLARE @LotType_Manual AS INT = 1
-	,@LotType_Serial AS INT = 2
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
+	,@ChargesAPClearing AS APClearing
 	,@intReturnValue AS INT
 DECLARE @dummyGLEntries AS RecapTableType
 
-SELECT @ENABLE_ACCRUALS_FOR_OUTBOUND = ysnEnableAccrualsForOutbound 
+SELECT TOP 1 @ENABLE_ACCRUALS_FOR_OUTBOUND = ysnEnableAccrualsForOutbound 
 FROM tblLGCompanyPreference
 
 -- Ensure ysnPost is not NULL  
@@ -49,7 +43,6 @@ BEGIN
 	DECLARE @dtmDate AS DATETIME
 	DECLARE @intTransactionId AS INT
 	DECLARE @intCreatedEntityId AS INT
-	DECLARE @ysnAllowUserSelfPost AS BIT
 	DECLARE @ysnTransactionPostedFlag AS BIT
 	DECLARE @ysnDirectShip BIT;
 	DECLARE @ysnIsReturn BIT = 0
@@ -102,7 +95,7 @@ BEGIN
 END
 
 -- Check if the transaction is already posted  
-IF @ysnPost = 0
+IF @ysnPost = 0 AND @ysnRecap = 0
 	AND @ysnTransactionPostedFlag = 0
 BEGIN
 	-- The transaction is already unposted.  
@@ -157,7 +150,6 @@ BEGIN
 	SET @intItemId = NULL
 
 	DECLARE @dblQuantityShipped AS NUMERIC(38, 20)
-		--,@LotQty AS NUMERIC(38,20)
 		,@LotQtyInItemUOM AS NUMERIC(38, 20)
 		,@QuantityShippedInItemUOM AS NUMERIC(38, 20)
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
@@ -170,22 +162,21 @@ BEGIN
 		,@intItemId = Item.intItemId
 		,@dblQuantityShipped = Detail.dblQuantity
 		,@LotQtyInItemUOM = ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0)
-		,@intSourceType = LOAD.intSourceType
-	FROM tblLGLoad LOAD
-	INNER JOIN tblLGLoadDetail Detail ON LOAD.intLoadId = Detail.intLoadId
+		,@intSourceType = L.intSourceType
+	FROM tblLGLoad L
+	INNER JOIN tblLGLoadDetail Detail ON L.intLoadId = Detail.intLoadId
 	INNER JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
 	LEFT JOIN (
 		SELECT LDL.intLoadDetailId
 			,TotalLotQtyInDetailItemUOM = SUM(dbo.fnCalculateQtyBetweenUOM(ISNULL(Lot.intItemUOMId, LD.intItemUOMId), LD.intItemUOMId, LDL.dblLotQuantity))
-		FROM dbo.tblLGLoad L
-		INNER JOIN dbo.tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		FROM dbo.tblLGLoadDetail LD
 		INNER JOIN dbo.tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 		INNER JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-		WHERE L.strLoadNumber = @strTransactionId
+		WHERE LD.intLoadId = @intTransactionId
 		GROUP BY LDL.intLoadDetailId
 		) ItemLot ON ItemLot.intLoadDetailId = Detail.intLoadDetailId
 	WHERE dbo.fnGetItemLotType(Detail.intItemId) <> 0
-		AND LOAD.strLoadNumber = @strTransactionId
+		AND L.strLoadNumber = @strTransactionId
 		AND ROUND(ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0), 2) <> ROUND(Detail.dblQuantity, 2)
 
 	IF @intItemId IS NOT NULL
@@ -251,6 +242,8 @@ BEGIN
 
 	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
 	BEGIN 
+		EXEC uspLGRecalculateLoadCosts @intTransactionId, @intEntityUserSecurityId
+		
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -294,6 +287,52 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
+		--Insert AP Clearing
+		INSERT INTO @ChargesAPClearing (
+			intTransactionId
+			,strTransactionId
+			,intTransactionType
+			,strReferenceNumber
+			,dtmDate
+			,intEntityVendorId
+			,intLocationId
+			,intTransactionDetailId
+			,intAccountId
+			,intItemId
+			,intItemUOMId
+			,dblQuantity
+			,dblAmount
+			,intOffsetId
+			,strOffsetId
+			,intOffsetDetailId
+			,intOffsetDetailTaxId
+			,strCode)
+		SELECT DISTINCT
+			intTransactionId = L.intLoadId
+			,strTransactionId = L.strLoadNumber
+			,intTransactionType = 5
+			,strReferenceNumber = L.strBLNumber
+			,dtmDate = GL.dtmDate
+			,intEntityVendorId = LC.intVendorId
+			,intLocationId = IL.intLocationId
+			,intTransactionDetailId = LC.intLoadCostId
+			,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+			,intItemId = LC.intItemId
+			,intItemUOMId = NULL
+			,dblQuantity = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+			,dblAmount = LC.dblAmount
+			,intOffsetId = NULL
+			,strOffsetId = NULL
+			,intOffsetDetailId = NULL
+			,intOffsetDetailTaxId = NULL
+			,strCode = 'LG'
+		FROM tblLGLoad L
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
+			LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+			OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
+		WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
+			AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
 	END 
 
 	-- Get the items to post  
@@ -320,36 +359,26 @@ BEGIN
 			,intLotId
 			,intSubLocationId
 			,intStorageLocationId
+			,intForexRateTypeId
+			,dblForexRate
 			)
-		SELECT intItemId = LoadDetail.intItemId
-			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
+		SELECT intItemId = ISNULL(Lot.intItemId, LoadDetail.intItemId)
+			,intItemLocationId = dbo.fnICGetItemLocation(ISNULL(Lot.intItemId, LoadDetail.intItemId), LoadDetail.intSCompanyLocationId)
 			,intItemUOMId = CASE WHEN Lot.intLotId IS NULL THEN 
 									ISNULL(LoadDetail.intItemUOMId, 0)
 								ELSE 
 									ISNULL(DetailLot.intItemUOMId, 0)
 								END
-			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
-			,dblQty = -1 * (
-				CASE 
-					WHEN Lot.intLotId IS NULL THEN 
-						ISNULL(LoadDetail.dblQuantity, 0)
-					ELSE 
-						ISNULL(DetailLot.dblLotQuantity, 0)
-					END
-				) 
-			,dblUOMQty = CASE 
-				WHEN Lot.intLotId IS NULL THEN 
-					ItemUOM.dblUnitQty
-				ELSE 
-					LotItemUOM.dblUnitQty
-				END
+			,dtmDate = dbo.fnRemoveTimeOnDate(L.dtmScheduledDate)
+			,dblQty = -1 * COALESCE(DetailLot.dblLotQuantity, LoadDetail.dblQuantity, 0)
+			,dblUOMQty = ISNULL(LotItemUOM.dblUnitQty, ItemUOM.dblUnitQty)
 			,dblCost = ISNULL(CASE 
 					WHEN Lot.dblLastCost IS NULL
 						THEN (
 								SELECT TOP 1 dblLastCost
 								FROM tblICItemPricing
 								WHERE intItemId = LoadDetail.intItemId
-									AND intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
+									AND intItemLocationId = dbo.fnICGetItemLocation(ISNULL(Lot.intItemId, LoadDetail.intItemId), LoadDetail.intSCompanyLocationId)
 								)
 					ELSE Lot.dblLastCost
 					END, 0) * CASE 
@@ -358,22 +387,63 @@ BEGIN
 				ELSE LotItemUOM.dblUnitQty
 				END
 			,dblSalesPrice = 0.00
-			,intCurrencyId = @DefaultCurrencyId
-			,dblExchangeRate = 1
-			,intTransactionId = LOAD.intLoadId
+			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
+			,dblExchangeRate = ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
+			,intTransactionId = L.intLoadId
 			,intTransactionDetailId = LoadDetail.intLoadDetailId
-			,strTransactionId = LOAD.strLoadNumber
+			,strTransactionId = L.strLoadNumber
 			,intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
 			,intLotId = Lot.intLotId
-			,intSubLocationId = Lot.intSubLocationId --, DetailLot.intSubLocationId)
-			,intStorageLocationId = Lot.intStorageLocationId --, DetailLot.intStorageLocationId) 
-		FROM tblLGLoad LOAD --Header 
-		INNER JOIN tblLGLoadDetail LoadDetail ON LOAD.intLoadId = LoadDetail.intLoadId -- DetailItem
+			,intSubLocationId = Lot.intSubLocationId
+			,intStorageLocationId = Lot.intStorageLocationId
+			,intForexRateTypeId = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN NULL --foreign price to functional FX, use NULL
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
+										ELSE LoadDetail.intForexRateTypeId END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										THEN FX.intForexRateTypeId
+										ELSE LoadDetail.intForexRateTypeId END
+									END
+			,dblForexRate = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN 1 --foreign price to functional FX, use 1
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+										ELSE ISNULL(LoadDetail.dblForexRate,1) END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										THEN ISNULL(FX.dblFXRate, 1)
+										ELSE ISNULL(LoadDetail.dblForexRate,1) END
+									END
+		FROM tblLGLoad L
+		INNER JOIN tblLGLoadDetail LoadDetail ON L.intLoadId = LoadDetail.intLoadId
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId -- ISNULL(Lot.intWeightUOMId, ISNULL(DetailLot.intWeightUOMId,LoadDetail.intWeightItemUOMId))
-		WHERE LOAD.intLoadId = @intTransactionId
+		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LoadDetail.intSContractDetailId
+		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
+		OUTER APPLY (SELECT	TOP 1  
+						intForexRateTypeId = RD.intRateTypeId
+						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+									THEN 1/RD.[dblRate] 
+									ELSE RD.[dblRate] END 
+						FROM tblSMCurrencyExchangeRate ER JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+						WHERE @DefaultCurrencyId <> CD.intInvoiceCurrencyId
+							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
+						ORDER BY RD.dtmValidFromDate DESC) FX
+		WHERE L.intLoadId = @intTransactionId
 
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
@@ -687,6 +757,56 @@ BEGIN
 				,@ysnPost
 				
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+			--Insert AP Clearing
+			INSERT INTO @ChargesAPClearing (
+				intTransactionId
+				,strTransactionId
+				,intTransactionType
+				,strReferenceNumber
+				,dtmDate
+				,intEntityVendorId
+				,intLocationId
+				,intTransactionDetailId
+				,intAccountId
+				,intItemId
+				,intItemUOMId
+				,dblQuantity
+				,dblAmount
+				,intOffsetId
+				,strOffsetId
+				,intOffsetDetailId
+				,intOffsetDetailTaxId
+				,strCode)
+			SELECT DISTINCT
+				intTransactionId = L.intLoadId
+				,strTransactionId = L.strLoadNumber
+				,intTransactionType = 5
+				,strReferenceNumber = L.strBLNumber
+				,dtmDate = GL.dtmDate
+				,intEntityVendorId = LC.intVendorId
+				,intLocationId = IL.intLocationId
+				,intTransactionDetailId = LC.intLoadCostId
+				,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+				,intItemId = LC.intItemId
+				,intItemUOMId = NULL
+				,dblQuantity = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+				,dblAmount = LC.dblAmount
+				,intOffsetId = NULL
+				,strOffsetId = NULL
+				,intOffsetDetailId = NULL
+				,intOffsetDetailTaxId = NULL
+				,strCode = 'LG'
+			FROM tblLGLoad L
+				INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+				INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
+				LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+				OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
+			WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
+				AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
+				AND EXISTS (SELECT TOP 1 1 FROM tblAPClearing APC 
+							WHERE APC.intTransactionDetailId = LC.intLoadCostId AND APC.intTransactionId = L.intLoadId 
+							AND APC.intTransactionType = 5 AND APC.ysnPostAction = 1)
 		END
 
 		-- Unpost the Taxes from the Other Charges
@@ -777,7 +897,7 @@ FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailLot LDL ON LD.intLoadDetailId = LDL.intLoadDetailId
 LEFT JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
-LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intSContractDetailId
+LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intSContractDetailId
 OUTER APPLY (SELECT TOP 1 intSubLocationId = LW.intSubLocationId 
 				FROM tblLGLoadDetailContainerLink LDCL 
 				LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
@@ -817,20 +937,23 @@ IF @ysnRecap = 0
 BEGIN
 
 	SELECT TOP 1 @ysnAllowBlankGLEntries = 0
-	FROM tblLGLoad LOAD --Header 
-	INNER JOIN tblLGLoadDetail LoadDetail ON LOAD.intLoadId = LoadDetail.intLoadId -- DetailItem
+	FROM tblLGLoad L --Header 
+	INNER JOIN tblLGLoadDetail LoadDetail ON L.intLoadId = LoadDetail.intLoadId
 	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 	INNER JOIN dbo.tblICItemLocation ItemLocation ON LoadDetail.intSCompanyLocationId = ItemLocation.intLocationId
 		AND ItemLocation.intItemId = LoadDetail.intItemId
 	LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
 	LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-	WHERE LOAD.intLoadId = @intTransactionId
+	WHERE L.intLoadId = @intTransactionId
 
 	IF @ysnAllowBlankGLEntries = 0
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
+
+		IF (@ENABLE_ACCRUALS_FOR_OUTBOUND = 1)
+			EXEC dbo.uspAPClearing @ChargesAPClearing, @ysnPost
 	END
 
 	UPDATE dbo.tblLGLoad
@@ -841,7 +964,7 @@ BEGIN
 		,dblDeliveredQuantity = CASE WHEN (@ysnPost = 1) THEN 
 									(SELECT SUM(dblDeliveredQuantity) FROM tblLGLoadDetail WHERE intLoadId = tblLGLoad.intLoadId)
 								ELSE 0 END
-	WHERE strLoadNumber = @strTransactionId
+	WHERE intLoadId = @intTransactionId
 
 	UPDATE Detail
 	SET dblDeliveredQuantity = CASE WHEN (@ysnPost = 1) THEN Detail.dblQuantity ELSE 0 END
@@ -850,12 +973,11 @@ BEGIN
 		,dblDeliveredNet = CASE WHEN (@ysnPost = 1) THEN Detail.dblNet ELSE 0 END
 	FROM dbo.tblLGLoadDetail Detail
 		INNER JOIN dbo.tblLGLoad Header ON Detail.intLoadId = Header.intLoadId 
-	WHERE strLoadNumber = @strTransactionId
+	WHERE Header.intLoadId = @intTransactionId
 
 	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType
 
 	INSERT INTO @ItemsFromInventoryShipment (
-		-- Header
 		[intShipmentId]
 		,[strShipmentId]
 		,[intOrderType]
@@ -864,11 +986,9 @@ BEGIN
 		,[intCurrencyId]
 		,[dblExchangeRate]
 		,[intEntityCustomerId]
-		-- Detail 
 		,[intInventoryShipmentItemId]
 		,[intItemId]
-		--,[intLotId]
-		--,[strLotNumber]
+		,[intLotId]
 		,[intLocationId]
 		,[intItemLocationId]
 		,[intSubLocationId]
@@ -877,53 +997,40 @@ BEGIN
 		,[intWeightUOMId]
 		,[dblQty]
 		,[dblUOMQty]
-		--,[dblNetWeight]
 		,[dblSalesPrice]
 		,[intDockDoorId]
-		--,[intOwnershipType]
 		,[intOrderId]
 		,[intSourceId]
 		,[intLineNo]
 		,[intLoadShipped]
 		,[ysnLoad]
 		)
-	SELECT L.intLoadId
-		,L.strLoadNumber
-		,1 AS intOrderType
-		,-1 AS intSourceType
-		,GETDATE()
-		,intCurrencyId = NULL
+	SELECT 
+		[intShipmentId] = L.intLoadId
+		,[strShipmentId] = L.strLoadNumber
+		,[intOrderType] = 1
+		,[intSourceType] = -1
+		,[dtmDate] = L.dtmScheduledDate
+		,[intCurrencyId] = NULL
 		,[dblExchangeRate] = 1
-		,LD.intCustomerEntityId
-		,LD.intLoadDetailId
-		,LD.intItemId
-		--,LDL.intLotId
-		--,Lot.strLotNumber
+		,[intEntityCustomerId] = LD.intCustomerEntityId
+		,[intInventoryShipmentItemId] = LD.intLoadDetailId
+		,[intItemId] = LD.intItemId
+		,[intLotId] = LDL.intLotId
 		,[intLocationId] = LD.intSCompanyLocationId
-		,[intItemLocationId] = --CASE 
-			--WHEN IL.intItemLocationId IS NULL
-			--	THEN (
+		,[intItemLocationId] = 
 						(SELECT TOP 1 ITL.intItemLocationId
 						FROM tblICItemLocation ITL
 						WHERE ITL.intItemId = LD.intItemId
-							AND ITL.intLocationId = CD.intCompanyLocationId)
-				--		)
-			--ELSE IL.intItemLocationId
-			--END
+							AND ITL.intLocationId = LD.intSCompanyLocationId)
 		,[intSubLocationId] = LD.intSSubLocationId
 		,[intStorageLocationId] = NULL
-		,[intItemUOMId] = LD.intItemUOMId
-		,[intWeightUOMId] = LD.intWeightItemUOMId
-		,[dblQty] = CASE 
-					WHEN @ysnPost = 1
-						THEN - 1 * LD.dblQuantity
-					ELSE LD.dblQuantity
-					END
-		,[dblUOMQty] = IU.dblUnitQty
-		--,[dblNetWeight] = LDL.dblGross - LDL.dblTare
+		,[intItemUOMId] = ISNULL(LOUM.intItemUOMId, LD.intItemUOMId)
+		,[intWeightUOMId] = ISNULL(LWOUM.intItemUOMId, LD.intWeightItemUOMId)
+		,[dblQty] = ISNULL(LDL.dblLotQuantity, LD.dblQuantity) * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
+		,[dblUOMQty] = ISNULL(LOUM.dblUnitQty, IU.dblUnitQty)
 		,[dblSalesPrice] = ISNULL(CD.dblCashPrice, 0)
 		,[intDockDoorId] = NULL
-		--,[intOwnershipType] = ISNULL(Lot.intOwnershipType, 0)
 		,[intOrderId] = NULL
 		,[intSourceId] = NULL
 		,[intLineNo] = ISNULL(LD.intSContractDetailId, 0)
@@ -935,11 +1042,12 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
+	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = LDL.intLotId
+	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 	LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
-	--LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	--LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-	--LEFT JOIN tblICItemLocation IL ON IL.intItemLocationId = Lot.intItemLocationId
+	OUTER APPLY (SELECT IU1.intItemUOMId, IU1.dblUnitQty from tblICItemUOM IU1 WHERE IU1.intItemId = Lot.intItemId AND IU1.intUnitMeasureId = IU.intUnitMeasureId) LOUM
+	OUTER APPLY (SELECT IU2.intItemUOMId from tblICItemUOM IU2 WHERE IU2.intItemId = Lot.intItemId AND IU2.intUnitMeasureId = WU.intUnitMeasureId) LWOUM
 	WHERE L.intLoadId = @intTransactionId
 
 	EXEC dbo.uspCTShipped @ItemsFromInventoryShipment
@@ -956,6 +1064,20 @@ BEGIN
 
 	COMMIT TRAN @TransactionName
 END
+ELSE
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+
+	-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN 
+		EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityUserSecurityId
+	END
+
+	COMMIT TRAN @TransactionName
+END  
 
 -- Create an Audit Log
 IF @ysnRecap = 0

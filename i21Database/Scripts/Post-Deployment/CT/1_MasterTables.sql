@@ -692,7 +692,11 @@ GO
 
 GO
 UPDATE tblCTAmendmentApproval SET ysnBulkChangeReadOnly =1 WHERE strDataIndex NOT IN (
-SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intItemId,dblQuantity,intItemUOMId,dblBasis,intBookId,intSubBookId,dblRatio',','))
+SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intItemId,dblQuantity,intItemUOMId,dblBasis,intBookId,intSubBookId,dblRatio,intFutureMonthId,dblFutures',','))
+GO
+
+UPDATE tblCTAmendmentApproval SET ysnBulkChangeReadOnly = 0 WHERE strDataIndex IN (
+SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intFutureMonthId,dblFutures',','))
 GO
 
 IF EXISTS(SELECT 1 FROM tblCTCompanyPreference WHERE ISNULL(strDefaultAmendmentReport,'')='')
@@ -743,6 +747,150 @@ IF EXISTS(SELECT 1 FROM tblSMGridLayout WHERE strGridLayoutFields LIKE '%{"strFi
 		WHERE strScreen LIKE 'ContractManagement.view.Overview%' and strGrid = 'grdSearch'
  END
 GO
+
+
+
+
+
+
+--tblCTOption
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 1)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 1,'Loading port','citycombo', 1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 2)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 2,'Destination port','citycombo', 1
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 3)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 3,'Crop Year','cropyearcombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 4)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 4,'Packaging','packagecombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 5)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 5,'INCO Terms','incotermcombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 6)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 6,'Period of Delivery','periodcombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 7)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 7,'Association','assoccombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 8)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 8,'Arbitration','arbitrationcombo', 1
+END
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 9)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 9,'Item','itemcombo', 1
+END
+GO
+
+
+
+
+
+
+--tblCTApprovalStatusTF
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 1)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 1, 'Pending', 1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId =  2)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 2, 'Approved', 1
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 3)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 3, 'Rejected', 1
+END
+GO
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 4, 'Cancelled', 1
+END
+ELSE 
+BEGIN
+	UPDATE tblCTApprovalStatusTF SET strApprovalStatus = 'Cancelled' WHERE intApprovalStatusId = 4
+END
+GO
+
+IF EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed')
+BEGIN
+	DELETE  FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed'
+END
+
+
+
+
+
+--tblCTOrderTypeFX
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOrderTypeFX WHERE intOrderTypeId = 1)
+BEGIN
+	INSERT INTO tblCTOrderTypeFX
+	select 1, 'GTC', 1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOrderTypeFX WHERE intOrderTypeId =  2)
+BEGIN
+	INSERT INTO tblCTOrderTypeFX
+	select 2, 'Limit', 1
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOrderTypeFX WHERE intOrderTypeId = 3)
+BEGIN
+	INSERT INTO tblCTOrderTypeFX
+	select 3, 'Market', 1
+END
+GO
+
+
+
 
 
 --=====================================================================================================================================

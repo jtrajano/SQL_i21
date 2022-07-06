@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[intPrimaryAccountId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[strLocationSearch] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL,
- CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED
 (
 	[intResponsiblePartyMatchingId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
@@ -20,21 +20,21 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [DF__tblCMResp__intCo__345999B0]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount] FOREIGN KEY([intOffsetBankId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount] FOREIGN KEY([intOffsetBankId])
 REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1] FOREIGN KEY([intPrimaryBankId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1] FOREIGN KEY([intPrimaryBankId])
 REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccount] FOREIGN KEY([intPrimaryAccountId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccount] FOREIGN KEY([intPrimaryAccountId])
 REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 GO
 

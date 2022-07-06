@@ -30,13 +30,27 @@
     [intSettlementReportId] TINYINT NULL,
     [ysnRailXMLExport] BIT NOT NULL DEFAULT (0), 
     [strRailXMLDocumentPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''),
+    [ysnEnableBOLOnScale] BIT NOT NULL DEFAULT(0), 
     [ysnEnableCanadianGrainReceipt] BIT NOT NULL DEFAULT(0),
     [strDefaultGrainReceiptReport] NVARCHAR(MAX) COLLATE  Latin1_General_CI_AS NULL,
     [ysnUseItemCommodityDiscountOriginImport] BIT NOT NULL DEFAULT(0),
     [ysnAutoShortCloseContractInSettlement] BIT NOT NULL DEFAULT(0),
     --[ysnStorageChargeAccountUseIncome] BIT NOT NULL DEFAULT(0),
     
+
     
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MarketingFeeId] FOREIGN KEY ([intGRRItemMarketingFeeId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_TestWeightId] FOREIGN KEY ([intGRRItemTestWeightId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_CCFMId] FOREIGN KEY ([intGRRItemCCFMId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_GradeId] FOREIGN KEY ([intGRRItemGradeId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_FactorId] FOREIGN KEY ([intGRRItemFactorId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_ProteinId] FOREIGN KEY ([intGRRItemProteinId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MoistureId] FOREIGN KEY ([intGRRItemMoistureId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_SplitId] FOREIGN KEY ([intGRRSplitItemId]) REFERENCES [tblICItem]([intItemId]),
+
+
+
+
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])

@@ -11,9 +11,10 @@
 			,ysnActiveEntity = tblEMEntity.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
 			,strSalesPersonType = 'Sales Rep Entity' COLLATE Latin1_General_CI_AS
-	from tblARSalesperson, tblEMEntity
-	where
-		tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
+	from 
+		tblARSalesperson
+		inner join tblEMEntity on tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
+	
 
 	/*
 	union all

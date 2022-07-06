@@ -4,6 +4,7 @@ SELECT reg.intRegisterId
 	--, reg.intStoreId
 	, st.intStoreId
 	, st.intStoreNo
+	, st.strStoreAppFileVersion
 	, st.intCompanyLocationId
 	, reg.strRegisterName
 	, reg.strRegisterClass

@@ -186,7 +186,10 @@ AS (
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
-									,t.intItemUOMId								)
+									,t.intItemUOMId								
+									,ri.intComputeItemTotalOption
+									,ri.dblOpenReceive
+								)
 								,2 
 							)
 						)					
@@ -302,7 +305,7 @@ SELECT
 		,dblDebitUnit				= DebitUnit.Value
 		,dblCreditUnit				= CreditUnit.Value
 		,strDescription				= ISNULL(tblGLAccount.strDescription, '')
-										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, DEFAULT) 
 										+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
 		,strReference				= '' 
@@ -379,7 +382,7 @@ SELECT
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
 		,strDescription				= ISNULL(tblGLAccount.strDescription, '')
-									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, DEFAULT) 
 									+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IC' 
 		,strReference				= '' 

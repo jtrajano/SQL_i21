@@ -119,6 +119,14 @@ BEGIN
 			,[strCertificateId]
 			,[strTrackingNumber]
 			,[intSeasonCropYear]
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
+			,[dblTare]
+			,[dblTarePerQty]
+			,[strWarrantNo]
+			,[intWarrantStatus]
 	)
 	SELECT	[intLotId]					= TargetLot.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -262,6 +270,15 @@ BEGIN
 			,[strCertificateId]			= SourceLot.strCertificateId
 			,[strTrackingNumber]		= SourceLot.strTrackingNumber 
 			,[intSeasonCropYear]		= SourceLot.intSeasonCropYear
+			,intContractHeaderId		= SourceLot.intContractHeaderId
+			,intContractDetailId		= SourceLot.intContractDetailId
+			,ysnWeighed					= SourceLot.ysnWeighed
+			,strSealNo					= SourceLot.strSealNo
+			,[dblTare]					= SourceLot.dblTare
+			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+			,[strWarrantNo]				= SourceLot.strWarrantNo
+			,[intWarrantStatus]			= SourceLot.intWarrantStatus
+
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation

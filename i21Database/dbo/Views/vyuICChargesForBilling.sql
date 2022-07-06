@@ -88,6 +88,23 @@ SELECT
 	,intLoadShipmentCostId						= ReceiptCharge.intLoadShipmentCostId
 	,ReceiptCharge.ysnAllowVoucher
 	,ReceiptCharge.strCostMethod
+	,Receipt.intBookId
+	,Receipt.intSubBookId
+	/*Payment Info*/
+	, [intPayFromBankAccountId]		= Receipt.intBankAccountId
+	, [strFinancingSourcedFrom] 	= 'Inventory Receipt'
+	, [strFinancingTransactionNumber] = Receipt.strReceiptNumber 
+	/*Trade Finance Info*/
+	, [strFinanceTradeNo]			= Receipt.strTradeFinanceNumber
+	, [intBankId]					= Receipt.intBankId 
+	, [intBankAccountId]			= Receipt.intBankAccountId 
+	, [intBorrowingFacilityId]		= Receipt.intBorrowingFacilityId
+	, [strBankReferenceNo]			= Receipt.strBankReferenceNo
+	, [intBorrowingFacilityLimitId]	= Receipt.intLimitTypeId
+	, [intBorrowingFacilityLimitDetailId] = Receipt.intSublimitTypeId
+	, [strReferenceNo]					= Receipt.strReferenceNo
+	, [intBankValuationRuleId]			= Receipt.intOverrideFacilityValuation
+	, [strComments]						= Receipt.strComments
 FROM 
 	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -270,6 +287,23 @@ SELECT
 	,[intLoadShipmentCostId]					= ReceiptCharge.intLoadShipmentCostId
 	,ReceiptCharge.ysnAllowVoucher
 	,ReceiptCharge.strCostMethod
+	,Receipt.intBookId
+	,Receipt.intSubBookId
+	/*Payment Info*/
+	, [intPayFromBankAccountId]		= Receipt.intBankAccountId
+	, [strFinancingSourcedFrom] 	= 'Inventory Receipt'
+	, [strFinancingTransactionNumber] = Receipt.strReceiptNumber 
+	/*Trade Finance Info*/
+	, [strFinanceTradeNo]			= Receipt.strTradeFinanceNumber
+	, [intBankId]					= Receipt.intBankId 
+	, [intBankAccountId]			= Receipt.intBankAccountId 
+	, [intBorrowingFacilityId]		= Receipt.intBorrowingFacilityId
+	, [strBankReferenceNo]			= Receipt.strBankReferenceNo
+	, [intBorrowingFacilityLimitId]	= Receipt.intLimitTypeId
+	, [intBorrowingFacilityLimitDetailId] = Receipt.intSublimitTypeId
+	, [strReferenceNo]					= Receipt.strBankReferenceNo
+	, [intBankValuationRuleId]			= Receipt.intOverrideFacilityValuation
+	, [strComments]						= Receipt.strComments
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 

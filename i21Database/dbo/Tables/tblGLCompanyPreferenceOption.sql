@@ -10,6 +10,15 @@
 	[intDefaultVisibleOldAccountSystemId] INT NULL,
 	[intDBVersion] INT NULL,
 	[ysnHistoricalJournalImported] BIT NULL,
+	[ysnShowAccountingPeriod] BIT NULL,
+	[ysnRequireLocation] BIT NULL,
+	[strSubsidiaryCompanyJson] NVARCHAR(MAX),
+	/*Override RE Settings*/
+	[ysnREOverride] BIT NULL,
+	[ysnREOverrideLocation] BIT NULL,
+	[ysnREOverrideLOB] BIT NULL,
+	[ysnREOverrideCompany] BIT NULL,
+	[strOverrideREArray] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO

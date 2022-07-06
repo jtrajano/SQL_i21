@@ -61,6 +61,8 @@ INSERT INTO tblGLPostRecap (
 		,[strTransactionForm]
 		,[strModuleName]
 		,[strRateType]
+		,strOverrideAccountError
+		,strNewAccountIdOverride
 		,[intConcurrencyId]
 )
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
@@ -103,12 +105,15 @@ SELECT	[dtmDate]
 		,[strTransactionForm]
 		,[strModuleName]
 		,[strRateType] =  Rate.strCurrencyExchangeRateType
+		,strOverrideAccountError
+		,strNewAccountIdOverride
 		,[intConcurrencyId] = 1
-FROM	@RecapTable udtRecap INNER JOIN tblGLAccount gl
+FROM	@RecapTable udtRecap LEFT JOIN tblGLAccount gl
 			ON udtRecap.intAccountId = gl.intAccountId
 		LEFT JOIN tblSMCurrencyExchangeRateType Rate on udtRecap.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
-		INNER JOIN tblGLAccountGroup gg
+		LEFT JOIN tblGLAccountGroup gg
 			ON gg.intAccountGroupId = gl.intAccountGroupId
+
 
 
 _Exit: 

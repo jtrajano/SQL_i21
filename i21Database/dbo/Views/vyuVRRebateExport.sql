@@ -6,6 +6,7 @@ SELECT
 	, vendorSetup.strCompany1Id
 	, vendorSetup.strCompany2Id
 	, invoice.dtmShipDate
+	, invoice.dtmDate dtmInvoiceDate
 	, invoice.strBOLNumber
 	, vendorXRef.strVendorProduct
 	, rebate.dblQuantity
@@ -20,11 +21,20 @@ SELECT
 	, vendorSetup.intVendorSetupId
 	, invoice.intInvoiceId
 	, uom.strUnitMeasure
+	, program.strVendorProgram
 	, program.strProgramDescription
 	, customerXref.strVendorCustomer
 	, rebate.intConcurrencyId
 	, invoiceDetail.intInvoiceDetailId
 	, strVendorName = vendorEntity.strName
+	, customer.strCustomerNumber
+	, customerEntity.strName strCustomerName
+	, rebate.dblRebateRate
+	, vendorSetup.strMarketerAccountNo
+	, vendorSetup.strMarketerEmail
+	, vendorSetup.strDataFileTemplate
+	, vendorSetup.strExportFilePath
+	, rebate.strSubmitted
 FROM tblVRRebate rebate
 INNER JOIN tblARInvoiceDetail invoiceDetail ON invoiceDetail.intInvoiceDetailId = rebate.intInvoiceDetailId
 INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId

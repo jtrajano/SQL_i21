@@ -34,6 +34,7 @@ BEGIN
 		AND S.intSampleStatusId = 3
 		AND S.intProductTypeId = @intProductTypeId
 		AND S.intProductValueId = @intProductValueId
+		AND S.intTypeId = 1
 
 	IF @intSampleId IS NULL
 		SELECT 0 AS intSampleId

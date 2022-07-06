@@ -49,3 +49,6 @@ GO
 IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE NAME = 'uspICReverseInventoryReceipt')
 	EXEC('DROP PROCEDURE uspICReverseInventoryReceipt')
 GO
+IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE NAME = 'uspICCreatePOInventoryTransaction')
+	EXEC('DROP PROCEDURE uspICCreatePOInventoryTransaction') 
+GO

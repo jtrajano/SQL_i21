@@ -12,12 +12,16 @@
     [strWebsite]            NVARCHAR (125) COLLATE Latin1_General_CI_AS NULL,
     [strEmail]              NVARCHAR (225) COLLATE Latin1_General_CI_AS NULL,
     [strRTN]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strIBAN]				VARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
+	[strSwiftCode]			VARCHAR (11) COLLATE Latin1_General_CI_AS NULL,
+	[strBICCode]			VARCHAR (8) COLLATE Latin1_General_CI_AS NULL,
     [intCreatedUserId]      INT            NULL,
     [dtmCreated]            DATETIME       NULL,
     [intLastModifiedUserId] INT            NULL,
     [dtmLastModified]       DATETIME       NULL,
 	[ysnDelete]				BIT            NULL,
 	[dtmDateDeleted]		DATETIME	   NULL,
+	[ysnInternational]		BIT			   NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([intBankId] ASC)
 );
@@ -50,12 +54,16 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 				   ,[strWebsite]
 				   ,[strEmail]
 				   ,[strRTN]
+				   ,[strIBAN]
+				   ,[strSwiftCode]
+				   ,[strBICCode]
 				   ,[intCreatedUserId]
 				   ,[dtmCreated]
 				   ,[intLastModifiedUserId]
 				   ,[dtmLastModified]
 				   ,[ysnDelete]
 				   ,[dtmDateDeleted]
+				   ,[ysnInternational]
 				   ,[intConcurrencyId]
 				)
 				OUTPUT 	inserted.intBankId
@@ -71,12 +79,16 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 						,[strWebsite]			= i.strWebsite
 						,[strEmail]				= i.strEmail
 						,[strRTN]               = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+						,[strIBAN]				= i.strIBAN	
+				   		,[strSwiftCode]			= i.strSwiftCode
+				   		,[strBICCode]			= i.strBICCode
 						,[intCreatedUserId]		= i.intCreatedUserId
 						,[dtmCreated]			= i.dtmCreated
 						,[intLastModifiedUserId]= i.intLastModifiedUserId
 						,[dtmLastModified]		= i.dtmLastModified
 						,[ysnDelete]			= i.ysnDelete
 						,[dtmDateDeleted]		= i.dtmDateDeleted
+						,[ysnInternational]		= i.ysnInternational
 						,[intConcurrencyId]		= i.intConcurrencyId
 				FROM	inserted i
 
@@ -102,25 +114,29 @@ BEGIN
 	-- WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
     UPDATE tblCMBank SET
-    strBankName           = i.strBankName
-    ,strContact              = i.strContact
-    ,strAddress              = i.strAddress
-    ,strZipCode              = i.strZipCode
-    ,strCity              = i.strCity
-    ,strState              = i.strState
-    ,strCountry              = i.strCountry
-    ,strPhone              = i.strPhone
-    ,strFax                  = i.strFax
-    ,strWebsite              = i.strWebsite
-    ,strEmail              = i.strEmail
-    ,strRTN                  = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
-    ,intCreatedUserId      = i.intCreatedUserId
-    ,dtmCreated              = i.dtmCreated
-    ,intLastModifiedUserId= i.intLastModifiedUserId
-    ,dtmLastModified      = i.dtmLastModified
+    strBankName           	= i.strBankName
+    ,strContact             = i.strContact
+    ,strAddress             = i.strAddress
+    ,strZipCode             = i.strZipCode
+    ,strCity              	= i.strCity
+    ,strState              	= i.strState
+    ,strCountry             = i.strCountry
+    ,strPhone              	= i.strPhone
+    ,strFax                 = i.strFax
+    ,strWebsite             = i.strWebsite
+    ,strEmail              	= i.strEmail
+    ,strRTN                 = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+	,[strIBAN]				= i.strIBAN	
+	,[strSwiftCode]			= i.strSwiftCode
+	,[strBICCode]			= i.strBICCode
+    ,intCreatedUserId      	= i.intCreatedUserId
+    ,dtmCreated             = i.dtmCreated
+    ,intLastModifiedUserId	= i.intLastModifiedUserId
+    ,dtmLastModified      	= i.dtmLastModified
     ,ysnDelete              = i.ysnDelete
-    ,dtmDateDeleted          = i.dtmDateDeleted
-    ,intConcurrencyId      = i.intConcurrencyId
+    ,dtmDateDeleted         = i.dtmDateDeleted
+	,ysnInternational		= i.ysnInternational
+    ,intConcurrencyId      	= i.intConcurrencyId
     FROM inserted i
     WHERE tblCMBank.intBankId = i.intBankId
 
@@ -136,6 +152,7 @@ BEGIN
     ,strWebsite = i.strWebsite
     ,strEmail   = i.strEmail
 	,strRTN     = CASE WHEN LEN(i.strRTN) > 300  THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+	
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 

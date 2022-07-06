@@ -8,13 +8,9 @@ A.intLineNo,
 A.strTaskId,  
 ysnError = case when strError is null then cast(0 as bit) else cast(1 as bit) end ,  
 A.strError,
--- case when strError is null and  BS.intBankStatementImportId is not null and T.intBankStatementImportId is null and TX.strTransactionId is null then  'Imported' 
--- when strError is null and  BS.intBankStatementImportId is not null and T.intBankStatementImportId is not null and TX.strTransactionId is null then  'Task Created'
--- when strError is null and  BS.intBankStatementImportId is not null and T.intBankStatementImportId is not null and TX.strTransactionId is not null and isnull(TX.ysnPosted,0) = 0 then  'Task and Transaction created'
--- when strError is null and  BS.intBankStatementImportId is not null and T.intBankStatementImportId is not null and TX.strTransactionId is not null and isnull(TX.ysnPosted,0) = 1 then  'Task created and Transaction posted'
--- else A.strError
--- end,
-BS.strBankDescription  
+BS.strBankDescription,
+ysnMatched = CASE WHEN ISNULL(BS.intImportStatus,0) = 1 THEN 1 ELSE 0 END,
+strTransactionMatched = ''
 from tblCMBankStatementImportLogDetail A join tblCMBankStatementImportLog B on B.intImportBankStatementLogId = A.intImportBankStatementLogId  
 left join  
 tblCMBankStatementImport BS on BS.intBankStatementImportId = A.intBankStatementImportId

@@ -7,8 +7,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCP
 	DROP VIEW vyuCPGABusinessSummary
 GO
 -- GRAINS DEPENDENT
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBName = db_name()	) = 1 and
-	(SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1 and
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'GR'	) = 1 and
+	(SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'EC') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gastlmst') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gacommst') = 1
 	EXEC ('
@@ -68,7 +68,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 				  WHEN (ISNULL(a.gastl_rec_type, '''') = ''J'' and isnumeric(a.gastl_adj_ckoff_amt) <> 0 and ISNULL(b.gacom_ckoff_desc, '''') = '''') THEN ''CKOFF=''+convert(varchar,a.gastl_adj_ckoff_amt)
 			else ''''
 			END AS recType, a.A4GLIdentity
-			FROM gastlmst a, gacommst b where b.gacom_com_cd = a.gastl_com_cd and a.gastl_pur_sls_ind = ''P''
+			FROM gastlmst a inner join gacommst b on b.gacom_com_cd = a.gastl_com_cd where a.gastl_pur_sls_ind = ''P''
 		),
 		GAS4
 		as
@@ -92,7 +92,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 				  WHEN ISNULL(a.gastl_rec_type, '''') = ''7'' THEN (select top 1 isnull(e.ecctl_ga_stor_desc_7, '''') from ecctlmst e)
 				  WHEN ISNULL(a.gastl_rec_type, '''') = ''8'' THEN (select top 1 isnull(e.ecctl_ga_stor_desc_8, '''') from ecctlmst e)
 			END AS recType, a.A4GLIdentity
-			FROM gastlmst a, gacommst b where b.gacom_com_cd = a.gastl_com_cd and a.gastl_pur_sls_ind = ''P''
+			FROM gastlmst a inner join gacommst b on b.gacom_com_cd = a.gastl_com_cd where a.gastl_pur_sls_ind = ''P''
 		)
 		select
 			a.A4GLIdentity
@@ -170,7 +170,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 			,Chk_Ins = (SELECT TOP 1 chkIns FROM GAS2 where A4GLIdentity = a.A4GLIdentity)
 		from
 			gastlmst a
-			,gacommst b
+			inner join gacommst b on 1=1
 		where
 			(a.gastl_pur_sls_ind = ''P'')
 			and (a.gastl_com_cd = b.gacom_com_cd)

@@ -29,16 +29,26 @@ WHERE intBankAccountId = @intBankAccountId
 
 IF @@ERROR <> 0	GOTO uspCMUnreconcileBankRecords_Rollback		
 
+DECLARE @Id Id
 
--- Mark all CM transactions as cleared.
-UPDATE	[dbo].[tblCMBankTransaction]
-SET		dtmDateReconciled = NULL
+INSERT INTO @Id
+SELECT intTransactionId FROM tblCMBankTransaction
 WHERE	intBankAccountId = @intBankAccountId
 		AND ysnPosted = 1
 		AND ysnClr = 1
 		AND dtmDateReconciled =@dtmDate
 		AND dbo.fnIsDepositEntry(strLink) = 0
 IF @@ERROR <> 0	GOTO uspCMUnreconcileBankRecords_Rollback
+
+UPDATE t
+SET dtmDateReconciled = NULL
+FROM  tblCMBankTransaction t 
+JOIN @Id i on i.intId = t.intTransactionId
+
+UPDATE t
+SET dtmDateReconciled = NULL
+FROM  tblCMABRActivityMatched t
+JOIN @Id i on i.intId = t.intTransactionId
 		
 --=====================================================================================================================================
 -- 	EXIT ROUTINES

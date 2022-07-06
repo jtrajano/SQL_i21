@@ -24,12 +24,12 @@
 	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
 	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
-	[dblDebitForeign]			NUMERIC (18, 9) NULL,
-	[dblDebitReport]			NUMERIC (18, 9) NULL,
-	[dblCreditForeign]			NUMERIC (18, 9) NULL,
-	[dblCreditReport]			NUMERIC (18, 9) NULL,
-	[dblReportingRate]			NUMERIC (18, 9) NULL,
-	[dblForeignRate]			NUMERIC (18, 9) NULL,
+	[dblDebitForeign]			NUMERIC (18, 6) NULL,
+	[dblDebitReport]			NUMERIC (18, 6) NULL,
+	[dblCreditForeign]			NUMERIC (18, 6) NULL,
+	[dblCreditReport]			NUMERIC (18, 6) NULL,
+	[dblReportingRate]			NUMERIC (18, 6) NULL,
+	[dblForeignRate]			NUMERIC (18, 6) NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
 	[strRateType]			    NVARCHAR(50)	COLLATE Latin1_General_CI_AS,
 	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
@@ -42,7 +42,16 @@
 	[dblSourceUnitCredit]		NUMERIC (18, 6)  NULL,
 	[intCommodityId]			INT NULL,
 	intSourceEntityId INT NULL,
-	ysnRebuild BIT NULL
+	ysnRebuild BIT NULL,
 	-- new columns GL-3550
+
+	--strModuleCode nvarchar(5) Collate Latin1_General_CI_AS,
+    intAccountIdOverride INT NULL,
+    intLocationSegmentOverrideId INT NULL,
+    intLOBSegmentOverrideId INT NULL,
+    intCompanySegmentOverrideId INT NULL,
+    strNewAccountIdOverride NVARCHAR(40) Collate Latin1_General_CI_AS NULL,
+    intNewAccountIdOverride INT NULL,
+    strOverrideAccountError NVARCHAR(800) Collate Latin1_General_CI_AS NULL
 )
 

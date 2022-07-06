@@ -183,7 +183,8 @@ AND RIGHT(RTRIM(strCommodityAttributeId),1) = ','
 GO
 
 --- Cleaned up/delete the account ids in the GL Account Set up of Risk Management for 18.1 Customer  RM-1312
-IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
+-- UPDATED CHECKING OF VERSION - Will force version to 22.1 if strVersionNo is blank due to changes in SM-5355
+IF EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CASE WHEN ISNULL(strVersionNo,'') <> '' THEN CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) ELSE 22.1 END FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion <= 18.1)
 BEGIN 
 	UPDATE tblRKCompanyPreference
 	SET intUnrealizedGainOnBasisId = NULL
@@ -373,7 +374,7 @@ END
 
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MInquiryBasisDetail' AND COLUMN_NAME = 'intM2MBasisDetailId')
 BEGIN
-	UPDATE tblRKM2MInquiryBasisDetail
+	UPDATE tblRKM2MInquiryBasisDetail 
 	SET intM2MBasisDetailId  = tblPatch.intM2MBasisDetailId
 	FROM (
 		SELECT ibd.intM2MInquiryBasisDetailId
@@ -401,6 +402,64 @@ BEGIN
 	WHERE dtmFutureMonthsDate <> CONVERT(DATE,'01 ' + strFutureMonth)
 
 END
+
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKMatchFuturesPSHeader' AND COLUMN_NAME = 'strMatchingType')
+BEGIN
+	UPDATE tblRKMatchFuturesPSHeader set strMatchingType = 'Manual' WHERE strMatchingType IS NULL
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKOptionsMatchPnS' AND COLUMN_NAME = 'strMatchingType')
+BEGIN
+	UPDATE tblRKOptionsMatchPnS set strMatchingType = 'Manual' WHERE strMatchingType IS NULL
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKFutOptTransaction' AND COLUMN_NAME = 'ysnCommissionExempt')
+AND NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for Derivatives Commission Exempt')
+BEGIN
+	UPDATE tblRKFutOptTransaction SET ysnCommissionExempt = 1 ,dblCommission = NULL
+
+	INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Derivatives Commission Exempt','1')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnEvaluationByLocation')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnEvaluationByLocation IS NULL AND ysnEvaluationByMarketZone IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnEvaluationByLocation = CASE WHEN strEvaluationByZone = 'Location' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			,  ysnEvaluationByMarketZone = CASE WHEN strEvaluationByZone = 'Market Zone' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	END
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnEnableAllocatedContractsGainOrLoss')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnEnableAllocatedContractsGainOrLoss IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnEnableAllocatedContractsGainOrLoss = 0
+	END
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'strTransactionShouldBeRelieved')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE strTransactionShouldBeRelieved IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET strTransactionShouldBeRelieved = 'Final Invoiced'
+	END
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnDropUninvoicedPurchaseAndInvoicedSales')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnDropUninvoicedPurchaseAndInvoicedSales IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnDropUninvoicedPurchaseAndInvoicedSales = 1
+	END
+END
+
+
 
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

@@ -15,6 +15,7 @@
     [dblTicketCost]          NUMERIC (18, 6) NULL,
     [dblTotalInventoryValue] NUMERIC (18, 6) NULL,
     [dblTotalInventoryCost]  NUMERIC (18, 6) NULL,
+    [intItemUOMId]  INT             NULL,
     [intConcurrencyId]       INT              NOT NULL,
     CONSTRAINT [PK_tblSTLotteryBook] PRIMARY KEY CLUSTERED ([intLotteryBookId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblSTLotteryBook_tblSTLotteryGame] FOREIGN KEY ([intLotteryGameId]) REFERENCES [dbo].[tblSTLotteryGame] ([intLotteryGameId]),

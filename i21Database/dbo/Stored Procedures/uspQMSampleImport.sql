@@ -303,6 +303,7 @@ BEGIN TRY
 				JOIN tblQMSampleImportSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 				WHERE S.intContractDetailId = @intCContractDetailId
 					AND S.intSampleStatusId = 3 -- Approved
+					AND S.intTypeId = 1
 				ORDER BY S.intSampleId DESC
 
 				-- Sequence existing sample

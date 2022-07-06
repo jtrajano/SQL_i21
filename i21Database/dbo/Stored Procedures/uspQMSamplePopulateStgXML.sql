@@ -58,7 +58,7 @@ BEGIN TRY
 	SELECT TOP 1 @intLogId = intLogId
 	FROM tblSMLog
 	WHERE intTransactionId = @intTransactionId
-	ORDER BY 1 DESC
+	ORDER BY intLogId DESC
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intSampleId)

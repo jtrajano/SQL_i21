@@ -62,18 +62,43 @@ Type the overview for the table here.
 		[intBookId] INT NULL, 
 		[intSubBookId] INT NULL, 
 		[dblSubTotal] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+
+		[strTradeFinanceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intBankId] INT NULL,
+		[intBankAccountId] INT NULL,
+		[intBorrowingFacilityId] INT NULL,
+		[strBankReferenceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+		[intLimitTypeId] INT NULL,
+		[intSublimitTypeId] INT NULL,
+		[ysnSubmittedToBank] BIT NULL, 
+		[dtmDateSubmitted] DATETIME NULL,
+		[strApprovalStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
+		[dtmDateApproved] DATETIME NULL,
+		[strWarrantNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+		[intWarrantStatus] INT NULL,
+		[strReferenceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+		[intOverrideFacilityValuation] INT NULL,
+		[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,	
+
 		[dblGrandTotal] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalGross] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalTare] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalLotTare] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalNet] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalTax] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dblTotalCharges] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblTotalLotQty] NUMERIC(38, 15) NOT NULL DEFAULT(0),
+		[dblAvgTarePerQty] NUMERIC(38, 15) NOT NULL DEFAULT(0),
 		[dtmLastCalculateTotals] DATETIME NULL,
 		[dtmDateCreated] DATETIME NULL,
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
 		[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-		guiApiUniqueId UNIQUEIDENTIFIER NULL,
+		[strRemarks] NVARCHAR(2000) COLLATE Latin1_General_CI_AS NULL,
+		[dtmLastCargoInsuranceDate] [datetime] NULL,
+
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICInventoryReceipt] PRIMARY KEY ([intInventoryReceiptId]), 
 		CONSTRAINT [AK_tblICInventoryReceipt_strReceiptNumber] UNIQUE ([strReceiptNumber]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
@@ -84,7 +109,10 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceipt_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]), 
-		CONSTRAINT [FK_tblICInventoryReceipt_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId])
+		CONSTRAINT [FK_tblICInventoryReceipt_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]),
+		CONSTRAINT [FK_tblICInventoryReceipt_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank] ([intBankId]),
+		CONSTRAINT [FK_tblICInventoryReceipt_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId]),
+		CONSTRAINT [FK_tblICInventoryReceipt_tblCMBorrowingFacility_intBorrowingFacilityId] FOREIGN KEY ([intBorrowingFacilityId]) REFERENCES [tblCMBorrowingFacility] ([intBorrowingFacilityId])
 	)
 	GO
 
@@ -97,6 +125,12 @@ Type the overview for the table here.
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceipt_strReceiptNumber]
 		ON [dbo].[tblICInventoryReceipt]([strReceiptNumber] ASC)
 		INCLUDE (intInventoryReceiptId, intEntityVendorId, strBillOfLading)
+
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceipt_strDataSource]
+		ON [dbo].[tblICInventoryReceipt]([strDataSource] ASC)
+		INCLUDE (ysnPosted, strReceiptNumber)
 
 	GO
 

@@ -67,7 +67,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Parent Lot'
 	END
 
@@ -94,7 +94,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No'
 	END
 
@@ -126,7 +126,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	END
 
@@ -152,7 +152,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Container'
 	END
 
@@ -178,7 +178,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Work Order'
 	END
 
@@ -206,7 +206,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Item & Parent Lot'
 	END
 
@@ -219,6 +219,7 @@ BEGIN
 		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMControlPoint C ON C.intControlPointId = ST.intControlPointId
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
 			AND EXISTS (
 				SELECT *
@@ -235,6 +236,7 @@ BEGIN
 		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		JOIN tblQMControlPoint C ON C.intControlPointId = ST.intControlPointId
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
 			AND EXISTS (
 				SELECT *
@@ -287,7 +289,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No'
 	END
 
@@ -319,7 +321,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	END
 
@@ -345,7 +347,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Container'
 	END
 
@@ -371,7 +373,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Work Order'
 	END
 
@@ -398,7 +400,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Item & Parent Lot'
 	END
 
@@ -409,6 +411,7 @@ BEGIN
 		JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId
 			AND SU.intUserRoleID = @intUserRoleID
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L
@@ -422,6 +425,7 @@ BEGIN
 		SELECT @strSampleId = COALESCE(@strSampleId + '|^|', '') + CONVERT(NVARCHAR, S.intSampleId)
 		FROM tblQMSample S
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intTypeId = 1
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L
@@ -441,6 +445,7 @@ BEGIN
 			AND SU.intUserRoleID = @intUserRoleID
 		WHERE S.intProductTypeId = @intProductTypeId
 			AND S.intProductValueId = @intProductValueId
+			AND S.intTypeId = 1
 		ORDER BY S.intSampleId DESC
 	END
 	ELSE
@@ -449,6 +454,7 @@ BEGIN
 		FROM tblQMSample S
 		WHERE S.intProductTypeId = @intProductTypeId
 			AND S.intProductValueId = @intProductValueId
+			AND S.intTypeId = 1
 		ORDER BY S.intSampleId DESC
 	END
 END

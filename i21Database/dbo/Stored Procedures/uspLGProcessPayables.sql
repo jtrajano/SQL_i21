@@ -7,10 +7,28 @@ AS
 BEGIN
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+	DECLARE @voucherPayableTax AS VoucherDetailTax
+	DECLARE @intTaxGroupId INT
 
 	IF (@intLoadId IS NOT NULL)
 	BEGIN
 		EXEC uspLGRecalculateLoadCosts @intLoadId, @intEntityUserSecurityId
+
+		-- Get tax group
+		SELECT TOP 1
+			@intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
+				LD.intVendorEntityId	-- @VendorId
+				,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
+				,NULL				--,@ItemId
+				,EL.intEntityLocationId		--,@VendorLocationId
+				,3--L.intFreightTermId	--,@FreightTermId
+			)
+		FROM tblLGLoad L
+		INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
+		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1	
+		WHERE L.intLoadId = @intLoadId
 
 		INSERT INTO @voucherPayable(
 			[intEntityVendorId]
@@ -56,7 +74,10 @@ BEGIN
 			,[ysnReturn]
 			,[ysnStage]
 			,[intStorageLocationId]
-			,[intSubLocationId])
+			,[intSubLocationId]
+			,[dblOptionalityPremium]
+			,[dblQualityPremium]
+			,[intPurchaseTaxGroupId])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -115,6 +136,9 @@ BEGIN
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
+			,[dblOptionalityPremium] = ISNULL(LD.dblOptionalityPremium, 0)
+			,[dblQualityPremium] = ISNULL(LD.dblQualityPremium, 0)
+			,[intPurchaseTaxGroupId] = @intTaxGroupId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -200,6 +224,9 @@ BEGIN
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = NULL
 			,[intSubLocationId] = NULL
+			,[dblOptionalityPremium] = 0
+			,[dblQualityPremium] = 0
+			,[intPurchaseTaxGroupId] = NULL
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
@@ -231,12 +258,153 @@ BEGIN
 					(SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
 					WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1)
 				AND NOT (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL)
+		
+		-- Assemble Item Taxes
+		BEGIN
+			INSERT INTO @voucherPayableTax (
+				[intVoucherPayableId]
+				,[intTaxGroupId]				
+				,[intTaxCodeId]				
+				,[intTaxClassId]				
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[intAccountId]				
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[ysnTaxAdjusted]			
+				,[ysnSeparateOnBill]			
+				,[ysnCheckOffTax]		
+				,[ysnTaxExempt]	
+				,[ysnTaxOnly]
+			)
+			SELECT 
+				[intVoucherPayableId]			= payables.intVoucherPayableId
+				,[intTaxGroupId]				= @intTaxGroupId
+				,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
+				,[intTaxClassId]				= vendorTax.[intTaxClassId]
+				,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]
+				,[strCalculationMethod]			= vendorTax.[strCalculationMethod]
+				,[dblRate]						= vendorTax.[dblRate]
+				,[intAccountId]					= vendorTax.[intTaxAccountId]
+				,[dblTax]						=	CASE 
+														WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN 
+															vendorTax.[dblTax] 
+														ELSE 
+															CASE 
+																WHEN payables.dblExchangeRate <> 0 THEN 
+																	ROUND(
+																		dbo.fnDivide(
+																			-- Convert the tax to the transaction currency. 
+																			vendorTax.[dblTax] 
+																			, payables.dblExchangeRate
+																		)
+																	, 2) 
+																ELSE 
+																	vendorTax.[dblTax] 
+															END 
+													END 
+				,[dblAdjustedTax]				= 
+													CASE 
+														WHEN vendorTax.[ysnTaxAdjusted] = 1 THEN 
+															vendorTax.[dblAdjustedTax]
+														WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN 
+															vendorTax.[dblTax] 
+														ELSE 
+															CASE 
+																WHEN payables.dblExchangeRate <> 0 THEN 
+																	ROUND(
+																		dbo.fnDivide(
+																			-- Convert the tax to the transaction currency. 
+																			vendorTax.[dblTax] 
+																			, payables.dblExchangeRate
+																		)
+																	, 2) 
+																ELSE 
+																	vendorTax.[dblTax] 
+															END 
+													END
+				,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
+				,[ysnSeparateOnBill]			= vendorTax.[ysnSeparateOnInvoice]
+				,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
+				,[ysnTaxExempt]					= vendorTax.[ysnTaxExempt]
+				,[ysnTaxOnly]					= 0
+			FROM @voucherPayable payables
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = payables.intLoadShipmentDetailId
+			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND payables.intLoadShipmentId = L.intLoadId
+			INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+			INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
+			INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1
+			INNER JOIN tblICItem I ON I.intItemId = LD.intItemId
+			OUTER APPLY [dbo].[fnGetItemTaxComputationForVendor](
+					payables.intItemId,
+					payables.intEntityVendorId,
+					GETDATE(),
+					-- Cost
+					CASE WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN
+						dbo.fnCalculateCostBetweenUOM(
+							COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
+							, payables.intWeightUOMId
+							, CASE WHEN payables.ysnSubCurrency = 1 AND ISNULL(payables.intSubCurrencyCents, 0) <> 0 THEN 
+									dbo.fnDivide(payables.dblCost, payables.intSubCurrencyCents) 
+								ELSE
+									payables.dblCost
+							END
+						)
+					ELSE 
+						dbo.fnCalculateCostBetweenUOM(
+							COALESCE(payables.intCostUOMId, payables.intOrderUOMId)
+							, LD.intItemUOMId
+							, CASE WHEN payables.ysnSubCurrency = 1 AND ISNULL(payables.intSubCurrencyCents, 0) <> 0 THEN 
+									dbo.fnDivide(payables.dblCost, payables.intSubCurrencyCents) 
+								ELSE
+									payables.dblCost
+							END
+						)
+					END,
+					-- Qty
+					CASE
+						WHEN payables.intWeightUOMId IS NOT NULL AND I.intComputeItemTotalOption = 0 THEN 
+							payables.dblNetWeight
+						ELSE 
+							payables.dblOrderQty 
+					END,
+					@intTaxGroupId,
+					CL.intCompanyLocationId,
+					EL.intEntityLocationId,
+					1,
+					0,
+					L.intFreightTermId,
+					0,
+					ISNULL(payables.intWeightUOMId, payables.intOrderUOMId),
+					NULL,
+					NULL,
+					NULL
+				) vendorTax
+			WHERE vendorTax.intTaxGroupId IS NOT NULL
+		END
 
 	END
 
 	IF (@ysnPost = 1)
 	BEGIN
-		EXEC uspAPUpdateVoucherPayableQty @voucherPayable, DEFAULT, 1
+		--UPDATE THE TAX FOR VOUCHER PAYABLE
+		UPDATE A
+			SET A.dblTax = ISNULL(generatedTax.dblTax, A.dblTax)
+		FROM @voucherPayable A
+		OUTER APPLY 
+		(
+			SELECT 
+				SUM(C.dblTax) dblTax, C.intTaxGroupId 
+			FROM @voucherPayableTax C
+			WHERE A.intVoucherPayableId = C.intVoucherPayableId
+			GROUP BY C.intTaxGroupId
+		) generatedTax
+
+		-- Post Voucher Payables
+		EXEC uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax, 1
 	END
 	ELSE
 	BEGIN

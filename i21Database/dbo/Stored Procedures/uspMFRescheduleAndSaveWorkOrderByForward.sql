@@ -1946,7 +1946,7 @@ BEGIN TRY
 		SELECT S.intScheduleId
 			,intScheduleRuleId
 		FROM @tblMFScheduleConstraint
-			,dbo.tblMFSchedule S
+			inner join dbo.tblMFSchedule S on 1=1
 		WHERE S.ysnStandard = 1
 	END
 

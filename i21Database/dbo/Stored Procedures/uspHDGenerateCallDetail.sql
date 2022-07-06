@@ -21,11 +21,10 @@ with closedCalls as
 		,intClosedCalls = count(a.intTicketId)
 	from
 		tblHDTicket a
-		,tblEMEntity b
+		inner join tblEMEntity b on b.intEntityId = a.intAssignedToEntity
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
-		and b.intEntityId = a.intAssignedToEntity
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.intTicketStatusId = (select top 1 intTicketStatusId from tblHDTicketStatus where strStatus = 'Closed')
 	group by
@@ -40,11 +39,10 @@ openCalls as
 		,intOpenCalls = count(a.intTicketId)
 	from
 		tblHDTicket a
-		,tblEMEntity b
+		inner join tblEMEntity b on b.intEntityId = a.intAssignedToEntity
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
-		and b.intEntityId = a.intAssignedToEntity
 		--and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.intTicketStatusId <> (select top 1 intTicketStatusId from tblHDTicketStatus where strStatus = 'Closed')
 	group by
@@ -59,11 +57,10 @@ totalCalls as
 		,intTotalCalls = count(a.intTicketId)
 	from
 		tblHDTicket a
-		,tblEMEntity b
+		inner join tblEMEntity b on b.intEntityId = a.intAssignedToEntity
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
-		and b.intEntityId = a.intAssignedToEntity
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 	group by
 		b.intEntityId
@@ -77,16 +74,15 @@ reopenCalls as
 		,intReopenCalls = count(c.strNewValue)
 	from
 		tblHDTicket a
-		,tblEMEntity b
-		,tblHDTicketHistory c
-		,tblHDTicketStatus d
+		inner join tblEMEntity b on b.intEntityId = a.intAssignedToEntity
+		inner join tblHDTicketHistory c on c.intTicketId = a.intTicketId 
+		inner join tblHDTicketStatus d on 1=1
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
-		and b.intEntityId = a.intAssignedToEntity
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and d.strStatus = 'Reopen'
-		and c.intTicketId = a.intTicketId and c.strField = 'intTicketStatusId' and convert(int,c.strNewValue) = d.intTicketStatusId
+		and c.strField = 'intTicketStatusId' and convert(int,c.strNewValue) = d.intTicketStatusId
 	group by
 		b.intEntityId
 		,b.strName
@@ -99,15 +95,14 @@ billedhours as
 		,dblTotalBillableAmount = sum(isnull((case when c.strServiceType = 'Expense' then 0.00 else b.intHours end),0.00)*isnull(b.dblRate,0.00))
 	from
 		tblHDTicket a
-		,tblHDTicketHoursWorked b
-		,tblICItem c
+		inner join tblHDTicketHoursWorked b on b.intTicketId = a.intTicketId
+		inner join tblICItem c on c.intItemId = b.intItemId
 	where
 		b.intAgentEntityId is not null
 		and a.strType = 'HD'
 		and convert(int, convert(nvarchar(8), b.dtmDate, 112)) between @DateFrom and @DateTo
-		and b.intTicketId = a.intTicketId
 		and b.ysnBillable = convert(bit,1)
-		and c.intItemId = b.intItemId
+
 	group by
 		b.intAgentEntityId
 ),
@@ -136,7 +131,8 @@ daysoutstanding as
 		intEntityId = a.intAssignedToEntity
 		,intDaysOutstanding = convert(numeric(18,6),datediff(hour,a.dtmCreated,a.dtmCompleted)) / convert(numeric(18,6),24.000000)
 	from
-		tblHDTicket a, tblHDTicketStatus b
+		tblHDTicket a
+		inner join tblHDTicketStatus b on a.intTicketStatusId = b.intTicketStatusId
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
@@ -144,7 +140,6 @@ daysoutstanding as
 		and a.dtmCreated is not null
 		and a.dtmCompleted is not null
 		and b.strStatus = 'Closed'
-		and a.intTicketStatusId = b.intTicketStatusId
 		--and a.dtmCompleted = (select max(b.dtmCompleted) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
 	)as rawResult
 	group by intEntityId
@@ -170,14 +165,14 @@ daysopen as
 		intEntityId = a.intAssignedToEntity
 		,intDaysOpen = convert(numeric(18,6),datediff(hour,a.dtmCreated,getdate())) / convert(numeric(18,6),24.000000)
 	from
-		tblHDTicket a, tblHDTicketStatus b
+		tblHDTicket a
+		inner join tblHDTicketStatus b on a.intTicketStatusId = b.intTicketStatusId
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.dtmCreated is not null
 		and b.strStatus <> 'Closed'
-		and a.intTicketStatusId = b.intTicketStatusId
 		--and a.dtmCompleted = (select max(b.dtmCompleted) from tblHDTicket b where b.dtmCreated is not null and b.dtmCompleted is not null and b.intAssignedToEntity = a.intAssignedToEntity)
 	)as rawResult
 	group by intEntityId

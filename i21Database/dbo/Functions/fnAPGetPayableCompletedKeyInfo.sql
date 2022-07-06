@@ -25,8 +25,12 @@ RETURN
       AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)  
       AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)  
       AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)  
+	  AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)  
       AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)  
       AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
+      AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+      AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
+      AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
       AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
       AND C.ysnStage = 1
       AND C.ysnReturn = A.ysnReturn

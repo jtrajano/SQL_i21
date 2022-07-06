@@ -125,7 +125,6 @@ BEGIN
 			AND uom.strLongUPCCode <> ''
 			AND uom.strLongUPCCode <> '0'
 			AND uom.strLongUPCCode NOT LIKE '%[^0-9]%'
-			AND uom.ysnStockUnit = CAST(1 AS BIT)
 			AND LEN(uom.strLongUPCCode) > 13
 
 
@@ -427,7 +426,7 @@ BEGIN
 
 					[strPOSCodeFormatFormat]			=	PCF.strPosCodeFormat,
 					[strPOSCode]						=	PCF.strUPCwthOrwthOutCheckDigit,
-					[strPOSCodeModifier]				=	'000'
+					[strPOSCodeModifier]				=	CAST(ISNULL(IUOM.intModifier, '000') AS VARCHAR(100))
 				FROM tblSTPromotionItemListDetail ILT
 				INNER JOIN tblSTPromotionItemList PIL
 					ON ILT.intPromoItemListId = PIL.intPromoItemListId
@@ -453,7 +452,6 @@ BEGIN
 					AND IUOM.strLongUPCCode <> ''
 					AND IUOM.strLongUPCCode <> '0'
 					AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-					AND IUOM.ysnStockUnit = 1
 				ORDER BY PIL.intPromoItemListNo ASC
 
 

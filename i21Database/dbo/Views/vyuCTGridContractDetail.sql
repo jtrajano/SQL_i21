@@ -14,6 +14,8 @@ AS
 			CD.intShipToId,
 			CD.dtmStartDate,
 			CD.dtmEndDate,
+			CD.ysnCashFlowOverride,
+			CD.dtmCashFlowDate,
 			CD.intFreightTermId,
 			CD.intShipViaId,
 			CD.intItemContractId,
@@ -257,10 +259,76 @@ AS
 				ELSE CD.strFinancialStatus --FS.strFinancialStatus
 			END AS strFinancialStatus,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
-			strFreightBasisBaseUOM = FBBUM.strUnitMeasure			
-
+			strFreightBasisBaseUOM = FBBUM.strUnitMeasure,
+			CD.intRefFuturesMarketId,
+			CD.intRefFuturesMonthId,
+			CD.intRefFuturesItemUOMId,
+			CD.intRefFuturesCurrencyId,
+			CD.dblRefFuturesQty,
+			RefFuturesMarket.strFutMarketName  strRefFuturesMarket,
+			REPLACE(RefFuturesMonth.strFutureMonth, ' ', '(' + RefFuturesMonth.strSymbol + ') ') strRefFuturesMonth,
+			RefFuturesCurrency.strCurrency strRefFuturesCurrency,
+			RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure,
+			ysnWithPriceFix = convert(bit, isnull(PF.intPriceFixationId,0)),
+			CD.dblQualityPremium,
+			CD.dblOptionalityPremium,
+			ICC.strProductType,
+			ICC.strGrade AS strGradeCommodity,
+			ICC.strRegion,
+			ICC.strSeason,
+			ICC.strClass,
+			ICC.strProductLine,
+			CD.dtmPrepaymentDate,
+			CD.dblPrepaymentAmount,
+			CD.intLocalCurrencyId,
+			CD.intLocalUOMId,	 
+			CD.dblLocalCashPrice,
+			ILU.strUnitMeasure AS strLocalUOM,
+			LUC.strCurrency AS strLocalCurrency,
+			CD.intAverageUOMId,
+			CD.dblAverageQuantity,
+			IAU.strUnitMeasure AS strAverageUOM,
+			CD.strLCNumber,
+			CD.intLCApplicantId,
+			CD.strLCType,
+			CD.strLCStatus,
+			CD.strLCConfirmation,
+			CD.dtmLCDate2,
+			CD.dtmLCValidityDate,
+			CD.dtmLCLatestDateOfReceipt,
+			CD.intLCPlaceOfIssuingId,
+			CD.intLCPaymentTermId,
+			CD.strLCReference,
+			CD.strLCFeesBreakdown,
+			CD.dtmLCStartPeriod,
+			CD.dtmLCEndPeriod,
+			CD.strLCPresentation,
+			CD.intLCTreasuryBankId,
+			CD.intLCBankId,
+			CD.strLCBankRole,
+			CD.ysnTransportPartialShipment,
+			CD.ysnTransportTransShipment,
+			CD.ysnTransportMultiplePorts,
+			CD.dblQuantityMinRate,
+			CD.dblAmountMinRate,
+			CD.dblQuantityMaxRate,
+			CD.dblAmountMaxRate,
+			CD.dblQuantityMinValue,
+			CD.dblAmountMinValue,
+			CD.dblQuantityMaxValue,
+			CD.dblAmountMaxValue
+			, strLCApplicant = credE.strName
+			, strLCPlaceOfIssuing = credC.strCountry
+			, strLCPaymentTerm = credT.strTerm
+			, strLCTreasuryBank = credB.strBankName
+			, strLCBank = credB2.strBankName
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
+	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
+	LEFT JOIN tblSMCountry credC on credC.intCountryID = CD.intLCPlaceOfIssuingId
+	LEFT JOIN tblSMTerm credT on credT.intTermID = CD.intLCPaymentTermId
+	LEFT JOIN tblCMBank credB on credB.intBankId = CD.intLCTreasuryBankId
+	LEFT JOIN tblCMBank credB2 on credB2.intBankId = CD.intLCBankId
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
 	LEFT	JOIN	tblCTBook						BK	ON	BK.intBookId						=		CD.intBookId				--strBook
 	LEFT    JOIN	tblCTContractOptHeader			OH	ON	OH.intContractOptHeaderId			=		CD.intContractOptHeaderId	--strContractOptDesc
@@ -271,6 +339,13 @@ AS
 	LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
 	LEFT    JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId					=		CD.intRailGradeId
 	LEFT	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId						=		CD.intSubBookId				--strSubBook
+
+	-- Reference Pricing
+	LEFT JOIN tblRKFutureMarket RefFuturesMarket ON RefFuturesMarket.intFutureMarketId = CD.intRefFuturesMarketId
+	LEFT JOIN tblRKFuturesMonth RefFuturesMonth ON RefFuturesMonth.intFutureMonthId = CD.intRefFuturesMonthId
+	LEFT JOIN tblSMCurrency RefFuturesCurrency ON RefFuturesCurrency.intCurrencyID = CD.intRefFuturesCurrencyId
+	LEFT JOIN tblICItemUOM RefFuturesItemUOMId ON RefFuturesItemUOMId.intItemUOMId = CD.intRefFuturesItemUOMId
+	LEFT JOIN tblICUnitMeasure RefFturesUnitMeasure ON RefFturesUnitMeasure.intUnitMeasureId = RefFuturesItemUOMId.intUnitMeasureId
 	
 	LEFT	JOIN	tblEMEntity						BT	ON	BT.intEntityId						=		CD.intBillTo				--strBillTo
 	LEFT	JOIN	tblEMEntity						SH	ON	SH.intEntityId						=		CD.intShipperId				--strShipper
@@ -296,7 +371,7 @@ AS
 	LEFT    JOIN	tblICUnitMeasure				QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId			--strUOM
 	LEFT    JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId						=		CD.intNetWeightUOMId		
 	LEFT    JOIN	tblICUnitMeasure				WM	ON	WM.intUnitMeasureId					=		WU.intUnitMeasureId			--strNetWeightUOM
-	LEFT    JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId						=		CD.intPriceItemUOMId		
+	LEFT    JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId						=		CD.intPriceItemUOMId
 	LEFT    JOIN	tblICUnitMeasure				PM	ON	PM.intUnitMeasureId					=		PU.intUnitMeasureId			--strPriceUOM
 	LEFT    JOIN	tblICItemUOM					XU	ON	XU.intItemUOMId						=		CD.intAdjItemUOMId
 	LEFT    JOIN	tblICUnitMeasure				XM	ON	XM.intUnitMeasureId					=		XU.intUnitMeasureId			--strAdjustmentUOM
@@ -307,7 +382,11 @@ AS
 	LEFT    JOIN	tblICItemUOM					VU	ON	VU.intItemUOMId						=		CD.intConvPriceUOMId
 	LEFT    JOIN	tblICUnitMeasure				VM	ON	VM.intUnitMeasureId					=		VU.intUnitMeasureId			--strConvertedUOM
 	LEFT    JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=		CD.intStorageLocationId		--strStorageLocationName
-	
+	LEFT    JOIN	tblICItemUOM					LU	ON	LU.intItemUOMId						=		CD.intLocalUOMId
+	LEFT    JOIN	tblICUnitMeasure				ILU	ON	ILU.intUnitMeasureId				=		LU.intUnitMeasureId			--strLocalUOM
+	LEFT	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId						=		CD.intAverageUOMId
+	LEFT	JOIN	tblICUnitMeasure				IAU ON	IAU.intUnitMeasureId				=		AU.intUnitMeasureId			--strAverageUOM
+
 	LEFT    JOIN	tblRKFutureMarket				MA	ON	MA.intFutureMarketId				=		CD.intFutureMarketId		--strFutureMarket
 	LEFT    JOIN	tblICUnitMeasure				MU	ON	MU.intUnitMeasureId					=		MA.intUnitMeasureId
 	LEFT    JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId					=		CD.intFutureMonthId			--strFutureMonth
@@ -320,6 +399,7 @@ AS
 	LEFT    JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID					=		CU.intMainCurrencyId
 	LEFT    JOIN	tblSMCurrency					BC	ON	BC.intCurrencyID					=		CD.intBasisCurrencyId		--strBasisCurrency
 	LEFT    JOIN	tblSMCurrency					CC	ON	CC.intCurrencyID					=		CD.intConvPriceCurrencyId	--strConvertedCurrency
+	LEFT    JOIN	tblSMCurrency					LUC	ON	LUC.intCurrencyID					=		CD.intLocalCurrencyId		--strLocalCurrency
 
 	LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
 	LEFT    JOIN	tblSMCurrency					MY	ON	MY.intCurrencyID					=		MA.intCurrencyId			--strMarketCurrency
@@ -393,3 +473,5 @@ AS
 	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 	LEFT	JOIN	tblAPBillDetail						BD ON	BD.intContractDetailId = CD.intContractDetailId
 	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId
+	-- Commodity Attributes
+	LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId

@@ -54,6 +54,10 @@ BEGIN
 	WHERE L.intLoadId = @intLoadId
 END
 
+--If transaction is a Transfer, or when Rejecting an Outbound shipment, do not reserve any stock  
+IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND (intPurchaseSale = 4 OR intShipmentStatus IN (4, 12)))  
+RETURN;  
+
 IF @ysnReserveStockForInventoryShipment=1
 BEGIN
 	SELECT @intLoadDetailPickLotId = MIN(intLoadDetailPickLotId) FROM #tblLoadDetailPickLots

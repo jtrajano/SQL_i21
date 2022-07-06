@@ -34,7 +34,8 @@ BEGIN TRY
 	   JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 	   JOIN tblQMSample AS S ON S.intWorkOrderId = W.intWorkOrderId
 			AND S.intProductTypeId = 12
-			AND S.intProductValueId = W.intWorkOrderId'
+			AND S.intProductValueId = W.intWorkOrderId
+			AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN
@@ -110,7 +111,8 @@ BEGIN TRY
 		JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 		JOIN tblQMSample AS S ON S.intWorkOrderId = W.intWorkOrderId
 			AND S.intProductTypeId = 12
-			AND S.intProductValueId = W.intWorkOrderId'
+			AND S.intProductValueId = W.intWorkOrderId
+			AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN

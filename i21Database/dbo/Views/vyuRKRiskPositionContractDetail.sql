@@ -36,6 +36,7 @@ SELECT DISTINCT CT.strContractType
 	, intPricingTypeIdHeader = CH.intPricingTypeId
 	, intLocationId = CD.intCompanyLocationId
 	, Location.strLocationName
+	, intCropYearId = CH.intCropYearId 
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId NOT IN (2, 3)
 JOIN tblRKFuturesMonth FM on FM.intFutureMonthId = CD.intFutureMonthId

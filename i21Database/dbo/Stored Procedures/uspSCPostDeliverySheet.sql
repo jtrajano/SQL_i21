@@ -109,7 +109,7 @@ BEGIN TRY
 	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
-	SET @currencyDecimal = 20
+	SET @currencyDecimal = 4
 
 	INSERT INTO @splitTable(
 		[intEntityId]
@@ -595,6 +595,10 @@ BEGIN TRY
 
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
+
+	-- Update the exported status of the delivery sheet
+	UPDATE tblSCDeliverySheet SET ysnExport = 0
+	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	--EXEC [dbo].[uspSCModifyTicketDiscountItemInfo] null, @intDeliverySheetId
 

@@ -4,7 +4,8 @@ SELECT TRANSACTIONS.*
      , CUSTOMER.strCustomerNumber
 	 , CUSTOMER.strName 
 FROM (
-	SELECT dtmDate				= ISNULL(SO.dtmProcessDate, SO.dtmDate)
+	SELECT dtmDate				= SO.dtmDate
+		 , dtmPostDate			= SO.dtmProcessDate
 		 , strTransactionNumber	= SO.strSalesOrderNumber
 		 , strTransactionType	= SO.strTransactionType
 		 , dblTransactionTotal	= ISNULL(SO.dblSalesOrderTotal, 0.00)
@@ -18,7 +19,8 @@ FROM (
 	
 	UNION	
 
-	SELECT dtmDate				= ISNULL(I.dtmPostDate, I.dtmDate)
+	SELECT dtmDate				= I.dtmDate
+		 , dtmPostDate			= I.dtmPostDate
 		 , strTransactionNumber	= I.strInvoiceNumber
 		 , strTransactionType	= I.strTransactionType
 		 , dblTransactionTotal	= ISNULL(I.dblInvoiceTotal, 0.00)
@@ -28,12 +30,21 @@ FROM (
 		 , intEntityCustomerId
 		 , ysnPaid				= I.ysnPaid
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
-	WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0))
+		OUTER APPLY
+		(
+		   SELECT ISC.strInvoiceNumber from tblARInvoiceDetail ID
+		   INNER JOIN tblARInvoice II ON II.intInvoiceId=ID.intInvoiceId
+		   INNER JOIN tblARInvoice ISC ON ISC.strInvoiceNumber = ID.strDocumentNumber
+		   WHERE ISC.strInvoiceNumber=I.strInvoiceNumber AND II.strTransactionType ='Credit Memo'
+		   AND ID.strDocumentNumber like '%SC%'  AND ISC.ysnForgiven =1
+		)SCCM
+	WHERE (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND  (ysnForgiven = 0 OR SCCM.strInvoiceNumber IS NOT NULL)))
 	   AND I.ysnRecurring = 0
 
 	UNION	
 	
 	SELECT dtmDate				= P.dtmDatePaid
+		 , dtmPostDate			= P.dtmDatePaid
 		 , strTransactionNumber	= P.strRecordNumber
 		 , strTransactionType	= 'Receive Payment'
 		 , dblTransactionTotal	= ISNULL(PD.dblTotal, 0.00)

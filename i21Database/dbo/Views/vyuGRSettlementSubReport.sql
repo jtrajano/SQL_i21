@@ -219,6 +219,7 @@ FROM
 				,strTaxClass = TaxClass.strTaxClass
 				,BillDtl2.intInventoryReceiptItemId
 				,BillDtl2.intLinkingId
+				,BillDtl.dblQtyReceived
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId
@@ -229,7 +230,7 @@ FROM
 		LEFT JOIN tblAPBillDetail BillDtl2
 			ON BillDtl2.intBillId = Bill.intBillId
 			AND isnull(BillDtl2.intInventoryReceiptItemId, isnull(BillDtl.intInventoryReceiptItemId, 0)) = isnull(BillDtl.intInventoryReceiptItemId, 0)
-			AND (ISNULL(BillDtl2.intLinkingId, 0) = ISNULL(BillDtl.intLinkingId, 0) OR ISNULL(BillDtl2.intLinkingId,-90) = -90)
+			AND ((ISNULL(BillDtl2.intLinkingId, 0) = ISNULL(BillDtl.intLinkingId, 0) OR ISNULL(BillDtl2.intLinkingId,-90) = -90) and (BillDtl.dblQtyReceived = ABS(BillDtl2.dblQtyReceived) OR ABS(BillDtl2.dblQtyReceived) = 1))
 		LEFT JOIN tblAPBill Bill2 
 			ON BillDtl2.intBillId = Bill2.intBillId --and Bill.intTransactionType = 1
 		LEFT JOIN tblICItem Item2 

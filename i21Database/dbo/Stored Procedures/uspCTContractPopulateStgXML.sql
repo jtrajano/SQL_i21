@@ -74,7 +74,7 @@ BEGIN TRY
 	SELECT TOP 1 @intLogId = intLogId
 	FROM dbo.tblSMLog
 	WHERE intTransactionId = @intTransactionId
-	ORDER BY 1 DESC
+	ORDER BY intLogId DESC
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -346,7 +346,7 @@ BEGIN TRY
 
 	IF EXISTS (
 			SELECT 1
-			FROM master.dbo.sysdatabases
+			FROM sys.databases
 			WHERE name = @strDatabaseName
 			)
 	BEGIN

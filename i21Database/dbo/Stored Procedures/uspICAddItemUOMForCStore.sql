@@ -47,7 +47,7 @@ BEGIN
 		intItemId = @intItemId
 		,intUnitMeasureId = @intUnitMeasureId
 		,dblUnitQty = 1
-		,strUpcCode = dbo.fnUPCAtoUPCE(@strLongUPCCode) 
+		,strUpcCode = CASE WHEN dbo.fnUPCAtoUPCE(@strLongUPCCode) = '' THEN NULL ELSE dbo.fnUPCAtoUPCE(@strLongUPCCode) END
 		,strLongUPCCode = @strLongUPCCode
 		,ysnStockUnit = @ysnStockUnit
 		,ysnAllowPurchase = 1

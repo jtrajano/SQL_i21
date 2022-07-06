@@ -8,6 +8,6 @@
 	[ysnEnabled] [bit] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblSMShortcutKeys] PRIMARY KEY CLUSTERED ([intShortcutKeyId] ASC),
-	CONSTRAINT [FK_tblSMMasterMenu_tblSMShortcutKeys] FOREIGN KEY ([intMenuId]) REFERENCES [tblSMMasterMenu]([intMenuID])
+	CONSTRAINT [FK_tblSMMasterMenu_tblSMShortcutKeys] FOREIGN KEY ([intMenuId]) REFERENCES [tblSMMasterMenu]([intMenuID]) ON DELETE CASCADE
 ) ON [PRIMARY]
 

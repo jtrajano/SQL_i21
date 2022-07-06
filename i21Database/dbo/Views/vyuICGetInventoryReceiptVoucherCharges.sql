@@ -96,6 +96,7 @@ FROM	tblICInventoryReceipt Receipt
 						WHERE	bd.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
 								AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 								AND b.ysnPosted = 1 
+								AND b.intTransactionType <> 16
 					) voucher
 					LEFT JOIN (
 						tblCTContractHeader ct INNER JOIN tblCTContractDetail cd
@@ -126,6 +127,7 @@ FROM	tblICInventoryReceipt Receipt
 					) chargeVouchers
 			WHERE	b.intBillId = chargeVouchers.intBillId 
 					AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
+					AND b.intTransactionType <> 16
 			ORDER BY b.intBillId DESC 
 		) topVoucher
 		OUTER APPLY (
@@ -140,6 +142,7 @@ FROM	tblICInventoryReceipt Receipt
 														ON bb.intBillId = bd.intBillId
 											WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 													AND bb.ysnPosted = 1
+													AND bb.intTransactionType <> 16
 										) chargeVouchers
 								WHERE	b.intBillId = chargeVouchers.intBillId 
 										AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
@@ -162,6 +165,7 @@ FROM	tblICInventoryReceipt Receipt
 													ON bb.intBillId = bd.intBillId
 										WHERE	bd.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 												AND bb.ysnPosted = 1
+												AND bb.intTransactionType <> 16
 									) chargeVouchers
 							WHERE	b.intBillId = chargeVouchers.intBillId 
 									AND b.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 

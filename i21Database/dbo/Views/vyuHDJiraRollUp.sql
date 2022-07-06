@@ -13,14 +13,14 @@
 			,intJiraKeyId
 			,strJiraKey
 			,strJiraUrl
-			,strTypeIconUrl
+			,REPLACE(strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
 			,strSummary
 			,strDescription
 			,strReporter
 			,strAssignee
 			,strFixedBy
-			,strPriorityIconUrl
-			,strStatusIconUrl
+			,REPLACE(strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
+			,REPLACE(strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
 			,strResolution
 			,dtmJiraCreated
 			,dtmJiraUpdated
@@ -53,11 +53,10 @@
 				,d.strFixedVersion
 			from
 				tblHDProject a
-				,tblHDTicket b
-				,tblHDProjectTask c
-				,tblHDTicketJIRAIssue d
+				inner join tblHDTicket b on 1=1
+				inner join tblHDProjectTask c on c.intProjectId = a.intProjectId
+				inner join tblHDTicketJIRAIssue d on d.intTicketId = c.intTicketId
 			where
-				d.intTicketId = c.intTicketId
-				and c.intProjectId = a.intProjectId
-				and b.intTicketId = c.intTicketId
+				b.intTicketId = c.intTicketId
 		) as result
+GO

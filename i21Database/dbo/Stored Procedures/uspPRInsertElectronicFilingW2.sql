@@ -62,6 +62,11 @@ BEGIN
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,strRepresentativeName
+		,strRepresentativeTitle
+		,strRepresentativePhone
+		,strNAICSCode
+		,strCentralRegistrationNo
 		,intConcurrencyId)
 	SELECT
 		intYear = @intYear
@@ -158,9 +163,14 @@ BEGIN
 		,dtmCreated = GETDATE()
 		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GETDATE()
+		,strRepresentativeName = ''
+		,strRepresentativeTitle = ''
+		,strRepresentativePhone = ''
+		,strNAICSCode = ISNULL((SELECT TOP 1 strNAICSCode FROM tblPRCompanyPreference),'')
+		,strCentralRegistrationNo = ISNULL((SELECT TOP 1 strNAICSCode FROM tblPRCompanyPreference),'')
 		,intConcurrencyId = 1
-	FROM tblSMCompanySetup COM,
-		(SELECT strName = ISNULL(EM.strName, '')
+	FROM tblSMCompanySetup COM
+		inner join (SELECT strName = ISNULL(EM.strName, '')
 				,strAddress = ISNULL(EML.strAddress, '')
 				,strCity = ISNULL(EML.strCity, '')
 				,strState = ISNULL(EML.strState, '')
@@ -170,7 +180,7 @@ BEGIN
 			INNER JOIN tblEMEntityLocation EML ON EM.intEntityId = EML.intEntityId AND EML.ysnDefaultLocation = 1
 			INNER JOIN tblEMEntityToContact EMC ON EM.intEntityId = EMC.intEntityId AND EMC.ysnDefaultContact = 1
 			INNER JOIN tblEMEntity EM2 ON EM2.intEntityId = EMC.intEntityContactId
-		WHERE EM.intEntityId = @intUserId) SUB
+		WHERE EM.intEntityId = @intUserId) SUB on 1=1
 
 	/* Get created Electronic Filing W-2 Id */
 	SET @intElectronicFilingW2Id = SCOPE_IDENTITY()

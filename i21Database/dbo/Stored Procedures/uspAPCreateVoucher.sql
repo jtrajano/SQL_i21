@@ -39,6 +39,8 @@ BEGIN TRY
 	DECLARE @voucherHeader AS VoucherPayable;
 	DECLARE @SavePoint NVARCHAR(32) = 'uspAPCreateVoucher';
 
+	DECLARE @startingNumberDigit INT = 0;
+	DECLARE @startingNumberPadding NVARCHAR(10) = '0000000000';
 	DECLARE @voucherStartNum INT = 0;
 	DECLARE @voucherPref NVARCHAR(50);
 	DECLARE @debitMemoStartNum INT = 0;
@@ -53,6 +55,27 @@ BEGIN TRY
 	DECLARE @deferPref NVARCHAR(50);
 	DECLARE @adjStartNum INT = 0;
 	DECLARE @adjPref NVARCHAR(50);
+	DECLARE @provStartNum INT = 0;
+	DECLARE @provPref NVARCHAR(50);
+	DECLARE @hasSavePoint BIT = 0;
+
+	--IF NO ACCOUNT PROVIDED, MAKE SURE THERE IS A DEFAULT LOCATION SETUP FOR THE USER
+	IF (
+		EXISTS(SELECT TOP 1 1 FROM @voucherPayables A WHERE (A.intAPAccount = 0 OR A.intAPAccount IS NULL) AND A.intLocationId IS NULL)
+		AND NULLIF((
+			SELECT TOP 1 B.intCompanyLocationId FROM tblSMUserSecurity B
+			LEFT JOIN tblSMCompanyLocation C ON B.intCompanyLocationId = C.intCompanyLocationId
+			WHERE B.intEntityId = @userId
+		),0) IS NULL
+	)
+	BEGIN
+		SET @error =  'Please setup default Location for user.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
+	END
 
 	--Voucher Type
 	IF EXISTS(SELECT TOP 1 1
@@ -251,18 +274,25 @@ BEGIN TRY
 
 	DECLARE @transCount INT = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
-	ELSE SAVE TRAN @SavePoint
+	ELSE 
+	BEGIN
+		SET @hasSavePoint = 1;
+		SAVE TRAN @SavePoint
+	END
 
 	--Voucher Type
 	UPDATE A
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@voucherStartNum = A.intNumber
 		,@voucherPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 9
 
 	UPDATE A
-		SET A.strBillId = @voucherPref + CAST(@voucherStartNum AS NVARCHAR)
+		SET A.strBillId = @voucherPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@voucherStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@voucherStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@voucherStartNum = @voucherStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 1
@@ -272,11 +302,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@debitMemoStartNum = A.intNumber
 		,@debitMemoPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 18
 
 	UPDATE A
-		SET A.strBillId = @debitMemoPref + CAST(@debitMemoStartNum AS NVARCHAR)
+		SET A.strBillId = @debitMemoPref + CASE 
+												WHEN @startingNumberDigit = 0 THEN CAST(@debitMemoStartNum AS NVARCHAR)
+												ELSE RIGHT(@startingNumberPadding + CAST(@debitMemoStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@debitMemoStartNum = @debitMemoStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 3
@@ -286,11 +319,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@claimStartNum = A.intNumber
 		,@claimPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 101
 
 	UPDATE A
-		SET A.strBillId = @claimPref + CAST(@claimStartNum AS NVARCHAR)
+		SET A.strBillId = @claimPref + CASE 
+											WHEN @startingNumberDigit = 0 THEN CAST(@claimStartNum AS NVARCHAR)
+											ELSE RIGHT(@startingNumberPadding + CAST(@claimStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@claimStartNum = @claimStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 11
@@ -300,11 +336,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@baStartNum = A.intNumber
 		,@baPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 124
 
 	UPDATE A
-		SET A.strBillId = @baPref + CAST(@baStartNum AS NVARCHAR)
+		SET A.strBillId = @baPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@baStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@baStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@baStartNum = @baStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 13
@@ -314,11 +353,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@prepaidStartNum = A.intNumber
 		,@prepaidPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 20
 
 	UPDATE A
-		SET A.strBillId = @prepaidPref + CAST(@prepaidStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @prepaidPref + CASE 
+											WHEN @startingNumberDigit = 0 THEN CAST(@prepaidStartNum AS NVARCHAR)
+											ELSE RIGHT(@startingNumberPadding + CAST(@prepaidStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@prepaidStartNum = @prepaidStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 2
@@ -328,11 +370,14 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@deferStartNum = A.intNumber
 		,@deferPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 132
 
 	UPDATE A
-		SET A.strBillId = @deferPref + CAST(@deferStartNum AS NVARCHAR)
+		SET A.strBillId = @deferPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@deferStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@deferStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@deferStartNum = @deferStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 14
@@ -342,14 +387,34 @@ BEGIN TRY
 		SET A.intConcurrencyId = A.intConcurrencyId + 1
 		,@adjStartNum = A.intNumber
 		,@adjPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 77
 
 	UPDATE A
-		SET A.strBillId = @adjPref + CAST(@adjStartNum AS NVARCHAR)
+		SET A.strBillId = @adjPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@adjStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@adjStartNum AS NVARCHAR), @startingNumberDigit) END
 		,@adjStartNum = @adjStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 9
+
+	--Provisional
+	UPDATE A
+		SET A.intConcurrencyId = A.intConcurrencyId + 1
+		,@provStartNum = A.intNumber
+		,@provPref = A.strPrefix
+		,@startingNumberDigit = ISNULL(A.intDigits, 0)
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 171
+
+	UPDATE A
+		SET A.strBillId = @provPref + CASE 
+										WHEN @startingNumberDigit = 0 THEN CAST(@provStartNum AS NVARCHAR)
+										ELSE RIGHT(@startingNumberPadding + CAST(@provStartNum AS NVARCHAR), @startingNumberDigit) END
+		,@provStartNum = @provStartNum + 1
+	FROM #tmpVoucherHeaderData A
+	WHERE A.intTransactionType = 16
 
 	MERGE INTO tblAPBill AS destination
 	USING
@@ -395,8 +460,25 @@ BEGIN TRY
 		[intShipViaId]			,
 		[intContactId]			,
 		[intOrderById]			,
+		[intBookId]				,
+		[intSubBookId]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]
+		[intSubCurrencyCents]	,
+		[intDefaultPayFromBankAccountId],
+		[intPayFromBankAccountId],
+		[strFinancingSourcedFrom],
+		[strFinancingTransactionNumber],
+		[intPayToBankAccountId],
+		[strFinanceTradeNo]					,
+		[intBankId]							,
+		[intBankAccountId]					,
+		[intBorrowingFacilityId]			,
+		[strBankReferenceNo]				,
+		[intBorrowingFacilityLimitId]		,
+		[intBorrowingFacilityLimitDetailId]	,
+		[strReferenceNo]					,
+		[intBankValuationRuleId]			,
+		[strComments]
 	)
 	VALUES (
 		[intTermsId]			,
@@ -434,8 +516,25 @@ BEGIN TRY
 		[intShipViaId]			,
 		[intContactId]			,
 		[intOrderById]			,
+		[intBookId]				,
+		[intSubBookId]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]
+		[intSubCurrencyCents]	,
+		[intPayFromBankAccountId],
+		[intPayFromBankAccountId],
+		[strFinancingSourcedFrom],
+		[strFinancingTransactionNumber],
+		[intPayToBankAccountId],
+		[strFinanceTradeNo]					,
+		[intBankId]							,
+		[intBankAccountId]					,
+		[intBorrowingFacilityId]			,
+		[strBankReferenceNo]				,
+		[intBorrowingFacilityLimitId]		,
+		[intBorrowingFacilityLimitDetailId]	,
+		[strReferenceNo]					,
+		[intBankValuationRuleId]			,
+		[strComments]
 	)
 	OUTPUT 
 		inserted.intBillId 
@@ -479,6 +578,12 @@ BEGIN TRY
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 77
 
+	--Provisional Type
+	UPDATE A
+		SET A.intNumber = @provStartNum
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 171
+
 	UPDATE A
 		SET A.intBillId = B.intBillId
 	FROM @voucherPayablesData A
@@ -521,7 +626,9 @@ BEGIN TRY
 	DECLARE @billCounter INT = 0;
 	DECLARE @totalRecords INT;
 	DECLARE @billId INT;
+	DECLARE @tranType INT;
 	DECLARE @tmpBillDetailDelete TABLE(intBillId INT)
+	DECLARE @screenName NVARCHAR(100);
 	SELECT @actionType = 'Deleted'
 
 	INSERT INTO @tmpBillDetailDelete
@@ -532,22 +639,84 @@ BEGIN TRY
 	WHILE(@billCounter != (@totalRecords))
 	BEGIN
 
-		SELECT TOP(1) @billId = A.intBillId
+		SELECT TOP(1) @billId = A.intBillId, @tranType = B.intTransactionType
 		FROM @tmpBillDetailDelete A
-			
-		EXEC dbo.uspSMAuditLog 
-			@screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
-			,@keyValue = @billId								-- Primary Key Value of the Voucher. 
-			,@entityId = @userId									-- Entity Id.
-			,@actionType = 'Created'                        -- Action Type
-			,@changeDescription = 'Integration'				-- Description
-			,@fromValue = ''									-- Previous Value
-			,@toValue = ''									-- New Value
+		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 
+		SET @screenName = CASE WHEN @tranType IN (1,2,13) THEN 'AccountsPayable.view.Voucher' ELSE 'AccountsPayable.view.DebitMemo' END 		
+
+		IF @tranType IN (1,2,3,13)
+		BEGIN
+			EXEC dbo.uspSMAuditLog 
+				@screenName = @screenName		-- Screen Namespace
+				,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+				,@entityId = @userId									-- Entity Id.
+				,@actionType = 'Created'                        -- Action Type
+				,@changeDescription = 'Integration'				-- Description
+				,@fromValue = ''									-- Previous Value
+				,@toValue = ''	
+		END							-- New Value
 
 	SET @billCounter = @billCounter + 1
 	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId
 	END
+
+	--Check for approval
+	DECLARE @vendorId INT
+	DECLARE @locationId INT
+	DECLARE @Total DECIMAL(18,2)
+	DECLARE @DueDate DATETIME
+	DECLARE @currencyId INT
+	DECLARE @requireApproval BIT = 0
+	DECLARE @generatedBillRecordId NVARCHAR(250)
+
+	DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+	FOR
+
+		SELECT intId FROM @voucherIds
+	
+	OPEN c;
+
+	FETCH c INTO @billId
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		SELECT
+			@vendorId = A.intEntityVendorId
+			,@locationId = A.intShipToId
+			,@currencyId = A.intCurrencyId
+			,@Total = A.dblTotal
+			,@DueDate = A.dtmDueDate
+			,@generatedBillRecordId = A.strBillId
+		FROM tblAPBill A
+		WHERE A.intBillId = @billId
+
+		EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+			@type = N'AccountsPayable.view.Voucher',
+			@transactionEntityId = @vendorId,
+			@currentUserEntityId = @userId,
+			@locationId = @locationId,
+			@amount = @Total,
+			@requireApproval = @requireApproval OUTPUT
+
+		IF @requireApproval = 1
+		BEGIN
+			EXEC uspSMUnSubmitTransaction
+				@type = 'AccountsPayable.view.Voucher',
+				@recordId = @billId,
+				@transactionNo = @generatedBillRecordId,
+				@transactionEntityId = @vendorId,
+				@currentUserEntityId = @userId,
+				@amount = @Total, 
+				@dueDate = @DueDate,
+				@currencyId = @currencyId
+		END
+		FETCH c INTO @billId
+	END
+
+	CLOSE c; DEALLOCATE c;
+
+	EXEC uspAPAddTransactionLinks 1, @createdVouchersId, 1, @userId
 
 	IF @transCount = 0 COMMIT TRANSACTION;
 
@@ -591,7 +760,8 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	DECLARE @ErrorSeverity INT,
+	DECLARE @newError NVARCHAR(4000),
+			@ErrorSeverity INT,
 			@ErrorNumber   INT,
 			@ErrorMessage nvarchar(4000),
 			@ErrorState INT,
@@ -605,24 +775,23 @@ BEGIN CATCH
 	SET @ErrorLine     = ERROR_LINE()
 	SET @ErrorProc     = ERROR_PROCEDURE()
 
-	SET @ErrorMessage  = 'Error creating voucher.' + CHAR(13) + 
-		'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
-		' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
+	SET @newError  = 'Error creating voucher.' + CHAR(13) + @ErrorMessage
 
 	IF (XACT_STATE()) = -1
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	ELSE IF (XACT_STATE()) = 1 AND @transCount = 0
+	ELSE 
+	IF (XACT_STATE()) = 1 AND @transCount = 0
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	-- ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
-	-- BEGIN
-	-- 	ROLLBACK TRANSACTION  @SavePoint
-	-- END
+	ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
+	BEGIN
+		IF @hasSavePoint = 1 ROLLBACK TRANSACTION  @SavePoint
+	END
 
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	RAISERROR (@newError , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
 
 END

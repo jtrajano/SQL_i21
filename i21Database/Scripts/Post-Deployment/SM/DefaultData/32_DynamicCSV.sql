@@ -13,20 +13,13 @@ BEGIN
 	SELECT @NewHeaderId, '1','1'
 END
 
-UPDATE tblSMCSVDynamicImport SET
-	strName = 'Contact Import',
-	strCommand = '
+UPDATE [dbo].[tblSMCSVDynamicImport]
+SET strCommand = N'
 	DECLARE @EntityId 			INT
 	DECLARE @EntityLocationId 	INT
-
-		--	phone
-		--mobile
-		--locname
-		--portal
-
-
-	--validation stage
+	DECLARE @UserRoleId		    INT
 	DECLARE @IsValid BIT
+	
 	--DECLARE @ValidationMessage NVARCHAR(MAX)
 	SET @IsValid = 1
 
@@ -35,11 +28,13 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @ActiveBit		BIT
 	DECLARE @RankStr		NVARCHAR(100)
 	DECLARE @Rank			INT
-	DECLARE @PortalStr		NVARCHAR(100)
 	DECLARE @PortalBit		BIT
 	DECLARE @Phone			NVARCHAR(100)
 	DECLARE @Mobile			NVARCHAR(100)
 	DECLARE @LocationName	NVARCHAR(100)
+	DECLARE @PortalUserRole NVARCHAR(100)
+	DECLARE @PortalPassword NVARCHAR(100)
+	DECLARE @Email          NVARCHAR(100)
 
 	SET @ValidationMessage	= ''''
 	SET @ContactMethod		= ''@contactMethod@''
@@ -47,11 +42,14 @@ UPDATE tblSMCSVDynamicImport SET
 	SET @ActiveBit			= 0
 	SET @RankStr			= ''@rank@''
 	SET @Rank				= 1
-	SET @PortalStr			= LOWER(''@portal@'')
 	SET @PortalBit			= 0
 	SET @Phone				= ''@phone@''
 	SET @Mobile				= ''@mobile@''
 	SET @LocationName		= ''@locname@''
+	SET @PortalPassword     = ''@portalPassword@''
+	SET @PortalUserRole     = ''@portalUserRole@''
+	SET @UserRoleId         = 0
+	SET @Email              = ''@email@''
 
 	DECLARE @EmailDistribution NVARCHAR(MAX)
 	DECLARE @EmailDistributionList NVARCHAR(MAX)
@@ -59,8 +57,6 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @EmailDistributionInvalid NVARCHAR(MAX)
 
 	SET @EmailDistributionList = ''Invoices,Transport Quote,Statements,AP remittance,AR Remittance,Contracts,Sales Order,Credit Memo,Quote Order,Scale,Storage,Cash,Cash Refund,Debit Memo,Customer Prepayment,CF Invoice,Letter,PR Remittance,Dealer CC Notification,Purchase Order,Settlement''
-
-
 	SET @EmailDistribution = ''@emailDistribution@''
 
 	select @EmailDistributionInvalid = COALESCE(@EmailDistributionInvalid + '','', '''') + RTRIM(LTRIM(a.Item))
@@ -99,13 +95,27 @@ UPDATE tblSMCSVDynamicImport SET
 		SET @ValidationMessage = @ValidationMessage + '',Active ['' + @ActiveStr + ''] should only be (0, 1, Yes, No, True, False)''
 	END
 
-	IF @PortalStr = ''1'' OR @PortalStr = ''yes'' OR @PortalStr = ''true''
+	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblSMUserRole WHERE strName = @PortalUserRole) AND ISNULL(@PortalUserRole, '''') <> ''''
 	BEGIN
+		SELECT TOP 1 @UserRoleId = intUserRoleID FROM dbo.tblSMUserRole WHERE strName = @PortalUserRole
 		SET @PortalBit = 1
 	END
-	ELSE IF lower(@PortalStr) NOT IN (''1'', ''0'', ''yes'', ''no'', ''true'', ''false'')
+	ELSE IF ISNULL(@PortalUserRole, '''') <> ''''
 	BEGIN
-		SET @ValidationMessage = @ValidationMessage + '',Portal Access ['' + @PortalStr + ''] should only be (0, 1, Yes, No, True, False)''
+		IF @ValidationMessage != ''''
+		BEGIN
+   			SET @ValidationMessage = @ValidationMessage + '',''
+		END
+		SET @ValidationMessage = @ValidationMessage + ''The User Role of '' + @PortalUserRole + '' was not found in the Portal User Role. Please add this Role from the System Manager screen and re-attempt the upload''
+	END
+
+	IF (@Email IS NULL OR @Email = '''') AND (@PortalBit = 1 AND ISNULL(@PortalPassword, '''') <> '''' AND EXISTS(SELECT TOP 1 1 FROM vyuEME2C2Role WHERE intEntityId = @EntityId AND ysnAdmin = 1))
+	BEGIN
+		IF @ValidationMessage != ''''
+		BEGIN
+   			SET @ValidationMessage = @ValidationMessage + '',''
+		END
+		SET @ValidationMessage = @ValidationMessage + ''The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
 	END
 
 	IF ISNUMERIC(@RankStr) = 1
@@ -117,7 +127,10 @@ UPDATE tblSMCSVDynamicImport SET
 		SET @ValidationMessage = @ValidationMessage + '',Rank ['' + @RankStr + ''] should be a number''
 	END
 
-
+	IF @ValidationMessage != ''''
+	BEGIN
+		RAISERROR(@ValidationMessage, 16, 1);
+	END
 
 	SELECT @EntityId = intEntityId
 		FROM tblEMEntity
@@ -127,13 +140,22 @@ UPDATE tblSMCSVDynamicImport SET
 	IF ISNULL(@EntityId, 0) > 0 and @LocationName <> ''''
 	BEGIN
 		SELECT TOP  1 @EntityLocationId = intEntityLocationId FROM tblEMEntityLocation where intEntityId = @EntityId and rtrim(ltrim(lower(@LocationName))) = rtrim(ltrim(lower(strLocationName)))
-
 	END
 
-	DECLARE @RoleId INT
+	IF ISNULL(@EntityId, 0) = 0
+	BEGIN
+		SET @ValidationMessage = ''Entity Number does not exists!. Please check the Customer Entity No. and re-attempt the upload''
+		RAISERROR(@ValidationMessage, 16, 1);
+	END
 
 	IF ISNULL(@EntityId, 0) > 0
 	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact contact INNER JOIN tblEMEntity entity ON contact.intEntityContactId = entity.intEntityId 
+				  WHERE contact.intEntityId = @EntityId AND entity.strName = ''@name@'')
+		BEGIN
+			SET @ValidationMessage = ''Detected duplicate contact name. Please check the name and re-attempt the upload''
+			RAISERROR(@ValidationMessage, 16, 1);
+		END
 
 		DECLARE @NewEntityId INT
 		INSERT INTO tblEMEntity(
@@ -165,16 +187,18 @@ UPDATE tblSMCSVDynamicImport SET
 			select @NewEntityId, @Mobile, null
 		END
 
-		IF @PortalBit = 1
+		IF @PortalBit = 1 AND ISNULL(@PortalPassword, '''') <> ''''
+			AND EXISTS(SELECT TOP 1 1 FROM vyuEME2C2Role WHERE intEntityId = @EntityId AND ysnAdmin = 1)
 		BEGIN
 			DECLARE @ToggleOutput	NVARCHAR(200)
-			DECLARE @UserRoleId		INT
+
 			EXEC uspEMTogglePortalAccess
 				@intEntityId				= @EntityId,
 				@intEntityContactId			= @NewEntityId,
 				@ysnEnablePortalAccess		= 1,
 				@message					= @ToggleOutput OUTPUT,
-				@intUserRoleId				= @UserRoleId OUTPUT
+				@intUserRoleId				= @UserRoleId,
+				@strPassword				= @PortalPassword
 
 			IF ISNULL(@ToggleOutput, '''') <> ''''
 			BEGIN
@@ -187,6 +211,7 @@ UPDATE tblSMCSVDynamicImport SET
 	END
 
 '
+
 	 WHERE intCSVDynamicImportId = @NewHeaderId
 
 	 DELETE FROM tblSMCSVDynamicImportParameter WHERE intCSVDynamicImportId = @NewHeaderId
@@ -223,7 +248,9 @@ UPDATE tblSMCSVDynamicImport SET
 	Union All
 	SELECT @NewHeaderId, 'rank', 'Rank', 0
 	Union All
-	SELECT @NewHeaderId, 'portal', 'Portal Access', 0
+	SELECT @NewHeaderId, 'portalUserRole', 'Portal User Role', 0
+	Union All
+	SELECT @NewHeaderId, 'portalPassword', 'Portal Password', 0
 
 -- Customer Contact Import End
 
@@ -255,6 +282,7 @@ UPDATE tblSMCSVDynamicImport SET
 	declare @mobileno								nvarchar(100)
 	declare @locationname							nvarchar(100)
 	declare @freightterm							nvarchar(100)
+	declare @lob									nvarchar(100)
 
 
 	declare @printedname							nvarchar(100)
@@ -352,6 +380,9 @@ UPDATE tblSMCSVDynamicImport SET
 	
 	declare @genfederaltaxid						nvarchar(50)
 	declare @genstatetaxid							nvarchar(50)
+
+	declare @taxgroup								nvarchar(100)
+
 	SELECT 
 		@entityno = ''@entityno@'',														@name = ''@name@'',
 		@phone = ''@phone@'',																@contactname= ''@contactname@'',
@@ -417,7 +448,7 @@ UPDATE tblSMCSVDynamicImport SET
 		@patronagemembershipdate = ''@patronagemembershipdate@'',
 		@patronagebirthdate = ''@patronagebirthdate@'',									@patronagestockstatus = ''@patronagestockstatus@'',
 		@patronagedeceaseddate = ''@patronagedeceaseddate@'',								@patronagelastactivitydate = ''@patronagelastactivitydate@'',
-		@genstatetaxid = ''@genstatetaxid@'', @genfederaltaxid = ''@genfederaltaxid@'', @freightterm = ''@freightterm@'',
+		@genstatetaxid = ''@genstatetaxid@'', @genfederaltaxid = ''@genfederaltaxid@'', @freightterm = ''@freightterm@'', @taxgroup = ''@taxgroup@'', @lob = ''@lob@'',
 
 
 		@IsValid = 1
@@ -455,6 +486,8 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @approvalpastdueid					int
 		declare @approvalpricechargeid				int
 		declare @freighttermid						int
+		declare @taxgroupId							int
+		declare @lobid								int
 
 		if ISNULL(@entityno, '''') = '''' AND ISNULL(@detailcustomerno, '''') <> ''''
 		begin
@@ -893,6 +926,27 @@ UPDATE tblSMCSVDynamicImport SET
 			end
 		end
 
+		if @taxgroup <> ''''
+		begin
+			select @taxgroupid = intTaxGroupId from tblSMTaxGroup where strTaxGroup = @taxgroup
+
+			if isnull(@taxgroupid, 0) <= 0
+			begin
+				set @ValidationMessage = @ValidationMessage + '', Tax Group (''+  @taxgroup +'') does not exists.''
+				set @IsValid = 0
+			end
+		end
+
+		if @lob <> ''''
+		begin
+			select @lobid = intLineOfBusinessId from tblSMLineOfBusiness where strLineOfBusiness = @lob
+
+			if isnull(@lobid, 0) <= 0
+			begin
+				set @ValidationMessage = @ValidationMessage + '', Line of Business (''+  @lob +'') does not exists.''
+				set @IsValid = 0
+			end
+		end
 
 		if isnull(@printedname, '''') = ''''
 		BEGIN
@@ -907,13 +961,15 @@ UPDATE tblSMCSVDynamicImport SET
 
 			set @entityId = @@IDENTITY
 
+			exec uspSMUpdateEntityStartingNumber @entityno		
+
 			insert into tblEMEntity(strName, strContactNumber, strSuffix, strEmail, intLanguageId, strInternalNotes)
 			select @contactname, '''', @suffix, @email, @languageId, @internalnotes
 
 			set @contactId = @@IDENTITY
 
-			insert into tblEMEntityLocation(intEntityId, strLocationName, strCheckPayeeName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, intDefaultCurrencyId, intTermsId, intShipViaId, ysnDefaultLocation, intFreightTermId)
-			select @entityId, @locationname, @printedname, @address, @city, @state, @zip, @country, @timezone, @defaultCurId, @detailTermsId, @detailShipViaId, 1, @freighttermid
+			insert into tblEMEntityLocation(intEntityId, strLocationName, strCheckPayeeName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, intDefaultCurrencyId, intTermsId, intShipViaId, ysnDefaultLocation, intFreightTermId, intTaxGroupId)
+			select @entityId, @locationname, @printedname, @address, @city, @state, @zip, @country, @timezone, @defaultCurId, @detailTermsId, @detailShipViaId, 1, @freighttermid, @taxgroupid
 
 			set @locationId = @@IDENTITY
 
@@ -1096,6 +1152,10 @@ UPDATE tblSMCSVDynamicImport SET
 				insert into tblARCustomerCompetitor(intEntityCustomerId, intEntityId)
 					select @entityId, @detailCurrentSysId
 
+			if isnull(@lobid, 0) > 0
+				insert into tblEMEntityLineOfBusiness(intEntityId, intLineOfBusinessId)
+					select @entityId, @lobid
+
 
 		end
 
@@ -1139,6 +1199,8 @@ UPDATE tblSMCSVDynamicImport SET
 	SELECT @NewHeaderId, 'zip', 'Zip', 0
 	Union All
 	SELECT @NewHeaderId, 'country', 'Country', 0
+	Union All
+	SELECT @NewHeaderId, 'lob', 'LOB', 0
 	Union All
 	SELECT @NewHeaderId, 'timezone', 'TimeZone', 0
 	Union All
@@ -1309,8 +1371,9 @@ UPDATE tblSMCSVDynamicImport SET
 	SELECT @NewHeaderId, 'genfederaltaxid', 'GEN FEDTAX ID', 0
 	Union All
 	SELECT @NewHeaderId, 'genstatetaxid', 'GEN STATE TAX ID', 0
-
-	--General Tab
+	--Location
+	Union All
+	SELECT @NewHeaderId, 'taxgroup', 'Tax Group', 0
 
 
 --Customer Import End
@@ -1664,14 +1727,22 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @ShipViaId		INT
 	DECLARE @AmountS		NVARCHAR(100)
 	DECLARE @Amount			NUMERIC (18, 6)	
-	DECLARE @RateS			NVARCHAR(100)
-	DECLARE @Rate			NUMERIC (18, 6)
+	DECLARE @FreightOutStr	NVARCHAR(100)
+	DECLARE @FreightOut		NUMERIC (18, 6)
+	DECLARE @FreightInStr	NVARCHAR(100)
+	DECLARE @FreightIn		NUMERIC (18, 6)
 	DECLARE @MilesS			NVARCHAR(100)
 	DECLARE @Miles			NUMERIC (18, 6)
 	DECLARE @FreightPrice	NVARCHAR(100)
 	DECLARE @FreightPriceB	BIT
 	DECLARE @UnitS			NVARCHAR(100)
-	DECLARE @Unit			NUMERIC (18, 6)	
+	DECLARE @Unit			NUMERIC (18, 6)
+	DECLARE @UnitInS		NVARCHAR(100)
+	DECLARE @UnitIn			NUMERIC (18, 6)
+	DECLARE @TariffType		NVARCHAR(100)
+	DECLARE @TariffTypeId	INT
+	DECLARE @SurchargeOutS	NVARCHAR(100)
+	DECLARE @SurchargeOut	NUMERIC (18, 6)
 
 	SELECT
 			@EntityNo 		= ''@entityCustomerId@'',
@@ -1682,21 +1753,29 @@ UPDATE tblSMCSVDynamicImport SET
 			@FreightType 	= ''@freighttype@'',
 			@ShipVia 		= ''@freightshipvia@'',
 			@AmountS		= ''@freightamount@'',
-			@RateS			= ''@freightrate@'',
+			@FreightOutStr	= ''@freightrateout@'',
+			@FreightInStr	= ''@freightratein@'',
 			@MilesS			= ''@freightmiles@'',
 			@FreightPrice	= LOWER(''@freightprice@''),
 			@UnitS			= ''@freightunit@'',
+			@UnitInS		= ''@freightunitIn@'',
+			@TariffType		= ''@tarifftype@'',
+			@SurchargeOutS  = ''@surchargeout@'',
 			
 			@CusLocId 		= NULL,
 			@ItemCatId		= NULL,
 			@FreightOnlyB	= 0,
 			@ShipViaId		= NULL,
 			@Amount			= 0,
-			@Rate			= 0,
+			@FreightOut		= 0,
+			@FreightIn		= 0,
 			@Miles			= 0,
 			@FreightPriceB	= 0,
 			@Unit			= 0,
-			@EntityId		= NULL
+			@UnitIn			= 0,
+			@EntityId		= NULL,
+			@TariffTypeId	= NULL,
+			@SurchargeOut   = 0
 
 	
 
@@ -1734,6 +1813,18 @@ UPDATE tblSMCSVDynamicImport SET
 		END			
 
 	END
+
+
+	IF @TariffType <> ''''   
+	BEGIN    
+		SELECT @TariffTypeId = ET.intEntityTariffTypeId    FROM      tblEMEntityTariffType ET   WHERE ET.strTariffType = @TariffType      
+		IF ISNULL(@TariffTypeId, 0) <= 0    
+		BEGIN     
+			SET @ValidationMessage = @ValidationMessage + '',Tariff Type does not exists.''     
+			SET @IsValid = 0    
+		END     
+	END 
+
 		
 	IF @AmountS <> ''''
 	BEGIN
@@ -1747,13 +1838,25 @@ UPDATE tblSMCSVDynamicImport SET
 
 	END
 	
-	IF @RateS <> ''''
+	IF @FreightOutStr <> ''''
 	BEGIN
-		IF ISNUMERIC(@RateS) = 1
-			SELECT @Rate = CAST(@RateS AS NUMERIC(18,6))
+		IF ISNUMERIC(@FreightOutStr) = 1
+			SELECT @FreightOut = CAST(@FreightOutStr AS NUMERIC(18,6))
 		ELSE
 		BEGIN
-			SET @ValidationMessage	= @ValidationMessage + '',Rate is invalid.''
+			SET @ValidationMessage	= @ValidationMessage + '',Freight Rate Out is invalid.''
+			SET @IsValid = 0
+		END
+
+	END
+
+	IF @FreightInStr <> ''''
+	BEGIN
+		IF ISNUMERIC(@FreightInStr) = 1
+			SELECT @FreightIn = CAST(@FreightInStr AS NUMERIC(18,6))
+		ELSE
+		BEGIN
+			SET @ValidationMessage	= @ValidationMessage + '',Freight Rate In is invalid.''
 			SET @IsValid = 0
 		END
 
@@ -1777,12 +1880,37 @@ UPDATE tblSMCSVDynamicImport SET
 			SELECT @Unit = CAST(@UnitS AS NUMERIC(18,6))
 		ELSE
 		BEGIN
-			SET @ValidationMessage	= @ValidationMessage + '',Unit is invalid.''
+			SET @ValidationMessage	= @ValidationMessage + '',Minimum Units Out is invalid.''
 			SET @IsValid = 0
 		END
 
 	END
 
+
+	IF @UnitInS <> ''''
+	BEGIN
+		IF ISNUMERIC(@UnitInS) = 1
+			SELECT @UnitIn = CAST(@UnitInS AS NUMERIC(18,6))
+		ELSE
+		BEGIN
+			SET @ValidationMessage	= @ValidationMessage + '',Mininum Units In is invalid.''
+			SET @IsValid = 0
+		END
+
+	END
+
+
+	IF @SurchargeOutS <> ''''
+	BEGIN
+		IF ISNUMERIC(@SurchargeOutS) = 1
+			SELECT @SurchargeOut = CAST(@SurchargeOutS AS NUMERIC(18,6))
+		ELSE
+		BEGIN
+			SET @ValidationMessage	= @ValidationMessage + '',Surcharge-Out is invalid.''
+			SET @IsValid = 0
+		END
+
+	END
 
 	
 
@@ -1819,26 +1947,34 @@ UPDATE tblSMCSVDynamicImport SET
 			IF LOWER(@FreightType) = ''amount''
 			BEGIN
 				SELECT @ShipViaId = NULL, 	
-						@Rate = 0,			@Miles = 0,
-						@Unit = 0
+						@FreightIn = 0,			@Miles = 0, 
+						@FreightOut = 0,
+						@Unit = 0,
+						@UnitIn = 0,
+						@SurchargeOut = 0
+
 			END
 			ELSE IF LOWER(@FreightType) = ''miles''
 			BEGIN
 				SELECT @Amount = 0,
-						@Rate = 0,			
-						@Unit = 0
+						@FreightIn = 0,		
+						@FreightOut = 0,			
+						@Unit = 0,
+						@UnitIn = 0,
+						@SurchargeOut = 0
 
 			END
 			ELSE IF LOWER(@FreightType) = ''rate''
 			BEGIN
-				SELECT @ShipViaId = NULL, 	@Amount = 0,
-						@Miles = 0
+				SELECT @Amount = 0, @Miles = 0
 			END
 			ELSE
 			BEGIN
 				SELECT @ShipViaId = NULL, 	@Amount = 0,
-						@Rate = 0,			@Miles = 0,
-						@Unit = 0
+						@FreightIn = 0,			@Miles = 0,
+						@FreightOut = 0,	
+						@Unit = 0,
+						@UnitIn = 0
 			END
 			BEGIN TRY
 				INSERT INTO tblARCustomerFreightXRef(
@@ -1848,16 +1984,20 @@ UPDATE tblSMCSVDynamicImport SET
 					dblMinimumUnits,			ysnFreightInPrice,
 					dblFreightMiles,			intShipViaId,
 					intEntityLocationId,		strZipCode,
-					intConcurrencyId	
+					intEntityTariffTypeId,		intConcurrencyId,
+					dblFreightRateIn,			dblMinimumUnitsIn,
+					dblSurchargeOut
 				)
 				SELECT
 					@EntityId,					@ItemCatId,
 					@FreightOnlyB,				@FreightType,
-					@Amount,					@Rate,
+					@Amount,					@FreightOut,
 					@Unit,						@FreightPriceB,
 					@Miles,						@ShipViaId,
 					@CusLocId,					@ZipCode,
-					0
+					@TariffTypeId,				0,
+					@FreightIn,					@UnitIn,
+					@SurchargeOut
 			END TRY
 			BEGIN CATCH
 				DECLARE @Err NVARCHAR(MAX)
@@ -1906,13 +2046,21 @@ UPDATE tblSMCSVDynamicImport SET
 	Union All
 	SELECT @NewHeaderId, 'freightamount', 'Freight Amount', 0
 	Union All
-	SELECT @NewHeaderId, 'freightrate', 'Freight Rate', 0
+	SELECT @NewHeaderId, 'freightrateout', 'Freight-Out', 0
+	Union All
+	SELECT @NewHeaderId, 'freightratein', 'Freight-In', 0
 	Union All
 	SELECT @NewHeaderId, 'freightmiles', 'Freight Miles', 0
 	Union All
 	SELECT @NewHeaderId, 'freightprice', 'Freight in Price', 0
 	Union All
-	SELECT @NewHeaderId, 'freightunit', 'Minimum Units', 0
+	SELECT @NewHeaderId, 'freightunit', 'Minimum Unit-Out', 0
+	Union All
+	SELECT @NewHeaderId, 'freightunitin', 'Minimum Unit-In', 0
+	Union All
+	SELECT @NewHeaderId, 'surchargeout', 'Surcharge-Out', 0
+	Union All
+	SELECT @NewHeaderId, 'tarifftype', 'Tariff Type', 1
 
 --Transport Freight Tab End
 
@@ -2329,7 +2477,7 @@ UPDATE tblSMCSVDynamicImport SET
 			)
 			SELECT
 				@entityId,		
-				@location_name,
+				@location_name,				
 				@address,				
 				@city, 
 				@country,				
@@ -2358,7 +2506,7 @@ UPDATE tblSMCSVDynamicImport SET
 				@latitudeNo,
 				@timezone,	
 				
-				@check_payee_name,
+				ISNULL(NULLIF(@check_payee_name, ''''), @location_name),
 				@defaultcurrencyId,
 				@vendorlinkId,
 				@location_description,	
@@ -2582,22 +2730,21 @@ UPDATE tblSMCSVDynamicImport SET
 		IF(@customer_id = '''')
 		BEGIN
 			SET @intEntityCustomerId = NULL
+			SET @IsValid = 0
+			SET @ValidationMessage = @ValidationMessage + '' '' + ''customer_id should not be Empty''
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@customer_id AS INT) IS NULL )
+			IF NOT EXISTS
+				(Select TOP 1 1 from tblARCustomer
+				Where strCustomerNumber = @customer_id)  AND  @customer_id <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_id should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage = @ValidationMessage + '' ''+''intEntityCustomerId :''+CAST(@intEntityCustomerId AS NVARCHAR(100))+'' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intEntityCustomerId = CONVERT(INT,@customer_id)
-				IF NOT EXISTS(Select TOP 1 1 from tblARCustomer Where intEntityId = @intEntityCustomerId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''intEntityCustomerId :''+CAST(@intEntityCustomerId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intEntityCustomerId =   (Select intEntityId from tblARCustomer  where strCustomerNumber  = @customer_id)
 			END
 		END
 
@@ -2607,19 +2754,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@customer_location AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblSMCompanyLocation
+			    Where strLocationName = @customer_location
+			) AND  @customer_location <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''customer_location id :'' + CAST(@intCustomerLocationId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intCustomerLocationId = CONVERT(INT,@customer_location)
-				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intCustomerLocationId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location id :''+CAST(@intCustomerLocationId AS NVARCHAR(100) ) +'' is not Exist''
-				END
+				SET @intCustomerLocationId =   (Select intCompanyLocationId from tblSMCompanyLocation  where strLocationNumber  = @customer_location)
 			END
 		END
 
@@ -2629,19 +2779,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@origin_vendor_no AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblAPVendor
+			    Where strVendorId = @origin_vendor_no
+			) AND  @origin_vendor_no <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''origin_vendor_no  :'' + CAST(@intEntityVendorId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intEntityVendorId = CONVERT(INT,@origin_vendor_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblAPVendor Where intEntityId = @intEntityVendorId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_no  :''+CAST(@intEntityVendorId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intEntityVendorId =   (Select intEntityId from tblAPVendor  where strVendorId  = @origin_vendor_no)
 			END
 		END
 
@@ -2651,19 +2804,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@origin_vendor_location AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblSMCompanyLocation
+			    Where strLocationName = @origin_vendor_location
+			) AND  @origin_vendor_location <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_location should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''origin_vendor_location  :'' + CAST(@intEntityLocationId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intEntityLocationId = CONVERT(INT,@origin_vendor_location)
-				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intEntityLocationId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_location  :''+CAST(@intEntityLocationId AS NVARCHAR(100) )+'' is not Exist''
-				END
+					SET @intRackLocationId =   (Select intCompanyLocationId from tblSMCompanyLocation  where  strLocationNumber = @origin_vendor_location)
 			END
 		END
 
@@ -2673,19 +2829,15 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@item_no AS INT) IS NULL )
+			IF NOT EXISTS (Select TOP 1 1 from tblICItem Where strItemNo = @item_no) AND  @item_no <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''item_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''item_no  :'' + CAST(@intItemId AS NVARCHAR(100)) + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intItemId = CONVERT(INT,@item_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intItemId = @intItemId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''item_no  :''+CAST(@intItemId AS NVARCHAR(100) )+'' is not Exist''
-				END
+				SET @intItemId =   (Select intItemId from tblICItem  where  strItemNo = @item_no)
 			END
 		END
 
@@ -2695,19 +2847,21 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@item_category AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblICCategory
+			    Where strCategoryCode = @item_category
+			) AND  @item_category <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''item_category should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''item_no  :'' + CAST(@intCategoryId AS NVARCHAR(100)) + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intCategoryId = CONVERT(INT,@item_category)
-				IF NOT EXISTS(Select TOP 1 1 from tblICCategory Where intCategoryId = @intCategoryId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''item_no  :''+CAST(@intCategoryId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intCategoryId =  (Select intCategoryId from tblICCategory  where  strCategoryCode = @item_category)
 			END
 		END
 
@@ -2750,8 +2904,7 @@ UPDATE tblSMCSVDynamicImport SET
 
 		IF(@end_date = '''')
 		BEGIN
-			SET @IsValid = 0
-			SET @ValidationMessage = @ValidationMessage + '' ''+''end_date should not be Empty''
+			SET @IsValid = 1
 		END
 		ELSE
 		BEGIN
@@ -2772,19 +2925,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@fixed_rack_vendor_no AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblAPVendor
+			    Where strVendorId = @fixed_rack_vendor_no
+			) AND  @fixed_rack_vendor_no <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''fixed_rack_vendor_no :'' + CAST(@intRackVendorId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
 			ELSE 
 			BEGIN
-				SET @intRackVendorId = CONVERT(INT,@fixed_rack_vendor_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblAPVendor Where intEntityId = @intRackVendorId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_no :''+CAST(@intRackVendorId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intRackVendorId =  (Select intEntityId from tblAPVendor  where  strVendorId = @fixed_rack_vendor_no)
 			END
 		END
 
@@ -2794,19 +2950,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@fixed_rack_no AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblICItem
+			    Where strItemNo = @fixed_rack_no
+			) AND  @fixed_rack_no <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''fixed_rack_no :'' + CAST(@intRackItemId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intRackItemId = CONVERT(INT,@fixed_rack_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intItemId = @intRackItemId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_no :''+CAST(@intRackItemId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intRackItemId =  (Select intItemId from tblICItem  where  strItemNo = @fixed_rack_no)
 			END
 		END
 
@@ -2816,19 +2975,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@fixed_rack_vendor_location AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblEMEntityLocation
+			    Where strLocationName = @fixed_rack_vendor_location
+			) AND  @fixed_rack_vendor_location <> ''''
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_location should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''fixed_rack_vendor_location :'' + CAST(@fixed_rack_vendor_location AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intRackLocationId = CONVERT(INT,@fixed_rack_vendor_location)
-				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intRackLocationId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_location :''+CAST(@intRackLocationId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intRackLocationId =  (Select intEntityLocationId from tblEMEntityLocation  where  strLocationName = @fixed_rack_vendor_location)
 			END
 		END
 
@@ -2880,6 +3042,7 @@ UPDATE tblSMCSVDynamicImport SET
 	'
 	WHERE intCSVDynamicImportId = @NewHeaderId
 
+	DELETE FROM tblSMCSVDynamicImportParameter WHERE intCSVDynamicImportId = @NewHeaderId
 
 
 INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)

@@ -26,7 +26,7 @@ BEGIN TRY
      JOIN dbo.tblEMEntity AS E ON E.intEntityId = CH.intEntityId  
      JOIN dbo.tblCTContractDetail AS CD ON CD.intContractHeaderId = CH.intContractHeaderId  
      JOIN dbo.tblICItem AS I ON I.intItemId = CD.intItemId  
-     JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId'
+     JOIN dbo.tblQMSample AS S ON S.intContractDetailId = CD.intContractDetailId AND S.intTypeId = 1'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
 	BEGIN

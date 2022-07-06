@@ -13,7 +13,7 @@
 */
 GO
 IF	EXISTS(select top 1 1 from sys.procedures where name = 'uspCMImportBankAccountsFromOrigin')
-	AND (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+	AND (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN 
 
 	EXEC('ALTER PROCEDURE [dbo].[uspCMImportBankAccountsFromOrigin]
@@ -159,7 +159,7 @@ BEGIN
 					,ysnActive
 					,intGLAccountId
 					,intCurrencyId
-					,intBankAccountType
+					,intBankAccountTypeId
 					,strContact
 					,strBankAccountNo
 					,strRTN
@@ -206,7 +206,7 @@ BEGIN
 					,ysnActive							= CASE WHEN i.apcbk_active_yn = ''Y'' THEN 1 ELSE 0 END 
 					,intGLAccountId						= dbo.fnGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
 					,intCurrencyId						= ISNULL(dbo.fnGetCurrencyIdFromOriginToi21(i.apcbk_currency), @intCurrencyId)
-					,intBankAccountType					= @DEPOSIT_ACCOUNT
+					,intBankAccountTypeId					= @DEPOSIT_ACCOUNT
 					,strContact							= ''''
 					,strBankAccountNo					= [dbo].fnAESEncryptASym(ISNULL(i.apcbk_bank_acct_no, ''''))
 					,strRTN								= [dbo].fnAESEncryptASym(ISNULL(LeadingZero.Value, ''''))

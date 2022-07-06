@@ -19,6 +19,13 @@ DECLARE @SummaryLog AS RKSummaryLog
 DECLARE @LogHelper AS RKMiscField
 DECLARE @dblPreviousNoOfLots NUMERIC(24,10)
 
+-- SHOULD NOT LOG OTC DERIVATIVES
+IF EXISTS (SELECT TOP 1 '' FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
+			AND intSelectedInstrumentTypeId = 2)
+BEGIN
+	RETURN
+END
+
 IF @action = 'HEADER DELETE' --This scenario is when you delete the entire derivative entry. 
 BEGIN
 	
@@ -189,8 +196,8 @@ BEGIN
 		, dblStrike = der.dblStrike
 		, strOptionType = der.strOptionType
 		, strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
-						WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
-						WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+						WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options' END COLLATE Latin1_General_CI_AS
+						--WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
 		, der.intBrokerageAccountId
 		, strBrokerAccount = BA.strAccountNumber
 		, strBroker = e.strName

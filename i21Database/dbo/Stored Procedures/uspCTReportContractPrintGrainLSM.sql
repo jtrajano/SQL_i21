@@ -18,6 +18,7 @@ BEGIN TRY
 			@strZip					NVARCHAR(500),
 			@strCountry				NVARCHAR(500),
 			@intContractHeaderId	NVARCHAR(MAX),
+			@intContractDetailId	INT,
 			@FirstApprovalId		INT,
 			@SecondApprovalId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
@@ -41,6 +42,14 @@ BEGIN TRY
 			@strAmendedColumns						NVARCHAR(MAX),
 			@xmlDocumentId			INT,
 			@intDecimalDPR			INT
+
+	declare
+		@strSequenceShipToAddress nvarchar(255)
+		,@strSequenceShipToCity nvarchar(255)
+		,@strSequenceShipToState nvarchar(255)
+		,@strSequenceShipToZipCode nvarchar(255)
+		,@strSequenceShipToCountry nvarchar(255)
+		;
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -77,6 +86,12 @@ BEGIN TRY
 	SELECT	@intContractHeaderId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intContractHeaderId' 
+    
+	SELECT	@intContractDetailId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intContractDetailId' 
+
+
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -172,14 +187,12 @@ BEGIN TRY
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
 		tblCTContractHeader ch
-		,tblSMMultiCompany smc
-		,tblIPMultiCompany mc
-		,tblSMUserSecurity us
+		inner join tblSMMultiCompany smc on smc.intMultiCompanyId = ch.intCompanyId
+		inner join tblIPMultiCompany mc on mc.intCompanyId = smc.intMultiCompanyId
+		inner join tblSMUserSecurity us on lower(us.strUserName) = lower(mc.strApprover)
 	where
 		ch.intContractHeaderId = @intContractHeaderId
-		and smc.intMultiCompanyId = ch.intCompanyId
-		and mc.intCompanyId = smc.intMultiCompanyId
-		and lower(us.strUserName) = lower(mc.strApprover)
+		
 
 	select
 		@ysnIsParent = t.ysnIsParent
@@ -221,8 +234,7 @@ BEGIN TRY
 		left join tblSMSignature l  on l.intEntityId = k.intEntityId and l.intSignatureId = k.intElectronicSignatureId
 		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
 		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId 
-	
-	
+
 	--CONTRACT CREATOR SIGNATORIES
 	SELECT @CreatorSign = sms.blbDetail
 	FROM
@@ -235,17 +247,37 @@ BEGIN TRY
 	LEFT join tblEMEntitySignature ems on ems.intEntityId = t.intSalespersonId
 	LEFT join tblSMSignature sms  on sms.intEntityId = ems.intEntityId and sms.intSignatureId = ems.intElectronicSignatureId 
 
-	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
+	if exists (select top 1 1 from tblCTCompanyPreference where isnull(ysnListAllCustomerVendorLocations,0) = 1) and isnull(@intContractDetailId,0) > 0
+	begin
+		select
+			@strSequenceShipToAddress = ltrim(rtrim(isnull(cdl.strAddress,'')))
+			,@strSequenceShipToCity = ltrim(rtrim(isnull(cdl.strCity,'')))
+			,@strSequenceShipToState = ltrim(rtrim(isnull(cdl.strState,'')))
+			,@strSequenceShipToZipCode = ltrim(rtrim(isnull(cdl.strZipCode,'')))
+			,@strSequenceShipToCountry = ltrim(rtrim(isnull(cdl.strCounty,'')))
+		from
+			tblCTContractDetail cd
+			join tblEMEntityLocation cdl on cdl.intEntityLocationId = cd.intShipToId
+		where
+			cd.intContractDetailId = @intContractDetailId
+	end
+	else
+	begin
+		select @intContractDetailId = null;
+	end
+
+
+	SELECT @strCompanyName + CHAR(13)+CHAR(10) +
 			ISNULL(@strAddress,'') + CHAR(13)+CHAR(10) +
 			ISNULL(@strCity,'') +ISNULL(', '+@strState,'') + ISNULL('  '+@strZip,'') + CHAR(13)+CHAR(10) +  
 			ISNULL(@strCountry,'')
 			AS	strA,
 			LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'')+ CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
-			ISNULL('  '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
-			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
+			(case when @intContractDetailId is not null then @strSequenceShipToAddress else ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'') end) + CHAR(13)+CHAR(10) +
+			(case when @intContractDetailId is not null then @strSequenceShipToCity else ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') end) + 
+			(case when @intContractDetailId is not null then ', ' + @strSequenceShipToState else ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') end) + 
+			(case when @intContractDetailId is not null then '  ' + @strSequenceShipToZipCode else ISNULL('  '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') end) + CHAR(13)+CHAR(10) + 
+			(case when @intContractDetailId is not null then @strSequenceShipToCountry else ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'') end)
 			AS	strB,
 			CH.dtmContractDate,
 			CH.strContractNumber,
@@ -290,16 +322,16 @@ BEGIN TRY
 		   ,CH.strFreightTerm
 		   ,LGMContractSubmitByParentSignature	= @blbParentSubmitSignature
 		   ,LGMContractSubmitSignature			= @blbChildSubmitSignature
-		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  IN (1,2) THEN @FirstApprovalSign ELSE NULL END 
+		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  IN (1,2) THEN @FirstApprovalSign ELSE NULL END
 		   --OLD
 		   --,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @SecondApprovalSign ELSE NULL END 
 		   ,strLogoType							= CASE WHEN @CreatorSign IS NOT NULL  THEN 'System' ELSE 'SalesAttachment' END
 		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN ISNULL(@CreatorSign, (SELECT TOP 1 Sig.blbFile FROM tblSMUpload Sig  WITH (NOLOCK) WHERE Sig.intAttachmentId=CH.intAttachmentSignatureId)) ELSE NULL  END 
 		   ,blbPurchaseContractFirstApproverSignature	= NULL--CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
-		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END
+		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END 
 	FROM	vyuCTContractHeaderView CH
-	LEFT JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
-	WHERE	intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
+	LEFT JOIN tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
+	WHERE	CH.intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 

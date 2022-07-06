@@ -93,6 +93,52 @@ AS
 		--WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
 	) storage
 	WHERE voucherDetail.intCustomerStorageId IS NOT NULL AND voucherDetail.intCustomerStorageId > 0
+	UNION ALL
+	SELECT
+	voucherDetail.intBillDetailId
+	,intInventoryReceiptItemId = NULL
+	,intPurchaseDetailId = NULL
+	,strSourceNumber = claim.strReferenceNumber
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			wc.strReferenceNumber
+			  FROM tblLGWeightClaim wc
+			  WHERE wc.intWeightClaimId = voucherDetail.intWeightClaimId
+		--INNER JOIN tblGRSettleStorageTicket ticket ON storage.intSettleStorageId = ticket.intSettleStorageId
+		--WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
+	) claim
+	WHERE voucherDetail.intWeightClaimId IS NOT NULL AND voucherDetail.intWeightClaimId > 0
+	UNION ALL
+	SELECT
+		voucherDetail.intBillDetailId
+		,intInventoryReceiptItemId = NULL
+		,intPurchaseDetailId = NULL
+		,strSourceNumber = storageCharge.strStorageChargeNumber
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			schrge.strStorageChargeNumber
+		FROM tblICStorageCharge schrge
+		INNER JOIN tblICStorageChargeDetail schrgedtl ON schrge.intStorageChargeId = schrgedtl.intStorageChargeId
+		WHERE schrgedtl.intStorageChargeDetailId = voucherDetail.intStorageChargeId
+	) storageCharge
+	WHERE voucherDetail.intStorageChargeId IS NOT NULL AND voucherDetail.intStorageChargeId > 0
+	UNION ALL
+	SELECT
+		voucherDetail.intBillDetailId
+		,intInventoryReceiptItemId = NULL
+		,intPurchaseDetailId = NULL
+		,strSourceNumber = insuranceCharge.strChargeNo
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			ichrge.strChargeNo
+		FROM tblICInsuranceCharge ichrge
+		INNER JOIN tblICInsuranceChargeDetail ichrgedtl ON ichrge.intInsuranceChargeId = ichrgedtl.intInsuranceChargeId
+		WHERE ichrgedtl.intInsuranceChargeDetailId = voucherDetail.intInsuranceChargeDetailId
+	) insuranceCharge
+	WHERE voucherDetail.intInsuranceChargeDetailId IS NOT NULL AND voucherDetail.intInsuranceChargeDetailId > 0
 	--INNER JOIN
 	--(
 	--	--PO Items

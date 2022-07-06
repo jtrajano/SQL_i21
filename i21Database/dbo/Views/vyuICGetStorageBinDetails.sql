@@ -27,6 +27,15 @@ SELECT
 	, intItemUOMId				= im.intItemUOMId
 	, strUOM					= um.strUnitMeasure
 	, i.strStatus
+	, Certification.intCertificationId
+	, Certification.strCertificationName
+	, strGrade					= Grade.strDescription
+	, strOrigin 				= Origin.strDescription
+	, strProductType			= ProductType.strDescription
+	, strRegion 				= Region.strDescription
+	, strSeason 				= Season.strDescription
+	, strClass 					= Class.strDescription
+	, strProductLine			= ProductLine.strDescription
 FROM vyuICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
 	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
@@ -75,5 +84,22 @@ FROM vyuICItemStockUOM sm
 		AND mrc.intStorageMeasurementReadingId = smr.intStorageMeasurementReadingId
 	LEFT JOIN tblGRDiscountId grd 
 		ON grd.intDiscountId = mrc.intDiscountSchedule
+	
+	LEFT JOIN tblICCertification Certification
+		ON Certification.intCertificationId = i.intCertificationId
+	LEFT JOIN tblICCommodityAttribute Grade
+		ON Grade.intCommodityAttributeId = i.intGradeId
+	LEFT JOIN tblICCommodityAttribute Origin
+		ON Origin.intCommodityAttributeId = i.intOriginId
+	LEFT JOIN tblICCommodityAttribute ProductType
+		ON ProductType.intCommodityAttributeId = i.intProductTypeId
+	LEFT JOIN tblICCommodityAttribute Region
+		ON Region.intCommodityAttributeId = i.intRegionId
+	LEFT JOIN tblICCommodityAttribute Season
+		ON Season.intCommodityAttributeId = i.intSeasonId
+	LEFT JOIN tblICCommodityAttribute Class
+		ON Class.intCommodityAttributeId = i.intClassVarietyId
+	LEFT JOIN tblICCommodityProductLine ProductLine
+		ON ProductLine.intCommodityProductLineId = i.intProductLineId
 WHERE 
 	i.strType = 'Inventory'	

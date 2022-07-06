@@ -49,13 +49,25 @@ SELECT TR.intTestResultId
 	,TR.intSequenceNo
 	,B.strBook
 	,SB.strSubBook
+	,CH.intContractHeaderId
+	,S.intItemId
+	,S.dtmCreated
+	,CE.strName AS strCreatedUserName
+	,S.dtmLastModified AS dtmLastUpdated
+	,UE.strName AS strUpdatedUserName
+	,I.strOrigin 
+	,I.strProductType
+	,I.strGrade,strRegion
+	,I.strSeason
+	,I.strClass
+	,I.strProductLine
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN dbo.tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
-LEFT JOIN dbo.tblICItem AS I ON I.intItemId = S.intItemId
+LEFT JOIN dbo.vyuICSearchItem AS I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblEMEntity AS E ON E.intEntityId = S.intEntityId
@@ -75,7 +87,7 @@ LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intProductValueId
 	AND S.intProductTypeId = 8
 LEFT JOIN dbo.tblCTContractHeader AS CH ON CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
+LEFT JOIN tblICCommodity CY ON CY.intCommodityId = ISNULL(CH.intCommodityId, I.intCommodityId)
 LEFT JOIN dbo.tblLGLoadDetail AS LD ON LD.intLoadDetailId = S.intProductValueId
 	AND S.intProductTypeId = 10
 LEFT JOIN dbo.tblLGLoad AS LL ON LL.intLoadId = LD.intLoadId
@@ -91,3 +103,6 @@ LEFT JOIN dbo.tblLGLoadDetail AS LD2 ON LD2.intLoadDetailId = SCC.intLoadDetailI
 LEFT JOIN dbo.tblLGLoad AS LL2 ON LL2.intLoadId = LD2.intLoadId
 LEFT JOIN dbo.tblCTContractDetail AS CD2 ON CD2.intContractDetailId = LD2.intPContractDetailId
 LEFT JOIN dbo.tblCTContractHeader AS CH2 ON CH2.intContractHeaderId = CD2.intContractHeaderId
+LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
+LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
+WHERE S.intTypeId = 1

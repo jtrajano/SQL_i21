@@ -46,6 +46,14 @@ BEGIN
 			,[dtmExpiryDate]
 			,[strParentLotNumber]
 			,[strParentLotAlias]
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
+			,[dblTare]
+			,[dblTarePerQty]
+			,[strWarrantNo]
+			,[intWarrantStatus]
 	)
 	SELECT	[intLotId]					= Detail.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -94,11 +102,22 @@ BEGIN
 			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
 			,[strParentLotNumber]		= Detail.strParentLotNo
 			,[strParentLotAlias]		= Detail.strParentLotAlias
+			,intContractHeaderId		= SourceLot.intContractHeaderId
+			,intContractDetailId		= SourceLot.intContractDetailId
+			,ysnWeighed					= SourceLot.ysnWeighed
+			,strSealNo					= SourceLot.strSealNo
+			,[dblTare]					= SourceLot.dblTare
+			,[dblTarePerQty]			= SourceLot.dblTarePerQty
+			,[strWarrantNo]				= SourceLot.strWarrantNo
+			,[intWarrantStatus]			= SourceLot.intWarrantStatus
+
 	FROM tblICInventoryCount Header
 		INNER JOIN tblICInventoryCountDetail Detail ON Detail.intInventoryCountId = Header.intInventoryCountId
 		INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId
 			AND ItemLocation.intLocationId = Header.intLocationId
+		LEFT JOIN tblICLot SourceLot 
+			ON SourceLot.intLotId = Detail.intLotId
 	WHERE Header.intInventoryCountId = @intTransactionId
 		AND (
 			ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) > 0 

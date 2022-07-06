@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@Guid						NVARCHAR(MAX)  
 	,@UserId					NVARCHAR(MAX)  
@@ -33,6 +32,8 @@ BEGIN
 
 	DELETE tblCFInvoiceStagingTable					WHERE strUserId is null
 	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null AND strStatementFormat = @strStatementFormat
+	
+	DELETE FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId  
 
 BEGIN TRY
 
@@ -109,6 +110,26 @@ BEGIN TRY
 		@strCustomerNumber = ISNULL([from],'')
 	FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
 
+
+	DECLARE @ysnInvoiceBillingCycleFee BIT
+	SELECT TOP 1
+			@ysnInvoiceBillingCycleFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnBillingCycle'
+
+	DECLARE @ysnInvoiceMonthyFee BIT
+	SELECT TOP 1
+			@ysnInvoiceMonthyFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnMonthly'
+
+	DECLARE @ysnInvoiceAnnualFee BIT
+	SELECT TOP 1
+			@ysnInvoiceAnnualFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnInvoiceAnnualFee'
+
+	
+
+
+
 		
 	SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
 
@@ -145,6 +166,17 @@ BEGIN TRY
 
 	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId 
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @UserId = @UserId , @StatementType = @StatementType
+	
+
+	DELETE FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId  
+	EXEC [uspCFInvoiceReportTieredUnitDiscount] 
+		 @InvoiceDate = @dtmInvoiceDate
+		,@UserId = @UserId
+		,@StatementType = @StatementType
+		,@ysnInvoiceBillingCycleFee =  @ysnInvoiceBillingCycleFee
+		,@ysnInvoiceMonthyFee = @ysnInvoiceMonthyFee
+		,@ysnInvoiceAnnualFee = @ysnInvoiceAnnualFee
+	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
@@ -296,6 +328,13 @@ BEGIN TRY
 	,ysnShowDriverPinDescriptionOnly
 	,ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd
+	,strDepartmentGrouping
+	,dblDiscountedCalculatedTotalPrice	
+	,dblDiscountedCalculatedNetPrice	
+	,dblDiscountedCalculatedGrossPrice	
+	,dblDiscountedTotalGrossAmount 		
+	,dblDiscountedTotalNetAmount		
+	,dblDiscountedTotalAmount			
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -608,6 +647,13 @@ BEGIN TRY
 	,ysnShowDriverPinDescriptionOnly
 	,ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd
+	,strDepartmentGrouping
+	,ISNULL(dblCalculatedTotalAmount,0)
+	,ISNULL(dblCalculatedNetAmount,0) 
+	,ISNULL(dblCalculatedGrossAmount,0) 
+	,ISNULL(dblTotalGrossAmount,0)
+	,ISNULL(dblTotalNetAmount,0) 
+	,ISNULL(dblTotalAmount,0) 
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
@@ -657,6 +703,22 @@ BEGIN TRY
 	--) AS cfMiscOdom
 	-----------------------------------------------------------
 	WHERE cfInvRpt.strUserId = @UserId 
+
+	--ADD PRICE DISCOUNT IN STAGING TABLE--
+	UPDATE tblCFInvoiceStagingTable 
+	SET
+	 dblDiscountedCalculatedTotalPrice = ISNULL(tblCFInvoiceStagingTable.dblCalculatedTotalAmount,0) + ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount,0)
+	,dblDiscountedCalculatedNetPrice = ISNULL(tblCFInvoiceStagingTable.dblCalculatedNetAmount,0) - ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate,0)
+	,dblDiscountedCalculatedGrossPrice = ISNULL(tblCFInvoiceStagingTable.dblCalculatedGrossAmount,0) - ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate,0)
+	,dblDiscountedTotalGrossAmount 	=  ISNULL(tblCFInvoiceStagingTable.dblTotalGrossAmount,0) - ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate,0) 
+	,dblDiscountedTotalNetAmount	=  ISNULL(tblCFInvoiceStagingTable.dblTotalNetAmount,0) + ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount,0)
+	,dblDiscountedTotalAmount		=  ISNULL(tblCFInvoiceStagingTable.dblTotalAmount,0) + ISNULL(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount,0)
+
+	FROM 
+	tblCFInvoiceReportTieredUnitDiscountTempTable
+	WHERE tblCFInvoiceReportTieredUnitDiscountTempTable.strUserId = tblCFInvoiceStagingTable.strUserId
+	AND tblCFInvoiceReportTieredUnitDiscountTempTable.[intTransactionId] = tblCFInvoiceStagingTable.[intTransactionId]
+	AND tblCFInvoiceReportTieredUnitDiscountTempTable.strUserId = @UserId 
 
 
 
@@ -945,19 +1007,19 @@ BEGIN TRY
 
 		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
-		UPDATE tblARCustomerStatementStagingTable
-		SET 
-		strCFEmail							=	  (SELECT TOP (1) strEmail
-																						FROM    dbo.vyuARCustomerContacts
-																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																						AND (ISNULL(strEmail, N'') <> ''))
-		,strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
-																						FROM    dbo.vyuARCustomerContacts
-																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																						AND (ISNULL(strEmail, N'') <> ''))	
-		WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
+		--UPDATE tblARCustomerStatementStagingTable
+		--SET 
+		--strCFEmail							=	  (SELECT TOP (1) strEmail
+		--																				FROM    dbo.vyuARCustomerContacts
+		--																				WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+		--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+		--																				AND (ISNULL(strEmail, N'') <> ''))
+		--,strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
+		--																				FROM    dbo.vyuARCustomerContacts
+		--																				WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+		--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+		--																				AND (ISNULL(strEmail, N'') <> ''))	
+		--WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 
 		UPDATE tblARCustomerStatementStagingTable
@@ -989,6 +1051,11 @@ BEGIN TRY
 		AND intEntityUserId = @intEntityUserId
 		AND LOWER(cfInv.strStatementType) =  LOWER(@StatementType)
 
+
+
+	
+
+
 		UPDATE tblARCustomerStatementStagingTable
 		SET
 				 tblARCustomerStatementStagingTable.intCFAccountId						=	  cfAccntTerm.intAccountId
@@ -996,17 +1063,17 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.strCFTermType						=	  cfAccntTerm.strType
 				,tblARCustomerStatementStagingTable.intCFTermID							=	  cfAccntTerm.intTermsCode
 
-				,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
-																								FROM    dbo.vyuARCustomerContacts as arCustCont
-																								WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																								AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																								AND (ISNULL(strEmail, N'') <> ''))
+				--,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
+				--																				FROM    dbo.vyuARCustomerContacts as arCustCont
+				--																				WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+				--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+				--																				AND (ISNULL(strEmail, N'') <> ''))
 
-				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
-																							FROM    dbo.vyuARCustomerContacts as arCustCont
-																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																							AND (ISNULL(strEmail, N'') <> ''))
+				--,tblARCustomerStatementStagingTable.strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
+				--																			FROM    dbo.vyuARCustomerContacts as arCustCont
+				--																			WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+				--																			AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+				--																			AND (ISNULL(strEmail, N'') <> ''))
 		FROM vyuCFAccountTerm cfAccntTerm
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfAccntTerm.intCustomerId
 		AND intEntityUserId = @intEntityUserId
@@ -1131,19 +1198,19 @@ BEGIN TRY
 			UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
 			WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
-			UPDATE tblARCustomerStatementStagingTable
-			SET 
-			strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
-																							FROM    dbo.vyuARCustomerContacts as arCustCont
-																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																							AND (ISNULL(strEmail, N'') <> ''))
-			,strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
-																							FROM    dbo.vyuARCustomerContacts as arCustCont
-																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																							AND (ISNULL(strEmail, N'') <> ''))	
-			WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
+			--UPDATE tblARCustomerStatementStagingTable
+			--SET 
+			--strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
+			--																				FROM    dbo.vyuARCustomerContacts as arCustCont
+			--																				WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+			--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+			--																				AND (ISNULL(strEmail, N'') <> ''))
+			--,strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
+			--																				FROM    dbo.vyuARCustomerContacts as arCustCont
+			--																				WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+			--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+			--																				AND (ISNULL(strEmail, N'') <> ''))	
+			--WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 
 			UPDATE tblARCustomerStatementStagingTable
@@ -1194,6 +1261,76 @@ BEGIN TRY
 
 
 	END
+
+
+	--=======================================--
+	-- Do this when transaction is only CF   --
+	--=======================================--
+	UPDATE tblARCustomerStatementStagingTable
+	SET 
+	dblTotalAR					= dblInvoiceTotal
+	,dblCreditAvailable			= 0
+	,dblFuture					= 0
+	,dbl0Days					= 0
+	,dbl10Days					= 0
+	,dbl30Days					= 0
+	,dbl60Days					= 0
+	,dbl90Days					= 0
+	,dbl91Days					= 0
+	,dblCredits					= 0
+	,dblPrepayments				= 0
+	FROM tblARCustomerStatementStagingTable
+	WHERE intEntityCustomerId IN
+	(
+		SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable
+		WHERE  intEntityUserId = @intEntityUserId
+		GROUP BY intEntityCustomerId,strCustomerName
+		HAVING ISNULL(COUNT(*),0) = 1
+	) 
+	AND intEntityUserId = @intEntityUserId
+	AND strTransactionType = 'Invoice'
+	AND ISNULL(dblTotalAR,0) = 0
+	AND ISNULL(dblPayment,0) = 0 
+	
+
+
+	UPDATE tblARCustomerStatementStagingTable
+	SET 
+			
+	 strCFEmail							= arCustomerContact.strEmail
+	,strCFEmailDistributionOption = 
+	(SELECT (CASE 
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'print , email , CF Invoice'
+
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email , CF Invoice'
+
+		WHEN ( (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email , CF Invoice'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+		ELSE 'print'
+	END))													
+	FROM tblARCustomerStatementStagingTable
+	INNER JOIN vyuCFCustomerEntity AS emEntity 
+	ON emEntity.intEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId
+	OUTER APPLY (
+	SELECT TOP 1 
+		 strEmailDistributionOption
+		,strEmail 
+	FROM vyuARCustomerContacts
+	WHERE intEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '' AND ISNULL(ysnActive,0) = 1
+	) AS arCustomerContact
+	WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
+	
 
 	IF LOWER(@StatementType)  = 'invoice'
 	BEGIN

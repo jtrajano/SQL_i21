@@ -133,8 +133,8 @@ BEGIN
 			,intFutureMarketId = NULL
 			,intFutureMonthId = NULL
 			,dblNoOfLots = NULL
-			,dblQty = t.dblQty
-			,dblPrice = t.dblCost
+			,dblQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty), 0) --t.dblQty
+			,dblPrice = ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblCost), 0) --t.dblCost
 			,intEntityId = t.intSourceEntityId --v.intEntityId
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
@@ -182,13 +182,17 @@ BEGIN
 						NULL
 				 END 
 		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICItem i 
+			tblICInventoryTransaction t 
+			
+			INNER JOIN tblICItem i 
 				ON t.intItemId = i.intItemId			
 
-			INNER JOIN tblICItemUOM iu
-				ON iu.intItemUOMId = t.intItemUOMId
-			INNER JOIN tblICUnitMeasure u
-				ON u.intUnitMeasureId = iu.intUnitMeasureId
+			INNER JOIN tblICItemUOM stockUOM 		
+				ON stockUOM.intItemId = i.intItemId
+				AND stockUOM.ysnStockUnit = 1 
+
+			INNER JOIN tblICUnitMeasure stockUnitMeasure
+				ON stockUnitMeasure.intUnitMeasureId = stockUOM.intUnitMeasureId 
 
 			CROSS APPLY (
 				SELECT TOP 1 
@@ -197,7 +201,7 @@ BEGIN
 					tblICCommodityUnitMeasure commodityUOM
 				WHERE 
 					commodityUOM.intCommodityId = i.intCommodityId 
-					AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
+					AND commodityUOM.intUnitMeasureId = stockUnitMeasure.intUnitMeasureId
 			) commodityUOM
 
 			LEFT JOIN tblICInventoryTransactionType transType 

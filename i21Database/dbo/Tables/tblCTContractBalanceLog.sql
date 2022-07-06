@@ -37,7 +37,7 @@
 	[intContractStatusId] INT NOT NULL,
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,
-	[strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnNegated] BIT DEFAULT((0)) NULL,
 	[intRefContractBalanceId] INT NULL,
 	intUserId INT NULL, 

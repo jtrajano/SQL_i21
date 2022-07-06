@@ -21,6 +21,7 @@
     [strSourceType]      NVARCHAR (10)    COLLATE Latin1_General_CI_AS NULL,
     [intFiscalYearId] INT NULL, 
     [intFiscalPeriodId] INT NULL, 
+    [intLocationSegmentId]  INT NULL,
     [intJournalIdToReverse] INT NULL, 
     [ysnReversed] BIT NULL, 
     [ysnRecurringTemplate] BIT NULL, 

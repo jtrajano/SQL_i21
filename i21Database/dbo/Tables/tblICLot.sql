@@ -46,7 +46,9 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[dblGrossWeight]			NUMERIC(38,20) NULL, -- Accumulated gross weight of the lot whenever posted or unposted in Inventory Receipt screen. 
 		[dblWeight]					NUMERIC(38,20) NULL DEFAULT ((0)),
 		[intWeightUOMId]			INT NULL,
-		[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0)),
+		[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0)),		
+		[dblTare]					NUMERIC(38,20) NULL DEFAULT ((0)),
+		[dblTarePerQty]				NUMERIC(38,20) NULL DEFAULT ((0)),
 		[intOriginId]				INT NULL,
 		[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 		[strVessel]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 		
@@ -75,6 +77,8 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[intSeasonCropYear]			INT NULL,
 		[dblQtyInTransit]			NUMERIC(38,20) NULL,		
 		[dblWeightInTransit]		NUMERIC(38,20) NULL,
+		[dblTareInTransit]			NUMERIC(38,20) NULL DEFAULT ((0)),
+		[dblGrossWeightInTransit]	NUMERIC(38,20) NULL,
 		[dtmDateCreated]			DATETIME NULL,
 		[intCreatedUserId]			INT NULL,
 		[intCreatedEntityId]		INT NULL,
@@ -85,6 +89,18 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[intProducerId]				INT	NULL,
 		[strCertificateId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 		[strTrackingNumber]			NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
+		[strCargoNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[strWarrantNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intWarrantStatus]			TINYINT NULL, 
+		[intContractHeaderId]		INT NULL, -- Contract Header Id
+		[intContractDetailId]		INT NULL, -- Contract Detail Id
+		[ysnWeighed]				BIT DEFAULT((0)),
+		[strSealNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+		[ysnInsuranceClaimed]		BIT NULL DEFAULT(0),
+		[ysnRejected]				BIT NULL DEFAULT(0),
+		[strRejectedBy]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 	
+		[intTradeFinanceId]			INT NULL, 
+		[dblReleasedQty]			NUMERIC(38,20) DEFAULT ((0)) NOT NULL,		
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
@@ -114,5 +130,20 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 
 	CREATE NONCLUSTERED INDEX [IX_tblICLot_intLotId]
 		ON [dbo].[tblICLot](strLotNumber ASC);
+
+	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_strCondition]
+		ON [dbo].[tblICLot](intItemId ASC, intLocationId ASC, strCondition ASC, strLotNumber ASC);
+
+	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_strWarrantNo]
+		ON [dbo].[tblICLot](strWarrantNo ASC, strLotNumber ASC, intLotId ASC);
+
+	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_intWarrantStatus]
+		ON [dbo].[tblICLot](intWarrantStatus ASC, strLotNumber ASC, intLotId ASC);
 
 	GO 

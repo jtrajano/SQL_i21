@@ -196,64 +196,64 @@ GO
 	print 'Begin fixing SM Transaction records associated to wrong Pricing Screen ID';
 GO
 
-	IF EXISTS (SELECT TOP 1 1 FROM tblCTMiscellaneous WHERE ysnFixedSMTransactionWithWrongPricingScreenId = 0)
-	BEGIN
+	--IF EXISTS (SELECT TOP 1 1 FROM tblCTMiscellaneous WHERE ysnFixedSMTransactionWithWrongPricingScreenId = 0)
+	--BEGIN
 
-		declare @strNameSpace nvarchar(100) = 'ContractManagement.view.PriceContracts';
-		declare @intCorrectPriceContractScreenId int;
-		declare @intLatestTransactionId int;
+	--	declare @strNameSpace nvarchar(100) = 'ContractManagement.view.PriceContracts';
+	--	declare @intCorrectPriceContractScreenId int;
+	--	declare @intLatestTransactionId int;
 
-		declare @tblWrongTransactionId table (
-			intTransactionId int
-		)
+	--	declare @tblWrongTransactionId table (
+	--		intTransactionId int
+	--	)
 
-		select @intLatestTransactionId = max(intTransactionId) from tblSMTransaction where intScreenId in (
-			select intScreenId from tblSMScreen where strNamespace = @strNameSpace
-		)
+	--	select @intLatestTransactionId = max(intTransactionId) from tblSMTransaction where intScreenId in (
+	--		select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+	--	)
 
-		select @intCorrectPriceContractScreenId = intScreenId from tblSMTransaction where intTransactionId = @intLatestTransactionId
+	--	select @intCorrectPriceContractScreenId = intScreenId from tblSMTransaction where intTransactionId = @intLatestTransactionId
 
-		insert into @tblWrongTransactionId
-		SELECT intTransactionId from tblSMTransaction where intScreenId in (
-				select intScreenId from tblSMScreen where strNamespace = @strNameSpace
-			) and intScreenId <> @intCorrectPriceContractScreenId
+	--	insert into @tblWrongTransactionId
+	--	SELECT intTransactionId from tblSMTransaction where intScreenId in (
+	--			select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+	--		) and intScreenId <> @intCorrectPriceContractScreenId
 
-		update tblSMLog set tblSMLog.intTransactionId = OrigId
-		from tblSMLog
-		INNER JOIN
-		(
-		SELECT Orig.intTransactionId AS OrigId, Wrong.intTransactionId As WrongId FROM (
-		SELECT A.intTransactionId, A.intRecordId, B.intScreenId FROM tblSMTransaction A INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId WHERE A.intScreenId = @intCorrectPriceContractScreenId
-		) Orig
-		INNER JOIN (
-		SELECT A.intTransactionId, A.intRecordId, B.intScreenId FROM tblSMTransaction A INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId WHERE A.intScreenId in (
-																																											select intScreenId from tblSMScreen where strNamespace = @strNameSpace
-																																										) and A.intScreenId <> @intCorrectPriceContractScreenId
-		) Wrong
-		ON Orig.intRecordId = Wrong.intRecordId
-		) Map ON tblSMLog.intTransactionId = Map.WrongId
+	--	update tblSMLog set tblSMLog.intTransactionId = OrigId
+	--	from tblSMLog
+	--	INNER JOIN
+	--	(
+	--	SELECT Orig.intTransactionId AS OrigId, Wrong.intTransactionId As WrongId FROM (
+	--	SELECT A.intTransactionId, A.intRecordId, B.intScreenId FROM tblSMTransaction A INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId WHERE A.intScreenId = @intCorrectPriceContractScreenId
+	--	) Orig
+	--	INNER JOIN (
+	--	SELECT A.intTransactionId, A.intRecordId, B.intScreenId FROM tblSMTransaction A INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId WHERE A.intScreenId in (
+	--																																										select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+	--																																									) and A.intScreenId <> @intCorrectPriceContractScreenId
+	--	) Wrong
+	--	ON Orig.intRecordId = Wrong.intRecordId
+	--	) Map ON tblSMLog.intTransactionId = Map.WrongId
 
-		WHERE tblSMLog.intTransactionId IN
-		(
-		SELECT intTransactionId from tblSMTransaction where intScreenId in (
-				select intScreenId from tblSMScreen where strNamespace = @strNameSpace
-			) and intScreenId <> @intCorrectPriceContractScreenId
-		)
+	--	WHERE tblSMLog.intTransactionId IN
+	--	(
+	--	SELECT intTransactionId from tblSMTransaction where intScreenId in (
+	--			select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+	--		) and intScreenId <> @intCorrectPriceContractScreenId
+	--	)
 
-		delete from t
-		from @tblWrongTransactionId wt
-		join tblSMTransaction t on t.intTransactionId = wt.intTransactionId
+	--	delete from t
+	--	from @tblWrongTransactionId wt
+	--	join tblSMTransaction t on t.intTransactionId = wt.intTransactionId
 
-		delete from tblSMScreen where intScreenId in (
-				select intScreenId from tblSMScreen where strNamespace = @strNameSpace
-			) and intScreenId <> @intCorrectPriceContractScreenId
+	--	delete from tblSMScreen where intScreenId in (
+	--			select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+	--		) and intScreenId <> @intCorrectPriceContractScreenId
 
-		UPDATE tblCTMiscellaneous SET ysnFixedSMTransactionWithWrongPricingScreenId = 1
-	END
+	--	UPDATE tblCTMiscellaneous SET ysnFixedSMTransactionWithWrongPricingScreenId = 1
+	--END
 
 
 
-GO
+--GO
 	print 'End fixing SM Transaction records associated to wrong Pricing Screen ID';
 GO
 
@@ -265,34 +265,35 @@ where
 	strScreen like 'ContractManagement.view.Contract%'
 	and strGridLayoutFields like '%"strFieldName":"strContractType",%'
 
+update
+	tblSMGridLayout
+set
+	strGridLayoutFields = replace(strGridLayoutFields,'"strFieldName":"intEntityId"','"strFieldName":"intEntityId","required":true')
+where
+	strScreen like 'ContractManagement.view.Contract%'
+	and strGridLayoutFields like '%"strFieldName":"intEntityId",%'
+
 
 IF EXISTS (SELECT TOP 1 1 FROM tblCTContractBalanceLog
 WHERE dblOrigQty IS NULL
 	AND dblQty IS NOT NULL)
 BEGIN
 	UPDATE tblCTContractBalanceLog
-	SET dblOrigQty = (CAST(REPLACE(strNotes, 'Priced Quantity is ', '') AS NUMERIC(18, 6)))
-	WHERE dblOrigQty IS NULL
-		AND dblQty IS NOT NULL
-		AND strNotes LIKE '%Priced Quantity is %'
-
-	UPDATE tblCTContractBalanceLog
-	SET dblOrigQty = (CAST(REPLACE(strNotes, 'Priced Load is ', '') AS NUMERIC(18, 6)))
-	WHERE dblOrigQty IS NULL
-		AND dblQty IS NOT NULL
-		AND strNotes LIKE '%Priced Load is %'
-
-	UPDATE tblCTContractBalanceLog
-	SET dblOrigQty = (CAST(REPLACE(REPLACE(strNotes, 'Invoiced Quantity is ', ''), ',', '') AS NUMERIC(18, 6)))
-	WHERE dblOrigQty IS NULL
-		AND dblQty IS NOT NULL
-		AND strNotes LIKE '%Invoiced Quantity is %'
-
-	UPDATE tblCTContractBalanceLog
 	SET dblOrigQty = dblQty
 	WHERE dblOrigQty IS NULL
 		AND dblQty IS NOT NULL
 END
+
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM tblCTContractHeader WHERE ysnLoad IS NULL)
+BEGIN
+	UPDATE tblCTContractHeader
+	SET ysnLoad = ISNULL(ysnLoad, 0)
+	WHERE ysnLoad IS NULL
+END
+
+GO
 
 if not exists (select top 1 1 from tblSMControl where intScreenId = 340 and strControlId = 'cboBasisUOM' and strControlName = 'Basis UOM')
 begin
@@ -309,5 +310,68 @@ IF EXISTS (SELECT TOP 1 1 FROM tblCTSequenceHistory WHERE ISNULL(intDtlQtyInComm
 BEGIN
 	EXEC uspCTFixCBLogAfterRebuild
 END
+
+GO
+
+declare
+	@intPriceContractId int,
+	@intPriceFixationDetailId int,
+	@intNumber int,
+	@strPriceContractNo nvarchar(50),
+	@strPrefix nvarchar(10),
+	@strTradeNo nvarchar(10)
+	;
+
+select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Contract' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+
+if (isnull(@strPrefix,'') <> '')
+begin
+	select @strPriceContractNo = max(strPriceContractNo) from tblCTPriceContract where strPriceContractNo like @strPrefix + '%';
+	if (isnull(@strPriceContractNo,'') = '')
+	begin
+		select @intPriceContractId = max(intPriceContractId) from tblCTPriceContract
+		select @intNumber = convert(int,isnull(strPriceContractNo,'0')) from tblCTPriceContract where intPriceContractId = @intPriceContractId
+	end
+	else
+	begin
+		select @intNumber = convert(int,replace(isnull(@strPriceContractNo,'0'),@strPrefix,''));
+	end
+end
+else
+begin
+	select @intPriceContractId = max(intPriceContractId) from tblCTPriceContract
+	select @intNumber = convert(int,isnull(strPriceContractNo,'0')) from tblCTPriceContract where intPriceContractId = @intPriceContractId
+end
+
+select @intNumber += 1;
+
+update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then @intNumber else intNumber end where strModule = 'Contract Management' and strTransactionType = 'Price Contract' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+select top 1 @strPrefix = strPrefix from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;
+
+if (isnull(@strPrefix,'') <> '')
+begin
+	select @strTradeNo = max(strTradeNo) from tblCTPriceFixationDetail where strTradeNo like @strPrefix + '%';
+	if (isnull(@strTradeNo,'') = '')
+	begin
+		select @intPriceFixationDetailId = max(intPriceFixationDetailId) from tblCTPriceFixationDetail
+		select @intNumber = convert(int,isnull(strTradeNo,'0')) from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId
+	end
+	else
+	begin
+		select @intNumber = convert(int,replace(isnull(@strTradeNo,'0'),@strPrefix,''));
+	end
+end
+else
+begin
+	select @intPriceFixationDetailId = max(intPriceFixationDetailId) from tblCTPriceFixationDetail
+	select @intNumber = convert(int,isnull(strTradeNo,'0')) from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId
+end
+
+select @intNumber += 1;
+
+update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then @intNumber else intNumber end where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;
 
 GO

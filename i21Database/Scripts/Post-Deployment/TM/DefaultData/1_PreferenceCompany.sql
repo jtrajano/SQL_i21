@@ -64,6 +64,21 @@ begin
 		intConcurrencyId = 1
 end
 
+if not exists (select * from tblTMTankMonitorInterfaceType where strInterfaceType = ''Anova Gaslog'')
+begin
+	insert into tblTMTankMonitorInterfaceType (
+		[intInterfaceTypeId],
+		[strInterfaceType],
+		[ysnFromAPI],
+		[intConcurrencyId]
+	)
+		select
+		intInterfaceTypeId = 3,
+		strInterfaceType = ''Anova Gaslog'',
+		ysnFromAPI = 1,
+		intConcurrencyId = 1
+end
+
 set identity_insert tblTMTankMonitorInterfaceType off;
 '
 );

@@ -25,7 +25,9 @@ AS
 				sg.strCode COLLATE Latin1_General_CI_AS strCode, 
 				cast(0.00 as numeric(18,2)) as dblBalance,
 				sg.ysnGLRestricted, 
-				sg.ysnAPRestricted
+				sg.ysnAPRestricted,
+				account.intUnnaturalAccountId,
+				unnaturalAccount.strAccountId COLLATE Latin1_General_CI_AS strUnnaturalAccountId
 FROM            dbo.tblGLAccount account 
 				CROSS APPLY (
 					SELECT 
@@ -47,6 +49,7 @@ FROM            dbo.tblGLAccount account
 				LEFT JOIN dbo.tblGLAccountUnit u ON account.intAccountUnitId = u.intAccountUnitId
 				LEFT JOIN dbo.tblGLCOACrossReference coa  on account.intAccountId =inti21Id
 				LEFT JOIN dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId
+				LEFT JOIN dbo.tblGLAccount unnaturalAccount on unnaturalAccount.intAccountId = account.intUnnaturalAccountId
 GO
 
 

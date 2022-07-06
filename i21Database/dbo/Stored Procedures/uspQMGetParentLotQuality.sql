@@ -34,7 +34,7 @@ BEGIN TRY
 		JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
+		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId AND S.intTypeId = 1
 			AND S.intProductTypeId = 11'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'
@@ -123,7 +123,7 @@ BEGIN TRY
 		JOIN tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId
+		JOIN tblQMSample S ON S.intProductValueId = L.intParentLotId AND S.intTypeId = 1
 			AND S.intProductTypeId = 11'
 
 	IF @ysnShowSampleFromAllLocation = 0 AND @strLocationId <> '0'

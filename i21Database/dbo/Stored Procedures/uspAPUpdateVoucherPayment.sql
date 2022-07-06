@@ -10,6 +10,10 @@ SET XACT_ABORT OFF
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+	DECLARE @emptyBillPayFromBankAccount VARCHAR(1000) = '';
+	DECLARE @emptyBillPayToBankAccount VARCHAR(1000) = '';
+	DECLARE @billPayBankAccountCount INT = 1;
+
 	DECLARE @dblPaymentTemp DECIMAL(18,2) = 0;
 	DECLARE @ysnInPayment BIT = 0;
 	DECLARE @nullCheck BIT = 0;
@@ -35,11 +39,59 @@ BEGIN TRY
 
 	IF @post IS NULL OR @post = 1
 	BEGIN
+		--VALIDATE EMPTY PAY FROM BANK ACCOUNT
+		SELECT @emptyBillPayFromBankAccount = COALESCE(@emptyBillPayFromBankAccount + ', ', '') + B.strBillId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayFromBankAccountId IS NULL
+
+		IF @emptyBillPayFromBankAccount <> ''
+		BEGIN
+			SET	@emptyBillPayFromBankAccount = RIGHT(@emptyBillPayFromBankAccount, LEN(@emptyBillPayFromBankAccount) - 2);
+			RAISERROR('%s have empty pay from bank account.', 11, 1, @emptyBillPayFromBankAccount);
+		END
+
+		--VALIDATE EMPTY PAY TO BANK ACCOUNT
+		SELECT @emptyBillPayToBankAccount = COALESCE(@emptyBillPayToBankAccount + ', ', '') + B.strBillId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayToBankAccountId IS NULL
+
+		IF @emptyBillPayToBankAccount <> ''
+		BEGIN
+			SET @emptyBillPayToBankAccount = RIGHT(@emptyBillPayToBankAccount, LEN(@emptyBillPayToBankAccount) - 2);
+			RAISERROR('%s have empty pay to bank account.', 11, 1, @emptyBillPayToBankAccount);
+		END
+
+		-- --VALIDATE MULTIPLE PAY BANK ACCOUNT COMBINATIONS
+		-- SELECT @billPayBankAccountCount = COUNT(*) FROM @ids
+		-- IF @billPayBankAccountCount = 1
+		-- BEGIN
+		-- 	SELECT @billPayBankAccountCount = COUNT(intGroupCount)
+		-- 	FROM (
+		-- 		SELECT COUNT(*) intGroupCount
+		-- 		FROM tblAPPayment P
+		-- 		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		-- 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		-- 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND PD.dblPayment != 0 AND P.intPaymentMethodId = 2
+		-- 		GROUP BY B.intPayFromBankAccountId, B.intPayToBankAccountId
+		-- 	) A
+
+		-- 	IF @billPayBankAccountCount > 1
+		-- 	BEGIN
+		-- 		RAISERROR('Multiple sets of pay from and to bank account is not allowed.', 11, 1);
+		-- 	END
+		-- END
+
 		--UPDATE PAYMENT SCHEDULE
 		UPDATE PS
 		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) <> 0 THEN 1 ELSE 0 END
-		FROM tblAPVoucherPaymentSchedule PS
-		INNER JOIN tblAPPaymentDetail PD ON PD.intPayScheduleId = PS.intId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intBillId = B.intBillId
 		OUTER APPLY (
 			SELECT SUM(PD2.dblPayment) dblPayment
 			FROM tblAPPaymentDetail PD2
@@ -47,7 +99,6 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
-		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -112,15 +163,16 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
-		AND PD.dblPayment != 0
 	END
 	ELSE IF @post = 0
 	BEGIN
 		--UPDATE PAYMENT SCHEDULE
 		UPDATE PS
 		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) <> 0 THEN 1 ELSE 0 END
-		FROM tblAPVoucherPaymentSchedule PS
-		INNER JOIN tblAPPaymentDetail PD ON PD.intPayScheduleId = PS.intId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intBillId = B.intBillId
 		OUTER APPLY (
 			SELECT SUM(PD2.dblPayment) dblPayment
 			FROM tblAPPaymentDetail PD2
@@ -128,7 +180,6 @@ BEGIN TRY
 			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1 AND P2.intPaymentId <> PD.intPaymentId
 		) paySched
 		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
-		AND PD.dblPayment != 0
 
 		UPDATE tblAPBill 
 		SET
@@ -193,7 +244,6 @@ BEGIN TRY
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND (B.ysnPrepayHasPayment = 0 OR B.intTransactionType NOT IN (2, 13))
-		AND PD.dblPayment != 0
 	END
 
 	--SELECT NULLED BILLS

@@ -13,5 +13,7 @@ CREATE TABLE [dbo].[tblFRAuditLog] (
     [intTotalCells]			INT			NULL,
 	[strBuildNumber]		NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]		INT			DEFAULT 1 NOT NULL,
+    [intReportHierarchyId]	INT			NULL,
+    [strLevel]		        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblFRAuditLog] PRIMARY KEY CLUSTERED ([intAuditLog] ASC)
 );

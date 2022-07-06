@@ -1,6 +1,10 @@
 ﻿GO
 	PRINT('CT - 1920_Add_Accrued_Payables Started')
 
+	-- Add Payables if 'Create Other Cost Payable on Save Contract' is set to true
+	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
+	BEGIN
+
 	DECLARE
 	@id			INT = 0,
 	@type		NVARCHAR(10) = 'header',
@@ -118,7 +122,7 @@
 		,[intAccountId]								=	apClearing.intAccountId
 		,[strAccountId]								=	apClearing.strAccountId
 		,[strAccountDesc]							=	apClearing.strDescription
-		,[intShipViaId]								=	0
+		,[intShipViaId]								=	NULL
 		,[intTermId]								=	CC.intTermId	
 		,[strTerm]									=	term.strTerm
 		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
@@ -222,6 +226,8 @@
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 	WHERE	ISNULL(CC.intPrevConcurrencyId,0) <> ISNULL(CC.intConcurrencyId,0)
 	
+	END
+
 	PRINT('CT - 1920_Add_Accrued_Payables End')
 GO
 

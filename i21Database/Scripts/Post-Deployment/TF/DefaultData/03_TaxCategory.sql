@@ -10,6 +10,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 */
 
 PRINT ('Deploying AR Tax Category')
+GO
 
 DECLARE @TaxCategoryAR AS TFTaxCategory
 
@@ -28,11 +29,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'AR', strTaxCategory = 'AR Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'AR', @TaxCategories = @TaxCategoryAR
 
 DELETE @TaxCategoryAR
-
 GO
 
 
 PRINT ('Deploying CO Tax Category')
+GO
 
 DECLARE @TaxCategoryCO AS TFTaxCategory
 
@@ -54,11 +55,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'CO', @TaxCategories = @TaxCategoryCO
 
 DELETE @TaxCategoryCO
-
 GO
 
 
 PRINT ('Deploying ID Tax Category')
+GO
 
 DECLARE @TaxCategoryID AS TFTaxCategory
 
@@ -79,11 +80,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'ID', @TaxCategories = @TaxCategoryID
 
 DELETE @TaxCategoryID
-
 GO
 
 
 PRINT ('Deploying IL Tax Category')
+GO
 
 DECLARE @TaxCategoryIL AS TFTaxCategory
 
@@ -103,11 +104,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'IL', strTaxCategory = 'IL Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'IL', @TaxCategories = @TaxCategoryIL
 
 DELETE @TaxCategoryIL
-
 GO
 
 
 PRINT ('Deploying IN Tax Category')
+GO
 
 DECLARE @TaxCategoryIN AS TFTaxCategory
 
@@ -126,11 +127,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'IN', strTaxCategory = 'IN Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'IN', @TaxCategories = @TaxCategoryIN
 
 DELETE @TaxCategoryIN
-
 GO
 
 
 PRINT ('Deploying KS Tax Category')
+GO
 
 DECLARE @TaxCategoryKS AS TFTaxCategory
 
@@ -147,11 +148,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'KS', strTaxCategory = 'KS Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'KS', @TaxCategories = @TaxCategoryKS
 
 DELETE @TaxCategoryKS
-
 GO
 
 
 PRINT ('Deploying KY Tax Category')
+GO
 
 DECLARE @TaxCategoryKY AS TFTaxCategory
 
@@ -169,11 +170,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'KY', strTaxCategory = 'KY Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'KY', @TaxCategories = @TaxCategoryKY
 
 DELETE @TaxCategoryKY
-
 GO
 
 
 PRINT ('Deploying LA Tax Category')
+GO
 
 DECLARE @TaxCategoryLA AS TFTaxCategory
 
@@ -191,11 +192,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'LA', strTaxCategory = 'LA Ins
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'LA', @TaxCategories = @TaxCategoryLA
 
 DELETE @TaxCategoryLA
-
 GO
 
 
 PRINT ('Deploying MI Tax Category')
+GO
 
 DECLARE @TaxCategoryMI AS TFTaxCategory
 
@@ -214,10 +215,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'MI', strTaxCategory = 'MI Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MI', @TaxCategories = @TaxCategoryMI
 
 DELETE @TaxCategoryMI
-
 GO
 
+
 PRINT ('Deploying MN Tax Category')
+GO
 
 DECLARE @TaxCategoryMN AS TFTaxCategory
 
@@ -239,11 +241,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'MN', strTaxCategory = 'MN Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MN', @TaxCategories = @TaxCategoryMN
 
 DELETE @TaxCategoryMN
-
 GO
 
 
 PRINT ('Deploying MS Tax Category')
+GO
 
 DECLARE @TaxCategoryMS AS TFTaxCategory
 
@@ -263,10 +265,11 @@ UNION ALL SELECT intTaxCategoryId = 54, strState = 'MS', strTaxCategory = 'MS Ex
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MS', @TaxCategories = @TaxCategoryMS
 
 DELETE @TaxCategoryMS
-
 GO
 
+
 PRINT ('Deploying MT Tax Category')
+GO
 
 DECLARE @TaxCategoryMT AS TFTaxCategory
 
@@ -283,11 +286,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MT', @TaxCategories = @TaxCategoryMT
 
 DELETE @TaxCategoryMT
-
 GO
 
 
 PRINT ('Deploying NC Tax Category')
+GO
 
 DECLARE @TaxCategoryNC AS TFTaxCategory
 
@@ -305,11 +308,11 @@ UNION ALL SELECT intTaxCategoryId = 139, strState = 'NC', strTaxCategory = 'NC E
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'NC', @TaxCategories = @TaxCategoryNC
 
 DELETE @TaxCategoryNC
-
 GO
 
 
 PRINT ('Deploying NE Tax Category')
+GO
 
 DECLARE @TaxCategoryNE AS TFTaxCategory
 
@@ -337,11 +340,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'NE', strTaxCategory = 'NE PRF
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'NE', @TaxCategories = @TaxCategoryNE
 
 DELETE @TaxCategoryNE
-
 GO
 
 
 PRINT ('Deploying NM Tax Category')
+GO
 
 DECLARE @TaxCategoryNM AS TFTaxCategory
 
@@ -358,11 +361,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'NM', strTaxCategory = 'NM Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'NM', @TaxCategories = @TaxCategoryNM
 
 DELETE @TaxCategoryNM
-
 GO
 
 
 PRINT ('Deploying OH Tax Category')
+GO
 
 DECLARE @TaxCategoryOH AS TFTaxCategory
 
@@ -385,11 +388,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'OH', strTaxCategory = 'OH Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'OH', @TaxCategories = @TaxCategoryOH
 
 DELETE @TaxCategoryOH
-
 GO
 
 
 PRINT ('Deploying OK Tax Category')
+GO
 
 DECLARE @TaxCategoryOK AS TFTaxCategory
 
@@ -409,11 +412,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'OK', strTaxCategory = 'OK Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'OK', @TaxCategories = @TaxCategoryOK
 
 DELETE @TaxCategoryOK
-
 GO
 
 
 PRINT ('Deploying OR Tax Category')
+GO
 
 DECLARE @TaxCategoryOR AS TFTaxCategory
 
@@ -470,11 +473,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'OR', strTaxCategory = 'OR Use
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'OR', @TaxCategories = @TaxCategoryOR
 
 DELETE @TaxCategoryOR
-
 GO
 
 
 PRINT ('Deploying PA Tax Category')
+GO
 
 DECLARE @TaxCategoryPA AS TFTaxCategory
 
@@ -492,11 +495,11 @@ UNION ALL SELECT intTaxCategoryId = 138, strState = 'PA', strTaxCategory = 'PA E
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'PA', @TaxCategories = @TaxCategoryPA
 
 DELETE @TaxCategoryPA
-
 GO
 
 
 PRINT ('Deploying SC Tax Category')
+GO
 
 DECLARE @TaxCategorySC AS TFTaxCategory
 
@@ -512,11 +515,11 @@ UNION ALL SELECT intTaxCategoryId = 134, strState = 'SC', strTaxCategory = 'SC U
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'SC', @TaxCategories = @TaxCategorySC
 
 DELETE @TaxCategorySC
-
 GO
 
 
 PRINT ('Deploying TX Tax Category')
+GO
 
 DECLARE @TaxCategoryTX AS TFTaxCategory
 
@@ -533,11 +536,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'TX', strTaxCategory = 'TX Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TX', @TaxCategories = @TaxCategoryTX
 
 DELETE @TaxCategoryTX
-
 GO
 
 
 PRINT ('Deploying WA Tax Category')
+GO
 
 DECLARE @TaxCategoryWA AS TFTaxCategory
 
@@ -553,10 +556,11 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'WA', strTaxCategory = 'WA Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WA', @TaxCategories = @TaxCategoryWA
 
 DELETE @TaxCategoryWA
-
 GO
 
+
 PRINT ('Deploying TN Tax Category')
+GO
 
 DECLARE @TaxCategoryTN AS TFTaxCategory
 
@@ -573,33 +577,29 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TN', @TaxCategories = @TaxCategoryTN
 
 DELETE @TaxCategoryTN
-
 GO
 
-PRINT ('Deploying MO Tax Category')
 
-DECLARE @TaxCategoryMO AS TFTaxCategory
+PRINT ('Deploying MD Tax Category')
+GO
 
-INSERT INTO @TaxCategoryMO(
+DECLARE @TaxCategoryMD AS TFTaxCategory
+
+INSERT INTO @TaxCategoryMD(
 	intTaxCategoryId
 	, strState
 	, strTaxCategory
 	, intMasterId
 )
-SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Motor Fuel Tax', intMasterId = 250001
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Agriculture Inspection Fee', intMasterId = 250002
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Transport Load Fee', intMasterId = 250003
+SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', intMasterId = 201
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Diesel/Biodiesel', intMasterId = 202
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Propane/LNG/CNG', intMasterId = 203
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Aviation Gasoline/Turbine Fuel', intMasterId = 204
 
-EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MO', @TaxCategories = @TaxCategoryMO
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MD', @TaxCategories = @TaxCategoryMD
 
-DELETE @TaxCategoryMO
-
+DELETE @TaxCategoryMD
 GO
-
-
-
-
-
 
 
 PRINT ('Deploying VA Tax Category')
@@ -626,4 +626,142 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'VA', @TaxCategories = @TaxCategoryVA
 
 DELETE @TaxCategoryVA
+GO
+
+
+PRINT ('Deploying DC Tax Category')
+GO
+
+DECLARE @TaxCategoryDC AS TFTaxCategory
+
+INSERT INTO @TaxCategoryDC(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'DC', strTaxCategory = 'DC Excise Gasoline', intMasterId = 520001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'DC', strTaxCategory = 'DC Excise Diesel', intMasterId = 520002
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'DC', @TaxCategories = @TaxCategoryDC
+
+DELETE @TaxCategoryDC
+GO
+
+
+PRINT ('Deploying GA Tax Category')
+GO
+
+DECLARE @TaxCategoryGA AS TFTaxCategory
+
+INSERT INTO @TaxCategoryGA(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Gasoline', intMasterId = 100001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Fuel Oils - Clear', intMasterId = 100002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Fuel Oils - Dyed', intMasterId = 100003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Aviation Gasoline to Licensed Purchaser', intMasterId = 100004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Aviation Gasoline to Unlicensed Purchaser', intMasterId = 100005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise LPG', intMasterId = 100006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excixe Special Fuel (inc. CNG)', intMasterId = 100007
+
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'GA', @TaxCategories = @TaxCategoryGA
+
+DELETE @TaxCategoryGA
+GO
+
+
+PRINT ('Deploying FL Tax Category')
+GO
+
+DECLARE @TaxCategoryFL AS TFTaxCategory
+
+INSERT INTO @TaxCategoryFL(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Excise Motor Fuel', intMasterId = 90001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Excise Undyed Diesel Fuel', intMasterId = 90002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Excise Aviation Fuel', intMasterId = 90003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Local Option Tax Motor Fuel', intMasterId = 90004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Local Option Tax Undyed Diesel Fuel', intMasterId = 90005
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'FL', @TaxCategories = @TaxCategoryFL
+
+DELETE @TaxCategoryFL
+GO
+
+
+PRINT ('Deploying AL Tax Category')
+GO
+
+DECLARE @TaxCategoryAL AS TFTaxCategory
+
+INSERT INTO @TaxCategoryAL(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Gasoline', intMasterId = 10001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Diesel Fuel', intMasterId = 10002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Aviation Gasoline', intMasterId = 10003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Jet Fuel', intMasterId = 10004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise CNG', intMasterId = 10005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise LNG', intMasterId = 10006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Lubricating Oil', intMasterId = 10007
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'AL', @TaxCategories = @TaxCategoryAL
+
+DELETE @TaxCategoryAL
+GO
+
+PRINT ('Deploying MO Tax Category')
+
+DECLARE @TaxCategoryMO AS TFTaxCategory
+
+INSERT INTO @TaxCategoryMO(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Motor Fuel Tax', intMasterId = 250001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Agriculture Inspection Fee', intMasterId = 250002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Transport Load Fee', intMasterId = 250003
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MO', @TaxCategories = @TaxCategoryMO
+
+DELETE @TaxCategoryMO
+GO
+
+PRINT ('Deploying WV Tax Category')
+
+DECLARE @TaxCategoryWV AS TFTaxCategory
+
+INSERT INTO @TaxCategoryWV(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Gasoline (GA)', intMasterId = 480001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Gasohol (GH)', intMasterId = 480002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Undyed Diesel/Kerosene (DI)', intMasterId = 480003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Compressed Natural Gas (CNG)', intMasterId = 480004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Dyed Diesel/Kerosene', intMasterId = 480005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Propane/LPG (LP)', intMasterId = 480006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Aviation Gas', intMasterId = 480007
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Aviation Jet Fuel', intMasterId = 480008
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Liquefied Natural Gas (LNG)', intMasterId = 480009
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WV', @TaxCategories = @TaxCategoryWV
+
+DELETE @TaxCategoryWV
 GO

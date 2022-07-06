@@ -28,7 +28,9 @@ BEGIN
 	  '' ERPWareHouseID,  
 	  0 WarehouseID, '' AS WarehouseName, '' AS AddressType,
 	  ISNULL(smus.intCompanyLocationId, 0) AS intDefaultCompanyLocationId
-	 FROM tblSMUserSecurity smus,tblSMCompanyLocation cl --,tblSMCompanyLocationSubLocation clsl
+	 FROM 
+		tblSMUserSecurity smus
+		inner join tblSMCompanyLocation cl on 1=1 --,tblSMCompanyLocationSubLocation clsl
 	 --LEFT JOIN tblSMCompanyLocation cl ON smus.intCompanyLocationId = cl.intCompanyLocationId
 	 --LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationId = cl.intCompanyLocationId
 

@@ -51,6 +51,24 @@ BEGIN
 				,dblNet
 				,dblGross
 				,intSourceInventoryDetailId
+				,[strTransactionId]
+				,[dtmReceiptDate] 
+				,[strTradeFinanceNumber] 
+				,[intBankId] 
+				,[intBankAccountId] 
+				,[intBorrowingFacilityId] 
+				,[strBankReferenceNo] 
+				,[intLimitTypeId] 
+				,[intSublimitTypeId] 
+				,[ysnSubmittedToBank] 
+				,[dtmDateSubmitted] 
+				,[strApprovalStatus] 
+				,[dtmDateApproved] 
+				,[strWarrantNo] 
+				,[intWarrantStatus] 
+				,[strReferenceNo] 
+				,[intOverrideFacilityValuation] 
+				,[strComments] 		
 			)
 			SELECT 'Inventory Receipt',
 				ReceiptItem.intInventoryReceiptId, 
@@ -77,7 +95,25 @@ BEGIN
 				ReceiptItem.intLoadReceive,
 				ReceiptItem.dblNet,
 				ReceiptItem.dblGross, 
-				ReceiptItem.intSourceInventoryReceiptItemId 
+				ReceiptItem.intSourceInventoryReceiptItemId
+				,[strTransactionId]  = Receipt.strReceiptNumber
+				,[dtmReceiptDate] = Receipt.dtmReceiptDate
+				,[strTradeFinanceNumber] = Receipt.strTradeFinanceNumber
+				,[intBankId] = Receipt.intBankId
+				,[intBankAccountId] = Receipt.intBankAccountId
+				,[intBorrowingFacilityId] = Receipt.intBorrowingFacilityId
+				,[strBankReferenceNo] = Receipt.strBankReferenceNo
+				,[intLimitTypeId] = Receipt.intLimitTypeId
+				,[intSublimitTypeId] = Receipt.intSublimitTypeId
+				,[ysnSubmittedToBank] = Receipt.ysnSubmittedToBank
+				,[dtmDateSubmitted] = Receipt.dtmDateSubmitted
+				,[strApprovalStatus] = Receipt.strApprovalStatus
+				,[dtmDateApproved] = Receipt.dtmDateApproved
+				,[strWarrantNo] = Receipt.strWarrantNo
+				,[intWarrantStatus] = Receipt.intWarrantStatus
+				,[strReferenceNo] = Receipt.strReferenceNo
+				,[intOverrideFacilityValuation] = Receipt.intOverrideFacilityValuation
+				,[strComments] = Receipt.strComments
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -109,6 +145,24 @@ BEGIN
 				ReceiptItem.dblNet,
 				ReceiptItem.dblGross, 
 				ReceiptItem.intSourceInventoryReceiptItemId 
+				,[strTransactionId]  = Receipt.strReceiptNumber
+				,[dtmReceiptDate] = Receipt.dtmReceiptDate
+				,[strTradeFinanceNumber] = Receipt.strTradeFinanceNumber
+				,[intBankId] = Receipt.intBankId
+				,[intBankAccountId] = Receipt.intBankAccountId
+				,[intBorrowingFacilityId] = Receipt.intBorrowingFacilityId
+				,[strBankReferenceNo] = Receipt.strBankReferenceNo
+				,[intLimitTypeId] = Receipt.intLimitTypeId
+				,[intSublimitTypeId] = Receipt.intSublimitTypeId
+				,[ysnSubmittedToBank] = Receipt.ysnSubmittedToBank
+				,[dtmDateSubmitted] = Receipt.dtmDateSubmitted
+				,[strApprovalStatus] = Receipt.strApprovalStatus
+				,[dtmDateApproved] = Receipt.dtmDateApproved
+				,[strWarrantNo] = Receipt.strWarrantNo
+				,[intWarrantStatus] = Receipt.intWarrantStatus
+				,[strReferenceNo] = Receipt.strReferenceNo
+				,[intOverrideFacilityValuation] = Receipt.intOverrideFacilityValuation
+				,[strComments] = Receipt.strComments
 			FROM tblICInventoryReceiptItem ReceiptItem
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -116,6 +170,50 @@ BEGIN
 				INNER JOIN tblICItem ItemBundleDetail ON ItemBundleDetail.intItemId = ItemBundle.intItemId
 				LEFT JOIN tblICItemUOM ItemBundleUOM ON ItemBundleUOM.intItemUOMId = [dbo].[fnGetMatchingItemUOMId](ItemBundle.intItemId, ReceiptItem.intUnitMeasureId)
 			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId AND ReceiptItem.intChildItemLinkId IS NULL AND ItemBundleDetail.strBundleType = 'Option'
+
+			-- Log the Trade Finance data before save. 
+			DELETE FROM tblICInventoryReceiptBeforeSave WHERE intInventoryReceiptId = @TransactionId
+			INSERT INTO tblICInventoryReceiptBeforeSave (
+				[intInventoryReceiptId] 
+				,[strTradeFinanceNumber] 
+				,[intBankId] 
+				,[intBankAccountId] 
+				,[intBorrowingFacilityId] 
+				,[strBankReferenceNo] 
+				,[intLimitTypeId] 
+				,[intSublimitTypeId] 
+				,[ysnSubmittedToBank]
+				,[dtmDateSubmitted] 
+				,[strApprovalStatus] 
+				,[dtmDateApproved] 
+				,[strWarrantNo] 
+				,[intWarrantStatus] 
+				,[strReferenceNo] 
+				,[intOverrideFacilityValuation] 
+				,[strComments] 
+			)
+			SELECT
+				[intInventoryReceiptId] 
+				,[strTradeFinanceNumber] 
+				,[intBankId] 
+				,[intBankAccountId] 
+				,[intBorrowingFacilityId] 
+				,[strBankReferenceNo] 
+				,[intLimitTypeId] 
+				,[intSublimitTypeId] 
+				,[ysnSubmittedToBank]
+				,[dtmDateSubmitted] 
+				,[strApprovalStatus] 
+				,[dtmDateApproved] 
+				,[strWarrantNo] 
+				,[intWarrantStatus] 
+				,[strReferenceNo] 
+				,[intOverrideFacilityValuation] 
+				,[strComments] 
+			FROM 
+				tblICInventoryReceipt r
+			WHERE
+				r.intInventoryReceiptId = @TransactionId
 		END
 	END
 	ELSE IF (@TransactionType = @TransactionType_Shipment)
@@ -189,5 +287,50 @@ BEGIN
 				AND ItemBundleDetail.strBundleType = 'Option'
 		END
 	END
+	ELSE IF (@TransactionType = @TransactionType_Transfer)
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @TransactionId)
+		BEGIN
+			DELETE FROM tblICTransactionDetailLog WHERE strTransactionType = 'Inventory Transfer' AND intTransactionId = @TransactionId
 
+			INSERT INTO tblICTransactionDetailLog(
+				strTransactionType
+				,intTransactionId 
+				,intTransactionDetailId
+				--,intOrderNumberId
+				--,intOrderType
+				--,intSourceNumberId
+				--,intSourceType
+				,intLineNo
+				,intItemId
+				,strItemType
+				,intItemUOMId
+				,dblQuantity
+				,ysnLoad
+				,intLoadReceive
+			)
+			SELECT 
+				strTransactionType = 'Inventory Transfer'
+				,intTransactionId = t.intInventoryTransferId
+				,intTransactionDetailId = td.intInventoryTransferDetailId
+				--,intOrderNumberId = NULL 
+				--,intOrderType = NULL 
+				--,intSourceNumberId = NULL 
+				--,intSourceType = NULL 
+				,intLineNo = td.intSort
+				,intItemId = td.intItemId
+				,strItemType = NULL 
+				,intItemUOMId = td.intItemUOMId
+				,dblQuantity = td.dblQuantity
+				,ysnLoad = NULL 
+				,intLoadReceive = NULL 
+			FROM
+				tblICInventoryTransfer t INNER JOIN tblICInventoryTransferDetail td
+					ON t.intInventoryTransferId = td.intInventoryTransferId
+				INNER JOIN tblICItem i 
+					ON i.intItemId = td.intItemId
+			WHERE 
+				t.intInventoryTransferId = @TransactionId 
+		END
+	END
 END

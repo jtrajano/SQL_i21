@@ -149,7 +149,7 @@ BEGIN
 			INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE R ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
 				AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
 				AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
-			WHERE U.TABLE_NAME = @CurTableName AND (@getAll = 1 OR R.TABLE_NAME NOT IN (SELECT strTable FROM @avoidtable))--OR U.TABLE_NAME = 'tblEMEntity'
+			WHERE U.TABLE_NAME = @CurTableName AND (@getAll = 1 OR R.TABLE_NAME COLLATE SQL_Latin1_General_CP1_CS_AS NOT IN (SELECT strTable FROM @avoidtable))--OR U.TABLE_NAME = 'tblEMEntity'
 			
 			DELETE FROM @EntityTypes WHERE strType = @curtype
 		END
@@ -223,7 +223,7 @@ BEGIN
 				JOIN sys.types y ON y.user_type_id = c.user_type_id 		
 				where c.object_id = object_id(@CurTableName) and c.name <> @CurTableKey
 				AND y.name in ('numeric', 'NVARCHAR', 'varchar', 'int')
-				AND (@getAllColumn = 1 or c.name not in (select strColumn from @avoidColumn)) 
+				AND (@getAllColumn = 1 or c.name COLLATE SQL_Latin1_General_CP1_CS_AS not in (select strColumn from @avoidColumn)) 
 		
 		INSERT INTO @EntityRelationShips
 		SELECT 'UPDATE ' + R.TABLE_NAME + ' SET ' +  R.COLUMN_NAME + '='+ @PrimaryKeyString +' WHERE ' + R.COLUMN_NAME  + '=' + @CurMergeId + ';' as stment		
@@ -234,7 +234,7 @@ BEGIN
 		INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE R ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
 			AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
 			AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME		
-		WHERE U.TABLE_NAME = 'tblEMEntity'  AND R.TABLE_NAME <> @CurTableName and R.TABLE_NAME NOT IN(SELECT strTable from @parentAvoidTable)
+		WHERE U.TABLE_NAME = 'tblEMEntity'  AND R.TABLE_NAME <> @CurTableName and R.TABLE_NAME COLLATE SQL_Latin1_General_CP1_CS_AS  NOT IN(SELECT strTable from @parentAvoidTable)
 
 		BEGIN TRANSACTION
 		BEGIN TRY

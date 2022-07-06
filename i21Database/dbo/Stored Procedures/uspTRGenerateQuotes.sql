@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspTRGenerateQuotes]
 	 @dtmEffectiveDate AS DATETIME,
 	 @ysnConfirm AS BIT,
 	 @ysnVoid AS BIT,
+	 @strSource AS NVARCHAR(50),
 	 @intBegQuoteId INT OUTPUT,
 	 @intEndQuoteId INT OUTPUT
 AS
@@ -21,18 +22,41 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	SELECT intCustomerId = intEntityCustomerId
-		, strQuoteNumber = NULL
-	INTO #tmpQuotes
-	FROM tblARCustomerGroup CG
-	LEFT JOIN tblARCustomerGroupDetail CD ON CG.intCustomerGroupId = CD.intCustomerGroupId
-	LEFT JOIN tblEMEntityLocation EL ON CD.intEntityId = EL.intEntityId
-	RIGHT JOIN vyuTRQuoteSelection QS ON QS.intEntityCustomerId = CD.intEntityId AND QS.intEntityCustomerLocationId = EL.intEntityLocationId
-	WHERE CD.ysnQuote = 1
-		AND QS.ysnQuote = 1
-		AND (CG.intCustomerGroupId = @intCustomerGroupId OR ISNULL(@intCustomerGroupId, 0) = 0)
-		AND (ISNULL(@intCustomerId, 0) = 0 OR @intCustomerId = QS.intEntityCustomerId)
-	GROUP BY QS.intEntityCustomerId
+	DECLARE @tmpQuotes TABLE (
+		[intCustomerId] [int],
+		[strQuoteNumber] NVARCHAR(200)
+	)
+
+	IF(@strSource = 'AUTO')
+	BEGIN
+		INSERT INTO @tmpQuotes
+		SELECT intCustomerId = intEntityCustomerId
+			, strQuoteNumber = NULL
+		FROM tblARCustomerGroup CG
+		LEFT JOIN tblARCustomerGroupDetail CD ON CG.intCustomerGroupId = CD.intCustomerGroupId
+		LEFT JOIN tblEMEntityLocation EL ON CD.intEntityId = EL.intEntityId
+		RIGHT JOIN vyuTRQuoteSelection QS ON QS.intEntityCustomerId = CD.intEntityId AND QS.intEntityCustomerLocationId = EL.intEntityLocationId
+		WHERE CD.ysnAutomatedQuoting = 1
+			AND QS.ysnQuote = 1
+			AND (CG.intCustomerGroupId = @intCustomerGroupId OR ISNULL(@intCustomerGroupId, 0) = 0)
+			AND (ISNULL(@intCustomerId, 0) = 0 OR @intCustomerId = QS.intEntityCustomerId)
+		GROUP BY QS.intEntityCustomerId
+	END
+	ELSE 
+	BEGIN
+		INSERT INTO @tmpQuotes
+		SELECT intCustomerId = intEntityCustomerId
+			, strQuoteNumber = NULL
+		FROM tblARCustomerGroup CG
+		LEFT JOIN tblARCustomerGroupDetail CD ON CG.intCustomerGroupId = CD.intCustomerGroupId
+		LEFT JOIN tblEMEntityLocation EL ON CD.intEntityId = EL.intEntityId
+		RIGHT JOIN vyuTRQuoteSelection QS ON QS.intEntityCustomerId = CD.intEntityId AND QS.intEntityCustomerLocationId = EL.intEntityLocationId
+		WHERE CD.ysnQuote = 1
+			AND QS.ysnQuote = 1
+			AND (CG.intCustomerGroupId = @intCustomerGroupId OR ISNULL(@intCustomerGroupId, 0) = 0)
+			AND (ISNULL(@intCustomerId, 0) = 0 OR @intCustomerId = QS.intEntityCustomerId)
+		GROUP BY QS.intEntityCustomerId
+	END
 
 	IF ((@ysnConfirm = 1) OR (@ysnVoid = 1))
 	BEGIN
@@ -40,13 +64,13 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblTRQuoteHeader
 			SET strQuoteStatus = 'Confirmed'
-			WHERE intEntityCustomerId IN (SELECT intCustomerId FROM #tmpQuotes) AND strQuoteStatus = 'UnConfirmed'
+			WHERE intEntityCustomerId IN (SELECT intCustomerId FROM @tmpQuotes) AND strQuoteStatus = 'UnConfirmed'
 		END
 		ELSE IF @ysnVoid = 1
 		BEGIN
 			UPDATE tblTRQuoteHeader
 			SET strQuoteStatus = 'Void'
-			WHERE intEntityCustomerId IN (SELECT intCustomerId FROM #tmpQuotes) AND strQuoteStatus = 'Confirmed'      
+			WHERE intEntityCustomerId IN (SELECT intCustomerId FROM @tmpQuotes) AND strQuoteStatus = 'Confirmed'      
 		END
 
 		SET @intBegQuoteId = 0
@@ -60,9 +84,9 @@ BEGIN TRY
 			, @MinQuote NVARCHAR(50)
 			, @MaxQuote NVARCHAR(50)
 
-		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpQuotes)
+		WHILE EXISTS (SELECT TOP 1 1 FROM @tmpQuotes)
 		BEGIN
-			SELECT TOP 1 @CustomerId = intCustomerId FROM #tmpQuotes
+			SELECT TOP 1 @CustomerId = intCustomerId FROM @tmpQuotes
 
 			EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT
 
@@ -231,7 +255,9 @@ BEGIN TRY
 					 @dblReceiptSurchargeRate = NULL,
 					 @dblInvoiceSurchargeRate = @SurchargeRate OUTPUT,
 					 @ysnFreightInPrice = NULL,
-					 @ysnFreightOnly = NULL
+					 @ysnFreightOnly = NULL,
+					 @dblMinimumUnitsIn = NULL,
+					 @dblMinimumUnitsOut = NULL
 
 				SET @QuotePrice = @RackPrice + @DeviationAmount + @FreightRate
 				SET @Margin = @QuotePrice - @RackPrice
@@ -339,7 +365,7 @@ BEGIN TRY
 
 			DROP TABLE #tmpQuoteDetail
 
-			DELETE FROM #tmpQuotes WHERE intCustomerId = @CustomerId
+			DELETE FROM @tmpQuotes WHERE intCustomerId = @CustomerId
 		END
 
 		SELECT @intBegQuoteId = intQuoteHeaderId FROM tblTRQuoteHeader WHERE @MinQuote = strQuoteNumber

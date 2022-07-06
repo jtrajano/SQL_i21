@@ -122,16 +122,14 @@ BEGIN TRY
 	
 	INSERT	INTO @tblPricing
 	SELECT	RP.intReassignPricingId,
-			RP.dblReassign,
+			dblReassign = RP.dblReassign / isnull(RP.dblLot,1.00),
 			RP.intPriceFixationDetailId,
 			F1.intPriceFixationId,
 			F1.[dblNoOfLots],
-			CAST(ISNULL(F2.intPriceFixationDetailId,0)/ISNULL(F2.intPriceFixationDetailId,1) AS INT) AS ysnFullyPricingReassign,
+			ysnFullyPricingReassign = case when RP.dblLot = RP.dblReassign then 1 else 0 end,
 			F1.intFutOptTransactionId
 	FROM	tblCTReassignPricing RP
-	JOIN	tblCTPriceFixationDetail	F1	ON	F1.intPriceFixationDetailId	=	RP.intPriceFixationDetailId	LEFT
-	JOIN	tblCTPriceFixationDetail	F2	ON	F2.intPriceFixationDetailId =	RP.intPriceFixationDetailId	AND 
-											F2.[dblNoOfLots]				=	RP.dblReassign
+	JOIN	tblCTPriceFixationDetail	F1	ON	F1.intPriceFixationDetailId	=	RP.intPriceFixationDetailId
 	WHERE	RP.intReassignId = @intReassignId AND ISNULL(RP.dblReassign,0) > 0
 	
 	INSERT	INTO @tblFutures

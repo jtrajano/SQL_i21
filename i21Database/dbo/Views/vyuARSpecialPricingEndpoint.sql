@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuARSpecialPricingEndpoint]
+﻿CREATE VIEW [dbo].[vyuARSpecialPricingEndpoint]
 	AS 
 SELECT
 	SP.intSpecialPriceId
@@ -9,7 +9,7 @@ SELECT
 	,Loc.strLocationName strCustomerLocation
 	,SP.intItemId
 	,I.strItemNo
-	,SP.dblDeviation
+	,dblDeviation = SP.dblDeviation + SP.dblDeviation2 + SP.dblDeviation3 + SP.dblDeviation4
 FROM
 	tblARCustomerSpecialPrice SP
 INNER JOIN
@@ -18,11 +18,9 @@ INNER JOIN
 INNER JOIN
 	tblEMEntity Customer 
 		ON Customer.intEntityId = C.intEntityId
-INNER JOIN 
+LEFT JOIN 
 	tblEMEntityLocation Loc 
-		ON Loc.intEntityLocationId = SP.intCustomerLocationId AND Loc.intEntityId = SP.intEntityCustomerId
-INNER JOIN
+		ON Loc.intEntityLocationId = SP.intCustomerLocationId
+LEFT JOIN
 	tblICItem I
 		ON I.intItemId = SP.intItemId
-WHERE intCustomerLocationId IS NOT NULL
-AND SP.intEntityVendorId IS NULL

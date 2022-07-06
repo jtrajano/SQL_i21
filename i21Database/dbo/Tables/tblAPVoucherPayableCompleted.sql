@@ -31,13 +31,19 @@
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intWeightClaimId]				INT NULL,
+	[intWeightClaimDetailId]		INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId] 			INT NULL,
+	[intStorageChargeId] 			INT NULL,
+	[intInsuranceChargeDetailId]	INT NULL,
 	[intItemId]						INT NULL,
+	[intLotId] 						INT NULL,
 	[intLinkingId]					INT NULL,
 	[intTicketDistributionAllocationId] INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intFreightTermId]				INT NULL,
+	[strFreightTerm]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
 	[strTaxGroup]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intItemLocationId]				INT NULL,
@@ -88,6 +94,11 @@
 	[str1099Type]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,
+	[intBookId]						INT NULL,
+	[intSubBookId]					INT NULL,
+	[intComputeTotalOption] 		TINYINT NOT NULL DEFAULT(0),
+	[intPayFromBankAccountId] 		INT NULL,
+	[strPayFromBankAccount]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO
@@ -104,5 +115,6 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_deleteIX]
 								,intSettleStorageId
 								,intLoadShipmentDetailId 
 								,intLoadShipmentCostId
+								,intWeightClaimDetailId
 								,intItemId DESC);
 GO

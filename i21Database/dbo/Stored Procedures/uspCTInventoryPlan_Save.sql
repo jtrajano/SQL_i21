@@ -141,6 +141,8 @@ BEGIN TRY
 			,[dtmCreated]
 			,[intLastModifiedUserId]
 			,[dtmLastModified]
+			,strExternalGroup
+			,intDayLeftInMonth
 			)
 		SELECT 1
 			,[strInvPlngReportName]
@@ -163,6 +165,8 @@ BEGIN TRY
 			,GETDATE()
 			,[intLastModifiedUserId]
 			,GETDATE()
+			,strExternalGroup
+			,intDayLeftInMonth
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
 				strInvPlngReportName NVARCHAR(150)
 				,intNoOfMonths INT
@@ -179,6 +183,8 @@ BEGIN TRY
 				,ysnPost BIT
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
+				,strExternalGroup NVARCHAR(50)
+				,intDayLeftInMonth int
 				)
 
 		SET @intInvPlngReportMasterID = SCOPE_IDENTITY()
@@ -196,7 +202,17 @@ BEGIN TRY
 				,intLastModifiedUserId INT
 				)
 
-		INSERT INTO [dbo].[tblCTInvPlngReportAttributeValue]
+		INSERT INTO [dbo].[tblCTInvPlngReportAttributeValue](intInvPlngReportMasterID,
+				intReportAttributeID,
+				intItemId,
+				strFieldName,
+				strValue,
+				intCreatedUserId,
+				dtmCreated,
+				intLastModifiedUserId,
+				dtmLastModified,
+				intMainItemId,
+				intLocationId)
 		SELECT @intInvPlngReportMasterID
 			,[intReportAttributeID]
 			,[intItemId]
@@ -207,6 +223,7 @@ BEGIN TRY
 			,[intLastModifiedUserId]
 			,GETDATE()
 			,intMainItemId
+			,intLocationId
 		FROM OPENXML(@idoc, 'root/InvPlngReportAttributeValue/InvPlngReportAttributeValueRow', 2) WITH (
 				intReportAttributeID INT
 				,intItemId INT
@@ -215,6 +232,7 @@ BEGIN TRY
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				,intMainItemId INT
+				,intLocationId INT
 				)
 	END
 	ELSE
@@ -272,6 +290,8 @@ BEGIN TRY
 				)
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
+			,strExternalGroup=x.strExternalGroup
+			,intDayLeftInMonth=x.intDayLeftInMonth
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
 				strInvPlngReportName NVARCHAR(150)
 				,intNoOfMonths INT
@@ -287,6 +307,8 @@ BEGIN TRY
 				,strComment NVARCHAR(MAX)
 				,ysnPost BIT
 				,intLastModifiedUserId INT
+				,strExternalGroup NVARCHAR(50)
+				,intDayLeftInMonth int
 				) x
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
@@ -315,7 +337,7 @@ BEGIN TRY
 					AND RAV.intReportAttributeID = 1
 					AND RAV.strFieldName = x.strFieldName
 				)
-			,I.strItemNo + IsNULL(' - [ ' + MI.strItemNo + ' ] ', '') + ' - ' + RA.strAttributeName
+			,IsNULL(L.strLocationName, 'All')+' - '+I.strItemNo + IsNULL(' - [ ' + MI.strItemNo + ' ] ', '') + ' - ' + RA.strAttributeName
 			,AV.strValue
 			,x.strValue
 		FROM OPENXML(@idoc, 'root/InvPlngReportAttributeValue/InvPlngReportAttributeValueRow', 2) WITH (
@@ -326,6 +348,7 @@ BEGIN TRY
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				,intMainItemId INT
+				,intLocationId int
 				) x
 		JOIN tblCTInvPlngReportAttributeValue AV ON x.intReportAttributeID = AV.intReportAttributeID
 			AND x.intItemId = AV.intItemId
@@ -334,6 +357,7 @@ BEGIN TRY
 		JOIN tblICItem I ON I.intItemId = x.intItemId
 		LEFT JOIN tblICItem MI ON MI.intItemId = x.intMainItemId
 		JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = x.intReportAttributeID
+		LEFT JOIN dbo.tblSMCompanyLocation L ON L.intCompanyLocationId = x.intLocationId
 		WHERE x.strValue <> AV.strValue
 			AND AV.intInvPlngReportMasterID = @intInvPlngReportMasterID
 			AND AV.intReportAttributeID IN (
@@ -348,7 +372,17 @@ BEGIN TRY
 		FROM dbo.tblCTInvPlngReportAttributeValue
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
-		INSERT INTO [dbo].[tblCTInvPlngReportAttributeValue]
+		INSERT INTO [dbo].[tblCTInvPlngReportAttributeValue](intInvPlngReportMasterID,
+				intReportAttributeID,
+				intItemId,
+				strFieldName,
+				strValue,
+				intCreatedUserId,
+				dtmCreated,
+				intLastModifiedUserId,
+				dtmLastModified,
+				intMainItemId,
+				intLocationId)
 		SELECT @intInvPlngReportMasterID
 			,[intReportAttributeID]
 			,[intItemId]
@@ -359,6 +393,7 @@ BEGIN TRY
 			,[intLastModifiedUserId]
 			,GETDATE()
 			,intMainItemId
+			,intLocationId
 		FROM OPENXML(@idoc, 'root/InvPlngReportAttributeValue/InvPlngReportAttributeValueRow', 2) WITH (
 				intReportAttributeID INT
 				,intItemId INT
@@ -367,6 +402,7 @@ BEGIN TRY
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				,intMainItemId INT
+				,intLocationId INT
 				)
 
 		IF EXISTS (
@@ -391,6 +427,22 @@ BEGIN TRY
 				,@actionType = 'Updated'
 				,@actionIcon = 'small-tree-modified'
 				,@details = @strDetails
+
+			BEGIN TRY
+			DECLARE @SingleAuditLogParam SingleAuditLogParam
+			INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT 1, '', 'Updated', 'Updated - Record: ' + CAST(@intInvPlngReportMasterID AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+					UNION ALL
+					SELECT 2, '', '', strColumnName, Ltrim(isNULL(strOldValue, '')), Ltrim(IsNULL(strNewValue, '')), strColumnDescription, NULL, NULL, 1 from @tblIPAuditLog
+
+			EXEC uspSMSingleAuditLog 
+				@screenName     = 'Manufacturing.view.DemandAnalysisView',
+				@recordId       = @intInvPlngReportMasterID,
+				@entityId       = @intLastModifiedUserId,
+				@AuditLogParam  = @SingleAuditLogParam
+			END TRY
+			BEGIN CATCH
+			END CATCH
 		END
 	END
 

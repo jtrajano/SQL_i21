@@ -22,6 +22,8 @@
 	[intLastModifiedUserId] [int] NOT NULL,
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_intConcurrencyId] DEFAULT 0, 
+	intSubLocationId int,
+	strERPRecipeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
     CONSTRAINT [PK_tblMFWorkOrderRecipe_intRecipeId] PRIMARY KEY ([intRecipeId],[intWorkOrderId]), 
     CONSTRAINT [FK_tblMFWorkOrderRecipe_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
@@ -31,7 +33,8 @@
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblEMEntityFarm_intFarmFieldId_intFarmId] FOREIGN KEY ([intFarmId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblEMEntityFarm_intFarmFieldId_intFieldId] FOREIGN KEY ([intFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
-	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblSMCompanyLocationSubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
 )
 
 GO

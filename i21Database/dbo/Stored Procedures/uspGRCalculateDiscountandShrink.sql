@@ -330,7 +330,7 @@ BEGIN TRY
 				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
 				,strCalculationShrinkOption		 = @strCalculationShrinkOption
 				,intDiscountUOMId				 = @intDiscountUOMId 
-				 FROM @tblExtendedTab ORDER BY 1 
+				 FROM @tblExtendedTab ORDER BY intExtendedKey
 			 END
 			 ELSE IF (@dblReading > @dblMaxToForIncremental)
 			 BEGIN
@@ -365,7 +365,7 @@ BEGIN TRY
 				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
 				,strCalculationShrinkOption		 = @strCalculationShrinkOption
 				,intDiscountUOMId				 = @intDiscountUOMId 			 
-				 FROM @tblExtendedTab ORDER BY 1 DESC
+				 FROM @tblExtendedTab ORDER BY intExtendedKey DESC
 			 END
 		END	 							
 		ELSE

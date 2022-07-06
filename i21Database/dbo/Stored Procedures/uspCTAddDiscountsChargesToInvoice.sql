@@ -131,7 +131,7 @@ begin try
 				,@ItemDocumentNumber                    = ARSI.[strTransactionNumber]
 				,@ItemDescription						= ARSI.[strItemDescription]
 				,@ItemOrderUOMId                        = ARSI.[intOrderUOMId]
-				,@ItemQtyOrdered                        = dbo.fnCTConvertQtyToTargetItemUOM(ICISI.intItemUOMId,ARSI.[intOrderUOMId],ICISI.dblQuantity)
+				,@ItemQtyOrdered                        = 0.00--dbo.fnCTConvertQtyToTargetItemUOM(ICISI.intItemUOMId,ARSI.[intOrderUOMId],ICISI.dblQuantity)
 				,@ItemUOMId								= ARSI.[intItemUOMId]
 				,@ItemPriceUOMId                        = ARSI.[intPriceUOMId]
 				,@ItemQtyShipped                        = ARSI.dblQtyShipped
@@ -263,7 +263,8 @@ begin try
 		update tblCTPriceFixationDetailAPAR set strInvoiceDiscountsChargesIds = @strInvoiceDiscountsChargesIds where intInvoiceDetailId = @intInvoiceDetailId;
 	end
 
-	EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @UserId = @UserId, @ysnLogRisk	= 0
+	EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @UserId = @UserId, @ysnLogRisk	= 0;
+	EXEC dbo.uspARReComputeInvoiceAmounts @InvoiceId = @intInvoiceId, @AvailableDiscountOnly = 0;
 
 end try
 begin catch

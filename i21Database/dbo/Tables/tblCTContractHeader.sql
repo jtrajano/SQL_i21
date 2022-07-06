@@ -11,6 +11,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intCommodityId] [int] NULL,
 	[dblQuantity] [numeric](18, 6) NOT NULL,
 	[intCommodityUOMId] INT NULL, 
+	[intCompanyLocationId] [int] NULL,
 	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmContractDate] [datetime] NOT NULL,
 	[strCustomerContract] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
@@ -48,7 +49,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [intCountryId] INT NULL, 
     [intCompanyLocationPricingLevelId] INT NULL, 
     [ysnProvisional] BIT NULL, 
-    [ysnLoad] BIT NULL, 
+    [ysnLoad] BIT NULL DEFAULT ((0)), 
     [intNoOfLoad] INT NULL, 
     [dblQuantityPerLoad] NUMERIC(18, 6) NULL, 
     [intLoadUOMId] INT NULL, 
@@ -85,7 +86,20 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	ysnReceivedSignedFixationLetter	BIT NOT NULL DEFAULT 0,
 	ysnReadOnlyInterCoContract BIT NOT NULL DEFAULT 0,
+	ysnEnableFutures BIT NULL DEFAULT 0,
+	guiApiUniqueId UNIQUEIDENTIFIER NULL,
+	intApiRowNumber INT NULL,
 
+    [ysnStrategic] BIT NULL DEFAULT 0, 
+    [intEntitySelectedLocationId] INT NULL,
+	[intDaysForFinance] INT NULL, 
+	[intSampleTypeId] [int] NULL,
+	[ysnLocalCurrency] BIT default ((0)),
+	[ysnPrintCropYear] BIT default ((0)),
+	
+	--CT-7027
+	--[intLastEntityId] INT NULL,
+    -- CT-5315
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
@@ -122,7 +136,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMonth_intFutureMonthId] FOREIGN KEY (intFutureMonthId) REFERENCES tblRKFuturesMonth(intFutureMonthId),
 	CONSTRAINT [FK_tblCTContractHeader_tblSMCountry_intCountryId] FOREIGN KEY (intCountryId) REFERENCES tblSMCountry(intCountryID),
 	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intBrokerId_intEntityId] FOREIGN KEY ([intBrokerId]) REFERENCES tblEMEntity([intEntityId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId])
+	CONSTRAINT [FK_tblCTContractHeader_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 
 )
 

@@ -135,7 +135,7 @@ DECLARE
 		,@Interest					= @ZeroDecimal
 		,@AmountDue					= @ZeroDecimal
 		,@Payment					= @ZeroDecimal
-		,@EntitySalespersonId		= ARC.[intSalespersonId]
+		,@EntitySalespersonId		= ISNULL(LD.intSalespersonId, ARC.[intSalespersonId])
 		,@FreightTermId				= L.intFreightTermId
 		,@ShipViaId					= CD.intShipViaId
 		,@PaymentMethodId			= NULL
@@ -291,7 +291,9 @@ DECLARE
 			,[intCurrencyExchangeRateId]
 			,[dblCurrencyExchangeRate]
 			,[intSubCurrencyId]
-			,[dblSubCurrencyRate])
+			,[dblSubCurrencyRate]
+			,[dblQualityPremium]
+			,[dblOptionalityPremium])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -414,6 +416,8 @@ DECLARE
 															THEN CU.intCent
 														ELSE 1.000000
 														END
+			,[dblQualityPremium]					= LD.dblQualityPremium
+			,[dblOptionalityPremium]				= LD.dblOptionalityPremium
 		FROM tblLGLoad L
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -431,6 +435,36 @@ DECLARE
 			IF NOT EXISTS (SELECT 1 FROM #tmpLGContractPrice HAVING SUM(dblPrice) <> 0)
 			BEGIN
 				RAISERROR('One or more contracts is not yet priced. Please price the contracts to proceed.', 16, 1);
+			END
+		END
+
+		IF ((SELECT TOP 1 ISNULL(ysnAllowInvoiceForPartialPriced, 0) FROM tblLGCompanyPreference) = 0)
+		BEGIN
+			IF EXISTS (SELECT TOP 1 1 FROM 
+						tblCTContractDetail CD
+						JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+						JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+						WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId IN (2)) AND @intType = 1
+			BEGIN
+				SELECT TOP 1 
+					@InvoiceNumber = CH.strContractNumber,
+					@ShipmentNumber = CAST(CD.intContractSeq AS nvarchar(10))
+				FROM tblCTContractDetail CD
+					JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+					LEFT JOIN tblCTPriceFixation PF ON PF.intContractDetailId = CD.intContractDetailId
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId IN (2) AND (PF.dblTotalLots IS NULL OR PF.dblLotsFixed < PF.dblTotalLots)
+
+				DECLARE @ErrorMessageNotPriced NVARCHAR(250)
+
+				SET @ErrorMessageNotPriced = 'Contract No. ' + @InvoiceNumber + '/' + @ShipmentNumber + ' is not fully priced. Unable to create Direct Invoice.';
+
+				IF (@ErrorMessageNotPriced IS NOT NULL)
+				BEGIN
+					RAISERROR(@ErrorMessageNotPriced, 16, 1);
+					RETURN 0;
+				END
 			END
 		END
 
@@ -535,7 +569,23 @@ DECLARE
 			,[intCurrencyExchangeRateId]
 			,[dblCurrencyExchangeRate]
 			,[intSubCurrencyId]
-			,[dblSubCurrencyRate])
+			,[dblSubCurrencyRate]
+			,[dblQualityPremium]
+			,[dblOptionalityPremium]
+			,[intBankId]
+			,[intBankAccountId]
+			,[intBorrowingFacilityId]
+			,[intBorrowingFacilityLimitId]
+			,[strTradeFinanceNo]
+			,[intFacilityId]
+			,[intLoanLimitId]
+			,[strBankReferenceNo]
+			,[strBankTransactionId]
+			,[dblLoanAmount]
+			,[intBankValuationRuleId]
+			,[strTradeFinanceComments]
+			,[strGoodsStatus]
+			)
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -645,7 +695,23 @@ DECLARE
 			,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate] 
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
+			,[dblQualityPremium]					= LD.dblQualityPremium
+			,[dblOptionalityPremium]				= LD.dblOptionalityPremium
+			,[intBankId]							= TF.intBankId				
+			,[intBankAccountId]						= TF.intBankAccountId
+			,[intBorrowingFacilityId]				= TF.intBorrowingFacilityId	
+			,[intBorrowingFacilityLimitId]			= TF.intBorrowingFacilityLimitId
+			,[strTradeFinanceNo]					= TF.strTradeFinanceNo
+			,[intFacilityId]						= TF.intFacilityId
+			,[intLoanLimitId]						= TF.intLoanLimitId
+			,[strBankReferenceNo]					= TF.strBankReferenceNo
+			,[strBankTransactionId]					= NULL
+			,[dblLoanAmount]						= TF.dblLoanAmount
+			,[intBankValuationRuleId]				= TF.intBankValuationRuleId
+			,[strTradeFinanceComments]				= TF.strTradeFinanceComments
+			,[strGoodsStatus]						= TF.strGoodsStatus
 		FROM vyuARShippedItems ARSI
+			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARSI.intLoadDetailId
 			OUTER APPLY (
 				SELECT cp.* 
 					,dblPrevRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice prcp
@@ -656,6 +722,27 @@ DECLARE
 												AND cp.intContractDetailId = ARSI.intContractDetailId)
 				FROM #tmpLGContractPrice cp
 				WHERE cp.intContractDetailId = ARSI.intContractDetailId) CP
+			OUTER APPLY (
+				SELECT TOP 1
+					[intBankId]							= IR.intBankId				
+					,[intBankAccountId]						= IR.intBankAccountId
+					,[intBorrowingFacilityId]				= IR.intBorrowingFacilityId	
+					,[intBorrowingFacilityLimitId]			= IR.intLimitTypeId
+					,[strTradeFinanceNo]					= IR.strTradeFinanceNumber
+					,[intFacilityId]						= IR.intOverrideFacilityValuation
+					,[intLoanLimitId]						= PL.intLoanLimitId
+					,[strBankReferenceNo]					= IR.strBankReferenceNo
+					,[dblLoanAmount]						= PL.dblLoanAmount
+					,[intBankValuationRuleId]				= PL.intBankValuationRuleId		
+					,[strTradeFinanceComments]				= IR.strComments
+					,[strGoodsStatus]						= CASE (PL.intWarrantStatus) WHEN 1 THEN 'Pledged' WHEN 2 THEN 'Released' ELSE NULL END COLLATE Latin1_General_CI_AS 
+				FROM tblLGLoadDetailLot LDL
+				LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LDL.intLotId
+				LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
+				LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+				LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = IRI.intSourceId 
+				LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
+				WHERE LDL.intLoadDetailId = ARSI.intLoadDetailId) TF
 		WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 		  AND ARSI.[intLoadId] = @intLoadId
 	
@@ -700,34 +787,6 @@ DECLARE
 
 		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
-	END
-
-	IF ((SELECT TOP 1 ISNULL(ysnAllowInvoiceForPartialPriced, 0) FROM tblLGCompanyPreference) = 0)
-	BEGIN
-		IF EXISTS (SELECT TOP 1 1 FROM 
-					tblCTContractDetail CD
-					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
-					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)) AND @intType = 1
-		BEGIN
-			SELECT TOP 1 
-				@InvoiceNumber = CH.strContractNumber,
-				@ShipmentNumber = CAST(CD.intContractSeq AS nvarchar(10))
-			FROM 
-			tblCTContractDetail CD
-			JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-			JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
-			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-			WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
-
-			DECLARE @ErrorMessageNotPriced NVARCHAR(250)
-
-			SET @ErrorMessageNotPriced = 'Contract No. ' + @InvoiceNumber + '/' + @ShipmentNumber + ' is not Priced. Unable to create Direct Invoice.';
-
-			RAISERROR(@ErrorMessageNotPriced, 16, 1);
-			RETURN 0;
-
-		END
 	END
 	
 	DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable

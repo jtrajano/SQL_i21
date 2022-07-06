@@ -193,6 +193,56 @@ BEGIN TRY
 				
 				EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId, @intNewPFDetailId OUTPUT,@XML
 
+				if exists (select top 1 1 from tblCTCompanyPreference where isnull(ysnEnableAdditionalFieldsOnSliceScreen,0) = 1)
+				begin
+					declare
+						@intCDFutureMonthId int
+						,@dblCDBasis numeric(18,6)
+						,@dblCDFutures numeric(18,6)
+						,@dblCDRatio numeric(18,6)
+						,@dblCDCashPrice numeric(18,6)
+						,@intCDPriceItemUOMId int
+						,@dblCDQuantity numeric(18,6)
+						,@intCDItemId int
+						,@intCDBasisUOMId int
+						,@intCDCurrencyId int
+
+					select
+						@intCDFutureMonthId=intFutureMonthId
+						,@dblCDBasis=dblBasis
+						,@dblCDRatio=dblRatio
+						,@dblCDFutures=dblFutures
+						,@dblCDCashPrice=dblCashPrice
+						,@intCDPriceItemUOMId=intPriceItemUOMId
+						,@dblCDQuantity=dblQuantity
+						,@intCDItemId = intItemId
+						,@intCDBasisUOMId = intBasisUOMId
+						,@intCDCurrencyId = intCurrencyId
+					from
+						tblCTContractDetail
+					where
+						intContractDetailId = @intChildContractDetailId;
+
+					update
+						fd
+					set
+						fd.intFutureMonthId = @intCDFutureMonthId
+						,fd.dblBasis = dbo.fnCTConvertQtyToTargetItemUOM(@intCDBasisUOMId,iuom.intItemUOMId,@dblCDBasis)
+						,fd.dblQuantity = @dblCDQuantity
+						,fd.dblFutures = dbo.fnCTConvertQtyToTargetItemUOM(@intCDPriceItemUOMId,iuom.intItemUOMId,@dblCDFutures) * (case when xrd.dblRate is not null then xrd.dblRate else 1 end)
+						,fd.dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intCDBasisUOMId,iuom.intItemUOMId,@dblCDBasis) + (dbo.fnCTConvertQtyToTargetItemUOM(@intCDPriceItemUOMId,iuom.intItemUOMId,@dblCDFutures) * (case when xrd.dblRate is not null then xrd.dblRate else 1 end))
+					from tblCTPriceFixationDetail fd
+					join tblCTPriceFixation pf on pf.intPriceFixationId = fd.intPriceFixationId
+					join tblCTPriceContract pc on pc.intPriceContractId = pf.intPriceContractId
+					left join tblSMCurrencyExchangeRate xr on xr.intFromCurrencyId = @intCDCurrencyId and xr.intToCurrencyId = pc.intFinalCurrencyId
+					left join tblSMCurrencyExchangeRateDetail xrd on xrd.intCurrencyExchangeRateId = xr.intCurrencyExchangeRateId
+					join tblICCommodityUnitMeasure cuom on cuom.intCommodityUnitMeasureId = fd.intPricingUOMId
+					join tblICItemUOM iuom on iuom.intUnitMeasureId = cuom .intUnitMeasureId and iuom.intItemId = @intCDItemId
+					where
+						fd.intPriceFixationDetailId = @intNewPFDetailId;
+
+				end
+
 				UPDATE	tblCTContractDetail SET intSplitFromId = NULL WHERE intContractDetailId =@intChildContractDetailId
 
 				SELECT	@intChildContractDetailId = MIN(intContractDetailId), @intNewPriceFixationId = null

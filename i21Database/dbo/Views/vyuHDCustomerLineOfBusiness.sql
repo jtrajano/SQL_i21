@@ -7,8 +7,5 @@
 			,strSalesPerson = tblEMEntity.strName
 		from
 			tblARCustomerLineOfBusiness
-			,[tblSMLineOfBusiness]
-			,tblEMEntity
-		where
-			[tblSMLineOfBusiness].intLineOfBusinessId = tblARCustomerLineOfBusiness.intLineOfBusinessId
-			and tblEMEntity.intEntityId = [tblSMLineOfBusiness].intEntityId
+			inner join tblSMLineOfBusiness on tblSMLineOfBusiness.intLineOfBusinessId = tblARCustomerLineOfBusiness.intLineOfBusinessId
+			inner join tblEMEntity on tblEMEntity.intEntityId = tblSMLineOfBusiness.intEntityId

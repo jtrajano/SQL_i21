@@ -12,7 +12,7 @@
 	strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,		
 	intItemId INT NULL,			
 	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
-	strDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,		
+	strDescription NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL,		
 	intItemUOMId INT NULL,	
 	strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
 	dblOpeningQty NUMERIC(28, 2) NULL,		

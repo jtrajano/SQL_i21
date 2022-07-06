@@ -68,8 +68,8 @@ BEGIN
 
     -- Remove hack value from screen name
     UPDATE @ReceiptEntries SET strSourceScreenName = NULL
-
-    EXEC dbo.[uspICImportReceipt] @ReceiptEntries, @OtherCharges, 1, @LotEntries
+	DECLARE @ID UNIQUEIDENTIFIER = NEWID()
+    EXEC dbo.[uspICImportReceipt] @ReceiptEntries, @OtherCharges, 1, @LotEntries, @ID
 
     -- Cleanup
     DELETE FROM tblICStagingReceipt

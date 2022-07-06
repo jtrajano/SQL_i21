@@ -730,6 +730,7 @@ BEGIN TRY
 		FROM tblQMSample
 		WHERE intProductTypeId = 12
 			AND intProductValueId = @intWorkOrderId
+			AND intTypeId = 1
 		ORDER BY dtmLastModified DESC
 
 		IF @intSampleStatusId = 4
@@ -761,6 +762,7 @@ BEGIN TRY
 			WHERE S.intProductTypeId = 12
 				AND S.intProductValueId = @intWorkOrderId
 				AND ST.intControlPointId = 12 --WIP Sample
+				AND S.intTypeId = 1
 			ORDER BY S.dtmLastModified DESC
 
 			SELECT @intDurationBetweenLineSample = strAttributeValue

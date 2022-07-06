@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @LotEntries ReceiptItemLotStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
+	DECLARE @ReceiptTradeFinance ReceiptTradeFinance
 	DECLARE @intPContractDetailId INT
 	DECLARE @intPEntityId INT
 	DECLARE @intPItemId INT
@@ -20,6 +21,12 @@ BEGIN TRY
 	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
 	DECLARE @strLotCondition NVARCHAR(50)
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+	DECLARE @strFOBPoint AS NVARCHAR(50)
+
+	SELECT @strFOBPoint = FT.strFobPoint 
+	FROM tblLGLoad L
+	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId 
+	WHERE intLoadId = @intLoadId
 
 	SELECT TOP 1 @strLotCondition = strLotCondition
 	FROM tblICCompanyPreference
@@ -157,9 +164,11 @@ BEGIN TRY
 		WHERE L.intLoadId = @intLoadId
 			AND 1 = (CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NULL AND LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) > 0)
 							OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL 
-								AND CAST((CASE WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0 THEN 0 ELSE 1 END) AS BIT) = 0
 								AND ISNULL(LC.ysnRejected, 0) <> 1 
-								AND ISNULL(LDCL.dblReceivedQty,0) = 0) 
+								AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
+												INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+												WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 2)
+								) 
 						THEN 1  ELSE 0 END)
 		ORDER BY LDCL.intLoadDetailContainerLinkId
 	
@@ -169,7 +178,7 @@ BEGIN TRY
 						INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
 						WHERE ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadId = @intLoadId)
 			BEGIN
-				SET @strErrorMessage = 'All the containers in the inbound shipment has already been received.'
+				SET @strErrorMessage = 'Receipt already exists for all the containers in the inbound shipment.'
 			END
 			ELSE 
 			BEGIN
@@ -303,7 +312,7 @@ BEGIN TRY
 			,[intSourceType]
 			,[strBillOfLadding]
 			)
-		SELECT [intLotId] = NULL
+		SELECT DISTINCT [intLotId] = NULL
 			,[strLotNumber] = NULL
 			,[strLotAlias] = NULL
 			,[intSubLocationId] = ISNULL(LW.intSubLocationId,LD.intPSubLocationId)
@@ -338,6 +347,69 @@ BEGIN TRY
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
 		WHERE LD.intLoadId = @intLoadId
 
+
+		INSERT INTO @ReceiptTradeFinance (
+			[strTradeFinanceNumber]
+			,[intBankId]
+			,[intBankAccountId] 
+			,[intBorrowingFacilityId] 
+			,[strBankReferenceNo] 
+			,[intLimitTypeId] 
+			,[intSublimitTypeId] 
+			,[ysnSubmittedToBank]
+			,[dtmDateSubmitted] 
+			,[strApprovalStatus] 
+			,[dtmDateApproved] 
+			,[strWarrantNo] 
+			,[intWarrantStatus] 
+			,[strReferenceNo] 
+			,[intOverrideFacilityValuation] 
+			,[strComments] 
+			
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT 
+			[strTradeFinanceNumber] = L.strTradeFinanceNo
+			,[intBankId] = ba.intBankId
+			,[intBankAccountId] = L.intBankAccountId
+			,[intBorrowingFacilityId] = L.intBorrowingFacilityId
+			,[strBankReferenceNo] = L.strBankReferenceNo
+			,[intLimitTypeId] = L.intBorrowingFacilityLimitId
+			,[intSublimitTypeId] = L.intBorrowingFacilityLimitDetailId
+			,[ysnSubmittedToBank] = L.ysnSubmittedToBank
+			,[dtmDateSubmitted] = L.dtmDateSubmitted
+			,[strApprovalStatus] = approvalStatus.strApprovalStatus
+			,[dtmDateApproved] = L.dtmDateApproved
+			,[strWarrantNo] = L.strWarrantNo
+			,[intWarrantStatus] = L.intWarrantStatus
+			,[strReferenceNo] = L.strTradeFinanceReferenceNo
+			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[strComments] = L.strTradeFinanceComments
+
+			,[intEntityVendorId] = LD.intVendorEntityId
+			,[strReceiptType] = 'Direct'
+			,[intLocationId] = LD.intPCompanyLocationId
+			,[intShipViaId] = NULL
+			,[intShipFromId] = EL.intEntityLocationId
+			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
+			,[intSourceType] = 0
+			,[strBillOfLadding] = L.strBLNumber
+		FROM tblLGLoad L  
+			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
+			LEFT JOIN tblCMBankAccount ba ON ba.intBankAccountId = L.intBankAccountId
+			LEFT JOIN tblCTApprovalStatusTF approvalStatus ON approvalStatus.intApprovalStatusId = L.intApprovalStatusId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
+		WHERE 
+			L.intLoadId = @intLoadId
+
 		IF NOT EXISTS (SELECT 1 FROM @ReceiptStagingTable)
 		BEGIN
 			RETURN
@@ -347,6 +419,7 @@ BEGIN TRY
 									,@OtherCharges = @OtherCharges
 									,@intUserId = @intEntityUserSecurityId
 									,@LotEntries = @LotEntries
+									,@ReceiptTradeFinance = @ReceiptTradeFinance
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult
@@ -473,7 +546,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
 			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
-			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0) AND @strFOBPoint = 'Origin'
 		BEGIN
 			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
 		END
@@ -550,8 +623,8 @@ BEGIN TRY
 									ISNULL(LDCL.dblLinkNetWt, 0)
 								END
 				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
-				,[intCostUOMId] = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)
-				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
+				,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
+				,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
 				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
 				,[dblExchangeRate] = 1
 				,[intLotId] = NULL
@@ -564,33 +637,33 @@ BEGIN TRY
 				,[strSourceScreenName] = 'Contract'
 				,[ysnSubCurrency] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.ysnSeqSubCurrency ELSE ISNULL(LSC.ysnSubCurrency, AD.ysnSeqSubCurrency) END
 				,[intForexRateTypeId] = CASE --if contract FX tab is setup
-									 WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+										WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN NULL --foreign price to functional FX, use null
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
 											ELSE LD.intForexRateTypeId END
-									 ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, ''))) 
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
-									 END
+										END
 				,[dblForexRate] = CASE --if contract FX tab is setup
-									 WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+										WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN dbo.fnDivide(1, CD.dblRate) --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN 1 --foreign price to functional FX, use 1
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
 											ELSE ISNULL(LD.dblForexRate,1) END
-									 ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID,''))) 
 											THEN ISNULL(FX.dblFXRate, 1)
 											ELSE ISNULL(LD.dblForexRate,1) END
-									 END
+										END
 				,[intContainerId] = ISNULL(LC.intLoadContainerId, -1)
 				,[intFreightTermId] = L.intFreightTermId
 				,[intBookId] = L.intBookId
@@ -619,13 +692,15 @@ BEGIN TRY
 									ELSE RD.[dblRate] END 
 						FROM tblSMCurrencyExchangeRate ER
 						JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
-						WHERE @DefaultCurrencyId <> ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)
-							AND ((ER.intFromCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
-								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)))
+						WHERE @DefaultCurrencyId <> CD.intInvoiceCurrencyId
+							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 			WHERE L.intLoadId = @intLoadId
-				AND (ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0)) > 0
 				AND ISNULL(LC.ysnRejected, 0) <> 1
+				AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
+								INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+								WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 2)
 			ORDER BY LDCL.intLoadDetailContainerLinkId
 		END
 		ELSE
@@ -688,8 +763,8 @@ BEGIN TRY
 				,[dblGross] = LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
 				,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
 				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
-				,[intCostUOMId] = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)
-				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
+				,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
+				,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
 				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
 				,[dblExchangeRate] = 1
 				,[intLotId] = NULL
@@ -702,33 +777,33 @@ BEGIN TRY
 				,[strSourceScreenName] = 'Contract'
 				,[ysnSubCurrency] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.ysnSeqSubCurrency ELSE LSC.ysnSubCurrency END
 				,[intForexRateTypeId] = CASE --if contract FX tab is setup
-									 WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+										WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN NULL --foreign price to functional FX, use null
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
 											ELSE LD.intForexRateTypeId END
-									 ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, 0))) 
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
-									 END
+										END
 				,[dblForexRate] = CASE --if contract FX tab is setup
-									 WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+										WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN dbo.fnDivide(1, CD.dblRate) --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN 1 --foreign price to functional FX, use 1
-											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
 											ELSE ISNULL(LD.dblForexRate,1) END
-									 ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID,''))) 
 											THEN ISNULL(FX.dblFXRate, 1)
 											ELSE ISNULL(LD.dblForexRate,1) END
-									 END
+										END
 				,[intContainerId] = -1
 				,[intFreightTermId] = L.intFreightTermId
 				,[intBookId] = L.intBookId
@@ -752,9 +827,9 @@ BEGIN TRY
 									ELSE RD.[dblRate] END 
 						FROM tblSMCurrencyExchangeRate ER
 						JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
-						WHERE @DefaultCurrencyId <> ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)
-							AND ((ER.intFromCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
-								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)))
+						WHERE @DefaultCurrencyId <> CD.intInvoiceCurrencyId
+							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 			WHERE L.intLoadId = @intLoadId
 				AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
@@ -766,7 +841,7 @@ BEGIN TRY
 						INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
 						WHERE ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadId = @intLoadId)
 			BEGIN
-				SET @strErrorMessage = 'All the containers in the inbound shipment has already been received.'
+				SET @strErrorMessage = 'Receipt already exists for all the containers in the inbound shipment.'
 			END
 			ELSE 
 			BEGIN
@@ -813,7 +888,7 @@ BEGIN TRY
 			,[ysnAccrue] = 1
 			,[strReceiptType] = 'Purchase Contract'
 			,[intShipViaId] = NULL
-			,[intCurrencyId] = L.intCurrencyId
+			,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
 			,[ysnPrice] = CV.ysnPrice
@@ -830,6 +905,9 @@ BEGIN TRY
 		JOIN tblICItem I ON I.intItemId = CV.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		WHERE CV.intLoadId = @intLoadId
@@ -899,8 +977,12 @@ BEGIN TRY
 			,[intCurrencyId]
 			,[intSourceType]
 			,[strBillOfLadding]
+			,[strCertificate]
+			,[intProducerId]
+			,[strCertificateId]
+			,[strTrackingNumber]
 			)
-		SELECT [intLotId] = NULL
+		SELECT DISTINCT [intLotId] = NULL
 			,[strLotNumber] = NULL
 			,[strLotAlias] = NULL
 			,[intSubLocationId] = LW.intSubLocationId
@@ -924,17 +1006,90 @@ BEGIN TRY
 			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 			,[intSourceType] = 2
 			,[strBillOfLadding] = L.strBLNumber
-		FROM tblLGLoad L  
+			,[strCertificate] = CF.strCertificationName
+			,[intProducerId] = CC.intProducerId
+			,[strCertificateId] = CC.strCertificationId
+			,[strTrackingNumber] = CC.strTrackingNumber
+		FROM tblLGLoad L 
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
 		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
+		LEFT JOIN tblICCertification CF ON CF.intCertificationId = CC.intCertificationId
 		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouse LW ON LD.intLoadId = LW.intLoadId
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 		WHERE LD.intLoadId = @intLoadId
+
+		INSERT INTO @ReceiptTradeFinance (
+			[strTradeFinanceNumber]
+			,[intBankId]
+			,[intBankAccountId] 
+			,[intBorrowingFacilityId] 
+			,[strBankReferenceNo] 
+			,[intLimitTypeId] 
+			,[intSublimitTypeId] 
+			,[ysnSubmittedToBank]
+			,[dtmDateSubmitted] 
+			,[strApprovalStatus] 
+			,[dtmDateApproved] 
+			,[strWarrantNo] 
+			,[intWarrantStatus] 
+			,[strReferenceNo] 
+			,[intOverrideFacilityValuation] 
+			,[strComments] 
+			
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT 
+			[strTradeFinanceNumber] = L.strTradeFinanceNo
+			,[intBankId] = ba.intBankId
+			,[intBankAccountId] = L.intBankAccountId
+			,[intBorrowingFacilityId] = L.intBorrowingFacilityId
+			,[strBankReferenceNo] = L.strBankReferenceNo
+			,[intLimitTypeId] = L.intBorrowingFacilityLimitId
+			,[intSublimitTypeId] = L.intBorrowingFacilityLimitDetailId
+			,[ysnSubmittedToBank] = L.ysnSubmittedToBank
+			,[dtmDateSubmitted] = L.dtmDateSubmitted
+			,[strApprovalStatus] = approvalStatus.strApprovalStatus
+			,[dtmDateApproved] = L.dtmDateApproved
+			,[strWarrantNo] = NULL
+			,[intWarrantStatus] = NULL
+			,[strReferenceNo] = L.strTradeFinanceReferenceNo
+			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[strComments] = L.strTradeFinanceComments
+
+			,[intEntityVendorId] = LD.intVendorEntityId
+			,[strReceiptType] = 'Purchase Contract'
+			,[intLocationId] = CD.intCompanyLocationId
+			,[intShipViaId] = NULL
+			,[intShipFromId] = EL.intEntityLocationId
+			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+			,[intSourceType] = 2
+			,[strBillOfLadding] = L.strBLNumber
+		FROM tblLGLoad L  
+			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
+			JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
+			LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+			LEFT JOIN tblCMBankAccount ba ON ba.intBankAccountId = L.intBankAccountId
+			LEFT JOIN tblCTApprovalStatusTF approvalStatus ON approvalStatus.intApprovalStatusId = L.intApprovalStatusId
+		WHERE 
+			L.intLoadId = @intLoadId
+			AND ISNULL(L.strTradeFinanceNo, '') <> ''
 
 		IF NOT EXISTS (
 				SELECT 1
@@ -948,18 +1103,10 @@ BEGIN TRY
 									,@OtherCharges = @OtherCharges
 									,@intUserId = @intEntityUserSecurityId
 									,@LotEntries = @LotEntries
+									,@ReceiptTradeFinance = @ReceiptTradeFinance
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult
-
-		--If IR is created, remove LS payables
-		IF (@intInventoryReceiptId IS NOT NULL)
-		BEGIN
-			DELETE VP
-			FROM tblAPVoucherPayable VP
-			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = VP.intLoadShipmentDetailId AND LD.intPContractDetailId = VP.intContractDetailId
-			WHERE LD.intLoadId = @intLoadId
-		END
 	END
 
 

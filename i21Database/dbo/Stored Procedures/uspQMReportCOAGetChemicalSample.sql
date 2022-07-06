@@ -36,6 +36,7 @@ BEGIN TRY
 		AND S.intSampleStatusId = 3
 		AND S.intProductTypeId = @intProductTypeId
 		AND S.intProductValueId = @intProductValueId
+		AND S.intTypeId = 1
 
 	SELECT P.strPropertyName
 		,CASE 
@@ -60,6 +61,7 @@ BEGIN TRY
 	JOIN dbo.tblQMSample S ON S.intSampleId = TR.intSampleId
 		AND S.intSampleId = @intSampleId
 		AND S.intSampleStatusId = 3
+		AND S.intTypeId = 1
 		AND TR.intProductValueId = @intProductValueId
 		AND TR.intProductTypeId = @intProductTypeId
 	JOIN dbo.tblQMProduct PRD ON PRD.intProductId = TR.intProductId

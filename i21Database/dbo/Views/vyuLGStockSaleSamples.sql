@@ -19,6 +19,6 @@ JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intIn
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = IRI.intLineNo
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity E ON E.intEntityId = L.intEntityVendorId
-LEFT JOIN tblQMSample S ON CD.intContractDetailId = S.intContractDetailId
+LEFT JOIN tblQMSample S ON CD.intContractDetailId = S.intContractDetailId AND S.intTypeId = 1
 LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
