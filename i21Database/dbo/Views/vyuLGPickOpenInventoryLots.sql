@@ -151,7 +151,7 @@ FROM (
 	   ,Lot.strWarrantNo
 	   ,Lot.intWarrantStatus
 	   ,WS.strWarrantStatus
-	   ,dblAllocReserved = (ISNULL(AL.dblAllocatedQty, 0) + ISNULL(SR.dblReservedQty, 0) ) - PL.dblLotPickedQty
+	   ,dblAllocReserved = (ISNULL(AL.dblAllocatedQty, 0) + ISNULL(SR.dblReservedQty, 0) ) - ISNULL(PL.dblLotPickedQty, 0)
 	FROM tblICLot Lot
 		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
