@@ -243,6 +243,9 @@ BEGIN TRY
 		,dblInvoicedQty					NUMERIC(18,6)
 		,ysnPriceChanged				BIT
 		,intContractDetailRefId			INT
+		,dtmHistoricalDate				DATETIME
+		,dblHistoricalRate				NUMERIC(18, 6)
+		,intHistoricalRateTypeId		INT
 	 )
 	
 	 DECLARE @tblCTContractCost AS TABLE
@@ -848,7 +851,10 @@ BEGIN TRY
 							,dblAllocationAdjQty		
 							,dblInvoicedQty				
 							,ysnPriceChanged			
-							,intContractDetailRefId		
+							,intContractDetailRefId
+							,dtmHistoricalDate
+							,dblHistoricalRate
+							,intHistoricalRateTypeId
 						)
 						SELECT 
 							 intContractDetailId		
@@ -980,6 +986,9 @@ BEGIN TRY
 							,dblInvoicedQty				
 							,ysnPriceChanged			
 							,intContractDetailRefId		
+							,dtmHistoricalDate
+							,dblHistoricalRate
+							,intHistoricalRateTypeId
 						FROM OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail', 2) WITH
 						(
 							 intContractDetailId			INT
@@ -1111,6 +1120,9 @@ BEGIN TRY
 							,dblInvoicedQty					NUMERIC(18,6)
 							,ysnPriceChanged				BIT
 							,intContractDetailRefId			INT
+							,dtmHistoricalDate				DATETIME
+							,dblHistoricalRate				NUMERIC(18, 6)
+							,intHistoricalRateTypeId		INT
 						)
 						UPDATE SD
 						SET  
@@ -1241,6 +1253,9 @@ BEGIN TRY
 							,SD.dblAllocationAdjQty				= CD.dblAllocationAdjQty		
 							,SD.dblInvoicedQty					= CD.dblInvoicedQty				
 							,SD.ysnPriceChanged					= CD.ysnPriceChanged	
+							,SD.dtmHistoricalDate				= CD.dtmHistoricalDate
+							,SD.dblHistoricalRate				= CD.dblHistoricalRate
+							,SD.intHistoricalRateTypeId			= CD.intHistoricalRateTypeId
 						FROM tblCTContractDetail SD 
 						JOIN @tblCTContractDetail CD ON CD.intContractDetailId = SD.intContractDetailRefId
 							

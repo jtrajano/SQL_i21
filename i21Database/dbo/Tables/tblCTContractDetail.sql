@@ -183,6 +183,11 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dtmPrepaymentDate datetime NULL,
 	dblPrepaymentAmount numeric(18, 6) NULL,
 
+	-- Historical FX Data (CT-7406
+	dtmHistoricalDate DATETIME NULL,
+	dblHistoricalRate NUMERIC(18, 6) NULL,
+	intHistoricalRateTypeId INT NULL,
+
 	 
 	-- Quality/Optionality
 	dblQualityPremium numeric(18, 6) NULL,
