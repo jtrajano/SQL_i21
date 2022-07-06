@@ -24,7 +24,9 @@ SELECT
 	B.dblDiscount,
 	B.dblInterest,
 	B.dblPayment,
-	N.strCurrency
+	N.strCurrency,
+	P.strPeriod,
+	O.strPaymentScheduleNumber
 FROM tblAPPayment A
 INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 INNER JOIN (tblAPVendor E INNER JOIN tblEMEntity F ON E.intEntityId = F.intEntityId)
@@ -39,4 +41,5 @@ LEFT JOIN vyuAPVoucherCommodity K ON K.intBillId = I.intBillId
 LEFT JOIN tblSMTerm L ON ISNULL(I.intTermsId, J.intTermId) = L.intTermID
 LEFT JOIN tblGLAccount M ON M.intAccountId = B.intAccountId
 LEFT JOIN tblSMCurrency N ON N.intCurrencyID = A.intCurrencyId
---LEFT JOIN vyuAPFiscalPeriod H ON MONTH(A.dtmDatePaid) = H.intMonth AND 
+LEFT JOIN vyuAPFiscalPeriod P ON MONTH(A.dtmDatePaid) = P.intMonth AND YEAR(A.dtmDatePaid) = P.intYear
+LEFT JOIN tblAPVoucherPaymentSchedule O ON O.intId = B.intPayScheduleId

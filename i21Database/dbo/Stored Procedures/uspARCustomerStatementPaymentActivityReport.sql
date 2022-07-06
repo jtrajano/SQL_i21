@@ -62,7 +62,7 @@ SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 --GET COMPANY DETAILS
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
+		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '') + CHAR(13) + CHAR(10) + strPhone
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -119,11 +119,12 @@ CREATE TABLE #STATEMENTREPORT (
 )
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTREPORT_PAYMENTACTIVITY] ON [#STATEMENTREPORT]([intEntityCustomerId], [intInvoiceId], [strTransactionType])
 CREATE TABLE #CFTABLE (
-	  intInvoiceId				INT NOT NULL PRIMARY KEY
+	  intInvoiceId				INT NOT NULL
 	, strInvoiceNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, strInvoiceReportNumber	NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, dtmInvoiceDate			DATETIME NULL
 )
+CREATE NONCLUSTERED INDEX [NC_Index_#CFTABLE2_intInvoiceId] ON [#CFTABLE]([intInvoiceId])
 CREATE TABLE #COMPANYLOCATIONS (
 	  intCompanyLocationId	INT	NOT NULL PRIMARY KEY
 	, strLocationName		NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
@@ -370,7 +371,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @intEntityUserId			= @intEntityUserI
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry
+SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
   , strSalesPersonName	= SP.strName
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1

@@ -10,11 +10,15 @@ SELECT
     , vd.ysnItemContract
     , vd.strContractNumber
     , u.strUnitMeasure
+    , vd.intUnitMeasureId
     , vd.dblQtyShipped
     , vd.dblQtyOrdered
+    , vd.dblQtyAllocated
     , vd.dblDiscount
+    , vd.dblPrice
     , vd.dblTotalTax
     , vd.strTaxGroup
+    , vd.intTaxGroupId
     , vd.strSubLocation strStorageLocation
     , vd.strStorageLocation strStorageUnit
     , vd.dblStandardWeight

@@ -31,13 +31,6 @@ BEGIN
 	OUTER APPLY vyuAPGuidGenerator 
 	WHERE guiApiUniqueId = @guiApiUniqueId AND NULLIF(strName, '') IS NULL
 
-	--strContactNumber
-	INSERT @returntable
-	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity Contact Number', strContactNumber, 'Entity Contact Number is required'
-	FROM tblApiSchemaVendor
-	OUTER APPLY vyuAPGuidGenerator 
-	WHERE guiApiUniqueId = @guiApiUniqueId AND NULLIF(strContactNumber, '') IS NULL
-
 	--strContactName
 	INSERT @returntable
 	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity Name', strContactName, 'Entity Contact is required'

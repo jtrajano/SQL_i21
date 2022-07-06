@@ -23,5 +23,7 @@ FROM dbo.tblAPPayment A
 INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 LEFT JOIN dbo.tblCMBankAccount D ON A.intBankAccountId = D.intBankAccountId
 LEFT JOIN dbo.tblCMBankTransaction C ON A.strPaymentRecordNum = C.strTransactionId 
-WHERE ISNULL(B.intBillId,B.intOrigBillId) = @voucherId
+-- WHERE ISNULL(B.intBillId,B.intOrigBillId) = @voucherId
+WHERE B.intBillId = @voucherId
+OR (B.intBillId IS NULL AND B.intOrigBillId = @voucherId)
 ORDER BY A.intPaymentId DESC

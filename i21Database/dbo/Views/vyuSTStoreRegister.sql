@@ -57,3 +57,4 @@ LEFT JOIN tblSTRegister rt
  ON st.intStoreId = rt.intStoreId AND st.intRegisterId = rt.intRegisterId
 LEFT JOIN tblSTHandheldScanner hs
  ON st.intStoreId = hs.intStoreId
+ WHERE st.ysnActive = 1

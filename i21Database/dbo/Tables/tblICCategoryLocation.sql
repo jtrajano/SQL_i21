@@ -53,6 +53,8 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+		[intRowNumber] INT NULL,
 		CONSTRAINT [PK_tblICCategoryLocation] PRIMARY KEY ([intCategoryLocationId]), 
 		CONSTRAINT [FK_tblICCategoryLocation_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCategoryLocation_tblICItem] FOREIGN KEY ([intGeneralItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 

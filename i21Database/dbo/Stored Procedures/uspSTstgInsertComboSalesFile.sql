@@ -617,9 +617,9 @@ BEGIN
 					, PSLD.intQuantity [ComboItemQuantity]
 					, IUM.strUnitMeasure [ComboItemQuantityUOM]
 					, PSLD.dblPrice [ComboItemUnitPrice]
-					, CONVERT(nvarchar(10), PSL.dtmPromoBegPeriod, 126) [StartDate]
+					, CONVERT(nvarchar(10), CAST(PSL.dtmPromoBegPeriod AS DATE), 126) [StartDate]
 					, '0:00:01' [StartTime]
-					, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) [StopDate]
+					, CONVERT(nvarchar(10), CAST(PSL.dtmPromoEndPeriod AS DATE), 126) [StopDate]
 					, '23:59:59' [StopTime]
 					, PSL.intPurchaseLimit [TransactionLimit]
 					, CASE 

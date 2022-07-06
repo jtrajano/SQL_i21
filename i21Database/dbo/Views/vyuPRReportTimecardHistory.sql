@@ -9,9 +9,9 @@ SELECT DISTINCT
 	,DP.strDepartment
 	,WC.strWCCode
 	,TC.dtmDateIn
-	,dtmTimeIn = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), TC.dtmTimeIn)
+	,dtmTimeIn = TC.dtmTimeIn
 	,TC.dtmDateOut
-	,dtmTimeOut = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), TC.dtmTimeOut)
+	,dtmTimeOut = TC.dtmTimeOut
 	,TC.dblHours
 	,TC.dblRegularHours
 	,TC.dblOvertimeHours

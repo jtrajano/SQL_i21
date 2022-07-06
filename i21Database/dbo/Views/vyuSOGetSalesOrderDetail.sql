@@ -67,7 +67,7 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , dblOriginalQty					= SOD.dblQtyOrdered
      , dblOriginalPrice					= SOD.dblPrice
      , intOriginalItemUOMId				= SOD.intItemUOMId
-     , strItemNo						= ITEM.strItemNo
+     , strItemNo						= ISNULL(ITEM.strItemNo, ITEMCOMMENT.strItemNo)
      , strBundleType					= ITEM.strBundleType
      , strUnitMeasure					= ITEMUOM.strUnitMeasure
      , intUnitMeasureId					= ITEMUOM.intUnitMeasureId
@@ -83,7 +83,7 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , ysnLoad							= CONT.ysnLoad
      , strItemContractNumber			= ISNULL(ITEMCONTRACT.strItemContractNumber, '')
      , intItemContractSeq				= ITEMCONTRACT.intLineNo
-     , strItemType						= ITEM.strType
+     , strItemType						= ISNULL(ITEM.strType, ITEMCOMMENT.strType)
      , strLotTracking					= ITEM.strLotTracking
      , strModule						= ITEM.strModule
      , strRequired						= ITEM.strRequired
@@ -131,6 +131,12 @@ LEFT JOIN (
 	LEFT JOIN tblICItemPricing PRICING WITH(NOLOCK) ON I.intItemId = PRICING.intItemId AND ITEMLOC.intItemLocationId = PRICING.intItemLocationId
 ) ITEM ON SOD.intItemId = ITEM.intItemId 
       AND SO.intCompanyLocationId = ITEM.intLocationId
+OUTER APPLY (
+	SELECT strItemNo
+		  ,strType
+FROM tblICItem I WITH(NOLOCK) 
+WHERE I.strType = 'Comment' AND I.intItemId = SOD.intItemId 
+) ITEMCOMMENT 
 LEFT JOIN (
 	SELECT intItemUOMId
 		 , strUnitMeasure

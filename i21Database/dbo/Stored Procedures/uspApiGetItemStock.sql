@@ -48,6 +48,7 @@ CREATE TABLE #ItemStock (
     , strItemUOMType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , ysnStockUnit BIT NULL
     , dblUnitQty NUMERIC(38, 20) NULL
+	, dblStandardWeight NUMERIC(38, 20) NULL
     , strCostingMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , intCostingMethodId INT NULL
     , intLocationId INT

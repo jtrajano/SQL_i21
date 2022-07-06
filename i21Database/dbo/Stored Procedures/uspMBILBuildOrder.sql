@@ -76,7 +76,13 @@ LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispa
 LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblARCustomer Customer ON Customer.intEntityId =  C.intEntityId
-WHERE Dispatch.intDriverID = @intDriverId
+WHERE Dispatch.intDriverID = @intDriverId AND 
+	  TMOrder.strOrderNumber NOT IN(SELECT strOrderNumber COLLATE Latin1_General_CI_AS 
+									FROM tblMBILOrder 
+									WHERE intDriverId = @intDriverId AND
+										  intOrderId IN (SELECT intOrderId 
+														 FROM tblMBILInvoice 
+														 WHERE intOrderId IS NOT NULL))
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
 INSERT INTO tblMBILOrder(intDispatchId

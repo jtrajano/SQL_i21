@@ -4224,7 +4224,6 @@ BEGIN TRY
 				BEGIN
 					IF (ISNULL(@TotalBasis, 0) <> 0)
 					BEGIN
-
 						-- Negate AND add previous record
 						insert into @cbLastLogPrev
 						(
@@ -4313,13 +4312,13 @@ BEGIN TRY
 						from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
 
 						UPDATE @cbLastLogPrev
-						SET dblQty = @TotalBasis * - 1
+						SET dblQty = (case when @ysnLoadBased = 1 then curr.dblOrigQty else @TotalBasis end) * - 1
 							, intPricingTypeId = 2
 							, dblFutures = NULL
 							, intActionId = 43
 							, strBatchId = @strBatchId
 							, strProcess = @strProcess
-							, dtmTransactionDate = curr.dtmTransactionDate
+							, dtmTransactionDate = @_dtmCurrent
 							, intPriceUOMId = curr.intPriceUOMId
 							, strTransactionReference = curr.strTransactionReference
 							, strTransactionReferenceNo = curr.strTransactionReferenceNo
@@ -4328,11 +4327,11 @@ BEGIN TRY
 							, intUserId = curr.intUserId
 							, dblOrigQty = curr.dblOrigQty
 							, strNotes = ''
-						FROM (SELECT top 1 * FROM @cbLogSpecific) curr
+						FROM (SELECT * FROM @cbLogSpecific) curr
 						EXEC uspCTLogContractBalance @cbLastLogPrev, 0
 
 						UPDATE @cbLogSpecific
-						SET dblQty = @TotalBasis
+						SET dblQty = (case when @ysnLoadBased = 1 then dblOrigQty else @TotalBasis end)
 							, intPricingTypeId = 2
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END		
@@ -4418,7 +4417,7 @@ BEGIN TRY
 					SET @FinalQty = CASE
 						WHEN @intContractStatusId IN (1, 4)
 						THEN
-							case when @dblCurrentQty < @dblPriced then @dblCurrentQty else @dblPriced end
+							case when @dblCurrentQty < @TotalPriced then @dblCurrentQty else @TotalPriced end
 						ELSE 0
 					END
 				end
@@ -4941,7 +4940,9 @@ BEGIN TRY
 															WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 															ELSE 2 END
 									, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
-															ELSE intActionId END
+														 ELSE 
+														 	(CASE WHEN intActionId = 46 THEN 18 ELSE intActionId END)
+														 END
 							END
 						END
 					END

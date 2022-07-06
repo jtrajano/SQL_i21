@@ -1092,7 +1092,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intStorageLocationId
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
-									, intPriceFixationDetailId	= @intPriceFixationDetailId
+									, intPriceFixationDetailId		= @intPriceFixationDetailId
 									, dblStandardWeight
 								FROM @EntriesForInvoice
 								WHERE intId = @intInvoiceEntriesId
@@ -1152,6 +1152,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
 									, intPriceFixationDetailId			= NULL
+									, dblStandardWeight
 								FROM (
 									SELECT TOP 1 *
 									FROM @EntriesForInvoice E
