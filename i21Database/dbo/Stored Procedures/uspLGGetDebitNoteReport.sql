@@ -103,8 +103,10 @@ SELECT DISTINCT WC.intWeightClaimId
 	,CL.strVatNo
 	,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
 	,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
-	,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
-	,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+	,blbHeaderLogo = LOGO.blbHeaderLogo
+	,blbFooterLogo = LOGO.blbFooterLogo
+	,strHeaderLogoType = LOGO.strHeaderLogoType
+	,strFooterLogoType = LOGO.strFooterLogoType
 	,ysnPrintLogo = CASE WHEN ISNULL(CP.ysnPrintLogo,0) = 1 THEN 'true' else 'false' END
 	,ysnFullHeaderLogo = CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END	
 	,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
@@ -133,6 +135,31 @@ FROM tblLGWeightClaim WC
 	LEFT JOIN tblSMPaymentMethod PM ON PM.intPaymentMethodID = WC.intPaymentMethodId
 	CROSS APPLY tblSMCompanySetup CS
 	CROSS APPLY tblLGCompanyPreference CP
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+			,[strLogoType] = 'Logo'
+		FROM tblSMLogoPreference
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = CD.intCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLH
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+			,[strLogoType] = 'Logo'
+		FROM tblSMLogoPreferenceFooter
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = CD.intCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLF
+	OUTER APPLY (
+		SELECT
+			blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+			,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+			,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+			,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	) LOGO
 WHERE WC.intWeightClaimId = @intWeightClaimId
 GROUP BY
 	WC.intWeightClaimId
@@ -176,3 +203,7 @@ GROUP BY
 	,PM.strPaymentMethod
 	,PM.strComment
 	,CL.strVatNo
+	,blbHeaderLogo
+	,blbFooterLogo
+	,strHeaderLogoType
+	,strFooterLogoType

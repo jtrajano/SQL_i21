@@ -37,7 +37,11 @@ SELECT Invoice.intInvoiceId
 	, Invoice.intConcurrencyId
 	, strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS
 	, isnull(tax.dblTaxTotal,0) dblTotalTaxAmount  
-	, isnull(tax.dblItemTotal,0) dblTotalBefTax 
+	, isnull(tax.dblItemTotal,0) dblTotalBefTax
+	, strAccountStatus = REPLACE(REPLACE(CustomerAS.strCustomerAccountStatus,'<strCustomerAccountStatus>',''),'</strCustomerAccountStatus>','')
+	
+
+
 FROM tblMBILInvoice Invoice
 --LEFT JOIN tblMBILInvoiceItem InvoiceItem ON InvoiceItem.intInvoiceId = Invoice.intInvoiceId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Invoice.intEntityCustomerId
@@ -48,6 +52,24 @@ LEFT JOIN tblMBILOrder InvoiceOrder ON InvoiceOrder.intOrderId = Invoice.intOrde
 LEFT JOIN tblSMTerm Term ON Term.intTermID = Invoice.intTermId
 LEFT JOIN tblSMPaymentMethod PaymentMethod ON PaymentMethod.intPaymentMethodID = Invoice.intPaymentMethodId
 LEFT JOIN tblARInvoice i21Invoice ON i21Invoice.intInvoiceId = Invoice.inti21InvoiceId
+LEFT JOIN (
+	select
+	intEntityCustomerId,
+	intInvoiceId,
+	(
+	select SUBSTRING(strCustomerAccountStatus,0,LEN(strCustomerAccountStatus)+1) from (
+		select
+		(select strAccountStatusCode + ' - ' + strDescription + ', '
+			from tblARAccountStatus 
+			where intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId FOR XML PATH('')) as strCustomerAccountStatus
+		from tblARCustomerAccountStatus	
+		where tblARCustomerAccountStatus.intEntityCustomerId = tblMBILInvoice.intEntityCustomerId
+		group by intAccountStatusId
+		) CAStatus
+	FOR XML PATH('')) as strCustomerAccountStatus
+	from
+	tblMBILInvoice
+) CustomerAS ON CustomerAS.intInvoiceId = Invoice.intInvoiceId
 LEFT JOIN (    
   SELECT item.intInvoiceId,SUM(isnull(dblItemTotal,0))dblItemTotal,SUM(isnull(dblTaxTotal,0))dblTaxTotal
   FROM tblMBILInvoiceItem item      

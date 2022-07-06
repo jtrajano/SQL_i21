@@ -13,7 +13,8 @@ SELECT
 	,strSeason 		= Season.strDescription
 	,strClass 		= Class.strDescription
 	,strProductLine = ProductLine.strDescription
-	,FiscalPeriod.dtmEndDate
+	,dtmFiscalEndDate = FiscalPeriod.dtmEndDate
+	,dtmFiscalStartDate = FiscalPeriod.dtmStartDate
 FROM
 	tblICInventoryValuationSummary s LEFT JOIN tblICInventoryValuationSummaryLog sl
 		ON s.strPeriod = sl.strPeriod

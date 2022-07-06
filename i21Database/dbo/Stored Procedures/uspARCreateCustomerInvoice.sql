@@ -159,6 +159,8 @@
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 	,@SourcedFrom							NVARCHAR(100)	= NULL
+	,@TaxLocationId							INT				= NULL
+	,@TaxPoint								NVARCHAR(50)	= NULL
 AS
 
 BEGIN
@@ -547,7 +549,9 @@ BEGIN TRY
 		,[strGoodsStatus]
 		,[intBorrowingFacilityLimitDetailId]
 		,[intDefaultPayToBankAccountId]
-		,[strSourcedFrom])
+		,[strSourcedFrom]
+		,[intTaxLocationId]
+		,[strTaxPoint])
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -647,6 +651,8 @@ BEGIN TRY
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
 		,[intDefaultPayToBankAccountId]  	= @BankAccountId
 		,[strSourcedFrom]					= @SourcedFrom
+		,[intTaxLocationId]					= @TaxLocationId
+		,[strTaxPoint]						= @TaxPoint
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN

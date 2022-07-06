@@ -1,8 +1,8 @@
 CREATE FUNCTION [dbo].[fnTRSearchItemId]
 (
-	@SupplierName AS NVARCHAR(100),
-	@SupplyPoint AS NVARCHAR(100),
-	@Item AS NVARCHAR(100)
+	@SupplierName AS NVARCHAR(50),
+	@SupplyPoint AS NVARCHAR(50),
+	@Item AS NVARCHAR(50)
 )
 RETURNS INT
 
@@ -26,32 +26,41 @@ BEGIN
 		SET @Item = NULL
 	END
 
-	SELECT TOP 1  @Id = D.intSupplyPointProductSearchHeaderId 
+	SELECT TOP 1 @Id = D.intSupplyPointProductSearchHeaderId 
 	FROM tblTRSupplyPointProductSearchDetail D
 	INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId 
 	INNER JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = H.intSupplyPointId
 	INNER JOIN tblEMEntity E ON E.intEntityId = SP.intEntityVendorId
-	INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId 
-	INNER JOIN (
-		SELECT H.intSupplyPointProductSearchHeaderId,  Condition = COUNT(H.intSupplyPointProductSearchHeaderId) FROM tblTRSupplyPointProductSearchDetail D
-		INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId  
-		WHERE strSearchValue LIKE @SupplierName + '%'
-		OR strSearchValue = @SupplyPoint 
-		--OR strSearchValue LIKE @Item + '%'
-		OR strSearchValue = @Item
-		GROUP BY  H.intSupplyPointProductSearchHeaderId
-	) A ON A.intSupplyPointProductSearchHeaderId = H.intSupplyPointProductSearchHeaderId
-	INNER JOIN (
-		SELECT D.intSupplyPointProductSearchHeaderId, TotalCondition = COUNT(intSupplyPointProductSearchDetailId)  
-		FROM tblTRSupplyPointProductSearchDetail D
-		GROUP BY D.intSupplyPointProductSearchHeaderId	
-	) B ON B.intSupplyPointProductSearchHeaderId = A.intSupplyPointProductSearchHeaderId
-	WHERE (strSearchValue LIKE @SupplierName + '%'
-		OR strSearchValue = @SupplyPoint 
-		--OR strSearchValue LIKE @Item + '%'
-		OR strSearchValue = @Item)
-	AND B.TotalCondition = A.Condition
+	INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId
+	WHERE D.intSupplyPointProductSearchHeaderId IN ( 
+		SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @SupplierName)
+	AND D.intSupplyPointProductSearchHeaderId IN ( 
+		SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @SupplyPoint)
+	AND D.intSupplyPointProductSearchHeaderId IN ( 
+		SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @Item)
 	ORDER BY H.intSupplyPointProductSearchHeaderId ASC
+	-- INNER JOIN (
+	-- 	SELECT H.intSupplyPointProductSearchHeaderId,  Condition = COUNT(H.intSupplyPointProductSearchHeaderId) FROM tblTRSupplyPointProductSearchDetail D
+	-- 	INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId  
+	-- 	WHERE (strSearchValue LIKE @SupplierName + '%'
+	-- 	OR strSearchValue = @SupplyPoint 
+	-- 	--OR strSearchValue LIKE @Item + '%'
+	-- 	OR strSearchValue = @Item)
+	-- 	AND H.intSupplyPointProductSearchHeaderId = A.intSupplyPointProductSearchHeaderId
+	-- 	GROUP BY  H.intSupplyPointProductSearchHeaderId
+	-- ) A ON A.intSupplyPointProductSearchHeaderId = H.intSupplyPointProductSearchHeaderId
+	-- INNER JOIN (
+	-- 	SELECT D.intSupplyPointProductSearchHeaderId, TotalCondition = COUNT(intSupplyPointProductSearchDetailId)  
+	-- 	FROM tblTRSupplyPointProductSearchDetail D
+	-- 	WHERE D.intSupplyPointProductSearchHeaderId = A.intSupplyPointProductSearchHeaderId
+	-- 	GROUP BY D.intSupplyPointProductSearchHeaderId	
+	-- ) B ON B.intSupplyPointProductSearchHeaderId = A.intSupplyPointProductSearchHeaderId
+	-- WHERE (strSearchValue LIKE @SupplierName + '%'
+	-- 	OR strSearchValue = @SupplyPoint 
+	-- 	--OR strSearchValue LIKE @Item + '%'
+	-- 	OR strSearchValue = @Item)
+	-- AND B.TotalCondition = A.Condition
+	-- ORDER BY H.intSupplyPointProductSearchHeaderId ASC
 
 	-- WHERE strSearchValue LIKE @SupplierName + '%'
 	-- 	OR strSearchValue = @SupplyPoint 

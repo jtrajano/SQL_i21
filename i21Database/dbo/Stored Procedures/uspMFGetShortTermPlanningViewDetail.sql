@@ -5,7 +5,7 @@
 	,@intUnitMeasureId INT
 	,@intCompanyLocationId INT = 0
 	,@intUserId INT
-	,@intCategoryId INT = NULL
+	,@intCategoryId INT=NULL
 	)
 AS
 BEGIN
@@ -17,14 +17,8 @@ BEGIN
 		,@intNoOfDays INT
 		,@dtmEndDateAfterSixMonth DATETIME
 		,@intConditionId INT
-		,@dtmCurrentDate DATETIME
-		,@dtmAfter80Days DATETIME
 	DECLARE @tblMFItem TABLE (intItemId INT)
 	DECLARE @tblSMCompanyLocation TABLE (intCompanyLocationId INT)
-
-	SELECT @dtmCurrentDate = GETDATE()
-
-	SELECT @dtmAfter80Days = @dtmCurrentDate + 80
 
 	SELECT @dtmCurrentMonthStartDate = DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0)
 
@@ -53,7 +47,7 @@ BEGIN
 			AND I.strStatus = 'Active'
 	END
 
-	IF @intCompanyLocationId = 0
+	IF @intCompanyLocationId=0
 	BEGIN
 		INSERT INTO @tblSMCompanyLocation (intCompanyLocationId)
 		SELECT intCompanyLocationId
@@ -93,10 +87,6 @@ BEGIN
 		,dblQty NUMERIC(18, 0)
 		,intAttributeId INT
 		)
-
-	DELETE
-	FROM tblMFShortTermPlanningViewDetail
-	WHERE intUserId = @intUserId
 
 	INSERT INTO #tblMFShortTermDemand (
 		intItemId
@@ -177,7 +167,7 @@ BEGIN
 		,U2.strUnitMeasure
 		,5 AS intAttributeId -->Available Inventory
 		,@intUserId
-		,L.strContainerNo
+		,L.strContainerNo 
 		,L.strMarkings
 		,L.intSubLocationId
 	FROM tblICLot L
@@ -205,34 +195,24 @@ BEGIN
 		)
 	SELECT Inv.intItemId
 		,Inv.intLocationId
-		,SUM(Inv.dblWeight) / IsNULL(CASE 
-				WHEN Max(F.dblQty) = 0
+		,Inv.dblQty / IsNULL(CASE 
+				WHEN F.dblQty = 0
 					THEN 1
-				ELSE MAX(F.dblQty)
+				ELSE F.dblQty
 				END, 1)
 		,4 AS intAttributeId -->DOH
-	FROM tblMFShortTermPlanningViewDetail Inv
+	FROM #tblMFShortTermDemand Inv
 	LEFT JOIN #tblMFShortTermDemand F ON F.intItemId = Inv.intItemId
 		AND F.intLocationId = Inv.intLocationId
-		AND F.intAttributeId = 3
 	WHERE Inv.intAttributeId = 5
-		AND intUserId = @intUserId
-	GROUP BY Inv.intItemId
-		,Inv.intLocationId
 
-	IF @strColumnName NOT IN (
-			'Available Inventory'
-			,'All Item'
-			)
-	BEGIN
-		DELETE
-		FROM tblMFShortTermPlanningViewDetail
-		WHERE intUserId = @intUserId
-	END
+	DELETE
+	FROM tblMFShortTermPlanningViewDetail
+	WHERE intUserId = @intUserId
 
 	IF @strColumnName IN (
 			'Approved Qty'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -257,22 +237,21 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+		LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 			AND S.intSampleStatusId = 3 -->Approved
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 			AND SS.intContractStatusId IN (
 				1
 				,4
 				)
 			AND L.dtmETAPOD <= GETDATE()
+			AND S.intLoadDetailContainerLinkId IS NOT NULL
 	END
 
 	IF @strColumnName IN (
 			'Not Approved Qty'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -297,26 +276,21 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+		LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+			AND S.intSampleStatusId = 3 -->Approved
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 			AND SS.intContractStatusId IN (
 				1
 				,4
 				)
-			AND L.dtmETAPOD <= @dtmCurrentDate
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblQMSample S1
-				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intSampleStatusId = 3 -->Approved)
-				)
+			AND L.dtmETAPOD <= GETDATE()
+			AND S.intLoadDetailContainerLinkId IS NULL
 	END
 
 	IF @strColumnName IN (
 			'In-Transit to WHSE'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -344,22 +318,20 @@ BEGIN
 		LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 			AND S.intSampleStatusId = 3 -->Approved
 		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		LEFT JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 			AND SS.intContractStatusId IN (
 				1
 				,4
 				)
 			AND S.intLoadDetailContainerLinkId IS NULL
-			AND LC.intLoadWarehouseContainerId IS NULL
+			AND LW.intLoadId IS NULL
 			AND L.ysnArrivedInPort = 1
 			AND L.dtmETAPOD IS NOT NULL
 	END
 
 	IF @strColumnName IN (
 			'Arrived in Port'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -387,15 +359,13 @@ BEGIN
 		LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 			AND S.intSampleStatusId = 3 -->Approved
 		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		LEFT JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 			AND SS.intContractStatusId IN (
 				1
 				,4
 				)
 			AND S.intLoadDetailContainerLinkId IS NULL
-			AND LC.intLoadWarehouseContainerId IS NULL
+			AND LW.intLoadId IS NULL
 			AND L.ysnArrivedInPort = 1
 			AND L.dtmETAPOD IS NULL
 	END
@@ -406,7 +376,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'CBS'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -431,19 +401,21 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
+		LEFT JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
 			AND LC.intConditionId = @intConditionId
 		WHERE SS.intContractStatusId IN (
 				1
 				,4
 				)
+			AND LC.intLoadId IS NOT NULL
 	END
 
 	IF @strColumnName IN (
 			'Scheduled'
-			,'All Item'
+			,''
 			)
 	BEGIN
+		
 		INSERT INTO tblMFShortTermPlanningViewDetail (
 			intContractDetailId
 			,intLoadContainerId
@@ -475,7 +447,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'Late Open Contracts'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -503,7 +475,7 @@ BEGIN
 
 	IF @strColumnName IN (
 			'Forward Open Contracts'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -525,14 +497,14 @@ BEGIN
 				1
 				,4
 				)
-			AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
-				AND @dtmAfter80Days
+			AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentMonthStartDate
+				AND @dtmNextMonthEndDate
 			AND SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0) > 0
 	END
 
 	IF @strColumnName IN (
 			'No ETA'
-			,'All Item'
+			,''
 			)
 	BEGIN
 		INSERT INTO tblMFShortTermPlanningViewDetail (
@@ -555,12 +527,12 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 			AND SS.intContractStatusId IN (
 				1
 				,4
 				)
-			AND IsNULL(L.ysnArrivedInPort, 0) <> 1
+			AND L.ysnArrivedInPort <> 1
 			AND L.dtmETAPOD IS NULL
 	END
 
@@ -578,5 +550,4 @@ BEGIN
 	LEFT JOIN #tblMFShortTermDemand DOH ON DOH.intItemId = D.intItemId
 		AND DOH.intLocationId = D.intLocationId
 		AND DOH.intAttributeId = 4 -->DOH
-	WHERE D.intUserId = @intUserId
 END

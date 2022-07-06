@@ -2073,8 +2073,8 @@ DECLARE
 		 ,dblQuantity
 		 ,@strUnitMeasure
 		 ,dblUnitQty
-		 ,strFutureMonth = FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'yyyy') + '-' + FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'MM')
-		 ,strStartDate  =  FORMAT(dtmStartDate,'yyyy') + '-' + FORMAT(dtmStartDate,'MM') 
+		 ,strFutureMonth = CAST(YEAR(CONVERT(DATETIME, '01 ' + strOrigFutureMonth)) AS NVARCHAR(10))  + '-' + RIGHT('0' + RTRIM(MONTH(CONVERT(DATETIME, '01 ' + strOrigFutureMonth))), 2)
+		 ,strStartDate  =  CAST(YEAR(dtmStartDate) AS NVARCHAR(10)) + '-' + RIGHT('0' + RTRIM(MONTH(dtmStartDate)), 2)
 		 ,strCommodity
 		 ,strFutureMarket
 		 ,strItem = strItemNo
@@ -2095,8 +2095,8 @@ DECLARE
 		 ,dblQuantity = dblQuantity * -1
 		 ,@strUnitMeasure
 		 ,dblUnitQty
-		 ,strFutureMonth = FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'yyyy') + '-' + FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'MM')  
-		 ,strStartDate  =  FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'yyyy') + '-' + FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'MM')  
+		 ,strFutureMonth = CAST(YEAR(CONVERT(DATETIME, '01 ' + strOrigFutureMonth)) AS NVARCHAR(10)) + '-' + RIGHT('0' + RTRIM(MONTH(CONVERT(DATETIME, '01 ' + strOrigFutureMonth))), 2) 
+		 ,strStartDate  =  CAST(YEAR(CONVERT(DATETIME, '01 ' + strOrigFutureMonth)) AS NVARCHAR(10)) + '-' + RIGHT('0' + RTRIM(MONTH(CONVERT(DATETIME, '01 ' + strOrigFutureMonth))), 2) 
 		 ,strCommodity
 		 ,strFutureMarket
 		 ,strItem = strItemNo
@@ -2118,8 +2118,8 @@ DECLARE
 		 ,dblQuantity
 		 ,@strUnitMeasure
 		 ,dblUnitQty
-		 ,strFutureMonth = FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'yyyy') + '-' + FORMAT(CONVERT(DATETIME, '01 ' + strOrigFutureMonth) ,'MM')  
-		 ,strStartDate  = FORMAT(CONVERT(DATETIME, '01 ' + strFutureMonth) ,'yyyy') + '-' + FORMAT(CONVERT(DATETIME, '01 ' + strFutureMonth) ,'MM')  
+		 ,strFutureMonth = CAST(YEAR(CONVERT(DATETIME, '01 ' + strOrigFutureMonth)) AS NVARCHAR(10)) + '-' + RIGHT('0' + RTRIM(MONTH(CONVERT(DATETIME, '01 ' + strOrigFutureMonth))), 2)
+		 ,strStartDate  =  CAST(YEAR(CONVERT(DATETIME, '01 ' + strFutureMonth)) AS NVARCHAR(10)) + '-' + RIGHT('0' + RTRIM(MONTH(CONVERT(DATETIME, '01 ' + strFutureMonth))), 2)
 		 ,strCommodity
 		 ,strFutureMarket
 		 ,strItem = strItemNo

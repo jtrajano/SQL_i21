@@ -116,7 +116,7 @@ FROM (
 			,[strTicketNumbers]					= ARI.[strTicketNumbers]
 			,[strCustomerReferences]			= ARI.[strCustomerReferences]
 			,[intTermId]						= ARI.[intTermId]
-			,[ysnExcludeForPayment]				= (CASE WHEN ARI.[strTransactionType] = 'Customer Prepayment' AND (EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE [intInvoiceId] = ARI.[intInvoiceId] AND ISNULL([ysnRestricted], 0) = 1))
+			,[ysnExcludeForPayment]				= (CASE WHEN ARI.[strTransactionType] = 'Customer Prepayment' AND PREPID.intInvoiceId IS NOT NULL
 														THEN CONVERT(BIT, 1)
 													WHEN ARI.[strType] = 'CF Tran'
 														THEN CONVERT(BIT, 1)
@@ -140,39 +140,17 @@ FROM (
 			,intPayToBankAccountId				= PFBA.intBankAccountId
 			,strPayToBankAccountNo				= PFBA.strBankAccountNo
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intEntityId
-				 , strCustomerNumber
-				 , intPaymentMethodId
-				 , strAccountNumber
-			 FROM dbo.tblARCustomer WITH (NOLOCK)
-		) AS ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
+		INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 		INNER JOIN (
 			SELECT intEntityId
 				 , strAddress
 			FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 			WHERE ysnDefaultLocation = 1
 		) AS EL ON ARC.intEntityId = EL.intEntityId
-		INNER JOIN (
-			SELECT intEntityId
-				 , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-		) AS CE ON ARC.[intEntityId] = CE.intEntityId 
-		LEFT OUTER JOIN (
-			SELECT intPaymentMethodID
-				 , strPaymentMethod
-			FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
-		) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
-		LEFT OUTER JOIN (
-			SELECT intInvoiceId
-				 , strInvoiceReportNumber
-			FROM dbo.tblCFTransaction WITH (NOLOCK)
-		) CFT ON ARI.[intInvoiceId] = CFT.[intInvoiceId]	
-		LEFT JOIN (
-			SELECT intEntityId
-				 , ysnActive
-			FROM dbo.tblEMEntityEFTInformation WITH (NOLOCK)
-		) EFT ON CE.intEntityId = EFT.intEntityId
+		INNER JOIN tblEMEntity CE WITH (NOLOCK) ON ARC.[intEntityId] = CE.intEntityId 
+		LEFT OUTER JOIN tblSMPaymentMethod SMP WITH (NOLOCK) ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
+		LEFT OUTER JOIN tblCFTransaction CFT WITH (NOLOCK) ON ARI.[intInvoiceId] = CFT.[intInvoiceId]	
+		LEFT JOIN tblEMEntityEFTInformation EFT WITH (NOLOCK) ON CE.intEntityId = EFT.intEntityId
 		LEFT JOIN (
 			SELECT intPaymentId
 				 , ysnInvoicePrepayment
@@ -190,14 +168,12 @@ FROM (
 			INNER JOIN (
 				SELECT [intInvoicedetailId]	= MIN([intInvoiceDetailId])
 					 , [intInvoiceId]		= [intInvoiceId]
-				FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+				FROM tblARInvoiceDetail WITH (NOLOCK)
+				WHERE intCurrencyExchangeRateTypeId IS NOT NULL
 				GROUP BY intInvoiceId
 			) B ON A.[intInvoiceDetailId] = B.[intInvoicedetailId]
-			INNER JOIN (
-				SELECT intCurrencyExchangeRateTypeId
-					 , strCurrencyExchangeRateType
-				FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
-			) SM ON A.[intCurrencyExchangeRateTypeId] = SM.[intCurrencyExchangeRateTypeId]
+			INNER JOIN tblSMCurrencyExchangeRateType SM WITH (NOLOCK) ON A.[intCurrencyExchangeRateTypeId] = SM.[intCurrencyExchangeRateTypeId]
+			WHERE A.intCurrencyExchangeRateTypeId IS NOT NULL
 		) FX ON ARI.[intInvoiceId] = FX.[intInvoiceId]						
 		LEFT JOIN tblARPOS POS ON ARI.[intInvoiceId] = POS.[intInvoiceId]		
 		LEFT JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
@@ -206,15 +182,22 @@ FROM (
 			SELECT TOP 1 intPOSPaymentId
 			FROM tblARPOSPayment
 			WHERE intPOSId = POS.intPOSId
-			AND strPaymentMethod = 'On Account'
+			  AND strPaymentMethod = 'On Account'
+			  AND ARI.strType = 'POS'
 		) ONACCOUNT
+		OUTER APPLY (
+			SELECT TOP 1 intInvoiceId
+			FROM tblARInvoiceDetail PID
+			WHERE PID.intInvoiceId = ARI.intInvoiceId
+			  AND PID.ysnRestricted = 1
+			  AND ARI.strTransactionType = 'Customer Prepayment'
+		) PREPID
 		LEFT JOIN vyuCMBankAccount PFBA ON PFBA.intBankAccountId = ISNULL(ARI.intPayToCashBankAccountId, ISNULL(ARI.intDefaultPayToBankAccountId, 0))
-		WHERE (ARI.[ysnPosted] = 1 OR (ARI.[ysnPosted] = 0 AND	ARI.strComments = 'NSF Processed' AND ARI.strTransactionType = 'Overpayment'))
-			AND ISNULL(ARI.ysnCancelled, 0) = 0
-			AND (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 1 OR ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 0 )
-			AND strTransactionType != 'Credit Note'
-			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
-			AND ARI.ysnProcessedToNSF = 0
+		WHERE (ARI.[ysnPosted] = 1 OR (ARI.[ysnPosted] = 0 AND ARI.strComments = 'NSF Processed' AND ARI.strTransactionType = 'Overpayment'))
+		  AND (ARI.ysnCancelled IS NULL OR ARI.ysnCancelled = 0)
+		  AND ARI.strTransactionType != 'Credit Note'
+		  AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
+		  AND ARI.ysnProcessedToNSF = 0
 	
 		UNION ALL
 
@@ -231,7 +214,7 @@ FROM (
 			,[intEntityCustomerId]				= APB.[intEntityCustomerId]
 			,[strCustomerName]					= APB.[strCustomerName]
 			,[strCustomerNumber]				= APB.[strCustomerNumber]
-			,[strAccountNumber]					= ARC.[strAccountNumber]
+			,[strAccountNumber]					= ARC.[strVendorAccountNum]
 			,[strAddress]						= EL.[strAddress]
 			,[intCompanyLocationId]				= APB.[intCompanyLocationId]
 			,[intAccountId]						= APB.[intAccountId]
@@ -274,11 +257,7 @@ FROM (
 			,intPayToBankAccountId				= NULL
 			,strPayToBankAccountNo				= NULL
 		FROM [vyuAPVouchersForARPayment] APB
-		INNER JOIN (
-			SELECT intEntityId
-				 , strAccountNumber = strVendorAccountNum
-			 FROM dbo.tblAPVendor WITH (NOLOCK)
-		) AS ARC ON APB.intEntityCustomerId = ARC.intEntityId
+		INNER JOIN tblAPVendor ARC WITH (NOLOCK) ON APB.intEntityCustomerId = ARC.intEntityId
 		INNER JOIN (
 			SELECT intEntityId
 				 , strAddress
@@ -336,7 +315,7 @@ FROM (
 			,[strCurrencyExchangeRateType]		= NULL
 			,[intCurrencyExchangeRateId]		= NULL
 			,[dblCurrencyExchangeRate]			= CAST(1 AS DECIMAL(18,6))
-			,[ysnACHActive]						= EFT.[ysnActive]
+			,[ysnACHActive]						= CAST(1 AS BIT)
 			,[dblInvoiceDiscountAvailable]		= CAST(0 AS DECIMAL(18,6))
 			,[intSourceId]						= NULL
 			,[ysnClosed]						= CAST(0 AS BIT)
@@ -363,32 +342,15 @@ FROM (
 			WHERE ysnDefaultLocation = 1 
 			  AND ISNULL(intWarehouseId, 0) <> 0
 		) AS EL ON ARC.intEntityId = EL.intEntityId
-		INNER JOIN (
-			SELECT intEntityId
-				 , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-		) AS CE ON ARC.[intEntityId] = CE.intEntityId 
-		LEFT OUTER JOIN (
-			SELECT intPaymentMethodID
-				 , strPaymentMethod
-			FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
-		) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
+		INNER JOIN tblEMEntity CE WITH (NOLOCK) ON ARC.[intEntityId] = CE.intEntityId 
+		LEFT OUTER JOIN tblSMPaymentMethod SMP WITH (NOLOCK) ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
 		OUTER APPLY (
 			SELECT TOP 1 intPaymentMethodID
 					   , strPaymentMethod 
 			FROM tblSMPaymentMethod
 			WHERE LOWER(strPaymentMethod) LIKE '%ach%'
-		) PM
-		LEFT JOIN (
-			SELECT intEntityId
-				 , ysnActive
-			FROM dbo.tblEMEntityEFTInformation WITH (NOLOCK)
-		) EFT ON CE.intEntityId = EFT.intEntityId
-		INNER JOIN (
-			SELECT intCompanyLocationId
-				 , intARAccount
-			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-		) SMCL ON EL.intWarehouseId = SMCL.intCompanyLocationId
+		) PM		
+		INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON EL.intWarehouseId = SMCL.intCompanyLocationId
 		CROSS APPLY (
 			SELECT TOP 1 intARAccountId
 			FROM tblARCompanyPreference
@@ -396,20 +358,5 @@ FROM (
 		) ARCP
 		WHERE CB.dblBudgetAmount - CB.dblAmountPaid <> 0
 	) ARIFP
-LEFT OUTER JOIN (
-	SELECT intTermID
-		 , strTerm
-		 , strType
-		 , intDiscountDay
-		 , dtmDiscountDate
-		 , dblDiscountEP
-		 , intBalanceDue
-		 , dtmDueDate
-		 , dblAPR
-	FROM dbo.tblSMTerm WITH (NOLOCK)
-) SMT ON ARIFP.intTermId = SMT.intTermID
-LEFT OUTER JOIN (
-	SELECT intCompanyLocationId
-		 , strLocationName
-	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) SMCL ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
+LEFT OUTER JOIN tblSMTerm SMT WITH (NOLOCK) ON ARIFP.intTermId = SMT.intTermID
+LEFT OUTER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId

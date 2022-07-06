@@ -24,6 +24,9 @@ SELECT
 @intRetainAccount= intRetainAccount,    
 @intIncomeSummaryAccount = intIncomeSummaryAccount    
 FROM tblGLFiscalYear WHERE @intFiscalYearId = intFiscalYearId    
+
+DELETE FROM tblGLDetail WHERE strBatchId = @strGUID
+DELETE FROM tblGLPostRecap WHERE strBatchId = @strGUID    
     
 INSERT INTO @tbl (intGLFiscalYearPeriodId,strPeriod, dtmStartDate, dtmEndDate)    
 SELECT intGLFiscalYearPeriodId, strPeriod, dtmStartDate, dtmEndDate    
@@ -155,15 +158,13 @@ FROM @PostGLEntries
    IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' )      
    BEGIN    
   
-  
-  DELETE FROM tblGLPostRecap WHERE strBatchId = @strGUID    
   EXEC uspGLPostRecap @PostGLEntries2, @intEntityId      
   EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId  
   SET @result = 'Error overriding accounts.'  
   GOTO _end  
    END    
     
-DELETE FROM tblGLDetail WHERE strBatchId = @strGUID    
+
     
 EXEC uspGLBookEntries @PostGLEntries2, 1, 1 ,1     
   

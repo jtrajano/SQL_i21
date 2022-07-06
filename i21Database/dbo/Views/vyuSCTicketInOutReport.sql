@@ -115,25 +115,25 @@
 									Ticket.intItemId
 									, UOM.intUnitMeasureId
 									, ScaleSetupUOM.intUnitMeasureId
-									, Ticket.dblGrossUnits) * -1
+									, Ticket.dblGrossUnits)
 		else
-			Ticket.dblGrossUnits * -1
+			Ticket.dblGrossUnits
 		end as dblComputedGrossUnits
 
 		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
-		,strStorageType = 'Transfer' --StorageType.strStorageTypeCode + ':' + StorageType.strStorageTypeDescription
+		,strStorageType = StorageType.strStorageTypeCode + ':' + StorageType.strStorageTypeDescription
 
 		
-		, Ticket.dblNetUnits * -1
+		, Ticket.dblNetUnits
 		,case when ScaleSetupUOM.intUnitMeasureId is not null and 
 			ScaleSetupUOM.intUnitMeasureId != UOM.intUnitMeasureId then
 			round(dbo.fnGRConvertQuantityToTargetItemUOM(
 									Ticket.intItemId
 									, UOM.intUnitMeasureId
 									, ScaleSetupUOM.intUnitMeasureId
-									, Ticket.dblNetUnits) , 4)* -1
+									, Ticket.dblNetUnits) , 4)
 		else
-			Ticket.dblNetUnits * -1
+			Ticket.dblNetUnits
 		end as dblComputedNetUnits
 		from tblSCTicket Ticket	
 			join tblICItem Item
@@ -141,7 +141,9 @@
 			join tblICCommodity Commodity
 				on Item.intCommodityId = Commodity.intCommodityId		
 			join tblSMCompanyLocation CompanyLocation
-				on Ticket.intProcessingLocationId = CompanyLocation.intCompanyLocationId			
+				on Ticket.intProcessingLocationId = CompanyLocation.intCompanyLocationId
+			join tblGRStorageType StorageType
+				on Ticket.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId
 			join tblSMCompanyLocation EntityCompanyLocation
 				on Ticket.intTransferLocationId= EntityCompanyLocation.intCompanyLocationId	
 			join tblSCListTicketTypes TicketType
@@ -195,7 +197,7 @@
 		end as dblComputedGrossUnits
 
 		,isnull(ScaleSetupUOM.strUnitMeasure, UOM.strUnitMeasure) as strStationUnitMeasure
-		,strStorageType = 'Transfer' --StorageType.strStorageTypeCode + ':' + StorageType.strStorageTypeDescription
+		,strStorageType = StorageType.strStorageTypeCode + ':' + StorageType.strStorageTypeDescription
 
 		
 		, Ticket.dblNetUnits
@@ -218,7 +220,8 @@
 				on Ticket.intTransferLocationId = CompanyLocation.intCompanyLocationId		
 			join tblSMCompanyLocation EntityCompanyLocation
 				on Ticket.intProcessingLocationId= EntityCompanyLocation.intCompanyLocationId	
-			
+			join tblGRStorageType StorageType
+				on Ticket.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId	
 			join tblSCListTicketTypes TicketType
 				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
 

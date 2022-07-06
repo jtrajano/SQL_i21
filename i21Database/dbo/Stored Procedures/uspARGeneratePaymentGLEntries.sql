@@ -1078,7 +1078,6 @@ BEGIN
 		AND P.[dblInterest] <> @ZeroDecimal
 
     --CREDIT CONVENIENCE FEE
-    --CREDIT INTEREST
     INSERT #ARPaymentGLEntries
         ([dtmDate]
         ,[strBatchId]

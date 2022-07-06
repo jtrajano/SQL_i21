@@ -50,6 +50,15 @@ BEGIN
 	DECLARE @applyWithHold BIT = 0, @applyDiscount INT = 0, @applyInterest INT = 0;
 	DECLARE @functionalCurrency INT;
 
+	DECLARE	@OverrideCompanySegment BIT,
+			@OverrideLocationSegment BIT,
+			@OverrideLineOfBusinessSegment BIT
+
+	SELECT TOP 1 @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+				 @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+				 @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
+	FROM tblAPCompanyPreference
+
 	SET @userLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityId] = @intUserId);
 	IF (@userLocation IS NOT NULL AND @userLocation > 0)
 	BEGIN
@@ -221,7 +230,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
-		[intAccountId]					=	@GainLossAccount,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]						=   --CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)) -
 											-- (CAST(
 											-- 	dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
@@ -285,6 +294,10 @@ BEGIN
 				GROUP BY AAA.intBillId
 			) voucherRate ON voucher.intBillId = voucherRate.intBillId
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
+			OUTER APPLY (
+				SELECT intOverrideAccount
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
 	AND B.intInvoiceId IS NULL

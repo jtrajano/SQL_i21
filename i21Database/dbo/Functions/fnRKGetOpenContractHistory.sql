@@ -49,13 +49,13 @@ BEGIN
 	UNION ALL 
 
 	SELECT mf.intSFutOptTransactionId
-			, 'Futures' as strInstrumentType
-			, 'Sell' as strBuySell
-			, - SUM(mf.dblMatchQty) as dblMatchContract
-		FROM tblRKMatchDerivativesHistory mf
-		WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-			AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
-		GROUP BY mf.intSFutOptTransactionId
+		, 'Futures' as strInstrumentType
+		, 'Sell' as strBuySell
+		, - SUM(mf.dblMatchQty) as dblMatchContract
+	FROM tblRKMatchDerivativesHistory mf
+	WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
+		AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+	GROUP BY mf.intSFutOptTransactionId
 
 	RETURN
 END

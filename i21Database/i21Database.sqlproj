@@ -804,9 +804,11 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateLotReleased.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
-    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
-    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" /> 
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
+    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
+    <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
+    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblIPBillDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
@@ -814,6 +816,7 @@
     <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
     <Build Include="dbo\Tables\tblIPBillDetail.sql" />
+    <Build Include="dbo\Views\vyuCTTaxLocation.sql" />
     <Build Include="dbo\Tables\tblMFShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
@@ -825,6 +828,9 @@
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
     <Build Include="dbo\Tables\tblCMABRActivityMatched.sql" />
     <Build Include="dbo\Tables\tblCMABRActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateAccountOnPost.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10639,6 +10645,7 @@
     <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11011,7 +11018,6 @@
     <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
     <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
-    <Build Include="dbo\Functions\fnARGetOverrideAccount.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
   </ItemGroup>
   <ItemGroup>

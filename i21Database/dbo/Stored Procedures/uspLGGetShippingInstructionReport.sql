@@ -488,8 +488,10 @@ FROM (
 		,strDischargeUnit = DisUnit.strUnitMeasure
 		,L.strLoadingPerUnit
 		,L.strDischargePerUnit
-		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
-		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+		,blbHeaderLogo = LOGO.blbHeaderLogo
+		,blbFooterLogo = LOGO.blbFooterLogo
+		,LOGO.strHeaderLogoType
+		,LOGO.strFooterLogoType
 		,strShippingInstructionStandardText = (SELECT TOP 1 strShippingInstructionText FROM tblLGCompanyPreference)
 		,strContractText = (SELECT TOP 1 strInboundText FROM tblSMCity WHERE strCity = L.strDestinationPort)
 		,L.strDestinationCity
@@ -621,6 +623,30 @@ FROM (
 	OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
 			 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
+	
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+		FROM tblSMLogoPreference
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = CD.intCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLH
+	OUTER APPLY (
+		SELECT TOP 1 [blbLogo] = imgLogo
+		FROM tblSMLogoPreferenceFooter
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = CD.intCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLF
+	OUTER APPLY (
+		SELECT
+			blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+			,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+			,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+			,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	) LOGO
+
 	WHERE L.intLoadId = @intLoadId
 	) tbl
 END

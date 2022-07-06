@@ -41,13 +41,13 @@ BEGIN TRY
 			@intSeqHistoryPreviousFutMkt	INT,
 			@intSeqHistoryPreviousFutMonth	INT,
 			@dblCurrentBasis				NUMERIC(24, 10),
-			@intHeaderPricingTypeId		INT;
+			@intHeaderPricingTypeId		INT,
+			@ysnInvoicePosted			BIT = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
 	-------------------------------------------
 	-- SELECT strSource = @strSource, strProcess = @strProcess
-
 	IF @strProcess IN 
 	(
 		'Update Scheduled Quantity',
@@ -148,7 +148,7 @@ BEGIN TRY
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
-		select pf.intPriceFixationId from tblCTPriceFixation pf where pf.intContractDetailId = @intContractDetailId
+		select pf.intPriceFixationId from vyuCTCombinePriceFixation pf where pf.intContractDetailId = @intContractDetailId
 	 ) priceFix
 	WHERE cd.intContractHeaderId = @intContractHeaderId
 		AND cd.intContractDetailId = @intContractDetailId
@@ -440,7 +440,6 @@ BEGIN TRY
 		-- 	1.2. Increase balance for additional sequence
 		-- 5. Deleting sequence
 		-- 	1.1. Negate balance of the sequence
-
 		DECLARE @sequenceHistory TABLE (Row_Num INT
 			, intSequenceHistoryId INT
 			, dtmTransactionDate DATETIME
@@ -677,10 +676,11 @@ BEGIN TRY
 						, dblOrigQty
 						, intContractStatusId
 						, strTransactionReference
+						, strTransactionReferenceNo
 						, COUNT (*)
 					FROM (
-						SELECT TOP 1 * FROM @cbLogTemp
-						UNION ALL SELECT TOP 1 * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId ORDER BY intId DESC
+						SELECT TOP 1 intRowId = 1, * FROM @cbLogTemp
+						UNION ALL SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY intId DESC) intRowId, * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) tbl WHERE intRowId = 1
 					) tbl
 					GROUP BY intContractDetailId
 						, intContractHeaderId
@@ -706,7 +706,14 @@ BEGIN TRY
 						, dblOrigQty
 						, intContractStatusId
 						, strTransactionReference
+						, strTransactionReferenceNo
 					HAVING COUNT(*) > 1)
+			BEGIN
+				DELETE FROM @cbLogTemp
+			END
+			ELSE IF NOT EXISTS(
+						SELECT TOP 1 intRowId = 1, * FROM @cbLogTemp WHERE intContractStatusId <> 5
+						UNION ALL SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY intId DESC) intRowId, * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) tbl WHERE intRowId = 1 AND intContractStatusId <> 5)
 			BEGIN
 				DELETE FROM @cbLogTemp
 			END
@@ -1233,7 +1240,8 @@ BEGIN TRY
 				, strNotes
 				, intUserId
 				, intActionId
-				, strProcess)
+				, strProcess
+				, ysnInvoicePosted)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Sales Basis Deliveries'
@@ -1272,10 +1280,11 @@ BEGIN TRY
 				, cbl.intUserId
 				, intActionId = 16
 				, strProcess = @strProcess
+				, ysnInvoicePosted = i.ysnPosted
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
-			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId
+			LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -1447,7 +1456,7 @@ BEGIN TRY
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
-			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId
+			LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -1627,7 +1636,7 @@ BEGIN TRY
 				FROM tblCTContractBalanceLog cbl
 				INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
 				INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
-				LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
+				LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 				WHERE cbl.intPricingTypeId = 1			
 					AND cbl.intContractHeaderId = @intContractHeaderId
 					AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
@@ -1717,7 +1726,7 @@ BEGIN TRY
 					FROM tblCTContractBalanceLog cbl
 					INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
 					INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
-					LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
+					LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 					WHERE cbl.intPricingTypeId = 1			
 						AND cbl.intContractHeaderId = @intContractHeaderId
 						AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
@@ -1946,10 +1955,11 @@ BEGIN TRY
 				OUTER APPLY 
 				(
 					SELECT dblFutures = AVG(pfd.dblFutures)
-					FROM tblCTPriceFixation pf 
-					INNER JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId
+					FROM vyuCTCombinePriceFixation pf 
+					INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 					WHERE pf.intContractHeaderId = suh.intContractHeaderId 
-					AND suh.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN suh.intContractDetailId ELSE pf.intContractDetailId END)
+					AND suh.intContractDetailId = pf.intContractDetailId
+					AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				) price
 				WHERE strFieldName = 'Balance'
 				AND suh.intExternalHeaderId is not null
@@ -2643,10 +2653,10 @@ BEGIN TRY
 					, intOrderBy = 1
 					, intUserId = @intUserId
 					, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
-				FROM tblCTPriceFixationDetail pfd
-				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+				FROM vyuCTCombinePriceFixationDetail pfd
+				INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				WHERE pfd.ysnToBeDeleted = 1
@@ -2658,6 +2668,7 @@ BEGIN TRY
 					AND intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
 				)			
+				 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			) tbl
 			WHERE intContractHeaderId = @intContractHeaderId
 			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)
@@ -2743,7 +2754,7 @@ BEGIN TRY
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess <> 'Priced DWG'
-			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
+			INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -2830,7 +2841,7 @@ BEGIN TRY
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess <> 'Priced DWG'
-			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
+			INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -2918,7 +2929,7 @@ BEGIN TRY
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strTransactionReference = 'Price Fixation'
-			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
+			INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -3061,10 +3072,10 @@ BEGIN TRY
 					, strNotes = (CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity
 										THEN (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Quantity. Change Futures Price.' ELSE 'Change Quantity.' END)
 										ELSE (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Futures Price' ELSE NULL END) END)
-				FROM tblCTPriceFixationDetail pfd
-				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+				FROM vyuCTCombinePriceFixationDetail pfd
+				INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				OUTER APPLY (
 					SELECT TOP 1 dblOrigQty = CASE WHEN intActionId = 1 THEN ABS(pl.dblOrigQty) ELSE pl.dblOrigQty END, pl.dblFutures
@@ -3074,7 +3085,7 @@ BEGIN TRY
 						AND intContractDetailId = @intContractDetailId
 					ORDER BY dtmTransactionDate DESC
 				) prevLog
-				WHERE ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity OR ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures
+				WHERE ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity OR ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			) tbl
 			/*End of CT-4833*/
 
@@ -3199,10 +3210,10 @@ BEGIN TRY
 						, intUserId = @intUserId
 						, intActionId = 17
 						, strNotes = null
-					FROM tblCTPriceFixationDetail pfd
-					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					FROM vyuCTCombinePriceFixationDetail pfd
+					INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-					INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+					INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 					LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 					WHERE pfd.intPriceFixationDetailId NOT IN
 					(
@@ -3211,6 +3222,7 @@ BEGIN TRY
 						WHERE strTransactionReference = 'Price Fixation'
 							AND intContractDetailId = @intContractDetailId
 					)
+					 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 				) tbl
 			END
 			/*End of CT-5179*/
@@ -3333,10 +3345,10 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId = 17
 					, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
-				FROM tblCTPriceFixationDetail pfd
-				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+				FROM vyuCTCombinePriceFixationDetail pfd
+				INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				WHERE pfd.intPriceFixationDetailId NOT IN
@@ -3346,15 +3358,17 @@ BEGIN TRY
 					WHERE strTransactionReference = 'Price Fixation'
 						AND intContractDetailId = @intContractDetailId
 				)
+				 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			) tbl
 		END
 	END
 
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
+			@intId INT,
+			@dblRunningQty NUMERIC(24, 10) = 0,
 			@ysnAddToLogSpecific BIT = 1,
-			@intNegatedCount int = 0,
-			@intId INT
+			@intNegatedCount int = 0
 
 	SELECT @intId = MIN(intId) FROM @cbLogCurrent
 	WHILE @intId > 0--EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
@@ -3375,15 +3389,15 @@ BEGIN TRY
 					and cter.intId <> curr.intId
 					and cter.strTransactionType = curr.strTransactionType
 					and @ysnDWGPriceOnly = 1
-                    and cter.strProcess = curr.strProcess
+					and cter.strProcess = curr.strProcess
 			where
 				curr.intId = @intId
 		)
 		begin
 			SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
-            continue;
+			continue;
 		end
-
+		
 		DELETE FROM @cbLogPrev
 
 		/*CT-5532 - If unposting and the contract is DWG, check the @cbLogCurrent if it's contains a self negated records*/
@@ -3392,77 +3406,77 @@ BEGIN TRY
         begin
             IF OBJECT_ID('tempdb..#tmpNegated') IS NOT NULL DROP TABLE #tmpNegated;
 
-            select * into #tmpNegated from
-            (
-                SELECT 
-                    ext.*
-                FROM @cbLogCurrent curr
-                join @cbLogCurrent ext on (ext.dblQty * -1) = curr.dblQty
-                WHERE curr.intId = @intId
+			select * into #tmpNegated from
+			(
+				SELECT 
+					ext.*
+				FROM @cbLogCurrent curr
+				join @cbLogCurrent ext on (ext.dblQty * -1) = curr.dblQty
+				WHERE curr.intId = @intId
 
-                union all
+				union all
 
-                SELECT 
-                    curr.*
-                FROM @cbLogCurrent curr
-                WHERE curr.intId = @intId
-            )tbl
+				SELECT 
+					curr.*
+				FROM @cbLogCurrent curr
+				WHERE curr.intId = @intId
+			)tbl
 
-            if ((select count(*) from #tmpNegated) = 2)
-            begin
+			if ((select count(*) from #tmpNegated) = 2)
+			begin
 
-                select @intNegatedCount = count(*) from
-                (
-                select distinct
-                strBatchId  
-                , dtmTransactionDate  
-                , strTransactionType  
-                , strTransactionReference  
-                , intTransactionReferenceId  
-                , intTransactionReferenceDetailId  
-                , strTransactionReferenceNo  
-                , intContractDetailId  
-                , intContractHeaderId  
-                , strContractNumber  
-                , intContractSeq  
-                , intContractTypeId  
-                , intEntityId  
-                , intCommodityId  
-                , intItemId  
-                , intLocationId  
-                , intPricingTypeId  
-                , intFutureMarketId  
-                , intFutureMonthId  
-                , dblBasis  
-                , dblFutures  
-                , intQtyUOMId  
-                , intQtyCurrencyId  
-                , intBasisUOMId  
-                , intBasisCurrencyId  
-                , intPriceUOMId  
-                , dtmStartDate  
-                , dtmEndDate  
-                , dblDynamic  
-                , intContractStatusId  
-                , intBookId  
-                , intSubBookId  
-                , strNotes  
-                , intUserId  
-                , intActionId  
-                , strProcess  
-                from #tmpNegated
-                ) tbl1
+				select @intNegatedCount = count(*) from
+				(
+				select distinct
+				strBatchId  
+				, dtmTransactionDate  
+				, strTransactionType  
+				, strTransactionReference  
+				, intTransactionReferenceId  
+				, intTransactionReferenceDetailId  
+				, strTransactionReferenceNo  
+				, intContractDetailId  
+				, intContractHeaderId  
+				, strContractNumber  
+				, intContractSeq  
+				, intContractTypeId  
+				, intEntityId  
+				, intCommodityId  
+				, intItemId  
+				, intLocationId  
+				, intPricingTypeId  
+				, intFutureMarketId  
+				, intFutureMonthId  
+				, dblBasis  
+				, dblFutures  
+				, intQtyUOMId  
+				, intQtyCurrencyId  
+				, intBasisUOMId  
+				, intBasisCurrencyId  
+				, intPriceUOMId  
+				, dtmStartDate  
+				, dtmEndDate  
+				, dblDynamic  
+				, intContractStatusId  
+				, intBookId  
+				, intSubBookId  
+				, strNotes  
+				, intUserId  
+				, intActionId  
+				, strProcess  
+				from #tmpNegated
+				) tbl1
 
-                if (@intNegatedCount = 1)
-                begin
-                    set @ysnAddToLogSpecific = 0;
-                end
+				if (@intNegatedCount = 1)
+				begin
+					set @ysnAddToLogSpecific = 0;
+				end
 
-            end
+			end
 
-        end
+		end
 
-        /**/
+		/**/
 
 		INSERT INTO @cbLogSpecific (strBatchId
 			, dtmTransactionDate
@@ -3641,10 +3655,8 @@ BEGIN TRY
 
 		-- Get previous totals
 		DECLARE @dblQtys 		NUMERIC(24, 10),
-				@dblPriced 		NUMERIC(24, 10),
 				@dblBasisDel 	NUMERIC(24, 10),
 				@dblPricedDel 	NUMERIC(24, 10),
-				@dblBasis 		NUMERIC(24, 10),
 				@dblDP 			NUMERIC(24, 10),
 				@dblCash		NUMERIC(24, 10),
 				@dblUnit		NUMERIC(24, 10),
@@ -3721,12 +3733,6 @@ BEGIN TRY
 		WHERE strTransactionType = 'Contract Balance'
 		GROUP BY intContractDetailId
 
-		SELECT @dblPriced = SUM(dblQty)
-		FROM @cbLogPrev
-		WHERE strTransactionType = 'Contract Balance'
-			AND intPricingTypeId = 1
-		GROUP BY intPricingTypeId	
-		
 		SELECT @dblBasisDel = SUM(dblQty)
 		FROM @cbLogPrev
 		WHERE strTransactionType LIKE '%Basis Deliveries'
@@ -3738,27 +3744,21 @@ BEGIN TRY
 			AND strTransactionReference IN ('Invoice', 'Voucher')
 		GROUP BY intContractDetailId
 
-		SELECT @dblBasis = SUM(dblQty)
-		FROM @cbLogPrev
-		WHERE intPricingTypeId = 2
-			AND strTransactionType NOT LIKE '%Basis Deliveries'
-		GROUP BY intPricingTypeId
-
 		SELECT @dblDP = SUM(dblQty)
 		FROM @cbLogPrev
 		WHERE intPricingTypeId = 5
 			AND strTransactionType NOT LIKE '%Basis Deliveries'
 		GROUP BY intPricingTypeId
 
+		SELECT @dblCash = SUM(dblQty)
+		FROM @cbLogPrev
+		WHERE intPricingTypeId = 6
+		GROUP BY intPricingTypeId
+
 		SELECT @dblUnit = SUM(dblQty)
 		FROM @cbLogPrev
 		WHERE intPricingTypeId = 4
 			AND strTransactionType NOT LIKE '%Basis Deliveries'
-		GROUP BY intPricingTypeId		
-
-		SELECT @dblCash = SUM(dblQty)
-		FROM @cbLogPrev
-		WHERE intPricingTypeId = 6
 		GROUP BY intPricingTypeId
 		
 		SELECT @dblQty = dblQty
@@ -3778,15 +3778,11 @@ BEGIN TRY
 
 		--Validate HTA Contract
 		SELECT TOP 1 @prevPricingTypeId = ISNULL(intPricingTypeId, @currPricingTypeId)
+			, @prevContractStatusId = ISNULL(intContractStatusId, @intContractStatusId)
 		FROM @cbLogPrev
 		WHERE strTransactionType = 'Contract Balance'
 			AND intActionId IN (42, 43)
-		ORDER BY intId DESC
-
-		SELECT TOP 1 @prevContractStatusId = ISNULL(intContractStatusId, @intContractStatusId)
-		FROM @cbLogPrev
-		WHERE strTransactionType = 'Contract Balance'
-		ORDER BY intId DESC
+		ORDER BY intId
 		
 		IF (@prevPricingTypeId = 3)
 		BEGIN
@@ -3809,10 +3805,10 @@ BEGIN TRY
 				FROM
 				(
 					SELECT pf.intContractHeaderId, dbTotallQuantity = ch.dblQuantity, pfd.dblQuantity
-					FROM tblCTPriceFixationDetail pfd
-					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					FROM vyuCTCombinePriceFixationDetail pfd
+					INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 					INNER JOIN tblCTContractHeader ch ON pf.intContractHeaderId = ch.intContractHeaderId
-					WHERE pf.intContractHeaderId = @intContractHeaderId
+					WHERE pf.intContractHeaderId = @intContractHeaderId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 				) pricing
 				WHERE intContractHeaderId = @intContractHeaderId
 				GROUP BY intContractHeaderId
@@ -3824,10 +3820,10 @@ BEGIN TRY
 				FROM
 				(
 					SELECT pf.intContractHeaderId, pf.intContractDetailId, dbTotallQuantity = cd.dblQuantity, pfd.dblQuantity
-					FROM tblCTPriceFixationDetail pfd
-					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					FROM vyuCTCombinePriceFixationDetail pfd
+					INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 					INNER JOIN tblCTContractDetail cd ON ISNULL(pf.intContractDetailId, 0) = cd.intContractDetailId
-					WHERE pf.intContractHeaderId = @intContractHeaderId			
+					WHERE pf.intContractHeaderId = @intContractHeaderId	 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice		
 				) pricing
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = @intContractDetailId
@@ -3849,25 +3845,25 @@ BEGIN TRY
 				END
 				IF (@intPricingTypeId NOT IN (5))
 				BEGIN
-					IF ISNULL(@dblBasis, 0) > 0
+					IF ISNULL(@TotalBasis, 0) > 0
 					BEGIN
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						UPDATE @cbLogSpecific SET dblQty = @dblBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
-																									WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
+						UPDATE @cbLogSpecific SET dblQty = @TotalBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
+																									WHEN @intHeaderPricingTypeId = 1 THEN 1
 																									ELSE 2 END, intActionId = @_action
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
-					IF ISNULL(@dblPriced, 0) > 0
+					IF ISNULL(@TotalPriced, 0) > 0
 					BEGIN
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						UPDATE @cbLogSpecific SET dblQty = @dblPriced * - 1, intPricingTypeId = 1, intActionId = @_action
+						UPDATE @cbLogSpecific SET dblQty = @TotalPriced * - 1, intPricingTypeId = 1, intActionId = @_action
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
-					IF ISNULL(@dblBasis, 0) <= 0 AND ISNULL(@dblPriced, 0) <= 0
+					IF ISNULL(@TotalBasis, 0) <= 0 AND ISNULL(@TotalPriced, 0) <= 0
 					BEGIN
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
@@ -3885,7 +3881,7 @@ BEGIN TRY
 						BEGIN
 							UPDATE @cbLogSpecific SET dblQty = @dblBasisDel * - 1,
 										strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
-										intPricingTypeId = CASE WHEN ISNULL(@dblBasis, 0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
+										intPricingTypeId = CASE WHEN ISNULL(@TotalBasis, 0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0 
 						END
 					END
@@ -4068,46 +4064,41 @@ BEGIN TRY
 												WHEN @truePricingTypeId = 5 THEN @dblDP
 												WHEN @truePricingTypeId = 6 THEN @dblCash END
 
-							IF NOT ((@truePricingTypeId = @prevPricingTypeId)
-								AND (@intContractStatusId NOT IN (1, 4) AND @intContractStatusId = @prevContractStatusId)
-								AND (@ptQty = 0))
-							BEGIN
-								-- Negate AND add previous record
-								UPDATE @cbLogPrev
-								SET dblQty = @ptQty * - 1
-									, intPricingTypeId = @truePricingTypeId
-									, intActionId = 43
+							-- Negate AND add previous record
+							UPDATE @cbLogPrev
+							SET dblQty = @ptQty * - 1
+								, intPricingTypeId = @truePricingTypeId
+								, intActionId = 43
 
-								-- Negate previous if the value is not 0
-								IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
+							-- Negate previous if the value is not 0
+							IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
+							BEGIN
+								UPDATE @cbLogPrev
+								SET strBatchId = @strBatchId
+									, strProcess = @strProcess
+									, dtmTransactionDate = @_dtmCurrent
+
+								IF (@strProcess = 'Do Roll')
 								BEGIN
 									UPDATE @cbLogPrev
-									SET strBatchId = @strBatchId
-										, strProcess = @strProcess
-										, dtmTransactionDate = @_dtmCurrent
-
-									IF (@strProcess = 'Do Roll')
-									BEGIN
-										UPDATE @cbLogPrev
-										SET intPriceUOMId = curr.intPriceUOMId
-											, strTransactionReference = curr.strTransactionReference
-											, strTransactionReferenceNo = curr.strTransactionReferenceNo
-											, intTransactionReferenceId = curr.intTransactionReferenceId
-											, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
-											, intUserId = curr.intUserId
-											, dblOrigQty = curr.dblOrigQty
-											, strNotes = ''
-										FROM (SELECT * FROM @cbLogSpecific) curr
-									END
-
-									EXEC uspCTLogContractBalance @cbLogPrev, 0
+									SET intPriceUOMId = curr.intPriceUOMId
+										, strTransactionReference = curr.strTransactionReference
+										, strTransactionReferenceNo = curr.strTransactionReferenceNo
+										, intTransactionReferenceId = curr.intTransactionReferenceId
+										, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+										, intUserId = curr.intUserId
+										, dblOrigQty = curr.dblOrigQty
+										, strNotes = ''
+									FROM (SELECT * FROM @cbLogSpecific) curr
 								END
 
-								UPDATE @cbLogSpecific
-								SET dblQty = @ptQty
-									, intPricingTypeId = @truePricingTypeId
-								EXEC uspCTLogContractBalance @cbLogSpecific, 0
-							END							
+								EXEC uspCTLogContractBalance @cbLogPrev, 0
+							END
+
+							UPDATE @cbLogSpecific
+							SET dblQty = @ptQty
+								, intPricingTypeId = @truePricingTypeId
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						END
 						ELSE IF (@prevPricingTypeId = 4 AND @currPricingTypeId = 1)
 						BEGIN
@@ -4370,10 +4361,10 @@ BEGIN TRY
 					IF EXISTS (SELECT TOP 1 1 FROM @cbLogSpecific WHERE intActionId = 43)  
 					BEGIN
 						--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
-						IF (@TotalOrigPriced <= @dblContractQty)
-						--IF (@TotalPriced <= @dblContractQty)
+						IF (@TotalPriced <= @dblContractQty)
 						BEGIN
-							UPDATE @cbLogSpecific SET intPricingTypeId = @intHeaderPricingTypeId
+							--UPDATE @cbLogSpecific SET intPricingTypeId = @intHeaderPricingTypeId
+							UPDATE @cbLogSpecific SET intPricingTypeId = (case when isnull(@truePricingTypeId,0) = 1 and @total < 0 then intPricingTypeId else @intHeaderPricingTypeId end)
 						END
 					END 
 
@@ -4391,13 +4382,15 @@ BEGIN TRY
 				, @dblRemainingQty NUMERIC(18, 6)
 				, @dblQuantityAppliedAndPriced NUMERIC(18, 6)
 				, @dblCurrentQty NUMERIC(18, 6)
+				, @tmpTotal NUMERIC(18, 6)
 				, @dblCurrentLoad NUMERIC(18, 6)
 				, @dblLoadAppliedAndPriced NUMERIC(18, 6)
-
-			SELECT @dblRemainingQty = 0
+			SELECT @dblRunningQty += @dblOrigQty
+				, @dblRemainingQty = 0
 				
 			SELECT TOP 1 @prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
 				, @qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
+				, @FinalQty = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
 				, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
 				, @dblCurrentQty = dblQuantity
 				, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced
@@ -4427,14 +4420,21 @@ BEGIN TRY
 				end
 
 				-- Negate all the priced quantities
-				-- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
-				UPDATE @cbLogSpecific SET dblQty = (case when @FinalQty = 0 and dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end) * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
+                -- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
+				UPDATE @cbLogSpecific SET dblQty = (
+					CASE WHEN (CASE WHEN @FinalQty = 0 AND dblOrigQty > @TotalPriced THEN @FinalQty + @TotalPriced ELSE @FinalQty END) > @TotalPriced THEN @TotalPriced
+					ELSE (CASE WHEN @FinalQty = 0 AND dblOrigQty > @TotalPriced THEN @FinalQty + @TotalPriced ELSE @FinalQty END) END
+				) * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				-- Add all the basis quantities
 				-- Use current Basis Price when putting back basis qty
-				-- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
-				UPDATE @cbLogSpecific SET dblQty = (case when @FinalQty = 0 and dblOrigQty > @dblPriced then @FinalQty + @dblPriced else @FinalQty end), intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
+                -- If there is remaining Priced and the Original Qty is more than the Priced, removed from Priced and add it to basis
+				UPDATE @cbLogSpecific SET dblQty = (
+					CASE WHEN @TotalBasis > 0 AND (CASE WHEN @FinalQty = 0 AND dblOrigQty > @TotalPriced THEN @FinalQty + @TotalPriced ELSE @FinalQty END) > @TotalBasis THEN @TotalBasis
+					ELSE (CASE WHEN @FinalQty = 0 AND dblOrigQty > @TotalPriced THEN @FinalQty + @TotalPriced ELSE @FinalQty END) END
+				), intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
+
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
@@ -4447,49 +4447,62 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				IF (@qtyDiff <> 0)
+			IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
 				BEGIN
-					-- Qty Changed
-					SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
-										ELSE @dblCurrentQty - @prevOrigQty END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
-				ELSE
+				ELSE IF @strNotes = 'Change Futures Price'
 				BEGIN
-					-- New Price or No change
-					SET @FinalQty = @dblQty
-				END
-				
-				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
-				BEGIN
-					-- Decrease Priced
-					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 				ELSE
 				BEGIN
-					
-					--If reducing the price and the remaining priced qty is less than the Final Qty, use the remaining priced qty.
-					select @FinalQty = case when @FinalQty < 0  and abs(@FinalQty) > @dblPriced then @dblPriced * -1 else @FinalQty end;
-					
-					-- If Reassign prices, do not bring back Basis qty
-					IF (@ysnReassign = 0)
+
+					IF (@qtyDiff <> 0)
 					BEGIN
-						-- Increase basis, qtyDiff is negative so multiply to -1
+						--If reducing the price and the remaining priced qty is less than the Final Qty, use the remaining priced qty.
+						select @FinalQty = case when @FinalQty < 0  and abs(@FinalQty) > @TotalPriced then @TotalPriced * -1 else @FinalQty end;
+					END
+					ELSE
+					BEGIN
+						-- New Price or No change
+						SET @FinalQty = @dblQty
+					END
+				
+					IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
+					BEGIN
+						-- Decrease Priced
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
+					ELSE
+					BEGIN
+
+						if (@TotalPriced = 0 and @TotalBasis > 0 and @TotalBasis < @FinalQty)
+						begin
+							select @FinalQty = @TotalBasis;
+						end
+						
+						-- If Reassign prices, do not bring back Basis qty
+						IF (@ysnReassign = 0)
+						BEGIN
+							-- Increase basis, qtyDiff is negative so multiply to -1
+							UPDATE  @cbLogSpecific
+							SET
+								dblQty = (case when strNotes = 'Change Futures Price' then dblOrigQty else @FinalQty end) * - 1
+								,intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE (case when strNotes = 'Change Futures Price' then intPricingTypeId else @intHeaderPricingTypeId end)  END
+								,intActionId = case when strTransactionReference = 'Price Fixation' and (strNotes like '%Change Futures Price%' or strNotes like '%Change Quantity%') then 67 else intActionId end
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						END
+
+						-- Decrease Priced
 						UPDATE  @cbLogSpecific
 						SET
-							dblQty = (case when strNotes = 'Change Futures Price' then dblOrigQty else @FinalQty end) * - 1
-							,intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE (case when strNotes = 'Change Futures Price' then intPricingTypeId else @intHeaderPricingTypeId end)  END
+							dblQty = (case when strNotes = 'Change Futures Price' then dblOrigQty else @FinalQty end)
+							,intPricingTypeId = 1
 							,intActionId = case when strTransactionReference = 'Price Fixation' and (strNotes like '%Change Futures Price%' or strNotes like '%Change Quantity%') then 67 else intActionId end
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
-
-					-- Decrease Priced
-					UPDATE  @cbLogSpecific
-					SET
-						dblQty = (case when strNotes = 'Change Futures Price' then dblOrigQty else @FinalQty end)
-						,intPricingTypeId = 1
-						,intActionId = case when strTransactionReference = 'Price Fixation' and (strNotes like '%Change Futures Price%' or strNotes like '%Change Quantity%') then 67 else intActionId end
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 			END
 		END
@@ -4497,15 +4510,53 @@ BEGIN TRY
 		BEGIN
 			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo', 'Create Voucher', 'Delete Voucher')
 			BEGIN
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+
+				
+				--Unposting invoice should not log SBD
+				set @ysnInvoicePosted = 0;
+
+				if (@strProcess = 'Create Invoice' and exists (
+					select top 1 1
+					from @cbLogPrev lp
+					join @cbLogCurrent i on i.intTransactionReferenceId = lp.intTransactionReferenceId
+					join @cbLogSpecific ls
+					on ls.strProcess = lp.strProcess
+					and ls.strTransactionType = lp.strTransactionType
+					and ls.strTransactionReference = lp.strTransactionReference
+					and ls.intTransactionReferenceId = lp.intTransactionReferenceId
+					and ls.intTransactionReferenceDetailId = lp.intTransactionReferenceDetailId
+					and ls.intActionId = lp.intActionId
+					and i.ysnInvoicePosted = 1				
+				))
+				begin
+					set @ysnInvoicePosted = 1;
+				end
+
+				if (@ysnInvoicePosted = 0)
+				begin
+					UPDATE @cbLogSpecific SET intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+											WHEN @strProcess = 'Create Credit Memo' THEN 64
+											WHEN @strProcess = 'Delete Invoice' THEN 63
+											WHEN @strProcess = 'Delete Credit Memo' THEN 65
+											WHEN @strProcess = 'Create Voucher' THEN 15
+											WHEN @strProcess = 'Delete Voucher' THEN 62
+											ELSE intActionId END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				end 
 
 				SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 				CONTINUE
 			END
 
 			IF @ysnInvoice = 1
-			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = case when strInvoiceType = 'Credit Memo' then 64 else 16 end, strTransactionReference = case when strInvoiceType = 'Credit Memo' then 'Credit Memo' else strTransactionReference end
+			BEGIN				
+				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
+					, intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+										WHEN @strProcess = 'Create Credit Memo' or strInvoiceType = 'Credit Memo' THEN 64
+										WHEN @strProcess = 'Delete Invoice' THEN 63
+										WHEN @strProcess = 'Delete Credit Memo' THEN 65
+										ELSE intActionId END
+					, strTransactionReference = case when strInvoiceType = 'Credit Memo' then 'Credit Memo' else strTransactionReference end
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @ysnReturn = 1
@@ -4615,24 +4666,21 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						IF ISNULL(@dblPriced, 0) > 0
+						IF ISNULL(@TotalPriced, 0) > 0
 						BEGIN
-							IF @dblPriced >= @dblQty
+							IF @TotalPriced >= @dblQty
 							BEGIN
 								UPDATE @cbLogSpecific SET dblQty = dblQty *- 1, intPricingTypeId = 1, intActionId = 46
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0
 							END
 						END
-						IF ISNULL(@dblBasis, 0) > 0
+						IF ISNULL(@TotalBasis, 0) > 0
 						BEGIN				
-							IF @dblBasis >= @dblQty
+							IF @TotalBasis >= @dblQty
 							BEGIN									
-								--Dont log DWG Contract Balance if there's no change in quantity in posting DWG.
-								IF ((@dblBasis >= @dblQty) and exists(select top 1 1 from @cbLogSpecific where dblQty <> 0 and dblOrigQty <> 0))
-								BEGIN
-									UPDATE @cbLogSpecific SET dblQty = dblQty *- 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, intActionId = 18
-									EXEC uspCTLogContractBalance @cbLogSpecific, 0
-								END
+							--Dont log DWG Contract Balance if there's no change in quantity in posting DWG.
+							IF ((@TotalBasis >= @dblQty) and exists(select top 1 1 from @cbLogSpecific where dblQty <> 0 and dblOrigQty <> 0))
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0
 							END
 						END
 					END
@@ -4641,8 +4689,24 @@ BEGIN TRY
 					BEGIN						
 						IF  @dblQty <> 0
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
-							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							--During posting of DWG, don't log the Sales Basis Delivery when there's no changes in the quantity because it's already logged during distribution of the ticket.
+							if not exists (
+								select top 1 1
+								from
+									@cbLogPrev lp
+									join @cbLogSpecific ls
+									on
+									lp.strTransactionType = 'Sales Basis Deliveries'
+									and lp.strTransactionReference = ls.strTransactionReference
+									and lp.intTransactionReferenceDetailId = ls.intTransactionReferenceDetailId
+									and lp.intTransactionReferenceId = ls.intTransactionReferenceId
+									and lp.dblQty = @dblQty
+									and lp.strProcess = 'Update Sequence Balance'
+								) and @strProcess = 'Update Sequence Balance - DWG'
+							begin
+								UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							end
 						END
 					END
 					ELSE IF (@currPricingTypeId = 1)
@@ -4691,7 +4755,7 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							SET @_d = (ABS(@dblQty) - ISNULL(@dblPriced, 0))
+							SET @_d = (ABS(@dblQty) - ISNULL(@TotalPriced, 0))
 							SET @dblQty = (CASE WHEN @_d < 0 THEN 0 ELSE @_d END) * - 1
 						END						
 					END
@@ -4707,7 +4771,7 @@ BEGIN TRY
 					BEGIN
 						IF @dblQty > 0
 						BEGIN
-							SET @dblQty = CASE WHEN @dblQty < @dblBasis THEN @dblQty ELSE @dblBasis END
+							SET @dblQty = CASE WHEN @dblQty < @TotalBasis THEN @dblQty ELSE @TotalBasis END
 						END
 						ELSE
 						BEGIN
@@ -4805,34 +4869,34 @@ BEGIN TRY
 						END
 
 						-- Increase SBD upon creation of IS
-						IF (@strTransactionReference = 'Inventory Shipment' AND @currPricingTypeId <> 3)
+						IF (@strTransactionReference = 'Inventory Shipment')
 						BEGIN
-							IF (@currPricingTypeId = 1)
-							BEGIN
-								IF (ISNULL(@ysnWithPriceFix, 0) = 1 )
-								BEGIN
-									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END
+							if (@currPricingTypeId = 1)
+							begin
+								if (isnull(@ysnWithPriceFix,0) = 1 )
+								begin
+									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = case when intActionId = 18 then 46 else intActionId end
 									EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-								END
-							END
-							ELSE
-							BEGIN
-								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END
+								end
+							end
+							else
+							begin
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = case when intActionId = 18 then 46 else intActionId end
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-							END
+							end
 						END
-						ELSE IF (@strTransactionReference = 'Inventory Receipt' AND @currPricingTypeId <> 3)
+						ELSE IF (@strTransactionReference = 'Inventory Receipt')  
 						BEGIN  
-							IF (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix, 0) = 1)  
-							BEGIN  
+							if (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix,0) = 1)  
+							begin  
 								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0   
-							END
+							end  
 							ELSE
-                            BEGIN
-                                UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'
-                                EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-                            END
+							BEGIN
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+							END
 						END
 						ELSE IF (@strTransactionReference = 'Settle Storage' AND @currPricingTypeId = 2 and exists (select top 1 1 from @cbLogSpecific where dblQty < 0) and @ysnLogSettleStorageBasisDeliveries = 1)
                         BEGIN  
@@ -4840,12 +4904,12 @@ BEGIN TRY
                             EXEC uspCTLogContractBalance @cbLogSpecific, 0;
                         END
 					END				
-					ELSE IF ISNULL(@dblBasis, 0) > 0
+					ELSE IF ISNULL(@TotalBasis, 0) > 0
 					BEGIN
 						IF (@dblQty > 0)
 						BEGIN
 							-- Balance
-							SET @_basis = (CASE WHEN @dblQty > ISNULL(@dblBasis, 0) THEN ISNULL(@dblBasis, 0) ELSE @dblQty END)
+							SET @_basis = (CASE WHEN @dblQty > ISNULL(@TotalBasis, 0) THEN ISNULL(@TotalBasis, 0) ELSE @dblQty END)
 							UPDATE @cbLogSpecific SET dblQty = @_basis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, intActionId = @_action
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 							SET @dblQty = @dblQty - @_basis
@@ -4856,7 +4920,7 @@ BEGIN TRY
 							SET @_actual = @dblActual
 						END
 					END
-					IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)
+					IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 and ISNULL(@dblDP, 0) <> 0)
 					BEGIN
 						-- Balance
 						SET @_dp = (CASE WHEN @dblQty > ISNULL(@dblDP, 0) THEN ISNULL(@dblDP, 0) ELSE @dblQty END)
@@ -4876,7 +4940,8 @@ BEGIN TRY
 						UPDATE a SET dblQty = (CASE WHEN @dblQty > ISNULL(@dblUnit, 0) THEN ISNULL(@dblUnit, 0) ELSE @dblQty END) * - 1, intActionId = CASE WHEN a.intContractTypeId = 1 THEN 52 ELSE 51 END
 						FROM @cbLogSpecific a
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
-					END					
+					END
+					
 					-- Increase basis deliveries based ON the basis quantities
 					-- Scenario 1
 					-- Priced 1000 | BD 0 /
@@ -4893,7 +4958,7 @@ BEGIN TRY
 							-- Basis Deliveries  
 							UPDATE @cbLogSpecific SET dblQty = CASE WHEN @ysnLoadBased = 1 THEN @_actual ELSE @_basis END,
 													  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
-													  intPricingTypeId = CASE WHEN ISNULL(@dblBasis, 0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
+													  intPricingTypeId = CASE WHEN ISNULL(@TotalBasis, 0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 						END
 					END
@@ -4909,7 +4974,7 @@ BEGIN TRY
 					BEGIN
 						IF (@TotalBasis < @dblOrigQty)
 						BEGIN
-							IF (@strTransactionType = 'Contract Balance' AND @strTransactionReference LIKE 'Inventory%') AND @TotalPriced = 0
+							IF (@strTransactionType = 'Contract Balance' AND @strTransactionReference LIKE 'Inventory%') AND @TotalPriced = 0 and @truePricingTypeId <> 1
 							BEGIN
 								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
 
@@ -4940,7 +5005,9 @@ BEGIN TRY
 															WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 															ELSE 2 END
 									, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
-															ELSE intActionId END
+														 ELSE 
+														 	(CASE WHEN intActionId = 46 THEN 18 ELSE intActionId END)
+														 END
 							END
 						END
 					END

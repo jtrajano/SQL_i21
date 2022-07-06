@@ -2313,6 +2313,70 @@ BEGIN TRY
 	ELSE
 	BEGIN
 
+	IF @intInvPlngReportMasterID>0
+	BEGIN
+		SELECT strMonth1
+		,strMonth2
+		,strMonth3
+		,strMonth4
+		,strMonth5
+		,strMonth6
+		,strMonth7
+		,strMonth8
+		,strMonth9
+		,strMonth10
+		,strMonth11
+		,strMonth12
+		,strMonth13
+		,strMonth14
+		,strMonth15
+		,strMonth16
+		,strMonth17
+		,strMonth18
+		,strMonth19
+		,strMonth20
+		,strMonth21
+		,strMonth22
+		,strMonth23
+		,strMonth24
+		,0 AS intMainItemId
+	FROM (
+		SELECT strFieldName
+				,strValue
+		FROM tblCTInvPlngReportAttributeValue
+		WHERE intInvPlngReportMasterID=@intInvPlngReportMasterID
+		AND intReportAttributeID=1
+		) src
+	PIVOT(MAX(src.strValue) FOR src.strFieldName IN (
+		 strMonth1
+		,strMonth2
+		,strMonth3
+		,strMonth4
+		,strMonth5
+		,strMonth6
+		,strMonth7
+		,strMonth8
+		,strMonth9
+		,strMonth10
+		,strMonth11
+		,strMonth12
+		,strMonth13
+		,strMonth14
+		,strMonth15
+		,strMonth16
+		,strMonth17
+		,strMonth18
+		,strMonth19
+		,strMonth20
+		,strMonth21
+		,strMonth22
+		,strMonth23
+		,strMonth24
+				)) AS pvt
+	END
+	ELSE
+	BEGIN
+
 	DECLARE @intNoOfMonth INT
 
 	SELECT @intNoOfMonth = DATEDIFF(mm, 0, GETDATE()) + 24;

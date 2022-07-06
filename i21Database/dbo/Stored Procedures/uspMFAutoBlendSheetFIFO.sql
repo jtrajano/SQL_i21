@@ -1,11 +1,12 @@
-﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheetFIFO] @intLocationId INT
-	,@intBlendRequirementId INT
-	,@dblQtyToProduce NUMERIC(38, 20)
-	,@strXml NVARCHAR(MAX) = NULL
-	,@ysnFromPickList BIT = 0
-	,@strExcludedLotXml NVARCHAR(MAX) = NULL
-	,@strWorkOrderIds NVARCHAR(max) = NULL
-	,@intItemId INT = NULL
+﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheetFIFO] 
+	  @intLocationId			INT
+	, @intBlendRequirementId	INT
+	, @dblQtyToProduce			NUMERIC(38, 20)
+	, @strXml					NVARCHAR(MAX) = NULL
+	, @ysnFromPickList			BIT = 0
+	, @strExcludedLotXml		NVARCHAR(MAX) = NULL
+	, @strWorkOrderIds			NVARCHAR(max) = NULL
+	, @intItemId			    INT = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -15,36 +16,36 @@ BEGIN TRY
 	SET ANSI_WARNINGS OFF
 	SET NOCOUNT ON
 
-	DECLARE @intBlendItemId INT
-	DECLARE @strBlendItemNo NVARCHAR(50)
-	DECLARE @dblRequiredQty NUMERIC(38, 20)
-	DECLARE @intMinRowNo INT
-	DECLARE @intRecipeItemId INT
-	DECLARE @intRawItemId INT
-	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @intIssuedUOMTypeId INT
-	DECLARE @ysnMinorIngredient BIT
-	DECLARE @dblPercentageIncrease NUMERIC(38, 20) = 0
-	DECLARE @intNoOfSheets INT = 1
-	DECLARE @intStorageLocationId INT
-	DECLARE @intRecipeId INT
-	DECLARE @strBlenderName NVARCHAR(50)
-	DECLARE @strLotNumber NVARCHAR(50)
-	DECLARE @dblAvailableQty NUMERIC(38, 20)
-	DECLARE @intEstNoOfSheets INT
-	DECLARE @dblWeightPerQty NUMERIC(38, 20)
-	DECLARE @intMachineId INT
-	DECLARE @strSQL NVARCHAR(MAX)
-	DECLARE @ysnEnableParentLot BIT = 0
-	DECLARE @ysnShowAvailableLotsByStorageLocation BIT = 0
-	DECLARE @intManufacturingProcessId INT
-	DECLARE @intParentLotId INT
-	DECLARE @ysnRecipeItemValidityByDueDate BIT = 0
-	DECLARE @intDayOfYear INT
-	DECLARE @dtmDate DATETIME
-	DECLARE @dtmDueDate DATETIME
-	DECLARE @dblOriginalRequiredQty NUMERIC(38, 20)
-	DECLARE @dblPartialQuantity NUMERIC(38, 20)
+	DECLARE @intBlendItemId							INT
+	DECLARE @strBlendItemNo							NVARCHAR(50)
+	DECLARE @dblRequiredQty							NUMERIC(38, 20)
+	DECLARE @intMinRowNo							INT
+	DECLARE @intRecipeItemId						INT
+	DECLARE @intRawItemId							INT
+	DECLARE @strErrMsg								NVARCHAR(MAX)
+	DECLARE @intIssuedUOMTypeId						INT
+	DECLARE @ysnMinorIngredient						BIT
+	DECLARE @dblPercentageIncrease					NUMERIC(38, 20) = 0
+	DECLARE @intNoOfSheets							INT = 1
+	DECLARE @intStorageLocationId					INT
+	DECLARE @intRecipeId							INT
+	DECLARE @strBlenderName							NVARCHAR(50)
+	DECLARE @strLotNumber							NVARCHAR(50)
+	DECLARE @dblAvailableQty						NUMERIC(38, 20)
+	DECLARE @intEstNoOfSheets						INT
+	DECLARE @dblWeightPerQty						NUMERIC(38, 20)
+	DECLARE @intMachineId							INT
+	DECLARE @strSQL									NVARCHAR(MAX)
+	DECLARE @ysnEnableParentLot						BIT = 0
+	DECLARE @ysnShowAvailableLotsByStorageLocation	BIT = 0
+	DECLARE @intManufacturingProcessId				INT
+	DECLARE @intParentLotId							INT
+	DECLARE @ysnRecipeItemValidityByDueDate			BIT = 0
+	DECLARE @intDayOfYear							INT
+	DECLARE @dtmDate								DATETIME
+	DECLARE @dtmDueDate								DATETIME
+	DECLARE @dblOriginalRequiredQty					NUMERIC(38, 20)
+	DECLARE @dblPartialQuantity						NUMERIC(38, 20)
 	DECLARE @dblRemainingRequiredQty NUMERIC(38, 20)
 	DECLARE @intPartialQuantitySubLocationId INT
 	DECLARE @intOriginalIssuedUOMTypeId INT
@@ -313,6 +314,7 @@ BEGIN TRY
 		,strLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,ysnParentLot BIT
 		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strSecondaryStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 	DECLARE @tblPickedItem TABLE (
 		intRowNo INT IDENTITY
@@ -2422,6 +2424,7 @@ BEGIN TRY
 								,strLotAlias
 								,ysnParentLot
 								,strRowState
+								,strSecondaryStatus
 								)
 							SELECT TOP 1 0
 								,0
@@ -2451,7 +2454,9 @@ BEGIN TRY
 								,''
 								,0
 								,'Added'
+								,ls.strSecondaryStatus
 							FROM tblICLot l
+							JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
 							JOIN tblICItem i ON l.intItemId = i.intItemId
 							JOIN tblICItemUOM iu ON l.intWeightUOMId = iu.intItemUOMId
 							JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
@@ -2498,6 +2503,7 @@ BEGIN TRY
 								,strLotAlias
 								,ysnParentLot
 								,strRowState
+								,strSecondaryStatus
 								)
 							SELECT TOP 1 0
 								,0
@@ -2527,6 +2533,7 @@ BEGIN TRY
 								,''
 								,0
 								,'Added'
+								,'Active'
 							FROM tblMFRecipeItem ri
 							JOIN tblICItem i ON ri.intItemId = i.intItemId
 							JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
@@ -2590,6 +2597,7 @@ BEGIN TRY
 						,strLotAlias
 						,ysnParentLot
 						,strRowState
+						,strSecondaryStatus
 						)
 					SELECT TOP 1 0
 						,0
@@ -2619,7 +2627,9 @@ BEGIN TRY
 						,''
 						,0
 						,'Added'
+						,ls.strSecondaryStatus
 					FROM tblICLot l
+					JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
 					JOIN tblICItem i ON l.intItemId = i.intItemId
 					JOIN tblICItemUOM iu ON l.intWeightUOMId = iu.intItemUOMId
 					JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
@@ -2721,9 +2731,11 @@ BEGIN TRY
 			,L.strLotAlias
 			,CAST(0 AS BIT) ysnParentLot
 			,'Added' AS strRowState
+			,ls.strSecondaryStatus
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICLot L ON BS.intParentLotId = L.intLotId
 			AND L.dblQty > 0
+		INNER JOIN tblICLotStatus ls on L.intLotStatusId=ls.intLotStatusId
 		INNER JOIN tblICItem I ON I.intItemId = L.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId
@@ -2768,6 +2780,7 @@ BEGIN TRY
 			,''
 			,0
 			,'Added'
+			,''
 		FROM @tblPickedItem pl
 		JOIN tblICItem i ON pl.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON pl.intItemUOMId = iu.intItemUOMId
@@ -2818,8 +2831,10 @@ BEGIN TRY
 			,PL.strParentLotAlias AS strLotAlias
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
+			,ls.strSecondaryStatus
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
+		INNER JOIN tblICLotStatus ls on PL.intLotStatusId=ls.intLotStatusId
 		INNER JOIN tblICItem I ON I.intItemId = BS.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId
@@ -2872,8 +2887,10 @@ BEGIN TRY
 			,PL.strParentLotAlias AS strLotAlias
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
+			,ls.strSecondaryStatus
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
+		INNER JOIN tblICLotStatus ls on PL.intLotStatusId=ls.intLotStatusId
 		INNER JOIN tblICItem I ON I.intItemId = BS.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId

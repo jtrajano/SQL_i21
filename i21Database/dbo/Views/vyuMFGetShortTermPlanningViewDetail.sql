@@ -37,7 +37,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 				12
 				,13
 				)
-			THEN CD.dblQuantity- IsNULL(CD.dblScheduleQty, 0) 
+			THEN CD.dblQuantity
 		ELSE LC.dblQuantity
 		END dblQty
 	,CASE 
@@ -120,12 +120,12 @@ FROM tblMFShortTermPlanningViewDetail D
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = D.intLoadContainerId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = D.intLocationId
-LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = D.intContractDetailId
-LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+JOIN tblCTContractDetail CD ON CD.intContractDetailId = D.intContractDetailId
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = D.intItemId
 LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intOriginId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intNetWeightUOMId
+JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure LCIU ON LCIU.intUnitMeasureId = CD.intUnitMeasureId
 JOIN tblICCommodity Comm ON Comm.intCommodityId = I.intCommodityId

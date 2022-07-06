@@ -759,17 +759,17 @@ BEGIN TRY
 						SET @NotConfiguredErrMsg = @NotConfiguredErrMsg +  CASE WHEN @NotConfiguredErrMsg <> '' THEN ', Currency' ELSE ' Currency' END
 					END
 
-					IF @strInstrumentType = 'Futures' AND PATINDEX ('[A-z][a-z][a-z]-[0-9][0-9]',RTRIM(LTRIM(@strFutureMonth))) = 0
+					IF @strInstrumentType IN ('Futures', 'Options') AND PATINDEX ('[A-z][a-z][a-z]-[0-9][0-9]',RTRIM(LTRIM(@strFutureMonth))) = 0
 					BEGIN
 						SET @ErrMsg = @ErrMsg + ' Invalid Futures Month, format should be in mmm-yy (Jan-18).'
 					END
 
-					ELSE IF @strInstrumentType = 'Futures' AND 
+					ELSE IF @strInstrumentType IN ('Futures', 'Options') AND 
 						NOT EXISTS(SELECT 1
 							FROM tblRKFutOptTransactionImport ti
 							JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName 
 							join tblRKFuturesMonth m on fm.intFutureMarketId=m.intFutureMarketId and m.strFutureMonth=replace(ti.strFutureMonth,'-',' ')
-							WHERE intFutOptTransactionId =@mRowNumber)
+							WHERE intFutOptTransactionId = @mRowNumber)
 					BEGIN
 						--SET @NotConfiguredErrMsg = @NotConfiguredErrMsg +  CASE WHEN @NotConfiguredErrMsg <> '' THEN ', Futures Month' ELSE ' Futures Month' END
 						SET @ErrMsg = 'Futures Month does not exist for Future Market: ' + @strFutMarketName + '.'

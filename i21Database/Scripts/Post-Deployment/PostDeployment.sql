@@ -82,6 +82,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\40_DisconnectedReplicationTable.sql 
 :r .\SM\DefaultData\41_TaxReportType.sql 
 :r .\SM\DefaultData\42_InterCompanyMasterScreen.sql
+:r .\SM\DefaultData\43_UserRoleAdvancePermission.sql
+:r .\SM\DefaultData\43_IDPFieldMapping.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
@@ -96,7 +98,14 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 :r .\SM\2010_UpdateLicenseAgreement.sql
+:r .\SM\2110_CreateIDPGridLayout.sql
+:r .\SM\2110_UpdateAuditLogs.sql
+:r .\SM\2110_AddIDPToCustomerLicenseModule.sql
+:r .\SM\2120_InsertLanguages.sql
+:r .\SM\2120_UpdateAddonComponents.sql
+:r .\SM\2120_InsertOtherLabels.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2110_FixUserSecurityAdminData.sql
 
 
 -- Canned Report
@@ -204,6 +213,13 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
 :r .\DB\7_Create_BusinessInsights.sql
+:r .\DB\8_RiskDemoData.sql
+
+-- Fixed Assets
+:r .\FA\DefaultData\FixedAssetGroup.sql
+:r .\FA\01_UpdateMultiCurrencyFields.sql
+:r .\FA\02_UpdateMonthlyAssetDepreciation.sql
+:r .\FA\03_UpdateAssetDepreciationCurrency.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
@@ -228,9 +244,35 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
 :r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
+:r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
+:r .\GL\DefaultData\1v_PostHistoryGroupings.sql
+:r .\GL\DefaultData\1w_UpdateGLAccount.sql
+:r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
+:r .\GL\03_UpdateForeignDebitCredit.sql
+:r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
+
+-- Cash Management
+:r .\CM\1_BankTransactionTypes.sql
+:r .\CM\2_DataImportStatus.sql
+:r .\CM\3_PopulateSourceSystemData.sql
+:r .\CM\4_DataFix.sql
+:r .\CM\5_UndepositedFund.sql
+:r .\CM\6_InsertDefaultDataSync.sql
+:r .\CM\7_AlterCashProjectionView.sql
+:r .\CM\8_FlagCCTransaction.sql
+:r .\CM\10_BankTransfer.sql
+:r .\CM\11_TradingFinance.sql
+:r .\CM\12_CashFlowReportSummary.sql
+:r .\CM\13_InsertDefaultCashFlowReportBucketType.sql
+:r .\CM\14_BankAccountTypes.sql
+:r .\CM\15_CompanyPreferenceOptions.sql
+:r .\CM\16_UpdateNextEFTNo.sql
+:r .\CM\17_InsertResponsiblePartyOption.sql
+:r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
+
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
@@ -262,10 +304,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
-:r .\AR\DefaultData\38_UpdateDefaultData.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
---:r .\AR\DefaultData\97_RefreshARTempTable.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
 
 --Accounts Payable
@@ -317,6 +357,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePaymentDetailOffset.sql
 :r .\AP\UpdatePayableFreightTerm.sql
 :r .\AP\NonEmployeeCompensationTo1099NEC.sql
+:r .\AP\InsertClearingTransactionsToClearingTable.sql
+:r .\AP\PopulateVoucherPayToBankAccount.sql
 :r .\AP\PopulateVoucherAverageExchangeRate.sql
 
 -- Inventory 
@@ -343,6 +385,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\22_InventoryValuationPerformance.sql
 :r .\IC\24_PopulateTransactionUOM.sql 
 :r .\IC\25_TransactionTypeRename.sql 
+:r .\IC\26_LockAvgCost.sql 
+:r .\IC\27_ActivateItemLocations.sql 
+:r .\IC\28_PopulateICAPClearing.sql 
+:r .\IC\29_CleanupObjects.sql
+:r .\IC\30_InventoryValuationAccountIds.sql
+:r .\IC\31_WarrantStatus.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -359,7 +407,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
 :r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
 :r .\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql
-
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
@@ -386,7 +433,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\Create_fnCTFormatNumber.sql
 :R .\CT\2010_AddMissingHistory.sql
 :R .\CT\CTPreference.sql
+:R .\CT\DefaultData.sql
 :R .\CT\DropUnusedObjects.sql
+:R .\CT\UpdateContractCostsPayableShipVia.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -498,9 +547,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1810_Set_Default_Language.sql
 :r .\EM\1810_Fix_Check_Payee_Name.sql
 :r .\EM\1910_Set_Contact_Location.sql
+:r .\EM\2210_AddDefaultEFTBank.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
+:r .\QM\2_SetDefaultData.sql
 
 -- C-Store Module
 :r .\ST\01_FileFieldMapping_PricebookSale.sql
@@ -527,6 +578,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\22_FileFieldMapping_Passport_ITT.sql
 :r .\ST\23_FileFieldMapping_Passport_ILT.sql
 :r .\ST\24_FileFieldMapping_Passport_MMT.sql
+:r .\ST\39_FileFieldMapping_Passport_TPM.sql
+:r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
 :r .\ST\25_DataFix.sql
 :r .\ST\26_FileFieldMapping_Commander_Department.sql
 :r .\ST\27_FileFieldMapping_Commander_FPHose.sql
@@ -537,10 +590,17 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
+:r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+:r .\ST\41_Checkout_Radiant_POSJournal.sql
+:r .\ST\42_FileFieldMapping_Commander_TankMonitor.sql
+:r .\ST\43_FileFieldMapping_Commander_FuelTotals.sql
+:r .\ST\44_FileFieldMapping_Commander_AppInfo.sql
+:r .\ST\45_FileFieldMapping_Commander_PopCfg.sql
+:r .\ST\46_FileFieldMapping_Commander_Tank.sql
+:r .\ST\47_FileFieldMapping_Commander_Loyalty.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
-:r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
-:r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+:r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
 
 
 
@@ -549,6 +609,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\02_TerminalControl.sql
 :r .\TF\DefaultData\03_TaxCategory.sql
 :r .\TF\DefaultData\04_TransactionSource.sql
+:r .\TF\DefaultData\05_Locality.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
@@ -574,6 +635,13 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\CO_Colorado.sql
 :r .\TF\DefaultData\TN_Tennessee.sql
 :r .\TF\DefaultData\MO_Missouri.sql
+:r .\TF\DefaultData\MD_Maryland.sql
+:r .\TF\DefaultData\VA_Virginia.sql
+:r .\TF\DefaultData\DC_DistrictColumbia.sql
+:r .\TF\DefaultData\GA_Georgia.sql
+:r .\TF\DefaultData\FL_Florida.sql
+:r .\TF\DefaultData\AL_Alabama.sql
+:r .\TF\DefaultData\WV_WestVirginia.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
@@ -603,6 +671,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CCR\SiteDataFix.sql
 :r .\CCR\RemoveCCRObsoleteScreen.sql
 :r .\CCR\ImportFileDefault.sql
+:r .\CCR\CrossReferenceDefault.sql
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
@@ -612,6 +681,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TR\OverrideTaxGroupDefault.sql
 :r .\TR\ImportDtnFileSetup.sql
 :r .\TR\ImportDtnDefaultSetup.sql
+:r .\TR\FreightTariffTypeSetup.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
@@ -638,28 +708,43 @@ print 'BEGIN POST DEPLOYMENT'
 -- Vendor rebate
 :r .\VR\1_UpdateColumnTableProgramItem.sql
 
+-- AGRONOMY
+:r .\AG\1_AGUOMDefaultData.sql
+
+
 --MIGRATE AUDIT LOGS
 :r .\SM\1910_MigrateAuditLog.sql
+
+--MIGRATE AUDIT LOGS
+:r .\SM\2120_MigrateAttachment.sql
 
 
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
 --:r .\SM\1830_ReIndexTables.sql
-:r .\SM\1830_CreateReIndexMaintenancePlan.sql
+--:r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
 
-
--- Cash Management
-:r .\CM\1_BankTransactionTypes.sql
-:r .\CM\2_DataImportStatus.sql
-:r .\CM\3_PopulateSourceSystemData.sql
-:r .\CM\4_DataFix.sql
-:r .\CM\5_UndepositedFund.sql
-:r .\CM\7_AlterCashProjectionView.sql
-:r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
-
+-- Clean up i21 database objects
+:r .\SM\01_CleanupObjects.sql
+:r .\IC\29_CleanupObjects.sql
+:r .\RM\03_CleanupObjects.sql
+:r .\IP\2_CleanupObjects.sql
+:r .\AR\01_CleanupObjects.sql
+:r .\GR\3_CleanupObjects.sql
+:r .\CM\9_CleanupObjects.sql
+:r .\CT\2_CleanupObjects.sql
+:r .\MF\11_CleanupObjects.sql
+:r .\TR\01_CleanupObjects.sql
+:r .\LG\3_CleanupObjects.sql
+:r .\GL\01_CleanupObjects.sql
+:r .\AP\01_CleanupObjects.sql
+:r .\ET\01_CleanupObjects.sql
+:r .\PAT\6_CleanupObjects.sql
+:r .\TF\01_CleanupObjects.sql
+:r .\MF\13_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'

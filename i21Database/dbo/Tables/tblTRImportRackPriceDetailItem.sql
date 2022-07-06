@@ -12,3 +12,7 @@
     CONSTRAINT [PK_tblTRImportRackPriceDetailItem] PRIMARY KEY ([intImportRackPriceDetailItemId]), 
     CONSTRAINT [FK_tblTRImportRackPriceDetailItem_tblTRImportRackPriceDetail] FOREIGN KEY ([intImportRackPriceDetailId]) REFERENCES [tblTRImportRackPriceDetail]([intImportRackPriceDetailId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTRImportRackPriceDetailItem_intImportRackPriceDetailId] ON [dbo].[tblTRImportRackPriceDetailItem] ([intImportRackPriceDetailId])
+GO

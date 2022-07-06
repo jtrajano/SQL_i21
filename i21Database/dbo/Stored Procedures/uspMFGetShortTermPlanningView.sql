@@ -15,14 +15,8 @@ BEGIN
 		,@intNoOfDays INT
 		,@dtmEndDateAfterSixMonth DATETIME
 		,@intConditionId INT
-		,@dtmCurrentDate DATETIME
-		,@dtmAfter80Days DATETIME
 	DECLARE @tblMFItem TABLE (intItemId INT)
 	DECLARE @tblSMCompanyLocation TABLE (intCompanyLocationId INT)
-
-	SELECT @dtmCurrentDate = GETDATE()
-
-	SELECT @dtmAfter80Days = @dtmCurrentDate + 80
 
 	SELECT @dtmCurrentMonthStartDate = DATEADD(m, DATEDIFF(m, 0, GETDATE()), 0)
 
@@ -94,6 +88,7 @@ BEGIN
 		intItemId INT
 		,intLocationId INT
 		,dblQty NUMERIC(18, 0)
+		--,intItemUOMId INT
 		,intAttributeId INT
 		)
 
@@ -101,6 +96,7 @@ BEGIN
 		intItemId INT
 		,intLocationId INT
 		,dblQty NUMERIC(18, 0)
+		--,intItemUOMId INT
 		,intAttributeId INT
 		)
 
@@ -195,7 +191,6 @@ BEGIN
 	FROM #tblMFShortTermDemand Inv
 	LEFT JOIN #tblMFShortTermDemand F ON F.intItemId = Inv.intItemId
 		AND F.intLocationId = Inv.intLocationId
-		AND F.intAttributeId = 3
 	WHERE Inv.intAttributeId = 5
 
 	DELETE
@@ -229,20 +224,12 @@ BEGIN
 	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		AND S.intSampleStatusId = 3 -->Approved
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-	JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-		AND LC.intLoadContainerId = LDCL.intLoadContainerId
-	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+	WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 		AND SS.intContractStatusId IN (
 			1
 			,4
 			)
-		AND L.dtmETAPOD <= @dtmCurrentDate
-		AND NOT EXISTS (
-			SELECT *
-			FROM tblQMSample S1
-			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-				AND S1.intSampleStatusId = 4 -->Rejected)
-			)
+		AND L.dtmETAPOD <= GETDATE()
 
 	INSERT INTO #tblMFShortTermDemand (
 		intItemId
@@ -290,15 +277,13 @@ BEGIN
 	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		AND S.intSampleStatusId = 3 -->Approved
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-	LEFT JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-		AND LC.intLoadContainerId = LDCL.intLoadContainerId
-	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+	WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 		AND SS.intContractStatusId IN (
 			1
 			,4
 			)
 		AND S.intLoadDetailContainerLinkId IS NULL
-		AND LC.intLoadWarehouseContainerId IS NULL
+		AND LW.intLoadId IS NULL
 		AND L.ysnArrivedInPort = 1
 
 	INSERT INTO #tblMFShortTermDemand (
@@ -412,8 +397,8 @@ BEGIN
 			1
 			,4
 			)
-		AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
-			AND @dtmAfter80Days
+		AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentMonthStartDate
+			AND @dtmNextMonthEndDate
 		AND SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0) > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
@@ -437,7 +422,7 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
 	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+	WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 		AND SS.intContractStatusId IN (
 			1
 			,4
