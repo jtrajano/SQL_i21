@@ -1170,6 +1170,99 @@ BEGIN
       AND P.[strTransactionType] <> 'Claim'
       AND (P.[dblCreditCardFee] <> @ZeroDecimal OR P.[dblBaseCreditCardFee] <> @ZeroDecimal)
 
+    --CREDIT CONVENIENCE FEE
+    --CREDIT INTEREST
+    INSERT #ARPaymentGLEntries
+        ([dtmDate]
+        ,[strBatchId]
+        ,[intAccountId]
+        ,[dblDebit]
+        ,[dblCredit]
+        ,[dblDebitUnit]
+        ,[dblCreditUnit]
+        ,[strDescription]
+        ,[strCode]
+        ,[strReference]
+        ,[intCurrencyId]
+        ,[dblExchangeRate]
+        ,[dtmDateEntered]
+        ,[dtmTransactionDate]
+        ,[strJournalLineDescription]
+        ,[intJournalLineNo]
+        ,[ysnIsUnposted]
+        ,[intUserId]
+        ,[intEntityId]
+        ,[strTransactionId]
+        ,[intTransactionId]
+        ,[strTransactionType]
+        ,[strTransactionForm]
+        ,[strModuleName]
+        ,[intConcurrencyId]
+        ,[dblDebitForeign]
+        ,[dblDebitReport]
+        ,[dblCreditForeign]
+        ,[dblCreditReport]
+        ,[dblReportingRate]
+        ,[dblForeignRate]
+        ,[strRateType]
+        ,[strDocument]
+        ,[strComments]
+        ,[strSourceDocumentId]
+        ,[intSourceLocationId]
+        ,[intSourceUOMId]
+        ,[dblSourceUnitDebit]
+        ,[dblSourceUnitCredit]
+        ,[intCommodityId]
+        ,[intSourceEntityId]
+        ,[ysnRebuild])
+	SELECT
+		 [dtmDate]                      = P.[dtmDatePaid]
+		,[strBatchId]                   = P.[strBatchId]
+		,[intAccountId]                 = P.[intCreditCardFeeAccountId]
+		,[dblDebit]                     = CASE WHEN P.[dblBaseCreditCardFee] < @ZeroDecimal THEN P.[dblBaseCreditCardFee] ELSE @ZeroDecimal END
+		,[dblCredit]                    = CASE WHEN P.[dblBaseCreditCardFee] > @ZeroDecimal THEN P.[dblBaseCreditCardFee] ELSE @ZeroDecimal END
+		,[dblDebitUnit]                 = @ZeroDecimal
+		,[dblCreditUnit]                = @ZeroDecimal
+		,[strDescription]               = 'Convenience Fee for ' + P.strTransactionNumber
+		,[strCode]                      = @CODE
+		,[strReference]                 = P.[strCustomerNumber]
+		,[intCurrencyId]                = P.[intCurrencyId]
+		,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+		,[dtmDateEntered]               = P.[dtmPostDate]
+		,[dtmTransactionDate]           = P.[dtmDatePaid]
+		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
+		,[intJournalLineNo]             = P.[intTransactionDetailId]
+		,[ysnIsUnposted]                = 0
+		,[intUserId]                    = P.[intUserId]
+		,[intEntityId]                  = P.[intEntityId]
+		,[strTransactionId]             = P.[strTransactionId]
+		,[intTransactionId]             = P.[intTransactionId]
+		,[strTransactionType]           = @SCREEN_NAME
+		,[strTransactionForm]           = @SCREEN_NAME
+		,[strModuleName]                = @MODULE_NAME
+		,[intConcurrencyId]             = 1
+		,[dblDebitForeign]              = CASE WHEN P.[dblCreditCardFee] < @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
+		,[dblDebitReport]               = CASE WHEN P.[dblBaseCreditCardFee] < @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
+		,[dblCreditForeign]             = CASE WHEN P.[dblCreditCardFee] > @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
+		,[dblCreditReport]              = CASE WHEN P.[dblBaseCreditCardFee] > @ZeroDecimal THEN P.[dblCreditCardFee] ELSE @ZeroDecimal END
+		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
+		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
+		,[strRateType]                  = P.[strRateType]
+		,[strDocument]                  = NULL
+		,[strComments]                  = NULL
+		,[strSourceDocumentId]          = NULL
+		,[intSourceLocationId]          = NULL
+		,[intSourceUOMId]               = NULL
+		,[dblSourceUnitDebit]           = NULL
+		,[dblSourceUnitCredit]          = NULL
+		,[intCommodityId]               = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
+		,[ysnRebuild]                   = NULL
+	FROM #ARPostPaymentDetail P
+	WHERE P.[ysnPost] = 1
+      AND P.[strTransactionType] <> 'Claim'
+      AND (P.[dblCreditCardFee] <> @ZeroDecimal OR P.[dblBaseCreditCardFee] <> @ZeroDecimal)
+
     DECLARE @TempPaymentIds AS [dbo].[Id]
     DELETE FROM @TempPaymentIds
     INSERT INTO @TempPaymentIds

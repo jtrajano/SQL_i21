@@ -10,6 +10,7 @@
 	,[intWriteOffAccountId]				INT	NULL
 	,[intGainLossAccountId]				INT	NULL
 	,[intCFAccountId]					INT	NULL
+	,[intCreditCardFeeAccountId]		INT NULL
 	,[ysnForDelete]						BIT	NULL
 	,[ysnFromPosting]					BIT	NULL
 	,[ysnPost]							BIT	NULL
