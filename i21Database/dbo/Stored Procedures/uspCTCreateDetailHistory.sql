@@ -220,7 +220,7 @@ BEGIN TRY
 		, CD.intPricingTypeId
 		, CD.intFutureMarketId
 		, CD.intFutureMonthId
-		, intCurrencyId
+		, CD.intCurrencyId
 		, QU.intCommodityUnitMeasureId
 		, CD.intUnitMeasureId
 		, CD.intCurrencyExchangeRateId

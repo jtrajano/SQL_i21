@@ -49,7 +49,6 @@
 	[ysnAllowSingleLocationEntries]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowSingleLocationEntries] DEFAULT((0)),
 	[intDueToAccountId]						INT NULL, 
     [intDueFromAccountId]					INT NULL,
-	[strCustomerAgingBy]					NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Invoice Due Date',
 	[intFreightRevenueAccount]				INT NULL, 
     [intFreightExpenseAccount]				INT NULL,
 	[ysnOverrideCompanySegment]				BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideCompanySegment] DEFAULT((0)),
