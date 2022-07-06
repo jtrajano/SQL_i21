@@ -50,7 +50,7 @@ BEGIN TRY
 				, dblOriginalBasis = CAST(NULL AS NUMERIC(18, 6))
 				, dblTotalLots = CH.dblNoOfLots
 				, dblAdditionalCost = CAST(NULL AS NUMERIC(18, 6))
-				, intFinalPriceUOMId = CD.intPriceCommodityUOMId
+				, intFinalPriceUOMId = ISNULL(CD.intPriceCommodityUOMId,intPriceItemUOMId) --WILLGET THE PRICE SEQUENCE UOM IF THE UOM IS NOT EXISTING IN THE COMMODITY.
 				, CH.dblQuantity
 				, intItemUOMId = CAST(NULL AS INT)
 				, strPriceUOM = CD.strPriceUOM
