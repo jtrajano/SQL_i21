@@ -105,4 +105,4 @@ AS
 				) defaultCurrency
 		WHERE	CY.intCurrencyID = COALESCE(vendorCurrency.intCurrencyID, customerCurrency.intCurrencyID, defaultCurrency.intCurrencyID)
 	) CY 	
-	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId
+	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId		
