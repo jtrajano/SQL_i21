@@ -325,7 +325,7 @@ END
 			DECLARE @GrandTotalCol	NVARCHAR (MAX)
 
 			SELECT @GrandTotalCol = COALESCE (@GrandTotalCol + 'ISNULL ([' + CAST (strContractEndMonth AS VARCHAR) +'],0) + ', 'ISNULL([' + CAST(strContractEndMonth AS VARCHAR)+ '],0) + ')
-			FROM	tblRKDPRContractHedgeByMonth
+			FROM @List
 			GROUP BY strContractEndMonth
 			ORDER BY strContractEndMonth
 			SET @GrandTotalCol = LEFT (@GrandTotalCol, LEN (@GrandTotalCol)-1)
@@ -375,6 +375,9 @@ END
 	--				FOR XML PATH(''), TYPE
 	--				).value('.', 'NVARCHAR(MAX)') 
 	--			,1,1,'')
+
+		set @strLocationName =  replace( @strLocationName,'''','''''')
+		set @strEntityName =  replace( @strEntityName,'''','''''')
 
 		exec (N' SELECT *, '''+ @xmlParam +''' AS xmlParam 
 		, '''+ @strCommodityCode +''' AS strCommodityCode
