@@ -223,7 +223,7 @@ SELECT
 	strItemId  COLLATE Latin1_General_CI_AS ,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'GL'  COLLATE Latin1_General_CI_AS, 
 	strType = 'Receivables'  COLLATE Latin1_General_CI_AS
-	,intAccountId = NULL
+	,intAccountId = intAccountId
 	,intCompanyLocationId = NULL
 	,intLOBSegmentCodeId = NULL
 FROM vyuGLMulticurrencyRevalueGJ
