@@ -40,4 +40,4 @@ AS
         and load.ysnInProgress = 0                              
         and ISNULL(load.dblDeliveredQuantity, 0.000000) <= 0                              
         and strTransUsedBy = 'Transport Load'              
-  and load.intLoadId not in(Select intLoadId from tblMBILLoadHeader)   
+  --and load.intLoadId not in(Select intLoadId from tblMBILLoadHeader)   
