@@ -719,8 +719,15 @@ IF @ysnPost = 1
     
     IF @ysnPost = 1   
     BEGIN    
-      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId =2 OR @intBankTransferTypeId = 4 OR @intBankTransferTypeId =5
+      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId IN (2,4,5)
       BEGIN  
+            DELETE A FROM tblCMBankTransaction A
+            WHERE 
+            A.strTransactionId IN( 
+              SELECT strTransactionId +@BANK_TRANSFER_WD_PREFIX strTransactionId FROM #tmpGLDetail UNION 
+              SELECT strTransactionId +@BANK_TRANSFER_DEP_PREFIX strTransactionId FROM #tmpGLDetail
+            )
+
          
             INSERT INTO tblCMBankTransaction (    
             strTransactionId    
