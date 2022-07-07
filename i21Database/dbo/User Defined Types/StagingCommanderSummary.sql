@@ -14,5 +14,7 @@
 	[dblCashierVoidLineAmountOfVoids] [numeric](18, 6) NULL,
 	[dblCashierSummaryInfoNumberOfOverrides] [numeric](18, 6) NULL,
 	[dblCashierSummaryInfoNumberOfCustomerCount] [numeric](18, 6) NULL,
-	[dblTotalDeposit] [numeric](18, 6) NULL
+	[dblTotalDeposit] [numeric](18, 6) NULL,
+	[dblSummaryInfoFuelSales] [numeric](18, 6) NULL,
+	[dblSummaryInfoPopPredispensedAmount] [numeric](18, 6) NULL
 )
