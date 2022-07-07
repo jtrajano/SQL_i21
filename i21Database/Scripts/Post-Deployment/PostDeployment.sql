@@ -82,6 +82,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\40_DisconnectedReplicationTable.sql 
 :r .\SM\DefaultData\41_TaxReportType.sql 
 :r .\SM\DefaultData\42_InterCompanyMasterScreen.sql
+:r .\SM\DefaultData\43_UserRoleAdvancePermission.sql
+:r .\SM\DefaultData\43_IDPFieldMapping.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
@@ -96,7 +98,14 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 :r .\SM\2010_UpdateLicenseAgreement.sql
+:r .\SM\2110_CreateIDPGridLayout.sql
+:r .\SM\2110_UpdateAuditLogs.sql
+:r .\SM\2110_AddIDPToCustomerLicenseModule.sql
+:r .\SM\2120_InsertLanguages.sql
+:r .\SM\2120_UpdateAddonComponents.sql
+:r .\SM\2120_InsertOtherLabels.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2110_FixUserSecurityAdminData.sql
 
 
 -- Canned Report
@@ -641,11 +650,14 @@ print 'BEGIN POST DEPLOYMENT'
 --MIGRATE AUDIT LOGS
 :r .\SM\1910_MigrateAuditLog.sql
 
+--MIGRATE AUDIT LOGS
+:r .\SM\2120_MigrateAttachment.sql
+
 
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
 --:r .\SM\1830_ReIndexTables.sql
-:r .\SM\1830_CreateReIndexMaintenancePlan.sql
+--:r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
 -- MB - Meter Billing
