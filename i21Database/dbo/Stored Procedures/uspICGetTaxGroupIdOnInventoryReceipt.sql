@@ -22,6 +22,7 @@ BEGIN
 					,NULL				--,@ItemId
 					,r.intShipFromId	--,@VendorLocationId
 					,r.intFreightTermId --,@FreightTermId
+					,default			--,@FOB
 				)			
 			) taxHierarchy
 			INNER JOIN tblSMTaxGroup taxGroup
