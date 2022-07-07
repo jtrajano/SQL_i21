@@ -196,7 +196,7 @@ END
         ,[dtmDate]              = @dtmDate      
         ,[strBatchId]           = @strBatchId      
         ,[intAccountId]         = GLAccnt.intAccountId      
-        ,[dblCredit]             = dblAmountSettlementFrom  
+        ,[dblCredit]            = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN dblAmountForeignFrom ELSE dblAmountSettlementFrom END   
         ,[dblDebit]            = 0       
         ,[dblDebitForeign]      = 0
         ,[dblCreditForeign]     = dblAmountForeignFrom      
@@ -259,7 +259,7 @@ END
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTForwardToFXGLAccountId
         ,[dblCredit]              = 0
-        ,[dblDebit]               = dblAmountFrom
+        ,[dblDebit]               =CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN dblAmountForeignFrom ELSE dblAmountFrom END
         ,[dblDebitForeign]       = dblAmountForeignFrom
         ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
@@ -288,7 +288,7 @@ END
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTForwardFromFXGLAccountId
-        ,[dblCredit]             = CASE WHERE dblRateAmountTo = 1 THEN  dblAmountForeignTo ELSE dblAmountSettlementTo END
+        ,[dblCredit]             = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo THEN  dblAmountForeignTo ELSE dblAmountSettlementTo END
         ,[dblDebit]				 = 0
         ,[dblDebitForeign]       = 0
         ,[dblCreditForeign]      = dblAmountForeignTo
