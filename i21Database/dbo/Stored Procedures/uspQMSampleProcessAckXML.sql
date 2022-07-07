@@ -20,13 +20,13 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 		,@intScreenId int
+		,@strMessage NVARCHAR(MAX) = 'Success'
 	DECLARE @tblQMSampleAcknowledgementStage TABLE (intSampleAcknowledgementStageId INT)
 
 	INSERT INTO @tblQMSampleAcknowledgementStage (intSampleAcknowledgementStageId)
 	SELECT intSampleAcknowledgementStageId
 	FROM tblQMSampleAcknowledgementStage
-	WHERE strMessage = 'Success'
-		AND ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
 
 	SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
@@ -70,10 +70,20 @@ BEGIN TRY
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
 			,@intCompanyRefId = intCompanyRefId
+			,@strMessage = strMessage
 		FROM tblQMSampleAcknowledgementStage WITH (NOLOCK)
 		WHERE intSampleAcknowledgementStageId = @intSampleAcknowledgementStageId
 
 		BEGIN
+			IF ISNULL(@strMessage, '') <> 'Success'
+			BEGIN
+				SELECT @intSampleRefId = intSampleId
+				FROM tblQMSampleAcknowledgementStage WITH (NOLOCK)
+				WHERE intSampleAcknowledgementStageId = @intSampleAcknowledgementStageId
+
+				GOTO ext
+			END
+
 			IF ISNULL(@strRowState, '') = 'Delete'
 			BEGIN
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -162,7 +172,7 @@ BEGIN TRY
 
 			UPDATE tblQMSamplePreStage
 			SET strFeedStatus = 'Ack Rcvd'
-				,strMessage = 'Success'
+				,strMessage = @strMessage
 			WHERE intSampleId = @intSampleRefId
 				AND strFeedStatus = 'Awt Ack'
 
@@ -173,6 +183,7 @@ BEGIN TRY
 		END
 
 		IF @strRowState <> 'Delete'
+			AND ISNULL(@strMessage, '') = 'Success'
 		BEGIN
 			IF @intTransactionId IS NULL
 			BEGIN
