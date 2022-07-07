@@ -46,7 +46,9 @@ select
 	intEntityEFTHeaderId,
 	strDistributionType,
 	dblAmount,
-	intOrder
+	intOrder,
+	ysnDomestic,
+	intConcurrencyId
 
 
 FROM tblEMEntityEFTInformation EFT

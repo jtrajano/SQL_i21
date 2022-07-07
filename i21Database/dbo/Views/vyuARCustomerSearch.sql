@@ -70,6 +70,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , ysnExemptCreditCardFee	= CUSTOMER.ysnExemptCreditCardFee
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
+	 , strSaleUnits				= SHIPTOLOCATION.strSaleUnits
 	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
 	 , intCreditStopDays		= CUSTOMER.intCreditStopDays
 	 , strCreditCode			= CUSTOMER.strCreditCode
@@ -218,6 +219,7 @@ LEFT JOIN (
 		 , strCountry
 		 , intWarehouseId
 		 , strWarehouseName
+		 , strSaleUnits
 	FROM dbo.tblEMEntityLocation EL WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCompanyLocationId

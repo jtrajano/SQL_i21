@@ -2745,7 +2745,8 @@ BEGIN TRY
 																								@LocationId,
 																								a.intItemId,
 																								coalesce(@intShipFrom, EM.intEntityLocationId),
-																								EM.intFreightTermId
+																								EM.intFreightTermId,
+																								default
 																							)
 														ELSE RI.intTaxGroupId
 													END
@@ -2921,7 +2922,8 @@ BEGIN TRY
 															@LocationId,
 															ACAP.intChargeAndPremiumItemId,
 															coalesce(@intShipFrom, EM.intEntityLocationId),
-															EM.intFreightTermId
+															EM.intFreightTermId,
+															default
 														)
 					,[dtmDate]						= @dtmClientPostDate
 					,[dtmVoucherDate]				= @dtmClientPostDate
@@ -3323,7 +3325,8 @@ BEGIN TRY
 							APB.intShipToId,
 							APD.intItemId,
 							APB.intShipFromId,
-							EM.intFreightTermId
+							EM.intFreightTermId,
+							default
 						)
 					FROM tblAPBillDetail APD 
 					INNER JOIN tblAPBill APB

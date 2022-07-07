@@ -15,6 +15,8 @@ BEGIN
 	[strCompanyId],
 	[intNumberOfAdmin],
 	[intNumberOfUser],
+	[intMaxStores],
+	[intMaxConsignmentStores],
 	[strDescription],
 	[strURL],
 	[ysnExternalAccess],
@@ -31,6 +33,8 @@ BEGIN
 	[strCompanyId],
 	[intNumberOfAdmin],
 	[intNumberOfUser],
+	[intMaxStores],
+	[intMaxConsignmentStores],
 	CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strDescription] 
 		   ELSE 'DUP: ' + [strDescription] + ' (' + CAST(@intCount AS NVARCHAR) + ')' END,
