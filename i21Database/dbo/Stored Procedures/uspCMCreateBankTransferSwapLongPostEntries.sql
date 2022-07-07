@@ -29,11 +29,12 @@ BEGIN
 END   
 
 
-DECLARE @intGLAccountIdFrom INT,@intGLAccountIdTo INT  
+DECLARE @intGLAccountIdFrom INT,@intGLAccountIdTo INT
 SELECT   
 @intGLAccountIdFrom=intGLAccountIdFrom,@intGLAccountIdTo = intGLAccountIdTo,  
 @dtmDate = CASE WHEN @ysnPostedInTransit = 0 THEN dtmDate ELSE dtmInTransit END  
 FROM tblCMBankTransfer WHERE @strTransactionId = strTransactionId  
+
   
   
 IF @ysnPostedInTransit = 0  
@@ -287,7 +288,7 @@ END
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTForwardFromFXGLAccountId
-        ,[dblCredit]             = dblAmountSettlementTo
+        ,[dblCredit]             = CASE WHERE dblRateAmountTo = 1 THEN  dblAmountForeignTo ELSE dblAmountSettlementTo END
         ,[dblDebit]				 = 0
         ,[dblDebitForeign]       = 0
         ,[dblCreditForeign]      = dblAmountForeignTo
