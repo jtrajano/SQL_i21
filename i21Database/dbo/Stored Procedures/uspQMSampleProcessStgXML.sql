@@ -2754,6 +2754,46 @@ BEGIN TRY
 				AND @intTransactionCount = 0
 				ROLLBACK TRANSACTION
 
+			DECLARE @strSQL1 NVARCHAR(MAX)
+				,@strServerName1 NVARCHAR(50)
+				,@strDatabaseName1 NVARCHAR(50)
+
+			SELECT @strServerName1 = strServerName
+				,@strDatabaseName1 = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL1 = N'INSERT INTO ' + @strServerName1 + '.' + @strDatabaseName1 + '.dbo.tblQMSampleAcknowledgementStage (
+				intSampleId
+				,dtmFeedDate
+				,strMessage
+				,strTransactionType
+				,intMultiCompanyId
+				,strRowState
+				,intCompanyId
+				)
+			SELECT @intSampleId
+				,GETDATE()
+				,@ErrMsg
+				,@strTransactionType
+				,@intCompanyId
+				,@strRowState
+				,@intCompanyId'
+
+			EXEC sp_executesql @strSQL1
+				,N'@intSampleId INT
+					,@ErrMsg NVARCHAR(MAX)
+					,@strTransactionType NVARCHAR(MAX)
+					,@intCompanyId INT
+					,@strRowState NVARCHAR(MAX)'
+				,@intSampleId
+				,@ErrMsg
+				,@strTransactionType
+				,@intCompanyId
+				,@strRowState
+
+			SELECT @intSampleAcknowledgementStageId = SCOPE_IDENTITY()
+
 			UPDATE tblQMSampleStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
