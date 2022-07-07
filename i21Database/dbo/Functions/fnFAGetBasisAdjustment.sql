@@ -39,7 +39,7 @@ BEGIN
 		WHERE intAssetId = @intAssetId AND intBookId = @intBookId AND strTransaction = 'Depreciation'
 		ORDER BY intAssetDepreciationId DESC
 	) Depreciation
-	WHERE BA.intAssetId = @intAssetId AND BA.intBookId = @intBookId AND BA.dtmDate BETWEEN DATEADD(DAY,1, Depreciation.dtmDepreciationToDate) AND dbo.fnFAGetNextDepreciationDate(@intAssetId, @intBookId)
+	WHERE BA.intAssetId = @intAssetId AND BA.intBookId = @intBookId AND BA.dtmDate BETWEEN DATEADD(DAY,1, Depreciation.dtmDepreciationToDate) AND dbo.fnFAGetNextDepreciationDate(@intAssetId, @intBookId, NULL)
 	GROUP BY
 		 BA.intAssetId
 		,BA.intBookId
