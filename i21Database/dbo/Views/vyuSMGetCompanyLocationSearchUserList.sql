@@ -193,6 +193,7 @@ a.intCompanyLocationId
 ,a.ysnProductCaseCodeScanningRequired
 ,a.ysnYieldAdjustmentAllowed
 ,a.ysnPrintInvTagOnReceivingComplete
+,a.intNoOfMonthsFromDemandToShipment
 ,a.intConcurrencyId
 ,a.strCode
 ,a.strCashAccount
