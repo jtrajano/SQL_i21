@@ -4986,13 +4986,44 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
+
+							declare @ysnWithPrice bit = 0;
 							UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
 
 							IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 							BEGIN
+
+								IF (@strTransactionType = 'Contract Balance' AND @strTransactionReference LIKE 'Inventory%')
+								begin
+									declare
+										@applied numeric(18,6)
+										,@priced numeric(18,6);
+
+									select @applied = sum(lpa.dblQty)
+									from @cbLogSpecific le
+									join @cbLogPrev lp on lp.intTransactionReferenceDetailId = le.intTransactionReferenceDetailId
+									join @cbLogPrev lpa on lpa.intId <= lp.intId
+									where
+									lp.strTransactionType = 'Contract Balance'
+									and lp.strTransactionReference like 'Inventory%'
+									and lpa.strTransactionType = 'Contract Balance'
+									and lpa.strTransactionReference like 'Inventory%'
+
+									select @priced = sum(fd.dblQuantity)
+									from @cbLogSpecific ls
+									join tblCTPriceFixation pf on pf.intContractDetailId = ls.intContractDetailId
+									join tblCTPriceFixationDetail fd on fd.intPriceFixationId = pf.intPriceFixationId
+
+									if (@priced >= abs(@applied))
+									begin
+										select @ysnWithPrice = 1;
+									end
+
+								end
+
 								UPDATE @cbLogSpecific
 								SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
-															WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
+															WHEN @intHeaderPricingTypeId IN (1, 3) or @ysnWithPrice = 1 THEN 1
 															ELSE 2 END
 									, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
 														 ELSE 
