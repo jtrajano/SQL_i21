@@ -85,9 +85,18 @@
     [strADUserName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strADPassword] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnEnableUserActivityLog] BIT NOT NULL DEFAULT 0,
+	[strPowerBIAdminUsername]						NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIAdminPassword]						NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strIDPDefaultModel]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strIDPDefaultModelId]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strIDPSasURI]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strIDPEndpointURI]								NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strIDPApiKey]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[ysnExportDataProcessEnabled]					BIT NOT NULL DEFAULT 0,
+	[strExportFilePath]								NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     [ysnLogPerformanceRuntime] BIT NOT NULL DEFAULT 0,
     [dtmPerformanceLoggingEffectivity] DATETIME NULL,
-    [intConcurrencyId] INT NOT NULL DEFAULT 1,
-	[strApiHostUrl] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+    [intConcurrencyId]								INT NOT NULL DEFAULT 1
 )
