@@ -149,4 +149,24 @@ IF EXISTS(SELECT intItemUOMId FROM tblSTLotteryBook WHERE intItemUOMId IS NULL)
 -- [END]: Update tblSTLotteryBook - Add default intItemUOMId with stock unit of Item UOM
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTRegister for password
+----------------------------------------------------------------------------------------------------------------------------------
+
+-- Note: <= 100 in length are the not encrypted passwords
+--       344 in length are the encrypted passwords
+UPDATE tblSTRegister
+SET strSAPPHIREPassword = dbo.fnAESEncryptASym(strSAPPHIREPassword)
+WHERE LEN(strSAPPHIREPassword) <= 100 
+
+UPDATE tblSTRegister
+SET strSAPPHIREBasePassword = dbo.fnAESEncryptASym(strSAPPHIREBasePassword)
+WHERE LEN(strSAPPHIREBasePassword) <= 100 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTRegister for password
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 GO
