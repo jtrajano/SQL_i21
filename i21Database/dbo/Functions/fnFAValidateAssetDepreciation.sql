@@ -7,7 +7,8 @@ CREATE FUNCTION [dbo].[fnFAValidateAssetDepreciation]
 )
 RETURNS @tbl TABLE (
 	intAssetId INT,
-	strError NVARCHAR(400) NULL
+	strError NVARCHAR(400) NULL,
+    intLedgerId INT NULL
 )
 AS
 BEGIN
@@ -17,17 +18,17 @@ BEGIN
     IF (@ysnPost = 1 )
     BEGIN
         INSERT INTO @tbl
-        SELECT  intAssetId, 'Asset was already disposed.' FROM tblFAFixedAsset A 
+        SELECT  intAssetId, 'Asset was already disposed.', NULL FROM tblFAFixedAsset A 
         JOIN @Id I on I.intId =  A.intAssetId
         WHERE  ISNULL(ysnDisposed, 0) = 1
 
         INSERT INTO @tbl
-        SELECT  intAssetId, 'Asset cost should be greater than zero.' FROM tblFAFixedAsset A 
+        SELECT  intAssetId, 'Asset cost should be greater than zero.', NULL FROM tblFAFixedAsset A 
         JOIN @Id I on I.intId =  A.intAssetId
         WHERE  ISNULL(dblCost, 0) = 0
 
         INSERT INTO @tbl
-        SELECT  intAssetId, 'Salvage value should be less than asset cost.' FROM tblFAFixedAsset A 
+        SELECT  intAssetId, 'Salvage value should be less than asset cost.', NULL FROM tblFAFixedAsset A 
         JOIN @Id I on I.intId =  A.intAssetId
         WHERE  ISNULL(dblSalvageValue, 0) > 0 AND  ISNULL(dblSalvageValue, 0) >= ISNULL(dblCost, 0) 
 
@@ -35,12 +36,12 @@ BEGIN
             RETURN
 
         INSERT INTO @tbl
-        SELECT A.intAssetId, 'Asset already fully depreciated.' FROM tblFAFixedAsset A 
+        SELECT A.intAssetId, 'Asset already fully depreciated.', BD.intLedgerId FROM tblFAFixedAsset A 
         JOIN @Id I on I.intId =  A.intAssetId
         JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId AND BD.intBookId = @BookId
         OUTER APPLY(
             SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate, dtmDepreciationToDate 
-            FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId
+            FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId AND intLegacyId = BD.intLedgerId
             ORDER BY dtmDepreciationToDate DESC
         )D
 		OUTER APPLY(
@@ -60,17 +61,18 @@ BEGIN
             RETURN
 
         INSERT INTO @tbl
-        SELECT A.intId, 'Missing Depreciation Method' FROM @Id A 
+        SELECT A.intId, 'Missing Depreciation Method', BD.intLedgerId FROM @Id A 
         LEFT JOIN tblFABookDepreciation BD on BD.intAssetId = A.intId AND BD.intBookId= @BookId
         WHERE BD.intAssetId IS NULL
 
         INSERT INTO @tbl
         SELECT 
-        intId,  'Next Depreciation Date is on a closed period in this asset.'
+        intId,  'Next Depreciation Date is on a closed period in this asset.', Depreciation.intLedgerId
         FROM @Id I 
+        JOIN tblFABookDepreciation BD ON BD.intAssetId = I.intId AND BD.intBookId = @BookId
             CROSS APPLY(
-                SELECT TOP 1 dbo.fnFAGetNextDepreciationDate(intAssetId, intBookId) nextDate
-                FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId AND ISNULL(intBookId,1) = @BookId
+                SELECT TOP 1 dbo.fnFAGetNextDepreciationDate(intAssetId, intBookId, intLedgerId) nextDate, intLedgerId
+                FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId AND ISNULL(intBookId,1) = @BookId AND intLedgerId = BD.intLedgerId
                 AND strTransaction = 'Depreciation'
                 AND dtmDepreciationToDate IS NOT NULL
                 ORDER BY intAssetDepreciationId DESC

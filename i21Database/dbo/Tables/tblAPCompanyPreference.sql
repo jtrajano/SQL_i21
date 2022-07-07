@@ -32,6 +32,7 @@
     [intFreightTermId]              INT NULL,
     [ysnOverrideCompanySegment]		    BIT NOT NULL DEFAULT(0),
 	[ysnOverrideLocationSegment]	    BIT NOT NULL DEFAULT(0),
-	[ysnOverrideLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0),
+	[ysnOverrideLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0), 
+    intBudgetCode int, 
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
