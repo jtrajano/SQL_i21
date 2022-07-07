@@ -6,6 +6,7 @@
 	[intUnitMeasureId] INT NULL, 
     [dblRate] NUMERIC(18, 6) NOT NULL, 
     [dtmEffectiveDate] DATETIME NOT NULL, 
+	[intGasolineItemCategoryId]		INT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMTaxCodeRate_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [AK_tblSMTaxGroupCode_intTaxCodeId_dtmEffectiveDate_strCalculationMethod_intUnitMeasureId] CHECK (NOT(dbo.fnSMUniqueEffectiveMethodUOM([intTaxCodeId],[dtmEffectiveDate],[strCalculationMethod],[intUnitMeasureId]) > 1))

@@ -32,6 +32,13 @@
 	[intSalesOrderDetailId] INT NULL,
 	[intInventoryTransferId] INT NULL, 
 	[intInventoryTransferDetailId] INT NULL,
+	[intTMSiteId] INT NULL,
+	[intTMDispatchId] INT NULL,
+	[intEntityShipViaId] INT NULL,
+	[intEntityShipViaTruckId] INT NULL, 
+	[intEntityShipViaTrailerId] INT NULL,
+	[intEntityShipViaCompartmentId] INT NULL, 
+	[intDriverEntityId] INT NULL, 
 	[intConcurrencyId] INT NULL DEFAULT((1)),
 
     CONSTRAINT [PK_tblLGDispatchOrderDetail] PRIMARY KEY ([intDispatchOrderDetailId]),

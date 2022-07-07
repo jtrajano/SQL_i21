@@ -139,6 +139,10 @@
     [ysnConsMeterReadingsForDollars] BIT NOT NULL DEFAULT 1,
     [ysnConsAddOutsideFuelDiscounts] BIT NOT NULL DEFAULT 1,
     [dblConsCommissionPerGallonOfDealer] DECIMAL(18,6) NOT NULL DEFAULT 0,
+    [ysnConsBankDepositDraft] BIT NOT NULL DEFAULT 1,
+    [intConsBankDepositDraftId] INT NULL,
+    [intConsARAccountId] INT NULL,
+    [intConsFuelOverShortItemId] INT NULL,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),

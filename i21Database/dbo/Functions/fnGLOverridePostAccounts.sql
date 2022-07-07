@@ -1,6 +1,10 @@
   
 CREATE FUNCTION fnGLOverridePostAccounts(  
-    @PostGLEntries RecapTableType READONLY  
+    @PostGLEntries RecapTableType READONLY,
+    @ysnOverrideLocation BIT =1,
+    @ysnOverrideLOB BIT = 1,
+    @ysnOverrideCompany BIT = 1
+
  )  
 RETURNS   
  @tbl  TABLE(  
@@ -57,7 +61,8 @@ RETURNS
     intCompanySegmentOverrideId INT,  
     strNewAccountIdOverride nvarchar(40) Collate Latin1_General_CI_AS,  
     intNewAccountIdOverride INT,  
-    strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS  
+    strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS,
+	[intLedgerId] INT NULL  
 )  
 AS  
 BEGIN  
@@ -113,7 +118,8 @@ INSERT INTO @tbl (
  intCompanySegmentOverrideId,  
  strNewAccountIdOverride,  
  intNewAccountIdOverride,  
- strOverrideAccountError  
+ strOverrideAccountError,
+ intLedgerId
 )  
 SELECT   
     dtmDate,  
@@ -165,14 +171,15 @@ SELECT
  intCompanySegmentOverrideId,  
  strNewAccountIdOverride,  
  intNewAccountIdOverride,  
- strOverrideAccountError  
+ strOverrideAccountError,
+ intLedgerId
 from @PostGLEntries  
   
   
 UPDATE A   
 SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
     A.intAccountIdOverride,   
-    A.intAccountId,1,1,1)  
+    A.intAccountId,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)  
 FROM @tbl A   
 WHERE ISNULL(intAccountIdOverride,0) <> 0  
   
@@ -196,7 +203,7 @@ dbo.fnGLGetOverrideAccountBySegment(
      A.intCompanySegmentOverrideId)  
 FROM @tbl A   
 WHERE (  
- ISNULL(intLocationSegmentOverrideId,0)<> 0  
+ISNULL(intLocationSegmentOverrideId,0)<> 0  
 OR ISNULL(intLOBSegmentOverrideId,0) <> 0  
 OR ISNULL(intCompanySegmentOverrideId,0) <> 0)  
 AND ISNULL(intAccountIdOverride,0) = 0  

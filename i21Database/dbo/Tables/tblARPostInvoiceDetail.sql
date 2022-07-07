@@ -94,6 +94,7 @@ CREATE TABLE tblARPostInvoiceDetail (
     ,[dblShipmentNetWt]                     NUMERIC(38,20)  NULL DEFAULT 0	
     ,[dblUnitQty]                           NUMERIC(38,20)  NULL DEFAULT 0
     ,[dblUnitOnHand]                        NUMERIC(38,20)  NULL DEFAULT 0
+    ,[dblQtyUnitOrGross]                    NUMERIC(38,20)  NULL DEFAULT 0
     ,[intAllowNegativeInventory]            INT             NULL
     ,[ysnStockTracking]                     BIT             NULL DEFAULT 0
     ,[intItemLocationId]                    INT             NULL
@@ -140,6 +141,7 @@ CREATE TABLE tblARPostInvoiceDetail (
     ,[intInventoryShipmentChargeId]         INT             NULL
     ,[intSalesOrderDetailId]                INT             NULL
     ,[intLoadDetailId]                      INT             NULL
+    ,[intLoadDistributionDetailId]          INT             NULL
     ,[intShipmentId]                        INT             NULL
     ,[intTicketId]                          INT             NULL
     ,[intDiscountAccountId]                 INT             NULL	
