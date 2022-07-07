@@ -32,12 +32,14 @@ SELECT
     [dtmEndDate] dtmFiscalPeriodEnd, 
     [intCurrencyExchangeRateId],
     intLocationSegmentId,
-    SG.strCode strLocationSegment
+    SG.strCode strLocationSegment,
+    GJ.[intLedgerId],
+    L.[strLedgerName]
     FROM   [dbo].[tblGLJournal] AS GJ
     LEFT JOIN [dbo].[tblSMCurrency] AS SM ON GJ.[intCurrencyId] = SM.[intCurrencyID]
     LEFT JOIN [dbo].[tblGLFiscalYearPeriod] AS FP ON GJ.[intFiscalPeriodId] = FP.[intGLFiscalYearPeriodId]
     LEFT JOIN tblGLAccountSegment SG ON SG.intAccountSegmentId = GJ.intLocationSegmentId
-    
+    LEFT JOIN [dbo].[tblGLLedger] L ON L.intLedgerId = GJ.intLedgerId    
     
 
 

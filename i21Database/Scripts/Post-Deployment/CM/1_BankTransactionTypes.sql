@@ -42,6 +42,8 @@ GO
 			SELECT id = 25,		name = 'Broker Settlement'		,debitCredit ='DC'   UNION ALL 
 			SELECT id = 26,		name = 'Broker Commission'		,debitCredit ='D'   UNION ALL 
 			SELECT id =	27,		name = 'Bank Fees'				,debitCredit ='D'   UNION ALL
+			SELECT id =	28,		name = 'Treasury Stock Sale'	,debitCredit ='C'   UNION ALL
+			SELECT id =	29,		name = 'Treasury Stock Purchase',debitCredit ='D'   UNION ALL
 			SELECT id = 103,	name = 'Void Misc Check'		,debitCredit ='C'	UNION ALL 
 			SELECT id = 116,	name = 'Void AP Payment'		,debitCredit ='C'	UNION ALL 
 			SELECT id = 121,	name = 'Void Paycheck'			,debitCredit ='C'	UNION ALL 
