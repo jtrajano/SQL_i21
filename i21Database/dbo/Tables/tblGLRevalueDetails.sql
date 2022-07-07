@@ -51,7 +51,7 @@ GO
 ALTER TABLE [dbo].[tblGLRevalueDetails] ADD  CONSTRAINT [DF_tblGLRevalueDetails_dblUnrealizedLoss]  DEFAULT ((0)) FOR [dblUnrealizedLoss]
 GO
 
-ALTER TABLE [dbo].[tblGLRevalueDetails] ADD  CONSTRAINT [FK_tblGLRevalueDetails_tblGLRevalue] FOREIGN KEY([intConsolidationId])
+ALTER TABLE [dbo].[tblGLRevalueDetails]  WITH CHECK ADD  CONSTRAINT [FK_tblGLRevalueDetails_tblGLRevalue] FOREIGN KEY([intConsolidationId])
 REFERENCES [dbo].[tblGLRevalue] ([intConsolidationId])
 ON DELETE CASCADE
 GO
