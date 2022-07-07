@@ -143,7 +143,10 @@ INSERT INTO #ARPostPaymentHeader
     ,[dblBaseTransactionAmountDue]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
-    ,[strRateType])
+    ,[strRateType]
+    ,[ysnUserDefinedPaymentMethod]
+    ,[intPaymentMethodAccountId]
+)
 SELECT 
      [intTransactionId]                 = ARP.[intPaymentId]
     ,[intTransactionDetailId]           = NULL
@@ -233,7 +236,8 @@ SELECT
     ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
     ,[dblCurrencyExchangeRate]          = @ZeroDecimal
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
-    
+    ,[ysnUserDefinedPaymentMethod]      = ISNULL(SMPM.[ysnUserDefined], 0)
+    ,[intPaymentMethodAccountId]        = ISNULL(SMPM.[intAccountId], 0)
 FROM
     tblARPayment ARP
 INNER JOIN
@@ -252,11 +256,14 @@ LEFT OUTER JOIN
     SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intSalesAdvAcct], [intInterestAccountId], [intSalesDiscounts], [intARAccount] FROM tblSMCompanyLocation  WITH(NoLock)
     ) SMCL
         ON ARP.[intLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-    (
-    SELECT [intPaymentMethodID], [strPaymentMethod] FROM tblSMPaymentMethod WITH(NoLock)
-    ) SMPM
-        ON ARP.[intPaymentMethodId] = SMPM.[intPaymentMethodID]
+LEFT OUTER JOIN (
+    SELECT 
+         [intPaymentMethodID]
+        ,[strPaymentMethod] 
+        ,[ysnUserDefined]
+        ,[intAccountId]
+    FROM tblSMPaymentMethod WITH(NOLOCK)
+) SMPM ON ARP.[intPaymentMethodId] = SMPM.[intPaymentMethodID]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]

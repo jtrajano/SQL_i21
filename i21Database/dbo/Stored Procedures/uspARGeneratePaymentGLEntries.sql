@@ -67,7 +67,8 @@ BEGIN
 	SELECT
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = (CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
+		,[intAccountId]                 = (CASE WHEN P.[ysnUserDefinedPaymentMethod] = 1 AND P.[intPaymentMethodAccountId] <> 0 THEN P.[intPaymentMethodAccountId]
+                                                WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
 												WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
 												ELSE P.[intAccountId]
 										  END)
