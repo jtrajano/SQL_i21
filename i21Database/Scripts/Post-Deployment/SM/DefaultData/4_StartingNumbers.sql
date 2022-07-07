@@ -1501,15 +1501,178 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Responsible Party Task' and strModule = 'Cash Management')
+	UNION ALL 
+		SELECT	[intStartingNumberId]	= 157
+			,[strTransactionType]	= N'AG Work Order'
+			,[strPrefix]			= N'AGWO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Agronomy'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order' and strModule = 'Agronomy')
+	--Make sure to check with 19.1 and lower version. 142 is the last number
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 157
+	SELECT	[intStartingNumberId]	= 158
+			,[strTransactionType]	= N'Contract Release Instruction'
+			,[strPrefix]			= N'REL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Contract Release Instruction' and strModule = 'Contract Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 159
+			,[strTransactionType]	= N'Pricing Number'
+			,[strPrefix]			= N'CP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pricing Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 160
 			,[strTransactionType]	= N'Grain Receipt'
 			,[strPrefix]			= N'GR-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' and strModule = 'Ticket Management')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 161
+			,[strTransactionType]	= N'Bank Activity'
+			,[strPrefix]			= N'BACT-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Activity' AND strModule = 'Cash Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 162
+			,[strTransactionType]	= N'Bank Matching'
+			,[strPrefix]			= N'BM-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Matching' AND strModule = 'Cash Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 163
+			,[strTransactionType]	= N'Borrowing Facility'
+			,[strPrefix]			= N'BF-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Borrowing Facility')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 164
+			,[strTransactionType]	= N'Split Number'
+			,[strPrefix]			= N'SN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Entity Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Entity Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 165
+			,[strTransactionType]	= N'Receipt Feed Id'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receipt Feed Id')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 166
+			,[strTransactionType]	= N'Trade Finance Transaction No'
+			,[strPrefix]			= N'TF-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Trade Finance Transaction No')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 167
+			,[strTransactionType]	= N'Bank Swap'
+			,[strPrefix]			= N'BSWAP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Swap')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 168
+			,[strTransactionType]	= N'Credit Insurance'
+			,[strPrefix]			= N'CI-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Insurance')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 169
+			,[strTransactionType]	= N'Storage Charge'
+			,[strPrefix]			= N'SC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Storage Charge')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 170
+			,[strTransactionType]	= N'Letter of Credit'
+			,[strPrefix]			= N'LC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Letter of Credit')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 171
+			,[strTransactionType]	= N'Provisional Voucher'
+			,[strPrefix]			= N'PROV-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Provisional Voucher')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 172
+			,[strTransactionType]	= N'Credit Line'
+			,[strPrefix]			= N'CL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Credit Line')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 173
+			,[strTransactionType]	= N'Cupping Session'
+			,[strPrefix]			= N'CS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Quality'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Cupping Session')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 174
+				,[strTransactionType]	= N'Allocated Contracts Gain or Loss'
+				,[strPrefix]			= N'AC-'
+				,[intNumber]			= 0
+				,[strModule]			= 'Risk Management'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Allocated Contracts Gain or Loss')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 175
+				,[strTransactionType]	= N'Insurance Charge'
+				,[strPrefix]			= N'INC-'
+				,[intNumber]			= 1
+				,[strModule]			= 'Inventory'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Insurance Charge' AND [strModule] = 'Inventory')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 176
 				,[strTransactionType]	= N'Recost Formulation'
