@@ -6,7 +6,6 @@ CREATE PROCEDURE [dbo].[uspPRImportEmployeePaycheck](
 AS      
       
 BEGIN      
-      
 --DECLARE @guiApiUniqueId UNIQUEIDENTIFIER = N'30278E67-E6EB-4122-8F66-3251689D711F'      
 --DECLARE @guiLogId UNIQUEIDENTIFIER = NEWID()      
 DECLARE @NewId AS INT      
