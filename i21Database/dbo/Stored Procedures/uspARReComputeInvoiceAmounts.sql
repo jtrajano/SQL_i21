@@ -120,7 +120,7 @@ LEFT JOIN vyuLGAdditionalColumnForContractDetailView LGACFDDV ON LGACFDDV.intCon
 WHERE [intInvoiceId] = @InvoiceIdLocal	
 	
 UPDATE tblARInvoice
-SET [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+SET  [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[dblBaseInvoiceSubtotal]				= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
 	,[dblShipping]							= ISNULL([dblShipping], @ZeroDecimal)
 	,[dblBaseShipping]						= ISNULL([dblBaseShipping], @ZeroDecimal)
@@ -148,6 +148,7 @@ SET [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
+	,[dblLoanAmount]						= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 WHERE [intInvoiceId] = @InvoiceIdLocal
 
 UPDATE I
@@ -220,23 +221,10 @@ SET ARID.[dblBaseTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN
 FROM tblARInvoiceDetail ARID
 LEFT OUTER JOIN tblICItem ICI ON ARID.[intItemId] = ICI.[intItemId] 
 WHERE ARID.[intInvoiceId] = @InvoiceIdLocal
-
-UPDATE I
-SET dblTax		= DF.dblTotalTax
-  , dblBaseTax	= DF.dblBaseTotalTax
-FROM tblARInvoice I
-INNER JOIN (
-	SELECT intInvoiceId 
-		 , dblTotalTax		= SUM(dblTax)
-		 , dblBaseTotalTax	= SUM(dblBaseTax)
-	FROM tblARInvoiceDeliveryFee 
-	GROUP BY intInvoiceId
-) DF ON I.intInvoiceId = DF.intInvoiceId
-WHERE I.intInvoiceId = @InvoiceIdLocal
 	
 UPDATE tblARInvoice
-SET [dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal) + ISNULL(tblARInvoice.dblTax, @ZeroDecimal)
-  , [dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) + ISNULL(tblARInvoice.dblBaseTax, @ZeroDecimal)
+SET [dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)
+  , [dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
   , [dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
   , [dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
   , [dblInvoiceTotal]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblInvoiceTotal] END
@@ -257,6 +245,19 @@ FROM (
 ) T
 WHERE tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
   AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal	
+
+UPDATE I
+SET dblTax		= ISNULL(I.dblTax, 0) + ISNULL(DF.dblTotalTax, 0)
+  , dblBaseTax	= ISNULL(I.dblBaseTax, 0) + ISNULL(DF.dblBaseTotalTax, 0)
+FROM tblARInvoice I
+INNER JOIN (
+	SELECT intInvoiceId 
+		 , dblTotalTax		= SUM(dblTax)
+		 , dblBaseTotalTax	= SUM(dblBaseTax)
+	FROM tblARInvoiceDeliveryFee 
+	GROUP BY intInvoiceId
+) DF ON I.intInvoiceId = DF.intInvoiceId
+WHERE I.intInvoiceId = @InvoiceIdLocal
 	
 UPDATE ARI
 SET  [dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])

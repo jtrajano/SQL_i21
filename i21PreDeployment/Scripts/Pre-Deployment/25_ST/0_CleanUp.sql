@@ -771,11 +771,6 @@ IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N't
 
 
 
-				-- Note: <= 100 in length are the not encrypted passwords
-				--       344 in length are the encrypted passwords
-				UPDATE tblSTRegister
-				SET strSAPPHIREPassword = dbo.fnAESEncryptASym(strSAPPHIREPassword)
-				WHERE LEN(strSAPPHIREPassword) <= 100 
 			')		
 		
 		
@@ -803,11 +798,6 @@ IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N't
 
 
 
-				-- Note: <= 100 in length are the not encrypted passwords
-				--       344 in length are the encrypted passwords
-				UPDATE tblSTRegister
-				SET strSAPPHIREBasePassword = dbo.fnAESEncryptASym(strSAPPHIREBasePassword)
-				WHERE LEN(strSAPPHIREBasePassword) <= 100 
 			')		
 		
 	END

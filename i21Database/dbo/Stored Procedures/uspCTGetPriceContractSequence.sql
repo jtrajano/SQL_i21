@@ -192,7 +192,7 @@ BEGIN TRY
 				, dblOriginalBasis = CD.dblBasis
 				, dblTotalLots = ISNULL(tblLots.dblNoOfLots, 0)
 				, dblAdditionalCost = CAST(NULL AS NUMERIC(18, 6))
-				, intFinalPriceUOMId = CD.intPriceCommodityUOMId
+				, intFinalPriceUOMId = ISNULL(CD.intPriceCommodityUOMId,CD.intPriceItemUOMId) --WILLGET THE PRICE SEQUENCE UOM IF THE UOM IS NOT EXISTING IN THE COMMODITY.
 				, dblQuantity = ISNULL(tblQuantity.dblQuantity, 0)
 				, CD.intItemUOMId
 				, CD.strPriceUOM

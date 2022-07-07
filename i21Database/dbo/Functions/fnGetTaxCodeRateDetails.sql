@@ -104,6 +104,7 @@ BEGIN
 			ON SMTCR.[intUnitMeasureId] = UOM.[intUnitMeasureId]
 	WHERE 
 		SMTCR.[intTaxCodeId] = @TaxCodeId
+		AND SMTCR.strCalculationMethod <> 'Using Texas Fee Matrix'
 		AND ( 
 				(SMTCR.[strCalculationMethod] = 'Unit' AND (UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL)) 
 			OR 

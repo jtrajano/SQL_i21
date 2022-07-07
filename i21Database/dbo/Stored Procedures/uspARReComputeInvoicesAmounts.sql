@@ -206,22 +206,9 @@ INNER JOIN (
 ) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 WHERE EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
 
-UPDATE ARI
-SET dblTax		= DF.dblTotalTax
-  , dblBaseTax	= DF.dblBaseTotalTax
-FROM tblARInvoice ARI
-INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
-INNER JOIN (
-	SELECT intInvoiceId 
-		 , dblTotalTax		= SUM(dblTax)
-		 , dblBaseTotalTax	= SUM(dblBaseTax)
-	FROM tblARInvoiceDeliveryFee 
-	GROUP BY intInvoiceId
-) DF ON ARI.intInvoiceId = DF.intInvoiceId
-
 UPDATE ARI	
-SET ARI.[dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal) + ISNULL(ARI.dblTax, @ZeroDecimal)
-	,ARI.[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) + ISNULL(ARI.dblBaseTax, @ZeroDecimal)
+SET ARI.[dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal) 
+	,ARI.[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) 
 	,ARI.[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,ARI.[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
 	,ARI.[dblTotalStandardWeight]	= ISNULL(T.[dblTotalStandardWeight], @ZeroDecimal)
@@ -237,6 +224,19 @@ LEFT OUTER JOIN (
 	GROUP BY [intInvoiceId]
 ) T ON ARI.[intInvoiceId] = T.[intInvoiceId] 
 INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
+
+UPDATE ARI
+SET dblTax		= ISNULL(ARI.dblTax, 0) + ISNULL(DF.dblTotalTax, 0)
+  , dblBaseTax	= ISNULL(ARI.dblBaseTax, 0) + ISNULL(DF.dblBaseTotalTax, 0)
+FROM tblARInvoice ARI
+INNER JOIN @InvoiceIds IID ON ARI.[intInvoiceId] = IID.[intHeaderId]
+INNER JOIN (
+	SELECT intInvoiceId 
+		 , dblTotalTax		= SUM(dblTax)
+		 , dblBaseTotalTax	= SUM(dblBaseTax)
+	FROM tblARInvoiceDeliveryFee 
+	GROUP BY intInvoiceId
+) DF ON ARI.intInvoiceId = DF.intInvoiceId
 	
 UPDATE ARI	
 SET ARI.[dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])

@@ -1167,11 +1167,9 @@ BEGIN
 								WHERE TGC.intTaxGroupId = @TaxGroupId 
 								  AND TC.intTaxClassId = @TaxClassId
 							END
-
-
-							select ysnPost,ysnImportedFromOrigin,* from @EntriesForInvoice
-	--PROCESS TO INVOICE
-			EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
+							
+						--PROCESS TO INVOICE
+						EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
 											, @LineItemTaxEntries	= @TaxDetails
 											, @UserId				= @UserEntityId
 											, @GroupingOption		= 11
@@ -1179,6 +1177,33 @@ BEGIN
 											, @ErrorMessage			= @ErrorMessage OUT
 											, @LogId				= @intInvoiceLogId OUT
 
+						--ERROR LOG
+						UPDATE ILD
+						SET ysnImported		= 0
+						  , ysnSuccess		= 0
+						  , strEventResult	= ERR.strMessage
+						FROM tblARImportLogDetail ILD
+						CROSS APPLY (
+							SELECT TOP 1 LOGD.strMessage
+							FROM tblARInvoiceIntegrationLogDetail LOGD 
+							WHERE LOGD.ysnSuccess = 0
+							  AND ILD.intImportLogDetailId = LOGD.intId
+						) ERR
+						WHERE ILD.intImportLogId = @ImportLogId
+
+						UPDATE IL
+						SET intSuccessCount = ISNULL(ILD.intTotalSuccess, 0)
+						  , intFailedCount	= ISNULL(ILD.intTotalFailed, 0)
+						FROM tblARImportLog IL 
+						INNER JOIN (
+							SELECT intTotalSuccess = SUM(CASE WHEN ysnSuccess = 1 THEN 1 ELSE 0 END)
+								 , intTotalFailed  = SUM(CASE WHEN ysnSuccess = 0 THEN 1 ELSE 0 END)
+								 , intImportLogId
+							FROM tblARImportLogDetail
+							GROUP BY intImportLogId
+						) ILD ON IL.intImportLogId = ILD.intImportLogId
+						WHERE IL.intImportLogId = @ImportLogId
+						
 						UPDATE
 						ARI
 						SET
