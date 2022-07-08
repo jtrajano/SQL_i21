@@ -9190,6 +9190,7 @@
     <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetInHousePerLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
