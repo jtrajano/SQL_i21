@@ -105,6 +105,9 @@ SELECT
 	, [strReferenceNo]					= Receipt.strReferenceNo
 	, [intBankValuationRuleId]			= Receipt.intOverrideFacilityValuation
 	, [strComments]						= Receipt.strComments
+	, [strTaxPoint]						= Receipt.strTaxPoint
+	, [intTaxLocationId]				= Receipt.intTaxLocationId
+
 FROM 
 	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -304,6 +307,9 @@ SELECT
 	, [strReferenceNo]					= Receipt.strBankReferenceNo
 	, [intBankValuationRuleId]			= Receipt.intOverrideFacilityValuation
 	, [strComments]						= Receipt.strComments
+	, [strTaxPoint]						= Receipt.strTaxPoint
+	, [intTaxLocationId]				= Receipt.intTaxLocationId
+
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 
