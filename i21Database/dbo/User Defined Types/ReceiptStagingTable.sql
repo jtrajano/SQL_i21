@@ -30,7 +30,9 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intShipFromEntityId] INT NULL 
 	,[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strWarehouseRefNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	,[dtmLastCargoInsuranceDate] DATETIME NULL			
+	,[dtmLastCargoInsuranceDate] DATETIME NULL
+	,[strTaxPoint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intTaxLocationId]	INT NULL
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 
@@ -51,7 +53,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[ysnSubCurrency] BIT NULL 
 	,[intPaymentOn] INT NULL								-- Reserved for PaymentOn option
 	,[intForexRateTypeId] INT NULL							-- Currency Forex Rate Type Id
-	,[dblForexRate] NUMERIC(38, 20) NULL						-- Forex Rate (Exchange Rate)
+	,[dblForexRate] NUMERIC(38, 20) NULL					-- Forex Rate (Exchange Rate)
 	,[intContainerId] INT NULL								-- Container id. Used by LG Inbound Shipment. 
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 	,[intLoadReceive] INT NULL								-- For Load Contracts. Number of Load to Receive
