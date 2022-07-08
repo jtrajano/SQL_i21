@@ -117,6 +117,7 @@ BEGIN
 				--Advanced Bank Recon
 				,i21.ysnABREnable
 				,i21.intABRDaysNoRef
+				,i21.strPaymentInstructions
 				--Advanced Bank Recon
 				-- The following fields are from the origin system		
 				,apcbk_comment = origin.apcbk_comment COLLATE Latin1_General_CI_AS			-- CHAR (30) 
@@ -340,6 +341,7 @@ BEGIN
 					,intResponsibleEntityId
 					,ysnABREnable
 					,intABRDaysNoRef
+					,strPaymentInstructions
 			)
 			OUTPUT 	inserted.intBankAccountId
 			SELECT	intBankId							= i.intBankId
@@ -427,6 +429,7 @@ BEGIN
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
+					,strPaymentInstructions				= i.strPaymentInstructions
 			FROM	inserted i 
 
 			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -632,6 +635,7 @@ BEGIN
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
+					,strPaymentInstructions				= i.strPaymentInstructions
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
