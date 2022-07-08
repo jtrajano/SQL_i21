@@ -25,7 +25,8 @@ BEGIN TRY
 		,@dblCurrentlyApplied numeric (18,6)
 		,@dblBalanceLessOtherShipmentItem numeric (18,6)
 		,@intContractHeaderId int
-		,@ysnLoad bit = convert(bit,0);
+		,@ysnLoad bit = convert(bit,0)
+		,@dblTotalAppliedQty numeric (18,6);
 
 	declare @ContractSequenceBalanceSummary table (
 		intId int 
@@ -83,7 +84,6 @@ BEGIN TRY
 
 		select
 			@intContractDetailId = intContractDetailId
-			,@dblSequenceQuantity  = dblSequenceQuantity
 			,@dblSequenceBalanceQuantity = dblSequenceBalanceQuantity
 			,@intToItemUOMId = intToItemUOMId
 			,@intExternalId = intExternalId
@@ -101,12 +101,20 @@ BEGIN TRY
 		/*Return the Shipment quantity*/
 		--Get all quantity applied to other Shipment Item
 		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
-		select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied), @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied), @intContractHeaderId = intContractHeaderId, @dblSequenceQuantity = dblQuantity from tblCTContractDetail where intContractDetailId = @intContractDetailId;
 		select @ysnLoad = ysnLoad from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;
+		select @dblTotalAppliedQty = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId;
 
-		if (@dblBalanceLessOtherShipmentItem < @dblOldQuantity)
+		if ((@dblSequenceQuantity - @dblTotalAppliedQty) <= 0)
 		begin
-			set @dblOldQuantity = @dblBalanceLessOtherShipmentItem;
+			set @dblOldQuantity = 0;
+		end
+		else
+		begin
+			if (@dblBalanceLessOtherShipmentItem < @dblOldQuantity)
+			begin
+				set @dblOldQuantity = @dblBalanceLessOtherShipmentItem;
+			end
 		end
 
 		SELECT @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblOldQuantity) * -1);
