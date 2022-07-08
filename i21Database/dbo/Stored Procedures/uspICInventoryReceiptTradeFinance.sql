@@ -286,7 +286,7 @@ BEGIN
 			, intSublimitId = r.intSublimitTypeId
 			, strSublimit = fld.strLimitDescription
 			, dblSublimit = fld.dblLimit
-			, strBankTradeReference = r.strBankReferenceNo
+			, strBankTradeReference = logistics.strTradeFinanceReferenceNo
 			, dblFinanceQty = ISNULL(contractIR.dblQty, directIR.dblQty) 
 			, dblFinancedAmount = r.dblGrandTotal
 			, strBankApprovalStatus = r.strApprovalStatus
@@ -369,6 +369,14 @@ BEGIN
 				WHERE
 					ri.intInventoryReceiptId = r.intInventoryReceiptId
 			) receiptContract
+			OUTER APPLY (
+				SELECT TOP 1 
+					lg.strTradeFinanceReferenceNo
+				FROM 
+					tblLGLoad lg
+				WHERE
+					lg.strTradeFinanceNo = r.strTradeFinanceNumber
+			) logistics
 		WHERE
 			r.intInventoryReceiptId = @ReceiptId
 
