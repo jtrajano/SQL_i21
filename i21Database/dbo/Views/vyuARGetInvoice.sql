@@ -183,6 +183,7 @@ SELECT
 	,intBorrowingFacilityLimitId		= INV.intBorrowingFacilityLimitId
 	,strBorrowingFacilityLimit			= BFL.strBorrowingFacilityLimit
 	,intBorrowingFacilityLimitDetailId	= INV.intBorrowingFacilityLimitDetailId
+	,strBorrowingFacilityLimitDetail	= BFLD.strLimitDescription
 	,strBankReferenceNo					= INV.strBankReferenceNo
 	,strBankTransactionId				= INV.strBankTransactionId
 	,dblLoanAmount						= INV.dblLoanAmount
@@ -412,6 +413,7 @@ LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId,0)
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId,0)
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId,0)
 LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId,0)
+LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = ISNULL(INV.intBorrowingFacilityLimitDetailId,0)
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId,0)
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 OUTER APPLY(
