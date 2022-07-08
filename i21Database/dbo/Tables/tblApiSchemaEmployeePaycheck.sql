@@ -3,7 +3,7 @@ CREATE TABLE tblApiSchemaEmployeePaycheck(
     ,intRowNumber INT													--Required
     ,intKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY						--Required
 	,intOriginalPaycheckId INT
-	,strPaycheckEarningId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL 
+	,strPaycheckEarningId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
 	,strEntityNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL 
 	,strRecordType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL	--Required VALUES should be "PAYCHECK, TAX, DEDUCTION, EARNING" only
 	,strRecordId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL	--Required		
