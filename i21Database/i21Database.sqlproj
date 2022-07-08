@@ -831,6 +831,8 @@
     <Build Include="dbo\Tables\tblARCustomerDefaultPayToBankAccount.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerDefaultPayToBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
+    <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
+    <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
