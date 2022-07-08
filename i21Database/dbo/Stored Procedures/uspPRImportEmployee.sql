@@ -154,6 +154,10 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 			,@strDocumentDelivery1 = LTRIM(RTRIM(temp.strDocumentDelivery1))
 			,@strDocumentDelivery2 = LTRIM(RTRIM(temp.strDocumentDelivery2))
 			,@strDocumentDelivery3 = LTRIM(RTRIM(temp.strDocumentDelivery3))
+			,@strMaritalStatus = LTRIM(RTRIM(temp.strMaritalStatus))
+			,@strEthnicity = LTRIM(RTRIM(temp.strEthnicity))
+			,@strEEOCCode = LTRIM(RTRIM(temp.strEEOCCode))
+			,@strGender = LTRIM(RTRIM(temp.strGender))
 		FROM #TempEmployeeDetails temp
 
 		SELECT TOP 1 @EntityId = intEntityId FROM tblPREmployee WHERE strEmployeeId = @EmployeeID
