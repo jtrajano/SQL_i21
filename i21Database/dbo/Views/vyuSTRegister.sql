@@ -131,6 +131,19 @@ SELECT reg.intRegisterId
 	, reg.strFTPUserName
 	, reg.strFTPPassword
 	, reg.intPurgeInterval
+	, reg.[strIrelyUsername]				
+	, reg.[strIrelyPassword]				
+	, reg.[strIrelyReEnterPassword]		
+	, reg.[strIrelyCompanyNumber]			
+	, reg.[ysnDeleteRegisterFileInbound]	
+	, reg.[strRegisterFolderInbound]		
+	, reg.[strRegisterFolderOutbound]		
+	, reg.[strHandheldImportFolderPath]	
+	, reg.[strHandheldExportFolderPath]	
+	, reg.[strDeleteLogsOlderDays]		
+	, reg.[strUpdateStoreAppInterval]
+	, reg.[ysnAllowAutoUpdate]			
+	, reg.[strDaysToRetrieveTranslog]	
 	, reg.intConcurrencyId 
 FROM tblSTRegister reg
 INNER JOIN tblSTStore st
