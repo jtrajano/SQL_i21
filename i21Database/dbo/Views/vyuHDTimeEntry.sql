@@ -15,7 +15,25 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 	  ,[intTimeEntryPeriodDetailId]		= TimeEntry.[intTimeEntryPeriodDetailId] 
 	  ,[strPeriodDisplay]				= TimeEntryPeriodDetail.[strPeriodDisplay]
 	  ,[strBillingPeriodStatus]			= TimeEntryPeriodDetail.[strBillingPeriodStatus]
-	  ,[ysnCanViewOtherCoworker]		= CONVERT(BIT, 0)				
+	  ,[ysnCanViewOtherCoworker]		= CONVERT(BIT, 0)	
+	  ,[dtmBillingPeriodStart]			= TimeEntryPeriodDetail.[dtmBillingPeriodStart]
+	  ,[dtmBillingPeriodEnd]			= TimeEntryPeriodDetail.[dtmBillingPeriodEnd]
+	  ,[dblTotalHours]					= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblTotalHours], 0)
+	  ,[dblBillableHours]			    = ISNULL(AgentTimeEntryPeriodDetailSummary.[dblBillableHours], 0)
+	  ,[dblNonBillableHours]			= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblNonBillableHours], 0)
+	  ,[dblVacationHolidaySick]			= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblVacationHolidaySick], 0)
+	  ,[intRequiredHours]				= ISNULL(AgentTimeEntryPeriodDetailSummary.[intRequiredHours], 0)
+	  ,[dblActualUtilizationAnnually]	= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblActualUtilizationAnnually], 0)
+	  ,[dblActualUtilizationWeekly]		= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblActualUtilizationWeekly], 0)
+	  ,[dblActualUtilizationMonthly]	= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblActualUtilizationMonthly], 0)
+	  ,[dblActualAnnualBudget]			= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblActualAnnualBudget], 0)
+	  ,[dblActualWeeklyBudget]			= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblActualWeeklyBudget], 0)
+	  ,[intUtilizationAnnually]			= ISNULL(AgentTimeEntryPeriodDetailSummary.[intUtilizationAnnually], 0)
+	  ,[intUtilizationWeekly]			= ISNULL(AgentTimeEntryPeriodDetailSummary.[intUtilizationWeekly], 0)
+	  ,[intUtilizationMonthly]			= ISNULL(AgentTimeEntryPeriodDetailSummary.[intUtilizationMonthly], 0)
+	  ,[dblAnnualBudget]				= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblAnnualBudget], 0)
+	  ,[dblWeeklyBudget]				= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblWeeklyBudget], 0)
+	  ,[dblAnnualHurdle]				= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblAnnualHurdle], 0)
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
@@ -28,6 +46,8 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 	(
 		SELECT TOP 1 strPeriodDisplay		  = TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName] --+ ' (' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodStart], 'MM/dd/yy') + '-' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodEnd], 'MM/dd/yy') + ')'
 					,[strBillingPeriodStatus] = TimeEntryPeriodDetail.strBillingPeriodStatus
+					,dtmBillingPeriodStart
+					,dtmBillingPeriodEnd
 		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 			INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
 		ON TimeEntryPeriodDetail.intTimeEntryPeriodId = TimeEntryPeriod.intTimeEntryPeriodId AND
@@ -35,5 +55,28 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 	) TimeEntryPeriodDetail
 	LEFT JOIN tblSMUserSecurity UserSecurity
 ON UserSecurity.intEntityId = Entity.intEntityId
+	OUTER APPLY 
+	(
+		SELECT TOP 1  dblTotalHours
+					 ,dblBillableHours
+					 ,dblNonBillableHours
+					 ,dblVacationHolidaySick
+					 ,intRequiredHours
+					 ,dblActualUtilizationAnnually
+					 ,dblActualUtilizationWeekly
+					 ,dblActualUtilizationMonthly
+					 ,dblActualAnnualBudget
+					 ,dblActualWeeklyBudget
+					 ,intUtilizationAnnually
+					 ,intUtilizationWeekly
+					 ,intUtilizationMonthly
+					 ,dblAnnualBudget
+					 ,dblWeeklyBudget = dblBudgetedHours
+					 ,dblAnnualHurdle
+		FROM tblHDAgentTimeEntryPeriodDetailSummary AgentTimeEntryPeriodDetailSummary
+		WHERE AgentTimeEntryPeriodDetailSummary.intEntityId = TimeEntry.intEntityId AND
+			  AgentTimeEntryPeriodDetailSummary.intTimeEntryPeriodDetailId = TimeEntry.intTimeEntryPeriodDetailId
+	 
+	) AgentTimeEntryPeriodDetailSummary
 WHERE TimeEntry.[intTimeEntryPeriodDetailId] IS NOT NULL
 GO
