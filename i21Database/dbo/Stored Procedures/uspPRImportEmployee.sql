@@ -260,13 +260,13 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 																						BEGIN
 																							IF(@RankCount IS NOT NULL AND @RankCount != 0)
 																								BEGIN
-																									IF(@strMaritalStatus IS NOT NULL AND @strMaritalStatus != 0)
+																									IF(@strMaritalStatus IS NOT NULL AND @strMaritalStatus != '')
 																										BEGIN
-																											IF(@strEthnicity IS NOT NULL AND @strEthnicity != 0)
+																											IF(@strEthnicity IS NOT NULL AND @strEthnicity != '')
 																												BEGIN
-																													IF(@strEEOCCode IS NOT NULL AND @strEEOCCode != 0)
+																													IF(@strEEOCCode IS NOT NULL AND @strEEOCCode != '')
 																														BEGIN
-																															IF(@strGender IS NOT NULL AND @strGender != 0)
+																															IF(@strGender IS NOT NULL AND @strGender != '')
 																																BEGIN
 																																	SET @ysnImport = 1
 																																END
