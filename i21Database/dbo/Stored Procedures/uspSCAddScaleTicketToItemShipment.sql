@@ -35,7 +35,9 @@ DECLARE @intContractDetailId AS INT,
 		@intShipToId INT,
 		@intFreightTermId INT,
 		@strWhereFinalizedWeight NVARCHAR(20),
-		@strWhereFinalizedGrade NVARCHAR(20);
+		@strWhereFinalizedGrade NVARCHAR(20),
+		@intLoadDetailId INT, 
+		@intCustomerEntityLocationId INT;
 
 DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
@@ -47,6 +49,7 @@ DECLARE @intTicketItemUOMId INT,
 
 SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intLoadId = SC.intLoadId
+, @intLoadDetailId = SC.intLoadDetailId
 , @intContractDetailId = SC.intContractId 
 , @intItemId = SC.intItemId
 , @splitDistribution = SC.strDistributionOption
@@ -94,7 +97,15 @@ END
 
 -- Insert Entries to Stagging table that needs to processed to Shipment Load
 BEGIN 
+    if isnull(@intLoadId, 0) > 0 and isnull(@intLoadDetailId, 0) > 0
+	begin
+		select @intCustomerEntityLocationId = null
+		select @intCustomerEntityLocationId = intCustomerEntityLocationId
+			from tblLGLoadDetail 
+				where intLoadDetailId = @intLoadDetailId and intLoadId = @intLoadId
 
+		select @intShipToId = isnull(@intCustomerEntityLocationId, @intShipToId)
+	end
 	-- Non item contract
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
