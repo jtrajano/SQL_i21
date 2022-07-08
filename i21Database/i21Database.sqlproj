@@ -9203,6 +9203,7 @@
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intCommodityId.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetInHousePerLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
