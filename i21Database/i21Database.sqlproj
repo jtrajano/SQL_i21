@@ -978,6 +978,8 @@
     <Build Include="dbo\Tables\tblSMUserDetailStageError.sql" />
     <Build Include="dbo\Tables\tblSMUserDetailStageArchive.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
+    <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
+    <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
