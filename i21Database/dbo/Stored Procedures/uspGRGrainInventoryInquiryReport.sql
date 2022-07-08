@@ -1343,7 +1343,7 @@ FROM @InventoryData
 WHERE strLabel NOT IN ('TOTAL STORAGE OBLIGATION')
 /*==END==REPORT DATA==*/
 
-UPDATE @ReportData SET dblUnits = 0 WHERE dblUnits IS NULL
+UPDATE @ReportData SET dblUnits = 0 WHERE dblUnits IS NULL AND strLabel <> ''
 
 /*CREATE A SUMMARY PAGE OF ALL LOCATIONS*/
 INSERT INTO @ReportData
