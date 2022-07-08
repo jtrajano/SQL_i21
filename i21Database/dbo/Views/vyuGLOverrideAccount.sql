@@ -39,5 +39,5 @@ CASE WHEN [Company] IS NULL THEN '' ELSE '-'+ CASE  when CHARINDEX('3', O.strOve
 strOverrideAccount
 from q
 OUTER APPLY (
-	SELECT strOverrideREArray FROM tblGLCompanyPreferenceOption
+	SELECT TOP 1 strOverrideREArray FROM tblGLCompanyPreferenceOption 
 )O
