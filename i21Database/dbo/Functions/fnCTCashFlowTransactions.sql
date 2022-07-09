@@ -156,8 +156,13 @@ BEGIN
 										* (CD1.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
 										* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
 									ELSE
-										CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT, 0) THEN CD1.dblTotalCost ELSE CD1.dblTotalBudget END
-										* (CC.dblRate/100) * ISNULL(CC.dblFX, 1)
+										CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT, 1) THEN  
+											CD1.dblTotalBudget  * (CC.dblRate/100) * ISNULL(CC.dblFX, 1)
+										ELSE
+											dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD1.dblQuantity) 
+											* ((FSPM.dblLastSettle + CD1.dblBasis) / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+											* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+										END
 									END
 
 							END
