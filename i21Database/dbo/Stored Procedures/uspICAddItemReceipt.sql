@@ -1132,16 +1132,24 @@ BEGIN
 				) forexRate
 
 				-- Get the default tax group (if override was not provided)
+				LEFT JOIN tblSMCompanyLocation taxPointCompanyLocation
+					ON taxPointCompanyLocation.intCompanyLocationId = RawData.intTaxLocationId
+					AND RawData.strTaxPoint = 'Destination'
+
+				LEFT JOIN tblEMEntityLocation taxPointEntityLocation
+					ON taxPointEntityLocation.intEntityLocationId = RawData.intTaxLocationId
+					AND RawData.strTaxPoint = 'Origin'
+
 				OUTER APPLY (
 					SELECT	taxGroup.intTaxGroupId, taxGroup.strTaxGroup
 					FROM	tblSMTaxGroup taxGroup
 					WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
 								RawData.intEntityVendorId	-- @VendorId
-								,RawData.intLocationId		--,@CompanyLocationId
+								,ISNULL(taxPointCompanyLocation.intCompanyLocationId, RawData.intLocationId) --,@CompanyLocationId
 								,NULL						--,@ItemId
-								,RawData.intShipFromId		--,@VendorLocationId
+								,ISNULL(taxPointEntityLocation.intEntityLocationId, RawData.intShipFromId) --,@VendorLocationId
 								,RawData.intFreightTermId	--,@FreightTermId
-								,default					--,@FOB
+								,RawData.strTaxPoint		--,@FOB
 							)
 							AND RawData.intTaxGroupId IS NULL
 				) taxHierarcy 
@@ -1182,6 +1190,8 @@ BEGIN
 				-- 5. Transport Loads (New tables)
 				LEFT JOIN vyuICGetLoadReceipt TransportView 
 					ON TransportView.intLoadReceiptId = RawData.intSourceId
+
+			
 
 		WHERE RawHeaderData.intId = @intId
 		ORDER BY RawData.intSort, RawData.intId

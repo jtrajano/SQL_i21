@@ -15,14 +15,22 @@ BEGIN
 			@intTaxGroupId = taxGroup.intTaxGroupId
 			,@strTaxGroup = taxGroup.strTaxGroup
 	FROM	tblICInventoryReceipt r 
+			LEFT JOIN tblSMCompanyLocation taxPointCompanyLocation
+				ON taxPointCompanyLocation.intCompanyLocationId = r.intTaxLocationId
+				AND r.strTaxPoint = 'Destination'
+
+			LEFT JOIN tblEMEntityLocation taxPointEntityLocation
+				ON taxPointEntityLocation.intEntityLocationId = r.intTaxLocationId
+				AND r.strTaxPoint = 'Origin'
+
 			CROSS APPLY (
 				SELECT id = dbo.fnGetTaxGroupIdForVendor(
 					ISNULL(r.intShipFromEntityId, r.intEntityVendorId) -- @VendorId
-					,r.intLocationId	--,@CompanyLocationId
+					,ISNULL(taxPointCompanyLocation.intCompanyLocationId, r.intLocationId)	--,@CompanyLocationId
 					,NULL				--,@ItemId
-					,r.intShipFromId	--,@VendorLocationId
+					,ISNULL(taxPointEntityLocation.intEntityLocationId, r.intShipFromId)	--,@VendorLocationId
 					,r.intFreightTermId --,@FreightTermId
-					,default			--,@FOB
+					,r.strTaxPoint	--,@FOB
 				)			
 			) taxHierarchy
 			INNER JOIN tblSMTaxGroup taxGroup
