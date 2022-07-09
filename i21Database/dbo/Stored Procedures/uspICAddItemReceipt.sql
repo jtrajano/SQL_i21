@@ -554,6 +554,8 @@ BEGIN
 				,strDataSource			= ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType)
 				,intShipFromEntityId	= ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
 				,dtmLastCargoInsuranceDate  = IntegrationData.dtmLastCargoInsuranceDate
+				,strTaxPoint			= IntegrationData.strTaxPoint
+				,intTaxLocationId		= IntegrationData.intTaxLocationId
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -598,6 +600,8 @@ BEGIN
 				,strDataSource
 				,intShipFromEntityId
 				,dtmLastCargoInsuranceDate
+				,strTaxPoint
+				,intTaxLocationId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -642,6 +646,8 @@ BEGIN
 				/*strDataSource*/				,ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType) 
 				/*intShipFromEntityId*/			,ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
 				/*dtmLastCargoInsuranceDate*/   ,IntegrationData.dtmLastCargoInsuranceDate
+				/*strTaxPoint*/					,IntegrationData.strTaxPoint
+				/*intTaxLocationId*/			,IntegrationData.intTaxLocationId
 			)
 		;
 				
