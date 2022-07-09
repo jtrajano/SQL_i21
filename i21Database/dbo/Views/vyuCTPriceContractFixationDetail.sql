@@ -120,8 +120,8 @@ AS
 			strBillIds = FDV.strBillIds COLLATE Latin1_General_CI_AS,
 			strBills = FDV.strBills COLLATE Latin1_General_CI_AS,
 			ysnPaid = CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(PV.ysnPaid,0) ELSE 0 END,
-			REPLACE(FM.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') AS strPricingMonth
-
+			REPLACE(FM.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') AS strPricingMonth,
+			strCurrencyPair = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
 	JOIN	tblICCommodityUnitMeasure	PU	ON	PU.intCommodityUnitMeasureId	=	FD.intPricingUOMId
