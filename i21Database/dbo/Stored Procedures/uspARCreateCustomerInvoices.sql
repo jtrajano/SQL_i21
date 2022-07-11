@@ -677,17 +677,16 @@ INSERT INTO #ARInvalidInvoiceRecords
     ,[intInvoiceId])
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'The customer provided is not active!'
+	,[strMessage]			= 'Customer ' + ARC.strCustomerNumber + ' is not active!'
 	,[strTransactionType]	= ITG.[strTransactionType]
 	,[strType]				= ITG.[strType]
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
 	,[intSourceId]			= ITG.[intSourceId]
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToGenerate ITG --WITH (NOLOCK)
-WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
+FROM @InvoicesToGenerate ITG
+INNER JOIN tblARCustomer ARC ON ARC.[intEntityId] = ITG.[intEntityCustomerId]
+WHERE ARC.[ysnActive] = 0 OR ARC.[ysnActive] IS NULL
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
