@@ -86,11 +86,20 @@ AS
 						strEntitySelectedLocation = ESL.strLocationName, -- CT-5315
 						COL.strLocationName,
 						ST.strSampleTypeName,
-						CY.ysnCheckMissingStandardPriceInContract
+						CY.ysnCheckMissingStandardPriceInContract,
+						dblHeaderBalance = cd.dblHeaderBalance,
+						dblHeaderAvailable = cd.dblHeaderAvailable
 
 				FROM	tblCTContractHeader						CH	
 				
-				JOIN	tblEMEntity								EY	ON	EY.intEntityId						=		CH.intEntityId							
+				JOIN	tblEMEntity								EY	ON	EY.intEntityId						=		CH.intEntityId
+				cross apply (
+					select
+					dblHeaderBalance = CH.dblQuantity - sum(cd.dblQuantity - cd.dblBalance)
+					,dblHeaderAvailable = CH.dblQuantity - (sum(cd.dblQuantity - cd.dblBalance) + sum(isnull(cd.dblScheduleQty,0)))
+					from tblCTContractDetail cd
+					where cd.intContractHeaderId = CH.intContractHeaderId
+				) cd
 			LEFT	JOIN	tblEMEntity							SP	ON	SP.intEntityId						=		CH.intSalespersonId									
 			LEFT	JOIN	tblEMEntity							CN	ON	CN.intEntityId						=		CH.intEntityContactId				
 			LEFT	JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					
