@@ -346,7 +346,11 @@ BEGIN TRY
 		tblCFInvoiceStagingTable
 		WHERE strUserId = @username
 		AND LOWER(strStatementType) = @statementType
-		AND intCustomerId NOT IN (SELECT intCustomerId FROM tblCFInvoiceProcessHistory AS innerQuery WHERE ISNULL(innerQuery.strInvoiceNumber,'') = ISNULL(tblCFInvoiceStagingTable.strTempInvoiceReportNumber,''))
+		AND intCustomerId NOT IN (
+			SELECT intCustomerId FROM tblCFInvoiceProcessHistory AS innerQuery
+			WHERE innerQuery.strInvoiceNumber = tblCFInvoiceStagingTable.strTempInvoiceReportNumber
+			OR (innerQuery.strInvoiceNumber IS NULL AND tblCFInvoiceStagingTable.strTempInvoiceReportNumber IS NULL)
+		)
 		GROUP BY 
 			intCustomerId , 
 			strCustomerNumber ,
