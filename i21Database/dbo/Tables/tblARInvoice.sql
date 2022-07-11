@@ -251,6 +251,9 @@ CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmPostDate]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmDate]
 	ON [dbo].[tblARInvoice] ([dtmDate])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intTransactionId]
+	ON [dbo].[tblARInvoice] ([intTransactionId])
 
 
 --TRIGGERS INSERT
