@@ -384,7 +384,6 @@
     <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeePaycheck.sql" />
-    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" /> 
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
