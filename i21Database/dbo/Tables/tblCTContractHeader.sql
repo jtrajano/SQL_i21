@@ -97,6 +97,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[ysnLocalCurrency] BIT default ((0)),
 	[ysnPrintCropYear] BIT default ((0)),
 	[ysnSupplyPointContract] BIT default ((0)),
+	[ysnQuantityAtHeaderLevel] BIT default ((0)),
 	
 	--CT-7027
 	--[intLastEntityId] INT NULL,
