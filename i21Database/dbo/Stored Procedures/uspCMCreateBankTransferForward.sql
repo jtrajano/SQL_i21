@@ -21,7 +21,7 @@ SELECT
 ,intBankAccountIdFrom
 ,intBankAccountIdTo
 ,intGLAccountIdFrom = BAF.intGLAccountId
-,intGLAccountIdTo = BAF.intGLAccountId
+,intGLAccountIdTo = BAT.intGLAccountId
 ,intCurrencyIdAmountFrom = BAF.intCurrencyId
 ,intCurrencyIdAmountTo = BAT.intCurrencyId
 ,intRateTypeIdAmountFrom = intCurrencyExchangeRateTypeId
@@ -33,10 +33,10 @@ SELECT
 ,dblRateAmountTo = BAT.dblRate
 ,dblCrossRate =ROUND(dblAmountForeignTo/dblAmountForeignFrom,6)
 ,dblReverseRate= Round( 1/dblCrossRate, 6)
-,dblAmountForeignFrom
-,dblAmountForeignTo
-,dblAmountFrom = dblAmountForeignFrom * BAF.dblRate
-,dblAmountTo =dblAmountForeignTo * BAT.dblRate
+,dblAmountForeignFrom = ROUND(dblAmountForeignFrom, 2)
+,dblAmountForeignTo = ROUND(dblAmountForeignTo, 2)
+,dblAmountFrom = ROUND(dblAmountForeignFrom * BAF.dblRate, 2)
+,dblAmountTo = ROUND(dblAmountForeignTo * BAT.dblRate, 2)
 ,strDerivativeId
 ,intFutOptTransactionId
 ,intFutOptTransactionHeaderId
