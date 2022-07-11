@@ -30,7 +30,12 @@ BEGIN TRY
 			@intUnPostedTicketDestinationWeightsAndGrades int,
 			@ysnLogSequenceHistory	BIT = 1,
 			@intContractHeaderId	INT,
-			@process				NVARCHAR(50)
+			@process				NVARCHAR(50),
+			@intHeaderUOMId				INT,
+			@intCommodityId				INT,
+			@dblHeaderQuantity	NUMERIC(18,6),
+			@dblTotalHeaderApplied NUMERIC(18,6),
+			@ysnQuantityAtHeaderLevel bit = 0
 			
 	
 	BEGINING:
@@ -41,7 +46,11 @@ BEGIN TRY
 			@intPricingTypeId		=	CD.intPricingTypeId,
 			@ysnLoad				=	CH.ysnLoad,
 			@intContractHeaderId	=	CH.intContractHeaderId,
-			@dblQuantityPerLoad = CH.dblQuantityPerLoad
+			@dblQuantityPerLoad = CH.dblQuantityPerLoad,
+			@intHeaderUOMId = CH.intCommodityUOMId,
+			@intCommodityId = CH.intCommodityId,
+			@dblHeaderQuantity = CH.dblQuantity,
+			@ysnQuantityAtHeaderLevel = isnull(CH.ysnQuantityAtHeaderLevel,0)
 
 	FROM	tblCTContractDetail		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
@@ -161,6 +170,18 @@ BEGIN TRY
 	from tblCTContractDetail cd
 	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	where cd.intContractDetailId = @intContractDetailId
+
+	if (@ysnQuantityAtHeaderLevel = 1)
+	begin
+		select @dblTotalHeaderApplied = sum(cd.dblQuantity - isnull(cd.dblBalance,0))
+		from tblCTContractDetail cd
+		where cd.intContractHeaderId = @intContractHeaderId
+
+		if (@dblHeaderQuantity = @dblTotalHeaderApplied)
+		begin
+			update tblCTContractDetail set intContractStatusId = 5, dblQuantity = (dblQuantity - isnull(dblBalance,0)), dblBalance = 0, dblBalanceLoad = 0 where intContractHeaderId = @intContractHeaderId;
+		end
+	end
 
 	 /*
 	 CT-4516
