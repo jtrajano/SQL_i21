@@ -32,7 +32,9 @@ BEGIN
 	IF(@FOB IS NOT NULL)
 		SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @TaxLocationId, @ItemId, @TaxLocationId, @SiteId, @FreightTermId, @FOB), 0)
 
-	SET @TaxGroupId = CASE WHEN @NewTaxGroupId = 0 THEN @OriginalTaxGroupId ELSE @NewTaxGroupId END
+	IF @NewTaxGroupId <> 0
+		SET @TaxGroupId = @NewTaxGroupId
+
 	SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @NewTaxGroupId THEN 1 ELSE 0 END
 END
 ELSE
