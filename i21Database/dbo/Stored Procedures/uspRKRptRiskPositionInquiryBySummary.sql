@@ -47,7 +47,7 @@ FROM OPENXML(@idoc, 'xmlparam/filters/filter', 2) WITH (
 		)
 
 SELECT @intCommodityId = [from]
-FROM @temp_xml_table 
+FROM @temp_xml_table
 WHERE [fieldname] = 'intCommodityId'
 
 SELECT @intCompanyLocationId = [from]
@@ -193,12 +193,6 @@ DECLARE @temp AS TABLE (
 	intItemId INT,
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	strItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	)
 
 DECLARE @intRiskViewId INT
@@ -211,36 +205,30 @@ FROM tblRKCompanyPreference
 IF (@intRiskViewId = 1)
 BEGIN
 	INSERT INTO @temp (
-		intRowNumber
-		, Selection
-		, PriceStatus
-		, strFutureMonth
-		, strAccountNumber
-		, dblNoOfContract
-		, strTradeNo
-		, TransactionDate
-		, TranType
-		, CustVendor
-		, dblNoOfLot
-		, dblQuantity
-		, intOrderByHeading
-		, intOrderBySubHeading
-		, intContractHeaderId
-		, intFutOptTransactionHeaderId
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, strGrade
-		, strRegion
-		, strSeason
-		, strClass
-		, strCertificationName 
-		, strCropYear 
+		intRowNumber,
+		Selection,
+		PriceStatus,
+		strFutureMonth,
+		strAccountNumber,
+		dblNoOfContract,
+		strTradeNo,
+		TransactionDate,
+		TranType,
+		CustVendor,
+		dblNoOfLot,
+		dblQuantity,
+		intOrderByHeading,
+		intOrderBySubHeading,
+		intContractHeaderId,
+		intFutOptTransactionHeaderId,
+		strProductType,
+		strProductLine,
+		strShipmentPeriod,
+		strLocation,
+		strOrigin,
+		intItemId,
+		strItemNo,
+		strItemDescription
 		)
 	EXEC uspRKRiskPositionInquiry @intCommodityId = @intCommodityId,
 		@intCompanyLocationId = @intCompanyLocationId,
@@ -342,44 +330,40 @@ BEGIN
 		intBookId INT,
 		strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		intSubBookId INT,
-		strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-		strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-		strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 
 	INSERT INTO @MonthOrder (
-		intRowNumFinal
-		, intRowNumber
-		, strGroup
-		, Selection
-		, PriceStatus
-		, strFutureMonth
-		, strAccountNumber
-		, dblNoOfContract
-		, strTradeNo
-		, TransactionDate
-		, TranType
-		, CustVendor
-		, dblNoOfLot
-		, dblQuantity
-		, intOrderByHeading
-		, intContractHeaderId
-		, intFutOptTransactionHeaderId
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook
-		, strCertificationName
-		, strCropYear
-	)
+		intRowNumFinal,
+		intRowNumber,
+		strGroup,
+		Selection,
+		PriceStatus,
+		strFutureMonth,
+		strAccountNumber,
+		dblNoOfContract,
+		strTradeNo,
+		TransactionDate,
+		TranType,
+		CustVendor,
+		dblNoOfLot,
+		dblQuantity,
+		intOrderByHeading,
+		intContractHeaderId,
+		intFutOptTransactionHeaderId,
+		strProductType,
+		strProductLine,
+		strShipmentPeriod,
+		strLocation,
+		strOrigin,
+		intItemId,
+		strItemNo,
+		strItemDescription,
+		intBookId,
+		strBook,
+		intSubBookId,
+		strSubBook
+		)
 	EXEC uspRKRiskPositionInquiryBySummary @intCommodityId = @intCommodityId,
 		@intCompanyLocationId = @intCompanyLocationId,
 		@intFutureMarketId = @intFutureMarketId,
@@ -397,8 +381,6 @@ BEGIN
 
 	IF OBJECT_ID('tempdb..#temp') IS NOT NULL
 		DROP TABLE #temp
-	IF OBJECT_ID('tempdb..#temp1') IS NOT NULL
-		DROP TABLE #temp1
 
 	SELECT intRowNumber1 intRowNumber,
 		strGroup,
