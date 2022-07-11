@@ -881,7 +881,7 @@ OUTER APPLY (
 		,strLocationName
 		,strUOM
 	FROM @StorageObligationData 
-	WHERE strLabel = 'TOTAL STORAGE OBLIGATION'
+	WHERE strLabel LIKE '%BALANCE'
 		AND intCommodityId = A.intCommodityId
 		AND intCompanyLocationId = A.intCompanyLocationId
 	GROUP BY strCommodityCode
@@ -974,6 +974,7 @@ INNER JOIN @Locs LO
 	ON LO.intId = SL.intLocationId
 WHERE strBucketType = 'Company Owned'
 	AND SL.intCommodityId = ISNULL(@intCommodityId,SL.intCommodityId)
+	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), SL.dtmTransactionDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
 GROUP BY SL.intCommodityId
 	,SL.strCommodityCode
 	,intLocationId
@@ -985,7 +986,7 @@ SELECT
 	(SELECT MAX(intRowNum) FROM @InventoryData) + 1
 	,'COMPANY-OWNED (PAID)'
 	,'+'
-	,dblDecrease
+	,dblIncrease
 	,strCommodityCode
 	,intCommodityId
 	,intLocationId
@@ -998,7 +999,7 @@ SELECT
 	(SELECT MAX(intRowNum) FROM @InventoryData) + 1
 	,'COMPANY-OWNED (PRICED BUT NOT PAID)'
 	,'-'
-	,dblIncrease
+	,dblDecrease
 	,strCommodityCode
 	,intCommodityId
 	,intLocationId
