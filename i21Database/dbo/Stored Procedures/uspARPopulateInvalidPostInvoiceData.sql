@@ -2290,7 +2290,8 @@ BEGIN
 		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
 		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightRevenueAccount], 0, 1, 0)
 	) OVERRIDESEGMENT
-	WHERE I.dblFreightCharge > 0
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
+	AND I.dblFreightCharge > 0
 	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 	AND I.strSessionId = @strSessionId
 
@@ -2303,7 +2304,7 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
-	-- Freight Expense Account
+	-- Location Freight Expense Account
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
 		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
@@ -2311,7 +2312,7 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the location of the AR Account. Please add ' +OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
@@ -2322,7 +2323,8 @@ BEGIN
 		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
 		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightExpenseAccount], 0, 1, 0)
 	) OVERRIDESEGMENT
-	WHERE I.dblFreightCharge > 0
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0 
+	AND I.dblFreightCharge > 0
 	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 	AND I.strSessionId = @strSessionId
 
