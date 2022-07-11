@@ -293,6 +293,7 @@ GROUP BY
       ,chk.[intCheckoutCurrentProcess]
       ,chk.[intConcurrencyId]
 	  ,Inv.[ysnPosted]
+      ,chk.[ysnStopCondition]
 	  ,vst.[intStoreId]
 	  ,vst.[intEntityId]
 	  ,vst.[intStoreNo]
