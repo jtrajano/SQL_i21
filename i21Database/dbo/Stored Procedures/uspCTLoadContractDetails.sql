@@ -629,8 +629,6 @@ BEGIN TRY
 		, CD.dblHistoricalRate
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
-		, intVendorLocationId = null
-		, strVendorLocation = null
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId

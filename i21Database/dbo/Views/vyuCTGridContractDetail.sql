@@ -333,7 +333,6 @@ AS
 			, CD.dblHistoricalRate
 			, CD.intHistoricalRateTypeId
 			, strHistoricalRateType = HRT.strCurrencyExchangeRateType
-			, intVendorLocationId = null
 			, strVendorLocation = null
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
