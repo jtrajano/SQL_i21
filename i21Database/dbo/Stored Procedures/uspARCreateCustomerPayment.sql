@@ -80,9 +80,15 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustom
 	END
 
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustomerId AND ysnActive = 1)
-	BEGIN		
+	BEGIN
+		DECLARE @strCustomerNumber  NVARCHAR(100) = NULL
+			  , @strCustomerErrMsg	NVARCHAR(100) = NULL
+
+		SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM tblARCustomer WHERE intEntityId = @EntityCustomerId
+		SET @strCustomerErrMsg = 'Customer ' + ISNULL(@strCustomerNumber, '') + ' is not active!'
+
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('The customer provided is not active!', 16, 1);
+			RAISERROR(@strCustomerErrMsg, 16, 1);
 		RETURN 0;
 	END	
 
