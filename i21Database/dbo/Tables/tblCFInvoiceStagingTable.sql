@@ -37,7 +37,7 @@
     [strTransactionId]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTransactionType]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceReportNumber]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strTempInvoiceReportNumber]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strTempInvoiceReportNumber]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strMiscellaneous]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strName]                         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCardNumber]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
