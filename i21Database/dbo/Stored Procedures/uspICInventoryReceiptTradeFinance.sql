@@ -254,6 +254,8 @@ BEGIN
 			, intConcurrencyId 
 			, intContractHeaderId 
 			, intContractDetailId 
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
 		)
 		SELECT 
 			strAction = @strAction + ' ' + CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
@@ -284,8 +286,8 @@ BEGIN
 			, intSublimitId = r.intSublimitTypeId
 			, strSublimit = fld.strLimitDescription
 			, dblSublimit = fld.dblLimit
-			, strBankTradeReference = r.strBankReferenceNo
-			, dblFinanceQty = ri.dblQty
+			, strBankTradeReference = r.strReferenceNo --r.strBankReferenceNo
+			, dblFinanceQty = ISNULL(contractIR.dblQty, directIR.dblQty)
 			, dblFinancedAmount = r.dblGrandTotal
 			, strBankApprovalStatus = r.strApprovalStatus
 			, dtmAppliedToTransactionDate = GETDATE()
@@ -301,6 +303,8 @@ BEGIN
 			, intConcurrencyId = 1
 			, intContractHeaderId = receiptContract.intContractHeaderId
 			, intContractDetailId = receiptContract.intContractDetailId
+			, intOverrideFacilityValuation = bvr.intBankValuationRuleId
+			, strOverrideFacilityValuation = bvr.strBankValuationRule
 		FROM 
 			tblICInventoryReceipt r LEFT JOIN tblTRFTradeFinance tf
 				ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
@@ -342,7 +346,20 @@ BEGIN
 						AND stockUOM.ysnStockUnit = 1
 				WHERE
 					ri.intInventoryReceiptId = r.intInventoryReceiptId
-			) ri
+					AND ISNULL(r.intSourceType, 0) = 0
+			) directIR
+		   OUTER APPLY (
+				SELECT 
+					dblQty = SUM(ri.dblOpenReceive)
+				FROM 
+					tblICInventoryReceiptItem ri 
+					LEFT JOIN tblICItemUOM stockUOM
+					ON stockUOM.intItemId = ri.intItemId
+					AND stockUOM.ysnStockUnit = 1
+				WHERE
+					ri.intInventoryReceiptId = r.intInventoryReceiptId
+					AND (r.intSourceType <> 0 OR r.intSourceType IS NULL) 
+		   ) contractIR
 			OUTER APPLY (
 				SELECT TOP 1 
 					ri.intContractHeaderId
@@ -352,6 +369,14 @@ BEGIN
 				WHERE
 					ri.intInventoryReceiptId = r.intInventoryReceiptId
 			) receiptContract
+			--OUTER APPLY (
+			--	SELECT TOP 1 
+			--		lg.strTradeFinanceReferenceNo
+			--	FROM 
+			--		tblLGLoad lg
+			--	WHERE
+			--		lg.strTradeFinanceNo = r.strTradeFinanceNumber
+			--) logistics
 		WHERE
 			r.intInventoryReceiptId = @ReceiptId
 
