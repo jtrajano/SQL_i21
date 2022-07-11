@@ -13,6 +13,9 @@ GO
 	BEGIN
 		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)
 	END
+
+	IF EXISTS (SELECT 1 FROM tblGLAccountStructure WHERE strStructureName = N'Company' AND strType=N'Segment')
+		UPDATE tblGLAccountStructure SET intStructureType = 6 WHERE LOWER(strStructureName) = N'company' AND strType=N'Segment'
 GO
 	PRINT N'END INSERT DEFAULT ACCOUNT STRUCTURE'
 GO
