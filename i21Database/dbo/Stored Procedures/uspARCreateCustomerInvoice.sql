@@ -342,9 +342,14 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) LEFT OUTER JOIN [
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN		
+		DECLARE @strCustomerNumber  NVARCHAR(100) = NULL
+			  , @strCustomerErrMsg	NVARCHAR(100) = NULL
+
+		SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM tblARCustomer WHERE intEntityId = @EntityCustomerId
+		SET @strCustomerErrMsg = 'Customer ' + ISNULL(@strCustomerNumber, '') + ' is not active!'
+
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('The entity Id provided does not exists!', 16, 1);	
-		SET @ErrorMessage = 'The entity Id provided does not exists!'
+			RAISERROR(@strCustomerErrMsg, 16, 1);
 		RETURN 0;
 	END
 
