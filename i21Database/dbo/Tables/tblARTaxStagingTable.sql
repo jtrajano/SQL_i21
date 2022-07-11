@@ -75,5 +75,6 @@
 	[dblStateSalesTax]					NUMERIC(18, 6)	NULL DEFAULT 0,
 	[dblTonnageTax]						NUMERIC(18, 6)	NULL DEFAULT 0,
 	[ysnTaxExempt]						BIT				NULL DEFAULT ((0)), 
-    [blbCompanyLogo] VARBINARY(MAX) NULL,	
+    [blbCompanyLogo]					VARBINARY(MAX) NULL,
+	[strLogoType]						NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL
 )
