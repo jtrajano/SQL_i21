@@ -31,6 +31,7 @@ DECLARE @dtmTransactionDateTo			DATETIME
 	  , @strSources						NVARCHAR(MAX)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
+	  , @blbLogo						VARBINARY(MAX)
 
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -124,35 +125,37 @@ IF @dtmTransactionDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmTransactionDateFrom = CAST(-53690 AS DATETIME)
 
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+
 DELETE FROM tblARSalesTrendStagingTable
 
 INSERT INTO tblARSalesTrendStagingTable
-SELECT *
-,CASE WHEN intMonth = 1  THEN dblQuantity   ELSE 0 END AS dblJanuary
-,CASE WHEN intMonth = 2  THEN dblQuantity   ELSE 0 END AS dblFebruary
-,CASE WHEN intMonth = 3  THEN dblQuantity   ELSE 0 END AS dblMarch
-,CASE WHEN intMonth = 4  THEN dblQuantity   ELSE 0 END AS dblApril
-,CASE WHEN intMonth = 5  THEN dblQuantity   ELSE 0 END AS dblMay
-,CASE WHEN intMonth = 6  THEN dblQuantity   ELSE 0 END AS dblJune
-,CASE WHEN intMonth = 7  THEN dblQuantity   ELSE 0 END AS dblJuly
-,CASE WHEN intMonth = 8  THEN dblQuantity   ELSE 0 END AS dblAugust
-,CASE WHEN intMonth = 9  THEN dblQuantity   ELSE 0 END AS dblSeptember
-,CASE WHEN intMonth = 10 THEN dblQuantity   ELSE 0 END AS dblOctober
-,CASE WHEN intMonth = 11 THEN dblQuantity   ELSE 0 END AS dblNovember
-,CASE WHEN intMonth = 12 THEN dblQuantity   ELSE 0 END AS dblDecember
-,CASE WHEN intMonth = 1  THEN dblSalesAmount ELSE 0 END AS dblSalesJanuary
-,CASE WHEN intMonth = 2  THEN dblSalesAmount ELSE 0 END AS dblSalesFebruary
-,CASE WHEN intMonth = 3  THEN dblSalesAmount ELSE 0 END AS dblSalesMarch
-,CASE WHEN intMonth = 4  THEN dblSalesAmount ELSE 0 END AS dblSalesApril
-,CASE WHEN intMonth = 5  THEN dblSalesAmount ELSE 0 END AS dblSalesMay
-,CASE WHEN intMonth = 6  THEN dblSalesAmount ELSE 0 END AS dblSalesJune
-,CASE WHEN intMonth = 7  THEN dblSalesAmount ELSE 0 END AS dblSalesJuly
-,CASE WHEN intMonth = 8  THEN dblSalesAmount ELSE 0 END AS dblSalesAugust
-,CASE WHEN intMonth = 9  THEN dblSalesAmount ELSE 0 END AS dblSalesSeptember
-,CASE WHEN intMonth = 10 THEN dblSalesAmount ELSE 0 END AS dblSalesOctober
-,CASE WHEN intMonth = 11 THEN dblSalesAmount ELSE 0 END AS dblSalesNovember
-,CASE WHEN intMonth = 12 THEN dblSalesAmount ELSE 0 END AS dblSalesDecember
-,CASE intMonth
+SELECT ARTS.*
+,CASE WHEN ARTS.intMonth = 1  THEN dblQuantity   ELSE 0 END AS dblJanuary
+,CASE WHEN ARTS.intMonth = 2  THEN dblQuantity   ELSE 0 END AS dblFebruary
+,CASE WHEN ARTS.intMonth = 3  THEN dblQuantity   ELSE 0 END AS dblMarch
+,CASE WHEN ARTS.intMonth = 4  THEN dblQuantity   ELSE 0 END AS dblApril
+,CASE WHEN ARTS.intMonth = 5  THEN dblQuantity   ELSE 0 END AS dblMay
+,CASE WHEN ARTS.intMonth = 6  THEN dblQuantity   ELSE 0 END AS dblJune
+,CASE WHEN ARTS.intMonth = 7  THEN dblQuantity   ELSE 0 END AS dblJuly
+,CASE WHEN ARTS.intMonth = 8  THEN dblQuantity   ELSE 0 END AS dblAugust
+,CASE WHEN ARTS.intMonth = 9  THEN dblQuantity   ELSE 0 END AS dblSeptember
+,CASE WHEN ARTS.intMonth = 10 THEN dblQuantity   ELSE 0 END AS dblOctober
+,CASE WHEN ARTS.intMonth = 11 THEN dblQuantity   ELSE 0 END AS dblNovember
+,CASE WHEN ARTS.intMonth = 12 THEN dblQuantity   ELSE 0 END AS dblDecember
+,CASE WHEN ARTS.intMonth = 1  THEN dblSalesAmount ELSE 0 END AS dblSalesJanuary
+,CASE WHEN ARTS.intMonth = 2  THEN dblSalesAmount ELSE 0 END AS dblSalesFebruary
+,CASE WHEN ARTS.intMonth = 3  THEN dblSalesAmount ELSE 0 END AS dblSalesMarch
+,CASE WHEN ARTS.intMonth = 4  THEN dblSalesAmount ELSE 0 END AS dblSalesApril
+,CASE WHEN ARTS.intMonth = 5  THEN dblSalesAmount ELSE 0 END AS dblSalesMay
+,CASE WHEN ARTS.intMonth = 6  THEN dblSalesAmount ELSE 0 END AS dblSalesJune
+,CASE WHEN ARTS.intMonth = 7  THEN dblSalesAmount ELSE 0 END AS dblSalesJuly
+,CASE WHEN ARTS.intMonth = 8  THEN dblSalesAmount ELSE 0 END AS dblSalesAugust
+,CASE WHEN ARTS.intMonth = 9  THEN dblSalesAmount ELSE 0 END AS dblSalesSeptember
+,CASE WHEN ARTS.intMonth = 10 THEN dblSalesAmount ELSE 0 END AS dblSalesOctober
+,CASE WHEN ARTS.intMonth = 11 THEN dblSalesAmount ELSE 0 END AS dblSalesNovember
+,CASE WHEN ARTS.intMonth = 12 THEN dblSalesAmount ELSE 0 END AS dblSalesDecember
+,CASE ARTS.intMonth
 	WHEN 1 THEN 'January' 
 	WHEN 2 THEN 'February' 
 	WHEN 3 THEN 'March' 
@@ -166,7 +169,10 @@ SELECT *
 	WHEN 11 THEN 'November' 
 	WHEN 12 THEN 'December' 
 	ELSE '' END AS strMonth
-FROM vyuARTransactionSummary 
+, strLogoType = CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+, blbLogo  = ISNULL(SMLP.imgLogo, @blbLogo)
+FROM vyuARTransactionSummary ARTS
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARTS.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
 WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDateTo
   AND (intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCustomerIds, '|^|', ','))) OR ISNULL(@strCustomerIds, '') = '')
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
@@ -180,7 +186,7 @@ WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDate
 			FROM tblICItem
 			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
 		)) OR ISNULL(@strItemDescriptions, '') = '')
-  AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
+  AND (ARTS.intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
   AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
 

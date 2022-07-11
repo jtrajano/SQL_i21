@@ -142,6 +142,7 @@ SELECT
 	,strIBAN				= CMBA.strIBAN
 	,strSWIFT				= CMBA.strSWIFT
 	,strBICCode				= CMBA.strBICCode
+	,blbFooterLogo          = SMLPF.imgLogo
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
@@ -153,6 +154,7 @@ LEFT JOIN tblSMTerm SMT WITH (NOLOCK) ON ARI.intTermId = SMT.intTermID
 LEFT JOIN tblCMBankAccount CMBA WITH (NOLOCK) ON ISNULL(ISNULL(ARI.intPayToCashBankAccountId, ARI.intDefaultPayToBankAccountId), 0) = CMBA.intBankAccountId
 LEFT JOIN tblCMBank CMB WITH (NOLOCK) ON CMBA.intBankId = CMB.intBankId
 LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
+LEFT JOIN tblSMLogoPreferenceFooter SMLPF ON SMLPF.intCompanyLocationId = ARI.intCompanyLocationId AND (SMLPF.ysnARInvoice = 1 OR SMLPF.ysnDefault = 1)
 WHERE ARI.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
 OR ARI.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
 OR ARI.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
