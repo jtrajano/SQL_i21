@@ -284,8 +284,8 @@ BEGIN
 			, intSublimitId = r.intSublimitTypeId
 			, strSublimit = fld.strLimitDescription
 			, dblSublimit = fld.dblLimit
-			, strBankTradeReference = r.strBankReferenceNo
-			, dblFinanceQty = ri.dblQty
+			, strBankTradeReference = r.strReferenceNo --r.strBankReferenceNo
+			, dblFinanceQty = ISNULL(contractIR.dblQty, directIR.dblQty)
 			, dblFinancedAmount = r.dblGrandTotal
 			, strBankApprovalStatus = r.strApprovalStatus
 			, dtmAppliedToTransactionDate = GETDATE()
@@ -342,7 +342,20 @@ BEGIN
 						AND stockUOM.ysnStockUnit = 1
 				WHERE
 					ri.intInventoryReceiptId = r.intInventoryReceiptId
-			) ri
+					AND ISNULL(r.intSourceType, 0) = 0
+			) directIR
+		   OUTER APPLY (
+				SELECT 
+					dblQty = SUM(ri.dblOpenReceive)
+				FROM 
+					tblICInventoryReceiptItem ri 
+					LEFT JOIN tblICItemUOM stockUOM
+					ON stockUOM.intItemId = ri.intItemId
+					AND stockUOM.ysnStockUnit = 1
+				WHERE
+					ri.intInventoryReceiptId = r.intInventoryReceiptId
+					AND (r.intSourceType <> 0 OR r.intSourceType IS NULL) 
+		   ) contractIR
 			OUTER APPLY (
 				SELECT TOP 1 
 					ri.intContractHeaderId
@@ -352,6 +365,14 @@ BEGIN
 				WHERE
 					ri.intInventoryReceiptId = r.intInventoryReceiptId
 			) receiptContract
+			--OUTER APPLY (
+			--	SELECT TOP 1 
+			--		lg.strTradeFinanceReferenceNo
+			--	FROM 
+			--		tblLGLoad lg
+			--	WHERE
+			--		lg.strTradeFinanceNo = r.strTradeFinanceNumber
+			--) logistics
 		WHERE
 			r.intInventoryReceiptId = @ReceiptId
 
