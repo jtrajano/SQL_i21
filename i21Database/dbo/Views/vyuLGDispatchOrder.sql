@@ -15,13 +15,16 @@ SELECT
 	,DO.intOriginType
 	,DO.intVendorId
 	,DO.intVendorLocationId
+	,DO.intTerminalControlNumberId
 	,DO.intCompanyLocationId
 	,DO.intCompanyLocationSubLocationId
 	,strOriginType = CASE (DO.intOriginType) 
 		WHEN 1 THEN 'Location' 
-		ELSE 'Terminal' END
+		ELSE 'Terminal' END COLLATE Latin1_General_CI_AS
 	,strVendor = V.strName
 	,strVendorLocation = VL.strLocationName
+	,strTerminalName = TCN.strName
+	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strCompanyLocation = CL.strLocationName
 	,strSubLocation = CLSL.strSubLocationName
 	,strFromAddress = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strAddress 
@@ -77,4 +80,6 @@ FROM tblLGDispatchOrder DO
 	LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = DO.intVendorLocationId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DO.intCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = DO.intCompanyLocationSubLocationId
+	LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = VL.intEntityLocationId
+	LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = SP.intTerminalControlNumberId
 GO
