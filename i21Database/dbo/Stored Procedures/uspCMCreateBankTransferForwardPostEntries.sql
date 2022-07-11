@@ -254,10 +254,10 @@ BEGIN
         ,[dtmDate]              = @dtmDate
         ,[strBatchId]           = @strBatchId    
         ,[intAccountId]         = A.intGLAccountIdTo
-        ,[dblDebit]             = dblAmountSettlementTo
+        ,[dblDebit]             = ISNULL(dblAmountSettlementTo, dblAmountTo)
         ,[dblCredit]            = 0     
         ,[dblDebitForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo   
-                                    THEN dblAmountSettlementTo ELSE  dblAmountForeignTo END  
+                                    THEN ISNULL(dblAmountSettlementTo, dblAmountTo) ELSE  dblAmountForeignTo END  
         ,[dblCreditForeign]     = 0    
         ,[dblDebitUnit]         = 0    
         ,[dblCreditUnit]        = 0    
@@ -289,10 +289,10 @@ BEGIN
         ,[strBatchId]            = @strBatchId    
         ,[intAccountId]          = A.intGLAccountIdFrom
         ,[dblDebit]              = 0    
-        ,[dblCredit]             = dblAmountSettlementFrom
+        ,[dblCredit]             = ISNULL(dblAmountSettlementFrom, dblAmountFrom)
         ,[dblDebitForeign]       = 0    
         ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom   
-                                    THEN dblAmountSettlementFrom ELSE  dblAmountForeignFrom END  
+                                    THEN ISNULL(dblAmountSettlementFrom, dblAmountFrom) ELSE  dblAmountForeignFrom END  
         ,[dblDebitUnit]          = 0    
         ,[dblCreditUnit]         = 0    
         ,[strDescription]        = A.strDescription    
