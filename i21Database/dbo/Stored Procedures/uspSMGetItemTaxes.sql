@@ -46,7 +46,9 @@ BEGIN
 				SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForVendor](@EntityId, @TaxLocationId, @ItemId, @TaxLocationId, @FreightTermId, @FOB), 0)
 		END
 
-		SET @TaxGroupId = CASE WHEN @NewTaxGroupId = 0 THEN @OriginalTaxGroupId ELSE @NewTaxGroupId END
+		IF @NewTaxGroupId <> 0
+			SET @TaxGroupId = @NewTaxGroupId
+
 		SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @NewTaxGroupId THEN 1 ELSE 0 END
 	END
 	ELSE
