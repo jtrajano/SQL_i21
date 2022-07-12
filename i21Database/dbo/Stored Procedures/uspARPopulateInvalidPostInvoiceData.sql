@@ -1394,6 +1394,7 @@ BEGIN
 	WHERE I.intItemId IS NULL
 	  AND I.strItemDescription IS NOT NULL
 	  AND CL.intSalesAccount IS NULL
+	  AND I.intSalesAccountId IS NULL
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
