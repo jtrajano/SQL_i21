@@ -183,6 +183,7 @@ SELECT
 	,intBorrowingFacilityLimitId		= INV.intBorrowingFacilityLimitId
 	,strBorrowingFacilityLimit			= BFL.strBorrowingFacilityLimit
 	,intBorrowingFacilityLimitDetailId	= INV.intBorrowingFacilityLimitDetailId
+	,strBorrowingFacilityLimitDetail	= BFLD.strLimitDescription
 	,strBankReferenceNo					= INV.strBankReferenceNo
 	,strBankTransactionId				= INV.strBankTransactionId
 	,dblLoanAmount						= INV.dblLoanAmount
@@ -196,8 +197,8 @@ SELECT
 	,ysnIntraCompany					= CASE WHEN ISNULL(INV.ysnIntraCompany,0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries,0) END
 	,strGoodsStatus						= INV.strGoodsStatus
 	,dblFreightCharge					= INV.dblFreightCharge
-	,strFreightCompanySegment			= INV.strFreightCompanySegment
-	,strFreightLocationSegment			= INV.strFreightLocationSegment
+	,strFreightCompanySegment			= GLCAI.strDescription
+	,strFreightLocationSegment			= GLLAI.strDescription
 	,intTaxLocationId                  	= INV.intTaxLocationId
 	,strTaxLocation						= TAXLOCATION.strLocationName
 	,strTaxPoint                        = INV.strTaxPoint
@@ -412,6 +413,7 @@ LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId,0)
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId,0)
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId,0)
 LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId,0)
+LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = ISNULL(INV.intBorrowingFacilityLimitDetailId,0)
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId,0)
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 OUTER APPLY(
@@ -423,3 +425,17 @@ OUTER APPLY(
 	SELECT TOP 1 ysnAllowIntraCompanyEntries
 	FROM tblARCompanyPreference
 ) ARCOMPANYPREFERENCE
+OUTER APPLY (
+	SELECT TOP 1 
+		 intAccountId
+		,strDescription 
+	FROM vyuGLCompanyAccountId WITH (NOLOCK)
+	WHERE intAccountSegmentId = INV.intFreightCompanySegment
+) GLCAI
+OUTER APPLY (
+	SELECT TOP 1 
+		 intAccountId
+		,strDescription 
+	FROM vyuGLLocationAccountId WITH (NOLOCK)
+	WHERE intAccountSegmentId = INV.intFreightLocationSegment
+) GLLAI

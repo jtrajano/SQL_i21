@@ -9,6 +9,8 @@ SELECT
 	,strLocationName	= LOCATION.strLocationName
 	,strCompanyName		= COMPANY.strCompanyName
 	,strCompanyAddress	= COMPANY.strCompanyAddress
+	,blbLogo			= ISNULL(SMLP.imgLogo, dbo.fnSMGetCompanyLogo('Header'))
+	,strLogoType		= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 FROM (
 	SELECT DISTINCT 
 		 I.intEntityCustomerId
@@ -119,3 +121,4 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = CREDITS.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)

@@ -4,6 +4,7 @@
 	,@intItemId AS INT = NULL 
 	,@intEntityVendorId AS INT = NULL
 	,@intEntityLocationId AS INT = NULL
+	,@strFOB AS NVARCHAR(100) = NULL 
 	,@intTaxGroupId INT OUTPUT
 	,@strTaxGroup NVARCHAR(50) OUTPUT
 AS
@@ -25,7 +26,7 @@ BEGIN
 					,@intItemId				--,@ItemId
 					,@intEntityLocationId	--,@VendorLocationId
 					,@intFreightTermId		--,@FreightTermId
-					,default				--,@FOB
+					,@strFOB				--,@FOB
 				)			
 			) taxHierarchy
 			INNER JOIN tblSMTaxGroup taxGroup

@@ -157,9 +157,9 @@
 	[strGoodsStatus]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
 	[strTicketNumbers]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
 	[strCustomerReferences]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
-	[dblFreightCharge]					NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
-	[strFreightCompanySegment]			NVARCHAR(100)									NULL,
-	[strFreightLocationSegment]			NVARCHAR(100)									NULL,
+	[dblFreightCharge]					NUMERIC(18, 6)									NULL		DEFAULT ((0)),
+	[intFreightCompanySegment]			INT												NULL,
+	[intFreightLocationSegment]			INT												NULL,
 	[intTaxLocationId]					INT												NULL,
 	[strTaxPoint]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[strSourcedFrom]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
@@ -251,6 +251,9 @@ CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmPostDate]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmDate]
 	ON [dbo].[tblARInvoice] ([dtmDate])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intTransactionId]
+	ON [dbo].[tblARInvoice] ([intTransactionId])
 
 
 --TRIGGERS INSERT

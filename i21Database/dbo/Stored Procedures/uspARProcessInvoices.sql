@@ -234,6 +234,9 @@ DECLARE  @Id									INT
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
+		,@FreightCharge							NUMERIC(18, 6)
+		,@FreightCompanySegment					INT
+		,@FreightLocationSegment				INT
 		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
@@ -334,6 +337,7 @@ DECLARE  @Id									INT
 		,@ItemQualityPremium					NUMERIC(18, 6)
 		,@ItemOptionalityPremium				NUMERIC(18, 6)
 		,@ItemComputedGrossPrice				NUMERIC(18, 6)
+		,@ItemOverrideTaxGroup					BIT
 
 --INSERT
 BEGIN TRY
@@ -457,6 +461,9 @@ BEGIN
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
+		,@FreightCharge					= [dblFreightCharge]
+		,@FreightCompanySegment			= [intFreightCompanySegment]
+		,@FreightLocationSegment		= [intFreightLocationSegment]
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
 
@@ -550,6 +557,7 @@ BEGIN
 		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
 		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
 		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
+		,@ItemOverrideTaxGroup			= (CASE WHEN @GroupingOption = 0 THEN [ysnOverrideTaxGroup] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -660,10 +668,10 @@ BEGIN
 	IF ISNULL(@Type, '') = ''
 		SET @Type = 'Standard'
 	
-	IF ISNULL(@LoadDistributionHeaderId, 0) > 0
-		BEGIN
-			SET @Type = 'Transport Delivery'
-		END
+	IF (ISNULL(@LoadDistributionHeaderId, 0) > 0 AND (ISNULL(@SourceTransaction,'') <> 'Transport Load')) OR ((ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@Type, '') = ''))
+	BEGIN
+		SET @Type = 'Transport Delivery'
+	END
 
 	SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 
@@ -745,6 +753,9 @@ BEGIN
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
+			,@FreightCharge					= @FreightCharge
+			,@FreightCompanySegment			= @FreightCompanySegment
+			,@FreightLocationSegment		= @FreightLocationSegment
 			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
@@ -838,6 +849,7 @@ BEGIN
 			,@ItemQualityPremium			= @ItemQualityPremium
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1023,6 +1035,7 @@ BEGIN
 					,@ItemQualityPremium            = [dblQualityPremium]
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+					,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1127,6 +1140,7 @@ BEGIN
 						,@ItemQualityPremium            = @ItemQualityPremium
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+						,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1513,6 +1527,9 @@ BEGIN TRY
 			,@Recap							= [ysnRecap] 
 			,@Post							= [ysnPost]
 			,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
+			,@FreightCharge					= [dblFreightCharge]
+			,@FreightCompanySegment			= [intFreightCompanySegment]
+			,@FreightLocationSegment		= [intFreightLocationSegment]
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1654,8 +1671,11 @@ BEGIN TRY
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
 			,[intTruckDriverId]			= @TruckDriverId
-			,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
+			,[intTruckDriverReferenceId]= @TruckDriverReferenceId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
+			,[dblFreightCharge]			= @FreightCharge 
+			,[intFreightCompanySegment]	= @FreightCompanySegment
+			,[intFreightLocationSegment]= @FreightLocationSegment
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN
@@ -1810,6 +1830,7 @@ BEGIN TRY
 						,@ItemQualityPremium            = [dblQualityPremium]
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+						,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1906,6 +1927,7 @@ BEGIN TRY
 							,@ItemQualityPremium            = @ItemQualityPremium
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+							,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN

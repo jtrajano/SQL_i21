@@ -8,6 +8,7 @@
 	[intCompanyLocationSubLocationId] INT NULL,
 	[intVendorId] INT NULL, 
 	[intVendorLocationId] INT NULL,
+	[intTerminalControlNumberId] INT NULL,
 	[intEntityShipViaId] INT NULL,
 	[intEntityShipViaTruckId] INT NULL, 
 	[intEntityShipViaTrailerId] INT NULL, 

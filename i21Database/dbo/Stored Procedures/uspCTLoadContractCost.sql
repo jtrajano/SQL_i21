@@ -66,15 +66,22 @@ AS
 							WHEN CC.strCostMethod = 'Per Container'
 								THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							WHEN CC.strCostMethod = 'Percentage'
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
-									* (
-										CASE WHEN ISNULL(CD.dblCashPrice, 0.00) <> 0.00 THEN CD.dblCashPrice
-																 WHEN CD.intPricingTypeId = 2 THEN
-																	CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT,1) THEN ISNULL(CD.dblBudgetPrice,0) ELSE ISNULL(FSPM.dblLastSettle,0) + CD.dblBasis END
-															ELSE NULL END
-																		
-									/ (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
-									* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+								THEN 
+
+									CASE WHEN CD.intPricingTypeId <> 2 THEN
+										dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
+										* (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+										* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+									ELSE
+										CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT, 1) THEN  
+											CD.dblTotalBudget  * (CC.dblRate/100) * ISNULL(CC.dblFX, 1)
+										ELSE
+											dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
+											* ((FSPM.dblLastSettle + CD.dblBasis) / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+											* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+										END
+									END
+
 							END)
 					/ (CASE WHEN ISNULL(CY.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY.intCent, 1) ELSE 1 END)
 		, RT.strCurrencyExchangeRateType

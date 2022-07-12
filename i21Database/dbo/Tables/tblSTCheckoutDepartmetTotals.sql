@@ -29,5 +29,8 @@
     CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
     CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [dbo].[tblSTCheckoutHeader] ([intCheckoutId]) ON DELETE CASCADE
 );
+GO
 
-
+CREATE NONCLUSTERED INDEX [IX_tblSTCheckoutDepartmetTotals_intCheckoutId]
+    ON [dbo].[tblSTCheckoutDepartmetTotals]([intCheckoutId] ASC);
+GO

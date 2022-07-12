@@ -162,7 +162,11 @@ AS
 			NM.ysnProvisionalVoucher,
 			NM.strProvisionalVoucherIds,
 			CH.ysnPrintCropYear,
-			NM.ysnCheckMissingStandardPriceInContract
+			NM.ysnCheckMissingStandardPriceInContract,
+			CH.ysnSupplyPointContract,
+			CH.ysnQuantityAtHeaderLevel,
+			NM.dblHeaderBalance,
+			NM.dblHeaderAvailable
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY

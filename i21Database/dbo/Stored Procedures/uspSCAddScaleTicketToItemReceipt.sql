@@ -353,16 +353,22 @@ END
 	,[dblForexRate]						= RE.dblForexRate
 	,[ysnInventoryCost]					= IC.ysnInventoryCost
 	,[strCostMethod]					= CASE WHEN CNT.intPricingTypeId = 5 THEN 'Per Unit' ELSE IC.strCostMethod END --case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
-	,[dblRate]							=  CASE
+	,[dblRate]							= 	ROUND(ISNULL((CASE
 												WHEN IC.strCostMethod = 'Per Unit'  OR  ISNULL(CNT.intPricingTypeId, 0) = 5 THEN 
-													
-													(
-														(
-																CASE WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0))    
-																	ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost))  
-																END
-															) / RE.dblQty
-														) * CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END 														
+													-- CASE WHEN ISNULL(CNT.intPricingTypeId, 0) = 5 THEN	
+															(
+																(
+																		CASE WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0))    
+																			ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost))  
+																		END
+																	) / (dbo.fnCalculateQtyBetweenUOM(RE.intItemUOMId, ISNULL(IUOM.intItemUOMId,RE.intItemUOMId), RE.dblQty))
+															) * CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END 		
+													-- 	ELSE
+													-- 		CASE
+													-- 		WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+													-- 		WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+													-- 		END
+													-- END												
 													
 												WHEN IC.strCostMethod = 'Amount' THEN --0
 													CASE
@@ -377,7 +383,7 @@ END
 															
 													END
 												ELSE 0
-											END
+											END),0.0),2)
 
 
 	,[intCostUOMId]						= CASE
@@ -432,6 +438,7 @@ END
 		,intPricingTypeId
 		FROM tblCTContractDetail 
 	) CNT ON CNT.intContractDetailId = RE.intContractDetailId
+	LEFT JOIN tblICItemUOM IUOM ON RE.intItemId = IUOM.intItemId AND GR.intUnitMeasureId = IUOM.intUnitMeasureId
 	WHERE RE.intSourceId = @intTicketId AND (QM.dblDiscountAmount != 0 OR GR.ysnSpecialDiscountCode = 1) AND RE.ysnIsStorage = 0 AND ISNULL(intPricingTypeId,0) IN (0,1,2,5,6) 
 
 		and isnull(@intDeliverySheetId,0 ) = 0
@@ -1635,7 +1642,6 @@ END
 
 
 -- update @OtherCharges set dblRate = isnull(dblRate, 0) where dblRate is null
-
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		,@OtherCharges

@@ -1993,7 +1993,15 @@ BEGIN
 		
 		UPDATE @List
 		SET strFutureMonth = @strFutureMonth
-		WHERE Selection = 'Net market risk' AND strFutureMonth = 'Previous'
+		WHERE Selection = 'Net market risk' AND strFutureMonth = 'Previous' 
+
+		UPDATE @List
+		SET strFutureMonth = 'Previous'
+		WHERE Selection = 'Net market risk' AND strFutureMonth IS NULL
+
+		UPDATE @List
+		SET strFutureMonth = 'Previous'
+		WHERE Selection = 'Switch position' AND strFutureMonth IS NULL
 		
 		IF NOT EXISTS (SELECT * FROM tblRKFutOptTransaction ft
 						JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId

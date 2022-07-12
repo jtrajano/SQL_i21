@@ -1,99 +1,105 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddItemToInvoice]
-	 @InvoiceId						INT	
-	,@ItemId						INT				= NULL
-	,@ItemPrepayTypeId				INT				= 0
-	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
-	,@ItemIsInventory				BIT				= 0
-	,@ItemIsBlended					BIT				= 0
-	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
-	,@RaiseError					BIT				= 0		
-	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
-	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@ItemOrderUOMId				INT				= NULL
-	,@ItemPriceUOMId				INT				= NULL
-	,@ItemQtyOrdered				NUMERIC(38,20)	= 0.000000
-	,@ItemUOMId						INT				= NULL
-	,@ItemQtyShipped				NUMERIC(38,20)	= 0.000000
-	,@ItemUnitQuantity				NUMERIC(38,20)	= 1.000000
-	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
-	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
-	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
-	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
-	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
-	,@ItemPricing					NVARCHAR(250)	= NULL
-	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
-	,@ItemBOLNumber					NVARCHAR(50)	= NULL
-	,@RefreshPrice					BIT				= 0
-	,@AllowRePrice					BIT				= 0
-	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
-	,@ItemFrequency					NVARCHAR(50)	= NULL
-	,@ItemMaintenanceDate			DATETIME		= NULL
-	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
-	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
-	,@ItemTaxGroupId				INT				= NULL
-	,@ItemStorageLocationId			INT				= NULL
-	,@ItemCompanyLocationSubLocationId	INT			= NULL
-	,@RecomputeTax					BIT				= 1
-	,@ItemSCInvoiceId				INT				= NULL
-	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
-	,@ItemInventoryShipmentItemId	INT				= NULL
-	,@ItemInventoryShipmentChargeId	INT				= NULL
-	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
-	,@ItemSubFormula			NVARCHAR(50)	= NULL
-	,@ItemRecipeItemId				INT				= NULL
-	,@ItemRecipeId					INT				= NULL
-	,@ItemSublocationId				INT				= NULL
-	,@ItemPriceFixationDetailId		INT 			= NULL
-	,@ItemCostTypeId				INT				= NULL
-	,@ItemMarginById				INT				= NULL
-	,@ItemCommentTypeId				INT				= NULL
-	,@ItemMargin					NUMERIC(18,6)	= NULL
-	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
-	,@ItemSalesOrderDetailId		INT				= NULL												
-	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
-	,@ContractHeaderId				INT				= NULL
-	,@ContractDetailId				INT				= NULL
-	,@ItemContractHeaderId			INT				= NULL
-	,@ItemContractDetailId			INT				= NULL
-	,@ItemContract					BIT				= 0
-	,@ItemShipmentId				INT				= NULL			
-	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
-	,@ItemWeightUOMId				INT				= NULL	
-	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
-	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
-	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
-	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
-	,@ItemTicketId					INT				= NULL		
-	,@ItemTicketHoursWorkedId		INT				= NULL	
-	,@ItemCustomerStorageId			INT				= NULL		
-	,@ItemSiteDetailId				INT				= NULL		
-	,@ItemLoadDetailId				INT				= NULL			
-	,@ItemLotId						INT				= NULL			
-	,@ItemOriginalInvoiceDetailId	INT				= NULL		
-	,@ItemConversionAccountId		INT				= NULL
-	,@ItemSalesAccountId			INT				= NULL
-	,@ItemSiteId					INT				= NULL												
-	,@ItemBillingBy					NVARCHAR(200)	= NULL
-	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
-	,@ItemNewMeterReading			NUMERIC(18,6)	= 0.000000
-	,@ItemPreviousMeterReading		NUMERIC(18,6)	= 0.000000
-	,@ItemConversionFactor			NUMERIC(18,8)	= 0.00000000
-	,@ItemPerformerId				INT				= NULL
-	,@ItemLeaseBilling				BIT				= 0
-	,@ItemVirtualMeterReading		BIT				= 0
-	,@EntitySalespersonId			INT				= NULL
-	,@ItemCurrencyExchangeRateTypeId	INT				= NULL
-	,@ItemCurrencyExchangeRateId	INT				= NULL
-	,@ItemCurrencyExchangeRate		NUMERIC(18,8)	= 1.000000
-	,@ItemSubCurrencyId				INT				= NULL
-	,@ItemSubCurrencyRate			NUMERIC(18,8)	= 1.000000
-	,@ItemStorageScheduleTypeId		INT				= NULL
-	,@ItemDestinationGradeId		INT				= NULL
-	,@ItemDestinationWeightId		INT				= NULL
-	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
-	,@ItemAddonParent				BIT				= NULL
-	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
+	 @InvoiceId								INT	
+	,@ItemId								INT				= NULL
+	,@ItemPrepayTypeId						INT				= 0
+	,@ItemPrepayRate						NUMERIC(18,6)	= 0.000000
+	,@ItemIsInventory						BIT				= 0
+	,@ItemIsBlended							BIT				= 0
+	,@NewInvoiceDetailId					INT				= NULL			OUTPUT 
+	,@ErrorMessage							NVARCHAR(250)	= NULL			OUTPUT
+	,@RaiseError							BIT				= 0		
+	,@ItemDocumentNumber					NVARCHAR(100)	= NULL			
+	,@ItemDescription						NVARCHAR(500)	= NULL
+	,@ItemOrderUOMId						INT				= NULL
+	,@ItemPriceUOMId						INT				= NULL
+	,@ItemQtyOrdered						NUMERIC(38,20)	= 0.000000
+	,@ItemUOMId								INT				= NULL
+	,@ItemQtyShipped						NUMERIC(38,20)	= 0.000000
+	,@ItemUnitQuantity						NUMERIC(38,20)	= 1.000000
+	,@ItemDiscount							NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount						NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy					NVARCHAR(50)	= NULL
+	,@ItemPrice								NUMERIC(18,6)	= 0.000000	
+	,@ItemUnitPrice							NUMERIC(18,6)	= 0.000000	
+	,@ItemPricing							NVARCHAR(250)	= NULL
+	,@ItemVFDDocumentNumber					NVARCHAR(100)	= NULL
+	,@ItemBOLNumber							NVARCHAR(50)	= NULL
+	,@RefreshPrice							BIT				= 0
+	,@AllowRePrice							BIT				= 0
+	,@ItemMaintenanceType					NVARCHAR(50)	= NULL
+	,@ItemFrequency							NVARCHAR(50)	= NULL
+	,@ItemMaintenanceDate					DATETIME		= NULL
+	,@ItemMaintenanceAmount					NUMERIC(18,6)	= 0.000000
+	,@ItemLicenseAmount						NUMERIC(18,6)	= 0.000000
+	,@ItemTaxGroupId						INT				= NULL
+	,@ItemStorageLocationId					INT				= NULL
+	,@ItemCompanyLocationSubLocationId		INT				= NULL
+	,@RecomputeTax							BIT				= 1
+	,@ItemSCInvoiceId						INT				= NULL
+	,@ItemSCInvoiceNumber					NVARCHAR(50)	= NULL
+	,@ItemInventoryShipmentItemId			INT				= NULL
+	,@ItemInventoryShipmentChargeId			INT				= NULL
+	,@ItemShipmentNumber					NVARCHAR(50)	= NULL
+	,@ItemSubFormula						NVARCHAR(50)	= NULL
+	,@ItemRecipeItemId						INT				= NULL
+	,@ItemRecipeId							INT				= NULL
+	,@ItemSublocationId						INT				= NULL
+	,@ItemPriceFixationDetailId				INT 			= NULL
+	,@ItemCostTypeId						INT				= NULL
+	,@ItemMarginById						INT				= NULL
+	,@ItemCommentTypeId						INT				= NULL
+	,@ItemMargin							NUMERIC(18,6)	= NULL
+	,@ItemRecipeQty							NUMERIC(18,6)	= NULL
+	,@ItemSalesOrderDetailId				INT				= NULL												
+	,@ItemSalesOrderNumber					NVARCHAR(50)	= NULL
+	,@ContractHeaderId						INT				= NULL
+	,@ContractDetailId						INT				= NULL
+	,@ItemContractHeaderId					INT				= NULL
+	,@ItemContractDetailId					INT				= NULL
+	,@ItemContract							BIT				= 0
+	,@ItemShipmentId						INT				= NULL			
+	,@ItemShipmentPurchaseSalesContractId	INT				= NULL	
+	,@ItemWeightUOMId						INT				= NULL	
+	,@ItemWeight							NUMERIC(38,20)	= 0.000000
+	,@ItemStandardWeight					NUMERIC(38,20)	= 0.000000
+	,@ItemShipmentGrossWt					NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentTareWt					NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentNetWt						NUMERIC(38,20)	= 0.000000			
+	,@ItemTicketId							INT				= NULL		
+	,@ItemTicketHoursWorkedId				INT				= NULL	
+	,@ItemCustomerStorageId					INT				= NULL		
+	,@ItemSiteDetailId						INT				= NULL		
+	,@ItemLoadDetailId						INT				= NULL
+	,@ItemLoadDistributionDetailId 			INT 			= NULL
+	,@ItemLotId								INT				= NULL			
+	,@ItemOriginalInvoiceDetailId			INT				= NULL		
+	,@ItemConversionAccountId				INT				= NULL
+	,@ItemSalesAccountId					INT				= NULL
+	,@ItemSiteId							INT				= NULL												
+	,@ItemBillingBy							NVARCHAR(200)	= NULL
+	,@ItemPercentFull						NUMERIC(18,6)	= 0.000000
+	,@ItemNewMeterReading					NUMERIC(18,6)	= 0.000000
+	,@ItemPreviousMeterReading				NUMERIC(18,6)	= 0.000000
+	,@ItemConversionFactor					NUMERIC(18,8)	= 0.00000000
+	,@ItemPerformerId						INT				= NULL
+	,@ItemLeaseBilling						BIT				= 0
+	,@ItemVirtualMeterReading				BIT				= 0
+	,@EntitySalespersonId					INT				= NULL
+	,@ItemCurrencyExchangeRateTypeId		INT				= NULL
+	,@ItemCurrencyExchangeRateId			INT				= NULL
+	,@ItemCurrencyExchangeRate				NUMERIC(18,8)	= 1.000000
+	,@ItemSubCurrencyId						INT				= NULL
+	,@ItemSubCurrencyRate					NUMERIC(18,8)	= 1.000000
+	,@ItemStorageScheduleTypeId				INT				= NULL
+	,@ItemDestinationGradeId				INT				= NULL
+	,@ItemDestinationWeightId				INT				= NULL
+	,@ItemAddonDetailKey					NVARCHAR(100)	= NULL
+	,@ItemAddonParent						BIT				= NULL
+	,@ItemAddOnQuantity						NUMERIC(18,8)	= NULL
+	,@ItemQualityPremium					NUMERIC(18, 6)	= 0.000000
+	,@ItemOptionalityPremium				NUMERIC(18, 6)	= 0.000000
+	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0.000000
+	,@ItemOverrideTaxGroup					BIT				= 0
 AS
 BEGIN
 
@@ -214,6 +220,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
 			,@ItemWeight					= @ItemWeight
+			,@ItemStandardWeight   			= @ItemStandardWeight
 			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 			,@ItemShipmentTareWt			= @ItemShipmentTareWt
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -222,6 +229,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
@@ -234,7 +242,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -247,6 +255,10 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemAddonDetailKey			= @ItemAddonDetailKey
 			,@ItemAddonParent				= @ItemAddonParent
 			,@ItemAddOnQuantity				= @ItemAddOnQuantity
+			,@ItemQualityPremium			= @ItemQualityPremium
+			,@ItemOptionalityPremium		= @ItemOptionalityPremium
+			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -468,7 +480,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
 				,[dblAddOnQuantity]
-				,[intInventoryShipmentChargeId])
+				,[intInventoryShipmentChargeId]
+				,[dblStandardWeight])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -560,6 +573,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemAddonParent
 				,@ItemAddOnQuantity
 				,@ItemInventoryShipmentChargeId
+				,@ItemStandardWeight
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()

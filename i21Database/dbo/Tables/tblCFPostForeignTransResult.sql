@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCFPostForeignTransResult] (
     [intPostForeignTransResultId] INT            IDENTITY (1, 1) NOT NULL,
-    [strBatchId]                  NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strBatchId]                  NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [intTransactionId]            INT            NULL,
     [strTransactionId]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strTransactionType]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,

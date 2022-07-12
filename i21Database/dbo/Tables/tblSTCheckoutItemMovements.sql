@@ -19,5 +19,9 @@
     CONSTRAINT [FK_tblSTCheckoutItemMovements_tblICItemUOM] FOREIGN KEY ([intItemUPCId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId]),
     CONSTRAINT [FK_tblSTCheckoutItemMovements_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [dbo].[tblSTCheckoutHeader] ([intCheckoutId]) ON DELETE CASCADE
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblSTCheckoutItemMovements_intCheckoutId]
+    ON [dbo].[tblSTCheckoutItemMovements]([intCheckoutId] ASC);
+GO
 

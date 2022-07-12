@@ -228,7 +228,7 @@ BEGIN
 			BEGIN
 				INSERT INTO tblSTCheckoutDealerCommission (intCheckoutId, dblCommissionAmount, intConcurrencyId)
 				SELECT		@intCheckoutId,
-							SUM(dblGallonsSold) * (SELECT dblConsCommissionPerGallonOfDealer FROM tblSTStore WHERE intStoreId = @intStoreId),
+							SUM(dblGallonsSold) * (SELECT dblConsCommissionRawMarkup FROM tblSTStore WHERE intStoreId = @intStoreId),
 							1
 				FROM		tblSTCheckoutFuelTotalSold a
 			END

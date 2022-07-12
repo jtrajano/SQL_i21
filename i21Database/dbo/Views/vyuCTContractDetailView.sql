@@ -202,6 +202,7 @@ AS
 		, CD.intAverageUOMId
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
+		, CD.intVendorLocationId
 		, CD.ysnApplyDefaultTradeFinance
 		, CD.ysnTaxOverride
 		, CD.strTaxPoint

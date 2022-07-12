@@ -19,6 +19,8 @@ SELECT -- Load Header
 			THEN 'Pick Lots'
 		WHEN 7
 			THEN 'Pick Lots w/o Contract'
+		WHEN 8
+			THEN 'TM Orders'
 		END COLLATE Latin1_General_CI_AS
 		,strPosition = P.strPosition
 	,L.ysnLoadBased

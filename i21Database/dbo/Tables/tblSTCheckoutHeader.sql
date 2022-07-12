@@ -93,6 +93,7 @@
 	[dblSummaryInfoPopPredispensedAmount] DECIMAL(18, 6) NULL,
     [dblEditableAggregateMeterReadingsForDollars] DECIMAL(18, 6) NULL,
     [dblEditableOutsideFuelDiscount] DECIMAL(18, 6) NULL,
+    [ysnStopCondition] BIT NOT NULL DEFAULT ((0)),
 
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),
