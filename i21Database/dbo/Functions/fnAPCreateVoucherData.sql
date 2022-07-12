@@ -380,7 +380,13 @@ BEGIN
 	--UPDATE PAY FROM BANK ACCOUNT
 	UPDATE A
 	SET A.intPayFromBankAccountId = ISNULL(B.intPayFromBankAccountId, ISNULL(C.intPayFromBankAccountId, ISNULL(D.intPayFromBankAccountId, NULL))),
-		A.strFinancingSourcedFrom = ISNULL(B.strSourcedFrom, ISNULL(C.strSourcedFrom, ISNULL(D.strSourcedFrom, 'None')))
+		A.strFinancingSourcedFrom = CASE WHEN B.strSourcedFrom IS NULL 
+										THEN CASE WHEN C.strSourcedFrom IS NULL
+											 THEN CASE WHEN D.strSourcedFrom IS NULL
+											 	  THEN 'None'
+												  ELSE D.strSourcedFrom END
+											 ELSE C.strSourcedFrom END
+										ELSE B.strSourcedFrom END
 	FROM @returntable A
 	OUTER APPLY (
 		SELECT VANL.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom
