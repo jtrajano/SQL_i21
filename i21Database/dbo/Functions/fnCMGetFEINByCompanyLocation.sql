@@ -17,7 +17,7 @@ OUTER apply(
 WHERE @intBankAccountId = intBankAccountId
 
 IF @intLocationSegmentId IS NOT NULL AND @intCompanySegmentId IS NULL
-SELECT TOP 1 @strFEIN = '' from tblSMCompanyLocation A
+SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
 WHERE intProfitCenter = @intLocationSegmentId
 
 
