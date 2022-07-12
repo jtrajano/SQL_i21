@@ -61,7 +61,9 @@ BEGIN
  intPContractDetailId INT NULL,                        
  intSContractDetailId INT NULL,                        
  intOutboundTaxGroupId INT NULL,                        
- intInboundTaxGroupId INT NULL                        
+ intInboundTaxGroupId INT NULL ,
+ intTMDispatchId INT NULL,
+ intTMSiteId INT NULL
  )                                 
    
   
@@ -136,26 +138,30 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
    ,intSalespersonId                        
  FROM #loadOrder a                                  
  inner join tblMBILLoadHeader load on a.intLoadId = load.intLoadId         
-  Where a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILDeliveryDetail)                              
-  Group by load.intLoadHeaderId                        
-   ,intCustomerId                        
-   ,intCustomerLocationId                        
-   ,isnull([intPCompanyLocationId],intSCompanyLocationId)                        
-   ,dtmDeliveryFrom                        
-   ,dtmDeliveryTo                        
-   ,intSalespersonId                        
+    Where a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILDeliveryDetail)                              
+    Group by load.intLoadHeaderId                        
+    ,intCustomerId                        
+    ,intCustomerLocationId                        
+    ,isnull([intPCompanyLocationId],intSCompanyLocationId)                        
+    ,dtmDeliveryFrom                        
+    ,dtmDeliveryTo                        
+    ,intSalespersonId                        
                         
    INSERT INTO tblMBILDeliveryDetail(                        
       intLoadDetailId                                    
      ,intDeliveryHeaderId                                  
      ,intItemId                                    
      ,dblQuantity                    
-  ,intPickupDetailId)                                    
+     ,intPickupDetailId
+     ,intTMDispatchId
+     ,intTMSiteId)
     SELECT a.intLoadDetailId                           
-  ,intDeliveryHeaderId                            
-     ,a.intItemId                                  
-     ,a.dblQuantity                        
-  ,pickupdetail.intPickupDetailId                    
+          ,intDeliveryHeaderId                            
+          ,a.intItemId                                  
+          ,a.dblQuantity                        
+          ,pickupdetail.intPickupDetailId  
+          ,a.intTMDispatchId
+          ,a.intTMSiteId
  FROM #loadOrder a                                  
  INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId              
  INNER JOIN tblMBILDeliveryHeader delivery on load.intLoadHeaderId = delivery.intLoadHeaderId and                         

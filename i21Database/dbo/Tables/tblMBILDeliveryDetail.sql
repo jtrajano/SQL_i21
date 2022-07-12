@@ -13,6 +13,9 @@ CREATE TABLE [dbo].[tblMBILDeliveryDetail]
 	[dblQuantity] [numeric](18, 6) NULL,
 	[dblDeliveredQty] [numeric](18, 6) NULL,
 	[ysnDelivered] bit default 0,
+	[intTMDispatchId] [int] NULL,
+	[intTMSiteId] [int] NULL,
+	[dblPercentageFull] [NUMERIC](18,6) NULL,
 	[intConcurrencyId] [int] DEFAULT(1) NULL,
  CONSTRAINT [PK_tblMBILLoadDeliveryDetail] PRIMARY KEY CLUSTERED ([intDeliveryDetailId]),
  CONSTRAINT [FK_tblMBILLoadDeliveryDetail_tblMBILDeliveryHeader] FOREIGN KEY ([intDeliveryHeaderId]) REFERENCES [tblMBILDeliveryHeader]([intDeliveryHeaderId])

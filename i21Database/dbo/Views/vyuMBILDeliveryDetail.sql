@@ -12,6 +12,8 @@ SELECT detail.intDeliveryDetailId
       ,detail.dblStickStartReading        
       ,detail.dblStickEndReading        
       ,detail.ysnDelivered
+      ,detail.intTMDispatchId
+      ,detail.intTMSiteId
 	  ,detail.intShiftId      
 FROM tblMBILDeliveryDetail detail            
 INNER JOIN tblICItem item ON detail.intItemId = item.intItemId 
