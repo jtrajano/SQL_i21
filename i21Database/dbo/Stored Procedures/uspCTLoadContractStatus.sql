@@ -39,6 +39,32 @@ BEGIN TRY
 				JOIN	tblICCommodityUnitMeasure	FU	ON	FU.intCommodityUnitMeasureId	=		PF.intFinalPriceUOMId	LEFT
 				JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=		FU.intUnitMeasureId		CROSS	
 				APPLY	tblLGCompanyPreference		LP 	
+				WHERE CH.intPricingTypeId <> 1
+
+
+				UNION ALL
+
+				
+				
+				SELECT	CD.intContractDetailId,
+						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,LP.intWeightUOMId,CD.dblQuantity)) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') Quantity,
+						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 6)))  + ' ' + CY.strCurrency + ' Per ' + PM.strUnitMeasure AS NVARCHAR(100) ) collate Latin1_General_CI_AS,'') [Differential],
+						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CF.dblHedgeNoOfLots) + '/' + dbo.fnRemoveTrailingZeroes(CF.dblNoOfLots - CF.dblHedgeNoOfLots) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Fixed/Unfixed],
+						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(null) + '/' + dbo.fnRemoveTrailingZeroes(CF.dblNoOfLots - null) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Hedge/Not Hedge],
+						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(ISNULL(CF.dblHedgePrice,CD.dblCashPrice) AS NUMERIC(18, 6)))  + ' ' + CY.strCurrency + ' Per ' + ISNULL(FM.strUnitMeasure,PM.strUnitMeasure) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') [Final Price]
+				FROM	tblCTContractDetail			CD 
+				JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId				=	CD.intContractHeaderId	
+														AND CD.intContractDetailId				=	@intContractDetailId 
+				LEFT JOIN	tblCTContractFutures			CF	ON	ISNULL(CF.intContractDetailId,0)	=	CD.intContractDetailId				
+				
+				LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=		CD.intCurrencyId		
+				LEFT JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId					=		CD.intItemUOMId			
+				LEFT JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId					=		CD.intPriceItemUOMId	
+				LEFT JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=		PU.intUnitMeasureId		
+				LEFT JOIN	tblICCommodityUnitMeasure	FU	ON	FU.intCommodityUnitMeasureId	=		CD.intPriceItemUOMId	
+				LEFT JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=		FU.intUnitMeasureId		
+				CROSS APPLY	tblLGCompanyPreference		LP 	
+				WHERE CH.intPricingTypeId = 1
 			) s
 		UNPIVOT	(strValue FOR strName IN 
 					(
@@ -85,6 +111,34 @@ BEGIN TRY
 		JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId	
 		WHERE   PF.intPriceFixationId	IS NOT NULL 
 		AND		CD.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  CD.intContractDetailId	ELSE @intContractDetailId	END
+
+		AND CH.intPricingTypeId  <> 1 
+
+
+		UNION ALL
+
+		SELECT	 0 intAssignFuturesToContractSummaryId,
+				0 intPriceFixationDetailId,
+				CD.intContractDetailId,
+				NULL dtmFixationDate,
+				null [dblNoOfLots],
+				dblCashPrice dblFinalPrice,
+				CM.strUnitMeasure strPricingUOM,
+				CF.dtmMatchDate,
+				dblHedgedLots = CF.dblHedgeNoOfLots,
+				CF.dblHedgePrice dblPrice, 
+				CF.strHedgeUOM strHedgeUOM,
+				0 intPriceContractId,
+				'' strPriceContractNo,
+				 dblFutures = CF.dblFuturesPrice,
+				intHedgedLots  = CF.dblHedgeNoOfLots
+		FROM [vyuCTContractFutures] CF
+		INNER JOIN tblCTContractDetail					CD	on CF.intContractDetailId = CD.intContractDetailId
+		INNER JOIN tblCTContractHeader					CH	on CH.intContractHeaderId = CD.intContractHeaderId	
+		LEFT JOIN  tblICItemUOM							IU	ON	IU.intItemUOMId					=	CD.intPriceItemUOMId				
+		LEFT JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	IU.intUnitMeasureId					
+		WHERE  CH.intPricingTypeId = 1 and CD.intContractDetailId = @intContractDetailId
+		
 
 	END
 	ELSE IF @strGrid = 'vyuCTContStsQuality'

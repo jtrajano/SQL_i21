@@ -13,7 +13,8 @@ AS
 			ISNULL(BK.strBook + ISNULL(' ('+SB.strSubBook+')','')  + ' - ','') +
 			ISNULL(EY.strName,'') +
 			'('+SS.strContractStatus+')'
-			strInfo
+			strInfo,
+			CH.intPricingTypeId
 
 	FROM	tblCTContractDetail CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
