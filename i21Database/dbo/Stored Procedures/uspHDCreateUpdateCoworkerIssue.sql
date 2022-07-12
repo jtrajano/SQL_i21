@@ -49,7 +49,7 @@ BEGIN
 																							THEN 'Inactive but has a Time Entry. '
 																						ELSE ''
 																				  END
-						   ,strUnapprovedTimeEntry					      =  CASE WHEN  hw.intTicketHoursWorkedId IS NOT NULL AND ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval'))
+						   ,strUnapprovedTimeEntry					      =  CASE WHEN  hw.intTicketHoursWorkedId IS NOT NULL AND ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
 																						THEN 'Has unapproved Time Entry.'
 																					ELSE ''
 																			 END 
@@ -86,10 +86,12 @@ BEGIN
 								  TimeEntry.intEntityId = Agent.intEntityId
 						) TimeEntry
 						OUTER APPLY(
-							SELECT TOP 1 hw.intTicketHoursWorkedId
-							FROM vyuHDTicketHoursWorked hw
-							WHERE dtmDate >= TimeEntryPeriodDetail.dtmBillingPeriodStart AND dtmDate <= TimeEntryPeriodDetail.dtmBillingPeriodEnd AND
-								  intAgentEntityId = TimeEntry.intEntityId
+							SELECT TOP 1 a.intTicketHoursWorkedId 
+							FROM vyuHDTicketHoursWorked a 
+								INNER JOIN tblEMEntity b 
+							ON a.intAgentEntityId = b.intEntityId
+							WHERE a.dtmDate >= TimeEntryPeriodDetail.dtmBillingPeriodStart AND a.dtmDate <= TimeEntryPeriodDetail.dtmBillingPeriodEnd AND
+								  b.intEntityId = TimeEntry.intEntityId
 					
 						) hw
 						OUTER APPLY(
