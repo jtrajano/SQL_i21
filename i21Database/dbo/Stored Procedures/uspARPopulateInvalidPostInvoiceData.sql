@@ -847,6 +847,7 @@ BEGIN
 	  AND I.strItemDescription IS NOT NULL
 	  AND I.intSalesAccountId IS NULL
 	  AND CL.intSalesAccount IS NULL
+	  AND I.intSalesAccountId IS NULL
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
