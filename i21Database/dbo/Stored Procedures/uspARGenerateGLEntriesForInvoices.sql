@@ -1456,7 +1456,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[dblFreightCharge] > 0
   AND I.strSessionId = @strSessionId
 
--- DUE TO ACCOUNT CREDIT FOR LOCATION
+--DUE TO ACCOUNT CREDIT FOR LOCATION
 INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]
     ,[strBatchId]
@@ -1495,7 +1495,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = DUEACCOUNT.intDueToAccountId
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
@@ -1529,13 +1529,9 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceDetail I
 OUTER APPLY (
-	SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = I.[intAccountId]
-) DUEACCOUNT
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
@@ -1584,7 +1580,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = DUEACCOUNT.intDueToAccountId
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
     ,[dblDebit]                     = @ZeroDecimal
     ,[dblCredit]                    = I.[dblFreightCharge]
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1618,13 +1614,9 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceDetail I
 OUTER APPLY (
-	SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-	AND intAccountId = I.[intAccountId]
-) DUEACCOUNT
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblFreightCharge] > 0
@@ -1669,7 +1661,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = FREIGHTACCOUNT.intRevenueExpenseAccount
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
     ,[dblDebit]                     = @ZeroDecimal
     ,[dblCredit]                    = I.[dblFreightCharge]
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1703,13 +1695,9 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceDetail I
 OUTER APPLY (
-	SELECT TOP 1 intRevenueExpenseAccount = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@FreightRevenueAccount, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-	FROM tblGLAccountSegmentMapping GLASM
-	INNER JOIN tblGLAccountSegment GLAS
-	ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-	WHERE intAccountStructureId = 3
-    AND intAccountId = I.[intAccountId]
-) FREIGHTACCOUNT
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @FreightRevenueAccount, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblFreightCharge] > 0
