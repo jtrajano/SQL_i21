@@ -61,7 +61,7 @@ RETURN
         BTR.strTransactionId,
         BTR.intBankAccountIdFrom,
         BTR.intCurrencyIdAmountFrom,
-        BTR.dtmAccrual,
+        BTR.dtmDate,
         BTR.dblAmountForeignFrom  * -1,
         BTR.intGLAccountIdFrom,
         NULL,
