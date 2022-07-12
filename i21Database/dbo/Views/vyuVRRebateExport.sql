@@ -25,6 +25,7 @@ SELECT
 	, rebate.intConcurrencyId
 	, invoiceDetail.intInvoiceDetailId
 	, strVendorName = vendorEntity.strName
+	, rebate.ysnChevronUploaded
 FROM tblVRRebate rebate
 INNER JOIN tblARInvoiceDetail invoiceDetail ON invoiceDetail.intInvoiceDetailId = rebate.intInvoiceDetailId
 INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId
