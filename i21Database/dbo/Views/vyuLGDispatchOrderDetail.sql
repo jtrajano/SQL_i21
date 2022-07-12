@@ -15,12 +15,15 @@ SELECT
 	,strOrderStatus = CASE DOD.intOrderStatus
 		WHEN 1 THEN 'Ready'
 		WHEN 2 THEN 'In Transit'
-		WHEN 3 THEN 'Delivered'
-		WHEN 4 THEN 'On-hold'
-		WHEN 5 THEN 'Cancelled'
+		WHEN 3 THEN 'At Location'
+		WHEN 4 THEN 'Delivered'
+		WHEN 5 THEN 'On-hold'
+		WHEN 6 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOD.strOrderNumber
 	,DOD.strOrderType
+	,strTerminalName = TCN.strName
+	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strFromEntity = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN V.strName ELSE CL.strLocationName END
 	,strFromLocation = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN VL.strLocationName ELSE CLSL.strSubLocationName END
 	,strFromAddress = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN VL.strAddress 
@@ -78,3 +81,4 @@ LEFT JOIN tblEMEntity V ON V.intEntityId = DOD.intVendorId
 LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = DOD.intVendorLocationId
 LEFT JOIN tblSMShipViaTrailerCompartment SVTC ON SVTC.intEntityShipViaTrailerCompartmentId = DOD.intEntityShipViaCompartmentId
 LEFT JOIN tblTMSite TMS ON TMS.intSiteID = DOD.intTMSiteId
+LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = DOD.intTerminalControlNumberId

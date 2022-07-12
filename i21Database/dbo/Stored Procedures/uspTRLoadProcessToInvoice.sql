@@ -140,7 +140,7 @@ BEGIN TRY
 		,[intTicketHoursWorkedId]				= NULL
 		,[intSiteId]							= DD.intSiteId
 		,[strBillingBy]							= ''
-		,[dblPercentFull]						= NULL
+		,[dblPercentFull]						= CASE WHEN DD.intSiteId IS NULL THEN NULL ELSE 100 END
 		,[dblNewMeterReading]					= NULL
 		,[dblPreviousMeterReading]				= NULL
 		,[dblConversionFactor]					= NULL
@@ -592,7 +592,8 @@ BEGIN TRY
 	WHERE (ISNULL(dblComboFreightRate, 0) != 0 AND ysnFreightInPrice != 1 AND ysnComboFreight = 1)
 
 	INSERT INTO #tmpSourceTableFinal(
-		[intId] 
+		[intId]
+		,[strType] 
 		,[strSourceTransaction]
 		,[intLoadDistributionDetailId]
 		,[intSourceId]
@@ -677,6 +678,7 @@ BEGIN TRY
 	)
 	SELECT
 		0 AS intId
+		,[strType] 								= IE.strType
 		,[strSourceTransaction]					= IE.strSourceTransaction
 		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		,[intSourceId]							= IE.intSourceId
@@ -744,9 +746,9 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[intTicketId]							= NULL
 		,[intTicketHoursWorkedId]				= NULL
-		,[intSiteId]							= IE.intSiteId
+		,[intSiteId]							= NULL
 		,[strBillingBy]							= IE.strBillingBy
-		,[dblPercentFull]						= IE.dblPercentFull
+		,[dblPercentFull]						= NULL--IE.dblPercentFull
 		,[dblNewMeterReading]					= NULL
 		,[dblPreviousMeterReading]				= NULL
 		,[dblConversionFactor]					= IE.dblConversionFactor
@@ -767,6 +769,7 @@ BEGIN TRY
 	UNION ALL
 	SELECT DISTINCT
 		0 AS intId
+		,[strType] 								= IE.strType
 		,[strSourceTransaction]					= IE.strSourceTransaction
 		,[intLoadDistributionDetailId]			= NULL
 		,[intSourceId]							= IE.intSourceId
@@ -834,9 +837,9 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[intTicketId]							= NULL
 		,[intTicketHoursWorkedId]				= NULL
-		,[intSiteId]							= IE.intSiteId
+		,[intSiteId]							= NULL
 		,[strBillingBy]							= IE.strBillingBy
-		,[dblPercentFull]						= IE.dblPercentFull
+		,[dblPercentFull]						= NULL --IE.dblPercentFull
 		,[dblNewMeterReading]					= NULL
 		,[dblPreviousMeterReading]				= NULL
 		,[dblConversionFactor]					= IE.dblConversionFactor
@@ -958,7 +961,7 @@ BEGIN TRY
 		,[intCompanyLocationId]					= TR.intCompanyLocationId
 		,[intCurrencyId]						= TR.intCurrencyId
 		,[intTermId]							= TR.intTermId
-		,[dtmDate]								= TR.dtmDate
+		,[dtmDate]								= CAST(TR.dtmDate AS DATE) 
 		,[dtmDueDate]							= TR.dtmDueDate
 		,[dtmShipDate]							= TR.dtmShipDate
 		,[intEntitySalespersonId]				= TR.intEntitySalespersonId
@@ -1125,7 +1128,7 @@ BEGIN TRY
 			,[intCompanyLocationId]					= IE.intCompanyLocationId
 			,[intCurrencyId]						= IE.intCurrencyId
 			,[intTermId]							= IE.intTermId
-			,[dtmDate]								= IE.dtmDate
+			,[dtmDate]								= CAST(IE.dtmDate AS DATE) 
 			,[dtmDueDate]							= IE.dtmDueDate
 			,[dtmShipDate]							= IE.dtmShipDate
 			,[intEntitySalespersonId]				= IE.intEntitySalespersonId
@@ -1180,9 +1183,9 @@ BEGIN TRY
 			,[intShipmentPurchaseSalesContractId]	= NULL
 			,[intTicketId]							= NULL
 			,[intTicketHoursWorkedId]				= NULL
-			,[intSiteId]							= IE.intSiteId
+			,[intSiteId]							= NULL
 			,[strBillingBy]							= IE.strBillingBy
-			,[dblPercentFull]						= IE.dblPercentFull
+			,[dblPercentFull]						= NULL --IE.dblPercentFull
 			,[dblNewMeterReading]					= NULL
 			,[dblPreviousMeterReading]				= NULL
 			,[dblConversionFactor]					= IE.dblConversionFactor
@@ -1206,7 +1209,7 @@ BEGIN TRY
 			,[intCompanyLocationId]					= IE.intCompanyLocationId
 			,[intCurrencyId]						= IE.intCurrencyId
 			,[intTermId]							= IE.intTermId
-			,[dtmDate]								= IE.dtmDate
+			,[dtmDate]								= CAST(IE.dtmDate AS DATE) 
 			,[dtmDueDate]							= IE.dtmDueDate
 			,[dtmShipDate]							= IE.dtmShipDate
 			,[intEntitySalespersonId]				= IE.intEntitySalespersonId

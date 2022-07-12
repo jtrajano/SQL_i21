@@ -126,6 +126,6 @@ LEFT JOIN (
 		AND SC.strScreenName = 'Invoice'
 	GROUP BY ARC.intEntityId 
 ) CUSTOMERCREDITAPPROVER ON CUSTOMERCREDITAPPROVER.intEntityId = CUSTOMER.intEntityId
-LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId = ISNULL(CUSTOMER.intDefaultPayToBankAccountId, 0)
+LEFT JOIN tblCMBankAccount CMBA ON CMBA.intBankAccountId = CUSTOMER.intDefaultPayToBankAccountId
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO

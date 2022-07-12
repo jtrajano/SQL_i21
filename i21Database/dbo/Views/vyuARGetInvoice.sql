@@ -426,14 +426,16 @@ OUTER APPLY(
 	FROM tblARCompanyPreference
 ) ARCOMPANYPREFERENCE
 OUTER APPLY (
-	SELECT TOP 1 intAccountId
-		 , strDescription 
+	SELECT TOP 1 
+		 intAccountId
+		,strDescription 
 	FROM vyuGLCompanyAccountId WITH (NOLOCK)
-	WHERE intAccountId = INV.intFreightCompanySegment
+	WHERE intAccountSegmentId = INV.intFreightCompanySegment
 ) GLCAI
 OUTER APPLY (
-	SELECT TOP 1 intAccountId
-		 , strDescription 
+	SELECT TOP 1 
+		 intAccountId
+		,strDescription 
 	FROM vyuGLLocationAccountId WITH (NOLOCK)
-	WHERE intAccountId = INV.intFreightLocationSegment
+	WHERE intAccountSegmentId = INV.intFreightLocationSegment
 ) GLLAI

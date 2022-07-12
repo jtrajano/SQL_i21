@@ -196,7 +196,7 @@ SELECT
 									CAST(0 AS BIT)
 							END
 	  ,ysnStoreManager = vst.ysnIsUserStoreManager
-	  
+	  ,ysnStopCondition = chk.ysnStopCondition
       ,chk.[intConcurrencyId]  
 FROM tblSTCheckoutHeader chk
 INNER JOIN vyuSTStoreOnUserRole vst
@@ -293,6 +293,7 @@ GROUP BY
       ,chk.[intCheckoutCurrentProcess]
       ,chk.[intConcurrencyId]
 	  ,Inv.[ysnPosted]
+      ,chk.[ysnStopCondition]
 	  ,vst.[intStoreId]
 	  ,vst.[intEntityId]
 	  ,vst.[intStoreNo]

@@ -160,11 +160,12 @@
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 	,@FreightCharge							NUMERIC(18, 6)	= 0
-	,@FreightCompanySegment					INT
-	,@FreightLocationSegment				INT
+	,@FreightCompanySegment					INT				= NULL
+	,@FreightLocationSegment				INT				= NULL
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
+	,@ItemOverrideTaxGroup					BIT				= 0
 AS
 
 BEGIN
@@ -360,9 +361,14 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) LEFT OUTER JOIN [
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN		
+		DECLARE @strCustomerNumber  NVARCHAR(100) = NULL
+			  , @strCustomerErrMsg	NVARCHAR(100) = NULL
+
+		SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM tblARCustomer WHERE intEntityId = @EntityCustomerId
+		SET @strCustomerErrMsg = 'Customer ' + ISNULL(@strCustomerNumber, '') + ' is not active!'
+
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('The entity Id provided does not exists!', 16, 1);	
-		SET @ErrorMessage = 'The entity Id provided does not exists!'
+			RAISERROR(@strCustomerErrMsg, 16, 1);
 		RETURN 0;
 	END
 
@@ -802,6 +808,7 @@ BEGIN TRY
 		,@ItemQualityPremium			= @ItemQualityPremium
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+		,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

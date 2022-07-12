@@ -977,11 +977,14 @@
     <Build Include="dbo\Tables\tblSMUserDetailStage.sql" />
     <Build Include="dbo\Tables\tblSMUserDetailStageError.sql" />
     <Build Include="dbo\Tables\tblSMUserDetailStageArchive.sql" />
-	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReading.sql" />
     <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
+    <Build Include="dbo\Views\vyuCTCategoryPerCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
