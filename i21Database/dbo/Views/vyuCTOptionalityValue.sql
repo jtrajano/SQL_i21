@@ -16,7 +16,7 @@ FROM
 		UNION ALL
 
 		SELECT intCityId
-		      ,intCountryId
+		      ,a.intCountryId
 			  ,strCity,
 			  'citycombo' strControlName
 			  ,strCountry
