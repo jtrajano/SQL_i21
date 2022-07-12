@@ -171,7 +171,7 @@ SELECT
 		
 FROM CTE
 WHERE 
-strSourceTransactionId NOT IN (SELECT strSourceTransactionId FROM tblCMundepositedFund)
+strSourceTransactionId NOT IN (SELECT strSourceTransactionId FROM tblCMUndepositedFund)
 AND dblAmount <> 0
 
 
