@@ -333,6 +333,7 @@ DECLARE  @Id									INT
 		,@ItemQualityPremium					NUMERIC(18, 6)
 		,@ItemOptionalityPremium				NUMERIC(18, 6)
 		,@ItemComputedGrossPrice				NUMERIC(18, 6)
+		,@ItemOverrideTaxGroup					BIT
 
 --INSERT
 BEGIN TRY
@@ -548,6 +549,7 @@ BEGIN
 		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
 		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
 		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
+		,@ItemOverrideTaxGroup			= (CASE WHEN @GroupingOption = 0 THEN [ysnOverrideTaxGroup] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -835,6 +837,7 @@ BEGIN
 			,@ItemQualityPremium			= @ItemQualityPremium
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1019,6 +1022,7 @@ BEGIN
 					,@ItemQualityPremium            = [dblQualityPremium]
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+					,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1122,6 +1126,7 @@ BEGIN
 						,@ItemQualityPremium            = @ItemQualityPremium
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+						,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1804,6 +1809,7 @@ BEGIN TRY
 						,@ItemQualityPremium            = [dblQualityPremium]
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+						,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1899,6 +1905,7 @@ BEGIN TRY
 							,@ItemQualityPremium            = @ItemQualityPremium
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+							,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
