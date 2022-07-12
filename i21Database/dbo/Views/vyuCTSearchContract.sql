@@ -84,6 +84,8 @@ AS
 			CH.strFreightTerm,
 			CH.strExternalEntity,
 			CH.strExternalContractNumber,
+			CH.strReportTo,
+			CH.ysnEnableFutures,
 			CH.ysnReceivedSignedFixationLetter, -- CT-5315
 			CH.strEntitySelectedLocation -- CT-5315
 
