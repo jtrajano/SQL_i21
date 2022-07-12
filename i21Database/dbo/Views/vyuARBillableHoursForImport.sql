@@ -27,7 +27,7 @@ SELECT intEntityId					= C.[intEntityId]
 	 , intSubCurrencyId				= NULLIF(HW.[intCurrencyId], 0)
 	 , dblSubCurrencyRate			= HW.[dblCurrencyRate]
 	 , intEntityWarehouseId			= EML.[intWarehouseId]
-	 , intTimeEntryPeriodDetailId	= BillingPeriod.intTimeEntryPeriodDetailId
+	 , intTimeEntryPeriodDetailId	= CASE WHEN HW.ysnLegacyWeek = 1 THEN 0 ELSE BillingPeriod.intTimeEntryPeriodDetailId END
 	 , strPeriodDisplay				= BillingPeriod.strPeriodDisplay
 	 , strApprovalStatus			= CASE WHEN ApprovalInfo.strStatus = 'Approved' OR ApprovalInfo.strStatus = 'No Need for Approval' OR ApprovalInfo.strStatus = 'Approved with Modifications'
 												THEN 'Approved'
