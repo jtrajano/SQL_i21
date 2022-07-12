@@ -159,6 +159,9 @@
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 	,@SourcedFrom							NVARCHAR(100)	= NULL
+	,@TaxLocationId							INT				= NULL
+	,@TaxPoint								NVARCHAR(50)	= NULL
+	,@ItemOverrideTaxGroup					BIT				= 0
 AS
 
 BEGIN
@@ -797,6 +800,7 @@ BEGIN TRY
 		,@ItemQualityPremium			= @ItemQualityPremium
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+		,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
