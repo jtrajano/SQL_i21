@@ -1,21 +1,22 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetDefaultAccount]
-	  @strTransactionType			NVARCHAR(25)
-	, @intCompanyLocationId			INT
-	, @intAccountId					INT				= NULL OUTPUT
-	, @strAccountId					NVARCHAR(250)	= NULL OUTPUT
-	, @strErrorMsg					NVARCHAR(250)	= NULL OUTPUT
-	, @intLocationAccountSegmentId	INT				= NULL OUTPUT
-	, @intCompanyAccountSegmentId	INT				= NULL OUTPUT
+	 @strTransactionType			NVARCHAR(25)
+	,@intCompanyLocationId			INT
+	,@intAccountId					INT				= NULL OUTPUT
+	,@strAccountId					NVARCHAR(250)	= NULL OUTPUT
+	,@strErrorMsg					NVARCHAR(250)	= NULL OUTPUT
+	,@intLocationAccountSegmentId	INT				= NULL OUTPUT
+	,@intCompanyAccountSegmentId	INT				= NULL OUTPUT
+	,@intProfitCenterId				INT				= NULL OUTPUT
 AS	
 
-DECLARE @intARAccountId 				INT = NULL
-	  , @intProfitCenterId				INT = NULL
-      , @strSalesCompanyLocation		NVARCHAR(250)	= NULL
+DECLARE  @intARAccountId 			INT = NULL
+		,@strSalesCompanyLocation	NVARCHAR(250)	= NULL
 
 SET @intARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
 
-SELECT @strSalesCompanyLocation = strLocationName
-	 , @intProfitCenterId		= intProfitCenter
+SELECT 
+	 @strSalesCompanyLocation	= strLocationName
+	,@intProfitCenterId			= intProfitCenter
 FROM tblSMCompanyLocation
 WHERE intCompanyLocationId = @intCompanyLocationId
 
