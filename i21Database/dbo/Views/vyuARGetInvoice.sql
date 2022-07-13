@@ -204,6 +204,7 @@ SELECT
 	,ysnOverrideTaxPoint                = CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
+	,intProfitCenter					= CLOC.intProfitCenter
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -224,7 +225,8 @@ INNER JOIN (
 INNER JOIN (
 	SELECT 
 		 intCompanyLocationId
-		,strLocationName 
+		,strLocationName
+		,intProfitCenter
 	FROM tblSMCompanyLocation WITH (NOLOCK) 
 ) CLOC ON INV.intCompanyLocationId = CLOC.intCompanyLocationId
 LEFT JOIN (
