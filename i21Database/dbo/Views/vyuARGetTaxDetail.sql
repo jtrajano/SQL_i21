@@ -79,7 +79,7 @@ INNER JOIN (
 		 , strTaxClass
 	FROM dbo.tblSMTaxClass WITH (NOLOCK)
 ) TAXCLASS ON TRANSACTIONS.intTaxClassId = TAXCLASS.intTaxClassId
-INNER JOIN (
+LEFT JOIN (
 	SELECT intItemId
 		 , intCategoryId
 		 , strItemNo
