@@ -185,7 +185,12 @@ BEGIN
 				LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = CD1.intPriceItemUOMId
 				LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CC.intCurrencyId
 				LEFT JOIN	tblSMCurrency		CY2	ON	CY2.intCurrencyID		=	CD1.intCurrencyId
-				LEFT JOIN  tblRKFuturesSettlementPrice FSP on FSP.intFutureMarketId = CD1.intFutureMarketId
+				LEFT JOIN  (
+					select intFutureMarketId, MAX(intFutureSettlementPriceId) intFutureSettlementPriceId, MAX( dtmPriceDate) dtmPriceDate
+					from tblRKFuturesSettlementPrice a
+					Group by intFutureMarketId, intCommodityMarketId
+	
+				) FSP on FSP.intFutureMarketId = CD1.intFutureMarketId
 				LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD1.intFutureMonthId = FSPM.intFutureMonthId
 			WHERE
 				CD1.intContractDetailId = cd.intContractDetailId

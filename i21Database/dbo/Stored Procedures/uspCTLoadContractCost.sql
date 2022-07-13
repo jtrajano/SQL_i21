@@ -108,6 +108,11 @@ AS
 	LEFT JOIN	tblICItemUOM		CM	ON	CM.intUnitMeasureId		=	IU.intUnitMeasureId
 										AND CM.intItemId			=	CD.intItemId	
 	LEFT JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CC.intRateTypeId	
-	LEFT JOIN  tblRKFuturesSettlementPrice FSP on FSP.intFutureMarketId = CD.intFutureMarketId
+	LEFT JOIN  (
+		select intFutureMarketId, MAX(intFutureSettlementPriceId) intFutureSettlementPriceId, MAX( dtmPriceDate) dtmPriceDate
+		from tblRKFuturesSettlementPrice a
+		Group by intFutureMarketId, intCommodityMarketId
+	
+	) FSP on FSP.intFutureMarketId = CD.intFutureMarketId
 	LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD.intFutureMonthId = FSPM.intFutureMonthId
 	
