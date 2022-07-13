@@ -89,7 +89,12 @@ BEGIN TRY
 									    AND CM.intItemId				=	CD.intItemId
 		LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 		LEFT JOIN	tblSMCurrency		CY2	ON	CY2.intCurrencyID		=	CD.intCurrencyId
-		LEFT JOIN  tblRKFuturesSettlementPrice FSP on FSP.intFutureMarketId = CD.intFutureMarketId
+		LEFT JOIN  (
+		select intFutureMarketId, MAX(intFutureSettlementPriceId) intFutureSettlementPriceId, MAX( dtmPriceDate) dtmPriceDate
+		from tblRKFuturesSettlementPrice a
+		Group by intFutureMarketId, intCommodityMarketId
+	
+		) FSP on FSP.intFutureMarketId = CD.intFutureMarketId
 		LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD.intFutureMonthId = FSPM.intFutureMonthId
 		WHERE	CC.intContractDetailId = @intContractDetailId
 
