@@ -8,6 +8,8 @@
 	,@InvalidCount			AS INT				= 0		OUTPUT
 	,@DocumentMaintenanceId AS INT				= NULL
 	,@DefaultLocationId		AS INT				= NULL
+	,@InvoiceDate			AS DATETIME				= NULL
+	,@PostDate			    AS DATETIME				= NULL
 AS
 
 BEGIN
@@ -30,6 +32,16 @@ DECLARE @dblZeroDecimal			NUMERIC(18,6)	= 0
 IF(OBJECT_ID('tempdb..#BILLABLE') IS NOT NULL)
 BEGIN
     DROP TABLE #BILLABLE
+END
+
+IF @InvoiceDate IS NULL
+BEGIN
+	SET @InvoiceDate = @dtmDateOnly
+END
+
+IF @PostDate IS NULL
+BEGIN
+	SET @PostDate = @dtmDateOnly
 END
 
 SELECT intEntityCustomerId				= intEntityId
@@ -157,8 +169,8 @@ SELECT
 	,[intEntityCustomerId]				= BILLABLE.intEntityCustomerId
 	,[intCompanyLocationId]				= BILLABLE.intCompanyLocationId
 	,[intCurrencyId]					= BILLABLE.intCurrencyId
-	,[dtmDate]							= @dtmDateOnly
-	,[dtmPostDate]						= @dtmDateOnly
+	,[dtmDate]							= @InvoiceDate
+	,[dtmPostDate]						= @PostDate
 	,[intEntityId]						= @UserId
 	,[ysnPost]							= 0
 	,[intItemId]						= BILLABLE.intItemId
@@ -190,8 +202,8 @@ SELECT
 	,[intEntityCustomerId]				= BILLABLE.intEntityCustomerId
 	,[intCompanyLocationId]				= BILLABLE.intCompanyLocationId
 	,[intCurrencyId]					= BILLABLE.intCurrencyId
-	,[dtmDate]							= @dtmDateOnly
-	,[dtmPostDate]						= @dtmDateOnly
+	,[dtmDate]							= @InvoiceDate
+	,[dtmPostDate]						= @PostDate
 	,[intEntityId]						= @UserId
 	,[ysnPost]							= 0
 	,[intItemId]						= BILLABLE.intItemId
@@ -229,7 +241,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 				UPDATE TICKETS
 				SET	TICKETS.intInvoiceId	= ID.intInvoiceId
 				   ,TICKETS.ysnBilled		= CONVERT(BIT, 1)
-				   ,TICKETS.dtmBilled		= @dtmDateOnly
+				   ,TICKETS.dtmBilled		= @InvoiceDate
 				FROM tblHDTicketHoursWorked TICKETS
 				INNER JOIN (
 					SELECT intTicketHoursWorkedId
