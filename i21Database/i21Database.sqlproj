@@ -804,7 +804,7 @@
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinanceAllocation.sql" />
     <Build Include="dbo\Functions\fnCTGetCompanyFooterLogo.sql" />
-    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" /> 
+    <None Include="Scripts\Post-Deployment\FA\03_UpdateAssetDepreciationCurrency.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
@@ -812,6 +812,7 @@
     <Build Include="dbo\Views\vyuAPSalesForPayablesForeign.sql" />
     <Build Include="dbo\Functions\fnAPGetVendorPayFromBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
+    <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
