@@ -24,8 +24,10 @@ SELECT
 	,DOD.strOrderType
 	,strTerminalName = TCN.strName
 	,strTerminalControlNumber = TCN.strTerminalControlNumber
-	,strFromEntity = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN V.strName ELSE CL.strLocationName END
-	,strFromLocation = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN VL.strLocationName ELSE CLSL.strSubLocationName END
+	,strFromSupplier = V.strName
+	,strFromTerminal = TCN.strName
+	,strFromStorageLocation = CLSL.strSubLocationName
+	,strFromLocation = CL.strLocationName
 	,strFromAddress = CASE WHEN (DOD.intVendorId IS NOT NULL) THEN VL.strAddress 
 		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.strAddress 
 		ELSE CL.strAddress END

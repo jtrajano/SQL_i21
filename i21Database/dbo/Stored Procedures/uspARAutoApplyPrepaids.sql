@@ -122,6 +122,7 @@ WHERE I.ysnCancelled = 0
   AND I.ysnPaid = 0
   AND I.strTransactionType IN ('Invoice', 'Debit Memo')
   AND I.strSessionId = @strSessionId
+  AND I.strType NOT IN ('CF Tran', 'CF Invoice')
 
 --GET AVAILABLE CREDITS AND PREPAIDS FOR CUSTOMERS
 INSERT INTO #AAPPREPAIDS WITH (TABLOCK) (

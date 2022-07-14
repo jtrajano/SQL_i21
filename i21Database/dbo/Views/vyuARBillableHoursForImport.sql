@@ -34,6 +34,11 @@ SELECT intEntityId					= C.[intEntityId]
 											ELSE 'Not Yet Approved'
 									  END 
 	 , ysnLegacyWeek				= HW.ysnLegacyWeek
+	 , strCurrency					= Currency.strCurrency
+	 , dblBaseAmount				= (CASE WHEN (ISNULL(HW.[intHours], 0.00) = 0.00 OR ISNULL(HW.[dblRate],0.00) = 0.00) 
+													THEN 0.00 
+												ELSE HW.[intHours] * HW.[dblRate] * (CASE WHEN ISNULL(HW.[dblCurrencyRate], 0.00) = 0.00 THEN 1.00 ELSE HW.[dblCurrencyRate] END)
+									   END)
 FROM dbo.tblHDTicketHoursWorked HW WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
@@ -69,6 +74,11 @@ INNER JOIN (
 		 , strName
 	FROM dbo.tblEMEntity WITH (NOLOCK) 
 ) U ON HW.[intAgentEntityId] = U.[intEntityId]
+LEFT JOIN (
+	SELECT intCurrencyID
+		 , strCurrency
+	FROM tblSMCurrency WITH (NOLOCK) 
+) Currency ON Currency.intCurrencyID = HW.[intCurrencyId]
 OUTER APPLY (
 	SELECT TOP 1 intCompanyLocationId 
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 

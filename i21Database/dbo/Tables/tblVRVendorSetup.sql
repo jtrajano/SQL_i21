@@ -14,6 +14,8 @@
 	[intAccountId] INT NULL,
 	[intConcurrencyId] INT DEFAULT 0 NOT NULL,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[guiApiScheduledJobId] UNIQUEIDENTIFIER NULL,
+	[guiApiBuybackScheduledJobId] UNIQUEIDENTIFIER NULL,
 	CONSTRAINT [PK_tblVRVendorSetup] PRIMARY KEY CLUSTERED([intVendorSetupId] ASC),
 	CONSTRAINT [UQ_tblVRVendorSetup_intEntityId] UNIQUE NONCLUSTERED ([intEntityId] ASC), 
 	CONSTRAINT [FK_tblVRVendorSetup_tblAPVendor] FOREIGN KEY([intEntityId]) REFERENCES [dbo].[tblAPVendor] ([intEntityId]),

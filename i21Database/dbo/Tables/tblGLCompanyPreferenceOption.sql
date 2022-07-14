@@ -18,6 +18,9 @@
 	[ysnREOverrideLocation] BIT NULL,
 	[ysnREOverrideLOB] BIT NULL,
 	[ysnREOverrideCompany] BIT NULL,
+	[ysnRevalOverrideLocation] BIT NULL,
+	[ysnRevalOverrideLOB] BIT NULL,
+	[ysnRevalOverrideCompany] BIT NULL,
 	[strOverrideREArray] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strParentCompanyCode] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])

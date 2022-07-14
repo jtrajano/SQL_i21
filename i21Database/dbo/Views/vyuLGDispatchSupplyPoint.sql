@@ -5,6 +5,7 @@ SELECT
 	,EL.strLocationName
 	,E.intEntityId
 	,strEntityName = E.strName
+	,strEntityNo = E.strEntityNo
 	,SP.intTerminalControlNumberId
 	,strTerminalName = TCN.strName
 	,strTerminalControlNumber = TCN.strTerminalControlNumber
