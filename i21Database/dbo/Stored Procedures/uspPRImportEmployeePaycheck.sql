@@ -38,7 +38,8 @@ DECLARE @strExcludeDeductions AS NVARCHAR(MAX)
     
 DECLARE @dblEarningHour AS FLOAT(50)       
 DECLARE @dblAmount AS FLOAT(50)       
-DECLARE @dblTotal AS FLOAT(50)       
+DECLARE @dblTotal AS FLOAT(50)      
+DECLARE @dblTaxableAmount AS FLOAT(50)  
     
 DECLARE @dtmPayDate AS NVARCHAR(100)      
 DECLARE @dtmPayFrom AS NVARCHAR(100)      
@@ -129,7 +130,8 @@ BEGIN
 				,@strRecordId   = strRecordId      
 				,@dblEarningHour  = dblEarningHour      
 				,@dblAmount    = dblAmount      
-				,@dblTotal    = dblTotal      
+				,@dblTotal    = dblTotal   
+				,@dblTaxableAmount = dblTaxableAmount  
 				,@dtmPayDate   = CAST(dtmPayDate AS NVARCHAR)       
 				,@dtmPayFrom   = CAST(dtmPayFrom AS NVARCHAR)       
 				,@dtmPayTo    = CAST(dtmPayTo AS NVARCHAR)       
@@ -237,7 +239,8 @@ BEGIN
 			  ,@strPaycheckEarningId = strPaycheckEarningId
 			  ,@dblEarningHour  = dblEarningHour    
 			  ,@dblAmount    = dblAmount    
-			  ,@dblTotal    = dblTotal    
+			  ,@dblTotal    = dblTotal 
+			  ,@dblTaxableAmount = dblTaxableAmount  
 			  ,@dtmPayDate   = CAST(dtmPayDate AS NVARCHAR)     
 			  ,@dtmPayFrom   = CAST(dtmPayFrom AS NVARCHAR)     
 			  ,@dtmPayTo    = CAST(dtmPayTo AS NVARCHAR)     
@@ -426,6 +429,7 @@ BEGIN
 						,[dblExtraWithholding]        
 						,[dblLimit]        
 						,[dblTotal]  
+						,dblTaxableAmount  
 						,[intAccountId]        
 						,[intExpenseAccountId]        
 						,[intAllowance]        
@@ -455,6 +459,7 @@ BEGIN
 						,[dblExtraWithholding]        
 						,[dblLimit]        
 						,@dblTotal  
+						,@dblTaxableAmount  
 						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)    
 						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId)    
 						,[intAllowance]        

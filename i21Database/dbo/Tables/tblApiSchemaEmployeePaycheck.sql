@@ -10,6 +10,7 @@ CREATE TABLE tblApiSchemaEmployeePaycheck(
 	,dblEarningHour FLOAT(50) NULL
 	,dblAmount FLOAT(50) NULL
 	,dblTotal FLOAT(50) NULL
+	,dblTaxableAmount FLOAT(50) NULL
 	,dtmPayDate NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 	,dtmPayFrom NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 	,dtmPayTo NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
