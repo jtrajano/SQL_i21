@@ -664,18 +664,16 @@ BEGIN
 													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
 													ELSE 'Contract'
 												END							  								 
-				,strSourceType					= 'Scale' --Dev's note: Scale for now for Direct In tickets
-												--CASE 
-												--	WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
-												--		CASE 
-												--			WHEN SC.intSourceType = 4 THEN 'Settle Storage'
-												--			WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
-												--			WHEN INVRCPT.intSourceType = 2 THEN 'Inbound Shipment'
-												--			WHEN INVRCPT.intSourceType = 1 THEN SD.strDistributionType --'Scale'
-												--			ELSE 'None'
-												--		END
-												--	ELSE CNTRCT.strContractNumber
-												--END
+				,strSourceType					= --Dev's note: Scale for now for Direct In tickets 
+													-- if it has a contract use contract #
+												CASE 
+													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+														CASE
+															When SC.intTicketType = 6 THEN 'Direct Ship'
+															ELSE 'Scale'
+														END														
+													ELSE CNTRCT.strContractNumber
+												END
 				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
 				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
 				,strId							= Bill.strBillId
@@ -1853,18 +1851,16 @@ BEGIN
 													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
 													ELSE 'Contract'
 												END							  								 
-				,strSourceType					= 'Scale' --Dev's note: Scale for now for Direct In tickets
-												--CASE 
-												--	WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
-												--		CASE 
-												--			WHEN SC.intSourceType = 4 THEN 'Settle Storage'
-												--			WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
-												--			WHEN INVRCPT.intSourceType = 2 THEN 'Inbound Shipment'
-												--			WHEN INVRCPT.intSourceType = 1 THEN SD.strDistributionType --'Scale'
-												--			ELSE 'None'
-												--		END
-												--	ELSE CNTRCT.strContractNumber
-												--END
+				,strSourceType					= --Dev's note: Scale for now for Direct In tickets 
+													-- if it has a contract use contract #
+												CASE 
+													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+														CASE
+															When SC.intTicketType = 6 THEN 'Direct Ship'
+															ELSE 'Scale'
+														END														
+													ELSE CNTRCT.strContractNumber
+												END
 				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
 				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
 				,strId							= Bill.strBillId
