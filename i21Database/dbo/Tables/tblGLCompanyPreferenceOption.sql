@@ -18,6 +18,7 @@
 	[ysnREOverrideLocation] BIT NULL,
 	[ysnREOverrideLOB] BIT NULL,
 	[ysnREOverrideCompany] BIT NULL,
+	[ysnRevalOverride] BIT NULL,
 	[ysnRevalOverrideLocation] BIT NULL,
 	[ysnRevalOverrideLOB] BIT NULL,
 	[ysnRevalOverrideCompany] BIT NULL,
