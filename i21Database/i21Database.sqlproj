@@ -1068,6 +1068,8 @@
     <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMProcessUserStage.sql" />
     <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
+    <Build Include="dbo\Views\vyuSMUserList.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
