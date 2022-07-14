@@ -157,7 +157,7 @@ BEGIN TRY
 				,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
 				,NULL				--,@ItemId
 				,EL.intEntityLocationId		--,@VendorLocationId
-				,3--L.intFreightTermId	--,@FreightTermId
+				,L.intFreightTermId	--,@FreightTermId
 			)
 		FROM tblLGLoad L
 		INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
