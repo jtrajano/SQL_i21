@@ -17,7 +17,11 @@ DECLARE @tblPostError TABLE(
  strPostBatchId NVARCHAR(40),  
  strMessage NVARCHAR(MAX),  
  strTransactionId NVARCHAR(40)  
-)  
+) 
+DECLARE
+@ysnOverrideLocation BIT = 0,
+@ysnOverrideLOB BIT = 0,
+@ysnOverrideCompany BIT = 0 
   
   DECLARE @ysnHasDetails BIT = 0
   SELECT @ysnHasDetails = 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
@@ -106,9 +110,16 @@ DECLARE @tblPostError TABLE(
   
  IF @ysnPost =1   
  BEGIN  
-  DECLARE @defaultType NVARCHAR(20)   
-  SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable() f   
-  WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;  
+
+    SELECT TOP 1 
+    @ysnOverrideLocation = ISNULL(ysnRevalOverrideLocation,0),
+    @ysnOverrideLOB = ISNULL(ysnRevalOverrideLOB,0),
+    @ysnOverrideCompany = ISNULL(ysnRevalOverrideCompany,0)
+    FROM tblGLCompanyPreferenceOption
+
+    DECLARE @defaultType NVARCHAR(20)   
+    SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable() f   
+    WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;  
 
     IF @ysnHasDetails = 1
     BEGIN
@@ -436,7 +447,7 @@ DECLARE @tblPostError TABLE(
   
    INSERT INTO @PostGLEntries2  
    SELECT *  
-   from fnGLOverridePostAccounts(@PostGLEntries,DEFAULT,DEFAULT,DEFAULT) A   
+   from fnGLOverridePostAccounts(@PostGLEntries,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
      
       
     IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
@@ -516,8 +527,8 @@ DECLARE @tblPostError TABLE(
   
   
    INSERT INTO @PostGLEntries2  
-   SELECT *  
-   from fnGLOverridePostAccounts(@PostGLEntries, DEFAULT,DEFAULT,DEFAULT) A   
+   SELECT * 
+   from fnGLOverridePostAccounts(@PostGLEntries,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A  
   
    EXEC uspGLPostRecap @PostGLEntries2, @intEntityId  
   

@@ -151,48 +151,26 @@ FROM @PostGLEntries
     
 
 DECLARE
-  @ysnOverrideLocation BIT = 0,
-    @ysnOverrideLOB BIT = 0,
-    @ysnOverrideCompany BIT = 0 
+@ysnOverrideLocation BIT = 0,
+@ysnOverrideLOB BIT = 0,
+@ysnOverrideCompany BIT = 0 
 
-
-    Declare  @tbl1 TABLE( intStructureType int );
-
-
-    with  st as (
-        select ROW_NUMBER() over(order by intSort)  rowId, intStructureType from tblGLAccountStructure where strType not in( 'Divider', 'Primary')
-    ),
-    ov as(
-
-    SELECT G.Item FROM tblGLCompanyPreferenceOption A
-    outer apply dbo.fnSplitString( A.strOverrideREArray, ',')G
-    )
-    insert into @tbl1
-    select intStructureType from st A join ov B on A.rowId = B.Item
-
-    SELECT @ysnOverrideLocation = 1 FROM @tbl1 WHERE intStructureType = 3
-    SELECT @ysnOverrideLOB = 1 FROM @tbl1 WHERE intStructureType = 5
-    SELECT @ysnOverrideCompany = 1 FROM @tbl1 WHERE intStructureType = 6
-
-
-
-
-  
+SELECT TOP 1 
+@ysnOverrideLocation = ISNULL(ysnREOverrideLocation,0),
+@ysnOverrideLOB = ISNULL(ysnREOverrideLOB,0),
+@ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0)
+FROM tblGLCompanyPreferenceOption
+ 
+INSERT INTO @PostGLEntries2   SELECT * FROM fnGLOverridePostAccounts(@PostGLEntries,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A       
     
-  INSERT INTO @PostGLEntries2   SELECT * FROM fnGLOverridePostAccounts(@PostGLEntries,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A       
-    
-  
-    
-   IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' )      
-   BEGIN    
-  
-  EXEC uspGLPostRecap @PostGLEntries2, @intEntityId      
-  EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId  
-  SET @result = 'Error overriding accounts.'  
-  GOTO _end  
-   END    
-    
+IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' )      
+BEGIN    
 
+EXEC uspGLPostRecap @PostGLEntries2, @intEntityId      
+EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId  
+SET @result = 'Error overriding accounts.'  
+GOTO _end  
+END    
     
 EXEC uspGLBookEntries @PostGLEntries2, 1, 1 ,1     
   
