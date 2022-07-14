@@ -2,6 +2,7 @@
 AS
 
 SELECT		a.intEntityId,
+			c.intUserSecurityCompanyLocationRolePermissionId,
 			strLocation = (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = c.intCompanyLocationId),
 			strRole = (SELECT strName FROM dbo.tblSMUserRole WHERE intUserRoleID = c.intUserRoleId)
 FROM		dbo.tblEMEntity AS a
