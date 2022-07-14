@@ -579,15 +579,15 @@ BEGIN TRY
 				DELETE FROM tblSMUserDetailStage WHERE intUserStageId = @UserStageId
 
 				--AuditLog
-				--DECLARE @SingleAuditLogParam SingleAuditLogParam
-				--INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				--		SELECT 1, '', 'Created', 'Created - Record: ' + CAST(@UserId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+				DECLARE @SingleAuditLogParam SingleAuditLogParam
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT 1, '', 'Created', 'Created - Record: ' + CAST(@UserId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
 
-				--EXEC uspSMSingleAuditLog
-				--	@screenName     = 'EntityManagement.view.Entity',
-				--	@recordId       = @NewUserEntityId,
-				--	@entityId       = 1,
-				--	@AuditLogParam  = @SingleAuditLogParam  
+				EXEC uspSMSingleAuditLog
+					@screenName     = 'EntityManagement.view.Entity',
+					@recordId       = @NewUserEntityId,
+					@entityId       = 1,
+					@AuditLogParam  = @SingleAuditLogParam  
 			END
 			ELSE
 			BEGIN
