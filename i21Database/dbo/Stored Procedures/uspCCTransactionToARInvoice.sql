@@ -84,7 +84,9 @@ BEGIN
 		,[strComments]
 		--,[intInvoiceId]
     )
-    SELECT [strTransactionType] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN 'Debit Memo' ELSE 'Credit Memo' END
+    SELECT [strTransactionType] =  CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN 'Debit Memo'
+		WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.strSiteType = 'Dealer Site' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSiteDetail.dblNet < 0 THEN 'Debit Memo' 
+		ELSE 'Credit Memo' END
         ,[strSourceTransaction] = 'Credit Card Reconciliation'
 		,[strType] = 'Dealer Credit Card'
         --,[intSourceId] = ccSiteHeader.intSiteHeaderId
@@ -102,7 +104,7 @@ BEGIN
         ,[strItemDescription] = ccItem.strItem
         ,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN -1 ELSE 1 END --CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblGross -- Dealer Site Gross
-			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblNet -- Dealer Site Net
+			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site' THEN (CASE WHEN ccSiteDetail.dblNet < 0 THEN ccSiteDetail.dblNet * -1 ELSE ccSiteDetail.dblNet END) -- Dealer Site Net
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSiteDetail.dblGross -- Company Owned Pass Thru
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet + (ccSiteDetail.dblFees * (1 - (ccSite.dblSharedFeePercentage / 100))) -- Dealer Site Shared Fees (Net) 
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross -- (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)) -- Dealer Site Shared Fees (Gross) 
