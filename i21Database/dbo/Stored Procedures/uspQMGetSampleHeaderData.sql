@@ -155,6 +155,9 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
@@ -206,6 +209,9 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
@@ -284,6 +290,9 @@ BEGIN
 		,S.strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		AND L.intLotId = @intProductValueId
@@ -314,8 +323,10 @@ BEGIN
 
 	SELECT @dblRepresentingQty = SUM(CASE 
 				WHEN IU.intItemUOMId = L.intWeightUOMId
-					THEN ISNULL(L.dblWeight, L.dblQty)
-				ELSE L.dblQty
+					THEN ISNULL(L.dblWeight, 0)
+				WHEN IU.intItemUOMId = L.intItemUOMId
+					THEN ISNULL(L.dblQty, 0)
+				ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, L.dblQty)
 				END)
 		,@intRepresentingUOMId = MAX(IU.intUnitMeasureId)
 		,@strRepresentingUOM = MAX(UOM.strUnitMeasure)
@@ -360,13 +371,17 @@ BEGIN
 		,@dblRepresentingQty AS dblRepresentingQty
 		,@intRepresentingUOMId AS intRepresentingUOMId
 		,@strRepresentingUOM AS strRepresentingUOM
-		,I.intOriginId AS intCountryId
-		,CA.strDescription AS strCountry
+		,ISNULL(C.intItemContractOriginId, I.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, CA.strDescription) AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
-		,@strContainerNumber AS strContainerNumber
+		,ISNULL(@strContainerNumber, L.strContainerNo) AS strContainerNumber
+		,L.intStorageLocationId
+		,SL.strName AS strStorageLocationName
+		,CL.intCompanyLocationSubLocationId
+		,CL.strSubLocationName
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.intLoadContainerId
@@ -388,6 +403,8 @@ BEGIN
 																				   END)
 	JOIN tblICItem I ON I.intItemId = L.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = L.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
