@@ -958,6 +958,10 @@
     <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
+    <Build Include="dbo\Views\vyuCTCategoryPerCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMProcessUserStage.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
     <Build Include="dbo\Views\vyuLGCustomerConsumptionSiteDevice.sql" />
     <Build Include="dbo\Views\vyuHDCustomerCompany.sql" />
