@@ -149,4 +149,17 @@ IF EXISTS(SELECT intItemUOMId FROM tblSTLotteryBook WHERE intItemUOMId IS NULL)
 -- [END]: Update tblSTLotteryBook - Add default intItemUOMId with stock unit of Item UOM
 ----------------------------------------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Add default value on tblSTCompanyPreferencce
+----------------------------------------------------------------------------------------------------------------------------------
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTCompanyPreference)
+	BEGIN
+		INSERT INTO tblSTCompanyPreference (dtmDateEntered, intConcurrencyId)
+		VALUES (GETDATE(), 1)
+	END
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Add default value on tblSTCompanyPreferencce
+----------------------------------------------------------------------------------------------------------------------------------
 GO
