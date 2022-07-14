@@ -981,6 +981,7 @@
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
     <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMProcessUserStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
