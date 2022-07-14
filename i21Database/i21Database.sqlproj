@@ -971,6 +971,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
     <Build Include="dbo\Tables\tblICFreightOverride.sql" />
     <Build Include="dbo\Views\vyuICGetFreightOverride.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
+    <Build Include="dbo\Views\vyuCTCategoryPerCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMProcessUserStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
