@@ -1481,6 +1481,24 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'LSI and LS Acknowledgement' and strModule = 'Manufacturing')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 152
+			,[strTransactionType]	= N'Pick Containers'
+			,[strPrefix]			= N'PC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 153
+			,[strTransactionType]	= N'Dispatch Schedule'
+			,[strPrefix]			= N'DS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Dispatch Schedule' and strModule = 'Logistics')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 155
