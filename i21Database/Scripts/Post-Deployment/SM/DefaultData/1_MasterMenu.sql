@@ -6410,6 +6410,9 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Quote Report' AND strModuleName
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reports' and strModuleName = 'Transports'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Supply Point' AND strModuleName = 'Transports'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Automated Process Status' AND strModuleName = 'Transports'
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Import Vendor Invoice' AND strModuleName = 'Transports' AND intMenuID NOT IN
+    ( SELECT MIN(intMenuID) FROM tblSMMasterMenu WHERE strMenuName = 'Import Vendor Invoice'  AND strModuleName = 'Transports'
+	  GROUP BY strMenuName, strModuleName, intParentMenuID, strCategory, strCommand);
 
 
 
@@ -8567,6 +8570,7 @@ BEGIN
 END
 
 GO
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
