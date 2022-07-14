@@ -101,6 +101,15 @@ BEGIN
 		WHERE intAccountId IS NOT NULL AND dblCost != 0
 		GROUP BY  intAccountId, intSiteDetailId, strItem 
 
+		IF (SELECT SUM(dblCost) FROM @Voucher WHERE strMiscDescription = 'Dealer Site Net') >= 0 
+		BEGIN
+			UPDATE @Voucher SET dblQuantityToBill = -1, dblCost = dblCost * -1 WHERE dblCost < 0
+		END
+		ELSE
+		BEGIN
+			UPDATE @Voucher SET dblCost = dblCost * -1, intTransactionType = 1 WHERE dblCost < 0
+		END
+
 		-- 1099K Adjustment
 		DECLARE @strInvalidCustomer NVARCHAR(2000) = NULL
 		DECLARE @strNo1099Setup NVARCHAR(2000) = NULL
