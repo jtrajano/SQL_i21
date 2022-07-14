@@ -1,9 +1,9 @@
   
 CREATE FUNCTION fnGLOverridePostAccounts(  
     @PostGLEntries RecapTableType READONLY,
-    @ysnOverrideLocation BIT =1,
-    @ysnOverrideLOB BIT = 1,
-    @ysnOverrideCompany BIT = 1
+    @ysnOverrideLocation BIT =0,
+    @ysnOverrideLOB BIT = 0,
+    @ysnOverrideCompany BIT = 0
 
  )  
 RETURNS   
