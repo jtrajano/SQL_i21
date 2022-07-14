@@ -7,7 +7,7 @@ SELECT
 	,intDiscountScheduleId=ISNULL(intDiscountScheduleId,0)
 	,intInvoiceCycle=ISNULL(intInvoiceCycle,0)
 	,intImportMapperId=ISNULL(intImportMapperId,0)
-	,intSalesPersonId=ISNULL(intSalesPersonId,0)
+	,intSalesPersonId=ISNULL(cfAccount.intSalesPersonId,0)
 	,intTermsCode=ISNULL(intTermsCode,0)
 	,intAccountStatusCodeId=ISNULL(intAccountStatusCodeId,0)
 	,intEntityId=ISNULL(intEntityId,0)
