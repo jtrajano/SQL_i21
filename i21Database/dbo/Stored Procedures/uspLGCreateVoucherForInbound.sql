@@ -157,7 +157,7 @@ BEGIN TRY
 				,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
 				,NULL				--,@ItemId
 				,EL.intEntityLocationId		--,@VendorLocationId
-				,L.intFreightTermId	--,@FreightTermId
+				,3--L.intFreightTermId	--,@FreightTermId
 				,default --,@FOB
 			)
 		FROM tblLGLoad L
