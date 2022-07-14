@@ -3,6 +3,9 @@
 
 AS
 
+	Declare @ysnEnableBudgetForBasisPricing BIT
+	SELECT TOP 1 @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
+
 	SELECT CC.intContractCostId
 		, CC.intConcurrencyId
 		, CC.intPrevConcurrencyId
@@ -57,15 +60,21 @@ AS
 		, CH.dtmContractDate
 		, strMainCurrency = MY.strCurrency
 		, dblAmount = (CASE	WHEN CC.strCostMethod = 'Per Unit'
-								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, CM.intUnitMeasureId, CD.dblQuantity) * CC.dblRate * CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
+								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, CM.intUnitMeasureId, CD.dblQuantity) * CC.dblRate * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							WHEN CC.strCostMethod = 'Amount'
-								THEN CC.dblRate * CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
+								THEN CC.dblRate * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							WHEN CC.strCostMethod = 'Per Container'
-								THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
+								THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							WHEN CC.strCostMethod = 'Percentage'
 								THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
-									* (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
-									* CC.dblRate/100 * CASE WHEN CC.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
+									* (
+										CASE WHEN ISNULL(CD.dblCashPrice, 0.00) <> 0.00 THEN CD.dblCashPrice
+																 WHEN CD.intPricingTypeId = 2 THEN
+																	CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT,1) THEN ISNULL(CD.dblBudgetPrice,0) ELSE ISNULL(FSPM.dblLastSettle,0) + CD.dblBasis END
+															ELSE NULL END
+																		
+									/ (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+									* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
 							END)
 					/ (CASE WHEN ISNULL(CY.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY.intCent, 1) ELSE 1 END)
 		, RT.strCurrencyExchangeRateType
@@ -92,3 +101,7 @@ AS
 	LEFT JOIN	tblICItemUOM		CM	ON	CM.intUnitMeasureId		=	IU.intUnitMeasureId
 										AND CM.intItemId			=	CD.intItemId	
 	LEFT JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CC.intRateTypeId
+	LEFT JOIN	tblCTBasisCost	    BC	ON	BC.intItemId			=	CC.intItemId
+	LEFT JOIN  tblRKFuturesSettlementPrice FSP on FSP.intFutureMarketId = CD.intFutureMarketId
+	LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD.intFutureMonthId = FSPM.intFutureMonthId
+	ORDER BY BC.intSort ASC

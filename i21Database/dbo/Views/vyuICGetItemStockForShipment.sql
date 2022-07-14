@@ -7,6 +7,7 @@ v.intKey
 , v.strItemNo
 , v.strShortName
 , v.strType
+, v.ysnActive
 , v.strManufactureType
 , v.strBundleType
 , v.strDescription
@@ -44,7 +45,7 @@ v.intKey
 , COALESCE(v.strIssueUOMType, stockUnit.strUnitType) strIssueUOMType
 , COALESCE(v.strReceiveUOM, stockUnit.strUnitMeasure) strReceiveUOM
 , v.strReceiveUPC
-, v.strReceieveLongUPC
+, v.strReceiveLongUPC
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblReceiveSalePrice) dblReceiveSalePrice
 , v.dblReceiveMSRPPrice
 , COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(v.intItemId, v.intItemLocationId, intReceiveUOMId, tsession.dtmTransactionDate), EffectiveCost.dblCost, v.dblReceiveLastCost) dblReceiveLastCost

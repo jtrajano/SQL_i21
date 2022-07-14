@@ -26,7 +26,9 @@ UPDATE r
 SET
 	  r.dtmLastCalculateTotals = @Date
 	, r.dblSubTotal = ISNULL(items.subTotal, 0)
-	, r.dblTotalTax = ISNULL(items.totalTax, 0) + ISNULL(charges.totalChargesTax,0)
+	, r.dblTotalItemTax = ISNULL(items.totalTax, 0)
+	, r.dblTotalReceiptTax = ISNULL(receiptTax.totalReceipTax, 0) 
+	, r.dblTotalTax = ISNULL(items.totalTax, 0) + ISNULL(charges.totalChargesTax,0) + ISNULL(receiptTax.totalReceipTax, 0) 
 	, r.dblTotalCharges = ISNULL(charges.totalCharges,0)
 	, r.dblTotalGross = ISNULL(items.totalGross,0)
 	, r.dblTotalTare = ISNULL(items.totalTare,0)
@@ -87,6 +89,14 @@ FROM
 		WHERE	ReceiptCharge.intInventoryReceiptId = r.intInventoryReceiptId
 				AND ISNULL(Receipt.intCurrencyId, 1) = ISNULL(ReceiptCharge.intCurrencyId, ISNULL(Receipt.intCurrencyId, 1)) 	
 	) charges
+	OUTER APPLY (
+		SELECT 
+			totalReceipTax = SUM(ReceiptTax.dblTax) 
+		FROM 
+			tblICInventoryReceiptTax ReceiptTax
+		WHERE
+			ReceiptTax.intInventoryReceiptId = r.intInventoryReceiptId
+	) receiptTax
 WHERE 
 	(r.intInventoryReceiptId = @ReceiptId OR @ReceiptId IS NULL) 
 	AND (@ForceRecalc = 1 OR (r.dtmLastCalculateTotals IS NULL OR r.dtmDateModified > r.dtmLastCalculateTotals))

@@ -234,7 +234,12 @@ DECLARE  @Id									INT
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
+		,@FreightCharge							NUMERIC(18, 6)
+		,@FreightCompanySegment					INT
+		,@FreightLocationSegment				INT
 		,@SourcedFrom							NVARCHAR(100)
+		,@TaxLocationId							INT
+		,@TaxPoint								NVARCHAR(50)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -298,6 +303,7 @@ DECLARE  @Id									INT
 		,@ItemCustomerStorageId					INT
 		,@ItemSiteDetailId						INT
 		,@ItemLoadDetailId						INT
+		,@ItemLoadDistributionDetailId   		INT
 		,@ItemLotId								INT
 		,@ItemOriginalInvoiceDetailId			INT			
 		,@ItemSiteId							INT
@@ -454,6 +460,11 @@ BEGIN
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
+		,@FreightCharge					= [dblFreightCharge]
+		,@FreightCompanySegment			= [intFreightCompanySegment]
+		,@FreightLocationSegment		= [intFreightLocationSegment]
+		,@TaxLocationId					= [intTaxLocationId]
+		,@TaxPoint						= [strTaxPoint]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -516,6 +527,7 @@ BEGIN
 		,@ItemCustomerStorageId			= (CASE WHEN @GroupingOption = 0 THEN [intCustomerStorageId] ELSE NULL END)
 		,@ItemSiteDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intSiteDetailId] ELSE NULL END)
 		,@ItemLoadDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intLoadDetailId] ELSE NULL END)
+		,@ItemLoadDistributionDetailId 	= (CASE WHEN @GroupingOption = 0 THEN [intLoadDistributionDetailId] ELSE NULL END)
 		,@ItemLotId						= (CASE WHEN @GroupingOption = 0 THEN [intLotId] ELSE NULL END)
 		,@ItemOriginalInvoiceDetailId	= (CASE WHEN @GroupingOption = 0 THEN [intOriginalInvoiceDetailId] ELSE NULL END)
 		,@ItemSiteId					= (CASE WHEN @GroupingOption = 0 THEN [intSiteId] ELSE NULL END)
@@ -654,10 +666,10 @@ BEGIN
 	IF ISNULL(@Type, '') = ''
 		SET @Type = 'Standard'
 	
-	IF ISNULL(@LoadDistributionHeaderId, 0) > 0
-		BEGIN
-			SET @Type = 'Transport Delivery'
-		END
+	IF (ISNULL(@LoadDistributionHeaderId, 0) > 0 AND (ISNULL(@SourceTransaction,'') <> 'Transport Load')) OR ((ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@Type, '') = ''))
+	BEGIN
+		SET @Type = 'Transport Delivery'
+	END
 
 	SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 
@@ -739,7 +751,12 @@ BEGIN
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
+			,@FreightCharge					= @FreightCharge
+			,@FreightCompanySegment			= @FreightCompanySegment
+			,@FreightLocationSegment		= @FreightLocationSegment
 			,@SourcedFrom					= @SourcedFrom
+			,@TaxLocationId					= @TaxLocationId
+			,@TaxPoint						= @TaxPoint
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -802,6 +819,7 @@ BEGIN
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
@@ -983,6 +1001,7 @@ BEGIN
 					,@ItemCustomerStorageId			= [intCustomerStorageId]
 					,@ItemSiteDetailId				= [intSiteDetailId]
 					,@ItemLoadDetailId				= [intLoadDetailId]
+					,@ItemLoadDistributionDetailId  = [intLoadDistributionDetailId]
 					,@ItemLotId						= [intLotId]
 					,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 					,@ItemSiteId					= [intSiteId]
@@ -1090,6 +1109,7 @@ BEGIN
 						,@ItemCustomerStorageId			= @ItemCustomerStorageId
 						,@ItemSiteDetailId				= @ItemSiteDetailId
 						,@ItemLoadDetailId				= @ItemLoadDetailId
+						,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 						,@ItemLotId						= @ItemLotId
 						,@ItemSiteId					= @ItemSiteId
 						,@ItemBillingBy					= @ItemBillingBy
@@ -1502,6 +1522,9 @@ BEGIN TRY
 			,@Recap							= [ysnRecap] 
 			,@Post							= [ysnPost]
 			,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
+			,@FreightCharge					= [dblFreightCharge]
+			,@FreightCompanySegment			= [intFreightCompanySegment]
+			,@FreightLocationSegment		= [intFreightLocationSegment]
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1643,8 +1666,11 @@ BEGIN TRY
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
 			,[intTruckDriverId]			= @TruckDriverId
-			,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
+			,[intTruckDriverReferenceId]= @TruckDriverReferenceId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
+			,[dblFreightCharge]			= @FreightCharge 
+			,[intFreightCompanySegment]	= @FreightCompanySegment
+			,[intFreightLocationSegment]= @FreightLocationSegment
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN
@@ -1770,6 +1796,7 @@ BEGIN TRY
 						,@ItemCustomerStorageId			= [intCustomerStorageId]
 						,@ItemSiteDetailId				= [intSiteDetailId]
 						,@ItemLoadDetailId				= [intLoadDetailId]
+						,@ItemLoadDistributionDetailId 	= [intLoadDistributionDetailId]
 						,@ItemLotId						= [intLotId]
 						,@ItemOriginalInvoiceDetailId	= [intOriginalInvoiceDetailId]
 						,@ItemSiteId					= [intSiteId]
@@ -1783,7 +1810,7 @@ BEGIN TRY
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 						,@ItemConversionAccountId		= [intConversionAccountId]
-						,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+						,@ItemCurrencyExchangeRateTypeId= [intCurrencyExchangeRateTypeId]
 						,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
 						,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
@@ -1864,6 +1891,7 @@ BEGIN TRY
 							,@ItemCustomerStorageId			= @ItemCustomerStorageId
 							,@ItemSiteDetailId				= @ItemSiteDetailId
 							,@ItemLoadDetailId				= @ItemLoadDetailId
+							,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 							,@ItemLotId						= @ItemLotId
 							,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 							,@ItemSiteId					= @ItemSiteId
@@ -2106,6 +2134,7 @@ BEGIN TRY
 					,@ItemCustomerStorageId			= [intCustomerStorageId]
 					,@ItemSiteDetailId				= [intSiteDetailId]
 					,@ItemLoadDetailId				= [intLoadDetailId]
+					,@ItemLoadDistributionDetailId 	= [intLoadDistributionDetailId]
 					,@ItemLotId						= [intLotId]
 					,@ItemSiteId					= [intSiteId]
 					,@ItemBillingBy					= [strBillingBy]
@@ -2271,6 +2300,7 @@ BEGIN TRY
 						,[intCustomerStorageId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCustomerStorageId ELSE [intCustomerStorageId] END
 						,[intSiteDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteDetailId ELSE [intSiteDetailId] END
 						,[intLoadDetailId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLoadDetailId ELSE [intLoadDetailId] END
+						,[intLoadDistributionDetailId]   		= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLoadDistributionDetailId ELSE [intLoadDistributionDetailId] END
 						,[intLotId]								= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemLotId ELSE [intLotId] END
 						,[intOriginalInvoiceDetailId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemOriginalInvoiceDetailId ELSE [intOriginalInvoiceDetailId] END
 						,[intSiteId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSiteId ELSE [intSiteId] END

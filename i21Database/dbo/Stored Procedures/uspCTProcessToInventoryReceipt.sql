@@ -111,7 +111,7 @@ AS
 																ISNULL(CD.dblBasis,0)
 														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
-				intCostUOMId				=	case when CD.intPricingTypeId = 2 then CD.intBasisUOMId else CD.intPriceItemUOMId end,
+				intCostUOMId				=	case when CD.intPricingTypeId = 2 then CD.intBasisUOMId else CD.intFXPriceUOMId end,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
 				dblExchangeRate				=	1,

@@ -14,6 +14,10 @@ SELECT
 	GainLossAccount.strAccountId strGainLossAccountId,
 	C.intSalesOffsetAccountId,
 	SalesOffsetAccount.strAccountId strSalesOffsetAccountId,
+	C.intDueToAccountId,
+	IntraCompanyDueTo.strAccountId strDueToAccountId,
+	C.intDueFromAccountId,
+	IntraCompanyDueFrom.strAccountId strDueFromAccountId,
 	C.intConcurrencyId
 FROM tblFACompanyPreferenceOption C
 LEFT JOIN tblGLAccount AssetAccount
@@ -28,3 +32,7 @@ LEFT JOIN tblGLAccount GainLossAccount
 	ON GainLossAccount.intAccountId = C.intGainLossAccountId
 LEFT JOIN tblGLAccount SalesOffsetAccount
 	ON SalesOffsetAccount.intAccountId = C.intSalesOffsetAccountId
+LEFT JOIN tblGLAccount IntraCompanyDueTo
+	ON IntraCompanyDueTo.intAccountId = C.intDueToAccountId
+LEFT JOIN tblGLAccount IntraCompanyDueFrom
+	ON IntraCompanyDueFrom.intAccountId = C.intDueFromAccountId

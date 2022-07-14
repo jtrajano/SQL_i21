@@ -6,12 +6,13 @@ SELECT
 	intSourceType = 2 /* TM Orders */
 	,intOrderId = TMO.intDispatchId
 	,intOrderDetailId = NULL
-	,intEntityId = NULL
-	,intEntityLocationId = NULL
+	,intEntityId = E.intEntityId
+	,intEntityLocationId = EL.intEntityLocationId
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
-	,strCustomerNumber = NULL
+	,strCustomerNumber = E.strEntityNo
 	,intSiteID = TMO.intSiteID
+	,strSiteNumber = TMO.strSiteNumber
 	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = TMO.intDispatchId
 	,intLoadDetailId = NULL
@@ -29,9 +30,10 @@ SELECT
 	,dblFromLongitude = CompLoc.dblLongitude
 	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = TMO.dtmRequestedDate
-	,dtmHoursFrom = CAST(NULL AS DATETIME)
-	,dtmHoursTo = CAST(NULL AS DATETIME)
+	,dtmHoursFrom = EL.dtmOperatingHoursStartTime
+	,dtmHoursTo = EL.dtmOperatingHoursEndTime
 	,strEntityName = TMO.strCustomerName
+	,strEntityLocation = EL.strLocationName
 	,strToWarehouse = NULL
 	,strToAddress = TMO.strSiteAddress
 	,strToCity = TMO.strSiteCity
@@ -65,6 +67,9 @@ FROM vyuTMGeneratedCallEntry TMO
 LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
 LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
+LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
+LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
 WHERE TMO.strOrderStatus <> 'Delivered' AND TMO.strOrderStatus <> 'Routed'
 
 UNION ALL
@@ -78,9 +83,10 @@ SELECT
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
 	,strCustomerNumber = NULL
-	,intSiteID = NULL
+	,intSiteID = LGLD.intTMSiteId
+	,strSiteNumber = LGLD.strSiteID
 	,intCustomerID = NULL
-	,intDispatchID = NULL
+	,intDispatchID = LGLD.intTMDispatchId
 	,intLoadDetailId = LGLD.intLoadDetailId
 	,intLoadId = LGLD.intLoadId
 	,intSequence = -1
@@ -99,6 +105,7 @@ SELECT
 	,dtmHoursFrom = EML.dtmOperatingHoursStartTime
 	,dtmHoursTo = EML.dtmOperatingHoursEndTime
 	,strEntityName = LGLD.strCustomer
+	,strEntityLocation = EML.strLocationName
 	,strToWarehouse = LGLD.strPSubLocationName
 	,strToAddress = LGLD.strShipToAddress
 	,strToCity = LGLD.strShipToCity
@@ -147,6 +154,7 @@ SELECT
 	,strEntityType = 'Vendor'
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = LGLD.intLoadDetailId
@@ -167,6 +175,7 @@ SELECT
 	,dtmHoursFrom = EML.dtmOperatingHoursStartTime
 	,dtmHoursTo = EML.dtmOperatingHoursEndTime
 	,strEntityName = LGLD.strVendor
+	,strEntityLocation = EML.strLocationName
 	,strToWarehouse = LGLD.strPSubLocationName
 	,strToAddress = LGLD.strShipFromAddress
 	,strToCity = LGLD.strShipFromCity
@@ -209,12 +218,13 @@ SELECT
 	intSourceType = 4  /* TM Sites */
 	,intOrderId = TMO.intSiteId
 	,intOrderDetailId = NULL
-	,intEntityId = NULL
-	,intEntityLocationId = NULL
+	,intEntityId = E.intEntityId
+	,intEntityLocationId = EL.intEntityLocationId
 	,intEntityTypeId = NULL
 	,strEntityType = 'Customer'
 	,strCustomerNumber
 	,intSiteID = TMO.intSiteId
+	,strSiteNumber = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
 	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
@@ -232,9 +242,10 @@ SELECT
 	,dblFromLongitude = 0.0
 	,dblFromLatitude = 0.0
 	,dtmScheduledDate = NULL
-	,dtmHoursFrom = CAST(NULL AS DATETIME)
-	,dtmHoursTo = CAST(NULL AS DATETIME)
+	,dtmHoursFrom = EL.dtmOperatingHoursStartTime
+	,dtmHoursTo = EL.dtmOperatingHoursEndTime
 	,strEntityName = TMO.strCustomerName
+	,strEntityLocation = EL.strLocationName
 	,strToWarehouse = NULL
 	,strToAddress = TMO.strSiteAddress
 	,strToCity = TMO.strSiteCity
@@ -264,7 +275,12 @@ SELECT
 	,ysnHold = Cast(0 as Bit)
 	,ysnRoutingAlert = Cast(0 as Bit)
 	,strRoute = TMO.strRoute
-FROM vyuTMCustomerConsumptionSiteInfo TMO WHERE TMO.ysnActive = 1
+FROM vyuTMCustomerConsumptionSiteInfo TMO 
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteId 
+LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
+LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
+WHERE TMO.ysnActive = 1
 
 UNION ALL
 
@@ -278,6 +294,7 @@ SELECT
 	,strEntityType = ET.strType
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
@@ -298,6 +315,7 @@ SELECT
 	,dtmHoursFrom = EL.dtmOperatingHoursStartTime
 	,dtmHoursTo = EL.dtmOperatingHoursEndTime
 	,strEntityName = EN.strName
+	,strEntityLocation = EL.strLocationName
 	,strToWarehouse = NULL
 	,strToAddress = EL.strAddress
 	,strToCity = EL.strCity
@@ -344,6 +362,7 @@ SELECT
 	,strEntityType = 'Customer'
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
@@ -364,6 +383,7 @@ SELECT
 	,dtmHoursFrom = EL.dtmOperatingHoursStartTime
 	,dtmHoursTo = EL.dtmOperatingHoursEndTime
 	,strEntityName = E.strName
+	,strEntityLocation = EL.strLocationName
 	,strToWarehouse = ToStrg.strSubLocationName
 	,strToAddress = EL.strAddress
 	,strToCity = EL.strCity
@@ -419,6 +439,7 @@ SELECT
 	,strEntityType = 'User'
 	,strCustomerNumber = NULL
 	,intSiteID = NULL
+	,strSiteNumber = NULL
 	,intCustomerID = NULL
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
@@ -439,6 +460,7 @@ SELECT
 	,dtmHoursFrom = CAST(NULL AS DATETIME)
 	,dtmHoursTo = CAST(NULL AS DATETIME)
 	,strEntityName = E.strName
+	,strEntityLocation = NULL
 	,strToWarehouse = ToStrg.strSubLocationName
 	,strToAddress = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.strAddress ELSE ToLoc.strAddress END
 	,strToCity = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.strCity ELSE ToLoc.strCity END

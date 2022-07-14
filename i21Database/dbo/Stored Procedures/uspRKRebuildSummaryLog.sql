@@ -338,11 +338,19 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad ELSE SUH.dblTransactionQuantity END
+				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
+												ELSE CASE WHEN SH.strPricingStatus = 'Partially Priced' AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0
+															AND (SH.dblOldBalance - SH.dblBalance) * -1 < (CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END) 
+													THEN 
+														CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END
+													ELSE SUH.dblTransactionQuantity  END
+												END
 				, SUH.strScreenName  
 				, @intContractHeaderId
 				, @intContractDetailId
-				, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' THEN 1 ELSE SH.intPricingTypeId END
+				, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
+												AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END >= 0 
+										THEN 1 ELSE SH.intPricingTypeId END
 				, intTransactionReferenceId = SUH.intExternalHeaderId
 				, strTransactionReferenceNo = SUH.strNumber
 				, @intCommodityId
@@ -370,6 +378,52 @@ BEGIN TRY
 			where ysnDeleted = 0
 			and SUH.strFieldName = 'Balance'
 			and SUH.intContractDetailId = @intContractDetailId
+
+
+			-- PRICED PART
+			union all
+			select 
+				dtmHistoryCreated
+				, @strContractNumber
+				, @intContractSeq
+				, @intContractTypeId
+				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
+								ELSE ((SH.dblOldBalance - SH.dblBalance) - ABS(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END)) * -1 END
+				, SUH.strScreenName  
+				, @intContractHeaderId
+				, @intContractDetailId
+				, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
+												AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0 
+										THEN 1 ELSE SH.intPricingTypeId END
+				, intTransactionReferenceId = SUH.intExternalHeaderId
+				, strTransactionReferenceNo = SUH.strNumber
+				, @intCommodityId
+				, @strCommodityCode
+				, @intItemId
+				, intEntityId
+				, @intLocationId
+				, @intFutureMarketId 
+				, @intFutureMonthId 
+				, @dtmStartDate 
+				, @dtmEndDate 
+				, @intQtyUOMId
+				, @dblFutures
+				, @dblBasis
+				, @intBasisUOMId 
+				, @intBasisCurrencyId 
+				, @intPriceUOMId 
+				, @intContractStatusId 
+				, @intBookId 
+				, @intSubBookId
+				, SU.intUserId
+			from vyuCTSequenceUsageHistory SUH
+			inner join tblCTSequenceHistory SH on SH.intSequenceUsageHistoryId = SUH.intSequenceUsageHistoryId
+			inner join tblCTSequenceUsageHistory SU on SU.intSequenceUsageHistoryId = SUH.intSequenceUsageHistoryId
+			where ysnDeleted = 0
+			and SUH.strFieldName = 'Balance'
+			and SUH.intContractDetailId = @intContractDetailId
+			AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0
+			AND (SH.dblOldBalance - SH.dblBalance) * -1 < (CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END) 
 
 			union all
 			select 
@@ -555,7 +609,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1
@@ -630,7 +684,7 @@ BEGIN TRY
 			WHERE SH.intContractDetailId = @intContractDetailId 
 			AND @intHeaderPricingType = 2
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND SH.intLagPricingTypeId <> SH.intPricingTypeId)
+			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
 					OR
 					 (ISNULL(P.intPriceFixationId, 0) = 0
 					  AND SH.ysnFuturesChange = 1

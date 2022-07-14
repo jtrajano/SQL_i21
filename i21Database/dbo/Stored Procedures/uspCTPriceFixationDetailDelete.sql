@@ -218,7 +218,8 @@ BEGIN TRY
 				CD.dblCashPrice			=	NULL,
 				CD.dblTotalCost			=	NULL,
 				CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-				CD.intContractStatusId	=	case when CD.intContractStatusId = 5 and @ysnDestinationWeightsAndGrades = 0 then 1 else CD.intContractStatusId end
+				CD.intContractStatusId	=	case when CD.intContractStatusId = 5 and @ysnDestinationWeightsAndGrades = 0 then 1 else CD.intContractStatusId end,
+				CD.dblFXPrice			=	null
 		FROM	tblCTContractDetail	CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblCTPriceFixation	PF	ON PF.intContractHeaderId = CH.intContractHeaderId and	isnull(PF.intContractDetailId,0) = (case when CH.ysnMultiplePriceFixation = 1 then isnull(PF.intContractDetailId,0) else CD.intContractDetailId end) OR PF.intContractDetailId = CD.intSplitFromId

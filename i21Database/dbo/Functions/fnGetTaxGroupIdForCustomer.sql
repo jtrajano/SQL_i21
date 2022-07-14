@@ -12,7 +12,7 @@ RETURNS INT
 AS
 BEGIN
 	IF ISNULL(@FOB, '') = ''
-		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId),''))))
+		SET @FOB = LOWER(RTRIM(LTRIM(ISNULL((SELECT strFobPoint FROM tblSMFreightTerms WHERE [intFreightTermId] = @FreightTermId), ''))))
 	ELSE
 		SET @FOB = LOWER(@FOB)
 
@@ -25,7 +25,7 @@ BEGIN
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
 
 	SELECT
-		 @VendorId			= VI.intVendorId
+		 @VendorId = VI.intVendorId
 	FROM
 		tblICItem I
 	INNER JOIN

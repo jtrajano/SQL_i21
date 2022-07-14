@@ -22,7 +22,12 @@ SELECT
 	,strVendorPhone = ISNULL(vendor.strPhone, vendor.strPhone2)
 
 	--TAXES
+	,APB.strTaxPoint
+	,CASE WHEN APB.strTaxPoint IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ysnOverrideTaxPoint
+	,TL.strLocationName strTaxLocation
+	,CASE WHEN TL.strLocationName IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ysnOverrideTaxLocation
 	,RT.strTaxGroup
+	,APBD.ysnOverrideTaxGroup
 	,RT.strCalculationMethod
 	,RT.strTaxCode
 	,strTaxAgency = RT.strTaxAgency
@@ -159,5 +164,6 @@ OUTER APPLY (
 	FROM tblGLAccount
 	WHERE intAccountId = APBD.intAccountId
 ) account
+LEFT JOIN vyuARTaxLocation TL ON TL.intTaxLocationId = APB.intTaxLocationId AND TL.strFobPoint = (CASE WHEN APB.strTaxPoint = 'Origin' THEN 'Destination' ELSE 'Origin' END)
 
 GO

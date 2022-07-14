@@ -105,6 +105,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2120_UpdateAddonComponents.sql
 :r .\SM\2120_InsertOtherLabels.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2110_FixUserSecurityAdminData.sql
+:r .\SM\2210_RemoveOldPowerBIData.sql
 
 
 -- Canned Report
@@ -247,6 +249,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
+:r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
 
 -- Financial Report Designer
@@ -302,6 +305,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
+:r .\AR\DefaultData\39_UpdateCreditCardCompanyPreference.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
@@ -546,6 +550,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1810_Fix_Check_Payee_Name.sql
 :r .\EM\1910_Set_Contact_Location.sql
 :r .\EM\2210_AddDefaultEFTBank.sql
+:r .\EM\2210_CompanyPreference.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

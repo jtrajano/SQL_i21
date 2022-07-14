@@ -56,7 +56,11 @@ BEGIN TRY
 		, @strresult NVARCHAR(MAX)
 		, @strDescription NVARCHAR(100)
 		, @dblReceivedQuantity DECIMAL(18, 6) = 0
+		, @dblReceivedQuantityGross DECIMAL(18, 6) = 0
+		, @dblReceivedQuantityNet DECIMAL(18, 6) = 0
 		, @dblDistributedQuantity DECIMAL(18, 6) = 0
+		, @dblDistributedQuantityGross DECIMAL(18, 6) = 0
+		, @dblDistributedQuantityNet DECIMAL(18, 6) = 0
 		, @intFreightItemId INT
 		, @intSurchargeItemId INT
 		, @ysnItemizeSurcharge BIT
@@ -67,6 +71,7 @@ BEGIN TRY
 		, @strFreightBilledBy NVARCHAR(30) = NULL
 		, @ysnComboFreight BIT
 		, @dblComboSurcharge DECIMAL(18, 6) = 0
+		, @ysnAllowDifferentUnits BIT
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -96,7 +101,9 @@ BEGIN TRY
 	END
 
 
-	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0) FROM tblTRCompanyPreference
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
+		, @ysnComboFreight = ISNULL(ysnComboFreight, 0)
+		, @ysnAllowDifferentUnits = ISNULL(ysnAllowDifferentUnits, 0) FROM tblTRCompanyPreference
 	SELECT @strFreightBilledBy = strFreightBilledBy FROM tblSMShipVia where intEntityId = @intShipVia
 
 	--IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
@@ -326,8 +333,9 @@ BEGIN TRY
 			RAISERROR(@err, 16, 1)
 		END
 
-		SELECT @dblReceivedQuantity = (CASE WHEN (@GrossorNet = 'Net') THEN SUM(TR.dblNet)
-											ELSE SUM(TR.dblGross) END)
+		SELECT @dblReceivedQuantity = SUM(TR.dblGross)
+			,  @dblReceivedQuantityGross = SUM(TR.dblGross)
+			,  @dblReceivedQuantityNet = SUM(TR.dblNet)
 		FROM tblTRLoadReceipt TR
 		WHERE TR.intLoadHeaderId = @intLoadHeaderId
 			AND TR.intItemId = @intItemId
@@ -403,18 +411,32 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			SELECT @dblDistributedQuantity = SUM(DD.dblUnits)
+				,  @dblDistributedQuantityGross = SUM(ISNULL(DD.dblDistributionGrossSalesUnits,0))
+				,  @dblDistributedQuantityNet = SUM(ISNULL(DD.dblDistributionNetSalesUnits,0))
 			FROM tblTRLoadDistributionHeader DH
 			JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 			WHERE intLoadHeaderId = @intLoadHeaderId
 				AND DD.intItemId = @intItemId
 			GROUP BY DD.intItemId
-		
-			IF (@dblReceivedQuantity != @dblDistributedQuantity)
+			
+			IF (@ysnAllowDifferentUnits = 1)
 			BEGIN
-				SET @strresult = @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match distributed quantity ' + LTRIM(@dblDistributedQuantity)
-				RAISERROR(@strresult, 16, 1)
+				IF ((@dblReceivedQuantityGross != @dblDistributedQuantityGross) OR (@dblReceivedQuantityNet != @dblDistributedQuantityNet))
+				BEGIN
+					SET @strresult = @strDescription + ' received quantity (Gross: ' + FORMAT(@dblReceivedQuantityGross, 'g17')  + ', Net: ' + FORMAT(@dblReceivedQuantityNet, 'g17') +  ') does not match distributed quantity (Gross: ' + FORMAT(@dblDistributedQuantityGross, 'g17') + ', Net: ' + FORMAT(@dblDistributedQuantityNet, 'g17') + ')'
+					RAISERROR(@strresult, 16, 1)
+				END
+			END
+			ELSE
+			BEGIN
+				IF (@dblReceivedQuantity != @dblDistributedQuantity)
+				BEGIN
+					SET @strresult = @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match distributed quantity ' + LTRIM(@dblDistributedQuantity)
+					RAISERROR(@strresult, 16, 1)
+				END
 			END
 		END
+		
 
 		DROP TABLE #tmpBlendDistributionItems
 

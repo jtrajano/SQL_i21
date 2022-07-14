@@ -228,7 +228,6 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[dblCurrencyExchangeRate]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
-	,[dblStandardWeight]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -349,7 +348,6 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
-	,[dblStandardWeight]					= ARSI.dblStandardWeight
 FROM vyuARShippedItems ARSI
 LEFT JOIN(
  SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
@@ -476,7 +474,6 @@ SELECT
 	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
-	,[dblStandardWeight]					= SOD.dblStandardWeight
 FROM tblICInventoryShipment ICIS
 INNER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
 							 AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
@@ -602,7 +599,6 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ICISI.[dblForexRate]
 	,[intSubCurrencyId]						= NULL
 	,[dblSubCurrencyRate]					= @ZeroDecimal
-	,[dblStandardWeight]					= @ZeroDecimal
 FROM 
 	tblICInventoryShipment ICIS
 INNER JOIN
@@ -1038,7 +1034,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
 									, intPriceFixationDetailId
-									, dblStandardWeight
 								)
 								SELECT strSourceTransaction
 									, intSourceId
@@ -1092,8 +1087,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intStorageLocationId
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
-									, intPriceFixationDetailId		= @intPriceFixationDetailId
-									, dblStandardWeight
+									, intPriceFixationDetailId	= @intPriceFixationDetailId
 								FROM @EntriesForInvoice
 								WHERE intId = @intInvoiceEntriesId
 
@@ -1152,7 +1146,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
 									, intPriceFixationDetailId			= NULL
-									, dblStandardWeight
 								FROM (
 									SELECT TOP 1 *
 									FROM @EntriesForInvoice E
@@ -1252,7 +1245,6 @@ ELSE
 				, intStorageLocationId
 				, intSubLocationId
 				, intCompanyLocationSubLocationId
-				, dblStandardWeight
 			)
 			SELECT intInvoiceDetailId				= NULL
 				, strSourceTransaction				= 'Direct'
@@ -1289,7 +1281,6 @@ ELSE
 				, intStorageLocationId				= EI.intStorageLocationId
 				, intSubLocationId					= EI.intSubLocationId
 				, intCompanyLocationSubLocationId	= EI.intSubLocationId
-				, dblStandardWeight					= EI.dblStandardWeight
 			FROM @EntriesForInvoice EI
 
 			EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries

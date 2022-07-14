@@ -123,13 +123,10 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
-				AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
-				AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
-				AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 		AND NOT EXISTS(
@@ -148,13 +145,10 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
-				AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
-				AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
-				AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 	BEGIN
@@ -182,6 +176,20 @@ ELSE SAVE TRAN @SavePoint
 			,intNewPayableId
 		FROM dbo.fnAPGetPayableKeyInfo(@voucherPayable)
 
+		--UPDATE THE QTY BEFORE BACKING UP AND DELETING, SO WE COULD ACTUAL QTY WHEN RE-INSERTING
+		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
+		UPDATE P
+		SET P.dblQuantityToBill = (P.dblQuantityToBill - P2.dblQuantityToBill),
+			P.dblQuantityBilled = (P.dblQuantityBilled + P2.dblQuantityToBill),
+			P.dblNetWeight = (P.dblNetWeight - P2.dblNetWeight)
+		FROM tblAPVoucherPayable P
+		INNER JOIN (
+			SELECT PK.intNewPayableId, SUM(dblQuantityToBill) dblQuantityToBill, SUM(dblNetWeight) dblNetWeight
+			FROM @payablesKey PK
+			INNER JOIN @voucherPayable VP ON VP.intVoucherPayableId = PK.intOldPayableId
+			GROUP BY PK.intNewPayableId
+		) P2 ON P2.intNewPayableId = P.intVoucherPayableId
+		
 		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE T
 		SET T.dblTax = T.dblTax - T2.dblTax,
@@ -193,26 +201,6 @@ ELSE SAVE TRAN @SavePoint
 			INNER JOIN @voucherPayableTax VT ON VT.intVoucherPayableId = PK.intOldPayableId
 			GROUP BY PK.intNewPayableId, VT.intTaxGroupId, VT.intTaxCodeId
 		) T2 ON T2.intNewPayableId = T.intVoucherPayableId AND T2.intTaxGroupId = T.intTaxGroupId AND T2.intTaxCodeId = T.intTaxCodeId
-
-		--UPDATE THE QTY BEFORE BACKING UP AND DELETING, SO WE COULD ACTUAL QTY WHEN RE-INSERTING
-		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
-		UPDATE P
-		SET P.dblQuantityToBill = (P.dblQuantityToBill - P2.dblQuantityToBill),
-			P.dblQuantityBilled = (P.dblQuantityBilled + P2.dblQuantityToBill),
-			P.dblNetWeight = (P.dblNetWeight - P2.dblNetWeight),
-			P.dblTax = ISNULL(PT.dblRemainingTax, 0)
-		FROM tblAPVoucherPayable P
-		INNER JOIN (
-			SELECT PK.intNewPayableId, SUM(dblQuantityToBill) dblQuantityToBill, SUM(dblNetWeight) dblNetWeight
-			FROM @payablesKey PK
-			INNER JOIN @voucherPayable VP ON VP.intVoucherPayableId = PK.intOldPayableId
-			GROUP BY PK.intNewPayableId
-		) P2 ON P2.intNewPayableId = P.intVoucherPayableId
-		OUTER APPLY (
-			SELECT SUM(dblAdjustedTax) dblRemainingTax
-			FROM tblAPVoucherPayableTaxStaging
-			WHERE intVoucherPayableId = P.intVoucherPayableId
-		) PT
 
 		--AS THE VALUES ARE NOW CORRECTLY SUMMED AND GROUPED REMOVE ENTRY IF SAME PAYABLE
 		;WITH CTE AS (
@@ -240,8 +228,6 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intContractHeaderId]			
 				,B.[intContractDetailId]
 				,B.[intPriceFixationDetailId]			
-				,B.[intInsuranceChargeDetailId]	
-				,B.[intStorageChargeId]	
 				,B.[intContractSeqId]				
 				,B.[intContractCostId]				
 				,B.[strContractNumber]				
@@ -254,14 +240,10 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intLoadShipmentId]				
 				,B.[intLoadShipmentDetailId]	
 				,B.[intLoadShipmentCostId]	
-				,B.[intWeightClaimId]
-				,B.[intWeightClaimDetailId]
 				,B.[intCustomerStorageId]	
 				,B.[intSettleStorageId]
 				,B.[intItemId]						
-				,B.[intLinkingId]		
-				,B.[intComputeTotalOption]	
-				,B.[intLotId]	
+				,B.[intLinkingId]			
 				,B.[intTicketDistributionAllocationId]
 				,B.[strItemNo]						
 				,B.[intPurchaseTaxGroupId]			
@@ -313,11 +295,6 @@ ELSE SAVE TRAN @SavePoint
 				,B.[str1099Type]					
 				,B.[ysnReturn]	
 				,B.[intFreightTermId]
-				,B.[strFreightTerm]
-				,B.[intBookId]
-				,B.[intSubBookId]
-				,B.[intPayFromBankAccountId]
-				,B.[strPayFromBankAccount]
 				,B.[intVoucherPayableId]
 				,C.intOldPayableId AS intVoucherPayableKey
 			FROM tblAPVoucherPayable B
@@ -356,8 +333,6 @@ ELSE SAVE TRAN @SavePoint
 			,[intContractHeaderId]			
 			,[intContractDetailId]	
 			,[intPriceFixationDetailId]		
-			,[intInsuranceChargeDetailId]	
-			,[intStorageChargeId]	
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				
@@ -370,14 +345,10 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
-			,[intWeightClaimId]
-			,[intWeightClaimDetailId]
 			,[intCustomerStorageId]	
 			,[intSettleStorageId]
 			,[intItemId]						
-			,[intLinkingId]		
-			,[intComputeTotalOption]	
-			,[intLotId]
+			,[intLinkingId]			
 			,[intTicketDistributionAllocationId]	
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -429,11 +400,6 @@ ELSE SAVE TRAN @SavePoint
 			,[str1099Type]					
 			,[ysnReturn]		
 			,[intFreightTermId]
-			,[strFreightTerm]
-			,[intBookId]
-			,[intSubBookId]
-			,[intPayFromBankAccountId]
-			,[strPayFromBankAccount]
 		)
 		VALUES (
 			[intTransactionType]
@@ -452,9 +418,7 @@ ELSE SAVE TRAN @SavePoint
 			,[strPurchaseOrderNumber]		
 			,[intContractHeaderId]			
 			,[intContractDetailId]
-			,[intPriceFixationDetailId]		
-			,[intInsuranceChargeDetailId]	
-			,[intStorageChargeId]	
+			,[intPriceFixationDetailId]			
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				
@@ -467,14 +431,10 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
-			,[intWeightClaimId]
-			,[intWeightClaimDetailId]
 			,[intCustomerStorageId]	
 			,[intSettleStorageId]
 			,[intItemId]						
-			,[intLinkingId]		
-			,[intComputeTotalOption]	
-			,[intLotId]	
+			,[intLinkingId]			
 			,[intTicketDistributionAllocationId]		
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -525,12 +485,7 @@ ELSE SAVE TRAN @SavePoint
 			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]	
-			,[intFreightTermId]	
-			,[strFreightTerm]
-			,[intBookId]
-			,[intSubBookId]	
-			,[intPayFromBankAccountId]
-			,[strPayFromBankAccount]
+			,[intFreightTermId]		
 		)
 		OUTPUT
 			SourceData.intVoucherPayableId,
@@ -650,6 +605,19 @@ ELSE SAVE TRAN @SavePoint
 			,intNewPayableId
 		FROM dbo.fnAPGetPayableKeyInfo(@voucherPayable)
 
+		--UPDATE QTY FOR PARTIAL
+		UPDATE B
+			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
+				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
+		FROM tblAPVoucherPayable B
+		INNER JOIN @payablesKeyPartial B2
+			ON B2.intNewPayableId = B.intVoucherPayableId
+		INNER JOIN @voucherPayable C
+			ON C.intVoucherPayableId = B2.intOldPayableId
+
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+
 		UPDATE A
 			SET 
 				A.dblTax = A.dblTax + taxData.dblTax,
@@ -672,24 +640,6 @@ ELSE SAVE TRAN @SavePoint
 		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
 		-- ) taxData
 
-		--UPDATE QTY FOR PARTIAL
-		UPDATE B
-			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
-				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
-				B.dblQuantityBilled = 0, --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
-				B.dblTax = ISNULL(PT.dblRemainingTax, 0)
-		FROM tblAPVoucherPayable B
-		INNER JOIN @payablesKeyPartial B2
-			ON B2.intNewPayableId = B.intVoucherPayableId
-		INNER JOIN @voucherPayable C
-			ON C.intVoucherPayableId = B2.intOldPayableId
-		OUTER APPLY (
-			SELECT SUM(dblAdjustedTax) dblRemainingTax
-			FROM tblAPVoucherPayableTaxStaging
-			WHERE intVoucherPayableId = B.intVoucherPayableId
-		) PT
-
-		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
 
 		--IF ALREADY EXISTS GET PAYABLES KEY
 		INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
@@ -724,8 +674,6 @@ ELSE SAVE TRAN @SavePoint
 				,D.[intContractHeaderId]			
 				,D.[intContractDetailId]
 				,D.[intPriceFixationDetailId]			
-				,D.[intInsuranceChargeDetailId]			
-				,D.[intStorageChargeId]			
 				,D.[intContractSeqId]				
 				,D.[intContractCostId]				
 				,D.[strContractNumber]				
@@ -738,12 +686,8 @@ ELSE SAVE TRAN @SavePoint
 				,D.[intLoadShipmentId]				
 				,D.[intLoadShipmentDetailId]	
 				,D.[intLoadShipmentCostId]	
-				,D.[intWeightClaimId]
-				,D.[intWeightClaimDetailId]
 				,D.[intItemId]						
 				,D.[intLinkingId]		
-				,D.[intComputeTotalOption]
-				,D.[intLotId]
 				,D.[intTicketDistributionAllocationId]			
 				,D.[strItemNo]						
 				,D.[intPurchaseTaxGroupId]			
@@ -795,11 +739,6 @@ ELSE SAVE TRAN @SavePoint
 				,D.[str1099Type]					
 				,D.[ysnReturn]		
 				,D.[intFreightTermId]
-				,D.[strFreightTerm]
-				,D.[intBookId]
-				,D.[intSubBookId]
-				,D.[intPayFromBankAccountId]
-				,D.[strPayFromBankAccount]
 				,D.[intVoucherPayableId]	
 				,B.intVoucherPayableId AS intVoucherPayableKey
 			-- FROM tblAPBillDetail A
@@ -841,8 +780,6 @@ ELSE SAVE TRAN @SavePoint
 			,[intContractHeaderId]			
 			,[intContractDetailId]	
 			,[intPriceFixationDetailId]		
-			,[intInsuranceChargeDetailId]		
-			,[intStorageChargeId]		
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				
@@ -855,12 +792,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]
-			,[intWeightClaimId]
-			,[intWeightClaimDetailId]
 			,[intItemId]						
 			,[intLinkingId]			
-			,[intComputeTotalOption]
-			,[intLotId]
 			,[intTicketDistributionAllocationId]		
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -912,11 +845,6 @@ ELSE SAVE TRAN @SavePoint
 			,[str1099Type]					
 			,[ysnReturn]	
 			,[intFreightTermId]
-			,[strFreightTerm]
-			,[intBookId]
-			,[intSubBookId]
-			,[intPayFromBankAccountId]
-			,[strPayFromBankAccount]
 		)
 		VALUES(
 			[intTransactionType]
@@ -935,9 +863,7 @@ ELSE SAVE TRAN @SavePoint
 			,[strPurchaseOrderNumber]		
 			,[intContractHeaderId]			
 			,[intContractDetailId]	
-			,[intPriceFixationDetailId]	
-			,[intInsuranceChargeDetailId]		
-			,[intStorageChargeId]				
+			,[intPriceFixationDetailId]			
 			,[intContractSeqId]				
 			,[intContractCostId]				
 			,[strContractNumber]				
@@ -949,13 +875,9 @@ ELSE SAVE TRAN @SavePoint
 			,[intInventoryShipmentChargeId]
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]		
-			,[intLoadShipmentCostId]	
-			,[intWeightClaimId]
-			,[intWeightClaimDetailId]
+			,[intLoadShipmentCostId]		
 			,[intItemId]						
-			,[intLinkingId]	
-			,[intComputeTotalOption]			
-			,[intLotId]			
+			,[intLinkingId]				
 			,[intTicketDistributionAllocationId]	
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -1007,11 +929,6 @@ ELSE SAVE TRAN @SavePoint
 			,[str1099Type]					
 			,[ysnReturn]	
 			,[intFreightTermId]
-			,[strFreightTerm]
-			,[intBookId]
-			,[intSubBookId]
-			,[intPayFromBankAccountId]
-			,[strPayFromBankAccount]
 		)
 		OUTPUT SourceData.intVoucherPayableId, inserted.intVoucherPayableId, SourceData.intVoucherPayableKey INTO @deleted;
 
@@ -1085,6 +1002,18 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayableTaxCompleted A
 		INNER JOIN @deleted B ON A.intVoucherPayableId = B.intVoucherPayableId
 
+		--UPDATE QTY AFTER REINSERTING
+		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
+		UPDATE B
+			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
+				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
+		FROM tblAPVoucherPayable B
+		INNER JOIN @deleted B2
+			ON B.intVoucherPayableId = B2.intNewPayableId
+		INNER JOIN @voucherPayable C
+			ON B2.intVoucherPayableKey = C.intVoucherPayableId
+
 		UPDATE A
 			SET A.dblTax = A.dblTax + taxData.dblTax, A.dblAdjustedTax = A.dblAdjustedTax + taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
@@ -1106,23 +1035,6 @@ ELSE SAVE TRAN @SavePoint
 		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
 		-- ) taxData
 
-		--UPDATE QTY AFTER REINSERTING
-		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
-		UPDATE B
-			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
-				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
-				B.dblQuantityBilled = 0, --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
-				B.dblTax = ISNULL(PT.dblRemainingTax, 0)
-		FROM tblAPVoucherPayable B
-		INNER JOIN @deleted B2
-			ON B.intVoucherPayableId = B2.intNewPayableId
-		INNER JOIN @voucherPayable C
-			ON B2.intVoucherPayableKey = C.intVoucherPayableId
-		OUTER APPLY (
-			SELECT SUM(dblAdjustedTax) dblRemainingTax
-			FROM tblAPVoucherPayableTaxStaging
-			WHERE intVoucherPayableId = B.intVoucherPayableId
-		) PT
 	END
 	ELSE
 	BEGIN

@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetOpenFutureByDate](
 	@intCommodityId INT = NULL
-	, @dtmFromDate DATETIME = NULL
-	, @dtmToDate DATETIME = NULL
+	, @dtmFromDate DATE = NULL
+	, @dtmToDate DATE = NULL
 	, @ysnCrush BIT = 0
 )
 RETURNS @FinalResult TABLE (intFutOptTransactionId INT
@@ -53,8 +53,8 @@ RETURNS @FinalResult TABLE (intFutOptTransactionId INT
 AS 
 
 BEGIN
-	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
-	SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
+	--SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+	--SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 
 	DECLARE @strCommodityCode NVARCHAR(MAX)
 		, @ysnDisableHistoricalDerivative BIT = 0
@@ -82,6 +82,83 @@ BEGIN
 	AS (
 		SELECT *
 		FROM dbo.[fnRKGetOpenContractHistory](@dtmFromDate, @dtmToDate)
+	)
+	, ExcludedDerivatives 
+	AS (
+		SELECT DISTINCT intFutOptTransactionId 
+		FROM 
+		(	SELECT intFutOptTransactionId
+			FROM tblRKOptionsPnSExercisedAssigned
+
+			UNION ALL
+			SELECT intFutOptTransactionId 
+			FROM tblRKOptionsPnSExpired
+		) t
+	)
+	, FilteredDerivatives 
+	AS (
+		SELECT intFutOptTransactionId
+			, FOT.intInstrumentTypeId
+		FROM tblRKFutOptTransactionHeader FOTH
+		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+		WHERE FOT.intInstrumentTypeId IN (1,2) 
+		AND FOT.strStatus = 'Filled'
+		AND (  
+				(@strReportByDate = 'Batch Date' 
+				AND CAST(FOT.dtmTransactionDate AS DATE) >= @dtmFromDate
+				AND CAST(FOT.dtmTransactionDate AS DATE) <= @dtmToDate)
+				OR
+				(@strReportByDate = 'Create Date' 
+				AND CAST(FOT.dtmCreateDateTime AS DATE) >= @dtmFromDate
+				AND CAST(FOT.dtmCreateDateTime AS DATE) <= @dtmToDate)
+				OR 
+				(@strReportByDate = 'Filled Date' 
+				AND CAST(FOT.dtmFilledDate AS DATE) >= @dtmFromDate
+				AND CAST(FOT.dtmFilledDate AS DATE) <= @dtmToDate)
+			)
+		AND FOT.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM ExcludedDerivatives)
+	)
+	, DerivativeHistory
+	AS (
+	
+		SELECT t.* 
+			, dblOpenContract = t.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
+			, dblMatchContract = ISNULL(mc.dblMatchContract, 0) 
+			, ysnFiltered = CASE WHEN ISNULL(filtered.intFutOptTransactionId, 0) <> 0 
+						THEN CAST(1 AS BIT) 
+						ELSE CAST(0 AS BIT) 
+						END
+		FROM 
+		(
+			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId 
+					ORDER BY History.intFutOptTransactionId, 
+						CASE WHEN @ysnDisableHistoricalDerivative = 1 
+						THEN History.intFutOptTransactionHistoryId 
+						ELSE 
+							CASE WHEN @strReportByDate = 'Create Date'
+							THEN History.dtmCreateDateTime
+							ELSE History.dtmTransactionDate 
+							END
+						END DESC) 
+				, History.*
+			FROM vyuRKGetFutOptTransactionHistory History
+			WHERE ((@ysnDisableHistoricalDerivative = 0
+							AND 
+							(  (@strReportByDate = 'Create Date'
+									AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
+									AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
+								OR
+								((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
+								AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+								AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
+							))
+						OR @ysnDisableHistoricalDerivative = 1
+					)
+		) t 
+		LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = t.intFutOptTransactionId
+		LEFT JOIN FilteredDerivatives filtered
+			ON filtered.intFutOptTransactionId = t.intFutOptTransactionId
+		WHERE t.intRowNum = 1
 	)
 
 	INSERT INTO @FinalResult(intFutOptTransactionId
@@ -232,56 +309,64 @@ BEGIN
 				, FOT.dblCommission
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-			OUTER APPLY (
-				SELECT * FROM (
-					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId 
-							ORDER BY History.intFutOptTransactionId, 
-								CASE WHEN @ysnDisableHistoricalDerivative = 1 
-								THEN History.intFutOptTransactionHistoryId 
-								ELSE 
-									CASE WHEN @strReportByDate = 'Create Date'
-									THEN History.dtmCreateDateTime
-									ELSE History.dtmTransactionDate 
-									END
-								END DESC) 
-						, History.*
-						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
-						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
-					FROM vyuRKGetFutOptTransactionHistory History
-					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
-					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
-						AND 
-							((@ysnDisableHistoricalDerivative = 0
-									AND 
-									(  (@strReportByDate = 'Create Date'
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
-										OR
-										((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-									))
-							  OR @ysnDisableHistoricalDerivative = 1
-							)
-				) t WHERE intRowNum = 1
-			) History
-			WHERE FOT.strInstrumentType = 'Futures'
-				AND FOT.strStatus = 'Filled'
-				AND (  
-						(@strReportByDate = 'Batch Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-						OR
-						(@strReportByDate = 'Create Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
-						OR 
-						(@strReportByDate = 'Filled Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-					)
-				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
-				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
+			LEFT JOIN DerivativeHistory History 
+				ON History.intFutOptTransactionId = FOT.intFutOptTransactionId
+				AND History.ysnFiltered = 1
+			WHERE FOT.intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM FilteredDerivatives filtered WHERE filtered.intInstrumentTypeId = 1)
+
+			--OUTER APPLY ( 
+			--	SELECT t.* 
+			--		, dblOpenContract = t.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
+			--		, dblMatchContract = ISNULL(mc.dblMatchContract, 0) 
+			--	FROM 
+			--	(
+			--		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId 
+			--				ORDER BY History.intFutOptTransactionId, 
+			--					CASE WHEN @ysnDisableHistoricalDerivative = 1 
+			--					THEN History.intFutOptTransactionHistoryId 
+			--					ELSE 
+			--						CASE WHEN @strReportByDate = 'Create Date'
+			--						THEN History.dtmCreateDateTime
+			--						ELSE History.dtmTransactionDate 
+			--						END
+			--					END DESC) 
+			--			, History.*
+			--		FROM vyuRKGetFutOptTransactionHistory History
+			--		WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
+			--			AND 
+			--				((@ysnDisableHistoricalDerivative = 0
+			--						AND 
+			--						(  (@strReportByDate = 'Create Date'
+			--								AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
+			--								AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
+			--							OR
+			--							((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
+			--							AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+			--							AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
+			--						))
+			--				  OR @ysnDisableHistoricalDerivative = 1
+			--				)
+			--	) t 
+			--	LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
+			--	WHERE t.intRowNum = 1
+			--) History
+			--WHERE FOT.strInstrumentType = 'Futures'
+			--	AND FOT.strStatus = 'Filled'
+			--	AND (  
+			--			(@strReportByDate = 'Batch Date' 
+			--			AND CAST(FOT.dtmTransactionDate AS DATE) >= @dtmFromDate
+			--			AND CAST(FOT.dtmTransactionDate AS DATE) <= @dtmToDate)
+			--			OR
+			--			(@strReportByDate = 'Create Date' 
+			--			AND CAST(FOT.dtmCreateDateTime AS DATE) >= @dtmFromDate
+			--			AND CAST(FOT.dtmCreateDateTime AS DATE) <= @dtmToDate)
+			--			OR 
+			--			(@strReportByDate = 'Filled Date' 
+			--			AND CAST(FOT.dtmFilledDate AS DATE) >= @dtmFromDate
+			--			AND CAST(FOT.dtmFilledDate AS DATE) <= @dtmToDate)
+			--		)
+			--	AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
+			--	AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 			
 			UNION ALL
 			--Options Buy & Sell
@@ -339,55 +424,64 @@ BEGIN
 				, FOT.dblCommission
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-			OUTER APPLY (
-				SELECT * FROM (
-					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId 
-							ORDER BY History.intFutOptTransactionId, 
-								CASE WHEN @ysnDisableHistoricalDerivative = 1 
-								THEN History.intFutOptTransactionHistoryId 
-								ELSE 
-									CASE WHEN @strReportByDate = 'Create Date'
-									THEN History.dtmCreateDateTime
-									ELSE History.dtmTransactionDate 
-									END
-								END DESC) 
-						, History.*
-						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
-						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
-					FROM vyuRKGetFutOptTransactionHistory History 
-					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
-					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
-						AND ((@ysnDisableHistoricalDerivative = 0
-									AND 
-									(  (@strReportByDate = 'Create Date'
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
-										OR
-										((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-									))
-							  OR @ysnDisableHistoricalDerivative = 1
-							)
-				) t WHERE intRowNum = 1
-			) History
-			WHERE FOT.strInstrumentType = 'Options'
-				AND FOT.strStatus = 'Filled'
-				AND (  
-						(@strReportByDate = 'Batch Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-						OR
-						(@strReportByDate = 'Create Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
-						OR 
-						(@strReportByDate = 'Filled Date' 
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(FOT.dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-					)
-				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
-				AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
+			LEFT JOIN DerivativeHistory History 
+				ON History.intFutOptTransactionId = FOT.intFutOptTransactionId
+				AND History.ysnFiltered = 1
+			WHERE FOT.intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM FilteredDerivatives filtered WHERE filtered.intInstrumentTypeId = 2)
+
+			--OUTER APPLY (
+			--	SELECT t.* 
+			--		, dblOpenContract = t.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
+			--		, dblMatchContract = ISNULL(mc.dblMatchContract, 0) 
+			--	FROM 
+			--	(
+			--		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId 
+			--				ORDER BY History.intFutOptTransactionId, 
+			--					CASE WHEN @ysnDisableHistoricalDerivative = 1 
+			--					THEN History.intFutOptTransactionHistoryId 
+			--					ELSE 
+			--						CASE WHEN @strReportByDate = 'Create Date'
+			--						THEN History.dtmCreateDateTime
+			--						ELSE History.dtmTransactionDate 
+			--						END
+			--					END DESC) 
+			--			, History.*
+			--		FROM vyuRKGetFutOptTransactionHistory History
+			--		WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
+			--			AND 
+			--				((@ysnDisableHistoricalDerivative = 0
+			--						AND 
+			--						(  (@strReportByDate = 'Create Date'
+			--								AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
+			--								AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
+			--							OR
+			--							((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
+			--							AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+			--							AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
+			--						))
+			--				  OR @ysnDisableHistoricalDerivative = 1
+			--				)
+			--	) t 
+			--	LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
+			--	WHERE t.intRowNum = 1
+			--) History
+			--WHERE FOT.strInstrumentType = 'Options'
+			--	AND FOT.strStatus = 'Filled'
+			--	AND (  
+			--			(@strReportByDate = 'Batch Date' 
+			--			AND CAST(FOT.dtmTransactionDate AS DATE) >= @dtmFromDate
+			--			AND CAST(FOT.dtmTransactionDate AS DATE) <= @dtmToDate)
+			--			OR
+			--			(@strReportByDate = 'Create Date' 
+			--			AND CAST(FOT.dtmCreateDateTime AS DATE) >= @dtmFromDate
+			--			AND CAST(FOT.dtmCreateDateTime AS DATE) <= @dtmToDate)
+			--			OR 
+			--			(@strReportByDate = 'Filled Date' 
+			--			AND CAST(FOT.dtmFilledDate AS DATE) >= @dtmFromDate
+			--			AND CAST(FOT.dtmFilledDate AS DATE) <= @dtmToDate)
+			--		)
+			--	AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
+			--	AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 
 			UNION ALL
 			-- Deleted Derivatives but with values prior to As Of Date
@@ -442,52 +536,75 @@ BEGIN
 				, History.strSalespersonId COLLATE Latin1_General_CI_AS
 				, dblMatchContract
 				, History.dblCommission
-			FROM (
-				SELECT *
-				FROM (
-					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId 
-							ORDER BY History.intFutOptTransactionId, 
-								CASE WHEN @ysnDisableHistoricalDerivative = 1 
-								THEN History.intFutOptTransactionHistoryId 
-								ELSE 
-									CASE WHEN @strReportByDate = 'Create Date'
-									THEN History.dtmCreateDateTime
-									ELSE History.dtmTransactionDate 
-									END
-								END DESC) 
-						, History.*
-						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
-						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
-					FROM vyuRKGetFutOptTransactionHistory History 
-					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = History.intFutOptTransactionId
-					WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
-						AND (  (@strReportByDate = 'Create Date'
-									AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-									AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
-								OR
-								((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-								AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-								AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-							)
-				) t WHERE intRowNum = 1
-						AND @ysnDisableHistoricalDerivative = 0
-			) History
-			WHERE ISNULL(@ysnCrush, 0) = 1
-				AND strStatus = 'Filled'
+
+			FROM DerivativeHistory History
+			WHERE History.ysnFiltered = 0
+			AND ISNULL(@ysnCrush, 0) = 1
+			AND @ysnDisableHistoricalDerivative = 0
+			AND strStatus = 'Filled'
 				AND (  
 						(@strReportByDate = 'Batch Date' 
-						AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(dtmTransactionDate AS DATE) >= @dtmFromDate
+						AND CAST(dtmTransactionDate AS DATE) <= @dtmToDate)
 						OR
 						(@strReportByDate = 'Create Date' 
-						AND CAST(FLOOR(CAST(dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+						AND CAST(dtmCreateDateTime AS DATE) >= @dtmFromDate
+						AND CAST(dtmCreateDateTime AS DATE) <= @dtmToDate)
 						OR 
 						(@strReportByDate = 'Filled Date' 
-						AND CAST(FLOOR(CAST(dtmFilledDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(dtmFilledDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-					)
+						AND CAST(dtmFilledDate AS DATE) >= @dtmFromDate
+						AND CAST(dtmFilledDate AS DATE) <= @dtmToDate)
+					) 
+
+			--FROM (
+			--	SELECT t.*
+			--		, dblOpenContract = t.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
+			--		, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
+			--	FROM (
+			--		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId 
+			--				ORDER BY History.intFutOptTransactionId, 
+			--					CASE WHEN @ysnDisableHistoricalDerivative = 1 
+			--					THEN History.intFutOptTransactionHistoryId 
+			--					ELSE 
+			--						CASE WHEN @strReportByDate = 'Create Date'
+			--						THEN History.dtmCreateDateTime
+			--						ELSE History.dtmTransactionDate 
+			--						END
+			--					END DESC) 
+			--			, History.*
+			--		FROM vyuRKGetFutOptTransactionHistory History 
+			--		WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
+			--			AND (  (@strReportByDate = 'Create Date'
+			--						AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
+			--						AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
+			--					OR
+			--					((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
+			--					AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+			--					AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
+			--				)
+			--	) t 
+			--	LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = t.intFutOptTransactionId
+			--	WHERE t.intRowNum = 1
+			--	AND @ysnDisableHistoricalDerivative = 0
+			--) History
+			--WHERE ISNULL(@ysnCrush, 0) = 1
+			--	AND strStatus = 'Filled'
+			--	AND (  
+			--			(@strReportByDate = 'Batch Date' 
+			--			AND CAST(dtmTransactionDate AS DATE) >= @dtmFromDate
+			--			AND CAST(dtmTransactionDate AS DATE) <= @dtmToDate)
+			--			OR
+			--			(@strReportByDate = 'Create Date' 
+			--			AND CAST(dtmCreateDateTime AS DATE) >= @dtmFromDate
+			--			AND CAST(dtmCreateDateTime AS DATE) <= @dtmToDate)
+			--			OR 
+			--			(@strReportByDate = 'Filled Date' 
+			--			AND CAST(dtmFilledDate AS DATE) >= @dtmFromDate
+			--			AND CAST(dtmFilledDate AS DATE) <= @dtmToDate)
+			--		)
 		) t2
-	)t3 WHERE t3.intRowNum = 1
+	)t3 
+	WHERE t3.intRowNum = 1
+
 	RETURN
 END

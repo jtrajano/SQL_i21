@@ -3,6 +3,7 @@
     [intSubsidiaryCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
     [dtmDate]                   DATETIME         NOT NULL,
+    --[dtmDateNoTime]             AS CAST(dtmDate AS DATE) PERSISTED,
     [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NOT NULL,
     [dblDebit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblDebit]  DEFAULT ((0)),
@@ -18,7 +19,7 @@
     [dtmDateEntered]            DATETIME         NOT NULL,
     [dtmDateEnteredMin]         DATETIME         NULL,
     [dtmTransactionDate]        DATETIME         NULL,
-    [strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
+    [strJournalLineDescription] NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
 	[intJournalLineNo]			INT              NULL,
     [ysnIsUnposted]             BIT              NOT NULL,    
     [ysnPostAction]             BIT              NULL,    
@@ -53,8 +54,9 @@
 	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
     [intFiscalPeriodId] INT NULL,
     [intSubsidiaryGLDetailId] INT NULL,
+    [intLedgerId] INT NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
-    --CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+   -- CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])
 );
 GO
@@ -220,3 +222,8 @@ CREATE NONCLUSTERED INDEX idxGL_tblGLDetail_FiscalPeriod ON [dbo].[tblGLDetail]
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 
+CREATE NONCLUSTERED INDEX [dpa_tblGLDetail_1] ON [tblGLDetail] ([intAccountId],[ysnIsUnposted],[dtmDate]) INCLUDE ([intFiscalPeriodId])
+GO
+
+CREATE NONCLUSTERED INDEX [dpa_tblGLDetail_2] ON [tblGLDetail] ([ysnIsUnposted],[dtmDate]) INCLUDE ([intAccountId],[intFiscalPeriodId])
+GO

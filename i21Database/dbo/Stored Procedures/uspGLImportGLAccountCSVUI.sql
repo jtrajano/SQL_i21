@@ -4,7 +4,7 @@ CREATE PROCEDURE uspGLImportGLAccountCSVUI (@strGUID     NVARCHAR(40),
                                             @importLogId INT OUT)
 AS
     IF Object_id('tblGLAccountImportDataStaging2') IS NOT NULL
-      DROP TABLE DBO.tblGLAccountImportDataStaging2
+      DROP TABLE dbo.tblGLAccountImportDataStaging2
 
     --Check the content of the table.  
     CREATE TABLE tblGLAccountImportDataStaging2
@@ -243,18 +243,18 @@ AS
              FROM   [tblGLAccountImportDataStaging2]
              WHERE  ISNULL(ysnInvalid, 0) = 0)
     INSERT INTO tblGLAccountSegmentMapping
-                (intAccountSegmentId,
-                 intAccountId,
+                (intAccountId,
+                 intAccountSegmentId,
                  intConcurrencyId)
-    SELECT SegmentId,
-           intAccountId,
+    SELECT intAccountId,
+           SegmentId,
            1
     FROM   SEGMENTS
 
     IF ISNULL(@withLOB, 0) = 1
       INSERT INTO tblGLAccountSegmentMapping
-                  (intAccountSegmentId,
-                   intAccountId,
+                  (intAccountId,
+                   intAccountSegmentId,
                    intConcurrencyId)
       SELECT intAccountId,
              [intLOBSegmentId],1

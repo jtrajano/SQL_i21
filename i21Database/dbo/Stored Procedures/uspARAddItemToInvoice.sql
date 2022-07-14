@@ -61,7 +61,7 @@
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
 	,@ItemWeight					NUMERIC(38,20)	= 0.000000
-	,@ItemStandardWeight			NUMERIC(38,20)	= 0.000000
+	,@ItemStandardWeight   			NUMERIC(38,20) = 0.000000		
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
@@ -69,7 +69,8 @@
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
 	,@ItemSiteDetailId				INT				= NULL		
-	,@ItemLoadDetailId				INT				= NULL			
+	,@ItemLoadDetailId				INT				= NULL		
+	,@ItemLoadDistributionDetailId 	INT 			= NULL	
 	,@ItemLotId						INT				= NULL			
 	,@ItemOriginalInvoiceDetailId	INT				= NULL		
 	,@ItemConversionAccountId		INT				= NULL
@@ -218,7 +219,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
 			,@ItemWeight					= @ItemWeight
-			,@ItemStandardWeight			= @ItemStandardWeight
+			,@ItemStandardWeight   			= @ItemStandardWeight
 			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 			,@ItemShipmentTareWt			= @ItemShipmentTareWt
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -227,6 +228,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId

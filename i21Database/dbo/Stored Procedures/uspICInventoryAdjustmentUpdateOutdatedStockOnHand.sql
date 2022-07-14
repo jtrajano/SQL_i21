@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspICInventoryAdjustmentUpdateOutdatedStockOnHand
-	@strTransactionId NVARCHAR(50) = NULL
+	@strTransactionId NVARCHAR(50) = NULL 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -37,7 +37,7 @@ FROM	dbo.tblICItem Item INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 			AND ItemStockUOM.intItemLocationId = ItemLocation.intItemLocationId
 		LEFT JOIN dbo.tblICLot Lot
 			ON Detail.intLotId = Lot.intLotId
-WHERE	Header.strAdjustmentNo = @strTransactionId	
+WHERE	Header.strAdjustmentNo = @strTransactionId	COLLATE Latin1_General_CI_AS
 		AND 1 = 
 			CASE	WHEN Detail.intLotId IS NOT NULL AND (Detail.dblQuantity <> Lot.dblQty) THEN 1
 					WHEN Detail.intLotId IS NULL AND (Detail.dblQuantity <> ItemStockUOM.dblOnHand) THEN 1

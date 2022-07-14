@@ -113,7 +113,8 @@
 	,@ItemTicketHoursWorkedId				INT				= NULL		
 	,@ItemCustomerStorageId					INT				= NULL		
 	,@ItemSiteDetailId						INT				= NULL		
-	,@ItemLoadDetailId						INT				= NULL		
+	,@ItemLoadDetailId						INT				= NULL
+	,@ItemLoadDistributionDetailId   		INT    			= NULL		
 	,@ItemLotId								INT				= NULL		
 	,@ItemOriginalInvoiceDetailId			INT				= NULL		
 	,@ItemSiteId							INT				= NULL												
@@ -158,7 +159,12 @@
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
+	,@FreightCharge							NUMERIC(18, 6)	= 0
+	,@FreightCompanySegment					INT				= NULL
+	,@FreightLocationSegment				INT				= NULL
 	,@SourcedFrom							NVARCHAR(100)	= NULL
+	,@TaxLocationId							INT				= NULL
+	,@TaxPoint								NVARCHAR(50)	= NULL
 AS
 
 BEGIN
@@ -171,12 +177,13 @@ SET ANSI_WARNINGS OFF
 IF @RaiseError = 1
 	SET XACT_ABORT ON
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@DateOnly DATETIME
-		,@DefaultCurrency INT
-		,@ARAccountId INT
-		,@InitTranCount INT
-		,@Savepoint NVARCHAR(32)
+DECLARE @ZeroDecimal						NUMERIC(18, 6)
+		,@DateOnly							DATETIME
+		,@DefaultCurrency					INT
+		,@ARAccountId						INT
+		,@InitTranCount						INT
+		,@Savepoint							NVARCHAR(32)
+		,@ImpactForProvisional				BIT = 0
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARCreateCustomerInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -220,10 +227,7 @@ BEGIN
 END
 
 IF ISNULL(@EntityContactId, 0) = 0
-	BEGIN
-		--SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
-		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityId = @EntityCustomerId
-	END
+	SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityId = @EntityCustomerId
 
 IF ISNULL(@TransactionType, '') = ''
 	SET @TransactionType = 'Invoice'
@@ -231,12 +235,10 @@ IF ISNULL(@TransactionType, '') = ''
 IF ISNULL(@Type, '') = ''
 	SET @Type = 'Standard'
 
-
 IF @AccountId IS NOT NULL
 	SET @ARAccountId = @AccountId
 ELSE
 	SET @ARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@TransactionType, @CompanyLocationId)
-
 
 IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash')
 	BEGIN		
@@ -369,9 +371,6 @@ IF @CurrencyId IS NOT NULL
 ELSE
 	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurrency](@EntityCustomerId)
 
---IF @TransactionType = 'Credit Memo'
---	SET @ImpactInventory = 1
-
 IF @ItemDescription like 'Washout net diff: Original Contract%' and @TransactionType = 'Credit Memo'
 BEGIN
 	SET @ImpactInventory = 0
@@ -425,12 +424,8 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
-DECLARE	@ImpactForProvisional BIT
-
-SELECT TOP 1
-	 @ImpactForProvisional = CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END
-FROM
-	tblARCompanyPreference
+SELECT TOP 1 @ImpactForProvisional = CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END
+FROM tblARCompanyPreference
 
 DECLARE @BorrowingFacilityLimitDetailId INT = NULL
 
@@ -546,8 +541,13 @@ BEGIN TRY
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
 		,[intBorrowingFacilityLimitDetailId]
+		,[dblFreightCharge]
+		,[intFreightCompanySegment]
+		,[intFreightLocationSegment]
 		,[intDefaultPayToBankAccountId]
-		,[strSourcedFrom])
+		,[strSourcedFrom]
+		,[intTaxLocationId]
+		,[strTaxPoint])
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -570,7 +570,6 @@ BEGIN TRY
 		,[dblDiscount]						= @ZeroDecimal
 		,[dblAmountDue]						= @ZeroDecimal
 		,[dblPayment]						= @ZeroDecimal
-		
 		,[intEntitySalespersonId]			= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[intEntityContactId]				= @EntityContactId
 		,[intFreightTermId]					= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
@@ -645,8 +644,13 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[intDefaultPayToBankAccountId]  	= @BankAccountId
+		,[dblFreightCharge]					= @FreightCharge
+		,[intFreightCompanySegment]			= @FreightCompanySegment
+		,[intFreightLocationSegment]		= @FreightLocationSegment
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 		,[strSourcedFrom]					= @SourcedFrom
+		,[intTaxLocationId]					= @TaxLocationId
+		,[strTaxPoint]						= @TaxPoint
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
@@ -770,6 +774,7 @@ BEGIN TRY
 		,@ItemCustomerStorageId			= @ItemCustomerStorageId
 		,@ItemSiteDetailId				= @ItemSiteDetailId
 		,@ItemLoadDetailId				= @ItemLoadDetailId
+		,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 		,@ItemLotId						= @ItemLotId
 		,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 		,@ItemSiteId					= @ItemSiteId
@@ -891,5 +896,3 @@ RETURN 1;
 	
 END
 GO
-
-

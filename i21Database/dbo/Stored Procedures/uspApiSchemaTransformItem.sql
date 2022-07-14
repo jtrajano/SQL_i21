@@ -99,7 +99,8 @@ DECLARE @tblFilteredItem TABLE(
 	strLotTracking NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strBarcodePrint NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strFuelInspectFee NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	ysnSeparateStockForUOMs BIT NULL DEFAULT ((1))
+	ysnSeparateStockForUOMs BIT NULL DEFAULT ((1)),
+	strSubcategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 INSERT INTO @tblFilteredItem
 (
@@ -170,7 +171,8 @@ INSERT INTO @tblFilteredItem
 	strLotTracking,
 	strBarcodePrint,
 	strFuelInspectFee ,
-	ysnSeparateStockForUOMs
+	ysnSeparateStockForUOMs,
+	strSubcategory
 )
 SELECT 
 	intKey,
@@ -240,7 +242,8 @@ SELECT
 	strLotTracking,
 	strBarcodePrint,
 	strFuelInspectFee ,
-	ysnSeparateStockForUOMs
+	ysnSeparateStockForUOMs,
+	strSubcategory
 FROM
 tblApiSchemaTransformItem
 WHERE guiApiUniqueId = @guiApiUniqueId;
@@ -491,6 +494,7 @@ USING
 		intRINFuelTypeId = Rin.intRinFuelCategoryId,
 		strFuelInspectFee = FilteredItem.strFuelInspectFee,
 		ysnSeparateStockForUOMs = FilteredItem.ysnSeparateStockForUOMs,
+		intSubcategoryId = Subcat.intSubcategoryId,
 		dtmDateCreated = GETDATE(),
 		intCreatedByUserId = NULL
 	FROM @tblFilteredItem FilteredItem
@@ -538,6 +542,7 @@ USING
 		LEFT OUTER JOIN tblICTag MedicationTag ON MedicationTag.strTagNumber = FilteredItem.strMedicationTag AND MedicationTag.strType = 'Medication Tag'
 		LEFT OUTER JOIN tblICTag IngredientTag ON IngredientTag.strTagNumber = FilteredItem.strIngredientTag AND IngredientTag.strType = 'Ingredient Tag'
 		LEFT OUTER JOIN tblICRinFuelCategory Rin ON Rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(FilteredItem.strFuelCategory)))	
+		LEFT OUTER JOIN tblSTSubcategory Subcat ON Subcat.strSubcategoryId = FilteredItem.strSubcategory
 		WHERE Category.intCategoryId IS NOT NULL
 ) AS SOURCE
 ON LTRIM(RTRIM(TARGET.strItemNo)) = LTRIM(RTRIM(SOURCE.strItemNo))
@@ -609,6 +614,7 @@ THEN
 		intRINFuelTypeId = SOURCE.intRINFuelTypeId,
 		strFuelInspectFee = SOURCE.strFuelInspectFee,
 		ysnSeparateStockForUOMs = SOURCE.ysnSeparateStockForUOMs,
+		intSubcategoryId = SOURCE.intSubcategoryId,
 		dtmDateModified = GETUTCDATE(),
 		intModifiedByUserId = SOURCE.intCreatedByUserId
 WHEN NOT MATCHED THEN
@@ -679,6 +685,7 @@ WHEN NOT MATCHED THEN
 		intRINFuelTypeId,
 		strFuelInspectFee,
 		ysnSeparateStockForUOMs,
+		intSubcategoryId,
 		dtmDateCreated,
 		intDataSourceId
 	)
@@ -751,6 +758,7 @@ WHEN NOT MATCHED THEN
 		intRINFuelTypeId,
 		strFuelInspectFee,
 		ysnSeparateStockForUOMs,
+		intSubcategoryId,
 		dtmDateCreated,
 		2
 	)

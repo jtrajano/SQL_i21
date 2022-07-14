@@ -2,8 +2,8 @@ CREATE PROCEDURE [dbo].[uspTRFBankLoanLineActivityReport]
 	  @intBankId INT = NULL
 	, @intApprovalStatusId INT = NULL
 	, @strLimitType NVARCHAR(50)
-	, @dtmStartDate DATETIME = NULL
-	, @dtmEndDate DATETIME = NULL
+	, @dtmStartDate DATE = NULL
+	, @dtmEndDate DATE = NULL
 
 AS
 
@@ -68,10 +68,22 @@ BEGIN
 				ON valRule.intBankValuationRuleId = sublimit.intBankValuationRuleId
 			LEFT JOIN tblCTApprovalStatusTF approvalStatus
 				ON approvalStatus.strApprovalStatus COLLATE Latin1_General_CI_AS = tfLog.strBankApprovalStatus
-			WHERE CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) >= CONVERT(NVARCHAR, ISNULL(@dtmStartDate, tfLog.dtmCreatedDate), 111)
-			AND CONVERT(NVARCHAR, tfLog.dtmCreatedDate, 111) <= CONVERT(NVARCHAR, ISNULL(@dtmEndDate, tfLog.dtmCreatedDate), 111)
+			OUTER APPLY (
+				SELECT TOP 1 ysnDeleted = CAST(1 AS BIT)
+				FROM tblTRFTradeFinanceLog tLog
+				WHERE tfLog.ysnDeleted = 1
+				AND CAST(tLog.dtmCreatedDate AS DATE) >= CAST(ISNULL(@dtmStartDate, tLog.dtmCreatedDate) AS DATE)
+				AND CAST(tLog.dtmCreatedDate AS DATE) <= CAST(ISNULL(@dtmEndDate, tLog.dtmCreatedDate) AS DATE)
+				AND UPPER(LEFT(strAction, 6)) = 'DELETE'
+				AND tfLog.strTransactionNumber = tLog.strTransactionNumber
+				AND tfLog.intTransactionHeaderId = tLog.intTransactionHeaderId
+				AND tfLog.intTransactionDetailId = tLog.intTransactionDetailId
+				AND tfLog.strTradeFinanceTransaction = tLog.strTradeFinanceTransaction
+			) deletedRecord
+			WHERE CAST(tfLog.dtmCreatedDate AS DATE) >= CAST(ISNULL(@dtmStartDate, tfLog.dtmCreatedDate) AS DATE)
+			AND CAST(tfLog.dtmCreatedDate AS DATE) <= CAST(ISNULL(@dtmEndDate, tfLog.dtmCreatedDate) AS DATE)
 			AND tfLog.dblFinanceQty >= 0
-			AND ISNULL(tfLog.ysnDeleted, 0) = 0
+			AND ISNULL(deletedRecord.ysnDeleted, 0) = 0
 		) t1
 		WHERE t1.intGroupNum = 1
 

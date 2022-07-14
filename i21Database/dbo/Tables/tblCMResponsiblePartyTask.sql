@@ -21,7 +21,7 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyTask] ADD  CONSTRAINT [DF_tblCMResponsiblePartyTask_intConcurrencyId]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyTask] ADD  CONSTRAINT [FK_tblCMResponsiblePartyTask_tblCMBankAccount] FOREIGN KEY([intResponsibleBankAccountId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyTask]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyTask_tblCMBankAccount] FOREIGN KEY([intResponsibleBankAccountId])
 REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 

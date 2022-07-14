@@ -243,6 +243,7 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,[dblFreightCharge]
     ,[intLineOfBusinessId]
 )
 SELECT 
@@ -331,6 +332,7 @@ SELECT
     ,[ysnAllowIntraEntries]             = @AllowIntraEntries
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,[dblFreightCharge]                 = ARI.dblFreightCharge
     ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
@@ -491,6 +493,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[intInventoryShipmentChargeId]
     ,[intSalesOrderDetailId]
     ,[intLoadDetailId]
+    ,[intLoadDistributionDetailId]
     ,[intShipmentId]
     ,[intTicketId]
     ,[intDiscountAccountId]
@@ -505,6 +508,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,[dblFreightCharge]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -644,6 +648,7 @@ SELECT
     ,[intInventoryShipmentChargeId]     = ARID.[intInventoryShipmentChargeId]
     ,[intSalesOrderDetailId]            = ARID.[intSalesOrderDetailId]
     ,[intLoadDetailId]                  = ARID.[intLoadDetailId]
+    ,[intLoadDistributionDetailId]      = ARID.[intLoadDistributionDetailId]
     ,[intShipmentId]                    = ARID.[intShipmentId]
     ,[intTicketId]                      = ARID.[intTicketId]
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
@@ -658,6 +663,7 @@ SELECT
     ,[ysnAllowIntraEntries]             = @AllowIntraEntries
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -818,6 +824,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[intInventoryShipmentChargeId]
     ,[intSalesOrderDetailId]
     ,[intLoadDetailId]
+    ,[intLoadDistributionDetailId]
     ,[intShipmentId]
     ,[intTicketId]
     ,[intDiscountAccountId]
@@ -832,6 +839,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,[dblFreightCharge]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1031,6 +1039,7 @@ SELECT
     ,[intInventoryShipmentChargeId]     = ARID.[intInventoryShipmentChargeId]
     ,[intSalesOrderDetailId]            = ARID.[intSalesOrderDetailId]
     ,[intLoadDetailId]                  = ARID.[intLoadDetailId]
+    ,[intLoadDistributionDetailId]      = ARID.[intLoadDistributionDetailId]
     ,[intShipmentId]                    = ARID.[intShipmentId]
     ,[intTicketId]                      = ARID.[intTicketId]
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
@@ -1045,6 +1054,7 @@ SELECT
     ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1193,6 +1203,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[intInventoryShipmentChargeId]
     ,[intSalesOrderDetailId]
     ,[intLoadDetailId]
+    ,[intLoadDistributionDetailId]
     ,[intShipmentId]
     ,[intTicketId]
     ,[intDiscountAccountId]
@@ -1207,6 +1218,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,[dblFreightCharge]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1342,6 +1354,7 @@ SELECT
     ,[intInventoryShipmentChargeId]     = ARID.[intInventoryShipmentChargeId]
     ,[intSalesOrderDetailId]            = ARID.[intSalesOrderDetailId]
     ,[intLoadDetailId]                  = ARID.[intLoadDetailId]
+    ,[intLoadDistributionDetailId]      = ARID.[intLoadDistributionDetailId]
     ,[intShipmentId]                    = ARID.[intShipmentId]
     ,[intTicketId]                      = ARID.[intTicketId]
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
@@ -1356,6 +1369,7 @@ SELECT
     ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1385,5 +1399,18 @@ INNER JOIN (
     GROUP BY ID.intInvoiceDetailId
 ) IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 WHERE ID.strSessionId = @strSessionId
+
+UPDATE ID
+SET dblQtyUnitOrGross = CASE WHEN SP.strGrossOrNet = 'Net' THEN DI.dblDistributionNetSalesUnits ELSE DI.dblDistributionGrossSalesUnits END
+FROM tblARPostInvoiceHeader I
+INNER JOIN tblARPostInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadDistributionHeaderId = I.intLoadDistributionHeaderId
+INNER JOIN tblTRLoadDistributionDetail DI ON ID.intLoadDistributionDetailId = DI.intLoadDistributionDetailId
+INNER JOIN tblTRLoadReceipt LR ON DH.intLoadHeaderId = LR.intLoadHeaderId
+INNER JOIN tblTRSupplyPoint SP ON LR.intSupplyPointId = SP.intSupplyPointId
+WHERE I.intLoadDistributionHeaderId IS NOT NULL
+  AND ID.intLoadDistributionDetailId IS NOT NULL
+  AND I.strSessionId = @strSessionId
+  AND ID.strSessionId = @strSessionId
 
 RETURN 1

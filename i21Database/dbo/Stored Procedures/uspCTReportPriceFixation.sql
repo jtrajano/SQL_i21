@@ -308,8 +308,12 @@ BEGIN TRY
 			strLogoType			= CASE WHEN dbo.[fnCTGetCompanyLocationCount](@intContractHeaderId) > 1 THEN 'Attachment' 
 									   WHEN EXISTS (SELECT 1 FROM tblSMLogoPreference where intCompanyLocationId = @intCompanyLocationId AND  ysnContract = 0 ) THEN 'Attachment' 
 								  ELSE ISNULL(@strLogoType,'Attachment') END,
-			strCurrencyExchangeRate = isnull((FY.strCurrency + '/' + TY.strCurrency), @strFinalCurrency),
-			dblRate = (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end),
+			strCurrencyExchangeRate = CASE  WHEN CD.intInvoiceCurrencyId != ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) THEN ISNULL((FY.strCurrency + '/' + TY.strCurrency), @strFinalCurrency)
+											WHEN CD.intInvoiceCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) AND PF.dblFX = 1 THEN NULL
+											ELSE NULL END,
+			dblRate =  CASE WHEN CD.intInvoiceCurrencyId != ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) THEN (case when isnull(@ysnEnableFXFieldInContractPricing,0) = 1 then PF.dblFX else CD.dblRate end)
+							WHEN CD.intInvoiceCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) AND PF.dblFX = 1 THEN NULL
+							ELSE NULL END,
 			strFXFinalPrice = LTRIM(
 									dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
 									CASE WHEN  isnull(@ysnEnableFXFieldInContractPricing,0) = 1 

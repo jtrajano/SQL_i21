@@ -487,7 +487,7 @@ BEGIN
     WHERE
             P.[ysnPost] = @OneBit
         AND P.[strPaymentMethod]  = 'ACH'
-        AND P.[dblAmountPaid] = @ZeroDecimal
+        AND P.[dblAmountPaid] <= @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]

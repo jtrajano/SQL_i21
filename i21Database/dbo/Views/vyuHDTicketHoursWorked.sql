@@ -8,9 +8,9 @@ select
 			,intHours
 			,dblHours
 			,dblEstimatedHours
-			,convert(datetime,ceiling(convert(numeric(18,6), dtmDate))) dtmDate
-			,dtmStartTime
-			,dtmEndTime
+			,convert(date,convert(datetime,ceiling(convert(numeric(18,6), dtmDate)))) dtmDate
+			,dtmStartTime 
+			,dtmEndTime  
 			,dblRate
 			,strDescription
 			,strJIRALink
@@ -19,7 +19,7 @@ select
 			,intBillId
 			,ysnBillable
 			,ysnReimburseable
-			,ysnBilled
+			,ysnBilled 
 			,dtmBilled
 			,intCreatedUserId
 			,intCreatedUserEntityId
@@ -45,11 +45,14 @@ select
 			,strTicketNumber
 			,intCustomerId
 			,dblExtendedRate
+			,dblBaseAmount
 			,strProjectName
 			,intProjectId
 			,ysnVendor
 			,strServiceType
 			,ysnTimeOff
+			,strName 
+			,ysnOverride
 from
 (
 		select
@@ -95,13 +98,19 @@ from
 			,strItemNo = h.strItemNo
 			,intTimeEntryId = 1
 			,i.strTicketNumber
-			,i.intCustomerId
+			,intCustomerId = ISNULL(a.intCustomerId, i.intCustomerId)
 			,dblExtendedRate = (case when (isnull(a.intHours, 0.00) = 0.00 or isnull(a.dblRate,0.00) = 0.00) then 0.00 else a.intHours * a.dblRate end)
-			,k.strProjectName
-			,k.intProjectId
+			,dblBaseAmount = (case when (isnull(a.intHours, 0.00) = 0.00 or isnull(a.dblRate,0.00) = 0.00) 
+										then 0.00 
+									else a.intHours * a.dblRate * (case when isnull(a.dblCurrencyRate, 0.00) = 0.00 then 1.00 else a.dblCurrencyRate end)
+							  end)
+			,strProjectName = ISNULL(o.strProjectName, k.strProjectName) 
+			,intProjectId = ISNULL(a.intProjectId, k.intProjectId)
 			,ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType m where m.intEntityId = a.intAgentEntityId and m.strType = 'Vendor')
 			,strServiceType = h.strServiceType
 			,ysnTimeOff = convert(bit,0)
+			,strName = ISNULL(m.strName, n.strName)
+			,ysnOverride = a.ysnOverride
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
@@ -115,6 +124,9 @@ from
 			left join tblHDProjectTask j on j.intTicketId = a.intTicketId
 			left join tblHDProject k on k.intProjectId = j.intProjectId
 			left join tblAPBill l on l.intBillId = a.intBillId
+			left join tblEMEntity m on m.intEntityId = a.intCustomerId
+			left join tblEMEntity n on n.intEntityId = i.intCustomerId
+			left join tblHDProject o on o.intProjectId = a.intProjectId
 
 union all
 
@@ -163,11 +175,14 @@ union all
 			,strTicketNumber = null
 			,intCustomerId = 0
 			,dblExtendedRate = null
+			,dblBaseAmount = null
 			,strProjectName = null
 			,intProjectId = null
 			,ysnVendor = convert(bit,0)
 			,strServiceType = null
 			,ysnTimeOff = convert(bit,1)
+			,strName = ''
+			,ysnOverride = convert(bit,0)
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
@@ -175,3 +190,4 @@ union all
 			inner join tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
 						
 ) as rawData
+GO

@@ -18,6 +18,7 @@ a.intCompanyLocationId
 ,a.dblLatitude
 ,a.strInternalNotes
 ,a.strUseLocationAddress
+,a.strFEIN
 ,a.strSkipSalesmanDefault
 ,a.ysnSkipTermsDefault
 ,a.strOrderTypeDefault
@@ -192,6 +193,7 @@ a.intCompanyLocationId
 ,a.ysnProductCaseCodeScanningRequired
 ,a.ysnYieldAdjustmentAllowed
 ,a.ysnPrintInvTagOnReceivingComplete
+,a.intNoOfMonthsFromDemandToShipment
 ,a.intConcurrencyId
 ,a.strCode
 ,a.strCashAccount

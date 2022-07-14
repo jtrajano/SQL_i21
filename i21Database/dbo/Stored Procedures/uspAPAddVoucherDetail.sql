@@ -276,6 +276,7 @@ SELECT TOP 100 PERCENT
 	,dblCashPrice 						= 	A.dblCost
 	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
 	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
+	,ysnOverrideTaxGroup				=	A.ysnOverrideTaxGroup
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -481,7 +482,8 @@ INSERT
 	,intCurrencyExchangeRateTypeId		
 	,dblRate							
 	/*Tax info*/						
-	,intTaxGroupId						
+	,intTaxGroupId	
+	,ysnOverrideTaxGroup					
 	,dblTax								
 	/*Bundle info*/						
 	,intBundletUOMId					
@@ -583,7 +585,8 @@ VALUES
 	,intCurrencyExchangeRateTypeId		
 	,dblRate							
 	/*Tax info*/						
-	,intTaxGroupId						
+	,intTaxGroupId	
+	,ysnOverrideTaxGroup					
 	,dblTax								
 	/*Bundle info*/						
 	,intBundletUOMId					

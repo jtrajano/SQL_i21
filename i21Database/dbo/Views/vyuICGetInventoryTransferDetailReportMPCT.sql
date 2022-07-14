@@ -34,8 +34,7 @@ SELECT
 			,DEFAULT
 			,DEFAULT
 			,DEFAULT
-		)
-
+		) COLLATE Latin1_General_CI_AS
 	,strDeliveryInstructions = 
 		dbo.fnICFormatErrorMessage (
 			'Commodity to be delivered to %s%s%s%s%s.'
@@ -49,7 +48,7 @@ SELECT
 			,DEFAULT
 			,DEFAULT
 			,DEFAULT
-		)
+		) COLLATE Latin1_General_CI_AS
 	,strApproxValue = 
 		CASE 
 			WHEN ISNULL(approxValue.dblValue, 0) = 0 THEN 
@@ -69,7 +68,7 @@ SELECT
 					,DEFAULT
 					,DEFAULT			
 				)
-			END
+			END COLLATE Latin1_General_CI_AS
 	,t.strDescription
 FROM 
 	tblICInventoryTransfer t INNER JOIN tblICInventoryTransferDetail tfd

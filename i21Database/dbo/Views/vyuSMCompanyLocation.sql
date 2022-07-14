@@ -17,6 +17,7 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.dblLongitude
 ,compLoc.strInternalNotes
 ,compLoc.strUseLocationAddress
+,compLoc.strFEIN
 ,compLoc.strSkipSalesmanDefault
 ,compLoc.ysnSkipTermsDefault
 ,compLoc.strOrderTypeDefault
@@ -206,6 +207,7 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.ysnProductCaseCodeScanningRequired
 ,compLoc.ysnYieldAdjustmentAllowed
 ,compLoc.ysnPrintInvTagOnReceivingComplete
+,compLoc.intNoOfMonthsFromDemandToShipment
 ,compLoc.intConcurrencyId
 ,ISNULL(acctSgmt.strCode, '') strProfitCenter
 ,ISNULL(acctCompSgmt.strCode, '') strCompanySegment

@@ -124,9 +124,9 @@
 	,SCListTicket.strTicketType
 	,SCT.ysnDeliverySheetPost
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
-    ,SCT.intLotId
-    ,SCT.strLotNumber
-    ,SCT.intSalesOrderId
+	,SCT.intLotId
+	,SCT.strLotNumber
+	,SCT.intSalesOrderId
 	,SCT.ysnReadyToTransfer
 	,SCT.ysnDestinationWeightGradePost
 	,SCT.strPlateNumber COLLATE Latin1_General_CI_AS AS strPlateNumber
@@ -146,11 +146,11 @@
 	,CAST(
 		CASE WHEN ISNULL(SMCSubLocation.intCompanyLocationSubLocationId,0) = 0 THEN 0
 		ELSE 1 END
-	 AS BIT) AS ysnHasSubLocation
-	 ,CAST(
+	AS BIT) AS ysnHasSubLocation
+	,CAST(
 		CASE WHEN ISNULL(SMCSubLocationTransfer.intCompanyLocationSubLocationId,0) = 0 THEN 0
 		ELSE 1 END
-	 AS BIT) AS ysnHasSubLocationTransfer
+	AS BIT) AS ysnHasSubLocationTransfer
 
 	,GRStorage.strStorageTypeDescription
 	,GRDiscountId.strDiscountId
@@ -179,16 +179,16 @@
 	,CAST(
 		CASE WHEN ICItem.strLotTracking != 'No' THEN 1
 		ELSE 0 END
-	 AS BIT) AS ysnLotItem
-	 ,CAST(
+	AS BIT) AS ysnLotItem
+	,CAST(
 		CASE WHEN (SELECT COUNT(ICAttribute.intCommodityAttributeId) FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) > 1 THEN 1
 		ELSE 0 END
-	 AS BIT) AS ysnHasCommodityGrade
-	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
-	 ,ICIUOM.dblUnitQty AS dblUnitQtyTo
-	 ,ICCategory.intCategoryId
-	 ,ICCategory.strCategoryCode
-	 ,ICCategory.strDescription AS strCategoryDescription
+	AS BIT) AS ysnHasCommodityGrade
+	,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
+	,ICIUOM.dblUnitQty AS dblUnitQtyTo
+	,ICCategory.intCategoryId
+	,ICCategory.strCategoryCode
+	,ICCategory.strDescription AS strCategoryDescription
 
 	,SCSetup.strStationShortDescription
 	,SCSetup.strWeightDescription
@@ -200,16 +200,16 @@
 			WHEN ICFreight.strStatus = 'Active' THEN 1
 			ELSE 0 
 		END
-	  AS BIT) AS ysnFreightActive
-	 ,CAST (CASE 
+	AS BIT) AS ysnFreightActive
+	,CAST (CASE 
 		WHEN ICFees.strStatus = 'Active' THEN 1
 		ELSE 0 
 		END
-	 AS BIT) AS ysnFeesActive
-	 ,SCSetup.intScaleProcessing
-	 ,SCSetup.intLocationId AS intScaleStationLocationId
-	 ,SCSetup.ysnActive AS ysnScaleStationActive
-	 
+	AS BIT) AS ysnFeesActive
+	,SCSetup.intScaleProcessing
+	,SCSetup.intLocationId AS intScaleStationLocationId
+	,SCSetup.ysnActive AS ysnScaleStationActive
+	
 	,CT.strShowContractNumber
 	,CT.intContractDetailSequence
 	,CT.strContractDetailLocation
@@ -251,14 +251,18 @@
 	,SCT.intAGWorkOrderId
 	,SCT.ysnMultipleTicket
 	,strAGWorkOrderNumber  = AWO.strOrderNumber
-   	,strAGWorkOrderLocation = AWOL.strLocationName
+	,strAGWorkOrderLocation = AWOL.strLocationName
 	,strShipToLocationName = EL.strLocationName
 	,intShipToLocationId	= EL.intEntityLocationId
 	,SCT.dblDWGOriginalNetUnits
 	,SCT.dblDWGSpotPrice
 	,SCT.intFreightCostUOMId
 	,SCT.ysnApplyOverageToSpot
-  FROM tblSCTicket SCT WITH(NOLOCK)
+	,SCT.intDecimalAdjustment
+	,SCT.ysnFixRounding
+	,SCT.ysnTicketInTransit
+	,SCT.ysnTicketApplied
+FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
 	LEFT JOIN tblSCListTicketTypes SCListTicket on SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag
@@ -347,7 +351,7 @@
 		INNER JOIN tblCMBankTransaction BankTran WITH(NOLOCK) ON APPay.strPaymentRecordNum = BankTran.strTransactionId
 		WHERE APD.intScaleTicketId <> 0 
 		AND APD.intScaleTicketId IS NOT NULL
-		 AND BankTran.ysnCheckVoid = 0
+		AND BankTran.ysnCheckVoid = 0
 		AND APPay.ysnPosted = 1
 		GROUP BY intScaleTicketId
 	) APPayment
@@ -360,7 +364,7 @@
 	LEFT JOIN tblCTItemContractDetail ICD ON ISNULL(SCT.intItemContractDetailId,0) = ICD.intItemContractDetailId
 	LEFT JOIN tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
 	LEFT JOIN tblAGWorkOrder AWO
-    	ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
-   	LEFT JOIN tblSMCompanyLocation AWOL
+		ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
+	LEFT JOIN tblSMCompanyLocation AWOL
 		ON AWO.intCompanyLocationId = AWOL.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SCT.intShipToLocationId

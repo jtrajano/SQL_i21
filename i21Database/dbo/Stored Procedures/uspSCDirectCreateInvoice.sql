@@ -624,7 +624,7 @@ BEGIN TRY
 							,[dblDiscount] = 0
 							,[dblPrice] = ISNULL(CTD.dblCashPrice,LGD.dblUnitPrice)
 							,[ysnRefreshPrice] = 0
-							,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 							,[ysnRecomputeTax] = 1
 							,[intContractDetailId] = CTD.intContractDetailId
 							,[intTicketId] = SC.intTicketId
@@ -756,7 +756,7 @@ BEGIN TRY
 								,[dblDiscount] = 0
 								,[dblPrice] = SCLC.dblPrice
 								,[ysnRefreshPrice] = 0
-								,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+								,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 								,[ysnRecomputeTax] = 1
 								,[intContractDetailId] = CTD.intContractDetailId
 								,[intTicketId] = SC.intTicketId
@@ -876,7 +876,7 @@ BEGIN TRY
 							,[dblDiscount] = 0
 							,[dblPrice] = ISNULL(CTD.dblCashPrice,0)
 							,[ysnRefreshPrice] = 0
-							,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 							,[ysnRecomputeTax] = 1
 							,[intContractDetailId] = CTD.intContractDetailId
 							,[intTicketId] = SC.intTicketId
@@ -1005,7 +1005,7 @@ BEGIN TRY
 								,[dblDiscount] = 0
 								,[dblPrice] = SCBC.dblPrice
 								,[ysnRefreshPrice] = 0
-								,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+								,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 								,[ysnRecomputeTax] = 1
 								,[intContractDetailId] = CTD.intContractDetailId
 								,[intTicketId] = SC.intTicketId
@@ -1130,7 +1130,7 @@ BEGIN TRY
 											ISNULL(dblSettlementPrice,0) + ISNULL(dblBasis,0)
 										FROM dbo.fnRKGetFutureAndBasisPrice(1,@intTicketCommodityId,SeqMonth.strSeqMonth,3,@intFutureMarketId,@intFutureMonthId,SC.intProcessingLocationId,null,0,SC.intItemId,null))
 						,[ysnRefreshPrice] = 0
-						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCS.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCS.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 						,[ysnRecomputeTax] = 1
 						,[intContractDetailId] = SCS.intContractDetailId
 						,[intTicketId] = SC.intTicketId
@@ -1221,7 +1221,7 @@ BEGIN TRY
 						,[dblDiscount] = 0
 						,[dblPrice] = ISNULL(SCSpot.dblUnitFuture,0) + ISNULL(SCSpot.dblUnitBasis,0)
 						,[ysnRefreshPrice] = 0
-						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCSpot.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCSpot.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 						,[ysnRecomputeTax] = 1
 						,[intContractDetailId] = NULL
 						,[intTicketId] = SC.intTicketId
@@ -1382,7 +1382,7 @@ BEGIN TRY
 					,[dblDiscount] = 0
 					,[dblPrice] = LDCTC.dblRate 
 					,[ysnRefreshPrice] = 0
-					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,[ysnRecomputeTax] = 1
 					,[intContractDetailId] = Staging.intContractDetailId
 					,[intTicketId] = SC.intTicketId
@@ -1472,14 +1472,14 @@ BEGIN TRY
 					,[ysnResetDetails] = 0
 					,[intItemId] = ICI.intItemId
 					,[strItemDescription] = ICI.strItemNo
-					,[intOrderUOMId]= CTDC.intItemUOMId
-					,[intItemUOMId] = CTDC.intItemUOMId
+					,[intOrderUOMId]= ISNULL(CTDC.intItemUOMId,SC.intItemUOMIdTo)
+					,[intItemUOMId] = ISNULL(CTDC.intItemUOMId,SC.intItemUOMIdTo)
 					,[dblQtyOrdered] = Staging.dblQtyOrdered 
 					,[dblQtyShipped] = Staging.dblQtyShipped 
 					,[dblDiscount] = 0
 					,[dblPrice] = SC.dblFreightRate
 					,[ysnRefreshPrice] = 0
-					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,[ysnRecomputeTax] = 1
 					,[intContractDetailId] = Staging.intContractDetailId
 					,[intTicketId] = SC.intTicketId
@@ -1499,12 +1499,12 @@ BEGIN TRY
 				INNER JOIN tblICItem ICI 
 					ON ICI.intItemId = SCS.intFreightItemId	
 				------******* START Contract Cost *****----------------
-				INNER JOIN tblCTContractDetail CTD
+				LEFT JOIN tblCTContractDetail CTD
 					ON SC.intContractId = CTD.intContractDetailId
-				INNER JOIN tblCTContractCost CTDC
+				LEFT JOIN tblCTContractCost CTDC
 					ON CTD.intContractDetailId = CTDC.intContractDetailId
 						AND CTDC.intItemId = SCS.intFreightItemId
-				INNER JOIN tblICItemUOM CTCITM		
+				LEFT JOIN tblICItemUOM CTCITM		
 					ON CTCITM.intItemUOMId = CTDC.intItemUOMId
 				------******* END Contract Cost *****----------------
 				WHERE SC.intTicketId = @intTicketId 
@@ -1577,7 +1577,7 @@ BEGIN TRY
 					,[dblDiscount] = 0
 					,[dblPrice] = SC.dblFreightRate
 					,[ysnRefreshPrice] = 0
-					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,[ysnRecomputeTax] = 1
 					,[intContractDetailId] = Staging.intContractDetailId
 					,[intTicketId] = SC.intTicketId
@@ -1671,7 +1671,7 @@ BEGIN TRY
 				,[dblDiscount] = 0
 				,[dblPrice] = SC.dblTicketFees
 				,[ysnRefreshPrice] = 0
-				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 				,[ysnRecomputeTax] = 1
 				,[intContractDetailId] = Staging.intContractDetailId
 				,[intTicketId] = SC.intTicketId
@@ -1759,7 +1759,7 @@ BEGIN TRY
 					,[dblDiscount] = 0
 					,[dblPrice] = dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1
 					,[ysnRefreshPrice] = 0
-					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,[ysnRecomputeTax] = 1
 					,[intContractDetailId] = SC.intContractId
 					,[intTicketId] = SC.intTicketId
@@ -1857,9 +1857,9 @@ BEGIN TRY
 					,[dblQtyOrdered] = Staging.dblQtyOrdered
 					,[dblQtyShipped] = Staging.dblQtyShipped
 					,[dblDiscount] = 0
-					,[dblPrice] = QM.dblDiscountAmount
+					,[dblPrice] = QM.dblDiscountAmount * -1
 					,[ysnRefreshPrice] = 0
-					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId,default)
 					,[ysnRecomputeTax] = 1
 					,[intContractDetailId] = Staging.intContractDetailId
 					,[intTicketId] = SC.intTicketId

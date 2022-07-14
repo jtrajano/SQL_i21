@@ -1993,7 +1993,15 @@ BEGIN
 		
 		UPDATE @List
 		SET strFutureMonth = @strFutureMonth
-		WHERE Selection = 'Net market risk' AND strFutureMonth = 'Previous'
+		WHERE Selection = 'Net market risk' AND strFutureMonth = 'Previous' 
+
+		UPDATE @List
+		SET strFutureMonth = 'Previous'
+		WHERE Selection = 'Net market risk' AND strFutureMonth IS NULL
+
+		UPDATE @List
+		SET strFutureMonth = 'Previous'
+		WHERE Selection = 'Switch position' AND strFutureMonth IS NULL
 		
 		IF NOT EXISTS (SELECT * FROM tblRKFutOptTransaction ft
 						JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
@@ -2055,6 +2063,14 @@ BEGIN
 		UPDATE @List
 		SET intOrderByHeading = 13
 		WHERE Selection IN ('Switch position', 'Futures required')
+
+		UPDATE @List
+		SET intOrderBySubHeading = 1
+		WHERE PriceStatus = 'a. Unpriced - (Balance to be Priced)'
+
+		UPDATE @List
+		SET intOrderBySubHeading = 2
+		WHERE PriceStatus = 'b. Priced / Outright - (Outright position)'
 		
 		-- Commented for RM-3281
 		--INSERT INTO @List(Selection
@@ -2136,6 +2152,7 @@ BEGIN
 			, strCropYear
 		FROM @List
 		ORDER BY intOrderByHeading
+			, intOrderBySubHeading
 			, CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
 					WHEN strFutureMonth ='Total' THEN '01/01/9999'
 					WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) 

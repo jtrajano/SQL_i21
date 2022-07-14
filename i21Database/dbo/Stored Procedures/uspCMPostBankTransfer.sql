@@ -45,7 +45,7 @@ CREATE TABLE #tmpGLDetail (
  ,[dblExchangeRate] [numeric](38, 20) NOT NULL    
  ,[dtmDateEntered] [datetime] NOT NULL    
  ,[dtmTransactionDate] [datetime] NULL    
- ,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL    
+ ,[strJournalLineDescription] [nvarchar](300)  COLLATE Latin1_General_CI_AS NULL    
  ,[intJournalLineNo] [int]    
  ,[ysnIsUnposted] [bit] NOT NULL    
  ,[intUserId] [int] NULL    
@@ -115,6 +115,8 @@ DECLARE
  ,@strReferenceTo NVARCHAR(150)
  ,@dblAmountSettlementTo DECIMAL(18,6)
  ,@dblRateAmountSettlementTo DECIMAL(18,6)
+ ,@intBankLoanIdFrom INT 
+ ,@intBankLoanIdTo INT
  
  -- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.     
      
@@ -157,7 +159,8 @@ SELECT TOP 1
   ,@intGLAccountIdTo = intGLAccountIdTo  
   ,@strReferenceFrom = strReferenceFrom
   ,@strReferenceTo =  strReferenceTo
-
+  ,@intBankLoanIdFrom = CASE WHEN intBankLoanIdFrom = 0 THEN NULL ELSE intBankLoanIdFrom END
+  ,@intBankLoanIdTo =CASE WHEN intBankLoanIdTo = 0 THEN NULL ELSE intBankLoanIdTo END
 FROM [dbo].tblCMBankTransfer A JOIN    
 [dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN    
 [dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo    
@@ -716,13 +719,21 @@ IF @ysnPost = 1
     
     IF @ysnPost = 1   
     BEGIN    
-      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId =2 OR @intBankTransferTypeId = 4 OR @intBankTransferTypeId =5
+      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId IN (2,4,5)
       BEGIN  
+            DELETE A FROM tblCMBankTransaction A
+            WHERE 
+            A.strTransactionId IN( 
+              SELECT strTransactionId +@BANK_TRANSFER_WD_PREFIX strTransactionId FROM #tmpGLDetail UNION 
+              SELECT strTransactionId +@BANK_TRANSFER_DEP_PREFIX strTransactionId FROM #tmpGLDetail
+            )
+
          
             INSERT INTO tblCMBankTransaction (    
             strTransactionId    
             ,intBankTransactionTypeId    
             ,intBankAccountId    
+            ,intBankLoanId
             ,intCurrencyId    
             ,intCurrencyExchangeRateTypeId    
             ,dblExchangeRate    
@@ -757,6 +768,7 @@ IF @ysnPost = 1
             SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_WD_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_WD    
               ,intBankAccountId      = @intBankAccountIdFrom
+              ,intBankLoanId =  @intBankLoanIdFrom
               ,intCurrencyId        = intCurrencyId    
               ,intCurrencyExchangeRateTypeId  = intCurrencyExchangeRateTypeId
               ,dblExchangeRate      = dblExchangeRate
@@ -803,6 +815,7 @@ IF @ysnPost = 1
             SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_DEP    
               ,intBankAccountId      = @intBankAccountIdTo
+              ,intBankLoanId = @intBankLoanIdTo
               ,intCurrencyId        = intCurrencyId
               ,intCurrencyExchangeRateTypeId  =intCurrencyExchangeRateTypeId
               ,dblExchangeRate       =  dblExchangeRate

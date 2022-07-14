@@ -321,16 +321,16 @@ SELECT a.intContractDetailId
 	, strStrategic = (case when isnull(b.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
 	, strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 	-- Trade Finance
-	, a.strFinanceTradeNo
+	, a.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
 	, BK.strBankName
-	, BA.strBankAccountNo
+	, BA.strBankAccountNo  COLLATE Latin1_General_CI_AS AS strBankAccountNo
 	, FA.strBorrowingFacilityId
 	, FA.strBankReferenceNo
-	, FL.strBorrowingFacilityLimit
-	, FLD.strLimitDescription
+	, FL.strBorrowingFacilityLimit  COLLATE Latin1_General_CI_AS AS strBorrowingFacilityLimit
+	, FLD.strLimitDescription COLLATE Latin1_General_CI_AS AS strLimitDescription
 	, a.ysnSubmittedToBank
 	, a.dtmDateSubmitted
-	, ASTF.strApprovalStatus
+	, ASTF.strApprovalStatus COLLATE Latin1_General_CI_AS  AS strApprovalStatus
 	, a.dtmDateApproved
 	, BVR.strBankValuationRule
 	, strCertificateName = (
@@ -339,7 +339,7 @@ SELECT a.intContractDetailId
 				FROM
 					CTECert where intContractDetailId = a.intContractDetailId
 				FOR XML PATH('')),' #!',', '), 1, 2, '')
-			)
+			)  COLLATE Latin1_General_CI_AS
 	, ICC.strGrade AS strGradeCommodity
 	, ICC.strRegion
 	, ICC.strSeason

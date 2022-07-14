@@ -26,6 +26,10 @@ SELECT
 	,ISNULL(VPI.ysnPaid,0) AS ysnPaid
 	,AP.ysnPosted
 	,strTaxGroup = CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END
+	,gradeReading = CASE
+						WHEN TD.dblGradeReading IS NULL THEN 
+							CASE WHEN C.strType = 'Inventory' THEN '' ELSE 'N/A' END
+						ELSE CAST([dbo].[fnRemoveTrailingZeroes](TD.dblGradeReading) AS NVARCHAR) END
 FROM tblGRSettleStorage SS
 INNER JOIN tblGRSettleStorageBillDetail SBD
 	ON SBD.intSettleStorageId = SS.intSettleStorageId
@@ -62,3 +66,13 @@ LEFT JOIN dbo.tblICStorageLocation SL
 	ON SL.intStorageLocationId = APD.intStorageLocationId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc
 	ON APD.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+LEFT JOIN (
+			tblGRCustomerStorage CS
+			INNER JOIN tblQMTicketDiscount TD
+				ON TD.intTicketFileId = CS.intCustomerStorageId
+					AND TD.strSourceType = 'Storage'
+			INNER JOIN tblGRDiscountScheduleCode DSC
+				ON DSC.intDiscountScheduleCodeId = TD.intDiscountScheduleCodeId
+	)
+	ON CS.intCustomerStorageId = APD.intCustomerStorageId
+		AND DSC.intItemId = APD.intItemId

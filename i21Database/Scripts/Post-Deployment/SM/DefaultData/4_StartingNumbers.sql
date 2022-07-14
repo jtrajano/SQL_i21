@@ -4,9 +4,6 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Delivery Notice'
 	WHERE strModule = 'Logistics' AND strTransactionType = 'Weight Claims' AND intStartingNumberId = 86
 
-	UPDATE tblSMStartingNumber SET strTransactionType = 'Batch Load'
-	WHERE strModule = 'Logistics' AND strTransactionType = 'Generate Loads' AND intStartingNumberId = 40
-
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Document Maintenance'
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
 
@@ -52,14 +49,6 @@ GO
 
 	UPDATE tblSMStartingNumber SET strModule = 'Accounts Payable'
 	WHERE strModule = 'Purchasing'	
-
-		
-	UPDATE tblSMStartingNumber SET strPrefix = 'BACT-' WHERE intStartingNumberId = 161 AND strPrefix = 'BC-'
-	AND strModule = 'Cash Management'
-
-	UPDATE tblSMStartingNumber SET strPrefix = 'BM-' , strTransactionType='Bank Matching'
-	WHERE intStartingNumberId = 162 AND strPrefix = 'BCLR-'
-	AND strModule = 'Cash Management'
 GO
 	PRINT N'BEGIN DELETE OF TRANSACTION'
 
@@ -74,6 +63,7 @@ GO
 
 	DELETE FROM tblSMStartingNumber
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Credit Note'
+
 GO
 	PRINT N'BEGIN CLEAN UP AND INSERT DEFAULT DATA'
 GO
@@ -422,13 +412,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Schedule')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 40
-			,[strTransactionType]	= N'Batch Load'
-			,[strPrefix]			= N'BLS-'
+			,[strTransactionType]	= N'Generate Loads'
+			,[strPrefix]			= N'GL-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Load')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Generate Loads')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 41
 			,[strTransactionType]	= N'Inventory Transfer'
@@ -1493,37 +1483,7 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'LSI and LS Acknowledgement' and strModule = 'Manufacturing')
 
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 152
-			,[strTransactionType]	= N'Pick Containers'
-			,[strPrefix]			= N'PC-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Logistics'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
-	
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 153
-			,[strTransactionType]	= N'Dispatch Order'
-			,[strPrefix]			= N'DO-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Logistics'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Dispatch Order' and strModule = 'Logistics')
-	
-	-- UNION ALL
-	-- SELECT	[intStartingNumberId]	= 154
-	-- 		,[strTransactionType]	= N'Payable Batch'
-	-- 		,[strPrefix]			= N'BPAY-'
-	-- 		,[intNumber]			= 1
-	-- 		,[strModule]			= 'Accounts Payable'
-	-- 		,[ysnEnable]			= 1
-	-- 		,[intConcurrencyId]		= 1
-	-- WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Payable Batch' and strModule = 'Accounts Payable')
-	
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 155	
+	SELECT	[intStartingNumberId]	= 155
 			,[strTransactionType]	= N'Receipt Item and Charge Update'
 			,[strPrefix]			= N'RIDetail-'
 			,[intNumber]			= 1
@@ -1713,6 +1673,18 @@ GO
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Insurance Charge' AND [strModule] = 'Inventory')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 176
+				,[strTransactionType]	= N'Recost Formulation'
+				,[strPrefix]			= N'RF-'
+				,[intNumber]			= 1
+				,[strModule]			= 'Inventory'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Recost Formulation' AND [strModule] = 'Inventory')
+
+
+	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
@@ -1793,7 +1765,6 @@ GO
 		END
 	END 
 
-
 GO
 	PRINT N'BEGIN RENAME S'
 
@@ -1821,8 +1792,6 @@ GO
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR SYSTEM MANAGER'
 GO
-	PRINT N'BEGIN CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR LOGISTICS'
+ EXEC uspLGFixStartingNumbers
 GO
-	EXEC uspLGFixStartingNumbers
-GO
-	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR LOGISTICS'
+ PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR LOGISTICS'

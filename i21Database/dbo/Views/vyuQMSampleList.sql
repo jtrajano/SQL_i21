@@ -101,11 +101,11 @@ SELECT S.intSampleId
 	,S.intRelatedSampleId
 	,S.intTypeId
 	,S.intCuppingSessionDetailId
-	,strMethodology = ''
+	,strMethodology = '' COLLATE Latin1_General_CI_AS
 	,strExtension = EX.strDescription
 	,intContractSequence = CD.intContractSeq
 	,strContractType = CT.strContractType
-	,strPacking = ''
+	,strPacking = '' COLLATE Latin1_General_CI_AS
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1

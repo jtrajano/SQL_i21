@@ -104,8 +104,8 @@ AS
        ,SCT.strDiscountComment
        ,SCT.intCommodityId
        ,SCT.intDiscountId
-       ,SCT.intContractId
        ,CTH.intContractHeaderId
+       ,SCT.intContractId
        ,SCT.intDiscountLocationId
        ,SCT.intItemId
        ,SCT.intEntityId
@@ -171,22 +171,26 @@ AS
 	   ,SO.strSalesOrderNumber
 	   ,IC.strItemNo AS strItemNumber
 	   --,EMDriver.strName AS strDriverName
-     ,SCT.dtmImportedDate
-	 ,ContractsApplied.strContractsApplied COLLATE Latin1_General_CI_AS AS strContractsApplied
-    ,SCT.strTrailerId
+       ,SCT.dtmImportedDate
+	   ,ContractsApplied.strContractsApplied COLLATE Latin1_General_CI_AS AS strContractsApplied
+       ,SCT.strTrailerId
     
     
     
-	,SCT.ysnCertOfAnalysisPosted
-	,SCT.ysnExportRailXML
-   ,SCT.intAGWorkOrderId
-   ,SCT.ysnMultipleTicket
-   ,strAGWorkOrderNumber  = AWO.strOrderNumber
-   ,strAGWorkOrderLocation = AWOL.strLocationName
-   ,SCT.dblDWGOriginalNetUnits
-   ,SCT.dblDWGSpotPrice
-   ,SCT.intFreightCostUOMId
-   ,HaulerEntity.strName as strHaulerEntityName
+	   ,SCT.ysnCertOfAnalysisPosted
+       ,SCT.ysnExportRailXML
+       ,SCT.intAGWorkOrderId
+       ,SCT.ysnMultipleTicket
+       ,strAGWorkOrderNumber  = AWO.strOrderNumber
+       ,strAGWorkOrderLocation = AWOL.strLocationName
+       ,SCT.dblDWGOriginalNetUnits
+       ,SCT.dblDWGSpotPrice
+       ,SCT.intFreightCostUOMId
+       ,HaulerEntity.strName as strHaulerEntityName
+       ,SCT.intDecimalAdjustment
+       ,SCT.ysnFixRounding
+       ,SCT.ysnTicketInTransit
+       ,SCT.ysnTicketApplied
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -225,8 +229,8 @@ AS
 		FOR XML PATH ('')
 	) ContractsApplied(strContractsApplied)
 	) ContractsApplied
-   LEFT JOIN tblAGWorkOrder AWO
+    LEFT JOIN tblAGWorkOrder AWO
       ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
-   LEFT JOIN tblSMCompanyLocation AWOL
+    LEFT JOIN tblSMCompanyLocation AWOL
 		ON AWO.intCompanyLocationId = AWOL.intCompanyLocationId
 	LEFT JOIN tblEMEntity HaulerEntity on SCT.intHaulerId = HaulerEntity.intEntityId

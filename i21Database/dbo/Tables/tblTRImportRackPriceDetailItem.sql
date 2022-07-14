@@ -8,7 +8,12 @@
     [dblJobberPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [strEquation] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnValid] BIT NOT NULL DEFAULT ((0)),
-    [intConcurrencyId] INT NULL DEFAULT ((0)), 
+    [intConcurrencyId] INT NULL DEFAULT ((0)),
+    [strMessage] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTRImportRackPriceDetailItem] PRIMARY KEY ([intImportRackPriceDetailItemId]), 
     CONSTRAINT [FK_tblTRImportRackPriceDetailItem_tblTRImportRackPriceDetail] FOREIGN KEY ([intImportRackPriceDetailId]) REFERENCES [tblTRImportRackPriceDetail]([intImportRackPriceDetailId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblTRImportRackPriceDetailItem_intImportRackPriceDetailId] ON [dbo].[tblTRImportRackPriceDetailItem] ([intImportRackPriceDetailId])
+GO

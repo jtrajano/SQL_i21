@@ -3,6 +3,7 @@ CREATE PROCEDURE dbo.uspARGetCustomerTaxCodeExemption
 AS
 
 DECLARE @CustomerTaxCodeExemption	CustomerTaxCodeExemptionParam
+DECLARE @ysnDisregardExemptionSetup	BIT = 0
 
 INSERT INTO @CustomerTaxCodeExemption
 SELECT * FROM @CustomerTaxCodeExemptionParam
@@ -10,6 +11,9 @@ SELECT * FROM @CustomerTaxCodeExemptionParam
 UPDATE @CustomerTaxCodeExemption
 SET ysnDisregardExemptionSetup = 0
 WHERE ysnDisregardExemptionSetup IS NULL
+
+IF EXISTS (SELECT TOP 1 NULL FROM @CustomerTaxCodeExemption WHERE ysnDisregardExemptionSetup = 1)
+	SET @ysnDisregardExemptionSetup	= 1
 
 IF(OBJECT_ID('tempdb..##TAXCODEEXEMPTIONS') IS NOT NULL) DROP TABLE ##TAXCODEEXEMPTIONS
 CREATE TABLE ##TAXCODEEXEMPTIONS (
@@ -49,8 +53,10 @@ SELECT ysnTaxExempt			= 1
 	, intLineItemId			= P.intLineItemId
 FROM @CustomerTaxCodeExemption P
 INNER JOIN tblARCustomer C ON P.intCustomerId = C.intEntityId
-WHERE C.ysnTaxExempt = 1
-  AND P.ysnDisregardExemptionSetup <> 1
+WHERE C.ysnTaxExempt = 1  
+
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
@@ -88,6 +94,9 @@ CROSS APPLY (
 WHERE P.ysnCustomerSiteTaxable = 0
   AND P.ysnCustomerSiteTaxable IS NOT NULL
 
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
+
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
     , ysnInvalidSetup
@@ -124,7 +133,9 @@ CROSS APPLY (
 	  AND SMTGC.intTaxGroupId = P.intTaxGroupId
 	  AND SMTGCE.intCategoryId = P.intItemCategoryId
 ) TAX
-WHERE P.ysnDisregardExemptionSetup <> 1
+
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
@@ -200,6 +211,9 @@ UPDATE @CustomerTaxCodeExemption
 SET strState = strTaxState
 WHERE strState IS NULL
 
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
+
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
     , ysnInvalidSetup
@@ -213,7 +227,7 @@ INSERT INTO ##TAXCODEEXEMPTIONS (
 	, intLineItemId
 )
 SELECT ysnTaxExempt			= 1
-    , ysnInvalidSetup		= 1
+    , ysnInvalidSetup		= 0
 	, strExemptionNotes		=  'Tax Exemption > '
 								+ ISNULL('Number: ' + CAST(TAX.[intCustomerTaxingTaxExceptionId] AS NVARCHAR(250)) +  ' - ' + ISNULL(TAX.[strException], ''), '') 
 								+ ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TAX.[dtmStartDate], 101), '')
@@ -249,7 +263,7 @@ CROSS APPLY (
 			   , TC.strTaxCode
 			   , TCL.strTaxClass
 			   , TE.strState
-			   , TE.dblPartialTax
+			   , dblPartialTax	= ISNULL(TE.dblPartialTax, 0)
 	FROM tblARCustomerTaxingTaxException TE 
 	LEFT OUTER JOIN tblSMTaxCode TC ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
 	LEFT OUTER JOIN [tblEMEntityLocation] EL ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
@@ -283,8 +297,7 @@ CROSS APPLY (
 				)
 
 			)
-		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR (TE.[strState] = P.strState AND P.strState = P.strTaxState) OR LEN(LTRIM(RTRIM(ISNULL(P.strState,'')))) <= 0 )		
-		AND P.ysnDisregardExemptionSetup <> 1
+		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR (TE.[strState] = P.strState AND P.strState = P.strTaxState) OR LEN(LTRIM(RTRIM(ISNULL(P.strState,'')))) <= 0 )				
 	ORDER BY
 		(
 			(CASE WHEN ISNULL(TE.[intCardId],0) = 0 THEN 0 ELSE 1 END)
@@ -309,6 +322,9 @@ CROSS APPLY (
 		,ISNULL(TE.[dtmStartDate], P.dtmTransactionDate) ASC
 		,ISNULL(TE.[dtmEndDate], P.dtmTransactionDate) DESC
 ) TAX
+
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
@@ -340,8 +356,7 @@ CROSS APPLY (
 	  AND TC.intSalesTaxAccountId IS NULL
 ) TAX
 WHERE P.intTaxCodeId IS NOT NULL
-  AND P.ysnDisregardExemptionSetup <> 1  
-
+  
 IF NOT EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS)
 	BEGIN
 		INSERT INTO ##TAXCODEEXEMPTIONS (

@@ -68,7 +68,7 @@ BEGIN
 	BEGIN 
 		SELECT	@intLotId = Lot.intLotId
 		FROM	dbo.tblICLot Lot 
-		WHERE	Lot.strLotNumber = @strLotNumber
+		WHERE	Lot.strLotNumber = @strLotNumber COLLATE Latin1_General_CI_AS
 				AND Lot.intItemId = @intItemId
 				AND ISNULL(Lot.intLocationId, 0) = ISNULL(@intLocationId, ISNULL(Lot.intLocationId, 0)) 
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, ISNULL(Lot.intSubLocationId, 0))
@@ -94,7 +94,7 @@ BEGIN
 	BEGIN 
 		-- Item UOM is invalid or missing.
 		DECLARE @strText_wsa03 NVARCHAR(200)
-		SET @strText_wsa03 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+		SET @strText_wsa03 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId) COLLATE Latin1_General_CI_AS
 		EXEC uspICRaiseError 80048, @strText_wsa03
 		GOTO _Exit
 	END 
@@ -118,7 +118,7 @@ IF NOT EXISTS (
 BEGIN 
 	-- Item UOM is invalid or missing.
 	DECLARE @strText_ihkr9 NVARCHAR(200)
-		SET @strText_ihkr9 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+		SET @strText_ihkr9 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId) COLLATE Latin1_General_CI_AS
 		EXEC uspICRaiseError 80048, @strText_ihkr9
 	GOTO _Exit
 END 
@@ -132,9 +132,9 @@ IF @@ERROR <> 0 GOTO _Exit
 
 --Re-check if the adjustment id is already used. If yes, then regenerate the adjustment no. 
 BEGIN 
-	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo)
+	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo COLLATE Latin1_General_CI_AS)
 	BEGIN 
-		EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT 
+		EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo  OUTPUT 
 		IF @@ERROR <> 0 GOTO _Exit
 	END
 END 
@@ -166,8 +166,8 @@ BEGIN
 	SELECT	intLocationId				= @intLocationId
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
 			,intAdjustmentType			= @ADJUSTMENT_TYPE_QuantityChange
-			,strAdjustmentNo			= @strAdjustmentNo
-			,strDescription				= @strDescription
+			,strAdjustmentNo			= @strAdjustmentNo COLLATE Latin1_General_CI_AS
+			,strDescription				= @strDescription COLLATE Latin1_General_CI_AS
 			,intSort					= 1
 			,ysnPosted					= 0
 			,intEntityId				= @intEntityUserSecurityId
@@ -255,7 +255,7 @@ END
 -- Auto-create the lot numbers 
 BEGIN 
 	EXEC uspICCreateLotNumberOnAdjustStockFromSAP
-		@strTransactionId = @strAdjustmentNo
+		@strTransactionId = @strAdjustmentNo 
 		,@intLocationId = @intLocationId
 		,@intEntityUserSecurityId = @intEntityUserSecurityId
 		,@ysnPost = 1

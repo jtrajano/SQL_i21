@@ -2532,6 +2532,9 @@ BEGIN TRY
 						,intConvPriceCurrencyId
 						,dblConvertedBasis
 						,intSubBookId
+						,dtmHistoricalDate
+						,dblHistoricalRate
+						,intHistoricalRateTypeId
 						)
 					SELECT @intNewContractHeaderId
 						,@intItemBundleId
@@ -2624,6 +2627,9 @@ BEGIN TRY
 						,@intConvPriceCurrencyId
 						,dblConvertedBasis
 						,@intSubBookId
+						,dtmHistoricalDate
+						,dblHistoricalRate
+						,intHistoricalRateTypeId
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							--strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 							dtmContractDate DATETIME
@@ -2651,9 +2657,9 @@ BEGIN TRY
 							,strPriceUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 							,intContractSeq INT
 							,dtmEndDate DATETIME
-							,dblDetailQuantity NUMERIC(18, 6)
-							,dblOriginalQty NUMERIC(18, 6)
-							,dblBalance NUMERIC(18, 6)
+							,dblDetailQuantity NUMERIC(38, 20)
+							,dblOriginalQty NUMERIC(38, 20)
+							,dblBalance NUMERIC(38, 20)
 							,dtmStartDate DATETIME
 							,dblTotalCost NUMERIC(18, 6)
 							,dblAvailableNetWeight NUMERIC(18, 6)
@@ -2705,7 +2711,10 @@ BEGIN TRY
 							,dblOriginalBasis NUMERIC(18, 6)
 							,strFixationBy NVARCHAR(50)
 							,dblConvertedBasis NUMERIC(18, 6)
-							,dblNetWeight NUMERIC(18, 6)
+							,dblNetWeight NUMERIC(38, 20)
+							,dtmHistoricalDate DATETIME
+							,dblHistoricalRate NUMERIC(18, 6)
+							,intHistoricalRateTypeId INT
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -2855,6 +2864,9 @@ BEGIN TRY
 					,ysnSplit
 					,ysnProvisionalPNL
 					,ysnFinalPNL
+					,dtmHistoricalDate
+					,dblHistoricalRate
+					,intHistoricalRateTypeId
 					)
 				SELECT intContractDetailId
 					,intSplitFromId
@@ -2994,6 +3006,9 @@ BEGIN TRY
 					,ysnSplit
 					,ysnProvisionalPNL
 					,ysnFinalPNL
+					,dtmHistoricalDate
+					,dblHistoricalRate
+					,intHistoricalRateTypeId
 				FROM tblCTContractDetail CD
 				WHERE CD.intContractHeaderId = @intNewContractHeaderId
 					AND NOT EXISTS (
@@ -3373,6 +3388,9 @@ BEGIN TRY
 							,intFreightBasisUOMId = CD1.intFreightBasisUOMId
 							,intFreightBasisBaseUOMId = CD1.intFreightBasisBaseUOMId
 							,CD.intContractDetailRefId = CD1.intContractDetailRefId
+							,dtmHistoricalDate = CD1.dtmHistoricalDate
+							,dblHistoricalRate = CD1.dblHistoricalRate
+							,intHistoricalRateTypeId = CD1.intHistoricalRateTypeId
 						FROM tblCTContractDetail CD
 						JOIN #tmpContractDetail CD1 ON CD.intContractSeq = CD1.intContractSeq
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
@@ -4020,7 +4038,7 @@ BEGIN TRY
 						,intContractDetailId INT
 						,strCertificationId NVARCHAR(50)
 						,strTrackingNumber NVARCHAR(50)
-						,dblQuantity NUMERIC(18, 6)
+						,dblQuantity NUMERIC(38, 20)
 						) x
 				LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
 				LEFT JOIN tblICCertification CF ON CF.strCertificationName = x.strCertificationName

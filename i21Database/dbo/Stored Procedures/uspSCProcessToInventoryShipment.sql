@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	,@dtmClientDate DATETIME = NULL
 	,@ysnSkipValidation as BIT = NULL
 	,@intNewTicketId AS INT = NULL OUTPUT
+	,@ysnProcessToInTransit AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -82,6 +83,8 @@ DECLARE @_strAuditDescription NVARCHAR(500)
 dECLARE @dblTicketNetUnits NUMERIC(38,20)
 
 SET @OWNERSHIP_CUSTOMER = 'CUSTOMER'
+
+SET @ysnProcessToInTransit = ISNULL(@ysnProcessToInTransit,0)
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -1105,6 +1108,16 @@ BEGIN TRY
 	UPDATE tblSCTicket
 	SET dblDWGOriginalNetUnits = dblNetUnits
 	WHERE intTicketId = @intTicketId
+
+
+	---In Transit Update
+	IF(@ysnProcessToInTransit = 1)
+	BEGIN
+		UPDATE tblSCTicket
+		SET ysnTicketInTransit = 1
+			,dblInTransitQuantity = dblNetUnits
+		WHERE intTicketId = @intTicketId
+	END
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

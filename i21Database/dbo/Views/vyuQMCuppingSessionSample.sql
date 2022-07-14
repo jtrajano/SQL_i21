@@ -88,11 +88,11 @@ SELECT S.intSampleId
 	,S.ysnImpactPricing
 	,strOrigin	= O.strDescription
 	,strProductType	= PT.strDescription	
-	,strGrade = ''
-	,strRegion = ''
-	,strSeason = ''
-	,strClass = ''
-	,strProductLine = ''
+	,strGrade = '' COLLATE Latin1_General_CI_AS
+	,strRegion = '' COLLATE Latin1_General_CI_AS
+	,strSeason = '' COLLATE Latin1_General_CI_AS
+	,strClass = '' COLLATE Latin1_General_CI_AS
+	,strProductLine = '' COLLATE Latin1_General_CI_AS
 	,S.dtmRequestedDate
 	,S.dtmSampleSentDate
 	,SC.strSamplingCriteria
@@ -105,13 +105,13 @@ SELECT S.intSampleId
 	,CSH.intCuppingSessionId
 	,CSH.dtmCuppingDate
 	,CSH.dtmCuppingTime
-	,CSD.intRank
-    ,CSD.intCuppingSessionDetailId
-	,strMethodology = ''
+	,CSH.intRank
+    ,CSH.intCuppingSessionDetailId
+	,strMethodology = '' COLLATE Latin1_General_CI_AS
 	,strExtension = EX.strDescription
 	,intContractSequence = CD.intContractSeq
 	,strContractType = CT.strContractType
-	,strPacking = ''
+	,strPacking = '' COLLATE Latin1_General_CI_AS
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -150,9 +150,23 @@ LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
 LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
-LEFT JOIN tblQMSample RS ON RS.intRelatedSampleId = S.intSampleId
-LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intSampleId = S.intSampleId
-LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
+OUTER APPLY (
+	SELECT TOP 1 strSampleNumber
+	FROM tblQMSample RS 
+	WHERE RS.intRelatedSampleId = S.intSampleId
+) RS
+OUTER APPLY (
+	SELECT TOP 1 CSH.strCuppingSessionNumber
+			   , CSH.intCuppingSessionId
+			   , CSH.dtmCuppingDate
+			   , CSH.dtmCuppingTime
+			   , CSD.intRank
+			   , CSD.intCuppingSessionDetailId
+	FROM tblQMCuppingSessionDetail CSD
+	INNER JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
+	WHERE CSD.intSampleId = S.intSampleId
+	ORDER BY CSH.intCuppingSessionId DESC
+) CSH
 LEFT JOIN tblICCommodityAttribute PT ON I.intProductTypeId = PT.intCommodityAttributeId AND PT.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute O ON I.intOriginId = O.intCommodityAttributeId AND O.strType = 'Origin'
 LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId

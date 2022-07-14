@@ -33,7 +33,7 @@ BEGIN
 	RETURN;
 END
 
-IF NULLIF(@param, '') IS NULL AND NULLIF(@billBatchId, '') IS NULL
+IF NULLIF(@param, '') IS NULL
 BEGIN
 	RAISERROR('@param is empty. No voucher to post.', 16, 1);
 	RETURN;
@@ -77,7 +77,6 @@ DECLARE @billIds NVARCHAR(MAX)
 DECLARE @totalRecords INT
 DECLARE @costAdjustmentResult INT;
 DECLARE @voucherPayables AS VoucherPayable;
-DECLARE @billIdsInventoryLog AS Id;
 
 -- Get the functional currency
 BEGIN 
@@ -238,13 +237,16 @@ BEGIN
 	-- FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
+	--IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData)
 	BEGIN
 		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
 		--undo updating of transactions for those invalid only
-		SELECT 
+		SELECT DISTINCT
 			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
 		FROM #tmpInvalidBillData
+		--WHERE intErrorKey = 1 OR intErrorKey = 33
+		--Invalid automatic undo of prepaid, this should not be part of posting
 		EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
 	END
 
@@ -285,6 +287,16 @@ END
 
 SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
 
+IF EXISTS(SELECT 1 FROM #tmpPostBillData)
+BEGIN
+	--CREATE TEMP GL ENTRIES
+	SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+	FROM #tmpPostBillData
+	ORDER BY intBillId
+
+	EXEC uspAPUpdateAccountOnPost @validBillIds
+END
+
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
@@ -301,15 +313,16 @@ BEGIN
 	FROM tblAPPostResult A
 	INNER JOIN @postResult B ON A.intId = B.id
 
+	-- --undo updating of transactions for those invalid only
+	-- SELECT 
+	-- 	@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
+	-- FROM #tmpPostBillData A
+	-- EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
+
 	SET @successfulCount = 0;
 	SET @success = 0
 	GOTO Post_Exit
 END
-
---CREATE TEMP GL ENTRIES
-SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
-FROM #tmpPostBillData
-ORDER BY intBillId
 
 BEGIN TRANSACTION
 
@@ -1096,225 +1109,6 @@ BEGIN
 	END
 END
 
-
---QUANTITY ADJUSTMENT
-DECLARE @qtyAdjustmentTable AS TABLE (
-		intBillId  INT
-		,intBillDetailId  INT
-		,intItemId  INT
-		,dtmDate  DATETIME 
-		,intLocationId  INT	
-		,intSubLocationId  INT	
-		,intStorageLocationId  INT	
-		,strLotNumber  NVARCHAR(50)
-		,dblAdjustByQuantity  NUMERIC(38,20)
-		,dblNewUnitCost  NUMERIC(38,20)
-		,intItemUOMId  INT 
-		,intSourceId  INT
-		,strDescription  NVARCHAR(1000)
-		,intContractHeaderId  INT NULL
-		,intContractDetailId  INT NULL
-		,intEntityId  INT NULL
-)
-
-DECLARE @intBillId AS INT
-		,@intBillDetailId AS INT
-		,@intItemId AS INT
-		,@dtmDate AS DATETIME 
-		,@intLocationId AS INT	
-		,@intSubLocationId AS INT	
-		,@intStorageLocationId AS INT	
-		,@strLotNumber AS NVARCHAR(50) 
-		,@intOwnershipType AS INT = 1
-		,@dblAdjustByQuantity AS NUMERIC(38,20)
-		,@dblNewUnitCost AS NUMERIC(38,20)
-		,@intItemUOMId AS INT 
-		,@intSourceId AS INT
-		,@intSourceTransactionTypeId AS INT = 27
-		,@intEntityUserSecurityId AS INT = @userId
-		,@strDescription2 AS NVARCHAR(1000)
-		,@ysnPost AS BIT = @post
-		,@intContractHeaderId AS INT
-		,@intContractDetailId AS INT
-		,@intEntityId AS INT
-		,@InventoryAdjustmentIntegrationId AS InventoryAdjustmentIntegrationId
-		,@intInventoryAdjustmentId AS INT
-
-INSERT INTO @qtyAdjustmentTable
-SELECT B.intBillId,
-		BD.intBillDetailId,
-		BD.intItemId, 
-		B.dtmDate,
-		L.intLocationId,
-		L.intSubLocationId,
-		L.intStorageLocationId,
-		L.strLotNumber,
-		--BD.dblQtyReceived - BD.dblQtyOrdered,
-		CASE 
-			WHEN @ysnPost = 1 THEN BD.dblQtyReceived - ri.dblOpenReceive
-			WHEN @ysnPost = 0 THEN -(BD.dblQtyReceived - ri.dblOpenReceive)
-		END,
-		BD.dblCost,
-		BD.intUnitOfMeasureId,
-		B.intBillId,
-		B.strBillId,
-		BD.intContractHeaderId,
-		BD.intContractDetailId,
-		B.intEntityVendorId
-FROM tblAPBill B
-INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
-INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
-INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-WHERE 
-	B.ysnFinalVoucher = 1 
-	--AND BD.dblQtyReceived <> BD.dblQtyOrdered
-	AND (BD.dblQtyReceived - ri.dblOpenReceive) <> 0 
-
-IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
-BEGIN
-	WHILE EXISTS(SELECT TOP 1 1 FROM @qtyAdjustmentTable)
-	BEGIN
-		SELECT TOP 1 @intBillId = intBillId
-					,@intBillDetailId = intBillDetailId
-					,@intItemId = intItemId
-					,@dtmDate = dtmDate
-					,@intLocationId = intLocationId
-					,@intSubLocationId = intSubLocationId
-					,@intStorageLocationId = intStorageLocationId
-					,@strLotNumber = strLotNumber
-					,@dblAdjustByQuantity = dblAdjustByQuantity
-					,@dblNewUnitCost = dblNewUnitCost
-					,@intItemUOMId = intItemUOMId
-					,@intSourceId = intSourceId
-					,@strDescription2 = strDescription
-					,@intContractHeaderId = intContractHeaderId
-					,@intContractDetailId = intContractDetailId
-					,@intEntityId = intEntityId
-		FROM @qtyAdjustmentTable
-
-		INSERT INTO @InventoryAdjustmentIntegrationId
-		SELECT NULL, NULL, NULL, NULL, @intBillId
-
-		EXEC uspICInventoryAdjustment_CreatePostQtyChange
-			@intItemId = @intItemId
-			,@dtmDate = @dtmDate
-			,@intLocationId	= @intLocationId
-			,@intSubLocationId = @intSubLocationId
-			,@intStorageLocationId = @intStorageLocationId
-			,@strLotNumber = @strLotNumber
-			,@intOwnershipType = @intOwnershipType
-			,@dblAdjustByQuantity = @dblAdjustByQuantity
-			,@dblNewUnitCost = @dblNewUnitCost
-			,@intItemUOMId = @intItemUOMId
-			,@intSourceId = @intSourceId
-			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@strDescription = @strDescription2
-			,@ysnPost = @ysnPost
-			,@InventoryAdjustmentIntegrationId = @InventoryAdjustmentIntegrationId
-			,@intContractHeaderId = @intContractHeaderId
-			,@intContractDetailId = @intContractDetailId
-			,@intEntityId = @intEntityId
-			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-
-		DELETE @qtyAdjustmentTable WHERE intBillDetailId = @intBillDetailId
-	END
-END
-
-INSERT INTO @qtyAdjustmentTable
-SELECT B.intBillId,
-		BD.intBillDetailId,
-		BD.intItemId, 
-		B.dtmDate,
-		L.intLocationId,
-		L.intSubLocationId,
-		L.intStorageLocationId,
-		L.strLotNumber,
-		--dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived),
-		CASE 
-			WHEN @ysnPost = 1 THEN dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived)
-			WHEN @ysnPost = 0 THEN dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) 
-		END,
-		BD.dblCost,
-		BD.intUnitOfMeasureId,
-		B.intBillId,
-		B.strBillId,
-		BD.intContractHeaderId,
-		BD.intContractDetailId,
-		B.intEntityVendorId
-FROM tblAPBill B
-INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
-INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
-INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
-INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-WHERE 
-	B.ysnFinalVoucher = 1 
-	AND BD.ysnNetWeightChanged = 1
-	-- compare the weight change between IR and final voucher
-	AND (
-		ROUND(
-			dbo.fnMultiply(
-				dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived) -- wgt/qty in final voucher
-				,BD.dblQtyReceived
-			)
-			,2
-		) 
-		<> 
-		ROUND(
-			dbo.fnMultiply(
-				dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) -- wgt/qty from receipt
-				,BD.dblQtyReceived
-			)
-			,2
-		)
-	)
-
-IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
-BEGIN
-	WHILE EXISTS(SELECT TOP 1 1 FROM @qtyAdjustmentTable)
-	BEGIN
-		SELECT TOP 1 @intBillId = intBillId
-					,@intBillDetailId = intBillDetailId
-					,@intItemId = intItemId
-					,@dtmDate = dtmDate
-					,@intLocationId = intLocationId
-					,@intSubLocationId = intSubLocationId
-					,@intStorageLocationId = intStorageLocationId
-					,@strLotNumber = strLotNumber
-					,@dblAdjustByQuantity = dblAdjustByQuantity
-					,@dblNewUnitCost = dblNewUnitCost
-					,@intItemUOMId = intItemUOMId
-					,@intSourceId = intSourceId
-					,@strDescription2 = strDescription
-					,@intContractHeaderId = intContractHeaderId
-					,@intContractDetailId = intContractDetailId
-					,@intEntityId = intEntityId
-		FROM @qtyAdjustmentTable
-
-		-- INSERT INTO @InventoryAdjustmentIntegrationId
-		-- SELECT NULL, NULL, NULL, NULL, @intBillId
-
-		EXEC uspICInventoryAdjustment_CreatePostLotWeight
-			@intItemId = @intItemId
-			,@dtmDate = @dtmDate
-			,@intLocationId	= @intLocationId
-			,@intSubLocationId = @intSubLocationId
-			,@intStorageLocationId = @intStorageLocationId
-			,@strLotNumber = @strLotNumber
-			,@dblNewLotWeight = NULL
-			,@dblNewWeightPerQty = @dblAdjustByQuantity
-			,@intSourceId = @intSourceId
-			,@intSourceTransactionTypeId = @intSourceTransactionTypeId
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@strDescription = @strDescription2
-			--,@ysnPost = @ysnPost
-			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-
-		DELETE @qtyAdjustmentTable WHERE intBillDetailId = @intBillDetailId
-	END
-END
-
 -- Get the vendor id to intSourceEntityId
 UPDATE GL SET intSourceEntityId = BL.intEntityVendorId
 FROM @GLEntries GL
@@ -1406,45 +1200,6 @@ BEGIN
 				GOTO Post_Rollback
 			END CATCH
 		END
-
-		--LOG TO tblAPClearing
-		BEGIN TRY
-			DECLARE @clearingIds AS Id
-			DECLARE @APClearing AS APClearing
-
-			INSERT INTO @clearingIds
-			SELECT intBillId FROM #tmpPostBillData
-
-			IF EXISTS(
-				SELECT 1
-				FROM tblAPBillDetail A
-				INNER JOIN #tmpPostBillData B ON A.intBillId = B.intBillId
-				WHERE
-					A.intInventoryReceiptItemId > 0
-				OR A.intInventoryReceiptChargeId > 0
-				OR A.intInventoryShipmentChargeId > 0
-				OR A.intLoadDetailId > 0
-				OR A.intLoadShipmentCostId > 0
-				OR A.intSettleStorageId > 0
-			)
-			BEGIN
-				INSERT INTO @APClearing
-				SELECT * FROM fnAPClearing(@clearingIds)
-
-				IF EXISTS(SELECT 1 FROM @APClearing)
-				BEGIN
-					EXEC uspAPClearing @APClearing = @APClearing, @post = @post
-				END
-			END
-
-		END TRY
-		BEGIN CATCH
-				DECLARE @errorClearing NVARCHAR(200) = ERROR_MESSAGE()
-				SET @invalidCount = @invalidCount + 1;
-				SET @totalRecords = @totalRecords - 1;
-				RAISERROR(@errorClearing, 16, 1);
-				GOTO Post_Rollback
-		END CATCH
 	END
 	ELSE
 	BEGIN
@@ -1453,37 +1208,6 @@ BEGIN
 		RAISERROR(@postError, 16, 1);
 		GOTO Post_Rollback
 	END
-
-	BEGIN TRY
-		--POST INTEGRATION
-		DECLARE @postIntegrationError TABLE(intBillId INT, strBillId NVARCHAR(50), strError NVARCHAR(200));
-
-		--DECLARE THE TEMP TABLE HERE NOT IS SP AND RETURN, NESTED INSERT EXEC IS NOT ALLOWED
-		IF OBJECT_ID(N'tempdb..#tmpPostVoucherIntegrationError') IS NOT NULL DROP TABLE #tmpPostVoucherIntegrationError
-		CREATE TABLE #tmpPostVoucherIntegrationError(intBillId INT, strBillId NVARCHAR(50), strError NVARCHAR(200));
-		
-		DECLARE @voucherIdsIntegration AS Id;
-		INSERT INTO @voucherIdsIntegration
-		SELECT DISTINCT intBillId FROM #tmpPostBillData	
-
-		EXEC uspAPCallPostVoucherIntegration @billIds = @voucherIdsIntegration, @post = @post, @intUserId = @userId
-
-		IF EXISTS(SELECT 1 FROM #tmpPostVoucherIntegrationError)
-		BEGIN
-			--REMOVE FAILED POST VOUCHER INTEGRATION FROM UPDATING VOUCHER TABLE
-			DELETE A
-			FROM #tmpPostBillData A
-			INNER JOIN #tmpPostVoucherIntegrationError B ON A.intBillId = B.intBillId
-		END
-	END TRY
-	BEGIN CATCH
-		DECLARE @errorPostIntegration NVARCHAR(200) = ERROR_MESSAGE()
-		SET @invalidCount = @invalidCount + 1;
-		SET @totalRecords = @totalRecords - 1;
-		RAISERROR(@errorPostIntegration, 16, 1);
-		--ROLLBACK ALL IF UNKNOWN ERROR OCCURS
-		GOTO Post_Rollback
-	END CATCH
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -1607,10 +1331,6 @@ BEGIN
 			WHERE Bill.intContractCostId > 0 
 			GROUP BY intContractCostId
 		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
-
-		INSERT INTO @billIdsInventoryLog
-		SELECT intBillId FROM #tmpPostBillData
-		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 1, @userId = @userId
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1742,10 +1462,6 @@ BEGIN
 			GROUP BY intContractCostId
 		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
 
-		INSERT INTO @billIdsInventoryLog
-		SELECT intBillId FROM #tmpPostBillData
-		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 0, @userId = @userId
-		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
@@ -2000,4 +1716,3 @@ Post_Exit:
 	--CLEAN UP TRACKER FOR POSTING
 	DELETE A
 	FROM tblAPBillForPosting A
-

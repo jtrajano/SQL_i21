@@ -153,7 +153,7 @@ CREATE TABLE #ARPostPaymentHeader
 	,[intTransactionAccountId]          INT             NULL
     ,[ysnTransactionPosted]             BIT             NULL
 	,[ysnTransactionPaid]               BIT             NULL
-	,[ysnTransactionProcessed]          BIT             NULL    
+	,[ysnTransactionProcessed]          BIT             NULL
     ,[dtmTransactionPostDate]           DATETIME        NULL
 	,[dblTransactionDiscount]           NUMERIC(18,6)   NULL
     ,[dblBaseTransactionDiscount]       NUMERIC(18,6)   NULL
@@ -163,7 +163,10 @@ CREATE TABLE #ARPostPaymentHeader
     ,[dblBaseTransactionAmountDue]      NUMERIC(18,6)   NULL
 	,[intCurrencyExchangeRateTypeId]    INT             NULL
     ,[dblCurrencyExchangeRate]          NUMERIC(18,6)   NULL
-    ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL)
+    ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
+	,[ysnUserDefinedPaymentMethod]      BIT             NULL
+	,[intPaymentMethodAccountId]		INT             NULL
+)
 
 IF(OBJECT_ID('tempdb..#ARPostPaymentDetail') IS NOT NULL)
 BEGIN

@@ -81,8 +81,10 @@
 	[ysnRestricted] BIT NOT NULL DEFAULT 0 ,
 	[ysnSubCurrency] BIT NOT NULL DEFAULT 0 ,
 	[ysnStage] BIT NOT NULL DEFAULT 0 ,
+	[ysnManualCreation] BIT NOT NULL DEFAULT 0,
     [intLineNo] INT NOT NULL DEFAULT 1,
     [intTaxGroupId] INT NULL, 
+	[ysnOverrideTaxGroup] BIT NULL,
 	[intFreightTermId] INT NULL, 
 	[intInventoryShipmentChargeId] INT NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
@@ -174,6 +176,10 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBillDetail]
 INCLUDE ( 	[dblTotal],
 	[dblRate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+
+CREATE NONCLUSTERED INDEX [dpa_tblAPBillDetail_1] ON [dbo].[tblAPBillDetail] ([dblTax]) INCLUDE ([intBillId],[dblRate])
+GO
+
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_voucherPayable]
     ON [dbo].[tblAPBillDetail](intPurchaseDetailId
 								,intContractDetailId

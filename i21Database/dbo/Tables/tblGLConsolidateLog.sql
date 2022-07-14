@@ -11,8 +11,8 @@ CREATE TABLE [dbo].[tblGLConsolidateLog](
 	[intSubsidiaryCompanyId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
 	[intRowInserted] [int] NULL,
-	[strPeriod] NVARCHAR(40) NOT NULL,
-	[strComment] [nvarchar](800) NULL,
+	[strPeriod] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strComment] [nvarchar](800) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblGLConsolidateLog] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidateLogId] ASC

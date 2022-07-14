@@ -68,6 +68,9 @@ SELECT Item.intItemId
 , CommodityAttribute3.strAttribute3
 , CommodityAttribute4.strAttribute4
 , Item.intCommodityAttributeId1
+, Subcategory.intSubcategoryId
+, Subcategory.strSubcategoryId
+
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -90,3 +93,4 @@ LEFT JOIN tblICCommodityAttribute1 CommodityAttribute1 ON CommodityAttribute1.in
 LEFT JOIN tblICCommodityAttribute2 CommodityAttribute2 ON CommodityAttribute2.intCommodityAttributeId2 = Item.intCommodityAttributeId2
 LEFT JOIN tblICCommodityAttribute3 CommodityAttribute3 ON CommodityAttribute3.intCommodityAttributeId3 = Item.intCommodityAttributeId3
 LEFT JOIN tblICCommodityAttribute4 CommodityAttribute4 ON CommodityAttribute4.intCommodityAttributeId4 = Item.intCommodityAttributeId4
+LEFT JOIN tblSTSubcategory Subcategory ON Subcategory.intSubcategoryId = Item.intSubcategoryId  

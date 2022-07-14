@@ -20,7 +20,7 @@
 	[intUnitMeasureId] INT NULL, 
     [ysnShowOpenContract] BIT NOT NULL DEFAULT 1, 
     [ysnShowStorage] BIT NOT NULL DEFAULT 1, 
-	[strRemoteExportFilePath] NVARCHAR(MAX) DEFAULT('')  COLLATE Latin1_General_CI_AS NULL,
+	[strRemoteExportFilePath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL  DEFAULT('')  ,
 	[intScaleRemoteFrequencyCheck] INT NOT NULL DEFAULT 1800, 
 	[ysnIsRemote] BIT NOT NULL DEFAULT 0,
 	[ysnDisconnectedEnabled] BIT NOT NULL DEFAULT(0), 
@@ -34,6 +34,7 @@
     [ysnEnableCanadianGrainReceipt] BIT NOT NULL DEFAULT(0),
     [strDefaultGrainReceiptReport] NVARCHAR(MAX) COLLATE  Latin1_General_CI_AS NULL,
     [ysnUseItemCommodityDiscountOriginImport] BIT NOT NULL DEFAULT(0),
+    [ysnAutoShortCloseContractInSettlement] BIT NOT NULL DEFAULT(0),
     --[ysnStorageChargeAccountUseIncome] BIT NOT NULL DEFAULT(0),
     
 

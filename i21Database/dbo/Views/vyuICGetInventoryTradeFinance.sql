@@ -7,8 +7,8 @@ SELECT
 	, bank.strBankName
 	, bankAccount.strBankAccountNo
 	, borrowingFacility.strBorrowingFacilityId
-	, strLimit = limit.strBorrowingFacilityLimit
-	, strSublimit = sublimit.strLimitDescription
+	, strLimit = limit.strBorrowingFacilityLimit COLLATE Latin1_General_CI_AS
+	, strSublimit = sublimit.strLimitDescription COLLATE Latin1_General_CI_AS
 	, strOverrideFacilityValuation = overrideFacilityValuation.strBankValuationRule
 	, warrantStatus.strWarrantStatus
 FROM 

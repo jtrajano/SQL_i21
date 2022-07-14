@@ -18,6 +18,7 @@ SELECT DH.intLoadDistributionHeaderId
 	, DH.intInvoiceId
 	, I.strInvoiceNumber
 	, I.dblAmountDue
+	, EL.strSaleUnits
 FROM tblTRLoadDistributionHeader DH
 LEFT JOIN vyuARCustomer C ON C.intEntityId = DH.intEntityCustomerId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId

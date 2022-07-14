@@ -17,6 +17,7 @@
     [dblLongitude] NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [strInternalNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strUseLocationAddress] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strFEIN] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[strSkipSalesmanDefault] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnSkipTermsDefault] BIT NULL DEFAULT (1),
 	[strOrderTypeDefault] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -205,6 +206,7 @@
 	[ysnProductCaseCodeScanningRequired] BIT NULL DEFAULT (0), 
 	[ysnYieldAdjustmentAllowed] BIT NULL DEFAULT (0), 
 	[ysnPrintInvTagOnReceivingComplete] BIT NULL DEFAULT (0), 
+    [intNoOfMonthsFromDemandToShipment] INT NOT NULL DEFAULT (0),
 	[strVendorRefNoPrefix] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strVatNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	---------------------------------------------------------------------

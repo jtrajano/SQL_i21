@@ -166,6 +166,7 @@ SELECT
 		WHEN 5 THEN 'Picked Lots'
 		WHEN 6 THEN 'Pick Lots'
 		WHEN 7 THEN 'Pick Lots w/o Contract'
+		WHEN 8 THEN 'TM Orders'
 		END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType
 	,strPosition = P.strPosition
@@ -246,6 +247,11 @@ SELECT
 		WHEN 2 THEN 'Partially Released'
 		WHEN 3 THEN 'Released'
 		END COLLATE Latin1_General_CI_AS
+    ,strTaxPoint = L.strTaxPoint
+    ,strLocationName = L.strLocationName
+    ,intTaxLocationId = L.intTaxLocationId
+    ,ysnTaxPointOverride = L.ysnTaxPointOverride
+    ,ysnTaxLocationOverride = L.ysnTaxLocationOverride
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId

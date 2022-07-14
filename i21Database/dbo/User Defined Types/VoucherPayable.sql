@@ -113,6 +113,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	/*Tax info*/
 	[intFreightTermId]				INT NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
+	[ysnOverrideTaxGroup] 			BIT NULL,
 	[dblTax]						DECIMAL(18,2) NOT NULL DEFAULT(0), --IF THIS IS NOT 0, PLEASE PROVIDE DATA FOR VoucherDetailTax
 	/*Discount Info*/
 	[dblDiscount]					DECIMAL(18,2) NOT NULL DEFAULT(0),
@@ -158,5 +159,8 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --COMMENTS
 	/*Quality and Optionality Premium*/
 	[dblQualityPremium] DECIMAL(18, 6) DEFAULT 0,
- 	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0
+ 	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0,
+	 /*Tax Override*/
+	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxLocationId] INT NULL
 )

@@ -29,11 +29,12 @@ BEGIN
 END   
 
 
-DECLARE @intGLAccountIdFrom INT,@intGLAccountIdTo INT  
+DECLARE @intGLAccountIdFrom INT,@intGLAccountIdTo INT
 SELECT   
 @intGLAccountIdFrom=intGLAccountIdFrom,@intGLAccountIdTo = intGLAccountIdTo,  
 @dtmDate = CASE WHEN @ysnPostedInTransit = 0 THEN dtmDate ELSE dtmInTransit END  
 FROM tblCMBankTransfer WHERE @strTransactionId = strTransactionId  
+
   
   
 IF @ysnPostedInTransit = 0  
@@ -195,7 +196,7 @@ END
         ,[dtmDate]              = @dtmDate      
         ,[strBatchId]           = @strBatchId      
         ,[intAccountId]         = GLAccnt.intAccountId      
-        ,[dblCredit]             = dblAmountSettlementFrom  
+        ,[dblCredit]            = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN dblAmountForeignFrom ELSE dblAmountSettlementFrom END   
         ,[dblDebit]            = 0       
         ,[dblDebitForeign]      = 0
         ,[dblCreditForeign]     = dblAmountForeignFrom      
@@ -258,7 +259,7 @@ END
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTForwardToFXGLAccountId
         ,[dblCredit]              = 0
-        ,[dblDebit]               = dblAmountFrom
+        ,[dblDebit]               =CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN dblAmountForeignFrom ELSE dblAmountFrom END
         ,[dblDebitForeign]       = dblAmountForeignFrom
         ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
@@ -287,7 +288,7 @@ END
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTForwardFromFXGLAccountId
-        ,[dblCredit]             = dblAmountSettlementTo
+        ,[dblCredit]             = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo THEN  dblAmountForeignTo ELSE dblAmountSettlementTo END
         ,[dblDebit]				 = 0
         ,[dblDebitForeign]       = 0
         ,[dblCreditForeign]      = dblAmountForeignTo

@@ -384,10 +384,14 @@ CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_strTrlUPCwithoutCheckDigit_idx]
 
 GO
 CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_dtmDate_idx]
-    ON [dbo].[tblSTTranslogRebates]([dtmDate] ASC);
+    ON [dbo].[tblSTTranslogRebates]([strTransRollback], [strTransFuelPrepay], [dtmDate] ASC);
 	
 GO
 CREATE NONCLUSTERED INDEX [IX_intStoreNumber]
     ON [dbo].[tblSTTranslogRebates]([intStoreNumber] ASC, [dtmDate] ASC);
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblSTTranslogRebates_strTransRollback_strTransFuelPrepay_strTrpPaycode]
+    ON [dbo].[tblSTTranslogRebates]([strTransRollback], [strTransFuelPrepay], [strTrpPaycode])
+GO
 
