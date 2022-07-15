@@ -19,6 +19,11 @@
 	[ysnREOverrideLOB] BIT NULL,
 	[ysnREOverrideCompany] BIT NULL,
 	[strOverrideREArray] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+	[ysnAllowIntraCompanyEntries]	BIT NOT NULL DEFAULT((0)),
+	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT((0)),
+	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT((0)),
+	[intDueToAccountId]				INT NULL,
+	[intDueFromAccountId]			INT NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO
