@@ -94,10 +94,10 @@ BEGIN
 			,[dtmDate]				= A.dtmDate
 			,[strBatchId]			= A.strBatchId
 			,[intAccountId]			= @intRealizedGainAccountId
-			,[dblDebit]				= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
 			,[dblCredit]			= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
-			,[dblDebitForeign]		= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
+			,[dblDebit]				= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
 			,[dblCreditForeign]		= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end
+			,[dblDebitForeign]		= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
