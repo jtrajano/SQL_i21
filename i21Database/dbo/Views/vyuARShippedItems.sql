@@ -485,16 +485,56 @@ FROM (
 			FROM dbo.tblICInventoryReceiptItem WITH (NOLOCK)
 		) ICIRI1 ON ICIL1.intTransactionDetailId = ICIRI1.intInventoryReceiptItemId
 		INNER JOIN (
-			SELECT intContractDetailId
-				 , intShipmentId
-				 , intTrackingNumber
-				 , strContractNumber
-				 , intContractHeaderId
-				 , intContractSeq
-		FROM dbo.vyuLGShipmentContainerPurchaseContracts WITH (NOLOCK)
+			SELECT CD.intContractDetailId
+				 , SC.intShipmentId
+				 , S.intTrackingNumber
+				 , CH.strContractNumber
+				 , CD.intContractHeaderId
+				 , CD.intContractSeq			
+			FROM tblLGShipmentBLContainerContract SC
+			INNER JOIN tblLGShipment S ON S.intShipmentId = SC.intShipmentId
+			INNER JOIN tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
+			INNER JOIN tblCTContractDetail CD ON SCQ.intContractDetailId = CD.intContractDetailId
+			INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		) LGSD ON ICIRI1.intLineNo = LGSD.intContractDetailId
 	) LGICSHIPMENT ON ICISI.intInventoryShipmentItemId = LGICSHIPMENT.intInventoryShipmentItemId
-	LEFT JOIN dbo.vyuCTCustomerContract ARCC WITH (NOLOCK) ON ICISI.intLineNo = ARCC.intContractDetailId AND ICIS.intOrderType = 1
+	LEFT JOIN (
+		SELECT intContractDetailId	= CD.intContractDetailId
+			 , intContractHeaderId	= CD.intContractHeaderId
+			 , intItemUOMId			= CD.intItemUOMId
+			 , dblCashPrice			= CASE WHEN	CD.intPricingTypeId = 2 
+										   THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
+										   ELSE	CD.dblCashPrice
+									  END
+			 , dblUnitPrice			= (CASE	WHEN CD.intPricingTypeId = 2 
+										    THEN dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
+										    ELSE CD.dblCashPrice
+									   END) * ISNULL([dbo].[fnCalculateQtyBetweenUOM](CD.intItemUOMId, ISNULL(ISNULL(CD.intPriceItemUOMId, CD.intAdjItemUOMId), CD.intItemUOMId), 1.000000),ISNULL(CD.dblQuantity, 0.000000))
+			 , dblPriceUOMQuantity	= ISNULL([dbo].[fnCalculateQtyBetweenUOM](CD.intItemUOMId, ISNULL(ISNULL(CD.intPriceItemUOMId, CD.intAdjItemUOMId), CD.intItemUOMId), 1.000000),ISNULL(CD.dblQuantity, 0.000000))
+			 , dblOrderPrice		= CD.dblCashPrice
+			 , intCurrencyId		= CASE WHEN CD.ysnUseFXPrice = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL  
+									       THEN ISNULL(CURTO.intFromCurrencyId, CURFROM.intToCurrencyId)
+									       ELSE CD.intCurrencyId
+								      END
+		 	 , intPriceItemUOMId	= CASE WHEN CD.ysnUseFXPrice = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL  
+									       THEN CD.intFXPriceUOMId
+									       ELSE ISNULL(CD.intPriceItemUOMId, CD.intAdjItemUOMId)
+								      END
+		FROM tblCTContractDetail CD WITH (NOLOCK)
+		OUTER APPLY (
+			SELECT TOP 1 intFromCurrencyId
+			FROM tblSMCurrencyExchangeRate 
+			WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+			  AND intToCurrencyId = CD.intCurrencyId
+		) CURTO
+		OUTER APPLY (
+			SELECT TOP 1 intToCurrencyId
+			FROM tblSMCurrencyExchangeRate 
+			WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+			  AND intFromCurrencyId = CD.intCurrencyId
+		) CURFROM
+	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
+	      AND ICIS.intOrderType = 1
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
@@ -1339,34 +1379,32 @@ LEFT OUTER JOIN (
 		 , strName
 	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) SALESPERSON ON SHIPPEDITEMS.intEntitySalespersonId = SALESPERSON.intEntityId
-LEFT OUTER JOIN (
-	SELECT intContractHeaderId
-		 , intContractDetailId
-		 , strContractNumber
-		 , intContractSeq
-		 , intDestinationGradeId
-		 , strDestinationGrade
-		 , intDestinationWeightId
-		 , strDestinationWeight
-		 , intSubCurrencyId
-		 , intCurrencyId
-		 , strUnitMeasure
-		 , intOrderUOMId
-		 , intItemUOMId
-		 , strOrderUnitMeasure
-		 , intItemWeightUOMId
-		 , intPricingTypeId
-		 , dblCashPrice
-		 , dblDetailQuantity
-		 , intFreightTermId
-		 , dblShipQuantity
-		 , dblOrderQuantity
-		 , dblSubCurrencyRate
-		 , intCurrencyExchangeRateTypeId
-		 , strCurrencyExchangeRateType
-		 , intCurrencyExchangeRateId
-		 , dblCurrencyExchangeRate
-	 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
+LEFT JOIN (
+	SELECT intContractDetailId		= CD.intContractDetailId
+		 , intContractHeaderId		= CD.intContractHeaderId
+		 , strContractNumber		= CH.strContractNumber
+		 , intContractSeq			= CD.intContractSeq
+		 , intPricingTypeId			= CD.intPricingTypeId
+		 , intDestinationGradeId	= CH.intGradeId
+		 , strDestinationGrade	    = GR.strWeightGradeDesc
+		 , intDestinationWeightId   = CH.intWeightId
+		 , strDestinationWeight	    = WT.strWeightGradeDesc
+	FROM tblCTContractDetail CD WITH (NOLOCK)
+	INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+	LEFT JOIN tblCTWeightGrade GR ON GR.intWeightGradeId = CH.intGradeId
+	LEFT JOIN tblCTWeightGrade WT ON WT.intWeightGradeId = CH.intWeightId
+	OUTER APPLY (
+		SELECT TOP 1 intFromCurrencyId
+		FROM tblSMCurrencyExchangeRate 
+		WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+			AND intToCurrencyId = CD.intCurrencyId
+	) CURTO
+	OUTER APPLY (
+		SELECT TOP 1 intToCurrencyId
+		FROM tblSMCurrencyExchangeRate 
+		WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+			AND intFromCurrencyId = CD.intCurrencyId
+	) CURFROM
 ) CUSTOMERCONTRACT ON SHIPPEDITEMS.intContractHeaderId = CUSTOMERCONTRACT.intContractHeaderId 
 				  AND SHIPPEDITEMS.intContractDetailId = CUSTOMERCONTRACT.intContractDetailId
 LEFT OUTER JOIN (
