@@ -946,6 +946,7 @@
     <Build Include="dbo\Views\vyuTMSiteCustomerLocation.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\40_UpdateSchedulePaymentMethod.sql" />
     <None Include="Scripts\Post-Deployment\DB\8_RiskDemoData.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGLoadUpdateOrders.sql" />
     <Build Include="dbo\Tables\tblSMShipViaTrailerCompartment.sql" />
     <Build Include="dbo\Tables\tblLGDispatchOrderRoute.sql" />
     <Build Include="dbo\Tables\tblSMUserStage.sql" />
