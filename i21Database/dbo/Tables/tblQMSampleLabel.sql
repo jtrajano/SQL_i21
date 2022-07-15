@@ -6,6 +6,5 @@
 	intControlPointId INT NOT NULL,
 	intConcurrencyId INT NULL CONSTRAINT [DF_tblQMSampleLabel_intConcurrencyId] DEFAULT 1,
 
-	CONSTRAINT [PK_tblQMSampleLabel] PRIMARY KEY (intSampleLabelId),
-	CONSTRAINT [AK_tblQMSampleLabel_strSampleLabelName] UNIQUE (strSampleLabelName)
+	CONSTRAINT [PK_tblQMSampleLabel] PRIMARY KEY (intSampleLabelId)
 )
