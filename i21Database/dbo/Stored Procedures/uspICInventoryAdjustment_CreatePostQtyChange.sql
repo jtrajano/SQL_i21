@@ -286,8 +286,8 @@ BEGIN
 				AND StocksPerUOM.intSubLocationId = ItemLocation.intSubLocationId
 				AND StocksPerUOM.intStorageLocationId = ItemLocation.intStorageLocationId
 			LEFT JOIN dbo.tblICItemUOM StockUnit
-				ON StockUnit.intItemId = Item.intItemId AND StockUnit.intItemUOMId = @intItemUOMId
-				--AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+				ON StockUnit.intItemId = Item.intItemId
+				AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Item.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
