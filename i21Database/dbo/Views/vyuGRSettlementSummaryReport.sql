@@ -425,6 +425,7 @@ FROM
 			ON Bill.intBillId = APD.intBillId 				
 				and APD.dblPayment <> 0
 				--AND Bill.intTransactionType = 3
+				AND Bill.intTransactionType <> 2
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 				AND BD.intCustomerStorageId IS NULL
