@@ -3,14 +3,147 @@ CREATE PROCEDURE uspApiSchemaTransformItem
 	@guiLogId UNIQUEIDENTIFIER
 AS
 
-DECLARE @ysnAllowOverwrite BIT
+-- Retrieve Properties
+DECLARE @OverwriteExisting BIT = 1
 
-SELECT @ysnAllowOverwrite = CAST(varPropertyValue AS BIT)
-FROM tblApiSchemaTransformProperty
-WHERE 
-guiApiUniqueId = @guiApiUniqueId
-AND
-strPropertyName = 'Overwrite'
+SELECT
+    @OverwriteExisting = ISNULL(CAST(Overwrite AS BIT), 0)
+FROM (
+	SELECT tp.strPropertyName, tp.varPropertyValue
+	FROM tblApiSchemaTransformProperty tp
+	WHERE tp.guiApiUniqueId = @guiApiUniqueId
+) AS Properties
+PIVOT (
+	MIN(varPropertyValue)
+	FOR strPropertyName IN
+	(
+		Overwrite
+	)
+) AS PivotTable
+
+DECLARE @Types TABLE (strType NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+INSERT INTO @Types
+SELECT 'Bundle' strType UNION
+SELECT 'Inventory' strType UNION
+SELECT 'Non-Inventory' strType UNION
+SELECT 'Kit' strType UNION
+SELECT 'Finished Good' strType UNION
+SELECT 'Other Charge' strType UNION
+SELECT 'Raw Material' strType UNION
+SELECT 'Service' strType UNION
+SELECT 'Software' strType UNION
+SELECT 'Comment' strType
+
+DECLARE  @Statuses TABLE(strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+INSERT INTO @Statuses
+SELECT 'Active' strStatus UNION
+SELECT 'Phased Out' strStatus UNION
+SELECT 'Discontinued' strStatus
+
+DECLARE @LotTracking TABLE (strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+INSERT INTO @LotTracking
+SELECT 'No' strLotTracking UNION
+SELECT 'Yes - Manual' strLotTracking UNION
+SELECT 'Yes - Serial Number' strLotTracking UNION
+SELECT 'Yes - Manual/Serial Number' strLotTracking
+
+IF @OverwriteExisting = 1
+BEGIN
+	-- Check if lot tracking can be changed
+	INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+	SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Lot Tracking'
+    , strValue = sr.strLotTracking
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Lot Tracking of "' + ISNULL(i.strItemNo, '') + '" cannot be changed.'
+	FROM tblApiSchemaTransformItem sr
+	JOIN tblICItem i ON sr.strItemNo = i.strItemNo
+	WHERE sr.guiApiUniqueId = @guiApiUniqueId
+		AND sr.strLotTracking IS NOT NULL
+		AND sr.strLotTracking != ''
+		AND LOWER(i.strLotTracking) <> RTRIM(LTRIM(LOWER(ISNULL(sr.strLotTracking, 'No'))))	
+		AND dbo.fnAllowLotTrackingToChange(i.intItemId, i.strLotTracking) = 0
+
+	-- Check if item type can be changed. 
+	INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+	SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Type'
+    , strValue = sr.strType
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Type of "' + ISNULL(i.strItemNo, '') + '" cannot be changed. The item already has transactions.'
+	FROM tblApiSchemaTransformItem sr
+	JOIN tblICItem i ON sr.strItemNo = i.strItemNo
+	WHERE sr.guiApiUniqueId = @guiApiUniqueId
+		AND sr.strType IS NOT NULL
+		AND sr.strType != ''
+		AND LOWER(i.strType) != LTRIM(RTRIM(LOWER(ISNULL(sr.strType, 'Inventory'))))
+		AND dbo.fnAllowItemTypeChange(i.intItemId, i.strType) = 0
+
+	-- Check if commodity can be changed. 
+	INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+	SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Commodity'
+    , strValue = sr.strCommodity
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Commodity of "' + ISNULL(i.strItemNo, '') + '" cannot be changed. The item have a contract and/or transactions and it will affect the commodity position.'
+	FROM tblApiSchemaTransformItem sr
+	JOIN tblICItem i ON sr.strItemNo = i.strItemNo
+	JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+	WHERE sr.guiApiUniqueId = @guiApiUniqueId
+		AND sr.strCommodity IS NOT NULL
+		AND sr.strCommodity != ''
+		AND LOWER(c.strCommodityCode) <> LTRIM(RTRIM(LOWER(sr.strCommodity)))
+		AND dbo.fnAllowCommodityToChange(i.intItemId, i.intCommodityId) = 0
+END
+
+-- Remove duplicate item numbers from file
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strItemNo ORDER BY sr.strItemNo) AS RowNumber
+   FROM tblApiSchemaTransformItem sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND sr.strItemNo IS NOT NULL
+   AND sr.strItemNo != ''
+)
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item No'
+    , strValue = sr.strItemNo
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Item No ' + ISNULL(sr.strItemNo, '') + ' in the file has duplicates.'
+    , strAction = 'Skipped'
+FROM cte sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.RowNumber > 1
+  AND @OverwriteExisting = 1
+
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strItemNo ORDER BY sr.strItemNo) AS RowNumber
+   FROM tblApiSchemaTransformItem sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+   AND sr.strItemNo IS NOT NULL
+   AND sr.strItemNo != ''
+)
+DELETE FROM cte WHERE RowNumber > 1
+AND @OverwriteExisting = 1
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -21,394 +154,92 @@ SELECT
     , strLogLevel = 'Error'
     , strStatus = 'Failed'
     , intRowNo = sr.intRowNumber
-    , strMessage = 'The Category ' + ISNULL(sr.strCategory, '') + ' does not exist.'
+    , strMessage = 'The Category "' + ISNULL(sr.strCategory, '') + '" does not exist.'
 FROM tblApiSchemaTransformItem sr
-OUTER APPLY (
-  SELECT TOP 1 * 
-  FROM tblICCategory ii
-  WHERE ii.strCategoryCode = sr.strCategory OR ii.strDescription = sr.strCategory
-) e
+LEFT JOIN tblICCategory c ON c.strCategoryCode =  sr.strCategory OR c.strDescription = sr.strCategory
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
-AND e.intCategoryId IS NULL
+	AND sr.strCategory IS NOT NULL
+	AND sr.strCategory != ''
+  AND c.intCategoryId IS NULL
 
-DECLARE @tblFilteredItem TABLE(
-	intKey INT NOT NULL,
-    guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
-    intRowNumber INT NULL,
-	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strShortName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL,
-	strManufacturer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCommodity NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strBrand NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strModelNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
-	ysnStockedItem BIT NULL,
-	ysnDyedFuel BIT NULL,
-	ysnMSDSRequired BIT NULL,
-	strEPANumber NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	ysnInboundTax BIT NULL,
-	ysnOutboundTax BIT NULL,
-	ysnRestrictedChemical BIT NULL,
-	ysnFuelItem BIT NULL,
-	ysnListBundleItemsSeparately BIT NULL,
-	dblDenaturantPercentage NUMERIC(38, 20) NULL,
-	ysnTonnageTax BIT NULL,
-	ysnLoadTracking BIT NULL,
-	dblMixOrder NUMERIC(38, 20) NULL,
-	ysnHandAddIngredients BIT NULL,
-	ysnExtendPickTicket BIT NULL,
-	ysnExportEDI BIT NULL,
-	ysnHazardMaterial BIT NULL,
-	ysnMaterialFee BIT NULL,
-	ysnAutoBlend BIT NULL,
-	dblUserGroupFeePercentage NUMERIC(38, 20) NULL,
-	dblWgtTolerancePercentage NUMERIC(38, 20) NULL,
-	dblOverReceiveTolerancePercentage NUMERIC(38, 20) NULL,
-	strMaintenanceCalculationMethod NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strWICCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	ysnLandedCost BIT NULL,
-	strLeadTime NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	ysnTaxable BIT NULL,
-	strKeywords NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	dblCaseQty NUMERIC(38, 20) NULL,
-	dtmDateShip DATETIME NULL,
-	dblTaxExempt NUMERIC(38, 20) NULL,
-	ysnDropShip BIT NULL,
-	ysnCommissionable BIT NULL,
-	ysnSpecialCommission BIT NULL,
-	ysnTankRequired BIT NULL,
-	ysnAvailableforTM BIT NULL,
-	dblDefaultPercentageFull NUMERIC(38, 20) NULL,
-	dblRate NUMERIC(38, 20) NULL,
-	strNACSCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	ysnReceiptCommentReq BIT NULL,
-	strDirectSale NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strPatronageCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strPhysicalItem NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVolumeRebateGroup NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strIngredientTag NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strMedicationTag NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strFuelCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	ysnLotWeightsRequired BIT NULL,
-	ysnUseWeighScales BIT NULL,
-	strCountCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strRinRequired NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strLotTracking NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strBarcodePrint NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strFuelInspectFee NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	ysnSeparateStockForUOMs BIT NULL DEFAULT ((1)),
-	strSubcategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-)
-INSERT INTO @tblFilteredItem
-(
-	intKey,
-    guiApiUniqueId,
-    intRowNumber,
-	strItemNo,
-	strType,
-	strShortName,
-	strDescription,
-	strManufacturer,
-	strCommodity,
-	strBrand,
-	strModelNo,
-	strCategory,
-	ysnStockedItem ,
-	ysnDyedFuel,
-	ysnMSDSRequired,
-	strEPANumber,
-	ysnInboundTax,
-	ysnOutboundTax,
-	ysnRestrictedChemical,
-	ysnFuelItem,
-	ysnListBundleItemsSeparately,
-	dblDenaturantPercentage,
-	ysnTonnageTax,
-	ysnLoadTracking,
-	dblMixOrder,
-	ysnHandAddIngredients,
-	ysnExtendPickTicket,
-	ysnExportEDI,
-	ysnHazardMaterial,
-	ysnMaterialFee,
-	ysnAutoBlend,
-	dblUserGroupFeePercentage,
-	dblWgtTolerancePercentage,
-	dblOverReceiveTolerancePercentage,
-	strMaintenanceCalculationMethod,
-	strWICCode,
-	ysnLandedCost,
-	strLeadTime,
-	ysnTaxable,
-	strKeywords,
-	dblCaseQty,
-	dtmDateShip,
-	dblTaxExempt,
-	ysnDropShip,
-	ysnCommissionable,
-	ysnSpecialCommission,
-	ysnTankRequired,
-	ysnAvailableforTM,
-	dblDefaultPercentageFull,
-	dblRate,
-	strNACSCategory,
-	ysnReceiptCommentReq,
-	strDirectSale,
-	strPatronageCategory,
-	strPhysicalItem,
-	strVolumeRebateGroup,
-	strIngredientTag,
-	strMedicationTag,
-	strFuelCategory,
-	ysnLotWeightsRequired,
-	ysnUseWeighScales,
-	strCountCode,
-	strRinRequired,
-	strStatus,
-	strLotTracking,
-	strBarcodePrint,
-	strFuelInspectFee ,
-	ysnSeparateStockForUOMs,
-	strSubcategory
-)
-SELECT 
-	intKey,
-    guiApiUniqueId,
-    intRowNumber,
-	strItemNo,
-	strType,
-	strShortName,
-	strDescription,
-	strManufacturer,
-	strCommodity,
-	strBrand,
-	strModelNo,
-	strCategory,
-	ysnStockedItem ,
-	ysnDyedFuel,
-	ysnMSDSRequired,
-	strEPANumber,
-	ysnInboundTax,
-	ysnOutboundTax,
-	ysnRestrictedChemical,
-	ysnFuelItem,
-	ysnListBundleItemsSeparately,
-	dblDenaturantPercentage,
-	ysnTonnageTax,
-	ysnLoadTracking,
-	dblMixOrder,
-	ysnHandAddIngredients,
-	ysnExtendPickTicket,
-	ysnExportEDI,
-	ysnHazardMaterial,
-	ysnMaterialFee,
-	ysnAutoBlend,
-	dblUserGroupFeePercentage,
-	dblWgtTolerancePercentage,
-	dblOverReceiveTolerancePercentage,
-	strMaintenanceCalculationMethod,
-	strWICCode,
-	ysnLandedCost,
-	strLeadTime,
-	ysnTaxable,
-	strKeywords,
-	dblCaseQty,
-	dtmDateShip,
-	dblTaxExempt,
-	ysnDropShip,
-	ysnCommissionable,
-	ysnSpecialCommission,
-	ysnTankRequired,
-	ysnAvailableforTM,
-	dblDefaultPercentageFull,
-	dblRate,
-	strNACSCategory,
-	ysnReceiptCommentReq,
-	strDirectSale,
-	strPatronageCategory,
-	strPhysicalItem,
-	strVolumeRebateGroup,
-	strIngredientTag,
-	strMedicationTag,
-	strFuelCategory,
-	ysnLotWeightsRequired,
-	ysnUseWeighScales,
-	strCountCode,
-	strRinRequired,
-	strStatus,
-	strLotTracking,
-	strBarcodePrint,
-	strFuelInspectFee ,
-	ysnSeparateStockForUOMs,
-	strSubcategory
-FROM
-tblApiSchemaTransformItem
-WHERE guiApiUniqueId = @guiApiUniqueId;
-
---Validate
-
---Validate duplicate Item No
-
-INSERT INTO tblApiImportLogDetail 
-(
-	guiApiImportLogDetailId,
-	guiApiImportLogId,
-	strField,
-	strValue,
-	strLogLevel,
-	strStatus,
-	intRowNo,
-	strMessage
-)
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
-	guiApiImportLogDetailId = NEWID(),
-	guiApiImportLogId = @guiLogId,
-	strField = 'Item No',
-	strValue = DuplicateCounter.strItemNo,
-	strLogLevel = 'Warning',
-	strStatus = 'Skipped',
-	intRowNo = DuplicateCounter.intRowNumber,
-	strMessage = 'Duplicate imported item no: ' + ISNULL(DuplicateCounter.strItemNo, '') + '.'
-FROM
-(
-	SELECT 
-		*,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo)
-	FROM 
-		@tblFilteredItem
-) AS DuplicateCounter
-WHERE RowNumber > 1
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Commodity'
+    , strValue = sr.strCommodity
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Commodity "' + ISNULL(sr.strCommodity, '') + '" does not exist.'
+FROM tblApiSchemaTransformItem sr
+LEFT JOIN tblICCommodity c ON c.strCommodityCode = sr.strCommodity OR c.strDescription = sr.strCommodity
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.strCommodity IS NOT NULL
+	AND sr.strCommodity != ''
+  AND c.intCommodityId IS NULL
 
---Remove duplicate Item No
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Type'
+    , strValue = sr.strType
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Type "' + ISNULL(sr.strType, '') + '" is not valid.'
+FROM tblApiSchemaTransformItem sr
+LEFT JOIN @Types types ON types.strType = sr.strType
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.strType IS NOT NULL
+	AND sr.strType != ''
+  AND types.strType IS NULL
 
-DELETE DuplicateCounter
-FROM
-(
-	SELECT 
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo)
-	FROM 
-		@tblFilteredItem
-) DuplicateCounter
-WHERE RowNumber > 1
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Lot Tracking'
+    , strValue = sr.strLotTracking
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Lot Tracking "' + ISNULL(sr.strLotTracking, '') + '" is not valid.'
+FROM tblApiSchemaTransformItem sr
+LEFT JOIN @LotTracking lotTracking ON lotTracking.strLotTracking = sr.strLotTracking
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.strLotTracking IS NOT NULL
+	AND sr.strLotTracking != ''
+  AND lotTracking.strLotTracking IS NULL
 
-DECLARE @tblErrorItem TABLE(
-	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	intRowNumber INT NULL,
-	intErrorType INT -- 1 - Lot Tracking, 2 - Item Type, 3 - Commodity
-)
+-- Existing item
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item No'
+    , strValue = sr.strItemNo
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = ISNULL(sr.strItemNo, '') + ' already exists.'
+FROM tblApiSchemaTransformItem sr
+CROSS APPLY (
+  SELECT TOP 1 1 intCount
+  FROM tblICItem i
+  WHERE i.strItemNo = sr.strItemNo
+) ex
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+  AND @OverwriteExisting = 0
 
-
-IF @ysnAllowOverwrite = 1
-BEGIN
-
-	--Validate update changes on Lot Tracking, Item Type and Commodity
-
-	INSERT INTO @tblErrorItem
-	(
-		strItemNo,
-		intRowNumber,
-		intErrorType
-	)
-	SELECT
-		FilteredItem.strItemNo,
-		FilteredItem.intRowNumber,
-		1 -- Lot Tracking Error
-	FROM 
-		@tblFilteredItem FilteredItem 
-		INNER JOIN 
-		tblICItem Item
-			ON FilteredItem.strItemNo = Item.strItemNo
-	WHERE
-		FilteredItem.strLotTracking IS NOT NULL 		
-		AND LOWER(Item.strLotTracking) <> RTRIM(LTRIM(LOWER(ISNULL(FilteredItem.strLotTracking, 'No'))))	
-		AND dbo.fnAllowLotTrackingToChange(Item.intItemId, Item.strLotTracking) = 0
-	UNION ALL
-	SELECT
-		FilteredItem.strItemNo,
-		FilteredItem.intRowNumber,
-		2 -- Item Type Error
-	FROM
-		@tblFilteredItem FilteredItem
-		INNER JOIN 
-		tblICItem Item 
-			ON FilteredItem.strItemNo = Item.strItemNo
-	WHERE
-		FilteredItem.strType IS NOT NULL
-		AND LOWER(Item.strType) <> LTRIM(RTRIM(LOWER(ISNULL(FilteredItem.strType, 'Inventory'))))
-		AND dbo.fnAllowItemTypeChange(Item.intItemId, Item.strType) = 0
-	UNION ALL
-	SELECT
-		FilteredItem.strItemNo,
-		FilteredItem.intRowNumber,
-		3 -- Commodity Error
-	FROM 
-		@tblFilteredItem FilteredItem		
-		INNER JOIN tblICItem Item 
-			ON FilteredItem.strItemNo = Item.strItemNo
-		INNER JOIN tblICCommodity Commodity
-			ON Commodity.intCommodityId = Item.intCommodityId
-	WHERE
-		FilteredItem.strCommodity IS NOT NULL 		
-		AND LOWER(Commodity.strCommodityCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCommodity)))
-		AND dbo.fnAllowCommodityToChange(Item.intItemId, Item.intCommodityId) = 0
-	UNION ALL
-	SELECT
-		FilteredItem.strItemNo,
-		FilteredItem.intRowNumber,
-		4 -- Category Error
-	FROM 
-		@tblFilteredItem FilteredItem		
-		INNER JOIN tblICItem Item 
-			ON FilteredItem.strItemNo = Item.strItemNo
-		INNER JOIN tblICCategory Category
-			ON Category.intCategoryId = Item.intCategoryId
-	WHERE
-		FilteredItem.strCommodity IS NOT NULL 		
-		AND LOWER(Category.strCategoryCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCategory)))
-
-	INSERT INTO tblApiImportLogDetail 
-	(
-		guiApiImportLogDetailId,
-		guiApiImportLogId,
-		strField,
-		strValue,
-		strLogLevel,
-		strStatus,
-		intRowNo,
-		strMessage
-	)
-	SELECT
-		guiApiImportLogDetailId = NEWID(),
-		guiApiImportLogId = @guiLogId,
-		strField = CASE
-			WHEN ErrorItem.intErrorType = 1
-				THEN 'Lot Tracking'
-			WHEN ErrorItem.intErrorType = 2
-				THEN 'Item Type'
-			WHEN ErrorItem.intErrorType = 3
-				THEN 'Commodity'
-			ELSE 'Category'
-		END,
-		strValue = ErrorItem.strItemNo,
-		strLogLevel = 'Error',
-		strStatus = 'Failed',
-		intRowNo = ErrorItem.intRowNumber,
-		strMessage = CASE
-			WHEN ErrorItem.intErrorType = 1
-				THEN 'Lot Tracking change is not allowed for item "' + ErrorItem.strItemNo + '"'
-			WHEN ErrorItem.intErrorType = 2
-				THEN 'Item Type change is not allowed for item "' + ErrorItem.strItemNo + '"'
-			WHEN ErrorItem.intErrorType = 3
-				THEN 'Commodity change is not allowed for item "' + ErrorItem.strItemNo + '"'
-			ELSE 'Category is required for item "' + ErrorItem.strItemNo + '"'
-		END
-	FROM @tblErrorItem ErrorItem
-	WHERE ErrorItem.intErrorType IN(1, 2, 3, 4)
-
-END
+-- Flag items for modifications
+DECLARE @ForUpdates TABLE (strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS, intRowNumber INT NULL)
+INSERT INTO @ForUpdates
+SELECT i.strItemNo, sr.intRowNumber
+FROM tblApiSchemaTransformItem sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
 
 INSERT INTO tblICItem (
   strItemNo
@@ -553,19 +384,42 @@ WHERE sr.guiApiUniqueId = @guiApiUniqueId
     WHERE x.strItemNo = sr.strItemNo
   )
 
-DELETE FilteredItem
-FROM @tblFilteredItem FilteredItem
-INNER JOIN @tblErrorItem Error
-ON FilteredItem.strItemNo = Error.strItemNo
 
---Crete Output Table
+-- Update type
+UPDATE i
+SET i.strType = COALESCE(invTypes.strType, 'Inventory')
+FROM tblApiSchemaTransformItem sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+JOIN @Types invTypes ON LOWER(invTypes.strType) = LTRIM(RTRIM(LOWER(ISNULL(sr.strType, 'Inventory'))))
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+  AND @OverwriteExisting = 1
+  AND sr.strType != ''
+  AND sr.strType IS NOT NULL
+  AND dbo.fnAllowItemTypeChange(i.intItemId, i.strType) = 1
 
-DECLARE @tblItemOutput TABLE(
-	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS
-)
+-- Update Lot Tracking
+UPDATE i
+SET i.strLotTracking = COALESCE(lotTrackTypes.strLotTracking, 'No')
+FROM tblApiSchemaTransformItem sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+JOIN @LotTracking lotTrackTypes ON LOWER(lotTrackTypes.strLotTracking) = RTRIM(LTRIM(LOWER(ISNULL(sr.strLotTracking, 'No'))))
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+  AND @OverwriteExisting = 1
+  AND sr.strLotTracking != ''
+  AND sr.strLotTracking IS NOT NULL
+  AND dbo.fnAllowLotTrackingToChange(i.intItemId, i.strLotTracking) = 1
 
---Transform and Insert statement
+-- Update commodity
+UPDATE i
+SET i.intCommodityId = cm.intCommodityId
+FROM tblApiSchemaTransformItem sr
+JOIN tblICItem i ON i.strItemNo = sr.strItemNo
+LEFT OUTER JOIN tblICCommodity cm ON LOWER(cm.strCommodityCode) = LTRIM(RTRIM(LOWER(sr.strCommodity)))
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+  AND @OverwriteExisting = 1
+  AND sr.strCommodity != ''
+  AND sr.strCommodity IS NOT NULL
+  AND dbo.fnAllowCommodityToChange(i.intItemId, i.intCommodityId) = 1
 
 UPDATE i 
 SET
@@ -660,29 +514,27 @@ FROM tblICItem i
 WHERE i.guiApiUniqueId = @guiApiUniqueId
   AND NOT EXISTS(SELECT TOP 1 1 FROM @ForUpdates u WHERE u.strItemNo = i.strItemNo AND u.intRowNumber = i.intRowNumber)
 
---Log skipped items when overwrite is not enabled.
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item'
+    , strValue = i.strItemNo
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = i.intRowNumber
+    , strMessage = 'The item ' + ISNULL(i.strItemNo, '') + ' was updated successfully.'
+    , strAction = 'Update'
+FROM tblICItem i
+JOIN @ForUpdates u ON u.strItemNo = i.strItemNo
+WHERE i.guiApiUniqueId = @guiApiUniqueId
 
---INSERT INTO tblApiImportLogDetail 
---(
---	guiApiImportLogDetailId,
---	guiApiImportLogId,
---	strField,
---	strValue,
---	strLogLevel,
---	strStatus,
---	intRowNo,
---	strMessage
---)
---SELECT
---	guiApiImportLogDetailId = NEWID(),
---	guiApiImportLogId = @guiLogId,
---	strField = 'Item No',
---	strValue = FilteredItem.strItemNo,
---	strLogLevel = 'Warning',
---	strStatus = 'Skipped',
---	intRowNo = FilteredItem.intRowNumber,
---	strMessage = 'Item No "' + FilteredItem.strItemNo + '" already exists and overwrite is not enabled.'
---FROM @tblFilteredItem FilteredItem
---LEFT JOIN @tblItemOutput ItemOutput
---	ON FilteredItem.strItemNo = ItemOutput.strItemNo
---WHERE ItemOutput.strItemNo IS NULL
+UPDATE log
+SET log.intTotalRowsImported = r.intCount
+FROM tblApiImportLog log
+CROSS APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblICItem
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) r
+WHERE log.guiApiImportLogId = @guiLogId
