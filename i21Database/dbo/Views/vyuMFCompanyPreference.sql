@@ -100,6 +100,7 @@ SELECT CP.intCompanyPreferenceId
 	,LS2.strSecondaryStatus AS strSanitizedLotStatus
 	,C.strControlPointName AS strPreProductionControlPointName
 	,CT.strContainerType
+	,CP.ysnRecipeBySite
 FROM tblMFCompanyPreference CP
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CP.intDefaultShipmentStagingLocation
 LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = CP.intDefaultShipmentDockDoorLocation
