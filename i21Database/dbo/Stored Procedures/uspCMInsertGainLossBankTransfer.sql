@@ -59,10 +59,10 @@ BEGIN
 			,[dtmDate]				= A.dtmDate
 			,[strBatchId]			= A.strBatchId
 			,[intAccountId]			= @intRealizedGainAccountId
-			,[dblDebit]				= case when BankFrom.gainLoss < 0 then BankFrom.gainLoss * -1  else 0 end
-			,[dblCredit]			= case when BankFrom.gainLoss >= 0 then BankFrom.gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
-			,[dblDebitForeign]		= case when BankFrom.gainLoss < 0 then BankFrom.gainLoss * -1  else 0 end
-			,[dblCreditForeign]		= case when BankFrom.gainLoss >= 0 then BankFrom.gainLoss  else 0 end
+			,[dblDebit]				= Debit.GainLoss
+			,[dblCredit]			= Credit.GainLoss
+			,[dblDebitForeign]		= Debit.GainLoss
+			,[dblCreditForeign]		= Credit.GainLoss
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
@@ -87,6 +87,8 @@ BEGIN
 			CROSS APPLY (
 				SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
 			)GL
+			CROSS APPLY (SELECT case when BankFrom.gainLoss < 0 then BankFrom.gainLoss * -1  else 0 end GainLoss ) Debit
+			CROSS APPLY (SELECT case when BankFrom.gainLoss >= 0 then BankFrom.gainLoss  else 0 end GainLoss) Credit
 			UNION
 			SELECT	TOP 1
 			 [strTransactionId]		= A.strTransactionId
@@ -94,10 +96,10 @@ BEGIN
 			,[dtmDate]				= A.dtmDate
 			,[strBatchId]			= A.strBatchId
 			,[intAccountId]			= @intRealizedGainAccountId
-			,[dblCredit]			= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
-			,[dblDebit]				= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
-			,[dblCreditForeign]		= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end
-			,[dblDebitForeign]		= case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end
+			,[dblDebit]				= case when BankTo.intBankTransactionTypeId = 5 THEN Debit.GainLoss ELSE Credit.GainLoss END
+			,[dblCredit]			= case when BankTo.intBankTransactionTypeId = 5 THEN Credit.GainLoss ELSE Debit.GainLoss END
+			,[dblDebitForeign]		= case when BankTo.intBankTransactionTypeId = 5 THEN Debit.GainLoss ELSE Credit.GainLoss END
+			,[dblCreditForeign]		= case when BankTo.intBankTransactionTypeId = 5 THEN Credit.GainLoss ELSE Debit.GainLoss END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
@@ -116,12 +118,15 @@ BEGIN
 			,[strModuleName]		= A.[strModuleName]
 			,[intEntityId]			= A.intEntityId
 			FROM	#tmpGLDetail A
+			
 			CROSS APPLY(
-				SELECT dblGainLossTo gainLoss, strReferenceTo FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossTo <> 0
+				SELECT dblGainLossTo gainLoss, strReferenceTo, intBankTransactionTypeId FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossTo <> 0
 			)BankTo
 			CROSS APPLY (
 				SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
 			)GL
+			CROSS APPLY (SELECT case when BankTo.gainLoss < 0 then BankTo.gainLoss * -1  else 0 end GainLoss ) Debit
+			CROSS APPLY (SELECT case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end GainLoss) Credit	
 	END
 	GOTO _end
 	_raiserror:
