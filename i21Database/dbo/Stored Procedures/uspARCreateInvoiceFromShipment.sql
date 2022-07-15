@@ -5,6 +5,7 @@
 	,@OnlyUseShipmentPrice 			AS BIT  = 0
 	,@IgnoreNoAvailableItemError 	AS BIT  = 0
 	,@dtmShipmentDate				AS DATETIME = NULL
+	,@intScaleTicketId				AS INT = NULL
 AS
 
 BEGIN
@@ -781,6 +782,278 @@ FROM @UnsortedEntriesForInvoice  EFI
 INNER JOIN tblSOSalesOrderDetailTax SOSODT ON EFI.[intTempDetailIdForTaxes] = SOSODT.[intSalesOrderDetailId] 
 ORDER BY EFI.[intSalesOrderDetailId] ASC
 	   , SOSODT.[intSalesOrderDetailTaxId] ASC
+
+--SCALE IN-TRANSIT TICKET
+DECLARE @intScaleItemInTransitId	INT = NULL
+	  , @dblScaleNetUnits			NUMERIC(18, 6) = 0
+	  , @dblScaleContractUsed		NUMERIC(18, 6) = 0
+
+SELECT TOP 1 @intScaleTicketId			= T.intTicketId
+	       , @dblScaleNetUnits			= T.dblNetUnits
+		   , @intScaleItemInTransitId	= T.intItemId
+FROM tblSCTicket T 
+WHERE T.intTicketId = @intScaleTicketId 
+  AND T.ysnTicketApplied = 1 
+  AND T.ysnTicketInTransit = 1
+
+IF @intScaleTicketId IS NOT NULL
+	BEGIN
+		SELECT @dblScaleContractUsed = SUM(dblScheduleQty)  
+		FROM tblSCTicketContractUsed 
+		WHERE intTicketId = @intScaleTicketId
+		  AND intContractDetailId IS NOT NULL
+		  AND dblScheduleQty > 0
+
+		IF @dblScaleNetUnits > @dblScaleContractUsed
+			BEGIN
+				UPDATE E
+				SET dblQtyShipped = dblQtyShipped - @dblScaleContractUsed
+				  , dblQtyOrdered = dblQtyShipped - @dblScaleContractUsed
+				FROM @EntriesForInvoice E
+				WHERE E.intTicketId = @intScaleTicketId
+				  AND E.intContractDetailId IS NULL
+				  AND E.intItemId = @intScaleItemInTransitId
+
+				INSERT INTO @EntriesForInvoice (
+					  strSourceTransaction
+					, intSourceId
+					, strSourceId
+					, intEntityCustomerId
+					, intCompanyLocationId
+					, intCurrencyId
+					, intPeriodsToAccrue
+					, dtmDate
+					, dtmShipDate
+					, intEntitySalespersonId
+					, intFreightTermId
+					, strBOLNumber
+					, strComments
+					, intShipToLocationId
+					, ysnTemplate
+					, ysnForgiven
+					, ysnCalculated
+					, ysnSplitted
+					, intContractHeaderId
+					, intEntityId
+					, ysnResetDetails
+					, ysnRecap
+					, ysnPost
+					, intItemId
+					, intTicketId
+					, ysnInventory
+					, strDocumentNumber
+					, strItemDescription
+					, intOrderUOMId
+					, dblQtyOrdered
+					, intItemUOMId
+					, intPriceUOMId
+					, dblContractPriceUOMQty
+					, dblQtyShipped
+					, dblDiscount
+					, dblItemWeight
+					, intItemWeightUOMId
+					, dblPrice
+					, dblUnitPrice
+					, strPricing
+					, ysnRefreshPrice
+					, ysnRecomputeTax
+					, intInventoryShipmentItemId
+					, intInventoryShipmentChargeId
+					, strShipmentNumber
+					, strSalesOrderNumber
+					, intContractDetailId
+					, ysnClearDetailTaxes
+					, dblSubCurrencyRate
+					, intStorageLocationId
+					, intCompanyLocationSubLocationId
+					, intSubLocationId
+				)
+				SELECT strSourceTransaction
+					, intSourceId
+					, strSourceId
+					, intEntityCustomerId
+					, intCompanyLocationId			= E.intCompanyLocationId
+					, intCurrencyId					= E.intCurrencyId
+					, intPeriodsToAccrue
+					, dtmDate
+					, dtmShipDate
+					, intEntitySalespersonId
+					, intFreightTermId				= E.intFreightTermId
+					, strBOLNumber	
+					, strComments					= E.strComments
+					, intShipToLocationId
+					, ysnTemplate
+					, ysnForgiven
+					, ysnCalculated
+					, ysnSplitted
+					, intContractHeaderId			= CD.intContractHeaderId
+					, intEntityId					= E.intEntityId
+					, ysnResetDetails
+					, ysnRecap
+					, ysnPost
+					, intItemId						= CD.intItemId
+					, intTicketId					= TCU.intTicketId
+					, ysnInventory
+					, strDocumentNumber
+					, strItemDescription
+					, intOrderUOMId
+					, dblQtyOrdered
+					, intItemUOMId					= CD.intItemUOMId
+					, intPriceUOMId
+					, dblContractPriceUOMQty
+					, dblQtyShipped					= TCU.dblScheduleQty
+					, dblDiscount
+					, dblItemWeight
+					, intItemWeightUOMId
+					, dblPrice						= CD.dblCashPrice
+					, dblUnitPrice					= CD.dblCashPrice
+					, strPricing
+					, ysnRefreshPrice
+					, ysnRecomputeTax
+					, intInventoryShipmentItemId
+					, intInventoryShipmentChargeId	= NULL
+					, strShipmentNumber
+					, strSalesOrderNumber
+					, intContractDetailId			= TCU.intContractDetailId
+					, ysnClearDetailTaxes
+					, dblSubCurrencyRate
+					, intStorageLocationId			= E.intStorageLocationId
+					, intCompanyLocationSubLocationId
+					, intSubLocationId				= E.intSubLocationId
+				FROM tblSCTicketContractUsed TCU 
+				INNER JOIN tblCTContractDetail CD ON TCU.intContractDetailId = CD.intContractDetailId
+				CROSS APPLY (
+					SELECT TOP 1 *
+					FROM @EntriesForInvoice
+				) E
+				WHERE TCU.intTicketId = @intScaleTicketId
+			END		
+		ELSE 
+			BEGIN
+				INSERT INTO @EntriesForInvoice (
+					  strSourceTransaction
+					, intSourceId
+					, strSourceId
+					, intEntityCustomerId
+					, intCompanyLocationId
+					, intCurrencyId
+					, intPeriodsToAccrue
+					, dtmDate
+					, dtmShipDate
+					, intEntitySalespersonId
+					, intFreightTermId
+					, strBOLNumber
+					, strComments
+					, intShipToLocationId
+					, ysnTemplate
+					, ysnForgiven
+					, ysnCalculated
+					, ysnSplitted
+					, intContractHeaderId
+					, intEntityId
+					, ysnResetDetails
+					, ysnRecap
+					, ysnPost
+					, intItemId
+					, intTicketId
+					, ysnInventory
+					, strDocumentNumber
+					, strItemDescription
+					, intOrderUOMId
+					, dblQtyOrdered
+					, intItemUOMId
+					, intPriceUOMId
+					, dblContractPriceUOMQty
+					, dblQtyShipped
+					, dblDiscount
+					, dblItemWeight
+					, intItemWeightUOMId
+					, dblPrice
+					, dblUnitPrice
+					, strPricing
+					, ysnRefreshPrice
+					, ysnRecomputeTax
+					, intInventoryShipmentItemId
+					, intInventoryShipmentChargeId
+					, strShipmentNumber
+					, strSalesOrderNumber
+					, intContractDetailId
+					, ysnClearDetailTaxes
+					, dblSubCurrencyRate
+					, intStorageLocationId
+					, intCompanyLocationSubLocationId
+					, intSubLocationId
+				)
+				SELECT strSourceTransaction
+					, intSourceId
+					, strSourceId
+					, intEntityCustomerId
+					, intCompanyLocationId			= E.intCompanyLocationId
+					, intCurrencyId					= E.intCurrencyId
+					, intPeriodsToAccrue
+					, dtmDate
+					, dtmShipDate
+					, intEntitySalespersonId
+					, intFreightTermId				= E.intFreightTermId
+					, strBOLNumber	
+					, strComments					= E.strComments
+					, intShipToLocationId
+					, ysnTemplate
+					, ysnForgiven
+					, ysnCalculated
+					, ysnSplitted
+					, intContractHeaderId			= CD.intContractHeaderId
+					, intEntityId					= E.intEntityId
+					, ysnResetDetails
+					, ysnRecap
+					, ysnPost
+					, intItemId						= CD.intItemId
+					, intTicketId					= TCU.intTicketId
+					, ysnInventory
+					, strDocumentNumber
+					, strItemDescription
+					, intOrderUOMId
+					, dblQtyOrdered
+					, intItemUOMId					= CD.intItemUOMId
+					, intPriceUOMId
+					, dblContractPriceUOMQty
+					, dblQtyShipped					= TCU.dblScheduleQty
+					, dblDiscount
+					, dblItemWeight
+					, intItemWeightUOMId
+					, dblPrice						= CD.dblCashPrice
+					, dblUnitPrice					= CD.dblCashPrice
+					, strPricing
+					, ysnRefreshPrice
+					, ysnRecomputeTax
+					, intInventoryShipmentItemId	= CASE WHEN @dblScaleNetUnits = @dblScaleContractUsed THEN intInventoryShipmentItemId ELSE NULL END
+					, intInventoryShipmentChargeId	= NULL
+					, strShipmentNumber
+					, strSalesOrderNumber
+					, intContractDetailId			= TCU.intContractDetailId
+					, ysnClearDetailTaxes
+					, dblSubCurrencyRate
+					, intStorageLocationId			= E.intStorageLocationId
+					, intCompanyLocationSubLocationId
+					, intSubLocationId				= E.intSubLocationId
+				FROM tblSCTicketContractUsed TCU 
+				INNER JOIN tblCTContractDetail CD ON TCU.intContractDetailId = CD.intContractDetailId
+				CROSS APPLY (
+					SELECT TOP 1 *
+					FROM @EntriesForInvoice
+				) E
+				WHERE TCU.intTicketId = @intScaleTicketId
+
+				IF @dblScaleNetUnits = @dblScaleContractUsed
+					BEGIN
+						DELETE E
+						FROM @EntriesForInvoice E
+						WHERE E.intTicketId = @intScaleTicketId
+						  AND E.intContractDetailId IS NULL
+						  AND E.intItemId = @intScaleItemInTransitId
+					END
+			END
+	END
 
 --GET DISTINCT SHIP TO FROM CONTRACT DETAIL
 IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomer WHERE ISNULL(strBatchInvoiceBy, '') <> '' AND intEntityId = @EntityCustomerId)
