@@ -110,6 +110,7 @@ BEGIN TRY
 	DECLARE @ExistingContactEntityId INT = 0
 	DECLARE @ExistingEntityLocationId INT = 0
 	DECLARE @TransactionType NVARCHAR(50)
+	DECLARE @SingleAuditLogParam SingleAuditLogParam
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUsersStageList)
 	BEGIN
@@ -446,7 +447,7 @@ BEGIN TRY
 				VALUES (
 						@NewUserEntityId, --intEntityId
 						@UserId, --strUserName
-						dbo.fnAESEncryptASym('DefaultPassword@123'), --strPassword
+						dbo.fnAESEncryptASym('i21By2015'), --strPassword
 						0, --ysnTFAEnabled
 						0, --ysnNotEncrypted
 						@Email, --strEmail
@@ -500,12 +501,75 @@ BEGIN TRY
 						1, --ysnDefaultContact
 						1) --intConcurrencyId
 
-				--CREATE tblEMEntityPhoneNumber
+				--CREATE tblEMEntityPhoneNumber (User)
 				INSERT INTO tblEMEntityPhoneNumber (intEntityId, strPhone, strPhoneCountry, strPhoneArea, strPhoneLocal, strPhoneExtension, strPhoneLookUp, strMaskLocal, strMaskArea, strFormatCountry, strFormatArea, strFormatLocal,
 													intCountryId, intAreaCityLength, ysnDisplayCountryCode, intConcurrencyId)
 				VALUES (
 						@NewUserEntityId, --intEntityId
 						@Phone, --strPhone
+						'', --strPhoneCountry
+						'', --strPhoneArea
+						'', --strPhoneLocal
+						'', --strPhoneExtension
+						'', --strPhoneLookUp
+						'', --strMaskLocal
+						'', --strMaskArea
+						'', --strFormatCountry
+						'', --strFormatArea
+						'', --strFormatLocal
+						@ExistingCountryId, --intCountryId
+						0, --intAreaCityLength
+						0, --ysnDisplayCountryCode
+						1) --intConcurrencyId
+
+				--CREATE tblEMEntityPhoneNumber (Contact)
+				INSERT INTO tblEMEntityPhoneNumber (intEntityId, strPhone, strPhoneCountry, strPhoneArea, strPhoneLocal, strPhoneExtension, strPhoneLookUp, strMaskLocal, strMaskArea, strFormatCountry, strFormatArea, strFormatLocal,
+													intCountryId, intAreaCityLength, ysnDisplayCountryCode, intConcurrencyId)
+				VALUES (
+						@NewContactEntityId, --intEntityId
+						@Phone, --strPhone
+						'', --strPhoneCountry
+						'', --strPhoneArea
+						'', --strPhoneLocal
+						'', --strPhoneExtension
+						'', --strPhoneLookUp
+						'', --strMaskLocal
+						'', --strMaskArea
+						'', --strFormatCountry
+						'', --strFormatArea
+						'', --strFormatLocal
+						@ExistingCountryId, --intCountryId
+						0, --intAreaCityLength
+						0, --ysnDisplayCountryCode
+						1) --intConcurrencyId
+
+						--CREATE tblEMEntityMobileNumber (User)
+				INSERT INTO tblEMEntityMobileNumber (intEntityId, strPhone, strPhoneCountry, strPhoneArea, strPhoneLocal, strPhoneExtension, strPhoneLookUp, strMaskLocal, strMaskArea, strFormatCountry, strFormatArea, strFormatLocal,
+													intCountryId, intAreaCityLength, ysnDisplayCountryCode, intConcurrencyId)
+				VALUES (
+						@NewUserEntityId, --intEntityId
+						@Mobile, --strPhone
+						'', --strPhoneCountry
+						'', --strPhoneArea
+						'', --strPhoneLocal
+						'', --strPhoneExtension
+						'', --strPhoneLookUp
+						'', --strMaskLocal
+						'', --strMaskArea
+						'', --strFormatCountry
+						'', --strFormatArea
+						'', --strFormatLocal
+						@ExistingCountryId, --intCountryId
+						0, --intAreaCityLength
+						0, --ysnDisplayCountryCode
+						1) --intConcurrencyId
+
+				--CREATE tblEMEntityMobileNumber (Contact)
+				INSERT INTO tblEMEntityMobileNumber (intEntityId, strPhone, strPhoneCountry, strPhoneArea, strPhoneLocal, strPhoneExtension, strPhoneLookUp, strMaskLocal, strMaskArea, strFormatCountry, strFormatArea, strFormatLocal,
+													intCountryId, intAreaCityLength, ysnDisplayCountryCode, intConcurrencyId)
+				VALUES (
+						@NewContactEntityId, --intEntityId
+						@Mobile, --strPhone
 						'', --strPhoneCountry
 						'', --strPhoneArea
 						'', --strPhoneLocal
@@ -579,7 +643,7 @@ BEGIN TRY
 				DELETE FROM tblSMUserDetailStage WHERE intUserStageId = @UserStageId
 
 				--AuditLog
-				DECLARE @SingleAuditLogParam SingleAuditLogParam
+				
 				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
 						SELECT 1, '', 'Created', 'Created - Record: ' + CAST(@UserId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
 
@@ -596,6 +660,40 @@ BEGIN TRY
 				SELECT	@ExistingContactEntityId = intEntityContactId,
 						@ExistingEntityLocationId = intEntityLocationId
 				FROM	dbo.tblEMEntityToContact
+				WHERE	intEntityId = @ExistingUserEntityId
+
+				DECLARE @ExistingStrNameFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrUserIdFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrExtErpIdFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrEmailFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrPhoneFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrMobileFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrContactNameFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrLocationNameFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrAddressFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrCityFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrStateFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrZipFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrCountryFromView NVARCHAR (100) = ''
+				DECLARE @ExistingStrUserRoleFromView NVARCHAR (100) = ''
+				DECLARE @ExistingYsnActiveFromView BIT = 0
+
+				SELECT	@ExistingStrNameFromView = strName,
+						@ExistingStrUserIdFromView = strUserId,
+						@ExistingStrExtErpIdFromView = strExternalERPId,
+						@ExistingStrEmailFromView = strEmail,
+						@ExistingStrPhoneFromView = strPhone,
+						@ExistingStrMobileFromView = strMobile,
+						@ExistingStrContactNameFromView = strContactName,
+						@ExistingStrLocationNameFromView = strLocationName,
+						@ExistingStrAddressFromView = strAddress,
+						@ExistingStrCityFromView = strCity,
+						@ExistingStrStateFromView = strState,
+						@ExistingStrZipFromView = strZipCode,
+						@ExistingStrCountryFromView = strCountry,
+						@ExistingStrUserRoleFromView = strUserRole,
+						@ExistingYsnActiveFromView = ysnActive
+				FROM	dbo.vyuSMUserList
 				WHERE	intEntityId = @ExistingUserEntityId
 
 				--UPDATE tblEMEntity (User)
@@ -645,11 +743,29 @@ BEGIN TRY
 						strCheckPayeeName = @Username
 				WHERE	intEntityLocationId = @ExistingEntityLocationId
 
-				--UPDATE tblEMEntityPhoneNumber
+				--UPDATE tblEMEntityPhoneNumber (User)
 				UPDATE	tblEMEntityPhoneNumber
 				SET		strPhone = @Phone,
 						intCountryId = @ExistingCountryId
 				WHERE	intEntityId = @ExistingUserEntityId
+
+				--UPDATE tblEMEntityPhoneNumber (Contact)
+				UPDATE	tblEMEntityPhoneNumber
+				SET		strPhone = @Phone,
+						intCountryId = @ExistingCountryId
+				WHERE	intEntityId = @ExistingContactEntityId
+
+				--UPDATE tblEMEntityMobileNumber (User)
+				UPDATE	tblEMEntityMobileNumber
+				SET		strPhone = @Mobile,
+						intCountryId = @ExistingCountryId
+				WHERE	intEntityId = @ExistingUserEntityId
+
+				--UPDATE tblEMEntityMobileNumber (Contact)
+				UPDATE	tblEMEntityMobileNumber
+				SET		strPhone = @Mobile,
+						intCountryId = @ExistingCountryId
+				WHERE	intEntityId = @ExistingContactEntityId
 
 				--CREATE tblSMUserSecurityCompanyLocationRolePermission (Details)
 				DELETE 
@@ -711,6 +827,146 @@ BEGIN TRY
 
 				DELETE FROM tblSMUserStage WHERE intUserStageId = @UserStageId
 				DELETE FROM tblSMUserDetailStage WHERE intUserStageId = @UserStageId
+
+				--AuditLog
+				DECLARE @AuditLogId INT = 0
+				SET @AuditLogId = @AuditLogId + 1
+				INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+				SELECT @AuditLogId, '', 'Updated', 'Updated - Record: ' + CAST(@UserId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+						
+				IF (@ExistingStrNameFromView <> @Username)
+				BEGIN
+					SET @AuditLogId = @AuditLogId + 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'Name', @ExistingStrNameFromView, @Username, NULL, NULL, NULL, 1
+				END 
+
+				IF (@ExistingStrExtErpIdFromView <> @ExtErpId)
+				BEGIN
+					SET @AuditLogId = @AuditLogId + 1
+
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'External Erp ID', @ExistingStrExtErpIdFromView, @ExtErpId, NULL, NULL, NULL, 1
+				END 
+
+				IF ((@ExistingStrEmailFromView <> @Email) OR (@ExistingStrPhoneFromView <> @Phone) OR (@ExistingStrMobileFromView <> @Mobile) OR (@ExistingStrContactNameFromView <> @ContactName))
+				BEGIN
+					SET @AuditLogId = @AuditLogId + 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'tblEMEntityToContacts', NULL, NULL, 'Entity To Contacts', NULL, NULL, (@AuditLogId - 1)
+
+					DECLARE @AuditLogIdForContacts INT = 0
+					SET @AuditLogId = @AuditLogId + 1
+					SET @AuditLogIdForContacts = @AuditLogId
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', 'Updated', 'Updated - Record: ' + convert(nvarchar(50),@ContactName), NULL, NULL, NULL, NULL, NULL, (@AuditLogId - 1)
+
+					IF (@ExistingStrEmailFromView <> @Email)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strEmail', @ExistingStrEmailFromView, @Email, 'Email', 1, 0, @AuditLogIdForContacts
+					END 
+
+					IF (@ExistingStrPhoneFromView <> @Phone)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strPhone', @ExistingStrPhoneFromView, @Phone, 'Phone', 1, 0, @AuditLogIdForContacts
+					END 
+
+					IF (@ExistingStrMobileFromView <> @Mobile)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strMobile', @ExistingStrMobileFromView, @Mobile, 'Mobile', 1, 0, @AuditLogIdForContacts
+					END 
+
+					IF (@ExistingStrContactNameFromView <> @ContactName)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strName', @ExistingStrContactNameFromView, @ContactName, 'Contact Name', 1, 0, @AuditLogIdForContacts
+					END 
+				END				
+
+				IF (@ExistingStrLocationNameFromView <> @LocationName)
+				BEGIN
+					SET @AuditLogId = @AuditLogId + 1
+
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'strLocationName', @ExistingStrLocationNameFromView, @LocationName, 'Default Location', 1, 0, 1
+				END 
+
+				IF ((@ExistingStrAddressFromView <> @Address) OR (@ExistingStrCityFromView <> @City) OR (@ExistingStrStateFromView <> @State) OR (@ExistingStrZipFromView <> @Zip) OR (@ExistingStrCountryFromView <> @Country))
+				BEGIN
+					SET @AuditLogId = @AuditLogId + 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'tblEMEntityLocations', NULL, NULL, 'Entity Locations', NULL, NULL, (@AuditLogId - 1)
+
+					DECLARE @AuditLogIdForLocation INT = 0
+					SET @AuditLogId = @AuditLogId + 1
+					SET @AuditLogIdForLocation = @AuditLogId
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', 'Updated', 'Updated - Record: ' + convert(nvarchar(50),@LocationName), NULL, NULL, NULL, NULL, NULL, (@AuditLogId - 1)
+
+					IF (@ExistingStrAddressFromView <> @Address)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strAddress', @ExistingStrAddressFromView, @Address, 'Address', 1, 0, @AuditLogIdForLocation
+					END 
+
+					IF (@ExistingStrCityFromView <> @City)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strCity', @ExistingStrCityFromView, @City, 'City', 1, 0, @AuditLogIdForLocation
+					END 
+
+					IF (@ExistingStrStateFromView <> @State)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strState', @ExistingStrStateFromView, @State, 'State', 1, 0, @AuditLogIdForLocation
+					END 
+
+					IF (@ExistingStrZipFromView <> @Zip)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strZipCode', @ExistingStrZipFromView, @Zip, 'Zip/Postal', 1, 0, @AuditLogIdForLocation
+					END 
+
+					IF (@ExistingStrCountryFromView <> @Country)
+					BEGIN
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', '', 'strCountry', @ExistingStrCountryFromView, @Country, 'Country', 1, 0, @AuditLogIdForLocation
+					END 
+				END
+ 
+				IF (@ExistingStrUserRoleFromView <> @UserRole)
+				BEGIN
+					SET @AuditLogId = @AuditLogId + 1
+
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'strUserRoleName', @ExistingStrUserRoleFromView, @UserRole, 'User Role', 1, 0, 1
+				END 
+
+				IF (@ExistingYsnActiveFromView <> @Active)
+				BEGIN
+					SET @AuditLogId = @AuditLogId + 1
+
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'ysnDisabled', @ExistingYsnActiveFromView, @Active, 'Disable User', 1, 0, 1
+				END 
+
+				EXEC uspSMSingleAuditLog
+					@screenName     = 'EntityManagement.view.Entity',
+					@recordId       = @NewUserEntityId,
+					@entityId       = 1,
+					@AuditLogParam  = @SingleAuditLogParam
 			END
 		END
 
