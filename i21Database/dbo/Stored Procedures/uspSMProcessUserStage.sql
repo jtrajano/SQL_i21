@@ -807,27 +807,6 @@ BEGIN TRY
 				SET @NewUserStageArchiveId = 0
 				SET @NewUserStageArchiveId = SCOPE_IDENTITY()
 
-				WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForArchive)
-				BEGIN
-					SET @ArchiveDetailLocation = ''
-					SET @ArchiveDetailRole = ''
-
-					SELECT	TOP 1
-							@ArchiveDetailLocation = strLocation,
-							@ArchiveDetailRole = strRole
-					FROM	#tmpUserLocationRolesForArchive
-
-					INSERT INTO tblSMUserDetailStageArchive(intUserStageArchiveId, strLocation, strRole)
-					VALUES (@NewUserStageArchiveId, @ArchiveDetailLocation, @ArchiveDetailRole)
-
-					DELETE TOP (1) FROM #tmpUserLocationRolesForArchive
-				END
-
-				DROP TABLE #tmpUserLocationRolesForArchive
-
-				DELETE FROM tblSMUserStage WHERE intUserStageId = @UserStageId
-				DELETE FROM tblSMUserDetailStage WHERE intUserStageId = @UserStageId
-
 				--AuditLog
 				DECLARE @AuditLogId INT = 0
 				SET @AuditLogId = @AuditLogId + 1
@@ -962,11 +941,45 @@ BEGIN TRY
 					SELECT @AuditLogId, '', '', 'ysnDisabled', @ExistingYsnActiveFromView, @Active, 'Disable User', 1, 0, 1
 				END 
 
+				IF EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForArchive)
+				BEGIN
+					DECLARE @AuditLogIdForLocationRoles INT = 0
+					SET @AuditLogId = @AuditLogId + 1
+					SET @AuditLogIdForLocationRoles = @AuditLogId
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', '', 'tblSMUserSecurityCompanyLocationRolePermissions', NULL, NULL, 'User Roles', NULL, NULL, 1
+				END
+
+				WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForArchive)
+				BEGIN
+					SET @ArchiveDetailLocation = ''
+					SET @ArchiveDetailRole = ''
+
+					SELECT	TOP 1
+							@ArchiveDetailLocation = strLocation,
+							@ArchiveDetailRole = strRole
+					FROM	#tmpUserLocationRolesForArchive
+
+					INSERT INTO tblSMUserDetailStageArchive(intUserStageArchiveId, strLocation, strRole)
+					VALUES (@NewUserStageArchiveId, @ArchiveDetailLocation, @ArchiveDetailRole)
+
+					SET @AuditLogId = @AuditLogId + 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', 'Created', 'Created - Record: ' + @ArchiveDetailLocation + ' - ' + @ArchiveDetailRole, NULL, NULL, NULL, NULL, NULL, @AuditLogIdForLocationRoles
+
+					DELETE TOP (1) FROM #tmpUserLocationRolesForArchive
+				END
+
+				DROP TABLE #tmpUserLocationRolesForArchive
+
+				DELETE FROM tblSMUserStage WHERE intUserStageId = @UserStageId
+				DELETE FROM tblSMUserDetailStage WHERE intUserStageId = @UserStageId
+
 				EXEC uspSMSingleAuditLog
 					@screenName     = 'EntityManagement.view.Entity',
-					@recordId       = @NewUserEntityId,
+					@recordId       = @ExistingUserEntityId,
 					@entityId       = 1,
-					@AuditLogParam  = @SingleAuditLogParam
+					@AuditLogParam  = @SingleAuditLogParam  
 			END
 		END
 
