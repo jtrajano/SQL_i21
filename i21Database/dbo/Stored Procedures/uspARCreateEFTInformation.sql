@@ -96,7 +96,9 @@ IF @intNewBankId IS NULL
 		  AND EC.ysnDefaultContact = 1
 		  AND EL.ysnDefaultLocation = 1
 
-		SET @intNewBankId = SCOPE_IDENTITY()
+		SELECT TOP 1 @intNewBankId = intBankId
+		FROM tblCMBank
+		WHERE strBankName = @strBankName
 	END
 
 --NEW BANK ACCOUNT
