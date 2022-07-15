@@ -1670,7 +1670,7 @@ BEGIN TRY
 				,[dblQtyOrdered] = Staging.dblQtyOrdered
 				,[dblQtyShipped] = Staging.dblQtyShipped
 				,[dblDiscount] = 0
-				,[dblPrice] = SC.dblTicketFees
+				,[dblPrice] = CASE WHEN SC.ysnCusVenPaysFees = 1 THEN SC.dblTicketFees * -1 ELSE SC.dblTicketFees END
 				,[ysnRefreshPrice] = 0
 				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 				,[ysnRecomputeTax] = 1
