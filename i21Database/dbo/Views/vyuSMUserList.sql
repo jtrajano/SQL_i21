@@ -8,7 +8,7 @@ SELECT
 	a.strExternalERPId,
     g.strEmail,
 	strPhone = i.strPhone,  
-	a.strMobile,
+	strMobile = j.strPhone,
 	strContactName = g.strName,
 	e.strLocationName,
     e.strAddress,  
@@ -36,6 +36,8 @@ FROM
 		on h.intUserRoleID = c.intUserRoleID
 	left join tblEMEntityPhoneNumber i
 		on i.intEntityId = g.intEntityId
+	left join tblEMEntityMobileNumber j
+		on j.intEntityId = g.intEntityId
 	outer apply 
 	(
 		SELECT TOP 1 dtmDate, strResult FROM tblSMUserLogin u WHERE u.intEntityId = c.[intEntityId] ORDER BY dtmDate DESC
