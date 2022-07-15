@@ -55,7 +55,7 @@ SELECT CH.intContractHeaderId
 	, PT.strPricingType
 	, PL.strPricingLevelName
 	, strLoadUnitMeasure = U3.strUnitMeasure
-	, strINCOLocation = CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
+	, strINCOLocation = CASE WHEN ISNULL(CB.strINCOLocationType,FT.strINCOLocationType) = 'City' THEN CT.strCity ELSE SL.strSubLocationName END 
 	, CP.strContractPlan
 	, strCreatedBy = CE.strName
 	, strLastModifiedBy = UE.strName
