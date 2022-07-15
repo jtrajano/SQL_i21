@@ -189,6 +189,7 @@ Type the overview for the table here.
 		[intCommodityAttributeId3] INT NULL,
 		[intCommodityAttributeId4] INT NULL,
 		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+		[intRowNumber] INT NULL,
 		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		[ysnProducePartialPacking] BIT NOT NULL DEFAULT(0),
 		[intSubcategoryId] [int] NULL,
