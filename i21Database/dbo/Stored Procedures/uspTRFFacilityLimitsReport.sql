@@ -1125,7 +1125,7 @@ AS
  		, pContract.strPurchaseTerm
  		, dblPurchaseBasis = ISNULL(purchaseCB.dblBasis, @dblZero)
  		, dblPurchaseDifferential = ISNULL(pContract.dblPurchaseDifferential, @dblZero)
- 		, dblPurchaseFixed = ISNULL((purchaseCB.dblBasis + pContract.dblPurchaseDifferential), @dblZero)
+ 		, dblPurchaseFixed = ISNULL((purchaseCB.dblBasis + purchaseCB.dblFutures), @dblZero)
  		, pContract.strPurchaseMarket
  		, pContract.strPurchaseMonth
  		, dblPurchaseUnitPrice = ISNULL((purchaseCB.dblBasis + purchaseCB.dblFutures), @dblZero)
