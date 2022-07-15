@@ -277,6 +277,20 @@ FROM
 		WHERE Item2.strType = 'Other Charge'
 			--AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
 				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL)) 
+			/*Leslie: Manual split distribution (Spot and Contract) in scale ticket creates one IR and one voucher with multiple line 	items. When adding an other charge item in the voucher, it should be put in "Spot" in the report and not show in the 		"Contract" to avoid duplication
+			*/	
+			AND (CASE 
+						WHEN (
+								SELECT COUNT(*) 
+								FROM tblAPBillDetail 
+								WHERE intBillId = BillDtl2.intBillId 
+									AND intInventoryReceiptItemId IS NOT NULL 
+									AND intInventoryReceiptChargeId IS NULL
+							) > 1 AND 
+								(BillDtl2.intInventoryReceiptItemId IS NULL AND BillDtl2.intInventoryReceiptChargeId IS NULL)
+						THEN 0 ELSE 1
+						END
+					) = 1
    )t3 
 	WHERE t3.intItemId IS NOT NULL 
 )t	
