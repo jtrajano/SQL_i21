@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGLoadUpdateOrders]
 	@intLoadId INT
-	,@intEntityUserSecurityId INT
+	,@intEntityUserSecurityId INT = NULL
 AS
 BEGIN
 	DECLARE @intSourceType INT
