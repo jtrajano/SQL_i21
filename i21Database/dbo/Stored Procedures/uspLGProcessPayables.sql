@@ -21,7 +21,7 @@ BEGIN
 				,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
 				,NULL				--,@ItemId
 				,EL.intEntityLocationId		--,@VendorLocationId
-				,3--L.intFreightTermId	--,@FreightTermId
+				,L.intFreightTermId	--,@FreightTermId
 				,default --,@FOB
 			)
 		FROM tblLGLoad L
