@@ -235,6 +235,7 @@ ELSE
 		WHERE ISNULL(ARI.intLoadId, 0) = 0	
     END
 
+EXEC [dbo].[uspARInitializeTempTableForPosting]
 EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
      @Param             = NULL
     ,@BeginDate         = @BeginDate
