@@ -16,7 +16,7 @@ SELECT
 		WHEN 1 THEN 'Ready'
 		WHEN 2 THEN 'In Transit'
 		WHEN 3 THEN 'At Location'
-		WHEN 4 THEN 'Delivered'
+		WHEN 4 THEN CASE WHEN (DOD.intStopType = 1) THEN 'Loaded' ELSE 'Delivered' END
 		WHEN 5 THEN 'On-hold'
 		WHEN 6 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
