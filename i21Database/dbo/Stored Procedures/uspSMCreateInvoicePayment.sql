@@ -34,10 +34,10 @@ BEGIN
 	DECLARE @intPaymentMethodId		INT = NULL
 		  , @intUndepositedFundId 	INT	= NULL
 		  , @intCompanyLocationId	INT = NULL
-		  , @intEFTARFileFormatId 	INT = NULL
+		  , @intEFTARFileFormatId	INT = NULL
 		  , @strLocationName		NVARCHAR(100) = NULL
-		  , @strBankName            NVARCHAR(100) = NULL
-          , @strAccountNo    	    NVARCHAR(500) = NULL
+		  , @strBankName 			NVARCHAR(100) = NULL
+		  , @strAccountNo 			NVARCHAR(500) = NULL
 	      , @dblTotalPayment		NUMERIC(18, 6) = 0
 
 	--GET DEFAULT VALUES
@@ -53,7 +53,7 @@ BEGIN
 	FROM tblSMPaymentMethod
 	WHERE strPaymentMethod = @strPaymentMethod
 
-	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@ysnScheduledPayment, 0) = 0
+	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ((@ysnScheduledPayment = 1 AND @intBankAccountId IS NOT NULL) OR ISNULL(@ysnScheduledPayment, 0) = 0)
 		BEGIN
 			SET @intCompanyLocationId	= NULL
 			SET @intUndepositedFundId	= NULL
@@ -203,14 +203,14 @@ BEGIN
 				, intCompanyLocationId			= @intCompanyLocationId
 				, intCurrencyId					= INVOICE.intCurrencyId
 				, dtmDatePaid					= CASE WHEN @ysnScheduledPayment = 1 THEN @dtmScheduledPayment ELSE GETDATE() END
-				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@ysnScheduledPayment, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
+				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
 				, strPaymentMethod				= ISNULL(@strCreditCardNumber, @strPaymentMethod)
 				, strPaymentInfo				= NULL
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
 				, intBankAccountId				= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0) OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN @intBankAccountId ELSE NULL END
 				, dblAmountPaid					= ISNULL(@dblTotalPayment, 0)
-				, ysnPost						= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0) OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN 1 ELSE 0 END
+				, ysnPost						= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND @strPaymentMethod <> 'ACH') OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
 				, intInvoiceId					= INVOICE.intInvoiceId
