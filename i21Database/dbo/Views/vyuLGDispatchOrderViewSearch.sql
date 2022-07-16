@@ -4,11 +4,13 @@ SELECT
 	DO.intDispatchOrderId
 	,DOD.intDispatchOrderDetailId
 	,DO.strDispatchOrderNumber
-	,strDispatchStatus = CASE DO.intDispatchStatus
-		WHEN 1 THEN 'Scheduled'
-		WHEN 2 THEN 'In Progress'
-		WHEN 3 THEN 'Complete'
-		WHEN 4 THEN 'Cancelled'
+	,strDispatchStatus = CASE (DO.intDispatchStatus) 
+		WHEN 0 THEN 'Created'
+		WHEN 1 THEN 'Routed'
+		WHEN 2 THEN 'Scheduled'
+		WHEN 3 THEN 'Dispatched'
+		WHEN 4 THEN 'Complete'
+		WHEN 5 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DO.dtmDispatchDate
 	,DO.intEntityShipViaId
@@ -41,9 +43,10 @@ SELECT
 	,strOrderStatus = CASE DOD.intOrderStatus
 		WHEN 1 THEN 'Ready'
 		WHEN 2 THEN 'In Transit'
-		WHEN 3 THEN CASE WHEN (DOD.intStopType = 1) THEN 'Loaded' ELSE 'Delivered' END
-		WHEN 4 THEN 'On-hold'
-		WHEN 5 THEN 'Cancelled'
+		WHEN 3 THEN 'At Location'
+		WHEN 4 THEN CASE WHEN (DOD.intStopType = 1) THEN 'Loaded' ELSE 'Delivered' END
+		WHEN 5 THEN 'On-hold'
+		WHEN 6 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOD.strOrderNumber
 	,DOD.strOrderType
