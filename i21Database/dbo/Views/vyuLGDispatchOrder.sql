@@ -27,6 +27,7 @@ SELECT
 	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strCompanyLocation = CL.strLocationName
 	,strSubLocation = CLSL.strSubLocationName
+	,strPickUpLocation = CASE WHEN (DO.intOriginType = 1) THEN CL.strLocationName ELSE VL.strLocationName END
 	,strFromAddress = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strAddress 
 		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.strAddress 
 		ELSE CL.strAddress END
@@ -51,6 +52,7 @@ SELECT
 	,strDriver = DV.strName
 	,strTruckNumber = SVT.strTruckNumber
 	,strTrailerNumber = SVTL.strTrailerNumber
+	,strTrailerDescription = SVTL.strTrailerDescription
 	,strTrailerType = SVTL.strType
 	,strTrailerStatus = SVTL.strTrailerStatus
 	,dblMaxWeight = DO.dblMaxWeight
