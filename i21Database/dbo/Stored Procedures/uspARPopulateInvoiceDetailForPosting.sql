@@ -13,7 +13,7 @@
     ,@AccrueLicense     BIT             = 0
     ,@TransType         NVARCHAR(25)    = 'all'
     ,@UserId            INT				= 1
-
+    ,@strSessionId	    NVARCHAR(50)    = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -150,7 +150,7 @@ ELSE
 	END
 
 --HEADER
-INSERT ##ARPostInvoiceHeader WITH (TABLOCK)
+INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -230,6 +230,7 @@ INSERT ##ARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnInterCompany]
     ,[intInterCompanyVendorId]
 	,[strBOLNumber]
+    ,[strSessionId]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -314,26 +315,29 @@ SELECT
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 	,[strBOLNumber]						= ARI.[strBOLNumber]
+    ,[strSessionId]                     = @strSessionId
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN tblEMEntity EM ON ARC.intEntityId = EM.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 
-UPDATE ##ARPostInvoiceHeader
+UPDATE tblARPostInvoiceHeader
 SET ysnIsInvoicePositive = CAST(0 AS BIT)  
 WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+  AND strSessionId = @strSessionId
 
 UPDATE HEADER
 SET ysnForApproval = CAST(1 AS BIT)
   , strDescription = FAT.strApprovalStatus
-FROM ##ARPostInvoiceHeader HEADER
+FROM tblARPostInvoiceHeader HEADER
 INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
 WHERE FAT.strScreenName = 'Invoice'
+  AND HEADER.strSessionId = @strSessionId
 
 --DETAIL
 --INVENTORY
-INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
+INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -482,6 +486,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]
     ,[strDescription]
 	,[strBOLNumber]
+    ,[strSessionId]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -633,7 +638,8 @@ SELECT
  
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
 	,[strBOLNumber]						= ARI.strBOLNumber 
-FROM ##ARPostInvoiceHeader ARI
+    ,[strSessionId]                     = @strSessionId
+FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN tblICItem ICI WITH(NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
@@ -652,9 +658,10 @@ LEFT OUTER JOIN tblICItemStock ICIS WITH(NOLOCK) ON ICIL.[intItemId] = ICIS.[int
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH(NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE ICI.strType IN ('Inventory', 'Finished Good', 'Raw Material')
+  AND ARI.strSessionId = @strSessionId
 
 --NON-INVENTORY
-INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
+INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -803,6 +810,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
+    ,[strSessionId]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1013,7 +1021,8 @@ SELECT
     ,[ysnBlended]                       = ARID.[ysnBlended]    
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
-FROM ##ARPostInvoiceHeader ARI
+    ,[strSessionId]                     = @strSessionId
+FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
@@ -1024,9 +1033,10 @@ LEFT OUTER JOIN tblICItemUOM ICIU WITH (NOLOCK) ON ARID.[intItemUOMId] = ICIU.[i
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH (NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE ICI.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material')
+  AND ARI.strSessionId = @strSessionId
 
 --MISC ITEMS
-INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
+INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1171,6 +1181,7 @@ INSERT ##ARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
+    ,[strSessionId]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1317,23 +1328,24 @@ SELECT
     ,[ysnBlended]                       = @ZeroBit
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
-FROM ##ARPostInvoiceHeader ARI
+    ,[strSessionId]                     = @strSessionId
+FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH(NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
-WHERE ARID.[intItemId] IS NULL
-   OR ARID.[intItemId] = 0
+WHERE (ARID.[intItemId] IS NULL OR ARID.[intItemId] = 0)
+  AND ARI.strSessionId = @strSessionId
 
 UPDATE ID
 SET dblTaxesAddToCost       = IDD.dblTaxesAddToCost
   , dblBaseTaxesAddToCost   = IDD.dblBaseTaxesAddToCost
-FROM ##ARPostInvoiceDetail ID
+FROM tblARPostInvoiceDetail ID
 INNER JOIN (
     SELECT dblTaxesAddToCost       = SUM(TAXES.dblTaxesAddToCost)
          , dblBaseTaxesAddToCost   = SUM(TAXES.dblBaseTaxesAddToCost)
          , intInvoiceDetailId      = ID.intInvoiceDetailId
-    FROM ##ARPostInvoiceDetail ID
+    FROM tblARPostInvoiceDetail ID
     CROSS APPLY (
         SELECT dblTaxesAddToCost        = ISNULL(dblAdjustedTax, 0)
             , dblBaseTaxesAddToCost     = ISNULL(dblBaseAdjustedTax, 0)
@@ -1342,7 +1354,9 @@ INNER JOIN (
         WHERE TC.ysnAddToCost = 1
         AND IDT.intInvoiceDetailId = ID.intInvoiceDetailId    
     ) TAXES
+    WHERE ID.strSessionId = @strSessionId
     GROUP BY ID.intInvoiceDetailId
 ) IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
+WHERE ID.strSessionId = @strSessionId
 
 RETURN 1

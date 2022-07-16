@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
+	  @strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -26,7 +27,7 @@ SET @ZeroBit = CAST(0 AS BIT)
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
 
-INSERT INTO ##ARItemsForCosting
+INSERT INTO tblARPostItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -56,6 +57,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnGLOnly]
 	,[strBOLNumber]
 	,[intSourceEntityId]
+	,[strSessionId]
 )
 
 SELECT 
@@ -120,35 +122,21 @@ SELECT
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
 	,[strBOLNumber]				= ARID.strBOLNumber 
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
-FROM
-    ##ARPostInvoiceDetail ARID
-LEFT OUTER JOIN
-	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
-		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-LEFT OUTER JOIN
-	(SELECT [intInvoiceDetailId], [dblQtyShipped], [dblShipmentNetWt] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
-		ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
-LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId], [intItemUOMId] FROM tblICLot WITH (NOLOCK)) LOT
-		ON LOT.[intLotId] = ARIDL.[intLotId]
-LEFT OUTER JOIN
-    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
-		ON LGL.[intLoadId] = ARID.[intLoadId]
-LEFT OUTER JOIN 
-	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
-		ON ARID.intTicketId = T.intTicketId
-LEFT OUTER JOIN(
-	SELECT intUnitMeasureId, intItemUOMId, ysnSeparateStockForUOMs FROM tblICItemUOM ICUOM  WITH (NOLOCK)
-	INNER JOIN tblICItem ITEM ON ICUOM.intItemId = ITEM.intItemId
-) ICIUOM
-ON ARID.intItemUOMId = ICIUOM.intItemUOMId
+	,[strSessionId]				= @strSessionId
+FROM tblARPostInvoiceDetail ARID
+INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
+LEFT OUTER JOIN tblARInvoiceDetailLot ARIDL WITH (NOLOCK) ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+LEFT OUTER JOIN tblARInvoiceDetail ARIDP WITH (NOLOCK) ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
+LEFT OUTER JOIN tblICLot LOT WITH (NOLOCK) ON LOT.[intLotId] = ARIDL.[intLotId]
+LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]
+LEFT OUTER JOIN tblSCTicket T WITH (NOLOCK) ON ARID.intTicketId = T.intTicketId
+LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARID.intItemUOMId = ICIUOM.intItemUOMId
 CROSS APPLY (
 	SELECT intItemUOMId 
 	FROM tblICItemUOM WITH (NOLOCK)
 	WHERE intItemId = ARID.intItemId
 	AND ysnStockUnit = 1
 ) ICIUOM_STOCK
-
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
@@ -170,9 +158,10 @@ WHERE
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))))
 	--AND ISNULL(T.[intTicketTypeId], 0) <> 9
+	AND ARID.strSessionId = @strSessionId 
 
 --Bundle Items
-INSERT INTO ##ARItemsForCosting
+INSERT INTO tblARPostItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -200,6 +189,7 @@ INSERT INTO ##ARItemsForCosting
 	,[strType]
 	,[ysnAutoBlend]
 	,[intSourceEntityId]
+	,[strSessionId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -238,7 +228,8 @@ SELECT
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
-FROM ##ARPostInvoiceDetail ARID
+	,[strSessionId]				= @strSessionId
+FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.[intBundleItemId] = ICI.[intItemId]
@@ -267,9 +258,10 @@ WHERE
 	AND ICI.[strType] <> 'Non-Inventory'
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
+	AND ARID.strSessionId = @strSessionId
 
 -- Final Invoice
-INSERT INTO ##ARItemsForCosting
+INSERT INTO tblARPostItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -296,6 +288,7 @@ INSERT INTO ##ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[intSourceEntityId]
+	,[strSessionId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -324,21 +317,23 @@ SELECT
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
 	,ARID.[intEntityCustomerId]
-FROM ##ARItemsForCosting ARIC
-INNER JOIN ##ARPostInvoiceDetail ARID
-ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
-INNER JOIN tblARInvoiceDetail ARIDP
-ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
+	,@strSessionId
+FROM tblARPostItemsForCosting ARIC
+INNER JOIN tblARPostInvoiceDetail ARID ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
+INNER JOIN tblARInvoiceDetail ARIDP ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
 WHERE ARID.[intSourceId] = 2
 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0) OR (ARID.[dblQtyShipped] < ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))
+AND ARID.strSessionId = @strSessionId
+AND ARIC.strSessionId = @strSessionId
 
 UPDATE IC
 SET strSourceType = 'Transport'
   , strSourceNumber	= LH.strTransaction
-FROM ##ARItemsForCosting IC
+FROM tblARPostItemsForCosting IC
 INNER JOIN tblARInvoice I ON IC.intTransactionId = I.intInvoiceId AND IC.strTransactionId = I.strInvoiceNumber
 INNER JOIN tblTRLoadDistributionHeader DH ON I.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId 
 INNER JOIN tblTRLoadHeader LH ON DH.intLoadHeaderId = LH.intLoadHeaderId
 WHERE IC.strType = 'Transport Delivery'
+  AND IC.strSessionId = @strSessionId
 
 RETURN 1

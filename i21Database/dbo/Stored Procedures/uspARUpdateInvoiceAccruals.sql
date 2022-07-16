@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceAccruals] 
-	 @intInvoiceId	INT = NULL
+	  @intInvoiceId		INT = NULL
+	, @strSessionId		NVARCHAR(50) = NULL
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -39,7 +40,7 @@ IF @intInvoiceId IS NOT NULL
 		WHERE I.intInvoiceId = @intInvoiceId
 		  AND I.intPeriodsToAccrue > 1
 	END
-ELSE IF (OBJECT_ID('tempdb..##ARPostInvoiceHeader') IS NOT NULL)
+ELSE IF EXISTS(SELECT TOP 1 NULL FROM tblARPostInvoiceHeader WHERE strSessionId = @strSessionId)
 	BEGIN
 		INSERT INTO #ACCRUALS (
 			  intInvoiceId
@@ -52,7 +53,7 @@ ELSE IF (OBJECT_ID('tempdb..##ARPostInvoiceHeader') IS NOT NULL)
 			, dblInvoiceSubtotal	= I.dblInvoiceSubtotal
 			, dblDifference			= ISNULL(ACC.dblTotalAmount, 0) - I.dblInvoiceSubtotal
 		FROM tblARInvoice I
-		INNER JOIN ##ARPostInvoiceHeader II ON I.intInvoiceId = II.intInvoiceId
+		INNER JOIN tblARPostInvoiceHeader II ON I.intInvoiceId = II.intInvoiceId
 		LEFT JOIN (
 			SELECT intInvoiceId		= A.intInvoiceId
 				 , dblTotalAmount	= SUM(A.dblAmount)
@@ -60,6 +61,7 @@ ELSE IF (OBJECT_ID('tempdb..##ARPostInvoiceHeader') IS NOT NULL)
 			GROUP BY A.intInvoiceId
 		) ACC ON I.intInvoiceId = ACC.intInvoiceId
 		WHERE I.intPeriodsToAccrue > 1
+		  AND II.strSessionId = @strSessionId
 	END
 	
 IF EXISTS (SELECT TOP 1 NULL FROM #ACCRUALS WHERE dblDifference <> 0)

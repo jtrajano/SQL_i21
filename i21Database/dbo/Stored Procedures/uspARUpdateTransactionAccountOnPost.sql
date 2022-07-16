@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateTransactionAccountOnPost]
+	@strSessionId		NVARCHAR(50) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -25,8 +26,9 @@ SET ANSI_WARNINGS OFF
 								ELSE ARI.intAccountId
 							END
 	FROM tblARInvoice ARI WITH (NOLOCK)
-	INNER JOIN ##ARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
+	INNER JOIN tblARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
 	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
+	WHERE PID.strSessionId = @strSessionId
 
 	INSERT INTO @LineItemAccounts (
 		  [intDetailId]
@@ -46,7 +48,8 @@ SET ANSI_WARNINGS OFF
 		, [intServiceChargeAccountId]
 		, [intLicenseAccountId]
 		, [intMaintenanceAccountId]
-	FROM ##ARPostInvoiceDetail
+	FROM tblARPostInvoiceDetail
+	WHERE strSessionId = @strSessionId
 
 	--INVENTORY
 	UPDATE LIA
@@ -55,10 +58,11 @@ SET ANSI_WARNINGS OFF
 	  , LIA.[intCOGSAccountId]		= IA.[intCOGSAccountId]
 	  , LIA.[intInventoryAccountId]	= IA.[intInventoryAccountId]
 	FROM @LineItemAccounts LIA
-	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.[intDetailId] = ARID.[intInvoiceDetailId]
-	INNER JOIN ##ARInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId]
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.[intDetailId] = ARID.[intInvoiceDetailId]
+	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId]
 									   AND ARID.[intCompanyLocationId] = IA.[intLocationId]
 	WHERE ARID.[strItemType] NOT IN ('Non-Inventory', 'Service', 'Other Charge', 'Software')
+	  AND ARID.strSessionId = @strSessionId
 
 	--NON-INVENTORY, SERVICE, OTHER CHARGE
 	UPDATE LIA
@@ -78,36 +82,40 @@ SET ANSI_WARNINGS OFF
 										END)											
 								END)
 	FROM @LineItemAccounts LIA
-	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
-	INNER JOIN ##ARInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId]
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
+	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId]
 									   AND ARID.[intCompanyLocationId] = IA.[intLocationId]
 	WHERE ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
+	  AND ARID.strSessionId = @strSessionId
 
 	UPDATE LIA
 	SET LIA.[intSalesAccountId] = LIA.[intAccountId]
 	FROM @LineItemAccounts LIA
-	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
 	WHERE ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
+	  AND ARID.strSessionId = @strSessionId
 
 	--SOFTWARE (LICENSE)
 	UPDATE LIA
 	SET LIA.intLicenseAccountId = IST.intGeneralAccountId
 	FROM @LineItemAccounts LIA
-	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
-	INNER JOIN ##ARInvoiceItemAccount IST ON ARID.intItemId = IST.intItemId
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARPostInvoiceItemAccount IST ON ARID.intItemId = IST.intItemId
 										AND ARID.[intCompanyLocationId] = IST.[intLocationId]
 	WHERE ARID.strMaintenanceType IN ('License/Maintenance', 'License Only')
 	  AND ARID.strItemType = 'Software'
+	  AND ARID.strSessionId = @strSessionId
 
 	--SOFTWARE (MAINTENANCE AND SAAS)
 	UPDATE LIA
 	SET LIA.intMaintenanceAccountId = IST.intMaintenanceSalesAccountId
 	FROM @LineItemAccounts LIA
-	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
-	INNER JOIN ##ARInvoiceItemAccount IST ON ARID.intItemId = IST.intItemId
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARPostInvoiceItemAccount IST ON ARID.intItemId = IST.intItemId
 										AND ARID.[intCompanyLocationId] = IST.[intLocationId]
 	WHERE ARID.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
-	  AND ARID.strItemType = 'Software'					
+	  AND ARID.strItemType = 'Software'
+	  AND ARID.strSessionId = @strSessionId
 
 	--NULL ACCOUNT IDS
 	UPDATE LIA
@@ -116,19 +124,21 @@ SET ANSI_WARNINGS OFF
 								ELSE ISNULL(ARID.intServiceChargeAccountId, ISNULL(ARID.intConversionAccountId, ISNULL(ARID.intSalesAccountId, ARID.[intLocationSalesAccountId])))
 						   END
 	FROM @LineItemAccounts LIA
-	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
-	INNER JOIN ##ARInvoiceItemAccount IST ON ARID.[intItemId] = IST.[intItemId]
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARPostInvoiceItemAccount IST ON ARID.[intItemId] = IST.[intItemId]
 									    AND ARID.intCompanyLocationId = IST.intLocationId
 	WHERE ISNULL(LIA.intAccountId, 0) = 0
+	  AND ARID.strSessionId = @strSessionId
 		
 	--NULL SALES ACCOUNT IDS
 	UPDATE LIA
 	SET LIA.intSalesAccountId = ISNULL(ARID.intSalesAccountId, IST.intSalesAccountId)
 	FROM @LineItemAccounts LIA
-	INNER JOIN ##ARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
-	INNER JOIN ##ARInvoiceItemAccount IST ON ARID.[intItemId] = IST.[intItemId]
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARPostInvoiceItemAccount IST ON ARID.[intItemId] = IST.[intItemId]
 										AND ARID.intCompanyLocationId = IST.intLocationId
-	WHERE ISNULL(LIA.intSalesAccountId, 0) = 0			
+	WHERE ISNULL(LIA.intSalesAccountId, 0) = 0
+	  AND ARID.strSessionId = @strSessionId
 		
 	--UPDATE INVOICE DETAIL ACCOUNTS
 	UPDATE ARID
@@ -149,20 +159,22 @@ SET ANSI_WARNINGS OFF
                                    ELSE ISNULL(LIA.[intConversionAccountId],(CASE WHEN LIA.[intServiceChargeAccountId] IS NOT NULL AND LIA.[intServiceChargeAccountId] <> 0 THEN LIA.[intServiceChargeAccountId] ELSE LIA.[intSalesAccountId] END)) 
                               END)		
 	FROM tblARInvoiceDetail ARID
-	INNER JOIN ##ARPostInvoiceDetail LIA ON ARID.[intInvoiceDetailId] = LIA.[intInvoiceDetailId]
+	INNER JOIN tblARPostInvoiceDetail LIA ON ARID.[intInvoiceDetailId] = LIA.[intInvoiceDetailId]
 									   AND LIA.[intItemId] IS NULL
 
 	--UPDATE INVOICE TAX DETAIL ACCOUNTS
 	UPDATE ARITD
 	SET ARITD.intSalesTaxAccountId = ISNULL(dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, ARID.intProfitCenter), ARITD.intSalesTaxAccountId)
 	FROM tblARInvoiceDetailTax ARITD
-	INNER JOIN ##ARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
+	WHERE ARID.strSessionId = @strSessionId
 
 	--UPDATE FINAL
 	UPDATE PIH
 	SET PIH.intAccountId	= ARI.intAccountId
-	FROM ##ARPostInvoiceHeader PIH
+	FROM tblARPostInvoiceHeader PIH
 	INNER JOIN tblARInvoice ARI ON PIH.intInvoiceId = ARI.intInvoiceId
+	WHERE PIH.strSessionId = @strSessionId	  
 
     UPDATE PID
     SET  PID.[intItemAccountId]             = ARID.[intAccountId]
@@ -170,6 +182,7 @@ SET ANSI_WARNINGS OFF
         ,PID.[intServiceChargeAccountId]    = ARID.[intServiceChargeAccountId]
         ,PID.[intLicenseAccountId]          = ARID.[intLicenseAccountId]
         ,PID.[intMaintenanceAccountId]      = ARID.[intMaintenanceAccountId]
-    FROM ##ARPostInvoiceDetail PID
+    FROM tblARPostInvoiceDetail PID
     INNER JOIN tblARInvoiceDetail ARID ON PID.intInvoiceDetailId = ARID.intInvoiceDetailId
+	WHERE PID.strSessionId = @strSessionId
 RETURN 0
