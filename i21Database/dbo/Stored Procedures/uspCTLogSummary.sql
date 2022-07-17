@@ -4588,7 +4588,24 @@ BEGIN TRY
 				IF (@strTransactionReference = 'Transfer Storage')
 				BEGIN
 					UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = 58
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+
+					-- check if balance is already logged on Sequence Balance Update for DP contract.
+					if not exists (
+						select top 1 1
+						from @cbLogPrev lp
+						join @cbLogSpecific ls on ls.intContractDetailId = lp.intContractDetailId
+						where lp.strTransactionType = 'Contract Balance'
+						and ls.intTransactionReferenceDetailId = lp.intTransactionReferenceDetailId
+						and ls.intTransactionReferenceId = lp.intTransactionReferenceId
+						and lp.dblQty = ls.dblQty
+						and ls.strProcess = 'Update Sequence Quantity'
+						and lp.strProcess = 'Update Sequence Balance'
+						and ls.intActionId = 58
+						and lp.intActionId = 58
+					)
+					begin
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+					end
 
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
@@ -4860,7 +4877,24 @@ BEGIN TRY
 						SET @_dp = (CASE WHEN @dblQty > ISNULL(@dblDP, 0) THEN ISNULL(@dblDP, 0) ELSE @dblQty END)
 						UPDATE a SET dblQty = @_dp * - 1, intActionId = CASE WHEN a.intContractTypeId = 1 THEN 49 ELSE 50 END
 						FROM @cbLogSpecific a
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+
+						-- check if balance is already logged on Sequence Balance Update for DP contract.
+						if not exists (
+							select top 1 1
+							from @cbLogPrev lp
+							join @cbLogSpecific ls on ls.intContractDetailId = lp.intContractDetailId
+							where lp.strTransactionType = 'Contract Balance'
+							and ls.intTransactionReferenceDetailId = lp.intTransactionReferenceDetailId
+							and ls.intTransactionReferenceId = lp.intTransactionReferenceId
+							and lp.dblQty = ls.dblQty
+							and ls.strProcess = 'Update Sequence Quantity'
+							and lp.strProcess = 'Update Sequence Balance'
+							and ls.intActionId = 49
+							and lp.intActionId = 49
+						)
+						begin
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+						end
 					END
 					IF ISNULL(@dblCash, 0) > 0
 					BEGIN
