@@ -235,7 +235,7 @@ SELECT LD.intLoadDetailId
 	, LD.intCropYearId
 	, strCropYear = CPY.strCropYear
 	, LD.intTMDispatchId 
-	, strTMOrderNumber = TMD.strOrderNumber
+	, LD.strOrderNumber
 	, LD.intTMSiteId
 	, strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 	, LD.intSalespersonId
