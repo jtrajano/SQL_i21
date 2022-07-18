@@ -203,6 +203,7 @@ INSERT INTO tblEMEntityEFTInformation (
 	, strBranchCode
 	, strNationalBankIdentifier
 	, intCurrencyId
+	, intOrder
 	, intConcurrencyId
 )
 SELECT intEntityId					= @intEntityCustomerId
@@ -226,6 +227,7 @@ SELECT intEntityId					= @intEntityCustomerId
 	 , strBranchCode				= @strBranchCode
 	 , strNationalBankIdentifier	= @strRTN
 	 , intCurrencyId				= @intCurrencyId
+	 , intOrder						= 0
 	 , intConcurrencyId				= 1
 FROM tblCMBank B
 WHERE B.intBankId = @intNewBankId
