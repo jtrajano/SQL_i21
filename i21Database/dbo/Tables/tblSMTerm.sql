@@ -20,7 +20,7 @@
     [intSort]					INT             NULL,
 	[ysnSent]					BIT				DEFAULT ((0)) NOT NULL,
 	[strRemarks]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[dblRemainingRisk]			NUMERIC (3, 0)	DEFAULT ((0)) NULL,
+	[dblRemainingRisk]			NUMERIC (18, 0)	DEFAULT ((0)) NULL,
     [intConcurrencyId]			INT				NOT NULL DEFAULT (1), 
 
     CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC), 
