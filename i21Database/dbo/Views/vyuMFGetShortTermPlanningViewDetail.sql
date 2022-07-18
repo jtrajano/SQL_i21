@@ -33,11 +33,10 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,CASE 
 		WHEN D.intAttributeId = 5
 			THEN D.dblQty
-		WHEN D.intAttributeId IN (
-				12
-				,13
-				)
-			THEN CD.dblQuantity
+		WHEN D.intAttributeId =12
+			THEN CD.dblBalance
+		WHEN D.intAttributeId =13
+			THEN CD.dblQuantity - IsNULL(CD.dblScheduleQty, 0)
 		ELSE LC.dblQuantity
 		END dblQty
 	,CASE 
@@ -48,10 +47,9 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,CASE 
 		WHEN D.intAttributeId = 5
 			THEN D.dblWeight
-		WHEN D.intAttributeId IN (
-				12
-				,13
-				)
+		WHEN D.intAttributeId =12
+			THEN dbo.fnMFConvertQuantityToTargetItemUOM(CD.intItemUOMId ,CD.intNetWeightUOMId , CD.dblBalance)
+		WHEN D.intAttributeId =13
 			THEN CD.dblNetWeight
 		ELSE LC.dblNetWt
 		END AS dblWeight
@@ -141,3 +139,6 @@ OUTER APPLY (
 	JOIN tblICCertification C2 ON C2.intCertificationId = IC.intCertificationId
 		AND IC.intItemId = I.intItemId
 	) C2
+GO
+
+
