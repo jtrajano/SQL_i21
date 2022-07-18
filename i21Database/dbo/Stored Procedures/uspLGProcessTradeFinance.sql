@@ -205,7 +205,8 @@ BEGIN
 		,intUserId
 		,intConcurrencyId
 		,intContractHeaderId
-		,intContractDetailId)
+		,intContractDetailId
+		,intOverrideBankValuationId)
 	SELECT
 		strAction = CASE WHEN (@strAction = 'ADD') THEN 'Created ' ELSE 'Updated ' END
 					+ CASE WHEN (L.intShipmentType = 2) THEN 'Shipping Instruction' ELSE 'Shipment' END
@@ -248,6 +249,7 @@ BEGIN
 		,intConcurrencyId = 1
 		,intContractHeaderId = CD.intContractHeaderId
 		,intContractDetailId = L.intContractDetailId
+		,intOverrideBankValuationId = L.intBankValuationRuleId
 	FROM tblLGLoad L
 		CROSS APPLY (SELECT TOP 1 intLoadDetailId, dblQuantity, dblAmount FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = L.intContractDetailId) LD
 		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = L.intContractDetailId
