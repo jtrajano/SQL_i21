@@ -9,8 +9,8 @@ DECLARE @dtmStartDate DATETIME
 DECLARE @dtmEndDate DATETIME    
 DECLARE @intRetainAccount INT    
 DECLARE @intIncomeSummaryAccount INT    
-DECLARE @PostGLEntries RecapTableType      
-DECLARE @PostGLEntries2  RecapTableType    
+DECLARE @RevalTableType RevalTableType      
+DECLARE @RecapTableType  RecapTableType    
 DECLARE @strPeriod NVARCHAR(30)    
 DECLARE @intGLFiscalYearPeriodId INT    
 DECLARE @dtmNow DATETIME  = GETDATE()    
@@ -40,12 +40,12 @@ BEGIN
     @dtmStartDate =  dtmStartDate, @dtmEndDate =dtmEndDate    
     FROM @tbl    
     
-      INSERT INTO @PostGLEntries(      
+      INSERT INTO @RevalTableType(      
             [strTransactionId]      
             ,[intTransactionId]      
             ,[intAccountId]      
             ,[strDescription]      
-            ,[dtmTransactionDate]      
+            ,[dtmTransactionDate]
             ,[dblDebit]      
             ,[dblCredit]      
             ,[dtmDate]      
@@ -68,8 +68,8 @@ BEGIN
             [strTransactionId]      
             ,[intTransactionId]     
             ,@intRetainAccount    
-            ,A.strDescription     
-            ,[dtmTransactionDate]      
+            ,A.[strDescription]      
+            ,[dtmTransactionDate]
             ,[dblDebit]      
             ,[dblCredit]      
             ,@dtmEndDate      
@@ -100,12 +100,12 @@ END
     
     
 --REVERSED BY INCOME SUMMARY ACCOUNT    
-INSERT INTO @PostGLEntries(      
+INSERT INTO @RevalTableType(      
     [strTransactionId]      
     ,[intTransactionId]      
     ,[intAccountId]      
     ,[strDescription]      
-    ,[dtmTransactionDate]      
+    ,[dtmTransactionDate]   
     ,[dblDebit]      
     ,[dblCredit]      
     ,[dtmDate]      
@@ -129,7 +129,7 @@ SELECT
     ,[intTransactionId]      
     ,@intIncomeSummaryAccount    
     ,[strDescription]      
-    ,[dtmTransactionDate]      
+    ,[dtmTransactionDate]
     ,[dblCredit]    
     ,[dblDebit]      
     ,[dtmDate]      
@@ -147,7 +147,7 @@ SELECT
     ,[strTransactionForm]      
     ,strModuleName      
     ,intAccountIdOverride    
-FROM @PostGLEntries    
+FROM @RevalTableType    
     
 
 DECLARE
@@ -161,18 +161,78 @@ SELECT TOP 1
 @ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0)
 FROM tblGLCompanyPreferenceOption
  
-INSERT INTO @PostGLEntries2   SELECT * FROM fnGLOverridePostAccounts(@PostGLEntries,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A       
+INSERT INTO @RecapTableType(
+    dtmDate,  
+    strBatchId,  
+    intAccountId,  
+    strDescription,    
+    dtmTransactionDate,
+    dblDebit,  
+    dblCredit, 
+    strCode, 
+    intCurrencyId,  
+    dtmDateEntered,  
+    strJournalLineDescription,  
+    intJournalLineNo,  
+    ysnIsUnposted,  
+    intUserId,  
+    intEntityId,  
+    strTransactionId,  
+    intTransactionId,  
+    strTransactionType,  
+    strTransactionForm,  
+    strModuleName,  
+    intConcurrencyId,  
+    intAccountIdOverride,  
+    intLocationSegmentOverrideId,  
+    intLOBSegmentOverrideId,  
+    intCompanySegmentOverrideId,  
+    strNewAccountIdOverride,  
+    intNewAccountIdOverride,  
+    strOverrideAccountError
+)
+
+SELECT 
+    dtmDate,  
+    strBatchId,  
+    intAccountId, 
+    strDescription,    
+    dtmTransactionDate, 
+    dblDebit,  
+    dblCredit, 
+    strCode, 
+    intCurrencyId,  
+    dtmDateEntered,  
+    strJournalLineDescription,  
+    intJournalLineNo,  
+    ysnIsUnposted,  
+    intUserId,  
+    intEntityId,  
+    strTransactionId,  
+    intTransactionId,  
+    strTransactionType,  
+    strTransactionForm,  
+    strModuleName,  
+    intConcurrencyId,  
+    intAccountIdOverride,  
+    intLocationSegmentOverrideId,  
+    intLOBSegmentOverrideId,  
+    intCompanySegmentOverrideId,  
+    strNewAccountIdOverride,  
+    intNewAccountIdOverride,  
+    strOverrideAccountError
+FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A       
     
-IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' )      
+IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )      
 BEGIN    
 
-EXEC uspGLPostRecap @PostGLEntries2, @intEntityId      
+EXEC uspGLPostRecap @RecapTableType, @intEntityId      
 EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId  
 SET @result = 'Error overriding accounts.'  
 GOTO _end  
 END    
     
-EXEC uspGLBookEntries @PostGLEntries2, 1, 1 ,1     
+EXEC uspGLBookEntries @RecapTableType, 1, 1 ,1     
   
             
 SET @result = 'Posted'  
