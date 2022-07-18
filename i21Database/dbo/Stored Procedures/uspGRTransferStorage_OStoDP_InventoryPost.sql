@@ -124,9 +124,9 @@ BEGIN
 			WHERE intId = @cursorId
 
 			SELECT @strRKError = CASE 
-								WHEN @dblBasisCost IS NULL AND @dblSettlementPrice > 0 THEN 'Basis in Risk Management is not available.'
-								WHEN @dblSettlementPrice IS NULL AND @dblBasisCost > 0 THEN 'Settlement Price in Risk Management is not available.'
-								WHEN @dblBasisCost IS NULL AND @dblSettlementPrice IS NULL THEN 'Basis and Settlement Price in Risk Management are not available.'
+								WHEN @dblBasisCost IS NULL AND ISNULL(@dblSettlementPrice, 0) > 0 THEN 'Basis in Risk Management is not available.'
+								WHEN ISNULL(@dblSettlementPrice, 0) = 0 AND @dblBasisCost > 0 THEN 'Settlement Price in Risk Management is not available.'
+								WHEN @dblBasisCost IS NULL AND ISNULL(@dblSettlementPrice, 0) = 0 THEN 'Basis and Settlement Price in Risk Management are not available.'
 							END
 
 			IF @strRKError IS NOT NULL
