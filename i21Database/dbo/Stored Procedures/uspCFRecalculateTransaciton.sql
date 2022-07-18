@@ -1776,6 +1776,8 @@ BEGIN
 						,NULL	--@@CurrencyExchangeRateTypeId
 						,NULL	--@@CurrencyExchangeRate								 
 					)
+
+
 					END
 					ELSE
 					BEGIN
@@ -1907,6 +1909,7 @@ BEGIN
 						)
 					END
 
+					
 
 					update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
 
