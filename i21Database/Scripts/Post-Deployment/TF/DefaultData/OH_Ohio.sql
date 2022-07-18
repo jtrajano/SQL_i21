@@ -10371,7 +10371,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 		, intFrequency
 		, intMasterId
 	)
-	SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '', strType = 'Text File', ysnStatus = 1, intFrequency = 1, intMasterId = 351411
+	SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = 'EX2_EFILE', strType = 'Text File', ysnStatus = 1, intFrequency = 1, intMasterId = 351411
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351203
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351207
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 351202
