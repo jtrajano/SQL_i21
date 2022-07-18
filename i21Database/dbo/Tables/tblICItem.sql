@@ -193,7 +193,6 @@ Type the overview for the table here.
 		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		[ysnProducePartialPacking] BIT NOT NULL DEFAULT(0),
 		[intSubcategoriesId] [int] NULL,
-		[intSubcategoryId] [int] NULL,
 
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
