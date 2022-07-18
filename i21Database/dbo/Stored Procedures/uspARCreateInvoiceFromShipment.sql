@@ -816,12 +816,14 @@ CREATE TABLE #FIXATION (
 )
 
 SELECT intInventoryShipmentItemId	= IE.intInventoryShipmentItemId
+	 , intInventoryShipmentId		= ISI.intInventoryShipmentId
 	 , intContractDetailId			= IE.intContractDetailId
 	 , intContractHeaderId			= IE.intContractHeaderId
 	 , intPriceFixationId			= PF.intPriceFixationId
 	 , intInvoiceEntriesId			= IE.intId
 	 , dtmInvoiceDate				= ISNULL(IE.dtmDate, @Date)
 	 , dblQtyShipped				= IE.dblQtyShipped
+	 , intTicketId					= IE.intTicketId
 	 , ysnLoad						= ISNULL(CD.ysnLoad, CAST(0 AS BIT))
 INTO #CONTRACTSPRICING
 FROM @EntriesForInvoice IE
@@ -883,6 +885,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 					  , @intContractDetailToDeleteId    INT = NULL
 					  , @ysnLoad						BIT = 0
 					  , @intContractDetailId			INT = NULL
+					  , @intTicketId					INT = NULL
+					  , @intInventoryShipmentId			INT = NULL
 
 				SELECT TOP 1 @intInvoiceEntriesId			= intInvoiceEntriesId 
 						   , @dblQtyShipped					= dblQtyShipped
@@ -891,6 +895,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 						   , @intContractDetailToDeleteId	= intContractDetailId
 						   , @ysnLoad						= ysnLoad
 						   , @intContractDetailId			= intContractDetailId
+						   , @intTicketId					= intTicketId
+						   , @intInventoryShipmentId		= intInventoryShipmentId
 				FROM #CONTRACTSPRICING 
 				ORDER BY intInvoiceEntriesId
 
@@ -921,6 +927,26 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 										UPDATE @EntriesForInvoice
 										SET dblQtyShipped	= @dblQuantity
 										WHERE intId = @intInvoiceEntriesId
+
+										UPDATE E
+										SET dblPrice		= dbo.fnSCCalculateDiscount(E.intTicketId, intTicketDiscountId, @dblQuantity, intItemUOMId, 0) * -1
+										  , dblUnitPrice	= dbo.fnSCCalculateDiscount(E.intTicketId, intTicketDiscountId, @dblQuantity, intItemUOMId, 0) * -1
+										FROM @EntriesForInvoice E
+										CROSS APPLY (
+											SELECT QM.intTicketDiscountId
+											FROM tblSCTicket SC
+											INNER JOIN tblGRDiscountCrossReference GCR ON GCR.intDiscountId = SC.intDiscountId
+											INNER JOIN tblGRDiscountSchedule GRDS ON GRDS.intDiscountScheduleId = GCR.intDiscountScheduleId AND GRDS.intCommodityId = SC.intCommodityId
+											INNER JOIN tblGRDiscountScheduleCode GRDSC ON GRDSC.intDiscountScheduleId = GCR.intDiscountScheduleId 
+											INNER JOIN tblQMTicketDiscount QM ON QM.intDiscountScheduleCodeId = GRDSC.intDiscountScheduleCodeId AND QM.strSourceType = 'Scale' AND QM.intTicketId = SC.intTicketId
+											INNER JOIN tblICInventoryShipmentItem ICS ON ICS.intSourceId = SC.intTicketId
+											INNER JOIN tblICInventoryShipmentCharge IC ON IC.intChargeId = GRDSC.intItemId AND IC.intInventoryShipmentId = ICS.intInventoryShipmentId
+											WHERE SC.intTicketId = @intTicketId
+											  AND ICS.intInventoryShipmentId = @intInventoryShipmentId
+											  AND E.intItemId = IC.intChargeId
+											GROUP BY SC.intTicketId, QM.intTicketDiscountId, IC.intCostUOMId, IC.intChargeId
+										) SC
+										WHERE intInventoryShipmentChargeId IS NOT NULL										
 									END
 
 								UPDATE @EntriesForInvoice
@@ -982,16 +1008,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, dblUnitPrice
 									, strPricing
 									, ysnRefreshPrice
-									, dblMaintenanceAmount
-									, dblLicenseAmount
 									, ysnRecomputeTax
 									, intInventoryShipmentItemId
+									, intInventoryShipmentChargeId
 									, strShipmentNumber
 									, strSalesOrderNumber
 									, intContractDetailId
-									, dblNewMeterReading
-									, dblPreviousMeterReading
-									, dblConversionFactor
 									, ysnClearDetailTaxes
 									, dblSubCurrencyRate
 									, intStorageLocationId
@@ -1032,36 +1054,117 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intItemUOMId
 									, intPriceUOMId
 									, dblContractPriceUOMQty
-									, dblQtyShipped				= @dblQuantity
+									, dblQtyShipped					= @dblQuantity
 									, dblDiscount
 									, dblItemWeight
 									, intItemWeightUOMId
-									, dblPrice					= @dblFinalPrice
-									, dblUnitPrice				= @dblFinalPrice
+									, dblPrice						= @dblFinalPrice
+									, dblUnitPrice					= @dblFinalPrice
 									, strPricing
 									, ysnRefreshPrice
-									, dblMaintenanceAmount
-									, dblLicenseAmount
 									, ysnRecomputeTax
 									, intInventoryShipmentItemId
+									, intInventoryShipmentChargeId	= NULL
 									, strShipmentNumber
 									, strSalesOrderNumber
 									, intContractDetailId
-									, dblNewMeterReading
-									, dblPreviousMeterReading
-									, dblConversionFactor
 									, ysnClearDetailTaxes
 									, dblSubCurrencyRate
 									, intStorageLocationId
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
-									, intPriceFixationDetailId	= @intPriceFixationDetailId
+									, intPriceFixationDetailId		= @intPriceFixationDetailId
 								FROM @EntriesForInvoice
 								WHERE intId = @intInvoiceEntriesId
 
+								UNION ALL
+
+								SELECT strSourceTransaction
+									, intSourceId
+									, strSourceId
+									, intEntityCustomerId
+									, intCompanyLocationId
+									, intCurrencyId						= E.intCurrencyId
+									, intPeriodsToAccrue
+									, dtmDate
+									, dtmShipDate
+									, intEntitySalespersonId
+									, intFreightTermId
+									, strBOLNumber
+									, strComments
+									, intShipToLocationId
+									, ysnTemplate
+									, ysnForgiven
+									, ysnCalculated
+									, ysnSplitted
+									, intContractHeaderId
+									, intEntityId
+									, ysnResetDetails
+									, ysnRecap
+									, ysnPost
+									, intItemId							= C.intChargeId
+									, intTicketId
+									, ysnInventory
+									, strDocumentNumber
+									, strItemDescription				= I.strDescription
+									, intOrderUOMId						= C.intCostUOMId
+									, dblQtyOrdered						= 0
+									, intItemUOMId						= C.intCostUOMId
+									, intPriceUOMId						= C.intCostUOMId
+									, dblContractPriceUOMQty
+									, dblQtyShipped						= 1
+									, dblDiscount
+									, dblItemWeight
+									, intItemWeightUOMId
+									, dblPrice							= dbo.fnSCCalculateDiscount(E.intTicketId, SC.intTicketDiscountId, @dblQuantity, intItemUOMId, 0) * -1
+									, dblUnitPrice						= dbo.fnSCCalculateDiscount(E.intTicketId, SC.intTicketDiscountId, @dblQuantity, intItemUOMId, 0) * -1
+									, strPricing
+									, ysnRefreshPrice
+									, ysnRecomputeTax
+									, intInventoryShipmentItemId		= NULL
+									, intInventoryShipmentChargeId		= C.intInventoryShipmentChargeId
+									, strShipmentNumber
+									, strSalesOrderNumber
+									, intContractDetailId				= E.intContractDetailId
+									, ysnClearDetailTaxes
+									, dblSubCurrencyRate
+									, intStorageLocationId
+									, intCompanyLocationSubLocationId
+									, intSubLocationId
+									, intPriceFixationDetailId			= NULL
+								FROM (
+									SELECT TOP 1 *
+									FROM @EntriesForInvoice E
+									WHERE E.intInventoryShipmentItemId IS NOT NULL
+									  AND intId = @intInvoiceEntriesId
+								) E
+								CROSS APPLY (
+									SELECT TOP 1 intInventoryShipmentChargeId
+										       , intChargeId
+											   , intCostUOMId
+									FROM tblICInventoryShipmentCharge C 
+									WHERE C.intInventoryShipmentId = @intInventoryShipmentId
+									  AND C.ysnPrice = 1
+								) C
+								INNER JOIN tblICItem I ON C.intChargeId = I.intItemId
+								CROSS APPLY (
+									SELECT QM.intTicketDiscountId
+									FROM tblSCTicket SC
+									INNER JOIN tblGRDiscountCrossReference GCR ON GCR.intDiscountId = SC.intDiscountId
+									INNER JOIN tblGRDiscountSchedule GRDS ON GRDS.intDiscountScheduleId = GCR.intDiscountScheduleId AND GRDS.intCommodityId = SC.intCommodityId
+									INNER JOIN tblGRDiscountScheduleCode GRDSC ON GRDSC.intDiscountScheduleId = GCR.intDiscountScheduleId 
+									INNER JOIN tblQMTicketDiscount QM ON QM.intDiscountScheduleCodeId = GRDSC.intDiscountScheduleCodeId AND QM.strSourceType = 'Scale' AND QM.intTicketId = SC.intTicketId
+									INNER JOIN tblICInventoryShipmentItem ICS ON ICS.intSourceId = SC.intTicketId
+									INNER JOIN tblICInventoryShipmentCharge IC ON IC.intChargeId = GRDSC.intItemId AND IC.intInventoryShipmentId = ICS.intInventoryShipmentId
+									WHERE SC.intTicketId = @intTicketId
+									  AND ICS.intInventoryShipmentId = @intInventoryShipmentId
+									  AND C.intChargeId = IC.intChargeId
+									GROUP BY SC.intTicketId, QM.intTicketDiscountId, IC.intCostUOMId, IC.intChargeId
+								) SC
+
 								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
 							END
-
+												
 						UPDATE #FIXATION 
 						SET ysnProcessed = CAST(1 AS BIT)
 						WHERE intPriceFixationId = @intPriceFixationId
