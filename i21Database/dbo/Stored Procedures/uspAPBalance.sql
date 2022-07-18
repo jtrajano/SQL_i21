@@ -69,7 +69,9 @@ SELECT * FROM (
 				SELECT     
 				intBillId    
 				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue    
-			FROM (SELECT * FROM dbo.vyuAPPayablesForeign) tmpAPPayables     
+			FROM (SELECT * FROM dbo.vyuAPPayablesForeign
+			 WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
+			) tmpAPPayables     
 			GROUP BY intBillId
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
