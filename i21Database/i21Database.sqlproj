@@ -958,6 +958,7 @@
     <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
