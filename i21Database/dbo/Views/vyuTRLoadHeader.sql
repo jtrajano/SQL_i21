@@ -46,6 +46,7 @@ SELECT TL.intLoadHeaderId
 	, strStateName = e.strStateName
 	, strTractor = dr.strData
 	, strSalesUnit = NULL
+	, strInvoiceType = NULL
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityVendorId] = TR.intTerminalId
@@ -104,6 +105,7 @@ SELECT TL.intLoadHeaderId
 	, strStateName = e.strStateName
 	, strTractor = dr.strData
 	, strSalesUnit = EL.strSaleUnits
+	, strInvoiceType = Invoice.strType
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
