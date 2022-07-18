@@ -720,6 +720,8 @@ BEGIN TRY
 	AND tblCFInvoiceReportTieredUnitDiscountTempTable.[intTransactionId] = tblCFInvoiceStagingTable.[intTransactionId]
 	AND tblCFInvoiceReportTieredUnitDiscountTempTable.strUserId = @UserId 
 
+
+
 	--AZ TAX--
 	DECLARE @intAZTaxCodeId INT 
 	SELECT TOP 1 @intAZTaxCodeId = intAZTaxCodeId FROM tblCFCompanyPreference
