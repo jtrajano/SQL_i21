@@ -390,7 +390,7 @@ BEGIN TRY
 			,[strWarrantNo] = L.strWarrantNo
 			,[intWarrantStatus] = L.intWarrantStatus
 			,[strReferenceNo] = L.strTradeFinanceReferenceNo
-			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[intOverrideFacilityValuation] = L.intBankValuationRuleId
 			,[strComments] = L.strTradeFinanceComments
 
 			,[intEntityVendorId] = LD.intVendorEntityId
@@ -1066,7 +1066,7 @@ BEGIN TRY
 			,[strWarrantNo] = NULL
 			,[intWarrantStatus] = NULL
 			,[strReferenceNo] = L.strTradeFinanceReferenceNo
-			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[intOverrideFacilityValuation] = L.intBankValuationRuleId
 			,[strComments] = L.strTradeFinanceComments
 
 			,[intEntityVendorId] = LD.intVendorEntityId
