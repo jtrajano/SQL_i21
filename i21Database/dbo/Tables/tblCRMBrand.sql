@@ -18,6 +18,7 @@
 	[intVendorId]			INT				NULL,
 	[intVendorContactId]	INT				NULL,
 	[strNote]				NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	[dtmServerStartTime]			DATETIME		NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCRMBrand] PRIMARY KEY CLUSTERED ([intBrandId] ASC),
 	CONSTRAINT [FK_tblCRMBrand_tblCRMBrandMaintenance_intBrandMaintenanceId] FOREIGN KEY ([intBrandMaintenanceId]) REFERENCES [dbo].[tblCRMBrandMaintenance] ([intBrandMaintenanceId]),
