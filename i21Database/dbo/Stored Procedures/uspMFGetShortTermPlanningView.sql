@@ -95,6 +95,7 @@ BEGIN
 		,intLocationId INT
 		,dblQty NUMERIC(18, 0)
 		,intAttributeId INT
+		,intLoadContainerId INT
 		)
 
 	CREATE TABLE #tblMFShortTermDemand (
@@ -186,11 +187,13 @@ BEGIN
 		)
 	SELECT Inv.intItemId
 		,Inv.intLocationId
-		,Inv.dblQty / IsNULL(CASE 
+		,(
+			CASE 
 				WHEN F.dblQty = 0
-					THEN 1
-				ELSE F.dblQty
-				END, 1)
+					THEN 0
+				ELSE Inv.dblQty / F.dblQty
+				END
+			) * 30
 		,4 AS intAttributeId -->DOH
 	FROM #tblMFShortTermDemand Inv
 	LEFT JOIN #tblMFShortTermDemand F ON F.intItemId = Inv.intItemId
@@ -206,6 +209,7 @@ BEGIN
 		,intLocationId
 		,dblQty
 		,intAttributeId
+		,intLoadContainerId
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
@@ -217,6 +221,7 @@ BEGIN
 				ELSE 7 -->Not Approved Qty
 				END
 			) AS intAttributeId
+		,LC.intLoadContainerId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
@@ -255,18 +260,22 @@ BEGIN
 		,SUM(dblQty)
 		,intAttributeId
 	FROM #tblMFPreShortTermDemand
+	WHERE intAttributeId IN (
+			5
+			,6
+			)
 	GROUP BY intItemId
 		,intLocationId
 		,intAttributeId
 
-	DELETE
-	FROM #tblMFPreShortTermDemand
-
+	--DELETE
+	--FROM #tblMFPreShortTermDemand
 	INSERT INTO #tblMFPreShortTermDemand (
 		intItemId
 		,intLocationId
 		,dblQty
 		,intAttributeId
+		,intLoadContainerId
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
@@ -278,6 +287,7 @@ BEGIN
 				ELSE 9 -->Arrived in Port
 				END
 			) AS intAttributeId
+		,LC.intLoadContainerId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
@@ -300,6 +310,17 @@ BEGIN
 		AND S.intLoadDetailContainerLinkId IS NULL
 		AND LC.intLoadWarehouseContainerId IS NULL
 		AND L.ysnArrivedInPort = 1
+		AND NOT EXISTS (
+			SELECT *
+			FROM #tblMFPreShortTermDemand PS
+			WHERE PS.intLoadContainerId = LDCL.intLoadContainerId
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
 
 	INSERT INTO #tblMFShortTermDemand (
 		intItemId
@@ -312,6 +333,10 @@ BEGIN
 		,SUM(dblQty)
 		,intAttributeId
 	FROM #tblMFPreShortTermDemand
+	WHERE intAttributeId IN (
+			8
+			,9
+			)
 	GROUP BY intItemId
 		,intLocationId
 		,intAttributeId
@@ -320,14 +345,14 @@ BEGIN
 	FROM tblCTCondition
 	WHERE strConditionName = 'CBS'
 
-	DELETE
-	FROM #tblMFPreShortTermDemand
-
+	--DELETE
+	--FROM #tblMFPreShortTermDemand
 	INSERT INTO #tblMFPreShortTermDemand (
 		intItemId
 		,intLocationId
 		,dblQty
 		,intAttributeId
+		,intLoadContainerId
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
@@ -340,6 +365,7 @@ BEGIN
 					THEN 10 -->Scheduled
 				END
 			) AS intAttributeId
+		,LDCL.intLoadContainerId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
@@ -355,6 +381,17 @@ BEGIN
 			1
 			,4
 			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM #tblMFPreShortTermDemand PS
+			WHERE PS.intLoadContainerId = LDCL.intLoadContainerId
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
 
 	INSERT INTO #tblMFShortTermDemand (
 		intItemId
@@ -367,6 +404,10 @@ BEGIN
 		,SUM(dblQty)
 		,intAttributeId
 	FROM #tblMFPreShortTermDemand
+	WHERE intAttributeId IN (
+			10
+			,11
+			)
 	GROUP BY intItemId
 		,intLocationId
 		,intAttributeId
@@ -379,7 +420,7 @@ BEGIN
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
-		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0))) AS dblQty
+		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblQty
 		,12 AS intAttributeId -->Late Open Contracts
 	FROM tblCTContractDetail SS
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
@@ -390,7 +431,7 @@ BEGIN
 			,4
 			)
 		AND SS.dtmUpdatedAvailabilityDate < @dtmCurrentMonthStartDate
-		AND SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0) > 0
+		AND SS.dblBalance > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 
@@ -444,6 +485,17 @@ BEGIN
 			)
 		AND L.ysnArrivedInPort <> 1
 		AND L.dtmETAPOD IS NULL
+		AND NOT EXISTS (
+			SELECT *
+			FROM #tblMFPreShortTermDemand PS
+			WHERE PS.intLoadContainerId = LDCL.intLoadContainerId
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 

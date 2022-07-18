@@ -33,11 +33,10 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,CASE 
 		WHEN D.intAttributeId = 5
 			THEN D.dblQty
-		WHEN D.intAttributeId IN (
-				12
-				,13
-				)
-			THEN CD.dblQuantity- IsNULL(CD.dblScheduleQty, 0) 
+		WHEN D.intAttributeId =12
+			THEN CD.dblBalance
+		WHEN D.intAttributeId =13
+			THEN CD.dblQuantity - IsNULL(CD.dblScheduleQty, 0)
 		ELSE LC.dblQuantity
 		END dblQty
 	,CASE 
@@ -48,10 +47,9 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,CASE 
 		WHEN D.intAttributeId = 5
 			THEN D.dblWeight
-		WHEN D.intAttributeId IN (
-				12
-				,13
-				)
+		WHEN D.intAttributeId =12
+			THEN dbo.fnMFConvertQuantityToTargetItemUOM(CD.intItemUOMId ,CD.intNetWeightUOMId , CD.dblBalance)
+		WHEN D.intAttributeId =13
 			THEN CD.dblNetWeight
 		ELSE LC.dblNetWt
 		END AS dblWeight
@@ -120,12 +118,12 @@ FROM tblMFShortTermPlanningViewDetail D
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = D.intLoadContainerId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = D.intLocationId
-JOIN tblCTContractDetail CD ON CD.intContractDetailId = D.intContractDetailId
-JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = D.intContractDetailId
+LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = D.intItemId
 LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intOriginId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intNetWeightUOMId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure LCIU ON LCIU.intUnitMeasureId = CD.intUnitMeasureId
 JOIN tblICCommodity Comm ON Comm.intCommodityId = I.intCommodityId
@@ -141,3 +139,6 @@ OUTER APPLY (
 	JOIN tblICCertification C2 ON C2.intCertificationId = IC.intCertificationId
 		AND IC.intItemId = I.intItemId
 	) C2
+GO
+
+
