@@ -20,6 +20,7 @@ AS
 		  ,intVendorId					= Brand.intVendorId
 		  ,intVendorContactId			= Brand.intVendorContactId
 		  ,strNote						= Brand.strNote
+		  ,dtmServerStartTime			= Brand.dtmServerStartTime
 		  ,intConcurrencyId				= Brand.intConcurrencyId
 		  ,strVendorName				= Vendor.strName
 		  ,strVendorContactName			= VendorContact.strName
