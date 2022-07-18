@@ -771,7 +771,7 @@ BEGIN TRY
 		0 AS intId
 		,[strType] 								= IE.strType
 		,[strSourceTransaction]					= IE.strSourceTransaction
-		,[intLoadDistributionDetailId]			= NULL
+		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		,[intSourceId]							= IE.intSourceId
 		,[strSourceId]							= IE.strSourceId
 		,[intInvoiceId]							= IE.intInvoiceId --NULL Value will create new invoice
@@ -1118,7 +1118,8 @@ BEGIN TRY
 			,[ysnClearDetailTaxes]					
 			,[intTempDetailIdForTaxes]
 			,[strBOLNumberDetail]
-			,[ysnBlended])
+			,[ysnBlended]
+			,[intLoadDistributionDetailId])
 		SELECT
 			[strSourceTransaction]					= IE.strSourceTransaction
 			,[intSourceId]							= IE.intSourceId
@@ -1196,6 +1197,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
+			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnComboFreight = 0 AND IE.intId > 0)
@@ -1277,6 +1279,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
+			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnComboFreight = 1 AND IE.intId > 0)
@@ -1353,6 +1356,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[intLoadDistributionDetailId]
 	)
 	SELECT 
 		[strSourceTransaction]					= IE.strSourceTransaction
@@ -1424,6 +1428,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
 		,[ysnImpactInventory]                   = ISNULL(IE.ysnImpactInventory,0)
 		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
+		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]
 		,[strSourceId]
@@ -1490,6 +1495,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[intLoadDistributionDetailId]
 
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
