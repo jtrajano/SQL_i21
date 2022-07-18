@@ -3,6 +3,9 @@
 	[intDispatchOrderRouteId] INT NOT NULL IDENTITY(1, 1), 
 	[intDispatchOrderId] INT NOT NULL, 
 	[intDispatchOrderDetailId] INT NULL,
+	[intEntityShipViaTruckId] INT NULL,
+	[intDriverEntityId] INT NULL, 
+
 	[intRouteSeq] INT NULL,
 	[intStopType] INT NULL,
 	[dtmStartTime] DATETIME NULL,
