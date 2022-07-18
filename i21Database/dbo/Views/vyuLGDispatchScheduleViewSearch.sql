@@ -4,10 +4,10 @@ SELECT
 	DOR.intDispatchOrderId
 	,DOR.intDispatchOrderRouteId
 	,DOD.intDispatchOrderDetailId
-	,DO.intDriverEntityId
+	,DOR.intDriverEntityId
 	,DO.intEntityShipViaId
 	,DO.intEntityShipViaTrailerId
-	,DO.intEntityShipViaTruckId
+	,DOR.intEntityShipViaTruckId
 	,DOD.intEntityId
 	,DOD.intEntityLocationId
 	,intSiteId = DOD.intTMSiteId
@@ -53,8 +53,8 @@ FROM tblLGDispatchOrderRoute DOR
 LEFT JOIN tblLGDispatchOrderDetail DOD ON DOD.intDispatchOrderDetailId = DOR.intDispatchOrderDetailId
 LEFT JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOR.intDispatchOrderId
 LEFT JOIN tblSMShipVia SV ON SV.intEntityId = DO.intEntityShipViaId
-LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = DO.intEntityShipViaTruckId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = DOR.intEntityShipViaTruckId
 LEFT JOIN tblSMShipViaTrailer SVTL ON SVTL.intEntityShipViaTrailerId = DO.intEntityShipViaTrailerId
-LEFT JOIN tblEMEntity DV ON DV.intEntityId = DO.intDriverEntityId
+LEFT JOIN tblEMEntity DV ON DV.intEntityId = DOR.intDriverEntityId
 
 GO
