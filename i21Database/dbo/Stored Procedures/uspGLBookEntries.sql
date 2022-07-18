@@ -100,6 +100,7 @@ BEGIN
 			,[intConcurrencyId]
 			,[ysnPostAction]
 			,dtmDateEnteredMin
+			,[intCompanyLocationId]
 			,[intLedgerId]
 	)
 	SELECT 
@@ -148,6 +149,7 @@ BEGIN
 			,GLEntries.[intConcurrencyId]
 			,@ysnPost
 			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
+			,[intCompanyLocationId]
 			,[intLedgerId]
 	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit

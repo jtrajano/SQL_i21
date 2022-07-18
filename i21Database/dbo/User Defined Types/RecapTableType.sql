@@ -53,6 +53,7 @@
     strNewAccountIdOverride NVARCHAR(40) Collate Latin1_General_CI_AS NULL,
     intNewAccountIdOverride INT NULL,
     strOverrideAccountError NVARCHAR(800) Collate Latin1_General_CI_AS NULL,
+    intCompanyLocationId INT NULL,
 	[intLedgerId] INT NULL
 )
 

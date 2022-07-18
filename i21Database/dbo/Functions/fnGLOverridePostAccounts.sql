@@ -62,6 +62,7 @@ RETURNS
     strNewAccountIdOverride nvarchar(40) Collate Latin1_General_CI_AS,  
     intNewAccountIdOverride INT,  
     strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS,
+    [intCompanyLocationId] INT,
 	[intLedgerId] INT NULL  
 )  
 AS  
@@ -119,6 +120,7 @@ INSERT INTO @tbl (
  strNewAccountIdOverride,  
  intNewAccountIdOverride,  
  strOverrideAccountError,
+ intCompanyLocationId,
  intLedgerId
 )  
 SELECT   
@@ -172,6 +174,7 @@ SELECT
  strNewAccountIdOverride,  
  intNewAccountIdOverride,  
  strOverrideAccountError,
+ intCompanyLocationId,
  intLedgerId
 from @PostGLEntries  
   
