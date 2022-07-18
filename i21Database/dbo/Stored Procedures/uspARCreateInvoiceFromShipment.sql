@@ -1087,7 +1087,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intStorageLocationId
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
-									, intPriceFixationDetailId	= @intPriceFixationDetailId
+									, intPriceFixationDetailId		= @intPriceFixationDetailId
 								FROM @EntriesForInvoice
 								WHERE intId = @intInvoiceEntriesId
 
