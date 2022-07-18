@@ -61,7 +61,8 @@ RETURNS
     intCompanySegmentOverrideId INT,  
     strNewAccountIdOverride nvarchar(40) Collate Latin1_General_CI_AS,  
     intNewAccountIdOverride INT,  
-    strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS  
+    strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS,
+    [intCompanyLocationId] INT
 )  
 AS  
 BEGIN  
@@ -117,7 +118,8 @@ INSERT INTO @tbl (
  intCompanySegmentOverrideId,  
  strNewAccountIdOverride,  
  intNewAccountIdOverride,  
- strOverrideAccountError  
+ strOverrideAccountError,
+ intCompanyLocationId
 )  
 SELECT   
     dtmDate,  
@@ -169,7 +171,8 @@ SELECT
  intCompanySegmentOverrideId,  
  strNewAccountIdOverride,  
  intNewAccountIdOverride,  
- strOverrideAccountError  
+ strOverrideAccountError,
+ intCompanyLocationId
 from @PostGLEntries  
   
   
