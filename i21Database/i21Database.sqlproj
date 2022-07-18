@@ -1048,6 +1048,7 @@
     <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
     <Build Include="dbo\Views\vyuSMUserList.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleList.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
