@@ -537,6 +537,77 @@ BEGIN
 				,glResult.[strAccountDescription]
 			)
 		;
+
+		IF EXISTS (SELECT TOP 1 1 FROM @glTransactions)
+		BEGIN
+			MERGE INTO #uspICValidateICAmountVsGLAmount_result 
+			AS result
+			USING (
+				SELECT 
+					[strTransactionType] = gd.strTransactionType
+					,[strTransactionId] = gd.strTransactionId
+					,[strBatchId] = gd.strBatchId
+					,[intAccountId] = gd.intAccountId 
+					,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
+					,[strAccountDescription] = ga.strDescription
+				FROM	
+					tblGLDetail gd INNER JOIN @glTransactions glTrans
+						ON gd.strTransactionId = glTrans.strTransactionId
+						AND gd.strBatchId = glTrans.strBatchId 
+					INNER JOIN tblGLAccount ga
+						ON gd.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegmentMapping gs
+						ON gs.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegment gm
+						ON gm.intAccountSegmentId = gs.intAccountSegmentId
+					INNER JOIN tblGLAccountCategory ac 
+						ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+				WHERE 
+					(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
+					AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+					AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+					AND gd.ysnIsUnposted = 0 
+					AND 1 = 
+						CASE 
+							WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+							--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+							WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+							WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+							ELSE 0 
+						END 
+				GROUP BY 				
+					gd.strTransactionType
+					,gd.strTransactionId
+					,gd.strBatchId
+					,gd.intAccountId 
+					,ga.strDescription
+			) AS glResult 
+				ON 
+					result.strTransactionId = glResult.strTransactionId
+					AND result.strBatchId = glResult.strBatchId
+					AND result.strTransactionType = glResult.strTransactionType
+					AND result.intAccountId = glResult.intAccountId
+				
+			WHEN MATCHED THEN 
+				UPDATE 
+				SET 
+					dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
+
+			WHEN NOT MATCHED THEN
+				INSERT (
+					strTransactionType 
+					,strTransactionId
+					,dblGLAmount
+					,strAccountDescription
+				)	 
+				VALUES (
+					glResult.[strTransactionType]
+					,glResult.[strTransactionId]
+					,glResult.[dblGLAmount]
+					,glResult.[strAccountDescription]
+				)
+			;
+		END 
 	END 
 	ELSE 
 	BEGIN	
@@ -633,7 +704,9 @@ BEGIN
 		,gd.strBatchId
 		,gd.dtmDate
 		,gd.dblDebit
-		,gd.dblCredit	
+		,gd.dblCredit
+		,gd.intAccountId
+		,gd.dtmDateEntered
 	from tblGLDetail gd 
 	where gd.strTransactionId = @strTransactionId
 	order by gd.intJournalLineNo
@@ -645,10 +718,24 @@ BEGIN
 		,gd.strBatchId
 		,gd.dtmDate
 		,gd.dblDebit
-		,gd.dblCredit	
+		,gd.dblCredit
+		,gd.intAccountId
+		,gd.dtmDateEntered
 	from @GLEntries gd 
 	where gd.strTransactionId = @strTransactionId
 	order by gd.intJournalLineNo
+
+	select 
+		'@GLEntries 2'
+		,gd.intJournalLineNo
+		,gd.strTransactionId
+		,gd.strBatchId
+		,gd.dtmDate
+		,gd.dblDebit
+		,gd.dblCredit
+		,gd.intAccountId
+		,gd.dtmDateEntered
+	from @GLEntries gd 
 	**/
  
 	DECLARE @difference AS NUMERIC(18, 6) 

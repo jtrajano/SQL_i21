@@ -8156,7 +8156,12 @@
     <Build Include="dbo\Views\vyuICGetInventoryValuationAsCommodityStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
     <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />    
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql" />
+    <Build Include="dbo\Tables\tblICItemCategoryChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildStocksWithCategoryChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

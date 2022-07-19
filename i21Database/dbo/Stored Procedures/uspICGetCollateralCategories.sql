@@ -60,7 +60,7 @@ FROM
 			t2.strTransactionId = t.strTransactionId
 			AND t2.ysnIsUnposted = 0 
 			AND i2.intItemId <> t.intItemId
-			AND t2.dblQty > 0 
+			--AND t2.dblQty > 0 
 			AND 1 = 
 				CASE 
 					WHEN 
@@ -80,7 +80,7 @@ FROM
 WHERE
 	i.intCategoryId = @intCategoryId
 	AND t.ysnIsUnposted = 0 
-	AND t.dblQty < 0 
+	--AND t.dblQty < 0 
 	AND ty.strName IN (
 		'Inventory Adjustment - Item Change'
 		,'Consume'
@@ -101,7 +101,7 @@ BEGIN
 		tblICInventoryTransaction t INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
 		INNER JOIN #tmpCollateralCategories c
-			ON t.intCategoryId = c.intCategoryId
+			ON i.intCategoryId = c.intCategoryId
 		INNER JOIN tblICInventoryTransactionType ty
 			ON ty.intTransactionTypeId = t.intTransactionTypeId
 		CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
@@ -122,7 +122,7 @@ BEGIN
 				AND t2.ysnIsUnposted = 0 
 				AND i2.intCategoryId <> i.intCategoryId
 				AND i2.intCategoryId <> @intCategoryId
-				AND t2.dblQty > 0 
+				--AND t2.dblQty > 0 
 				AND 1 = 
 					CASE 
 						WHEN 
@@ -142,7 +142,7 @@ BEGIN
 		) collateralItem
 	WHERE
 		t.ysnIsUnposted = 0
-		AND t.dblQty < 0 
+		--AND t.dblQty < 0 
 		AND ty.strName IN (
 			'Inventory Adjustment - Item Change'
 			,'Consume'
@@ -163,3 +163,26 @@ SELECT DISTINCT
 FROM 
 	#tmpCollateralCategories c INNER JOIN tblICCategory cat
 		ON cat.intCategoryId = c.intCategoryId
+	OUTER APPLY (
+		SELECT 
+			dtmDate = MIN(tblSequenced.dtmDate) 
+		FROM (
+				SELECT 
+					t.dtmDate
+					,correctSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.dtmDate, t.intInventoryTransactionId)
+					,actualSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.intInventoryTransactionId)
+				FROM 
+					tblICInventoryTransaction t INNER JOIN tblICItem i 
+						ON t.intItemId = i.intItemId
+				WHERE
+					i.intCategoryId = cat.intCategoryId
+					AND t.dblQty <> 0 
+					AND t.dblValue = 0  
+					AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
+			)
+			AS tblSequenced
+		WHERE
+			tblSequenced.correctSeq <> tblSequenced.actualSeq
+	) outOfSequence
+WHERE
+	outOfSequence.dtmDate IS NOT NULL 
