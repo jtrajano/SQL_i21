@@ -1049,6 +1049,9 @@
     <Build Include="dbo\Views\vyuSMUserList.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleList.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTranslogFuelComputation.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogFuelComputation.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelSalesByGradeAndPricePoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11191,7 +11194,7 @@
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />    
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
