@@ -11117,6 +11117,7 @@
     <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_RemoveOldPowerBIData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
