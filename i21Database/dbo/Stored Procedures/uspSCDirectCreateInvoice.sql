@@ -1047,6 +1047,7 @@ BEGIN TRY
 										,@_dblQty = dblScheduleQty
 										,@_intContractDetailId = intContractDetailId
 									FROM #tmpBasisContractUsed
+										WHERE intTicketContractUsed > @_intTicketContractUsed
 									ORDER BY intTicketContractUsed
 								END
 							END
