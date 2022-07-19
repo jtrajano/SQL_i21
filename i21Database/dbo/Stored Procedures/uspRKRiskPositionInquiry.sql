@@ -149,7 +149,8 @@ BEGIN
 	INSERT INTO @PricedContractList
 	SELECT fm.strFutureMonth
 		, strAccountNumber = strContractType + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(ca.strDescription, '') ELSE ISNULL(cv.strEntityName, '') END
-		, dblNoOfContract = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN ISNULL(dblBalance, 0) ELSE dblDetailQuantity END)
+		, dblNoOfContract = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN ISNULL(dblBalance, 0)
+				ELSE (CASE WHEN intContractStatusId = 6 THEN (ISNULL(dblDetailQuantity, 0) - ISNULL(dblBalance, 0)) ELSE dblDetailQuantity END) END)
 		, strTradeNo = LEFT(strContractType, 1) + ' - ' + strContractNumber + ' - ' + CONVERT(NVARCHAR, intContractSeq)
 		, TransactionDate = cv.dtmStartDate
 		, TranType = strContractType
