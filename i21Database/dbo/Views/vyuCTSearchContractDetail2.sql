@@ -323,7 +323,7 @@ SELECT a.intContractDetailId
 	-- Trade Finance
 	, a.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
 	, BK.strBankName
-	, BA.strBankAccountNo  COLLATE Latin1_General_CI_AS AS strBankAccountNo
+	, CBA.strBankAccountNo  COLLATE Latin1_General_CI_AS AS strBankAccountNo
 	, FA.strBorrowingFacilityId
 	, FA.strBankReferenceNo
 	, FL.strBorrowingFacilityLimit  COLLATE Latin1_General_CI_AS AS strBorrowingFacilityLimit
@@ -365,8 +365,8 @@ LEFT JOIN tblCTContractStatus p WITH(NOLOCK) ON p.intContractStatusId = a.intCon
 LEFT JOIN shipmentstatus r ON r.intContractDetailId = a.intContractDetailId
 
 	-- Trade Finance
-	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = a.intBankAccountId
-	LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
+	LEFT JOIN vyuCMBankAccount CBA ON CBA.intBankAccountId = a.intBankAccountId
+	LEFT JOIN tblCMBank BK ON BK.intBankId = CBA.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = a.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = a.intBorrowingFacilityLimitId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = a.intBorrowingFacilityLimitDetailId
