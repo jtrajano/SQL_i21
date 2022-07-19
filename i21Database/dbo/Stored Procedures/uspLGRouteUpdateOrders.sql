@@ -6,19 +6,50 @@ AS
 
 DECLARE @OrdersFromRouting AS RouteOrdersTableType
 
-BEGIN TRY
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-	DECLARE		@ErrMsg		NVARCHAR(MAX);
+	DECLARE		@ErrMsg		NVARCHAR(MAX) = NULL;
 	DECLARE		@intSourceType INT;
 
 	IF @ysnPost = 1 
 	BEGIN
+		/* Check for TM Orders that are already posted on another LCR */
+		SELECT TOP 1 @ErrMsg = 'Unable to Post. Order Number ' + LTRIM(RTRIM(TMD.strOrderNumber))  + ' is already Routed for another record.'
+		FROM tblLGRouteOrder RO LEFT JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = RO.intDispatchID 
+		WHERE R.intSourceType = 2 AND RO.intDispatchID IS NOT NULL AND TMD.strWillCallStatus IN ('Routed') AND R.intRouteId = @intRouteId
+
+		IF (@ErrMsg IS NOT NULL)
+		BEGIN
+			RAISERROR (@ErrMsg,16,1,'WITH NOWAIT') 
+			RETURN 0; 
+		END
+
+		/* Check for TM Orders that are already Delivered */
+		SELECT TOP 1 @ErrMsg = 'Unable to Post. Order Number ' + LTRIM(RTRIM(TMD.strOrderNumber))  + ' is already Routed for another record.'
+		FROM tblLGRouteOrder RO LEFT JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = RO.intDispatchID 
+		WHERE R.intSourceType = 2 AND RO.intDispatchID IS NOT NULL AND TMD.strWillCallStatus IN ('Delivered') AND R.intRouteId = @intRouteId
+
+		IF (@ErrMsg IS NOT NULL)
+		BEGIN
+			RAISERROR (@ErrMsg,16,1,'WITH NOWAIT') 
+			RETURN 0; 
+		END
+
+		/* Check for TM Orders that no longer exists */
+		SELECT TOP 1 @ErrMsg = 'Unable to Post. Order Number ' + LTRIM(RTRIM(RO.strOrderNumber))  + ' no longer exists or is already Completed.'
+		FROM tblLGRouteOrder RO LEFT JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = RO.intDispatchID 
+		WHERE R.intSourceType = 2 AND RO.intDispatchID IS NOT NULL AND TMD.intDispatchID IS NULL AND R.intRouteId = @intRouteId
+
+		IF (@ErrMsg IS NOT NULL)
+		BEGIN
+			RAISERROR (@ErrMsg,16,1,'WITH NOWAIT') 
+			RETURN 0; 
+		END
+
 		INSERT INTO @OrdersFromRouting
 			(
 				intOrderId
@@ -96,11 +127,4 @@ SET ANSI_WARNINGS OFF
 
 			UPDATE tblLGRoute SET ysnPosted = @ysnPost, dtmPostedDate=NULL WHERE intRouteId = @intRouteId
 	END
-END TRY
-
-BEGIN CATCH
-
-	SET @ErrMsg = 'uspLGRouteUpdateOrders - ' + ERROR_MESSAGE()  
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
-	
-END CATCH
+GO
