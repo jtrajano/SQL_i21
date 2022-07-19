@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGetXmlNamespace]
 	@intStoreNo INT
-	, @strFilePrefix NVARCHAR(20)
+	, @strFilePrefix NVARCHAR(25)
 	, @strRegisterClass NVARCHAR(50) OUTPUT
 	, @strXmlNamespace NVARCHAR(50) OUTPUT
 	, @stri21FolderPath NVARCHAR(500) OUTPUT
