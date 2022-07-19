@@ -11191,6 +11191,7 @@
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />    
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
