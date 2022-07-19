@@ -216,10 +216,10 @@ BEGIN TRY
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE ROUND((CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
+							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
 							END
-			,[dblAmount] = ROUND((CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity, 2)
-			,[intCostUOMId] = CV.intItemUOMId
+			,[dblAmount] = (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
+			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
 			,[ysnAccrue] = 1
@@ -879,10 +879,10 @@ BEGIN TRY
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE ROUND((CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
+							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
 							END
-			,[dblAmount] = ROUND((CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity, 2)
-			,[intCostUOMId] = CV.intItemUOMId
+			,[dblAmount] = (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
+			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
 			,[ysnAccrue] = 1
