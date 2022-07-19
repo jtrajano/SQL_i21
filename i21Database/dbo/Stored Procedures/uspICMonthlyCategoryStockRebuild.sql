@@ -121,6 +121,11 @@ BEGIN TRY
 	SET il.intAllowNegativeInventory = 1
 	FROM tblICItemLocation il
 
+	-- Manually rebuild all the items where the categories has changed. 
+	EXEC uspICRebuildStocksWithCategoryChange
+		@dtmStartDate = @dtmStartDate
+		,@intUserId = @intUserId
+
 	-- Rebuild the stock (Incremental)
 	DECLARE @intReturnValue AS INT
 	EXEC @intReturnValue = uspICRebuildInventoryValuation

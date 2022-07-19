@@ -347,6 +347,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
 :r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
+:r .\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql
 
 
 -- Patronage

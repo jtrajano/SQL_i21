@@ -53,24 +53,6 @@ BEGIN
 	RETURN -80225; 
 END 
 
--- Create the backup header
-BEGIN 
-	DECLARE @strRemarks VARCHAR(200)
-	DECLARE @strRebuildFilter VARCHAR(50)	
-
-	SET @strRebuildFilter = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
-	SET @strRebuildFilter = (CASE WHEN @strCategoryCode IS NOT NULL THEN '"' + @strCategoryCode + '" category' ELSE @strRebuildFilter END)
-
-	SET @strRemarks = 'Rebuild inventory for ' + @strRebuildFilter + ' in a '+
-		(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
-		' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
-
-	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, strItemNo, strCategoryCode)
-	SELECT @dtmStartDate, @intUserId, 'Rebuild Inventory', @strRemarks, 1, GETDATE(), @strItemNo, @strCategoryCode
-
-	SET @intBackupId = SCOPE_IDENTITY()
-END 
-
 -- 'Unable to find an open fiscal year period to match the transaction date.'
 IF (dbo.isOpenAccountingDate(@dtmStartDate) = 0) 
 BEGIN 	
@@ -189,6 +171,53 @@ BEGIN
 		,intCategoryId
 	)
 	SELECT intItemId = NULL, intCategoryId = NULL 
+END 
+
+-- Create the backup header
+BEGIN 
+	DECLARE @strRemarks VARCHAR(200)
+	DECLARE @strRebuildFilter VARCHAR(50)	
+
+	IF EXISTS (SELECT c = count(1) FROM #tmpRebuildList HAVING count(1) > 1) 
+	BEGIN 
+		SET @strRebuildFilter = 'multiple items'
+	END 
+	ELSE 
+	BEGIN
+		SET @strRebuildFilter = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
+		SET @strRebuildFilter = (CASE WHEN @strCategoryCode IS NOT NULL THEN '"' + @strCategoryCode + '" category' ELSE @strRebuildFilter END)
+	END
+
+	SET @strRemarks = 'Rebuild inventory for ' + @strRebuildFilter + ' in a '+
+		(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
+		' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
+
+	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, strItemNo, strCategoryCode)
+	SELECT @dtmStartDate, @intUserId, 'Rebuild Inventory', @strRemarks, 1, GETDATE(), @strItemNo, @strCategoryCode
+
+	SET @intBackupId = SCOPE_IDENTITY()
+
+	IF @strRebuildFilter = 'multiple items' AND @intBackupId IS NOT NULL 
+	BEGIN 
+		INSERT INTO tblICBackupDetail (
+			[intBackupId]
+			,[intItemId]
+			,[intCategoryId]
+			,[strItemNo]
+			,[strCategoryCode]
+		)
+		SELECT 
+			[intBackupId] = @intBackupId
+			,[intItemId] = i.intItemId
+			,[intCategoryId] = c.intCategoryId
+			,[strItemNo] = i.strItemNo
+			,[strCategoryCode] = c.strCategoryCode 
+		FROM 
+			#tmpRebuildList list LEFT JOIN tblICItem i
+				ON list.intItemId = i.intItemId
+			LEFT JOIN tblICCategory c
+				ON list.intCategoryId = c.intCategoryId
+	END 
 END 
 
 -- Backup Inventory transactions 
@@ -5561,7 +5590,7 @@ BEGIN
 	UPDATE	tblICBackup 
 	SET		ysnRebuilding = 0
 			,dtmEnd = GETDATE()
-	WHERE intBackupId = @intBackupId
+	WHERE	intBackupId = @intBackupId
 END
 
 BEGIN 
