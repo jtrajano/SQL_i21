@@ -322,7 +322,7 @@ SELECT a.intContractDetailId
 	, strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 	-- Trade Finance
 	, a.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
-	, BK.strBankName
+	, CBK.strBankName
 	, CBA.strBankAccountNo  COLLATE Latin1_General_CI_AS AS strBankAccountNo
 	, FA.strBorrowingFacilityId
 	, FA.strBankReferenceNo
@@ -366,7 +366,7 @@ LEFT JOIN shipmentstatus r ON r.intContractDetailId = a.intContractDetailId
 
 	-- Trade Finance
 	LEFT JOIN vyuCMBankAccount CBA ON CBA.intBankAccountId = a.intBankAccountId
-	LEFT JOIN tblCMBank BK ON BK.intBankId = CBA.intBankId
+	LEFT JOIN tblCMBank CBK ON CBK.intBankId = CBA.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = a.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = a.intBorrowingFacilityLimitId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = a.intBorrowingFacilityLimitDetailId
