@@ -94,6 +94,7 @@
 	[intCustomerStorageId]					INT												NULL,
 	[intSiteDetailId]						INT												NULL,
 	[intLoadDetailId]						INT												NULL,
+	[intLoadDistributionDetailId]			INT												NULL,
 	[intLotId]								INT												NULL,
 	[intOriginalInvoiceDetailId]			INT												NULL,
 	[intConversionAccountId]				INT												NULL,
