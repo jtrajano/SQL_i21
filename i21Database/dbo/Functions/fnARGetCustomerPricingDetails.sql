@@ -122,7 +122,7 @@ BEGIN
 		,SP.strPriceBasis
 		,SP.strCustomerGroup
 		,SP.strCostToUse
-		,SP.dblDeviation + SP.dblDeviation2 + SP.dblDeviation3 + SP.dblDeviation4
+		,ISNULL(SP.dblDeviation, 0) + ISNULL(SP.dblDeviation2, 0) + ISNULL(SP.dblDeviation3, 0) + ISNULL(SP.dblDeviation4, 0)
 		,SP.strLineNote
 		,SP.intRackVendorId
 		,SP.intRackItemId
