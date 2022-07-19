@@ -51,7 +51,7 @@ BEGIN TRY
 						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 6)))  + ' ' + CY.strCurrency + ' Per ' + PM.strUnitMeasure AS NVARCHAR(100) ) collate Latin1_General_CI_AS,'') [Differential],
 						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CF.dblHedgeNoOfLots) + '/' + dbo.fnRemoveTrailingZeroes(CF.dblNoOfLots - CF.dblHedgeNoOfLots) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Fixed/Unfixed],
 						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CF.dblHedgeNoOfLots) + '/' + dbo.fnRemoveTrailingZeroes(CF.dblNoOfLots - CF.dblHedgeNoOfLots) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') AS [Hedge/Not Hedge],
-						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(ISNULL(CD.dblCashPrice,CF.dblHedgePrice) AS NUMERIC(18, 6)))  + ' ' + CY.strCurrency + ' Per ' + ISNULL(FM.strUnitMeasure,PM.strUnitMeasure) AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') [Final Price]
+						ISNULL(CAST(dbo.fnRemoveTrailingZeroes(CAST(ISNULL(CD.dblCashPrice,CF.dblHedgePrice) AS NUMERIC(18, 6)))  + ' ' + CY.strCurrency + ' Per ' + PM.strUnitMeasure AS NVARCHAR(100)) collate Latin1_General_CI_AS,'') [Final Price]
 				FROM	tblCTContractDetail			CD 
 				JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId				=	CD.intContractHeaderId	
 														AND CD.intContractDetailId				=	@intContractDetailId 
