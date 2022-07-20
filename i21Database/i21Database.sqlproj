@@ -1053,6 +1053,7 @@
     <Build Include="dbo\User Defined Types\StagingTransactionLogFuelComputation.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelSalesByGradeAndPricePoint.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketApply.sql" />
+    <Build Include="dbo\Views\vyuLGCustomerConsumptionSiteDevice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
