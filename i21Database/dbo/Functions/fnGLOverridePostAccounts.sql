@@ -101,6 +101,10 @@ SELECT
  intNewAccountIdOverride,  
  strOverrideAccountError
 from @PostGLEntries  
+
+IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 0 )
+    RETURN
+
   
   
 UPDATE A   
