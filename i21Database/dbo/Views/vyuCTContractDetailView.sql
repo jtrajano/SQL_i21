@@ -171,20 +171,31 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
+		
 		, CD.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
 		, CD.intBankAccountId
 		, BA.intBankId
 		, strBankName = BN.strBankName
 		, strBankAccountNo = BA.strBankAccountNo
-		, CD.intFacilityId
-		, strFacility = FA.strBorrowingFacilityId
-		, CD.intLoanLimitId
-		, strLoanLimit = BL.strBankLoanId
-		, strLoanReferenceNo = BL.strLimitDescription COLLATE Latin1_General_CI_AS
+		, CD.intBorrowingFacilityId
+		, FA.strBorrowingFacilityId
+		, CD.intBorrowingFacilityLimitId
+		, CD.intBorrowingFacilityLimitDetailId
 		, CD.dblLoanAmount
-		, intOverrideFacilityId
-		, strOverrideFacility = BVR.strBankValuationRule
-		, CD.strBankReferenceNo COLLATE Latin1_General_CI_AS AS strBankReferenceNo
+		, FAL.dblLimit
+		, FALD.dblLimit AS dblSublimit
+		, CD.intBankValuationRuleId
+		, BVR.strBankValuationRule
+		, FA.strBankReferenceNo
+		, FAL.strBorrowingFacilityLimit
+		, FALD.strLimitDescription
+		, CD.strReferenceNo
+		, CD.strComments
+		, CD.ysnSubmittedToBank
+		, CD.dtmDateSubmitted
+		, CD.intApprovalStatusId
+		, ASTF.strApprovalStatus
+		, CD.dtmDateApproved
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
 		, CD.dblPrepaymentAmount
@@ -209,6 +220,7 @@ AS
 		, CD.strTaxLocation
 		, CD.intTaxGroupId
 		, CD.intTaxLocationId
+		, EFT.strAccountNumber
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -297,11 +309,14 @@ AS
 	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
 	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 
-	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
 	LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
-	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intFacilityId
+	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
+	LEFT JOIN tblCMBorrowingFacilityLimit FAL ON FAL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
+	LEFT JOIN tblCMBorrowingFacilityLimitDetail FALD ON FALD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
+	LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = CD.intApprovalStatusId
 	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
-	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intOverrideFacilityId
+	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intBankValuationRuleId
 	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
 	LEFT JOIN tblQMSampleType sam on sam.intSampleTypeId = CH.intSampleTypeId
 	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
@@ -309,3 +324,4 @@ AS
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
+	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId 

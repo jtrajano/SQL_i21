@@ -137,7 +137,7 @@ FROM @tblErrorItemCost
 
 
 IF EXISTS(SELECT * FROM @tblErrorItemCost)
-BEGIN select * from tblICImportLog
+BEGIN
 	UPDATE tblICImportLog SET strDescription = 'Import Finished with Error' WHERE intImportLogId = @intImportLogId
 END
 
