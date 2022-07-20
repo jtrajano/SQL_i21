@@ -77,7 +77,10 @@ BEGIN
 			,[intSubLocationId]
 			,[dblOptionalityPremium]
 			,[dblQualityPremium]
-			,[intPurchaseTaxGroupId])
+			,[intPurchaseTaxGroupId]
+			,[intPayFromBankAccountId]
+			,[strFinancingSourcedFrom]
+			,[strFinancingTransactionNumber])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -139,6 +142,9 @@ BEGIN
 			,[dblOptionalityPremium] = ISNULL(LD.dblOptionalityPremium, 0)
 			,[dblQualityPremium] = ISNULL(LD.dblQualityPremium, 0)
 			,[intPurchaseTaxGroupId] = @intTaxGroupId
+			,[intPayFromBankAccountId] = BA.intBankAccountId
+			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
+			,[strFinancingTransactionNumber] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN L.strLoadNumber ELSE '' END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -172,6 +178,7 @@ BEGIN
 							OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
 					ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 		WHERE L.intLoadId = @intLoadId
 			AND CT.intPricingTypeId IN (1, 6)
 			AND LD.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
@@ -227,6 +234,9 @@ BEGIN
 			,[dblOptionalityPremium] = 0
 			,[dblQualityPremium] = 0
 			,[intPurchaseTaxGroupId] = NULL
+			,[intPayFromBankAccountId] = NULL
+			,[strFinancingSourcedFrom] = NULL
+			,[strFinancingTransactionNumber] = NULL
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
