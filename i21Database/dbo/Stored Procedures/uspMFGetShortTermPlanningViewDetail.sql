@@ -205,11 +205,13 @@ BEGIN
 		)
 	SELECT Inv.intItemId
 		,Inv.intLocationId
-		,SUM(Inv.dblWeight) / IsNULL(CASE 
+		,(
+			CASE 
 				WHEN Max(F.dblQty) = 0
-					THEN 1
-				ELSE MAX(F.dblQty)
-				END, 1)
+					THEN 0
+				ELSE SUM(Inv.dblWeight) / MAX(F.dblQty)
+				END
+			) * 30
 		,4 AS intAttributeId -->DOH
 	FROM tblMFShortTermPlanningViewDetail Inv
 	LEFT JOIN #tblMFShortTermDemand F ON F.intItemId = Inv.intItemId
@@ -315,7 +317,7 @@ BEGIN
 	END
 
 	IF @strColumnName IN (
-			'In-Transit to WHSE'
+			'InTransit to WHSE'
 			,'All Item'
 			)
 	BEGIN
@@ -355,6 +357,18 @@ BEGIN
 			AND LC.intLoadWarehouseContainerId IS NULL
 			AND L.ysnArrivedInPort = 1
 			AND L.dtmETAPOD IS NOT NULL
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFShortTermPlanningViewDetail SP
+				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+					AND SP.intUserId = @intUserId
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblQMSample S1
+				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					AND S1.intSampleStatusId = 4 -->Rejected)
+				)
 	END
 
 	IF @strColumnName IN (
@@ -398,6 +412,18 @@ BEGIN
 			AND LC.intLoadWarehouseContainerId IS NULL
 			AND L.ysnArrivedInPort = 1
 			AND L.dtmETAPOD IS NULL
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFShortTermPlanningViewDetail SP
+				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+					AND SP.intUserId = @intUserId
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblQMSample S1
+				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					AND S1.intSampleStatusId = 4 -->Rejected)
+				)
 	END
 
 	SELECT @intConditionId = intConditionId
@@ -437,6 +463,18 @@ BEGIN
 				1
 				,4
 				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFShortTermPlanningViewDetail SP
+				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+					AND SP.intUserId = @intUserId
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblQMSample S1
+				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					AND S1.intSampleStatusId = 4 -->Rejected)
+				)
 	END
 
 	IF @strColumnName IN (
@@ -471,6 +509,18 @@ BEGIN
 				,4
 				)
 			AND L.intShipmentStatus = 1
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFShortTermPlanningViewDetail SP
+				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+					AND SP.intUserId = @intUserId
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblQMSample S1
+				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					AND S1.intSampleStatusId = 4 -->Rejected)
+				)
 	END
 
 	IF @strColumnName IN (
@@ -498,7 +548,7 @@ BEGIN
 				,4
 				)
 			AND SS.dtmUpdatedAvailabilityDate < @dtmCurrentMonthStartDate
-			AND SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0) > 0
+			AND SS.dblBalance > 0
 	END
 
 	IF @strColumnName IN (
@@ -562,6 +612,18 @@ BEGIN
 				)
 			AND IsNULL(L.ysnArrivedInPort, 0) <> 1
 			AND L.dtmETAPOD IS NULL
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFShortTermPlanningViewDetail SP
+				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+					AND SP.intUserId = @intUserId
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblQMSample S1
+				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					AND S1.intSampleStatusId = 4 -->Rejected)
+				)
 	END
 
 	UPDATE D

@@ -111,6 +111,8 @@ BEGIN TRY
 	DECLARE @ExistingEntityLocationId INT = 0
 	DECLARE @TransactionType NVARCHAR(50)
 	DECLARE @SingleAuditLogParam SingleAuditLogParam
+	DECLARE @DuplicateLocationDetail NVARCHAR(100) = ''
+	DECLARE @DuplicateLocationDetailCount INT = 0
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUsersStageList)
 	BEGIN
@@ -230,6 +232,23 @@ BEGIN TRY
 		FROM tblSMUserDetailStage
 		WHERE intUserStageId = @UserStageId
 		ORDER BY intUserStageDetailId
+
+		SET			@DuplicateLocationDetailCount = 0
+		SELECT		@DuplicateLocationDetailCount = (SELECT TOP 1 COUNT(strLocation)
+		FROM		#tmpUserLocationRolesForChecking
+		GROUP BY	strLocation
+		ORDER BY	1 DESC)
+
+		SET			@DuplicateLocationDetail = ''
+		SELECT		@DuplicateLocationDetail = (SELECT TOP 1 strLocation
+		FROM		#tmpUserLocationRolesForChecking
+		GROUP BY	strLocation
+		ORDER BY	1 DESC)
+
+		IF (ISNULL(@DuplicateLocationDetailCount, 0) > 1)
+		BEGIN
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Cannot have a duplicate Company Location (' + @DuplicateLocationDetail + '). '
+		END
 
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForChecking)
 		BEGIN
@@ -938,7 +957,7 @@ BEGIN TRY
 					SET @AuditLogId = @AuditLogId + 1
 
 					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @AuditLogId, '', '', 'ysnDisabled', @ExistingYsnActiveFromView, @Active, 'Disable User', 1, 0, 1
+					SELECT @AuditLogId, '', '', 'ysnDisabled', CASE WHEN @ExistingYsnActiveFromView = 1 THEN 'false' WHEN @ExistingYsnActiveFromView = 0 THEN 'true' END, CASE WHEN @Active = 1 THEN 'false' WHEN @Active = 0 THEN 'true' END, 'Disable User', 1, 0, 1
 				END 
 
 				IF EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForArchive)

@@ -62,8 +62,6 @@ EXEC dbo.[uspARLogRiskPosition] @IIDs, @UserId
 
 EXEC dbo.[uspARInsertInvoiceTransactionLink] @IIDs
 
-EXEC dbo.[uspARInsertInvoiceTransactionLink] @IIDs
-
 DELETE FROM ARTD
 FROM tblARTransactionDetail ARTD WITH (NOLOCK)
 INNER JOIN @IIDs II ON ARTD.[intTransactionId] = II.[intHeaderId]
