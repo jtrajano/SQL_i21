@@ -28,16 +28,24 @@ BEGIN
         ON B.intAccountStructureId = A.intAccountStructureId
     WHERE intAccountSegmentId = @intAccountSegmentId
 
-    SELECT @intDividerCount = COUNT(1)  FROM tblGLAccountStructure 
-    WHERE strType <> 'Divider' and intStructureType < @intStructureType
+    DECLARE @tbl TABLE (
+		intRowNumber INT,
+		intStructureType INT,
+		intLength INT
+	)
+	
+	INSERT INTO @tbl
+    SELECT ROW_NUMBER() OVER (ORDER BY intSort), intStructureType, intLength FROM tblGLAccountStructure 
+    WHERE strType <> 'Divider'
 
-    SELECT @intStart = SUM(intLength) + @intDividerCount FROM tblGLAccountStructure 
-    WHERE strType <> 'Divider' and intStructureType < @intStructureType
+	SELECT @intDividerCount = intRowNumber FROM @tbl WHERE intStructureType = @intStructureType
+
+    SELECT @intStart = SUM(intLength) + @intDividerCount - 1 FROM @tbl
+	WHERE intRowNumber < @intDividerCount
 
     SELECT @intLength = intLength FROM tblGLAccountStructure WHERE intStructureType = @intStructureType
     SELECT @intEnd = @intStart + @intLength
 
-        
     declare @intL int = len(@strAccountId)
     declare @str NVARCHAR(30)=''
     DECLARE @i int = 1
