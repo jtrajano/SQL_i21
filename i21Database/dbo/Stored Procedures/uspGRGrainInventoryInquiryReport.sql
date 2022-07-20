@@ -1005,6 +1005,7 @@ INNER JOIN @Locs LO
 WHERE strBucketType = 'Company Owned'
 	AND SL.intCommodityId = ISNULL(@intCommodityId,SL.intCommodityId)
 	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), SL.dtmTransactionDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
+	AND SL.strTransactionType NOT IN ('Inventory Transfer')
 GROUP BY SL.intCommodityId
 	,SL.strCommodityCode
 	,intLocationId
