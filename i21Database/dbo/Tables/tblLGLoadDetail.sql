@@ -56,6 +56,7 @@
 	[intPickLotDetailId] INT NULL,
 	[intTMDispatchId] INT NULL,
 	[intTMSiteId] INT NULL,
+	[intTMDeviceId] INT NULL,
 	[strOrderNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intPSubLocationId] INT NULL, 
 	[intSSubLocationId] INT NULL, 
