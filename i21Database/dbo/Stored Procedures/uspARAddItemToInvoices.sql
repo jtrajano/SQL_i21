@@ -244,6 +244,9 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting] @Param = @strInvoiceIds, @strS
 EXEC [dbo].[uspARPopulateInvoiceAccountForPosting] @Post = 1, @strSessionId = @strSessionId
 EXEC [dbo].[uspARUpdateTransactionAccountOnPost] @strSessionId = @strSessionId
 
+DELETE FROM tblARPostInvoiceHeader WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostInvoiceDetail WHERE strSessionId = @strSessionId
+DELETE FROM tblARPostInvoiceItemAccount WHERE strSessionId = @strSessionId
 
 IF ISNULL(@RaiseError,0) = 0
 BEGIN
