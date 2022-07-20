@@ -12,8 +12,7 @@ CREATE TABLE tblARPostInvoiceItemAccount (
     ,[intAccountId]                      INT                                             NULL
     ,[intDiscountAccountId]              INT                                             NULL
     ,[intMaintenanceSalesAccountId]      INT                                             NULL
-    ,[strSessionId]                      NVARCHAR(50)     COLLATE Latin1_General_CI_AS   NULL
-	,PRIMARY KEY CLUSTERED ([intItemId], [intLocationId])
+    ,[strSessionId]                      NVARCHAR(50)     COLLATE Latin1_General_CI_AS   NULL	
 );
 GO
 CREATE INDEX [idx_tblARPostInvoiceItemAccount_strSessionId] ON [dbo].[tblARPostInvoiceItemAccount] (strSessionId)

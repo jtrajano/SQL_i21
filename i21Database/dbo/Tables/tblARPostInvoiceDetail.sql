@@ -73,7 +73,7 @@ CREATE TABLE tblARPostInvoiceDetail (
     ,[ysnPaid]                              BIT             NULL DEFAULT 0
     ,[strPONumber]                          NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
 
-    ,[intInvoiceDetailId]                   INT             NOT NULL PRIMARY KEY
+    ,[intInvoiceDetailId]                   INT             NOT NULL
     ,[intItemId]                            INT             NULL
     ,[strItemNo]                            NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
     ,[strItemType]                          NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL

@@ -1,6 +1,6 @@
 CREATE TABLE tblARPostInvoiceHeader (
-     [intInvoiceId]                         INT             NOT NULL PRIMARY KEY
-    ,[strInvoiceNumber]                     NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL UNIQUE NONCLUSTERED
+     [intInvoiceId]                         INT             NOT NULL
+    ,[strInvoiceNumber]                     NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strTransactionType]                   NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strType]                              NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[dtmDate]                              DATETIME        NOT NULL
