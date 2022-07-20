@@ -1274,6 +1274,18 @@ GO
 		WHERE strNamespace = 'AccountsPayable.view.DebitMemo'
 	END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'HelpDesk.view.TimeEntry')
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [ysnApproval], [intConcurrencyId])
+			VALUES (N'Time Entry', N'Time Entry', N'HelpDesk.view.TimeEntry', N'HelpDesk', 1, 0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET  ysnApproval = 1
+			WHERE strNamespace = 'HelpDesk.view.TimeEntry'
+		END
+
 	--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance')
 	--BEGIN
 	--	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
