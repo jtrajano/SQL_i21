@@ -165,7 +165,7 @@ BEGIN
 		CROSS APPLY tblSMCompanySetup CS
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intShipToId
 		INNER JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON V.intEntityId = E.intEntityId) ON V.intEntityId = A.intEntityVendorId
-		LEFT JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = E.intEntityId AND VANL.intCompanyLocationId = CL.intCompanyLocationId
+		LEFT JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = E.intEntityId AND VANL.intCompanyLocationId = CL.intCompanyLocationId AND VANL.intCurrencyId = A.intCurrencyId
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
