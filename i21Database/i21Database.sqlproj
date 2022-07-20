@@ -1052,6 +1052,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTranslogFuelComputation.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLogFuelComputation.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelSalesByGradeAndPricePoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketApply.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
