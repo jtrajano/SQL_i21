@@ -8,6 +8,8 @@
 	[strLoginUrl]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strUserName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strPassword]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strTokenUrl]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strResource]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strSendType]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strFrequency]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strDayOfWeek]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
