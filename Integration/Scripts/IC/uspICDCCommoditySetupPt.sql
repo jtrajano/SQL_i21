@@ -39,7 +39,9 @@ from tblICItem I
 join ptcntmst cnt on I.strItemNo collate Latin1_General_CI_AS = rtrim(cnt.ptcnt_itm_or_cls) 
 
 ALTER TABLE tblICItem
-WITH CHECK CHECK CONSTRAINT CK_AllowCommodityChange
+WITH NOCHECK CHECK CONSTRAINT CK_AllowCommodityChange
+-- NO CHECK ON EXISTING 
+-- NEXT CHECK WILL ENFORCE CONSTRAINT FOR NEW RECORDS/ITEM 
 
 ----=====================================STEP 4=========================================
 --insert uoms into Commodity UOM for all items in the contract.
