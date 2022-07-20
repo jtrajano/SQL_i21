@@ -219,6 +219,7 @@ BEGIN TRY
 			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendingIngredient.strZipCode)
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
+		AND TL.intMobileLoadHeaderId IS NULL
 
 	-- Concatenate PO Number, BOL Number, and Comments in cases there are different values and they are not used as a grouping option
 	DECLARE @concatPONumber NVARCHAR(MAX) = ''
