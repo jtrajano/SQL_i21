@@ -9,6 +9,8 @@ AS
 		  ,strIntegrationObject			= Brand.strIntegrationObject
 		  ,strLoginUrl					= Brand.strLoginUrl
 		  ,strUserName					= Brand.strUserName
+		  ,strTokenUrl					= Brand.strTokenUrl
+		  ,strResource					= Brand.strResource
 		  ,strPassword					= dbo.fnAESDecryptASym(Brand.strPassword) COLLATE Latin1_General_CI_AS
 		  ,strSendType					= Brand.strSendType
 		  ,strFrequency					= Brand.strFrequency
