@@ -6,4 +6,4 @@ call shell_integration.bat
 
 timeout 1
 
-call shell_deploy.bat
+call shell_deploy.bat 
