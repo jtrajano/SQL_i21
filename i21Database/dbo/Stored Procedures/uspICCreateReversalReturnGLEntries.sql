@@ -235,7 +235,7 @@ BEGIN
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
-			,strTransactionType			= @AccountCategory_Auto_Negative
+			,strTransactionType			= ISNULL(ty.strName, @AccountCategory_Auto_Negative) 
 			,strTransactionForm			= ItemTransactions.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
@@ -260,6 +260,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
 			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
+			LEFT JOIN tblICInventoryTransactionType ty ON ty.intTransactionTypeId = ItemTransactions.intTransactionTypeId
 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
@@ -288,7 +289,7 @@ BEGIN
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
-			,strTransactionType			= @AccountCategory_Auto_Negative
+			,strTransactionType			= ISNULL(ty.strName, @AccountCategory_Auto_Negative) 
 			,strTransactionForm			= ItemTransactions.strTransactionForm 
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
@@ -313,6 +314,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
 			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
+			LEFT JOIN tblICInventoryTransactionType ty ON ty.intTransactionTypeId = ItemTransactions.intTransactionTypeId
 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
@@ -327,7 +329,13 @@ BEGIN
 	FROM	dbo.tblGLDetail GLEntries
 	WHERE	GLEntries.intTransactionId = @intTransactionId
 			AND GLEntries.strTransactionId = @strTransactionId
-			AND strTransactionType <> @AccountCategory_Auto_Negative
+			AND strTransactionType NOT IN ( 
+				@AccountCategory_Auto_Negative
+				,'Inventory Auto Variance'
+				, 'Inventory Write-Off Sold'
+				, 'Inventory Revalue Sold'
+				, 'Inventory Auto Variance on Negatively Sold or Used Stock'
+			)
 	;
 	-- Update the ysnPostedFlag for the related transactions
 	UPDATE	GLEntries
@@ -337,6 +345,12 @@ BEGIN
 				AND GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
 				AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND GLEntries.strTransactionType <> @AccountCategory_Auto_Negative
+			AND strTransactionType NOT IN ( 
+				@AccountCategory_Auto_Negative
+				,'Inventory Auto Variance'
+				, 'Inventory Write-Off Sold'
+				, 'Inventory Revalue Sold'
+				, 'Inventory Auto Variance on Negatively Sold or Used Stock'
+			)
 	;
 END 
