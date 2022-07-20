@@ -14,6 +14,11 @@ BEGIN
 
 	
 	DECLARE @strTransactionId NVARCHAR(50)
+	DECLARE @intInventoryShipmentId INT
+	DECLARE @dtmClientDate DATETIME
+
+
+	SET @dtmClientDate = GETDATE()
 
 	----Contract
 	INSERT INTO tblSCTicketContractUsed(
@@ -31,8 +36,6 @@ BEGIN
 	WHERE intAllocationType = 3
 
 	-- Spot
-
-
 	-- Delete entry from distribution of in-transit status this will be replaced by the Allocation int ticket applied screen
 	DELETE FROM tblSCTicketSpotUsed WHERE intTicketId = @intTicketId
 
@@ -52,6 +55,17 @@ BEGIN
 		,dblUnitBasis = dblBasis
 	FROM @UnitAllocation
 	WHERE intAllocationType = 4 
+
+	SELECT TOP 1 
+		@intInventoryShipmentId = A.intInventoryShipmentId
+	FROM tblICInventoryShipment A
+	INNER JOIN tblICInventoryShipmentItem B
+		ON A.intInventoryShipmentId = B.intInventoryShipmentId
+	WHERE A.intSourceType = 1
+		AND B.intSourceId = @intTicketId
+
+	-- TODO add parameter for ticket in-transit
+	EXEC dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId OUT, 0, 1 ,@dtmShipmentDate = @dtmClientDate, @intScaleTicketId = @intTicketId;
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
