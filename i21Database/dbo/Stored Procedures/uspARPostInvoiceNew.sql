@@ -308,21 +308,18 @@ IF(@totalInvalid > 0)
 			SELECT TOP 1 @ErrorMerssage = strPostingError FROM tblARPostInvalidInvoiceData WHERE strSessionId = @strRequestId
 
         UPDATE ILD
-		SET
-			 ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
+		SET  ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
 			,ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
 			,ILD.[strPostingMessage]		= PID.[strPostingError]
+			,ILD.[strMessage]				= PID.[strPostingError]
 			,ILD.[strBatchId]				= PID.[strBatchId]
 			,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
 			,ILD.[ysnSuccess] = 0
-		FROM
-			tblARInvoiceIntegrationLogDetail ILD
-		INNER JOIN
-			tblARPostInvalidInvoiceData PID
-				ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-		WHERE
-			ILD.[intIntegrationLogId] = @IntegrationLogId
-			AND ILD.[ysnPost] IS NOT NULL
+		FROM tblARInvoiceIntegrationLogDetail ILD
+		INNER JOIN tblARPostInvalidInvoiceData PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+		WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+		  AND ILD.[ysnPost] IS NOT NULL
+	      AND PID.strSessionId = @strRequestId
 
 		--DELETE Invalid Transaction From temp table
 		DELETE A
