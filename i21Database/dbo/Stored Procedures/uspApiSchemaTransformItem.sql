@@ -116,6 +116,7 @@ END
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
    AND sr.strItemNo IS NOT NULL
    AND sr.strItemNo != ''
+   AND @OverwriteExisting = 0
 )
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
@@ -132,7 +133,7 @@ FROM cte sr
 JOIN tblICItem i ON i.strItemNo = sr.strItemNo
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
 	AND sr.RowNumber > 1
-  AND @OverwriteExisting = 1
+  AND @OverwriteExisting = 0
 
 ;WITH cte AS
 (
@@ -141,9 +142,10 @@ WHERE sr.guiApiUniqueId = @guiApiUniqueId
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
    AND sr.strItemNo IS NOT NULL
    AND sr.strItemNo != ''
+   AND @OverwriteExisting = 0
 )
 DELETE FROM cte WHERE RowNumber > 1
-AND @OverwriteExisting = 1
+AND @OverwriteExisting = 0
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT

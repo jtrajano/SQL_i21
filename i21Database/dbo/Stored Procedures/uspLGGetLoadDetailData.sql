@@ -66,6 +66,7 @@ BEGIN
 		,ysnSubCurrency = PCU.ysnSubCurrency
 		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
 		,strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
+		,strSerialNumber = TMD.strSerialNumber
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -110,4 +111,5 @@ BEGIN
 	LEFT JOIN tblICItemContract					ICI				ON		ICI.intItemId = Item.intItemId AND PDetail.intItemContractId = ICI.intItemContractId
 	LEFT JOIN tblSMCountry						CO				ON		CO.intCountryID = (CASE WHEN ISNULL(ICI.intCountryId, 0) = 0 THEN ISNULL(CA.intCountryID, 0) ELSE ICI.intCountryId END)
 	LEFT JOIN tblTMSite							TMS				ON		TMS.intSiteID = LoadDetail.intTMSiteId
+	LEFT JOIN tblTMDevice						TMD				ON		TMD.intDeviceId = LoadDetail.intTMDeviceId
 END

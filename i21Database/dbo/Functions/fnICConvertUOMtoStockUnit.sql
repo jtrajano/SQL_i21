@@ -7,23 +7,13 @@
 RETURNS NUMERIC(38,20)
 AS
 BEGIN	
-	DECLARE @UOMQty NUMERIC(38, 20) = 0
-			,@IsStockUnit BIT = 0
-
-	SELECT	@UOMQty = dblUnitQty
-			, @IsStockUnit = ysnStockUnit
+	DECLARE @stockUOM INT 
+	
+	SELECT	TOP 1 
+			@stockUOM = intItemUOMId
 	FROM	tblICItemUOM 
 	WHERE	intItemId = @ItemId 
-			AND intItemUOMId = @UOM
+			AND ysnStockUnit = 1
 
-	IF (@IsStockUnit = 1)
-	BEGIN
-		RETURN @Qty;
-	END
-	ELSE
-	BEGIN
-		RETURN @Qty * @UOMQty;
-	END
-
-	RETURN 0;
+	RETURN dbo.fnCalculateQtyBetweenUOM(@UOM, @stockUOM, @Qty)
 END

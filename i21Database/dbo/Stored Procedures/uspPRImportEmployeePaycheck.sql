@@ -98,7 +98,7 @@ DROP TABLE #TempPaycheckGroupId
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempPaycheckGroupYear'))         
 DROP TABLE #TempPaycheckGroupYear    
   
-SELECT YEAR(dtmPayDate) AS intYear,strEntityNo INTO #TempPaycheckGroupYear FROM tblApiSchemaEmployeePaycheckTest  
+SELECT YEAR(dtmPayDate) AS intYear,strEntityNo INTO #TempPaycheckGroupYear FROM tblApiSchemaEmployeePaycheck 
 GROUP BY YEAR(dtmPayDate),strEntityNo  
   
       

@@ -25,5 +25,5 @@ JOIN tblICItem I
 	ON UOM.intItemId = I.intItemId
 JOIN tblSTStore ST
 	ON PU.intStoreId = ST.intStoreId
-JOIN tblSMTaxGroup TG
+LEFT JOIN tblSMTaxGroup TG
 	ON PU.intTaxGroupId = TG.intTaxGroupId
