@@ -51,6 +51,7 @@ BEGIN TRY
         , dblFinancedAmount
         , strBorrowingFacilityBankRefNo
         , ysnDeleted
+        , intOverrideBankValuationId
     )
     SELECT
         strAction = 'Allocated Contract'
@@ -90,6 +91,7 @@ BEGIN TRY
                             * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end))
         , strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
         , ysnDeleted = @ysnDeleted
+        , intOverrideBankValuationId = cd.intBankValuationRuleId
     FROM
         tblLGAllocationHeader ah
         JOIN tblLGAllocationDetail ad ON ad.intAllocationHeaderId = ah.intAllocationHeaderId
@@ -129,6 +131,7 @@ BEGIN TRY
         ,cd.intInvoiceCurrencyId
         ,cd.dblRate
         ,cd.strBankReferenceNo
+        ,cd.intBankValuationRuleId
 
     -- Log Trade Finance
     IF EXISTS(SELECT 1 FROM @TRFLog)
