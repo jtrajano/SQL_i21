@@ -115,7 +115,5 @@ AS
 		Group by intFutureMarketId, intCommodityMarketId
 	
 	) FSP on FSP.intFutureMarketId = CD.intFutureMarketId
-	LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD.intFutureMonthId = FSPM.intFutureMonthId
-	LEFT JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CC.intRateTypeId
-	LEFT JOIN	tblCTBasisCost	    BC	ON	BC.intItemId			=	CC.intItemId
+	LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD.intFutureMonthId = FSPM.intFutureMonthId	
 	ORDER BY BC.intSort ASC
