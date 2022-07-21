@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1)
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -3739,7 +3739,7 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Position Report', strDescription = 'Po
 UPDATE tblSMMasterMenu SET strMenuName = N'Coverage/Risk Inquiry', strDescription = N'Coverage/Risk Inquiry' WHERE strMenuName = 'Coverage Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Mark To Market', strDescription = N'Mark To Market' WHERE strMenuName = 'M2M Inquiry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Profit and Loss Analysis', strDescription = N'Profit and Loss Analysis'  WHERE strMenuName = 'PnL Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = N'Position Reconciliation Report', strDescription = N'Position Reconciliation Report' WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+--UPDATE tblSMMasterMenu SET strMenuName = N'Position Reconciliation Report', strDescription = N'Position Reconciliation Report' WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
 /* END OF RENAMING  */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId)
@@ -4021,6 +4021,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Market Exchange' AND strModuleN
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1
 
 --DELETE DUPLICATE DATA
 DECLARE @BrokerageAccountsCount INT
