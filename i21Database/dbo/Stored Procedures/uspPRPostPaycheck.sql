@@ -31,7 +31,7 @@ DECLARE @intPaycheckId INT
 SELECT @intPaycheckId = intPaycheckId
 	  ,@intEmployeeId = [intEntityEmployeeId]
 	  ,@strTransactionId = strPaycheckId
-	  ,@dtmPayDate = dtmPosted
+	  ,@dtmPayDate = ISNULL(dtmPosted,GETDATE())
 	  ,@intCreatedEntityId = intCreatedUserId
 	  ,@intBankAccountId = intBankAccountId
 	  ,@ysnPaycheckPosted = ysnPosted
