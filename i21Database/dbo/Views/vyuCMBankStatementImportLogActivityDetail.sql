@@ -8,7 +8,7 @@ C.strTaskId,
 B.strABRActivityId,
 ysnError = case when C.ysnSuccess = 0 then cast(1 as bit) else cast( 0 as bit) end ,   
 C.strError,  
-ISNULL(B.strBankDescription, Task.strNotes) strBankDescription,
+ISNULL(B.strBankDescription, isnull( Task.strNotes, C.strComment)) strBankDescription,
 strTransactionMatched = Match.strTransactionId  
 FROM   
 tblCMBankStatementImportLog A   
