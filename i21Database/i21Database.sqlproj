@@ -829,9 +829,6 @@
     <Build Include="dbo\Tables\tblARCompanyDefaultPayToBankAccount.sql" />
     <Build Include="dbo\Tables\tblARCustomerDefaultPayToBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
-    <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
-    <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
-    <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
