@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[tblCMBankStatementImportLogDetail](
 	[strTransactionId] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
 	[intBankStatementImportId] [int] NULL,
 	[strError] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
+	[strComment] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strBankStatementImportId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[strCategory] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intLineNo] INT NULL,
