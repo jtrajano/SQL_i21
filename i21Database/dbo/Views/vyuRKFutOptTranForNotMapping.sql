@@ -54,6 +54,7 @@ SELECT DE.intFutOptTransactionId
 	, strHedgeType = 'Contract Futures' COLLATE Latin1_General_CI_AS
 	, intHedgeContractId = hedgecontractheader.intContractHeaderId 
 	, strHedgeContract = hedgecontractheader.strContractNumber + ISNULL('-' + CAST(hedgecontractdetail.intContractSeq AS NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS
+	, intFutureMonthsFutureMarketId = FMonth.intFutureMarketId
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
