@@ -15,18 +15,18 @@ BEGIN TRY
 	DECLARE @tblShipment TABLE (
 		intContractHeaderId INT
 		, intContractDetailId INT
-		, dblQuantity NUMERIC(18, 6)
-		, dblDestinationQuantity NUMERIC(18, 6)
+		, dblQuantity NUMERIC(38, 20)
+		, dblDestinationQuantity NUMERIC(38, 20)
 	);
 
 	DECLARE @tblInvoice TABLE (  
 		intContractDetailId  INT,        
-		dblQuantity    NUMERIC(18,6)
+		dblQuantity    NUMERIC(38, 20)
 	); 
 
 	DECLARE @tblBill TABLE (
 		intContractDetailId INT
-		, dblQuantity NUMERIC(18, 6)
+		, dblQuantity NUMERIC(38, 20)
 	);
 
 	DECLARE @OpenLoad TABLE (
