@@ -359,7 +359,7 @@ BEGIN
 					, strCustomer					=	EY.strEntityName
 					, strContract					=	CBL.strContractNumber + '-' + LTRIM(CBL.intContractSeq)
 					, CBL.intPricingTypeId
-					, strPricingType				=	CASE WHEN CBL.intPricingTypeId = 1 THEN 'P' ELSE 'B' END
+					, PT.strPricingType
 					, strContractDate				=	LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 					, strShipMethod					=	FT.strFreightTerm
 					--, strShipmentPeriod				=	LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))  + ' - ' + LTRIM(DATEPART(mm,CD.dtmEndDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
@@ -394,6 +394,7 @@ BEGIN
 				INNER JOIN tblCTContractDetail		CD			ON CD.intContractDetailId = CBL.intContractDetailId
 				INNER JOIN tblICItemUOM				ItemUOM		ON ItemUOM.intItemUOMId = CD.intItemUOMId
 				INNER JOIN tblICUnitMeasure			IUM			ON IUM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+				JOIN tblCTPricingType    PT   ON PT.intPricingTypeId = CBL.intPricingTypeId
 				LEFT JOIN tblSMFreightTerms			FT			ON FT.intFreightTermId = CD.intFreightTermId
 				LEFT JOIN tblRKFuturesMonth			FH			ON FH.intFutureMonthId = CD.intFutureMonthId
 				LEFT JOIN tblICItemUOM				BASISUOM	ON BASISUOM.intItemUOMId = CBL.intBasisUOMId
