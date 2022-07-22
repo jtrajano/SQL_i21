@@ -39,7 +39,7 @@ BEGIN
 		,strTransactionType = ct.strContractType
 		,intCurrencyId  = cd.intInvoiceCurrencyId
 		,dtmDate = isnull(cd.dtmCashFlowDate,cd.dtmEndDate)
-		,dblAmount = (((cd.dblBalance - isnull(dblScheduleQty,0)) / cd.dblQuantity) * cd.dblTotalCost) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,0) then 1 else 100 end) end) 
+		,dblAmount = (((cd.dblBalance - isnull(dblScheduleQty,0)) / cd.dblQuantity) * cd.dblTotalCost) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,cd.intCurrencyId) then 1 else 100 end) end) 
 		,intBankAccountId = cd.intBankAccountId
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId
@@ -68,7 +68,7 @@ BEGIN
 		,strTransactionType = ct.strContractType
 		,intCurrencyId  = cd.intInvoiceCurrencyId
 		,dtmDate = isnull(cd.dtmCashFlowDate,cd.dtmEndDate)
-		,dblAmount = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,QU.intUnitMeasureId,QUB.intUnitMeasureId,((cd.dblBalance - isnull(cd.dblScheduleQty,0))) * ((sp.dblLastSettle + cd.dblBasis) / (case when cb.intMainCurrencyId is null then 1 else 100 end))) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,0) then 1 else 100 end) end) 
+		,dblAmount = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,QU.intUnitMeasureId,QUB.intUnitMeasureId,((cd.dblBalance - isnull(cd.dblScheduleQty,0))) * ((sp.dblLastSettle + cd.dblBasis) / (case when cb.intMainCurrencyId is null then 1 else 100 end))) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,cd.intCurrencyId) then 1 else 100 end) end) 
 		,intBankAccountId = cd.intBankAccountId
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId
