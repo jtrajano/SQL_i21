@@ -9855,6 +9855,7 @@
     <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
