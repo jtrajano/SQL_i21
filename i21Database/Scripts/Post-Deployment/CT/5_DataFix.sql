@@ -6,7 +6,7 @@ GO
 	declare @ysnLoad bit;
 	declare @intPriceFixationId int;
 	declare @intPriceFixationDetailId int;
-	declare @dblQuantity numeric(18,6);
+	declare @dblQuantity numeric(38,20);
 	declare @dblQuantityAppliedAndPriced numeric(18,6);
 	declare @dblLoadPriced numeric(18,6);
 	declare @dblLoadAppliedAndPriced numeric(18,6);
