@@ -64,9 +64,6 @@ BEGIN
 	WHERE A.intSourceType = 1
 		AND B.intSourceId = @intTicketId
 
-	-- TODO add parameter for ticket in-transit
-	EXEC dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId OUT, 0, 1 ,@dtmShipmentDate = @dtmClientDate, @intScaleTicketId = @intTicketId;
-
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
 		,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
@@ -81,6 +78,10 @@ BEGIN
 	SET ysnTicketApplied = 1
 		,dtmDateModifiedUtc = GETUTCDATE()
 	WHERE intTicketId = @intTicketId
+
+
+	-- TODO add parameter for ticket in-transit
+	EXEC dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId OUT, 0, 1 ,@dtmShipmentDate = @dtmClientDate, @intScaleTicketId = @intTicketId;
 END
 
 
