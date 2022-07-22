@@ -86,19 +86,19 @@ BEGIN
 					,[dblTotalHours]					= AgentInfoWeekly.[totalHours]
 					,[totalBillableHours]				= AgentInfoWeekly.[totalBillableHours]
 					,[totalNonBillableHours]			= AgentInfoWeekly.[totalNonBillableHours]
-					,[vlHolidaySickHours]				= WeeklyVacationHolidaySick.dblRequest
+					,[vlHolidaySickHours]				= ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoWeekly.totalHolidayHours, 0)
 					,[intRequiredHours]					= ISNULL(TimeEntryPeriodDetail.intRequiredHours, 0)
 					,[dblActualUtilizationWeekly]		= CASE WHEN ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) = 0
 																	THEN 0
-															   ELSE AgentInfoWeekly.[totalBillableHours] / ( ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) ) * 100
+															   ELSE AgentInfoWeekly.[totalBillableHours] / ( ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ( ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoWeekly.totalHolidayHours, 0) ) ) * 100
 														  END 
 					,[dblActualUtilizationAnnually]		= CASE WHEN ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) = 0
 																	THEN 0
-															   ELSE AgentInfoAnnually.[totalBillableHours] / ( ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) ) * 100
+															   ELSE AgentInfoAnnually.[totalBillableHours] / ( ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ( ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoAnnually.totalHolidayHours, 0) ) ) * 100
 														   END 
 					,[dblActualUtilizationMonthly]		= CASE WHEN ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) = 0
 																	THEN 0
-															   ELSE AgentInfoMonthly.[totalBillableHours] / ( ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) ) * 100
+															   ELSE AgentInfoMonthly.[totalBillableHours] / ( ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ( ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoMonthly.totalHolidayHours, 0) ) ) * 100
 														  END 
 					,[dblActualAnnualBudget]			= AgentInfoAnnually.[totalBaseAmount]
 					,[dblActualWeeklyBudget]			= AgentInfoWeekly.[totalBaseAmount]
@@ -139,25 +139,32 @@ BEGIN
 						   ,[totalBillableHours]	= SUM([totalBillableHours])
 						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
 						   ,[totalBaseAmount]		= SUM([totalBaseAmount])
+						   ,[totalHolidayHours]		= SUM([totalHolidayHours])
 					FROM (		
-								SELECT  [totalHours]			= SUM(dblHours)
-									   ,[totalBillableHours]	= CASE WHEN ysnBillable = 1
-																			THEN SUM(dblHours)
+								SELECT  [totalHours]			= SUM(TicketHoursWorked.dblHours)
+									   ,[totalBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
 																  END
-									   ,[totalNonBillableHours]	= CASE WHEN ysnBillable = 0
-																			THEN SUM(dblHours)
+									   ,[totalNonBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 0 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
 																  END
-									   ,[totalBaseAmount] = CASE WHEN ysnBillable = 1
-																			THEN SUM(dblBaseAmount)
+									   ,[totalHolidayHours] = CASE WHEN LOWER(Item.strItemNo) = 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
 																  END
-								FROM vyuHDTicketHoursWorked
-								WHERE [dtmDate] >= TimeEntryPeriodDetail.[dtmBillingPeriodStart] AND
-									  [dtmDate] <= TimeEntryPeriodDetail.[dtmBillingPeriodEnd] AND
+									   ,[totalBaseAmount] = CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblBaseAmount)
+																		ELSE 0
+																  END
+								FROM vyuHDTicketHoursWorked TicketHoursWorked
+									LEFT JOIN tblICItem Item ON Item.intItemId = TicketHoursWorked.intItemId
+								WHERE TicketHoursWorked.[dtmDate] >= TimeEntryPeriodDetail.[dtmBillingPeriodStart] AND
+									  TicketHoursWorked.[dtmDate] <= TimeEntryPeriodDetail.[dtmBillingPeriodEnd] AND
 									  intAgentEntityId = @EntityId
-								GROUP BY [ysnBillable]
+								GROUP BY  TicketHoursWorked.[ysnBillable]
+										 ,Item.strItemNo
 					) TotalHours
 				) AgentInfoWeekly
 				CROSS APPLY
@@ -166,24 +173,32 @@ BEGIN
 						   ,[totalBillableHours]	= SUM([totalBillableHours])
 						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
 						   ,[totalBaseAmount]		= SUM([totalBaseAmount])
+						   ,[totalHolidayHours]		= SUM([totalHolidayHours])
 					FROM (		
-								SELECT  [totalHours]			= SUM(dblHours)
-									   ,[totalBillableHours]	= CASE WHEN ysnBillable = 1
-																			THEN SUM(dblHours)
+								SELECT  [totalHours]			= SUM(TicketHoursWorked.dblHours)
+									   ,[totalBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
 																  END
-									   ,[totalNonBillableHours]	= CASE WHEN ysnBillable = 0
-																			THEN SUM(dblHours)
+									   ,[totalNonBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 0 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
 																  END	
-										,[totalBaseAmount]      = CASE WHEN ysnBillable = 1
-																			THEN SUM(dblBaseAmount)
+
+										,[totalHolidayHours] = CASE WHEN LOWER(Item.strItemNo) = 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
 																  END
-								FROM vyuHDTicketHoursWorked
+										,[totalBaseAmount]      = CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblBaseAmount)
+																		ELSE 0
+																  END
+								FROM vyuHDTicketHoursWorked TicketHoursWorked
+									LEFT JOIN tblICItem Item ON Item.intItemId = TicketHoursWorked.intItemId
 								WHERE DATEPART(YEAR, dtmDate) = TimeEntryPeriod.strFiscalYear AND
 										  intAgentEntityId = @EntityId
-								GROUP BY [ysnBillable]
+								GROUP BY TicketHoursWorked.[ysnBillable]
+										,Item.strItemNo
 					) TotalHours
 				) AgentInfoAnnually
 				CROSS APPLY
@@ -191,21 +206,28 @@ BEGIN
 					SELECT  [totalHours]			= SUM([totalHours])
 						   ,[totalBillableHours]	= SUM([totalBillableHours])
 						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
+						   ,[totalHolidayHours]		= SUM([totalHolidayHours])
 					FROM (		
-								SELECT  [totalHours]			= SUM(dblHours)
-									   ,[totalBillableHours]	= CASE WHEN ysnBillable = 1
-																			THEN SUM(dblHours)
+								SELECT  [totalHours]			= SUM(TicketHoursWorked.dblHours)
+									   ,[totalBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
 																  END
-									   ,[totalNonBillableHours]	= CASE WHEN ysnBillable = 0
-																			THEN SUM(dblHours)
+									   ,[totalNonBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 0 AND LOWER(Item.strItemNo) <> 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
 																		ELSE 0
-																  END								
-								FROM vyuHDTicketHoursWorked
+																  END
+									   ,[totalHolidayHours] = CASE WHEN LOWER(Item.strItemNo) = 'holiday'
+																			THEN SUM(TicketHoursWorked.dblHours)
+																		ELSE 0
+																  END
+								FROM vyuHDTicketHoursWorked TicketHoursWorked
+									LEFT JOIN tblICItem Item ON Item.intItemId = TicketHoursWorked.intItemId 
 								WHERE DATEPART(YEAR, dtmDate) = TimeEntryPeriod.strFiscalYear AND
 									  DATEPART(month, dtmDate) = DATEPART(month, TimeEntryPeriodDetail.dtmBillingPeriodStart) AND
 									  intAgentEntityId = @EntityId
-								GROUP BY [ysnBillable]
+								GROUP BY TicketHoursWorked.[ysnBillable]
+										,Item.strItemNo
 					) TotalHours
 				) AgentInfoMonthly
 				CROSS APPLY
