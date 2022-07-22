@@ -13,8 +13,8 @@ AS
 			CD.intDiscountTypeId,				CD.intDiscountId,				CD.intContractOptHeaderId,						
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
 			CD.strFobBasis,						CD.intRailGradeId,				CD.strRemark,
-			CD.dblOriginalQty,					CD.dblBalance,					CD.dblIntransitQty,
-			CD.dblScheduleQty,					CD.strPackingDescription,		intPriceItemUOMId = isnull(CD.intPriceItemUOMId,CD.intItemUOMId),
+			CD.dblOriginalQty,					dblBalance = case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end,					CD.dblIntransitQty,
+			dblScheduleQty = case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end,					CD.strPackingDescription,		intPriceItemUOMId = isnull(CD.intPriceItemUOMId,CD.intItemUOMId),
 			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
 			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
 			CD.intShipperId,					CD.intNetWeightUOMId,			CD.strVendorLotID,
@@ -50,15 +50,15 @@ AS
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)															AS	ysnSubCurrency,
 			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
 			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
-			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)											AS	dblAvailableQty,
+			ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0)		-	ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end),0)											AS	dblAvailableQty,
 			dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,
-												ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))			AS	dblAvailableQtyInItemStockUOM,
-			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0))			AS	dblBalanceInItemStockUOM,
+												ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0) - ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end),0))			AS	dblAvailableQtyInItemStockUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0))			AS	dblBalanceInItemStockUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblQuantity,0))		AS	dblQuantityInItemStockUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblQuantityPerLoad,0))	AS	dblQtyPerLoadInItemStockUOM,
 			CASE	WHEN	CH.ysnLoad = 1
 					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
-					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
+					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0)												
 			END																									AS	dblAppliedQty,
 			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)												AS	strSequenceNumber,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInQtyUOM,
@@ -67,8 +67,8 @@ AS
 			dbo.fnCTConvertQtyToTargetItemUOM(SM.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInStockUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(AD.intSeqPriceUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)),CD.intItemUOMId,1)AS	dblPriceToQtyConvFactor,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CD.intItemUOMId,1)							AS	dblWeightToQtyConvFactor,
-			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)		
-																		      -	ISNULL(CD.dblScheduleQty,0))	AS	dblAvailableNetWeight,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0)		
+																		      -	ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end),0))	AS	dblAvailableNetWeight,
 			CD.dblBalanceLoad - ISNULL(CD.dblScheduleLoad, 0) AS dblAvailableLoad,
 			CD.dblFutures	/ CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainFutures,
 			CD.dblBasis		/ CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainBasis,
@@ -325,3 +325,11 @@ AS
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId 
+    cross apply (
+     select
+     dblHeaderBalance = CH.dblHeaderQuantity - sum(cd.dblQuantity - cd.dblBalance)
+     ,dblHeaderAvailable = CH.dblHeaderQuantity - (sum(cd.dblQuantity - cd.dblBalance) + sum(isnull(cd.dblScheduleQty,0)))
+	 ,dblHeaderScheduleQty = sum(isnull(cd.dblScheduleQty,0))
+     from tblCTContractDetail cd
+     where cd.intContractHeaderId = CH.intContractHeaderId
+    ) cds

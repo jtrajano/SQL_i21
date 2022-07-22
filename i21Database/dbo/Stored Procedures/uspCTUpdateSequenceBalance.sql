@@ -35,13 +35,15 @@ BEGIN TRY
 			@intCommodityId				INT,
 			@dblHeaderQuantity	NUMERIC(18,6),
 			@dblTotalHeaderApplied NUMERIC(18,6),
-			@ysnQuantityAtHeaderLevel bit = 0
+			@ysnQuantityAtHeaderLevel bit = 0,
+			@dblSequenceOrigBalance NUMERIC(18,6)
 			
 	
 	BEGINING:
 
 	SELECT	@dblQuantity			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblQuantity,0) ELSE ISNULL(CD.intNoOfLoad,0) END,
-			@dblOldBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblBalance,0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
+			@dblSequenceOrigBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblBalance,0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
+			@dblOldBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
 			@ysnUnlimitedQuantity	=	ISNULL(CH.ysnUnlimitedQuantity,0),
 			@intPricingTypeId		=	CD.intPricingTypeId,
 			@ysnLoad				=	CH.ysnLoad,
@@ -54,6 +56,14 @@ BEGIN TRY
 
 	FROM	tblCTContractDetail		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
+    cross apply (
+		select
+		dblHeaderBalance = CH.dblQuantity - sum(cd.dblQuantity - cd.dblBalance)
+		,dblHeaderAvailable = CH.dblQuantity - (sum(cd.dblQuantity - cd.dblBalance) + sum(isnull(cd.dblScheduleQty,0)))
+		,dblHeaderScheduleQty = sum(isnull(cd.dblScheduleQty,0))
+		from tblCTContractDetail cd
+		where cd.intContractHeaderId = CH.intContractHeaderId
+    ) cds
 	WHERE	intContractDetailId		=	@intContractDetailId 
 
 	 if (@ysnLoad = 1 and @ysnFromInvoice = convert(bit,1)) 
@@ -155,7 +165,7 @@ BEGIN TRY
 
 	UPDATE	tblCTContractDetail
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
-			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END,
+			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN (case when isnull(@ysnQuantityAtHeaderLevel,0) = 1 then @dblSequenceOrigBalance - @dblQuantityToUpdate else @dblNewBalance end) ELSE @dblNewBalance * dblQuantityPerLoad END,
 			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END,
 			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0 and (CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END) > 0
 											THEN	(CASE	WHEN intContractStatusId = 5
