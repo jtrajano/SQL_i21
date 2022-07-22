@@ -6,6 +6,8 @@ SELECT
 	,intEntityId = E.intEntityId
 	,intEntityLocationId = EL.intEntityLocationId
 	,intSiteId = TMO.intSiteID
+	,intDeviceId = SD.intDeviceId
+	,strSerialNumber = SD.strSerialNumber
 	,strOrderNumber = TMO.strOrderNumber
 	,strLocationName = TMO.strCompanyLocationName
 	,strEntityNo = E.strEntityNo
@@ -44,6 +46,8 @@ SELECT
 	,TMO.intConcurrencyId
 FROM vyuTMGeneratedCallEntry TMO 
 	LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
+	OUTER APPLY (SELECT TOP 1 sd.intDeviceId, d.strSerialNumber FROM tblTMSiteDevice sd 
+		INNER JOIN tblTMDevice d ON d.intDeviceId = sd.intDeviceId WHERE sd.intSiteID = TMS.intSiteID) SD
 	LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
 	LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
