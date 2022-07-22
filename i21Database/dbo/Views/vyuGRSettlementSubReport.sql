@@ -233,6 +233,7 @@ FROM
 			AND ((ISNULL(BillDtl2.intLinkingId, 0) = ISNULL(BillDtl.intLinkingId, 0) OR ISNULL(BillDtl2.intLinkingId,-90) = -90) and (BillDtl.dblQtyReceived = ABS(BillDtl2.dblQtyReceived) OR ABS(BillDtl2.dblQtyReceived) = 1))
 		LEFT JOIN tblAPBill Bill2 
 			ON BillDtl2.intBillId = Bill2.intBillId --and Bill.intTransactionType = 1
+		OUTER APPLY dbo.fnGRSettlementManualChargeItem(BillDtl.intBillId) MC
 		LEFT JOIN tblICItem Item2 
 			ON BillDtl2.intItemId = Item2.intItemId
 		LEFT JOIN vyuAPBillDetailTax Tax 
@@ -279,21 +280,11 @@ FROM
 					AND StorageDiscount.intItemId = BillDtl2.intItemId
 		WHERE Item2.strType = 'Other Charge'
 			--AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
-				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL)) 
-				/*Leslie: Manual split distribution (Spot and Contract) in scale ticket creates one IR and one voucher with multiple line 	items. When adding an other charge item in the voucher, it should be put in "Spot" in the report and not show in the 		"Contract" to avoid duplication
-			*/	
-			AND (CASE 
-						WHEN (
-								SELECT COUNT(*) 
-								FROM tblAPBillDetail 
-								WHERE intBillId = BillDtl2.intBillId 
-									AND intInventoryReceiptItemId IS NOT NULL 
-									AND intInventoryReceiptChargeId IS NULL
-							) > 1 AND 
-								(BillDtl2.intInventoryReceiptItemId IS NULL AND BillDtl2.intInventoryReceiptChargeId IS NULL)
-						THEN 0 ELSE 1
-						END
-					) = 1			
+				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL))
+			AND (MC.intBillDetailItemId = BillDtl.intBillDetailId AND MC.intBillDetailOtherChargeItemId = BillDtl2.intBillDetailId AND MC.ysnShow = 1)
    )t3 
 	WHERE t3.intItemId IS NOT NULL 
-)t	
+)t
+GO
+
+
