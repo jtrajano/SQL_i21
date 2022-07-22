@@ -2,7 +2,6 @@
 	[intCrossReferenceMappingId] [int] IDENTITY(1,1) NOT NULL,
 	[strOldAccountId] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[intAccountId] INT NULL,
-	[intParentAccountId] INT NULL,
 	[intAccountSystemId] INT NULL,
 	[ysnOutbound] BIT NULL,
 	[ysnInbound] BIT NULL,
