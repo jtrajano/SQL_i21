@@ -711,30 +711,6 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
-	--NOT BALANCE
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The debit and credit amounts are not balanced.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceHeader I			 
-	WHERE ((I.strType <> 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM tblARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0)))
-	   OR (I.strType = 'Tax Adjustment' AND I.[dblInvoiceTotal] <> (SELECT SUM([dblTax]) FROM tblARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId)))
-	   AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
 	--Header Account ID
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
@@ -2195,686 +2171,6 @@ BEGIN
 	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Configuration Due From Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The due from account is not yet configured in company configuration.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intDueFromAccountId = ISNULL(intDueFromAccountId, 0)
-		FROM tblARCompanyPreference
-	) ARCP
-	WHERE I.dblFreightCharge > 0
-	AND ARCP.[intDueFromAccountId] = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Configuration Due To Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The due to account is not yet configured in company configuration.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intDueToAccountId = ISNULL(intDueToAccountId, 0)
-		FROM tblARCompanyPreference
-	) ARCP
-	WHERE I.dblFreightCharge > 0
-	AND ARCP.[intDueToAccountId] = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Due From Account For Location
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intDueFromAccountId
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], ARCP.intDueFromAccountId, 0, 1, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
-	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Due From Account For Company
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due from account that matches the company of the Sales Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intDueFromAccountId
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], ARCP.intDueFromAccountId, 1, 0, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Due To Account For Location
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intDueToAccountId
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intDueToAccountId, 0, 1, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
-	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Due To Account For Company
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due to account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intDueToAccountId
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intDueToAccountId, 1, 0, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Configuration Freight Revenue Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The freight revenue account is not yet configured in company configuration.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightRevenueAccount = ISNULL(intFreightRevenueAccount, 0)
-		FROM tblARCompanyPreference
-	) ARCP
-	WHERE I.dblFreightCharge > 0
-	AND ARCP.[intFreightRevenueAccount] = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Configuration Freight Expense Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The freight expense account is not yet configured in company configuration.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightExpenseAccount = ISNULL(intFreightExpenseAccount, 0)
-		FROM tblARCompanyPreference
-	) ARCP
-	WHERE I.dblFreightCharge > 0
-	AND ARCP.[intFreightExpenseAccount] = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Freight Revenue Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightRevenueAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightRevenueAccount], 1, 0, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Location Freight Revenue Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightRevenueAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightRevenueAccount], 0, 1, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Freight Expense Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightExpenseAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightExpenseAccount], 1, 0, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0 
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Location Freight Expense Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightExpenseAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightExpenseAccount], 0, 1, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0 
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Due To Account For Company
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due to account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intDueToAccountId
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intDueToAccountId, 1, 0, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Configuration Freight Revenue Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The freight revenue account is not yet configured in company configuration.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightRevenueAccount = ISNULL(intFreightRevenueAccount, 0)
-		FROM tblARCompanyPreference
-	) ARCP
-	WHERE I.dblFreightCharge > 0
-	AND ARCP.[intFreightRevenueAccount] = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Configuration Freight Expense Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The freight expense account is not yet configured in company configuration.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightExpenseAccount = ISNULL(intFreightExpenseAccount, 0)
-		FROM tblARCompanyPreference
-	) ARCP
-	WHERE I.dblFreightCharge > 0
-	AND ARCP.[intFreightExpenseAccount] = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Freight Revenue Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightRevenueAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightRevenueAccount], 1, 0, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Location Freight Revenue Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightRevenueAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightRevenueAccount], 0, 1, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Company Freight Expense Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightExpenseAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightExpenseAccount], 1, 0, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0 
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Location Freight Expense Account
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	OUTER APPLY (
-		SELECT TOP 1 intFreightExpenseAccount
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightExpenseAccount], 0, 1, 0)
-	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.intOverrideAccount = 0 
-	AND I.dblFreightCharge > 0
-	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Check company segment
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	WHERE I.[ysnAllowIntraEntries] = 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Check company segment
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceDetail I
-	WHERE I.[ysnAllowIntraEntries] = 0
-	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
-	AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	-- Check line of business segment
-	SELECT
-		 [intInvoiceId]			= ARPID.[intInvoiceId]
-		,[strInvoiceNumber]		= ARPID.[strInvoiceNumber]		
-		,[strTransactionType]	= ARPID.[strTransactionType]
-		,[intInvoiceDetailId]	= ARPID.[intInvoiceDetailId] 
-		,[intItemId]			= ARPID.[intItemId] 
-		,[strBatchId]			= ARPID.[strBatchId]
-		,[strPostingError]		= 'Unable to find the due to account that matches the line of business. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](ARPID.[intSalesAccountId], NULL, LOB.intSegmentCodeId, NULL) + ' to the chart of accounts.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceHeader ARPIH
-	INNER JOIN tblARPostInvoiceDetail ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
-	OUTER APPLY (
-		SELECT TOP 1 ysnOverrideLineOfBusinessSegment
-		FROM tblARCompanyPreference
-	) ARCP
-	OUTER APPLY (
-		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPID.[intSalesAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
-		FROM tblSMLineOfBusiness
-		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
-	) LOB
-	WHERE ARCP.ysnOverrideLineOfBusinessSegment = 1
-	AND ISNULL(LOB.intAccountId, 0) = 0
-	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
-	AND ARPID.strSessionId = @strSessionId
 END
 
 IF @Post = @ZeroBit
@@ -3531,6 +2827,469 @@ SELECT [intInvoiceId]
 	, [strPostingError]
 	, [strSessionId]			= @strSessionId
 FROM dbo.fnCTValidateInvoiceContract(@ItemsForContracts)
+
+INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Company Configuration Due From Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The due from account is not yet configured in company configuration.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 
+			 intDueFromAccountId = ISNULL(intDueFromAccountId, 0)
+			,ysnAllowIntraEntries = CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END
+		FROM tblARCompanyPreference
+	) ARCP
+	WHERE (I.dblFreightCharge > 0 OR ARCP.[ysnAllowIntraEntries] = 1)
+	AND ARCP.[intDueFromAccountId] = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Company Configuration Due To Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The due to account is not yet configured in company configuration.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 
+			 intDueToAccountId = ISNULL(intDueToAccountId, 0)
+			,ysnAllowIntraEntries = CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END
+		FROM tblARCompanyPreference
+	) ARCP
+	WHERE (I.dblFreightCharge > 0 OR ARCP.[ysnAllowIntraEntries] = 1)
+	AND ARCP.[intDueToAccountId] = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Due From Account For Location
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due from account that matches the location of the Sales Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intDueFromAccountId
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], ARCP.intDueFromAccountId, 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
+	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Due From Account For Company
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due from account that matches the company of the Sales Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intDueFromAccountId
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], ARCP.intDueFromAccountId, 1, 0, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
+	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
+	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Due To Account For Location
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due to account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intDueToAccountId
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intDueToAccountId, 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
+	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Due To Account For Company
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due to account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intDueToAccountId
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.intDueToAccountId, 1, 0, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
+	AND ((I.[ysnAllowIntraEntries] = 1 AND I.ysnSkipIntraEntriesValiation = 0) OR I.dblFreightCharge > 0)
+	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Company Configuration Freight Revenue Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The freight revenue account is not yet configured in company configuration.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intFreightRevenueAccount = ISNULL(intFreightRevenueAccount, 0)
+		FROM tblARCompanyPreference
+	) ARCP
+	WHERE I.dblFreightCharge > 0
+	AND ARCP.[intFreightRevenueAccount] = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Company Configuration Freight Expense Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The freight expense account is not yet configured in company configuration.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intFreightExpenseAccount = ISNULL(intFreightExpenseAccount, 0)
+		FROM tblARCompanyPreference
+	) ARCP
+	WHERE I.dblFreightCharge > 0
+	AND ARCP.[intFreightExpenseAccount] = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Company Freight Revenue Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intFreightRevenueAccount
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightRevenueAccount], 1, 0, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
+	AND I.dblFreightCharge > 0
+	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Location Freight Revenue Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intFreightRevenueAccount
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightRevenueAccount], 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0
+	AND I.dblFreightCharge > 0
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Company Freight Expense Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intFreightExpenseAccount
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameCompanySegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightExpenseAccount], 1, 0, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0 
+	AND I.dblFreightCharge > 0
+	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Location Freight Expense Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	OUTER APPLY (
+		SELECT TOP 1 intFreightExpenseAccount
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], ARCP.[intFreightExpenseAccount], 0, 1, 0)
+	) OVERRIDESEGMENT
+	WHERE OVERRIDESEGMENT.intOverrideAccount = 0 
+	AND I.dblFreightCharge > 0
+	AND OVERRIDESEGMENT.bitSameLocationSegment = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check location segment
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Sales and AR Account should have the same location segment.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	WHERE I.[ysnAllowIntraEntries] = 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check company segment
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Sales and AR Account should have the same company segment.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	WHERE I.[ysnAllowIntraEntries] = 0
+	AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0
+	AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check line of business segment
+	SELECT
+		 [intInvoiceId]			= ARPID.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPID.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPID.[strTransactionType]
+		,[intInvoiceDetailId]	= ARPID.[intInvoiceDetailId] 
+		,[intItemId]			= ARPID.[intItemId] 
+		,[strBatchId]			= ARPID.[strBatchId]
+		,[strPostingError]		= 'Unable to find the due to account that matches the line of business. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](ARPID.[intSalesAccountId], NULL, LOB.intSegmentCodeId, NULL) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	INNER JOIN tblARPostInvoiceDetail ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
+	OUTER APPLY (
+		SELECT TOP 1 ysnOverrideLineOfBusinessSegment
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPID.[intSalesAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
+	) LOB
+	WHERE ARCP.ysnOverrideLineOfBusinessSegment = 1
+	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+	AND ARPID.strSessionId = @strSessionId
 
 --VALIDATE INVOICE GL ENTRIES
 INSERT INTO tblARPostInvalidInvoiceData (
