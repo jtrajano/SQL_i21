@@ -110,6 +110,8 @@ BEGIN TRY
 		,ysnBrokerage							 BIT
 		,intCompanyId							 INT
 		,intContractHeaderRefId					 INT
+		,intProductTypeId						 INT
+		,ysnPrimeCustomer						 BIT
 	  )
 	
 	 DECLARE @tblCTContractDetail AS TABLE
@@ -131,14 +133,14 @@ BEGIN TRY
 		,intItemId						INT
 		,strItemSpecification			NVARCHAR(MAX)
 		,intCategoryId					INT
-		,dblQuantity					NUMERIC(18,6)
+		,dblQuantity					NUMERIC(38,20)
 		,intItemUOMId					INT
-		,dblOriginalQty					NUMERIC(18,6)
-		,dblBalance						NUMERIC(18,6)
+		,dblOriginalQty					NUMERIC(38,20)
+		,dblBalance						NUMERIC(38,20)
 		,dblIntransitQty				NUMERIC(18,6)
-		,dblScheduleQty					NUMERIC(18,6)
+		,dblScheduleQty					NUMERIC(38,20)
 		,dblShippingInstructionQty		NUMERIC(18,6)
-		,dblNetWeight				    NUMERIC(18,6)
+		,dblNetWeight				    NUMERIC(38,20)
 		,intNetWeightUOMId				INT
 		,intUnitMeasureId				INT
 		,intCategoryUOMId				INT
@@ -685,7 +687,9 @@ BEGIN TRY
 							,SH.ysnMailSent						 = 	CH.ysnMailSent						
 							,SH.strAmendmentLog					 = 	CH.strAmendmentLog					
 							,SH.ysnBrokerage					 = 	CH.ysnBrokerage					
-							,SH.intCompanyId					 = 	CH.intCompanyId					
+							,SH.intCompanyId					 = 	CH.intCompanyId
+							,SH.intProductTypeId				 =  CH.intProductTypeId
+							,SH.ysnPrimeCustomer				 =  CH.ysnPrimeCustomer
 						FROM tblCTContractHeader SH  
 						JOIN @tblCTContractHeader CH ON CH.intContractHeaderId = SH.intContractHeaderRefId
 
@@ -1008,14 +1012,14 @@ BEGIN TRY
 							,intItemId						INT
 							,strItemSpecification			NVARCHAR(MAX)
 							,intCategoryId					INT
-							,dblQuantity					NUMERIC(18,6)
+							,dblQuantity					NUMERIC(38,20)
 							,intItemUOMId					INT
-							,dblOriginalQty					NUMERIC(18,6)
-							,dblBalance						NUMERIC(18,6)
+							,dblOriginalQty					NUMERIC(38,20)
+							,dblBalance						NUMERIC(38,20)
 							,dblIntransitQty				NUMERIC(18,6)
-							,dblScheduleQty					NUMERIC(18,6)
+							,dblScheduleQty					NUMERIC(38,20)
 							,dblShippingInstructionQty		NUMERIC(18,6)
-							,dblNetWeight				    NUMERIC(18,6)
+							,dblNetWeight				    NUMERIC(38,20)
 							,intNetWeightUOMId				INT
 							,intUnitMeasureId				INT
 							,intCategoryUOMId				INT

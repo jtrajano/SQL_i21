@@ -346,6 +346,7 @@ SELECT a.intContractDetailId
 	, ICC.strClass
 	, ICC.strProductLine
 	, a.dblInterestRate
+	, strPrimeCustomer = (CASE WHEN ISNULL(b.ysnPrimeCustomer, 0) = 0 THEN 'N' ELSE 'Y' END) COLLATE Latin1_General_CI_AS
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId

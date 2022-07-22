@@ -176,10 +176,18 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	--,[dblQty]                       = - ROUND(ARID.dblQtyShipped/ CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
-	,[dblQty]                       = - (CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 
-										THEN CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 AND ICISI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId = 1 THEN CTD.dblQuantity 
-										ELSE ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) END ELSE ICISI.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
+	,[dblQty]                       = - (CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(
+											CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 
+												 THEN 
+													CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 AND ICISI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId = 1 
+														 THEN CTD.dblQuantity 
+														 ELSE ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) 
+												    END
+												 WHEN (T.ysnTicketApplied = 1 AND T.ysnTicketInTransit = 1)
+												 THEN T.dblNetUnits
+												 ELSE ICISI.[dblQuantity] 
+											 END AS NUMERIC(18, 10))
+										) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -213,6 +221,7 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICIS.[int
 										 AND ICIT.[intItemId] = ARID.[intItemId]
 										 AND ICIT.[ysnIsUnposted] = 0
 										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0 
+INNER JOIN tblSCTicket T ON ARID.intTicketId = T.intTicketId
 LEFT JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT JOIN(
 	SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
@@ -234,8 +243,14 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	--,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
-	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10))/CAST(CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) ELSE ICISI.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
+	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10))/CAST(
+											CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 
+												 THEN ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) 
+												 WHEN (T.ysnTicketApplied = 1 AND T.ysnTicketInTransit = 1)
+												 THEN T.dblNetUnits
+												 ELSE ICISI.[dblQuantity] 
+											END AS NUMERIC(18, 10))
+										) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -260,6 +275,7 @@ SELECT
 	,[intSourceEntityId]		    = ARID.intEntityCustomerId
 	,[strSessionId]					= @strSessionId
 FROM tblARPostInvoiceDetail ARID
+INNER JOIN tblSCTicket T ON ARID.intTicketId = T.intTicketId
 INNER JOIN tblICInventoryShipmentItem ICISI WITH (NOLOCK) ON ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 INNER JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]

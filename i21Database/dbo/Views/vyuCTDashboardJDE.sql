@@ -148,6 +148,8 @@ SELECT CD.intContractDetailId
 								ELSE 'Y' END COLLATE Latin1_General_CI_AS
 	, ysnClaimsToProducer = CASE WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 0 THEN 'N'
 								ELSE 'Y' END COLLATE Latin1_General_CI_AS
+	, strPrimeCustomer = CASE WHEN ISNULL(CH.ysnPrimeCustomer, 0) = 0 THEN 'N'
+								ELSE 'Y' END COLLATE Latin1_General_CI_AS
 	, CD.strERPPONumber
 	, CD.strERPItemNumber
 	, CD.strERPBatchNumber
