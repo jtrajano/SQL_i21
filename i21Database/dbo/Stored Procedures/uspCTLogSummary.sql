@@ -41,7 +41,9 @@ BEGIN TRY
 			@intSeqHistoryPreviousFutMkt	INT,
 			@intSeqHistoryPreviousFutMonth	INT,
 			@dblCurrentBasis				NUMERIC(24, 10),
-			@intHeaderPricingTypeId		INT;
+			@intHeaderPricingTypeId		INT,
+			@dblInvoicedQuantity				NUMERIC(24, 10),
+			@ysnMissingShipment bit = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -75,6 +77,18 @@ BEGIN TRY
 
 	DECLARE @strBatchId NVARCHAR(50)
 	EXEC uspSMGetStartingNumber 148, @strBatchId OUTPUT
+
+	declare @tmpAvailablePrice table (
+		intIdentity int not null
+		,intContractHeaderId int
+		,intContractDetailId int
+		,ysnLoad bit
+		,intPriceContractId int
+		,intPriceFixationId int
+		,intPriceFixationDetailId int
+		,dblQuantity numeric(18,6)
+		,dblPrice numeric(18,6)
+	)
 
 	DECLARE @tmpContractDetail TABLE (
 		  intContractHeaderId INT
@@ -1280,6 +1294,244 @@ BEGIN TRY
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
 			ORDER BY cbl.intContractBalanceLogId DESC
+
+
+			insert into @tmpAvailablePrice (
+				intIdentity
+				,intContractHeaderId
+				,intContractDetailId
+				,ysnLoad
+				,intPriceContractId
+				,intPriceFixationId
+				,intPriceFixationDetailId
+				,dblQuantity
+				,dblPrice
+			)
+			exec uspCTGetContractPrice
+			@intContractHeaderId = @intContractHeaderId
+			,@intContractDetailId = @intContractDetailId
+			,@dblQuantityToPrice = @dblTransactionQty
+			,@strScreen = 'Invoice'
+
+			select @dblInvoicedQuantity = ap.dblQuantity from @tmpAvailablePrice ap join tblCTPriceFixationDetail fd on fd.intPriceFixationDetailId = ap.intPriceFixationDetailId
+			where fd.dblPreviousQuantityAppliedAndPriced is not null;
+			
+			if (@dblInvoicedQuantity is not null)
+			begin
+
+				select @ysnMissingShipment = 1;
+
+				INSERT INTO @cbLogTemp (strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, dblOrigQty
+					, dblDynamic
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId
+					, intActionId
+					, strProcess
+					, strInvoiceType
+				)		
+				SELECT strBatchId = null
+					, dtmTransactionDate
+					, strTransactionType = 'Contract Balance'
+					, strTransactionReference = strTransactionType
+					, intTransactionReferenceId = intTransactionId
+					, intTransactionReferenceDetailId = intTransactionDetailId
+					, strTransactionReferenceNo = strTransactionId
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber		
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intCompanyLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId = NULL
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, dblOrigQty
+					, dblDynamic
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes = ''
+					, intUserId
+					, intActionId = 46
+					, strProcess = 'Update Sequence Balance'
+					, strInvoiceType
+				FROM 
+				(
+					SELECT Row_Num = 1
+						, dtmTransactionDate = shipment.dtmShipDate
+						, strTransactionType = 'Inventory Shipment'
+						, intTransactionId = shipment.intInventoryShipmentId
+						, intTransactionDetailId = si.intInventoryShipmentItemId
+						, strTransactionId = shipment.strShipmentNumber
+						, cd.intContractDetailId
+						, ch.intContractHeaderId				
+						, ch.strContractNumber
+						, cd.intContractSeq
+						, ch.intContractTypeId
+						, ch.intEntityId
+						, ch.intCommodityId
+						, cd.intItemId
+						, cd.intCompanyLocationId
+						, intPricingTypeId = 1
+						, cd.intFutureMarketId  
+						, cd.intFutureMonthId  
+						, cd.dblBasis  
+						, dblFutures = cd.dblFutures
+						, intQtyUOMId = ch.intCommodityUOMId
+						, cd.intBasisUOMId
+						, cd.intBasisCurrencyId
+						, intPriceUOMId = cd.intPriceItemUOMId
+						, cd.dtmStartDate
+						, cd.dtmEndDate
+						, dblQty = @dblInvoicedQuantity
+						, dblOrigQty = di.dblQtyShipped
+						, dblDynamic = @dblInvoicedQuantity
+						, cd.intContractStatusId
+						, cd.intBookId
+						, cd.intSubBookId		
+						, intUserId	= shipment.intModifiedByUserId
+						, strInvoiceType = 'Invoice'
+					FROM tblARInvoiceDetail di
+					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = di.intContractDetailId
+					JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+					JOIN tblICInventoryShipmentItem si on si.intInventoryShipmentItemId = di.intInventoryShipmentItemId
+					JOIN tblICInventoryShipment shipment ON shipment.intInventoryShipmentId = si.intInventoryShipmentId
+					OUTER APPLY 
+					(
+						SELECT dblFutures = AVG(pfd.dblFutures)
+						FROM tblCTPriceFixation pf 
+						INNER JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId
+						WHERE pf.intContractHeaderId = cd.intContractHeaderId 
+						AND cd.intContractDetailId = pf.intContractDetailId
+					) price
+					WHERE di.intInvoiceDetailId = @intTransactionId
+				) tbl
+
+				INSERT INTO @cbLogCurrent (strBatchId
+						, dtmTransactionDate
+						, strTransactionType
+						, strTransactionReference
+						, intTransactionReferenceId
+						, intTransactionReferenceDetailId
+						, strTransactionReferenceNo
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, dblOrigQty
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes
+						, intUserId
+						, intActionId
+						, strProcess
+						, strInvoiceType)		
+					SELECT lt.strBatchId
+						, lt.dtmTransactionDate
+						, lt.strTransactionType
+						, lt.strTransactionReference
+						, lt.intTransactionReferenceId
+						, lt.intTransactionReferenceDetailId
+						, lt.strTransactionReferenceNo
+						, lt.intContractDetailId
+						, lt.intContractHeaderId
+						, lt.strContractNumber
+						, lt.intContractSeq
+						, lt.intContractTypeId
+						, lt.intEntityId
+						, lt.intCommodityId
+						, lt.intItemId
+						, lt.intLocationId
+						, lt.intPricingTypeId
+						, lt.intFutureMarketId
+						, lt.intFutureMonthId
+						, lt.dblBasis
+						, lt.dblFutures
+						, lt.intQtyUOMId
+						, lt.intQtyCurrencyId
+						, lt.intBasisUOMId
+						, lt.intBasisCurrencyId
+						, lt.intPriceUOMId
+						, lt.dtmStartDate
+						, lt.dtmEndDate
+						, lt.dblQty
+						, lt.dblOrigQty
+						, lt.intContractStatusId
+						, lt.intBookId
+						, lt.intSubBookId
+						, lt.strNotes
+						, lt.intUserId
+						, lt.intActionId
+						, lt.strProcess
+						, lt.strInvoiceType
+					FROM @cbLogTemp lt
+
+				end
+
 		END
 		ELSE IF @strProcess = 'Delete Invoice'
 		BEGIN
@@ -3463,6 +3715,7 @@ BEGIN TRY
         end
 
         /**/
+		delete @cbLogSpecific;
 
 		INSERT INTO @cbLogSpecific (strBatchId
 			, dtmTransactionDate
@@ -5026,8 +5279,6 @@ BEGIN TRY
 			END
 
 		END
-
-		DELETE FROM @cbLogSpecific
 
 		SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 	END

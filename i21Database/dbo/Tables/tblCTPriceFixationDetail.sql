@@ -42,6 +42,8 @@
 	[ysnToBeDeleted]				BIT NOT NULL DEFAULT 0,
 	[dblPreviousQty]				NUMERIC(18,6) NULL,
 	[intConcurrencyId]				INT NOT NULL,
+	[dblPreviousQuantityAppliedAndPriced]	NUMERIC(18,6) NULL,
+	[dblPreviousLoadAppliedAndPriced]		NUMERIC(18,6) NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
 	CONSTRAINT [UK_tblCTPackingDescriptionDetail_strTradeNo] UNIQUE ([strTradeNo]),
