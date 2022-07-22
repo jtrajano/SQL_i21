@@ -123,7 +123,6 @@
     [guiApiUniqueId]                        UNIQUEIDENTIFIER NULL,
     [intDefaultPayToBankAccountId]          INT NULL,
     [strDefaultPayToBankAccountNo]          NVARCHAR(50),
-    [ysnLoadToLoad]                         BIT CONSTRAINT [DF_tblARCustomer_ysnLoadToLoad] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
