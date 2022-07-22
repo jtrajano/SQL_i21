@@ -166,7 +166,10 @@ AS
 			CH.ysnSupplyPointContract,
 			CH.ysnQuantityAtHeaderLevel,
 			NM.dblHeaderBalance,
-			NM.dblHeaderAvailable
+			NM.dblHeaderAvailable,
+			CH.intProductTypeId,
+			NM.strHeaderProductType,
+			CH.ysnPrimeCustomer
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY

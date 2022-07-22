@@ -52,6 +52,8 @@ SELECT CH.intContractHeaderId
 	,AB.strCity strArbitration
 	,SB.strSubBook
 	,CT.strCity					AS	strINCOLocation
+	,CH.intProductTypeId
+	,CH.ysnPrimeCustomer
 FROM tblCTContractHeader CH
 LEFT JOIN tblCTWeightGrade W1 ON W1.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblCTWeightGrade W2 ON W2.intWeightGradeId = CH.intWeightId
