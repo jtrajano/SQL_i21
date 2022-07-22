@@ -198,8 +198,8 @@ BEGIN
     ,0              
     ,0              
     ,0              
-    ,NULL              
-    ,0              
+    ,CONVERT(DATE, @dtmPayDate)               
+    ,1              
     ,0              
     ,0    
     ,0          
