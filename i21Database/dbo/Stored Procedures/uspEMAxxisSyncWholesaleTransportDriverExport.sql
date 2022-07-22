@@ -15,12 +15,15 @@ BEGIN
 		A.strEmail, 
 		A.strEmail AS strEmailUserName, 
 		ISNULL((SELECT strName from tblEMEntity where intEntityId = D.intShipViaId), '') AS strShipVia,
-		CONVERT(NVARCHAR(10), ISNULL(D.ysnActive, '')) COLLATE Latin1_General_CI_AS AS ysnActive
+		CONVERT(NVARCHAR(10), ISNULL(D.ysnActive, '')) COLLATE Latin1_General_CI_AS AS ysnActive,
+		ISNULL(E.strLocationName, '')  COLLATE Latin1_General_CI_AS AS strCompanyLocation
 	INTO tmpEMAxxisDriver
 	FROM tblEMEntity A
 	INNER JOIN tblEMEntityLineOfBusiness B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblSMLineOfBusiness C ON B.intLineOfBusinessId = C.intLineOfBusinessId
 	INNER JOIN tblARSalesperson D ON  A.intEntityId = D.intEntityId AND D.strType = 'Driver'
+	LEFT OUTER JOIN tblSMCompanyLocation E on D.intCompanyLocationId = E.intCompanyLocationId
+	
 	WHERE C.strLineOfBusiness = 'Wholesale Transports'
 
 	MERGE tmpEMAxxisDriver AS driver
@@ -39,6 +42,7 @@ BEGIN
 		   strEmail AS Email, 
 		   strEmailUserName AS EmailUserName, 
 		   strShipVia AS ShipVia,
-		   ysnActive AS Active
+		   ysnActive AS Active,
+		   strCompanyLocation AS CompanyLocation
 	FROM tmpEMAxxisDriver
 END
