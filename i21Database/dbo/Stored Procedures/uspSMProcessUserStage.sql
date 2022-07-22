@@ -786,45 +786,15 @@ BEGIN TRY
 						intCountryId = @ExistingCountryId
 				WHERE	intEntityId = @ExistingContactEntityId
 
-				--CREATE tblSMUserSecurityCompanyLocationRolePermission (Details)
-				DELETE 
-				FROM	tblSMUserSecurityCompanyLocationRolePermission
-				WHERE	intEntityId = @ExistingUserEntityId
-
-				WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForInsert)
-				BEGIN
-					SET @InsertDetailLocation = ''
-					SET @InsertDetailRole = ''
-					SET @ExistingInsertDetailLocation = 0
-					SET @ExistingInsertDetailRole = 0
-
-					SELECT	TOP 1
-							@InsertDetailLocation = strLocation,
-							@InsertDetailRole = strRole
-					FROM	#tmpUserLocationRolesForInsert
-
-					SELECT	@ExistingInsertDetailLocation = intCompanyLocationId
-					FROM	dbo.tblSMCompanyLocation
-					WHERE	strLocationName = @InsertDetailLocation
-
-					SELECT	@ExistingInsertDetailRole = intUserRoleID
-					FROM	dbo.tblSMUserRole
-					WHERE	strName = @InsertDetailRole
-
-					INSERT tblSMUserSecurityCompanyLocationRolePermission (intEntityUserSecurityId, intEntityId, intUserRoleId, intCompanyLocationId, intConcurrencyId)
-					VALUES (@ExistingUserEntityId, @ExistingUserEntityId, @ExistingInsertDetailRole, @ExistingInsertDetailLocation, 1)
-
-					DELETE TOP (1) FROM #tmpUserLocationRolesForInsert
-				END
-
-				DROP TABLE #tmpUserLocationRolesForInsert
-
-				-- TRANSFER TO tblSMUserStageArchive
-				INSERT INTO tblSMUserStageArchive(strUserName, strUserId, strExtErpId, strEmail, strPhone, strMobile, strContactName, strLocationName, strAddress, strCity, strState, strZip, strCountry, strUserRole, ysnActive, strTransactionType, strErrorMessage, strImportStatus)
-				VALUES (@Username, @UserId, @ExtErpId, @Email, @Phone, @Mobile, @ContactName, @LocationName, @Address, @City, @State, @Zip, @Country, @UserRole, @Active, @TransactionType, 'Success', 'Processed')
-		
-				SET @NewUserStageArchiveId = 0
-				SET @NewUserStageArchiveId = SCOPE_IDENTITY()
+				DECLARE @ExistingDetailCompanyLocationUserRoleId INT = 0
+				DECLARE @ExistingDetailUserRoleId INT = 0
+				DECLARE @CurrentCompanyLocationUserRoleId INT = 0
+				DECLARE @ExistingPrimaryKey INT = 0
+				DECLARE @ExistingCompanyLocationToDeleteId INT = 0
+				DECLARE @ExistingUserRoleToDeleteId INT = 0
+				CREATE TABLE #tmpCompanyLocationUserRoleIds (
+					intCompanyLocationUserRoleId INT
+				);
 
 				--AuditLog
 				DECLARE @AuditLogId INT = 0
@@ -960,7 +930,7 @@ BEGIN TRY
 					SELECT @AuditLogId, '', '', 'ysnDisabled', CASE WHEN @ExistingYsnActiveFromView = 1 THEN 'false' WHEN @ExistingYsnActiveFromView = 0 THEN 'true' END, CASE WHEN @Active = 1 THEN 'false' WHEN @Active = 0 THEN 'true' END, 'Disable User', 1, 0, 1
 				END 
 
-				IF EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForArchive)
+				IF EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForInsert)
 				BEGIN
 					DECLARE @AuditLogIdForLocationRoles INT = 0
 					SET @AuditLogId = @AuditLogId + 1
@@ -968,6 +938,135 @@ BEGIN TRY
 					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
 					SELECT @AuditLogId, '', '', 'tblSMUserSecurityCompanyLocationRolePermissions', NULL, NULL, 'User Roles', NULL, NULL, 1
 				END
+
+				--CREATE tblSMUserSecurityCompanyLocationRolePermission (Details)
+				WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForInsert)
+				BEGIN
+					SET @InsertDetailLocation = ''
+					SET @InsertDetailRole = ''
+					SET @ExistingInsertDetailLocation = 0
+					SET @ExistingInsertDetailRole = 0
+
+					SELECT	TOP 1
+							@InsertDetailLocation = strLocation,
+							@InsertDetailRole = strRole
+					FROM	#tmpUserLocationRolesForInsert
+
+					SELECT	@ExistingInsertDetailLocation = intCompanyLocationId
+					FROM	dbo.tblSMCompanyLocation
+					WHERE	strLocationName = @InsertDetailLocation
+
+					SELECT	@ExistingInsertDetailRole = intUserRoleID
+					FROM	dbo.tblSMUserRole
+					WHERE	strName = @InsertDetailRole
+
+					SET		@ExistingDetailCompanyLocationUserRoleId = 0
+					SET		@ExistingDetailUserRoleId = 0
+					SELECT	@ExistingDetailCompanyLocationUserRoleId = intUserSecurityCompanyLocationRolePermissionId,
+							@ExistingDetailUserRoleId = intUserRoleId
+					FROM	dbo.tblSMUserSecurityCompanyLocationRolePermission
+					WHERE	intEntityId = @ExistingUserEntityId
+						AND intCompanyLocationId = @ExistingInsertDetailLocation
+
+					IF (ISNULL(@ExistingDetailCompanyLocationUserRoleId, 0) = 0)
+					BEGIN
+						INSERT	tblSMUserSecurityCompanyLocationRolePermission (intEntityUserSecurityId, intEntityId, intUserRoleId, intCompanyLocationId, intConcurrencyId)
+						VALUES	(@ExistingUserEntityId, @ExistingUserEntityId, @ExistingInsertDetailRole, @ExistingInsertDetailLocation, 1)
+
+						SET		@CurrentCompanyLocationUserRoleId = SCOPE_IDENTITY()
+
+						INSERT INTO #tmpCompanyLocationUserRoleIds (intCompanyLocationUserRoleId)
+						VALUES (@CurrentCompanyLocationUserRoleId)
+
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', 'Created', 'Created - Record: ' + @InsertDetailLocation + ' - ' + @InsertDetailRole, NULL, NULL, NULL, NULL, NULL, @AuditLogIdForLocationRoles
+					END
+					ELSE
+					BEGIN
+						UPDATE	tblSMUserSecurityCompanyLocationRolePermission
+						SET		intUserRoleId = @ExistingInsertDetailRole
+						WHERE	intUserSecurityCompanyLocationRolePermissionId = @ExistingDetailCompanyLocationUserRoleId
+
+						INSERT INTO #tmpCompanyLocationUserRoleIds (intCompanyLocationUserRoleId)
+						VALUES (@ExistingDetailCompanyLocationUserRoleId)
+
+						IF (@ExistingInsertDetailRole <> @ExistingDetailUserRoleId)
+						BEGIN
+							DECLARE @AuditLogIdForLocationUserRole INT = 0
+							SET @AuditLogId = @AuditLogId + 1
+							SET @AuditLogIdForLocationUserRole = @AuditLogId
+							INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+							SELECT @AuditLogId, '', 'Updated', 'Updated - Record: ' + @InsertDetailLocation + ' - ' + @InsertDetailRole, NULL, NULL, NULL, NULL, NULL, @AuditLogIdForLocationRoles
+
+							SET @AuditLogId = @AuditLogId + 1
+							INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+							SELECT @AuditLogId, '', '', 'strUserRole', (SELECT strName FROM tblSMUserRole WHERE intUserRoleID = @ExistingDetailUserRoleId), @InsertDetailRole, 'User Role', 1, 0, @AuditLogIdForLocationUserRole
+						END
+					END
+
+					DELETE TOP (1) FROM #tmpUserLocationRolesForInsert
+				END
+
+				CREATE TABLE #tmpCompanyLocationUserRolesToDelete (
+					intCompanyLocationUserRoleIdToDelete INT
+				);
+
+				INSERT INTO #tmpCompanyLocationUserRolesToDelete (intCompanyLocationUserRoleIdToDelete)
+				SELECT	intUserSecurityCompanyLocationRolePermissionId
+				FROM	dbo.tblSMUserSecurityCompanyLocationRolePermission
+				WHERE	intEntityId = @ExistingUserEntityId
+					AND	intUserSecurityCompanyLocationRolePermissionId NOT IN (SELECT intCompanyLocationUserRoleId FROM #tmpCompanyLocationUserRoleIds)
+					
+				WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCompanyLocationUserRolesToDelete)
+				BEGIN
+					SET @ExistingPrimaryKey = 0
+					SET @ExistingCompanyLocationToDeleteId = 0
+					SET @ExistingUserRoleToDeleteId = 0
+					DECLARE @ExistingCompanyLocationNameToDelete NVARCHAR(100) = ''
+					DECLARE @ExistingUserRoleNameToDelete NVARCHAR(100) = ''
+
+					SELECT	TOP 1
+							@ExistingPrimaryKey = intCompanyLocationUserRoleIdToDelete
+					FROM	#tmpCompanyLocationUserRolesToDelete
+
+					SELECT	@ExistingCompanyLocationToDeleteId = intCompanyLocationId,
+							@ExistingUserRoleToDeleteId = intUserRoleId
+					FROM	dbo.tblSMUserSecurityCompanyLocationRolePermission
+					WHERE	intUserSecurityCompanyLocationRolePermissionId = @ExistingPrimaryKey
+					
+					SELECT	@ExistingCompanyLocationNameToDelete = strLocationName
+					FROM	dbo.tblSMCompanyLocation
+					WHERE	intCompanyLocationId = @ExistingCompanyLocationToDeleteId
+
+					SELECT	@ExistingUserRoleNameToDelete = strName
+					FROM	dbo.tblSMUserRole
+					WHERE	intUserRoleID = @ExistingUserRoleToDeleteId
+
+					SET @AuditLogId = @AuditLogId + 1
+					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+					SELECT @AuditLogId, '', 'Deleted', 'Deleted - Record: ' + @ExistingCompanyLocationNameToDelete + ' - ' + @ExistingUserRoleNameToDelete, NULL, NULL, NULL, NULL, NULL, @AuditLogIdForLocationRoles
+
+					DELETE TOP (1) FROM #tmpCompanyLocationUserRolesToDelete
+				END
+
+				DELETE
+				FROM	dbo.tblSMUserSecurityCompanyLocationRolePermission
+				WHERE	intEntityId = @ExistingUserEntityId
+					AND	intUserSecurityCompanyLocationRolePermissionId NOT IN (SELECT intCompanyLocationUserRoleId FROM #tmpCompanyLocationUserRoleIds)
+
+				DROP TABLE #tmpCompanyLocationUserRolesToDelete
+
+				DROP TABLE #tmpCompanyLocationUserRoleIds
+
+				DROP TABLE #tmpUserLocationRolesForInsert
+
+				-- TRANSFER TO tblSMUserStageArchive
+				INSERT INTO tblSMUserStageArchive(strUserName, strUserId, strExtErpId, strEmail, strPhone, strMobile, strContactName, strLocationName, strAddress, strCity, strState, strZip, strCountry, strUserRole, ysnActive, strTransactionType, strErrorMessage, strImportStatus)
+				VALUES (@Username, @UserId, @ExtErpId, @Email, @Phone, @Mobile, @ContactName, @LocationName, @Address, @City, @State, @Zip, @Country, @UserRole, @Active, @TransactionType, 'Success', 'Processed')
+		
+				SET @NewUserStageArchiveId = 0
+				SET @NewUserStageArchiveId = SCOPE_IDENTITY()
 
 				WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForArchive)
 				BEGIN
@@ -981,10 +1080,6 @@ BEGIN TRY
 
 					INSERT INTO tblSMUserDetailStageArchive(intUserStageArchiveId, strLocation, strRole)
 					VALUES (@NewUserStageArchiveId, @ArchiveDetailLocation, @ArchiveDetailRole)
-
-					SET @AuditLogId = @AuditLogId + 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @AuditLogId, '', 'Created', 'Created - Record: ' + @ArchiveDetailLocation + ' - ' + @ArchiveDetailRole, NULL, NULL, NULL, NULL, NULL, @AuditLogIdForLocationRoles
 
 					DELETE TOP (1) FROM #tmpUserLocationRolesForArchive
 				END
