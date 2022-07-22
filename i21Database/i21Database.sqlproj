@@ -9168,6 +9168,7 @@
     <Build Include="dbo\Stored Procedures\uspICLoadRecostFormulationItems.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
