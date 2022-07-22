@@ -9196,6 +9196,7 @@
     <Build Include="dbo\Tables\tblRKDPRReconDerivatives.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPRRecon.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetDPRReconSummary.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
