@@ -26,11 +26,11 @@ BEGIN TRY
 		[intSort] INT NOT NULL,
 		[strLocationName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[strName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[strCommodityCode] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[strContractType] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[strContractStatus] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[strContractNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[intContractSeq] INT,
+		[strCommodityCode] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+		[strContractType] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+		[strContractStatus] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+		[strContractNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+		[intContractSeq] INT NULL,
 		[strItemNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 		[dtmCreatedDate] DATETIME NOT NULL,
 		[dtmTransactionDate] DATETIME NOT NULL,
@@ -209,13 +209,13 @@ BEGIN TRY
 		,EC.strUserName
 		,strBucketName = '+ Spot Purchases'
 		,strAction
-		,strPricingType = NULL
-		,strTicketNumber = NULL
+		,strPricingType = ''
+		,strTicketNumber = T.strTicketNumber
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
 		,CH.intContractHeaderId
-		,intTicketId = NULL
+		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
@@ -227,7 +227,8 @@ BEGIN TRY
 	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = SL.intUserId
 	LEFT JOIN tblCTContractHeader CH on CH.intContractHeaderId = SL.intContractHeaderId 
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = SL.intContractDetailId
-	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId 
+	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
+	LEFT JOIN tblSCTicket T ON T.intTicketId = SL.intTicketId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned' 
@@ -325,14 +326,14 @@ BEGIN TRY
 		,CL.strLocationName
 		,E.strName
 		,C.strCommodityCode
-		,CT.strContractType
+		,strContractType = 'Purchase'
 		,CS.strContractStatus
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
 		,SL.dtmCreatedDate
 		,SL.dtmTransactionDate
-		,dblVariance  = SL.dblOrigQty - CH.dblQuantityPerLoad
+		,dblVariance  = ABS(SL.dblOrigQty) - ABS(CH.dblQuantityPerLoad)
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+/- Purchase Load Variance'
@@ -361,6 +362,7 @@ BEGIN TRY
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
+	AND CT.strContractType = 'Purchase' 
 	AND CH.ysnLoad = 1
 
 	UNION ALL
@@ -555,12 +557,12 @@ BEGIN TRY
 		,strBucketName = '+ Spot Sales'
 		,strAction
 		,strPricingType = NULL
-		,strTicketNumber = NULL
+		,strTicketNumber = T.strTicketNumber
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
 		,CH.intContractHeaderId
-		,intTicketId = NULL
+		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
@@ -573,10 +575,11 @@ BEGIN TRY
 	LEFT JOIN tblCTContractHeader CH on CH.intContractHeaderId = SL.intContractHeaderId 
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = SL.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId 
+	LEFT JOIN tblSCTicket T ON T.intTicketId = SL.intTicketId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned' 
-	AND SL.strAction = 'Receipt on Spot Priced'
+	AND SL.strAction = 'Shipment on Spot Priced'
 
 	UNION ALL
 
@@ -670,14 +673,14 @@ BEGIN TRY
 		,CL.strLocationName
 		,E.strName
 		,C.strCommodityCode
-		,CT.strContractType
+		,strContractType = 'Sales'
 		,CS.strContractStatus
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
 		,SL.dtmCreatedDate
 		,SL.dtmTransactionDate
-		,dblVariance  = SL.dblOrigQty - CH.dblQuantityPerLoad
+		,dblVariance  = ABS(SL.dblOrigQty) - ABS(CH.dblQuantityPerLoad)
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+/- Sales Load Variance'
@@ -706,6 +709,7 @@ BEGIN TRY
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
+	AND CT.strContractType = 'Sale'
 	AND CH.ysnLoad = 1
 
 	UNION ALL
