@@ -115,4 +115,5 @@ WHERE HW.[ysnBillable] = 1
   AND (HW.[intInvoiceId] IS NULL OR HW.[intInvoiceId] = 0)
   AND ISNULL(HW.dblRate, 0) <> 0
   AND ISNULL(HW.intHours, 0) <> 0
+  AND LOWER(IC.strItemNo) <> 'holiday'
 GO
