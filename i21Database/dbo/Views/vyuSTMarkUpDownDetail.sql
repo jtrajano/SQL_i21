@@ -6,9 +6,9 @@ SELECT
 	markDetail.intItemId,
 	markDetail.intCategoryId,
 	strMarkUpOrDown = CASE
-						WHEN (mark.strType = 'Item Level' AND markDetail.dblRetailPerUnit > ISNULL(itemPricing.dblSalePrice, 0))
+						WHEN (mark.strType = 'Item Level' AND markDetail.dblRetailPerUnit > ISNULL(markDetail.dblRetailItemPerUnit, 0))
 							THEN 'Mark Up'
-						WHEN (mark.strType = 'Item Level' AND markDetail.dblRetailPerUnit < ISNULL(itemPricing.dblSalePrice, 0))
+						WHEN (mark.strType = 'Item Level' AND markDetail.dblRetailPerUnit < ISNULL(markDetail.dblRetailItemPerUnit, 0))
 							THEN 'Mark Down'
 
 						-- Note: Please see comment here http://jira.irelyserver.com/browse/ST-1014
@@ -26,6 +26,8 @@ SELECT
 	markDetail.intQty, 
     markDetail.dblRetailPerUnit, 
     markDetail.dblTotalRetailAmount, 
+    markDetail.dblRetailItemPerUnit AS dblRetailItemPerUnit, 
+    markDetail.dblTotalItemRetailAmount AS dblTotalItemRetailAmount, 
     markDetail.dblTotalCostAmount, 
     markDetail.strNote, 
     markDetail.dblActulaGrossProfit, 
@@ -43,6 +45,8 @@ SELECT
 	--Item
 	item.strItemNo,
 	strItemDescription						=	item.strDescription,
+	intItemUOMId							=	UOM.intItemUOMId,
+	strUnitOfMeasure						=	UM.strUnitMeasure,
 
 	--CStore
 	store.intStoreId,
@@ -103,7 +107,36 @@ INNER JOIN tblICCategory cat
 LEFT JOIN tblICCategoryPricing catPricing
 	ON cat.intCategoryId = catPricing.intCategoryId
 		AND itemLoc.intItemLocationId = catPricing.intItemLocationId
-
+LEFT JOIN tblICItemUOM UOM
+	ON markDetail.intItemUOMId = UOM.intItemUOMId
+LEFT JOIN tblICUnitMeasure UM
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+INNER JOIN vyuSTItemHierarchyPricing vyupriceHierarchy
+	ON item.intItemId = vyupriceHierarchy.intItemId 
+	AND itemLoc.intItemLocationId = vyupriceHierarchy.intItemLocationId
+	AND UOM.intItemUOMId = vyupriceHierarchy.intItemUOMId
+INNER JOIN ( 
+	SELECT SIP.intItemId, intItemLocationId, SIP.intItemUOMId,
+		CASE WHEN UOM.ysnStockUnit = 1
+			THEN dblSalePrice 
+			ELSE 
+			(
+				SELECT UOM.dblUnitQty * HP.dblSalePrice 
+				FROM vyuSTItemHierarchyPricing HP
+				JOIN tblICItemUOM UOMM
+					ON HP.intItemUOMId = UOMM.intItemUOMId
+					AND UOMM.ysnStockUnit = 1
+				WHERE HP.intItemId = SIP.intItemId
+				AND HP.intItemLocationId = SIP.intItemLocationId
+			)
+		END AS dblSalePrice
+		FROM vyuSTItemHierarchyPricing SIP
+		JOIN tblICItemUOM UOM
+		ON SIP.intItemUOMId = UOM.intItemUOMId
+	) vyupriceHierarchyStockUnit
+	ON item.intItemId = vyupriceHierarchyStockUnit.intItemId 
+	AND itemLoc.intItemLocationId = vyupriceHierarchyStockUnit.intItemLocationId
+	AND UOM.intItemUOMId = vyupriceHierarchyStockUnit.intItemUOMId
 
 
 --SELECT * FROM tblSTMarkUpDownDetail
