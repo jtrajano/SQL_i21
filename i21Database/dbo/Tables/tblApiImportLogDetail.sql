@@ -5,6 +5,7 @@ CREATE TABLE tblApiImportLogDetail (
     strStatus NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL, --Failed, Success, Warning
     strAction NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CI_AS NULL, --Skipped, etc.
     intRowNo INT NULL,
+    ysnPreventRowUpdate BIT NULL DEFAULT(0),
     strField NVARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
     strValue NVARCHAR(4000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
     strMessage NVARCHAR(4000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
