@@ -83,7 +83,10 @@ AS
 				intBookId,
 				intSubBookId,
 				intLoadReceive,
-				dblUnitRetail
+				dblUnitRetail,
+				strTaxPoint,
+				intTaxLocationId,
+				intTaxGroupId
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -130,7 +133,10 @@ AS
 				intBookId					=	CD.intBookId,
 				intSubBookId				=	CD.intSubBookId,
 				intLoadReceive				=	ISNULL(CD.dblBalanceLoad,0)		-	ISNULL(CD.dblScheduleLoad,0),
-				dblUnitRetail				=	CD.dblCashPrice
+				dblUnitRetail				=	CD.dblCashPrice,
+				strTaxPoint					=	CD.strTaxPoint,
+				intTaxLocationId			=	CD.intTaxLocationId,
+				intTaxGroupId				=	CD.intTaxGroupId
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
