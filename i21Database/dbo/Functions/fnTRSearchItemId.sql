@@ -1,8 +1,8 @@
 CREATE FUNCTION [dbo].[fnTRSearchItemId]
 (
-	@SupplierName AS NVARCHAR(50),
-	@SupplyPoint AS NVARCHAR(50),
-	@Item AS NVARCHAR(50)
+	@SupplierName AS NVARCHAR(200),
+	@SupplyPoint AS NVARCHAR(200),
+	@Item AS NVARCHAR(100)
 )
 RETURNS INT
 
