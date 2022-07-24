@@ -6,6 +6,7 @@
 	[strColumnType]    NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmRunDate]       DATETIME       NULL,
     [intConcurrencyId] INT            DEFAULT 1 NOT NULL,
+    [ysnObsolete]	   BIT            DEFAULT 0 NULL,
     CONSTRAINT [PK_tblFRColumn] PRIMARY KEY CLUSTERED ([intColumnId] ASC)
 );
 

@@ -5,6 +5,7 @@
 	[strReportType]    NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [intMapId]         INT            NULL,
     [intConcurrencyId] INT            DEFAULT 1 NOT NULL,
+    [ysnObsolete]	   BIT            DEFAULT 0 NULL,
     CONSTRAINT [PK_tblFRRow] PRIMARY KEY CLUSTERED ([intRowId] ASC)
 );
 
