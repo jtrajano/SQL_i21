@@ -89,4 +89,4 @@ LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocatio
 LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
 LEFT JOIN tblICItem I ON I.intItemId = ContractDetail.intItemId
 CROSS JOIN tblSMCompanyPreference CP
-WHERE DM.intTransactionType = 1
+WHERE DM.intTransactionType IN (1, 16)
