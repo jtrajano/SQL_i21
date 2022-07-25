@@ -79,6 +79,10 @@
 	[ysnOverrideLocationSegment]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLocationSegment] DEFAULT((0)),
 	[ysnOverrideLineOfBusinessSegment]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLineOfBusinessSegment] DEFAULT((0)),
 	[intFreightTermId]						INT	NULL,
+	[intTermItemCategoryId]					INT NULL,
+	[intTermItemId]							INT NULL,	
+	[intTermId]								INT NULL,
+	[strTermPullPoint]						NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Terminal',
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -94,4 +98,7 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFeeGeneralLedgerAccountId] FOREIGN KEY ([intFeeGeneralLedgerAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMFreightTerm_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId])
+	CONSTRAINT [FK_tblARCompanyPreference_tblICCategory_intTermItemCategoryId] FOREIGN KEY ([intTermItemCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblICItem_intTermItemId] FOREIGN KEY ([intTermItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 )
