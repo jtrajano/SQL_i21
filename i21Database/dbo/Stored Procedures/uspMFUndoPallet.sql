@@ -254,7 +254,8 @@ BEGIN TRY
 
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
-		,@dblPercentage NUMERIC(18, 6)
+		  , @dblPercentage   NUMERIC(18, 6)
+		  , @intChargeItem   INT
 
 	SELECT @dblPercentage = CASE 
 			WHEN ysnConsumptionRequired = 1
@@ -277,6 +278,7 @@ BEGIN TRY
 					ELSE ISNULL(P.dblStandardCost, 0) + (ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
 					END
 				) / R.dblQuantity)
+		 , @intChargeItem = I.intItemId
 	FROM dbo.tblMFWorkOrderRecipeItem RI
 	JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
 		AND R.intRecipeId = RI.intRecipeId
@@ -289,6 +291,7 @@ BEGIN TRY
 	JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
 		AND P.intItemLocationId = IL.intItemLocationId
 	WHERE RI.intWorkOrderId = @intWorkOrderId
+	GROUP BY  I.intItemId
 
 	IF @dblPercentage IS NOT NULL
 		SELECT @dblOtherCharges = @dblOtherCharges * @dblPercentage / 100
@@ -303,10 +306,10 @@ BEGIN TRY
 			,intOtherChargeIncome
 			,intTransactionTypeId
 			)
-		SELECT intChargeId = @intItemId
+		SELECT intChargeId = @intChargeItem
 			,intItemLocationId = @intItemLocationId
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)
-			,intOtherChargeIncome = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Inventory)
+			,intOtherChargeExpense = dbo.fnGetItemGLAccount(@intChargeItem, @intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)
+			,intOtherChargeIncome = dbo.fnGetItemGLAccount(@intChargeItem, @intItemLocationId, @ACCOUNT_CATEGORY_Inventory)
 			,intTransactionTypeId = @INVENTORY_PRODUCE
 
 		SELECT TOP 1 @intItemId1 = Item.intItemId
@@ -712,7 +715,6 @@ BEGIN TRY
 				BEGIN
 					EXEC dbo.uspGLBookEntries @GLEntries
 						,0
-						,1
 						,1
 				END
 				ELSE
