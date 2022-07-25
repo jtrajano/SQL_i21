@@ -10438,6 +10438,7 @@
     <Build Include="dbo\Stored Procedures\uspIPUnfixedPurchaseContract.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
+    <Build Include="dbo\Functions\fnAPFormatBillGLDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
     <None Include="Scripts\Post-Deployment\CM\9_CleanupObjects.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
