@@ -1054,6 +1054,8 @@
     <Build Include="dbo\Tables\tblSTCheckoutFuelSalesByGradeAndPricePoint.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketApply.sql" />
     <Build Include="dbo\Views\vyuLGCustomerConsumptionSiteDevice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetIndividualDispenserReadingsToPriorDay.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutAggregateMeterReadingsByFuelGrade.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
