@@ -65,13 +65,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
 		,dtmTransactionDate			= A.dtmDate
 		,dblItemCost				= B.dblCost
-		,dblQuantity				= CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
-										THEN B.dblNetWeight
-										ELSE B.dblQtyReceived END
-									-- CASE WHEN B.intWeightUOMId > 0 
-										-- 	THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
-										-- 	ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
-										-- END
+		,dblQuantity				= 
+									-- CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
+									-- 	THEN B.dblNetWeight
+									-- 	ELSE B.dblQtyReceived END
+									--THIS IS THE CORRECT QUANTITY, IT SHOULD MATCH WITH THE UOM OF COST
+										CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
+											THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
+											ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
+										END
 		,intTaxGroupId				= B.intTaxGroupId
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
