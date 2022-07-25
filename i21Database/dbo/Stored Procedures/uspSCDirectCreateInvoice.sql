@@ -932,7 +932,7 @@ BEGIN TRY
 
 						WHILE ISNULL(@_intTicketContractUsed,0) > 0
 						BEGIN
-
+							DELETE FROM @contractBasisPriceTable 
 							INSERT INTO @contractBasisPriceTable (
 								intContractDetailId 
 								,intPriceFixationDetailId
