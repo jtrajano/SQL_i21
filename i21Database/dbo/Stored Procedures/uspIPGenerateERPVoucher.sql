@@ -343,7 +343,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<Book>' + ISNULL(@strBook, '') + '</Book>'
 
-		SELECT @strXML += '<InvoiceNo>' + ISNULL(@strInvoiceNo, '') + '</InvoiceNo>'
+		SELECT @strXML += '<InvoiceNo>' + dbo.fnEscapeXML(ISNULL(@strInvoiceNo, '')) + '</InvoiceNo>'
 
 		SELECT @strXML += '<InvoiceDate>' + ISNULL(CONVERT(VARCHAR, @dtmInvoiceDate, 112), '') + '</InvoiceDate>'
 
