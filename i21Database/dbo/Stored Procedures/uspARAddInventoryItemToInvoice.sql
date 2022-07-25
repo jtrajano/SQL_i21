@@ -446,7 +446,7 @@ BEGIN TRY
 				,[intCurrencyExchangeRateId]		= @ItemCurrencyExchangeRateId
 				,[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END
 				,[intSubCurrencyId]					= ISNULL(@ItemSubCurrencyId, @CurrencyId)
-				,[dblSubCurrencyRate]				= CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
+				,[dblSubCurrencyRate]				= (CASE WHEN (ISNULL(@ItemSubCurrencyId, 0) = 0 OR ISNULL((SELECT TOP 1 [ysnSubCurrency] FROM tblSMCurrency where [intCurrencyID] = @ItemSubCurrencyId), 0) = 0) THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END)
 				,[ysnBlended]						= @ItemIsBlended
 				,[intAccountId]						= NULL --Acct.[intAccountId] 
 				,[intCOGSAccountId]					= NULL --Acct.[intCOGSAccountId] 
