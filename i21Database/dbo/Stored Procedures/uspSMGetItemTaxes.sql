@@ -26,31 +26,12 @@ AS
 BEGIN
 
 	IF ISNULL(@TaxGroupId,0) = 0
-	BEGIN				
-		IF (@TransactionType = 'Sale')
-		BEGIN
-			SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @SiteId, @FreightTermId, NULL), 0)
-
-			IF(@FOB IS NOT NULL)
-				SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @TaxLocationId, @ItemId, @TaxLocationId, @SiteId, @FreightTermId, @FOB), 0)
+		BEGIN				
+			IF (@TransactionType = 'Sale')
+				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @SiteId, @FreightTermId,@FOB)
+			ELSE
+				SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @FreightTermId)
 		END
-		ELSE
-		BEGIN
-			SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @FreightTermId, NULL), 0)
-
-			IF(@FOB IS NOT NULL)
-				SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForVendor](@EntityId, @TaxLocationId, @ItemId, @TaxLocationId, @FreightTermId, @FOB), 0)
-		END
-
-		IF @NewTaxGroupId <> 0
-			SET @TaxGroupId = @NewTaxGroupId
-
-		SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @NewTaxGroupId THEN 1 ELSE 0 END
-	END
-	ELSE
-	BEGIN
-		SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> ISNULL(@TaxGroupId, 0) THEN 1 ELSE 0 END
-	END
 			
 				
 	IF (@TransactionType = 'Sale')
