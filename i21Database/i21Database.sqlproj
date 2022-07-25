@@ -985,6 +985,14 @@
     <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
     <Build Include="dbo\Views\vyuSMUserList.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleList.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTranslogFuelComputation.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogFuelComputation.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelSalesByGradeAndPricePoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketApply.sql" />
+    <Build Include="dbo\Views\vyuLGCustomerConsumptionSiteDevice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetIndividualDispenserReadingsToPriorDay.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutAggregateMeterReadingsByFuelGrade.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11346,5 +11354,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\QM\2_SetDefaultData.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\40_UpdateSchedulePaymentMethod.sql" />
   </ItemGroup>
 </Project>
