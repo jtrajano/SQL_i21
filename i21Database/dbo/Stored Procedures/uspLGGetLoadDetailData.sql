@@ -16,6 +16,7 @@ BEGIN
 		,intPPricingTypeId = PDetail.intPricingTypeId
 		,ysnPLoad = PHeader.ysnLoad
 		,dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
+		,dblPAvailableQty = PDetail.dblBalance - ISNULL(PDetail.dblScheduleQty, 0)
 		,strPCropYear = PCY.strCropYear
 		,strPLoadingPort = PLP.strCity
 		,strPDestinationPort = PDP.strCity
