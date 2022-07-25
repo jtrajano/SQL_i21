@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblHDTicketHoursWorked]
 (
 	[intTicketHoursWorkedId] [int] IDENTITY(1,1) NOT NULL,
-	[intTicketId] [int] NOT NULL,
+	[intTicketId] [int] NULL,
 	[intAgentId] [int] NOT NULL,
 	[intAgentEntityId] [int] NULL,
 	[intHours] [numeric](18, 6) NOT NULL,
