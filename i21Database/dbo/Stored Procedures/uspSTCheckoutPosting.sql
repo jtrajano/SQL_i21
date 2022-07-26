@@ -145,8 +145,6 @@ BEGIN
 		DECLARE @intCompanyLocationId INT
 		DECLARE @intTaxGroupId INT
 		DECLARE @intStoreId INT
-		DECLARE @strRegisterName NVARCHAR(150)
-		DECLARE @ysnConsignmentStore BIT = 0
 		DECLARE @strComments NVARCHAR(MAX) = 'Store Checkout' -- All comments should be same to create a single Invoice
 		DECLARE @strInvoiceTypeMain AS NVARCHAR(100) = 'Store Checkout' --'Standard' --'Store Checkout'
 		DECLARE @strInvoiceTransactionTypeMain AS NVARCHAR(100) --= 'Store Checkout'
@@ -162,8 +160,6 @@ BEGIN
 			   , @intEntityCustomerId = intCheckoutCustomerId
 			   , @intTaxGroupId = intTaxGroupId
 			   , @intStoreId = intStoreId
-			   , @strRegisterName = strRegisterName
-			   , @ysnConsignmentStore = ysnConsignmentStore
 			   , @strAllowMarkUpDown = strAllowRegisterMarkUpDown 
 		FROM tblSTStore 
 		WHERE intStoreId = (
@@ -338,34 +334,7 @@ BEGIN
 		-------------------- End Verify Posting Direction --------------------
 		----------------------------------------------------------------------
 
-		--temporarily transfer the value of tblSTCheckoutFuelTotalSold to tblSTCheckoutPumpTotals for processing
-		IF @strRegisterName = 'Commander' AND @strDirection = 'Post' AND @ysnConsignmentStore = 1
-		BEGIN
-			DELETE FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId
 
-			INSERT INTO tblSTCheckoutPumpTotals (intCheckoutId, intPumpCardCouponId, intCategoryId, strDescription, dblPrice, dblQuantity, dblAmount, intConcurrencyId)
-			SELECT		[intCheckoutId]			    = CFTS.intCheckoutId,
-						[intPumpCardCouponId]		= UOM.intItemUOMId,
-						[intCategoryId]			    = I.intCategoryId,
-						[strDescription]			= I.strDescription,
-						[dblPrice]					= CFTS.dblDollarsSold/CFTS.dblGallonsSold,
-						[dblQuantity]				= CFTS.dblGallonsSold,
-						[dblAmount]					= CFTS.dblDollarsSold,
-						[intConcurrencyId]			= 0
-			FROM	tblSTCheckoutFuelTotalSold CFTS
-			JOIN dbo.tblICItemLocation IL 
-				--ON CFTS.intProductNumber = IL.strPassportFuelId1
-				ON ISNULL(CAST(CFTS.intProductNumber as nvarchar(5)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-			JOIN dbo.tblICItem I 
-				ON I.intItemId = IL.intItemId
-			JOIN dbo.tblICItemUOM UOM 
-				ON UOM.intItemId = I.intItemId
-			JOIN dbo.tblSMCompanyLocation CL 
-				ON CL.intCompanyLocationId = IL.intLocationId
-			JOIN dbo.tblSTStore S 
-				ON S.intCompanyLocationId = CL.intCompanyLocationId
-			WHERE CFTS.intCheckoutId = @intCheckoutId
-		END
 
 		-- ===================================================================
 		-- [Start] - VALIDATION ----------------------------------------------
@@ -6734,11 +6703,6 @@ ExitWithCommit:
 	-- [START] - AUDIT LOG - Mark as Created
 	-- ==========================================================================
 
-		--delete temporarily transferred the value of tblSTCheckoutFuelTotalSold to tblSTCheckoutPumpTotals for processing
-		IF @strRegisterName = 'Commander' AND @strDirection = 'Post' AND @ysnConsignmentStore = 1
-		BEGIN
-			DELETE FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId
-		END
 
 	-- Commit Transaction
 
