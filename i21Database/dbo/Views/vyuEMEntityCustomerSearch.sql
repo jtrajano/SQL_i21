@@ -50,9 +50,9 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, intShipToId			= shipLocation.intEntityLocationId
 	, intBillToId			= billLocation.intEntityLocationId
 	, dblARBalance			= CUSTOMER.dblARBalance
-	, strTerm				= custTerm.strTerm
+	, strTerm				= ISNULL(ISNULL(LOCATIONTERM.strTerm, PREFTERM.strTerm), CUSTOMERTERM.strTerm)
 	, intCurrencyId			= CUSTOMER.intCurrencyId
-	, intTermsId			= CUSTOMER.intTermsId
+	, intTermsId			= ISNULL(ISNULL(LOCATIONTERM.intTermID, PREFTERM.intTermId), CUSTOMERTERM.intTermID)
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
@@ -87,14 +87,21 @@ LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocatio
 LEFT JOIN tblEMEntityLocation billLocation ON CUSTOMER.intBillToId = billLocation.intEntityLocationId AND billLocation.ysnActive = 1
 LEFT JOIN tblEMEntity entityToSalesperson ON entityToSalesperson.intEntityId = ISNULL(shipLocation.intSalespersonId, CUSTOMER.intSalespersonId)
 LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId
-LEFT JOIN tblSMTerm entityLocationTerm ON custLocation.intTermsId = entityLocationTerm.intTermID
 LEFT JOIN tblSMCurrency custCurrency ON CUSTOMER.intCurrencyId = custCurrency.intCurrencyID
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
 LEFT JOIN vyuEMEntityType entityType ON CUSTOMER.intEntityId = entityType.intEntityId
 LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON CUSTOMER.intCompanyLocationPricingLevelId = entityLocationPricingLevel.intCompanyLocationPricingLevelId
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
-LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
+LEFT JOIN tblSMTerm LOCATIONTERM ON custLocation.intTermsId = LOCATIONTERM.intTermID
+LEFT JOIN tblSMTerm CUSTOMERTERM ON CUSTOMER.intTermsId = CUSTOMERTERM.intTermID
+OUTER APPLY (
+	SELECT TOP 1 intTermId	= P.intTermId
+			   , strTerm	= T.strTerm
+	FROM tblARCompanyPreference P 
+	INNER JOIN tblSMTerm T ON P.intTermId = T.intTermID
+	WHERE P.strTermPullPoint = 'Company Location'
+) PREFTERM
 LEFT JOIN tblSMFreightTerms fTerms ON ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId) = fTerms.intFreightTermId
 LEFT JOIN tblSMShipVia shipVia on shipLocation.intShipViaId = shipVia.intEntityId
 LEFT JOIN (
