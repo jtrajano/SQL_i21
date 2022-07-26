@@ -384,8 +384,17 @@ BEGIN
 				ON TG.intTaxGroupId = TGC.intTaxGroupId
 			INNER JOIN tblSMTaxCode TC 
 				ON TGC.intTaxCodeId = TC.intTaxCodeId 
-			INNER JOIN tblSMTaxCodeRate TCR 
-				ON TCR.intTaxCodeId = TC.intTaxCodeId 
+			CROSS APPLY (
+				SELECT TOP 1 
+					TCR.* 
+				FROM tblSMTaxCodeRate TCR 
+				WHERE 
+					TCR.intTaxCodeId = TC.intTaxCodeId 
+					AND TCR.dtmEffectiveDate <= Receipt.dtmReceiptDate
+				ORDER BY
+					TCR.dtmEffectiveDate
+			) TCR
+
 	WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 			AND TC.ysnTexasLoadingFee = 1
 			AND Receipt.intSourceType = @SourceType_TRANSPORT
@@ -440,10 +449,22 @@ BEGIN
 					, RI.dtmDate
 					, RI.ysnGas
 			) RI
+			INNER JOIN tblICInventoryReceipt R 
+				ON R.intInventoryReceiptId = RI.intInventoryReceiptId			
 			INNER JOIN tblSMTaxCode TC 
 				ON RI.intTaxCodeId = TC.intTaxCodeId 			
-			INNER JOIN tblSMTaxCodeRate TCR 
-				ON TCR.intTaxCodeId = TC.intTaxCodeId 
+			--INNER JOIN tblSMTaxCodeRate TCR 
+			--	ON TCR.intTaxCodeId = TC.intTaxCodeId 
+			CROSS APPLY (
+				SELECT TOP 1 
+					TCR.* 
+				FROM tblSMTaxCodeRate TCR 
+				WHERE 
+					TCR.intTaxCodeId = TC.intTaxCodeId 
+					AND TCR.dtmEffectiveDate <= R.dtmReceiptDate
+				ORDER BY
+					TCR.dtmEffectiveDate
+			) TCR
 	END
 
 END 
