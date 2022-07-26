@@ -62,7 +62,7 @@ FROM   CM F
                ON ISNULL(PYMTDetail.intBillId, PYMTDetail.intOrigBillId) =
                   BILL.intBillId
 WHERE  F.intBankTransactionTypeId IN ( @AP_PAYMENT, @AP_ECHECK )
-UNION
+UNION ALL
 SELECT preBILL.strVendorOrderNumber, F.strTransactionId
 FROM   tblCMBankTransaction F
        INNER JOIN [dbo].[tblAPPayment] PYMT
@@ -78,7 +78,7 @@ FROM   tblCMBankTransaction F
                ON preBILL.intBillId = PreAndDeb.intTransactionId
 WHERE  PreAndDeb.ysnApplied = 1
 
-UNION
+UNION ALL
 SELECT INV.strInvoiceNumber strVendorOrderNumber, F.strTransactionId
 FROM   CM F
        INNER JOIN [dbo].[tblAPPayment] PYMT
