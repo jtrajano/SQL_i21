@@ -66,7 +66,7 @@ BEGIN
 				,strSiteCountry = B.strCountry
 				,dblLongitude = B.dblLongitude
 				,dblLatitude = B.dblLatitude
-				,intCustomerId = B.intCustomerID
+				,intCustomerID = B.intCustomerID
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,dblCustomerBalance = ISNULL(D.vwcus_high_past_due, 0.0) -- TM-2695
 				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
@@ -128,7 +128,6 @@ BEGIN
 				,dtmDispatchedDate = A.dtmDispatchingDate
 				,intConcurrencyId = A.intConcurrencyId
 				,intDispatchId = A.intDispatchID
-				,intCustomerID = B.intCustomerID
 				,intCompanyLocationId  = B.intLocationId
 				,strCompanyLocationName  = I.strLocationName
 				,dblLocationLongitude = ISNULL(I.dblLongitude,0.0)
@@ -139,7 +138,7 @@ BEGIN
 				,strSiteCountry = B.strCountry
 				,dblLongitude = B.dblLongitude
 				,dblLatitude = B.dblLatitude
-				,intCustomerId = B.intCustomerID
+				,intCustomerID = B.intCustomerID
 				,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 				,dblCustomerBalance = ISNULL(K.dbl30Days,0.0) + ISNULL(K.dbl60Days,0.0) + ISNULL(K.dbl90Days,0.0) + ISNULL(K.dbl91Days,0.0) --TM-2695
 				,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
