@@ -11092,6 +11092,8 @@
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_RemoveOldPowerBIData.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPreProcessPriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPostProcessPriceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
