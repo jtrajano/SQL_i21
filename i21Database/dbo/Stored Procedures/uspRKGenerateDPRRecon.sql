@@ -44,6 +44,7 @@ BEGIN TRY
 		[strLoadNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS  NULL,
 		[dblLoadQty] NUMERIC(24, 10) NULL,
 		[dblReceivedQty] NUMERIC(24, 10) NULL,
+		[dblCash] NUMERIC(24, 10) NULL,
 		[intContractHeaderId] INT NULL,
 		[intTicketId] INT NULL,
 		[intLoadId] INT NULL
@@ -103,6 +104,7 @@ BEGIN TRY
 		,strLoadNumber 
 		,dblLoadQty
 		,dblReceivedQty 
+		,dblCash
 		,intContractHeaderId
 		,intTicketId
 		,intLoadId
@@ -129,6 +131,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -171,6 +174,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -214,6 +218,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = SL.dblPrice
 		,CH.intContractHeaderId
 		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
@@ -258,6 +263,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -301,6 +307,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -343,6 +350,7 @@ BEGIN TRY
 		,T.strLoadNumber
 		,dblLoadQty = CH.dblQuantityPerLoad
 		,dblReceivedQty  = SL.dblOrigQty
+		,dblCash = NULL
 		,CH.intContractHeaderId
 		,intTicketId = T.intTicketId
 		,intLoadId = T.intLoadId
@@ -389,6 +397,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -430,6 +439,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -476,6 +486,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -518,6 +529,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -561,6 +573,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = SL.dblPrice
 		,CH.intContractHeaderId
 		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
@@ -605,6 +618,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -648,6 +662,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -690,6 +705,7 @@ BEGIN TRY
 		,T.strLoadNumber
 		,dblLoadQty = CH.dblQuantityPerLoad
 		,dblReceivedQty  = SL.dblOrigQty
+		,dblCash = NULL
 		,CH.intContractHeaderId
 		,intTicketId = T.intTicketId
 		,intLoadId = T.intLoadId
@@ -736,6 +752,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -777,6 +794,7 @@ BEGIN TRY
 		,strLoadNumber = NULL
 		,dblLoadQty = NULL
 		,dblReceivedQty  = NULL
+		,dblCash = NULL
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
@@ -977,6 +995,7 @@ BEGIN TRY
 		,strLoadNumber 
 		,dblLoadQty
 		,dblReceivedQty 
+		,dblCash
 		,intContractHeaderId
 		,intTicketId
 		,intLoadId
@@ -1004,6 +1023,7 @@ BEGIN TRY
 		,strLoadNumber 
 		,dblLoadQty
 		,dblReceivedQty 
+		,dblCash
 		,intContractHeaderId
 		,intTicketId
 		,intLoadId

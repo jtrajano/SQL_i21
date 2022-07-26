@@ -23,6 +23,7 @@
 	[strLoadNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS  NULL,
 	[dblLoadQty] NUMERIC(24, 10) NULL,
 	[dblReceivedQty] NUMERIC(24, 10) NULL,
+	[dblCash] NUMERIC(24, 10) NULL,
 	[intContractHeaderId] INT NULL,
 	[intTicketId] INT NULL,
 	[intLoadId] INT NULL,
