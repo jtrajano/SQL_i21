@@ -97,7 +97,7 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightExpenseAccount] FOREIGN KEY ([intFreightExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFeeGeneralLedgerAccountId] FOREIGN KEY ([intFeeGeneralLedgerAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblSMFreightTerm_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId])
+	CONSTRAINT [FK_tblARCompanyPreference_tblSMFreightTerm_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblICCategory_intTermItemCategoryId] FOREIGN KEY ([intTermItemCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblICItem_intTermItemId] FOREIGN KEY ([intTermItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
