@@ -611,7 +611,6 @@ BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries
 					,@ysnPost
 					,1
-					,1
 			END
 			ELSE
 			BEGIN
@@ -875,7 +874,6 @@ BEGIN
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,@ysnPost
-				,1
 				,1
 		END
 		ELSE
