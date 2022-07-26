@@ -1722,7 +1722,7 @@ BEGIN
 				WHEN ri.intWeightUOMId IS NOT NULL AND i.intComputeItemTotalOption = 0 THEN ri.dblNet 
 				ELSE ri.dblOpenReceive
 			END 
-		,[dblAmount] = ri.dblLineTotal
+		,[dblAmount] = ri.dblLineTotal + rctTax.dblHeaderTax
 		,strBatchId = @strBatchId	
 	FROM (
 			SELECT DISTINCT 
@@ -1753,6 +1753,9 @@ BEGIN
 		) apClearing
 		INNER JOIN tblGLAccount ga
 			ON ga.intAccountId = apClearing.intAccountId
+		CROSS APPLY (
+			SELECT TOP 1 dblAdjustedTax AS dblHeaderTax FROM tblICInventoryReceiptTax tx WHERE tx.intInventoryReceiptId = r.intInventoryReceiptId
+		) rctTax
 	WHERE
 		r.strReceiptType NOT IN ('Transfer Order')
 END
