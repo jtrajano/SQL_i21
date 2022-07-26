@@ -25,7 +25,8 @@ BEGIN
 		SELECT	@intPreviousCheckoutId = intCheckoutId
 		FROM	dbo.tblSTCheckoutHeader
 		WHERE	intStoreId = @intStoreId AND
-				dtmCheckoutDate = DATEADD(day, -1, @dtmCheckoutDate)
+				strCheckoutType = 'Automatic' AND
+				dtmCheckoutDate < @dtmCheckoutDate
 
 		SELECT	@ysnConsStopAutoProcessIfValuesDontMatch = ysnConsStopAutoProcessIfValuesDontMatch, 
 				@ysnConsMeterReadingsForDollars = ysnConsAddOutsideFuelDiscounts,
@@ -186,7 +187,7 @@ BEGIN
 											WHERE		a.dblFuelMoney > b.dblFuelMoney)
 
 			END;
-			
+
 			WITH previous_day_reading (intProductNumber, sumDblFuelVolume, sumDblFuelMoney)  
 			AS  
 			(  
@@ -203,6 +204,7 @@ BEGIN
 				GROUP BY intProductNumber
 			)
 
+			--use tblSTCheckoutFuelTotalSold as temp table
 			INSERT INTO dbo.tblSTCheckoutFuelTotalSold(
 						 [intCheckoutId]
 						 , [intProductNumber]
@@ -217,6 +219,65 @@ BEGIN
 			FROM		current_day_reading b
 			LEFT JOIN	previous_day_reading a
 			ON			a.intProductNumber = b.intProductNumber
+
+			IF NOT EXISTS (SELECT '' FROM dbo.tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
+			BEGIN
+				INSERT INTO dbo.tblSTCheckoutPumpTotals(
+					 [intCheckoutId]
+					 , [intPumpCardCouponId]
+					 , [intCategoryId]
+					 , [strDescription]
+					 , [dblPrice]
+					 , [dblQuantity]
+					 , [dblAmount]
+					 , [intConcurrencyId]
+				)
+				 SELECT 
+					  [intCheckoutId]			    = @intCheckoutId
+					, [intPumpCardCouponId]			= UOM.intItemUOMId
+					, [intCategoryId]			    = I.intCategoryId
+					, [strDescription]				= I.strDescription
+					, [dblPrice]					= CAST((ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))
+					, [dblQuantity]					= ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)), 0)
+					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)), 0))) AS DECIMAL(18,6))
+					, [intConcurrencyId]			= 0
+				 FROM tblSTCheckoutFuelTotalSold Chk
+				 JOIN dbo.tblICItemLocation IL 
+					ON ISNULL(CAST(Chk.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					AND Chk.intCheckoutId = @intCheckoutId
+				 JOIN dbo.tblICItem I 
+					ON I.intItemId = IL.intItemId
+				 JOIN dbo.tblICItemUOM UOM 
+					ON UOM.intItemId = I.intItemId
+				 JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				 JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				 WHERE S.intStoreId = @intStoreId
+			END
+			ELSE
+			BEGIN
+				UPDATE CPT
+					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.dblDollarsSold AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblGallonsSold AS DECIMAL(18,6)),0),0)
+						, CPT.[dblQuantity] = CAST(ISNULL(Chk.dblGallonsSold, 0) AS DECIMAL(18,6))
+						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.dblDollarsSold AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblGallonsSold AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.dblGallonsSold, 0) AS DECIMAL(18,6))
+					FROM dbo.tblSTCheckoutPumpTotals CPT
+					INNER JOIN tblSTCheckoutHeader CH
+						ON CPT.intCheckoutId = CH.intCheckoutId
+					INNER JOIN tblSTStore ST
+						ON CH.intStoreId = ST.intStoreId
+					INNER JOIN tblICItemUOM UOM
+						ON CPT.intPumpCardCouponId = UOM.intItemUOMId
+					INNER JOIN tblICItem Item
+						ON UOM.intItemId = Item.intItemId
+					INNER JOIN dbo.tblICItemLocation IL 
+						ON Item.intItemId = IL.intItemId
+						AND ST.intCompanyLocationId = IL.intLocationId
+					INNER JOIN tblSTCheckoutFuelTotalSold Chk
+						ON ISNULL(CAST(Chk.intProductNumber AS NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						AND Chk.intCheckoutId = @intCheckoutId
+					WHERE CPT.intCheckoutId = @intCheckoutId
+			END
 
 			UPDATE		tblSTCheckoutHeader
 			SET			dblEditableAggregateMeterReadingsForDollars = (	SELECT		ISNULL(SUM(dblDollarsSold),0)
@@ -255,6 +316,9 @@ BEGIN
 				END
 			END
 		END
+
+		--delete stored temp data in tblSTCheckoutFuelTotalSold
+		DELETE tblSTCheckoutFuelTotalSold WHERE intCheckoutId = @intCheckoutId
 		
 		SET @intCountRows = 1
 		SET @strMessage = 'Success'
