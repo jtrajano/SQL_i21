@@ -550,6 +550,21 @@ BEGIN
        ,(SELECT TOP 1  intTypeTaxId FROM tblPRTypeTax WHERE LTRIM(RTRIM(strTax)) = LTRIM(RTRIM(@strRecordId)))  
        ,1  
       )  
+
+        INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)    
+	    SELECT TOP 1    
+		    NEWID()    
+	    , guiApiImportLogId = @guiLogId    
+	    , strField = 'Paycheck Earning Tax Record'    
+	    , strValue = @strRecordType    
+	    , strLogLevel = 'Info'    
+	    , strStatus = 'Success'    
+	    , intRowNo = SE.intRowNumber    
+	    , strMessage = 'The paycheck earning tax record has been successfully imported.'    
+	    FROM tblApiSchemaEmployeePaycheck SE    
+	    LEFT JOIN tblPRPaycheck E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)    
+	    WHERE SE.guiApiUniqueId = @guiApiUniqueId    
+	    AND SE.strRecordId = @strRecordId  
      END  
      ELSE  
      BEGIN  
