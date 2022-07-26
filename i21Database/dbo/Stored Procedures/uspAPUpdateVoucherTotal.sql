@@ -87,7 +87,16 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM ((dblTotal + dblTax) * dblRate) dblTotalUSD FROM tblAPBillDetail C WHERE C.intBillId = B.intId
+		SELECT SUM(dblTotal) dblTotal, SUM(dblTax + ISNULL(texasFee.dblAdjustedTax, 0)) dblTotalTax, SUM ((dblTotal + dblTax + ISNULL(texasFee.dblAdjustedTax, 0)) * dblRate) dblTotalUSD 
+		FROM tblAPBillDetail C 
+		OUTER APPLY (
+			SELECT TOP 1 dblAdjustedTax
+			FROM tblAPBillDetailTax D
+			WHERE 
+				C.intBillDetailId = D.intBillDetailId
+			AND D.strCalculationMethod = 'Using Texas Fee Matrix'
+		) texasFee
+		WHERE C.intBillId = B.intId
 	) DetailTotal
 	WHERE DetailTotal.dblTotal IS NOT NULL
 
