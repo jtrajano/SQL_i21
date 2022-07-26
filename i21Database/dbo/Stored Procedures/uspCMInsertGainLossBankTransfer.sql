@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]  
+alter PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]  
 @intDefaultCurrencyId INT,  
 @strDescription nvarchar(300),  
 @intBankTransferTypeId INT,  
@@ -59,10 +59,10 @@ BEGIN
    ,[dtmDate]    = A.dtmDate  
    ,[strBatchId]   = A.strBatchId  
    ,[intAccountId]   = @intRealizedGainAccountId  
-   ,[dblDebit]    = Debit.GainLoss  
-   ,[dblCredit]   = Credit.GainLoss  
-   ,[dblDebitForeign]  = Debit.GainLoss  
-   ,[dblCreditForeign]  = Credit.GainLoss  
+   ,[dblDebit]    = case when @intBankTransferTypeId = 5 THEN Credit.GainLoss ELSE Debit.GainLoss END  
+   ,[dblCredit]   = case when @intBankTransferTypeId = 5 THEN Debit.GainLoss ELSE Credit.GainLoss END  
+   ,[dblDebitForeign]  =case when @intBankTransferTypeId = 5 THEN Credit.GainLoss ELSE Debit.GainLoss END  
+   ,[dblCreditForeign]  = case when @intBankTransferTypeId = 5 THEN Debit.GainLoss ELSE Credit.GainLoss END  
    ,[dblDebitUnit]   = 0  
    ,[dblCreditUnit]  = 0  
    ,[strDescription]  = @strDescription --'Gain / Loss on Multicurrency Bank Transfer'  
