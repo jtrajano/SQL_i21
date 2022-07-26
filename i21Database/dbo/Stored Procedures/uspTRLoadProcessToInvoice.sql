@@ -45,7 +45,11 @@ BEGIN TRY
 		,[intEntityCustomerId]					= DH.intEntityCustomerId
 		,[intCompanyLocationId]					= DH.intCompanyLocationId
 		,[intCurrencyId]						= NULL
-		,[intTermId]							= ISNULL(EL.intTermsId, Customer.intTermsId)
+		,[intTermId]							= CASE WHEN TMS.intDeliveryTermID IS NOT NULL THEN TMS.intDeliveryTermID
+													WHEN EL.intTermsId IS NOT NULL THEN EL.intTermsId
+													WHEN ARCP.intTermId IS NOT NULL THEN ARCP.intTermId
+													ELSE Customer.intTermsId END
+		 --ISNULL(EL.intTermsId, Customer.intTermsId)
 		,[dtmDate]								= DH.dtmInvoiceDateTime
 		,[dtmDueDate]							= NULL
 		,[dtmShipDate]							= DH.dtmInvoiceDateTime
@@ -173,6 +177,7 @@ BEGIN TRY
 	LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
 	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
 	LEFT JOIN tblSCTruckDriverReference SC ON SC.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
+	LEFT JOIN tblTMSite TMS ON TMS.intSiteID = DD.intSiteId
 	LEFT JOIN vyuTRGetLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
 		SELECT Item 
 		FROM dbo.fnTRSplit(DD.strReceiptLink,','))
@@ -217,6 +222,12 @@ BEGIN TRY
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
 			AND CustomerFreight.intCategoryId = Item.intCategoryId
 			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendingIngredient.strZipCode)
+	LEFT JOIN tblARCompanyPreference ARCP ON ARCP.strTermPullPoint = CASE WHEN TR.strOrigin = 'Location' THEN 'Company Location' ELSE TR.strOrigin END
+	AND (
+		(ARCP.intTermItemCategoryId = IC.intCategoryId AND ARCP.intTermItemId = DD.intItemId)
+		OR (ARCP.intTermItemCategoryId = IC.intCategoryId AND ARCP.intTermItemId IS NULL)
+		OR (ARCP.intTermItemCategoryId IS NULL AND ARCP.intTermItemId = DD.intItemId)
+	)
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
 		AND (TL.intMobileLoadHeaderId IS NULL
