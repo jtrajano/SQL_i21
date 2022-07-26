@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGProcessTradeFinance]
 	@intLoadId INT,
-	@strAction NVARCHAR(20), /* 'ADD' or 'UPDATE' */
+	@strAction NVARCHAR(20),
 	@intUserId INT
 AS
 BEGIN 
@@ -15,7 +15,23 @@ BEGIN
 			,@strLastApprovalStatus NVARCHAR(100) = NULL
 			,@intLastTradeFinanceLogId INT = NULL
 			,@strLastTradeFinanceLogStatus INT = NULL
+			,@intApprovalStatusId INT = NULL
+			,@ysnDelete BIT = 0
+
+	IF @strAction = 'DELETE' BEGIN SET @ysnDelete = 1 END
+
+	/* Get current approval status */
+	SELECT @intApprovalStatusId = intApprovalStatusId FROM tblLGLoad WHERE intLoadId = @intLoadId
 	
+	/* Get Last Trade Finance Number associated to this LS */
+	SELECT TOP 1 
+		@intLastTradeFinanceId = intTradeFinanceId
+		,@strLastTradeFinanceNo = TRF.strTradeFinanceNumber
+		,@strLastApprovalStatus = TRF.strApprovalStatus
+	FROM tblTRFTradeFinance TRF
+	WHERE TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = @intLoadId
+	ORDER BY intTradeFinanceId DESC
+
 	/* Generate Trade Finance No if blank */
 	IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND intBankAccountId IS NOT NULL AND ISNULL(strTradeFinanceNo, '') = '')
 	BEGIN	
@@ -30,80 +46,19 @@ BEGIN
 		SELECT @strTradeFinanceNumber = strTradeFinanceNo FROM tblLGLoad WHERE intLoadId = @intLoadId
 	END
 
-	/* Get intTradeFinanceId */
-	SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
-	FROM tblTRFTradeFinance TRF
-	INNER JOIN tblLGLoad L ON ISNULL(L.strTradeFinanceNo, '') = TRF.strTradeFinanceNumber 
-		AND TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = L.intLoadId
-	WHERE L.intLoadId = @intLoadId
+	/* If LS is for deletion, no need to modify TF records */
+	IF (@ysnDelete <> 1)
+	BEGIN
 
-	/* Construct Trade Finance SP parameter */
-	INSERT INTO @TRFTradeFinance 
-		(intTradeFinanceId
-		,strTradeFinanceNumber
-		,strTransactionType
-		,strTransactionNumber
-		,intTransactionHeaderId
-		,intTransactionDetailId
-		,intBankId
-		,intBankAccountId
-		,intBorrowingFacilityId
-		,intLimitTypeId
-		,intSublimitTypeId
-		,ysnSubmittedToBank
-		,dtmDateSubmitted
-		,strApprovalStatus
-		,dtmDateApproved
-		,strRefNo
-		,intOverrideFacilityValuation
-		,strCommnents
-		,dtmCreatedDate
-		,intConcurrencyId)
-	SELECT
-		intTradeFinanceId = @intTradeFinanceId
-		,strTradeFinanceNumber = L.strTradeFinanceNo
-		,strTransactionType = 'Logistics'
-		,strTransactionNumber = L.strLoadNumber
-		,intTransactionHeaderId = L.intLoadId
-		,intTransactionDetailId = LD.intLoadDetailId
-		,intBankId = BA.intBankId
-		,intBankAccountId = L.intBankAccountId
-		,intBorrowingFacilityId = L.intBorrowingFacilityId
-		,intLimitTypeId = L.intBorrowingFacilityLimitId
-		,intSublimitTypeId = L.intBorrowingFacilityLimitDetailId
-		,ysnSubmittedToBank = L.ysnSubmittedToBank
-		,dtmDateSubmitted = L.dtmDateSubmitted
-		,strApprovalStatus = AP.strApprovalStatus
-		,dtmDateApproved = L.dtmDateApproved
-		,strRefNo = L.strTradeFinanceReferenceNo
-		,intOverrideFacilityValuation = L.intBankValuationRuleId
-		,strCommnents = L.strTradeFinanceComments
-		,dtmCreatedDate = GETDATE()
-		,intConcurrencyId = 1
-	FROM
-		tblLGLoad L
-		CROSS APPLY (SELECT TOP 1 intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = L.intContractDetailId) LD
-		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = L.intContractDetailId
-		INNER JOIN tblCTContractHeader CH on CH.intContractHeaderId = CD.intContractHeaderId
-		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
-		LEFT JOIN tblCTApprovalStatusTF AP on AP.intApprovalStatusId = L.intApprovalStatusId
-		LEFT JOIN tblCMBankLoan BL on BL.intBankLoanId = L.intLoanLimitId
-	WHERE intLoadId = @intLoadId
-	
-	/* Get Last Trade Finance Number associated to this LS */
-	SELECT TOP 1 
-		@intLastTradeFinanceId = intTradeFinanceId
-		,@strLastTradeFinanceNo = TRF.strTradeFinanceNumber
-		,@strLastApprovalStatus = TRF.strApprovalStatus
-	FROM tblTRFTradeFinance TRF
-	WHERE TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = @intLoadId
-	ORDER BY intTradeFinanceId DESC
+		/* Get intTradeFinanceId */
+		SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
+		FROM tblTRFTradeFinance TRF
+		INNER JOIN tblLGLoad L ON ISNULL(L.strTradeFinanceNo, '') = TRF.strTradeFinanceNumber 
+			AND TRF.strTransactionType = 'Logistics' AND TRF.intTransactionHeaderId = L.intLoadId
+		WHERE L.intLoadId = @intLoadId
 
-	/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel the previous */
-	IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') NOT IN ('Canceled', 'Cancelled')
-		AND ISNULL(@strLastTradeFinanceNo, '') <> ISNULL(@strTradeFinanceNumber, ''))
-	BEGIN 
-		INSERT INTO @TRFTradeFinanceCancel
+		/* Construct Trade Finance SP parameter */
+		INSERT INTO @TRFTradeFinance 
 			(intTradeFinanceId
 			,strTradeFinanceNumber
 			,strTransactionType
