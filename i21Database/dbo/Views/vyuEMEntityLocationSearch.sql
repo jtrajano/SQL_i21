@@ -15,7 +15,7 @@ SELECT intEntityId				= EL.intEntityId
      , strOregonFacilityNumber	= EL.strOregonFacilityNumber
      , strPricingLevel			= EL.strPricingLevel
      , intShipViaId				= EL.intShipViaId
-     , intTermsId				= EL.intTermsId
+     , intTermsId				= ISNULL(ISNULL(LOCATIONTERM.intTermID, PREFTERM.intTermId), CUSTOMERTERM.intTermID)
      , intWarehouseId			= EL.intWarehouseId
      , ysnDefaultLocation		= EL.ysnDefaultLocation
      , intFreightTermId			= EL.intFreightTermId
@@ -31,7 +31,7 @@ SELECT intEntityId				= EL.intEntityId
      , strTaxGroup				= TG.strTaxGroup
      , strCheckPayeeName		= EL.strCheckPayeeName
      , strShipVia				= SV.strShipVia
-     , strTerm					= TERM.strTerm
+     , strTerm					= ISNULL(ISNULL(LOCATIONTERM.strTerm, PREFTERM.strTerm), CUSTOMERTERM.strTerm)
      , strWarehouse				= LOC.strLocationName
      , strFreightTerm			= FREIGHT.strFreightTerm
      , strCountyTaxCode			= TCODE.strCounty
@@ -64,12 +64,20 @@ LEFT JOIN tblSMTaxClass TC ON EL.intTaxClassId = TC.intTaxClassId
 LEFT JOIN tblSMTaxGroup TG ON EL.intTaxGroupId = TG.intTaxGroupId
 LEFT JOIN tblSMTaxCode TCODE ON EL.intCountyTaxCodeId = TCODE.intTaxCodeId
 LEFT JOIN tblSMCurrency CURRENCY ON EL.intDefaultCurrencyId = CURRENCY.intCurrencyID
-LEFT JOIN tblSMTerm TERM ON EL.intTermsId = TERM.intTermID
 LEFT JOIN tblSMFreightTerms FREIGHT ON EL.intFreightTermId = FREIGHT.intFreightTermId
 LEFT JOIN tblSMCompanyLocation LOC ON EL.intWarehouseId = LOC.intCompanyLocationId
 LEFT JOIN tblEMEntity VLINK ON EL.intVendorLinkId = VLINK.intEntityId
 LEFT JOIN tblSMShipVia SV ON EL.intShipViaId = SV.intEntityId
 LEFT JOIN tblARCustomer CUSTOMER ON EL.intEntityId = CUSTOMER.intEntityId
+LEFT JOIN tblSMTerm LOCATIONTERM ON EL.intTermsId = LOCATIONTERM.intTermID
+LEFT JOIN tblSMTerm CUSTOMERTERM ON CUSTOMER.intTermsId = CUSTOMERTERM.intTermID
+OUTER APPLY (
+	SELECT TOP 1 intTermId	= P.intTermId
+			   , strTerm	= T.strTerm
+	FROM tblARCompanyPreference P 
+	INNER JOIN tblSMTerm T ON P.intTermId = T.intTermID
+	WHERE P.strTermPullPoint = 'Company Location'
+) PREFTERM
 LEFT JOIN (
 	SELECT S.intEntityId
 		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END
