@@ -57,6 +57,7 @@ BEGIN TRY
 		,@strItemNo nvarchar(50)
 		,@intMCSubLocationId INT
 		,@strProductionDateByCurrentDate NVARCHAR(50)
+		,@dblActualQuantity NUMERIC(18, 6);
 
 	DECLARE @tblQuantityBreakup AS Table
 	(
@@ -111,6 +112,8 @@ BEGIN TRY
 			)
 
 	SELECT @dtmProductionDate = ISNULL(@dtmProductionDate, dbo.fnGetBusinessDate(GETDATE(), @intLocationId)) 
+
+	SET @dblActualQuantity = ISNULL(@dblQtyToProduce, 0);
 
 	IF @intWorkOrderId > 0
 	BEGIN
@@ -313,6 +316,7 @@ BEGIN TRY
 			,intSubLocationId
 			,dtmPlannedDate
 			,dtmOrderDate
+			,dblActualQuantity
 			)
 		SELECT @strWorkOrderNo
 			,@intItemId
@@ -343,6 +347,8 @@ BEGIN TRY
 			,@intMCSubLocationId
 			,@dtmProductionDate
 			,@dtmProductionDate
+			,@dblActualQuantity
+
 
 		SELECT @intWorkOrderId = SCOPE_IDENTITY()
 
