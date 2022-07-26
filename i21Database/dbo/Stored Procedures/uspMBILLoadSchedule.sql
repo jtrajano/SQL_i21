@@ -19,11 +19,11 @@ BEGIN
                
              DELETE FROM tblMBILPickupDetail  where intLoadDetailId in(select intLoadDetailId from #tmp)    
                   
-              DELETE FROM tblMBILDeliveryDetail where intLoadDetailId in(select intLoadDetailId from #tmp)    
+              DELETE FROM tblMBILDeliveryDetail WHERE ysnDelivered = 0 and intLoadDetailId IN (Select intLoadDetailId from #tmp)   
                   
               DELETE FROM tblMBILDeliveryHeader where intDeliveryHeaderId not in(Select intDeliveryHeaderId FROM tblMBILDeliveryDetail)  
                    
-              DELETE FROM tblMBILLoadHeader Where intLoadHeaderId NOT IN(Select intLoadHeaderId from tblMBILPickupDetail)    
+              DELETE FROM tblMBILLoadHeader WHERE intLoadHeaderId NOT IN(SELECT intLoadHeaderId FROM tblMBILPickupDetail) AND intLoadHeaderId NOT IN(SELECT intLoadHeaderId FROM tblMBILDeliveryHeader)   
    '            
  EXEC(@DeleteQuery)                
              
