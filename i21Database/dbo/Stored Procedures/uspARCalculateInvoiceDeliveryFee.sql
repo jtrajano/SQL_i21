@@ -35,7 +35,7 @@ BEGIN
 	LEFT JOIN tblSMTaxGroup TG ON ID.intTaxGroupId = TG.intTaxGroupId
 	INNER JOIN tblSMTaxGroupCode TGC ON TG.intTaxGroupId = TGC.intTaxGroupId
 	INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId AND TC.ysnTexasLoadingFee = 1
-	INNER JOIN tblSMTaxCodeRate TCR ON TCR.intTaxCodeId = TC.intTaxCodeId 
+	INNER JOIN (SELECT TOP 1 * FROM tblSMTaxCodeRate ORDER BY dtmEffectiveDate DESC) TCR ON TCR.intTaxCodeId = TC.intTaxCodeId
 	INNER JOIN @InvoiceIds IDS ON ID.intInvoiceId = IDS.intId
 
 	UPDATE ILI
