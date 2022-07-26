@@ -29,7 +29,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--DELETE EXISTING TAXES
 	DELETE A
 		FROM tblAPBillDetailTax A
-	WHERE intBillDetailId IN (SELECT intId FROM @billDetailIds)
+	WHERE
+		intBillDetailId IN (SELECT intId FROM @billDetailIds)
+	AND A.strCalculationMethod != 'Using Texas Fee Matrix'
 	
 	DECLARE @ParamTable AS TABLE
 		(intItemId					INT

@@ -150,7 +150,7 @@ BEGIN
 						[intPaymentId]					=	A.intPaymentId,
 						[dblCredit]	 					=	--CASE WHEN A.dblExchangeRate != 1 THEN 
 															CAST(
-															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal + ISNULL(loadingFee.dblLoadingFee,0)
 																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 																paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
 															AS DECIMAL(18,6)), 
@@ -159,9 +159,9 @@ BEGIN
 															-- 	CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
 						[dblCreditForeign]				=	--CASE WHEN A.dblExchangeRate != 1 THEN 
 															CAST(
-															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal + ISNULL(loadingFee.dblLoadingFee,0)
 																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-																paymentDetail.dblPayment, voucher.dblTotal)
+																paymentDetail.dblPayment, voucher.dblTotal )
 															AS DECIMAL(18,6))
 															--* (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END)
 															-- ELSE
@@ -180,6 +180,13 @@ BEGIN
 			OUTER APPLY (
 				SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
 			) withHoldData
+			OUTER APPLY (
+				SELECT TOP 1 dblAdjustedTax AS dblLoadingFee
+				FROM tblAPBillDetailTax R2
+				INNER JOIN tblAPBillDetail R3 ON R2.intBillDetailId = R3.intBillDetailId
+				WHERE R3.intBillId = voucher.intBillId
+				AND R2.strCalculationMethod = 'Using Texas Fee Matrix'
+			) loadingFee
 			-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL

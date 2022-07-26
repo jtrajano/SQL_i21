@@ -656,6 +656,12 @@ WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 
+DECLARE @billIds AS Id
+INSERT INTO @billIds
+SELECT intBillId FROM @voucherDetails
+
+EXEC uspAPUpdateTaxForTexasLoadingFee @billIds
+
 INSERT INTO @voucherDetailIds
 SELECT intBillDetailId FROM @voucherDetailsInfo
 
