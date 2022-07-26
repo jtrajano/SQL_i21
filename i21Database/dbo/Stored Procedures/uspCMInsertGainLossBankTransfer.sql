@@ -1,4 +1,4 @@
-alter PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]  
+CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]  
 @intDefaultCurrencyId INT,  
 @strDescription nvarchar(300),  
 @intBankTransferTypeId INT,  
