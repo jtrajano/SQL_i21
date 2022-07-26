@@ -125,39 +125,96 @@ BEGIN
 			,dtmCreatedDate
 			,intConcurrencyId)
 		SELECT
-			intTradeFinanceId = @intLastTradeFinanceId
-			,strTradeFinanceNumber = @strLastTradeFinanceNo
-			,strTransactionType
-			,strTransactionNumber
-			,intTransactionHeaderId
-			,intTransactionDetailId
-			,intBankId
-			,intBankAccountId
-			,intBorrowingFacilityId
-			,intLimitTypeId
-			,intSublimitTypeId
-			,ysnSubmittedToBank
-			,dtmDateSubmitted
-			,strApprovalStatus = 'Cancelled'
-			,dtmDateApproved
-			,strRefNo
-			,intOverrideFacilityValuation
-			,strCommnents
+			intTradeFinanceId = @intTradeFinanceId
+			,strTradeFinanceNumber = L.strTradeFinanceNo
+			,strTransactionType = 'Logistics'
+			,strTransactionNumber = L.strLoadNumber
+			,intTransactionHeaderId = L.intLoadId
+			,intTransactionDetailId = LD.intLoadDetailId
+			,intBankId = BA.intBankId
+			,intBankAccountId = L.intBankAccountId
+			,intBorrowingFacilityId = L.intBorrowingFacilityId
+			,intLimitTypeId = L.intBorrowingFacilityLimitId
+			,intSublimitTypeId = L.intBorrowingFacilityLimitDetailId
+			,ysnSubmittedToBank = L.ysnSubmittedToBank
+			,dtmDateSubmitted = L.dtmDateSubmitted
+			,strApprovalStatus = AP.strApprovalStatus
+			,dtmDateApproved = L.dtmDateApproved
+			,strRefNo = L.strTradeFinanceReferenceNo
+			,intOverrideFacilityValuation = L.intBankValuationRuleId
+			,strCommnents = L.strTradeFinanceComments
 			,dtmCreatedDate = GETDATE()
 			,intConcurrencyId = 1
-		FROM @TRFTradeFinance
+		FROM
+			tblLGLoad L
+			CROSS APPLY (SELECT TOP 1 intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = L.intContractDetailId) LD
+			INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = L.intContractDetailId
+			INNER JOIN tblCTContractHeader CH on CH.intContractHeaderId = CD.intContractHeaderId
+			LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+			LEFT JOIN tblCTApprovalStatusTF AP on AP.intApprovalStatusId = L.intApprovalStatusId
+			LEFT JOIN tblCMBankLoan BL on BL.intBankLoanId = L.intLoanLimitId
+		WHERE intLoadId = @intLoadId
 
-		EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinanceCancel, @intUserId = @intUserId, @strAction = @strAction
-	END
+		/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel/Reject the previous */
+		IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') NOT IN ('Canceled', 'Cancelled', 'Rejected')
+			AND ISNULL(@strLastTradeFinanceNo, '') <> ISNULL(@strTradeFinanceNumber, ''))
+		BEGIN 
+			INSERT INTO @TRFTradeFinanceCancel
+				(intTradeFinanceId
+				,strTradeFinanceNumber
+				,strTransactionType
+				,strTransactionNumber
+				,intTransactionHeaderId
+				,intTransactionDetailId
+				,intBankId
+				,intBankAccountId
+				,intBorrowingFacilityId
+				,intLimitTypeId
+				,intSublimitTypeId
+				,ysnSubmittedToBank
+				,dtmDateSubmitted
+				,strApprovalStatus
+				,dtmDateApproved
+				,strRefNo
+				,intOverrideFacilityValuation
+				,strCommnents
+				,dtmCreatedDate
+				,intConcurrencyId)
+			SELECT
+				intTradeFinanceId = @intLastTradeFinanceId
+				,strTradeFinanceNumber = @strLastTradeFinanceNo
+				,strTransactionType
+				,strTransactionNumber
+				,intTransactionHeaderId
+				,intTransactionDetailId
+				,intBankId
+				,intBankAccountId
+				,intBorrowingFacilityId
+				,intLimitTypeId
+				,intSublimitTypeId
+				,ysnSubmittedToBank
+				,dtmDateSubmitted
+				,strApprovalStatus = CASE WHEN ISNULL(@intApprovalStatusId, '') = 3 THEN 'Rejected' ELSE 'Cancelled' END
+				,dtmDateApproved
+				,strRefNo
+				,intOverrideFacilityValuation
+				,strCommnents
+				,dtmCreatedDate = GETDATE()
+				,intConcurrencyId = 1
+			FROM @TRFTradeFinance
 
-	/* Execute Trade Finance SP */
-	If (@strAction = 'ADD' OR (@intTradeFinanceId IS NULL AND ISNULL(@strTradeFinanceNumber, '') <> ''))
-	BEGIN
-		EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId
-	END	
-	ELSE
-	BEGIN
-		EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = @strAction
+			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinanceCancel, @intUserId = @intUserId, @strAction = @strAction
+		END
+
+		/* Execute Trade Finance SP */
+		If (@strAction = 'ADD' OR (@intTradeFinanceId IS NULL AND ISNULL(@strTradeFinanceNumber, '') <> ''))
+		BEGIN
+			EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId
+		END	
+		ELSE
+		BEGIN
+			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @intUserId, @strAction = @strAction
+		END
 	END
 
 	/* Construct Trade Finance Log SP parameter */
@@ -206,9 +263,10 @@ BEGIN
 		,intConcurrencyId
 		,intContractHeaderId
 		,intContractDetailId
-		,intOverrideBankValuationId)
+		,intOverrideBankValuationId
+		,ysnDeleted)
 	SELECT
-		strAction = CASE WHEN (@strAction = 'ADD') THEN 'Created ' ELSE 'Updated ' END
+		strAction = CASE WHEN (@strAction = 'ADD') THEN 'Created ' ELSE CASE WHEN (@ysnDelete = 1) THEN 'Deleted ' ELSE 'Updated ' END END
 					+ CASE WHEN (L.intShipmentType = 2) THEN 'Shipping Instruction' ELSE 'Shipment' END
 		,strTransactionType = 'Logistics'
 		,intTradeFinanceTransactionId = @intTradeFinanceId
@@ -250,6 +308,7 @@ BEGIN
 		,intContractHeaderId = CD.intContractHeaderId
 		,intContractDetailId = L.intContractDetailId
 		,intOverrideBankValuationId = L.intBankValuationRuleId
+		,ysnDeleted = @ysnDelete
 	FROM tblLGLoad L
 		CROSS APPLY (SELECT TOP 1 intLoadDetailId, dblQuantity, dblAmount FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = L.intContractDetailId) LD
 		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = L.intContractDetailId
@@ -265,8 +324,8 @@ BEGIN
 
 	IF EXISTS (SELECT 1 FROM @TRFLog)
 	BEGIN
-		/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel the previous */
-		IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') NOT IN ('Canceled', 'Cancelled')
+		/* If Last Trade Finance Number does not match the current Trade Finance Number, Cancel/Reject the previous */
+		IF (@strLastTradeFinanceNo IS NOT NULL AND ISNULL(@strLastApprovalStatus, '') NOT IN ('Canceled', 'Cancelled', 'Rejected')
 			AND ISNULL(@strLastTradeFinanceNo, '') <> ISNULL(@strTradeFinanceNumber, ''))
 		BEGIN
 
@@ -343,7 +402,7 @@ BEGIN
 				,strBankTradeReference
 				,dblFinanceQty
 				,dblFinancedAmount
-				,strBankApprovalStatus = 'Canceled'
+				,strBankApprovalStatus = CASE WHEN ISNULL(@intApprovalStatusId, '') = 3 THEN 'Rejected' ELSE 'Cancelled' END
 				,dtmAppliedToTransactionDate = GETDATE()
 				,intStatusId
 				,intWarrantId
@@ -360,9 +419,18 @@ BEGIN
 			EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLogCancel;
 		END
 
-		IF EXISTS (SELECT 1 FROM @TRFLog WHERE ISNULL(strTradeFinanceTransaction, '') <> '')
+		IF EXISTS (SELECT 1 FROM @TRFLog WHERE ISNULL(strTradeFinanceTransaction, '') <> '') OR @ysnDelete = 1
 			EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 	END
+
+	/* Clear trade finance approval status after updating tfrecord and logs if rejected/cancelled */
+	IF (@intApprovalStatusId = 3 OR @intApprovalStatusId = 4)
+	BEGIN
+		UPDATE tblLGLoad
+		SET intApprovalStatusId = NULL
+		WHERE intLoadId = @intLoadId 
+	END
+
 
 END
 
