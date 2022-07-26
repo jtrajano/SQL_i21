@@ -1058,6 +1058,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutAggregateMeterReadingsByFuelGrade.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateTaxForTexasLoadingFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePayableTaxForTexasLoadingFee.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutDeposit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
