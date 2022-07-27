@@ -105,6 +105,9 @@ BEGIN TRY
 			,[intSort]
 			,[intLoadShipmentId]
 			,[intLoadShipmentDetailId]
+			,[intTaxGroupId]
+			,[strTaxPoint]
+			,[intTaxLocationId]
 			)
 		SELECT 
 			[strReceiptType] = 'Direct'
@@ -152,6 +155,9 @@ BEGIN TRY
 			,[intSort] = ISNULL(LC.intLoadContainerId, 0)
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentDetailId] = LD.intLoadDetailId
+			,[intTaxGroupId] = LD.intTaxGroupId
+			,[strTaxPoint] = L.strTaxPoint
+			,[intTaxLocationId] = L.intTaxLocationId
 		FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -595,6 +601,9 @@ BEGIN TRY
 				,[intSort]
 				,[intLoadShipmentId]
 				,[intLoadShipmentDetailId]
+				,[intTaxGroupId]
+				,[strTaxPoint]
+				,[intTaxLocationId]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -671,6 +680,9 @@ BEGIN TRY
 				,[intSort] = ISNULL(LC.intLoadContainerId,0)
 				,[intLoadShipmentId] = L.intLoadId
 				,[intLoadShipmentDetailId] = LD.intLoadDetailId
+				,[intTaxGroupId] = LD.intTaxGroupId
+				,[strTaxPoint] = L.strTaxPoint
+				,[intTaxLocationId] = L.intTaxLocationId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -745,6 +757,9 @@ BEGIN TRY
 				,[intSort]
 				,[intLoadShipmentId]
 				,[intLoadShipmentDetailId]
+				,[intTaxGroupId]
+				,[strTaxPoint]
+				,[intTaxLocationId]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -811,6 +826,9 @@ BEGIN TRY
 				,[intSort] = NULL
 				,[intLoadShipmentId] = L.intLoadId
 				,[intLoadShipmentDetailId] = LD.intLoadDetailId
+				,[intTaxGroupId] = LD.intTaxGroupId
+				,[strTaxPoint] = L.strTaxPoint
+				,[intTaxLocationId] = L.intTaxLocationId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
