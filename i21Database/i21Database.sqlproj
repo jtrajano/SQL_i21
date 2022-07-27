@@ -1063,6 +1063,9 @@
     <Build Include="dbo\Functions\fnSTGetDepartmentTotalsForFuel.sql" />
     <Build Include="dbo\Functions\fnSTTotalAmountOfDepositablePaymentMethods.sql" />
     <Build Include="dbo\Views\vyuHDCustomerCompany.sql" />
+    <Build Include="dbo\Tables\tblRKPaymentCondition.sql" />
+    <Build Include="dbo\Views\vyuRKGetPaymentCondition.sql" />
+    <Build Include="dbo\Tables\tblRKAcceptableCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
