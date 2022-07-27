@@ -87,6 +87,8 @@ SELECT CH.intContractHeaderId
 	, VNM.dblHeaderBalance
 	, VNM.dblHeaderAvailable
 	, CH.ysnQuantityAtHeaderLevel
+	, CH.intProductTypeId
+	, strHeaderProductType = CA.strDescription
 FROM tblCTContractHeader				CH	WITH (NOLOCK)
 JOIN tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=	CH.intContractTypeId
 JOIN tblEMEntity						EY	WITH (NOLOCK) ON	EY.intEntityId						=	CH.intEntityId
@@ -99,6 +101,7 @@ LEFT JOIN tblICCommodityUnitMeasure		CD	WITH (NOLOCK) ON	CD.intCommodityId					=
 															AND	CD.ysnDefault						=	1
 LEFT JOIN tblICUnitMeasure				U1	WITH (NOLOCK) ON	U1.intUnitMeasureId					=	CS.intUnitMeasureId
 LEFT JOIN tblICCommodityUnitMeasure		CM	WITH (NOLOCK) ON	CM.intCommodityUnitMeasureId		=	CH.intCommodityUOMId
+LEFT JOIN tblICCommodityAttribute		CA	WITH (NOLOCK) ON	CA.intCommodityAttributeId			=	CH.intProductTypeId
 cross apply (
 	select
 		cd.intContractHeaderId
