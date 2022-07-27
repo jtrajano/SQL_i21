@@ -197,6 +197,10 @@ SELECT
 							END
 	  ,ysnStoreManager = vst.ysnIsUserStoreManager
 	  ,ysnStopCondition = chk.ysnStopCondition
+      ,dblEditableAggregateMeterReadingsForDollars = chk.dblEditableAggregateMeterReadingsForDollars
+      ,dblEditableOutsideFuelDiscount = chk.dblEditableOutsideFuelDiscount
+      ,ysnConsMeterReadingsForDollars = st.ysnConsMeterReadingsForDollars
+      ,ysnConsAddOutsideFuelDiscounts = st.ysnConsAddOutsideFuelDiscounts
       ,chk.[intConcurrencyId]  
 FROM tblSTCheckoutHeader chk
 INNER JOIN vyuSTStoreOnUserRole vst
@@ -310,4 +314,7 @@ GROUP BY
 	  ,comm.[strCommodityCode]
 	  ,Inv.[intInvoiceId]
 	  ,chk.intEntityId
-
+	  ,chk.dblEditableAggregateMeterReadingsForDollars
+	  ,chk.dblEditableOutsideFuelDiscount
+      ,st.ysnConsMeterReadingsForDollars
+      ,st.ysnConsAddOutsideFuelDiscounts
