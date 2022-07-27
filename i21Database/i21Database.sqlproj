@@ -993,6 +993,9 @@
     <Build Include="dbo\Views\vyuLGCustomerConsumptionSiteDevice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGetIndividualDispenserReadingsToPriorDay.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutAggregateMeterReadingsByFuelGrade.sql" />
+    <Build Include="dbo\Tables\tblRKPaymentCondition.sql" />
+    <Build Include="dbo\Views\vyuRKGetPaymentCondition.sql" />
+    <Build Include="dbo\Tables\tblRKAcceptableCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

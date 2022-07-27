@@ -7742,4 +7742,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTermCostDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="115562a0-911f-49ae-a4cc-35885ec2c41b" ChangeDateTime="07/21/2022 07:11:54">
+    <Property Name="ElementName" Value="[dbo].[tblRKAcceptableCurrency].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKAcceptableCurrency]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAcceptableCurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5b87feda-c409-4283-8614-7afd8d1744d4" ChangeDateTime="07/21/2022 09:43:14">
+    <Property Name="ElementName" Value="[dbo].[tblRKPaymentCondition].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKPaymentCondition]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPaymentConditionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d29325e7-9b0f-42b6-9b3d-66aabfd28e11" ChangeDateTime="07/25/2022 07:19:04">
+    <Property Name="ElementName" Value="[dbo].[tblRKPaymentCondition].[strPaymentCondition]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKPaymentCondition]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strTerm" />
+  </Operation>
 </Operations>
