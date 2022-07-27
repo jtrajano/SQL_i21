@@ -10,7 +10,7 @@ BSI.dblDepositAmount,
 BSI.intImportStatus,
 BankTrans.dblAmount, 
 0 AS dblDiff,
-'OK' AS strResult
+'OK' COLLATE Latin1_General_CI_AS AS strResult 
 FROM
 tblCMBankStatementImport BSI 
 cross APPLY(
@@ -36,7 +36,7 @@ ABS(BSI.dblAmount) -  ABS(BankTrans.dblAmount) AS dblDiff,
 CASE 
 	WHEN BSI.dblWithdrawalAmount - BankTrans.dblAmount <> 0 THEN 'Difference Found' 
 	ELSE 'Reference No not found'
-END AS strResult
+END COLLATE Latin1_General_CI_AS AS strResult
 FROM
 tblCMBankStatementImport BSI 
 OUTER APPLY(

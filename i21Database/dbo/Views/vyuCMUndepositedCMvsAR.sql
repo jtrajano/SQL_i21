@@ -201,7 +201,7 @@ strStatus =  CASE
   WHEN ysnGLMismatch = 1 THEN 'GL Account Matching Error' 
 ELSE 
   'Good'
-END,      
+END COLLATE Latin1_General_CI_AS,      
 *  FROM  
 Query Q  
 

@@ -4,7 +4,7 @@ SELECT
 	Header.intTransactionId
 	,Header.strTransactionId
 	,TransactionType.strBankTransactionTypeName
-	,strBankAccountNo = dbo.fnAESDecryptASym(BankAccount.strBankAccountNo)
+	,strBankAccountNo = dbo.fnAESDecryptASym(BankAccount.strBankAccountNo) COLLATE Latin1_General_CI_AS
 	,Account.strAccountId
 	,Detail.strDescription
 	,Header.dtmDate
