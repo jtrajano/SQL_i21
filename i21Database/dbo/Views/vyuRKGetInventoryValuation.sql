@@ -42,7 +42,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 												WHEN receipt.intSourceType = 1 THEN ScaleView.strTicketNumber -- Scale
 												WHEN receipt.intSourceType = 2 THEN LogisticsView.strLoadNumber -- Inbound Shipment
 												WHEN receipt.intSourceType = 3 THEN LoadHeader.strTransaction -- Transport
-												WHEN receipt.intSourceType = 4 THEN SettleStorage.strStorageTicketNumber -- Settle Storage
+												WHEN receipt.intSourceType = 4 THEN CustomerSettleStorage.strStorageTicketNumber -- Settle Storage
 												WHEN receipt.intSourceType = 5 THEN DeliverySheet.strDeliverySheetNumber -- Delivery Sheet
 												ELSE ''
 											END
@@ -63,7 +63,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 												WHEN receipt.intSourceType = 1 THEN ScaleView.intTicketId -- Scale
 												WHEN receipt.intSourceType = 2 THEN LogisticsView.intLoadContainerId -- Inbound Shipment
 												WHEN receipt.intSourceType = 3 THEN LoadHeader.intLoadHeaderId -- Transport
-												WHEN receipt.intSourceType = 4 THEN SettleStorage.intStorageScheduleId -- Settle Storage
+												WHEN receipt.intSourceType = 4 THEN CustomerSettleStorage.intStorageScheduleId -- Settle Storage
 												WHEN receipt.intSourceType = 5 THEN DeliverySheet.intDeliverySheetId -- Delivery Sheet
 												ELSE ''
 											END
@@ -228,12 +228,12 @@ FROM 	tblICItem i
 			AND shipment.intSourceType = 3		
 
 
-		LEFT JOIN tblGRCustomerStorage SettleStorage
-			ON SettleStorage.intCustomerStorageId = CASE 
+		LEFT JOIN tblGRCustomerStorage CustomerSettleStorage
+			ON CustomerSettleStorage.intCustomerStorageId = CASE 
 														WHEN receiptItem.intInventoryReceiptId IS NOT NULL THEN receiptItem.intSourceId
 														ELSE NULL
 													END
-			AND receipt.intSourceType = 4
+			AND receipt.intSourceType = 4 
 
 		LEFT JOIN tblSCDeliverySheet DeliverySheet
 			ON DeliverySheet.intDeliverySheetId =  CASE 
