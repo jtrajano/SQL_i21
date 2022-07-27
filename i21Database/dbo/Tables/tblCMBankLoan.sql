@@ -16,12 +16,12 @@ CREATE TABLE [dbo].[tblCMBankLoan](
 	--LIMIT
 	intBorrowingFacilityId INT NULL,
 	intLimitTypeId INT NULL,
-	strLimitDescription NVARCHAR(50),
+	strLimitDescription NVARCHAR(50)COLLATE Latin1_General_CI_AS,
 	dblLimit DECIMAL(18,6) NULL,
 	intMaturityDays INT NULL,
 	intDaysInCycle INT NULL,
 	dblHaircut DECIMAL(18,2) NULL,
-	strLimitComments NVARCHAR(500),
+	strLimitComments NVARCHAR(500) COLLATE Latin1_General_CI_AS,
  CONSTRAINT [PK_tblBankLoan] PRIMARY KEY CLUSTERED 
 (
 	[intBankLoanId] ASC
