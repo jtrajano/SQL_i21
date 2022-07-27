@@ -834,6 +834,9 @@
     <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
     <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
+    <Build Include="dbo\Tables\tblRKPaymentCondition.sql" />
+    <Build Include="dbo\Views\vyuRKGetPaymentCondition.sql" />
+    <Build Include="dbo\Tables\tblRKAcceptableCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
