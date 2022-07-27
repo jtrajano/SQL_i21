@@ -2,7 +2,6 @@ print('/*******************  BEGIN Update tblARCompanyPreference ***************
 GO
 
 UPDATE tblARCompanyPreference SET intPageLimit = 1000 WHERE intPageLimit IS NULL
-UPDATE tblARCompanyPreference SET strTermPullPoint = 'Terminal' WHERE strTermPullPoint IS NULL
 
 GO
 print('/*******************  BEGIN Update tblARCompanyPreference  *******************/')
