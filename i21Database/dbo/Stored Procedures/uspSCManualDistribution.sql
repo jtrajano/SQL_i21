@@ -339,6 +339,7 @@ OPEN intListCursor;
 								,strSourceTransactionId  
 								,intStorageScheduleTypeId
 								,ysnAllowVoucher
+								,intSourceTransactionId -- Will be used for the loadDetailid
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -361,6 +362,7 @@ OPEN intListCursor;
 								,strDistributionOption 
 								,intStorageScheduleTypeId = @intStorageScheduleTypeId
 								,ysnAllowVoucher
+								,intSourceTransactionId = @intLoadDetailId
 							FROM @LineItem
 							where intId = @intId
 					END
