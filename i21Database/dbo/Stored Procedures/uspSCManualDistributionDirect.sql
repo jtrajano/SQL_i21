@@ -55,6 +55,9 @@ BEGIN TRY
 	
 
 	
+	DECLARE @_intTicketContractDetailId int
+	DECLARE @_dblTicketScheduleQuantity NUMERIC(38,20)
+
 	SET @ysnDropShip = 0
 
 	---GET TICKET DETAILS
@@ -69,6 +72,8 @@ BEGIN TRY
 		,@intTicketItemId = intItemId
 		,@intMatchTicketId = intMatchTicketId
 		,@intTicketFreightCostUOMId = A.intFreightCostUOMId
+		,@_intTicketContractDetailId = A.intContractId
+		,@_dblTicketScheduleQuantity = ISNULL(A.dblScheduleQty, 0) 
 	FROM tblSCTicket A
 	INNER JOIN tblSCScaleSetup B
 		ON A.intScaleSetupId = B.intScaleSetupId
@@ -788,6 +793,26 @@ BEGIN TRY
 				WHERE intTicketId = @intTicketId
 			END
 
+
+
+			if @_dblTicketScheduleQuantity <> 0
+			begin
+
+				set @_dblTicketScheduleQuantity = -1 * @_dblTicketScheduleQuantity
+
+				EXEC uspSCUpdateContractSchedule
+					@intContractDetailId = @_intTicketContractDetailId
+					,@dblQuantity = @_dblTicketScheduleQuantity
+					,@intUserId = @intUserId
+					,@intExternalId = @intTicketId
+					,@strScreenName = 'Scale'
+			end
+			
+
+
+
+
+
 			---STORAGE
 			BEGIN
 
@@ -935,6 +960,7 @@ BEGIN TRY
 
 
 
+		print 'e'
 		---CREATE INVOICE
 		BEGIN
 			EXEC uspSCDirectCreateInvoice 

@@ -964,6 +964,23 @@ BEGIN TRY
 						FROM tblSCTicketContractUsed
 						WHERE intTicketId = @intTicketId
 						
+
+
+						if @dblTicketScheduledQty <> 0
+						begin
+
+							set @dblTicketScheduledQty = -1 * @dblTicketScheduledQty
+
+							EXEC uspSCUpdateContractSchedule
+								@intContractDetailId = @intTicketContractDetailId
+								,@dblQuantity = @dblTicketScheduledQty
+								,@intUserId = @intUserId
+								,@intExternalId = @intTicketId
+								,@strScreenName = 'Scale'
+						end
+
+
+						
 					END
 
 					---Load Distribution
