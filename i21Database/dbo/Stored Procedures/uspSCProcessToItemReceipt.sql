@@ -340,6 +340,7 @@ BEGIN TRY
 					,strSourceTransactionId 
 					,intStorageScheduleTypeId
 					,ysnAllowVoucher 
+					,intSourceTransactionId
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
 
@@ -405,6 +406,7 @@ BEGIN TRY
 				,strSourceTransactionId  
 				,intStorageScheduleTypeId
 				,ysnAllowVoucher
+				,intSourceTransactionId
 			)
 			EXEC dbo.uspSCGetScaleItemForItemReceipt 
 				@intTicketId
@@ -452,6 +454,7 @@ BEGIN TRY
 					,strSourceTransactionId 
 					,intStorageScheduleTypeId
 					,ysnAllowVoucher
+					,intSourceTransactionId
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
