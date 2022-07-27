@@ -27,7 +27,7 @@ SELECT
 	Detail.intAccountId,
 	GLAccount.strAccountId,
 	Detail.intBankAccountId,
-	dbo.fnAESDecryptASym(BankAccount.strBankAccountNo) strBankAccountId,
+	dbo.fnAESDecryptASym(BankAccount.strBankAccountNo) COLLATE Latin1_General_CI_AS strBankAccountId,
 	Bank.strBankName,
 	Detail.intCompanyLocationId,
 	CompanyLocation.strLocationName strCompanyLocation,
