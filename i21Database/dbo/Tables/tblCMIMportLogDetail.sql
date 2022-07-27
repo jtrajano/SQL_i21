@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCMImportLogDetail](
 	[intImportLogId] [int] NOT NULL,
 	[intImportLogDetailId] [int] IDENTITY(1,1) NOT NULL,
-	[strDescription] [nvarchar](200) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
+	[strDescription] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
 	[intLineNo] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblCMImportLogDetail] PRIMARY KEY CLUSTERED 
