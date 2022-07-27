@@ -48,7 +48,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionStorageId, 
 												WHEN receipt.intSourceType = 1 THEN ScaleView.strTicketNumber -- Scale
 												WHEN receipt.intSourceType = 2 THEN LogisticsView.strLoadNumber -- Inbound Shipment
 												WHEN receipt.intSourceType = 3 THEN LoadHeader.strTransaction -- Transport
-												WHEN receipt.intSourceType = 4 THEN SettleStorage.strStorageTicketNumber -- Settle Storage
+												WHEN receipt.intSourceType = 4 THEN CustomerSettleStorage.strStorageTicketNumber -- Settle Storage
 												WHEN receipt.intSourceType = 5 THEN DeliverySheet.strDeliverySheetNumber -- Delivery Sheet
 												ELSE ''
 											END
@@ -297,8 +297,8 @@ FROM 	tblICInventoryTransactionStorage t
 			AND shipment.intSourceType = 3		
 
 
-		LEFT JOIN tblGRCustomerStorage SettleStorage
-			ON SettleStorage.intCustomerStorageId = CASE 
+		LEFT JOIN tblGRCustomerStorage CustomerSettleStorage
+			ON CustomerSettleStorage.intCustomerStorageId = CASE 
 														WHEN receiptItem.intInventoryReceiptId IS NOT NULL THEN receiptItem.intSourceId
 														ELSE NULL
 													END
