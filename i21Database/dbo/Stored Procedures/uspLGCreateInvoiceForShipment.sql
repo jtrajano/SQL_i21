@@ -295,7 +295,8 @@ DECLARE
 			,[dblOptionalityPremium]
 			,[strTaxPoint]
 			,[intTaxLocationId]
-			,[intTaxGroupId])
+			,[intTaxGroupId]
+			,[ysnOverrideTaxGroup])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -422,6 +423,7 @@ DECLARE
 			,[strTaxPoint]							= L.strTaxPoint
 			,[intTaxLocationId]						= L.intTaxLocationId
 			,[intTaxGroupId]						= LD.intTaxGroupId
+			,[ysnOverrideTaxGroup]					= LD.ysnTaxGroupOverride
 		FROM tblLGLoad L
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -590,7 +592,8 @@ DECLARE
 			,[strGoodsStatus]
 			,[strTaxPoint]
 			,[intTaxLocationId]
-			,[intTaxGroupId])
+			,[intTaxGroupId]
+			,[ysnOverrideTaxGroup])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -717,6 +720,7 @@ DECLARE
 			,[strTaxPoint]							= L.strTaxPoint
 			,[intTaxLocationId]						= L.intTaxLocationId
 			,[intTaxGroupId]						= CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN ARSI.[intTaxGroupId] ELSE LD.intTaxGroupId END
+			,[ysnOverrideTaxGroup]					= LD.ysnTaxGroupOverride
 		FROM vyuARShippedItems ARSI
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARSI.intLoadDetailId
 			LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
