@@ -1142,14 +1142,19 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
-DECLARE  @AddDetailError NVARCHAR(MAX)
-		,@IntegrationLog InvoiceIntegrationLogStagingTable
-        ,@ImpactForProvisional BIT
+DECLARE  @AddDetailError 		NVARCHAR(MAX)
+		,@IntegrationLog 		InvoiceIntegrationLogStagingTable
+        ,@ImpactForProvisional 	BIT
+		,@intARTermId			INT = NULL
 
-SELECT TOP 1
-	 @ImpactForProvisional = ISNULL([ysnImpactForProvisional], 0)
-FROM 
-	tblARCompanyPreference
+SELECT TOP 1 @ImpactForProvisional 	= ISNULL([ysnImpactForProvisional], 0)
+FROM tblARCompanyPreference
+ORDER BY intCompanyPreferenceId DESC
+
+SELECT TOP 1 @intARTermId = CASE WHEN strPullPoint = 'Company Location' THEN intTermId ELSE NULL END
+FROM tblSMTermPullPoint P 
+WHERE P.strPullPoint = 'Company Location'
+ORDER BY P.intTermPullPointId ASC
 
 INSERT INTO @IntegrationLog
 	([intIntegrationLogId]
@@ -1447,12 +1452,12 @@ SELECT
 	,[intCompanyLocationId]			= ITG.intCompanyLocationId
 	,[intAccountId]					= ITG.[intAccountId]
 	,[intCurrencyId]				= ITG.intCurrencyId
-	,[intTermId]					= ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]), EL.[intTermsId])
+	,[intTermId]					= ISNULL(ISNULL(ISNULL(ITG.intTermId, EL.[intTermsId]), @intARTermId), ARC.[intTermsId])
 	,[intOriginalSourceId]			= ITG.[intSourceId]
 	,[intSourceId]					= [dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
 	,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
 	,[dtmDate]						= ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly)
-	,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]),0)) AS DATE)))
+	,[dtmDueDate]					= ISNULL(ITG.dtmDueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly), ISNULL(ISNULL(ISNULL(ITG.intTermId, EL.[intTermsId]), @intARTermId), ARC.[intTermsId])) AS DATE)))
 	,[dtmShipDate]					= ISNULL(ITG.dtmShipDate, ISNULL(CAST(ITG.dtmPostDate AS DATE),@DateOnly))
 	,[dtmPostDate]					= ISNULL(CAST(ITG.dtmPostDate AS DATE),ISNULL(CAST(ITG.dtmDate AS DATE),@DateOnly))
 	,[dtmCalculated]				= NULL
@@ -1547,39 +1552,14 @@ SELECT
 	,[strNutrientAnalysis]			= ITG.[strNutrientAnalysis]
 	,[strBillingMethod]				= ITG.[strBillingMethod]
 	,[strApplicatorLicense]			= ITG.[strApplicatorLicense]
-FROM	
-	@InvoicesToGenerate ITG --WITH (NOLOCK)
---INNER JOIN
---	(SELECT intId FROM @InvoicesToGenerate) ITG2  --WITH (NOLOCK)) ITG2
---		ON ITG.[intId] = ITG2.[intId]
-INNER JOIN
-	(SELECT [intEntityId], [intTermsId], [intSalespersonId], [intShipToId], [intBillToId] FROM tblARCustomer WITH (NOLOCK)) ARC
-		ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
-LEFT OUTER JOIN
-	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [intEntityId], [strCountry], [strState], [strCity], [strZipCode], [intTermsId], [intShipViaId]
-	FROM 
-		[tblEMEntityLocation] WITH (NOLOCK)
-	WHERE
-		ysnDefaultLocation = 1
-	) EL
-		ON ARC.[intEntityId] = EL.[intEntityId]
-LEFT OUTER JOIN
-	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
-		ON ISNULL(ITG.intShipToLocationId, 0) <> 0
-		AND ITG.intShipToLocationId = SL.[intEntityLocationId]
-LEFT OUTER JOIN
-	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL1
-		ON ARC.[intShipToId] = SL1.intEntityLocationId
-LEFT OUTER JOIN
-	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL
-		ON ISNULL(ITG.intBillToLocationId, 0) <> 0
-		AND ITG.intBillToLocationId = BL.intEntityLocationId		
-LEFT OUTER JOIN
-	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
-		ON ARC.[intBillToId] = BL1.intEntityLocationId
-LEFT OUTER JOIN
-	(SELECT intEntityId, intEntityContactId FROM tblEMEntityToContact WITH (NOLOCK) WHERE ysnDefaultContact = 1) ETC
-		ON ITG.intEntityCustomerId = ETC.intEntityId
+FROM @InvoicesToGenerate ITG --WITH (NOLOCK)
+INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
+LEFT OUTER JOIN [tblEMEntityLocation] EL WITH (NOLOCK) ON ARC.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
+LEFT OUTER JOIN [tblEMEntityLocation] SL WITH (NOLOCK) ON ISNULL(ITG.intShipToLocationId, 0) <> 0 AND ITG.intShipToLocationId = SL.[intEntityLocationId]
+LEFT OUTER JOIN [tblEMEntityLocation] SL1 WITH (NOLOCK) ON ARC.[intShipToId] = SL1.intEntityLocationId
+LEFT OUTER JOIN [tblEMEntityLocation] BL WITH (NOLOCK) ON ISNULL(ITG.intBillToLocationId, 0) <> 0 AND ITG.intBillToLocationId = BL.intEntityLocationId		
+LEFT OUTER JOIN [tblEMEntityLocation] BL1 WITH (NOLOCK) ON ARC.[intBillToId] = BL1.intEntityLocationId
+LEFT OUTER JOIN tblEMEntityToContact ETC WITH (NOLOCK) ON ITG.intEntityCustomerId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
 		
 WHILE EXISTS(SELECT TOP 1 NULL FROM #CustomerInvoice WHERE RTRIM(LTRIM(ISNULL([strInvoiceNumber],''))) = '' ORDER BY [intRowId])	
 BEGIN
