@@ -31,19 +31,10 @@ BEGIN
 	)
 	
 	SELECT		b.intFuelTotalsId, 
-				@intCheckoutId,
+				@intCheckoutId as intCheckoutId,
 				b.intFuelingPositionId,
 				b.intProductNumber ,
-				CASE 
-					WHEN b.intProductNumber = 1
-					THEN '87 Unl'
-					WHEN b.intProductNumber = 2
-					THEN '89 Mid'
-					WHEN b.intProductNumber = 3
-					THEN '91 Premium'
-					WHEN b.intProductNumber = 4
-					THEN 'Diesel'
-					END as 'strDescription',
+				I.strDescription,
 				a.dblFuelVolume as dblPriorGallons,
 				a.dblFuelMoney as dblPriorDollars,
 				b.dblFuelVolume as dblCurrentGallons,
@@ -54,5 +45,14 @@ BEGIN
 	INNER JOIN	current_day_reading b
 	ON			a.intProductNumber = b.intProductNumber AND
 				a.intFuelingPositionId = b.intFuelingPositionId
-	ORDER BY	1,2
+	JOIN dbo.tblICItemLocation IL 
+	ON ISNULL(CAST(b.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+	 JOIN dbo.tblICItem I 
+		ON I.intItemId = IL.intItemId
+	 JOIN dbo.tblICItemUOM UOM 
+		ON UOM.intItemId = I.intItemId
+	 JOIN dbo.tblSMCompanyLocation CL 
+		ON CL.intCompanyLocationId = IL.intLocationId
+	 JOIN dbo.tblSTStore S 
+		ON S.intCompanyLocationId = CL.intCompanyLocationId
 END
