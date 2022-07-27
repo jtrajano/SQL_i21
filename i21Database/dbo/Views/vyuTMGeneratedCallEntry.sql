@@ -34,7 +34,7 @@ AS
 		,strSiteCountry = B.strCountry
 		,dblLongitude = B.dblLongitude
 		,dblLatitude = B.dblLatitude
-		,intCustomerID = B.intCustomerID
+		,intCustomerId = B.intCustomerID
 		,ysnLeakCheckRequired = A.ysnLeakCheckRequired
 		,dblCustomerBalance = ISNULL(K.dbl30Days,0.0) + ISNULL(K.dbl60Days,0.0) + ISNULL(K.dbl90Days,0.0) + ISNULL(K.dbl91Days,0.0) --TM-2695
 		,dblSiteEstimatedPercentLeft = B.dblEstimatedPercentLeft
