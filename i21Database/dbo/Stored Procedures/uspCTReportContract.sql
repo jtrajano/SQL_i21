@@ -290,7 +290,7 @@ BEGIN TRY
 
 	SELECT	@strContractConditions = STUFF(								
 			(
-					SELECT	CHAR(13)+CHAR(10) + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
+					SELECT	CHAR(13)+CHAR(10) + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription)
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
@@ -302,7 +302,7 @@ BEGIN TRY
 	FROM	tblCTContractHeader CH WITH (NOLOCK)						
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
-	SELECT	@strApplicableLaw = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
+	SELECT	@strApplicableLaw = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription)
 	FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 	JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
@@ -311,10 +311,10 @@ BEGIN TRY
 	SELECT	@strGeneralCondition = STUFF(								
 			(
 					SELECT	--CHAR(13)+CHAR(10) + 
-							'  </br>' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,1,'Description',DM.strConditionDesc)
+							'  </br>' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,1,'Description',CD.strConditionDescription)
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
-					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) LIKE	'%GENERAL_CONDITION')
+					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(CD.strConditionDescription) LIKE	'%GENERAL_CONDITION')
 					ORDER BY DM.intConditionId		
 					FOR XML PATH(''), TYPE				
 			   ).value('.','varchar(max)')

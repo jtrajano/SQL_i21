@@ -87,7 +87,9 @@ AS
 			CH.ysnReceivedSignedFixationLetter, -- CT-5315
 			CH.strEntitySelectedLocation, -- CT-5315
 			CH.strReportTo,
-			CH.ysnEnableFutures
+			CH.ysnEnableFutures,
+			CH.strCompanyLocation,
+			CH.strHeaderProductType
 	FROM	[vyuCTSearchContractHeader]  CH	WITH (NOLOCK) LEFT
 	JOIN
 	 (
