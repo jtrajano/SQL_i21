@@ -58,7 +58,7 @@ FROM
 											) +
 											-- Include tax for discounts/other charges
 											CASE 
-												WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
+												WHEN BillDtl.intInventoryReceiptChargeId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
 												ELSE ISNULL(BillByReceipt.dblTax, 0)
 											END
 		,InboundDiscount				= CASE 
