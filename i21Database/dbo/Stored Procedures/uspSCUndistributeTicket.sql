@@ -1045,11 +1045,22 @@ BEGIN TRY
 						
 						SET @dblScheduleQty  = 0
 
-						-- IF(ISNULL(@dblScheduleQty,0) = 0)
-						-- BEGIN
-						-- 	SELECT @dblScheduleQty = -dblScheduleQty  FROM tblSCTicket WHERE intTicketId = @intTicketId
-						-- END
+						IF(ISNULL(@dblScheduleQty,0) = 0)
+						BEGIN
+							SELECT @dblScheduleQty = dblScheduleQty  FROM tblSCTicket WHERE intTicketId = @intTicketId
+						END
 
+						if @intTicketStorageScheduleTypeId = -2
+						begin
+							EXEC uspCTUpdateScheduleQuantity
+								@intContractDetailId	=	@_intContractDetailId,
+								@dblQuantityToUpdate	=	@dblScheduleQty,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intTicketId,
+								@strScreenName			=	'Scale'		
+																		
+
+						end
 						-- IF((SELECT strPricingType FROM vyuCTContractDetailView WHERE intContractDetailId = @_intContractDetailId) <> 'Basis')
 						-- BEGIN
 						-- 	EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
