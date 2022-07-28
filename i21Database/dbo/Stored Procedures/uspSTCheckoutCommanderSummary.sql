@@ -18,10 +18,12 @@ BEGIN
 				DECLARE @intStoreId INT
 					  , @intCustomerChargeMopId INT
 					  , @intCashTransctionMopId INT
+					  , @ysnConsignmentStore BIT = 1
 
 				SELECT @intStoreId			  = ch.intStoreId
 					 , @intCustomerChargeMopId = st.intCustomerChargeMopId
 					 , @intCashTransctionMopId = st.intCashTransctionMopId
+					 , @ysnConsignmentStore = st.ysnConsignmentStore
 				FROM dbo.tblSTCheckoutHeader ch
 				INNER JOIN dbo.tblSTStore st
 					ON ch.intStoreId = st.intStoreId
@@ -121,23 +123,37 @@ BEGIN
 			-- ======================================================================================================================
 			-- [START] - Create list of excluded MOP Id
 			-- ======================================================================================================================
-			DECLARE @tempExcludedMOPid TABLE
-			(
-				intPaymentOptionId INT
-			)
-
-			INSERT INTO @tempExcludedMOPid
-			(
-				intPaymentOptionId
-			)
-			SELECT 
-				stpo.intPaymentOptionId
-			FROM tblSTStore st
-			INNER JOIN tblSTPaymentOption stpo
-				ON st.intStoreId = stpo.intStoreId
-				AND stpo.intPaymentOptionId IN (st.intCashTransctionMopId, st.intCustomerChargeMopId)
-			WHERE st.intStoreId = @intStoreId
-				AND stpo.ysnSkipImport = CAST(0 AS BIT)
+			DECLARE @tempExcludedMOPid TABLE  
+			(  
+			intPaymentOptionId INT  
+			)  
+			IF @ysnConsignmentStore = 0
+			BEGIN
+				INSERT INTO @tempExcludedMOPid  
+				(  
+				intPaymentOptionId  
+				)  
+				SELECT   
+				stpo.intPaymentOptionId  
+				FROM tblSTStore st  
+				INNER JOIN tblSTPaymentOption stpo  
+				ON st.intStoreId = stpo.intStoreId  
+				AND stpo.intPaymentOptionId IN (st.intCashTransctionMopId, st.intCustomerChargeMopId)  
+				WHERE st.intStoreId = @intStoreId  
+				AND stpo.ysnSkipImport = CAST(0 AS BIT)  
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @tempExcludedMOPid  
+				(  
+				intPaymentOptionId  
+				)  
+				SELECT intPaymentOptionId
+				FROM tblSTPaymentOption 
+				WHERE intStoreId = @intStoreId
+				AND strRegisterMop IS NOT NULL
+				AND ISNULL(ysnDepositable,0) = 0
+			END
             -- ======================================================================================================================
 			-- [END] - Create list of excluded MOP Id
 			-- ======================================================================================================================
@@ -388,41 +404,97 @@ BEGIN
 		-- ======================================================================================================================
 		-- [START] - INSERT CASHIER DETAIL 
 		-- ======================================================================================================================
-			IF NOT EXISTS (SELECT 1 FROM dbo.tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId)
+			IF @ysnConsignmentStore = 0 -- If not Consignment
 				BEGIN
-					INSERT INTO dbo.tblSTCheckoutCashiers (
-						 [intCheckoutId]
-						,[intCashierId]
-						,[dblTotalPaymentOption]
-						,[intNumberOfVoids]
-						,[dblVoidAmount]
-						,[intOverrideCount]
-						,[intCustomerCount]
-						,[dblTotalDeposit]
-						)
-					SELECT
-						@intCheckoutId  
-						, (SELECT TOP 1 intCashierId FROM tblSTCashier WHERE strCashierName = CAST(ISNULL(UDT.strCashier, '') AS NVARCHAR(50)) COLLATE SQL_Latin1_General_CP1_CS_AS)
-						, CAST(UDT.dblCashierTotalPaymentOption AS DECIMAL(18,6))
-						, CAST(UDT.dblCashierVoidLineNumberOfVoids  AS DECIMAL(18,6))
-						, CAST(UDT.dblCashierVoidLineAmountOfVoids AS DECIMAL(18,6))
-						, CAST(UDT.dblCashierSummaryInfoNumberOfOverrides AS DECIMAL(18,6))
-						, CAST(UDT.dblCashierSummaryInfoNumberOfCustomerCount AS DECIMAL(18,6))
-						, CAST(UDT.dblTotalDeposit AS DECIMAL(18,6))
-					FROM @UDT_TransSummary UDT
+					IF NOT EXISTS (SELECT 1 FROM dbo.tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId)  
+					BEGIN  
+					 INSERT INTO dbo.tblSTCheckoutCashiers (  
+					   [intCheckoutId]  
+					  ,[intCashierId]  
+					  ,[dblTotalPaymentOption]  
+					  ,[intNumberOfVoids]  
+					  ,[dblVoidAmount]  
+					  ,[intOverrideCount]  
+					  ,[intCustomerCount]  
+					  ,[dblTotalDeposit]  
+					  )  
+					 SELECT  
+					  @intCheckoutId    
+					  , (SELECT TOP 1 intCashierId FROM tblSTCashier WHERE strCashierName = CAST(ISNULL(UDT.strCashier, '') AS NVARCHAR(50)) COLLATE SQL_Latin1_General_CP1_CS_AS)  
+					  , CAST(UDT.dblCashierTotalPaymentOption AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierVoidLineNumberOfVoids  AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierVoidLineAmountOfVoids AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierSummaryInfoNumberOfOverrides AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierSummaryInfoNumberOfCustomerCount AS DECIMAL(18,6))  
+					  , CAST(UDT.dblTotalDeposit AS DECIMAL(18,6))  
+					 FROM @UDT_TransSummary UDT  
+					END  
+				   ELSE  
+					BEGIN  
+					 UPDATE dbo.tblSTCheckoutCashiers  
+					  SET dblTotalPaymentOption  = ISNULL(UDT.dblCashierTotalPaymentOption, 0)  
+					  , intNumberOfVoids  = ISNULL(UDT.dblCashierVoidLineNumberOfVoids, 0)  
+					  , dblVoidAmount   = ISNULL(UDT.dblCashierVoidLineAmountOfVoids, 0)  
+					  , intOverrideCount   = ISNULL(UDT.dblCashierSummaryInfoNumberOfOverrides, 0)  
+					  , intCustomerCount   = ISNULL(UDT.dblCashierSummaryInfoNumberOfCustomerCount, 0)  
+					  , dblTotalDeposit         =ISNULL(UDT.dblTotalDeposit , 0)  
+					 FROM @UDT_TransSummary UDT  
+					 WHERE tblSTCheckoutCashiers.intCheckoutId = @intCheckoutId    
+					END  
 				END
-			ELSE
+			  ELSE -- Consignment (filter payment options, exclude MOPs that are not marked as depositable)
 				BEGIN
-					UPDATE dbo.tblSTCheckoutCashiers
-						SET dblTotalPaymentOption		= ISNULL(UDT.dblCashierTotalPaymentOption, 0)
-						, intNumberOfVoids		= ISNULL(UDT.dblCashierVoidLineNumberOfVoids, 0)
-						, dblVoidAmount			= ISNULL(UDT.dblCashierVoidLineAmountOfVoids, 0)
-						, intOverrideCount			= ISNULL(UDT.dblCashierSummaryInfoNumberOfOverrides, 0)
-						, intCustomerCount			= ISNULL(UDT.dblCashierSummaryInfoNumberOfCustomerCount, 0)
-						, dblTotalDeposit         =ISNULL(UDT.dblTotalDeposit , 0)
-					FROM @UDT_TransSummary UDT
-					WHERE tblSTCheckoutCashiers.intCheckoutId = @intCheckoutId
-
+					IF NOT EXISTS (SELECT 1 FROM dbo.tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId)  
+					BEGIN  
+					 INSERT INTO dbo.tblSTCheckoutCashiers (  
+					   [intCheckoutId]  
+					  ,[intCashierId]  
+					  ,[dblTotalPaymentOption]  
+					  ,[intNumberOfVoids]  
+					  ,[dblVoidAmount]  
+					  ,[intOverrideCount]  
+					  ,[intCustomerCount]  
+					  ,[dblTotalDeposit]  
+					  )  
+					 SELECT  
+					  @intCheckoutId    
+					  , (SELECT TOP 1 intCashierId FROM tblSTCashier WHERE strCashierName = CAST(ISNULL(UDT.strCashier, '') AS NVARCHAR(50)) COLLATE SQL_Latin1_General_CP1_CS_AS)  
+					  , CAST(UDT.dblCashierTotalPaymentOption AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierVoidLineNumberOfVoids  AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierVoidLineAmountOfVoids AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierSummaryInfoNumberOfOverrides AS DECIMAL(18,6))  
+					  , CAST(UDT.dblCashierSummaryInfoNumberOfCustomerCount AS DECIMAL(18,6))  
+					  , CAST(UDT.dblTotalDeposit AS DECIMAL(18,6))  
+					 FROM @UDT_TransSummary UDT  
+					 WHERE UDT.strSysId NOT IN  
+					   (  
+						SELECT strRegisterMop COLLATE SQL_Latin1_General_CP1_CS_AS AS strSysId
+						FROM tblSTPaymentOption 
+						WHERE intStoreId = @intStoreId
+						AND strRegisterMop IS NOT NULL
+						AND ISNULL(ysnDepositable,0) = 0
+					   )  
+					END  
+				   ELSE  
+					BEGIN  
+					 UPDATE dbo.tblSTCheckoutCashiers  
+					  SET dblTotalPaymentOption  = ISNULL(UDT.dblCashierTotalPaymentOption, 0)  
+					  , intNumberOfVoids  = ISNULL(UDT.dblCashierVoidLineNumberOfVoids, 0)  
+					  , dblVoidAmount   = ISNULL(UDT.dblCashierVoidLineAmountOfVoids, 0)  
+					  , intOverrideCount   = ISNULL(UDT.dblCashierSummaryInfoNumberOfOverrides, 0)  
+					  , intCustomerCount   = ISNULL(UDT.dblCashierSummaryInfoNumberOfCustomerCount, 0)  
+					  , dblTotalDeposit         =ISNULL(UDT.dblTotalDeposit , 0)  
+					 FROM @UDT_TransSummary UDT  
+					 WHERE tblSTCheckoutCashiers.intCheckoutId = @intCheckoutId   
+					 AND UDT.strSysId NOT IN  
+					   (  
+						SELECT strRegisterMop COLLATE SQL_Latin1_General_CP1_CS_AS AS strSysId
+						FROM tblSTPaymentOption 
+						WHERE intStoreId = @intStoreId
+						AND strRegisterMop IS NOT NULL
+						AND ISNULL(ysnDepositable,0) = 0
+					   )  
+					END  
 				END
 		-- ======================================================================================================================
 		-- [ENDT] - INSERT CASHIER DETAIL 
