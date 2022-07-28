@@ -98,7 +98,9 @@ BEGIN
 			LEFT JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
 			LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID	=	M.intCurrencyId
 			LEFT JOIN	tblSMCurrency				MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
-			WHERE C.intCommodityId = @intCommodityId  ORDER BY M.intFutureMarketId ASC
+			LEFT JOIN	tblICCommodity				CC	ON CC.intCommodityId	=	C.intCommodityId AND CC.intFutureMarketId	= M.intFutureMarketId
+			WHERE C.intCommodityId = @intCommodityId 
+			ORDER BY ISNULL(CC.intFutureMarketId, 0) DESC, M.intFutureMarketId ASC
 		END
 	END
 
