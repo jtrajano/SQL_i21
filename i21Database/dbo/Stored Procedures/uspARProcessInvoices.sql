@@ -240,6 +240,7 @@ DECLARE  @Id									INT
 		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
+		,@Surcharge								NUMERIC(18, 6)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -465,6 +466,7 @@ BEGIN
 		,@FreightLocationSegment		= [intFreightLocationSegment]
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
+		,@Surcharge						= [dblSurcharge]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -757,6 +759,7 @@ BEGIN
 			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
+			,@Surcharge						= @Surcharge
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -1525,6 +1528,7 @@ BEGIN TRY
 			,@FreightCharge					= [dblFreightCharge]
 			,@FreightCompanySegment			= [intFreightCompanySegment]
 			,@FreightLocationSegment		= [intFreightLocationSegment]
+			,@Surcharge						= [dblSurcharge]
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1671,6 +1675,7 @@ BEGIN TRY
 			,[dblFreightCharge]			= @FreightCharge 
 			,[intFreightCompanySegment]	= @FreightCompanySegment
 			,[intFreightLocationSegment]= @FreightLocationSegment
+			,[dblSurcharge]				= @Surcharge
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN
