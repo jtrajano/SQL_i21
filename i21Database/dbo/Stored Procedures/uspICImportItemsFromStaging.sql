@@ -508,6 +508,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
   , intSubcategoriesId = source.intSubcategoriesId          
   , dtmDateModified = GETUTCDATE()          
   , intModifiedByUserId = source.intCreatedByUserId          
+  , intCommodityId = source.intCommodityId
 WHEN NOT MATCHED THEN          
  INSERT          
  (          
