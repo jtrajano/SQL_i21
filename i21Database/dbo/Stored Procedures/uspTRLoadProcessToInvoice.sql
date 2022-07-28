@@ -160,7 +160,7 @@ BEGIN TRY
 		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
-		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
+		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NOT NULL AND BlendingIngredient.intItemId IS NOT NULL THEN 1 ELSE 0 END
 		,dblMinimumUnits						= DD.dblMinimumUnits
 		,dblComboFreightRate					= DD.dblComboFreightRate
 		,ysnComboFreight						= DD.ysnComboFreight
