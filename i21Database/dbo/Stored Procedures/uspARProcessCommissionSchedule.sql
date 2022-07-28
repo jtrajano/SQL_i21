@@ -362,7 +362,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																		, ysnRejected
 																		, ysnPayroll
 																		, ysnPayables
-																		, ISNULL(dblTotalAmount, 0)
+																		, ISNULL(@dblLineTotal, 0)
 																		, strReason
 																		, 1
 																	FROM tblARCommissionRecap
