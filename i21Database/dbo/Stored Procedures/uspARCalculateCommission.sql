@@ -183,7 +183,10 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			 , intSourceId				=  intGLDetailId
 			 , strSourceType			= 'tblGLDetail'
 			 , dtmSourceDate			= dtmDate
-			 , dblAmount				= dblDebit - dblCredit
+			 , dblAmount				= (CASE 
+											WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblDebit - dblCredit), 0)) - ISNULL(@dblHurdle, 0) 
+											WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
+										  END)
 			 , intConcurrencyId			= 1
 		FROM @tmpAccountsTable
 
@@ -213,7 +216,10 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			 , intSourceId				= intInvoiceId
 			 , strSourceType			= 'tblARInvoice'
 			 , dtmSourceDate			= dtmPostDate
-			 , dblAmount				= dblInvoiceTotal
+			 , dblAmount				= (CASE 
+											WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblInvoiceTotal), 0)) - ISNULL(@dblHurdle, 0) 
+											WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
+										  END)
 			 , intConcurrencyId			= 1
 		FROM @tmpSalespersonsTable
 
@@ -238,7 +244,10 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			 , intSourceId				= intTicketHoursWorkedId
 			 , strSourceType			= 'tblHDTicketHoursWorked'
 			 , dtmSourceDate			= dtmDate
-			 , dblAmount				= dblAmount
+			 , dblAmount				= (CASE 
+											WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblAmount), 0)) - ISNULL(@dblHurdle, 0) 
+											WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
+										  END)
 			 , intConcurrencyId			= 1
 		FROM @tmpAgentsTable
 
@@ -267,7 +276,10 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			 , intSourceId				= intInvoiceId
 			 , strSourceType			= 'tblARInvoice'
 			 , dtmSourceDate			= dtmPostDate
-			 , dblAmount				= dblTotalAmount
+			 , dblAmount				= (CASE 
+											WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblTotalAmount), 0)) - ISNULL(@dblHurdle, 0) 
+											WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
+										  END)
 			 , intConcurrencyId			= 1
 		FROM @tmpItemCategoriesTable ICT
 		
@@ -294,7 +306,10 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			 , intSourceId				= intInvoiceId
 			 , strSourceType			= 'tblARInvoice'
 			 , dtmSourceDate			= dtmPostDate
-			 , dblAmount				= dblTotalAmount
+			 , dblAmount				= (CASE 
+											WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblTotalAmount), 0)) - ISNULL(@dblHurdle, 0) 
+											WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
+										  END)
 			 , intConcurrencyId			= 1
 		FROM @tmpItemsTable
 		

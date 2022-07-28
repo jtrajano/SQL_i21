@@ -45,7 +45,11 @@ BEGIN TRY
 		,[intEntityCustomerId]					= DH.intEntityCustomerId
 		,[intCompanyLocationId]					= DH.intCompanyLocationId
 		,[intCurrencyId]						= NULL
-		,[intTermId]							= ISNULL(EL.intTermsId, Customer.intTermsId)
+		,[intTermId]                            = CASE WHEN TMS.intDeliveryTermID IS NOT NULL THEN TMS.intDeliveryTermID
+                                                    WHEN EL.intTermsId IS NOT NULL THEN EL.intTermsId
+                                                    WHEN TPPI.intTermId IS NOT NULL THEN TPPI.intTermId
+													WHEN TPPC.intTermId IS NOT NULL THEN TPPC.intTermId
+                                                    ELSE Customer.intTermsId END
 		,[dtmDate]								= DH.dtmInvoiceDateTime
 		,[dtmDueDate]							= NULL
 		,[dtmShipDate]							= DH.dtmInvoiceDateTime
@@ -156,7 +160,7 @@ BEGIN TRY
 		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
-		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
+		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NOT NULL AND BlendingIngredient.intItemId IS NOT NULL THEN 1 ELSE 0 END
 		,dblMinimumUnits						= DD.dblMinimumUnits
 		,dblComboFreightRate					= DD.dblComboFreightRate
 		,ysnComboFreight						= DD.ysnComboFreight
@@ -217,6 +221,14 @@ BEGIN TRY
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
 			AND CustomerFreight.intCategoryId = Item.intCategoryId
 			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendingIngredient.strZipCode)
+	LEFT JOIN tblTMSite TMS ON TMS.intSiteID = DD.intSiteId
+	
+	LEFT JOIN tblSMTermPullPoint TPPI ON TPPI.strPullPoint = CASE WHEN TR.strOrigin = 'Location' THEN 'Company Location' ELSE TR.strOrigin END
+    AND TPPI.intCategoryId = IC.intCategoryId AND TPPI.intItemId = DD.intItemId
+	
+	LEFT JOIN tblSMTermPullPoint TPPC ON TPPC.strPullPoint = CASE WHEN TR.strOrigin = 'Location' THEN 'Company Location' ELSE TR.strOrigin END
+    AND TPPC.intCategoryId = IC.intCategoryId
+
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
 		-- AND (TL.intMobileLoadHeaderId IS NULL

@@ -245,6 +245,8 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[intLineOfBusinessId]
+    ,[intFreightCompanySegment]
+    ,[intFreightLocationSegment]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -334,6 +336,8 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ARI.dblFreightCharge
     ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
+    ,[intFreightCompanySegment]         = ARI.[intFreightCompanySegment]
+    ,[intFreightLocationSegment]        = ARI.[intFreightLocationSegment]
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]

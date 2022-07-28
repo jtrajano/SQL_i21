@@ -345,55 +345,98 @@ WHERE strTransactionDate <= @dtmDate
 AND ISNULL(dblForexRate, 1) <> 1
 END
 
-;WITH finalQuery AS(
-SELECT  
-A.strTransactionType,
-A.dblTransactionAmount,
-A.intCurrencyId,
-A.dblHistoricForexRate,
-A.dblHistoricAmount, 
-A.dblAmountDifference,
-A.strType,
-B.strCurrency,
-intAccountIdOverride = A.intAccountId,
-intLOBSegmentOverrideId = intLOBSegmentCodeId,
-C.strAccountId,
-CL.* 
-FROM @tblMulti A 
-JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
-LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
-OUTER APPLY(
-	SELECT	
-	intLocationSegmentCodeId = intProfitCenter,
-	intCompanySegmentCodeId = intCompanySegment 
-	FROM dbo.tblSMCompanyLocation 
-	WHERE intCompanyLocationId = A.intCompanyLocationId
-)CL
-)
-SELECT 
-strTransactionType,
-intAccountIdOverride,
-strForexRateType = 'Avg',
-intCurrencyId,
-strCurrency,
-strAccountId,
-AVG(dblTransactionAmount) dblTransactionAmount,
-AVG(dblHistoricAmount) dblHistoricAmount,
-AVG(dblHistoricForexRate) dblHistoricForexRate,
-AVG(dblAmountDifference) dblAmountDifference,
-intLOBSegmentOverrideId,
-intLocationSegmentCodeId,
-intCompanySegmentCodeId,
-strType
-FROM 
-finalQuery
-GROUP BY
-intCurrencyId,
-strCurrency,
-intAccountIdOverride,
-intLOBSegmentOverrideId,
-intLocationSegmentCodeId,
-intCompanySegmentCodeId,
-strType,
-strAccountId,
-strTransactionType
+
+
+IF @strModule = 'GL' -- GL will average
+	WITH finalQuery AS(
+	SELECT  
+	A.strTransactionType,
+	A.dblTransactionAmount,
+	A.intCurrencyId,
+	A.dblHistoricForexRate,
+	A.dblHistoricAmount, 
+	A.dblAmountDifference,
+	A.strType,
+	B.strCurrency,
+	intAccountIdOverride = A.intAccountId,
+	intLOBSegmentOverrideId = intLOBSegmentCodeId,
+	C.strAccountId,
+	CL.* 
+	FROM @tblMulti A 
+	JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
+	LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
+	OUTER APPLY(
+		SELECT	
+		intLocationSegmentCodeId = intProfitCenter,
+		intCompanySegmentCodeId = intCompanySegment 
+		FROM dbo.tblSMCompanyLocation 
+		WHERE intCompanyLocationId = A.intCompanyLocationId
+	)CL
+	)
+	SELECT 
+	strTransactionType,
+	intAccountIdOverride,
+	strForexRateType = 'Avg',
+	intCurrencyId,
+	strCurrency,
+	strAccountId,
+	AVG(dblTransactionAmount) dblTransactionAmount,
+	AVG(dblHistoricAmount) dblHistoricAmount,
+	AVG(dblHistoricForexRate) dblHistoricForexRate,
+	AVG(dblAmountDifference) dblAmountDifference,
+	intLOBSegmentOverrideId,
+	intLocationSegmentCodeId,
+	intCompanySegmentCodeId,
+	strType
+	FROM 
+	finalQuery
+	GROUP BY
+	intCurrencyId,
+	strCurrency,
+	intAccountIdOverride,
+	intLOBSegmentOverrideId,
+	intLocationSegmentCodeId,
+	intCompanySegmentCodeId,
+	strType,
+	strAccountId,
+	strTransactionType
+
+ELSE
+	SELECT 
+	A.strTransactionType,
+	A.strTransactionId , 
+	C.strAccountId,
+	A.dtmDate, 
+	A.dtmDueDate,
+	A.strVendorName  ,
+	A.strCommodity,
+	A.strLineOfBusiness ,
+	A.strLocation ,
+	A.strTicket, 
+	A.strContractId,
+	A.strItemId,
+	A.dblQuantity,
+	A.dblUnitPrice,  
+	A.dblTransactionAmount,
+	A.intCurrencyId,  
+	A.intCurrencyExchangeRateTypeId, 
+	A.strForexRateType, 
+	A.dblHistoricForexRate,
+	A.dblHistoricAmount, 
+	A.dblAmountDifference , 
+	A.strModule, 
+	A.strType,
+	B.strCurrency,
+	intAccountIdOverride = A.intAccountId,
+	intLOBSegmentOverrideId = intLOBSegmentCodeId,
+	CL.* 
+	FROM @tblMulti A 
+	JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
+	LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
+	OUTER APPLY(
+		SELECT	
+		intLocationSegmentCodeId = intProfitCenter  , 
+		intCompanySegmentCodeId = intCompanySegment 
+		FROM dbo.tblSMCompanyLocation 
+		WHERE intCompanyLocationId = A.intCompanyLocationId
+	)CL
