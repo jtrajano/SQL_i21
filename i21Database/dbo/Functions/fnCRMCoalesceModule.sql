@@ -15,7 +15,7 @@ BEGIN
 		and a.strCompanyId = @strCompanyId
 		and b.ysnAddonComponent = 0
 		and b.ysnEnabled = convert(bit,1)
-		
+	group by c.strApplicationName, c.strPrefix, c.strModule	
 
 	RETURN @strModules
 
