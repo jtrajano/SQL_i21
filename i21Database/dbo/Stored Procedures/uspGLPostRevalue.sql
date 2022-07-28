@@ -378,7 +378,7 @@ DECLARE
           OUTER APPLY(  
           SELECT dtmReverseDate FROM tblGLRevalue  WHERE intConsolidationId = @intConsolidationId  
           )U  
-		      WHERE strModule <> 'GL'  
+		      WHERE strModule NOT IN ('GL', 'CM')  
     
           DECLARE @dtmReverseDate DATETIME  
           SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
