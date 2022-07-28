@@ -219,7 +219,7 @@ BEGIN TRY
 
 		SELECT ITD.intInventoryTransferDetailId
 			,IT.strTransferNo
-			,dbo.fnConvertDateToReportDateFormat(IT.dtmTransferDate, 0) dtmTransferDate
+			,dbo.fnConvertDateToReportDateFormat(ITD.dtmDeliveryDate, 0) dtmTransferDate
 			,I.strItemNo
 			,L.strLotNumber
 			,PL.strParentLotNumber
