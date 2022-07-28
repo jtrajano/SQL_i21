@@ -6,15 +6,24 @@ CREATE PROCEDURE [dbo].[uspCMBTOverrideGLAccount]
 )
 AS
 BEGIN
-DECLARE @ysnOverrideLocation BIT , @ysnOverrideCompany BIT
+DECLARE @ysnOverrideLocation BIT = 0 , @ysnOverrideLOB BIT = 0, @ysnOverrideCompany BIT = 0
 
+IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  3)
 SELECT TOP 1 @ysnOverrideLocation=ISNULL(
 CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideLocationSegment_InTransit
     WHEN @intBankTransferTypeId = 3 THEN ysnOverrideLocationSegment_Forward
     WHEN @intBankTransferTypeId IN (4,5) THEN ysnOverrideLocationSegment_Swap ELSE 0 END,0)
+FROM tblCMCompanyPreferenceOption  
+
+IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  5)
+SELECT TOP 1 @ysnOverrideLOB=ISNULL(
+CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideLOBSegment_InTransit
+    WHEN @intBankTransferTypeId = 3 THEN ysnOverrideLOBSegment_Forward
+    WHEN @intBankTransferTypeId IN (4,5) THEN ysnOverrideLOBSegment_Swap ELSE 0 END,0)
 FROM tblCMCompanyPreferenceOption
 
 
+IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  6)
 SELECT TOP 1 @ysnOverrideCompany= ISNULL(
 CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideCompanySegment_InTransit
     WHEN @intBankTransferTypeId = 3 THEN ysnOverrideCompanySegment_Forward
@@ -104,6 +113,9 @@ BEGIN
     IF @ysnOverrideLocation = 1 
         SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(3,@strAccountId,@strAccountId1)
     
+     IF @ysnOverrideLOB = 1
+        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(6,@strAccountId,@newStrAccountId)
+    
     IF @ysnOverrideCompany = 1
         SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(6,@strAccountId,@newStrAccountId)
         
@@ -139,8 +151,5 @@ BEGIN
     SET @msg = '<ul style="text-indent:-40px">' + @msg + '</ul>'
 	RAISERROR (@msg ,16,1)
 END
-
-
-
 
 END
