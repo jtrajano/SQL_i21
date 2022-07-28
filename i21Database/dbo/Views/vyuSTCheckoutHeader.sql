@@ -201,6 +201,9 @@ SELECT
       ,dblEditableOutsideFuelDiscount = chk.dblEditableOutsideFuelDiscount
       ,ysnConsMeterReadingsForDollars = st.ysnConsMeterReadingsForDollars
       ,ysnConsAddOutsideFuelDiscounts = st.ysnConsAddOutsideFuelDiscounts
+      ,dblTotalAmountOfDepositablePaymentMethods = dbo.fnSTTotalAmountOfDepositablePaymentMethods(chk.intCheckoutId)
+      ,dblDepartmentTotalsForFuel = dbo.fnSTGetDepartmentTotalsForFuel(chk.intCheckoutId)
+      ,dblDealerCommission = dbo.fnSTGetDealerCommission(chk.intCheckoutId)
       ,chk.[intConcurrencyId]  
 FROM tblSTCheckoutHeader chk
 INNER JOIN vyuSTStoreOnUserRole vst
