@@ -335,19 +335,19 @@ BEGIN
 			FROM tblSMTerm payableTerm
 			WHERE payableTerm.intTermID = A.intTermId
 			UNION ALL
-			--there is ship from received, use the term setup on that ship from
-			SELECT
-				shipFromTerm.*
-			FROM tblEMEntityLocation shipFrom
-			INNER JOIN tblSMTerm shipFromTerm ON shipFrom.intTermsId = shipFromTerm.intTermID
-			WHERE shipFrom.intEntityLocationId = A.intShipFromId AND shipFrom.intEntityId = A.intEntityVendorId
-			UNION ALL
 			--use contract term
 			SELECT
 				defaultTerm.* 
 			FROM  tblCTContractHeader CH
 			INNER JOIN tblSMTerm defaultTerm ON  defaultTerm.intTermID = CH.intTermId
 			WHERE A.intContractHeaderId = CH.intContractHeaderId  AND A.intContractHeaderId > 0
+			UNION ALL
+			--there is ship from received, use the term setup on that ship from
+			SELECT
+				shipFromTerm.*
+			FROM tblEMEntityLocation shipFrom
+			INNER JOIN tblSMTerm shipFromTerm ON shipFrom.intTermsId = shipFromTerm.intTermID
+			WHERE shipFrom.intEntityLocationId = A.intShipFromId AND shipFrom.intEntityId = A.intEntityVendorId
 			UNION ALL
 			--use vendor default location term
 			SELECT
