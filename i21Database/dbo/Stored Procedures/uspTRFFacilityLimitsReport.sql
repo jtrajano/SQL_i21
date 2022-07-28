@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[uspTRFFacilityLimitsReport]
 	, @intCurrencyId INT = NULL
 
 AS
-
+ 
  SET QUOTED_IDENTIFIER OFF
  SET ANSI_NULLS ON
  SET NOCOUNT ON
@@ -309,6 +309,7 @@ AS
  		WHERE facInfo.intBorrowingFacilityId = latestLog.intBorrowingFacilityId
  	) facility
  	WHERE ctd.intContractDetailId IN (SELECT intContractDetailId FROM #tempTradeLogContracts)
+	AND cth.intContractTypeId = 1
 
 
  	-- Get Contract Hedge Info
