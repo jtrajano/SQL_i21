@@ -1059,6 +1059,9 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateTaxForTexasLoadingFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePayableTaxForTexasLoadingFee.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDeposit.sql" />
+    <Build Include="dbo\Functions\fnSTGetDealerCommission.sql" />
+    <Build Include="dbo\Functions\fnSTGetDepartmentTotalsForFuel.sql" />
+    <Build Include="dbo\Functions\fnSTTotalAmountOfDepositablePaymentMethods.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
