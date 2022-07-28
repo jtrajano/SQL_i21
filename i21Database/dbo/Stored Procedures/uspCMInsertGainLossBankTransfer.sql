@@ -2,13 +2,22 @@ CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]
 @intDefaultCurrencyId INT,  
 @strDescription nvarchar(300),  
 @intBankTransferTypeId INT,  
-@intGLAccountIdTo INT,  
+@intGLAccountIdTo INT, 
+@strTransactionId NVARCHAR(40),
 @intRealizedGainAccountId INT = NULL  
   
 AS  
 BEGIN  
  SET NOCOUNT ON;  
  DECLARE @strErrorMessage NVARCHAR(100)  
+
+IF EXISTS (
+SELECT 1 FROM tblCMBankTransfer
+WHERE @intDefaultCurrencyId = intCurrencyIdAmountFrom AND @intDefaultCurrencyId = intCurrencyIdAmountTo 
+AND strTransactionId =@strTransactionId)
+RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
+
+
   
  IF @intRealizedGainAccountId is NULL  
  BEGIN  
