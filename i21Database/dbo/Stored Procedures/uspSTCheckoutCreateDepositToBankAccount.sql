@@ -35,12 +35,7 @@ BEGIN
 		FROM		dbo.tblSTCheckoutHeader 
 		WHERE		intCheckoutId = @intCheckoutId
 
-		SELECT		@dblTotalDebitCreditCard = ISNULL(SUM(dblTotalSalesAmountComputed), 0)
-		FROM		tblSTCheckoutDepartmetTotals a
-		INNER JOIN	tblICItem b
-		ON			a.intItemId = b.intItemId
-		WHERE		a.intCheckoutId = @intCheckoutId AND
-					b.ysnFuelItem = 1
+		SET	@dblTotalDebitCreditCard = dbo.fnSTTotalAmountOfDepositablePaymentMethods(@intCheckoutId)
 
 		--Get the Bank Deposit strTransactionId by using this script.
 		SELECT		TOP 1 @intStartingNumberId = intStartingNumberId 
