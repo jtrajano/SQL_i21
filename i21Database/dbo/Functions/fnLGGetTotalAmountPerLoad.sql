@@ -35,8 +35,8 @@ BEGIN
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
-	SELECT @dblTotalCostPerContainer = dblTotalCostPerContainer
-		,@intTotalCostPerContainerCurrency = intCurrencyId
+	SELECT @dblTotalCostPerContainer = FRM.dblTotalCostPerContainer
+		,@intTotalCostPerContainerCurrency = FRM.intCurrencyId
 		,@strTotalCostPerContainerCurrency = CU.strCurrency
 	FROM tblLGFreightRateMatrix FRM
 	JOIN tblSMCurrency CU ON CU.intCurrencyID = FRM.intCurrencyId
@@ -48,7 +48,7 @@ BEGIN
 	
 	SELECT TOP 1 @dblCurrencyExchangeRate = CASE
 			WHEN ISNULL(CD.intInvoiceCurrencyId,0) = @intTotalCostPerContainerCurrency
-				THEN dblRate
+				THEN CD.dblRate
 			ELSE 1
 			END
 	FROM tblCTContractDetail CD
