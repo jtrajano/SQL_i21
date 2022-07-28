@@ -118,7 +118,7 @@ DECLARE
     FROM tblGLCompanyPreferenceOption
 
     DECLARE @defaultType NVARCHAR(20)   
-    SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable() f   
+    SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable(DEFAULT) f   
     WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;  
 
     IF @ysnHasDetails = 1
@@ -251,7 +251,7 @@ DECLARE
           INTO #iRelyPostGLEntries
           FROM cte1 A  
           OUTER APPLY (  
-          SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable() f   
+          SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable(intAccountIdOverride) f   
           WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS   
           AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS  
           AND f.OffSet  = A.OffSet  
