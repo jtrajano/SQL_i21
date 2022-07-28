@@ -15,7 +15,7 @@ CASE WHEN intBankTransferTypeId = 1 THEN 'Bank Transfer'
  WHEN intBankTransferTypeId = 3 THEN 'Bank Forward'   
  WHEN intBankTransferTypeId = 4 THEN 'Swap Short'   
  WHEN intBankTransferTypeId = 5 THEN 'Swap Long' 
-END strBankTransferTypeId,
+END COLLATE Latin1_General_CI_AS strBankTransferTypeId,
 CASE WHEN A.intRateTypeIdAmountFrom = 99999 THEN 'Historic Rate' ELSE J.strCurrencyExchangeRateType  END strRateTypeAmountFrom,
 K.strCurrencyExchangeRateType strRateTypeAmountTo,
 L.strCurrencyExchangeRateType strRateTypeFeesFrom,

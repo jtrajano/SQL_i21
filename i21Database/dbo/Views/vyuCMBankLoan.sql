@@ -14,12 +14,12 @@ CASE
   WHEN intLimitTypeId =3 THEN 'Payables'
   WHEN intLimitTypeId =4 THEN 'Receivables'
   WHEN intLimitTypeId =5 THEN 'Total'
-END,
+END COLLATE Latin1_General_CI_AS,
 strLoanType=
 CASE 
   WHEN intLoanTypeId = 1 THEN 'Bank Loan'
   WHEN intLoanTypeId = 2 THEN 'Trade Limit'
-END,
+END COLLATE Latin1_General_CI_AS,
 strBorrowingFacilityId,
 ISNULL(Detail.ysnHasFunds, CAST(0 AS BIT)) ysnHasFunds
 FROM tblCMBankLoan L

@@ -21,7 +21,7 @@ BTD.dblExchangeRate,
 BT.dblAmount,
 BTD.intConcurrencyId, 
 BT.ysnPosted,
-strRowState = ''
+strRowState = '' COLLATE Latin1_General_CI_AS
 FROM tblCMBankTransactionBatch AS BTB INNER JOIN
     tblCMBankTransaction AS BT ON BTB.strBankTransactionBatchId = BT.strLink INNER JOIN
     tblCMBankTransactionDetail AS BTD ON BT.intTransactionId = BTD.intTransactionId INNER JOIN

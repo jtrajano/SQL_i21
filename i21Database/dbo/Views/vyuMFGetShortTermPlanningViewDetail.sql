@@ -81,7 +81,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 				THEN 'Late'
 			ELSE 'Expected'
 			END
-		) AS strOnTime
+		) COLLATE Latin1_General_CI_AS  AS strOnTime
 	,D.dblDOH AS dblDOPDOH
 	,CASE 
 		WHEN intAttributeId = 5
@@ -104,7 +104,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 			THEN 'Forward Open Contracts'
 		WHEN intAttributeId = 14
 			THEN 'No ETA'
-		END strContainerStatus
+		END COLLATE Latin1_General_CI_AS AS strContainerStatus
 	,(
 		CASE 
 			WHEN SS.strStatus IS NOT NULL
@@ -112,7 +112,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 				THEN 'Warehouse'
 			ELSE 'No Warehouse'
 			END
-		) AS strStorage
+		) COLLATE Latin1_General_CI_AS AS strStorage
 	,D.intUserId
 FROM tblMFShortTermPlanningViewDetail D
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = D.intLoadContainerId

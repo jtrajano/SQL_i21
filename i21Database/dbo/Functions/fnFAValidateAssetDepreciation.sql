@@ -41,7 +41,10 @@ BEGIN
         JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId AND BD.intBookId = @BookId
         OUTER APPLY(
             SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate, dtmDepreciationToDate 
-            FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId AND intLegacyId = BD.intLedgerId
+            FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId
+            AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
             ORDER BY dtmDepreciationToDate DESC
         )D
 		OUTER APPLY(
@@ -72,7 +75,10 @@ BEGIN
         JOIN tblFABookDepreciation BD ON BD.intAssetId = I.intId AND BD.intBookId = @BookId
             CROSS APPLY(
                 SELECT TOP 1 dbo.fnFAGetNextDepreciationDate(intAssetId, intBookId, intLedgerId) nextDate, intLedgerId
-                FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId AND ISNULL(intBookId,1) = @BookId AND intLedgerId = BD.intLedgerId
+                FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId AND ISNULL(intBookId,1) = @BookId
+                AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
                 AND strTransaction = 'Depreciation'
                 AND dtmDepreciationToDate IS NOT NULL
                 ORDER BY intAssetDepreciationId DESC

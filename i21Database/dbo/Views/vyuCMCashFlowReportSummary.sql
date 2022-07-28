@@ -8,7 +8,7 @@ SELECT
 	C.intCashFlowReportSummaryCodeId,
 	C.strCashFlowReportSummaryCode,
 	BA.intBankAccountId,
-	dbo.fnAESDecryptASym(BA.strBankAccountNo) strBankAccountId,
+	dbo.fnAESDecryptASym(BA.strBankAccountNo) COLLATE Latin1_General_CI_AS strBankAccountId,
 	B.strBankName,
 	BA.intCurrencyId intBankAccountCurrencyId,
 	Currency.strCurrency strBankAccountCurrency,

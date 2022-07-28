@@ -985,6 +985,24 @@
     <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
     <Build Include="dbo\Views\vyuSMUserList.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleList.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTranslogFuelComputation.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogFuelComputation.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelSalesByGradeAndPricePoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketApply.sql" />
+    <Build Include="dbo\Views\vyuLGCustomerConsumptionSiteDevice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetIndividualDispenserReadingsToPriorDay.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutAggregateMeterReadingsByFuelGrade.sql" />
+    <Build Include="dbo\Tables\tblRKPaymentCondition.sql" />
+    <Build Include="dbo\Views\vyuRKGetPaymentCondition.sql" />
+    <Build Include="dbo\Tables\tblRKAcceptableCurrency.sql" />
+    <Build Include="dbo\Tables\tblGRAdjustmentType.sql" />
+    <Build Include="dbo\Tables\tblGRAdjustSettlements.sql" />
+    <Build Include="dbo\Views\vyuGRSearchAdjustSettlements.sql" />
+    <Build Include="dbo\User Defined Types\AdjustSettlementsStagingTable.sql" />
+    <Build Include="dbo\Tables\tblGRDeletedAdjustSettlements.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnpostAdjustSettlements.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPostAdjustSettlements.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10741,6 +10759,7 @@
     <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11118,6 +11137,7 @@
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_RemoveOldPowerBIData.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
+    <Build Include="dbo\Tables\tblSMTermPullPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -11345,5 +11365,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\QM\2_SetDefaultData.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\40_UpdateSchedulePaymentMethod.sql" />
   </ItemGroup>
 </Project>

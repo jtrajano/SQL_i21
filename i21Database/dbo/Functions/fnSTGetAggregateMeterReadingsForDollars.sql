@@ -7,8 +7,8 @@ AS BEGIN
 
     DECLARE @dblAggregateMeterReadingsForDollars DECIMAL(18,2) = 0
 
-    SELECT		@dblAggregateMeterReadingsForDollars = ISNULL(SUM(dblDollarsSold),0)
-    FROM		tblSTCheckoutFuelTotalSold
+    SELECT		@dblAggregateMeterReadingsForDollars = ISNULL(SUM(dblAmount),0)
+    FROM        tblSTCheckoutPumpTotals
     WHERE		intCheckoutId = @intCheckoutId
 
     RETURN @dblAggregateMeterReadingsForDollars

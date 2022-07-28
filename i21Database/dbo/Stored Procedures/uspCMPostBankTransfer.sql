@@ -720,15 +720,7 @@ IF @ysnPost = 1
     IF @ysnPost = 1   
     BEGIN    
       IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId IN (2,4,5)
-      BEGIN  
-            DELETE A FROM tblCMBankTransaction A
-            WHERE 
-            A.strTransactionId IN( 
-              SELECT strTransactionId +@BANK_TRANSFER_WD_PREFIX strTransactionId FROM #tmpGLDetail UNION 
-              SELECT strTransactionId +@BANK_TRANSFER_DEP_PREFIX strTransactionId FROM #tmpGLDetail
-            )
-
-         
+      BEGIN
             INSERT INTO tblCMBankTransaction (    
             strTransactionId    
             ,intBankTransactionTypeId    
@@ -780,8 +772,8 @@ IF @ysnPost = 1
               ,strCity            = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = dblCreditForeign    
-              ,strAmountInWords     = dbo.fnConvertNumberToWord(A.dblCreditForeign)    
+              ,dblAmount          = CASE WHEN @intBankTransferTypeId = 5 THEN dblDebitForeign ELSE dblCreditForeign END    
+              ,strAmountInWords     = dbo.fnConvertNumberToWord(CASE WHEN @intBankTransferTypeId = 5 THEN dblDebitForeign ELSE dblCreditForeign END)    
               ,strMemo            = CASE WHEN ISNULL(strReference,'') = '' THEN strDescription     
                                         WHEN ISNULL(strDescription,'') = '' THEN strReference    
                                         ELSE strDescription + ' / ' + strReference END    
@@ -864,25 +856,30 @@ IF @ysnPost = 1
     BEGIN    
       IF @ysnPostedInTransit = 1 --OR @intBankTransferTypeId = 1 --OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
       BEGIN  
-        IF @intBankTransferTypeId = 1
+        IF @intBankTransferTypeId IN (1,3)
         BEGIN
           		DELETE FROM tblCMBankTransaction
               WHERE	strLink = @strTransactionId
-                  AND ysnClr = 0
-                  AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+              AND ysnClr = 0
+              AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+
+              
         END
         ELSE
         BEGIN
-          IF @ysnPosted = 1
-            DELETE FROM tblCMBankTransaction    
-            WHERE strLink = @strTransactionId    
-            AND ysnClr = 0    
-            AND intBankTransactionTypeId IN (@BANK_TRANSFER_DEP)      
+          IF @intBankTransferTypeId = 5
+          BEGIN
+              DELETE FROM tblCMBankTransaction    
+              WHERE strLink = @strTransactionId    
+              AND ysnClr = 0    
+              AND intBankTransactionTypeId  = CASE WHEN @ysnPosted = 1 THEN @BANK_TRANSFER_WD ELSE  @BANK_TRANSFER_DEP  END  
+          END
           ELSE
-            DELETE FROM tblCMBankTransaction    
-            WHERE strLink = @strTransactionId    
-            AND ysnClr = 0    
-            AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD)   
+              DELETE FROM tblCMBankTransaction    
+              WHERE strLink = @strTransactionId    
+              AND ysnClr = 0    
+              AND intBankTransactionTypeId  = CASE WHEN @ysnPosted = 1 THEN @BANK_TRANSFER_DEP ELSE  @BANK_TRANSFER_WD  END  
+         
         END
      
       END  
