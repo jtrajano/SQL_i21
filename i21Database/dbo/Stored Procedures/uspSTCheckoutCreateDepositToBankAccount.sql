@@ -135,6 +135,8 @@ BEGIN
 												, @intUserId		= @intEntityId
 												, @intEntityId		= @intEntityId
 												, @isSuccessful		= @ysnSuccess OUT
+
+				UPDATE tblSTCheckoutDeposits SET intBDepId = @intNewTransactionId WHERE intCheckoutId = @intCheckoutId
 			END
 		ELSE
 			BEGIN
