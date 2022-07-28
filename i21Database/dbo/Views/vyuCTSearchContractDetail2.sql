@@ -321,16 +321,16 @@ SELECT a.intContractDetailId
 	, strStrategic = (case when isnull(b.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
 	, strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 	-- Trade Finance
-	, a.strFinanceTradeNo
-	, BK.strBankName
-	, BA.strBankAccountNo
+	, a.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
+	, CBK.strBankName
+	, CBA.strBankAccountNo  COLLATE Latin1_General_CI_AS AS strBankAccountNo
 	, FA.strBorrowingFacilityId
 	, FA.strBankReferenceNo
-	, FL.strBorrowingFacilityLimit
-	, FLD.strLimitDescription
+	, FL.strBorrowingFacilityLimit  COLLATE Latin1_General_CI_AS AS strBorrowingFacilityLimit
+	, FLD.strLimitDescription COLLATE Latin1_General_CI_AS AS strLimitDescription
 	, a.ysnSubmittedToBank
 	, a.dtmDateSubmitted
-	, ASTF.strApprovalStatus
+	, ASTF.strApprovalStatus COLLATE Latin1_General_CI_AS  AS strApprovalStatus
 	, a.dtmDateApproved
 	, BVR.strBankValuationRule
 	, strCertificateName = (
@@ -339,13 +339,14 @@ SELECT a.intContractDetailId
 				FROM
 					CTECert where intContractDetailId = a.intContractDetailId
 				FOR XML PATH('')),' #!',', '), 1, 2, '')
-			)
+			)  COLLATE Latin1_General_CI_AS
 	, ICC.strGrade AS strGradeCommodity
 	, ICC.strRegion
 	, ICC.strSeason
 	, ICC.strClass
 	, ICC.strProductLine
 	, a.dblInterestRate
+	, strPrimeCustomer = (CASE WHEN ISNULL(b.ysnPrimeCustomer, 0) = 0 THEN 'N' ELSE 'Y' END) COLLATE Latin1_General_CI_AS
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
@@ -365,8 +366,8 @@ LEFT JOIN tblCTContractStatus p WITH(NOLOCK) ON p.intContractStatusId = a.intCon
 LEFT JOIN shipmentstatus r ON r.intContractDetailId = a.intContractDetailId
 
 	-- Trade Finance
-	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = a.intBankAccountId
-	LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
+	LEFT JOIN vyuCMBankAccount CBA ON CBA.intBankAccountId = a.intBankAccountId
+	LEFT JOIN tblCMBank CBK ON CBK.intBankId = CBA.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = a.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = a.intBorrowingFacilityLimitId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = a.intBorrowingFacilityLimitDetailId
