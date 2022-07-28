@@ -166,19 +166,66 @@ BEGIN TRY
 			SET @TransactionType = 'Updated'
 		END
 
-		IF (ISNULL(@ExistingCountryId, 0) = 0)
+		IF (ISNULL(@Username, '') = '')
 		BEGIN
-			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Country (' + @Country + ') is not existing. '
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Name is required. '
 		END
 
-		IF (ISNULL(@ExistingLocationId, 0) = 0)
+		IF (ISNULL(@UserId, '') = '')
 		BEGIN
-			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Company Location (' + @LocationName + ') is not existing. '
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'User ID is required. '
 		END
 
-		IF (ISNULL(@ExistingUserRoleId, 0) = 0)
+		IF (ISNULL(@ExtErpId, '') = '')
 		BEGIN
-			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'User Role (' + @UserRole + ') is not existing. '
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'External ERP ID is required. '
+		END
+
+		IF (ISNULL(@Email, '') = '')
+		BEGIN
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Email is required. '
+		END
+
+		IF (ISNULL(@ContactName, '') = '')
+		BEGIN
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Contact Name is required. '
+		END
+
+		IF (ISNULL(@LocationName, '') = '')
+		BEGIN
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Location Name is required. '
+		END
+		ELSE
+		BEGIN
+			IF (ISNULL(@ExistingLocationId, 0) = 0)
+			BEGIN
+				SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Company Location (' + @LocationName + ') is not existing. '
+			END
+		END
+
+		IF (ISNULL(@Country, '') <> '')
+		BEGIN
+			IF (ISNULL(@ExistingCountryId, 0) = 0)
+			BEGIN
+				SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Country (' + @Country + ') is not existing. '
+			END
+		END
+
+		IF (ISNULL(@UserRole, '') = '')
+		BEGIN
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'User Role is required. '
+		END
+		ELSE
+		BEGIN
+			IF (ISNULL(@ExistingUserRoleId, 0) = 0)
+			BEGIN
+				SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'User Role (' + @UserRole + ') is not existing. '
+			END
+		END
+
+		IF (ISNULL(@Active, '') = '')
+		BEGIN
+			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Active is required. '
 		END
 
 		CREATE TABLE #tmpUserLocationRolesForChecking (
@@ -270,14 +317,27 @@ BEGIN TRY
 			FROM	dbo.tblSMUserRole
 			WHERE	strName = @DetailRole
 
-			IF (ISNULL(@ExistingDetailLocation, 0) = 0)
+			IF (ISNULL(@DetailLocation, '') = '')
 			BEGIN
-				SET	@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Company Location (' + @DetailLocation + ') is not existing. '
+				SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Detail Location Name is required. '
+			END
+			ELSE
+			BEGIN
+				IF (ISNULL(@ExistingDetailLocation, 0) = 0)
+				BEGIN
+					SET	@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Company Location (' + @DetailLocation + ') is not existing. '
+				END
 			END
 
-			IF (ISNULL(@ExistingDetalRole, 0) = 0)
+			IF (ISNULL(@DetailRole, '') = '')
 			BEGIN
-				SET	@ErrorMessage = ISNULL(@ErrorMessage, '') + 'User Role (' + @DetailRole + ') is not existing. '
+				SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Detail User Role is required. '
+			END
+			BEGIN
+				IF (ISNULL(@ExistingDetalRole, 0) = 0)
+				BEGIN
+					SET	@ErrorMessage = ISNULL(@ErrorMessage, '') + 'User Role (' + @DetailRole + ') is not existing. '
+				END
 			END
 
 			DELETE TOP (1) FROM #tmpUserLocationRolesForChecking
@@ -318,6 +378,19 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			DECLARE		@AuditLogEntityId INT = 0
+
+			SELECT		@AuditLogEntityId = intEntityId
+			FROM		tblEMEntityCredential
+			WHERE		strUserName = 'irelyadmin'
+
+			IF (ISNULL(@AuditLogEntityId, 0) = 0)
+			BEGIN
+				SELECT		TOP 1 @AuditLogEntityId = intEntityId
+				FROM		tblSMUserSecurity 
+				WHERE		ysnAdmin = 1
+			END
+			
 			IF (ISNULL(@ExistingUserEntityId, 0) = 0)
 			BEGIN
 				SET @newEntityNo = ''
@@ -669,7 +742,7 @@ BEGIN TRY
 				EXEC uspSMSingleAuditLog
 					@screenName     = 'EntityManagement.view.Entity',
 					@recordId       = @NewUserEntityId,
-					@entityId       = 1,
+					@entityId       = @AuditLogEntityId,
 					@AuditLogParam  = @SingleAuditLogParam  
 			END
 			ELSE
@@ -1092,7 +1165,7 @@ BEGIN TRY
 				EXEC uspSMSingleAuditLog
 					@screenName     = 'EntityManagement.view.Entity',
 					@recordId       = @ExistingUserEntityId,
-					@entityId       = 1,
+					@entityId       = @AuditLogEntityId,
 					@AuditLogParam  = @SingleAuditLogParam  
 			END
 		END
