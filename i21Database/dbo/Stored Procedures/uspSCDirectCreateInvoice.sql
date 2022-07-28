@@ -1668,7 +1668,11 @@ BEGIN TRY
 				,[intOrderUOMId]= NULL
 				,[intItemUOMId] = NULL
 				,[dblQtyOrdered] = Staging.dblQtyOrdered
-				,[dblQtyShipped] = Staging.dblQtyShipped
+				,[dblQtyShipped] =  CASE WHEN ICI.strCostMethod = 'Amount' THEN
+										1
+									ELSE
+										Staging.dblQtyShipped
+									END
 				,[dblDiscount] = 0
 				,[dblPrice] = CASE WHEN SC.ysnCusVenPaysFees = 1 THEN SC.dblTicketFees * -1 ELSE SC.dblTicketFees END
 				,[ysnRefreshPrice] = 0
