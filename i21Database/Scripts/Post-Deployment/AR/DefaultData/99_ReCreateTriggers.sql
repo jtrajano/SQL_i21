@@ -152,7 +152,8 @@ BEGIN
 			,PD.intBillId                      =  i.intBillId                    
 			,PD.strTransactionNumber           =  i.strTransactionNumber         
 			,PD.intTermId                      =  i.intTermId                    
-			,PD.intAccountId                   =  i.intAccountId                 
+			,PD.intAccountId                   =  i.intAccountId         
+			,PD.intWriteOffAccountId		   =  i.intWriteOffAccountId
 			,PD.dblInvoiceTotal                =  i.dblInvoiceTotal              
 			,PD.dblBaseInvoiceTotal            =  i.dblBaseInvoiceTotal          
 			,PD.dblDiscount                    =  i.dblDiscount                  
