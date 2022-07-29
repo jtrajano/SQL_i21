@@ -94,8 +94,8 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = compPref.intDefaultCurrencyId AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CC.intCurrencyId
-	LEFT JOIN tblSMCurrencyExchangeRate Rate ON Rate.intFromCurrencyId = compPref.intDefaultCurrencyId AND Rate.intToCurrencyId = CU.intMainCurrencyId
-	LEFT JOIN tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
+	LEFT JOIN tblSMCurrencyExchangeRate SMER2 ON SMER2.intFromCurrencyId = compPref.intDefaultCurrencyId AND SMER2.intToCurrencyId = CU.intMainCurrencyId
+	LEFT JOIN tblSMCurrencyExchangeRateDetail RateDetail ON SMER2.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	LEFT JOIN tblSMTerm term ON term.intTermID =  CC.intTermId
