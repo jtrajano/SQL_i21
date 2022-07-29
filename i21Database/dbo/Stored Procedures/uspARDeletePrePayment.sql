@@ -32,7 +32,7 @@ WHILE EXISTS(
 		  AND P.intPaymentId = @PaymentId
 
 		DELETE FROM tblARPrepaidAndCredit
-		WHERE intPrepaymentId = @InvoiceId
+		WHERE intPrepaymentId = @invoiceId
 		AND ysnApplied = 0
 
 		DELETE FROM tblARPaymentDetail
