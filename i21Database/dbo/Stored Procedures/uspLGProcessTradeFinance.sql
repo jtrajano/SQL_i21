@@ -355,7 +355,7 @@ BEGIN
 				,strSublimit
 				,dblSublimit
 				,strBankTradeReference
-				,dblFinanceQty
+				,dblFinanceQty = 0
 				,dblFinancedAmount
 				,strBankApprovalStatus = CASE WHEN ISNULL(@intApprovalStatusId, '') = 3 THEN 'Rejected' ELSE 'Cancelled' END
 				,dtmAppliedToTransactionDate = GETDATE()
