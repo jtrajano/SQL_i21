@@ -85,19 +85,6 @@ DECLARE @InventoryData TABLE
 	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
 )
 
---DECLARE @InventoryData2 TABLE
---(
---	intRowNum INT
---	,strLabel NVARCHAR(500) COLLATE Latin1_General_CI_AS
---	,strSign NVARCHAR(2) COLLATE Latin1_General_CI_AS
---	,dblUnits DECIMAL(18,6)
---	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
---	,intCommodityId INT
---	,intCompanyLocationId INT
---	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
---	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
---)
-
 DECLARE @intCommodityId2 INT
 DECLARE @strCommodityCode NVARCHAR(20)
 DECLARE @strUOM NVARCHAR(20)
@@ -353,21 +340,6 @@ BEGIN
 		WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment')
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
-
-		--INSERT INTO @InventoryData2
-		--SELECT 3
-		--	,'SHIPPED'
-		--	,'-'
-		--	,ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
-		--	,@strCommodityCode
-		--	,@intCommodityId2
-		--	,@intCompanyLocationId
-		--	,@strLocationName
-		--	,@strUOM
-		--FROM #tblInOut
-		--WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment')
-		--	AND dtmDate IS NULL
-		--	AND intCompanyLocationId = @intCompanyLocationId
 
 		INSERT INTO @InventoryData
 		SELECT 4
@@ -981,62 +953,87 @@ GROUP BY strCommodityCode
 /***END===STILL ADD TOTAL STORAGE OBLIGATION IF THERE'S NONE ON SPECIFIC LOCATIONS****/
 
 IF EXISTS (SELECT * FROM tempdb.sys.tables WHERE name = '#DPR')
-	DROP TABLE #DPR
+	DROP TABLE #VouchersPostedButNotPaid
 
-SELECT 
-	dblIncrease = SUM(CASE WHEN dblOrigQty > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,UM.intCommodityUnitMeasureId,dblOrigQty) ELSE 0 END)
-	,dblDecrease = ABS(SUM(CASE WHEN dblOrigQty < 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,UM.intCommodityUnitMeasureId,dblOrigQty) ELSE 0 END))
-	,SL.intCommodityId
-	,SL.strCommodityCode
-	,intLocationId
-	,strLocationName
-	,UOM.strUnitMeasure
-INTO #DPR
-FROM vyuRKGetSummaryLog SL
-INNER JOIN tblICCommodity IC
-	ON IC.intCommodityId = SL.intCommodityId
-INNER JOIN tblICCommodityUnitMeasure UM
-	ON UM.intCommodityId = IC.intCommodityId
-		AND ysnStockUnit = 1
-INNER JOIN tblICUnitMeasure UOM
-	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
-INNER JOIN @Locs LO
-	ON LO.intId = SL.intLocationId
-WHERE strBucketType = 'Company Owned'
-	AND SL.intCommodityId = ISNULL(@intCommodityId,SL.intCommodityId)
-	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), SL.dtmTransactionDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
-	AND SL.strTransactionType NOT IN ('Inventory Transfer')
-GROUP BY SL.intCommodityId
-	,SL.strCommodityCode
-	,intLocationId
-	,strLocationName
-	,UOM.strUnitMeasure
+SELECT dblQty = BILL.dblQty
+	,BILL.intCommodityId
+	,BILL.strCommodityCode
+	,intLocationId = LO.intId
+	,CL.strLocationName
+	,BILL.strUnitMeasure
+INTO #VouchersPostedButNotPaid
+FROM @Locs LO
+INNER JOIN tblSMCompanyLocation CL
+	ON CL.intCompanyLocationId = LO.intId
+OUTER APPLY (
+	SELECT dblQty = SUM(ISNULL(BD.dblQtyReceived,0))
+		,CO.intCommodityId
+		,CO.strCommodityCode
+		,AP.intShipToId
+		,UOM.strUnitMeasure
+	FROM tblAPBillDetail BD
+	INNER JOIN tblAPBill AP
+		ON AP.intBillId = BD.intBillId
+	INNER JOIN tblICItem IC
+		ON IC.intItemId = BD.intItemId
+			AND IC.strType = 'Inventory'
+	INNER JOIN tblICCommodity CO
+		ON CO.intCommodityId = IC.intCommodityId
+	INNER JOIN tblICCommodityUnitMeasure UM
+		ON UM.intCommodityId = IC.intCommodityId
+			AND ysnStockUnit = 1
+	INNER JOIN tblICUnitMeasure UOM
+		ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+	WHERE AP.ysnPosted = 1 
+		AND AP.ysnPaid = 0
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), AP.dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
+		AND IC.intCommodityId = ISNULL(@intCommodityId,IC.intCommodityId)
+		AND AP.intTransactionType = 1
+		AND AP.intShipToId = LO.intId
+	GROUP BY CO.intCommodityId
+		,CO.strCommodityCode
+		,BD.intLocationId
+		,AP.intShipToId
+		,UOM.strUnitMeasure
+) BILL
+
+UPDATE NP
+SET intCommodityId = ID.intCommodityId
+	,strCommodityCode = ID.strCommodityCode
+	,intLocationId = ID.intCompanyLocationId
+	,strLocationName = ID.strLocationName
+	,strUnitMeasure = ID.strUOM
+FROM #VouchersPostedButNotPaid NP
+INNER JOIN @InventoryData ID
+	ON ID.intCompanyLocationId = NP.intLocationId
+WHERE ID.strLabel = 'COMPANY-OWNED BEGINNING BALANCE'
+	AND NP.dblQty IS NULL
 
 INSERT INTO @InventoryData
 SELECT 
 	(SELECT MAX(intRowNum) FROM @InventoryData) + 1
 	,'COMPANY-OWNED (PAID)'
-	,'+'
-	,dblIncrease
+	,'-'
+	,0
 	,strCommodityCode
 	,intCommodityId
 	,intLocationId
 	,strLocationName
 	,strUnitMeasure
-FROM #DPR
+FROM #VouchersPostedButNotPaid
 
 INSERT INTO @InventoryData
 SELECT 
 	(SELECT MAX(intRowNum) FROM @InventoryData) + 1
 	,'COMPANY-OWNED (PRICED BUT NOT PAID)'
-	,'-'
-	,dblDecrease
+	,'+'
+	,dblQty
 	,strCommodityCode
 	,intCommodityId
 	,intLocationId
 	,strLocationName
 	,strUnitMeasure
-FROM #DPR
+FROM #VouchersPostedButNotPaid
 /* END COMPANY OWNED */
 
 --BLANK SPACE
@@ -1330,6 +1327,32 @@ INNER JOIN @StorageObligationData SD
 WHERE ID.strLabel = 'COMPANY-OWNED BEGINNING BALANCE'
 	AND SD.strLabel LIKE '%BALANCE'
 
+--UPDATE COMPANY-OWNED (PAID)
+UPDATE A
+SET dblUnits = B.dblTotal
+FROM @InventoryData A
+INNER JOIN (
+	SELECT dblTotal = SUM(dblUnits)
+		,strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+	FROM @InventoryData
+	WHERE strLabel IN ('COMPANY-OWNED (PRICED BUT NOT PAID)','COMPANY-OWNED BEGINNING BALANCE')
+	GROUP BY strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+) B
+	ON B.strCommodityCode = A.strCommodityCode
+		AND B.intCommodityId = A.intCommodityId
+		AND B.intCompanyLocationId = A.intCompanyLocationId
+		AND B.strLocationName = A.strLocationName
+		AND B.strUOM = A.strUOM
+WHERE strLabel = 'COMPANY-OWNED (PAID)'
+
 SET @intTotalRowCnt = ISNULL((SELECT MAX(intRowNum) FROM @StorageObligationData),100)
 
 INSERT INTO @InventoryData
@@ -1479,31 +1502,35 @@ OUTER APPLY (
 ) B
 WHERE A.strLabel = 'TOTAL STORAGE OBLIGATION'
 
-/*CREATE A SUMMARY PAGE OF ALL LOCATIONS*/
-INSERT INTO @ReportData
-SELECT
-	intRowNum
-	,strLabel
-	,strSign
-	,SUM(dblUnits)
-	,strCommodityCode
-	,intCommodityId
-	,999
-	,'ALL LOCATIONS'
-	,@dtmReportDate
-	,strUOM
-FROM @ReportData
-GROUP BY intRowNum
-	,strLabel
-	,strSign
-	,strCommodityCode
-	,intCommodityId
-	,strUOM
+IF(SELECT COUNT(*) FROM @Locs) > 1
+BEGIN
+	/*CREATE A SUMMARY PAGE OF ALL LOCATIONS*/
+	INSERT INTO @ReportData
+	SELECT
+		intRowNum
+		,strLabel
+		,strSign
+		,SUM(dblUnits)
+		,strCommodityCode
+		,intCommodityId
+		,999
+		,'ALL LOCATIONS'
+		,@dtmReportDate
+		,strUOM
+	FROM @ReportData
+	GROUP BY intRowNum
+		,strLabel
+		,strSign
+		,strCommodityCode
+		,intCommodityId
+		,strUOM
+END
+
+--SET THE dblUnits OF COMPANY-OWNED (PAID) TO ABS
+UPDATE A
+SET dblUnits = ABS(dblUnits)
+FROM @ReportData A
+WHERE A.strLabel = 'COMPANY-OWNED (PAID)'
 
 SELECT * FROM @ReportData ORDER BY intCommodityId,intCompanyLocationId,intRowNum
---SELECT SUM(ISNULL(dblUnits,0)) FROM @InventoryData2
---SELECT DISTINCT s.strLocationName,ysnLicensed FROM @ReportData s
---inner join tblSMCompanyLocation c
---	on c.intCompanyLocationId = s.intCompanyLocationId
-
 SET FMTONLY ON
