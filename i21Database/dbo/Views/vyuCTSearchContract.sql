@@ -9,7 +9,7 @@ AS
 			CH.dblHeaderQuantity,			
 			CH.strContractNumber,  
 			CH.ysnPrinted,						
-			dblTotalBalance = CASE WHEN CH.ysnQuantityAtHeaderLevel = 1 THEN   CAST(CH.dblHeaderBalance AS NUMERIC(18,6))  ELSE CAST(BL.dblTotalBalance AS NUMERIC(18,6)) END,
+			dblTotalBalance = CAST(BL.dblTotalBalance AS NUMERIC(18,6)),
 			CH.intEntityId,					
 			CH.strCustomerContract,	
 			CH.ysnSigned,		
