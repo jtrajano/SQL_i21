@@ -546,6 +546,7 @@ END
           'Gain / Loss from Bank Transfer',
           @intBankTransferTypeId,
           @intGLAccountIdTo,
+          @strTransactionId,
           @intRealizedAccountId
 
       IF @@ERROR <> 0 GOTO Post_Rollback
