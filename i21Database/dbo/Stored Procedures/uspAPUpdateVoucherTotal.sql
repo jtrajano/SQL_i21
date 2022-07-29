@@ -78,26 +78,30 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 		--UPDATE HEADER TOTAL
 	UPDATE A
-		SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18,2)) 
-		,A.dblTotalController = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18,2))
+		SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax + ISNULL(texasFee.dblTexasFee,0)) AS DECIMAL(18,2)) 
+		,A.dblTotalController = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax+ ISNULL(texasFee.dblTexasFee,0)) AS DECIMAL(18,2))
 		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
-		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18,2)) 
-		,A.dblTax = DetailTotal.dblTotalTax
+		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax+ ISNULL(texasFee.dblTexasFee,0)) - A.dblPayment AS DECIMAL(18,2)) 
+		,A.dblTax = DetailTotal.dblTotalTax + ISNULL(texasFee.dblTexasFee,0)
 		,A.dblAverageExchangeRate = DetailTotal.dblTotalUSD
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) dblTotal, SUM(dblTax + ISNULL(texasFee.dblAdjustedTax, 0)) dblTotalTax, SUM ((dblTotal + dblTax + ISNULL(texasFee.dblAdjustedTax, 0)) * dblRate) dblTotalUSD 
+		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM ((dblTotal + dblTax) * dblRate) dblTotalUSD 
 		FROM tblAPBillDetail C 
-		OUTER APPLY (
-			SELECT TOP 1 dblAdjustedTax
-			FROM tblAPBillDetailTax D
-			WHERE 
-				C.intBillDetailId = D.intBillDetailId
-			AND D.strCalculationMethod = 'Using Texas Fee Matrix'
-		) texasFee
 		WHERE C.intBillId = B.intId
 	) DetailTotal
+	OUTER APPLY (
+		SELECT SUM(ISNULL(dblAdjustedTax,0)) AS dblTexasFee
+		FROM (
+			SELECT DISTINCT dblAdjustedTax
+			FROM tblAPBillDetailTax D
+			INNER JOIN tblAPBillDetail E ON D.intBillDetailId = E.intBillDetailId
+			WHERE 
+				E.intBillId = A.intBillId
+			AND D.strCalculationMethod = 'Using Texas Fee Matrix'
+		) tmp
+	) texasFee
 	WHERE DetailTotal.dblTotal IS NOT NULL
 
 IF @transCount = 0 COMMIT TRANSACTION
