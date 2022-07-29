@@ -43,6 +43,8 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 	WHERE CH.ysnSupplyPointContract = 1 
+		AND CH.intEntityId = @intEntityVendorId
+		AND CD.intVendorLocationId = @intEntityLocationId
 		AND CD.intCategoryId = @intCategoryId
 		AND ((@intContractDetailId IS NOT NULL AND @intContractDetailId = CD.intContractDetailId)
 			OR (@intContractDetailId IS NULL AND (@dtmEffectiveDate IS NULL OR @dtmEffectiveDate BETWEEN CD.dtmStartDate AND CD.dtmEndDate)))
