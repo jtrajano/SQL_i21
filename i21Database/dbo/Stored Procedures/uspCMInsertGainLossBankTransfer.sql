@@ -17,7 +17,7 @@ IF EXISTS (
     AND strTransactionId =@strTransactionId)
 RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 
-	IF @intRealizedGainAccountId is NULL
+	IF ISNULL(@intRealizedGainAccountId,0) = 0
 	BEGIN
 		SELECT TOP 1 @intRealizedGainAccountId= intCashManagementRealizedId FROM tblSMMultiCurrency
 		IF ISNULL(@intRealizedGainAccountId,0) = 0
