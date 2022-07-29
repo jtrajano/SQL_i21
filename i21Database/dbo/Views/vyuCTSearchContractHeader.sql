@@ -82,10 +82,7 @@ SELECT CH.intContractHeaderId
 	, dblTotalBalance = CAST(BL.dblTotalBalance AS NUMERIC(18, 6))
 	, dblTotalAppliedQty = CAST(BL.dblTotalAppliedQty AS NUMERIC(18, 6))
 	, ysnApproved = ISNULL(TR.ysnApproved, 0)
-	, CH.dblQuantity
-	, VNM.dblHeaderBalance
-	, VNM.dblHeaderAvailable
-	, CH.ysnQuantityAtHeaderLevel
+
 FROM tblCTContractHeader				CH	WITH (NOLOCK)
 JOIN tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=	CH.intContractTypeId
 JOIN tblEMEntity						EY	WITH (NOLOCK) ON	EY.intEntityId						=	CH.intEntityId
@@ -138,7 +135,6 @@ LEFT JOIN tblCTBook						BK	WITH (NOLOCK) ON	BK.intBookId						=	CH.intBookId
 LEFT JOIN tblCTSubBook					SB	WITH (NOLOCK) ON	SB.intSubBookId						=	CH.intSubBookId
 LEFT JOIN tblSMFreightTerms				FT	WITH (NOLOCK) ON	FT.intFreightTermId					=	CH.intFreightTermId
 LEFT JOIN tblEMEntityLocation			ESL WITH (NOLOCK) ON	ESL.intEntityLocationId				=	CH.intEntitySelectedLocationId
-INNER JOIN vyuCTContractHeaderNotMapped	VNM	ON	VNM.intContractHeaderId	=	CH.intContractHeaderId
 OUTER APPLY (
 	select top 1
 		ysnApproved = convert(bit,1)
