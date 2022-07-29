@@ -70,9 +70,35 @@ RETURNS TABLE AS RETURN
 	) shipmentChargeTax
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3,15)
+	AND D.strCalculationMethod != 'Using Texas Fee Matrix'
 	-- AND D.dblTax != 0
 	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax
 	-- 				* (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN -1 ELSE 1 END)
 	-- 	ELSE (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2) != 0
+	UNION ALL
+	SELECT DISTINCT
+		-1
+		,-1
+		,'Texas Fee' --B.strMiscDescription
+		,CAST((D.dblTax * ISNULL(NULLIF(B.dblRate,0),1)) 
+			* (CASE WHEN A.intTransactionType NOT IN (1, 15) THEN -1 ELSE 1 END) 
+			AS DECIMAL(18,2)) AS dblTotal
+		,CAST((D.dblTax) 
+			* (CASE WHEN A.intTransactionType NOT IN (1, 15) THEN -1 ELSE 1 END) 
+			AS DECIMAL(18,2)) AS dblForeignTotal
+		,0 as dblTotalUnits
+		,D.intAccountId
+		,G.intCurrencyExchangeRateTypeId
+		,G.strCurrencyExchangeRateType
+		,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	INNER JOIN tblAPBillDetailTax D
+		ON B.intBillDetailId = D.intBillDetailId
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
+		ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	WHERE A.intBillId = @billId
+	AND A.intTransactionType IN (1,3,15)
+	AND D.strCalculationMethod = 'Using Texas Fee Matrix'
 )

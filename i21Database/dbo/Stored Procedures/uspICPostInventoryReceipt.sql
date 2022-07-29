@@ -3287,22 +3287,25 @@ BEGIN
 			,[intItemId] = ISNULL([intItemId], 0) 
 			,[intItemUOMId] = ISNULL([intItemUOMId], 0) 
 			,[dblQuantity] = ISNULL([dblQuantity], 0) 
-			,[dblAmount] = ISNULL(g.dblAmount, 0) 
+			,[dblAmount] = CASE WHEN NULLIF(ap.intInventoryReceiptTaxId,0) IS NOT NULL THEN ap.dblAmount ELSE ISNULL(g.dblAmount, 0)  END
 			,[strCode] = 'IR'
 		FROM 
 			tblICAPClearing ap
 			CROSS APPLY (
-				SELECT 
-					dblAmount = SUM(g.dblAmount) 
-				FROM
-					tblICAPClearing g
-				WHERE
-					g.strBatchId = @strBatchId
-					AND (
-						(g.intInventoryReceiptItemId = ap.intInventoryReceiptItemId AND ap.intInventoryReceiptItemId IS NOT NULL)
-						OR (g.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId AND ap.intInventoryReceiptChargeId IS NOT NULL)
-						OR (g.intInventoryReceiptItemId IS NULL AND g.intInventoryReceiptChargeId IS NULL )
-					)
+				SELECT SUM(dblAmount) AS dblAmount
+				FROM (
+					SELECT 
+						dblAmount = CASE WHEN NULLIF(g.intInventoryReceiptTaxId,0) IS NOT NULL  THEN 0 ELSE g.dblAmount END 
+					FROM
+						tblICAPClearing g
+					WHERE
+						g.strBatchId = @strBatchId
+						AND (
+							(g.intInventoryReceiptItemId = ap.intInventoryReceiptItemId AND ap.intInventoryReceiptItemId IS NOT NULL)
+							OR (g.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId AND ap.intInventoryReceiptChargeId IS NOT NULL)
+							OR (g.intInventoryReceiptItemId IS NULL AND g.intInventoryReceiptChargeId IS NULL )
+						)
+					) tmp
 			) g
 		WHERE
 			strBatchId = @strBatchId

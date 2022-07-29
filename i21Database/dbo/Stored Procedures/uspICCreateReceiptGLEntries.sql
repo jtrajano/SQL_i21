@@ -1753,7 +1753,7 @@ BEGIN
 		) apClearing
 		INNER JOIN tblGLAccount ga
 			ON ga.intAccountId = apClearing.intAccountId
-		CROSS APPLY (
+		OUTER APPLY (
 			SELECT TOP 1 dblAdjustedTax AS dblHeaderTax FROM tblICInventoryReceiptTax tx WHERE tx.intInventoryReceiptId = r.intInventoryReceiptId
 		) rctTax
 	WHERE

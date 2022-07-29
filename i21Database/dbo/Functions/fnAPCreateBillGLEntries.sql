@@ -242,6 +242,22 @@ BEGIN
 					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId --AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
+				AND R2.strCalculationMethod != 'Using Texas Fee Matrix'
+				UNION ALL --TEXAS FEE
+				SELECT DISTINCT
+					-1,
+					3 intFormat,
+					R2.dblAdjustedTax AS dblTotal ,
+					R.dblRate  AS dblRate, 
+					exRates.intCurrencyExchangeRateTypeId,
+					exRates.strCurrencyExchangeRateType,
+					0,
+					''
+                FROM dbo.tblAPBillDetail R
+				INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
+                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+                WHERE R.intBillId = A.intBillId --AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
+				AND R2.strCalculationMethod = 'Using Texas Fee Matrix'
 				-- UNION ALL --discount
 				-- SELECT
 				-- 	(R.dblTotal * (ISNULL(R.dblDiscount,0) / 100)) AS dblTotal
@@ -1218,6 +1234,7 @@ BEGIN
 		  AND A.intTransactionType IN (1,3)
 		  AND A.intTransactionType <> 15
 		  AND D.ysnTaxAdjusted = 1
+		  AND D.strCalculationMethod != 'Using Texas Fee Matrix'
 		  --AND D.dblTax != 0 --include zero because we load the exempted tax, we expect that it will be adjusted to non zero
 		  --AND (B.intInventoryReceiptItemId > 0 OR B.intInventoryShipmentChargeId > 0 OR B.intCustomerStorageId > 0) --create tax adjustment only for integration
 	GROUP BY A.dtmDate
