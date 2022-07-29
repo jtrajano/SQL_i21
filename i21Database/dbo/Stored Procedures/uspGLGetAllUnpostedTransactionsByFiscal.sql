@@ -17,7 +17,7 @@ BEGIN
 	-- BEGIN DECLARE TABLE VARIABLES
 	DECLARE @tblOriginTransactions TABLE(
 		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-		strTransactionType NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+		strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		dtmDate DATETIME,
 		strModule NVARCHAR(3)COLLATE Latin1_General_CI_AS NULL
 		
@@ -25,7 +25,7 @@ BEGIN
 	DECLARE @tblTransactions TABLE(
 		intTransactionId INT,
 		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-		strTransactionType NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+		strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		dtmDate DATETIME,
 		strDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 		strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
