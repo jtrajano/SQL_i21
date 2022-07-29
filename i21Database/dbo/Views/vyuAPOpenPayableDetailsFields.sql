@@ -48,6 +48,24 @@ FROM (
 			) tmpAPPayables
 		GROUP BY intBillId
 		UNION ALL
+		SELECT intBillId
+			,SUM(tmpAPPayables.dblTotal) AS dblTotal
+			,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+			,SUM(tmpAPPayables.dblDiscount) AS dblDiscount
+			,SUM(tmpAPPayables.dblInterest) AS dblInterest
+			,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
+		FROM (
+			SELECT intBillId
+				,dblTotal
+				,dblAmountDue
+				,dblAmountPaid
+				,dblDiscount
+				,dblInterest
+				,dtmDate
+			FROM dbo.vyuAPPayablesForeign
+			) tmpAPPayables
+		GROUP BY intBillId
+		UNION ALL
 		SELECT 
 			intBillId
 			,SUM(tmpAPPrepaidPayables.dblTotal) AS dblTotal
