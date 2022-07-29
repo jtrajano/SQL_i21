@@ -1100,92 +1100,92 @@ BEGIN
 		AND ReceiptCharge.intEntityVendorId IS NOT NULL 
 
 	-- Receipt Taxes
-	-- INSERT INTO tblICAPClearing (
-	-- 	[intTransactionId]
-	-- 	,[strTransactionId]
-	-- 	,[intTransactionType]
-	-- 	,[strReferenceNumber]
-	-- 	,[dtmDate]
-	-- 	,[intEntityVendorId]
-	-- 	,[intLocationId]
-	-- 	,[intInventoryReceiptItemId]
-	-- 	,[intInventoryReceiptItemTaxId]
-	-- 	,[intInventoryReceiptTaxId]
-	-- 	,[intInventoryReceiptChargeId]
-	-- 	,[intInventoryReceiptChargeTaxId]
-	-- 	,[intInventoryShipmentChargeId]
-	-- 	,[intInventoryShipmentChargeTaxId]
-	-- 	,[intAccountId]
-	-- 	,[intItemId]
-	-- 	,[intItemUOMId]
-	-- 	,[dblQuantity]
-	-- 	,[dblAmount]
-	-- 	,[strBatchId]
-	-- )
-	-- SELECT 
-	-- 	[intTransactionId] = Receipt.intInventoryReceiptId
-	-- 	,[strTransactionId] = Receipt.strReceiptNumber
-	-- 	,[intTransactionType] = 1
-	-- 	,[strReferenceNumber] = 
-	-- 		CASE 
-	-- 			WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
-	-- 				CASE 
-	-- 					WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
-	-- 					WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN Receipt.strBillOfLading 
-	-- 					WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
-	-- 					ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
-	-- 				END 
-	-- 			ELSE
-	-- 				CASE 
-	-- 					WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
-	-- 					WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN Receipt.strBillOfLading 
-	-- 					WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
-	-- 					ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
-	-- 				END 						
-	-- 		END	
-	-- 	,[dtmDate] = Receipt.dtmReceiptDate
-	-- 	,[intEntityVendorId] = Receipt.intEntityVendorId
-	-- 	,[intLocationId] = Receipt.intLocationId
-	-- 	,[intInventoryReceiptItemId] = NULL 
-	-- 	,[intInventoryReceiptItemTaxId] = NULL
-	-- 	,[intInventoryReceiptTaxId] = ReceiptTaxes.intInventoryReceiptTaxId
-	-- 	,[intInventoryReceiptChargeId] = NULL 
-	-- 	,[intInventoryReceiptChargeTaxId] = NULL 
-	-- 	,[intInventoryShipmentChargeId] = NULL 
-	-- 	,[intInventoryShipmentChargeTaxId] = NULL 
-	-- 	,[intAccountId] = ga.intAccountId
-	-- 	,[intItemId] = NULL 
-	-- 	,[intItemUOMId] = NULL 
-	-- 	,[dblQuantity] = 
-	-- 		CASE 
-	-- 			WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
-	-- 				-ReceiptTaxes.dblQty
-	-- 			ELSE
-	-- 				ReceiptTaxes.dblQty
-	-- 		END
-	-- 	,[dblAmount] = 
-	-- 		CASE 
-	-- 			WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
-	-- 				-ReceiptTaxes.dblTax 
-	-- 			ELSE
-	-- 				ReceiptTaxes.dblTax 
-	-- 		END
-	-- 	,strBatchId = @strBatchId
-	-- FROM	
-	-- 	dbo.tblICInventoryReceipt Receipt 
-	-- 	INNER JOIN dbo.vyuICGetInventoryReceiptTax ReceiptTaxes
-	-- 		ON Receipt.intInventoryReceiptId = ReceiptTaxes.intInventoryReceiptId
-	-- 	INNER JOIN dbo.tblSMTaxCode TaxCode
-	-- 		ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
-	-- 	CROSS APPLY (
-	-- 		SELECT intAccountId = ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId), TaxCode.intAPClearingAccountId) 
-	-- 	) apClearing
+	INSERT INTO tblICAPClearing (
+		[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionType]
+		,[strReferenceNumber]
+		,[dtmDate]
+		,[intEntityVendorId]
+		,[intLocationId]
+		,[intInventoryReceiptItemId]
+		,[intInventoryReceiptItemTaxId]
+		,[intInventoryReceiptTaxId]
+		,[intInventoryReceiptChargeId]
+		,[intInventoryReceiptChargeTaxId]
+		,[intInventoryShipmentChargeId]
+		,[intInventoryShipmentChargeTaxId]
+		,[intAccountId]
+		,[intItemId]
+		,[intItemUOMId]
+		,[dblQuantity]
+		,[dblAmount]
+		,[strBatchId]
+	)
+	SELECT 
+		[intTransactionId] = Receipt.intInventoryReceiptId
+		,[strTransactionId] = Receipt.strReceiptNumber
+		,[intTransactionType] = 1
+		,[strReferenceNumber] = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					CASE 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN Receipt.strBillOfLading 
+						WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
+					END 
+				ELSE
+					CASE 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN Receipt.strBillOfLading 
+						WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN Receipt.strVendorRefNo 
+						ELSE ISNULL(NULLIF(LTRIM(RTRIM(Receipt.strBillOfLading)), ''), Receipt.strVendorRefNo)
+					END 						
+			END	
+		,[dtmDate] = Receipt.dtmReceiptDate
+		,[intEntityVendorId] = Receipt.intEntityVendorId
+		,[intLocationId] = Receipt.intLocationId
+		,[intInventoryReceiptItemId] = NULL 
+		,[intInventoryReceiptItemTaxId] = NULL
+		,[intInventoryReceiptTaxId] = ReceiptTaxes.intInventoryReceiptTaxId
+		,[intInventoryReceiptChargeId] = NULL 
+		,[intInventoryReceiptChargeTaxId] = NULL 
+		,[intInventoryShipmentChargeId] = NULL 
+		,[intInventoryShipmentChargeTaxId] = NULL 
+		,[intAccountId] = ga.intAccountId
+		,[intItemId] = NULL 
+		,[intItemUOMId] = NULL 
+		,[dblQuantity] = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					-ReceiptTaxes.dblQty
+				ELSE
+					ReceiptTaxes.dblQty
+			END
+		,[dblAmount] = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					-ReceiptTaxes.dblTax 
+				ELSE
+					ReceiptTaxes.dblTax 
+			END
+		,strBatchId = @strBatchId
+	FROM	
+		dbo.tblICInventoryReceipt Receipt 
+		INNER JOIN dbo.vyuICGetInventoryReceiptTax ReceiptTaxes
+			ON Receipt.intInventoryReceiptId = ReceiptTaxes.intInventoryReceiptId
+		INNER JOIN dbo.tblSMTaxCode TaxCode
+			ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
+		CROSS APPLY (
+			SELECT intAccountId = ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intAPClearingAccountId, Receipt.intLocationId), TaxCode.intAPClearingAccountId) 
+		) apClearing
 
-	-- 	INNER JOIN tblGLAccount ga
-	-- 		ON ga.intAccountId = apClearing.intAccountId
-	-- WHERE	
-	-- 	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-	-- 	AND Receipt.intEntityVendorId IS NOT NULL  
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = apClearing.intAccountId
+	WHERE	
+		Receipt.intInventoryReceiptId = @intInventoryReceiptId
+		AND Receipt.intEntityVendorId IS NOT NULL  
 
 END
 
