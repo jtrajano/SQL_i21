@@ -17,7 +17,8 @@
 	@intLoggedInUserId		INT	= NULL,
 	@dtmEndDate				DATETIME = NULL,
 	@intBorrowingFacilityId INT = NULL,
-	@intBorrowingFacilityLimitId INT = NULL
+	@intBorrowingFacilityLimitId INT = NULL,
+	@strFutureMonth			NVARCHAR(50) = ''
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -211,6 +212,20 @@ BEGIN
 		--AND ysnExpired <> 1
 		--AND ISNULL(	dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))		
 		--ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) ASC
+	END
+
+	IF @strType = 'FutureMonthByName'
+	BEGIN
+		SELECT	@intCommodityId = intCommodityId FROM tblICItem WHERE intItemId = @intItemId
+				
+		SELECT TOP 1 M.intFutureMonthId,REPLACE(M.strFutureMonth,' ','('+M.strSymbol+') ') strFutureMonth 
+		FROM tblRKFuturesMonth M
+		LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
+		WHERE M.intFutureMarketId = @intMarketId
+		AND C.intCommodityId = @intCommodityId
+		AND M.strFutureMonth = LEFT(@strFutureMonth, 3) + ' ' + RIGHT(@strFutureMonth,2)
+		AND M.ysnExpired = 0
+		ORDER BY M.dtmLastTradingDate ASC
 	END
 
 	IF @strType = 'FX'
