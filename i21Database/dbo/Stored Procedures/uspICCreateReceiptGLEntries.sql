@@ -1722,7 +1722,7 @@ BEGIN
 				WHEN ri.intWeightUOMId IS NOT NULL AND i.intComputeItemTotalOption = 0 THEN ri.dblNet 
 				ELSE ri.dblOpenReceive
 			END 
-		,[dblAmount] = ri.dblLineTotal + rctTax.dblHeaderTax
+		,[dblAmount] = ri.dblLineTotal --+ rctTax.dblHeaderTax
 		,strBatchId = @strBatchId	
 	FROM (
 			SELECT DISTINCT 
