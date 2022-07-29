@@ -20,7 +20,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 	IF @intRealizedGainAccountId is NULL
 	BEGIN
 		SELECT TOP 1 @intRealizedGainAccountId= intCashManagementRealizedId FROM tblSMMultiCurrency
-		IF @intRealizedGainAccountId is NULL
+		IF ISNULL(@intRealizedGainAccountId,0) = 0
 		BEGIN
 			RAISERROR ('Cash Management Realized Gain/Loss account was not set in Company Configuration- Multicurrency screen.',11,1)
 			GOTO _end
