@@ -31,6 +31,10 @@ WHILE EXISTS(
 		WHERE I.strTransactionType = 'Customer Prepayment'
 		  AND P.intPaymentId = @PaymentId
 
+		DELETE FROM tblARPrepaidAndCredit
+		WHERE intPrepaymentId = @InvoiceId
+		AND ysnApplied = 0
+
 		DELETE FROM tblARPaymentDetail
 		WHERE intInvoiceId = @invoiceId
 
