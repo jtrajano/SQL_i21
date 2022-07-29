@@ -1295,9 +1295,8 @@ GO
 	ELSE
 	BEGIN
 		UPDATE tblSMScreen
-		SET  ysnApproval = 1
-			,strScreenName = N'Time Entry'
-		WHERE strNamespace = 'HelpDesk.view.TimeEntry'
+		SET strScreenName = N'Time Approval', ysnAvailable = 1
+		WHERE strNamespace = 'Payroll.view.TimeApproval'
 	END
 
 
