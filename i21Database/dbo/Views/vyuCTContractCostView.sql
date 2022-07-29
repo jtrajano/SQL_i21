@@ -27,8 +27,8 @@ AS
 				CC.strCostStatus,
 				CC.dblReqstdAmount,
 				CC.dblRcvdPaidAmount,
-				CC.dblActualAmount,
-				CC.dblAccruedAmount,
+				ROUND (CC.dblActualAmount,ISNULL(CP.intQuantityDecimals,6)) AS dblActualAmount,
+				ROUND (CC.dblAccruedAmount,ISNULL(CP.intQuantityDecimals,6)) AS dblAccruedAmount,
 				CC.dblRemainingPercent,
 				CC.dtmAccrualDate,
 				CC.strAPAR,
@@ -57,11 +57,25 @@ AS
 				CH.dtmContractDate,
 				MY.strCurrency	AS	strMainCurrency,
 				CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
-							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
-						WHEN	CC.strCostMethod = 'Amount' OR CC.strCostMethod = 'Per Container' THEN
-							CC.dblRate
+							dbo.fnCTChangeNumericScale( dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END,ISNULL(CP.intQuantityDecimals,6))
+						WHEN	CC.strCostMethod = 'Amount' THEN
+								ROUND( CC.dblRate * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END, ISNULL(CP.intQuantityDecimals,6))
+						WHEN CC.strCostMethod = 'Per Container'THEN
+								ROUND( (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END, ISNULL(CP.intQuantityDecimals,6) )
 						WHEN	CC.strCostMethod = 'Percentage' THEN 
-							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
+							CASE WHEN CD.intPricingTypeId <> 2 THEN
+										ROUND( dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
+										* (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+										* CC.dblRate/100 * ISNULL(CC.dblFX, 1), ISNULL(CP.intQuantityDecimals,6))
+									ELSE
+										CASE WHEN CP.ysnEnableBudgetForBasisPricing =1 THEN  
+											ROUND( CD.dblTotalBudget  * (CC.dblRate/100) * ISNULL(CC.dblFX, 1), ISNULL(CP.intQuantityDecimals,6))
+										ELSE
+											ROUND( dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) 
+											* ((FSPM.dblLastSettle + CD.dblBasis) / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+											* CC.dblRate/100 * ISNULL(CC.dblFX, 1) , ISNULL(CP.intQuantityDecimals,6))
+										END
+									END							
 				END   dblAmount,
 				RT.strCurrencyExchangeRateType,
 				CH.intBookId AS intHeaderBookId,
@@ -75,6 +89,7 @@ AS
 	LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
 	LEFT JOIN	tblICUnitMeasure	UM ON UM.intUnitMeasureId		=	IU.intUnitMeasureId
 	LEFT JOIN	tblSMCurrency		CY ON CY.intCurrencyID			=	CC.intCurrencyId
+	LEFT JOIN	tblSMCurrency		CY2	ON	CY2.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblSMCurrency		MY ON MY.intCurrencyID			=	CY.intMainCurrencyId
 	LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
 	LEFT JOIN	tblEMEntityType		ET ON ET.intEntityId			=	EY.intEntityId
@@ -84,3 +99,11 @@ AS
 	LEFT JOIN	tblICItemUOM		CM ON CM.intUnitMeasureId		=	IU.intUnitMeasureId
 									  AND CM.intItemId				=	CD.intItemId		
 	LEFT JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CC.intRateTypeId
+	LEFT JOIN  (
+		select intFutureMarketId, MAX(intFutureSettlementPriceId) intFutureSettlementPriceId, MAX( dtmPriceDate) dtmPriceDate
+		from tblRKFuturesSettlementPrice a
+		Group by intFutureMarketId, intCommodityMarketId
+	
+	) FSP on FSP.intFutureMarketId = CD.intFutureMarketId
+	LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD.intFutureMonthId = FSPM.intFutureMonthId
+	CROSS 	APPLY	tblCTCompanyPreference 		CP
