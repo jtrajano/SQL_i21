@@ -174,6 +174,7 @@ INNER JOIN (
 		ON TCT_IDT.intInvoiceDetailId = TCT_ID.intInvoiceDetailId
 		WHERE TCT_ID.intItemId = ITEM.intItemId
 		  AND IDT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
+		  AND TCT_ID.intInvoiceDetailId IN (SELECT TARID.intInvoiceDetailId FROM tblARInvoiceDetail TARID WHERE TARID.intInvoiceDetailId = ID.intInvoiceId)
 		GROUP BY TCT_ID.intCategoryId
 	) TAXCLASSTOTALBYINVOICEDETAIL
 	CROSS APPLY (
