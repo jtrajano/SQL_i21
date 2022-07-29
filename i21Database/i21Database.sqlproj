@@ -9198,6 +9198,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetDPRReconSummary.sql" />
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDTemplateAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
