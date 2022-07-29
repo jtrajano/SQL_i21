@@ -9197,6 +9197,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPRRecon.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetDPRReconSummary.sql" />
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
