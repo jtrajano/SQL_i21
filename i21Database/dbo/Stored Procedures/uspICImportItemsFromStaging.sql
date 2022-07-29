@@ -484,6 +484,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 		, ysn1099Box3 = source.ysn1099Box3
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
+		, intCommodityId = source.intCommodityId
 WHEN NOT MATCHED THEN
 	INSERT
 	(

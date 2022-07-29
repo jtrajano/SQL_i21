@@ -17,10 +17,10 @@ AS
 			,dblUnitPrice			=	CD.dblCashPrice
 			,dblAmount				=	CD.dblTotalCost
 			,intCurrencyId			=	CD.intCurrencyId
-			,intForexRateType		=	CD.intRateTypeId
+			,intForexRateType		=	CD.intHistoricalRateTypeId
 			,strForexRateType		=	RT.strCurrencyExchangeRateType
-			,dblForexRate			=	CD.dblRate
-			,dblHistoricAmount		=	CD.dblTotalCost * CD.dblRate
+			,dblForexRate			=	CD.dblHistoricalRate
+			,dblHistoricAmount		=	CD.dblTotalCost * CD.dblHistoricalRate
 			,dblNewForexRate		=	0
 			,dblNewAmount			=	0
 			,dblUnrealizedDebitGain =	0

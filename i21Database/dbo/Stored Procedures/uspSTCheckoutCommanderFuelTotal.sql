@@ -22,7 +22,7 @@ BEGIN
 		FROM	dbo.tblSTCheckoutHeader 
 		WHERE	intCheckoutId = @intCheckoutId
 
-		SELECT	@intPreviousCheckoutId = intCheckoutId
+		SELECT	@intPreviousCheckoutId = MAX(intCheckoutId)
 		FROM	dbo.tblSTCheckoutHeader
 		WHERE	intStoreId = @intStoreId AND
 				strCheckoutType = 'Automatic' AND

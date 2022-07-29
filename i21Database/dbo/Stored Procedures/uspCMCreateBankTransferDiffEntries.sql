@@ -5,6 +5,13 @@ CREATE PROCEDURE uspCMCreateBankTransferDiffEntries
 @intDefaultCurrencyId INT
 AS
 
+IF EXISTS (
+SELECT 1 FROM tblCMBankTransfer
+WHERE @intDefaultCurrencyId = intCurrencyIdAmountFrom AND @intDefaultCurrencyId = intCurrencyIdAmountTo 
+AND strTransactionId =@strTransactionId)
+RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
+
+
 DECLARE @intDiffAccountId INT
 SELECT TOP 1 @intDiffAccountId= intBTForexDiffAccountId FROM tblCMCompanyPreferenceOption  
 IF @intDiffAccountId is NULL  

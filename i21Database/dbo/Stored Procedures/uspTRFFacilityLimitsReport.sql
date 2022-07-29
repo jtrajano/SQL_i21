@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[uspTRFFacilityLimitsReport]
 	, @intCurrencyId INT = NULL
 
 AS
-
+ 
  SET QUOTED_IDENTIFIER OFF
  SET ANSI_NULLS ON
  SET NOCOUNT ON
@@ -246,6 +246,7 @@ AS
 		, strOverrideBankValuation
 		, strBankTradeReference
 		, dblFinanceQty
+		, dtmCreatedDate
  	INTO #tempLatestLogValues
  	FROM 
  	(
@@ -293,6 +294,7 @@ AS
 		, latestLog.strBankTradeReference
 		, intUnitMeasureId = ctd.intPriceItemUOMId
 		, latestLog.dblFinanceQty
+		, dtmTFLogCreateDate = latestLog.dtmCreatedDate
  	INTO #tempPurchaseContracts
  	FROM tblCTContractDetail ctd
  	JOIN tblCTContractHeader cth
@@ -309,6 +311,7 @@ AS
  		WHERE facInfo.intBorrowingFacilityId = latestLog.intBorrowingFacilityId
  	) facility
  	WHERE ctd.intContractDetailId IN (SELECT intContractDetailId FROM #tempTradeLogContracts)
+	AND cth.intContractTypeId = 1
 
 
  	-- Get Contract Hedge Info
@@ -461,7 +464,8 @@ AS
 										END
 									END
 								END
-		, dblFinanceQty
+		, dblFinanceQty = tempLogCT.dblFinanceQty
+		, dtmTFLogCreateDate = tempLogCT.dtmTFLogCreateDate
  	INTO #tempPurchaseContractInfo 
  	FROM tblCTContractHeader cth
  	JOIN #tempPurchaseContracts tempLogCT
@@ -755,6 +759,8 @@ AS
  		, dblSaleLots = ctd.dblNoOfLots 
  		, intFutOptTransactionId = saleHedgeInfo.intFutOptTransactionId
  		, cth.intContractTypeId
+		, latestLog.dblFinanceQty
+		, dtmTFLogCreateDate = latestLog.dtmCreatedDate
  	INTO #tempSaleContractInfo
  	FROM tblCTContractDetail ctd
  	JOIN tblCTContractHeader cth
@@ -782,6 +788,8 @@ AS
  		ON supplier.intEntityId = cth.intEntityId
  	LEFT JOIN tblSMTerm term
  		ON term.intTermID = cth.intTermId
+	LEFT JOIN #tempLatestLogValues latestLog
+		ON latestLog.intContractDetailId = ctd.intContractDetailId
 	WHERE ctd.intContractDetailId IN (SELECT intSContractDetailId FROM #tempContractPair)
 	AND cth.intContractTypeId = 2 -- SALE CONTRACTS ONLY
 
@@ -1204,7 +1212,12 @@ AS
 		--, firstMonthSettle = marketFutures.dblLastSettle
 		--, secondMonthSettle = secondMonthSettlementPrice.dblLastSettle
 
- 		, dblBankValuation =  pContract.dblFinanceQty * 
+ 		, dblBankValuation = CASE WHEN pContract.dblFinanceQty < 0 
+								AND ISNULL(sContract.dblFinanceQty, 0) <> 0 
+								AND sContract.dtmTFLogCreateDate >= pContract.dtmTFLogCreateDate
+							THEN sContract.dblFinanceQty 
+							ELSE pContract.dblFinanceQty	
+							END * 
 							(CASE	WHEN pContract.intBankValuationRuleId = 1 -- BANK VALUATION: Purchase Price
 										THEN 
 											CASE WHEN purchaseCTSeqHist.ysnPriced = 1 

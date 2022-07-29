@@ -191,6 +191,18 @@ BEGIN TRY
 		begin
 			update tblCTContractDetail set intContractStatusId = 5, dblQuantity = (dblQuantity - isnull(dblBalance,0)), dblBalance = 0, dblBalanceLoad = 0 where intContractHeaderId = @intContractHeaderId;
 		end
+		else
+		begin
+			if (@dblQuantityToUpdate < 0 and exists (select top 1 1 from tblCTContractDetail where intContractStatusId = 5 and intContractHeaderId = @intContractHeaderId))
+			begin
+				update tblCTContractDetail
+				set
+				intContractStatusId = 1
+				, dblQuantity = @dblHeaderQuantity
+				, dblBalance = case when intContractStatusId = 5 then (@dblHeaderQuantity - dblQuantity) else @dblHeaderQuantity - (dblQuantity - abs(@dblQuantityToUpdate)) end
+				where intContractHeaderId = @intContractHeaderId
+			end
+		end
 	end
 
 	 /*
