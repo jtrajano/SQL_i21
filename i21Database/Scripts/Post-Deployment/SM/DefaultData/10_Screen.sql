@@ -1287,38 +1287,20 @@ GO
 			WHERE strNamespace = 'HelpDesk.view.TimeEntry'
 		END
 
-	--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance')
-	--BEGIN
-	--	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-	--	VALUES (N'Voucher/Vendor Prepayment/Basis Advance', N'Voucher/Vendor Prepayment/Basis Advance', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0, N'Transaction')
-	--END
-	--ELSE
-	--BEGIN
-	--	UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction'
-	--	WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance'
-	--END
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Payroll.view.TimeApproval')
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [ysnApproval], [intConcurrencyId], [ysnAvailable])
+		VALUES (N'Time Approval', N'Time Approval', N'Payroll.view.TimeApproval', N'Payroll', 0, 1, 1)
+	END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET  ysnApproval = 1
+			,strScreenName = N'Time Entry'
+		WHERE strNamespace = 'HelpDesk.view.TimeEntry'
+	END
 
-	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
-	-- BEGIN
-	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
-    --     VALUES (N'', N'Inventory Receipt', N'Inventory.view.InventoryReceipt', N'Inventory Receipt', N'', 1,  0) 
-	-- END
-	-- ELSE
-	-- BEGIN
-	-- 	UPDATE tblSMScreen
-    --     SET  ysnApproval = 1
-    --     WHERE strNamespace = 'Inventory.view.InventoryReceipt'
-	-- END
 
-	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders')
-	-- BEGIN
-	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
-    --     VALUES (N'', N'Inventory Receipt Transfer Orders', N'Inventory.view.InventoryReceipt.TransferOrders', N'Inventory Receipt Transfer Orders', N'', 1,  0) 
-	-- END
-	-- ELSE
-	-- BEGIN
-	-- 	UPDATE tblSMScreen
-    --     SET  ysnApproval = 1
-    --     WHERE strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders'
-	-- END
+
+
 GO
