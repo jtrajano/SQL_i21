@@ -960,6 +960,7 @@
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
     <Build Include="dbo\Views\vyuLGCustomerConsumptionSiteDevice.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerCompany.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
