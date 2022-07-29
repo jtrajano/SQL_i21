@@ -126,12 +126,12 @@ SELECT a.intContractDetailId
 	, a.dtmEndDate
 	, dblDetailQuantity = a.dblQuantity
 	, dblDetailApplied = a.dblQuantity - a.dblBalance
-	, dblAvailableQty = case when b.ysnQuantityAtHeaderLevel = 1 then hq.dblHeaderAvailable else a.dblBalance - ISNULL(a.dblScheduleQty, 0) end
+	, dblAvailableQty = a.dblBalance - ISNULL(a.dblScheduleQty, 0)
 	, a.dblFutures
 	, a.dblBasis
 	, a.dblRatio
 	, a.dblCashPrice
-	, dblBalance = case when b.ysnQuantityAtHeaderLevel = 1 then hq.dblHeaderBalance else a.dblBalance end
+	, a.dblBalance
 	, a.dtmEventStartDate
 	, a.dtmPlannedAvailabilityDate
 	, a.dtmUpdatedAvailabilityDate
@@ -467,14 +467,6 @@ LEFT JOIN (
 		WHERE SC.strNamespace IN('ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
 	) t WHERE intRowNum = 1
 ) TR ON TR.intRecordId = b.intContractHeaderId
-cross apply (
-	select
-	dblHeaderBalance = b.dblQuantity - sum(cd.dblQuantity - cd.dblBalance)
-	,dblHeaderAvailable = b.dblQuantity - (sum(cd.dblQuantity - cd.dblBalance) + sum(isnull(cd.dblScheduleQty,0)))
-	,dblHeaderScheduleQuantity = sum(isnull(cd.dblScheduleQty,0))
-	from tblCTContractDetail cd
-	where cd.intContractHeaderId = b.intContractHeaderId
-) hq
 /*
 OUTER APPLY (
 	SELECT TOP 1 strSampleStatus = CASE WHEN s.intSampleStatusId = 3 THEN (CASE WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(c.intItemId, s.intRepresentingUOMId, c.intUnitMeasureId, s.dblRepresentingQty)) >= 100 THEN 'Approved'
