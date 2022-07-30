@@ -88,7 +88,7 @@ RETURNS TABLE AS RETURN
 			* (CASE WHEN A.intTransactionType NOT IN (1, 15) THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
-		,D.intAccountId
+		,H.intAPClearingAccountId --D.intAccountId
 		,G.intCurrencyExchangeRateTypeId
 		,G.strCurrencyExchangeRateType
 		,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate
@@ -96,6 +96,7 @@ RETURNS TABLE AS RETURN
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBillDetailTax D
 		ON B.intBillDetailId = D.intBillDetailId
+	INNER JOIN tblSMTaxCode H ON D.intTaxCodeId = H.intTaxCodeId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 		ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 	WHERE A.intBillId = @billId
