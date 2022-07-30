@@ -29,7 +29,7 @@ SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@Customer
 
 IF(ISNULL(@TaxGroupId,0) = 0)
 BEGIN
-	IF(@FOB IS NOT NULL)
+	IF(@FOB IS NOT NULL AND @TaxLocationId IS NOT NULL)
 		SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @TaxLocationId, @ItemId, @TaxLocationId, @SiteId, @FreightTermId, @FOB), 0)
 
 	IF(ISNULL(@TaxLocationId, 0) <> 0)
