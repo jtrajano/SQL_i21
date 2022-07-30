@@ -731,7 +731,7 @@ FROM
 														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
-		,[dblRate]									=	ISNULL(rate.forexRate,1)
+		,[dblRate]									=	ISNULL(forexRate.forexRate,1)
 		,[strRateType]								=	rtype.strDescription
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -832,7 +832,7 @@ FROM
 		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1
 		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
 		ORDER BY G1.dtmValidFromDate DESC
-	) rate
+	) forexRate
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId)
@@ -870,7 +870,7 @@ FROM
 														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
-		,[dblRate]									=	ISNULL(rate.forexRate,1)
+		,[dblRate]									=	ISNULL(forexRate.forexRate,1)
 		,[strRateType]								=	rtype.strDescription
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
@@ -970,7 +970,7 @@ FROM
 		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1
 		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
 		ORDER BY G1.dtmValidFromDate DESC
-	) rate
+	) forexRate
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 
