@@ -174,8 +174,9 @@ OUTER APPLY (
 	  AND ysnForgiven = 0
 	  AND strType = 'Service Charge'	  
 	  AND YEAR(dtmPostDate) = DATEPART(year, GETDATE())
+	  AND intEntityCustomerId = CUSTOMER.intEntityCustomerId
 	GROUP BY intEntityCustomerId
-) YTDSERVICECHARGE ON CUSTOMER.intEntityCustomerId = YTDSERVICECHARGE.intEntityCustomerId
+) YTDSERVICECHARGE
 LEFT JOIN (
 	SELECT intEntityCustomerId	= I.intEntityCustomerId
 		 , intDaysToPay = AVG(CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
