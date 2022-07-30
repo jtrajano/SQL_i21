@@ -12,11 +12,11 @@ AS
 BEGIN
 	IF (@TransactionType = 'Sale')
 	BEGIN
-		SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @SiteId, @FreightTermId, NULL), 0)
+		SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @ShipLocationId, @SiteId, @FreightTermId, NULL), 0)
 	END
 	ELSE
 	BEGIN
-		SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @FreightTermId, NULL), 0)
+		SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @ShipLocationId, @FreightTermId, NULL), 0)
 	END
 
 	RETURN @OriginalTaxGroupId
