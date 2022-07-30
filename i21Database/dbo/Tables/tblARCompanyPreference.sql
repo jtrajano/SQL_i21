@@ -79,6 +79,8 @@
 	[ysnOverrideLocationSegment]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLocationSegment] DEFAULT((0)),
 	[ysnOverrideLineOfBusinessSegment]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLineOfBusinessSegment] DEFAULT((0)),
 	[intFreightTermId]						INT	NULL,
+	[intSurchargeRevenueAccount]			INT NULL, 
+    [intSurchargeExpenseAccount]			INT NULL,
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -93,5 +95,7 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightExpenseAccount] FOREIGN KEY ([intFreightExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFeeGeneralLedgerAccountId] FOREIGN KEY ([intFeeGeneralLedgerAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblSMFreightTerm_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId])
+	CONSTRAINT [FK_tblARCompanyPreference_tblSMFreightTerm_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeRevenueAccount] FOREIGN KEY ([intSurchargeRevenueAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeExpenseAccount] FOREIGN KEY ([intSurchargeExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
