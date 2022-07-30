@@ -1010,6 +1010,7 @@
     <Build Include="dbo\Functions\fnSTGetDepartmentTotalsForFuel.sql" />
     <Build Include="dbo\Functions\fnSTTotalAmountOfDepositablePaymentMethods.sql" />
     <Build Include="dbo\Views\vyuHDCustomerCompany.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetOriginalTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

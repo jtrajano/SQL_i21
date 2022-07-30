@@ -35,14 +35,14 @@ BEGIN
 		BEGIN
 			SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @SiteId, @FreightTermId, NULL), 0)
 
-			IF(@FOB IS NOT NULL)
+			IF(@FOB IS NOT NULL AND @TaxLocationId IS NOT NULL)
 				SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@EntityId, @TaxLocationId, @ItemId, @TaxLocationId, @SiteId, @FreightTermId, @FOB), 0)
 		END
 		ELSE
 		BEGIN
 			SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForVendor](@EntityId, @LocationId, @ItemId, @BillShipToLocationId, @FreightTermId, NULL), 0)
 
-			IF(@FOB IS NOT NULL)
+			IF(@FOB IS NOT NULL AND @TaxLocationId IS NOT NULL)
 				SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForVendor](@EntityId, @TaxLocationId, @ItemId, @TaxLocationId, @FreightTermId, @FOB), 0)
 		END
 
