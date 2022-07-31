@@ -79,6 +79,7 @@ SET	@dblMinimumUnitsOut = 0
 	        and CF.intCategoryId = @intCategoryid
             and CF.intEntityLocationId = @intShipToId	
 			and CF.intShipViaId = @intShipViaId
+		ORDER BY CF.dblFreightRate DESC
 
 		IF(@intFreightXRefId IS NULL)
 		BEGIN
@@ -101,6 +102,7 @@ SET	@dblMinimumUnitsOut = 0
 	           	and CF.intCategoryId = @intCategoryid
                 and CF.intEntityLocationId = @intShipToId
 				and CF.intShipViaId IS NULL
+			ORDER BY CF.dblFreightRate DESC
 		END
     END
 	 ELSE
