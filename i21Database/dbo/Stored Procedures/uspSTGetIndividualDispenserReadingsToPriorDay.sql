@@ -11,10 +11,11 @@ BEGIN
 	FROM	dbo.tblSTCheckoutHeader 
 	WHERE	intCheckoutId = @intCheckoutId
 
-	SELECT	@intPreviousCheckoutId = intCheckoutId
+	SELECT	@intPreviousCheckoutId = MAX(intCheckoutId)
 	FROM	dbo.tblSTCheckoutHeader
 	WHERE	intStoreId = @intStoreId AND
-			dtmCheckoutDate = DATEADD(day, -1, @dtmCheckoutDate);
+	        strCheckoutType = 'Automatic' AND
+			dtmCheckoutDate < @dtmCheckoutDate;
 
 	WITH previous_day_reading (intFuelTotalsId, intFuelingPositionId,intProductNumber, dblFuelVolume, dblFuelMoney)  
 	AS  

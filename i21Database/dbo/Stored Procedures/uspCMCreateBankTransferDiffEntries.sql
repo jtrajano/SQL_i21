@@ -14,7 +14,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 
 DECLARE @intDiffAccountId INT
 SELECT TOP 1 @intDiffAccountId= intBTForexDiffAccountId FROM tblCMCompanyPreferenceOption  
-IF @intDiffAccountId is NULL  
+IF ISNULL(@intDiffAccountId,0)  = 0
 BEGIN  
     RAISERROR ('Foreign Difference Account was not set in Company Configuration screen.',11,1)  
     RETURN

@@ -58,7 +58,8 @@ BEGIN TRY
 			@ysnEnableLetterOfCredit    BIT = 0,
 			@intLCApplicantId			INT,
             @strLCType					NVARCHAR(100),
-            @strLCNumber				NVARCHAR(50)
+            @strLCNumber				NVARCHAR(50),
+			@ysnRoll				    BIT = 0
 
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
@@ -276,7 +277,8 @@ BEGIN TRY
 				@dblBasis			=	NULL,
 				@dblOriginalBasis	=	NULL,
 				@ysnSlice			=	NULL,
-				@strLCNumber		=	null
+				@strLCNumber		=	null,
+				@ysnRoll			=	null
 
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
 				@dblCashPrice		=	dblCashPrice,
@@ -297,7 +299,8 @@ BEGIN TRY
 				@intCurrencyId		=	intCurrencyId,
 				@strLCNumber		=	strLCNumber,
 				@intLCApplicantId	=	intLCApplicantId,
-				@strLCType			=	strLCType
+				@strLCType			=	strLCType,
+				@ysnRoll			=	ysnRoll
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
 		WHERE	intContractDetailId =	@intContractDetailId 
@@ -395,9 +398,12 @@ BEGIN TRY
 		BEGIN
 			UPDATE @CDTableUpdate SET dblOriginalBasis = @dblBasis WHERE intContractDetailId = @intContractDetailId;
 
-			--DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
-			--EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
-			--ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			IF ISNULL(@ysnRoll,0) = 0
+			BEGIN
+				DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+				EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
+				ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			END	
 		END
 
 		IF @intPricingTypeId IN (1,2,8)

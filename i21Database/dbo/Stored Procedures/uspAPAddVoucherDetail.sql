@@ -658,7 +658,7 @@ EXEC uspAPUpdateVoucherDetailTax @idetailIds
 
 DECLARE @billIds AS Id
 INSERT INTO @billIds
-SELECT intBillId FROM @voucherDetails
+SELECT DISTINCT intBillId FROM @voucherDetails
 
 EXEC uspAPUpdateTaxForTexasLoadingFee @billIds
 

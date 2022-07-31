@@ -10,11 +10,12 @@ BEGIN
 		
 		BEGIN TRANSACTION
 
-		DECLARE @intStoreId INT, @strAllowRegisterMarkUpDown NVARCHAR(50), @intShiftNo INT, @intMarkUpDownId INT, @strAllowMarkUpDown NVARCHAR(1)
+		DECLARE @intStoreId INT, @strAllowRegisterMarkUpDown NVARCHAR(50), @intShiftNo INT, @intMarkUpDownId INT, @strAllowMarkUpDown NVARCHAR(1), @ysnConsignmentStore BIT = 1  
 
 		SELECT @intStoreId = CH.intStoreId
 			   , @intShiftNo = CH.intShiftNo
 			   , @strAllowMarkUpDown = ST.strAllowRegisterMarkUpDown 
+			   , @ysnConsignmentStore = ST.ysnConsignmentStore
 		FROM dbo.tblSTCheckoutHeader CH
 		INNER JOIN dbo.tblSTStore ST
 			ON CH.intStoreId = ST.intStoreId
@@ -291,62 +292,65 @@ BEGIN
 		-- ==================================================================================================================
 		-- Start: Insert first those UPC's that are not existing in i21
 		-- ==================================================================================================================
-			INSERT INTO dbo.tblSTCheckoutItemMovements
-			(
-				intCheckoutId
-				, intItemUPCId
-				, strInvalidUPCCode
-				, strDescription
-				, intVendorId
-				, intQtySold
-				, dblCurrentPrice
-				, dblDiscountAmount
-				, dblGrossSales
-				, dblTotalSales
-				, dblItemStandardCost
-				, intConcurrencyId
-				, intCalculationId
-			)
-			SELECT 
-				intCheckoutId		= @intCheckoutId
-			  , intItemUPCId		= NULL -- UOM.intItemUOMId
-			  , strInvalidUPCCode	= ISNULL(TempChk.POSCode, '')
-			  , strDescription		= NULL -- I.strDescription
-			  , intVendorId			= NULL -- IL.intVendorId
-			  , intQtySold			= (TempChk.SalesQuantity)
-			  , dblCurrentPrice		= CASE 
-										WHEN (TempChk.SalesQuantity) = 0
-											THEN 0
-										ELSE (TempChk.SalesAmount)  /  (TempChk.SalesQuantity)
-									END
-			  , dblDiscountAmount	= (TempChk.DiscountAmount + TempChk.PromotionAmount)
-			  , dblGrossSales		= (TempChk.SalesAmount)
-			  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
-			  , dblItemStandardCost = NULL --ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
-			  , intConcurrencyId	= 1
-			  , intCalculationId	= TempChk.intCalculationId
-			FROM #tblTempForCalculation TempChk
-			WHERE TempChk.intPOSCode NOT IN
-			(
-				SELECT DISTINCT
-					UOM.intUpcCode AS intPOSCode
-				FROM tblICItemUOM UOM
-				INNER JOIN dbo.tblICItem I 
-					ON I.intItemId = UOM.intItemId
-				INNER JOIN dbo.tblICItemLocation IL 
-					ON IL.intItemId = I.intItemId
-				LEFT JOIN dbo.tblICItemPricing P 
-					ON IL.intItemLocationId = P.intItemLocationId 
-					AND I.intItemId = P.intItemId
-				INNER JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
-				INNER JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
-				WHERE S.intStoreId = @intStoreId
-					AND UOM.strLongUPCCode IS NOT NULL
-					AND UOM.intUpcCode IS NOT NULL
-			)
-				AND ISNULL(TempChk.POSCode, '') != ''
+			IF @ysnConsignmentStore = 0
+			BEGIN
+			   INSERT INTO dbo.tblSTCheckoutItemMovements  
+			   (  
+				intCheckoutId  
+				, intItemUPCId  
+				, strInvalidUPCCode  
+				, strDescription  
+				, intVendorId  
+				, intQtySold  
+				, dblCurrentPrice  
+				, dblDiscountAmount  
+				, dblGrossSales  
+				, dblTotalSales  
+				, dblItemStandardCost  
+				, intConcurrencyId  
+				, intCalculationId  
+			   )  
+			   SELECT 
+					intCheckoutId		= @intCheckoutId
+				  , intItemUPCId		= NULL -- UOM.intItemUOMId
+				  , strInvalidUPCCode	= ISNULL(TempChk.POSCode, '')
+				  , strDescription		= NULL -- I.strDescription
+				  , intVendorId			= NULL -- IL.intVendorId
+				  , intQtySold			= (TempChk.SalesQuantity)
+				  , dblCurrentPrice		= CASE 
+											WHEN (TempChk.SalesQuantity) = 0
+												THEN 0
+											ELSE (TempChk.SalesAmount)  /  (TempChk.SalesQuantity)
+										END
+				  , dblDiscountAmount	= (TempChk.DiscountAmount + TempChk.PromotionAmount)
+				  , dblGrossSales		= (TempChk.SalesAmount)
+				  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
+				  , dblItemStandardCost = NULL --ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
+				  , intConcurrencyId	= 1
+				  , intCalculationId	= TempChk.intCalculationId
+				FROM #tblTempForCalculation TempChk
+			   WHERE TempChk.intPOSCode NOT IN  
+			   (  
+				SELECT DISTINCT  
+				 UOM.intUpcCode AS intPOSCode  
+				FROM tblICItemUOM UOM  
+				INNER JOIN dbo.tblICItem I   
+				 ON I.intItemId = UOM.intItemId  
+				INNER JOIN dbo.tblICItemLocation IL   
+				 ON IL.intItemId = I.intItemId  
+				LEFT JOIN dbo.tblICItemPricing P   
+				 ON IL.intItemLocationId = P.intItemLocationId   
+				 AND I.intItemId = P.intItemId  
+				INNER JOIN dbo.tblSMCompanyLocation CL   
+				 ON CL.intCompanyLocationId = IL.intLocationId  
+				INNER JOIN dbo.tblSTStore S   
+				 ON S.intCompanyLocationId = CL.intCompanyLocationId  
+				WHERE S.intStoreId = @intStoreId  
+				 AND UOM.strLongUPCCode IS NOT NULL  
+				 AND UOM.intUpcCode IS NOT NULL  
+			   )  
+				AND ISNULL(TempChk.POSCode, '') != ''  
+			END
 
 		-- ==================================================================================================================
 		-- End: Insert first those UPC's that are not existing in i21

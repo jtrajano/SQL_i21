@@ -247,6 +247,7 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[intLineOfBusinessId]
     ,[intFreightCompanySegment]
     ,[intFreightLocationSegment]
+    ,[dblSurcharge]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -338,6 +339,7 @@ SELECT
     ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
     ,[intFreightCompanySegment]         = ARI.[intFreightCompanySegment]
     ,[intFreightLocationSegment]        = ARI.[intFreightLocationSegment]
+    ,[dblSurcharge]                      = ARI.[dblSurcharge]
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -513,6 +515,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[dblFreightCharge]
+    ,[dblSurcharge]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -668,6 +671,7 @@ SELECT
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
+    ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -844,6 +848,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[dblFreightCharge]
+    ,[dblSurcharge]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1059,6 +1064,7 @@ SELECT
     ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
+    ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1223,6 +1229,7 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[dblFreightCharge]
+    ,[dblSurcharge]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1374,6 +1381,7 @@ SELECT
     ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
+    ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]

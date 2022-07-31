@@ -16,7 +16,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	UPDATE A
 	SET
-		A.dblTax = details.dblTotalTax
+		A.dblTax = ISNULL(details.dblTotalTax,0)
 	FROM tblAPVoucherPayable A
 	OUTER APPLY (
 		SELECT 

@@ -33,6 +33,8 @@ DECLARE  @tblMulti TABLE(
 	[intAccountId] [int] NULL,
 	[intCompanyLocationId] [int] NULL,
 	[intLOBSegmentCodeId] [int] NULL,
+	[intNewCurrencyExchangeRateTypeId] [int] NULL,
+	[strNewForexRateType] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[strCurrency] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL
 )
 
@@ -50,6 +52,8 @@ SELECT
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuAPMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
@@ -69,6 +73,8 @@ BEGIN
 	,intAccountId = NULL
 	,intCompanyLocationId
 	,intLOBSegmentCodeId
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCTMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
@@ -87,6 +93,8 @@ BEGIN
 	intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuARMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
@@ -106,6 +114,8 @@ SELECT
 	,intAccountId = NULL
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = intLOBSegmentCodeId
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuICMultiCurrencyRevalueReceipt
 UNION ALL
 SELECT 
@@ -118,6 +128,8 @@ SELECT
 	,intAccountId = NULL
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = intLOBSegmentCodeId
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuICMultiCurrencyRevalueReceiptOtherCharges
 UNION ALL
 SELECT 
@@ -130,6 +142,8 @@ SELECT
 	,intAccountId = NULL
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = intLOBSegmentCodeId
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuICMultiCurrencyRevalueShipment
 UNION ALL
 SELECT 
@@ -143,6 +157,8 @@ SELECT
 	,intAccountId = NULL
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = intLOBSegmentCodeId
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnPayable = 1
 UNION ALL
 SELECT 
@@ -156,6 +172,8 @@ SELECT
 	,intAccountId = NULL
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = intLOBSegmentCodeId
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnReceivable = 1
 )
 INSERT INTO  @tblMulti
@@ -179,6 +197,8 @@ BEGIN
 	intAccountId = intAccountId,
 	intCompanyLocationId,
 	intLOBSegmentCodeId = NULL,
+	intNewCurrencyExchangeRateTypeId = NULL,
+	strNewForexRateType = '' COLLATE Latin1_General_CI_AS,
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMMultiCurrencyRevalue A
 LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
@@ -200,6 +220,8 @@ BEGIN
 	intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuFAMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
@@ -220,6 +242,8 @@ WITH cte AS (
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMForwardPayablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
@@ -233,6 +257,8 @@ SELECT
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMForwardReceivablesMultiCurrencyRevalue
 )
 INSERT INTO  @tblMulti
@@ -257,6 +283,8 @@ BEGIN
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMInTransitMultiCurrencyRevalue  A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
@@ -277,6 +305,8 @@ SELECT
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapOutReceivablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
@@ -290,6 +320,8 @@ SELECT
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapInPayablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
@@ -303,6 +335,8 @@ SELECT
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapInReceivablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
@@ -316,6 +350,8 @@ SELECT
 	,intAccountId
 	,intCompanyLocationId
 	,intLOBSegmentCodeId = NULL
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue
 )
 INSERT INTO  @tblMulti
@@ -340,6 +376,8 @@ SELECT
 	,intCompanyLocationId = NULL
 	,intLOBSegmentCodeId = NULL
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
+	,intNewCurrencyExchangeRateTypeId = NULL
+	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuGLMulticurrencyRevalueGJ A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
 AND ISNULL(dblForexRate, 1) <> 1
@@ -360,6 +398,8 @@ IF @strModule = 'GL' -- GL will average
 	B.strCurrency,
 	intAccountIdOverride = A.intAccountId,
 	intLOBSegmentOverrideId = intLOBSegmentCodeId,
+	A.intNewCurrencyExchangeRateTypeId,
+	A.strNewForexRateType,
 	C.strAccountId,
 	CL.* 
 	FROM @tblMulti A 
@@ -429,6 +469,8 @@ ELSE
 	B.strCurrency,
 	intAccountIdOverride = A.intAccountId,
 	intLOBSegmentOverrideId = intLOBSegmentCodeId,
+	A.intNewCurrencyExchangeRateTypeId,
+	A.strNewForexRateType,
 	CL.* 
 	FROM @tblMulti A 
 	JOIN tblGLAccount C ON C.intAccountId = A.intAccountId

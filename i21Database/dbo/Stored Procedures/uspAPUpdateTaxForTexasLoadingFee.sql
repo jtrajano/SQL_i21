@@ -22,7 +22,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	UPDATE A
 	SET
-		A.dblTax = details.dblTotalTax
+		A.dblTax = ISNULL(details.dblTotalTax,0)
 	FROM tblAPBillDetail A
 	OUTER APPLY (
 		SELECT 
@@ -36,7 +36,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	UPDATE A
 	SET
-		A.dblTax = details.dblTotalTax
+		A.dblTax = ISNULL(details.dblTotalTax,0)
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
 	OUTER APPLY (

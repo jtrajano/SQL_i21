@@ -135,6 +135,7 @@ SET ANSI_WARNINGS OFF
 	FROM @LineItemAccounts LIA
 	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId] AND ARID.[intCompanyLocationId] = IA.[intLocationId]
 	OUTER APPLY (
 		SELECT TOP 1 intSegmentCodeId
 		FROM tblSMLineOfBusiness
@@ -144,8 +145,9 @@ SET ANSI_WARNINGS OFF
 		SELECT intOverrideAccount
 		FROM dbo.[fnARGetOverrideAccount](
 			 ARI.[intAccountId]
-			,CASE WHEN ARID.[strItemType] IN ('Service', 'Non-Inventory', 'Other Charge')
-				THEN ARID.[intSalesAccountId]
+			,CASE 
+				WHEN ARID.[strItemType] IN ('Service', 'Non-Inventory') THEN ISNULL(ARID.[intSalesAccountId], IA.[intGeneralAccountId])
+				WHEN ARID.[strItemType] = 'Other Charge' THEN ISNULL(ARID.[intSalesAccountId], IA.[intOtherChargeIncomeAccountId])
 				ELSE ISNULL(ARID.[intConversionAccountId], (CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END))
 			 END
 			,@OverrideCompanySegment

@@ -33,11 +33,11 @@ BoundaryDate as(
 ),
 DueAmounts AS (
 	SELECT A.* FROM (
-		SELECT dtmDueDate, 'AP' strType, CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) WeekNo , 
+		SELECT dtmDueDate, 'AP' strType, CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) COLLATE Latin1_General_CI_AS WeekNo , 
 		isnull(dblAmountDue ,0) dblAmountDue
 		FROM dbo.vyuAPPayablesAmountDue 
 		UNION ALL
-		SELECT dtmDueDate, 'AR' strType, CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) WeekNo , 
+		SELECT dtmDueDate, 'AR' strType, CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) COLLATE Latin1_General_CI_AS WeekNo , 
 		isnull(dblAmountDue,0) dblAmountDue FROM QueryAR 
 	) A
 		WHERE dtmDueDate  
