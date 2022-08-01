@@ -184,10 +184,11 @@ BEGIN
 				'CM' 
 				FROM vyuCMUnpostedTransaction --CM
 		)
-		INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate, strModule)
-		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,T.strModule from Transactions T
+		INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
+		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, MIN(dtmDate) from Transactions T
 		INNER JOIN @tblModule M ON T.strModule = M.strModule
 		WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+		GROUP BY intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId
 		IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
 		BEGIN
 			
