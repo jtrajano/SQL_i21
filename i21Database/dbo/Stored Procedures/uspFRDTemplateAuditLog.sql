@@ -8,21 +8,44 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
    	
-	DECLARE @intReportId INT
+	DECLARE @intId INT  
+  							
+------------------For Setup For 21.1 and Below  
+		SET @intId = (SELECT MAX(intRowId) FROM tblFRRow)  	
+		EXEC    dbo.uspSMAuditLog  
+		@keyValue           = @intId,                          
+		@screenName         = 'FinancialReportDesigner.view.RowDesigner',  
+		@entityId           = @intEntityId,  
+		@actionType         = 'Created',  
+		@actionIcon         = 'small-new-plus',  
+		@changeDescription  = '',  
+		@fromValue          = '',  
+		@toValue            = '',  
+		@details            = ''     
 
-	SET @intReportId = (SELECT MAX(intReportId) FROM tblFRReport)
+		SET @intId = (SELECT MAX(intColumnId) FROM tblFRColumn)  
+		EXEC    dbo.uspSMAuditLog  
+		@keyValue           = @intId,                          
+		@screenName         = 'FinancialReportDesigner.view.ColumnDesigner',  
+		@entityId           = @intEntityId,  
+		@actionType         = 'Created',  
+		@actionIcon         = 'small-new-plus',  
+		@changeDescription  = '',  
+		@fromValue          = '',  
+		@toValue            = '',  
+		@details            = ''     
 
-------------------For Setup For 21.1 and Below
-	EXEC    dbo.uspSMAuditLog
-			@keyValue           = @intReportId,                        
-			@screenName         = 'FinancialReportDesigner.view.ReportBuilder',
-			@entityId           = @intEntityId,
-			@actionType         = 'Created',
-			@actionIcon         = 'small-new-plus',
-			@changeDescription  = '',
-			@fromValue          = '',
-			@toValue            = '',
-			@details            = ''   
+		SET @intId = (SELECT MAX(intReportId) FROM tblFRReport)  
+		EXEC    dbo.uspSMAuditLog  
+		@keyValue           = @intId,                          
+		@screenName         = 'FinancialReportDesigner.view.ReportBuilder',  
+		@entityId           = @intEntityId,  
+		@actionType         = 'Created',  
+		@actionIcon         = 'small-new-plus',  
+		@changeDescription  = '',  
+		@fromValue          = '',  
+		@toValue            = '',  
+		@details            = ''   
 
 ------------------For Setup For 21.2 and Higher
 	--INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
