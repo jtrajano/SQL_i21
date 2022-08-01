@@ -80,7 +80,9 @@ LEFT JOIN(
 		intItemId,
 		intAddOnItemId,
 		dblQuantity,
-		ysnAutoAdd
+		ysnAutoAdd,
+		dtmEffectivityDateFrom	= ISNULL(dtmEffectivityDateFrom, CAST('01/01/1900' AS DATE)),
+	    dtmEffectivityDateTo	= ISNULL(dtmEffectivityDateTo, CAST('12/31/9999' AS DATE))
 	FROM tblICItemAddOn
 	WHERE ysnAutoAdd = 1
 ) ADDON ON ITEMS.intItemId = ADDON.intItemId
