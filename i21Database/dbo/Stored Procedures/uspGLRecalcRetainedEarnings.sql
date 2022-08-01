@@ -1,7 +1,7 @@
-CREATE PROCEDURE uspGLRecalcRetainedEarnings  
-  
-    @intFiscalYearId INT,    
-    @intEntityId INT,  
+CREATE PROCEDURE uspGLRecalcRetainedEarnings
+    @intFiscalYearId INT = NULL,
+    @ysnOpen BIT = NULL,
+    @intEntityId INT,
     @result NVARCHAR(30) OUTPUT  
 AS  
   
@@ -15,30 +15,54 @@ DECLARE @strPeriod NVARCHAR(30)
 DECLARE @intGLFiscalYearPeriodId INT    
 DECLARE @dtmNow DATETIME  = GETDATE()    
     
-DECLARE @tbl TABLE ( intGLFiscalYearPeriodId INT,     
-strPeriod NVARCHAR(30),  dtmStartDate DATETIME ,  dtmEndDate  DATETIME)    
+DECLARE @tblPeriod TABLE ( 
+intGLFiscalYearPeriodId INT,  
+intRetainAccount INT, 
+intIncomeSummaryAccount INT,   
+strPeriod NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,  
+guidPostId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
+dtmStartDate DATETIME ,  
+dtmEndDate  DATETIME)    
+
 DECLARE @strGUID NVARCHAR(40)    
     
-SELECT    
-@strGUID =  CAST( guidPostId AS NVARCHAR(40)) ,    
-@intRetainAccount= intRetainAccount,    
-@intIncomeSummaryAccount = intIncomeSummaryAccount    
-FROM tblGLFiscalYear WHERE @intFiscalYearId = intFiscalYearId    
+DECLARE @tblFiscalYear TABLE (
+intFiscalYearId INT,  
+guidPostId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
+intRetainAccount INT, 
+intIncomeSummaryAccount INT)
 
-DELETE FROM tblGLDetail WHERE strBatchId = @strGUID
-DELETE FROM tblGLPostRecap WHERE strBatchId = @strGUID    
+INSERT INTO @tblFiscalYear (intFiscalYearId, guidPostId,intRetainAccount,intIncomeSummaryAccount)
+SELECT    
+intFiscalYearId,
+CAST(guidPostId AS NVARCHAR(40)),    
+intRetainAccount,    
+intIncomeSummaryAccount    
+FROM tblGLFiscalYear WHERE ISNULL(@intFiscalYearId,intFiscalYearId) = intFiscalYearId
+
+DELETE FROM tblGLDetail WHERE strBatchId IN (SELECT guidPostId FROM @tblFiscalYear)
+DELETE FROM tblGLPostRecap WHERE strBatchId IN (SELECT guidPostId FROM @tblFiscalYear)
+
     
-INSERT INTO @tbl (intGLFiscalYearPeriodId,strPeriod, dtmStartDate, dtmEndDate)    
-SELECT intGLFiscalYearPeriodId, strPeriod, dtmStartDate, dtmEndDate    
-FROM tblGLFiscalYearPeriod WHERE intFiscalYearId = @intFiscalYearId     
+INSERT INTO @tblPeriod (intGLFiscalYearPeriodId, guidPostId, intRetainAccount, intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate)    
+SELECT intGLFiscalYearPeriodId,B.guidPostId,B.intRetainAccount, B.intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate    
+FROM tblGLFiscalYearPeriod A
+JOIN @tblFiscalYear B ON A.intFiscalYearId = B.intFiscalYearId
+WHERE ISNULL(ysnOpen,0) = 
+CASE WHEN @ysnOpen = 1 THEN 1
+WHEN @ysnOpen = 0 THEN 0
+ELSE ISNULL(ysnOpen,0)
+END
+
   
     
-WHILE EXISTS (SELECT 1 FROM  @tbl)    
+WHILE EXISTS (SELECT 1 FROM  @tblPeriod)    
 BEGIN    
     
     SELECT TOP 1 @intGLFiscalYearPeriodId =intGLFiscalYearPeriodId,@strPeriod = strPeriod,    
-    @dtmStartDate =  dtmStartDate, @dtmEndDate =dtmEndDate    
-    FROM @tbl    
+    @dtmStartDate =  dtmStartDate, @dtmEndDate =dtmEndDate,@strGUID = guidPostId,
+    @intRetainAccount=intRetainAccount,@intIncomeSummaryAccount= intIncomeSummaryAccount
+    FROM @tblPeriod    
     
       INSERT INTO @RevalTableType(      
             [strTransactionId]      
@@ -94,7 +118,7 @@ BEGIN
         AND ISNULL(ysnIsUnposted,0) = 0    
         AND dtmDate BETWEEN @dtmStartDate AND @dtmEndDate    
     
-    DELETE FROM @tbl WHERE @intGLFiscalYearPeriodId = intGLFiscalYearPeriodId    
+    DELETE FROM @tblPeriod WHERE @intGLFiscalYearPeriodId = intGLFiscalYearPeriodId    
     
 END    
     
