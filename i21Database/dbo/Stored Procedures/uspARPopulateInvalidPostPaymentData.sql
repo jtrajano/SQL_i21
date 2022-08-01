@@ -38,27 +38,6 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
-	--Undeposited Funds Account	
-    SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'The Undeposited Funds account in Company Location - ' + P.[strLocationName]  + ' was not set.'
-    FROM
-        #ARPostPaymentHeader P
-    WHERE
-        P.[ysnPost] = @OneBit
-        AND ISNULL(P.[intUndepositedFundsId], 0) = 0
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
 	--AR Account
     SELECT
          [intTransactionId]         = P.[intTransactionId]
