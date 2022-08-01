@@ -255,7 +255,8 @@ Begin
 		intSubLocationId int,
 		strLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS,
 		ysnParentLot bit,
-		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS
+		strRowState nvarchar(50) COLLATE Latin1_General_CI_AS,
+		strLotStatus nvarchar(50) COLLATE Latin1_General_CI_AS
 	)
 
 	Insert Into @tblPickedLots
