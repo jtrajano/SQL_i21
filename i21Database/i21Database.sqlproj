@@ -963,6 +963,12 @@
     <Build Include="dbo\Views\vyuHDCustomerCompany.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateTaxForTexasLoadingFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePayableTaxForTexasLoadingFee.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReserveStockForInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryTransferAfterSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBeforePostInventoryTransferIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryTransferIntegration.sql" />
+    <Build Include="dbo\Views\vyuICCategoryAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
