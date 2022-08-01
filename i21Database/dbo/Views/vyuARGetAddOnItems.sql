@@ -1,21 +1,23 @@
 ﻿CREATE VIEW [dbo].[vyuARGetAddOnItems]
 AS 
-SELECT intItemAddOnId		= ITEMADDON.intItemAddOnId
-	 , intItemId			= ITEMADDON.intItemId
-     , intComponentItemId	= ITEMADDON.intAddOnItemId
-	 , intItemUnitMeasureId	= ITEMADDON.intItemUOMId
-	 , intUnitMeasureId		= ITEMUOM.intUnitMeasureId
-	 , intCompanyLocationId	= ITEMLOCATION.intLocationId
-	 , intSubLocationId		= ITEMLOCATION.intSubLocationId
-	 , intStorageLocationId	= ITEMLOCATION.intStorageLocationId
-	 , strDescription		= ITEM.strDescription
-	 , strItemNo			= ITEM.strItemNo
-	 , strUnitMeasure		= ITEMUOM.strUnitMeasure
-	 , strStorageLocation	= STORAGELOCATION.strName
-	 , strStorageUnit		= SUBLOCATION.strSubLocationName
-	 , dblQuantity			= ITEMADDON.dblQuantity
-	 , dblPrice				= dbo.fnICConvertUOMtoStockUnit(ITEMADDON.intAddOnItemId, ITEMADDON.intItemUOMId, 1) * ITEMLOCATION.dblSalePrice
-	 , ysnAutoAdd			= ITEMADDON.ysnAutoAdd
+SELECT intItemAddOnId			= ITEMADDON.intItemAddOnId
+	 , intItemId				= ITEMADDON.intItemId
+     , intComponentItemId		= ITEMADDON.intAddOnItemId
+	 , intItemUnitMeasureId		= ITEMADDON.intItemUOMId
+	 , intUnitMeasureId			= ITEMUOM.intUnitMeasureId
+	 , intCompanyLocationId		= ITEMLOCATION.intLocationId
+	 , intSubLocationId			= ITEMLOCATION.intSubLocationId
+	 , intStorageLocationId		= ITEMLOCATION.intStorageLocationId
+	 , strDescription			= ITEM.strDescription
+	 , strItemNo				= ITEM.strItemNo
+	 , strUnitMeasure			= ITEMUOM.strUnitMeasure
+	 , strStorageLocation		= STORAGELOCATION.strName
+	 , strStorageUnit			= SUBLOCATION.strSubLocationName
+	 , dblQuantity				= ITEMADDON.dblQuantity
+	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(ITEMADDON.intAddOnItemId, ITEMADDON.intItemUOMId, 1) * ITEMLOCATION.dblSalePrice
+	 , ysnAutoAdd				= ITEMADDON.ysnAutoAdd
+	 , dtmEffectivityDateFrom	= ISNULL(ITEMADDON.dtmEffectivityDateFrom, CAST('01/01/1900' AS DATE))
+	 , dtmEffectivityDateTo		= ISNULL(ITEMADDON.dtmEffectivityDateTo, CAST('12/31/9999' AS DATE))
 FROM dbo.tblICItemAddOn ITEMADDON WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
