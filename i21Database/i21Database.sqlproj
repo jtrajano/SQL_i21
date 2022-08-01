@@ -1069,6 +1069,8 @@
     <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryTransferIntegration.sql" />
     <Build Include="dbo\Views\vyuICCategoryAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
+    <Build Include="dbo\Tables\tblICFreightOverride.sql" />
+    <Build Include="dbo\Views\vyuICGetFreightOverride.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
