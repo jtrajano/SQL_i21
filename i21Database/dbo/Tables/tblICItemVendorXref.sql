@@ -29,6 +29,7 @@ Type the overview for the table here.
         [intModifiedByUserId] INT NULL, 
 		[intDataSourceId] TINYINT NULL,
 		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+		[intRowNumber] INT NULL,
 		CONSTRAINT [PK_tblICItemVendorXref] PRIMARY KEY ([intItemVendorXrefId]), 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
