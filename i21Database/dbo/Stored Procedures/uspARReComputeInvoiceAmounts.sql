@@ -167,8 +167,8 @@ WHERE
 --IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
 --BEGIN
 	UPDATE I
-	SET [dblDiscountAvailable]					= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblInvoiceTotal] ELSE [dblInvoiceSubtotal] + [dblShipping] END)  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END, 2)
-		,[dblBaseDiscountAvailable]				= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblBaseInvoiceTotal] ELSE [dblBaseInvoiceSubtotal] + [dblBaseShipping] END)  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END, 2)
+	SET [dblDiscountAvailable]					= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], I.[intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblInvoiceTotal] ELSE [dblInvoiceSubtotal] + [dblShipping] END)  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END, 2)
+		,[dblBaseDiscountAvailable]				= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], I.[intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblBaseInvoiceTotal] ELSE [dblBaseInvoiceSubtotal] + [dblBaseShipping] END)  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END, 2)
 		,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
 		,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
 		,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
@@ -319,24 +319,3 @@ WHERE
 	ARI.[intInvoiceId] = @InvoiceIdLocal
 
 END
-
---IF ISNULL(@OriginalInvoiceId, 0) <> 0
---	BEGIN
---		DECLARE @dblProvisionalAmt	NUMERIC(18,6)
---				,@dblBaseProvisionalAmt	NUMERIC(18,6)
-
---		SELECT TOP 1 
---			 @dblProvisionalAmt = dblAmountDue 
---			,@dblBaseProvisionalAmt = dblBaseAmountDue 
---		FROM dbo.tblARInvoice WITH (NOLOCK)
---		WHERE intInvoiceId = @OriginalInvoiceId
---		  AND ysnProcessed = 1
---		  AND strType = 'Provisional'
-
---		UPDATE tblARInvoice
---		SET dblAmountDue		= dblAmountDue - ISNULL(@dblProvisionalAmt, @ZeroDecimal)
---		  , dblBaseAmountDue	= dblAmountDue - ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
---		  , dblPayment			= ISNULL(@dblProvisionalAmt, @ZeroDecimal)
---		  , dblBasePayment		= ISNULL(@dblBaseProvisionalAmt, @ZeroDecimal)
---		WHERE intInvoiceId = @OriginalInvoiceId
---	END
