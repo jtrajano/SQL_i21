@@ -11,6 +11,7 @@
 	[intAccountId] [int] NULL,
 	[intConcurrencyId] INT DEFAULT 0 NOT NULL ,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[intRowNumber] INT NULL,
 	[guiApiScheduledJobId] UNIQUEIDENTIFIER NULL,
 	[guiApiBuybackScheduledJobId] UNIQUEIDENTIFIER NULL,
 	CONSTRAINT [PK_tblVRVendorSetup] PRIMARY KEY CLUSTERED([intVendorSetupId] ASC),
