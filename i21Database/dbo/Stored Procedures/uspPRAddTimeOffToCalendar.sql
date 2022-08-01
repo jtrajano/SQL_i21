@@ -180,6 +180,27 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			WHERE intTimeOffRequestId = @intTimeOffRequestId
 
 			EXEC uspSMAuditLog 'Payroll.view.TimeOffRequest', @intTransactionId, @intUserId, 'Posted to Calendar', '', '', ''
+
+			
+			DECLARE @intEntityId AS INT
+			DECLARE @intTypeTimeOffId AS INT
+			DECLARE @intPaycheckId AS INT
+
+			SELECT
+				 @intEntityId = ENT.intEntityId
+				,@intTypeTimeOffId = TOR.intTypeTimeOffId
+			FROM 
+				tblPRTimeOffRequest TOR
+				INNER JOIN tblEMEntity ENT ON TOR.intEntityEmployeeId = ENT.intEntityId
+				INNER JOIN tblPRTypeTimeOff TTO ON TOR.intTypeTimeOffId = TTO.intTypeTimeOffId
+			WHERE intTimeOffRequestId = @intTimeOffRequestId
+
+			--For awarding reset
+			EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEntityId
+
+			--For awarding
+			SET @intPaycheckId = NULL
+			EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEntityId, @intPaycheckId
 		
 			/* If Time Off is setup to Deduct from Earning, create Pay Group Detail entry */
 			IF EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarning EE INNER JOIN tblPRTimeOffRequest TOR
