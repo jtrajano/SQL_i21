@@ -11,6 +11,7 @@ SELECT
  ,SMLocation.intCompanyLocationId    
  ,SMLocation.strLocationName  
  ,fo.ysnActive    
+ ,fo.intConcurrencyId
     
 FROM tblICFreightOverride fo    
  INNER JOIN tblSMCompanyLocation SMLocation ON SMLocation.intCompanyLocationId = fo.intCompanyLocationId      
