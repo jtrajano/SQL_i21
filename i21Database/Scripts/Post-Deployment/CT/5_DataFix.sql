@@ -187,7 +187,7 @@ GO
 		,tblCTContractCondition b
 		,tblCTCondition c
 	where
-		b.strConditionDescription is null
+		TRIM(ISNULL(b.strConditionDescription, '')) = ''
 		and b.intContractHeaderId = a.intContractHeaderId
 		and c.intConditionId = b.intConditionId
 
