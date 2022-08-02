@@ -52,6 +52,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbStretchedLogo					AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @ysnUseInvoiceDateAsDue             AS BIT              = 0
 
 DECLARE @temp_statement_table TABLE(
 	 [intTempId]					INT IDENTITY(1,1)		
@@ -124,7 +125,8 @@ SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + '''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 --LOGO
-SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
+SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
+		   , @ysnUseInvoiceDateAsDue = CASE WHEN strCustomerAgingBy = 'Invoice Create Date' AND @strStatementFormat = 'Zeeland Balance Forward' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -279,13 +281,13 @@ FROM (
 	SELECT strReferenceNumber			= CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
 		 , strTransactionType			= CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
 		 , intEntityCustomerId			= C.intEntityId
-		 , dtmDueDate					= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
+		 , dtmDueDate					= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE ' + CASE WHEN @ysnUseInvoiceDateAsDue = 1 THEN 'I.dtmDate' ELSE 'I.dtmDueDate' END + ' END
 		 , dtmDate						= I.dtmDate
-		 , intDaysDue					= DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
+		 , intDaysDue					= DATEDIFF(DAY, ' + CASE WHEN @ysnUseInvoiceDateAsDue = 1 THEN 'I.dtmDate' ELSE 'I.dtmDueDate' END + ', '+ @strDateTo +')
 		 , dblTotalAmount				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 		 , dblAmountPaid				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(TOTALPAYMENT.dblPayment, 0) * -1 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
 		 , dblAmountDue					= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
-		 , dblPastDue					= CASE WHEN '+ @strDateTo +' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
+		 , dblPastDue					= CASE WHEN '+ @strDateTo +' > ' + CASE WHEN @ysnUseInvoiceDateAsDue = 1 THEN 'I.dtmDate' ELSE 'I.dtmDueDate' END + ' AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
 												 THEN I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0)
 											   ELSE 0
 										  END

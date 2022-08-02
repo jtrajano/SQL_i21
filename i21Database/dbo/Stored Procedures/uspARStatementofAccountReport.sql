@@ -189,7 +189,7 @@ SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 	
-IF @strStatementFormat = 'Balance Forward'
+IF @strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 	BEGIN
 		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
 			  @dtmDateTo					= @dtmDateTo
@@ -208,8 +208,9 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
 			, @intEntityUserId				= @intEntityUserId
+			, @strStatementFormat           = @strStatementFormat
 	END
-ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
+ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer', 'Zeeland Open Item')
 	BEGIN
 		EXEC dbo.uspARCustomerStatementReport
 		      @dtmDateTo					= @dtmDateTo
