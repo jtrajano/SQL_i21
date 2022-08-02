@@ -80,6 +80,7 @@
 	[ysnOverrideLineOfBusinessSegment]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLineOfBusinessSegment] DEFAULT((0)),
 	[intSurchargeRevenueAccount]			INT NULL, 
     [intSurchargeExpenseAccount]			INT NULL,
+	[ysnEnableCustomStatement]              BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnEnableCustomStatement] DEFAULT ((0)),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
