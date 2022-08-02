@@ -114,7 +114,8 @@ SELECT	i21.intBankAccountId
 		,i21.intABRDaysNoRef
 		,i21.strPaymentInstructions
 		--Advanced Bank Recon
-		
+		,i21.strNickname
+
 		-- The following fields are from the origin system		
 		,apcbk_comment = CAST(NULL AS NVARCHAR(30))	 COLLATE Latin1_General_CI_AS -- CHAR (30)
 		,apcbk_password = CAST(NULL AS NVARCHAR(16)) COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -255,6 +256,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intABRDaysNoRef
 						,strPaymentInstructions
 						,strCorrespondingBank
+						,strNickname
 				)
 				OUTPUT 	inserted.intBankAccountId
 				SELECT	intBankId							= i.intBankId
@@ -347,6 +349,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intABRDaysNoRef					= i.intABRDaysNoRef
 						,strPaymentInstructions				= i.strPaymentInstructions
 						,strCorrespondingBank				= i.strCorrespondingBank
+						,strNickname						= i.strNickname
 				FROM	inserted i 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
@@ -462,6 +465,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intABRDaysNoRef					= i.intABRDaysNoRef
 					,strPaymentInstructions				= i.strPaymentInstructions
 					,strCorrespondingBank				= i.strCorrespondingBank
+					,strNickname						= i.strNickname
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
