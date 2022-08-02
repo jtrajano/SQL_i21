@@ -96,7 +96,15 @@ AS
 				intForexRateTypeId		=	CD.intRateTypeId,
 				dblForexRate			=	CD.dblRate,
 				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq),
-				intPriceUOMId			=	CASE WHEN CD.intPricingTypeId = 2 THEN IU.intItemUOMId ELSE CD.intFXPriceUOMId END,
+				intPriceUOMId			=	CASE WHEN CD.intPricingTypeId = 2  THEN 
+												IU.intItemUOMId 
+											ELSE 
+												CASE WHEN ISNULL(CD.intCurrencyExchangeRateId, 0) = 0 THEN 
+													CD.intBasisUOMId 
+												ELSE 
+													CD.intFXPriceUOMId 
+												END
+											END,
 				dblGross				=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId, ISNULL(CD.dblBalance,0)	- ISNULL(CD.dblScheduleQty,0)),
 				dblTare					=	0,
 				dblNet					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId, ISNULL(CD.dblBalance,0)	- ISNULL(CD.dblScheduleQty,0)),
