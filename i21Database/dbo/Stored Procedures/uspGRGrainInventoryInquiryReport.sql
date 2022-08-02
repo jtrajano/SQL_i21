@@ -982,6 +982,15 @@ OUTER APPLY (
 			AND ysnStockUnit = 1
 	INNER JOIN tblICUnitMeasure UOM
 		ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+	INNER JOIN tblGRSettleStorageBillDetail SBD
+		ON SBD.intBillId = BD.intBillId
+	INNER JOIN tblGRSettleStorageTicket SST
+		ON SST.intSettleStorageId = SBD.intSettleStorageId
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = SST.intCustomerStorageId
+	INNER JOIN tblGRStorageType ST
+		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND ST.ysnDPOwnedType = 0
 	WHERE AP.ysnPosted = 1 
 		AND AP.ysnPaid = 0
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), AP.dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
@@ -1270,8 +1279,8 @@ SET dblUnits = ID.dblUnits - SD.dblUnits
 FROM @InventoryData ID
 INNER JOIN @StorageObligationData SD
 	ON SD.intCompanyLocationId = ID.intCompanyLocationId
-WHERE ID.strLabel = 'COMPANY-OWNED'
-	AND SD.strLabel LIKE '%BALANCE'
+WHERE ID.strLabel = 'COMPANY-OWNED BEGINNING BALANCE'
+	AND SD.strLabel LIKE '%BEGINNING BALANCE'
 
 --UPDATE COMPANY-OWNED (PAID)
 UPDATE A
