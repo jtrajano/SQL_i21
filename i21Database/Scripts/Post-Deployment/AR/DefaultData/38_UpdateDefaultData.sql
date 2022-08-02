@@ -2,7 +2,7 @@ print('/*******************  BEGIN Update tblARCompanyPreference ***************
 GO
 
 UPDATE tblARCompanyPreference SET intPageLimit = 1000 WHERE intPageLimit IS NULL
-UPDATE tblARCompanyPreference SET ysnCustomFormat = CAST(0 AS BIT) WHERE ysnCustomFormat IS NULL
+UPDATE tblARCompanyPreference SET ysnEnableCustomStatement = CAST(0 AS BIT) WHERE ysnEnableCustomStatement IS NULL
 
 GO
 print('/*******************  BEGIN Update tblARCompanyPreference  *******************/')
