@@ -40,6 +40,8 @@ BEGIN
 				,i21.strEmail
 				,i21.strIBAN
 				,i21.strSWIFT
+				,i21.strBICCode
+				,i21.strBranchCode
 				,i21.intCheckStartingNo
 				,i21.intCheckEndingNo
 				,i21.intCheckNextNo
@@ -112,8 +114,10 @@ BEGIN
 				,i21.strCbkNo
 				,i21.intConcurrencyId
 				,i21.intPayToDown
+				,i21.strACHClientId
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
+				,i21.strCorrespondingBank
 				--Advanced Bank Recon
 				,i21.ysnABREnable
 				,i21.intABRDaysNoRef
@@ -277,6 +281,8 @@ BEGIN
 					,strEmail
 					,strIBAN
 					,strSWIFT
+					,strBICCode
+					,strBranchCode
 					,intCheckStartingNo
 					,intCheckEndingNo
 					,intCheckNextNo
@@ -338,7 +344,9 @@ BEGIN
 					,intConcurrencyId
 					,strCbkNo
 					,intPayToDown
+					,strACHClientId
 					,intResponsibleEntityId
+					,strCorrespondingBank
 					,ysnABREnable
 					,intABRDaysNoRef
 					,strPaymentInstructions
@@ -365,6 +373,8 @@ BEGIN
 					,strEmail							= i.strEmail
 					,strIBAN							= i.strIBAN
 					,strSWIFT							= i.strSWIFT
+					,strBICCode							= i.strBICCode
+					,strBranchCode						= i.strBranchCode
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
@@ -426,7 +436,9 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,strACHClientId						= i.strACHClientId
 					,intResponsibleEntityId				= i.intResponsibleEntityId
+					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
 					,strPaymentInstructions				= i.strPaymentInstructions
@@ -571,6 +583,8 @@ BEGIN
 					,strEmail							= i.strEmail
 					,strIBAN							= i.strIBAN
 					,strSWIFT							= i.strSWIFT
+					,strBICCode							= i.strBICCode
+					,strBranchCode						= i.strBranchCode
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
@@ -632,7 +646,9 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,strACHClientId						= i.strACHClientId
 					,intResponsibleEntityId				= i.intResponsibleEntityId
+					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
 					,strPaymentInstructions				= i.strPaymentInstructions
