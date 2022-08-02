@@ -47,8 +47,6 @@ DECLARE	@DiscountAccountId          INT
        ,@OneHundredDecimal          DECIMAL(18,6)
        ,@Param2                     NVARCHAR(MAX)
 	   ,@Precision					INT = 2
-       ,@AllowIntraEntries          BIT
-       ,@SkipIntraEntriesValiation  BIT
 
 SET @ZeroDecimal = 0.000000
 SET @OneDecimal = 1.000000
@@ -61,14 +59,6 @@ SELECT TOP 1
     ,@DeferredRevenueAccountId  = [intDeferredRevenueAccountId]
 	,@ImpactForProvisional      = ISNULL([ysnImpactForProvisional], @ZeroBit)
     ,@ExcludeInvoiceFromPayment = ISNULL([ysnExcludePaymentInFinalInvoice], @ZeroBit)
-    ,@AllowIntraEntries         = CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 OR (ISNULL(ysnAllowIntraCompanyEntries, 0) = 0 AND ISNULL(ysnAllowIntraLocationEntries, 0) = 0 AND ISNULL(ysnAllowSingleLocationEntries, 0) = 0)
-                                    THEN 1 
-                                    ELSE 0 
-                                  END
-    ,@SkipIntraEntriesValiation = CASE WHEN (ISNULL(ysnAllowIntraCompanyEntries, 0) = 0 AND ISNULL(ysnAllowIntraLocationEntries, 0) = 0 AND ISNULL(ysnAllowSingleLocationEntries, 0) = 0)
-									THEN 1
-									ELSE 0
-								  END
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId 
 
@@ -240,8 +230,6 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnInterCompany]
     ,[intInterCompanyVendorId]
 	,[strBOLNumber]
-    ,[ysnAllowIntraEntries]
-    ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[intLineOfBusinessId]
     ,[intFreightCompanySegment]
@@ -332,8 +320,6 @@ SELECT
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 	,[strBOLNumber]						= ARI.[strBOLNumber]
-    ,[ysnAllowIntraEntries]             = @AllowIntraEntries
-    ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
     ,[intFreightCompanySegment]         = ARI.[intFreightCompanySegment]
@@ -510,8 +496,6 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]
     ,[strDescription]
 	,[strBOLNumber]
-    ,[ysnAllowIntraEntries]
-    ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[dblSurcharge]
@@ -667,8 +651,6 @@ SELECT
     ,[ysnBlended]                       = ARID.[ysnBlended]
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
 	,[strBOLNumber]						= ARI.strBOLNumber
-    ,[ysnAllowIntraEntries]             = @AllowIntraEntries
-    ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
@@ -844,8 +826,6 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
-    ,[ysnAllowIntraEntries]
-    ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[dblSurcharge]
@@ -1061,8 +1041,6 @@ SELECT
     ,[ysnBlended]                       = ARID.[ysnBlended]    
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
-    ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
-    ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
@@ -1226,8 +1204,6 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnBlended]    
     ,[strDescription]
 	,[strBOLNumber]
-    ,[ysnAllowIntraEntries]
-    ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[dblSurcharge]
@@ -1379,8 +1355,6 @@ SELECT
     ,[ysnBlended]                       = @ZeroBit
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 	,[strBOLNumber]						= ARI.strBOLNumber
-    ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
-    ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
