@@ -178,6 +178,7 @@ SELECT intEntityId							= C.intEntityId
 	, intDefaultPayToBankAccountId		    = C.intDefaultPayToBankAccountId
 	, strDefaultPayToBankAccountNo		    = C.strDefaultPayToBankAccountNo
      , ysnLoadToLoad		                = C.ysnLoadToLoad
+  , strDeliveryDocument					= C.strDeliveryDocument
 FROM tblARCustomer C
 INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
 LEFT JOIN tblSMLanguage LANG ON E.intLanguageId = LANG.intLanguageId
