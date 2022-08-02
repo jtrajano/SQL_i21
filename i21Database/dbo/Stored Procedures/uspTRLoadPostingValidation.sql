@@ -333,7 +333,7 @@ BEGIN TRY
 			RAISERROR(@err, 16, 1)
 		END
 
-		SELECT @dblReceivedQuantity = SUM(TR.dblGross)
+		SELECT @dblReceivedQuantity = (CASE WHEN (@GrossorNet = 'Net') THEN SUM(TR.dblNet) ELSE SUM(TR.dblGross) END)
 			,  @dblReceivedQuantityGross = SUM(TR.dblGross)
 			,  @dblReceivedQuantityNet = SUM(TR.dblNet)
 		FROM tblTRLoadReceipt TR
