@@ -164,8 +164,6 @@ CREATE TABLE tblARPostInvoiceDetail (
 	,[ysnInterCompany]                      BIT             NULL
 	,[intInterCompanyVendorId]				INT				NULL
 	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
-    ,[ysnAllowIntraEntries]                 BIT             NULL DEFAULT 0
-    ,[ysnSkipIntraEntriesValiation]         BIT             NULL DEFAULT 0
     ,[strSessionId]			                NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
     ,[dblFreightCharge]                     NUMERIC(18,6)   NULL DEFAULT 0
     ,[dblSurcharge]                         NUMERIC(18,6)   NULL DEFAULT 0
