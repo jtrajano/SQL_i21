@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1)
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Projects' AND strModuleName = 'IDP')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -7436,6 +7436,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Docum
 	VALUES (N'Add Documents', N'IDP', @IDPCreateParentMenuId, N'Add Documents', 'Create', N'Screen', N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr', N'small-menu-create', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL WHERE strMenuName = 'Add Documents' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Projects' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Add Projects', N'IDP', @IDPCreateParentMenuId, N'Add Projects', 'Create', N'Screen', N'GlobalComponentEngine.view.OcrFormTool?menu=projects/create', N'small-menu-create', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.OcrFormTool?menu=projects/create', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL 
+	WHERE strMenuName = 'Add Projects' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId
 
 --FORM TRAINING TOOL
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Form Training Tool' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId)
