@@ -1,5 +1,5 @@
 
-CREATE TABLE [dbo].[tblCFImportTransactionTaxZeroQuantity1](
+CREATE TABLE [dbo].[tblCFImportTransactionTaxZeroQuantity](
 	[intTransactionId] int NULL,
 	[intTransactionDetailTaxId] int NULL,
 	[intInvoiceDetailId] int NULL,
