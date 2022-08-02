@@ -9199,6 +9199,8 @@
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTemplateAuditLog.sql" />
+    <Build Include="dbo\Index\IX_tblRKSummaryLog_intCommodityId.sql" />
+    <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
