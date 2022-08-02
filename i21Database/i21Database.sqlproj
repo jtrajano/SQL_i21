@@ -10836,7 +10836,6 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTemplateAuditLog.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intCommodityId.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
