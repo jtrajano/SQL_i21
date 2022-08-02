@@ -19,6 +19,7 @@
 	, @ysnReprintInvoice			AS BIT				= 1
 	, @intEntityUserId				AS INT				= NULL
 	, @dblTotalAR				    AS NUMERIC(18,6)    = 0.00
+	, @strStatementFormat			AS NVARCHAR(50)		= NULL
 AS
 
 SET ANSI_NULLS ON
@@ -140,8 +141,8 @@ CREATE TABLE #STATEMENTTABLE (
 	, intPaymentId				INT NULL
 	, strCustomerName			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
     , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL    
-	, strInvoiceNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
-	, strRecordNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
+	, strInvoiceNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strRecordNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strBOLNumber				NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
 	, strTransactionType		NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, strType					NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
@@ -165,12 +166,11 @@ CREATE TABLE #STATEMENTTABLE (
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_A1] ON [#STATEMENTTABLE]([intEntityCustomerId], [intInvoiceId], [strTransactionType], [strType])
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_A2] ON [#STATEMENTTABLE]([strTransactionType]) INCLUDE ([dblPayment])
 CREATE TABLE #CFTABLE (
-	  intInvoiceId				INT NOT NULL
+	  intInvoiceId				INT NOT NULL PRIMARY KEY
 	, strInvoiceNumber			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, strInvoiceReportNumber	NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
 	, dtmInvoiceDate			DATETIME NULL
 )
-CREATE NONCLUSTERED INDEX [NC_Index_#CFTABLE_intInvoiceId] ON [#CFTABLE]([intInvoiceId])
 CREATE TABLE #CUSTOMERS (
 	  intEntityCustomerId		INT NOT NULL PRIMARY KEY	  
     , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
@@ -263,7 +263,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN tblEMEntity EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
-		  AND C.strStatementFormat = 'Balance Forward'
+		  AND C.strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 		  AND strEntityNo = @strCustomerNumberLocal
 	END
 ELSE IF @strCustomerIdsLocal IS NOT NULL
@@ -284,7 +284,7 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 		INNER JOIN #DELCUSTOMERS CUSTOMERS ON C.intEntityId = CUSTOMERS.intEntityCustomerId
 		INNER JOIN tblEMEntity EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
-			AND C.strStatementFormat = 'Balance Forward'
+			AND C.strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 	END
 ELSE
 	BEGIN
@@ -299,7 +299,7 @@ ELSE
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN tblEMEntity EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
-		  AND C.strStatementFormat = 'Balance Forward'
+		  AND C.strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 		  AND (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
 	END
 
@@ -340,7 +340,7 @@ WHERE CUS.intSalespersonId IS NOT NULL
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress	= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
+SET strFullAddress	= EL.strAddress + CHAR(13) + char(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry 
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 
@@ -1086,11 +1086,11 @@ IF @ysnPrintFromCFLocal = 1
 		UPDATE #STATEMENTTABLE SET strTransactionType = 'Payment' WHERE strTransactionType = 'Customer Prepayment' AND strType <> 'CF Tran'
 		UPDATE #STATEMENTTABLE SET strTransactionType = 'Invoice' WHERE strTransactionType = 'Debit Memo' AND strType <> 'CF Tran'
 		UPDATE #STATEMENTTABLE SET strTransactionType = 'Service Charge' WHERE strType = 'Service Charge'
-		DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND (strStatementFormat IS NULL OR strStatementFormat = 'Balance Forward')
+		DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND (strStatementFormat IS NULL OR strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward'))
 	END
 ELSE
 	BEGIN
-		DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Balance Forward'
+		DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 	END
 
 INSERT INTO tblARCustomerStatementStagingTable WITH (TABLOCK) (
@@ -1158,7 +1158,7 @@ SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, strFullAddress			= MAINREPORT.strFullAddress
 	, strComment				= MAINREPORT.strComment
 	, strStatementFooterComment	= MAINREPORT.strStatementFooterComment
-	, strStatementFormat		= 'Balance Forward'
+	, strStatementFormat		= @strStatementFormat
 	, dblCreditLimit			= MAINREPORT.dblCreditLimit
 	, dblInvoiceTotal			= MAINREPORT.dblInvoiceTotal
 	, dblPayment				= MAINREPORT.dblPayment
@@ -1250,7 +1250,7 @@ IF @ysnPrintFromCFLocal = 0
 		FROM tblARCustomerStatementStagingTable STAGING
 		INNER JOIN tblEMEntityMessage EM ON STAGING.intEntityCustomerId = EM.intEntityId
 		WHERE STAGING.intEntityUserId = @intEntityUserIdLocal
-		  AND STAGING.strStatementFormat = 'Balance Forward'
+		  AND STAGING.strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 		  AND EM.strMessageType = 'Statement'
 
 		IF @ysnPrintZeroBalanceLocal = 0
@@ -1262,10 +1262,10 @@ IF @ysnPrintFromCFLocal = 0
 					FROM tblARCustomerStatementStagingTable 
 					WHERE dblTotalAR = 0
 					 AND intEntityUserId = @intEntityUserIdLocal
-					 AND strStatementFormat = 'Balance Forward'
+					 AND strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 				) ZERO ON ORIG.intEntityCustomerId = ZERO.intEntityCustomerId
 				AND intEntityUserId = @intEntityUserIdLocal
-				AND strStatementFormat = 'Balance Forward'
+				AND strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 			END
 	END
 
@@ -1273,7 +1273,7 @@ IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM tblARCustomerStatementStagingTable 
 		WHERE intEntityUserId = @intEntityUserIdLocal 
-		  AND strStatementFormat = 'Balance Forward'
+		  AND strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 		  AND intEntityCustomerId IN (
 			  SELECT DISTINCT intEntityCustomerId
 			  FROM tblARCustomerAgingStagingTable AGINGREPORT

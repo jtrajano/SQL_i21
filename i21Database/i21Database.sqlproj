@@ -9858,6 +9858,8 @@
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intCommodityId.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
+    <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
