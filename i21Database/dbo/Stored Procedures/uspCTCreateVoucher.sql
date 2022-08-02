@@ -479,6 +479,8 @@ begin try
 					, [intBankValuationRuleId]
 					, [strComments]
 					, [intFreightTermId]
+					, strTaxPoint
+					, intTaxLocationId
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -607,6 +609,8 @@ begin try
 					, vp.intBankValuationRuleId
 					, vp.strComments
 					, vp.intFreightTermId
+					, vp.strTaxPoint
+					, vp.intTaxLocationId
 				from
 					@voucherPayables vp
 					LEFT JOIN tblEMEntityLocation em 
@@ -968,6 +972,8 @@ begin try
 					, [intBankValuationRuleId]
 					, [strComments]
 					, [intFreightTermId]
+					, strTaxPoint
+					, intTaxLocationId
 		)
 		SELECT
 			intPartitionId = vp.intPartitionId
@@ -1077,6 +1083,8 @@ begin try
 			, [intBankValuationRuleId]
 			, [strComments]
 			, [intFreightTermId]
+			, strTaxPoint
+			, intTaxLocationId
 		from
 			@voucherPayables vp
 		where
