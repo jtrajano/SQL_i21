@@ -14,7 +14,6 @@ DECLARE  @MODULE_NAME		        NVARCHAR(25) = 'Accounts Receivable'
 	    ,@OneDecimal	            DECIMAL(18,6) = 1
 	    ,@OneHundredDecimal	        DECIMAL(18,6) = 100
 	    ,@PostDate		            DATETIME = CAST(GETDATE() AS DATE)
-        ,@AllowIntraEntries         BIT
         ,@DueToAccountId            INT
         ,@DueFromAccountId          INT
         ,@AllowIntraCompanyEntries  BIT
@@ -25,8 +24,7 @@ DECLARE  @MODULE_NAME		        NVARCHAR(25) = 'Accounts Receivable'
         ,@SurchargeExpenseAccount   INT
 
 SELECT TOP 1
-     @AllowIntraEntries         = CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END
-    ,@AllowIntraCompanyEntries  = ISNULL(ysnAllowIntraCompanyEntries, 0)
+     @AllowIntraCompanyEntries  = ISNULL(ysnAllowIntraCompanyEntries, 0)
     ,@AllowIntraLocationEntries = ISNULL(ysnAllowIntraLocationEntries, 0)
     ,@DueToAccountId            = ISNULL([intDueToAccountId], 0)
     ,@DueFromAccountId          = ISNULL([intDueFromAccountId], 0)
@@ -314,7 +312,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
     EXISTS(SELECT NULL FROM tblARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId)
   )
   AND I.strType <> 'Tax Adjustment'
-  AND @AllowIntraEntries = 1
+  AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueToAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0)
   AND I.strSessionId = @strSessionId
@@ -965,7 +963,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
   AND I.strType <> 'Tax Adjustment'
-  AND @AllowIntraEntries = 1
+  AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
   AND I.strSessionId = @strSessionId
@@ -1276,10 +1274,10 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
+FROM tblARPostInvoiceHeader I
 OUTER APPLY (
 	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @FreightExpenseAccount, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @FreightExpenseAccount, 1, 1, 0)
 ) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
@@ -1357,10 +1355,10 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
+FROM tblARPostInvoiceHeader I
 OUTER APPLY (
 	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, 1, 1, 0)
 ) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
@@ -1406,7 +1404,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@FreightRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@SurchargeRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
     ,[dblDebit]                     = @ZeroDecimal
     ,[dblCredit]                    = I.[dblSurcharge]
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1592,10 +1590,10 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
+FROM tblARPostInvoiceHeader I
 OUTER APPLY (
 	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @FreightExpenseAccount, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @SurchargeExpenseAccount, 1, 1, 0)
 ) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
@@ -1673,10 +1671,10 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
+FROM tblARPostInvoiceHeader I
 OUTER APPLY (
 	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, 1, 1, 0)
 ) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
@@ -2890,7 +2888,7 @@ OUTER APPLY (
 WHERE I.[intPeriodsToAccrue] <= 1
   AND (ARIDT.[dblAdjustedTax] <> @ZeroDecimal
    OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 AND [ysnInvalidSetup] = 0))
-  AND @AllowIntraEntries = 1
+  AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
   AND I.strSessionId = @strSessionId

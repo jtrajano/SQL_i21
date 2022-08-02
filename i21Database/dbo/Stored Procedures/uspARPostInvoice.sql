@@ -368,6 +368,10 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			WHERE strSessionId = @strRequestId
 		END
 
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@param))
+
 		IF @raiseError = 1
 			BEGIN
 				IF ISNULL(@ErrorMerssage, '') = ''
