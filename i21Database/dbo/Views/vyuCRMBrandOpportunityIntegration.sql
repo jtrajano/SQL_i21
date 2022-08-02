@@ -1,15 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuCRMBrandOpportunityIntegration]
 AS
-SELECT  [Owner]						 = SalesPerson.strName
+SELECT  [Owner]						 = Customer.strName
 	   ,MarketerOpportunityID		 = CONVERT(nvarchar(100), NEWID())
 	   ,MarketerOwnerID				 = CONVERT(nvarchar(100), NEWID())
-	   ,MarketerOwnerName			 = SalesPerson.strName
+	   ,MarketerOwnerName			 = Customer.strName
 	   ,MarketerAccountID			 = CONVERT(nvarchar(100), NEWID())
 	   ,Company						 = Customer.strName
 	   ,MarketerContactID			 = ''
-	   ,MarketerName				 = ''
-	   ,FirstName					 = Contact.strName
-	   ,LastName					 = Contact.strName
+	   ,MarketerName				 = 'WOODFORD OIL CO'
+	   ,FirstName					 = LTRIM(RTRIM(SUBSTRING(Contact.strName, dbo.fnLastIndex(Contact.strName,' '), DATALENGTH(Contact.strName))))
+	   ,LastName					 = LTRIM(RTRIM(REPLACE(SUBSTRING(LTRIM(RTRIM(Contact.strName)),1,CHARINDEX(' ',LTRIM(RTRIM(Contact.strName)),1)),',', '')))
 	   ,Email						 = Customer.strEmail
 	   ,Phone						 = Customer.strPhone
 	   ,Street						 = CustomerLocation.strAddress
@@ -41,8 +41,6 @@ SELECT  [Owner]						 = SalesPerson.strName
 	   ,intOpportunityId			 = Opportunity.intOpportunityId
 	   ,intBrandMaintenanceId		 = Opportunity.intBrandMaintenanceId
 FROM tblCRMOpportunity Opportunity
-		LEFT JOIN tblEMEntity SalesPerson
-ON SalesPerson.intEntityId = Opportunity.intInternalSalesPerson
 		LEFT JOIN tblEMEntity Contact
 ON Contact.intEntityId = Opportunity.intCustomerContactId
 		LEFT JOIN tblEMEntityLocation ContactLocation
