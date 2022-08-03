@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPValidateImportedPaidVouchers]
-	
+	@ignoreInvoiceMatch BIT
 AS
 
 BEGIN  
@@ -38,9 +38,6 @@ UPDATE A
 						B.ysnPosted = 0
 					THEN 'Voucher is not yet posted'
 					WHEN 
-						B.intBillId IS NULL
-					THEN 'Voucher not found.'
-					WHEN 
 						A.dblPayment > 0 AND B.intTransactionType != 1
 					THEN 'Amount is positive. Voucher type is expected.'
 					WHEN 
@@ -61,6 +58,13 @@ UPDATE A
 					WHEN
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > ABS((B.dblTotal - B.dblPaymentTemp))
 					THEN 'Already included in payment' + P.strPaymentRecordNum
+					WHEN 
+						B.intBillId IS NULL
+					THEN CASE
+						 WHEN @ignoreInvoiceMatch = 1
+						 THEN 'Will create empty payment.'
+						 ELSE 'Voucher not found.'
+						 END
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
@@ -88,6 +92,21 @@ OUTER APPLY (
 	) AS strPaymentRecordNum
 ) P
 WHERE A.strNotes IS NULL
+
+;WITH cte AS (
+	SELECT DENSE_RANK() OVER(ORDER BY A.dtmDatePaid, A.intEntityVendorId, A.strCheckNumber, A.intCustomPartition) intRow,
+	A.intId
+	FROM tblAPImportPaidVouchersForPayment A
+	ORDER BY A.intId
+	WHERE A.strNotes = 'Will create empty payment.'
+)
+
+UPDATE A
+SET A.strNotes = 'Will create empty payment (' + CAST(cte.intRow AS NVARCHAR(10)) + ').',
+    A.intCustomPartition = cte.intRow
+FROM tblAPImportPaidVouchersForPayment A
+INNER JOIN cte cte ON cte.intId = A.intId
+WHERE A.strNotes = 'Will create empty payment.'
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
   
