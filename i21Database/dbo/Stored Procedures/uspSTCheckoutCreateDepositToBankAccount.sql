@@ -136,7 +136,17 @@ BEGIN
 												, @intEntityId		= @intEntityId
 												, @isSuccessful		= @ysnSuccess OUT
 
-				UPDATE tblSTCheckoutDeposits SET intBDepId = @intNewTransactionId WHERE intCheckoutId = @intCheckoutId
+				IF EXISTS (SELECT '' FROM tblSTCheckoutDeposits WHERE intCheckoutId = @intCheckoutId)
+					BEGIN
+						UPDATE tblSTCheckoutDeposits SET intBDepId = @intNewTransactionId WHERE intCheckoutId = @intCheckoutId  
+					END
+				ELSE
+					BEGIN
+						INSERT INTO tblSTCheckoutDeposits
+						(intCheckoutId,dblCash,dblTotalCash,dblTotalDeposit,intBDepId,intConcurrencyId)
+						VALUES
+						(@intCheckoutId,ABS(@dblAmount),ABS(@dblAmount),ABS(@dblAmount),@intNewTransactionId,0)
+					END
 			END
 		ELSE
 			BEGIN
