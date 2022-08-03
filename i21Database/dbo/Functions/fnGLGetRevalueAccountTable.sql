@@ -1,6 +1,4 @@
-CREATE FUNCTION [dbo].[fnGLGetRevalueAccountTable](
-	@offsetAccountId INT = NULL
-)
+CREATE FUNCTION [dbo].[fnGLGetRevalueAccountTable]()
 RETURNS TABLE
 AS
 RETURN
@@ -33,5 +31,5 @@ RETURN
 	SELECT 'CM In-Transit'	strModule,'Receivables' strType, [intCashManagementOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Swaps'		strModule,'Payables' strType, [intGainOnSwapOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Swaps'		strModule,'Receivables' strType, [intGainOnSwapOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
-	SELECT 'GL'		strModule, 'Receivables' strType, @offsetAccountId AccountId , OffSet = 1 FROM tblSMMultiCurrency
+	SELECT 'GL'		strModule, 'Receivables' strType, [intGainOnGLOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency
 )

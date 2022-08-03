@@ -110,16 +110,9 @@ DECLARE
   
  IF @ysnPost =1   
  BEGIN  
-
-    SELECT TOP 1 
-    @ysnOverrideLocation = ISNULL(ysnRevalOverrideLocation,0),
-    @ysnOverrideLOB = ISNULL(ysnRevalOverrideLOB,0),
-    @ysnOverrideCompany = ISNULL(ysnRevalOverrideCompany,0)
-    FROM tblGLCompanyPreferenceOption
-
-    DECLARE @defaultType NVARCHAR(20)   
-    SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable(DEFAULT) f   
-    WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;  
+  DECLARE @defaultType NVARCHAR(20)   
+  SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable() f   
+  WHERE f.strModule COLLATE Latin1_General_CI_AS = @strTransactionType;  
 
     IF @ysnHasDetails = 1
     BEGIN
@@ -251,7 +244,7 @@ DECLARE
           INTO #iRelyPostGLEntries
           FROM cte1 A  
           OUTER APPLY (  
-          SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable(intAccountIdOverride) f   
+          SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable() f   
           WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS   
           AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS  
           AND f.OffSet  = A.OffSet  
