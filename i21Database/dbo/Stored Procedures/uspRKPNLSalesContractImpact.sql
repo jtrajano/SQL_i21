@@ -131,7 +131,7 @@ BEGIN
 		LEFT JOIN tblSMCurrency c ON c.intCurrencyID = m.intCurrencyId
 		LEFT JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = t.intFutureMonthId
 		WHERE intSContractDetailId = @intSContractDetailId
-		AND AD.intPurchaseSale = CH.intContractTypeId
+		AND AD.intShipmentType = 1
 		
 		UNION ALL SELECT DISTINCT TP.strContractType
 			, strContractNumber = CH.strContractNumber + ' - ' + CONVERT(NVARCHAR(100),CD.intContractSeq)
