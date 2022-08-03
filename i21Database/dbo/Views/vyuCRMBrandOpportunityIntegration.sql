@@ -41,12 +41,12 @@ SELECT  [Owner]						 = Customer.strName
 	   ,intOpportunityId			 = Opportunity.intOpportunityId
 	   ,intBrandMaintenanceId		 = Opportunity.intBrandMaintenanceId
 FROM tblCRMOpportunity Opportunity
-		LEFT JOIN tblEMEntity Contact
-ON Contact.intEntityId = Opportunity.intCustomerContactId
+		LEFT JOIN vyuEMEntityContact Contact
+ON Contact.intEntityContactId = Opportunity.intCustomerContactId
 		LEFT JOIN tblEMEntityLocation ContactLocation
 ON ContactLocation.intEntityId = Contact.intEntityId AND
    ContactLocation.ysnDefaultLocation = 1
-		LEFT JOIN tblEMEntity Customer
+		LEFT JOIN vyuEMEntityContact Customer
 ON Customer.intEntityId = Opportunity.intCustomerId
 		LEFT JOIN tblEMEntityLocation CustomerLocation
 ON CustomerLocation.intEntityId = Customer.intEntityId AND
