@@ -30,6 +30,8 @@ SELECT
    ,detail.intSellerId
    ,dblQuantity = sum(detail.dblQuantity)
    ,dblPickupQuantity = sum(detail.dblPickupQuantity)
+   ,dblGross = sum(detail.dblGross)
+   ,dblNet = sum(detail.dblNet)
 FROM tblMBILPickupDetail detail                      
 INNER JOIN tblMBILLoadHeader load on detail.intLoadHeaderId = load.intLoadHeaderId                
 INNER JOIN tblICItem item on detail.intItemId = item.intItemId                
