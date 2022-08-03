@@ -97,7 +97,6 @@ WHERE A.strNotes IS NULL
 	SELECT DENSE_RANK() OVER(ORDER BY A.dtmDatePaid, A.intEntityVendorId, A.strCheckNumber, A.intCustomPartition) intRow,
 	A.intId
 	FROM tblAPImportPaidVouchersForPayment A
-	ORDER BY A.intId
 	WHERE A.strNotes = 'Will create empty payment.'
 )
 
