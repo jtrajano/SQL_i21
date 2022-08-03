@@ -54,7 +54,8 @@ SELECT
 	B.int1099Category,
 	CASE WHEN D.int1099CategoryId IS NULL THEN 'NONE' ELSE D.strCategory END AS str1099Category,
 	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
-	CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL THEN  ISS.strShipmentNumber ELSE  IR.strReceiptNumber END as strReceiptNumber,
+	CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL THEN  ISS.strShipmentNumber WHEN B.intStorageChargeId > 0 THEN SG.strStorageChargeNumber 
+	WHEN B.intInsuranceChargeDetailId > 0 THEN ichrge.strChargeNo ELSE  IR.strReceiptNumber END as strReceiptNumber,
 	ISNULL(IR.intInventoryReceiptId,0) AS intInventoryReceiptId,
 	ISNULL(SC.strTicketNumber,SCB.strTicketNumber) AS strTicketNumber, 
 	CH.strContractNumber,
@@ -95,7 +96,9 @@ SELECT
 	CASE WHEN B.dblCashPrice = 0 THEN B.dblCost ELSE B.dblCashPrice END dblCashPrice,
 	B.dblQualityPremium,
 	B.dblOptionalityPremium,
-	lot.strLotNumber
+	lot.strLotNumber,
+	SG.intStorageChargeId,
+	ichrgedtl.intInsuranceChargeDetailId
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -169,5 +172,9 @@ LEFT JOIN (tblLGLoad receiptLoad INNER JOIN tblLGLoadDetail receiptLoadDetail ON
 	ON receiptLoadDetail.intLoadDetailId = IRE.intSourceId 
 			AND IR.intSourceType = 2
 			AND (IR.strReceiptType = 'Purchase Contract' OR IR.strReceiptType = 'Inventory Return')
+LEFT JOIN tblICStorageCharge SG ON SG.intStorageChargeId = B.intStorageChargeId
+LEFT JOIN (tblICInsuranceCharge ichrge
+	INNER JOIN tblICInsuranceChargeDetail ichrgedtl ON ichrge.intInsuranceChargeId = ichrgedtl.intInsuranceChargeId)
+		ON ichrgedtl.intInsuranceChargeDetailId = B.intInsuranceChargeDetailId
 LEFT JOIN tblICLot lot
 	ON lot.intLotId = B.intLotId

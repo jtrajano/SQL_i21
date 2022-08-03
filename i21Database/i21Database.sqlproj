@@ -2363,6 +2363,8 @@
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuICGetLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCopyCategoryLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCopyItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMassAddLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPrice.sql" />
@@ -10836,6 +10838,11 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDTemplateAuditLog.sql" />
+    <Build Include="dbo\Index\IX_tblRKSummaryLog_intCommodityId.sql" />
+    <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
+    <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

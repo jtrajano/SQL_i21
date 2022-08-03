@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Copy Store' AND strModuleName = 'Store')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5658,6 +5658,12 @@ BEGIN
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubCategory' WHERE strMenuName = 'Subcategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 END
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Copy Store' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Copy Store', N'Store', @StoreMaintenanceParentMenuId, N'Copy Store', N'Maintenance', N'Screen', N'Store.view.CopyToStore', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Store.view.CopyToStore' WHERE strMenuName = 'Copy Store' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Checkout Transaction Journal' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Checkout Transaction Journal', N'Store', @StoreReportParentMenuId, N'Checkout Transaction Journal', N'Report', N'Screen', N'Store.view.CheckoutTransactionJournal?showSearch=true&searchCommand=SearchCheckoutTransactionJournal', N'small-menu-report', 0, 0, 0, 1, 0, 1)
@@ -7436,6 +7442,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Docum
 	VALUES (N'Add Documents', N'IDP', @IDPCreateParentMenuId, N'Add Documents', 'Create', N'Screen', N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr', N'small-menu-create', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL WHERE strMenuName = 'Add Documents' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Projects' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Add Projects', N'IDP', @IDPCreateParentMenuId, N'Add Projects', 'Create', N'Screen', N'GlobalComponentEngine.view.OcrFormTool?menu=projects/create', N'small-menu-create', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.OcrFormTool?menu=projects/create', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL 
+	WHERE strMenuName = 'Add Projects' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId
 
 --FORM TRAINING TOOL
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Form Training Tool' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId)

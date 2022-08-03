@@ -1304,7 +1304,9 @@ GO
 		WHERE strNamespace = 'Payroll.view.TimeApproval'
 	END
 
-
-
-
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.Allocation') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'', N'Allocation', N'Logistics.view.Allocation', N'Logistics', NULL, 1, N'Logistics')
+	END
 GO

@@ -239,7 +239,7 @@ BEGIN
 					, [strDescription]				= I.strDescription
 					, [dblPrice]					= CAST((ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))
 					, [dblQuantity]					= ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)), 0)
-					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)), 0))) AS DECIMAL(18,6))
+					, [dblAmount]					= ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) --just based the readings on the meter readings
 					, [intConcurrencyId]			= 0
 				 FROM tblSTCheckoutFuelTotalSold Chk
 				 JOIN dbo.tblICItemLocation IL 
@@ -260,7 +260,7 @@ BEGIN
 				UPDATE CPT
 					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.dblDollarsSold AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblGallonsSold AS DECIMAL(18,6)),0),0)
 						, CPT.[dblQuantity] = CAST(ISNULL(Chk.dblGallonsSold, 0) AS DECIMAL(18,6))
-						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.dblDollarsSold AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblGallonsSold AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.dblGallonsSold, 0) AS DECIMAL(18,6))
+						, CPT.[dblAmount] = CAST(ISNULL(Chk.dblDollarsSold, 0) AS DECIMAL(18,6)) --just based the readings on the meter readings
 					FROM dbo.tblSTCheckoutPumpTotals CPT
 					INNER JOIN tblSTCheckoutHeader CH
 						ON CPT.intCheckoutId = CH.intCheckoutId
