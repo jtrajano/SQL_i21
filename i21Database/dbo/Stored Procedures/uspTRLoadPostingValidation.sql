@@ -243,7 +243,7 @@ BEGIN TRY
 			END
 			IF (@intSupplyPoint IS NULL)
 			BEGIN
-				RAISERROR('Cannot find a valid Supply Point. If this TR Load is created from a Load Schedule, check the originating Load Scheudule''s Vendor and Vendor Location.', 16, 1)
+				RAISERROR('Cannot find a valid Supply Point. If this TR Load is created from a Load Schedule, check the originating Load Schedule''s Vendor and Vendor Location.', 16, 1)
 			END
 			IF (@intCompanyLocation IS NULL)
 			BEGIN
