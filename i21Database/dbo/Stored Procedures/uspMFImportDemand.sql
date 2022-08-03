@@ -88,6 +88,16 @@ BEGIN TRY
 		,intLocationId INT
 		)
 
+	DECLARE @strAutoFillValue nvarchar(50)
+
+	SELECT @strAutoFillValue = strValue
+	FROM tblIPSAPIDOCTag
+	WHERE strMessageType = 'Demand'
+		AND strTag = 'AutoFill'
+
+	if @strAutoFillValue is null or @strAutoFillValue=''
+	Select @strAutoFillValue='Yes'
+
 	SELECT @strDemandImportDateTimeFormat = IsNULL(strDemandImportDateTimeFormat, 'MM DD YYYY HH:MI')
 		,@intMinimumDemandMonth = IsNULL(intMinimumDemandMonth, 12)
 		,@intMaximumDemandMonth = IsNULL(intMaximumDemandMonth, 12)
@@ -434,6 +444,7 @@ BEGIN TRY
 				OR ISNULL(intOldItemUOMId, 0) <> ISNULL(intNewItemUOMId, 0)
 
 			IF @intMonthDiff <> 12
+				AND @strAutoFillValue='Yes'
 				AND NOT EXISTS (
 					SELECT *
 					FROM @tblMFItem
