@@ -33,9 +33,9 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,CASE 
 		WHEN D.intAttributeId = 5
 			THEN D.dblQty
-		WHEN D.intAttributeId =12
+		WHEN D.intAttributeId = 12
 			THEN CD.dblBalance
-		WHEN D.intAttributeId =13
+		WHEN D.intAttributeId = 13
 			THEN CD.dblQuantity - IsNULL(CD.dblScheduleQty, 0)
 		ELSE LC.dblQuantity
 		END dblQty
@@ -45,12 +45,8 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 		ELSE LCIU.strUnitMeasure
 		END AS strQtyUOM
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,12,13)
 			THEN D.dblWeight
-		WHEN D.intAttributeId =12
-			THEN dbo.fnMFConvertQuantityToTargetItemUOM(CD.intItemUOMId ,CD.intNetWeightUOMId , CD.dblBalance)
-		WHEN D.intAttributeId =13
-			THEN CD.dblNetWeight
 		ELSE LC.dblNetWt
 		END AS dblWeight
 	,CASE 
@@ -131,8 +127,15 @@ LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = D.intLoadC
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = IsNULL(D.intSubLocationId, LW.intSubLocationId)
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = D.intLoadContainerId
-LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+OUTER APPLY (
+	SELECT TOP 1 S.intSampleStatusId
+	FROM tblQMSample S
+	WHERE S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+		AND S.intLoadContainerId = D.intLoadContainerId
+		AND S.intSampleStatusId = 3 -->Approved
+	ORDER BY S.intSampleId DESC
+	) C3
+LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = C3.intSampleStatusId
 OUTER APPLY (
 	SELECT TOP 1 C2.strCertificationName
 	FROM tblICItemCertification IC
