@@ -5,9 +5,9 @@
  @intEntityId    AS INT,
  @strMessage NVARCHAR(MAX) OUT
 AS  
-DECLARE @PostGLEntries RecapTableType  
-DECLARE @ReversePostGLEntries RecapTableType  
-DECLARE @PostGLEntries2 RecapTableType  
+DECLARE @RevalTable RevalTableType 
+DECLARE @ReversePostGLEntries RevalTableType
+DECLARE @RecapTable RecapTableType  
 DECLARE @strPostBatchId NVARCHAR(100) = ''  
 DECLARE @strReversePostBatchId NVARCHAR(100) = ''  
 -- DECLARE @strMessage NVARCHAR(MAX)  
@@ -17,7 +17,11 @@ DECLARE @tblPostError TABLE(
  strPostBatchId NVARCHAR(40),  
  strMessage NVARCHAR(MAX),  
  strTransactionId NVARCHAR(40)  
-)  
+) 
+DECLARE
+@ysnOverrideLocation BIT = 0,
+@ysnOverrideLOB BIT = 0,
+@ysnOverrideCompany BIT = 0 
   
   DECLARE @ysnHasDetails BIT = 0
   SELECT @ysnHasDetails = 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
@@ -260,7 +264,7 @@ DECLARE @tblPostError TABLE(
           ) BankTransferAccount  
 
 -- Insert Unreealized Gain/Loss  (Realized for GL using fnGLGetRevalueAccountTable) with offset
-          INSERT INTO @PostGLEntries(  
+          INSERT INTO @RevalTable(  
            [strTransactionId]  
           ,[intTransactionId]  
           ,[intAccountId]  
@@ -317,7 +321,7 @@ DECLARE @tblPostError TABLE(
 
 
 --Insert Reverse Entries ( Except GL )
-          INSERT INTO @PostGLEntries (  
+          INSERT INTO @RevalTable (  
             [strTransactionId]  
           ,[intTransactionId]  
           ,[intAccountId]  
@@ -374,11 +378,11 @@ DECLARE @tblPostError TABLE(
           OUTER APPLY(  
           SELECT dtmReverseDate FROM tblGLRevalue  WHERE intConsolidationId = @intConsolidationId  
           )U  
-		      WHERE strModule <> 'GL'  
+		      WHERE strModule NOT IN ('GL', 'CM')  
     
           DECLARE @dtmReverseDate DATETIME  
           SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
-          IF EXISTS(Select TOP 1 1 FROM @PostGLEntries WHERE intAccountId IS NULL)  
+          IF EXISTS(Select TOP 1 1 FROM @RevalTable WHERE intAccountId IS NULL)  
           BEGIN  
             GOTO _error
           END  
@@ -388,10 +392,10 @@ DECLARE @tblPostError TABLE(
  END  
  ELSE  
  BEGIN  
-  INSERT INTO @PostGLEntries(  
+  INSERT INTO @RevalTable(  
    [strTransactionId]  
    ,[intTransactionId]  
-   ,[intAccountId]  
+   ,[intAccountId]
    ,[strDescription]  
    ,[dtmTransactionDate]  
    ,[dblDebit]  
@@ -414,9 +418,9 @@ DECLARE @tblPostError TABLE(
   SELECT   
    [strTransactionId]    
    ,[intTransactionId]    
-   ,[intAccountId]  
-   ,[strDescription]    
-   ,[dtmTransactionDate]   
+   ,[intAccountId]
+   ,[strDescription]  
+   ,[dtmTransactionDate]  
    ,[dblCredit]   
    ,[dblDebit]      
    ,[dtmDate]      
@@ -441,18 +445,77 @@ DECLARE @tblPostError TABLE(
   IF @ysnRecap = 0   
   BEGIN  
   
-   INSERT INTO @PostGLEntries2  
-   SELECT *  
-   from fnGLOverridePostAccounts(@PostGLEntries,DEFAULT,DEFAULT,DEFAULT) A   
+   INSERT INTO @RecapTable  (
+    dtmDate,  
+    strBatchId,  
+    intAccountId,
+    strDescription, 
+    dtmTransactionDate,   
+    dblDebit,  
+    dblCredit, 
+    strCode, 
+    intCurrencyId,  
+    dtmDateEntered,  
+    strJournalLineDescription,  
+    intJournalLineNo,  
+    ysnIsUnposted,  
+    intUserId,  
+    intEntityId,  
+    strTransactionId,  
+    intTransactionId,  
+    strTransactionType,  
+    strTransactionForm,  
+    strModuleName,  
+    intConcurrencyId,  
+    intAccountIdOverride,  
+    intLocationSegmentOverrideId,  
+    intLOBSegmentOverrideId,  
+    intCompanySegmentOverrideId,  
+    strNewAccountIdOverride,  
+    intNewAccountIdOverride,  
+    strOverrideAccountError 
+   )
+   SELECT 
+    dtmDate,  
+    strBatchId,  
+    intAccountId,  
+    strDescription, 
+    dtmTransactionDate,
+    dblDebit,  
+    dblCredit, 
+    strCode, 
+    intCurrencyId,  
+    dtmDateEntered,  
+    strJournalLineDescription,  
+    intJournalLineNo,  
+    ysnIsUnposted,  
+    intUserId,  
+    intEntityId,  
+    strTransactionId,  
+    intTransactionId,  
+    strTransactionType,  
+    strTransactionForm,  
+    strModuleName,  
+    intConcurrencyId,  
+    intAccountIdOverride,  
+    intLocationSegmentOverrideId,  
+    intLOBSegmentOverrideId,  
+    intCompanySegmentOverrideId,  
+    strNewAccountIdOverride,  
+    intNewAccountIdOverride,  
+    strOverrideAccountError 
+    from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
      
       
-    IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
+    IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
     BEGIN 
-      EXEC uspGLPostRecap @PostGLEntries2, @intEntityId  
+
+      EXEC uspGLPostRecap @RecapTable, @intEntityId  
       GOTO _overrideError
     END
-    
-   EXEC uspGLBookEntries @PostGLEntries2, @ysnPost, 1 ,1  
+  
+   IF EXISTS ( SELECT 1 FROM @RecapTable )
+      EXEC uspGLBookEntries @RecapTable, @ysnPost, 1 ,1  
   
    IF @@ERROR <> 0 RETURN  
   
@@ -464,70 +527,71 @@ DECLARE @tblPostError TABLE(
   END  
   ELSE  
   BEGIN  
-   DECLARE @RecapTable RecapTableType  
-   INSERT INTO @RecapTable (  
-     [strTransactionId]  
-    ,[intTransactionId]  
-    ,[intAccountId]  
-    ,[strDescription]  
-    ,[dtmTransactionDate]  
-    ,[dblDebit]  
-    ,[dblCredit]  
-    ,[dtmDate]  
-    ,[ysnIsUnposted]  
-    ,[intConcurrencyId]   
-    ,[intCurrencyId]  
-    ,[intUserId]  
-    ,[intEntityId]     
-    ,[dtmDateEntered]  
-    ,[strBatchId]  
-    ,[strCode]     
-    ,[strJournalLineDescription]  
-    ,[intJournalLineNo]  
-    ,[strTransactionType]  
-    ,[strTransactionForm]  
-    ,strModuleName  
-    ,intAccountIdOverride  
-    ,intLocationSegmentOverrideId  
-    ,intLOBSegmentOverrideId  
-    ,intCompanySegmentOverrideId  
-   )  
-   SELECT  
-     [strTransactionId]  
-    ,[intTransactionId]  
-    ,[intAccountId]  
-    ,[strDescription]  
-    ,[dtmTransactionDate]  
-    ,[dblDebit]  
-    ,[dblCredit]  
-    ,[dtmDate]  
-    ,[ysnIsUnposted]  
-    ,[intConcurrencyId]   
-    ,[intCurrencyId]  
-    ,[intUserId]  
-    ,[intEntityId]     
-    ,[dtmDateEntered]  
-    ,[strBatchId]= @strPostBatchId  
-    ,[strCode]     
-    ,[strJournalLineDescription]  
-    ,[intJournalLineNo]  
-    ,[strTransactionType]  
-    ,[strTransactionForm]  
-    ,strModuleName  
-    ,intAccountIdOverride  
-    ,intLocationSegmentOverrideId  
-    ,intLOBSegmentOverrideId  
-    ,intCompanySegmentOverrideId  
-   FROM @PostGLEntries  
+   INSERT INTO @RecapTable  (
+    dtmDate,  
+    strBatchId,  
+    intAccountId, 
+    strDescription, 
+    dtmTransactionDate,   
+    dblDebit,  
+    dblCredit, 
+    strCode, 
+    intCurrencyId,  
+    dtmDateEntered,  
+    strJournalLineDescription,  
+    intJournalLineNo,  
+    ysnIsUnposted,  
+    intUserId,  
+    intEntityId,  
+    strTransactionId,  
+    intTransactionId,  
+    strTransactionType,  
+    strTransactionForm,  
+    strModuleName,  
+    intConcurrencyId,  
+    intAccountIdOverride,  
+    intLocationSegmentOverrideId,  
+    intLOBSegmentOverrideId,  
+    intCompanySegmentOverrideId,  
+    strNewAccountIdOverride,  
+    intNewAccountIdOverride,  
+    strOverrideAccountError 
+   
+   )
+   SELECT 
+    dtmDate,  
+    strBatchId,  
+    intAccountId,  
+    strDescription, 
+    dtmTransactionDate,  
+    dblDebit,  
+    dblCredit, 
+    strCode, 
+    intCurrencyId,  
+    dtmDateEntered,  
+    strJournalLineDescription,  
+    intJournalLineNo,  
+    ysnIsUnposted,  
+    intUserId,  
+    intEntityId,  
+    strTransactionId,  
+    intTransactionId,  
+    strTransactionType,  
+    strTransactionForm,  
+    strModuleName,  
+    intConcurrencyId,  
+    intAccountIdOverride,  
+    intLocationSegmentOverrideId,  
+    intLOBSegmentOverrideId,  
+    intCompanySegmentOverrideId,  
+    strNewAccountIdOverride,  
+    intNewAccountIdOverride,  
+    strOverrideAccountError 
+   from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A  
   
+   EXEC uspGLPostRecap @RecapTable, @intEntityId  
   
-   INSERT INTO @PostGLEntries2  
-   SELECT *  
-   from fnGLOverridePostAccounts(@PostGLEntries, DEFAULT,DEFAULT,DEFAULT) A   
-  
-   EXEC uspGLPostRecap @PostGLEntries2, @intEntityId  
-  
-   IF EXISTS(SELECT 1 FROM @PostGLEntries2 WHERE ISNULL(strOverrideAccountError,'') <> '' )  
+   IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' )  
       GOTO _overrideError
    
   END  
