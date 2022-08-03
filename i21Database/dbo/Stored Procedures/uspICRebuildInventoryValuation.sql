@@ -1041,7 +1041,8 @@ BEGIN
 						WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
 						WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.		
 						/*
-							8	Produce
+							8	Consume
+							9	Produce
 							12	Inventory Transfer	Inventory Transfer
 							13	Inventory Transfer with Shipment	Inventory Transfer
 							14	Inventory Adjustment - UOM Change	Inventory Adjustment
@@ -1052,15 +1053,17 @@ BEGIN
 						*/
 						WHEN t.intTransactionTypeId IN (
 							8
-							, 12
-							, 13
-							, 14
-							, 15
-							, 17
-							, 19
-							, 20
+							,9
+							,12
+							,13
+							,14
+							,15
+							,17
+							,19
+							,20
 						) THEN 4 
 						WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
+						WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
 						WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
 						WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
@@ -1114,6 +1117,9 @@ BEGIN
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 				LEFT JOIN tblICInventoryTransactionType  ty
 					ON t.intTransactionTypeId = ty.intTransactionTypeId
+				LEFT JOIN tblICInventoryReceipt r 
+					ON r.strReceiptNumber = t.strTransactionId
+					AND t.strTransactionForm = 'Inventory Receipt'
 		ORDER BY 
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
@@ -1126,8 +1132,10 @@ BEGIN
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
 				WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
 				WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.				
+				WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.		
 				/*
-					8	Produce
+					8	Consume
+					9	Produce
 					12	Inventory Transfer	Inventory Transfer
 					13	Inventory Transfer with Shipment	Inventory Transfer
 					14	Inventory Adjustment - UOM Change	Inventory Adjustment
@@ -1138,15 +1146,17 @@ BEGIN
 				*/
 				WHEN t.intTransactionTypeId IN (
 					8
-					, 12
-					, 13
-					, 14
-					, 15
-					, 17
-					, 19
-					, 20
+					,9
+					,12
+					,13
+					,14
+					,15
+					,17
+					,19
+					,20
 				) THEN 4 
 				WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
+				WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
 				WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
 				WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
