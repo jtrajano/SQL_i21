@@ -24,6 +24,7 @@
     [ysnCMSwapsRevalued]		BIT				DEFAULT 0 NULL,
 	[ysnConsolidated]			BIT				DEFAULT 0 NULL,
     [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
+    guidPostId                  UNIQUEIDENTIFIER DEFAULT (NEWID()) NOT NULL,
    CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED 
 (
 	[intGLFiscalYearPeriodId] ASC,
