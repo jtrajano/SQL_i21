@@ -191,7 +191,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 			,[intEntityCustomerId] = InvoiceItem.intEntityCustomerId
 			,[intCompanyLocationId] = InvoiceItem.intLocationId
 			,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
-			,[intEntityId] = InvoiceItem.intEntityCustomerId
+			,[intEntityId] = @UserId
 			,[dtmDate] = InvoiceItem.dtmInvoiceDate
 			,[dtmDueDate] = NULL
 			,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
