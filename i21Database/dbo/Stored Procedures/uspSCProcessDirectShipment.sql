@@ -24,6 +24,7 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @InventoryReceiptId AS INT; 
 DECLARE @ErrMsg NVARCHAR(MAX);
+DECLARE @DoContractValidation BIT = 1
 
 DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@strWhereFinalizedWeight NVARCHAR(20)
@@ -33,6 +34,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intMatchTicketEntityId INT
 		,@intMatchTicketLocationId INT
 		,@intContractDetailId INT
+		,@intContractHeaderId INT
 		,@dblContractUnits NUMERIC(38, 20)
 		,@intMatchContractDetailId INT
 		,@dblMatchContractUnits NUMERIC(38, 20)
@@ -58,6 +60,7 @@ DECLARE @intMatchTicketContractDetailId INT
 DECLARE @ysnContractLoadBased BIT
 DECLARE @intTicketStorageScheduleTypeId INT
 DECLARE @dblTicketScheduledQty NUMERIC(38, 20)
+DECLARE @dblContractAvailableQuantity NUMERIC(38, 20)
 DECLARE @dblMatchTicketScheduledQty NUMERIC(18, 6)
 DECLARE @_dblMatchTicketScheduledQty NUMERIC(38, 20)
 DECLARE @dblLoadUsedQty NUMERIC(38,20)
@@ -964,6 +967,55 @@ BEGIN TRY
 						FROM tblSCTicketContractUsed
 						WHERE intTicketId = @intTicketId
 						
+
+
+						
+						
+						if @DoContractValidation = 1
+						begin
+							declare @ContractAvailablePricedQuantity numeric(38,20)												
+							declare @ContractNumberAffected nvarchar(500)
+			
+							select 
+								@intContractHeaderId = ContractHeader.intContractHeaderId 							
+								,@ContractNumberAffected = ContractHeader.strContractNumber
+							from tblCTContractDetail ContractDetail
+								join tblCTContractHeader ContractHeader
+									on ContractDetail.intContractHeaderId = ContractHeader.intContractHeaderId 
+							where intContractDetailId = @intContractDetailId
+
+							IF OBJECT_ID (N'tempdb.dbo.#tmpContractPriceChecking') IS NOT NULL DROP TABLE #tmpContractPriceChecking
+							CREATE TABLE #tmpContractPriceChecking (
+								intIdentityId INT
+								,intContractHeaderId int
+								,intContractDetailId int
+								,ysnLoad bit
+								,intPriceContractId int
+								,intPriceFixationId int
+								,intPriceFixationDetailId int
+								,dblQuantity numeric(38,20)
+								,dblPrice numeric(38,20)
+							)
+			
+							delete from #tmpContractPriceChecking
+							INSERT INTO #tmpContractPriceChecking 
+							EXEC uspCTGetContractPrice @intContractHeaderId,@intContractDetailId, @dblTicketNetUnits, 'Invoice'
+
+							select @ContractAvailablePricedQuantity = sum(dblQuantity) 
+							from #tmpContractPriceChecking
+
+							IF OBJECT_ID (N'tempdb.dbo.#tmpContractPriceChecking') IS NOT NULL DROP TABLE #tmpContractPriceChecking
+							if(@ContractAvailablePricedQuantity < @dblTicketNetUnits)
+							begin
+
+								declare @error_message nvarchar(200) = 'Cannot distribute to contract with not enough Priced Quantity (' + @ContractNumberAffected + ' has ' + cast(cast(@ContractAvailablePricedQuantity as numeric(18, 2)) as nvarchar) + ' priced units) .'
+								RAISERROR(@error_message, 11, 1);
+							end
+
+						end
+						
+
+
 					END
 
 					---Load Distribution
@@ -1250,7 +1302,3 @@ BEGIN CATCH
 		@ErrorState -- State.
 	);
 END CATCH
-GO
-
-	
-
