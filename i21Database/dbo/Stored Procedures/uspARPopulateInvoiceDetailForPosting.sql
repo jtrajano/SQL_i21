@@ -1394,4 +1394,18 @@ INNER JOIN (
 ) IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 WHERE ID.strSessionId = @strSessionId
 
+UPDATE ID
+SET dblQtyUnitOrGross = CASE WHEN SP.strGrossOrNet = 'Net' THEN DI.dblDistributionNetSalesUnits ELSE DI.dblDistributionGrossSalesUnits END
+FROM tblARPostInvoiceHeader I
+INNER JOIN tblARPostInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadDistributionHeaderId = I.intLoadDistributionHeaderId
+INNER JOIN tblTRLoadDistributionDetail DI ON ID.intLoadDistributionDetailId = DI.intLoadDistributionDetailId
+INNER JOIN tblTRLoadReceipt LR ON DH.intLoadHeaderId = LR.intLoadHeaderId
+INNER JOIN tblTRSupplyPoint SP ON LR.intSupplyPointId = SP.intSupplyPointId
+WHERE I.intLoadDistributionHeaderId IS NOT NULL
+  AND ID.intLoadDistributionDetailId IS NOT NULL
+  AND I.strSessionId = @strSessionId
+  AND ID.strSessionId = @strSessionId
+  AND DH.strDestination = 'Customer'
+
 RETURN 1
