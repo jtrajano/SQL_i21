@@ -172,7 +172,8 @@ LEFT JOIN (tblLGLoad receiptLoad INNER JOIN tblLGLoadDetail receiptLoadDetail ON
 	ON receiptLoadDetail.intLoadDetailId = IRE.intSourceId 
 			AND IR.intSourceType = 2
 			AND (IR.strReceiptType = 'Purchase Contract' OR IR.strReceiptType = 'Inventory Return')
-LEFT JOIN tblICStorageCharge SG ON SG.intStorageChargeId = B.intStorageChargeId
+LEFT JOIN (tblICStorageCharge SG
+		INNER JOIN tblICStorageChargeDetail schrgedtl ON SG.intStorageChargeId = schrgedtl.intStorageChargeId) ON schrgedtl.intStorageChargeDetailId = B.intStorageChargeId
 LEFT JOIN (tblICInsuranceCharge ichrge
 	INNER JOIN tblICInsuranceChargeDetail ichrgedtl ON ichrge.intInsuranceChargeId = ichrgedtl.intInsuranceChargeId)
 		ON ichrgedtl.intInsuranceChargeDetailId = B.intInsuranceChargeDetailId
