@@ -1061,13 +1061,7 @@ BEGIN TRY
 			
 					
 
-					EXEC uspSCUpdateContractSchedule
-						@intContractDetailId = @intTicketContractDetailId
-						,@dblQuantity = @dblTicketScheduledQty
-						,@intUserId = @intUserId
-						,@intExternalId = @intTicketId
-						,@strScreenName = 'Scale'
-
+					
 					--Remove loop schedule
 					while @CurrentTicketContractUsedId is not null			
 					begin 
@@ -1092,6 +1086,12 @@ BEGIN TRY
 				
 					end
 
+					EXEC uspSCUpdateContractSchedule
+						@intContractDetailId = @intTicketContractDetailId
+						,@dblQuantity = @dblTicketScheduledQty
+						,@intUserId = @intUserId
+						,@intExternalId = @intTicketId
+						,@strScreenName = 'Scale'
 
 
 
