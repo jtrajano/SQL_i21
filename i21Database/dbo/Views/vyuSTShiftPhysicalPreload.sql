@@ -8,6 +8,7 @@ SELECT DISTINCT
 	, p.intItemUOMId AS intItemUOMId
 	, p.intCountGroupId
 	, dblQtyReceived 
+	, dblQtyTransferred 
 	, dblQtySold 
 	, dblSystemCount 
 	
