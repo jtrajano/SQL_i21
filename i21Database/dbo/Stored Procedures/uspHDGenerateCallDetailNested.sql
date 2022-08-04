@@ -160,11 +160,15 @@ daysoutstanding as
 		,intDaysOutstanding = convert(numeric(18,6),datediff(hour,a.dtmCreated,a.dtmCompleted)) / convert(numeric(18,6),24.000000)
 	from
 		tblHDTicket a
+		inner join tblHDTicketStatus b on a.intTicketStatusId = b.intTicketStatusId
 	where
 		a.intTicketPriorityId is not null
 		and a.intTicketTypeId is not null
 		and a.dtmCreated is not null
 		and a.dtmCompleted is not null
+		and b.strStatus = 'Closed'
+		and a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 )
 
 --alter table tblHDCallDetailNested alter column intDaysOutstanding numeric(16,8) null;
@@ -247,7 +251,7 @@ select distinct
 		,dblTotalBillableAmount = isnull((select sum(dblTotalBillableAmount) from billedhours where intEntityId = b.intEntityId and intTicketTypeId = a.intTicketTypeId and intTicketPriorityId = a.intTicketPriorityId and dtmDate between @DateFrom and @DateTo),0.00)
 		,intCallsRated = null
 		,dblAverageRating = null
-		,intDaysOutstanding = isnull((select avg(isnull(daysoutstanding.intDaysOutstanding,0.00)) from daysoutstanding where daysoutstanding.intEntityId = b.intEntityId and daysoutstanding.intTicketTypeId = a.intTicketTypeId and daysoutstanding.intTicketPriorityId = a.intTicketPriorityId and daysoutstanding.intDate between @DateFrom and @DateTo),0.00)
+		,intDaysOutstanding = isnull((select sum(isnull(daysoutstanding.intDaysOutstanding,0.00)) from daysoutstanding where daysoutstanding.intEntityId = b.intEntityId and daysoutstanding.intTicketTypeId = a.intTicketTypeId and daysoutstanding.intTicketPriorityId = a.intTicketPriorityId and daysoutstanding.intDate between @DateFrom and @DateTo),0.00)
 		,dtmCreatedDate = getdate()
 		,intConcurrencyId = 1
 from

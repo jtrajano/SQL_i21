@@ -127,7 +127,7 @@ daysoutstanding as
 
 	select intEntityId, intDaysOutstanding = sum(intDaysOutstanding) / count(intEntityId) from
 	(
-	select distinct
+	select 
 		intEntityId = a.intAssignedToEntity
 		,intDaysOutstanding = convert(numeric(18,6),datediff(hour,a.dtmCreated,a.dtmCompleted)) / convert(numeric(18,6),24.000000)
 	from

@@ -57,6 +57,22 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
+	, strField = 'Vendor'
+	, strValue = vts.strVendor
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Vendor ID "' + vts.strVendor + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND v.intEntityId IS NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
 	, strField = 'Customer No'
 	, strValue = vts.strCustomer
 	, strLogLevel = 'Error'
@@ -65,8 +81,6 @@ SELECT
 	, strMessage = 'The Customer No. "' + vts.strCustomer + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
-JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 LEFT JOIN tblARCustomer c ON c.strCustomerNumber = vts.strCustomer
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND c.intEntityId IS NULL
@@ -84,8 +98,6 @@ SELECT
 	, strMessage = 'The Customer Name "' + vts.strCustomerName + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
-JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 LEFT JOIN tblEMEntity e ON e.strName = vts.strCustomerName
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -130,8 +142,6 @@ SELECT
 	, strMessage = 'The category "' + vts.strCategory + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
-JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 LEFT JOIN tblICCategory c ON c.strCategoryCode = vts.strCategory OR c.strDescription = vts.strCategory
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND c.intCategoryId IS NULL
@@ -177,8 +187,6 @@ SELECT
 	, strMessage = 'The UOM "' + vts.strUnitMeasure + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
-JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND u.intUnitMeasureId IS NULL
@@ -222,12 +230,29 @@ SELECT
 	, strMessage = 'The Item No "' + vts.strItemNo + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
-JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 LEFT JOIN tblICItem i ON i.strItemNo = vts.strItemNo
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND i.intItemId IS NULL
 	AND NULLIF(vts.strItemNo, '') IS NOT NULL
+
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Item Name'
+	, strValue = vts.strItemName
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Item "' + vts.strItemName + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblICItem i ON i.strDescription = vts.strItemName
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND i.intItemId IS NULL
+	AND NULLIF(vts.strItemName, '') IS NOT NULL
+	AND NULLIF(vts.strItemNo, '') IS NULL
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT

@@ -31,13 +31,13 @@ SELECT
 	,dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTaxAmountFunctional		= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblNonTaxable    			= (CASE WHEN INVOICE.dblTax = 0 
-								THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-								ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000
-											THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-											ELSE 0.000000 
-										END) 
-								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	, dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
+		 							THEN DETAIL.dblLineTotal 
+									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 
+												THEN DETAIL.dblLineTotal 
+												ELSE 0.000000 
+											END) 
+									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblNonTaxableFunctional	= (CASE WHEN INVOICE.dblBaseTax = 0 
 								THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 								ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax = 0.000000
@@ -45,16 +45,16 @@ SELECT
 											ELSE 0.000000 
 										END) 
 								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblTaxable       			= (CASE WHEN INVOICE.dblTax = 0 
-								THEN 0 
-								ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-											THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
-														THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
-														ELSE 0.000000
-													END
-											ELSE 0.000000 
-										END) 
-								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTaxable       		= (CASE WHEN INVOICE.dblTax = 0 
+		 							THEN 0 
+									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblLineTotal 
+														  ELSE 0.000000
+													 END
+												ELSE 0.000000 
+											END) 
+									END) 
 	,dblTaxableFunctional		= (CASE WHEN INVOICE.dblBaseTax = 0 
 								THEN 0 
 								ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax <> 0.000000 
