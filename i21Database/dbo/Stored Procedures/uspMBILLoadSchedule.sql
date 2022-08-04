@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]       
+CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]      
     @intDriverId AS INT,                      
  @forDeleteId NVARCHAR(MAX) = ''                      
 AS                                      
@@ -53,9 +53,9 @@ BEGIN
  dtmDeliveryFrom datetime NULL,                                        
  dtmDeliveryTo datetime NULL,                                        
  intTruckId nvarchar(200) COLLATE Latin1_General_CI_AS NULL,                                       
- strTrailerNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,                                    
- --strPONumber nvarchar(200) COLLATE Latin1_General_CI_AS NULL,              
- strLoadRefNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,              
+ strTrailerNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,
+ strLoadRefNo nvarchar(200) COLLATE Latin1_General_CI_AS NULL,   
+ strPONumber nvarchar(200) COLLATE Latin1_General_CI_AS NULL,               
  intHaulerId int,                             
  dtmScheduledDate datetime,                            
  intPContractDetailId INT NULL,                            
@@ -72,7 +72,7 @@ BEGIN
  FROM vyuMBILLoadSchedule                                        
  WHERE intDriverEntityId = @intDriverId AND intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader where ysnPosted = 1)                                    
                         
-                           
+                    
 INSERT INTO tblMBILLoadHeader(intLoadId      
         ,strLoadNumber      
         ,strType      
@@ -106,7 +106,8 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
   ,[dtmPickupTo]                             
   ,[strLoadRefNo]                      
   ,[intItemId]                             
-  ,[dblQuantity]                            
+  ,[dblQuantity]
+  ,[strPONumber]
     )                             
    SELECT  distinct                             
    intLoadDetailId                            
@@ -123,7 +124,8 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
   ,[dtmPickUpTo]                             
   ,[strLoadRefNo]                             
   ,[intItemId]                             
-  ,[dblQuantity]                                
+  ,[dblQuantity]         
+  ,[strPONumber]
     FROM #loadOrder a                                      
  INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId                
  WHERE a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILPickupDetail)                                  
@@ -203,7 +205,8 @@ SET   ysnPickup = 1
   ,pickupdetail.intShiftId = b.intShiftId    
   ,pickupdetail.dblPickupQuantity = LGLoadDetail.dblQuantity   
   ,pickupdetail.dblQuantity = LGLoadDetail.dblQuantity  
-  ,pickupdetail.strBOL = b.strBOL    
+  ,pickupdetail.strBOL = b.strBOL
+  ,pickupdetail.strPONumber = LGLoadDetail.strCustomerReference
 FROM tblMBILPickupDetail pickupdetail    
 INNER JOIN tblLGLoadDetail LGLoadDetail on pickupdetail.intLoadDetailId = LGLoadDetail.intLoadDetailId  
 INNER JOIN (    
