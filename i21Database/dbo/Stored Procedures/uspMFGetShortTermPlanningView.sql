@@ -1,4 +1,4 @@
-﻿AutoCREATE PROCEDURE uspMFGetShortTermPlanningView (
+﻿CREATE PROCEDURE uspMFGetShortTermPlanningView (
 	@intDemandHeaderId INT
 	,@intUnitMeasureId INT
 	,@intCompanyLocationId INT = NULL
