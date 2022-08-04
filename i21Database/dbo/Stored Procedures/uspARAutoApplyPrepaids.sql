@@ -47,6 +47,7 @@ CREATE TABLE #AAPPREPAIDS (
 	, strTransactionType	NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
 	, ysnProcessed			BIT NULL DEFAULT 0
 	, dblRunningTotal		NUMERIC(18,6) DEFAULT 0
+	, intContractDetailId	INT NULL	
 )
 
 SELECT TOP 1 @ysnAutoApplyPrepaids = ysnAutoApplyPrepaids 
@@ -138,6 +139,7 @@ INSERT INTO #AAPPREPAIDS WITH (TABLOCK) (
 	, dtmPostDate
 	, strInvoiceNumber
 	, strTransactionType
+	, intContractDetailId	
 )
 SELECT intInvoiceId			= C.intInvoiceId
 	, intEntityCustomerId	= C.intEntityCustomerId
@@ -152,6 +154,7 @@ SELECT intInvoiceId			= C.intInvoiceId
 	, dtmPostDate			= C.dtmPostDate
 	, strInvoiceNumber		= C.strInvoiceNumber
 	, strTransactionType	= C.strTransactionType
+	, intContractDetailId   = ISNULL(CreditWithLinkContract.intContractDetailId , 0)
 FROM tblARInvoice C WITH (NOLOCK)
 INNER JOIN (
 	SELECT DISTINCT intEntityCustomerId
@@ -163,6 +166,12 @@ LEFT JOIN (
 	WHERE ysnPosted = 1
 	AND ysnProcessedToNSF = 0
 ) PREPAY ON C.intPaymentId = PREPAY.intPaymentId
+INNER JOIN tblARInvoice I ON I.intInvoiceId=C.intInvoiceId	
+INNER JOIN tblARInvoiceDetail ID ON C.intInvoiceId=ID.intInvoiceId AND ID.intInvoiceId=I.intInvoiceId	
+LEFT JOIN(	
+SELECT intContractDetailId,intContractHeaderId FROM #AAPINVOICES AAPI	
+INNER JOIN tblARInvoiceDetail ID ON AAPI.intInvoiceId=ID.intInvoiceId)	
+CreditWithLinkContract ON CreditWithLinkContract.intContractDetailId =ID.intContractDetailId AND ID.intContractHeaderId=CreditWithLinkContract.intContractHeaderId
 WHERE C.ysnPosted = 1
   AND C.ysnCancelled = 0
   AND C.ysnPaid = 0
@@ -195,7 +204,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 				FROM #AAPPREPAIDS P
 				INNER JOIN (
 					SELECT P.dtmPostDate, P.intInvoiceId,P.dblAmountDue,P.dblAppliedPayment
-						 ,dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.dtmPostDate, P.intInvoiceId)
+						 ,dblRunningTotal = SUM(P.dblAmountDue - dblAppliedPayment) OVER (ORDER BY P.intContractDetailId DESC, P.dtmPostDate,  P.intInvoiceId)
 					FROM #AAPPREPAIDS P
 					WHERE P.dblAppliedPayment <> P.dblAmountDue
 				) CREDITS ON CREDITS.intInvoiceId = P.intInvoiceId
@@ -375,7 +384,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 						(
 							SELECT 
 								 intInvoiceId
-								,SUM(dblAppliedPayment) OVER(ORDER BY intInvoiceId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS dbldblAppliedPaymentTotal
+								,SUM(dblAppliedPayment) OVER(ORDER BY intContractDetailId DESC,intInvoiceId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS dbldblAppliedPaymentTotal
 							FROM  #AAPPREPAIDS
 						) T
 						WHERE T.dbldblAppliedPaymentTotal <= ' + CAST(@dblAmountDue AS NVARCHAR(MAX)) + '
@@ -475,7 +484,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #AAPINVOICES WHERE ysnProcessed = 0)
 			END
 	END
 
---CREATE AND POST PAYMENTS
+--CREATE AND POST PAYMENTS	
 IF EXISTS (SELECT TOP 1 NULL FROM @tblPaymentEntries)
 	BEGIN
 		DECLARE @ErrorMessage NVARCHAR(500) = NULL, @LogId INT = NULL
