@@ -98,7 +98,7 @@ SELECT CD.intContractDetailId
 	,CH.intCropYearId
 	,CPY.strCropYear
 	,CD.dblOptionalityPremium
-	,CD.dblQualityPremium
+	,CQP.dblQualityPremium --CD.dblQualityPremium
 	,intSeqCurrencyId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END
 	,strSeqCurrency = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.strCurrency ELSE AD.strSeqCurrency END
 	,intSeqPriceUOMId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END
@@ -178,3 +178,8 @@ OUTER APPLY (
 	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
 OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
+OUTER APPLY (
+	SELECT dblQualityPremium = SUM(ISNULL(dblAmount, 0))
+	FROM tblCTContractQuality
+	WHERE intContractDetailId = CD.intContractDetailId
+) CQP
