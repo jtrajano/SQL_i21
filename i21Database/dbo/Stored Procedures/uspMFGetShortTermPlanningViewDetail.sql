@@ -245,7 +245,7 @@ BEGIN
 			,intAttributeId
 			,intUserId
 			)
-		SELECT LD.intPContractDetailId
+		SELECT DISTINCT LD.intPContractDetailId
 			,LDCL.intLoadContainerId
 			,I.intItemId
 			,SS.intCompanyLocationId
@@ -260,6 +260,7 @@ BEGIN
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+			AND S.intLoadContainerId = LDCL.intLoadContainerId
 			AND S.intSampleStatusId = 3 -->Approved
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
@@ -312,7 +313,8 @@ BEGIN
 				SELECT *
 				FROM tblQMSample S1
 				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intSampleStatusId = 3 -->Approved)
+					AND S1.intLoadContainerId = LDCL.intLoadContainerId
+					AND S1.intSampleStatusId in (3,4) -->Approved)
 				)
 	END
 
@@ -534,21 +536,28 @@ BEGIN
 			,intLocationId
 			,intAttributeId
 			,intUserId
+			,dblWeight 
 			)
 		SELECT SS.intContractDetailId
 			,I.intItemId
 			,SS.intCompanyLocationId
 			,12 AS intAttributeId -->Late Open Contracts
 			,@intUserId
+			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
 		FROM tblCTContractDetail SS
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+		OUTER APPLY (
+			SELECT Sum(dblNet) dblNet
+			FROM tblLGLoadDetail LD
+			WHERE LD.intPContractDetailId = SS.intContractDetailId
+			) C2
 		WHERE SS.intContractStatusId IN (
 				1
 				,4
 				)
-			AND SS.dtmUpdatedAvailabilityDate < @dtmCurrentMonthStartDate
-			AND SS.dblBalance > 0
+			AND SS.dtmStartDate < @dtmCurrentMonthStartDate
+			AND SS.dblNetWeight - IsNULL(C2.dblNet, 0) > 0
 	END
 
 	IF @strColumnName IN (
@@ -562,22 +571,29 @@ BEGIN
 			,intLocationId
 			,intAttributeId
 			,intUserId
+			,dblWeight 
 			)
 		SELECT SS.intContractDetailId
 			,I.intItemId
 			,SS.intCompanyLocationId
 			,13 AS intAttributeId -->Forward Open Contracts
 			,@intUserId
+			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
 		FROM tblCTContractDetail SS
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+		OUTER APPLY (
+			SELECT Sum(dblNet) dblNet
+			FROM tblLGLoadDetail LD
+			WHERE LD.intPContractDetailId = SS.intContractDetailId
+			) C2
 		WHERE SS.intContractStatusId IN (
 				1
 				,4
 				)
 			AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
 				AND @dtmAfter80Days
-			AND SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0) > 0
+			AND SS.dblNetWeight - IsNULL(C2.dblNet, 0) > 0
 	END
 
 	IF @strColumnName IN (

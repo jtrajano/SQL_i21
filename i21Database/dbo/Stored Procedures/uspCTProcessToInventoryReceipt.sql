@@ -114,7 +114,11 @@ AS
 																ISNULL(CD.dblBasis,0))  / CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = CAST(1 AS BIT)   THEN 100 ELSE 1 END) * ISNULL(CD.dblRate, 1 )
 														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
-				intCostUOMId				=	case when CD.intPricingTypeId = 2 then CD.intBasisUOMId else CD.intFXPriceUOMId end,
+				intCostUOMId				=	CASE WHEN CD.intPricingTypeId = 2 OR ISNULL(CD.intCurrencyExchangeRateId, 0) = 0 THEN 
+													CD.intBasisUOMId 
+												ELSE
+													CD.intFXPriceUOMId 
+												END,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
 				dblExchangeRate				=	1,

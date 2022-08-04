@@ -23,6 +23,8 @@ CREATE TABLE [dbo].[tblMBILPickupDetail]
 	[intItemId] [int] NULL,
 	[dblQuantity] [numeric](18, 6) NULL,
 	[dblPickupQuantity] [numeric](18, 6) NULL,
+	[dblGross] [numeric](18, 6) NULL,
+	[dblNet] [numeric](18, 6) NULL,
 	[strItemUOM] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[strRack] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[intShiftId] [int] NULL,

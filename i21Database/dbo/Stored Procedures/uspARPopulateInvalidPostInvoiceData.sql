@@ -2215,7 +2215,7 @@ BEGIN
 		,[strPostingError]		= 'The due from account is not yet configured in company configuration.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
-	WHERE (I.dblFreightCharge > 0 OR @AllowSingleLocationEntries = 0)
+	WHERE (I.dblFreightCharge > 0 OR (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1))
 	AND @DueFromAccountId = 0
 	AND I.strSessionId = @strSessionId
 
@@ -2239,7 +2239,7 @@ BEGIN
 		,[strPostingError]		= 'The due to account is not yet configured in company configuration.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
-	WHERE (I.dblFreightCharge > 0 OR @AllowSingleLocationEntries = 0)
+	WHERE (I.dblFreightCharge > 0 OR (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1))
 	AND @DueToAccountId = 0
 	AND I.strSessionId = @strSessionId
 

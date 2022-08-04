@@ -539,7 +539,8 @@ BEGIN
 	 						,@dblMinimumUnitsOut OUTPUT
 					END
 
-					UPDATE tblTRLoadReceipt SET dblFreightRate = @dblFreightRateReceipt, dblPurSurcharge = @dblSurchargeReceipt
+					UPDATE tblTRLoadReceipt SET dblFreightRate = @dblFreightRateReceipt, dblPurSurcharge = @dblSurchargeReceipt,
+						intTaxGroupId = CASE WHEN ISNULL(@ysnFreightOnly, 0) = 1 THEN NULL ELSE intTaxGroupId END
 					WHERE intLoadHeaderId = @intLoadHeaderId
 					AND strReceiptLine = @strNonBlendReceiptLink
 
@@ -562,7 +563,7 @@ BEGIN
 						strBillOfLading, 
 						strReceiptLink,
 						intItemId, 
-						dblUnits, 
+						dblUnits,
 						dblPrice, 
 						dblFreightRate, 
 						dblDistSurcharge, 
@@ -577,7 +578,7 @@ BEGIN
 						@dblNonBlendPrice,
 						@dblFreightRateDistribution,
 						@dblSurchargeDistribution,
-						@intNonBlendTaxGroupId,
+						CASE WHEN ISNULL(@ysnFreightOnly, 0) = 1 THEN NULL ELSE @intNonBlendTaxGroupId END,
 						0,
 						1)
 
