@@ -203,26 +203,72 @@ SET @strToPriceIndexId			=  ISNULL(@strPriceIndexId			,'')
 					
 
 
-SET @children += ' {' + '"change":' +'"'+ 'Total Original Price'		  +'"'+ ',"from":"' + @dblFromOriginalTotalPrice		 + '",' + '"to":"' + @dblToOriginalTotalPrice	+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Original Gross Pirce'		  +'"'+ ',"from":"' + @dblFromOriginalGrossPrice		 + '",' + '"to":"' + @dblToOriginalGrossPrice	+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Original Net Price'			  +'"'+ ',"from":"' + @dblFromOriginalNetPrice		 + '",' + '"to":"' + @dblToOriginalNetPrice		+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Total Calculated Price' 		  +'"'+ ',"from":"' + @dblFromCalculatedTotalPrice	 + '",' + '"to":"' + @dblToCalculatedTotalPrice	+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Calculated Gross Pirce' 		  +'"'+ ',"from":"' + @dblFromCalculatedGrossPrice	 + '",' + '"to":"' + @dblToCalculatedGrossPrice	+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Calculated Net Price'		  +'"'+ ',"from":"' + @dblFromCalculatedNetPrice		 + '",' + '"to":"' + @dblToCalculatedNetPrice	+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Total Calculated Tax'		  +'"'+ ',"from":"' + @dblFromCalculatedTotalTax		 + '",' + '"to":"' + @dblToCalculatedTotalTax	+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Total Original Tax'			  +'"'+ ',"from":"' + @dblFromOriginalTotalTax		 + '",' + '"to":"' + @dblToOriginalTotalTax		+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Price Method'				  +'"'+ ',"from":"' + @strFromPriceMethod				 + '",' + '"to":"' + @strToPriceMethod			+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Price Basis'				      +'"'+ ',"from":"' + @strFromPriceBasis				 + '",' + '"to":"' + @strToPriceBasis			+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Price Profile'				  +'"'+ ',"from":"' + @strFromPriceProfileId			 + '",' + '"to":"' + @strToPriceProfileId		+ '",' + '"iconCls": "small-gear"},'
-SET @children += ' {' + '"change":' +'"'+ 'Price Index'				      +'"'+ ',"from":"' + @strFromPriceIndexId			 + '",' + '"to":"' + @strToPriceIndexId			+ '",' + '"iconCls": "small-gear"}'
+-- SET @children += ' {' + '"change":' +'"'+ 'Total Original Price'		  +'"'+ ',"from":"' + @dblFromOriginalTotalPrice		 + '",' + '"to":"' + @dblToOriginalTotalPrice	+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Original Gross Pirce'		  +'"'+ ',"from":"' + @dblFromOriginalGrossPrice		 + '",' + '"to":"' + @dblToOriginalGrossPrice	+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Original Net Price'			  +'"'+ ',"from":"' + @dblFromOriginalNetPrice		 + '",' + '"to":"' + @dblToOriginalNetPrice		+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Total Calculated Price' 		  +'"'+ ',"from":"' + @dblFromCalculatedTotalPrice	 + '",' + '"to":"' + @dblToCalculatedTotalPrice	+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Calculated Gross Pirce' 		  +'"'+ ',"from":"' + @dblFromCalculatedGrossPrice	 + '",' + '"to":"' + @dblToCalculatedGrossPrice	+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Calculated Net Price'		  +'"'+ ',"from":"' + @dblFromCalculatedNetPrice		 + '",' + '"to":"' + @dblToCalculatedNetPrice	+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Total Calculated Tax'		  +'"'+ ',"from":"' + @dblFromCalculatedTotalTax		 + '",' + '"to":"' + @dblToCalculatedTotalTax	+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Total Original Tax'			  +'"'+ ',"from":"' + @dblFromOriginalTotalTax		 + '",' + '"to":"' + @dblToOriginalTotalTax		+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Price Method'				  +'"'+ ',"from":"' + @strFromPriceMethod				 + '",' + '"to":"' + @strToPriceMethod			+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Price Basis'				      +'"'+ ',"from":"' + @strFromPriceBasis				 + '",' + '"to":"' + @strToPriceBasis			+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Price Profile'				  +'"'+ ',"from":"' + @strFromPriceProfileId			 + '",' + '"to":"' + @strToPriceProfileId		+ '",' + '"iconCls": "small-gear"},'
+-- SET @children += ' {' + '"change":' +'"'+ 'Price Index'				      +'"'+ ',"from":"' + @strFromPriceIndexId			 + '",' + '"to":"' + @strToPriceIndexId			+ '",' + '"iconCls": "small-gear"}'
 
 
-exec uspSMAuditLog
-@screenName				 = @screenName,
-@keyValue				 = @keyValue,
-@entityId				 = @entityId,
-@actionType				 = @processName,
-@changeDescription  	 = @processName,
-@details				 = @children
+DECLARE @strScreenName VARCHAR(MAX) = 'CardFueling.view.Transaction'
+DECLARE @intRecordId INT = @keyValue
+DECLARE @intEntityId INT = @entityId
+
+
+BEGIN TRY
+    DECLARE @SingleAuditLogParam SingleAuditLogParam
+
+    INSERT INTO @SingleAuditLogParam ([Id], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+    SELECT 1, 'Import Transaction', 'Updated - Record: ' + CAST(@intRecordId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
+    UNION ALL
+    SELECT 2, NULL, 'Total Original Price', @dblFromOriginalTotalPrice, @dblToOriginalTotalPrice, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 3, NULL, 'Original Gross Price', @dblFromOriginalGrossPrice, @dblToOriginalGrossPrice, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 4, NULL, 'Original Net Price', @dblFromOriginalNetPrice, @dblToOriginalNetPrice, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 5, NULL, 'Total Calculated Price', @dblFromCalculatedTotalPrice, @dblToCalculatedTotalPrice, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 6, NULL, 'Calculated Gross Price', @dblFromCalculatedGrossPrice, @dblToCalculatedGrossPrice, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 7, NULL, 'Calculated Net Price', @dblFromCalculatedNetPrice, @dblToCalculatedNetPrice, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 8, NULL, 'Total Calculated Tax',@dblFromCalculatedTotalTax, @dblToCalculatedTotalTax, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 9, NULL, 'Total Original Tax', @dblFromOriginalTotalTax, @dblToOriginalTotalTax, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 10, NULL, 'Price Method', @strFromPriceMethod, @strToPriceMethod, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 11, NULL, 'Price Basis', @strFromPriceBasis, @strToPriceBasis, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 12, NULL, 'Price Profile', @strFromPriceProfileId, @strToPriceProfileId, NULL, NULL, NULL, 1
+    UNION ALL
+    SELECT 13, NULL, 'Price Index', @strFromPriceIndexId, @strToPriceProfileId, NULL, NULL, NULL, 1
+
+    EXEC uspSMSingleAuditLog 
+        @screenName = @strScreenName,
+        @recordId = @intRecordId,
+        @entityId = @intEntityId,
+        @AuditLogParam = @SingleAuditLogParam
+END TRY
+BEGIN CATCH
+END CATCH
+
+
+
+-- exec uspSMAuditLog
+-- @screenName				 = @screenName,
+-- @keyValue				 = @keyValue,
+-- @entityId				 = @entityId,
+-- @actionType				 = @processName,
+-- @changeDescription  	 = @processName,
+-- @details				 = @children
 
 
