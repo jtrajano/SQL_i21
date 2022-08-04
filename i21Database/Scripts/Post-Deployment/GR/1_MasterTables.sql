@@ -412,3 +412,11 @@ BEGIN
 	VALUES ('Rate x Contract''s Charge')
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblGRAdjustmentType)
+BEGIN
+	INSERT INTO [tblGRAdjustmentType]
+	(
+		[strAdjustmentType]
+	) 
+	VALUES ('Advance'), ('Freight'), ('Adjustment'), ('Receivable')
+END
