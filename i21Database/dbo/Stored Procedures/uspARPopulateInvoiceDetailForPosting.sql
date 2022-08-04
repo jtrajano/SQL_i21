@@ -1412,5 +1412,6 @@ WHERE I.intLoadDistributionHeaderId IS NOT NULL
   AND ID.intLoadDistributionDetailId IS NOT NULL
   AND I.strSessionId = @strSessionId
   AND ID.strSessionId = @strSessionId
+  AND DH.strDestination = 'Customer'
 
 RETURN 1
