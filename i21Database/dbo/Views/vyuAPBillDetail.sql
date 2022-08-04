@@ -81,7 +81,7 @@ SELECT
 	A.strRemarks,
 	PG.strName as strPurchasingGroupName,
 	CB.strContractBasis as strINCO,
-	ISNULL(A2.ysnPaid,0) AS ysnPaid,
+	A.ysnPaid,
 	A2.strPaymentInfo COLLATE Latin1_General_CI_AS AS strPaymentInfo,
 	A2.dtmDatePaid,
 	A2.dtmPaymentDateReconciled,
