@@ -416,7 +416,7 @@ IF NOT EXISTS(SELECT 1 FROM tblGRAdjustmentType)
 BEGIN
 	INSERT INTO [tblGRAdjustmentType]
 	(
-		[strAdjustmentType]
+		[strAdjustmentType],[ysnPurchase],[ysnSales]
 	) 
-	VALUES ('Advance'), ('Freight'), ('Adjustment'), ('Receivable')
+	VALUES ('Advance',1,0), ('Freight',1,1), ('Adjustment',1,1), ('Receivable',1,0)
 END
