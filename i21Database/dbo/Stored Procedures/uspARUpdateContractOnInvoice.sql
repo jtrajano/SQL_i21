@@ -376,15 +376,15 @@ BEGIN TRY
 			END
 		
 		--FOR DIRECT OUT TICKET UPDATE SCHEDULE QTY
-		IF (ISNULL(@intTicketId, 0) <> 0 AND  (ISNULL(@intTicketType, 0) = 6  AND ISNULL(@intTicketTypeId, 0) = 9  AND ISNULL(@strInOutFlag, '') = 'O')) AND @strPricing = ('Subsystem - Ticket Management')
-			BEGIN
-				EXEC	uspCTUpdateScheduleQuantity
-						@intContractDetailId	=	@intContractDetailId,
-						@dblQuantityToUpdate	=	@dblQty,
-						@intUserId				=	@UserId,
-						@intExternalId			=	@intInvoiceDetailId,
-						@strScreenName			=	'Invoice'
-			END
+		--IF (ISNULL(@intTicketId, 0) <> 0 AND  (ISNULL(@intTicketType, 0) = 6  AND ISNULL(@intTicketTypeId, 0) = 9  AND ISNULL(@strInOutFlag, '') = 'O')) AND @strPricing = ('Subsystem - Ticket Management')
+		--	BEGIN
+		--		EXEC	uspCTUpdateScheduleQuantity
+		--				@intContractDetailId	=	@intContractDetailId,
+		--				@dblQuantityToUpdate	=	@dblQty,
+		--				@intUserId				=	@UserId,
+		--				@intExternalId			=	@intInvoiceDetailId,
+		--				@strScreenName			=	'Invoice'
+		--	END
 			
 		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing IN ('Subsystem - Direct', 'MANUAL OVERRIDE')	
 			BEGIN
