@@ -53,6 +53,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 	  , @dblTotalAR							NUMERIC(18,6)		= NULL
+	  , @ysnUseInvoiceDateAsDue				AS BIT				= 0
 
 DECLARE @temp_statement_table TABLE(
 	 [intTempId]					INT IDENTITY(1,1)		
@@ -130,6 +131,7 @@ SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + '''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
+			, @ysnUseInvoiceDateAsDue = CASE WHEN strCustomerAgingBy = 'Invoice Create Date' AND @strStatementFormatLocal = 'Zeeland Open Item' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -331,7 +333,7 @@ FROM (
 			 , dblInvoiceTotal
 			 , dtmDate
 			 , dtmPostDate
-			 , dtmDueDate
+			 , dtmDueDate       = '+ CASE WHEN @ysnUseInvoiceDateAsDue = 1 THEN 'I.dtmDate' ELSE 'I.dtmDueDate' END +'
 			 , ysnImportedFromOrigin
 			 , strTicketNumbers	= I.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
