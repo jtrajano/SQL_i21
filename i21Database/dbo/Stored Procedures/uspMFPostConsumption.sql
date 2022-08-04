@@ -227,6 +227,11 @@ BEGIN
 		,strActualCostId = (
 			CASE WHEN Receipt.strOrigin = 'Terminal'
 				AND HeaderDistItem.strDestination = 'Location'
+				AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+					THEN LoadHeader.strTransaction
+				WHEN Receipt.strOrigin = 'Terminal'
+				AND HeaderDistItem.strDestination = 'Location'
+				AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
 					THEN NULL
 				WHEN Receipt.strOrigin = 'Terminal'
 					THEN LoadHeader.strTransaction
