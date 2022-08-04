@@ -70,8 +70,20 @@ BEGIN
 		ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] DISABLE  
 		ALTER INDEX [AK_tblICItemUomUpc_strUpcCode] ON [dbo].[tblICItemUomUpc] DISABLE
 		ALTER INDEX [AK_tblICItemUomUpc_strLongUpcCode] ON [dbo].[tblICItemUomUpc] DISABLE
+
+		-- Drop the PERSISTED for intUpcCode
+		IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE [name] = N'intUpcCode' AND [object_id] = Object_ID(N'tblICItemUOM'))
+		BEGIN
+			EXEC ('ALTER TABLE tblICItemUOM ALTER COLUMN intUpcCode DROP PERSISTED')		
+		END
      
 		EXEC dbo.[uspICDCItemMigrationAg]  
+
+		-- Re-add the PERSISTED for intUpcCode
+		IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE [name] = N'intUpcCode' AND [object_id] = Object_ID(N'tblICItemUOM'))
+		BEGIN
+			EXEC ('ALTER TABLE tblICItemUOM ALTER COLUMN intUpcCode ADD PERSISTED')		
+		END
      
 		ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 		ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
@@ -102,9 +114,21 @@ BEGIN
 		BEGIN
 			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] DISABLE
 			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] DISABLE
+
+			-- Drop the PERSISTED for intUpcCode
+			IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE [name] = N'intUpcCode' AND [object_id] = Object_ID(N'tblICItemUOM'))
+			BEGIN
+				EXEC ('ALTER TABLE tblICItemUOM ALTER COLUMN intUpcCode DROP PERSISTED')		
+			END
 			
 			EXEC dbo.uspICDCCommodityMigrationGr 
 			EXEC dbo.uspICDCCommodityGLMigrationGr
+
+			-- Re-add the PERSISTED for intUpcCode
+			IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE [name] = N'intUpcCode' AND [object_id] = Object_ID(N'tblICItemUOM'))
+			BEGIN
+				EXEC ('ALTER TABLE tblICItemUOM ALTER COLUMN intUpcCode ADD PERSISTED')		
+			END
 			
 			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) 
