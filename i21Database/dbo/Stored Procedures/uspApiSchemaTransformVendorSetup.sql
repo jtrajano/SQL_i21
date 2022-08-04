@@ -57,6 +57,22 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
+	, strField = 'Vendor'
+	, strValue = vts.strVendor
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Vendor ID "' + vts.strVendor + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND v.intEntityId IS NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
 	, strField = 'Customer No'
 	, strValue = vts.strCustomer
 	, strLogLevel = 'Error'
