@@ -62,6 +62,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnStretchLogo						AS BIT				= 0
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @ysnUseInvoiceDateAsDue				AS BIT				= 0
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -242,6 +243,7 @@ CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTPAYMENTFORCF_A1] ON [#PAYMENTSFORC
 CREATE TABLE #DELCUSTOMERS (intEntityCustomerId	INT NOT NULL PRIMARY KEY)
 
 SELECT TOP 1 @ysnStretchLogo	= ysnStretchLogo
+	       , @ysnUseInvoiceDateAsDue = CASE WHEN strCustomerAgingBy = 'Invoice Create Date' AND @strStatementFormat = 'Zeeland Balance Forward' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 --COMPANY INFO
@@ -455,7 +457,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 								   ELSE 0.00
 							  END
 	, dtmDate				= I.dtmDate      
-	, dtmDueDate			= I.dtmDueDate      
+	, dtmDueDate			= CASE WHEN @ysnUseInvoiceDateAsDue = 1 THEN I.dtmDate ELSE I.dtmDueDate END
 	, dtmShipDate			= I.dtmShipDate
 	, dtmPostDate			= I.dtmPostDate
 	, strType				= I.strType      

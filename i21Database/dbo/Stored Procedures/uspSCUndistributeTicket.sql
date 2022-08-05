@@ -1050,6 +1050,54 @@ BEGIN TRY
 					FROM vyuSCTicketScreenView SC
 					WHERE intTicketId = @intTicketId
 
+
+
+					--Re-add Schedule
+					declare @CurrentTicketContractUsedId int
+
+					select @CurrentTicketContractUsedId = min(intTicketContractUsed)
+					from tblSCTicketContractUsed
+					where intTicketId = @intTicketId
+			
+					
+
+					
+					--Remove loop schedule
+					while @CurrentTicketContractUsedId is not null			
+					begin 
+
+						select 
+							@intLoopContractDetailId = intContractDetailId
+							,@dblLoopScheduleQty = -dblScheduleQty
+						from tblSCTicketContractUsed
+						where intTicketContractUsed = @CurrentTicketContractUsedId
+
+						EXEC uspSCUpdateContractSchedule
+							@intContractDetailId = @intLoopContractDetailId
+							,@dblQuantity = @dblLoopScheduleQty
+							,@intUserId = @intUserId
+							,@intExternalId = @intTicketId
+							,@strScreenName = 'Scale'
+
+						select @CurrentTicketContractUsedId = min(intTicketContractUsed)
+						from tblSCTicketContractUsed
+						where intTicketId = @intTicketId 
+							and intTicketContractUsed > @CurrentTicketContractUsedId
+				
+					end
+
+					EXEC uspSCUpdateContractSchedule
+						@intContractDetailId = @intTicketContractDetailId
+						,@dblQuantity = @dblTicketScheduledQty
+						,@intUserId = @intUserId
+						,@intExternalId = @intTicketId
+						,@strScreenName = 'Scale'
+
+
+
+
+
+
 					IF(@strTicketType = 'Direct Out' and ((LOWER(ISNULL(@strGrade,'Origin')) <> 'destination') AND LOWER(ISNULL(@strWght,'Origin')) <> 'destination'))
 					BEGIN
 						--No updating of Schedule and balances since unposting of invoice updates the contract schedule and balances

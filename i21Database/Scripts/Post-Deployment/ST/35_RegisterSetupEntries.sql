@@ -1612,11 +1612,11 @@ IF (@intTableCount = 3)
 					END		
 			END
 
-			-- vrubyrept-tankmonitor
+			-- vrubyrept-tankMonitor
 			BEGIN
 				SET @strImportFileHeader	= N'Commander Tank Monitor'
 				SET @strFileType			= N'Inbound'
-				SET @strFilePrefix			= N'vrubyrept-tankmonitor'
+				SET @strFilePrefix			= N'vrubyrept-tankMonitor'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
 				SET @strStoredProcedure		= N'[to be develop]'
 						

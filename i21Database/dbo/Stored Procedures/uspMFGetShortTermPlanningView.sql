@@ -211,7 +211,7 @@ BEGIN
 		,intAttributeId
 		,intLoadContainerId
 		)
-	SELECT I.intItemId
+	SELECT Distinct I.intItemId
 		,SS.intCompanyLocationId
 		,dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, LDCL.dblQuantity - ISNULL(LDCL.dblReceivedQty, 0)) AS dblQty
 		,(
@@ -233,6 +233,7 @@ BEGIN
 	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		AND S.intSampleStatusId = 3 -->Approved
+		AND S.intLoadContainerId = LDCL.intLoadContainerId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
 		AND LC.intLoadContainerId = LDCL.intLoadContainerId
@@ -261,8 +262,8 @@ BEGIN
 		,intAttributeId
 	FROM #tblMFPreShortTermDemand
 	WHERE intAttributeId IN (
-			5
-			,6
+			6
+			,7
 			)
 	GROUP BY intItemId
 		,intLocationId
@@ -420,18 +421,23 @@ BEGIN
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
-		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblQty
+		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight -IsNULL(dblNet,0))) AS dblQty
 		,12 AS intAttributeId -->Late Open Contracts
 	FROM tblCTContractDetail SS
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
+	OUTER APPLY (
+			SELECT Sum(dblNet) dblNet
+			FROM tblLGLoadDetail LD
+			WHERE LD.intPContractDetailId = SS.intContractDetailId
+			) C2
 	WHERE SS.intContractStatusId IN (
 			1
 			,4
 			)
-		AND SS.dtmUpdatedAvailabilityDate < @dtmCurrentMonthStartDate
-		AND SS.dblBalance > 0
+		AND SS.dtmStartDate  < @dtmCurrentMonthStartDate
+		AND SS.dblNetWeight -IsNULL(dblNet,0) > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 
@@ -443,19 +449,24 @@ BEGIN
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
-		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0))) AS dblQty
+		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight  - IsNULL(C2.dblNet , 0))) AS dblQty
 		,13 AS intAttributeId -->Forward Open Contracts
 	FROM tblCTContractDetail SS
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId 
+	OUTER APPLY (
+			SELECT Sum(dblNet) dblNet
+			FROM tblLGLoadDetail LD
+			WHERE LD.intPContractDetailId = SS.intContractDetailId
+			) C2
 	WHERE SS.intContractStatusId IN (
 			1
 			,4
 			)
 		AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
 			AND @dtmAfter80Days
-		AND SS.dblQuantity - IsNULL(SS.dblScheduleQty, 0) > 0
+		AND SS.dblNetWeight -IsNULL(dblNet,0) > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 
