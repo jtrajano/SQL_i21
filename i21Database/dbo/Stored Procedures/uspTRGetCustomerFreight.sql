@@ -126,7 +126,6 @@ SET	@dblMinimumUnitsOut = 0
 	      		and CF.strZipCode = @strZipCode
 	        	and CF.intCategoryId = @intCategoryid
 				and CF.intEntityLocationId = @intShipToId
-				and CF.intShipViaId IS NOT NULL
 			ORDER BY CF.dblFreightRate DESC
 		END
 
@@ -202,23 +201,26 @@ SET	@dblMinimumUnitsOut = 0
 				IF(@intShipViaId IS NULL)
 				BEGIN
 					-- FOR MULTIPLE SAME CUSTOMER LOC, ZIP CODE, CATEGORY
-					SELECT TOP 1 @intEntityShipViaId = CF.intShipViaId,
+					SELECT TOP 1 @intEntityShipViaId = TA.intEntityId,
 						@intMiles = convert(int,CF.dblFreightMiles),
 						@intTariffType  = CF.intEntityTariffTypeId
 					FROM tblARCustomerFreightXRef CF 
 					INNER JOIN tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
-					LEFT JOIN [tblEMEntityTariff] TA ON TA.intEntityId = CF.intShipViaId
+					CROSS JOIN [tblEMEntityTariff] TA 
 	                LEFT JOIN [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
 	  	       		LEFT JOIN [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId
 					WHERE CF.intEntityCustomerId = @intEntityCustomerId 
 						and CF.strZipCode = @strZipCode
 						and CF.intCategoryId = @intCategoryid
-						and CF.intEntityLocationId = @intShipToId	
-						and CF.intShipViaId IS NOT NULL
+						and CF.intEntityLocationId = @intShipToId
 						AND CF.strFreightType = 'Miles'
-						and TA.dtmEffectiveDate <= @dtmInvoiceDate
+						AND TA.dtmEffectiveDate <= @dtmInvoiceDate
 						AND  (@intMiles  >= TM.intFromMiles 
 		       		        and @intMiles  <= TM.intToMiles)
+						AND CF.intEntityTariffTypeId = TA.intEntityTariffTypeId
+						AND CF.intCategoryId = TC.intCategoryId
+						AND  (CF.dblFreightMiles  >= TM.intFromMiles 
+		       		        and CF.dblFreightMiles  <= TM.intToMiles)
 					ORDER BY TM.dblInvoiceRatePerUnit DESC
 				END
 			
