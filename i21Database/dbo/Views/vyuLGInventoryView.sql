@@ -301,9 +301,9 @@ FROM (
 		,dtmEndDate = PCD.dtmEndDate
 		,dblOriginalQty = PCD.dblOriginalQty
 		,strOriginalQtyUOM = PUM.strUnitMeasure
-		,dblStockQty = (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0))
+		,dblStockQty = (ISNULL(PCD.dblBalance,0) - ISNULL(InTrans.dblInTransitQty, 0))
 		,strStockUOM = IUM.strUnitMeasure
-		,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(PCD.intItemUOMId, ISNULL(PCD.intNetWeightUOMId, PCD.intItemUOMId), (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)))
+		,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(PCD.intItemUOMId, ISNULL(PCD.intNetWeightUOMId, PCD.intItemUOMId), (ISNULL(PCD.dblBalance,0) - ISNULL(InTrans.dblInTransitQty, 0)))
 		,strWeightUOM = WUM.strUnitMeasure
 		,intEntityVendorId = PCH.intEntityId
 		,strVendor = V.strName
@@ -332,12 +332,12 @@ FROM (
 		,strLocationName = WHU.strName
 		,strCondition = '' COLLATE Latin1_General_CI_AS
 		,dtmPostedDate = NULL
-		,dblQtyInStockUOM = (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)) * dbo.fnICConvertUOMtoStockUnit (I.intItemId, PCD.intItemUOMId, 1)
+		,dblQtyInStockUOM = (ISNULL(PCD.dblBalance,0) - ISNULL(InTrans.dblInTransitQty, 0)) * dbo.fnICConvertUOMtoStockUnit (I.intItemId, PCD.intItemUOMId, 1)
 		,intItemId = I.intItemId
 		,intWeightItemUOMId = PCD.intNetWeightUOMId
 		,strWarehouseRefNo = '' COLLATE Latin1_General_CI_AS
 		,dtmReceiptDate = CAST(NULL AS DATETIME)
-		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(PCD.intNetWeightUOMId, PCD.intItemUOMId), PCD.intPriceItemUOMId, (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)))) 
+		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(PCD.intNetWeightUOMId, PCD.intItemUOMId), PCD.intPriceItemUOMId, (ISNULL(PCD.dblBalance,0) - ISNULL(InTrans.dblInTransitQty, 0)))) 
 										* dbo.fnCTGetSequencePrice(PCD.intContractDetailId,NULL),0) AS NUMERIC(18,6)) / CASE WHEN (BC.ysnSubCurrency = 1) THEN BC.intCent ELSE 1 END
 		,dblFutures = PCD.dblFutures
 		,dblCashPrice = PCD.dblCashPrice
@@ -404,7 +404,7 @@ FROM (
 						AND LD.intPContractDetailId = PCD.intContractDetailId
 						AND L.intPurchaseSale = 1
 						AND LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity, 0) > 0) InTrans
-	WHERE (ISNULL(PCD.dblBalance,0) - ISNULL(dblInTransitQty, 0)) > 0
+	WHERE (ISNULL(PCD.dblBalance,0) - ISNULL(InTrans.dblInTransitQty, 0)) > 0
 		AND PCH.intContractTypeId = 1 AND PCD.intContractStatusId IN (1, 4)
 		AND EXISTS (SELECT 1 FROM tblLGCompanyPreference WHERE ysnIncludeOpenContractsOnInventoryView = 1)
 	) t1
