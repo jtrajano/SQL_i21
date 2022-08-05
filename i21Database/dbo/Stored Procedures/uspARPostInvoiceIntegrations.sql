@@ -1017,7 +1017,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesToUpdate)
 	END
 
 --SALES ANALYSIS REPORT
-EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds     = @tblInvoicesToUpdate
+EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds     = @Invoices
                                 , @ysnInvoice            = 1
                                 , @ysnRebuild            = 0
                                 , @ysnPost               = @Post
