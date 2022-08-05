@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[tblSTCheckoutShiftPhysicalItem]
     [intEntityUserSecurityId] INT NOT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)),
     CONSTRAINT [PK_tblCheckoutShiftPhysicalItem] PRIMARY KEY ([intCheckoutShiftPhysicalItemId]),
-    CONSTRAINT [AK_tblSTCheckoutShiftPhysicalItem_intCheckoutId_intItemId_intItemLocationId_intItemUOMId] UNIQUE NONCLUSTERED ([intCheckoutId],[intItemId],[intItemLocationId],[intItemUOMId]  ASC), 
+    --CONSTRAINT [AK_tblSTCheckoutShiftPhysicalItem_intCheckoutId_intItemId_intItemLocationId_intItemUOMId] UNIQUE NONCLUSTERED ([intCheckoutId],[intItemId],[intItemLocationId],[intItemUOMId]  ASC), 
     CONSTRAINT [FK_tblCheckoutShiftPhysicalItem_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCheckoutShiftPhysicalItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
     CONSTRAINT [FK_tblCheckoutShiftPhysicalItem_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
