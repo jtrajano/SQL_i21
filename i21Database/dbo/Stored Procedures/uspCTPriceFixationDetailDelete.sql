@@ -164,6 +164,11 @@ BEGIN TRY
 			-- -----------------------------------------
 			-- -- CT-4094	
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
+
+			update tc set tc.ysnProcessed = 0
+			from tblAPBillDetail bd
+			join tblSCTicketDirectBasisContract  tc on tc.intTicketId = bd.intTicketId
+			where bd.intBillDetailId = @DetailId;
 			--DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
 			
 			INSERT INTO @voucherIds			
@@ -247,6 +252,11 @@ BEGIN TRY
 			-- Disable constraints
 			ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
 			ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId
+
+			update tc set tc.ysnProcessed = 0
+			from tblAPBillDetail bd
+			join tblSCTicketDirectBasisContract  tc on tc.intTicketId = bd.intTicketId
+			where bd.intBillId = @Id;
 
 			EXEC uspAPDeleteVoucher @Id,@intUserId,4
 			
