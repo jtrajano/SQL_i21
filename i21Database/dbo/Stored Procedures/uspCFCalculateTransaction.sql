@@ -1815,8 +1815,9 @@ AND (tblCFImportTransactionStagingTable.ysnPostedOrigin = 0 OR tblCFImportTransa
 AND (LOWER(tblCFImportTransactionStagingTable.strTransactionType) like '%remote%')
 AND (tblCFImportTransactionStagingTable.intTaxGroupId IS NULL OR tblCFImportTransactionStagingTable.intTaxGroupId = 0 )
 AND (tblCFImportTransactionRemoteOriginalTax.ysnInvalidSetup =1 )
-AND LOWER(tblCFImportTransactionRemoteOriginalTax.strReason) like '%unable to find match for%'
+AND LOWER(ISNULL(tblCFImportTransactionRemoteOriginalTax.strReason,'')) like '%unable to find match for%'
 AND tblCFImportTransactionStagingTable.strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId 
+
 
 
 UPDATE tblCFImportTransactionStagingTable

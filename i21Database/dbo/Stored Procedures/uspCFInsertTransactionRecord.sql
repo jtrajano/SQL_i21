@@ -2448,7 +2448,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId,'Unable to find driver pin number ' + strDriverPin + ' into i21 driver pin list'
+		'Import',@dtmProcessDate,@strGUID,intTransactionId,'Unable to find driver pin number ' + ISNULL(strDriverPin,'') + ' into i21 driver pin list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(ysnWriteDriverPinError,0) = 1
 		AND strGUID = @strGUID
@@ -2456,7 +2456,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,'Unable to find driver pin number ' + strDriverPin + ' into i21 driver pin list'
+		intTransactionId,'Unable to find driver pin number ' + ISNULL(strDriverPin,'') + ' into i21 driver pin list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(ysnWriteDriverPinError,0) = 1
 		AND strGUID = @strGUID
@@ -2467,7 +2467,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Unable to find product number ' + strProductId + ' into i21 item list'
+		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Unable to find product number ' +ISNULL(strProductId,'')  + ' into i21 item list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(intARItemId,0) = 0
 		AND strGUID = @strGUID
@@ -2475,7 +2475,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,'Unable to find product number ' + strProductId + ' into i21 item list'
+		intTransactionId,'Unable to find product number ' + ISNULL(strProductId,'') + ' into i21 item list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(intARItemId,0) = 0
 		AND strGUID = @strGUID
@@ -2485,7 +2485,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Unable to find customer number using card number ' + strCardId + ' into i21 card account list'
+		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Unable to find customer number using card number ' + ISNULL(strCardId,'') + ' into i21 card account list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(intPrcCustomerId,0) = 0 AND strTransactionType != 'Foreign Sale'
 		AND strGUID = @strGUID
@@ -2493,7 +2493,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,'Unable to find customer number using card number ' + strCardId + ' into i21 card account list'
+		intTransactionId,'Unable to find customer number using card number ' + ISNULL(strCardId,'') + ' into i21 card account list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(intPrcCustomerId,0) = 0 AND strTransactionType != 'Foreign Sale'
 		AND strGUID = @strGUID
@@ -2503,7 +2503,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Invalid location for site ' + strSiteId
+		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Invalid location for site ' + ISNULL(strSiteId,'')
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intARItemLocationId,0) = 0)
 		AND strGUID = @strGUID
@@ -2511,7 +2511,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,'Invalid location for site ' + strSiteId
+		intTransactionId,'Invalid location for site ' + ISNULL(strSiteId,'')
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intARItemLocationId,0) = 0)
 		AND strGUID = @strGUID
@@ -2521,7 +2521,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Invalid UOM for product number ' + strProductId
+		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Invalid UOM for product number ' +  ISNULL(strProductId,'')
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intPrcItemUOMId,0) = 0)
 		AND strGUID = @strGUID
@@ -2529,7 +2529,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,'Invalid UOM for product number ' + strProductId
+		intTransactionId,'Invalid UOM for product number ' + ISNULL(strProductId,'')
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intPrcItemUOMId,0) = 0)
 		AND strGUID = @strGUID
@@ -2539,7 +2539,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId,  'Unable to find network ' + strNetworkId + ' into i21 network list'
+		'Import',@dtmProcessDate,@strGUID,intTransactionId,  'Unable to find network ' + ISNULL(strNetworkId,'') + ' into i21 network list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intNetworkId,0) = 0)
 		AND strGUID = @strGUID
@@ -2547,7 +2547,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId, 'Unable to find network ' + strNetworkId + ' into i21 network list'
+		intTransactionId, 'Unable to find network ' + ISNULL(strNetworkId,'') + ' into i21 network list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intNetworkId,0) = 0)
 		AND strGUID = @strGUID
@@ -2557,7 +2557,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId,   'Unable to find site ' + strSiteId + ' into i21 site list'
+		'Import',@dtmProcessDate,@strGUID,intTransactionId,   'Unable to find site ' + ISNULL(strSiteId ,'') + ' into i21 site list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intSiteId,0) = 0)
 		AND strGUID = @strGUID
@@ -2565,7 +2565,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,  'Unable to find site ' + strSiteId + ' into i21 site list'
+		intTransactionId,  'Unable to find site ' + ISNULL(strSiteId,'') + ' into i21 site list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intSiteId,0) = 0)
 		AND strGUID = @strGUID
@@ -2591,7 +2591,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId,  'Unable to find card number ' + strCardId + ' into i21 card list'
+		'Import',@dtmProcessDate,@strGUID,intTransactionId,  'Unable to find card number ' + ISNULL(strCardId  ,'') + ' into i21 card list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE(ISNULL(intCardId,0) = 0) AND strTransactionType != 'Foreign Sale'
 		AND strGUID = @strGUID
@@ -2599,7 +2599,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,  'Unable to find card number ' + strCardId + ' into i21 card list'
+		intTransactionId,  'Unable to find card number ' + ISNULL(strCardId,'') + ' into i21 card list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE (ISNULL(intCardId,0) = 0) AND strTransactionType != 'Foreign Sale'
 		AND strGUID = @strGUID
@@ -2609,7 +2609,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId,  'Invalid quantity - ' + Str(dblQuantity, 16, 8)
+		'Import',@dtmProcessDate,@strGUID,intTransactionId,  'Invalid quantity - ' + Str(ISNULL(dblQuantity  ,0) , 16, 8)
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(dblQuantity,0) = 0
 		AND strGUID = @strGUID
@@ -2617,7 +2617,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId,  'Invalid quantity - ' + Str(dblQuantity, 16, 8)
+		intTransactionId,  'Invalid quantity - ' + Str(ISNULL(dblQuantity,0), 16, 8)
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(dblQuantity,0) = 0
 		AND strGUID = @strGUID
@@ -2694,7 +2694,7 @@ BEGIN
 		INSERT INTO tblCFTransactionNote 
 		(strProcess,dtmProcessDate,strGuid,intTransactionId,strNote)
 		SELECT 
-		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Unable to find vehicle number '+ strVehicleId +' into i21 vehicle list'
+		'Import',@dtmProcessDate,@strGUID,intTransactionId, 'Unable to find vehicle number '+ ISNULL(strVehicleId  ,'') +' into i21 vehicle list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(intVehicleId,0) = 0 
 		AND strTransactionType != 'Foreign Sale'
@@ -2704,7 +2704,7 @@ BEGIN
 		INSERT INTO tblCFFailedImportedTransaction 
 		(intTransactionId,strFailedReason)
 		SELECT 
-		intTransactionId, 'Unable to find vehicle number '+ strVehicleId +' into i21 vehicle list'
+		intTransactionId, 'Unable to find vehicle number '+ ISNULL(strVehicleId,'') +' into i21 vehicle list'
 		FROM tblCFImportTransactionStagingTable
 		WHERE ISNULL(intVehicleId,0) = 0 
 		AND strTransactionType != 'Foreign Sale'
@@ -3081,7 +3081,7 @@ BEGIN
 	DELETE FROM tblCFImportTransactionRemoteCalculatedTax				WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionRemoteOriginalTax					WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionRemoteTax							WHERE strGUID = @strGUID
-	DELETE FROM tblCFImportTransactionStagingTable						WHERE strGUID = @strGUID
+	--DELETE FROM tblCFImportTransactionStagingTable						WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionStringVehicleStagingTable			WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionTax								WHERE strGUID = @strGUID
 	DELETE FROM tblCFImportTransactionTaxType							WHERE strGUID = @strGUID
