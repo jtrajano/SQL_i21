@@ -50,15 +50,9 @@ BEGIN TRY
 		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), intBillId)
 		FROM dbo.fnAPGetPayVoucherForPayment(@currencyId, @paymentMethodId, @datePaid, 1, @vendorId, @payToAddress, 0, DEFAULT, DEFAULT)
 
-		IF @billIds IS NOT NULL
+		IF NULLIF(@billIds, '') IS NOT NULL
 		BEGIN
 			EXEC uspAPCreatePayment @userId, @bankAccountId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
-
-			DELETE PD
-			FROM tblAPPaymentDetail PD
-			INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
-			LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
-			WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND (I.intId IS NULL OR I.intId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds)))
 			
 			UPDATE PD
 			SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
@@ -69,7 +63,7 @@ BEGIN TRY
 			FROM tblAPPaymentDetail PD
 			INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 			LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
-			LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
+			LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber) AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
 			WHERE PD.intPaymentId = @createdPaymentId
 
 			EXEC uspAPUpdateVoucherPayment @createdPaymentId, NULL
@@ -89,8 +83,6 @@ BEGIN TRY
 				SELECT COUNT(*) intPaymentCount FROM tblAPPaymentDetail WHERE dblPayment <> 0
 			) PC
 			WHERE P.intPaymentId = @createdPaymentId
-			
-			EXEC uspAPUpdateVoucherPayment @createdPaymentId, 1
 
 			SET @createdPayments = @createdPayments + CASE WHEN @createdPayments = '' THEN '' ELSE ', ' END + CONVERT(VARCHAR(12), @createdPaymentId)
 		END
