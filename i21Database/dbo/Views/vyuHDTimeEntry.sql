@@ -34,9 +34,20 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 	  ,[dblAnnualBudget]				= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblAnnualBudget], 0)
 	  ,[dblWeeklyBudget]				= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblWeeklyBudget], 0)
 	  ,[dblAnnualHurdle]				= ISNULL(AgentTimeEntryPeriodDetailSummary.[dblAnnualHurdle], 0)
+	  ,[ysnVendor]						= CASE WHEN EntityType.strType IS NULL
+										  			THEN CONVERT(BIT,0)
+										  	   ELSE CONVERT(BIT,1)
+										   END 
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
+	OUTER APPLY
+	(
+		SELECT TOP 1 EntityType.strType
+		FROM tblEMEntityType EntityType
+		WHERE EntityType.intEntityId = TimeEntry.intEntityId AND
+			  EntityType.strType = 'Vendor'
+	) EntityType
 	CROSS APPLY
 	(
 		SELECT TOP 1 intBillingIncrement
