@@ -196,8 +196,8 @@ SELECT
 	,ysnIntraCompany					= CASE WHEN ISNULL(INV.ysnIntraCompany,0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries,0) END
 	,strGoodsStatus						= INV.strGoodsStatus
 	,dblFreightCharge					= INV.dblFreightCharge
-	,strFreightCompanySegment			= INV.strFreightCompanySegment
-	,strFreightLocationSegment			= INV.strFreightLocationSegment
+	,strFreightCompanySegment			= CAST(GLCAI.strCode AS NVARCHAR(50)) + ' - ' + GLCAI.strDescription
+	,strFreightLocationSegment			= CAST(GLLAI.strCode AS NVARCHAR(50)) + ' - ' + GLLAI.strDescription
 	,intTaxLocationId                  	= INV.intTaxLocationId
 	,strTaxLocation						= TAXLOCATION.strLocationName
 	,strTaxPoint                        = INV.strTaxPoint
@@ -428,14 +428,16 @@ OUTER APPLY(
 OUTER APPLY (
 	SELECT TOP 1 
 		 intAccountId
-		,strDescription 
+		,strDescription
+		,strCode
 	FROM vyuGLCompanyAccountId WITH (NOLOCK)
 	WHERE intAccountSegmentId = INV.intFreightCompanySegment
 ) GLCAI
 OUTER APPLY (
 	SELECT TOP 1 
 		 intAccountId
-		,strDescription 
+		,strDescription
+		,strCode
 	FROM vyuGLLocationAccountId WITH (NOLOCK)
 	WHERE intAccountSegmentId = INV.intFreightLocationSegment
 ) GLLAI
