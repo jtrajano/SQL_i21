@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Copy Store' AND strModuleName = 'Store')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rapid Deployment' AND strModuleName = 'System Manager')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -480,6 +480,15 @@ ELSE
 DECLARE @SystemManagerLicensingParentMenuId INT
 SELECT @SystemManagerLicensingParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Licensing' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Setup', N'System Manager', @SystemManagerParentMenuId, N'Setup', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1, intRow = 1 WHERE strMenuName = 'Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+
+DECLARE @SystemManagerSetupParentMenuId INT
+SELECT @SystemManagerSetupParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */
 UPDATE tblSMMasterMenu SET intParentMenuID = @SystemManagerActivitiesParentMenuId WHERE intParentMenuID IN (@SystemManagerMaintenanceParentMenuId, @SystemManagerParentMenuId) AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @SystemManagerMaintenanceParentMenuId WHERE intParentMenuID IN (@SystemManagerParentMenuId) AND strCategory = 'Maintenance'
@@ -634,6 +643,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer 
 	VALUES (N'Customer Licenses', N'System Manager', @SystemManagerLicensingParentMenuId, N'CRM Customer Licenses', N'Licensing', N'Screen', N'CRM.view.CustomerLicense?showSearch=true&searchCommand=CustomerLicense', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CRM.view.CustomerLicense?showSearch=true&searchCommand=CustomerLicense' WHERE strMenuName = 'Customer Licenses' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerLicensingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rapid Deployment' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerSetupParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Rapid Deployment', N'System Manager', @SystemManagerSetupParentMenuId, N'Rapid Deployment', N'Setup', N'Screen', N'i21.view.RapidDeployment?strModule=System Manager', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'i21.view.RapidDeployment?strModule=System Manager' WHERE strMenuName = 'Rapid Deployment' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerSetupParentMenuId
+
 --/* Start of Remodule*/
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'i21 Updates' AND strModuleName = 'Service Pack' AND intParentMenuID = @UtilitiesParentMenuId)
 --UPDATE tblSMMasterMenu SET strModuleName = N'System Manager' WHERE strMenuName = 'i21 Updates' AND strModuleName = 'Service Pack' AND intParentMenuID = @UtilitiesParentMenuId
