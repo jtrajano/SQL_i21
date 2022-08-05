@@ -361,18 +361,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 			,@CurrencyExchangeRate			= @CurrencyExchangeRate			OUTPUT
 			,@SubCurrencyId					= @SubCurrencyId				OUTPUT
 			,@SubCurrencyRate				= @SubCurrencyRate				OUTPUT
-			--,@AvailableQuantity			= NULL OUTPUT
-			--,@UnlimitedQuantity			= 0    OUTPUT
-			--,@OriginalQuantity			= NULL
-			--,@CustomerPricingOnly			= 0
-			--,@ItemPricingOnly				= 0
-			--,@VendorId					= NULL
-			--,@SupplyPointId				= NULL
-			--,@LastCost					= NULL
-			--,@ShipToLocationId			= NULL
-			--,@VendorLocationId			= NULL
-			--,@PricingLevelId			= NULL
-			--,@AllowQtyToExceedContract	= 0
 			,@InvoiceType				= @InvoiceType
 			,@TermId					= @TermId
 
@@ -479,7 +467,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[ysnAddonParent]
 				,[dblAddOnQuantity]
 				,[intInventoryShipmentChargeId]
-				,[dblStandardWeight])
+				,[dblStandardWeight]
+				,[intLoadDistributionDetailId])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -572,6 +561,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemAddOnQuantity
 				,@ItemInventoryShipmentChargeId
 				,@ItemStandardWeight
+				,@ItemLoadDistributionDetailId
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -642,7 +632,7 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -744,6 +734,5 @@ END
 
 SET @ErrorMessage = NULL;
 RETURN 1;
-	
 	
 END

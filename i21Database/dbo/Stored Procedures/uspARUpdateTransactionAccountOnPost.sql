@@ -130,7 +130,7 @@ SET ANSI_WARNINGS OFF
 	UPDATE LIA
 	SET LIA.[intAccountId] = CASE WHEN @OverrideLineOfBusinessSegment  = 1 
 								THEN ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](OVERRIDESEGMENT.intOverrideAccount , ISNULL(LOB.intSegmentCodeId, 0)), OVERRIDESEGMENT.intOverrideAccount)
-								ELSE OVERRIDESEGMENT.intOverrideAccount 
+								ELSE ISNULL(OVERRIDEFREIGHTLOCATION.[intSalesAccountId], OVERRIDESEGMENT.intOverrideAccount)
 							 END
 	FROM @LineItemAccounts LIA
 	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
@@ -141,6 +141,26 @@ SET ANSI_WARNINGS OFF
 		FROM tblSMLineOfBusiness
 		WHERE intLineOfBusinessId = ISNULL(ARI.intLineOfBusinessId, 0)
 	) LOB
+	OUTER APPLY (
+		SELECT TOP 1 [intSalesAccountId] = dbo.[fnGetGLAccountIdFromProfitCenter](ARID.[intSalesAccountId] , ISNULL(SMCL.intProfitCenter, 0))
+		FROM tblICFreightOverride ICFO
+		INNER JOIN (
+			SELECT 
+				 intFreightItemId  = ARPID1.intItemId
+				,ARPID2.intItemId
+			FROM tblARPostInvoiceDetail ARPID1
+			CROSS JOIN tblARPostInvoiceDetail ARPID2
+			WHERE ARPID1.intLoadDistributionDetailId = ARID.intLoadDistributionDetailId
+			AND ARPID2.intLoadDistributionDetailId = ARID.intLoadDistributionDetailId
+			AND ARPID1.intItemId = ARID.intItemId
+			AND ARPID1.strSessionId = @strSessionId
+			AND ARPID2.strSessionId = @strSessionId
+		) ITEMFREIGHT 
+		ON ICFO.intItemId = ITEMFREIGHT.intFreightItemId 
+		AND ICFO.intFreightOverrideItemId = ITEMFREIGHT.intItemId
+		INNER JOIN tblSMCompanyLocation SMCL ON ICFO.intCompanyLocationId = SMCL.intCompanyLocationId
+		GROUP BY ICFO.intItemId, ICFO.intFreightOverrideItemId, ICFO.intCompanyLocationId, SMCL.intProfitCenter
+	) OVERRIDEFREIGHTLOCATION
 	OUTER APPLY (
 		SELECT intOverrideAccount
 		FROM dbo.[fnARGetOverrideAccount](
@@ -156,6 +176,7 @@ SET ANSI_WARNINGS OFF
 		)
 	) OVERRIDESEGMENT
 	WHERE ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
+	AND ARID.strSessionId = @strSessionId
 
 	UPDATE LIA
 	SET LIA.[intSalesAccountId] = LIA.[intAccountId]
