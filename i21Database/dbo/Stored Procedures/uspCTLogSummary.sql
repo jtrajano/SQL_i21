@@ -1796,9 +1796,9 @@ BEGIN TRY
 				, cbl.intPriceUOMId
 				, cbl.dtmStartDate
 				, cbl.dtmEndDate
-				, dblQty = @dblTransactionQty
-				, dblOrigQty = @dblTransactionQty
-				, dblDynamic = @dblTransactionQty
+				, dblQty = case when isnull(@dblTransactionQty,0) = 0 then pLog.dblQty else @dblTransactionQty end
+				, dblOrigQty = case when isnull(@dblTransactionQty,0) = 0 then pLog.dblOrigQty else @dblTransactionQty end
+				, dblDynamic = case when isnull(@dblTransactionQty,0) = 0 then pLog.dblDynamic else @dblTransactionQty end
 				, cbl.intContractStatusId
 				, cbl.intBookId
 				, cbl.intSubBookId
@@ -4860,6 +4860,11 @@ BEGIN TRY
                             UPDATE @cbLogSpecific SET dblQty = abs(dblQty), intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
                             EXEC uspCTLogContractBalance @cbLogSpecific, 0;
                         END
+						ELSE IF (@strTransactionReference = 'Scale' AND @currPricingTypeId <> 3)
+						BEGIN
+								UPDATE @cbLogSpecific SET dblQty = abs(dblOrigQty), intPricingTypeId = 1, strTransactionType = case when intContractTypeId = 1 then 'Purchase Basis Deliveries' else 'Sales Basis Deliveries' end    
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0   
+						END
 					END				
 					ELSE IF ISNULL(@dblBasis, 0) > 0
 					BEGIN
