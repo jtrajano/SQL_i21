@@ -13,6 +13,10 @@ CREATE TABLE [dbo].[tblICEffectiveItemCost]
 	[intDataSourceId] TINYINT NULL,
 	[intImportFlagInternal] INT NULL,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[intStoreGroupId] INT NULL,
+	[intVendorId] INT NULL,
+	[strVendorProduct] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intVendorProductUOMId] INT NULL,
 	CONSTRAINT [PK_intEffectiveItemCostId] PRIMARY KEY ([intEffectiveItemCostId]),
 	CONSTRAINT [FK_intEffectiveItemCostId_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_intEffectiveItemCostId_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
