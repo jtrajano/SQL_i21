@@ -38,7 +38,7 @@ AS
 					, intSubCurrencyId					=   AD.intSeqCurrencyId
 					, dblSubCurrencyRate				=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE 1.000000 END
 					, strSubCurrency					=	AD.strSeqCurrency
-					, dblOrderPrice						=	AD.dblSeqPrice
+					, dblOrderPrice						=	AD.dblSeqPrice * dblQtyToPriceUOMConvFactor
 					, intPriceItemUOMId					=	AD.intSeqPriceUOMId
 					, strPriceUnitMeasure				=	AD.strSeqPriceUOM
 					, dblBalance						=	CD.dblBalance
@@ -73,7 +73,9 @@ AS
 					, intSubLocationId					= 	CASE WHEN CD.intSubLocationId IS NULL THEN IL.intSubLocationId ELSE CD.intSubLocationId END
 					, strStorageLocation				=	SL.strName
 					, strSubLocation					=	UL.strSubLocationName
-    
+					, strTaxPoint						=   CD.strTaxPoint
+					, intTaxGroupId						=   CD.intTaxGroupId
+					, intTaxLocationId					=   CD.intTaxLocationId
 			FROM	tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON  CH.intContractHeaderId				=   CD.intContractHeaderId
 														AND CH.intContractTypeId				=	2
