@@ -1,115 +1,117 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
-SELECT id							= NEWID()
-	 , strTransactionType			= SHIPPEDITEMS.strTransactionType
-	 , strTransactionNumber			= SHIPPEDITEMS.strTransactionNumber
-	 , strShippedItemId				= SHIPPEDITEMS.strShippedItemId
-	 , intEntityCustomerId			= SHIPPEDITEMS.intEntityCustomerId
-	 , intCurrencyId				= ISNULL(ISNULL(SHIPPEDITEMS.intCurrencyId, CUSTOMER.intCurrencyId), DEFAULTCURRENCY.intDefaultCurrencyId)
-	 , strCustomerName				= CUSTOMER.strName
-	 , intSalesOrderId				= SHIPPEDITEMS.intSalesOrderId
-	 , intSalesOrderDetailId		= SHIPPEDITEMS.intSalesOrderDetailId
-	 , strSalesOrderNumber			= SHIPPEDITEMS.strSalesOrderNumber
-	 , dtmProcessDate				= SHIPPEDITEMS.dtmProcessDate
-	 , intInventoryShipmentId		= SHIPPEDITEMS.intInventoryShipmentId
-	 , intInventoryShipmentItemId	= SHIPPEDITEMS.intInventoryShipmentItemId
-	 , intInventoryShipmentChargeId	= SHIPPEDITEMS.intInventoryShipmentChargeId
-	 , strInventoryShipmentNumber	= SHIPPEDITEMS.strInventoryShipmentNumber	
-	 , intShipmentId				= SHIPPEDITEMS.intShipmentId
-	 , strShipmentNumber			= SHIPPEDITEMS.strShipmentNumber
-	 , intLoadId					= SHIPPEDITEMS.intLoadId
-	 , intLoadDetailId				= SHIPPEDITEMS.intLoadDetailId
-	 , intLotId						= SHIPPEDITEMS.intLotId
-	 , strLoadNumber				= SHIPPEDITEMS.strLoadNumber
-	 , intRecipeItemId 				= SHIPPEDITEMS.intRecipeItemId
-	 , intContractHeaderId			= SHIPPEDITEMS.intContractHeaderId
-	 , strContractNumber			= CUSTOMERCONTRACT.strContractNumber
-	 , intContractDetailId			= SHIPPEDITEMS.intContractDetailId
-	 , intContractSeq				= CUSTOMERCONTRACT.intContractSeq
-	 , intPricingTypeId				= CUSTOMERCONTRACT.intPricingTypeId
-	 , intCompanyLocationId			= SHIPPEDITEMS.intCompanyLocationId
-	 , strLocationName				= COMPANYLOCATION.strLocationName
-	 , intShipToLocationId			= SHIPPEDITEMS.intShipToLocationId
-	 , intFreightTermId				= SHIPPEDITEMS.intFreightTermId
-	 , intItemId					= SHIPPEDITEMS.intItemId
-	 , strItemNo					= ITEM.strItemNo 
-	 , strItemDescription			= ISNULL(SHIPPEDITEMS.strItemDescription, ITEM.strDescription)
-	 , intItemUOMId					= SHIPPEDITEMS.intItemUOMId
-	 , strUnitMeasure				= ITEMUOM.strUnitMeasure
-	 , intPriceUOMId				= SHIPPEDITEMS.intPriceUOMId	 
-	 , strPriceUnitMeasure			= ITEMPRICEUOM.strUnitMeasure
-	 , intOrderUOMId				= SHIPPEDITEMS.intOrderUOMId
-	 , strOrderUnitMeasure			= ITEMORDERUOM.strUnitMeasure
-	 , intShipmentItemUOMId			= SHIPPEDITEMS.intItemUOMId	 
-	 , strShipmentUnitMeasure		= ITEMUOM.strUnitMeasure
-	 , dblQtyShipped				= SHIPPEDITEMS.dblQtyShipped	
-	 , dblQtyOrdered				= SHIPPEDITEMS.dblQtyOrdered 
-	 , dblShipmentQuantity			= SHIPPEDITEMS.dblShipmentQuantity
-	 , dblShipmentQtyShippedTotal	= SHIPPEDITEMS.dblShipmentQtyShippedTotal
-	 , dblQtyRemaining				= SHIPPEDITEMS.dblQtyRemaining
-	 , dblPriceUOMQuantity			= SHIPPEDITEMS.dblPriceUOMQuantity
-	 , dblDiscount					= SHIPPEDITEMS.dblDiscount
-	 , dblPrice						= SHIPPEDITEMS.dblPrice
-	 , dblUnitPrice					= SHIPPEDITEMS.dblUnitPrice
-	 , dblShipmentUnitPrice			= SHIPPEDITEMS.dblShipmentUnitPrice
-	 , strPricing					= SHIPPEDITEMS.strPricing
-	 , strVFDDocumentNumber			= SHIPPEDITEMS.strVFDDocumentNumber
-	 , dblTotalTax					= SHIPPEDITEMS.dblTotalTax
-	 , dblTotal						= SHIPPEDITEMS.dblTotal
-	 , intStorageLocationId			= SHIPPEDITEMS.intStorageLocationId
-	 , strStorageLocationName		= STORAGELOCATION.strName
-	 , strSubLocationName			= SUBLOCATION.strSubLocationName
-	 , intTermID					= SHIPPEDITEMS.intTermId
-	 , strTerm						= TERM.strTerm
-	 , intEntityShipViaId			= SHIPPEDITEMS.intEntityShipViaId
-	 , strShipVia					= SHIPVIA.strShipVia
-	 , strTicketNumber				= SCALETICKET.strTicketNumber
-	 , strCustomerReference			= SCALETICKET.strCustomerReference
-	 , intTicketId					= SHIPPEDITEMS.intTicketId
-	 , intTaxGroupId				= SHIPPEDITEMS.intTaxGroupId
-	 , strTaxGroup					= TAXGROUP.strTaxGroup	 
-	 , dblWeight					= SHIPPEDITEMS.dblWeight
-	 , intWeightUOMId				= SHIPPEDITEMS.intWeightUOMId
-	 , strWeightUnitMeasure			= WEIGHTUOM.strUnitMeasure
-	 , dblGrossWt					= SHIPPEDITEMS.dblGrossWt
-	 , dblTareWt					= SHIPPEDITEMS.dblTareWt
-	 , dblNetWt						= SHIPPEDITEMS.dblNetWt
-	 , strPONumber					= SHIPPEDITEMS.strPONumber
-	 , strBOLNumber					= SHIPPEDITEMS.strBOLNumber
-	 , intSplitId					= SHIPPEDITEMS.intSplitId
-	 , intEntitySalespersonId		= SHIPPEDITEMS.intEntitySalespersonId
-	 , strSalespersonName			= SALESPERSON.strName
-	 , ysnBlended					= SHIPPEDITEMS.ysnBlended
-	 , intRecipeId					= SHIPPEDITEMS.intRecipeId
-	 , intSubLocationId				= SHIPPEDITEMS.intSubLocationId
-	 , intOwnershipType				= ISNULL(SHIPPEDITEMS.intOwnershipType,0)
-	 , intCostTypeId				= SHIPPEDITEMS.intCostTypeId
-	 , intMarginById				= SHIPPEDITEMS.intMarginById
-	 , intCommentTypeId				= SHIPPEDITEMS.intCommentTypeId
-	 , dblMargin					= SHIPPEDITEMS.dblMargin
-	 , dblRecipeQuantity			= SHIPPEDITEMS.dblRecipeQuantity
-	 , intStorageScheduleTypeId		= SHIPPEDITEMS.intStorageScheduleTypeId
-	 , intDestinationGradeId		= ISNULL(SHIPPEDITEMS.intDestinationGradeId, CUSTOMERCONTRACT.intDestinationGradeId)
-	 , strDestinationGrade			= ISNULL(DESTINATIONGRADE.strDestinationGrade, CUSTOMERCONTRACT.strDestinationGrade)
-	 , intDestinationWeightId		= ISNULL(SHIPPEDITEMS.intDestinationWeightId, CUSTOMERCONTRACT.intDestinationWeightId)
-	 , strDestinationWeight			= ISNULL(DESTINATIONWEIGHT.strDestinationWeight, CUSTOMERCONTRACT.strDestinationWeight)
-	 , intCurrencyExchangeRateTypeId= SHIPPEDITEMS.intCurrencyExchangeRateTypeId
-	 , strCurrencyExchangeRateType	= CURRENCYERT.strCurrencyExchangeRateType
-	 , intCurrencyExchangeRateId	= SHIPPEDITEMS.intCurrencyExchangeRateId
-	 , dblCurrencyExchangeRate		= SHIPPEDITEMS.dblCurrencyExchangeRate
-	 , intSubCurrencyId				= SHIPPEDITEMS.intSubCurrencyId
-	 , dblSubCurrencyRate			= ISNULL(ISNULL(SHIPPEDITEMS.dblSubCurrencyRate, CAST(CURRENCY.intCent AS NUMERIC(18,6))), 1.000000)
-	 , strSubCurrency				= CURRENCY.strCurrency
-	 , intBookId					= SHIPPEDITEMS.intBookId
-	 , intSubBookId					= SHIPPEDITEMS.intSubBookId
-	 , strBook						= BOOK.strBook
-	 , strSubBook					= SUBBOOK.strSubBook
-	 , ysnShowForShipment			= isnull(SCALETICKET.ysnShowForShipment, 1)
-	 , intItemContractHeaderId		= SHIPPEDITEMS.intItemContractHeaderId
-	 , intItemContractDetailId		= SHIPPEDITEMS.intItemContractDetailId
-	 , dblStandardWeight			= ITEMUOM.dblStandardWeight
+SELECT id								= NEWID()
+	 , strTransactionType				= SHIPPEDITEMS.strTransactionType
+	 , strTransactionNumber				= SHIPPEDITEMS.strTransactionNumber
+	 , strShippedItemId					= SHIPPEDITEMS.strShippedItemId
+	 , intEntityCustomerId				= SHIPPEDITEMS.intEntityCustomerId
+	 , intCurrencyId					= ISNULL(ISNULL(SHIPPEDITEMS.intCurrencyId, CUSTOMER.intCurrencyId), DEFAULTCURRENCY.intDefaultCurrencyId)
+	 , strCustomerName					= CUSTOMER.strName
+	 , intSalesOrderId					= SHIPPEDITEMS.intSalesOrderId
+	 , intSalesOrderDetailId			= SHIPPEDITEMS.intSalesOrderDetailId
+	 , strSalesOrderNumber				= SHIPPEDITEMS.strSalesOrderNumber
+	 , dtmProcessDate					= SHIPPEDITEMS.dtmProcessDate
+	 , intInventoryShipmentId			= SHIPPEDITEMS.intInventoryShipmentId
+	 , intInventoryShipmentItemId		= SHIPPEDITEMS.intInventoryShipmentItemId
+	 , intInventoryShipmentChargeId		= SHIPPEDITEMS.intInventoryShipmentChargeId
+	 , strInventoryShipmentNumber		= SHIPPEDITEMS.strInventoryShipmentNumber	
+	 , intShipmentId					= SHIPPEDITEMS.intShipmentId
+	 , strShipmentNumber				= SHIPPEDITEMS.strShipmentNumber
+	 , intLoadId						= SHIPPEDITEMS.intLoadId
+	 , intLoadDetailId					= SHIPPEDITEMS.intLoadDetailId
+	 , intLotId							= SHIPPEDITEMS.intLotId
+	 , strLoadNumber					= SHIPPEDITEMS.strLoadNumber
+	 , intRecipeItemId 					= SHIPPEDITEMS.intRecipeItemId
+	 , intContractHeaderId				= SHIPPEDITEMS.intContractHeaderId
+	 , strContractNumber				= CUSTOMERCONTRACT.strContractNumber
+	 , intContractDetailId				= SHIPPEDITEMS.intContractDetailId
+	 , intContractSeq					= CUSTOMERCONTRACT.intContractSeq
+	 , intPricingTypeId					= CUSTOMERCONTRACT.intPricingTypeId
+	 , intCompanyLocationId				= SHIPPEDITEMS.intCompanyLocationId
+	 , strLocationName					= COMPANYLOCATION.strLocationName
+	 , intShipToLocationId				= SHIPPEDITEMS.intShipToLocationId
+	 , intFreightTermId					= SHIPPEDITEMS.intFreightTermId
+	 , intItemId						= SHIPPEDITEMS.intItemId
+	 , strItemNo						= ITEM.strItemNo 
+	 , strItemDescription				= ISNULL(SHIPPEDITEMS.strItemDescription, ITEM.strDescription)
+	 , intItemUOMId						= SHIPPEDITEMS.intItemUOMId
+	 , strUnitMeasure					= ITEMUOM.strUnitMeasure
+	 , intPriceUOMId					= SHIPPEDITEMS.intPriceUOMId	 
+	 , strPriceUnitMeasure				= ITEMPRICEUOM.strUnitMeasure
+	 , intOrderUOMId					= SHIPPEDITEMS.intOrderUOMId
+	 , strOrderUnitMeasure				= ITEMORDERUOM.strUnitMeasure
+	 , intShipmentItemUOMId				= SHIPPEDITEMS.intItemUOMId	 
+	 , strShipmentUnitMeasure			= ITEMUOM.strUnitMeasure
+	 , dblQtyShipped					= SHIPPEDITEMS.dblQtyShipped	
+	 , dblQtyOrdered					= SHIPPEDITEMS.dblQtyOrdered 
+	 , dblShipmentQuantity				= SHIPPEDITEMS.dblShipmentQuantity
+	 , dblShipmentQtyShippedTotal		= SHIPPEDITEMS.dblShipmentQtyShippedTotal
+	 , dblQtyRemaining					= SHIPPEDITEMS.dblQtyRemaining
+	 , dblPriceUOMQuantity				= SHIPPEDITEMS.dblPriceUOMQuantity
+	 , dblDiscount						= SHIPPEDITEMS.dblDiscount
+	 , dblPrice							= SHIPPEDITEMS.dblPrice
+	 , dblUnitPrice						= SHIPPEDITEMS.dblUnitPrice
+	 , dblShipmentUnitPrice				= SHIPPEDITEMS.dblShipmentUnitPrice
+	 , strPricing						= SHIPPEDITEMS.strPricing
+	 , strVFDDocumentNumber				= SHIPPEDITEMS.strVFDDocumentNumber
+	 , dblTotalTax						= SHIPPEDITEMS.dblTotalTax
+	 , dblTotal							= SHIPPEDITEMS.dblTotal
+	 , intStorageLocationId				= SHIPPEDITEMS.intStorageLocationId
+	 , strStorageLocationName			= STORAGELOCATION.strName
+	 , strSubLocationName				= SUBLOCATION.strSubLocationName
+	 , intTermID						= SHIPPEDITEMS.intTermId
+	 , strTerm							= TERM.strTerm
+	 , intEntityShipViaId				= SHIPPEDITEMS.intEntityShipViaId
+	 , strShipVia						= SHIPVIA.strShipVia
+	 , strTicketNumber					= SCALETICKET.strTicketNumber
+	 , strCustomerReference				= SCALETICKET.strCustomerReference
+	 , intTicketId						= SHIPPEDITEMS.intTicketId
+	 , intTaxGroupId					= SHIPPEDITEMS.intTaxGroupId
+	 , strTaxGroup						= TAXGROUP.strTaxGroup	 
+	 , dblWeight						= SHIPPEDITEMS.dblWeight
+	 , intWeightUOMId					= SHIPPEDITEMS.intWeightUOMId
+	 , strWeightUnitMeasure				= WEIGHTUOM.strUnitMeasure
+	 , dblGrossWt						= SHIPPEDITEMS.dblGrossWt
+	 , dblTareWt						= SHIPPEDITEMS.dblTareWt
+	 , dblNetWt							= SHIPPEDITEMS.dblNetWt
+	 , strPONumber						= SHIPPEDITEMS.strPONumber
+	 , strBOLNumber						= SHIPPEDITEMS.strBOLNumber
+	 , intSplitId						= SHIPPEDITEMS.intSplitId
+	 , intEntitySalespersonId			= SHIPPEDITEMS.intEntitySalespersonId
+	 , strSalespersonName				= SALESPERSON.strName
+	 , ysnBlended						= SHIPPEDITEMS.ysnBlended
+	 , intRecipeId						= SHIPPEDITEMS.intRecipeId
+	 , intSubLocationId					= SHIPPEDITEMS.intSubLocationId
+	 , intOwnershipType					= ISNULL(SHIPPEDITEMS.intOwnershipType,0)
+	 , intCostTypeId					= SHIPPEDITEMS.intCostTypeId
+	 , intMarginById					= SHIPPEDITEMS.intMarginById
+	 , intCommentTypeId					= SHIPPEDITEMS.intCommentTypeId
+	 , dblMargin						= SHIPPEDITEMS.dblMargin
+	 , dblRecipeQuantity				= SHIPPEDITEMS.dblRecipeQuantity
+	 , intStorageScheduleTypeId			= SHIPPEDITEMS.intStorageScheduleTypeId
+	 , intDestinationGradeId			= ISNULL(SHIPPEDITEMS.intDestinationGradeId, CUSTOMERCONTRACT.intDestinationGradeId)
+	 , strDestinationGrade				= ISNULL(DESTINATIONGRADE.strDestinationGrade, CUSTOMERCONTRACT.strDestinationGrade)
+	 , intDestinationWeightId			= ISNULL(SHIPPEDITEMS.intDestinationWeightId, CUSTOMERCONTRACT.intDestinationWeightId)
+	 , strDestinationWeight				= ISNULL(DESTINATIONWEIGHT.strDestinationWeight, CUSTOMERCONTRACT.strDestinationWeight)
+	 , intCurrencyExchangeRateTypeId	= SHIPPEDITEMS.intCurrencyExchangeRateTypeId
+	 , strCurrencyExchangeRateType		= CURRENCYERT.strCurrencyExchangeRateType
+	 , intCurrencyExchangeRateId		= SHIPPEDITEMS.intCurrencyExchangeRateId
+	 , dblCurrencyExchangeRate			= SHIPPEDITEMS.dblCurrencyExchangeRate
+	 , intSubCurrencyId					= SHIPPEDITEMS.intSubCurrencyId
+	 , dblSubCurrencyRate				= ISNULL(ISNULL(SHIPPEDITEMS.dblSubCurrencyRate, CAST(CURRENCY.intCent AS NUMERIC(18,6))), 1.000000)
+	 , strSubCurrency					= CURRENCY.strCurrency
+	 , intBookId						= SHIPPEDITEMS.intBookId
+	 , intSubBookId						= SHIPPEDITEMS.intSubBookId
+	 , strBook							= BOOK.strBook
+	 , strSubBook						= SUBBOOK.strSubBook
+	 , ysnShowForShipment				= isnull(SCALETICKET.ysnShowForShipment, 1)
+	 , intItemContractHeaderId			= SHIPPEDITEMS.intItemContractHeaderId
+	 , intItemContractDetailId			= SHIPPEDITEMS.intItemContractDetailId
+	 , dblStandardWeight				= ITEMUOM.dblStandardWeight
 	 , ysnDestinationWeightsAndGrades   = SHIPPEDITEMS.ysnDestinationWeightsAndGrades
-	 , dblDestinationQuantity		= SHIPPEDITEMS.dblDestinationQuantity
+	 , dblDestinationQuantity			= SHIPPEDITEMS.dblDestinationQuantity
+	 , strTaxPoint						= SHIPPEDITEMS.[strTaxPoint]
+	 , intTaxLocationId					= SHIPPEDITEMS.[intTaxLocationId]
 FROM (
 	--IS FROM SO
 	SELECT strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
@@ -194,6 +196,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	INNER JOIN (
 		SELECT *
@@ -306,10 +310,9 @@ FROM (
 	     , intFreightTermId					= ICIS.intFreightTermId
 	     , intItemId						= ICISI.intItemId
 	     , strItemDescription				= NULL
-	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
+	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId)
 		 , intPriceUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intPriceItemUOMId ELSE ICISI.intPriceUOMId END
-	     --, intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
-		 , intOrderUOMId					= ISNULL(TICKET.intItemUOMIdTo, ICISI.intItemUOMId)
+	     , intOrderUOMId					= ISNULL(TICKET.intItemUOMIdTo, ICISI.intItemUOMId)
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
 		 , dblWeight						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1) ELSE 1 END
@@ -349,7 +352,7 @@ FROM (
 	     , intTermId						= NULL
 	     , intEntityShipViaId				= NULL
 	     , intTicketId						= ICISI.intSourceId
-	     , intTaxGroupId					= NULL
+	     , intTaxGroupId					= ARCC.intTaxGroupId
 	     , dblGrossWt						= ISISIL.dblGrossWeight 
 	     , dblTareWt						= ISISIL.dblTareWeight 
 	     , dblNetWt							= ISISIL.dblNetWeight
@@ -380,6 +383,8 @@ FROM (
 		 , intItemContractDetailId			= ITEMCONTRACT.intItemContractDetailId
 		 , ysnDestinationWeightsAndGrades   = ICISI.ysnDestinationWeightsAndGrades
 		 , dblDestinationQuantity			= ICISI.dblDestinationQuantity
+		 , strTaxPoint						= ARCC.strTaxPoint
+		 , intTaxLocationId					= ARCC.intTaxLocationId
 	FROM (
 		SELECT 
 			dblForexRate,
@@ -643,6 +648,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM dbo.tblICInventoryShipmentCharge ICISC WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -775,6 +782,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(0, SO.intSalesOrderId) MFG
 	LEFT OUTER JOIN (
@@ -891,6 +900,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(ICISI.intInventoryShipmentItemId, 0) MFG	
 	INNER JOIN (
@@ -1003,6 +1014,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM 
 		vyuLGLoadScheduleForInvoice
 	 
@@ -1090,6 +1103,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM (
 		SELECT intLoadDetailId
 			 , intCurrencyId
@@ -1213,6 +1228,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM (
 		SELECT intLoadId
 		     , intLoadDetailId
@@ -1333,6 +1350,8 @@ FROM (
 		 , intItemContractDetailId			= NULL
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
+		 , strTaxPoint						= NULL
+		 , intTaxLocationId					= NULL
 	FROM (
 		SELECT intLoadId
 			 , intLoadDetailId
