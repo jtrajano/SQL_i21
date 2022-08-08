@@ -8,21 +8,23 @@ BEGIN
     SET XACT_ABORT ON
 	BEGIN TRY
 		
-		DECLARE @intStoreId INT
-		DECLARE @dblGrossFuelSales DECIMAL(18,6) = 0
-		DECLARE @dblDealerCommission DECIMAL(18,6) = 0
-		DECLARE @dblTotalDebitCreditCard DECIMAL(18,6) = 0
-		DECLARE @BankTransaction BankTransactionTable
-		DECLARE @BankTransactionDetail BankTransactionDetailTable
-		DECLARE @strTransactionId					NVARCHAR(100)
-		DECLARE @STARTING_NUMBER_BANK_DEPOSIT 		NVARCHAR(100) = 'Bank Deposit'
-		DECLARE @intStartingNumberId				INT
-		DECLARE @intNewTransactionId				INT
-		DECLARE @intBankAccountId					INT
-		DECLARE @intCurrencyId						INT
-		DECLARE @intEntityId						INT
-		DECLARE @intCompanyLocationId				INT
-		DECLARE @intGLAccountId						INT
+		DECLARE @intStoreId											INT
+		DECLARE @dblGrossFuelSales									DECIMAL(18,6) = 0
+		DECLARE @dblDealerCommission								DECIMAL(18,6) = 0
+		DECLARE @dblTotalDebitCreditCard							DECIMAL(18,6) = 0
+		DECLARE @BankTransaction									BankTransactionTable
+		DECLARE @BankTransactionDetail								BankTransactionDetailTable
+		DECLARE @strTransactionId									NVARCHAR(100)
+		DECLARE @STARTING_NUMBER_BANK_DEPOSIT 						NVARCHAR(100) = 'Bank Deposit'
+		DECLARE @intStartingNumberId								INT
+		DECLARE @intNewTransactionId								INT
+		DECLARE @intBankAccountId									INT
+		DECLARE @intCurrencyId										INT
+		DECLARE @intEntityId										INT
+		DECLARE @intCompanyLocationId								INT
+		DECLARE @intGLAccountId										INT
+		DECLARE @dblTotalToDeposit									DECIMAL(18,6) = 0 
+		DECLARE @dblCashOverShort									DECIMAL(18,6) = 0  
 		
 
 		SET @dblGrossFuelSales = dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId)
@@ -32,6 +34,7 @@ BEGIN
 		WHERE		intCheckoutId = @intCheckoutId
 
 		SELECT		@intStoreId = intStoreId
+					,@dblTotalToDeposit = dblTotalToDeposit
 		FROM		dbo.tblSTCheckoutHeader 
 		WHERE		intCheckoutId = @intCheckoutId
 
@@ -136,17 +139,20 @@ BEGIN
 												, @intEntityId		= @intEntityId
 												, @isSuccessful		= @ysnSuccess OUT
 
-				IF EXISTS (SELECT '' FROM tblSTCheckoutDeposits WHERE intCheckoutId = @intCheckoutId)
-					BEGIN
-						UPDATE tblSTCheckoutDeposits SET intBDepId = @intNewTransactionId WHERE intCheckoutId = @intCheckoutId  
-					END
-				ELSE
-					BEGIN
-						INSERT INTO tblSTCheckoutDeposits
-						(intCheckoutId,dblCash,dblTotalCash,dblTotalDeposit,intBDepId,intConcurrencyId)
-						VALUES
-						(@intCheckoutId,ABS(@dblAmount),ABS(@dblAmount),ABS(@dblAmount),@intNewTransactionId,0)
-					END
+				IF EXISTS (SELECT '' FROM tblSTCheckoutDeposits WHERE intCheckoutId = @intCheckoutId)  
+					BEGIN  
+					UPDATE tblSTCheckoutDeposits SET intBDepId = @intNewTransactionId WHERE intCheckoutId = @intCheckoutId
+					END  
+				ELSE  
+					BEGIN  
+						INSERT INTO tblSTCheckoutDeposits  
+						(intCheckoutId,dblCash,dblTotalCash,dblTotalDeposit,intBDepId,intConcurrencyId)  
+						VALUES  
+						(@intCheckoutId,ABS(@dblAmount),ABS(@dblAmount),ABS(@dblAmount),@intNewTransactionId,0)  
+					END  
+	 
+				SET @dblCashOverShort = @dblTotalToDeposit - ABS(@dblAmount)
+				UPDATE tblSTCheckoutHeader SET dblTotalDeposits = ABS(@dblAmount), dblCashOverShort = @dblCashOverShort WHERE intCheckoutId = @intCheckoutId
 			END
 		ELSE
 			BEGIN
