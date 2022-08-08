@@ -35,8 +35,18 @@ BEGIN
 	FROM @UnitAllocation
 	WHERE intAllocationType = 3
 
+	---Change Ticket Distribution to Contract if there is a contract Allocation
+	----
+	IF EXISTS(SELECT TOP 1 1 FROM @UnitAllocation WHERE intAllocationType = 3)
+	BEGIN 
+		UPDATE tblSCTicket 
+		SET  strDistributionOption = 'CNT'
+			,intStorageScheduleTypeId = -2
+		WHERE intTicketId = @intTicketId
+	END
+
 	-- Spot
-	-- Delete entry from distribution of in-transit status this will be replaced by the Allocation int ticket applied screen
+	-- Delete entry from distribution of in-transit status this will be replaced by the Allocation in ticket applied screen
 	DELETE FROM tblSCTicketSpotUsed WHERE intTicketId = @intTicketId
 
 

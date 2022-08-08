@@ -42,6 +42,7 @@
 	[dtmApproved]	DATETIME,
 	[ysnApproved]	BIT,
 	strPackingDescription	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[strReference] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 
 	CONSTRAINT [PK_tblCTApprovedContract_intApprovedContractId] PRIMARY KEY CLUSTERED (intApprovedContractId ASC)
 )
