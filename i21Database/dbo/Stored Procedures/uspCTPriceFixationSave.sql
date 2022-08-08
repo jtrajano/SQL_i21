@@ -901,9 +901,12 @@ BEGIN TRY
 
 				select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId><ysnStatusChange>0</ysnStatusChange></row></rows>';
 
-				exec uspCTProcessTFLogs
-					@strXML = @strXML,
-					@intUserId = @intUserId
+				IF ISNULL(@strAction, '') <> ''
+				BEGIN
+					exec uspCTProcessTFLogs
+						@strXML = @strXML,
+						@intUserId = @intUserId
+				END
 
 				IF	@ysnMultiplePriceFixation = 1
 				BEGIN
