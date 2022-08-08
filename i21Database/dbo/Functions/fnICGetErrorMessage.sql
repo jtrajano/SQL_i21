@@ -284,6 +284,7 @@ BEGIN
 		WHEN @msgId = 80268 THEN '%s is a missing lot it should not have a negative quantity.'
 		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
 		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
+		WHEN @msgId = 80271 THEN '%s is currently in a Voucher. Please remove it in %s first before you can unpost the Destination Weight/Grade.'
 	END 
 
 	RETURN @msg COLLATE Latin1_General_CI_AS
