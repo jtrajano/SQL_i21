@@ -30,7 +30,9 @@ JOIN tblCTContractDetail CD ON CD.intContractDetailId = ld.intPContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem AS I ON I.intItemId = ld.intItemId
 JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId
-LEFT JOIN tblICInventoryReceiptItem AS Lot ON Lot.intContainerId = Cont.intLoadContainerId
+LEFT JOIN tblICInventoryReceiptItem AS Lot
+  ON Lot.intContainerId = Cont.intLoadContainerId
+  AND Lot.intLoadShipmentDetailId = ld.intLoadDetailId
 LEFT JOIN tblICInventoryReceiptItemLot AS Lt ON Lt.intInventoryReceiptItemId = Lot.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation AS SL ON SL.intCompanyLocationSubLocationId = Lot.intSubLocationId
 LEFT JOIN tblICItemUOM AS Lotuom ON Lotuom.intItemId = Lot.intItemId AND Lotuom.intItemUOMId = Lot.intUnitMeasureId
