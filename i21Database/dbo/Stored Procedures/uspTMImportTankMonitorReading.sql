@@ -351,6 +351,12 @@
 				BEGIN
 					GOTO CREATECALLENTRY
 				END
+				ELSE IF @intInterfaceTypeId = 1 AND @ta_ltankcrit = 0
+				BEGIN
+					-- LOG to tblTMImportTankReadingDetail
+					INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
+					VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
+				END
 			END
 
 			IF(@intInterfaceTypeId = 3)
