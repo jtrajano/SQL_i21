@@ -54,7 +54,7 @@ BEGIN TRY
 	DECLARE @_strLoopContractNumber nvarchar(100)
 	DECLARE @_dblLoopContractUpdateQuantity NUMERIC(38,20)
 
-	DECLARE @DoContractValidation BIT = 1
+	DECLARE @DoContractValidation BIT = 0
 	
 
 	
