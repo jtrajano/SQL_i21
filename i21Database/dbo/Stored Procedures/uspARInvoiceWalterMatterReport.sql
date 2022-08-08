@@ -142,6 +142,10 @@ SELECT
 	,strIBAN				= CMBA.strIBAN
 	,strSWIFT				= CMBA.strSWIFT
 	,strBICCode				= CMBA.strBICCode
+	,blbFooterLogo          = SMLPF.imgLogo
+	,dblInvoiceSubtotal		= ARI.dblInvoiceSubtotal
+	,dblTax					= ARI.dblTax
+	,dblInvoiceTotal		= ARI.dblInvoiceTotal
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
