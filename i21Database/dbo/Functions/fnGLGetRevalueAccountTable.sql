@@ -11,7 +11,7 @@ RETURN
 	SELECT 'INV'	strModule,'Receivables' strType, [intInventoryUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CT'		strModule,'Payables' strType, [intContractPurchaseUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CT'		strModule,'Receivables' strType, [intContractSaleUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
-	SELECT 'CM'		strModule,'Receivables' strType, intCashManagementUnrealizedId AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
+	SELECT 'CM'		strModule,'Receivables' strType, [intCashManagementRealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'FA'		strModule,'Receivables' strType, [intFixedAssetsUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Forwards'	strModule, 'Payables' strType, [intGainOnForwardUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Forwards'	strModule, 'Receivables' strType, [intGainOnForwardUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
@@ -26,7 +26,7 @@ RETURN
 	SELECT 'INV'	strModule,'Receivables' strType, [intInventoryOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CT'		strModule,'Payables' strType, [intContractPurchaseOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CT'		strModule,'Receivables' strType, [intContractSaleOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
-	SELECT 'CM'		strModule,'Receivables' strType, intCashManagementOffsetId AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
+	SELECT 'CM'		strModule,'Receivables' strType, @offsetAccountId AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'FA'		strModule,'Receivables' strType, [intFixedAssetsOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Forwards'	strModule,'Payables' strType, [intGainOnForwardOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'CM Forwards'	strModule,'Receivables' strType, [intGainOnForwardOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
