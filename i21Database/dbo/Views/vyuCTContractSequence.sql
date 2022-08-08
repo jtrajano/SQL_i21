@@ -60,7 +60,9 @@ AS
 			CD.dblRate,
 			CD.intInvoiceCurrencyId,
 			strInvoiceCurrency = ICU.strCurrency,
-			CD.intCurrencyExchangeRateId
+			CD.intCurrencyExchangeRateId,
+			strCertBody = CD.strVendorLotID,
+			strCertCost = CD.strReference
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
