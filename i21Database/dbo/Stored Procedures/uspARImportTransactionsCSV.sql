@@ -137,7 +137,11 @@ BEGIN
 	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
 	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
-	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(C.intEntityId, 0) > 0 AND ISNULL(C.intTermsId, 0) = 0) 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ILD.strTransactionNumber IN (SELECT strTransactionNumber FROM tblARImportLogDetail  ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId
+			GROUP BY ILD.strTransactionNumber
+			HAVING COUNT(1) > 1)) 
 	
 	UPDATE tblARImportLog 
 	SET [intSuccessCount]	= intSuccessCount - @FailedCount
