@@ -2691,12 +2691,12 @@ BEGIN TRY
 			AND (
 				(
 					ri.ysnYearValidationRequired = 1
-					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+					AND @dtmCurrentDate NOT BETWEEN ri.dtmValidFrom
 						AND ri.dtmValidTo
 					)
 				OR (
 					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+					AND @intDayOfYear NOT BETWEEN DATEPART(dy, ri.dtmValidFrom)
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
@@ -2718,18 +2718,22 @@ BEGIN TRY
 					AND IsNULL(WC.intBatchId, @intBatchId) = @intBatchId
 				)
 
-		SELECT @strItemNo = strItemNo
-		FROM dbo.tblICItem
-		WHERE intItemId = @intInputItemId
+		IF (@intInputItemId IS NOT NULL) 
+			BEGIN
+				SELECT @strItemNo = strItemNo
+				FROM dbo.tblICItem
+				WHERE intItemId = @intInputItemId
 
-		RAISERROR (
-				'The input lots for the item %s are expired / inactive / unavailable. Cannot produce.'
-				,11
-				,1
-				,@strItemNo
-				)
+				RAISERROR (
+						'The input lots for the item %s are expired / inactive / unavailable. Cannot produce.'
+						,11
+						,1
+						,@strItemNo
+						)
 
-		RETURN
+				RETURN
+			END
+		
 	END
 
 	IF @intRecipeTypeId = 3
