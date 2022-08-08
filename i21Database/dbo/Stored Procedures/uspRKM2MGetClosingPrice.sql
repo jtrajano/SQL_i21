@@ -116,7 +116,7 @@ BEGIN
 			, @intPriceUOMId = @intPriceUOMId
 			, @intCurrencyUOMId = @intCurrencyUOMId
 			, @dtmTransactionDateUpTo = @dtmTransactionDateUpTo
-			, @strRateType = @strRateType
+			, @strRateType = @strRateType COLLATE Latin1_General_CI_AS
 			, @intCommodityId = @intCommodityId
 			, @intLocationId = @intLocationId
 			, @intMarketZoneId = @intMarketZoneId
