@@ -172,7 +172,7 @@ BEGIN
 		AND @strItemNo IS NOT NULL 
 	BEGIN
 		-- '{Other Charge} is currently in a Voucher. Please remove it in {Voucher No} first before you can unpost the Destination Weight/Grade.'
-		EXEC uspICRaiseError 80267, @strItemNo, @strBillId; 
+		EXEC uspICRaiseError 80271, @strItemNo, @strBillId; 
 		GOTO _ExitWithError
 	END
 END
