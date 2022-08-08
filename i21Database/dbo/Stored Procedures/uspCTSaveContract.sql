@@ -357,14 +357,6 @@ BEGIN TRY
 		FROM @CDTableUpdate CD
 		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
-
-		UPDATE CD
-		SET CD.intContractStatusId = CASE WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Received' THEN 5 ELSE CD.intContractStatusId  END
-		from tblCTContractDetail CD
-		OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-		where intContractDetailId = @intContractDetailId and intContractStatusId = 1
-
-
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 		BEGIN
