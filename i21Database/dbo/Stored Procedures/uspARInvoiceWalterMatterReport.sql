@@ -129,7 +129,6 @@ SELECT
 	,strShipmentTareWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentTareWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
 	,strShipmentNetWt		= CONVERT(VARCHAR,CAST(ARGID.dblShipmentNetWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
 	,strCurrenyPriceUOM		= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARGID.dblPrice AS MONEY),1), '.00','') + ' ' + ARGID.strPriceUnitMeasure
-	,dblTotal				= ARGID.dblTotal
 	,strEDICode				= ICC.strEDICode
 	,ysnCustomsReleased		= ISNULL(LGL.ysnCustomsReleased, 0)
 	,strBOLNumber			= LGL.strBLNumber + ' dd ' + [dbo].[fnConvertDateToReportDateFormat](LGL.dtmBLDate, 0)
@@ -143,6 +142,9 @@ SELECT
 	,strSWIFT				= CMBA.strSWIFT
 	,strBICCode				= CMBA.strBICCode
 	,blbFooterLogo          = SMLPF.imgLogo
+	,dblInvoiceSubtotal		= ARI.dblInvoiceSubtotal
+	,dblTax					= ARI.dblTax
+	,dblInvoiceTotal		= ARI.dblInvoiceTotal
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
