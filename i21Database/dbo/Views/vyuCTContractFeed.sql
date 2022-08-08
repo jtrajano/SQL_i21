@@ -53,6 +53,8 @@ AS
 				PR.strName AS strProducer
 				,CD.intPricingTypeId
 				,IM.intItemId
+				,CD.strCertBody
+				,CD.strCertCost
 		FROM	vyuCTContractSequence	CD
 		--JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
 		JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
