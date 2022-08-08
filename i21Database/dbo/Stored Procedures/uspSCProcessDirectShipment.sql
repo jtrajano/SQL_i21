@@ -24,7 +24,7 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @InventoryReceiptId AS INT; 
 DECLARE @ErrMsg NVARCHAR(MAX);
-DECLARE @DoContractValidation BIT = 1
+DECLARE @DoContractValidation BIT = 0
 
 DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@strWhereFinalizedWeight NVARCHAR(20)
