@@ -59,7 +59,9 @@ AS
 			CH.ysnReadOnlyInterCoContract,
 			CD.dblRate,
 			CD.intInvoiceCurrencyId,
-			strInvoiceCurrency = ICU.strCurrency
+			strInvoiceCurrency = ICU.strCurrency,
+			strCertBody = CD.strVendorLotID,
+			strCertCost = CD.strReference
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
