@@ -52,7 +52,7 @@ BEGIN TRY
 					,@intEntityId = @intEntityId
 					,@intLocationId = @intLocationId
 					,@intUserId = @intUserId
-					,@intBillId = @intCreatedTransactionId OUTPUT
+					,@intInvoiceId = @intCreatedTransactionId OUTPUT
 		END
 
 		IF(ISNULL(@intCreatedTransactionId,0) > 0)
