@@ -34,7 +34,7 @@ SELECT
 		WHEN 2 THEN 'Delivery'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOR.intOrderStatus
-	,strOrderStatus = CASE DOD.intOrderStatus
+	,strOrderStatus = CASE DOR.intOrderStatus
 		WHEN 1 THEN 'Ready'
 		WHEN 2 THEN 'In Transit'
 		WHEN 3 THEN 'At Location'
