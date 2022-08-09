@@ -81,6 +81,8 @@ SELECT
 	, attribute2.strAttribute2
 	, attribute3.strAttribute3
 	, attribute4.strAttribute4
+	, strStoreFamily = StoreFamily.strSubcategoryId
+	, strStoreClass = StoreClass.strSubcategoryId
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -126,17 +128,14 @@ LEFT JOIN tblSMModule Module
 LEFT JOIN tblICCertification Certification
 	ON Certification.intCertificationId = Item.intCertificationId
 
-LEFT JOIN tblICCommodityAttribute1 attribute1 
-	ON attribute1.intCommodityAttributeId1 = Item.intCommodityAttributeId1
-
-LEFT JOIN tblICCommodityAttribute2 attribute2
-	ON attribute2.intCommodityAttributeId2 = Item.intCommodityAttributeId2
-
-LEFT JOIN tblICCommodityAttribute3 attribute3
-	ON attribute3.intCommodityAttributeId3 = Item.intCommodityAttributeId3
-
-LEFT JOIN tblICCommodityAttribute4 attribute4
-	ON attribute4.intCommodityAttributeId4 = Item.intCommodityAttributeId4
-
-LEFT JOIN tblSTSubCategories subcategory    
- ON subcategory.intSubcategoriesId = Item.intSubcategoriesId
+LEFT JOIN tblICCommodityAttribute1 attribute1 ON attribute1.intCommodityAttributeId1 = Item.intCommodityAttributeId1
+LEFT JOIN tblICCommodityAttribute2 attribute2 ON attribute2.intCommodityAttributeId2 = Item.intCommodityAttributeId2
+LEFT JOIN tblICCommodityAttribute3 attribute3 ON attribute3.intCommodityAttributeId3 = Item.intCommodityAttributeId3
+LEFT JOIN tblICCommodityAttribute4 attribute4 ON attribute4.intCommodityAttributeId4 = Item.intCommodityAttributeId4
+LEFT JOIN tblSTSubCategories subcategory  ON subcategory.intSubcategoriesId = Item.intSubcategoriesId
+OUTER APPLY (SELECT strSubcategoryId  
+			 FROM tblSTSubcategory
+			 WHERE intSubcategoryId = Item.intStoreFamilyId) AS StoreFamily
+OUTER APPLY (SELECT strSubcategoryId  
+			 FROM tblSTSubcategory
+			 WHERE intSubcategoryId = Item.intStoreClassId) AS StoreClass
