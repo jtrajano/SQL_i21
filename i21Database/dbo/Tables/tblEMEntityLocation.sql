@@ -64,6 +64,43 @@
 	[strSaleUnits]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+
+    --MCDG
+    --Customer Linked Fields
+    [strOrderType]                          NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
+    [intDetailCompanyLocationId]            INT NULL,
+    [intSalespersonId2]                     INT NULL,
+	[ysnRequireStickReading]			    BIT NULL,
+	[ysnRequirePump]			            BIT NULL,
+    [ysnPrintPriceOnTicket]			        BIT NULL,
+    [ysnRequirePO]			                BIT NULL,
+    [ysnRequireSignature]	                BIT NULL,
+    --SkyBitz Integration
+    [intTicketCopies]						INT NOT NULL DEFAULT(0),
+	[strUserDefined1]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[strUserDefined2]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[strUserDefined3]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[strUserDefined4]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnPrintTotalizerOnTicket]				BIT, 
+	[ysnDisplayTicketInInsight]				BIT, 
+	[ysnDisplayPriceInInsight]				BIT, 
+	[intAvgDeliveryTime]					INT NOT NULL DEFAULT(0),
+	[intExcludeFromAvg]						INT NOT NULL DEFAULT(0),
+	[intNumPrevOrderToAvg]					INT NOT NULL DEFAULT(0),
+	[intAvgForDayOfWeek]					INT NOT NULL DEFAULT(0),
+	[intFuelingRadius]						INT NULL,
+
+    --End SkyBitz Integration
+    --Default Item
+    [intItemId]								INT NULL,
+	[intEstimatedUnits]						INT NULL,
+	[intMonthstoUseForAvg]					INT NULL,
+	[strOrderToUseForAvg]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+
+    --Default Item
+
+
+
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
@@ -76,7 +113,10 @@
 	CONSTRAINT [FK_tblEMEntityLocation_intCurrencyId] FOREIGN KEY ([intDefaultCurrencyId]) REFERENCES tblSMCurrency([intCurrencyID]),
     CONSTRAINT [FK_tblEMEntityLocation_tblEMEntity_intVendorLinkId] FOREIGN KEY ([intVendorLinkId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [UK_tblEMEntityLocation_strLocationName_strFieldNumber] UNIQUE NONCLUSTERED ([strLocationName] ASC, [strFarmFieldNumber] ASC,[intEntityId] ASC), 
-    CONSTRAINT [FK_tblEMEntityLocation_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId)
+    CONSTRAINT [FK_tblEMEntityLocation_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId),
+    
+	CONSTRAINT [FK_tblEMEntityLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
+
 );
 
 
