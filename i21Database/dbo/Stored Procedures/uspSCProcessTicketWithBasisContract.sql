@@ -52,7 +52,7 @@ BEGIN TRY
 					,@intEntityId = @intEntityId
 					,@intLocationId = @intLocationId
 					,@intUserId = @intUserId
-					,@intBillId = @intCreatedTransactionId
+					,@intInvoiceId = @intCreatedTransactionId OUTPUT
 		END
 
 	END
