@@ -1701,7 +1701,15 @@ GO
 				,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Recost Formulation' AND [strModule] = 'Inventory')
 
-
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 177
+			,[strTransactionType]	= N'Change Account Category'
+			,[strPrefix]			= N'CAC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'General Ledger'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Account Category')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
