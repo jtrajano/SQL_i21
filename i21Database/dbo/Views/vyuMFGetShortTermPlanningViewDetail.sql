@@ -31,12 +31,8 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,C2.strCertificationName AS strCertification
 	,E.strName AS strVendor
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,12,13)
 			THEN D.dblQty
-		WHEN D.intAttributeId = 12
-			THEN CD.dblBalance
-		WHEN D.intAttributeId = 13
-			THEN CD.dblQuantity - IsNULL(CD.dblScheduleQty, 0)
 		ELSE LC.dblQuantity
 		END dblQty
 	,CASE 
