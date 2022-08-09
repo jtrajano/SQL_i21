@@ -36,9 +36,10 @@ BEGIN
             DELETE FROM @tblPeriod WHERE guidPostId = @strGuid
         END')
     END
-    
-	UPDATE tblGLCompanyPreferenceOption SET ysnREOverride = 0, ysnREOverrideLocation = 0 , ysnREOverrideLOB=0, ysnREOverrideCompany = 0
+
+    IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCompanyPreferenceOption]') AND type in (N'U')) 
+    EXEC ('UPDATE tblGLCompanyPreferenceOption SET ysnREOverride = 0, ysnREOverrideLocation = 0 , ysnREOverrideLOB=0, ysnREOverrideCompany = 0
 	INSERT INTO tblGLDataFixLog (dtmDate, strDescription)
-	VALUES (GETDATE(),  'Reset Retained Earnings Posting')
+	VALUES (GETDATE(),  ''Reset Retained Earnings Posting''')
 END
 GO
