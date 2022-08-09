@@ -1366,6 +1366,17 @@ GO
 		   [strPrefix]						=		N'TRF',
 		   [ysnAddonComponent]              =       0
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Enhanced Dispatching')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		132,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Enhanced Dispatching',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		130,
+		   [strPrefix]						=		N'ED',
+		   [ysnAddonComponent]              =       1
+
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
