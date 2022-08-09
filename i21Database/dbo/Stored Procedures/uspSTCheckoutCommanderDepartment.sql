@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderDepartment]
 	@intCheckoutId							INT,
 	@UDT_TransDept							StagingCommanderDepartment		READONLY,
+	@UDT_TransCashier						StagingCommanderCashier			READONLY,
 	@ysnSuccess								BIT				OUTPUT,
 	@strMessage								NVARCHAR(1000)	OUTPUT,
 	@intCountRows							INT				OUTPUT
@@ -252,7 +253,7 @@ BEGIN
 					, CAST(Chk.dblCashierRefundAmount  AS DECIMAL(18,6))
 					, CAST(Chk.intCashierRefundCount AS INT) 
 					, CAST(Chk.intCashierSaleCount AS INT) 
-				FROM @UDT_TransDept Chk
+				FROM @UDT_TransCashier Chk
 			END
 		ELSE
 			BEGIN
@@ -263,14 +264,16 @@ BEGIN
 					, [intNumberOfRefunds] = CAST(Chk.intCashierRefundCount AS INT)
 					, [intNoSalesCount] = CAST(Chk.intCashierSaleCount AS INT) 
 				FROM tblSTCheckoutCashiers STC
+				JOIN tblSTCashier SC
+					ON STC.intCashierId = SC.intCashierId
 				JOIN dbo.tblSTCheckoutDepartmetTotals DT 
 					ON STC.intCheckoutId = DT.intCheckoutId
 				JOIN tblICCategory Cat 
 					ON DT.intCategoryId = Cat.intCategoryId
 				JOIN tblICCategoryLocation CatLoc 
 					ON Cat.intCategoryId = CatLoc.intCategoryId
-				JOIN @UDT_TransDept Chk 
-					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50))
+				JOIN @UDT_TransCashier Chk 
+					ON SC.strCashierName = Chk.strCashierName COLLATE Latin1_General_CI_AS
 				WHERE STC.intCheckoutId = @intCheckoutId 
 			END
 		
