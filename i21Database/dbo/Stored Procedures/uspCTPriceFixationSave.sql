@@ -901,7 +901,7 @@ BEGIN TRY
 
 				select @strXML = '<rows><row><intContractDetailId>' + convert(nvarchar(20),@intContractDetailId) + '</intContractDetailId><ysnStatusChange>0</ysnStatusChange></row></rows>';
 
-				IF ISNULL(@strAction, '') <> ''
+				IF ISNULL(@strAction, '') = ''
 				BEGIN
 					exec uspCTProcessTFLogs
 						@strXML = @strXML,
