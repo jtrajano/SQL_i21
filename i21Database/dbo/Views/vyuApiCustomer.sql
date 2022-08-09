@@ -58,6 +58,17 @@ SELECT [EntityId]			= e.intEntityId
      , [SalespersonId]      = e.intSalespersonId
      , [ContactId]          = e.intEntityContactId
 	 , [WarehouseId]		= e.intWarehouseId
+
+
+
+	, [OrderType] 		= c.strOrderType
+	, [CustomerCompanyLocation] = ''
+	, [CustomerSalesPerson2] = ''
+	, [RequireStickReading] = c.ysnRequireStickReading
+	, [RequirePump] = c.ysnRequirePump
+	, [RequirePO] = c.ysnRequirePO
+	, [RequireSignature] = c.ysnRequireSignature  
+
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId

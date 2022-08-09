@@ -124,6 +124,19 @@
     [intDefaultPayToBankAccountId]          INT NULL,
     [strDefaultPayToBankAccountNo]          NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
     [strDeliveryDocument]                   NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL DEFAULT 'Invoice',
+
+    --Mon 
+    [strOrderType]                          NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
+    [intDetailCompanyLocationId]            INT NULL,
+    [intSalespersonId2]                     INT NULL,
+	[ysnRequireStickReading]			    BIT NULL,
+	[ysnRequirePump]			            BIT NULL,
+    --[ysnPrintPriceOnPrintTicket]			    BIT NULL,
+    [ysnRequirePO]			                BIT NULL,
+    [ysnRequireSignature]	                BIT NULL,
+
+
+
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
@@ -153,6 +166,11 @@
 	CONSTRAINT [FK_tblARCustomer_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID]),
 
 	
+
+    CONSTRAINT [FK_tblARCustomer_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocationId] ([intCompanyLocationId]),
+    CONSTRAINT [FK_tblARCustomer_tblARSalesperson_intSalespersonId2] FOREIGN KEY ([intSalespersonId2]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
+
+
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 
