@@ -1806,6 +1806,7 @@
     <Build Include="dbo\Tables\tblSTPaymentOption.sql" />
     <Build Include="dbo\Tables\tblSTRegister.sql" />
     <Build Include="dbo\Tables\tblSTStoreGroup.sql" />
+    <Build Include="dbo\Tables\tblSTSubCategories.sql" />
     <Build Include="dbo\Tables\tblSTStoreGroupDetail.sql" />
     <Build Include="dbo\Tables\tblSCScaleSetup.sql" />
     <Build Include="dbo\Tables\tblSCTicket.sql" />
