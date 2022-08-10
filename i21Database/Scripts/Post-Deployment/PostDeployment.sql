@@ -393,6 +393,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\29_CleanupObjects.sql
 :r .\IC\30_InventoryValuationAccountIds.sql
 :r .\IC\31_WarrantStatus.sql
+:r .\IC\32_Family_Class_Initial_Adjustment.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
