@@ -109,7 +109,7 @@ SELECT CD.intContractDetailId
 	,intInvoiceCurrencyId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intInvoiceCurrencyId ELSE NULL END
 	,strInvoiceCurrency = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN FXC.strCurrency ELSE NULL END
 	,strCurrencyExchangeRateType = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CET.strCurrencyExchangeRateType ELSE NULL END
-	,CD.intFreightTermId
+	,CH.intFreightTermId
 	,FT.strFreightTerm
 	,CD.intShipToId
 	,strShipTo = SH.strLocationName
@@ -154,7 +154,7 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND CD.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId = CD.intRateTypeId
-LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CH.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
