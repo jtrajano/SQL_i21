@@ -201,6 +201,65 @@ BEGIN
 		AND F.intAttributeId = 3
 	WHERE Inv.intAttributeId = 5
 
+	SELECT @intConditionId = intConditionId
+	FROM tblCTCondition
+	WHERE strConditionName = 'CBS'
+
+	INSERT INTO #tblMFPreShortTermDemand (
+		intItemId
+		,intLocationId
+		,dblQty
+		,intAttributeId
+		,intLoadContainerId
+		)
+	SELECT I.intItemId
+		,SS.intCompanyLocationId
+		,dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, LDCL.dblQuantity) AS dblQty
+		,11 AS intAttributeId-->CBS
+		,LDCL.intLoadContainerId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
+	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
+		AND LC.intConditionId = @intConditionId
+	WHERE SS.intContractStatusId IN (
+			1
+			,4
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM #tblMFPreShortTermDemand PS
+			WHERE PS.intLoadContainerId = LDCL.intLoadContainerId
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
+
+	INSERT INTO #tblMFShortTermDemand (
+		intItemId
+		,intLocationId
+		,dblQty
+		,intAttributeId
+		)
+	SELECT intItemId
+		,intLocationId
+		,SUM(dblQty)
+		,intAttributeId
+	FROM #tblMFPreShortTermDemand
+	WHERE intAttributeId =11
+	GROUP BY intItemId
+		,intLocationId
+		,intAttributeId
+
 	DELETE
 	FROM #tblMFPreShortTermDemand
 
@@ -342,10 +401,6 @@ BEGIN
 		,intLocationId
 		,intAttributeId
 
-	SELECT @intConditionId = intConditionId
-	FROM tblCTCondition
-	WHERE strConditionName = 'CBS'
-
 	--DELETE
 	--FROM #tblMFPreShortTermDemand
 	INSERT INTO #tblMFPreShortTermDemand (
@@ -358,14 +413,7 @@ BEGIN
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
 		,dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, LDCL.dblQuantity) AS dblQty
-		,(
-			CASE 
-				WHEN LC.intLoadId IS NOT NULL
-					THEN 11 -->CBS
-				WHEN L.intShipmentStatus = 1
-					THEN 10 -->Scheduled
-				END
-			) AS intAttributeId
+		,10 AS intAttributeId -->Scheduled
 		,LDCL.intLoadContainerId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -376,8 +424,6 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
 	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-	LEFT JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
-		AND LC.intConditionId = @intConditionId
 	WHERE SS.intContractStatusId IN (
 			1
 			,4
@@ -405,10 +451,7 @@ BEGIN
 		,SUM(dblQty)
 		,intAttributeId
 	FROM #tblMFPreShortTermDemand
-	WHERE intAttributeId IN (
-			10
-			,11
-			)
+	WHERE intAttributeId =10
 	GROUP BY intItemId
 		,intLocationId
 		,intAttributeId
