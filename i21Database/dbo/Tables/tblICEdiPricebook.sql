@@ -58,7 +58,22 @@
     dtmDateModified DATETIME NULL,
     intCreatedByUserId INT NULL,
     intModifiedByUserId INT NULL,
-	intConcurrencyId INT NULL
+	intConcurrencyId INT NULL,
+
+	strSubcategory	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strProductCode	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strTaxFlag1		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strTaxFlag2		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strTaxFlag3		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strTaxFlag4		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strIdRequiredLiquor NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strIdRequiredCigarettes NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strMinimumAge NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strSaleable NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strOpenPLU NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strFoodStamp NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strInventoryType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 GO
 

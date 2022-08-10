@@ -3,6 +3,7 @@ AS
 SELECT 
 	intDispatchId = TMO.intDispatchId	
 	,intCompanyLocationId = TMO.intCompanyLocationId
+	,intSubLocationId = IL.intSubLocationId
 	,intEntityId = E.intEntityId
 	,intEntityLocationId = EL.intEntityLocationId
 	,intSiteId = TMO.intSiteID
@@ -10,6 +11,7 @@ SELECT
 	,strSerialNumber = SD.strSerialNumber
 	,strOrderNumber = TMO.strOrderNumber
 	,strLocationName = TMO.strCompanyLocationName
+	,strSubLocationName = CLSL.strSubLocationName
 	,strEntityNo = E.strEntityNo
 	,strEntityName = TMO.strCustomerName
 	,strEntityLocation = EL.strLocationName
@@ -54,6 +56,8 @@ FROM vyuTMGeneratedCallEntry TMO
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
 	LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
 	LEFT JOIN tblICItem I ON I.intItemId = TMS.intProduct
+	LEFT JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId AND IL.intLocationId IS NOT NULL AND IL.intLocationId = TMS.intLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = IL.intSubLocationId
 	OUTER APPLY (SELECT TOP 1 uom.intItemUOMId, um.intUnitMeasureId, um.strUnitMeasure FROM tblICItemUOM uom
 		LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId = uom.intUnitMeasureId
 		WHERE intItemId = I.intItemId AND ysnStockUnit = 1) UOM

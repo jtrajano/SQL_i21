@@ -3886,6 +3886,11 @@ BEGIN TRY
 						END
 					END
 				END
+				ELSE
+				BEGIN
+						UPDATE @cbLogSpecific SET dblQty = dblQty * -1, intActionId = case when intContractStatusId = 3 then 54 else intContractStatusId end;
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
 			END			
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 4)
 			BEGIN

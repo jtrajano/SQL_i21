@@ -355,6 +355,40 @@ BEGIN TRANSACTION
 
 					SET @NewStoreId = SCOPE_IDENTITY()
 
+					
+					--intCheckoutCustomerId
+					--IF EXISTS (SELECT TOP 1 1 FROM tblSTStore WHERE intCheckoutCustomerId IS NOT NULL AND intStoreId = @intStoreId)
+					--	BEGIN
+					--		DECLARE @intCheckoutCustomerId AS INT = (SELECT TOP 1 intCheckoutCustomerId FROM tblSTStore WHERE intCheckoutCustomerId IS NOT NULL AND intStoreId = @intStoreId)
+
+					--		EXEC dbo.uspSTCopyItemLocation
+					--		@intSourceItemId 			= @intCheckoutCustomerId,
+					--		@intSourceLocationId		= @intSourceLocationId,
+					--		@intToLocationId 			= @intLocationId
+					--	END
+						
+					--intCustomerChargesItemId
+					IF EXISTS (SELECT TOP 1 1 FROM tblSTStore WHERE intCustomerChargesItemId IS NOT NULL AND intStoreId = @intStoreId)
+						BEGIN
+							DECLARE @intCustomerChargesItemId AS INT = (SELECT TOP 1 intCustomerChargesItemId FROM tblSTStore WHERE intCustomerChargesItemId IS NOT NULL AND intStoreId = @intStoreId)
+
+							EXEC dbo.uspSTCopyItemLocation
+							@intSourceItemId 			= @intCustomerChargesItemId,
+							@intSourceLocationId		= @intSourceLocationId,
+							@intToLocationId 			= @intLocationId
+						END
+
+					--intOverShortItemId
+					IF EXISTS (SELECT TOP 1 1 FROM tblSTStore WHERE intOverShortItemId IS NOT NULL AND intStoreId = @intStoreId)
+						BEGIN
+							DECLARE @intOverShortItemId AS INT = (SELECT TOP 1 intOverShortItemId FROM tblSTStore WHERE intOverShortItemId IS NOT NULL AND intStoreId = @intStoreId)
+
+							EXEC dbo.uspSTCopyItemLocation
+							@intSourceItemId 			= @intOverShortItemId,
+							@intSourceLocationId		= @intSourceLocationId,
+							@intToLocationId 			= @intLocationId
+						END
+
 					--REGISTER TAB--
 					INSERT INTO tblSTRegister
 					(

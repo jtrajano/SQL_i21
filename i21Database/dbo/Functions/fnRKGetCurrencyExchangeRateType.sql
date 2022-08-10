@@ -16,5 +16,5 @@ BEGIN
 	WHERE cd1.intContractDetailId =@intContractDetailId
 	ORDER BY rd.dtmValidFromDate DESC
 
-	RETURN @strCurrencyExchangeRateType
+	RETURN @strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS
 END

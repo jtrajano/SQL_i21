@@ -223,7 +223,7 @@ BEGIN TRY
 			END
 		END
 
-		IF (ISNULL(@Active, '') = '')
+		IF (@Active IS NULL)
 		BEGIN
 			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Active is required. '
 		END
@@ -1028,12 +1028,16 @@ BEGIN TRY
 
 				IF (NOT EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForInsert))
 				BEGIN
-					INSERT INTO tblSMUserSecurityCompanyLocationRolePermission (intEntityUserSecurityId, intEntityId, intUserRoleId, intCompanyLocationId, intConcurrencyId)
-					VALUES (@NewUserEntityId, @NewUserEntityId, @ExistingUserRoleId, @ExistingLocationId, 1)
 
-					SET @AuditLogId = @AuditLogId + 1
-					INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-					SELECT @AuditLogId, '', 'Created', 'Created - Record: ' + @LocationName + ' - ' + @UserRole, NULL, NULL, NULL, NULL, NULL, @AuditLogIdForLocationRoles
+					IF (NOT EXISTS (SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityId = @ExistingUserEntityId AND intUserRoleId = @ExistingUserRoleId AND intCompanyLocationId = @ExistingLocationId))
+					BEGIN
+						INSERT INTO tblSMUserSecurityCompanyLocationRolePermission (intEntityUserSecurityId, intEntityId, intUserRoleId, intCompanyLocationId, intConcurrencyId)
+						VALUES (@ExistingUserEntityId, @ExistingUserEntityId, @ExistingUserRoleId, @ExistingLocationId, 1)
+
+						SET @AuditLogId = @AuditLogId + 1
+						INSERT INTO @SingleAuditLogParam ([Id], [KeyValue], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+						SELECT @AuditLogId, '', 'Created', 'Created - Record: ' + @LocationName + ' - ' + @UserRole, NULL, NULL, NULL, NULL, NULL, @AuditLogIdForLocationRoles
+					END
 				END
 				ELSE
 				BEGIN

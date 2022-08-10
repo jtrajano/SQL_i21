@@ -56,7 +56,7 @@
 	,intPurchaseCropYearId INT
 	,intPurchaseStorageLocationId INT
 	,intPurchaseStorageUnitId INT
-	,strSalesContract  NVARCHAR(50)
+	,strSalesContract  NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strSalesCounterparty NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strSalesFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,intSalesFutureMarketId INT

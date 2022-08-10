@@ -270,7 +270,7 @@ BEGIN
 				1
 				,4
 				)
-			AND L.dtmETAPOD <= GETDATE()
+		AND IsNULL(L.dtmETAPOD,@dtmCurrentDate) <= @dtmCurrentDate
 	END
 
 	IF @strColumnName IN (
@@ -308,7 +308,7 @@ BEGIN
 				1
 				,4
 				)
-			AND L.dtmETAPOD <= @dtmCurrentDate
+			AND IsNULL(L.dtmETAPOD,@dtmCurrentDate) <= @dtmCurrentDate
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblQMSample S1
@@ -537,6 +537,7 @@ BEGIN
 			,intAttributeId
 			,intUserId
 			,dblWeight 
+			,dblQty
 			)
 		SELECT SS.intContractDetailId
 			,I.intItemId
@@ -544,11 +545,12 @@ BEGIN
 			,12 AS intAttributeId -->Late Open Contracts
 			,@intUserId
 			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
+			,SS.dblQuantity-IsNULL(C2.dblQuantity, 0)
 		FROM tblCTContractDetail SS
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
+			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
@@ -557,7 +559,7 @@ BEGIN
 				,4
 				)
 			AND SS.dtmStartDate < @dtmCurrentMonthStartDate
-			AND SS.dblNetWeight - IsNULL(C2.dblNet, 0) > 0
+			AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
 	END
 
 	IF @strColumnName IN (
@@ -572,6 +574,7 @@ BEGIN
 			,intAttributeId
 			,intUserId
 			,dblWeight 
+			,dblQty
 			)
 		SELECT SS.intContractDetailId
 			,I.intItemId
@@ -579,11 +582,12 @@ BEGIN
 			,13 AS intAttributeId -->Forward Open Contracts
 			,@intUserId
 			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
+			,SS.dblQuantity-IsNULL(C2.dblQuantity, 0)
 		FROM tblCTContractDetail SS
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
+			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
@@ -593,7 +597,7 @@ BEGIN
 				)
 			AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
 				AND @dtmAfter80Days
-			AND SS.dblNetWeight - IsNULL(C2.dblNet, 0) > 0
+			AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
 	END
 
 	IF @strColumnName IN (

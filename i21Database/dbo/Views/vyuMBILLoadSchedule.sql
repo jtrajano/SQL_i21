@@ -24,7 +24,8 @@ AS
          ,load.dtmDeliveryTo
          ,intTruckId = scTruck.intTruckDriverReferenceId
          ,strTrailerNo = load.strTrailerNo1
-         ,strPONumber = case strType when 'Outbound' then isnull(load.strDetailCustomerReference,load.strCustomerReference) else  isnull(load.strExternalLoadNumber,load.strDetailVendorReference) end
+		 ,strLoadRefNo = loaddetail.strVendorReference
+         ,strPONumber = loaddetail.strCustomerReference
          ,intHaulerId = load.intHaulerEntityId
          ,load.dtmScheduledDate
          ,load.intPContractDetailId

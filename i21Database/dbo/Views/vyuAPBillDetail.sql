@@ -85,8 +85,8 @@ SELECT
 	A.strRemarks,
 	PG.strName as strPurchasingGroupName,
 	CB.strContractBasis as strINCO,
-	ISNULL(A2.ysnPaid,0) AS ysnPaid,
-	A2.strPaymentInfo,
+	A.ysnPaid,
+	A2.strPaymentInfo COLLATE Latin1_General_CI_AS AS strPaymentInfo,
 	A2.dtmDatePaid,
 	A2.dtmPaymentDateReconciled,
 	ISNULL(A2.dblPayment,0) AS dblPayment,
@@ -172,7 +172,8 @@ LEFT JOIN (tblLGLoad receiptLoad INNER JOIN tblLGLoadDetail receiptLoadDetail ON
 	ON receiptLoadDetail.intLoadDetailId = IRE.intSourceId 
 			AND IR.intSourceType = 2
 			AND (IR.strReceiptType = 'Purchase Contract' OR IR.strReceiptType = 'Inventory Return')
-LEFT JOIN tblICStorageCharge SG ON SG.intStorageChargeId = B.intStorageChargeId
+LEFT JOIN (tblICStorageCharge SG
+		INNER JOIN tblICStorageChargeDetail schrgedtl ON SG.intStorageChargeId = schrgedtl.intStorageChargeId) ON schrgedtl.intStorageChargeDetailId = B.intStorageChargeId
 LEFT JOIN (tblICInsuranceCharge ichrge
 	INNER JOIN tblICInsuranceChargeDetail ichrgedtl ON ichrge.intInsuranceChargeId = ichrgedtl.intInsuranceChargeId)
 		ON ichrgedtl.intInsuranceChargeDetailId = B.intInsuranceChargeDetailId

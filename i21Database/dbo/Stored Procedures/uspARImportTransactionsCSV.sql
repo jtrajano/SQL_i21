@@ -115,6 +115,40 @@ BEGIN
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+WHERE  IL.intImportLogId = @ImportLogId
+GROUP BY ILD.strTransactionNumber
+HAVING COUNT(1) > 1)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'Invoice:' + RTRIM(LTRIM(ISNULL(ILD.strTransactionNumber,''))) + ' has duplicates! (' + ISNULL(CAST((SELECT COUNT(1) FROM tblARImportLogDetail SILD WHERE SILD.intImportLogId = @ImportLogId AND SILD.strTransactionNumber = ILD.strTransactionNumber) AS VARCHAR(5)), '0') + '). '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId 
+		AND ILD.strTransactionNumber IN (SELECT strTransactionNumber FROM tblARImportLogDetail  ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId
+			GROUP BY ILD.strTransactionNumber
+			HAVING COUNT(1) > 1)
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ILD.strTransactionNumber IN (SELECT strTransactionNumber FROM tblARImportLogDetail  ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId
+			GROUP BY ILD.strTransactionNumber
+			HAVING COUNT(1) > 1)) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
 IF EXISTS (SELECT top 1 1 FROM tblSOSalesOrder SO
 			INNER JOIN tblARImportLogDetail ILD  ON SO.strSalesOrderOriginId = ILD.strTransactionNumber  AND LEN(RTRIM(LTRIM(ISNULL(SO.strSalesOrderOriginId,'')))) > 0
 			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
@@ -189,6 +223,30 @@ BEGIN
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+WHERE  IL.intImportLogId = @ImportLogId AND ILD.strCustomerNumber <> '' AND C.ysnActive = 0)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'The Customer Number provided is In-active. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND C.ysnActive = 0
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess = 0 AND C.ysnActive = 0) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
 
 IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
 INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
@@ -373,6 +431,31 @@ BEGIN
 	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
 	LEFT JOIN tblARSalesperson S on ILD.strSalespersonNumber=S.strSalespersonId
 	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND ISNULL(intSalespersonId, 0) = 0 AND ILD.strSalespersonNumber <> '') 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+WHERE  IL.intImportLogId = @ImportLogId AND (C.strCreditCode = 'COD' OR C.dblCreditLimit IS NULL) AND ILD.strTransactionType <> 'Cash')
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'Customer Credit Limit is either blank or COD! Only Cash Sale transaction is allowed. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId  AND (C.strCreditCode = 'COD' OR C.dblCreditLimit IS NULL) AND ILD.strTransactionType <> 'Cash'
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND (C.strCreditCode = 'COD' OR C.dblCreditLimit IS NULL) AND ILD.strTransactionType <> 'Cash')
 	
 	UPDATE tblARImportLog 
 	SET [intSuccessCount]	= intSuccessCount - @FailedCount
@@ -725,7 +808,7 @@ BEGIN
 			,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(D.dtmDate, S.intDeliveryTermID) AS DATE)
 			,[dtmShipDate]				= D.dtmDate
 			,[dtmCalculated]			= NULL
-			,[dtmPostDate]				= NULL
+			,[dtmPostDate]				= D.dtmPostDate
 			,[intEntitySalespersonId]	= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
 			,[intFreightTermId]			= NULL
 			,[intShipViaId]				= NULL
@@ -856,7 +939,7 @@ BEGIN
 				,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId) AS DATE)
 				,[dtmShipDate]				= ILD.dtmDate
 				,[dtmCalculated]			= NULL
-				,[dtmPostDate]				= NULL
+				,[dtmPostDate]				= ILD.dtmPostDate
 				,[intEntitySalespersonId]	= CASE WHEN ISNULL(ILD.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
 				,[intFreightTermId]			= NULL
 				,[intShipViaId]				= NULL
@@ -1013,7 +1096,7 @@ BEGIN
 				,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(D.dtmDate, C.intTermsId) AS DATE)
 				,[dtmShipDate]				= D.dtmDate
 				,[dtmCalculated]			= NULL
-				,[dtmPostDate]				= NULL
+				,[dtmPostDate]				= D.dtmPostDate
 				,[intEntitySalespersonId]	= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
 				,[intFreightTermId]			= NULL
 				,[intShipViaId]				= NULL

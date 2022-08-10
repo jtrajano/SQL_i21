@@ -1,4 +1,4 @@
-﻿AutoCREATE PROCEDURE uspMFGetShortTermPlanningView (
+﻿CREATE PROCEDURE uspMFGetShortTermPlanningView (
 	@intDemandHeaderId INT
 	,@intUnitMeasureId INT
 	,@intCompanyLocationId INT = NULL
@@ -242,7 +242,7 @@ BEGIN
 			1
 			,4
 			)
-		AND L.dtmETAPOD <= @dtmCurrentDate
+		AND IsNULL(L.dtmETAPOD,@dtmCurrentDate) <= @dtmCurrentDate
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblQMSample S1
@@ -428,7 +428,7 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
 	OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
+			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
@@ -437,7 +437,7 @@ BEGIN
 			,4
 			)
 		AND SS.dtmStartDate  < @dtmCurrentMonthStartDate
-		AND SS.dblNetWeight -IsNULL(dblNet,0) > 0
+		AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 
@@ -456,7 +456,7 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId 
 	OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
+			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
@@ -466,7 +466,7 @@ BEGIN
 			)
 		AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
 			AND @dtmAfter80Days
-		AND SS.dblNetWeight -IsNULL(dblNet,0) > 0
+		AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 

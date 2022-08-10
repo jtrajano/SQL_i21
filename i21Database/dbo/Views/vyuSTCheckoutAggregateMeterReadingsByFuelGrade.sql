@@ -5,7 +5,8 @@ SELECT		a.intPumpTotalsId as intFuelTotalSoldId,
 			IL.strPassportFuelId1 as intProductNumber,
 			a.strDescription,
 			a.dblAmount as dblDollarsSold,
-			a.dblQuantity as dblGallonsSold
+			a.dblQuantity as dblGallonsSold,
+			Item.strItemNo
 FROM		tblSTCheckoutPumpTotals  a
 INNER JOIN	tblSTCheckoutHeader CH
 ON			a.intCheckoutId = CH.intCheckoutId

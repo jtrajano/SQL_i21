@@ -55,7 +55,7 @@ BEGIN TRY
 			strOrigin,				dblNetWeight,			intNetWeightUOMId,
 			intItemContractId,		strApprovalType,		strVendorLotID,
 			dblNoOfLots,			intCertificationId,		intLoadingPortId,
-			ysnApproved,			strPackingDescription
+			ysnApproved,			strPackingDescription,	strReference
 	)
 	OUTPUT	inserted.intApprovedContractId INTO @SCOPE_IDENTITY
 	SELECT	CD.intContractHeaderId,
@@ -95,7 +95,8 @@ BEGIN TRY
 			CF.intCertificationId,
 			intLoadingPortId,
 			@ysnApproved,
-			CD.strPackingDescription
+			CD.strPackingDescription,
+			CD.strReference
 
 	FROM	tblCTContractDetail		CD 
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT

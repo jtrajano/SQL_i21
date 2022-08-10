@@ -33,7 +33,15 @@ DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@intSubLocationId INT
 	,@strUpdateTolerance NVARCHAR(50)
 	,@ysnVirtualRecipe BIT
+	,@dtmCurrentDate Datetime
+	,@ysnRecipeBySite BIT
+	,@dtmValidFrom Datetime
+	,@dtmValidTo Datetime
 
+SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
+
+SELECT @ysnRecipeBySite = IsNULL(ysnRecipeBySite, 0)
+FROM tblMFCompanyPreference
 
 --Recipe Delete
 IF @strImportType = 'Recipe Delete'
@@ -1347,6 +1355,8 @@ BEGIN
 			AND intRecipeItemStageId = @intMinId
 
 		SELECT @ysnVirtualRecipe = NULL
+				,@dtmValidFrom=NULL
+				,@dtmValidTo=NULL
 
 		SELECT @strRecipeName = strRecipeName
 			,@strItemNo = strRecipeHeaderItemNo
@@ -1355,6 +1365,8 @@ BEGIN
 			,@strRecipeDetailItemNo = strRecipeItemNo
 			,@strRecipeItemType = strRecipeItemType
 			,@ysnVirtualRecipe = ysnVirtualRecipe
+			,@dtmValidFrom=strValidFrom
+			,@dtmValidTo=strValidTo
 		FROM tblMFRecipeItemStage
 		WHERE intRecipeItemStageId = @intMinId
 
@@ -1391,6 +1403,9 @@ BEGIN
 				WHERE intItemId = @intItemId
 					AND intVersionNo = @intVersionNo
 					AND intLocationId = @intLocationId
+					AND IsNULL(dtmValidFrom,@dtmValidFrom)=@dtmValidFrom 
+					AND IsNULL(dtmValidTo,@dtmValidTo)=@dtmValidTo 
+
 			ELSE --Virtual Recipe
 				SELECT TOP 1 @intRecipeId = intRecipeId
 					,@intRecipeTypeId = intRecipeTypeId
@@ -1699,11 +1714,21 @@ BEGIN
 				WHERE intItemId = @intItemId
 					AND ysnActive = 1
 					AND intLocationId = @intLocationId
+					AND @dtmCurrentDate BETWEEN IsNULL(dtmValidFrom,@dtmCurrentDate) AND IsNULL(dtmValidTo,@dtmCurrentDate) 
+					--AND IsNULL(intSubLocationId,0)=(Case When @ysnRecipeBySite =1 Then IsNULL(@intSubLocationId,0)else IsNULL(intSubLocationId,0) end)
 				)
-			UPDATE tblMFRecipe
-			SET ysnActive = 1
-			WHERE intRecipeId = @intRecipeId
+			Begin
+				Update tblMFRecipe
+				Set ysnActive =0
+				WHERE intItemId = @intItemId
+				AND ysnActive = 1
+				AND intLocationId = @intLocationId
+				--AND IsNULL(intSubLocationId,0)=(Case When @ysnRecipeBySite =1 Then IsNULL(@intSubLocationId,0)else IsNULL(intSubLocationId,0) end)
 
+				UPDATE tblMFRecipe
+				SET ysnActive = 1
+				WHERE intRecipeId = @intRecipeId
+			End
 		NEXT_RECIPEITEM:
 
 		SELECT @intMinId = MIN(intRecipeItemStageId)

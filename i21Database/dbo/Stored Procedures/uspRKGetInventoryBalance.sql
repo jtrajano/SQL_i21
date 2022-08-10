@@ -40,8 +40,8 @@ BEGIN
 	SELECT intCompanyLocationId
 	INTO #LicensedLocation
 	FROM tblSMCompanyLocation
-	WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
-										WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0
+	WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' COLLATE Latin1_General_CI_AS THEN 1 
+										WHEN @strPositionIncludes = 'Non-licensed Storage' COLLATE Latin1_General_CI_AS THEN 0
 										ELSE ISNULL(ysnLicensed, 0) END
 
 	SELECT *

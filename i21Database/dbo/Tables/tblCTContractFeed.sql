@@ -59,6 +59,8 @@
 	intItemId int,
 	dtmProcessedDate DATETIME,
 	intStatusId INT,
+	strVendorLotID NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strReference NVARCHAR(100) COLLATE Latin1_General_CI_AS,
     CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC),
 	CONSTRAINT [FK_tblCTContractFeed_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
