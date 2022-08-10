@@ -871,7 +871,7 @@ BEGIN TRY
 				UPDATE CD
 				SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
 					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost),
-					CD.dblFXPrice = ((CD.dblCashPrice * (sUOM.dblUnitQty / fUOM.dblUnitQty)) * tUOM.dblUnitQty) * 
+					CD.dblFXPrice = (((CD.dblCashPrice * (sUOM.dblUnitQty / fUOM.dblUnitQty)) * tUOM.dblUnitQty)/case when isnull(ICY2.intMainCurrencyId,0) > 0 then 100 else 1 end) * 
 					(
 						case
 						when CD.intCurrencyId = CD.intInvoiceCurrencyId or CD.intCurrencyId = isnull(ICY.intMainCurrencyId,0)
@@ -891,9 +891,9 @@ BEGIN TRY
 				join tblICItemUOM tUOM on tUOM.intItemUOMId = CD.intFXPriceUOMId
 				JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
 				LEFT JOIN	tblSMCurrency		ICY	ON	ICY.intCurrencyID = CD.intInvoiceCurrencyId
+				LEFT JOIN	tblSMCurrency		ICY2	ON	ICY2.intCurrencyID = CD.intCurrencyId
 				cross apply (select top 1 *  from tblICItemUOM where ysnStockUnit = 1) sUOM
 				where PF.intPriceFixationId = @intPriceFixationId
-
 
 				exec uspCTUpdateSequenceCostRate
 					@intContractDetailId = @intContractDetailId,

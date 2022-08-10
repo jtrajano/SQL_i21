@@ -315,7 +315,7 @@ BEGIN TRY
 							WHEN CD.intInvoiceCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId) AND PF.dblFX = 1 THEN NULL
 							ELSE NULL END,
 			strFXFinalPrice = LTRIM(
-									dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)*
+									(dbo.fnCTConvertQuantityToTargetCommodityUOM(FC.intCommodityUnitMeasureId,PF.intFinalPriceUOMId,PF.dblFinalPrice)/CASE WHEN isnull(@ysnEnableFXFieldInContractPricing,0) = 1 and CY.ysnSubCurrency = 1 THEN ISNULL(CY.intCent,1) ELSE 1 END )*
 									CASE WHEN  isnull(@ysnEnableFXFieldInContractPricing,0) = 1 
 									 THEN ISNULL(PF.dblFX,1)
 									ELSE dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)/CASE WHEN CY.ysnSubCurrency = 1 THEN ISNULL(CY.intCent,1) ELSE 1 END 
