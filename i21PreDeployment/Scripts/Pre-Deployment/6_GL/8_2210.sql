@@ -37,9 +37,9 @@ BEGIN
         END')
     END
 
-    IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCompanyPreferenceOption]') AND type in (N'U')) 
+    IF COL_LENGTH('dbo.tblGLCompanyPreferenceOption', 'ysnREOverride') IS NOT NULL
     EXEC ('UPDATE tblGLCompanyPreferenceOption SET ysnREOverride = 0, ysnREOverrideLocation = 0 , ysnREOverrideLOB=0, ysnREOverrideCompany = 0
 	INSERT INTO tblGLDataFixLog (dtmDate, strDescription)
-	VALUES (GETDATE(),  ''Reset Retained Earnings Posting''')
+	VALUES (GETDATE(),  ''Reset Retained Earnings Posting'')')
 END
 GO
