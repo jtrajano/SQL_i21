@@ -624,6 +624,47 @@ WHERE
 
 SET @missingVendorCategoryXRef = @@ROWCOUNT;	
 
+
+/* Log and remove invalid Item Type */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId
+)
+SELECT @LogId
+	 , 'Error'
+	 , PriceBook.intRecordNumber
+	 , 'strInventoryType / Inventory Type'
+	 , PriceBook.strInventoryType
+	 , 'Invalid Inventory Type'
+	 , 'Skipped'
+	 , 'Record not imported.'
+	 , 1
+FROM tblICEdiPricebook PriceBook
+WHERE NULLIF(PriceBook.strInventoryType,'') IS NOT NULL AND PriceBook.strInventoryType NOT IN ('Inventory'
+																						     , 'Non-Inventory'
+																						     , 'Other Charge'
+																						     , 'Service'
+																						     , 'Software'
+																						     , 'Comment');
+
+DELETE 
+FROM tblICEdiPricebook 
+WHERE strUniqueId = @UniqueId AND NULLIF(strInventoryType,'') IS NOT NULL AND strInventoryType NOT IN ('Inventory'
+																									 , 'Non-Inventory'
+																									 , 'Other Charge'
+																									 , 'Service'
+																									 , 'Software'
+																									 , 'Comment');
+
+/* End of Log and remove invalid Item Type */
+
 -- Update or Insert items based on the Category -> Vendor Category XRef. 
 INSERT INTO #tmpICEdiImportPricebook_tblICItem (
 	strAction 
