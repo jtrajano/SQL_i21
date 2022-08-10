@@ -81,7 +81,7 @@ SELECT
 	, strMessage = 'The Customer No. "' + vts.strCustomer + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-LEFT JOIN tblARCustomer c ON c.strCustomerNumber = vts.strCustomer
+LEFT JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND c.intEntityId IS NULL
 	AND NULLIF(vts.strCustomer, '') IS NOT NULL
@@ -98,8 +98,7 @@ SELECT
 	, strMessage = 'The Customer Name "' + vts.strCustomerName + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-LEFT JOIN tblEMEntity e ON e.strName = vts.strCustomerName
-LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
+LEFT JOIN vyuARCustomer c ON c.strName = vts.strCustomerName
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND c.intEntityId IS NULL
 	AND NULLIF(vts.strCustomer, '') IS NULL
@@ -119,7 +118,7 @@ SELECT
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
-JOIN tblARCustomer c ON c.strCustomerNumber = vts.strCustomer
+JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND NULLIF(vts.strCustomer, '') IS NOT NULL
 	AND EXISTS (
@@ -415,7 +414,7 @@ SELECT e.intVendorSetupId, xc.intEntityId, xc.strVendorCustomer, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
-JOIN tblARCustomer c ON c.strCustomerNumber = vs.strCustomer
+JOIN vyuARCustomer c ON c.strCustomerNumber = vs.strCustomer
 JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
 	AND xc.intEntityId = c.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
@@ -427,7 +426,7 @@ FROM tblApiSchemaTransformVendorSetup vs
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblEMEntity en ON en.strName = vs.strCustomerName
-JOIN tblARCustomer c ON c.intEntityId = en.intEntityId
+JOIN vyuARCustomer c ON c.intEntityId = en.intEntityId
 JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
 	AND xc.intEntityId = c.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
@@ -442,7 +441,7 @@ SET
 	, xc.strVendorCustomer = COALESCE(vs.strVendorCustomer, xc.strVendorCustomer)
 	, xc.intRowNumber = vs.intRowNumber
 FROM tblVRCustomerXref xc
-JOIN tblARCustomer c ON c.intEntityId = xc.intEntityId
+JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomer = c.strCustomerNumber
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
@@ -457,7 +456,7 @@ SET
 	, xc.intRowNumber = vs.intRowNumber
 FROM tblVRCustomerXref xc
 JOIN tblEMEntity en ON en.intEntityId = xc.intEntityId
-JOIN tblARCustomer c ON c.intEntityId = xc.intEntityId
+JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomerName = en.strName
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
