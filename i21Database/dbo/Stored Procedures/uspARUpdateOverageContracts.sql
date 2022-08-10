@@ -15,6 +15,7 @@ DECLARE @intUnitMeasureId			INT
 	  , @strInvalidItem				NVARCHAR(500)
 	  , @dblQtyOverAged				NUMERIC(18, 6) = 0
 	  , @dblDWGSpotPrice			NUMERIC(18, 6) = 0
+	  , @dtmInvoiceDate				DATETIME = NULL
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#INVOICEDETAILS') IS NOT NULL)
@@ -66,6 +67,10 @@ CREATE TABLE #BASISCONTRACT (
 	, dblFinalPrice				NUMERIC(18, 6)
 	, ysnProcessed				BIT DEFAULT ((0))
 )
+
+SELECT TOP 1 @dtmInvoiceDate = dtmDate
+FROM tblARInvoice
+WHERE intInvoiceId = @intInvoiceId
 
 --GET INVOICES WITH CONTRACTS AND OVERAGED CONVERT ITEM QTY WITH CONTRACTS TO SCALE UOM (BUSHELS USUALLY)
 SELECT intInvoiceId					= ID.intInvoiceId
@@ -419,6 +424,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				INNER JOIN vyuARGetAddOnItems ADDONITEMS ON ID.intItemId = ADDONITEMS.intComponentItemId
 														AND PARENT.intItemId = ADDONITEMS.intItemId
 														AND PARENT.intCompanyLocationId = ADDONITEMS.intCompanyLocationId
+														AND @dtmInvoiceDate BETWEEN ADDONITEMS.dtmEffectivityDateFrom AND ADDONITEMS.dtmEffectivityDateTo
 				WHERE ID.intContractDetailId IS NULL 
 				  AND ID.intContractHeaderId IS NULL
 				  AND ISNULL(ID.ysnAddonParent, 0) = 0
@@ -865,6 +871,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 		) ID
 		INNER JOIN vyuARGetAddOnItems ADDON ON IDTOADD.intItemId = ADDON.intItemId
 										   AND ID.intCompanyLocationId = ADDON.intCompanyLocationId
+										   AND @dtmInvoiceDate BETWEEN ADDON.dtmEffectivityDateFrom AND ADDON.dtmEffectivityDateTo
 		WHERE ADDON.ysnAutoAdd = 1		  
 		  AND ISNULL(@ysnFromSalesOrder, 0) = 1
 
@@ -877,6 +884,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 		INNER JOIN vyuARGetAddOnItems ADDON ON ID.intItemId = ADDON.intComponentItemId
 										   AND I.intCompanyLocationId = ADDON.intCompanyLocationId
+										   AND @dtmInvoiceDate BETWEEN ADDON.dtmEffectivityDateFrom AND ADDON.dtmEffectivityDateTo
 		INNER JOIN (
 			SELECT dblQtyShipped = SUM(dblQtyShipped)
 				 , intItemId	 = intItemId
