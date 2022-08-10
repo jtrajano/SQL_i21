@@ -742,6 +742,7 @@ BEGIN
 	-- If there are items for adjust, expect it to have g/l entries. 
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN
+		UPDATE @GLEntries SET dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
 	END
 	COMMIT TRAN @TransactionName
