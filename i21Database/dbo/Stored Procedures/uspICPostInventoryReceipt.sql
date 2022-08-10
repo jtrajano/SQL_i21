@@ -3246,6 +3246,7 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 OR EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
+		UPDATE @GLEntries SET dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
 
