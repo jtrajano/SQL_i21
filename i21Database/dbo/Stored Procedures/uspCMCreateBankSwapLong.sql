@@ -77,6 +77,7 @@ OUTER APPLY(
 	WHERE intAccountId = @intBTSwapToFXGLAccountId
 	AND strTransactionId =A.strTransactionId
 	AND ysnIsUnposted = 0
+	and strJournalLineDescription = 'Currency Payable'
 	ORDER by intGLDetailId DESC
 )GLDetail
 where intTransactionId = @intSwapShortId
