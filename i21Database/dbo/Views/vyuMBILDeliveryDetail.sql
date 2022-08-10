@@ -14,6 +14,7 @@ SELECT detail.intDeliveryDetailId
       ,detail.ysnDelivered
       ,detail.intTMDispatchId
       ,detail.intTMSiteId
-	  ,detail.intShiftId      
+	  ,detail.intShiftId
+      ,detail.dblWaterInches
 FROM tblMBILDeliveryDetail detail            
 INNER JOIN tblICItem item ON detail.intItemId = item.intItemId 
