@@ -63,7 +63,8 @@ BEGIN
  intOutboundTaxGroupId INT NULL,                              
  intInboundTaxGroupId INT NULL ,      
  intTMDispatchId INT NULL,      
- intTMSiteId INT NULL      
+ intTMSiteId INT NULL,
+ strItemUOM nvarchar(100) NULL
  )                                       
          
         
@@ -107,7 +108,8 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
   ,[strLoadRefNo]                        
   ,[intItemId]                               
   ,[dblQuantity]  
-  ,[strPONumber]  
+  ,[strPONumber]
+  ,[strItemUOM]
     )                               
    SELECT  distinct                               
    intLoadDetailId                              
@@ -126,6 +128,7 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
   ,[intItemId]                               
   ,[dblQuantity]           
   ,[strPONumber]  
+  ,[strItemUOM]
     FROM #loadOrder a                                        
  INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId                  
  WHERE a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILPickupDetail)                                    
