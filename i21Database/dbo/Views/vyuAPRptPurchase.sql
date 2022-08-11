@@ -34,6 +34,7 @@ SELECT
 	,B.strMiscDescription + CASE WHEN G.strVendorItemXref IS NULL THEN '' ELSE CHAR(13) + CHAR(10) + G.strVendorItemXref END AS strDescription
 	,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) COLLATE Latin1_General_CI_AS as strCompanyAddress
 	,F.strFreightTerm
+	,A.intShipToId
 FROM dbo.tblPOPurchase A
 	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEMEntity C1 ON C.[intEntityId] = C1.intEntityId)
 			ON A.[intEntityVendorId] = C.[intEntityId]

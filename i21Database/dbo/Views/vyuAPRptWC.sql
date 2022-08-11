@@ -34,6 +34,7 @@ SELECT
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
 		,strContainerNumber		=	LCointainer.strContainerNumber
+		,intShipToId			=	WC2.intShipToId
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
