@@ -118,11 +118,13 @@ BEGIN TRY
 
 				intItemId			=	SC.intItemId,		intItemUOMId				=	SC.intItemUOMIdTo,
 				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SP.intStorageScheduleId,ISNULL(SC.intStorageScheduleId,CP.intDefStorageSchedule)),
-				dtmEndDate			=	CASE	WHEN	strDefEndDateType	=	'Calender'	THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
-												WHEN	strDefEndDateType	=	'None'		THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
-												WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
-												ELSE	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
-										END,
+				dtmEndDate			=	dateadd(second,-1,dateadd(day,1,dbo.fnRemoveTimeOnDate(
+											CASE	WHEN	strDefEndDateType	=	'Calender'	THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
+													WHEN	strDefEndDateType	=	'None'		THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+													WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
+													ELSE	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+											END
+										))),
 				intCompanyLocationId		=	SC.intProcessingLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
 				dblBalance			=	0,					dtmStartDate				=	dbo.fnRemoveTimeOnDate(SC.dtmTicketDateTime),
@@ -168,11 +170,13 @@ BEGIN TRY
 
 				intItemId			=	SC.intItemId,		intItemUOMId				=	QU.intItemUOMId,
 				intContractSeq		=	1,					intStorageScheduleRuleId	=	ISNULL(SP.intStorageScheduleRuleId,CP.intDefStorageSchedule),
-				dtmEndDate			=	CASE	WHEN	strDefEndDateType	=	'Calender'	THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
-												WHEN	strDefEndDateType	=	'None'		THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
-												WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
-												ELSE	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
-										END,
+				dtmEndDate			=	dateadd(second,-1,dateadd(day,1,dbo.fnRemoveTimeOnDate(
+											CASE	WHEN	strDefEndDateType	=	'Calender'	THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
+													WHEN	strDefEndDateType	=	'None'		THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+													WHEN	strDefEndDateType	=	'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
+													ELSE	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+											END
+										))),
 				intCompanyLocationId		=	SC.intCompanyLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
 				dblBalance			=	0,					dtmStartDate				=	dbo.fnRemoveTimeOnDate(SC.dtmDeliverySheetDate),
@@ -219,12 +223,14 @@ BEGIN TRY
 				intItemUOMId		= TS.intItemUOMId,
 				intContractSeq		= 1,
 				intStorageScheduleRuleId = TSS.intStorageScheduleId,
-				dtmEndDate = CASE 
-				WHEN strDefEndDateType = 'Calender' THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
-				WHEN strDefEndDateType = 'None' THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
-				WHEN strDefEndDateType = 'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
-				ELSE DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
-				END,
+				dtmEndDate = dateadd(second,-1,dateadd(day,1,dbo.fnRemoveTimeOnDate(
+					CASE 
+					WHEN strDefEndDateType = 'Calender' THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
+					WHEN strDefEndDateType = 'None' THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+					WHEN strDefEndDateType = 'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
+					ELSE DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+					END
+				))),
 				intCompanyLocationId =	TSS.intCompanyLocationId,
 				dblQuantity			=	0,
 				intContractStatusId =	1,
@@ -272,7 +278,7 @@ BEGIN TRY
 
 				intItemId			=	IM.intItemId,			intItemUOMId				=	QU.intItemUOMId,
 				intContractSeq		=	1,						intStorageScheduleRuleId	=	NULL,
-				dtmEndDate			=	CI.dtmEndDate,			intCompanyLocationId		=	CL.intCompanyLocationId, 
+				dtmEndDate			=	dateadd(second,-1,dateadd(day,1,dbo.fnRemoveTimeOnDate(CI.dtmEndDate))),			intCompanyLocationId		=	CL.intCompanyLocationId, 
 				dblQuantity			=	CI.dblQuantity,			intContractStatusId			=	1,
 				dblBalance			=	CI.dblQuantity,			dtmStartDate				=	dbo.fnRemoveTimeOnDate(CI.dtmStartDate),
 				intPriceItemUOMId	=	QU.intItemUOMId,		dtmCreated					=	GETDATE(),
