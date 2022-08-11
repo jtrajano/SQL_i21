@@ -591,6 +591,7 @@ BEGIN
 
 								WHERE CPT.intCheckoutId = @intCheckoutId
 									AND CPT.dblAmount > 0
+									AND TPI.intTaxGroupId IS NOT NULL
 									-- AND UOM.ysnStockUnit = CAST(1 AS BIT)
 						end try
 						begin catch
@@ -842,6 +843,7 @@ BEGIN
 								AND Tax.strSourceTransaction = @strtblSTCheckoutPumpTotals01
 							WHERE CPT.intCheckoutId = @intCheckoutId
 								AND CPT.dblAmount > 0
+								AND TPI.intTaxGroupId IS NOT NULL
 							
 
 						-- Insert Department Total Item with Pump Total negative amount 
