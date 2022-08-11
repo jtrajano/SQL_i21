@@ -122,7 +122,7 @@ BEGIN TRY
 										END,
 				intCompanyLocationId		=	SC.intProcessingLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
-				dblBalance			=	0,					dtmStartDate				=	SC.dtmTicketDateTime,
+				dblBalance			=	0,					dtmStartDate				=	dbo.fnRemoveTimeOnDate(SC.dtmTicketDateTime),
 				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
 				intConcurrencyId	=	1,					intCreatedById				=	@intUserId,
 				intUnitMeasureId	=	QU.intUnitMeasureId
@@ -168,7 +168,7 @@ BEGIN TRY
 										END,
 				intCompanyLocationId		=	SC.intCompanyLocationId, 
 				dblQuantity			=	0,					intContractStatusId			=	1,
-				dblBalance			=	0,					dtmStartDate				=	SC.dtmDeliverySheetDate,
+				dblBalance			=	0,					dtmStartDate				=	dbo.fnRemoveTimeOnDate(SC.dtmDeliverySheetDate),
 				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
 				intConcurrencyId	=	1,					intCreatedById				=	@intUserId,
 				intUnitMeasureId	=	QU.intUnitMeasureId,intCurrencyId				=	SC.intCurrencyId
@@ -220,7 +220,7 @@ BEGIN TRY
 				dblQuantity			=	0,
 				intContractStatusId =	1,
 				dblBalance			=	0,
-				dtmStartDate		=	TS.dtmTransferStorageDate,
+				dtmStartDate		=	dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate),
 				intPricingTypeId	=	5, --DP
 				dtmCreated			=	GETDATE(),
 				intConcurrencyId	=	1,
@@ -263,7 +263,7 @@ BEGIN TRY
 				intContractSeq		=	1,						intStorageScheduleRuleId	=	NULL,
 				dtmEndDate			=	CI.dtmEndDate,			intCompanyLocationId		=	CL.intCompanyLocationId, 
 				dblQuantity			=	CI.dblQuantity,			intContractStatusId			=	1,
-				dblBalance			=	CI.dblQuantity,			dtmStartDate				=	CI.dtmStartDate,
+				dblBalance			=	CI.dblQuantity,			dtmStartDate				=	dbo.fnRemoveTimeOnDate(CI.dtmStartDate),
 				intPriceItemUOMId	=	QU.intItemUOMId,		dtmCreated					=	GETDATE(),
 				intConcurrencyId	=	1,						intCreatedById				=	@intUserId,
 				intFutureMarketId	=	MA.intFutureMarketId,	intFutureMonthId			=	MO.intFutureMonthId,
