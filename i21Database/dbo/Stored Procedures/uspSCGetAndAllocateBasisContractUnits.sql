@@ -48,7 +48,7 @@ BEGIN TRY
 		FROM #tmpContractPrice
 
 		--check if there is available Price Quantity
-		IF(ISNULL(@dblContractAvailablePrice,0) > @dblQty)
+		IF(ISNULL(@dblContractAvailablePrice,0) >= @dblQty)
 		BEGIN
 			SELECT TOP 1 
 				@_intPriceFixationDetailId = intPriceFixationDetailId
