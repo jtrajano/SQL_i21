@@ -57,6 +57,8 @@ DECLARE @intMinSeq INT
 	,@intItemId INT
 	,@intUnitMeasureId INT
 	,@dblNetWeight NUMERIC(18, 6)
+	,@strVendorLotID NVARCHAR(100)
+	,@strReference NVARCHAR(100)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strContractFeedIds NVARCHAR(MAX)
@@ -290,6 +292,8 @@ BEGIN
 		,ysnPopulatedByIntegration
 		,ysnMaxPrice
 		,intItemId
+		,strVendorLotID
+		,strReference
 		)
 	SELECT CF.intContractHeaderId
 		,intContractDetailId
@@ -342,6 +346,8 @@ BEGIN
 		,1
 		,RC.ysnMaxPrice
 		,CF.intItemId
+		,CF.strVendorLotID
+		,CF.strReference
 	FROM vyuCTContractFeed CF
 	JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 		AND CF1.strItemNo = CF.strItemNo
@@ -537,6 +543,8 @@ BEGIN
 				,ysnPopulatedByIntegration
 				,ysnMaxPrice
 				,intItemId
+				,strVendorLotID
+				,strReference
 				)
 			OUTPUT inserted.intContractHeaderId
 				,inserted.strItemNo
@@ -588,6 +596,8 @@ BEGIN
 				,1
 				,RC.ysnMaxPrice
 				,CF.intItemId
+				,CF.strVendorLotID
+				,CF.strReference
 			FROM vyuCTContractFeed CF
 			JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
 				AND CF1.strItemNo = CF.strItemNo
@@ -662,6 +672,8 @@ BEGIN
 				,ysnPopulatedByIntegration
 				,ysnMaxPrice
 				,intItemId
+				,strVendorLotID
+				,strReference
 				)
 			SELECT CF2.intContractHeaderId
 				,intContractDetailId
@@ -711,6 +723,8 @@ BEGIN
 				,1
 				,RC.ysnMaxPrice
 				,CF2.intItemId
+				,CF2.strVendorLotID
+				,CF2.strReference
 			FROM tblCTContractFeed CF2
 			JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 				AND CF1.strItemNo = CF2.strItemNo
@@ -893,6 +907,8 @@ BEGIN
 			,ysnPopulatedByIntegration
 			,ysnMaxPrice
 			,intItemId
+			,strVendorLotID
+			,strReference
 			)
 		SELECT CF2.intContractHeaderId
 			,intContractDetailId
@@ -941,6 +957,8 @@ BEGIN
 			,1
 			,RC.ysnMaxPrice
 			,CF2.intItemId
+			,CF2.strVendorLotID
+			,CF2.strReference
 		FROM tblCTContractFeed CF2
 		JOIN @tblCTFinalContractFeed CF1 ON CF1.intContractHeaderId = CF2.intContractHeaderId
 			AND CF1.strItemNo = CF2.strItemNo
@@ -1309,6 +1327,8 @@ BEGIN
 					THEN '1'
 				ELSE strFLOId
 				END
+			,@strVendorLotID = CF.strVendorLotID
+			,@strReference = CF.strReference
 		FROM tblCTContractFeed CF
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 			AND intContractFeedId = @intMinSeq
@@ -1396,6 +1416,8 @@ BEGIN
 						THEN '1'
 					ELSE strFLOId
 					END
+				,@strVendorLotID = CF.strVendorLotID
+				,@strReference = CF.strReference
 			FROM tblCTContractFeed CF
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CF.intContractHeaderId = @intContractHeaderId
@@ -1427,6 +1449,8 @@ BEGIN
 				,CF.strRowState
 				,strFLOId
 				,V.strTaxNumber
+				,CF.strVendorLotID
+				,CF.strReference
 		END
 		ELSE
 		BEGIN
@@ -1496,6 +1520,8 @@ BEGIN
 						THEN '1'
 					ELSE strFLOId
 					END
+				,@strVendorLotID = CF.strVendorLotID
+				,@strReference = CF.strReference
 			FROM tblCTContractFeed CF
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CF.intContractHeaderId = @intContractHeaderId
@@ -1526,6 +1552,8 @@ BEGIN
 				,CF.strRowState
 				,strFLOId
 				,V.strTaxNumber
+				,CF.strVendorLotID
+				,CF.strReference
 		END
 	END
 
@@ -1745,6 +1773,8 @@ BEGIN
 		SET @strItemXml += '<ORDERPR_UN>' + ISNULL(@strPriceUOM, '') + '</ORDERPR_UN>'
 		SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
 		SET @strItemXml += '<PRICE_UNIT>' + IsNULL(@strFLOId, 1) + '</PRICE_UNIT>'
+		SET @strItemXml += '<CERT_BODY>' + dbo.fnEscapeXML(ISNULL(@strVendorLotID, '')) + '</CERT_BODY>'
+		SET @strItemXml += '<CERT_COST>' + dbo.fnEscapeXML(ISNULL(@strReference, '')) + '</CERT_COST>'
 		SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 		SET @strItemXml += '</E1BPMEOUTITEM>'
 	END
@@ -1802,6 +1832,8 @@ BEGIN
 
 		SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 		--SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
+		SET @strItemXml += '<CERT_BODY>' + dbo.fnEscapeXML(ISNULL(@strVendorLotID, '')) + '</CERT_BODY>'
+		SET @strItemXml += '<CERT_COST>' + dbo.fnEscapeXML(ISNULL(@strReference, '')) + '</CERT_COST>'
 		SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 		SET @strItemXml += '</E1BPMEOUTITEM>'
 		SET @strItemXml += '<E1BPMEOUTITEMX>'
