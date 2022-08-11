@@ -39,7 +39,7 @@ FROM
 	, SMCur.strCurrency as strCurrency
 	, SMCurExRateType.strCurrencyExchangeRateType as strCurrencyExchangeRateType
 	FROM tblGLPostRecap GLPR
-	INNER JOIN tblSMCurrency SMCur ON GLPR.intCurrencyId = SMCur.intCurrencyID
+	LEFT OUTER JOIN tblSMCurrency SMCur ON GLPR.intCurrencyId = SMCur.intCurrencyID
 	LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCurExRateType on GLPR.intCurrencyExchangeRateTypeId = SMCurExRateType.intCurrencyExchangeRateTypeId
 
 	UNION ALL
