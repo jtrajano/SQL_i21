@@ -1079,6 +1079,7 @@
     <Build Include="dbo\Tables\tblGLPostedCompare.sql" />
     <Build Include="dbo\Views\vyuGLSummaryCompare.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdatePumpTotals.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
