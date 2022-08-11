@@ -197,20 +197,20 @@ BEGIN TRY
 
 		-- Send Create Feed only Once
 		IF @strRowState = 'Added'
-			AND (
-				SELECT TOP 1 UPPER(strRowState)
+			AND ISNULL((
+				SELECT TOP 1 strRowState
 				FROM tblCTContractFeed
 				WHERE intContractDetailId = @intContractDetailId
 					AND intContractFeedId < @intContractFeedId
 				ORDER BY intContractFeedId
-				) = 'Added'
-			AND (
-				SELECT TOP 1 UPPER(strRowState)
+				), '') = 'Added'
+			AND ISNULL((
+				SELECT TOP 1 strRowState
 				FROM tblCTContractFeed
 				WHERE intContractDetailId = @intContractDetailId
 					AND intContractFeedId < @intContractFeedId
 					AND strRowState = 'Delete'
-				) <> 'Delete'
+				), '') <> 'Delete'
 		BEGIN
 			UPDATE dbo.tblCTContractFeed
 			SET strRowState = 'Modified'
