@@ -1072,12 +1072,20 @@ BEGIN TRY
 						from tblSCTicketContractUsed
 						where intTicketContractUsed = @CurrentTicketContractUsedId
 
-						EXEC uspSCUpdateContractSchedule
+						-- EXEC uspSCUpdateContractSchedule
+						-- 	@intContractDetailId = @intLoopContractDetailId
+						-- 	,@dblQuantity = @dblLoopScheduleQty
+						-- 	,@intUserId = @intUserId
+						-- 	,@intExternalId = @intTicketId
+						-- 	,@strScreenName = 'Scale'
+
+						EXEC uspCTUpdateSequenceBalance 
 							@intContractDetailId = @intLoopContractDetailId
-							,@dblQuantity = @dblLoopScheduleQty
-							,@intUserId = @intUserId
-							,@intExternalId = @intTicketId
-							,@strScreenName = 'Scale'
+							,@dblQuantityToUpdate = @dblLoopScheduleQty
+							,@intUserId	= @intUserId
+							,@intExternalId	= @intTicketId
+							,@strScreenName	= 'Scale'
+							
 
 						select @CurrentTicketContractUsedId = min(intTicketContractUsed)
 						from tblSCTicketContractUsed
