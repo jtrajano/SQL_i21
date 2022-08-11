@@ -70,8 +70,6 @@ DECLARE @dblContractScheduledQty NUMERIC(18,6)
 DECLARE @dblScheduleAdjustment NUMERIC(38, 20)
 DECLARE @_dblTicketScheduledQty NUMERIC(38, 20)
 DECLARE @intContractPricingType INT
-
-
 DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType 
 
 BEGIN TRY
@@ -85,7 +83,8 @@ BEGIN TRY
 		,@dblTicketNetUnits = SC.dblNetUnits
 		,@intTicketStorageScheduleTypeId = SC.intStorageScheduleTypeId 
 		,@intTicketContractDetailId = SC.intContractId
-		,@intTicketLoadDetailId = SC.intLoadDetailId
+		,@intTicketLoadDetailId = SC.intLoadDetailId		
+		
 	FROM tblSCTicket SC 
 	LEFT JOIN tblCTWeightGrade CTGrade 
 		ON CTGrade.intWeightGradeId = SC.intGradeId
@@ -969,6 +968,28 @@ BEGIN TRY
 						
 
 
+						if @dblTicketScheduledQty <> 0
+						begin
+
+							set @dblTicketScheduledQty = -1 * @dblTicketScheduledQty
+
+							EXEC uspSCUpdateContractSchedule
+								@intContractDetailId = @intTicketContractDetailId
+								,@dblQuantity = @dblTicketScheduledQty
+								,@intUserId = @intUserId
+								,@intExternalId = @intTicketId
+								,@strScreenName = 'Scale'
+
+							set @dblTicketScheduledQty = abs(@dblTicketScheduledQty)
+
+							EXEC uspCTUpdateSequenceBalance 
+								@intContractDetailId = @intTicketContractDetailId
+								,@dblQuantityToUpdate = @dblTicketScheduledQty
+								,@intUserId	= @intUserId
+								,@intExternalId	= @intTicketId
+								,@strScreenName	= 'Scale'
+
+						end
 						
 						
 						if @DoContractValidation = 1

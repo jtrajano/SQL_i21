@@ -912,13 +912,21 @@ BEGIN TRY
 					,@_dblLoopQuantity = dblScheduleQty
 				from tblSCTicketContractUsed
 				where intTicketContractUsed = @CurrentTicketContractUsedId
-
+				/*
 				EXEC uspSCUpdateContractSchedule
 					@intContractDetailId = @_intLoopContractDetailId
 					,@dblQuantity = @_dblLoopQuantity
 					,@intUserId = @intUserId
 					,@intExternalId = @intTicketId
 					,@strScreenName = 'Scale'
+				*/
+
+				EXEC uspCTUpdateSequenceBalance 
+					@intContractDetailId = @_intLoopContractDetailId
+					,@dblQuantityToUpdate = @_dblLoopQuantity
+					,@intUserId	= @intUserId
+					,@intExternalId	= @intTicketId
+					,@strScreenName	= 'Scale'
 
 				select @CurrentTicketContractUsedId = min(intTicketContractUsed)
 				from tblSCTicketContractUsed
