@@ -542,15 +542,15 @@ DELETE FROM cte
 WHERE guiApiUniqueId = @guiApiUniqueId
   AND RowNumber > 1;
 
-;WITH cte AS
-(
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorCustomer ORDER BY sr.intVendorSetupId, sr.strVendorCustomer) AS RowNumber
-   FROM @UniqueCustomers sr
-   WHERE sr.guiApiUniqueId = @guiApiUniqueId
-)
-DELETE FROM cte
-WHERE guiApiUniqueId = @guiApiUniqueId
-  AND RowNumber > 1;
+-- ;WITH cte AS
+-- (
+--    SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorCustomer ORDER BY sr.intVendorSetupId, sr.strVendorCustomer) AS RowNumber
+--    FROM @UniqueCustomers sr
+--    WHERE sr.guiApiUniqueId = @guiApiUniqueId
+-- )
+-- DELETE FROM cte
+-- WHERE guiApiUniqueId = @guiApiUniqueId
+--   AND RowNumber > 1;
 
 INSERT INTO tblVRCustomerXref (
 	  intEntityId
