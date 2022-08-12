@@ -193,6 +193,11 @@ Type the overview for the table here.
 		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		[ysnProducePartialPacking] BIT NOT NULL DEFAULT(0),
 		[intSubcategoriesId] [int] NULL,
+		//SkyBitzIntegration
+		[strMeterCalibration] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
+		[strEPADisclaimer] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
+		[ysnNonBulk] BIT NULL DEFAULT((0)),
+		[intNonBulkType] INT NULL,
 
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
