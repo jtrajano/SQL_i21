@@ -7,6 +7,7 @@
 	, @strFileType NVARCHAR(50) = NULL 
 	, @ErrorCount INT OUTPUT
 	, @TotalRows INT OUTPUT
+	, @storeGroup udtStoreGroup READONLY
 AS
 
 SET @intVendorId = NULLIF(@intVendorId, '0') 
@@ -622,9 +623,6 @@ WHERE
 	AND p.intCategoryId IS NULL 
 	AND p.intVendorId IS NULL 
 
-SET @missingVendorCategoryXRef = @@ROWCOUNT;	
-
-
 /* Log and remove invalid Item Type */
 
 INSERT INTO tblICImportLogDetail(intImportLogId
@@ -664,6 +662,8 @@ WHERE strUniqueId = @UniqueId AND NULLIF(strInventoryType,'') IS NOT NULL AND st
 																									 , 'Comment');
 
 /* End of Log and remove invalid Item Type */
+
+SET @missingVendorCategoryXRef = @@ROWCOUNT;	
 
 -- Update or Insert items based on the Category -> Vendor Category XRef. 
 INSERT INTO #tmpICEdiImportPricebook_tblICItem (
@@ -1202,13 +1202,22 @@ BEGIN
 END 
 ELSE
 BEGIN 
-	INSERT INTO @ValidLocations (
-		intCompanyLocationId
-	) 
-	SELECT 
-		intCompanyLocationId
-	FROM	
-		@Locations
+	IF EXISTS (SELECT TOP 1 1 FROM @storeGroup)
+		BEGIN
+			INSERT INTO @ValidLocations (intCompanyLocationId) 
+			SELECT DISTINCT (Store.intCompanyLocationId)
+			FROM tblSTStoreGroupDetail AS StoreGroupDetail
+			LEFT JOIN tblSTStore AS Store ON StoreGroupDetail.intStoreId = Store.intStoreId
+			WHERE StoreGroupDetail.intStoreGroupId IN (SELECT paramStoreGroup.intStoreGroupId
+													   FROM @storeGroup AS paramStoreGroup)
+
+		END
+	ELSE
+		BEGIN
+			INSERT INTO @ValidLocations (intCompanyLocationId) 
+			SELECT intCompanyLocationId
+			FROM @Locations
+		END
 END 
 
 -- Upsert the Item Location 
