@@ -180,7 +180,10 @@ BEGIN
 		intCommodityAttributeId3,
 		intCommodityAttributeId4,
 		ysnProducePartialPacking,
-		intValuationGroupId
+		intValuationGroupId,
+		intSubcategoriesId,
+		intStoreFamilyId,
+		intStoreClassId
 	)
 	SELECT @NewItemNo,
 		strType,
@@ -330,7 +333,10 @@ BEGIN
 		intCommodityAttributeId3,
 		intCommodityAttributeId4,
 		ysnProducePartialPacking,
-		intValuationGroupId
+		intValuationGroupId,
+		intSubcategoriesId,
+		intStoreFamilyId,
+		intStoreClassId
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
