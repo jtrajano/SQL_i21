@@ -55,6 +55,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 		, dtmEndDate				DATETIME
 		, ysnPayables				BIT
 		, ysnPayroll				BIT
+		, ysnJournal				BIT
 		, ysnAdjustPrevious			BIT
 	)
 
@@ -81,6 +82,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 		 , dtmEndDate
 		 , ysnPayables
 		 , ysnPayroll
+		 , ysnJournal
 		 , ysnAdjustPrevious
 	FROM tblARCommissionSchedule
 	WHERE ysnActive = 1
@@ -113,6 +115,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 						  , @dtmSchedEndDate		DATETIME	
 						  , @ysnPayables			BIT
 						  , @ysnPayroll				BIT
+						  , @ysnJournal				BIT
 						  , @ysnAdjustPrevious		BIT
 
 					SELECT TOP 1 
@@ -125,6 +128,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 							, @dtmSchedEndDate			= dtmEndDate
 							, @ysnPayables				= ysnPayables
 							, @ysnPayroll				= ysnPayroll
+							, @ysnJournal				= ysnJournal
 							, @ysnAdjustPrevious		= ysnAdjustPrevious
 					FROM @tblARCommissionSchedules ORDER BY intCommissionScheduleId
 
@@ -175,6 +179,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 										, ysnRejected
 										, ysnPayroll
 										, ysnPayables
+										, ysnJournal
 										, dblTotalAmount
 										, strReason
 										, strBatchId
@@ -191,6 +196,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 										, 0
 										, CS.ysnPayroll
 										, CS.ysnPayables
+										, CS.ysnJournal
 										, ISNULL(@dblLineTotal, 0)
 										, NULL
 										, @batchId
@@ -219,6 +225,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 												, ysnRejected
 												, ysnPayroll
 												, ysnPayables
+												, ysnJournal
 												, dblTotalAmount
 												, strReason
 												, intConcurrencyId)
@@ -234,6 +241,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 												, ysnRejected
 												, ysnPayroll
 												, ysnPayables
+												, ysnJournal
 												, ISNULL(dblTotalAmount, 0)
 												, strReason
 												, 1
@@ -303,6 +311,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																, ysnRejected
 																, ysnPayroll
 																, ysnPayables
+																, ysnJournal
 																, dblTotalAmount
 																, strReason
 																, strBatchId
@@ -319,6 +328,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																, 0
 																, CS.ysnPayroll
 																, CS.ysnPayables
+																, CS.ysnJournal
 																, isnull(@dblLineTotal,0)
 																, NULL
 																, @batchId
@@ -347,6 +357,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																		, ysnRejected
 																		, ysnPayroll
 																		, ysnPayables
+																		, ysnJournal
 																		, dblTotalAmount
 																		, strReason
 																		, intConcurrencyId)
@@ -362,6 +373,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																		, ysnRejected
 																		, ysnPayroll
 																		, ysnPayables
+																		, ysnJournal
 																		, ISNULL(@dblLineTotal, 0)
 																		, strReason
 																		, 1
