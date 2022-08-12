@@ -93,7 +93,8 @@ v.intKey
 , v.dblStandardCost
 , v.dblAverageCost
 , v.dblEndMonthCost
-, v.dblOnOrder
+, CAST(v.dblOnOrder AS DECIMAL(38, 6)) dblOnOrder 
+--, v.dblOnOrder
 , v.dblInTransitInbound
 , v.dblUnitOnHand
 , v.dblInTransitOutbound
