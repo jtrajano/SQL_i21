@@ -149,6 +149,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND (RI.[intInvoiceId] IS NULL OR (RI.[intInvoiceId] IS NOT NULL AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
 	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
+	AND (T.intTicketType <> 6 AND T.intTicketTypeId <> 9 AND T.strInOutFlag <> 'O')
 	AND ID.intContractDetailId IS NOT NULL
 	AND ID.strSessionId = @strSessionId
 	AND ID.strType <> 'Service Charge'
