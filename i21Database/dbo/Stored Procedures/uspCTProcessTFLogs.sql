@@ -341,7 +341,7 @@ BEGIN
 			, intTransactionDetailId = tf.intContractDetailId
 			, intBankId = isnull(cd.intBankId,0)
 			, intBankAccountId = CASE WHEN @strAction = 'Created' then cd.intBankAccountId else isnull(cd.intBankAccountId, 0) end
-			, intBorrowingFacilityId = isnull(cd.intBorrowingFacilityId, 0)
+			, intBorrowingFacilityId = cd.intBorrowingFacilityId
 			, intLimitTypeId = isnull(cd.intBorrowingFacilityLimitId, 0)
 			, intSublimitTypeId = isnull(cd.intBorrowingFacilityLimitDetailId, 0)
 			, ysnSubmittedToBank = isnull(cd.ysnSubmittedToBank, 0)
