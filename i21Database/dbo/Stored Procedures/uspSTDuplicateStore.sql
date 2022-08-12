@@ -146,7 +146,7 @@ BEGIN TRANSACTION
 						,intCashTransctionMopId
 						,ysnAllowMassPriceChanges
 						,ysnUsingTankMonitors
-						,strRegisterName
+						--,strRegisterName
 						,intMaxRegisterPlu
 						,strReportDepartmentAtGrossOrNet
 						,intLoyaltyDiscountMopId
@@ -273,7 +273,7 @@ BEGIN TRANSACTION
 						,intCashTransctionMopId
 						,ysnAllowMassPriceChanges
 						,ysnUsingTankMonitors
-						,strRegisterName
+						--,strRegisterName
 						,intMaxRegisterPlu
 						,strReportDepartmentAtGrossOrNet
 						,intLoyaltyDiscountMopId
