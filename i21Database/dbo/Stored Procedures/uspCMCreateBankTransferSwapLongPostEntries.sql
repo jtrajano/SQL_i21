@@ -142,19 +142,19 @@ BEGIN
 END  
 ELSE  
 BEGIN  
-DECLARE @intBTForwardToFXGLAccountId INT  -- payable
-, @intBTForwardFromFXGLAccountId INT -- receivable
+DECLARE @intBTSwapToFXGLAccountId INT  -- payable
+, @intBTSwapFromFXGLAccountId INT -- receivable
 
-SELECT TOP 1 @intBTForwardToFXGLAccountId = intBTForwardToFXGLAccountId,@intBTForwardFromFXGLAccountId = intBTForwardFromFXGLAccountId 
+SELECT TOP 1 @intBTSwapToFXGLAccountId = intBTSwapToFXGLAccountId,@intBTSwapFromFXGLAccountId = intBTSwapFromFXGLAccountId 
 FROM tblCMCompanyPreferenceOption    
 
-IF @intBTForwardToFXGLAccountId IS NULL    
+IF @intBTSwapToFXGLAccountId IS NULL    
 BEGIN    
     RAISERROR('Cannot find the Accrued Payable Forward GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
-IF @intBTForwardFromFXGLAccountId IS NULL    
+IF @intBTSwapFromFXGLAccountId IS NULL    
 BEGIN    
     RAISERROR('Cannot find the Accrued Receivable Forward GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
@@ -257,7 +257,7 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForwardToFXGLAccountId
+        ,[intAccountId]          = @intBTSwapFromFXGLAccountId
         ,[dblCredit]              = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN dblAmountForeignFrom ELSE dblAmountFrom END
         ,[dblDebit]               = 0
         ,[dblDebitForeign]       =  0
@@ -272,7 +272,7 @@ END
         ,[dblExchangeRate]       = dblRateAmountFrom
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
-        ,[strJournalLineDescription]  = 'Currency Payable'
+        ,[strJournalLineDescription]  = 'Currency Receivable'
         ,[ysnIsUnposted]         = 0       
         ,[intConcurrencyId]      = 1      
         ,[intUserId]             = intLastModifiedUserId      
@@ -287,7 +287,7 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForwardFromFXGLAccountId
+        ,[intAccountId]          = @intBTSwapToFXGLAccountId
         ,[dblCredit]             = 0
         ,[dblDebit]				 = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo THEN  dblAmountForeignTo ELSE dblAmountSettlementTo END
         ,[dblDebitForeign]       = dblAmountForeignTo
@@ -302,7 +302,7 @@ END
         ,[dblExchangeRate]       = dblRateAmountTo
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
-        ,[strJournalLineDescription]  = 'Currency Receivable'
+        ,[strJournalLineDescription]  = 'Currency Payable'
         ,[ysnIsUnposted]         = 0       
         ,[intConcurrencyId]      = 1      
         ,[intUserId]             = intLastModifiedUserId      
