@@ -6,6 +6,8 @@ CREATE TABLE [dbo].[tblSTCheckoutFuelSalesByGradeAndPricePoint]
 	[dblPrice] [decimal](18,2) NOT NULL,
 	[dblDollarsSold] [decimal](18, 2) NOT NULL,
 	[dblGallonsSold] [decimal](18, 3) NOT NULL,
+	[dblPumpTestDollars] [decimal](18, 2) NULL,
+	[dblPumpTestGallons] [decimal](18, 3) NULL,
 	[intItemUOMId] [int] NULL,
     [intConcurrencyId] [int] NOT NULL, 
     CONSTRAINT [PK_tblSTCheckoutFuelSalesByGradeAndPricePoint_intFuelSalesByGradeAndPricePointId] PRIMARY KEY ([intFuelSalesByGradeAndPricePointId]), 

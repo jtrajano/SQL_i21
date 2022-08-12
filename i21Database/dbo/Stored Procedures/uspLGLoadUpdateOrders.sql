@@ -19,6 +19,7 @@ BEGIN
 				SET ysnDispatched = L.ysnDispatched
 					,strWillCallStatus = 'Dispatched'
 					,dtmDispatchingDate = L.dtmDispatchedDate
+					,intDriverID = ISNULL(L.intDriverEntityId, TMD.intDriverID)
 			FROM tblTMDispatch TMD
 				INNER JOIN tblLGLoadDetail LD ON LD.intTMDispatchId = TMD.intDispatchID
 				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -42,10 +43,12 @@ BEGIN
 			UPDATE TMD
 				SET ysnDispatched = L.ysnDispatched
 					,strWillCallStatus = 'Generated'
-					,dtmDispatchingDate = L.dtmDispatchedDate
+					,dtmDispatchingDate = NULL
+					,intDriverID = ISNULL(L.intDriverEntityId, TMD.intDriverID)
 				FROM tblTMDispatch TMD
 				INNER JOIN tblLGLoadDetail LD ON LD.intTMDispatchId = TMD.intDispatchID
 				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+				LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMD.intSiteID
 			WHERE L.intLoadId = @intLoadId
 				AND TMD.strWillCallStatus NOT IN ('Delivered')
 		END

@@ -133,10 +133,10 @@ BEGIN TRANSACTION
 						,strBarcodePrinterName
 						,dblServiceChargeRate
 						,ysnUseArStatements
-						,dtmLastShiftOpenDate
-						,intLastShiftNo
-						,dtmLastPhysicalImportDate
-						,dtmLastStatementRollDate
+						--,dtmLastShiftOpenDate
+						--,intLastShiftNo
+						--,dtmLastPhysicalImportDate
+						--,dtmLastStatementRollDate
 						,ysnShiftPhysicalQuantityRecieved
 						,ysnShiftPhysicalQuantitySold
 						,strHandheldDeviceModel
@@ -146,7 +146,7 @@ BEGIN TRANSACTION
 						,intCashTransctionMopId
 						,ysnAllowMassPriceChanges
 						,ysnUsingTankMonitors
-						,strRegisterName
+						--,strRegisterName
 						,intMaxRegisterPlu
 						,strReportDepartmentAtGrossOrNet
 						,intLoyaltyDiscountMopId
@@ -212,14 +212,14 @@ BEGIN TRANSACTION
 						,guidStoreAppConnectionId
 						,strStoreAppMacAddress
 						,dtmStoreAppLastDateLog
-						,intChangeFundBegBalanceItemId
-						,intChangeFundEndBalanceItemId
-						,intChangeFundReplenishItemId
-						,intATMFundBegBalanceItemId
-						,intATMFundEndBalanceItemId
-						,intATMFundReplenishedItemId
-						,intATMFundVarianceItemId
-						,intATMFundWithdrawalItemId
+						--,intChangeFundBegBalanceItemId
+						--,intChangeFundEndBalanceItemId
+						--,intChangeFundReplenishItemId
+						--,intATMFundBegBalanceItemId
+						--,intATMFundEndBalanceItemId
+						--,intATMFundReplenishedItemId
+						--,intATMFundVarianceItemId
+						--,intATMFundWithdrawalItemId
 						--,strHandheldScannerServerFolderPath
 						,intConcurrencyId
 						,ysnLotterySetupMode
@@ -260,10 +260,10 @@ BEGIN TRANSACTION
 						,strBarcodePrinterName
 						,dblServiceChargeRate
 						,ysnUseArStatements
-						,dtmLastShiftOpenDate
-						,intLastShiftNo
-						,dtmLastPhysicalImportDate
-						,dtmLastStatementRollDate
+						--,dtmLastShiftOpenDate
+						--,intLastShiftNo
+						--,dtmLastPhysicalImportDate
+						--,dtmLastStatementRollDate
 						,ysnShiftPhysicalQuantityRecieved
 						,ysnShiftPhysicalQuantitySold
 						,strHandheldDeviceModel
@@ -273,7 +273,7 @@ BEGIN TRANSACTION
 						,intCashTransctionMopId
 						,ysnAllowMassPriceChanges
 						,ysnUsingTankMonitors
-						,strRegisterName
+						--,strRegisterName
 						,intMaxRegisterPlu
 						,strReportDepartmentAtGrossOrNet
 						,intLoyaltyDiscountMopId
@@ -340,14 +340,14 @@ BEGIN TRANSACTION
 						,strStoreAppMacAddress
 						,dtmStoreAppLastDateLog
 						--,''
-						,intChangeFundBegBalanceItemId
-						,intChangeFundEndBalanceItemId
-						,intChangeFundReplenishItemId
-						,intATMFundBegBalanceItemId
-						,intATMFundEndBalanceItemId
-						,intATMFundReplenishedItemId
-						,intATMFundVarianceItemId
-						,intATMFundWithdrawalItemId
+						--,intChangeFundBegBalanceItemId
+						--,intChangeFundEndBalanceItemId
+						--,intChangeFundReplenishItemId
+						--,intATMFundBegBalanceItemId
+						--,intATMFundEndBalanceItemId
+						--,intATMFundReplenishedItemId
+						--,intATMFundVarianceItemId
+						--,intATMFundWithdrawalItemId
 						,intConcurrencyId
 						,ysnLotterySetupMode
 					FROM tblSTStore
@@ -578,6 +578,9 @@ BEGIN TRANSACTION
 					DECLARE @intRegisterId INT
 					SET @intRegisterId = SCOPE_IDENTITY()
 
+					UPDATE tblSTStore 
+					SET intRegisterId = NULL
+					WHERE intStoreId = @NewStoreId
 
 					DECLARE @intOldRegisterId INT
 					SELECT TOP 1 @intOldRegisterId = intRegisterId
@@ -1013,11 +1016,21 @@ BEGIN TRANSACTION
 
 										END
 								END
-						END
+						END 
 							
 					--ATM FUND SETUP--
 					IF @chkATMFundSetup = 'true'
 						BEGIN
+
+							UPDATE tblSTStore 
+							SET tblSTStore.intATMFundBegBalanceItemId 	= (SELECT TOP 1 intATMFundBegBalanceItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							, tblSTStore.intATMFundEndBalanceItemId		= (SELECT TOP 1 intATMFundEndBalanceItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							, tblSTStore.intATMFundReplenishedItemId	= (SELECT TOP 1 intATMFundReplenishedItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							, tblSTStore.intATMFundVarianceItemId		= (SELECT TOP 1 intATMFundVarianceItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							, tblSTStore.intATMFundWithdrawalItemId		= (SELECT TOP 1 intATMFundWithdrawalItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							WHERE intStoreId = @NewStoreId
+
+
 							--intATMFundBegBalanceItemId
 							IF EXISTS (SELECT TOP 1 1 FROM tblSTStore WHERE intATMFundBegBalanceItemId IS NOT NULL AND intStoreId = @intStoreId)
 								BEGIN
@@ -1077,7 +1090,14 @@ BEGIN TRANSACTION
 
 					--CHANGE FUND--
 					IF @chkChangeFundSetup = 'true'
-						BEGIN
+						BEGIN						
+							UPDATE tblSTStore 
+							SET tblSTStore.intChangeFundBegBalanceItemId 	= (SELECT TOP 1 intChangeFundBegBalanceItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							, tblSTStore.intChangeFundEndBalanceItemId		= (SELECT TOP 1 intChangeFundEndBalanceItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							, tblSTStore.intChangeFundReplenishItemId	= (SELECT TOP 1 intChangeFundReplenishItemId FROM tblSTStore WHERE intStoreId = @intStoreId)
+							WHERE intStoreId = @NewStoreId
+
+
 							INSERT INTO tblSTStoreChangeFund
 							(
 								intStoreId

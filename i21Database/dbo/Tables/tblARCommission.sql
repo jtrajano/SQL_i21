@@ -14,6 +14,7 @@
 	[ysnRejected]				BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnRejected] DEFAULT ((0)),
 	[ysnPayroll]				BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnPayroll] DEFAULT ((0)),
 	[ysnPayables]				BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnPayables] DEFAULT ((0)),
+	[ysnJournal]				BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnJournal] DEFAULT ((0)),
 	[ysnPosted]					BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnPosted] DEFAULT ((0)),
 	[ysnPaid]					BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnPaid] DEFAULT ((0)),
 	[dblTotalAmount]			NUMERIC(18,6) NOT NULL DEFAULT 0,

@@ -16,6 +16,7 @@ DECLARE @tblCommissions TABLE (
 	, intEntityId			INT
 	, ysnPayroll			BIT
 	, ysnPayables			BIT
+	, ysnJournal			BIT
 	, dblTotalAmount		NUMERIC(18, 6)
 )
 DECLARE @intAPAccountId				INT = (SELECT TOP 1 intAPAccount FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId)
@@ -27,6 +28,7 @@ INSERT INTO @tblCommissions (
 	, intEntityId
     , ysnPayroll
 	, ysnPayables
+	, ysnJournal
 	, dblTotalAmount
 )
 SELECT intCommissionId		= COMM.intCommissionId
@@ -34,6 +36,7 @@ SELECT intCommissionId		= COMM.intCommissionId
 	 , intEntityId			= COMM.intEntityId
 	 , ysnPayroll			= COMM.ysnPayroll
 	 , ysnPayables			= COMM.ysnPayables
+	 , ysnPayables			= COMM.ysnJournal
 	 , dblTotalAmount		= COMM.dblTotalAmount
 FROM dbo.tblARCommission COMM WITH (NOLOCK)
 INNER JOIN (
@@ -169,5 +172,21 @@ ELSE
 					END
 
 				DELETE FROM @tblCommissions WHERE intCommissionId = @intCommissionPayrollId AND ysnPayroll = 1
-			END				
+			END
+		
+		-- PROCESS GENERAL JOURNAL
+		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblCommissions WHERE ysnJournal = 1)
+			BEGIN
+				DECLARE @intCommissionJournalId INT = NULL
+
+				SELECT TOP 1 @intCommissionJournalId = intCommissionId 
+				FROM @tblCommissions 
+				WHERE ysnJournal = 1 ORDER BY intCommissionId ASC
+
+				UPDATE dbo.tblARCommission
+				SET ysnPaid			= 1
+				WHERE intCommissionId = @intCommissionJournalId
+
+				DELETE FROM @tblCommissions WHERE intCommissionId = @intCommissionJournalId AND ysnJournal = 1
+			END
 	END

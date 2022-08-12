@@ -82,7 +82,7 @@ IF @param IS NOT NULL
 		)
 		SELECT [intCommissionId]				= [intCommissionId]	
 			,[intCommissionExpenseAccountId]	= @intCommissionExpenseAccountId
-			,[intAPAccountId]					= @intAPAccountId
+			,[intAPAccountId]					= (CASE WHEN ARCS.ysnJournal = 1 THEN ARCS.intCreditAccountId ELSE @intAPAccountId END)
 			,[intCompanyLocationId]				= @companyLocationId
 			,[strCommissionNumber]				= [strCommissionNumber]
 			,[strBatchId]						= @batchIdUsed
@@ -94,6 +94,7 @@ IF @param IS NOT NULL
 			SELECT intID
 			FROM dbo.fnGetRowsFromDelimitedValues(@param)
 		) D ON C.intCommissionId = D.intID
+		INNER JOIN dbo.tblARCommissionSchedule ARCS ON C.intCommissionScheduleId = ARCS.intCommissionScheduleId
 	END
 ELSE
 	BEGIN
@@ -228,7 +229,7 @@ IF @post = 1
 		SELECT
 			 [dtmDate]					= @PostDate
 			,[strBatchID]				= @batchIdUsed
-			,[intAccountId]				= @intAPAccountId
+			,[intAccountId]				= (CASE WHEN ARCS.ysnJournal = 1 THEN ISNULL(PCD.intAPAccountId, @intAPAccountId) ELSE @intAPAccountId END)
 			,[dblDebit]					= @ZeroDecimal
 			,[dblCredit]				= COMM.dblTotalAmount
 			,[dblDebitUnit]				= @ZeroDecimal
@@ -265,6 +266,7 @@ IF @post = 1
 				 , strEntityNo
 			FROM tblEMEntity WITH (NOLOCK)
 		) E ON COMM.intEntityId = E.intEntityId
+		INNER JOIN dbo.tblARCommissionSchedule ARCS ON COMM.intCommissionScheduleId = ARCS.intCommissionScheduleId
 
 		UNION ALL
 

@@ -205,6 +205,7 @@ SELECT
       ,dblDepartmentTotalsForFuel = dbo.fnSTGetDepartmentTotalsForFuel(chk.intCheckoutId)
       ,dblDealerCommission = dbo.fnSTGetDealerCommission(chk.intCheckoutId)
       ,chk.[intConcurrencyId]  
+      ,st.ysnConsignmentStore
 FROM tblSTCheckoutHeader chk
 INNER JOIN vyuSTStoreOnUserRole vst
 	ON chk.intStoreId = vst.intStoreId
@@ -321,3 +322,4 @@ GROUP BY
 	  ,chk.dblEditableOutsideFuelDiscount
       ,st.ysnConsMeterReadingsForDollars
       ,st.ysnConsAddOutsideFuelDiscounts
+      ,st.ysnConsignmentStore
