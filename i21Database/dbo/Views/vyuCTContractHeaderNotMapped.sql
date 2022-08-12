@@ -50,7 +50,7 @@ AS
 						PT.strPricingType,						
 						TM.strTerm,						
 						TM.strTermCode,	
-						TM.intBalanceDue,
+						ISNULL(TM.intBalanceDue, 0) intBalanceDue,
 						TP.strContractType,						
 						TX.strTextCode,						
 						U2.strUnitMeasure			AS	strCommodityUOM,		
