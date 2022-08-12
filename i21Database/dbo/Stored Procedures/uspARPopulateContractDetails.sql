@@ -123,6 +123,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
 	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
+	AND (T.intTicketType <> 6 AND T.intTicketTypeId <> 9 AND T.strInOutFlag <> 'O')
 
 --DESTINATION WEIGHTS/GRADES
 IF NOT EXISTS(SELECT * FROM @tblToProcess)
