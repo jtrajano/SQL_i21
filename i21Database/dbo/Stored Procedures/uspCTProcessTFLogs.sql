@@ -56,7 +56,7 @@ BEGIN
 		while (@intActiveContractDetailId is not null)
 		begin
 			
-			IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail where intContractDetailId = @intActiveContractDetailId and intBankId IS NOT NULL)
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail where intContractDetailId = @intActiveContractDetailId and intBankId IS NOT NULL AND ISNULL(intBankAccountId,0) > 0)
 			BEGIN
 				select @TFTransNo = strFinanceTradeNo from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId  ;
 		
@@ -197,7 +197,7 @@ BEGIN
 					ORDER BY intTradeFinanceLogId Desc
 				) et
 				left join tblTRFTradeFinanceLog TFL on TFL.intTradeFinanceLogId = et.intTradeFinanceLogId
-			where isnull(cd.intBankId,0) > 0 AND ISNULL(tf.strRowState, '') <> 'Delete'
+			where isnull(cd.intBankId,0) > 0 AND ISNULL(tf.strRowState, '') <> 'Delete' and tf.strFinanceTradeNo is not null
 			;
 
 			if exists (select top 1 1 from @TRFLog)
@@ -307,6 +307,7 @@ BEGIN
 				@TFXML tf
 				INNER JOIN tblTRFTradeFinanceLog TFL on TFL.intContractDetailId = tf.intContractDetailId
 				INNER JOIN @deletedSequence ds on ds.intTradeFinanceLogId = TFL.intTradeFinanceLogId
+			WHERE  tf.strFinanceTradeNo is not null
 			;
 
 			if exists (select top 1 1 from @TRFLog)
@@ -329,6 +330,7 @@ BEGIN
 			cross apply (
 				select  intTradeFinanceLogId = max(intTradeFinanceId) from tblTRFTradeFinance where intTransactionDetailId = tf.intContractDetailId
 			) et
+			 WHERE tf.strFinanceTradeNo is not null
 		;
 
 		insert into @TRFTradeFinance
@@ -361,7 +363,7 @@ BEGIN
 			left join tblCTApprovalStatusTF ap on ap.intApprovalStatusId = cd.intApprovalStatusId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
 			left join tblTRFTradeFinance tff on tff.intTransactionDetailId = tf.intContractDetailId
-		where isnull(cd.intBankId,0) > 0
+		where isnull(cd.intBankId,0) > 0 and  tf.strFinanceTradeNo is not null
 			
 		;
 

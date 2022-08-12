@@ -535,7 +535,7 @@ BEGIN TRY
 
 		, CD.strFinanceTradeNo
 		, CD.intBankAccountId
-		, BA.intBankId
+		, BK.intBankId
 		, BK.strBankName
 		, BA.strBankAccountNo
 		, CD.intBorrowingFacilityId
