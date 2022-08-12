@@ -133,10 +133,10 @@ BEGIN TRANSACTION
 						,strBarcodePrinterName
 						,dblServiceChargeRate
 						,ysnUseArStatements
-						,dtmLastShiftOpenDate
-						,intLastShiftNo
-						,dtmLastPhysicalImportDate
-						,dtmLastStatementRollDate
+						--,dtmLastShiftOpenDate
+						--,intLastShiftNo
+						--,dtmLastPhysicalImportDate
+						--,dtmLastStatementRollDate
 						,ysnShiftPhysicalQuantityRecieved
 						,ysnShiftPhysicalQuantitySold
 						,strHandheldDeviceModel
@@ -260,10 +260,10 @@ BEGIN TRANSACTION
 						,strBarcodePrinterName
 						,dblServiceChargeRate
 						,ysnUseArStatements
-						,dtmLastShiftOpenDate
-						,intLastShiftNo
-						,dtmLastPhysicalImportDate
-						,dtmLastStatementRollDate
+						--,dtmLastShiftOpenDate
+						--,intLastShiftNo
+						--,dtmLastPhysicalImportDate
+						--,dtmLastStatementRollDate
 						,ysnShiftPhysicalQuantityRecieved
 						,ysnShiftPhysicalQuantitySold
 						,strHandheldDeviceModel
@@ -579,7 +579,7 @@ BEGIN TRANSACTION
 					SET @intRegisterId = SCOPE_IDENTITY()
 
 					UPDATE tblSTStore 
-					SET intRegisterId = @intRegisterId
+					SET intRegisterId = NULL
 					WHERE intStoreId = @NewStoreId
 
 					DECLARE @intOldRegisterId INT
