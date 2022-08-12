@@ -61,6 +61,7 @@ SELECT intEntityId				= EL.intEntityId
 	 , strSaleUnits				= EL.strSaleUnits
 	 , strOurFiscalRepName		= EL.strOurFiscalRepName
 	 , strOurFiscalRepAddress	= EL.strOurFiscalRepAddress
+	 , strRemarks				= EL.strRemarks
 FROM tblEMEntityLocation EL
 LEFT JOIN tblSMTaxClass TC ON EL.intTaxClassId = TC.intTaxClassId
 LEFT JOIN tblSMTaxGroup TG ON EL.intTaxGroupId = TG.intTaxGroupId

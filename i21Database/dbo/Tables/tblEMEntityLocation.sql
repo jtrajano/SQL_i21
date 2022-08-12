@@ -64,6 +64,7 @@
 	[strSaleUnits]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strOurFiscalRepName]			NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
 	[strOurFiscalRepAddress]		NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
+	[strRemarks]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 
