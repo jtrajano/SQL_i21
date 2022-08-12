@@ -309,7 +309,7 @@ AS
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
 	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 
 	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
-	LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
+	LEFT JOIN tblCMBank BN ON BN.intBankId = CD.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FAL ON FAL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FALD ON FALD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
