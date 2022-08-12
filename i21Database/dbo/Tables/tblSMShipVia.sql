@@ -18,6 +18,8 @@
 	[intSort]            INT            NULL,
 	[intProfitCenterId]            INT            NULL,
     [intCompanySegmentId]            INT            NULL,
+    [ysnP2PFuelsEnabled]       BIT NULL,
+    
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intEntityId] ASC), 
     CONSTRAINT [AK_tblSMShipVia_strShipVia] UNIQUE ([strShipVia]),
