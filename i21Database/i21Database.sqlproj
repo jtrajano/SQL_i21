@@ -1081,6 +1081,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdatePumpTotals.sql" />
     <None Include="Scripts\Post-Deployment\ST\48_FileFieldMapping_Commander_TierProduct.sql" />
+    <Build Include="dbo\Functions\fnGLPrimaryAccountHasBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
