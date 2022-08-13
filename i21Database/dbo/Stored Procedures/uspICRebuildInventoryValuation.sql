@@ -3609,7 +3609,7 @@ BEGIN
 								ON s.intFreightTermId = ft.intFreightTermId
 							LEFT JOIN tblICFobPoint fp
 								ON fp.strFobPoint = ft.strFobPoint
-					WHERE	s.strShipmentNumber = @strTransactionId  		
+					WHERE	s.strShipmentNumber = @strTransactionId 		
 
 					SELECT	@strAccountToCounterInventory = NULL 
 					WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
@@ -6751,5 +6751,4 @@ BEGIN
 		DROP TABLE #tmpLogRiskPosition		
 END 
 
-RETURN @intReturnValue; 
-
+RETURN @intReturnValue;
