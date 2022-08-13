@@ -199,6 +199,7 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 		  AND ID.intShipmentPurchaseSalesContractId IS NULL
 		  AND (I.intLoadDetailId IS NULL OR (I.intLoadDetailId IS NOT NULL AND ID.strPricing = 'Subsystem - Ticket Management'))
 		  AND ISNULL(I.[strItemType], '') <> 'Other Charge'
+		  AND (T.intTicketType <> 6 AND T.intTicketTypeId <> 9 AND T.strInOutFlag <> 'O')
 		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId
 	END
 
