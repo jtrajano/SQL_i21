@@ -1107,7 +1107,7 @@ BEGIN
 				,dblCost
 				,dblValue
 				,dblSalesPrice
-				,intCurrencyId
+				,t.intCurrencyId
 				,dblExchangeRate
 				,intTransactionId
 				,t.strTransactionId
@@ -1121,14 +1121,14 @@ BEGIN
 				,strRelatedTransactionId
 				,t.strTransactionForm
 				,intCostingMethod
-				,dtmCreated
+				,t.dtmCreated
 				,strDescription
-				,intCreatedUserId
+				,t.intCreatedUserId
 				,intCreatedEntityId
-				,intConcurrencyId  
+				,t.intConcurrencyId  
 				,intForexRateTypeId
 				,dblForexRate 
-				,strActualCostId
+				,t.strActualCostId
 				,intCategoryId
 				,dblUnitRetail
 				,dblCategoryCostValue
@@ -3562,7 +3562,7 @@ BEGIN
 								ON s.intFreightTermId = ft.intFreightTermId
 							LEFT JOIN tblICFobPoint fp
 								ON fp.strFobPoint = ft.strFobPoint
-					WHERE	s.strShipmentNumber = @strTransactionId  		
+					WHERE	s.strShipmentNumber = @strTransactionId 		
 
 					SELECT	@strAccountToCounterInventory = NULL 
 					WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
@@ -6750,5 +6750,4 @@ BEGIN
 		DROP TABLE #tmpLogRiskPosition		
 END 
 
-RETURN @intReturnValue; 
-
+RETURN @intReturnValue;
