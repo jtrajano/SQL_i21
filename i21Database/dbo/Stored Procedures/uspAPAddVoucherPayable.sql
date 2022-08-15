@@ -113,6 +113,7 @@ BEGIN
 			,[strItemNo]						=	item.strItemNo
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 			,[strTaxGroup]						=	taxGroup.strTaxGroup
+			,[ysnOverrideTaxGroup]				=	A.ysnOverrideTaxGroup
 			,[strMiscDescription]				=	A.strMiscDescription
 			,[dblOrderQty]						=	CASE 
 													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 --Consider contract logic if voucher only
@@ -288,8 +289,30 @@ BEGIN
 			,[intSubBookId]						=	A.intSubBookId
 			,[intComputeTotalOption]			=	ISNULL(item.intComputeItemTotalOption, 0)
 			,[intLotId]							=	A.intLotId
-			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
-			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
+			,[intPayFromBankAccountId]				=	A.intPayFromBankAccountId
+			,[strPayFromBankAccount]				=	bankAccount.strBankAccountNo
+			,[strFinancingTransactionNumber]		= 	A.strFinancingTransactionNumber
+			,[strFinanceTradeNo]					=	A.strFinanceTradeNo
+			,[intBankId]							=	A.intBankId
+			,[strBankName]							=	bank.strBankName
+			,[intBankAccountId]						=	A.intBankAccountId
+			,[strBankAccountNo]						=	bankAccount2.strBankAccountNo
+			,[intBorrowingFacilityId]				=	A.intBorrowingFacilityId
+			,[strBorrowingFacilityId]				=	borrowingFacility.strBorrowingFacilityId
+			,[strBankReferenceNo]					= 	ISNULL(A.strBankReferenceNo, borrowingFacility.strBankReferenceNo)
+			,[intBorrowingFacilityLimitId]			=	A.intBorrowingFacilityLimitId
+			,[strBorrowingFacilityLimit]			=	borrowingFacilityLimit.strBorrowingFacilityLimit
+			,[intBorrowingFacilityLimitDetailId]	=	A.intBorrowingFacilityLimitDetailId
+			,[strLimitDescription]					=	borrowingFacilityLimitDetail.strLimitDescription
+			,[strReferenceNo]						=	A.strReferenceNo
+			,[intBankValuationRuleId]				=	A.intBankValuationRuleId
+			,[strBankValuationRule]					=	bankValuationRule.strBankValuationRule
+			,[strComments]							=	A.strComments
+			,[dblQualityPremium]					=	A.dblQualityPremium
+			,[dblOptionalityPremium]				=	A.dblOptionalityPremium
+			,[strTaxPoint]							=	A.strTaxPoint
+			,[intTaxLocationId]						=	A.intTaxLocationId
+			,[strTaxLocation]						=	taxLocation.strLocationName
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -328,6 +351,13 @@ BEGIN
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON subLoc.intCompanyLocationSubLocationId = A.intSubLocationId
 		LEFT JOIN tblSMTaxGroup taxGroup ON taxGroup.intTaxGroupId = A.intPurchaseTaxGroupId
 		LEFT JOIN vyuCMBankAccount bankAccount ON bankAccount.intBankAccountId = A.intPayFromBankAccountId
+		LEFT JOIN tblCMBank bank ON bank.intBankId = A.intBankId
+		LEFT JOIN vyuCMBankAccount bankAccount2 ON bankAccount2.intBankAccountId = A.intBankAccountId
+		LEFT JOIN tblCMBorrowingFacility borrowingFacility ON borrowingFacility.intBorrowingFacilityId = A.intBorrowingFacilityId
+		LEFT JOIN tblCMBorrowingFacilityLimit borrowingFacilityLimit ON borrowingFacilityLimit.intBorrowingFacilityLimitId = A.intBorrowingFacilityLimitId
+		LEFT JOIN tblCMBorrowingFacilityLimitDetail borrowingFacilityLimitDetail ON borrowingFacilityLimitDetail.intBorrowingFacilityLimitDetailId = A.intBorrowingFacilityLimitDetailId
+		LEFT JOIN tblCMBankValuationRule bankValuationRule ON bankValuationRule.intBankValuationRuleId = A.intBankValuationRuleId
+		LEFT JOIN vyuARTaxLocation taxLocation ON taxLocation.intTaxLocationId = A.intTaxLocationId AND taxLocation.strFobPoint = (CASE WHEN A.strTaxPoint = 'Origin' THEN 'Destination' ELSE 'Origin' END)
 		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
@@ -376,6 +406,7 @@ BEGIN
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
 		,[strTaxGroup]	
+		,[ysnOverrideTaxGroup]
 		,[strMiscDescription]			
 		,[dblOrderQty]					
 		,[dblOrderUnitQty]				
@@ -428,6 +459,28 @@ BEGIN
 		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
+		,[strFinancingTransactionNumber]
+		,[strFinanceTradeNo]
+		,[intBankId]
+		,[strBankName]
+		,[intBankAccountId]
+		,[strBankAccountNo]
+		,[intBorrowingFacilityId]
+		,[strBorrowingFacilityId]
+		,[strBankReferenceNo]
+		,[intBorrowingFacilityLimitId]
+		,[strBorrowingFacilityLimit]
+		,[intBorrowingFacilityLimitDetailId]
+		,[strLimitDescription]
+		,[strReferenceNo]
+		,[intBankValuationRuleId]
+		,[strBankValuationRule]
+		,[strComments]
+		,[dblQualityPremium]
+		,[dblOptionalityPremium]
+		,[strTaxPoint]
+		,[intTaxLocationId]
+		,[strTaxLocation]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -472,7 +525,8 @@ BEGIN
 		,[intTicketDistributionAllocationId]			
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
-		,[strTaxGroup]	
+		,[strTaxGroup]
+		,[ysnOverrideTaxGroup]	
 		,[strMiscDescription]			
 		,[dblOrderQty]					
 		,[dblOrderUnitQty]				
@@ -525,6 +579,28 @@ BEGIN
 		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
+		,[strFinancingTransactionNumber]
+		,[strFinanceTradeNo]
+		,[intBankId]
+		,[strBankName]
+		,[intBankAccountId]
+		,[strBankAccountNo]
+		,[intBorrowingFacilityId]
+		,[strBorrowingFacilityId]
+		,[strBankReferenceNo]
+		,[intBorrowingFacilityLimitId]
+		,[strBorrowingFacilityLimit]
+		,[intBorrowingFacilityLimitDetailId]
+		,[strLimitDescription]
+		,[strReferenceNo]
+		,[intBankValuationRuleId]
+		,[strBankValuationRule]
+		,[strComments]
+		,[dblQualityPremium]
+		,[dblOptionalityPremium]
+		,[strTaxPoint]
+		,[intTaxLocationId]
+		,[strTaxLocation]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,
