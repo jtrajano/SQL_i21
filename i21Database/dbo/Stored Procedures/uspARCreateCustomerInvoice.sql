@@ -541,7 +541,9 @@ BEGIN TRY
 		,[intDefaultPayToBankAccountId]
 		,[strSourcedFrom]
 		,[intTaxLocationId]
-		,[strTaxPoint])
+		,[strTaxPoint]
+		,[strPaymentInstructions]
+	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -642,6 +644,7 @@ BEGIN TRY
 		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
+		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
@@ -675,7 +678,8 @@ BEGIN TRY
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
-			ON C.intBillToId = BL1.intEntityLocationId	
+			ON C.intBillToId = BL1.intEntityLocationId
+	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
