@@ -55,6 +55,8 @@
 	ysnAdjBurnRate BIT NULL,												-- Adjust Burn Rate
 	ysnPromptFull BIT NULL,													-- Prompt for % Full
 
+	strSiteLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL			-- Site Location
+
 	-- DEVICE
 	--strDeviceType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,		-- Device Type
 	--strDeviceOwnership NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,		-- Device Ownership
