@@ -133,21 +133,19 @@ SET ANSI_WARNINGS OFF
 								ELSE ISNULL(OVERRIDEFREIGHTLOCATION.[intSalesAccountId], OVERRIDESEGMENT.intOverrideAccount)
 							 END
 	FROM @LineItemAccounts LIA
-	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
-	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId] AND ARID.[intCompanyLocationId] = IA.[intLocationId]
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId AND ARID.strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId] AND ARID.[intCompanyLocationId] = IA.[intLocationId] AND IA.strSessionId = @strSessionId
 	OUTER APPLY (
 		SELECT TOP 1 intSegmentCodeId
 		FROM tblSMLineOfBusiness
 		WHERE intLineOfBusinessId = ISNULL(ARI.intLineOfBusinessId, 0)
 	) LOB
 	OUTER APPLY (
-		SELECT TOP 1 [intSalesAccountId] = dbo.[fnGetGLAccountIdFromProfitCenter](ARID.[intSalesAccountId] , ISNULL(SMCL.intProfitCenter, 0))
+		SELECT TOP 1 [intSalesAccountId] = dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(IA.intOtherChargeIncomeAccountId, ARID.[intSalesAccountId]), ISNULL(SMCL.intProfitCenter, 0))
 		FROM tblICFreightOverride ICFO
 		INNER JOIN (
-			SELECT 
-				 intFreightItemId  = ARPID1.intItemId
-				,ARPID2.intItemId
+			SELECT ARPID2.intItemId
 			FROM tblARPostInvoiceDetail ARPID1
 			CROSS JOIN tblARPostInvoiceDetail ARPID2
 			WHERE ARPID1.intLoadDistributionDetailId = ARID.intLoadDistributionDetailId
@@ -155,8 +153,9 @@ SET ANSI_WARNINGS OFF
 			AND ARPID1.intItemId = ARID.intItemId
 			AND ARPID1.strSessionId = @strSessionId
 			AND ARPID2.strSessionId = @strSessionId
+			AND ISNULL(ARPID1.intLoadDistributionDetailId, 0) <> 0
 		) ITEMFREIGHT 
-		ON ICFO.intItemId = ITEMFREIGHT.intFreightItemId 
+		ON ICFO.intItemId = ARID.intItemId
 		AND ICFO.intFreightOverrideItemId = ITEMFREIGHT.intItemId
 		INNER JOIN tblSMCompanyLocation SMCL ON ICFO.intCompanyLocationId = SMCL.intCompanyLocationId
 		GROUP BY ICFO.intItemId, ICFO.intFreightOverrideItemId, ICFO.intCompanyLocationId, SMCL.intProfitCenter
@@ -176,7 +175,6 @@ SET ANSI_WARNINGS OFF
 		)
 	) OVERRIDESEGMENT
 	WHERE ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
-	AND ARID.strSessionId = @strSessionId
 
 	UPDATE LIA
 	SET LIA.[intSalesAccountId] = LIA.[intAccountId]
