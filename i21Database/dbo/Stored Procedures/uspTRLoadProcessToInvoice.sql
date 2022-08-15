@@ -160,7 +160,7 @@ BEGIN TRY
 		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
-		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
+		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NOT NULL AND BlendingIngredient.intItemId IS NOT NULL THEN 1 ELSE 0 END
 		,dblMinimumUnits						= DD.dblMinimumUnits
 		,dblComboFreightRate					= DD.dblComboFreightRate
 		,ysnComboFreight						= DD.ysnComboFreight
@@ -215,7 +215,7 @@ BEGIN TRY
 		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
 		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
-		AND BlendIngredient.strType != 'Other Charge'
+		--AND ISNULL(BlendIngredient.strType, '') != 'Other Charge'
 	) BlendingIngredient ON BlendingIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = '' AND BlendingIngredient.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId

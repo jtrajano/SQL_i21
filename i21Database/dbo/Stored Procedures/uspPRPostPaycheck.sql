@@ -31,7 +31,7 @@ DECLARE @intPaycheckId INT
 SELECT @intPaycheckId = intPaycheckId
 	  ,@intEmployeeId = [intEntityEmployeeId]
 	  ,@strTransactionId = strPaycheckId
-	  ,@dtmPayDate = dtmPosted
+	  ,@dtmPayDate = ISNULL(dtmPosted,GETDATE())
 	  ,@intCreatedEntityId = intCreatedUserId
 	  ,@intBankAccountId = intBankAccountId
 	  ,@ysnPaycheckPosted = ysnPosted
@@ -977,7 +977,22 @@ BEGIN
 		RAISERROR('Period To cannot be earlier than Period From.', 11, 1)
 		GOTO Post_Rollback
 	END
-END 
+END
+
+-- Check if transaction has invalid date range  
+IF @ysnPost = 1 AND @ysnRecap = 0  
+BEGIN   
+	IF EXISTS (  
+		SELECT TOP 1 1   
+		FROM	tblPRPaycheck  
+		WHERE	intPaycheckId = @intPaycheckId   
+			AND dtmPosted < dtmPayDate
+	)  
+	BEGIN  
+		RAISERROR('Posted cannot be later than Pay Date.', 11, 1)  
+		GOTO Post_Rollback  
+	END  
+END
 
 -- Check if transaction has associated Payables
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0

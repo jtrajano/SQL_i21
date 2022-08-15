@@ -15,15 +15,19 @@ SELECT
 	,DO.intOriginType
 	,DO.intVendorId
 	,DO.intVendorLocationId
+	,DO.intTerminalControlNumberId
 	,DO.intCompanyLocationId
 	,DO.intCompanyLocationSubLocationId
 	,strOriginType = CASE (DO.intOriginType) 
 		WHEN 1 THEN 'Location' 
-		ELSE 'Terminal' END
+		ELSE 'Terminal' END COLLATE Latin1_General_CI_AS
 	,strVendor = V.strName
 	,strVendorLocation = VL.strLocationName
+	,strTerminalName = TCN.strName
+	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strCompanyLocation = CL.strLocationName
 	,strSubLocation = CLSL.strSubLocationName
+	,strPickUpLocation = CASE WHEN (DO.intOriginType = 1) THEN CL.strLocationName ELSE VL.strLocationName END
 	,strFromAddress = CASE WHEN (DO.intVendorId IS NOT NULL) THEN VL.strAddress 
 		WHEN (CLSL.intCompanyLocationSubLocationId IS NOT NULL) THEN CLSL.strAddress 
 		ELSE CL.strAddress END
@@ -48,6 +52,7 @@ SELECT
 	,strDriver = DV.strName
 	,strTruckNumber = SVT.strTruckNumber
 	,strTrailerNumber = SVTL.strTrailerNumber
+	,strTrailerDescription = SVTL.strTrailerDescription
 	,strTrailerType = SVTL.strType
 	,strTrailerStatus = SVTL.strTrailerStatus
 	,dblMaxWeight = DO.dblMaxWeight
@@ -56,7 +61,7 @@ SELECT
 		WHEN 0 THEN 'Created'
 		WHEN 1 THEN 'Routed'
 		WHEN 2 THEN 'Scheduled'
-		WHEN 3 THEN 'In Progress'
+		WHEN 3 THEN 'Dispatched'
 		WHEN 4 THEN 'Complete'
 		WHEN 5 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
@@ -77,4 +82,6 @@ FROM tblLGDispatchOrder DO
 	LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = DO.intVendorLocationId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DO.intCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = DO.intCompanyLocationSubLocationId
+	LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = VL.intEntityLocationId
+	LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = SP.intTerminalControlNumberId
 GO
