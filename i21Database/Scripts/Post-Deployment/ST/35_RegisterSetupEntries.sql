@@ -1744,7 +1744,7 @@ IF (@intTableCount = 3)
 			BEGIN
 				SET @strImportFileHeader	= N'Commander Tier Product'
 				SET @strFileType			= N'Inbound'
-				SET @strFilePrefix			= N'tierProduct'
+				SET @strFilePrefix			= N'vrubyrept-tierProduct'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
 				SET @strStoredProcedure		= N'[to be develop]'
 						
