@@ -40,7 +40,8 @@ BEGIN TRY
 			@intSeqHistoryPreviousFutMkt	INT,
 			@intSeqHistoryPreviousFutMonth	INT,
 			@dblCurrentBasis				NUMERIC(24, 10),
-			@intHeaderPricingTypeId		INT;
+			@intHeaderPricingTypeId		INT,
+			@intSequencePricingTypeId INT;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -410,6 +411,7 @@ BEGIN TRY
 		, @intCurrStatusId = intContractStatusId
 		, @dblCurrentBasis = dblBasis
 		, @intHeaderPricingTypeId = intHeaderPricingTypeId
+		, @intSequencePricingTypeId = intPricingTypeId
 	FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
@@ -4813,7 +4815,14 @@ BEGIN TRY
 							END
 							ELSE
 							BEGIN
-								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1, intActionId = (CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END)
+								if exists (select top 1 1 from @cbLogSpecific where dblOrigQty > @TotalPriced and @intHeaderPricingTypeId = 2 and @intSequencePricingTypeId = 2)
+								begin
+									UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 2, intActionId =  18
+								end
+								else
+								begin
+									UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1, intActionId = (CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END)
+								end
 							END
 						END
 						ELSE
