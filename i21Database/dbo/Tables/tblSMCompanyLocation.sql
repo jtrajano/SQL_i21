@@ -218,6 +218,9 @@
 	/* POS Drawer - Freight Term */
 	[intFreightTermId] INT NULL,
 	------------------------------------------------------------------------------
+    /* Sky Bitz Integration */    
+    [strContactName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    ------------------------------------------------------------------------------
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [AK_tblSMCompanyLocation_strLocationName] UNIQUE ([strLocationName]), 
     CONSTRAINT [FK_tblSMCompanyLocation_tblICStorageLocation_BlendProductionDockDoorUnit] FOREIGN KEY ([intBlendProductionDockDoorUnitId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
