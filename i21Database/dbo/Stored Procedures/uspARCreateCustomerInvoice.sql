@@ -565,6 +565,7 @@ BEGIN TRY
 		,[strTaxPoint]
 		,[dblSurcharge]
 		,[intOpportunityId]
+		,[strPaymentInstructions]
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -669,14 +670,42 @@ BEGIN TRY
 		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
-		,[dblSurcharge]						= @Surcharge
-		,[intOpportunityId]					= @OpportunityId
-	FROM tblARCustomer C
-	LEFT OUTER JOIN [tblEMEntityLocation] EL ON C.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
-	LEFT OUTER JOIN [tblEMEntityLocation] SL ON ISNULL(@ShipToLocationId, 0) <> 0 AND @ShipToLocationId = SL.intEntityLocationId
-	LEFT OUTER JOIN [tblEMEntityLocation] SL1 ON C.intShipToId = SL1.intEntityLocationId
-	LEFT OUTER JOIN [tblEMEntityLocation] BL ON ISNULL(@BillToLocationId, 0) <> 0 AND @BillToLocationId = BL.intEntityLocationId		
-	LEFT OUTER JOIN [tblEMEntityLocation] BL1 ON C.intBillToId = BL1.intEntityLocationId	
+		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
+	FROM	
+		tblARCustomer C
+	LEFT OUTER JOIN
+					(	SELECT 
+							 [intEntityLocationId]
+							,[strLocationName]
+							,[strAddress]
+							,[intEntityId] 
+							,[strCountry]
+							,[strState]
+							,[strCity]
+							,[strZipCode]
+							,[intTermsId]
+							,[intShipViaId]
+						FROM 
+							[tblEMEntityLocation]
+						WHERE
+							ysnDefaultLocation = 1
+					) EL
+						ON C.[intEntityId] = EL.[intEntityId]
+	LEFT OUTER JOIN
+		[tblEMEntityLocation] SL
+			ON ISNULL(@ShipToLocationId, 0) <> 0
+			AND @ShipToLocationId = SL.intEntityLocationId
+	LEFT OUTER JOIN
+		[tblEMEntityLocation] SL1
+			ON C.intShipToId = SL1.intEntityLocationId
+	LEFT OUTER JOIN
+		[tblEMEntityLocation] BL
+			ON ISNULL(@BillToLocationId, 0) <> 0
+			AND @BillToLocationId = BL.intEntityLocationId		
+	LEFT OUTER JOIN
+		[tblEMEntityLocation] BL1
+			ON C.intBillToId = BL1.intEntityLocationId
+	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
