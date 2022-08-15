@@ -95,8 +95,8 @@ BEGIN TRY
 		, dblTransactionAmountActual	= CTCD.dblLoanAmount
 		, intLimitId					= ARI.intBorrowingFacilityLimitId
 		, dblLimit						= CMBFL.dblLimit
-		, strBankTradeReference			= ARI.strBankReferenceNo
-		, strBankApprovalStatus			=  ISNULL(LS.strApprovalStatus, '')
+		, strBankTradeReference			= ARI.strBankTransactionId
+		, strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
 		, dtmAppliedToTransactionDate	= GETDATE() 
 		, intStatusId					= CASE WHEN @intStatusId = 0
 											   THEN CASE WHEN @FromPosting = 1 
@@ -111,10 +111,10 @@ BEGIN TRY
 										  END
 		, intUserId						= @UserId
 		, intConcurrencyId				= 1 
-		, dblFinanceQty					= ARID.dblQtyShipped
-		, dblFinancedAmount				= ARID.dblTotal
-		, intContractHeaderId			= ARID.intContractHeaderId
-		, intContractDetailId			= ARID.intContractDetailId
+		, dblFinanceQty					= ISNULL(LS.dblNet, ARID.dblShipmentNetWt)
+		, dblFinancedAmount				= ARID.dblTotal + ARID.dblTotalTax
+		, intContractHeaderId			= LS.intContractHeaderId
+		, intContractDetailId			= LS.intContractDetailId
 		, intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
 		, strSublimit					= CMBFLD.strLimitDescription
 		, dblSublimit					= CMBFLD.dblLimit
@@ -135,7 +135,11 @@ BEGIN TRY
 		ORDER BY intAuditLogId DESC
 	) ARAL
 	OUTER APPLY (
-		SELECT TOP 1 ICIR.strApprovalStatus
+		SELECT TOP 1 
+			 ICIR.strApprovalStatus
+			,ICIRI.intContractHeaderId
+			,ICIRI.intContractDetailId
+			,dblNet						= ISNULL(LGLD.dblNet, ICIRI.dblNet)
 		FROM tblLGLoadDetailLot LGLD
 		LEFT JOIN tblICInventoryReceiptItemLot ICIRIL ON ICIRIL.intLotId = LGLD.intLotId
 		LEFT JOIN tblICInventoryReceiptItem ICIRI ON ICIRI.intInventoryReceiptItemId = ICIRIL.intInventoryReceiptItemId
@@ -157,7 +161,7 @@ BEGIN TRY
 			   OR ISNULL(ARI.intBankAccountId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
-			   OR ISNULL(ARI.strBankReferenceNo, '') <> ''
+			   OR ISNULL(ARI.strBankTransactionId, '') <> ''
 			   OR ISNULL(ARI.dblLoanAmount, 0) <> 0
 			   OR ISNULL(ARI.strTransactionNo, '') <> ''
 			)
@@ -166,6 +170,7 @@ BEGIN TRY
 		OR @FromPosting = 1
 		OR @LogTradeFinanceInfo = 1
 	)
+	AND ISNULL(ARI.strTransactionNo, '') <> ''
 
 	DECLARE  @strTradeFinanceNumber		NVARCHAR(100)
 			,@dtmTransactionDate		DATETIME
@@ -205,13 +210,8 @@ BEGIN TRY
 			ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
 			WHERE strTradeFinanceNumber = @strTradeFinanceNumber
 
-			IF (ISNULL(@strTradeFinanceNumber, '') = '')
-			BEGIN
-				EXEC uspSMGetStartingNumber 166, @strNewTradeFinanceNumber OUT
-			END	
-
 			DELETE FROM @TRFTradeFinance
-			-- This is for direct invoice.
+
 			INSERT INTO @TRFTradeFinance 
 			(
 				 intTradeFinanceId
@@ -231,7 +231,7 @@ BEGIN TRY
 			)
 			SELECT
 				 intTradeFinanceId				= @intTradeFinanceId
-				,strTradeFinanceNumber			= ISNULL(TFL.strTradeFinanceTransaction, @strNewTradeFinanceNumber)
+				,strTradeFinanceNumber			= TFL.strTradeFinanceTransaction
 				,strTransactionType				= TFL.strTransactionType
 				,strTransactionNumber			= TFL.strTransactionNumber
 				,intTransactionHeaderId			= TFL.intTransactionHeaderId
@@ -239,7 +239,7 @@ BEGIN TRY
 				,intBankId						= ARI.intBankId
 				,intBankAccountId				= ARI.intBankAccountId
 				,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
-				,strRefNo						= ARI.strBankReferenceNo
+				,strRefNo						= ARI.strBankTransactionId
 				,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
 				,strCommnents					= ARI.strTradeFinanceComments
 				,dtmCreatedDate					= GETDATE()
@@ -249,19 +249,7 @@ BEGIN TRY
 			ON ARI.intInvoiceId = TFL.intTransactionHeaderId
 			WHERE ARI.intInvoiceId = @intTransactionHeaderId
 
-			IF (ISNULL(@strTradeFinanceNumber, '') = '')
-			BEGIN
-				UPDATE tblARInvoice 
-				SET strTransactionNo = @strNewTradeFinanceNumber
-				WHERE intInvoiceId = @intTransactionHeaderId
-
-				UPDATE @TradeFinanceLogs 
-				SET strTradeFinanceTransaction = @strNewTradeFinanceNumber
-				WHERE intTransactionHeaderId = @intTransactionHeaderId
-
-				EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId
-			END	
-			ELSE IF ISNULL(@intTradeFinanceId, 0) <> 0
+			IF ISNULL(@intTradeFinanceId, 0) <> 0
 			BEGIN
 				EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = 'UPDATE'
 			END
