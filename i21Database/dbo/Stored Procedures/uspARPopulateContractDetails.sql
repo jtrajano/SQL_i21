@@ -246,7 +246,7 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 		  AND (I.[strItemType] IS NOT NULL AND I.[strItemType] <> 'Other Charge')
 		  AND (T.intTicketType <> 6 AND T.intTicketTypeId <> 9 AND T.strInOutFlag <> 'O')
 		  AND I.strSessionId = @strSessionId
-		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId
+		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId, CD.intItemId, CD.intItemUOMId, CH.intEntityId, T.intTicketTypeId, T.intTicketType, T.strInOutFlag, CH.ysnLoad, CD.dblScheduleQty
 	END
 
 IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
