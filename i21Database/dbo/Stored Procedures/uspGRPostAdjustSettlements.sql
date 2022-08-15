@@ -11,6 +11,13 @@ DECLARE @ysnPosted BIT
 DECLARE @strAdjustSettlementNumber NVARCHAR(40)
 DECLARE @intTransferAdjustSettlementId INT
 DECLARE @intAdjustmentTypeId INT
+DECLARE @intTypeId INT
+DECLARE @intUserId INT
+DECLARE @intEntityId INT
+DECLARE @intContractDetailId INT
+DECLARE @intBillId INT
+DECLARE @success AS BIT
+DECLARE @intItemId INT
 
 BEGIN TRANSACTION
 BEGIN TRY
@@ -24,13 +31,18 @@ WHERE intAdjustSettlementId = @intAdjustSettlementId
 SELECT @ysnTransferSettlement = ysnTransferSettlement
 	,@ysnPosted = ysnPosted
 	,@intAdjustmentTypeId = intAdjustmentTypeId
+	,@intTypeId = intTypeId
+	,@intUserId = intCreatedUserId
+	,@intEntityId = intEntityId
+	,@intContractDetailId = intContractDetailId
+	,@intItemId = intItemId
 FROM @AdjustSettlementsStagingTable
 
 SELECT @intTransferAdjustSettlementId = CASE WHEN ISNULL(intAdjustSettlementId,0) = 0 THEN 0 ELSE 1 END
 FROM tblGRAdjustSettlements
 WHERE intParentAdjustSettlementId = @intAdjustSettlementId
 
-IF(@ysnTransferSettlement = 1 AND ISNULL(@intTransferAdjustSettlementId,0) = 0)
+IF @ysnTransferSettlement = 1
 BEGIN
 	EXEC uspSMGetStartingNumber 177, @strAdjustSettlementNumber OUT
 
@@ -108,89 +120,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	--UNPOST TRANSACTION FIRST THEN UPDATE THE DETAILS
-	EXEC uspGRUnpostAdjustSettlements @intAdjustSettlementId
-	
-	IF(@intAdjustmentTypeId <> 3 AND ISNULL(@intTransferAdjustSettlementId,0) > 0)
-	BEGIN
-		INSERT INTO tblGRDeletedAdjustSettlements
-		(
-			[strAdjustSettlementNumber]
-			,[intTypeId]
-			,[intEntityId]
-			,[intCompanyLocationId]
-			,[intItemId]
-			,[intTicketId]
-			,[strTicketNumber]
-			,[intAdjustmentTypeId]
-			,[intSplitId]
-			,[dtmAdjustmentDate]
-			,[dblAdjustmentAmount]
-			,[dblWithholdAmount]
-			,[dblTotalAdjustment]
-			,[dblCkoffAdjustment]
-			,[strRailReferenceNumber]
-			,[strCustomerReference]
-			,[strComments]
-			,[intGLAccountId]
-			,[ysnTransferSettlement]
-			,[intTransferEntityId]
-			,[strTransferComments]
-			,[ysnPosted]
-			--FREIGHT
-			,[dblFreightUnits]
-			,[dblFreightRate]
-			,[dblFreightSettlement]
-			--CONTRACT
-			,[intContractLocationId]
-			,[intContractDetailId]
-			,[dtmDateCreated]
-			,[intConcurrencyId]
-			,[intParentAdjustSettlementId]
-			,[intCreatedUserId]
-			,[dtmDateDeleted]
-		)
-		SELECT 
-			[strAdjustSettlementNumber]
-			,[intTypeId]
-			,[intEntityId]
-			,[intCompanyLocationId]
-			,[intItemId]
-			,[intTicketId]
-			,[strTicketNumber]
-			,[intAdjustmentTypeId]
-			,[intSplitId]
-			,[dtmAdjustmentDate]
-			,[dblAdjustmentAmount]
-			,[dblWithholdAmount]
-			,[dblTotalAdjustment]
-			,[dblCkoffAdjustment]
-			,[strRailReferenceNumber]
-			,[strCustomerReference]
-			,[strComments]
-			,[intGLAccountId]
-			,[ysnTransferSettlement]
-			,[intTransferEntityId]
-			,[strTransferComments]
-			,[ysnPosted]
-			--FREIGHT
-			,[dblFreightUnits]
-			,[dblFreightRate]
-			,[dblFreightSettlement]
-			--CONTRACT
-			,[intContractLocationId]
-			,[intContractDetailId]
-			,[dtmDateCreated]
-			,[intConcurrencyId]
-			,[intParentAdjustSettlementId]
-			,[intCreatedUserId]
-			,[dtmDateDeleted] = GETDATE()
-		FROM tblGRAdjustSettlements
-		WHERE intParentAdjustSettlementId = @intAdjustSettlementId
-
-		DELETE FROM tblGRAdjustSettlements WHERE intParentAdjustSettlementId = @intAdjustSettlementId
-	END
-	ELSE IF (@intAdjustmentTypeId = 3 AND ISNULL(@intTransferAdjustSettlementId,0) > 0)
+	IF (@intAdjustmentTypeId = 3 AND ISNULL(@intTransferAdjustSettlementId,0) > 0)
 	BEGIN
 		UPDATE A
 		SET intEntityId = B.intEntityId
@@ -214,7 +144,71 @@ BEGIN
 	END	
 END
 
-SELECT SCOPE_IDENTITY()
+IF @intTypeId = 1 --PURCHASE
+/*************CREATE VOUCHER/VENDOR PREPAY/DEBIT MEMO****************/
+BEGIN
+	EXEC [dbo].[uspGRAdjustSettlementsForPurchase]
+		@intUserId = @intUserId
+		,@intItemId = @intItemId
+		,@intContractDetailId = @intContractDetailId
+		,@intAdjustmentTypeId = @intAdjustmentTypeId
+		,@ysnTransferSettlement = @ysnTransferSettlement
+		,@AdjustSettlementsStagingTable = @AdjustSettlementsStagingTable
+		,@intBillId = @intBillId OUTPUT
+
+	UPDATE tblGRAdjustSettlements SET intBillId = @intBillId WHERE intAdjustSettlementId = @intAdjustSettlementId
+	
+	IF (SELECT ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId) = 1
+	BEGIN
+		EXEC [dbo].[uspAPPostBill] 
+			@post = 1
+			,@recap = 0
+			,@isBatch = 0
+			,@param = @intBillId
+			,@userId = @intUserId
+			,@transactionType = NULL
+			,@success = @success OUTPUT
+
+		UPDATE tblGRAdjustSettlements SET ysnPosted = 1 WHERE intAdjustSettlementId = @intAdjustSettlementId
+	END
+
+	IF @ysnTransferSettlement = 1
+	BEGIN
+		SELECT @intTransferAdjustSettlementId = intAdjustSettlementId FROM tblGRAdjustSettlements WHERE intParentAdjustSettlementId = @intAdjustSettlementId
+		--CALL THIS SP AGAIN
+		EXEC [dbo].[uspGRPostAdjustSettlements] @intTransferAdjustSettlementId		
+	END
+END
+ELSE --SALES
+BEGIN
+	DECLARE @strBillId NVARCHAR(40)
+	EXEC [dbo].[uspGRAdjustSettlementsForSales]
+		@intUserId = @intUserId
+		,@intItemId = @intItemId
+		,@intAdjustmentTypeId = @intAdjustmentTypeId
+		,@ysnTransferSettlement  = @ysnTransferSettlement
+		,@AdjustSettlementsStagingTable = @AdjustSettlementsStagingTable
+		,@intInvoiceId = @intBillId OUTPUT
+
+	UPDATE tblGRAdjustSettlements SET intBillId = @intBillId WHERE intAdjustSettlementId = @intAdjustSettlementId
+	
+	IF ISNULL(@intBillId,0) > 0
+	BEGIN
+		SET @strBillId = CAST(@intBillId AS NVARCHAR(40))
+		EXEC dbo.uspARPostInvoice @param = @strBillId, @post = 1, @recap = 0, @userId = @intUserId, @raiseError = 1
+
+		UPDATE tblGRAdjustSettlements SET ysnPosted = 1 WHERE intAdjustSettlementId = @intAdjustSettlementId
+	END
+
+	IF @ysnTransferSettlement = 1
+	BEGIN
+		SELECT @intTransferAdjustSettlementId = intAdjustSettlementId FROM tblGRAdjustSettlements WHERE intParentAdjustSettlementId = @intAdjustSettlementId
+		--CALL THIS SP AGAIN
+		EXEC [dbo].[uspGRPostAdjustSettlements] @intTransferAdjustSettlementId		
+	END
+END
+
+
 
 Post_Transaction:
 COMMIT TRANSACTION

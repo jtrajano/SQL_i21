@@ -23,6 +23,7 @@
 	,[intTransferEntityId] INT NULL
 	,[strTransferComments] NVARCHAR(500) NULL
 	,[ysnPosted] BIT DEFAULT(0)
+	,[intBillId] INT NULL
 	--FREIGHT
 	,[dblFreightUnits] DECIMAL(38,20) NULL
 	,[dblFreightRate] DECIMAL(18,6) NULL
@@ -30,6 +31,7 @@
 	--CONTRACT
 	,[intContractLocationId] INT NULL
 	,[intContractDetailId] INT NULL
+	,[intContractHeaderId] INT NULL
 	,[dtmDateCreated] DATETIME DEFAULT(GETDATE())
 	,[intConcurrencyId] INT DEFAULT(1)
 	,[intParentAdjustSettlementId] INT NULL
@@ -43,7 +45,8 @@
 	,CONSTRAINT [FK_tblGRAdjustSettlements_intCustomerGLAccountId] FOREIGN KEY ([intGLAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 	,CONSTRAINT [FK_tblGRAdjustSettlements_intTransferEntityId] FOREIGN KEY ([intTransferEntityId]) REFERENCES [tblEMEntity]([intEntityId])
 	,CONSTRAINT [FK_tblGRAdjustSettlements_intContractLocationId] FOREIGN KEY ([intContractLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
-	,CONSTRAINT [FK_tblGRAdjustSettlements_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
+	,CONSTRAINT [FK_tblGRAdjustSettlements_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId])
+	,CONSTRAINT [FK_tblGRAdjustSettlements_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId])
 	,CONSTRAINT [FK_tblGRAdjustSettlements_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId])
 )
 
@@ -78,3 +81,47 @@ BEGIN
 	END
 END
 GO
+
+CREATE TRIGGER trg_tblGRAdjustSettlements_contract
+ON dbo.tblGRAdjustSettlements
+AFTER INSERT, UPDATE
+AS
+BEGIN
+	IF (SELECT intAdjustmentTypeId FROM INSERTED) = 1 AND (SELECT intContractDetailId FROM INSERTED) IS NOT NULL
+	BEGIN
+		UPDATE ADJ
+		SET intContractHeaderId = CD.intContractHeaderId
+		FROM tblGRAdjustSettlements ADJ
+		INNER JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = ADJ.intContractDetailId
+		INNER JOIN INSERTED I
+			ON I.intAdjustSettlementId = ADJ.intAdjustSettlementId
+	END
+	ELSE
+	BEGIN
+		UPDATE ADJ
+		SET intContractHeaderId = NULL
+		FROM tblGRAdjustSettlements ADJ
+		INNER JOIN INSERTED I
+			ON I.intAdjustSettlementId = ADJ.intAdjustSettlementId
+	END
+END
+GO
+
+--CREATE TRIGGER trg_tblGRAdjustSettlements_contract_update
+--ON dbo.tblGRAdjustSettlements
+--AFTER UPDATE
+--AS
+--BEGIN
+--	IF (SELECT intAdjustmentTypeId FROM tblGRAdjustSettlements) = 1 AND (SELECT intContractDetailId FROM tblGRAdjustSettlements) IS NOT NULL	
+--	BEGIN
+--		UPDATE ADJ
+--		SET intContractHeaderId = CD.intContractHeaderId
+--		FROM tblGRAdjustSettlements ADJ
+--		INNER JOIN tblCTContractDetail CD
+--			ON CD.intContractDetailId = ADJ.intContractDetailId
+--		INNER JOIN inse U
+--			ON U.intAdjustSettlementId = ADJ.intAdjustSettlementId
+--	END
+--END
+--GO

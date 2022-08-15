@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRSearchAdjustSettlements]
-AS SELECT 
+AS 
+SELECT 
 	ASTR.intAdjustSettlementId	
 	,ASTR.intTypeId
 	,strType = CASE WHEN ASTR.intTypeId = 1 THEN 'Purchase' ELSE 'Sales' END COLLATE Latin1_General_CI_AS
@@ -12,7 +13,7 @@ AS SELECT
 	,IC.strItemNo
 	,ASTR.intTicketId
 	,ASTR.strTicketNumber
-	,ysnManualTicket = CAST(CASE WHEN ASTR.intTicketId IS NULL THEN 0 ELSE 1 END AS BIT)
+	,ysnManualTicket = CAST(CASE WHEN ASTR.intTicketId IS NULL THEN 1 ELSE 0 END AS BIT)
 	,ASTR.intAdjustmentTypeId
 	,AST.strAdjustmentType
 	,ASTR.intSplitId
@@ -38,11 +39,16 @@ AS SELECT
 	,ASTR.intContractLocationId
 	,strContractLocationName = CL_CD.strLocationName
 	,ASTR.intContractDetailId
+	,ASTR.intContractHeaderId
 	,CH.strContractNumber
 	,ASTR.dtmDateCreated
 	,ASTR.intConcurrencyId
 	,ASTR.intCreatedUserId
 	,ASTR.intParentAdjustSettlementId
+	,intBillId = CASE WHEN ASTR.intTypeId = 1 THEN AP.intBillId ELSE AR.intInvoiceId END
+	,strBillId = CASE WHEN ASTR.intTypeId = 1 THEN AP.strBillId ELSE AR.strInvoiceNumber END
+	,ysnBillPosted = CASE WHEN ASTR.intTypeId = 1 THEN AP.ysnPosted ELSE AR.ysnPosted END
+	,ysnBillPaid = CASE WHEN ASTR.intTypeId = 1 THEN AP.ysnPaid ELSE AR.ysnPaid END
 FROM tblGRAdjustSettlements ASTR
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = ASTR.intEntityId
@@ -65,5 +71,8 @@ LEFT JOIN (
 	) ON CD.intContractDetailId = ASTR.intContractDetailId
 INNER JOIN tblGRAdjustmentType AST
 	ON AST.intAdjustmentTypeId = ASTR.intAdjustmentTypeId
-
+LEFT JOIN tblAPBill AP
+	ON (AP.intBillId = ASTR.intBillId AND ASTR.intTypeId = 1)
+LEFT JOIN tblARInvoice AR
+	ON (AR.intInvoiceId = ASTR.intBillId AND ASTR.intTypeId = 2)
 GO

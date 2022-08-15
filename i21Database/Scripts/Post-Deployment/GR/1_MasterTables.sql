@@ -418,5 +418,5 @@ BEGIN
 	(
 		[strAdjustmentType],[ysnPurchase],[ysnSales]
 	) 
-	VALUES ('Advance',1,0), ('Freight',1,1), ('Adjustment',1,1), ('Receivable',1,0)
+	VALUES ('Advance',1,0), ('Freight',1,1), ('Adjustment',1,1)--, ('Receivable',1,0)
 END
