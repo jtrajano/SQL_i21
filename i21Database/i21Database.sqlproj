@@ -839,6 +839,7 @@
     <Build Include="dbo\Tables\tblRKAcceptableCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetOriginalTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinancePickLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
