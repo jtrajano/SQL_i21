@@ -260,6 +260,7 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.strMerchantPassword
 ,freightTerms.intFreightTermId
 ,freightTerms.strFreightTerm
+,compLoc.strContactName
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctCompSgmt ON compLoc.intCompanySegment = acctCompSgmt.intAccountSegmentId
