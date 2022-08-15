@@ -34,7 +34,6 @@ AS
          ,intInboundTaxGroupId
          ,load.intTMDispatchId
          ,load.intTMSiteId
-		 ,load.strItemUOM
   From vyuLGLoadDetailView load       
   INNER JOIN tblLGLoadDetail loaddetail on load.intLoadDetailId = loaddetail.intLoadDetailId          
   LEFT JOIN tblSMCompanyLocation compLocation on load.intPCompanyLocationId = compLocation.intCompanyLocationId                              
