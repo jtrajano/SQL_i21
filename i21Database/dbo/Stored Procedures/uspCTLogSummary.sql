@@ -43,7 +43,8 @@ BEGIN TRY
 			@dblCurrentBasis				NUMERIC(24, 10),
 			@intHeaderPricingTypeId		INT,
 			@dblInvoicedQuantity				NUMERIC(24, 10),
-			@ysnMissingShipment bit = 0;
+			@ysnMissingShipment bit = 0,
+			@intSequencePricingTypeId INT;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -425,6 +426,7 @@ BEGIN TRY
 		, @intCurrStatusId = intContractStatusId
 		, @dblCurrentBasis = dblBasis
 		, @intHeaderPricingTypeId = intHeaderPricingTypeId
+		, @intSequencePricingTypeId = intPricingTypeId
 	FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
@@ -5217,7 +5219,7 @@ BEGIN TRY
 							END
 							ELSE
 							BEGIN
-								if exists (select top 1 1 from @cbLogSpecific where dblOrigQty > @TotalPriced and @intHeaderPricingTypeId = 2)
+								if exists (select top 1 1 from @cbLogSpecific where dblOrigQty > @TotalPriced and @intHeaderPricingTypeId = 2 and @intSequencePricingTypeId = 2)
 								begin
 									UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 2, intActionId =  18
 								end
