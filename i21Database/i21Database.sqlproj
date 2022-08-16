@@ -840,6 +840,9 @@
     <Build Include="dbo\Stored Procedures\uspSMGetOriginalTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinancePickLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
+    <Build Include="dbo\Tables\tblGLPostedCompare.sql" />
+    <Build Include="dbo\Views\vyuGLSummaryCompare.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
