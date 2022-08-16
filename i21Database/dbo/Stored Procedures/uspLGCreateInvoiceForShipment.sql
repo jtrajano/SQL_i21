@@ -585,7 +585,7 @@ DECLARE
 			,[intFacilityId]
 			,[intLoanLimitId]
 			,[strBankReferenceNo]
-			,[strBankTransactionId]
+			,[strBankTradeReference]
 			,[dblLoanAmount]
 			,[intBankValuationRuleId]
 			,[strTradeFinanceComments]
@@ -712,7 +712,7 @@ DECLARE
 			,[intFacilityId]						= TF.intFacilityId
 			,[intLoanLimitId]						= TF.intLoanLimitId
 			,[strBankReferenceNo]					= TF.strBankReferenceNo
-			,[strBankTransactionId]					= NULL
+			,[strBankTradeReference]				= TF.strBankTradeReference
 			,[dblLoanAmount]						= TF.dblLoanAmount
 			,[intBankValuationRuleId]				= TF.intBankValuationRuleId
 			,[strTradeFinanceComments]				= TF.strTradeFinanceComments
@@ -749,6 +749,7 @@ DECLARE
 					,[intBankValuationRuleId]				= PL.intBankValuationRuleId		
 					,[strTradeFinanceComments]				= IR.strComments
 					,[strGoodsStatus]						= CASE (PL.intWarrantStatus) WHEN 1 THEN 'Pledged' WHEN 2 THEN 'Released' ELSE NULL END COLLATE Latin1_General_CI_AS 
+					,[strBankTradeReference]				= IR.strReferenceNo
 				FROM tblLGLoadDetailLot LDL
 				LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LDL.intLotId
 				LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
