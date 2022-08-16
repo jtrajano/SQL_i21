@@ -1701,7 +1701,7 @@ GO
 				,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Recost Formulation' AND [strModule] = 'Inventory')
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 177
+	SELECT	[intStartingNumberId]	= 178
 			,[strTransactionType]	= N'Change Account Category'
 			,[strPrefix]			= N'CAC-'
 			,[intNumber]			= 1
