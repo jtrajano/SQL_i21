@@ -773,8 +773,8 @@ IF @ysnPost = 1
               ,strCity            = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = dblCreditForeign    
-              ,strAmountInWords     = dbo.fnConvertNumberToWord(A.dblCreditForeign)    
+              ,dblAmount          = CASE WHEN @intBankTransferTypeId = 5 THEN dblDebitForeign ELSE dblCreditForeign END    
+              ,strAmountInWords     = dbo.fnConvertNumberToWord(CASE WHEN @intBankTransferTypeId = 5 THEN dblDebitForeign ELSE dblCreditForeign END)    
               ,strMemo            = CASE WHEN ISNULL(strReference,'') = '' THEN strDescription     
                                         WHEN ISNULL(strDescription,'') = '' THEN strReference    
                                         ELSE strDescription + ' / ' + strReference END    
@@ -868,10 +868,19 @@ IF @ysnPost = 1
         END
         ELSE
         BEGIN
-            DELETE FROM tblCMBankTransaction    
-            WHERE strLink = @strTransactionId    
-            AND ysnClr = 0    
-            AND intBankTransactionTypeId  = CASE WHEN @ysnPosted = 1 THEN @BANK_TRANSFER_DEP ELSE  @BANK_TRANSFER_WD  END  
+          IF @intBankTransferTypeId = 5
+          BEGIN
+              DELETE FROM tblCMBankTransaction    
+              WHERE strLink = @strTransactionId    
+              AND ysnClr = 0    
+              AND intBankTransactionTypeId  = CASE WHEN @ysnPosted = 1 THEN @BANK_TRANSFER_WD ELSE  @BANK_TRANSFER_DEP  END  
+          END
+          ELSE
+              DELETE FROM tblCMBankTransaction    
+              WHERE strLink = @strTransactionId    
+              AND ysnClr = 0    
+              AND intBankTransactionTypeId  = CASE WHEN @ysnPosted = 1 THEN @BANK_TRANSFER_DEP ELSE  @BANK_TRANSFER_WD  END  
+         
         END
      
       END  

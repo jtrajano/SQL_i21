@@ -89,8 +89,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			,[intEntityId]			= A.intEntityId
 			FROM	#tmpGLDetail A
 			CROSS APPLY(
-				SELECT dblGainLossFrom * case when @intBankTransferTypeId <> 5 THEN -1 ELSE 1 END
-				
+				SELECT dblGainLossFrom * -1 
 				gainLoss, strReferenceFrom FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossFrom <> 0
 			)BankFrom
 			CROSS APPLY (
@@ -126,7 +125,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			,[intEntityId]			= A.intEntityId
 			FROM	#tmpGLDetail A
 			CROSS APPLY(
-				SELECT dblGainLossTo * CASE WHEN @intBankTransferTypeId <> 5 THEN 1 ELSE -1 END gainLoss, strReferenceTo FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossTo <> 0
+				SELECT dblGainLossTo gainLoss, strReferenceTo FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossTo <> 0
 			)BankTo
 			CROSS APPLY (
 				SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
