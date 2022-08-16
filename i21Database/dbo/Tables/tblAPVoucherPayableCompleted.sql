@@ -101,6 +101,7 @@
 
 	[intPayFromBankAccountId] 			INT NULL,
 	[strPayFromBankAccount]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strFinancingSourcedFrom] 			NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strFinancingTransactionNumber] 	NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 
 	[strFinanceTradeNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
