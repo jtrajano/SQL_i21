@@ -1691,6 +1691,15 @@ GO
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjust Settlements' AND [strModule] = 'Ticket Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 178
+			,[strTransactionType]	= N'Change Account Category'
+			,[strPrefix]			= N'CAC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'General Ledger'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Account Category' AND [strModule] = 'General Ledger')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
