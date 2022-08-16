@@ -291,6 +291,7 @@ BEGIN
 			,[intLotId]							=	A.intLotId
 			,[intPayFromBankAccountId]				=	A.intPayFromBankAccountId
 			,[strPayFromBankAccount]				=	bankAccount.strBankAccountNo
+			,[strFinancingSourcedFrom]				=	A.strFinancingSourcedFrom
 			,[strFinancingTransactionNumber]		= 	A.strFinancingTransactionNumber
 			,[strFinanceTradeNo]					=	A.strFinanceTradeNo
 			,[intBankId]							=	A.intBankId
@@ -459,6 +460,7 @@ BEGIN
 		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
+		,[strFinancingSourcedFrom]
 		,[strFinancingTransactionNumber]
 		,[strFinanceTradeNo]
 		,[intBankId]
@@ -579,6 +581,7 @@ BEGIN
 		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
+		,[strFinancingSourcedFrom]
 		,[strFinancingTransactionNumber]
 		,[strFinanceTradeNo]
 		,[intBankId]
