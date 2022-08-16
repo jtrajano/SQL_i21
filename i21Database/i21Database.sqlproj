@@ -1109,6 +1109,8 @@
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords2.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentIntegrations.sql" />
     <None Include="Scripts\Post-Deployment\IC\32_InventoryJournalLineDescription.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEntityEFTInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntityEFTInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
