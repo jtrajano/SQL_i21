@@ -86,7 +86,7 @@ BEGIN TRY
 		, dblTransactionAmountActual	= CTCD.dblLoanAmount
 		, intLimitId					= ARI.intBorrowingFacilityLimitId
 		, dblLimit						= CMBFL.dblLimit
-		, strBankTradeReference			= ARI.strBankTransactionId
+		, strBankTradeReference			= ARI.strBankTradeReference
 		, strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
 		, dtmAppliedToTransactionDate	= GETDATE() 
 		, intStatusId					= CASE WHEN @intStatusId = 0
@@ -157,7 +157,7 @@ BEGIN TRY
 			   OR ISNULL(ARI.intBankAccountId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
-			   OR ISNULL(ARI.strBankTransactionId, '') <> ''
+			   OR ISNULL(ARI.strBankTradeReference, '') <> ''
 			   OR ISNULL(ARI.dblLoanAmount, 0) <> 0
 			   OR ISNULL(ARI.strTransactionNo, '') <> ''
 			)
@@ -231,7 +231,7 @@ BEGIN TRY
 				,intBankId						= ARI.intBankId
 				,intBankAccountId				= ARI.intBankAccountId
 				,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
-				,strRefNo						= ARI.strBankTransactionId
+				,strRefNo						= ARI.strBankTradeReference
 				,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
 				,strCommnents					= ARI.strTradeFinanceComments
 				,dtmCreatedDate					= GETDATE()
