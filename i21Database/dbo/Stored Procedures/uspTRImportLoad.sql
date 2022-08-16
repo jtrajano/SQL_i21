@@ -160,9 +160,12 @@ BEGIN
 
 				IF(@strSource = 'API')
 				BEGIN
-					SELECT TOP 1 @intTruckId = E.intEntityId FROM tblSCTruckDriverReference D 
-					INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId 
-					WHERE E.strName = @strTruck
+					--SELECT TOP 1 @intTruckId = E.intEntityId FROM tblSCTruckDriverReference D 
+					--INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId 
+					--WHERE E.strName = @strTruck
+					SELECT TOP 1 @intTruckId = T.intEntityShipViaTruckId FROM tblSMShipViaTruck T 
+					INNER JOIN tblSMShipVia SV ON SV.intEntityId = T.intEntityShipViaId 
+					WHERE T.strTruckNumber = @strTruck
 				END
 				ELSE
 				BEGIN
