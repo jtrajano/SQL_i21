@@ -185,7 +185,7 @@ SELECT
 	,intBorrowingFacilityLimitDetailId	= INV.intBorrowingFacilityLimitDetailId
 	,strBorrowingFacilityLimitDetail	= BFLD.strLimitDescription
 	,strBankReferenceNo					= INV.strBankReferenceNo
-	,strBankTransactionId				= INV.strBankTransactionId
+	,strBankTradeReference				= INV.strBankTradeReference
 	,dblLoanAmount						= INV.dblLoanAmount
 	,intBankValuationRuleId				= INV.intBankValuationRuleId
 	,strBankValuationRule				= BVR.strBankValuationRule
