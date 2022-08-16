@@ -1377,6 +1377,17 @@ GO
 		   [strPrefix]						=		N'ED',
 		   [ysnAddonComponent]              =       1
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'SkyBitz Integration')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		133,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'SkyBitz Integration',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		131,
+		   [strPrefix]						=		N'SI',
+		   [ysnAddonComponent]              =       1
+
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
