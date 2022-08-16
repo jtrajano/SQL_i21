@@ -484,7 +484,7 @@ BEGIN TRANSACTION
 					)
 					SELECT
 							@NewStoreId
-						,strRegisterName
+						,strRegisterClass + ' - ' + CAST((SELECT TOP 1 intStoreNo FROM tblSTStore WHERE intStoreId = @NewStoreId) AS VARCHAR(200)) AS strRegisterName
 						,strRegisterClass
 						,ysnRegisterDataLoad
 						,ysnCheckoutLoad
