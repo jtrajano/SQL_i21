@@ -1,8 +1,8 @@
 CREATE VIEW [dbo].[vyuGLSummaryCompare]      
    AS      
-   SELECT * FROM (      
+    SELECT * FROM (      
         SELECT  A.strReport,A.dtmDateEntered,A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*,
-        E.strUOMCode, E.dblLbsPerUnit , A.intCurrencyId , F.strCurrency,B.intUnnaturalAccountId,A.intLedgerId            
+        E.strUOMCode, E.dblLbsPerUnit , A.intCurrencyId , F.strCurrency,B.intUnnaturalAccountId            
         FROM  dbo.tblGLPostedCompare AS A         
         INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId         
         INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId        
