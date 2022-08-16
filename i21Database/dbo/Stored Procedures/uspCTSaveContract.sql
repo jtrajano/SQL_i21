@@ -448,6 +448,7 @@ BEGIN TRY
 			, dblOriginalBasis = CD.dblOriginalBasis
 			, dblConvertedBasis = CD.dblConvertedBasis
 			, strLCNumber = @strLCNumber
+			, ysnApplyDefaultTradeFinance = 0
 		FROM @CDTableUpdate CD
 		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
