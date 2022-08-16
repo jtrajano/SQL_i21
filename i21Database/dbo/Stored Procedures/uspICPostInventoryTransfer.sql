@@ -130,7 +130,7 @@ IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN   
 	-- The transaction is already unposted.  
 	EXEC uspICRaiseError 80170; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit    
 END
 
 -- Don't allow unpost when there's a receipt
@@ -162,7 +162,7 @@ BEGIN
 			AND t.intInventoryTransferId = @intTransactionId
 
 		EXEC uspICRaiseError 80107, @TR, @R;
-		GOTO Post_Exit	
+		GOTO With_Rollback_Exit  	
 	END
 END
 
@@ -193,7 +193,7 @@ IF EXISTS(
 		AND ISNULL(i.strLotTracking, 'No') <> 'No')
 BEGIN
 	EXEC uspICRaiseError 80085, @strTransactionId;
-	GOTO Post_Exit
+	GOTO With_Rollback_Exit  
 END
 
 IF EXISTS(SELECT TOP 1 1 FROM #tempValidateItemLocation)
@@ -211,7 +211,7 @@ BEGIN
 	
 	-- Item %s is not available on location %s.
 	EXEC uspICRaiseError 80026, @LocationId, @ItemId;
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit    
 END
 
 IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) DROP TABLE #tempValidateItemLocation
@@ -225,13 +225,13 @@ BEGIN
 	IF @ysnPost = 1   
 	BEGIN   
 		EXEC uspICRaiseError 80172, 'Post';
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit    
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
 		EXEC uspICRaiseError 80172, 'Unpost';
-		GOTO Post_Exit    
+		GOTO With_Rollback_Exit      
 	END  
 END   
 
