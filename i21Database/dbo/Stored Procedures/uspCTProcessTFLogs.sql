@@ -188,6 +188,165 @@ BEGIN
 			begin
 				exec uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 			end
+			else
+			begin
+				if exists
+				(
+					select top 1 1
+					from @TFXML tf
+					join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
+					join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+					where isnull(cd.intBankId,0) = 0
+					and ch.intContractTypeId = 2
+				)
+				begin
+					declare @intAllocatedPContractDetailId int, @intAllocatedSContractDetailId int;
+					select @intAllocatedPContractDetailId = al.intPContractDetailId, @intAllocatedSContractDetailId = al.intSContractDetailId
+					from @TFXML tf
+					join tblLGAllocationDetail al on al.intSContractDetailId = tf.intContractDetailId
+
+					if (@intAllocatedPContractDetailId is not null)
+					begin
+						insert into @TRFLog
+						(
+							strAction
+							, strTransactionType
+							, intTradeFinanceTransactionId
+							, strTradeFinanceTransaction
+							, intTransactionHeaderId
+							, intTransactionDetailId
+							, strTransactionNumber
+							, dtmTransactionDate
+							, intBankTransactionId
+							, strBankTransactionId
+							, dblTransactionAmountAllocated
+							, dblTransactionAmountActual
+							, intLoanLimitId
+							, strLoanLimitNumber
+							, strLoanLimitType
+							, dtmAppliedToTransactionDate
+							, intStatusId
+							, intWarrantId
+							, strWarrantId
+							, intUserId
+							, intConcurrencyId
+							, intContractHeaderId
+							, intContractDetailId
+							, intBankId
+							, intBankAccountId
+							, intBorrowingFacilityId
+							, intLimitId
+							, intSublimitId
+							, strBankTradeReference
+							, strBankApprovalStatus
+							, dblLimit
+							, dblSublimit
+							, dblFinanceQty
+							, dblFinancedAmount
+							, strBorrowingFacilityBankRefNo
+							, ysnDeleted
+							, intOverrideBankValuationId
+							, strOverrideBankValuation
+							, ysnNegateLog
+							)
+						select top 1
+							strAction = 'Updated Contract'
+							, strTransactionType = tfl.strTransactionType
+							, intTradeFinanceTransactionId = tfl.intTradeFinanceTransactionId
+							, strTradeFinanceTransaction = tfl.strTradeFinanceTransaction
+							, intTransactionHeaderId = sc.intContractHeaderId
+							, intTransactionDetailId = sc.intContractDetailId
+							, strTransactionNumber = sc.strTransactionNo
+							, dtmTransactionDate = getdate()
+							, intBankTransactionId = tfl.intBankTransactionId
+							, strBankTransactionId = tfl.strBankTransactionId
+							, dblTransactionAmountAllocated = tfl.dblTransactionAmountAllocated
+							, dblTransactionAmountActual = tfl.dblTransactionAmountActual
+							, intLoanLimitId  = tfl.intLoanLimitId
+							, strLoanLimitNumber = tfl.strLoanLimitNumber
+							, strLoanLimitType = tfl.strLoanLimitType
+							, dtmAppliedToTransactionDate = getdate()
+							, intStatusId = tfl.intStatusId
+							, intWarrantId = tfl.intWarrantId
+							, strWarrantId = tfl.strWarrantId
+							, intUserId = @intUserId
+							, intConcurrencyId = 1
+							, intContractHeaderId = sc.intContractHeaderId
+							, intContractDetailId = sc.intContractDetailId
+							, intBankId = tfl.intBankId
+							, intBankAccountId = tfl.intBankAccountId
+							, intBorrowingFacilityId = tfl.intBorrowingFacilityId
+							, intLimitId = tfl.intLimitId
+							, intSublimitId = tfl.intSublimitId
+							, strBankTradeReference = tfl.strBankTradeReference
+							, strBankApprovalStatus = tfl.strBankApprovalStatus
+							, dblLimit = tfl.dblLimit
+							, dblSublimit = tfl.dblSublimit
+							, dblFinanceQty = (
+								CASE
+								WHEN sc.intApprovalStatusId in (3,4) OR sc.intContractStatusId = 3
+								THEN 0 
+								ELSE
+									case
+									when sc.intContractStatusId <> 6
+									then sc.dblQuantity
+									else (sc.dblQuantity - sc.dblBalance)
+									END 
+								END
+							)
+							, dblFinancedAmount = (
+								CASE
+								WHEN sc.intApprovalStatusId in (3,4) OR sc.intContractStatusId = 3
+								THEN 0 
+								ELSE
+									case
+									when sc.intContractStatusId <> 6
+									then sc.dblTotalCost
+									else sc.dblTotalCost * ((sc.dblQuantity - sc.dblBalance) / sc.dblQuantity)
+									end
+								END
+							) * (
+								case
+								when sc.intCurrencyId <> sc.intInvoiceCurrencyId and isnull(sc.dblRate,0) <> 0
+								then sc.dblRate
+								else 1
+								end
+							)
+							, strBorrowingFacilityBankRefNo = tfl.strBorrowingFacilityBankRefNo
+							, ysnDeleted = tfl.ysnDeleted
+							, intOverrideBankValuationId = tfl.intOverrideBankValuationId
+							, strOverrideBankValuation = tfl.strOverrideBankValuation
+							, ysnNegateLog = 1
+						from tblTRFTradeFinanceLog tfl
+						cross apply (
+							select
+							ch.intContractHeaderId
+							,cd.intContractDetailId
+							,strTransactionNo = ch.strContractNumber + '-' + convert(nvarchar(20),cd.intContractSeq)
+							,cd.intApprovalStatusId
+							,cd.intContractStatusId
+							,cd.dblTotalCost
+							,cd.dblQuantity
+							,cd.dblBalance
+							,cd.intCurrencyId
+							,cd.intInvoiceCurrencyId
+							,cd.dblRate
+							from tblCTContractDetail cd
+							join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+							where cd.intContractDetailId = @intAllocatedSContractDetailId
+						) sc
+						where tfl.intContractDetailId = @intAllocatedPContractDetailId and tfl.strTransactionType = 'Contract'
+						order by tfl.intTradeFinanceLogId desc
+
+						if exists (select top 1 1 from @TRFLog)
+						begin
+							exec uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
+						end
+
+					end
+
+				end
+			end
 
 
 
