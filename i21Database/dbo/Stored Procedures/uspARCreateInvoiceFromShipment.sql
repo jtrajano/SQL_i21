@@ -906,7 +906,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
                         WHERE intContractDetailId = @intContractDetailToDeleteId
                     END
 
-				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
+				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(dblQuantity, 0) > 0) AND @dblQtyShipped > 0
 					BEGIN
 						DECLARE @intPriceFixationDetailId		INT = NULL
 							, @dblQuantity					NUMERIC(18, 6) = 0
@@ -917,7 +917,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 								   , @dblFinalPrice					= dblFinalPrice
 						FROM #FIXATION 
 						WHERE intPriceFixationId = @intPriceFixationId
-						AND ISNULL(ysnProcessed, 0) = 0
+						  AND ISNULL(dblQuantity, 0) > 0
 						ORDER BY intPriceFixationDetailId
 						
 						IF @dblOriginalQtyShipped = @dblQtyShipped AND @dblQuantity > 0
@@ -1166,9 +1166,10 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 							END
 												
 						UPDATE #FIXATION 
-						SET ysnProcessed = CAST(1 AS BIT)
+						SET ysnProcessed 	= CAST(1 AS BIT)
+						  , dblQuantity		= dblQuantity - @dblOriginalQtyShipped
 						WHERE intPriceFixationId = @intPriceFixationId
-						AND intPriceFixationDetailId = @intPriceFixationDetailId
+						  AND intPriceFixationDetailId = @intPriceFixationDetailId
 					END
 				
 				DELETE FROM #CONTRACTSPRICING WHERE intInvoiceEntriesId = @intInvoiceEntriesId
