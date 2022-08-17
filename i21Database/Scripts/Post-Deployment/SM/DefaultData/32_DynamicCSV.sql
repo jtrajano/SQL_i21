@@ -2024,9 +2024,9 @@ UPDATE tblSMCSVDynamicImport SET
 
 
 	INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)
-	SELECT @NewHeaderId, 'entityCustomerId', 'Customer Entity No*', 1
+	SELECT @NewHeaderId, 'entityCustomerId', 'Customer Entity No', 1
 	UNION All
-	SELECT @NewHeaderId, 'cusloc', 'Customer Location*', 1
+	SELECT @NewHeaderId, 'cusloc', 'Customer Location', 1
 	Union All
 	SELECT @NewHeaderId, 'zipcode', 'Supplier Zip Code', 0
 	Union All
