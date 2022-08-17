@@ -25,7 +25,6 @@ SELECT
 	,intQuoteProduct3Id=ISNULL(intQuoteProduct3Id,0)
 	,intQuoteProduct4Id=ISNULL(intQuoteProduct4Id,0)
 	,intQuoteProduct5Id=ISNULL(intQuoteProduct5Id,0)
-	,intSalespersonId=ISNULL(intSalespersonId,0)
 	,intCurrencyId=ISNULL(intCurrencyId,0)
 	,intTermsId=ISNULL(intTermsId,0)
 	,intShipViaId=ISNULL(intShipViaId,0)
