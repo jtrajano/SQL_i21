@@ -340,7 +340,7 @@ BEGIN TRY
 		,I.strItemNo
 		,SL.dtmCreatedDate
 		,SL.dtmTransactionDate
-		,dblVariance  = ABS(SL.dblOrigQty) - ABS(CH.dblQuantityPerLoad)
+		,dblVariance  =  CASE WHEN SL.dblOrigQty < 0 THEN CH.dblQuantityPerLoad - ABS(SL.dblOrigQty)  ELSE  SL.dblOrigQty - CH.dblQuantityPerLoad END
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+/- Purchase Load Variance'
@@ -695,7 +695,7 @@ BEGIN TRY
 		,I.strItemNo
 		,SL.dtmCreatedDate
 		,SL.dtmTransactionDate
-		,dblVariance  = ABS(SL.dblOrigQty) - ABS(CH.dblQuantityPerLoad)
+		,dblVariance  = CASE WHEN SL.dblOrigQty < 0 THEN ABS(SL.dblOrigQty) - CH.dblQuantityPerLoad ELSE CH.dblQuantityPerLoad - SL.dblOrigQty END
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+/- Sales Load Variance'
