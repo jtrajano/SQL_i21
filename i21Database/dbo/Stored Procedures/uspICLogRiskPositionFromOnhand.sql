@@ -115,13 +115,17 @@ BEGIN
 				receipt.intContractDetailId
 				, shipment.intContractDetailId
 				, invoice.intContractDetailId
-				, adjustment.intContractDetailId
+				, CASE WHEN overage.dblOverAgeValue <> 0 THEN NULL
+					ELSE adjustment.intContractDetailId
+				  END 
 			)
 			,intContractHeaderId = COALESCE(
 				receipt.intContractHeaderId
 				, shipment.intContractHeaderId
 				, invoice.intContractHeaderId
-				, adjustment.intContractHeaderId
+				, CASE WHEN overage.dblOverAgeValue <> 0 THEN NULL
+					   ELSE adjustment.intContractHeaderId
+				  END
 			)
 			,intTicketId = t.intTicketId -- v.intTicketId
 			,intCommodityId =  i.intCommodityId --v.intCommodityId
@@ -288,6 +292,22 @@ BEGIN
 					AND ad.intInventoryAdjustmentDetailId = t.intTransactionDetailId
 			) adjustment 
 
+			OUTER APPLY (
+				SELECT  dbo.fnCTGetOverage(CASE WHEN (ABS(ISNULL(dblAdjustByQuantity, 0)) + ISNULL(dblAdjustByQuantity, 0)) / 2  = 0 THEN
+									ABS(ISNULL(dblAdjustByQuantity, 0)) + ISNULL(isi.dblQuantity, 0)
+								ELSE
+									ISNULL(isi.dblQuantity, 0)
+						   END, isi.intInventoryShipmentItemId, 0) as dblOverAgeValue
+				FROM tblICInventoryAdjustment a 
+				INNER JOIN tblICInventoryAdjustmentDetail ad ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+				JOIN tblICInventoryShipmentItem AS isi ON ad.intContractHeaderId = isi.intOrderId AND ad.intContractDetailId = isi.intLineNo
+				LEFT JOIN tblICLot l ON l.intLotId = ad.intLotId 
+				WHERE t.strTransactionForm = 'Inventory Adjustment'
+				  AND a.strAdjustmentNo = t.strTransactionId
+				  AND a.intInventoryAdjustmentId = t.intTransactionId
+				  AND ad.intInventoryAdjustmentDetailId = t.intTransactionDetailId 
+			) overage
+
 		WHERE
 			(t.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
 			AND t.strBatchId = @strBatchId
@@ -297,4 +317,4 @@ BEGIN
 	END
 	
 	EXEC uspRKLogRiskPosition @SummaryLogs, 0, 0
-END 
+END
