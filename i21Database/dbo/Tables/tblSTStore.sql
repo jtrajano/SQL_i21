@@ -49,7 +49,7 @@
     [intCashTransctionMopId] INT NULL, 
     [ysnAllowMassPriceChanges] BIT NULL, 
     [ysnUsingTankMonitors] BIT NULL, 
-    [strRegisterName] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+    [strRegisterName] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [intMaxRegisterPlu] INT NULL, 
     [strReportDepartmentAtGrossOrNet] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
     [intLoyaltyDiscountMopId] INT NULL, 
