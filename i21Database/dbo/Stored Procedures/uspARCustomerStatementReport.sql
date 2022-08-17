@@ -88,6 +88,18 @@ DECLARE @temp_cf_table TABLE(
 	,[dtmInvoiceDate]			DATETIME
 )
 
+DECLARE @CREDITMEMOPAIDREFUNDED TABLE (
+	 intInvoiceId			INT												NOT NULL PRIMARY KEY
+	,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,strDocumentNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+)
+DECLARE @CASHREFUNDS TABLE (
+	 intOriginalInvoiceId			INT												NULL
+	,strDocumentNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
+	,dblRefundTotal				NUMERIC(18, 6)									NULL DEFAULT 0
+	,dblBaseRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
+)
+
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
 BEGIN
     DROP TABLE #CUSTOMERS
@@ -465,6 +477,46 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 SELECT @dblTotalAR = SUM(dblTotalAR) FROM tblARCustomerAgingStagingTable
 
+--@CREDITMEMOPAIDREFUNDED
+INSERT INTO @CREDITMEMOPAIDREFUNDED (
+	   intInvoiceId
+	 , strInvoiceNumber
+	 , strDocumentNumber
+)
+SELECT I.intInvoiceId,I.strInvoiceNumber,REFUND.strDocumentNumber
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN(
+	SELECT ID.strDocumentNumber from tblARInvoice INV
+	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
+	where   strTransactionType='Cash Refund' and ysnPosted = 1
+)REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
+WHERE I.ysnPosted = 1 
+	AND I.ysnPaid = 1
+	AND I.strTransactionType <> 'Cash Refund'
+	AND I.strTransactionType = 'Credit Memo'
+	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+
+--@CASHREFUNDS
+INSERT INTO @CASHREFUNDS (
+	   intOriginalInvoiceId
+	 , strDocumentNumber
+	 , dblRefundTotal
+	 , dblBaseRefundTotal
+)
+SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
+	 , strDocumentNumber	= ID.strDocumentNumber
+	 , dblRefundTotal		= SUM(ID.dblTotal)
+	 , dblBaseRefundTotal	= SUM(ID.dblBaseTotal)
+FROM tblARInvoiceDetail ID
+INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+WHERE I.strTransactionType = 'Cash Refund'
+  AND I.ysnPosted = 1
+  AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
+GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
+
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
 		IF @dblTotalAR = 0 
@@ -546,6 +598,11 @@ BEGIN
             GROUP BY STATEMENTREPORT.intTempId
         ) STATEMENTREPORT2 ON STATEMENTREPORT2.intTempId = STATEMENTREPORT.intTempId;
 END;
+
+
+DELETE FROM  @temp_statement_table
+WHERE strReferenceNumber IN (SELECT CF.strDocumentNumber FROM @CASHREFUNDS CF INNER  JOIN @CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber) 
+
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = @strStatementFormatLocal
 INSERT INTO tblARCustomerStatementStagingTable (
