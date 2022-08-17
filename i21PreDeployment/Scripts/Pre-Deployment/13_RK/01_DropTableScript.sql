@@ -431,4 +431,9 @@ BEGIN
 	
 END
 
+IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKTempDPRDetailLog' AND COLUMN_NAME = 'intTransactionReferenceDetailId')
+BEGIN
+	EXEC('ALTER TABLE tblRKTempDPRDetailLog ADD intTransactionReferenceDetailId INT')
+END
+
 GO
