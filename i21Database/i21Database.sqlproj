@@ -17,7 +17,7 @@
     <ModelCollation>1033,CS</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SqlServerVerification>False</SqlServerVerification>
@@ -71,6 +71,7 @@
     <EnableFullTextSearch>True</EnableFullTextSearch>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
     <DacVersion>1.1.0.0</DacVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
@@ -9205,6 +9206,7 @@
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuCTSequenceHistoryForDPR.sql" />
     <Build Include="dbo\Functions\fnCTGetContractDPRRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
