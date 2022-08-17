@@ -8,6 +8,7 @@ declare @queryResult cursor
 		,@intEntityEmployeeId int
 		,@strRequestId nvarchar(20)
 		,@dblRequest numeric(18,6)
+		,@dblRequestToInsert numeric(18,6)
 		,@intNoOfDays int
 		
 		,@strPRDayName nvarchar(20)
@@ -110,6 +111,17 @@ BEGIN
 
 	if (@intNoOfDays > 1)
 	begin
+		--time off was edited, delete the record
+		if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId 
+			and intPRNoOfDays != @intNoOfDays 
+		) or not exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId 
+			and dtmPRDate != @dtmDateFrom 
+		)
+		begin
+			delete from tblHDTimeOffRequest
+			where intPRTimeOffRequestId = @intTimeOffRequestId 			
+		end
+
 		set @intI = 0;
 		while @intI < @intNoOfDays
 		begin
@@ -124,10 +136,16 @@ BEGIN
 					if (@intI < @intNoOfDays)
 					begin
 						set @dblRequest = @dblRequest - 8;
+						set @dblRequestToInsert = @intFixEightHours;
 					end
 					if (sign(@dblRequest) = -1)
 					begin
-						set @dblRequest = @intFixEightHours;
+						--set @dblRequest = @intFixEightHours;
+						set @dblRequestToInsert = @dblRequest * -1;
+					end
+					if (sign(@dblRequest) = 0)
+					begin
+						set @dblRequestToInsert = @intFixEightHours;
 					end
 					begin
 						INSERT INTO [dbo].[tblHDTimeOffRequest]
@@ -145,7 +163,7 @@ BEGIN
 								   ,@strRequestId
 								   ,@dtmPRDate
 								   ,@strPRDayName
-								   ,@dblRequest
+								   ,@dblRequestToInsert
 								   ,@intNoOfDays
 								   ,1)
 					end
