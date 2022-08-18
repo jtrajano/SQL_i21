@@ -1,11 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuHDCoworkerIssue]
 AS 
 SELECT  intId						= CONVERT(INT,ROW_NUMBER() OVER ( ORDER BY CoworkerIssues.intEntityId, CoworkerIssues.intTimeEntryPeriodDetailId ))
-	   ,strAgentName				= CoworkerIssues.strFullName
+	   ,strAgentName				= CoworkerIssues.strFullName 
 	   ,intTimeEntryPeriodDetailId	= CoworkerIssues.intTimeEntryPeriodDetailId
 	   ,intEntityId					= CoworkerIssues.intEntityId
 	   ,ysnActive					= CoworkerIssues.ysnActive
-	   ,strRemarks					= CoworkerIssues.strNoCoworkerGoal + CoworkerIssues.strNoTimeEntryOrInsufficientHours + CoworkerIssues.strInactiveWithTimeEntry + CoworkerIssues.strUnapprovedTimeEntry
+	   ,strRemarks					= CoworkerIssues.strNoCoworkerGoal + CoworkerIssues.strNoTimeEntryOrInsufficientHours + CoworkerIssues.strInactiveWithTimeEntry + CoworkerIssues.strUnapprovedTimeEntry  COLLATE Latin1_General_CI_AS
 	   ,intConcurrencyId			= 1
 FROM (
 
