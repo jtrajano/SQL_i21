@@ -1086,6 +1086,7 @@
     <Build Include="dbo\Functions\fnGLGetForwardBalanceAndUnit.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEntityEFTInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntityEFTInformation.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
