@@ -1010,6 +1010,8 @@
     <None Include="Scripts\Post-Deployment\ST\48_FileFieldMapping_Commander_TierProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
     <Build Include="dbo\Functions\fnGLGetForwardBalanceAndUnit.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryPeriodDetailDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateTimeEntryPeriodDetailDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
