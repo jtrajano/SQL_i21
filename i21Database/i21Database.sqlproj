@@ -1016,6 +1016,9 @@
     <Build Include="dbo\Tables\tblApiSchemaEntityEFTInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntityEFTInformation.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemLotArchive.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemLotError.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemLotStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
