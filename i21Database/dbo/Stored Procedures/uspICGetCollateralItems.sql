@@ -200,4 +200,3 @@ FROM
 WHERE
 	outOfSequence.dtmDate IS NOT NULL 
 	OR produceExists.intInventoryTransactionId IS NOT NULL 
-	OR produceExists.intInventoryTransactionId IS NOT NULL 
