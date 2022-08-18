@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspHDImportTimeEntryPeriodDetail]
+﻿CREATE PROCEDURE [dbo].[uspHDGenerateTimeEntryPeriodDetailDay]
 	 @TimeEntryPeriodDetailId int  
 AS
 
