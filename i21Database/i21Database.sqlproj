@@ -1086,6 +1086,8 @@
     <Build Include="dbo\Functions\fnGLGetForwardBalanceAndUnit.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEntityEFTInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntityEFTInformation.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntryPeriodDetailDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateTimeEntryPeriodDetailDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
