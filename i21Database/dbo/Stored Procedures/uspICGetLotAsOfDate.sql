@@ -234,6 +234,7 @@ FROM
 	AND Reserve.intSubLocationId = Lot.intSubLocationId
 	AND Reserve.intStorageLocationId = Lot.intStorageLocationId
 	AND Reserve.intLotId = Lot.intLotId
+	WHERE (@ysnHasStockOnly = 1 AND ISNULL(Lot.dblQty, 0) - ISNULL(Reserve.dblTotalQty, 0) > 0) OR @ysnHasStockOnly = 0
 GROUP BY i.intItemId
 		,i.strItemNo
 		,ItemUOM.intItemUOMId

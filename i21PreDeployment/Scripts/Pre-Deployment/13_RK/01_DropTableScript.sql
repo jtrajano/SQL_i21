@@ -431,4 +431,12 @@ BEGIN
 	
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKTempDPRDetailLog]') AND type IN (N'U'))
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKTempDPRDetailLog' AND COLUMN_NAME = 'intTransactionReferenceDetailId')
+	BEGIN
+		EXEC('ALTER TABLE tblRKTempDPRDetailLog ADD intTransactionReferenceDetailId INT')
+	END
+END
+
 GO

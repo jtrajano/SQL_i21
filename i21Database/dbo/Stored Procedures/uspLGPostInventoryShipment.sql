@@ -1027,7 +1027,10 @@ BEGIN
 		,[intStorageLocationId] = NULL
 		,[intItemUOMId] = ISNULL(LOUM.intItemUOMId, LD.intItemUOMId)
 		,[intWeightUOMId] = ISNULL(LWOUM.intItemUOMId, LD.intWeightItemUOMId)
-		,[dblQty] = ISNULL(LDL.dblLotQuantity, LD.dblQuantity) * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
+		,[dblQty] = ISNULL(
+						dbo.fnCalculateQtyBetweenUOM(LDL.intItemUOMId, ISNULL(LOUM.intItemUOMId, LD.intItemUOMId), LDL.dblLotQuantity)
+						,LD.dblQuantity)
+					* CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
 		,[dblUOMQty] = ISNULL(LOUM.dblUnitQty, IU.dblUnitQty)
 		,[dblSalesPrice] = ISNULL(CD.dblCashPrice, 0)
 		,[intDockDoorId] = NULL
