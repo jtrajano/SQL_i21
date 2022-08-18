@@ -13,7 +13,8 @@ RETURNS @CTCashFlowTransactions TABLE(
 	intBankAccountId INT null,
 	intGLAccountId INT null,
 	intCompanyLocationId INT,
-	ysnCost BIT default 0
+	ysnCost BIT default 0,
+	intBankId  INT null
 )
 AS 
 BEGIN 
@@ -32,6 +33,7 @@ BEGIN
 		,intGLAccountId
 		,intCompanyLocationId
 		,ysnCost
+		,intBankId
 	)
 	select
 		intTransactionId  = cd.intContractDetailId
@@ -44,6 +46,7 @@ BEGIN
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId
 		,ysnCost = 0
+		,cd.intBankId
 	from
 		tblCTContractDetail cd
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -73,6 +76,7 @@ BEGIN
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId
 		,ysnCost = 0
+		,cd.intBankId
 	from
 		tblCTContractDetail cd
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -119,6 +123,7 @@ BEGIN
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId
 		,ysnCost = 1
+		,cd.intBankId
 	from
 		tblCTContractDetail cd
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
