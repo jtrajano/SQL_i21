@@ -193,7 +193,7 @@ BEGIN TRY
 		,ysnSubCurrency = CU.ysnSubCurrency
 		,intSubCurrencyCents = CU.intCent
 	FROM tblLGWeightClaim WC
-	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+	JOIN tblLGWeightClaimDetail WCD2 ON WC.intWeightClaimId = WCD2.intWeightClaimId
 	JOIN tblLGWeightClaimOtherCharges WCOC ON WCOC.intWeightClaimId = WC.intWeightClaimId
 	JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
@@ -217,8 +217,8 @@ BEGIN TRY
 				WHERE WCD.intWeightClaimId = WC.intWeightClaimId
 					AND ISNULL(WCD.dblClaimAmount, 0) <> 0) WCD
 	WHERE WC.intWeightClaimId = @intWeightClaimId
-		AND ISNULL(WCD.ysnNoClaim, 0) = 0
-		AND ISNULL(WCD.dblClaimAmount, 0) > 0
+		AND ISNULL(WCD2.ysnNoClaim, 0) = 0
+		AND ISNULL(WCD2.dblClaimAmount, 0) > 0
 
 	SELECT @intVoucherType = CASE 
 							 WHEN WCD.dblWeightLoss < 0
