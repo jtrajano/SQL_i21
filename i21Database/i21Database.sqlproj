@@ -1090,6 +1090,9 @@
     <Build Include="dbo\Stored Procedures\uspHDGenerateTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelReport.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemLotArchive.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemLotError.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemLotStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
