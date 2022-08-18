@@ -18,6 +18,7 @@ AS
 			@intInventoryReceiptId	INT,
 			@ysnRequireProducerQty	BIT,
 			@ysnLoad				BIT,
+			@ysnEnableBudgetForBasisPricing	BIT,
 
 			@ReceiptStagingTable		ReceiptStagingTable,
 			@OtherCharges				ReceiptOtherChargesTableType,
@@ -25,6 +26,7 @@ AS
 			@ReceiptTradeFinance		ReceiptTradeFinance
 	
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
+	SELECT TOP 1 @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
 
 	SELECT	@ysnLoad	=	ISNULL(CH.ysnLoad, 0) 
 	FROM	tblCTContractDetail CD 
@@ -107,7 +109,7 @@ AS
 				--CT-7100 (ECOM commented this line for ECOM) --								END,
 				--CT-7100 (ECOM commented this line for ECOM) --intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
-														THEN	((ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
+														THEN	((CASE WHEN @ysnEnableBudgetForBasisPricing = 0 THEN ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) ELSE CD.dblBudgetPrice END + 
 																ISNULL(CD.dblBasis,0))  / CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = CAST(1 AS BIT)   THEN 100 ELSE 1 END) * ISNULL(CD.dblRate, 1 )
 														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
