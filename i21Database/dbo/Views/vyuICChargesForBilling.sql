@@ -107,6 +107,7 @@ SELECT
 	, [strComments]						= Receipt.strComments
 	, [strTaxPoint]						= Receipt.strTaxPoint
 	, [intTaxLocationId]				= Receipt.intTaxLocationId
+	, [ysnOverrideTaxGroup]				= CAST(0 AS BIT) 
 
 FROM 
 	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
@@ -309,7 +310,7 @@ SELECT
 	, [strComments]						= Receipt.strComments
 	, [strTaxPoint]						= Receipt.strTaxPoint
 	, [intTaxLocationId]				= Receipt.intTaxLocationId
-
+	, [ysnOverrideTaxGroup]				= CAST(0 AS BIT) 
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 

@@ -157,6 +157,7 @@ BEGIN
 			, [strComments]
 			, [strTaxPoint]
 			, [intTaxLocationId]
+			, [ysnOverrideTaxGroup]
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -235,6 +236,7 @@ BEGIN
 		, [strComments]
 		, [strTaxPoint]
 		, [intTaxLocationId]
+		, [ysnOverrideTaxGroup]
 	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1, @strType) GP
 
 	END 
