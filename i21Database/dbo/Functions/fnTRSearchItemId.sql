@@ -26,19 +26,37 @@ BEGIN
 		SET @Item = NULL
 	END
 
-	SELECT TOP 1 @Id = D.intSupplyPointProductSearchHeaderId 
-	FROM tblTRSupplyPointProductSearchDetail D
-	INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId 
-	INNER JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = H.intSupplyPointId
-	INNER JOIN tblEMEntity E ON E.intEntityId = SP.intEntityVendorId
-	INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId
-	WHERE D.intSupplyPointProductSearchHeaderId IN ( 
-		SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @SupplierName)
-	AND D.intSupplyPointProductSearchHeaderId IN ( 
-		SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @SupplyPoint)
-	AND D.intSupplyPointProductSearchHeaderId IN ( 
-		SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @Item)
-	ORDER BY H.intSupplyPointProductSearchHeaderId ASC
+	IF (@SupplierName IS NULL)
+	BEGIN
+		SELECT TOP 1 @Id = D.intSupplyPointProductSearchHeaderId 
+		FROM tblTRSupplyPointProductSearchDetail D
+		INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId 
+		INNER JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = H.intSupplyPointId
+		INNER JOIN tblEMEntity E ON E.intEntityId = SP.intEntityVendorId
+		INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId
+		WHERE D.intSupplyPointProductSearchHeaderId IN ( 
+			SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @SupplyPoint)
+		AND D.intSupplyPointProductSearchHeaderId IN ( 
+			SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @Item)
+		ORDER BY H.intSupplyPointProductSearchHeaderId ASC
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 @Id = D.intSupplyPointProductSearchHeaderId 
+		FROM tblTRSupplyPointProductSearchDetail D
+		INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId 
+		INNER JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = H.intSupplyPointId
+		INNER JOIN tblEMEntity E ON E.intEntityId = SP.intEntityVendorId
+		INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId
+		WHERE D.intSupplyPointProductSearchHeaderId IN ( 
+			SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @SupplierName)
+		AND D.intSupplyPointProductSearchHeaderId IN ( 
+			SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @SupplyPoint)
+		AND D.intSupplyPointProductSearchHeaderId IN ( 
+			SELECT intSupplyPointProductSearchHeaderId FROM tblTRSupplyPointProductSearchDetail SD WHERE SD.strSearchValue = @Item)
+		ORDER BY H.intSupplyPointProductSearchHeaderId ASC
+	END
+	
 	-- INNER JOIN (
 	-- 	SELECT H.intSupplyPointProductSearchHeaderId,  Condition = COUNT(H.intSupplyPointProductSearchHeaderId) FROM tblTRSupplyPointProductSearchDetail D
 	-- 	INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId  
