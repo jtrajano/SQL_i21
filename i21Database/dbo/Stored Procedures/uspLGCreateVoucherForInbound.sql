@@ -290,7 +290,7 @@ BEGIN TRY
 										THEN ISNULL(FX.dblFXRate, 1)
 										ELSE ISNULL(LD.dblForexRate,1) END
 									END
-			,[ysnSubCurrency] =	CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN 1 ELSE 0 END
+			,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 			,[intSubCurrencyCents] = SC.intCent
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
