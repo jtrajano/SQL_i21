@@ -1,6 +1,20 @@
 ﻿GO
 	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Accounts Payable'
 GO
+	DECLARE @intAccountTemplateId int
+	DECLARE @tblTemp TABLE ( intId INT )
+	INSERT INTO @tblTemp (intId ) SELECT intAccountTemplateId FROM  tblGLCOATemplate WHERE  strType = N'Primary'
+
+	WHILE EXISTS ( SELECT 1 FROM @tblTemp )
+	BEGIN
+		SELECT TOP 1 @intAccountTemplateId = intId FROM @tblTemp
+		IF @intAccountTemplateId IS NOT NULL
+			IF NOT EXISTS(SELECT 1 FROM tblGLCOATemplateDetail WHERE @intAccountTemplateId = intAccountTemplateId)
+				DELETE FROM tblGLCOATemplate WHERE intAccountTemplateId =@intAccountTemplateId
+
+		DELETE FROM @tblTemp WHERE intId = @intAccountTemplateId
+	END
+GO
 
 	DELETE FROM tblGLCOATemplateDetail where strDescription in ('Beginning Inventory', 'Ending Inventory')
 
