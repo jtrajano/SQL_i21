@@ -1088,6 +1088,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntityEFTInformation.sql" />
     <Build Include="dbo\Tables\tblHDTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTimeEntryPeriodDetailDay.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
