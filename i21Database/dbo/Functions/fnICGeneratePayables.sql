@@ -119,6 +119,7 @@ RETURNS @table TABLE
 
 , [strTaxPoint]						NVARCHAR(50) NULL
 , [intTaxLocationId]				INT NULL 
+, [ysnOverrideTaxGroup]				BIT NULL 
 )
 AS
 BEGIN
@@ -385,7 +386,7 @@ SELECT DISTINCT
 	, [strComments]						= A.strComments
 	, [strTaxPoint]						= A.strTaxPoint
 	, [intTaxLocationId]				= A.intTaxLocationId
-
+	, [ysnOverrideTaxGroup]				= B.ysnOverrideTaxGroup
 
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -856,6 +857,7 @@ SELECT DISTINCT
 		, [strComments]						= A.[strComments]
 		, [strTaxPoint]						= A.strTaxPoint
 		, [intTaxLocationId]				= A.intTaxLocationId
+		, [ysnOverrideTaxGroup]				= A.ysnOverrideTaxGroup
 FROM 
 	[vyuICChargesForBilling] A
 	INNER JOIN (
