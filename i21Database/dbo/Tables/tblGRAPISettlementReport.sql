@@ -73,7 +73,7 @@
 	,dblPartialPrepaymentSubTotal		DECIMAL(24,10)
 	,dblPartialPrepayment				DECIMAL(24,10)
 	,lblPartialPrepayment			    NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	,blbHeaderLogo						VARBINARY(max)
+	-- ,blbHeaderLogo						VARBINARY(max)
 	,intEntityId						INT
 	,strDeliveryDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strDeliverySheetNumber				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
