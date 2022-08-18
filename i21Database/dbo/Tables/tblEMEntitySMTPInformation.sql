@@ -8,7 +8,7 @@
 	[strSMTPPort]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 		
 	[strSMTPEncryption]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 		
 	[strUserName]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 		
-	[strPassword]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 		
+	[strPassword]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 		
 	[ysnUseProfileNameAndEmail]		BIT DEFAULT(1),
 	[ysnUseGlobalSMTPServer]		BIT DEFAULT(1),
 	[ysnRequiresAuthentication]		BIT DEFAULT(1),
