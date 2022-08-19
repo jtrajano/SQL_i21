@@ -863,6 +863,10 @@ BEGIN
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE
 		GLDetail.strCode IN ('IC', 'ICA', 'IAN', 'IAV', 'ICA')
+		AND (
+			GLDetail.strJournalLineDescription = '' 
+			OR GLDetail.strJournalLineDescription IS NULL
+		)
 
 END 
 
@@ -2584,6 +2588,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 					)			
@@ -3883,6 +3888,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 					)
@@ -4246,6 +4252,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 					)
@@ -4747,6 +4754,7 @@ BEGIN
 								,[dblCreditReport]	
 								,[dblReportingRate]	
 								,[dblForeignRate]
+								,[strRateType]
 								,[intSourceEntityId]
 								,[intCommodityId]
 						)
@@ -5378,6 +5386,7 @@ BEGIN
 							,[dblCreditReport]
 							,[dblReportingRate]
 							,[dblForeignRate]
+							,[strRateType]
 							,[intSourceEntityId]
 							,[intCommodityId]
 						)
@@ -5628,6 +5637,65 @@ BEGIN
 						@GLEntries gd
 					WHERE
 						gd.strBatchId = @strMissingLotBatchId		
+				END
+
+				-------------------------------------------------------
+				-- Fix the decimal discrepancy in Inventory Receipt
+				-------------------------------------------------------
+				BEGIN 
+					SET @intReturnValue = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+							,[intSourceEntityId]
+							,[intCommodityId]
+					)			
+					EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+						@strTransactionId 
+						,@strBatchId
+						,@GLEntries	
+						,@intEntityUserSecurityId
+						,NULL -- @strGLDescription
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
+						,@ysnRebuild = 1 
+
+					IF @intReturnValue <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy'
+						GOTO _EXIT_WITH_ERROR
+					END
 				END
 			END
 
@@ -5887,6 +5955,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -5932,49 +6001,55 @@ BEGIN
 						,[intSourceTransactionDetailId]
 						,[intFobPointId]
 						,[intInTransitSourceLocationId]
-						,[intSourceEntityId] 
-						,[strSourceType] 
-						,[strSourceNumber] 
-						,[strBOLNumber] 
-						,[intTicketId] 
+						,[intForexRateTypeId]
+						,[dblForexRate]
+						,[intSourceEntityId]
+						,[strBOLNumber]
+						,[intTicketId]
+						,[strSourceType]
+						,[strSourceNumber]
 					)
 					SELECT 	
-							[intItemId] = t.intItemId
-							,[intItemLocationId] = t.intItemLocationId
-							,[intItemUOMId] = t.intItemUOMId
-							,[dtmDate] = t.dtmDate
-							,[dblQty] = t.dblQty
-							,[dblUOMQty] = t.dblUOMQty
-							,[dblCost] = t.dblCost
-							,[dblValue] = t.dblValue
-							,[dblSalesPrice] = t.dblSalesPrice
-							,[intCurrencyId] = t.intCurrencyId
-							,[dblExchangeRate] = t.dblExchangeRate
-							,[intTransactionId] = t.intTransactionId
-							,[intTransactionDetailId] = t.intTransactionDetailId
-							,[strTransactionId] = t.strTransactionId
-							,[intTransactionTypeId] = t.intTransactionTypeId
-							,[intLotId] = t.intLotId
-							,[intSourceTransactionId] = t.intTransactionId
-							,[strSourceTransactionId] = t.strTransactionId
-							,[intSourceTransactionDetailId] = t.intTransactionDetailId
-							,[intFobPointId] = t.intFobPointId
-							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-							,[intSourceEntityId] = t.intSourceEntityId
-							,[strSourceType] = t.strSourceType
-							,[strSourceNumber] = t.strSourceNumber
-							,[strBOLNumber] = t.strBOLNumber
-							,[intTicketId] = t.intTicketId
-					FROM	#tmpICInventoryTransaction t INNER JOIN tblICItem i 
-								ON i.intItemId = t.intItemId 
-							INNER JOIN #tmpRebuildList list
-								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
-								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 								
-							LEFT JOIN dbo.tblICItemUOM ItemUOM
-								ON t.intItemId = ItemUOM.intItemId
-								AND t.intItemUOMId = ItemUOM.intItemUOMId
-					WHERE	t.strTransactionId = @strTransactionId
-							AND t.strBatchId = @strBatchId
+						[intItemId] = t.intItemId
+						,[intItemLocationId] = t.intItemLocationId
+						,[intItemUOMId] = t.intItemUOMId
+						,[dtmDate] = t.dtmDate
+						,[dblQty] = t.dblQty
+						,[dblUOMQty] = t.dblUOMQty
+						,[dblCost] = t.dblCost
+						,[dblValue] = t.dblValue
+						,[dblSalesPrice] = t.dblSalesPrice
+						,[intCurrencyId] = t.intCurrencyId
+						,[dblExchangeRate] = t.dblExchangeRate
+						,[intTransactionId] = t.intTransactionId
+						,[intTransactionDetailId] = t.intTransactionDetailId
+						,[strTransactionId] = t.strTransactionId
+						,[intTransactionTypeId] = t.intTransactionTypeId
+						,[intLotId] = t.intLotId
+						,[intSourceTransactionId] = t.intTransactionId
+						,[strSourceTransactionId] = t.strTransactionId
+						,[intSourceTransactionDetailId] = t.intTransactionDetailId
+						,[intFobPointId] = t.intFobPointId
+						,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+						,[intForexRateTypeId] = t.intForexRateTypeId
+						,[dblForexRate] = t.dblForexRate
+						,[intSourceEntityId] = t.intSourceEntityId
+						,[strBOLNumber] = t.strBOLNumber
+						,[intTicketId] = t.intTicketId
+						,[strSourceType] = t.strSourceType
+						,[strSourceNumber] = t.strSourceNumber
+					FROM	
+						#tmpICInventoryTransaction t INNER JOIN tblICItem i 
+							ON i.intItemId = t.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 								
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON t.intItemId = ItemUOM.intItemId
+							AND t.intItemUOMId = ItemUOM.intItemUOMId
+					WHERE	
+						t.strTransactionId = @strTransactionId
+						AND t.strBatchId = @strBatchId
 
 					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
