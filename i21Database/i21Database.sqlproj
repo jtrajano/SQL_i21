@@ -968,7 +968,6 @@
     <Build Include="dbo\Tables\tblSTSubCategories.sql" />
     <Build Include="dbo\Functions\fnAPGetAccountBudgetWarning.sql" />
     <Build Include="dbo\Functions\fnCMGetDetailsOfCharges.sql" />
-    <Build Include="dbo\Functions\fnCMGetFEINByCompanyLocation.sql" />
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
     <Build Include="dbo\Functions\fnGetIncrementalAmount.sql" />
