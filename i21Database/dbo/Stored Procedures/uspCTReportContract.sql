@@ -306,7 +306,7 @@ BEGIN TRY
 
 	SELECT	@strPrimeCustomerCondition = STUFF(								
 			(
-					SELECT	CHAR(13) + CHAR(10) + DM.strConditionName + ' ' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription) + CHAR(13) + CHAR(10)
+					SELECT	CHAR(13) + CHAR(10) + DM.strConditionName + ' ' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription)
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
