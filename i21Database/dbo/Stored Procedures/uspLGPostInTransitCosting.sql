@@ -286,6 +286,7 @@ SET ANSI_WARNINGS ON
 			,[dblCreditReport]
 			,[dblReportingRate]
 			,[dblForeignRate]
+			,[strRateType]
 			,[intSourceEntityId]
 			,[intCommodityId]
 			)

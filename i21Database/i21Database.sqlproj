@@ -1028,6 +1028,7 @@
     <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords2.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentIntegrations.sql" />
+    <None Include="Scripts\Post-Deployment\IC\32_InventoryJournalLineDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
