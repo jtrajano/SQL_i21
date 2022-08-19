@@ -216,6 +216,7 @@ BEGIN TRY
 			)p on p.intContractDetailId = cd.intContractDetailId
 			where cd.intContractDetailId = @intContractDetailId
 			and isnull(p.dblPricedQuantity,0) < cd.dblQuantity
+			and isnull(p.dblPricedQuantity,0) > 0
 		end
 
 		SELECT	@intPricingTypeId	=	NULL,
