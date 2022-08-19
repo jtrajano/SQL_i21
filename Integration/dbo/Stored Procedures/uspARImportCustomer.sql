@@ -1689,7 +1689,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				, ysnDefaultLocation	= 0
 				, strOriginLinkCustomer	= LTRIM(RTRIM(ptcus_cus_no))								
 			FROM ptcusmst O
-			INNER JOIN #CUSTOMERS C ON O.ptcus_cus_no COLLATE Latin1_General_CI_AS = C.strCustomerNumber COLLATE Latin1_General_CI_AS
+			INNER JOIN #CUSTOMERS C ON O.ptcus_bill_to COLLATE Latin1_General_CI_AS = C.strCustomerNumber COLLATE Latin1_General_CI_AS
 			WHERE ptcus_cus_no <> ptcus_bill_to 
 
 			--INSERT BILL TO ADDRESS LOCATIONS (ptadrmst)
@@ -1861,10 +1861,12 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		IF(@Update = 1 AND @CustomerId IS NULL)
 		BEGIN
 			SELECT @Total = COUNT(ptcus_cus_no)
-				FROM ptcusmst
+			FROM ptcusmst
 			LEFT JOIN tblARCustomer
-				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
-			WHERE tblARCustomer.strCustomerNumber IS NULL and  ptcus_co_per_ind_cp is not null
+			ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
+			WHERE tblARCustomer.strCustomerNumber IS NULL 
+			  AND ptcus_co_per_ind_cp IS NOT NULL
+			  AND ptcus_cus_no = ptcus_bill_to
 		END
 	END
 	'
