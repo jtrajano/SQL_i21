@@ -5,7 +5,7 @@ BEGIN
 
 	DECLARE @strJiraKeys nvarchar(max);
 	SELECT
-		@strJiraKeys = (case when @ysnDisplay = convert(bit,1) then COALESCE(@strJiraKeys + ',<br>', '') + '<a target="_blank" title="Click to go to ' + Ticket.strKey + '." href="http://jira.irelyserver.com/browse/' + Ticket.strKey + '">' + Ticket.strKey + '</a>' else COALESCE(@strJiraKeys + ',', '') + Ticket.strKey end)
+		@strJiraKeys = (case when @ysnDisplay = convert(bit,1) then COALESCE(@strJiraKeys + ',<br>', '') + '<a target="_blank" title="Click to go to ' + Ticket.strKey + '." href="http://jira.irelyserver.com/browse/' + Ticket.strKey + '">' + Ticket.strKey + '</a>' else COALESCE(@strJiraKeys + ',', '') + Ticket.strKey end) COLLATE Latin1_General_CI_AS
 	FROM
 		( 
 			SELECT strKey = CASE WHEN ISNULL(strJiraKey, '') <> '' AND strKey != strJiraKey  
@@ -17,6 +17,8 @@ BEGIN
 				  AND tblHDTicketJIRAIssue.intTicketId = @intTicketId
 		) Ticket
 
-	RETURN @strJiraKeys
+	RETURN @strJiraKeys COLLATE Latin1_General_CI_AS
 
 END
+
+GO
