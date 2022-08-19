@@ -306,7 +306,7 @@ BEGIN TRY
 
 	SELECT	@strPrimeCustomerCondition = STUFF(								
 			(
-					SELECT	CHAR(13)+CHAR(10) + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription)
+					SELECT	CHAR(13) + CHAR(10) + DM.strConditionName + ' ' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription) + CHAR(13) + CHAR(10)
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
@@ -828,8 +828,7 @@ BEGIN TRY
 		    ,strStraussShipmentLabel      = (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end) 
 			,intContractTypeId						=	CH.intContractTypeId
 			,ysnPrimeCustomer = ISNULL(CH.ysnPrimeCustomer, 0)
-			,lblPrimeCustomer = 'Prime Customer - ' + ICA.strDescription
-			,strPrimeCustomerCondition = @strPrimeCustomerCondition 
+			,strPrimeCustomerCondition = CASE WHEN ISNULL(CH.ysnPrimeCustomer, 0) = 1 THEN @strPrimeCustomerCondition END
 
 	FROM	tblCTContractHeader				CH
 	JOIN	tblICCommodity					CM	WITH (NOLOCK) ON	CM.intCommodityId				=	CH.intCommodityId
