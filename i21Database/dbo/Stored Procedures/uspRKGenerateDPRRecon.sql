@@ -344,7 +344,7 @@ BEGIN TRY
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+/- Purchase Load Variance'
-		,strAction
+		,strAction = CASE WHEN SL.strInOut = 'IN' THEN 'Distributed' ELSE 'Undistributed' END
 		,strPricingType = NULL
 		,T.strTicketNumber
 		,T.strLoadNumber
@@ -699,7 +699,7 @@ BEGIN TRY
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+/- Sales Load Variance'
-		,strAction
+		,strAction = CASE WHEN SL.strInOut = 'IN' THEN 'Distributed' ELSE 'Undistributed' END
 		,strPricingType = NULL
 		,T.strTicketNumber
 		,T.strLoadNumber

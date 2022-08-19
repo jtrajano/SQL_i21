@@ -97,6 +97,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 :r .\SM\2010_UpdateLicenseAgreement.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2010_EncryptPasswords.sql
 
 
 -- Canned Report
