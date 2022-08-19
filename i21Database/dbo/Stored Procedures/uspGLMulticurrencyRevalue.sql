@@ -473,7 +473,7 @@ ELSE
 	A.strNewForexRateType,
 	CL.* 
 	FROM @tblMulti A 
-	JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
+	LEFT JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
 	LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
 	OUTER APPLY(
 		SELECT	
