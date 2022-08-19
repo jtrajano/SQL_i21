@@ -288,6 +288,7 @@ AS
 			,[dtmServiceChargeDate]
 			,[dblTotalAmount]
 			,[intCurrencyId]
+			,[intCompanyLocationId]
 		)
 		SELECT 
 			 @batchId
@@ -296,6 +297,7 @@ AS
 			,@dtmServiceChargeDate
 			,@dblInvoiceTotal
 			,@intCurrencyId
+			,@intCompanyLocationId
 
 		--INSERT INTO RECAP DETAIL TABLE
 		SET @newRecapId = SCOPE_IDENTITY()

@@ -8,5 +8,6 @@
 	[dblTotalAmount]			NUMERIC(18,6)		NULL,
 	[intConcurrencyId]			INT DEFAULT ((0))	NOT NULL,
 	[intCurrencyId]				INT					NULL,
+	[intCompanyLocationId]		INT					NULL,
 	CONSTRAINT [PK_tblARServiceChargeRecap] PRIMARY KEY CLUSTERED ([intSCRecapId] ASC)
 )
