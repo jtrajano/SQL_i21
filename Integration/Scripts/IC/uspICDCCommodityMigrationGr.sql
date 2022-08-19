@@ -174,16 +174,16 @@ join gacdcmst od on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS 
 left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)+'GrainDiscount'  COLLATE SQL_Latin1_General_CP1_CS_AS
 where C.intCategoryId is null
 
-
+SET ANSI_WARNINGS ON
 ----====================================STEP 10======================================
 --convert discount codes as other charge items from discount code table. 
 
 insert into tblICItem 
 (strItemNo, strDescription, strShortName,strType, strInventoryTracking, strLotTracking, intCommodityId, intCategoryId, strStatus,
-intLifeTime, strCostType, strCostMethod,ysnAccrue)
+intLifeTime, strCostType, strCostMethod,ysnAccrue, ysnInventoryCost)
 select rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd), rtrim(gacdc_com_cd)+' '+rtrim(gacdc_desc), rtrim(oc.gacdc_cd) strShortName,'Other Charge' strInventoryType, 'Item Level' InventoryTracking, 'No' LotTracking,
 ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1 intLifeTime, 'Grain Discount' strCostType
-,'Per Unit' strCostMethod, 1 ysnAccrue
+,'Per Unit' strCostMethod, 1 ysnAccrue,0 ysnInventoryCost
 from gacdcmst oc 
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd)+'GrainDiscount' COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -300,4 +300,6 @@ UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
 SET ANSI_WARNINGS OFF
 
 GO
+
+
 
