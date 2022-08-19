@@ -276,11 +276,13 @@ BEGIN TRY
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
+	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Created Price'
 	AND CBL.intContractTypeId = 1 --Purchase
 	AND CBL.intPricingTypeId = 1
+	AND CH.intPricingTypeId = 2
 
 	--Deletion of price Fixation not yet catered
 	UNION ALL
@@ -631,11 +633,13 @@ BEGIN TRY
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
+	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Created Price'
 	AND CBL.intContractTypeId = 2 --Sales
 	AND CBL.intPricingTypeId = 1
+	AND CH.intPricingTypeId = 2
 
 	--Deletion of price Fixation not yet catered
 	UNION ALL
