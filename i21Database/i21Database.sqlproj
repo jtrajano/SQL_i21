@@ -9207,6 +9207,7 @@
     <Build Include="dbo\Views\vyuCTSequenceHistoryForDPR.sql" />
     <Build Include="dbo\Functions\fnCTGetContractDPRRecon.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_EncryptPasswords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
