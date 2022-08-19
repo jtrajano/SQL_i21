@@ -246,6 +246,7 @@ BEGIN		 --Call the post routine
 		,[dblCreditReport]
 		,[dblReportingRate]
 		,[dblForeignRate]
+		,[strRateType]
 		,[intSourceEntityId]
 		,[intCommodityId]
 	)
