@@ -18,7 +18,8 @@
 	@dtmEndDate				DATETIME = NULL,
 	@intBorrowingFacilityId INT = NULL,
 	@intBorrowingFacilityLimitId INT = NULL,
-	@strFutureMonth			NVARCHAR(50) = ''
+	@strFutureMonth			NVARCHAR(50) = '',
+	@intFreightTermId INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -301,6 +302,36 @@ BEGIN
 			JOIN tblCMBorrowingFacility BF on BF.intBorrowingFacilityId = BFL.intBorrowingFacilityId
 			LEFT JOIN tblCMBankValuationRule VR on VR.intBankValuationRuleId = BFLD.intBankValuationRuleId
 			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFLD.ysnDefault = 1
+	END
+
+	IF @strType = 'Tax'
+	BEGIN
+		Declare @strFobPoint varchar(30)
+		Declare @intTaxLocationId INT
+		Declare @strTaxLocation Varchar(100)
+		Declare @intTaxGroupId INT
+		Declare @strTaxGroupId varchar(100)
+
+		SELECT TOP 1 @strFobPoint = strFobPoint FROM tblSMFreightTerms where intFreightTermId = @intFreightTermId
+
+		SELECT TOP 1 @intTaxLocationId = intTaxLocationId
+					,@strTaxLocation = strTaxLocation
+					,@intTaxGroupId = ISNULL(TL.intTaxGroupId,0)
+					,@strTaxGroupId = ISNULL(TG.strTaxGroup, '')
+		FROM [vyuCTTaxLocation] TL
+		LEFT JOIN tblSMTaxGroup TG on TG.intTaxGroupId = TL.intTaxGroupId
+		WHERE intEntityId = @intEntityId and  strTaxPoint = @strFobPoint
+
+		
+		
+
+		SELECT @strFobPoint strFobPoint
+				, @strTaxLocation strTaxLocation
+				, @intTaxLocationId intTaxLocationId
+				, @strTaxGroupId strTaxGroupId
+				, @intTaxGroupId intTaxGroupId
+
+			
 	END
 
 END
