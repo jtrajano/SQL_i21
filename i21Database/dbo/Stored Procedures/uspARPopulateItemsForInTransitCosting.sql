@@ -247,9 +247,9 @@ SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
-	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	--,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
-	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] * ICIT.[dblUOMQty] AS NUMERIC(18, 10))
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])	
+	--,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] * ICIT.[dblUOMQty] AS NUMERIC(18, 10))
+	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(CAST(ICIT.[dblQty] AS NUMERIC(18, 10)) * CAST(ICIT.[dblUOMQty] AS NUMERIC(18, 10)) AS NUMERIC(18, 10))
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
