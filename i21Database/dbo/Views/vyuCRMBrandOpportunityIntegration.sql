@@ -1,9 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuCRMBrandOpportunityIntegration]
 AS
-SELECT  [Owner]						 = Customer.strName
+SELECT  [Owner]						 = ISNULL(SalesPerson.strName, '')
 	   ,MarketerOpportunityID		 = CONVERT(nvarchar(100), NEWID())
 	   ,MarketerOwnerID				 = CONVERT(nvarchar(100), NEWID())
-	   ,MarketerOwnerName			 = Customer.strName
+	   ,MarketerOwnerName			 = ISNULL(SalesPerson.strName, '')
 	   ,MarketerAccountID			 = CONVERT(nvarchar(100), NEWID())
 	   ,Company						 = Customer.strName
 	   ,MarketerContactID			 = ''
@@ -51,6 +51,8 @@ ON Customer.intEntityId = Opportunity.intCustomerId
 		LEFT JOIN tblEMEntityLocation CustomerLocation
 ON CustomerLocation.intEntityId = Customer.intEntityId AND
    CustomerLocation.ysnDefaultLocation = 1
+		LEFT JOIN tblEMEntity SalesPerson 
+ON SalesPerson.intEntityId = Opportunity.intInternalSalesPerson
 		LEFT JOIN tblCRMIndustrySegment IndustrySegment
 ON IndustrySegment.intIndustrySegmentId = Opportunity.intIndustrySegmentId
 		LEFT JOIN tblCRMSalesPipeStatus SalesPipeStatus
@@ -58,5 +60,6 @@ ON SalesPipeStatus.intSalesPipeStatusId = Opportunity.intSalesPipeStatusId
 		LEFT JOIN tblCRMOpportunityType OpportunityType
 ON OpportunityType.intOpportunityTypeId = Opportunity.intOpportunityTypeId
 WHERE Opportunity.intBrandMaintenanceId IS NOT NULL
+
 
 GO
