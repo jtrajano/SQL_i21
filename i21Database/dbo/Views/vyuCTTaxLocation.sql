@@ -5,6 +5,7 @@ AS
 			, 'Origin' strTaxPoint
 			, strLocationName strTaxLocation
 			, intEntityId 
+			, intTaxGroupId
 	FROM tblEMEntityLocation
 
 	UNION ALL
@@ -14,6 +15,7 @@ AS
 			, 'Destination' strTaxPoint
 			, strLocationName strTaxLocation
 			, 0 intEntityId 
+			, intTaxGroupId
 	FROM tblSMCompanyLocation
 
 	UNION ALL
@@ -23,6 +25,7 @@ AS
 			, 'Origin' strTaxPoint
 			, strLocationName strTaxLocation
 			, 0 intEntityId 
+			, intTaxGroupId
 	FROM tblSMCompanyLocation
 
 	UNION ALL
@@ -32,6 +35,7 @@ AS
 			, 'Destination' strTaxPoint
 			, strLocationName strTaxLocation
 			, intEntityId 
+			, intTaxGroupId
 	FROM tblEMEntityLocation
 GO
 
