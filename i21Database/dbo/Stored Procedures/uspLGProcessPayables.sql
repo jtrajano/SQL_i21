@@ -141,7 +141,7 @@ BEGIN
 			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 			,[dblOptionalityPremium] = ISNULL(LD.dblOptionalityPremium, 0)
 			,[dblQualityPremium] = ISNULL(LD.dblQualityPremium, 0)
-			,[intPurchaseTaxGroupId] = @intTaxGroupId
+			,[intPurchaseTaxGroupId] = CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
 			,[intPayFromBankAccountId] = BA.intBankAccountId
 			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
 			,[strFinancingTransactionNumber] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN L.strLoadNumber ELSE '' END
@@ -296,7 +296,7 @@ BEGIN
 			)
 			SELECT 
 				[intVoucherPayableId]			= payables.intVoucherPayableId
-				,[intTaxGroupId]				= @intTaxGroupId
+				,[intTaxGroupId]				= CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
 				,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
 				,[intTaxClassId]				= vendorTax.[intTaxClassId]
 				,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]
