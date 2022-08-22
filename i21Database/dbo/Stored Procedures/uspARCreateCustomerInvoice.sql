@@ -163,6 +163,9 @@
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
+	,@DefaultPayToBankAccountId				INT				= NULL
+	,@PayToCashBankAccountId				INT				= NULL
+	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
 AS
 
 BEGIN
@@ -551,6 +554,7 @@ BEGIN TRY
 		,[intTaxLocationId]
 		,[strTaxPoint]
 		,[strPaymentInstructions]
+		,[intPayToCashBankAccountId]
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -648,11 +652,12 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
 		,[strSourcedFrom]					= @SourcedFrom
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
-		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
+		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
+		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
 	FROM tblARCustomer C
 	LEFT OUTER JOIN [tblEMEntityLocation] EL ON C.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
 	LEFT OUTER JOIN [tblEMEntityLocation] SL ON ISNULL(@ShipToLocationId, 0) <> 0 AND @ShipToLocationId = SL.intEntityLocationId
