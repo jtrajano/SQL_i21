@@ -60,11 +60,6 @@ BEGIN
 					SELECT
 					@InvoiceDetailId = ID.intInvoiceDetailId, @intContractDetailId = ID.intContractDetailId
 					FROM tblARInvoiceDetail ID INNER JOIN tblICItem I ON I.intItemId = ID.intItemId AND I.strType = 'Other Charge' WHERE ID.intInvoiceId=@intInvoiceId
-	
-				     IF  ISNULL(@InvoiceDetailId,0) <> 0 AND  ISNULL(@intContractDetailId,0) <> 0 
-					 BEGIN
-					 EXEC [dbo].[uspARAddDiscountsCharges] @intContractDetailId=@intContractDetailId,@intInventoryShipmentId=@intInventoryShipmentId,@UserId=@intUserId,@intInvoiceDetailId=@InvoiceDetailId
-					 END
 
 					IF(ISNULL(@intInvoiceId,0) <> 0 AND @ysnDWG = 1)
 					BEGIN

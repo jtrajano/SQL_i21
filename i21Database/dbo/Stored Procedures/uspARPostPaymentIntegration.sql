@@ -109,7 +109,15 @@ BEGIN
     FROM tblARPayment A
     INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
     INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
-    INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId				
+    INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
+
+    UPDATE C
+    SET C.ysnPaidCPP = 0
+    FROM tblARPayment A
+    INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
+    INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
+    INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
+    WHERE C.strTransactionType = 'Customer Prepayment'
 
     UPDATE tblARPaymentDetail
     SET dblAmountDue     = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) - ISNULL(A.dblWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblPayment)
@@ -189,9 +197,6 @@ BEGIN
 		 WHERE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmEndDate) + 1, 0)) = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, A.dtmDatePaid) + 1, 0))
 	 ) ACCPERIOD
   	WHERE P.[ysnPost] = @OneBit
-
-
-
 
 	-- Delete Invoice with Zero Payment
     DELETE FROM tblARPaymentDetail
@@ -273,7 +278,7 @@ BEGIN
 
 	--Paid if prepayment
 	UPDATE C
-    SET C.ysnPaidCPP = 1
+    SET C.ysnPaidCPP = (CASE WHEN (C.dblAmountDue) = @ZeroDecimal THEN 1 ELSE 0 END)
     FROM #ARPostPaymentDetail B
     INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
     WHERE C.strTransactionType = 'Customer Prepayment'	
@@ -305,6 +310,9 @@ BEGIN
 
     EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 1
 END
+
+-- UPDATE PAYMENT HEADER INVOICE
+EXEC dbo.uspARUpdatePaymentInvoiceField @PaymentIds, 0
 
 --UPDATE PAYMENT DETAIL AMOUNT DUE PAID FROM VOUCHER
 UPDATE ARPD
@@ -353,6 +361,48 @@ CROSS APPLY (
     ORDER BY P.dtmDatePaid DESC
 ) PAYMENT
 WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
+
+--UPDATE HIGHEST AR
+UPDATE CUSTOMER
+SET dblHighestAR		= CUSTOMER.dblARBalance
+  , dtmHighestARDate	= CAST(@PostDate AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+	SELECT DISTINCT intEntityCustomerId
+	FROM #ARPostPaymentHeader
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
+WHERE CUSTOMER.dblARBalance > ISNULL(CUSTOMER.dblHighestAR, 0)
+
+--UPDATE HIGHEST DUE AR
+UPDATE CUSTOMER
+SET dblHighestDueAR		= DUE.dblPastDue
+  , dtmHighestDueARDate	= CAST(@PostDate AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+    SELECT intEntityCustomerId	= I.intEntityCustomerId
+         , dblPastDue			= SUM(CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmPostDate) > 0
+                                        THEN 
+                                                CASE WHEN I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') 
+                                                    THEN I.dblAmountDue
+                                                    ELSE -I.dblAmountDue
+                                                END 
+                                        ELSE 0 
+                                    END) 
+    FROM tblARInvoice I
+    INNER JOIN (
+        SELECT DISTINCT intEntityCustomerId
+        FROM #ARPostPaymentHeader
+    ) PAYMENT ON I.intEntityCustomerId = PAYMENT.intEntityCustomerId
+    WHERE I.ysnPosted = 1
+      AND I.ysnForgiven = 0
+      AND I.ysnPaid = 0
+      AND I.dblAmountDue <> 0
+      AND I.strTransactionType <> 'Cash Refund'
+      AND I.dtmPostDate <= @PostDate
+    GROUP BY I.intEntityCustomerId
+) DUE ON CUSTOMER.intEntityId = DUE.intEntityCustomerId
+     AND DUE.dblPastDue > 0
+     AND DUE.dblPastDue > CUSTOMER.dblHighestDueAR
 
 --UPDATE CUSTOMER'S BUDGET
 EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @PaymentIds, @Post = @Post

@@ -2,7 +2,7 @@
 AS
 BEGIN TRY
 	SET NOCOUNT ON;
-	ALTER TABLE [dbo].[tblICItem] NOCHECK CONSTRAINT [CK_AllowItemTypeChange];
+
 	DECLARE @idoc INT
 		,@intTransactionCount INT
 		,@strErrorMessage NVARCHAR(MAX)
@@ -1311,7 +1311,7 @@ BEGIN TRY
 					UPDATE tblICItem
 					SET strItemNo = x.strItemNo
 						,strShortName = x.strShortName
-						,strType = x.strType
+						--,strType = x.strType
 						,strBundleType = x.strBundleType
 						,strDescription = x.strDescription
 						,intManufacturerId = @intManufacturerId
@@ -8275,11 +8275,11 @@ BEGIN TRY
 			FROM @tblICItemStage S
 			)
 		AND IsNULL(strFeedStatus, '') = 'In-Progress'
-		ALTER TABLE [dbo].[tblICItem] CHECK CONSTRAINT [CK_AllowItemTypeChange]
+
 END TRY
 
 BEGIN CATCH
-	ALTER TABLE [dbo].[tblICItem] CHECK CONSTRAINT [CK_AllowItemTypeChange]
+
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (

@@ -600,6 +600,14 @@ BEGIN TRY
 				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
 				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 			END
+			ELSE
+			BEGIN
+				UPDATE	CH
+				SET		CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			END
 		END
 		ELSE
 		BEGIN

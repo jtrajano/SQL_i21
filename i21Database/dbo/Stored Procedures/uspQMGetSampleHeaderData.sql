@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspQMGetSampleHeaderData @intProductTypeId INT
 	,@intProductValueId INT
+	,@intLotId INT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -225,8 +226,7 @@ BEGIN
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	JOIN tblICLot L ON L.intLotId = RIL.intLotId
-		AND L.strLotNumber = @strLotNumber
+	JOIN tblICLot L ON L.intLotId = RIL.intLotId AND L.intLotId = @intLotId
 	ORDER BY RI.intInventoryReceiptId DESC
 
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
@@ -320,20 +320,20 @@ BEGIN
 		,@intRepresentingUOMId = MAX(IU.intUnitMeasureId)
 		,@strRepresentingUOM = MAX(UOM.strUnitMeasure)
 	FROM tblICLot L
-	JOIN tblICItemUOM IU ON IU.intItemId = L.intItemId
-		AND IU.ysnStockUnit = 1
+	JOIN tblICItemUOM IU ON IU.intItemId = L.intItemId AND IU.ysnStockUnit = 1
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 	WHERE L.intParentLotId = @intProductValueId
 
 	-- Inventory Receipt / Work Order No
 	SELECT TOP 1 @intInventoryReceiptId = RI.intInventoryReceiptId
-		,@strReceiptNumber = R.strReceiptNumber
-		,@strContainerNumber = RIL.strContainerNo
+			   , @strReceiptNumber		= R.strReceiptNumber
+			   , @strContainerNumber	= RIL.strContainerNo
 	FROM tblICInventoryReceiptItemLot RIL
 	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	JOIN tblICLot L ON L.intLotId = RIL.intLotId
-		AND L.intParentLotId = @intProductValueId
+	JOIN tblICLot L ON L.intLotId = RIL.intLotId AND L.intParentLotId = @intProductValueId AND L.intLotId = (CASE WHEN ISNULL(@intLotId, 0) > 0 THEN @intLotId
+																						ELSE L.intLotId 
+																				   END)
 	ORDER BY RI.intInventoryReceiptId DESC
 
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
@@ -352,7 +352,7 @@ BEGIN
 		,PL.intLotStatusId
 		,LS.strSecondaryStatus AS strLotStatus
 		,PL.strParentLotNumber AS strLotNumber
-		,PL.intItemId
+		,I.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,CD.intItemBundleId
@@ -383,10 +383,11 @@ BEGIN
 		,C.strItemSpecification
 	FROM tblICParentLot PL
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = PL.intLotStatusId
-	JOIN tblICItem I ON I.intItemId = PL.intItemId
+	LEFT JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId AND L.intLotId = (CASE WHEN ISNULL(@intLotId, 0) > 0 THEN @intLotId
+																						ELSE L.intLotId 
+																				   END)
+	JOIN tblICItem I ON I.intItemId = L.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
-	LEFT JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
-		AND L.intParentLotId = @intProductValueId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId

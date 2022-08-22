@@ -490,6 +490,48 @@ CROSS APPLY (
 ) INVOICE
 WHERE ISNULL(CUSTOMER.[dblCreditLimit], @ZeroDecimal) > @ZeroDecimal
 
+--UPDATE HIGHEST AR
+UPDATE CUSTOMER
+SET dblHighestAR		= CUSTOMER.dblARBalance
+  , dtmHighestARDate	= CAST(GETDATE() AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+	SELECT DISTINCT intEntityCustomerId
+	FROM ##ARPostInvoiceHeader
+) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
+WHERE CUSTOMER.dblARBalance > ISNULL(CUSTOMER.dblHighestAR, 0)
+
+--UPDATE HIGHEST DUE AR
+UPDATE CUSTOMER
+SET dblHighestDueAR		= DUE.dblPastDue
+  , dtmHighestDueARDate	= CAST(GETDATE() AS DATE)
+FROM dbo.tblARCustomer CUSTOMER
+INNER JOIN (
+    SELECT intEntityCustomerId	= I.intEntityCustomerId
+         , dblPastDue			= SUM(CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmPostDate) > 0
+                                        THEN 
+                                                CASE WHEN I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') 
+                                                    THEN I.dblAmountDue
+                                                    ELSE -I.dblAmountDue
+                                                END 
+                                        ELSE 0 
+                                    END) 
+    FROM tblARInvoice I
+    INNER JOIN (
+        SELECT DISTINCT intEntityCustomerId
+        FROM ##ARPostInvoiceHeader
+    ) INVOICE ON I.intEntityCustomerId = INVOICE.intEntityCustomerId
+    WHERE I.ysnPosted = 1
+      AND I.ysnForgiven = 0
+      AND I.ysnPaid = 0
+      AND I.dblAmountDue <> 0
+      AND I.strTransactionType <> 'Cash Refund'
+      AND I.dtmPostDate <= GETDATE()
+    GROUP BY I.intEntityCustomerId
+) DUE ON CUSTOMER.intEntityId = DUE.intEntityCustomerId
+     AND DUE.dblPastDue > 0
+     AND DUE.dblPastDue > CUSTOMER.dblHighestDueAR
+
 --UPDATE BATCH ID
 UPDATE INV
 SET INV.[strBatchId]	 = CASE WHEN PID.[ysnPost] = 1 THEN PID.[strBatchId] ELSE NULL END

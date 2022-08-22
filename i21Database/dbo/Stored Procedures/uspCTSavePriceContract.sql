@@ -253,6 +253,25 @@ BEGIN TRY
 
 		IF ISNULL(@intContractDetailId,0) > 0 
 		BEGIN
+			declare @DirectTickets table (intTicketId int);
+			declare @intDirectTicketId int, @strErrorMessage NVARCHAR(MAX), @intCreatedTransactionId int;
+
+			insert into @DirectTickets (intTicketId)
+			select distinct intTicketId from tblSCTicketDirectBasisContract where intContractDetailId = @intContractDetailId and ysnProcessed = 0
+
+			while exists (select top 1 1 from @DirectTickets)
+			begin
+				select @intDirectTicketId = min(intTicketId) from @DirectTickets;
+				exec uspSCProcessTicketWithBasisContract
+					@intTicketId =  @intDirectTicketId
+					,@intUserId = @intUserId
+					,@ysnThrowError = 1
+					,@strErrorMessage = @strErrorMessage out
+					,@intCreatedTransactionId = @intCreatedTransactionId out
+
+				delete from @DirectTickets where intTicketId = @intDirectTicketId;
+			end
+
 			DECLARE @ticketId INT
 			SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket with (nolock) WHERE intTicketType = 6 AND intContractId = @intContractDetailId
 			IF @ticketId IS NOT NULL

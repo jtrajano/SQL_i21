@@ -22,3 +22,10 @@
 	CONSTRAINT [FK_tblCCSiteHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblCCSiteHeader_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])  
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCCSiteHeader_intVendorDefaultId] ON [dbo].[tblCCSiteHeader] ([intVendorDefaultId])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCCSiteHeader_intBankAccountId] ON [dbo].[tblCCSiteHeader] ([intBankAccountId])
+GO

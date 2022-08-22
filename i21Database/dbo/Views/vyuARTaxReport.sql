@@ -28,9 +28,9 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
-		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 --AND (DETAIL.ysnTaxExempt = 1 OR (DETAIL.ysnTaxExempt = 0 AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000)) 
-												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+		 							THEN DETAIL.dblLineTotal 
+									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 
+												THEN DETAIL.dblLineTotal 
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
@@ -38,26 +38,26 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 		 							THEN 0 
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
 												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
-														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  THEN DETAIL.dblLineTotal 
 														  ELSE 0.000000
 													 END
 												ELSE 0.000000 
 											END) 
-									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+									END) 
 	 , dblTotalSales 			= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000 --AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000 
-												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000 
+												THEN DETAIL.dblLineTotal 
 												ELSE 0.000000 
 											END) +
 											(CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
 												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
-														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  THEN DETAIL.dblLineTotal 
 														  ELSE 0.000000
 													 END
 												ELSE 0.000000 
 											END))
-									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+									END) 
 	 , dblTaxCollected			= INVOICE.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , strCustomerNumber	    = CUSTOMER.strCustomerNumber
 	 , strCustomerName			= CUSTOMER.strCustomerName
