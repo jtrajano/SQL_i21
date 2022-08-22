@@ -56,7 +56,7 @@ BEGIN
         , strTransactionNumber			    = I.strInvoiceNumber
         , dtmTransactionDate			      = I.dtmDate
         , intContractDetailId			      = ID.intContractDetailId
-        , intContractHeaderId			      = ID.intContractHeaderId
+        , intContractHeaderId			      = CTD.intContractHeaderId
         , intFutOptTransactionId		    = NULL
         , intTicketId					          = ID.intTicketId
         , intCommodityId				        = ITEM.intCommodityId
@@ -103,7 +103,7 @@ BEGIN
         , strTransactionNumber			    = I.strInvoiceNumber
         , dtmTransactionDate			      = I.dtmDate
         , intContractDetailId			      = ID.intContractDetailId
-        , intContractHeaderId			      = ID.intContractHeaderId
+        , intContractHeaderId			      = CTD.intContractHeaderId
         , intFutOptTransactionId		    = NULL
         , intTicketId					          = ID.intTicketId
         , intCommodityId				        = ITEM.intCommodityId
@@ -153,7 +153,7 @@ BEGIN
         , strTransactionNumber			    = I.strInvoiceNumber
         , dtmTransactionDate			      = I.dtmDate
         , intContractDetailId			      = TD.intContractDetailId
-        , intContractHeaderId			      = TD.intContractHeaderId
+        , intContractHeaderId			      = CTD.intContractHeaderId
         , intFutOptTransactionId		    = NULL
         , intTicketId					          = TD.intTicketId
         , intCommodityId				        = ITEM.intCommodityId
@@ -203,7 +203,7 @@ BEGIN
         , strTransactionNumber			    = I.strInvoiceNumber
         , dtmTransactionDate			      = I.dtmDate
         , intContractDetailId			      = ID.intContractDetailId
-        , intContractHeaderId			      = ID.intContractHeaderId
+        , intContractHeaderId			      = CTD.intContractHeaderId
         , intFutOptTransactionId		    = NULL
         , intTicketId				          	= ID.intTicketId
         , intCommodityId				        = ITEM.intCommodityId
@@ -251,7 +251,7 @@ BEGIN
         , strTransactionNumber			    = I.strInvoiceNumber
         , dtmTransactionDate			      = I.dtmDate
         , intContractDetailId			      = ID.intContractDetailId
-        , intContractHeaderId			      = ID.intContractHeaderId
+        , intContractHeaderId			      = CTD.intContractHeaderId
         , intFutOptTransactionId		    = NULL
         , intTicketId					          = ID.intTicketId
         , intCommodityId				        = ITEM.intCommodityId
