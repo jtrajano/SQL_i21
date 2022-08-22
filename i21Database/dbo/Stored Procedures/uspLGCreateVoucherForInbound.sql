@@ -663,7 +663,7 @@ BEGIN TRY
 							ELSE 
 								payables.dblOrderQty 
 						END,
-						@intTaxGroupId,
+						CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END,
 						CL.intCompanyLocationId,
 						EL.intEntityLocationId,
 						1,
