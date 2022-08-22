@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARProcessProvisionalInvoice] 
+﻿CREATE PROCEDURE [dbo].[uspARProcessProvisionalInvoice]
 	 @InvoiceId		INT
 	,@UserId		INT	
 	,@RaiseError	BIT				= 0
@@ -181,6 +181,21 @@ BEGIN TRY
 		,[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]
 		,[dblComputedGrossPrice]
+		,[intBankId]
+		,[intBankAccountId]
+		,[intBorrowingFacilityId]
+		,[intBorrowingFacilityLimitId]
+		,[strTradeFinanceNo]
+		,[strBankReferenceNo]
+		,[strBankTradeReference]
+		,[dblLoanAmount]
+		,[intBankValuationRuleId]
+		,[strTradeFinanceComments]
+		,[strGoodsStatus]
+		,[intDefaultPayToBankAccountId]
+		,[intPayToCashBankAccountId]
+		,[strPaymentInstructions]
+		,[strSourcedFrom]
 	)
 	SELECT
 		 [strTransactionType]				= 'Invoice'
@@ -280,6 +295,21 @@ BEGIN TRY
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
 		,[dblComputedGrossPrice]			= ARID.[dblComputedGrossPrice]
+		,[intBankId]						= ARI.[intBankId]
+		,[intBankAccountId]					= ARI.[intBankAccountId]
+		,[intBorrowingFacilityId]			= ARI.[intBorrowingFacilityId]
+		,[intBorrowingFacilityLimitId]		= ARI.[intBorrowingFacilityLimitId]
+		,[strTransactionNo]					= ARI.[strTransactionNo]
+		,[strBankReferenceNo]				= ARI.[strBankReferenceNo]
+		,[strBankTradeReference]			= ARI.[strBankTradeReference]
+		,[dblLoanAmount]					= ARI.[dblLoanAmount]
+		,[intBankValuationRuleId]			= ARI.[intBankValuationRuleId]
+		,[strTradeFinanceComments]			= ARI.[strTradeFinanceComments]
+		,[strGoodsStatus]					= ARI.[strGoodsStatus]
+		,[intDefaultPayToBankAccountId]		= ARI.[intDefaultPayToBankAccountId]
+		,[intPayToCashBankAccountId]		= ARI.[intPayToCashBankAccountId]
+		,[strPaymentInstructions]			= ARI.[strPaymentInstructions]
+		,[strSourcedFrom]					= ARI.[strSourcedFrom]
 	FROM
 		tblARInvoiceDetail ARID
 	INNER JOIN
@@ -358,7 +388,7 @@ SELECT
 		,[strSalesOrderNumber]				= NULL
 		,[intContractHeaderId]				= ARID.[intContractHeaderId] 
 		,[intContractDetailId]				= ARID.[intContractDetailId] 
-		,[intShipmentPurchaseSalesContractId]	= NULL
+		,[intShipmentPurchaseSalesContractId]= NULL
 		,[intItemWeightUOMId]				= NULL
 		,[dblItemWeight]					= 0.00
 		,[dblShipmentGrossWt]				= 0.00
@@ -387,6 +417,21 @@ SELECT
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
 		,[dblComputedGrossPrice]			= ARID.[dblComputedGrossPrice]
+		,[intBankId]						= NULL
+		,[intBankAccountId]					= NULL
+		,[intBorrowingFacilityId]			= NULL
+		,[intBorrowingFacilityLimitId]		= NULL
+		,[strTransactionNo]					= NULL
+		,[strBankReferenceNo]				= NULL
+		,[strBankTradeReference]			= NULL
+		,[dblLoanAmount]					= NULL
+		,[intBankValuationRuleId]			= NULL
+		,[strTradeFinanceComments]			= NULL
+		,[strGoodsStatus]					= NULL
+		,[intDefaultPayToBankAccountId]		= NULL
+		,[intPayToCashBankAccountId]		= NULL
+		,[strPaymentInstructions]			= NULL
+		,[strSourcedFrom]					= NULL
 	FROM 
 		tblARInvoiceDetail ARID
 	LEFT JOIN tblICItem I
