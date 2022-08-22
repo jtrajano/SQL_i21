@@ -9863,6 +9863,7 @@
     <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_EncryptPasswords.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
