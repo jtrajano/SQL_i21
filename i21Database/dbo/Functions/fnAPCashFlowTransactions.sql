@@ -57,7 +57,7 @@ BEGIN
 				,dblInterest
 				,dtmDate
 				FROM dbo.vyuAPPayables
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
 		GROUP BY intBillId
 		UNION ALL
 		SELECT 
@@ -76,7 +76,7 @@ BEGIN
 				,dtmDate
 				,intPrepaidRowType
 				FROM dbo.vyuAPPrepaidPayables
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPrepaidPayables 
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPrepaidPayables 
 		GROUP BY intBillId, intPrepaidRowType
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill B ON B.intBillId = tmpAgingSummaryTotal.intBillId
@@ -122,7 +122,7 @@ BEGIN
 				,dtmDate
 				,intCount
 				FROM dbo.vyuAPPayablesAgingDeleted
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
 		GROUP BY intBillId
 		HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
 	) AS tmpAgingSummaryTotal
@@ -157,7 +157,7 @@ BEGIN
 				,dblInterest
 				,dtmDate
 				FROM dbo.vyuAPSalesForPayables
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
 		GROUP BY intInvoiceId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblARInvoice I ON I.intInvoiceId = tmpAgingSummaryTotal.intInvoiceId
