@@ -48,7 +48,7 @@ BEGIN TRY
 	END
 	
 	SELECT TOP 1 @URL = strInterfaceWebServicesURL, @IntinterfaceSystem = intInterfaceSystemId FROM tblSMCompanyPreference
-	SELECT TOP 1 @strUserName = strProviderUserId, @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
+	SELECT TOP 1 @strUserName = strProviderUserId, @strPassword = dbo.fnAESDecryptASym(ISNULL(strProviderPassword, '')) FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
 
 	IF @IntinterfaceSystem = 1
 	BEGIN

@@ -1099,6 +1099,7 @@
     <Build Include="dbo\Views\vyuTMCompanySiteEvent.sql" />
     <Build Include="dbo\Views\vyuTMCompanySiteWorkOrder.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
