@@ -162,6 +162,9 @@
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
+	,@DefaultPayToBankAccountId				INT				= NULL
+	,@PayToCashBankAccountId				INT				= NULL
+	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
 AS
 
 BEGIN
@@ -543,6 +546,7 @@ BEGIN TRY
 		,[intTaxLocationId]
 		,[strTaxPoint]
 		,[strPaymentInstructions]
+		,[intPayToCashBankAccountId]
 		,strPrintFormat
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
@@ -641,11 +645,12 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
 		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
-		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
+		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
+		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
 		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 	FROM	
 		tblARCustomer C

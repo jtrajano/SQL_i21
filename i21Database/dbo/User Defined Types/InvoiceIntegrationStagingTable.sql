@@ -228,4 +228,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intTaxLocationId]						INT												NULL
 	,[strTaxPoint]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	,[ysnOverrideTaxGroup]					BIT												NULL
+	,[intDefaultPayToBankAccountId]			INT												NULL
+	,[intPayToCashBankAccountId]			INT												NULL
+	,[strPaymentInstructions]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strSourcedFrom]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 )

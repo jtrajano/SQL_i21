@@ -237,6 +237,9 @@ DECLARE  @Id									INT
 		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
+		,@DefaultPayToBankAccountId				INT
+		,@PayToCashBankAccountId				INT
+		,@PaymentInstructions					NVARCHAR(MAX)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -459,6 +462,10 @@ BEGIN
 		,@GoodsStatus					= [strGoodsStatus]
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
+		,@DefaultPayToBankAccountId		= [intDefaultPayToBankAccountId]
+		,@PayToCashBankAccountId		= [intPayToCashBankAccountId]
+		,@PaymentInstructions			= [strPaymentInstructions]
+		,@SourcedFrom					= [strSourcedFrom]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -578,61 +585,66 @@ BEGIN
 		IF ISNULL(@SourceTransaction, '') <> 'Import'
 			BEGIN
 				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
-					BEGIN
-						SET @SourceColumn = 'intLoadDistributionHeaderId'
-						SET @SourceTable = 'tblTRLoadDistributionHeader'
-					END
+				BEGIN
+					SET @SourceColumn = 'intLoadDistributionHeaderId'
+					SET @SourceTable = 'tblTRLoadDistributionHeader'
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
-					BEGIN
-						SET @SourceColumn = 'intShipmentId'
-						SET @SourceTable = 'tblLGShipment'
-						SET @SourcedFrom = 'Logistics'
-					END
+				BEGIN
+					SET @SourceColumn = 'intShipmentId'
+					SET @SourceTable = 'tblLGShipment'
+					SET @SourcedFrom = 'Logistics'
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
-					BEGIN
-						SET @SourceColumn = 'intTransactionId'
-						SET @SourceTable = 'tblCFTransaction'
-					END
+				BEGIN
+					SET @SourceColumn = 'intTransactionId'
+					SET @SourceTable = 'tblCFTransaction'
+				END
+
 				IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
-					BEGIN
-						SET @SourceColumn = 'intMeterReadingId'
-						SET @SourceTable = 'tblMBMeterReading' 
-					END
+				BEGIN
+					SET @SourceColumn = 'intMeterReadingId'
+					SET @SourceTable = 'tblMBMeterReading' 
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Provisional'
-					BEGIN
-						SET @SourceColumn = 'intInvoiceId'
-						SET @SourceTable = 'tblARInvoice'
-					END					
+				BEGIN
+					SET @SourceColumn = 'intInvoiceId'
+					SET @SourceTable = 'tblARInvoice'
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
-					BEGIN
-						SET @SourceColumn = 'intInventoryShipmentId'
-						SET @SourceTable = 'tblICInventoryShipment'
-						SET @SourcedFrom = 'Inventory Shipment'
-					END		
+				BEGIN
+					SET @SourceColumn = 'intInventoryShipmentId'
+					SET @SourceTable = 'tblICInventoryShipment'
+					SET @SourcedFrom = 'Inventory Shipment'
+				END
 
 				IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
-					BEGIN
-						SET @SourceColumn = 'intContractHeaderId'
-						SET @SourceTable = 'tblCTContractHeader'
-					END
+				BEGIN
+					SET @SourceColumn = 'intContractHeaderId'
+					SET @SourceTable = 'tblCTContractHeader'
+				END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Load Schedule')
-					BEGIN
-						SET @SourceColumn = 'intLoadId'
-						SET @SourceTable = 'tblLGLoad'
-						SET @SourcedFrom = 'Logistics'
-					END
+				BEGIN
+					SET @SourceColumn = 'intLoadId'
+					SET @SourceTable = 'tblLGLoad'
+					SET @SourcedFrom = 'Logistics'
+				END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
-					BEGIN
-						SET @SourceColumn = 'intWeightClaimId'
-						SET @SourceTable = 'tblLGWeightClaim'
-					END
+				BEGIN
+					SET @SourceColumn = 'intWeightClaimId'
+					SET @SourceTable = 'tblLGWeightClaim'
+				END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim')
-					BEGIN
-						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
-					END
+				BEGIN
+					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
+				END
 			END		
 	END TRY
 	BEGIN CATCH
@@ -748,6 +760,9 @@ BEGIN
 			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
+			,@DefaultPayToBankAccountId		= @DefaultPayToBankAccountId
+			,@PayToCashBankAccountId		= @PayToCashBankAccountId
+			,@PaymentInstructions			= @PaymentInstructions
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
