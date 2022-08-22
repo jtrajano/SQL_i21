@@ -161,6 +161,9 @@
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
+	,@DefaultPayToBankAccountId				INT				= NULL
+	,@PayToCashBankAccountId				INT				= NULL
+	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
 AS
 
 BEGIN
@@ -540,7 +543,10 @@ BEGIN TRY
 		,[intDefaultPayToBankAccountId]
 		,[strSourcedFrom]
 		,[intTaxLocationId]
-		,[strTaxPoint])
+		,[strTaxPoint]
+		,[strPaymentInstructions]
+		,[intPayToCashBankAccountId]
+	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -637,10 +643,12 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
 		,[strSourcedFrom]					= @SourcedFrom
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
+		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
+		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
