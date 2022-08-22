@@ -165,7 +165,7 @@ BEGIN
 		,intTransactionId
 		,strTransactionType
 	FROM @CompanyTitle
-	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
+	WHERE dtmDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate -- CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
 		AND strTransactionId IS NOT NULL
 	ORDER BY dtmDate desc, strTransactionId desc, intTransactionId desc
 	
@@ -304,7 +304,7 @@ BEGIN
 			,dblUnpaidBalance = SUM(dblUnpaidBalance)
 			,dblPaidBalance = SUM(dblPaidBalance)
 		FROM @CompanyTitle 
-		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
+		WHERE dtmDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate -- CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
 		GROUP BY
 			dtmDate
 	)
@@ -432,7 +432,7 @@ BEGIN
 				,SUM(dblAdjustments)
 				,SUM(dblInventoryCount)
 			FROM @InHouse 
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
+			WHERE dtmDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate --  CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
 			GROUP BY
 				dtmDate
 		)

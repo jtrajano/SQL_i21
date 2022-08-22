@@ -292,7 +292,8 @@ BEGIN TRY
 		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  IN (1,2) THEN @FirstApprovalSign ELSE NULL END 
 		   --OLD
 		   --,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @SecondApprovalSign ELSE NULL END 
-		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @CreatorSign ELSE NULL END 
+		   ,strLogoType							= CASE WHEN @CreatorSign IS NOT NULL  THEN 'System' ELSE 'SalesAttachment' END
+		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN ISNULL(@CreatorSign, (SELECT TOP 1 Sig.blbFile FROM tblSMUpload Sig  WITH (NOLOCK) WHERE Sig.intAttachmentId=CH.intAttachmentSignatureId)) ELSE NULL  END 
 		   ,blbPurchaseContractFirstApproverSignature	= NULL--CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
 		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END
 	FROM	vyuCTContractHeaderView CH

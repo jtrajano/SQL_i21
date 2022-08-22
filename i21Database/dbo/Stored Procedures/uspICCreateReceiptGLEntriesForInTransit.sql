@@ -281,6 +281,7 @@ WITH ForGLEntries_CTE (
 	,dblForexRate
 	,intSourceEntityId
 	,intCommodityId
+	,intInTransitSourceLocationId
 )
 AS 
 (
@@ -303,6 +304,7 @@ AS
 			,t.dblForexRate
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,t.intInTransitSourceLocationId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
@@ -312,7 +314,7 @@ AS
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 	WHERE	t.strBatchId = @strBatchId
 			--AND t.intFobPointId IS NOT NULL 	
-			AND t.intInTransitSourceLocationId IS NOT NULL 
+			--AND t.intInTransitSourceLocationId IS NOT NULL 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 )
 -------------------------------------------------------------------------------------------
@@ -390,6 +392,7 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				, @InventoryTransactionTypeId_AutoNegative
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
+		AND ForGLEntries_CTE.intInTransitSourceLocationId IS NOT NULL
 
 UNION ALL 
 SELECT	
@@ -464,6 +467,7 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				, @InventoryTransactionTypeId_AutoNegative
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
+		AND ForGLEntries_CTE.intInTransitSourceLocationId IS NOT NULL
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto Variance 
@@ -509,7 +513,7 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
 		) Debit
@@ -612,4 +616,4 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 				@InventoryTransactionTypeId_AutoNegative
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
-		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0

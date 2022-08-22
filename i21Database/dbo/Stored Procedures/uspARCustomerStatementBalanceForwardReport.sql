@@ -244,7 +244,7 @@ FROM tblARCompanyPreference WITH (NOLOCK)
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+		   , @strCompanyAddress = ISNULL(strAddress + CHAR(13) + char(10), '') + ISNULL(strCity, '') + ISNULL(', ' + strState, '') + ISNULL(', ' + strZip, '') + ISNULL(', ' + strCountry, '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -430,6 +430,7 @@ INSERT INTO #INVOICES (
 	, dtmPostDate
 	, strType
 	, strComment
+	, strTicketNumbers
 	, ysnServiceChargeCredit
 )
 SELECT intInvoiceId			= I.intInvoiceId      
@@ -457,6 +458,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	, dtmPostDate			= I.dtmPostDate
 	, strType				= I.strType      
 	, strComment			= dbo.fnEliminateHTMLTags(I.strComments, 0)      
+	, strTicketNumbers		= I.strTicketNumbers
 	, ysnServiceChargeCredit = I.ysnServiceChargeCredit    
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -474,23 +476,6 @@ FROM #INVOICES I
 INNER JOIN #PAYMENTS P ON I.intPaymentId = P.intPaymentId	  
 WHERE I.intPaymentId IS NOT NULL
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-
---INVOICE_SCALETICKET
-UPDATE I
-SET strTicketNumbers = SCALETICKETS.strTicketNumbers
-FROM #INVOICES I
-CROSS APPLY (     
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)     
-	FROM (      
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '      
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)        
-		INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId	
-		WHERE ID.intInvoiceId = I.intInvoiceId
-		  AND ID.intTicketId IS NOT NULL
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber      
-		FOR XML PATH ('')     
-	) INV (strTicketNumber)
-) SCALETICKETS
 
 --LOCATION FILTER
 IF @strLocationNameLocal IS NOT NULL

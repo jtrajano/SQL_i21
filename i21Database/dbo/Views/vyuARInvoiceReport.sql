@@ -101,7 +101,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
 	 , ysnStretchLogo			= ISNULL(ARPREFERENCE.ysnStretchLogo, 0)
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
-	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
+	 , strTicketNumbers			= INV.strTicketNumbers
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
@@ -315,21 +315,6 @@ OUTER APPLY (
 	  AND ysnProcessed = 1
 	  AND intInvoiceId = INV.intOriginalInvoiceId
 ) PROVISIONAL
-OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-		INNER JOIN (
-			SELECT intTicketId
-				 , strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intInvoiceId = INV.intInvoiceId
-		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
 LEFT JOIN(
 	SELECT intInvoiceId, strAddonDetailKey 
 	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)

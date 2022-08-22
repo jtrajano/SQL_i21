@@ -241,14 +241,14 @@ BEGIN
 					,@createdVouchersId = @created1099KVouchersId OUTPUT
 				END
 
-				IF(ISNULL(@errorMessage, '') = '')
-				BEGIN
-					SET @errorMessage = @strNo1099Setup	
-				END
-				ELSE
-				BEGIN
-					SET @errorMessage = @errorMessage + ' ' + @strNo1099Setup	
-				END
+				-- IF(ISNULL(@errorMessage, '') = '')
+				-- BEGIN
+				-- 	SET @errorMessage = @strNo1099Setup	
+				-- END
+				-- ELSE
+				-- BEGIN
+				-- 	SET @errorMessage = @errorMessage + ' ' + @strNo1099Setup	
+				-- END
 			END
 			ELSE
 			BEGIN
@@ -258,7 +258,15 @@ BEGIN
 			IF(ISNULL(@errorMessage, '') != '')
 			BEGIN
 				RAISERROR(@errorMessage,16,1)
-			END			
+			END	
+			ELSE
+			BEGIN
+				-- WARNING MESSAGE FOR 1099K SETUP
+				IF(ISNULL(@strNo1099Setup, '') != '')
+				BEGIN
+					SET @errorMessage = @strNo1099Setup
+				END
+			END				
 		END
 		ELSE
 		BEGIN

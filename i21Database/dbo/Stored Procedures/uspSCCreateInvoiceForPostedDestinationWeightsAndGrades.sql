@@ -34,13 +34,13 @@ BEGIN TRY
 	FROM tblSCTicket
 	WHERE intTicketId = @intTicketId
 
-	IF(@strTicketInOutFlag = 'O' AND @intTicketType = 6)
-	BEGIN
-		IF(@ysnTicketDestinationWeightAndGradesPosted = 1)
-		BEGIN
-			EXEC uspSCDirectCreateInvoice @intTicketId, @ysnTicketEntityId, @ysnTicketLocationId, @intUserId, @intInvoiceId OUTPUT
-		END
-	END
+	--IF(@strTicketInOutFlag = 'O' AND @intTicketType = 6)
+	--BEGIN
+	--	IF(@ysnTicketDestinationWeightAndGradesPosted = 1)
+	--	BEGIN
+	--		EXEC uspSCDirectCreateInvoice @intTicketId, @ysnTicketEntityId, @ysnTicketLocationId, @intUserId, @intInvoiceId OUTPUT
+	--	END
+	--END
 
 END TRY
 BEGIN CATCH

@@ -131,5 +131,6 @@
 	[intDaysOld]						INT				NULL,
 	[strServiceChargeItem]				NVARCHAR(100)	NULL,
 	[strServiceChareInvoiceNumber]		NVARCHAR(100)	NULL,
-	[dtmDateSC]							DATETIME		NULL
+	[dtmDateSC]							DATETIME		NULL,
+	[intInventoryShipmentChargeId]		INT				NULL
 );

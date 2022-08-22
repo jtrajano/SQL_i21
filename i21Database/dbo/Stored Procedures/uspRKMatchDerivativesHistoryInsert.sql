@@ -46,6 +46,20 @@ BEGIN
 	IF @@ERROR <> 0	GOTO _Rollback
 END
 ELSE --FOR DELETE
+BEGIN
+	SELECT intFutOptTransactionId
+	INTO #tmpDerivativesToDelete 
+	FROM (
+		SELECT intFutOptTransactionId = intLFutOptTransactionId
+		FROM tblRKMatchDerivativesHistory H
+		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+
+		UNION ALL
+
+		SELECT intFutOptTransactionId = intSFutOptTransactionId
+		FROM tblRKMatchDerivativesHistory H
+		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+	) t
 
 	INSERT INTO tblRKMatchDerivativesHistory(
 		 intMatchFuturesPSHeaderId
@@ -121,12 +135,19 @@ ELSE --FOR DELETE
 	FROM tblRKSummaryLog  
 	WHERE strTransactionType = 'Match Derivatives'  
 	AND intTransactionRecordHeaderId = @intMatchFuturesPSHeaderId
+	AND intFutOptTransactionId IN (SELECT intFutOptTransactionId
+									 FROM #tmpDerivativesToDelete)
 
 	EXEC uspRKLogRiskPosition @SummaryLog
+	
 
+	DROP TABLE #tmpDerivativesToDelete
 
 	IF @@ERROR <> 0	GOTO _Rollback
 
+END
+
+GOTO _Commit
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------

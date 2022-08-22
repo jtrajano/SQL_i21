@@ -455,7 +455,7 @@ BEGIN TRY
 
 	SELECT @dblInputWeight2 = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
 
-	IF @dblInputWeight2 > @dblQty - @dblReservedQty
+	IF @dblInputWeight2 > @dblQty - @dblReservedQty AND @dblInputWeight2 -( @dblQty - @dblReservedQty)>0.1 and @dblReservedQty>0
 	BEGIN
 		SELECT @dblRequiredQty = ABS((@dblQty - @dblReservedQty) - @dblInputWeight2)
 

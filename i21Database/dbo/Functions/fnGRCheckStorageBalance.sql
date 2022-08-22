@@ -28,7 +28,7 @@ BEGIN
 		AND B.intParentSettleStorageId IS NULL
 	WHERE intCustomerStorageId = @intCustomerStorageId	
 	
-	SELECT @dblTransferTotal = SUM(B.dblOriginalUnits)
+	SELECT @dblTransferTotal = SUM(B.dblDeductedUnits)
 	FROM tblGRCustomerStorage A 
 	INNER JOIN tblGRTransferStorageSourceSplit B 
 		ON B.intSourceCustomerStorageId = A.intCustomerStorageId 

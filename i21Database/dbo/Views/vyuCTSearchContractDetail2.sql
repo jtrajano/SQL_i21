@@ -226,7 +226,7 @@ SELECT a.intContractDetailId
 						WHEN ISNULL(ad.dblUnitQty, 0) = ISNULL(ae.dblUnitQty, 0) THEN i.dblContractSize * ISNULL(ab.dblHedgedLots, 0)
 						ELSE(i.dblContractSize * ISNULL(ab.dblHedgedLots, 0)) * (ISNULL(ad.dblUnitQty, 0) / ISNULL(ae.dblUnitQty, 0)) END)
 	, ab.dblHedgedLots
-	, strINCOLocation = CASE WHEN av.strINCOLocationType = 'City' THEN aw.strCity
+	, strINCOLocation = CASE WHEN ISNULL(av.strINCOLocationType,ar.strINCOLocationType) = 'City' THEN aw.strCity
 							ELSE ax.strSubLocationName END
 	, ay.strIndex
 	, az.strInsuranceBy

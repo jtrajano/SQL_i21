@@ -43,6 +43,8 @@ SELECT DISTINCT
     
     --,intTicketPricingTypeId = ISNULL(CH_Ticket.intPricingTypeId, -99)
     ,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
+    ,CAP.intChargeAndPremiumId
+	,CAP.strChargeAndPremiumId
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
@@ -57,6 +59,8 @@ JOIN tblICItem Item
 JOIN tblICItemUOM ItemUOM
 	ON ItemUOM.intItemId = Item.intItemId
 		AND ItemUOM.ysnStockUnit = 1
+LEFT JOIN tblGRChargeAndPremiumId CAP
+	ON CAP.intChargeAndPremiumId = CS.intChargeAndPremiumId
 LEFT JOIN tblSMCompanyLocationSubLocation SLOC 
     ON SLOC.intCompanyLocationSubLocationId = CS.intCompanyLocationSubLocationId
 LEFT JOIN 

@@ -394,4 +394,21 @@ BEGIN
     SET IDENTITY_INSERT [dbo].[tblGRStorageType] OFF
 END
 GO
-
+IF NOT EXISTS(SELECT 1 FROM tblGRCalculationType)
+BEGIN
+	INSERT INTO [tblGRCalculationType]
+	(
+		[strCalculationType]
+	) 
+	VALUES ('Range by Unit'), ('Range by Grade Reading'), ('Percentage by Item'), ('Percentage by Discount'), ('Fixed Rate')
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM tblGRCalculationType WHERE strCalculationType = 'Rate x Contract''s Charge')
+BEGIN
+	INSERT INTO [tblGRCalculationType]
+	(
+		[strCalculationType]
+	) 
+	VALUES ('Rate x Contract''s Charge')
+END
+GO

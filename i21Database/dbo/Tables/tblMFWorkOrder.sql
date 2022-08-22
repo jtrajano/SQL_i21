@@ -9,6 +9,7 @@
     [intItemUOMId] INT NULL, 
     [intStatusId] INT NOT NULL, 
 	[intManufacturingCellId] INT NULL, 
+	dblBatchSize NUMERIC(18, 6) NULL,
     [intStorageLocationId] INT NULL,
 	[intLocationId] INT NOT NULL,
 	[dtmCreated] DATETIME NULL, 

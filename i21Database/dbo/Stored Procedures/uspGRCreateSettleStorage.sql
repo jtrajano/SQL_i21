@@ -20,6 +20,7 @@ BEGIN TRY
 	DECLARE @dblSpotCashPrice DECIMAL(18,6)
 	DECLARE @dblTotalUnitsForSettle DECIMAL(18,6)
 	DECLARE @strType NVARCHAR(20)
+	DECLARE @intChargeAndPremiumId INT
 
 	DECLARE @SettleStorageToSave AS TABLE 
 	(
@@ -34,6 +35,7 @@ BEGIN TRY
 		,dblCashPrice DECIMAL(18,6)
 		,intContractPricingTypeId INT
 		,isSaved BIT
+		,intChargeAndPremiumId INT NULL
 	)
 
 	DECLARE @MainSettleStorageToSave AS TABLE 
@@ -44,6 +46,7 @@ BEGIN TRY
 		,dblContractUnits DECIMAL(18,6)
 		,intContractDetailId INT --for basis contract only
 		,strType NVARCHAR(20)
+		,intChargeAndPremiumId INT NULL
 	)
 
 	DECLARE @SettleStorage AS TABLE 
@@ -56,6 +59,7 @@ BEGIN TRY
 		,dblFutures DECIMAL(18,6)
 		,dblBasis DECIMAL(18,6)
 		,dblCashPrice DECIMAL(18,6)
+		,intChargeAndPremiumId INT NULL
 	)
 
 	DECLARE @SettleContract AS TABLE 
@@ -76,6 +80,7 @@ BEGIN TRY
 		,dblFutures
 		,dblBasis
 		,dblCashPrice
+		,intChargeAndPremiumId
 	)
 	SELECT 
 		 intSettleStorageTicketId	= SST.intSettleStorageTicketId
@@ -85,6 +90,7 @@ BEGIN TRY
 		,dblFutures					= SS.dblFuturesPrice
 		,dblBasis					= SS.dblFuturesBasis
 		,dblCashPrice				= SS.dblCashPrice
+		,intChargeAndPremiumId		= SST.intChargeAndPremiumId
 	FROM tblGRSettleStorageTicket SST
 	INNER JOIN tblGRSettleStorage SS
 		ON SS.intSettleStorageId = SST.intSettleStorageId
@@ -115,6 +121,7 @@ BEGIN TRY
 		SET @intCustomerStorageId = NULL
 		SET @dblRemainingUnits = NULL
 		SET @dblRemainingSpotUnits = NULL		
+		SET @intChargeAndPremiumId = NULL
 
 
 		SELECT TOP 1
@@ -125,6 +132,7 @@ BEGIN TRY
 			,@dblFutures				= dblFutures
 			,@dblBasis					= dblBasis
 			,@dblSpotCashPrice			= dblCashPrice
+			,@intChargeAndPremiumId		= intChargeAndPremiumId
 		FROM @SettleStorage
 		ORDER BY intSettleStorageKey
 
@@ -163,6 +171,7 @@ BEGIN TRY
 						,dblCashPrice
 						,intContractPricingTypeId
 						,isSaved
+						,intChargeAndPremiumId
 					)
 					SELECT
 						intCustomerStorageId		= @intCustomerStorageId
@@ -178,6 +187,7 @@ BEGIN TRY
 						,dblCashPrice				= @dblCashPrice
 						,intContractPricingTypeId	= @intContractPricingTypeId
 						,0
+						,intChargeAndPremiumId		= @intChargeAndPremiumId
 				END
 				UPDATE @SettleStorage
 				SET dblRemainingUnits = @dblRemainingUnits - @dblContractRemainingUnits
@@ -218,6 +228,7 @@ BEGIN TRY
 				,dblCashPrice
 				,intContractPricingTypeId
 				,isSaved
+				,intChargeAndPremiumId
 			)
 			SELECT
 				intCustomerStorageId		= @intCustomerStorageId
@@ -233,7 +244,7 @@ BEGIN TRY
 				,dblCashPrice				= 0
 				,intContractPricingTypeId	= -1
 				,0
-				
+				,intChargeAndPremiumId		= @intChargeAndPremiumId
 			UPDATE @SettleStorage
 			SET dblRemainingUnits = @dblRemainingUnits - @dblRemainingSpotUnits
 			WHERE intCustomerStorageId = @intCustomerStorageId
@@ -254,9 +265,10 @@ BEGIN TRY
 		,dblContractUnits = SUM(dblContractUnits)
 		,0
 		,'Priced'
+		,intChargeAndPremiumId
 	FROM @SettleStorageToSave
 	WHERE intContractPricingTypeId IN (1,6)
-	GROUP BY intCustomerStorageId
+	GROUP BY intCustomerStorageId, intChargeAndPremiumId
 	UNION
 	--BASIS CONTRACT
 	SELECT 
@@ -265,6 +277,7 @@ BEGIN TRY
 		,dblContractUnits
 		,intContractDetailId
 		,'Basis'
+		,intChargeAndPremiumId
 	FROM @SettleStorageToSave
 	WHERE intContractPricingTypeId = 2
 	UNION
@@ -275,6 +288,7 @@ BEGIN TRY
 		,0
 		,0
 		,'Spot'
+		,intChargeAndPremiumId
 	FROM @SettleStorageToSave
 	WHERE intContractPricingTypeId = -1
 
@@ -287,6 +301,7 @@ BEGIN TRY
 		SET @intSettleStorageKey = NULL
 		SET @intNewSettleStorageId = NULL
 		SET @intContractDetailId = NULL
+		SET @intChargeAndPremiumId = NULL
 
 		SELECT TOP 1
 			@intSettleStorageKey		= intSettleStorageKey
@@ -294,6 +309,7 @@ BEGIN TRY
 			,@dblTotalUnitsForSettle	= CASE WHEN dblContractUnits > 0 THEN dblContractUnits ELSE dblSpotUnits END
 			,@strType					= strType
 			,@intContractDetailId		= intContractDetailId
+			,@intChargeAndPremiumId		= intChargeAndPremiumId
 		FROM @MainSettleStorageToSave
 		ORDER BY intSettleStorageKey		
 
@@ -327,6 +343,7 @@ BEGIN TRY
 			,dtmCreated
 			,intParentSettleStorageId
 			,intItemUOMId
+			,dtmCalculateChargeAndPremiumOn
 		)
 		SELECT 
 			intConcurrencyId			= 1
@@ -354,6 +371,7 @@ BEGIN TRY
 			,dtmCreated					= dtmCreated
 			,intParentSettleStorageId	= @intSettleStorageId
 			,intItemUOMId				= intItemUOMId
+			,dtmCalculateChargeAndPremiumOn = dtmCalculateChargeAndPremiumOn
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 
@@ -405,13 +423,14 @@ BEGIN TRY
 			,intSettleStorageId
 			,intCustomerStorageId
 			,dblUnits
+			,intChargeAndPremiumId
 		)
 		SELECT 
 			intConcurrencyId	    = 1
 			,intSettleStorageId		= @intNewSettleStorageId
 			,intCustomerStorageId   = @intCustomerStorageId
 			,dblUnits				= @dblTotalUnitsForSettle
-
+			,intChargeAndPremiumId				= @intChargeAndPremiumId
 		DELETE FROM @MainSettleStorageToSave WHERE intSettleStorageKey = @intSettleStorageKey
 	END
 

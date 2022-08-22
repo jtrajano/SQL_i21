@@ -18,7 +18,8 @@ begin
 	-- XML Parameter Table
 	DECLARE @temp_xml_table TABLE 
 	(
-		[fieldname] NVARCHAR(50)
+		id int identity(1,1)
+		,[fieldname] NVARCHAR(50)
 		,[condition] NVARCHAR(20)
 		,[from] NVARCHAR(MAX)
 		,[to] NVARCHAR(MAX)
@@ -44,7 +45,19 @@ begin
 		,[endgroup] NVARCHAR(50)
 		,[datatype] NVARCHAR(50)
 	)
+	
 
+	declare @final_condition nvarchar(max) = ''
+	
+	update @temp_xml_table set [to] = convert(nvarchar, dateadd(day, 1,cast([to] as date)), 101) where datatype like 'Date%' and ([to] is not null and [to] <> '')
+	
+	select @final_condition  = @final_condition + ' '  + dbo.fnAPCreateFilter(fieldname, condition, [from], [to], [join], begingroup, endgroup, datatype) + ' ' + [join]  
+		from @temp_xml_table xml_table 
+			where condition <> 'Dummy'
+		order by id asc
+
+	set @final_condition = @final_condition + ' 1 = 1' 
+	--select @final_condition
 	-- Query Parameters
 	DECLARE 
 		@dtmTicketDateTimeFrom DATETIME
@@ -88,9 +101,10 @@ begin
 							, strTicketNumber as strModTicketNumber
 							, *  
 					from vyuSCTicketInOutReport 
-					where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')'
+					where ' + @final_condition
 
 
+	-- print @sqlcmd
 	exec (@sqlcmd)
 	
 
@@ -103,11 +117,11 @@ begin
 	declare @Min int
 	declare @Max int
 
-
+	/*
 	declare @MinMaxTable table ( id int identity(1,1), intMin int, intMax int, intDifference int, intLocationId int, strIndicator nvarchar(50))
 	declare @RangedTicketNumber table( intTicketNumber int, intLocationId int, strIndicator nvarchar(50) )
 
-
+	
 	insert @MinMaxTable ( intMin, intMax, intLocationId, strIndicator)
 	select min(intTicketNumber), max(intTicketNumber), intProcessingLocationId, strIndicator
 		from #tmpSampleExport
@@ -117,12 +131,12 @@ begin
 
 	update @MinMaxTable set intDifference = intMax - intMin
 	
-	
 	declare @CurrentLocationId int
 	declare @CurrentIndicator nvarchar(50)
+
 	declare @id int
 	select @id= min(id) from @MinMaxTable
-
+	
 	while @id is not null
 	begin
 
@@ -168,15 +182,15 @@ begin
 		
 	end
 
-
+	*/
 	select 
 	
-		AllTicketNumber.intTicketNumber
-		,case when AllExport.intTicketNumber is null then cast(AllTicketNumber.intTicketNumber as nvarchar(50)) + '*' else AllExport.strTicketNumber end as strTicketNumber
+		AllExport.intTicketNumber
+		,case when AllExport.intTicketNumber is null then cast(AllExport.intTicketNumber as nvarchar(50)) + '*' else AllExport.strTicketNumber end as strTicketNumber
 		,AllExport.strName
 		,CompanyLocation.strLocationName
 		,AllExport.strStorageTypeDescription
-		,case when AllExport.intTicketNumber is null then cast(AllTicketNumber.strIndicator as nvarchar(50)) else AllExport.strIndicator end as strIndicator
+		,case when AllExport.intTicketNumber is null then cast(AllExport.strIndicator as nvarchar(50)) else AllExport.strIndicator end as strIndicator
 		,AllExport.dblGrossUnits
 		,AllExport.intTicketType
 		,AllExport.strTicketType
@@ -189,16 +203,22 @@ begin
 		,AllExport.strUnitMeasure
 		,AllExport.dblComputedGrossUnits
 		,AllExport.strStationUnitMeasure
+		,AllExport.dblNetUnits
+		,AllExport.dblComputedNetUnits
+		from #tmpSampleExport AllExport				
+			left join tblSMCompanyLocation CompanyLocation
+				on AllExport.intProcessingLocationId = CompanyLocation.intCompanyLocationId
+			order by AllExport.intTicketNumber asc, strModTicketNumber
+			/*
 		from @RangedTicketNumber AllTicketNumber
-			left join #tmpSampleExport AllExport
+			join #tmpSampleExport AllExport
 				on AllTicketNumber.intTicketNumber = AllExport.intTicketNumber
 					and AllTicketNumber.intLocationId = AllExport.intProcessingLocationId
 					and AllTicketNumber.strIndicator = AllExport.strIndicator
 			left join tblSMCompanyLocation CompanyLocation
 				on AllTicketNumber.intLocationId = CompanyLocation.intCompanyLocationId
-			order by AllTicketNumber.intTicketNumber asc, strModTicketNumber
+			order by AllTicketNumber.intTicketNumber asc, strModTicketNumber */
 
 
 
 end
-GO

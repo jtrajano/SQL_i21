@@ -31,6 +31,7 @@ SELECT
 	,UOM.strUnitMeasure
 	,SS.intConcurrencyId
 	,ysnBillIsPaid	= dbo.fnGRCheckBillPaymentOfSettleStorage(SS.intSettleStorageId)
+	,SS.dtmCalculateChargeAndPremiumOn
 FROM tblGRSettleStorage SS
 JOIN tblEMEntity E 
 	ON E.intEntityId = SS.intEntityId

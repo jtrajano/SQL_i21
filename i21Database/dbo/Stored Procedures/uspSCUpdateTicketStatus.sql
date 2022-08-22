@@ -30,6 +30,7 @@ BEGIN
 		-- BEGIN
 		DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @scId
 		DELETE FROM tblSCTicketLoadUsed WHERE intTicketId = @scId
+		DELETE FROM tblSCTicketSpotUsed WHERE intTicketId = @scId
 		-- END
 	END
 	ELSE

@@ -513,8 +513,8 @@ SELECT
 	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 
 									THEN ( 
 											CASE WHEN entity.str1099Form = '1099-MISC' THEN category.int1099CategoryId
-													WHEN entity.str1099Form = '1099-INT' THEN category.int1099CategoryId
-													WHEN entity.str1099Form = '1099-B' THEN category.int1099CategoryId
+													WHEN entity.str1099Form = '1099-INT' THEN 0
+													WHEN entity.str1099Form = '1099-B' THEN 0
 													WHEN entity.str1099Form = '1099-PATR' THEN categoryPATR.int1099CategoryId
 													WHEN entity.str1099Form = '1099-DIV' THEN categoryDIV.int1099CategoryId
 											ELSE 0 END

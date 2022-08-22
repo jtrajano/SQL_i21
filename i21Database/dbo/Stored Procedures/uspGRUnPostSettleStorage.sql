@@ -525,6 +525,13 @@ BEGIN TRY
 			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 		END
 
+		--5. Delete applied charges and premiums
+		BEGIN
+			DELETE FROM tblGRAppliedChargeAndPremium
+			WHERE intTransactionId = @intSettleStorageId
+			AND strTransactionType = 'Settlement'
+		END
+
 		--get first the parent settle storage id before the deletion
 		IF @isParentSettleStorage = 0
 		BEGIN
@@ -579,11 +586,29 @@ BEGIN TRY
 			UPDATE tblGRStorageInventoryReceipt SET ysnUnposted = 1 WHERE intSettleStorageId = @intSettleStorageId
 		END
 
+		--for multiple storage settlements when deleting specific settlements only
+		BEGIN
+			DECLARE @cnt INT
+
+			IF @isParentSettleStorage = 0
+			BEGIN
+				DELETE
+				FROM tblGRSettleStorageChargeAndPremium
+				WHERE intParentSettleStorageId = @intParentSettleStorageId
+					AND intCustomerStorageId = @intCustomerStorageId
+					AND (	SELECT COUNT(*) 
+							FROM tblGRSettleStorageTicket 
+							WHERE intCustomerStorageId = @intCustomerStorageId
+								AND intParentSettleStorageId = @intParentSettleStorageId
+						) = 0
+			END
+		END		
+		
 		--LAST
 		DELETE FROM @SettleStorages WHERE intId = @intSettleStorageId
 	END
 
-	--5. Voucher deletion
+	--6. Voucher deletion
 	BEGIN
 		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
 		BEGIN

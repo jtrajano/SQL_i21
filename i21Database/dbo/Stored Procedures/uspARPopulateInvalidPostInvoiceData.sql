@@ -1625,7 +1625,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
+		,[dblQty]
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -1670,6 +1670,36 @@ BEGIN
 	FROM 
 		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @OneBit)
 
+	--INVOICE HAS EARLIER DATE COMPARE TO STOCK DATE
+	INSERT INTO ##ARInvalidInvoiceData(
+		 [intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= COSTING.[intTransactionDetailId]
+		,[intItemId]			= COSTING.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Stock is not available for ' + ITEM.strItemNo + ' at ' + CLOC.strLocationName + ' as of ' + CONVERT(NVARCHAR(30), CAST(COSTING.dtmDate AS DATETIME), 101) + '. Use the nearest stock available date of ' + CONVERT(NVARCHAR(30), CAST(STOCKDATE.dtmDate AS DATETIME), 101) + ' or later.'	
+	FROM ##ARPostInvoiceHeader I
+	INNER JOIN ##ARItemsForCosting COSTING  ON I.intInvoiceId =  COSTING.intTransactionId
+	INNER JOIN  
+	(
+		SELECT intItemId,intItemLocationId,intItemUOMId,MAX(dtmDate)[dtmDate] 
+		FROM tblICInventoryStockAsOfDate 
+		GROUP BY  intItemId,intItemLocationId,intItemUOMId
+	) STOCKDATE ON COSTING.intItemId = STOCKDATE.intItemId AND COSTING.intItemUOMId = STOCKDATE.intItemUOMId AND STOCKDATE.intItemLocationId = COSTING.intItemLocationId
+	INNER JOIN tblICItem ITEM ON  ITEM.intItemId = COSTING.intItemId
+	INNER JOIN tblICItemLocation LOC ON COSTING.intItemLocationId = LOC.intItemLocationId
+	INNER JOIN tblSMCompanyLocation CLOC ON LOC.intLocationId = CLOC.intCompanyLocationId
+	WHERE COSTING.dtmDate < STOCKDATE.dtmDate
+	AND I.[strType] = 'POS'	
 
 	-- IC In Transit Costing
 	DELETE FROM @ItemsForInTransitCosting

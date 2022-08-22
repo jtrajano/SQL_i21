@@ -44,6 +44,7 @@ SELECT DISTINCT
 	, NULL AS dblCaseExposure
 	, NULL AS dblBasisExposure
 	, NULL AS dblAvailForSale
+	, C.ysnExchangeTraded
 FROM tblICCommodity C
 INNER JOIN tblICCommodityUnitMeasure CUOM ON C.intCommodityId = CUOM.intCommodityId
 INNER JOIN tblICUnitMeasure UOM ON CUOM.intUnitMeasureId = UOM.intUnitMeasureId

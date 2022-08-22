@@ -115,6 +115,7 @@ CREATE TABLE #INVOICES (
 	 , ysnIncludeEntityName			BIT				NULL
 	 , strFooterComments			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	 , intOriginalInvoiceId			INT				NULL
+	 , intInventoryShipmentChargeId INT				NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -156,7 +157,7 @@ FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId DESC
 
 --COMPANY INFO
-SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(strCity, ''), '') + ISNULL(', ' + ISNULL(strState, ''), '') + ISNULL(', ' + ISNULL(strZip, ''), '') + ISNULL(', ' + ISNULL(strCountry, ''), '')
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
@@ -168,7 +169,7 @@ SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strLocationName			= L.strLocationName
 	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
 	 , strInvoiceComments		= L.strInvoiceComments
-	 , strFullAddress			= L.strAddress + CHAR(13) + char(10) + L.strCity + ', ' + L.strStateProvince + ', ' + L.strZipPostalCode + ', ' + L.strCountry 
+	 , strFullAddress			= L.strAddress + CHAR(13) + char(10) + ISNULL(ISNULL(L.strCity, ''), '') + ISNULL(', ' + ISNULL(L.strStateProvince, ''), '') + ISNULL(', ' + ISNULL(L.strZipPostalCode, ''), '') + ISNULL(', ' + ISNULL(L.strCountry, ''), '')
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
 
@@ -287,6 +288,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	 , ysnIncludeEntityName
 	 , strFooterComments
 	 , intOriginalInvoiceId
+	 , intInventoryShipmentChargeId
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -370,7 +372,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTotalProvisional		= CAST(0 AS NUMERIC(18, 6))
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CAST(0 AS BIT))
-	 , strTicketNumbers			= CAST('' AS NVARCHAR(500))
+	 , strTicketNumbers			= INV.strTicketNumbers
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
@@ -410,6 +412,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnIncludeEntityName		= CAST(0 AS BIT)
 	 , strFooterComments		= INV.strFooterComments
 	 , intOriginalInvoiceId		= INV.intOriginalInvoiceId
+	 , intInventoryShipmentChargeId = ISNULL(INVOICEDETAIL.intInventoryShipmentChargeId, 0)
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -458,7 +461,8 @@ LEFT JOIN (
 		 , strSubFormula			= ID.strSubFormula
 		 , strSCInvoiceNumber		= INVSC.strInvoiceNumber
 		 , dtmDateSC				= INVSC.dtmDate
-		 , dtmToCalculate			= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END		 
+		 , dtmToCalculate			= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END
+		 , intInventoryShipmentChargeId = ISNULL(ID.intInventoryShipmentChargeId, 0)
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblARInvoice INVSC ON INVSC.intInvoiceId = ID.intSCInvoiceId
@@ -577,26 +581,6 @@ INNER JOIN (
 	GROUP BY intInvoiceId
 	HAVING COUNT(*) > 0
 ) VFDDRUGITEM ON VFDDRUGITEM.intInvoiceId = I.intInvoiceId
-
---SCALE TICKETS
-UPDATE I
-SET strTicketNumbers = SCALETICKETS.strTicketNumbers
-FROM #INVOICES I
-CROSS APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
-	FROM (
-		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
-		INNER JOIN (
-			SELECT intTicketId
-				 , strTicketNumber 
-			FROM dbo.tblSCTicket WITH(NOLOCK)
-		) T ON ID.intTicketId = T.intTicketId
-		WHERE ID.intTicketId IS NOT NULL
-		  AND I.intInvoiceId = ID.intInvoiceId
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
 	 
 --UPDATE NEGATIVE AMOUNTS
 UPDATE I
@@ -796,6 +780,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , intDaysOld
 	 , strServiceChareInvoiceNumber
 	 , dtmDateSC
+	 , intInventoryShipmentChargeId
 )
 SELECT intInvoiceId
 	 , intCompanyLocationId
@@ -895,6 +880,7 @@ SELECT intInvoiceId
 	 , intDaysOld
 	 , strServiceChareInvoiceNumber
 	 , dtmDateSC
+	 , intInventoryShipmentChargeId
 FROM #INVOICES
 
 --UPDATE STAGING
@@ -917,7 +903,7 @@ OUTER APPLY (
 ) SUBFORMULA
 WHERE STAGING.intEntityUserId = @intEntityUserId 
   AND STAGING.strRequestId = @strRequestId 
-  AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
+  AND STAGING.strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 2')
   
 EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId
 
@@ -926,4 +912,4 @@ WHERE intEntityUserId = @intEntityUserId
   AND strRequestId = @strRequestId 
   AND ysnIncludeInvoicePrice = 1
   AND strInvoiceType = 'Transport Delivery'
-  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2')

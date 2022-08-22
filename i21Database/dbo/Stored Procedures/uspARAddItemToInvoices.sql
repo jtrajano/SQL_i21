@@ -230,6 +230,19 @@ IF EXISTS(SELECT TOP 1 NULL FROM @MiscItem)
 
 --EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
 
+DECLARE @strInvoiceIds NVARCHAR(MAX) = NULL
+SELECT @strInvoiceIds = LEFT(intInvoiceId, LEN(intInvoiceId) - 1)
+FROM (
+	SELECT DISTINCT CAST(intInvoiceId AS VARCHAR(200))  + ', '
+	FROM @InvoiceEntries
+	FOR XML PATH ('')
+) C (intInvoiceId)
+
+EXEC [dbo].[uspARInitializeTempTableForPosting] 
+EXEC [dbo].[uspARPopulateInvoiceDetailForPosting] @Param = @strInvoiceIds
+EXEC [dbo].[uspARPopulateInvoiceAccountForPosting] @Post = 1
+EXEC [dbo].[uspARUpdateTransactionAccountOnPost]
+
 
 IF ISNULL(@RaiseError,0) = 0
 BEGIN

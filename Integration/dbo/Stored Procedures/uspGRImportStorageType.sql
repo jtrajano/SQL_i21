@@ -334,7 +334,7 @@ BEGIN
 	  ---1. If any Storage Type is assocaited with Only "S" Storage Ticket and not with any "P" Storage Ticket then make the Offsite as Checked.
 	  IF EXISTS(SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='S' AND gastr_stor_type NOT IN (SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='P'))
 	  BEGIN
-		  UPDATE tblGRStorageType SET ysnCustomerStorage=1 WHERE strStorageTypeCode IN(SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='S' AND gastr_stor_type NOT IN (SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='P'))
+		  UPDATE tblGRStorageType SET ysnCustomerStorage=1 WHERE ISNUMERIC(strStorageTypeCode) = 1 AND strStorageTypeCode IN(SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='S' AND gastr_stor_type NOT IN (SELECT Distinct gastr_stor_type FROM gastrmst WHERE  gastr_pur_sls_ind='P'))
 	  END
 		
 END	
