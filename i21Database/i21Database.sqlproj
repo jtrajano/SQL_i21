@@ -8928,6 +8928,7 @@
     <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
