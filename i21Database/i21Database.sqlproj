@@ -844,6 +844,7 @@
     <Build Include="dbo\Tables\tblGLPostedCompare.sql" />
     <Build Include="dbo\Views\vyuGLSummaryCompare.sql" />
     <None Include="Scripts\Post-Deployment\IC\32_InventoryJournalLineDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdatePaymentIntegrations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
