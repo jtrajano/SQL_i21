@@ -41,34 +41,36 @@ BEGIN TRY
 	END
 
 	INSERT INTO @TradeFinanceLogs (
-		  strAction
-		, strTransactionType
-		, intTransactionHeaderId
-		, intTransactionDetailId
-		, strTransactionNumber
-		, strTradeFinanceTransaction
-		, dtmTransactionDate
-		, intBankId
-		, intBankAccountId
-		, intBorrowingFacilityId
-		, dblTransactionAmountAllocated
-		, dblTransactionAmountActual
-		, intLimitId
-		, dblLimit
-		, strBankTradeReference
-		, strBankApprovalStatus
-		, dtmAppliedToTransactionDate
-		, intStatusId
-		, intUserId
-		, intConcurrencyId
-		, dblFinanceQty
-		, dblFinancedAmount
-		, intContractHeaderId
-		, intContractDetailId
-		, intSublimitId
-		, strSublimit
-		, dblSublimit
-		, ysnDeleted
+		 strAction
+		,strTransactionType
+		,intTransactionHeaderId
+		,intTransactionDetailId
+		,strTransactionNumber
+		,strTradeFinanceTransaction
+		,dtmTransactionDate
+		,intBankId
+		,intBankAccountId
+		,intBorrowingFacilityId
+		,dblTransactionAmountAllocated
+		,dblTransactionAmountActual
+		,intLimitId
+		,dblLimit
+		,strBankTradeReference
+		,strBankApprovalStatus
+		,dtmAppliedToTransactionDate
+		,intStatusId
+		,intUserId
+		,intConcurrencyId
+		,dblFinanceQty
+		,dblFinancedAmount
+		,intContractHeaderId
+		,intContractDetailId
+		,intSublimitId
+		,strSublimit
+		,dblSublimit
+		,ysnDeleted
+		,intWarrantStatusId
+		,strWarrantId
 	)
 	SELECT
 		  strAction						= CASE WHEN @strAction = '' 
@@ -82,23 +84,23 @@ BEGIN TRY
 														 END   + ' ' + @TransactionType
 											   ELSE @strAction 
 										  END
-		, strTransactionType			= 'Sales'
-		, intTransactionHeaderId		= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
-		, intTransactionDetailId		= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
-		, strTransactionNumber			= CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
-		, strTradeFinanceTransaction	= ARI.strTransactionNo
-		, dtmTransactionDate			= GETDATE()
-		, intBankId						= ARI.intBankId
-		, intBankAccountId				= ARI.intBankAccountId
-		, intBorrowingFacilityId		= ARI.intBorrowingFacilityId
-		, dblTransactionAmountAllocated = CTCD.dblLoanAmount
-		, dblTransactionAmountActual	= CTCD.dblLoanAmount
-		, intLimitId					= ARI.intBorrowingFacilityLimitId
-		, dblLimit						= CMBFL.dblLimit
-		, strBankTradeReference			= ARI.strBankTradeReference
-		, strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
-		, dtmAppliedToTransactionDate	= GETDATE() 
-		, intStatusId					= CASE WHEN @intStatusId = 0
+		,strTransactionType				= 'Sales'
+		,intTransactionHeaderId			= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
+		,intTransactionDetailId			= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
+		,strTransactionNumber			= CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
+		,strTradeFinanceTransaction		= ARI.strTransactionNo
+		,dtmTransactionDate				= GETDATE()
+		,intBankId						= ARI.intBankId
+		,intBankAccountId				= ARI.intBankAccountId
+		,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
+		,dblTransactionAmountAllocated	= CTCD.dblLoanAmount
+		,dblTransactionAmountActual		= CTCD.dblLoanAmount
+		,intLimitId						= ARI.intBorrowingFacilityLimitId
+		,dblLimit						= CMBFL.dblLimit
+		,strBankTradeReference			= ARI.strBankTradeReference
+		,strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
+		,dtmAppliedToTransactionDate	= GETDATE() 
+		,intStatusId					= CASE WHEN @intStatusId = 0
 											   THEN CASE WHEN @FromPosting = 1 
 														 THEN 1
 														 ELSE
@@ -109,16 +111,18 @@ BEGIN TRY
 														 END
 											   ELSE @intStatusId 
 										  END
-		, intUserId						= @UserId
-		, intConcurrencyId				= 1 
-		, dblFinanceQty					= ISNULL(LS.dblNet, ARID.dblShipmentNetWt)
-		, dblFinancedAmount				= ARID.dblTotal + ARID.dblTotalTax
-		, intContractHeaderId			= LS.intContractHeaderId
-		, intContractDetailId			= LS.intContractDetailId
-		, intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
-		, strSublimit					= CMBFLD.strLimitDescription
-		, dblSublimit					= CMBFLD.dblLimit
-		, ysnDeleted					= @ForDelete
+		,intUserId						= @UserId
+		,intConcurrencyId				= 1 
+		,dblFinanceQty					= dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intOrderUOMId, ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped))
+		,dblFinancedAmount				= ARID.dblTotal + ARID.dblTotalTax
+		,intContractHeaderId			= LS.intContractHeaderId
+		,intContractDetailId			= LS.intContractDetailId
+		,intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
+		,strSublimit					= CMBFLD.strLimitDescription
+		,dblSublimit					= CMBFLD.dblLimit
+		,ysnDeleted						= @ForDelete
+		,intWarrantStatus				= LS.intWarrantStatus
+		,strWarrantNo					= LS.strWarrantNo
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 	ON ARI.intInvoiceId = ARID.intInvoiceId
@@ -139,7 +143,8 @@ BEGIN TRY
 			 ICIR.strApprovalStatus
 			,ICIRI.intContractHeaderId
 			,ICIRI.intContractDetailId
-			,dblNet						= ISNULL(LGLD.dblNet, ICIRI.dblNet)
+			,ICIRIL.intWarrantStatus
+			,ICIRIL.strWarrantNo
 		FROM tblLGLoadDetailLot LGLD
 		LEFT JOIN tblICInventoryReceiptItemLot ICIRIL ON ICIRIL.intLotId = LGLD.intLotId
 		LEFT JOIN tblICInventoryReceiptItem ICIRI ON ICIRI.intInventoryReceiptItemId = ICIRIL.intInventoryReceiptItemId
