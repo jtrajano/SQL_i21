@@ -59,6 +59,7 @@ BEGIN TRY
 		,ysnDeleted
 		,intWarrantStatusId
 		,strWarrantId
+		,intOverrideBankValuationId
 	)
 	SELECT
 		 strAction						= CASE WHEN @ForDelete = 1 THEN 'Deleted ' ELSE ISNULL(ARAL.strActionType, 'Created') END + ' ' + @TransactionType
@@ -91,6 +92,7 @@ BEGIN TRY
 		,ysnDeleted						= @ForDelete
 		,intWarrantStatus				= LS.intWarrantStatus
 		,strWarrantNo					= LS.strWarrantNo
+		,intOverrideBankValuationId		= ARI.intBankValuationRuleId
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 	ON ARI.intInvoiceId = ARID.intInvoiceId
