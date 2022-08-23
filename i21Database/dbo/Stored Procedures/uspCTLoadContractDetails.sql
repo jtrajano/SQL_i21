@@ -355,6 +355,7 @@ BEGIN TRY
 		, CD.strPackingDescription
 		, CD.dblYield
 		, CD.intCurrencyExchangeRateId
+		, CD.intRevaluationCurrencyExchangeRateId
 		, CD.intRateTypeId
 		, CD.intCreatedById
 		, CD.dtmCreated
@@ -452,6 +453,7 @@ BEGIN TRY
 		, strDestinationCity = dbo.[fnCTGetSeqDisplayField](CD.intDestinationCityId, 'tblSMCity')
 		, strInvoiceCurrency = IY.strCurrency
 		, strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
+		, strRevaluationExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intRevaluationCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 		, strPurchasingGroup = PG.strName
 		, strFXPriceUOM = dbo.[fnCTGetSeqDisplayField](CD.intFXPriceUOMId, 'tblICItemUOM')
 		, RT.strCurrencyExchangeRateType
