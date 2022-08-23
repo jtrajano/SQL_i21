@@ -113,7 +113,8 @@ INSERT INTO @payables
 	,[intCurrencyExchangeRateTypeId]	
 	,[dblExchangeRate]				
 	/*Tax info*/
-	,[intPurchaseTaxGroupId]			
+	,[intPurchaseTaxGroupId]
+	,[ysnOverrideTaxGroup]			
 	,[dblTax]						
 	/*Discount Info*/
 	,[dblDiscount]					
@@ -137,7 +138,28 @@ INSERT INTO @payables
 	,[int1099Form]					
 	,[int1099Category]				
 	,[dbl1099]						
-	,[ysnStage]						
+	,[ysnStage]		
+	/*Payment Info*/
+	,[intPayFromBankAccountId]
+	,[strFinancingSourcedFrom]
+	,[strFinancingTransactionNumber]
+	/*Trade Finance Info*/
+	,[strFinanceTradeNo]
+	,[intBankId]
+	,[intBankAccountId]
+	,[intBorrowingFacilityId]
+	,[strBankReferenceNo]
+	,[intBorrowingFacilityLimitId]
+	,[intBorrowingFacilityLimitDetailId]
+	,[strReferenceNo]
+	,[intBankValuationRuleId]
+	,[strComments]
+	/*Quality and Optionality Premium*/
+	,[dblQualityPremium]
+ 	,[dblOptionalityPremium]
+	 /*Tax Override*/
+	,[strTaxPoint]
+	,[intTaxLocationId]			
 )
 SELECT 
 	[intEntityVendorId]				
@@ -217,7 +239,8 @@ SELECT
 	,[intCurrencyExchangeRateTypeId]	
 	,[dblExchangeRate]				
 	/*Tax info*/
-	,[intPurchaseTaxGroupId]			
+	,[intPurchaseTaxGroupId]
+	,[ysnOverrideTaxGroup]		
 	,[dblTax]						
 	/*Discount Info*/
 	,[dblDiscount]					
@@ -242,6 +265,27 @@ SELECT
 	,[int1099Category]				
 	,[dbl1099]						
 	,[ysnStage]	
+	/*Payment Info*/
+	,[intPayFromBankAccountId]
+	,[strFinancingSourcedFrom]
+	,[strFinancingTransactionNumber]
+	/*Trade Finance Info*/
+	,[strFinanceTradeNo]
+	,[intBankId]
+	,[intBankAccountId]
+	,[intBorrowingFacilityId]
+	,[strBankReferenceNo]
+	,[intBorrowingFacilityLimitId]
+	,[intBorrowingFacilityLimitDetailId]
+	,[strReferenceNo]
+	,[intBankValuationRuleId]
+	,[strComments]
+	/*Quality and Optionality Premium*/
+	,[dblQualityPremium]
+ 	,[dblOptionalityPremium]
+	 /*Tax Override*/
+	,[strTaxPoint]
+	,[intTaxLocationId]
 FROM dbo.fnAPCreateVoucherPayable(@payableIds);
 
 SET @payableIdIdentity = SCOPE_IDENTITY();
