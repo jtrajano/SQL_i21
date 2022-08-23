@@ -17,17 +17,18 @@ SELECT ST.*
 	   , CL.strLocationName
 	   , CL.strLocationType
 	   , EM.strEntityNo AS strVendorId
-	   , strATMFundBegBalanceItemId 	 = 	  ATMFundBegBalanceItem.strItemNo
-	   , strATMFundReplenishedItemId	 = 	  ATMFundReplenishedItem.strItemNo
-	   , strATMFundWithdrawalItemId		 = 	  ATMFundWithdrawalItem.strItemNo
-	   , strATMFundEndBalanceItemId		 = 	  ATMFundEndBalanceItem.strItemNo
-	   , strATMFundVarianceItemId		 = 	  ATMFundVarianceItem.strItemNo
-	   , strChangeFundBegBalanceItemId	 = 	  ChangeFundBegBalanceItem.strItemNo
-	   , strChangeFundEndBalanceItemId	 = 	  ChangeFundEndBalanceItem.strItemNo
-	   , strChangeFundReplenishItemId	 = 	  ChangeFundReplenishItem.strItemNo
-	   , strConsBankDepositDraftId		 =	  Bank.strBankName + ' - ' + dbo.fnAESDecryptASym(ConsBankDepositDraftId.strBankAccountNo)
-	   , strConsARAccountId				 =	  ConsARAccountId.strAccountId
-	   , strConsFuelOverShortItem		 =    FuelItemOverShort.strItemNo
+	   , strATMFundBegBalanceItemId 		 = 	  ATMFundBegBalanceItem.strItemNo
+	   , strATMFundReplenishedItemId		 = 	  ATMFundReplenishedItem.strItemNo
+	   , strATMFundWithdrawalItemId			 = 	  ATMFundWithdrawalItem.strItemNo
+	   , strATMFundEndBalanceItemId			 = 	  ATMFundEndBalanceItem.strItemNo
+	   , strATMFundVarianceItemId			 = 	  ATMFundVarianceItem.strItemNo
+	   , strChangeFundBegBalanceItemId		 = 	  ChangeFundBegBalanceItem.strItemNo
+	   , strChangeFundEndBalanceItemId		 = 	  ChangeFundEndBalanceItem.strItemNo
+	   , strChangeFundReplenishItemId		 = 	  ChangeFundReplenishItem.strItemNo
+	   , strConsBankDepositDraftId			 =	  Bank.strBankName + ' - ' + dbo.fnAESDecryptASym(ConsBankDepositDraftId.strBankAccountNo)
+	   , strConsStoreCashInTransitAccountId	 =	  ConsStoreCasInTransitAccountId.strAccountId
+	   , strConsARAccountId					 =	  ConsARAccountId.strAccountId
+	   , strConsFuelOverShortItem			 =    FuelItemOverShort.strItemNo
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
@@ -78,3 +79,5 @@ LEFT JOIN tblCMBank Bank
 	ON ConsBankDepositDraftId.intBankId = Bank.intBankId
 LEFT JOIN tblGLAccount ConsARAccountId
 	ON ST.intConsARAccountId = ConsARAccountId.intAccountId
+LEFT JOIN tblGLAccount ConsStoreCasInTransitAccountId
+	ON ST.intConsStoreCashInTransitAccountId = ConsStoreCasInTransitAccountId.intAccountId
