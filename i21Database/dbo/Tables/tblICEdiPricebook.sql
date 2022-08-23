@@ -73,7 +73,21 @@
 	strOpenPLU NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strFoodStamp NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strInventoryType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCNumber1] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCModifier1] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCUOM1] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCQuantity1] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strPurchaseSale1] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCCost1] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCPrice1] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCNumber2] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCModifier2] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCUOM2] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCQuantity2] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strPurchaseSale2] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCCost2] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strAltUPCPrice2] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL
 )
 GO
 
