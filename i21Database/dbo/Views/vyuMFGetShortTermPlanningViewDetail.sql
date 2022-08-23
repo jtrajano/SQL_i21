@@ -33,7 +33,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,CASE 
 		WHEN D.intAttributeId IN (5,12,13)
 			THEN D.dblQty
-		ELSE LC.dblQuantity
+		ELSE LC.dblQuantity-ISNULL(LDCL.dblReceivedQty, 0)
 		END dblQty
 	,CASE 
 		WHEN D.intAttributeId = 5
@@ -43,7 +43,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,CASE 
 		WHEN D.intAttributeId IN (5,12,13)
 			THEN D.dblWeight
-		ELSE LC.dblNetWt
+		ELSE LC.dblNetWt-(dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, CD.intUnitMeasureId, IU.intUnitMeasureId,  ISNULL(LDCL.dblReceivedQty, 0)))
 		END AS dblWeight
 	,CASE 
 		WHEN D.intAttributeId = 5
