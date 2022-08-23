@@ -122,6 +122,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	strPackingDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dblYield NUMERIC(18, 6) NULL, 
 	intCurrencyExchangeRateId INT NULL,
+	intRevaluationCurrencyExchangeRateId INT NULL,
 	intRateTypeId INT NULL,
     intCreatedById INT,
 	dtmCreated DATETIME,
@@ -306,6 +307,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRateType_intRateTypeId_intCurrencyExchangeRateId] FOREIGN KEY (intRateTypeId) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+
+
 	--CONSTRAINT [FK_tblCTContractDetail_tblEMEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMPurchasingGroup_intPurchasingGroupId] FOREIGN KEY ([intPurchasingGroupId]) REFERENCES [tblSMPurchasingGroup]([intPurchasingGroupId]),

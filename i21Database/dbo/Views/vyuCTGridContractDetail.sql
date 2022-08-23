@@ -234,6 +234,7 @@ AS
 			DY.strCity						AS	strDestinationCity,
 			IY.strCurrency AS strInvoiceCurrency,
 			FY.strCurrency + '/' + TY.strCurrency AS strExchangeRate,
+			RFY.strCurrency + '/' + RTY.strCurrency AS strRevaluationExchangeRate,
 			PG.strName						AS	strPurchasingGroup,
 			FM.strUnitMeasure				AS	strFXPriceUOM,
 			RT.strCurrencyExchangeRateType,
@@ -415,8 +416,14 @@ AS
 	LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
 	LEFT    JOIN	tblSMCurrency					MY	ON	MY.intCurrencyID					=		MA.intCurrencyId			--strMarketCurrency
 	LEFT    JOIN	tblSMCurrencyExchangeRate		ER	ON	ER.intCurrencyExchangeRateId		=		CD.intCurrencyExchangeRateId--strExchangeRate
+	
 	LEFT    JOIN	tblSMCurrency					FY	ON	FY.intCurrencyID					=		ER.intFromCurrencyId			
 	LEFT    JOIN	tblSMCurrency					TY	ON	TY.intCurrencyID					=		ER.intToCurrencyId	
+
+	LEFT    JOIN	tblSMCurrencyExchangeRate		RER	ON	RER.intCurrencyExchangeRateId		=		CD.intRevaluationCurrencyExchangeRateId--strRevaluationExchangeRate
+	LEFT    JOIN	tblSMCurrency					RFY	ON	RFY.intCurrencyID					=		RER.intFromCurrencyId			
+	LEFT    JOIN	tblSMCurrency					RTY	ON	RTY.intCurrencyID					=		RER.intToCurrencyId	
+
 	LEFT    JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CD.intRateTypeId
 	LEFT    JOIN	tblSMCurrencyExchangeRateType	HRT	ON	HRT.intCurrencyExchangeRateTypeId	=		CD.intHistoricalRateTypeId
 	LEFT    JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId					=		CD.intFreightTermId			--strFreightTerm

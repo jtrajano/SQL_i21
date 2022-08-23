@@ -32,7 +32,10 @@ BEGIN
 			@strContractItemName	NVARCHAR(100),
 			@strEntityName			NVARCHAR(100),
 			@intBrokerageAccountId	INT,
-			@strAccountNumber		NVARCHAR(100)
+			@strAccountNumber		NVARCHAR(100),
+			@intDefaultCurrencyId INT,
+			@intRevaluationCurrencyExchangeRateId INT,
+			@strRevaluationExchangeRate varchar(100)
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
 			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
@@ -241,6 +244,24 @@ BEGIN
 			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
 			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
 			WHERE	intToCurrencyId = @intInvoiceCurrencyId AND intFromCurrencyId = @intCurrencyId
+		END
+	END
+
+	
+	IF @strType = 'Revaluation'
+	BEGIN
+
+		
+		SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId from tblSMCompanyPreference
+		IF @intDefaultCurrencyId <> @intInvoiceCurrencyId
+		BEGIN
+			SELECT	 intCurrencyExchangeRateId
+				, 'From ' + FC.strCurrency +' To ' + TC.strCurrency 
+				, (SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
+			FROM	tblSMCurrencyExchangeRate ER
+			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
+			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
+			WHERE	intToCurrencyId = @intDefaultCurrencyId AND intFromCurrencyId = @intInvoiceCurrencyId
 		END
 	END
 
