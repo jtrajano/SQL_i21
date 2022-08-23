@@ -8,6 +8,8 @@ BEGIN
 		,intInvoiceCnt	 int
 	);
 
+	declare @cnt int;
+
 	INSERT INTO @tbl
 		select fd.intPriceFixationDetailId, inv.intInvoiceCnt
 		from tblCTPriceFixation pf
@@ -23,14 +25,25 @@ BEGIN
 	end
 	else
 	begin
-		if exists (select top 1 1 from @tbl where isnull(intInvoiceCnt,0) = 0)
+
+		select @cnt = count(*) from @tbl;
+		if (@cnt > 1)
 		begin
-			select intResult = 1
+			if exists (select top 1 1 from @tbl where isnull(intInvoiceCnt,0) = 0)
+			begin
+				select intResult = 1
+			end
+			else
+			begin
+				select intResult = 0
+			end
 		end
 		else
 		begin
-			select intResult = 0
+			select intResult = 1
 		end
+
+
 	end
 
 END
