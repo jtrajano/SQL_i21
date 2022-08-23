@@ -1257,6 +1257,113 @@ BEGIN
 	,E.strName
 	,B.strComment
 
+	--TAX ADJUSTMENT FOR OVERRIDE TAX LOCATION CREDIT
+	UNION ALL 
+	SELECT
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	dbo.[fnGetItemGLAccount](G.intItemId, ISNULL(H.intItemLocationId, I.intItemLocationId), 'AP Clearing'),
+		[dblDebit]						=	0,
+		[dblCredit]						=	CAST(C.dblSourceTransactionTax * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	NULL,
+		[strCode]						=	'AP',	
+		[strReference]					=	D.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	F.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	C.intSourceTransactionDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,   
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	CAST(C.dblSourceTransactionTax AS DECIMAL(18,2)),
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	F.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
+	CROSS APPLY dbo.fnAPGetDetailSourceTransactionTaxes(B.intInventoryReceiptItemId, B.intInventoryReceiptChargeId, B.intInventoryShipmentChargeId) C
+	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	LEFT JOIN tblICItem G ON G.intItemId = B.intItemId
+	LEFT JOIN tblICItemLocation H ON H.intItemId = B.intItemId AND H.intLocationId = B.intLocationId
+	LEFT JOIN tblICItemLocation I ON I.intItemId = B.intItemId AND I.intLocationId = A.intShipToId
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND B.ysnOverrideTaxGroup = 1
+
+	--TAX ADJUSTMENT FOR OVERRIDE TAX LOCATION DEBIT
+	UNION ALL 
+	SELECT
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	C.intSourceTaxAccountId,
+		[dblDebit]						=	CAST(C.dblSourceTransactionTax * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	NULL,
+		[strCode]						=	'AP',	
+		[strReference]					=	D.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	F.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	C.intSourceTransactionDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	CAST(C.dblSourceTransactionTax AS DECIMAL(18,2)),   
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	F.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
+	CROSS APPLY dbo.fnAPGetDetailSourceTransactionTaxes(B.intInventoryReceiptItemId, B.intInventoryReceiptChargeId, B.intInventoryShipmentChargeId) C
+	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND B.ysnOverrideTaxGroup = 1
+
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A

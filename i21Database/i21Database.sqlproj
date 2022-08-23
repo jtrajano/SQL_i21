@@ -853,6 +853,7 @@
     <Build Include="dbo\Functions\fnGLGetForwardBalanceAndUnit.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForOrigin.sql" />
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
+    <Build Include="dbo\Functions\fnAPGetDetailSourceTransactionTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
