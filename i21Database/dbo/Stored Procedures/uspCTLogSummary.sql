@@ -1613,9 +1613,9 @@ BEGIN TRY
 					, cbl.intPriceUOMId
 					, cbl.dtmStartDate
 					, cbl.dtmEndDate
-					, dblQty = @dblTransactionQty
-					, dblOrigQty = @dblTransactionQty
-					, dblDynamic = @dblTransactionQty
+					, dblQty = case when isnull(@dblTransactionQty,0) = 0 then bd.dblQtyReceived * -1 else @dblTransactionQty end
+					, dblOrigQty = case when isnull(@dblTransactionQty,0) = 0 then bd.dblQtyReceived else @dblTransactionQty end
+					, dblDynamic = case when isnull(@dblTransactionQty,0) = 0 then bd.dblQtyReceived else @dblTransactionQty end
 					, cbl.intContractStatusId
 					, cbl.intBookId
 					, cbl.intSubBookId
