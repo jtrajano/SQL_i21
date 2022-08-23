@@ -15,6 +15,7 @@ UPDATE		tblRMConnection
 SET			strPassword = dbo.fnAESEncryptASym(ISNULL(strPassword, ''))
 WHERE		dbo.fnAESDecryptASym(strPassword) IS NULL
 
+
 PRINT('/*******************  END PASSWORD ENCRYPTION *******************/')
 
 GO
