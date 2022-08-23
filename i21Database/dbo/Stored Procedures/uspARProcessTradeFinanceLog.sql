@@ -71,6 +71,7 @@ BEGIN TRY
 		,ysnDeleted
 		,intWarrantStatusId
 		,strWarrantId
+		,intOverrideBankValuationId
 	)
 	SELECT
 		  strAction						= CASE WHEN @strAction = '' 
@@ -123,6 +124,7 @@ BEGIN TRY
 		,ysnDeleted						= @ForDelete
 		,intWarrantStatus				= LS.intWarrantStatus
 		,strWarrantNo					= LS.strWarrantNo
+		,intOverrideBankValuationId		= ARI.intBankValuationRuleId
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 	ON ARI.intInvoiceId = ARID.intInvoiceId
