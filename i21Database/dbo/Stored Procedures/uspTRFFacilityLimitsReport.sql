@@ -695,7 +695,7 @@ AS
  		, voucher.intBillId
  		, strInvoiceNumber = bill.strVendorOrderNumber
  		, strSupplierVoucherReference = voucher.strBillId
- 		, dblPurchaseInvoiceAmount = bill.dblTotalController
+ 		, dblPurchaseInvoiceAmount = bill.dblTotal --bill.dblTotalController
  		, dtmVoucherDate = bill.dtmDate
  		, dtmVoucherDueDate = bill.dtmDueDate
  		, dblVoucherPaidAmount = bill.dblPayment
