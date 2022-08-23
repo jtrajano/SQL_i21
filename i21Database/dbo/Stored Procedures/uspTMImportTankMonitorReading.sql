@@ -358,12 +358,17 @@
 					end
 				end
 			
-				PRINT @ta_ltankcrit
-				IF(@ta_ltankcrit = 1)
+				IF @ta_ltankcrit = 1
 				BEGIN
 					GOTO CREATECALLENTRY
 				END
-				ELSE IF @intInterfaceTypeId = 1 AND @ta_ltankcrit = 0
+				ELSE IF (@intInterfaceTypeId = 1 AND (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
+									FROM tblTMSite 
+									WHERE intSiteID = @siteId),0) <= 5))
+				BEGIN
+					GOTO CREATECALLENTRY
+				END
+				ELSE IF @intInterfaceTypeId = 1
 				BEGIN
 					-- LOG to tblTMImportTankReadingDetail
 					INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
@@ -392,17 +397,7 @@
 
 				END
 			END
-			ELSE
-			BEGIN
-				IF (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
-							FROM tblTMSite 
-							WHERE intSiteID = @siteId),0) <= 5)
-				BEGIN
-					GOTO CREATECALLENTRY
-				END
-			END
-		
-			
+	
 		
 			RETURN;
 			CREATECALLENTRY:
