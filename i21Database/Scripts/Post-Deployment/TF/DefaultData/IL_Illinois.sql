@@ -1670,7 +1670,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 		, intFrequency
 		, intMasterId
 	)
-	SELECT intFilingPacketId = 0, strFormCode = 'E-file', strScheduleCode = '', strType = 'Text File', ysnStatus = 1, intFrequency = 1, intMasterId = 132590
+	SELECT intFilingPacketId = 0, strFormCode = 'E-file', strScheduleCode = 'E-file', strType = 'Text File', ysnStatus = 1, intFrequency = 1, intMasterId = 132590
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'A', strType = 'Imported, Both MFT- and UST-/EIF-free', ysnStatus = 1, intFrequency = 1, intMasterId = 132293
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'A', strType = 'Imported, MFT-free Only', ysnStatus = 1, intFrequency = 1, intMasterId = 132291
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'A', strType = 'Imported, UST-/EIF-free Only', ysnStatus = 1, intFrequency = 1, intMasterId = 132292
