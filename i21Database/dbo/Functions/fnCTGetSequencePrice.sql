@@ -118,10 +118,10 @@ BEGIN
 				SELECT @dblSeqPrice = @dblSettlementPrice +@dblBasis
 
 			SELECT @dblSeqPrice = CASE 
-								  WHEN @ysnSubCurrency = 1 AND @ysnValidFX = 1
-									 THEN (@dblSeqPrice / 100) * ISNULL(@dblRate, 1 )
-								  ELSE @dblSeqPrice
-								  END
+								  WHEN @ysnSubCurrency = 1 
+									 THEN (@dblSeqPrice / 100) 
+								  ELSE @dblSeqPrice  
+								  END * ISNULL(@dblRate, 1 )
 		END
 	END
 
