@@ -787,7 +787,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '06-168GD', strScheduleCode = '06-159', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433389
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '06-168GD', strScheduleCode = '06-161', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433390
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '06-168GD', strScheduleCode = '06-190', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433391
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TX E-file', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433392
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TX E-file', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433392
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
