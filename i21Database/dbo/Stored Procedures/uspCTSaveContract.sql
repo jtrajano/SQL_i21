@@ -59,7 +59,6 @@ BEGIN TRY
 			@intLCApplicantId			INT,
             @strLCType					NVARCHAR(100),
             @strLCNumber				NVARCHAR(50),
-			@ysnRoll				    BIT = 0,
 			@intCostTermId				INT
 
 
@@ -279,7 +278,6 @@ BEGIN TRY
 				@dblOriginalBasis	=	NULL,
 				@ysnSlice			=	NULL,
 				@strLCNumber		=	null,
-				@ysnRoll			=	null,
 				@intCostTermId		=	NULL
 
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
@@ -302,7 +300,6 @@ BEGIN TRY
 				@strLCNumber		=	strLCNumber,
 				@intLCApplicantId	=	intLCApplicantId,
 				@strLCType			=	strLCType,
-				@ysnRoll			=	ysnRoll,
 				@intCostTermId		=	intCostTermId
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
