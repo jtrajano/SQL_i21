@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSMLabels]
 AS
 
-SELECT DISTINCT strLabel FROM (  
+SELECT DISTINCT  CAST(ROW_NUMBER() OVER(ORDER BY (SELECT 1)) AS int) as intLabelId, strLabel FROM (  
 	SELECT strLabel from tblSMScreenLabel 
 		UNION  
 	SELECT strMenuName strLabel from tblSMMasterMenu  

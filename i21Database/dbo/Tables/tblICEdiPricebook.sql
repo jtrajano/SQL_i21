@@ -73,7 +73,21 @@
 	strOpenPLU NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strFoodStamp NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strInventoryType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCNumber1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCModifier1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCUOM1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCQuantity1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strPurchaseSale1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCCost1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCPrice1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCNumber2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCModifier2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCUOM2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCQuantity2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strPurchaseSale2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCCost2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAltUPCPrice2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 GO
 

@@ -142,6 +142,7 @@
     [dblConsCommissionDealerPercentage] DECIMAL(18,6) NOT NULL DEFAULT 0,
     [ysnConsBankDepositDraft] BIT NOT NULL DEFAULT 1,
     [intConsBankDepositDraftId] INT NULL,
+    [intConsStoreCashInTransitAccountId] INT NULL,
     [intConsARAccountId] INT NULL,
     [intConsFuelOverShortItemId] INT NULL,
     [intConsDealerCommissionItemId] INT NULL,

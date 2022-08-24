@@ -105,7 +105,7 @@ OUTER APPLY(
 	AND (CASE WHEN BD.intLedgerId IS NOT NULL 
 					THEN CASE WHEN (intLedgerId = BD.intLedgerId) THEN 1 ELSE 0 END
 					ELSE 1 END) = 1
-	ORDER BY intAssetDepreciationId DESC
+	ORDER BY dtmDepreciationToDate DESC, intAssetDepreciationId DESC
 )Depreciation
 OUTER APPLY (
 	SELECT dtmEndDate FROM [dbo].[fnFAGetMonthPeriodFromDate](A.dtmImportedDepThru, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
@@ -154,7 +154,10 @@ BEGIN
 	FROM @tblAssetInfo A
 	OUTER APPLY (
 		SELECT MAX(dblDepreciationToDate) dblDepreciationToDate FROM tblFAFixedAssetDepreciation 
-		WHERE dtmDepreciationToDate <= @dtmBasisAdjustment AND intAssetId = A.intAssetId and intBookId = @BookId AND intLedgerId = A.intLedgerId
+		WHERE dtmDepreciationToDate <= @dtmBasisAdjustment AND intAssetId = A.intAssetId and intBookId = @BookId
+		AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = A.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 	) DepBeforeAdjustment
 END
 
@@ -180,7 +183,10 @@ JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= M.intDepreciationMe
 OUTER APPLY(
 	SELECT COUNT (*) + 1 intMonth
 	FROM tblFAFixedAssetDepreciation B
-	WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = @BookId AND B.intLedgerId = T.intLedgerId
+	WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = @BookId
+	AND (CASE WHEN B.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (B.intLedgerId = T.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 	AND strTransaction = 'Depreciation'
 ) D
 OUTER APPLY(
@@ -214,9 +220,12 @@ BEGIN
 			A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0),
 			A.dblMonth = ISNULL(A.dblMonth, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
 		FROM  @tblAssetInfo A
-		JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId AND BD.intLedgerId = A.intLedgerId
+		JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
 		JOIN @Id I ON I.intId = A.intAssetId
 		WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+		AND (CASE WHEN BD.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = A.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 
 	-- If sum of Section179 and BonusDepreciation (current dblDepre) is greater than or equal to the basis, skip monthly depreciation
 	IF EXISTS(SELECT TOP 1 1 FROM  @tblAssetInfo A JOIN @Id I ON I.intId = A.intAssetId 
@@ -305,7 +314,10 @@ IF (@ysnDepreciationAdjustBasis = 0) -- Adjust monthly depreciation between curr
 	FROM @tblAssetInfo T
 	JOIN tblFABasisAdjustment B ON B.intAssetId = T.intAssetId AND B.intBookId = @BookId
 	OUTER APPLY (
-		SELECT MAX(dtmDepreciationToDate) dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intAssetId = T.intAssetId AND intBookId = @BookId AND strTransaction = 'Depreciation' AND intLedgerId = T.intLedgerId
+		SELECT MAX(dtmDepreciationToDate) dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intAssetId = T.intAssetId AND intBookId = @BookId AND strTransaction = 'Depreciation'
+		AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = T.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 	) Depreciation
 	WHERE B.dtmDate BETWEEN Depreciation.dtmDepreciationToDate AND dbo.fnFAGetNextDepreciationDate(B.intAssetId, @BookId, T.intLedgerId) AND B.strAdjustmentType = 'Depreciation'
 
@@ -324,7 +336,10 @@ BEGIN
 	FROM  @tblAssetInfo A
 	JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
 	JOIN @Id I ON I.intId = A.intAssetId
-	WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1 AND BD.intLedgerId = A.intLedgerId
+	WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+	AND (CASE WHEN BD.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = A.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 
 	IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE dblDepreciationBasis < dblDepre)
 		GOTO Basis_Limit_Reached
@@ -340,14 +355,20 @@ SET
 	dblMonth = dblBasis - U.dblDepreciationToDate
 FROM @tblAssetInfo B 
 JOIN tblFABookDepreciation BD 
-	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId AND BD.intLedgerId = B.intLedgerId
+	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
 OUTER APPLY(
 	SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
-	tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId AND intLedgerId = B.intLedgerId
+	tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+	AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = B.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 ) U
 WHERE 
 	dblDepre > dblBasis AND 
 	strError IS NULL 
+	AND (CASE WHEN BD.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = B.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 
 
 --imported assets
@@ -381,7 +402,9 @@ OUTER APPLY
 	FROM tblFAFixedAssetDepreciation
 	WHERE intAssetId = A.intAssetId
 	AND intBookId = @BookId
-	AND intLedgerId = A.intLedgerId
+	AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = A.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
 OUTER APPLY(
@@ -414,15 +437,21 @@ UPDATE B set dblDepre = dblBasis,
 	dblMonth = dblBasis - U.dblDepreciationToDate
 	FROM @tblAssetInfo B JOIN
 	tblFABookDepreciation BD 
-	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId AND BD.intLedgerId = B.intLedgerId
+	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
 	OUTER APPLY(
 		SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
-		tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId AND intLedgerId = B.intLedgerId
+		tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+		AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = B.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 	) U
 	WHERE dblDepre < dblBasis 
 	AND intMonth > totalMonths
 	AND strConvention NOT IN ('Full Month', 'Mid Quarter', 'Mid Year')
 	AND ISNULL(BD.ysnFullyDepreciated,0) = 0
+	AND (CASE WHEN BD.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (BD.intLedgerId = B.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 
 --ROUND OFF TO NEAREAST HUNDREDTHS
 UPDATE @tblAssetInfo

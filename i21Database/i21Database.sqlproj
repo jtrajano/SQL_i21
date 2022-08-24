@@ -1100,10 +1100,10 @@
     <Build Include="dbo\Tables\tblIPInvReceiptItemLotArchive.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptItemLotError.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptItemLotStage.sql" />
-    <Build Include="dbo\Tables\tblTMCompanyConsumptionSite.sql" />
+	<Build Include="dbo\Tables\tblTMCompanyConsumptionSite.sql" />
     <Build Include="dbo\Tables\tblTMCompanySiteDevice.sql" />
     <Build Include="dbo\Views\vyuTMCompanyConsumptionSite.sql" />
-    <Build Include="dbo\Views\vyuTMCompanySiteDevice.sql" />
+	<Build Include="dbo\Views\vyuTMCompanySiteDevice.sql" />
     <Build Include="dbo\Views\vyuTMCompanySiteEvent.sql" />
     <Build Include="dbo\Views\vyuTMCompanySiteWorkOrder.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
@@ -10903,6 +10903,7 @@
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
