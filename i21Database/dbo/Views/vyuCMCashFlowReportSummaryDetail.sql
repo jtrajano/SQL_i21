@@ -28,7 +28,7 @@ SELECT
 	GLAccount.strAccountId,
 	Detail.intBankAccountId,
 	dbo.fnAESDecryptASym(BankAccount.strBankAccountNo) strBankAccountId,
-	strBankName = ISNULL(BankFromDetail.strBankName, Bank.strBankName),
+	Bank.strBankName,
 	Detail.intCompanyLocationId,
 	CompanyLocation.strLocationName strCompanyLocation,
 	Detail.intConcurrencyId
@@ -39,8 +39,6 @@ LEFT JOIN tblCMBankAccount BankAccount
 	ON BankAccount.intBankAccountId = Detail.intBankAccountId
 LEFT JOIN tblCMBank Bank
 	ON Bank.intBankId = BankAccount.intBankId
-LEFT JOIN tblCMBank BankFromDetail
-	ON BankFromDetail.intBankId = Detail.intBankId
 LEFT JOIN tblGLAccount GLAccount
 	ON GLAccount.intAccountId = Detail.intAccountId
 LEFT JOIN tblSMCurrency Currency
