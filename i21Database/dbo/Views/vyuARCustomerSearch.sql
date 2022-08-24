@@ -81,6 +81,11 @@ SELECT intEntityId				= ENTITY.intEntityId
      , dblHighestAR             = CUSTOMER.dblHighestAR
      , dtmHighestARDate         = CUSTOMER.dtmHighestARDate
      , dtmHighestDueARDate      = CUSTOMER.dtmHighestDueARDate
+
+
+	 , intTicketCopies 			= CUSTOMERLOCATION.intTicketCopies
+	 , ysnRequireStickReading	= CUSTOMERLOCATION.ysnRequireStickReading
+	 , ysnPrintPriceOnPrintTicket = CUSTOMER.ysnPrintPriceOnPrintTicket
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -121,6 +126,7 @@ INNER JOIN (
          , dblHighestAR
          , dtmHighestARDate
          , dtmHighestDueARDate
+		 , ysnPrintPriceOnPrintTicket
 	FROM dbo.tblARCustomer C WITH (NOLOCK)	
 	LEFT JOIN (
 		SELECT intTermID
@@ -180,6 +186,8 @@ LEFT JOIN (
 		 , strWarehouseName	= WH.strWarehouseName
 		 , strLocationName
 		 , strCountry
+		 , intTicketCopies
+		 , ysnRequireStickReading
 	FROM dbo.tblEMEntityLocation L WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intTaxGroupId
