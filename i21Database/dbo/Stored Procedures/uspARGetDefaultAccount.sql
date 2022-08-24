@@ -8,21 +8,37 @@
 	, @intCompanyAccountSegmentId	INT				= NULL OUTPUT
 AS	
 
-DECLARE @intARAccountId 				INT = NULL
-	  , @intProfitCenterId				INT = NULL
-      , @strSalesCompanyLocation		NVARCHAR(250)	= NULL
+DECLARE  @intCompanySegment			INT
+		,@intARAccountId 			INT = NULL
+		,@strARAccountId			NVARCHAR (40)
+		,@strSalesCompanyLocation	NVARCHAR(250)	= NULL
+		,@ysnActive					BIT = 0
 
-SET @intARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
-
-SELECT @strSalesCompanyLocation = strLocationName
-	 , @intProfitCenterId		= intProfitCenter
+SELECT 
+	 @strSalesCompanyLocation	= strLocationName
+	,@intProfitCenterId			= intProfitCenter
+	,@intCompanySegment			= intCompanySegment
+	,@intARAccountId			= intARAccount
 FROM tblSMCompanyLocation
 WHERE intCompanyLocationId = @intCompanyLocationId
 
-SELECT @strErrorMsg = 'Default AR Account ' + strAccountId + ' for company location ' + @strSalesCompanyLocation + ' is inactive.'
+SET @strARAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
+						 [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
+						,@intProfitCenterId
+						,NULL
+						,@intCompanySegment
+					  )
+
+SELECT
+	 @intARAccountId= intAccountId
+	,@strARAccountId=strAccountId
+	,@ysnActive		= ysnActive
 FROM tblGLAccount WITH(NOLOCK)
-WHERE intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](@intARAccountId, @intProfitCenterId)
-  AND ysnActive = 0
+WHERE strAccountId = @strARAccountId
+OR (@strARAccountId IS NULL AND intAccountId = @intARAccountId)
+
+IF @ysnActive = 0
+	SET @strErrorMsg = 'Default AR Account ' + @strARAccountId + ' for company location ' + @strSalesCompanyLocation + ' is inactive.'
 
 IF ISNULL(@strErrorMsg,'') <> ''
 BEGIN
