@@ -24,7 +24,7 @@ SELECT Invoice.intInvoiceId
  , ISNULL(dblTotal,0) as dblTotal  
  , Invoice.intTermId  
  , Term.strTerm  
- , ysnPosted = case isnull(loaddtl.intOrderId,0) when 0 then cast(case when i21Invoice.intInvoiceId is null then 0 else 1 end as bit)  else cast(1 as bit) end
+ , ysnPosted = cast(case when i21Invoice.intInvoiceId is null then 0 else 1 end as bit)
  , Invoice.ysnVoided  
  , Invoice.dtmPostedDate  
  , Invoice.dtmVoidedDate  
@@ -38,7 +38,8 @@ SELECT Invoice.intInvoiceId
  , strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS  
  , isnull(tax.dblTaxTotal,0) dblTotalTaxAmount    
  , isnull(tax.dblItemTotal,0) dblTotalBefTax  
- , strAccountStatus = REPLACE(REPLACE(CustomerAS.strCustomerAccountStatus,'<strCustomerAccountStatus>',''),'</strCustomerAccountStatus>','')  
+ , strAccountStatus = REPLACE(REPLACE(CustomerAS.strCustomerAccountStatus,'<strCustomerAccountStatus>',''),'</strCustomerAccountStatus>','')
+ , ysnTransport = cast(case when isnull(transportDelivery.intOrderId,0) = 0 then 0 else 1 end as bit)
    
   
   
@@ -75,7 +76,7 @@ LEFT JOIN (
   FROM tblMBILInvoiceItem item        
   GROUP BY item.intInvoiceId) tax ON Invoice.intInvoiceId = tax.intInvoiceId
 LEFT JOIN (
-SELECT ordr.intOrderId FROM tblMBILOrder ordr
-INNER JOIN tblMBILDeliveryDetail loadDeliveryDtl on loadDeliveryDtl.intTMDispatchId = ordr.intDispatchId
-Where loadDeliveryDtl.ysnDelivered = 1
-) loaddtl on loaddtl.intOrderId = Invoice.intOrderId
+	Select TMOrder.intOrderId from tblMBILOrder TMOrder
+	INNER JOIN tblMBILDeliveryDetail loadDeliveryDtl on TMOrder.intDispatchId = loadDeliveryDtl.intTMDispatchId
+	Where loadDeliveryDtl.ysnDelivered = 1
+) transportDelivery on Invoice.intOrderId = transportDelivery.intOrderId

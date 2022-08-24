@@ -1,7 +1,43 @@
 ﻿CREATE VIEW [dbo].[vyuMBILInvoiceItem]
 	AS
 	
-SELECT Invoice.*
+SELECT Invoice.intInvoiceId
+	,Invoice.strInvoiceNo
+	,Invoice.intOrderId
+	,Invoice.strOrderNumber
+	,Invoice.intEntityCustomerId
+	,Invoice.strCustomerNo
+	,Invoice.strCustomerName
+	,Invoice.intLocationId
+	,Invoice.strLocationName
+	,Invoice.strType
+	,Invoice.dtmDeliveryDate
+	,Invoice.dtmInvoiceDate
+	,Invoice.intDriverId
+	,Invoice.strDriverNo
+	,Invoice.strDriverName
+	,Invoice.intShiftId
+	,Invoice.intShiftNumber
+	,Invoice.strShiftNo
+	,Invoice.strComments
+	,Invoice.strVoidComments
+	,Invoice.dblTotal
+	,Invoice.intTermId
+	,Invoice.strTerm
+	,Invoice.ysnPosted
+	,Invoice.ysnVoided
+	,Invoice.dtmPostedDate
+	,Invoice.dtmVoidedDate
+	,Invoice.intPaymentMethodId
+	,Invoice.strPaymentMethod
+	,Invoice.strPaymentInfo
+	,Invoice.inti21InvoiceId
+	,Invoice.stri21InvoiceNo
+	,Invoice.intConcurrencyId
+	,Invoice.strStatus
+	,Invoice.dblTotalTaxAmount
+	,Invoice.dblTotalBefTax
+	,Invoice.strAccountStatus
 	, InvoiceItem.intInvoiceItemId
 	, InvoiceItem.intSiteId
 	, Site.intSiteNumber
