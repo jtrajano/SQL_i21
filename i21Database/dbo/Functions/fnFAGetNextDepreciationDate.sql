@@ -27,7 +27,7 @@ BEGIN
 			AND (CASE WHEN @intLedgerId IS NOT NULL 
 					THEN CASE WHEN (intLedgerId = @intLedgerId) THEN 1 ELSE 0 END
 					ELSE 1 END) = 1
-		ORDER BY intAssetDepreciationId DESC
+		ORDER BY dtmDepreciationToDate DESC, intAssetDepreciationId DESC
 	) Depreciation
 
 	WHERE A.intAssetId = @intAssetId
