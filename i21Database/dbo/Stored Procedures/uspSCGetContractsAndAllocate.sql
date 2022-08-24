@@ -212,7 +212,7 @@ BEGIN TRY
 			SELECT	TOP	1	
 				@intContractDetailId = CD.intContractDetailId
 			FROM	vyuCTContractDetailView CD
-			WHERE	CD.intContractTypeId	=	'I'
+			WHERE	CD.intContractTypeId	=	1
 			AND		CD.intEntityId			=	@intEntityId
 			AND		CD.intItemId			=	@intItemId
 			AND		CD.intPricingTypeId		=	5
