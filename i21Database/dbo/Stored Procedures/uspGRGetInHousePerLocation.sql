@@ -92,7 +92,7 @@ BEGIN
 		AND CusOwn.intItemId = ISNULL(@intItemId,CusOwn.intItemId)
 		AND CusOwn.intLocationId = ISNULL(@intLocationId,CusOwn.intLocationId)
 		AND CusOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-		AND CusOwn.dblTotal > 0
+		AND CusOwn.dblTotal <> 0
 
 	--=============================
 	-- On Hold
