@@ -27,7 +27,7 @@ BEGIN
 			AND (CASE WHEN @intLedgerId IS NOT NULL 
 					THEN CASE WHEN (intLedgerId = @intLedgerId) THEN 1 ELSE 0 END
 					ELSE 1 END) = 1
-		ORDER BY dtmDepreciationToDate DESC, intAssetDepreciationId DESC
+		ORDER BY intAssetDepreciationId DESC
 	) Depreciation
 
 	WHERE A.intAssetId = @intAssetId
@@ -61,16 +61,21 @@ BEGIN
 	IF (ISNULL(@intBookId, 1) = 1)
 	BEGIN
 		DECLARE
-			@dtmCurrentEndate DATETIME
+			@dtmCurrentEndDate DATETIME = NULL
 
-		SELECT TOP 1 @dtmCurrentEndate = CONVERT(DATE, dtmEndDate) FROM tblGLFiscalYearPeriod -- If PlacedInService or Adjustment is equal to the fiscal period's end date, next depreciation to date should be same with PlacedInService date
-		WHERE 
-			CONVERT(DATE, dtmEndDate) = @dtmPlacedInService OR 
-			(@strTransaction IN ('Basis Adjustment', 'Depreciation Adjustment') AND CONVERT(DATE, dtmEndDate) = @dtmDepreciationToDate)
+		IF (@strTransaction IN ('Basis Adjustment', 'Depreciation Adjustment') OR @strTransaction IS NULL)
+		BEGIN
+			-- Get end of the fiscal period where the compare date falls into.
+			SELECT TOP 1 @dtmCurrentEndDate = CONVERT(DATE, dtmEndDate) FROM tblGLFiscalYearPeriod
+			WHERE (CONVERT(DATE, dtmEndDate) = @dtmCompareDate)
 			ORDER BY dtmStartDate
 
-		IF (@dtmCurrentEndate IS NOT NULL AND (@ysnDepreciated = 0 OR @strTransaction IN ('Basis Adjustment', 'Depreciation Adjustment')))
-			SET @dtmDate = @dtmCurrentEndate
+			IF(@dtmCurrentEndDate IS NULL) -- Compare date is not the same end date of fiscal period. Get next fiscal year period
+				SELECT TOP 1 @dtmDate = CONVERT(DATE, dtmEndDate) FROM tblGLFiscalYearPeriod 
+				WHERE CONVERT(DATE, dtmEndDate) > @dtmCompareDate ORDER BY dtmStartDate
+			ELSE
+				SET @dtmDate = @dtmCurrentEndDate
+		END
 		ELSE
 			SELECT TOP 1 @dtmDate = CONVERT(DATE, dtmEndDate) FROM tblGLFiscalYearPeriod -- Get next fiscal year period
 			WHERE CONVERT(DATE, dtmEndDate) > @dtmCompareDate ORDER BY dtmStartDate

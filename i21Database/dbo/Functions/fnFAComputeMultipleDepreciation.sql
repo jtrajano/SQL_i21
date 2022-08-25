@@ -102,10 +102,10 @@ JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
 	SELECT TOP 1 dblDepreciationToDate, dtmDepreciationToDate, strTransaction, dblDepreciationBasis, dblBasis FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
 	AND ISNULL(intBookId,1) = @BookId AND strTransaction <> 'Place in service' 
-	AND (CASE WHEN BD.intLedgerId IS NOT NULL 
+	AND (CASE WHEN intLedgerId IS NOT NULL 
 					THEN CASE WHEN (intLedgerId = BD.intLedgerId) THEN 1 ELSE 0 END
 					ELSE 1 END) = 1
-	ORDER BY dtmDepreciationToDate DESC, intAssetDepreciationId DESC
+	ORDER BY intAssetDepreciationId DESC
 )Depreciation
 OUTER APPLY (
 	SELECT dtmEndDate FROM [dbo].[fnFAGetMonthPeriodFromDate](A.dtmImportedDepThru, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
@@ -118,7 +118,7 @@ SELECT @dblDepreciationBasisComputation = dblBasis, @dblOrigBasis = dblBasis FRO
 SELECT @dblAdjustment = ISNULL(SUM(dblAdjustment), 0), @dblFunctionalAdjustment = ISNULL(SUM(dblFunctionalAdjustment), 0), @ysnAdjustBasis = B.ysnAddToBasis, @dtmBasisAdjustment = MAX(B.dtmDate)
 FROM @tblAssetInfo A 
 JOIN tblFABasisAdjustment B ON B.intAssetId = A.intAssetId AND B.intBookId = @BookId
-WHERE B.dtmDate BETWEEN A.dtmDepreciationToDate AND dbo.fnFAGetNextDepreciationDate(B.intAssetId, @BookId, A.intLedgerId) AND (B.strAdjustmentType IS NULL OR B.strAdjustmentType = 'Basis')
+WHERE B.dtmDate BETWEEN DATEADD(DAY, 1, A.dtmDepreciationToDate) AND dbo.fnFAGetNextDepreciationDate(B.intAssetId, @BookId, A.intLedgerId) AND (B.strAdjustmentType IS NULL OR B.strAdjustmentType = 'Basis')
 GROUP BY B.ysnAddToBasis
 
 IF (@dblAdjustment <> 0)
@@ -133,7 +133,7 @@ END
 SELECT @dblDepreciationAdjustment = ISNULL(SUM(dblAdjustment), 0), @dblFunctionalDepreciationAdjustment = ISNULL(SUM(dblFunctionalAdjustment), 0), @ysnDepreciationAdjustBasis = B.ysnAddToBasis
 FROM @tblAssetInfo A 
 JOIN tblFABasisAdjustment B ON B.intAssetId = A.intAssetId AND B.intBookId = @BookId
-WHERE B.dtmDate BETWEEN A.dtmDepreciationToDate AND dbo.fnFAGetNextDepreciationDate(B.intAssetId, @BookId, A.intLedgerId) AND (B.strAdjustmentType IS NULL OR B.strAdjustmentType = 'Depreciation')
+WHERE B.dtmDate BETWEEN DATEADD(DAY, 1, A.dtmDepreciationToDate) AND dbo.fnFAGetNextDepreciationDate(B.intAssetId, @BookId, A.intLedgerId) AND (B.strAdjustmentType IS NULL OR B.strAdjustmentType = 'Depreciation')
 GROUP BY B.ysnAddToBasis
 
 IF (@dblDepreciationAdjustment <> 0)

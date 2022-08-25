@@ -196,7 +196,10 @@ BEGIN
     INSERT INTO @IdHasNoDepreciation 
 		SELECT G.intId, G.intLedgerId FROM @IdGood G
 		OUTER APPLY (	
-            SELECT COUNT(*) cnt FROM tblFAFixedAssetDepreciation WHERE intAssetId = G.intId AND intLedgerId = intLedgerId
+            SELECT COUNT(*) cnt FROM tblFAFixedAssetDepreciation WHERE intAssetId = G.intId
+            AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
             AND ISNULL(intBookId,1) = @BookId
             AND strTransaction  in( 'Depreciation','Imported')
 		)D
@@ -205,7 +208,10 @@ BEGIN
     INSERT INTO @IdHasDepreciation 
 		SELECT G.intId, G.intLedgerId FROM @IdGood G
 		OUTER APPLY (	
-			SELECT count(*) cnt FROM tblFAFixedAssetDepreciation WHERE intAssetId = G.intId AND intLedgerId = G.intLedgerId
+			SELECT count(*) cnt FROM tblFAFixedAssetDepreciation WHERE intAssetId = G.intId
+            AND (CASE WHEN intLedgerId IS NOT NULL 
+					THEN CASE WHEN (intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
             AND ISNULL(intBookId,1) = @BookId
             AND strTransaction  in( 'Depreciation','Imported')
 		)D
@@ -342,7 +348,10 @@ BEGIN
                   ) E
                   OUTER APPLY(
                     SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
-                    WHERE [intAssetId] = @i AND intBookId = @BookId AND intLedgerId = E.intLedgerId
+                    WHERE [intAssetId] = @i AND intBookId = @BookId
+                    AND (CASE WHEN intLedgerId IS NOT NULL 
+					    THEN CASE WHEN (intLedgerId = E.intLedgerId) THEN 1 ELSE 0 END
+					    ELSE 1 END) = 1
                     ORDER BY dtmDepreciationToDate DESC
                   )Depreciation
                   WHERE F.intAssetId = @i
@@ -958,13 +967,19 @@ BEGIN
 END
 
   ;WITH Q as(
-     SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult, 'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError, L.strLedgerName 
-      FROM @GLEntries C 
-      LEFT JOIN tblGLLedger L ON L.intLedgerId = C.intLedgerId
-      WHERE @strBatchId = strBatchId
-      AND ysnIsUnposted = 0  AND @BookId = 1
-      AND strModuleName ='Fixed Assets'
-      GROUP by strReference, strTransactionId, dtmDate, L.strLedgerName
+     --SELECT TOP 1 strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult, 'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError, L.strLedgerName 
+     -- FROM @GLEntries C 
+     -- LEFT JOIN tblGLLedger L ON L.intLedgerId = C.intLedgerId
+     -- WHERE @strBatchId = strBatchId
+     -- AND ysnIsUnposted = 0  AND @BookId = 1
+     -- AND strModuleName ='Fixed Assets'
+     -- GROUP by strReference, strTransactionId, dtmDate, L.strLedgerName
+     SELECT strAssetId, strTransactionId, 'Asset Depreciated' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) ysnError, L.strLedgerName
+	  FROM  tblFAFixedAssetDepreciation A 
+      JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
+      WHERE @strBatchId = strBatchId AND A.intBookId = 1 AND @BookId = 1
+	  AND strTransaction = 'Depreciation'
     UNION
 	  SELECT strAssetId, strTransactionId, 'Asset Basis Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) ysnError, L.strLedgerName
 	  FROM  tblFAFixedAssetDepreciation A 
@@ -1011,7 +1026,7 @@ END
       LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
   )
   INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate, ysnError, strLedgerName) 
-  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError, strLedgerName FROM Q ORDER BY strAssetId
+  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDepreciationToDate, ysnError, strLedgerName FROM Q ORDER BY strAssetId
 
 DECLARE @intGLEntry INT
 
