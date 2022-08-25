@@ -44,6 +44,7 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 4 THEN 'TM Sites'
 		WHEN 5 THEN 'Entities'
 		WHEN 6 THEN 'Sales/Transfer Orders'
+		WHEN 7 THEN 'LG Loads - Drop Ship'
 		END COLLATE Latin1_General_CI_AS
 	,CP.strALKMapKey
 	,CP.intTransUsedBy

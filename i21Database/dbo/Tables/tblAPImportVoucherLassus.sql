@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPImportVoucherLassus]
 (
-	[strIdentity] CHAR(1) NOT NULL,
+	[strIdentity] CHAR(1) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strInvoiceNumber] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intVoucherType] TINYINT,
 	[strReference] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,

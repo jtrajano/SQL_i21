@@ -19,6 +19,7 @@ BEGIN
 		,@intConditionId INT
 		,@dtmCurrentDate DATETIME
 		,@dtmAfter80Days DATETIME
+		,@intAttributeId INT
 	DECLARE @tblMFItem TABLE (intItemId INT)
 	DECLARE @tblSMCompanyLocation TABLE (intCompanyLocationId INT)
 
@@ -64,6 +65,35 @@ BEGIN
 		INSERT INTO @tblSMCompanyLocation (intCompanyLocationId)
 		SELECT @intCompanyLocationId AS intCompanyLocationId
 	END
+
+	IF @strColumnName = 'Balance Month Forecast'
+		SELECT @intAttributeId = 1
+	ELSE IF @strColumnName = 'Next Month Forecast'
+		SELECT @intAttributeId = 2
+	ELSE IF @strColumnName = 'Avg 6 months Forecast'
+		SELECT @intAttributeId = 3
+	ELSE IF @strColumnName = 'DOH'
+		SELECT @intAttributeId = 4
+	ELSE IF @strColumnName = 'Available Inventory'
+		SELECT @intAttributeId = 5
+	ELSE IF @strColumnName = 'Approved Qty'
+		SELECT @intAttributeId = 6
+	ELSE IF @strColumnName = 'Not Approved Qty'
+		SELECT @intAttributeId = 7
+	ELSE IF @strColumnName = 'In-Transit to WHSE'
+		SELECT @intAttributeId = 8
+	ELSE IF @strColumnName = 'Arrived in Port'
+		SELECT @intAttributeId = 9
+	ELSE IF @strColumnName = 'Scheduled'
+		SELECT @intAttributeId = 10
+	ELSE IF @strColumnName = 'CBS'
+		SELECT @intAttributeId = 11
+	ELSE IF @strColumnName = 'Late Open Contracts'
+		SELECT @intAttributeId = 12
+	ELSE IF @strColumnName = 'Forward Open Contracts'
+		SELECT @intAttributeId = 13
+	ELSE IF @strColumnName = 'No ETA'
+		SELECT @intAttributeId = 14
 
 	--Attribute Id
 	--1-->Balance Month Forecast
@@ -236,294 +266,191 @@ BEGIN
 	FROM tblCTCondition
 	WHERE strConditionName = 'CBS'
 
-	IF @strColumnName IN (
-			'CBS'
-			,'All Item'
+	INSERT INTO tblMFShortTermPlanningViewDetail (
+		intContractDetailId
+		,intLoadContainerId
+		,intItemId
+		,intLocationId
+		,intAttributeId
+		,intUserId
+		)
+	SELECT LD.intPContractDetailId
+		,LDCL.intLoadContainerId
+		,I.intItemId
+		,SS.intCompanyLocationId
+		,11 AS intAttributeId -->CBS
+		,@intUserId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
+	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
+		AND LC.intConditionId = @intConditionId
+	WHERE SS.intContractStatusId IN (
+			1
+			,4
 			)
-	BEGIN
-		INSERT INTO tblMFShortTermPlanningViewDetail (
-			intContractDetailId
-			,intLoadContainerId
-			,intItemId
-			,intLocationId
-			,intAttributeId
-			,intUserId
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
 			)
-		SELECT LD.intPContractDetailId
-			,LDCL.intLoadContainerId
-			,I.intItemId
-			,SS.intCompanyLocationId
-			,11 AS intAttributeId -->CBS
-			,@intUserId
-		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			AND L.intPurchaseSale = 1
-			AND L.intShipmentType = 1
-		JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
-		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
-			AND LC.intConditionId = @intConditionId
-		WHERE SS.intContractStatusId IN (
-				1
-				,4
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFShortTermPlanningViewDetail SP
-				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
-					AND SP.intUserId = @intUserId
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblQMSample S1
-				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intSampleStatusId = 4 -->Rejected)
-				)
-	END
 
-	IF @strColumnName IN (
-			'Approved Qty'
-			,'All Item'
+	INSERT INTO tblMFShortTermPlanningViewDetail (
+		intContractDetailId
+		,intLoadContainerId
+		,intItemId
+		,intLocationId
+		,intAttributeId
+		,intUserId
+		)
+	SELECT DISTINCT LD.intPContractDetailId
+		,LDCL.intLoadContainerId
+		,I.intItemId
+		,SS.intCompanyLocationId
+		,(
+			CASE 
+				WHEN S.intLoadDetailContainerLinkId IS NOT NULL
+					THEN 6 -->Approved Qty
+				ELSE 7 -->Not Approved Qty
+				END
+			) AS intAttributeId
+		,@intUserId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
+	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+		AND S.intLoadContainerId = LDCL.intLoadContainerId
+		AND S.intSampleStatusId = 3 -->Approved
+	CROSS APPLY (
+		SELECT TOP 1 LW.intLoadWarehouseId
+		FROM tblLGLoadWarehouse LW
+		WHERE LW.intLoadId = L.intLoadId
+		) LW1
+	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		AND SS.intContractStatusId IN (
+			1
+			,4
 			)
-	BEGIN
-		INSERT INTO tblMFShortTermPlanningViewDetail (
-			intContractDetailId
-			,intLoadContainerId
-			,intItemId
-			,intLocationId
-			,intAttributeId
-			,intUserId
+		AND IsNULL(L.dtmETAPOD, @dtmCurrentDate) <= @dtmCurrentDate
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFShortTermPlanningViewDetail SP
+			WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+				AND SP.intUserId = @intUserId
 			)
-		SELECT DISTINCT LD.intPContractDetailId
-			,LDCL.intLoadContainerId
-			,I.intItemId
-			,SS.intCompanyLocationId
-			,6 AS intAttributeId -->Approved Qty
-			,@intUserId
-		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			AND L.intPurchaseSale = 1
-			AND L.intShipmentType = 1
-		JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
-		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-			AND S.intLoadContainerId = LDCL.intLoadContainerId
-			AND S.intSampleStatusId = 3 -->Approved
-		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
-			AND SS.intContractStatusId IN (
-				1
-				,4
-				)
-		AND IsNULL(L.dtmETAPOD,@dtmCurrentDate) <= @dtmCurrentDate
-	END
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
 
-	IF @strColumnName IN (
-			'Not Approved Qty'
-			,'All Item'
+	INSERT INTO tblMFShortTermPlanningViewDetail (
+		intContractDetailId
+		,intLoadContainerId
+		,intItemId
+		,intLocationId
+		,intAttributeId
+		,intUserId
+		)
+	SELECT LD.intPContractDetailId
+		,LDCL.intLoadContainerId
+		,I.intItemId
+		,SS.intCompanyLocationId
+		,(
+			CASE 
+				WHEN L.dtmETAPOD IS NOT NULL
+					THEN 8 -->In-Transit to WHSE
+				ELSE 9 -->Arrived in Port
+				END
+			) AS intAttributeId
+		,@intUserId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
+	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+		AND S.intSampleStatusId = 3 -->Approved
+	OUTER APPLY (
+		SELECT TOP 1 LW.intLoadWarehouseId
+		FROM tblLGLoadWarehouse LW
+		WHERE LW.intLoadId = L.intLoadId
+		) LW1
+	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		AND SS.intContractStatusId IN (
+			1
+			,4
 			)
-	BEGIN
-		INSERT INTO tblMFShortTermPlanningViewDetail (
-			intContractDetailId
-			,intLoadContainerId
-			,intItemId
-			,intLocationId
-			,intAttributeId
-			,intUserId
+		AND S.intLoadDetailContainerLinkId IS NULL
+		AND LW1.intLoadWarehouseId IS NULL
+		AND L.ysnArrivedInPort = 1
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFShortTermPlanningViewDetail SP
+			WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+				AND SP.intUserId = @intUserId
 			)
-		SELECT LD.intPContractDetailId
-			,LDCL.intLoadContainerId
-			,I.intItemId
-			,SS.intCompanyLocationId
-			,7 AS intAttributeId -->Not Approved Qty
-			,@intUserId
-		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			AND L.intPurchaseSale = 1
-			AND L.intShipmentType = 1
-		JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
-		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
-			AND SS.intContractStatusId IN (
-				1
-				,4
-				)
-			AND IsNULL(L.dtmETAPOD,@dtmCurrentDate) <= @dtmCurrentDate
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblQMSample S1
-				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intLoadContainerId = LDCL.intLoadContainerId
-					AND S1.intSampleStatusId in (3,4) -->Approved)
-				)
-	END
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
 
-	IF @strColumnName IN (
-			'InTransit to WHSE'
-			,'All Item'
+	INSERT INTO tblMFShortTermPlanningViewDetail (
+		intContractDetailId
+		,intLoadContainerId
+		,intItemId
+		,intLocationId
+		,intAttributeId
+		,intUserId
+		)
+	SELECT LD.intPContractDetailId
+		,LDCL.intLoadContainerId
+		,I.intItemId
+		,SS.intCompanyLocationId
+		,10 AS intAttributeId -->Scheduled
+		,@intUserId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
+	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	WHERE SS.intContractStatusId IN (
+			1
+			,4
 			)
-	BEGIN
-		INSERT INTO tblMFShortTermPlanningViewDetail (
-			intContractDetailId
-			,intLoadContainerId
-			,intItemId
-			,intLocationId
-			,intAttributeId
-			,intUserId
+		AND LDCL.dblQuantity - ISNULL(LDCL.dblReceivedQty, 0) > 0
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFShortTermPlanningViewDetail SP
+			WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+				AND SP.intUserId = @intUserId
 			)
-		SELECT LD.intPContractDetailId
-			,LDCL.intLoadContainerId
-			,I.intItemId
-			,SS.intCompanyLocationId
-			,8 AS intAttributeId -->In-Transit to WHSE
-			,@intUserId
-		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			AND L.intPurchaseSale = 1
-			AND L.intShipmentType = 1
-		JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
-		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-			AND S.intSampleStatusId = 3 -->Approved
-		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		LEFT JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
-			AND SS.intContractStatusId IN (
-				1
-				,4
-				)
-			AND S.intLoadDetailContainerLinkId IS NULL
-			AND LC.intLoadWarehouseContainerId IS NULL
-			AND L.ysnArrivedInPort = 1
-			AND L.dtmETAPOD IS NOT NULL
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFShortTermPlanningViewDetail SP
-				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
-					AND SP.intUserId = @intUserId
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblQMSample S1
-				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intSampleStatusId = 4 -->Rejected)
-				)
-	END
-
-	IF @strColumnName IN (
-			'Arrived in Port'
-			,'All Item'
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
 			)
-	BEGIN
-		INSERT INTO tblMFShortTermPlanningViewDetail (
-			intContractDetailId
-			,intLoadContainerId
-			,intItemId
-			,intLocationId
-			,intAttributeId
-			,intUserId
-			)
-		SELECT LD.intPContractDetailId
-			,LDCL.intLoadContainerId
-			,I.intItemId
-			,SS.intCompanyLocationId
-			,9 AS intAttributeId -->Arrived in Port
-			,@intUserId
-		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			AND L.intPurchaseSale = 1
-			AND L.intShipmentType = 1
-		JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
-		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-			AND S.intSampleStatusId = 3 -->Approved
-		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-		LEFT JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-			AND LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
-			AND SS.intContractStatusId IN (
-				1
-				,4
-				)
-			AND S.intLoadDetailContainerLinkId IS NULL
-			AND LC.intLoadWarehouseContainerId IS NULL
-			AND L.ysnArrivedInPort = 1
-			AND L.dtmETAPOD IS NULL
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFShortTermPlanningViewDetail SP
-				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
-					AND SP.intUserId = @intUserId
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblQMSample S1
-				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intSampleStatusId = 4 -->Rejected)
-				)
-	END
-	
-	IF @strColumnName IN (
-			'Scheduled'
-			,'All Item'
-			)
-	BEGIN
-		INSERT INTO tblMFShortTermPlanningViewDetail (
-			intContractDetailId
-			,intLoadContainerId
-			,intItemId
-			,intLocationId
-			,intAttributeId
-			,intUserId
-			)
-		SELECT LD.intPContractDetailId
-			,LDCL.intLoadContainerId
-			,I.intItemId
-			,SS.intCompanyLocationId
-			,10 AS intAttributeId -->Scheduled
-			,@intUserId
-		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			AND L.intPurchaseSale = 1
-			AND L.intShipmentType = 1
-		JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
-		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		WHERE SS.intContractStatusId IN (
-				1
-				,4
-				)
-			AND L.intShipmentStatus = 1
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFShortTermPlanningViewDetail SP
-				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
-					AND SP.intUserId = @intUserId
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblQMSample S1
-				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intSampleStatusId = 4 -->Rejected)
-				)
-	END
 
 	IF @strColumnName IN (
 			'Late Open Contracts'
@@ -536,7 +463,7 @@ BEGIN
 			,intLocationId
 			,intAttributeId
 			,intUserId
-			,dblWeight 
+			,dblWeight
 			,dblQty
 			)
 		SELECT SS.intContractDetailId
@@ -545,12 +472,13 @@ BEGIN
 			,12 AS intAttributeId -->Late Open Contracts
 			,@intUserId
 			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
-			,SS.dblQuantity-IsNULL(C2.dblQuantity, 0)
+			,SS.dblQuantity - IsNULL(C2.dblQuantity, 0)
 		FROM tblCTContractDetail SS
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
+			SELECT Sum(dblNet) dblNet
+				,Sum(dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
@@ -559,7 +487,7 @@ BEGIN
 				,4
 				)
 			AND SS.dtmStartDate < @dtmCurrentMonthStartDate
-			AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
+			AND SS.dblQuantity - IsNULL(C2.dblQuantity, 0) > 0
 	END
 
 	IF @strColumnName IN (
@@ -573,7 +501,7 @@ BEGIN
 			,intLocationId
 			,intAttributeId
 			,intUserId
-			,dblWeight 
+			,dblWeight
 			,dblQty
 			)
 		SELECT SS.intContractDetailId
@@ -582,12 +510,13 @@ BEGIN
 			,13 AS intAttributeId -->Forward Open Contracts
 			,@intUserId
 			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
-			,SS.dblQuantity-IsNULL(C2.dblQuantity, 0)
+			,SS.dblQuantity - IsNULL(C2.dblQuantity, 0)
 		FROM tblCTContractDetail SS
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
+			SELECT Sum(dblNet) dblNet
+				,Sum(dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
@@ -597,53 +526,55 @@ BEGIN
 				)
 			AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
 				AND @dtmAfter80Days
-			AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
+			AND SS.dblQuantity - IsNULL(C2.dblQuantity, 0) > 0
 	END
 
-	IF @strColumnName IN (
-			'No ETA'
-			,'All Item'
+	INSERT INTO tblMFShortTermPlanningViewDetail (
+		intLoadContainerId
+		,intItemId
+		,intLocationId
+		,intAttributeId
+		,intUserId
+		)
+	SELECT LDCL.intLoadContainerId
+		,I.intItemId
+		,SS.intCompanyLocationId
+		,14 AS intAttributeId -->No ETA
+		,@intUserId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
+	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
+		AND SS.intContractStatusId IN (
+			1
+			,4
 			)
+		AND IsNULL(L.ysnArrivedInPort, 0) <> 1
+		AND L.dtmETAPOD IS NULL
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFShortTermPlanningViewDetail SP
+			WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
+				AND SP.intUserId = @intUserId
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
+
+	IF @strColumnName <> 'All Item'
 	BEGIN
-		INSERT INTO tblMFShortTermPlanningViewDetail (
-			intLoadContainerId
-			,intItemId
-			,intLocationId
-			,intAttributeId
-			,intUserId
-			)
-		SELECT LDCL.intLoadContainerId
-			,I.intItemId
-			,SS.intCompanyLocationId
-			,14 AS intAttributeId -->No ETA
-			,@intUserId
-		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-			AND L.intPurchaseSale = 1
-			AND L.intShipmentType = 1
-		JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
-		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-		WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
-			AND SS.intContractStatusId IN (
-				1
-				,4
-				)
-			AND IsNULL(L.ysnArrivedInPort, 0) <> 1
-			AND L.dtmETAPOD IS NULL
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFShortTermPlanningViewDetail SP
-				WHERE SP.intLoadContainerId = LDCL.intLoadContainerId
-					AND SP.intUserId = @intUserId
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblQMSample S1
-				WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					AND S1.intSampleStatusId = 4 -->Rejected)
-				)
+		DELETE
+		FROM tblMFShortTermPlanningViewDetail
+		WHERE intUserId = @intUserId
+			AND intAttributeId <> @intAttributeId
 	END
 
 	UPDATE D

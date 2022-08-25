@@ -4,6 +4,7 @@
     [intKey]						INT IDENTITY(1, 1) NOT NULL PRIMARY KEY,
  
     [strEntityName]				    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strEntityNo]				    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strDefault]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strBankName]					NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     [strCurrency]					NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
