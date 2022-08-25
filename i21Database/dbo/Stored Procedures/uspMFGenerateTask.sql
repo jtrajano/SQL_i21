@@ -673,6 +673,7 @@ BEGIN TRY
 					,L.intSubLocationId
 					,L.intStorageLocationId
 					,L.dblWeightPerQty
+					,L.strLotNumber
 				HAVING (
 						CASE 
 							WHEN L.intWeightUOMId IS NULL
@@ -711,7 +712,9 @@ BEGIN TRY
 							ELSE 0
 							END
 						)
-				ORDER BY CASE 
+				ORDER BY 
+					 L.strLotNumber ASC 
+				    ,CASE 
 						WHEN I.ysnStrictFIFO = 1
 							AND @ysnPickByLotCode = 0
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
@@ -849,6 +852,7 @@ BEGIN TRY
 					,L.intSubLocationId
 					,L.intStorageLocationId
 					,L.dblWeightPerQty
+					,L.strLotNumber
 				HAVING (
 						CASE 
 							WHEN L.intWeightUOMId IS NULL
@@ -872,7 +876,9 @@ BEGIN TRY
 							ELSE 1
 							END
 						) = IsNULL(@ysnAllowPartialPallet, 1)
-				ORDER BY CASE 
+				ORDER BY 
+				    strLotNumber ASC
+				   ,CASE 
 						WHEN @ysnPickByLotCode = 0
 							THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 						ELSE '1900-01-01'
