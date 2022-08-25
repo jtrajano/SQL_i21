@@ -525,6 +525,9 @@ FROM (
 									       THEN CD.intFXPriceUOMId
 									       ELSE ISNULL(CD.intPriceItemUOMId, CD.intAdjItemUOMId)
 								      END
+			 , strTaxPoint			= CD.strTaxPoint
+			 , intTaxGroupId		= CD.intTaxGroupId
+			 , intTaxLocationId		= CD.intTaxLocationId
 		FROM tblCTContractDetail CD WITH (NOLOCK)
 		OUTER APPLY (
 			SELECT TOP 1 intFromCurrencyId
