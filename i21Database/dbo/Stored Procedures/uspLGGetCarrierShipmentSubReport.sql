@@ -27,6 +27,15 @@ DECLARE @LoadDetailTable TABLE
 		strPLocationCountry NVARCHAR(MAX),
 		strPLocationState NVARCHAR(MAX),
 		strPLocationZipCode NVARCHAR(MAX),
+
+		strTerminalName NVARCHAR(MAX),
+		strTerminalAddress NVARCHAR(MAX),
+		strTerminalCity NVARCHAR(MAX),
+		strTerminalCountry NVARCHAR(MAX),
+		strTerminalState NVARCHAR(MAX),
+		strTerminalZipCode NVARCHAR(MAX),
+		strTerminalReference NVARCHAR(MAX),
+
 		strCustomer NVARCHAR(MAX),
 		strShipTo NVARCHAR(MAX),
 		strShipToAddress NVARCHAR(MAX),
@@ -48,14 +57,16 @@ DECLARE @LoadDetailTable TABLE
 		strItemNo NVARCHAR(MAX),
 		strItemUOM NVARCHAR(MAX),
 		strOriginFullAddress NVARCHAR(MAX),
-		strDestinationFullAddress NVARCHAR(MAX)
+		strDestinationFullAddress NVARCHAR(MAX),
+		strTerminalFullAddress NVARCHAR(MAX)
 	)
 
 DECLARE @strOriginName NVARCHAR(MAX), @strOriginLocationName NVARCHAR(MAX), @strOriginAddress NVARCHAR(MAX), @strOriginCity NVARCHAR(MAX), @strOriginCountry NVARCHAR(MAX), @strOriginState NVARCHAR(MAX), @strOriginZipCode NVARCHAR(MAX)
+DECLARE @strTerminalName NVARCHAR(MAX), @strTerminalReference NVARCHAR(MAX), @strTerminalAddress NVARCHAR(MAX), @strTerminalCity NVARCHAR(MAX), @strTerminalCountry NVARCHAR(MAX), @strTerminalState NVARCHAR(MAX), @strTerminalZipCode NVARCHAR(MAX)
 DECLARE @strDestinationName NVARCHAR(MAX), @strDestinationLocationName NVARCHAR(MAX), @strDestinationAddress NVARCHAR(MAX), @strDestinationCity NVARCHAR(MAX), @strDestinationCountry NVARCHAR(MAX), @strDestinationState NVARCHAR(MAX), @strDestinationZipCode NVARCHAR(MAX)
 DECLARE @strItemNo NVARCHAR(MAX), @strItemUOM NVARCHAR(MAX), @strQuantity NVARCHAR(MAX), @strVendor NVARCHAR(MAX), @strCustomer NVARCHAR(MAX), @strScheduleInfo NVARCHAR(MAX), @strLoadDirections NVARCHAR(MAX)
 
-DECLARE @strOriginFullAddress NVARCHAR(MAX), @strDestinationFullAddress NVARCHAR(MAX)
+DECLARE @strOriginFullAddress NVARCHAR(MAX), @strDestinationFullAddress NVARCHAR(MAX), @strTerminalFullAddress NVARCHAR(MAX)
 BEGIN
 	SELECT DISTINCT Top(1)
 		@intPurchaseSale = L.intPurchaseSale
@@ -77,6 +88,13 @@ BEGIN
 			L.strPLocationCountry,
 			L.strPLocationState,
 			L.strPLocationZipCode,
+			strTerminalName = CASE WHEN L.intTransUsedBy = 3 THEN TCN.strName ELSE '' END,
+			strTerminalAddress = TCN.strAddress,
+			strTerminalCity = TCN.strCity,
+			strTerminalCountry = L.strPLocationCountry,
+			strTerminalState = L.strPLocationState,
+			strTerminalZipCode = TCN.strZip,
+			strTerminalReference = TCN.strTerminalControlNumber,
 			L.strCustomer,
 			L.strShipTo,
 			L.strShipToAddress,
@@ -97,9 +115,13 @@ BEGIN
 			Convert(NVarchar, Convert(decimal (16, 2), dblQuantity)) + ' - ' + L.strItemUOM as strQuantity,
 			L.strItemDescription,
 			L.strItemUOM,
-			'' as strOrignFullAddress,
-			'' as strDestinationFullAddress
+			'' as strOriginFullAddress,
+			'' as strDestinationFullAddress,
+			'' as strTerminalFullAddress
 		FROM vyuLGLoadDetailView L 
+			LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = L.intVendorEntityLocationId
+			LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = VL.intEntityLocationId
+			LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = SP.intTerminalControlNumberId
 		WHERE L.[strLoadNumber] = @xmlParam
 
 	SELECT @total = count(*) from @LoadDetailTable;
@@ -168,6 +190,13 @@ BEGIN
 										L1.strSLocationCountry
 									END
 								END
+			,@strTerminalName = IsNull(L1.strTerminalName, '')
+			,@strTerminalAddress = IsNull(L1.strTerminalAddress, '')
+			,@strTerminalCity = IsNull(L1.strTerminalCity, '')
+			,@strTerminalState = IsNull(L1.strTerminalState, '')
+			,@strTerminalCountry = IsNull(L1.strTerminalCountry, '')
+			,@strTerminalZipCode = IsNull(L1.strTerminalZipCode, '')
+			,@strTerminalReference = IsNull(L1.strTerminalReference, '')
 			,@strDestinationName = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
 									L1.strCustomer
 								ELSE
@@ -254,6 +283,21 @@ BEGIN
 									ISNULL(' '+CASE WHEN LTRIM(RTRIM(@strOriginZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginZipCode)) END,'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(''+CASE WHEN LTRIM(RTRIM(@strOriginCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(@strOriginCountry)) END,'')
 
+		SET @strTerminalFullAddress = CASE WHEN IsNull(@strTerminalName, '') <> '' THEN
+										LTRIM(RTRIM(@strTerminalName)) + ', ' + CHAR(13)+CHAR(10)
+									ELSE
+										' ' + CHAR(13)+CHAR(10)
+									END
+		SET @strTerminalFullAddress = CASE WHEN IsNull(@strTerminalName, '') <> '' THEN
+										@strTerminalFullAddress + 
+										'TCN: ' + ISNULL(LTRIM(RTRIM(@strTerminalReference)),'') + ', ' + CHAR(13)+CHAR(10) +
+										ISNULL(LTRIM(RTRIM(@strTerminalAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+										ISNULL(LTRIM(RTRIM(@strTerminalCity)),'') + 
+										ISNULL(', '+CASE WHEN LTRIM(RTRIM(@strTerminalState)) = '' THEN NULL ELSE LTRIM(RTRIM(@strTerminalState)) END,'') + 
+										ISNULL(' '+CASE WHEN LTRIM(RTRIM(@strTerminalZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(@strTerminalZipCode)) END,'') + ', ' + CHAR(13)+CHAR(10) +
+										ISNULL(''+CASE WHEN LTRIM(RTRIM(@strTerminalCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(@strTerminalCountry)) END,'')
+									ELSE '' END
+
 		SET @strDestinationFullAddress = CASE WHEN IsNull(@strDestinationName, '') <> '' THEN
 										LTRIM(RTRIM(@strDestinationName)) + ', ' + CHAR(13)+CHAR(10)
 									ELSE
@@ -266,11 +310,11 @@ BEGIN
 									ISNULL(' '+CASE WHEN LTRIM(RTRIM(@strDestinationZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationZipCode)) END,'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(''+CASE WHEN LTRIM(RTRIM(@strDestinationCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(@strDestinationCountry)) END,'')
 
-		UPDATE @LoadDetailTable SET strOriginFullAddress = @strOriginFullAddress, strDestinationFullAddress = @strDestinationFullAddress, 
+		UPDATE @LoadDetailTable SET strOriginFullAddress = @strOriginFullAddress, strTerminalFullAddress = @strTerminalFullAddress, strDestinationFullAddress = @strDestinationFullAddress, 
 									strScheduleInfoMsg = @strScheduleInfo, strLoadDirectionMsg = @strLoadDirections WHERE intId=@incval
 
 		SET @incval = @incval + 1
 	END
 
-	SELECT strOriginFullAddress, strDestinationFullAddress, strQuantity, strItemNo, strItemUOM, strScheduleInfoMsg, strLoadDirectionMsg FROM @LoadDetailTable
+	SELECT strOriginFullAddress, strTerminalFullAddress, strDestinationFullAddress, strQuantity, strItemNo, strItemUOM, strScheduleInfoMsg, strLoadDirectionMsg FROM @LoadDetailTable
 END

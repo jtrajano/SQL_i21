@@ -13,7 +13,7 @@ SET ANSI_WARNINGS OFF
 --DECLARE @strMailMessage NVARCHAR(MAX)
 
 DECLARE @strCompanyName NVARCHAR(MAX), @strCompanyAddress NVARCHAR(MAX), @strCompanyCountry NVARCHAR(MAX), @strCompanyCity NVARCHAR(MAX), @strCompanyState NVARCHAR(MAX), @strCompanyZip NVARCHAR(MAX)
-DECLARE @intPurchaseSale INT
+DECLARE @intPurchaseSale INT, @intTransUsedBy INT
 DECLARE @strEquipmentType NVARCHAR(MAX), @strComments NVARCHAR(MAX), @strSupplierLoadNo NVARCHAR(MAX), @strCustomerReferenceNo NVARCHAR(MAX) 
 DECLARE @strHauler NVARCHAR(MAX), @strHaulerAddress NVARCHAR(MAX), @strHaulerCity NVARCHAR(MAX), @strHaulerCountry NVARCHAR(MAX), @strHaulerState NVARCHAR(MAX), @strHaulerZip NVARCHAR(MAX), @strHaulerPhone NVARCHAR(MAX)
 DECLARE @strDriver NVARCHAR(MAX), @strDispatcher NVARCHAR(MAX), @strTrailerNo1 NVARCHAR(MAX), @strTrailerNo2 NVARCHAR(MAX), @strTrailerNo3 NVARCHAR(MAX), @strTruckNo NVARCHAR(MAX)
@@ -37,6 +37,12 @@ DECLARE @LoadDetailTable TABLE
 		strPLocationCountry NVARCHAR(MAX),
 		strPLocationState NVARCHAR(MAX),
 		strPLocationZipCode NVARCHAR(MAX),
+		strTerminalName NVARCHAR(MAX),
+		strTerminalAddress NVARCHAR(MAX),
+		strTerminalCity NVARCHAR(MAX),
+		strTerminalCountry NVARCHAR(MAX),
+		strTerminalState NVARCHAR(MAX),
+		strTerminalZipCode NVARCHAR(MAX),
 		strCustomer NVARCHAR(MAX),
 		strShipTo NVARCHAR(MAX),
 		strShipToAddress NVARCHAR(MAX),
@@ -58,10 +64,12 @@ DECLARE @LoadDetailTable TABLE
 		strItemNo NVARCHAR(MAX),
 		strItemUOM NVARCHAR(MAX),
 		strVendorReference NVARCHAR(MAX),
-		strCustomerReference NVARCHAR(MAX)
+		strCustomerReference NVARCHAR(MAX),
+		strTerminalReference NVARCHAR(MAX)
 	)
 
 DECLARE @strOriginName NVARCHAR(MAX), @strOriginLocationName NVARCHAR(MAX), @strOriginAddress NVARCHAR(MAX), @strOriginCity NVARCHAR(MAX), @strOriginCountry NVARCHAR(MAX), @strOriginState NVARCHAR(MAX), @strOriginZipCode NVARCHAR(MAX), @strOriginMapLink NVARCHAR(MAX) 
+DECLARE @strTerminalName NVARCHAR(MAX), @strTerminalReference NVARCHAR(MAX), @strTerminalAddress NVARCHAR(MAX), @strTerminalCity NVARCHAR(MAX), @strTerminalCountry NVARCHAR(MAX), @strTerminalState NVARCHAR(MAX), @strTerminalZipCode NVARCHAR(MAX), @strTerminalMapLink NVARCHAR(MAX) 
 DECLARE @strDestinationName NVARCHAR(MAX), @strDestinationLocationName NVARCHAR(MAX), @strDestinationAddress NVARCHAR(MAX), @strDestinationCity NVARCHAR(MAX), @strDestinationCountry NVARCHAR(MAX), @strDestinationState NVARCHAR(MAX), @strDestinationZipCode NVARCHAR(MAX), @strDestinationMapLink NVARCHAR(MAX) 
 DECLARE @strItemNo NVARCHAR(MAX), @strItemUOM NVARCHAR(MAX), @strQuantity NVARCHAR(MAX), @strVendor NVARCHAR(MAX), @strCustomer NVARCHAR(MAX), @strScheduleInfo NVARCHAR(MAX), @strLoadDirections NVARCHAR(MAX)
 DECLARE @strVendorReference NVARCHAR(MAX), @strCustomerReference NVARCHAR(MAX)
@@ -70,6 +78,7 @@ BEGIN
 
 	SELECT DISTINCT Top(1)
 		@intPurchaseSale = L.intPurchaseSale,
+		@intTransUsedBy = L.intTransUsedBy,
 		@strCompanyName = (SELECT TOP(1) C.strCompanyName FROM tblSMCompanySetup C),
 		@strCompanyAddress = (SELECT TOP(1) C.strAddress FROM tblSMCompanySetup C),
 		@strCompanyCountry = (SELECT TOP(1) C.strCountry FROM tblSMCompanySetup C),
@@ -124,6 +133,12 @@ BEGIN
 			L.strPLocationCountry,
 			L.strPLocationState,
 			L.strPLocationZipCode,
+			strTerminalName = TCN.strName,
+			strTerminalAddress = TCN.strAddress,
+			strTerminalCity = TCN.strCity,
+			strTerminalCountry = L.strPLocationCountry,
+			strTerminalState = L.strPLocationState,
+			strTerminalZipCode = TCN.strZip,
 			L.strCustomer,
 			L.strShipTo,
 			L.strShipToAddress,
@@ -145,8 +160,13 @@ BEGIN
 			L.strItemNo,
 			L.strItemUOM,
 			L.strDetailVendorReference,
-			L.strDetailCustomerReference
+			L.strDetailCustomerReference,
+			strTerminalControlNumber = TCN.strTerminalControlNumber
 		FROM vyuLGLoadDetailView L 
+			LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = L.intVendorEntityLocationId
+			LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = VL.intEntityLocationId
+			LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = SP.intTerminalControlNumberId
+
 		where L.[strLoadNumber] = @strLoadNumber
 
 	SET @strMailMessage =	N'<HTML> <BODY> <TABLE cellpadding=2 cellspacing=1 border=1>' + 
@@ -238,7 +258,7 @@ BEGIN
 									'<TD size=210> <B> Commodity </B> </TD>' +
 									'<TD size=210> <B> Quantity </B> </TD>' +
 									'<TD size=210> <B> UOM </B> </TD>' +
-									'<TD size=210> <B> Vendor Ref. </B> </TD>' +
+									'<TD size=210> <B> Vendor Ref.' + CASE WHEN (@intTransUsedBy = 3) THEN '</BR>/Load Ref.' ELSE '' END +  ' </B> </TD>' +
 									'<TD size=210> <B> Customer Ref. </B> </TD>' +
 									'<TD size=210> <B> Schedule Info </B> </TD>' +
 									'<TD size=210> <B> Load Directions </B> </TD>' +
@@ -301,6 +321,12 @@ BEGIN
 										L1.strSLocationZipCode
 									END
 								END
+			,@strTerminalName = IsNull(L1.strTerminalName, '')
+			,@strTerminalAddress = IsNull(L1.strTerminalAddress, '')
+			,@strTerminalCity = IsNull(L1.strTerminalCity, '')
+			,@strTerminalState = IsNull(L1.strTerminalState, '')
+			,@strTerminalCountry = IsNull(L1.strTerminalCountry, '')
+			,@strTerminalZipCode = IsNull(L1.strTerminalZipCode, '')
 			,@strDestinationName = CASE WHEN IsNull(@strCustomer, '') <> '' THEN
 									L1.strCustomer
 								ELSE
@@ -366,6 +392,7 @@ BEGIN
 									END
 			,@strVendorReference = L1.strVendorReference
 			,@strCustomerReference = L1.strCustomerReference
+			,@strTerminalReference = L1.strTerminalReference
 		FROM @LoadDetailTable L1 where L1.intId = @incval
 
 -- Origin Map Link
@@ -389,6 +416,29 @@ BEGIN
 		IF IsNull(@strOriginCountry, '') <> ''
 		BEGIN
 			SET @strOriginMapLink =	@strOriginMapLink + '+' + @strOriginCountry
+		END
+
+-- Terminal Map Link
+		SET @strTerminalMapLink = 'http://maps.google.com/maps?q='
+		IF IsNull(@strTerminalAddress, '') <> ''
+		BEGIN
+			SET @strTerminalMapLink =	@strTerminalMapLink + REPLACE(REPLACE(@strTerminalAddress, ' ', '+'), Char(10), '+')
+		END
+		IF IsNull(@strTerminalCity, '') <> ''
+		BEGIN
+			SET @strTerminalMapLink =	@strTerminalMapLink + '+' + @strTerminalCity
+		END
+		IF IsNull(@strTerminalState, '') <> ''
+		BEGIN
+			SET @strTerminalMapLink =	@strTerminalMapLink + '+' + @strTerminalState
+		END
+		IF IsNull(@strTerminalZipCode, '') <> ''
+		BEGIN
+			SET @strTerminalMapLink =	@strTerminalMapLink + '+' + @strTerminalZipCode
+		END
+		IF IsNull(@strTerminalCountry, '') <> ''
+		BEGIN
+			SET @strTerminalMapLink =	@strTerminalMapLink + '+' + @strTerminalCountry
 		END
 
 -- Destination Map Link
@@ -416,7 +466,10 @@ BEGIN
 
 		SET @strMailMessage =	@strMailMessage + 
 								'<TR><FONT face=tahoma size=2>' +
-									'<TD><B>' + IsNull(@strOriginName, '') + '</B><BR>' + IsNull(@strOriginLocationName, '') + '<BR><a href="' + @strOriginMapLink + '">' + IsNull(@strOriginAddress, '') + '</a><BR>' + IsNull(@strOriginCity, '') + ', ' + IsNull(@strOriginState, '') + ' ' + IsNull(@strOriginZipCode, '') + '</TD>' +
+									'<TD><B>' + IsNull(@strOriginName, '') + '</B><BR>' + IsNull(@strOriginLocationName, '') + '<BR><a href="' + @strOriginMapLink + '">' + IsNull(@strOriginAddress, '') + '</a><BR>' + IsNull(@strOriginCity, '') + ', ' + IsNull(@strOriginState, '') + ' ' + IsNull(@strOriginZipCode, '') +
+										CASE WHEN (@intTransUsedBy = 3 AND @strTerminalName <> '') 
+											THEN '<BR><B>' + IsNull(@strTerminalName, '') + '</B><BR>TCN:' + IsNull(@strTerminalReference, '') + '<BR><a href="' + @strTerminalMapLink + '">' + IsNull(@strTerminalAddress, '') + '</a><BR>' + IsNull(@strTerminalCity, '') + ', ' + IsNull(@strTerminalState, '') + ' ' + IsNull(@strTerminalZipCode, '') 
+											ELSE '' END + '</TD>' +
 									'<TD><B>' + IsNull(@strDestinationName, '') + '</B><BR>' + IsNull(@strDestinationLocationName, '') + '<BR><a href="' + @strDestinationMapLink + '">' + IsNull(@strDestinationAddress, '') + '</a><BR>' + IsNull(@strDestinationCity, '') + ', ' + IsNull(@strDestinationState, '') + ' ' + IsNull(@strDestinationZipCode, '') + '</TD>' +
 									'<TD>' + IsNull(@strItemNo, '') + '</TD>' +
 									'<TD>' + IsNull(@strQuantity, '') + '</TD>' +

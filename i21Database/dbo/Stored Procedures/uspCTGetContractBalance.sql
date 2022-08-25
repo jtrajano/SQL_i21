@@ -359,7 +359,7 @@ BEGIN
 					, strCustomer					=	EY.strEntityName
 					, strContract					=	CBL.strContractNumber + '-' + LTRIM(CBL.intContractSeq)
 					, CBL.intPricingTypeId
-					, strPricingType				=	CASE WHEN CBL.intPricingTypeId = 1 THEN 'P' ELSE 'B' END
+					, PT.strPricingType
 					, strContractDate				=	LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 					, strShipMethod					=	FT.strFreightTerm
 					--, strShipmentPeriod				=	LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))  + ' - ' + LTRIM(DATEPART(mm,CD.dtmEndDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
@@ -389,11 +389,12 @@ BEGIN
 				INNER JOIN tblICUnitMeasure			UOM			ON UOM.intUnitMeasureId = C1.intUnitMeasureId
 				INNER JOIN tblICItem				IM			ON IM.intItemId = CBL.intItemId
 				INNER JOIN tblSMCompanyLocation		L			ON L.intCompanyLocationId = CBL.intLocationId
-				INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 				INNER JOIN tblCTContractHeader		CH			ON CH.intContractHeaderId = CBL.intContractHeaderId
+				INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND CASE WHEN ISNULL(CH.intEntitySelectedLocationId,0) = 0 THEN EY.intDefaultLocationId ELSE CH.intEntitySelectedLocationId END = EY.intDefaultLocationId				
 				INNER JOIN tblCTContractDetail		CD			ON CD.intContractDetailId = CBL.intContractDetailId
 				INNER JOIN tblICItemUOM				ItemUOM		ON ItemUOM.intItemUOMId = CD.intItemUOMId
 				INNER JOIN tblICUnitMeasure			IUM			ON IUM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+				JOIN tblCTPricingType    PT   ON PT.intPricingTypeId = CBL.intPricingTypeId
 				LEFT JOIN tblSMFreightTerms			FT			ON FT.intFreightTermId = CD.intFreightTermId
 				LEFT JOIN tblRKFuturesMonth			FH			ON FH.intFutureMonthId = CD.intFutureMonthId
 				LEFT JOIN tblICItemUOM				BASISUOM	ON BASISUOM.intItemUOMId = CBL.intBasisUOMId

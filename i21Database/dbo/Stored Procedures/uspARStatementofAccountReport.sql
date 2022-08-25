@@ -380,7 +380,7 @@ BEGIN
 
 	--LOGO
 	UPDATE tblARCustomerStatementStagingTable
-	SET blbLogo = @blbLogo
+	SET blbLogo = ISNULL(blbLogo, @blbLogo)
 	WHERE intEntityUserId = @intEntityUserId
 	  AND strStatementFormat = @strStatementFormat
 

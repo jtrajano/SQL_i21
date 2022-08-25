@@ -207,16 +207,14 @@ UNION ALL
 
 SELECT
 	 [intId]				= ITG.[intId]
-	,[strMessage]			= 'The customer provided is not active!'
+	,[strMessage]			= 'Customer ' + ARC.strCustomerNumber + ' is not active!'
 	,[strSourceTransaction]	= ITG.[strSourceTransaction]
 	,[intSourceId]			= ITG.[intSourceId]
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intPaymentId]			= ITG.[intPaymentId]
-FROM
-	@PaymentsToGenerate ITG --WITH (NOLOCK)
-WHERE
-	NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intEntityId] = ITG.[intEntityCustomerId] AND ARC.[ysnActive] = 1)
-
+FROM @PaymentsToGenerate ITG
+INNER JOIN tblARCustomer ARC ON ARC.[intEntityId] = ITG.[intEntityCustomerId]
+WHERE ARC.[ysnActive] = 0 OR ARC.[ysnActive] IS NULL
 
 UNION ALL
 

@@ -34,6 +34,20 @@
 	CONSTRAINT [FK_tblGLJournal_tblGLFiscalYearPeriod] FOREIGN KEY([intFiscalPeriodId], [intFiscalYearId])REFERENCES [dbo].[tblGLFiscalYearPeriod] ([intGLFiscalYearPeriodId], [intFiscalYearId]),
 	CONSTRAINT [FK_tblGLJournal_tblSMCurrencyExchangeRate] FOREIGN KEY([intCurrencyExchangeRateId])REFERENCES [dbo].[tblSMCurrencyExchangeRate] ([intCurrencyExchangeRateId])
 );
+
+GO
+
+--CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
+--ON [dbo].[tblGLJournal]
+--INSTEAD OF DELETE 
+--AS
+--BEGIN
+--    DELETE R
+--    FROM [DELETED] J JOIN tblSMRecurringTransaction R ON J.intJournalId = R.intTransactionId AND J.strJournalId = R.strTransactionNumber
+--    WHERE J.ysnRecurringTemplate = 1
+--END
+
+
 GO
 CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
 ON [dbo].[tblGLJournal]

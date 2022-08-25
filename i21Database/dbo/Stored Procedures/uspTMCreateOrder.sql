@@ -26,12 +26,14 @@ BEGIN
 		, @dblQuantity = CASE WHEN ISNULL(D.dblMinimumQuantity,0) = 0 THEN D.dblQuantity ELSE D.dblMinimumQuantity END
 		, @dblPrice = D.dblPrice
 		, @dblTotal = D.dblTotal
-		, @intCustomerId = S.intCustomerID
+		, @intCustomerId = E.intEntityId
 		, @intLocationId = S.intLocationId
 		, @intCompanyLocationPricingLevelId = intCompanyLocationPricingLevelId
 		, @strOriginalPricingMethod = D.strOriginalPricingMethod
 	FROM tblTMDispatch D
 	INNER JOIN tblTMSite S ON S.intSiteID = D.intSiteID
+	INNER JOIN tblTMCustomer C ON C.intCustomerID = S.intCustomerID 
+	LEFT JOIN tblEMEntity E ON E.intEntityId =  C.intCustomerNumber
 	WHERE D.intDispatchID = @intDispatchId
 	AND D.strWillCallStatus = 'Generated' --IN ('Dispatched', 'Routed')
 
@@ -93,23 +95,26 @@ BEGIN
 			BEGIN
 				DECLARE @intUOMId INT = NULL
 
-				SELECT @dblItemPrice = dblRegularPrice FROM tblTMDispatch WHERE intDispatchID = @intDispatchId
+				--SELECT @dblItemPrice = dblRegularPrice FROM tblTMDispatch WHERE intDispatchID = @intDispatchId
 				
 				-- SELECT @intUOMId = intIssueUOMId 
                 -- FROM tblICItemLocation WHERE intItemId = @intItemId
                 -- AND intLocationId = @intLocationId
 
-				-- EXEC dbo.uspARGetItemPrice
-				--  @ItemUOMId = @intUOMId
-				-- ,@ItemId =  @intItemId
-				-- ,@CustomerId = @intCustomerId
-				-- ,@LocationId = @intLocationId
-				-- ,@Quantity = @dblRemainingQty
-				-- ,@PricingLevelId = @intCompanyLocationPricingLevelId
-				-- ,@InvoiceType = 'Tank Delivery'
-				-- ,@ExcludeContractPricing = 1
-				-- ,@Price = @dblItemPrice OUT
-				-- ,@Pricing = @strPricing OUT
+				SELECT TOP 1 @intUOMId = intItemUOMId
+                                          FROM vyuARItemUOM
+                                          WHERE intItemId = @intItemId
+										  
+				EXEC dbo.uspARGetItemPrice @ItemUOMId = @intUOMId
+					,@ItemId =  @intItemId
+					,@CustomerId = @intCustomerId
+					,@LocationId = @intLocationId
+					,@Quantity = @dblRemainingQty
+					,@PricingLevelId = @intCompanyLocationPricingLevelId
+					,@InvoiceType = 'Tank Delivery'
+					,@ExcludeContractPricing = 1
+					,@Price = @dblItemPrice OUT
+					,@Pricing = @strPricing OUT
 
 				-- IF(@dblItemPrice IS NULL)
 				-- BEGIN

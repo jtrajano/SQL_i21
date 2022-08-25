@@ -21,6 +21,7 @@ SELECT CF.intContractFuturesId
 ,strInternalTradeNo = FT.strInternalTradeNo
 ,CF.intConcurrencyId
 ,FT.intFutOptTransactionHeaderId
+,FT.dtmTransactionDate dtmMatchDate
 FROM tblCTContractFutures CF
 INNER JOIN tblCTContractDetail CD ON CF.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblRKFutOptTransaction FT ON CF.intFutOptTransactionId = FT.intFutOptTransactionId

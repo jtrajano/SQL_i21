@@ -243,7 +243,7 @@ BEGIN TRY
 			END
 			IF (@intSupplyPoint IS NULL)
 			BEGIN
-				RAISERROR('Cannot find a valid Supply Point. If this TR Load is created from a Load Schedule, check the originating Load Scheudule''s Vendor and Vendor Location.', 16, 1)
+				RAISERROR('Cannot find a valid Supply Point. If this TR Load is created from a Load Schedule, check the originating Load Schedule''s Vendor and Vendor Location.', 16, 1)
 			END
 			IF (@intCompanyLocation IS NULL)
 			BEGIN
@@ -587,11 +587,11 @@ BEGIN TRY
 	
 	-- Validate Different Combo Freight Rate - Receipt
 	DECLARE @receiptRowCount INT = NULL
-	SELECT dblComboFreightRate 
+	SELECT ISNULL(dblComboFreightRate, 0)
 	FROM tblTRLoadHeader LH
 	INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
 	WHERE LH.intLoadHeaderId = @intLoadHeaderId
-	GROUP BY dblComboFreightRate
+	GROUP BY ISNULL(dblComboFreightRate, 0)
 
 	SET @receiptRowCount = @@ROWCOUNT;
 	IF(@receiptRowCount > 1)
@@ -601,12 +601,12 @@ BEGIN TRY
 
 	-- Validate Different Combo Freight Rate - Distribution
 	DECLARE @distributionRowCount INT = NULL
-	SELECT dblComboFreightRate 
+	SELECT ISNULL(dblComboFreightRate, 0)
 	FROM tblTRLoadHeader LH
 	INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
 	INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 	WHERE LH.intLoadHeaderId = @intLoadHeaderId
-	GROUP BY dblComboFreightRate
+	GROUP BY ISNULL(dblComboFreightRate, 0)
 
 	SET @distributionRowCount = @@ROWCOUNT;
 	IF(@distributionRowCount > 1)

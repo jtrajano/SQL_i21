@@ -8,6 +8,12 @@ SELECT DISTINCT
 	,TE.strEarning
 	,DP.strDepartment
 	,WC.strWCCode
+	,strSupervisor = SUBSTRING((SELECT ', '+ E.strName AS [text()] FROM tblPREmployeeSupervisor ES
+								INNER JOIN tblEMEntity E ON E.intEntityId = ES.intSupervisorId
+								WHERE EMP.intEntityId = ES.intEntityEmployeeId
+								ORDER BY ES.intEmployeeSupervisorId ASC
+								FOR XML PATH ('')
+							), 2, 1000) COLLATE Latin1_General_CI_AS 
 	,TC.dtmDateIn
 	,dtmTimeIn = TC.dtmTimeIn
 	,TC.dtmDateOut
@@ -31,7 +37,7 @@ SELECT DISTINCT
 						 CASE WHEN (TC.intPaycheckId IS NOT NULL) THEN ISNULL(PE.dblAmount, EE.dblRateAmount)
 						   WHEN (TC.intPayGroupDetailId IS NOT NULL) THEN ISNULL(PGD.dblAmount, EE.dblRateAmount)
 						   ELSE ISNULL(EE.dblRateAmount, 0) END, 0)
-							* dblRegularHours) AS NUMERIC (18, 6))
+							* TC.dblRegularHours) AS NUMERIC (18, 6))
 	,dblOvertimeTotal = CAST((ISNULL(
 						  CASE WHEN (TC.intPaycheckId IS NOT NULL) THEN ISNULL(PEOT.dblAmount, EEOT.dblRateAmount)
 						   WHEN (TC.intPayGroupDetailId IS NOT NULL) THEN ISNULL(PGDOT.dblAmount, EEOT.dblRateAmount)
@@ -42,7 +48,7 @@ SELECT DISTINCT
 						 CASE WHEN (TC.intPaycheckId IS NOT NULL) THEN ISNULL(PE.dblAmount, EE.dblRateAmount)
 						   WHEN (TC.intPayGroupDetailId IS NOT NULL) THEN ISNULL(PGD.dblAmount, EE.dblRateAmount)
 						   ELSE ISNULL(EE.dblRateAmount, 0) END, 0)
-							* dblRegularHours)
+							* TC.dblRegularHours)
 				  + (ISNULL(
 						  CASE WHEN (TC.intPaycheckId IS NOT NULL) THEN ISNULL(PEOT.dblAmount, EEOT.dblRateAmount)
 						   WHEN (TC.intPayGroupDetailId IS NOT NULL) THEN ISNULL(PGDOT.dblAmount, EEOT.dblRateAmount)
@@ -52,6 +58,7 @@ SELECT DISTINCT
 	,PC.strPaycheckId
 FROM 
 	tblPRTimecard TC
+	INNER JOIN tblPREmployee EMP ON TC.intEntityEmployeeId = EMP.intEntityId
 	LEFT JOIN tblEMEntity EM 
 		ON EM.intEntityId = TC.intEntityEmployeeId
 	LEFT JOIN tblSMUserSecurity USA

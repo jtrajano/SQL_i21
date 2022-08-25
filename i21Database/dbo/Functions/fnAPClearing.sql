@@ -87,6 +87,39 @@ BEGIN
 	AND ST.intSourceTransactionTypeId IN (1, 2, 3) AND ST.dblSourceTransactionTax <> 0 AND DT.dblTax <> 0 --ONLY RECEIPT AND SHIPMENT TAXES AND DON'T INCLUDE 0 
 	AND ST.intSourceTransactionId IS NOT NULL --ONLY BILLS WITH SOURCE TRANSACTION
 	AND B.intTransactionType NOT IN (15) --DON'T INCLUDE TAX ADJUSTMENTS
+	AND DT.strCalculationMethod != 'Using Texas Fee Matrix'
+	UNION ALL --TEXAS FEE
+	--DETAIL TAX
+	SELECT DISTINCT
+		ST.intSourceTransactionId,
+		ST.strSourceTransaction,
+		ST.intSourceTransactionTypeId,
+		'',
+		B.dtmDate,
+		B.intEntityVendorId,
+		B.intShipToId,
+		0, --ST.intSourceTransactionDetailId,
+		BD.intAccountId,
+		0, --BD.intItemId,
+		0, --BD.intUnitOfMeasureId,
+		0,
+		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(DT.dblTax, 0) ELSE ISNULL(DT.dblTax, 0) * -1 END,
+		B.intBillId,
+		B.strBillId,
+		0, --BD.intBillDetailId,
+		0, --DT.intBillDetailTaxId,
+		'AP',
+		NULL
+	FROM tblAPBill B
+	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+	INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId
+	INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = BD.intAccountId
+	OUTER APPLY fnAPGetDetailSourceTransaction(BD.intInventoryReceiptItemId, BD.intInventoryReceiptChargeId, BD.intInventoryShipmentChargeId, BD.intLoadDetailId, BD.intLoadShipmentCostId, BD.intCustomerStorageId, BD.intSettleStorageId, BD.intBillId, BD.intItemId) ST
+	WHERE B.intBillId IN (SELECT intId FROM @ids) AND AD.intAccountCategoryId = 45 
+	AND ST.intSourceTransactionTypeId IN (1, 2, 3) AND ST.dblSourceTransactionTax <> 0 AND DT.dblTax <> 0 --ONLY RECEIPT AND SHIPMENT TAXES AND DON'T INCLUDE 0 
+	AND ST.intSourceTransactionId IS NOT NULL --ONLY BILLS WITH SOURCE TRANSACTION
+	AND B.intTransactionType NOT IN (15) --DON'T INCLUDE TAX ADJUSTMENTS
+	AND DT.strCalculationMethod = 'Using Texas Fee Matrix'
 
 	RETURN
 END

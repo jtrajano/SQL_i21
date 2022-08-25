@@ -33,7 +33,7 @@ BEGIN
 	RETURN;
 END
 
-IF NULLIF(@param, '') IS NULL
+IF NULLIF(@param, '') IS NULL AND NULLIF(@billBatchId,'') IS NULL
 BEGIN
 	RAISERROR('@param is empty. No voucher to post.', 16, 1);
 	RETURN;
@@ -1200,6 +1200,27 @@ BEGIN
 				GOTO Post_Rollback
 			END CATCH
 		END
+
+		--LOG TO tblAPClearing
+		BEGIN TRY
+			DECLARE @clearingIds AS Id
+			DECLARE @APClearing AS APClearing
+
+			INSERT INTO @clearingIds
+			SELECT intBillId FROM #tmpPostBillData
+
+			INSERT INTO @APClearing
+			SELECT * FROM fnAPClearing(@clearingIds)
+
+			EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+		END TRY
+		BEGIN CATCH
+				DECLARE @errorClearing NVARCHAR(200) = ERROR_MESSAGE()
+				SET @invalidCount = @invalidCount + 1;
+				SET @totalRecords = @totalRecords - 1;
+				RAISERROR(@errorClearing, 16, 1);
+				GOTO Post_Rollback
+		END CATCH
 	END
 	ELSE
 	BEGIN

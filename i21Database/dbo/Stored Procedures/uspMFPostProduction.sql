@@ -936,6 +936,34 @@ BEGIN
 
 	IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN
+		DECLARE @dblProcessQtyOld NUMERIC(38, 6)
+	
+		/* Creating Audit Log for processed quantity. */
+
+		SELECT  @dblProcessQtyOld = WRD.dblProcessedQty 
+		FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
+		WHERE WRD.intWorkOrderId = @intWorkOrderId;
+
+		IF (@dblProcessQtyOld IS NOT NULL)
+			BEGIN 
+
+			DECLARE @dblProcessQtyNew NUMERIC(38, 6)
+
+			SELECT @dblProcessQtyNew = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)
+			FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
+			JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
+			WHERE WRD.intWorkOrderId = @intWorkOrderId;
+
+				EXEC dbo.uspSMAuditLog @keyValue = @intWorkOrderId
+									 , @screenName = 'Manufacturing.view.WorkOrder'
+									 , @entityId = @intUserId
+									 , @actionType = 'Updated'
+									 , @changeDescription = 'Processed Qty'
+									 , @fromValue = @dblProcessQtyOld
+									 , @toValue = @dblProcessQtyNew;
+			END		
+		
+		/* End of creating audit log.*/
 
 		UPDATE WRD
 		SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intWeightUOMId, RD.intItemUOMId, @dblWeight), 0)

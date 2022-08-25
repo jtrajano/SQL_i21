@@ -1808,7 +1808,7 @@ IF (@intTableCount = 3)
 			BEGIN
 				SET @strImportFileHeader	= N'Commander App Info'
 				SET @strFileType			= N'Inbound'
-				SET @strFilePrefix			= N'vappinfo'
+				SET @strFilePrefix			= N'vAppInfo'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
 				SET @strStoredProcedure		= N'[to be develop]'
 						

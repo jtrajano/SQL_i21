@@ -8,27 +8,27 @@ SELECT  [Owner]						 = ISNULL(SalesPerson.strName, '')
 	   ,Company						 = Customer.strName
 	   ,MarketerContactID			 = ''
 	   ,MarketerName				 = 'WOODFORD OIL CO'
-	   ,FirstName					 = CASE WHEN CHARINDEX(',', Contact.strName) > 0
-											THEN LTRIM(RTRIM(SUBSTRING(Contact.strName, dbo.fnLastIndex(Contact.strName,' '), DATALENGTH(Contact.strName))))
-											ELSE LTRIM(RTRIM(REPLACE(SUBSTRING(LTRIM(RTRIM(Contact.strName)),1,CHARINDEX(' ',LTRIM(RTRIM(Contact.strName)),1)),',', '')))
+	   ,FirstName					 = CASE WHEN CHARINDEX(',', EntityContact.strName) > 0
+											THEN LTRIM(RTRIM(SUBSTRING(EntityContact.strName, dbo.fnLastIndex(EntityContact.strName,' '), DATALENGTH(EntityContact.strName))))
+											ELSE LTRIM(RTRIM(REPLACE(SUBSTRING(LTRIM(RTRIM(EntityContact.strName)),1,CHARINDEX(' ',LTRIM(RTRIM(EntityContact.strName)),1)),',', '')))
 									   END
-	   ,LastName					 = CASE WHEN CHARINDEX(',', Contact.strName) > 0
-											THEN LTRIM(RTRIM(REPLACE(SUBSTRING(LTRIM(RTRIM(Contact.strName)),1,CHARINDEX(' ',LTRIM(RTRIM(Contact.strName)),1)),',', '')))
-											ELSE LTRIM(RTRIM(SUBSTRING(Contact.strName, dbo.fnLastIndex(Contact.strName,' '), DATALENGTH(Contact.strName))))
+	   ,LastName					 = CASE WHEN CHARINDEX(',', EntityContact.strName) > 0
+											THEN LTRIM(RTRIM(REPLACE(SUBSTRING(LTRIM(RTRIM(EntityContact.strName)),1,CHARINDEX(' ',LTRIM(RTRIM(EntityContact.strName)),1)),',', '')))
+											ELSE LTRIM(RTRIM(SUBSTRING(EntityContact.strName, dbo.fnLastIndex(EntityContact.strName,' '), DATALENGTH(EntityContact.strName))))
 									   END
-	   ,Email						 = Contact.strEmail
-	   ,Phone						 = Contact.strPhone
-	   ,Street						 = ContactLocation.strAddress
-	   ,City						 = ContactLocation.strCity
-	   ,[State]						 = ContactLocation.strState
-	   ,PostalCode					 = ContactLocation.strZipCode
-	   ,Country						 = ContactLocation.strCountry
-	   ,ContactStreet				 = ContactLocation.strAddress
-	   ,ContactCity					 = ContactLocation.strCity
-	   ,ContactState				 = ContactLocation.strState
-	   ,ContactPostalCode			 = ContactLocation.strZipCode
-	   ,ContactEmail				 = Contact.strEmail
-	   ,ContactPhone				 = Contact.strPhone
+	   ,Email						 = Entity.strEmail
+	   ,Phone						 = Entity.strPhone
+	   ,Street						 = EntityLocation.strAddress
+	   ,City						 = EntityLocation.strCity
+	   ,[State]						 = EntityLocation.strState
+	   ,PostalCode					 = EntityLocation.strZipCode
+	   ,Country						 = EntityLocation.strCountry
+	   ,ContactStreet				 = EntityContactLocation.strAddress
+	   ,ContactCity					 = EntityContactLocation.strCity
+	   ,ContactState				 = EntityContactLocation.strState
+	   ,ContactPostalCode			 = EntityContactLocation.strZipCode
+	   ,ContactEmail				 = EntityContact.strEmail
+	   ,ContactPhone				 = EntityContact.strPhone
 	   ,Volume						 = Opportunity.intVolume
 	   ,IndustrySegment				 = IndustrySegment.strIndustrySegment
 	   ,NextSteps					 = Opportunity.strDescription
@@ -47,11 +47,18 @@ SELECT  [Owner]						 = ISNULL(SalesPerson.strName, '')
 	   ,intOpportunityId			 = Opportunity.intOpportunityId
 	   ,intBrandMaintenanceId		 = Opportunity.intBrandMaintenanceId
 FROM tblCRMOpportunity Opportunity
-		LEFT JOIN vyuEMEntityContact Contact
-ON Contact.intEntityContactId = Opportunity.intCustomerContactId
-		LEFT JOIN tblEMEntityLocation ContactLocation
-ON ContactLocation.intEntityId = Contact.intEntityId AND
-   ContactLocation.ysnDefaultLocation = 1
+		LEFT JOIN vyuEMEntityContact Entity
+ON Entity.intEntityId = Opportunity.intCustomerId AND	
+   Entity.ysnDefaultContact = 1
+		LEFT JOIN tblEMEntityLocation EntityLocation
+ON EntityLocation.intEntityId = Entity.intEntityId AND
+   EntityLocation.ysnDefaultLocation = 1
+		 LEFT JOIN vyuEMEntityContact EntityContact
+ON EntityContact.intEntityContactId = Opportunity.intCustomerContactId
+		LEFT JOIN tblEMEntityToContact EntityToContact
+ON EntityToContact.intEntityContactId = Opportunity.intCustomerContactId
+		LEFT JOIN tblEMEntityLocation EntityContactLocation
+ON EntityContactLocation.intEntityLocationId = EntityToContact.intEntityLocationId
 		LEFT JOIN tblEMEntity Customer
 ON Customer.intEntityId = Opportunity.intCustomerId
 		LEFT JOIN tblEMEntity SalesPerson 

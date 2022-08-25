@@ -14,6 +14,8 @@
     [ysnPayables]				BIT NULL, 
     [ysnPayroll]				BIT NULL, 
     [ysnAdjustPrevious]			BIT NULL, 
+	[intCreditAccountId]		INT NULL,
+    [ysnJournal]				BIT NULL, 
     [intConcurrencyId]			INT NOT NULL DEFAULT ((0)),
 	CONSTRAINT [PK_tblARCommissionSchedule_intCommissionScheduleId] PRIMARY KEY CLUSTERED ([intCommissionScheduleId] ASC),
 	CONSTRAINT [FK_tblARCommissionSchedule_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),

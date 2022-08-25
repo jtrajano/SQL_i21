@@ -43,7 +43,7 @@ BEGIN TRY
 		,dblTransactionAmountActual
 		,intLimitId
 		,dblLimit
-		,strBankTradeReference
+		--,strBankTradeReference
 		,strBankApprovalStatus
 		,dtmAppliedToTransactionDate
 		,intStatusId
@@ -76,7 +76,7 @@ BEGIN TRY
 		,dblTransactionAmountActual		= CTCD.dblLoanAmount
 		,intLimitId						= ARI.intBorrowingFacilityLimitId
 		,dblLimit						= CMBFL.dblLimit
-		,strBankTradeReference			= ARI.strBankTradeReference
+		--,strBankTradeReference			= ARI.strBankTradeReference
 		,strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
 		,dtmAppliedToTransactionDate	= GETDATE() 
 		,intStatusId					= CASE WHEN @ForDelete = 1 THEN 3 ELSE 1 END
@@ -141,7 +141,7 @@ BEGIN TRY
 			   OR ISNULL(ARI.intBankAccountId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
-			   OR ISNULL(ARI.strBankTradeReference, '') <> ''
+			   --OR ISNULL(ARI.strBankTradeReference, '') <> ''
 			   OR ISNULL(ARI.dblLoanAmount, 0) <> 0
 			   OR ISNULL(ARI.strTransactionNo, '') <> ''
 			)

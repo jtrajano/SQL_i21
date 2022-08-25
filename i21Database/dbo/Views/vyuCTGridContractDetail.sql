@@ -322,6 +322,7 @@ AS
 			, strLCPaymentTerm = credT.strTerm
 			, strLCTreasuryBank = credB.strBankName
 			, strLCBank = credB2.strBankName
+			, CD.intVendorLocationId
 			, CD.ysnTaxOverride
 			, CD.strTaxPoint
 			, CD.intTaxGroupId

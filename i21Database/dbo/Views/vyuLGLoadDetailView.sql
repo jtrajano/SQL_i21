@@ -234,7 +234,13 @@ SELECT LD.intLoadDetailId
 	, strDetailTerminalReference = LD.strTerminalReference
 	, LD.intCropYearId
 	, strCropYear = CPY.strCropYear
-
+	, LD.intTMDispatchId 
+	, LD.strOrderNumber
+	, LD.intTMSiteId
+	, strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
+	, LD.intTMDeviceId
+	, TMDV.strSerialNumber
+	, LD.intSalespersonId
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
@@ -276,6 +282,9 @@ LEFT JOIN tblCTIndex SIndex ON SIndex.intIndexId = SDetail.intIndexId
 LEFT JOIN tblSMCity SLPort ON SLPort.intCityId = SDetail.intLoadingPortId
 LEFT JOIN tblSMCity SDPort ON SDPort.intCityId = SDetail.intDestinationPortId
 LEFT JOIN tblTRSupplyPoint SSP ON SSP.intEntityVendorId = SIndex.intVendorId AND SSP.intEntityLocationId = SIndex.intVendorLocationId
+LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = LD.intTMDispatchId
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = LD.intTMSiteId
+LEFT JOIN tblTMDevice TMDV ON TMDV.intDeviceId = LD.intTMDeviceId
 LEFT JOIN tblICItem	IMS ON IMS.intItemId = SDetail.intItemId
 LEFT JOIN vyuLGAdditionalColumnForContractDetailView ADS ON AD.intContractDetailId = SDetail.intContractDetailId
 LEFT JOIN tblSMCurrency	CUS ON CUS.intCurrencyID = SDetail.intCurrencyId			

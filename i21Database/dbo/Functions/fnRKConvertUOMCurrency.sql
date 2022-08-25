@@ -25,7 +25,7 @@ BEGIN
 	----------------------------------
 	IF (@FromUOMId != @ToUOMId)
 	BEGIN
-		IF (@IDType = 'ItemUOM')
+		IF (@IDType COLLATE Latin1_General_CI_AS = 'ItemUOM')
 		BEGIN
 			SELECT @FromUOMRate = dblUnitQty
 			FROM tblICItemUOM
@@ -35,7 +35,7 @@ BEGIN
 			FROM tblICItemUOM
 			WHERE intItemUOMId = @ToUOMId
 		END
-		ELSE IF (@IDType = 'CommodityUOM')
+		ELSE IF (@IDType COLLATE Latin1_General_CI_AS = 'CommodityUOM')
 		BEGIN
 			SELECT @FromUOMRate = dblUnitQty
 			FROM tblICCommodityUnitMeasure
@@ -45,7 +45,7 @@ BEGIN
 			FROM tblICCommodityUnitMeasure
 			WHERE intCommodityUnitMeasureId = @ToUOMId
 		END
-		ELSE IF (@IDType = 'UOM')
+		ELSE IF (@IDType COLLATE Latin1_General_CI_AS = 'UOM')
 		BEGIN
 			SELECT @FromUOMRate = dblConversionToStock
 			FROM tblICUnitMeasureConversion

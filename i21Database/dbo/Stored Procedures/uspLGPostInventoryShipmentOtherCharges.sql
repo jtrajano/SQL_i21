@@ -270,12 +270,28 @@ BEGIN
 			,strTransactionForm = 'Logistics'
 			,ShipmentCharges.ysnAccrue
 			,ShipmentCharges.ysnPrice
-			,dblForexRate = ISNULL(1, 1)
+			,dblForexRate = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @intFunctionalCurrencyId AND CD.intInvoiceCurrencyId <> @intFunctionalCurrencyId) 
+											THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @intFunctionalCurrencyId AND CD.intInvoiceCurrencyId = @intFunctionalCurrencyId)
+											THEN 1 --foreign price to functional FX, use 1
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @intFunctionalCurrencyId AND CD.intInvoiceCurrencyId <> @intFunctionalCurrencyId)
+											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+										ELSE ISNULL(ShipmentItem.dblForexRate,1) END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@intFunctionalCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										THEN ISNULL(FX.dblFXRate, 1)
+										ELSE ISNULL(ShipmentItem.dblForexRate,1) END
+									END
 			,strRateType = 1
 			,Charge.strItemNo
 			,intEntityId = 1
 		FROM dbo.tblLGLoad Shipment
 		INNER JOIN dbo.tblLGLoadDetail ShipmentItem ON Shipment.intLoadId = ShipmentItem.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intSContractDetailId
+		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
 		INNER JOIN dbo.tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = Shipment.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
 		INNER JOIN tblICItem Charge ON Charge.intItemId = ShipmentCharges.intItemId
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ShipmentItem.intItemId
@@ -283,6 +299,16 @@ BEGIN
 		LEFT JOIN dbo.tblICItemLocation ChargeItemLocation ON ChargeItemLocation.intItemId = ShipmentCharges.intItemId
 			AND ChargeItemLocation.intLocationId = ShipmentItem.intSCompanyLocationId
 		LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
+		OUTER APPLY (SELECT	TOP 1  
+						intForexRateTypeId = RD.intRateTypeId
+						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @intFunctionalCurrencyId  
+									THEN 1/RD.[dblRate] 
+									ELSE RD.[dblRate] END 
+						FROM tblSMCurrencyExchangeRate ER JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+						WHERE @intFunctionalCurrencyId <> CD.intInvoiceCurrencyId
+							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @intFunctionalCurrencyId) 
+								OR (ER.intFromCurrencyId = @intFunctionalCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
+						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE Shipment.intLoadId = @intInventoryShipmentId
 		)
 

@@ -7,6 +7,7 @@
 	, @strFileType NVARCHAR(50) = NULL 
 	, @ErrorCount INT OUTPUT
 	, @TotalRows INT OUTPUT
+	, @storeGroup udtStoreGroup READONLY
 AS
 
 SET @intVendorId = NULLIF(@intVendorId, '0') 
@@ -1647,13 +1648,22 @@ BEGIN
 END 
 ELSE
 BEGIN 
-	INSERT INTO @ValidLocations (
-		intCompanyLocationId
-	) 
-	SELECT 
-		intCompanyLocationId
-	FROM	
-		@Locations
+	IF EXISTS (SELECT TOP 1 1 FROM @storeGroup)
+		BEGIN
+			INSERT INTO @ValidLocations (intCompanyLocationId) 
+			SELECT DISTINCT (Store.intCompanyLocationId)
+			FROM tblSTStoreGroupDetail AS StoreGroupDetail
+			LEFT JOIN tblSTStore AS Store ON StoreGroupDetail.intStoreId = Store.intStoreId
+			WHERE StoreGroupDetail.intStoreGroupId IN (SELECT paramStoreGroup.intStoreGroupId
+													   FROM @storeGroup AS paramStoreGroup)
+
+		END
+	ELSE
+		BEGIN
+			INSERT INTO @ValidLocations (intCompanyLocationId) 
+			SELECT intCompanyLocationId
+			FROM @Locations
+		END
 END 
 
 -- Upsert the Item Location 

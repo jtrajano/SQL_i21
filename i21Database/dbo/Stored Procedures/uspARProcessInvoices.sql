@@ -229,17 +229,18 @@ DECLARE  @Id									INT
 		,@BorrowingFacilityId					INT
 		,@BorrowingFacilityLimitId				INT
 		,@BankReferenceNo						NVARCHAR(100)
-		,@BankTradeReference					NVARCHAR(100)
+		,@BankTransactionId						NVARCHAR(100)
 		,@LoanAmount							NUMERIC(18, 6)
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
+		,@FreightCharge							NUMERIC(18, 6)
+		,@FreightCompanySegment					INT
+		,@FreightLocationSegment				INT
 		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
-		,@DefaultPayToBankAccountId				INT
-		,@PayToCashBankAccountId				INT
-		,@PaymentInstructions					NVARCHAR(MAX)
+		,@Surcharge								NUMERIC(18, 6)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -456,17 +457,17 @@ BEGIN
 		,@BorrowingFacilityId			= [intBorrowingFacilityId]
 		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
 		,@BankReferenceNo				= [strBankReferenceNo]
-		,@BankTradeReference			= [strBankTradeReference]
+		,@BankTransactionId				= [strBankTransactionId]
 		,@LoanAmount					= [dblLoanAmount]
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
+		,@FreightCharge					= [dblFreightCharge]
+		,@FreightCompanySegment			= [intFreightCompanySegment]
+		,@FreightLocationSegment		= [intFreightLocationSegment]
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
-		,@DefaultPayToBankAccountId		= [intDefaultPayToBankAccountId]
-		,@PayToCashBankAccountId		= [intPayToCashBankAccountId]
-		,@PaymentInstructions			= [strPaymentInstructions]
-		,@SourcedFrom					= [strSourcedFrom]
+		,@Surcharge						= [dblSurcharge]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -541,7 +542,7 @@ BEGIN
 		,@ItemPerformerId				= (CASE WHEN @GroupingOption = 0 THEN [intPerformerId] ELSE NULL END)
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
-		,@ItemCurrencyExchangeRateTypeId= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateTypeId] ELSE NULL END)
+		,@ItemCurrencyExchangeRateTypeId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateTypeId] ELSE NULL END)
 		,@ItemCurrencyExchangeRateId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateId] ELSE NULL END)
 		,@ItemCurrencyExchangeRate		= (CASE WHEN @GroupingOption = 0 THEN [dblCurrencyExchangeRate] ELSE 1 END)
 		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE NULL END)
@@ -587,66 +588,61 @@ BEGIN
 		IF ISNULL(@SourceTransaction, '') <> 'Import'
 			BEGIN
 				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
-				BEGIN
-					SET @SourceColumn = 'intLoadDistributionHeaderId'
-					SET @SourceTable = 'tblTRLoadDistributionHeader'
-				END
-
+					BEGIN
+						SET @SourceColumn = 'intLoadDistributionHeaderId'
+						SET @SourceTable = 'tblTRLoadDistributionHeader'
+					END
 				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
-				BEGIN
-					SET @SourceColumn = 'intShipmentId'
-					SET @SourceTable = 'tblLGShipment'
-					SET @SourcedFrom = 'Logistics'
-				END
-
+					BEGIN
+						SET @SourceColumn = 'intShipmentId'
+						SET @SourceTable = 'tblLGShipment'
+						SET @SourcedFrom = 'Logistics'
+					END
 				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
-				BEGIN
-					SET @SourceColumn = 'intTransactionId'
-					SET @SourceTable = 'tblCFTransaction'
-				END
-
+					BEGIN
+						SET @SourceColumn = 'intTransactionId'
+						SET @SourceTable = 'tblCFTransaction'
+					END
 				IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
-				BEGIN
-					SET @SourceColumn = 'intMeterReadingId'
-					SET @SourceTable = 'tblMBMeterReading' 
-				END
-
+					BEGIN
+						SET @SourceColumn = 'intMeterReadingId'
+						SET @SourceTable = 'tblMBMeterReading' 
+					END
 				IF ISNULL(@SourceTransaction,'') = 'Provisional'
-				BEGIN
-					SET @SourceColumn = 'intInvoiceId'
-					SET @SourceTable = 'tblARInvoice'
-				END
-
+					BEGIN
+						SET @SourceColumn = 'intInvoiceId'
+						SET @SourceTable = 'tblARInvoice'
+					END					
 				IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
-				BEGIN
-					SET @SourceColumn = 'intInventoryShipmentId'
-					SET @SourceTable = 'tblICInventoryShipment'
-					SET @SourcedFrom = 'Inventory Shipment'
-				END
+					BEGIN
+						SET @SourceColumn = 'intInventoryShipmentId'
+						SET @SourceTable = 'tblICInventoryShipment'
+						SET @SourcedFrom = 'Inventory Shipment'
+					END		
 
 				IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
-				BEGIN
-					SET @SourceColumn = 'intContractHeaderId'
-					SET @SourceTable = 'tblCTContractHeader'
-				END
+					BEGIN
+						SET @SourceColumn = 'intContractHeaderId'
+						SET @SourceTable = 'tblCTContractHeader'
+					END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Load Schedule')
-				BEGIN
-					SET @SourceColumn = 'intLoadId'
-					SET @SourceTable = 'tblLGLoad'
-					SET @SourcedFrom = 'Logistics'
-				END
+					BEGIN
+						SET @SourceColumn = 'intLoadId'
+						SET @SourceTable = 'tblLGLoad'
+						SET @SourcedFrom = 'Logistics'
+					END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
-				BEGIN
-					SET @SourceColumn = 'intWeightClaimId'
-					SET @SourceTable = 'tblLGWeightClaim'
-				END
+					BEGIN
+						SET @SourceColumn = 'intWeightClaimId'
+						SET @SourceTable = 'tblLGWeightClaim'
+					END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim')
-				BEGIN
-					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
-				END
+					BEGIN
+						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
+					END
 			END		
 	END TRY
 	BEGIN CATCH
@@ -674,10 +670,10 @@ BEGIN
 	IF ISNULL(@Type, '') = ''
 		SET @Type = 'Standard'
 	
-	IF ISNULL(@LoadDistributionHeaderId, 0) > 0
-		BEGIN
-			SET @Type = 'Transport Delivery'
-		END
+	IF (ISNULL(@LoadDistributionHeaderId, 0) > 0 AND (ISNULL(@SourceTransaction,'') <> 'Transport Load')) OR ((ISNULL(@SourceTransaction,'') = 'Transport Load' AND ISNULL(@Type, '') = ''))
+	BEGIN
+		SET @Type = 'Transport Delivery'
+	END
 
 	SET @NewSourceId = dbo.[fnARValidateInvoiceSourceId](@SourceTransaction, @SourceId)
 
@@ -754,17 +750,18 @@ BEGIN
 			,@BorrowingFacilityId			= @BorrowingFacilityId
 			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
 			,@BankReferenceNo				= @BankReferenceNo
-			,@BankTradeReference			= @BankTradeReference
+			,@BankTransactionId				= @BankTransactionId
 			,@LoanAmount					= @LoanAmount
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
+			,@FreightCharge					= @FreightCharge
+			,@FreightCompanySegment			= @FreightCompanySegment
+			,@FreightLocationSegment		= @FreightLocationSegment
 			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
-			,@DefaultPayToBankAccountId		= @DefaultPayToBankAccountId
-			,@PayToCashBankAccountId		= @PayToCashBankAccountId
-			,@PaymentInstructions			= @PaymentInstructions
+			,@Surcharge						= @Surcharge
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -1533,6 +1530,10 @@ BEGIN TRY
 			,@Recap							= [ysnRecap] 
 			,@Post							= [ysnPost]
 			,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
+			,@FreightCharge					= [dblFreightCharge]
+			,@FreightCompanySegment			= [intFreightCompanySegment]
+			,@FreightLocationSegment		= [intFreightLocationSegment]
+			,@Surcharge						= [dblSurcharge]
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1674,8 +1675,12 @@ BEGIN TRY
 			,[intOriginalInvoiceId]		= @OriginalInvoiceId 
 			,[intEntityId]				= @EntityId
 			,[intTruckDriverId]			= @TruckDriverId
-			,[intTruckDriverReferenceId]	= @TruckDriverReferenceId
+			,[intTruckDriverReferenceId]= @TruckDriverReferenceId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
+			,[dblFreightCharge]			= @FreightCharge 
+			,[intFreightCompanySegment]	= @FreightCompanySegment
+			,[intFreightLocationSegment]= @FreightLocationSegment
+			,[dblSurcharge]				= @Surcharge
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN

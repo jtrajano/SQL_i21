@@ -1,4 +1,4 @@
-﻿CREATE TABLE tblApiSchemaEmployeePaycheck(
+CREATE TABLE tblApiSchemaEmployeePaycheck(
      guiApiUniqueId UNIQUEIDENTIFIER NOT NULL							--Required
     ,intRowNumber INT													--Required
     ,intKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY						--Required
@@ -10,6 +10,7 @@
 	,dblEarningHour FLOAT(50) NULL
 	,dblAmount FLOAT(50) NULL
 	,dblTotal FLOAT(50) NULL
+	,dblTaxableAmount FLOAT(50) NULL
 	,dtmPayDate NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 	,dtmPayFrom NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 	,dtmPayTo NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL

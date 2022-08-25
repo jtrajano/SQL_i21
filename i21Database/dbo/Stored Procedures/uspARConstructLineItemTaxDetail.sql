@@ -876,7 +876,10 @@ BEGIN
 	SET dblTaxableAmount = dblTaxableAmount + ISNULL(dblOtherTaxAmount, 0)
 
 	UPDATE IT
-	SET dblItemTaxAmount = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN IT.dblTaxableAmount * (IT.dblRate/100) ELSE P.dblQuantity * IT.dblRate END
+	SET dblItemTaxAmount = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN IT.dblTaxableAmount * (IT.dblRate/100) 
+						        WHEN IT.strCalculationMethod = 'Percentage of Tax Only' THEN IT.dblOtherTaxAmount * IT.dblRate
+								ELSE P.dblQuantity * IT.dblRate 
+						   END
 	FROM @ItemTaxes IT
 	INNER JOIN @ConstructLineItemTaxDetailParam P ON P.intLineItemId = IT.intLineItemId
 	WHERE IT.ysnInvalidSetup = 0 

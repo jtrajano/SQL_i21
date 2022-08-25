@@ -140,7 +140,13 @@ BEGIN
 			7
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
-			(A.dblTotal) <> (SELECT CAST(SUM(dblTotal) + SUM(dblTax) AS DECIMAL(18,2)) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
+			(A.dblTotal) <> 
+			(
+				(SELECT CAST(SUM(dblTotal) + SUM(dblTax) AS DECIMAL(18,2)) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
+				+
+				(SELECT TOP 1 ISNULL(dblAdjustedTax,0) FROM tblAPBillDetailTax B INNER JOIN tblAPBillDetail B2 ON B.intBillDetailId = B2.intBillDetailId 
+				WHERE B2.intBillId = A.intBillId AND B.strCalculationMethod = 'Using Texas Fee Matrix')
+			)
 			AND A.intTransactionType <> 15
 
 		--ALREADY POSTED
@@ -567,10 +573,10 @@ BEGIN
 			SELECT SUM(dblTax) AS dblTaxTotal
 			FROM (
 				SELECT 
-					ISNULL(B.dblAdjustedTax,0)
-				AS dblTax
+					ISNULL(B.dblAdjustedTax,0) AS dblTax
 				FROM tblAPBillDetailTax B
 				WHERE B.intBillDetailId = A2.intBillDetailId
+				AND B.strCalculationMethod != 'Using Texas Fee Matrix'
 			) tmp
 		) taxDetails
 		WHERE 

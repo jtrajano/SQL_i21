@@ -227,7 +227,7 @@ BEGIN
 			EXEC('UPDATE tblTFReportingComponent SET intMasterId = NULL')
 		END
 
-		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)	
+		INSERT INTO tblSMCleanupLog VALUES('MFT', 'Overall-Cleanup', GETDATE(), GETUTCDATE(), 1)
 
 	END
 
@@ -254,11 +254,6 @@ BEGIN
 			EXEC('UPDATE tblTFReportingComponent SET strStoredProcedure = (CASE WHEN strTransactionType = ''Inventory'' THEN strSPInventory WHEN strTransactionType = ''Invoice'' THEN strSPInvoice ELSE strSPRunReport END)')
 		END
 	END
-END
-
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthority' AND COLUMN_NAME = 'intMasterId')
-BEGIN
-	EXEC('DELETE FROM tblTFTaxAuthority WHERE intMasterId IS NULL')
 END
 
 PRINT('MFT Cleanup - END')

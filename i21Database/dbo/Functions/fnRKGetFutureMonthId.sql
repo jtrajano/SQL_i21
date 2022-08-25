@@ -13,7 +13,7 @@ BEGIN
 	SELECT TOP 1 @FutureMonthId = intFutureMonthId
 	FROM tblRKFuturesMonth
 	WHERE intFutureMarketId = @FutureMarketId
-			AND strFutureMonth = @FutureMonth
+			AND strFutureMonth = @FutureMonth COLLATE Latin1_General_CI_AS
 
 	RETURN @FutureMonthId
 END

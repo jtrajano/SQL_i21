@@ -87,6 +87,7 @@ Type the overview for the table here.
 		[intDataSourceId] TINYINT NULL,
 		[dblTransactionQtyLimit] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+		[intRowNumber] INT NULL,
 		CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),

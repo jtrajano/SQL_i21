@@ -1,5 +1,5 @@
 ﻿
-Create VIEW [dbo].[vyuCTOptionalityValue]
+CREATE VIEW [dbo].[vyuCTOptionalityValue]
 AS
 
 SELECT  intOptionId, intValueId, intFilterId, strValue, strDescription
@@ -16,7 +16,7 @@ FROM
 		UNION ALL
 
 		SELECT intCityId
-		      ,intCountryId
+		      ,a.intCountryId
 			  ,strCity,
 			  'citycombo' strControlName
 			  ,strCountry
@@ -55,7 +55,7 @@ FROM
 		UNION ALL 
 
 		SELECT intCityId
-		      ,intCountryId
+		      ,a.intCountryId
 			  ,strCity,
 			  'arbitrationcombo' strControlName
 			  ,strCountry

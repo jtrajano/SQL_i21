@@ -501,6 +501,8 @@ BEGIN TRY
 						THEN 6
 					WHEN 'Pick Lots w/o Contract'
 						THEN 7
+					WHEN 'TM Orders'
+						THEN 8
 					END
 
 			SELECT @strErrorMessage = ''

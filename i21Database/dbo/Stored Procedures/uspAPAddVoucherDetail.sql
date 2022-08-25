@@ -276,7 +276,7 @@ SELECT TOP 100 PERCENT
 	,dblCashPrice 						= 	A.dblCost
 	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
 	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
-	,intOriginalTaxGroupId				=	A.intOriginalTaxGroupId
+	,ysnOverrideTaxGroup				=	A.ysnOverrideTaxGroup
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -371,8 +371,7 @@ UPDATE A
 								@qtyToBillFromDev
 							END,
 		A.dblTax = ISNULL(vp.dblTax, A.dblTax), --UPDATE THE TAX IF WE GENERATED IT
-		A.intTaxGroupId = ISNULL(vp.intPurchaseTaxGroupId, A.intTaxGroupId),
-		A.intOriginalTaxGroupId = ISNULL(A.intOriginalTaxGroupId, A.intTaxGroupId)
+		A.intTaxGroupId = ISNULL(vp.intPurchaseTaxGroupId, A.intTaxGroupId)
 FROM #tmpVoucherPayableData A
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
@@ -483,7 +482,8 @@ INSERT
 	,intCurrencyExchangeRateTypeId		
 	,dblRate							
 	/*Tax info*/						
-	,intTaxGroupId						
+	,intTaxGroupId	
+	,ysnOverrideTaxGroup					
 	,dblTax								
 	/*Bundle info*/						
 	,intBundletUOMId					
@@ -497,7 +497,6 @@ INSERT
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
-	,intOriginalTaxGroupId
 )
 VALUES
 (
@@ -586,7 +585,8 @@ VALUES
 	,intCurrencyExchangeRateTypeId		
 	,dblRate							
 	/*Tax info*/						
-	,intTaxGroupId						
+	,intTaxGroupId	
+	,ysnOverrideTaxGroup					
 	,dblTax								
 	/*Bundle info*/						
 	,intBundletUOMId					
@@ -600,7 +600,6 @@ VALUES
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
-	,intOriginalTaxGroupId
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 
@@ -653,9 +652,15 @@ FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
 LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
-WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL OR A.intPriceFixationDetailId > 0
+WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
+
+DECLARE @billIds AS Id
+INSERT INTO @billIds
+SELECT DISTINCT intBillId FROM @voucherDetails
+
+EXEC uspAPUpdateTaxForTexasLoadingFee @billIds
 
 INSERT INTO @voucherDetailIds
 SELECT intBillDetailId FROM @voucherDetailsInfo

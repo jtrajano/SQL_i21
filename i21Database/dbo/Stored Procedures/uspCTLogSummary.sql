@@ -87,7 +87,7 @@ BEGIN TRY
 		, intCommodityUOMId INT
 		, strContractNumber NVARCHAR(50)
 		, ysnLoadBased BIT
-		, dblQuantity NUMERIC(18, 6)
+		, dblQuantity NUMERIC(38, 20)
 		, intNoOfLoad INT
 		, dblQuantityPerLoad NUMERIC(18, 6)
 		, ysnMultiPrice BIT
@@ -109,7 +109,7 @@ BEGIN TRY
 		, intBookId INT
 		, intSubBookId INT
   		, ysnWithPriceFix bit
-		, dblBalance NUMERIC(18, 6)
+		, dblBalance NUMERIC(38, 20)
 	)
 
 	-- Get Contract Details
@@ -479,7 +479,7 @@ BEGIN TRY
 			, intSubBookId INT
 			, intOrderBy INT
 			, intUserId INT
-			, dblQuantity NUMERIC(18, 6));
+			, dblQuantity NUMERIC(38, 20));
 
 		INSERT INTO @sequenceHistory (Row_Num
 			, intSequenceHistoryId

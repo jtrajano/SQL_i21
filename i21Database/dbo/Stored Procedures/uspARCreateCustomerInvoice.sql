@@ -153,19 +153,20 @@
 	,@BorrowingFacilityId					INT				= NULL
 	,@BorrowingFacilityLimitId				INT				= NULL
 	,@BankReferenceNo						NVARCHAR(100)	= NULL
-	,@BankTradeReference					NVARCHAR(100)	= NULL
+	,@BankTransactionId						NVARCHAR(100)	= NULL
 	,@LoanAmount							NUMERIC(18, 6)	= NULL
 	,@BankValuationRuleId					INT				= NULL
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
+	,@FreightCharge							NUMERIC(18, 6)	= 0
+	,@FreightCompanySegment					INT				= NULL
+	,@FreightLocationSegment				INT				= NULL
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
-	,@DefaultPayToBankAccountId				INT				= NULL
-	,@PayToCashBankAccountId				INT				= NULL
-	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
+	,@Surcharge								NUMERIC(18, 6)	= 0
 AS
 
 BEGIN
@@ -362,9 +363,14 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) LEFT OUTER JOIN [
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN		
+		DECLARE @strCustomerNumber  NVARCHAR(100) = NULL
+			  , @strCustomerErrMsg	NVARCHAR(100) = NULL
+
+		SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM tblARCustomer WHERE intEntityId = @EntityCustomerId
+		SET @strCustomerErrMsg = 'Customer ' + ISNULL(@strCustomerNumber, '') + ' is not active!'
+
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('The entity Id provided does not exists!', 16, 1);	
-		SET @ErrorMessage = 'The entity Id provided does not exists!'
+			RAISERROR(@strCustomerErrMsg, 16, 1);
 		RETURN 0;
 	END
 
@@ -543,18 +549,20 @@ BEGIN TRY
 		,[intBorrowingFacilityId]
 		,[intBorrowingFacilityLimitId]
 		,[strBankReferenceNo]
-		,[strBankTradeReference]
+		,[strBankTransactionId]
 		,[dblLoanAmount]
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
 		,[intBorrowingFacilityLimitDetailId]
+		,[dblFreightCharge]
+		,[intFreightCompanySegment]
+		,[intFreightLocationSegment]
 		,[intDefaultPayToBankAccountId]
 		,[strSourcedFrom]
 		,[intTaxLocationId]
 		,[strTaxPoint]
-		,[strPaymentInstructions]
-		,[intPayToCashBankAccountId]
+		,[dblSurcharge]
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -646,25 +654,26 @@ BEGIN TRY
 		,[intBorrowingFacilityId]			= @BorrowingFacilityId
 		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
-		,[strBankTradeReference]			= @BankTradeReference
+		,[strBankTransactionId]				= @BankTransactionId
 		,[dblLoanAmount]					= @LoanAmount
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
+		,[dblFreightCharge]					= @FreightCharge
+		,[intFreightCompanySegment]			= @FreightCompanySegment
+		,[intFreightLocationSegment]		= @FreightLocationSegment
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 		,[strSourcedFrom]					= @SourcedFrom
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
-		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
-		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
+		,[dblSurcharge]						= @Surcharge
 	FROM tblARCustomer C
 	LEFT OUTER JOIN [tblEMEntityLocation] EL ON C.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
 	LEFT OUTER JOIN [tblEMEntityLocation] SL ON ISNULL(@ShipToLocationId, 0) <> 0 AND @ShipToLocationId = SL.intEntityLocationId
 	LEFT OUTER JOIN [tblEMEntityLocation] SL1 ON C.intShipToId = SL1.intEntityLocationId
 	LEFT OUTER JOIN [tblEMEntityLocation] BL ON ISNULL(@BillToLocationId, 0) <> 0 AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN [tblEMEntityLocation] BL1 ON C.intBillToId = BL1.intEntityLocationId	
-	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
