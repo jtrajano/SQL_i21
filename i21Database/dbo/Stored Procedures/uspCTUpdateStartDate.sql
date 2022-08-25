@@ -9,18 +9,20 @@ BEGIN
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
-					AND @dtmStartDate <= dtmEndDate)
+					AND @dtmStartDate > dtmEndDate)
 	BEGIN
 		RAISERROR ('Start Date must be earlier than or equal to current end date.', 16, 1)
 	END
 
 	DECLARE @intContractHeaderId INT
-		, @strDetails NVARCHAR(200)
+		, @strDetails NVARCHAR(MAX)
 		, @dtmPreviousStartDate DATETIME
+		, @dtmPreviousStartDateUTC DATETIME
 		, @intContractSeq INT
 
 	SELECT @intContractHeaderId = intContractHeaderId
 		, @dtmPreviousStartDate = dtmStartDate
+		, @dtmPreviousStartDateUTC = dtmStartDateUTC
 		, @intContractSeq = intContractSeq
 	FROM tblCTContractDetail
 	WHERE intContractDetailId = @intContractDetailId
@@ -38,41 +40,44 @@ BEGIN
 		, @intUserId			= @intUserId
 
 
-	SET @strDetails ='{ "action":"Updated",
-					"change":"Updated - Record: ' + CAST(@intContractHeaderId AS NVARCHAR) + '",
-					"keyValue":' + CAST(@intContractHeaderId AS NVARCHAR) + ',
-					"iconCls":"small-tree-modified",
-					"children":[  
-						{  
-							"change":"tblCTContractDetails",
-							"change":"tblCTContractDetails",
-							"children":[  
-								{  
-								"action":"Updated",
-								"change":"Updated - Record: Sequence - ' + CAST(@intContractSeq AS NVARCHAR) + '",
-								"keyValue":' + CAST(@intContractSeq AS NVARCHAR) + ',
-								"iconCls":"small-tree-modified",
-								"children":
-									[   
-										{  
-										"change":"dtmStartDate",
-										"from":"' + CAST(@dtmPreviousStartDate AS NVARCHAR) + '",
-										"to":"' + CAST(@dtmStartDate AS NVARCHAR) + '",
-										"leaf":true,
-										"iconCls":"small-gear",
-										"isField":true,
-										"keyValue":' + CAST(@intContractDetailId AS NVARCHAR) + ',
-										"associationKey":"tblCTContractDetails",
-										"changeDescription":"Start Date"
-										}
-								]
-							}
+	SET @strDetails ='{  
+						"change":"tblCTContractDetails",
+						"children":[  
+							{  
+							"action":"Updated",
+							"change":"Updated - Record: Sequence - ' + CAST(@intContractSeq AS NVARCHAR) + '",
+							"keyValue":' + CAST(@intContractSeq AS NVARCHAR) + ',
+							"iconCls":"small-tree-modified",
+							"children":
+								[   
+									{  
+									"change":"dtmStartDate",
+									"from":"' + CAST(@dtmPreviousStartDate AS NVARCHAR) + '",
+									"to":"' + CAST(@dtmStartDate AS NVARCHAR) + '",
+									"leaf":true,
+									"iconCls":"small-gear",
+									"isField":true,
+									"keyValue":' + CAST(@intContractDetailId AS NVARCHAR) + ',
+									"associationKey":"tblCTContractDetails",
+									"changeDescription":"Start Date"
+									},
+									{  
+									"change":"dtmStartDateUTC",
+									"from":"' + CAST(@dtmPreviousStartDateUTC AS NVARCHAR) + '",
+									"to":"' + CAST(@dtmStartDate AS NVARCHAR) + '",
+									"leaf":true,
+									"iconCls":"small-gear",
+									"isField":true,
+									"keyValue":' + CAST(@intContractDetailId AS NVARCHAR) + ',
+									"associationKey":"tblCTContractDetails",
+									"changeDescription":"Start Date UTC"
+									}
+							]
+						}
 						],
 						"iconCls":"small-tree-grid",
 						"changeDescription":"Details"
-						}
-					]
-					}'
+						}'
 
 			 EXEC
 			 [uspSMAuditLog]
@@ -85,5 +90,6 @@ BEGIN
 			,@fromValue			 = ''			
 			,@toValue			 = ''			
 			,@details			 = @strDetails
+
 
 END
