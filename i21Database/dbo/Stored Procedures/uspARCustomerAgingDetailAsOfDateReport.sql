@@ -69,7 +69,8 @@ INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 	, strLogoType
 	, blbLogo
 	, blbFooterLogo
-	, strReportLogId
+	, intAge
+	, strReportLogId	
 )
 SELECT *, NULLIF(@strReportLogId, CAST(NEWID() AS NVARCHAR(100)))
 FROM [dbo].[fnARCustomerAgingDetail](
