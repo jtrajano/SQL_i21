@@ -57,7 +57,7 @@ BEGIN
 			BEGIN
 				IF ISNULL(@intInventoryShipmentId, 0) != 0 AND  EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @intInventoryShipmentId AND ysnAllowInvoice = 1)
 				BEGIN
-					EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId , 0, 1 ,@dtmShipmentDate = @dtmClientDate, @intScaleTicketId = @intTicketId;
+					EXEC dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId OUT, 0, 1 ,@dtmShipmentDate = @dtmClientDate, @intScaleTicketId = @intTicketId;
 
 					SELECT
 					@InvoiceDetailId = ID.intInvoiceDetailId, @intContractDetailId = ID.intContractDetailId

@@ -17,7 +17,7 @@ BEGIN TRY
 		,@intToItemUOMId int
 		,@intExternalId int
 		,@dblOldQuantity NUMERIC(24, 10) 
-		,@dblQuantity NUMERIC(24, 10) 
+		,@dblQuantity NUMERIC(38, 20) 
 		,@dblAdjustment NUMERIC(24, 10) 
 		,@dblContractQuantity NUMERIC(24, 10) 
 		,@intFromItemUOMId int
@@ -38,7 +38,7 @@ BEGIN TRY
 		,intToItemUOMId int
 		,intExternalId int NULL
 		,dblOldQuantity NUMERIC(24, 10) NULL
-		,dblQuantity NUMERIC(24, 10) NULL
+		,dblQuantity NUMERIC(38, 20) NULL
 		,intFromItemUOMId int NULL
 		,strScreenName NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 		,intUserId INT NULL

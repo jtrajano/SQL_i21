@@ -1081,8 +1081,8 @@ BEGIN
 						WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
 						WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.		
 						/*
-							8	Consume
-							9	Produce
+							8	Produce
+							9	Consume
 							12	Inventory Transfer	Inventory Transfer
 							13	Inventory Transfer with Shipment	Inventory Transfer
 							14	Inventory Adjustment - UOM Change	Inventory Adjustment
@@ -1188,8 +1188,8 @@ BEGIN
 				WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
 				WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.				
 				/*
-					8	Consume
-					9	Produce
+					8	Produce
+					9	Consume
 					12	Inventory Transfer	Inventory Transfer
 					13	Inventory Transfer with Shipment	Inventory Transfer
 					14	Inventory Adjustment - UOM Change	Inventory Adjustment
@@ -1201,7 +1201,7 @@ BEGIN
 				*/
 				WHEN t.intTransactionTypeId IN (
 					8
-					, 9
+					, 9 
 					, 12
 					, 13
 					, 14

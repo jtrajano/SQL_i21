@@ -30,6 +30,10 @@ DECLARE @dblExtraWithholding  AS FLOAT(50)
 DECLARE @dblLimit AS FLOAT(50)
 DECLARE @intAccountId AS INT
 DECLARE @intExpenseAccountId AS INT
+
+DECLARE @strAccountId  AS NVARCHAR(100)
+DECLARE @strExpenseAccountId  AS NVARCHAR(100)
+
 DECLARE @intAllowance AS INT
 DECLARE @strPaidBy  AS NVARCHAR(100)
 DECLARE @ysnDefault AS BIT
@@ -42,6 +46,8 @@ DECLARE @dblW4Deductions  AS FLOAT(50)
 DECLARE @ysnUseLocationDistribution AS BIT
 DECLARE @ysnUseLocationDistributionExpense AS BIT
 DECLARE @EmployeeCount AS INT
+DECLARE @AccountCount AS INT
+DECLARE @ExpenseAccountCount AS INT
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
 SELECT
@@ -91,6 +97,8 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@dblLimit							= dblLimit
 			,@intAccountId						= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strLiabilityAccount)
 			,@intExpenseAccountId				= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
+			,@strAccountId						= strLiabilityAccount
+			,@strExpenseAccountId				= strExpenseAccount
 			,@intAllowance						= dblFederalAllowance
 			,@strPaidBy							= strPaidBy
 			,@ysnDefault						= ysnDefault
@@ -126,78 +134,146 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 												SELECT TOP 1 @EmployeeCount = COUNT(intEntityId) FROM tblPREmployee WHERE intEntityId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId)
 												IF(@EmployeeCount != 0)
 													BEGIN
-														INSERT INTO tblPREmployeeTax
-														(
-														 intEntityEmployeeId
-														,intTypeTaxId
-														,strCalculationType
-														,strFilingStatus
-														,intTypeTaxStateId
-														,intTypeTaxLocalId 
-														,intSupplementalCalc
-														,dblAmount
-														,dblExtraWithholding 
-														,dblLimit
-														,intAccountId
-														,intExpenseAccountId
-														,ysnUseLocationDistribution
-														,ysnUseLocationDistributionExpense
-														,intAllowance
-														,strPaidBy
-														,ysnDefault
-														,intSort
-														,ysnW42020
-														,ysnW4Step2c
-														,dblW4ClaimDependents
-														,dblW4OtherIncome 
-														,dblW4Deductions 
-														,intConcurrencyId 
-														)
-														SELECT TOP 1
-															 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = EMT.intEntityNo)
-															,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
-															,@strCalculationType
-															,@strFilingStatus
-															,(SELECT TOP 1 intTypeTaxStateId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
-															,(SELECT TOP 1 intTypeTaxLocalId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
-															,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 WHEN EMT.strSupplimentalCalc = 'Normal Rate' THEN 1 ELSE 2 END)
-															,EMT.dblAmount
-															,EMT.dblExtraWithholding
-															,EMT.dblLimit
-															,@intAccountId
-															,@intExpenseAccountId
-															,EMT.ysnLiabilityGlSplit
-															,EMT.ysnExpenseAccountGlSplit
-															,EMT.dblFederalAllowance
-															,EMT.strPaidBy
-															,EMT.ysnDefault
-															,1
-															,ISNULL(EMT.ysn2020W4, 0)
-															,ISNULL(EMT.ysnStep2c,0)
-															,EMT.dblClaimDependents
-															,0
-															,0
-															,1
-															FROM #TempEmployeeTaxes EMT
-														WHERE EMT.intEntityNo = @strEmployeeId AND EMT.strTaxId = @TaxId
-														SET @NewId = SCOPE_IDENTITY()
+														SET @AccountCount = 0
+														SET @ExpenseAccountCount = 0
+
+														IF(@strAccountId IS NULL OR @strAccountId = '')
+														BEGIN
+															SET @AccountCount = 1
+														END
+														ELSE
+														BEGIN
+															SELECT @AccountCount = COUNT(intAccountId) FROM tblGLAccount WHERE strAccountId = @strAccountId
+														END
+
+														IF(@AccountCount != 0)
+														BEGIN
+															IF(@strExpenseAccountId IS NULL OR @strExpenseAccountId = '')
+															BEGIN
+																SET @ExpenseAccountCount = 1
+															END
+															ELSE
+															BEGIN
+																SELECT @ExpenseAccountCount = COUNT(intAccountId) FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId
+															END
+
+															IF(@ExpenseAccountCount != 0)
+															BEGIN
+																INSERT INTO tblPREmployeeTax
+																(
+																 intEntityEmployeeId
+																,intTypeTaxId
+																,strCalculationType
+																,strFilingStatus
+																,intTypeTaxStateId
+																,intTypeTaxLocalId 
+																,intSupplementalCalc
+																,dblAmount
+																,dblExtraWithholding 
+																,dblLimit
+																,intAccountId
+																,intExpenseAccountId
+																,ysnUseLocationDistribution
+																,ysnUseLocationDistributionExpense
+																,intAllowance
+																,strPaidBy
+																,ysnDefault
+																,intSort
+																,ysnW42020
+																,ysnW4Step2c
+																,dblW4ClaimDependents
+																,dblW4OtherIncome 
+																,dblW4Deductions 
+																,intConcurrencyId 
+																)
+																SELECT TOP 1
+																	 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = EMT.intEntityNo)
+																	,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
+																	,@strCalculationType
+																	,@strFilingStatus
+																	,(SELECT TOP 1 intTypeTaxStateId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
+																	,(SELECT TOP 1 intTypeTaxLocalId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
+																	,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 WHEN EMT.strSupplimentalCalc = 'Normal Rate' THEN 1 ELSE 2 END)
+																	,EMT.dblAmount
+																	,EMT.dblExtraWithholding
+																	,EMT.dblLimit
+																	,@intAccountId
+																	,@intExpenseAccountId
+																	,EMT.ysnLiabilityGlSplit
+																	,EMT.ysnExpenseAccountGlSplit
+																	,EMT.dblFederalAllowance
+																	,EMT.strPaidBy
+																	,EMT.ysnDefault
+																	,1
+																	,ISNULL(EMT.ysn2020W4, 0)
+																	,ISNULL(EMT.ysnStep2c,0)
+																	,EMT.dblClaimDependents
+																	,0
+																	,0
+																	,1
+																	FROM #TempEmployeeTaxes EMT
+																WHERE EMT.intEntityNo = @strEmployeeId AND EMT.strTaxId = @TaxId
+																SET @NewId = SCOPE_IDENTITY()
+
+																INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+																SELECT TOP 1
+																	  NEWID()
+																	, guiApiImportLogId = @guiLogId
+																	, strField = 'Employee Taxes'
+																	, strValue = SE.strTaxId
+																	, strLogLevel = 'Info'
+																	, strStatus = 'Success'
+																	, intRowNo = SE.intRowNumber
+																	, strMessage = 'The employee taxes has been successfully imported.'
+																FROM tblApiSchemaEmployeeTaxes SE
+																LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+																WHERE SE.guiApiUniqueId = @guiApiUniqueId
+																AND SE.strTaxId = @TaxId
+															END
+															
+															ELSE
+															BEGIN
+																INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+																SELECT TOP 1
+																	  NEWID()
+																	, guiApiImportLogId = @guiLogId
+																	, strField = 'Employee Taxes'
+																	, strValue = SE.strExpenseAccount
+																	, strLogLevel = 'Error'
+																	, strStatus = 'Failed'
+																	, intRowNo = SE.intRowNumber
+																	, strMessage = 'Expense Account Id does not exist or in wrong format. Please try again.'
+																FROM tblApiSchemaEmployeeTaxes SE
+																LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+																WHERE SE.guiApiUniqueId = @guiApiUniqueId
+																AND SE.strTaxId = @TaxId
+															END
+															
+														END
+
+
+														ELSE
+														BEGIN
+															INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+															SELECT TOP 1
+																  NEWID()
+																, guiApiImportLogId = @guiLogId
+																, strField = 'Employee Taxes'
+																, strValue = SE.strAccountId
+																, strLogLevel = 'Error'
+																, strStatus = 'Failed'
+																, intRowNo = SE.intRowNumber
+																, strMessage = 'Account Id does not exist or in wrong format. Please try again.'
+															FROM tblApiSchemaEmployeeTaxes SE
+															LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+															WHERE SE.guiApiUniqueId = @guiApiUniqueId
+															AND SE.strTaxId = @TaxId
+														END
+														
 													END
 											END
 
-										INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-										SELECT TOP 1
-											  NEWID()
-											, guiApiImportLogId = @guiLogId
-											, strField = 'Employee Taxes'
-											, strValue = SE.strTaxId
-											, strLogLevel = 'Info'
-											, strStatus = 'Success'
-											, intRowNo = SE.intRowNumber
-											, strMessage = 'The employee taxes has been successfully imported.'
-										FROM tblApiSchemaEmployeeTaxes SE
-										LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
-										WHERE SE.guiApiUniqueId = @guiApiUniqueId
-										AND SE.strTaxId = @TaxId
+										
 				
 										DELETE FROM #TempEmployeeTaxes WHERE LTRIM(RTRIM(intEntityNo)) = @strEmployeeId AND LTRIM(RTRIM(strTaxId)) = LTRIM(RTRIM(@TaxId))
 

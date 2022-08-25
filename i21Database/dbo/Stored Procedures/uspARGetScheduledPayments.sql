@@ -3,8 +3,31 @@ AS
 BEGIN TRY
 	BEGIN TRANSACTION
 
+	IF OBJECT_ID('tempdb..#PAYMENTS') IS NOT NULL DROP TABLE #PAYMENTS
 	IF OBJECT_ID('tempdb..#PAYMENTSTOPROCESS') IS NOT NULL DROP TABLE #PAYMENTSTOPROCESS
 	IF OBJECT_ID('tempdb..#OPENINVOICES') IS NOT NULL DROP TABLE #OPENINVOICES
+	IF OBJECT_ID('tempdb..#CUSTOMERSAUTOPAY') IS NOT NULL DROP TABLE #CUSTOMERSAUTOPAY
+
+	CREATE TABLE #PAYMENTS (
+		  intPaymentId			INT PRIMARY KEY
+		, intEntityCardInfoId	INT NULL
+		, intEntityCustomerId	INT NULL
+		, intBankAccountId		INT NULL	
+		, intEntityUserId		INT NULL
+		, intCompanyLocationId	INT NULL
+		, intDayOfMonth			INT NULL
+		, dtmDatePaid			DATETIME
+		, dtmScheduledPayment	DATETIME
+		, dblAmountPaid			NUMERIC(18, 6) NULL
+		, strRecordNumber		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL	
+	)
+
+	CREATE TABLE #CUSTOMERSAUTOPAY (
+		  intEntityCustomerId	INT PRIMARY KEY
+		, intEntityCardInfoId	INT NULL
+		, intBankAccountId		INT NULL
+		, strCreditCardNumber	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
+	)
 
 	CREATE TABLE #PAYMENTSTOPROCESS (
 		  intPaymentId			INT PRIMARY KEY
@@ -26,19 +49,19 @@ BEGIN TRY
 		, strVersion			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, strUserName			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	)
-
+	
 	DECLARE @EntriesForPayment		PaymentIntegrationStagingTable
 	DECLARE @dtmCurrentDate			DATETIME = CAST(GETDATE() AS DATE)
-	DECLARE @intMaxDayLastMonth		INT = NULL
-		  , @intCompanyLocationId	INT = NULL
+	DECLARE @intCompanyLocationId	INT = NULL
 		  , @intBankAccountId		INT = NULL
 		  , @intUserId				INT = NULL
+		  , @intACHPaymentMethodId	INT = NULL
 		  , @strErrorMessage		NVARCHAR(MAX) = NULL
 		  , @intLogId				INT = NULL
 		  , @strVersion 			NVARCHAR(100)
 
 	SELECT TOP 1 @intCompanyLocationId  = CP.intPaymentsLocationId
-			 , @intBankAccountId		= BA.intBankAccountId
+			   , @intBankAccountId		= BA.intBankAccountId
 	FROM tblSMCompanyPreference CP
 	INNER JOIN tblSMCompanyLocation CL ON CP.intPaymentsLocationId = CL.intCompanyLocationId
 	LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
@@ -49,19 +72,114 @@ BEGIN TRY
 	FROM tblEMEntityCredential
 	WHERE strUserName LIKE '%irely%'
 	ORDER BY intEntityCredentialId ASC
-
-	SET @intMaxDayLastMonth = DAY(DATEADD(d, -1, DATEADD(M, DATEDIFF(M, 0, @dtmCurrentDate), 0)))
-	IF @intCompanyLocationId IS NULL
-		BEGIN
-			RAISERROR('Company Configuration > System Manager > Payments Location is required.', 16, 1)	
-			RETURN
-		END
-
+	
 	SELECT TOP 1 @strVersion = strVersionNo
 	FROM tblSMBuildNumber
 	ORDER BY intVersionID DESC
 
-	--GET SCHEDULED PAYMENTS
+	SELECT TOP 1 @intACHPaymentMethodId = intPaymentMethodID
+	FROM tblSMPaymentMethod
+	WHERE strPaymentMethod = 'ACH'
+	ORDER BY intPaymentMethodID ASC
+
+	IF @intCompanyLocationId IS NULL
+		BEGIN
+			RAISERROR('Company Configuration > System Manager > Payments Location is required.', 16, 1)	
+			RETURN
+		END	
+
+	--GET ACH CUSTOMERS
+	INSERT INTO #CUSTOMERSAUTOPAY (
+		  intEntityCustomerId
+		, intBankAccountId
+	)
+	SELECT intEntityCustomerId	= SPM.intEntityId
+		 , intBankAccountId		= MIN(SPM.intBankAccountId)
+	FROM tblARScheduledPaymentMethod SPM 
+	WHERE SPM.ysnAutoPay = 1
+	  AND DAY(@dtmCurrentDate) = SPM.intDayOfMonth
+	  AND SPM.intBankAccountId IS NOT NULL
+	GROUP BY SPM.intEntityId
+
+	--GET CC CUSTOMERS IF THERES NO ACH YET
+	INSERT INTO #CUSTOMERSAUTOPAY (
+		  intEntityCustomerId
+		, intEntityCardInfoId
+		, strCreditCardNumber
+	)
+	SELECT intEntityCustomerId	= ECI.intEntityId
+		 , intEntityCardInfoId	= MIN(ECI.intEntityCardInfoId)
+		 , strCreditCardNumber	= MIN(ECI.strCreditCardNumber)
+	FROM tblARScheduledPaymentMethod SPM 
+	INNER JOIN tblEMEntityCardInformation ECI ON SPM.intEntityCardInfoId = ECI.intEntityCardInfoId
+	LEFT JOIN #CUSTOMERSAUTOPAY C ON SPM.intEntityId = C.intEntityCustomerId
+	WHERE ECI.ysnActive = 1
+	  AND SPM.ysnAutoPay = 1
+	  AND ECI.dtmTokenExpired > GETDATE()
+	  AND DAY(@dtmCurrentDate) = SPM.intDayOfMonth
+	  AND SPM.intBankAccountId IS NULL
+	  AND C.intEntityCustomerId IS NULL
+	GROUP BY ECI.intEntityId
+
+	INSERT INTO #PAYMENTS (
+		  intPaymentId
+		, intEntityCardInfoId
+		, intEntityCustomerId
+		, intBankAccountId
+		, intEntityUserId
+		, intCompanyLocationId
+		, dtmDatePaid
+		, dtmScheduledPayment
+		, dblAmountPaid
+		, strRecordNumber
+		, intDayOfMonth
+	)
+	--GET CC SCHEDULED PAYMENTS
+	SELECT intPaymentId			= P.intPaymentId
+		, intEntityCardInfoId	= P.intEntityCardInfoId
+		, intEntityCustomerId	= P.intEntityCustomerId
+		, intBankAccountId		= NULL
+		, intEntityUserId		= P.intEntityId
+		, intCompanyLocationId	= P.intLocationId
+		, dtmDatePaid			= P.dtmDatePaid
+		, dtmScheduledPayment	= CAST(P.dtmScheduledPayment AS DATE)
+		, dblAmountPaid			= P.dblAmountPaid
+		, strRecordNumber		= P.strRecordNumber
+		, intDayOfMonth			= SPM.intDayOfMonth
+	FROM tblARPayment P
+	INNER JOIN tblARScheduledPaymentMethod SPM ON P.intEntityCardInfoId = SPM.intEntityCardInfoId  AND SPM.ysnAutoPay = 1 
+	WHERE P.ysnPosted = 0
+	  AND P.ysnScheduledPayment = 1
+	  AND P.intEntityCardInfoId IS NOT NULL
+	  AND P.dtmScheduledPayment IS NOT NULL
+	  AND P.intPaymentMethodId = 11
+	  AND P.ysnProcessCreditCard = 0  
+	  AND DAY(@dtmCurrentDate) = SPM.intDayOfMonth
+	  AND CAST(P.dtmScheduledPayment AS DATE) <= @dtmCurrentDate
+
+	UNION ALL
+
+	SELECT intPaymentId			= P.intPaymentId
+		, intEntityCardInfoId	= NULL
+		, intEntityCustomerId	= P.intEntityCustomerId
+		, intBankAccountId		= P.intBankAccountId
+		, intEntityUserId		= P.intEntityId
+		, intCompanyLocationId	= P.intLocationId
+		, dtmDatePaid			= P.dtmDatePaid
+		, dtmScheduledPayment	= CAST(P.dtmScheduledPayment AS DATE)
+		, dblAmountPaid			= P.dblAmountPaid
+		, strRecordNumber		= P.strRecordNumber
+		, intDayOfMonth			= SPM.intDayOfMonth
+	FROM tblARPayment P
+	INNER JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
+	INNER JOIN tblARScheduledPaymentMethod SPM ON P.intBankAccountId = SPM.intBankAccountId AND SPM.ysnAutoPay = 1
+	WHERE P.ysnPosted = 0
+	  AND P.ysnScheduledPayment = 1    
+	  AND P.dtmScheduledPayment IS NOT NULL
+	  AND PM.strPaymentMethod = 'ACH'
+	  AND DAY(@dtmCurrentDate) = SPM.intDayOfMonth
+	  AND CAST(P.dtmScheduledPayment AS DATE) <= @dtmCurrentDate	
+
 	INSERT INTO #PAYMENTSTOPROCESS (
 		  intPaymentId
 		, intEntityCardInfoId
@@ -83,9 +201,9 @@ BEGIN TRY
 		 , intEntityCardInfoId	= P.intEntityCardInfoId
 		 , intEntityCustomerId	= P.intEntityCustomerId		 
 		 , intBankAccountId		= P.intBankAccountId
-		 , intDayOfMonth		= CI.intDayOfMonth
-         , intEntityUserId      = P.intEntityId
-		 , intCompanyLocationId	= P.intLocationId
+		 , intDayOfMonth		= P.intDayOfMonth
+		 , intEntityUserId      = P.intEntityUserId
+		 , intCompanyLocationId	= P.intCompanyLocationId
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , dtmScheduledPayment	= P.dtmScheduledPayment
 		 , dblAmountPaid		= P.dblAmountPaid
@@ -94,27 +212,19 @@ BEGIN TRY
 		 , strInvoices			= INVOICE.strInvoiceNumbers
 		 , strVersion			= @strVersion
 		 , strUserName			= EC.strUserName	
-	FROM tblARPayment P
+	FROM #PAYMENTS P
 	INNER JOIN tblARCustomer C ON P.intEntityCustomerId = C.intEntityId
-	INNER JOIN tblEMEntityCardInformation CI ON P.intEntityCardInfoId = CI.intEntityCardInfoId
-	INNER JOIN tblEMEntityCredential EC ON P.intEntityId = EC.intEntityId
+	INNER JOIN tblEMEntityCredential EC ON P.intEntityUserId = EC.intEntityId
 	CROSS APPLY (
 		SELECT strInvoiceNumbers = LEFT(strTransactionNumber, LEN(strTransactionNumber) - 1) COLLATE Latin1_General_CI_AS
 		FROM (
 			SELECT CAST(PD.strTransactionNumber AS VARCHAR(200))  + ', '
 			FROM tblARPaymentDetail PD WITH(NOLOCK)			
 			WHERE PD.intPaymentId = P.intPaymentId
-			  AND PD.dblPayment != 0
+				AND PD.dblPayment != 0
 			FOR XML PATH ('')
 		) INV (strTransactionNumber)
 	) INVOICE
-	WHERE P.intPaymentMethodId = 11
-	  AND P.ysnScheduledPayment = 1
-	  AND CI.ysnAutoPay = 1
-	  AND CI.ysnActive = 1
-	  AND P.ysnProcessCreditCard = 0
-	  AND P.ysnPosted = 0
-	  AND ((DAY(@dtmCurrentDate) = 1 AND DAY(P.dtmScheduledPayment) = @intMaxDayLastMonth AND @intMaxDayLastMonth < CI.intDayOfMonth) OR (DAY(@dtmCurrentDate) <> 1 AND DAY(P.dtmScheduledPayment) = CI.intDayOfMonth))
 
 	--GET OPEN DUE INVOICES
 	SELECT intInvoiceId						= P.intInvoiceId
@@ -137,20 +247,11 @@ BEGIN TRY
 		, dblTotalPayment					= CAST(0 AS NUMERIC(18, 6))
 		, strCreditCardNumber				= ECI.strCreditCardNumber
 		, intEntityCardInfoId				= ECI.intEntityCardInfoId
+		, intBankAccountId					= ECI.intBankAccountId
 	INTO #OPENINVOICES
-	FROM (
-		SELECT intEntityId
-			 , intEntityCardInfoId	= MIN(intEntityCardInfoId)
-			 , strCreditCardNumber	= MIN(strCreditCardNumber)
-		FROM tblEMEntityCardInformation ECI
-		WHERE ECI.ysnActive = 1
-		  AND ECI.ysnAutoPay = 1
-		  AND ECI.dtmTokenExpired > GETDATE()
-		  AND DAY(@dtmCurrentDate) = ECI.intDayOfMonth
-		GROUP BY ECI.intEntityId
-	) ECI
-	INNER JOIN vyuARInvoicesForPayment P ON ECI.intEntityId = P.intEntityCustomerId
-	INNER JOIN tblARCustomer C ON ECI.intEntityId = C.intEntityId
+	FROM #CUSTOMERSAUTOPAY ECI
+	INNER JOIN vyuARInvoicesForPayment P ON ECI.intEntityCustomerId = P.intEntityCustomerId
+	INNER JOIN tblARCustomer C ON ECI.intEntityCustomerId = C.intEntityId
 	WHERE P.ysnExcludeForPayment = 0
 	  AND P.dtmDueDate < @dtmCurrentDate
 	  AND P.ysnPosted = 1
@@ -160,7 +261,7 @@ BEGIN TRY
 	  AND P.strTransactionType NOT IN ('EFT Budget', 'Cash Refund', 'Vendor Prepayment', 'Claim')
 	  AND P.strTransactionType IN ('Invoice', 'Debit Memo')
 	  AND C.dblARBalance > 0
-
+	  	  
 	--REMOVE EXISTING PAYMENTS FROM SCHEDULED
 	IF EXISTS (SELECT TOP 1 NULL FROM #PAYMENTSTOPROCESS) AND EXISTS (SELECT TOP 1 NULL FROM #OPENINVOICES)
 		BEGIN
@@ -240,14 +341,14 @@ BEGIN TRY
 		, intCompanyLocationId			= @intCompanyLocationId
 		, intCurrencyId					= INVOICE.intCurrencyId
 		, dtmDatePaid					= @dtmCurrentDate
-		, intPaymentMethodId			= 11
-		, strPaymentMethod				= INVOICE.strCreditCardNumber
+		, intPaymentMethodId			= CASE WHEN INVOICE.intEntityCardInfoId IS NULL THEN @intACHPaymentMethodId ELSE 11 END
+		, strPaymentMethod				= CASE WHEN INVOICE.intEntityCardInfoId IS NULL THEN 'ACH' ELSE INVOICE.strCreditCardNumber END
 		, strPaymentInfo				= NULL
 		, strNotes						= NULL
 		, intAccountId					= INVOICE.intAccountId
-		, intBankAccountId				= @intBankAccountId
+		, intBankAccountId				= CASE WHEN INVOICE.intEntityCardInfoId IS NULL THEN INVOICE.intBankAccountId ELSE @intBankAccountId END
 		, dblAmountPaid					= INVOICE.dblTotalPayment
-		, ysnPost						= 0
+		, ysnPost						= CASE WHEN INVOICE.intEntityCardInfoId IS NULL THEN 1 ELSE 0 END
 		, intEntityId					= @intUserId
 		, intEntityCardInfoId			= INVOICE.intEntityCardInfoId
 		, intInvoiceId					= INVOICE.intInvoiceId
@@ -276,6 +377,24 @@ BEGIN TRY
 		, ysnScheduledPayment			= 1
 		, dtmScheduledPayment			= @dtmCurrentDate
 	FROM #OPENINVOICES INVOICE
+
+	--POST PAYMENTS FOR SCHEDULED ACH
+	IF EXISTS (SELECT TOP 1 NULL FROM #PAYMENTSTOPROCESS WHERE intEntityCardInfoId IS NULL)
+		BEGIN
+			DECLARE @strPaymentIds NVARCHAR(MAX) = NULL
+
+			SELECT @strPaymentIds = LEFT(intPaymentId, LEN(intPaymentId) - 1)
+			FROM (
+				SELECT DISTINCT CAST(intPaymentId AS VARCHAR(200))  + ', '
+				FROM #PAYMENTSTOPROCESS
+				WHERE intEntityCardInfoId IS NULL
+				FOR XML PATH ('')
+			) C (intPaymentId) 
+
+			EXEC dbo.uspARPostPayment @post = 1, @raiseError = 0, @param = @strPaymentIds, @userId = @intUserId
+
+			DELETE FROM #PAYMENTSTOPROCESS WHERE intBankAccountId IS NOT NULL AND intEntityCardInfoId IS NULL
+		END
 
 	--CREATE PAYMENTS FOR DUE INVOICES
 	IF EXISTS (SELECT TOP 1 NULL FROM #OPENINVOICES)
@@ -378,8 +497,8 @@ BEGIN TRY
 	  AND PP.ysnValid = 0
 	  AND P.ysnPosted = 0
 
-	SELECT * FROM #PAYMENTSTOPROCESS WHERE ysnValid = 1
-
+	SELECT * FROM #PAYMENTSTOPROCESS WHERE ysnValid = 1 AND intEntityCardInfoId IS NOT NULL
+	
 	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH

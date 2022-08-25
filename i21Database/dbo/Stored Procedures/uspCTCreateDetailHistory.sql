@@ -17,11 +17,11 @@ BEGIN TRY
 		, @ysnAmdWoAppvl BIT
 		, @intSequenceHistoryId INT
 		, @intPrevHistoryId INT
-		, @dblPrevQty NUMERIC(18, 6)
-		, @dblPrevBal NUMERIC(18, 6)
+		, @dblPrevQty NUMERIC(38, 20)
+		, @dblPrevBal NUMERIC(38, 20)
 		, @intPrevStatusId INT
-		, @dblQuantity NUMERIC(18, 6)
-		, @dblBalance NUMERIC(18, 6)
+		, @dblQuantity NUMERIC(38, 20)
+		, @dblBalance NUMERIC(38, 20)
 		, @intContractStatusId INT
 		, @dblPrevFutures NUMERIC(18, 6)
 		, @dblPrevBasis NUMERIC(18, 6)

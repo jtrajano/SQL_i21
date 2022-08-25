@@ -231,6 +231,7 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[intInterCompanyVendorId]
 	,[strBOLNumber]
     ,[strSessionId]
+    ,[dblFreightCharge]
     ,[intLineOfBusinessId]
     ,[intFreightCompanySegment]
     ,[intFreightLocationSegment]
@@ -321,6 +322,7 @@ SELECT
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 	,[strBOLNumber]						= ARI.[strBOLNumber]
     ,[strSessionId]                     = @strSessionId
+    ,[dblFreightCharge]                 = ARI.dblFreightCharge
     ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
     ,[intFreightCompanySegment]         = ARI.[intFreightCompanySegment]
     ,[intFreightLocationSegment]        = ARI.[intFreightLocationSegment]

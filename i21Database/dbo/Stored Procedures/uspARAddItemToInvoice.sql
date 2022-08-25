@@ -220,6 +220,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
 			,@ItemWeight					= @ItemWeight
+			,@ItemStandardWeight   			= @ItemStandardWeight
 			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 			,@ItemShipmentTareWt			= @ItemShipmentTareWt
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -228,6 +229,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemCustomerStorageId			= @ItemCustomerStorageId
 			,@ItemSiteDetailId				= @ItemSiteDetailId
 			,@ItemLoadDetailId				= @ItemLoadDetailId
+			,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 			,@ItemLotId						= @ItemLotId
 			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			,@ItemSiteId					= @ItemSiteId
@@ -240,7 +242,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemLeaseBilling				= @ItemLeaseBilling
 			,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
 			,@EntitySalespersonId			= @EntitySalespersonId
-			,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+			,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 			,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 			,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 			,@ItemSubCurrencyId				= @ItemSubCurrencyId

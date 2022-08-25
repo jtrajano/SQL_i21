@@ -437,6 +437,17 @@ BEGIN
 						-- ROLLBACK
 						GOTO ExitWithRollback
 					END
+
+				-- Pump Items
+				IF EXISTS(SELECT TOP 1 1 FROM tblSTPumpItem WHERE intStoreId = @intStoreId AND intTaxGroupId IS NULL)
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Please configure Tax Group for the Fuel Items on the Pump Items tab of Store Configuration Screen.'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
+
 			END
 		
 

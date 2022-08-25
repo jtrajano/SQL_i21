@@ -30,7 +30,7 @@ declare @ContractPrieList table (
 	,intPriceContractId int
 	,intPriceFixationId int
 	,intPriceFixationDetailId int
-	,dblQuantity numeric(18,6)
+	,dblQuantity numeric(38,20)
 	,dblPrice numeric(18,6)
 )
 

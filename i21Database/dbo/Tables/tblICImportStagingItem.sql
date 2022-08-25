@@ -65,6 +65,7 @@ CREATE TABLE [dbo].[tblICImportStagingItem] (
 	[strFuelInspectFee] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSeparateStockForUOMs] BIT NULL DEFAULT ((1)),
 	[ysn1099Box3] BIT NULL,
+	[strSubcategory] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateCreated] [datetime] NULL,
 	[dtmDateModified] [datetime] NULL,
 	[intCreatedByUserId] [int] NULL,

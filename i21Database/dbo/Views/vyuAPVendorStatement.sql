@@ -3,7 +3,7 @@ AS
 --VOUCHERS
 SELECT 
 	A.intBillId,
-	A.strBillId,
+	A.strVendorOrderNumber,
 	dbo.fnAPGetVoucherTransactionType2(A.intTransactionType) strTransactionType,
 	A.dtmBillDate,
 	A.dtmDueDate,
@@ -23,7 +23,7 @@ WHERE A.ysnPosted = 1
 UNION ALL
 SELECT
 	A.intBillId,
-	A.strBillId,
+	A.strVendorOrderNumber,
 	dbo.fnAPGetVoucherTransactionType2(A.intTransactionType),
 	A.dtmBillDate,
 	A.dtmDueDate,
@@ -43,7 +43,7 @@ WHERE A.ysnPosted = 1 AND A.intTransactionType IN (2, 13)
 UNION ALL
 SELECT 
 	A.intBillId,
-	A.strBillId,
+	A.strVendorOrderNumber,
 	dbo.fnAPGetVoucherTransactionType2(A.intTransactionType),
 	A.dtmBillDate,
 	A.dtmDueDate,
@@ -104,7 +104,7 @@ WHERE A.ysnPosted = 1
 UNION ALL
 SELECT
 	ISNULL(C.intBillId, D.intBillId) intBillId,
-	ISNULL(C.strBillId, D.strBillId) strBillId,
+	ISNULL(C.strVendorOrderNumber, D.strVendorOrderNumber) strVendorOrderNumber,
 	dbo.fnAPGetVoucherTransactionType2(ISNULL(C.intTransactionType, D.intTransactionType)),
 	A.dtmDatePaid,
 	A.dtmDatePaid,
@@ -125,14 +125,14 @@ WHERE A.ysnPosted = 1 AND B.ysnOffset = 1
 UNION ALL
 SELECT 
 	B.intBillId,
-	B.strBillId,
+	B.strVendorOrderNumber,
 	dbo.fnAPGetVoucherTransactionType2(B.intTransactionType),
 	C.dtmDate,
 	C.dtmDate,
 	C.intCurrencyId,
 	A.dblAmountApplied,
 	NULL,
-	'APPLIED VENDOR PREPAYMENT ' + '(' + C.strBillId + ')',
+	'APPLIED VENDOR PREPAYMENT ' + '(' + C.strVendorOrderNumber + ')',
 	C.intEntityVendorId,
 	C.intShipToId,
 	5 intOrder
@@ -145,14 +145,14 @@ WHERE C.ysnPosted = 1 AND A.ysnApplied = 1
 UNION ALL
 SELECT 
 	C.intBillId,
-	C.strBillId,
+	C.strVendorOrderNumber,
 	dbo.fnAPGetVoucherTransactionType2(C.intTransactionType),
 	C.dtmDate,
 	C.dtmDate,
 	C.intCurrencyId,
 	A.dblAmountApplied * -1,
 	NULL,
-	'APPLIED VENDOR PREPAYMENT ' + '(' + B.strBillId + ')',
+	'APPLIED VENDOR PREPAYMENT ' + '(' + B.strVendorOrderNumber + ')',
 	C.intEntityVendorId,
 	C.intShipToId,
 	5 intOrder

@@ -101,7 +101,8 @@ BEGIN TRY
 			CD.intFutureMonthId		=	TD.intFutureMonthId,
 			CD.dblCashPrice		    =	CASE WHEN CD.dblCashPrice IS NULL THEN CD.dblCashPrice ELSE ISNULL(TD.dblFutures,0) + ISNULL(TD.dblBasis,0) END,
 			CD.dblTotalCost		    =	CASE WHEN CD.dblTotalCost IS NULL THEN CD.dblTotalCost ELSE (ISNULL(TD.dblFutures,0) + ISNULL(TD.dblBasis,0)) * ISNULL(CD.dblQuantity,0) END,
-			CD.intFutureMarketId	=	CASE WHEN ISNULL(TD.intFutureMarketId,0) = 0 THEN CD.intFutureMarketId ELSE TD.intFutureMarketId END
+			CD.intFutureMarketId	=	CASE WHEN ISNULL(TD.intFutureMarketId,0) = 0 THEN CD.intFutureMarketId ELSE TD.intFutureMarketId END,
+			CD.ysnRoll				=	1
 				
 	FROM	tblCTContractDetail		CD
 	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId

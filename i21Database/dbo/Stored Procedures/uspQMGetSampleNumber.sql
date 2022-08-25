@@ -9,11 +9,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @tblMFLot TABLE (strLotNumber NVARCHAR(50) Collate Latin1_General_CI_AS)
-DECLARE @tblMFFinalLot TABLE (
-	strLotNumber NVARCHAR(50) Collate Latin1_General_CI_AS
-	,intSampleTypeId INT
-	)
+DECLARE @tblMFLot TABLE (strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS);
+
+DECLARE @tblMFFinalLot TABLE (strLotNumber		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							, intSampleTypeId	INT);
+
 DECLARE @strSampleId NVARCHAR(MAX)
 	,@ysnEnableSampleTypeByUserRole BIT
 	,@intParentLotId INT
@@ -32,6 +32,10 @@ FROM tblMFCompanyPreference
 
 IF @intProductTypeId = 6 -- Take all samples from the multiple Lot ID
 BEGIN
+	SELECT @intItemId = intItemId
+	FROM tblICLot
+	WHERE intLotId = @intProductValueId
+
 	INSERT INTO @tblMFLot
 	SELECT strLotNumber
 	FROM tblICLot
@@ -221,10 +225,11 @@ BEGIN
 		WHERE S.intProductTypeId = @intProductTypeId
 			AND S.intTypeId = 1
 			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
+			AND S.intItemId = @intItemId
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L
-				WHERE L.strLotNumber = S.strLotNumber
+				WHERE L.strLotNumber = S.strLotNumber 
 					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId 
 				)
 		ORDER BY S.intSampleId DESC
@@ -238,6 +243,7 @@ BEGIN
 		WHERE S.intProductTypeId = @intProductTypeId
 			AND S.intTypeId = 1
 			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
+			AND S.intItemId = @intItemId
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L

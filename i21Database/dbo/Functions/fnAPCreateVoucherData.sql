@@ -335,19 +335,19 @@ BEGIN
 			FROM tblSMTerm payableTerm
 			WHERE payableTerm.intTermID = A.intTermId
 			UNION ALL
-			--there is ship from received, use the term setup on that ship from
-			SELECT
-				shipFromTerm.*
-			FROM tblEMEntityLocation shipFrom
-			INNER JOIN tblSMTerm shipFromTerm ON shipFrom.intTermsId = shipFromTerm.intTermID
-			WHERE shipFrom.intEntityLocationId = A.intShipFromId AND shipFrom.intEntityId = A.intEntityVendorId
-			UNION ALL
 			--use contract term
 			SELECT
 				defaultTerm.* 
 			FROM  tblCTContractHeader CH
 			INNER JOIN tblSMTerm defaultTerm ON  defaultTerm.intTermID = CH.intTermId
 			WHERE A.intContractHeaderId = CH.intContractHeaderId  AND A.intContractHeaderId > 0
+			UNION ALL
+			--there is ship from received, use the term setup on that ship from
+			SELECT
+				shipFromTerm.*
+			FROM tblEMEntityLocation shipFrom
+			INNER JOIN tblSMTerm shipFromTerm ON shipFrom.intTermsId = shipFromTerm.intTermID
+			WHERE shipFrom.intEntityLocationId = A.intShipFromId AND shipFrom.intEntityId = A.intEntityVendorId
 			UNION ALL
 			--use vendor default location term
 			SELECT
@@ -380,7 +380,13 @@ BEGIN
 	--UPDATE PAY FROM BANK ACCOUNT
 	UPDATE A
 	SET A.intPayFromBankAccountId = ISNULL(B.intPayFromBankAccountId, ISNULL(C.intPayFromBankAccountId, ISNULL(D.intPayFromBankAccountId, NULL))),
-		A.strFinancingSourcedFrom = ISNULL(B.strSourcedFrom, ISNULL(C.strSourcedFrom, ISNULL(D.strSourcedFrom, 'None')))
+		A.strFinancingSourcedFrom = CASE WHEN B.strSourcedFrom IS NULL 
+										THEN CASE WHEN C.strSourcedFrom IS NULL
+											 THEN CASE WHEN D.strSourcedFrom IS NULL
+											 	  THEN 'None'
+												  ELSE D.strSourcedFrom END
+											 ELSE C.strSourcedFrom END
+										ELSE B.strSourcedFrom END
 	FROM @returntable A
 	OUTER APPLY (
 		SELECT VANL.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom

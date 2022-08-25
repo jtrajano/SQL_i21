@@ -26,7 +26,9 @@ SELECT
 								WHEN 4 THEN 'Multimodal' 
 								END COLLATE Latin1_General_CI_AS
 	,dtmETAPOD = L.dtmETAPOD
-	,dtmLastWeighingDate = L.dtmETAPOD + ISNULL(ASN.intLastWeighingDays, 0)
+	,dtmLastWeighingDate = L.dtmETAPOD + CASE WHEN ISNULL(CB.intLastWeighingDays, 0) <> 0 
+											THEN CB.intLastWeighingDays
+											ELSE ISNULL(ASN.intLastWeighingDays, 0) END
 	,dtmClaimValidTill = CAST(NULL AS DATETIME)
 	,intClaimValidTill = ISNULL(ASN.intClaimValidTill, 0)
 	,strBLNumber = L.strBLNumber

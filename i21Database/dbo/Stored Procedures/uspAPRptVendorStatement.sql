@@ -10,7 +10,9 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 	DECLARE @tblAPVendorStatement TABLE (
+		strLogoType NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
 		imgLogo VARBINARY(MAX) NULL,
+		imgFooter VARBINARY(MAX) NULL,
 		strCompanyName NVARCHAR(1000) NULL,
 		strCompanyAddress NVARCHAR(1000) NULL,
 		strLocationName NVARCHAR(1000) NULL,
@@ -26,7 +28,7 @@ BEGIN
 		dtmBillDate DATETIME NULL,
 		dtmDueDate DATETIME NULL,
 		intBillId INT NULL,
-		strBillId NVARCHAR(1000) NULL,
+		strVendorOrderNumber NVARCHAR(1000) NULL,
 		strTransactionType NVARCHAR(1000) NULL,
 		strContractNumber NVARCHAR(1000) NULL,
 		strItemDescription NVARCHAR(1000) NULL,
@@ -99,20 +101,14 @@ BEGIN
 		SET @dtmDateTo = ISNULL(@dtmDateTo, GETDATE())
 
 		-- GET LOGO
-		SELECT @imgLogo = imgLogo FROM tblSMLogoPreference WHERE ysnVendorStatement = 1
-		IF @imgLogo IS NULL
-		BEGIN
-			SELECT @imgLogo = imgLogo FROM tblSMLogoPreference WHERE ysnDefault = 1
-
-			IF @imgLogo IS NULL
-			BEGIN
-				SELECT @imgLogo = imgCompanyLogo FROM tblSMCompanySetup
-			END
-		END
+		 SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
 
 		-- ASSEMBLE VENDOR STATEMENTS
 		INSERT INTO @tblAPVendorStatement
-		SELECT @imgLogo,
+		SELECT 
+			   CASE WHEN LP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END,
+			   ISNULL(LP.imgLogo, @imgLogo),
+			   LPF.imgLogo,
 			   CS.strCompanyName,
 			   dbo.fnAPFormatAddress(NULL, NULL, NULL, CS.strAddress, CS.strCity, CS.strState, CS.strZip, CS.strCountry, NULL),
 			   CL.strLocationName,
@@ -128,7 +124,7 @@ BEGIN
 			   A.dtmBillDate,
 			   A.dtmDueDate,
 			   A.intBillId,
-			   A.strBillId,
+			   A.strVendorOrderNumber,
 			   A.strTransactionType,
 			   CH.strContractNumber,
 			   A.strDescription,
@@ -141,10 +137,10 @@ BEGIN
 		FROM (
 			--INITIAL BALANCES
 			SELECT NULL intBillId, 
-			       NULL strBillId, 
+			       NULL strVendorOrderNumber, 
 				   'Initial Balance' strTransactionType, 
 				   @dtmDateFrom dtmBillDate, 
-				   @dtmDateTo dtmDueDate, 
+				   NULL dtmDueDate, 
 				   intCurrencyId, 
 				   SUM(dblTotal) dblTotal, 
 				   NULL intContractHeaderId, 
@@ -165,10 +161,12 @@ BEGIN
 		CROSS APPLY tblSMCompanySetup CS
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intShipToId
 		INNER JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON V.intEntityId = E.intEntityId) ON V.intEntityId = A.intEntityVendorId
-		LEFT JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = E.intEntityId AND VANL.intCompanyLocationId = CL.intCompanyLocationId
+		LEFT JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = E.intEntityId AND VANL.intCompanyLocationId = CL.intCompanyLocationId AND VANL.intCurrencyId = A.intCurrencyId
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
+		LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND (LP.ysnVendorStatement = 1 OR LP.ysnDefault = 1)
+		LEFT JOIN tblSMLogoPreferenceFooter LPF ON LPF.intCompanyLocationId = CL.intCompanyLocationId AND (LPF.ysnVendorStatement = 1 OR LPF.ysnDefault = 1)
 		WHERE (NULLIF(@strName, '') IS NULL OR @strName = E.strName) 
 		      AND (NULLIF(@strLocationName, '') IS NULL OR @strLocationName = CL.strLocationName)
 			  AND (NULLIF(@strCurrency, '') IS NULL OR @strCurrency = C.strCurrency)

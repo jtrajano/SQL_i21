@@ -55,8 +55,8 @@ FROM @CustomerTaxCodeExemption P
 INNER JOIN tblARCustomer C ON P.intCustomerId = C.intEntityId
 WHERE C.ysnTaxExempt = 1  
 
-IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
-	RETURN
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
@@ -94,8 +94,8 @@ CROSS APPLY (
 WHERE P.ysnCustomerSiteTaxable = 0
   AND P.ysnCustomerSiteTaxable IS NOT NULL
 
-IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
-	RETURN
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
@@ -134,8 +134,8 @@ CROSS APPLY (
 	  AND SMTGCE.intCategoryId = P.intItemCategoryId
 ) TAX
 
-IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
-	RETURN
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
@@ -211,8 +211,8 @@ UPDATE @CustomerTaxCodeExemption
 SET strState = strTaxState
 WHERE strState IS NULL
 
-IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
-	RETURN
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt
@@ -227,7 +227,7 @@ INSERT INTO ##TAXCODEEXEMPTIONS (
 	, intLineItemId
 )
 SELECT ysnTaxExempt			= 1
-    , ysnInvalidSetup		= 1
+    , ysnInvalidSetup		= 0
 	, strExemptionNotes		=  'Tax Exemption > '
 								+ ISNULL('Number: ' + CAST(TAX.[intCustomerTaxingTaxExceptionId] AS NVARCHAR(250)) +  ' - ' + ISNULL(TAX.[strException], ''), '') 
 								+ ISNULL('; Start Date: ' + CONVERT(NVARCHAR(25), TAX.[dtmStartDate], 101), '')
@@ -263,7 +263,7 @@ CROSS APPLY (
 			   , TC.strTaxCode
 			   , TCL.strTaxClass
 			   , TE.strState
-			   , TE.dblPartialTax
+			   , dblPartialTax	= ISNULL(TE.dblPartialTax, 0)
 	FROM tblARCustomerTaxingTaxException TE 
 	LEFT OUTER JOIN tblSMTaxCode TC ON TE.[intTaxCodeId] = TC.[intTaxCodeId]
 	LEFT OUTER JOIN [tblEMEntityLocation] EL ON TE.[intEntityCustomerLocationId] = EL.[intEntityLocationId]
@@ -323,8 +323,8 @@ CROSS APPLY (
 		,ISNULL(TE.[dtmEndDate], P.dtmTransactionDate) DESC
 ) TAX
 
-IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
-	RETURN
+-- IF EXISTS (SELECT TOP 1 NULL FROM ##TAXCODEEXEMPTIONS) AND @ysnDisregardExemptionSetup <> 1
+-- 	RETURN
 
 INSERT INTO ##TAXCODEEXEMPTIONS (
 	  ysnTaxExempt

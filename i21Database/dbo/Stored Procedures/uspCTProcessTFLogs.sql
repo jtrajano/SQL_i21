@@ -148,8 +148,8 @@ BEGIN
 				, intBorrowingFacilityId = cd.intBorrowingFacilityId
 				, intLimitId = cd.intBorrowingFacilityLimitId
 				, intSublimitId = cd.intBorrowingFacilityLimitDetailId
-				, strBankTradeReference = isnull(TFL.strBankTradeReference, cd.strReferenceNo)
-				, strBankApprovalStatus = isnull(TFL.strBankApprovalStatus, STF.strApprovalStatus)
+				, strBankTradeReference = CASE WHEN TFL.strTransactionType = 'Contract' THEN cd.strReferenceNo ELSE isnull(TFL.strBankTradeReference, cd.strReferenceNo) END
+				, strBankApprovalStatus = CASE WHEN TFL.strTransactionType = 'Contract' THEN STF.strApprovalStatus ELSE isnull(TFL.strBankApprovalStatus, STF.strApprovalStatus) END
 				, dblLimit = limit.dblLimit
 				, dblSublimit = sublimit.dblLimit
 				, dblFinanceQty = CASE WHEN cd.intApprovalStatusId in (3,4) OR cd.intContractStatusId = 3 THEN 0 

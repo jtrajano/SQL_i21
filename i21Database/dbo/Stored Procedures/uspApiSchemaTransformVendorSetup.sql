@@ -3,1117 +3,1076 @@ CREATE PROCEDURE uspApiSchemaTransformVendorSetup
 	@guiLogId UNIQUEIDENTIFIER
 AS
 
---Check overwrite settings
+-- Retrieve Properties
+DECLARE @OverwriteExisting BIT = 1
 
-DECLARE @ysnAllowOverwrite BIT = 0
+SELECT
+    @OverwriteExisting = ISNULL(CAST(Overwrite AS BIT), 0)
+FROM (
+	SELECT tp.strPropertyName, tp.varPropertyValue
+	FROM tblApiSchemaTransformProperty tp
+	WHERE tp.guiApiUniqueId = @guiApiUniqueId
+) AS Properties
+PIVOT (
+	MIN(varPropertyValue)
+	FOR strPropertyName IN
+	(
+		Overwrite
+	)
+) AS PivotTable
 
-SELECT @ysnAllowOverwrite = CAST(varPropertyValue AS BIT)
-FROM tblApiSchemaTransformProperty
-WHERE 
-guiApiUniqueId = @guiApiUniqueId
-AND
-strPropertyName = 'Overwrite'
+-- Remove duplicate vendor from file
+-- ;WITH cte AS
+-- (
+--    SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strVendor ORDER BY sr.strVendor) AS RowNumber
+--    FROM tblApiSchemaTransformVendorSetup sr
+--    WHERE sr.guiApiUniqueId = @guiApiUniqueId
+-- )
+-- INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+-- SELECT
+--       NEWID()
+--     , guiApiImportLogId = @guiLogId
+--     , strField = 'Vendor'
+--     , strValue = sr.strVendor
+--     , strLogLevel = 'Error'
+--     , strStatus = 'Failed'
+--     , intRowNo = sr.intRowNumber
+--     , strMessage = 'The vendor ' + sr.strVendor + ' has duplicates in the file.'
+--     , strAction = 'Skipped'
+-- FROM cte sr
+-- WHERE sr.guiApiUniqueId = @guiApiUniqueId
+--   AND sr.RowNumber > 1
 
---Filter Vendor Setup imported
+-- ;WITH cte AS
+-- (
+--    SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strVendor ORDER BY sr.strVendor) AS RowNumber
+--    FROM tblApiSchemaTransformVendorSetup sr
+--    WHERE sr.guiApiUniqueId = @guiApiUniqueId
+-- )
+-- DELETE FROM cte
+-- WHERE guiApiUniqueId = @guiApiUniqueId
+--   AND RowNumber > 1
 
-DECLARE @tblFilteredVendorSetup TABLE(
-	intKey INT NOT NULL,
-    intRowNumber INT NULL,
-	strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
-	strExportFileType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strExportFilePath NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	strCompany1Id NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCompany2Id NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCustomerName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strItemName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strEquipmentType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strRebateUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorRebateUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-)
-INSERT INTO @tblFilteredVendorSetup
-(
-	intKey,
-    intRowNumber,
-	strVendor,
-	strExportFileType,
-	strExportFilePath,
-	strCompany1Id,
-	strCompany2Id,
-	strCustomer,
-	strCustomerName,
-	strVendorCustomer,
-	strItemNo,
-	strItemName,
-	strVendorItemNo,
-	strUnitMeasure,
-	strVendorUnitMeasure,
-	strEquipmentType,
-	strCategory,
-	strVendorCategory,
-	strRebateUnitMeasure,
-	strVendorRebateUnitMeasure
-)
-SELECT 
-	intKey,
-    intRowNumber,
-	strVendor,
-	strExportFileType,
-	strExportFilePath,
-	strCompany1Id,
-	strCompany2Id,
-	strCustomer,
-	strCustomerName,
-	strVendorCustomer,
-	strItemNo,
-	strItemName,
-	strVendorItemNo,
-	strUnitMeasure,
-	strVendorUnitMeasure,
-	strEquipmentType,
-	strCategory,
-	strVendorCategory,
-	strRebateUnitMeasure,
-	strVendorRebateUnitMeasure
-FROM
-tblApiSchemaTransformVendorSetup
-WHERE guiApiUniqueId = @guiApiUniqueId;
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Vendor'
+	, strValue = vts.strVendor
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Vendor ID "' + vts.strVendor + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND v.intEntityId IS NULL
 
--- Error Types
--- Vendor Setup Logs
--- 1 - Invalid Vendor
--- 2 - Duplicate Vendor Name
--- 3 - Invalid Export File Type
--- Customer Xref Logs
--- 4 - Invalid Customer
--- 5 - Duplicate Customer Name
--- 6 - Duplicate imported customer
--- 7 - Customer already exists and overwrite is not enabled
--- 8 - Customer Xref incomplete
--- Item Xref Logs
--- 9 - Invalid Item
--- 10 - Duplicate imported item
--- 11 - Item already exists and overwrite is not enabled
--- 12 - Item Xref incomplete
--- UOM Xref Logs
--- 13 - Invalid UOM
--- 14 - Duplicate imported UOM
--- 15 - UOM already exists and overwrite is not enabled
--- 16 - UOM Xref incomplete
--- Category Xref Logs
--- 17 - Invalid Category
--- 18 - Duplicate imported category
--- 19 - Category already exists and overwrite is not enabled
--- 20 - Category Xref incomplete
--- Rebate UOM Xref Logs
--- 21 - Invalid Rebate UOM
--- 22 - Duplicate imported rebate UOM
--- 23 - Rebate UOM already exists and overwrite is not enabled
--- 24 - Rebate UOM Xref incomplete
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Customer No'
+	, strValue = vts.strCustomer
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Customer No. "' + vts.strCustomer + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND c.intEntityId IS NULL
+	AND NULLIF(vts.strCustomer, '') IS NOT NULL
 
-DECLARE @tblLogVendorSetup TABLE(
-	strFieldValue NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-	intRowNumber INT NULL,
-	intLogType INT NULL
-)
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Customer Name'
+	, strValue = vts.strCustomerName
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Customer Name "' + vts.strCustomerName + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN vyuARCustomer c ON c.strName = vts.strCustomerName
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND c.intEntityId IS NULL
+	AND NULLIF(vts.strCustomer, '') IS NULL
+	AND NULLIF(vts.strCustomerName, '') IS NOT NULL
 
-INSERT INTO @tblLogVendorSetup
-(
-	strFieldValue,
-	strMessage,
-	intRowNumber,
-	intLogType
-)
--------------------------- Vendor Setup Logs --------------------------
-SELECT -- Invalid Vendor
-	FilteredVendorSetup.strVendor,
-	'Vendor: ' + FilteredVendorSetup.strVendor + ' does not exist.',
-	FilteredVendorSetup.intRowNumber,
-	1
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	vyuAPVendor Vendor
-	ON
-		Vendor.strName = FilteredVendorSetup.strVendor
-WHERE
-Vendor.intEntityId IS NULL
-AND
-FilteredVendorSetup.strVendor IS NOT NULL
-UNION
-SELECT -- Duplicate Vendor Name
-	FilteredVendorSetup.strVendor,
-	'Vendor: ' + FilteredVendorSetup.strVendor + ' has duplicate name matches.',
-	FilteredVendorSetup.intRowNumber,
-	2
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-OUTER APPLY
-(
-	SELECT 
-		intMatchCount = COUNT(*) 
-	FROM 
-		vyuAPVendor Vendor 
-	WHERE Vendor.strName = FilteredVendorSetup.strVendor 
-) Vendor
-WHERE
-Vendor.intMatchCount > 1
-UNION
-SELECT -- Invalid Export File Type
-	FilteredVendorSetup.strExportFileType,
-	'Export file type: ' + FilteredVendorSetup.strExportFileType + ' does not exist.',
-	FilteredVendorSetup.intRowNumber,
-	3
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-WHERE
-FilteredVendorSetup.strExportFileType NOT IN('CSV','TXT','XML')
-AND
-FilteredVendorSetup.strExportFileType IS NOT NULL
-UNION
-------------------------- Customer Xref Logs -------------------------
-SELECT -- Invalid Customer
-	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
-	'Customer ' + CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN 'No. :' ELSE 'Name: ' END + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' does not exist.',
-	FilteredVendorSetup.intRowNumber,
-	4
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	vyuARCustomer Customer
-	ON
-		ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN Customer.strCustomerNumber ELSE Customer.strName END
-		AND
-		Customer.ysnActive = 1
-WHERE
-Customer.intEntityId IS NULL
-AND
-ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL
-UNION
-SELECT -- Duplicate Customer Name
-	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
-	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' has duplicate customer matches.',
-	FilteredVendorSetup.intRowNumber,
-	5
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-OUTER APPLY
-(
-	SELECT 
-		intMatchCount = COUNT(*) 
-	FROM 
-		vyuARCustomer 
-	WHERE 
-		CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN strCustomerNumber ELSE strName END = ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) 
-) Customer
-WHERE
-Customer.intMatchCount > 1
-UNION
-SELECT -- Duplicate imported customer
-	DuplicateVendorSetup.strCustomer,
-	'Duplicate imported customer: ' + DuplicateVendorSetup.strCustomer + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
-	DuplicateVendorSetup.intRowNumber,
-	6
-FROM
-(
-	SELECT 
-		strCustomer = ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
-		FilteredVendorSetup.strVendor,
-		FilteredVendorSetup.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) ORDER BY FilteredVendorSetup.intRowNumber)
-	FROM 
-		@tblFilteredVendorSetup FilteredVendorSetup
-) AS DuplicateVendorSetup
-WHERE DuplicateVendorSetup.RowNumber > 1
-AND
-DuplicateVendorSetup.strCustomer IS NOT NULL
-UNION
-SELECT -- Customer already exists
-	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName),
-	'Customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
-	FilteredVendorSetup.intRowNumber,
-	7
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	vyuARCustomer Customer
-	ON
-		ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = Customer.strName
-LEFT JOIN
-	vyuAPVendor Vendor
-	ON
-		FilteredVendorSetup.strVendor = Vendor.strName
-INNER JOIN
-	tblVRVendorSetup VendorSetup
-	ON
-		VendorSetup.intEntityId = Vendor.intEntityId
-INNER JOIN
-	tblVRCustomerXref CustomerXref
-	ON
-		Customer.intEntityId = CustomerXref.intEntityId
-		AND
-		VendorSetup.intVendorSetupId = CustomerXref.intVendorSetupId
-WHERE
-@ysnAllowOverwrite = 0
-UNION
-SELECT -- Customer Xref incomplete
-	CASE
-		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
-		THEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName)
-		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
-		THEN FilteredVendorSetup.strVendorCustomer
-		ELSE NULL
-	END,
-	CASE
-		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
-		THEN 'Vendor cross reference is missing for customer: ' + ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) + '.'
-		WHEN ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
-		THEN 'Customer is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorCustomer + '.'
-		ELSE NULL
-	END,
-	FilteredVendorSetup.intRowNumber,
-	8
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-WHERE
-(
-	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NOT NULL 
-	AND 
-	FilteredVendorSetup.strVendorCustomer IS NULL
-)
-OR
-(
-	ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) IS NULL 
-	AND 
-	FilteredVendorSetup.strVendorCustomer IS NOT NULL
-)
-UNION
---------------------------- Item Xref Logs ---------------------------
-SELECT -- Invalid Item
-	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName),
-	'Item: ' + ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) + ' does not exist.',
-	FilteredVendorSetup.intRowNumber,
-	9
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICItem Item
-	ON
-		ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) = Item.strItemNo
-		AND
-		Item.strType NOT LIKE '%Comment%'
-WHERE
-Item.intItemId IS NULL
-AND
-ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL
-UNION
-SELECT -- Duplicate imported item
-	DuplicateVendorSetup.strItemNo,
-	'Duplicate imported item: ' + DuplicateVendorSetup.strItemNo + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
-	DuplicateVendorSetup.intRowNumber,
-	10
-FROM
-(
-	SELECT 
-		strItemNo = ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName),
-		FilteredVendorSetup.strVendor,
-		FilteredVendorSetup.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) ORDER BY FilteredVendorSetup.intRowNumber)
-	FROM 
-		@tblFilteredVendorSetup FilteredVendorSetup
-) AS DuplicateVendorSetup
-WHERE DuplicateVendorSetup.RowNumber > 1
-AND
-DuplicateVendorSetup.strItemNo IS NOT NULL
-UNION
-SELECT  -- Item already exists
-	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName),
-	'Item: ' + ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
-	FilteredVendorSetup.intRowNumber,
-	11
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICItem Item
-	ON
-		ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) = Item.strItemNo
-LEFT JOIN
-	vyuAPVendor Vendor
-	ON
-		FilteredVendorSetup.strVendor = Vendor.strName
-INNER JOIN
-	tblVRVendorSetup VendorSetup
-	ON
-		VendorSetup.intEntityId = Vendor.intEntityId
-INNER JOIN
-	tblICItemVendorXref ItemXref
-	ON
-		Item.intItemId = ItemXref.intItemId
-		AND
-		VendorSetup.intVendorSetupId = ItemXref.intVendorSetupId
-WHERE 
-@ysnAllowOverwrite = 0
-UNION
-SELECT -- Item Xref incomplete
-	CASE
-		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
-		THEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName)
-		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
-		THEN FilteredVendorSetup.strVendorItemNo
-		ELSE NULL
-	END,
-	CASE
-		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
-		THEN 'Vendor cross reference is missing for item: ' + ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) + '.'
-		WHEN ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
-		THEN 'Item is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorItemNo + '.'
-		ELSE NULL
-	END,
-	FilteredVendorSetup.intRowNumber,
-	12
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-WHERE
-(
-	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NOT NULL 
-	AND 
-	FilteredVendorSetup.strVendorItemNo IS NULL
-)
-OR
-(
-	ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) IS NULL 
-	AND 
-	FilteredVendorSetup.strVendorItemNo IS NOT NULL
-)
-UNION
---------------------------- UOM Xref Logs ---------------------------
-SELECT -- Invalid UOM
-	FilteredVendorSetup.strUnitMeasure,
-	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' does not exist.',
-	FilteredVendorSetup.intRowNumber,
-	13
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICUnitMeasure UnitMeasure
-	ON
-		FilteredVendorSetup.strUnitMeasure = UnitMeasure.strUnitMeasure
-WHERE
-UnitMeasure.intUnitMeasureId IS NULL
-AND
-FilteredVendorSetup.strUnitMeasure IS NOT NULL
-UNION
-SELECT -- Duplicate imported unit of measure
-	DuplicateVendorSetup.strUnitMeasure,
-	'Duplicate imported unit of measure: ' + DuplicateVendorSetup.strUnitMeasure + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
-	DuplicateVendorSetup.intRowNumber,
-	14
-FROM
-(
-	SELECT 
-		FilteredVendorSetup.strUnitMeasure,
-		FilteredVendorSetup.strVendor,
-		FilteredVendorSetup.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, FilteredVendorSetup.strUnitMeasure ORDER BY FilteredVendorSetup.intRowNumber)
-	FROM 
-		@tblFilteredVendorSetup FilteredVendorSetup
-) AS DuplicateVendorSetup
-WHERE DuplicateVendorSetup.RowNumber > 1
-AND
-DuplicateVendorSetup.strUnitMeasure IS NOT NULL
-UNION
-SELECT  -- Unit of measure already exists
-	FilteredVendorSetup.strUnitMeasure,
-	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
-	FilteredVendorSetup.intRowNumber,
-	15
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICUnitMeasure UnitMeasure
-	ON
-		FilteredVendorSetup.strUnitMeasure = UnitMeasure.strUnitMeasure
-LEFT JOIN
-	vyuAPVendor Vendor
-	ON
-		FilteredVendorSetup.strVendor = Vendor.strName
-INNER JOIN
-	tblVRVendorSetup VendorSetup
-	ON
-		VendorSetup.intEntityId = Vendor.intEntityId
-INNER JOIN
-	tblVRUOMXref UOMXref
-	ON
-		UnitMeasure.intUnitMeasureId = UOMXref.intUnitMeasureId
-		AND
-		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
-WHERE
-@ysnAllowOverwrite = 0
-UNION
-SELECT -- UOM Xref incomplete
-	CASE
-		WHEN FilteredVendorSetup.strUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NULL
-		THEN FilteredVendorSetup.strUnitMeasure
-		WHEN FilteredVendorSetup.strUnitMeasure IS NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NOT NULL
-		THEN FilteredVendorSetup.strVendorUnitMeasure
-		ELSE NULL
-	END,
-	CASE
-		WHEN FilteredVendorSetup.strUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NULL
-		THEN 'Vendor cross reference is missing for unit of measure: ' + FilteredVendorSetup.strUnitMeasure + '.'
-		WHEN FilteredVendorSetup.strUnitMeasure IS NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NOT NULL
-		THEN 'Unit of measure is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorUnitMeasure + '.'
-		ELSE NULL
-	END,
-	FilteredVendorSetup.intRowNumber,
-	16
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-WHERE
-(
-	FilteredVendorSetup.strUnitMeasure IS NOT NULL 
-	AND 
-	FilteredVendorSetup.strVendorUnitMeasure IS NULL
-)
-OR
-(
-	FilteredVendorSetup.strUnitMeasure IS NULL 
-	AND 
-	FilteredVendorSetup.strVendorUnitMeasure IS NOT NULL
-)
-UNION
-------------------------- Category Xref Logs -------------------------
-SELECT -- Invalid Category
-	FilteredVendorSetup.strCategory,
-	'Category: ' + FilteredVendorSetup.strCategory + ' does not exist.',
-	FilteredVendorSetup.intRowNumber,
-	17
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICCategory Category
-	ON
-		FilteredVendorSetup.strCategory = Category.strCategoryCode
-WHERE
-Category.intCategoryId IS NULL
-AND
-FilteredVendorSetup.strCategory IS NOT NULL
-UNION
-SELECT -- Duplicate imported category
-	DuplicateVendorSetup.strCategory,
-	'Duplicate imported category: ' + DuplicateVendorSetup.strCategory + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
-	DuplicateVendorSetup.intRowNumber,
-	18
-FROM
-(
-	SELECT 
-		FilteredVendorSetup.strCategory,
-		FilteredVendorSetup.strVendor,
-		FilteredVendorSetup.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, FilteredVendorSetup.strCategory ORDER BY FilteredVendorSetup.intRowNumber)
-	FROM 
-		@tblFilteredVendorSetup FilteredVendorSetup
-) AS DuplicateVendorSetup
-WHERE DuplicateVendorSetup.RowNumber > 1
-AND
-DuplicateVendorSetup.strCategory IS NOT NULL
-UNION
-SELECT  -- Category already exists
-	FilteredVendorSetup.strCategory,
-	'Category: ' + FilteredVendorSetup.strCategory + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
-	FilteredVendorSetup.intRowNumber,
-	19
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICCategory Category
-	ON
-		FilteredVendorSetup.strCategory = Category.strCategoryCode
-LEFT JOIN
-	vyuAPVendor Vendor
-	ON
-		FilteredVendorSetup.strVendor = Vendor.strName
-INNER JOIN
-	tblVRVendorSetup VendorSetup
-	ON
-		VendorSetup.intEntityId = Vendor.intEntityId
-INNER JOIN
-	tblICCategoryVendor CategoryXref
-	ON
-		Category.intCategoryId = CategoryXref.intCategoryId
-		AND
-		VendorSetup.intVendorSetupId = CategoryXref.intVendorSetupId
-WHERE
-@ysnAllowOverwrite = 0
-UNION
-SELECT -- Category Xref incomplete
-	CASE
-		WHEN FilteredVendorSetup.strCategory IS NOT NULL AND FilteredVendorSetup.strVendorCategory IS NULL
-		THEN FilteredVendorSetup.strCategory
-		WHEN FilteredVendorSetup.strCategory IS NULL AND FilteredVendorSetup.strVendorCategory IS NOT NULL
-		THEN FilteredVendorSetup.strVendorCategory
-		ELSE NULL
-	END,
-	CASE
-		WHEN FilteredVendorSetup.strCategory IS NOT NULL AND FilteredVendorSetup.strVendorCategory IS NULL
-		THEN 'Vendor cross reference is missing for category: ' + FilteredVendorSetup.strCategory + '.'
-		WHEN FilteredVendorSetup.strCategory IS NULL AND FilteredVendorSetup.strVendorCategory IS NOT NULL
-		THEN 'Category is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorCategory + '.'
-		ELSE NULL
-	END,
-	FilteredVendorSetup.intRowNumber,
-	20
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-WHERE
-(
-	FilteredVendorSetup.strCategory IS NOT NULL 
-	AND 
-	FilteredVendorSetup.strVendorCategory IS NULL
-)
-OR
-(
-	FilteredVendorSetup.strCategory IS NULL 
-	AND 
-	FilteredVendorSetup.strVendorCategory IS NOT NULL
-)
-UNION
------------------------- Rebate UOM Xref Logs ------------------------
-SELECT -- Invalid Rebate UOM
-	FilteredVendorSetup.strRebateUnitMeasure,
-	'Rebate Unit of measure: ' + FilteredVendorSetup.strRebateUnitMeasure + ' does not exist.',
-	FilteredVendorSetup.intRowNumber,
-	21
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICUnitMeasure UnitMeasure
-	ON
-		FilteredVendorSetup.strRebateUnitMeasure = UnitMeasure.strUnitMeasure
-WHERE
-UnitMeasure.intUnitMeasureId IS NULL
-AND
-FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL
-UNION
-SELECT -- Duplicate imported unit of measure
-	DuplicateVendorSetup.strRebateUnitMeasure,
-	'Duplicate imported rebate unit of measure: ' + DuplicateVendorSetup.strRebateUnitMeasure + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
-	DuplicateVendorSetup.intRowNumber,
-	22
-FROM
-(
-	SELECT 
-		FilteredVendorSetup.strRebateUnitMeasure,
-		FilteredVendorSetup.strVendor,
-		FilteredVendorSetup.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, FilteredVendorSetup.strRebateUnitMeasure ORDER BY FilteredVendorSetup.intRowNumber)
-	FROM 
-		@tblFilteredVendorSetup FilteredVendorSetup
-) AS DuplicateVendorSetup
-WHERE DuplicateVendorSetup.RowNumber > 1
-AND
-DuplicateVendorSetup.strRebateUnitMeasure IS NOT NULL
-UNION
-SELECT  -- Unit of measure already exists
-	FilteredVendorSetup.strRebateUnitMeasure,
-	'Rebate unit of measure: ' + FilteredVendorSetup.strRebateUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
-	FilteredVendorSetup.intRowNumber,
-	23
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	tblICUnitMeasure UnitMeasure
-	ON
-		FilteredVendorSetup.strRebateUnitMeasure = UnitMeasure.strUnitMeasure
-LEFT JOIN
-	vyuAPVendor Vendor
-	ON
-		FilteredVendorSetup.strVendor = Vendor.strName
-INNER JOIN
-	tblVRVendorSetup VendorSetup
-	ON
-		VendorSetup.intEntityId = Vendor.intEntityId
-INNER JOIN
-	tblVRUOMXref UOMXref
-	ON
-		UnitMeasure.intUnitMeasureId = UOMXref.intUnitMeasureId
-		AND
-		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
-WHERE
-@ysnAllowOverwrite = 0
-UNION
-SELECT -- Rebate UOM Xref incomplete
-	CASE
-		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NULL
-		THEN FilteredVendorSetup.strRebateUnitMeasure
-		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NOT NULL
-		THEN FilteredVendorSetup.strVendorRebateUnitMeasure
-		ELSE NULL
-	END,
-	CASE
-		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NULL
-		THEN 'Vendor cross reference is missing for rebate unit of measure: ' + FilteredVendorSetup.strRebateUnitMeasure + '.'
-		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NOT NULL
-		THEN 'Rebate unit of measure is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorRebateUnitMeasure + '.'
-		ELSE NULL
-	END,
-	FilteredVendorSetup.intRowNumber,
-	24
-FROM
-	@tblFilteredVendorSetup FilteredVendorSetup
-WHERE
-(
-	FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL 
-	AND 
-	FilteredVendorSetup.strVendorRebateUnitMeasure IS NULL
-)
-OR
-(
-	FilteredVendorSetup.strRebateUnitMeasure IS NULL 
-	AND 
-	FilteredVendorSetup.strVendorRebateUnitMeasure IS NOT NULL
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Vendor Customer'
+	, strValue = vts.strVendorCustomer
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Vendor Customer "' + vts.strVendorCustomer + '" already exists.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NULLIF(vts.strCustomer, '') IS NOT NULL
+	AND EXISTS (
+		SELECT TOP 1 1
+		FROM tblVRCustomerXref xx
+		WHERE xx.intVendorSetupId = vs.intVendorSetupId
+			AND xx.intEntityId = c.intEntityId
+			AND xx.strVendorCustomer = vts.strVendorCustomer
+	)
+	AND @OverwriteExisting = 0
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Category'
+	, strValue = vts.strCategory
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The category "' + vts.strCategory + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblICCategory c ON c.strCategoryCode = vts.strCategory OR c.strDescription = vts.strCategory
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND c.intCategoryId IS NULL
+	AND NULLIF(vts.strCategory, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Vendor''s Category'
+	, strValue = vts.strVendorCategory
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The vendor category mapping "' + vts.strVendorCategory + '" for "' + vts.strCategory + '"already exists.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblICCategory c ON c.strCategoryCode = vts.strCategory
+	AND c.strDescription = vts.strCategory
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NULLIF(vts.strCategory, '') IS NOT NULL
+	AND EXISTS (
+		SELECT TOP 1 1
+		FROM tblICCategoryVendor xx
+		JOIN tblICCategory xc ON xc.intCategoryId = xx.intCategoryId
+		WHERE xx.intVendorSetupId = vs.intVendorSetupId
+			AND xx.intCategoryId = c.intCategoryId
+			--AND xx.strVendorDepartment = vts.strVendorCategory
+	)
+	AND @OverwriteExisting = 0
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'UOM'
+	, strValue = vts.strUnitMeasure
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The UOM "' + vts.strUnitMeasure + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND u.intUnitMeasureId IS NULL
+	AND NULLIF(vts.strUnitMeasure, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'UOM'
+	, strValue = vts.strVendorUnitMeasure
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The UOM mapping "' + vts.strVendorUnitMeasure + '" for "' + vts.strUnitMeasure + '" already exists.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NULLIF(vts.strCategory, '') IS NOT NULL
+	AND EXISTS (
+		SELECT TOP 1 1
+		FROM tblVRUOMXref xref
+		WHERE xref.intVendorSetupId = vs.intVendorSetupId
+			AND xref.intUnitMeasureId = u.intUnitMeasureId
+			--AND xref.strVendorUOM = vts.strVendorUnitMeasure
+	)
+	AND @OverwriteExisting = 0
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Item No'
+	, strValue = vts.strItemNo
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Item No "' + vts.strItemNo + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblICItem i ON i.strItemNo = vts.strItemNo
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND i.intItemId IS NULL
+	AND NULLIF(vts.strItemNo, '') IS NOT NULL
+
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Item Name'
+	, strValue = vts.strItemName
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Item "' + vts.strItemName + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+LEFT JOIN tblICItem i ON i.strDescription = vts.strItemName
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND i.intItemId IS NULL
+	AND NULLIF(vts.strItemName, '') IS NOT NULL
+	AND NULLIF(vts.strItemNo, '') IS NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = 'Vendor Item No'
+	, strValue = vts.strVendorItemNo
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The Item mapping "' + vts.strVendorItemNo + '" for "' + vts.strItemNo + '" already exists.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblICItem i ON i.strItemNo = vts.strItemNo OR i.strDescription = i.strItemNo
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NULLIF(vts.strItemNo, '') IS NOT NULL
+	AND EXISTS (
+		SELECT TOP 1 1
+		FROM tblICItemVendorXref xref
+		WHERE xref.intVendorSetupId = vs.intVendorSetupId
+			AND xref.intItemId = i.intItemId
+			--AND xref.strVendorProduct = vts.strVendorItemNo
+	)
+	AND @OverwriteExisting = 0
+
+-- Existing item
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Rebate Vendor Setup'
+    , strValue = vs.strVendor
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = vs.intRowNumber
+    , strMessage = ISNULL(vs.strVendor, '') + ' already exists.'
+FROM tblApiSchemaTransformVendorSetup vs
+CROSS APPLY (
+  SELECT TOP 1 1 intCount
+  FROM tblAPVendor v
+  WHERE v.strVendorId = vs.strVendor
+) ex
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+  AND @OverwriteExisting = 0
+
+DECLARE @UniqueSetups TABLE (
+	  intEntityId INT
+	, strExportFileType NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL
+	, strExportFilePath NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strCompany1Id NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL
+	, strCompany2Id NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL
+	, intConcurrencyId INT
+	, guiApiUniqueId UNIQUEIDENTIFIER
+	, intRowNumber INT
 )
 
---Validate Records
-
-INSERT INTO tblApiImportLogDetail 
-(
-	guiApiImportLogDetailId,
-	guiApiImportLogId,
-	strField,
-	strValue,
-	strLogLevel,
-	strStatus,
-	intRowNo,
-	strMessage
+INSERT INTO @UniqueSetups (
+	  intEntityId
+	, strExportFileType
+	, strExportFilePath
+	, strCompany1Id
+	, strCompany2Id
+	, intConcurrencyId
+	, guiApiUniqueId
+	, intRowNumber
 )
 SELECT
-	guiApiImportLogDetailId = NEWID(),
-	guiApiImportLogId = @guiLogId,
-	strField = CASE
-		WHEN LogVendorSetup.intLogType IN (1,2)
-		THEN 'Vendor'
-		WHEN LogVendorSetup.intLogType = 3
-		THEN 'Export File Type'
-		WHEN LogVendorSetup.intLogType IN (4,5,6,7,8)
-		THEN 'Customer No./Name'
-		WHEN LogVendorSetup.intLogType IN (9,10,11,12)
-		THEN 'Item Name'
-		WHEN LogVendorSetup.intLogType IN (13,14,15,16)
-		THEN 'UOM Name'
-		WHEN LogVendorSetup.intLogType IN (17,18,19,20)
-		THEN 'Category Name'
-		ELSE 'Rebate UOM Name'
-	END,
-	strValue = LogVendorSetup.strFieldValue,
-	strLogLevel =  CASE
-		WHEN LogVendorSetup.intLogType IN(2,5,6,7,8,10,11,12,14,15,16,18,19,20,22,23,24)
-		THEN 'Warning'
-		ELSE 'Error'
-	END,
-	strStatus = CASE
-		WHEN LogVendorSetup.intLogType IN(2,5,6,7,8,10,11,12,14,15,16,18,19,20,22,23,24)
-		THEN 'Skipped'
-		ELSE 'Failed'
-	END,
-	intRowNo = LogVendorSetup.intRowNumber,
-	strMessage = LogVendorSetup.strMessage
-FROM @tblLogVendorSetup LogVendorSetup
-WHERE LogVendorSetup.intLogType BETWEEN 1 AND 24
+	  v.intEntityId
+	, vs.strExportFileType
+	, vs.strExportFilePath
+	, vs.strCompany1Id
+	, vs.strCompany2Id
+	, 1
+	, @guiApiUniqueId
+	, vs.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vs
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+  AND NOT EXISTS (
+    SELECT TOP 1 1
+    FROM tblApiImportLogDetail d
+    WHERE d.guiApiImportLogId = @guiLogId
+      AND d.intRowNo = vs.intRowNumber
+      AND d.strLogLevel = 'Error'
+  )
+  AND NOT EXISTS(
+    SELECT TOP 1 1 
+    FROM tblVRVendorSetup xvs
+	WHERE xvs.intEntityId = v.intEntityId
+  )
 
---Vendor Setup Transform logic
-
-;MERGE INTO tblVRVendorSetup AS TARGET
-USING
+;WITH cte AS
 (
-	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intEntityId = MAX(Vendor.intEntityId),
-		strExportFileType = MAX(FilteredVendorSetup.strExportFileType),
-		strExportFilePath = MAX(FilteredVendorSetup.strExportFilePath),
-		strCompany1Id = MAX(FilteredVendorSetup.strCompany1Id),
-		strCompany2Id = MAX(FilteredVendorSetup.strCompany2Id)
-	FROM @tblFilteredVendorSetup FilteredVendorSetup
-	LEFT JOIN
-		@tblLogVendorSetup LogVendorSetup
-		ON
-			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-			AND
-			LogVendorSetup.intLogType IN (1,2,3)
-	INNER JOIN
-		vyuAPVendor Vendor
-		ON
-			Vendor.strName = FilteredVendorSetup.strVendor
-	WHERE
-	LogVendorSetup.intLogType NOT IN (1,2,3) OR LogVendorSetup.intLogType IS NULL
-	GROUP BY
-	FilteredVendorSetup.strVendor
-) AS SOURCE
-ON TARGET.intEntityId = SOURCE.intEntityId
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intEntityId = SOURCE.intEntityId,
-		strExportFileType = SOURCE.strExportFileType,
-		strExportFilePath = SOURCE.strExportFilePath,
-		strCompany1Id = SOURCE.strCompany1Id,
-		strCompany2Id = SOURCE.strCompany2Id
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intEntityId,
-		strExportFileType,
-		strExportFilePath,
-		strCompany1Id,
-		strCompany2Id,
-		intConcurrencyId
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intEntityId ORDER BY sr.intEntityId) AS RowNumber
+   FROM @UniqueSetups sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+)
+DELETE FROM cte
+WHERE guiApiUniqueId = @guiApiUniqueId
+  AND RowNumber > 1
+
+INSERT INTO tblVRVendorSetup (
+	  intEntityId
+	, strExportFileType
+	, strExportFilePath
+	, strCompany1Id
+	, strCompany2Id
+	, intConcurrencyId
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT * 
+FROM @UniqueSetups vs
+WHERE NOT EXISTS(
+    SELECT TOP 1 1 
+    FROM tblVRVendorSetup xvs
+	JOIN tblAPVendor xv ON xv.intEntityId = xvs.intEntityId
+		AND vs.intEntityId = xv.intEntityId
+  )
+
+-- Flag setup for modifications
+DECLARE @ForUpdates TABLE (strVendorNumber NVARCHAR(400) COLLATE Latin1_General_CI_AS, intRowNumber INT NULL)
+INSERT INTO @ForUpdates
+SELECT v.strVendorId, vs.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vs
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId 
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND @OverwriteExisting = 1
+
+UPDATE vs
+SET 
+	  vs.guiApiUniqueId = @guiApiUniqueId
+	, vs.intRowNumber = sr.intRowNumber
+	, vs.strExportFilePath = sr.strExportFilePath
+	, vs.strExportFileType = sr.strExportFileType
+	, vs.strCompany1Id = sr.strCompany1Id
+	, vs.strCompany2Id = sr.strCompany2Id
+	, vs.intConcurrencyId = ISNULL(vs.intConcurrencyId, 1) + 1
+FROM tblVRVendorSetup vs
+JOIN tblAPVendor v ON v.intEntityId = vs.intEntityId
+JOIN tblApiSchemaTransformVendorSetup sr ON sr.strVendor = v.strVendorId
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail d
+		WHERE d.guiApiImportLogId = @guiLogId
+		AND d.intRowNo = sr.intRowNumber
+		AND d.strLogLevel = 'Error'
+		AND d.ysnPreventRowUpdate = 1
 	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intEntityId,
-		strExportFileType,
-		strExportFilePath,
-		strCompany1Id,
-		strCompany2Id,
-		1
-	);
+	AND @OverwriteExisting = 1
 
---Customer Xref Transform logic
 
-;MERGE INTO tblVRCustomerXref AS TARGET
-USING
+DECLARE @CustomerForUpdates TABLE (intVendorSetupId INT, intEntityId INT, strVendorCustomer NVARCHAR(400) COLLATE Latin1_General_CI_AS, intRowNumber INT NULL)
+INSERT INTO @CustomerForUpdates
+SELECT e.intVendorSetupId, xc.intEntityId, xc.strVendorCustomer, vs.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vs
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+JOIN vyuARCustomer c ON c.strCustomerNumber = vs.strCustomer
+JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
+	AND xc.intEntityId = c.intEntityId
+	--AND xc.strVendorCustomer = vs.strVendorCustomer
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND @OverwriteExisting = 1
+
+INSERT INTO @CustomerForUpdates
+SELECT e.intVendorSetupId, xc.intEntityId, xc.strVendorCustomer, vs.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vs
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+JOIN tblEMEntity en ON en.strName = vs.strCustomerName
+JOIN vyuARCustomer c ON c.intEntityId = en.intEntityId
+JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
+	AND xc.intEntityId = c.intEntityId
+	--AND xc.strVendorCustomer = vs.strVendorCustomer
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND NULLIF(vs.strCustomer, '') IS NULL
+	AND NULLIF(vs.strCustomerName, '') IS NOT NULL
+	AND @OverwriteExisting = 1
+
+UPDATE xc
+SET 
+	  xc.guiApiUniqueId = @guiApiUniqueId
+	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
+	, xc.strVendorCustomer = COALESCE(vs.strVendorCustomer, xc.strVendorCustomer)
+	, xc.intRowNumber = vs.intRowNumber
+FROM tblVRCustomerXref xc
+JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
+JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomer = c.strCustomerNumber
+	--AND vs.strVendorCustomer = xc.strVendorCustomer
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND @OverwriteExisting = 1
+
+UPDATE xc
+SET 
+	  xc.guiApiUniqueId = @guiApiUniqueId
+	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
+	, xc.strVendorCustomer = COALESCE(vs.strVendorCustomer, xc.strVendorCustomer)
+	, xc.intRowNumber = vs.intRowNumber
+FROM tblVRCustomerXref xc
+JOIN tblEMEntity en ON en.intEntityId = xc.intEntityId
+JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
+JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomerName = en.strName
+	--AND vs.strVendorCustomer = xc.strVendorCustomer
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND NULLIF(vs.strCustomer, '') IS NULL
+	AND NULLIF(vs.strCustomerName, '') IS NOT NULL
+	AND @OverwriteExisting = 1
+
+DECLARE @UniqueCustomers TABLE (
+	  intEntityId INT
+	, intVendorSetupId INT
+	, strVendorCustomer [nvarchar](50) COLLATE Latin1_General_CI_AS
+	, guiApiUniqueId UNIQUEIDENTIFIER
+	, intRowNumber INT
+)
+
+INSERT INTO @UniqueCustomers (
+	  intEntityId
+	, intVendorSetupId
+	, strVendorCustomer
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	  c.intEntityId
+	, vs.intVendorSetupId
+	, COALESCE(vts.strVendorCustomer, c.strCustomerNumber)
+	, @guiApiUniqueId
+	, vts.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblARCustomer c ON c.strCustomerNumber = vts.strCustomer
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblVRCustomerXref xx
+		WHERE xx.intVendorSetupId = vs.intVendorSetupId
+			AND xx.intEntityId != c.intEntityId 
+			--AND xx.strVendorCustomer = vts.strVendorCustomer
+	)
+
+INSERT INTO @UniqueCustomers (
+	  intEntityId
+	, intVendorSetupId
+	, strVendorCustomer
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	  c.intEntityId
+	, vs.intVendorSetupId
+	, COALESCE(vts.strVendorCustomer, c.strCustomerNumber)
+	, @guiApiUniqueId
+	, vts.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblEMEntity e ON e.strName = vts.strCustomerName
+JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblVRCustomerXref xx
+		WHERE xx.intVendorSetupId = vs.intVendorSetupId
+			AND xx.intEntityId != c.intEntityId 
+	)
+	AND NULLIF(vts.strCustomer, '') IS NULL
+	AND NULLIF(vts.strCustomerName, '') IS NOT NULL
+
+;WITH cte AS
 (
-	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intEntityId = Customer.intEntityId,
-		intVendorSetupId = VendorSetup.intVendorSetupId,
-		strVendorCustomer = ISNULL(FilteredVendorSetup.strVendorCustomer, Customer.strName)
-	FROM @tblFilteredVendorSetup FilteredVendorSetup
-	LEFT JOIN
-		@tblLogVendorSetup LogVendorSetup
-		ON
-			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-			AND
-			LogVendorSetup.intLogType IN (1,2,3,4,5,6,7,8)
-	INNER JOIN
-		vyuARCustomer Customer
-		ON
-			ISNULL(FilteredVendorSetup.strCustomer, FilteredVendorSetup.strCustomerName) = CASE WHEN FilteredVendorSetup.strCustomer IS NOT NULL THEN Customer.strCustomerNumber ELSE Customer.strName END
-			AND
-			Customer.ysnActive = 1
-	INNER JOIN
-	(
-		vyuAPVendor Vendor
-		INNER JOIN
-			tblVRVendorSetup VendorSetup 
-			ON
-				Vendor.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.strName = FilteredVendorSetup.strVendor
-	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,3,4,5,6,7,8) OR LogVendorSetup.intLogType IS NULL
-) AS SOURCE
-ON TARGET.intEntityId = SOURCE.intEntityId AND TARGET.intVendorSetupId = SOURCE.intVendorSetupId
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intEntityId = SOURCE.intEntityId,
-		intVendorSetupId = SOURCE.intVendorSetupId,
-		strVendorCustomer = SOURCE.strVendorCustomer
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intEntityId,
-		intVendorSetupId,
-		strVendorCustomer,
-		intConcurrencyId
-	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intEntityId,
-		intVendorSetupId,
-		strVendorCustomer,
-		1
-	);
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intEntityId ORDER BY sr.intVendorSetupId, sr.intEntityId) AS RowNumber
+   FROM @UniqueCustomers sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+)
+DELETE FROM cte
+WHERE guiApiUniqueId = @guiApiUniqueId
+  AND RowNumber > 1;
 
---Item Xref Transform logic
+-- ;WITH cte AS
+-- (
+--    SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorCustomer ORDER BY sr.intVendorSetupId, sr.strVendorCustomer) AS RowNumber
+--    FROM @UniqueCustomers sr
+--    WHERE sr.guiApiUniqueId = @guiApiUniqueId
+-- )
+-- DELETE FROM cte
+-- WHERE guiApiUniqueId = @guiApiUniqueId
+--   AND RowNumber > 1;
 
-;MERGE INTO tblICItemVendorXref AS TARGET
-USING
+INSERT INTO tblVRCustomerXref (
+	  intEntityId
+	, intVendorSetupId
+	, strVendorCustomer
+	, intConcurrencyId
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	c.intEntityId
+	, c.intVendorSetupId
+	, c.strVendorCustomer
+	, 1
+	, c.guiApiUniqueId
+	, c.intRowNumber
+FROM @UniqueCustomers c
+
+DECLARE @CategoryForUpdates TABLE (intVendorSetupId INT, intCategoryId INT, intRowNumber INT NULL)
+INSERT INTO @CategoryForUpdates
+SELECT e.intVendorSetupId, c.intCategoryId, vs.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vs
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+JOIN tblICCategory c ON c.strCategoryCode = vs.strCategory
+	OR c.strDescription = vs.strCategory
+JOIN tblICCategoryVendor cv ON cv.intCategoryId=  c.intCategoryId
+	AND cv.intVendorSetupId = e.intVendorSetupId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND @OverwriteExisting = 1
+
+UPDATE xc
+SET 
+	  xc.guiApiUniqueId = @guiApiUniqueId
+	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
+	, xc.strVendorDepartment = COALESCE(vs.strVendorCategory, xc.strVendorDepartment)
+	, xc.intRowNumber = vs.intRowNumber
+FROM tblICCategoryVendor xc
+JOIN tblICCategory c ON c.intCategoryId = xc.intCategoryId
+JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCategory = c.strCategoryCode
+	OR c.strDescription = vs.strCategory
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND e.intVendorSetupId = xc.intVendorSetupId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail d
+		WHERE d.guiApiImportLogId = @guiLogId
+		AND d.intRowNo = vs.intRowNumber
+		AND d.strLogLevel = 'Error'
+		AND d.ysnPreventRowUpdate = 1
+	)
+	AND @OverwriteExisting = 1
+
+DECLARE @UniqueCategories TABLE (
+	  intCategoryId INT
+	, intVendorSetupId INT
+	, strVendorDepartment NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, guiApiUniqueId UNIQUEIDENTIFIER
+	, intRowNumber INT
+)
+INSERT INTO @UniqueCategories (
+	  intCategoryId
+	, intVendorSetupId
+	, strVendorDepartment
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	  c.intCategoryId
+	, vs.intVendorSetupId
+	, COALESCE(vts.strVendorCategory, c.strCategoryCode)
+	, @guiApiUniqueId
+	, vts.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblICCategory c ON c.strCategoryCode = vts.strCategory
+	OR c.strDescription = vts.strCategory
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblICCategoryVendor xx
+		WHERE xx.intVendorSetupId = vs.intVendorSetupId
+			AND xx.intCategoryId = c.intCategoryId
+			--AND xx.strVendorDepartment = vts.strVendorCategory
+	)
+
+;WITH cte AS
 (
-	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intItemId = Item.intItemId,
-		intVendorId = Vendor.intEntityId,
-		intVendorSetupId = VendorSetup.intVendorSetupId,
-		strVendorProduct = ISNULL(FilteredVendorSetup.strVendorItemNo, Item.strItemNo)
-	FROM @tblFilteredVendorSetup FilteredVendorSetup
-	LEFT JOIN
-		@tblLogVendorSetup LogVendorSetup
-		ON
-			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-			AND
-			LogVendorSetup.intLogType IN (1,2,3,9,10,11,12)
-	INNER JOIN
-		tblICItem Item
-		ON
-			ISNULL(FilteredVendorSetup.strItemNo, FilteredVendorSetup.strItemName) = Item.strItemNo
-			AND
-			Item.strType NOT LIKE '%Comment%'
-	INNER JOIN
-	(
-		vyuAPVendor Vendor
-		INNER JOIN
-			tblVRVendorSetup VendorSetup 
-			ON
-				Vendor.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.strName = FilteredVendorSetup.strVendor
-	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,3,9,10,11,12) OR LogVendorSetup.intLogType IS NULL
-) AS SOURCE
-ON TARGET.intItemId = SOURCE.intItemId AND TARGET.intVendorSetupId = SOURCE.intVendorSetupId
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intItemId = SOURCE.intItemId,
-		intVendorId = SOURCE.intVendorId,
-		intVendorSetupId = SOURCE.intVendorSetupId,
-		strVendorProduct = SOURCE.strVendorProduct
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intItemId,
-		intVendorId,
-		intVendorSetupId,
-		strVendorProduct,
-		intConcurrencyId
-	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intItemId,
-		intVendorId,
-		intVendorSetupId,
-		strVendorProduct,
-		1
-	);
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorDepartment ORDER BY sr.intVendorSetupId, sr.strVendorDepartment) AS RowNumber
+   FROM @UniqueCategories sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+)
+DELETE FROM cte
+WHERE guiApiUniqueId = @guiApiUniqueId
+  AND RowNumber > 1;
 
---UOM Xref Transform logic
+INSERT INTO tblICCategoryVendor (
+	  intCategoryId
+	, intVendorSetupId
+	, strVendorDepartment
+	, guiApiUniqueId
+	, intRowNumber
+	, intConcurrencyId
+	, dtmDateCreated
+)
+SELECT 
+  	  intCategoryId
+	, intVendorSetupId
+	, strVendorDepartment
+	, guiApiUniqueId
+	, intRowNumber
+	, 1
+	, GETUTCDATE()
+FROM @UniqueCategories
 
-;MERGE INTO tblVRUOMXref AS TARGET
-USING
+DECLARE @UomForUpdates TABLE (intVendorSetupId INT, intUnitMeasureId INT, intRowNumber INT NULL)
+INSERT INTO @UomForUpdates
+SELECT e.intVendorSetupId, u.intUnitMeasureId, vs.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vs
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+JOIN tblICUnitMeasure u ON u.strUnitMeasure = vs.strUnitMeasure
+JOIN tblVRUOMXref uv ON uv.intUnitMeasureId = u.intUnitMeasureId
+	AND uv.intVendorSetupId = e.intVendorSetupId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND @OverwriteExisting = 1
+
+UPDATE xc
+SET 
+	  xc.guiApiUniqueId = @guiApiUniqueId
+	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
+	, xc.strVendorUOM = COALESCE(vs.strVendorUnitMeasure, xc.strVendorUOM)
+	, xc.strEquipmentType = COALESCE(vs.strEquipmentType, xc.strEquipmentType)
+	, xc.intRowNumber = vs.intRowNumber
+FROM tblVRUOMXref xc
+JOIN tblICUnitMeasure u ON u.intUnitMeasureId = xc.intUnitMeasureId
+JOIN tblApiSchemaTransformVendorSetup vs ON vs.strUnitMeasure = u.strUnitMeasure
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND e.intVendorSetupId = xc.intVendorSetupId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail d
+		WHERE d.guiApiImportLogId = @guiLogId
+		AND d.intRowNo = vs.intRowNumber
+		AND d.strLogLevel = 'Error'
+		AND d.ysnPreventRowUpdate = 1
+	)
+	AND @OverwriteExisting = 1
+
+DECLARE @UniqueUOMs TABLE (
+	[intVendorSetupId] [int] NOT NULL,
+	[intUnitMeasureId] [int] NOT NULL,
+	[strVendorUOM] [nvarchar](50)  COLLATE Latin1_General_CI_AS NOT NULL,
+	[strEquipmentType] [nvarchar](50)  COLLATE Latin1_General_CI_AS NULL,
+	[intRowNumber] INT NULL,
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL
+)
+
+INSERT INTO @UniqueUOMs (
+	  intVendorSetupId
+	, intUnitMeasureId
+	, strVendorUOM
+	, strEquipmentType
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	  vs.intVendorSetupId
+	, u.intUnitMeasureId
+	, COALESCE(vts.strVendorUnitMeasure, u.strUnitMeasure)
+	, vts.strEquipmentType
+	, @guiApiUniqueId
+	, vts.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblVRUOMXref xref
+		WHERE xref.intVendorSetupId = vs.intVendorSetupId
+			AND xref.intUnitMeasureId = u.intUnitMeasureId
+			--AND xref.strVendorUOM = vts.strVendorUnitMeasure
+	)
+
+;WITH cte AS
 (
-	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intVendorSetupId = VendorSetup.intVendorSetupId,
-		intUnitMeasureId = UnitMeasure.intUnitMeasureId,
-		strVendorUOM = ISNULL(FilteredVendorSetup.strVendorUnitMeasure, UnitMeasure.strUnitMeasure),
-		strEquipmentType = FilteredVendorSetup.strEquipmentType
-	FROM @tblFilteredVendorSetup FilteredVendorSetup
-	LEFT JOIN
-		@tblLogVendorSetup LogVendorSetup
-		ON
-			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-			AND
-			LogVendorSetup.intLogType IN (1,2,3,13,14,15,16)
-	INNER JOIN
-		tblICUnitMeasure UnitMeasure
-		ON
-			FilteredVendorSetup.strUnitMeasure = UnitMeasure.strUnitMeasure
-	INNER JOIN
-	(
-		vyuAPVendor Vendor
-		INNER JOIN
-			tblVRVendorSetup VendorSetup 
-			ON
-				Vendor.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.strName = FilteredVendorSetup.strVendor
-	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,3,13,14,15,16) OR LogVendorSetup.intLogType IS NULL
-) AS SOURCE
-ON 
-TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
-AND
-TARGET.intUnitMeasureId = SOURCE.intUnitMeasureId 
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intVendorSetupId = SOURCE.intVendorSetupId,
-		intUnitMeasureId = SOURCE.intUnitMeasureId,
-		strVendorUOM = SOURCE.strVendorUOM,
-		strEquipmentType = SOURCE.strEquipmentType
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intVendorSetupId,
-		intUnitMeasureId,
-		strVendorUOM,
-		strEquipmentType,
-		intConcurrencyId
-	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intVendorSetupId,
-		intUnitMeasureId,
-		strVendorUOM,
-		strEquipmentType,
-		1
-	);
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorUOM ORDER BY sr.intVendorSetupId, sr.strVendorUOM) AS RowNumber
+   FROM @UniqueUOMs sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+)
+DELETE FROM cte
+WHERE guiApiUniqueId = @guiApiUniqueId
+  AND RowNumber > 1;
 
---Category Xref Transform logic
-
-;MERGE INTO tblICCategoryVendor AS TARGET
-USING
+;WITH cte AS
 (
-	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intCategoryId = Category.intCategoryId,
-		intVendorId = Vendor.intEntityId,
-		intVendorSetupId = VendorSetup.intVendorSetupId,
-		strVendorDepartment = ISNULL(FilteredVendorSetup.strVendorCategory, Category.strCategoryCode)
-	FROM @tblFilteredVendorSetup FilteredVendorSetup
-	LEFT JOIN
-		@tblLogVendorSetup LogVendorSetup
-		ON
-			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-			AND
-			LogVendorSetup.intLogType IN (1,2,3,17,18,19,20)
-	INNER JOIN
-		tblICCategory Category
-		ON
-			FilteredVendorSetup.strCategory = Category.strCategoryCode
-	INNER JOIN
-	(
-		vyuAPVendor Vendor
-		INNER JOIN
-			tblVRVendorSetup VendorSetup 
-			ON
-				Vendor.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.strName = FilteredVendorSetup.strVendor
-	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,3,17,18,19,20) OR LogVendorSetup.intLogType IS NULL
-) AS SOURCE
-ON 
-TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
-AND
-TARGET.intCategoryId = SOURCE.intCategoryId 
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intCategoryId = SOURCE.intCategoryId,
-		intVendorId = SOURCE.intVendorId,
-		intVendorSetupId = SOURCE.intVendorSetupId,
-		strVendorDepartment = SOURCE.strVendorDepartment
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intCategoryId,
-		intVendorId,
-		intVendorSetupId,
-		strVendorDepartment,
-		intConcurrencyId
-	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intCategoryId,
-		intVendorId,
-		intVendorSetupId,
-		strVendorDepartment,
-		1
-	);
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intUnitMeasureId ORDER BY sr.intVendorSetupId, sr.intUnitMeasureId) AS RowNumber
+   FROM @UniqueUOMs sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+)
+DELETE FROM cte
+WHERE guiApiUniqueId = @guiApiUniqueId
+  AND RowNumber > 1;
 
---Rebate UOM Xref Transform logic
+INSERT INTO tblVRUOMXref (
+	  intVendorSetupId
+	, intUnitMeasureId
+	, strVendorUOM
+	, strEquipmentType
+	, intConcurrencyId
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT   
+	  intVendorSetupId
+	, intUnitMeasureId
+	, strVendorUOM
+	, strEquipmentType
+	, 1
+	, guiApiUniqueId
+	, intRowNumber
+FROM @UniqueUOMs vs
 
-;MERGE INTO tblVRUOMXref AS TARGET
-USING
+DECLARE @ItemForUpdates TABLE (intVendorSetupId INT, intItemId INT, intRowNumber INT NULL)
+INSERT INTO @ItemForUpdates
+SELECT e.intVendorSetupId, i.intItemId, vs.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vs
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+JOIN tblICItem i ON i.strItemNo = vs.strItemNo OR i.strDescription = vs.strItemNo
+JOIN tblICItemVendorXref xr ON xr.intItemId = i.intItemId
+	AND xr.intVendorSetupId = e.intVendorSetupId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND @OverwriteExisting = 1
+
+UPDATE xc
+SET 
+	  xc.guiApiUniqueId = @guiApiUniqueId
+	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
+	, xc.strVendorProduct = COALESCE(vs.strVendorItemNo, xc.strVendorProduct)
+	, xc.intRowNumber = vs.intRowNumber
+FROM tblICItemVendorXref xc
+JOIN tblICItem i ON i.intItemId = xc.intItemId
+JOIN tblApiSchemaTransformVendorSetup vs ON vs.strItemNo = i.strItemNo
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND e.intVendorSetupId = xc.intVendorSetupId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail d
+		WHERE d.guiApiImportLogId = @guiLogId
+		AND d.intRowNo = vs.intRowNumber
+		AND d.strLogLevel = 'Error'
+		AND d.ysnPreventRowUpdate = 1
+	)
+	AND @OverwriteExisting = 1
+
+UPDATE xc
+SET 
+	  xc.guiApiUniqueId = @guiApiUniqueId
+	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
+	, xc.strVendorProduct = COALESCE(vs.strVendorItemNo, xc.strVendorProduct)
+	, xc.intRowNumber = vs.intRowNumber
+FROM tblICItemVendorXref xc
+JOIN tblICItem i ON i.intItemId = xc.intItemId
+JOIN tblApiSchemaTransformVendorSetup vs ON vs.strItemName = i.strDescription
+JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND e.intVendorSetupId = xc.intVendorSetupId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail d
+		WHERE d.guiApiImportLogId = @guiLogId
+		AND d.intRowNo = vs.intRowNumber
+		AND d.strLogLevel = 'Error'
+		AND d.ysnPreventRowUpdate = 1
+	)
+	AND NULLIF(vs.strItemName, '') IS NOT NULL
+	AND NULLIF(vs.strItemNo, '') IS NULL
+	AND @OverwriteExisting = 1
+
+DECLARE @UniqueItems TABLE (
+	  intItemId INT
+	, intVendorId INT
+	, intVendorSetupId INT
+	, strVendorProduct NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	, guiApiUniqueId UNIQUEIDENTIFIER
+	, intRowNumber INT
+)
+
+INSERT INTO @UniqueItems (
+	  intItemId
+	, intVendorId
+	, intVendorSetupId
+	, strVendorProduct
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	  i.intItemId
+	, v.intEntityId
+	, vs.intVendorSetupId
+	, COALESCE(vts.strVendorItemNo, i.strItemNo)
+	, @guiApiUniqueId
+	, vts.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblICItem i ON i.strItemNo = vts.strItemNo
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblICItemVendorXref xref
+		WHERE xref.intVendorSetupId = vs.intVendorSetupId
+			AND xref.intItemId = i.intItemId
+			--AND xref.strVendorProduct = vts.strVendorItemNo
+	)
+
+INSERT INTO @UniqueItems (
+	  intItemId
+	, intVendorId
+	, intVendorSetupId
+	, strVendorProduct
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	  i.intItemId
+	, v.intEntityId
+	, vs.intVendorSetupId
+	, COALESCE(vts.strVendorItemNo, i.strItemNo)
+	, @guiApiUniqueId
+	, vts.intRowNumber
+FROM tblApiSchemaTransformVendorSetup vts
+JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblICItem i ON i.strDescription = vts.strItemName
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblICItemVendorXref xref
+		WHERE xref.intVendorSetupId = vs.intVendorSetupId
+			AND xref.intItemId = i.intItemId
+			--AND xref.strVendorProduct = vts.strVendorItemNo
+	)
+	AND NULLIF(vts.strItemName, '') IS NOT NULL
+	AND NULLIF(vts.strItemNo, '') IS NULL
+
+;WITH cte AS
 (
-	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intVendorSetupId = VendorSetup.intVendorSetupId,
-		intUnitMeasureId = UnitMeasure.intUnitMeasureId,
-		strVendorUOM = ISNULL(FilteredVendorSetup.strVendorRebateUnitMeasure, UnitMeasure.strUnitMeasure),
-		strEquipmentType = FilteredVendorSetup.strEquipmentType
-	FROM @tblFilteredVendorSetup FilteredVendorSetup
-	LEFT JOIN
-		@tblLogVendorSetup LogVendorSetup
-		ON
-			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-			AND
-			LogVendorSetup.intLogType IN (1,2,3,21,22,23,24)
-	INNER JOIN
-		tblICUnitMeasure UnitMeasure
-		ON
-			FilteredVendorSetup.strRebateUnitMeasure = UnitMeasure.strUnitMeasure
-	INNER JOIN
-	(
-		vyuAPVendor Vendor
-		INNER JOIN
-			tblVRVendorSetup VendorSetup 
-			ON
-				Vendor.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.strName = FilteredVendorSetup.strVendor
-	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,3,21,22,23,24) OR LogVendorSetup.intLogType IS NULL
-) AS SOURCE
-ON 
-TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
-AND
-TARGET.intUnitMeasureId = SOURCE.intUnitMeasureId 
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intVendorSetupId = SOURCE.intVendorSetupId,
-		intUnitMeasureId = SOURCE.intUnitMeasureId,
-		strVendorUOM = SOURCE.strVendorUOM,
-		strEquipmentType = SOURCE.strEquipmentType
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intVendorSetupId,
-		intUnitMeasureId,
-		strVendorUOM,
-		strEquipmentType,
-		intConcurrencyId
-	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intVendorSetupId,
-		intUnitMeasureId,
-		strVendorUOM,
-		strEquipmentType,
-		1
-	);
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorProduct ORDER BY sr.intVendorSetupId, sr.strVendorProduct) AS RowNumber
+   FROM @UniqueItems sr
+   WHERE sr.guiApiUniqueId = @guiApiUniqueId
+)
+DELETE FROM cte
+WHERE guiApiUniqueId = @guiApiUniqueId
+  AND RowNumber > 1;
+
+INSERT INTO tblICItemVendorXref (
+	  intItemId
+	, intVendorId
+	, intVendorSetupId
+	, strVendorProduct
+	, guiApiUniqueId
+	, intRowNumber
+	, dtmDateCreated
+	, intConcurrencyId
+)
+SELECT
+	  intItemId
+	, intVendorId
+	, intVendorSetupId
+	, strVendorProduct
+	, @guiApiUniqueId
+	, intRowNumber
+	, GETUTCDATE()
+	, 1
+FROM @UniqueItems
+
+-- Log successful imports
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Rebate Vendor Setup'
+    , strValue = v.strVendorId
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = vs.intRowNumber
+    , strMessage = 'The rebate vendor setup ' + ISNULL(v.strVendorId, '') + ' was imported successfully.'
+    , strAction = 'Create'
+FROM tblVRVendorSetup vs
+JOIN tblEMEntity e ON e.intEntityId = vs.intEntityId
+JOIN tblAPVendor v ON v.intEntityId = vs.intEntityId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+  AND NOT EXISTS(SELECT TOP 1 1 FROM @ForUpdates u WHERE u.strVendorNumber = v.strVendorId AND u.intRowNumber = vs.intRowNumber)
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item Mapping'
+    , strValue = i.strVendorProduct
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = vs.intRowNumber
+    , strMessage = 'The Item mapping ' + ISNULL(i.strVendorProduct, '') + ' was ' 
+		+ CASE WHEN updates.intItemId IS NOT NULL THEN 'updated' ELSE 'imported' END + ' successfully.'
+    , strAction = CASE WHEN updates.intItemId IS NOT NULL THEN 'Update' ELSE 'Create' END
+FROM tblICItemVendorXref i
+JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = i.intVendorSetupId
+OUTER APPLY (
+	SELECT TOP 1 i.intItemId
+	FROM @ItemForUpdates ux 
+	WHERE ux.intRowNumber = i.intRowNumber
+		AND ux.intItemId = i.intItemId
+		AND ux.intVendorSetupId = i.intVendorSetupId
+) updates
+WHERE i.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'UOM Mapping'
+    , strValue = u.strVendorUOM
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = vs.intRowNumber
+    , strMessage = 'The UOM mapping ' + ISNULL(u.strVendorUOM, '') + ' was ' 
+		+ CASE WHEN updates.intUnitMeasureId IS NOT NULL THEN 'updated' ELSE 'imported' END + ' successfully.'
+    , strAction = CASE WHEN updates.intUnitMeasureId IS NOT NULL THEN 'Update' ELSE 'Create' END
+FROM tblVRUOMXref u
+JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = u.intVendorSetupId
+OUTER APPLY (
+	SELECT TOP 1 u.intUnitMeasureId
+	FROM @UomForUpdates ux 
+	WHERE ux.intRowNumber = u.intRowNumber
+		AND ux.intUnitMeasureId = u.intUnitMeasureId
+		AND ux.intVendorSetupId = u.intVendorSetupId
+) updates
+WHERE u.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Vendor''s Category'
+    , strValue = c.strVendorDepartment
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = vs.intRowNumber
+   , strMessage = 'The Vendor''s Category mapping ' + ISNULL(c.strVendorDepartment, '') + ' was ' 
+		+ CASE WHEN updates.intCategoryId IS NOT NULL THEN 'updated' ELSE 'imported' END + ' successfully.'
+    , strAction = CASE WHEN updates.intCategoryId IS NOT NULL THEN 'Update' ELSE 'Create' END
+FROM tblICCategoryVendor c
+JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = c.intVendorSetupId
+OUTER APPLY (
+	SELECT TOP 1 u.intCategoryId
+	FROM @CategoryForUpdates u 
+	WHERE u.intRowNumber = c.intRowNumber
+		AND u.intCategoryId = c.intCategoryId
+		AND u.intVendorSetupId = c.intVendorSetupId
+) updates
+WHERE c.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Vendor Customer'
+    , strValue = xc.strVendorCustomer
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = xc.intRowNumber
+    , strMessage = 'The Vendor Customer mapping ' + ISNULL(xc.strVendorCustomer, '') + ' was ' 
+		+ CASE WHEN updates.strVendorCustomer IS NOT NULL THEN 'updated' ELSE 'imported' END + ' successfully.'
+    , strAction = CASE WHEN updates.strVendorCustomer IS NOT NULL THEN 'Update' ELSE 'Create' END
+FROM tblVRCustomerXref xc
+JOIN tblARCustomer c ON c.intEntityId = xc.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 u.strVendorCustomer
+	FROM @CustomerForUpdates u 
+	WHERE u.intRowNumber = xc.intRowNumber
+		AND u.intEntityId = xc.intEntityId
+		AND u.intVendorSetupId = xc.intVendorSetupId
+) updates
+WHERE xc.guiApiUniqueId = @guiApiUniqueId
+
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Rebate Vendor Setup'
+    , strValue = e.strName
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = vs.intRowNumber
+    , strMessage = 'The rebate vendor setup ' + ISNULL(e.strName, '') + ' was updated successfully.'
+    , strAction = 'Update'
+FROM tblVRVendorSetup vs
+JOIN tblEMEntity e ON e.intEntityId = vs.intEntityId
+JOIN tblAPVendor v ON v.intEntityId = vs.intEntityId
+JOIN @ForUpdates u ON u.strVendorNumber = v.strVendorId
+WHERE vs.guiApiUniqueId = @guiApiUniqueId
+
+UPDATE log
+SET log.intTotalRowsImported = r.intCount
+FROM tblApiImportLog log
+CROSS APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblICItem
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) r
+WHERE log.guiApiImportLogId = @guiLogId

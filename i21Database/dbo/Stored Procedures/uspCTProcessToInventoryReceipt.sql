@@ -110,11 +110,15 @@ AS
 				--CT-7100 (ECOM commented this line for ECOM) --								END,
 				--CT-7100 (ECOM commented this line for ECOM) --intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
-														THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
-																ISNULL(CD.dblBasis,0)
+														THEN	((ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
+																ISNULL(CD.dblBasis,0))  / CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = CAST(1 AS BIT)   THEN 100 ELSE 1 END) * ISNULL(CD.dblRate, 1 )
 														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
-				intCostUOMId				=	case when CD.intPricingTypeId = 2 then CD.intBasisUOMId else CD.intFXPriceUOMId end,
+				intCostUOMId				=	CASE WHEN CD.intPricingTypeId = 2 OR ISNULL(CD.intCurrencyExchangeRateId, 0) = 0 THEN 
+													CD.intBasisUOMId 
+												ELSE
+													CD.intFXPriceUOMId 
+												END,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
 				dblExchangeRate				=	1,
@@ -150,6 +154,8 @@ AS
 												AND	SK.intLocationId		=	CD.intCompanyLocationId
   LEFT  JOIN	tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
   LEFT  JOIN	tblSMCurrency				SY  ON	SY.intCurrencyID		=	CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
+	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
+	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CU.intMainCurrencyId
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		INSERT	INTO	@OtherCharges
@@ -367,7 +373,7 @@ AS
 			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM  #tmpAddItemReceiptResult	
 
 			DECLARE @intInventoryReceiptItemId	INT = NULL,
-					@dblQty						NUMERIC(18,6) = 0
+					@dblQty						NUMERIC(38,20) = 0
 
 			SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
 			FROM	tblICInventoryReceiptItem

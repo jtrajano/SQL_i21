@@ -51,6 +51,7 @@ AS
 			NM.strSampleTypeName,
 			CH.ysnLocalCurrency,
 			CH.ysnPrintCropYear,
+			CH.ysnSupplyPointContract,
 			CH.ysnQuantityAtHeaderLevel
 	FROM	tblCTContractHeader					CH
 	cross apply (select * from tblCTCompanyPreference) CP

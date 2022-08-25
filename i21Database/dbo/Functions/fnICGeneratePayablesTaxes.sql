@@ -193,7 +193,7 @@ BEGIN
 		FROM 
 			tblICInventoryReceiptTax ReceiptTax
 			CROSS APPLY (
-				SELECT TOP 1
+				SELECT 
 					v.intVoucherPayableId
 				FROM @voucherItems v
 			) voucherItems

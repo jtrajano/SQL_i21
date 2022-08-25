@@ -27,7 +27,7 @@ SELECT
 	,TL.strLocationName strTaxLocation
 	,CASE WHEN TL.strLocationName IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ysnOverrideTaxLocation
 	,RT.strTaxGroup
-	,CASE WHEN ISNULL(APBD.intTaxGroupId, 0) <> ISNULL(APBD.intOriginalTaxGroupId, 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ysnOverrideTaxGroup
+	,APBD.ysnOverrideTaxGroup
 	,RT.strCalculationMethod
 	,RT.strTaxCode
 	,strTaxAgency = RT.strTaxAgency

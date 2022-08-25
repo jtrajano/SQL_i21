@@ -1533,6 +1533,15 @@ BEGIN TRY
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 
+						--Check for Ticket In-Transit and make sure to change it back to spot Distribution
+						IF (SELECT TOP 1 ysnTicketInTransit FROM tblSCTicket WHERE intTicketId = @intTicketId) = 1
+						BEGIN
+							UPDATE tblSCTicket
+							SET  strDistributionOption = 'SPT'
+								,intStorageScheduleTypeId = -3
+							WHERE intTicketId = @intTicketId
+						END
+
 						---- Update contract schedule based on ticket schedule qty
 
 						IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT')

@@ -147,7 +147,7 @@
 	[intBorrowingFacilityLimitId]		INT												NULL,
 	[intBorrowingFacilityLimitDetailId]	INT												NULL,
 	[strBankReferenceNo]				NVARCHAR(100)									NULL,
-	[strBankTradeReference]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
+	[strBankTransactionId]				NVARCHAR(100)									NULL,
 	[dblLoanAmount]						NUMERIC(18, 6)									NULL,
 	[intBankValuationRuleId]			INT												NULL,
 	[strTradeFinanceComments]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS		NULL,
@@ -157,12 +157,13 @@
 	[strGoodsStatus]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
 	[strTicketNumbers]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
 	[strCustomerReferences]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
-	[dblFreightCharge]					NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
+	[dblFreightCharge]					NUMERIC(18, 6)									NULL		DEFAULT ((0)),
 	[intFreightCompanySegment]			INT												NULL,
 	[intFreightLocationSegment]			INT												NULL,
 	[intTaxLocationId]					INT												NULL,
 	[strTaxPoint]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
-	[strSourcedFrom]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
+	[strSourcedFrom]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
+	[dblSurcharge]						NUMERIC(18, 6)									NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
@@ -251,6 +252,9 @@ CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmPostDate]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmDate]
 	ON [dbo].[tblARInvoice] ([dtmDate])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intTransactionId]
+	ON [dbo].[tblARInvoice] ([intTransactionId])
 
 
 --TRIGGERS INSERT

@@ -743,6 +743,12 @@ BEGIN
 			GROUP BY C.intTaxGroupId
 		) generatedTax
 	END
+
+	DECLARE @payableIds AS Id
+	INSERT INTO @payableIds
+	SELECT intNewPayableId
+	FROM @insertedData
+	EXEC uspAPUpdatePayableTaxForTexasLoadingFee @payableIds
 END
 
 IF @transCount = 0

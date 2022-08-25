@@ -42,6 +42,8 @@ SELECT
 	, strPhysicalItem 		= PhysicalItem.strItemNo
 	, strPatronageCategory 	= PatronageCategory.strCategoryCode
 	, strDirectSaleCategory	= PatronageDirect.strCategoryCode
+ 	, intSubcategoriesId = subcategory.intSubcategoriesId  
+  	, strSubCategory  = subcategory.strSubCategory
 	, strGrade				= Grade.strDescription
 	, strOrigin 			= Origin.strDescription
 	, strProductType		= ProductType.strDescription

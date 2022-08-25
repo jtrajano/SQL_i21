@@ -36,6 +36,7 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	SELECT DISTINCT [strSourceTransaction]		= 'Transport Load'
+		,[strType] 								= CASE WHEN DD.intSiteId IS NULL THEN 'Transport Delivery' ELSE 'Tank Delivery' END
 		,[intLoadDistributionHeaderId]			= DH.intLoadDistributionHeaderId
 		,[intLoadDistributionDetailId]			= DD.intLoadDistributionDetailId
 		,[intSourceId]							= DH.intLoadDistributionHeaderId
@@ -44,7 +45,11 @@ BEGIN TRY
 		,[intEntityCustomerId]					= DH.intEntityCustomerId
 		,[intCompanyLocationId]					= DH.intCompanyLocationId
 		,[intCurrencyId]						= NULL
-		,[intTermId]							= ISNULL(EL.intTermsId, Customer.intTermsId)
+		,[intTermId]                            = CASE WHEN TMS.intDeliveryTermID IS NOT NULL THEN TMS.intDeliveryTermID
+                                                    WHEN EL.intTermsId IS NOT NULL THEN EL.intTermsId
+                                                    WHEN TPPI.intTermId IS NOT NULL THEN TPPI.intTermId
+													WHEN TPPC.intTermId IS NOT NULL THEN TPPC.intTermId
+                                                    ELSE Customer.intTermsId END
 		,[dtmDate]								= DH.dtmInvoiceDateTime
 		,[dtmDueDate]							= NULL
 		,[dtmShipDate]							= DH.dtmInvoiceDateTime
@@ -137,9 +142,9 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[intTicketId]							= NULL
 		,[intTicketHoursWorkedId]				= NULL
-		,[intSiteId]							= NULL
+		,[intSiteId]							= DD.intSiteId
 		,[strBillingBy]							= ''
-		,[dblPercentFull]						= NULL
+		,[dblPercentFull]						= CASE WHEN DD.intSiteId IS NULL THEN NULL ELSE 100 END
 		,[dblNewMeterReading]					= NULL
 		,[dblPreviousMeterReading]				= NULL
 		,[dblConversionFactor]					= NULL
@@ -155,12 +160,13 @@ BEGIN TRY
 		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
-		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
+		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NOT NULL AND BlendingIngredient.intItemId IS NOT NULL THEN 1 ELSE 0 END
 		,dblMinimumUnits						= DD.dblMinimumUnits
 		,dblComboFreightRate					= DD.dblComboFreightRate
 		,ysnComboFreight						= DD.ysnComboFreight
 		,dblComboMinimumUnits					= DD.dblComboMinimumUnits
 		,dblComboSurcharge						= DD.dblComboSurcharge
+		,intInventoryReceiptId					= TR.intInventoryReceiptId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -209,14 +215,25 @@ BEGIN TRY
 		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
 		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
-		AND BlendIngredient.strType != 'Other Charge'
+		--AND ISNULL(BlendIngredient.strType, '') != 'Other Charge'
 	) BlendingIngredient ON BlendingIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = '' AND BlendingIngredient.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
 			AND CustomerFreight.intCategoryId = Item.intCategoryId
 			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendingIngredient.strZipCode)
+	LEFT JOIN tblTMSite TMS ON TMS.intSiteID = DD.intSiteId
+	
+	LEFT JOIN tblSMTermPullPoint TPPI ON TPPI.strPullPoint = CASE WHEN TR.strOrigin = 'Location' THEN 'Company Location' ELSE TR.strOrigin END
+    AND TPPI.intCategoryId = IC.intCategoryId AND TPPI.intItemId = DD.intItemId
+	
+	LEFT JOIN tblSMTermPullPoint TPPC ON TPPC.strPullPoint = CASE WHEN TR.strOrigin = 'Location' THEN 'Company Location' ELSE TR.strOrigin END
+    AND TPPC.intCategoryId = IC.intCategoryId
+
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
+		-- AND (TL.intMobileLoadHeaderId IS NULL
+		-- 	OR (TL.intMobileLoadHeaderId IS NOT NULL AND DH.ysnMobileInvoice = 0)
+		-- )
 
 	-- Concatenate PO Number, BOL Number, and Comments in cases there are different values and they are not used as a grouping option
 	DECLARE @concatPONumber NVARCHAR(MAX) = ''
@@ -590,7 +607,8 @@ BEGIN TRY
 	WHERE (ISNULL(dblComboFreightRate, 0) != 0 AND ysnFreightInPrice != 1 AND ysnComboFreight = 1)
 
 	INSERT INTO #tmpSourceTableFinal(
-		[intId] 
+		[intId]
+		,[strType] 
 		,[strSourceTransaction]
 		,[intLoadDistributionDetailId]
 		,[intSourceId]
@@ -671,9 +689,11 @@ BEGIN TRY
 		,[ysnBlended]
 		,[ysnComboFreight]
 		,[dblComboFreightRate]
+		,[intInventoryReceiptId]
 	)
 	SELECT
 		0 AS intId
+		,[strType] 								= IE.strType
 		,[strSourceTransaction]					= IE.strSourceTransaction
 		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		,[intSourceId]							= IE.intSourceId
@@ -741,9 +761,9 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[intTicketId]							= NULL
 		,[intTicketHoursWorkedId]				= NULL
-		,[intSiteId]							= IE.intSiteId
+		,[intSiteId]							= NULL
 		,[strBillingBy]							= IE.strBillingBy
-		,[dblPercentFull]						= IE.dblPercentFull
+		,[dblPercentFull]						= NULL--IE.dblPercentFull
 		,[dblNewMeterReading]					= NULL
 		,[dblPreviousMeterReading]				= NULL
 		,[dblConversionFactor]					= IE.dblConversionFactor
@@ -757,14 +777,16 @@ BEGIN TRY
 		,[ysnBlended]							= IE.ysnBlended
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
+		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1) AND ysnComboFreight = 0
 	UNION ALL
 	SELECT DISTINCT
 		0 AS intId
+		,[strType] 								= IE.strType
 		,[strSourceTransaction]					= IE.strSourceTransaction
-		,[intLoadDistributionDetailId]			= NULL
+		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		,[intSourceId]							= IE.intSourceId
 		,[strSourceId]							= IE.strSourceId
 		,[intInvoiceId]							= IE.intInvoiceId --NULL Value will create new invoice
@@ -830,9 +852,9 @@ BEGIN TRY
 		,[intShipmentPurchaseSalesContractId]	= NULL
 		,[intTicketId]							= NULL
 		,[intTicketHoursWorkedId]				= NULL
-		,[intSiteId]							= IE.intSiteId
+		,[intSiteId]							= NULL
 		,[strBillingBy]							= IE.strBillingBy
-		,[dblPercentFull]						= IE.dblPercentFull
+		,[dblPercentFull]						= NULL --IE.dblPercentFull
 		,[dblNewMeterReading]					= NULL
 		,[dblPreviousMeterReading]				= NULL
 		,[dblConversionFactor]					= IE.dblConversionFactor
@@ -846,6 +868,7 @@ BEGIN TRY
 		,[ysnBlended]							= IE.ysnBlended
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
+		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1 AND ysnComboFreight = 1)
@@ -861,6 +884,7 @@ BEGIN TRY
 
 	INSERT INTO @EntriesForInvoice(
 		 [strSourceTransaction]
+		,[strType]
 		,[intSourceId]
 		,[strSourceId]
 		,[intInvoiceId]
@@ -935,6 +959,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
+		,[intLoadDistributionDetailId]
 		,[intTruckDriverId]
 		,[intTruckDriverReferenceId]
 		,[ysnImpactInventory]
@@ -943,6 +968,7 @@ BEGIN TRY
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
+		,[strType]								= TR.strType
 		,[intSourceId]							= TR.intSourceId
 		,[strSourceId]							= TR.strSourceId
 		,[intInvoiceId]							= TR.intInvoiceId
@@ -950,7 +976,7 @@ BEGIN TRY
 		,[intCompanyLocationId]					= TR.intCompanyLocationId
 		,[intCurrencyId]						= TR.intCurrencyId
 		,[intTermId]							= TR.intTermId
-		,[dtmDate]								= TR.dtmDate
+		,[dtmDate]								= CAST(TR.dtmDate AS DATE) 
 		,[dtmDueDate]							= TR.dtmDueDate
 		,[dtmShipDate]							= TR.dtmShipDate
 		,[intEntitySalespersonId]				= TR.intEntitySalespersonId
@@ -1017,6 +1043,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= TR.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= TR.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
+		,[intLoadDistributionDetailId]			= TR.intLoadDistributionDetailId
 		,intTruckDriverId						= TR.intTruckDriverId
 		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
 		,ysnImpactInventory                     = ISNULL(TR.ysnImpactInventory, 0)
@@ -1106,7 +1133,8 @@ BEGIN TRY
 			,[ysnClearDetailTaxes]					
 			,[intTempDetailIdForTaxes]
 			,[strBOLNumberDetail]
-			,[ysnBlended])
+			,[ysnBlended]
+			,[intLoadDistributionDetailId])
 		SELECT
 			[strSourceTransaction]					= IE.strSourceTransaction
 			,[intSourceId]							= IE.intSourceId
@@ -1116,7 +1144,7 @@ BEGIN TRY
 			,[intCompanyLocationId]					= IE.intCompanyLocationId
 			,[intCurrencyId]						= IE.intCurrencyId
 			,[intTermId]							= IE.intTermId
-			,[dtmDate]								= IE.dtmDate
+			,[dtmDate]								= CAST(IE.dtmDate AS DATE) 
 			,[dtmDueDate]							= IE.dtmDueDate
 			,[dtmShipDate]							= IE.dtmShipDate
 			,[intEntitySalespersonId]				= IE.intEntitySalespersonId
@@ -1171,9 +1199,9 @@ BEGIN TRY
 			,[intShipmentPurchaseSalesContractId]	= NULL
 			,[intTicketId]							= NULL
 			,[intTicketHoursWorkedId]				= NULL
-			,[intSiteId]							= IE.intSiteId
+			,[intSiteId]							= NULL
 			,[strBillingBy]							= IE.strBillingBy
-			,[dblPercentFull]						= IE.dblPercentFull
+			,[dblPercentFull]						= NULL --IE.dblPercentFull
 			,[dblNewMeterReading]					= NULL
 			,[dblPreviousMeterReading]				= NULL
 			,[dblConversionFactor]					= IE.dblConversionFactor
@@ -1184,6 +1212,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
+			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnComboFreight = 0 AND IE.intId > 0)
@@ -1197,7 +1226,7 @@ BEGIN TRY
 			,[intCompanyLocationId]					= IE.intCompanyLocationId
 			,[intCurrencyId]						= IE.intCurrencyId
 			,[intTermId]							= IE.intTermId
-			,[dtmDate]								= IE.dtmDate
+			,[dtmDate]								= CAST(IE.dtmDate AS DATE) 
 			,[dtmDueDate]							= IE.dtmDueDate
 			,[dtmShipDate]							= IE.dtmShipDate
 			,[intEntitySalespersonId]				= IE.intEntitySalespersonId
@@ -1265,6 +1294,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
+			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnComboFreight = 1 AND IE.intId > 0)
@@ -1341,6 +1371,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[intLoadDistributionDetailId]
 	)
 	SELECT 
 		[strSourceTransaction]					= IE.strSourceTransaction
@@ -1412,6 +1443,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
 		,[ysnImpactInventory]                   = ISNULL(IE.ysnImpactInventory,0)
 		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
+		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]
 		,[strSourceId]
@@ -1478,8 +1510,40 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[intLoadDistributionDetailId]
 
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
+
+	-- CHECK IF INTERNAL CARRIER
+	IF EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice E
+	LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
+	WHERE E.intLoadDistributionHeaderId IS NOT NULL AND S.strFreightBilledBy = 'Internal Carrier')
+	BEGIN
+		DECLARE @dblTotalFreightCharge NUMERIC(18,6) = NULL
+		DECLARE @dblTotalSurcharge NUMERIC(18,6) = NULL
+		
+		SELECT @dblTotalFreightCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
+		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
+		INNER JOIN tblICItem II ON RC.intChargeId = II.intItemId
+		WHERE STF.intId != 0 AND II.strCostType = 'Freight'
+
+		SELECT @dblTotalSurcharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
+		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
+		INNER JOIN tblICItem II ON RC.intChargeId = II.intItemId
+		WHERE STF.intId != 0 AND II.strCostType = 'Other Charges'
+
+		UPDATE E SET E.intFreightCompanySegment = S.intCompanySegmentId
+		, E.intFreightLocationSegment = S.intProfitCenterId
+		, E.dblFreightCharge = @dblTotalFreightCharge
+		, E.dblSurcharge = @dblTotalSurcharge
+		FROM @EntriesForInvoice E
+		LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
+		WHERE E.intId = (
+			SELECT TOP 1 intId FROM @EntriesForInvoice EI
+			LEFT JOIN tblSMShipVia SI ON SI.intEntityId = EI.intShipViaId
+			WHERE EI.intLoadDistributionHeaderId IS NOT NULL AND SI.strFreightBilledBy = 'Internal Carrier'
+		)
+	END
 
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice

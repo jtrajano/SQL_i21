@@ -44,8 +44,9 @@ SELECT TL.intLoadHeaderId
 	, strShipVia = c.strName
 	, strSeller = d.strName
 	, strStateName = e.strStateName
-	, strTractor = dr.strData
+	, strTractor = smtr.strTruckNumber
 	, strSalesUnit = NULL
+	, strInvoiceType = NULL
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityVendorId] = TR.intTerminalId
@@ -60,6 +61,7 @@ left join tblEMEntity c on c.intEntityId = TL.intShipViaId
 left join tblEMEntity d on d.intEntityId = TL.intSellerId
 left join tblTRState e on e.intStateId = TL.intStateId
 left join tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
+left join tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
 
 
 UNION ALL
@@ -102,8 +104,9 @@ SELECT TL.intLoadHeaderId
 	, strShipVia = c.strName
 	, strSeller = d.strName
 	, strStateName = e.strStateName
-	, strTractor = dr.strData
+	, strTractor = smtr.strTruckNumber
 	, strSalesUnit = EL.strSaleUnits
+	, strInvoiceType = Invoice.strType
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
@@ -118,6 +121,7 @@ left join tblEMEntity c on c.intEntityId = TL.intShipViaId
 left join tblEMEntity d on d.intEntityId = TL.intSellerId
 left join tblTRState e on e.intStateId = TL.intStateId
 left join tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
+left join tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
 left join vyuTRLinkedReceipts Receipts ON Receipts.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 -- LEFT JOIN(
 -- 	SELECT DISTINCT intLoadDistributionDetailId
