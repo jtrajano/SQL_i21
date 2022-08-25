@@ -351,7 +351,7 @@ BEGIN TRY
 			UPDATE @CDTableUpdate SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
 
 			-- RECALCULATE Cost Term
-			IF (ISNULL(@intCostTermId, 0) = 0)
+			IF (ISNULL(@intCostTermId, 0) <> 0)
 			BEGIN
 				DECLARE @intCommodityId INT
 					, @intItemId INT
