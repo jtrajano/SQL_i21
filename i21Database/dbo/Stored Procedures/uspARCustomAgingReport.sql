@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE [dbo].[uspARCustomAgingReport]
+CREATE PROCEDURE [dbo].[uspARCustomAgingReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
