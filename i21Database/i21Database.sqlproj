@@ -10877,6 +10877,7 @@
     <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
