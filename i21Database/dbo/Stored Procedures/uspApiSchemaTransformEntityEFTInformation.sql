@@ -3,7 +3,8 @@
     @guiLogId		UNIQUEIDENTIFIER
 AS
 
-DECLARE @entityName nvarchar(100), @bankName nvarchar(100), 
+DECLARE @entityName nvarchar(100), @entityNo nvarchar(100), 
+		@bankName nvarchar(100), 
 		@currencyName nvarchar(100), @strBankAccountNumber nvarchar(100),
 		@strDefault nvarchar(100), @strIBAN nvarchar(100), 
 		@strSwift nvarchar(11), @strBICCode nvarchar(8), 
@@ -43,7 +44,7 @@ DECLARE @withError				BIT;
 DECLARE @defaultExist			SMALLINT;
 
 DECLARE StagingCursor CURSOR LOCAL FOR 
-SELECT	intRowNumber,strEntityName, strBankName, strCurrency, strBankAccountNumber, strDefault, strIBAN, strSwift, strBICCode, strBranchCode, strIntermediaryBank, strIntermediarySwiftCode,
+SELECT	intRowNumber,strEntityName, strEntityNo, strBankName, strCurrency, strBankAccountNumber, strDefault, strIBAN, strSwift, strBICCode, strBranchCode, strIntermediaryBank, strIntermediarySwiftCode,
 		strIntermediaryBICCode, strIntermediaryIBAN, strNationalBankIdentifier, strComment, strIntermediaryBankAddress, strFiftySevenFormat, strFiftySixFormat, strPrintNotifications,
 		strAccountType, strAccountClassification, strEffectiveDate, strActive, strPullARBy, strPullTaxSeparately, strRefundBudgetCredits, strPrenoteSent, strDetailsOfCharges
 FROM	tblApiSchemaEntityEFTInformation
@@ -56,7 +57,7 @@ PIVOT	(MIN([varPropertyValue]) FOR [strPropertyName] IN (Overwrite, StopOnError)
 
 OPEN	StagingCursor 
 FETCH NEXT FROM StagingCursor INTO 
-		@intRowNo, @entityName, @bankName, @currencyName, @strBankAccountNumber, @strDefault, @strIBAN, @strSwift, @strBICCode, @strBranchCode, @strIntermediaryBank, @strIntermediarySwiftCode,
+		@intRowNo, @entityName, @entityNo, @bankName, @currencyName, @strBankAccountNumber, @strDefault, @strIBAN, @strSwift, @strBICCode, @strBranchCode, @strIntermediaryBank, @strIntermediarySwiftCode,
 		@strIntermediaryBICCode, @strIntermediaryIBAN, @strNationalBankIdentifier, @strComment, @strIntermediaryBankAddress, @strFiftySevenFormat, @strFiftySixFormat, @strPrintNotifications,
 		@strAccountType, @strAccountClassification, @strEffectiveDate, @strActive, @strPullARBy, @strPullTaxSeparately, @strRefundBudgetCredits, @strPrenoteSent, @strDetailsOfCharges
 
@@ -71,13 +72,14 @@ BEGIN
 	FROM	tblEMEntity AS en
 			INNER JOIN tblEMEntityToContact AS en_tc ON
 			en.intEntityId = en_tc.intEntityId
-	WHERE	strName = @entityName;
+	WHERE	en.strName = @entityName AND
+			en.strEntityNo = @entityNo;
 
-	SELECT	@intBankId = intBankId
+	SELECT	distinct top 1 @intBankId = intBankId
 	FROM	tblCMBank
 	WHERE	strBankName = @bankName;
 
-	SELECT	@intCurrencyId = intCurrencyID
+	SELECT	distinct top 1 @intCurrencyId = intCurrencyID
 	FROM	tblSMCurrency
 	WHERE	strCurrency = @currencyName;
 
@@ -85,7 +87,7 @@ BEGIN
 	SET @intEntityEFTHeaderId = NULL;
 
 	-- GET EFT HEADER ID
-	SELECT	@intEntityEFTHeaderId = intEntityEFTHeaderId
+	SELECT	distinct top 1 @intEntityEFTHeaderId = intEntityEFTHeaderId
 	FROM	tblEMEntityEFTHeader
 	WHERE	intEntityId = @intEntityId;
 
@@ -95,7 +97,7 @@ BEGIN
 	IF @intEntityId IS NULL
 	BEGIN 
 		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField , strValue, strLogLevel, strStatus, intRowNo, strMessage)
-		VALUES(NEWID(),  @guiLogId, 'Entity Name', @entityName, 'Error', 'Failed', @intRowNo, 'Entity Name does not exist in database');
+		VALUES(NEWID(),  @guiLogId, 'Entity Name/No', concat(@entityName, '/', @entityNo), 'Error', 'Failed', @intRowNo, 'Entity does not exist. Please check provided entity name and entity no');
 		SET @withError = 1;
 	END
 
@@ -379,8 +381,8 @@ BEGIN
 		BREAK;
 
 	FETCH NEXT FROM StagingCursor INTO 
-		@intRowNo, @entityName, @bankName, @currencyName, @strBankAccountNumber, @strDefault, @strIBAN, @strSwift, @strBICCode, @strBranchCode, @strIntermediaryBank, @strIntermediarySwiftCode,
+		@intRowNo, @entityName, @entityNo, @bankName, @currencyName, @strBankAccountNumber, @strDefault, @strIBAN, @strSwift, @strBICCode, @strBranchCode, @strIntermediaryBank, @strIntermediarySwiftCode,
 		@strIntermediaryBICCode, @strIntermediaryIBAN, @strNationalBankIdentifier, @strComment, @strIntermediaryBankAddress, @strFiftySevenFormat, @strFiftySixFormat, @strPrintNotifications,
 		@strAccountType, @strAccountClassification, @strEffectiveDate, @strActive, @strPullARBy, @strPullTaxSeparately, @strRefundBudgetCredits, @strPrenoteSent, @strDetailsOfCharges
-END 
+END
 
