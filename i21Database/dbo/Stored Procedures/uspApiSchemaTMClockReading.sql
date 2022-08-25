@@ -54,7 +54,7 @@ BEGIN
 
 		SELECT @intDegreeDayReadingId = intDegreeDayReadingID FROM tblTMDegreeDayReading WHERE intClockID = @intClockId AND dtmDate = @dtmReadingDate
 
-		IF(@intDegreeDayReadingId IS NOT NULL)
+		IF(@intDegreeDayReadingId IS NULL)
 		BEGIN
 			INSERT INTO tblTMDegreeDayReading (intClockID, dtmDate, intDegreeDays, dblAccumulatedDegreeDay, guiApiUniqueId, intRowNumber)
 			VALUES (@intClockId, @dtmReadingDate, @intDegreeDay, @intAccumulatedDegreeDay, @guiLogId, @intRowNumber)
