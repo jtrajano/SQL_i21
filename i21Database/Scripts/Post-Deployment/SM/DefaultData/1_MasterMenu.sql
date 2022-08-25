@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	   
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Regions' AND strModuleName = 'System Manager')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Terminal' AND strModuleName = 'Transports')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6417,11 +6417,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Combo Fre
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ComboFreight', intSort = 4 WHERE strMenuName = 'Combo Freight' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Terminal' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Terminals' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Fuel Terminal', N'Transports', @TransportsMaintenanceParentMenuId, N'Fuel Terminal', N'Maintenance', N'Screen', N'Transports.view.FuelTerminal?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Fuel Terminals', N'Transports', @TransportsMaintenanceParentMenuId, N'Fuel Terminals', N'Maintenance', N'Screen', N'Transports.view.FuelTerminal?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.FuelTerminal?showSearch=true', intSort = 5 WHERE strMenuName = 'Fuel Terminal' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.FuelTerminal?showSearch=true', intSort = 5 WHERE strMenuName = 'Fuel Terminals' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
