@@ -349,7 +349,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
-	,[dblStandardWeight]					= CASE WHEN strSalesOrderNumber IS NOT NULL  THEN ARSI.dblStandardWeight ELSE @ZeroDecimal END
+	,[dblStandardWeight]					= ARSI.dblStandardWeight
 FROM vyuARShippedItems ARSI
 LEFT JOIN(
  SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
@@ -476,7 +476,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
-	,[dblStandardWeight]					= @ZeroDecimal
+	,[dblStandardWeight]					= SOD.dblStandardWeight
 FROM tblICInventoryShipment ICIS
 INNER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
 							 AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
