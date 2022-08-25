@@ -7479,6 +7479,7 @@
     <Build Include="dbo\Tables\tblPRTypeTaxStatePSDCode.sql" />
     <Build Include="dbo\Views\vyuCRMLostRevenueSalesperson.sql" />
     <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
+    <Build Include="dbo\Functions\fnGLGetCommonSettings.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
     <Build Include="dbo\Views\vyuAPVoucherCheckOffDetail.sql" />
     <Build Include="dbo\User Defined Types\TFReportTransaction.sql" />
