@@ -87,7 +87,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM(((dblTotal + dblTax) * dblRate) / (dblTotal + dblTax)) dblAverageExchangeRate FROM tblAPBillDetail C WHERE C.intBillId = B.intId
+		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM((dblTotal + dblTax) * dblRate) / SUM((dblTotal + dblTax)) dblAverageExchangeRate FROM tblAPBillDetail C WHERE C.intBillId = B.intId
 	) DetailTotal
 	WHERE DetailTotal.dblTotal IS NOT NULL
 
