@@ -37,15 +37,15 @@
 
 GO
 
-CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
-ON [dbo].[tblGLJournal]
-INSTEAD OF DELETE 
-AS
-BEGIN
-    DELETE R
-    FROM [DELETED] J JOIN tblSMRecurringTransaction R ON J.intJournalId = R.intTransactionId AND J.strJournalId = R.strTransactionNumber
-    WHERE J.ysnRecurringTemplate = 1
-END
+--CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
+--ON [dbo].[tblGLJournal]
+--INSTEAD OF DELETE 
+--AS
+--BEGIN
+--    DELETE R
+--    FROM [DELETED] J JOIN tblSMRecurringTransaction R ON J.intJournalId = R.intTransactionId AND J.strJournalId = R.strTransactionNumber
+--    WHERE J.ysnRecurringTemplate = 1
+--END
 
 
 GO

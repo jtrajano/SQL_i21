@@ -28,6 +28,7 @@ DECLARE @ZeroDecimal					DECIMAL(18,6) = 0
 	  , @ysnHasPriceFixation			BIT = 0
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
+--SET @dtmShipmentDate			 = ISNULL(CAST(@dtmShipmentDate AS DATE), @DateOnly)
 
 DECLARE
 	 @TransactionType			NVARCHAR(25)
@@ -228,9 +229,6 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[dblCurrencyExchangeRate]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
-	,[dblStandardWeight]
-	,[strTaxPoint]
-	,[intTaxLocationId]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -270,7 +268,7 @@ SELECT
 	,[ysnResetDetails]						= 0
 	,[ysnRecap]								= 0
 	,[ysnPost]								= 0
-
+																																																		
 	,[intInvoiceDetailId]					= NULL
 	,[intItemId]							= ARSI.[intItemId]
 	,[ysnInventory]							= 1
@@ -351,9 +349,6 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
-	,[dblStandardWeight]					= ARSI.dblStandardWeight
-	,[strTaxPoint]							= ARSI.strTaxPoint
-	,[intTaxLocationId]						= ARSI.intTaxLocationId
 FROM vyuARShippedItems ARSI
 LEFT JOIN(
  SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
@@ -480,9 +475,6 @@ SELECT
 	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
-	,[dblStandardWeight]					= SOD.dblStandardWeight
-	,[strTaxPoint]							= NULL
-	,[intTaxLocationId]						= NULL
 FROM tblICInventoryShipment ICIS
 INNER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
 							 AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
@@ -608,9 +600,6 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ICISI.[dblForexRate]
 	,[intSubCurrencyId]						= NULL
 	,[dblSubCurrencyRate]					= @ZeroDecimal
-	,[dblStandardWeight]					= @ZeroDecimal
-	,[strTaxPoint]							= NULL
-	,[intTaxLocationId]						= NULL
 FROM 
 	tblICInventoryShipment ICIS
 INNER JOIN
