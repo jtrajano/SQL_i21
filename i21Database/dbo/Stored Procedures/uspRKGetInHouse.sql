@@ -21,7 +21,7 @@ BEGIN
 	SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
 		, @intCommodityStockUOMId = intUnitMeasureId
 	FROM tblICCommodityUnitMeasure
-	WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1
+	WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1 
 
 	SELECT * 
 	INTO #tmpDelayedPricing
@@ -67,11 +67,14 @@ BEGIN
 		, strTransactionId  = strTransactionNumber
 		, intTransactionId = intTransactionRecordHeaderId
 		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
-			WHEN (SELECT TOP 1 1 FROM #tmpDelayedPricing WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
+			WHEN (SELECT TOP 1 1 FROM #tmpDelayedPricing dp
+					WHERE dp.intTransactionRecordId = CompOwn.intTransactionRecordId
+					AND dp.strTransactionType = CompOwn.strTransactionType) = 1 THEN 'DP'
 			WHEN CompOwn.intContractHeaderId IS NOT NULL 
-				THEN ISNULL(
+				THEN ISNULL(ISNULL(
 			     (SELECT TOP 1 strDistributionOption FROM tblSCTicket WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId),
 				 (SELECT TOP 1 'CNT' FROM tblSCTicketContractUsed WHERE intTicketId = CompOwn.intTicketId and intContractDetailId = CompOwn.intContractDetailId) )
+				 , ST.strStorageTypeCode)
 			WHEN CompOwn.strTransactionType = 'Inventory Adjustment' THEN 'ADJ'
 			WHEN CompOwn.strTransactionType IN ('Inventory Receipt','Inventory Shipment') AND CompOwn.intContractHeaderId IS NULL AND CompOwn.intTicketId IS NULL THEN ''
 			ELSE ISNULL(ST.strStorageTypeCode, ISNULL(TV.strDistributionOption, '')) END
