@@ -9,7 +9,7 @@ declare @queryResult cursor
 		,@strRequestId nvarchar(20)
 		,@dblRequest numeric(18,6)
 		,@dblRequestToInsert numeric(18,6)
-		,@dblTotalHours numeric(18,6)
+		,@dblTotalHours numeric(18,6) = 0
 		,@intNoOfDays int
 		
 		,@strPRDayName nvarchar(20)
@@ -120,18 +120,26 @@ BEGIN
 
 		--time off was edited, delete the record
 		--if time off hours is changed, delete the record
+		--there is a more than 8 hours 
 		if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId 
 			and intPRNoOfDays != @intNoOfDays 
 		) or not exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId 
 			and dtmPRDate != @dtmDateFrom 
 		) or @dblTotalHours <> @dblRequest
+		or exists (
+			select top 1 ''
+			from tblHDTimeOffRequest
+			where intPREntityEmployeeId = @intEntityEmployeeId and 
+				  intPRTimeOffRequestId = @intTimeOffRequestId and
+				  dblPRRequest > 8 
+		)
 		begin
 			delete from tblHDTimeOffRequest
 			where intPRTimeOffRequestId = @intTimeOffRequestId 			
 		end
 
 		set @intI = 0;
-		while @intI < @intNoOfDays
+		while @intI < @intNoOfDays 
 		begin
 			set @dtmPRDate = DATEADD(day,@intI,@dtmDateFrom);
 			set @strPRDayName = DATENAME(WEEKDAY,@dtmPRDate);
@@ -149,7 +157,7 @@ BEGIN
 					if (sign(@dblRequest) = -1)
 					begin
 						--set @dblRequest = @intFixEightHours;
-						set @dblRequestToInsert = @dblRequest * -1;
+						set @dblRequestToInsert = @intFixEightHours - ( @dblRequest * -1 );
 					end
 					if (sign(@dblRequest) = 0)
 					begin
