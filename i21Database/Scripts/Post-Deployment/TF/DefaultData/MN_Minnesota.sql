@@ -173,7 +173,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'PAF-1', strFormName = 'Alternative Fuels Tax Return', strScheduleCode = '5Q', strScheduleName = 'Taxable Sales of Alternative Fuels', strType = 'CNG', strNote = 'PAF-1 Ln 2 Col A', strTransactionType = 'Invoice', intSort = 910, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 232052, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'PAF-1', strFormName = 'Alternative Fuels Tax Return', strScheduleCode = '5Q', strScheduleName = 'Taxable Sales of Alternative Fuels', strType = 'LNG', strNote = 'PAF-1 Ln 3 Col A', strTransactionType = 'Invoice', intSort = 920, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 232053, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'PAF-1', strFormName = 'Alternative Fuels Tax Return', strScheduleCode = 'PAF-1', strScheduleName = '', strType = '', strNote = 'Main Form', strTransactionType = '', intSort = 930, strStoredProcedure = '', intMasterId = 232054, intComponentTypeId = 2
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MN E File', strFormName = 'MN Text File', strScheduleCode = '', strScheduleName = '', strType = '', strNote = 'MN Text File', strTransactionType = '', intSort = 1000, strStoredProcedure = '', intMasterId = 232055, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MN E File', strFormName = 'MN Text File', strScheduleCode = 'E-file', strScheduleName = '', strType = '', strNote = 'MN Text File', strTransactionType = '', intSort = 1000, strStoredProcedure = '', intMasterId = 232055, intComponentTypeId = 4
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -1550,7 +1550,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 		, intFrequency
 		, intMasterId
 	)
-	SELECT intFilingPacketId = 0, strFormCode = 'MN E File', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 232958
+	SELECT intFilingPacketId = 0, strFormCode = 'MN E File', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 232958
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'PAF-1', strScheduleCode = 'PAF-1', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 232957
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'PAF-1', strScheduleCode = '5Q', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 232955
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'PAF-1', strScheduleCode = '5Q', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 232956
