@@ -32,7 +32,11 @@ FROM tblGLAccount WITH(NOLOCK)
 WHERE strAccountId = @strAccountId
 
 IF @ysnActive = 0
+BEGIN
 	SET @strErrorMsg = 'Default AR Account ' + @strAccountId + ' for company location ' + @strSalesCompanyLocation + ' is either not existing or inactive.'
+	SET @intAccountId = NULL
+	SET @strAccountId = NULL
+END
 
 IF EXISTS(SELECT TOP 1 ysnAllowSingleLocationEntries FROM tblARCompanyPreference WHERE ISNULL(ysnAllowSingleLocationEntries, 0) = 1)
 BEGIN
