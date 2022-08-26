@@ -984,6 +984,8 @@
     <Build Include="dbo\Tables\tblHDTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
+	<Build Include="dbo\Tables\tblApiSchemaTMRoute.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMRoute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
