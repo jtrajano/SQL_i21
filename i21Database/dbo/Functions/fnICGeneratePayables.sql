@@ -117,9 +117,6 @@ RETURNS @table TABLE
 , [intBankValuationRuleId]			INT NULL --OVERRIDE FACILITY VALUATION
 , [strComments]						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --COMMENTS
 
-, [strTaxPoint]						NVARCHAR(50) NULL
-, [intTaxLocationId]				INT NULL 
-, [ysnOverrideTaxGroup]				BIT NULL 
 )
 AS
 BEGIN
@@ -384,10 +381,6 @@ SELECT DISTINCT
 	, [strReferenceNo]					= A.strReferenceNo
 	, [intBankValuationRuleId]			= A.intOverrideFacilityValuation
 	, [strComments]						= A.strComments
-	, [strTaxPoint]						= A.strTaxPoint
-	, [intTaxLocationId]				= A.intTaxLocationId
-	, [ysnOverrideTaxGroup]				= B.ysnOverrideTaxGroup
-
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C 
@@ -855,9 +848,6 @@ SELECT DISTINCT
 		, [strReferenceNo]					= A.[strReferenceNo]
 		, [intBankValuationRuleId]			= A.[intBankValuationRuleId]
 		, [strComments]						= A.[strComments]
-		, [strTaxPoint]						= A.strTaxPoint
-		, [intTaxLocationId]				= A.intTaxLocationId
-		, [ysnOverrideTaxGroup]				= A.ysnOverrideTaxGroup
 FROM 
 	[vyuICChargesForBilling] A
 	INNER JOIN (
