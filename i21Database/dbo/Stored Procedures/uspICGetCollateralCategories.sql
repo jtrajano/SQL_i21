@@ -55,7 +55,7 @@ INSERT INTO #tmpCollateralCategories (
 )
 SELECT 
 	DISTINCT 
-	collateralItem.intCategoryId
+	collateralCategory.intCategoryId
 	,[level] = 1
 FROM 
 	tblICInventoryTransaction t INNER JOIN tblICItem i 
@@ -79,31 +79,35 @@ FROM
 			t2.strTransactionId = t.strTransactionId
 			AND t2.ysnIsUnposted = 0 
 			AND i2.intItemId <> t.intItemId
-			--AND t2.dblQty > 0 
-			AND 1 = 
-				CASE 
-					WHEN 
-						ty2.strName = 'Inventory Adjustment - Item Change' 
-						AND t2.intTransactionDetailId = t.intTransactionDetailId 
-						AND t2.strBatchId = t.strBatchId 
-					THEN 
-						1 
-					WHEN 
-						ty2.strName = 'Produce' 
-					THEN 
-						1 
-					ELSE 
-						0 
-				END 
-	) collateralItem
+			AND (
+				(
+					t2.dblQty > 0 
+					AND (
+						(
+							ty2.strName = 'Inventory Adjustment - Item Change' 
+							AND t2.intTransactionDetailId = t.intTransactionDetailId 
+							AND t2.strBatchId = t.strBatchId 
+						)
+						OR (
+							ty2.strName IN ('Produce')
+						)
+					)
+
+				)
+				OR (
+					t2.dblQty = 0 
+					AND ty2.strName IN ('Cost Adjustment')
+				)
+			)
+	) collateralCategory
 WHERE
 	i.intCategoryId = @intCategoryId
 	AND t.ysnIsUnposted = 0 
-	--AND t.dblQty < 0 
-	AND ty.strName IN (
-		'Inventory Adjustment - Item Change'
-		,'Consume'
+	AND (
+		(t.dblQty < 0 AND ty.strName IN ('Inventory Adjustment - Item Change','Consume'))
+		OR (ty.strName IN ('Cost Adjustment', 'Produce') AND t.strTransactionForm IN ('Produce'))
 	)
+
 SET @continueLoop = @@ROWCOUNT
 
 -- Do Loop and Query the collateral categories: 
@@ -114,7 +118,7 @@ BEGIN
 		,lvl
 	)
 	SELECT  DISTINCT
-		collateralItem.intCategoryId
+		collateralCategory.intCategoryId
 		,[level] = [lvl] + 1
 	FROM 
 		tblICInventoryTransaction t INNER JOIN tblICItem i 
@@ -141,31 +145,33 @@ BEGIN
 				AND t2.ysnIsUnposted = 0 
 				AND i2.intCategoryId <> i.intCategoryId
 				AND i2.intCategoryId <> @intCategoryId
-				--AND t2.dblQty > 0 
-				AND 1 = 
-					CASE 
-						WHEN 
+				AND (
+				(
+					t2.dblQty > 0 
+					AND (
+						(
 							ty2.strName = 'Inventory Adjustment - Item Change' 
 							AND t2.intTransactionDetailId = t.intTransactionDetailId 
 							AND t2.strBatchId = t.strBatchId 
-						THEN 
-							1 
-						WHEN 
-							ty2.strName = 'Produce' 
-						THEN 
-							1 
-						ELSE 
-							0 
-					END 
+						)
+						OR (
+							ty2.strName IN ('Produce')
+						)
+					)
+				)
+				OR (
+					t2.dblQty = 0 
+					AND ty2.strName IN ('Cost Adjustment')
+				)
+			)
 				AND NOT EXISTS (SELECT TOP  1 1 FROM #tmpCollateralCategories c WHERE c.intCategoryId = i2.intCategoryId)
-		) collateralItem
+		) collateralCategory
 	WHERE
-		t.ysnIsUnposted = 0
-		--AND t.dblQty < 0 
-		AND ty.strName IN (
-			'Inventory Adjustment - Item Change'
-			,'Consume'
-		)		
+		t.ysnIsUnposted = 0	
+		AND (
+			(t.dblQty < 0 AND ty.strName IN ('Inventory Adjustment - Item Change','Consume'))
+			OR (ty.strName IN ('Cost Adjustment', 'Produce') AND t.strTransactionForm IN ('Produce'))
+		)
 		AND c.lvl = @loop
 
 	SET @continueLoop = @@ROWCOUNT
@@ -211,8 +217,6 @@ FROM
 				ON t.intItemId = i.intItemId
 		WHERE
 			i.intCategoryId = cat.intCategoryId
-			AND t.dblQty <> 0 
-			AND t.dblValue = 0  
 			AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
 			AND t.strTransactionForm = 'Produce'
 	) produceExists 
