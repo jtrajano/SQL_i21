@@ -185,9 +185,21 @@ BEGIN
 				intContractDetailId
 			)
 			SELECT
-				strAction						= CASE WHEN @intAction = 1 THEN 'Created Voucher' 
-														WHEN @intAction = 2 THEN 'Updated Voucher'
-														ELSE 'Deleted Voucher'
+				strAction						= CASE WHEN @intAction = 1 THEN 'Created ' + 
+																				CASE B.intTransactionType
+																					WHEN 1 THEN 'Voucher' 
+																					WHEN 2 THEN 'Vendor Prepayment'
+																				END
+														WHEN @intAction = 2 THEN 'Updated ' + 
+																				CASE B.intTransactionType
+																					WHEN 1 THEN 'Voucher' 
+																					WHEN 2 THEN 'Vendor Prepayment'
+																				END
+														ELSE 'Deleted ' + 
+																				CASE B.intTransactionType
+																					WHEN 1 THEN 'Voucher' 
+																					WHEN 2 THEN 'Vendor Prepayment'
+																				END
 													END, 
 				strTransactionType				= 'Purchasing',
 				strTradeFinanceTransaction		= B.strFinanceTradeNo,
