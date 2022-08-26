@@ -25,6 +25,7 @@ BEGIN
 		DECLARE @intGLAccountId										INT
 		DECLARE @dblTotalToDeposit									DECIMAL(18,6) = 0 
 		DECLARE @dblCashOverShort									DECIMAL(18,6) = 0  
+		DECLARE @strGLAccountDescription	 						NVARCHAR(100)
 		
 
 		SET @dblGrossFuelSales = dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId)
@@ -48,16 +49,23 @@ BEGIN
 		EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
 
 		SELECT		@intBankAccountId = intBankAccountId,
-					@intCurrencyId = intCurrencyId,
-					@intGLAccountId = intGLAccountId
+					@intCurrencyId = intCurrencyId
 		FROM		tblCMBankAccount
-		WHERE		intGLAccountId IN (	SELECT	intConsBankDepositDraftId 
-										FROM	tblSTStore 
-										WHERE	intStoreId = @intStoreId)
-
-		SELECT		@intEntityId = intCheckoutCustomerId,
-					@intCompanyLocationId = intCompanyLocationId
-		FROM		tblSTStore
+		WHERE		intGLAccountId IN (	SELECT			b.intCashAccount 
+										FROM			tblSTStore a
+										INNER JOIN		tblSMCompanyLocation b
+										ON				a.intCompanyLocationId = b.intCompanyLocationId
+										WHERE			a.intStoreId = @intStoreId)
+		
+		SELECT		@intEntityId = a.intCheckoutCustomerId,
+					@intCompanyLocationId = a.intCompanyLocationId,
+					@intGLAccountId = c.intUndepositedFundsId,
+					@strGLAccountDescription = b.strDescription
+		FROM		tblSTStore a
+		INNER JOIN	tblSMCompanyLocation c
+		ON			a.intCompanyLocationId = c.intCompanyLocationId
+		LEFT JOIN	tblGLAccount b
+		ON			c.intUndepositedFundsId = b.intAccountId
 		WHERE		intStoreId = @intStoreId
 
 		BEGIN TRANSACTION
@@ -70,12 +78,14 @@ BEGIN
 
 			IF @dblAmount >= 0
 				BEGIN
-					SET @dblCreditAmount = @dblAmount
+					SET @dblDebitAmount = @dblAmount
 				END
 			ELSE
 				BEGIN
-					SET @dblDebitAmount = ABS(@dblAmount)
+					SET @dblCreditAmount = ABS(@dblAmount)
 				END
+
+			SET @dblAmount = @dblAmount * -1
 
 			INSERT INTO @BankTransaction(
 				[intBankAccountId]
@@ -119,7 +129,7 @@ BEGIN
 				, NULL					--[intUndepositedFundId]
 				, GETDATE()				--[dtmDate]
 				, @intGLAccountId		--[intGLAccountId]
-				, 'Consignment Payment' --[strDescription]
+				, @strGLAccountDescription --[strDescription]
 				, @dblDebitAmount		--[dblDebit]
 				, @dblCreditAmount		--[dblCredit]
 				, @intEntityId			--[intEntityId
