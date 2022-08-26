@@ -217,7 +217,7 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= BD.dblTotal + BD.dblTax,
-				strBankApprovalStatus			= '',
+				strBankApprovalStatus			= 'Pending',
 				dtmAppliedToTransactionDate		= B.dtmBillDate,
 				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
@@ -288,7 +288,7 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= PD.dblPayment,
-				strBankApprovalStatus			= '',
+				strBankApprovalStatus			= 'Pending',
 				dtmAppliedToTransactionDate		= P.dtmDatePaid,
 				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
