@@ -39,31 +39,31 @@ BEGIN TRY
 
 	IF @post IS NULL OR @post = 1
 	BEGIN
-		--VALIDATE EMPTY PAY FROM BANK ACCOUNT
-		SELECT @emptyBillPayFromBankAccount = COALESCE(@emptyBillPayFromBankAccount + ', ', '') + B.strBillId
-		FROM tblAPPayment P
-		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
-		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayFromBankAccountId IS NULL
+		-- --VALIDATE EMPTY PAY FROM BANK ACCOUNT
+		-- SELECT @emptyBillPayFromBankAccount = COALESCE(@emptyBillPayFromBankAccount + ', ', '') + B.strBillId
+		-- FROM tblAPPayment P
+		-- INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		-- INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		-- WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayFromBankAccountId IS NULL
 
-		IF @emptyBillPayFromBankAccount <> ''
-		BEGIN
-			SET	@emptyBillPayFromBankAccount = RIGHT(@emptyBillPayFromBankAccount, LEN(@emptyBillPayFromBankAccount) - 2);
-			RAISERROR('%s have empty pay from bank account.', 11, 1, @emptyBillPayFromBankAccount);
-		END
+		-- IF @emptyBillPayFromBankAccount <> ''
+		-- BEGIN
+		-- 	SET	@emptyBillPayFromBankAccount = RIGHT(@emptyBillPayFromBankAccount, LEN(@emptyBillPayFromBankAccount) - 2);
+		-- 	RAISERROR('%s have empty pay from bank account.', 11, 1, @emptyBillPayFromBankAccount);
+		-- END
 
-		--VALIDATE EMPTY PAY TO BANK ACCOUNT
-		SELECT @emptyBillPayToBankAccount = COALESCE(@emptyBillPayToBankAccount + ', ', '') + B.strBillId
-		FROM tblAPPayment P
-		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
-		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayToBankAccountId IS NULL
+		-- --VALIDATE EMPTY PAY TO BANK ACCOUNT
+		-- SELECT @emptyBillPayToBankAccount = COALESCE(@emptyBillPayToBankAccount + ', ', '') + B.strBillId
+		-- FROM tblAPPayment P
+		-- INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		-- INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		-- WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND P.intPaymentMethodId = 2 AND PD.dblPayment != 0 AND B.intPayToBankAccountId IS NULL
 
-		IF @emptyBillPayToBankAccount <> ''
-		BEGIN
-			SET @emptyBillPayToBankAccount = RIGHT(@emptyBillPayToBankAccount, LEN(@emptyBillPayToBankAccount) - 2);
-			RAISERROR('%s have empty pay to bank account.', 11, 1, @emptyBillPayToBankAccount);
-		END
+		-- IF @emptyBillPayToBankAccount <> ''
+		-- BEGIN
+		-- 	SET @emptyBillPayToBankAccount = RIGHT(@emptyBillPayToBankAccount, LEN(@emptyBillPayToBankAccount) - 2);
+		-- 	RAISERROR('%s have empty pay to bank account.', 11, 1, @emptyBillPayToBankAccount);
+		-- END
 
 		-- --VALIDATE MULTIPLE PAY BANK ACCOUNT COMBINATIONS
 		-- SELECT @billPayBankAccountCount = COUNT(*) FROM @ids
