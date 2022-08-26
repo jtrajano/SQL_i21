@@ -136,6 +136,19 @@ SET @ysnLicensed =	CASE
 						WHEN @strLicensed = 'Non-Licensed' THEN 0
 						ELSE NULL
 					END
+
+IF @intLocationId IS NULL
+BEGIN
+	INSERT INTO #Locations
+	SELECT intCompanyLocationId, strLocationName 
+	FROM tblSMCompanyLocation
+	WHERE ysnLicensed = ISNULL(@ysnLicensed,ysnLicensed)
+
+	INSERT INTO @Locs
+	SELECT intCompanyLocationId
+	FROM tblSMCompanyLocation
+	WHERE ysnLicensed = ISNULL(@ysnLicensed,ysnLicensed)
+END
 ;
 
 /* Inventory Opening Balance*/
@@ -176,9 +189,9 @@ INNER JOIN tblSMCompanyLocation CL
 WHERE t.ysnIsUnposted <> 1
 	AND t.dtmDate < @dtmReportDate 
 	AND I.intCommodityId = ISNULL(@intCommodityId, I.intCommodityId)
-	AND ((CL.ysnLicensed = COALESCE(@ysnLicensed,CL.ysnLicensed) AND CL.intCompanyLocationId = ISNULL(@intLocationId,CL.intCompanyLocationId))
-			OR CL.intCompanyLocationId = @intLocationId
-		)
+	--AND ((CL.ysnLicensed = COALESCE(@ysnLicensed,CL.ysnLicensed) AND CL.intCompanyLocationId = ISNULL(@intLocationId,CL.intCompanyLocationId))
+	--		OR CL.intCompanyLocationId = @intLocationId
+	--	)
 GROUP BY t.intItemId
 		,ItemLocation.intLocationId
 		,t.intLotId
@@ -262,15 +275,6 @@ SELECT DISTINCT ID.intCommodityId
 	,ID.strCommodityCode
 FROM @InventoryData ID
 WHERE strLabel = 'INVENTORY BALANCE'
-
---IF @intLocationId IS NULL
-BEGIN
-	INSERT INTO #Locations
-	SELECT DISTINCT intCompanyLocationId, strLocationName FROM @InventoryData
-
-	INSERT INTO @Locs
-	SELECT DISTINCT intCompanyLocationId FROM @InventoryData
-END
 
 DECLARE @intCompanyLocationId INT
 DECLARE @strLocationName NVARCHAR(200)
@@ -844,6 +848,28 @@ GROUP BY strCommodityCode
 /*==END==STORAGE OBLIGATION==*/
 
 SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @StorageObligationData)
+
+/* ADD INVENTORY BALANCE IF IT DOES NOT EXIST */
+INSERT INTO @InventoryData
+SELECT 
+	1
+	,'INVENTORY BALANCE'
+	,''
+	,0
+	,A.strCommodityCode
+	,A.intCommodityId
+	,A.intCompanyLocationId
+	,A.strLocationName
+	,A.strUOM
+FROM @InventoryData A
+WHERE (
+	CASE 
+		WHEN strLabel = 'RECEIVED' AND dblUnits <> 0 THEN 1
+		WHEN strLabel = 'SHIPPED' AND dblUnits <> 0 THEN 1
+		ELSE 0
+	END) = 1
+	AND NOT EXISTS(SELECT 1 FROM @InventoryData WHERE strLabel = 'INVENTORY BALANCE')
+
 
 /* COMPANY OWNED */
 INSERT INTO @InventoryData
@@ -1475,6 +1501,20 @@ UPDATE A
 SET dblUnits = ABS(dblUnits)
 FROM @ReportData A
 WHERE A.strLabel = 'COMPANY-OWNED (PAID)'
+
+DECLARE @LocsWithNoInventory AS Id
+
+INSERT INTO @LocsWithNoInventory
+SELECT DISTINCT intCompanyLocationId 
+FROM @ReportData 
+WHERE (strLabel = 'TOTAL INVENTORY' AND dblUnits = 0)
+
+DELETE A
+FROM @ReportData A
+INNER JOIN @LocsWithNoInventory B
+	ON B.intId = A.intCompanyLocationId
+
+DELETE FROM @ReportData WHERE strUOM IS NULL
 
 SELECT * FROM @ReportData ORDER BY intCommodityId,intCompanyLocationId,intRowNum
 --SELECT DISTINCT s.strLocationName,ysnLicensed FROM @ReportData s
