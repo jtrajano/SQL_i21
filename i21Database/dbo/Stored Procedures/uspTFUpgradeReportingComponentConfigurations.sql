@@ -51,7 +51,7 @@ BEGIN TRY
 			, strScheduleCode			= SOURCE.strScheduleList
 			, ysnConfiguration			= SOURCE.ysnConfiguration
 			, ysnUserDefinedValue		= SOURCE.ysnUserDefinedValue
-			, strConfiguration			= CASE WHEN SOURCE.ysnUserDefinedValue = 0 THEN SOURCE.strConfiguration ELSE TARGET.strConfiguration END
+			, strConfiguration			= CASE WHEN SOURCE.ysnUserDefinedValue = 0 THEN SOURCE.strConfiguration ELSE CASE WHEN (SOURCE.ysnUserDefinedValue = 1 AND (TARGET.strConfiguration IS NULL OR TRIM(TARGET.strConfiguration) = '')) THEN SOURCE.strConfiguration ELSE TARGET.strConfiguration END END
 			, strLastIndexOf			= SOURCE.strLastIndexOf
 			, strSegment				= SOURCE.strSegment
 			, intConfigurationSequence	= SOURCE.intSort
