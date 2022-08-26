@@ -99,8 +99,18 @@ CREATE TABLE #tmpDailyStockPosition
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 	FROM tblICInventoryTransaction t
 		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
-	WHERE t.ysnIsUnposted <> 1
-		AND t.dtmDate < @dtmDate
+	WHERE 
+		t.ysnIsUnposted <> 1
+		AND (
+			t.dtmDate < @dtmDate
+			OR (
+				t.dtmDate = @dtmDate
+				AND t.intTransactionTypeId IN (
+					@InventoryAdjustmentOpeningInventory			
+				)
+			)
+		)
+		AND intInTransitSourceLocationId IS NULL
 	GROUP BY t.intItemId,
 			ItemLocation.intLocationId,
 			t.intTransactionTypeId,
@@ -118,8 +128,17 @@ CREATE TABLE #tmpDailyStockPosition
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 	FROM tblICInventoryTransactionStorage t
 		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
-	WHERE t.ysnIsUnposted <> 1
-		AND t.dtmDate < @dtmDate
+	WHERE 
+		t.ysnIsUnposted <> 1
+		AND (
+			t.dtmDate < @dtmDate
+			OR (
+				t.dtmDate = @dtmDate
+				AND t.intTransactionTypeId IN (
+					@InventoryAdjustmentOpeningInventory			
+				)
+			)
+		)
 	GROUP BY t.intItemId,
 			ItemLocation.intLocationId,
 			t.intTransactionTypeId,
@@ -183,6 +202,8 @@ CREATE TABLE #tmpDailyStockPosition
 			,@InventoryAdjustmentLotMerge
 			,@InventoryAdjustmentLotMove
 			,@InventoryAdjustmentOwnershipChange
+			--,@InventoryAdjustmentOpeningInventory
+			,@InventoryAdjustmentChangeLotWeight
 		)
 		AND intInTransitSourceLocationId IS NULL
 	GROUP BY t.intItemId,
@@ -519,5 +540,3 @@ CREATE TABLE #tmpDailyStockPosition
 			INNER JOIN tblSMCompanyLocation Loc 
 				ON Loc.intCompanyLocationId = tmpDSP.intLocationId
 	END 
-	
-	
