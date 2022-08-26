@@ -383,7 +383,7 @@ END
 															
 													END
 												ELSE 0
-											END),0.0),2)
+											END),0.0),6)
 
 
 	,[intCostUOMId]						= CASE
