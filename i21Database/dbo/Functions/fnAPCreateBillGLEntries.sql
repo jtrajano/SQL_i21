@@ -1262,7 +1262,7 @@ BEGIN
 	SELECT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	dbo.[fnGetItemGLAccount](G.intItemId, ISNULL(H.intItemLocationId, I.intItemLocationId), 'AP Clearing'),
+		[intAccountId]					=	C.intSourceTaxAccountId,
 		[dblDebit]						=	0,
 		[dblCredit]						=	CAST(C.dblSourceTransactionTax * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
@@ -1287,8 +1287,8 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,   
-		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	CAST(C.dblSourceTransactionTax AS DECIMAL(18,2)),
+		[dblDebitReport]				=	CAST(C.dblSourceTransactionTax AS DECIMAL(18,2)),
+		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
@@ -1306,9 +1306,6 @@ BEGIN
 	CROSS APPLY dbo.fnAPGetDetailSourceTransactionTaxes(B.intInventoryReceiptItemId, B.intInventoryReceiptChargeId, B.intInventoryShipmentChargeId) C
 	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-	LEFT JOIN tblICItem G ON G.intItemId = B.intItemId
-	LEFT JOIN tblICItemLocation H ON H.intItemId = B.intItemId AND H.intLocationId = B.intLocationId
-	LEFT JOIN tblICItemLocation I ON I.intItemId = B.intItemId AND I.intLocationId = A.intShipToId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND B.ysnOverrideTaxGroup = 1
 
@@ -1317,7 +1314,7 @@ BEGIN
 	SELECT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	C.intSourceTaxAccountId,
+		[intAccountId]					=	dbo.[fnGetItemGLAccount](G.intItemId, ISNULL(H.intItemLocationId, I.intItemLocationId), 'AP Clearing'),
 		[dblDebit]						=	CAST(C.dblSourceTransactionTax * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
@@ -1361,6 +1358,9 @@ BEGIN
 	CROSS APPLY dbo.fnAPGetDetailSourceTransactionTaxes(B.intInventoryReceiptItemId, B.intInventoryReceiptChargeId, B.intInventoryShipmentChargeId) C
 	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	LEFT JOIN tblICItem G ON G.intItemId = B.intItemId
+	LEFT JOIN tblICItemLocation H ON H.intItemId = B.intItemId AND H.intLocationId = B.intLocationId
+	LEFT JOIN tblICItemLocation I ON I.intItemId = B.intItemId AND I.intLocationId = A.intShipToId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND B.ysnOverrideTaxGroup = 1
 
