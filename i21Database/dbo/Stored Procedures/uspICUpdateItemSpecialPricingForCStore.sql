@@ -41,6 +41,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Category') IS NULL
 		intCategoryId INT 
 	)
 
+IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Subcategory') IS NULL  
+	CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Subcategory (
+		intSubcategoryId INT 
+	)
+
 IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Family') IS NULL  
 	CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Family (
 		intFamilyId INT 
@@ -138,6 +143,10 @@ BEGIN
 								AND (
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Category)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Category WHERE intCategoryId = i.intCategoryId)			
+								)
+								AND (
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Subcategory)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Subcategory WHERE intSubcategoryId = i.intSubcategoriesId)			
 								)
 								AND (
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Family)

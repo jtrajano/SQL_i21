@@ -40,6 +40,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NULL
 		intCategoryId INT 
 	)
 
+IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Subcategory') IS NULL  
+	CREATE TABLE #tmpUpdateItemPricingForCStore_Subcategory (
+		intSubcategoryId INT 
+	)
+
 IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL  
 	CREATE TABLE #tmpUpdateItemPricingForCStore_Family (
 		intFamilyId INT 
@@ -137,6 +142,10 @@ BEGIN
 						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category WHERE intCategoryId = i.intCategoryId)			
 					)
 					AND (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Subcategory)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Subcategory WHERE intSubcategoryId = i.intSubcategoriesId)			
+					)
+					AND (
 						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)
 						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family WHERE intFamilyId = il.intFamilyId)			
 					)
@@ -173,6 +182,7 @@ BEGIN
 			SET 
 				e.dblCost = @dblStandardCost
 				,e.dtmDateModified = GETDATE()
+				,e.strVendorProduct = ''
 				,e.intModifiedByUserId = @intEntityUserSecurityId
 		
 		-- If none found, insert a new Effective Item Cost
@@ -183,6 +193,7 @@ BEGIN
 				, dblCost
 				, dtmDateCreated
 				, dtmEffectiveCostDate
+				, strVendorProduct
 				, intCreatedByUserId
 				, intConcurrencyId
 			)
@@ -192,6 +203,7 @@ BEGIN
 				, u.dblNewStandardCost
 				, GETUTCDATE()
 				, @dtmEffectiveDate
+				, ''
 				, @intEntityUserSecurityId
 				, 1
 			)
@@ -343,6 +355,10 @@ BEGIN
 					AND (
 						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category)
 						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category WHERE intCategoryId = i.intCategoryId)			
+					)
+					AND (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Subcategory)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Subcategory WHERE intSubcategoryId = i.intSubcategoriesId)			
 					)
 					AND (
 						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)

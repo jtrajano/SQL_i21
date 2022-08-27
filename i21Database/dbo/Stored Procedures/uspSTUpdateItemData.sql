@@ -45,6 +45,7 @@ BEGIN TRY
 				@State					   NVARCHAR(20),
 				@strVendorId               NVARCHAR(MAX),
 				@strCategoryId             NVARCHAR(MAX),
+				@strSubcategoryId             NVARCHAR(MAX),
 				@strFamilyId			   NVARCHAR(MAX),
 				@strClassId                NVARCHAR(MAX),
 				@intItemUOMId              INT, -- @intUpcCode                INT,
@@ -102,6 +103,7 @@ BEGIN TRY
 				@strCompanyLocationId	=	Location,
 				@strVendorId			=   Vendor,
 				@strCategoryId			=   Category,
+				@strSubcategoryId		=   Subcategory,
 				@strFamilyId			=   Family,
 				@strClassId				=   Class,
 				@intItemUOMId			=   intItemUOMId, --UPCCode,
@@ -161,6 +163,7 @@ BEGIN TRY
 				Location 			      NVARCHAR(MAX),
 				Vendor                    NVARCHAR(MAX),
 				Category                  NVARCHAR(MAX),
+				Subcategory               NVARCHAR(MAX),
 				Family                    NVARCHAR(MAX),
 				Class                     NVARCHAR(MAX),
 				intItemUOMId              INT,
@@ -244,6 +247,14 @@ BEGIN TRY
 
 					CREATE TABLE #tmpUpdateItemForCStore_Category (
 						intCategoryId INT 
+					)
+				END
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Subcategory') IS NULL  
+				BEGIN
+
+					CREATE TABLE #tmpUpdateItemForCStore_Subcategory (
+						intSubcategoryId INT 
 					)
 				END
 
@@ -578,6 +589,16 @@ BEGIN TRY
 					--SELECT intCategoryId = CAST(@strCategoryId AS INT)
 					SELECT [intID] AS intCategoryId
 					FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryId)
+				END
+			
+			IF(@strSubcategoryId IS NOT NULL AND @strSubcategoryId != '')
+				BEGIN
+					INSERT INTO #tmpUpdateItemForCStore_Subcategory (
+						intSubcategoryId
+					)
+					--SELECT intCategoryId = CAST(@strCategoryId AS INT)
+					SELECT [intID] AS intSubcategoryId
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@strSubcategoryId)
 				END
 
 			IF(@strFamilyId IS NOT NULL AND @strFamilyId != '')
@@ -1990,7 +2011,7 @@ BEGIN TRY
 									ON tempVendor.intVendorId = EntityVendor.intEntityId
 
 								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
+							END 
 
 						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Category)
 							BEGIN
@@ -2000,6 +2021,18 @@ BEGIN TRY
 								FROM #tmpUpdateItemForCStore_Category tempCategory
 								INNER JOIN tblICCategory Category
 									ON tempCategory.intCategoryId = Category.intCategoryId
+
+								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+							END
+						
+						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Subcategory)
+							BEGIN
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Subcategory</b></p>'
+								
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Subcategory.strSubCategory + '</p>'
+								FROM #tmpUpdateItemForCStore_Subcategory tempSubcategory
+								INNER JOIN tblSTSubCategories Subcategory
+									ON tempSubcategory.intSubcategoryId = Subcategory.intSubcategoriesId
 
 								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 							END
@@ -2169,6 +2202,9 @@ BEGIN TRY
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NOT NULL 
 				DROP TABLE #tmpUpdateItemForCStore_Category 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Subcategory') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Subcategory 
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NOT NULL 
 				DROP TABLE #tmpUpdateItemForCStore_Family 
