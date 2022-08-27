@@ -19,6 +19,7 @@ BEGIN TRY
 			@Location 			NVARCHAR(MAX),
 			@Vendor             NVARCHAR(MAX),
 			@Category           NVARCHAR(MAX),
+			@Subcategory        NVARCHAR(MAX),
 			@Family             NVARCHAR(MAX),
 			@Class              NVARCHAR(MAX),
 		    @NotSoldSince		NVARCHAR(50),
@@ -35,6 +36,7 @@ BEGIN TRY
 			@Location			=	 Location,
             @Vendor				=   Vendor,
 			@Category			=   Category,
+			@Subcategory		=   Subcategory,
 			@Family				=   Family,
             @Class				=   Class,
             @NotSoldSince       =   NotSoldSince,
@@ -49,6 +51,7 @@ BEGIN TRY
 			Location		        NVARCHAR(MAX),
 			Vendor	     	        NVARCHAR(MAX),
 			Category		        NVARCHAR(MAX),
+			Subcategory		        NVARCHAR(MAX),
 			Family	     	        NVARCHAR(MAX),
 			Class	     	        NVARCHAR(MAX),
 			NotSoldSince			NVARCHAR(50),
@@ -78,6 +81,13 @@ BEGIN TRY
 			BEGIN
 				CREATE TABLE #tmpUpdateItemForCStore_Category (
 					intCategoryId INT 
+				)
+			END
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Subcategory') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemForCStore_Subcategory (
+					intSubcategoryId INT 
 				)
 			END
 
@@ -157,6 +167,15 @@ BEGIN TRY
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Category)
 			END
 
+		IF(@Subcategory IS NOT NULL AND @Subcategory != '')
+			BEGIN
+				INSERT INTO #tmpUpdateItemForCStore_Subcategory (
+					intSubcategoryId
+				)
+				SELECT [intID] AS intSubcategoryId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@Subcategory)
+			END
+
 		IF(@Family IS NOT NULL AND @Family != '')
 			BEGIN
 				INSERT INTO #tmpUpdateItemForCStore_Family (
@@ -210,7 +229,8 @@ BEGIN TRY
 	BEGIN TRY
 		
 		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Location)
-		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Vendor) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Category)
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Vendor) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Category) 
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Subcategory)
 		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Family) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Class))
 		BEGIN
 			-- This is where IC SP Executed for updating 
