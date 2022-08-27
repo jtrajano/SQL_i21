@@ -2,6 +2,7 @@
 	@strStoreIdList AS NVARCHAR(MAX) = '',
 	@strStoreGroupIdList AS NVARCHAR(MAX) = '',
 	@strCategoryIdList AS NVARCHAR(MAX) = '',
+	@strSubcategoryIdList AS NVARCHAR(MAX) = '',
 	@strFamilyIdList AS NVARCHAR(MAX) = '', 
 	@strClassIdList AS NVARCHAR(MAX) = '', 
 	@dtmCheckoutDateFrom AS DATETIME,
@@ -139,6 +140,14 @@ FROM
 				Item.intCategoryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryIdList))
 				OR 1 = CASE 
 							WHEN @strCategoryIdList = ''
+								THEN 1
+							ELSE 0
+					   END
+			)
+		AND (
+				Item.intSubcategoriesId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strSubcategoryIdList))
+				OR 1 = CASE 
+							WHEN @strSubcategoryIdList = ''
 								THEN 1
 							ELSE 0
 					   END

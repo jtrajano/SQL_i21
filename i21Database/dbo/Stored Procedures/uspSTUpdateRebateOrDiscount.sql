@@ -21,6 +21,7 @@ BEGIN TRY
 	    	@Location 			    NVARCHAR(MAX),
 			@Vendor                 NVARCHAR(MAX),
 			@Category               NVARCHAR(MAX),
+			@Subcategory               NVARCHAR(MAX),
 			@Family                 NVARCHAR(MAX),
 			@Class                  NVARCHAR(MAX),
 			@PromotionType          NVARCHAR(50),
@@ -42,6 +43,7 @@ BEGIN TRY
 			@Location	   	    =	Location,
             @Vendor             =   Vendor,
 			@Category           =   Category,
+			@Subcategory           =   Subcategory,
 			@Family             =   Family,
             @Class              =   Class,
 			@PromotionType      =   PromotionTypeValue, 
@@ -63,6 +65,7 @@ BEGIN TRY
 			Location		        NVARCHAR(MAX),
 			Vendor	     	        NVARCHAR(MAX),
 			Category		        NVARCHAR(MAX),
+			Subcategory		        NVARCHAR(MAX),
 			Family	     	        NVARCHAR(MAX),
 			Class	     	        NVARCHAR(MAX),
 			PromotionTypeValue      NVARCHAR(50),
@@ -100,6 +103,13 @@ BEGIN TRY
 			BEGIN
 				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Category (
 					intCategoryId INT 
+				)
+			END
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Subcategory') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Subcategory (
+					intSubcategoryId INT 
 				)
 			END
 
@@ -185,6 +195,15 @@ BEGIN TRY
 				)
 				SELECT [intID] AS intCategoryId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Category)
+			END
+
+		IF(@Subcategory IS NOT NULL AND @Subcategory != '')
+			BEGIN
+				INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Subcategory (
+					intSubcategoryId
+				)
+				SELECT [intID] AS intSubcategoryId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@Subcategory)
 			END
 
 		IF(@Family IS NOT NULL AND @Family != '')
@@ -579,6 +598,18 @@ PRINT 'test01'
 
 							END
 
+						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Subcategory)
+							BEGIN
+
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Subcategory</b></p>'
+								
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Subcategory.strSubCategory + '</p>'
+								FROM #tmpUpdateItemSpecialPricingForCStore_Subcategory tempSubcategory
+								INNER JOIN tblSTSubCategories Subcategory
+									ON tempSubcategory.intSubcategoryId = Subcategory.intSubcategoriesId
+
+							END
+
 						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Family)
 							BEGIN
 
@@ -736,6 +767,9 @@ PRINT 'test01'
 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Category') IS NOT NULL   
 			DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Category 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Subcategory') IS NOT NULL   
+			DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Subcategory 
 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Family') IS NOT NULL  
 			DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Family 
