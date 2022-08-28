@@ -197,7 +197,7 @@ FROM
 		SELECT TOP 1
 			t.* 
 		FROM 
-			tblICInventoryTransaction 
+			tblICInventoryTransaction t
 		WHERE
 			t.intItemId = i.intItemId
 			AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
