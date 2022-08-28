@@ -84,20 +84,13 @@ FROM
 				(
 					t2.dblQty > 0 
 					AND (
-						(
-							ty2.strName = 'Inventory Adjustment - Item Change' 
-							AND t2.intTransactionDetailId = t.intTransactionDetailId 
-							AND t2.strBatchId = t.strBatchId 
-						)
-						OR (
-							ty2.strName IN ('Produce')
-						)
+						ty2.strName = 'Inventory Adjustment - Item Change' 
+						AND t2.intTransactionDetailId = t.intTransactionDetailId 
+						AND t2.strBatchId = t.strBatchId 
 					)
-
 				)
 				OR (
-					t2.dblQty = 0 
-					AND ty2.strName IN ('Cost Adjustment')
+					t2.strTransactionForm IN ('Produce', 'Consume')
 				)
 			)
 	) collateralItem
@@ -151,20 +144,13 @@ BEGIN
 					(
 						t2.dblQty > 0 
 						AND (
-							(
-								ty2.strName = 'Inventory Adjustment - Item Change' 
-								AND t2.intTransactionDetailId = t.intTransactionDetailId 
-								AND t2.strBatchId = t.strBatchId 
-							)
-							OR (
-								ty2.strName IN ('Produce')
-							)
+							ty2.strName = 'Inventory Adjustment - Item Change' 
+							AND t2.intTransactionDetailId = t.intTransactionDetailId 
+							AND t2.strBatchId = t.strBatchId 
 						)
-
 					)
 					OR (
-						t2.dblQty = 0 
-						AND ty2.strName IN ('Cost Adjustment')
+						t2.strTransactionForm IN ('Produce', 'Consume')
 					)
 				)
 				AND NOT EXISTS (SELECT TOP  1 1 FROM #tmpCollateralItems c WHERE c.intItemId = i2.intItemId)
