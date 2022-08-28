@@ -106,7 +106,7 @@ BEGIN
 				, strMessage = 'Error on inserting/updating - ' + @ErrorMessage
 		END CATCH
 
-        FETCH NEXT FROM DataCursor INTO @strRoute
+        FETCH NEXT FROM DataCursor INTO @strRoute, @intRowNumber
     END
     CLOSE DataCursor
 	DEALLOCATE DataCursor
