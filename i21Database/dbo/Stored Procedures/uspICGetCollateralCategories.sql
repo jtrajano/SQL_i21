@@ -64,20 +64,13 @@ FROM
 				(
 					t2.dblQty > 0 
 					AND (
-						(
-							ty2.strName = 'Inventory Adjustment - Item Change' 
-							AND t2.intTransactionDetailId = t.intTransactionDetailId 
-							AND t2.strBatchId = t.strBatchId 
-						)
-						OR (
-							ty2.strName IN ('Produce')
-						)
+						ty2.strName = 'Inventory Adjustment - Item Change' 
+						AND t2.intTransactionDetailId = t.intTransactionDetailId 
+						AND t2.strBatchId = t.strBatchId 
 					)
-
 				)
 				OR (
-					t2.dblQty = 0 
-					AND ty2.strName IN ('Cost Adjustment')
+					t2.strTransactionForm IN ('Produce', 'Consume')
 				)
 			)
 	) collateralCategory
@@ -127,24 +120,18 @@ BEGIN
 				AND i2.intCategoryId <> i.intCategoryId
 				AND i2.intCategoryId <> @intCategoryId
 				AND (
-				(
-					t2.dblQty > 0 
-					AND (
-						(
+					(
+						t2.dblQty > 0 
+						AND (
 							ty2.strName = 'Inventory Adjustment - Item Change' 
 							AND t2.intTransactionDetailId = t.intTransactionDetailId 
 							AND t2.strBatchId = t.strBatchId 
 						)
-						OR (
-							ty2.strName IN ('Produce')
-						)
+					)
+					OR (
+						t2.strTransactionForm IN ('Produce', 'Consume')
 					)
 				)
-				OR (
-					t2.dblQty = 0 
-					AND ty2.strName IN ('Cost Adjustment')
-				)
-			)
 				AND NOT EXISTS (SELECT TOP  1 1 FROM #tmpCollateralCategories c WHERE c.intCategoryId = i2.intCategoryId)
 		) collateralCategory
 	WHERE
