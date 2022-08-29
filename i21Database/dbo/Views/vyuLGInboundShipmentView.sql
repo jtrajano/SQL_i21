@@ -40,7 +40,7 @@ SELECT
 	strSubLocationName = SubLocation.strSubLocationName,
 	dtmLastFreeDate = LW.dtmLastFreeDate,
 	dtmEmptyContainerReturn = LW.dtmEmptyContainerReturn,
-	strTruckNo = L.strTruckNo,
+	strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END,
 	intForwardingAgentEntityId = L.intForwardingAgentEntityId,
 	strForwardingAgent = FwdAgent.strName,
 	strForwardingAgentRef = L.strForwardingAgentRef,
@@ -243,6 +243,7 @@ LEFT JOIN tblICCommodityAttribute SCG ON SCG.intCommodityAttributeId = IMS.intGr
 LEFT JOIN tblICItemUOM IUS ON IUS.intItemUOMId = SCT.intItemUOMId
 LEFT JOIN tblICUnitMeasure SU1 ON SU1.intUnitMeasureId = IUS.intUnitMeasureId
 LEFT JOIN tblSMFreightTerms SCB ON SCB.intFreightTermId = SCH.intFreightTermId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblCTPricingType SPT ON SPT.intPricingTypeId = SCH.intPricingTypeId
 LEFT JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId AND ISNULL(LC.ysnRejected, 0) <> 1

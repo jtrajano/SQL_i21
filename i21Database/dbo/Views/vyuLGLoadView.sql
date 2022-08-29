@@ -64,7 +64,8 @@ SELECT -- Load Header
 	,strDriver = Driver.strName
 	,strDispatcher = US.strUserName
 	,L.strCustomerReference
-	,L.strTruckNo
+	,L.intTruckId
+	,strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END
 	,L.strTrailerNo1
 	,L.strTrailerNo2
 	,L.strTrailerNo3
@@ -353,6 +354,7 @@ LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intLoadingUnitMeasureId
 LEFT JOIN tblICUnitMeasure DUM ON DUM.intUnitMeasureId = L.intDischargeUnitMeasureId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = L.intLoadShippingInstructionId
