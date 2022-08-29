@@ -31,6 +31,7 @@ BEGIN
 				,strPosition = P.strPosition
 				,strPositionType = P.strPositionType
 				,strHauler = Hauler.strName
+				,strTruckNumber = SVT.strTruckNumber
 				,strWeightUnitMeasure = UM.strUnitMeasure
 				,strScaleTicketNo = CASE 
 					WHEN IsNull(L.intTicketId, 0) <> 0
@@ -90,6 +91,7 @@ BEGIN
 			LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 			LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+			LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
 			LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
 			LEFT JOIN tblLGContainerType CONT ON CONT.intContainerTypeId = L.intContainerTypeId
@@ -134,6 +136,7 @@ BEGIN
 			,strPosition = P.strPosition
 			,strPositionType = P.strPositionType
 			,strHauler = Hauler.strName
+			,strTruckNumber = SVT.strTruckNumber
 			,strWeightUnitMeasure = UM.strUnitMeasure
 			,strScaleTicketNo = CASE 
 				WHEN IsNull(L.intTicketId, 0) <> 0
@@ -190,6 +193,7 @@ BEGIN
 		LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+		LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 		LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
 		LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN tblLGContainerType CONT ON CONT.intContainerTypeId = L.intContainerTypeId

@@ -153,7 +153,7 @@ BEGIN TRY
 				,strCustomerPO = L.strCustomerReference
 				,L.dtmScheduledDate
 				,strShipVia = Via.strName
-				,L.strTruckNo
+				,strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END
 				,L.strComments
 				,FreightTerm.strFreightTerm
 				,Item.strItemNo
@@ -274,6 +274,7 @@ BEGIN TRY
 			LEFT JOIN tblEMEntity EC ON EC.intEntityId = ETC.intEntityContactId
 			LEFT JOIN tblEMEntity Via ON Via.intEntityId = L.intHaulerEntityId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = L.intFreightTermId
+			LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 			CROSS APPLY tblSMCompanySetup CS
 			CROSS APPLY tblLGCompanyPreference CP
 			) AS a

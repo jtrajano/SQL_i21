@@ -186,7 +186,7 @@ SELECT LD.intLoadDetailId
 	, strDriver = Driver.strName
 	, strDispatcher = US.strUserName
 	, L.strCustomerReference
-	, L.strTruckNo
+	, strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END
 	, L.strTrailerNo1
 	, L.strTrailerNo2
 	, L.strTrailerNo3
@@ -292,6 +292,7 @@ LEFT JOIN tblSMCurrency	CYS ON CYS.intCurrencyID = CUS.intMainCurrencyId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblSMUserSecurity US ON US.intEntityId	= L.intDispatcherId
 LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PHeader.intWeightId
 LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SHeader.intWeightId
