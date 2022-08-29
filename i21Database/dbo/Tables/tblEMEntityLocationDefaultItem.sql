@@ -5,7 +5,8 @@
     [intItemId]                             INT DEFAULT 0 NULL,
     [intEstimatedUnits]						INT NULL,
 	[intMonthstoUseForAvg]					INT NULL,
-	[strOrderToUseForAvg]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [intOrdersToUseForAvg]					INT NULL,
+	-- [strOrderToUseForAvg]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 
     [intConcurrencyId]                      INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblEMEntityLocationDefaultItem] PRIMARY KEY CLUSTERED ([intEntityLocationDefaultItemId] ASC),   

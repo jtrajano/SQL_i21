@@ -87,16 +87,16 @@
 	[intAvgDeliveryTime]					INT NOT NULL DEFAULT(0),
 	[intExcludeFromAvg]						INT NOT NULL DEFAULT(0),
 	[intNumPrevOrderToAvg]					INT NOT NULL DEFAULT(0),
-	[intAvgForDayOfWeek]					INT NOT NULL DEFAULT(0),
+	-- [intAvgForDayOfWeek]					INT NOT NULL DEFAULT(0),
 	[intFuelingRadius]						INT NULL,
-
+    [intTerritoryId]                        INT NULL,
     --End SkyBitz Integration
     --Default Item
     [intItemId]								INT NULL,
 	[intEstimatedUnits]						INT NULL,
 	[intMonthstoUseForAvg]					INT NULL,
-	[strOrderToUseForAvg]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-
+	-- [strOrderToUseForAvg]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [strAvgForDayOfWeek]					NVARCHAR(50) COLLATE Latin1_General_CI_AS DEFAULT('All') NOT NULL, 
     --Default Item
 
 

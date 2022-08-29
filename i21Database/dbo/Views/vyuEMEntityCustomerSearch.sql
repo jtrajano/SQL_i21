@@ -78,6 +78,9 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, intDefaultPayToBankAccountId		= CUSTOMER.intDefaultPayToBankAccountId
 	, strDefaultPayToBankAccountNo		= CUSTOMER.strDefaultPayToBankAccountNo
 	, strPaymentInstructions			= CMBA.strPaymentInstructions
+	, CUSTOMER.ysnPrintPriceOnPrintTicket
+	, custLocation.intTicketCopies
+	, custLocation.ysnRequireStickReading
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
@@ -137,3 +140,5 @@ LEFT JOIN (
 LEFT JOIN tblCMBankAccount CMBA ON CMBA.intBankAccountId = CUSTOMER.intDefaultPayToBankAccountId
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO
+
+
