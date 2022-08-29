@@ -26,6 +26,7 @@
 [intGenerateLoadId] INT NULL, 
 [intGenerateSequence] INT NULL, 
 
+[intTruckId] INT NULL,
 [strTruckNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strTrailerNo1] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strTrailerNo2] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
@@ -220,6 +221,7 @@ CONSTRAINT [FK_tblLGLoad_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) RE
 CONSTRAINT [FK_tblLGLoad_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 CONSTRAINT [FK_tblLGLoad_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
 CONSTRAINT [FK_tblLGLoad_tblEMEntity_intHaulerEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGLoad_tblSMShipViaTruck_intTruckId] FOREIGN KEY ([intTruckId]) REFERENCES [dbo].[tblSMShipViaTruck] ([intEntityShipViaTruckId]),
 
 CONSTRAINT [FK_tblLGLoad_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]), 
 CONSTRAINT [FK_tblLGLoad_tblLGGenerateLoad_intGenerateLoadId] FOREIGN KEY ([intGenerateLoadId]) REFERENCES [tblLGGenerateLoad]([intGenerateLoadId]) ON DELETE CASCADE,
