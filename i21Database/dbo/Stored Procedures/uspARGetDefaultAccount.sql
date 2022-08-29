@@ -31,7 +31,7 @@ WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0
 
 SET @intAccountId = [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
 
-IF (@OverrideLocationSegment = 1AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
+IF (@OverrideLocationSegment = 1 AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
 BEGIN
 	SET @strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
 						 @intAccountId
@@ -61,10 +61,27 @@ BEGIN
 	SET @strErrorMsg = 'Default AR Account ' + @strAccountId + ' for company location ' + @strSalesCompanyLocation + ' is either not existing or inactive.'
 
 	SELECT TOP 1
-		@strAccountId = strAccountId
+		 @intAccountId = intAccountId
+		,@strAccountId = strAccountId
 	FROM tblGLAccount WITH(NOLOCK)
 	WHERE intAccountId = @intCompanyARAccountId 
 	AND ysnActive = 1
+
+	IF (@OverrideLocationSegment = 1 AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
+	BEGIN
+		SET @strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
+							 @intAccountId
+							,CASE WHEN @OverrideLocationSegment = 1 THEN @intProfitCenterId ELSE NULL END
+							,NULL
+							,CASE WHEN @OverrideCompanySegment = 1 THEN @intCompanySegment ELSE NULL END
+						  )
+
+		SELECT TOP 1
+			 @strAccountId	= strAccountId
+			,@intAccountId	= intAccountId
+		FROM tblGLAccount WITH(NOLOCK)
+		WHERE strAccountId = @strAccountId
+	END
 END
 
 IF EXISTS(SELECT TOP 1 ysnAllowSingleLocationEntries FROM tblARCompanyPreference WHERE ISNULL(ysnAllowSingleLocationEntries, 0) = 1)
