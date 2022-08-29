@@ -2112,9 +2112,9 @@ BEGIN
 		,[strBatchId]			= @BatchId
 		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment in ' + CL.strLocationName + ' for ' + GLAC.strAccountCategory + ' account category. Please add ' + [dbo].[fnGLGetOverrideAccountBySegment](
 										 [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory)
-										,CL.intProfitCenter
+										,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
 										,NULL
-										,CL.intCompanySegment
+										,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
 									) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM @ItemsForCosting IFC
@@ -2128,7 +2128,7 @@ BEGIN
 		FROM tblGLAccount
 		WHERE strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
 								 [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory)
-								,CASE WHEN @OverrideLocationSegment =1 THEN CL.intProfitCenter ELSE NULL END
+								,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
 								,NULL
 								,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
 							)
@@ -2156,9 +2156,9 @@ BEGIN
 		,[strBatchId]			= @BatchId
 		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment in ' + CL.strLocationName + ' for Inventory In-Transit account category. Please add ' + [dbo].[fnGLGetOverrideAccountBySegment](
 										 [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, 'Inventory In-Transit')
-										,CL.intProfitCenter
+										,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
 										,NULL
-										,CL.intCompanySegment
+										,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
 									) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM @ItemsForInTransitCosting IFITC
@@ -2170,7 +2170,7 @@ BEGIN
 		FROM tblGLAccount
 		WHERE strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
 								 [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, 'Inventory In-Transit')
-								,CASE WHEN @OverrideLocationSegment =1 THEN CL.intProfitCenter ELSE NULL END
+								,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
 								,NULL
 								,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
 							)

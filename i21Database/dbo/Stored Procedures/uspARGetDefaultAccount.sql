@@ -12,6 +12,9 @@ AS
 DECLARE  @strSalesCompanyLocation	NVARCHAR(250)	= NULL
 		,@ysnActive					BIT = 0
 		,@intCompanySegment			INT
+		,@OverrideCompanySegment	BIT
+		,@OverrideLocationSegment	BIT
+		,@intCompanyARAccountId		INT				= NULL
 
 SELECT 
 	 @strSalesCompanyLocation	= strLocationName
@@ -20,15 +23,22 @@ SELECT
 FROM tblSMCompanyLocation
 WHERE intCompanyLocationId = @intCompanyLocationId
 
+SELECT TOP 1 
+	 @intCompanyARAccountId		= [intARAccountId]
+	,@OverrideCompanySegment	= ysnOverrideCompanySegment
+	,@OverrideLocationSegment	= ysnOverrideLocationSegment
+FROM tblARCompanyPreference 
+WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0
+
 SET @intAccountId = [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
 
-IF ISNULL(@intProfitCenterId, 0) > 0 OR ISNULL(@intCompanySegment, 0) > 0
+IF (@OverrideLocationSegment = 1AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
 BEGIN
 	SET @strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
 						 @intAccountId
-						,@intProfitCenterId
+						,CASE WHEN @OverrideLocationSegment = 1 THEN @intProfitCenterId ELSE NULL END
 						,NULL
-						,@intCompanySegment
+						,CASE WHEN @OverrideCompanySegment = 1 THEN @intCompanySegment ELSE NULL END
 					  )
 
 	SELECT TOP 1
@@ -51,13 +61,11 @@ IF @ysnActive = 0
 BEGIN
 	SET @strErrorMsg = 'Default AR Account ' + @strAccountId + ' for company location ' + @strSalesCompanyLocation + ' is either not existing or inactive.'
 
-	SET @intAccountId = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0)
-	SET @intAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId AND ysnActive = 1)
-
 	SELECT TOP 1
 		@strAccountId = strAccountId
 	FROM tblGLAccount WITH(NOLOCK)
-	WHERE intAccountId = @intAccountId
+	WHERE intAccountId = @intCompanyARAccountId 
+	AND ysnActive = 1
 END
 
 IF EXISTS(SELECT TOP 1 ysnAllowSingleLocationEntries FROM tblARCompanyPreference WHERE ISNULL(ysnAllowSingleLocationEntries, 0) = 1)
