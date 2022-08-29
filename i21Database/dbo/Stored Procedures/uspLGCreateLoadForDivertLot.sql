@@ -37,6 +37,7 @@ INSERT INTO tblLGLoad (
 	,ysnInProgress
 	,dblDeliveredQuantity
 	,dtmDeliveredDate
+	,intTruckId
 	,strTruckNo
 	,strTrailerNo1
 	,strTrailerNo2
@@ -156,6 +157,7 @@ SELECT @strNewLoadNumber
 	,ysnInProgress
 	,dblDeliveredQuantity
 	,dtmDeliveredDate
+	,intTruckId
 	,strTruckNo
 	,strTrailerNo1
 	,strTrailerNo2

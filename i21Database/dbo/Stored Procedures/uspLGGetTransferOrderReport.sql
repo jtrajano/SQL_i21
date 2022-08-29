@@ -142,7 +142,7 @@ BEGIN
 	LEFT JOIN vyuCTEntity CTE ON CTE.intEntityId = LW.intHaulerEntityId AND CTE.strEntityType = 'Ship Via' 
 	LEFT JOIN vyuICGetCompactItem ICI ON ICI.intItemId = LD.intItemId
 	LEFT JOIN vyuLGLoadDetailLotsView LDL ON LDL.intLoadId = @intLoadId AND LD.intLoadDetailId = LDL.intLoadDetailId
-	LEFT JOIN vyuLGGetLoadData LLD ON LLD.intLoadId = @intLoadId
+	LEFT JOIN vyuLGLoadView LLD ON LLD.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocationSubLocation FromStorageLoc ON LD.intPSubLocationId = FromStorageLoc.intCompanyLocationSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation ToStorageLoc ON LD.intSSubLocationId = ToStorageLoc.intCompanyLocationSubLocationId	
 	LEFT JOIN tblEMEntityLocation FromStorageVendor ON FromStorageVendor.intEntityId = FromStorageLoc.intVendorId AND FromStorageVendor.ysnDefaultLocation = 1 
