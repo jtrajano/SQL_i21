@@ -37,7 +37,7 @@ SELECT   L.intLoadId
         ,ysnInProgress = IsNull(L.ysnInProgress, 0)
         ,L.dtmDeliveredDate
         ,L.strCustomerReference
-        ,strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END
+        ,strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END
         ,L.strTrailerNo1
         ,L.strTrailerNo2
         ,L.strTrailerNo3
