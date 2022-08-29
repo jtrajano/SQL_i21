@@ -1023,6 +1023,7 @@ BEGIN TRY
 					,dtmDeliveredDate
 					,intGenerateLoadId
 					,intGenerateSequence
+					,intTruckId
 					,strTruckNo
 					,strTrailerNo1
 					,strTrailerNo2
@@ -1178,6 +1179,7 @@ BEGIN TRY
 					,dtmDeliveredDate
 					,NULL intGenerateLoadId
 					,NULL intGenerateSequence
+					,intTruckId
 					,strTruckNo
 					,strTrailerNo1
 					,strTrailerNo2
@@ -1332,6 +1334,7 @@ BEGIN TRY
 						,ysnInProgress BIT
 						,dblDeliveredQuantity NUMERIC(18, 6)
 						,dtmDeliveredDate DATETIME
+						,intTruckId INT
 						,strTruckNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strTrailerNo1 NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strTrailerNo2 NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -1503,6 +1506,7 @@ BEGIN TRY
 					,dtmDeliveredDate = x.dtmDeliveredDate
 					,intGenerateLoadId = NULL
 					,intGenerateSequence = NULL
+					,intTruckId = x.intTruckId
 					,strTruckNo = x.strTruckNo
 					,strTrailerNo1 = x.strTrailerNo1
 					,strTrailerNo2 = x.strTrailerNo2
@@ -1660,6 +1664,7 @@ BEGIN TRY
 						,ysnInProgress BIT
 						,dblDeliveredQuantity NUMERIC(18, 6)
 						,dtmDeliveredDate DATETIME
+						,intTruckId INT
 						,strTruckNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strTrailerNo1 NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strTrailerNo2 NVARCHAR(100) COLLATE Latin1_General_CI_AS
