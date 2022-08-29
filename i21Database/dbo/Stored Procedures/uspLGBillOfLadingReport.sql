@@ -153,7 +153,7 @@ BEGIN TRY
 				,strCustomerPO = L.strCustomerReference
 				,L.dtmScheduledDate
 				,strShipVia = Via.strName
-				,strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END
+				,strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END
 				,L.strComments
 				,FreightTerm.strFreightTerm
 				,Item.strItemNo
