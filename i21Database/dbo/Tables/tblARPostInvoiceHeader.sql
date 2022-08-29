@@ -168,6 +168,7 @@ CREATE TABLE tblARPostInvoiceHeader (
     ,[intFreightCompanySegment]			    INT												NULL
 	,[intFreightLocationSegment]			INT												NULL
     ,[dblSurcharge]                         NUMERIC(18,6)   NULL DEFAULT 0
+    ,[intCompanySegment]                    INT             NULL
 );
 GO
 CREATE INDEX [idx_tblARPostInvoiceHeader_intInvoiceId] ON [dbo].[tblARPostInvoiceHeader] (intInvoiceId)
