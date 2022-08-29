@@ -36,13 +36,22 @@ SET ANSI_WARNINGS OFF
 	
 	--AR ACCOUNT	
 	UPDATE ARI
-	SET ARI.intAccountId = CASE WHEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter) IS NOT NULL AND ISNULL(GL.ysnActive, 0) = 1 AND @AllowIntraCompanyEntries = 0 AND @AllowIntraLocationEntries = 0 AND @AllowSingleLocationEntries = 0
-								THEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
+	SET ARI.intAccountId = CASE WHEN @OverrideLocationSegment = 1 OR @OverrideLocationSegment = 1
+								THEN ISNULL(GLA.intAccountId, ARI.intAccountId)
 								ELSE ARI.intAccountId
 							END
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	INNER JOIN tblARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
-	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
+	OUTER APPLY (
+		SELECT intAccountId
+		FROM tblGLAccount
+		WHERE strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
+								 ARI.intAccountId
+								,CASE WHEN @OverrideLocationSegment = 1 THEN PID.intProfitCenter ELSE NULL END
+								,NULL
+								,CASE WHEN @OverrideCompanySegment = 1 THEN PID.intCompanySegment ELSE NULL END
+							)
+	) GLA
 	WHERE PID.strSessionId = @strSessionId
 
 	INSERT INTO @LineItemAccounts (

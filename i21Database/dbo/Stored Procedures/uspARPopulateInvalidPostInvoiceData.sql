@@ -50,6 +50,8 @@ BEGIN
 			,@SurchargeRevenueAccount		INT
 			,@SurchargeExpenseAccount		INT
 			,@OverrideLineOfBusinessSegment	BIT
+			,@OverrideCompanySegment		BIT
+			,@OverrideLocationSegment		BIT
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting] @strSessionId = @strSessionId
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting] @strSessionId = @strSessionId
@@ -68,6 +70,8 @@ BEGIN
 		,@SurchargeRevenueAccount		= ISNULL([intSurchargeRevenueAccount], 0)
 		,@SurchargeExpenseAccount		= ISNULL([intSurchargeExpenseAccount], 0)
 		,@OverrideLineOfBusinessSegment	= ISNULL([ysnOverrideLineOfBusinessSegment], 0)
+		,@OverrideCompanySegment		= ISNULL([ysnOverrideCompanySegment], 0)
+		,@OverrideLocationSegment		= ISNULL([ysnOverrideLocationSegment], 0)
 	FROM tblARCompanyPreference
 	
 	INSERT INTO tblARPostInvalidInvoiceData (
@@ -2090,88 +2094,6 @@ BEGIN
 	FROM 
 		[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @OneBit)
 
-	--VALIDATE INVENTORY ACCOUNTS
-	DECLARE @InvalidItemsForPosting TABLE (
-		  intInvoiceId				INT
-		, intInvoiceDetailId		INT
-		, intItemId					INT
-		, intItemLocationId			INT
-		, strInvoiceNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strAccountCategory		NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	)
-
-	INSERT INTO @InvalidItemsForPosting (
-		  intInvoiceId
-		, intInvoiceDetailId
-		, intItemId
-		, intItemLocationId
-		, strInvoiceNumber
-		, strAccountCategory
-	)
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Inventory'
-	FROM @ItemsForCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory') IS NULL	
-
-	UNION ALL
-	
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Cost of Goods'
-	FROM @ItemsForCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Cost of Goods') IS NULL
-
-	UNION ALL
-	
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Sales Account'
-	FROM @ItemsForCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Sales Account') IS NULL
-
-	UNION ALL
-
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Cost of Goods'
-	FROM @ItemsForCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Cost of Goods') IS NULL
-
-	UNION ALL
-	
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Sales Account'
-	FROM @ItemsForCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Sales Account') IS NULL
-
-	UNION ALL
-
-	SELECT intInvoiceId			= IC.intTransactionId
-		, intInvoiceDetailId	= IC.intTransactionDetailId		
-		, intItemId				= IC.intItemId
-		, intItemLocationId		= IC.intItemLocationId
-		, strInvoiceNumber		= IC.strTransactionId
-		, strAccountCategory	= 'Inventory In-Transit'
-	FROM @ItemsForInTransitCosting IC
-	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory In-Transit') IS NULL	
-	
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -2182,18 +2104,80 @@ BEGIN
 		,[strPostingError]
 		,[strSessionId])
 	SELECT
-		 [intInvoiceId]			= IC.intInvoiceId
-		,[strInvoiceNumber]		= IC.strInvoiceNumber
+		 [intInvoiceId]			= IFC.intTransactionId
+		,[strInvoiceNumber]		= IFC.strTransactionId
 		,[strTransactionType]	= 'Invoice'
-		,[intInvoiceDetailId]	= IC.intInvoiceDetailId
-		,[intItemId]			= IC.intItemId
+		,[intInvoiceDetailId]	= IFC.intTransactionDetailId
+		,[intItemId]			= IFC.intItemId
 		,[strBatchId]			= @BatchId
-		,[strPostingError]		= ITEM.strItemNo + ' in ' + CL.strLocationName + ' is missing a GL account setup for ' + IC.strAccountCategory + ' account category.'
+		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment in ' + CL.strLocationName + ' for ' + GLAC.strAccountCategory + ' account category. Please add ' + [dbo].[fnGLGetOverrideAccountBySegment](
+										 [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory)
+										,CL.intProfitCenter
+										,NULL
+										,CL.intCompanySegment
+									) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
-	FROM @InvalidItemsForPosting IC
-	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
-	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
+	FROM @ItemsForCosting IFC
+	INNER JOIN tblICItem ITEM ON IFC.intItemId = ITEM.intItemId
+	INNER JOIN tblICItemLocation IL ON IFC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+	INNER JOIN tblICItemAccount ICIA ON IFC.intItemId = ICIA.intItemId
+	INNER JOIN tblGLAccountCategory GLAC ON ICIA.intAccountCategoryId = GLAC.intAccountCategoryId
+	OUTER APPLY (
+		SELECT intAccountId
+		FROM tblGLAccount
+		WHERE strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
+								 [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory)
+								,CASE WHEN @OverrideLocationSegment =1 THEN CL.intProfitCenter ELSE NULL END
+								,NULL
+								,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
+							)
+	) GLA
+	WHERE (@OverrideLocationSegment = 1
+	OR @OverrideCompanySegment = 1)
+	AND ISNULL(GLA.intAccountId, 0) = 0
+	AND GLAC.strAccountCategory IN ('Cost of Goods', 'Sales Account', 'Inventory')
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	SELECT
+		 [intInvoiceId]			= IFITC.intTransactionId
+		,[strInvoiceNumber]		= IFITC.strTransactionId
+		,[strTransactionType]	= 'Invoice'
+		,[intInvoiceDetailId]	= IFITC.intTransactionDetailId
+		,[intItemId]			= IFITC.intItemId
+		,[strBatchId]			= @BatchId
+		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment in ' + CL.strLocationName + ' for Inventory In-Transit account category. Please add ' + [dbo].[fnGLGetOverrideAccountBySegment](
+										 [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, 'Inventory In-Transit')
+										,CL.intProfitCenter
+										,NULL
+										,CL.intCompanySegment
+									) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM @ItemsForInTransitCosting IFITC
+	INNER JOIN tblICItem ITEM ON IFITC.intItemId = ITEM.intItemId
+	INNER JOIN tblICItemLocation IL ON IFITC.intItemLocationId = IL.intItemLocationId
+	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+	OUTER APPLY (
+		SELECT intAccountId
+		FROM tblGLAccount
+		WHERE strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
+								 [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, 'Inventory In-Transit')
+								,CASE WHEN @OverrideLocationSegment =1 THEN CL.intProfitCenter ELSE NULL END
+								,NULL
+								,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
+							)
+	) GLA
+	WHERE (@OverrideLocationSegment = 1
+	OR @OverrideCompanySegment = 1)
+	AND ISNULL(GLA.intAccountId, 0) = 0
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
