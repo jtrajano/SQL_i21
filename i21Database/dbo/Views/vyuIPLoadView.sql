@@ -33,7 +33,8 @@ SELECT -- Load Header
 	,strDriver = Driver.strName
 	,strDispatcher = US.strUserName
 	,L.strCustomerReference
-	,L.strTruckNo
+	,L.intTruckId
+	,strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END
 	,L.strTrailerNo1
 	,L.strTrailerNo2
 	,L.strTrailerNo3
@@ -166,6 +167,7 @@ LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblCTBook B ON B.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblSMUserSecurity US1 ON US1.[intEntityId] = L.intUserSecurityId
