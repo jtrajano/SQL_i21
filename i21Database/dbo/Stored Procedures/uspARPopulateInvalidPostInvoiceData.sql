@@ -2110,32 +2110,21 @@ BEGIN
 		,[intInvoiceDetailId]	= IFC.intTransactionDetailId
 		,[intItemId]			= IFC.intItemId
 		,[strBatchId]			= @BatchId
-		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment in ' + CL.strLocationName + ' for ' + GLAC.strAccountCategory + ' account category. Please add ' + [dbo].[fnGLGetOverrideAccountBySegment](
-										 [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory)
-										,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
-										,NULL
-										,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
-									) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment of AR Account for ' + GLAC.strAccountCategory + ' account category. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM @ItemsForCosting IFC
+	INNER JOIN tblARPostInvoiceDetail ARPID ON IFC.intTransactionDetailId = ARPID.intInvoiceDetailId AND @strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId
 	INNER JOIN tblICItem ITEM ON IFC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IFC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
 	INNER JOIN tblICItemAccount ICIA ON IFC.intItemId = ICIA.intItemId
 	INNER JOIN tblGLAccountCategory GLAC ON ICIA.intAccountCategoryId = GLAC.intAccountCategoryId
 	OUTER APPLY (
-		SELECT intAccountId
-		FROM tblGLAccount
-		WHERE strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
-								 [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory)
-								,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
-								,NULL
-								,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
-							)
-	) GLA
-	WHERE (@OverrideLocationSegment = 1
-	OR @OverrideCompanySegment = 1)
-	AND ISNULL(GLA.intAccountId, 0) = 0
+		SELECT bitOverriden, strOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](ARPIH.[intAccountId], [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory), @OverrideCompanySegment, @OverrideLocationSegment, 0)
+	) OVERRIDESEGMENT
+	WHERE ((@OverrideLocationSegment = 1 OR @OverrideCompanySegment = 1) AND OVERRIDESEGMENT.bitOverriden = 0)
 	AND GLAC.strAccountCategory IN ('Cost of Goods', 'Sales Account', 'Inventory')
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2154,30 +2143,22 @@ BEGIN
 		,[intInvoiceDetailId]	= IFITC.intTransactionDetailId
 		,[intItemId]			= IFITC.intItemId
 		,[strBatchId]			= @BatchId
-		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment in ' + CL.strLocationName + ' for Inventory In-Transit account category. Please add ' + [dbo].[fnGLGetOverrideAccountBySegment](
-										 [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, 'Inventory In-Transit')
-										,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
-										,NULL
-										,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
-									) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment of AR Account for ' + GLAC.strAccountCategory + ' account category. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM @ItemsForInTransitCosting IFITC
+	INNER JOIN tblARPostInvoiceDetail ARPID ON IFITC.intTransactionDetailId = ARPID.intInvoiceDetailId AND @strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId
 	INNER JOIN tblICItem ITEM ON IFITC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IFITC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+	INNER JOIN tblICItemAccount ICIA ON IFITC.intItemId = ICIA.intItemId
+	INNER JOIN tblGLAccountCategory GLAC ON ICIA.intAccountCategoryId = GLAC.intAccountCategoryId
 	OUTER APPLY (
-		SELECT intAccountId
-		FROM tblGLAccount
-		WHERE strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
-								 [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, 'Inventory In-Transit')
-								,CASE WHEN @OverrideLocationSegment = 1 THEN CL.intProfitCenter ELSE NULL END
-								,NULL
-								,CASE WHEN @OverrideCompanySegment = 1 THEN CL.intCompanySegment ELSE NULL END
-							)
-	) GLA
-	WHERE (@OverrideLocationSegment = 1
-	OR @OverrideCompanySegment = 1)
-	AND ISNULL(GLA.intAccountId, 0) = 0
+		SELECT bitOverriden, strOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](ARPIH.[intAccountId], [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, GLAC.strAccountCategory), @OverrideCompanySegment, @OverrideLocationSegment, 0)
+	) OVERRIDESEGMENT
+	WHERE ((@OverrideLocationSegment = 1 OR @OverrideCompanySegment = 1) AND OVERRIDESEGMENT.bitOverriden = 0)
+	AND GLAC.strAccountCategory = 'Inventory In-Transit'
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
