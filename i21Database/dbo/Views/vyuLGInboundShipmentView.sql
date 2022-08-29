@@ -40,7 +40,7 @@ SELECT
 	strSubLocationName = SubLocation.strSubLocationName,
 	dtmLastFreeDate = LW.dtmLastFreeDate,
 	dtmEmptyContainerReturn = LW.dtmEmptyContainerReturn,
-	strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END,
+	strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END,
 	intForwardingAgentEntityId = L.intForwardingAgentEntityId,
 	strForwardingAgent = FwdAgent.strName,
 	strForwardingAgentRef = L.strForwardingAgentRef,

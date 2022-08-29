@@ -6,7 +6,7 @@ SELECT L.intLoadId
 	,L.strLoadNumber
 	,L.strExternalLoadNumber
 	,L.strExternalShipmentNumber
-	,strTruckNo = CASE WHEN (L.intTransUsedBy = 3) THEN SVT.strTruckNumber ELSE L.strTruckNo END
+	,strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END
 	,L.strBLNumber
 	,L.dtmETAPOD
 	,L.dtmETAPOL
