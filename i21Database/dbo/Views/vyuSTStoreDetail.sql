@@ -25,7 +25,6 @@ SELECT ST.*
 	   , strChangeFundBegBalanceItemId		 = 	  ChangeFundBegBalanceItem.strItemNo
 	   , strChangeFundEndBalanceItemId		 = 	  ChangeFundEndBalanceItem.strItemNo
 	   , strChangeFundReplenishItemId		 = 	  ChangeFundReplenishItem.strItemNo
-	   , strConsARAccountId					 =	  ConsARAccountId.strAccountId
 	   , strConsFuelOverShortItem			 =    FuelItemOverShort.strItemNo
 	   , CustomerCharge.strDescription as strCustomerChargeDescription
 	   , CashTransaction.strDescription as strCashTransactionDescription
@@ -73,5 +72,3 @@ LEFT JOIN tblICItem ChangeFundReplenishItem
 	ON ST.intChangeFundReplenishItemId = ChangeFundReplenishItem.intItemId
 LEFT JOIN tblICItem FuelItemOverShort 
 	ON ST.intConsFuelOverShortItemId = FuelItemOverShort.intItemId
-LEFT JOIN tblGLAccount ConsARAccountId
-	ON ST.intConsARAccountId = ConsARAccountId.intAccountId
