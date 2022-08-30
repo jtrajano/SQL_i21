@@ -1118,6 +1118,12 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntityEFTInformation.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityCompanySegmentRolePermission.sql" />
     <Build Include="dbo\Functions\fnFAGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblARSalespersonFuelTerminal.sql" />
+    <Build Include="dbo\Tables\tblARSalespersonRegion.sql" />
+    <Build Include="dbo\Tables\tblEMEntityLocationDefaultItem.sql" />
+    <Build Include="dbo\Tables\tblSMRegion.sql" />
+    <Build Include="dbo\Tables\tblSMTerritory.sql" />
+    <Build Include="dbo\Tables\tblTRFuelTerminal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
