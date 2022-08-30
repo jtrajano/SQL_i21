@@ -81,6 +81,8 @@
 	[intSurchargeRevenueAccount]			INT NULL, 
     [intSurchargeExpenseAccount]			INT NULL,
 	[ysnEnableCustomStatement]              BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnEnableCustomStatement] DEFAULT ((0)),
+	[intFreightTermId]      				INT NULL,
+	[strProvisionalInvoiceOverpayment]  	NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Create Overpayment',
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -96,5 +98,6 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFeeGeneralLedgerAccountId] FOREIGN KEY ([intFeeGeneralLedgerAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeRevenueAccount] FOREIGN KEY ([intSurchargeRevenueAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeExpenseAccount] FOREIGN KEY ([intSurchargeExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeExpenseAccount] FOREIGN KEY ([intSurchargeExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),	
+ 	CONSTRAINT [FK_tblARCompanyPreference_tblSMFreightTerm_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId])
 )
