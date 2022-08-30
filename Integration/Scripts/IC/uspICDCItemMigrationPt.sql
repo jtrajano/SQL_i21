@@ -19,6 +19,8 @@ SET ANSI_WARNINGS ON
 -- Section 1
 --------------------------------------------------------------------------------------------------------------------------------------------
 
+/* Prioritize Inventory Type insert first, this will prevent insertion of Duplicate Item No with Other Charge type or  ptitm_phys_inv_yno = NO */
+
 INSERT INTO tblICItem(
 	strItemNo
 	, strType
@@ -81,7 +83,7 @@ SELECT
 FROM (
 	SELECT
 			  strItemNo					= RTRIM(ptitm_itm_no) COLLATE Latin1_General_CI_AS
-			, strType					= CASE WHEN (min(ptitm_phys_inv_yno) = 'N') THEN 'Other Charge' ELSE 'Inventory' END COLLATE Latin1_General_CI_AS
+			, strType					= 'Inventory' COLLATE Latin1_General_CI_AS
 			, strDescription			= RTRIM(min(ptitm_desc)) COLLATE Latin1_General_CI_AS
 			, strStatus					= 'Active'
 			, strInventoryTracking		= 'Item Level' COLLATE Latin1_General_CI_AS
@@ -108,7 +110,104 @@ FROM (
 			, intConcurrencyId			= 1
 			, ysnCommisionable			= CAST(CASE WHEN (min(ptitm_comm_ind_uag) = 'Y') THEN 1 ELSE 0 END AS BIT)
 	FROM ptitmmst AS inv 
-	where ptitm_phys_inv_yno <> 'O'
+	where ptitm_phys_inv_yno <> 'O' AND ptitm_phys_inv_yno = 'Y'
+	GROUP BY ptitm_itm_no
+) AS i
+WHERE NOT EXISTS(SELECT TOP 1 * FROM tblICItem where strItemNo = i.strItemNo)
+
+
+/* Insert Other Charge Item*/
+
+INSERT INTO tblICItem(
+	strItemNo
+	, strType
+	, strDescription
+	, strStatus
+	, strInventoryTracking
+	, strLotTracking
+	, intCategoryId
+	, intPatronageCategoryId
+	, intLifeTime
+	, ysnLandedCost
+	, ysnDropShip
+	, ysnSpecialCommission
+	, ysnStockedItem
+	, ysnDyedFuel
+	, strBarcodePrint
+	, ysnMSDSRequired
+	, ysnAvailableTM
+	, dblDefaultFull
+	, ysnExtendPickTicket
+	, ysnExportEDI
+	, ysnHazardMaterial
+	, ysnMaterialFee
+	, strCountCode
+	, ysnTaxable
+	, strKeywords
+	, intConcurrencyId
+	, ysnCommisionable
+	, dtmDateCreated
+)
+SELECT
+	strItemNo				
+	, strType				
+	, strDescription		
+	, strStatus				
+	, strInventoryTracking	
+	, strLotTracking		
+	, intCategoryId			
+	, intPatronageCategoryId
+	, intLifeTime			
+	, ysnLandedCost			
+	, ysnDropShip			
+	, ysnSpecialCommission	
+	, ysnStockedItem		
+	, ysnDyedFuel			
+	, strBarcodePrint		
+	, ysnMSDSRequired		
+	, ysnAvailableTM		
+	, dblDefaultFull		
+	, ysnExtendPickTicket	
+	, ysnExportEDI			
+	, ysnHazardMaterial		
+	, ysnMaterialFee		
+	, strCountCode			
+	, ysnTaxable			
+	, strKeywords			
+	, intConcurrencyId		
+	, ysnCommisionable
+	, GETUTCDATE()
+FROM (
+	SELECT
+			  strItemNo					= RTRIM(ptitm_itm_no) COLLATE Latin1_General_CI_AS
+			, strType					= 'Other Charge' COLLATE Latin1_General_CI_AS
+			, strDescription			= RTRIM(min(ptitm_desc)) COLLATE Latin1_General_CI_AS
+			, strStatus					= 'Active'
+			, strInventoryTracking		= 'Item Level' COLLATE Latin1_General_CI_AS
+			, strLotTracking			= 'No' COLLATE Latin1_General_CI_AS
+			, intCategoryId				= (SELECT TOP 1 min(intCategoryId) FROM tblICCategory AS cls WHERE (cls.strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = min(inv.ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
+			, intPatronageCategoryId	= (SELECT TOP 1 min(intPatronageCategoryId) FROM tblPATPatronageCategory INNER JOIN ptitmmst ON (strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = (ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
+			, intLifeTime				= 1
+			, ysnLandedCost				= CAST(0 AS BIT)
+			, ysnDropShip				= CAST(0 AS BIT)
+			, ysnSpecialCommission		= CAST(0 AS BIT)
+			, ysnStockedItem			= CAST(CASE WHEN (min(ptitm_stock_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnDyedFuel				= CAST(CASE WHEN (min(ptitm_dyed_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, strBarcodePrint			= CASE WHEN (min(ptitm_bar_code_ind) = 'I') THEN 'Item' WHEN (min(ptitm_bar_code_ind) = 'U') THEN 'UPC' ELSE 'None' END COLLATE Latin1_General_CI_AS
+			, ysnMSDSRequired			= CAST(CASE WHEN (min(ptitm_msds_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnAvailableTM			= CAST(CASE WHEN (max(ptitm_avail_tm) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, dblDefaultFull			= max(ptitm_deflt_percnt)
+			, ysnExtendPickTicket		= CAST(CASE WHEN (min(ptitm_ext_pic_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnExportEDI				= CAST(CASE WHEN (min(ptitm_edi_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnHazardMaterial			= CAST(CASE WHEN (min(ptitm_hazmat_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnMaterialFee			= CAST(CASE WHEN (min(ptitm_amf_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, strCountCode				= RTRIM(min(ptitm_phys_inv_yno)) COLLATE Latin1_General_CI_AS
+			, ysnTaxable				= CAST(CASE WHEN (min(ptitm_sst_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, strKeywords				= RTRIM(min(ptitm_search)) COLLATE Latin1_General_CI_AS
+			, intConcurrencyId			= 1
+			, ysnCommisionable			= CAST(CASE WHEN (min(ptitm_comm_ind_uag) = 'Y') THEN 1 ELSE 0 END AS BIT)
+	FROM ptitmmst AS inv 
+	where ptitm_phys_inv_yno <> 'O' AND ptitm_phys_inv_yno = 'N'
 	GROUP BY ptitm_itm_no
 ) AS i
 WHERE NOT EXISTS(SELECT TOP 1 * FROM tblICItem where strItemNo = i.strItemNo)
