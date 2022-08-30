@@ -10,6 +10,7 @@
 	[intUnitMeasureId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblVRProgramItem_intConcurrencyId]  DEFAULT ((0)),
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[intRowNumber] INT NULL,
 	CONSTRAINT [PK_tblVRProgramItem] PRIMARY KEY CLUSTERED ([intProgramItemId] ASC),
 	CONSTRAINT [FK_tblVRProgramItem_tblICCategory] FOREIGN KEY([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),
 	CONSTRAINT [FK_tblVRProgramItem_tblICItem] FOREIGN KEY([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
