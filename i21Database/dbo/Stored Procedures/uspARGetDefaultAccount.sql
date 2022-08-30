@@ -6,6 +6,7 @@
 	, @strErrorMsg					NVARCHAR(250)	= NULL OUTPUT
 	, @intLocationAccountSegmentId	INT				= NULL OUTPUT
 	, @intCompanyAccountSegmentId	INT				= NULL OUTPUT
+	, @intProfitCenterId			INT				= NULL OUTPUT
 AS	
 
 DECLARE  @strSalesCompanyLocation	NVARCHAR(250)	= NULL
