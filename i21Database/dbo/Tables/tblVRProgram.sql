@@ -7,6 +7,7 @@
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblVRProgram_intConcurrencyId]  DEFAULT ((0)),
 	[ysnActive] BIT NOT NULL DEFAULT 1,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[intRowNumber] INT NULL,
     CONSTRAINT [PK_tblVRProgram] PRIMARY KEY CLUSTERED ([intProgramId] ASC),
 	CONSTRAINT [FK_tblVRProgram_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [dbo].[tblVRVendorSetup] ([intVendorSetupId]) 
 )

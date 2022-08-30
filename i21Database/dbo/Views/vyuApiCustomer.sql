@@ -14,6 +14,7 @@ SELECT [EntityId]			= e.intEntityId
 	 , [LastName]			= ISNULL(SUBSTRING((CASE WHEN CHARINDEX(' ', e.strName) > 0 THEN SUBSTRING(SUBSTRING(e.strName,1,30),CHARINDEX(' ',e.strName) + 1, LEN(e.strName))END), 1, 20) , '') COLLATE Latin1_General_CI_AS
 	 , [FirstName]			= ISNULL(SUBSTRING((CASE WHEN CHARINDEX(' ', e.strName) > 0 THEN SUBSTRING(SUBSTRING(e.strName,1,30), 0, CHARINDEX(' ',e.strName)) ELSE SUBSTRING(e.strName,1,30)END), 1, 20) , '') COLLATE Latin1_General_CI_AS
 	 , [Name]				= ISNULL(e.strName, '') COLLATE Latin1_General_CI_AS
+	 , [ContactName]		= ISNULL(e.strContactName, '') COLLATE Latin1_General_CI_AS
 	 , [Address1]			= ISNULL(dbo.fnEMSplitWithGetByIdx(e.strAddress,char(10),1) , '') COLLATE Latin1_General_CI_AS
 	 , [Address2]			= ISNULL(dbo.fnEMSplitWithGetByIdx(e.strAddress,char(10),2) , '') COLLATE Latin1_General_CI_AS
 	 , [City]				= ISNULL(e.strCity, '') COLLATE Latin1_General_CI_AS
