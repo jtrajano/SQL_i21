@@ -22,7 +22,7 @@ BEGIN
             IF(ISNULL(@strRoute, '') != '')
             BEGIN
 
-                IF EXISTS(SELECT TOP 1 1 FROM tblTMRoute WHERE strRouteId = @strRoute)
+                IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMRoute WHERE strRouteId = @strRoute)
                 BEGIN
 
                     DECLARE  @intRouteId INT = NULL 
@@ -106,7 +106,7 @@ BEGIN
 				, strMessage = 'Error on inserting/updating - ' + @ErrorMessage
 		END CATCH
 
-        FETCH NEXT FROM DataCursor INTO @strRoute
+        FETCH NEXT FROM DataCursor INTO @strRoute, @intRowNumber
     END
     CLOSE DataCursor
 	DEALLOCATE DataCursor

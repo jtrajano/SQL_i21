@@ -44,7 +44,9 @@ BEGIN TRANSACTION;
    ,[strCode]  
    ,[strTransactionType]  
    ,[strTransactionForm]  
-   ,[strModuleName]  
+   ,[strModuleName]
+   ,[intLedgerId]
+   ,[intCompanyLocationId]
   )  
   SELECT   
     [strTransactionId]  
@@ -74,6 +76,8 @@ BEGIN TRANSACTION;
    ,[strTransactionType]  
    ,[strTransactionForm]  
    ,[strModuleName]  
+   ,[intLedgerId]
+   ,A.[intCompanyLocationId]
   FROM tblGLDetail A 
   JOIN  @Id B 
     ON B.intId = A.intGLDetailId AND ysnIsUnposted = 0  

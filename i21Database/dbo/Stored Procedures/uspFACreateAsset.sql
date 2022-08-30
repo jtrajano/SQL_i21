@@ -80,7 +80,18 @@ DECLARE @dblRate NUMERIC (18,6)
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
 		WHILE EXISTS(SELECT TOP 1 1 FROM #AssetID WHERE ysnProcessed = 0)
-		BEGIN	
+		BEGIN
+		
+			DECLARE 
+				 @intCompanyLocationId INT
+				,@intLocationSegmentId INT
+				,@intAssetAccountId INT
+				,@intNewAssetAccountId INT = NULL
+				,@strNewAssetAccountId NVARCHAR(40)
+				,@intExpenseAccountId INT = NULL
+				,@intNewExpenseAccountId INT
+				,@strNewExpenseAccountId NVARCHAR(40)
+
 			SELECT TOP 1 @intCurrentAssetId = intAssetId FROM #AssetID WHERE ysnProcessed = 0
 
 			SELECT @dblRate = CASE WHEN ISNULL(BD.dblRate, 0) > 0 
@@ -90,14 +101,41 @@ IF ISNULL(@ysnRecap, 0) = 0
 							THEN F.dblForexRate 
 							ELSE 1 
 							END 
-						END,
-					@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, F.intCurrencyId) THEN 0 ELSE 1 END
+						END
+					,@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, F.intCurrencyId) THEN 0 ELSE 1 END
+					,@intAssetAccountId = F.intAssetAccountId
+					,@intExpenseAccountId = F.intExpenseAccountId
+					,@intCompanyLocationId = F.intCompanyLocationId
 			FROM tblFAFixedAsset F 
 			JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
 			WHERE F.[intAssetId] = @intCurrentAssetId AND BD.intBookId = 1 
 
 			EXEC uspSMGetStartingNumber @intStartingNumberId = 112, @strID = @strCurrentTransactionId OUT
 			
+			-- Get Accounts Overridden by Location Segment
+			SELECT @intLocationSegmentId = intProfitCenter FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+			SELECT 
+				 @strNewAssetAccountId = [dbo].[fnGLGetOverrideAccountBySegment](@intAssetAccountId, @intLocationSegmentId, NULL, NULL)
+				,@strNewExpenseAccountId = [dbo].[fnGLGetOverrideAccountBySegment](@intExpenseAccountId, @intLocationSegmentId, NULL, NULL)
+
+			-- Validate override accounts
+			SELECT @intNewAssetAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewAssetAccountId
+			SELECT @intNewExpenseAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewExpenseAccountId
+
+			IF (@intNewAssetAccountId IS NULL)
+			BEGIN
+				SET @ErrorMessage  = @strNewAssetAccountId + ' is not an existing account override for Asset Account.'
+				RAISERROR(@ErrorMessage, 11, 1)
+				GOTO Post_Rollback;
+			END
+
+			IF (@intNewExpenseAccountId IS NULL)
+			BEGIN
+				SET @ErrorMessage  = @strNewExpenseAccountId + ' is not an existing account override for Offset Account.'
+				RAISERROR(@ErrorMessage, 11, 1)
+				GOTO Post_Rollback;
+			END
+
 			DECLARE @GLEntries RecapTableType
 			DELETE FROM @GLEntries
 			
@@ -135,11 +173,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strTransactionForm]
 				,[strModuleName]			
 				,[intCurrencyExchangeRateTypeId]
+				,[intCompanyLocationId]
 			)
 			SELECT 
 				 [strTransactionId]		= @strCurrentTransactionId
 				,[intTransactionId]		= A.[intAssetId]
-				,[intAccountId]			= A.[intAssetAccountId]
+				,[intAccountId]			= @intNewAssetAccountId
 				,[strDescription]		= A.[strAssetDescription]
 				,[strReference]			= A.[strAssetId]
 				,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -173,6 +212,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strTransactionForm]	= 'Fixed Assets'
 				,[strModuleName]		= 'Fixed Assets'
 				,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId
+				,[intCompanyLocationId] = A.[intCompanyLocationId]
 
 			FROM tblFAFixedAsset A
 			WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
@@ -182,7 +222,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			SELECT 
 				 [strTransactionId]		= @strCurrentTransactionId
 				,[intTransactionId]		= A.[intAssetId]
-				,[intAccountId]			= A.[intExpenseAccountId]
+				,[intAccountId]			= @intNewExpenseAccountId
 				,[strDescription]		= A.[strAssetDescription]
 				,[strReference]			= A.[strAssetId]
 				,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -216,6 +256,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strTransactionForm]	= 'Fixed Assets'
 				,[strModuleName]		= 'Fixed Assets'
 				,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId
+				,[intCompanyLocationId] = A.[intCompanyLocationId]
 
 			FROM tblFAFixedAsset A
 			WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)

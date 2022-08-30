@@ -26,17 +26,19 @@ BEGIN
 	IF @intARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 		SELECT TOP 1 @intARAccountId = [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0
 	
-	SET @strARAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
-						 @intARAccountId
-						,@intProfitCenterId
-						,NULL
-						,@intCompanySegment
-					  )
+	IF ISNULL(@intProfitCenterId, 0) > 0 OR ISNULL(@intCompanySegment, 0) > 0
+	BEGIN
+		SET @strARAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
+								 @intARAccountId
+								,@intProfitCenterId
+								,NULL
+								,@intCompanySegment
+							  )
 
-	SELECT @intARAccountId = intAccountId
-	FROM tblGLAccount WITH(NOLOCK)
-	WHERE strAccountId = @strARAccountId
-	OR (ISNULL(@strARAccountId, '') = '' AND intAccountId = @intARAccountId)
+		SELECT @intARAccountId = intAccountId
+		FROM tblGLAccount WITH(NOLOCK)
+		WHERE strAccountId = @strARAccountId
+	END
 
 	RETURN @intARAccountId
 END

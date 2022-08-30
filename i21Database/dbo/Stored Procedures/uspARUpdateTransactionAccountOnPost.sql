@@ -33,17 +33,6 @@ SET ANSI_WARNINGS OFF
 		,@OverrideLocationSegment		= ysnOverrideLocationSegment
 		,@OverrideLineOfBusinessSegment	= ysnOverrideLineOfBusinessSegment
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
-	
-	--AR ACCOUNT	
-	UPDATE ARI
-	SET ARI.intAccountId = CASE WHEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter) IS NOT NULL AND ISNULL(GL.ysnActive, 0) = 1 AND @AllowIntraCompanyEntries = 0 AND @AllowIntraLocationEntries = 0 AND @AllowSingleLocationEntries = 0
-								THEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
-								ELSE ARI.intAccountId
-							END
-	FROM tblARInvoice ARI WITH (NOLOCK)
-	INNER JOIN tblARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
-	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
-	WHERE PID.strSessionId = @strSessionId
 
 	INSERT INTO @LineItemAccounts (
 		  [intDetailId]
