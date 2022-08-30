@@ -245,6 +245,7 @@ BEGIN
 	DELETE FROM #tmpRetroactiveTransactions
 	INSERT INTO #tmpRetroactiveTransactions (
 		intInventoryTransactionId
+		,intSort
 	)
 	-- Self: 
 	SELECT	@InventoryTransactionStartId 
@@ -345,7 +346,7 @@ BEGIN
 			,t.intTransactionDetailId
 			,intTransactionTypeId = 
 				CASE 
-					WHEN cbOut.intRevalueFifoId IS NOT NULL THEN 
+					WHEN cbOut.intRevalueLifoId IS NOT NULL THEN 
 						@INV_TRANS_TYPE_NegativeStock 
 					ELSE 
 						t.intTransactionTypeId 
@@ -371,7 +372,7 @@ BEGIN
 					tblICInventoryLIFOOut cbOut  
 				WHERE
 					cbOut.intInventoryTransactionId = t.intInventoryTransactionId
-					AND cbOut.intRevalueFifoId IS NOT NULL
+					AND cbOut.intRevalueLifoId IS NOT NULL
 					AND SIGN(tmp.intInventoryTransactionId) = -1
 				GROUP BY 
 					cbOut.intRevalueLifoId

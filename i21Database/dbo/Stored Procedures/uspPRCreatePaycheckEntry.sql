@@ -103,7 +103,7 @@ SELECT
  ,0      
  ,0      
  ,0      
- ,NULL      
+ ,@dtmPay      
  ,0      
  ,0      
  ,0      

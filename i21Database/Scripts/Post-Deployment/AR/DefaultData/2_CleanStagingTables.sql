@@ -7,6 +7,7 @@ TRUNCATE TABLE tblARInvoiceReportStagingTable
 TRUNCATE TABLE tblARInvoiceTaxReportStagingTable
 TRUNCATE TABLE tblARCustomerStatementStagingTable
 TRUNCATE TABLE tblARCustomerAgingStagingTable
+TRUNCATE TABLE tblARCustomAgingStagingTable
 TRUNCATE TABLE tblARCustomerActivityStagingTable
 TRUNCATE TABLE tblARTaxStagingTable
 TRUNCATE TABLE tblARGLSummaryStagingTable

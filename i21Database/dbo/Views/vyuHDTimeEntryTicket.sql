@@ -20,7 +20,7 @@
 			,i.strProjectName
 			,i.intProjectId
 			,j.strStatus
-			,dtmCloseDate = CONVERT(VARCHAR(30),a.dtmCompleted , 101) 
+			,dtmCloseDate = CONVERT(VARCHAR(30),a.dtmCompleted , 101)  COLLATE Latin1_General_CI_AS
 			,intDefaultCurrencyExchangeRateTypeId = DefaultHelpDeskRateType.intHelpdeskRateTypeId
 			,strDefaultCurrencyExchangeRateType = DefaultHelpDeskRateType.strCurrencyExchangeRateType
 		from

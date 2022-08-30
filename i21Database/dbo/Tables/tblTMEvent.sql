@@ -15,8 +15,10 @@
     [strLevel]              NVARCHAR (20)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [dtmTankMonitorReading] DATETIME NULL, 
     [strDeviceDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL, 
+    [intCompanyConsumptionSiteId] INT NULL,
     CONSTRAINT [PK_tblTMEvent] PRIMARY KEY CLUSTERED ([intEventID] ASC),
-    CONSTRAINT [FK_tblTMEvent_tblTMEventType] FOREIGN KEY ([intEventTypeID]) REFERENCES [dbo].[tblTMEventType] ([intEventTypeID])
+    CONSTRAINT [FK_tblTMEvent_tblTMEventType] FOREIGN KEY ([intEventTypeID]) REFERENCES [dbo].[tblTMEventType] ([intEventTypeID]),
+    CONSTRAINT [FK_tblTMEvent_tblTMCompanyConsumptionSite] FOREIGN KEY ([intCompanyConsumptionSiteId]) REFERENCES [dbo].[tblTMCompanyConsumptionSite] ([intCompanyConsumptionSiteId])
 );
 
 

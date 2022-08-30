@@ -88,7 +88,7 @@
 		end
 
 		SET @resultLog = @resultLog +   'Customer Number = ' + ISNULL(@ts_cat_1,'') + char(10)
-		print 'Customer Number = ' + ISNULL(@ts_cat_1,'')
+		--print 'Customer Number = ' + ISNULL(@ts_cat_1,'')
 		--Check by customer and Tank monitor serial number
 
 		DECLARE @intCustomerId INT = NULL
@@ -151,7 +151,7 @@
 		SET @resultLog = @resultLog + 'Site ID = ' + CAST(ISNULL(@siteId,'') AS NVARCHAR(10)) + char(10) 
 		SET @resultLog = @resultLog +  'Date = ' + CAST(@rpt_date_ti AS NVARCHAR(30))  + char(10) 	
 	
-		print 'get DegreeDay'
+		--print 'get DegreeDay'
 		--Get degreeDay reading of for the tank monitor date
 		SELECT TOP 1 
 				@SiteLastDeliveryDate = dtmLastDeliveryDate
@@ -170,7 +170,19 @@
 
 			RETURN
 		END
-		print 'get event id'
+
+		-- Check if site has tank
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMSiteDevice SD
+			INNER JOIN tblTMDevice D ON D.intDeviceId = SD.intDeviceId
+			INNER JOIN tblTMDeviceType DT ON DT.intDeviceTypeId = D.intDeviceTypeId
+			WHERE DT.strDeviceType = 'Tank'
+			AND SD.intSiteID = @siteId)
+		BEGIN
+			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
+			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			RETURN
+		END
+
 		--Get the event ID of the tank monitor reading event
 		SET @TankMonitorEventID = (SELECT TOP 1 intEventTypeID FROM tblTMEventType WHERE strDefaultEventType = 'Event-021')
 	
@@ -242,7 +254,7 @@
 		--Check if site is not on hold then update the site
 		IF ((SELECT TOP 1 ysnOnHold FROM tblTMSite WHERE intSiteID = @siteId) <> 1)
 		BEGIN
-			PRINT 'Update Site'
+			--PRINT 'Update Site'
 			SELECT TOP 1 
 				@SiteLastDeliveryDate = dtmLastDeliveryDate
 				,@SiteClockId = intClockID
@@ -346,12 +358,17 @@
 					end
 				end
 			
-				PRINT @ta_ltankcrit
-				IF(@ta_ltankcrit = 1)
+				IF @ta_ltankcrit = 1
 				BEGIN
 					GOTO CREATECALLENTRY
 				END
-				ELSE IF @intInterfaceTypeId = 1 AND @ta_ltankcrit = 0
+				ELSE IF (@intInterfaceTypeId = 1 AND (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
+									FROM tblTMSite 
+									WHERE intSiteID = @siteId),0) <= 5))
+				BEGIN
+					GOTO CREATECALLENTRY
+				END
+				ELSE IF @intInterfaceTypeId = 1
 				BEGIN
 					-- LOG to tblTMImportTankReadingDetail
 					INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
@@ -380,17 +397,7 @@
 
 				END
 			END
-			ELSE
-			BEGIN
-				IF (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
-							FROM tblTMSite 
-							WHERE intSiteID = @siteId),0) <= 5)
-				BEGIN
-					GOTO CREATECALLENTRY
-				END
-			END
-		
-			
+	
 		
 			RETURN;
 			CREATECALLENTRY:
@@ -407,7 +414,7 @@
 				RETURN
 			END	
 		
-			PRINT 'Create Call entry'
+			--PRINT 'Create Call entry'
 			EXEC uspTMGetNextWillCallStartingNumber @strOrderNumber OUTPUT
 
 			SELECT
@@ -625,7 +632,7 @@
 		
 		END
 	
-		print @resultLog
+		--print @resultLog
 		SET @resultLog = @resultLog + 'Import successful'
 
 		-- LOG to tblTMImportTankReadingDetail

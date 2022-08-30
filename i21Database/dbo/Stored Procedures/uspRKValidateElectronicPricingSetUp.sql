@@ -21,7 +21,7 @@ BEGIN TRY
 	FROM tblGRUserPreference
 	WHERE [intEntityUserSecurityId] = @intUserId
 
-	SELECT @strPassword = strProviderPassword
+	SELECT @strPassword = dbo.fnAESDecryptASym(ISNULL(strProviderPassword, ''))
 	FROM tblGRUserPreference
 	WHERE [intEntityUserSecurityId] = @intUserId
 

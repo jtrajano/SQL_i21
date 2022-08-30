@@ -278,6 +278,8 @@ BEGIN
 		AND	ST.[intTaxGroupId] IS NOT NULL
 		AND ISNULL(ST.[intEntityVendorId],0) = 0
 		AND ST.[intEntityCustomerLocationId] = @CustomerLocationId
+		AND ST.[intItemId] IS NULL
+	    AND ST.[intCategoryId] IS NULL
 				
 	UNION
 

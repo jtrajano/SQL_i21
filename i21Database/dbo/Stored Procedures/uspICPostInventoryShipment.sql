@@ -891,6 +891,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -1468,6 +1469,7 @@ BEGIN
 			 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
+		UPDATE @GLEntries SET dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END
 

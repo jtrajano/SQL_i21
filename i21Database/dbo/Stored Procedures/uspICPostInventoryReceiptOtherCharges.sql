@@ -694,7 +694,7 @@ BEGIN
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptItemId' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -755,7 +755,7 @@ BEGIN
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptItemId' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -822,7 +822,7 @@ BEGIN
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptItemId' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -880,7 +880,7 @@ BEGIN
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptChargeId--InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -961,7 +961,7 @@ BEGIN
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptItemId' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -1019,7 +1019,7 @@ BEGIN
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptChargeId--InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -1204,7 +1204,7 @@ BEGIN
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -1264,7 +1264,7 @@ BEGIN
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -1331,7 +1331,7 @@ BEGIN
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -1389,7 +1389,7 @@ BEGIN
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -1455,7 +1455,7 @@ BEGIN
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -1512,7 +1512,7 @@ BEGIN
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 

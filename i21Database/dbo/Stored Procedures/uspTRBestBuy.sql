@@ -198,10 +198,12 @@ BEGIN
 	SELECT intSupplierId,
 			strSupplierEntityNo,
 			strSupplierName,
-			intSupplyPointId,
-			intEntityLocationId,
+			A.intSupplyPointId,
+			A.intEntityLocationId,
 			strSupplyPointName,
 			strSupplypointZipCode, 
+			TCN.intTerminalControlNumberId,
+			TCN.strTerminalControlNumber,
 			intContractDetailId,
 			strContractNumber,
 			intContractSeq,
@@ -256,6 +258,8 @@ BEGIN
 			dblRemainingAllocation,
 			dtmEffectiveDate
 	) A
+	LEFT JOIN tblTRSupplyPoint SP ON A.intSupplyPointId = SP.intSupplyPointId
+	LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = SP.intTerminalControlNumberId
 
 
 END

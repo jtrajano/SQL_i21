@@ -147,7 +147,7 @@
 	[intBorrowingFacilityLimitId]		INT												NULL,
 	[intBorrowingFacilityLimitDetailId]	INT												NULL,
 	[strBankReferenceNo]				NVARCHAR(100)									NULL,
-	[strBankTransactionId]				NVARCHAR(100)									NULL,
+	[strBankTradeReference]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblLoanAmount]						NUMERIC(18, 6)									NULL,
 	[intBankValuationRuleId]			INT												NULL,
 	[strTradeFinanceComments]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS		NULL,

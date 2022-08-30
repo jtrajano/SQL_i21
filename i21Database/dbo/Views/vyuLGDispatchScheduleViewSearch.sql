@@ -27,6 +27,7 @@ SELECT
 	,strTruckNumber = SVT.strTruckNumber
 	,strDriver = DV.strName
 	,strTrailerNumber = SVTL.strTrailerNumber
+	,ysnDispatched = CONVERT(BIT, CASE WHEN DO.intDispatchStatus > 2 THEN 1 ELSE 0 END)
 
 	,DOR.intStopType
 	,strStopType = CASE DOR.intStopType 
@@ -34,7 +35,7 @@ SELECT
 		WHEN 2 THEN 'Delivery'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOR.intOrderStatus
-	,strOrderStatus = CASE DOD.intOrderStatus
+	,strOrderStatus = CASE DOR.intOrderStatus
 		WHEN 1 THEN 'Ready'
 		WHEN 2 THEN 'In Transit'
 		WHEN 3 THEN 'At Location'

@@ -15,7 +15,8 @@
 	[intDecember] [int] NOT NULL CONSTRAINT [DF_tblTMGlobalJulianCalendar_intDecember]  DEFAULT ((30)),
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblTMGlobalJulianCalendar_intConcurrencyId]  DEFAULT ((1)),
 	[ysnDefault] [bit] NOT NULL CONSTRAINT [DF_tblTMGlobalJulianCalendar_ysnDefault]  DEFAULT ((0)), 
-    CONSTRAINT [PK_tblTMGlobalJulianCalendar] PRIMARY KEY ([intGlobalJulianCalendarId])
+    CONSTRAINT [PK_tblTMGlobalJulianCalendar] PRIMARY KEY ([intGlobalJulianCalendarId]),
+	CONSTRAINT [UK_tblTMGlobalJulianCalendar_strDescription] UNIQUE (strDescription)
 ) ON [PRIMARY]
 
 GO

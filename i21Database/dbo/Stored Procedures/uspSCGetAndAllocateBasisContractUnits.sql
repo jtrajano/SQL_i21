@@ -48,12 +48,12 @@ BEGIN TRY
 		FROM #tmpContractPrice
 
 		--check if there is available Price Quantity
-		IF(ISNULL(@dblContractAvailablePrice,0) > @dblQty)
+		IF(ISNULL(@dblContractAvailablePrice,0) >= @dblQty)
 		BEGIN
 			SELECT TOP 1 
 				@_intPriceFixationDetailId = intPriceFixationDetailId
 				,@_dblPrice = dblCashPrice
-				,@_dblPriceAvailable = dblQuantity
+				,@_dblPriceAvailable = dblAvailableQuantity
 			FROM #tmpContractPrice
 			ORDER BY intPriceFixationDetailId
 
@@ -75,7 +75,7 @@ BEGIN TRY
 						,dblQuantity = @dblRemainingQty
 						,dblPrice  = @_dblPrice
 
-					SET @dblRemainingQty = @dblRemainingQty - @_intPriceFixationDetailId 	
+					SET @dblRemainingQty = 0	
 				END
 				ELSE
 				BEGIN
@@ -99,7 +99,8 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (SELECT TOP 1 1 
 								FROM #tmpContractPrice 
-								WHERE intPriceFixationDetailId > @_intPriceFixationDetailId)
+								WHERE intPriceFixationDetailId > @_intPriceFixationDetailId
+								ORDER BY intPriceFixationDetailId)
 					BEGIN
 						SET @_intPriceFixationDetailId = NULL
 					END 
@@ -108,9 +109,10 @@ BEGIN TRY
 						SELECT TOP 1 
 							@_intPriceFixationDetailId = intPriceFixationDetailId 
 							,@_dblPrice = dblCashPrice
-							,@_dblPriceAvailable = dblQuantity
+							,@_dblPriceAvailable = dblAvailableQuantity
 						FROM #tmpContractPrice 
 						WHERE intPriceFixationDetailId > @_intPriceFixationDetailId
+						ORDER BY intPriceFixationDetailId
 					END
 				END
 			END

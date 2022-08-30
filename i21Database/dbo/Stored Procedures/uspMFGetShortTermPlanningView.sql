@@ -201,8 +201,9 @@ BEGIN
 		AND F.intAttributeId = 3
 	WHERE Inv.intAttributeId = 5
 
-	DELETE
-	FROM #tblMFPreShortTermDemand
+	SELECT @intConditionId = intConditionId
+	FROM tblCTCondition
+	WHERE strConditionName = 'CBS'
 
 	INSERT INTO #tblMFPreShortTermDemand (
 		intItemId
@@ -211,7 +212,62 @@ BEGIN
 		,intAttributeId
 		,intLoadContainerId
 		)
-	SELECT Distinct I.intItemId
+	SELECT I.intItemId
+		,SS.intCompanyLocationId
+		,dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, LDCL.dblQuantity) AS dblQty
+		,11 AS intAttributeId -->CBS
+		,LDCL.intLoadContainerId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		AND L.intPurchaseSale = 1
+		AND L.intShipmentType = 1
+	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
+		AND LC.intConditionId = @intConditionId
+	WHERE SS.intContractStatusId IN (
+			1
+			,4
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM #tblMFPreShortTermDemand PS
+			WHERE PS.intLoadContainerId = LDCL.intLoadContainerId
+			)
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblQMSample S1
+			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+				AND S1.intSampleStatusId = 4 -->Rejected)
+			)
+
+	INSERT INTO #tblMFShortTermDemand (
+		intItemId
+		,intLocationId
+		,dblQty
+		,intAttributeId
+		)
+	SELECT intItemId
+		,intLocationId
+		,SUM(dblQty)
+		,intAttributeId
+	FROM #tblMFPreShortTermDemand
+	WHERE intAttributeId = 11
+	GROUP BY intItemId
+		,intLocationId
+		,intAttributeId
+
+	INSERT INTO #tblMFPreShortTermDemand (
+		intItemId
+		,intLocationId
+		,dblQty
+		,intAttributeId
+		,intLoadContainerId
+		)
+	SELECT DISTINCT I.intItemId
 		,SS.intCompanyLocationId
 		,dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, LDCL.dblQuantity - ISNULL(LDCL.dblReceivedQty, 0)) AS dblQty
 		,(
@@ -221,7 +277,7 @@ BEGIN
 				ELSE 7 -->Not Approved Qty
 				END
 			) AS intAttributeId
-		,LC.intLoadContainerId
+		,LDCL.intLoadContainerId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
@@ -234,15 +290,22 @@ BEGIN
 	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		AND S.intSampleStatusId = 3 -->Approved
 		AND S.intLoadContainerId = LDCL.intLoadContainerId
-	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-	JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-		AND LC.intLoadContainerId = LDCL.intLoadContainerId
+	CROSS APPLY (
+		SELECT TOP 1 LW.intLoadWarehouseId
+		FROM tblLGLoadWarehouse LW
+		WHERE LW.intLoadId = L.intLoadId
+		) LW1
 	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 		AND SS.intContractStatusId IN (
 			1
 			,4
 			)
-		AND IsNULL(L.dtmETAPOD,@dtmCurrentDate) <= @dtmCurrentDate
+		AND IsNULL(L.dtmETAPOD, @dtmCurrentDate) <= @dtmCurrentDate
+		AND NOT EXISTS (
+			SELECT *
+			FROM #tblMFPreShortTermDemand PS
+			WHERE PS.intLoadContainerId = LDCL.intLoadContainerId
+			)
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblQMSample S1
@@ -269,8 +332,6 @@ BEGIN
 		,intLocationId
 		,intAttributeId
 
-	--DELETE
-	--FROM #tblMFPreShortTermDemand
 	INSERT INTO #tblMFPreShortTermDemand (
 		intItemId
 		,intLocationId
@@ -288,7 +349,7 @@ BEGIN
 				ELSE 9 -->Arrived in Port
 				END
 			) AS intAttributeId
-		,LC.intLoadContainerId
+		,LDCL.intLoadContainerId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
@@ -300,16 +361,19 @@ BEGIN
 	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		AND S.intSampleStatusId = 3 -->Approved
-	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-	LEFT JOIN tblLGLoadWarehouseContainer LC ON LC.intLoadWarehouseId = LW.intLoadWarehouseId
-		AND LC.intLoadContainerId = LDCL.intLoadContainerId
+	OUTER APPLY (
+		SELECT TOP 1 LW.intLoadWarehouseId
+		FROM tblLGLoadWarehouse LW
+		WHERE LW.intLoadId = L.intLoadId
+		) LW1
+	
 	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 		AND SS.intContractStatusId IN (
 			1
 			,4
 			)
 		AND S.intLoadDetailContainerLinkId IS NULL
-		AND LC.intLoadWarehouseContainerId IS NULL
+		AND LW1.intLoadWarehouseId IS NULL
 		AND L.ysnArrivedInPort = 1
 		AND NOT EXISTS (
 			SELECT *
@@ -342,12 +406,6 @@ BEGIN
 		,intLocationId
 		,intAttributeId
 
-	SELECT @intConditionId = intConditionId
-	FROM tblCTCondition
-	WHERE strConditionName = 'CBS'
-
-	--DELETE
-	--FROM #tblMFPreShortTermDemand
 	INSERT INTO #tblMFPreShortTermDemand (
 		intItemId
 		,intLocationId
@@ -358,14 +416,7 @@ BEGIN
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
 		,dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, LDCL.dblQuantity) AS dblQty
-		,(
-			CASE 
-				WHEN LC.intLoadId IS NOT NULL
-					THEN 11 -->CBS
-				WHEN L.intShipmentStatus = 1
-					THEN 10 -->Scheduled
-				END
-			) AS intAttributeId
+		,10 AS intAttributeId -->Scheduled
 		,LDCL.intLoadContainerId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -376,12 +427,11 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
 	JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-	LEFT JOIN tblLGLoadCondition LC ON LC.intLoadId = L.intLoadId
-		AND LC.intConditionId = @intConditionId
 	WHERE SS.intContractStatusId IN (
 			1
 			,4
 			)
+		AND LDCL.dblQuantity-ISNULL(LDCL.dblReceivedQty, 0)>0
 		AND NOT EXISTS (
 			SELECT *
 			FROM #tblMFPreShortTermDemand PS
@@ -405,10 +455,7 @@ BEGIN
 		,SUM(dblQty)
 		,intAttributeId
 	FROM #tblMFPreShortTermDemand
-	WHERE intAttributeId IN (
-			10
-			,11
-			)
+	WHERE intAttributeId = 10
 	GROUP BY intItemId
 		,intLocationId
 		,intAttributeId
@@ -421,23 +468,24 @@ BEGIN
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
-		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight -IsNULL(dblNet,0))) AS dblQty
+		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight - IsNULL(dblNet, 0))) AS dblQty
 		,12 AS intAttributeId -->Late Open Contracts
 	FROM tblCTContractDetail SS
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
 	OUTER APPLY (
-			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
-			FROM tblLGLoadDetail LD
-			WHERE LD.intPContractDetailId = SS.intContractDetailId
-			) C2
+		SELECT Sum(dblNet) dblNet
+			,Sum(dblQuantity) dblQuantity
+		FROM tblLGLoadDetail LD
+		WHERE LD.intPContractDetailId = SS.intContractDetailId
+		) C2
 	WHERE SS.intContractStatusId IN (
 			1
 			,4
 			)
-		AND SS.dtmStartDate  < @dtmCurrentMonthStartDate
-		AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
+		AND SS.dtmStartDate < @dtmCurrentMonthStartDate
+		AND SS.dblQuantity - IsNULL(C2.dblQuantity, 0) > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 
@@ -449,24 +497,25 @@ BEGIN
 		)
 	SELECT I.intItemId
 		,SS.intCompanyLocationId
-		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight  - IsNULL(C2.dblNet , 0))) AS dblQty
+		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight - IsNULL(C2.dblNet, 0))) AS dblQty
 		,13 AS intAttributeId -->Forward Open Contracts
 	FROM tblCTContractDetail SS
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId 
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
 	OUTER APPLY (
-			SELECT Sum(dblNet) dblNet,Sum(dblQuantity) dblQuantity
-			FROM tblLGLoadDetail LD
-			WHERE LD.intPContractDetailId = SS.intContractDetailId
-			) C2
+		SELECT Sum(dblNet) dblNet
+			,Sum(dblQuantity) dblQuantity
+		FROM tblLGLoadDetail LD
+		WHERE LD.intPContractDetailId = SS.intContractDetailId
+		) C2
 	WHERE SS.intContractStatusId IN (
 			1
 			,4
 			)
 		AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
 			AND @dtmAfter80Days
-		AND SS.dblQuantity-IsNULL(C2.dblQuantity, 0) > 0
+		AND SS.dblQuantity - IsNULL(C2.dblQuantity, 0) > 0
 	GROUP BY I.intItemId
 		,SS.intCompanyLocationId
 

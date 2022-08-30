@@ -262,7 +262,8 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblCurrencyExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
+											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -526,7 +527,8 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
+											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -855,7 +857,8 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
+											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -1232,7 +1235,8 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
+											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]

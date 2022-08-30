@@ -39,7 +39,7 @@ FROM
 	, SMCur.strCurrency as strCurrency
 	, SMCurExRateType.strCurrencyExchangeRateType as strCurrencyExchangeRateType
 	FROM tblGLPostRecap GLPR
-	INNER JOIN tblSMCurrency SMCur ON GLPR.intCurrencyId = SMCur.intCurrencyID
+	LEFT OUTER JOIN tblSMCurrency SMCur ON GLPR.intCurrencyId = SMCur.intCurrencyID
 	LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCurExRateType on GLPR.intCurrencyExchangeRateTypeId = SMCurExRateType.intCurrencyExchangeRateTypeId
 
 	UNION ALL
@@ -50,7 +50,7 @@ FROM
 	INNER JOIN (SELECT [intAccountId], [intAccountGroupId], [strDescription] FROM dbo.tblGLAccount) B ON A.[intAccountId] = B.[intAccountId]
 	INNER JOIN (SELECT [intAccountGroupId], [strAccountGroup] FROM dbo.tblGLAccountGroup) C
 		ON B.[intAccountGroupId] = C.[intAccountGroupId]
-	INNER JOIN tblSMCurrency SMCur2 ON A.intCurrencyId = SMCur2.intCurrencyID
+	LEFT OUTER JOIN tblSMCurrency SMCur2 ON A.intCurrencyId = SMCur2.intCurrencyID
 	WHERE [strModuleName] NOT IN ('PAYROLL')
 
 ) BatchPostingRecap

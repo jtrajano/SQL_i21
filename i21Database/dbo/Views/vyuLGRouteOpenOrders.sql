@@ -17,10 +17,15 @@ SELECT
 	,intDispatchID = TMO.intDispatchId
 	,intLoadDetailId = NULL
 	,intLoadId = NULL
+	,strLoadNumber = NULL
 	,intSequence = -1
 	,strOrderNumber = TMO.strOrderNumber
 	,strLocationName = TMO.strCompanyLocationName
 	,intLocationId = TMO.intCompanyLocationId
+	,intVendorId = NULL
+	,intVendorLocationId = NULL
+	,strFromEntity = NULL
+	,strFromEntityLocation = NULL
 	,strFromWarehouse = NULL
 	,strLocationAddress = CompLoc.strAddress
 	,strLocationCity = CompLoc.strCity
@@ -76,7 +81,7 @@ UNION ALL
 
 SELECT
 	intSourceType = 1  /* LG Loads - Outbound */
-	,intOrderId = LGLD.intLoadDetailId
+	,intOrderId = ISNULL(LGLD.intTMDispatchId, LGLD.intLoadDetailId)
 	,intOrderDetailId = NULL
 	,intEntityId = LGLD.intCustomerEntityId
 	,intEntityLocationId = LGLD.intCustomerEntityLocationId
@@ -85,14 +90,19 @@ SELECT
 	,strCustomerNumber = NULL
 	,intSiteID = LGLD.intTMSiteId
 	,strSiteNumber = LGLD.strSiteID
-	,intCustomerID = NULL
+	,intCustomerID = TMO.intCustomerId
 	,intDispatchID = LGLD.intTMDispatchId
 	,intLoadDetailId = LGLD.intLoadDetailId
 	,intLoadId = LGLD.intLoadId
+	,strLoadNumber = LGLD.strLoadNumber
 	,intSequence = -1
-	,strOrderNumber = LGLD.strLoadNumber
-	,strLocationName = LGLD.strSLocationName
-	,intLocationId = LGLD.intSCompanyLocationId
+	,strOrderNumber = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strOrderNumber ELSE LGLD.strLoadNumber END
+	,strLocationName = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strCompanyLocationName ELSE LGLD.strSLocationName END 
+	,intLocationId = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.intCompanyLocationId ELSE LGLD.intSCompanyLocationId END 
+	,intVendorId = NULL
+	,intVendorLocationId = NULL
+	,strFromEntity = NULL
+	,strFromEntityLocation = NULL
 	,strFromWarehouse = LGLD.strSSubLocationName
 	,strLocationAddress = LGLD.strSLocationAddress
 	,strLocationCity = LGLD.strSLocationCity
@@ -107,39 +117,44 @@ SELECT
 	,strEntityName = LGLD.strCustomer
 	,strEntityLocation = EML.strLocationName
 	,strToWarehouse = LGLD.strPSubLocationName
-	,strToAddress = LGLD.strShipToAddress
-	,strToCity = LGLD.strShipToCity
-	,strToZipCode = LGLD.strShipToZipCode
-	,strToState = LGLD.strShipToState
-	,strToCountry = LGLD.strShipToCountry
-	,strDestination = LGLD.strShipToAddress + ', ' + LGLD.strShipToCity + ', ' + LGLD.strShipToState + ' ' + LGLD.strShipToZipCode 
-	,dblToLongitude = EML.dblLongitude
-	,dblToLatitude = EML.dblLatitude
+	,strToAddress = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteAddress ELSE LGLD.strShipToAddress END
+	,strToCity = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteCity ELSE LGLD.strShipToCity END
+	,strToZipCode = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteZipCode ELSE LGLD.strShipToZipCode END
+	,strToState = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteState ELSE LGLD.strShipToState END
+	,strToCountry = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteCountry ELSE LGLD.strShipToCountry END
+	,strDestination = CASE WHEN (TMO.intDispatchId IS NOT NULL) 
+						THEN TMO.strSiteAddress + ', ' + TMO.strSiteCity + ', ' + TMO.strSiteState + ' ' + TMO.strSiteZipCode 
+						ELSE LGLD.strShipToAddress + ', ' + LGLD.strShipToCity + ', ' + LGLD.strShipToState + ' ' + LGLD.strShipToZipCode END
+	,dblToLongitude = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.dblLongitude ELSE EML.dblLongitude END
+	,dblToLatitude = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.dblLatitude ELSE EML.dblLatitude END
 	,strOrderStatus = LGL.strShipmentStatus
-	,strDriver = LGL.strDriver
+	,strDriver = ISNULL(LGL.strDriver, TMO.strDriverName)
 	,strItemNo = LGLD.strItemNo
 	,dblOnHand = OH.dblUnitOnHand
 	,dblOrderedQty = NULL
 	,dblQuantity = LGLD.dblQuantity
 	,dblStandardWeight = 0.0
 	,strCustomerReference = LGLD.strCustomerReference
-	,strOrderComments = LGLD.strComments
+	,strOrderComments = ISNULL(LGLD.strComments, TMO.strComments)
 	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
 	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
 	,strOrderType = 'Outbound' COLLATE Latin1_General_CI_AS
-	,intPriority = -1
-	,ysnLeakCheckRequired = Cast(0 as Bit)
-	,dblPercentLeft = 0.0
-	,dblARBalance = 0.0
-	,strFillMethod = ''
-	,ysnHold = Cast(0 as Bit)
-	,ysnRoutingAlert = Cast(0 as Bit)
-	,strRoute = EML.strLocationRoute
+	,intPriority = ISNULL(TMO.intPriority, -1)
+	,ysnLeakCheckRequired =TMO.ysnLeakCheckRequired
+	,dblPercentLeft = TMO.dblPercentLeft
+	,dblARBalance = TMO.dblCustomerBalance
+	,strFillMethod = TMO.strFillMethod
+	,ysnHold = TMO.ysnHold
+	,ysnRoutingAlert = TMO.ysnRoutingAlert
+	,strRoute = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMR.strRouteId ELSE EML.strLocationRoute END
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intSCompanyLocationId
 JOIN tblEMEntityLocation EML ON EML.intEntityLocationId = LGLD.intCustomerEntityLocationId
 LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = LGLD.intItemId AND OH.intLocationId = LGLD.intSCompanyLocationId
+LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = LGLD.intTMDispatchId
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
+LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
 WHERE LGL.intPurchaseSale = 2 AND LGL.intShipmentStatus = 1 AND IsNull(LGLD.intLoadDetailId, 0) NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblLGRouteOrder)
 
 UNION ALL
@@ -159,10 +174,15 @@ SELECT
 	,intDispatchID = NULL
 	,intLoadDetailId = LGLD.intLoadDetailId
 	,intLoadId = LGLD.intLoadId
+	,strLoadNumber = LGLD.strLoadNumber
 	,intSequence = -1
 	,strOrderNumber = LGLD.strLoadNumber
 	,strLocationName = LGLD.strPLocationName
 	,intLocationId = LGLD.intPCompanyLocationId
+	,intVendorId = LGLD.intVendorEntityId
+	,intVendorLocationId = LGLD.intVendorEntityLocationId
+	,strFromEntity = LGLD.strVendor
+	,strFromEntityLocation = LGLD.strShipFrom
 	,strFromWarehouse = LGLD.strSSubLocationName
 	,strLocationAddress = LGLD.strPLocationAddress
 	,strLocationCity = LGLD.strPLocationCity
@@ -229,10 +249,15 @@ SELECT
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
 	,intLoadId = NULL
+	,strLoadNumber = NULL
 	,intSequence = -1
 	,strOrderNumber = NULL
 	,strLocationName = TMO.strCompanyLocationName
 	,intLocationId = TMO.intCompanyLocationId
+	,intVendorId = NULL
+	,intVendorLocationId = NULL
+	,strFromEntity = NULL
+	,strFromEntityLocation = NULL
 	,strFromWarehouse = NULL
 	,strLocationAddress = ''
 	,strLocationCity = ''
@@ -299,10 +324,15 @@ SELECT
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
 	,intLoadId = NULL
+	,strLoadNumber = NULL
 	,intSequence = -1
 	,strOrderNumber = NULL
 	,strLocationName = NULL
 	,intLocationId = NULL
+	,intVendorId = CASE WHEN (ET.strType = 'Vendor') THEN EN.intEntityId ELSE NULL END
+	,intVendorLocationId = CASE WHEN (ET.strType = 'Vendor') THEN EL.intEntityLocationId ELSE NULL END
+	,strFromEntity = CASE WHEN (ET.strType = 'Vendor') THEN EN.strName ELSE NULL END
+	,strFromEntityLocation = CASE WHEN (ET.strType = 'Vendor') THEN EL.strLocationName ELSE NULL END
 	,strFromWarehouse = NULL
 	,strLocationAddress = NULL
 	,strLocationCity = NULL
@@ -367,10 +397,15 @@ SELECT
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
 	,intLoadId = NULL
+	,strLoadNumber = NULL
 	,intSequence = -1
 	,strOrderNumber = SO.strSalesOrderNumber
 	,strLocationName = CompLoc.strLocationName
 	,intLocationId = CompLoc.intCompanyLocationId
+	,intVendorId = NULL
+	,intVendorLocationId = NULL
+	,strFromEntity = NULL
+	,strFromEntityLocation = NULL
 	,strFromWarehouse = FromStrg.strSubLocationName
 	,strLocationAddress = CompLoc.strAddress
 	,strLocationCity = CompLoc.strCity
@@ -444,10 +479,15 @@ SELECT
 	,intDispatchID = NULL
 	,intLoadDetailId = NULL
 	,intLoadId = NULL
+	,strLoadNumber = NULL
 	,intSequence = -1
 	,strOrderNumber = IT.strTransferNo
 	,strLocationName = FromLoc.strLocationName
 	,intLocationId = FromLoc.intCompanyLocationId
+	,intVendorId = NULL
+	,intVendorLocationId = NULL
+	,strFromEntity = NULL
+	,strFromEntityLocation = NULL
 	,strFromWarehouse = FromStrg.strSubLocationName
 	,strLocationAddress = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.strAddress ELSE FromLoc.strAddress END
 	,strLocationCity = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.strCity ELSE FromLoc.strCity END
@@ -505,5 +545,87 @@ LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = I.intItemId AND OH.intLocationI
 WHERE IT.intStatusId IN (1, 2)
 AND NOT EXISTS (SELECT 1 FROM tblLGRouteOrder RO INNER JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
 				WHERE R.intSourceType = 6 AND R.ysnPosted = 1 AND RO.intInventoryTransferDetailId = ITD.intInventoryTransferDetailId)
+
+UNION ALL
+
+SELECT
+	intSourceType = 7  /* LG Loads - Drop Ship */
+	,intOrderId = ISNULL(LGLD.intTMDispatchId, LGLD.intLoadDetailId)
+	,intOrderDetailId = NULL
+	,intEntityId = LGLD.intCustomerEntityId
+	,intEntityLocationId = LGLD.intCustomerEntityLocationId
+	,intEntityTypeId = NULL
+	,strEntityType = 'Customer'
+	,strCustomerNumber = NULL
+	,intSiteID = LGLD.intTMSiteId
+	,strSiteNumber = LGLD.strSiteID
+	,intCustomerID = TMO.intCustomerId
+	,intDispatchID = LGLD.intTMDispatchId
+	,intLoadDetailId = LGLD.intLoadDetailId
+	,intLoadId = LGLD.intLoadId
+	,strLoadNumber = LGLD.strLoadNumber
+	,intSequence = -1
+	,strOrderNumber = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strOrderNumber ELSE LGLD.strLoadNumber END
+	,strLocationName = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strCompanyLocationName ELSE LGLD.strSLocationName END 
+	,intLocationId = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.intCompanyLocationId ELSE LGLD.intSCompanyLocationId END 
+	,intVendorId = LGLD.intVendorEntityId
+	,intVendorLocationId = LGLD.intVendorEntityLocationId
+	,strFromEntity = LGLD.strVendor
+	,strFromEntityLocation = LGLD.strShipFrom
+	,strFromWarehouse = LGLD.strSSubLocationName
+	,strLocationAddress = LGLD.strShipFromAddress
+	,strLocationCity = LGLD.strShipFromCity
+	,strLocationZipCode = LGLD.strShipFromZipCode
+	,strLocationState = LGLD.strShipFromState
+	,strLocationCountry = LGLD.strShipFromCountry
+	,dblFromLongitude = VL.dblLongitude
+	,dblFromLatitude = VL.dblLatitude
+	,dtmScheduledDate = LGL.dtmScheduledDate
+	,dtmHoursFrom = EML.dtmOperatingHoursStartTime
+	,dtmHoursTo = EML.dtmOperatingHoursEndTime
+	,strEntityName = LGLD.strCustomer
+	,strEntityLocation = EML.strLocationName
+	,strToWarehouse = LGLD.strPSubLocationName
+	,strToAddress = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteAddress ELSE LGLD.strShipToAddress END
+	,strToCity = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteCity ELSE LGLD.strShipToCity END
+	,strToZipCode = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteZipCode ELSE LGLD.strShipToZipCode END
+	,strToState = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteState ELSE LGLD.strShipToState END
+	,strToCountry = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.strSiteCountry ELSE LGLD.strShipToCountry END
+	,strDestination = CASE WHEN (TMO.intDispatchId IS NOT NULL) 
+						THEN TMO.strSiteAddress + ', ' + TMO.strSiteCity + ', ' + TMO.strSiteState + ' ' + TMO.strSiteZipCode 
+						ELSE LGLD.strShipToAddress + ', ' + LGLD.strShipToCity + ', ' + LGLD.strShipToState + ' ' + LGLD.strShipToZipCode END
+	,dblToLongitude = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.dblLongitude ELSE EML.dblLongitude END
+	,dblToLatitude = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMO.dblLatitude ELSE EML.dblLatitude END
+	,strOrderStatus = LGL.strShipmentStatus
+	,strDriver = ISNULL(LGL.strDriver, TMO.strDriverName)
+	,strItemNo = LGLD.strItemNo
+	,dblOnHand = OH.dblUnitOnHand
+	,dblOrderedQty = NULL
+	,dblQuantity = LGLD.dblQuantity
+	,dblStandardWeight = 0.0
+	,strCustomerReference = LGLD.strCustomerReference
+	,strOrderComments = ISNULL(LGLD.strComments, TMO.strComments)
+	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
+	,intDaysPassed = DATEDIFF (day, LGL.dtmScheduledDate, GetDate())
+	,strOrderType = 'Drop Ship' COLLATE Latin1_General_CI_AS
+	,intPriority = ISNULL(TMO.intPriority, -1)
+	,ysnLeakCheckRequired =TMO.ysnLeakCheckRequired
+	,dblPercentLeft = TMO.dblPercentLeft
+	,dblARBalance = TMO.dblCustomerBalance
+	,strFillMethod = TMO.strFillMethod
+	,ysnHold = TMO.ysnHold
+	,ysnRoutingAlert = TMO.ysnRoutingAlert
+	,strRoute = CASE WHEN (TMO.intDispatchId IS NOT NULL) THEN TMR.strRouteId ELSE EML.strLocationRoute END
+FROM vyuLGLoadDetailView LGLD
+JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
+JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intSCompanyLocationId
+JOIN tblEMEntityLocation EML ON EML.intEntityLocationId = LGLD.intCustomerEntityLocationId
+LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = LGLD.intVendorEntityLocationId
+LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = LGLD.intItemId AND OH.intLocationId = LGLD.intSCompanyLocationId
+LEFT JOIN vyuTMGeneratedCallEntry TMO ON TMO.intDispatchId = LGLD.intTMDispatchId
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
+LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
+WHERE LGL.intPurchaseSale = 3 AND LGL.intShipmentStatus = 1 AND IsNull(LGLD.intLoadDetailId, 0) NOT IN (SELECT IsNull(intLoadDetailId, 0) FROM tblLGRouteOrder)
+
 
 ) t1

@@ -406,6 +406,13 @@ BEGIN TRY
 
 		SELECT @intSequenceHistoryCount = COUNT(*) FROM #tempSequenceHistoryCompare
 
+		declare @intLastEntryUsageHistoryId int;
+		select top 1 @intLastEntryUsageHistoryId = intSequenceUsageHistoryId from #tempSequenceHistoryCompare;
+		if (@intLastEntryUsageHistoryId is null)
+		begin
+			update #tempSequenceHistoryCompare set intSequenceUsageHistoryId = null;
+		end
+
 		SELECT @intValidSequenceHistoryCount = COUNT(*) FROM (
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl

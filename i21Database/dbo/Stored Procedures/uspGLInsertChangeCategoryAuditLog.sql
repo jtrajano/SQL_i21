@@ -16,6 +16,8 @@ AS
 		,@intNewAccountCategoryId INT
 		,@strAccountCategory NVARCHAR(50)
 		,@strNewAccountCategory NVARCHAR(50)
+		,@ysnGoLive BIT
+		,@dtmDate DATETIME
 		,@ErrorMessage NVARCHAR(MAX)
 
 	SELECT
@@ -26,6 +28,8 @@ AS
 		,@intEntityId = intEntityId
 		,@strAccountCategory = strAccountCategory COLLATE Latin1_General_CI_AS
 		,@strNewAccountCategory = strNewAccountCategory COLLATE Latin1_General_CI_AS
+		,@ysnGoLive = CAST((CASE WHEN strReason = 'Go Live' THEN 1 ELSE 0 END) AS BIT)
+		,@dtmDate = dtmGoLiveDate
 	FROM vyuGLChangeAccountCategory WHERE strTransactionId = @strTransactionId
 
 	DECLARE @strCode NVARCHAR(20)
@@ -51,7 +55,7 @@ AS
 	-- Get all affected accounts
 	INSERT INTO @tbl
 	SELECT
-		ROW_NUMBER() OVER(ORDER BY intAccountId ASC), Mapping.intAccountId, AccountSegment.intAccountCategoryId, AccountSegment.intAccountSegmentId, 0
+		ROW_NUMBER() OVER(ORDER BY Mapping.intAccountId ASC), Mapping.intAccountId, AccountSegment.intAccountCategoryId, AccountSegment.intAccountSegmentId, 0
 	FROM [dbo].[tblGLAccountSegment] AccountSegment
 	JOIN [dbo].[tblGLAccountSegmentMapping] Mapping
 		ON Mapping.intAccountSegmentId = AccountSegment.intAccountSegmentId
@@ -88,28 +92,56 @@ AS
 			ON C.intAccountCategoryId = A.intAccountCategoryId
 		WHERE A.ysnProcessed = 0
 
-		INSERT INTO [dbo].[tblGLChangeAccountCategoryDetail] (
-			intTransactionId
-			,intAccountId
-			,intAccountCategoryId
-			,intNewAccountCategoryId
-			,intEntityId
-			,dtmDate
-			,dblGLBalance
-		) 
-		SELECT
-			@intTransactionId
-			,@intCurrentAccountId
-			,@intCurrentAccountCategoryId
-			,@intNewAccountCategoryId
-			,@intEntityId
-			,GETDATE()
-			,ISNULL(BeginningBalance.beginBalance, 0)
-		FROM [dbo].[tblGLAccount] A
-		OUTER APPLY (
-			SELECT * FROM [dbo].[fnGLGetBeginningBalanceAndUnitTB](A.strAccountId, GETDATE(), -1)
-		) BeginningBalance
-		WHERE A.intAccountId = @intCurrentAccountId
+		IF @ysnGoLive = 0
+		BEGIN
+			INSERT INTO [dbo].[tblGLChangeAccountCategoryDetail] (
+				intTransactionId
+				,intAccountId
+				,intAccountCategoryId
+				,intNewAccountCategoryId
+				,intEntityId
+				,dtmDate
+				,dblGLBalance
+			) 
+			SELECT
+				@intTransactionId
+				,@intCurrentAccountId
+				,@intCurrentAccountCategoryId
+				,@intNewAccountCategoryId
+				,@intEntityId
+				,GETDATE()
+				,ISNULL(BeginningBalance.beginBalance, 0)
+			FROM [dbo].[tblGLAccount] A
+			OUTER APPLY (
+				SELECT beginBalance FROM [dbo].[fnGLGetBeginningBalanceAndUnit](A.strAccountId, GETDATE())
+			) BeginningBalance
+			WHERE A.intAccountId = @intCurrentAccountId
+		END
+		ELSE
+		BEGIN
+			INSERT INTO [dbo].[tblGLChangeAccountCategoryDetail] (
+				intTransactionId
+				,intAccountId
+				,intAccountCategoryId
+				,intNewAccountCategoryId
+				,intEntityId
+				,dtmDate
+				,dblGLBalance
+			) 
+			SELECT
+				@intTransactionId
+				,@intCurrentAccountId
+				,@intCurrentAccountCategoryId
+				,@intNewAccountCategoryId
+				,@intEntityId
+				,GETDATE()
+				,ISNULL(ForwardBalance.beginBalance, 0)
+			FROM [dbo].[tblGLAccount] A
+			OUTER APPLY (
+				SELECT beginBalance FROM [dbo].[fnGLGetForwardBalanceAndUnit](A.strAccountId, @dtmDate)
+			) ForwardBalance
+			WHERE A.intAccountId = @intCurrentAccountId
+		END
 
 		UPDATE @tbl set ysnProcessed = 1 WHERE intRowId = @intCurrentRowId
 

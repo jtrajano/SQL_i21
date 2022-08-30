@@ -54,7 +54,7 @@ BEGIN
 			EXEC uspSMGetStartingNumber 54, @strTransactionNumber OUT
 			
 			-- TR HEADER
-			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckDriverReferenceId, intTrailerId, strTransaction, intFreightItemId, intConcurrencyId, intUserId)
+			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckId, intTrailerId, strTransaction, intFreightItemId, intConcurrencyId, intUserId)
 			VALUES (@dtmPullDate, @intCarrierId, @intSellerId, @intDriverId, @intTruckId, @intTrailerId, @strTransactionNumber, @intFreightItemId, 1, @intUserId)
 			
 			SET @intLoadHeaderId = @@identity

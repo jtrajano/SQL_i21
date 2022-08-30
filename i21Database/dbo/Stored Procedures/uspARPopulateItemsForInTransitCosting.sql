@@ -250,7 +250,7 @@ SELECT
 												 THEN T.dblNetUnits
 												 ELSE ICISI.[dblQuantity] 
 											END AS NUMERIC(18, 10))
-										) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
+										) * CAST(CAST(ICIT.[dblQty] AS NUMERIC(18, 10)) * CAST(ICIT.[dblUOMQty] AS NUMERIC(18, 10)) AS NUMERIC(18, 10))
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0

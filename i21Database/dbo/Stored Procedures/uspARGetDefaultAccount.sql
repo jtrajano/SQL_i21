@@ -9,42 +9,35 @@
 	,@intProfitCenterId				INT				= NULL OUTPUT
 AS	
 
-DECLARE  @intARAccountId 			INT = NULL
-		,@strSalesCompanyLocation	NVARCHAR(250)	= NULL
-
-SET @intARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
+DECLARE  @strSalesCompanyLocation	NVARCHAR(250)	= NULL
+		,@ysnActive					BIT = 0
+		,@intCompanySegment			INT
 
 SELECT 
 	 @strSalesCompanyLocation	= strLocationName
 	,@intProfitCenterId			= intProfitCenter
+	,@intCompanySegment			= intCompanySegment
 FROM tblSMCompanyLocation
 WHERE intCompanyLocationId = @intCompanyLocationId
 
-SELECT @strErrorMsg = 'Default AR Account ' + strAccountId + ' for company location ' + @strSalesCompanyLocation + ' is inactive.'
+SET @intAccountId = [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
+SET @strAccountId	= [dbo].[fnGLGetOverrideAccountBySegment](
+						 @intAccountId
+						,@intProfitCenterId
+						,NULL
+						,@intCompanySegment
+					  )
+
+SELECT @ysnActive = ysnActive
 FROM tblGLAccount WITH(NOLOCK)
-WHERE intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](@intARAccountId, @intProfitCenterId)
-  AND ysnActive = 0
+WHERE strAccountId = @strAccountId
 
-IF ISNULL(@strErrorMsg,'') <> ''
+IF @ysnActive = 0
 BEGIN
-	SELECT TOP 1 @intARAccountId = CASE WHEN @strTransactionType = 'Cash Refund' THEN intAPAccount
-										WHEN @strTransactionType = 'Cash' THEN intUndepositedFundsId
-										WHEN @strTransactionType = 'Customer Prepayment' THEN intSalesAdvAcct
-										ELSE intARAccount
-									END
-	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId = @intCompanyLocationId
-		
-	IF @intARAccountId IS NULL AND @strTransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
-		SET @intARAccountId = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0)
-		
-	SET @intARAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountId = @intARAccountId AND ysnActive = 1)
+	SET @strErrorMsg = 'Default AR Account ' + @strAccountId + ' for company location ' + @strSalesCompanyLocation + ' is either not existing or inactive.'
+	SET @intAccountId = NULL
+	SET @strAccountId = NULL
 END
-
-SELECT @intAccountId	= intAccountId
-	 , @strAccountId	= strAccountId
-FROM tblGLAccount WITH(NOLOCK) 
-WHERE intAccountId  = @intARAccountId
 
 IF EXISTS(SELECT TOP 1 ysnAllowSingleLocationEntries FROM tblARCompanyPreference WHERE ISNULL(ysnAllowSingleLocationEntries, 0) = 1)
 BEGIN
@@ -52,5 +45,5 @@ BEGIN
 		 @intLocationAccountSegmentId = intLocationAccountSegmentId
 		,@intCompanyAccountSegmentId  = intCompanyAccountSegmentId 
 	FROM vyuARAccountDetail 
-	WHERE intAccountId = @intARAccountId
+	WHERE intAccountId = @intAccountId
 END

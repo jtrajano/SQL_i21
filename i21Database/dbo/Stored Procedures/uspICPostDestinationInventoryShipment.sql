@@ -580,7 +580,7 @@ IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 BEGIN 
 	-- Update the date and transaction type. 
 	UPDATE @GLEntries
-	SET dtmDate = @dtmDate
+	SET dtmDate = dbo.fnRemoveTimeOnDate(@dtmDate) 
 		,strTransactionType = @strTransactionType
 		
 	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 

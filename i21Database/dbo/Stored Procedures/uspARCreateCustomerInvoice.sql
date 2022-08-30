@@ -153,7 +153,7 @@
 	,@BorrowingFacilityId					INT				= NULL
 	,@BorrowingFacilityLimitId				INT				= NULL
 	,@BankReferenceNo						NVARCHAR(100)	= NULL
-	,@BankTransactionId						NVARCHAR(100)	= NULL
+	,@BankTradeReference					NVARCHAR(100)	= NULL
 	,@LoanAmount							NUMERIC(18, 6)	= NULL
 	,@BankValuationRuleId					INT				= NULL
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
@@ -549,7 +549,7 @@ BEGIN TRY
 		,[intBorrowingFacilityId]
 		,[intBorrowingFacilityLimitId]
 		,[strBankReferenceNo]
-		,[strBankTransactionId]
+		,[strBankTradeReference]
 		,[dblLoanAmount]
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
@@ -654,7 +654,7 @@ BEGIN TRY
 		,[intBorrowingFacilityId]			= @BorrowingFacilityId
 		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
-		,[strBankTransactionId]				= @BankTransactionId
+		,[strBankTradeReference]			= @BankTradeReference
 		,[dblLoanAmount]					= @LoanAmount
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments

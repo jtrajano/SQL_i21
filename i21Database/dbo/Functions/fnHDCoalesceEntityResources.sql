@@ -6,7 +6,7 @@ BEGIN
 	DECLARE @strEmails nvarchar(max);
 
 	select
-		@strEmails = coalesce(@strEmails + ',', '') +  b.strEmail
+		@strEmails = coalesce(@strEmails + ',', '') +  b.strEmail COLLATE Latin1_General_CI_AS
 	from
 		tblHDTimeEntryResources a
 	inner join tblEMEntity b on b.intEntityId = a.intResourcesEntityId
@@ -15,6 +15,8 @@ BEGIN
 		and b.strEmail is not null
 		and ltrim(rtrim(b.strEmail)) <> ''
 
-	return @strEmails
+	return @strEmails COLLATE Latin1_General_CI_AS
 
 END
+
+GO

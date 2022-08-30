@@ -27,6 +27,7 @@ SELECT  detail.intPickupDetailId
        ,item.intCategoryId
        ,detail.dblGross
        ,detail.dblNet
+       ,detail.strItemUOM
 FROM tblMBILPickupDetail detail              
 INNER JOIN tblMBILLoadHeader load on detail.intLoadHeaderId = load.intLoadHeaderId        
 INNER JOIN tblICItem item on detail.intItemId = item.intItemId        

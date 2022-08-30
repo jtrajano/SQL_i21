@@ -14,7 +14,7 @@ E.strTimezone,
 D.strTitle,
 C.ysnPortalAccess,  
 --D.ysnActive,
-ysnActive = CASE WHEN (X.[User] = 1) THEN B.ysnActive ELSE D.ysnActive END,
+ysnActive = CASE WHEN (X.[User] = 1 AND C.ysnDefaultContact = 1) THEN CASE WHEN (userSec.ysnDisabled = 1) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END ELSE D.ysnActive END,
 C.ysnDefaultContact, 
 D.strContactType,
 D.strEmailDistributionOption,
@@ -73,3 +73,6 @@ LEFT JOIN tblSMCountry h
 on h.strCountry = E.strCountry
 cross apply (select * from tblSMCountry where intCountryID in(select top 1 intDefaultCountryId from tblSMCompanyPreference)) i
 outer apply (select top 1 * from tblEMContactDetail where intEntityId = C.intEntityContactId and intContactDetailTypeId = 5) j
+
+LEFT OUTER JOIN tblSMUserSecurity userSec
+ON B.intEntityId = userSec.intEntityId

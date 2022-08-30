@@ -50,7 +50,8 @@
     [intAccountId]			    INT NULL,
     [strLogoType]               NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
     [blbLogo]                   VARBINARY (MAX) NULL,
-    [blbFooterLogo]             VARBINARY (MAX) NULL
+    [blbFooterLogo]             VARBINARY (MAX) NULL,
+    [intAge]                    INT NULL
 );
 
 GO

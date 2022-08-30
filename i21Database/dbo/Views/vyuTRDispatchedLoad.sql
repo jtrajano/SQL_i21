@@ -87,6 +87,7 @@ SELECT LG.intLoadId
 	, ysnBrokered = CASE WHEN (Config.intSellerId IS NOT NULL AND (Config.intSellerId <> ISNULL(LG.intSellerId, 0))) THEN 1 ELSE 0 END
 	, LG.intSalespersonId
 	, intSiteId = LG.intTMSiteId
+	, intSiteNumber = TS.intSiteNumber
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
@@ -96,4 +97,5 @@ LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLoca
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 LEFT JOIN vyuICGetItemStock ItemS ON ItemS.intItemId = LG.intItemId AND ItemS.intLocationId = LG.intSCompanyLocationId
+LEFT JOIN tblTMSite TS ON LG.intTMSiteId = TS.intSiteID
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

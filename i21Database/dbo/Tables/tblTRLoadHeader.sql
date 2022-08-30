@@ -22,6 +22,7 @@
 	[intUserId] INT NULL,
 	[intLongTruckLoadId] INT NULL,
 	[intMobileLoadHeaderId] INT NULL,
+	[intTruckId] INT NULL,
     CONSTRAINT [PK_tblTRLoadHeader] PRIMARY KEY ([intLoadHeaderId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intSellerId] FOREIGN KEY ([intSellerId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),
@@ -29,7 +30,8 @@
 	CONSTRAINT [FK_tblTRLoadHeader_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [dbo].[tblLGLoad] ([intLoadId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblTRState_intStateId] FOREIGN KEY ([intStateId]) REFERENCES [dbo].[tblTRState] ([intStateId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblICItem_intItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipViaTrailer_intTrailerId] FOREIGN KEY ([intTrailerId]) REFERENCES [dbo].[tblSMShipViaTrailer] ([intEntityShipViaTrailerId])
+	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipViaTrailer_intTrailerId] FOREIGN KEY ([intTrailerId]) REFERENCES [dbo].[tblSMShipViaTrailer] ([intEntityShipViaTrailerId]),
+	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipViaTruck_intTruckId] FOREIGN KEY ([intTruckId]) REFERENCES [dbo].[tblSMShipViaTruck] ([intEntityShipViaTruckId])
 )
 GO
 

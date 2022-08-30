@@ -6,11 +6,11 @@ SELECT  [intTimeEntryPeriodNotificationId] = Notif.[intTimeEntryPeriodNotificati
 	   ,[dtmDateCreated]				   = Notif.[dtmDateCreated]
 	   ,[dtmDateSent]					   = Notif.[dtmDateSent]
 	   ,[ysnSent]						   = Notif.[ysnSent]
-	   ,[strWarning]					   = Notif.[strWarning]
+	   ,[strWarning]					   = Notif.[strWarning]			
 	   ,[intConcurrencyId]				   = Notif.[intConcurrencyId]
-	   ,[strRecipientFullName]			   = Entity.[strName]
-	   ,[strRecipientEmail]				   = Entity.[strEmail]
-	   ,[strBillingPeriodRange]			   = CONVERT(VARCHAR(30), TimeEntryPeriodDetail.dtmBillingPeriodStart , 101)  + ' - ' + CONVERT(VARCHAR(30), TimeEntryPeriodDetail.dtmBillingPeriodEnd, 101)
+	   ,[strRecipientFullName]			   = Entity.[strName]			
+	   ,[strRecipientEmail]				   = Entity.[strEmail]			
+	   ,[strBillingPeriodRange]			   = CONVERT(VARCHAR(30), TimeEntryPeriodDetail.dtmBillingPeriodStart , 101)  + ' - ' + CONVERT(VARCHAR(30), TimeEntryPeriodDetail.dtmBillingPeriodEnd, 101) COLLATE Latin1_General_CI_AS
 FROM tblHDTimeEntryPeriodNotification Notif
 		INNER JOIN vyuEMEntityContact Entity
 ON Entity.[intEntityId] = Notif.[intEntityRecipientId] AND Entity.ysnDefaultContact = 1 

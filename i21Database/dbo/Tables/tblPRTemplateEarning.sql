@@ -6,6 +6,7 @@
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblDefaultHours] [numeric](18, 6) NULL DEFAULT ((0)),
 	[intAccountId] INT NULL,
+    [ysnUseLocationDistribution] BIT            DEFAULT ((1)) NOT NULL,
 	[intTaxCalculationType] INT NULL DEFAULT ((0)),
 	[strW2Code] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intTemplateTimeOffId] [int] NULL,

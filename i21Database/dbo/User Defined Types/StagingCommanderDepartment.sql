@@ -12,11 +12,6 @@
 	[intTotalCount] [int] NULL,
 	[dblTotalAmount] [numeric](18, 6) NULL,
 	[intPromotionCount] [int] NULL,
-	[dblPromotionAmount] [numeric](18, 6) NULL,
-	[strCashierName] [nvarchar](max) NULL,
-	[dblCashierRefundAmount] [numeric](18, 6) NULL,
-	[intCashierRefundCount] [numeric](18, 6) NULL,
-	[intCashierSaleCount] [int] NULL,
-	[dblCashierSaleAmount] [int] NULL
+	[dblPromotionAmount] [numeric](18, 6) NULL
 )
 

@@ -63,6 +63,7 @@ RETURNS @returntable TABLE (
 	,[strLogoType]				NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL
 	,[blbLogo]					VARBINARY (MAX) NULL
 	,[blbFooterLogo]			VARBINARY (MAX) NULL
+	,[intAge]                   INT NULL DEFAULT 0
 )
 AS
 BEGIN
@@ -183,7 +184,7 @@ BEGIN
 	SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 	SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 
-	 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+	SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 
 	SELECT TOP 1 @strCompanyName	= strCompanyName
 			   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
@@ -557,6 +558,7 @@ BEGIN
 		 , strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		 , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
 		 , blbFooterLogo		= SMLPF.imgLogo
+		 , intAge				= ISNULL(AGING.intAge, 0)
 	FROM
 	(SELECT A.strInvoiceNumber
 		 , B.strRecordNumber
@@ -590,6 +592,7 @@ BEGIN
 		 , dblCurrencyRevalueRate	= A.dblCurrencyRevalueRate
 		 , dblCurrencyRevalueAmount = A.dblCurrencyRevalueAmount
 		 , intAccountId				= A.intAccountId
+		 , intAge					= A.intAge
 	FROM
 	(SELECT dtmDate				= I.dtmDate
 		 , I.strInvoiceNumber
@@ -607,6 +610,7 @@ BEGIN
 		 , I.dblCurrencyRevalueRate
 		 , I.dblCurrencyRevalueAmount
 		 , I.intAccountId
+		 , intAge = DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal)
 		 , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
 					ELSE CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 0 THEN 'Current'
 							  WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 10 THEN '1 - 10 Days'

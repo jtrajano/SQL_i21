@@ -81,7 +81,7 @@ SELECT
 	, strMessage = 'The Customer No. "' + vts.strCustomer + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-LEFT JOIN tblARCustomer c ON c.strCustomerNumber = vts.strCustomer
+LEFT JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND c.intEntityId IS NULL
 	AND NULLIF(vts.strCustomer, '') IS NOT NULL
@@ -98,8 +98,7 @@ SELECT
 	, strMessage = 'The Customer Name "' + vts.strCustomerName + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-LEFT JOIN tblEMEntity e ON e.strName = vts.strCustomerName
-LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
+LEFT JOIN vyuARCustomer c ON c.strName = vts.strCustomerName
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND c.intEntityId IS NULL
 	AND NULLIF(vts.strCustomer, '') IS NULL
@@ -119,7 +118,7 @@ SELECT
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
-JOIN tblARCustomer c ON c.strCustomerNumber = vts.strCustomer
+JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND NULLIF(vts.strCustomer, '') IS NOT NULL
 	AND EXISTS (
@@ -127,6 +126,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		FROM tblVRCustomerXref xx
 		WHERE xx.intVendorSetupId = vs.intVendorSetupId
 			AND xx.intEntityId = c.intEntityId
+			AND xx.strVendorCustomer = vts.strVendorCustomer
 	)
 	AND @OverwriteExisting = 0
 
@@ -415,9 +415,10 @@ SELECT e.intVendorSetupId, xc.intEntityId, xc.strVendorCustomer, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
-JOIN tblARCustomer c ON c.strCustomerNumber = vs.strCustomer
+JOIN vyuARCustomer c ON c.strCustomerNumber = vs.strCustomer
 JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
 	AND xc.intEntityId = c.intEntityId
+	--AND xc.strVendorCustomer = vs.strVendorCustomer
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 1
 
@@ -427,9 +428,10 @@ FROM tblApiSchemaTransformVendorSetup vs
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblEMEntity en ON en.strName = vs.strCustomerName
-JOIN tblARCustomer c ON c.intEntityId = en.intEntityId
+JOIN vyuARCustomer c ON c.intEntityId = en.intEntityId
 JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
 	AND xc.intEntityId = c.intEntityId
+	--AND xc.strVendorCustomer = vs.strVendorCustomer
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND NULLIF(vs.strCustomer, '') IS NULL
 	AND NULLIF(vs.strCustomerName, '') IS NOT NULL
@@ -442,8 +444,9 @@ SET
 	, xc.strVendorCustomer = COALESCE(vs.strVendorCustomer, xc.strVendorCustomer)
 	, xc.intRowNumber = vs.intRowNumber
 FROM tblVRCustomerXref xc
-JOIN tblARCustomer c ON c.intEntityId = xc.intEntityId
+JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomer = c.strCustomerNumber
+	--AND vs.strVendorCustomer = xc.strVendorCustomer
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
@@ -457,8 +460,9 @@ SET
 	, xc.intRowNumber = vs.intRowNumber
 FROM tblVRCustomerXref xc
 JOIN tblEMEntity en ON en.intEntityId = xc.intEntityId
-JOIN tblARCustomer c ON c.intEntityId = xc.intEntityId
+JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomerName = en.strName
+	--AND vs.strVendorCustomer = xc.strVendorCustomer
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
@@ -496,9 +500,8 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		SELECT TOP 1 1
 		FROM tblVRCustomerXref xx
 		WHERE xx.intVendorSetupId = vs.intVendorSetupId
-			AND (xx.intEntityId = c.intEntityId OR (
-				xx.intEntityId != c.intEntityId AND xx.strVendorCustomer = vts.strVendorCustomer	
-			))
+			AND xx.intEntityId != c.intEntityId 
+			--AND xx.strVendorCustomer = vts.strVendorCustomer
 	)
 
 INSERT INTO @UniqueCustomers (
@@ -524,9 +527,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		SELECT TOP 1 1
 		FROM tblVRCustomerXref xx
 		WHERE xx.intVendorSetupId = vs.intVendorSetupId
-			AND (xx.intEntityId = c.intEntityId OR (
-				xx.intEntityId != c.intEntityId AND xx.strVendorCustomer = vts.strVendorCustomer	
-			))
+			AND xx.intEntityId != c.intEntityId 
 	)
 	AND NULLIF(vts.strCustomer, '') IS NULL
 	AND NULLIF(vts.strCustomerName, '') IS NOT NULL
@@ -541,15 +542,15 @@ DELETE FROM cte
 WHERE guiApiUniqueId = @guiApiUniqueId
   AND RowNumber > 1;
 
-;WITH cte AS
-(
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorCustomer ORDER BY sr.intVendorSetupId, sr.strVendorCustomer) AS RowNumber
-   FROM @UniqueCustomers sr
-   WHERE sr.guiApiUniqueId = @guiApiUniqueId
-)
-DELETE FROM cte
-WHERE guiApiUniqueId = @guiApiUniqueId
-  AND RowNumber > 1;
+-- ;WITH cte AS
+-- (
+--    SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorCustomer ORDER BY sr.intVendorSetupId, sr.strVendorCustomer) AS RowNumber
+--    FROM @UniqueCustomers sr
+--    WHERE sr.guiApiUniqueId = @guiApiUniqueId
+-- )
+-- DELETE FROM cte
+-- WHERE guiApiUniqueId = @guiApiUniqueId
+--   AND RowNumber > 1;
 
 INSERT INTO tblVRCustomerXref (
 	  intEntityId

@@ -143,3 +143,216 @@ END
 
 GO
 print('/*******************  BEGIN INSERT DEFAULT STATEMENT FORMATS  *******************/')
+
+print('/*******************  BEGIN INSERT DEFAULT CUSTOM AGING SETUP *******************/')
+GO
+
+DECLARE @intCustomAgingSetupId INT = NULL
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblARCustomAgingSetup')
+    BEGIN
+        IF NOT EXISTS (SELECT TOP 1 1 FROM tblARCustomAgingSetup)
+            BEGIN 
+                INSERT INTO tblARCustomAgingSetup (
+					  intEntityId
+                    , intConcurrencyId
+                )
+                SELECT TOP 1 intEntityId		= intEntityId
+                           , intConcurrencyId	= 1
+                FROM tblEMEntityCredential
+                ORDER BY intEntityId ASC
+            END
+
+		SELECT TOP 1 @intCustomAgingSetupId = intCustomAgingSetupId
+        FROM tblARCustomAgingSetup
+        ORDER BY intCustomAgingSetupId ASC
+    END
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblARCustomAgingSetupBucket')
+    BEGIN
+        IF NOT EXISTS (SELECT TOP 1 1 FROM tblARCustomAgingSetupBucket) AND @intCustomAgingSetupId IS NOT NULL
+            BEGIN 
+                INSERT INTO tblARCustomAgingSetupBucket (
+					  intCustomAgingSetupId
+					, strOriginalBucket
+					, strCustomTitle
+					, intAgeFrom
+					, intAgeTo
+					, ysnShow
+					, intConcurrencyId
+                )
+                SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strOriginalBucket			= 'Current'
+					, strCustomTitle			= NULL
+					, intAgeFrom				= NULL
+					, intAgeTo					= NULL
+					, ysnShow					= 1
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strOriginalBucket			= '1-10 Days'
+					, strCustomTitle			= NULL
+					, intAgeFrom				= 1
+					, intAgeTo					= 10
+					, ysnShow					= 1
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strOriginalBucket			= '11-30 Days'
+					, strCustomTitle			= NULL
+					, intAgeFrom				= 11
+					, intAgeTo					= 30
+					, ysnShow					= 1
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strOriginalBucket			= '31-60 Days'
+					, strCustomTitle			= NULL
+					, intAgeFrom				= 31
+					, intAgeTo					= 60
+					, ysnShow					= 1
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strOriginalBucket			= '61-90 Days'
+					, strCustomTitle			= NULL
+					, intAgeFrom				= 61
+					, intAgeTo					= 90
+					, ysnShow					= 1
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strOriginalBucket			= 'Over 90 Days'
+					, strCustomTitle			= NULL
+					, intAgeFrom				= 90
+					, intAgeTo					= NULL
+					, ysnShow					= 1
+					, intConcurrencyId			= 1
+            END
+    END
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblARCustomAgingSetupFilter')
+    BEGIN
+        IF NOT EXISTS (SELECT TOP 1 1 FROM tblARCustomAgingSetupFilter) AND @intCustomAgingSetupId IS NOT NULL
+            BEGIN 
+                INSERT INTO tblARCustomAgingSetupFilter (
+					  intCustomAgingSetupId
+					, strFilterField
+					, strCondition
+					, strFrom
+					, strTo
+					, strOperator
+					, intConcurrencyId
+                )
+                SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Date'
+					, strCondition				= 'As Of'
+					, strFrom					= '01/01/1900'
+					, strTo						= CONVERT(NVARCHAR(10), GETDATE(), 101)
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Customer Name'
+					, strCondition				= 'Equal To'
+					, strFrom					= NULL
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Salesperson Name'
+					, strCondition				= 'Equal To'
+					, strFrom					= NULL
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Source Transaction'
+					, strCondition				= 'Equal To'
+					, strFrom					= NULL
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Print Customers with Balances'
+					, strCondition				= 'Equal To'
+					, strFrom					= 'All'
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Print only Customers over Credit Limit'
+					, strCondition				= 'Equal To'
+					, strFrom					= 'False'
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Account Status Code'
+					, strCondition				= 'Equal To'
+					, strFrom					= NULL
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Company Location'
+					, strCondition				= 'Equal To'
+					, strFrom					= NULL
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Roll Credits'
+					, strCondition				= 'Equal To'
+					, strFrom					= 'False'
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+
+				UNION ALL
+
+				SELECT intCustomAgingSetupId	= @intCustomAgingSetupId
+					, strFilterField			= 'Override Cash Flow'
+					, strCondition				= 'Equal To'
+					, strFrom					= 'False'
+					, strTo						= NULL
+					, strOperator				= 'AND'
+					, intConcurrencyId			= 1
+            END
+    END
+
+GO
+print('/*******************  BEGIN INSERT DEFAULT CUSTOM AGING SETUP *******************/')
