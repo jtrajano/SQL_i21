@@ -1358,7 +1358,7 @@ BEGIN
 		DECLARE @intPrcItemUOMId			INT
 		DECLARE @dblPrcPriceOut				NUMERIC(18,6)	
 		DECLARE @strPrcPricingOut			NVARCHAR(MAX)		
-		DECLARE @intPrcAvailableQuantity	INT				
+		DECLARE @intPrcAvailableQuantity	NUMERIC(18,6)				
 		DECLARE @dblPrcOriginalPrice		NUMERIC(18,6)	
 		DECLARE @intPrcContractHeaderId		INT				
 		DECLARE @intPrcContractDetailId		INT				
