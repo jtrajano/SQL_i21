@@ -37,6 +37,8 @@ BEGIN TRY
 	--		RAISERROR(@ErrMsg,16,1)
 	--	END
 	--END
+	
+	update tblCTPriceFixation set intPreviousConcurrencyId = intConcurrencyId WHERE intPriceContractId = @intPriceContractId;
 
 	SELECT @intContractTypeId = b.intContractTypeId, @intContractDetailId = a.intContractDetailId
 	FROM tblCTPriceFixation a
