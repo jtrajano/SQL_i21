@@ -639,16 +639,13 @@ BEGIN TRY
 			, @logProcess NVARCHAR(50)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
 		SELECT @logProcess = @process + CASE WHEN @strAction = 'Reassign' THEN ' - Reassign' ELSE '' END
-
-		if exists (select top 1 1 from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId and isnull(intPreviousConcurrencyId,0) <> intConcurrencyId)
-		begin
-			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-								 @intContractDetailId 	= 	@intContractDetailId,
-								 @strSource			 	= 	'Pricing',
-								 @strProcess		 	= 	@logProcess,
-								 @contractDetail 		= 	@contractDetails,
-								 @intUserId				= 	@intUserId
-		end
+		
+		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+							 @intContractDetailId 	= 	@intContractDetailId,
+							 @strSource			 	= 	'Pricing',
+							 @strProcess		 	= 	@logProcess,
+							 @contractDetail 		= 	@contractDetails,
+							 @intUserId				= 	@intUserId
 
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0, @dtmLocalDate
 
