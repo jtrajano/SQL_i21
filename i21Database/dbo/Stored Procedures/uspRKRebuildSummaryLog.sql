@@ -3074,6 +3074,11 @@ BEGIN TRY
 		---------------------------------------------------------------------------------------------------
 		EXEC uspRKRebuildNonOpenContracts
 			@intMonthThreshold = 3
+
+		-------------------------------------------------------------------
+		-- FIX FOR COMMON ISSUES IN DERIVATIVES AFTER UPGRADING TO 20.1	 --
+		-------------------------------------------------------------------
+		EXEC uspRKFixDerivativeCommonIssues
 			
 		----------------------------------------------------
 		-- Run Integration scripts required after rebuild --

@@ -9,6 +9,7 @@ SELECT DISTINCT
 	V.strName AS strVendorId,
 	CV.strVendorDepartment,
 	CAT.strCategoryCode,
+	subcategories.strSubCategory AS strSubcategory,
 	family.strSubcategoryId AS strFamily,
 	class.strSubcategoryId AS strClass,
 	CASE WHEN I.strStatus = 'Active'
@@ -31,3 +32,5 @@ LEFT JOIN tblSTSubcategory family
 	ON IL.intFamilyId = family.intSubcategoryId
 LEFT JOIN tblSTSubcategory class
 	ON IL.intClassId = class.intSubcategoryId
+LEFT JOIN tblSTSubCategories subcategories
+	ON I.intSubcategoriesId = subcategories.intSubcategoriesId

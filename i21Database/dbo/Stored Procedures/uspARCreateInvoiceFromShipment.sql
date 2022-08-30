@@ -228,7 +228,8 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intCurrencyExchangeRateId]
 	,[dblCurrencyExchangeRate]
 	,[intSubCurrencyId] 
-	,[dblSubCurrencyRate] 
+	,[dblSubCurrencyRate]
+	,[dblStandardWeight]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -349,6 +350,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
+	,[dblStandardWeight]					= ARSI.dblStandardWeight
 FROM vyuARShippedItems ARSI
 LEFT JOIN(
  SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
@@ -475,6 +477,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
+	,[dblStandardWeight]					= SOD.dblStandardWeight
 FROM tblICInventoryShipment ICIS
 INNER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
 							 AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
@@ -600,6 +603,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ICISI.[dblForexRate]
 	,[intSubCurrencyId]						= NULL
 	,[dblSubCurrencyRate]					= @ZeroDecimal
+	,[dblStandardWeight]					= @ZeroDecimal
 FROM 
 	tblICInventoryShipment ICIS
 INNER JOIN

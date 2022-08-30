@@ -272,6 +272,107 @@ BEGIN
 			NULL
 		FROM dbo.fnFAGetBasisAdjustment(@idx2, @BookId) WHERE intBookdId = @BookId AND intAssetId = @idx2
     END
+
+    -- Get Accounts Overridden by Location Segment
+	DECLARE @tblOverrideAccount TABLE (
+		intAssetId INT,
+		intAccountId INT,
+		intTransactionType INT,
+		intNewAccountId INT  NULL,
+		strNewAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+		strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+	)
+	INSERT INTO @tblOverrideAccount (
+		intAssetId
+		,intAccountId
+		,intTransactionType
+		,intNewAccountId
+		,strNewAccountId
+		,strError
+	)
+	SELECT 
+		AssetAccountOverride.intAssetId
+		,AssetAccountOverride.intAccountId
+		,AssetAccountOverride.intTransactionType
+		,AssetAccountOverride.intNewAccountId
+		,AssetAccountOverride.strNewAccountId
+		,AssetAccountOverride.strError
+	FROM tblFAFixedAsset A
+    JOIN @tblDepComputation B 
+    ON A.intAssetId = B.intAssetId
+    OUTER APPLY (
+		SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+	) Adjustment
+    OUTER APPLY (
+		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.intAssetAccountId, 1)
+	) AssetAccountOverride
+    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
+	AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
+    UNION ALL
+    SELECT 
+		OffsetAccount.intAssetId
+		,OffsetAccount.intAccountId
+		,OffsetAccount.intTransactionType
+		,OffsetAccount.intNewAccountId
+		,OffsetAccount.strNewAccountId
+		,OffsetAccount.strError
+	FROM tblFAFixedAsset A
+    JOIN @tblDepComputation B 
+    ON A.intAssetId = B.intAssetId
+    OUTER APPLY (
+		SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+	) Adjustment
+    OUTER APPLY (
+		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.intExpenseAccountId, 2)
+	) OffsetAccount
+    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL 
+	AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
+    UNION ALL
+    SELECT 
+		DepreciationAccount.intAssetId
+		,DepreciationAccount.intAccountId
+		,DepreciationAccount.intTransactionType
+		,DepreciationAccount.intNewAccountId
+		,DepreciationAccount.strNewAccountId
+		,DepreciationAccount.strError
+	FROM tblFAFixedAsset A
+    JOIN @tblDepComputation B 
+    ON A.intAssetId = B.intAssetId
+    OUTER APPLY (
+		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, CASE WHEN B.strTransaction = 'Imported' THEN A.[intExpenseAccountId] ELSE A.[intDepreciationAccountId] END, CASE WHEN B.strTransaction = 'Imported' THEN 2 ELSE 3 END)
+	) DepreciationAccount
+    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
+    UNION ALL
+    SELECT 
+		DepreciationAccount.intAssetId
+		,DepreciationAccount.intAccountId
+		,DepreciationAccount.intTransactionType
+		,DepreciationAccount.intNewAccountId
+		,DepreciationAccount.strNewAccountId
+		,DepreciationAccount.strError
+	FROM tblFAFixedAsset A
+    JOIN @tblDepComputation B 
+    ON A.intAssetId = B.intAssetId
+    OUTER APPLY (
+		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.[intAccumulatedAccountId], 4)
+	) DepreciationAccount
+    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
+
+    -- Validate override accounts
+	IF EXISTS(SELECT TOP 1 1 FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL)
+	BEGIN
+        INSERT INTO @tblError
+        SELECT A.intAssetId, O.strError, B.intLedgerId
+        FROM tblFAFixedAsset A  
+        JOIN @tblDepComputation B 
+            ON A.intAssetId = B.intAssetId
+        JOIN @tblOverrideAccount O
+            ON O.intAssetId = B.intAssetId
+        WHERE O.intNewAccountId IS NULL AND O.strError IS NOT NULL
+
+        GOTO LogError
+	END
+
   
       DECLARE @IdIterate Id
       DECLARE @i INT 
@@ -615,7 +716,6 @@ BEGIN
     
       IF @BookId = 1
       BEGIN
-
           DELETE FROM @GLEntries  
           INSERT INTO @GLEntries (
           [strTransactionId]  
@@ -651,12 +751,13 @@ BEGIN
           ,[strModuleName]     
           ,[intCurrencyExchangeRateTypeId]
           ,[intLedgerId]
+          ,[intCompanyLocationId]
           )
 		  -- Adjustment Entries
 		  SELECT   
           [strTransactionId]  = Adjustment.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intAssetAccountId]  
+          ,[intAccountId]   = OverrideAccount.[intNewAccountId]  
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
@@ -707,9 +808,12 @@ BEGIN
           ,[strModuleName]  = 'Fixed Assets'
           ,[intCurrencyExchangeRateTypeId] = Adjustment.intCurrencyExchangeRateTypeId
           ,[intLedgerId] = B.intLedgerId
+          ,[intCompanyLocationId] = A.intCompanyLocationId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
-          ON A.intAssetId = B.intAssetId
+            ON A.intAssetId = B.intAssetId
+          JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intAssetAccountId
 		  OUTER APPLY (
 			SELECT TOP 1 strTransactionId, dblAdjustment, dblFunctionalAdjustment,dblRate, dtmDate, intCurrencyId,
 				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId, ysnAddToBasis
@@ -722,7 +826,7 @@ BEGIN
 		  SELECT   
           [strTransactionId]  = Adjustment.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intExpenseAccountId]  
+          ,[intAccountId]   = OverrideAccount.[intNewAccountId] 
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
@@ -773,9 +877,12 @@ BEGIN
           ,[strModuleName]  = 'Fixed Assets'
           ,[intCurrencyExchangeRateTypeId] = Adjustment.intCurrencyExchangeRateTypeId
           ,[intLedgerId] = B.intLedgerId
+          ,[intCompanyLocationId] = A.intCompanyLocationId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
-          ON A.intAssetId = B.intAssetId
+            ON A.intAssetId = B.intAssetId
+          JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intExpenseAccountId
 		  OUTER APPLY (
 			SELECT TOP 1 strTransactionId, dblAdjustment, dblFunctionalAdjustment,dblRate, dtmDate, intCurrencyId,
 				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId, ysnAddToBasis
@@ -789,7 +896,7 @@ BEGIN
           SELECT   
           [strTransactionId]  = B.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = CASE WHEN B.strTransaction = 'Imported' THEN A.[intExpenseAccountId] ELSE A.[intDepreciationAccountId] END
+          ,[intAccountId]   = OverrideAccount.[intNewAccountId]
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
@@ -820,9 +927,12 @@ BEGIN
           ,[strModuleName]  = 'Fixed Assets'
           ,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
           ,[intLedgerId] = B.intLedgerId
+          ,[intCompanyLocationId] = A.intCompanyLocationId
           FROM tblFAFixedAsset A  
-          JOIN @tblDepComputation B 
+            JOIN @tblDepComputation B
           ON A.intAssetId = B.intAssetId
+          JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = CASE WHEN B.strTransaction = 'Imported' THEN A.[intExpenseAccountId] ELSE A.[intDepreciationAccountId] END
           OUTER APPLY(
               SELECT TOP 1 B.[dtmDepreciationToDate] 
               FROM tblFAFixedAssetDepreciation B 
@@ -836,7 +946,7 @@ BEGIN
           SELECT   
           [strTransactionId]  = B.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intAccumulatedAccountId]  
+          ,[intAccountId]   = OverrideAccount.[intNewAccountId]
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
@@ -867,9 +977,12 @@ BEGIN
           ,[strModuleName]  = 'Fixed Assets'  
           ,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
           ,[intLedgerId] = B.intLedgerId
+          ,[intCompanyLocationId] = A.intCompanyLocationId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
-          ON A.intAssetId = B.intAssetId
+            ON A.intAssetId = B.intAssetId
+          JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.[intAccumulatedAccountId]
           OUTER APPLY(
               SELECT TOP 1 B.[dtmDepreciationToDate] 
               FROM tblFAFixedAssetDepreciation B 

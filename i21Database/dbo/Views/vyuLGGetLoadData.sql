@@ -16,7 +16,9 @@ SELECT
     ,L.dtmDeliveredDate
     ,L.intGenerateLoadId
     ,L.intGenerateSequence
-    ,L.strTruckNo
+    ,L.intTruckId
+	,strTruckNumber = SVT.strTruckNumber
+	,L.strTruckNo
     ,L.strTrailerNo1
     ,L.strTrailerNo2
     ,L.strTrailerNo3
@@ -270,6 +272,7 @@ LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
 LEFT JOIN tblLGContainerType CONT ON CONT.intContainerTypeId = L.intContainerTypeId

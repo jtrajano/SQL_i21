@@ -312,6 +312,8 @@ WHERE I.[intPeriodsToAccrue] <= 1
     EXISTS(SELECT NULL FROM tblARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId)
   )
   AND I.strType <> 'Tax Adjustment'
+  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+  AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueToAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0)

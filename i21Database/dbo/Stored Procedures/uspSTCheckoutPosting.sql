@@ -447,6 +447,16 @@ BEGIN
 						-- ROLLBACK
 						GOTO ExitWithRollback
 					END
+					
+				-- Cash over/short item id
+				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NULL)
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Missing setup of over-short item on Store configuration Setup tab'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
 
 			END
 		

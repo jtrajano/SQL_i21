@@ -6,7 +6,7 @@ SELECT L.intLoadId
 	,L.strLoadNumber
 	,L.strExternalLoadNumber
 	,L.strExternalShipmentNumber
-	,L.strTruckNo
+	,strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END
 	,L.strBLNumber
 	,L.dtmETAPOD
 	,L.dtmETAPOL
@@ -207,5 +207,6 @@ LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReas
 LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId

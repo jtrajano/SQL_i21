@@ -37,7 +37,7 @@ SELECT   L.intLoadId
         ,ysnInProgress = IsNull(L.ysnInProgress, 0)
         ,L.dtmDeliveredDate
         ,L.strCustomerReference
-        ,L.strTruckNo
+        ,strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END
         ,L.strTrailerNo1
         ,L.strTrailerNo2
         ,L.strTrailerNo3
@@ -303,6 +303,7 @@ LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId
 LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId  
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = LD.intSellerId

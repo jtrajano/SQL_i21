@@ -8,6 +8,7 @@
 	,@strDistrict			NVARCHAR(MAX) = ''
 	,@strRegion				NVARCHAR(MAX) = ''
 	,@intCategoryId			NVARCHAR(MAX)
+	,@intSubcategoryId		NVARCHAR(MAX)
 	,@intBasketCategoryId	NVARCHAR(MAX)
 	,@intUserId				INT
 AS
@@ -31,8 +32,8 @@ INNER JOIN tblICItem item
 ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
 ON item.intCategoryId = cat.intCategoryId
-WHERE ((strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE ''%suspended%'' AND strTransType NOT LIKE ''%void%'' AND strTrLineType<>''preFuel'' AND strTransFuelPrepayCompletion IS NULL) 
-OR     (strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND strTransType NOT LIKE ''%suspended%'' AND strTransType NOT LIKE ''%void%'' AND strTrLineType=''postFuel'' AND strTransFuelPrepayCompletion IS NOT NULL)) '
+WHERE ((strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND ISNULL(strTransType, '''') NOT LIKE ''%suspended%'' AND ISNULL(strTransType, '''') NOT LIKE ''%void%'' AND ISNULL(strTrLineType, '''')<>''preFuel'' AND strTransFuelPrepayCompletion IS NULL) 
+OR     (strTransRollback IS NULL AND strTransFuelPrepay IS NULL AND ISNULL(strTransType, '''') NOT LIKE ''%suspended%'' AND ISNULL(strTransType, '''') NOT LIKE ''%void%'' AND ISNULL(strTrLineType, '''')=''postFuel'' AND strTransFuelPrepayCompletion IS NOT NULL)) '
 
 --DEFAULT VALUES--
 DECLARE @ValueMinDate NVARCHAR(MAX) = '1000-01-01 12:00:00'
@@ -228,7 +229,7 @@ BEGIN
 			ON uom.intItemId = item.intItemId
 		INNER JOIN tblICCategory cat
 			ON item.intCategoryId = cat.intCategoryId
-		WHERE cat.intCategoryId != @intCategoryId AND item.intItemId != @intItemId
+		WHERE cat.intCategoryId != @intCategoryId AND item.intSubcategoriesId != @intSubcategoryId AND item.intItemId != @intItemId
 	END
 
 	IF(@strComparison = @ValueCategory)
@@ -241,7 +242,7 @@ BEGIN
 			ON uom.intItemId = item.intItemId
 		INNER JOIN tblICCategory cat
 			ON item.intCategoryId = cat.intCategoryId
-		WHERE cat.intCategoryId != @intCategoryId AND item.intCategoryId != @intBasketCategoryId
+		WHERE cat.intCategoryId != @intCategoryId AND item.intSubcategoriesId != @intSubcategoryId AND item.intCategoryId != @intBasketCategoryId
 	END
 	
 
@@ -286,3 +287,4 @@ INNER JOIN tblICItem item
 	ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
 	ON item.intCategoryId = cat.intCategoryId
+WHERE strTrlUPC != ''
