@@ -174,6 +174,103 @@ IF ISNULL(@ysnRecap, 0) = 0
 			GOTO Post_Rollback
 		END
 
+
+		-- Get Accounts Overridden by Location Segment
+		DECLARE @tblOverrideAccount TABLE (
+			intAssetId INT,
+			intAccountId INT,
+			intTransactionType INT,
+			intNewAccountId INT  NULL,
+			strNewAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+			strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+		)
+		INSERT INTO @tblOverrideAccount (
+			intAssetId
+			,intAccountId
+			,intTransactionType
+			,intNewAccountId
+			,strNewAccountId
+			,strError
+		)
+		SELECT 
+			AccumAccountOverride.intAssetId
+			,AccumAccountOverride.intAccountId
+			,AccumAccountOverride.intTransactionType
+			,AccumAccountOverride.intNewAccountId
+			,AccumAccountOverride.strNewAccountId
+			,AccumAccountOverride.strError
+		FROM tblFAFixedAsset F
+		JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+		OUTER APPLY (
+			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intAccumulatedAccountId, 4)
+		) AccumAccountOverride
+		UNION ALL
+		SELECT 
+			AssetAccountOverride.intAssetId
+			,AssetAccountOverride.intAccountId
+			,AssetAccountOverride.intTransactionType
+			,AssetAccountOverride.intNewAccountId
+			,AssetAccountOverride.strNewAccountId
+			,AssetAccountOverride.strError
+		FROM tblFAFixedAsset F
+		JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+		OUTER APPLY (
+			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intAssetAccountId, 1)
+		) AssetAccountOverride
+		UNION ALL
+		SELECT 
+			GainLossAccountOverride.intAssetId
+			,GainLossAccountOverride.intAccountId
+			,GainLossAccountOverride.intTransactionType
+			,GainLossAccountOverride.intNewAccountId
+			,GainLossAccountOverride.strNewAccountId
+			,GainLossAccountOverride.strError
+		FROM tblFAFixedAsset F
+		JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+		OUTER APPLY (
+			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intGainLossAccountId, 5)
+		) GainLossAccountOverride
+		WHERE A.totalDepre <> A.dblAssetValue
+		AND ((A.dblAssetValue - (CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre ELSE A.totalForeignDepre END) - @dblDispositionAmount) <> 0)
+		UNION ALL
+		SELECT 
+			SalesOffsetAccountOverride.intAssetId
+			,SalesOffsetAccountOverride.intAccountId
+			,SalesOffsetAccountOverride.intTransactionType
+			,SalesOffsetAccountOverride.intNewAccountId
+			,SalesOffsetAccountOverride.strNewAccountId
+			,SalesOffsetAccountOverride.strError
+		FROM tblFAFixedAsset F
+		JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+		OUTER APPLY (
+			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intSalesOffsetAccountId, 6)
+		) SalesOffsetAccountOverride
+		WHERE @dblDispositionAmount > 0 AND A.totalDepre <> A.dblAssetValue
+
+		UNION ALL
+		SELECT 
+			RealizedAccountOverride.intAssetId
+			,RealizedAccountOverride.intAccountId
+			,RealizedAccountOverride.intTransactionType
+			,RealizedAccountOverride.intNewAccountId
+			,RealizedAccountOverride.strNewAccountId
+			,RealizedAccountOverride.strError
+		FROM tblFAFixedAsset F
+		JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+		OUTER APPLY (
+			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, @intRealizedGainLossAccountId, 7)
+		) RealizedAccountOverride
+		WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
+			AND @dblRate <> @dblCurrentRate AND ((A.dblAssetValue - A.totalForeignDepre) <> 0)
+
+		-- Validate override accounts
+		IF EXISTS(SELECT TOP 1 1 FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL)
+		BEGIN
+			SELECT TOP 1 @ErrorMessage = strError FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL
+			RAISERROR(@ErrorMessage, 16, 1)
+			GOTO Post_Rollback;
+		END
+
 		UPDATE A 
 		SET totalDepre = G.S, totalForeignDepre = G.dblSumForeign
 		FROM  @tblAsset A
@@ -182,8 +279,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			SUM(dblCredit - dblDebit) S,
 			SUM(dblCreditForeign - dblDebitForeign) dblSumForeign
 			FROM tblGLDetail GL
-			JOIN tblFAFixedAsset FA ON FA.intAssetId = A.intAssetId
-			WHERE FA.intAccumulatedAccountId = GL.intAccountId
+			JOIN tblFAFixedAsset FA 
+				ON FA.intAssetId = A.intAssetId
+			JOIN @tblOverrideAccount OverrideAccount 
+				ON OverrideAccount.intAssetId = FA.intAssetId AND OverrideAccount.intAccountId = FA.intAccumulatedAccountId
+			WHERE GL.intAccountId = OverrideAccount.intNewAccountId
 			AND strCode = 'AMDPR'
 			AND ysnIsUnposted = 0
 			AND A.strAssetId = GL.strReference
@@ -284,12 +384,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]
 			,[strModuleName]			
 			,[intCurrencyExchangeRateTypeId]
+			,[intCompanyLocationId]
 		)
 		-- Accumulated Depreciation Account GL Entry
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intAccumulatedAccountId]
+			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -327,16 +428,19 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
+			,[intCompanyLocationId] = A.[intCompanyLocationId]
 		
 		FROM tblFAFixedAsset A 
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
+		JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intAccumulatedAccountId
 
 		-- Asset Account GL Entry
 		UNION ALL
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intAssetAccountId]
+			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -367,16 +471,19 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
+			,[intCompanyLocationId] = A.[intCompanyLocationId]
 		
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
+		JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intAssetAccountId
 		
 		-- Gain or Loss Account GL Entry
 		UNION ALL
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intGainLossAccountId]
+			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -439,17 +546,20 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
+			,[intCompanyLocationId] = A.[intCompanyLocationId]
 		
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
 		AND ((B.dblAssetValue - (CASE WHEN @ysnMultiCurrency = 0 THEN B.totalDepre ELSE B.totalForeignDepre END) - @dblDispositionAmount) <> 0) -- debit and credit should not be zero.
+		JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intGainLossAccountId
 
 		-- Add Sales Offset Account entry if Disposition Amount has value, else no entry
 		UNION ALL
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intSalesOffsetAccountId]
+			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -488,9 +598,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
+			,[intCompanyLocationId] = A.[intCompanyLocationId]
 		
 			FROM tblFAFixedAsset A
 			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
+			JOIN @tblOverrideAccount OverrideAccount 
+				ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intSalesOffsetAccountId
 			WHERE @dblDispositionAmount > 0
 
 		-- Realized Gain or Loss GL Entry -> If multi currency, and if history rate and current rate is not equal
@@ -498,7 +611,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		SELECT
 			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= @intRealizedGainLossAccountId
+			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -537,9 +650,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = NULL
+			,[intCompanyLocationId] = A.[intCompanyLocationId]
 				
 			FROM tblFAFixedAsset A
 			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
+			JOIN @tblOverrideAccount OverrideAccount 
+				ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = @intRealizedGainLossAccountId
 			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
 			AND @dblRate <> @dblCurrentRate AND ((B.dblAssetValue - B.totalForeignDepre) <> 0)
 

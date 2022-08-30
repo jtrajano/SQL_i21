@@ -1103,7 +1103,8 @@
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords2.sql" />
     <None Include="Scripts\Post-Deployment\IC\32_InventoryJournalLineDescription.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTMRoute.sql" />
-	<Build Include="dbo\Stored Procedures\uspApiSchemaTMRoute.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMRoute.sql" />
+    <Build Include="dbo\Functions\fnFAGetOverrideAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -4184,7 +4185,7 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" /> 
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
@@ -7539,7 +7540,7 @@
     <Build Include="dbo\Tables\tblLGEntityShippingLine.sql" />
     <Build Include="dbo\Tables\tblIPFTPServer.sql" />
     <Build Include="dbo\Tables\tblCRMSalesRepSummaryResult.sql" />
-    <Build Include="dbo\Stored Procedures\uspCRMGenerateSalesRepSummary.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspCRMGenerateSalesRepSummary.sql" />
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
     <Build Include="dbo\Views\vyuSTItemsToRegister.sql" />
     <Build Include="dbo\Views\vyuSTCategoriesToRegister.sql" />
