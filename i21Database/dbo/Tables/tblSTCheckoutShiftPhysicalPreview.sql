@@ -14,6 +14,6 @@ CREATE TABLE [dbo].[tblSTCheckoutShiftPhysicalPreview]
     [intEntityUserSecurityId] INT NOT NULL,
     [dtmCheckoutDate] DATETIME NULL,
     [intLocationId] INT NOT NULL,
-    [intConcurrencyId] INT NULL DEFAULT ((0)),
-    CONSTRAINT [FK_tblSTCheckoutShiftPhysicalPreview_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE,
+    [intConcurrencyId] INT NULL DEFAULT ((0))
+    --CONSTRAINT [FK_tblSTCheckoutShiftPhysicalPreview_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE,
 )
