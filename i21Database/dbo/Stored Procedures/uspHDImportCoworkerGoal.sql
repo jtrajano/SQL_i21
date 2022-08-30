@@ -134,15 +134,15 @@ BEGIN TRY
 		BEGIN
 			SET @message = @message + '- Utilization Target Annual should be numeric.' + @newLine;
 		END
-		ELSE IF ISNUMERIC(LTRIM(RTRIM(@UtilizationTargetAnnual))) = 1 AND ( CAST(@UtilizationTargetAnnual AS INT) < 1 OR CAST(@UtilizationTargetAnnual AS INT) > 150 )
-		BEGIN
-			SET @message = @message + '- Utilization Target Annual must be between 1-150.' + @newLine;
-		END
+		--ELSE IF ISNUMERIC(LTRIM(RTRIM(@UtilizationTargetAnnual))) = 1 AND ( CAST(@UtilizationTargetAnnual AS INT) < 1 OR CAST(@UtilizationTargetAnnual AS INT) > 150 )
+		--BEGIN
+		--	SET @message = @message + '- Utilization Target Annual must be between 1-150.' + @newLine;
+		--END
 	END
-	ELSE
-	BEGIN
-		SET @message = @message + '- Utilization Target Annual have a value between 1-150.' + @newLine;
-	END
+	--ELSE
+	--BEGIN
+	--	SET @message = @message + '- Utilization Target Annual have a value between 1-150.' + @newLine;
+	--END
 
 	/*Validate Utilization Target Weekly*/
 	IF (@UtilizationTargetWeekly IS NOT NULL AND LTRIM(RTRIM(@UtilizationTargetWeekly)) <> '')
@@ -151,15 +151,15 @@ BEGIN TRY
 		BEGIN
 			SET @message = @message + '- Utilization Target Weekly should be numeric.' + @newLine;
 		END
-		ELSE IF ISNUMERIC(LTRIM(RTRIM(@UtilizationTargetWeekly))) = 1 AND ( CAST(@UtilizationTargetWeekly AS INT) < 1 OR CAST(@UtilizationTargetWeekly AS INT) > 60 )
-		BEGIN
-			SET @message = @message + '- Utilization Target Weekly must be between 1-60.' + @newLine;
-		END
+		--ELSE IF ISNUMERIC(LTRIM(RTRIM(@UtilizationTargetWeekly))) = 1 AND ( CAST(@UtilizationTargetWeekly AS INT) < 1 OR CAST(@UtilizationTargetWeekly AS INT) > 60 )
+		--BEGIN
+		--	SET @message = @message + '- Utilization Target Weekly must be between 1-60.' + @newLine;
+		--END
 	END
-	ELSE
-	BEGIN
-		SET @message = @message + '- Utilization Target Weekly should have a value between 1-60.' + @newLine;
-	END
+	--ELSE
+	--BEGIN
+	--	SET @message = @message + '- Utilization Target Weekly should have a value between 1-60.' + @newLine;
+	--END
 
 	/*Validate Utilization Target Monthly - required*/
 	IF (@UtilizationTargetMonthly IS NOT NULL AND LTRIM(RTRIM(@UtilizationTargetMonthly)) <> '')
@@ -168,15 +168,15 @@ BEGIN TRY
 		BEGIN
 			SET @message = @message + '- Utilization Target Monthly should be numeric.' + @newLine;
 		END
-		ELSE IF ISNUMERIC(LTRIM(RTRIM(@UtilizationTargetMonthly))) = 1 AND ( CAST(@UtilizationTargetMonthly AS INT) < 1 OR CAST(@UtilizationTargetMonthly AS INT) > 200 )
-		BEGIN
-			SET @message = @message + '- Utilization Target Monthly must be between 1-200.' + @newLine;
-		END
+		--ELSE IF ISNUMERIC(LTRIM(RTRIM(@UtilizationTargetMonthly))) = 1 AND ( CAST(@UtilizationTargetMonthly AS INT) < 1 OR CAST(@UtilizationTargetMonthly AS INT) > 200 )
+		--BEGIN
+		--	SET @message = @message + '- Utilization Target Monthly must be between 1-200.' + @newLine;
+		--END
 	END
-	ELSE
-	BEGIN
-		SET @message = @message + '- Utilization Target Monthly should have a value between 1-200.' + @newLine;
-	END
+	--ELSE
+	--BEGIN
+	--	SET @message = @message + '- Utilization Target Monthly should have a value between 1-200.' + @newLine;
+	--END
 
 	/*Validate Incentive Rate*/
 	IF (@IncentiveRate IS NOT NULL AND LTRIM(RTRIM(@IncentiveRate)) <> '')
@@ -378,9 +378,9 @@ BEGIN TRY
 				SELECT  [intEntityId]					= @intEntityId
 					   ,[strFiscalYear]					= @FiscalYear			
 					   ,[intCurrencyId]					= @intCurrencyId		
-					   ,[intUtilizationTargetAnnual]	= CAST(@UtilizationTargetAnnual AS INT)
-					   ,[intUtilizationTargetWeekly]	= CAST(@UtilizationTargetWeekly AS INT)
-					   ,[intUtilizationTargetMonthly]	= CAST(@UtilizationTargetMonthly AS INT)
+					   ,[intUtilizationTargetAnnual]	= CASE WHEN @UtilizationTargetAnnual IS NULL OR LTRIM(RTRIM(@UtilizationTargetAnnual)) = '' THEN 0 ELSE CAST(@UtilizationTargetAnnual AS INT) END
+					   ,[intUtilizationTargetWeekly]	= CASE WHEN @UtilizationTargetWeekly IS NULL OR LTRIM(RTRIM(@UtilizationTargetWeekly)) = '' THEN 0 ELSE CAST(@UtilizationTargetWeekly AS INT) END
+					   ,[intUtilizationTargetMonthly]	= CASE WHEN @UtilizationTargetMonthly IS NULL OR LTRIM(RTRIM(@UtilizationTargetMonthly)) = '' THEN 0 ELSE CAST(@UtilizationTargetMonthly AS INT) END
 					   ,[dblAnnualHurdle]				= CASE WHEN @AnnualHurdle IS NULL OR LTRIM(RTRIM(@AnnualHurdle)) = '' THEN 0 ELSE CAST(@AnnualHurdle AS NUMERIC(18, 6)) END
 					   ,[dblAnnualBudget]				= CASE WHEN @AnnualBudget IS NULL OR LTRIM(RTRIM(@AnnualBudget)) = '' THEN 0 ELSE CAST(@AnnualBudget AS NUMERIC(18, 6)) END
 					   ,[intCommissionAccountId]		= @intCommissionAccount
