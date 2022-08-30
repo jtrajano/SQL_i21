@@ -148,7 +148,7 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
               isnull(a.intCustomerLocationId,0) = isnull(delivery.intEntityLocationId,0) and                                    
               isnull(a.intSCompanyLocationId,a.intPCompanyLocationId) = delivery.intCompanyLocationId          
     --Where a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILDeliveryDetail)                                          
-	wHERE  a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILDeliveryDetail)        
+	WHERE  delivery.intDeliveryHeaderId is null or a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILDeliveryDetail)    
     Group by load.intLoadHeaderId                                  
     ,intCustomerId                                    
     ,intCustomerLocationId                                    
