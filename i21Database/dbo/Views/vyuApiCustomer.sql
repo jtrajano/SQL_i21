@@ -61,13 +61,13 @@ SELECT [EntityId]			= e.intEntityId
 
 
 
-	, [OrderType] 		= c.strOrderType
+	, [OrderType] 		= e.strOrderType
 	, [CustomerCompanyLocation] = ''
 	, [CustomerSalesPerson2] = ''
-	, [RequireStickReading] = c.ysnRequireStickReading
-	, [RequirePump] = c.ysnRequirePump
-	, [RequirePO] = c.ysnRequirePO
-	, [RequireSignature] = c.ysnRequireSignature  
+	, [RequireStickReading] = e.ysnRequireStickReading
+	, [RequirePump] = e.ysnRequirePump
+	, [RequirePO] = e.ysnRequirePO
+	, [RequireSignature] = e.ysnRequireSignature  
 
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId

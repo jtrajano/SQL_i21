@@ -195,7 +195,7 @@ Type the overview for the table here.
 		[intSubcategoriesId] [int] NULL,
 		[intStoreFamilyId] [int] NULL,
 		[intStoreClassId] [int] NULL,
-		//SkyBitzIntegration
+		-- //SkyBitzIntegration
 		[strMeterCalibration] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
 		[strEPADisclaimer] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
 		[ysnNonBulk] BIT NULL DEFAULT((0)),

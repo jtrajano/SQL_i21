@@ -81,6 +81,12 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, CUSTOMER.ysnPrintPriceOnPrintTicket
 	, custLocation.intTicketCopies
 	, custLocation.ysnRequireStickReading
+
+	,custLocation.strOrderType
+	,custLocation.ysnRequirePO
+	,custLocation.ysnRequireSignature
+	,custLocation.ysnRequirePump
+	
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
