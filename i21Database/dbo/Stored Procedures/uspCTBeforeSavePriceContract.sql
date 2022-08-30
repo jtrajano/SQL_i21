@@ -38,6 +38,8 @@ BEGIN TRY
 	--	END
 	--END
 
+	update tblCTPriceFixation set intPreviousConcurrencyId = intConcurrencyId WHERE intPriceContractId = @intPriceContractId;
+
 	SELECT @intContractTypeId = b.intContractTypeId
 	FROM tblCTPriceFixation a
 	INNER JOIN tblCTContractHeader b on a.intContractHeaderId = b.intContractHeaderId

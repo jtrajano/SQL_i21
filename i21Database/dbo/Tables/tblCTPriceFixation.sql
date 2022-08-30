@@ -28,6 +28,7 @@
 	[intFinalPriceUOMId] INT NOT NULL,
 	[ysnSplit] BIT,
 	[intPriceFixationRefId] INT,
+	[intPreviousConcurrencyId] int null,
 
     CONSTRAINT [PK_tblCTPriceFixation_intPriceFixationId] PRIMARY KEY CLUSTERED ([intPriceFixationId] ASC),
 	CONSTRAINT [UQ_tblCTPriceFixation_intContractHeaderId_intContractDetailId] UNIQUE (intContractHeaderId,intContractDetailId), 
