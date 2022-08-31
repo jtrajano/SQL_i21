@@ -481,6 +481,8 @@ begin try
 					, [intFreightTermId]
 					, strTaxPoint
 					, intTaxLocationId
+					, dblOptionalityPremium
+					, dblQualityPremium
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -612,6 +614,8 @@ begin try
 					, vp.intFreightTermId
 					, vp.strTaxPoint
 					, vp.intTaxLocationId
+					, dblOptionalityPremium = vp.dblOptionalityPremium
+					, dblQualityPremium = vp.dblQualityPremium
 				from
 					@voucherPayables vp
 					LEFT JOIN tblEMEntityLocation em 
@@ -780,6 +784,8 @@ begin try
 					, [strReferenceNo]
 					, [intBankValuationRuleId]
 					, [strComments]
+					, dblOptionalityPremium
+					, dblQualityPremium
 				)
 				SELECT 
 					[intEntityVendorId]			
@@ -851,6 +857,8 @@ begin try
 					, [strReferenceNo]
 					, [intBankValuationRuleId]
 					, [strComments]
+					, dblOptionalityPremium
+					, dblQualityPremium
 				FROM 
 					@voucherPayableProRatedCharges
 
@@ -975,6 +983,8 @@ begin try
 					, [intFreightTermId]
 					, strTaxPoint
 					, intTaxLocationId
+					, dblOptionalityPremium
+					, dblQualityPremium
 		)
 		SELECT
 			intPartitionId = vp.intPartitionId
@@ -1086,6 +1096,8 @@ begin try
 			, [intFreightTermId]
 			, strTaxPoint
 			, intTaxLocationId
+			, dblOptionalityPremium = vp.dblOptionalityPremium
+			, dblQualityPremium = vp.dblQualityPremium
 		from
 			@voucherPayables vp
 		where
