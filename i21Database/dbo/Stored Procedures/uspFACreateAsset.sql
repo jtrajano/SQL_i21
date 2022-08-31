@@ -81,17 +81,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
 		WHILE EXISTS(SELECT TOP 1 1 FROM #AssetID WHERE ysnProcessed = 0)
 		BEGIN
-		
-			DECLARE 
-				 @intCompanyLocationId INT
-				,@intLocationSegmentId INT
-				,@intAssetAccountId INT
-				,@intNewAssetAccountId INT = NULL
-				,@strNewAssetAccountId NVARCHAR(40)
-				,@intExpenseAccountId INT = NULL
-				,@intNewExpenseAccountId INT
-				,@strNewExpenseAccountId NVARCHAR(40)
-
 			SELECT TOP 1 @intCurrentAssetId = intAssetId FROM #AssetID WHERE ysnProcessed = 0
 
 			SELECT @dblRate = CASE WHEN ISNULL(BD.dblRate, 0) > 0 
@@ -103,36 +92,60 @@ IF ISNULL(@ysnRecap, 0) = 0
 							END 
 						END
 					,@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, F.intCurrencyId) THEN 0 ELSE 1 END
-					,@intAssetAccountId = F.intAssetAccountId
-					,@intExpenseAccountId = F.intExpenseAccountId
-					,@intCompanyLocationId = F.intCompanyLocationId
 			FROM tblFAFixedAsset F 
 			JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
 			WHERE F.[intAssetId] = @intCurrentAssetId AND BD.intBookId = 1 
 
 			EXEC uspSMGetStartingNumber @intStartingNumberId = 112, @strID = @strCurrentTransactionId OUT
 			
-			-- Get Accounts Overridden by Location Segment
-			SELECT @intLocationSegmentId = intProfitCenter FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+			-- Get Accounts Overridden by Location and/or Company segment
+			DECLARE @tblOverrideAccount TABLE (
+				intAssetId INT,
+				intAccountId INT,
+				intTransactionType INT,
+				intNewAccountId INT  NULL,
+				strNewAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+				strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+			)
+			INSERT INTO @tblOverrideAccount (
+				intAssetId
+				,intAccountId
+				,intTransactionType
+				,intNewAccountId
+				,strNewAccountId
+				,strError
+			)
 			SELECT 
-				 @strNewAssetAccountId = [dbo].[fnGLGetOverrideAccountBySegment](@intAssetAccountId, @intLocationSegmentId, NULL, NULL)
-				,@strNewExpenseAccountId = [dbo].[fnGLGetOverrideAccountBySegment](@intExpenseAccountId, @intLocationSegmentId, NULL, NULL)
+				AssetAccountOverride.intAssetId
+				,AssetAccountOverride.intAccountId
+				,AssetAccountOverride.intTransactionType
+				,AssetAccountOverride.intNewAccountId
+				,AssetAccountOverride.strNewAccountId
+				,AssetAccountOverride.strError
+			FROM tblFAFixedAsset F
+			OUTER APPLY (
+				SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intAssetAccountId, 1)
+			) AssetAccountOverride
+			WHERE F.intAssetId = @intCurrentAssetId
+			UNION ALL
+			SELECT 
+				OffsetAccountOverride.intAssetId
+				,OffsetAccountOverride.intAccountId
+				,OffsetAccountOverride.intTransactionType
+				,OffsetAccountOverride.intNewAccountId
+				,OffsetAccountOverride.strNewAccountId
+				,OffsetAccountOverride.strError
+			FROM tblFAFixedAsset F
+			OUTER APPLY (
+				SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intExpenseAccountId, 2)
+			) OffsetAccountOverride
+			WHERE F.intAssetId = @intCurrentAssetId
 
 			-- Validate override accounts
-			SELECT @intNewAssetAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewAssetAccountId
-			SELECT @intNewExpenseAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewExpenseAccountId
-
-			IF (@intNewAssetAccountId IS NULL)
+			IF EXISTS (SELECT TOP 1 1 FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL)
 			BEGIN
-				SET @ErrorMessage  = @strNewAssetAccountId + ' is not an existing account override for Asset Account.'
-				RAISERROR(@ErrorMessage, 11, 1)
-				GOTO Post_Rollback;
-			END
-
-			IF (@intNewExpenseAccountId IS NULL)
-			BEGIN
-				SET @ErrorMessage  = @strNewExpenseAccountId + ' is not an existing account override for Offset Account.'
-				RAISERROR(@ErrorMessage, 11, 1)
+				SELECT TOP 1 @ErrorMessage = strError FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL
+				RAISERROR(@ErrorMessage, 16, 1)
 				GOTO Post_Rollback;
 			END
 
@@ -178,7 +191,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			SELECT 
 				 [strTransactionId]		= @strCurrentTransactionId
 				,[intTransactionId]		= A.[intAssetId]
-				,[intAccountId]			= @intNewAssetAccountId
+				,[intAccountId]			= OverrideAccount.[intNewAccountId]
 				,[strDescription]		= A.[strAssetDescription]
 				,[strReference]			= A.[strAssetId]
 				,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -215,14 +228,16 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intCompanyLocationId] = A.[intCompanyLocationId]
 
 			FROM tblFAFixedAsset A
-			WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+			JOIN @tblOverrideAccount OverrideAccount 
+				ON OverrideAccount.intAssetId = A.intAssetId AND OverrideAccount.intAccountId = A.intAssetAccountId
+			WHERE A.[intAssetId] = @intCurrentAssetId
 
 			-- EXPENSE ACCOUNT
 			UNION ALL
 			SELECT 
 				 [strTransactionId]		= @strCurrentTransactionId
 				,[intTransactionId]		= A.[intAssetId]
-				,[intAccountId]			= @intNewExpenseAccountId
+				,[intAccountId]			= OverrideAccount.[intNewAccountId]
 				,[strDescription]		= A.[strAssetDescription]
 				,[strReference]			= A.[strAssetId]
 				,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -259,23 +274,25 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intCompanyLocationId] = A.[intCompanyLocationId]
 
 			FROM tblFAFixedAsset A
-			WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+			JOIN @tblOverrideAccount OverrideAccount 
+				ON OverrideAccount.intAssetId = A.intAssetId AND OverrideAccount.intAccountId = A.intExpenseAccountId
+			WHERE A.[intAssetId] = @intCurrentAssetId
 					
-				BEGIN TRY
-					EXEC uspGLBookEntries @GLEntries, @ysnPost
-				END TRY
-				BEGIN CATCH		
-					SET @ErrorMessage  = ERROR_MESSAGE()
-					RAISERROR(@ErrorMessage, 11, 1)
+			BEGIN TRY
+				EXEC uspGLBookEntries @GLEntries, @ysnPost
+			END TRY
+			BEGIN CATCH		
+				SET @ErrorMessage  = ERROR_MESSAGE()
+				RAISERROR(@ErrorMessage, 11, 1)
 
-					IF @@ERROR <> 0	GOTO Post_Rollback;
-				END CATCH
+				IF @@ERROR <> 0	GOTO Post_Rollback;
+			END CATCH
 
 				-- Update flag
-				UPDATE #AssetID SET ysnProcessed = 1 WHERE intAssetId = @intCurrentAssetId
-			END
+			UPDATE #AssetID SET ysnProcessed = 1 WHERE intAssetId = @intCurrentAssetId
+		END
 
-			IF @@ERROR <> 0	GOTO Post_Rollback;
+		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 
 

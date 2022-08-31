@@ -347,6 +347,7 @@
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
+    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql"/>
     <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
@@ -519,6 +520,8 @@
     <Build Include="dbo\Views\vyuSCISLoadOutLoadIn.sql" />
     <Build Include="dbo\Views\vyuAPEntityEFTInformation.sql" />
     <Build Include="dbo\Views\vyuCMBankTransactionDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatDropDown.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatStatus.sql" />
     <Build Include="dbo\Views\vyuCMUnassignedBrokerageAccount.sql" />
     <Build Include="dbo\Functions\fnRKIsUserOTCApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspRKValidateOTCRecords.sql" />
@@ -1105,6 +1108,9 @@
     <Build Include="dbo\Tables\tblApiSchemaTMRoute.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMRoute.sql" />
     <Build Include="dbo\Functions\fnFAGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11203,6 +11209,7 @@
     <None Include="Scripts\Post-Deployment\CM\15_CompanyPreferenceOptions.sql" />
     <None Include="Scripts\Post-Deployment\CM\16_UpdateNextEFTNo.sql" />
     <None Include="Scripts\Post-Deployment\CM\17_InsertResponsiblePartyOption.sql" />
+    <None Include="Scripts\Post-Deployment\CM\18_BankFileFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
