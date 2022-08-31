@@ -938,4 +938,31 @@ BEGIN
 END
 GO
 	PRINT N'End Update Existing status of tblHDTimeEntryPeriodDetail to closed';
+	PRINT N'Start Insert Existing intReportsTo in CoworkerGoal to tblHDTimeEntryPeriodDetail';
+GO
+
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDCoworkerSuperVisor' AND COLUMN_NAME = 'intEntityId') AND
+   NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Insert tblHDCoworkerSuperVisor intEntityId')
+BEGIN
+	INSERT INTO tblHDCoworkerSuperVisor
+	(
+		 [intEntityId]
+	    ,[ysnAutoAdded]	 
+		,[intConcurrencyId]
+	)
+	SELECT [intEntityId]	  = [intReportsToId]
+	      ,[ysnAutoAdded]	  = CONVERT(BIT, 1)
+		  ,[intConcurrencyId] = 1
+	FROM tblHDCoworkerGoal CoworkerGoal
+		LEFT JOIN tblHDCoworkerSuperVisor CoworkerSuperVisor
+	ON CoworkerSuperVisor.intEntityId = CoworkerGoal.intReportsToId
+	WHERE CoworkerGoal.intReportsToId IS NOT NULL AND CoworkerSuperVisor.intEntityId IS NULL
+	GROUP BY [intReportsToId]
+
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Insert tblHDCoworkerSuperVisor intEntityId','1')
+
+END
+GO
+		PRINT N'End Insert Existing intReportsTo in CoworkerGoal to tblHDTimeEntryPeriodDetail';
 GO
