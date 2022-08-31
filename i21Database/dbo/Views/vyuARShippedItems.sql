@@ -635,8 +635,10 @@ FROM (
 	LEFT JOIN (
 		SELECT intInventoryShipmentChargeId
 			 , dblQtyShipped
-		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblARInvoice I ON ID.intInvoiceId=I.intInvoiceId
 		WHERE ISNULL(intInventoryShipmentChargeId, 0) <> 0
+		AND ysnPosted = 0
 	) ARIDCHARGE ON ICISC.intInventoryShipmentChargeId = ARIDCHARGE.intInventoryShipmentChargeId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
