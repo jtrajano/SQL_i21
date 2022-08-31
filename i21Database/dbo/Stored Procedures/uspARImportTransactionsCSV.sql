@@ -725,7 +725,7 @@ BEGIN
 			,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(D.dtmDate, S.intDeliveryTermID) AS DATE)
 			,[dtmShipDate]				= D.dtmDate
 			,[dtmCalculated]			= NULL
-			,[dtmPostDate]				= NULL
+			,[dtmPostDate]				= D.dtmPostDate
 			,[intEntitySalespersonId]	= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
 			,[intFreightTermId]			= NULL
 			,[intShipViaId]				= NULL
@@ -856,7 +856,7 @@ BEGIN
 				,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId) AS DATE)
 				,[dtmShipDate]				= ILD.dtmDate
 				,[dtmCalculated]			= NULL
-				,[dtmPostDate]				= NULL
+				,[dtmPostDate]				= ILD.dtmPostDate
 				,[intEntitySalespersonId]	= CASE WHEN ISNULL(ILD.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
 				,[intFreightTermId]			= NULL
 				,[intShipViaId]				= NULL
@@ -1013,7 +1013,7 @@ BEGIN
 				,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(D.dtmDate, C.intTermsId) AS DATE)
 				,[dtmShipDate]				= D.dtmDate
 				,[dtmCalculated]			= NULL
-				,[dtmPostDate]				= NULL
+				,[dtmPostDate]				= D.dtmPostDate
 				,[intEntitySalespersonId]	= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' AND @IsFromOldVersion = 1 THEN SP.intEntityId END
 				,[intFreightTermId]			= NULL
 				,[intShipViaId]				= NULL
