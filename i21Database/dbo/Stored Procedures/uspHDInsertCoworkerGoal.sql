@@ -1,5 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspHDInsertCoworkerGoal]
 AS
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+
 BEGIN
 			INSERT INTO tblHDCoworkerGoal		
 				(
@@ -76,5 +82,7 @@ BEGIN
 
 
 				DELETE FROM tblHDImportCoworkerGoal
+
+				EXEC [dbo].[uspHDSyncCoworkerSuperVisor]
 END
 GO
