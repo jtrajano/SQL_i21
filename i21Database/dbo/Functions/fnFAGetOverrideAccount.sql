@@ -26,14 +26,15 @@ BEGIN
 	DECLARE 
 	     @intCompanyLocationId INT
 		,@intLocationSegmentId INT
+		,@intCompanySegmentId INT = NULL
 		,@intNewAccountId INT = NULL
 		,@strNewAccountId NVARCHAR(40)
 		,@strError NVARCHAR(MAX) = NULL
 
 	SELECT @intCompanyLocationId = intCompanyLocationId FROM tblFAFixedAsset WHERE intAssetId = @intAssetId
-	SELECT @intLocationSegmentId = intProfitCenter FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+	SELECT @intLocationSegmentId = intProfitCenter, @intCompanySegmentId = intCompanySegment FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
 
-	SELECT @strNewAccountId = dbo.fnGLGetOverrideAccountBySegment(@intAccountId, @intLocationSegmentId, NULL, NULL)
+	SELECT @strNewAccountId = dbo.fnGLGetOverrideAccountBySegment(@intAccountId, @intLocationSegmentId, NULL, @intCompanySegmentId)
 	SELECT @intNewAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewAccountId
 
 	IF (@intNewAccountId IS NULL)
