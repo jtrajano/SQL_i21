@@ -29,7 +29,7 @@ UNION ALL
 SELECT 	intEntityId = B.intBankId,
 		strName = B.strBankName,
 		strEntity = 'Bank',
-		strEntityNo = B.strRTN,
+		strEntityNo = B.strBankName,
 		strAddress = B.strAddress,
 		strCity = B.strCity,
 		strState = B.strState,
