@@ -1124,6 +1124,9 @@
     <Build Include="dbo\Tables\tblSMRegion.sql" />
     <Build Include="dbo\Tables\tblSMTerritory.sql" />
     <Build Include="dbo\Tables\tblTRFuelTerminal.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
