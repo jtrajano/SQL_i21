@@ -984,8 +984,12 @@
     <Build Include="dbo\Tables\tblHDTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
-	<Build Include="dbo\Tables\tblApiSchemaTMRoute.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMRoute.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMRoute.sql" />
+    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatDropDown.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatStatus.sql" />
+    <Build Include="Scripts\Post-Deployment\CM\18_BankFileFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
