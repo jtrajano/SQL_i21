@@ -58,9 +58,9 @@
     [intCFAccountId]               INT             NULL,
     [dblCFDiscount]                NUMERIC (18, 6) NULL,
     [dblCFEligableGallon]          NUMERIC (18, 6) NULL,
-    [strCFGroupDiscoount]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strCFGroupDiscoount]          NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intCFDiscountDay]             INT             NULL,
-    [strCFTermType]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strCFTermType]                NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [dtmCFInvoiceDate]             DATETIME        NULL,
     [dblCFTotalBalance]            NUMERIC (18, 6) NULL,
     [intCFTermID]                  INT             NULL,
@@ -79,7 +79,7 @@
     [strCFTermCode]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strComment]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCFInvoiceNumber]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strInvoiceNumberHistory]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceNumberHistory]      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmDueDateBaseOnTermsHistory] DATETIME		   NULL,
 	[dtmDiscountDateBaseOnTermsHistory] DATETIME   NULL
 );
