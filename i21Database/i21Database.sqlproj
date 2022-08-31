@@ -982,6 +982,9 @@
     <Build Include="dbo\Tables\tblHDTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTimeEntryPeriodDetailDay.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
