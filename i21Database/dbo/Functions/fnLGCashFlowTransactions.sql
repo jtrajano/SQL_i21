@@ -6,7 +6,7 @@ RETURNS TABLE
 AS
 RETURN 
 
-SELECT
+SELECT DISTINCT
 	intTransactionId = L.intLoadId
 	,strTransactionId = L.strLoadNumber
 	,strTransactionType = CASE WHEN (L.intPurchaseSale = 2) 
