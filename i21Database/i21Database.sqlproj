@@ -1105,6 +1105,9 @@
     <Build Include="dbo\Tables\tblApiSchemaTMRoute.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMRoute.sql" />
     <Build Include="dbo\Functions\fnFAGetOverrideAccount.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
