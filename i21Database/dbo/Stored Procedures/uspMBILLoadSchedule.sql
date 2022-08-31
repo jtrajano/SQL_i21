@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]   
+CREATE PROCEDURE [dbo].[uspMBILLoadSchedule]
     @intDriverId AS INT,                                
  @forDeleteId NVARCHAR(MAX) = ''                                
 AS                                                
@@ -64,7 +64,7 @@ BEGIN
  intInboundTaxGroupId INT NULL ,              
  intTMDispatchId INT NULL,              
  intTMSiteId INT NULL,        
- strItemUOM nvarchar(100)  COLLATE Latin1_General_CI_AS NULL        
+ strItemUOM nvarchar(100) COLLATE Latin1_General_CI_AS NULL,             
  )                                               
                  
                 
@@ -89,7 +89,7 @@ SELECT DISTINCT intLoadId
       ,strTrailerNo                
       ,intDriverEntityId                
       ,intHaulerId                
-      ,dtmScheduledDate                 
+      ,dtmScheduledDate              
 FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)                                          
                                          
  INSERT INTO tblMBILPickupDetail(                                  
@@ -124,10 +124,10 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
   ,isnull(intOutboundTaxGroupId,intInboundTaxGroupId)                                      
   ,[dtmPickUpFrom]                                       
   ,[dtmPickUpTo]                                       
-  ,[strLoadRefNo]                                       
+  ,(Select top 1 [strLoadRefNo] from #loadOrder po Where po.intLoadId = a.intLoadId and isnull(po.intCustomerLocationId,0) = isnull(a.intCustomerLocationId,0) and isnull(po.intEntityLocationId,0) = isnull(a.intEntityLocationId ,0) and isnull([strLoadRefNo],'') <> '')
   ,[intItemId]                                       
   ,[dblQuantity]                   
-  ,[strPONumber]      
+  ,(Select top 1 [strPONumber] from #loadOrder po Where po.intLoadId = a.intLoadId and isnull(po.intCustomerLocationId,0) = isnull(a.intCustomerLocationId,0) and isnull(po.intEntityLocationId,0) = isnull(a.intEntityLocationId ,0) and isnull([strPONumber],'') <> '') 
   ,[strItemUOM]        
     FROM #loadOrder a                                                
  INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId                          
@@ -148,7 +148,7 @@ FROM #loadOrder WHERE intLoadId NOT IN (SELECT intLoadId FROM tblMBILLoadHeader)
               isnull(a.intCustomerLocationId,0) = isnull(delivery.intEntityLocationId,0) and                                      
               isnull(a.intSCompanyLocationId,a.intPCompanyLocationId) = delivery.intCompanyLocationId            
     --Where a.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblMBILDeliveryDetail)                                            
- WHERE  delivery.intDeliveryHeaderId is null    
+ WHERE  delivery.intDeliveryHeaderId is null     
     Group by load.intLoadHeaderId                                    
     ,intCustomerId                                      
     ,intCustomerLocationId                                      
