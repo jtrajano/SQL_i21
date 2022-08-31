@@ -273,6 +273,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\16_UpdateNextEFTNo.sql
 :r .\CM\17_InsertResponsiblePartyOption.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
+:r .\CM\18_BankFileFormat.sql
 
 
 --Accounts Receivable
