@@ -363,7 +363,9 @@ BEGIN
 								ELSE 
 									(CASE WHEN B.dblAmountDue = 0 
 										THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) 
-										ELSE (ISNULL(C.dblAmountDue,0) + B.dblPayment + B.dblDiscount - B.dblInterest) --this will handle issue on voiding which the first payment is voided
+										ELSE (ISNULL(C.dblAmountDue,0) + B.dblPayment 
+												+ (CASE WHEN B.dblDiscount  + B.dblAmountDue = B.dblPayment THEN B.dblDiscount ELSE 0 END)
+												- B.dblInterest) --this will handle issue on voiding which the first payment is voided
 									END)
 							END
 		,B.intOrigBillId = B.intBillId
@@ -385,12 +387,16 @@ BEGIN
 	WHERE C.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
+	DECLARE @paidDateDefault DATETIME = GETDATE()
 	UPDATE C
 		SET C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
 			C.dblPayment = (CASE WHEN C.intTransactionType IN (2, 13) AND C.dblPayment = 0 THEN C.dblTotal ELSE C.dblPayment END) - ABS(B.dblPayment + B.dblDiscount),
-			C.dblAmountDue = C.dblTotal - (((CASE WHEN C.intTransactionType IN (2, 13) AND C.dblPayment = 0 THEN C.dblTotal ELSE C.dblPayment END) - ABS(B.dblPayment + B.dblDiscount)))
+			C.dblAmountDue = C.dblTotal - (((CASE WHEN C.intTransactionType IN (2, 13) AND C.dblPayment = 0 THEN C.dblTotal ELSE C.dblPayment END) - ABS(B.dblPayment + B.dblDiscount))),
+			C.dblDiscount = CASE WHEN C.ysnDiscountOverride = 0 
+							THEN dbo.fnGetDiscountBasedOnTerm(@paidDateDefault, C.dtmBillDate, C.intTermsId, ABS(B.dblAmountDue)) 
+							ELSE C.dblDiscount END
 	FROM tblAPPayment A
 	INNER JOIN (
 		SELECT intPaymentId, intBillId, intOrigBillId, SUM(dblPayment) dblPayment, SUM(dblDiscount) dblDiscount, SUM(dblAmountDue) dblAmountDue
