@@ -249,7 +249,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			FOR 
 			SELECT     
 				        agcus_key = RTRIM(LTRIM(agcus_key)), 
-						strName = CASE WHEN agcus_co_per_ind_cp = ''C'' THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
+						strName = CASE WHEN agcus_co_per_ind_cp = ''C'' OR agcus_co_per_ind_cp IS NULL THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
 						strEmail   = '''',
 						strWebsite = '''',
 						strInternalNotes = agcus_comments,
@@ -292,7 +292,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						ysnPortalAccess = NULL,
 					
 						--Locations
-						strLocationName = CASE WHEN agcus_co_per_ind_cp = ''C'' THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
+						strLocationName = CASE WHEN agcus_co_per_ind_cp = ''C'' OR agcus_co_per_ind_cp IS NULL THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
 						strAddress      = ISNULL(agcus_addr,'''') + CHAR(10) + ISNULL(agcus_addr2,''''),
 						strCity         = LTRIM(RTRIM(agcus_city)),
 						strCountry      = LTRIM(RTRIM(agcus_country)),
@@ -306,7 +306,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				
 						--Customer
 						strCustomerNumber		= agcus_key,			
-						strType				= CASE WHEN agcus_co_per_ind_cp = ''C'' THEN ''Company'' ELSE ''Person'' END,					
+						strType				= CASE WHEN agcus_co_per_ind_cp = ''C'' OR agcus_co_per_ind_cp IS NULL THEN ''Company'' ELSE ''Person'' END,					
 						dblCreditLimit			= agcus_cred_limit,					
 						strTaxNumber			= agcus_tax_exempt,
 						strCurrency			= agcus_dflt_currency, 				
@@ -434,7 +434,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 			--------------------------------------------------------------------------------------------------------------------------------------------
 			SELECT 
-				 (RTRIM (CASE WHEN agcus_co_per_ind_cp = ''C'' THEN 
+				 (RTRIM (CASE WHEN agcus_co_per_ind_cp = ''C'' OR agcus_co_per_ind_cp IS NULL THEN 
 										agcus_last_name + agcus_first_name 
 									WHEN agcus_co_per_ind_cp =''P'' THEN 
 										RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))
