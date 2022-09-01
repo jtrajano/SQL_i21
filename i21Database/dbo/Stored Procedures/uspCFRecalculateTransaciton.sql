@@ -5886,7 +5886,7 @@ BEGIN
 			SELECT '@tblCFTransactionTaxZeroQuantity',* FROM @tblCFTransactionTaxZeroQuantity
 		END
 
-		IF(@ysnReRunCalcTax = 0)
+		IF(@ysnReRunForSpecialTax = 0)
 		BEGIN
 
 			SELECT @dblSpecialTaxZeroQty = SUM(ISNULL([dblOriginalTax],0))
@@ -5900,7 +5900,7 @@ BEGIN
 			SELECT '@tblCFTransactionTaxZeroQuantity',* FROM @tblCFTransactionTax
 		END
 
-		IF(@ysnReRunCalcTax = 0)
+		IF(@ysnReRunForSpecialTax = 0)
 		BEGIN
 
 			SELECT @dblSpecialTax = SUM(ISNULL([dblOriginalTax],0))
