@@ -102,6 +102,7 @@
     [strAvgForDayOfWeek]					NVARCHAR(50) COLLATE Latin1_General_CI_AS DEFAULT('All') NOT NULL, 
     --Default Item
 
+    [strRecurringPONumber]                   NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
 
 
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
