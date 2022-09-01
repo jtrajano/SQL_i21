@@ -25,6 +25,8 @@ SELECT ST.*
 	   , strChangeFundBegBalanceItemId		 = 	  ChangeFundBegBalanceItem.strItemNo
 	   , strChangeFundEndBalanceItemId		 = 	  ChangeFundEndBalanceItem.strItemNo
 	   , strChangeFundReplenishItemId		 = 	  ChangeFundReplenishItem.strItemNo
+	   , strConsBankDepositDraftId			 =	  Bank.strBankName + ' - ' + dbo.fnAESDecryptASym(ConsBankDepositDraftId.strBankAccountNo)
+	   , strConsDelearCommissionARAccountId	 =	  ConsARAccountId.strAccountId
 	   , strConsFuelOverShortItem			 =    FuelItemOverShort.strItemNo
 	   , CustomerCharge.strDescription as strCustomerChargeDescription
 	   , CashTransaction.strDescription as strCashTransactionDescription
@@ -72,3 +74,9 @@ LEFT JOIN tblICItem ChangeFundReplenishItem
 	ON ST.intChangeFundReplenishItemId = ChangeFundReplenishItem.intItemId
 LEFT JOIN tblICItem FuelItemOverShort 
 	ON ST.intConsFuelOverShortItemId = FuelItemOverShort.intItemId
+LEFT JOIN tblCMBankAccount ConsBankDepositDraftId
+	ON ST.intConsBankDepositDraftId = ConsBankDepositDraftId.intGLAccountId
+LEFT JOIN tblCMBank Bank
+	ON ConsBankDepositDraftId.intBankId = Bank.intBankId
+LEFT JOIN tblGLAccount ConsARAccountId
+	ON ST.intConsDelearCommissionARAccountId = ConsARAccountId.intAccountId
