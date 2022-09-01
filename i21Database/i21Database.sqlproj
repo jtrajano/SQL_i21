@@ -347,7 +347,7 @@
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
-    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql"/>
+    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql" />
     <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
@@ -1111,6 +1111,7 @@
     <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
