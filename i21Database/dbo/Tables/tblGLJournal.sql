@@ -39,7 +39,7 @@ GO
 
 CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
 ON [dbo].[tblGLJournal]
-INSTEAD OF DELETE 
+FOR DELETE 
 AS
 BEGIN
     DELETE R
