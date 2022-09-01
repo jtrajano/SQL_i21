@@ -250,6 +250,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
+:r .\GL\DefaultData\1x_RecurringTransaction.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 :r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
