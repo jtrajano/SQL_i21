@@ -27,6 +27,7 @@
 	[dtmCreated] DATETIME NULL,
 	[intParentSettleStorageId] INT NULL,
 	[intItemUOMId] INT NULL,
+	[ysnManualSpotUnitsEntry] BIT DEFAULT ((0)),
 	[dtmCalculateChargeAndPremiumOn] DATETIME NULL,
     CONSTRAINT [PK_tblGRSettleStorage_intCustomerStorageId] PRIMARY KEY ([intSettleStorageId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
