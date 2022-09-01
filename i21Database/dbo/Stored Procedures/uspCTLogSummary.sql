@@ -3900,7 +3900,16 @@ BEGIN TRY
 			END			
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 4)
 			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1 --, intActionId = 61
+				declare @dblLogSpecificQty numeric(18,6), @intLogSpecificPricingTypeId int;
+				select @dblLogSpecificQty = dblQty, @intLogSpecificPricingTypeId = intPricingTypeId from @cbLogSpecific;
+
+				if (@intHeaderPricingTypeId = 2 and @intSequencePricingTypeId = 1 and not exists (select top 1 1 from @cbLogPrev where intPricingTypeId = 1))
+				begin
+					UPDATE @cbLogSpecific SET dblQty = abs(dblQty) * -1, intPricingTypeId = 2
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				end
+
+				UPDATE @cbLogSpecific SET dblQty = @dblLogSpecificQty * - 1, intPricingTypeId = @intLogSpecificPricingTypeId
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				if (@strProcess = 'Do Roll')
