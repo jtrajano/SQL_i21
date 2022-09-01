@@ -169,18 +169,18 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   SELECT TOP 1 @LineOfBusiness4Count = COUNT(strLineOfBusiness) FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness4  
   SELECT TOP 1 @LineOfBusiness5Count = COUNT(strLineOfBusiness) FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness5  
   
-  SET @LineOfBusiness1 = CASE WHEN @LineOfBusiness1Count = 0 THEN '' ELSE @LineOfBusiness1 END  
-  SET @LineOfBusiness2 = CASE WHEN @LineOfBusiness2Count = 0 THEN '' ELSE @LineOfBusiness2 END  
-  SET @LineOfBusiness3 = CASE WHEN @LineOfBusiness3Count = 0 THEN '' ELSE @LineOfBusiness3 END  
-  SET @LineOfBusiness4 = CASE WHEN @LineOfBusiness4Count = 0 THEN '' ELSE @LineOfBusiness4 END  
-  SET @LineOfBusiness5 = CASE WHEN @LineOfBusiness5Count = 0 THEN '' ELSE @LineOfBusiness5 END  
+  -- SET @LineOfBusiness1 = CASE WHEN @LineOfBusiness1Count = 0 THEN '' ELSE @LineOfBusiness1 END  
+  -- SET @LineOfBusiness2 = CASE WHEN @LineOfBusiness2Count = 0 THEN '' ELSE @LineOfBusiness2 END  
+  -- SET @LineOfBusiness3 = CASE WHEN @LineOfBusiness3Count = 0 THEN '' ELSE @LineOfBusiness3 END  
+  -- SET @LineOfBusiness4 = CASE WHEN @LineOfBusiness4Count = 0 THEN '' ELSE @LineOfBusiness4 END  
+  -- SET @LineOfBusiness5 = CASE WHEN @LineOfBusiness5Count = 0 THEN '' ELSE @LineOfBusiness5 END  
   
   --checking Country  
   SELECT TOP 1 @CountryCount = COUNT(strCountry) FROM tblSMCountry WHERE strCountry = @strCountry  
   
   SET @strDocumentDelivery1 = CASE WHEN @strDocumentDelivery1 <> '' AND @strDocumentDelivery1 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery1 ELSE '' END  
   SET @strDocumentDelivery2 = CASE WHEN @strDocumentDelivery2 <> '' AND @strDocumentDelivery2 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery2 ELSE '' END  
-  SET @strDocumentDelivery1 = CASE WHEN @strDocumentDelivery3 <> '' AND @strDocumentDelivery3 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery3 ELSE '' END  
+  SET @strDocumentDelivery3 = CASE WHEN @strDocumentDelivery3 <> '' AND @strDocumentDelivery3 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery3 ELSE '' END  
   
   
   
@@ -242,15 +242,15 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   --Combo validation  
   IF(@CountryCount IS NOT NULL AND @CountryCount != 0)  
    BEGIN  
-    IF(@LineOfBusiness1Count IS NOT NULL)  
+    IF(@LineOfBusiness1Count != 0 OR @LineOfBusiness1 IS NULL)  
      BEGIN  
-      IF(@LineOfBusiness2Count IS NOT NULL)  
+      IF(@LineOfBusiness2Count != 0 OR @LineOfBusiness2 IS NULL)  
        BEGIN  
-        IF(@LineOfBusiness3Count IS NOT NULL)  
+        IF(@LineOfBusiness3Count != 0 OR @LineOfBusiness3 IS NULL)  
          BEGIN  
-          IF(@LineOfBusiness4Count IS NOT NULL)  
+          IF(@LineOfBusiness4Count != 0 OR @LineOfBusiness4 IS NULL)  
            BEGIN  
-            IF(@LineOfBusiness5Count IS NOT NULL)  
+            IF(@LineOfBusiness5Count != 0 OR @LineOfBusiness5 IS NULL)  
              BEGIN  
               IF(@strDocumentDelivery1 IS NOT NULL)  
                BEGIN  
