@@ -53,7 +53,8 @@ BEGIN TRY
 			@strCertificationName		NVARCHAR(MAX),
 			@strCustomerContract		NVARCHAR(100),
 			@intContractTypeId			INT,
-			@strAddToPayableMessage		NVARCHAR(MAX)
+			@strAddToPayableMessage		NVARCHAR(MAX),
+			@ysnCancelledLoad			bit = 0;
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -427,8 +428,20 @@ BEGIN TRY
 			WHERE	ysnBasisContract = 1
 		END;
 
+		select @ysnCancelledLoad = 0
 		IF @intContractStatusId IN (3,6)
 		BEGIN
+			if exists (
+			SELECT	top 1 1
+			FROM	tblLGLoad			LO
+			JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId			=	LO.intLoadId and ISNULL(LD.intSContractDetailId,LD.intPContractDetailId) = @intContractDetailId
+			WHERE	intTicketId IS NULL 
+			AND		LO.intShipmentStatus IN (1, 7)
+			AND		LO.intShipmentType <> 2)
+			begin
+				select @ysnCancelledLoad = 1;
+			end
+
 			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
 		END
 
@@ -530,7 +543,8 @@ BEGIN TRY
 	EXEC	uspCTCreateDetailHistory		@intContractHeaderId 	= @intContractHeaderId,
 											@strSource 				= 'Contract',
 											@strProcess 			= 'Save Contract',
-											@intUserId				= @userId	
+											@intUserId				= @userId,
+											@ysnCancelledLoad		= @ysnCancelledLoad
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
 
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true
