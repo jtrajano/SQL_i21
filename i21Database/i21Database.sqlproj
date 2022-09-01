@@ -9212,6 +9212,7 @@
     <Build Include="dbo\Functions\fnRKGetDerivativeDPRRecon.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPRReconDiagnostic.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
