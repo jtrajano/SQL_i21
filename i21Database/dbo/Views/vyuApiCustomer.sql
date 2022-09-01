@@ -69,6 +69,11 @@ SELECT [EntityId]			= e.intEntityId
 	, [RequirePO] = e.ysnRequirePO
 	, [RequireSignature] = e.ysnRequireSignature  
 	, [DefaultLocationId]  = e.intDefaultLocationId
+
+	,[IsRequireStickReadings] = e.ysnRequireStickReading
+	,[IsPrintPriceOnTicket] = e.ysnPrintPriceOnTicket
+	,[TicketCopies] = e.intTicketCopies
+
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId

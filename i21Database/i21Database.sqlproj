@@ -1135,6 +1135,7 @@
     <Build Include="dbo\Tables\tblEMEntityLocationRecurringPO.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
     <Build Include="dbo\Views\vyuCTPrepaidHistory.sql" />
+    <Build Include="dbo\Views\vyuSMTerritoryRegion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
