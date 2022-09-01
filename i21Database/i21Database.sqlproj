@@ -318,7 +318,6 @@
     <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
