@@ -35,6 +35,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, strState				= custLocation.strState
 	, strZipCode			= custLocation.strZipCode
 	, strCountry			= custLocation.strCountry
+	, intDefaultLocationId  = custLocation.intEntityLocationId
 	, strShipToLocationName	= shipLocation.strLocationName
 	, strShipToAddress		= shipLocation.strAddress
 	, strShipToCity			= shipLocation.strCity

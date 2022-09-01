@@ -68,7 +68,7 @@ SELECT [EntityId]			= e.intEntityId
 	, [RequirePump] = e.ysnRequirePump
 	, [RequirePO] = e.ysnRequirePO
 	, [RequireSignature] = e.ysnRequireSignature  
-
+	, [DefaultLocationId]  = e.intDefaultLocationId
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId
