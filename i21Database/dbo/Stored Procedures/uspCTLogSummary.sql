@@ -3904,6 +3904,13 @@ BEGIN TRY
 					UPDATE @cbLogSpecific SET dblQty = abs(dblQty) * -1, intPricingTypeId = 2
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				end
+				else
+				begin
+					if exists(select top 1 1 from @cbLogPrev where strTransactionType = 'Contract Balance' and intContractStatusId = 4 order by intId desc)
+					begin
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					end
+				end
 
 				UPDATE @cbLogSpecific SET dblQty = @dblLogSpecificQty * - 1, intPricingTypeId = @intLogSpecificPricingTypeId
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
