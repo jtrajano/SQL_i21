@@ -75,3 +75,28 @@ BEGIN
 	')
 END
 GO
+
+/*
+* Update Inbound and Outbound Company Locations for Trans. Used By Transport Loads
+*/
+IF EXISTS (SELECT 1 FROM tblLGLoadDetail LD INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+	WHERE L.intTransUsedBy = 3 AND L.intPurchaseSale = 1 AND LD.intSCompanyLocationId IS NULL)
+BEGIN
+	UPDATE LD
+	SET intSCompanyLocationId = LD.intPCompanyLocationId
+	FROM tblLGLoadDetail LD
+	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+	WHERE L.intTransUsedBy = 3 AND L.intPurchaseSale = 1 AND LD.intSCompanyLocationId IS NULL
+END
+GO
+
+IF EXISTS (SELECT 1 FROM tblLGLoadDetail LD INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+	WHERE L.intTransUsedBy = 3 AND L.intPurchaseSale = 2 AND LD.intPCompanyLocationId IS NULL)
+BEGIN
+	UPDATE LD
+	SET intPCompanyLocationId = LD.intSCompanyLocationId
+	FROM tblLGLoadDetail LD
+	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+	WHERE L.intTransUsedBy = 3 AND L.intPurchaseSale = 2 AND LD.intPCompanyLocationId IS NULL
+END
+GO
