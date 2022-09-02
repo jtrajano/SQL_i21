@@ -64,15 +64,15 @@ SELECT [EntityId]			= e.intEntityId
 	, [OrderType] 		= e.strOrderType
 	, [CustomerCompanyLocation] = ''
 	, [CustomerSalesPerson2] = ''
-	, [RequireStickReading] = e.ysnRequireStickReading
-	, [RequirePump] = e.ysnRequirePump
-	, [RequirePO] = e.ysnRequirePO
-	, [RequireSignature] = e.ysnRequireSignature  
+	, [RequireStickReading] = ISNULL(e.ysnRequireStickReading, 0)
+	, [RequirePump] = ISNULL(e.ysnRequirePump, 0)
+	, [RequirePO] = ISNULL(e.ysnRequirePO, 0)
+	, [RequireSignature] = ISNULL(e.ysnRequireSignature  , 0)
 	, [DefaultLocationId]  = e.intDefaultLocationId
 
-	,[IsRequireStickReadings] = e.ysnRequireStickReading
-	,[IsPrintPriceOnTicket] = e.ysnPrintPriceOnTicket
-	,[TicketCopies] = e.intTicketCopies
+	,[IsRequireStickReadings] = ISNULL(e.ysnRequireStickReading, 0)
+	,[IsPrintPriceOnTicket] = ISNULL(e.ysnPrintPriceOnTicket, 0)
+	,[TicketCopies] = ISNULL(e.intTicketCopies, 0)
 
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
