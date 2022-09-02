@@ -145,8 +145,7 @@ BEGIN
 			INNER JOIN tblTMCustomer TC  ON TC.intCustomerID = US.intCustomerID
 			INNER JOIN tblARCustomer AC ON AC.intEntityId = TC.intCustomerNumber
 			INNER JOIN tblEMEntity En ON En.intEntityId = AC.intEntityId
-			INNER JOIN tblTMEventType ET ON ET.intEventTypeID = CS.intEventTypeID
-		 WHERE E.guiApiUniqueId = @guiApiUniqueId 
+		 WHERE CS.guiApiUniqueId = @guiApiUniqueId 
 
 
     OPEN DataCursor
