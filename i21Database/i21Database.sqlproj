@@ -1112,6 +1112,8 @@
     <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeploymentConfiguration.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeploymentConfigurationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
