@@ -994,14 +994,7 @@
     <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
-    <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
-    <Build Include="dbo\Tables\tblGLChangeAccountCategory.sql" />
-    <Build Include="dbo\Tables\tblGLChangeAccountCategoryDetail.sql" />
-    <Build Include="dbo\Views\vyuGLChangeAccountCategory.sql" />
-    <Build Include="dbo\Views\vyuGLChangeAccountCategoryDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLInsertChangeCategoryAuditLog.sql" />
-    <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
-    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
