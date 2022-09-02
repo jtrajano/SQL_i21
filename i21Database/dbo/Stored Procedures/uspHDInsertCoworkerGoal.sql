@@ -83,6 +83,6 @@ BEGIN
 
 				DELETE FROM tblHDImportCoworkerGoal
 
-				EXEC [dbo].[uspHDSyncCoworkerSuperVisor]
+				--EXEC [dbo].[uspHDSyncCoworkerSuperVisor]
 END
 GO
