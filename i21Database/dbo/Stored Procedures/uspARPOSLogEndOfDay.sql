@@ -19,6 +19,13 @@ AS
 
 		IF EXISTS(SELECT TOP 1 intPOSEndOfDayId FROM tblARPOSLog WHERE intPOSEndOfDayId = @intPOSEndOfDayId)
 		BEGIN
+			IF ISNULL(@dblNewEndingBalance, 0) = 0
+				BEGIN 
+					SELECT @dblNewEndingBalance = (EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0) + ISNULL(EOD.dblCashPaymentReceived,0)) - ABS(ISNULL(EOD.dblCashReturn,0))
+					FROM tblARPOSEndOfDay EOD
+					WHERE EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+				END 
+
 			SELECT
 				 @intCashOverAccountId	 = LOC.intCashOverShort
 				,@intUndepositedFundsId	 = LOC.intUndepositedFundsId
