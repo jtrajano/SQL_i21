@@ -54,7 +54,8 @@ FROM vyuTMGeneratedCallEntry TMO
 	LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
 	LEFT JOIN tblEMEntityLocationConsumptionSite ELCS ON ELCS.intSiteID = TMS.intSiteID
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ELCS.intEntityLocationId
-	LEFT JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
+	LEFT JOIN tblTMCustomer TMC ON TMC.intCustomerID = TMS.intCustomerID
+	LEFT JOIN tblEMEntity E ON E.intEntityId = TMC.intCustomerNumber
 	LEFT JOIN tblICItem I ON I.intItemId = TMS.intProduct
 	LEFT JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId AND IL.intLocationId IS NOT NULL AND IL.intLocationId = TMS.intLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = IL.intSubLocationId
