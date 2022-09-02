@@ -985,6 +985,7 @@
     <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -61,7 +61,12 @@ SELECT DISTINCT a.intEntityId
 FROM vyuHDAgentDetail a
 	 INNER JOIN tblEMEntity b
 ON a.intEntityId = b.intEntityId
-WHERE ISNULL(a.strEmail, '') <> ''
+	 INNER JOIN tblHDCoworkerGoal c
+ON c.intEntityId = a.intEntityId 
+WHERE ISNULL(a.strEmail, '') <> '' AND 
+	  a.ysnVendor = CONVERT(BIT, 0) AND
+	  a.ysnTimeEntryExempt = CONVERT(BIT, 0) AND
+      c.strFiscalYear = DATEPART(YEAR, GETDATE())
 
 OPEN EmployeeLoop
 FETCH NEXT FROM EmployeeLoop INTO @EntityId
