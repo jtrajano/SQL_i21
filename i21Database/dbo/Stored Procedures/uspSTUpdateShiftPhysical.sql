@@ -123,7 +123,7 @@ LEFT JOIN
 		ON IT.intInventoryTransferId = ITD.intInventoryTransferId
 	JOIN tblICItemLocation IL
 		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intFromLocationId
-	WHERE ISNULL(IL.intCountGroupId, 0) != 0
+	WHERE ISNULL(IL.intCountGroupId, 0) != 0 AND IT.intStatusId IN (2,3)
 	GROUP BY 
 		IT.intFromLocationId,
 		IT.dtmTransferDate,
@@ -143,8 +143,8 @@ LEFT JOIN
 	JOIN tblICInventoryTransferDetail ITD
 		ON IT.intInventoryTransferId = ITD.intInventoryTransferId
 	JOIN tblICItemLocation IL
-		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intFromLocationId
-	WHERE ISNULL(IL.intCountGroupId, 0) != 0
+		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intToLocationId
+	WHERE ISNULL(IL.intCountGroupId, 0) != 0 AND IT.intStatusId = 3
 	GROUP BY 
 		IT.intToLocationId,
 		IT.dtmTransferDate,
@@ -272,7 +272,7 @@ SELECT
 	, IL.intItemLocationId
 	, dblSystemCount = ISNULL(shiftPhysical.dblPhysicalCount, 0)
 	, InventoryReceipt.dblQtyReceived
-	, InventoryQtyTransferred.dblQtyTransferred
+	, ISNULL(InventoryQtyTransferredTo.dblQtyTransferred, 0) - ISNULL(InventoryQtyTransferredFrom.dblQtyTransferred, 0) AS dblQtyTransferred
 	, ItemMovement.dblQtySold
 	, UOM.intItemUOMId
 	, intEntityUserSecurityId = @intEntityUserSecurityId
@@ -329,6 +329,32 @@ LEFT JOIN
 LEFT JOIN 
 (
 	SELECT 
+		IT.intToLocationId,
+		IT.dtmTransferDate,
+		ITD.intItemId,
+		UOM.intItemUOMId,
+		SUM(ITD.dblQuantity) AS dblQtyTransferred
+	FROM tblICInventoryTransfer IT
+	JOIN tblICInventoryTransferDetail ITD
+		ON IT.intInventoryTransferId = ITD.intInventoryTransferId
+	JOIN tblICItemUOM UOM
+		ON ITD.intItemUOMId = UOM.intItemUOMId
+	JOIN tblICItemLocation IL
+		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intToLocationId
+	WHERE ISNULL(IL.intCountGroupId, 0) = 0 AND IL.ysnCountedDaily = 1 AND IT.intStatusId = 3
+	GROUP BY 
+		IT.intToLocationId,
+		IT.dtmTransferDate,
+		ITD.intItemId,
+		UOM.intItemUOMId
+) AS InventoryQtyTransferredTo
+	ON I.intItemId = InventoryQtyTransferredTo.intItemId
+	AND IL.intLocationId = InventoryQtyTransferredTo.intToLocationId
+	AND @dtmCheckoutDate = InventoryQtyTransferredTo.dtmTransferDate
+	AND UOM.intItemUOMId = InventoryQtyTransferredTo.intItemUOMId
+LEFT JOIN 
+(
+	SELECT 
 		IT.intFromLocationId,
 		IT.dtmTransferDate,
 		ITD.intItemId,
@@ -341,17 +367,17 @@ LEFT JOIN
 		ON ITD.intItemUOMId = UOM.intItemUOMId
 	JOIN tblICItemLocation IL
 		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intFromLocationId
-	WHERE ISNULL(IL.intCountGroupId, 0) = 0 AND IL.ysnCountedDaily = 1
+	WHERE ISNULL(IL.intCountGroupId, 0) = 0 AND IL.ysnCountedDaily = 1 AND IT.intStatusId IN (2,3)
 	GROUP BY 
 		IT.intFromLocationId,
 		IT.dtmTransferDate,
 		ITD.intItemId,
 		UOM.intItemUOMId
-) AS InventoryQtyTransferred
-	ON I.intItemId = InventoryQtyTransferred.intItemId
-	AND IL.intLocationId = InventoryQtyTransferred.intFromLocationId
-	AND @dtmCheckoutDate = InventoryQtyTransferred.dtmTransferDate
-	AND UOM.intItemUOMId = InventoryQtyTransferred.intItemUOMId
+) AS InventoryQtyTransferredFrom
+	ON I.intItemId = InventoryQtyTransferredFrom.intItemId
+	AND IL.intLocationId = InventoryQtyTransferredFrom.intFromLocationId
+	AND @dtmCheckoutDate = InventoryQtyTransferredFrom.dtmTransferDate
+	AND UOM.intItemUOMId = InventoryQtyTransferredFrom.intItemUOMId
 LEFT JOIN 
 (
 	SELECT 
