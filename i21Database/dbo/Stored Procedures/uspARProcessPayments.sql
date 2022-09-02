@@ -582,17 +582,15 @@ END CATCH
 DECLARE @CreatedPaymentIds PaymentId			
 DELETE FROM @CreatedPaymentIds
 
-INSERT INTO @CreatedPaymentIds
-	([intHeaderId]
-	,[intDetailId])
-SELECT 
-		[intHeaderId]	= EFP.[intPaymentId]
-	,[intDetailId]	= EFP.[intPaymentDetailId]
-FROM
-	@tmpEntriesForProcessing EFP
-INNER JOIN
-	@PaymentEntries IE
-		ON EFP.[intPaymentId] = IE.[intPaymentId] 
+INSERT INTO @CreatedPaymentIds (
+	[intHeaderId]
+  , [intDetailId]
+)
+SELECT [intHeaderId]	= EFP.[intPaymentId]
+	 , [intDetailId]	= EFP.[intPaymentDetailId]
+FROM @tmpEntriesForProcessing EFP
+INNER JOIN @PaymentEntries IE ON EFP.[intPaymentId] = IE.[intPaymentId] 
+WHERE ISNULL(EFP.[ysnForInsert],0) = 1
 
 EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
 
