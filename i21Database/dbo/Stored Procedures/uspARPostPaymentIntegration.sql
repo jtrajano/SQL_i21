@@ -297,8 +297,8 @@ BEGIN
       AND B.[ysnPost] = @OneBit	
 
 	--Paid if prepayment
-	UPDATE C
-    SET C.ysnPaidCPP = (CASE WHEN (C.dblAmountDue) = @ZeroDecimal THEN 1 ELSE 0 END)
+	  UPDATE C
+    SET C.ysnPaidCPP = 1
     FROM #ARPostPaymentDetail B
     INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
     WHERE C.strTransactionType = 'Customer Prepayment'	
