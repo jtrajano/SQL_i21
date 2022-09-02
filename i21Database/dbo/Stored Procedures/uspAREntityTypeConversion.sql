@@ -4,7 +4,9 @@
 		@ToType NVARCHAR(100)
 	AS
 	DECLARE @OutputMessage NVARCHAR(200)
+	DECLARE @Location INT
 	SET @OutputMessage = 'Conversion is not applicable to this type of entity.'
+	SET @Location = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
 
 	SET @FromType = LOWER(@FromType)
 	SET @ToType = LOWER(@ToType)
@@ -18,8 +20,8 @@
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomer WHERE intEntityId = @EntityId)
 			BEGIN
 
-				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance)
-				SELECT @EntityId,0,0
+				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance, intBillToId, intShipToId)
+				SELECT @EntityId,0,0,@Location,@Location
 
 			END
 
