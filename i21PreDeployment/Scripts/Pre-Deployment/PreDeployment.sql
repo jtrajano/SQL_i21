@@ -206,6 +206,7 @@
 
 --TR
 :r .\17_TR\01_Drop_Column.sql
+:r .\17_TR\02_CleanUp_TR_Data.sql
 
 --IU
 :r .\18_IU\1_DataCleanUp.sql
