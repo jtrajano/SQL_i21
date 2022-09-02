@@ -1116,6 +1116,7 @@
     <Build Include="dbo\Tables\tblSMRapidDeploymentConfigurationDetail.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTMEvent.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMEvent.sql" />
+    <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
