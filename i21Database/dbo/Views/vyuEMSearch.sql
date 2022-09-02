@@ -28,6 +28,7 @@ SELECT
 		Trucker,
 		Insurer,
 		ShipVia,
+		0 Applicator,
 		VendorOrCustomer =  Vendor + Customer,
 		b.strFederalTaxId,
 		strDefaultEntityType = ET.strType
