@@ -36,7 +36,7 @@ BEGIN
 		AND PAYMENT.intPaymentId NOT IN (SELECT ISNULL(intPaymentId,0) from tblARPOSPayment)
 		
 		UPDATE EOD
-		SET dblCashPaymentReceived = ISNULL(dblCashPaymentReceived, 0.000000) + @PAYMENT
+		SET dblCashPaymentReceived = ISNULL(dblCashPaymentReceived, 0.000000) + ISNULL(@PAYMENT, 0)
 		FROM tblARPOSEndOfDay EOD 
 		WHERE EOD.intPOSEndOfDayId = @intPOSEndOfDayId
 
