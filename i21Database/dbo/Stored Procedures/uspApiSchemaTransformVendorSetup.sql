@@ -746,17 +746,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 
 ;WITH cte AS
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorUOM ORDER BY sr.intVendorSetupId, sr.strVendorUOM) AS RowNumber
-   FROM @UniqueUOMs sr
-   WHERE sr.guiApiUniqueId = @guiApiUniqueId
-)
-DELETE FROM cte
-WHERE guiApiUniqueId = @guiApiUniqueId
-  AND RowNumber > 1;
-
-;WITH cte AS
-(
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intUnitMeasureId ORDER BY sr.intVendorSetupId, sr.intUnitMeasureId) AS RowNumber
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intUnitMeasureId, sr.strVendorUOM ORDER BY sr.intVendorSetupId, sr.intUnitMeasureId, sr.strVendorUOM) AS RowNumber
    FROM @UniqueUOMs sr
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
 )
