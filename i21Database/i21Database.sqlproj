@@ -4933,6 +4933,11 @@
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
     <Build Include="dbo\Views\vyuApiSubscriptionHealthStatus.sql" />
+    <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql" />
+    <Build Include="dbo\Views\vyuApiFreightTerm.sql" />
+    <Build Include="dbo\Views\vyuApiCountry.sql" />
+    <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuApiCustomer.sql" />
     <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
