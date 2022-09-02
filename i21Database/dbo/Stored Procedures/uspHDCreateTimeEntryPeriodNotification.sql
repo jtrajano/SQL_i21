@@ -24,11 +24,11 @@ SELECT TOP 1   @TimeEntryPeriodDetailId		= intTimeEntryPeriodDetailId
 			  ,@BillingEndDate				= dtmBillingPeriodEnd
 			  ,@RequiredHours				= intRequiredHours
 			  ,@strWarningType				= CASE WHEN dtmFirstWarningDate = @currentDate
-														THEN 'First Warning'
+														THEN 'First Reminder'
 												  WHEN dtmSecondWarningDate = @currentDate
-														THEN 'Second Warning'
+														THEN 'Second Reminder'
 												  WHEN dtmLockoutDate = @currentDate
-														THEN 'Lockout Warning'
+														THEN ''
 												  ELSE NULL
 											  END
 FROM tblHDTimeEntryPeriodDetail
