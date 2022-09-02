@@ -16,19 +16,30 @@ OUTER apply(
 )C
 WHERE @intBankAccountId = intBankAccountId
 
-IF @intLocationSegmentId IS NOT NULL AND @intCompanySegmentId IS NULL
-SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
-WHERE intProfitCenter = @intLocationSegmentId
+
+DECLARE @ysnHasLocation BIT = 0
+DECLARE @ysnHasComopany BIT = 0
+
+SELECT @ysnHasLocation = 1 FROM tblSMCompanyLocation WHERE intProfitCenter = @intLocationSegmentId
+
+IF (@ysnHasLocation = 1)
+BEGIN
+	SELECT TOP 1 @ysnHasComopany = 1 FROM tblSMCompanyLocation WHERE intProfitCenter = @intLocationSegmentId AND intCompanySegment = @intCompanySegmentId
+END
 
 
-IF @intLocationSegmentId IS NULL AND @intCompanySegmentId IS NOT NULL
-SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
-WHERE intCompanySegment = @intCompanySegmentId
+IF @ysnHasLocation = 0 OR @ysnHasComopany = 0
+BEGIN
+		SET @strError = 'FEIN was not found. Please fill up the FEIN and make sure that Location and Company Segment of the Bank GL Account is setup in a Company Location.'
+END
+ELSE
+BEGIN
+	SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
+	WHERE intCompanySegment = @intCompanySegmentId AND intProfitCenter = @intLocationSegmentId
 
+END
 
-IF @intLocationSegmentId IS NOT NULL AND @intCompanySegmentId IS NOT NULL
-SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
-WHERE intCompanySegment = @intCompanySegmentId AND intProfitCenter = @intLocationSegmentId
+INSERT INTO @tbl ( FEIN, Error ) SELECT @strFEIN, @strError
 
 RETURN  @strFEIN
 
