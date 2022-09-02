@@ -994,7 +994,7 @@
     <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
-    <Build Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
