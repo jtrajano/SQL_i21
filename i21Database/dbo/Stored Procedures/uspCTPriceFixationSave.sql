@@ -586,7 +586,7 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
-			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intSplitFromId, CD.intContractDetailId)
+			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN ((case when @ysnMultiplePriceFixation = 1 then CD.intSplitFromId else CD.intContractDetailId end), CD.intContractDetailId)
 			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
