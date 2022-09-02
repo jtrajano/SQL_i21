@@ -24,7 +24,7 @@ BEGIN
 		DECLARE @intCompanyLocationId								INT
 		DECLARE @intGLAccountId										INT
 		DECLARE @dblTotalToDeposit									DECIMAL(18,6) = 0 
-		DECLARE @dblCashOverShort									DECIMAL(18,6) = 0  
+		DECLARE @dblCashOverShort									DECIMAL(18,6) = 0 
 		DECLARE @strGLAccountDescription	 						NVARCHAR(100)
 		
 
@@ -160,8 +160,8 @@ BEGIN
 						VALUES  
 						(@intCheckoutId,ABS(@dblAmount),ABS(@dblAmount),ABS(@dblAmount),@intNewTransactionId,0)  
 					END  
-	 
-				SET @dblCashOverShort = @dblTotalToDeposit - ABS(@dblAmount)
+
+				SET @dblCashOverShort = @dblTotalToDeposit - (ABS(@dblAmount) + @dblDealerCommission)
 				UPDATE tblSTCheckoutHeader SET dblTotalDeposits = ABS(@dblAmount), dblCashOverShort = @dblCashOverShort WHERE intCheckoutId = @intCheckoutId
 			END
 		ELSE
