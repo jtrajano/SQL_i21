@@ -23,7 +23,7 @@ BEGIN
 			, intRowNo = CS.intRowNumber
 			, strMessage = 'Cannot find the Event Type ''' + CS.strEventType + ''' in i21 Event type'
 		FROM tblApiSchemaTMEvent CS
-		LEFT JOIN tblTMEventType E ON E.strEventType = CS.strEventType
+		LEFT JOIN tblTMEventType E ON E.strEventType  COLLATE Latin1_General_CI_AS = CS.strEventType  COLLATE Latin1_General_CI_AS
 		WHERE (E.intEventTypeID IS NULL)
 		AND CS.guiApiUniqueId = @guiApiUniqueId
 
@@ -47,7 +47,7 @@ BEGIN
 			, intRowNo = CS.intRowNumber
 			, strMessage = 'Cannot find the user name ''' + CS.strUserName + ''' in i21 '
 		FROM tblApiSchemaTMEvent CS
-			INNER JOIN tblSMUserSecurity US ON CS.strUserName = US.strUserName
+			INNER JOIN tblSMUserSecurity US ON CS.strUserName = US.strUserName COLLATE Latin1_General_CI_AS 
 			INNER JOIN tblEMEntity E ON E.intEntityId = US.intEntityId
 		WHERE (US.intEntityId IS NULL)
 		AND CS.guiApiUniqueId = @guiApiUniqueId
@@ -74,7 +74,7 @@ BEGIN
 		FROM tblTMCustomer TC 
 			INNER JOIN tblARCustomer AC ON AC.intEntityId = TC.intCustomerNumber
 			INNER JOIN tblEMEntity E ON E.intEntityId = AC.intEntityId
-			inner join tblApiSchemaTMEvent CS on CS.strCustomer = E.strName
+			inner join tblApiSchemaTMEvent CS on CS.strCustomer = E.strName COLLATE Latin1_General_CI_AS 
 		WHERE (E.strName IS NULL)
 		AND CS.guiApiUniqueId = @guiApiUniqueId
 
