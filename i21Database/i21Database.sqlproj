@@ -1138,6 +1138,7 @@
     <Build Include="dbo\Views\vyuSMTerritoryRegion.sql" />
     <Build Include="dbo\Tables\tblSMRapidDeploymentConfiguration.sql" />
     <Build Include="dbo\Tables\tblSMRapidDeploymentConfigurationDetail.sql" />
+    <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
