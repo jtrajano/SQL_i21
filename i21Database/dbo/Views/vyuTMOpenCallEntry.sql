@@ -32,6 +32,7 @@ AS
 		,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 		,strFillMethod = N.strFillMethod
 		,strCity = B.strCity
+		,strRouteId = RU.strRouteId
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
@@ -41,6 +42,8 @@ AS
 		ON C.intCustomerNumber = D.intEntityId
 	INNER JOIN tblICItem E
 		ON B.intProduct = E.intItemId
+	INNER JOIN tblTMRoute RU
+			ON B.intRouteId = RU.intRouteId
 	LEFT JOIN tblICItem F
 		ON A.intSubstituteProductID = F.intItemId
 	LEFT JOIN tblEMEntity G

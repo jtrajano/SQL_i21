@@ -9,7 +9,7 @@ OUTER APPLY (
 	WHERE intBillId = B.intBillId
 	
 ) BD
-WHERE B.dblAverageExchangeRate IS NULL AND B.dblTotal <> 0 AND BD.intDetailCount > 0
+WHERE B.dblTotal <> 0 AND BD.intDetailCount > 0
 
 --POPULATE EMPTY VOUCHER AVERAGE EXCHANGE RATE (ARCHIVED)
 UPDATE B
@@ -21,6 +21,6 @@ OUTER APPLY (
 	WHERE intBillId = B.intBillId
 	
 ) BD
-WHERE B.dblAverageExchangeRate IS NULL AND B.dblTotal <> 0 AND BD.intDetailCount > 0
+WHERE B.dblTotal <> 0 AND BD.intDetailCount > 0
 
 PRINT N'SUCCESS: POPULATING VOUCHER AVERAGE EXCHANGE RATE'

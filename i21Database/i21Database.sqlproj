@@ -347,7 +347,7 @@
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
-    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql"/>
+    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql" />
     <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
@@ -1111,6 +1111,12 @@
     <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeploymentConfiguration.sql" />
+    <Build Include="dbo\Tables\tblSMRapidDeploymentConfigurationDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMEvent.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMEvent.sql" />
+    <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10894,6 +10900,7 @@
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
+    <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

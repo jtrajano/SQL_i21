@@ -142,7 +142,8 @@
     [dblConsCommissionDealerPercentage] DECIMAL(18,6) NOT NULL DEFAULT 0,
     [ysnConsBankDepositDraft] BIT NOT NULL DEFAULT 1,
     [intConsFuelOverShortItemId] INT NULL,
-    [intConsDealerCommissionItemId] INT NULL,
+    [intConsBankDepositDraftId] INT NULL,
+    [intConsDelearCommissionARAccountId] INT NULL,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),

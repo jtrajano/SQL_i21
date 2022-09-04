@@ -60,7 +60,7 @@ BEGIN
 		ISNULL(SMTPHost, '') AS strSMTPHost,
 		ISNULL(SMTPPort, 0) AS intSMTPPort,
 		ISNULL(SMTPUserName, '') AS strSMTPUserName,
-		ISNULL(SMTPPassword, '') AS strSMTPPassword,
+		dbo.fnAESEncryptASym(ISNULL(SMTPPassword, '')) AS strSMTPPassword,
 		ISNULL(SMTPFromEmail, '') AS strSMTPFromEmail,
 		ISNULL(SMTPFromName, '') AS strSMTPFromName,
 		ISNULL(SMTPAuthentication, 0) AS ysnSMTPAuthentication,

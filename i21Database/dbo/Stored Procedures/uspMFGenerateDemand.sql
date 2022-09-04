@@ -966,7 +966,7 @@ BEGIN TRY
 			JOIN dbo.tblICInventoryTransferDetail TD ON TD.intNewLotId = L.intLotId
 				AND TD.intItemId = L.intItemId
 			JOIN dbo.tblICInventoryTransfer T ON T.intInventoryTransferId = TD.intInventoryTransferId
-				AND T.intStatusId = 2
+				AND T.intStatusId = 2 AND T.intFromLocationId = @intCompanyLocationId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
 				AND L.intLocationId = IsNULL(@intCompanyLocationId, L.intLocationId)
 			WHERE EXISTS (

@@ -10,7 +10,7 @@
 		,strEncryptedConnection = tblSMCompanyPreference.strSMTPSsl
 		,ysnRequiresAuthentication = convert(bit, 1)
 		,strUserName = tblSMCompanyPreference.strSMTPUserName
-		,strPassword = tblSMCompanyPreference.strSMTPPassword
+		,strPassword = dbo.fnAESDecryptASym(tblSMCompanyPreference.strSMTPPassword)
 		,intConcurrencyId = tblSMCompanyPreference.intConcurrencyId
 	from
 		tblHDSetting
