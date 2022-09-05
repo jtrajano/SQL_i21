@@ -89,8 +89,7 @@ BEGIN
 				FROM tblHDTimeEntryPeriodNotification
 				WHERE intEntityId = @EntityId AND
 					  intEntityRecipientId = @EntityId AND
-					  dtmDateCreated = @currentDate AND
-					  strWarning = @strWarningType
+					  dtmDateCreated = @currentDate
 		)
 		BEGIN	
 			INSERT INTO tblHDTimeEntryPeriodNotification
