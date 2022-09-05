@@ -6,7 +6,21 @@
 	@strAction              NVARCHAR(50) = NULL
 AS
 
-	INSERT INTO tblCRMBrandIntegrationLog (intBrandId, intOpportunityId, dtmIntegrationDate, strAPIMessage, strStatus, strAction)
-	VALUES (@intBrandId, @intOpportunityId, GETDATE(), @strAPIMessage, @strStatus, @strAction)
+INSERT INTO tblCRMBrandIntegrationLog (
+	intBrandId
+	,intOpportunityId
+	,dtmIntegrationDate
+	,strAPIMessage
+	,strStatus
+	,strAction
+)
+VALUES (
+	@intBrandId
+	,@intOpportunityId
+	,GETDATE()
+	,@strAPIMessage COLLATE Latin1_General_CI_AS
+	,@strStatus COLLATE Latin1_General_CI_AS
+	,@strAction COLLATE Latin1_General_CI_AS
+)
 
 GO

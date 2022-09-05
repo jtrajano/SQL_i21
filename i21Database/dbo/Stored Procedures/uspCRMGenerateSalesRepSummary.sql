@@ -80,7 +80,7 @@ SET ANSI_WARNINGS OFF;
 		,dblDollarValueOfOrders = (select isnull(sum(dblAmountDue),0) from sales where intEntitySalespersonId = salesrep.intEntitySalespersonId and intDate between @DateFrom and @DateTo and strType = 'Order')
 		,intStartDate = @DateFrom
 		,intEndDate = @DateTo
-		,strFilterKey = @strIdentifier
+		,strFilterKey = @strIdentifier COLLATE Latin1_General_CI_AS
 		,intRequestedByEntityId = 0
 		,intCreatedDate = convert(int, convert(nvarchar(8), getdate(), 112))
 		,strDisplayType = 'grid'
