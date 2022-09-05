@@ -2,11 +2,14 @@
 (
 	@intBankAccountId INT
 )
-RETURNS  NVARCHAR(10)
+RETURNS @tbl TABLE(
+	FEIN NVARCHAR(10)  COLLATE Latin1_General_CI_AS NULL ,
+	Error NVARCHAR(200) COLLATE  Latin1_General_CI_AS NULL
+) 
 AS
 BEGIN
 
-DECLARE @intLocationSegmentId int , @intCompanySegmentId INT, @intCompanyLocationId INT, @strFEIN NVARCHAR(10) = '', @strError NVARCHAR(150)
+DECLARE @intLocationSegmentId int , @intCompanySegmentId INT, @intCompanyLocationId INT, @strFEIN NVARCHAR(10) = '', @strError NVARCHAR(200)
 SELECT  @intLocationSegmentId = L.intAccountSegmentId, @intCompanySegmentId = C.intAccountSegmentId from tblCMBankAccount A  
 OUTER apply(
 	select  intAccountSegmentId from vyuGLLocationAccountId where intGLAccountId = intAccountId
@@ -41,6 +44,6 @@ END
 
 INSERT INTO @tbl ( FEIN, Error ) SELECT @strFEIN, @strError
 
-RETURN  @strFEIN
+RETURN
 
 END
