@@ -14,10 +14,20 @@ BEGIN
 	IF (@Checking = 1)
 	BEGIN
 		
-		IF EXISTS(SELECT 1 FROM tblEMEntitySplit)
+		IF NOT EXISTS(
+			SELECT COUNT(1)
+			FROM sssplmst OSplit
+			JOIN	tblEMEntity EY		ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(OSplit.ssspl_bill_to_cus))
+			JOIN	tblEMEntityType ET	ON	ET.intEntityId = EY.intEntityId AND ET.strType = 'Customer'
+			WHERE OSplit.A4GLIdentity NOT IN (SELECT intSplitId FROM tblEMEntitySplit)
+		)
 			SELECT @Total = 0
 		ELSE  
-			SELECT @Total = COUNT(1)FROM sssplmst
+			SELECT @Total = COUNT(1)
+			FROM sssplmst OSplit
+			JOIN	tblEMEntity EY		ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(OSplit.ssspl_bill_to_cus))
+			JOIN	tblEMEntityType ET	ON	ET.intEntityId = EY.intEntityId AND ET.strType = 'Customer'
+			WHERE OSplit.A4GLIdentity NOT IN (SELECT intSplitId FROM tblEMEntitySplit)
 
 		RETURN @Total
 	END
@@ -47,6 +57,17 @@ BEGIN
 		  FROM sssplmst OSplit
 		  JOIN	tblEMEntity EY		ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(OSplit.ssspl_bill_to_cus))
 		  JOIN	tblEMEntityType ET	ON	ET.intEntityId = EY.intEntityId AND ET.strType = 'Customer'
+		  WHERE OSplit.A4GLIdentity NOT IN (SELECT intSplitId FROM tblEMEntitySplit)
+		
+		--to correct the option of the first batch of imported split details
+		UPDATE ES
+		SET strOption = 'Storage Type'
+			,intStorageScheduleTypeId = ST.intStorageScheduleTypeId
+		FROM tblEMEntitySplitDetail ES
+		OUTER APPLY (
+			SELECT TOP 1 * FROM tblGRStorageType WHERE strOwnedPhysicalStock = 'Customer' AND intStorageScheduleTypeId > 0
+		) ST
+		WHERE strOption = 'StorageType'
 
 	    SET IDENTITY_INSERT tblEMEntitySplit OFF
 
@@ -64,7 +85,7 @@ BEGIN
 		 ,intEntityId			       = EY.intEntityId
 		 ,dblSplitPercent			   = t.Percentage
 		 ,strOption				       = t.strOption
-		 ,intStorageScheduleTypeId     = St.intStorageScheduleTypeId
+		 ,intStorageScheduleTypeId     = CASE WHEN strOption = 'Storage Type' THEN ST.intStorageScheduleTypeId ELSE NULL END
 		 ,intConcurrencyId             = 1
 		 FROM
 		 ( 
@@ -75,7 +96,7 @@ BEGIN
 			,strOption = CASE 
 								  WHEN LTRIM(RTRIM(t1.strStorageCode))='S' THEN 'Spot Sale'
 								  WHEN LTRIM(RTRIM(t1.strStorageCode))='C' THEN 'Contract'
-								  ELSE 'StorageType'
+								  ELSE 'Storage Type'
 						 END
             ,strStorageCode = t1.strStorageCode
 			FROM 
@@ -97,10 +118,17 @@ BEGIN
 		 JOIN	tblEMEntity EY	ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(t.Entity))
 		 JOIN	tblEMEntityType ET	ON	ET.intEntityId = EY.intEntityId AND ET.strType = 'Customer'
 		 JOIN	tblEMEntitySplit S ON S.intSplitId=t.A4GLIdentity
-		 LEFT  JOIN tblGRStorageType St ON St.strStorageTypeCode collate Latin1_General_CI_AS = t.strStorageCode
-
-		 WHERE t.Entity IS NOT NULL AND t.Percentage >0
-
-
+		 --LEFT  JOIN tblGRStorageType St ON St.strStorageTypeCode collate Latin1_General_CI_AS = t.strStorageCode
+		 OUTER APPLY (
+			SELECT TOP 1 * FROM tblGRStorageType WHERE strOwnedPhysicalStock = 'Customer' AND intStorageScheduleTypeId > 0
+		 ) ST
+		 LEFT JOIN (
+			SELECT intEntityId,intSplitId
+			FROM tblEMEntitySplitDetail ESD
+		 ) A ON A.intEntityId = EY.intEntityId AND A.intSplitId = S.intSplitId
+		 WHERE t.Entity IS NOT NULL AND t.Percentage > 0 
+			--AND EY.intEntityId NOT IN (SELECT intEntityId FROM tblEMEntitySplitDetail)
+			--AND S.intSplitId = 1918
+			AND (A.intEntityId IS NULL AND A.intSplitId IS NULL)
 END
 GO
