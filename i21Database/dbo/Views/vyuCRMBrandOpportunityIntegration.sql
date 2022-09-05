@@ -1,13 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuCRMBrandOpportunityIntegration]
 AS
 SELECT  [Owner]						 = ISNULL(SalesPerson.strName, '')
-	   ,MarketerOpportunityID		 = CONVERT(nvarchar(100), NEWID())
-	   ,MarketerOwnerID				 = CONVERT(nvarchar(100), NEWID())
+	   ,MarketerOpportunityID		 = CONVERT(nvarchar(100), NEWID()) COLLATE Latin1_General_CI_AS
+	   ,MarketerOwnerID				 = CONVERT(nvarchar(100), NEWID()) COLLATE Latin1_General_CI_AS
 	   ,MarketerOwnerName			 = ISNULL(SalesPerson.strName, '')
-	   ,MarketerAccountID			 = CONVERT(nvarchar(100), NEWID())
+	   ,MarketerAccountID			 = CONVERT(nvarchar(100), NEWID()) COLLATE Latin1_General_CI_AS
 	   ,Company						 = Customer.strName
-	   ,MarketerContactID			 = ''
-	   ,MarketerName				 = 'WOODFORD OIL CO'
+	   ,MarketerContactID			 = '' COLLATE Latin1_General_CI_AS
+	   ,MarketerName				 = 'WOODFORD OIL CO' COLLATE Latin1_General_CI_AS
 	   ,FirstName					 = CASE WHEN CHARINDEX(',', EntityContact.strName) > 0
 											THEN LTRIM(RTRIM(SUBSTRING(EntityContact.strName, dbo.fnLastIndex(EntityContact.strName,' '), DATALENGTH(EntityContact.strName))))
 											ELSE LTRIM(RTRIM(REPLACE(SUBSTRING(LTRIM(RTRIM(EntityContact.strName)),1,CHARINDEX(' ',LTRIM(RTRIM(EntityContact.strName)),1)),',', '')))
@@ -37,13 +37,13 @@ SELECT  [Owner]						 = ISNULL(SalesPerson.strName, '')
 	   ,OpportunityName				 = Opportunity.strName
 	   ,OpportunityDescription		 = Opportunity.strOpportunityDescription
 	   ,OpportunityType				 = OpportunityType.strOpportunityType
-	   ,Product						 = ''
-	   ,UnitOfMeasure				 = 'Gallons'
-	   ,CurrencyIsocode				 = 'USD'
-	   ,RBLProposal					 = ''
-	   ,ISOCLEANCertifiedLubricants  = ''
-	   ,PrivateLabel				 = ''
-	   ,MSA							 = ''
+	   ,Product						 = '' COLLATE Latin1_General_CI_AS
+	   ,UnitOfMeasure				 = 'Gallons' COLLATE Latin1_General_CI_AS
+	   ,CurrencyIsocode				 = 'USD' COLLATE Latin1_General_CI_AS
+	   ,RBLProposal					 = '' COLLATE Latin1_General_CI_AS
+	   ,ISOCLEANCertifiedLubricants  = '' COLLATE Latin1_General_CI_AS
+	   ,PrivateLabel				 = '' COLLATE Latin1_General_CI_AS
+	   ,MSA							 = '' COLLATE Latin1_General_CI_AS
 	   ,intOpportunityId			 = Opportunity.intOpportunityId
 	   ,intBrandMaintenanceId		 = Opportunity.intBrandMaintenanceId
 FROM tblCRMOpportunity Opportunity
