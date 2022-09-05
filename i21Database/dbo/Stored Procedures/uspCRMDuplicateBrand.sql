@@ -110,7 +110,7 @@ BEGIN CATCH
 						ROLLBACK TRANSACTION @Savepoint
 			END
 
-			SET @ErrorMessage = ERROR_MESSAGE();
+			SET @ErrorMessage = ERROR_MESSAGE() COLLATE Latin1_General_CI_AS;
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
 			RETURN
