@@ -6,7 +6,7 @@ RETURNS  NVARCHAR(10)
 AS
 BEGIN
 
-DECLARE @intLocationSegmentId int , @intCompanySegmentId INT, @intCompanyLocationId INT, @strFEIN NVARCHAR(10) = ''
+DECLARE @intLocationSegmentId int , @intCompanySegmentId INT, @intCompanyLocationId INT, @strFEIN NVARCHAR(10) = '', @strError NVARCHAR(150)
 SELECT  @intLocationSegmentId = L.intAccountSegmentId, @intCompanySegmentId = C.intAccountSegmentId from tblCMBankAccount A  
 OUTER apply(
 	select  intAccountSegmentId from vyuGLLocationAccountId where intGLAccountId = intAccountId
