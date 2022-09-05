@@ -660,13 +660,16 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitOverriden
-			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
 		AND OVERRIDESEGMENT.bitOverriden = 0
-		AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1)
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
 
 		--You cannot post intra-location transaction without due from account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -679,13 +682,16 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitOverriden
-			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
 		AND OVERRIDESEGMENT.bitOverriden = 0
-		AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1)
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
 
 		--VALIDATE DETAIL ACCOUNT OVERRIDE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -698,12 +704,16 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitOverriden
-			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND @AllowIntraEntries = 1
 		AND OVERRIDESEGMENT.bitOverriden = 0
-		AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1)
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
 
 		--VALIDATE TAX ACCOUNT OVERRIDE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -717,12 +727,16 @@ BEGIN
 		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 		INNER JOIN tblAPBillDetailTax C ON C.intBillDetailId = B.intBillDetailId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitOverriden
-			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], C.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], C.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND @AllowIntraEntries = 1
 		AND OVERRIDESEGMENT.bitOverriden = 0
-		AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1)
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
 	END
 	ELSE
 	BEGIN
