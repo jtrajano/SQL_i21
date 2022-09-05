@@ -19,11 +19,12 @@
 	[strRegion]									[nvarchar](500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDistrict]								[nvarchar](500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intCategoryId]								[int] NULL,	
+	[ysnOnHold]									[bit] NULL,
+
 	[intConcurrencyId]							[int] DEFAULT 1,
 
 	CONSTRAINT [PK_tblSCHReportDistribution] PRIMARY KEY CLUSTERED ([intReportDistributionId] ASC),
 	CONSTRAINT [UC_tblSCHReportDistribution] UNIQUE (strDescription),
-
 	CONSTRAINT [FK_tblSCHReportDistribution_tblSCHSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES tblSCHSchedule(intScheduleId),
 	CONSTRAINT [FK_tblSCHReportDistribution_tblDBPanel_intPanelId] FOREIGN KEY (intDashboardPanelId) REFERENCES tblDBPanel(intPanelId),
 )
