@@ -280,12 +280,11 @@ BEGIN TRY
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
-	AND strAction = 'Created Price'
+	AND strAction IN ('Created Price','Deleted Pricing')
 	AND CBL.intContractTypeId = 1 --Purchase
 	AND CBL.intPricingTypeId = 1
 	AND CH.intPricingTypeId = 2
 
-	--Deletion of price Fixation not yet catered
 	UNION ALL
 
 	SELECT
@@ -682,12 +681,11 @@ BEGIN TRY
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
-	AND strAction = 'Created Price'
+	AND strAction IN ('Created Price','Deleted Pricing')
 	AND CBL.intContractTypeId = 2 --Sales
 	AND CBL.intPricingTypeId = 1
 	AND CH.intPricingTypeId = 2
 
-	--Deletion of price Fixation not yet catered
 	UNION ALL
 
 	SELECT
