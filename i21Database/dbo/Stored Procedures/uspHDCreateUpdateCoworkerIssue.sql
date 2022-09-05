@@ -4,11 +4,59 @@
 	,@TimeEntryPeriodDetailId INT
 )
 AS
+
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT ON  
+SET ANSI_WARNINGS ON  
+
 BEGIN
 
 			DELETE FROM tblHDCoworkerIssue
 			WHERE intUserId = @UserId AND
 				  intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+
+			--Start Sync Time Off Request
+
+		    DECLARE @intTimeEntryPeriodDetail INT = @TimeEntryPeriodDetailId,
+					@dtmDateFrom DATE = NULL,
+					@dtmDateTo DATE = NULL,
+					@strFiscalYear NVARCHAR(10) = NULL
+
+			SELECT TOP 1 @dtmDateFrom		 = a.dtmBillingPeriodStart 
+						,@dtmDateTo			 = a.dtmBillingPeriodEnd
+						,@strFiscalYear		 = b.strFiscalYear
+			FROM tblHDTimeEntryPeriodDetail a
+					INNER JOIN tblHDTimeEntryPeriod b
+			ON a.intTimeEntryPeriodId = b.intTimeEntryPeriodId
+			WHERE intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail
+
+			DECLARE @intEntityEmployeeId INT
+
+			DECLARE EmployeeLoop CURSOR 
+			  LOCAL STATIC READ_ONLY FORWARD_ONLY
+			FOR 
+
+			SELECT intEntityEmployeeId 
+			FROM tblPRTimeOffRequest TimeOffRequest
+			WHERE TimeOffRequest.dtmDateFrom <= @dtmDateTo AND 
+				  TimeOffRequest.dtmDateFrom >= @dtmDateFrom
+			GROUP BY intEntityEmployeeId
+
+			OPEN EmployeeLoop
+			FETCH NEXT FROM EmployeeLoop INTO @intEntityEmployeeId
+			WHILE @@FETCH_STATUS = 0
+			BEGIN 
+  
+				EXEC [dbo].[uspHDGenerateTimeOffRequest] @intEntityEmployeeId
+
+				FETCH NEXT FROM EmployeeLoop INTO @intEntityEmployeeId
+			END
+			CLOSE EmployeeLoop
+			DEALLOCATE EmployeeLoop
+
+			--End Sync Time Off Request
 
 
 			INSERT INTO tblHDCoworkerIssue		
@@ -45,10 +93,7 @@ BEGIN
 																						THEN 'No Time Entry or insufficient time entry. '
 																					ELSE ''
 																			  END
-						   ,strInactiveWithTimeEntry						=  CASE WHEN ISNULL(CoworkerGoalTimeEntryperiodDetails.ysnActive, 0) = 0 AND AgentTimeEntryPeriodDetailSummaries.dblTotalHours > 0 AND CoworkerGoalTimeEntryperiodDetails.intEntityId IS NOT NULL 
-																							THEN 'Inactive but has a Time Entry. '
-																						ELSE ''
-																				  END
+						   ,strInactiveWithTimeEntry						=  ''
 						   ,strUnapprovedTimeEntry					      =  CASE WHEN  hw.intTicketHoursWorkedId IS NOT NULL AND ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
 																						THEN 'Has unapproved Time Entry.'
 																					ELSE ''
@@ -68,7 +113,8 @@ BEGIN
 										INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
 								ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalId
 								WHERE CoworkerGoals.intEntityId = Agent.intEntityId AND
-									  CoworkerGoalDetail.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+									  CoworkerGoalDetail.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId AND
+									  CoworkerGoals.strFiscalYear = @strFiscalYear
 						) CoworkerGoalTimeEntryperiodDetails
 						OUTER APPLY(
 							SELECT TOP 1 intAgentTimeEntryPeriodDetailSummaryId = AgentTimeEntryPeriodDetailSummary.intAgentTimeEntryPeriodDetailSummaryId
@@ -105,12 +151,19 @@ BEGIN
 								  SMTransaction.intRecordId = TimeEntry.intTimeEntryId AND
 								  Approval.ysnCurrent = 1
 						) ApprovalInfo
-					WHERE Agent.ysnDisabled = 0
+					WHERE Agent.ysnDisabled = CONVERT(BIT, 0) AND
+						  Agent.ysnVendor = CONVERT(BIT, 0) AND
+						  Agent.ysnTimeEntryExempt = CONVERT(BIT, 0) AND 
+						  ( 
+						    ( CoworkerGoalTimeEntryperiodDetails.intEntityId IS NOT NULL AND CoworkerGoalTimeEntryperiodDetails.ysnActive = CONVERT(BIT, 1) ) OR
+							  CoworkerGoalTimeEntryperiodDetails.intEntityId IS NULL
+						  )
 				) CoworkerIssues
 				WHERE ( CoworkerIssues.strInactiveWithTimeEntry != '' OR
 				CoworkerIssues.strNoCoworkerGoal != '' OR
 				CoworkerIssues.strNoTimeEntryOrInsufficientHours != '' OR
-				CoworkerIssues.strUnapprovedTimeEntry != '' ) AND intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+				CoworkerIssues.strUnapprovedTimeEntry != '' ) 
+				AND intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
 			
 END
 GO

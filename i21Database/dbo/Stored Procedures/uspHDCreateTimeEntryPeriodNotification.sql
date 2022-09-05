@@ -66,7 +66,8 @@ ON c.intEntityId = a.intEntityId
 WHERE ISNULL(a.strEmail, '') <> '' AND 
 	  a.ysnVendor = CONVERT(BIT, 0) AND
 	  a.ysnTimeEntryExempt = CONVERT(BIT, 0) AND
-      c.strFiscalYear = DATEPART(YEAR, GETDATE())
+      c.strFiscalYear = DATEPART(YEAR, GETDATE()) AND
+	  c.ysnActive = CONVERT(bit, 1)
 
 OPEN EmployeeLoop
 FETCH NEXT FROM EmployeeLoop INTO @EntityId
