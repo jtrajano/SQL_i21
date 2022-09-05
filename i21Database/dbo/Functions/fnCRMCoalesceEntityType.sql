@@ -5,12 +5,12 @@ BEGIN
 
 	DECLARE @strEntityType nvarchar(max);
 	SELECT
-		@strEntityType = COALESCE(@strEntityType + ', ', '') + tblEMEntityType.strType
+		@strEntityType = COALESCE(@strEntityType COLLATE Latin1_General_CI_AS + ', ', '') + tblEMEntityType.strType COLLATE Latin1_General_CI_AS
 	FROM
 		tblEMEntityType
 	WHERE
 		tblEMEntityType.intEntityId = @intEntityId
 
-	return @strEntityType
+	return @strEntityType COLLATE Latin1_General_CI_AS
 
 END
