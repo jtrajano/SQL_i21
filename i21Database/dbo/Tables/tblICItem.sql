@@ -193,8 +193,8 @@ Type the overview for the table here.
 		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		[ysnProducePartialPacking] BIT NOT NULL DEFAULT(0),
 		[intSubcategoriesId] [int] NULL,
-		[intSubcategoryId] [int] NULL,
-
+		[intStoreFamilyId] [int] NULL,
+		[intStoreClassId] [int] NULL,
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
@@ -218,7 +218,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblICM2MComputation] FOREIGN KEY ([intM2MComputationId]) REFERENCES [tblICM2MComputation]([intM2MComputationId]), 
 		CONSTRAINT [FK_tblICItem_tblICUnitMeasure] FOREIGN KEY ([intTonnageTaxUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItem_tblICDataSource] FOREIGN KEY ([intDataSourceId]) REFERENCES [tblICDataSource]([intDataSourceId]),
-		CONSTRAINT [FK_tblICItem_tblSTSubcategory] FOREIGN KEY ([intSubcategoryId]) REFERENCES [tblSTSubcategory] ([intSubcategoryId])
+		CONSTRAINT [FK_tblICItem_tblSTSubCategories] FOREIGN KEY ([intSubcategoriesId]) REFERENCES [tblSTSubCategories] ([intSubcategoriesId])
 	);
 	GO
 

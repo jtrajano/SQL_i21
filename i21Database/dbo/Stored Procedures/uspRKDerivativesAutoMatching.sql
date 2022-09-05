@@ -106,27 +106,27 @@ DECLARE @tempResult AS TABLE (
 )
 
 --Get Open Derivatives based on filter criteria
-IF @strCondition = 'Between'
+IF @strCondition COLLATE Latin1_General_CI_AS = 'Between'
 BEGIN
 	INSERT INTO @tempOpenDerivativesForAutoMatching 
 	SELECT * FROM vyuRKOpenDerivativesForAutoMatching WHERE dtmFilledDate BETWEEN @dtmFromFilledDate AND @dtmToFilledDate
 END
-ELSE IF @strCondition = 'Equals'
+ELSE IF @strCondition COLLATE Latin1_General_CI_AS = 'Equals'
 BEGIN
 	INSERT INTO @tempOpenDerivativesForAutoMatching 
 	SELECT * FROM vyuRKOpenDerivativesForAutoMatching WHERE dtmFilledDate = @dtmFromFilledDate
 END
-ELSE IF @strCondition = 'Not Equal To'
+ELSE IF @strCondition COLLATE Latin1_General_CI_AS = 'Not Equal To'
 BEGIN
 	INSERT INTO @tempOpenDerivativesForAutoMatching 
 	SELECT * FROM vyuRKOpenDerivativesForAutoMatching WHERE dtmFilledDate <> @dtmFromFilledDate
 END
-ELSE IF @strCondition = 'Before'
+ELSE IF @strCondition COLLATE Latin1_General_CI_AS = 'Before'
 BEGIN
 	INSERT INTO @tempOpenDerivativesForAutoMatching 
 	SELECT * FROM vyuRKOpenDerivativesForAutoMatching WHERE dtmFilledDate < @dtmFromFilledDate
 END
-ELSE IF @strCondition = 'After'
+ELSE IF @strCondition COLLATE Latin1_General_CI_AS = 'After'
 BEGIN
 	INSERT INTO @tempOpenDerivativesForAutoMatching 
 	SELECT * FROM vyuRKOpenDerivativesForAutoMatching WHERE dtmFilledDate > @dtmFromFilledDate

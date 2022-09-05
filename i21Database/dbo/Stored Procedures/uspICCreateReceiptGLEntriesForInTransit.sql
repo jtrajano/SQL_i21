@@ -312,6 +312,7 @@ DECLARE @resultGLEntries AS RecapTableType
 	,intSourceEntityId
 	,intCommodityId
 	,intInTransitSourceLocationId
+	,intForexRateTypeId
 )
 AS 
 (
@@ -335,6 +336,7 @@ AS
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,t.intInTransitSourceLocationId
+			,t.intForexRateTypeId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
@@ -379,8 +381,9 @@ INSERT INTO @resultGLEntries (
 		,[dblCreditReport]	
 		,[dblReportingRate]	
 		,[dblForeignRate]
+		,[strRateType] 
 		,[intSourceEntityId]
-		,[intCommodityId]
+		,[intCommodityId]		
 )
 /*
 	Expected GL entries: 
@@ -420,8 +423,9 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,strRateType				= currencyRateType.strCurrencyExchangeRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
-		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId		
 FROM	ForGLEntries_CTE  
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -453,6 +457,9 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCreditUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId	
+
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
@@ -495,6 +502,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,strRateType				= currencyRateType.strCurrencyExchangeRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
@@ -528,6 +536,8 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCreditUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId	
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
@@ -573,6 +583,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= currencyRateType.strCurrencyExchangeRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
@@ -606,6 +617,8 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCreditUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId	
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 				@InventoryTransactionTypeId_AutoNegative
@@ -646,6 +659,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= currencyRateType.strCurrencyExchangeRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
@@ -679,6 +693,8 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCreditUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId	
 
 WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 				@InventoryTransactionTypeId_AutoNegative
@@ -706,6 +722,7 @@ BEGIN
 		,intSourceEntityId
 		,intCommodityId
 		,intInTransitSourceLocationId
+		,intForexRateTypeId
 	)
 	AS 
 	(
@@ -726,6 +743,7 @@ BEGIN
 				,inTransit.intSourceEntityId
 				,i.intCommodityId
 				,inTransit.intInTransitSourceLocationId
+				,inTransit.intForexRateTypeId
 		FROM
 			tblICInventoryTransaction inTransit 
 			INNER JOIN tblICItem i
@@ -797,6 +815,7 @@ BEGIN
 		,[dblCreditReport]	
 		,[dblReportingRate]	
 		,[dblForeignRate]
+		,[strRateType]
 		,[intSourceEntityId]
 		,[intCommodityId]
 	)
@@ -832,6 +851,7 @@ BEGIN
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= DiscrepanyCTE.dblForexRate  
+		,strRateType				= currencyRateType.strCurrencyExchangeRateType
 		,intSourceEntityId			= DiscrepanyCTE.intSourceEntityId
 		,intCommodityId				= DiscrepanyCTE.intCommodityId
 	FROM	
@@ -858,7 +878,10 @@ BEGIN
 			,DiscrepanyCTE.intCurrencyId
 			,@intFunctionalCurrencyId
 			,ISNULL(NULLIF(DiscrepanyCTE.dblForexRate, 0), 1) 
-		) CreditForeign			
+		) CreditForeign		
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = DiscrepanyCTE.intForexRateTypeId	
+		
 	UNION ALL 
 	SELECT	
 		dtmDate					= DiscrepanyCTE.dtmDate
@@ -892,6 +915,7 @@ BEGIN
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= DiscrepanyCTE.dblForexRate  
+		,strRateType				= currencyRateType.strCurrencyExchangeRateType
 		,intSourceEntityId			= DiscrepanyCTE.intSourceEntityId
 		,intCommodityId				= DiscrepanyCTE.intCommodityId
 	FROM	
@@ -919,6 +943,9 @@ BEGIN
 			,@intFunctionalCurrencyId
 			,ISNULL(NULLIF(DiscrepanyCTE.dblForexRate, 0), 1) 
 		) CreditForeign			
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+			ON currencyRateType.intCurrencyExchangeRateTypeId = DiscrepanyCTE.intForexRateTypeId	
+
 END 
 
 
@@ -954,6 +981,7 @@ SELECT
 	,[dblCreditReport]	
 	,[dblReportingRate]	
 	,[dblForeignRate]
+	,[strRateType]
 	,[intSourceEntityId]
 	,[intCommodityId]
 FROM

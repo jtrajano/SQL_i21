@@ -10,7 +10,7 @@ SELECT TH.intLoadHeaderId
 ,TH.intStateId
 ,S.strStateName strStateName
 ,TH.intTruckDriverReferenceId
-,TDR.strData strTractorName
+,SVTR.strTruckNumber strTractorName
 ,TH.intFreightItemId
 ,F.strItemNo strFreightItemNo
 ,TH.intLoadId
@@ -26,5 +26,4 @@ LEFT JOIN tblTRState S ON S.intStateId = TH.intStateId
 LEFT JOIN tblICItem F ON F.intItemId = TH.intFreightItemId
 LEFT JOIN tblLGLoad L ON L.intLoadId = TH.intLoadId
 LEFT JOIN tblSMShipViaTrailer ST ON ST.intEntityShipViaTrailerId = TH.intTrailerId
-
-
+LEFT JOIN tblSMShipViaTruck SVTR ON SVTR.intEntityShipViaTruckId = TH.intTruckId

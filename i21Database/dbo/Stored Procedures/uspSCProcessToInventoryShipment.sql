@@ -763,7 +763,7 @@ BEGIN TRY
 	exec uspSCAddTransactionLinks @intTransactionType = 3, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	IF(@intTicketStorageScheduleTypeId <> -9)
+	IF(@intTicketStorageScheduleTypeId <> -9 AND @ysnProcessToInTransit <> 1)
 	BEGIN
 		EXEC uspSCProcessShipmentToInvoice 
 			@intTicketId = @intTicketId

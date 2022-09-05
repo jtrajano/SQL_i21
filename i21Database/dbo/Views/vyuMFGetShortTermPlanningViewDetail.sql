@@ -31,14 +31,9 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,C2.strCertificationName AS strCertification
 	,E.strName AS strVendor
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,12,13)
 			THEN D.dblQty
-		WHEN D.intAttributeId IN (
-				12
-				,13
-				)
-			THEN CD.dblQuantity- IsNULL(CD.dblScheduleQty, 0) 
-		ELSE LC.dblQuantity
+		ELSE LC.dblQuantity-ISNULL(LDCL.dblReceivedQty, 0)
 		END dblQty
 	,CASE 
 		WHEN D.intAttributeId = 5
@@ -46,14 +41,9 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 		ELSE LCIU.strUnitMeasure
 		END AS strQtyUOM
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,12,13)
 			THEN D.dblWeight
-		WHEN D.intAttributeId IN (
-				12
-				,13
-				)
-			THEN CD.dblNetWeight
-		ELSE LC.dblNetWt
+		ELSE LC.dblNetWt-(dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, CD.intUnitMeasureId, IU.intUnitMeasureId,  ISNULL(LDCL.dblReceivedQty, 0)))
 		END AS dblWeight
 	,CASE 
 		WHEN D.intAttributeId = 5
@@ -83,7 +73,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 				THEN 'Late'
 			ELSE 'Expected'
 			END
-		) AS strOnTime
+		) COLLATE Latin1_General_CI_AS  AS strOnTime
 	,D.dblDOH AS dblDOPDOH
 	,CASE 
 		WHEN intAttributeId = 5
@@ -106,7 +96,7 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 			THEN 'Forward Open Contracts'
 		WHEN intAttributeId = 14
 			THEN 'No ETA'
-		END strContainerStatus
+		END COLLATE Latin1_General_CI_AS AS strContainerStatus
 	,(
 		CASE 
 			WHEN SS.strStatus IS NOT NULL
@@ -114,18 +104,18 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 				THEN 'Warehouse'
 			ELSE 'No Warehouse'
 			END
-		) AS strStorage
+		) COLLATE Latin1_General_CI_AS AS strStorage
 	,D.intUserId
 FROM tblMFShortTermPlanningViewDetail D
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = D.intLoadContainerId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = D.intLocationId
-JOIN tblCTContractDetail CD ON CD.intContractDetailId = D.intContractDetailId
-JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = D.intContractDetailId
+LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = D.intItemId
 LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intOriginId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intNetWeightUOMId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure LCIU ON LCIU.intUnitMeasureId = CD.intUnitMeasureId
 JOIN tblICCommodity Comm ON Comm.intCommodityId = I.intCommodityId
@@ -133,11 +123,21 @@ LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = D.intLoadC
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = IsNULL(D.intSubLocationId, LW.intSubLocationId)
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = D.intLoadContainerId
-LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+OUTER APPLY (
+	SELECT TOP 1 S.intSampleStatusId
+	FROM tblQMSample S
+	WHERE S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+		AND S.intLoadContainerId = D.intLoadContainerId
+		AND S.intSampleStatusId = 3 -->Approved
+	ORDER BY S.intSampleId DESC
+	) C3
+LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = C3.intSampleStatusId
 OUTER APPLY (
 	SELECT TOP 1 C2.strCertificationName
 	FROM tblICItemCertification IC
 	JOIN tblICCertification C2 ON C2.intCertificationId = IC.intCertificationId
 		AND IC.intItemId = I.intItemId
 	) C2
+GO
+
+

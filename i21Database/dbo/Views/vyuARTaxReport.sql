@@ -31,13 +31,13 @@ SELECT
 	,dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTaxAmountFunctional		= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblNonTaxable    			= (CASE WHEN INVOICE.dblTax = 0 
-								THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-								ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000
-											THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-											ELSE 0.000000 
-										END) 
-								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	, dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
+		 							THEN DETAIL.dblLineTotal 
+									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 
+												THEN DETAIL.dblLineTotal 
+												ELSE 0.000000 
+											END) 
+									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblNonTaxableFunctional	= (CASE WHEN INVOICE.dblBaseTax = 0 
 								THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 								ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax = 0.000000
@@ -45,16 +45,16 @@ SELECT
 											ELSE 0.000000 
 										END) 
 								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblTaxable       			= (CASE WHEN INVOICE.dblTax = 0 
-								THEN 0 
-								ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-											THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
-														THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
-														ELSE 0.000000
-													END
-											ELSE 0.000000 
-										END) 
-								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , dblTaxable       		= (CASE WHEN INVOICE.dblTax = 0 
+		 							THEN 0 
+									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblLineTotal 
+														  ELSE 0.000000
+													 END
+												ELSE 0.000000 
+											END) 
+									END) 
 	,dblTaxableFunctional		= (CASE WHEN INVOICE.dblBaseTax = 0 
 								THEN 0 
 								ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax <> 0.000000 
@@ -134,6 +134,8 @@ SELECT
 	,ysnOverrideTaxPoint        = CAST(CASE WHEN ISNULL(INVOICE.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
 	,ysnOverrideTaxLocation     = CAST(CASE WHEN ISNULL(INVOICE.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
+	,dtmDateCreated				= CAST(INVOICE.dtmDateCreated AS DATE)
+	,dtmUpdatedDate				= CAST(AUDITLOG.dtmUpdatedDate AS DATE)
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -227,6 +229,8 @@ INNER JOIN (
 		ON TCT_IDT.intInvoiceDetailId = TCT_ID.intInvoiceDetailId
 		WHERE TCT_ID.intItemId = ITEM.intItemId
 		  AND IDT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
+		  AND TCT_ID.intInvoiceDetailId IN (SELECT TARID.intInvoiceDetailId FROM tblARInvoiceDetail TARID WHERE TARID.intInvoiceDetailId = ID.intInvoiceDetailId)
+		GROUP BY TCT_ID.intCategoryId
 	) TAXCLASSTOTALBYINVOICEDETAIL
 	CROSS APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
@@ -462,4 +466,19 @@ OUTER APPLY (
 	WHERE intInvoiceId = INVOICE.intInvoiceId
 ) PAYMENT
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INVOICE.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INVOICE.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
+OUTER APPLY (
+	SELECT TOP 1
+        [SMT].[intRecordId]	AS [intInvoiceId], 
+        DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), [VSMAD].[changeDate]) AS [dtmUpdatedDate]
+    FROM [dbo].[vyuSMAuditDetail] AS [VSMAD]
+    INNER JOIN [dbo].[tblSMLog] AS [SML] ON [VSMAD].[intLogId] = [SML].[intLogId]
+    LEFT OUTER JOIN [dbo].[tblSMTransaction] AS [SMT] ON [SML].[intTransactionId] = [SMT].[intTransactionId]
+    LEFT OUTER JOIN [dbo].[tblSMScreen] AS [SMS] ON [SMT].[intScreenId] = [SMS].[intScreenId]
+    WHERE ([SML].[strType] = 'Audit') 
+	AND ([VSMAD].[intParentAuditId] IS NULL) 
+	AND ([VSMAD].[hidden] = 0 OR [VSMAD].[hidden] IS NULL) 
+	AND (([SMS].[strNamespace] = 'AccountsReceivable.view.Invoice') OR (([SMS].[strNamespace] IS NULL) AND ('AccountsReceivable.view.Invoice' IS NULL))) 
+	AND [SMT].[intRecordId] = INVOICE.[intInvoiceId]
+	ORDER BY [VSMAD].[changeDate] DESC
+) AUDITLOG
 WHERE INVOICE.ysnPosted = 1

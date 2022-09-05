@@ -397,6 +397,32 @@ Begin
 
 End
 
+IF @strMessageType = 'User Failure'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;User Id</th>
+						<th>&nbsp;Ext ERP Id</th>
+						<th>&nbsp;Transaction Date</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+	
+	SELECT @strDetail = @strDetail + '<tr>' +
+		'<td>&nbsp;' + ISNULL(t.strUserName, '') + '</td>' + 
+		'<td>&nbsp;' + ISNULL(t.strUserId, '') + '</td>' + 
+		'<td>&nbsp;' + ISNULL(t.strExtErpId, '') + '</td>' + 
+		'<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), t.dtmTransactionDate, 120), '') + '</td>' + 
+		'<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+	'</tr>'
+	FROM tblSMUserStageError t WITH (NOLOCK)
+	WHERE ISNULL(t.ysnMailSent, 0) = 0
+
+	UPDATE t
+	SET ysnMailSent = 1
+	FROM tblSMUserStageError t WITH (NOLOCK)
+	WHERE ISNULL(t.ysnMailSent, 0) = 0
+END
+
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
 Set @strHtml=REPLACE(@strHtml,'@detail',@strDetail)
 Set @strMessage=@strStyle + @strHtml

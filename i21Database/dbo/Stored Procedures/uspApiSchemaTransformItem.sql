@@ -116,6 +116,7 @@ END
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
    AND sr.strItemNo IS NOT NULL
    AND sr.strItemNo != ''
+   AND @OverwriteExisting = 0
 )
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
@@ -132,7 +133,7 @@ FROM cte sr
 JOIN tblICItem i ON i.strItemNo = sr.strItemNo
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
 	AND sr.RowNumber > 1
-  AND @OverwriteExisting = 1
+  AND @OverwriteExisting = 0
 
 ;WITH cte AS
 (
@@ -141,9 +142,10 @@ WHERE sr.guiApiUniqueId = @guiApiUniqueId
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
    AND sr.strItemNo IS NOT NULL
    AND sr.strItemNo != ''
+   AND @OverwriteExisting = 0
 )
 DELETE FROM cte WHERE RowNumber > 1
-AND @OverwriteExisting = 1
+AND @OverwriteExisting = 0
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -291,7 +293,7 @@ INSERT INTO tblICItem (
 , intRINFuelTypeId
 , strFuelInspectFee
 , ysnSeparateStockForUOMs
-, intSubcategoryId
+, intSubcategoriesId
 , dtmDateCreated
 , intDataSourceId
 , intRowNumber
@@ -348,7 +350,7 @@ SELECT
   , rin.intRinFuelCategoryId
   , sr.strFuelInspectFee
   , sr.ysnSeparateStockForUOMs
-  , subcat.intSubcategoryId
+  , subcat.intSubcategoriesId
   , GETUTCDATE()
   , 3
   , sr.intRowNumber
@@ -369,7 +371,7 @@ LEFT OUTER JOIN tblICItem ph ON LOWER(ph.strItemNo) = LTRIM(RTRIM(LOWER(sr.strPh
 LEFT OUTER JOIN tblICTag med ON med.strTagNumber = sr.strMedicationTag AND med.strType = 'Medication Tag'
 LEFT OUTER JOIN tblICTag ing ON ing.strTagNumber = sr.strIngredientTag AND ing.strType = 'Ingredient Tag'
 LEFT OUTER JOIN tblICRinFuelCategory rin ON rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(sr.strFuelCategory)))
-LEFT OUTER JOIN tblSTSubcategory subcat ON subcat.strSubcategoryId = sr.strSubcategory
+LEFT OUTER JOIN tblSTSubCategories subcat ON LOWER(subcat.strSubCategory) = LTRIM(RTRIM(LOWER(sr.strSubcategory)))
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
   AND NOT EXISTS (
     SELECT TOP 1 1
@@ -468,7 +470,7 @@ SET
   , i.intRINFuelTypeId = rin.intRinFuelCategoryId
   , i.strFuelInspectFee = sr.strFuelInspectFee
   , i.ysnSeparateStockForUOMs = sr.ysnSeparateStockForUOMs
-  , i.intSubcategoryId = subcat.intSubcategoryId
+  , i.intSubcategoriesId = subcat.intSubcategoriesId
   , i.dtmDateCreated = GETUTCDATE()
   , i.intDataSourceId = 3
   , i.intRowNumber = sr.intRowNumber
@@ -487,7 +489,7 @@ LEFT OUTER JOIN tblICItem ph ON LOWER(ph.strItemNo) = LTRIM(RTRIM(LOWER(sr.strPh
 LEFT OUTER JOIN tblICTag med ON med.strTagNumber = sr.strMedicationTag AND med.strType = 'Medication Tag'
 LEFT OUTER JOIN tblICTag ing ON ing.strTagNumber = sr.strIngredientTag AND ing.strType = 'Ingredient Tag'
 LEFT OUTER JOIN tblICRinFuelCategory rin ON rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(sr.strFuelCategory)))
-LEFT OUTER JOIN tblSTSubcategory subcat ON subcat.strSubcategoryId = sr.strSubcategory
+LEFT OUTER JOIN tblSTSubCategories subcat ON LOWER(subcat.strSubCategory) = LTRIM(RTRIM(LOWER(sr.strSubcategory)))
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
   AND @OverwriteExisting = 1
   AND NOT EXISTS (

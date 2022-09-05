@@ -183,6 +183,7 @@ SELECT
 	,intBorrowingFacilityLimitId		= INV.intBorrowingFacilityLimitId
 	,strBorrowingFacilityLimit			= BFL.strBorrowingFacilityLimit
 	,intBorrowingFacilityLimitDetailId	= INV.intBorrowingFacilityLimitDetailId
+	,strBorrowingFacilityLimitDetail	= BFLD.strLimitDescription
 	,strBankReferenceNo					= INV.strBankReferenceNo
 	,strBankTransactionId				= INV.strBankTransactionId
 	,dblLoanAmount						= INV.dblLoanAmount
@@ -196,14 +197,16 @@ SELECT
 	,ysnIntraCompany					= CASE WHEN ISNULL(INV.ysnIntraCompany,0) = 1 THEN INV.ysnIntraCompany ELSE ISNULL(ARCOMPANYPREFERENCE.ysnAllowIntraCompanyEntries,0) END
 	,strGoodsStatus						= INV.strGoodsStatus
 	,dblFreightCharge					= INV.dblFreightCharge
-	,strFreightCompanySegment			= GLCAI.strDescription
-	,strFreightLocationSegment			= GLLAI.strDescription
+	,strFreightCompanySegment			= CAST(GLCAI.strCode AS NVARCHAR(50)) + ' - ' + GLCAI.strDescription
+	,strFreightLocationSegment			= CAST(GLLAI.strCode AS NVARCHAR(50)) + ' - ' + GLLAI.strDescription
 	,intTaxLocationId                  	= INV.intTaxLocationId
 	,strTaxLocation						= TAXLOCATION.strLocationName
 	,strTaxPoint                        = INV.strTaxPoint
 	,ysnOverrideTaxPoint                = CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
+	,intProfitCenter					= CLOC.intProfitCenter
+	,dblSurcharge						= INV.dblSurcharge
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -224,7 +227,8 @@ INNER JOIN (
 INNER JOIN (
 	SELECT 
 		 intCompanyLocationId
-		,strLocationName 
+		,strLocationName
+		,intProfitCenter
 	FROM tblSMCompanyLocation WITH (NOLOCK) 
 ) CLOC ON INV.intCompanyLocationId = CLOC.intCompanyLocationId
 LEFT JOIN (
@@ -412,6 +416,7 @@ LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId,0)
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId,0)
 LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId,0)
 LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId,0)
+LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = ISNULL(INV.intBorrowingFacilityLimitDetailId,0)
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId,0)
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 OUTER APPLY(
@@ -426,14 +431,16 @@ OUTER APPLY(
 OUTER APPLY (
 	SELECT TOP 1 
 		 intAccountId
-		,strDescription 
+		,strDescription
+		,strCode
 	FROM vyuGLCompanyAccountId WITH (NOLOCK)
 	WHERE intAccountSegmentId = INV.intFreightCompanySegment
 ) GLCAI
 OUTER APPLY (
 	SELECT TOP 1 
 		 intAccountId
-		,strDescription 
+		,strDescription
+		,strCode
 	FROM vyuGLLocationAccountId WITH (NOLOCK)
 	WHERE intAccountSegmentId = INV.intFreightLocationSegment
 ) GLLAI

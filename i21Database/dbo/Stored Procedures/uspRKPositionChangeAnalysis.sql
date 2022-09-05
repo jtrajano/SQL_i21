@@ -35,7 +35,7 @@ FROM tblRKM2MInquiry i
 	JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=c.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 	JOIN tblCTContractDetail cd on cd.intContractDetailId=t.intContractDetailId
 	JOIN tblSMCompanyLocation l on l.intCompanyLocationId=cd.intCompanyLocationId
-WHERE i.strBatchId = @strFromBatchId AND strContractOrInventoryType like 'Contract(%'
+WHERE i.strBatchId = @strFromBatchId COLLATE Latin1_General_CI_AS AND strContractOrInventoryType like 'Contract(%'
 
 
 SELECT 
@@ -67,7 +67,7 @@ FROM tblRKM2MInquiry i
 	JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=c.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 	join tblCTContractDetail cd on cd.intContractDetailId=t.intContractDetailId
 	JOIN tblSMCompanyLocation l on l.intCompanyLocationId=cd.intCompanyLocationId
-WHERE i.strBatchId = @strToBatchId AND strContractOrInventoryType like 'Contract(%'
+WHERE i.strBatchId = @strToBatchId COLLATE Latin1_General_CI_AS AND strContractOrInventoryType like 'Contract(%'
 
 
 
@@ -95,7 +95,7 @@ FROM tblRKM2MInquiry i
 	JOIN tblSMCompanyLocation l on l.intCompanyLocationId=ft.intLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND m.intUnitMeasureId=ium.intUnitMeasureId 
 	JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=c.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-WHERE i.strBatchId=@strFromBatchId and strTransactionType ='Mark To Market-Futures Derivative' 
+WHERE i.strBatchId=@strFromBatchId COLLATE Latin1_General_CI_AS and strTransactionType ='Mark To Market-Futures Derivative' 
 
 SELECT 
 	c.strCommodityCode
@@ -120,7 +120,7 @@ FROM tblRKM2MInquiry i
 	JOIN tblSMCompanyLocation l on l.intCompanyLocationId=ft.intLocationId
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND m.intUnitMeasureId=ium.intUnitMeasureId 
 	JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=c.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-WHERE i.strBatchId=@strToBatchId and strTransactionType ='Mark To Market-Futures Derivative' 
+WHERE i.strBatchId=@strToBatchId COLLATE Latin1_General_CI_AS and strTransactionType ='Mark To Market-Futures Derivative' 
 
 DECLARE @tblFinal TABLE (
 

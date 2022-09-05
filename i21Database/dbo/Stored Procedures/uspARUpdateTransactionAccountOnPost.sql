@@ -33,17 +33,6 @@ SET ANSI_WARNINGS OFF
 		,@OverrideLocationSegment		= ysnOverrideLocationSegment
 		,@OverrideLineOfBusinessSegment	= ysnOverrideLineOfBusinessSegment
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
-	
-	--AR ACCOUNT	
-	UPDATE ARI
-	SET ARI.intAccountId = CASE WHEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter) IS NOT NULL AND ISNULL(GL.ysnActive, 0) = 1 AND @AllowIntraCompanyEntries = 0 AND @AllowIntraLocationEntries = 0 AND @AllowSingleLocationEntries = 0
-								THEN [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
-								ELSE ARI.intAccountId
-							END
-	FROM tblARInvoice ARI WITH (NOLOCK)
-	INNER JOIN tblARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
-	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
-	WHERE PID.strSessionId = @strSessionId
 
 	INSERT INTO @LineItemAccounts (
 		  [intDetailId]
@@ -130,17 +119,36 @@ SET ANSI_WARNINGS OFF
 	UPDATE LIA
 	SET LIA.[intAccountId] = CASE WHEN @OverrideLineOfBusinessSegment  = 1 
 								THEN ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](OVERRIDESEGMENT.intOverrideAccount , ISNULL(LOB.intSegmentCodeId, 0)), OVERRIDESEGMENT.intOverrideAccount)
-								ELSE OVERRIDESEGMENT.intOverrideAccount 
+								ELSE ISNULL(OVERRIDEFREIGHTLOCATION.[intSalesAccountId], OVERRIDESEGMENT.intOverrideAccount)
 							 END
 	FROM @LineItemAccounts LIA
-	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
-	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId] AND ARID.[intCompanyLocationId] = IA.[intLocationId]
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId
+	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId AND ARID.strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId] AND ARID.[intCompanyLocationId] = IA.[intLocationId] AND IA.strSessionId = @strSessionId
 	OUTER APPLY (
 		SELECT TOP 1 intSegmentCodeId
 		FROM tblSMLineOfBusiness
 		WHERE intLineOfBusinessId = ISNULL(ARI.intLineOfBusinessId, 0)
 	) LOB
+	OUTER APPLY (
+		SELECT TOP 1 [intSalesAccountId] = dbo.[fnGetGLAccountIdFromProfitCenter](ISNULL(IA.intOtherChargeIncomeAccountId, ARID.[intSalesAccountId]), ISNULL(SMCL.intProfitCenter, 0))
+		FROM tblICFreightOverride ICFO
+		INNER JOIN (
+			SELECT ARPID2.intItemId
+			FROM tblARPostInvoiceDetail ARPID1
+			CROSS JOIN tblARPostInvoiceDetail ARPID2
+			WHERE ARPID1.intLoadDistributionDetailId = ARID.intLoadDistributionDetailId
+			AND ARPID2.intLoadDistributionDetailId = ARID.intLoadDistributionDetailId
+			AND ARPID1.intItemId = ARID.intItemId
+			AND ARPID1.strSessionId = @strSessionId
+			AND ARPID2.strSessionId = @strSessionId
+			AND ISNULL(ARPID1.intLoadDistributionDetailId, 0) <> 0
+		) ITEMFREIGHT 
+		ON ICFO.intItemId = ARID.intItemId
+		AND ICFO.intFreightOverrideItemId = ITEMFREIGHT.intItemId
+		INNER JOIN tblSMCompanyLocation SMCL ON ICFO.intCompanyLocationId = SMCL.intCompanyLocationId
+		GROUP BY ICFO.intItemId, ICFO.intFreightOverrideItemId, ICFO.intCompanyLocationId, SMCL.intProfitCenter
+	) OVERRIDEFREIGHTLOCATION
 	OUTER APPLY (
 		SELECT intOverrideAccount
 		FROM dbo.[fnARGetOverrideAccount](
@@ -237,16 +245,18 @@ SET ANSI_WARNINGS OFF
 	WHERE LIA.strSessionId = @strSessionId
 
 	--UPDATE INVOICE TAX DETAIL ACCOUNTS
-	UPDATE ARITD
-	SET ARITD.intSalesTaxAccountId = OVERRIDESEGMENT.intOverrideAccount
-	FROM tblARInvoiceDetailTax ARITD
-	INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
-	OUTER APPLY (
-		SELECT intOverrideAccount
-		FROM dbo.[fnARGetOverrideAccount](ARITD.intSalesTaxAccountId, ARID.[intAccountId], @OverrideCompanySegment, @OverrideLocationSegment, 0)
-	) OVERRIDESEGMENT
-	WHERE ARID.strSessionId = @strSessionId
-	AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
+	IF @OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1
+	BEGIN
+		UPDATE ARITD
+		SET ARITD.intSalesTaxAccountId = OVERRIDESEGMENT.intOverrideAccount
+		FROM tblARInvoiceDetailTax ARITD
+		INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
+		OUTER APPLY (
+			SELECT intOverrideAccount
+			FROM dbo.[fnARGetOverrideAccount](ARID.[intSalesAccountId], ARITD.intSalesTaxAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+		) OVERRIDESEGMENT
+		WHERE ARID.strSessionId = @strSessionId
+	END
 
 	--UPDATE FINAL
 	UPDATE PIH

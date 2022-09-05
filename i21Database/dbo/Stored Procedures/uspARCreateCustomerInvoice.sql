@@ -165,6 +165,8 @@
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
+	,@ItemOverrideTaxGroup					BIT				= 0
+	,@Surcharge								NUMERIC(18, 6)	= 0
 AS
 
 BEGIN
@@ -184,6 +186,7 @@ DECLARE @ZeroDecimal						NUMERIC(18, 6)
 		,@InitTranCount						INT
 		,@Savepoint							NVARCHAR(32)
 		,@ImpactForProvisional				BIT = 0
+		,@intARTermId						INT = NULL
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARCreateCustomerInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -360,9 +363,14 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) LEFT OUTER JOIN [
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN		
+		DECLARE @strCustomerNumber  NVARCHAR(100) = NULL
+			  , @strCustomerErrMsg	NVARCHAR(100) = NULL
+
+		SELECT TOP 1 @strCustomerNumber = strCustomerNumber FROM tblARCustomer WHERE intEntityId = @EntityCustomerId
+		SET @strCustomerErrMsg = 'Customer ' + ISNULL(@strCustomerNumber, '') + ' is not active!'
+
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('The entity Id provided does not exists!', 16, 1);	
-		SET @ErrorMessage = 'The entity Id provided does not exists!'
+			RAISERROR(@strCustomerErrMsg, 16, 1);
 		RETURN 0;
 	END
 
@@ -424,8 +432,14 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
-SELECT TOP 1 @ImpactForProvisional = CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END
+SELECT TOP 1 @ImpactForProvisional 	= CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END	       
 FROM tblARCompanyPreference
+ORDER BY intCompanyPreferenceId DESC
+
+SELECT TOP 1 @intARTermId = CASE WHEN strPullPoint = 'Company Location' THEN intTermId ELSE NULL END
+FROM tblSMTermPullPoint P 
+WHERE P.strPullPoint = 'Company Location'
+ORDER BY P.intTermPullPointId ASC
 
 DECLARE @BorrowingFacilityLimitDetailId INT = NULL
 
@@ -547,7 +561,9 @@ BEGIN TRY
 		,[intDefaultPayToBankAccountId]
 		,[strSourcedFrom]
 		,[intTaxLocationId]
-		,[strTaxPoint])
+		,[strTaxPoint]
+		,[dblSurcharge]
+	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -555,11 +571,11 @@ BEGIN TRY
 		,[intCompanyLocationId]				= @CompanyLocationId
 		,[intAccountId]						= @ARAccountId
 		,[intCurrencyId]					= @DefaultCurrency
-		,[intTermId]						= ISNULL(ISNULL(@TermId, C.[intTermsId]), EL.[intTermsId])
+		,[intTermId]						= ISNULL(ISNULL(ISNULL(@TermId, EL.[intTermsId]), @intARTermId), C.[intTermsId])
 		,[intSourceId]						= @SourceId
 		,[intPeriodsToAccrue]				= ISNULL(@PeriodsToAccrue, 1)
 		,[dtmDate]							= CASE WHEN @Type = 'Transport Delivery' THEN ISNULL(@InvoiceDate, @DateOnly) ELSE ISNULL(CAST(@InvoiceDate AS DATE), @DateOnly) END
-		,[dtmDueDate]						= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
+		,[dtmDueDate]						= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(ISNULL(@TermId, EL.[intTermsId]), @intARTermId), C.[intTermsId])) AS DATE)))
 		,[dtmShipDate]						= ISNULL(@ShipDate, ISNULL(CAST(@PostDate AS DATE),@DateOnly))
 		,[dtmCalculated]					= CAST(@CalculatedDate AS DATE)
 		,[dtmPostDate]						= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
@@ -651,40 +667,13 @@ BEGIN TRY
 		,[strSourcedFrom]					= @SourcedFrom
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
-	FROM	
-		tblARCustomer C
-	LEFT OUTER JOIN
-					(	SELECT 
-							 [intEntityLocationId]
-							,[strLocationName]
-							,[strAddress]
-							,[intEntityId] 
-							,[strCountry]
-							,[strState]
-							,[strCity]
-							,[strZipCode]
-							,[intTermsId]
-							,[intShipViaId]
-						FROM 
-							[tblEMEntityLocation]
-						WHERE
-							ysnDefaultLocation = 1
-					) EL
-						ON C.[intEntityId] = EL.[intEntityId]
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] SL
-			ON ISNULL(@ShipToLocationId, 0) <> 0
-			AND @ShipToLocationId = SL.intEntityLocationId
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] SL1
-			ON C.intShipToId = SL1.intEntityLocationId
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] BL
-			ON ISNULL(@BillToLocationId, 0) <> 0
-			AND @BillToLocationId = BL.intEntityLocationId		
-	LEFT OUTER JOIN
-		[tblEMEntityLocation] BL1
-			ON C.intBillToId = BL1.intEntityLocationId	
+		,[dblSurcharge]						= @Surcharge
+	FROM tblARCustomer C
+	LEFT OUTER JOIN [tblEMEntityLocation] EL ON C.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
+	LEFT OUTER JOIN [tblEMEntityLocation] SL ON ISNULL(@ShipToLocationId, 0) <> 0 AND @ShipToLocationId = SL.intEntityLocationId
+	LEFT OUTER JOIN [tblEMEntityLocation] SL1 ON C.intShipToId = SL1.intEntityLocationId
+	LEFT OUTER JOIN [tblEMEntityLocation] BL ON ISNULL(@BillToLocationId, 0) <> 0 AND @BillToLocationId = BL.intEntityLocationId		
+	LEFT OUTER JOIN [tblEMEntityLocation] BL1 ON C.intBillToId = BL1.intEntityLocationId	
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
@@ -802,6 +791,7 @@ BEGIN TRY
 		,@ItemQualityPremium			= @ItemQualityPremium
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+		,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

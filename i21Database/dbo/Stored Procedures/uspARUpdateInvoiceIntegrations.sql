@@ -28,6 +28,8 @@ DECLARE @intInvoiceId				INT
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId	  
 	  , @InvoicesForContractDelete	InvoiceId
+	  , @strItemNo					NVARCHAR(100)
+	  , @strLocationName			NVARCHAR(100)
 
 --For Prepaid Contract Update
 DECLARE @dblValueToUpdate NUMERIC(18, 6),
@@ -74,6 +76,29 @@ BEGIN TRY
 			EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @Post, @FromPosting, @LogTradeFinanceInfo
 
 			RETURN
+		END
+
+	--VALIDATE ITEM LOCATION
+	SELECT TOP 1 @strItemNo			= ITEM.strItemNo
+			   , @strLocationName	= CL.strLocationName
+	FROM tblARInvoice I
+	INNER JOIN tblSMCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+	INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
+	LEFT JOIN tblICItemLocation IL ON ITEM.intItemId = IL.intItemId AND IL.intLocationId = I.intCompanyLocationId
+	WHERE I.intInvoiceId = @intInvoiceId
+	  AND ID.intItemId IS NOT NULL
+	  AND ITEM.strType = 'Inventory'
+	  AND IL.intItemLocationId IS NULL
+	  AND @ForDelete = 0
+	
+	IF @strItemNo IS NOT NULL AND @strLocationName IS NOT NULL
+		BEGIN
+			DECLARE @errorMsg NVARCHAR(200) = ''
+
+			SET @errorMsg = 'Item: ' + @strItemNo + ' does not have Company Location setup for ' + @strLocationName
+
+			RAISERROR(@errorMsg, 11, 1)
 		END
 
 	EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId

@@ -46,6 +46,34 @@ BEGIN
 	WHERE (C.intEntityId IS NULL OR T.intCustomerID IS NULL)
 	AND CS.guiApiUniqueId = @guiApiUniqueId
 
+	-- VALIDATE SITE LOCATION
+	INSERT INTO tblApiImportLogDetail (
+		guiApiImportLogDetailId
+		, guiApiImportLogId
+		, strField
+		, strValue
+		, strLogLevel
+		, strStatus
+		, intRowNo
+		, strMessage
+	)
+	SELECT guiApiImportLogDetailId = NEWID()
+		, guiApiImportLogId = @guiLogId
+		, strField = 'Site Location'
+		, strValue = CS.strSiteLocation
+		, strLogLevel = 'Error'
+		, strStatus = 'Failed'
+		, intRowNo = CS.intRowNumber
+		, strMessage = 'Cannot find the Site Location ''' + CS.strSiteLocation + ''' in i21 Customer Location'
+	FROM tblApiSchemaTMConsumptionSite CS
+	LEFT JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
+	LEFT JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
+	LEFT JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId AND EL.strLocationName = CS.strSiteLocation
+	WHERE EL.intEntityLocationId IS NULL
+	AND CS.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(CS.strSiteLocation, '') != ''
+
 	-- VALIDATE Billing By
 	INSERT INTO tblApiImportLogDetail (
 		guiApiImportLogDetailId
@@ -241,6 +269,7 @@ BEGIN
 	WHERE P.intCompanyLocationPricingLevelId IS NULL
 	AND ISNULL(CS.strPriceLevel, '') != ''
 	AND CS.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(CS.strClassFill, '') != ''
 
 	-- VALIDATE Tax Group
 	INSERT INTO tblApiImportLogDetail (
@@ -265,6 +294,7 @@ BEGIN
 	LEFT JOIN tblSMTaxGroup T ON T.strTaxGroup = CS.strTaxGroup
 	WHERE T.intTaxGroupId IS NULL
 	AND CS.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(CS.strTaxGroup, '') != ''
 
 	-- VALIDATE Class Fill
 	INSERT INTO tblApiImportLogDetail (
@@ -289,6 +319,7 @@ BEGIN
 	LEFT JOIN @tmpClassFill C ON C.strClassFill = CS.strClassFill
 	WHERE C.strClassFill IS NULL
 	AND CS.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(CS.strClassFill, '') != ''
 
 	-- VALIDATE Item
 	INSERT INTO tblApiImportLogDetail (
@@ -413,6 +444,7 @@ BEGIN
 	AND CS.guiApiUniqueId = @guiApiUniqueId
 	AND ISNULL(CS.strJulianCalendar, '') != ''
 
+
 	-- CHECK IF ALREADY EXISTS IN CONSUMPTION SITE
 
 	-- PROCESS
@@ -467,6 +499,7 @@ BEGIN
 		, @strSiteNumber NVARCHAR(20) = NULL
 		, @strCustomerEntityNo NVARCHAR(100) = NULL
 		, @ysnActive BIT = NULL
+		, @intSiteLocationId INT = NULL
 
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
@@ -522,6 +555,7 @@ BEGIN
 		, CS.strSiteNumber AS strSiteNumber
 		, CS.strCustomerEntityNo AS strCustomerEntityNo	
 		, CS.ysnActive AS ysnActive
+		, EL.intEntityLocationId
 	FROM tblApiSchemaTMConsumptionSite CS
 	INNER JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
 	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
@@ -542,6 +576,7 @@ BEGIN
 	LEFT JOIN tblTMFillGroup FG ON FG.strFillGroupCode = CS.strFillGroup
 	LEFT JOIN tblTMHoldReason H ON H.strHoldReason = CS.strHoldReason
 	LEFT JOIN tblTMGlobalJulianCalendar JC ON JC.strDescription = CS.strJulianCalendar
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId AND EL.strLocationName = CS.strSiteLocation
 	--LEFT JOIN tblTMSite ST ON ST.intCustomerID = T.intCustomerID
 		-- AND ST.strBillingBy = B.strBillingType
 		-- AND ST.intDriverID = D.intEntityId
@@ -566,147 +601,278 @@ BEGIN
 		AND (ISNULL(CS.strFillGroup, '') = '' OR (FG.intFillGroupId IS NOT NULL AND ISNULL(CS.strFillGroup, '') != ''))
 		AND (ISNULL(CS.strHoldReason, '') = '' OR (H.intHoldReasonID IS NOT NULL AND ISNULL(CS.strHoldReason, '') != ''))
 		AND (ISNULL(CS.strJulianCalendar, '') = '' OR (JC.intGlobalJulianCalendarId IS NOT NULL AND ISNULL(CS.strJulianCalendar, '') != ''))
+		AND (ISNULL(CS.strSiteLocation, '') = '' OR (EL.intEntityLocationId IS NOT NULL AND ISNULL(CS.strSiteLocation, '') != ''))
 
 	OPEN DataCursor
 	FETCH NEXT FROM DataCursor INTO @intCustomerId, @strBillingType, @intDriverId, @intRouteId, @intCompanyLocationId, @intClockId, @strAccountStatus, @intItemId, @intFillMethodId, @intTermId, @intCompanyLocationPricingLevelId, @intTaxGroupId, @strClassFill, @intFillGroupId, @intHoldReasonId, @intRowNumber
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId
 	WHILE @@FETCH_STATUS = 0
     BEGIN
-		DECLARE @intSiteId INT = NULL
-		SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
+
+		BEGIN TRY
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblApiImportLogDetail WHERE guiApiImportLogId = @guiLogId AND strLogLevel = 'Error' AND intRowNo = @intRowNumber)
+			BEGIN
+
+				DECLARE @intSiteId INT = NULL
+				SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
+				
+				-- IF ONE OF THE REQUIRED FIELDS FOR ADDRESS IS NULL THEN IT WILL GET THE CUSTOMER ADDRESS
+				IF(@strAddress IS NULL OR @strZipCode IS NULL OR @strCity IS NULL OR @strState IS NULL OR @strCountry IS NULL)
+				BEGIN
+					SELECT @strAddress = vwcus_addr
+						, @strCity = vwcus_city
+						, @strState = vwcus_state
+						, @strZipCode = vwcus_zip
+						, @strCountry = vwcus_country 
+					FROM tblTMCustomer A
+					INNER JOIN vwcusmst C ON C.A4GLIdentity =  A.intCustomerNumber
+					WHERE A.intCustomerID = @intCustomerId
+				END
+
+				IF(@intSiteId IS NULL) 
+				BEGIN
+					-- ADD NEW SITE		
+					DECLARE @intSiteNumber INT = NULL
+
+					SELECT @intSiteNumber = MAX(intSiteNumber) FROM tblTMSite WHERE intCustomerID = @intCustomerId
+
+					INSERT INTO tblTMSite (intCustomerID
+						, strBillingBy
+						, intDriverID
+						, intRouteId
+						, intLocationId
+						, intClockID
+						, strAcctStatus
+						, intProduct
+						, intFillMethodId
+						, intDeliveryTermID
+						, intCompanyLocationPricingLevelId
+						, intTaxStateID
+						, strClassFillOption
+						, intFillGroupId
+						, intHoldReasonID
+						, intSiteNumber
+						
+						, ysnActive
+						, strDescription
+						, strSiteAddress
+						, strZipCode
+						, strCity
+						, strState
+						, strCountry
+						, dblLatitude
+						, dblLongitude
+						, strSequenceID
+						, strFacilityNumber
+
+						, ysnOnHold
+						, ysnHoldDDCalculations
+						, dtmOnHoldStartDate
+						, dtmOnHoldEndDate
+						, ysnLostCustomer
+						, dtmLostCustomerDate
+
+						, dblTotalCapacity
+						, dblTotalReserve
+						, dblPriceAdjustment
+						, ysnTaxable
+						, strRecurringPONumber
+
+						, intGlobalJulianCalendarId
+						, dtmNextDeliveryDate
+						, dblSummerDailyUse
+						, dblWinterDailyUse
+						, dblBurnRate
+						, dblPreviousBurnRate
+						, dblDegreeDayBetweenDelivery
+						, ysnAdjustBurnRate
+						, ysnPromptForPercentFull
+						
+						, guiApiUniqueId
+						, intRowNumber)
+					VALUES (@intCustomerId
+						, @strBillingType
+						, @intDriverId
+						, @intRouteId
+						, @intCompanyLocationId
+						, @intClockId
+						, @strAccountStatus
+						, @intItemId
+						, @intFillMethodId
+						, @intTermId
+						, @intCompanyLocationPricingLevelId
+						, @intTaxGroupId
+						, @strClassFill
+						, @intFillGroupId
+						, @intHoldReasonId
+						, ISNULL(@intSiteNumber, 0) + 1
+						
+						, @ysnActive
+						, @strSiteDescription
+						, @strAddress
+						, @strZipCode
+						, @strCity
+						, @strState
+						, @strCountry
+						, @dblLatitude
+						, @dblLongitude
+						, @strSequence
+						, @strFacilityNo
+
+						, @ysnHold
+						, @ysnHoldDDCalc
+						, @dtmHoldStartDate
+						, @dtmHoldEndDate
+						, ISNULL(@ysnLost, 0)
+						, @dtmLostDate
+
+						, @dblCapacity
+						, @dblReserve
+						, @dblPriceAdj
+						, ISNULL(@ysnSaleTax, 0)
+						, @strRecurringPONo
+
+						, @intGlobalJulianCalendarId
+						, @dtmNextJulianDate
+						, ISNULL(@dblSummerDailyRate, 0)
+						, ISNULL(@dblWinterDailyRate, 0)
+						, @dblBurnRate
+						, @dblPreviousBurnRate
+						, @dblDDBetweenDelivery
+						, @ysnAdjBurnRate
+						, @ysnPromptFull
+						
+						, @guiLogId
+						, @intRowNumber)
+
+					SET @intSiteId = SCOPE_IDENTITY()
+					
+					INSERT INTO tblApiImportLogDetail (
+						guiApiImportLogDetailId
+						, guiApiImportLogId
+						, strField
+						, strValue
+						, strLogLevel
+						, strStatus
+						, intRowNo
+						, strMessage
+					)
+					SELECT guiApiImportLogDetailId = NEWID()
+						, guiApiImportLogId = @guiLogId
+						, strField = ''
+						, strValue = '' 
+						, strLogLevel = 'Success'
+						, strStatus = 'Success'
+						, intRowNo = @intRowNumber
+						, strMessage = 'Successfully added'	
+						
+				END
+				ELSE
+				BEGIN
+					-- UPDATE THE EXISTING SITE
+					UPDATE tblTMSite SET strBillingBy = @strBillingType
+						, intDriverID = @intDriverId
+						, intRouteId = @intRouteId
+						, intLocationId = @intCompanyLocationId
+						, intClockID = @intClockId
+						, strAcctStatus = @strAccountStatus
+						, intProduct = @intItemId
+						, intFillMethodId = @intFillMethodId
+						, intDeliveryTermID = @intTermId
+						, intCompanyLocationPricingLevelId = @intCompanyLocationPricingLevelId
+						, intTaxStateID = @intTaxGroupId
+						, strClassFillOption = @strClassFill
+						, intFillGroupId = @intFillGroupId
+						, intHoldReasonID = @intHoldReasonId
+
+						, ysnActive = @ysnActive
+						, strDescription = @strSiteDescription
+						, strSiteAddress = @strAddress
+						, strZipCode = @strZipCode
+						, strCity = @strCity
+						, strState = @strState
+						, strCountry = @strCountry
+						, dblLatitude = @dblLatitude
+						, dblLongitude = @dblLongitude
+						, strSequenceID = @strSequence
+						, strFacilityNumber = @strFacilityNo
+
+						, ysnOnHold = @ysnHold
+						, ysnHoldDDCalculations = @ysnHoldDDCalc
+						, dtmOnHoldStartDate = @dtmHoldStartDate
+						, dtmOnHoldEndDate = @dtmHoldEndDate
+						, ysnLostCustomer = ISNULL(@ysnLost, 0)
+						, dtmLostCustomerDate = @dtmLostDate
+						
+						, dblTotalCapacity = @dblCapacity
+						, dblTotalReserve = @dblReserve
+						, dblPriceAdjustment = @dblPriceAdj
+						, ysnTaxable = ISNULL(@ysnSaleTax, 0)
+						, strRecurringPONumber = @strRecurringPONo
+
+						, intGlobalJulianCalendarId = @intGlobalJulianCalendarId
+						, dtmNextDeliveryDate = @dtmNextJulianDate
+						, dblSummerDailyUse = ISNULL(@dblSummerDailyRate, 0)
+						, dblWinterDailyUse = ISNULL(@dblWinterDailyRate, 0)
+						, dblBurnRate = @dblBurnRate
+						, dblPreviousBurnRate = @dblPreviousBurnRate
+						, dblDegreeDayBetweenDelivery = @dblDDBetweenDelivery
+						, ysnAdjustBurnRate = @ysnAdjBurnRate
+						, ysnPromptForPercentFull = @ysnPromptFull
+						, guiApiUniqueId = @guiLogId
+						, intRowNumber = @intRowNumber
+					WHERE intSiteID = @intSiteId
+
+					INSERT INTO tblApiImportLogDetail (
+						guiApiImportLogDetailId
+						, guiApiImportLogId
+						, strField
+						, strValue
+						, strLogLevel
+						, strStatus
+						, intRowNo
+						, strMessage
+					)
+					SELECT guiApiImportLogDetailId = NEWID()
+						, guiApiImportLogId = @guiLogId
+						, strField = ''
+						, strValue = '' 
+						, strLogLevel = 'Success'
+						, strStatus = 'Success'
+						, intRowNo = @intRowNumber
+						, strMessage = 'Successfully updated'
+				END
+
+				-- SET SITE LOCATION
+				IF (@intSiteLocationId IS NOT NULL)
+				BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocationConsumptionSite WHERE intSiteID = @intSiteId)
+					BEGIN
+						-- UPDATE
+						UPDATE tblEMEntityLocationConsumptionSite SET intEntityLocationId = @intSiteLocationId
+						WHERE intSiteID = @intSiteId 
+					END
+					ELSE
+					BEGIN
+						-- ADD
+						INSERT INTO tblEMEntityLocationConsumptionSite (intEntityLocationId, intSiteID, intConcurrencyId)
+						VALUES (@intSiteLocationId, @intSiteId, 1)
+					END
+				END
+				ELSE
+				BEGIN
+					-- DELETE
+					DELETE tblEMEntityLocationConsumptionSite WHERE intSiteID = @intSiteId
+				END
+			END
+		END TRY
+		BEGIN CATCH
+			DECLARE @ErrorMessage NVARCHAR(MAX) = NULL
+			SELECT @ErrorMessage = ERROR_MESSAGE()
 		
-		-- IF ONE OF THE REQUIRED FIELDS FOR ADDRESS IS NULL THEN IT WILL GET THE CUSTOMER ADDRESS
-		IF(@strAddress IS NULL OR @strZipCode IS NULL OR @strCity IS NULL OR @strState IS NULL OR @strCountry IS NULL)
-		BEGIN
-			SELECT @strAddress = vwcus_addr
-				, @strCity = vwcus_city
-				, @strState = vwcus_state
-				, @strZipCode = vwcus_zip
-				, @strCountry = vwcus_country 
-			FROM tblTMCustomer A
-			INNER JOIN vwcusmst C ON C.A4GLIdentity =  A.intCustomerNumber
-			WHERE A.intCustomerID = @intCustomerId
-		END
-
-		IF(@intSiteId IS NULL) 
-		BEGIN
-			-- ADD NEW SITE		
-			DECLARE @intSiteNumber INT = NULL
-
-			SELECT @intSiteNumber = MAX(intSiteNumber) FROM tblTMSite WHERE intCustomerID = @intCustomerId
-
-			INSERT INTO tblTMSite (intCustomerID
-				, strBillingBy
-				, intDriverID
-				, intRouteId
-				, intLocationId
-				, intClockID
-				, strAcctStatus
-				, intProduct
-				, intFillMethodId
-				, intDeliveryTermID
-				, intCompanyLocationPricingLevelId
-				, intTaxStateID
-				, strClassFillOption
-				, intFillGroupId
-				, intHoldReasonID
-				, intSiteNumber
-				
-				, ysnActive
-				, strDescription
-				, strSiteAddress
-				, strZipCode
-				, strCity
-				, strState
-				, strCountry
-				, dblLatitude
-				, dblLongitude
-				, strSequenceID
-				, strFacilityNumber
-
-				, ysnOnHold
-				, ysnHoldDDCalculations
-				, dtmOnHoldStartDate
-				, dtmOnHoldEndDate
-				, ysnLostCustomer
-				, dtmLostCustomerDate
-
-				, dblTotalCapacity
-				, dblTotalReserve
-				, dblPriceAdjustment
-				, ysnTaxable
-				, strRecurringPONumber
-
-				, intGlobalJulianCalendarId
-				, dtmNextDeliveryDate
-				, dblSummerDailyUse
-				, dblWinterDailyUse
-				, dblBurnRate
-				, dblPreviousBurnRate
-				, dblDegreeDayBetweenDelivery
-				, ysnAdjustBurnRate
-				, ysnPromptForPercentFull
-				
-				, guiApiUniqueId
-				, intRowNumber)
-			VALUES (@intCustomerId
-				, @strBillingType
-				, @intDriverId
-				, @intRouteId
-				, @intCompanyLocationId
-				, @intClockId
-				, @strAccountStatus
-				, @intItemId
-				, @intFillMethodId
-				, @intTermId
-				, @intCompanyLocationPricingLevelId
-				, @intTaxGroupId
-				, @strClassFill
-				, @intFillGroupId
-				, @intHoldReasonId
-				, ISNULL(@intSiteNumber, 0) + 1
-				
-				, @ysnActive
-				, @strSiteDescription
-				, @strAddress
-				, @strZipCode
-				, @strCity
-				, @strState
-				, @strCountry
-				, @dblLatitude
-				, @dblLongitude
-				, @strSequence
-				, @strFacilityNo
-
-				, @ysnHold
-				, @ysnHoldDDCalc
-				, @dtmHoldStartDate
-				, @dtmHoldEndDate
-				, @ysnLost
-				, @dtmLostDate
-
-				, @dblCapacity
-				, @dblReserve
-				, @dblPriceAdj
-				, @ysnSaleTax
-				, @strRecurringPONo
-
-				, @intGlobalJulianCalendarId
-				, @dtmNextJulianDate
-				, ISNULL(@dblSummerDailyRate, 0)
-				, ISNULL(@dblWinterDailyRate, 0)
-				, @dblBurnRate
-				, @dblPreviousBurnRate
-				, @dblDDBetweenDelivery
-				, @ysnAdjBurnRate
-				, @ysnPromptFull
-				
-				, @guiLogId
-				, @intRowNumber)
-
 			INSERT INTO tblApiImportLogDetail (
 				guiApiImportLogDetailId
 				, guiApiImportLogId
@@ -721,93 +887,17 @@ BEGIN
 				, guiApiImportLogId = @guiLogId
 				, strField = ''
 				, strValue = '' 
-				, strLogLevel = 'Success'
-				, strStatus = 'Success'
+				, strLogLevel = 'Error'
+				, strStatus = 'Failed'
 				, intRowNo = @intRowNumber
-				, strMessage = 'Successfully added'	
-
-		END
-		ELSE
-		BEGIN
-			-- UPDATE THE EXISTING SITE
-			UPDATE tblTMSite SET strBillingBy = @strBillingType
-				, intDriverID = @intDriverId
-				, intRouteId = @intRouteId
-				, intLocationId = @intCompanyLocationId
-				, intClockID = @intClockId
-				, strAcctStatus = @strAccountStatus
-				, intProduct = @intItemId
-				, intFillMethodId = @intFillMethodId
-				, intDeliveryTermID = @intTermId
-				, intCompanyLocationPricingLevelId = @intCompanyLocationPricingLevelId
-				, intTaxStateID = @intTaxGroupId
-				, strClassFillOption = @strClassFill
-				, intFillGroupId = @intFillGroupId
-				, intHoldReasonID = @intHoldReasonId
-
-				, ysnActive = @ysnActive
-				, strDescription = @strSiteDescription
-				, strSiteAddress = @strAddress
-				, strZipCode = @strZipCode
-				, strCity = @strCity
-				, strState = @strState
-				, strCountry = @strCountry
-				, dblLatitude = @dblLatitude
-				, dblLongitude = @dblLongitude
-				, strSequenceID = @strSequence
-				, strFacilityNumber = @strFacilityNo
-
-				, ysnOnHold = @ysnHold
-				, ysnHoldDDCalculations = @ysnHoldDDCalc
-				, dtmOnHoldStartDate = @dtmHoldStartDate
-				, dtmOnHoldEndDate = @dtmHoldEndDate
-				, ysnLostCustomer = @ysnLost
-				, dtmLostCustomerDate = @dtmLostDate
-				
-				, dblTotalCapacity = @dblCapacity
-				, dblTotalReserve = @dblReserve
-				, dblPriceAdjustment = @dblPriceAdj
-				, ysnTaxable = @ysnSaleTax
-				, strRecurringPONumber = @strRecurringPONo
-
-				, intGlobalJulianCalendarId = @intGlobalJulianCalendarId
-				, dtmNextDeliveryDate = @dtmNextJulianDate
-				, dblSummerDailyUse = ISNULL(@dblSummerDailyRate, 0)
-				, dblWinterDailyUse = ISNULL(@dblWinterDailyRate, 0)
-				, dblBurnRate = @dblBurnRate
-				, dblPreviousBurnRate = @dblPreviousBurnRate
-				, dblDegreeDayBetweenDelivery = @dblDDBetweenDelivery
-				, ysnAdjustBurnRate = @ysnAdjBurnRate
-				, ysnPromptForPercentFull = @ysnPromptFull
-				, guiApiUniqueId = @guiLogId
-				, intRowNumber = @intRowNumber
-			WHERE intSiteID = @intSiteId
-
-			INSERT INTO tblApiImportLogDetail (
-				guiApiImportLogDetailId
-				, guiApiImportLogId
-				, strField
-				, strValue
-				, strLogLevel
-				, strStatus
-				, intRowNo
-				, strMessage
-			)
-			SELECT guiApiImportLogDetailId = NEWID()
-				, guiApiImportLogId = @guiLogId
-				, strField = ''
-				, strValue = '' 
-				, strLogLevel = 'Success'
-				, strStatus = 'Success'
-				, intRowNo = @intRowNumber
-				, strMessage = 'Successfully updated'
-		END
+				, strMessage = 'Error on inserting/updating - ' + @ErrorMessage
+		END CATCH
 
 		FETCH NEXT FROM DataCursor INTO @intCustomerId, @strBillingType, @intDriverId, @intRouteId, @intCompanyLocationId, @intClockId, @strAccountStatus, @intItemId, @intFillMethodId, @intTermId, @intCompanyLocationPricingLevelId, @intTaxGroupId, @strClassFill, @intFillGroupId, @intHoldReasonId, @intRowNumber
-			, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
-			, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
-			, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-			, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive
+		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
+		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
+		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId
 	END
 	CLOSE DataCursor
 	DEALLOCATE DataCursor

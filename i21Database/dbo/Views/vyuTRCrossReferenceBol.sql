@@ -20,7 +20,7 @@ SELECT CRB.intCrossReferenceBolId,
     CRB.intDriverId,
     EMD.strName strDriverName,
     CRB.intTruckId,
-    DR.strData strTruckName,
+    SVTR.strTruckNumber strTruckName,
     CRB.intTrailerId,
     ST.strTrailerNumber,
     CRB.intCarrierId,
@@ -38,3 +38,4 @@ LEFT JOIN tblEMEntity EMD ON EMD.intEntityId = CRB.intDriverId
 LEFT JOIN tblSCTruckDriverReference DR ON DR.intTruckDriverReferenceId = CRB.intTruckId
 LEFT JOIN tblSMShipViaTrailer ST ON ST.intEntityShipViaTrailerId = CRB.intTrailerId
 LEFT JOIN tblSMShipVia SV ON SV.intEntityId = CRB.intCarrierId
+LEFT JOIN tblSMShipViaTruck SVTR ON SVTR.intEntityShipViaTruckId = CRB.intTruckId

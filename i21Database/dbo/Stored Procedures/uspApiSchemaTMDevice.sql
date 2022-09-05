@@ -427,131 +427,237 @@ BEGIN
 	WHILE @@FETCH_STATUS = 0
     BEGIN
 	
-		IF (@strSerialNumber IS NOT NULL)
-		BEGIN		
-			DECLARE @intDeviceId INT = NULL
-			SELECT @intDeviceId = intDeviceId FROM tblTMDevice WHERE strSerialNumber = @strSerialNumber
-		
-			IF(@intDeviceId IS NULL)
-			BEGIN
-				-- INSERT DEVICE
-				INSERT INTO tblTMDevice(intDeviceTypeId
-					, strDescription
-					, strOwnership
-					, intLocationId
-					, intInventoryStatusTypeId
-					, strComment
-					, intParentDeviceID
-					, intRegulatorTypeId
+		BEGIN TRY
+			IF (@strSerialNumber IS NOT NULL)
+			BEGIN		
+				DECLARE @intDeviceId INT = NULL
+				SELECT @intDeviceId = intDeviceId FROM tblTMDevice WHERE strSerialNumber = @strSerialNumber
+			
+				IF(@intDeviceId IS NULL)
+				BEGIN
+					-- INSERT DEVICE
+					INSERT INTO tblTMDevice(intDeviceTypeId
+						, strDescription
+						, strOwnership
+						, intLocationId
+						, intInventoryStatusTypeId
+						, strComment
+						, intParentDeviceID
+						, intRegulatorTypeId
 
-					, dblTankCapacity
-					, dblTankReserve
-					, intTankTypeId
-					, dblEstimatedGalTank
-					, ysnUnderground
+						, dblTankCapacity
+						, dblTankReserve
+						, intTankTypeId
+						, dblEstimatedGalTank
+						, ysnUnderground
 
-					, strSerialNumber
-					, intManufacturerId
-					, dtmManufacturedDate
-					, strModelNumber
-					, strAssetNumber
-					, dblPurchasePrice
-					, dtmPurchaseDate
+						, strSerialNumber
+						, intManufacturerId
+						, dtmManufacturedDate
+						, strModelNumber
+						, strAssetNumber
+						, dblPurchasePrice
+						, dtmPurchaseDate
 
-					, intMeterTypeId
-					, intMeterCycle
-					, strMeterStatus
-					, dblMeterReading
-					
-					, guiApiUniqueId
-					, intRowNumber)
-				VALUES(@intDeviceTypeId
-					, @strDescription
-					, @strOwnership
-					, @intCompanyLocationId
-					, @intInventoryStatusTypeId
-					, @strComment
-					, @intParentDeviceID
-					, @intRegulatorTypeId
+						, intMeterTypeId
+						, intMeterCycle
+						, strMeterStatus
+						, dblMeterReading
+						
+						, guiApiUniqueId
+						, intRowNumber)
+					VALUES(@intDeviceTypeId
+						, @strDescription
+						, @strOwnership
+						, @intCompanyLocationId
+						, @intInventoryStatusTypeId
+						, @strComment
+						, @intParentDeviceID
+						, @intRegulatorTypeId
 
-					, @dblCapacity
-					, @dblReserve
-					, @intTankTypeId
-					, @dblEstGallonInTank
-					, @ysnUnderground
+						, ISNULL(@dblCapacity, 0)
+						, ISNULL(@dblReserve, 0)
+						, @intTankTypeId
+						, ISNULL(@dblEstGallonInTank, 0)
+						, ISNULL(@ysnUnderground, 0)
 
-					, @strSerialNumber
-					, @intManufacturerId
-					, @dtmManufacturedDate
-					, @strModelNumber
-					, @strAssetNumber
-					, @dblPurchasePrice
-					, @dtmPurchaseDate
-					
-					, @intMeterTypeId
-					, @intMeterCycle
-					, @strMeterStatus
-					, @dblMeterReading
+						, @strSerialNumber
+						, @intManufacturerId
+						, @dtmManufacturedDate
+						, @strModelNumber
+						, @strAssetNumber
+						, @dblPurchasePrice
+						, @dtmPurchaseDate
+						
+						, @intMeterTypeId
+						, ISNULL(@intMeterCycle, 0)
+						, @strMeterStatus
+						, ISNULL(@dblMeterReading, 0)
 
-					, @guiLogId
-					, @intRowNumber
-				)
+						, @guiLogId
+						, @intRowNumber
+					)
 
-				SET @intDeviceId = SCOPE_IDENTITY()
+					SET @intDeviceId = SCOPE_IDENTITY()
 
-				INSERT INTO tblApiImportLogDetail (
-					guiApiImportLogDetailId
-					, guiApiImportLogId
-					, strField
-					, strValue
-					, strLogLevel
-					, strStatus
-					, intRowNo
-					, strMessage
-				)
-				SELECT guiApiImportLogDetailId = NEWID()
-					, guiApiImportLogId = @guiLogId
-					, strField = ''
-					, strValue = '' 
-					, strLogLevel = 'Success'
-					, strStatus = 'Success'
-					, intRowNo = @intRowNumber
-					, strMessage = 'Successfully added'	
+					INSERT INTO tblApiImportLogDetail (
+						guiApiImportLogDetailId
+						, guiApiImportLogId
+						, strField
+						, strValue
+						, strLogLevel
+						, strStatus
+						, intRowNo
+						, strMessage
+					)
+					SELECT guiApiImportLogDetailId = NEWID()
+						, guiApiImportLogId = @guiLogId
+						, strField = ''
+						, strValue = '' 
+						, strLogLevel = 'Success'
+						, strStatus = 'Success'
+						, intRowNo = @intRowNumber
+						, strMessage = 'Successfully added'	
+				END
+				ELSE 
+				BEGIN
+					-- UPDATE DEVICE
+					UPDATE tblTMDevice SET intDeviceTypeId = @intDeviceTypeId
+						, strDescription = @strDescription
+						, strOwnership = @strOwnership
+						, intLocationId = @intCompanyLocationId
+						, intInventoryStatusTypeId = @intInventoryStatusTypeId
+						, strComment = @strComment
+						, intParentDeviceID = @intParentDeviceID
+						, intRegulatorTypeId = @intRegulatorTypeId
+
+						, dblTankCapacity = ISNULL(@dblCapacity, 0)
+						, dblTankReserve = ISNULL(@dblReserve, 0)
+						, intTankTypeId = @intTankTypeId
+						, dblEstimatedGalTank = ISNULL(@dblEstGallonInTank, 0)
+						, ysnUnderground = ISNULL(@ysnUnderground, 0)
+
+						, strSerialNumber = @strSerialNumber
+						, intManufacturerId = @intManufacturerId
+						, dtmManufacturedDate = @dtmManufacturedDate
+						, strModelNumber = @strModelNumber
+						, strAssetNumber = @strAssetNumber
+						, dblPurchasePrice = @dblPurchasePrice
+						, dtmPurchaseDate = @dtmPurchaseDate
+
+						, intMeterTypeId = @intMeterTypeId
+						, intMeterCycle = ISNULL(@intMeterCycle, 0)
+						, strMeterStatus = @strMeterStatus
+						, dblMeterReading = ISNULL(@dblMeterReading, 0)
+						, guiApiUniqueId = @guiLogId
+						, intRowNumber = @intRowNumber
+					WHERE intDeviceId = @intDeviceId
+
+					INSERT INTO tblApiImportLogDetail (
+						guiApiImportLogDetailId
+						, guiApiImportLogId
+						, strField
+						, strValue
+						, strLogLevel
+						, strStatus
+						, intRowNo
+						, strMessage
+					)
+					SELECT guiApiImportLogDetailId = NEWID()
+						, guiApiImportLogId = @guiLogId
+						, strField = ''
+						, strValue = '' 
+						, strLogLevel = 'Success'
+						, strStatus = 'Success'
+						, intRowNo = @intRowNumber
+						, strMessage = 'Successfully updated'
+				END
+
+				-- ATTACH TO SITE
+				IF(@intDeviceId IS NOT NULL)
+				BEGIN	
+					IF (@intCustomerId IS NOT NULL AND @intSiteId IS NOT NULL)
+					BEGIN
+						IF EXISTS(SELECT TOP 1 1 FROM tblTMSiteDevice SD
+							INNER JOIN tblTMSite S ON S.intSiteID = SD.intSiteID
+							INNER JOIN tblTMDevice D ON D.intDeviceId = SD.intDeviceId
+							WHERE D.intDeviceId = @intDeviceId
+							AND S.intCustomerID = @intCustomerId
+							AND SD.intSiteID = @intSiteId)
+						BEGIN
+							INSERT INTO tblApiImportLogDetail (
+								guiApiImportLogDetailId
+								, guiApiImportLogId
+								, strField
+								, strValue
+								, strLogLevel
+								, strStatus
+								, intRowNo
+								, strMessage
+							)
+							SELECT guiApiImportLogDetailId = NEWID()
+								, guiApiImportLogId = @guiLogId
+								, strField = ''
+								, strValue = '' 
+								, strLogLevel = 'Error'
+								, strStatus = 'Failed'
+								, intRowNo = @intRowNumber
+								, strMessage = 'Device already attached to the site'			
+						END
+						ELSE IF EXISTS(SELECT TOP 1 1 FROM tblTMSiteDevice SD
+							INNER JOIN tblTMSite S ON S.intSiteID = SD.intSiteID
+							INNER JOIN tblTMDevice D ON D.intDeviceId = SD.intDeviceId
+							WHERE D.intDeviceId = @intDeviceId)
+						BEGIN
+							INSERT INTO tblApiImportLogDetail (
+								guiApiImportLogDetailId
+								, guiApiImportLogId
+								, strField
+								, strValue
+								, strLogLevel
+								, strStatus
+								, intRowNo
+								, strMessage
+							)
+							SELECT guiApiImportLogDetailId = NEWID()
+								, guiApiImportLogId = @guiLogId
+								, strField = ''
+								, strValue = '' 
+								, strLogLevel = 'Error'
+								, strStatus = 'Failed'
+								, intRowNo = @intRowNumber
+								, strMessage = 'Device already attached to the other site'
+						END
+						ELSE
+						BEGIN
+							INSERT INTO tblTMSiteDevice(intSiteID, intDeviceId, intConcurrencyId, guiApiUniqueId, intRowNumber)
+							VALUES(@intSiteId, @intDeviceId, 1, @guiLogId, @intRowNumber)
+
+							INSERT INTO tblApiImportLogDetail (
+								guiApiImportLogDetailId
+								, guiApiImportLogId
+								, strField
+								, strValue
+								, strLogLevel
+								, strStatus
+								, intRowNo
+								, strMessage
+							)
+							SELECT guiApiImportLogDetailId = NEWID()
+								, guiApiImportLogId = @guiLogId
+								, strField = ''
+								, strValue = '' 
+								, strLogLevel = 'Success'
+								, strStatus = 'Success'
+								, intRowNo = @intRowNumber
+								, strMessage = 'Successfully attached the device to the site'
+						END
+					END
+				END
+
 			END
 			ELSE 
 			BEGIN
-				-- UPDATE DEVICE
-				UPDATE tblTMDevice SET intDeviceTypeId = @intDeviceTypeId
-					, strDescription = @strDescription
-					, strOwnership = @strOwnership
-					, intLocationId = @intCompanyLocationId
-					, intInventoryStatusTypeId = @intInventoryStatusTypeId
-					, strComment = @strComment
-					, intParentDeviceID = @intParentDeviceID
-					, intRegulatorTypeId = @intRegulatorTypeId
-
-					, dblTankCapacity = @dblCapacity
-					, dblTankReserve = @dblReserve
-					, intTankTypeId = @intTankTypeId
-					, dblEstimatedGalTank = @dblEstGallonInTank
-					, ysnUnderground = @ysnUnderground
-
-					, strSerialNumber = @strSerialNumber
-					, intManufacturerId = @intManufacturerId
-					, dtmManufacturedDate = @dtmManufacturedDate
-					, strModelNumber = @strModelNumber
-					, strAssetNumber = @strAssetNumber
-					, dblPurchasePrice = @dblPurchasePrice
-					, dtmPurchaseDate = @dtmPurchaseDate
-
-					, intMeterTypeId = @intMeterTypeId
-					, intMeterCycle = @intMeterCycle
-					, strMeterStatus = @strMeterStatus
-					, dblMeterReading = @dblMeterReading
-					, guiApiUniqueId = @guiLogId
-					, intRowNumber = @intRowNumber
-				WHERE intDeviceId = @intDeviceId
-
 				INSERT INTO tblApiImportLogDetail (
 					guiApiImportLogDetailId
 					, guiApiImportLogId
@@ -566,97 +672,16 @@ BEGIN
 					, guiApiImportLogId = @guiLogId
 					, strField = ''
 					, strValue = '' 
-					, strLogLevel = 'Success'
-					, strStatus = 'Success'
+					, strLogLevel = 'Error'
+					, strStatus = 'Failed'
 					, intRowNo = @intRowNumber
-					, strMessage = 'Successfully updated'
+					, strMessage = 'Serial Number is required'
 			END
+		END TRY
+		BEGIN CATCH
+			DECLARE @ErrorMessage NVARCHAR(MAX) = NULL
+			SELECT @ErrorMessage = ERROR_MESSAGE()
 
-			-- ATTACH TO SITE
-			IF(@intDeviceId IS NOT NULL)
-			BEGIN	
-				IF (@intCustomerId IS NOT NULL AND @intSiteId IS NOT NULL)
-				BEGIN
-					IF EXISTS(SELECT TOP 1 1 FROM tblTMSiteDevice SD
-						INNER JOIN tblTMSite S ON S.intSiteID = SD.intSiteID
-						INNER JOIN tblTMDevice D ON D.intDeviceId = SD.intDeviceId
-						WHERE D.intDeviceId = @intDeviceId
-						AND S.intCustomerID = @intCustomerId
-						AND SD.intSiteID = @intSiteId)
-					BEGIN
-						INSERT INTO tblApiImportLogDetail (
-							guiApiImportLogDetailId
-							, guiApiImportLogId
-							, strField
-							, strValue
-							, strLogLevel
-							, strStatus
-							, intRowNo
-							, strMessage
-						)
-						SELECT guiApiImportLogDetailId = NEWID()
-							, guiApiImportLogId = @guiLogId
-							, strField = ''
-							, strValue = '' 
-							, strLogLevel = 'Error'
-							, strStatus = 'Failed'
-							, intRowNo = @intRowNumber
-							, strMessage = 'Device already attached to the site'			
-					END
-					ELSE IF EXISTS(SELECT TOP 1 1 FROM tblTMSiteDevice SD
-						INNER JOIN tblTMSite S ON S.intSiteID = SD.intSiteID
-						INNER JOIN tblTMDevice D ON D.intDeviceId = SD.intDeviceId
-						WHERE D.intDeviceId = @intDeviceId)
-					BEGIN
-						INSERT INTO tblApiImportLogDetail (
-							guiApiImportLogDetailId
-							, guiApiImportLogId
-							, strField
-							, strValue
-							, strLogLevel
-							, strStatus
-							, intRowNo
-							, strMessage
-						)
-						SELECT guiApiImportLogDetailId = NEWID()
-							, guiApiImportLogId = @guiLogId
-							, strField = ''
-							, strValue = '' 
-							, strLogLevel = 'Error'
-							, strStatus = 'Failed'
-							, intRowNo = @intRowNumber
-							, strMessage = 'Device already attached to the other site'
-					END
-					ELSE
-					BEGIN
-						INSERT INTO tblTMSiteDevice(intSiteID, intDeviceId, intConcurrencyId, guiApiUniqueId, intRowNumber)
-						VALUES(@intSiteId, @intDeviceId, 1, @guiLogId, @intRowNumber)
-
-						INSERT INTO tblApiImportLogDetail (
-							guiApiImportLogDetailId
-							, guiApiImportLogId
-							, strField
-							, strValue
-							, strLogLevel
-							, strStatus
-							, intRowNo
-							, strMessage
-						)
-						SELECT guiApiImportLogDetailId = NEWID()
-							, guiApiImportLogId = @guiLogId
-							, strField = ''
-							, strValue = '' 
-							, strLogLevel = 'Success'
-							, strStatus = 'Success'
-							, intRowNo = @intRowNumber
-							, strMessage = 'Successfully attached the device to the site'
-					END
-				END
-			END
-
-		END
-		ELSE 
-		BEGIN
 			INSERT INTO tblApiImportLogDetail (
 				guiApiImportLogDetailId
 				, guiApiImportLogId
@@ -674,8 +699,8 @@ BEGIN
 				, strLogLevel = 'Error'
 				, strStatus = 'Failed'
 				, intRowNo = @intRowNumber
-				, strMessage = 'Serial Number is required'
-		END
+				, strMessage = 'Error on inserting/updating - ' + @ErrorMessage
+		END CATCH
 
 		FETCH NEXT FROM DataCursor INTO @intDeviceTypeId, @strDescription, @strOwnership, @intCompanyLocationId, @intInventoryStatusTypeId, @strComment, @intParentDeviceID
 			, @intRegulatorTypeId, @dblCapacity, @dblReserve, @intTankTypeId, @dblEstGallonInTank, @ysnUnderground, @strSerialNumber, @intManufacturerId

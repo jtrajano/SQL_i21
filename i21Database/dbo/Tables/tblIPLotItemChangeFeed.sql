@@ -17,7 +17,7 @@
 	,strMessage NVARCHAR(2048) COLLATE Latin1_General_CI_AS
 	,strAdjustmentNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,ysnMailSent BIT CONSTRAINT DF_tblIPLotItemChangeFeed_ysnMailSent DEFAULT 0
-
+	,strLotStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,CONSTRAINT PK_tblIPLotItemChangeFeed PRIMARY KEY (intLotItemChangeFeedId)
 	)
 

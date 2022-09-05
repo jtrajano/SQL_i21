@@ -59,7 +59,10 @@ AS
 			CH.ysnReadOnlyInterCoContract,
 			CD.dblRate,
 			CD.intInvoiceCurrencyId,
-			strInvoiceCurrency = ICU.strCurrency
+			strInvoiceCurrency = ICU.strCurrency,
+			CD.intCurrencyExchangeRateId,
+			strVendorLotID = case when ltrim(rtrim(CD.strVendorLotID)) = '' then null else CD.strVendorLotID end,
+			strReference = case when ltrim(rtrim(CD.strReference)) = '' then null else CD.strReference end
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId

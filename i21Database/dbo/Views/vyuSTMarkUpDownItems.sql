@@ -1,23 +1,55 @@
 ﻿CREATE VIEW [dbo].[vyuSTMarkUpDownItems]
 AS
 SELECT 
-IP.strItemNo
-,IP.strDescription
-,IP.strUpcCode
-,IP.strLongUPCCode
-,IP.intItemId
-,IP.intLocationId
+I.strItemNo
+,I.strDescription
+,UOM.intItemUOMId
+,UOM.strUpcCode
+,UOM.strLongUPCCode
+,UM.strUnitMeasure AS strUnitOfMeasure
+,I.intItemId
+,IL.intLocationId
 ,ST.intStoreId
 ,ST.intStoreNo
-,IP.dblSalePrice
+,vyupriceHierarchy.dblSalePrice
+,vyupriceHierarchyStockUnit.dblSalePrice AS dblRetailItemPerUnit
+,vyupriceHierarchyStockUnit.dblSalePrice AS dblStockUnitPrice
 ,I.intCategoryId
-FROM vyuICGetItemPricing IP
-INNER JOIN tblICItem I 
-	ON IP.intItemId = I.intItemId
+FROM tblICItem I 
+INNER JOIN tblICItemLocation IL 
+	ON I.intItemId = IL.intItemId
+INNER JOIN tblICItemUOM UOM 
+	ON UOM.intItemId = IL.intItemId
+INNER JOIN tblICUnitMeasure UM 
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+--FOR Price hierarchy --
+INNER JOIN vyuSTItemHierarchyPricing vyupriceHierarchy
+	ON I.intItemId = vyupriceHierarchy.intItemId 
+	AND IL.intItemLocationId = vyupriceHierarchy.intItemLocationId
+	AND UOM.intItemUOMId = vyupriceHierarchy.intItemUOMId
+INNER JOIN ( 
+	SELECT SIP.intItemId, intItemLocationId, SIP.intItemUOMId, 
+		CASE WHEN UOM.ysnStockUnit = 1
+			THEN dblSalePrice 
+			ELSE 
+			(
+				SELECT UOM.dblUnitQty * HP.dblSalePrice 
+				FROM vyuSTItemHierarchyPricing HP
+				JOIN tblICItemUOM UOMM
+					ON HP.intItemUOMId = UOMM.intItemUOMId
+					AND UOMM.ysnStockUnit = 1
+				WHERE HP.intItemId = SIP.intItemId
+				AND HP.intItemLocationId = SIP.intItemLocationId
+			)
+		END AS dblSalePrice
+		FROM vyuSTItemHierarchyPricing SIP
+		JOIN tblICItemUOM UOM
+		ON SIP.intItemUOMId = UOM.intItemUOMId
+	) vyupriceHierarchyStockUnit
+	ON I.intItemId = vyupriceHierarchyStockUnit.intItemId 
+	AND IL.intItemLocationId = vyupriceHierarchyStockUnit.intItemLocationId
+	AND UOM.intItemUOMId = vyupriceHierarchyStockUnit.intItemUOMId
 INNER JOIN tblSTStore ST 
-	ON IP.intLocationId = ST.intCompanyLocationId
-INNER JOIN vyuICGetItemLocation GIL 
-	ON IP.intItemUOMId = GIL.intIssueUOMId
-WHERE GIL.intItemLocationId = IP.intItemLocationId
-AND I.strLotTracking = 'No'
-AND GIL.intCostingMethod = 6
+	ON IL.intLocationId = ST.intCompanyLocationId
+WHERE I.strLotTracking = 'No'
+AND IL.intCostingMethod = 6

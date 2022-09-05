@@ -66,7 +66,7 @@ SELECT id							= NEWID()
 	 , strTicketNumber				= SCALETICKET.strTicketNumber
 	 , strCustomerReference			= SCALETICKET.strCustomerReference
 	 , intTicketId					= SHIPPEDITEMS.intTicketId
-	 , intTaxGroupId				= SHIPPEDITEMS.intTaxGroupId
+	 , intTaxGroupId				= NULLIF(SHIPPEDITEMS.intTaxGroupId, 0)
 	 , strTaxGroup					= TAXGROUP.strTaxGroup	 
 	 , dblWeight					= SHIPPEDITEMS.dblWeight
 	 , intWeightUOMId				= SHIPPEDITEMS.intWeightUOMId
@@ -672,8 +672,10 @@ FROM (
 	LEFT JOIN (
 		SELECT intInventoryShipmentChargeId
 			 , dblQtyShipped
-		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblARInvoice I ON ID.intInvoiceId=I.intInvoiceId
 		WHERE ISNULL(intInventoryShipmentChargeId, 0) <> 0
+		AND ysnPosted = 0
 	) ARIDCHARGE ON ICISC.intInventoryShipmentChargeId = ARIDCHARGE.intInventoryShipmentChargeId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId

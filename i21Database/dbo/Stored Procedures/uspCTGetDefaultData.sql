@@ -17,7 +17,9 @@
 	@intLoggedInUserId		INT	= NULL,
 	@dtmEndDate				DATETIME = NULL,
 	@intBorrowingFacilityId INT = NULL,
-	@intBorrowingFacilityLimitId INT = NULL
+	@intBorrowingFacilityLimitId INT = NULL,
+	@intLoadingPointId		INT = NULL,
+	@strFutureMonth			NVARCHAR(50) = ''
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -30,7 +32,9 @@ BEGIN
 			@strContractItemName	NVARCHAR(100),
 			@strEntityName			NVARCHAR(100),
 			@intBrokerageAccountId	INT,
-			@strAccountNumber		NVARCHAR(100)
+			@strAccountNumber		NVARCHAR(100),
+			@intFreightMatrixLeadTime INT,
+			@intDestinationLeadTime int
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
 			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
@@ -98,7 +102,9 @@ BEGIN
 			LEFT JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
 			LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID	=	M.intCurrencyId
 			LEFT JOIN	tblSMCurrency				MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
-			WHERE C.intCommodityId = @intCommodityId  ORDER BY M.intFutureMarketId ASC
+			LEFT JOIN	tblICCommodity				CC	ON CC.intCommodityId	=	C.intCommodityId AND CC.intFutureMarketId	= M.intFutureMarketId
+			WHERE C.intCommodityId = @intCommodityId 
+			ORDER BY ISNULL(CC.intFutureMarketId, 0) DESC, M.intFutureMarketId ASC
 		END
 	END
 
@@ -106,15 +112,26 @@ BEGIN
 	BEGIN
 		SELECT @intVendorId = intVendorId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId
 		SELECT @strCity = strCity FROM tblEMEntityLocation WHERE intEntityId = @intVendorId AND ysnDefaultLocation = 1
-		SELECT @intCityId = intCityId, @ysnPort = ysnPort, @ysnRegion = ysnRegion FROM tblSMCity WHERE strCity = @strCity
+		SELECT @intCityId = intCityId, @ysnPort = ysnPort, @ysnRegion = ysnRegion, @intDestinationLeadTime = intLeadTime FROM tblSMCity WHERE strCity = @strCity
 
 		IF @intCityId IS NOT NULL
 		BEGIN
+			if (isnull(@intLoadingPointId,0) > 0)
+			begin
+				select
+					@intFreightMatrixLeadTime = frm.intLeadTime 
+				from tblSMCity c
+				join tblLGFreightRateMatrix frm on frm.strOriginPort = c.strCity and frm.strDestinationCity = @strCity
+				where c.intCityId = @intLoadingPointId
+			end
+
 			SELECT @intCityId AS intCityId, CASE	WHEN @ysnPort = 1 THEN 'Port' 
 													WHEN @ysnRegion = 1 THEN 'Region'
 													ELSE 'City'
 											END	AS strDestinationPointType
 											,@strCity AS strDestinationPoint
+											,isnull(@intFreightMatrixLeadTime,0) as intFreightMatrixLeadTime
+											,isnull(@intDestinationLeadTime,0) as intDestinationLeadTime
 		END
 		ELSE
 		BEGIN
@@ -209,6 +226,20 @@ BEGIN
 		--AND ysnExpired <> 1
 		--AND ISNULL(	dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))		
 		--ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) ASC
+	END
+
+	IF @strType = 'FutureMonthByName'
+	BEGIN
+		SELECT	@intCommodityId = intCommodityId FROM tblICItem WHERE intItemId = @intItemId
+				
+		SELECT TOP 1 M.intFutureMonthId,REPLACE(M.strFutureMonth,' ','('+M.strSymbol+') ') strFutureMonth 
+		FROM tblRKFuturesMonth M
+		LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
+		WHERE M.intFutureMarketId = @intMarketId
+		AND C.intCommodityId = @intCommodityId
+		AND M.strFutureMonth = LEFT(@strFutureMonth, 3) + ' ' + RIGHT(@strFutureMonth,2)
+		AND M.ysnExpired = 0
+		ORDER BY M.dtmLastTradingDate ASC
 	END
 
 	IF @strType = 'FX'

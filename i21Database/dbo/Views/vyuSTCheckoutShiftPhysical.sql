@@ -3,13 +3,15 @@ AS
 SELECT 
 intCheckoutShiftPhysicalId
 , SP.intCheckoutId
+, CH.dtmCheckoutDate
 , SP.intItemId
 , SP.intItemLocationId
 , SP.intCountGroupId
-, preload.dblSystemCount
+, ISNULL(SP.dblSystemCount, preload.dblSystemCount) AS dblSystemCount
 , SP.dblPhysicalCount
 , SP.intItemUOMId
 , preload.dblQtyReceived
+, preload.dblQtyTransferred
 , preload.dblQtySold
 , SP.intEntityUserSecurityId
 , dblConversionFactor = dbo.fnICConvertUOMtoStockUnit(SP.intItemId, SP.intItemUOMId, 1)
@@ -25,6 +27,7 @@ intCheckoutShiftPhysicalId
 , dblVariance = (CASE WHEN CH.ysnCountByLots = 1 THEN ISNULL(SP.dblSystemCount, 0) - ISNULL(SP.dblPhysicalCount, 0)
 					ELSE ISNULL(SP.dblSystemCount, 0) - dbo.fnICConvertUOMtoStockUnit(SP.intItemId, SP.intItemUOMId, SP.dblPhysicalCount)
 					END)
+, SP.intConcurrencyId
 FROM tblSTCheckoutShiftPhysical SP
 LEFT JOIN tblSTCheckoutShiftPhysicalPreview preload 
 	ON SP.intCheckoutId = preload.intCheckoutId
@@ -41,3 +44,4 @@ LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = SP.intCount
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = SP.intItemLocationId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblSMUserSecurity UserSecurity ON UserSecurity.[intEntityId] = SP.intEntityUserSecurityId
+WHERE SP.intCountGroupId IS NOT NULL

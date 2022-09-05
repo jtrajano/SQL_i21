@@ -114,8 +114,12 @@ FROM
 			dblTotalInputCost = 
 					SUM (
 						dbo.fnMultiply (
-							dbo.fnCalculateCostBetweenUOM (stockUOM.intItemUOMId, ri.intItemUOMId, p.dblStandardCost) 	
-							,ri.dblQuantity
+							dbo.fnCalculateCostBetweenUOM (
+								ISNULL(stockUOM.intItemUOMId, alternateStockUOM.intItemUOMId)
+								, COALESCE(ri.intItemUOMId, stockUOM.intItemUOMId, alternateStockUOM.intItemUOMId) 
+								, p.dblStandardCost
+							) 	
+							,CASE WHEN ri.intCostDriverId = 2 THEN 1 ELSE ri.dblQuantity END 
 						)
 					) 
 			
@@ -127,9 +131,25 @@ FROM
 			INNER JOIN tblICItemPricing p
 				ON p.intItemId = i.intItemId
 				AND p.intItemLocationId = il.intItemLocationId
-			INNER JOIN tblICItemUOM stockUOM
-				ON stockUOM.intItemId = i.intItemId
-				AND stockUOM.ysnStockUnit = 1
+			OUTER APPLY (
+				SELECT TOP 1 
+					stockUOM.* 
+				FROM 
+					tblICItemUOM stockUOM
+				WHERE
+					stockUOM.intItemId = i.intItemId
+					AND stockUOM.ysnStockUnit = 1
+			) stockUOM
+			OUTER APPLY (
+				SELECT TOP 1 
+					alternateStockUOM.* 
+				FROM 
+					tblICItemUOM alternateStockUOM
+				WHERE
+					alternateStockUOM.intItemId = i.intItemId
+					AND alternateStockUOM.dblUnitQty = 1 
+					AND (alternateStockUOM.ysnStockUnit = 0 OR alternateStockUOM.ysnStockUnit IS NULL) 
+			) alternateStockUOM
 		WHERE
 			ri.intRecipeId = items.intRecipeId
 			AND il.intLocationId = items.intLocationId	

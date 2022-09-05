@@ -110,7 +110,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '06-168DD', strFormName = 'Diesel Distributors Return', strScheduleCode = '06-159', strScheduleName = 'Gallons Sold to Exempt Entities, TX Tax Not Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 330, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 432288, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '06-168DD', strFormName = 'Diesel Distributors Return', strScheduleCode = '06-160', strScheduleName = 'Gallons of Dyed Diesel Sold on a Signed Statement', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 340, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 432289, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '06-168DD', strFormName = 'Diesel Distributors Return', strScheduleCode = '06-161', strScheduleName = 'State Diversions of Undyed Diesel', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 350, strStoredProcedure = 'uspTFGetDiversionTax', intMasterId = 432290, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'TX E-file', strFormName = 'Texas E-file (txt files)', strScheduleCode = '', strScheduleName = '', strType = '', strNote = 'Texas E-file (txt files)', strTransactionType = '', intSort = 500, strStoredProcedure = '', intMasterId = 432291, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'TX E-file', strFormName = 'Texas E-file (txt files)', strScheduleCode = 'E-file', strScheduleName = '', strType = '', strNote = 'Texas E-file (txt files)', strTransactionType = '', intSort = 500, strStoredProcedure = '', intMasterId = 432291, intComponentTypeId = 4
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -787,7 +787,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '06-168GD', strScheduleCode = '06-159', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433389
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '06-168GD', strScheduleCode = '06-161', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433390
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '06-168GD', strScheduleCode = '06-190', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433391
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TX E-file', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433392
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TX E-file', strScheduleCode = 'E-file', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 433392
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 

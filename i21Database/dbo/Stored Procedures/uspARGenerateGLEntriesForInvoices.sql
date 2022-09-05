@@ -14,22 +14,24 @@ DECLARE  @MODULE_NAME		        NVARCHAR(25) = 'Accounts Receivable'
 	    ,@OneDecimal	            DECIMAL(18,6) = 1
 	    ,@OneHundredDecimal	        DECIMAL(18,6) = 100
 	    ,@PostDate		            DATETIME = CAST(GETDATE() AS DATE)
-        ,@AllowIntraEntries         BIT
         ,@DueToAccountId            INT
         ,@DueFromAccountId          INT
         ,@AllowIntraCompanyEntries  BIT
         ,@AllowIntraLocationEntries BIT
-        ,@FreightRevenueAccount INT
-        ,@FreightExpenseAccount INT
+        ,@FreightRevenueAccount     INT
+        ,@FreightExpenseAccount     INT
+        ,@SurchargeRevenueAccount   INT
+        ,@SurchargeExpenseAccount   INT
 
 SELECT TOP 1
-     @AllowIntraEntries         = CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END
-    ,@AllowIntraCompanyEntries  = ISNULL(ysnAllowIntraCompanyEntries, 0)
+     @AllowIntraCompanyEntries  = ISNULL(ysnAllowIntraCompanyEntries, 0)
     ,@AllowIntraLocationEntries = ISNULL(ysnAllowIntraLocationEntries, 0)
     ,@DueToAccountId            = ISNULL([intDueToAccountId], 0)
     ,@DueFromAccountId          = ISNULL([intDueFromAccountId], 0)
     ,@FreightRevenueAccount     = ISNULL([intFreightRevenueAccount], 0)
     ,@FreightExpenseAccount     = ISNULL([intFreightExpenseAccount], 0)
+    ,@SurchargeRevenueAccount   = ISNULL([intSurchargeRevenueAccount], 0)
+    ,@SurchargeExpenseAccount   = ISNULL([intSurchargeExpenseAccount], 0)
 FROM tblARCompanyPreference
 
 --REVERSE PROVISIONAL INVOICE
@@ -267,7 +269,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
     ,[dtmDateEntered]               = @PostDate
     ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType]
+    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType] + ' Intra-Company Due To Account'
     ,[intJournalLineNo]             = I.[intInvoiceId]
     ,[ysnIsUnposted]                = 0
     ,[intUserId]                    = I.[intUserId]
@@ -310,7 +312,9 @@ WHERE I.[intPeriodsToAccrue] <= 1
     EXISTS(SELECT NULL FROM tblARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId)
   )
   AND I.strType <> 'Tax Adjustment'
-  AND @AllowIntraEntries = 1
+  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+  AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
+  AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueToAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0)
   AND I.strSessionId = @strSessionId
@@ -930,7 +934,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = I.[dtmDatePosted]
     ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = I.[strItemDescription]
+    ,[strJournalLineDescription]    = I.[strItemDescription] + ' Intra-Company Due From Account'
     ,[intJournalLineNo]             = I.[intInvoiceDetailId]
     ,[ysnIsUnposted]                = 0
     ,[intUserId]                    = I.[intUserId]
@@ -961,171 +965,9 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
   AND I.strType <> 'Tax Adjustment'
-  AND @AllowIntraEntries = 1
+  AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
-  AND I.strSessionId = @strSessionId
-
---DUE FROM ACCOUNT DEBIT FOR FREIGHT CHARGE
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
-     [dtmDate]
-    ,[strBatchId]
-    ,[intAccountId]
-    ,[dblDebit]
-    ,[dblCredit]
-    ,[dblDebitUnit]
-    ,[dblCreditUnit]
-    ,[strDescription]
-    ,[strCode]
-    ,[strReference]
-    ,[intCurrencyId]
-    ,[dblExchangeRate]
-    ,[dtmDateEntered]
-    ,[dtmTransactionDate]
-    ,[strJournalLineDescription]
-    ,[intJournalLineNo]
-    ,[ysnIsUnposted]
-    ,[intUserId]
-    ,[intEntityId]
-    ,[strTransactionId]
-    ,[intTransactionId]
-    ,[strTransactionType]
-    ,[strTransactionForm]
-    ,[strModuleName]
-    ,[intConcurrencyId]
-    ,[dblDebitForeign]
-    ,[dblDebitReport]
-    ,[dblCreditForeign]
-    ,[dblCreditReport]
-    ,[dblReportingRate]
-    ,[dblForeignRate]
-    ,[strRateType]    
-    ,[intSourceEntityId]
-    ,[strSessionId]
-)
-SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
-    ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
-    ,[dblDebit]                     = I.[dblFreightCharge]
-    ,[dblCredit]                    = @ZeroDecimal
-    ,[dblDebitUnit]                 = @ZeroDecimal
-    ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = I.[strDescription]
-    ,[strCode]                      = @CODE
-    ,[strReference]                 = I.[strCustomerNumber]
-    ,[intCurrencyId]                = I.[intCurrencyId]
-    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
-    ,[dtmDateEntered]               = I.[dtmDatePosted]
-    ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = I.[strItemDescription]
-    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
-    ,[ysnIsUnposted]                = 0
-    ,[intUserId]                    = I.[intUserId]
-    ,[intEntityId]                  = I.[intEntityId]
-    ,[strTransactionId]             = I.[strInvoiceNumber]
-    ,[intTransactionId]             = I.[intInvoiceId]
-    ,[strTransactionType]           = I.[strTransactionType]
-    ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @MODULE_NAME
-    ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = I.[dblFreightCharge]
-    ,[dblDebitReport]               = I.[dblFreightCharge]
-    ,[dblCreditForeign]             = @ZeroDecimal
-    ,[dblCreditReport]              = @ZeroDecimal
-    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
-    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
-    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
-    ,[intSourceEntityId]            = I.[intEntityCustomerId]
-    ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
-OUTER APPLY (
-	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], @DueFromAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
-) OVERRIDESEGMENT
-WHERE I.[intPeriodsToAccrue] <= 1
-  AND I.[ysnFromProvisional] = 0
-  AND I.[dblFreightCharge] > 0
-  AND I.strSessionId = @strSessionId
-
---EXPENSE ACCOUNT DEBIT FOR FREIGHT CHARGE
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
-     [dtmDate]
-    ,[strBatchId]
-    ,[intAccountId]
-    ,[dblDebit]
-    ,[dblCredit]
-    ,[dblDebitUnit]
-    ,[dblCreditUnit]
-    ,[strDescription]
-    ,[strCode]
-    ,[strReference]
-    ,[intCurrencyId]
-    ,[dblExchangeRate]
-    ,[dtmDateEntered]
-    ,[dtmTransactionDate]
-    ,[strJournalLineDescription]
-    ,[intJournalLineNo]
-    ,[ysnIsUnposted]
-    ,[intUserId]
-    ,[intEntityId]
-    ,[strTransactionId]
-    ,[intTransactionId]
-    ,[strTransactionType]
-    ,[strTransactionForm]
-    ,[strModuleName]
-    ,[intConcurrencyId]
-    ,[dblDebitForeign]
-    ,[dblDebitReport]
-    ,[dblCreditForeign]
-    ,[dblCreditReport]
-    ,[dblReportingRate]
-    ,[dblForeignRate]
-    ,[strRateType]    
-    ,[intSourceEntityId]
-    ,[strSessionId]
-)
-SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
-    ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
-    ,[dblDebit]                     = I.[dblFreightCharge]
-    ,[dblCredit]                    = @ZeroDecimal
-    ,[dblDebitUnit]                 = @ZeroDecimal
-    ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = I.[strDescription]
-    ,[strCode]                      = @CODE
-    ,[strReference]                 = I.[strCustomerNumber]
-    ,[intCurrencyId]                = I.[intCurrencyId]
-    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
-    ,[dtmDateEntered]               = I.[dtmDatePosted]
-    ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = I.[strItemDescription]
-    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
-    ,[ysnIsUnposted]                = 0
-    ,[intUserId]                    = I.[intUserId]
-    ,[intEntityId]                  = I.[intEntityId]
-    ,[strTransactionId]             = I.[strInvoiceNumber]
-    ,[intTransactionId]             = I.[intInvoiceId]
-    ,[strTransactionType]           = I.[strTransactionType]
-    ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @MODULE_NAME
-    ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = I.[dblFreightCharge]
-    ,[dblDebitReport]               = I.[dblFreightCharge]
-    ,[dblCreditForeign]             = @ZeroDecimal
-    ,[dblCreditReport]              = @ZeroDecimal
-    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
-    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
-    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
-    ,[intSourceEntityId]            = I.[intEntityCustomerId]
-    ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
-OUTER APPLY (
-	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], @FreightExpenseAccount, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
-) OVERRIDESEGMENT
-WHERE I.[intPeriodsToAccrue] <= 1
-  AND I.[ysnFromProvisional] = 0
-  AND I.[dblFreightCharge] > 0
   AND I.strSessionId = @strSessionId
 
 --SOFTWARE MAINTENANCE/SAAS CREDIT
@@ -1209,6 +1051,241 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strType <> 'Tax Adjustment'
   AND I.strSessionId = @strSessionId
 
+--FREIGHT REVENUE ACCOUNT CREDIT
+INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+    ,[strSessionId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@FreightRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[dblDebit]                     = @ZeroDecimal
+    ,[dblCredit]                    = I.[dblFreightCharge]
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'Intra-Company Freight Revenue Account'
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = @ZeroDecimal
+    ,[dblDebitReport]               = @ZeroDecimal
+    ,[dblCreditForeign]             = I.[dblFreightCharge]
+    ,[dblCreditReport]              = I.[dblFreightCharge]
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[strSessionId]                 = @strSessionId    
+FROM tblARPostInvoiceHeader I
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[dblFreightCharge] > 0
+  AND I.strSessionId = @strSessionId
+
+--DUE FROM ACCOUNT DEBIT FOR FREIGHT CHARGE
+INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+    ,[strSessionId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[dblDebit]                     = I.[dblFreightCharge]
+    ,[dblCredit]                    = @ZeroDecimal
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'Intra-Company Due From Account for Freight Charge'
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = I.[dblFreightCharge]
+    ,[dblDebitReport]               = I.[dblFreightCharge]
+    ,[dblCreditForeign]             = @ZeroDecimal
+    ,[dblCreditReport]              = @ZeroDecimal
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[strSessionId]                 = @strSessionId    
+FROM tblARPostInvoiceHeader I
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[dblFreightCharge] > 0
+  AND I.strSessionId = @strSessionId
+
+--FREIGHT EXPENSE ACCOUNT DEBIT
+INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+    ,[strSessionId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
+    ,[dblDebit]                     = I.[dblFreightCharge]
+    ,[dblCredit]                    = @ZeroDecimal
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'Intra-Company Freight Expense Account'
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = I.[dblFreightCharge]
+    ,[dblDebitReport]               = I.[dblFreightCharge]
+    ,[dblCreditForeign]             = @ZeroDecimal
+    ,[dblCreditReport]              = @ZeroDecimal
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[strSessionId]                 = @strSessionId    
+FROM tblARPostInvoiceHeader I
+OUTER APPLY (
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @FreightExpenseAccount, 1, 1, 0)
+) OVERRIDESEGMENT
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[dblFreightCharge] > 0
+  AND I.strSessionId = @strSessionId
+
 --DUE TO ACCOUNT CREDIT FOR FREIGHT CHARGE
 INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]
@@ -1260,7 +1337,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = I.[dtmDatePosted]
     ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = I.[strItemDescription]
+    ,[strJournalLineDescription]    = 'Intra-Company Due To Account for Freight Charge'
     ,[intJournalLineNo]             = I.[intInvoiceDetailId]
     ,[ysnIsUnposted]                = 0
     ,[intUserId]                    = I.[intUserId]
@@ -1280,17 +1357,252 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
+FROM tblARPostInvoiceHeader I
 OUTER APPLY (
 	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, 1, 1, 0)
 ) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblFreightCharge] > 0
   AND I.strSessionId = @strSessionId
 
---REVENUE ACCOUNT CREDIT FOR FREIGHT CHARGE
+--SURCHARGE REVENUE ACCOUNT CREDIT
+INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+    ,[strSessionId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@SurchargeRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[dblDebit]                     = @ZeroDecimal
+    ,[dblCredit]                    = I.[dblSurcharge]
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'Intra-Company Surcharge Revenue Account'
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = @ZeroDecimal
+    ,[dblDebitReport]               = @ZeroDecimal
+    ,[dblCreditForeign]             = I.[dblFreightCharge]
+    ,[dblCreditReport]              = I.[dblFreightCharge]
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[strSessionId]                 = @strSessionId    
+FROM tblARPostInvoiceHeader I
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[dblSurcharge] > 0
+  AND I.strSessionId = @strSessionId
+
+--DUE FROM ACCOUNT DEBIT FOR SURCHARGE
+INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+    ,[strSessionId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[dblDebit]                     = I.[dblSurcharge]
+    ,[dblCredit]                    = @ZeroDecimal
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'Intra-Company Due From Account for Surcharge'
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = I.[dblFreightCharge]
+    ,[dblDebitReport]               = I.[dblFreightCharge]
+    ,[dblCreditForeign]             = @ZeroDecimal
+    ,[dblCreditReport]              = @ZeroDecimal
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[strSessionId]                 = @strSessionId    
+FROM tblARPostInvoiceHeader I
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[dblSurcharge] > 0
+  AND I.strSessionId = @strSessionId
+
+--SURCHARGE EXPENSE ACCOUNT DEBIT
+INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+     [dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]    
+    ,[intSourceEntityId]
+    ,[strSessionId]
+)
+SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
+    ,[dblDebit]                     = I.[dblSurcharge]
+    ,[dblCredit]                    = @ZeroDecimal
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'Intra-Company Surcharge Expense Account'
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = I.[dblFreightCharge]
+    ,[dblDebitReport]               = I.[dblFreightCharge]
+    ,[dblCreditForeign]             = @ZeroDecimal
+    ,[dblCreditReport]              = @ZeroDecimal
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[strSessionId]                 = @strSessionId    
+FROM tblARPostInvoiceHeader I
+OUTER APPLY (
+	SELECT intOverrideAccount
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @SurchargeExpenseAccount, 1, 1, 0)
+) OVERRIDESEGMENT
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND I.[ysnFromProvisional] = 0
+  AND I.[dblSurcharge] > 0
+  AND I.strSessionId = @strSessionId
+
+--DUE TO ACCOUNT CREDIT FOR SURCHARGE
 INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]
     ,[strBatchId]
@@ -1331,7 +1643,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
     ,[dblDebit]                     = @ZeroDecimal
-    ,[dblCredit]                    = I.[dblFreightCharge]
+    ,[dblCredit]                    = I.[dblSurcharge]
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
@@ -1341,7 +1653,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = I.[dtmDatePosted]
     ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = I.[strItemDescription]
+    ,[strJournalLineDescription]    = 'Intra-Company Due To Account for Surcharge'
     ,[intJournalLineNo]             = I.[intInvoiceDetailId]
     ,[ysnIsUnposted]                = 0
     ,[intUserId]                    = I.[intUserId]
@@ -1361,14 +1673,14 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceDetail I
+FROM tblARPostInvoiceHeader I
 OUTER APPLY (
 	SELECT intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @FreightRevenueAccount, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	FROM dbo.[fnARGetOverrideAccount](I.[intAccountId], @DueToAccountId, 1, 1, 0)
 ) OVERRIDESEGMENT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
-  AND I.[dblFreightCharge] > 0
+  AND I.[dblSurcharge] > 0
   AND I.strSessionId = @strSessionId
 
 --FINAL INVOICE CREDIT
@@ -2511,7 +2823,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = I.[dtmDatePosted]
     ,[dtmTransactionDate]           = I.[dtmDate]
-    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType]
+    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType] + ' Intra-Company Due From Account'
     ,[intJournalLineNo]             = ARIDT.[intInvoiceDetailTaxId]
     ,[ysnIsUnposted]                = 0
     ,[intUserId]                    = I.[intUserId]
@@ -2578,7 +2890,7 @@ OUTER APPLY (
 WHERE I.[intPeriodsToAccrue] <= 1
   AND (ARIDT.[dblAdjustedTax] <> @ZeroDecimal
    OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 AND [ysnInvalidSetup] = 0))
-  AND @AllowIntraEntries = 1
+  AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
   AND I.strSessionId = @strSessionId

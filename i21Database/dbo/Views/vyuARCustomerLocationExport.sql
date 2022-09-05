@@ -20,7 +20,7 @@ SELECT
     ,strTimezone		= ISNULL(EMEL.strTimezone, '')
     ,strShipVia			= ISNULL(SMSV.strShipVia, '')
     ,ysnDefaultLocation	= ISNULL(EMEL.ysnDefaultLocation, 0)
-    ,strWarehouse       = SMCL.strLocationName
+    ,strWarehouse       = ISNULL(SMCL.strLocationName, '')
 FROM tblARCustomer ARC
 INNER JOIN tblEMEntityLocation EMEL ON ARC.intEntityId = EMEL.intEntityId
 INNER JOIN tblEMEntity EME ON ARC.intEntityId = EME.intEntityId

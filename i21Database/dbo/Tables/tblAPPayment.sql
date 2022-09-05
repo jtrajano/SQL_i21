@@ -28,7 +28,7 @@
     [intEntityId] INT NOT NULL DEFAULT 0,
     [intEntityVendorId] INT NULL,
 	[intBatchId] INT NULL,
-	[strBatchId] NVARCHAR(255) NULL,
+	[strBatchId] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
     --[ysnVoid] BIT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 

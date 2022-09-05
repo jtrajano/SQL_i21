@@ -80,6 +80,7 @@
 :r .\6_GL\5_1710.sql
 :r .\6_GL\6_1910.sql
 :r .\6_GL\7_2110.sql
+:r .\6_GL\8_2210.sql
 
 -- AR
 :r .\7_AR\00_DropTriggers.sql
@@ -206,6 +207,7 @@
 
 --TR
 :r .\17_TR\01_Drop_Column.sql
+:r .\17_TR\02_CleanUp_TR_Data.sql
 
 --IU
 :r .\18_IU\1_DataCleanUp.sql

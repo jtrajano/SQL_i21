@@ -55,7 +55,7 @@ SELECT CH.intContractHeaderId
 	, PT.strPricingType
 	, PL.strPricingLevelName
 	, strLoadUnitMeasure = U3.strUnitMeasure
-	, strINCOLocation = CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
+	, strINCOLocation = CASE WHEN ISNULL(CB.strINCOLocationType,FT.strINCOLocationType) = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
 	, CP.strContractPlan
 	, strCreatedBy = CE.strName
 	, strLastModifiedBy = UE.strName
@@ -82,7 +82,13 @@ SELECT CH.intContractHeaderId
 	, dblTotalBalance = CAST(BL.dblTotalBalance AS NUMERIC(18, 6))
 	, dblTotalAppliedQty = CAST(BL.dblTotalAppliedQty AS NUMERIC(18, 6))
 	, ysnApproved = ISNULL(TR.ysnApproved, 0)
-
+	, strCompanyLocation = SMC.strLocationName
+	, CH.dblQuantity
+	, VNM.dblHeaderBalance
+	, VNM.dblHeaderAvailable
+	, CH.ysnQuantityAtHeaderLevel
+	, CH.intProductTypeId
+	, strHeaderProductType = CA.strDescription
 FROM tblCTContractHeader				CH	WITH (NOLOCK)
 JOIN tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=	CH.intContractTypeId
 JOIN tblEMEntity						EY	WITH (NOLOCK) ON	EY.intEntityId						=	CH.intEntityId
@@ -95,6 +101,7 @@ LEFT JOIN tblICCommodityUnitMeasure		CD	WITH (NOLOCK) ON	CD.intCommodityId					=
 															AND	CD.ysnDefault						=	1
 LEFT JOIN tblICUnitMeasure				U1	WITH (NOLOCK) ON	U1.intUnitMeasureId					=	CS.intUnitMeasureId
 LEFT JOIN tblICCommodityUnitMeasure		CM	WITH (NOLOCK) ON	CM.intCommodityUnitMeasureId		=	CH.intCommodityUOMId
+LEFT JOIN tblICCommodityAttribute		CA	WITH (NOLOCK) ON	CA.intCommodityAttributeId			=	CH.intProductTypeId
 cross apply (
 	select
 		cd.intContractHeaderId
@@ -135,6 +142,8 @@ LEFT JOIN tblCTBook						BK	WITH (NOLOCK) ON	BK.intBookId						=	CH.intBookId
 LEFT JOIN tblCTSubBook					SB	WITH (NOLOCK) ON	SB.intSubBookId						=	CH.intSubBookId
 LEFT JOIN tblSMFreightTerms				FT	WITH (NOLOCK) ON	FT.intFreightTermId					=	CH.intFreightTermId
 LEFT JOIN tblEMEntityLocation			ESL WITH (NOLOCK) ON	ESL.intEntityLocationId				=	CH.intEntitySelectedLocationId
+LEFT JOIN tblSMCompanyLocation 			SMC WITH (NOLOCK) ON 	SMC.intCompanyLocationId			= 	CH.intCompanyLocationId
+INNER JOIN vyuCTContractHeaderNotMapped	VNM	ON	VNM.intContractHeaderId	=	CH.intContractHeaderId
 OUTER APPLY (
 	select top 1
 		ysnApproved = convert(bit,1)

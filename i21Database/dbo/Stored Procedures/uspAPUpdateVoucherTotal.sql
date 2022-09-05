@@ -83,13 +83,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,A.dblSubtotal = CAST((DetailTotal.dblTotal)  AS DECIMAL(18,2)) 
 		,A.dblAmountDue =  CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax+ ISNULL(texasFee.dblTexasFee,0)) - A.dblPayment AS DECIMAL(18,2)) 
 		,A.dblTax = DetailTotal.dblTotalTax + ISNULL(texasFee.dblTexasFee,0)
-		,A.dblAverageExchangeRate = DetailTotal.dblTotalUSD
+		,A.dblAverageExchangeRate = DetailTotal.dblAverageExchangeRate
 	FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	CROSS APPLY (
-		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM ((dblTotal + dblTax) * dblRate) dblTotalUSD 
-		FROM tblAPBillDetail C 
-		WHERE C.intBillId = B.intId
+		SELECT SUM(dblTotal) dblTotal, SUM(dblTax) dblTotalTax, SUM((dblTotal + dblTax) * dblRate) / SUM((dblTotal + dblTax)) dblAverageExchangeRate FROM tblAPBillDetail C WHERE C.intBillId = B.intId
 	) DetailTotal
 	OUTER APPLY (
 		SELECT SUM(ISNULL(dblAdjustedTax,0)) AS dblTexasFee

@@ -62,6 +62,7 @@ SELECT
 	,strContractNumberSeq	=	CASE WHEN ContractHeader.intContractHeaderId > 0 THEN ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq) ELSE '' END
 	,dblDetailTotalWithTax	=	CAST((DMDetails.dblTotal + DMDetails.dblTax) AS DECIMAL(18, 2))
 	,dblHeaderTotal			=	CAST(DM.dblTotal AS DECIMAL(18, 2))
+	,intShipToId			=	DM.intShipToId
 FROM tblAPBill DM
 INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -89,4 +90,4 @@ LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocatio
 LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
 LEFT JOIN tblICItem I ON I.intItemId = ContractDetail.intItemId
 CROSS JOIN tblSMCompanyPreference CP
-WHERE DM.intTransactionType = 1
+WHERE DM.intTransactionType IN (1, 16)

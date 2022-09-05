@@ -62,6 +62,7 @@ AS
         A.ysnPostAction,
         A.dtmDateEnteredMin,
         FP.strPeriod,
+        CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
         L.strLedgerName,
         A.intSubsidiaryCompanyId
      FROM tblGLDetail AS A
@@ -72,6 +73,7 @@ AS
      LEFT JOIN tblICCommodity ICCom ON ICCom.intCommodityId = A.intCommodityId
      LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
      LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
+     LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId

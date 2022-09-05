@@ -24,8 +24,8 @@
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation](intCompanyLocationId),
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem](intItemId),
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblARSalesperson_intDriverId] FOREIGN KEY ([intDriverId]) REFERENCES [tblARSalesperson](intEntityId),
-    CONSTRAINT [FK_tblTRCrossReferenceBol_tblSCTruckDriverReference_intTruckId] FOREIGN KEY ([intTruckId]) REFERENCES [tblSCTruckDriverReference](intTruckDriverReferenceId),
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblSMShipViaTrailer_intTrailerId] FOREIGN KEY ([intTrailerId]) REFERENCES [tblSMShipViaTrailer](intEntityShipViaTrailerId),
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblSMShipVia_intCarrierId] FOREIGN KEY ([intCarrierId]) REFERENCES [tblSMShipVia](intEntityId),
+    CONSTRAINT[FK_tblTRCrossReferenceBol_tblSMShipViaTruck_intTruckId] FOREIGN KEY ([intTruckId]) REFERENCES [dbo].[tblSMShipViaTruck] ([intEntityShipViaTruckId]),
     CONSTRAINT [UK_tblTRCrossReferenceBol_strType_strImportValue] UNIQUE ([strType], [strImportValue]) 
 )

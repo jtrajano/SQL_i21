@@ -108,6 +108,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_FixUserSecurityAdminData.sql
 :r .\SM\2210_RemoveOldPowerBIData.sql
 :r .\SM\2210_EncryptPasswords.sql
+:r .\SM\2210_EncryptPasswords2.sql
 
 
 -- Canned Report
@@ -249,6 +250,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
+:r .\GL\DefaultData\1x_RecurringTransaction.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 :r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
@@ -274,6 +276,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\16_UpdateNextEFTNo.sql
 :r .\CM\17_InsertResponsiblePartyOption.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
+:r .\CM\18_BankFileFormat.sql
 
 
 --Accounts Receivable
@@ -394,6 +397,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\29_CleanupObjects.sql
 :r .\IC\30_InventoryValuationAccountIds.sql
 :r .\IC\31_WarrantStatus.sql
+:r .\IC\32_Family_Class_Initial_Adjustment.sql
+:r .\IC\32_InventoryJournalLineDescription.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -602,6 +607,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\45_FileFieldMapping_Commander_PopCfg.sql
 :r .\ST\46_FileFieldMapping_Commander_Tank.sql
 :r .\ST\47_FileFieldMapping_Commander_Loyalty.sql
+:r .\ST\48_FileFieldMapping_Commander_TierProduct.sql
+:r .\ST\49_FileFieldMapping_Radiant_Department.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
@@ -731,6 +738,9 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
+
+-- MBIL - Mobile Billing
+:r .\MBIL\InsertLongTruckScreen.sql
 
 -- Clean up i21 database objects
 :r .\SM\01_CleanupObjects.sql

@@ -10,8 +10,7 @@ SELECT LG.intLoadId
 								ELSE NULL END
 	, intSupplyPointId = CASE WHEN (LG.strType != 'Outbound') THEN SP.intSupplyPointId
 								ELSE NULL END
-	, intInboundCompanyLocationId = CASE WHEN (LG.strType != 'Outbound') THEN LG.intPCompanyLocationId
-											ELSE NULL END
+	, intInboundCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId) 
 	, intInboundContractDetailId = CASE WHEN (LG.strType != 'Outbound') THEN LG.intPContractDetailId
 											ELSE NULL END
 	, dblInboundQuantiy = LG.dblQuantity
@@ -31,8 +30,7 @@ SELECT LG.intLoadId
 	, strInboundContractNumber = CASE WHEN (LG.strType != 'Outbound') THEN LG.strPContractNumber
 										ELSE NULL END
 	, intEntityCustomerId = LG.intCustomerEntityId
-	, intOutboundCompanyLocationId = CASE WHEN (LG.strType != 'Outbound') THEN ISNULL(LG.intSCompanyLocationId, LG.intPCompanyLocationId)
-											ELSE LG.intSCompanyLocationId END
+	, intOutboundCompanyLocationId = ISNULL(LG.intSCompanyLocationId, LG.intPCompanyLocationId)
 	, intShipToLocationId = LG.intCustomerEntityLocationId
 	, intEntitySalespersonId = Customer.intSalespersonId
 	, strCustomerNumber = Customer.strName
@@ -87,6 +85,7 @@ SELECT LG.intLoadId
 	, ysnBrokered = CASE WHEN (Config.intSellerId IS NOT NULL AND (Config.intSellerId <> ISNULL(LG.intSellerId, 0))) THEN 1 ELSE 0 END
 	, LG.intSalespersonId
 	, intSiteId = LG.intTMSiteId
+	, intSiteNumber = TS.intSiteNumber
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
@@ -96,4 +95,5 @@ LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLoca
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 LEFT JOIN vyuICGetItemStock ItemS ON ItemS.intItemId = LG.intItemId AND ItemS.intLocationId = LG.intSCompanyLocationId
+LEFT JOIN tblTMSite TS ON LG.intTMSiteId = TS.intSiteID
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

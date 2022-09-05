@@ -125,6 +125,7 @@ BEGIN TRY
 			,FD.dblPreviousQty
 			,FD.intConcurrencyId
 			,FD.dblFX
+			,strCurrencyPair = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 			,PF.dblRollArb
 			,PM.strUnitMeasure	AS strPricingUOM,
 			strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,

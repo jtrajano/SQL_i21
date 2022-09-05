@@ -243,7 +243,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryShipmentChargeTaxId' 
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
 			,intUserId					= @intEntityUserSecurityId
@@ -304,7 +304,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryShipmentChargeTaxId' 
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
 			,intUserId					= @intEntityUserSecurityId

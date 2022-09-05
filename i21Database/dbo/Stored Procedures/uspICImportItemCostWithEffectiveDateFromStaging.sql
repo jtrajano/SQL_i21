@@ -137,7 +137,7 @@ FROM @tblErrorItemCost
 
 
 IF EXISTS(SELECT * FROM @tblErrorItemCost)
-BEGIN select * from tblICImportLog
+BEGIN
 	UPDATE tblICImportLog SET strDescription = 'Import Finished with Error' WHERE intImportLogId = @intImportLogId
 END
 
@@ -199,7 +199,19 @@ SELECT
  , NULL AS intRecordNo 
  , '' AS strField 
  , 'Import Successful' AS strValue 
- , CONCAT('Success - Item: ', s.strItemNo, ' ,Location: ', s.strLocation) AS strMessage 
+ , strMessage = dbo.fnFormatMessage(
+		'Success - Item: %s, Location: %s' COLLATE Latin1_General_CI_AS
+		,s.strItemNo
+		,s.strLocation
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+	)
  , 'Success' AS strStatus 
  , 'Import Finished' AS strAction 
  , 1 AS intConcurrencyId

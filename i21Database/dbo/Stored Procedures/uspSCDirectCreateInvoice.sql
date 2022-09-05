@@ -32,6 +32,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@invoiceId INT,
 		/* Price Contract variables*/
 		@_intContractDetailId INT,
+		@_intContractHeaderId INT,
 		@_intTicketId INT,
 		@_dblNetUnits DECIMAL(18,6),
 		@_dblRemainingNetUnits DECIMAL(18,6),
@@ -54,6 +55,8 @@ DECLARE @intTicketCommodityId INT
 dECLARE @intFutureMarketId INT
 DECLARE @intFutureMonthId INT
 DECLARE @intTicketStorageScheduleTypeId INT
+		,@dblTicketSchedule NUMERIC(36,20)
+		,@intTicketItemId int
 
 
 DECLARE @_dblQty NUMERIC(36,20)
@@ -63,6 +66,9 @@ DECLARE @_intBillDetailId INT
 DECLARE @_intLoadDetailId INT
 DECLARE @_intTicketLoadUsedId INT
 
+
+declare @ysnProcessInvoice bit = 1
+declare @dblAllocatedUnits NUMERIC(36,20)
 
 
 DECLARE @invoiceItemIntegrationStagingTable InvoiceIntegrationStagingTable
@@ -110,12 +116,27 @@ BEGIN TRY
 		,@intTicketContractHeaderId = CH.intContractHeaderId
 		,@_intTicketId = SC.intTicketId
 		,@intTicketStorageScheduleTypeId =  intStorageScheduleTypeId
+		,@dblTicketSchedule = SC.dblScheduleQty
+		
 	FROM tblSCTicket SC
 	INNER JOIN tblCTContractDetail CD
 		ON CD.intContractDetailId = SC.intContractId
 	INNER JOIN tblCTContractHeader CH	
 		ON CD.intContractHeaderId = CH.intContractHeaderId
 	WHERE SC.intTicketId = @intTicketId
+
+	select
+		@intTicketItemId = SC.intItemId
+	FROM tblSCTicket SC
+	WHERE SC.intTicketId = @intTicketId
+
+	--IF(@intContractHeaderPricingTypeId = 2)
+	--BEGIN
+	--	INSERT INTO #tmpSCContractPrice
+	--	EXEC uspCTGetContractPrice @intTicketContractHeaderId,@intTicketContractDetailId, @_dblRemainingNetUnits, 'Invoice'
+	--END
+
+
 
 	--Priced Basis
 	/*
@@ -910,6 +931,7 @@ BEGIN TRY
 							intTicketContractUsed 
 							,SCC.dblScheduleQty
 							,SCC.intContractDetailId
+							,CTH.intContractHeaderId
 						INTO #tmpBasisContractUsed
 						FROM tblSCTicket SC 
 						INNER JOIN tblSCTicketContractUsed SCC
@@ -927,20 +949,53 @@ BEGIN TRY
 							@_intTicketContractUsed = intTicketContractUsed
 							,@_dblQty = dblScheduleQty
 							,@_intContractDetailId = intContractDetailId
+							,@_intContractHeaderId = intContractHeaderId
 						FROM #tmpBasisContractUsed
 						ORDER BY intTicketContractUsed
+
+
+						IF OBJECT_ID (N'tempdb.dbo.#tmpContractPriceOutbound') IS NOT NULL DROP TABLE #tmpContractPriceOutbound
+						CREATE TABLE #tmpContractPriceOutbound (
+							intIdentityId INT
+							,intContractHeaderId int
+							,intContractDetailId int
+							,ysnLoad bit
+							,intPriceContractId int
+							,intPriceFixationId int
+							,intPriceFixationDetailId int
+							,dblQuantity numeric(38,20)
+							,dblPrice numeric(38,20)
+						)
+
 
 						WHILE ISNULL(@_intTicketContractUsed,0) > 0
 						BEGIN
 
+							set @dblAllocatedUnits = 0
+
+							delete from #tmpContractPriceOutbound
+							INSERT INTO #tmpContractPriceOutbound 
+							EXEC uspCTGetContractPrice @_intContractHeaderId,@_intContractDetailId, @_dblQty, 'Invoice'
+
+
+							DELETE FROM @contractBasisPriceTable 
 							INSERT INTO @contractBasisPriceTable (
 								intContractDetailId 
 								,intPriceFixationDetailId
 								,dblQuantity 
 								,dblPrice 
 							)
-							EXEC uspSCGetAndAllocateBasisContractUnits @_dblQty,@_intContractDetailId
+							EXEC uspSCGetAndAllocateBasisContractUnits @_dblQty,@_intContractDetailId, 1
 
+
+
+
+							select @dblAllocatedUnits = sum(dblQuantity) from @contractBasisPriceTable
+
+							if @dblAllocatedUnits <> @_dblQty
+							begin
+								set @ysnProcessInvoice = 0
+							end
 
 							INSERT INTO @invoiceIntegrationStagingTable (
 								[strTransactionType]
@@ -1046,7 +1101,9 @@ BEGIN TRY
 										@_intTicketContractUsed = intTicketContractUsed
 										,@_dblQty = dblScheduleQty
 										,@_intContractDetailId = intContractDetailId
+										,@_intContractHeaderId = intContractHeaderId
 									FROM #tmpBasisContractUsed
+										WHERE intTicketContractUsed > @_intTicketContractUsed
 									ORDER BY intTicketContractUsed
 								END
 							END
@@ -1667,7 +1724,11 @@ BEGIN TRY
 				,[intOrderUOMId]= NULL
 				,[intItemUOMId] = NULL
 				,[dblQtyOrdered] = Staging.dblQtyOrdered
-				,[dblQtyShipped] = Staging.dblQtyShipped
+				,[dblQtyShipped] =  CASE WHEN ICI.strCostMethod = 'Amount' THEN
+										1
+									ELSE
+										Staging.dblQtyShipped
+									END
 				,[dblDiscount] = 0
 				,[dblPrice] = SC.dblTicketFees
 				,[ysnRefreshPrice] = 0
@@ -1943,6 +2004,11 @@ BEGIN TRY
 
 	---CREATE INVOICE
 	BEGIN
+		
+		if @ysnProcessInvoice = 0
+		begin
+			delete from @invoiceIntegrationStagingTable
+		end
 		SELECT TOP 1 @recCount = COUNT(1) FROM @invoiceIntegrationStagingTable;
 		
 		IF ISNULL(@recCount,0) > 0
@@ -1971,30 +2037,115 @@ BEGIN TRY
 				,@CreatedIvoices = @CreatedInvoices OUTPUT
 				,@UpdatedIvoices = @UpdatedInvoices OUTPUT
 
+	
+
+
 			SET @intInvoiceId = CAST(@CreatedInvoices AS INT)
 
-			IF (EXISTS(SELECT TOP 1 1 FROM #tmpSCContractPrice) AND EXISTS(SELECT TOP 1 1 FROM @invoiceIntegrationStagingTable))
+
+					declare @intInvoiceDetailId int
+					declare @intInvoicePriceFixationDetailId int
+
+					select 
+						@intInvoiceDetailId = intInvoiceDetailId 
+						,@intInvoicePriceFixationDetailId = intPriceFixationDetailId
+					from tblARInvoiceDetail 
+					where intInvoiceId = @intInvoiceId
+
+
+
+			IF EXISTS(SELECT TOP 1 1 FROM @invoiceIntegrationStagingTable)
 			BEGIN
+					
+					
+
+				--For Basis
+				--if @intContractHeaderPricingTypeId = 2
+				if 2 = 2
+				begin
+					
+					--declare @intPriceFixationDetailId int
+					declare @AvailbleContractQuantity NUMERIC(36,20) 
+
+
+
+					--if @AvailbleContractQuantity <> 0
+					if 1 = 1
+					begin
+						
+						declare @PriceLinking Table(
+							id int identity(1,1)
+							,intInvoiceDetailId int
+							,intInvoicePriceFixationDetailId int
+							,dblQuantity numeric(36, 20)
+						)
+						declare @currentPricingId int
+						delete from @PriceLinking
+
+						insert into @PriceLinking(intInvoiceDetailId, intInvoicePriceFixationDetailId, dblQuantity)
+						select intInvoiceDetailId, intPriceFixationDetailId, dblQtyShipped 
+						from tblARInvoiceDetail 
+						where intInvoiceId = @intInvoiceId
+							and intPriceFixationDetailId is not null
+							and intItemId = @intTicketItemId
+						
+						
+
+						select @currentPricingId = min(id) from @PriceLinking
+						while (@currentPricingId is not null)
+						begin
+							select 
+							
+								@intInvoicePriceFixationDetailId = intInvoicePriceFixationDetailId
+								,@intInvoiceDetailId = intInvoiceDetailId
+								,@AvailbleContractQuantity = dblQuantity
+							from @PriceLinking where id = @currentPricingId
+
+							exec uspCTCreatePricingAPARLink  
+								 @intPriceFixationDetailId = @intInvoicePriceFixationDetailId  
+								 ,@intHeaderId = @intInvoiceId  
+								 ,@intDetailId = @intInvoiceDetailId  
+								 ,@intSourceHeaderId = null  
+								 ,@intSourceDetailId = @intTicketId				 
+								 ,@dblQuantity = @AvailbleContractQuantity
+								 ,@strScreen = 'Invoice'  
+							
+							
+							select @currentPricingId = min(id) from @PriceLinking where id > @currentPricingId
+
+						end
+						delete from @PriceLinking
+
+						
+
+					end
+
+				end
+					
+
+				
+
+
 				/* INSERT tblCTPriceFixationDetailAPAR */
 				
-				INSERT INTO tblCTPriceFixationDetailAPAR (
-					intPriceFixationDetailId
-					, intInvoiceId
-					, intInvoiceDetailId
-					, intConcurrencyId
-				)
-				SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
-					, intInvoiceId				= ID.intInvoiceId
-					, intInvoiceDetailId		= ID.intInvoiceDetailId
-					, intConcurrencyId			= 1
-				FROM tblARInvoiceDetail ID
-				INNER JOIN #tmpSCContractPrice PRICE 
-					ON ID.intContractDetailId = PRICE.intContractDetailId 
-						AND ID.dblPrice = PRICE.dblPrice
-				WHERE ID.intInvoiceId = @intInvoiceId
-				/*Fixes for CT-5248 (Direct Out ticket does not have create IS)*/
-				--AND ID.intInventoryShipmentItemId IS NOT NULL
-					AND ID.intInventoryShipmentChargeId IS NULL
+				--INSERT INTO tblCTPriceFixationDetailAPAR (
+				--	intPriceFixationDetailId
+				--	, intInvoiceId
+				--	, intInvoiceDetailId
+				--	, intConcurrencyId
+				--)
+				--SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+				--	, intInvoiceId				= ID.intInvoiceId
+				--	, intInvoiceDetailId		= ID.intInvoiceDetailId
+				--	, intConcurrencyId			= 1
+				--FROM tblARInvoiceDetail ID
+				--INNER JOIN #tmpSCContractPrice PRICE 
+				--	ON ID.intContractDetailId = PRICE.intContractDetailId 
+				--		AND ID.dblPrice = PRICE.dblPrice
+				--WHERE ID.intInvoiceId = @intInvoiceId
+				--/*Fixes for CT-5248 (Direct Out ticket does not have create IS)*/
+				----AND ID.intInventoryShipmentItemId IS NOT NULL
+				--	AND ID.intInventoryShipmentChargeId IS NULL
 				
 			END
 
@@ -2049,4 +2200,3 @@ BEGIN CATCH
 		@ErrorState -- State.
 	);
 END CATCH
-GO

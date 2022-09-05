@@ -215,7 +215,7 @@ BEGIN TRY
 		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
 		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
-		AND BlendIngredient.strType != 'Other Charge'
+		--AND ISNULL(BlendIngredient.strType, '') != 'Other Charge'
 	) BlendingIngredient ON BlendingIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = '' AND BlendingIngredient.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
@@ -231,7 +231,9 @@ BEGIN TRY
 
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
-		AND TL.intMobileLoadHeaderId IS NULL
+		-- AND (TL.intMobileLoadHeaderId IS NULL
+		-- 	OR (TL.intMobileLoadHeaderId IS NOT NULL AND DH.ysnMobileInvoice = 0)
+		-- )
 
 	-- Concatenate PO Number, BOL Number, and Comments in cases there are different values and they are not used as a grouping option
 	DECLARE @concatPONumber NVARCHAR(MAX) = ''
@@ -1517,15 +1519,23 @@ BEGIN TRY
 	LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
 	WHERE E.intLoadDistributionHeaderId IS NOT NULL AND S.strFreightBilledBy = 'Internal Carrier')
 	BEGIN
-		DECLARE @dblTotalCharge NUMERIC(18,6) = NULL
+		DECLARE @dblTotalFreightCharge NUMERIC(18,6) = NULL
+		DECLARE @dblTotalSurcharge NUMERIC(18,6) = NULL
 		
-		SELECT @dblTotalCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
+		SELECT @dblTotalFreightCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
 		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
-		WHERE STF.intId != 0
+		INNER JOIN tblICItem II ON RC.intChargeId = II.intItemId
+		WHERE STF.intId != 0 AND II.strCostType = 'Freight'
+
+		SELECT @dblTotalSurcharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
+		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
+		INNER JOIN tblICItem II ON RC.intChargeId = II.intItemId
+		WHERE STF.intId != 0 AND II.strCostType = 'Other Charges'
 
 		UPDATE E SET E.intFreightCompanySegment = S.intCompanySegmentId
 		, E.intFreightLocationSegment = S.intProfitCenterId
-		, E.dblFreightCharge = @dblTotalCharge
+		, E.dblFreightCharge = @dblTotalFreightCharge
+		, E.dblSurcharge = @dblTotalSurcharge
 		FROM @EntriesForInvoice E
 		LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
 		WHERE E.intId = (

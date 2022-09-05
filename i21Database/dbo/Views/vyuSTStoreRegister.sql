@@ -27,7 +27,7 @@ SELECT
  , rt.strRegisterClass
  , rt.strSapphireIpAddress
  , rt.strSAPPHIREUserName
- , strSAPPHIREPassword = dbo.fnAESDecrypt(rt.strSAPPHIREPassword)
+ , strSAPPHIREPassword = dbo.fnAESDecryptASym(rt.strSAPPHIREPassword)
  , hs.intHandheldScannerId
  , ISNULL(rt.intSAPPHIRECheckoutPullTimePeriodId, 0) AS intSAPPHIRECheckoutPullTimePeriodId
  , CASE

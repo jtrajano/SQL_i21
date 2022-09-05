@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdateSequenceBalance]
 	@intContractDetailId			INT,
-	@dblQuantityToUpdate			NUMERIC(18,6),
+	@dblQuantityToUpdate			NUMERIC(38,20),
 	@intUserId						INT,
 	@intExternalId					INT,
 	@strScreenName					NVARCHAR(50),
@@ -12,12 +12,12 @@ AS
 BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@dblQuantity			NUMERIC(18,6),
-			@dblOldBalance			NUMERIC(18,6),
-			@dblNewBalance			NUMERIC(18,6),
+			@dblQuantity			NUMERIC(38,20),
+			@dblOldBalance			NUMERIC(38,20),
+			@dblNewBalance			NUMERIC(38,20),
 			@strAdjustmentNo		NVARCHAR(50),
-			@dblTransactionQuantity	NUMERIC(18,6),
-			@dblQuantityToIncrease	NUMERIC(18,6),
+			@dblTransactionQuantity	NUMERIC(38,20),
+			@dblQuantityToIncrease	NUMERIC(38,20),
 			@ysnUnlimitedQuantity	BIT,
 			@ysnCompleted			BIT	= 0,
 			@intPricingTypeId		INT,
@@ -30,21 +30,40 @@ BEGIN TRY
 			@intUnPostedTicketDestinationWeightsAndGrades int,
 			@ysnLogSequenceHistory	BIT = 1,
 			@intContractHeaderId	INT,
-			@process				NVARCHAR(50)
+			@process				NVARCHAR(50),
+			@intHeaderUOMId				INT,
+			@intCommodityId				INT,
+			@dblHeaderQuantity	NUMERIC(18,6),
+			@dblTotalHeaderApplied NUMERIC(18,6),
+			@ysnQuantityAtHeaderLevel bit = 0,
+			@dblSequenceOrigBalance NUMERIC(18,6)
 			
 	
 	BEGINING:
 
 	SELECT	@dblQuantity			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblQuantity,0) ELSE ISNULL(CD.intNoOfLoad,0) END,
-			@dblOldBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblBalance,0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
+			@dblSequenceOrigBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblBalance,0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
+			@dblOldBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
 			@ysnUnlimitedQuantity	=	ISNULL(CH.ysnUnlimitedQuantity,0),
 			@intPricingTypeId		=	CD.intPricingTypeId,
 			@ysnLoad				=	CH.ysnLoad,
 			@intContractHeaderId	=	CH.intContractHeaderId,
-			@dblQuantityPerLoad = CH.dblQuantityPerLoad
+			@dblQuantityPerLoad = CH.dblQuantityPerLoad,
+			@intHeaderUOMId = CH.intCommodityUOMId,
+			@intCommodityId = CH.intCommodityId,
+			@dblHeaderQuantity = CH.dblQuantity,
+			@ysnQuantityAtHeaderLevel = isnull(CH.ysnQuantityAtHeaderLevel,0)
 
 	FROM	tblCTContractDetail		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
+    cross apply (
+		select
+		dblHeaderBalance = CH.dblQuantity - sum(cd.dblQuantity - cd.dblBalance)
+		,dblHeaderAvailable = CH.dblQuantity - (sum(cd.dblQuantity - cd.dblBalance) + sum(isnull(cd.dblScheduleQty,0)))
+		,dblHeaderScheduleQty = sum(isnull(cd.dblScheduleQty,0))
+		from tblCTContractDetail cd
+		where cd.intContractHeaderId = CH.intContractHeaderId
+    ) cds
 	WHERE	intContractDetailId		=	@intContractDetailId 
 
 	 if (@ysnLoad = 1 and @ysnFromInvoice = convert(bit,1)) 
@@ -146,7 +165,7 @@ BEGIN TRY
 
 	UPDATE	tblCTContractDetail
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
-			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END,
+			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN (case when isnull(@ysnQuantityAtHeaderLevel,0) = 1 then @dblSequenceOrigBalance - @dblQuantityToUpdate else @dblNewBalance end) ELSE @dblNewBalance * dblQuantityPerLoad END,
 			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END,
 			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0 and (CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END) > 0
 											THEN	(CASE	WHEN intContractStatusId = 5
@@ -161,6 +180,30 @@ BEGIN TRY
 	from tblCTContractDetail cd
 	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	where cd.intContractDetailId = @intContractDetailId
+
+	if (@ysnQuantityAtHeaderLevel = 1)
+	begin
+		select @dblTotalHeaderApplied = sum(cd.dblQuantity - isnull(cd.dblBalance,0))
+		from tblCTContractDetail cd
+		where cd.intContractHeaderId = @intContractHeaderId
+
+		if (@dblHeaderQuantity = @dblTotalHeaderApplied)
+		begin
+			update tblCTContractDetail set intContractStatusId = 5, dblQuantity = (dblQuantity - isnull(dblBalance,0)), dblBalance = 0, dblBalanceLoad = 0 where intContractHeaderId = @intContractHeaderId;
+		end
+		else
+		begin
+			if (@dblQuantityToUpdate < 0 and exists (select top 1 1 from tblCTContractDetail where intContractStatusId = 5 and intContractHeaderId = @intContractHeaderId))
+			begin
+				update tblCTContractDetail
+				set
+				intContractStatusId = 1
+				, dblQuantity = @dblHeaderQuantity
+				, dblBalance = case when intContractStatusId = 5 then (@dblHeaderQuantity - dblQuantity) else @dblHeaderQuantity - (dblQuantity - abs(@dblQuantityToUpdate)) end
+				where intContractHeaderId = @intContractHeaderId
+			end
+		end
+	end
 
 	 /*
 	 CT-4516

@@ -232,7 +232,7 @@ END
 			, ysnPreCrush = ysnCrush
 		FROM tblRKDPRContractHedgeByMonth
 		WHERE intDPRHeaderId = @intDPRHeaderId
-		AND	 strLocationName = CASE WHEN @strLocationName = 'All' THEN strLocationName ELSE @strLocationName END
+		AND	 ISNULL(strLocationName,'') = CASE WHEN @strLocationName = 'All' THEN ISNULL(strLocationName,'') ELSE @strLocationName END
 
 	IF (@strCommodityCode IS NULL) 
 	BEGIN

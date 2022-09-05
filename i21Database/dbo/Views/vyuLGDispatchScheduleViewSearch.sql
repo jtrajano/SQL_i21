@@ -27,6 +27,7 @@ SELECT
 	,strTruckNumber = SVT.strTruckNumber
 	,strDriver = DV.strName
 	,strTrailerNumber = SVTL.strTrailerNumber
+	,ysnDispatched = CONVERT(BIT, CASE WHEN DO.intDispatchStatus > 2 THEN 1 ELSE 0 END)
 
 	,DOR.intStopType
 	,strStopType = CASE DOR.intStopType 

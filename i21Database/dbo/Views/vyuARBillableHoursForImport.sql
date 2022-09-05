@@ -2,7 +2,7 @@
 AS 
 SELECT intEntityId					= C.[intEntityId]
 	 , strCustomerNumber			= C.[strCustomerNumber]
-	 , strName						= E.[strName]
+	 , strName						= LTRIM(RTRIM(E.[strName]))
 	 , intTicketId					= T.[intTicketId]
 	 , strTicketNumber				= T.[strTicketNumber]
 	 , strSubject					= HW.[strDescription]

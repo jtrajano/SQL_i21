@@ -240,6 +240,7 @@ DECLARE  @Id									INT
 		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
+		,@Surcharge								NUMERIC(18, 6)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -337,6 +338,7 @@ DECLARE  @Id									INT
 		,@ItemQualityPremium					NUMERIC(18, 6)
 		,@ItemOptionalityPremium				NUMERIC(18, 6)
 		,@ItemComputedGrossPrice				NUMERIC(18, 6)
+		,@ItemOverrideTaxGroup					BIT
 
 --INSERT
 BEGIN TRY
@@ -465,6 +467,7 @@ BEGIN
 		,@FreightLocationSegment		= [intFreightLocationSegment]
 		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
+		,@Surcharge						= [dblSurcharge]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -556,6 +559,7 @@ BEGIN
 		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
 		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
 		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
+		,@ItemOverrideTaxGroup			= (CASE WHEN @GroupingOption = 0 THEN [ysnOverrideTaxGroup] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -757,6 +761,7 @@ BEGIN
 			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
+			,@Surcharge						= @Surcharge
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -847,6 +852,7 @@ BEGIN
 			,@ItemQualityPremium			= @ItemQualityPremium
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1032,6 +1038,7 @@ BEGIN
 					,@ItemQualityPremium            = [dblQualityPremium]
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+					,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1136,6 +1143,7 @@ BEGIN
 						,@ItemQualityPremium            = @ItemQualityPremium
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+						,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1525,6 +1533,7 @@ BEGIN TRY
 			,@FreightCharge					= [dblFreightCharge]
 			,@FreightCompanySegment			= [intFreightCompanySegment]
 			,@FreightLocationSegment		= [intFreightLocationSegment]
+			,@Surcharge						= [dblSurcharge]
 		FROM
 			@InvoiceEntries
 		WHERE
@@ -1671,6 +1680,7 @@ BEGIN TRY
 			,[dblFreightCharge]			= @FreightCharge 
 			,[intFreightCompanySegment]	= @FreightCompanySegment
 			,[intFreightLocationSegment]= @FreightLocationSegment
+			,[dblSurcharge]				= @Surcharge
 		FROM
 			tblARCustomer C
 		LEFT OUTER JOIN
@@ -1825,6 +1835,7 @@ BEGIN TRY
 						,@ItemQualityPremium            = [dblQualityPremium]
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+						,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1921,6 +1932,7 @@ BEGIN TRY
 							,@ItemQualityPremium            = @ItemQualityPremium
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+							,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN

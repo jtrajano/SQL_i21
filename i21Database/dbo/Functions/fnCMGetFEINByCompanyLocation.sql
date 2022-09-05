@@ -19,32 +19,26 @@ OUTER apply(
 )C
 WHERE @intBankAccountId = intBankAccountId
 
-IF @intLocationSegmentId IS NOT NULL AND @intCompanySegmentId IS NULL
+
+DECLARE @ysnHasLocation BIT = 0
+DECLARE @ysnHasComopany BIT = 0
+
+SELECT @ysnHasLocation = 1 FROM tblSMCompanyLocation WHERE intProfitCenter = @intLocationSegmentId
+
+IF (@ysnHasLocation = 1)
 BEGIN
-	SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
-	WHERE intProfitCenter = @intLocationSegmentId
-	IF @strFEIN IS NULL 
-		SET @strError = 'FEIN was not found. Please fill up the FEIN and make sure that Location GL Account segments of Bank account is set up in the Company Location GL Accounts'
-END
-
-IF @intLocationSegmentId IS NULL AND @intCompanySegmentId IS NOT NULL
-BEGIN
-	SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
-	WHERE intCompanySegment = @intCompanySegmentId
-
-	IF @strFEIN IS NULL 
-		SET @strError = 'FEIN was not found. Please fill up the FEIN and make sure that Company GL Account segments of Bank account is set up in the Company Location GL Accounts'
-
+	SELECT TOP 1 @ysnHasComopany = 1 FROM tblSMCompanyLocation WHERE intProfitCenter = @intLocationSegmentId AND intCompanySegment = @intCompanySegmentId
 END
 
 
-IF @intLocationSegmentId IS NOT NULL AND @intCompanySegmentId IS NOT NULL
+IF @ysnHasLocation = 0 OR @ysnHasComopany = 0
+BEGIN
+		SET @strError = 'FEIN was not found. Please fill up the FEIN and make sure that Location and Company Segment of the Bank GL Account is setup in a Company Location.'
+END
+ELSE
 BEGIN
 	SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
 	WHERE intCompanySegment = @intCompanySegmentId AND intProfitCenter = @intLocationSegmentId
-
-	IF @strFEIN IS NULL 
-		SET @strError = 'FEIN was not found. Please fill up the FEIN and make sure that Location and Company GL Account segments of Bank account is set up in the Company Location GL Accounts'
 
 END
 

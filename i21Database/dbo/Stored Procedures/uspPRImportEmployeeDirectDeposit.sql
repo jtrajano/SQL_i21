@@ -74,7 +74,7 @@ DECLARE @BankCount AS INT
 			,@ysnPreNoteSent = ysnPreNoteSent
 			,@strDistributionType = CASE WHEN strDistributionType <> '' AND strDistributionType IN('Fixed Amount','Percent','Remainder') THEN strDistributionType ELSE '' END
 			,@dblAmount	= dblAmount
-			,@intOrder	= intOrder
+			,@intOrder	= ISNULL(intOrder,0)
 			,@ysnActive	= ysnActive
 		FROM #TempEmployeeDirectDeposit
 		

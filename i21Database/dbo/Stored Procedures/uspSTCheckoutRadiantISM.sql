@@ -509,61 +509,61 @@ BEGIN
 					[dblRetailUnit]			= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice > ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePrice)
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice < ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePrice)
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts)
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts)
 														END
 											END),
 					[dblAmount]				= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice > ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePrice < ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
 																THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
 														END
 											END),
 					[dblShrink]				= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
-																THEN CAST((TempChk.dblAveragePrice - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
-																THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePrice) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePrice > ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
+																THEN CAST((TempChk.dblAveragePrice - ISNULL(vyupriceHierarchy.dblSalePrice, 0)) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePrice < ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
+																THEN CAST((ISNULL(vyupriceHierarchy.dblSalePrice, 0) - TempChk.dblAveragePrice) AS DECIMAL(18,6))
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
-																THEN CAST((TempChk.dblAveragePriceWthDiscounts - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0)
-																THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(vyupriceHierarchy.dblSalePrice, 0) 
+																THEN CAST((TempChk.dblAveragePriceWthDiscounts - ISNULL(vyupriceHierarchy.dblSalePrice, 0)) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(vyupriceHierarchy.dblSalePrice, 0)
+																THEN CAST((ISNULL(vyupriceHierarchy.dblSalePrice, 0) - TempChk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
 														END
 											END),
 					[strUpDownNotes]		= (CASE 
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN CASE
-															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
-															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+															WHEN TempChk.dblAveragePrice > ISNULL(vyupriceHierarchy.dblSalePrice, 0) THEN 'Mark Up'
+															WHEN TempChk.dblAveragePrice < ISNULL(vyupriceHierarchy.dblSalePrice, 0) THEN 'Mark Down' 
 														END
 												WHEN @strAllowMarkUpDown = 'D'
 													THEN CASE
-															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
-															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(vyupriceHierarchy.dblSalePrice, 0) THEN 'Mark Up'
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(vyupriceHierarchy.dblSalePrice, 0) THEN 'Mark Down' 
 														END
 											END),
 					[intConcurrencyId]		= 1
@@ -580,6 +580,29 @@ BEGIN
 				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
+				--FOR Price hierarchy --
+				INNER JOIN ( 
+					SELECT SIP.intItemId, intItemLocationId, SIP.intItemUOMId,
+						CASE WHEN UOM.ysnStockUnit = 1
+							THEN dblSalePrice 
+						 ELSE 
+							(
+								SELECT UOM.dblUnitQty * HP.dblSalePrice 
+								FROM vyuSTItemHierarchyPricing HP
+								JOIN tblICItemUOM UOMM
+									ON HP.intItemUOMId = UOMM.intItemUOMId
+									AND UOMM.ysnStockUnit = 1
+								WHERE HP.intItemId = SIP.intItemId
+								AND HP.intItemLocationId = SIP.intItemLocationId
+							)
+						END AS dblSalePrice
+					 FROM vyuSTItemHierarchyPricing SIP
+					 JOIN tblICItemUOM UOM
+					 ON SIP.intItemUOMId = UOM.intItemUOMId
+				 ) vyupriceHierarchy
+					ON I.intItemId = vyupriceHierarchy.intItemId 
+					AND IL.intItemLocationId = vyupriceHierarchy.intItemLocationId
+					AND UOM.intItemUOMId = vyupriceHierarchy.intItemUOMId
 				INNER JOIN dbo.tblSMCompanyLocation CL 
 					ON CL.intCompanyLocationId = IL.intLocationId
 				INNER JOIN dbo.tblICCategory IC 

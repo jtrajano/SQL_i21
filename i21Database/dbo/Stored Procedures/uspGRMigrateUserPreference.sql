@@ -18,7 +18,7 @@ BEGIN
 				--, intEntityId
 				, CAST(ISNULL(QuoteProvider, '') AS NVARCHAR) AS strQuoteProvider
 				, CAST(ISNULL(ProviderUserId, '') AS NVARCHAR) AS strProviderUserId
-				, CAST(ISNULL(ProviderPassword, '') AS NVARCHAR) AS strProviderPassword
+				, CAST(dbo.fnAESEncryptASym(ISNULL(ProviderPassword, '')) AS NVARCHAR) AS strProviderPassword
 				, CAST(ISNULL(ProviderAccessType, '') AS NVARCHAR) AS strProviderAccessType
 		FROM (SELECT pref.intUserID userId
 				--, sec.intEntityId

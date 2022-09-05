@@ -6,7 +6,7 @@ RETURNS NVARCHAR(MAX)
 AS
 BEGIN
 	DECLARE @FinalString NVARCHAR(MAX) = ''
-		, @FieldName NVARCHAR(100)
+		, @FieldName NVARCHAR(100) 
 		, @Value NVARCHAR(100)
 		, @Max INT
 		, @ctr INT = 1
@@ -27,5 +27,5 @@ BEGIN
 		SET @ctr += 1
 	END
 
-	RETURN @FinalString
+	RETURN @FinalString COLLATE Latin1_General_CI_AS
 END

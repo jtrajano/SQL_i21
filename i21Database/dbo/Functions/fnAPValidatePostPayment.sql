@@ -673,6 +673,17 @@ BEGIN
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND OVERRIDESEGMENT.intOverrideAccount = 0
 		AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
+
+		--DO NOT ALLOW EMPTY PAY TO BANK ACCOUNT ON ACH
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Default pay to bank account is required on ACH payment method.',
+			'Payable',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND P.intPayToBankAccountId IS NULL AND P.intPaymentMethodId = 2
 	END
 	ELSE
 	BEGIN

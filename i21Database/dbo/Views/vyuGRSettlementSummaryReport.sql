@@ -18,16 +18,18 @@ SELECT
 	,OutboundDiscount			    = OutboundDiscount		
 	,OutboundNetDue				    = OutboundNetDue			
 	,SalesAdjustment			    = SalesAdjustment	
-	,VoucherAdjustment			    = SUM(VoucherAdjustment) + BillAdjustments.dblTotalAdjustment
+	,VoucherAdjustment			    = SUM(ISNULL(VoucherAdjustment,0)) + ISNULL(BillAdjustments.dblTotalAdjustment,0)
 	,dblVendorPrepayment		    = VendorPrepayment.dblVendorPrepayment
-	,lblVendorPrepayment		    = lblVendorPrepayment		 
+	--,lblVendorPrepayment		    = lblVendorPrepayment		 
 	,dblCustomerPrepayment		    = dblCustomerPrepayment		 
-	,lblCustomerPrepayment		    = lblCustomerPrepayment		 
+	--,lblCustomerPrepayment		    = lblCustomerPrepayment		 
 	,dblGradeFactorTax			    = dblGradeFactorTax			 
-	,lblFactorTax				    = lblFactorTax				 
-	,dblPartialPrepaymentSubTotal   = dblPartialPrepaymentSubTotal
-	,lblPartialPrepayment		    = lblPartialPrepayment		 
-	,dblPartialPrepayment		    = sum(isnull(dblPartialPrepayment, 0))
+	--,lblFactorTax				    = lblFactorTax				 
+	--,dblPartialPrepaymentSubTotal   = dblPartialPrepaymentSubTotal
+	--,lblPartialPrepayment		    = lblPartialPrepayment		 
+	--,dblPartialPrepayment		    = sum(isnull(dblPartialPrepayment, 0))
+	,dblBasisPayment				= ROUND(ISNULL(dblBasisPayment,0),2)
+	,dblDebitMemoPayment			= ROUND(ISNULL(dblDebitMemoPayment,0),2)
 	,CheckAmount				    = CheckAmount				 			
 FROM 
 (
@@ -58,7 +60,7 @@ FROM
 											) +
 											-- Include tax for discounts/other charges
 											CASE 
-												WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
+												WHEN BillDtl.intInventoryReceiptChargeId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
 												ELSE ISNULL(BillByReceipt.dblTax, 0)
 											END
 		,InboundDiscount				= CASE 
@@ -90,26 +92,28 @@ FROM
 		,OutboundNetDue					= 0
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0)
 		,VoucherAdjustment				= ISNULL(BillAdjustments.dblTotal, 0)
-		,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
+		--,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment, 0) <> 0 THEN Invoice.dblPayment
 											ELSE NULL 
 										END
-		,lblCustomerPrepayment			= 'Customer Prepay' COLLATE Latin1_General_CI_AS
+		--,lblCustomerPrepayment			= 'Customer Prepay' COLLATE Latin1_General_CI_AS
 		,dblGradeFactorTax				= CASE 
 											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax, 0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
 											ELSE NULL 
 										END
-		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepaymentSubTotal	= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment 
-											ELSE NULL 
-										END
-		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepayment		  = CASE 
-											WHEN ISNULL(BasisPayment.dblVendorPrepayment, 0) <> 0 THEN BasisPayment.dblVendorPrepayment -- PartialPayment.dblTotals 
-											ELSE NULL 
-										END
+		--,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
+		--,dblPartialPrepaymentSubTotal	= CASE 
+		--									WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment 
+		--									ELSE NULL 
+		--								END
+		----,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
+		--,dblPartialPrepayment		  = CASE 
+		--									WHEN ISNULL(BasisPayment.dblVendorPrepayment, 0) <> 0 THEN BasisPayment.dblVendorPrepayment -- PartialPayment.dblTotals 
+		--									ELSE NULL 
+		--								END
+		,dblBasisPayment			  = ISNULL(BasisPayment.dblPayment,0) + ISNULL(BasisApplied.dblBasisApplied,0)
+		,dblDebitMemoPayment		  = ISNULL(DebitMemoPayment.dblPayment,0) + ISNULL(DebitMemoApplied.dblDebitMemoApplied,0)
 		,CheckAmount				  = PYMT.dblAmountPaid
 		,intMark					  = 1
 	FROM tblAPPayment PYMT 
@@ -134,17 +138,6 @@ FROM
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId 
 			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
-	-- LEFT JOIN (
-	-- 	SELECT 
-	-- 		A.intBillId
-	-- 		,SUM(dblTotal) dblTotal
-	-- 	FROM tblAPBillDetail A
-	-- 	JOIN tblICItem B 
-	-- 		ON A.intItemId = B.intItemId 
-	-- 			AND B.strType = 'Other Charge'
-	-- 	GROUP BY A.intBillId
-	-- ) tblOtherCharge 
-	-- 	ON tblOtherCharge.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
 			a.intBillId
@@ -168,8 +161,8 @@ FROM
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 				
-				and APD.dblPayment <> 0
-				AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
+				AND APD.dblPayment <> 0
+				AND Bill.intTransactionType NOT IN (2,3)
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 			AND BD.intScaleTicketId IS NULL
@@ -203,23 +196,49 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(APD.dblTotal) dblTotals
-			,SUM(APD.dblPayment) dblPayment
+			,dblPayment = SUM(APD.dblPayment)
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
-		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
-			and APD.dblPayment <> 0
-		GROUP BY intPaymentId
-		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
-	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
+		WHERE APD.intBillId IS NOT NULL 
+			AND (APB.intTransactionType = 13)-- OR APB.intTransactionType = 3)				
+			AND APD.dblPayment <> 0
+		GROUP BY intPaymentId--, APB.intTransactionType
+		--HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	) BasisPayment ON BasisPayment.intPaymentId = PYMT.intPaymentId
 	LEFT JOIN (
 		SELECT
 			a.intBillId
-			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
-		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType in (13, 3)
+			,dblBasisApplied = SUM(a.dblAmountApplied* -1) 
+		FROM tblAPAppliedPrepaidAndDebit a
+		JOIN tblAPBill b 
+			ON a.intTransactionId = b.intBillId 
+				AND b.intTransactionType = 13
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
-	) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
+	) BasisApplied ON BasisApplied.intBillId = Bill.intBillId
+	LEFT JOIN (
+		SELECT 
+			intPaymentId
+			,dblPayment = SUM(APD.dblPayment) 
+		FROM tblAPPaymentDetail APD
+		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+		WHERE APD.intBillId IS NOT NULL 
+			AND APB.intTransactionType = 3
+			AND APD.dblPayment <> 0
+		GROUP BY intPaymentId--, APB.intTransactionType
+		--HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	) DebitMemoPayment ON DebitMemoPayment.intPaymentId = PYMT.intPaymentId
+	LEFT JOIN (
+		SELECT
+			a.intBillId
+			,dblDebitMemoApplied = SUM(a.dblAmountApplied* -1) 
+		FROM tblAPAppliedPrepaidAndDebit  a 
+		JOIN tblAPBill b 
+			ON a.intTransactionId = b.intBillId 
+				AND b.intTransactionType = 3
+		WHERE a.ysnApplied = 1
+		GROUP BY a.intBillId
+	) DebitMemoApplied ON DebitMemoApplied.intBillId = Bill.intBillId
 	WHERE ((
 			BillDtl.intInventoryReceiptChargeId IS NOT NULL
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
@@ -236,16 +255,16 @@ FROM
 		-- ,VendorPrepayment.dblVendorPrepayment
 		,Invoice.dblPayment
 		,ScaleDiscountTax.dblGradeFactorTax
-		,PartialPayment.dblPayment
-		,PartialPayment.dblPayment
-		,PartialPayment.dblTotals
+		,BasisApplied.dblBasisApplied
+		,BasisPayment.dblPayment
+		,DebitMemoApplied.dblDebitMemoApplied
+		,DebitMemoPayment.dblPayment
 		,PYMT.dblAmountPaid 	
 		,BillDtl.intCustomerStorageId
 		,BillDtl.intInventoryReceiptItemId
 		,tblOtherCharge.dblTotal
 		,tblOtherCharge.dblTax
 		,BillDtl.intInventoryReceiptChargeId
-		,BasisPayment.dblVendorPrepayment
 	--------------------------------------------------------
 	-- SCALE --> Storage --> Settle Storage
 	--------------------------------------------------------
@@ -292,23 +311,25 @@ FROM
 		,OutboundNetDue					= 0 
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0) 
 		,VoucherAdjustment				= ISNULL(BillAdjustments.dblTotal, 0)
-		,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
+		--,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment 
 											ELSE NULL 
 										END 
-		,lblCustomerPrepayment			=  'Customer Prepay' COLLATE Latin1_General_CI_AS
+		--,lblCustomerPrepayment			=  'Customer Prepay' COLLATE Latin1_General_CI_AS
 		,dblGradeFactorTax				= CASE 
 											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
 											ELSE NULL 
 										END 
-		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepaymentSubTotal	= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment--PartialPayment.dblPayment
-											ELSE NULL 
-										END
-		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepayment			= sum(ISNULL(BasisPayment.dblVendorPrepayment,0))
+		--,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
+		--,dblPartialPrepaymentSubTotal	= CASE 
+		--									WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment--PartialPayment.dblPayment
+		--									ELSE NULL 
+		--								END
+		----,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
+		--,dblPartialPrepayment			= sum(ISNULL(BasisPayment.dblVendorPrepayment,0))
+		,dblBasisPayment			  = ISNULL(BasisPayment.dblPayment,0) + ISNULL(BasisApplied.dblBasisApplied,0)
+		,dblDebitMemoPayment		  = ISNULL(DebitMemoPayment.dblPayment,0) + ISNULL(DebitMemoApplied.dblDebitMemoApplied,0)
 		,CheckAmount				    = PYMT.dblAmountPaid 
 		,intMark					  	= 2	    
 	FROM tblAPPayment PYMT 
@@ -334,16 +355,6 @@ FROM
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId
 			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
-	-- LEFT JOIN (
-	-- 	SELECT 
-	-- 		A.intBillId
-	-- 		,SUM(dblTotal) dblTotal
-	-- 	FROM tblAPBillDetail A
-	-- 	JOIN tblICItem B 
-	-- 		ON A.intItemId = B.intItemId 
-	-- 			AND B.strType = 'Other Charge'
-	-- 	GROUP BY A.intBillId
-	-- ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId			
 	JOIN (
 		SELECT 
 			A.intBillId
@@ -361,7 +372,7 @@ FROM
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 				
 				and APD.dblPayment <> 0
-				AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
+				AND Bill.intTransactionType NOT IN (2,3)
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 				AND BD.intCustomerStorageId IS NULL
@@ -392,26 +403,72 @@ FROM
 		WHERE intInvoiceId IS NOT NULL and dblPayment <> 0
 		GROUP BY intPaymentId
 	) Invoice ON Invoice.intPaymentId = PYMT.intPaymentId			
+	--LEFT JOIN (
+	--	SELECT 
+	--		intPaymentId
+	--		,SUM(APD.dblTotal) dblTotals
+	--		,SUM(APD.dblPayment) dblPayment
+	--	FROM tblAPPaymentDetail APD
+	--	JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+	--	WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
+	--		and APD.dblPayment <> 0
+	--	GROUP BY intPaymentId
+	--	HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	--) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
+	--LEFT JOIN (
+	--	SELECT
+	--		a.intBillId
+	--		,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
+	--	FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  in (13, 3)
+	--	WHERE a.ysnApplied = 1
+	--	GROUP BY a.intBillId
+	--) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(APD.dblTotal) dblTotals
-			,SUM(APD.dblPayment) dblPayment
+			,dblPayment = SUM(APD.dblPayment)
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
-		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
-			and APD.dblPayment <> 0
-		GROUP BY intPaymentId
-		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
-	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
+		WHERE APD.intBillId IS NOT NULL 
+			AND (APB.intTransactionType = 13)-- OR APB.intTransactionType = 3)				
+			AND APD.dblPayment <> 0
+		GROUP BY intPaymentId--, APB.intTransactionType
+		--HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	) BasisPayment ON BasisPayment.intPaymentId = PYMT.intPaymentId
 	LEFT JOIN (
 		SELECT
 			a.intBillId
-			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
-		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  in (13, 3)
+			,dblBasisApplied = SUM(a.dblAmountApplied* -1) 
+		FROM tblAPAppliedPrepaidAndDebit a
+		JOIN tblAPBill b 
+			ON a.intTransactionId = b.intBillId 
+				AND b.intTransactionType = 13
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
-	) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
+	) BasisApplied ON BasisApplied.intBillId = Bill.intBillId
+	LEFT JOIN (
+		SELECT 
+			intPaymentId
+			,dblPayment = SUM(APD.dblPayment) 
+		FROM tblAPPaymentDetail APD
+		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+		WHERE APD.intBillId IS NOT NULL 
+			AND APB.intTransactionType = 3
+			AND APD.dblPayment <> 0
+		GROUP BY intPaymentId--, APB.intTransactionType
+		--HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	) DebitMemoPayment ON DebitMemoPayment.intPaymentId = PYMT.intPaymentId
+	LEFT JOIN (
+		SELECT
+			a.intBillId
+			,dblDebitMemoApplied = SUM(a.dblAmountApplied* -1) 
+		FROM tblAPAppliedPrepaidAndDebit  a 
+		JOIN tblAPBill b 
+			ON a.intTransactionId = b.intBillId 
+				AND b.intTransactionType = 3
+		WHERE a.ysnApplied = 1
+		GROUP BY a.intBillId
+	) DebitMemoApplied ON DebitMemoApplied.intBillId = Bill.intBillId
 	WHERE Item.strType <> 'Other Charge' 
 		AND (intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
 		AND (intSettleStorageId IS NOT NULL OR intCustomerStorageId IS NOT NULL)
@@ -425,9 +482,13 @@ FROM
 		,BillAdjustments.dblTotal
 		,Invoice.dblPayment
 		,ScaleDiscountTax.dblGradeFactorTax
-		,PartialPayment.dblPayment
-		,PartialPayment.dblPayment
-		,PartialPayment.dblTotals
+		--,PartialPayment.dblPayment
+		--,PartialPayment.dblPayment
+		--,PartialPayment.dblTotals
+		,BasisApplied.dblBasisApplied
+		,BasisPayment.dblPayment
+		,DebitMemoApplied.dblDebitMemoApplied
+		,DebitMemoPayment.dblPayment
 		,PYMT.dblAmountPaid	
 		--,BasisPayment.dblVendorPrepayment
 	UNION ALL
@@ -499,26 +560,28 @@ FROM
 		,OutboundNetDue					= 0
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0)
 		,VoucherAdjustment				= ISNULL(BillAdjustments.dblTotal, 0)
-		,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
+		--,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment, 0) <> 0 THEN Invoice.dblPayment
 											ELSE NULL 
 										END
-		,lblCustomerPrepayment			= 'Customer Prepay' COLLATE Latin1_General_CI_AS
+		--,lblCustomerPrepayment			= 'Customer Prepay' COLLATE Latin1_General_CI_AS
 		,dblGradeFactorTax				= CASE 
 											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax, 0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
 											ELSE NULL 
 										END
-		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepaymentSubTotal	= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment 
-											ELSE NULL 
-										END
-		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepayment		  = CASE 
-											WHEN ISNULL(BasisPayment.dblVendorPrepayment, 0) <> 0 THEN BasisPayment.dblVendorPrepayment -- PartialPayment.dblTotals 
-											ELSE NULL 
-										END
+		--,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
+		--,dblPartialPrepaymentSubTotal	= CASE 
+		--									WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment 
+		--									ELSE NULL 
+		--								END
+		----,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
+		--,dblPartialPrepayment		  = CASE 
+		--									WHEN ISNULL(BasisPayment.dblVendorPrepayment, 0) <> 0 THEN BasisPayment.dblVendorPrepayment -- PartialPayment.dblTotals 
+		--									ELSE NULL 
+		--								END
+		,dblBasisPayment			  = ISNULL(BasisPayment.dblPayment,0) + ISNULL(BasisApplied.dblBasisApplied,0)
+		,dblDebitMemoPayment		  = ISNULL(DebitMemoPayment.dblPayment,0) + ISNULL(DebitMemoApplied.dblDebitMemoApplied,0)
 		,CheckAmount				  = PYMT.dblAmountPaid
 		,intMark					  = 1
 	FROM tblAPPayment PYMT 
@@ -543,20 +606,6 @@ FROM
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId 
 			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
-	--LEFT JOIN (
-	--	SELECT 
-	--		a.intBillId
-	--		,a.intInventoryReceiptItemId
-	--		,SUM(a.dblTotal) dblTotal
-	--		,SUM(a.dblTax) dblTax
-	--	FROM tblAPBillDetail a 
-	--		join tblAPBill  b
-	--			on a.intBillId = b.intBillId --and b.intTransactionType = 1
-	--	WHERE a.intInventoryReceiptChargeId IS NOT NULL
-	--	GROUP BY a.intBillId
-	--		,a.intInventoryReceiptItemId
-	--) BillByReceipt ON BillByReceipt.intBillId = BillDtl.intBillId
-	--	AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	-- MANUALLY ADDED LINE ITEMS IN THE MAIN VOUCHER FROM SCALE TICKET
 	LEFT JOIN (
 		SELECT 
@@ -567,7 +616,7 @@ FROM
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 				
 				and APD.dblPayment <> 0
-				AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
+				AND Bill.intTransactionType NOT IN (2,3)
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 			AND BD.intScaleTicketId IS NULL
@@ -598,26 +647,72 @@ FROM
 		WHERE intInvoiceId IS NOT NULL and dblPayment <> 0
 		GROUP BY intPaymentId
 	) Invoice ON Invoice.intPaymentId = PYMT.intPaymentId
+	--LEFT JOIN (
+	--	SELECT 
+	--		intPaymentId
+	--		,SUM(APD.dblTotal) dblTotals
+	--		,SUM(APD.dblPayment) dblPayment
+	--	FROM tblAPPaymentDetail APD
+	--	JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+	--	WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
+	--		and APD.dblPayment <> 0
+	--	GROUP BY intPaymentId
+	--	HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	--) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
+	--LEFT JOIN (
+	--	SELECT
+	--		a.intBillId
+	--		,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
+	--	FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType in (13, 3)
+	--	WHERE a.ysnApplied = 1
+	--	GROUP BY a.intBillId
+	--) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(APD.dblTotal) dblTotals
-			,SUM(APD.dblPayment) dblPayment
+			,dblPayment = SUM(APD.dblPayment)
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
-		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
-			and APD.dblPayment <> 0
-		GROUP BY intPaymentId
-		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
-	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
+		WHERE APD.intBillId IS NOT NULL 
+			AND (APB.intTransactionType = 13)-- OR APB.intTransactionType = 3)				
+			AND APD.dblPayment <> 0
+		GROUP BY intPaymentId--, APB.intTransactionType
+		--HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	) BasisPayment ON BasisPayment.intPaymentId = PYMT.intPaymentId
 	LEFT JOIN (
 		SELECT
 			a.intBillId
-			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
-		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType in (13, 3)
+			,dblBasisApplied = SUM(a.dblAmountApplied* -1) 
+		FROM tblAPAppliedPrepaidAndDebit a
+		JOIN tblAPBill b 
+			ON a.intTransactionId = b.intBillId 
+				AND b.intTransactionType = 13
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
-	) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
+	) BasisApplied ON BasisApplied.intBillId = Bill.intBillId
+	LEFT JOIN (
+		SELECT 
+			intPaymentId
+			,dblPayment = SUM(APD.dblPayment) 
+		FROM tblAPPaymentDetail APD
+		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+		WHERE APD.intBillId IS NOT NULL 
+			AND APB.intTransactionType = 3
+			AND APD.dblPayment <> 0
+		GROUP BY intPaymentId--, APB.intTransactionType
+		--HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+	) DebitMemoPayment ON DebitMemoPayment.intPaymentId = PYMT.intPaymentId
+	LEFT JOIN (
+		SELECT
+			a.intBillId
+			,dblDebitMemoApplied = SUM(a.dblAmountApplied* -1) 
+		FROM tblAPAppliedPrepaidAndDebit  a 
+		JOIN tblAPBill b 
+			ON a.intTransactionId = b.intBillId 
+				AND b.intTransactionType = 3
+		WHERE a.ysnApplied = 1
+		GROUP BY a.intBillId
+	) DebitMemoApplied ON DebitMemoApplied.intBillId = Bill.intBillId
 	WHERE (BillDtl.intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
 		AND (intSettleStorageId IS NULL AND intCustomerStorageId IS NULL)
 		AND Item.strType <> 'Other Charge'
@@ -625,23 +720,24 @@ FROM
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
 		,Bill.strBillId
-		--,BillByReceipt.dblTotal
-		--,BillByReceipt.dblTax
 		,Invoice.dblPayment
 		,BillAdjustments.dblTotal
-		-- ,VendorPrepayment.dblVendorPrepayment
 		,Invoice.dblPayment
 		,ScaleDiscountTax.dblGradeFactorTax
-		,PartialPayment.dblPayment
-		,PartialPayment.dblPayment
-		,PartialPayment.dblTotals
+		--,PartialPayment.dblPayment
+		--,PartialPayment.dblPayment
+		--,PartialPayment.dblTotals
+		,BasisApplied.dblBasisApplied
+		,BasisPayment.dblPayment
+		,DebitMemoApplied.dblDebitMemoApplied
+		,DebitMemoPayment.dblPayment
 		,PYMT.dblAmountPaid 	
 		,BillDtl.intCustomerStorageId
 		,BillDtl.intInventoryReceiptItemId
 		,tblOtherCharge.dblTotal
 		,tblOtherCharge.dblTax
 		,BillDtl.intInventoryReceiptChargeId
-		,BasisPayment.dblVendorPrepayment
+		--,BasisPayment.dblVendorPrepayment
 ) t
 
 --This is added for GRN-2639
@@ -716,14 +812,13 @@ OUTER APPLY (
 	JOIN tblAPBill Bill
 		ON Bill.intBillId = APD.intBillId 				
 			and APD.dblPayment <> 0
-			AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
+			--AND Bill.intTransactionType <> 2 -- Exclude vendor prepay
+			AND Bill.intTransactionType = 1
 	-- Exclude vouchers generated from scale or settlement
 	WHERE NOT EXISTS (
 		SELECT 1 FROM tblGRSettleStorageBillDetail SSBH
 		WHERE SSBH.intBillId = Bill.intBillId
-
 		UNION ALL
-
 		SELECT 1 FROM tblAPBillDetail BD2
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = BD2.intScaleTicketId
 		WHERE BD2.intBillId = Bill.intBillId
@@ -742,13 +837,15 @@ GROUP BY
 	,SalesAdjustment	
 	,BillAdjustments.dblTotalAdjustment
 	,VendorPrepayment.dblVendorPrepayment
-	,lblVendorPrepayment		 
+	--,lblVendorPrepayment		 
 	,dblCustomerPrepayment		 
-	,lblCustomerPrepayment		 
-	,dblGradeFactorTax			 
-	,lblFactorTax				 
-	,dblPartialPrepaymentSubTotal
-	,lblPartialPrepayment		 
+	--,lblCustomerPrepayment		 
+	,dblGradeFactorTax	
+	,dblBasisPayment	
+	,dblDebitMemoPayment
+	--,lblFactorTax				 
+	--,dblPartialPrepaymentSubTotal
+	--,lblPartialPrepayment		 
 	--,dblPartialPrepayment		 
 	,CheckAmount
 	,ISNULL(AdditionalTax.dblTax, 0)

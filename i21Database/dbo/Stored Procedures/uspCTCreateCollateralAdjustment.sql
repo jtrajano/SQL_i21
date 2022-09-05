@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateCollateralAdjustment]
 	@intContractDetailId			INT,
-	@dblQuantityToUpdate			NUMERIC(18,6),
+	@dblQuantityToUpdate			NUMERIC(38,20),
 	@intUserId						INT,
 	@intExternalId					INT,
 	@strScreenName					NVARCHAR(50)
@@ -10,8 +10,8 @@ BEGIN TRY
 	
 	DECLARE @idoc			INT,			@ErrMsg				NVARCHAR(MAX),	@intQtyUnitMeasureId		INT,
 			@intItemId		INT,			@XML				NVARCHAR(MAX),	@intContractHeaderId		INT,
-			@strNumber		NVARCHAR(100),	@intCollateralId	INT,			@dblCollateralQty			NUMERIC(18,6),
-			@strUnitMeasure	NVARCHAR(100),	@intCollateralUOMId	INT,			@dblRemainingQuantity		NUMERIC(18,6),
+			@strNumber		NVARCHAR(100),	@intCollateralId	INT,			@dblCollateralQty			NUMERIC(38,20),
+			@strUnitMeasure	NVARCHAR(100),	@intCollateralUOMId	INT,			@dblRemainingQuantity		NUMERIC(38,20),
 			@strTransNo		NVARCHAR(100),	@strItemNo			NVARCHAR(100),	@strAdjustmentNo			NVARCHAR(100),	
 																				@intCollateralAdjustmentId	INT
 

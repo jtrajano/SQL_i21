@@ -206,6 +206,30 @@ BEGIN TRY
             FROM fnSCGetDPContract(NULL,@intEntityId,@intItemId,'I',@dtmTicketDate)
         END
 
+		-- If there is still no existing DP contract selected, try to search for an existing DP contract with end date later than the ticket date and then adjust it's start date
+		IF ISNULL(@intContractDetailId,0) = 0
+		BEGIN
+			SELECT	TOP	1	
+				@intContractDetailId = CD.intContractDetailId
+			FROM	vyuCTContractDetailView CD
+			WHERE	CD.intContractTypeId	=	1
+			AND		CD.intEntityId			=	@intEntityId
+			AND		CD.intItemId			=	@intItemId
+			AND		CD.intPricingTypeId		=	5
+			AND		CD.ysnAllowedToShow		=	1
+			AND 	CD.intCompanyLocationId = 	CASE WHEN ISNULL((SELECT TOP 1 intAllowOtherLocationContracts FROM tblSCScaleSetup WHERE intScaleSetupId = @intTicketSclaeSetupId),0) = 2
+													THEN @locationId
+													ELSE CD.intCompanyLocationId
+												END
+			AND		CD.dtmEndDate			>=	@dtmTicketDate
+			ORDER BY CD.dtmEndDate DESC
+
+			IF ISNULL(@intContractDetailId,0) <> 0
+			BEGIN
+				EXEC uspCTUpdateStartDate @intContractDetailId, @dtmTicketDate, @intUserId
+			END
+		END
+
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
 			IF ISNULL(@ysnAutoCreateDP ,0) = 1

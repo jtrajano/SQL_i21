@@ -17,11 +17,11 @@ BEGIN TRY
 		, @ysnAmdWoAppvl BIT
 		, @intSequenceHistoryId INT
 		, @intPrevHistoryId INT
-		, @dblPrevQty NUMERIC(18, 6)
-		, @dblPrevBal NUMERIC(18, 6)
+		, @dblPrevQty NUMERIC(38, 20)
+		, @dblPrevBal NUMERIC(38, 20)
 		, @intPrevStatusId INT
-		, @dblQuantity NUMERIC(18, 6)
-		, @dblBalance NUMERIC(18, 6)
+		, @dblQuantity NUMERIC(38, 20)
+		, @dblBalance NUMERIC(38, 20)
 		, @intContractStatusId INT
 		, @dblPrevFutures NUMERIC(18, 6)
 		, @dblPrevBasis NUMERIC(18, 6)
@@ -405,6 +405,13 @@ BEGIN TRY
 		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
 
 		SELECT @intSequenceHistoryCount = COUNT(*) FROM #tempSequenceHistoryCompare
+
+		declare @intLastEntryUsageHistoryId int;
+		select top 1 @intLastEntryUsageHistoryId = intSequenceUsageHistoryId from #tempSequenceHistoryCompare;
+		if (@intLastEntryUsageHistoryId is null)
+		begin
+			update #tempSequenceHistoryCompare set intSequenceUsageHistoryId = null;
+		end
 
 		SELECT @intValidSequenceHistoryCount = COUNT(*) FROM (
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare

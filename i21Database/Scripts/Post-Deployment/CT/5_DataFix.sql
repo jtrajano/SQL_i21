@@ -6,7 +6,7 @@ GO
 	declare @ysnLoad bit;
 	declare @intPriceFixationId int;
 	declare @intPriceFixationDetailId int;
-	declare @dblQuantity numeric(18,6);
+	declare @dblQuantity numeric(38,20);
 	declare @dblQuantityAppliedAndPriced numeric(18,6);
 	declare @dblLoadPriced numeric(18,6);
 	declare @dblLoadAppliedAndPriced numeric(18,6);
@@ -187,7 +187,7 @@ GO
 		,tblCTContractCondition b
 		,tblCTCondition c
 	where
-		b.strConditionDescription is null
+		LTRIM(RTRIM(ISNULL(b.strConditionDescription, ''))) = ''
 		and b.intContractHeaderId = a.intContractHeaderId
 		and c.intConditionId = b.intConditionId
 

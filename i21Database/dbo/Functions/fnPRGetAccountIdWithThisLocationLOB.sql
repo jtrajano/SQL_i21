@@ -45,6 +45,7 @@ BEGIN
 		INNER JOIN tblGLAccountSegment B ON B.intAccountSegmentId = A.intAccountSegmentId
 		INNER JOIN tblGLAccountStructure C ON C.intAccountStructureId = B.intAccountStructureId
 		INNER JOIN tblGLAccount D ON A.intAccountId = D.intAccountId
+		WHERE B.intAccountSegmentId IN (@intOrigPrimaryAccount,@intProfitCenter,@intLineOfBusiness)
 	) AS S
 	PIVOT
 	(

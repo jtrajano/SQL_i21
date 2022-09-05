@@ -707,8 +707,13 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.FreightTerm') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Freight Terms', N'Freight Terms', N'i21.view.FreightTerm', N'System Manager', N'tblSMFreightTerm', 1, N'System Manager')
+		VALUES (N'Freight Term', N'Freight Term', N'i21.view.FreightTerm', N'System Manager', N'tblSMFreightTerm', 1, N'System Manager')
 	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Freight Term', strScreenName = 'Freight Term' WHERE strNamespace = 'i21.view.FreightTerm'
+	END
+	DELETE FROM tblSMScreen WHERE strNamespace = 'i21.view.FreightTerms'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.City') 
 	BEGIN
@@ -1287,38 +1292,21 @@ GO
 			WHERE strNamespace = 'HelpDesk.view.TimeEntry'
 		END
 
-	--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance')
-	--BEGIN
-	--	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-	--	VALUES (N'Voucher/Vendor Prepayment/Basis Advance', N'Voucher/Vendor Prepayment/Basis Advance', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0, N'Transaction')
-	--END
-	--ELSE
-	--BEGIN
-	--	UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction'
-	--	WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance'
-	--END
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Payroll.view.TimeApproval')
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [ysnApproval], [intConcurrencyId], [ysnAvailable])
+		VALUES (N'Time Approval', N'Time Approval', N'Payroll.view.TimeApproval', N'Payroll', 0, 1, 1)
+	END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strScreenName = N'Time Approval', ysnAvailable = 1
+		WHERE strNamespace = 'Payroll.view.TimeApproval'
+	END
 
-	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
-	-- BEGIN
-	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
-    --     VALUES (N'', N'Inventory Receipt', N'Inventory.view.InventoryReceipt', N'Inventory Receipt', N'', 1,  0) 
-	-- END
-	-- ELSE
-	-- BEGIN
-	-- 	UPDATE tblSMScreen
-    --     SET  ysnApproval = 1
-    --     WHERE strNamespace = 'Inventory.view.InventoryReceipt'
-	-- END
-
-	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders')
-	-- BEGIN
-	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
-    --     VALUES (N'', N'Inventory Receipt Transfer Orders', N'Inventory.view.InventoryReceipt.TransferOrders', N'Inventory Receipt Transfer Orders', N'', 1,  0) 
-	-- END
-	-- ELSE
-	-- BEGIN
-	-- 	UPDATE tblSMScreen
-    --     SET  ysnApproval = 1
-    --     WHERE strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders'
-	-- END
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.Allocation') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'', N'Allocation', N'Logistics.view.Allocation', N'Logistics', NULL, 1, N'Logistics')
+	END
 GO

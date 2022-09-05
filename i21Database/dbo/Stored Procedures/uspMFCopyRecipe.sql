@@ -295,7 +295,7 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intLocationId
 			AND ysnActive = 1
-			AND intSubLocationId = @intSubLocationId
+			-- AND intSubLocationId = @intSubLocationId --MFG-4587
 	END
 
 	IF @intRecipeId IS NULL
@@ -305,7 +305,7 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intLocationId
 			AND ysnActive = 1
-			AND intSubLocationId IS NULL
+			AND intSubLocationId IS NULL 
 	END
 
 	INSERT INTO dbo.tblMFWorkOrderRecipe (
