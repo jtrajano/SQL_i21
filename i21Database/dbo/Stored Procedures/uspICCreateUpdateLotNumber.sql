@@ -781,16 +781,32 @@ BEGIN
 				,dblWeightPerQty		=	CASE	
 													-- Allow the wgt per qty to change if qty is zero or negative (if negative stock is allowed)
 													WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
-														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
-																	CASE WHEN LotToUpdate.intWeightUOMId = LotToUpdate.intItemUOMId THEN 1 ELSE
-																	dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) END
-																ELSE 0 
+														CASE	
+															-- If new weight uom is provided, compute a new weight per qty. 
+															WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
+																CASE 
+																	WHEN LotToUpdate.intWeightUOMId = LotToUpdate.intItemUOMId THEN 1 
+																	ELSE dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) 
+																END
+															-- If new weight uom is blank but new lot qty is the same uom for the qty and wgt of the existing lot, keep the same wgt per qty. 
+															WHEN LotMaster.intItemUOMId = LotMaster.intWeightUOMId AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId THEN
+																LotMaster.dblWeightPerQty  
+															ELSE
+																0
 														END 
 													WHEN ISNULL(LotMaster.dblQty, 0) < 0 AND LotToUpdate.dblQty > 0 THEN 														
-														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
-																	CASE WHEN LotToUpdate.intWeightUOMId = LotToUpdate.intItemUOMId THEN 1 ELSE
-																	dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) END
-																ELSE 0 
+														CASE	
+															-- If new weight uom is provided, compute a new weight per qty. 
+															WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
+																CASE 
+																	WHEN LotToUpdate.intWeightUOMId = LotToUpdate.intItemUOMId THEN 1 
+																	ELSE dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) 
+																END
+															-- If new weight uom is blank but new lot qty is the same uom for the qty and wgt of the existing lot, keep the same wgt per qty. 
+															WHEN LotMaster.intItemUOMId = LotMaster.intWeightUOMId AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId THEN
+																LotMaster.dblWeightPerQty 
+															ELSE 
+																0
 														END 
 													ELSE 
 														
