@@ -214,7 +214,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		FROM tblVRUOMXref xref
 		WHERE xref.intVendorSetupId = vs.intVendorSetupId
 			AND xref.intUnitMeasureId = u.intUnitMeasureId
-			--AND xref.strVendorUOM = vts.strVendorUnitMeasure
+			AND xref.strVendorUOM = vts.strVendorUnitMeasure
 	)
 	AND @OverwriteExisting = 0
 
@@ -678,6 +678,7 @@ JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblICUnitMeasure u ON u.strUnitMeasure = vs.strUnitMeasure
 JOIN tblVRUOMXref uv ON uv.intUnitMeasureId = u.intUnitMeasureId
 	AND uv.intVendorSetupId = e.intVendorSetupId
+	AND uv.strVendorUOM = vs.strVendorUnitMeasure
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 1
 
@@ -695,6 +696,7 @@ JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND e.intVendorSetupId = xc.intVendorSetupId
+	AND vs.strVendorUnitMeasure = xc.strVendorUOM
 	AND NOT EXISTS (
 		SELECT TOP 1 1
 		FROM tblApiImportLogDetail d
@@ -739,22 +741,12 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		FROM tblVRUOMXref xref
 		WHERE xref.intVendorSetupId = vs.intVendorSetupId
 			AND xref.intUnitMeasureId = u.intUnitMeasureId
-			--AND xref.strVendorUOM = vts.strVendorUnitMeasure
+			AND xref.strVendorUOM = vts.strVendorUnitMeasure
 	)
 
 ;WITH cte AS
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorUOM ORDER BY sr.intVendorSetupId, sr.strVendorUOM) AS RowNumber
-   FROM @UniqueUOMs sr
-   WHERE sr.guiApiUniqueId = @guiApiUniqueId
-)
-DELETE FROM cte
-WHERE guiApiUniqueId = @guiApiUniqueId
-  AND RowNumber > 1;
-
-;WITH cte AS
-(
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intUnitMeasureId ORDER BY sr.intVendorSetupId, sr.intUnitMeasureId) AS RowNumber
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intUnitMeasureId, sr.strVendorUOM ORDER BY sr.intVendorSetupId, sr.intUnitMeasureId, sr.strVendorUOM) AS RowNumber
    FROM @UniqueUOMs sr
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
 )

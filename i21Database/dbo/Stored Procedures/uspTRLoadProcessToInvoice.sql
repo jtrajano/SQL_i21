@@ -215,7 +215,7 @@ BEGIN TRY
 		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
 		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
-		--AND ISNULL(BlendIngredient.strType, '') != 'Other Charge'
+		AND BlendIngredient.strType != 'Other Charge'
 	) BlendingIngredient ON BlendingIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = '' AND BlendingIngredient.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
@@ -231,9 +231,7 @@ BEGIN TRY
 
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
-		-- AND (TL.intMobileLoadHeaderId IS NULL
-		-- 	OR (TL.intMobileLoadHeaderId IS NOT NULL AND DH.ysnMobileInvoice = 0)
-		-- )
+		AND TL.intMobileLoadHeaderId IS NULL
 
 	-- Concatenate PO Number, BOL Number, and Comments in cases there are different values and they are not used as a grouping option
 	DECLARE @concatPONumber NVARCHAR(MAX) = ''
@@ -786,7 +784,7 @@ BEGIN TRY
 		0 AS intId
 		,[strType] 								= IE.strType
 		,[strSourceTransaction]					= IE.strSourceTransaction
-		,[intLoadDistributionDetailId]			= NULL
+		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		,[intSourceId]							= IE.intSourceId
 		,[strSourceId]							= IE.strSourceId
 		,[intInvoiceId]							= IE.intInvoiceId --NULL Value will create new invoice
@@ -1133,7 +1131,8 @@ BEGIN TRY
 			,[ysnClearDetailTaxes]					
 			,[intTempDetailIdForTaxes]
 			,[strBOLNumberDetail]
-			,[ysnBlended])
+			,[ysnBlended]
+			,[intLoadDistributionDetailId])
 		SELECT
 			[strSourceTransaction]					= IE.strSourceTransaction
 			,[intSourceId]							= IE.intSourceId
@@ -1211,6 +1210,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
+			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnComboFreight = 0 AND IE.intId > 0)
@@ -1292,6 +1292,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
+			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnComboFreight = 1 AND IE.intId > 0)
@@ -1368,6 +1369,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[intLoadDistributionDetailId]
 	)
 	SELECT 
 		[strSourceTransaction]					= IE.strSourceTransaction
@@ -1439,6 +1441,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
 		,[ysnImpactInventory]                   = ISNULL(IE.ysnImpactInventory,0)
 		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
+		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]
 		,[strSourceId]
@@ -1505,6 +1508,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[intLoadDistributionDetailId]
 
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
@@ -1513,23 +1517,15 @@ BEGIN TRY
 	LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
 	WHERE E.intLoadDistributionHeaderId IS NOT NULL AND S.strFreightBilledBy = 'Internal Carrier')
 	BEGIN
-		DECLARE @dblTotalFreightCharge NUMERIC(18,6) = NULL
-		DECLARE @dblTotalSurcharge NUMERIC(18,6) = NULL
+		DECLARE @dblTotalCharge NUMERIC(18,6) = NULL
 		
-		SELECT @dblTotalFreightCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
+		SELECT @dblTotalCharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
 		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
-		INNER JOIN tblICItem II ON RC.intChargeId = II.intItemId
-		WHERE STF.intId != 0 AND II.strCostType = 'Freight'
-
-		SELECT @dblTotalSurcharge = SUM(RC.dblAmount) FROM #tmpSourceTableFinal STF 
-		INNER JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptId = STF.intInventoryReceiptId
-		INNER JOIN tblICItem II ON RC.intChargeId = II.intItemId
-		WHERE STF.intId != 0 AND II.strCostType = 'Other Charges'
+		WHERE STF.intId != 0
 
 		UPDATE E SET E.intFreightCompanySegment = S.intCompanySegmentId
 		, E.intFreightLocationSegment = S.intProfitCenterId
-		, E.dblFreightCharge = @dblTotalFreightCharge
-		, E.dblSurcharge = @dblTotalSurcharge
+		, E.dblFreightCharge = @dblTotalCharge
 		FROM @EntriesForInvoice E
 		LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
 		WHERE E.intId = (

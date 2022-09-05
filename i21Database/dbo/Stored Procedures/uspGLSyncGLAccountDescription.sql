@@ -1,18 +1,18 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLSyncGLAccountDescription]
 	@intAccountSegmentId int
 AS
-DECLARE @tbl TABLE 
+EXEC('DECLARE @tbl TABLE 
 (
 	intAccountId INT
 )
 INSERT INTO @tbl
-	SELECT intAccountId FROM tblGLAccountSegmentMapping WHERE intAccountSegmentId = @intAccountSegmentId
+	SELECT intAccountId FROM tblGLAccountSegmentMapping WHERE intAccountSegmentId = ' + @intAccountSegmentId + '
 
 ;WITH CTE(intAccountId,strDescription) AS(
 
 	SELECT A1.intAccountId,
 	   STUFF(( 
-	   SELECT  ' - ' +  RTRIM(S.strDescription)
+	   SELECT  '' - '' +  RTRIM(S.strDescription)
 		FROM         dbo.tblGLAccountSegment S INNER JOIN
 						  dbo.tblGLAccountSegmentMapping M ON S.intAccountSegmentId = M.intAccountSegmentId 
 						  RIGHT OUTER JOIN
@@ -20,17 +20,17 @@ INSERT INTO @tbl
 						  
 						  WHERE A2.intAccountId = A1.intAccountId
 						  
-			FOR XML PATH('') )  
-		, 1, 2, '' ) AS strDescription
+			FOR XML PATH('''') )  
+		, 1, 2, '''' ) AS strDescription
 FROM tblGLAccount A1  
 JOIN @tbl A3 ON A3.intAccountId = A1.intAccountId
 GROUP BY A1.intAccountId)
 
-UPDATE A SET A.strDescription = ISNULL(CTE.strDescription ,'')
+UPDATE A SET A.strDescription = ISNULL(CTE.strDescription ,'''')
 FROM tblGLAccount A INNER JOIN CTE ON A.intAccountId = CTE.intAccountId
 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
-EXEC('UPDATE G SET G.glact_desc = SUBSTRING(ISNULL(A.strDescription,''''),1,30)
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glactmst]'') AND type IN (N''U''))
+UPDATE G SET G.glact_desc = SUBSTRING(ISNULL(A.strDescription,''''),1,30)
 FROM tblGLAccount A 
 JOIN @tbl S ON S.intAccountId = A.intAccountId
 JOIN tblGLCOACrossReference C ON C.inti21Id = A.intAccountId

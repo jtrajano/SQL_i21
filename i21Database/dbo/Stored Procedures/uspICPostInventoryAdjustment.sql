@@ -853,6 +853,7 @@ BEGIN
 	BEGIN 
 		IF(EXISTS(SELECT * FROM @GLEntries))
 		BEGIN
+			UPDATE @GLEntries SET dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
 			EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 		END
 	END

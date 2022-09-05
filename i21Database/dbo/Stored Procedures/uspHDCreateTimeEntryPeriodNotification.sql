@@ -2,6 +2,11 @@
 AS
 BEGIN
 
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET ANSI_WARNINGS OFF
+
 DECLARE @FirstWarningDate DATETIME,
 		@SencondWarningDate DATETIME,
 		@LockoutDate DATETIME,
@@ -24,11 +29,11 @@ SELECT TOP 1   @TimeEntryPeriodDetailId		= intTimeEntryPeriodDetailId
 			  ,@BillingEndDate				= dtmBillingPeriodEnd
 			  ,@RequiredHours				= intRequiredHours
 			  ,@strWarningType				= CASE WHEN dtmFirstWarningDate = @currentDate
-														THEN 'First Warning'
+														THEN 'First Reminder'
 												  WHEN dtmSecondWarningDate = @currentDate
-														THEN 'Second Warning'
+														THEN 'Second Reminder'
 												  WHEN dtmLockoutDate = @currentDate
-														THEN 'Lockout Warning'
+														THEN ''
 												  ELSE NULL
 											  END
 FROM tblHDTimeEntryPeriodDetail
@@ -56,7 +61,12 @@ SELECT DISTINCT a.intEntityId
 FROM vyuHDAgentDetail a
 	 INNER JOIN tblEMEntity b
 ON a.intEntityId = b.intEntityId
-WHERE ISNULL(a.strEmail, '') <> ''
+	 INNER JOIN tblHDCoworkerGoal c
+ON c.intEntityId = a.intEntityId 
+WHERE ISNULL(a.strEmail, '') <> '' AND 
+	  a.ysnVendor = CONVERT(BIT, 0) AND
+	  a.ysnTimeEntryExempt = CONVERT(BIT, 0) AND
+      c.strFiscalYear = DATEPART(YEAR, GETDATE())
 
 OPEN EmployeeLoop
 FETCH NEXT FROM EmployeeLoop INTO @EntityId
