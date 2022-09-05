@@ -2,8 +2,6 @@
 (
 	@intUserId INT
 	,@intItemId INT
-	,@intAdjustmentTypeId INT
-	,@ysnTransferSettlement BIT
 	,@AdjustSettlementsStagingTable AdjustSettlementsStagingTable READONLY
 	,@intInvoiceId INT OUTPUT
 )
@@ -12,17 +10,12 @@ BEGIN
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 	DECLARE @intCurrencyId INT
-	DECLARE @strTransactionType NVARCHAR(25)
+	--DECLARE @strTransactionType NVARCHAR(25)
 	DECLARE @intFreightItemId INT
 	DECLARE @ErrorMessage NVARCHAR(MAX)
 	DECLARE @CreatedInvoices NVARCHAR(MAX)
 
 	SELECT @intCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
-	
-	SET @strTransactionType = CASE 
-								WHEN @intAdjustmentTypeId = 2 OR (@intAdjustmentTypeId = 3 AND @ysnTransferSettlement = 0) THEN 'Invoice'
-								ELSE 'Credit Memo'
-							END
 
 	SELECT @intFreightItemId = FR.intItemId
 	FROM tblICItem IC
@@ -70,7 +63,7 @@ BEGIN
 		,[ysnRecomputeTax]
 	)
 	SELECT 
-		[strTransactionType]			= @strTransactionType
+		[strTransactionType]			= CASE WHEN ADJ.dblAdjustmentAmount < 0 THEN 'Credit Memo' ELSE 'Invoice' END
 		,[strType]						= 'Standard'
 		,[strSourceTransaction]			= 'Direct'
 		,[intAccountId]					= intGLAccountId
@@ -88,14 +81,14 @@ BEGIN
 		,[ysnSplitted]					= 0
 		,[intEntityId]					= ADJ.intEntityId
 		,[ysnResetDetails]				= 0
-		,[intItemId]					= CASE WHEN @intAdjustmentTypeId = 2 THEN @intFreightItemId ELSE NULL END
+		,[intItemId]					= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN @intFreightItemId ELSE NULL END
 		,[ysnInventory]					= 0
-		,[strItemDescription]			= CASE WHEN @intAdjustmentTypeId = 2 THEN ICF.strDescription ELSE ADJ.strAdjustSettlementNumber END
-		,[intOrderUOMId]				= CASE WHEN @intAdjustmentTypeId = 2 THEN UOM.intItemUOMId ELSE NULL END
-		,[intItemUOMId]					= CASE WHEN @intAdjustmentTypeId = 2 THEN UOM.intItemUOMId ELSE NULL END
-		,[dblQtyOrdered]				= CASE WHEN @intAdjustmentTypeId = 2 THEN ADJ.dblFreightUnits ELSE 1 END
-		,[dblQtyShipped]				= CASE WHEN @intAdjustmentTypeId = 2 THEN ADJ.dblFreightUnits ELSE 1 END
-		,[dblPrice]						= CASE WHEN @intAdjustmentTypeId = 2 THEN ADJ.dblFreightRate ELSE ABS(dblAdjustmentAmount) END
+		,[strItemDescription]			= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ICF.strDescription ELSE ADJ.strAdjustSettlementNumber END
+		,[intOrderUOMId]				= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN UOM.intItemUOMId ELSE NULL END
+		,[intItemUOMId]					= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN UOM.intItemUOMId ELSE NULL END
+		,[dblQtyOrdered]				= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ADJ.dblFreightUnits ELSE 1 END
+		,[dblQtyShipped]				= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ADJ.dblFreightUnits ELSE 1 END
+		,[dblPrice]						= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ADJ.dblFreightRate ELSE ABS(dblAdjustmentAmount) END
 		,[ysnRecomputeTax]				= 1
 	FROM @AdjustSettlementsStagingTable ADJ
 	LEFT JOIN tblARCustomer AR

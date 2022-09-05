@@ -4,25 +4,17 @@
 	,@intItemId INT
 	,@intContractDetailId INT = NULL
 	,@intAdjustmentTypeId INT
-	,@ysnTransferSettlement BIT
 	,@AdjustSettlementsStagingTable AdjustSettlementsStagingTable READONLY
 	,@intBillId INT OUTPUT
 )
 AS
 BEGIN
-	DECLARE @intTransactionTypeId INT
 	DECLARE @intPrepayTypeId INT
 	DECLARE @intFreightItemId INT
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
 	DECLARE @createdVouchersId NVARCHAR(MAX)
 	DECLARE @ErrMsg NVARCHAR(MAX)
-
-	SET @intTransactionTypeId = CASE
-									WHEN @intAdjustmentTypeId = 1 THEN 2 --VPRE
-									WHEN @intAdjustmentTypeId = 2 THEN 1 --BL
-									WHEN @intAdjustmentTypeId = 3 THEN CASE WHEN @ysnTransferSettlement = 1 THEN 3 ELSE 1 END --DM
-								END
 
 	SET @intPrepayTypeId = CASE WHEN @intAdjustmentTypeId = 1 THEN CASE WHEN @intContractDetailId IS NULL THEN 1 /*Standard*/ ELSE 2 /*Unit*/ END ELSE NULL END
 
@@ -59,9 +51,14 @@ BEGIN
 		,intContractHeaderId
 		,intContractSeqId
 		,intTermId
+		,ysnStage
 	)
-	SELECT	
-		intTransactionType		= @intTransactionTypeId
+	SELECT
+		intTransactionType		= CASE
+									WHEN @intAdjustmentTypeId = 1 THEN 2 --VPRE
+									WHEN @intAdjustmentTypeId IN (2,3) THEN 
+										CASE WHEN ADJ.dblAdjustmentAmount < 0 THEN 3 /*DM*/ ELSE 1 END --BL
+								END
 		,intEntityVendorId		= ADJ.intEntityId
 		,intShipToId			= ADJ.intCompanyLocationId
 		,intItemId				= CASE 
@@ -94,7 +91,7 @@ BEGIN
 											WHEN ISNULL(ADJ.dblFreightRate,0) > 0 THEN ADJ.dblFreightRate
 											ELSE ABS(ADJ.dblAdjustmentAmount)
 										END
-									ELSE ADJ.dblAdjustmentAmount 
+									ELSE ABS(ADJ.dblAdjustmentAmount)
 								END
 		,intAccountId			= intGLAccountId
 		,strVendorOrderNumber	= strTicketNumber
@@ -123,6 +120,7 @@ BEGIN
 									WHEN @intAdjustmentTypeId = 1 THEN CH.intTermId
 									ELSE AP.intTermsId
 								END
+		,ysnStage				= 0
 	FROM @AdjustSettlementsStagingTable ADJ
 	LEFT JOIN tblAPVendor AP
 		ON AP.intEntityId = ADJ.intEntityId
@@ -145,10 +143,12 @@ BEGIN
 		,@error = @ErrMsg
 		,@createdVouchersId = @createdVouchersId OUTPUT
 
+		SELECT * FROM tblAPBill ORDER BY intBillId DESC
+
 	IF @createdVouchersId IS NOT NULL
 	BEGIN
 		SET @intBillId = CAST(@createdVouchersId AS int)
 	END
 
-	RETURN;
+	RETURN @intBillId;
 END

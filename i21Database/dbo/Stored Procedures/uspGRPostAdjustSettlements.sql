@@ -152,7 +152,6 @@ BEGIN
 		,@intItemId = @intItemId
 		,@intContractDetailId = @intContractDetailId
 		,@intAdjustmentTypeId = @intAdjustmentTypeId
-		,@ysnTransferSettlement = @ysnTransferSettlement
 		,@AdjustSettlementsStagingTable = @AdjustSettlementsStagingTable
 		,@intBillId = @intBillId OUTPUT
 
@@ -185,8 +184,6 @@ BEGIN
 	EXEC [dbo].[uspGRAdjustSettlementsForSales]
 		@intUserId = @intUserId
 		,@intItemId = @intItemId
-		,@intAdjustmentTypeId = @intAdjustmentTypeId
-		,@ysnTransferSettlement  = @ysnTransferSettlement
 		,@AdjustSettlementsStagingTable = @AdjustSettlementsStagingTable
 		,@intInvoiceId = @intBillId OUTPUT
 
