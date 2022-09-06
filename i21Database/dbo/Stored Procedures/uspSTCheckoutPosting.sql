@@ -208,6 +208,11 @@ BEGIN
 		DECLARE @strCASH NVARCHAR(100) = 'Cash'
 		DECLARE @strCREDITMEMO NVARCHAR(100) = 'Credit Memo'
 
+		IF @ysnConsignmentStore = 1
+		BEGIN
+			SET @strCASH = 'Invoice'
+		END
+
 		------------------------------------------------------------------------------
 		-- Set Invoice Type for MAIN
 		-- http://jira.irelyserver.com/browse/ST-1352
@@ -458,6 +463,42 @@ BEGIN
 						GOTO ExitWithRollback
 					END
 
+				-- Consignment validations
+				IF @ysnConsignmentStore = 1
+				BEGIN
+					DECLARE		@intPaymentMethod INT = 0
+					DECLARE		@intCustomerPaymentMethod INT = 0
+					DECLARE		@strCustomerName NVARCHAR(150) = ''
+
+					SELECT		@intPaymentMethod = intPaymentMethodID 
+					FROM		tblSMPaymentMethod 
+					WHERE		strPaymentMethod = 'ACH'
+
+					SELECT		@intCustomerPaymentMethod = a.intPaymentMethodId,
+								@strCustomerName = b.strName
+					FROM		tblARCustomer a
+					INNER JOIN	tblEMEntity b
+					ON			a.intEntityId = b.intEntityId
+					WHERE		a.intEntityId = @intEntityCustomerId
+
+					IF @intPaymentMethod != @intCustomerPaymentMethod
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Missing or Incorrect Payment Method for the customer ' + @strCustomerName + '.'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
+
+					IF NOT EXISTS(SELECT '' FROM tblEMEntityEFTInformation WHERE intEntityId = @intEntityCustomerId AND intBankId IS NOT NULL)
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Missing EFT/ACH setup for the customer ' + @strCustomerName + '.'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
+				END
 			END
 		
 
@@ -4637,7 +4678,10 @@ BEGIN
 											,[intCurrencyId]
 											,[intTermId]
 											,[dtmDate]
-											,[dtmDueDate]
+											,CASE WHEN @ysnConsignmentStore = 0
+												THEN [dtmDueDate]
+												ELSE CAST(FLOOR(CAST(GETDATE()AS FLOAT))AS DATETIME)
+												END
 											,[dtmShipDate]
 											,[intEntitySalespersonId]
 											,[intFreightTermId]
@@ -5455,7 +5499,6 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 									IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
 										BEGIN
-
 											-- Posting to Recieve Payments is successfull
 											UPDATE tblSTCheckoutHeader
 											SET intReceivePaymentsIntegrationLogId = @intIntegrationLogId

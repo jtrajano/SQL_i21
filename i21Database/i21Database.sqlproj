@@ -1147,6 +1147,7 @@
     <Build Include="dbo\Stored Procedures\uspLGDispatchLoadSchedule.sql" />
     <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
     <Build Include="dbo\Tables\tblHDDeploymentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutValidatePaymentMethod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
