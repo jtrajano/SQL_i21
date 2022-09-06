@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuCTMultiCurrencyRevalue]
+﻿
+CREATE VIEW [dbo].[vyuCTMultiCurrencyRevalue]
 
 AS 
 
@@ -17,10 +18,10 @@ AS
 			,dblUnitPrice			=	CD.dblCashPrice
 			,dblAmount				=	CD.dblTotalCost
 			,intCurrencyId			=	CD.intCurrencyId
-			,intForexRateType		=	CD.intRateTypeId
+			,intForexRateType		=	CD.intHistoricalRateTypeId
 			,strForexRateType		=	RT.strCurrencyExchangeRateType
-			,dblForexRate			=	CD.dblRate
-			,dblHistoricAmount		=	CD.dblTotalCost * CD.dblRate
+			,dblForexRate			=	CD.dblHistoricalRate
+			,dblHistoricAmount		=	CD.dblTotalCost * CD.dblHistoricalRate
 			,dblNewForexRate		=	0
 			,dblNewAmount			=	0
 			,dblUnrealizedDebitGain =	0
@@ -36,11 +37,11 @@ AS
 	JOIN	tblCTContractType				CT	ON	CT.intContractTypeId				=	CH.intContractTypeId
 	JOIN	tblEMEntity						EY	ON	EY.intEntityId						=	CH.intEntityId
 	JOIN	tblICCommodity					CY	ON	CY.intCommodityId					=	CH.intCommodityId
-	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=	CD.intCompanyLocationId			LEFT
-	JOIN	tblICItem						IM	ON	IM.intItemId						=	CD.intItemId					LEFT
-	JOIN	tblICCategory					CG	ON	CG.intCategoryId					=	IM.intCategoryId				LEFT 
-	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId				LEFT
-	JOIN	tblSMLineOfBusiness				LB	ON 	LB.intLineOfBusinessId				=	CG.intLineOfBusinessId
+	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=	CD.intCompanyLocationId			
+	LEFT	JOIN	tblICItem						IM	ON	IM.intItemId						=	CD.intItemId					
+	LEFT	JOIN	tblICCategory					CG	ON	CG.intCategoryId					=	IM.intCategoryId				
+	LEFT	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intHistoricalRateTypeId				
+	LEFT	JOIN	tblSMLineOfBusiness				LB	ON 	LB.intLineOfBusinessId				=	CG.intLineOfBusinessId
 	LEFT JOIN (
 		select 
 		fspm.dblLastSettle, cmm.intCommodityId, sp.intFutureMarketId , fspm.intFutureMonthId, sp.dtmPriceDate 
@@ -59,3 +60,4 @@ AS
 
 
 	) LS on LS.intCommodityId = CH.intCommodityId and LS.intFutureMarketId = CD.intFutureMarketId and LS.intFutureMonthId = CD.intFutureMonthId
+GO
