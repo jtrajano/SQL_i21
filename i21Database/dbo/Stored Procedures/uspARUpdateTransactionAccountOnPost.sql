@@ -154,8 +154,9 @@ SET ANSI_WARNINGS OFF
 		FROM dbo.[fnARGetOverrideAccount](
 			 ARI.[intAccountId]
 			,CASE 
-				WHEN ARID.[strItemType] IN ('Service', 'Non-Inventory') THEN ISNULL(ARID.[intSalesAccountId], IA.[intGeneralAccountId])
-				WHEN ARID.[strItemType] = 'Other Charge' THEN ISNULL(ARID.[intSalesAccountId], IA.[intOtherChargeIncomeAccountId])
+				WHEN ARID.[strItemType] = 'Service' THEN CASE WHEN ARID.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], IA.[intGeneralAccountId]) ELSE IA.[intGeneralAccountId] END
+				WHEN ARID.[strItemType] = 'Non-Inventory' THEN CASE WHEN ARID.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], ISNULL(IA.[intSalesAccountId], IA.[intGeneralAccountId])) ELSE ISNULL(IA.[intSalesAccountId], IA.[intGeneralAccountId]) END
+				WHEN ARID.[strItemType] = 'Other Charge' THEN CASE WHEN ARID.[strTransactionType] = 'Debit Memo' THEN ISNULL(ARID.[intSalesAccountId], IA.[intOtherChargeIncomeAccountId]) ELSE IA.[intOtherChargeIncomeAccountId] END
 				ELSE ISNULL(ARID.[intConversionAccountId], (CASE WHEN ARID.[intServiceChargeAccountId] IS NOT NULL AND ARID.[intServiceChargeAccountId] <> 0 THEN ARID.[intServiceChargeAccountId] ELSE ARID.[intSalesAccountId] END))
 			 END
 			,@OverrideCompanySegment
