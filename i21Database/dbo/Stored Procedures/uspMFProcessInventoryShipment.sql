@@ -88,9 +88,7 @@ BEGIN TRY
 		,dblQuantity = D.dblQuantity
 		,intItemUOMId = IU.intItemUOMId
 		,intOrderId = S.intSalesOrderId
-		,intLineNo = ROW_NUMBER() OVER (
-			ORDER BY I.intItemId
-			)
+		,intLineNo = D.intSalesOrderDetailId
 		,intWeightUOMId = NULL
 		,dblUnitPrice = SD.dblUnitPrice
 		,intCurrencyId = S.intCurrencyId
