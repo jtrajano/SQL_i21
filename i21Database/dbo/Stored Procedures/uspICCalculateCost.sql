@@ -114,16 +114,6 @@ EXEC dbo.uspICPostCosting
     , 0
     , 1
 
-DECLARE @LastTransactionId INT
-SELECT TOP 1 @LastTransactionId = t.intInventoryTransactionId
-FROM tblICInventoryTransaction t
-WHERE t.intItemId = @ItemId
-  AND t.intItemLocationId = @ItemLocationId
-  AND t.dblQty > 0 
-  AND ISNULL(t.ysnIsUnposted, 0) = 0 
-  AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@Date AS FLOAT))
-ORDER BY t.intInventoryTransactionId DESC 
-
 SELECT @Cost = COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost)
 
 rollback
