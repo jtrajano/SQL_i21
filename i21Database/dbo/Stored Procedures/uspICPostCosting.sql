@@ -19,6 +19,7 @@
 				Receive stocks from AP module may use "AP Clearing".
 
 	@intEntityUserSecurityId - The user who is initiating the post. 
+	@ysnSuppressGLEntries - Sets whether or not to generate GL Entries.
 */
 CREATE PROCEDURE [dbo].[uspICPostCosting]
 	@ItemsToPost AS ItemCostingTableType READONLY
@@ -28,6 +29,7 @@ CREATE PROCEDURE [dbo].[uspICPostCosting]
 	,@strGLDescription AS NVARCHAR(255) = NULL 
 	,@ysnUpdateItemCostAndPrice AS BIT = 0
 	,@ysnTransferOnSameLocation AS BIT = 0 
+	,@ysnSuppressGLEntries AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -1129,7 +1131,7 @@ END
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-IF @strAccountToCounterInventory IS NOT NULL 
+IF @strAccountToCounterInventory IS NOT NULL AND ISNULL(@ysnSuppressGLEntries, 0) = 0
 BEGIN 
 	DECLARE @intContraInventory_ItemLocationId AS INT
 
