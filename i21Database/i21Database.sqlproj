@@ -1118,6 +1118,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMEvent.sql" />
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutValidatePaymentMethod.sql" />
+    <Build Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
