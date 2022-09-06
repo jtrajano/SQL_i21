@@ -144,6 +144,7 @@
     [intConsFuelOverShortItemId] INT NULL,
     [intConsBankDepositDraftId] INT NULL,
     [intConsDelearCommissionARAccountId] INT NULL,
+    [intConsDealerCommissionItemId] INT NULL,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
