@@ -8,8 +8,8 @@ SELECT intInvoiceDetailId				=			ID.intInvoiceDetailId
 	 , intItemContractHeaderId			=			ICH.intItemContractHeaderId
 	 , strInvoiceNumber					=			I.strInvoiceNumber 
 
-	 , strContractNumber				=			CH.strContractNumber
-	 , strItemNumber					=			ICH.strContractNumber 
+	 , strContractNumber				=			ICH.strContractNumber 
+	 , strItemNumber					=			ID.strItemDescription
 	 , strPrepayType					=			CASE WHEN ID.intPrepayTypeId = 1 THEN 'Standard' 
 														WHEN ID.intPrepayTypeId = 2 THEN 'Unit' 
 														WHEN ID.intPrepayTypeId = 3 THEN 'Percentage' 
@@ -38,4 +38,3 @@ LEFT JOIN tblCTContractHeader CH on CH.intContractHeaderId = ID.intContractHeade
 LEFT JOIN vyuARItemUOM IOUM ON IOUM.intItemUOMId = ID.intItemUOMId
 LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = ID.intSubCurrencyId
 GO
-
