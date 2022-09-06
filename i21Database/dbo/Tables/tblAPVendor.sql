@@ -48,7 +48,7 @@
 	--store
 	[strStoreFTPPath] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
 	[strStoreFTPUsername] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
-	[strStoreFTPPassword] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
+	[strStoreFTPPassword] NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS NULL,
 	[intStoreStoreId] INT NULL,--
 	[intProtocolNumber] INT NULL,--
 	[intPortNumber] INT NULL,--
