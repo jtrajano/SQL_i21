@@ -6329,7 +6329,6 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 									IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
 										BEGIN
-
 											-- Posting to Recieve Payments is successfull
 											UPDATE tblSTCheckoutHeader
 											SET intReceivePaymentsIntegrationLogId = @intIntegrationLogId
