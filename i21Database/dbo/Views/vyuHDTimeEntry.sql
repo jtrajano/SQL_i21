@@ -38,6 +38,13 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 										  			THEN CONVERT(BIT,0)
 										  	   ELSE CONVERT(BIT,1)
 										   END 
+	  ,[ysnTimeEntryExempt]				= CASE WHEN EntityType.strType IS NOT NULL OR 
+													CoworkerSuperVisor.intEntityId IS NOT NULL OR
+													CoworkerGoalDetail.intEntityId IS NULL OR
+													( CoworkerGoalDetail.intEntityId IS NOT NULL AND CoworkerGoalDetail.ysnActive = CONVERT(BIT,0) )
+										  			THEN CONVERT(BIT,1)
+										  	   ELSE CONVERT(BIT,0)
+										   END 
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
@@ -55,15 +62,32 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 	) Setting
 	CROSS APPLY
 	(
-		SELECT TOP 1 strPeriodDisplay		  = TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName] --+ ' (' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodStart], 'MM/dd/yy') + '-' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodEnd], 'MM/dd/yy') + ')'
-					,[strBillingPeriodStatus] = TimeEntryPeriodDetail.strBillingPeriodStatus
-					,dtmBillingPeriodStart
-					,dtmBillingPeriodEnd
+		SELECT TOP 1 strPeriodDisplay		    = TimeEntryPeriod.[strFiscalYear] + ' - ' + TimeEntryPeriodDetail.[strBillingPeriodName] --+ ' (' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodStart], 'MM/dd/yy') + '-' + FORMAT(TimeEntryPeriodDetail.[dtmBillingPeriodEnd], 'MM/dd/yy') + ')'
+					,[strBillingPeriodStatus]   = TimeEntryPeriodDetail.strBillingPeriodStatus
+					,dtmBillingPeriodStart      = TimeEntryPeriodDetail.dtmBillingPeriodStart
+					,dtmBillingPeriodEnd		= TimeEntryPeriodDetail.dtmBillingPeriodEnd	
+					,strFiscalYear				= TimeEntryPeriod.[strFiscalYear]
 		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 			INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
 		ON TimeEntryPeriodDetail.intTimeEntryPeriodId = TimeEntryPeriod.intTimeEntryPeriodId AND
 		   TimeEntryPeriodDetail.intTimeEntryPeriodDetailId = TimeEntry.[intTimeEntryPeriodDetailId]
 	) TimeEntryPeriodDetail
+	OUTER APPLY
+	(
+		SELECT	 TOP 1 intEntityId	= CoworkerGoals.intEntityId
+					  ,ysnActive	= CoworkerGoals.ysnActive 
+		FROM tblHDCoworkerGoal CoworkerGoals
+				INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
+		ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalId
+		WHERE CoworkerGoals.intEntityId = TimeEntry.intEntityId AND
+			  CoworkerGoalDetail.intTimeEntryPeriodDetailId = TimeEntry.[intTimeEntryPeriodDetailId] AND
+			  CoworkerGoals.strFiscalYear = TimeEntryPeriodDetail.strFiscalYear
+	) CoworkerGoalDetail
+	OUTER APPLY(
+		SELECT TOP 1 intEntityId
+		FROM vyuHDExemptedAgent
+		WHERE intEntityId = TimeEntry.intEntityId	
+	) CoworkerSuperVisor
 	LEFT JOIN tblSMUserSecurity UserSecurity
 ON UserSecurity.intEntityId = Entity.intEntityId
 	OUTER APPLY 
@@ -90,4 +114,6 @@ ON UserSecurity.intEntityId = Entity.intEntityId
 	 
 	) AgentTimeEntryPeriodDetailSummary
 WHERE TimeEntry.[intTimeEntryPeriodDetailId] IS NOT NULL
+
+
 GO
