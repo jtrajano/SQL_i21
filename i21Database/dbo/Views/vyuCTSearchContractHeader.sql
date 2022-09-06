@@ -9,6 +9,7 @@ SELECT CH.intContractHeaderId
 	, dblHeaderQuantity = CH.dblQuantity
 	, CH.ysnSigned
 	, CH.strCustomerContract
+	, VNM.strApprovalStatus
 	, CH.ysnPrinted
 	, CH.dtmCreated
 	, CH.ysnLoad

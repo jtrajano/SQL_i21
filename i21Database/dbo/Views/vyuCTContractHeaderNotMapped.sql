@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuCTContractHeaderNotMapped]
+﻿
+Create VIEW [dbo].[vyuCTContractHeaderNotMapped]
 	
 AS 
 
@@ -89,7 +90,8 @@ AS
 						CY.ysnCheckMissingStandardPriceInContract,
 						dblHeaderBalance = cd.dblHeaderBalance,
 						dblHeaderAvailable = cd.dblHeaderAvailable,
-						strHeaderProductType = HPT.strDescription
+						strHeaderProductType = HPT.strDescription,
+						strApprovalStatus = app.strApprovalStatus
 				FROM	tblCTContractHeader						CH	
 				
 				JOIN	tblEMEntity								EY	ON	EY.intEntityId						=		CH.intEntityId
@@ -159,4 +161,23 @@ AS
 			LEFT JOIN tblSMCompanyLocation COL on COL.intCompanyLocationId = CH.intCompanyLocationId
 			LEFT JOIN tblQMSampleType ST on ST.intSampleTypeId = CH.intSampleTypeId
 
+			Outer Apply(
+				select tr.intRecordId, 
+					   strApprovalStatus =	CASE WHEN tr.strApprovalStatus in ('Waiting for Submit','Waiting for Approval','Approved') THEN  
+												CASE WHEN tr.strApprovalStatus = 'Approved with Modifications' then 'Approved' ELSE tr.strApprovalStatus END
+											ELSE '' END
+				from
+					tblSMScreen sc
+					join tblSMTransaction tr on tr.intScreenId = sc.intScreenId
+				where
+					sc.strModule = 'Contract Management'
+					and sc.strNamespace in ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
+					and tr.intRecordId = CH.intContractHeaderId
+			) app
+
 			)t
+			
+GO
+
+
+
