@@ -23,7 +23,7 @@ SELECT
       ,chk.[dblTotalDeposits]  
       ,chk.[dblTotalPaidOuts]  
       ,chk.[dblEnteredPaidOuts]  
-  
+      
    ,dblTotalPaidOutsOrig = (SELECT SUM(ISNULL(po.dblAmount, 0))  
          FROM tblSTCheckoutPaymentOptions po  
          WHERE po.intCheckoutId = chk.intCheckoutId)  
@@ -206,8 +206,7 @@ SELECT
       ,dblDealerCommission = dbo.fnSTGetDealerCommission(chk.intCheckoutId)  
       ,chk.[intConcurrencyId]    
       ,st.ysnConsignmentStore  
-	  ,po.dblAmount AS dblCustomerChargeMOP
-	  ,(chk.[dblCustomerCharges] - po.dblAmount) as dblCustomerChargeVariance
+	  ,chk.[dblCustomerChargeMOP]  
 FROM tblSTCheckoutHeader chk  
 INNER JOIN vyuSTStoreOnUserRole vst  
  ON chk.intStoreId = vst.intStoreId  
@@ -305,6 +304,7 @@ GROUP BY
       ,chk.[intReceivePaymentsIntegrationLogId]  
       ,chk.[intCheckoutCurrentProcess]  
       ,chk.[intConcurrencyId]  
+	  ,chk.dblCustomerChargeMOP 
    ,Inv.[ysnPosted]  
       ,chk.[ysnStopCondition]  
    ,vst.[intStoreId]  
