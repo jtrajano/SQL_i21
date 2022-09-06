@@ -255,7 +255,13 @@ BEGIN
 			LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intPriceItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+							A.intItemId,
+							ItemLoc.intItemLocationId,
+							CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL)
+							THEN 'AP Clearing'
+							ELSE 'Other Charge Expense' 
+							END) itemAccnt
 			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 			OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
 			OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
