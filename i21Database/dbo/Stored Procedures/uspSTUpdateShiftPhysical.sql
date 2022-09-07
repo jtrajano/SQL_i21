@@ -16,6 +16,7 @@ BEGIN TRANSACTION @TranName;
 SET @strStatusMsg = 'Success'
 
 DELETE FROM tblSTCheckoutShiftPhysicalPreview
+WHERE intCheckoutId NOT IN (SELECT intCheckoutId FROM tblSTCheckoutHeader)
 
 DECLARE @tmpTblShiftPhysicalCountGroup TABLE (
 		intCheckoutId INT NULL,
@@ -210,7 +211,8 @@ USING (
 WHEN MATCHED THEN 
 	UPDATE 
 	SET 
-		e.dblQtyReceived = u.dblQtyTransferredNew
+		e.dblSystemCount = u.dblSystemCount
+		,e.dblQtyReceived = u.dblQtyTransferredNew
 		,e.dblQtyTransferred = u.dblQtyReceivedNew
 		,e.dblQtySold = u.dblQtySoldNew
 		,e.dtmCheckoutDate = @dtmCheckoutDate
@@ -268,9 +270,9 @@ SELECT
 	, I.intItemId
 	, IL.intItemLocationId
 	, dblSystemCount = ISNULL(shiftPhysical.dblPhysicalCount, 0)
-	, InventoryReceipt.dblQtyReceived
+	, ISNULL(InventoryReceipt.dblQtyReceived, 0) AS dblQtyReceived
 	, ISNULL(InventoryQtyTransferredTo.dblQtyTransferred, 0) - ISNULL(InventoryQtyTransferredFrom.dblQtyTransferred, 0) AS dblQtyTransferred
-	, ItemMovement.dblQtySold
+	, ISNULL(ItemMovement.dblQtySold, 0)
 	, UOM.intItemUOMId
 	, intEntityUserSecurityId = @intEntityUserSecurityId
 	, intConcurrencyId = 1
@@ -436,8 +438,8 @@ USING (
 WHEN MATCHED THEN 
 	UPDATE 
 	SET 
-		--e.dblSystemCount = u.dblSystemCount
-		e.dblQtyReceived = u.dblQtyReceivedNew
+		e.dblSystemCount = u.dblSystemCountNew
+		,e.dblQtyReceived = u.dblQtyReceivedNew
 		,e.dblQtyTransferred = u.dblQtyTransferredNew
 		,e.dblQtySold = u.dblQtySoldNew
 		,e.dtmCheckoutDate = @dtmCheckoutDate
