@@ -178,11 +178,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   --checking Country  
   SELECT TOP 1 @CountryCount = COUNT(strCountry) FROM tblSMCountry WHERE strCountry = @strCountry  
   
-  SET @strDocumentDelivery1 = CASE WHEN @strDocumentDelivery1 <> '' AND @strDocumentDelivery1 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery1 ELSE '' END  
-  SET @strDocumentDelivery2 = CASE WHEN @strDocumentDelivery2 <> '' AND @strDocumentDelivery2 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery2 ELSE '' END  
-  SET @strDocumentDelivery3 = CASE WHEN @strDocumentDelivery3 <> '' AND @strDocumentDelivery3 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery3 ELSE '' END  
-  
-  
+  SET @strDocumentDelivery1 = CASE WHEN @strDocumentDelivery1 <> '' AND @strDocumentDelivery1 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery1 ELSE 'NONE' END    
+  SET @strDocumentDelivery2 = CASE WHEN @strDocumentDelivery2 <> '' AND @strDocumentDelivery2 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery2 ELSE 'NONE' END    
+  SET @strDocumentDelivery3 = CASE WHEN @strDocumentDelivery3 <> '' AND @strDocumentDelivery3 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery3 ELSE 'NONE' END   
   
   SET @strType = CASE WHEN @strType <> '' AND @strType IN('Full-Time','Part-Time') THEN @strType ELSE '' END  
   SET @strPayPeriod = CASE WHEN @strPayPeriod <> '' AND @strPayPeriod   
@@ -252,11 +250,11 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
            BEGIN  
             IF(@LineOfBusiness5Count != 0 OR @LineOfBusiness5 IS NULL)  
              BEGIN  
-              IF(@strDocumentDelivery1 IS NOT NULL)  
+              IF(@strDocumentDelivery1 IS NOT NULL AND @strDocumentDelivery1 != '')  
                BEGIN  
-                IF(@strDocumentDelivery2 IS NOT NULL)  
+                IF(@strDocumentDelivery2 IS NOT NULL AND @strDocumentDelivery2 != '')  
                  BEGIN  
-                  IF(@strDocumentDelivery3 IS NOT NULL)  
+                  IF(@strDocumentDelivery3 IS NOT NULL AND @strDocumentDelivery3 != '')  
                   BEGIN  
                    IF(@strType IS NOT NULL AND @strType != '')  
                     BEGIN  
