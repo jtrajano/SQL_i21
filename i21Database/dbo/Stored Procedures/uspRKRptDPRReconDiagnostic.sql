@@ -162,6 +162,7 @@ select
 	 ,strUOM = R.strUnitMeasure COLLATE Latin1_General_CI_AS
 from #tmpSourceContracts S
 left join #tmpDPRReconContracts R ON R.strContractNumber COLLATE Latin1_General_CI_AS = S.strContractNumber COLLATE Latin1_General_CI_AS
+	and REPLACE(REPLACE(REPLACE(R.strBucketName,'+ ',''),'- ',''),'+/','') COLLATE Latin1_General_CI_AS = S.strBucket COLLATE Latin1_General_CI_AS
 
 union all
 
@@ -175,7 +176,7 @@ select
 	 ,strUOM = R.strUnitMeasure COLLATE Latin1_General_CI_AS
 from #tmpSourceDerivatives S
 left join #tmpDPRReconDerivatives R ON R.strTransactionNumber COLLATE Latin1_General_CI_AS = S.strInternalTradeNo COLLATE Latin1_General_CI_AS
-
+	and R.strBucketName COLLATE Latin1_General_CI_AS = S.strBucket COLLATE Latin1_General_CI_AS
 
 
 drop table #tmpDPRReconContracts
