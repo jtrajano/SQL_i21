@@ -15,4 +15,5 @@ SELECT DISTINCT intLotId
 	,dblNetWeight
 	,intItemId
 	,strWarehouseRefNo
+	,intCompanyLocationId
 FROM vyuLGPickOpenInventoryLots
