@@ -32,7 +32,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	 									END
 	,strReceiptNumber					= Receipt.strReceiptNumber
 	,intInventoryAdjustmentId			= IA.intInventoryAdjustmentId
-	,strAdjustmentNo					= IA.strAdjustmentNo
+	,strAdjustmentNo					= ISNULL(IA.strAdjustmentNo, SH.strTransactionId)
 	,strSplitNumber						= EMSplit.strSplitNumber
 	,dblSplitPercent					= CASE
 	 										WHEN ISNULL(CS.intDeliverySheetId,0) > 0 THEN DSSplit.dblSplitPercent
