@@ -452,6 +452,16 @@ BEGIN
 						-- ROLLBACK
 						GOTO ExitWithRollback
 					END
+
+				-- DEALER COMMISSION ITEM ID
+				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intConsDealerCommissionItemId IS NULL)
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Missing setup of Dealer Commission item on Store Consignment configuration Setup tab'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
 					
 				-- Cash over/short item id
 				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NULL)
@@ -2635,242 +2645,480 @@ BEGIN
 
 
 
---PRINT 'CASH OVER SHORT'
+				IF @ysnConsignmentStore = 1
+				BEGIN
+					--PRINT 'DEALER COMMISSION'
+					----------------------------------------------------------------------
+					-------------------------- DEALER COMMISSION -------------------------
+					----------------------------------------------------------------------
+					IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId = @intStoreId AND intConsDealerCommissionItemId IS NOT NULL)
+						BEGIN
+								INSERT INTO @EntriesForInvoice(
+												 [strSourceTransaction]
+												,[strTransactionType]
+												,[strType]
+												,[intSourceId]
+												,[strSourceId]
+												,[intInvoiceId]
+												,[intEntityCustomerId]
+												,[intCompanyLocationId]
+												,[intCurrencyId]
+												,[intTermId]
+												,[dtmDate]
+												,[dtmDueDate]
+												,[dtmShipDate]
+												,[dtmCalculated]
+												,[dtmPostDate]
+												,[intEntitySalespersonId]
+												,[intFreightTermId]
+												,[intShipViaId]
+												,[intPaymentMethodId]
+												,[strInvoiceOriginId]
+												,[strPONumber]
+												,[strBOLNumber]
+												,[strComments]
+												,[intShipToLocationId]
+												,[intBillToLocationId]
+												,[ysnTemplate]
+												,[ysnForgiven]
+												,[ysnCalculated]
+												,[ysnSplitted]
+												,[intPaymentId]
+												,[intSplitId]
+												,[intLoadDistributionHeaderId]
+												,[strActualCostId]
+												,[intShipmentId]
+												,[intTransactionId]
+												,[intEntityId]
+												,[ysnResetDetails]
+												,[ysnRecap] -- RECAP
+												,[ysnPost]
+												,[intInvoiceDetailId]
+												,[intItemId]
+												,[ysnInventory]
+												,[strItemDescription]
+												,[intOrderUOMId]
+												,[dblQtyOrdered]
+												,[intItemUOMId]
+												,[dblQtyShipped]
+												,[dblDiscount]
+												,[dblPrice]
+												,[ysnRefreshPrice]
+												,[strMaintenanceType]
+												,[strFrequency]
+												,[dtmMaintenanceDate]
+												,[dblMaintenanceAmount]
+												,[dblLicenseAmount]
+												,[intTaxGroupId]
+												,[ysnRecomputeTax]
+												,[intSCInvoiceId]
+												,[strSCInvoiceNumber]
+												,[intInventoryShipmentItemId]
+												,[strShipmentNumber]
+												,[intSalesOrderDetailId]
+												,[strSalesOrderNumber]
+												,[intContractHeaderId]
+												,[intContractDetailId]
+												,[intShipmentPurchaseSalesContractId]
+												,[intTicketId]
+												,[intTicketHoursWorkedId]
+												,[intSiteId]
+												,[strBillingBy]
+												,[dblPercentFull]
+												,[dblNewMeterReading]
+												,[dblPreviousMeterReading]
+												,[dblConversionFactor]
+												,[intPerformerId]
+												,[ysnLeaseBilling]
+												,[ysnVirtualMeterReading]
+												,[strImportFormat]
+												,[dblCOGSAmount]
+												,[intTempDetailIdForTaxes]
+												,[intConversionAccountId]
+												,[intCurrencyExchangeRateTypeId]
+												,[intCurrencyExchangeRateId]
+												,[dblCurrencyExchangeRate]
+												,[intSubCurrencyId]
+												,[dblSubCurrencyRate]
+												--,[ysnImportedFromOrigin]
+												--,[ysnImportedAsPosted]
+											)
+											SELECT 
+												 [strSourceTransaction]		= 'Invoice'
+												,[strTransactionType]		= @strInvoiceTransactionTypeMain
+												,[strType]					= @strInvoiceTypeMain
+												,[intSourceId]				= @intCheckoutId
+												,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
+												,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
+												,[intEntityCustomerId]		= @intEntityCustomerId
+												,[intCompanyLocationId]		= @intCompanyLocationId
+												,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
+												,[intTermId]				= vC.intTermsId						--ADDED
+												,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+												,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+												,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+												,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+												,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
+												,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+												,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+												,[intShipViaId]				= vC.intShipViaId					--ADDED
+												,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
+												,[strInvoiceOriginId]		= NULL -- not sure
+												,[strPONumber]				= NULL -- not sure
+												,[strBOLNumber]				= NULL -- not sure
+												,[strComments]				= @strComments
+												,[intShipToLocationId]		= vC.intShipToId					--ADDED
+												,[intBillToLocationId]		= NULL
+												,[ysnTemplate]				= 0
+												,[ysnForgiven]				= 0
+												,[ysnCalculated]			= 0 -- not sure
+												,[ysnSplitted]				= 0
+												,[intPaymentId]				= NULL
+												,[intSplitId]				= NULL
+												,[intLoadDistributionHeaderId]	= NULL
+												,[strActualCostId]			= NULL
+												,[intShipmentId]			= NULL
+												,[intTransactionId]			= NULL
+												,[intEntityId]				= @intCurrentUserId
+												,[ysnResetDetails]			= CASE
+																				WHEN @intCurrentInvoiceId IS NOT NULL
+																					THEN CAST(0 AS BIT)
+																				ELSE CAST(1 AS BIT)
+																			  END
+												,[ysnRecap]					= @ysnRecap
+												,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
+												,[intInvoiceDetailId]		= NULL
+												,[intItemId]				= I.intItemId
+												,[ysnInventory]				= 1
+												,[strItemDescription]		= I.strDescription
+												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[dblQtyOrdered]			= 0 -- 1
+												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+
+												--,[dblQtyShipped]			= CASE
+												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+												--										THEN 1
+												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--										THEN -1
+												--							END
+												,[dblQtyShipped]			= CASE
+																				-- Refference: http://jira.irelyserver.com/browse/ST-1558
+																				WHEN @strInvoiceTransactionTypeMain = @strCASH
+																					THEN 1
+																				WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																					THEN -1
+																			END
+
+												,[dblDiscount]				= 0
+
+												--,[dblPrice]					= CASE
+												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+												--										THEN ISNULL(CH.dblCashOverShort, 0)
+												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
+												,[dblPrice]					= ISNULL(DC.dblCommissionAmount, 0) * -1
+
+												,[ysnRefreshPrice]			= 0
+												,[strMaintenanceType]		= NULL
+												,[strFrequency]				= NULL
+												,[dtmMaintenanceDate]		= NULL
+												,[dblMaintenanceAmount]		= NULL
+												,[dblLicenseAmount]			= NULL
+												,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+												,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
+												,[intSCInvoiceId]			= NULL
+												,[strSCInvoiceNumber]		= NULL
+												,[intInventoryShipmentItemId] = NULL
+												,[strShipmentNumber]		= NULL
+												,[intSalesOrderDetailId]	= NULL
+												,[strSalesOrderNumber]		= NULL
+												,[intContractHeaderId]		= NULL
+												,[intContractDetailId]		= NULL
+												,[intShipmentPurchaseSalesContractId]	= NULL
+												,[intTicketId]				= NULL
+												,[intTicketHoursWorkedId]	= NULL
+												,[intSiteId]				= NULL -- not sure
+												,[strBillingBy]				= NULL -- not sure
+												,[dblPercentFull]			= NULL
+												,[dblNewMeterReading]		= NULL
+												,[dblPreviousMeterReading]	= NULL -- not sure
+												,[dblConversionFactor]		= NULL -- not sure
+												,[intPerformerId]			= NULL -- not sure
+												,[ysnLeaseBilling]			= NULL
+												,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
+												,[strImportFormat]			= ''
+												,[dblCOGSAmount]			= 0 --IP.dblSalePrice
+												,[intTempDetailIdForTaxes]  = NULL
+												,[intConversionAccountId]	= NULL -- not sure
+												,[intCurrencyExchangeRateTypeId]	= NULL
+												,[intCurrencyExchangeRateId]		= NULL
+												,[dblCurrencyExchangeRate]	= 1.000000
+												,[intSubCurrencyId]			= NULL
+												,[dblSubCurrencyRate]		= 1.000000
+												--,0
+												--,1
+									FROM tblSTStore ST
+									JOIN tblSTCheckoutHeader CH 
+										ON ST.intStoreId = CH.intStoreId
+									JOIN tblSTCheckoutDealerCommission DC
+										ON CH.intCheckoutId = DC.intCheckoutId
+									JOIN tblICItem I 
+										ON ST.intConsDealerCommissionItemId = I.intItemId 
+									JOIN tblICItemLocation IL
+										ON I.intItemId = IL.intItemId
+										AND ST.intCompanyLocationId = IL.intLocationId
+									JOIN vyuEMEntityCustomerSearch vC 
+										ON ST.intCheckoutCustomerId = vC.intEntityId									
+									WHERE CH.intCheckoutId = @intCheckoutId
+										AND ISNULL(DC.dblCommissionAmount,0) <> 0
+						END
+				END
 				----------------------------------------------------------------------
-				--------------------------- CASH OVER SHORT --------------------------
+				------------------------- END DEALER COMMISSION ------------------------
 				----------------------------------------------------------------------
-				--http://jira.irelyserver.com/browse/ST-1008
-				IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NOT NULL)
-					BEGIN
-							INSERT INTO @EntriesForInvoice(
-											 [strSourceTransaction]
-											,[strTransactionType]
-											,[strType]
-											,[intSourceId]
-											,[strSourceId]
-											,[intInvoiceId]
-											,[intEntityCustomerId]
-											,[intCompanyLocationId]
-											,[intCurrencyId]
-											,[intTermId]
-											,[dtmDate]
-											,[dtmDueDate]
-											,[dtmShipDate]
-											,[dtmCalculated]
-											,[dtmPostDate]
-											,[intEntitySalespersonId]
-											,[intFreightTermId]
-											,[intShipViaId]
-											,[intPaymentMethodId]
-											,[strInvoiceOriginId]
-											,[strPONumber]
-											,[strBOLNumber]
-											,[strComments]
-											,[intShipToLocationId]
-											,[intBillToLocationId]
-											,[ysnTemplate]
-											,[ysnForgiven]
-											,[ysnCalculated]
-											,[ysnSplitted]
-											,[intPaymentId]
-											,[intSplitId]
-											,[intLoadDistributionHeaderId]
-											,[strActualCostId]
-											,[intShipmentId]
-											,[intTransactionId]
-											,[intEntityId]
-											,[ysnResetDetails]
-											,[ysnRecap] -- RECAP
-											,[ysnPost]
-											,[intInvoiceDetailId]
-											,[intItemId]
-											,[ysnInventory]
-											,[strItemDescription]
-											,[intOrderUOMId]
-											,[dblQtyOrdered]
-											,[intItemUOMId]
-											,[dblQtyShipped]
-											,[dblDiscount]
-											,[dblPrice]
-											,[ysnRefreshPrice]
-											,[strMaintenanceType]
-											,[strFrequency]
-											,[dtmMaintenanceDate]
-											,[dblMaintenanceAmount]
-											,[dblLicenseAmount]
-											,[intTaxGroupId]
-											,[ysnRecomputeTax]
-											,[intSCInvoiceId]
-											,[strSCInvoiceNumber]
-											,[intInventoryShipmentItemId]
-											,[strShipmentNumber]
-											,[intSalesOrderDetailId]
-											,[strSalesOrderNumber]
-											,[intContractHeaderId]
-											,[intContractDetailId]
-											,[intShipmentPurchaseSalesContractId]
-											,[intTicketId]
-											,[intTicketHoursWorkedId]
-											,[intSiteId]
-											,[strBillingBy]
-											,[dblPercentFull]
-											,[dblNewMeterReading]
-											,[dblPreviousMeterReading]
-											,[dblConversionFactor]
-											,[intPerformerId]
-											,[ysnLeaseBilling]
-											,[ysnVirtualMeterReading]
-											,[strImportFormat]
-											,[dblCOGSAmount]
-											,[intTempDetailIdForTaxes]
-											,[intConversionAccountId]
-											,[intCurrencyExchangeRateTypeId]
-											,[intCurrencyExchangeRateId]
-											,[dblCurrencyExchangeRate]
-											,[intSubCurrencyId]
-											,[dblSubCurrencyRate]
-											--,[ysnImportedFromOrigin]
-											--,[ysnImportedAsPosted]
-										)
-										SELECT 
-											 [strSourceTransaction]		= 'Invoice'
-											,[strTransactionType]		= @strInvoiceTransactionTypeMain
-										    ,[strType]					= @strInvoiceTypeMain
-											,[intSourceId]				= @intCheckoutId
-											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
-											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
-											,[intEntityCustomerId]		= @intEntityCustomerId
-											,[intCompanyLocationId]		= @intCompanyLocationId
-											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= vC.intTermsId						--ADDED
-											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
-											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
-											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
-											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
-											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
-											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
-											,[intShipViaId]				= vC.intShipViaId					--ADDED
-											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
-											,[strInvoiceOriginId]		= NULL -- not sure
-											,[strPONumber]				= NULL -- not sure
-											,[strBOLNumber]				= NULL -- not sure
-											,[strComments]				= @strComments
-											,[intShipToLocationId]		= vC.intShipToId					--ADDED
-											,[intBillToLocationId]		= NULL
-											,[ysnTemplate]				= 0
-											,[ysnForgiven]				= 0
-											,[ysnCalculated]			= 0 -- not sure
-											,[ysnSplitted]				= 0
-											,[intPaymentId]				= NULL
-											,[intSplitId]				= NULL
-											,[intLoadDistributionHeaderId]	= NULL
-											,[strActualCostId]			= NULL
-											,[intShipmentId]			= NULL
-											,[intTransactionId]			= NULL
-											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= CASE
-																			WHEN @intCurrentInvoiceId IS NOT NULL
-																				THEN CAST(0 AS BIT)
-																			ELSE CAST(1 AS BIT)
-																	      END
-											,[ysnRecap]					= @ysnRecap
-											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
-											,[intInvoiceDetailId]		= NULL
-											,[intItemId]				= I.intItemId
-											,[ysnInventory]				= 1
-											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
-											,[dblQtyOrdered]			= 0 -- 1
-											,[intItemUOMId]				= NULL -- UOM.intItemUOMId
 
-											--,[dblQtyShipped]			= CASE
-											--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-											--										THEN 1
-											--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
-											--										THEN -1
-											--							END
-											,[dblQtyShipped]			= CASE
-																			-- Refference: http://jira.irelyserver.com/browse/ST-1558
-																			WHEN @strInvoiceTransactionTypeMain = @strCASH
-																				THEN 1
-																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-																				THEN -1
-																		END
 
-											,[dblDiscount]				= 0
 
-											--,[dblPrice]					= CASE
-											--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-											--										THEN ISNULL(CH.dblCashOverShort, 0)
-											--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
-											--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
-											,[dblPrice]					= ISNULL(CH.dblCashOverShort, 0)
 
-											,[ysnRefreshPrice]			= 0
-											,[strMaintenanceType]		= NULL
-											,[strFrequency]				= NULL
-											,[dtmMaintenanceDate]		= NULL
-											,[dblMaintenanceAmount]		= NULL
-											,[dblLicenseAmount]			= NULL
-											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
-											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
-											,[intSCInvoiceId]			= NULL
-											,[strSCInvoiceNumber]		= NULL
-											,[intInventoryShipmentItemId] = NULL
-											,[strShipmentNumber]		= NULL
-											,[intSalesOrderDetailId]	= NULL
-											,[strSalesOrderNumber]		= NULL
-											,[intContractHeaderId]		= NULL
-											,[intContractDetailId]		= NULL
-											,[intShipmentPurchaseSalesContractId]	= NULL
-											,[intTicketId]				= NULL
-											,[intTicketHoursWorkedId]	= NULL
-											,[intSiteId]				= NULL -- not sure
-											,[strBillingBy]				= NULL -- not sure
-											,[dblPercentFull]			= NULL
-											,[dblNewMeterReading]		= NULL
-											,[dblPreviousMeterReading]	= NULL -- not sure
-											,[dblConversionFactor]		= NULL -- not sure
-											,[intPerformerId]			= NULL -- not sure
-											,[ysnLeaseBilling]			= NULL
-											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= ''
-											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = NULL
-											,[intConversionAccountId]	= NULL -- not sure
-											,[intCurrencyExchangeRateTypeId]	= NULL
-											,[intCurrencyExchangeRateId]		= NULL
-											,[dblCurrencyExchangeRate]	= 1.000000
-											,[intSubCurrencyId]			= NULL
-											,[dblSubCurrencyRate]		= 1.000000
-											--,0
-											--,1
-								FROM tblSTStore ST
-								JOIN tblICItem I 
-									ON ST.intOverShortItemId = I.intItemId 
-								JOIN tblICItemLocation IL
-									ON I.intItemId = IL.intItemId
-									AND ST.intCompanyLocationId = IL.intLocationId
+				IF @ysnConsignmentStore <> 1
+				BEGIN
+					--PRINT 'CASH OVER SHORT'
+					----------------------------------------------------------------------
+					--------------------------- CASH OVER SHORT --------------------------
+					----------------------------------------------------------------------
+					--http://jira.irelyserver.com/browse/ST-1008
+					IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NOT NULL)
+						BEGIN
+								INSERT INTO @EntriesForInvoice(
+												 [strSourceTransaction]
+												,[strTransactionType]
+												,[strType]
+												,[intSourceId]
+												,[strSourceId]
+												,[intInvoiceId]
+												,[intEntityCustomerId]
+												,[intCompanyLocationId]
+												,[intCurrencyId]
+												,[intTermId]
+												,[dtmDate]
+												,[dtmDueDate]
+												,[dtmShipDate]
+												,[dtmCalculated]
+												,[dtmPostDate]
+												,[intEntitySalespersonId]
+												,[intFreightTermId]
+												,[intShipViaId]
+												,[intPaymentMethodId]
+												,[strInvoiceOriginId]
+												,[strPONumber]
+												,[strBOLNumber]
+												,[strComments]
+												,[intShipToLocationId]
+												,[intBillToLocationId]
+												,[ysnTemplate]
+												,[ysnForgiven]
+												,[ysnCalculated]
+												,[ysnSplitted]
+												,[intPaymentId]
+												,[intSplitId]
+												,[intLoadDistributionHeaderId]
+												,[strActualCostId]
+												,[intShipmentId]
+												,[intTransactionId]
+												,[intEntityId]
+												,[ysnResetDetails]
+												,[ysnRecap] -- RECAP
+												,[ysnPost]
+												,[intInvoiceDetailId]
+												,[intItemId]
+												,[ysnInventory]
+												,[strItemDescription]
+												,[intOrderUOMId]
+												,[dblQtyOrdered]
+												,[intItemUOMId]
+												,[dblQtyShipped]
+												,[dblDiscount]
+												,[dblPrice]
+												,[ysnRefreshPrice]
+												,[strMaintenanceType]
+												,[strFrequency]
+												,[dtmMaintenanceDate]
+												,[dblMaintenanceAmount]
+												,[dblLicenseAmount]
+												,[intTaxGroupId]
+												,[ysnRecomputeTax]
+												,[intSCInvoiceId]
+												,[strSCInvoiceNumber]
+												,[intInventoryShipmentItemId]
+												,[strShipmentNumber]
+												,[intSalesOrderDetailId]
+												,[strSalesOrderNumber]
+												,[intContractHeaderId]
+												,[intContractDetailId]
+												,[intShipmentPurchaseSalesContractId]
+												,[intTicketId]
+												,[intTicketHoursWorkedId]
+												,[intSiteId]
+												,[strBillingBy]
+												,[dblPercentFull]
+												,[dblNewMeterReading]
+												,[dblPreviousMeterReading]
+												,[dblConversionFactor]
+												,[intPerformerId]
+												,[ysnLeaseBilling]
+												,[ysnVirtualMeterReading]
+												,[strImportFormat]
+												,[dblCOGSAmount]
+												,[intTempDetailIdForTaxes]
+												,[intConversionAccountId]
+												,[intCurrencyExchangeRateTypeId]
+												,[intCurrencyExchangeRateId]
+												,[dblCurrencyExchangeRate]
+												,[intSubCurrencyId]
+												,[dblSubCurrencyRate]
+												--,[ysnImportedFromOrigin]
+												--,[ysnImportedAsPosted]
+											)
+											SELECT 
+												 [strSourceTransaction]		= 'Invoice'
+												,[strTransactionType]		= @strInvoiceTransactionTypeMain
+												,[strType]					= @strInvoiceTypeMain
+												,[intSourceId]				= @intCheckoutId
+												,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
+												,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
+												,[intEntityCustomerId]		= @intEntityCustomerId
+												,[intCompanyLocationId]		= @intCompanyLocationId
+												,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
+												,[intTermId]				= vC.intTermsId						--ADDED
+												,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+												,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+												,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+												,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+												,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
+												,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+												,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+												,[intShipViaId]				= vC.intShipViaId					--ADDED
+												,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
+												,[strInvoiceOriginId]		= NULL -- not sure
+												,[strPONumber]				= NULL -- not sure
+												,[strBOLNumber]				= NULL -- not sure
+												,[strComments]				= @strComments
+												,[intShipToLocationId]		= vC.intShipToId					--ADDED
+												,[intBillToLocationId]		= NULL
+												,[ysnTemplate]				= 0
+												,[ysnForgiven]				= 0
+												,[ysnCalculated]			= 0 -- not sure
+												,[ysnSplitted]				= 0
+												,[intPaymentId]				= NULL
+												,[intSplitId]				= NULL
+												,[intLoadDistributionHeaderId]	= NULL
+												,[strActualCostId]			= NULL
+												,[intShipmentId]			= NULL
+												,[intTransactionId]			= NULL
+												,[intEntityId]				= @intCurrentUserId
+												,[ysnResetDetails]			= CASE
+																				WHEN @intCurrentInvoiceId IS NOT NULL
+																					THEN CAST(0 AS BIT)
+																				ELSE CAST(1 AS BIT)
+																			  END
+												,[ysnRecap]					= @ysnRecap
+												,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
+												,[intInvoiceDetailId]		= NULL
+												,[intItemId]				= I.intItemId
+												,[ysnInventory]				= 1
+												,[strItemDescription]		= I.strDescription
+												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[dblQtyOrdered]			= 0 -- 1
+												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+
+												--,[dblQtyShipped]			= CASE
+												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+												--										THEN 1
+												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--										THEN -1
+												--							END
+												,[dblQtyShipped]			= CASE
+																				-- Refference: http://jira.irelyserver.com/browse/ST-1558
+																				WHEN @strInvoiceTransactionTypeMain = @strCASH
+																					THEN 1
+																				WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																					THEN -1
+																			END
+
+												,[dblDiscount]				= 0
+
+												--,[dblPrice]					= CASE
+												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+												--										THEN ISNULL(CH.dblCashOverShort, 0)
+												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
+												,[dblPrice]					= ISNULL(CH.dblCashOverShort, 0)
+
+												,[ysnRefreshPrice]			= 0
+												,[strMaintenanceType]		= NULL
+												,[strFrequency]				= NULL
+												,[dtmMaintenanceDate]		= NULL
+												,[dblMaintenanceAmount]		= NULL
+												,[dblLicenseAmount]			= NULL
+												,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+												,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
+												,[intSCInvoiceId]			= NULL
+												,[strSCInvoiceNumber]		= NULL
+												,[intInventoryShipmentItemId] = NULL
+												,[strShipmentNumber]		= NULL
+												,[intSalesOrderDetailId]	= NULL
+												,[strSalesOrderNumber]		= NULL
+												,[intContractHeaderId]		= NULL
+												,[intContractDetailId]		= NULL
+												,[intShipmentPurchaseSalesContractId]	= NULL
+												,[intTicketId]				= NULL
+												,[intTicketHoursWorkedId]	= NULL
+												,[intSiteId]				= NULL -- not sure
+												,[strBillingBy]				= NULL -- not sure
+												,[dblPercentFull]			= NULL
+												,[dblNewMeterReading]		= NULL
+												,[dblPreviousMeterReading]	= NULL -- not sure
+												,[dblConversionFactor]		= NULL -- not sure
+												,[intPerformerId]			= NULL -- not sure
+												,[ysnLeaseBilling]			= NULL
+												,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
+												,[strImportFormat]			= ''
+												,[dblCOGSAmount]			= 0 --IP.dblSalePrice
+												,[intTempDetailIdForTaxes]  = NULL
+												,[intConversionAccountId]	= NULL -- not sure
+												,[intCurrencyExchangeRateTypeId]	= NULL
+												,[intCurrencyExchangeRateId]		= NULL
+												,[dblCurrencyExchangeRate]	= 1.000000
+												,[intSubCurrencyId]			= NULL
+												,[dblSubCurrencyRate]		= 1.000000
+												--,0
+												--,1
+									FROM tblSTStore ST
+									JOIN tblICItem I 
+										ON ST.intOverShortItemId = I.intItemId 
+									JOIN tblICItemLocation IL
+										ON I.intItemId = IL.intItemId
+										AND ST.intCompanyLocationId = IL.intLocationId
 								
-								-- http://jira.irelyserver.com/browse/ST-1316
-								--JOIN tblICItemUOM UOM 
-								--	ON I.intItemId = UOM.intItemId
-								--JOIN tblICItemPricing IP 
-								--	ON I.intItemId = IP.intItemId
-								--	AND IL.intItemLocationId = IP.intItemLocationId
+									-- http://jira.irelyserver.com/browse/ST-1316
+									--JOIN tblICItemUOM UOM 
+									--	ON I.intItemId = UOM.intItemId
+									--JOIN tblICItemPricing IP 
+									--	ON I.intItemId = IP.intItemId
+									--	AND IL.intItemLocationId = IP.intItemLocationId
 
-								JOIN vyuEMEntityCustomerSearch vC 
-									ON ST.intCheckoutCustomerId = vC.intEntityId
-								JOIN tblSTCheckoutHeader CH 
-									ON ST.intStoreId = CH.intStoreId
-								WHERE CH.intCheckoutId = @intCheckoutId
-									-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
-									AND ISNULL(CH.dblCashOverShort,0) <> 0
-					END
-				----------------------------------------------------------------------
-				------------------------- END CASH OVER SHORT ------------------------
-				----------------------------------------------------------------------
+									JOIN vyuEMEntityCustomerSearch vC 
+										ON ST.intCheckoutCustomerId = vC.intEntityId
+									JOIN tblSTCheckoutHeader CH 
+										ON ST.intStoreId = CH.intStoreId
+									WHERE CH.intCheckoutId = @intCheckoutId
+										-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
+										AND ISNULL(CH.dblCashOverShort,0) <> 0
+						END
+					----------------------------------------------------------------------
+					------------------------- END CASH OVER SHORT ------------------------
+					----------------------------------------------------------------------
+				END
 
 
 
@@ -5191,92 +5439,186 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 
 
-								------------------------------------------------------------------------------------------------------
-                                ---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
-                                ------------------------------------------------------------------------------------------------------
-                                DECLARE @ysnEqual AS BIT
+								DECLARE @ysnEqual AS BIT
                                 DECLARE @strRemark AS NVARCHAR(500)
 
-                                SELECT @ysnEqual = A.ysnEqual
-                                       , @strRemark = A.strRemark
+								IF @ysnConsignmentStore = 1
+								BEGIN
+									-----------------------------------------------------------------------------------------------------------------------------------
+									---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments) - (CheckoutDealerCommission)) -----------
+									-----------------------------------------------------------------------------------------------------------------------------------
+									SELECT @ysnEqual = A.ysnEqual
+										   , @strRemark = A.strRemark
 
-                                FROM
-                                (
-									SELECT
-                                         CASE
-											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
-													THEN CASE
-														WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
-														   THEN CAST(1 AS BIT)
-														WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
-															THEN CAST(0 AS BIT)
-														WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
-															THEN CAST(0 AS BIT)
-												END
-											 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
-													THEN CASE
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+									FROM
+									(
+										SELECT
+											 CASE
+												WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+														THEN CASE
+															WHEN Inv.dblInvoiceTotal = ((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished))
 															   THEN CAST(1 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal > ((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished))
 																THEN CAST(0 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal < ((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished))
 																THEN CAST(0 AS BIT)
-												END
-                                         END AS ysnEqual
+													END
+												 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
+														THEN CASE
+																WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = (((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished)) * -1)
+																   THEN CAST(1 AS BIT)
+																WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > (((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished)) * -1)
+																	THEN CAST(0 AS BIT)
+																WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < (((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished)) * -1)
+																	THEN CAST(0 AS BIT)
+													END
+											 END AS ysnEqual
 -- QQ
-                                       , CASE
-											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
-													THEN CASE
-														WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
-															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
-														WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																			  + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-																			  + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
-																			  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-														WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
-															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																			   + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-																			   + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
-																			   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-												END
-											 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
-													THEN CASE
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
-															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																			  + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
-																			  + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
-																			  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
-															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																			   + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
-																			   + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
-																			   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-												END
+										   , CASE
+												WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+														THEN CASE
+															WHEN Inv.dblInvoiceTotal = ((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished))
+																THEN 'x1Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
+															WHEN Inv.dblInvoiceTotal > ((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished))
+																THEN 'x2Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				  + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Total Dealer Commission: ' + CAST(ISNULL(CH.dblDealerCommission, 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+															WHEN Inv.dblInvoiceTotal < ((CH.dblTotalDeposits) - (CH.dblCustomerPayments + CH.dblATMReplenished))
+																THEN 'x3Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				   + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Total Dealer Commission: ' + CAST(ISNULL(CH.dblDealerCommission, 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+													END
+												 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
+														THEN CASE
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				  + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Total Dealer Commission: ' + CAST(ISNULL(CH.dblDealerCommission, 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				   + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Total Dealer Commission: ' + CAST(ISNULL(CH.dblDealerCommission, 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+													END
 											
                                              
-                                       END AS strRemark
-                                    FROM tblARInvoice Inv
-                                    OUTER APPLY dbo.tblSTCheckoutHeader CH
-                                    WHERE CH.intCheckoutId = @intCheckoutId
-                                        AND Inv.intInvoiceId = @intCreatedInvoiceId
-								) AS A
+										   END AS strRemark
+										FROM tblARInvoice Inv
+										OUTER APPLY dbo.tblSTCheckoutHeader CH
+										WHERE CH.intCheckoutId = @intCheckoutId
+											AND Inv.intInvoiceId = @intCreatedInvoiceId
+									) AS A
                                 
-								IF(@ysnEqual = CAST(0 AS BIT))
-									BEGIN
-										SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
-                                        SET @ysnSuccess = CAST(0 AS BIT)
-                                        SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
+									IF(@ysnEqual = CAST(0 AS BIT))
+										BEGIN
+											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+											SET @ysnSuccess = CAST(0 AS BIT)
+											SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
 
 
-                                        -- ROLLBACK
-                                        GOTO ExitWithRollback
-                                END
-								------------------------------------------------------------------------------------------------------
-                                -------------------------------------- VALIDATION ENDED ----------------------------------------------
-                                ------------------------------------------------------------------------------------------------------
+											-- ROLLBACK
+											GOTO ExitWithRollback
+									END
+									------------------------------------------------------------------------------------------------------
+									-------------------------------------- VALIDATION ENDED ----------------------------------------------
+									------------------------------------------------------------------------------------------------------
+								END
+
+								ELSE
+								BEGIN
+									------------------------------------------------------------------------------------------------------
+									---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
+									------------------------------------------------------------------------------------------------------
+									SELECT @ysnEqual = A.ysnEqual
+										   , @strRemark = A.strRemark
+
+									FROM
+									(
+										SELECT
+											 CASE
+												WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+														THEN CASE
+															WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
+															   THEN CAST(1 AS BIT)
+															WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
+																THEN CAST(0 AS BIT)
+															WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
+																THEN CAST(0 AS BIT)
+													END
+												 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
+														THEN CASE
+																WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																   THEN CAST(1 AS BIT)
+																WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																	THEN CAST(0 AS BIT)
+																WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																	THEN CAST(0 AS BIT)
+													END
+											 END AS ysnEqual
+-- QQ
+										   , CASE
+												WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+														THEN CASE
+															WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
+																THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
+															WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
+																THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				  + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+															WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished)
+																THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				   + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+													END
+												 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
+														THEN CASE
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				  + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
+																				  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+																THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																				   + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
+																				   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+													END
+											
+                                             
+										   END AS strRemark
+										FROM tblARInvoice Inv
+										OUTER APPLY dbo.tblSTCheckoutHeader CH
+										WHERE CH.intCheckoutId = @intCheckoutId
+											AND Inv.intInvoiceId = @intCreatedInvoiceId
+									) AS A
+                                
+									IF(@ysnEqual = CAST(0 AS BIT))
+										BEGIN
+											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+											SET @ysnSuccess = CAST(0 AS BIT)
+											SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
+
+
+											-- ROLLBACK
+											GOTO ExitWithRollback
+									END
+									------------------------------------------------------------------------------------------------------
+									-------------------------------------- VALIDATION ENDED ----------------------------------------------
+									------------------------------------------------------------------------------------------------------
+								END
 
 
 								-- Invoice remaining will be used for Customer CHarges
