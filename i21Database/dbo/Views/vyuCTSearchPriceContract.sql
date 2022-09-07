@@ -101,6 +101,8 @@ AS
 			,x.dblAppliedLoad
 			,x.dblLoadAppliedUnpriced 
 			,x.ysnLoad
+			,ysnApproved = CAST(isnull(PF.ysnApproved,0) as BIT)
+			,strApprovalStatus = isnull(PF.strApprovalStatus, '')
 	FROM
 	(
 		SELECT 		CAST (NULL AS INT) AS intPriceContractId,
@@ -561,5 +563,31 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					--CD.strShortName
 	)t
 	LEFT JOIN x ON x.intContractHeaderId = t.intContractHeaderId AND ISNULL(t.ysnMultiplePriceFixation,0) = 0
+	OUTER APPLY (
+	
+		select	intPriceFixationId	=		PF.intPriceFixationId
+			   , ysnApproved		=		CASE WHEN ISNULL(PF.dblTotalLots,0) - ISNULL(PF.dblLotsFixed,0) = 0 THEN 
+												CASE WHEN strApprovalStatus in ('Approved', 'Approved with Modifications') THEN 1 ELSE 0 END
+											ELSE 0 END 
+			   , strApprovalStatus	=		CASE WHEN ISNULL(PF.dblTotalLots,0) - ISNULL(PF.dblLotsFixed,0) = 0 THEN 
+												CASE WHEN strApprovalStatus in ('Approved', 'Approved with Modifications') THEN 'Approved' 
+													 WHEN strApprovalStatus in ('Waiting for Submit', 'Waiting for Approval') THEN strApprovalStatus
+												ELSE '' END
+										    ELSE '' END 
+
+		from tblCTPriceFixation PF 
+		LEFT JOIN (
+			select intRecordId, strApprovalStatus
+				from
+					tblSMScreen sc
+					join tblSMTransaction tr on tr.intScreenId = sc.intScreenId
+				where
+			sc.strModule = 'Contract Management'
+			and sc.strNamespace in ('ContractManagement.view.PriceContracts','ContractManagement.view.PriceContractsNew')
+		) app on app.intRecordId = PF.intPriceContractId
+		where PF.intPriceFixationId = t.intPriceFixationId
+
+	) PF
+
 	where 
 	 ISNULL(t.intContractDetailId,0) = CASE WHEN t.ysnMultiplePriceFixation = 1 THEN ISNULL(t.intContractDetailId,0) ELSE x.intContractDetailId END
