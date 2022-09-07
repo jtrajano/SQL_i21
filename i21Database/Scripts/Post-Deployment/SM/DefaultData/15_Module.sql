@@ -1377,7 +1377,27 @@ GO
 		   [strPrefix]						=		N'ED',
 		   [ysnAddonComponent]              =       1
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'VOIPstudio')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		134,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'VOIPstudio',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		132,
+		   [strPrefix]						=		N'VOIP',
+		   [ysnAddonComponent]              =       1
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Best Buy')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		135,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Best Buy',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		133,
+		   [strPrefix]						=		N'BBY',
+		   [ysnAddonComponent]              =       1
 
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
