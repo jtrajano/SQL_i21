@@ -1140,6 +1140,11 @@
     <Build Include="dbo\Tables\tblSMRapidDeploymentConfigurationDetail.sql" />
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutValidatePaymentMethod.sql" />
+<<<<<<< HEAD
+=======
+    <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSCalculateDealerCommission.sql" />
+>>>>>>> fc15477b13 (CS-60)
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
