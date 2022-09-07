@@ -53,6 +53,6 @@ GO
 
 	-- Show All Bank Accounts
 	IF NOT EXISTS(SELECT 1 FROM tblCMBankAccountAll)
-	INSERT INTO tblCMBankAccountAll(intBankAccountId, strBankName, strBankAccount) 
+	INSERT INTO tblCMBankAccountAll(intBankAccountId, strBankName, strBankAccountNo) 
 		SELECT -1, 'All Bank Accounts', 'All Banks'
 GO
