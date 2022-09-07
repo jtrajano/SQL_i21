@@ -81,6 +81,7 @@ BEGIN TRY
 			) PD
 			OUTER APPLY (
 				SELECT COUNT(*) intPaymentCount FROM tblAPPaymentDetail WHERE dblPayment <> 0
+				AND intPaymentId = P.intPaymentId
 			) PC
 			WHERE P.intPaymentId = @createdPaymentId
 
