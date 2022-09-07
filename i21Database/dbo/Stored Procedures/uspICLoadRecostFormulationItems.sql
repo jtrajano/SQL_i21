@@ -194,12 +194,18 @@ FROM
  								ISNULL(receiptOutputNewStandardCost.dblNewStandardCost, 0) 
 								* (p.dblAmountPercent / 100) 
 								+ ISNULL(receiptOutputNewStandardCost.dblNewStandardCost, 0) 
-								, r.intRounding
+								, ISNULL(r.intRounding, 6)
 							) 
 						WHEN p.strPricingMethod = 'Markup Last Cost' THEN 
-							ROUND(p.dblLastCost * p.dblAmountPercent / 100 + p.dblLastCost, r.intRounding) 
+							ROUND(
+								p.dblLastCost * p.dblAmountPercent / 100 + p.dblLastCost
+								, ISNULL(r.intRounding, 6)
+							) 
 						WHEN p.strPricingMethod = 'Markup Avg Cost' THEN 
-							ROUND(p.dblAverageCost * p.dblAmountPercent / 100 + p.dblAverageCost, r.intRounding) 
+							ROUND(
+								p.dblAverageCost * p.dblAmountPercent / 100 + p.dblAverageCost
+								, ISNULL(r.intRounding, 6)
+							) 
 						ELSE 
 							p.dblSalePrice
 				END 
