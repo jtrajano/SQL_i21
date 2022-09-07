@@ -45,6 +45,7 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 										  			THEN CONVERT(BIT,1)
 										  	   ELSE CONVERT(BIT,0)
 										   END 
+	   ,[strSelectedDate]				= TimeEntry.[strSelectedDate]
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
