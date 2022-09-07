@@ -91,6 +91,7 @@ BEGIN
 		   ,[intLineOfBusinessId]
 		   ,[intDocumentMaintenanceId]
 		   ,[dblTotalStandardWeight]
+		   ,[intOpportunityId]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -164,6 +165,7 @@ BEGIN
 		   ,[intLineOfBusinessId]
 		   ,@intDocumentMaintenanceId
 		   ,[dblTotalStandardWeight]
+		   ,[intOpportunityId]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
