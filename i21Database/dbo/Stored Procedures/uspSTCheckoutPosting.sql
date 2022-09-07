@@ -3574,81 +3574,81 @@ BEGIN
 											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= NULL -- UOM.intItemUOMId
 
-											--,[dblQtyShipped]			= CASE
-											--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-											--										THEN 1
-											--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
-											--										THEN -1
-											--							END
-											,[dblQtyShipped]			= CASE
-																			-- Refference: http://jira.irelyserver.com/browse/ST-1558
-																			WHEN @strInvoiceTransactionTypeMain = @strCASH
-																				THEN 1
-																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-																				THEN -1
-																		END
+												--,[dblQtyShipped]			= CASE
+												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+												--										THEN 1
+												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--										THEN -1
+												--							END
+												,[dblQtyShipped]			= CASE
+																				-- Refference: http://jira.irelyserver.com/browse/ST-1558
+																				WHEN @strInvoiceTransactionTypeMain = @strCASH
+																					THEN 1
+																				WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																					THEN -1
+																			END
 
-											,[dblDiscount]				= 0
+												,[dblDiscount]				= 0
 
-											--,[dblPrice]					= CASE
-											--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-											--										THEN ISNULL(CH.dblCashOverShort, 0)
-											--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
-											--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
-											,[dblPrice]					= ISNULL(CH.dblCashOverShort, 0)
+												--,[dblPrice]					= CASE
+												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+												--										THEN ISNULL(CH.dblCashOverShort, 0)
+												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
+												,[dblPrice]					= ISNULL(CH.dblCashOverShort, 0)
 
-											,[ysnRefreshPrice]			= 0
-											,[strMaintenanceType]		= NULL
-											,[strFrequency]				= NULL
-											,[dtmMaintenanceDate]		= NULL
-											,[dblMaintenanceAmount]		= NULL
-											,[dblLicenseAmount]			= NULL
-											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
-											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
-											,[intSCInvoiceId]			= NULL
-											,[strSCInvoiceNumber]		= NULL
-											,[intInventoryShipmentItemId] = NULL
-											,[strShipmentNumber]		= NULL
-											,[intSalesOrderDetailId]	= NULL
-											,[strSalesOrderNumber]		= NULL
-											,[intContractHeaderId]		= NULL
-											,[intContractDetailId]		= NULL
-											,[intShipmentPurchaseSalesContractId]	= NULL
-											,[intTicketId]				= NULL
-											,[intTicketHoursWorkedId]	= NULL
-											,[intSiteId]				= NULL -- not sure
-											,[strBillingBy]				= NULL -- not sure
-											,[dblPercentFull]			= NULL
-											,[dblNewMeterReading]		= NULL
-											,[dblPreviousMeterReading]	= NULL -- not sure
-											,[dblConversionFactor]		= NULL -- not sure
-											,[intPerformerId]			= NULL -- not sure
-											,[ysnLeaseBilling]			= NULL
-											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-											,[strImportFormat]			= ''
-											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-											,[intTempDetailIdForTaxes]  = NULL
-											,[intConversionAccountId]	= NULL -- not sure
-											,[intCurrencyExchangeRateTypeId]	= NULL
-											,[intCurrencyExchangeRateId]		= NULL
-											,[dblCurrencyExchangeRate]	= 1.000000
-											,[intSubCurrencyId]			= NULL
-											,[dblSubCurrencyRate]		= 1.000000
-											--,0
-											--,1
-								FROM tblSTStore ST
-								JOIN tblICItem I 
-									ON ST.intOverShortItemId = I.intItemId 
-								JOIN tblICItemLocation IL
-									ON I.intItemId = IL.intItemId
-									AND ST.intCompanyLocationId = IL.intLocationId
+												,[ysnRefreshPrice]			= 0
+												,[strMaintenanceType]		= NULL
+												,[strFrequency]				= NULL
+												,[dtmMaintenanceDate]		= NULL
+												,[dblMaintenanceAmount]		= NULL
+												,[dblLicenseAmount]			= NULL
+												,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+												,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
+												,[intSCInvoiceId]			= NULL
+												,[strSCInvoiceNumber]		= NULL
+												,[intInventoryShipmentItemId] = NULL
+												,[strShipmentNumber]		= NULL
+												,[intSalesOrderDetailId]	= NULL
+												,[strSalesOrderNumber]		= NULL
+												,[intContractHeaderId]		= NULL
+												,[intContractDetailId]		= NULL
+												,[intShipmentPurchaseSalesContractId]	= NULL
+												,[intTicketId]				= NULL
+												,[intTicketHoursWorkedId]	= NULL
+												,[intSiteId]				= NULL -- not sure
+												,[strBillingBy]				= NULL -- not sure
+												,[dblPercentFull]			= NULL
+												,[dblNewMeterReading]		= NULL
+												,[dblPreviousMeterReading]	= NULL -- not sure
+												,[dblConversionFactor]		= NULL -- not sure
+												,[intPerformerId]			= NULL -- not sure
+												,[ysnLeaseBilling]			= NULL
+												,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
+												,[strImportFormat]			= ''
+												,[dblCOGSAmount]			= 0 --IP.dblSalePrice
+												,[intTempDetailIdForTaxes]  = NULL
+												,[intConversionAccountId]	= NULL -- not sure
+												,[intCurrencyExchangeRateTypeId]	= NULL
+												,[intCurrencyExchangeRateId]		= NULL
+												,[dblCurrencyExchangeRate]	= 1.000000
+												,[intSubCurrencyId]			= NULL
+												,[dblSubCurrencyRate]		= 1.000000
+												--,0
+												--,1
+									FROM tblSTStore ST
+									JOIN tblICItem I 
+										ON ST.intOverShortItemId = I.intItemId 
+									JOIN tblICItemLocation IL
+										ON I.intItemId = IL.intItemId
+										AND ST.intCompanyLocationId = IL.intLocationId
 								
-								-- http://jira.irelyserver.com/browse/ST-1316
-								--JOIN tblICItemUOM UOM 
-								--	ON I.intItemId = UOM.intItemId
-								--JOIN tblICItemPricing IP 
-								--	ON I.intItemId = IP.intItemId
-								--	AND IL.intItemLocationId = IP.intItemLocationId
+									-- http://jira.irelyserver.com/browse/ST-1316
+									--JOIN tblICItemUOM UOM 
+									--	ON I.intItemId = UOM.intItemId
+									--JOIN tblICItemPricing IP 
+									--	ON I.intItemId = IP.intItemId
+									--	AND IL.intItemLocationId = IP.intItemLocationId
 
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId

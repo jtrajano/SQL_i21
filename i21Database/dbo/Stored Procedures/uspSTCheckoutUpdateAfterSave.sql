@@ -8,6 +8,7 @@
 	@dblTotalPaidOuts DECIMAL(18, 6),
 	@dblEnteredPaidOuts DECIMAL(18, 6),
 	@dblCashOverShort DECIMAL(18, 6),
+	@dblDealerCommission DECIMAL(18, 6),
 	@strStatus NVARCHAR(50),
 	@intCheckoutId INT,
 	@strRegisterClass NVARCHAR(30),
@@ -56,6 +57,7 @@ BEGIN
 				  , dblTotalPaidOuts				= @dblTotalPaidOuts
 				  , dblEnteredPaidOuts				= @dblEnteredPaidOuts
 				  , dblCashOverShort				= @dblCashOverShort
+				  , dblDealerCommission				= @dblDealerCommission
 				  , strStatus						= @strStatus
 				  , dblATMBegBalance				= ISNULL(@dblATMBegBalance, 0)
 				  , dblATMEndBalanceCalculated		= ISNULL(@dblATMEndBalanceCalculated, 0)
