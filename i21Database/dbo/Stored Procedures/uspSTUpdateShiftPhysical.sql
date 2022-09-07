@@ -16,7 +16,6 @@ BEGIN TRANSACTION @TranName;
 SET @strStatusMsg = 'Success'
 
 DELETE FROM tblSTCheckoutShiftPhysicalPreview
-WHERE intCheckoutId = @intCheckoutId
 
 DECLARE @tmpTblShiftPhysicalCountGroup TABLE (
 		intCheckoutId INT NULL,
@@ -208,11 +207,9 @@ USING (
 ) AS u
 	ON e.intCheckoutShiftPhysicalPreviewId = u.intCheckoutShiftPhysicalPreviewId
 
--- If matched, update the effective cost.
 WHEN MATCHED THEN 
 	UPDATE 
 	SET 
-		--e.dblSystemCount = u.dblSystemCount
 		e.dblQtyReceived = u.dblQtyTransferredNew
 		,e.dblQtyTransferred = u.dblQtyReceivedNew
 		,e.dblQtySold = u.dblQtySoldNew
@@ -436,7 +433,6 @@ USING (
 ) AS u
 	ON e.intCheckoutShiftPhysicalPreviewId = u.intCheckoutShiftPhysicalPreviewId
 
--- If matched, update the effective cost.
 WHEN MATCHED THEN 
 	UPDATE 
 	SET 
@@ -446,7 +442,6 @@ WHEN MATCHED THEN
 		,e.dblQtySold = u.dblQtySoldNew
 		,e.dtmCheckoutDate = @dtmCheckoutDate
 		
--- If none found, insert a new Effective Item Cost
 WHEN NOT MATCHED THEN 
 	INSERT (
 		intCheckoutId
