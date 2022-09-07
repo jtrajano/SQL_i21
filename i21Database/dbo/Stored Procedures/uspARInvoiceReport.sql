@@ -505,6 +505,68 @@ LEFT JOIN (
 		  AND ISNULL(strPricing, '') <> ''
 	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
 			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId	
+	
+	UNION ALL
+
+	SELECT intInvoiceId					= DF.intInvoiceId
+		 , intInvoiceDetailId			= 9999999
+		 , intCommentTypeId				= NULL
+		 , dblTotalTax					= DF.dblTax
+		 , dblQtyShipped				= ISNULL(QTY.dblTotalQty, 1)
+		 , dblQtyOrdered				= 0
+		 , dblDiscount					= 0
+		 , dblComputedGrossPrice		= 0	
+		 , dblPrice                 	= 0
+		 , dblTotal						= DF.dblTax
+		 , strVFDDocumentNumber			= NULL
+		 , strUnitMeasure				= NULL
+		 , intContractSeq				= NULL
+		 , dblBalance					= NULL
+		 , strContractNumber			= NULL
+		 , strCustomerContract			= NULL
+		 , strItemNo					= NULL
+		 , strInvoiceComments			= NULL
+		 , strItemType					= NULL
+		 , strItemDescription			= TC.strTaxCode
+		 , strBOLNumber					= NULL
+		 , ysnListBundleSeparately		= NULL
+		 , intRecipeId					= NULL
+		 , intOneLinePrintId			= NULL
+		 , intSiteID					= NULL
+		 , strSiteNumber				= NULL
+		 , dblEstimatedPercentLeft		= NULL
+		 , strTicketNumber				= NULL
+		 , strTicketNumberDate			= NULL
+		 , strTrailerNumber				= NULL
+		 , strSealNumber				= NULL
+		 , strCustomerReference			= NULL
+		 , strSalesReference			= NULL
+		 , strPurchaseReference			= NULL
+		 , strLoadNumber				= NULL
+		 , strTruckName					= NULL
+		 , dblPercentFull				= NULL
+		 , strAddonDetailKey			= NULL
+		 , ysnAddonParent				= NULL
+		 , strBOLNumberDetail			= NULL
+		 , strSubFormula				= NULL
+	 	 , strSCInvoiceNumber			= NULL
+		 , dtmDateSC					= NULL
+		 , dtmToCalculate				= NULL
+		 , dblServiceChargeAmountDue	= NULL
+		 , dblServiceChargeAPR			= NULL
+		 , dtmDueDate					= NULL
+		 , ysnPaid						= NULL
+		 , intSCInvoiceId				= NULL
+	FROM dbo.tblARInvoiceDeliveryFee DF WITH (NOLOCK)
+	INNER JOIN tblSMTaxCode TC ON DF.intTaxCodeId = TC.intTaxCodeId
+	OUTER APPLY (
+		SELECT dblTotalQty = SUM(dblQtyShipped)
+		FROM tblARInvoiceDetail ID
+		INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
+		INNER JOIN tblSMTaxCodeRate TCR ON ITEM.intCategoryId = TCR.intGasolineItemCategoryId
+		WHERE ID.intInvoiceId = DF.intInvoiceId
+		GROUP BY ID.intInvoiceId
+	) QTY
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN tblSMCurrency CURRENCY ON INV.intCurrencyId = CURRENCY.intCurrencyID
 LEFT JOIN tblEMEntity SALESPERSON ON INV.intEntitySalespersonId = SALESPERSON.intEntityId
