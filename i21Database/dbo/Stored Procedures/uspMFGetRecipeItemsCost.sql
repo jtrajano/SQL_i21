@@ -3,34 +3,50 @@
 	@intLocationId int
 AS
 
-Declare @intCostTypeId int
+DECLARE @intCostTypeId INT;
 
-Select @intCostTypeId=intCostTypeId From tblMFRecipe where intRecipeId=@intRecipeId
+SELECT @intCostTypeId = ISNULL(intCostTypeId, 1)
+FROM tblMFRecipe 
+WHERE intRecipeId=@intRecipeId;
 
-If ISNULL(@intCostTypeId,0)=0
-	Set @intCostTypeId=1
-
-Select ri.intRecipeId,ri.intRecipeItemId,ri.intItemId,iu.dblUnitQty,
-ISNULL(dbo.fnMFConvertCostToTargetItemUOM((Select intItemUOMId From tblICItemUOM Where intItemId=ri.intItemId AND ysnStockUnit=1),ri.intItemUOMId,
-CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
-When @intCostTypeId=3 AND ISNULL(ip.dblLastCost,0) > 0 THEN ISNULL(ip.dblLastCost,0)
-Else ISNULL(ip.dblStandardCost,0) End
-),0) AS dblCost
-From tblMFRecipeItem ri 
-Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId --AND ysnStockUnit=1
-Join tblICItemLocation il on ri.intItemId=il.intItemId 
-Left Join tblICItemPricing ip on ip.intItemId=ri.intItemId AND ip.intItemLocationId=il.intItemLocationId
-Join tblICItem i on ri.intItemId=i.intItemId
-Where ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1 AND il.intLocationId=@intLocationId AND i.strType<>'Other Charge'
+SELECT ri.intRecipeId
+	 , ri.intRecipeItemId
+	 , ri.intItemId
+	 , iu.dblUnitQty
+	 , ISNULL(dbo.fnMFConvertCostToTargetItemUOM((SELECT intItemUOMId 
+												  FROM tblICItemUOM 
+												  WHERE intItemId = ri.intItemId 
+												    AND ysnStockUnit=1), ri.intItemUOMId, CASE WHEN @intCostTypeId = 2 AND ISNULL(itp.dblAverageCost, 0) > 0 THEN 
+																									ISNULL(itp.dblAverageCost, 0) 
+																						       WHEN @intCostTypeId = 3 AND ISNULL(itp.dblLastCost, 0) > 0 THEN 
+																									ISNULL(itp.dblLastCost, 0)
+																							   ELSE 
+																									ISNULL(itp.dblStandardCost, 0) 
+																						  END), 0) AS dblCost
+	, itp.dblSalePrice
+FROM tblMFRecipeItem ri 
+JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId --AND ysnStockUnit=1
+JOIN tblICItemLocation il ON ri.intItemId = il.intItemId 
+LEFT JOIN tblICItemPricing itp ON itp.intItemId = ri.intItemId AND itp.intItemLocationId = il.intItemLocationId
+JOIN tblICItem i on ri.intItemId=i.intItemId
+WHERE ri.intRecipeId = @intRecipeId AND ri.intRecipeItemTypeId=1 AND il.intLocationId = @intLocationId AND i.strType<>'Other Charge'
 UNION
-Select ri.intRecipeId,ri.intRecipeItemId,ri.intItemId,1 dblUnitQty,
-ISNULL(
-CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
-When @intCostTypeId=3 AND ISNULL(ip.dblLastCost,0) > 0 THEN ISNULL(ip.dblLastCost,0)
-Else ISNULL(ip.dblStandardCost,0) End
-,0) AS dblCost
-From tblMFRecipeItem ri 
-Join tblICItemLocation il on ri.intItemId=il.intItemId 
-Left Join tblICItemPricing ip on ip.intItemId=ri.intItemId AND ip.intItemLocationId=il.intItemLocationId
-Join tblICItem i on ri.intItemId=i.intItemId
-Where ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1 AND il.intLocationId=@intLocationId AND i.strType='Other Charge'
+SELECT ri.intRecipeId
+     , ri.intRecipeItemId
+	 , ri.intItemId
+	 , 1 AS dblUnitQty
+	 , ISNULL(CASE WHEN @intCostTypeId = 2 AND ISNULL(itp.dblAverageCost, 0) > 0 THEN 
+						ISNULL(itp.dblAverageCost, 0) 
+				   WHEN @intCostTypeId = 3 AND ISNULL(itp.dblLastCost, 0) > 0 THEN 
+						ISNULL(itp.dblLastCost, 0)
+				   ELSE ISNULL(itp.dblStandardCost, 0) 
+			  END ,0) AS dblCost
+	 , itp.dblSalePrice
+FROM tblMFRecipeItem ri 
+JOIN tblICItemLocation il on ri.intItemId=il.intItemId 
+LEFT JOIN tblICItemPricing itp on itp.intItemId=ri.intItemId AND itp.intItemLocationId = il.intItemLocationId
+JOIN tblICItem i on ri.intItemId = i.intItemId
+WHERE ri.intRecipeId = @intRecipeId 
+  AND ri.intRecipeItemTypeId = 1 
+  AND il.intLocationId = @intLocationId 
+  AND i.strType = 'Other Charge'
