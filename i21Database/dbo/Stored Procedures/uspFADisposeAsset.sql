@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspFADisposeAsset]
-	@Param				AS NVARCHAR(MAX)	= '',	
+	@Id					AS Id READONLY,	
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
 	@intEntityId		AS INT				= 1,
@@ -20,44 +20,69 @@ DECLARE @ErrorMessage NVARCHAR(MAX)
 --=====================================================================================================================================
 -- 	POPULATE FIXEDASSETS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE TABLE #AssetID(
-			[intAssetId] [int] NOT NULL
-		)
-
 DECLARE @tblAsset TABLE (
-			[strAssetId] NVARCHAR (20) COLLATE Latin1_General_CI_AS NOT NULL,
-			[intAssetId] [int] NOT NULL,
-			dblAssetValue NUMERIC(18,6),
-			dtmDispose DATETIME NOT NULL,
-			ysnOpenPeriod BIT NOT NULL,
-			totalDepre NUMERIC(18,6),
-			totalForeignDepre NUMERIC(18,6),
-			strTransactionId NVARCHAR(20)
-		)
-IF (ISNULL(@Param, '') <> '') 
-	INSERT INTO #AssetID EXEC (@Param)
-ELSE
-	INSERT INTO #AssetID( intAssetid ) SELECT [intAssetId] FROM tblFAFixedAsset
+	[intRowId] INT,
+	[strAssetId] NVARCHAR (20) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intAssetId] [int] NOT NULL,
+	[dblAssetValue] NUMERIC(18,6),
+	[dtmDispose] DATETIME NOT NULL,
+	[ysnOpenPeriod] BIT NOT NULL,
+	[totalDepre] NUMERIC(18,6),
+	[totalForeignDepre] NUMERIC(18,6),
+	[dblBasis] NUMERIC(18,6),
+	[dblAnnualBasis] NUMERIC(18,6),
+	[intDepreciationMethodId] INT,
+	[strTransactionId] NVARCHAR(20),
+	[intLedgerId] INT,
+	[ysnProcessed] BIT
+)
 
---START GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
+-- START GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
 INSERT INTO @tblAsset
 SELECT
-B.strAssetId,
-A.intAssetId,
-(B.dblCost - ISNULL(B.dblSalvageValue, 0)) + ISNULL(Adjustment.dblAdjustment, 0),
-B.dtmDispositionDate,
-F.ysnOpenPeriod,
-0,
-0,
-NULL
-FROM #AssetID A 
-JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId
-JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId AND BD.intBookId = 1
+	ROW_NUMBER() OVER (ORDER BY A.intId ASC, BD.intBookDepreciationId ASC),
+	B.strAssetId,
+	A.intId,
+	(B.dblCost - ISNULL(B.dblSalvageValue, 0)) + ISNULL(Adjustment.dblAdjustment, 0),
+	B.dtmDispositionDate,
+	F.ysnOpenPeriod,
+	0,
+	0,
+	B.dblCost - ISNULL(B.dblSalvageValue, 0),
+	(E.dblPercentage *.01) * (B.dblCost - ISNULL(B.dblSalvageValue, 0)),
+	M.intDepreciationMethodId,
+	NULL,
+	BD.intLedgerId,
+	0
+FROM @Id A 
+JOIN tblFAFixedAsset B on A.intId = B.intAssetId
+JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intId AND BD.intBookId = 1
+join tblFADepreciationMethod  M ON  M.intDepreciationMethodId = BD.intDepreciationMethodId
+OUTER APPLY(
+	SELECT COUNT (*) + 1 intMonth
+	FROM tblFAFixedAssetDepreciation FAD
+	WHERE FAD.intAssetId = B.intAssetId and ISNULL(FAD.intBookId,1) = BD.intBookId
+	AND (CASE WHEN FAD.intLedgerId IS NOT NULL 
+					THEN CASE WHEN (FAD.intLedgerId = BD.intLedgerId) THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
+	AND strTransaction = 'Depreciation'
+)Dep
 OUTER APPLY(
 	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate 
-	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
+	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intId
 	ORDER BY dtmDepreciationToDate DESC
 )D
+OUTER APPLY(
+	SELECT ISNULL(dblPercentage,1) dblPercentage FROM tblFADepreciationMethodDetail 
+		WHERE M.[intDepreciationMethodId] = intDepreciationMethodId AND
+			intYear = CEILING(
+		 	CASE 
+			 	WHEN Dep.intMonth > ISNULL(M.intServiceYear,0)* 12 + ISNULL(M.intMonth ,0) 
+			 	THEN ISNULL(M.intServiceYear,0)* 12 + ISNULL(M.intMonth ,0)
+		  	ELSE
+		  		Dep.intMonth -- IF MONTH IS OUT OF RANGE, THIS WILL GET THE LAST PERCENTAGE OF MONTH
+		  	END/12.0)
+)E
 OUTER APPLY(
 	SELECT ISNULL(ysnOpen,0) &  ISNULL(ysnFAOpen,0) ysnOpenPeriod FROM tblGLFiscalYearPeriod WHERE 
 	D.dtmDepreciationToDate BETWEEN
@@ -66,10 +91,9 @@ OUTER APPLY(
 OUTER APPLY(
 	SELECT ISNULL(SUM(BA.dblAdjustment), 0) dblAdjustment
 	FROM tblFABasisAdjustment BA
-	WHERE BA.intAssetId = A.intAssetId AND BA.intBookId = 1 AND BA.dtmDate <= D.dtmDepreciationToDate AND BA.strAdjustmentType = 'Basis'
+	WHERE BA.intAssetId = A.intId AND BA.intBookId = 1 AND BA.dtmDate <= D.dtmDepreciationToDate AND BA.strAdjustmentType = 'Basis'
 ) Adjustment
-
-WHERE isnull(ysnAcquired,0) = 1 AND isnull(ysnDisposed,0) = 0 AND isnull(ysnDepreciated,0) = 1
+WHERE ISNULL(ysnAcquired,0) = 1 AND isnull(ysnDisposed,0) = 0 AND ISNULL(ysnDepreciated,0) = 1
 
 UPDATE A SET 
 dtmDispose = F.dtmStartDate,
@@ -97,15 +121,7 @@ BEGIN
 	GOTO Post_Rollback
 END
 
-WHILE EXISTS( SELECT TOP 1 1 FROM @tblAsset WHERE strTransactionId IS NULL)
-BEGIN
-	SELECT TOP 1 @strAssetId = strAssetId FROM @tblAsset WHERE strTransactionId IS NULL
-	EXEC uspSMGetStartingNumber 111, @strTransactionId OUTPUT
-	UPDATE @tblAsset SET strTransactionId = @strTransactionId FROM @tblAsset where strAssetId = @strAssetId
-END
-
-
---END GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
+-- END GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
 
 DECLARE @strBatchId AS NVARCHAR(100)= ''
 EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT
@@ -115,19 +131,19 @@ EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF ISNULL(@ysnPost, 0) = 0
 	BEGIN
-		DECLARE @intCount AS INT	
-		SELECT TOP 1 @strAssetId= strAssetId FROM tblFAFixedAsset A JOIN #AssetID B on A.intAssetId = B.intAssetId
+		DECLARE @intCount AS INT, @Param NVARCHAR(MAX)
+		SELECT TOP 1 @strAssetId= strAssetId FROM tblFAFixedAsset A JOIN @Id B on A.intAssetId = B.intId
 		SET @Param = 'SELECT intGLDetailId FROM tblGLDetail WHERE strReference = ''' + @strAssetId + ''' AND strCode = ''AMDIS'' AND ysnIsUnposted=0'
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
 			BEGIN
 				DECLARE @ReverseResult INT
-				EXEC @ReverseResult  = [dbo].[uspFAReverseGLEntries] @strBatchId,@Param, @ysnRecap, NULL, @intEntityId, @intCount	OUT
+				EXEC @ReverseResult  = [dbo].[uspFAReverseGLEntries] @strBatchId, @Param, @ysnRecap, NULL, @intEntityId, @intCount	OUT
 				IF @ReverseResult <> 0 RETURN -1
 				SET @successfulCount = @intCount
 				IF ISNULL(@ysnRecap,0) = 0
 					IF(@intCount > 0)
 					BEGIN
-						UPDATE tblFAFixedAsset SET ysnDisposed = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
+						UPDATE tblFAFixedAsset SET ysnDisposed = 0 WHERE intAssetId IN (SELECT intId FROM @Id)				
 					END									
 			END
 		
@@ -141,7 +157,16 @@ IF ISNULL(@ysnPost, 0) = 0
 Post_Transaction:
 
 
-DECLARE @intDefaultCurrencyId INT, @ysnMultiCurrency BIT = 0, @intDefaultCurrencyExchangeRateTypeId INT, @intRealizedGainLossAccountId INT
+DECLARE @intDefaultCurrencyId INT
+		,@ysnMultiCurrency BIT = 0
+		,@intDefaultCurrencyExchangeRateTypeId INT
+		,@intRealizedGainLossAccountId INT
+		,@strConvention NVARCHAR(50) = '' COLLATE Latin1_General_CI_AS
+		,@dtmDispositionDate DATETIME
+		,@ysnFullyDepreciated BIT
+		,@dblDepreciationTake NUMERIC(18, 6)
+		,@dblAccumulatedDepreciation NUMERIC(18, 6)
+		,@dblExpenseAdjustment NUMERIC(18, 6)
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 SELECT TOP 1 @intRealizedGainLossAccountId = intFixedAssetsRealizedId FROM tblSMMultiCurrency
 SELECT @intDefaultCurrencyExchangeRateTypeId = dbo.fnFAGetDefaultCurrencyExchangeRateTypeId()
@@ -149,8 +174,14 @@ SELECT @intDefaultCurrencyExchangeRateTypeId = dbo.fnFAGetDefaultCurrencyExchang
 DECLARE @dblCurrentRate NUMERIC(18,6), @dblRate NUMERIC(18,6), @dblDispositionAmount NUMERIC(18, 6)
 
 IF ISNULL(@ysnRecap, 0) = 0
-	BEGIN				
-		SELECT 
+BEGIN
+	WHILE EXISTS(SELECT TOP 1 1 FROM @tblAsset WHERE ysnProcessed = 0)
+	BEGIN
+		DECLARE @intRowId INT, @intLedgerId INT = NULL
+		
+		SELECT TOP 1
+				@intRowId = A.intRowId,
+				@intLedgerId = A.intLedgerId,
 				@dblDispositionAmount = ISNULL(F.dblDispositionAmount, 0),
 				@dblRate = CASE WHEN ISNULL(BD.dblRate, 0) > 0 
 					THEN BD.dblRate 
@@ -161,11 +192,18 @@ IF ISNULL(@ysnRecap, 0) = 0
 						END 
 					END,
 				@dblCurrentRate = ISNULL(dbo.fnGetForexRate(A.dtmDispose, F.intCurrencyId, ISNULL(F.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)), 1),
-				@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, F.intCurrencyId) THEN 0 ELSE 1 END
+				@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, F.intCurrencyId) THEN 0 ELSE 1 END,
+				@strConvention = DM.strConvention,
+				@dtmDispositionDate = F.dtmDispositionDate,
+				@ysnFullyDepreciated = ISNULL(BD.ysnFullyDepreciated, 0)
 		FROM tblFAFixedAsset F 
 		JOIN @tblAsset A ON A.intAssetId = F.intAssetId
         JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
-        WHERE BD.intBookId = 1
+		JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = F.intDepreciationMethodId
+        WHERE BD.intBookId = 1 AND A.ysnProcessed = 0
+			AND (CASE WHEN A.intLedgerId IS NOT NULL
+				THEN CASE WHEN A.intLedgerId = BD.intLedgerId THEN 1 ELSE 0 END
+				ELSE 1 END) = 1
 
 		-- Rollback if Multi Currency but no Fixed Asset Realized Gain or Loss Account configured
 		IF (@ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NULL)
@@ -173,7 +211,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 			RAISERROR('Fixed Asset Realized Gain or Loss Account for Multi Currency was not configured in the Company Configuration.', 16,1)
 			GOTO Post_Rollback
 		END
-
 
 		-- Get Accounts Overridden by Location Segment
 		DECLARE @tblOverrideAccount TABLE (
@@ -184,6 +221,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			strNewAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 			strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
 		)
+
+		DELETE @tblOverrideAccount
 		INSERT INTO @tblOverrideAccount (
 			intAssetId
 			,intAccountId
@@ -204,6 +243,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		OUTER APPLY (
 			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intAccumulatedAccountId, 4)
 		) AccumAccountOverride
+		WHERE A.intRowId = @intRowId
 		UNION ALL
 		SELECT 
 			AssetAccountOverride.intAssetId
@@ -217,6 +257,21 @@ IF ISNULL(@ysnRecap, 0) = 0
 		OUTER APPLY (
 			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intAssetAccountId, 1)
 		) AssetAccountOverride
+		WHERE A.intRowId = @intRowId
+		UNION ALL
+		SELECT 
+			DepreciationExpenseAccountOverride.intAssetId
+			,DepreciationExpenseAccountOverride.intAccountId
+			,DepreciationExpenseAccountOverride.intTransactionType
+			,DepreciationExpenseAccountOverride.intNewAccountId
+			,DepreciationExpenseAccountOverride.strNewAccountId
+			,DepreciationExpenseAccountOverride.strError
+		FROM tblFAFixedAsset F
+		JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+		OUTER APPLY (
+			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intDepreciationAccountId, 3)
+		) DepreciationExpenseAccountOverride
+		WHERE A.intRowId = @intRowId AND @strConvention IN ('Mid Month', 'Mid Quarter', 'Mid Year')
 		UNION ALL
 		SELECT 
 			GainLossAccountOverride.intAssetId
@@ -232,6 +287,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		) GainLossAccountOverride
 		WHERE A.totalDepre <> A.dblAssetValue
 		AND ((A.dblAssetValue - (CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre ELSE A.totalForeignDepre END) - @dblDispositionAmount) <> 0)
+		AND A.intRowId = @intRowId
 		UNION ALL
 		SELECT 
 			SalesOffsetAccountOverride.intAssetId
@@ -246,7 +302,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intSalesOffsetAccountId, 6)
 		) SalesOffsetAccountOverride
 		WHERE @dblDispositionAmount > 0 AND A.totalDepre <> A.dblAssetValue
-
+		AND A.intRowId = @intRowId
 		UNION ALL
 		SELECT 
 			RealizedAccountOverride.intAssetId
@@ -262,6 +318,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		) RealizedAccountOverride
 		WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
 			AND @dblRate <> @dblCurrentRate AND ((A.dblAssetValue - A.totalForeignDepre) <> 0)
+			AND A.intRowId = @intRowId
 
 		-- Validate override accounts
 		IF EXISTS(SELECT TOP 1 1 FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL)
@@ -270,7 +327,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			RAISERROR(@ErrorMessage, 16, 1)
 			GOTO Post_Rollback;
 		END
+		
+		-- Generate Transaction Id
+		EXEC uspSMGetStartingNumber 111, @strTransactionId OUTPUT
+		UPDATE @tblAsset SET strTransactionId = @strTransactionId FROM @tblAsset WHERE intRowId = @intRowId AND strTransactionId IS NULL
 
+		-- Get Accumulated Depreciation (Functional and Foreign)
 		UPDATE A 
 		SET totalDepre = G.S, totalForeignDepre = G.dblSumForeign
 		FROM  @tblAsset A
@@ -287,72 +349,212 @@ IF ISNULL(@ysnRecap, 0) = 0
 			AND strCode = 'AMDPR'
 			AND ysnIsUnposted = 0
 			AND A.strAssetId = GL.strReference
+			AND (CASE WHEN GL.intLedgerId IS NOT NULL THEN CASE WHEN GL.intLedgerId = A.intLedgerId THEN 1 ELSE 0 END
+				ELSE 1 END) = 1
 			GROUP BY FA.strAssetId
 		) G
+		WHERE A.intRowId = @intRowId 
 
-		-- Dispose Fixed Asset
-		 INSERT INTO tblFAFixedAssetDepreciation (  
-                [intAssetId],  
-                [intBookId],
-                [intDepreciationMethodId],  
-                [dblBasis],  
-                [dblDepreciationBasis],  
-                [dtmDateInService],  
-                [dtmDispositionDate],  
-                [dtmDepreciationToDate],  
-                [dblDepreciationToDate],  
-                [dblSalvageValue],
-                [dblFunctionalBasis],
-                [dblFunctionalDepreciationBasis],
-                [dblFunctionalDepreciationToDate],
-                [dblFunctionalSalvageValue],
-                [dblRate],  
-                [strTransaction],  
-                [strTransactionId],  
-                [strType],  
-                [strConvention],
-                [strBatchId]
-              )  
-              SELECT  
-                F.intAssetId,
-                1,
-                D.intDepreciationMethodId,
-                LastDepreciation.dblBasis,  
-                LastDepreciation.dblDepreciationBasis,  
-                BD.dtmPlacedInService,  
-                A.dtmDispose,
-				A.dtmDispose,
-				CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre ELSE A.totalForeignDepre END,  
-                LastDepreciation.dblSalvageValue,
-                LastDepreciation.dblFunctionalBasis,
-                LastDepreciation.dblFunctionalDepreciationBasis,
-                ROUND((CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre * @dblRate ELSE A.totalDepre END), 2),
-                LastDepreciation.dblFunctionalSalvageValue,
-                @dblRate,    
-                'Dispose',  
-                A.strTransactionId,  
-                D.strDepreciationType,  
-                D.strConvention,
-                @strBatchId
-                FROM tblFAFixedAsset F 
-				JOIN @tblAsset A ON A.intAssetId = F.intAssetId
-                JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
-                JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+		IF (@strConvention IN ('Mid Quarter', 'Mid Year') AND @ysnFullyDepreciated = 0)
+		BEGIN
+			-- Get Depreciation Take per convention
+			SELECT 
+				@dblDepreciationTake = ISNULL(CASE
+					WHEN @strConvention = 'Mid Year' THEN T.dblAnnualBasis/2
+					WHEN @strConvention = 'Mid Quarter' THEN (T.dblAnnualBasis/4)/2
+					END, 0)
+			FROM @tblAsset T 
+			JOIN tblFADepreciationMethod  M ON  M.intDepreciationMethodId = T.intDepreciationMethodId
+			JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= M.intDepreciationMethodId AND BD.intBookId = 1  and BD.intAssetId = T.intAssetId
+			WHERE T.intRowId = @intRowId
+				AND (CASE WHEN BD.intLedgerId IS NOT NULL THEN CASE WHEN BD.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+
+			IF (@strConvention = 'Mid Quarter')
+			BEGIN
+				-- Get the quarter where the disposition date is into
+				DECLARE @intQuarter INT
+				SELECT TOP 1 @intQuarter = intQuarter FROM [dbo].[fnFACalendarDatesWithQuarter](@dtmDispositionDate, 1) WHERE @dtmDispositionDate BETWEEN dtmStartDate AND dtmEndDate
+
+				-- Get all the depreciation on the quarter
+				SELECT @dblAccumulatedDepreciation = ISNULL(SUM(FAD.dblDepreciation), 0)
+				FROM tblFAFixedAssetDepreciation FAD
+				JOIN @tblAsset T ON T.intAssetId = FAD.intAssetId
 				OUTER APPLY (
-					SELECT TOP 1 dblBasis, dblFunctionalBasis, dblDepreciationBasis, dblFunctionalDepreciationBasis, dblSalvageValue, dblFunctionalSalvageValue 
-					FROM tblFAFixedAssetDepreciation 
-					WHERE intAssetId = A.intAssetId AND intBookId = 1 AND strTransaction = 'Depreciation'
-					ORDER BY dtmDepreciationToDate DESC
-				) LastDepreciation
-				 
-                WHERE BD.intBookId = 1
+					SELECT dtmStartDate, dtmEndDate FROM [dbo].[fnFACalendarDatesWithQuarter](@dtmDispositionDate, 1) WHERE intQuarter = @intQuarter
+				) QuarterDate
+				WHERE FAD.strTransaction = 'Depreciation'
+					AND FAD.dtmDepreciationToDate BETWEEN QuarterDate.dtmStartDate AND QuarterDate.dtmEndDate
+					AND T.intRowId = @intRowId
+					AND (CASE WHEN FAD.intLedgerId IS NOT NULL THEN CASE WHEN FAD.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+			END
+			ELSE
+			BEGIN
+				-- Get all the depreciation on the year where the disposition date is into
+				SELECT @dblAccumulatedDepreciation = ISNULL(SUM(dblDepreciation), 0)
+				FROM tblFAFixedAssetDepreciation B
+				JOIN @tblAsset T ON T.intAssetId = B.intAssetId
+				WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = 1
+				AND (CASE WHEN B.intLedgerId IS NOT NULL 
+								THEN CASE WHEN (B.intLedgerId = T.intLedgerId) THEN 1 ELSE 0 END
+								ELSE 1 END) = 1
+				AND strTransaction = 'Depreciation'
+				AND YEAR(B.dtmDepreciationToDate) = YEAR(@dtmDispositionDate)
+				AND T.intRowId = @intRowId
+				AND (CASE WHEN B.intLedgerId IS NOT NULL THEN CASE WHEN B.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+			END
+
+			IF (@dblAccumulatedDepreciation = 0) --No depreciation within the period: Do not depreciate and set the depreciation take as the expense adjustment
+				SET @dblExpenseAdjustment = @dblDepreciationTake
+			ELSE IF (@dblAccumulatedDepreciation = @dblDepreciationTake) -- Depreciation to date is same with the depreciation take: Do not depreciate and there should be no expense adjusments
+				SET @dblExpenseAdjustment = 0
+			ELSE
+			BEGIN
+				-- Depreciate
+				DECLARE @intSuccessfulCount INT = 0 
+				EXEC [dbo].[uspFADepreciateMultipleAsset]
+					@Id						-- Asset Ids
+					,1						-- intBookId
+					,@intLedgerId			-- intLedgerId
+					,@dtmDispositionDate	-- dtmDepreciationDate
+					,1						-- ysnPost
+					,0						-- ysnRecap
+					,@intEntityId			-- intEntityId
+					,0						-- ysnReverseCurrentDate
+					,@strBatchId			-- strBatchId
+					,@intSuccessfulCount OUTPUT -- successfulCount
+				
+				IF @intSuccessfulCount = 0
+					GOTO Post_Rollback
+				
+				-- Get again the accumulated depreciation per convention
+				IF (@strConvention = 'Mid Quarter')
+				BEGIN
+					SELECT @dblAccumulatedDepreciation = ISNULL(SUM(FAD.dblDepreciation), 0)
+					FROM tblFAFixedAssetDepreciation FAD
+					JOIN @tblAsset T ON T.intAssetId = FAD.intAssetId
+					OUTER APPLY (
+						SELECT dtmStartDate, dtmEndDate FROM [dbo].[fnFACalendarDatesWithQuarter](@dtmDispositionDate, 1) WHERE intQuarter = @intQuarter
+					) QuarterDate
+					WHERE FAD.strTransaction = 'Depreciation'
+						AND FAD.dtmDepreciationToDate BETWEEN QuarterDate.dtmStartDate AND QuarterDate.dtmEndDate
+						AND T.intRowId = @intRowId
+						AND (CASE WHEN FAD.intLedgerId IS NOT NULL THEN CASE WHEN FAD.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+				END
+				ELSE
+				BEGIN
+					SELECT @dblAccumulatedDepreciation = ISNULL(SUM(dblDepreciation), 0)
+					FROM tblFAFixedAssetDepreciation B
+					JOIN @tblAsset T ON T.intAssetId = B.intAssetId
+					WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = 1
+						AND (CASE WHEN B.intLedgerId IS NOT NULL 
+										THEN CASE WHEN (B.intLedgerId = T.intLedgerId) THEN 1 ELSE 0 END
+										ELSE 1 END) = 1
+						AND strTransaction = 'Depreciation'
+						AND YEAR(B.dtmDepreciationToDate) = YEAR(@dtmDispositionDate)
+						AND T.intRowId = @intRowId
+						AND (CASE WHEN B.intLedgerId IS NOT NULL THEN CASE WHEN B.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+				END
+
+				-- Get again Accumulated Depreciation (Functional and Foreign) from GL Entries
+				UPDATE A 
+				SET totalDepre = G.S, totalForeignDepre = G.dblSumForeign
+				FROM  @tblAsset A
+				OUTER APPLY(
+					SELECT 
+						SUM(dblCredit - dblDebit) S,
+						SUM(dblCreditForeign - dblDebitForeign) dblSumForeign
+					FROM tblGLDetail GL
+					JOIN tblFAFixedAsset FA 
+						ON FA.intAssetId = A.intAssetId
+					JOIN @tblOverrideAccount OverrideAccount 
+						ON OverrideAccount.intAssetId = FA.intAssetId AND OverrideAccount.intAccountId = FA.intAccumulatedAccountId
+					WHERE GL.intAccountId = OverrideAccount.intNewAccountId
+						AND strCode = 'AMDPR'
+						AND ysnIsUnposted = 0
+						AND A.strAssetId = GL.strReference
+						AND (CASE WHEN GL.intLedgerId IS NOT NULL THEN CASE WHEN GL.intLedgerId = A.intLedgerId THEN 1 ELSE 0 END
+							ELSE 1 END) = 1
+						GROUP BY FA.strAssetId
+				) G
+				WHERE A.intRowId = @intRowId 
+
+				SET @dblExpenseAdjustment = @dblDepreciationTake - @dblAccumulatedDepreciation
+			END
+		END
+
+		SELECT @dblExpenseAdjustment, @dblDepreciationTake, @dblAccumulatedDepreciation, @ysnFullyDepreciated
+		-- Dispose Fixed Asset
+		INSERT INTO tblFAFixedAssetDepreciation (  
+            [intAssetId],  
+            [intBookId],
+            [intDepreciationMethodId],  
+            [dblBasis],  
+            [dblDepreciationBasis],  
+            [dtmDateInService],  
+            [dtmDispositionDate],  
+            [dtmDepreciationToDate],  
+            [dblDepreciationToDate],  
+            [dblSalvageValue],
+            [dblFunctionalBasis],
+            [dblFunctionalDepreciationBasis],
+            [dblFunctionalDepreciationToDate],
+            [dblFunctionalSalvageValue],
+            [dblRate],  
+            [strTransaction],  
+            [strTransactionId],  
+            [strType],  
+            [strConvention],
+            [strBatchId],
+			[intCurrencyId],
+			[intFunctionalCurrencyId],
+			[intLedgerId]
+            )  
+            SELECT  
+            F.intAssetId,
+            1,
+            D.intDepreciationMethodId,
+            LastDepreciation.dblBasis,  
+            LastDepreciation.dblDepreciationBasis,  
+            BD.dtmPlacedInService,  
+            A.dtmDispose,
+			A.dtmDispose,
+			CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre ELSE A.totalForeignDepre END,  
+            LastDepreciation.dblSalvageValue,
+            LastDepreciation.dblFunctionalBasis,
+            LastDepreciation.dblFunctionalDepreciationBasis,
+            ROUND((CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre * @dblRate ELSE A.totalDepre END), 2),
+            LastDepreciation.dblFunctionalSalvageValue,
+            @dblRate,    
+            'Dispose',  
+            A.strTransactionId,  
+            D.strDepreciationType,  
+            D.strConvention,
+            @strBatchId,
+			BD.intCurrencyId,
+			BD.intFunctionalCurrencyId,
+			BD.intLedgerId
+            FROM tblFAFixedAsset F 
+			JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+            JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
+            JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+			OUTER APPLY (
+				SELECT TOP 1 dblBasis, dblFunctionalBasis, dblDepreciationBasis, dblFunctionalDepreciationBasis, dblSalvageValue, dblFunctionalSalvageValue 
+				FROM tblFAFixedAssetDepreciation 
+				WHERE intAssetId = A.intAssetId AND intBookId = 1 AND strTransaction = 'Depreciation'
+					AND (CASE WHEN intLedgerId IS NOT NULL THEN CASE WHEN intLedgerId = A.intLedgerId THEN 1 ELSE 0 END
+						ELSE 1 END) = 1
+				ORDER BY dtmDepreciationToDate DESC
+			) LastDepreciation
+            WHERE BD.intBookId = 1 AND intRowId = @intRowId AND
+				(CASE WHEN BD.intLedgerId IS NOT NULL THEN CASE WHEN BD.intLedgerId = A.intLedgerId THEN 1 ELSE 0 END
+					ELSE 1 END) = 1
 
 
 		DECLARE @GLEntries RecapTableType				
 		
 		DELETE FROM @GLEntries
 		INSERT INTO @GLEntries (
-			 [strTransactionId]
+				[strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
 			,[strDescription]
@@ -385,10 +587,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]			
 			,[intCurrencyExchangeRateTypeId]
 			,[intCompanyLocationId]
+			,[intLedgerId]
 		)
 		-- Accumulated Depreciation Account GL Entry
 		SELECT 
-			 [strTransactionId]		= B.strTransactionId
+				[strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
@@ -429,16 +632,18 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
 			,[intCompanyLocationId] = A.[intCompanyLocationId]
+			,[intLedgerId]			= B.[intLedgerId]
 		
 		FROM tblFAFixedAsset A 
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
 		JOIN @tblOverrideAccount OverrideAccount 
 			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intAccumulatedAccountId
+		WHERE B.intRowId = @intRowId
 
 		-- Asset Account GL Entry
 		UNION ALL
 		SELECT 
-			 [strTransactionId]		= B.strTransactionId
+				[strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
@@ -472,16 +677,67 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
 			,[intCompanyLocationId] = A.[intCompanyLocationId]
+			,[intLedgerId]			= B.[intLedgerId]
 		
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
 		JOIN @tblOverrideAccount OverrideAccount 
 			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intAssetAccountId
+		WHERE B.intRowId = @intRowId
+
+		-- Expense Adjustment Entry
+		UNION ALL
+		SELECT 
+				[strTransactionId]		= B.strTransactionId
+			,[intTransactionId]		= A.[intAssetId]
+			,[intAccountId]			= OverrideAccount.[intNewAccountId]
+			,[strDescription]		= A.[strAssetDescription]
+			,[strReference]			= A.strAssetId
+			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[dblDebit]				= CASE WHEN @dblExpenseAdjustment > 0
+											THEN CASE WHEN @ysnMultiCurrency = 0 THEN @dblExpenseAdjustment ELSE ROUND(@dblExpenseAdjustment * @dblRate, 2) END
+											ELSE 0 END
+			,[dblCredit]			= CASE WHEN @dblExpenseAdjustment < 0
+											THEN CASE WHEN @ysnMultiCurrency = 0 THEN ABS(@dblExpenseAdjustment) ELSE ROUND(ABS(@dblExpenseAdjustment) * @dblRate, 2) END
+											ELSE 0 END
+			,[dblDebitForeign]		= CASE WHEN @dblExpenseAdjustment > 0 THEN CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE @dblExpenseAdjustment END END
+			,[dblCreditForeign]		= CASE WHEN @dblExpenseAdjustment < 0 THEN CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE ABS(@dblExpenseAdjustment) END END
+			,[dblDebitReport]		= 0
+			,[dblCreditReport]		= 0
+			,[dblReportingRate]		= 0
+			,[dblForeignRate]		= 0
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[dtmDate]				= B.[dtmDispose]
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intCurrencyId]		= A.intCurrencyId
+			,[dblExchangeRate]		= @dblRate
+			,[intUserId]			= 0
+			,[intEntityId]			= @intEntityId			
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchId]			= @strBatchId
+			,[strCode]				= 'AMDIS' --FA
+								
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]		= A.[intAssetId]			
+			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionForm]	= 'Fixed Assets'
+			,[strModuleName]		= 'Fixed Assets'
+			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
+			,[intCompanyLocationId] = A.[intCompanyLocationId]
+			,[intLedgerId]			= B.[intLedgerId]
 		
+		FROM tblFAFixedAsset A
+		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
+		JOIN @tblOverrideAccount OverrideAccount 
+			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intDepreciationAccountId
+		WHERE B.intRowId = @intRowId AND @dblExpenseAdjustment <> 0
+
 		-- Gain or Loss Account GL Entry
 		UNION ALL
 		SELECT 
-			 [strTransactionId]		= B.strTransactionId
+				[strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
@@ -489,38 +745,38 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= CASE WHEN @ysnMultiCurrency = 0
 										THEN
-											CASE WHEN (B.dblAssetValue - B.totalDepre - @dblDispositionAmount) > 0 
-											THEN B.dblAssetValue - B.totalDepre - @dblDispositionAmount ELSE 0 
+											CASE WHEN (B.dblAssetValue - B.totalDepre - @dblDispositionAmount - @dblExpenseAdjustment) > 0 
+											THEN B.dblAssetValue - B.totalDepre - @dblDispositionAmount - @dblExpenseAdjustment ELSE 0 
 											END
 										ELSE
-											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) > 0
-												THEN ROUND(((B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2) 
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) > 0
+												THEN ROUND(((B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) * @dblCurrentRate), 2) 
 												ELSE 0
 										END
-									  END
+										END
 			,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0
 										THEN 
-											CASE WHEN (B.dblAssetValue - B.totalDepre - @dblDispositionAmount) < 0 
-											THEN ABS(B.dblAssetValue - B.totalDepre - @dblDispositionAmount) ELSE 0 
+											CASE WHEN (B.dblAssetValue - B.totalDepre - @dblDispositionAmount - @dblExpenseAdjustment) < 0 
+											THEN ABS(B.dblAssetValue - B.totalDepre - @dblDispositionAmount - @dblExpenseAdjustment) ELSE 0 
 											END
 										ELSE
-											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) < 0
-												THEN ROUND((ABS(B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2)
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) < 0
+												THEN ROUND((ABS(B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) * @dblCurrentRate), 2)
 												ELSE 0
 										END
-									  END
+										END
 			,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0
 										THEN 0
 										ELSE
-											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) > 0
-												THEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) > 0
+												THEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) ELSE 0
 											END
 										END
 			,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0
 										THEN 0
 										ELSE
-											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) < 0
-												THEN ABS(B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
+											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) < 0
+												THEN ABS(B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount - @dblExpenseAdjustment) ELSE 0
 											END
 										END
 			,[dblDebitReport]		= 0
@@ -547,17 +803,19 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
 			,[intCompanyLocationId] = A.[intCompanyLocationId]
+			,[intLedgerId]			= B.[intLedgerId]
 		
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
 		AND ((B.dblAssetValue - (CASE WHEN @ysnMultiCurrency = 0 THEN B.totalDepre ELSE B.totalForeignDepre END) - @dblDispositionAmount) <> 0) -- debit and credit should not be zero.
 		JOIN @tblOverrideAccount OverrideAccount 
 			ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intGainLossAccountId
+		WHERE B.intRowId = @intRowId
 
 		-- Add Sales Offset Account entry if Disposition Amount has value, else no entry
 		UNION ALL
 		SELECT 
-			 [strTransactionId]		= B.strTransactionId
+				[strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
@@ -568,12 +826,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 											@dblDispositionAmount
 										ELSE
 											ROUND((@dblDispositionAmount * @dblCurrentRate), 2)
-									  END
+										END
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0
 										THEN 0
 										ELSE @dblDispositionAmount 
-									  END
+										END
 			,[dblCreditForeign]		= 0
 			,[dblDebitReport]		= 0
 			,[dblCreditReport]		= 0
@@ -599,17 +857,18 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
 			,[intCompanyLocationId] = A.[intCompanyLocationId]
+			,[intLedgerId]			= B.[intLedgerId]
 		
 			FROM tblFAFixedAsset A
 			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
 			JOIN @tblOverrideAccount OverrideAccount 
 				ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = A.intSalesOffsetAccountId
-			WHERE @dblDispositionAmount > 0
+			WHERE @dblDispositionAmount > 0 AND B.intRowId = @intRowId
 
 		-- Realized Gain or Loss GL Entry -> If multi currency, and if history rate and current rate is not equal
 		UNION ALL
 		SELECT
-			 [strTransactionId]		= B.strTransactionId
+				[strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= OverrideAccount.[intNewAccountId]
 			,[strDescription]		= A.[strAssetDescription]
@@ -619,12 +878,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 										THEN 
 											ROUND((B.dblAssetValue* (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2)
 										ELSE 0
-									  END
+										END
 			,[dblCredit]			= CASE WHEN ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) < 0
 										THEN 
 											ABS(ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2))
 										ELSE 0
-									  END
+										END
 			,[dblDebitForeign]		= 0
 			,[dblCreditForeign]		= 0
 			,[dblDebitReport]		= 0
@@ -651,6 +910,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]		= 'Fixed Assets'
 			,[intCurrencyExchangeRateTypeId] = NULL
 			,[intCompanyLocationId] = A.[intCompanyLocationId]
+			,[intLedgerId]			= B.[intLedgerId]
 				
 			FROM tblFAFixedAsset A
 			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
@@ -658,8 +918,10 @@ IF ISNULL(@ysnRecap, 0) = 0
 				ON OverrideAccount.intAssetId = B.intAssetId AND OverrideAccount.intAccountId = @intRealizedGainLossAccountId
 			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
 			AND @dblRate <> @dblCurrentRate AND ((B.dblAssetValue - B.totalForeignDepre) <> 0)
+			AND B.intRowId = @intRowId
 
-
+			-- UPDATE FLAG
+			UPDATE @tblAsset SET ysnProcessed = 1 WHERE intRowId = @intRowId
 		BEGIN TRY
 			EXEC uspGLBookEntries @GLEntries, @ysnPost
 		END TRY
@@ -673,6 +935,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
+END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

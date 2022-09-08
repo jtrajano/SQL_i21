@@ -43,7 +43,7 @@ BEGIN
 			CASE
 				WHEN @intTransactionType = 1 THEN 'Asset Account' COLLATE Latin1_General_CI_AS
 				WHEN @intTransactionType = 2 THEN 'Offset Account' COLLATE Latin1_General_CI_AS
-				WHEN @intTransactionType = 3 THEN 'Depreciation Account' COLLATE Latin1_General_CI_AS
+				WHEN @intTransactionType = 3 THEN 'Depreciation Expense Account' COLLATE Latin1_General_CI_AS
 				WHEN @intTransactionType = 4 THEN 'Accumulated Deperciation Account' COLLATE Latin1_General_CI_AS
 				WHEN @intTransactionType = 5 THEN 'Gain/Loss Account' COLLATE Latin1_General_CI_AS
 				WHEN @intTransactionType = 6 THEN 'Sales Offset Account' COLLATE Latin1_General_CI_AS
