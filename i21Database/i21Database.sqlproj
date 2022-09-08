@@ -3105,6 +3105,7 @@
     <Build Include="dbo\Views\vyuAPBillItemReceiptTaxes.sql" />
     <Build Include="dbo\Tables\tblMFLotTransactionType.sql" />
     <Build Include="dbo\Views\vyuSTPricebookMaster.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Views\vyuSTItemDetailSearch.sql" />
     <Build Include="dbo\Views\vyuSTItemSearch.sql" />
     <Build Include="dbo\Views\vyuSTItemVendorSearch.sql" />
@@ -4066,8 +4067,9 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" /> 
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutPumpTotals.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutPaymentOptions.sql" />
@@ -4501,6 +4503,7 @@
     <Build Include="dbo\Stored Procedures\uspSTBatchRetailAdjustmentPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRetailAdjustmentPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspSTBatchRetailAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateShiftPhysicalItem.sql" />
     <Build Include="dbo\Views\vyuHDProjectSearchSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDragAndDropWorkOrder.sql" />

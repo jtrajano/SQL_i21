@@ -7,10 +7,16 @@
 AS
 
 BEGIN TRY
+
+DECLARE @TranName VARCHAR(20);  
+SELECT @TranName = 'uspSTUpdateShiftPhysical';  
+
+BEGIN TRANSACTION @TranName;  
+
 SET @strStatusMsg = 'Success'
 
 DELETE FROM tblSTCheckoutShiftPhysicalPreview
-WHERE intCheckoutId = @intCheckoutId
+WHERE intCheckoutId NOT IN (SELECT intCheckoutId FROM tblSTCheckoutHeader)
 
 DECLARE @tmpTblShiftPhysicalCountGroup TABLE (
 		intCheckoutId INT NULL,
@@ -19,11 +25,13 @@ DECLARE @tmpTblShiftPhysicalCountGroup TABLE (
 		intItemLocationId INT NULL,
 		dblSystemCount NUMERIC(20, 2) NULL,
 		dblQtyReceived NUMERIC(20, 2) NULL,
+		dblQtyTransferred NUMERIC(20, 2) NULL,
 		dblQtySold NUMERIC(20, 2) NULL,
 		intItemUOMId INT NULL,
 		intEntityUserSecurityId INT NULL,
 		intConcurrencyId INT NULL
 )
+
 
 DECLARE @tmpTblShiftPhysicalItem TABLE (
 		intCheckoutId INT NULL,
@@ -32,11 +40,13 @@ DECLARE @tmpTblShiftPhysicalItem TABLE (
 		intItemLocationId INT NULL,
 		dblSystemCount NUMERIC(20, 2) NULL,
 		dblQtyReceived NUMERIC(20, 2) NULL,
+		dblQtyTransferred NUMERIC(20, 2) NULL,
 		dblQtySold NUMERIC(20, 2) NULL,
 		intItemUOMId INT NULL,
 		intEntityUserSecurityId INT NULL,
 		intConcurrencyId INT NULL
 )
+
 
 --COUNT GROUP
 INSERT INTO @tmpTblShiftPhysicalCountGroup(
@@ -44,15 +54,17 @@ INSERT INTO @tmpTblShiftPhysicalCountGroup(
 	, intCountGroupId
 	, dblSystemCount
 	, dblQtyReceived
+	, dblQtyTransferred
 	, dblQtySold
 	, intEntityUserSecurityId
 	, intConcurrencyId)
 SELECT 
 	intCheckoutId = @intCheckoutId
 	, CG.intCountGroupId
-	, dblSystemCount = ISNULL(SUM(shiftPhysical.dblPhysicalCount), 0)
-	, ISNULL(SUM(InventoryReceipt.dblQtyReceived), 0) AS dblQtyReceived
-	, ISNULL(SUM(ItemMovement.dblQtySold), 0) AS dblQtySold
+	, dblSystemCount = SUM(ISNULL(shiftPhysical.dblPhysicalCount, 0))
+	, SUM(ISNULL(InventoryReceipt.dblQtyReceived, 0)) AS dblQtyReceived
+	, SUM(ISNULL(InventoryQtyTransferredTo.dblQtyTransferred, 0) - ISNULL(InventoryQtyTransferredFrom.dblQtyTransferred, 0)) AS dblQtyTransferred
+	, SUM(ISNULL(ItemMovement.dblQtySold, 0)) AS dblQtySold
 	, intEntityUserSecurityId = @intEntityUserSecurityId
 	, intConcurrencyId = 1
 FROM tblICCountGroup CG
@@ -66,7 +78,7 @@ LEFT JOIN
 		SELECT 
 				SP.intCountGroupId,
 				dblPhysicalCount,
-				ROW_NUMBER() OVER (PARTITION BY SP.intCountGroupId ORDER BY CH.intCheckoutId DESC) AS intRowNum
+				ROW_NUMBER() OVER (PARTITION BY SP.intCountGroupId ORDER BY CH.dtmCheckoutDate DESC) AS intRowNum
 		FROM tblSTCheckoutShiftPhysical SP
 		JOIN tblSTCheckoutHeader CH
 			ON SP.intCheckoutId = CH.intCheckoutId
@@ -102,6 +114,48 @@ LEFT JOIN
 LEFT JOIN 
 (
 	SELECT 
+		IT.intFromLocationId,
+		IT.dtmTransferDate,
+		IL.intCountGroupId,
+		SUM(ITD.dblQuantity) AS dblQtyTransferred
+	FROM tblICInventoryTransfer IT
+	JOIN tblICInventoryTransferDetail ITD
+		ON IT.intInventoryTransferId = ITD.intInventoryTransferId
+	JOIN tblICItemLocation IL
+		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intFromLocationId
+	WHERE ISNULL(IL.intCountGroupId, 0) != 0 AND IT.intStatusId IN (2,3)
+	GROUP BY 
+		IT.intFromLocationId,
+		IT.dtmTransferDate,
+		IL.intCountGroupId
+) AS InventoryQtyTransferredFrom
+	ON IL.intCountGroupId = InventoryQtyTransferredFrom.intCountGroupId
+	AND @dtmCheckoutDate = InventoryQtyTransferredFrom.dtmTransferDate
+	AND @intCompanyLocationId = InventoryQtyTransferredFrom.intFromLocationId
+LEFT JOIN 
+(
+	SELECT 
+		IT.intToLocationId,
+		IT.dtmTransferDate,
+		IL.intCountGroupId,
+		SUM(ITD.dblQuantity) AS dblQtyTransferred
+	FROM tblICInventoryTransfer IT
+	JOIN tblICInventoryTransferDetail ITD
+		ON IT.intInventoryTransferId = ITD.intInventoryTransferId
+	JOIN tblICItemLocation IL
+		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intToLocationId
+	WHERE ISNULL(IL.intCountGroupId, 0) != 0 AND IT.intStatusId = 3
+	GROUP BY 
+		IT.intToLocationId,
+		IT.dtmTransferDate,
+		IL.intCountGroupId
+) AS InventoryQtyTransferredTo
+	ON IL.intCountGroupId = InventoryQtyTransferredTo.intCountGroupId
+	AND @dtmCheckoutDate = InventoryQtyTransferredTo.dtmTransferDate
+	AND @intCompanyLocationId = InventoryQtyTransferredTo.intToLocationId
+LEFT JOIN 
+(
+	SELECT 
 		IL.intLocationId,
 		CH.dtmCheckoutDate,
 		IL.intCountGroupId,
@@ -128,6 +182,76 @@ WHERE IL.intCountGroupId IS NOT NULL
 GROUP BY
 	CG.intCountGroupId
 
+	
+--COUNT GROUP MERGE TO HANDLE IF SHIFT PHYSICAL IS EXISTING
+MERGE	
+INTO	dbo.tblSTCheckoutShiftPhysicalPreview
+WITH	(HOLDLOCK) 
+AS		e
+USING (
+	SELECT SPP.*,
+		PI.intCheckoutId			AS 	 intCheckoutIdNew,		
+		PI.intItemId				AS 	 intItemIdNew,	
+		PI.intCountGroupId			AS 	 intCountGroupIdNew,		
+		PI.intItemLocationId		AS 	 intItemLocationIdNew,		
+		PI.dblSystemCount			AS 	 dblSystemCountNew,			
+		PI.dblQtyReceived			AS 	 dblQtyReceivedNew,			
+		PI.dblQtyTransferred		AS 	 dblQtyTransferredNew,			
+		PI.dblQtySold				AS 	 dblQtySoldNew,				
+		PI.intItemUOMId				AS 	 intItemUOMIdNew,				
+		PI.intEntityUserSecurityId	AS 	 intEntityUserSecurityIdNew,
+		PI.intConcurrencyId			AS	 intConcurrencyIdNew
+	FROM @tmpTblShiftPhysicalCountGroup PI
+	LEFT JOIN tblSTCheckoutShiftPhysicalPreview SPP
+		ON SPP.intCheckoutId = PI.intCheckoutId
+		AND SPP.intCountGroupId = PI.intCountGroupId
+) AS u
+	ON e.intCheckoutShiftPhysicalPreviewId = u.intCheckoutShiftPhysicalPreviewId
+
+WHEN MATCHED THEN 
+	UPDATE 
+	SET 
+		e.dblSystemCount = u.dblSystemCountNew
+		,e.dblQtyReceived = u.dblQtyReceivedNew
+		,e.dblQtyTransferred = u.dblQtyTransferredNew
+		,e.dblQtySold = u.dblQtySoldNew
+		,e.dtmCheckoutDate = @dtmCheckoutDate
+
+
+------------- Merging of Default values to preview table -------------	 	 
+WHEN NOT MATCHED THEN 
+	INSERT (
+		intCheckoutId
+		, intItemId
+		, intCountGroupId
+		, intItemLocationId
+		, dblSystemCount
+		, dblQtyReceived
+		, dblQtyTransferred
+		, dblQtySold
+		, intItemUOMId
+		, intEntityUserSecurityId
+		, dtmCheckoutDate
+		, intLocationId
+		, intConcurrencyId
+	)
+	VALUES (
+		u.intCheckoutIdNew,
+		u.intItemIdNew,
+		u.intCountGroupIdNew,
+		u.intItemLocationIdNew,
+		u.dblSystemCountNew,
+		ISNULL(u.dblQtyReceivedNew, 0),
+		ISNULL(u.dblQtyTransferredNew, 0),
+		ISNULL(u.dblQtySoldNew, 0),
+		u.intItemUOMIdNew,
+		u.intEntityUserSecurityIdNew,
+		@dtmCheckoutDate,
+		@intCompanyLocationId,
+		u.intConcurrencyIdNew
+	);
+
+--Normal Items
 
 --NORMAL ITEMS
 INSERT INTO @tmpTblShiftPhysicalItem(
@@ -136,6 +260,7 @@ INSERT INTO @tmpTblShiftPhysicalItem(
 	, intItemLocationId
 	, dblSystemCount
 	, dblQtyReceived
+	, dblQtyTransferred
 	, dblQtySold
 	, intItemUOMId
 	, intEntityUserSecurityId
@@ -145,8 +270,9 @@ SELECT
 	, I.intItemId
 	, IL.intItemLocationId
 	, dblSystemCount = ISNULL(shiftPhysical.dblPhysicalCount, 0)
-	, InventoryReceipt.dblQtyReceived
-	, ItemMovement.dblQtySold
+	, ISNULL(InventoryReceipt.dblQtyReceived, 0) AS dblQtyReceived
+	, ISNULL(InventoryQtyTransferredTo.dblQtyTransferred, 0) - ISNULL(InventoryQtyTransferredFrom.dblQtyTransferred, 0) AS dblQtyTransferred
+	, ISNULL(ItemMovement.dblQtySold, 0)
 	, UOM.intItemUOMId
 	, intEntityUserSecurityId = @intEntityUserSecurityId
 	, intConcurrencyId = 1
@@ -163,11 +289,12 @@ LEFT JOIN
 				intItemLocationId,
 				intItemUOMId,
 				dblPhysicalCount,
-				ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId, intItemUOMId ORDER BY CH.intCheckoutId DESC) AS intRowNum
-		FROM tblSTCheckoutShiftPhysical SP
+				ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId, intItemUOMId ORDER BY CH.dtmCheckoutDate DESC) AS intRowNum
+		FROM tblSTCheckoutShiftPhysicalItem SP
 		JOIN tblSTCheckoutHeader CH
 			ON SP.intCheckoutId = CH.intCheckoutId
 		WHERE dblPhysicalCount != 0
+			AND intItemId IS NOT NULL
 			AND CH.dtmCheckoutDate < @dtmCheckoutDate
 	) AS tblShiftPhysical WHERE intRowNum = 1
 ) AS shiftPhysical
@@ -201,6 +328,58 @@ LEFT JOIN
 LEFT JOIN 
 (
 	SELECT 
+		IT.intToLocationId,
+		IT.dtmTransferDate,
+		ITD.intItemId,
+		UOM.intItemUOMId,
+		SUM(ITD.dblQuantity) AS dblQtyTransferred
+	FROM tblICInventoryTransfer IT
+	JOIN tblICInventoryTransferDetail ITD
+		ON IT.intInventoryTransferId = ITD.intInventoryTransferId
+	JOIN tblICItemUOM UOM
+		ON ITD.intItemUOMId = UOM.intItemUOMId
+	JOIN tblICItemLocation IL
+		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intToLocationId
+	WHERE ISNULL(IL.intCountGroupId, 0) = 0 AND IL.ysnCountedDaily = 1 AND IT.intStatusId = 3
+	GROUP BY 
+		IT.intToLocationId,
+		IT.dtmTransferDate,
+		ITD.intItemId,
+		UOM.intItemUOMId
+) AS InventoryQtyTransferredTo
+	ON I.intItemId = InventoryQtyTransferredTo.intItemId
+	AND IL.intLocationId = InventoryQtyTransferredTo.intToLocationId
+	AND @dtmCheckoutDate = InventoryQtyTransferredTo.dtmTransferDate
+	AND UOM.intItemUOMId = InventoryQtyTransferredTo.intItemUOMId
+LEFT JOIN 
+(
+	SELECT 
+		IT.intFromLocationId,
+		IT.dtmTransferDate,
+		ITD.intItemId,
+		UOM.intItemUOMId,
+		SUM(ITD.dblQuantity) AS dblQtyTransferred
+	FROM tblICInventoryTransfer IT
+	JOIN tblICInventoryTransferDetail ITD
+		ON IT.intInventoryTransferId = ITD.intInventoryTransferId
+	JOIN tblICItemUOM UOM
+		ON ITD.intItemUOMId = UOM.intItemUOMId
+	JOIN tblICItemLocation IL
+		ON IL.intItemId = ITD.intItemId AND IL.intLocationId = IT.intFromLocationId
+	WHERE ISNULL(IL.intCountGroupId, 0) = 0 AND IL.ysnCountedDaily = 1 AND IT.intStatusId IN (2,3)
+	GROUP BY 
+		IT.intFromLocationId,
+		IT.dtmTransferDate,
+		ITD.intItemId,
+		UOM.intItemUOMId
+) AS InventoryQtyTransferredFrom
+	ON I.intItemId = InventoryQtyTransferredFrom.intItemId
+	AND IL.intLocationId = InventoryQtyTransferredFrom.intFromLocationId
+	AND @dtmCheckoutDate = InventoryQtyTransferredFrom.dtmTransferDate
+	AND UOM.intItemUOMId = InventoryQtyTransferredFrom.intItemUOMId
+LEFT JOIN 
+(
+	SELECT 
 		IL.intLocationId,
 		CH.dtmCheckoutDate,
 		UOM.intItemId,
@@ -229,75 +408,6 @@ LEFT JOIN
 WHERE IL.ysnCountedDaily = 1 AND ISNULL(IL.intCountGroupId, 0) = 0
 AND (IL.intLocationId = @intCompanyLocationId OR ISNULL(@intCompanyLocationId, 0) = 0)
 
-
-
---COUNT GROUP MERGE TO HANDLE IF SHIFT PHYSICAL IS EXISTING
-MERGE	
-INTO	dbo.tblSTCheckoutShiftPhysicalPreview
-WITH	(HOLDLOCK) 
-AS		e
-USING (
-	SELECT SPP.*,
-		PI.intCheckoutId			AS 	 intCheckoutIdNew,		
-		PI.intItemId				AS 	 intItemIdNew,	
-		PI.intCountGroupId			AS 	 intCountGroupIdNew,		
-		PI.intItemLocationId		AS 	 intItemLocationIdNew,		
-		PI.dblSystemCount			AS 	 dblSystemCountNew,			
-		PI.dblQtyReceived			AS 	 dblQtyReceivedNew,			
-		PI.dblQtySold				AS 	 dblQtySoldNew,				
-		PI.intItemUOMId				AS 	 intItemUOMIdNew,				
-		PI.intEntityUserSecurityId	AS 	 intEntityUserSecurityIdNew,
-		PI.intConcurrencyId			AS	 intConcurrencyIdNew
-	FROM @tmpTblShiftPhysicalCountGroup PI
-	LEFT JOIN tblSTCheckoutShiftPhysicalPreview SPP
-		ON SPP.intCheckoutId = PI.intCheckoutId
-		AND SPP.intCountGroupId = PI.intCountGroupId
-) AS u
-	ON e.intCheckoutShiftPhysicalPreviewId = u.intCheckoutShiftPhysicalPreviewId
-
--- If matched, update the effective cost.
-WHEN MATCHED THEN 
-	UPDATE 
-	SET 
-		--e.dblSystemCount = u.dblSystemCount
-		e.dblQtyReceived = u.dblQtyReceived
-		,e.dblQtySold = u.dblQtySold
-		,e.dtmCheckoutDate = @dtmCheckoutDate
-
-
-------------- Merging of Default values to preview table -------------	 	
--- If none found, insert a new Effective Item Cost
-WHEN NOT MATCHED THEN 
-	INSERT (
-		intCheckoutId
-		, intItemId
-		, intCountGroupId
-		, intItemLocationId
-		, dblSystemCount
-		, dblQtyReceived
-		, dblQtySold
-		, intItemUOMId
-		, intEntityUserSecurityId
-		, dtmCheckoutDate
-		, intLocationId
-		, intConcurrencyId
-	)
-	VALUES (
-		u.intCheckoutIdNew,
-		u.intItemIdNew,
-		u.intCountGroupIdNew,
-		u.intItemLocationIdNew,
-		u.dblSystemCountNew,
-		ISNULL(u.dblQtyReceivedNew, 0),
-		ISNULL(u.dblQtySoldNew, 0),
-		u.intItemUOMIdNew,
-		u.intEntityUserSecurityIdNew,
-		@dtmCheckoutDate,
-		@intCompanyLocationId,
-		u.intConcurrencyIdNew
-	);
-
-
 --NORMAL ITEMS MERGE TO HANDLE IF SHIFT PHYSICAL IS EXISTING
 MERGE	
 INTO	dbo.tblSTCheckoutShiftPhysicalPreview
@@ -311,6 +421,7 @@ USING (
 		PI.intItemLocationId		AS 	 intItemLocationIdNew,		
 		PI.dblSystemCount			AS 	 dblSystemCountNew,			
 		PI.dblQtyReceived			AS 	 dblQtyReceivedNew,			
+		PI.dblQtyTransferred		AS 	 dblQtyTransferredNew,		
 		PI.dblQtySold				AS 	 dblQtySoldNew,				
 		PI.intItemUOMId				AS 	 intItemUOMIdNew,				
 		PI.intEntityUserSecurityId	AS 	 intEntityUserSecurityIdNew,
@@ -324,16 +435,15 @@ USING (
 ) AS u
 	ON e.intCheckoutShiftPhysicalPreviewId = u.intCheckoutShiftPhysicalPreviewId
 
--- If matched, update the effective cost.
 WHEN MATCHED THEN 
 	UPDATE 
 	SET 
-		--e.dblSystemCount = u.dblSystemCount
-		e.dblQtyReceived = u.dblQtyReceived
-		,e.dblQtySold = u.dblQtySold
+		e.dblSystemCount = u.dblSystemCountNew
+		,e.dblQtyReceived = u.dblQtyReceivedNew
+		,e.dblQtyTransferred = u.dblQtyTransferredNew
+		,e.dblQtySold = u.dblQtySoldNew
 		,e.dtmCheckoutDate = @dtmCheckoutDate
 		
--- If none found, insert a new Effective Item Cost
 WHEN NOT MATCHED THEN 
 	INSERT (
 		intCheckoutId
@@ -342,6 +452,7 @@ WHEN NOT MATCHED THEN
 		, intItemLocationId
 		, dblSystemCount
 		, dblQtyReceived
+		, dblQtyTransferred
 		, dblQtySold
 		, intItemUOMId
 		, intEntityUserSecurityId
@@ -356,6 +467,7 @@ WHEN NOT MATCHED THEN
 		u.intItemLocationIdNew,
 		u.dblSystemCountNew,
 		ISNULL(u.dblQtyReceivedNew, 0),
+		ISNULL(u.dblQtyTransferredNew, 0),
 		ISNULL(u.dblQtySoldNew, 0),
 		u.intItemUOMIdNew,
 		u.intEntityUserSecurityIdNew,
@@ -364,9 +476,10 @@ WHEN NOT MATCHED THEN
 		u.intConcurrencyIdNew
 	);
 
-	
 
 END TRY
 BEGIN CATCH
 		SET @strStatusMsg = ERROR_MESSAGE()
 END CATCH
+
+COMMIT TRANSACTION @TranName
