@@ -21,6 +21,7 @@ BEGIN TRY
 			,@intScreenId							INT
 			,@ysnExternal							BIT
 			,@strAmendedColumns						NVARCHAR(MAX)
+			,@strAmendedDate						NVARCHAR(200)
 			,@strSequenceHistoryId					NVARCHAR(MAX)
 			,@strCompanyName						NVARCHAR(500)
 			,@strPackingDescription					NVARCHAR(100)
@@ -157,6 +158,15 @@ BEGIN TRY
 												AND AL.dtmHistoryCreated >= @dtmApproveDate
 											FOR XML PATH('')
 											), 1, 1, '')
+
+		SELECT  @strAmendedDate = (SELECT TOP 1 CONVERT(VARCHAR(20),AL.dtmHistoryCreated, 3)   
+											FROM tblCTAmendmentApproval AAP
+											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
+											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
+											WHERE ISNULL(AAP.ysnAmendment,0) = 1
+												AND AL.dtmHistoryCreated >= @dtmApproveDate 
+											order by AL.dtmHistoryCreated DESC )
+
 	END
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
@@ -353,7 +363,7 @@ BEGIN TRY
 														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END, '')
 													END + '</span>'
 		 ,dtmContractDate						= CH.dtmContractDate
-		 ,strContractNumberStrauss				= CH.strContractNumber + (CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns, '')))) = 0 OR (@strTransactionApprovalStatus = 'Waiting for Submit' OR @strTransactionApprovalStatus = 'Waiting for Approval') THEN '' ELSE ' - AMENDMENT' END)
+		 ,strContractNumberStrauss				= CH.strContractNumber + (CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns, '')))) = 0 OR (@strTransactionApprovalStatus = 'Waiting for Submit' OR @strTransactionApprovalStatus = 'Waiting for Approval') THEN '' ELSE ' - AMENDMENT' END) + ' - ('+ @strAmendedDate + ')'
 		 ,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
