@@ -500,9 +500,10 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		SELECT TOP 1 1
 		FROM tblVRCustomerXref xx
 		WHERE xx.intVendorSetupId = vs.intVendorSetupId
-			AND xx.intEntityId != c.intEntityId 
+			AND xx.intEntityId = c.intEntityId 
 			--AND xx.strVendorCustomer = vts.strVendorCustomer
 	)
+	AND NULLIF(vts.strCustomer, '') IS NOT NULL
 
 INSERT INTO @UniqueCustomers (
 	  intEntityId
@@ -527,7 +528,8 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		SELECT TOP 1 1
 		FROM tblVRCustomerXref xx
 		WHERE xx.intVendorSetupId = vs.intVendorSetupId
-			AND xx.intEntityId != c.intEntityId 
+			AND xx.intEntityId = c.intEntityId
+			--AND xx.strVendorCustomer = vts.strVendorCustomer
 	)
 	AND NULLIF(vts.strCustomer, '') IS NULL
 	AND NULLIF(vts.strCustomerName, '') IS NOT NULL
@@ -552,22 +554,47 @@ WHERE guiApiUniqueId = @guiApiUniqueId
 -- WHERE guiApiUniqueId = @guiApiUniqueId
 --   AND RowNumber > 1;
 
-INSERT INTO tblVRCustomerXref (
-	  intEntityId
-	, intVendorSetupId
-	, strVendorCustomer
-	, intConcurrencyId
-	, guiApiUniqueId
-	, intRowNumber
-)
-SELECT
-	c.intEntityId
-	, c.intVendorSetupId
-	, c.strVendorCustomer
-	, 1
-	, c.guiApiUniqueId
-	, c.intRowNumber
-FROM @UniqueCustomers c
+    
+MERGE tblVRCustomerXref AS Target
+USING (
+	SELECT
+		  c.intEntityId
+		, c.intVendorSetupId
+		, c.strVendorCustomer
+		, 1 intConcurrencyId
+		, c.guiApiUniqueId
+		, c.intRowNumber
+	FROM @UniqueCustomers c
+) AS Source
+ON Source.intVendorSetupId = Target.intVendorSetupId
+	AND Source.intEntityId = Target.intEntityId
+    
+-- For Inserts
+WHEN NOT MATCHED BY Target THEN
+    INSERT (intEntityId, intVendorSetupId, strVendorCustomer, intConcurrencyId, guiApiUniqueId, intRowNumber) 
+    VALUES (Source.intEntityId, Source.intVendorSetupId, Source.strVendorCustomer, Source.intConcurrencyId, Source.guiApiUniqueId, Source.intRowNumber)
+
+-- For Updates
+WHEN MATCHED THEN UPDATE SET
+    Target.strVendorCustomer = Source.strVendorCustomer,
+    Target.intRowNumber = Source.intRowNumber;    
+
+-- INSERT INTO tblVRCustomerXref (
+-- 	  intEntityId
+-- 	, intVendorSetupId
+-- 	, strVendorCustomer
+-- 	, intConcurrencyId
+-- 	, guiApiUniqueId
+-- 	, intRowNumber
+-- )
+-- SELECT
+-- 	c.intEntityId
+-- 	, c.intVendorSetupId
+-- 	, c.strVendorCustomer
+-- 	, 1
+-- 	, c.guiApiUniqueId
+-- 	, c.intRowNumber
+-- FROM @UniqueCustomers c
 
 DECLARE @CategoryForUpdates TABLE (intVendorSetupId INT, intCategoryId INT, intRowNumber INT NULL)
 INSERT INTO @CategoryForUpdates
