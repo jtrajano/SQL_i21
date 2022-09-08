@@ -34,7 +34,7 @@
     [intSort] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)),
     CONSTRAINT [PK_tblCheckoutShiftPhysical] PRIMARY KEY ([intCheckoutShiftPhysicalId]),
-    CONSTRAINT [AK_tblSTCheckoutShiftPhysical_intCheckoutId_intCountGroupId] UNIQUE NONCLUSTERED ([intCheckoutId],[intCountGroupId] ASC), 
+    --CONSTRAINT [AK_tblSTCheckoutShiftPhysical_intCheckoutId_intCountGroupId] UNIQUE NONCLUSTERED ([intCheckoutId],[intCountGroupId] ASC), 
     CONSTRAINT [FK_tblCheckoutShiftPhysical_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCheckoutShiftPhysical_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
     CONSTRAINT [FK_tblCheckoutShiftPhysical_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
