@@ -1,13 +1,14 @@
 CREATE PROCEDURE [dbo].[uspFADepreciateMultipleAsset]  
  @Id    AS Id READONLY, 
  @BookId INT = 1,
+ @intLedgerId INT = NULL,
+ @dtmDepreciationDate DATETIME = NULL,
  @ysnPost   AS BIT    = 0,  
  @ysnRecap   AS BIT    = 0,  
  @intEntityId  AS INT    = 1,  
  @ysnReverseCurrentDate BIT = 0,
  @strBatchId   AS NVARCHAR(100),
  @successfulCount AS INT    = 0 OUTPUT
- 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -30,7 +31,6 @@ DECLARE @tblError TABLE (
 INSERT INTO @tblError 
       SELECT intAssetId , strError, intLedgerId FROM fnFAValidateAssetDepreciation(@ysnPost, @BookId, @Id)
 
-
   UPDATE BD
   SET ysnFullyDepreciated = 1
   FROM
@@ -38,6 +38,7 @@ INSERT INTO @tblError
   ON E.intAssetId = BD.intAssetId
   WHERE intBookId = @BookId
   AND strError = 'Asset already fully depreciated.'
+  AND (CASE WHEN @intLedgerId IS NOT NULL THEN CASE WHEN BD.intLedgerId = @intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
 
   UPDATE A
   SET ysnDisposed = 1
@@ -48,9 +49,9 @@ INSERT INTO @tblError
 
 
 INSERT INTO @IdGood
-    SELECT A.intId, B.intLedgerId FROM @Id A LEFT JOIN @tblError B
-    ON A.intId = B.intAssetId WHERE B.intAssetId IS NULL
-    
+    SELECT A.intId, ISNULL(@intLedgerId, B.intLedgerId) FROM @Id A LEFT JOIN @tblError B
+    ON A.intId = B.intAssetId WHERE B.intAssetId IS NULL 
+ 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @IdGood)
   GOTO LogError
    
@@ -179,14 +180,17 @@ BEGIN
       INSERT INTO @tblDepComputation(intAssetId,dblBasis, dblDepreciationBasis,dblMonth, dblDepre, dblFunctionalBasis, dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction, intLedgerId)
         SELECT intAssetId, dblBasis,dblDepreciationBasis,dblMonth,dblDepre, dblFunctionalBasis,dblFunctionalDepreciationBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction, intLedgerId
         FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
-
+        WHERE (CASE WHEN @intLedgerId IS NOT NULL THEN CASE WHEN intLedgerId = @intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+      
       DELETE FROM @IdGood
 
       INSERT INTO @IdGood
-        SELECT intAssetId, intLedgerId FROM @tblDepComputation WHERE strError IS NULL
+        SELECT intAssetId, intLedgerId FROM @tblDepComputation WHERE strError IS NULL AND 
+        (CASE WHEN @intLedgerId IS NOT NULL THEN CASE WHEN intLedgerId = @intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
 
       INSERT INTO @tblError(intAssetId, strError, intLedgerId)
-        SELECT intAssetId, strError, intLedgerId FROM @tblDepComputation WHERE strError IS NOT NULL
+        SELECT intAssetId, strError, intLedgerId FROM @tblDepComputation WHERE strError IS NOT NULL AND 
+        (CASE WHEN @intLedgerId IS NOT NULL THEN CASE WHEN intLedgerId = @intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
       
       DELETE FROM @tblDepComputation WHERE strError IS NOT NULL
       
@@ -221,7 +225,7 @@ BEGIN
 	INSERT INTO @IdHasBasisAdjustment
         SELECT intId, intLedgerId FROM @IdGood
         OUTER APPLY (
-            SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId) WHERE intAssetId = intId AND intBookdId = @BookId AND (strAdjustmentType IS NULL OR strAdjustmentType = 'Basis')
+            SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId, @dtmDepreciationDate) WHERE intAssetId = intId AND intBookdId = @BookId AND (strAdjustmentType IS NULL OR strAdjustmentType = 'Basis')
         ) Adjustment
         WHERE Adjustment.cnt > 0
 
@@ -242,14 +246,14 @@ BEGIN
 			dtmDate,
 			ysnAddToBasis,
 			NULL
-		FROM dbo.fnFAGetBasisAdjustment(@idx, @BookId) WHERE intBookdId = @BookId AND intAssetId = @idx
+		FROM dbo.fnFAGetBasisAdjustment(@idx, @BookId, @dtmDepreciationDate) WHERE intBookdId = @BookId AND intAssetId = @idx
     END 
 
     INSERT INTO @IdHasDepreciationAdjustment
         SELECT intId, BD.intLedgerId FROM @IdGood
         LEFT JOIN tblFABookDepreciation BD ON BD.intAssetId = intId AND BD.intBookId = @BookId
         OUTER APPLY (
-            SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId) WHERE intAssetId = intId AND intBookdId = @BookId AND strAdjustmentType = 'Depreciation'
+            SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId, @dtmDepreciationDate) WHERE intAssetId = intId AND intBookdId = @BookId AND strAdjustmentType = 'Depreciation'
         ) Adjustment
         WHERE Adjustment.cnt > 0
 
@@ -270,7 +274,7 @@ BEGIN
 			dtmDate,
 			ysnAddToBasis,
 			NULL
-		FROM dbo.fnFAGetBasisAdjustment(@idx2, @BookId) WHERE intBookdId = @BookId AND intAssetId = @idx2
+		FROM dbo.fnFAGetBasisAdjustment(@idx2, @BookId, @dtmDepreciationDate) WHERE intBookdId = @BookId AND intAssetId = @idx2
     END
 
     -- Get Accounts Overridden by Location Segment
@@ -674,7 +678,7 @@ BEGIN
                 E.dblDepreciationBasis,
                 BD.dtmPlacedInService,  
                 NULL,  
-				        dbo.fnFAGetNextDepreciationDate(@i, @BookId, E.intLedgerId),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
+				        ISNULL(@dtmDepreciationDate, dbo.fnFAGetNextDepreciationDate(@i, @BookId, E.intLedgerId)),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
                 E.dblDepre,  
                 E.dblMonth,
                 E.dblFunctionalMonth,
