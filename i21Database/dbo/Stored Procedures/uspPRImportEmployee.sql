@@ -136,6 +136,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   
  WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeDetails)  
  BEGIN  
+  SET @strDocumentDelivery1 = NULL
+  SET @strDocumentDelivery2 = NULL
+  SET @strDocumentDelivery3 = NULL
   SELECT TOP 1   
     @EmployeeID = strEmployeeId   
    ,@LineOfBusiness1 = LTRIM(RTRIM(temp.strLineOfBusiness1))  
@@ -178,9 +181,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   --checking Country  
   SELECT TOP 1 @CountryCount = COUNT(strCountry) FROM tblSMCountry WHERE strCountry = @strCountry  
   
-  SET @strDocumentDelivery1 = CASE WHEN @strDocumentDelivery1 <> '' AND @strDocumentDelivery1 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery1 ELSE 'NONE' END    
-  SET @strDocumentDelivery2 = CASE WHEN @strDocumentDelivery2 <> '' AND @strDocumentDelivery2 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery2 ELSE 'NONE' END    
-  SET @strDocumentDelivery3 = CASE WHEN @strDocumentDelivery3 <> '' AND @strDocumentDelivery3 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery3 ELSE 'NONE' END   
+  SET @strDocumentDelivery1 = CASE WHEN @strDocumentDelivery1 <> '' AND @strDocumentDelivery1 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery1 WHEN @strDocumentDelivery1 IS NULL THEN 'NO VAL' ELSE 'NONE' END    
+  SET @strDocumentDelivery2 = CASE WHEN @strDocumentDelivery2 <> '' AND @strDocumentDelivery2 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery2 WHEN @strDocumentDelivery2 IS NULL THEN 'NO VAL' ELSE 'NONE' END    
+  SET @strDocumentDelivery3 = CASE WHEN @strDocumentDelivery3 <> '' AND @strDocumentDelivery3 IN('Direct Mail','Email','Fax','Web Portal') THEN @strDocumentDelivery3 WHEN @strDocumentDelivery3 IS NULL THEN 'NO VAL' ELSE 'NONE' END    
   
   SET @strType = CASE WHEN @strType <> '' AND @strType IN('Full-Time','Part-Time') THEN @strType ELSE '' END  
   SET @strPayPeriod = CASE WHEN @strPayPeriod <> '' AND @strPayPeriod   
@@ -250,11 +253,11 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
            BEGIN  
             IF(@LineOfBusiness5Count != 0 OR @LineOfBusiness5 IS NULL)  
              BEGIN  
-              IF(@strDocumentDelivery1 IS NOT NULL AND @strDocumentDelivery1 != '')  
+              IF((@strDocumentDelivery1 IS NOT NULL AND @strDocumentDelivery1 != 'NONE') OR @strDocumentDelivery1 = 'NO VAL')  
                BEGIN  
-                IF(@strDocumentDelivery2 IS NOT NULL AND @strDocumentDelivery2 != '')  
+                IF((@strDocumentDelivery2 IS NOT NULL AND @strDocumentDelivery2 != 'NONE') OR @strDocumentDelivery2 = 'NO VAL')  
                  BEGIN  
-                  IF(@strDocumentDelivery3 IS NOT NULL AND @strDocumentDelivery3 != '')  
+                  IF((@strDocumentDelivery3 IS NOT NULL AND @strDocumentDelivery3 != 'NONE') OR @strDocumentDelivery3 = 'NO VAL')  
                   BEGIN  
                    IF(@strType IS NOT NULL AND @strType != '')  
                     BEGIN  
@@ -427,7 +430,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                      , strLogLevel = 'Error'  
                      , strStatus = 'Failed'  
                      , intRowNo = SE.intRowNumber  
-                     , strMessage = 'Wrong input/format for Document Delivery. Please try again.'  
+                     , strMessage = 'Wrong input/format for Document Delivery 3. Please try again.'  
                        FROM tblApiSchemaEmployee SE  
                       LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
                       WHERE SE.guiApiUniqueId = @guiApiUniqueId  
@@ -447,7 +450,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                    , strLogLevel = 'Error'  
                    , strStatus = 'Failed'  
                    , intRowNo = SE.intRowNumber  
-                   , strMessage = 'Wrong input/format for Document Delivery. Please try again.'  
+                   , strMessage = 'Wrong input/format for Document Delivery 2. Please try again.'  
                      FROM tblApiSchemaEmployee SE  
                     LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
                     WHERE SE.guiApiUniqueId = @guiApiUniqueId  
@@ -467,7 +470,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                  , strLogLevel = 'Error'  
                  , strStatus = 'Failed'  
                  , intRowNo = SE.intRowNumber  
-                 , strMessage = 'Wrong input/format for Document Delivery. Please try again.'  
+                 , strMessage = 'Wrong input/format for Document Delivery 1. Please try again.'  
                    FROM tblApiSchemaEmployee SE  
                   LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
                   WHERE SE.guiApiUniqueId = @guiApiUniqueId  
@@ -487,7 +490,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                , strLogLevel = 'Error'  
                , strStatus = 'Failed'  
                , intRowNo = SE.intRowNumber  
-               , strMessage = 'Wrong input/format for Line of Business. Please try again.'  
+               , strMessage = 'Wrong input/format for Line of Business 5. Please try again.'  
                  FROM tblApiSchemaEmployee SE  
                 LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
                 WHERE SE.guiApiUniqueId = @guiApiUniqueId  
@@ -507,7 +510,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
              , strLogLevel = 'Error'  
              , strStatus = 'Failed'  
              , intRowNo = SE.intRowNumber  
-             , strMessage = 'Wrong input/format for Line of Business. Please try again.'  
+             , strMessage = 'Wrong input/format for Line of Business 4. Please try again.'  
                FROM tblApiSchemaEmployee SE  
               LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
               WHERE SE.guiApiUniqueId = @guiApiUniqueId  
@@ -527,7 +530,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
            , strLogLevel = 'Error'  
            , strStatus = 'Failed'  
            , intRowNo = SE.intRowNumber  
-           , strMessage = 'Wrong input/format for Line of Business. Please try again.'  
+           , strMessage = 'Wrong input/format for Line of Business 3. Please try again.'  
              FROM tblApiSchemaEmployee SE  
             LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
             WHERE SE.guiApiUniqueId = @guiApiUniqueId  
@@ -547,7 +550,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
          , strLogLevel = 'Error'  
          , strStatus = 'Failed'  
          , intRowNo = SE.intRowNumber  
-         , strMessage = 'Wrong input/format for Line of Business. Please try again.'  
+         , strMessage = 'Wrong input/format for Line of Business 2. Please try again.'  
            FROM tblApiSchemaEmployee SE  
           LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
           WHERE SE.guiApiUniqueId = @guiApiUniqueId  
@@ -567,7 +570,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        , strLogLevel = 'Error'  
        , strStatus = 'Failed'  
        , intRowNo = SE.intRowNumber  
-       , strMessage = 'Wrong input/format for Line of Business. Please try again.'  
+       , strMessage = 'Wrong input/format for Line of Business 1. Please try again.'  
          FROM tblApiSchemaEmployee SE  
         LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
         WHERE SE.guiApiUniqueId = @guiApiUniqueId  
