@@ -4069,6 +4069,7 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" /> 
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalPreview.sql" /> 
     <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutPumpTotals.sql" />
