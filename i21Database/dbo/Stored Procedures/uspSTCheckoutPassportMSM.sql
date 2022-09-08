@@ -154,7 +154,7 @@ BEGIN
 				----Update tblSTCheckoutPaymentOptions
 				Update dbo.tblSTCheckoutPaymentOptions
 				SET dblRegisterAmount = ISNULL(chk.dblMiscellaneousSummaryAmount, 0)
-                     , intRegisterCount = ISNULL(chk.intMiscellaneousSummaryCount, 0)
+                     , dblRegisterCount = ISNULL(chk.dblMiscellaneousSummaryCount, 0)
                      , dblAmount = ISNULL(chk.dblMiscellaneousSummaryAmount, 0)
 				FROM @UDT_MSM chk
 				INNER JOIN tblSTPaymentOption PO 
@@ -215,7 +215,7 @@ BEGIN
 			  -------------------------------------------------------------------------------------------------------------
 			  UPDATE dbo.tblSTCheckoutHeader 
 			  SET dblTotalTax = (
-									SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+									SELECT SUM(CAST(dblMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
 									FROM @UDT_MSM 
 									WHERE ISNULL(strMiscellaneousSummaryCode, '') = 'totalizer' 
 									AND ISNULL(strMiscellaneousSummarySubCode, '') = 'tax' 
@@ -233,7 +233,7 @@ BEGIN
 			  -------------------------------------------------------------------------------------------------------------
 			  UPDATE dbo.tblSTCheckoutHeader
 			  SET dblTotalNoSalesCount = (
-											SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+											SELECT SUM(CAST(dblMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
 											FROM @UDT_MSM 
 											WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
 											AND ISNULL(strMiscellaneousSummarySubCode, '') = 'noSales'
@@ -250,7 +250,7 @@ BEGIN
 			  -------------------------------------------------------------------------------------------------------------
 			  UPDATE dbo.tblSTCheckoutHeader
 			  SET dblFuelAdjustmentCount = (
-											 SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+											 SELECT SUM(CAST(dblMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
 											 FROM @UDT_MSM 
 											 WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
 											 AND ISNULL(strMiscellaneousSummarySubCode, '') = 'driveOffs'
@@ -276,7 +276,7 @@ BEGIN
 			  -------------------------------------------------------------------------------------------------------------
 			  UPDATE dbo.tblSTCheckoutHeader
 			  SET dblTotalRefundCount = (
-											SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18,6)))
+											SELECT SUM(CAST(dblMiscellaneousSummaryCount AS DECIMAL(18,6)))
 											FROM @UDT_MSM 
 											WHERE ISNULL(strMiscellaneousSummaryCode, '') = 'refunds' 
 											AND ISNULL(strMiscellaneousSummarySubCode, '') ='total'
@@ -337,7 +337,7 @@ BEGIN
 							UPDATE chkMet
 								SET chkMet.dblAmount = (		
 														-- SELECT SUM(CAST(dblMiscellaneousSummaryAmount AS DECIMAL(18, 6)))										
-														SELECT SUM(CAST(intMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+														SELECT SUM(CAST(dblMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
 														FROM @UDT_MSM 
 														WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
 															AND ISNULL(strMiscellaneousSummarySubCode, '') = 'noSales'									 
@@ -483,19 +483,6 @@ BEGIN
 																   FROM @UDT_MSM
 																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
 																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'noSales'
-																	AND strCashierId = @strCashierId
-															   )
-									FROM tblSTCheckoutCashiers cashier
-									WHERE cashier.intCheckoutId = @intCheckoutId 
-										AND cashier.intCashierId = @intCashierId
-										
-									--dblTotalDeposit
-									UPDATE cashier
-										SET cashier.dblTotalDeposit = (	
-																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
-																   FROM @UDT_MSM
-																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'safeDrop' 
-																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'total'
 																	AND strCashierId = @strCashierId
 															   )
 									FROM tblSTCheckoutCashiers cashier

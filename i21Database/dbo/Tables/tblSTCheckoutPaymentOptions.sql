@@ -10,6 +10,7 @@
     [dblAmount]							DECIMAL(18, 6)	NULL, 
     [dblRegisterAmount]					DECIMAL(18, 6)	NULL, 
     [intRegisterCount]					INT				NULL, 
+    [dblRegisterCount]					DECIMAL(18, 6)	NULL, 
 	[strNetworkCreditCardName]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,  
 	[ysnSkipImport]                     BIT             DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]					INT				NULL, 
