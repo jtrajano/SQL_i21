@@ -636,12 +636,12 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, 0, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--You cannot post intra-location transaction without due from account. 
@@ -655,12 +655,12 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, 0, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
@@ -677,9 +677,13 @@ BEGIN
 			SELECT TOP 1 ysnAllowSingleLocationEntries
 			FROM tblAPCompanyPreference
 		) APCP
+		OUTER APPLY (
+			SELECT *
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, 0, @OverrideLocationSegment, 0)
+		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND APCP.[ysnAllowSingleLocationEntries] = 1
-		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], B.[intAccountId], 3) = 0
+		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], OVERRIDESEGMENT.intOverrideAccount, 3) = 0
 
 		--VALIDATE DETAIL ACCOUNT OVERRIDE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -692,11 +696,11 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, 0, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--VALIDATE TAX ACCOUNT OVERRIDE
@@ -711,11 +715,11 @@ BEGIN
 		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 		INNER JOIN tblAPBillDetailTax C ON C.intBillDetailId = B.intBillDetailId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLocationSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], C.intAccountId, 0, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLocationSegment = 0
 
 		--You cannot post intra-location transaction without due to account. 
@@ -729,12 +733,12 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLineOfBusinessSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, 0, 0, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
 
 		--You cannot post intra-location transaction without due from account. 
@@ -748,12 +752,12 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLineOfBusinessSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, 0, 0, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND @AllowIntraEntries = 1
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
 
 		--VALIDATE DETAIL ACCOUNT OVERRIDE
@@ -767,11 +771,11 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLineOfBusinessSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, 0, 0, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
 
 		--VALIDATE TAX ACCOUNT OVERRIDE
@@ -786,11 +790,11 @@ BEGIN
 		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 		INNER JOIN tblAPBillDetailTax C ON C.intBillDetailId = B.intBillDetailId
 		OUTER APPLY (
-			SELECT intOverrideAccount, strOverrideAccount, bitSameLineOfBusinessSegment
+			SELECT *
 			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], C.intAccountId, 0, 0, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND OVERRIDESEGMENT.intOverrideAccount = 0
+		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
 	END
 	ELSE
