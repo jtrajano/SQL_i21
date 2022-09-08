@@ -212,8 +212,8 @@ WHEN MATCHED THEN
 	UPDATE 
 	SET 
 		e.dblSystemCount = u.dblSystemCount
-		,e.dblQtyReceived = u.dblQtyTransferredNew
-		,e.dblQtyTransferred = u.dblQtyReceivedNew
+		,e.dblQtyReceived = u.dblQtyReceivedNew
+		,e.dblQtyTransferred = u.dblQtyTransferredNew
 		,e.dblQtySold = u.dblQtySoldNew
 		,e.dtmCheckoutDate = @dtmCheckoutDate
 
