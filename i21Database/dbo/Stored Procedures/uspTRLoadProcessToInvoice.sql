@@ -144,7 +144,7 @@ BEGIN TRY
 		,[intTicketHoursWorkedId]				= NULL
 		,[intSiteId]							= DD.intSiteId
 		,[strBillingBy]							= ''
-		,[dblPercentFull]						= CASE WHEN DD.intSiteId IS NULL THEN NULL ELSE 100 END
+		,[dblPercentFull]						= CASE WHEN DD.intSiteId IS NULL THEN NULL ELSE DD.dblPercentFull END
 		,[dblNewMeterReading]					= NULL
 		,[dblPreviousMeterReading]				= NULL
 		,[dblConversionFactor]					= NULL
