@@ -6,7 +6,7 @@ intCheckoutShiftPhysicalItemId
 , CH.dtmCheckoutDate
 , SP.intItemId
 , SP.intItemLocationId
-, ISNULL(SP.dblSystemCount, preload.dblSystemCount) AS dblSystemCount
+, preload.dblSystemCount AS dblSystemCount
 , SP.dblPhysicalCount
 , SP.intItemUOMId
 , preload.dblQtyReceived

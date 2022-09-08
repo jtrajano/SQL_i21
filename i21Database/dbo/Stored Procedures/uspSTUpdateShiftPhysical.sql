@@ -211,7 +211,7 @@ USING (
 WHEN MATCHED THEN 
 	UPDATE 
 	SET 
-		e.dblSystemCount = u.dblSystemCount
+		e.dblSystemCount = u.dblSystemCountNew
 		,e.dblQtyReceived = u.dblQtyReceivedNew
 		,e.dblQtyTransferred = u.dblQtyTransferredNew
 		,e.dblQtySold = u.dblQtySoldNew
