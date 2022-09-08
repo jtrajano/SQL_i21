@@ -1087,11 +1087,26 @@ JOIN @ForUpdates u ON u.strVendorNumber = v.strVendorId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 
 UPDATE log
-SET log.intTotalRowsImported = r.intCount
+SET log.intTotalRowsImported = ISNULL(rv.intCount, 0) + ISNULL(rc.intCount, 0) + ISNULL(rp.intCount, 0) + ISNULL(ru.intCount, 0)
 FROM tblApiImportLog log
-CROSS APPLY (
+OUTER APPLY (
 	SELECT COUNT(*) intCount
-	FROM tblICItem
+	FROM tblApiSchemaTransformVendorSetup
 	WHERE guiApiUniqueId = log.guiApiUniqueId
-) r
+) rv
+OUTER APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblVRCustomerXref
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) rc
+OUTER APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblICCategoryVendor
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) rp
+OUTER APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblVRUOMXref
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) ru
 WHERE log.guiApiImportLogId = @guiLogId
