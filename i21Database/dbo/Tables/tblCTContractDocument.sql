@@ -5,8 +5,11 @@
     [intDocumentId] INT NOT NULL, 
     [intConcurrencyId] INT NOT NULL,
 	[intContractDocumentRefId] INT,
+	[dtmCreatedDate] datetime null,
+	[intCreatedById] int null,
 	CONSTRAINT [PK_tblCTContractDocument_intContractDocumentId] PRIMARY KEY CLUSTERED ([intContractDocumentId] ASC),
 	CONSTRAINT [UQ_tblCTContractDocument_intContractHeaderId_intDocumentId] UNIQUE ([intContractHeaderId], [intDocumentId]), 
 	CONSTRAINT [FK_tblCTContractDocument_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblCTContractDocument_tblICDocument_intDocumentId] FOREIGN KEY ([intDocumentId]) REFERENCES [tblICDocument]([intDocumentId]) 
+	CONSTRAINT [FK_tblCTContractDocument_tblICDocument_intDocumentId] FOREIGN KEY ([intDocumentId]) REFERENCES [tblICDocument]([intDocumentId]),
+	CONSTRAINT [FK_tblCTContractDocument_tblEMEntity_intCreatedById] FOREIGN KEY ([intCreatedById]) REFERENCES [tblEMEntity]([intEntityId])
 )

@@ -1142,6 +1142,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutValidatePaymentMethod.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCalculateDealerCommission.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAddContractDocuments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
