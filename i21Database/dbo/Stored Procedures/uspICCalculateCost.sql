@@ -114,6 +114,18 @@ EXEC dbo.uspICPostCosting
     , 0
     , 1
 
-SELECT @Cost = COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost)
+DECLARE @LastTransactionId INT
+
+SELECT TOP 1 @LastTransactionId = t.intInventoryTransactionId
+FROM tblICInventoryTransaction t
+WHERE t.intItemId = @ItemId
+  AND t.intItemLocationId = @ItemLocationId
+  AND t.dblQty > 0
+  AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+ORDER BY t.intInventoryTransactionId DESC
+
+-- SELECT @Cost = COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost)
+
+SELECT @Cost = dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId)	
 
 rollback
