@@ -115,7 +115,6 @@ EXEC dbo.uspICPostCosting
     , 1
 
 DECLARE @LastTransactionId INT
-
 SELECT TOP 1 @LastTransactionId = t.intInventoryTransactionId
 FROM tblICInventoryTransaction t
 WHERE t.intItemId = @ItemId
@@ -124,8 +123,51 @@ WHERE t.intItemId = @ItemId
   AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
 ORDER BY t.intInventoryTransactionId DESC
 
--- SELECT @Cost = COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost)
+------ Smart AVG
+DECLARE @TransactionId INT
+DECLARE @TransactionQty NUMERIC(38, 20)
+DECLARE @TransactionCost NUMERIC(38, 20)
+DECLARE @RunningQty NUMERIC(38, 20)
 
-SELECT @Cost = dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId)	
+SELECT t.intInventoryTransactionId, t.dblQty, t.dblCost
+FROM tblICInventoryTransaction t
+WHERE t.intItemId = @ItemId
+  AND t.intItemLocationId = @ItemLocationId
+  AND t.dblQty > 0
+  AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+ORDER BY t.intInventoryTransactionId DESC
+  
+DECLARE cur CURSOR LOCAL FAST_FORWARD
+FOR 
+  SELECT t.intInventoryTransactionId, t.dblQty, t.dblCost
+  FROM tblICInventoryTransaction t
+  WHERE t.intItemId = @ItemId
+    AND t.intItemLocationId = @ItemLocationId
+    AND t.dblQty > 0
+    AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+  ORDER BY t.intInventoryTransactionId DESC
+
+OPEN cur
+
+FETCH NEXT FROM cur INTO @TransactionId, @TransactionQty, @TransactionCost
+
+WHILE @@FETCH_STATUS = 0 
+BEGIN  
+  IF @Quantity <= @RunningQty
+  BEGIN
+    SET @LastTransactionId = @TransactionId
+  END
+
+  SET @RunningQty = ISNULL(@RunningQty, 0) + @TransactionQty
+
+  FETCH NEXT FROM cur INTO @TransactionId, @TransactionQty, @TransactionCost
+END
+
+CLOSE cur
+DEALLOCATE cur
+
+-- SELECT @Cost = COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId))
+
+SELECT @Cost = dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId)
 
 rollback
