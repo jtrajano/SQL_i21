@@ -147,7 +147,7 @@ BEGIN
 	DECLARE @dtmContractDate DATETIME
 	DECLARE @intCommodityId INT
 	DECLARE @intCommodityUOMId INT
-	DECLARE @dblQuantity INT
+	DECLARE @dblQuantity NUMERIC(18, 6)
 	DECLARE @intSalespersonId INT
 	DECLARE @ysnSigned BIT
 	DECLARE @strContractNumber NVARCHAR(200)
