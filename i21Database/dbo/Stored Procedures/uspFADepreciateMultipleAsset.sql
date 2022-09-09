@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspFADepreciateMultipleAsset]
  @BookId INT = 1,
  @intLedgerId INT = NULL,
  @dtmDepreciationDate DATETIME = NULL,
+ @dblDepreciation NUMERIC(18,6) = NULL,
  @ysnPost   AS BIT    = 0,  
  @ysnRecap   AS BIT    = 0,  
  @intEntityId  AS INT    = 1,  
@@ -348,18 +349,18 @@ BEGIN
     WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
     UNION ALL
     SELECT 
-		DepreciationAccount.intAssetId
-		,DepreciationAccount.intAccountId
-		,DepreciationAccount.intTransactionType
-		,DepreciationAccount.intNewAccountId
-		,DepreciationAccount.strNewAccountId
-		,DepreciationAccount.strError
+		AccumulatedDepreciationAccount.intAssetId
+		,AccumulatedDepreciationAccount.intAccountId
+		,AccumulatedDepreciationAccount.intTransactionType
+		,AccumulatedDepreciationAccount.intNewAccountId
+		,AccumulatedDepreciationAccount.strNewAccountId
+		,AccumulatedDepreciationAccount.strError
 	FROM tblFAFixedAsset A
     JOIN @tblDepComputation B 
     ON A.intAssetId = B.intAssetId
     OUTER APPLY (
 		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.[intAccumulatedAccountId], 4)
-	) DepreciationAccount
+	) AccumulatedDepreciationAccount
     WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
 
     -- Validate override accounts

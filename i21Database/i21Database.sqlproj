@@ -1130,6 +1130,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
+	<Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleAsset.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
