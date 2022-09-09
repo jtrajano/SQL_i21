@@ -31,6 +31,7 @@ DECLARE @tblAsset TABLE (
 	[totalForeignDepre] NUMERIC(18,6),
 	[dblBasis] NUMERIC(18,6),
 	[dblAnnualBasis] NUMERIC(18,6),
+	[intMonthDivisor] INT,
 	[intDepreciationMethodId] INT,
 	[strTransactionId] NVARCHAR(20),
 	[intLedgerId] INT,
@@ -50,6 +51,7 @@ SELECT
 	0,
 	B.dblCost - ISNULL(B.dblSalvageValue, 0),
 	(E.dblPercentage *.01) * (B.dblCost - ISNULL(B.dblSalvageValue, 0)),
+	CASE WHEN M.intMonth > (M.intServiceYear * 12) AND isnull(M.intMonth,0) > 0 THEN M.intMonth ELSE 12 END,
 	M.intDepreciationMethodId,
 	NULL,
 	BD.intLedgerId,
@@ -165,8 +167,8 @@ DECLARE @intDefaultCurrencyId INT
 		,@dtmDispositionDate DATETIME
 		,@ysnFullyDepreciated BIT
 		,@dblDepreciationTake NUMERIC(18, 6)
-		,@dblAccumulatedDepreciation NUMERIC(18, 6)
-		,@dblExpenseAdjustment NUMERIC(18, 6)
+		,@dblAccumulatedDepreciation NUMERIC(18, 6) = 0
+		,@dblExpenseAdjustment NUMERIC(18, 6) = 0
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 SELECT TOP 1 @intRealizedGainLossAccountId = intFixedAssetsRealizedId FROM tblSMMultiCurrency
 SELECT @intDefaultCurrencyExchangeRateTypeId = dbo.fnFAGetDefaultCurrencyExchangeRateTypeId()
@@ -177,11 +179,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 BEGIN
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblAsset WHERE ysnProcessed = 0)
 	BEGIN
-		DECLARE @intRowId INT, @intLedgerId INT = NULL
+		DECLARE @intRowId INT, @intLedgerId INT = NULL, @intAssetId INT, @intBookId INT
 		
 		SELECT TOP 1
 				@intRowId = A.intRowId,
 				@intLedgerId = A.intLedgerId,
+				@intAssetId = A.intAssetId,
+				@intBookId = BD.intBookId,
 				@dblDispositionAmount = ISNULL(F.dblDispositionAmount, 0),
 				@dblRate = CASE WHEN ISNULL(BD.dblRate, 0) > 0 
 					THEN BD.dblRate 
@@ -271,7 +275,7 @@ BEGIN
 		OUTER APPLY (
 			SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intDepreciationAccountId, 3)
 		) DepreciationExpenseAccountOverride
-		WHERE A.intRowId = @intRowId AND @strConvention IN ('Mid Month', 'Mid Quarter', 'Mid Year')
+		WHERE A.intRowId = @intRowId AND @strConvention <> 'Full Month'
 		UNION ALL
 		SELECT 
 			GainLossAccountOverride.intAssetId
@@ -355,17 +359,24 @@ BEGIN
 		) G
 		WHERE A.intRowId = @intRowId 
 
-		IF (@strConvention IN ('Mid Quarter', 'Mid Year') AND @ysnFullyDepreciated = 0)
+		IF (@strConvention <> 'Full Month' AND @ysnFullyDepreciated = 0)
 		BEGIN
 			-- Get Depreciation Take per convention
+			DECLARE @dtmMonthStartDate DATETIME, @intDays INT
+
 			SELECT 
 				@dblDepreciationTake = ISNULL(CASE
 					WHEN @strConvention = 'Mid Year' THEN T.dblAnnualBasis/2
 					WHEN @strConvention = 'Mid Quarter' THEN (T.dblAnnualBasis/4)/2
+					WHEN @strConvention = 'Mid Month' THEN (T.dblAnnualBasis / T.intMonthDivisor) * .50
+					WHEN @strConvention = 'Actual Days' THEN (T.dblAnnualBasis / T.intMonthDivisor) * ((MonthPeriod.intDays - (DATEDIFF(DAY, MonthPeriod.dtmStartDate, @dtmDispositionDate) + 1) + 1)/ CAST(MonthPeriod.intDays AS FLOAT))
 					END, 0)
 			FROM @tblAsset T 
 			JOIN tblFADepreciationMethod  M ON  M.intDepreciationMethodId = T.intDepreciationMethodId
 			JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= M.intDepreciationMethodId AND BD.intBookId = 1  and BD.intAssetId = T.intAssetId
+			OUTER APPLY (
+				SELECT TOP 1 dtmStartDate, intDays FROM [dbo].[fnFAGetMonthPeriodFromDate](@dtmDispositionDate, 1)
+			) MonthPeriod
 			WHERE T.intRowId = @intRowId
 				AND (CASE WHEN BD.intLedgerId IS NOT NULL THEN CASE WHEN BD.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
 
@@ -387,7 +398,7 @@ BEGIN
 					AND T.intRowId = @intRowId
 					AND (CASE WHEN FAD.intLedgerId IS NOT NULL THEN CASE WHEN FAD.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
 			END
-			ELSE
+			IF (@strConvention = 'Mid Year')
 			BEGIN
 				-- Get all the depreciation on the year where the disposition date is into
 				SELECT @dblAccumulatedDepreciation = ISNULL(SUM(dblDepreciation), 0)
@@ -403,86 +414,102 @@ BEGIN
 				AND (CASE WHEN B.intLedgerId IS NOT NULL THEN CASE WHEN B.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
 			END
 
-			IF (@dblAccumulatedDepreciation = 0) --No depreciation within the period: Do not depreciate and set the depreciation take as the expense adjustment
-				SET @dblExpenseAdjustment = @dblDepreciationTake
-			ELSE IF (@dblAccumulatedDepreciation = @dblDepreciationTake) -- Depreciation to date is same with the depreciation take: Do not depreciate and there should be no expense adjusments
-				SET @dblExpenseAdjustment = 0
-			ELSE
+			IF (@strConvention IN ('Mid Year', 'Mid Quarter'))
 			BEGIN
-				-- Depreciate
-				DECLARE @intSuccessfulCount INT = 0 
-				EXEC [dbo].[uspFADepreciateMultipleAsset]
-					@Id						-- Asset Ids
-					,1						-- intBookId
-					,@intLedgerId			-- intLedgerId
-					,@dtmDispositionDate	-- dtmDepreciationDate
-					,1						-- ysnPost
-					,0						-- ysnRecap
-					,@intEntityId			-- intEntityId
-					,0						-- ysnReverseCurrentDate
-					,@strBatchId			-- strBatchId
-					,@intSuccessfulCount OUTPUT -- successfulCount
-				
-				IF @intSuccessfulCount = 0
-					GOTO Post_Rollback
-				
-				-- Get again the accumulated depreciation per convention
-				IF (@strConvention = 'Mid Quarter')
-				BEGIN
-					SELECT @dblAccumulatedDepreciation = ISNULL(SUM(FAD.dblDepreciation), 0)
-					FROM tblFAFixedAssetDepreciation FAD
-					JOIN @tblAsset T ON T.intAssetId = FAD.intAssetId
-					OUTER APPLY (
-						SELECT dtmStartDate, dtmEndDate FROM [dbo].[fnFACalendarDatesWithQuarter](@dtmDispositionDate, 1) WHERE intQuarter = @intQuarter
-					) QuarterDate
-					WHERE FAD.strTransaction = 'Depreciation'
-						AND FAD.dtmDepreciationToDate BETWEEN QuarterDate.dtmStartDate AND QuarterDate.dtmEndDate
-						AND T.intRowId = @intRowId
-						AND (CASE WHEN FAD.intLedgerId IS NOT NULL THEN CASE WHEN FAD.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
-				END
+				IF (@dblAccumulatedDepreciation = 0) --No depreciation within the period: Do not depreciate and set the depreciation take as the expense adjustment
+					SET @dblExpenseAdjustment = @dblDepreciationTake
+				ELSE IF (@dblAccumulatedDepreciation = @dblDepreciationTake) -- Depreciation to date is same with the depreciation take: Do not depreciate and there should be no expense adjusments
+					SET @dblExpenseAdjustment = 0
 				ELSE
 				BEGIN
-					SELECT @dblAccumulatedDepreciation = ISNULL(SUM(dblDepreciation), 0)
-					FROM tblFAFixedAssetDepreciation B
-					JOIN @tblAsset T ON T.intAssetId = B.intAssetId
-					WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = 1
-						AND (CASE WHEN B.intLedgerId IS NOT NULL 
-										THEN CASE WHEN (B.intLedgerId = T.intLedgerId) THEN 1 ELSE 0 END
-										ELSE 1 END) = 1
-						AND strTransaction = 'Depreciation'
-						AND YEAR(B.dtmDepreciationToDate) = YEAR(@dtmDispositionDate)
-						AND T.intRowId = @intRowId
-						AND (CASE WHEN B.intLedgerId IS NOT NULL THEN CASE WHEN B.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+					-- Depreciate
+					DECLARE @intSuccessfulCount INT = 0 
+					EXEC [dbo].[uspFADepreciateMultipleAsset]
+						@Id						-- Asset Ids
+						,1						-- intBookId
+						,@intLedgerId			-- intLedgerId
+						,@dtmDispositionDate	-- dtmDepreciationDate
+						,1						-- ysnPost
+						,0						-- ysnRecap
+						,@intEntityId			-- intEntityId
+						,0						-- ysnReverseCurrentDate
+						,@strBatchId			-- strBatchId
+						,@intSuccessfulCount OUTPUT -- successfulCount
+				
+					IF @intSuccessfulCount = 0
+						GOTO Post_Rollback
+				
+					-- Get again the accumulated depreciation per convention
+					IF (@strConvention = 'Mid Quarter')
+					BEGIN
+						SELECT @dblAccumulatedDepreciation = ISNULL(SUM(FAD.dblDepreciation), 0)
+						FROM tblFAFixedAssetDepreciation FAD
+						JOIN @tblAsset T ON T.intAssetId = FAD.intAssetId
+						OUTER APPLY (
+							SELECT dtmStartDate, dtmEndDate FROM [dbo].[fnFACalendarDatesWithQuarter](@dtmDispositionDate, 1) WHERE intQuarter = @intQuarter
+						) QuarterDate
+						WHERE FAD.strTransaction = 'Depreciation'
+							AND FAD.dtmDepreciationToDate BETWEEN QuarterDate.dtmStartDate AND QuarterDate.dtmEndDate
+							AND T.intRowId = @intRowId
+							AND (CASE WHEN FAD.intLedgerId IS NOT NULL THEN CASE WHEN FAD.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+					END
+					ELSE
+					BEGIN
+						SELECT @dblAccumulatedDepreciation = ISNULL(SUM(dblDepreciation), 0)
+						FROM tblFAFixedAssetDepreciation B
+						JOIN @tblAsset T ON T.intAssetId = B.intAssetId
+						WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = 1
+							AND (CASE WHEN B.intLedgerId IS NOT NULL 
+											THEN CASE WHEN (B.intLedgerId = T.intLedgerId) THEN 1 ELSE 0 END
+											ELSE 1 END) = 1
+							AND strTransaction = 'Depreciation'
+							AND YEAR(B.dtmDepreciationToDate) = YEAR(@dtmDispositionDate)
+							AND T.intRowId = @intRowId
+							AND (CASE WHEN B.intLedgerId IS NOT NULL THEN CASE WHEN B.intLedgerId = T.intLedgerId THEN 1 ELSE 0 END ELSE 1 END) = 1
+					END
 				END
-
-				-- Get again Accumulated Depreciation (Functional and Foreign) from GL Entries
-				UPDATE A 
-				SET totalDepre = G.S, totalForeignDepre = G.dblSumForeign
-				FROM  @tblAsset A
-				OUTER APPLY(
-					SELECT 
-						SUM(dblCredit - dblDebit) S,
-						SUM(dblCreditForeign - dblDebitForeign) dblSumForeign
-					FROM tblGLDetail GL
-					JOIN tblFAFixedAsset FA 
-						ON FA.intAssetId = A.intAssetId
-					JOIN @tblOverrideAccount OverrideAccount 
-						ON OverrideAccount.intAssetId = FA.intAssetId AND OverrideAccount.intAccountId = FA.intAccumulatedAccountId
-					WHERE GL.intAccountId = OverrideAccount.intNewAccountId
-						AND strCode = 'AMDPR'
-						AND ysnIsUnposted = 0
-						AND A.strAssetId = GL.strReference
-						AND (CASE WHEN GL.intLedgerId IS NOT NULL THEN CASE WHEN GL.intLedgerId = A.intLedgerId THEN 1 ELSE 0 END
-							ELSE 1 END) = 1
-						GROUP BY FA.strAssetId
-				) G
-				WHERE A.intRowId = @intRowId 
 
 				SET @dblExpenseAdjustment = @dblDepreciationTake - @dblAccumulatedDepreciation
 			END
+			
+			IF (@strConvention IN ('Actual Days', 'Mid Month'))
+			BEGIN
+				-- Depreciate like the fist month
+				EXEC [dbo].[uspFAManualDepreciateSingleAsset]
+					@intAssetId,
+					@intBookId,
+					@intLedgerId,
+					@dtmDispositionDate,
+					@dblDepreciationTake,
+					@strBatchId,
+					'Depreciation',
+					@intEntityId
+			END
+
+			-- Get again Accumulated Depreciation (Functional and Foreign) from GL Entries
+			UPDATE A 
+			SET totalDepre = G.S, totalForeignDepre = G.dblSumForeign
+			FROM  @tblAsset A
+			OUTER APPLY(
+				SELECT 
+					SUM(dblCredit - dblDebit) S,
+					SUM(dblCreditForeign - dblDebitForeign) dblSumForeign
+				FROM tblGLDetail GL
+				JOIN tblFAFixedAsset FA 
+					ON FA.intAssetId = A.intAssetId
+				JOIN @tblOverrideAccount OverrideAccount 
+					ON OverrideAccount.intAssetId = FA.intAssetId AND OverrideAccount.intAccountId = FA.intAccumulatedAccountId
+				WHERE GL.intAccountId = OverrideAccount.intNewAccountId
+					AND strCode = 'AMDPR'
+					AND ysnIsUnposted = 0
+					AND A.strAssetId = GL.strReference
+					AND (CASE WHEN GL.intLedgerId IS NOT NULL THEN CASE WHEN GL.intLedgerId = A.intLedgerId THEN 1 ELSE 0 END
+						ELSE 1 END) = 1
+					GROUP BY FA.strAssetId
+			) G
+			WHERE A.intRowId = @intRowId 
 		END
 
-		SELECT @dblExpenseAdjustment, @dblDepreciationTake, @dblAccumulatedDepreciation, @ysnFullyDepreciated
 		-- Dispose Fixed Asset
 		INSERT INTO tblFAFixedAssetDepreciation (  
             [intAssetId],  
