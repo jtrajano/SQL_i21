@@ -239,11 +239,12 @@ GO
 	PRINT N'END INSERT ACCOUNT TEMPLATE: Payroll'
 	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Petro'
 GO
+		IF EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petro' AND strType = N'Primary') 
+			DELETE FROM tblGLCOATemplate WHERE strAccountTemplateName = 'Petro'
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petro' AND strType = N'Primary') 
-	BEGIN
+	
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Petro', N'Primary', 1)
-	
+
 		DECLARE @intAccountTemplateId AS INT		
 			SET @intAccountTemplateId = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petro' AND strType = N'Primary')
 	
@@ -455,7 +456,7 @@ GO
 		SELECT @intAccountTemplateId, '59710','Use Tax Expense',(SELECT TOP 1 intAccountGroupId from tblGLAccountGroup where strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId from tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
 		SELECT @intAccountTemplateId, '59810','Loss On Abandonment',(SELECT TOP 1 intAccountGroupId from tblGLAccountGroup where strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId from tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
 		SELECT @intAccountTemplateId, '59910','Overhead Distribution',(SELECT TOP 1 intAccountGroupId from tblGLAccountGroup where strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId from tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1
-	END
+	
 GO
 
 	PRINT N'END INSERT ACCOUNT TEMPLATE: Petro'
