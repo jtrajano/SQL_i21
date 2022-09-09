@@ -23,6 +23,8 @@ DECLARE @intImportFileHeaderId Int, @intImportFileColumnDetailId Int
 
 SELECT @intImportFileHeaderId = intImportFileHeaderId FROM [dbo].[tblSMImportFileHeader]
 WHERE strLayoutTitle = 'Pricebook Mix Match' AND strFileType = 'XML' AND [strXMLType] = 'Outbound'
+	
+DELETE FROM [dbo].[tblSMImportFileColumnDetail] WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 DELETE FROM [dbo].[tblSMImportFileColumnDetail] WHERE intImportFileHeaderId = @intImportFileHeaderId
 
