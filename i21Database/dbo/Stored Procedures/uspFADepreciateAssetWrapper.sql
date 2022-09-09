@@ -12,6 +12,7 @@ EXEC uspFADepreciateMultipleAsset
 1,
 NULL,
 NULL,
+NULL,
 @ysnPost,  
 @ysnRecap,  
 @intEntityId,  
@@ -36,6 +37,7 @@ IF @ysnPost =1
 		EXEC uspFADepreciateMultipleAsset  
 		@Id1,  
 		2,  	
+		NULL,
 		NULL,
 		NULL,
 		@ysnPost,  
