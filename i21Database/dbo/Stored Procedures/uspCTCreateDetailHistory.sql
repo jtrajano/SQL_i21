@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTCreateDetailHistory]
+﻿ALTER PROCEDURE [dbo].[uspCTCreateDetailHistory]
 	@intContractHeaderId INT
 	, @intContractDetailId INT = NULL
 	, @strComment NVARCHAR(100) = NULL
@@ -56,6 +56,7 @@ BEGIN TRY
 		, @ContractHeaderIntGradeId INT
 		, @ContractHeaderIntWeightId INT
 		, @ContractHeaderIntFreightTermId INT
+		, @ContractHeaderIntINCOLocationTypeId INT
 	
 	DECLARE @HeaderLastModificationIntEntityId INT
 		, @HeaderLastModificationIntPositionId INT
@@ -64,6 +65,7 @@ BEGIN TRY
 		, @HeaderLastModificationIntGradeId INT
 		, @HeaderLastModificationIntWeightId INT
 		, @HeaderLastModificationIntFreightTermId INT
+		, @HeaderLastModificationIntINCOLocationTypeId INT
 		
 	DECLARE @tblDetail AS TABLE (intContractHeaderId INT
 		, intContractDetailId INT
@@ -101,6 +103,7 @@ BEGIN TRY
 			, @ContractHeaderIntGradeId = intGradeId
 			, @ContractHeaderIntWeightId = intWeightId
 			, @ContractHeaderIntFreightTermId = intFreightTermId
+			, @ContractHeaderIntINCOLocationTypeId = intINCOLocationTypeId
 
 
 		FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
@@ -138,6 +141,7 @@ BEGIN TRY
 		, @HeaderLastModificationIntGradeId = intGradeId
 		, @HeaderLastModificationIntWeightId = intWeightId
 		, @HeaderLastModificationIntFreightTermId = intFreightTermId
+		, @HeaderLastModificationIntINCOLocationTypeId = intINCOLocationTypeId
 	FROM tblCTContractHeaderLastModification
 	WHERE intContractHeaderId = @intContractHeaderId
 
@@ -148,6 +152,7 @@ BEGIN TRY
 		or isnull(@ContractHeaderIntGradeId,0) <> isnull(@HeaderLastModificationIntGradeId, 0)
 		or isnull(@ContractHeaderIntWeightId,0) <> isnull(@HeaderLastModificationIntWeightId, 0)
 		or isnull(@ContractHeaderIntFreightTermId,0) <> isnull(@HeaderLastModificationIntFreightTermId, 0)
+		or isnull(@ContractHeaderIntINCOLocationTypeId,0) <> isnull(@HeaderLastModificationIntINCOLocationTypeId, 0)
 	)
 	begin
 		set @ysnHasModification = 1
@@ -688,6 +693,8 @@ BEGIN TRY
 							and strDataIndex = 'intWeightId'
 							and isnull(@ContractHeaderIntWeightId, 0) <> isnull(@HeaderLastModificationIntWeightId, 0)
 
+														
+
 			END
 
 
@@ -952,7 +959,27 @@ BEGIN TRY
 			LEFT JOIN tblCTSubBook newSubBook on ISNULL(newSubBook.intSubBookId,0) = ISNULL(CurrentRow.intSubBookId,0)
 			LEFT JOIN tblCTSubBook oldSubBook on ISNULL(oldSubBook.intSubBookId,0) = ISNULL(PreviousRow.intSubBookId,0)
 			WHERE ISNULL(oldSubBook.intSubBookId,0) <> ISNULL(newSubBook.intSubBookId,0)
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	
+				
+			--intINCOLocationTypeId
+			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
+				, dtmHistoryCreated			= GETDATE()
+				, intContractHeaderId	    = @intContractHeaderId
+				, intContractDetailId		= CurrentRow.intContractDetailId
+				, intAmendmentApprovalId	= 22
+				, strItemChanged			= 'Port / City'
+				, strOldValue			    =  PreviousType.strCity
+				, strNewValue		        =  CurrentType.strCity
+				, intConcurrencyId			=  1
+			FROM tblCTSequenceHistory	CurrentRow								
+			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+			outer apply(select intCityId, strCity from tblSMCity where ISNULL(intCityId,0)	        =	ISNULL(@ContractHeaderIntINCOLocationTypeId,0))			CurrentType			
+			outer apply(select intCityId, strCity from tblSMCity where ISNULL(intCityId,0)	        =	ISNULL(@HeaderLastModificationIntINCOLocationTypeId,0))			PreviousType
+			cross apply tblCTAmendmentApproval CTA
+				where CTA.strType = '1.Header' 
+					and CTA.ysnAmendment = 1 
+					and CTA.strDataIndex = 'intINCOLocationTypeId'
+					and isnull(@ContractHeaderIntINCOLocationTypeId, 0) <> isnull(@HeaderLastModificationIntINCOLocationTypeId, 0)		
 		END     
 	END
 END TRY

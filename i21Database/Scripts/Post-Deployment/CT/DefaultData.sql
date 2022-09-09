@@ -42,3 +42,44 @@ MERGE INTO tblCTBasisCost AS destination
 			,SourceData.[intConcurrencyId]
 		);	
 END		
+
+--INSERT NEW Item in Ammendment and Approval
+BEGIN
+MERGE INTO tblCTAmendmentApproval AS destination
+		USING
+		(		SELECT
+				 'intINCOLocationTypeId' AS strDataIndex
+				,'Port/City' AS strDataField
+				,1 AS ysnAmendment
+				,1 AS ysnApproval
+				,NULL AS ysnBulkChange
+				,NULL AS ysnBulkChangeReadOnly
+				,7 AS intConcurrencyId
+				,'1.Header' AS strType
+		)
+		AS SourceData
+		ON destination.strDataIndex = SourceData.strDataIndex
+		WHEN NOT MATCHED THEN
+		INSERT
+		(
+				 strDataIndex
+				,strDataField
+				,ysnAmendment
+				,ysnApproval
+				,ysnBulkChange
+				,ysnBulkChangeReadOnly
+				,intConcurrencyId
+				,strType
+		)
+		VALUES
+		(
+				 SourceData.strDataIndex
+				,SourceData.strDataField
+				,SourceData.ysnAmendment
+				,SourceData.ysnApproval
+				,SourceData.ysnBulkChange
+				,SourceData.ysnBulkChangeReadOnly
+				,SourceData.intConcurrencyId
+				,SourceData.strType
+		);	
+END	

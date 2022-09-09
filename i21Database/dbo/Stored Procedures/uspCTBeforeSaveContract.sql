@@ -265,7 +265,7 @@ BEGIN TRY
 			,intTermId 
 			,intGradeId 
 			,intWeightId 
-
+			,intINCOLocationTypeId
 			from tblCTContractHeader 
 				where intContractHeaderId = @intContractHeaderId --order by intContractHeaderId desc
 	) as source
@@ -278,6 +278,7 @@ BEGIN TRY
 			,intTermId 
 			,intGradeId 
 			,intWeightId 
+			,intINCOLocationTypeId
 	)values (
 		source.intContractHeaderId 
 			,source.intEntityId 
@@ -285,7 +286,8 @@ BEGIN TRY
 			,source.intFreightTermId 
 			,source.intTermId 
 			,source.intGradeId 
-			,source.intWeightId )
+			,source.intWeightId
+			,source.intINCOLocationTypeId )
 	when matched then 
 	update set intContractHeaderId = source.intContractHeaderId
 			,intEntityId  = source.intEntityId
@@ -294,6 +296,7 @@ BEGIN TRY
 			,intTermId  = source.intTermId  
 			,intGradeId  = source.intGradeId  
 			,intWeightId  = source.intWeightId
+			,intINCOLocationTypeId =source.intINCOLocationTypeId
 
 	;
 END TRY

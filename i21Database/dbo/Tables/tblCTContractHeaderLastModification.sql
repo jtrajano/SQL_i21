@@ -8,6 +8,7 @@
 	,intTermId int null
 	,intGradeId int null
 	,intWeightId int null
+	,intINCOLocationTypeId int null
 
 	, intConcurrencyId int not null default(1)
 	, CONSTRAINT [FK_tblCTContractHeaderLastModification_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
