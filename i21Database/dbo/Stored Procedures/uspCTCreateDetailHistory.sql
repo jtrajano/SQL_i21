@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspCTCreateDetailHistory]
+﻿CREATE PROCEDURE [dbo].[uspCTCreateDetailHistory]
 	@intContractHeaderId INT
 	, @intContractDetailId INT = NULL
 	, @strComment NVARCHAR(100) = NULL
