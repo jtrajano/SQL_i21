@@ -129,13 +129,13 @@ DECLARE @TransactionQty NUMERIC(38, 20)
 DECLARE @TransactionCost NUMERIC(38, 20)
 DECLARE @RunningQty NUMERIC(38, 20)
 
-SELECT t.intInventoryTransactionId, t.dblQty, t.dblCost
-FROM tblICInventoryTransaction t
-WHERE t.intItemId = @ItemId
-  AND t.intItemLocationId = @ItemLocationId
-  AND t.dblQty > 0
-  AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
-ORDER BY t.intInventoryTransactionId DESC
+-- SELECT t.intInventoryTransactionId, t.dblQty, t.dblCost
+-- FROM tblICInventoryTransaction t
+-- WHERE t.intItemId = @ItemId
+--   AND t.intItemLocationId = @ItemLocationId
+--   AND t.dblQty > 0
+--   AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+-- ORDER BY t.intInventoryTransactionId DESC
   
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR 
