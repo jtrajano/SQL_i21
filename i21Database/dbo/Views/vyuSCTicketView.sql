@@ -104,8 +104,8 @@ AS
        ,SCT.strDiscountComment
        ,SCT.intCommodityId
        ,SCT.intDiscountId
-       ,CTH.intContractHeaderId
        ,SCT.intContractId
+       ,CTH.intContractHeaderId
        ,SCT.intDiscountLocationId
        ,SCT.intItemId
        ,SCT.intEntityId

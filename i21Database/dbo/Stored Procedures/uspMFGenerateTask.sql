@@ -672,6 +672,7 @@ BEGIN TRY
 					,I.intLayerPerPallet
 					,L.intSubLocationId
 					,L.intStorageLocationId
+					,L.strLotNumber
 					,L.dblWeightPerQty
 					,L.strLotNumber
 				HAVING (
@@ -851,6 +852,7 @@ BEGIN TRY
 					,I.intLayerPerPallet
 					,L.intSubLocationId
 					,L.intStorageLocationId
+					,L.strLotNumber
 					,L.dblWeightPerQty
 					,L.strLotNumber
 				HAVING (

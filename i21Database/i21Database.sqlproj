@@ -17,7 +17,7 @@
     <ModelCollation>1033,CS</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SqlServerVerification>False</SqlServerVerification>
@@ -71,6 +71,7 @@
     <EnableFullTextSearch>True</EnableFullTextSearch>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
     <DacVersion>1.1.0.0</DacVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
@@ -347,6 +348,7 @@
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
+    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql" />
     <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
@@ -519,6 +521,8 @@
     <Build Include="dbo\Views\vyuSCISLoadOutLoadIn.sql" />
     <Build Include="dbo\Views\vyuAPEntityEFTInformation.sql" />
     <Build Include="dbo\Views\vyuCMBankTransactionDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatDropDown.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatStatus.sql" />
     <Build Include="dbo\Views\vyuCMUnassignedBrokerageAccount.sql" />
     <Build Include="dbo\Functions\fnRKIsUserOTCApprover.sql" />
     <Build Include="dbo\Stored Procedures\uspRKValidateOTCRecords.sql" />
@@ -1138,11 +1142,60 @@
     <Build Include="dbo\Views\vyuSMTerritoryRegion.sql" />
     <Build Include="dbo\Tables\tblSMRapidDeploymentConfiguration.sql" />
     <Build Include="dbo\Tables\tblSMRapidDeploymentConfigurationDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMRoute.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMRoute.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMEvent.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMEvent.sql" />
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutValidatePaymentMethod.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCalculateDealerCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddContractDocuments.sql" />
+    <Build Include="dbo\Views\vyuCTCategoryPerCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMProcessUserStage.sql" />
+    <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
+    <Build Include="dbo\Views\vyuSMUserList.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleList.sql" />
+    <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatDropDown.sql" />
+    <Build Include="dbo\Views\vyuCMBSBankFileFormatStatus.sql" />
+    <None Include="Scripts\Post-Deployment\CM\18_BankFileFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivityMatched.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivity.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
+    <Build Include="dbo\User Defined Types\SingleAuditLogParam.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTaxExempt.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTaxExemptZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTaxZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCFNTaxDetailStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionContractOverfillStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionNumericVehicleStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTaxExempt.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTaxExemptZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTaxZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionPriceProfile.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionPriceType.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionPricingType.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionRemoteCalculatedTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionRemoteOriginalTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionRemoteTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionStringVehicleStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionTaxType.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1421,6 +1474,9 @@
     <Build Include="dbo\Tables\tblTMRegulatorType.sql" />
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
+	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Tables\tblTMSite.sql">
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
@@ -3260,6 +3316,7 @@
     <Build Include="dbo\Views\vyuAPBillItemReceiptTaxes.sql" />
     <Build Include="dbo\Tables\tblMFLotTransactionType.sql" />
     <Build Include="dbo\Views\vyuSTPricebookMaster.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Views\vyuSTItemDetailSearch.sql" />
     <Build Include="dbo\Views\vyuSTItemSearch.sql" />
     <Build Include="dbo\Views\vyuSTItemVendorSearch.sql" />
@@ -4225,6 +4282,7 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutPumpTotals.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutPaymentOptions.sql" />
@@ -4658,6 +4716,7 @@
     <Build Include="dbo\Stored Procedures\uspSTBatchRetailAdjustmentPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRetailAdjustmentPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspSTBatchRetailAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateShiftPhysicalItem.sql" />
     <Build Include="dbo\Views\vyuHDProjectSearchSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDragAndDropWorkOrder.sql" />
@@ -6138,6 +6197,11 @@
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
     <Build Include="dbo\Views\vyuApiSubscriptionHealthStatus.sql" />
+    <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql" />
+    <Build Include="dbo\Views\vyuApiFreightTerm.sql" />
+    <Build Include="dbo\Views\vyuApiCountry.sql" />
+    <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuApiCustomer.sql" />
     <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
@@ -10916,15 +10980,33 @@
     <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetInHousePerLocation.sql" />
+    <Build Include="dbo\Tables\tblRKDPRReconHeader.sql" />
+    <Build Include="dbo\Tables\tblRKDPRReconContracts.sql" />
+    <Build Include="dbo\Tables\tblRKDPRReconDerivatives.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateDPRRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetDPRReconSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTemplateAuditLog.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intCommodityId.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
+    <Build Include="dbo\User Defined Types\udtStoreGroup.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceHistoryForDPR.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractDPRRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_EncryptPasswords.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
+    <Build Include="dbo\Functions\fnRKGetDerivativeDPRRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconDiagnostic.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11240,6 +11322,7 @@
     <None Include="Scripts\Post-Deployment\CM\15_CompanyPreferenceOptions.sql" />
     <None Include="Scripts\Post-Deployment\CM\16_UpdateNextEFTNo.sql" />
     <None Include="Scripts\Post-Deployment\CM\17_InsertResponsiblePartyOption.sql" />
+    <None Include="Scripts\Post-Deployment\CM\18_BankFileFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
@@ -11302,12 +11385,26 @@
     <None Include="Scripts\Post-Deployment\SM\2210_RemoveOldPowerBIData.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
-    <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
     <Build Include="dbo\Tables\tblSMTermPullPoint.sql" />
+    <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPreProcessPriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPostProcessPriceContract.sql" />
+    <Build Include="dbo\Views\vyuARGetEntityLocation.sql" />
+    <Build Include="dbo\Views\vyuARGetCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
+    <Build Include="dbo\Tables\tblARPostInvalidInvoiceData.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceHeader.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceDetail.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceItemAccount.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForInTransitCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForStorageCosting.sql" />
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <Build Include="dbo\Tables\tblARCustomAgingSetup.sql" />
     <Build Include="dbo\Tables\tblARCustomAgingSetupBucket.sql" />

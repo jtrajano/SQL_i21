@@ -96,7 +96,7 @@
     [dblDealerCommission] DECIMAL(18, 6) NULL,
     [ysnStopCondition] BIT NOT NULL DEFAULT ((0)),
     [strTierProductSavedFileName] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
-
+    [dblCustomerChargeMOP] DECIMAL(18, 6) NULL,
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),

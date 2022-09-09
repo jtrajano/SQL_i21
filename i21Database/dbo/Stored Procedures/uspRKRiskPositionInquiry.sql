@@ -2065,6 +2065,14 @@ BEGIN
 		UPDATE @List
 		SET intOrderByHeading = 13
 		WHERE Selection IN ('Switch position', 'Futures required')
+
+		UPDATE @List
+		SET intOrderBySubHeading = 1
+		WHERE PriceStatus = 'a. Unpriced - (Balance to be Priced)'
+
+		UPDATE @List
+		SET intOrderBySubHeading = 2
+		WHERE PriceStatus = 'b. Priced / Outright - (Outright position)'
 		
 		-- Commented for RM-3281
 		--INSERT INTO @List(Selection
@@ -2146,6 +2154,7 @@ BEGIN
 			, strCropYear
 		FROM @List
 		ORDER BY intOrderByHeading
+			, intOrderBySubHeading
 			, CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
 					WHEN strFutureMonth ='Total' THEN '01/01/9999'
 					WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) 

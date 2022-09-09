@@ -515,3 +515,22 @@ BEGIN
 	')
 END
 GO
+
+/*
+* Attempt to update Truck Id on Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'intTruckId')
+BEGIN
+	EXEC ('UPDATE L
+				SET intTruckId = SVT.intEntityShipViaTruckId
+			FROM tblLGLoad L
+				OUTER APPLY (
+					SELECT TOP 1 intEntityShipViaTruckId 
+					FROM tblSMShipViaTruck 
+					WHERE intEntityId = L.intHaulerEntityId
+						AND strTruckNumber = L.strTruckNo) SVT
+			WHERE L.intTransUsedBy <> 2
+				AND L.intTruckId IS NULL
+	')
+END
+GO

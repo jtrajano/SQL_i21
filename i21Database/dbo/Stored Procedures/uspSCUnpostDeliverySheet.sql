@@ -142,7 +142,7 @@ BEGIN TRY
 						,[intDeliverySheetId]				= intDeliverySheetId
 						,[intInventoryAdjustmentId]			= NULL
 						,[dblUnits]							= (dblUnits * -1)
-						,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(GETDATE())
+						,[dtmHistoryDate]					= dtmHistoryDate--dbo.fnRemoveTimeOnDate(GETDATE())
 						,[dblCurrencyRate]					= 1
 						,[strPaidDescription]				= 'Quantity Adjustment Reversal ' + @strTransactionId + ' From Delivery Sheet'
 						,[intTransactionTypeId]				= 9

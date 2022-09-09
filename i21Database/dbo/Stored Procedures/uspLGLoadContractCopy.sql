@@ -70,6 +70,7 @@ BEGIN TRY
 		,dtmDeliveredDate
 		,intGenerateLoadId
 		,intGenerateSequence
+		,intTruckId
 		,strTruckNo
 		,strTrailerNo1
 		,strTrailerNo2
@@ -192,6 +193,7 @@ BEGIN TRY
 		,dtmDeliveredDate
 		,intGenerateLoadId
 		,intGenerateSequence
+		,intTruckId
 		,strTruckNo
 		,strTrailerNo1
 		,strTrailerNo2

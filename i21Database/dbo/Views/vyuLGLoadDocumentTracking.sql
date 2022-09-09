@@ -60,7 +60,7 @@ SELECT CH.strContractNumber
 	,strDriver = Driver.strName
 	,strDispatcher = US.strUserName
 	,L.strCustomerReference
-	,L.strTruckNo
+	,strTruckNo = CASE WHEN (L.intTransUsedBy = 2) THEN L.strTruckNo ELSE SVT.strTruckNumber END
 	,L.strTrailerNo1
 	,L.strTrailerNo2
 	,L.strTrailerNo3
@@ -289,6 +289,7 @@ LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = L.intDocPresentationId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
+LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId

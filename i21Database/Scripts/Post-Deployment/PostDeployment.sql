@@ -366,6 +366,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\InsertClearingTransactionsToClearingTable.sql
 :r .\AP\PopulateVoucherPayToBankAccount.sql
 :r .\AP\PopulateVoucherAverageExchangeRate.sql
+:r .\AP\UpdateVendorStorePassword.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
