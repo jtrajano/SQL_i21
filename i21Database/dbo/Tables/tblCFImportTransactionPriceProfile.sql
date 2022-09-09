@@ -1,0 +1,28 @@
+
+CREATE TABLE [dbo].[tblCFImportTransactionPriceProfile](
+	[intRowId] int IDENTITY(1,1) NOT NULL,
+	[intTransactionId] int NULL,
+	[intAccountId] int NULL,
+	[intCustomerId] int NULL,
+	[intDiscountDays] int NULL,
+	[intDiscountScheduleId] int NULL,
+	[intSalesPersonId] int NULL,
+	[intPriceProfileDetailId] int NULL,
+	[intPriceProfileHeaderId] int NULL,
+	[intItemId] int NULL,
+	[intNetworkId] int NULL,
+	[intSiteGroupId] int NULL,
+	[intSiteId] int NULL,
+	[intLocalPricingIndex] int NULL,
+	[dblRate] numeric(18, 6) NULL,
+	[strBasis] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[strType] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[intLinkedProfile] int NULL,
+	[strIndexType] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[strPriceProfileId] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[strPriceIndexId] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[ysnForceRounding] bit NULL,
+	[intFreightTermId] int NULL,
+	[strGUID] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[intUserId] int NULL
+) 

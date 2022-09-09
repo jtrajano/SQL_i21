@@ -17,7 +17,7 @@
     <ModelCollation>1033,CS</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <SqlServerVerification>False</SqlServerVerification>
@@ -71,6 +71,7 @@
     <EnableFullTextSearch>True</EnableFullTextSearch>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
     <DacVersion>1.1.0.0</DacVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
@@ -1130,6 +1131,41 @@
     <Build Include="dbo\Views\vyuCMBSBankFileFormatDropDown.sql" />
     <Build Include="dbo\Views\vyuCMBSBankFileFormatStatus.sql" />
     <None Include="Scripts\Post-Deployment\CM\18_BankFileFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivityMatched.sql" />
+    <Build Include="dbo\Tables\tblCMABRActivity.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptUPC.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
+    <Build Include="dbo\User Defined Types\SingleAuditLogParam.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTaxExempt.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTaxExemptZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCalculatedTaxZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionCFNTaxDetailStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionContractOverfillStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionNumericVehicleStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTaxExempt.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTaxExemptZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionOriginalTaxZeroQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionPriceProfile.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionPriceType.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionPricingType.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionRemoteCalculatedTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionRemoteOriginalTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionRemoteTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionStringVehicleStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionTax.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionTaxType.sql" />
+    <Build Include="dbo\Tables\tblCFImportTransactionTaxZeroQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1408,6 +1444,9 @@
     <Build Include="dbo\Tables\tblTMRegulatorType.sql" />
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
+	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
+    <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Tables\tblTMSite.sql">
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
@@ -6128,6 +6167,11 @@
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
     <Build Include="dbo\Views\vyuApiSubscriptionHealthStatus.sql" />
+    <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql" />
+    <Build Include="dbo\Views\vyuApiFreightTerm.sql" />
+    <Build Include="dbo\Views\vyuApiCountry.sql" />
+    <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuApiCustomer.sql" />
     <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
@@ -10906,16 +10950,33 @@
     <Build Include="dbo\Views\vyuAPPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRecostFormulationItems.sql" />
     <Build Include="dbo\Views\vyuICRecostFormulationSearchDetail.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetInHousePerLocation.sql" />
+    <Build Include="dbo\Tables\tblRKDPRReconHeader.sql" />
+    <Build Include="dbo\Tables\tblRKDPRReconContracts.sql" />
+    <Build Include="dbo\Tables\tblRKDPRReconDerivatives.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateDPRRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetDPRReconSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTemplateAuditLog.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intCommodityId.sql" />
     <Build Include="dbo\Index\IX_tblRKSummaryLog_intEntityId.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\User Defined Types\udtStoreGroup.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceHistoryForDPR.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractDPRRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_EncryptPasswords.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
+    <Build Include="dbo\Functions\fnRKGetDerivativeDPRRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPRReconDiagnostic.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11294,16 +11355,27 @@
     <None Include="Scripts\Post-Deployment\SM\2210_RemoveOldPowerBIData.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
-    <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
     <Build Include="dbo\Tables\tblSMTermPullPoint.sql" />
-    <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\MBIL\InsertLongTruckScreen.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPreProcessPriceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPostProcessPriceContract.sql" />
+    <Build Include="dbo\Views\vyuARGetEntityLocation.sql" />
+    <Build Include="dbo\Views\vyuARGetCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateEntityStartingNumber.sql" />
+    <Build Include="dbo\Tables\tblARPostInvalidInvoiceData.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceHeader.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceDetail.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceGLEntries.sql" />
+    <Build Include="dbo\Tables\tblARPostInvoiceItemAccount.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForContracts.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForInTransitCosting.sql" />
+    <Build Include="dbo\Tables\tblARPostItemsForStorageCosting.sql" />
+    <Build Include="dbo\Functions\fnCTGetOverage.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

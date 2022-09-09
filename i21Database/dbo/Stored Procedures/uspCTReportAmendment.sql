@@ -166,7 +166,7 @@ BEGIN TRY
 			,strSalesPerson		= AH.strSalesPerson + CHAR(13)+CHAR(10) + @strCompanyName
 			,strOtherCompany	= CHAR(13)+CHAR(10) + AH.strEntityName
 			,blbHeaderLogo		= dbo.fnSMGetCompanyLogo('Header')
-			,intSalesPersonId
+			,AH.intSalesPersonId
 
 	FROM	vyuCTAmendmentHistory AH
 	JOIN tblCTContractHeader					CH ON CH.intContractHeaderId = AH.intContractHeaderId

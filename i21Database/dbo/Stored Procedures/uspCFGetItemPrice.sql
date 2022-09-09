@@ -768,7 +768,7 @@ DECLARE @cfPriceProfile TABLE
 	----------------------------------------------
 	--   SITE | SITE GROUP | PRODUCT | NETWORK  --
 	----------------------------------------------
-	--   N/A  |		1      |   ALL	 |   1      --
+	--   ALL  |		1      |   ALL	 |   1      --
 	----------------------------------------------
 	IF (@cfMatchProfileCount = 0 AND @cfMatchProfileSkip = 0)
 		BEGIN

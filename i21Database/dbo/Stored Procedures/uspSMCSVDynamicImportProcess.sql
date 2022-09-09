@@ -60,6 +60,15 @@ BEGIN
 
 		return 0;
 	end
+
+	if exists(SELECT top 1 1 from tblSMCSVDynamicImportLogDetail WHERE intCSVDynamicImportLogId = @LogId and intSort > 0 AND @ImportId = 2 AND strData LIKE '%Error Field!%')
+	begin		
+		update tblSMCSVDynamicImportLogDetail 
+					set strResult = ' Failed. Field was invalid. Please check values.'
+				WHERE intCSVDynamicImportLogId = @LogId and intSort > 0 AND strData LIKE '%Error Field!%'
+
+		return 0;
+	end
 	
 	DECLARE @CurrentImportData		INT
 	DECLARE @CurrentImportLinked	INT

@@ -2,7 +2,7 @@
 AS 
 
 SELECT 
-* 
+*
 FROM vyuGLAccountDetail
-WHERE 
+WHERE
 strAccountCategory = 'Cash Account'
