@@ -2756,11 +2756,10 @@ UPDATE tblSMCSVDynamicImport SET
 		BEGIN
 			IF NOT EXISTS
 			(
-			    Select TOP 1
-			        1
-			    from tblSMCompanyLocation
-			    Where strLocationName = @customer_location
-			) AND  @customer_location <> ''''
+			    SELECT TOP 1 1
+			    FROM tblEMEntityLocation
+			    WHERE strLocationName = @customer_location
+			) AND @customer_location <> ''''
 			BEGIN
 			    SET @IsValid = 0
 			    SET @ValidationMessage
@@ -2769,7 +2768,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intCustomerLocationId =   (Select intCompanyLocationId from tblSMCompanyLocation  where strLocationNumber  = @customer_location)
+				SET @intCustomerLocationId = (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE strLocationName = @customer_location)
 			END
 		END
 
