@@ -62,9 +62,15 @@ SELECT
 										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
 										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
 								END
-	,strUnitsOnly                   =  CASE
-										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits)))
-										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) 
+	-- ,strUnitsOnly                   =  CASE
+	-- 									WHEN SS.intParentSettleStorageId IS NOT NULL THEN 
+	-- 									CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits)))
+	-- 									ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) 
+	-- 							END
+	,dblUnits                   =  CASE
+										WHEN SS.intParentSettleStorageId IS NOT NULL THEN 
+										(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))
+										ELSE dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))
 								END
 	,strUnitsMeasurementOnly                   =  UOM.strSymbol								
 	,intTransactionId			= CASE 
@@ -108,11 +114,20 @@ SELECT
 								END COLLATE Latin1_General_CI_AS AS strTransactionCode
 	, strCommodityCode
 	, strCategoryCode	= Category.strCategoryCode
+	,ST2.strStorageTypeDescription
+	,ST2.ysnDPOwnedType
+	,dtmVoucherPosted = Bill.dtmDate
+	,ysnBillPosted = Bill.ysnPosted
+	,ysnBillPaid = Bill.ysnPaid
 FROM tblGRSettleStorage SS
 LEFT JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
 	AND SS.intParentSettleStorageId IS NOT NULL
-LEFT JOIN tblGRCustomerStorage CS
+LEFT JOIN (
+	tblGRCustomerStorage CS
+	INNER JOIN tblGRStorageType ST2
+		ON ST2.intStorageScheduleTypeId = CS.intStorageTypeId
+	)
 	ON CS.intCustomerStorageId = ST.intCustomerStorageId
 JOIN tblEMEntity E 
 	ON E.intEntityId = SS.intEntityId

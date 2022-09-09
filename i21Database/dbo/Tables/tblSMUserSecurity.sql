@@ -44,6 +44,7 @@
     [strActiveDirectorySID]         NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [ysnActiveDirectory]            BIT NOT NULL DEFAULT 0,
 	[ysnStoreDPRDetail]	            BIT NOT NULL DEFAULT 0,
+    [ysnEnableMonitoring]           BIT NULL DEFAULT 0,
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_UserSecurity_tblSMSecurityPolicy] FOREIGN KEY ([intSecurityPolicyId]) REFERENCES [dbo].[tblSMSecurityPolicy] ([intSecurityPolicyId]),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),

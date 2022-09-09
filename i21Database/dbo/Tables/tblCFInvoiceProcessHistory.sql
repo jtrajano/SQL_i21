@@ -5,7 +5,7 @@
     [intPaymentId]                INT             NULL,
     [strCustomerNumber]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCustomerName]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strInvoiceNumber]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceNumber]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strPaymentNumber]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblInvoiceAmount]            NUMERIC (18, 6) NULL,
     [dblTotalQuantity]            NUMERIC (18, 6) NULL,
