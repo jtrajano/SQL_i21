@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspICReportPhysicalInventoryCount] @xmlParam NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE [dbo].[uspICReportPhysicalInventoryCount] 
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -109,8 +110,9 @@ BEGIN TRY
 				   ,InvCount.ysnIncludeOnHand
 				   ,dblOnHand = InvCountDetail.dblSystemCount
 				   ,dblPhysicalCount = InvCountDetail.dblPhysicalCount --ISNULL(InvCountDetail.dblPallets, 0) * ISNULL(InvCountDetail.dblQtyPerPallet, 0) 
+				   ,InvCountDetail.intCountLine 
 			FROM tblICInventoryCount InvCount 
-				 LEFT JOIN tblICInventoryCountDetail InvCountDetail ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
+				 LEFT JOIN vyuICGetInventoryCountDetail InvCountDetail ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
 				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId
 				 LEFT JOIN tblICItem Item ON InvCountDetail.intItemId = Item.intItemId
 				 LEFT JOIN tblSMCompanyLocation CompanyLocation ON InvCount.intLocationId = CompanyLocation.intCompanyLocationId
@@ -122,7 +124,7 @@ BEGIN TRY
 				
 			) AS a
 		WHERE strCountNo = @strCountNo 
-		ORDER BY strSubLocationName ASC, strStorageLocationName ASC
+		ORDER BY strSubLocationName ASC, strStorageLocationName ASC, intCountLine ASC
 	END
 END TRY
 
