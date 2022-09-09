@@ -244,7 +244,8 @@ SET ANSI_WARNINGS OFF
 		FROM dbo.[fnARGetOverrideAccount](ARITD.intSalesTaxAccountId, ARID.[intAccountId], @OverrideCompanySegment, @OverrideLocationSegment, 0)
 	) OVERRIDESEGMENT
 	WHERE ARID.strSessionId = @strSessionId
-	AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
+	  AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
+	  AND ARID.strType <> 'Tax Adjustment'
 
 	--UPDATE FINAL
 	UPDATE PIH
