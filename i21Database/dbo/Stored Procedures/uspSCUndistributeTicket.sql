@@ -79,6 +79,12 @@ DECLARE @dblLoadUsedQty NUMERIC(18,6)
 DECLARE @dblScheduleQtyToUpdate NUMERIC(18,6)
 DECLARE @dblContractAvailableQty NUMERIC(38,20)
 
+DECLARE @_dblCovertedLoadQtyUsed NUMERIC(38,20)
+DECLARE @_dblLoadItemUOMId INT
+DECLARE @_dblLoadQuantity NUMERIC(38,20)
+DECLARE @_dblLoadQtyVsUsedDiff NUMERIC(38,20)
+DECLARE @_dblOriginalLoadUsedQty NUMERIC(38,20)
+
 SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not allowed.'
 declare @intInventoryAdjustmentId int
 declare @strAdjustmentNo AS NVARCHAR(40)
@@ -1461,6 +1467,7 @@ BEGIN TRY
 									SET @dblLoadUsedQty = 0
 									SELECT TOP 1 
 										@dblLoadUsedQty = dblQty
+										,@_dblOriginalLoadUsedQty = dblQty
 									FROM tblSCTicketLoadUsed
 									WHERE intTicketId = @intTicketId
 										AND intLoadDetailId = @intTicketLoadDetailId
@@ -1479,29 +1486,52 @@ BEGIN TRY
 									END
 									ELSE
 									BEGIN										
-										IF @dblTicketScheduledQty <= @dblContractAvailableQty
+										-- IF @dblTicketScheduledQty <= @dblContractAvailableQty
+										-- BEGIN
+										-- 	SET @dblLoadUsedQty = @dblTicketScheduledQty
+										-- END
+										-- ELSE
+										-- BEGIN
+										-- 	IF(@dblTicketScheduledQty > @dblLoadUsedQty)
+										-- 	BEGIN
+										-- 		IF(@dblLoadUsedQty > @dblContractAvailableQty)
+										-- 		BEGIN
+										-- 			SET @dblLoadUsedQty = @dblContractAvailableQty
+										-- 		END
+										-- 	END
+										-- 	ELSE
+										-- 	BEGIN
+										-- 		SET @dblLoadUsedQty = @dblContractAvailableQty
+										-- 	END
+										-- END
+
+										IF(@dblLoadUsedQty > @dblContractAvailableQty)
 										BEGIN
-											SET @dblLoadUsedQty = @dblTicketScheduledQty
-										END
-										ELSE
-										BEGIN
-											IF(@dblTicketScheduledQty > @dblLoadUsedQty)
-											BEGIN
-												IF(@dblLoadUsedQty > @dblContractAvailableQty)
-												BEGIN
-													SET @dblLoadUsedQty = @dblContractAvailableQty
-												END
-											END
-											ELSE
-											BEGIN
-												SET @dblLoadUsedQty = @dblContractAvailableQty
-											END
+											SET @dblLoadUsedQty = @dblContractAvailableQty
 										END
 									END
 
 									IF @dblLoadUsedQty <> 0
 									BEGIN
 										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryShipmentItemUsed, 'Inventory Shipment', @intTicketItemUOMId
+
+										IF(ISNULL(@ysnLoadContract,0) = 0)
+										BEGIN
+											----- Check Load Quantity
+											SELECT @_dblCovertedLoadQtyUsed = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,intItemUOMId,@_dblOriginalLoadUsedQty)
+												,@_dblLoadItemUOMId = intItemUOMId
+												,@_dblLoadQuantity = dblQuantity
+											FROM tblLGLoadDetail
+											WHERE intLoadDetailId = @intTicketLoadDetailId
+
+											SET @_dblLoadQtyVsUsedDiff = (SELECT @_dblCovertedLoadQtyUsed - @_dblLoadQuantity)
+
+											IF(@_dblLoadQtyVsUsedDiff <> 0)
+											BEGIN
+												SET @_dblLoadQtyVsUsedDiff = @_dblLoadQtyVsUsedDiff * -1
+												EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadQtyVsUsedDiff, @intUserId, @intTicketId, 'Auto - Scale', @_dblLoadItemUOMId
+											END
+										END
 									END
 								END
 
