@@ -53,6 +53,7 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	InvCountDetail.dblSystemCount,
 	InvCountDetail.dblLastCost,
 	InvCountDetail.strCountLine,
+	intCountLine = CAST(REPLACE(InvCountDetail.strCountLine, InvCount.strCountNo + '-', '') AS INT),
 	InvCountDetail.dblPallets,
 	InvCountDetail.dblQtyPerPallet,
 	InvCountDetail.dblPhysicalCount,
@@ -93,7 +94,8 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	CountGroup.strCountGroup,
 	InvCountDetail.dblQtyReceived,
 	InvCountDetail.dblQtySold,
-	InvCountDetail.intSort, InvCountDetail.intConcurrencyId,
+	InvCountDetail.intSort, 
+	InvCountDetail.intConcurrencyId,
 	ItemLocation.strStorageUnitNo
 FROM tblICInventoryCountDetail InvCountDetail	
 	INNER JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
