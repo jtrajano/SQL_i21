@@ -1369,6 +1369,7 @@
 	<Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
     <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
+    <Build Include="dbo\Views\vyuARTaxGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
