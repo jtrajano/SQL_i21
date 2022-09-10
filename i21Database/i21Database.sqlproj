@@ -10643,6 +10643,7 @@
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
     <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
