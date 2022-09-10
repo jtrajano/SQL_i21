@@ -3,7 +3,6 @@ CREATE PROCEDURE [dbo].[uspFADepreciateMultipleAsset]
  @BookId INT = 1,
  @intLedgerId INT = NULL,
  @dtmDepreciationDate DATETIME = NULL,
- @dblDepreciation NUMERIC(18,6) = NULL,
  @ysnPost   AS BIT    = 0,  
  @ysnRecap   AS BIT    = 0,  
  @intEntityId  AS INT    = 1,  
