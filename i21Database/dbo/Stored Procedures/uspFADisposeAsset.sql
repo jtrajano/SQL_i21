@@ -427,7 +427,6 @@ BEGIN
 						,1						-- intBookId
 						,@intLedgerId			-- intLedgerId
 						,@dtmDispositionDate	-- dtmDepreciationDate
-						,NULL					-- dblDepreciation
 						,1						-- ysnPost
 						,0						-- ysnRecap
 						,@intEntityId			-- intEntityId
