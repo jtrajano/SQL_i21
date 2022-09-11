@@ -67,7 +67,7 @@ set a.strType = b.strType
    ,a.dtmScheduledDate = b.dtmScheduledDate
    ,a.intDriverId = b.intDriverEntityId
 From tblMBILLoadHeader a
-inner join #loadOrder b on b.intLoadId = b.intLoadId
+inner join #loadOrder b on b.intLoadId = a.intLoadId
 Where a.intDriverId = @intDriverId
 		   
 INSERT INTO tblMBILLoadHeader(intLoadId                  
