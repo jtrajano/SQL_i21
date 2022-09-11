@@ -418,8 +418,6 @@ BEGIN
 			BEGIN
 				IF (@dblAccumulatedDepreciation = 0) --No depreciation within the period: Do not depreciate and set the depreciation take as the expense adjustment
 					SET @dblExpenseAdjustment = @dblDepreciationTake
-				ELSE IF (@dblAccumulatedDepreciation = @dblDepreciationTake) -- Depreciation to date is same with the depreciation take: Do not depreciate and there should be no expense adjusments
-					SET @dblExpenseAdjustment = 0
 				ELSE
 				BEGIN
 					-- Depreciate
