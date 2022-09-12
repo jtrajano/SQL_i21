@@ -83,6 +83,7 @@ DECLARE @_dblCovertedLoadQtyUsed NUMERIC(38,20)
 DECLARE @_dblLoadItemUOMId INT
 DECLARE @_dblLoadQuantity NUMERIC(38,20)
 DECLARE @_dblLoadQtyVsUsedDiff NUMERIC(38,20)
+DECLARE @_dblOriginalLoadUsedQty NUMERIC(38,20)
 
 SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not allowed.'
 declare @intInventoryAdjustmentId int
@@ -1124,6 +1125,7 @@ BEGIN TRY
 										SET @dblLoadUsedQty = 0
 										SELECT TOP 1 
 											@dblLoadUsedQty = dblQty
+											,@_dblOriginalLoadUsedQty = dblQty
 										FROM tblSCTicketLoadUsed
 										WHERE intTicketId = @intTicketId
 											AND intLoadDetailId = @intTicketLoadDetailId
@@ -1170,7 +1172,7 @@ BEGIN TRY
 											IF(ISNULL(@ysnLoadContract,0) = 0)
 											BEGIN
 												----- Check Load Quantity
-												SELECT @_dblCovertedLoadQtyUsed = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,intItemUOMId,@dblLoadUsedQty)
+												SELECT @_dblCovertedLoadQtyUsed = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,intItemUOMId,@_dblOriginalLoadUsedQty)
 													,@_dblLoadItemUOMId = intItemUOMId
 													,@_dblLoadQuantity = dblQuantity
 												FROM tblLGLoadDetail
