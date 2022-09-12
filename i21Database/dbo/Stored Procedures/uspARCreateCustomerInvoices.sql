@@ -1119,7 +1119,39 @@ FROM
 WHERE
 	ITG.[intTermId] IS NULL
 	AND NOT EXISTS (SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) LEFT OUTER JOIN [tblEMEntityLocation] EL ON ARC.[intEntityId] = EL.[intEntityId] AND EL.[ysnDefaultLocation] = 1 WHERE ISNULL(ARC.[intTermsId], EL.[intTermsId]) IS NOT NULL AND ARC.[intEntityId] = ITG.[intEntityCustomerId])
-	
+
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'Duplicate Invoice Number: ' + ITG.strInvoiceOriginId
+	,[strTransactionType]	= ITG.[strTransactionType]
+	,[strType]				= ITG.[strType]
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intInvoiceId]			= ITG.[intInvoiceId]
+FROM @InvoicesToGenerate ITG 
+INNER JOIN (
+	SELECT strInvoiceOriginId
+	FROM @InvoicesToGenerate
+	WHERE ysnUseOriginIdAsInvoiceNumber = 1
+	  AND strInvoiceOriginId IS NOT NULL 
+	  AND strInvoiceOriginId <> ''
+	GROUP BY strInvoiceOriginId 
+	HAVING COUNT(1) > 1 
+) ITG2 ON ITG.strInvoiceOriginId = ITG2.strInvoiceOriginId
+WHERE ITG.ysnUseOriginIdAsInvoiceNumber = 1
+  AND ITG.strInvoiceOriginId IS NOT NULL 
+  AND ITG.strInvoiceOriginId <> ''
+  	
 DELETE FROM V
 FROM @InvoicesToGenerate V
 WHERE EXISTS(SELECT NULL FROM #ARInvalidInvoiceRecords I WHERE V.[intId] = I.[intId])
