@@ -189,6 +189,48 @@ BEGIN
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail ILD
+INNER JOIN (
+	SELECT strTransactionNumber
+	FROM tblARImportLogDetail
+	WHERE strTransactionNumber IS NOT NULL
+	  AND strTransactionNumber <> ''
+	  AND intImportLogId = @ImportLogId 
+	GROUP BY strTransactionNumber
+	HAVING COUNT(1) > 1
+) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
+WHERE ILD.intImportLogId = @ImportLogId)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'Transaction Number provided has duplicates.'
+	FROM tblARImportLogDetail ILD
+	INNER JOIN (
+	SELECT strTransactionNumber
+		FROM tblARImportLogDetail
+		WHERE strTransactionNumber IS NOT NULL
+		  AND strTransactionNumber <> ''
+		  AND intImportLogId = @ImportLogId 
+		GROUP BY strTransactionNumber
+		HAVING COUNT(1) > 1
+	) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
+	WHERE ILD.intImportLogId = @ImportLogId
+
+	SET @FailedCount = (
+		SELECT COUNT(ysnSuccess) 
+		FROM tblARImportLogDetail ILD
+		WHERE ILD.intImportLogId = @ImportLogId 
+		  AND ysnSuccess = 0 
+		  AND strEventResult = 'Transaction Number provided has duplicates.'		  
+	)  
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
 
 IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
 INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
