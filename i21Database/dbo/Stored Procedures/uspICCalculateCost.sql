@@ -4,7 +4,8 @@ CREATE PROCEDURE [dbo].[uspICCalculateCost] (
     @Quantity NUMERIC(38, 20),       -- The quantity sold.
     @Date DATETIME,                  -- The date of transaction. This is optional and will default to the current date.
     @Cost NUMERIC(18, 6) OUTPUT,     -- The cost of the item. This is the output value of this procedure.
-    @ItemUOMId INT                   -- The item UOM ID. This is optional and will default to ID of the GALLONS uom.
+    @ItemUOMId INT,                  -- The item UOM ID. This is optional and will default to ID of the GALLONS uom.
+    @ShowBucket BIT = 0              -- Lists the cost bucket
 )
 AS
 
@@ -115,28 +116,40 @@ EXEC dbo.uspICPostCosting
     , 1
 
 DECLARE @LastTransactionId INT
+DECLARE @FirstTransactionId INT
+DECLARE @TransactionId INT
+DECLARE @TransactionQty NUMERIC(38, 20)
+DECLARE @TransactionCost NUMERIC(38, 20)
+DECLARE @RunningQty NUMERIC(38, 20)
+DECLARE @MovingAverageCost NUMERIC(38, 20)
+DECLARE @IsAvgLifo BIT
+-- 1: AVG
+-- 2: FIFO
+-- 3: LIFO
+-- 4: LOT
+-- 5: Actual
+-- 6: CATEGORY
+DECLARE @CostingMethod INT
+SELECT @CostingMethod = dbo.fnGetCostingMethod(@ItemId, @ItemLocationId)
+
 SELECT TOP 1 @LastTransactionId = t.intInventoryTransactionId
 FROM tblICInventoryTransaction t
 WHERE t.intItemId = @ItemId
   AND t.intItemLocationId = @ItemLocationId
   AND t.dblQty > 0
+  AND t.ysnIsUnposted = 0
   AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
 ORDER BY t.intInventoryTransactionId DESC
 
------- Smart AVG
-DECLARE @TransactionId INT
-DECLARE @TransactionQty NUMERIC(38, 20)
-DECLARE @TransactionCost NUMERIC(38, 20)
-DECLARE @RunningQty NUMERIC(38, 20)
+SELECT TOP 1 @FirstTransactionId = t.intInventoryTransactionId
+FROM tblICInventoryTransaction t
+WHERE t.intItemId = @ItemId
+  AND t.intItemLocationId = @ItemLocationId
+  AND t.dblQty > 0
+  AND t.ysnIsUnposted = 0
+  AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+ORDER BY t.intInventoryTransactionId ASC
 
--- SELECT t.intInventoryTransactionId, t.dblQty, t.dblCost
--- FROM tblICInventoryTransaction t
--- WHERE t.intItemId = @ItemId
---   AND t.intItemLocationId = @ItemLocationId
---   AND t.dblQty > 0
---   AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
--- ORDER BY t.intInventoryTransactionId DESC
-  
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR 
   SELECT t.intInventoryTransactionId, t.dblQty, t.dblCost
@@ -144,6 +157,7 @@ FOR
   WHERE t.intItemId = @ItemId
     AND t.intItemLocationId = @ItemLocationId
     AND t.dblQty > 0
+    -- AND t.ysnIsUnposted = 0
     AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
   ORDER BY t.intInventoryTransactionId DESC
 
@@ -153,9 +167,16 @@ FETCH NEXT FROM cur INTO @TransactionId, @TransactionQty, @TransactionCost
 
 WHILE @@FETCH_STATUS = 0 
 BEGIN  
+--  SET @MovingAverageCost = dbo.fnCalculateAverageCost(@TransactionQty, @TransactionCost, @RunningQty, ISNULL(@MovingAverageCost, 0))
+  
   IF @Quantity <= @RunningQty
   BEGIN
     SET @LastTransactionId = @TransactionId
+  END
+
+  IF @RunningQty < @Quantity
+  BEGIN
+    SET @IsAvgLifo = 1
   END
 
   SET @RunningQty = ISNULL(@RunningQty, 0) + @TransactionQty
@@ -166,8 +187,73 @@ END
 CLOSE cur
 DEALLOCATE cur
 
--- SELECT @Cost = COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId))
+IF @CostingMethod = 2 -- FIFO
+SET @Cost = ISNULL(dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId), @LastCost)
 
-SELECT @Cost = dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId)
+IF @CostingMethod = 1 -- AVG
+  SET @Cost = ISNULL(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @AverageCost)
 
+IF @CostingMethod = 3 -- LIFO
+BEGIN
+  DECLARE curLifo CURSOR LOCAL FAST_FORWARD
+  FOR 
+    SELECT t.intInventoryTransactionId, t.dblQty, t.dblCost
+    FROM tblICInventoryTransaction t
+    WHERE t.intItemId = @ItemId
+      AND t.intItemLocationId = @ItemLocationId
+      AND t.dblQty > 0
+      -- AND t.ysnIsUnposted = 0
+      AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+    ORDER BY t.intInventoryTransactionId ASC
+
+  OPEN curLifo
+
+  FETCH NEXT FROM curLifo INTO @TransactionId, @TransactionQty, @TransactionCost
+
+  WHILE @@FETCH_STATUS = 0 
+  BEGIN  
+  --  SET @MovingAverageCost = dbo.fnCalculateAverageCost(@TransactionQty, @TransactionCost, @RunningQty, ISNULL(@MovingAverageCost, 0))
+    
+    IF @Quantity <= @RunningQty
+    BEGIN
+      SET @FirstTransactionId = @TransactionId
+    END
+
+    IF @RunningQty < @Quantity
+    BEGIN
+      SET @IsAvgLifo = 1
+    END
+
+    SET @RunningQty = ISNULL(@RunningQty, 0) + @TransactionQty
+
+    FETCH NEXT FROM curLifo INTO @TransactionId, @TransactionQty, @TransactionCost
+  END
+
+  CLOSE curLifo
+  DEALLOCATE curLifo
+
+  SET @Cost = CASE WHEN @IsAvgLifo = 1 THEN ISNULL(dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @FirstTransactionId), @LastCost) ELSE @LastCost END
+END
+
+IF @ShowBucket = 1
+BEGIN
+  SELECT t.intInventoryTransactionId, t.dtmDate, t.dblQty, t.dblCost, t.ysnIsUnposted
+  FROM tblICInventoryTransaction t
+  WHERE t.intItemId = @ItemId
+    AND t.intItemLocationId = @ItemLocationId
+    AND t.dblQty > 0
+    AND t.ysnIsUnposted = 0
+    AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+  ORDER BY t.intInventoryTransactionId DESC
+
+  SELECT @Cost Cost, @LastCost LastCost, @StandardCost StdCost, @AverageCost AvgCost, 
+  dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0) fnRunning,
+  dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId) fnAvg
+END
+
+-- SELECT @LastCost LastCost, @StandardCost StdCost, @AverageCost AvgCost, 
+--   dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0) fnRunning,
+--   dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId) fnAvg
+
+-- SELECT @Cost
 rollback
