@@ -422,7 +422,12 @@ BEGIN TRY
 			BEGIN
 				IF ((@dblReceivedQuantityGross != @dblDistributedQuantityGross) OR (@dblReceivedQuantityNet != @dblDistributedQuantityNet))
 				BEGIN
-					SET @strresult = @strDescription + ' received quantity (Gross: ' + FORMAT(@dblReceivedQuantityGross, 'g17')  + ', Net: ' + FORMAT(@dblReceivedQuantityNet, 'g17') +  ') does not match distributed quantity (Gross: ' + FORMAT(@dblDistributedQuantityGross, 'g17') + ', Net: ' + FORMAT(@dblDistributedQuantityNet, 'g17') + ')'
+					DECLARE @dblMissingGross INT = @dblReceivedQuantityGross - @dblDistributedQuantityGross
+					DECLARE @dblMissingNet INT = @dblReceivedQuantityNet - @dblDistributedQuantityNet
+
+					SET @strresult = @strDescription + ' ' + char(10) + ' received quantity (Gross: ' + FORMAT(@dblReceivedQuantityGross, 'g17')  + ', Net: ' + FORMAT(@dblReceivedQuantityNet, 'g17') +  ') ' + 
+					CHAR(13) + CHAR(10) + ' does not match distributed quantity (Gross: ' + FORMAT(@dblDistributedQuantityGross, 'g17') + ', Net: ' + FORMAT(@dblDistributedQuantityNet, 'g17') + ')' +
+					CHAR(13) + CHAR(10) + char(149) + ' Missing quantity (Gross: ' + FORMAT(@dblMissingGross, 'g17') + ', Net: ' +  FORMAT(@dblMissingNet, 'g17') + ')'
 					RAISERROR(@strresult, 16, 1)
 				END
 			END
@@ -430,7 +435,10 @@ BEGIN TRY
 			BEGIN
 				IF (@dblReceivedQuantity != @dblDistributedQuantity)
 				BEGIN
-					SET @strresult = @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match distributed quantity ' + LTRIM(@dblDistributedQuantity)
+					DECLARE @dblMissingQuantity INT = @dblReceivedQuantity - @dblDistributedQuantity
+					
+					SET @strresult = @strDescription + ' received quantity ' + LTRIM(@dblReceivedQuantity)  + ' does not match distributed quantity ' + LTRIM(@dblDistributedQuantity) +
+					CHAR(13) + CHAR(10) + char(149) + ' Missing quantity: ' +  LTRIM(@dblMissingQuantity) 
 					RAISERROR(@strresult, 16, 1)
 				END
 			END
