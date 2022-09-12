@@ -1133,6 +1133,8 @@
 	<Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
+    <Build Include="dbo\Tables\tblGLLedgerDetail.sql" />
+    <Build Include="dbo\Tables\tblGLLedgerAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
