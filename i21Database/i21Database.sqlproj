@@ -839,6 +839,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
     <Build Include="dbo\Views\vyuGLSummaryCompare.sql" />
     <Build Include="dbo\Tables\tblGLPostedCompare.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
     <None Include="Scripts\Post-Deployment\IC\32_InventoryJournalLineDescription.sql" />
   </ItemGroup>
   <ItemGroup>
