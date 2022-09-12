@@ -488,6 +488,19 @@ BEGIN
 									FROM tblSTCheckoutCashiers cashier
 									WHERE cashier.intCheckoutId = @intCheckoutId 
 										AND cashier.intCashierId = @intCashierId
+										
+									--dblTotalDeposit
+									UPDATE cashier
+										SET cashier.dblTotalDeposit = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'safeDrop' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'total'
+																	AND strCashierId = @strCashierId
+															   )
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
 
 
 
