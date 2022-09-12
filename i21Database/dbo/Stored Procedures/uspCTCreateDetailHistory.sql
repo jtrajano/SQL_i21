@@ -972,7 +972,7 @@ BEGIN TRY
 				, strNewValue		        =  CurrentType.strCity
 				, intConcurrencyId			=  1
 			FROM tblCTSequenceHistory	CurrentRow								
-			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+			LEFT JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			outer apply(select intCityId, strCity from tblSMCity where ISNULL(intCityId,0)	        =	ISNULL(@ContractHeaderIntINCOLocationTypeId,0))			CurrentType			
 			outer apply(select intCityId, strCity from tblSMCity where ISNULL(intCityId,0)	        =	ISNULL(@HeaderLastModificationIntINCOLocationTypeId,0))			PreviousType
 			cross apply tblCTAmendmentApproval CTA
