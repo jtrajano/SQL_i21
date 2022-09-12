@@ -21,6 +21,7 @@
     [dblTotal]             DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblTotalController]   DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dbl1099]             DECIMAL (18, 6) NOT NULL DEFAULT 0,
+	[dblAverageExchangeRate] DECIMAL (18, 6) NULL,
 	[dblSubtotal]          DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [ysnPosted]            BIT             NOT NULL DEFAULT 0,
     [ysnPaid]              BIT             NOT NULL DEFAULT 0,
