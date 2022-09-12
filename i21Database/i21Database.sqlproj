@@ -1167,6 +1167,8 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
 	<Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleAsset.sql" />
+    <Build Include="dbo\Tables\tblGLLedgerDetail.sql" />
+    <Build Include="dbo\Tables\tblGLLedgerAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
