@@ -18,6 +18,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EncryptionDataFix.sql
 
 -- System Manager Default Data
+:r .\SM\DefaultData\0_UpdateScreenNamesForSenchaUniversal.sql
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
 :r .\SM\DefaultData\3_Currency.sql 
