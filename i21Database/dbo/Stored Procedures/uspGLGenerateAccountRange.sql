@@ -72,7 +72,7 @@ AS
 	SET intMinRange = B.intMinRange , intMaxRange =B.intMaxRange
 	FROM tblGLAccountRange A 
 	JOIN R1 B ON A.strAccountType = B.strAccountType
-	WHERE A.intMinRange IS NULL AND A.intMaxRange IS NULL
+	WHERE A.intMinRange IS NOT NULL AND A.intMaxRange IS NOT NULL
 
 		SET @result = 'SUCCESS'
 	END TRY
