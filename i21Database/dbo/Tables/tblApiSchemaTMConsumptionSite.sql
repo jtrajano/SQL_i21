@@ -55,7 +55,12 @@
 	ysnAdjBurnRate BIT NULL,												-- Adjust Burn Rate
 	ysnPromptFull BIT NULL,													-- Prompt for % Full
 
-	strSiteLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL			-- Site Location
+	strSiteLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,			-- Site Location
+	dtmLastDeliveryDate DATETIME NULL,										--Last Delivery Date
+	dtmNextDeliveryDate DATETIME NULL,										--Next Delivery Date
+	dblLastGalsInTank NUMERIC(18,6) NULL,									--Last Gallon In Tank
+	ysnDeliveryTicketPrinted BIT NULL,										--Delivery Ticket Printed?
+	ysnPrintARBalance BIT NULL												--Print AR Balance?
 
 	-- DEVICE
 	--strDeviceType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,		-- Device Type
