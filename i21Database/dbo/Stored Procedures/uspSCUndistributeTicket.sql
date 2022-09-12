@@ -1145,23 +1145,28 @@ BEGIN TRY
 										END
 										ELSE
 										BEGIN										
-											IF @dblTicketScheduledQty <= @dblContractAvailableQty
+											-- IF @dblTicketScheduledQty <= @dblContractAvailableQty
+											-- BEGIN
+											-- 	SET @dblLoadUsedQty = @dblTicketScheduledQty
+											-- END
+											-- ELSE
+											-- BEGIN
+											-- 	IF(@dblTicketScheduledQty > @dblLoadUsedQty)
+											-- 	BEGIN
+											-- 		IF(@dblLoadUsedQty > @dblContractAvailableQty)
+											-- 		BEGIN
+											-- 			SET @dblLoadUsedQty = @dblContractAvailableQty
+											-- 		END
+											-- 	END
+											-- 	ELSE
+											-- 	BEGIN
+											-- 		SET @dblLoadUsedQty = @dblContractAvailableQty
+											-- 	END
+											-- END
+											
+											IF(@dblLoadUsedQty > @dblContractAvailableQty)
 											BEGIN
-												SET @dblLoadUsedQty = @dblTicketScheduledQty
-											END
-											ELSE
-											BEGIN
-												IF(@dblTicketScheduledQty > @dblLoadUsedQty)
-												BEGIN
-													IF(@dblLoadUsedQty > @dblContractAvailableQty)
-													BEGIN
-														SET @dblLoadUsedQty = @dblContractAvailableQty
-													END
-												END
-												ELSE
-												BEGIN
-													SET @dblLoadUsedQty = @dblContractAvailableQty
-												END
+												SET @dblLoadUsedQty = @dblContractAvailableQty
 											END
 										END
 
