@@ -997,6 +997,7 @@
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
+    <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -4069,9 +4070,9 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" /> 
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
-    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalPreview.sql" /> 
+    <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalPreview.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutPumpTotals.sql" />
@@ -5262,7 +5263,7 @@
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
     <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
-    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" /> 
+    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTFuelTanks.sql" />
     <Build Include="dbo\Views\vyuSTStoreFuelTanks.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
