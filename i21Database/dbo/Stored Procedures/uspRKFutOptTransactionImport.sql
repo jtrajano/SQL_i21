@@ -280,7 +280,7 @@ BEGIN TRY
 					, ROW_NUMBER() OVER(ORDER BY intFutOptTransactionId) strInternalTradeNo
 					, ti.strBrokerTradeNo
 					, ti.strBuySell
-					, ti.dblNoOfContract
+					, dblNoOfContract = ABS(ti.dblNoOfContract)
 					, m.intFutureMonthId
 					, intOptionMonthId
 					, strOptionType
