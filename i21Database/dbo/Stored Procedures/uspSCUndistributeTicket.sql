@@ -1467,6 +1467,7 @@ BEGIN TRY
 									SET @dblLoadUsedQty = 0
 									SELECT TOP 1 
 										@dblLoadUsedQty = dblQty
+										,@_dblOriginalLoadUsedQty = dblQty
 									FROM tblSCTicketLoadUsed
 									WHERE intTicketId = @intTicketId
 										AND intLoadDetailId = @intTicketLoadDetailId
@@ -1485,23 +1486,28 @@ BEGIN TRY
 									END
 									ELSE
 									BEGIN										
-										IF @dblTicketScheduledQty <= @dblContractAvailableQty
+										-- IF @dblTicketScheduledQty <= @dblContractAvailableQty
+										-- BEGIN
+										-- 	SET @dblLoadUsedQty = @dblTicketScheduledQty
+										-- END
+										-- ELSE
+										-- BEGIN
+										-- 	IF(@dblTicketScheduledQty > @dblLoadUsedQty)
+										-- 	BEGIN
+										-- 		IF(@dblLoadUsedQty > @dblContractAvailableQty)
+										-- 		BEGIN
+										-- 			SET @dblLoadUsedQty = @dblContractAvailableQty
+										-- 		END
+										-- 	END
+										-- 	ELSE
+										-- 	BEGIN
+										-- 		SET @dblLoadUsedQty = @dblContractAvailableQty
+										-- 	END
+										-- END
+
+										IF(@dblLoadUsedQty > @dblContractAvailableQty)
 										BEGIN
-											SET @dblLoadUsedQty = @dblTicketScheduledQty
-										END
-										ELSE
-										BEGIN
-											IF(@dblTicketScheduledQty > @dblLoadUsedQty)
-											BEGIN
-												IF(@dblLoadUsedQty > @dblContractAvailableQty)
-												BEGIN
-													SET @dblLoadUsedQty = @dblContractAvailableQty
-												END
-											END
-											ELSE
-											BEGIN
-												SET @dblLoadUsedQty = @dblContractAvailableQty
-											END
+											SET @dblLoadUsedQty = @dblContractAvailableQty
 										END
 									END
 
