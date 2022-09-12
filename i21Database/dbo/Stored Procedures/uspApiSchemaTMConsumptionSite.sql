@@ -501,7 +501,6 @@ BEGIN
 		, @ysnActive BIT = NULL
 		, @intSiteLocationId INT = NULL
 		, @dtmLastDeliveryDate DATETIME = NULL 
-		, @dtmNextDeliveryDate DATETIME = NULL
 		, @dblLastGalsInTank NUMERIC(18,6) = NULL 
 		, @ysnDeliveryTicketPrinted BIT = NULL
 		, @ysnPrintARBalance BIT = NULL
@@ -620,7 +619,7 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dtmNextDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
 	WHILE @@FETCH_STATUS = 0
     BEGIN
 
@@ -704,7 +703,6 @@ BEGIN
 						, ysnPromptForPercentFull
 
 						,dtmLastDeliveryDate 
-						,dtmNextDeliveryDate
 						,dblLastGalsInTank 
 						,ysnDeliveryTicketPrinted 
 						,ysnPrintARBalance
@@ -765,7 +763,6 @@ BEGIN
 						, @ysnPromptFull
 
 						,@dtmLastDeliveryDate
-						,@dtmNextDeliveryDate
 						,@dblLastGalsInTank
 						,@ysnDeliveryTicketPrinted
 						,@ysnPrintARBalance
@@ -850,7 +847,6 @@ BEGIN
 						, ysnPromptForPercentFull = @ysnPromptFull
 
 						, dtmLastDeliveryDate = @dtmLastDeliveryDate
-						, dtmNextDeliveryDate = @dtmNextDeliveryDate
 						, dblLastGalsInTank = @dblLastGalsInTank
 						, ysnDeliveryTicketPrinted = @ysnDeliveryTicketPrinted
 						, ysnPrintARBalance = @ysnPrintARBalance
@@ -931,7 +927,7 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dtmNextDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
 	END
 	CLOSE DataCursor
 	DEALLOCATE DataCursor
