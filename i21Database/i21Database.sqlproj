@@ -1128,6 +1128,7 @@
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
+    <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
