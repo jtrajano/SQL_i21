@@ -251,214 +251,223 @@ GO
 		DECLARE @GL_intAccountStructureId_Primary AS INT
 			SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 
-		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId],[intAccountCategoryId], [intAccountStructureId], [intConcurrencyId])
 	
-		SELECT @intAccountTemplateId, '10100','Cash On Hand',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cash Accounts')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Cash Account'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '10110','Petty Cash',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cash Accounts')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Cash Account'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '10599','Undeposited Funds',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Undeposited Funds')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Undeposited Funds'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '10910','Cash Receivable Charge Cards',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Current Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11000','Accounts Receivable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='AR Account'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11010','A/R Employees',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11100','Misc Accts Receivable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11200','Advance To Dealers',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11300','Allw For Doubtful Accts Rec',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11500','Intercompany',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11600','Warranty Receivable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11700','Credit Card Receivable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11800','Fuel Taxes Receivable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '11900','Credit Card Account',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Receivables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '12000','Inventory Account',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Inventories')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Inventory'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13000','Prepaid Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13100','Prepaid Insurance',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13200','Prepaid State Taxes',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13300','Prepaid Federal Taxes',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13400','Prepaid Property Taxes',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13500','Prepaid Lease',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13600','Vendor Prepaid',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Vendor Prepayments'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '13700','Customer Prepaid',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Prepaids')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Customer Prepayments'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '14200','Clearing Account',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '14400','Common Stock',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '14500','Treasury Stock',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '15100','Buildings',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '15200','Land',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '15300','Real Estate',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '15400','Furniture/Fixtures',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '15500','Improvements',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '15600','Equipment',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '15700','Vehicles',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '16000','Organizational Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '16100','Goodwill',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '16200','Capitalized Lease',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '16300','Accumulated Depreciation',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Accumulated Depreciation'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '16400','Accum Amort Goodwill',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '16500','Accum Amort Organ Exp',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Fixed Assets')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Fixed Assets'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21000','Accounts Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='AP Account'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21010','Unbilled Liabilities',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Liability')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='AP Clearing'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21020','Miscellaneous Acct Pay',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21030','Notes Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Current Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21050','Credit Cards Clearing',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Current Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21200','Federal Income Tax Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Tax Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21300','State Income Tax Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Tax Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21600','Federal Income Tax Withheld',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Tax Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21800','FICA Tax Withheld',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Tax Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21810','FICA Deferred',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Tax Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '21910','Insurance Withheld',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '22210','Deferred Income Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Liability')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '22300','Deferred Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Liability')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '22310','Rent Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '22410','Loan Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Current Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '22510','Loan Payable (Interest)',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Current Liabilities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '23000','Sales Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Sales Tax Account'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '23100','Use Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '27200','Gas Tax Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '27210','Excise Tax Exempt',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '27300','Diesel Tax Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '27400','Enviro Petroleum Fee',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '29200','Fed Excise-Gas Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '29300','Fed Excise-DSL Payable',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '29400','Federal Lust',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '29500','Fed Environmental Fee Recovery',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '29600','National Oilheat Alliance',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Tax Payables')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '30000','Common Stock',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Owners Equities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '30100','Paid In Surplus',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Owners Equities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '30200','Retained Earnings',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Retained Earnings')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '30300','Distrib To Shareholders',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Owners Equities')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40000','Supreme',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40100','Plus',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40200','Reg Unleaded',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40300','Diesel Clear',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40400','Propane',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40500','Diesel Dyed',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40600','Kerosene Clear',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '40800','Kerosene Dyed',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '42000','Supreme Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '42100','Plus Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '42200','Regular Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '42300','Recreational Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '44000','Automotive',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '44100','Diesel Exhaust Fluid',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '44200','Antifreeze',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '44700','General Merchandise',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '45000','Oil',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '45100','Grease',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '46000','Home Propane Appliances',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '46100','Propane Tank Rental',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '46200','Hvac Sales - Appliances',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Sales Account'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '46300','Hvac Service - Appliances',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '46400','Deferred Revenue',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '46500','Repair Parts',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '46700','Labor Income',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '47000','Special Purchases',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '47600','Prompt Pay Discounts',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Discounts')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '47700','ROE',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48100','Rental Income',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48200','Interest Income',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48210','Dividend Income',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48300','Miscellaneous Income',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48400','Gain-Sale Of Asset',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48500','Bad Debt Recovery',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48700','FICA Credit',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '48900','Other Income',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '49000','Sales Discounts',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales Discounts')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '49700','Freight Income',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '49800','Core Charges',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '49850','Tote Charges',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Sales')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '49900','Invoice Errors',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Other Income')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50000','Supreme',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50100','Plus',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50200','Reg Unleaded',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50300','Diesel Clear',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50400','Propane',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50500','Diesel Dyed',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50600','Kerosene Clear',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50800','Kerosene Dyed',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51200','Federal Environmental Fee',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52000','Supreme Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52100','Plus Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52200','Regular Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52300','Recreational Non-Ethanol',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54000','Automotive',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54100','Diesel Exhaust Fluid',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54200','Antifreeze',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54700','General Merchandise',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55000','Oil',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55100','Grease',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55200','Fuel',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56000','Home Propane Equip',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56100','Propane Tank Rental',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56200','HVAC Sales',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56300','HVAC Service',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56500','Repair Parts',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56700','Labor',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '57000','Special Purchases',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '57600','Prompt Pay Discount',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '57700','ROI',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '58300','Miscellaneous Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59000','Purchase Discount',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59700','Freight Cost',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59800','Core Charges',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59850','Tote Charges',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Cost of Goods Sold')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59900','Invoice Errors',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50010','Officers Salary Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Earnings')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50110','Other Salary Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Earnings')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50210','Professional Services',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50310','Auto & Truck',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50410','Advertising',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50510','Donations',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50610','Dues & Subscriptions',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50700','Dues & Subscriptions',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50710','Write Off',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Write Off'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50810','Bank Charges',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '50900','Depreciation',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Depreciation Expense'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51000','Insurance',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51100','Contract Labor',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51210','License & Taxes',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51300','Road Fuel Tax Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51400','Business Franchise Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51500','Meetings & Conventions',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51600','Travel',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51800','Office Expenses',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '51900','Payroll Tax Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52010','Property Rent',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52110','Repairs & Maintenance',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52150','Tank Repairs & Maintenance',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52210','Uniforms',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52310','Telephone',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52400','Utilities',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52500','Interest Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52600','Environmental Clean Up',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52700','Fuel Environment &Compliance Fee',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52800','Penalties & Fines',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '52900','Over & Short Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53000','Pension Plan Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53100','Employee Benefits',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53200','Federal Income Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53300','State Income Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53400','B & O Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53500','Workers'' Comp',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53600','Federal Unempl. Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Expenses')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53700','State Unempl. Tax',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Payroll Expenses')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53800','Property Taxes',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53900','Rent - Equipment',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '53910','Rent - Building',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54010','Services Reimbursement',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54110','Service Charges',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='Service Charges'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54210','Home Propane Expenses',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54400','Home Heat Parts & Service',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54500','Meals & Entertainment',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54800','Postage',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '54900','Equipment Rental',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55010','Credit Card Fees',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55110','Commissions',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55210','Accident Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55500','Regulation Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '55700','Inventory Variance',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56110','Amortization Exp Organization',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '56510','Public & Comm Relations',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '58400','Loss On Disposal Of Assets',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59710','Use Tax Expense',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59810','Loss On Abandonment',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1 UNION
-		SELECT @intAccountTemplateId, '59910','Overhead Distribution',(SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup ='Expense')  ,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory ='General'),@GL_intAccountStructureId_Primary, 1	
+		;WITH RawData AS (
+			SELECT '10100' strCode,'Cash On Hand' strDescription,'Cash Accounts' strAccountGroup,'Cash Account' strAccountCategory UNION
+			SELECT '10110','Petty Cash','Cash Accounts','Cash Account' UNION
+			SELECT '10599','Undeposited Funds','Undeposited Funds','Undeposited Funds' UNION
+			SELECT '10910','Cash Receivable Charge Cards','Current Assets','General' UNION
+			SELECT '11000','Accounts Receivable','Receivables','AR Account' UNION
+			SELECT '11010','A/R Employees','Receivables','General' UNION
+			SELECT '11100','Misc Accts Receivable','Receivables','General' UNION
+			SELECT '11200','Advance To Dealers','Receivables','General' UNION
+			SELECT '11300','Allw For Doubtful Accts Rec','Receivables','General' UNION
+			SELECT '11500','Intercompany','Receivables','General' UNION
+			SELECT '11600','Warranty Receivable','Receivables','General' UNION
+			SELECT '11700','Credit Card Receivable','Receivables','General' UNION
+			SELECT '11800','Fuel Taxes Receivable','Receivables','General' UNION
+			SELECT '11900','Credit Card Account','Receivables','General' UNION
+			SELECT '12000','Inventory Account','Inventories','Inventory' UNION
+			SELECT '13000','Prepaid Expense','Prepaids','General' UNION
+			SELECT '13100','Prepaid Insurance','Prepaids','General' UNION
+			SELECT '13200','Prepaid State Taxes','Prepaids','General' UNION
+			SELECT '13300','Prepaid Federal Taxes','Prepaids','General' UNION
+			SELECT '13400','Prepaid Property Taxes','Prepaids','General' UNION
+			SELECT '13500','Prepaid Lease','Prepaids','General' UNION
+			SELECT '13600','Vendor Prepaid','Prepaids','Vendor Prepayments' UNION
+			SELECT '13700','Customer Prepaid','Prepaids','Customer Prepayments' UNION
+			SELECT '14200','Clearing Account','Other Assets','General' UNION
+			SELECT '14400','Common Stock','Other Assets','General' UNION
+			SELECT '14500','Treasury Stock','Other Assets','General' UNION
+			SELECT '15100','Buildings','Fixed Assets','Fixed Assets' UNION
+			SELECT '15200','Land','Fixed Assets','Fixed Assets' UNION
+			SELECT '15300','Real Estate','Fixed Assets','Fixed Assets' UNION
+			SELECT '15400','Furniture/Fixtures','Fixed Assets','Fixed Assets' UNION
+			SELECT '15500','Improvements','Fixed Assets','Fixed Assets' UNION
+			SELECT '15600','Equipment','Fixed Assets','Fixed Assets' UNION
+			SELECT '15700','Vehicles','Fixed Assets','Fixed Assets' UNION
+			SELECT '16000','Organizational Expense','Fixed Assets','Fixed Assets' UNION
+			SELECT '16100','Goodwill','Fixed Assets','Fixed Assets' UNION
+			SELECT '16200','Capitalized Lease','Fixed Assets','Fixed Assets' UNION
+			SELECT '16300','Accumulated Depreciation','Fixed Assets','Accumulated Depreciation' UNION
+			SELECT '16400','Accum Amort Goodwill','Fixed Assets','Fixed Assets' UNION
+			SELECT '16500','Accum Amort Organ Exp','Fixed Assets','Fixed Assets' UNION
+			SELECT '21000','Accounts Payable','Payables','AP Account' UNION
+			SELECT '21010','Unbilled Liabilities','Liability','AP Clearing' UNION
+			SELECT '21020','Miscellaneous Acct Pay','Payables','General' UNION
+			SELECT '21030','Notes Payable','Current Liabilities','General' UNION
+			SELECT '21050','Credit Cards Clearing','Current Liabilities','General' UNION
+			SELECT '21200','Federal Income Tax Payable','Payroll Tax Liabilities','General' UNION
+			SELECT '21300','State Income Tax Payable','Payroll Tax Liabilities','General' UNION
+			SELECT '21600','Federal Income Tax Withheld','Payroll Tax Liabilities','General' UNION
+			SELECT '21800','FICA Tax Withheld','Payroll Tax Liabilities','General' UNION
+			SELECT '21810','FICA Deferred','Payroll Tax Liabilities','General' UNION
+			SELECT '21910','Insurance Withheld','Other Payables','General' UNION
+			SELECT '22210','Deferred Income Tax','Liability','General' UNION
+			SELECT '22300','Deferred Payable','Liability','General' UNION
+			SELECT '22310','Rent Payable','Other Payables','General' UNION
+			SELECT '22410','Loan Payable','Current Liabilities','General' UNION
+			SELECT '22510','Loan Payable (Interest)','Current Liabilities','General' UNION
+			SELECT '23000','Sales Tax','Sales Tax Payables','Sales Tax Account' UNION
+			SELECT '23100','Use Tax','Sales Tax Payables','General' UNION
+			SELECT '27200','Gas Tax Payable','Sales Tax Payables','General' UNION
+			SELECT '27210','Excise Tax Exempt','Sales Tax Payables','General' UNION
+			SELECT '27300','Diesel Tax Payable','Sales Tax Payables','General' UNION
+			SELECT '27400','Enviro Petroleum Fee','Sales Tax Payables','General' UNION
+			SELECT '29200','Fed Excise-Gas Payable','Sales Tax Payables','General' UNION
+			SELECT '29300','Fed Excise-DSL Payable','Sales Tax Payables','General' UNION
+			SELECT '29400','Federal Lust','Sales Tax Payables','General' UNION
+			SELECT '29500','Fed Environmental Fee Recovery','Sales Tax Payables','General' UNION
+			SELECT '29600','National Oilheat Alliance','Sales Tax Payables','General' UNION
+			SELECT '30000','Common Stock','Owners Equities','General' UNION
+			SELECT '30100','Paid In Surplus','Owners Equities','General' UNION
+			SELECT '30200','Retained Earnings','Retained Earnings','General' UNION
+			SELECT '30300','Distrib To Shareholders','Owners Equities','General' UNION
+			SELECT '40000','Supreme','Sales','General' UNION
+			SELECT '40100','Plus','Sales','General' UNION
+			SELECT '40200','Reg Unleaded','Sales','General' UNION
+			SELECT '40300','Diesel Clear','Sales','General' UNION
+			SELECT '40400','Propane','Sales','General' UNION
+			SELECT '40500','Diesel Dyed','Sales','General' UNION
+			SELECT '40600','Kerosene Clear','Sales','General' UNION
+			SELECT '40800','Kerosene Dyed','Sales','General' UNION
+			SELECT '42000','Supreme Non-Ethanol','Sales','General' UNION
+			SELECT '42100','Plus Non-Ethanol','Sales','General' UNION
+			SELECT '42200','Regular Non-Ethanol','Sales','General' UNION
+			SELECT '42300','Recreational Non-Ethanol','Sales','General' UNION
+			SELECT '44000','Automotive','Sales','General' UNION
+			SELECT '44100','Diesel Exhaust Fluid','Sales','General' UNION
+			SELECT '44200','Antifreeze','Sales','General' UNION
+			SELECT '44700','General Merchandise','Sales','General' UNION
+			SELECT '45000','Oil','Sales','General' UNION
+			SELECT '45100','Grease','Sales','General' UNION
+			SELECT '46000','Home Propane Appliances','Sales','General' UNION
+			SELECT '46100','Propane Tank Rental','Sales','General' UNION
+			SELECT '46200','Hvac Sales - Appliances','Sales','Sales Account' UNION
+			SELECT '46300','Hvac Service - Appliances','Sales','General' UNION
+			SELECT '46400','Deferred Revenue','Sales','General' UNION
+			SELECT '46500','Repair Parts','Sales','General' UNION
+			SELECT '46700','Labor Income','Sales','General' UNION
+			SELECT '47000','Special Purchases','Sales','General' UNION
+			SELECT '47600','Prompt Pay Discounts','Sales Discounts','General' UNION
+			SELECT '47700','ROE','Other Income','General' UNION
+			SELECT '48100','Rental Income','Sales','General' UNION
+			SELECT '48200','Interest Income','Other Income','General' UNION
+			SELECT '48210','Dividend Income','Other Income','General' UNION
+			SELECT '48300','Miscellaneous Income','Other Income','General' UNION
+			SELECT '48400','Gain-Sale Of Asset','Other Income','General' UNION
+			SELECT '48500','Bad Debt Recovery','Other Income','General' UNION
+			SELECT '48700','FICA Credit','Other Income','General' UNION
+			SELECT '48900','Other Income','Other Income','General' UNION
+			SELECT '49000','Sales Discounts','Sales Discounts','General' UNION
+			SELECT '49700','Freight Income','Sales','General' UNION
+			SELECT '49800','Core Charges','Sales','General' UNION
+			SELECT '49850','Tote Charges','Sales','General' UNION
+			SELECT '49900','Invoice Errors','Other Income','General' UNION
+			SELECT '50000','Supreme','Cost of Goods Sold','General' UNION
+			SELECT '50100','Plus','Cost of Goods Sold','General' UNION
+			SELECT '50200','Reg Unleaded','Cost of Goods Sold','General' UNION
+			SELECT '50300','Diesel Clear','Cost of Goods Sold','General' UNION
+			SELECT '50400','Propane','Cost of Goods Sold','General' UNION
+			SELECT '50500','Diesel Dyed','Cost of Goods Sold','General' UNION
+			SELECT '50600','Kerosene Clear','Cost of Goods Sold','General' UNION
+			SELECT '50800','Kerosene Dyed','Cost of Goods Sold','General' UNION
+			SELECT '51200','Federal Environmental Fee','Cost of Goods Sold','General' UNION
+			SELECT '52000','Supreme Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '52100','Plus Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '52200','Regular Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '52300','Recreational Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '54000','Automotive','Cost of Goods Sold','General' UNION
+			SELECT '54100','Diesel Exhaust Fluid','Cost of Goods Sold','General' UNION
+			SELECT '54200','Antifreeze','Cost of Goods Sold','General' UNION
+			SELECT '54700','General Merchandise','Cost of Goods Sold','General' UNION
+			SELECT '55000','Oil','Cost of Goods Sold','General' UNION
+			SELECT '55100','Grease','Cost of Goods Sold','General' UNION
+			SELECT '55200','Fuel','Cost of Goods Sold','General' UNION
+			SELECT '56000','Home Propane Equip','Cost of Goods Sold','General' UNION
+			SELECT '56100','Propane Tank Rental','Cost of Goods Sold','General' UNION
+			SELECT '56200','HVAC Sales','Cost of Goods Sold','General' UNION
+			SELECT '56300','HVAC Service','Cost of Goods Sold','General' UNION
+			SELECT '56500','Repair Parts','Cost of Goods Sold','General' UNION
+			SELECT '56700','Labor','Cost of Goods Sold','General' UNION
+			SELECT '57000','Special Purchases','Cost of Goods Sold','General' UNION
+			SELECT '57600','Prompt Pay Discount','Expense','General' UNION
+			SELECT '57700','ROI','Expense','General' UNION
+			SELECT '58300','Miscellaneous Expense','Expense','General' UNION
+			SELECT '59000','Purchase Discount','Expense','General' UNION
+			SELECT '59700','Freight Cost','Expense','General' UNION
+			SELECT '59800','Core Charges','Cost of Goods Sold','General' UNION
+			SELECT '59850','Tote Charges','Cost of Goods Sold','General' UNION
+			SELECT '59900','Invoice Errors','Expense','General' UNION
+			SELECT '50010','Officers Salary Expense','Payroll Earnings','General' UNION
+			SELECT '50110','Other Salary Expense','Payroll Earnings','General' UNION
+			SELECT '50210','Professional Services','Expense','General' UNION
+			SELECT '50310','Auto & Truck','Expense','General' UNION
+			SELECT '50410','Advertising','Expense','General' UNION
+			SELECT '50510','Donations','Expense','General' UNION
+			SELECT '50610','Dues & Subscriptions','Expense','General' UNION
+			SELECT '50700','Dues & Subscriptions','Expense','General' UNION
+			SELECT '50710','Write Off','Expense','Write Off' UNION
+			SELECT '50810','Bank Charges','Expense','General' UNION
+			SELECT '50900','Depreciation','Expense','Depreciation Expense' UNION
+			SELECT '51000','Insurance','Expense','General' UNION
+			SELECT '51100','Contract Labor','Expense','General' UNION
+			SELECT '51210','License & Taxes','Expense','General' UNION
+			SELECT '51300','Road Fuel Tax Expense','Expense','General' UNION
+			SELECT '51400','Business Franchise Tax','Expense','General' UNION
+			SELECT '51500','Meetings & Conventions','Expense','General' UNION
+			SELECT '51600','Travel','Expense','General' UNION
+			SELECT '51800','Office Expenses','Expense','General' UNION
+			SELECT '51900','Payroll Tax Expense','Expense','General' UNION
+			SELECT '52010','Property Rent','Expense','General' UNION
+			SELECT '52110','Repairs & Maintenance','Expense','General' UNION
+			SELECT '52150','Tank Repairs & Maintenance','Expense','General' UNION
+			SELECT '52210','Uniforms','Expense','General' UNION
+			SELECT '52310','Telephone','Expense','General' UNION
+			SELECT '52400','Utilities','Expense','General' UNION
+			SELECT '52500','Interest Expense','Expense','General' UNION
+			SELECT '52510','Deferred Payable Interest','Expense','General' UNION
+			SELECT '52600','Environmental Clean Up','Expense','General' UNION
+			SELECT '52700','Fuel Environment &Compliance Fee','Expense','General' UNION
+			SELECT '52800','Penalties & Fines','Expense','General' UNION
+			SELECT '52900','Over & Short Expense','Expense','General' UNION
+			SELECT '53000','Pension Plan Expense','Expense','General' UNION
+			SELECT '53100','Employee Benefits','Expense','General' UNION
+			SELECT '53200','Federal Income Tax','Expense','General' UNION
+			SELECT '53300','State Income Tax','Expense','General' UNION
+			SELECT '53400','B & O Tax','Expense','General' UNION
+			SELECT '53500','Workers'' Comp','Expense','General' UNION
+			SELECT '53600','Federal Unempl. Tax','Payroll Expenses','General' UNION
+			SELECT '53700','State Unempl. Tax','Payroll Expenses','General' UNION
+			SELECT '53800','Property Taxes','Expense','General' UNION
+			SELECT '53900','Rent - Equipment','Expense','General' UNION
+			SELECT '53910','Rent - Building','Expense','General' UNION
+			SELECT '54010','Services Reimbursement','Expense','General' UNION
+			SELECT '54110','Service Charges','Expense','Service Charges' UNION
+			SELECT '54210','Home Propane Expenses','Expense','General' UNION
+			SELECT '54400','Home Heat Parts & Service','Expense','General' UNION
+			SELECT '54500','Meals & Entertainment','Expense','General' UNION
+			SELECT '54800','Postage','Expense','General' UNION
+			SELECT '54900','Equipment Rental','Expense','General' UNION
+			SELECT '55010','Credit Card Fees','Expense','General' UNION
+			SELECT '55110','Commissions','Expense','General' UNION
+			SELECT '55210','Accident Expense','Expense','General' UNION
+			SELECT '55500','Regulation Expense','Expense','General' UNION
+			SELECT '55700','Inventory Variance','Expense','General' UNION
+			SELECT '56110','Amortization Exp Organization','Expense','General' UNION
+			SELECT '56510','Public & Comm Relations','Expense','General' UNION
+			SELECT '58400','Loss On Disposal Of Assets','Expense','General' UNION
+			SELECT '59710','Use Tax Expense','Expense','General' UNION
+			SELECT '59810','Loss On Abandonment','Expense','General' UNION
+			SELECT '59910','Overhead Distribution','Expense','General' UNION
+			SELECT '21100','Due From Account','Current Liabilities','General' UNION
+			SELECT '10920','Due to Account','Current Assets','General')	
+				
+			INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId],[intAccountCategoryId], [intAccountStructureId], [intConcurrencyId])
+			SELECT @intAccountTemplateId, strCode, strDescription, G.intAccountGroupId, C.intAccountCategoryId, @GL_intAccountStructureId_Primary, 1  FROM RawData A 
+			OUTER APPLY (SELECT TOP 1 intAccountCategoryId from tblGLAccountCategory where strAccountCategory = A.strAccountCategory)C
+			OUTER APPLY (SELECT TOP 1 intAccountGroupId from tblGLAccountGroup where strAccountGroup = A.strAccountGroup)G
+					
 GO
 
 	PRINT N'END INSERT ACCOUNT TEMPLATE: Petro'
