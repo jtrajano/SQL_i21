@@ -5524,7 +5524,9 @@
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
     <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
-    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
+    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" 
+    <Build Include="dbo\Views\vyuSTFuelTanks.sql" />
+    <Build Include="dbo\Views\vyuSTStoreFuelTanks.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
     <Build Include="dbo\Views\vyuRKGetInventoryAdjustQty.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
@@ -7871,6 +7873,7 @@
     <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessRefund.sql" />
     <Build Include="dbo\Tables\tblSTStoreTaxTotals.sql" />
+    <Build Include="dbo\Tables\tblSTStoreFuelTanks.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetStorageDetailByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetOpenContractByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetStorageOffSiteDetail.sql" />
