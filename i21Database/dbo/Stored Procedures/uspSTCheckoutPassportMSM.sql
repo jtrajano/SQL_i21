@@ -372,6 +372,149 @@ BEGIN
 			  -- [END] - METRICS TAB 
 			  -------------------------------------------------------------------------------------------------------------
 
+			  
+			  -------------------------------------------------------------------------------------------------------------
+			  -- [START] - Cashiers TAB 
+			  -------------------------------------------------------------------------------------------------------------
+			  BEGIN
+					/*
+						Insert first the cashiers in checkout that has matching ID then Update it
+					*/
+					IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId)
+						BEGIN
+
+							DECLARE @intCashierId AS INT
+							DECLARE @strCashierId AS INT
+
+							
+							IF(OBJECT_ID('tempdb..#tempCashier') IS NOT NULL) BEGIN DROP TABLE #tempCashier END
+
+							INSERT INTO tblSTCheckoutCashiers (intCheckoutId, intCashierId)
+							SELECT DISTINCT @intCheckoutId, C.intCashierId
+							FROM tblSTCashier C
+							INNER JOIN @UDT_MSM udt
+								ON C.strCashierNumber = udt.strCashierId COLLATE DATABASE_DEFAULT
+
+							--Create Temp table for while loop use
+							SELECT * INTO #tempCashier FROM tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId
+
+							WHILE EXISTS (SELECT TOP 1 1 FROM #tempCashier)
+								BEGIN
+
+									
+									SELECT TOP 1 @intCashierId = c.intCashierId, @strCashierId = c.strCashierNumber
+									FROM #tempCashier tmp
+									JOIN tblSTCashier c
+										ON tmp.intCashierId = c.intCashierId
+
+									--dblTotalSales
+									UPDATE cashier
+										SET cashier.dblTotalSales = (	
+																SELECT CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)) 
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'sales' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'total'
+																	AND strCashierId = @strCashierId
+															   )
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
+
+										
+									--dblTotalPaymentOption
+									UPDATE cashier
+										SET cashier.dblTotalPaymentOption = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'sales' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'MOP'
+																	AND strCashierId = @strCashierId
+															   )
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
+										
+										
+									--intNumberOfVoids and dblVoidAmount
+									UPDATE cashier
+										SET cashier.intNumberOfVoids = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6)))
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'voidTransactions'
+																	AND intCashierId = @strCashierId
+															   ),
+											cashier.dblVoidAmount = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
+																	FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'voidTransactions'
+																	AND strCashierId = @strCashierId
+																)
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
+										
+									--intNumberOfRefunds and dblRefundAmount
+									UPDATE cashier
+										SET cashier.intNumberOfRefunds = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6)))
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'refunds' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'total'
+																	AND strCashierId = @strCashierId
+															   ),
+											cashier.dblRefundAmount = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
+																	FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'refunds' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'total'
+																	AND strCashierId = @strCashierId
+																)
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
+
+										
+									--intNoSalesCount
+									UPDATE cashier
+										SET cashier.intNoSalesCount = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6)))
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'noSales'
+																	AND strCashierId = @strCashierId
+															   )
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
+										
+									--dblTotalDeposit
+									UPDATE cashier
+										SET cashier.dblTotalDeposit = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'safeDrop' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'total'
+																	AND strCashierId = @strCashierId
+															   )
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
+
+
+
+
+									DELETE FROM #tempCashier WHERE intCashierId = @intCashierId AND intCheckoutId = @intCheckoutId
+
+								END
+						END
+
+			  END
+			  -------------------------------------------------------------------------------------------------------------
+			  -- [END] - Cashiers TAB 
+			  -------------------------------------------------------------------------------------------------------------
+
 
 
 
