@@ -217,4 +217,3 @@ END
 
 rollback
 
-GO
