@@ -704,7 +704,7 @@ BEGIN
 
 						,dtmLastDeliveryDate 
 						,dblLastGalsInTank 
-						,ysnDeliveryTicketPrinted 
+						,ysnPrintDeliveryTicket 
 						,ysnPrintARBalance
 						,intNextDeliveryDegreeDay
 
@@ -848,7 +848,7 @@ BEGIN
 
 						, dtmLastDeliveryDate = @dtmLastDeliveryDate
 						, dblLastGalsInTank = @dblLastGalsInTank
-						, ysnDeliveryTicketPrinted = @ysnDeliveryTicketPrinted
+						, ysnPrintDeliveryTicket = @ysnDeliveryTicketPrinted
 						, ysnPrintARBalance = @ysnPrintARBalance
 						, intNextDeliveryDegreeDay = @intNextDeliveryDegreeDay
 
