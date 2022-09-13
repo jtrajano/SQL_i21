@@ -67,7 +67,8 @@ BEGIN TRY
 			@dblLotsFixed				NUMERIC(18,6),
 			@dblQtyFixed				NUMERIC(18,6),
 			@dblNewNoOfLots				NUMERIC(18,6),
-			@pricedDivided				BIT
+			@pricedDivided				BIT,
+			@ysnQuantityAtHeaderLevel	BIT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -99,7 +100,8 @@ BEGIN TRY
 			@intNewShippingLineId		=	intShippingLineId,
 			@dtmNewM2MDate				=	dtmM2MDate,
 			@dblNewNoOfLots				=	dblNoOfLots,
-			@pricedDivided				=	pricedDivided
+			@pricedDivided				=	pricedDivided,
+			@ysnQuantityAtHeaderLevel	=	ysnQuantityAtHeaderLevel
 
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
@@ -132,7 +134,8 @@ BEGIN TRY
 			intShippingLineId			INT,
 			dtmM2MDate					DATETIME,
 			dblNoOfLots					NUMERIC(18,6),
-			pricedDivided				BIT
+			pricedDivided				BIT,
+			ysnQuantityAtHeaderLevel	BIT
 	)  
 
 	SELECT @strPricingQuantity = strPricingQuantity FROM tblCTCompanyPreference
