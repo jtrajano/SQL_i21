@@ -59,7 +59,7 @@ CREATE TABLE #tmpExtracted
 	dblFutures					NUMERIC(18,6),	dblBasis			NUMERIC(18,6),	dblCashPrice		NUMERIC(18,6),	intPriceItemUOMId	INT,
 	intStorageScheduleRuleId	INT,			intCurrencyId		INT,			dtmCreated			DATETIME,		intCreatedById		INT,
 	intConcurrencyId			INT,			dblTotalCost		NUMERIC(18,6),	intUnitMeasureId	INT,			strRemark			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-	dtmM2MDate					DATETIME
+	dtmM2MDate					DATETIME,		ysnQuantityAtHeaderLevel	BIT
 ); 
 
 IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -80,7 +80,7 @@ INSERT	INTO #tmpExtracted
 (
 	intContractImportId, intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,
 	intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-	intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId, dtmM2MDate
+	intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId, dtmM2MDate, ysnQuantityAtHeaderLevel
 )
 SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 		intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -113,7 +113,8 @@ SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strCo
 		dblTotalCost		=	CI.dblCashPrice * CI.dblQuantity,
 		intCurrencyId		=	CY.intCurrencyID,
 		intUnitMeasureId	=	QU.intUnitMeasureId,
-		dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate())
+		dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate()),
+		ysnQuantityAtHeaderLevel	=	CASE WHEN CT.strQtyAtHeaderLevel = 'Yes' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 
 FROM	tblCTContractImport			CI	LEFT
 JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -160,14 +161,15 @@ BEGIN
 	DECLARE @intConcurrencyId INT
 	DECLARE @ysnReceivedSignedFixationLetter BIT
 	DECLARE @ysnReadOnlyInterCoContract BIT
+	DECLARE @ysnQuantityAtHeaderLevel BIT
 	DECLARE @Date DATETIME = GETUTCDATE()
 
 	DECLARE cur CURSOR LOCAL FAST_FORWARD
 	FOR
-	SELECT DISTINCT	MAX(intContractImportId), intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,MAX(dblHeaderQuantity),intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,MAX(intCreatedById),MAX(dtmCreated),1, 0, 0
+	SELECT DISTINCT	MAX(intContractImportId), intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,MAX(dblHeaderQuantity),intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,MAX(intCreatedById),MAX(dtmCreated),1, 0, 0, ysnQuantityAtHeaderLevel
 	FROM	#tmpExtracted
 	GROUP BY intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,
-		intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId
+		intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId, ysnQuantityAtHeaderLevel
 
 	OPEN cur
 
@@ -191,13 +193,14 @@ BEGIN
 		, @intConcurrencyId
 		, @ysnReceivedSignedFixationLetter
 		, @ysnReadOnlyInterCoContract
+		, @ysnQuantityAtHeaderLevel
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		BEGIN TRY
 		DELETE FROM #tmpContractHeader
 
-		INSERT INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter, ysnReadOnlyInterCoContract)
+		INSERT INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter, ysnReadOnlyInterCoContract, ysnQuantityAtHeaderLevel)
 		SELECT @intContractTypeId
 			, @intContractEntityId
 			, @dtmContractDate
@@ -216,6 +219,7 @@ BEGIN
 			, @intConcurrencyId
 			, @ysnReceivedSignedFixationLetter
 			, @ysnReadOnlyInterCoContract
+			, @ysnQuantityAtHeaderLevel
 
 		EXEC uspCTGetTableDataInXML '#tmpContractHeader', null, @strTblXML OUTPUT,'tblCTContractHeader'
 		EXEC uspCTValidateContractHeader @strTblXML,'Added'
@@ -239,6 +243,7 @@ BEGIN
 			, intConcurrencyId
 			, ysnReceivedSignedFixationLetter
 			, ysnReadOnlyInterCoContract
+			, ysnQuantityAtHeaderLevel
 		)
 		VALUES (
 			  @intContractTypeId
@@ -259,6 +264,7 @@ BEGIN
 			, @intConcurrencyId
 			, @ysnReceivedSignedFixationLetter
 			, @ysnReadOnlyInterCoContract
+			, @ysnQuantityAtHeaderLevel
 		)
 
 		SET @intContractHeaderId = SCOPE_IDENTITY()
@@ -266,7 +272,7 @@ BEGIN
 		DELETE FROM #tmpContractDetail
 
 		INSERT	INTO #tmpContractDetail(intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL
+			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL, ysnQuantityAtHeaderLevel
 		)
 		SELECT
 			  @intContractHeaderId
@@ -299,6 +305,7 @@ BEGIN
 			, dtmM2MDate
 			, 0
 			, 0
+			, ysnQuantityAtHeaderLevel
 		FROM #tmpExtracted
 		WHERE
 				ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
@@ -317,6 +324,21 @@ BEGIN
 
 		EXEC uspCTGetTableDataInXML '#tmpContractDetail', null, @strTblXML OUTPUT,'tblCTContractDetail'
 		EXEC uspCTValidateContractDetail @strTblXML, 'Added'
+
+		-- VALIDATE Qty At Header Level
+		IF ISNULL(@ysnReadOnlyInterCoContract, 0) = 1
+		BEGIN
+			IF (SELECT COUNT(1) FROM (SELECT DISTINCT dblQuantity FROM #tmpContractDetail) tbl ) > 1
+			BEGIN
+				SET @ErrMsg = 'Quantity must be the same for Contracts whose Quantity is at the Header Level.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+			IF (SELECT COUNT(1) FROM (SELECT DISTINCT ysnQuantityAtHeaderLevel FROM #tmpContractDetail) tbl ) > 1
+			BEGIN
+				SET @ErrMsg = 'Quantity at Header Level must be the same for all sequences of the Contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+		END
 
 		INSERT INTO tblCTContractDetail (
 			  intContractHeaderId
@@ -396,7 +418,8 @@ BEGIN
 			AND ISNULL(intPricingTypeId, 0) = ISNULL(@intPricingTypeId, 0)
 
 		UPDATE tblCTContractHeader
-		SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
+		SET dblQuantity = CASE WHEN ISNULL(@ysnQuantityAtHeaderLevel, 0) = 0 THEN (SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
+								ELSE @dblQuantity END
 		WHERE intContractHeaderId = @intContractHeaderId
 
 		EXEC uspCTCreateDetailHistory	@intContractHeaderId = @intContractHeaderId, 
