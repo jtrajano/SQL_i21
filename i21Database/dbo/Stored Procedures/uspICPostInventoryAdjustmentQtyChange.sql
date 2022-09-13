@@ -130,6 +130,7 @@ BEGIN
 			,intLotId 
 			,intSubLocationId
 			,intStorageLocationId
+			,intCategoryId
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
