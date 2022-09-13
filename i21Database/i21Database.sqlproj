@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{2e49b212-114b-4cfd-a343-2a2061e987bc}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -5449,7 +5449,7 @@
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
     <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
-	<Build Include="dbo\Views\vyuSTStorePumpItemList.sql" /> 
+    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTFuelTanks.sql" />
     <Build Include="dbo\Views\vyuSTStoreFuelTanks.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
