@@ -3,6 +3,7 @@ AS
 SELECT LCS.intEntityLocationConsumptionSiteId
 , LCS.intEntityLocationId
 , EL.strLocationName
+, EL.strCheckPayeeName
 , LCS.intSiteID
 FROM tblEMEntityLocationConsumptionSite LCS
 INNER JOIN tblTMSite S ON S.intSiteID = LCS.intSiteID
