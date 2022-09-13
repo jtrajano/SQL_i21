@@ -114,7 +114,7 @@ SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strCo
 		intCurrencyId		=	CY.intCurrencyID,
 		intUnitMeasureId	=	QU.intUnitMeasureId,
 		dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate()),
-		ysnQuantityAtHeaderLevel	=	CASE WHEN CT.strQtyAtHeaderLevel = 'Yes' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+		ysnQuantityAtHeaderLevel	=	CASE WHEN CI.strQtyAtHeaderLevel = 'Yes' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 
 FROM	tblCTContractImport			CI	LEFT
 JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
