@@ -56,6 +56,17 @@ DECLARE @strDocumentDelivery  as NVARCHAR(50)
 DECLARE @strDocumentDelivery1  as NVARCHAR(50)  
 DECLARE @strDocumentDelivery2  as NVARCHAR(50)  
 DECLARE @strDocumentDelivery3 as NVARCHAR(50)  
+
+--for logs
+DECLARE @strDocumentDeliveryLog1  as NVARCHAR(50)  
+DECLARE @strDocumentDeliveryLog2  as NVARCHAR(50)  
+DECLARE @strDocumentDeliveryLog3 as NVARCHAR(50) 
+DECLARE @strPayPeriodLog as NVARCHAR(50)
+DECLARE @strMaritalStatusLog as NVARCHAR(50)
+DECLARE @strEthnicityLog as NVARCHAR(50)
+DECLARE @strEEOCCodeLog as NVARCHAR(50)
+DECLARE @strGenderLog as NVARCHAR(50)
+DECLARE @strTypeLog as NVARCHAR(50)
   
   
 DECLARE @strExternalERPId as NVARCHAR(50)  
@@ -162,6 +173,16 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
    ,@strEEOCCode = LTRIM(RTRIM(temp.strEEOCCode))  
    ,@strGender = LTRIM(RTRIM(temp.strGender))  
   FROM #TempEmployeeDetails temp  
+
+  SET @strDocumentDeliveryLog1 = @strDocumentDelivery1
+  SET @strDocumentDeliveryLog2 = @strDocumentDelivery2
+  SET @strDocumentDeliveryLog3 = @strDocumentDelivery3
+  SET @strPayPeriodLog = @strPayPeriod
+  SET @strMaritalStatusLog = @strMaritalStatus
+  SET @strEthnicityLog = @strEthnicity
+  SET @strEEOCCodeLog = @strEEOCCode
+  SET @strGenderLog = @strGender
+  SET @strTypeLog = @strType
   
   SELECT TOP 1 @EntityId = intEntityId FROM tblPREmployee WHERE strEmployeeId = @EmployeeID  
   
@@ -281,8 +302,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                                  SELECT TOP 1  
                                    NEWID()  
                                   , guiApiImportLogId = @guiLogId  
-                                  , strField = 'Entity and Employee Import'  
-                                  , strValue = @strGender  
+                                  , strField = 'Gender'  
+                                  , strValue = @strGenderLog  
                                   , strLogLevel = 'Error'  
                                   , strStatus = 'Failed'  
                                   , intRowNo = SE.intRowNumber  
@@ -301,8 +322,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                                SELECT TOP 1  
                                  NEWID()  
                                 , guiApiImportLogId = @guiLogId  
-                                , strField = 'Entity and Employee Import'  
-                                , strValue = @strEEOCCode  
+                                , strField = 'EEOC Code'  
+                                , strValue = @strEEOCCodeLog  
                                 , strLogLevel = 'Error'  
                                 , strStatus = 'Failed'  
                                 , intRowNo = SE.intRowNumber  
@@ -322,8 +343,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                              SELECT TOP 1  
                                NEWID()  
                               , guiApiImportLogId = @guiLogId  
-                              , strField = 'Entity and Employee Import'  
-                              , strValue = @strEthnicity  
+                              , strField = 'Ethnicity'  
+                              , strValue = @strEthnicityLog
                               , strLogLevel = 'Error'  
                               , strStatus = 'Failed'  
                               , intRowNo = SE.intRowNumber  
@@ -342,8 +363,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                            SELECT TOP 1  
                              NEWID()  
                             , guiApiImportLogId = @guiLogId  
-                            , strField = 'Entity and Employee Import'  
-                            , strValue = @strMaritalStatus  
+                            , strField = 'Marital Status'  
+                            , strValue = @strMaritalStatusLog  
                             , strLogLevel = 'Error'  
                             , strStatus = 'Failed'  
                             , intRowNo = SE.intRowNumber  
@@ -363,7 +384,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                          SELECT TOP 1  
                            NEWID()  
                           , guiApiImportLogId = @guiLogId  
-                          , strField = 'Entity and Employee Import'  
+                          , strField = 'Rank'  
                           , strValue = @strRank  
                           , strLogLevel = 'Error'  
                           , strStatus = 'Failed'  
@@ -384,8 +405,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                        SELECT TOP 1  
                          NEWID()  
                         , guiApiImportLogId = @guiLogId  
-                        , strField = 'Entity and Employee Import'  
-                        , strValue = @strPayPeriod  
+                        , strField = 'Pay Period'  
+                        , strValue = @strPayPeriodLog  
                         , strLogLevel = 'Error'  
                         , strStatus = 'Failed'  
                         , intRowNo = SE.intRowNumber  
@@ -405,8 +426,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                      SELECT TOP 1  
                        NEWID()  
                       , guiApiImportLogId = @guiLogId  
-                      , strField = 'Entity and Employee Import'  
-                      , strValue = @strType  
+                      , strField = 'Type'  
+                      , strValue = @strTypeLog  
                       , strLogLevel = 'Error'  
                       , strStatus = 'Failed'  
                       , intRowNo = SE.intRowNumber  
@@ -425,8 +446,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                     SELECT TOP 1  
                        NEWID()  
                      , guiApiImportLogId = @guiLogId  
-                     , strField = 'Entity and Employee Import'  
-                     , strValue = @strDocumentDelivery3  
+                     , strField = 'Document Delivery 3'  
+                     , strValue = @strDocumentDeliveryLog3  
                      , strLogLevel = 'Error'  
                      , strStatus = 'Failed'  
                      , intRowNo = SE.intRowNumber  
@@ -445,8 +466,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                   SELECT TOP 1  
                      NEWID()  
                    , guiApiImportLogId = @guiLogId  
-                   , strField = 'Entity and Employee Import'  
-                   , strValue = @strDocumentDelivery2  
+                   , strField = 'Document Delivery 2'  
+                   , strValue = @strDocumentDeliveryLog2  
                    , strLogLevel = 'Error'  
                    , strStatus = 'Failed'  
                    , intRowNo = SE.intRowNumber  
@@ -465,8 +486,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                 SELECT TOP 1  
                    NEWID()  
                  , guiApiImportLogId = @guiLogId  
-                 , strField = 'Entity and Employee Import'  
-                 , strValue = @strDocumentDelivery1  
+                 , strField = 'Document Delivery 1'  
+                 , strValue = @strDocumentDeliveryLog1  
                  , strLogLevel = 'Error'  
                  , strStatus = 'Failed'  
                  , intRowNo = SE.intRowNumber  
@@ -485,7 +506,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
               SELECT TOP 1  
                  NEWID()  
                , guiApiImportLogId = @guiLogId  
-               , strField = 'Entity and Employee Import'  
+               , strField = 'Line of Business 5'  
                , strValue = @LineOfBusiness5  
                , strLogLevel = 'Error'  
                , strStatus = 'Failed'  
@@ -505,7 +526,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
             SELECT TOP 1  
                NEWID()  
              , guiApiImportLogId = @guiLogId  
-             , strField = 'Entity and Employee Import'  
+             , strField = 'Line of Business 4'  
              , strValue = @LineOfBusiness4  
              , strLogLevel = 'Error'  
              , strStatus = 'Failed'  
@@ -525,7 +546,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
           SELECT TOP 1  
              NEWID()  
            , guiApiImportLogId = @guiLogId  
-           , strField = 'Entity and Employee Import'  
+           , strField = 'Line of Business 3'  
            , strValue = @LineOfBusiness3  
            , strLogLevel = 'Error'  
            , strStatus = 'Failed'  
@@ -545,7 +566,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
         SELECT TOP 1  
            NEWID()  
          , guiApiImportLogId = @guiLogId  
-         , strField = 'Entity and Employee Import'  
+         , strField = 'Line of Business 2'  
          , strValue = @LineOfBusiness2  
          , strLogLevel = 'Error'  
          , strStatus = 'Failed'  
@@ -565,7 +586,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
       SELECT TOP 1  
          NEWID()  
        , guiApiImportLogId = @guiLogId  
-       , strField = 'Entity and Employee Import'  
+       , strField = 'Line of Business 1'  
        , strValue = @LineOfBusiness1  
        , strLogLevel = 'Error'  
        , strStatus = 'Failed'  
@@ -585,7 +606,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
     SELECT TOP 1  
        NEWID()  
      , guiApiImportLogId = @guiLogId  
-     , strField = 'Entity and Employee Import'  
+     , strField = 'Country'  
      , strValue = @strCountry  
      , strLogLevel = 'Error'  
      , strStatus = 'Failed'  
