@@ -163,6 +163,7 @@ BEGIN
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
+			,intCategoryId			= Category.intCategoryId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
@@ -176,7 +177,10 @@ BEGIN
 				ON Lot.intLotId = Detail.intLotId  
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
-				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId	
+			OUTER APPLY (SELECT intCategoryId
+						 FROM tblICItem 
+						 WHERE intItemId = Detail.intItemId) AS Category
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 		AND Detail.dblAdjustByQuantity != 0
@@ -202,6 +206,7 @@ SELECT	intItemId
 		,intLotId 
 		,intSubLocationId
 		,intStorageLocationId
+		,intCategoryId
 FROM	@ItemsForQtyChange
 
 
