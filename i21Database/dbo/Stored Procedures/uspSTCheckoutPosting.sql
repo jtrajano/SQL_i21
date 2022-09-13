@@ -764,6 +764,7 @@ BEGIN
 										,[dblCurrencyExchangeRate]
 										,[intSubCurrencyId]
 										,[dblSubCurrencyRate]
+										,[intSubLocationId]
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
@@ -877,6 +878,7 @@ BEGIN
 										,[dblCurrencyExchangeRate]	= 1.000000
 										,[intSubCurrencyId]			= @intCurrencyId
 										,[dblSubCurrencyRate]		= 1.000000
+										,[intSubLocationId]			= IL.intSubLocationId
 										--,0
 										--,1
 							FROM tblSTCheckoutPumpTotals CPT
@@ -1011,6 +1013,7 @@ BEGIN
 										,[dblCurrencyExchangeRate]
 										,[intSubCurrencyId]
 										,[dblSubCurrencyRate]
+										,[intSubLocationId]
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
@@ -1116,6 +1119,7 @@ BEGIN
 										,[dblCurrencyExchangeRate]	= 1.000000
 										,[intSubCurrencyId]			= @intCurrencyId
 										,[dblSubCurrencyRate]		= 1.000000
+										,[intSubLocationId]			= IL.intSubLocationId
 										--,0
 										--,1
 							FROM tblSTCheckoutDepartmetTotals DT
@@ -4913,7 +4917,8 @@ BEGIN
 											,[strImportFormat]
 											,[dblSubCurrencyRate]
 											,[dblCurrencyExchangeRate]
-											,[ysnRecap])
+											,[ysnRecap]
+											,[intSubLocationId])
 										SELECT 
 											ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 											,[strTransactionType]
@@ -5005,6 +5010,7 @@ BEGIN
 											,[dblSubCurrencyRate]
 											,[dblCurrencyExchangeRate]
 											,[ysnRecap]
+											,[intSubLocationId]
 										FROM @EntriesForInvoice
 
 
