@@ -442,7 +442,7 @@ BEGIN
 																   FROM @UDT_MSM
 																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
 																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'voidTransactions'
-																	AND intCashierId = @strCashierId
+																	AND strCashierId = @strCashierId
 															   ),
 											cashier.dblVoidAmount = (	
 																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
@@ -496,6 +496,19 @@ BEGIN
 																   FROM @UDT_MSM
 																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'safeDrop' 
 																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'total'
+																	AND strCashierId = @strCashierId
+															   )
+									FROM tblSTCheckoutCashiers cashier
+									WHERE cashier.intCheckoutId = @intCheckoutId 
+										AND cashier.intCashierId = @intCashierId
+										
+									--intCustomerCount
+									UPDATE cashier
+										SET cashier.intCustomerCount = (	
+																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6)))
+																   FROM @UDT_MSM
+																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = 'statistics' 
+																	AND ISNULL(strMiscellaneousSummarySubCode, '') = 'transactions'
 																	AND strCashierId = @strCashierId
 															   )
 									FROM tblSTCheckoutCashiers cashier
