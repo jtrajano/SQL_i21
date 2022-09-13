@@ -454,6 +454,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intCategoryId
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentOpeningInventory
 				@intTransactionId
