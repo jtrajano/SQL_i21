@@ -354,7 +354,6 @@ FROM (
 		CROSS APPLY (
 			SELECT TOP 1 intARAccountId
 			FROM tblARCompanyPreference
-			WHERE ISNULL(intARAccountId, 0) <> 0
 		) ARCP
 		WHERE CB.dblBudgetAmount - CB.dblAmountPaid <> 0
 	) ARIFP
