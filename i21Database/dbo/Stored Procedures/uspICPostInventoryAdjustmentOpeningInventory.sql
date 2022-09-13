@@ -63,6 +63,7 @@ BEGIN
 			,intLotId 
 			,intSubLocationId
 			,intStorageLocationId
+			,intCategoryId
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
@@ -81,6 +82,7 @@ BEGIN
 			,intLotId				= Detail.intNewLotId
 			,intSubLocationId		= Detail.intNewSubLocationId
 			,intStorageLocationId	= Detail.intNewStorageLocationId
+			,intCategoryId			= Category.intCategoryId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItem Item
@@ -95,6 +97,9 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
+			OUTER APPLY (SELECT intCategoryId
+						 FROM tblICItem 
+						 WHERE intItemId = Detail.intItemId) AS Category
 	WHERE	
 		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
@@ -121,6 +126,7 @@ BEGIN
 			,intLotId				= NULL
 			,intSubLocationId		= Detail.intNewSubLocationId
 			,intStorageLocationId	= Detail.intNewStorageLocationId
+			,intCategoryId			= Category.intCategoryId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItem Item
@@ -133,6 +139,9 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
+			OUTER APPLY (SELECT intCategoryId
+						 FROM tblICItem 
+						 WHERE intItemId = Detail.intItemId) AS Category
 	WHERE	
 		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
@@ -174,6 +183,7 @@ BEGIN
 			,intLotId 
 			,intSubLocationId
 			,intStorageLocationId
+			,intCategoryId
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
@@ -192,6 +202,7 @@ BEGIN
 			,intLotId				= Detail.intNewLotId
 			,intSubLocationId		= Detail.intNewSubLocationId
 			,intStorageLocationId	= Detail.intNewStorageLocationId
+			,intCategoryId			= Category.intCategoryId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItem Item
@@ -206,6 +217,9 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
+			OUTER APPLY (SELECT intCategoryId
+						 FROM tblICItem 
+						 WHERE intItemId = Detail.intItemId) AS Category
 	WHERE	
 		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Storage
@@ -232,6 +246,7 @@ BEGIN
 			,intLotId				= NULL
 			,intSubLocationId		= Detail.intNewSubLocationId
 			,intStorageLocationId	= Detail.intNewStorageLocationId
+			,intCategoryId			= Category.intCategoryId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItem Item
@@ -244,6 +259,9 @@ BEGIN
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId		
+			OUTER APPLY (SELECT intCategoryId
+						 FROM tblICItem 
+						 WHERE intItemId = Detail.intItemId) AS Category
 	WHERE	
 		Header.intInventoryAdjustmentId = @intTransactionId
 		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Storage
