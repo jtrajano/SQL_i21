@@ -272,7 +272,7 @@ BEGIN
 		DELETE FROM #tmpContractDetail
 
 		INSERT	INTO #tmpContractDetail(intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL, ysnQuantityAtHeaderLevel
+			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL
 		)
 		SELECT
 			  @intContractHeaderId
@@ -305,7 +305,6 @@ BEGIN
 			, dtmM2MDate
 			, 0
 			, 0
-			, ysnQuantityAtHeaderLevel
 		FROM #tmpExtracted
 		WHERE
 				ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
@@ -326,18 +325,18 @@ BEGIN
 		EXEC uspCTValidateContractDetail @strTblXML, 'Added'
 
 		-- VALIDATE Qty At Header Level
-		IF ISNULL(@ysnReadOnlyInterCoContract, 0) = 1
+		IF ISNULL(@ysnQuantityAtHeaderLevel, 0) = 1
 		BEGIN
 			IF (SELECT COUNT(1) FROM (SELECT DISTINCT dblQuantity FROM #tmpContractDetail) tbl ) > 1
 			BEGIN
 				SET @ErrMsg = 'Quantity must be the same for Contracts whose Quantity is at the Header Level.'
 				RAISERROR(@ErrMsg,16,1)
 			END
-			IF (SELECT COUNT(1) FROM (SELECT DISTINCT ysnQuantityAtHeaderLevel FROM #tmpContractDetail) tbl ) > 1
-			BEGIN
-				SET @ErrMsg = 'Quantity at Header Level must be the same for all sequences of the Contract.'
-				RAISERROR(@ErrMsg,16,1)
-			END
+			--IF (SELECT COUNT(1) FROM (SELECT DISTINCT ysnQuantityAtHeaderLevel FROM #tmpContractDetail) tbl ) > 1
+			--BEGIN
+			--	SET @ErrMsg = 'Quantity at Header Level must be the same for all sequences of the Contract.'
+			--	RAISERROR(@ErrMsg,16,1)
+			--END
 		END
 
 		INSERT INTO tblCTContractDetail (
@@ -468,6 +467,7 @@ BEGIN
 			, @intConcurrencyId
 			, @ysnReceivedSignedFixationLetter
 			, @ysnReadOnlyInterCoContract
+			, @ysnQuantityAtHeaderLevel
 
 	END
 
