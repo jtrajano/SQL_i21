@@ -49,11 +49,7 @@ BEGIN
 END
 
 BEGIN TRY
-	IF OBJECT_ID('tempdb..#TempPaymentEntries') IS NOT NULL DROP TABLE #TempPaymentEntries	
-	SELECT * INTO #TempPaymentEntries FROM @PaymentEntries 	
-	
-	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
-	CREATE TABLE #EntriesForProcessing(
+	DECLARE @tmpEntriesForProcessing TABLE (
 		 [intId]						INT												NOT NULL
 		,[intPaymentId]					INT												NULL
 		,[intPaymentDetailId]			INT												NULL
@@ -75,40 +71,156 @@ BEGIN TRY
 		,[ysnPost]						BIT												NULL
 	)
 
-	DECLARE  @QueryString AS VARCHAR(MAX)
-			,@Columns AS VARCHAR(MAX)
-			
-	SET @Columns =	(CASE 
-						WHEN @GroupingOption = 0  THEN '[intId]'
-						WHEN @GroupingOption = 1  THEN '[intEntityCustomerId]'
-						WHEN @GroupingOption = 2  THEN '[intEntityCustomerId], [intCompanyLocationId]'
-						WHEN @GroupingOption = 3  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId]'
-						WHEN @GroupingOption = 4  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid]'
-						WHEN @GroupingOption = 5  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]'
-						WHEN @GroupingOption = 6  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]'		
-						WHEN @GroupingOption = 7  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]'
-						WHEN @GroupingOption = 8  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]'
-						WHEN @GroupingOption = 9  THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId]'
-						WHEN @GroupingOption = 10 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate]'
-						WHEN @GroupingOption = 11 THEN '[intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType]'
-					END)
-					
-				
-	IF @GroupingOption > 0
-		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], ' +  @Columns + ', [ysnForInsert]) SELECT MIN([intId]), ' + @Columns + ', 1 FROM #TempPaymentEntries WHERE ISNULL([intPaymentId],0) = 0 GROUP BY ' + @Columns
-	ELSE
-		SET @QueryString = 'INSERT INTO #EntriesForProcessing(' +  @Columns + ', [ysnForInsert]) SELECT ' + @Columns + ', 1 FROM #TempPaymentEntries WHERE ISNULL([intPaymentId],0) = 0 GROUP BY ' + @Columns
+	IF @GroupingOption = 0
+		INSERT INTO @tmpEntriesForProcessing([intId])
+		SELECT [intId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intId]
+	ELSE IF @GroupingOption = 1
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId])
+		SELECT MIN([intId]), [intEntityCustomerId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId]
+	ELSE IF @GroupingOption = 2
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId]
+	ELSE IF @GroupingOption = 3
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId]
+	ELSE IF @GroupingOption = 4
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid]
+	ELSE IF @GroupingOption = 5
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]
+	ELSE IF @GroupingOption = 6
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]
+	ELSE IF @GroupingOption = 7
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]
+	ELSE IF @GroupingOption = 8
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]
+	ELSE IF @GroupingOption = 9
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId]
+	ELSE IF @GroupingOption = 10
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate]
+	ELSE IF @GroupingOption = 11
+		INSERT INTO @tmpEntriesForProcessing([intId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType])
+		SELECT MIN([intId]), [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) = 0
+		GROUP BY [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType]
 
-	EXECUTE(@QueryString);
+	IF @GroupingOption = 0
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId]
+	ELSE IF @GroupingOption = 1
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId]
+	ELSE IF @GroupingOption = 2
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId]
+	ELSE IF @GroupingOption = 3
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId]
+	ELSE IF @GroupingOption = 4
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid]
+	ELSE IF @GroupingOption = 5
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId]
+	ELSE IF @GroupingOption = 6
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo]
+	ELSE IF @GroupingOption = 7
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes]
+	ELSE IF @GroupingOption = 8
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId]
+	ELSE IF @GroupingOption = 9
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId]
+	ELSE IF @GroupingOption = 10
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate]
+	ELSE IF @GroupingOption = 11
+		INSERT INTO @tmpEntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType])
+		SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType]
+		FROM @PaymentEntries
+		WHERE ISNULL([intPaymentId],0) <> 0
+		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType]
 
-	IF @GroupingOption > 0
-		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], ' + @Columns + ', 1 FROM #TempPaymentEntries WHERE ISNULL([intPaymentId],0) <> 0 GROUP BY [intId], [intPaymentId], [intPaymentDetailId],' + @Columns
-	ELSE
-		SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intPaymentId], [intPaymentDetailId], [ysnForUpdate]) SELECT DISTINCT [intId], [intPaymentId], [intPaymentDetailId], 1 FROM #TempPaymentEntries WHERE ISNULL([intPaymentId],0) <> 0 GROUP BY [intId], [intPaymentId], [intPaymentDetailId]'
+	UPDATE @tmpEntriesForProcessing
+	SET ysnForInsert = CASE WHEN ISNULL([intPaymentId], 0) > 1 THEN 0 ELSE 1 END
+	  , ysnForUpdate = CASE WHEN ISNULL([intPaymentId], 0) > 1 THEN 1 ELSE 0 END
 
-	EXECUTE(@QueryString);
-
-	IF OBJECT_ID('tempdb..#TempPaymentEntries') IS NOT NULL DROP TABLE #TempPaymentEntries	
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
@@ -169,7 +281,7 @@ BEGIN CATCH
 END CATCH
 
 BEGIN TRY
-IF EXISTS(SELECT TOP 1 NULL FROM #EntriesForProcessing WITH (NOLOCK) WHERE ISNULL([ysnForInsert],0) = 1)
+IF EXISTS(SELECT TOP 1 NULL FROM @tmpEntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1)
 BEGIN
 	DECLARE @PaymentsForInsert	PaymentIntegrationStagingTable			
 	INSERT INTO @PaymentsForInsert(
@@ -286,7 +398,7 @@ BEGIN
 		,[ysnAllowOverpayment]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAllowOverpayment] ELSE NULL END) 
 		,[ysnFromAP]							= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnFromAP] ELSE NULL END) 
 	FROM
-		#EntriesForProcessing EFP
+		@tmpEntriesForProcessing EFP
 	CROSS APPLY
 		(	SELECT TOP 1 * 
 			FROM @PaymentEntries I
@@ -294,10 +406,6 @@ BEGIN
 				I.[intId] = EFP.[intId]
 		)IE
 	
-	-- 	@PaymentEntries IE
-	-- INNER JOIN
-	-- 	#EntriesForProcessing EFP WITH (NOLOCK)
-	-- 		ON IE.[intId] = EFP.[intId]
 	WHERE
 		ISNULL(EFP.[ysnForInsert],0) = 1
 	ORDER BY
@@ -357,7 +465,7 @@ BEGIN
 			EFP.[intPaymentId] = IL.[intPaymentId]
 
 		FROM
-			#EntriesForProcessing EFP
+			@tmpEntriesForProcessing EFP
 		INNER JOIN
 			(SELECT [intId], [intPaymentId], [ysnSuccess], [ysnHeader] FROM tblARPaymentIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) IL
 				ON EFP.[intId] = IL.[intId]
@@ -481,7 +589,7 @@ BEGIN
 		FROM
 			@PaymentEntries ITG
 		INNER JOIN
-			#EntriesForProcessing EFP WITH (NOLOCK)
+			@tmpEntriesForProcessing EFP
 				ON (ISNULL(ITG.[intId], 0) = ISNULL(EFP.[intId], 0) OR @GroupingOption > 0)
 				AND (ISNULL(ITG.[intEntityCustomerId], 0) = ISNULL(EFP.[intEntityCustomerId], 0) OR (EFP.[intEntityCustomerId] IS NULL AND @GroupingOption < 1))
 				AND (ISNULL(ITG.[intCompanyLocationId], 0) = ISNULL(EFP.[intCompanyLocationId], 0) OR (EFP.[intCompanyLocationId] IS NULL AND @GroupingOption < 2))
@@ -557,7 +665,7 @@ SELECT
 		[intHeaderId]	= EFP.[intPaymentId]
 	,[intDetailId]	= EFP.[intPaymentDetailId]
 FROM
-	#EntriesForProcessing EFP
+	@tmpEntriesForProcessing EFP
 INNER JOIN
 	@PaymentEntries IE
 		ON EFP.[intPaymentId] = IE.[intPaymentId] 
@@ -604,7 +712,7 @@ BEGIN TRY
 		,[strSourceTransaction]	= IE.[strSourceTransaction]
 		,[ysnProcessed]			= 0		 
 	FROM
-		#EntriesForProcessing EFP
+		@tmpEntriesForProcessing EFP
 	INNER JOIN
 		@PaymentEntries IE
 			ON EFP.[intPaymentId] = IE.[intPaymentId] 

@@ -3996,6 +3996,14 @@ BEGIN TRY
 											ELSE @TotalBasis END
 							, intPricingTypeId = (case when intPricingTypeId = 1 then 1 else 2 end)
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+						--Log Basis Delivery for Manually Priced DWG contracts
+						if (@ysnDWGPriceOnly = 1 and @truePricingTypeId = 1 and not exists (SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0 and intPricingTypeId = 2))
+						begin
+							update @cbLogSpecific set dblQty = abs(dblQty) * -1, strTransactionType = 'Sales Basis Deliveries'
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						end
+
 					END		
 					IF (ISNULL(@TotalPriced, 0) <> 0)
 					BEGIN
@@ -4976,11 +4984,11 @@ BEGIN TRY
 								IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 								BEGIN
 									UPDATE @cbLogSpecific
-									SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
+									SET intPricingTypeId = CASE WHEN @currPricingTypeId in (1,3) THEN 1
 																WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 																WHEN @intHeaderPricingTypeId = 6 THEN 6
 																ELSE 2 END
-										, intActionId = CASE WHEN @currPricingTypeId = 3 OR @intHeaderPricingTypeId IN (1, 3) THEN 46
+										, intActionId = CASE WHEN @currPricingTypeId in (1,3) OR @intHeaderPricingTypeId IN (1, 3) THEN 46
 															ELSE intActionId END
 
 								END
