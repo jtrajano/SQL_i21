@@ -18,7 +18,9 @@ SELECT
 	ISNULL(Mapping.c,0)  ysnUsed,
 	S.dtmObsoleteDate,
 	S.intConcurrencyId,
-	S.intCode
+	S.intCode,
+	CompanyDetails.intCompanyDetailsId,
+	CompanyDetails.strCompanyName
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
 	dbo.tblGLAccountGroup AS G ON S.intAccountGroupId = G.intAccountGroupId LEFT OUTER JOIN
@@ -27,6 +29,10 @@ FROM
 	outer APPLY (
 		SELECT  TOP 1 CONVERT(BIT,1)    c FROM tblGLAccountSegmentMapping M WHERE M.intAccountSegmentId = S.intAccountSegmentId
 	)Mapping
+	OUTER APPLY(
+		SELECT TOP 1 strCompanyName, intCompanyDetailsId
+		 FROM tblGLCompanyDetails C WHERE S.intAccountSegmentId = C.intAccountSegmentId
+	)CompanyDetails
 GO
 
 
