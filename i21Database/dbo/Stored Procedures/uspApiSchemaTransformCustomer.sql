@@ -335,10 +335,11 @@ WHERE guiApiUniqueId = @guiApiUniqueId
 AND (RTRIM(LTRIM(ISNULL(SC.strCurrentSystem, ''))) <> '' AND NOT EXISTS(SELECT TOP 1 EME.intEntityId FROM tblEMEntity EME join tblEMEntityType EMET ON EME.intEntityId = EMET.intEntityId and EMET.strType = 'Competitor' WHERE strName = SC.strCurrentSystem))
 
 -- TRANSFORM
-DECLARE @intEntityId	INT
-DECLARE	@intContactId	INT
-DECLARE @intLocationId	INT
-DECLARE @ysnNew			BIT = 1
+DECLARE @intEntityId			INT
+DECLARE	@intContactId			INT
+DECLARE @intLocationId			INT
+DECLARE @intEntityToContactId	INT
+DECLARE @ysnNew					BIT = 1
 
 DECLARE   @strEntityNumber				NVARCHAR(100)
 		, @strCustomerName				NVARCHAR(100)
@@ -407,6 +408,7 @@ DECLARE   @strEntityNumber				NVARCHAR(100)
 		, @strPhone						NVARCHAR(100)
 		, @strMobileNo					NVARCHAR(100)
 		, @strCurrentSystem				NVARCHAR(100)
+		, @strContactName				NVARCHAR(100)
 		, @intRowNumber					INT
 
 DECLARE cursorSC CURSOR LOCAL FAST_FORWARD
@@ -479,6 +481,7 @@ SELECT
 	, strPhone
 	, strMobileNo
 	, strCurrentSystem
+	, strContactName
 	, intRowNumber
 FROM	tblApiSchemaCustomer SC
 WHERE	guiApiUniqueId = @guiApiUniqueId
@@ -554,6 +557,7 @@ FETCH NEXT FROM cursorSC INTO
 	, @strPhone
 	, @strMobileNo
 	, @strCurrentSystem
+	, @strContactName
 	, @intRowNumber
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -567,7 +571,7 @@ BEGIN
 
 	SELECT @intEntityId = E.intEntityId
 	FROM tblEMEntity E
-	WHERE E.strContactNumber = @strEntityNumber
+	WHERE E.strEntityNo = @strEntityNumber
 
 	IF @intEntityId IS NULL
 		BEGIN
@@ -602,7 +606,7 @@ BEGIN
 				, strInternalNotes
 			)
 			SELECT 
-				  @strCustomerName
+				  @strContactName
 				, ''
 				, @strSuffix 
 				, @strEmail
@@ -813,7 +817,27 @@ BEGIN
 			FROM tblEMEntityLocation EL
 			WHERE EL.intEntityId = @intEntityId
 			  AND EL.strLocationName = @strLocationName
+			
+			IF @intLocationId IS NULL
+			BEGIN 
+				SELECT @intLocationId = ISNULL(ISNULL(E.intDefaultLocationId, C.intDefaultLocationId), intBillToId)
+				FROM tblARCustomer C
+				INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
+				WHERE E.intEntityId = @intEntityId
+			END 
 
+			UPDATE tblEMEntityLocation
+			SET strCheckPayeeName = @strPrintedName
+			WHERE intEntityLocationId = @intLocationId
+
+			UPDATE ETCE
+			SET strName = @strContactName
+			FROM tblEMEntity E
+			INNER JOIN tblEMEntityToContact ETC ON E.intEntityId = E.intEntityId
+			INNER JOIN tblEMEntity ETCE ON ETC.intEntityContactId = ETCE.intEntityId
+			WHERE E.intEntityId = @intEntityId
+			  AND ETC.intEntityLocationId = @intLocationId
+			
 			UPDATE tblARCustomer
 			SET   strType						= (CASE WHEN ISNULL(@strType, '') NOT IN ('Company', 'Person') THEN 'Company' ELSE @strType END)
 				, strAccountNumber				= @strAccountNo
@@ -947,6 +971,7 @@ BEGIN
 		, @strPhone
 		, @strMobileNo
 		, @strCurrentSystem
+		, @strContactName
 		, @intRowNumber
 END
 
