@@ -411,7 +411,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\14_CT\DropIndexes.sql" />
-  </ItemGroup>  
+  </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql" />
   </ItemGroup>
@@ -424,5 +424,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\RenameAndAlterCashRegisterDepartment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\2010_TemporaryDecryptPasswords.sql" />
   </ItemGroup>
 </Project>
