@@ -242,6 +242,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intCategoryId
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentQtyChange
 				@intTransactionId
@@ -453,6 +454,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,intCategoryId
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentOpeningInventory
 				@intTransactionId

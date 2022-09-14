@@ -39,19 +39,20 @@ FROM tblApiSchemaCustomer SC
 WHERE guiApiUniqueId = @guiApiUniqueId
 AND RTRIM(LTRIM(ISNULL(strLocationName, ''))) = '' 
 
-INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-	  guiApiImportLogDetailId = NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Entity No'
-    , strValue = strEntityNumber
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = intRowNumber
-    , strMessage = 'Entity No ('+ SC.strEntityNumber + ') already exists.'
-FROM tblApiSchemaCustomer SC
-WHERE SC.guiApiUniqueId = @guiApiUniqueId
-AND EXISTS (SELECT TOP 1 NULL FROM tblEMEntity WHERE strEntityNo = strEntityNumber)
+----COMMENTED OUT FOR UPDATE PURPOSES
+--INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+--SELECT
+--	  guiApiImportLogDetailId = NEWID()
+--    , guiApiImportLogId = @guiLogId
+--    , strField = 'Entity No'
+--    , strValue = strEntityNumber
+--    , strLogLevel = 'Error'
+--    , strStatus = 'Failed'
+--    , intRowNo = intRowNumber
+--    , strMessage = 'Entity No ('+ SC.strEntityNumber + ') already exists.'
+--FROM tblApiSchemaCustomer SC
+--WHERE SC.guiApiUniqueId = @guiApiUniqueId
+--AND EXISTS (SELECT TOP 1 NULL FROM tblEMEntity WHERE strEntityNo = strEntityNumber)
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -291,7 +292,6 @@ FROM tblApiSchemaCustomer SC
 WHERE guiApiUniqueId = @guiApiUniqueId
 AND RTRIM(LTRIM(ISNULL(SC.strUpdateQuote, ''))) <> '' AND SC.strUpdateQuote NOT IN ('Yes', 'No', 'Deviation')
 
-
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
       guiApiImportLogDetailId = NEWID()
@@ -335,9 +335,11 @@ WHERE guiApiUniqueId = @guiApiUniqueId
 AND (RTRIM(LTRIM(ISNULL(SC.strCurrentSystem, ''))) <> '' AND NOT EXISTS(SELECT TOP 1 EME.intEntityId FROM tblEMEntity EME join tblEMEntityType EMET ON EME.intEntityId = EMET.intEntityId and EMET.strType = 'Competitor' WHERE strName = SC.strCurrentSystem))
 
 -- TRANSFORM
-DECLARE @intEntityId	INT
-DECLARE	@intContactId	INT
-DECLARE @intLocationId	INT
+DECLARE @intEntityId			INT
+DECLARE	@intContactId			INT
+DECLARE @intLocationId			INT
+DECLARE @intEntityToContactId	INT
+DECLARE @ysnNew					BIT = 1
 
 DECLARE   @strEntityNumber				NVARCHAR(100)
 		, @strCustomerName				NVARCHAR(100)
@@ -406,6 +408,7 @@ DECLARE   @strEntityNumber				NVARCHAR(100)
 		, @strPhone						NVARCHAR(100)
 		, @strMobileNo					NVARCHAR(100)
 		, @strCurrentSystem				NVARCHAR(100)
+		, @strContactName				NVARCHAR(100)
 		, @intRowNumber					INT
 
 DECLARE cursorSC CURSOR LOCAL FAST_FORWARD
@@ -478,6 +481,7 @@ SELECT
 	, strPhone
 	, strMobileNo
 	, strCurrentSystem
+	, strContactName
 	, intRowNumber
 FROM	tblApiSchemaCustomer SC
 WHERE	guiApiUniqueId = @guiApiUniqueId
@@ -553,238 +557,337 @@ FETCH NEXT FROM cursorSC INTO
 	, @strPhone
 	, @strMobileNo
 	, @strCurrentSystem
+	, @strContactName
 	, @intRowNumber
 WHILE @@FETCH_STATUS = 0
 BEGIN
+	SET @intEntityId = NULL
+	SET @ysnNew = 1
+
 	IF(ISNULL(@strEntityNumber, '') = '')
 	BEGIN
 		EXEC uspSMGetStartingNumber 43, @strEntityNumber OUT
 	END
 
-	INSERT INTO tblEMEntity(
-		  strEntityNo
-		, strName
-		, strContactNumber 
-		, dtmOriginationDate 
-		, strDocumentDelivery 
-		, strExternalERPId
-		, strFederalTaxId 
-		, strStateTaxId
-	)
-	SELECT 
-		  @strEntityNumber
-		, @strCustomerName
-		, ''
-		, CASE WHEN ISNULL(@strOriginationDate, '') <> '' THEN CASE WHEN ISDATE(@strOriginationDate) = 1 THEN CAST(@strOriginationDate AS DATETIME) ELSE GETDATE() END ELSE GETDATE() END
-		, @strDocumentDelivery
-		, @strExternalERP
-		, @strFederalTax
-		, @strStateTax
+	SELECT @intEntityId = E.intEntityId
+	FROM tblEMEntity E
+	WHERE E.strEntityNo = @strEntityNumber
 
-	SET @intEntityId = @@IDENTITY
+	IF @intEntityId IS NULL
+		BEGIN
+			INSERT INTO tblEMEntity(
+				  strEntityNo
+				, strName
+				, strContactNumber 
+				, dtmOriginationDate 
+				, strDocumentDelivery 
+				, strExternalERPId
+				, strFederalTaxId 
+				, strStateTaxId
+			)
+			SELECT 
+				  @strEntityNumber
+				, @strCustomerName
+				, ''
+				, CASE WHEN ISNULL(@strOriginationDate, '') <> '' THEN CASE WHEN ISDATE(@strOriginationDate) = 1 THEN CAST(@strOriginationDate AS DATETIME) ELSE GETDATE() END ELSE GETDATE() END
+				, @strDocumentDelivery
+				, @strExternalERP
+				, @strFederalTax
+				, @strStateTax
 
-	INSERT INTO tblEMEntity(
-		  strName
-		, strContactNumber
-		, strSuffix
-		, strEmail 
-		, intLanguageId 
-		, strInternalNotes
-	)
-	SELECT 
-		  @strCustomerName
-		, ''
-		, @strSuffix 
-		, @strEmail
-		, (SELECT TOP 1 intLanguageId FROM tblSMLanguage WHERE strLanguage = @strLanguage)
-		, @strInternalNotes
+			SET @intEntityId = @@IDENTITY
 
-	SET @intContactId = @@IDENTITY
+			INSERT INTO tblEMEntity(
+				  strName
+				, strContactNumber
+				, strSuffix
+				, strEmail 
+				, intLanguageId 
+				, strInternalNotes
+			)
+			SELECT 
+				  @strContactName
+				, ''
+				, @strSuffix 
+				, @strEmail
+				, (SELECT TOP 1 intLanguageId FROM tblSMLanguage WHERE strLanguage = @strLanguage)
+				, @strInternalNotes
 
-	INSERT INTO tblEMEntityLocation(
-		  intEntityId
-		, strLocationName
-		, strCheckPayeeName
-		, strAddress
-		, strCity
-		, strState
-		, strZipCode
-		, strCountry
-		, strTimezone
-		, intDefaultCurrencyId
-		, intTermsId
-		, intShipViaId 
-		, ysnDefaultLocation
-		, intFreightTermId
-	)
-	SELECT 
-		  @intEntityId
-		, @strLocationName 
-		, CASE WHEN ISNULL(@strPrintedName, '') = '' THEN @strCustomerName ELSE @strPrintedName END
-		, @strAddress
-		, @strCity
-		, @strState 
-		, @strZip
-		, @strCountry
-		, @strTimezone
-		, (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrency)
-		, (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = @strTerms)
-		, (SELECT TOP 1 SMSV.intEntityId FROM tblSMShipVia SMSV JOIN tblEMEntity EME on SMSV.intEntityId = EME.intEntityId WHERE SMSV.strShipVia = @strShipVia)
-		, 1
-		, (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = @strFreightTerm)
+			SET @intContactId = @@IDENTITY
 
-	SET @intLocationId = @@IDENTITY
+			INSERT INTO tblEMEntityLocation(
+				  intEntityId
+				, strLocationName
+				, strCheckPayeeName
+				, strAddress
+				, strCity
+				, strState
+				, strZipCode
+				, strCountry
+				, strTimezone
+				, intDefaultCurrencyId
+				, intTermsId
+				, intShipViaId 
+				, ysnDefaultLocation
+				, intFreightTermId
+			)
+			SELECT 
+				  @intEntityId
+				, @strLocationName 
+				, CASE WHEN ISNULL(@strPrintedName, '') = '' THEN @strCustomerName ELSE @strPrintedName END
+				, @strAddress
+				, @strCity
+				, @strState 
+				, @strZip
+				, @strCountry
+				, @strTimezone
+				, (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrency)
+				, (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = @strTerms)
+				, (SELECT TOP 1 SMSV.intEntityId FROM tblSMShipVia SMSV JOIN tblEMEntity EME on SMSV.intEntityId = EME.intEntityId WHERE SMSV.strShipVia = @strShipVia)
+				, 1
+				, (SELECT TOP 1 intFreightTermId FROM tblSMFreightTerms WHERE strFreightTerm = @strFreightTerm)
 
-	INSERT INTO tblEMEntityToContact(
-		  intEntityId
-		, intEntityContactId 
-		, intEntityLocationId 
-		, ysnPortalAccess
-		, ysnDefaultContact
-	)
-	SELECT 
-		  @intEntityId 
-		, @intContactId 
-		, @intLocationId 
-		, 0 
-		, 1
+			SET @intLocationId = @@IDENTITY
+
+			INSERT INTO tblEMEntityToContact(
+				  intEntityId
+				, intEntityContactId 
+				, intEntityLocationId 
+				, ysnPortalAccess
+				, ysnDefaultContact
+			)
+			SELECT 
+				  @intEntityId 
+				, @intContactId 
+				, @intLocationId 
+				, 0 
+				, 1
 			
-	INSERT INTO tblEMEntityType(
-		  intEntityId
-		, strType 
-		, intConcurrencyId
-	)
-	SELECT 
-		  @intEntityId
-		, 'Customer'
-		, 1
+			INSERT INTO tblEMEntityType(
+				  intEntityId
+				, strType 
+				, intConcurrencyId
+			)
+			SELECT 
+				  @intEntityId
+				, 'Customer'
+				, 1
 
-	SET @strCustomerNumber = CASE WHEN ISNULL(@strCustomerNumber, '') = '' THEN @strEntityNumber ELSE @strCustomerNumber END
+			SET @strCustomerNumber = CASE WHEN ISNULL(@strCustomerNumber, '') = '' THEN @strEntityNumber ELSE @strCustomerNumber END
 
-	INSERT INTO tblARCustomer (
-		  intEntityId
-		, strType
-		, strAccountNumber
-		, intCurrencyId
-		, intPaymentMethodId
-		, intTermsId
-		, intSalespersonId
-		, strFLOId
-		, strTaxNumber
-		, ysnTaxExempt
-		, intTaxCodeId
-		, strVatNumber
-		, intEmployeeCount
-		, dblRevenue
-		, dblCreditLimit
-		, intCreditStopDays
-		, strCreditCode
-		, ysnActive
-		, ysnPORequired
-		, ysnCreditHold
-		, dtmBudgetBeginDate
-		, dblMonthlyBudget
-		, intNoOfPeriods
-		, ysnCustomerBudgetTieBudget
-		, ysnStatementDetail
-		, ysnStatementCreditLimit
-		, strStatementFormat
-		, intServiceChargeId
-		, dtmLastServiceCharge
-		, ysnApplyPrepaidTax
-		, ysnApplySalesTax
-		, ysnCalcAutoFreight
-		, strUpdateQuote
-		, strDiscSchedule
-		, strPrintInvoice
-		, strLinkCustomerNumber
-		, intReferredByCustomer
-		, ysnSpecialPriceGroup
-		, ysnExcludeDunningLetter
-		, ysnReceivedSignedLiscense
-		, ysnPrintPriceOnPrintTicket
-		, ysnIncludeEntityName
-		, intBillToId
-		, intShipToId
-		, dblARBalance
-		, strCustomerNumber
-		, guiApiUniqueId
-	)
-SELECT 
-	  @intEntityId
-	, (CASE WHEN ISNULL(@strType, '') NOT IN ('Company', 'Person') THEN 'Company' ELSE @strType END)
-	, @strAccountNo
-	, (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrency)
-	, (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = @strPaymentMethod)
-	, (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = @strTerms)
-	, (SELECT TOP 1 ARS.intEntityId FROM tblARSalesperson ARS 
-			JOIN tblEMEntity EME ON ARS.intEntityId = EME.intEntityId 
-	   WHERE ARS.strSalespersonId = @strSalesperson OR 
-			 EME.strEntityNo = @strSalesperson)
-	, @strFLO
-	, @strTaxNumber
-	, (CASE WHEN LOWER(ISNULL(@strExemptAllTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END)
-	, (CASE WHEN @strTaxCounty <> '' THEN (SELECT TOP 1 intTaxCodeId FROM tblSMTaxCode WHERE strCounty = @strTaxCounty) ELSE @strTaxCounty END)
-	, @strVatNumber
-	, CASE WHEN ISNULL(@strEmployeeCount, '') <> '' AND ISNUMERIC(@strEmployeeCount) = 1 THEN @strEmployeeCount ELSE 0 END
-	, CASE WHEN ISNULL(@strRevenue, '') <> '' AND ISNUMERIC(@strRevenue) = 1 THEN @strRevenue ELSE 0 END
-	, CASE WHEN ISNULL(@strCreditLimit, '') <> '' AND ISNUMERIC(@strCreditLimit) = 1 THEN @strCreditLimit ELSE 0 END
-	, CASE WHEN ISNULL(@strCreditStopDays, '') <> '' AND ISNUMERIC(@strCreditStopDays) = 1 THEN @strCreditStopDays ELSE 0 END
-	, @strCreditCode
-	, CASE WHEN LOWER(ISNULL(@strActive, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strPORequired, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strCreditHold, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CAST(@strBudgetBeginDate as DATETIME)
-	, CASE WHEN ISNULL(@strBudgetMonthly, '') <> '' AND ISNUMERIC(@strBudgetMonthly) = 1 THEN @strBudgetMonthly ELSE 0 END
-	, CASE WHEN ISNULL(@strBudgetNoPeriod, '') <> '' AND ISNUMERIC(@strBudgetNoPeriod) = 1 THEN @strBudgetNoPeriod ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strBudgetTieCustomerAging, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strStatementDetail, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strStatementCreditLimit, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, @strStatementFormat
-	, (CASE WHEN @strServiceCharge <> '' THEN (SELECT TOP 1 intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode = @strServiceCharge) ELSE @strTaxCounty END)
-	, @strLastServiceChargeDate
-	, CASE WHEN LOWER(ISNULL(@strApplyPrepaidTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strApplySalesTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strCalculateAutoFreight, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, @strUpdateQuote
-	, CASE WHEN ISNULL(@strDiscountSchedule, '') <> '' AND ISNUMERIC(@strDiscountSchedule) = 1 THEN @strDiscountSchedule ELSE 0 END
-	, @strPrintInvoice
-	, @strLinkCustomerNumber
-	, @strReferencebyCustomer
-	, CASE WHEN LOWER(ISNULL(@strSpecialPriceGroup, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strExcludeDunningLetter, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strReceivedSignedLicense, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strPrintPriceOnPickTicket, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, CASE WHEN LOWER(ISNULL(@strIncludeNameInAddress, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
-	, @intLocationId
-	, @intLocationId
-	, 0
-	, @strCustomerNumber
-	, @guiApiUniqueId
+			INSERT INTO tblARCustomer (
+				  intEntityId
+				, strType
+				, strAccountNumber
+				, intCurrencyId
+				, intPaymentMethodId
+				, intTermsId
+				, intSalespersonId
+				, strFLOId
+				, strTaxNumber
+				, ysnTaxExempt
+				, intTaxCodeId
+				, strVatNumber
+				, intEmployeeCount
+				, dblRevenue
+				, dblCreditLimit
+				, intCreditStopDays
+				, strCreditCode
+				, ysnActive
+				, ysnPORequired
+				, ysnCreditHold
+				, dtmBudgetBeginDate
+				, dblMonthlyBudget
+				, intNoOfPeriods
+				, ysnCustomerBudgetTieBudget
+				, ysnStatementDetail
+				, ysnStatementCreditLimit
+				, strStatementFormat
+				, intServiceChargeId
+				, dtmLastServiceCharge
+				, ysnApplyPrepaidTax
+				, ysnApplySalesTax
+				, ysnCalcAutoFreight
+				, strUpdateQuote
+				, strDiscSchedule
+				, strPrintInvoice
+				, strLinkCustomerNumber
+				, intReferredByCustomer
+				, ysnSpecialPriceGroup
+				, ysnExcludeDunningLetter
+				, ysnReceivedSignedLiscense
+				, ysnPrintPriceOnPrintTicket
+				, ysnIncludeEntityName
+				, intBillToId
+				, intShipToId
+				, dblARBalance
+				, strCustomerNumber
+				, guiApiUniqueId
+			)
+			SELECT 
+			  @intEntityId
+			, (CASE WHEN ISNULL(@strType, '') NOT IN ('Company', 'Person') THEN 'Company' ELSE @strType END)
+			, @strAccountNo
+			, (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrency)
+			, (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = @strPaymentMethod)
+			, (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = @strTerms)
+			, (SELECT TOP 1 ARS.intEntityId FROM tblARSalesperson ARS 
+					JOIN tblEMEntity EME ON ARS.intEntityId = EME.intEntityId 
+			   WHERE ARS.strSalespersonId = @strSalesperson OR 
+					 EME.strEntityNo = @strSalesperson)
+			, @strFLO
+			, @strTaxNumber
+			, (CASE WHEN LOWER(ISNULL(@strExemptAllTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END)
+			, (CASE WHEN @strTaxCounty <> '' THEN (SELECT TOP 1 intTaxCodeId FROM tblSMTaxCode WHERE strCounty = @strTaxCounty) ELSE @strTaxCounty END)
+			, @strVatNumber
+			, CASE WHEN ISNULL(@strEmployeeCount, '') <> '' AND ISNUMERIC(@strEmployeeCount) = 1 THEN @strEmployeeCount ELSE 0 END
+			, CASE WHEN ISNULL(@strRevenue, '') <> '' AND ISNUMERIC(@strRevenue) = 1 THEN @strRevenue ELSE 0 END
+			, CASE WHEN ISNULL(@strCreditLimit, '') <> '' AND ISNUMERIC(@strCreditLimit) = 1 THEN @strCreditLimit ELSE 0 END
+			, CASE WHEN ISNULL(@strCreditStopDays, '') <> '' AND ISNUMERIC(@strCreditStopDays) = 1 THEN @strCreditStopDays ELSE 0 END
+			, @strCreditCode
+			, CASE WHEN LOWER(ISNULL(@strActive, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strPORequired, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strCreditHold, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CAST(@strBudgetBeginDate as DATETIME)
+			, CASE WHEN ISNULL(@strBudgetMonthly, '') <> '' AND ISNUMERIC(@strBudgetMonthly) = 1 THEN @strBudgetMonthly ELSE 0 END
+			, CASE WHEN ISNULL(@strBudgetNoPeriod, '') <> '' AND ISNUMERIC(@strBudgetNoPeriod) = 1 THEN @strBudgetNoPeriod ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strBudgetTieCustomerAging, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strStatementDetail, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strStatementCreditLimit, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, @strStatementFormat
+			, (CASE WHEN @strServiceCharge <> '' THEN (SELECT TOP 1 intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode = @strServiceCharge) ELSE @strTaxCounty END)
+			, @strLastServiceChargeDate
+			, CASE WHEN LOWER(ISNULL(@strApplyPrepaidTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strApplySalesTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strCalculateAutoFreight, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, @strUpdateQuote
+			, CASE WHEN ISNULL(@strDiscountSchedule, '') <> '' AND ISNUMERIC(@strDiscountSchedule) = 1 THEN @strDiscountSchedule ELSE 0 END
+			, @strPrintInvoice
+			, @strLinkCustomerNumber
+			, @strReferencebyCustomer
+			, CASE WHEN LOWER(ISNULL(@strSpecialPriceGroup, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strExcludeDunningLetter, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strReceivedSignedLicense, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strPrintPriceOnPickTicket, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, CASE WHEN LOWER(ISNULL(@strIncludeNameInAddress, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+			, @intLocationId
+			, @intLocationId
+			, 0
+			, @strCustomerNumber
+			, @guiApiUniqueId
 
-	IF @strPhone <> ''
-	BEGIN			
-		INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone)
-		select @intContactId, @strPhone
-	END
+			IF @strPhone <> ''
+			BEGIN			
+				INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone)
+				select @intContactId, @strPhone
+			END
 
-	IF @strMobileNo <> ''
-	BEGIN			
-		INSERT INTO tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
-		SELECT @intContactId, @strMobileNo, null
-	END
+			IF @strMobileNo <> ''
+			BEGIN			
+				INSERT INTO tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
+				SELECT @intContactId, @strMobileNo, null
+			END
 
-	IF(@strStatus <> '')
-	BEGIN
-		INSERT INTO tblARCustomerAccountStatus( intEntityCustomerId, intAccountStatusId)
-		SELECT @intEntityId, (SELECT TOP 1 intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode = @strStatus)
-	END
+			IF(@strStatus <> '')
+			BEGIN
+				INSERT INTO tblARCustomerAccountStatus( intEntityCustomerId, intAccountStatusId)
+				SELECT @intEntityId, (SELECT TOP 1 intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode = @strStatus)
+			END
 			
-	IF @strCurrentSystem <> ''
-	BEGIN
-		INSERT INTO tblARCustomerCompetitor(intEntityCustomerId, intEntityId)
-		SELECT @intEntityId, (SELECT TOP 1 EME.intEntityId FROM tblEMEntity EME join tblEMEntityType EMET ON EME.intEntityId = EMET.intEntityId and EMET.strType = 'Competitor' WHERE strName = @strCurrentSystem)
-	END
+			IF @strCurrentSystem <> ''
+			BEGIN
+				INSERT INTO tblARCustomerCompetitor(intEntityCustomerId, intEntityId)
+				SELECT @intEntityId, (SELECT TOP 1 EME.intEntityId FROM tblEMEntity EME join tblEMEntityType EMET ON EME.intEntityId = EMET.intEntityId and EMET.strType = 'Competitor' WHERE strName = @strCurrentSystem)
+			END
+		END
+	ELSE
+		BEGIN
+			SET @ysnNew = 0
+
+			UPDATE tblEMEntity
+			SET strName				= @strCustomerName
+			  , dtmOriginationDate	= CASE WHEN ISNULL(@strOriginationDate, '') <> '' THEN CASE WHEN ISDATE(@strOriginationDate) = 1 THEN CAST(@strOriginationDate AS DATETIME) ELSE GETDATE() END ELSE GETDATE() END
+			  , strDocumentDelivery = @strDocumentDelivery
+			  , strExternalERPId	= @strExternalERP
+			  , strFederalTaxId 	= @strFederalTax
+			  , strStateTaxId		= @strStateTax
+			WHERE intEntityId = @intEntityId
+
+			SELECT @intLocationId = EL.intEntityLocationId
+			FROM tblEMEntityLocation EL
+			WHERE EL.intEntityId = @intEntityId
+			  AND EL.strLocationName = @strLocationName
+			
+			IF @intLocationId IS NULL
+			BEGIN 
+				SELECT @intLocationId = ISNULL(ISNULL(E.intDefaultLocationId, C.intDefaultLocationId), intBillToId)
+				FROM tblARCustomer C
+				INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
+				WHERE E.intEntityId = @intEntityId
+			END 
+
+			UPDATE tblEMEntityLocation
+			SET strCheckPayeeName = @strPrintedName
+			WHERE intEntityLocationId = @intLocationId
+
+			UPDATE ETCE
+			SET strName = @strContactName
+			FROM tblEMEntity E
+			INNER JOIN tblEMEntityToContact ETC ON E.intEntityId = E.intEntityId
+			INNER JOIN tblEMEntity ETCE ON ETC.intEntityContactId = ETCE.intEntityId
+			WHERE E.intEntityId = @intEntityId
+			  AND ETC.intEntityLocationId = @intLocationId
+			
+			UPDATE tblARCustomer
+			SET   strType						= (CASE WHEN ISNULL(@strType, '') NOT IN ('Company', 'Person') THEN 'Company' ELSE @strType END)
+				, strAccountNumber				= @strAccountNo
+				, intCurrencyId					= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrency)
+				, intPaymentMethodId			= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = @strPaymentMethod)
+				, intTermsId					= (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = @strTerms)
+				, intSalespersonId				= (SELECT TOP 1 ARS.intEntityId FROM tblARSalesperson ARS 
+														JOIN tblEMEntity EME ON ARS.intEntityId = EME.intEntityId 
+												   WHERE ARS.strSalespersonId = @strSalesperson OR 
+														 EME.strEntityNo = @strSalesperson)
+				, strFLOId						= @strFLO
+				, strTaxNumber					= @strTaxNumber
+				, ysnTaxExempt					= (CASE WHEN LOWER(ISNULL(@strExemptAllTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END)
+				, intTaxCodeId					= (CASE WHEN @strTaxCounty <> '' THEN (SELECT TOP 1 intTaxCodeId FROM tblSMTaxCode WHERE strCounty = @strTaxCounty) ELSE @strTaxCounty END)
+				, strVatNumber					= @strVatNumber
+				, intEmployeeCount				= CASE WHEN ISNULL(@strEmployeeCount, '') <> '' AND ISNUMERIC(@strEmployeeCount) = 1 THEN @strEmployeeCount ELSE 0 END
+				, dblRevenue					= CASE WHEN ISNULL(@strRevenue, '') <> '' AND ISNUMERIC(@strRevenue) = 1 THEN @strRevenue ELSE 0 END
+				, dblCreditLimit				= CASE WHEN ISNULL(@strCreditLimit, '') <> '' AND ISNUMERIC(@strCreditLimit) = 1 THEN @strCreditLimit ELSE 0 END
+				, intCreditStopDays				= CASE WHEN ISNULL(@strCreditStopDays, '') <> '' AND ISNUMERIC(@strCreditStopDays) = 1 THEN @strCreditStopDays ELSE 0 END
+				, strCreditCode					= @strCreditCode
+				, ysnActive						= CASE WHEN LOWER(ISNULL(@strActive, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnPORequired					= CASE WHEN LOWER(ISNULL(@strPORequired, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnCreditHold					= CASE WHEN LOWER(ISNULL(@strCreditHold, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, dtmBudgetBeginDate			= CAST(@strBudgetBeginDate as DATETIME)
+				, dblMonthlyBudget				= CASE WHEN ISNULL(@strBudgetMonthly, '') <> '' AND ISNUMERIC(@strBudgetMonthly) = 1 THEN @strBudgetMonthly ELSE 0 END
+				, intNoOfPeriods				= CASE WHEN ISNULL(@strBudgetNoPeriod, '') <> '' AND ISNUMERIC(@strBudgetNoPeriod) = 1 THEN @strBudgetNoPeriod ELSE 0 END
+				, ysnCustomerBudgetTieBudget	= CASE WHEN LOWER(ISNULL(@strBudgetTieCustomerAging, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnStatementDetail			= CASE WHEN LOWER(ISNULL(@strStatementDetail, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnStatementCreditLimit		= CASE WHEN LOWER(ISNULL(@strStatementCreditLimit, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, strStatementFormat			= @strStatementFormat
+				, intServiceChargeId			= (CASE WHEN @strServiceCharge <> '' THEN (SELECT TOP 1 intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode = @strServiceCharge) ELSE @strTaxCounty END)
+				, dtmLastServiceCharge			= @strLastServiceChargeDate
+				, ysnApplyPrepaidTax			= CASE WHEN LOWER(ISNULL(@strApplyPrepaidTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnApplySalesTax				= CASE WHEN LOWER(ISNULL(@strApplySalesTax, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnCalcAutoFreight			= CASE WHEN LOWER(ISNULL(@strCalculateAutoFreight, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, strUpdateQuote				= @strUpdateQuote
+				, strDiscSchedule				= CASE WHEN ISNULL(@strDiscountSchedule, '') <> '' AND ISNUMERIC(@strDiscountSchedule) = 1 THEN @strDiscountSchedule ELSE 0 END
+				, strPrintInvoice				= @strPrintInvoice
+				, strLinkCustomerNumber			= @strLinkCustomerNumber
+				, intReferredByCustomer			= @strReferencebyCustomer
+				, ysnSpecialPriceGroup			= CASE WHEN LOWER(ISNULL(@strSpecialPriceGroup, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnExcludeDunningLetter		= CASE WHEN LOWER(ISNULL(@strExcludeDunningLetter, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnReceivedSignedLiscense		= CASE WHEN LOWER(ISNULL(@strReceivedSignedLicense, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnPrintPriceOnPrintTicket	= CASE WHEN LOWER(ISNULL(@strPrintPriceOnPickTicket, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, ysnIncludeEntityName			= CASE WHEN LOWER(ISNULL(@strIncludeNameInAddress, '')) IN ( '1','y','yes','true') THEN 1 ELSE 0 END
+				, intBillToId					= CASE WHEN @intLocationId IS NULL THEN intBillToId ELSE @intLocationId END
+				, intShipToId					= CASE WHEN @intLocationId IS NULL THEN intShipToId ELSE @intLocationId END
+				, strCustomerNumber				= @strCustomerNumber
+			WHERE intEntityId = @intEntityId
+		END
 
 	INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 	SELECT
@@ -795,7 +898,7 @@ SELECT
 		, strLogLevel = 'Info'
 		, strStatus = 'Success'
 		, intRowNo = @intRowNumber
-		, strMessage = 'The record was imported successfully.'
+		, strMessage = CASE WHEN @ysnNew = 1 THEN 'The record was imported successfully.' ELSE 'The record was updated successfully.' END
 	FROM tblApiSchemaCustomer SC
 	WHERE guiApiUniqueId = @guiApiUniqueId
 	
@@ -868,6 +971,7 @@ SELECT
 		, @strPhone
 		, @strMobileNo
 		, @strCurrentSystem
+		, @strContactName
 		, @intRowNumber
 END
 
