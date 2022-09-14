@@ -95,22 +95,21 @@ BEGIN TRY
 			UPPER(F.strItemNo) as strLineItemNo,
 			UPPER(F.strItemDescription) as strLineItemDescription,
 			F.dblContracted as dblLineItemQytSold,
-			CAST(E.dblQtyShipped as NUMERIC(36,6)) as dblLineItemQytShipped,
+			CAST(ISNULL(E.dblQtyShipped,0) as NUMERIC(36,6)) as dblLineItemQytShipped,
 			UPPER(F.strUnitMeasure) as strLineUnitMeasure,
 			UPPER(GA.strSymbol) as strLineSymbolSold,
 			UPPER(G.strSymbol) as strLineSymbolShipped,
-			E.dblPrice as dblLinePrice,
-			CAST(ROUND(E.dblTotal,2) as NUMERIC(36,2)) as dblLineTotal,
+			ISNULL(E.dblPrice,F.dblPrice) as dblLinePrice,
+			CAST(ROUND(ISNULL(E.dblTotal,F.dblTotal),2) as NUMERIC(36,2)) as dblLineTotal,
 			UPPER(F.strContractNumber) as strContractNumber,
 			F.intItemContractHeaderId,
 			F.intItemContractDetailId
-
 			FROM vyuCTItemContractHeader A 
 					LEFT JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 					LEFT JOIN tblEMEntityLocation C ON A.intEntityId = C.intEntityId
 					LEFT JOIN tblARCustomer D ON A.intEntityId = D.intEntityId
 					LEFT JOIN tblARInvoiceDetail E ON A.intItemContractHeaderId = E.intItemContractHeaderId
-					LEFT JOIN vyuCTItemContractDetail F ON E.intItemContractDetailId = F.intItemContractDetailId
+					LEFT JOIN vyuCTItemContractDetail F ON ISNULL(E.intItemContractDetailId,F.intItemContractDetailId) = F.intItemContractDetailId AND F.intItemContractHeaderId = A.intItemContractHeaderId
 					LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = E.intItemUOMId
 					LEFT JOIN tblICUnitMeasure G ON IU.intUnitMeasureId = G.intUnitMeasureId
 					LEFT JOIN tblICItemUOM IUA ON IUA.intItemUOMId = F.intItemUOMId
@@ -182,4 +181,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
-GO
