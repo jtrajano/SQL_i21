@@ -446,4 +446,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\17_TR\02_CleanUp_TR_Data.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\2010_TemporaryDecryptPasswords.sql" />
+  </ItemGroup>
 </Project>
