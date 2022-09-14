@@ -45,8 +45,16 @@ SELECT
 	,ASTR.intConcurrencyId
 	,ASTR.intCreatedUserId
 	,ASTR.intParentAdjustSettlementId
-	,intBillId = CASE WHEN ASTR.intTypeId = 1 THEN AP.intBillId ELSE AR.intInvoiceId END
-	,strBillId = CASE WHEN ASTR.intTypeId = 1 THEN AP.strBillId ELSE AR.strInvoiceNumber END
+	,strBillNumbers = CASE
+						WHEN ASTR.intTypeId = 1 THEN 
+							ISNULL(CAST(ASTR.intBillId AS NVARCHAR),_strBillIds.strBillIds) 
+						ELSE ISNULL(CAST(ASTR.intBillId AS NVARCHAR),_strBillIdsInvoice.strBillIds) 
+					END
+	,strBillId = CASE 
+					WHEN ASTR.intTypeId = 1 THEN 
+						ISNULL(AP.strBillId,STUFF(_strVoucherNumbers.strVoucherNumbers,1,1,'')) 
+					ELSE ISNULL(AR.strInvoiceNumber,STUFF(_strInvoiceNumbers.strInvoiceNumbers,1,1,''))
+				END
 	,ysnBillPosted = CASE WHEN ASTR.intTypeId = 1 THEN AP.ysnPosted ELSE AR.ysnPosted END
 	,ysnBillPaid = CASE WHEN ASTR.intTypeId = 1 THEN AP.ysnPaid ELSE AR.ysnPaid END
 FROM tblGRAdjustSettlements ASTR
@@ -75,4 +83,36 @@ LEFT JOIN tblAPBill AP
 	ON (AP.intBillId = ASTR.intBillId AND ASTR.intTypeId = 1)
 LEFT JOIN tblARInvoice AR
 	ON (AR.intInvoiceId = ASTR.intBillId AND ASTR.intTypeId = 2)
+OUTER APPLY (
+	SELECT (
+		SELECT CONVERT(VARCHAR(40), intBillId) + '|^|'
+		FROM tblGRAdjustSettlementsSplit
+		WHERE intAdjustSettlementId = ASTR.intAdjustSettlementId
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strBillIds
+) AS _strBillIds
+OUTER APPLY (
+	SELECT (
+		SELECT ',' + AP.strBillId
+		FROM tblGRAdjustSettlementsSplit ADJS
+		INNER JOIN tblAPBill AP
+			ON AP.intBillId = ADJS.intBillId
+		WHERE ADJS.intAdjustSettlementId = ASTR.intAdjustSettlementId
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strVoucherNumbers
+) AS _strVoucherNumbers
+OUTER APPLY (
+	SELECT (
+		SELECT CONVERT(VARCHAR(40), intBillId) + '|^|'
+		FROM tblGRAdjustSettlementsSplit
+		WHERE intAdjustSettlementId = ASTR.intAdjustSettlementId
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strBillIds
+) AS _strBillIdsInvoice
+OUTER APPLY (
+	SELECT (
+		SELECT ',' + AR.strInvoiceNumber
+		FROM tblGRAdjustSettlementsSplit ADJS
+		INNER JOIN tblARInvoice AR
+			ON AR.intInvoiceId = ADJS.intBillId
+		WHERE ADJS.intAdjustSettlementId = ASTR.intAdjustSettlementId
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strInvoiceNumbers
+) AS _strInvoiceNumbers
 GO

@@ -5,7 +5,8 @@
 	,@intContractDetailId INT = NULL
 	,@intAdjustmentTypeId INT
 	,@AdjustSettlementsStagingTable AdjustSettlementsStagingTable READONLY
-	,@intBillId INT OUTPUT
+	,@intBillId INT NULL OUTPUT
+	,@BillIds NVARCHAR(MAX) NULL OUTPUT
 )
 AS
 BEGIN
@@ -59,7 +60,7 @@ BEGIN
 									WHEN @intAdjustmentTypeId IN (2,3) THEN 
 										CASE WHEN ADJ.dblAdjustmentAmount < 0 THEN 3 /*DM*/ ELSE 1 END --BL
 								END
-		,intEntityVendorId		= ADJ.intEntityId
+		,intEntityVendorId		= CASE WHEN ADJ.intSplitId IS NULL THEN ADJ.intEntityId ELSE EM.intEntityId END
 		,intShipToId			= ADJ.intCompanyLocationId
 		,intItemId				= CASE 
 									WHEN @intAdjustmentTypeId = 1 THEN CD.intItemId
@@ -70,7 +71,7 @@ BEGIN
 									WHEN @intAdjustmentTypeId = 1 AND ADJ.intContractDetailId IS NOT NULL THEN ROUND(ADJ.dblAdjustmentAmount / CD.dblCashPrice,6)
 									WHEN @intAdjustmentTypeId = 2 THEN
 										CASE 
-											WHEN ISNULL(ADJ.dblFreightUnits,0) > 0 THEN ADJ.dblFreightUnits
+											WHEN ISNULL(ADJ.dblFreightUnits,0) <> 0 AND ADJ.dblFreightSettlement = ADJ.dblAdjustmentAmount THEN ADJ.dblFreightUnits
 											ELSE 1
 										END
 									ELSE 1 --3
@@ -79,7 +80,7 @@ BEGIN
 									WHEN @intAdjustmentTypeId = 1 AND ADJ.intContractDetailId IS NOT NULL THEN ROUND(ADJ.dblAdjustmentAmount / CD.dblCashPrice,6)
 									WHEN @intAdjustmentTypeId = 2 THEN
 										CASE 
-											WHEN ISNULL(ADJ.dblFreightUnits,0) > 0 THEN ADJ.dblFreightUnits
+											WHEN ISNULL(ADJ.dblFreightUnits,0) <> 0 AND ADJ.dblFreightSettlement = ADJ.dblAdjustmentAmount THEN ADJ.dblFreightUnits
 											ELSE 1
 										END
 									ELSE 1 --3
@@ -88,10 +89,10 @@ BEGIN
 									WHEN @intAdjustmentTypeId = 1 THEN ISNULL(CD.dblCashPrice,ADJ.dblAdjustmentAmount)
 									WHEN @intAdjustmentTypeId = 2 THEN
 										CASE 
-											WHEN ISNULL(ADJ.dblFreightRate,0) > 0 THEN ADJ.dblFreightRate
+											WHEN ISNULL(ADJ.dblFreightRate,0) <> 0 AND ADJ.dblFreightSettlement = ADJ.dblAdjustmentAmount THEN ABS(ADJ.dblFreightRate)
 											ELSE ABS(ADJ.dblAdjustmentAmount)
 										END
-									ELSE ABS(ADJ.dblAdjustmentAmount)
+									ELSE CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ADJ.dblAdjustmentAmount) ELSE (ABS(ADJ.dblAdjustmentAmount) * (ESD.dblSplitPercent / 100)) END
 								END
 		,intAccountId			= intGLAccountId
 		,strVendorOrderNumber	= strTicketNumber
@@ -130,11 +131,20 @@ BEGIN
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = CD.intItemId
-	)
-	ON CD.intContractDetailId = ADJ.intContractDetailId
+	) ON CD.intContractDetailId = ADJ.intContractDetailId
+	LEFT JOIN (
+		tblEMEntitySplit ES
+		INNER JOIN tblEMEntitySplitDetail ESD
+			ON ESD.intSplitId = ES.intSplitId
+		INNER JOIN tblEMEntity EM
+			ON EM.intEntityId = ESD.intEntityId
+	) ON ES.intSplitId = ADJ.intSplitId	
 	LEFT JOIN tblICItem ICF
 		ON ICF.intItemId = @intFreightItemId
-		select '@voucherPayable',* from @voucherPayable
+		--select '@voucherPayable',* from @voucherPayable
+
+	UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1, dblOrderQty = dblOrderQty * -1 WHERE dblQuantityToBill < 0 AND intTransactionType = 1
+
 	EXEC uspAPCreateVoucher
 		@voucherPayables = @voucherPayable
 		,@voucherPayableTax = @voucherPayableTax
@@ -143,12 +153,29 @@ BEGIN
 		,@error = @ErrMsg
 		,@createdVouchersId = @createdVouchersId OUTPUT
 
-		SELECT * FROM tblAPBill ORDER BY intBillId DESC
-
 	IF @createdVouchersId IS NOT NULL
 	BEGIN
-		SET @intBillId = CAST(@createdVouchersId AS int)
+		IF @createdVouchersId NOT LIKE '%,%'
+		BEGIN
+			SET @intBillId = CAST(@createdVouchersId AS INT)
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblGRAdjustSettlementsSplit
+			(
+				intAdjustSettlementId
+				,intBillId
+			)
+			SELECT intAdjustSettlementId
+				,BL.value
+			FROM @AdjustSettlementsStagingTable A
+			OUTER APPLY (
+				SELECT * FROM dbo.fnCommaSeparatedValueToTable(@createdVouchersId)
+			) BL
+
+			SET @BillIds = @createdVouchersId
+		END
 	END
 
-	RETURN @intBillId;
+	--RETURN @intBillId;
 END

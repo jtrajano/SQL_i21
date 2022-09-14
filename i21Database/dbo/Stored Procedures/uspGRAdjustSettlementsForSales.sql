@@ -4,6 +4,7 @@
 	,@intItemId INT
 	,@AdjustSettlementsStagingTable AdjustSettlementsStagingTable READONLY
 	,@intInvoiceId INT OUTPUT
+	,@InvoiceIds NVARCHAR(MAX) OUTPUT
 )
 AS
 BEGIN
@@ -38,6 +39,7 @@ BEGIN
 		,[strType]
 		,[strSourceTransaction]
 		,[intAccountId]
+		,[intSalesAccountId]
 		,[intSourceId]
 		,[strSourceId]
 		,[intInvoiceId]
@@ -66,12 +68,13 @@ BEGIN
 		[strTransactionType]			= CASE WHEN ADJ.dblAdjustmentAmount < 0 THEN 'Credit Memo' ELSE 'Invoice' END
 		,[strType]						= 'Standard'
 		,[strSourceTransaction]			= 'Direct'
-		,[intAccountId]					= intGLAccountId
+		,[intAccountId]					= CL.intARAccount
+		,[intSalesAccountId]			= ADJ.intGLAccountId
 		,[intSourceId]					= NULL
 		,[strSourceId]					= ''
 		,[intInvoiceId]					= NULL
-		,[intEntityCustomerId]			= ADJ.intEntityId
-		,[intCompanyLocationId]			= intCompanyLocationId
+		,[intEntityCustomerId]			= CASE WHEN ADJ.intSplitId IS NULL THEN ADJ.intEntityId ELSE EM.intEntityId END
+		,[intCompanyLocationId]			= ADJ.intCompanyLocationId
 		,[intCurrencyId]				= @intCurrencyId
 		,[intTermId]					= AR.intTermsId
 		,[dtmDate]						= dtmAdjustmentDate
@@ -86,11 +89,33 @@ BEGIN
 		,[strItemDescription]			= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ICF.strDescription ELSE ADJ.strAdjustSettlementNumber END
 		,[intOrderUOMId]				= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN UOM.intItemUOMId ELSE NULL END
 		,[intItemUOMId]					= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN UOM.intItemUOMId ELSE NULL END
-		,[dblQtyOrdered]				= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ADJ.dblFreightUnits ELSE 1 END
-		,[dblQtyShipped]				= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ADJ.dblFreightUnits ELSE 1 END
-		,[dblPrice]						= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN ADJ.dblFreightRate ELSE ABS(dblAdjustmentAmount) END
+		,[dblQtyOrdered]				= CASE 
+											WHEN ADJ.intAdjustmentTypeId = 2 THEN
+												CASE 
+													WHEN ISNULL(ADJ.dblFreightUnits,0) <> 0 AND ADJ.dblFreightSettlement = ADJ.dblAdjustmentAmount THEN ADJ.dblFreightUnits
+													ELSE 1
+												END
+											ELSE 1 --3 
+										END
+		,[dblQtyShipped]				= CASE 
+											WHEN ADJ.intAdjustmentTypeId = 2 THEN
+												CASE 
+													WHEN ISNULL(ADJ.dblFreightUnits,0) <> 0 AND ADJ.dblFreightSettlement = ADJ.dblAdjustmentAmount THEN ADJ.dblFreightUnits
+													ELSE 1
+												END
+											ELSE 1 --3 
+										END
+		,[dblPrice]						= CASE WHEN ADJ.intAdjustmentTypeId = 2 THEN
+											CASE 
+												WHEN ISNULL(ADJ.dblFreightRate,0) <> 0 AND ADJ.dblFreightSettlement = ADJ.dblAdjustmentAmount THEN ABS(ADJ.dblFreightRate)
+												ELSE ABS(ADJ.dblAdjustmentAmount)
+											END
+											ELSE CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ADJ.dblAdjustmentAmount) ELSE (ABS(ADJ.dblAdjustmentAmount) * (ESD.dblSplitPercent / 100)) END 
+										END
 		,[ysnRecomputeTax]				= 1
 	FROM @AdjustSettlementsStagingTable ADJ
+	JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = ADJ.intCompanyLocationId
 	LEFT JOIN tblARCustomer AR
 		ON AR.intEntityId = ADJ.intEntityId
 	LEFT JOIN (
@@ -100,8 +125,15 @@ BEGIN
 				AND UOM.ysnStockUnit = 1
 		)
 		ON ICF.intItemId = @intFreightItemId
+	LEFT JOIN (
+		tblEMEntitySplit ES
+		INNER JOIN tblEMEntitySplitDetail ESD
+			ON ESD.intSplitId = ES.intSplitId
+		INNER JOIN tblEMEntity EM
+			ON EM.intEntityId = ESD.intEntityId
+	) ON ES.intSplitId = ADJ.intSplitId	
 
-		--SELECT '@EntriesForInvoice',* FROM @EntriesForInvoice
+		--SELECT '@EntriesForInvoice',intAccountId,intSalesAccountId,* FROM @EntriesForInvoice
 
 	EXEC [dbo].[uspARProcessInvoices] 
 		@InvoiceEntries = @EntriesForInvoice
@@ -111,8 +143,32 @@ BEGIN
 		,@RaiseError = 1
 		,@ErrorMessage = @ErrorMessage OUTPUT
 		,@CreatedIvoices = @CreatedInvoices OUTPUT
+		
+	IF @CreatedInvoices IS NOT NULL
+	BEGIN
+		IF @CreatedInvoices NOT LIKE '%,%'
+		BEGIN
+			SELECT @intInvoiceId = intID FROM fnGetRowsFromDelimitedValues(@CreatedInvoices)
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblGRAdjustSettlementsSplit
+			(
+				intAdjustSettlementId
+				,intBillId
+			)
+			SELECT intAdjustSettlementId
+				,AR.value
+			FROM @AdjustSettlementsStagingTable A
+			OUTER APPLY (
+				SELECT * FROM dbo.fnCommaSeparatedValueToTable(@CreatedInvoices)
+			) AR
 
-	SELECT @intInvoiceId = intID FROM fnGetRowsFromDelimitedValues(@CreatedInvoices)
+			SET @InvoiceIds = @CreatedInvoices
+		END
+	END
+
+	
 
 	RETURN;
 END

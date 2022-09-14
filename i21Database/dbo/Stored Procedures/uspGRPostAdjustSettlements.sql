@@ -16,6 +16,7 @@ DECLARE @intUserId INT
 DECLARE @intEntityId INT
 DECLARE @intContractDetailId INT
 DECLARE @intBillId INT
+DECLARE @BillIds NVARCHAR(MAX)
 DECLARE @success AS BIT
 DECLARE @intItemId INT
 
@@ -154,22 +155,23 @@ BEGIN
 		,@intAdjustmentTypeId = @intAdjustmentTypeId
 		,@AdjustSettlementsStagingTable = @AdjustSettlementsStagingTable
 		,@intBillId = @intBillId OUTPUT
+		,@BillIds = @BillIds OUTPUT
 
 	UPDATE tblGRAdjustSettlements SET intBillId = @intBillId WHERE intAdjustSettlementId = @intAdjustSettlementId
-	
-	IF (SELECT ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId) = 1
-	BEGIN
-		EXEC [dbo].[uspAPPostBill] 
-			@post = 1
-			,@recap = 0
-			,@isBatch = 0
-			,@param = @intBillId
-			,@userId = @intUserId
-			,@transactionType = NULL
-			,@success = @success OUTPUT
 
-		UPDATE tblGRAdjustSettlements SET ysnPosted = 1 WHERE intAdjustSettlementId = @intAdjustSettlementId
-	END
+	DECLARE @param NVARCHAR(MAX)
+	SET @param = CASE WHEN @intBillId IS NULL THEN @BillIds ELSE CAST(@intBillId AS NVARCHAR) END
+
+	EXEC [dbo].[uspAPPostBill] 
+		@post = 1
+		,@recap = 0
+		,@isBatch = 0
+		,@param = @param
+		,@userId = @intUserId
+		,@transactionType = NULL
+		,@success = @success OUTPUT
+
+	UPDATE tblGRAdjustSettlements SET ysnPosted = 1 WHERE intAdjustSettlementId = @intAdjustSettlementId
 
 	IF @ysnTransferSettlement = 1
 	BEGIN
@@ -186,16 +188,17 @@ BEGIN
 		,@intItemId = @intItemId
 		,@AdjustSettlementsStagingTable = @AdjustSettlementsStagingTable
 		,@intInvoiceId = @intBillId OUTPUT
+		,@InvoiceIds = @BillIds OUTPUT
 
 	UPDATE tblGRAdjustSettlements SET intBillId = @intBillId WHERE intAdjustSettlementId = @intAdjustSettlementId
 	
-	IF ISNULL(@intBillId,0) > 0
+	IF ISNULL(@intBillId,0) > 0 OR @BillIds IS NOT NULL
 	BEGIN
-		SET @strBillId = CAST(@intBillId AS NVARCHAR(40))
-		EXEC dbo.uspARPostInvoice @param = @strBillId, @post = 1, @recap = 0, @userId = @intUserId, @raiseError = 1
-
-		UPDATE tblGRAdjustSettlements SET ysnPosted = 1 WHERE intAdjustSettlementId = @intAdjustSettlementId
+		SET @strBillId = CASE WHEN @intBillId IS NOT NULL THEN CAST(@intBillId AS NVARCHAR(40)) ELSE @BillIds END
+		EXEC dbo.uspARPostInvoice @param = @strBillId, @post = 1, @recap = 0, @userId = @intUserId, @raiseError = 1		
 	END
+
+	UPDATE tblGRAdjustSettlements SET ysnPosted = 1 WHERE intAdjustSettlementId = @intAdjustSettlementId
 
 	IF @ysnTransferSettlement = 1
 	BEGIN
