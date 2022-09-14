@@ -39,7 +39,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ATTACHMENTS)
 		SELECT strName				= A.strName
 			 , strFileType			= A.strFileType
 			 , strFileIdentifier	= A.strFileIdentifier
-			 , strScreen			= 'GlobalComponentEngine.view.ActivityEmail'
+			 , strScreen			= 'SystemManager.view.ActivityEmail'
 			 , strRecordNo			= CAST(@intActivityId AS NVARCHAR(50))
 			 , dtmDateModified		= GETDATE()
 			 , intSize				= A.intSize

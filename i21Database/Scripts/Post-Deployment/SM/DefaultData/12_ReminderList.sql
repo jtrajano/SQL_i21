@@ -29,7 +29,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        1
 
 		END
@@ -57,7 +57,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        2
 
 		END
@@ -85,7 +85,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        3
 		END
 	ELSE
@@ -112,7 +112,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        4
 		END
 	ELSE
@@ -139,7 +139,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        5
 		END
 	ELSE
@@ -172,12 +172,12 @@ GO
 				[strType]        	=        N'General Journal',
 				[strMessage]		=        N'{0} {1} {2} left unposted.',
 				[strQuery]  		=        N'Select intJournalId FROM vyuGLPostRemind WHERE intEntityId = {0}',
-				[strNamespace]      =        N'i21.view.BatchPosting?module=General Ledger',--N'GeneralLedger.view.GeneralJournal?unposted=1',
+				[strNamespace]      =        N'SystemManager.view.BatchPosting?module=General Ledger',--N'GeneralLedger.view.GeneralJournal?unposted=1',
 				[intSort]           =        8
 	END	
 	ELSE
 	BEGIN
-		UPDATE [tblSMReminderList] SET [strNamespace] = 'i21.view.BatchPosting?module=General Ledger' 
+		UPDATE [tblSMReminderList] SET [strNamespace] = 'SystemManager.view.BatchPosting?module=General Ledger' 
 		WHERE [strReminder] = N'Post' AND [strType] = N'General Journal'
 	END
 
@@ -244,7 +244,7 @@ GO
 												WHERE  A.ysnCurrent = 1 AND                
 												A.strStatus = ''Waiting for Approval'' and 
 												(A.intApproverId = {0} OR B.intApproverId = {0})',
-				[strNamespace]		=        N'i21.view.Approval?activeTab=Pending',
+				[strNamespace]		=        N'SystemManager.view.Approval?activeTab=Pending',
 				[intSort]			=        11
 	END
 	ELSE
@@ -267,7 +267,7 @@ GO
 				[strMessage]        =        N'{0} Transaction(s) {2} approved.',
 				[strQuery]          =        N'select intApprovalId from tblSMApprovalHistory
 												where intEntityId = {0} and ysnApproved = 1 and ysnRead = 0',
-				[strNamespace]      =        N'i21.view.Approval?activeTab=Approved',
+				[strNamespace]      =        N'SystemManager.view.Approval?activeTab=Approved',
 				[intSort]           =        12
 
 	END
@@ -290,7 +290,7 @@ GO
 												and intEntityId not in (
 													select intEntityContactId from  tblEMEntityToContact where ysnPortalAccess = 1
 												)',
-                [strNamespace]      =        N'i21.view.Approval?activeTab=Closed',
+                [strNamespace]      =        N'SystemManager.view.Approval?activeTab=Closed',
                 [intSort]           =        13
     END
 	ELSE
@@ -316,12 +316,12 @@ GO
                                                 WHERE    ysnCurrent = 1 AND 
                                                         strStatus IN (''Waiting for Submit'') AND 
                                                         intSubmittedById= {0}',
-                [strNamespace]      =        N'i21.view.Approval?activeTab=Unsubmitted',
+                [strNamespace]      =        N'SystemManager.view.Approval?activeTab=Unsubmitted',
                 [intSort]           =        14
     END 
 	ELSE
 	BEGIN
-		UPDATE tblSMReminderList SET strNamespace = N'i21.view.Approval?activeTab=Unsubmitted'
+		UPDATE tblSMReminderList SET strNamespace = N'SystemManager.view.Approval?activeTab=Unsubmitted'
 		WHERE [strReminder] = N'Unsubmitted' AND [strType] = N'Transaction'
 	END  
   
@@ -334,7 +334,7 @@ GO
                 [strQuery]          =        N'select intEntityId from tblSMApprovalHistory              
 												where intEntityId = {0} and ysnRejected = 1 and ysnRead = 0              
 												and intEntityId not in (               select intEntityContactId from tblEMEntityToContact where ysnPortalAccess = 1              )',
-                [strNamespace]      =        N'i21.view.Approval?activeTab=Rejected',
+                [strNamespace]      =        N'SystemManager.view.Approval?activeTab=Rejected',
                 [intSort]           =        15
     END
 	ELSE
@@ -389,7 +389,7 @@ GO
 															 WHEN strReminder = ''1 week'' THEN DATEADD(WEEK, -1, dtmStartDate)
 															 WHEN strReminder = ''2 weeks'' THEN DATEADD(WEEK, -2, dtmStartDate)
 														END <= GETUTCDATE()',
-                [strNamespace]      =        N'GlobalComponentEngine.view.ActivityReminder',
+                [strNamespace]      =        N'SystemManager.view.ActivityReminder',
                 [intSort]           =        1
     END
 	ELSE
@@ -456,7 +456,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        17
 		END
 	ELSE
@@ -483,7 +483,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        1
 
 		END
@@ -511,7 +511,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        1
 
 		END
@@ -539,7 +539,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        1
 
 		END
@@ -567,7 +567,7 @@ GO
 												  'AND intEntityId = {0} ' +
 												  'AND DATEDIFF(DAY, GETDATE(), dtmNextProcess) > 0 ' +
 												  'AND DATEDIFF(DAY, GETDATE(), DATEADD(DAY, intWarningDays * -1 , dtmNextProcess)) <= 0 ',
-				   [strNamespace]       =        N'i21.view.RecurringTransaction', 
+				   [strNamespace]       =        N'SystemManager.view.RecurringTransaction', 
 				   [intSort]            =        1
 
 		END
@@ -593,7 +593,7 @@ GO
 															(SELECT intEntityId 
 																FROM tblSMUserSecurity 
 																WHERE intEntityId = {0} AND ysnAdmin = 1))',
-					[strNamespace]		=        N'GlobalComponentEngine.view.LockedRecord',
+					[strNamespace]		=        N'SystemManager.view.LockedRecord',
 					[intSort]			=        1
 		END
 	ELSE

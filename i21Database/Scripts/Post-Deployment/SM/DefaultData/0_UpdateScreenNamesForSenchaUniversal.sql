@@ -1,8 +1,106 @@
 ﻿GO
+PRINT '*** Start Updating strTransactionType on tblSMAuditLog ***'
+GO
+
+UPDATE tblSMAuditLog 
+SET	tblSMAuditLog.strTransactionType = CASE WHEN (CHARINDEX('i21', tblSMAuditLog.strTransactionType) > 0)
+                            THEN REPLACE(tblSMAuditLog.strTransactionType, 'i21', 'SystemManager')
+                            ELSE REPLACE(tblSMAuditLog.strTransactionType, 'GlobalComponentEngine', 'SystemManager') END
+FROM tblSMAuditLog AS tblSMAuditLog
+WHERE tblSMAuditLog.strTransactionType LIKE '%i21%'
+	OR tblSMAuditLog.strTransactionType LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strTransactionType on tblSMAuditLog ***'
+GO
+
+PRINT '*** Start Updating strScreen on tblSMComment ***'
+GO
+
+UPDATE tblSMComment 
+SET	tblSMComment.strScreen = CASE WHEN (CHARINDEX('i21', tblSMComment.strScreen) > 0)
+                            THEN REPLACE(tblSMComment.strScreen, 'i21', 'SystemManager')
+                            ELSE REPLACE(tblSMComment.strScreen, 'GlobalComponentEngine', 'SystemManager') END
+FROM tblSMComment AS tblSMComment
+WHERE tblSMComment.strScreen LIKE '%i21%'
+	OR tblSMComment.strScreen LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strScreen on tblSMComment ***'
+GO
+
+PRINT '*** Start Updating strScreen on tblSMAttachment ***'
+GO
+
+UPDATE tblSMAttachment 
+SET	tblSMAttachment.strScreen = CASE WHEN (CHARINDEX('i21', tblSMAttachment.strScreen) > 0)
+                            THEN REPLACE(tblSMAttachment.strScreen, 'i21', 'SystemManager')
+                            ELSE REPLACE(tblSMAttachment.strScreen, 'GlobalComponentEngine', 'SystemManager') END
+FROM tblSMAttachment AS tblSMAttachment
+WHERE tblSMAttachment.strScreen LIKE '%i21%'
+	OR tblSMAttachment.strScreen LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strScreen on tblSMAttachment ***'
+GO
+
+PRINT '*** Start Updating strScreen on tblSMGridLayout ***'
+GO
+
+UPDATE tblSMGridLayout 
+SET	tblSMGridLayout.strScreen = CASE WHEN (CHARINDEX('i21', tblSMGridLayout.strScreen) > 0)
+                            THEN REPLACE(tblSMGridLayout.strScreen, 'i21', 'SystemManager')
+                            ELSE REPLACE(tblSMGridLayout.strScreen, 'GlobalComponentEngine', 'SystemManager') END
+FROM tblSMGridLayout AS tblSMGridLayout
+WHERE tblSMGridLayout.strScreen LIKE '%i21%'
+	OR tblSMGridLayout.strScreen LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strScreen on tblSMGridLayout ***'
+GO
+
+PRINT '*** Start Updating strScreen on tblSMGridLayout ***'
+GO
+
+UPDATE tblSMCompanyGridLayout 
+SET	tblSMCompanyGridLayout.strScreen = CASE WHEN (CHARINDEX('i21', tblSMCompanyGridLayout.strScreen) > 0)
+                            THEN REPLACE(tblSMCompanyGridLayout.strScreen, 'i21', 'SystemManager')
+                            ELSE REPLACE(tblSMCompanyGridLayout.strScreen, 'GlobalComponentEngine', 'SystemManager') END
+FROM tblSMCompanyGridLayout AS tblSMCompanyGridLayout
+WHERE tblSMCompanyGridLayout.strScreen LIKE '%i21%'
+	OR tblSMCompanyGridLayout.strScreen LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strScreen on tblSMGridLayout ***'
+GO
+
+PRINT '*** Start Updating strScreen on tblSMEmail ***'
+GO
+
+UPDATE tblSMEmail 
+SET	tblSMEmail.strScreen = CASE WHEN (CHARINDEX('i21', tblSMEmail.strScreen) > 0)
+                            THEN REPLACE(tblSMEmail.strScreen, 'i21', 'SystemManager')
+                            ELSE REPLACE(tblSMEmail.strScreen, 'GlobalComponentEngine', 'SystemManager') END
+FROM tblSMEmail AS tblSMEmail
+WHERE tblSMEmail.strScreen LIKE '%i21%'
+	OR tblSMEmail.strScreen LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strScreen on tblSMEmail ***'
+GO
+
+PRINT '*** Start Updating strScreen on tblSMReminderList ***'
+GO
+
+UPDATE tblSMReminderList 
+SET	tblSMReminderList.strNamespace = CASE WHEN (CHARINDEX('i21', tblSMReminderList.strNamespace) > 0)
+                            THEN REPLACE(tblSMReminderList.strNamespace, 'i21', 'SystemManager')
+                            ELSE REPLACE(tblSMReminderList.strNamespace, 'GlobalComponentEngine', 'SystemManager') END
+FROM tblSMReminderList AS tblSMReminderList
+WHERE tblSMReminderList.strNamespace LIKE '%i21%'
+	OR tblSMReminderList.strNamespace LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strScreen on tblSMReminderList ***'
+GO
+
 PRINT N'START UPDATE SCREEN NAMES FOR SENCHA UNIVERSAL'
 GO
 ---------------------------------------------------------------------------------------------------------------------------------------
------------ Delete record for GlobalComponentEngine.view.SecurityListingGenerator as it has a duplicate record on SM Module -----------
+----------- Delete record for SystemManager.view.SecurityListingGenerator as it has a duplicate record on SM Module -----------
 ---------------------------------------------------------------------------------------------------------------------------------------
 PRINT '*** Start Deleting SecurityListingGenerator namespace on tblSMScreen ***'
 GO
@@ -86,4 +184,20 @@ WHERE TSMM.strType = 'Screen'
           )
 
 PRINT '*** End Updating strCommand on tblSMMasterMenu for GCE and SM ***'
+GO
+
+PRINT '*** Start Updating strCommand on tblSMScreen for GCE and SM ***'
+GO
+
+UPDATE
+     TSS
+SET
+     TSS.strNamespace = CASE WHEN (CHARINDEX('i21', TSS.strNamespace) > 0)
+                              THEN REPLACE(TSS.strNamespace, 'i21', 'SystemManager')
+                              ELSE REPLACE(TSS.strNamespace, 'GlobalComponentEngine', 'SystemManager') END
+FROM  dbo.tblSMScreen AS TSS
+WHERE TSS.strNamespace LIKE '%i21%'
+     OR TSS.strNamespace LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strCommand on tblSMScreen for GCE and SM ***'
 GO

@@ -27,7 +27,7 @@
 								ON			b.intTransactionId = c.intTransactionId
 								INNER JOIN	tblSMScreen AS d
 								ON			c.intScreenId = d.intScreenId
-								WHERE		d.strNamespace = 'GlobalComponentEngine.view.Activity' 
+								WHERE		d.strNamespace = 'SystemManager.view.Activity' 
 										AND CONVERT(int, c.intRecordId) = a.intActivityId)
 			,a.strDetails
 		from tblSMActivity a

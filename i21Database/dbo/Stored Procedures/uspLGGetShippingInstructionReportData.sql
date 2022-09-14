@@ -84,7 +84,7 @@ BEGIN
 		,@strPhone = tblSMCompanySetup.strPhone
 	FROM tblSMCompanySetup
 	left join tblSMCountry				rtCompanyCountry on lower(rtrim(ltrim(rtCompanyCountry.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-	left join tblSMScreen				rtCompanyScreen on rtCompanyScreen.strNamespace = 'i21.view.Country'
+	left join tblSMScreen				rtCompanyScreen on rtCompanyScreen.strNamespace = 'SystemManager.view.Country'
 	left join tblSMTransaction			rtCompanyTransaction on rtCompanyTransaction.intScreenId = rtCompanyScreen.intScreenId and rtCompanyTransaction.intRecordId = rtCompanyCountry.intCountryID
 	left join tblSMReportTranslation	rtCompanyTranslation on rtCompanyTranslation.intLanguageId = @intLaguageId and rtCompanyTranslation.intTransactionId = rtCompanyTransaction.intTransactionId and rtCompanyTranslation.strFieldName = 'Country'
 
@@ -974,12 +974,12 @@ BEGIN
 		CROSS APPLY tblLGCompanyPreference CP
 		
 		left join tblSMCountry				rtc4 on lower(rtrim(ltrim(rtc4.strCountry))) = lower(rtrim(ltrim(VLocation.strCountry)))
-		left join tblSMScreen				rts4 on rts4.strNamespace = 'i21.view.Country'
+		left join tblSMScreen				rts4 on rts4.strNamespace = 'SystemManager.view.Country'
 		left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = rtc4.intCountryID
 		left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Country'
 						
 		left join tblSMCountry				rtc5 on lower(rtrim(ltrim(rtc5.strCountry))) = lower(rtrim(ltrim(VLocation.strCountry)))
-		left join tblSMScreen				rts5 on rts5.strNamespace = 'i21.view.Country'
+		left join tblSMScreen				rts5 on rts5.strNamespace = 'SystemManager.view.Country'
 		left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = rtc5.intCountryID
 		left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
 
