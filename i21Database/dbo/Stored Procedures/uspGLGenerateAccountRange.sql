@@ -57,11 +57,7 @@ AS
 	DECLARE @intLength INT
 	SELECT TOP 1 @intLength = intLength - 1  FROM tblGLAccountStructure WHERE strType = 'Primary'
 	;WITH R AS(
-		SELECT 'Asset'strAccountType, '1' strPrefix union all
-		SELECT 'Liability'strAccountType, '2' strPrefix union all
-		SELECT 'Equity'strAccountType, '3' strPrefix union all
-		SELECT 'Revenue'strAccountType, '4' strPrefix union all
-		SELECT 'Expense'strAccountType, '5' strPrefix 
+		SELECT strAccountType, CAST(LEFT(intMinRange, 1) AS NVARCHAR) strPrefix FROM tblGLAccountRange
 	),
 	R1 AS (
 		SELECT * FROM R A CROSS APPLY(
@@ -72,7 +68,7 @@ AS
 	SET intMinRange = B.intMinRange , intMaxRange =B.intMaxRange
 	FROM tblGLAccountRange A 
 	JOIN R1 B ON A.strAccountType = B.strAccountType
-	WHERE A.intMinRange IS NULL AND A.intMaxRange IS NULL
+	WHERE A.intMinRange IS NOT NULL AND A.intMaxRange IS NOT NULL
 
 		SET @result = 'SUCCESS'
 	END TRY
