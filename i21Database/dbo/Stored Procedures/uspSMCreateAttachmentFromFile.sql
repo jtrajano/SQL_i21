@@ -130,10 +130,10 @@ BEGIN
 			)
 
 			INSERT INTO #TempFileExtension
-			SELECT Item FROM dbo.fnSplitString(@validExtension, ',')
+			SELECT Item FROM dbo.fnSplitStringWithTrim(@validExtension, ',')
 
 			INSERT INTO #TempFileExtensionMime
-			SELECT Item FROM dbo.fnSplitString(@validExtesionMime, ',')
+			SELECT Item FROM dbo.fnSplitStringWithTrim(@validExtesionMime, ',')
 
 			--SELECT a.RowNum, a.Description, REPLACE(RTRIM(LTRIM(b.Description)), CHAR(9), '')
 			--FROM #TempFileExtension a 
