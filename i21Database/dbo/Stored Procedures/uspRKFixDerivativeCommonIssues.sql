@@ -58,7 +58,6 @@ BEGIN
 	DROP TABLE #tmpDerivativesToBeFixed
 	
 
-
 	-----------------------------------------------------------------------
 	--				FIX DERIVATIVE WITH MISSING CURRENCY				 --
 	-----------------------------------------------------------------------
@@ -86,6 +85,53 @@ BEGIN
 		SET ysnPreCrush = 0
 		WHERE ysnPreCrush IS NULL
 	END 
+
+	-----------------------------------------------------------------------
+	--	 FIX ON DERIVATIVE HISTORY WITH UPDATED COMPANY LOCATION NAMES	 --
+	-----------------------------------------------------------------------
+	IF EXISTS (SELECT TOP 1 1 FROM vyuRKGetFutOptTransactionHistory hist
+				INNER JOIN tblRKFutOptTransaction der
+					ON der.intFutOptTransactionId = hist.intFutOptTransactionId
+				WHERE hist.intLocationId IS NULL
+				AND der.intLocationId IS NOT NULL
+			)
+	BEGIN
+		UPDATE hist
+		SET   hist.intLocationId = der.intLocationId
+			, hist.strLocationName = compLoc.strLocationName
+		FROM tblRKFutOptTransactionHistory hist
+		LEFT JOIN vyuRKGetFutOptTransactionHistory vyuHist
+			ON vyuHist.intFutOptTransactionHistoryId = hist.intFutOptTransactionHistoryId 
+		INNER JOIN tblRKFutOptTransaction der
+			ON der.intFutOptTransactionId = hist.intFutOptTransactionId
+		LEFT JOIN tblSMCompanyLocation compLoc
+			ON compLoc.intCompanyLocationId = der.intLocationId
+		WHERE vyuHist.intLocationId IS NULL 
+		AND der.intLocationId IS NOT NULL
+	END 
+	
+	-------------------------------------------------------------------------------
+	--	 FIX ON DERIVATIVE HISTORY WITH MISSING LOCATION ID (DUE TO NEW COLUMN)	 --
+	-------------------------------------------------------------------------------
+	IF EXISTS (SELECT TOP 1 1 FROM tblRKFutOptTransactionHistory hist
+				INNER JOIN tblRKFutOptTransaction der
+					ON der.intFutOptTransactionId = hist.intFutOptTransactionId
+				INNER JOIN tblSMCompanyLocation compLoc
+					ON compLoc.intCompanyLocationId = der.intLocationId
+				WHERE hist.intLocationId IS NULL
+				AND hist.strLocationName = compLoc.strLocationName
+			)
+	BEGIN
+		UPDATE hist
+		SET hist.intLocationId = der.intLocationId
+		FROM tblRKFutOptTransactionHistory hist
+		INNER JOIN tblRKFutOptTransaction der
+			ON der.intFutOptTransactionId = hist.intFutOptTransactionId
+		INNER JOIN tblSMCompanyLocation compLoc
+			ON compLoc.intCompanyLocationId = der.intLocationId
+		WHERE hist.intLocationId IS NULL
+		AND hist.strLocationName = compLoc.strLocationName
+	END
 
 	COMMIT TRAN
 END
