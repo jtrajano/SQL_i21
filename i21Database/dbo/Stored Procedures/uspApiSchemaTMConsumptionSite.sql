@@ -562,7 +562,7 @@ BEGIN
 		, CS.ysnActive AS ysnActive
 		, EL.intEntityLocationId
 		,CS.dtmLastDeliveryDate AS dtmLastDeliveryDate 
-		,CS.dtmNextDeliveryDate AS dtmNextDeliveryDate 
+		--,CS.dtmNextDeliveryDate AS dtmNextDeliveryDate 
 		,CS.dblLastGalsInTank AS dblLastGalsInTank  
 		,CS.ysnDeliveryTicketPrinted AS ysnDeliveryTicketPrinted   
 		,CS.ysnPrintARBalance AS ysnPrintARBalance

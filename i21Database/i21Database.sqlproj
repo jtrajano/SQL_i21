@@ -1170,6 +1170,8 @@
     <Build Include="dbo\Tables\tblGLLedgerDetail.sql" />
     <Build Include="dbo\Tables\tblGLLedgerAccount.sql" />
     <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGDispatchUpdateOrders.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11389,6 +11391,7 @@
     <Build Include="dbo\Tables\tblARPostItemsForStorageCosting.sql" />
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
+    <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
