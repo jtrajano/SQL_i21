@@ -243,6 +243,100 @@ BEGIN TRY
 	UNION ALL
 
 	SELECT
+		intSort = 3
+		,CL.strLocationName
+		,E.strName
+		,C.strCommodityCode
+		,strContractType = 'Purchase' 
+		,CS.strContractStatus
+		,CH.strContractNumber
+		,CD.intContractSeq
+		,I.strItemNo
+		,SL.dtmCreatedDate
+		,SL.dtmTransactionDate
+		,dblQty = SL.dblOrigQty
+		,UM.strUnitMeasure
+		,EC.strUserName
+		,strBucketName = '+ Spot Purchases'
+		,strAction
+		,strPricingType = ''
+		,strTicketNumber = T.strTicketNumber
+		,strLoadNumber = NULL
+		,dblLoadQty = NULL
+		,dblReceivedQty  = NULL
+		,dblCash = SS.dblCashPrice
+		,CH.intContractHeaderId
+		,intTicketId = T.intTicketId
+		,intLoadId = NULL
+	FROM tblRKSummaryLog SL
+	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
+	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
+	INNER JOIN tblICCommodity C ON C.intCommodityId = SL.intCommodityId
+	INNER JOIN tblICItem I ON I.intItemId = SL.intItemId
+	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
+	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = SL.intUserId
+	LEFT JOIN tblCTContractHeader CH on CH.intContractHeaderId = SL.intContractHeaderId 
+	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = SL.intContractDetailId
+	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
+	LEFT JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SL.intTransactionRecordId
+	LEFT JOIN tblGRCustomerStorage GR ON GR.intCustomerStorageId = SL.intTransactionRecordHeaderId
+	LEFT JOIN tblSCTicket T ON T.intTicketId = GR.intTicketId
+	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
+	AND SL.intCommodityId = @intCommodityId
+	AND SL.strBucketType = 'Company Owned' 
+	AND SL.strAction = 'Settle Storage - Company owned storage'
+
+	UNION ALL
+
+	SELECT
+		intSort = 3
+		,CL.strLocationName
+		,E.strName
+		,C.strCommodityCode
+		,strContractType = 'Purchase' 
+		,CS.strContractStatus
+		,CH.strContractNumber
+		,CD.intContractSeq
+		,I.strItemNo
+		,SL.dtmCreatedDate
+		,SL.dtmTransactionDate
+		,dblQty = SL.dblOrigQty * -1
+		,UM.strUnitMeasure
+		,EC.strUserName
+		,strBucketName = '+ Spot Purchases'
+		,strAction
+		,strPricingType = ''
+		,strTicketNumber = T.strTicketNumber
+		,strLoadNumber = NULL
+		,dblLoadQty = NULL
+		,dblReceivedQty  = NULL
+		,dblCash = SS.dblCashPrice
+		,CH.intContractHeaderId
+		,intTicketId = T.intTicketId
+		,intLoadId = NULL
+	FROM tblRKSummaryLog SL
+	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
+	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
+	INNER JOIN tblICCommodity C ON C.intCommodityId = SL.intCommodityId
+	INNER JOIN tblICItem I ON I.intItemId = SL.intItemId
+	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
+	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = SL.intUserId
+	LEFT JOIN tblCTContractHeader CH on CH.intContractHeaderId = SL.intContractHeaderId 
+	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = SL.intContractDetailId
+	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
+	LEFT JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SL.intTransactionRecordId
+	LEFT JOIN tblGRCustomerStorage GR ON GR.intCustomerStorageId = SL.intTransactionRecordHeaderId
+	LEFT JOIN tblSCTicket T ON T.intTicketId = GR.intTicketId
+	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
+	AND SL.intCommodityId = @intCommodityId
+	AND SL.strBucketType = 'Delayed Pricing' 
+	AND SL.strAction = 'Settle Storage - Company owned storage'
+
+	UNION ALL
+
+	SELECT
 		intSort = 4
 		,CL.strLocationName
 		,E.strName
