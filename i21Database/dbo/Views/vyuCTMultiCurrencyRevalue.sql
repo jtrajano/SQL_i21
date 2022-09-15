@@ -1,5 +1,5 @@
 ﻿
-Create VIEW [dbo].[vyuCTMultiCurrencyRevalue]
+CREATE VIEW [dbo].[vyuCTMultiCurrencyRevalue]
 
 AS 
 
@@ -14,14 +14,14 @@ AS
 			,strTicket				=	'' COLLATE Latin1_General_CI_AS 
 			,strContractNumber		=	CH.strContractNumber
 			,strItemId				=	IM.strItemNo
-			,dblQuantity			=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblQuantity ELSE CD.dblQuantity END
+			,dblQuantity			=	CD.dblQuantity
 			,dblUnitPrice			=	CD.dblCashPrice
 			,dblAmount				=	CD.dblTotalCost
 			,intCurrencyId			=	CD.intCurrencyId
-			,intForexRateType		=	CD.intRateTypeId
+			,intForexRateType		=	CD.intHistoricalRateTypeId
 			,strForexRateType		=	RT.strCurrencyExchangeRateType
-			,dblForexRate			=	CD.dblRate
-			,dblHistoricAmount		=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblFinalPrice ELSE CD.dblTotalCost END * CD.dblRate
+			,dblForexRate			=	CD.dblHistoricalRate
+			,dblHistoricAmount		=	CD.dblTotalCost * CD.dblHistoricalRate
 			,dblNewForexRate		=	0
 			,dblNewAmount			=	0
 			,dblUnrealizedDebitGain =	0
@@ -30,6 +30,8 @@ AS
 			,dblCredit				=	0
 			,intCompanyLocationId	=	CL.intCompanyLocationId	
 			,intLOBSegmentCodeId	=	LB.intSegmentCodeId
+			,CASE WHEN CH.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END dblAppliedQty
+			,CASE WHEN CD.intPricingTypeId = 1 THEN 0.00 ELSE ISNULL(CD.dblBalance, 0) *  ISNULL(LS.dblLastSettle, 0 ) END dblSettlementAmount
 	FROM	tblCTContractDetail				CD
 	JOIN	tblCTContractHeader				CH	ON	CD.intContractHeaderId				=	CH.intContractHeaderId
 	JOIN	tblCTContractType				CT	ON	CT.intContractTypeId				=	CH.intContractTypeId
