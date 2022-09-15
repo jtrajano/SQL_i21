@@ -57,7 +57,11 @@ AS
 	DECLARE @intLength INT
 	SELECT TOP 1 @intLength = intLength - 1  FROM tblGLAccountStructure WHERE strType = 'Primary'
 	;WITH R AS(
-		SELECT strAccountType, CAST(LEFT(intMinRange, 1) AS NVARCHAR) strPrefix FROM tblGLAccountRange
+		SELECT 'Asset'strAccountType, '1' strPrefix union all
+		SELECT 'Liability'strAccountType, '2' strPrefix union all
+		SELECT 'Equity'strAccountType, '3' strPrefix union all
+		SELECT 'Revenue'strAccountType, '4' strPrefix union all
+		SELECT 'Expense'strAccountType, '5' strPrefix 
 	),
 	R1 AS (
 		SELECT * FROM R A CROSS APPLY(
