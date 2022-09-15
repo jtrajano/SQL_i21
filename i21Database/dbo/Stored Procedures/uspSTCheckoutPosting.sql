@@ -156,13 +156,15 @@ BEGIN
 													WHERE strPaymentMethod = @strInvoicePaymentMethodMain
 												 )
 		DECLARE @ysnConsignmentStore BIT = 1
-
+		DECLARE @strStoreName NVARCHAR(60)
+		
 		SELECT @intCompanyLocationId = intCompanyLocationId
 			   , @intEntityCustomerId = intCheckoutCustomerId
 			   , @intTaxGroupId = intTaxGroupId
 			   , @intStoreId = intStoreId
 			   , @ysnConsignmentStore = ysnConsignmentStore
 			   , @strAllowMarkUpDown = strAllowRegisterMarkUpDown 
+			   , @strStoreName = strDescription
 		FROM tblSTStore 
 		WHERE intStoreId = (
 				SELECT intStoreId FROM tblSTCheckoutHeader
@@ -195,6 +197,7 @@ BEGIN
 		DECLARE @dblCheckoutTotalDeposited AS DECIMAL(18,6)
 		DECLARE @dblCheckoutTotalCustomerPayments AS DECIMAL(18,6)
 		DECLARE @dblCheckoutCustomerChargeAmount AS DECIMAL(18,6)
+		DECLARE @strCheckoutType NVARCHAR(100)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
 				, @strCurrentAllInvoiceIdList = strAllInvoiceIdList
@@ -202,6 +205,7 @@ BEGIN
 				, @dblCheckoutTotalDeposited = dblTotalDeposits
 				, @dblCheckoutCustomerChargeAmount = dblTotalDeposits
 				, @dblCheckoutTotalCustomerPayments = dblCustomerPayments
+				, @strCheckoutType = strCheckoutType
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
@@ -5662,6 +5666,21 @@ IF(@ysnDebug = CAST(1 AS BIT))
 								-----------------------------------------------------------------------
 								------------- END POST MArk Up / Down ---------------------------------
 								-----------------------------------------------------------------------
+
+								--------------------------------------------------------------------------
+								--- CS-72 - Record Successful Day Processing in Polling Status Report. ---
+								--------------------------------- START ----------------------------------
+								--------------------------------------------------------------------------
+								IF (@ysnConsignmentStore = 1 AND @strCheckoutType = 'Automatic')
+								BEGIN
+									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
+								VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'W', 'Done processing checkout for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
+								END
+								--------------------------------------------------------------------------
+								--- CS-72 - Record Successful Day Processing in Polling Status Report. ---
+								---------------------------------- END -----------------------------------
+								--------------------------------------------------------------------------
+
 
 
 								SET @ysnUpdateCheckoutStatus = 1
