@@ -197,8 +197,7 @@ SELECT
 							END
 	  ,ysnStoreManager = vst.ysnIsUserStoreManager
 	  ,ysnStopCondition = chk.ysnStopCondition
-	  ,po.dblAmount AS dblCustomerChargeMOP
-	  ,(chk.[dblCustomerCharges] - po.dblAmount) as dblCustomerChargeVariance
+	  ,chk.[dblCustomerChargeMOP]  
       ,chk.[intConcurrencyId]  
 FROM tblSTCheckoutHeader chk
 INNER JOIN vyuSTStoreOnUserRole vst
@@ -297,6 +296,7 @@ GROUP BY
       ,chk.[intReceivePaymentsIntegrationLogId]
       ,chk.[intCheckoutCurrentProcess]
       ,chk.[intConcurrencyId]
+	  ,chk.dblCustomerChargeMOP 
 	  ,Inv.[ysnPosted]
       ,chk.[ysnStopCondition]
 	  ,vst.[intStoreId]
