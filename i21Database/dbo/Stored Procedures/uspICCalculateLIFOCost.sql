@@ -24,10 +24,10 @@ DECLARE @ItemLocationId INT
 DECLARE @StockUOMId INT
 
 IF @Date IS NULL
-    SET @Date = GETDATE()
+  SET @Date = GETDATE()
 
 IF (@ItemUOMId IS NULL)
-  SELECT @ItemUOMId = intItemUOMId FROM vyuICItemUOM WHERE strUnitMeasure = 'GALLON'
+  SELECT @ItemUOMId = intItemUOMId FROM vyuICItemUOM WHERE strUnitMeasure = 'GALLON' AND intItemId = @ItemId
 
 SELECT @CategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId
 SELECT @UnitQty = dblUnitQty FROM vyuICItemUOM WHERE intItemUOMId = @ItemUOMId
