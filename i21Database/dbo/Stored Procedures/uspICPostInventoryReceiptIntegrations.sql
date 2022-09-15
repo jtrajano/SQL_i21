@@ -68,6 +68,9 @@ BEGIN
 	EXEC dbo.uspICGetItemsFromItemReceipt
 		@intReceiptId = @intTransactionId		
 
+	-- Consignment/Consumption Site integration
+	EXEC dbo.uspTMReceived @intTransactionId, @ysnPost, @intEntityUserSecurityId
+
 	-- Negate the Qty if posting an Inventory Return
 	UPDATE	@ItemsFromInventoryReceipt
 	SET		dblQty = -dblQty 
