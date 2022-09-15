@@ -11420,6 +11420,7 @@
     <Build Include="dbo\Tables\tblARCustomAgingStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomAgingReport.sql" />
     <None Include="Scripts\Post-Deployment\SM\2220_MigrateLabels.sql" />
+     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

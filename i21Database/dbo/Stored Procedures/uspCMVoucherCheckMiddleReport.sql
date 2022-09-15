@@ -110,11 +110,8 @@ SELECT
 		,strCurrency = CURRENCY.strCurrency
 		
 		-- Bank and company info related fields
-		,strCompanyName = COMPANY.strCompanyName 
-		,strCompanyAddress =	CASE WHEN COMPANY.strCompanyAddress <> ''
-								THEN COMPANY.strCompanyAddress
-								ELSE NULL
-								END
+		,strCompanyName = Companies.strCompanyName
+		,strCompanyAddress =Companies.strAddress
 		,strBank =	CASE WHEN MICR.strText <> '' 
 					THEN BNK.strBankName 
 					ELSE NULL 
@@ -154,10 +151,22 @@ FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
 		LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 		LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.intCurrencyID = CHK.intCurrencyId
-		OUTER APPLY (SElECT TOP 1 strCompanyName,ISNULL(dbo.fnConvertToFullAddress(strAddress,strCity,strState,strZip),'') strCompanyAddress FROM tblSMCompanySetup) COMPANY
+		OUTER APPLY (
+			SELECT TOP 1 strCompanyName, strAddress FROM (
+				SELECT  TOP 1 strCompanyName, strAddress  FROM vyuGLCompanyAccountId A 
+				LEFT JOIN tblGLAccountSegment G ON G.intAccountSegmentId = A.intAccountSegmentId
+				LEFT JOIN tblGLCompanyDetails C ON C.intAccountSegmentId = G.intAccountSegmentId
+				WHERE intAccountId = BNKACCNT.intGLAccountId 
+				UNION ALL
+				SElECT TOP 1 strCompanyName,ISNULL(dbo.fnConvertToFullAddress(strAddress,strCity,strState,strZip),'') strAddress
+				FROM tblSMCompanySetup
+			) AllCompanies
+			WHERE ISNULL(strCompanyName, '')<> ''
+		)Companies
 		OUTER APPLY (SELECT ISNULL(dbo.fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') strText) MICR
 		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode), '') strAddress) BANK
 		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') strAddress) CHEK
+
 		OUTER APPLY
 		(
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
