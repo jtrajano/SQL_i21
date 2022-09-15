@@ -1156,7 +1156,44 @@ UPDATE tblSMCSVDynamicImport SET
 				insert into tblEMEntityLineOfBusiness(intEntityId, intLineOfBusinessId)
 					select @entityId, @lobid
 
+			--CUSTOMER BUDGET
+			IF OBJECT_ID(''tempdb..#CUSTOMERBUDGET'') IS NOT NULL DROP TABLE #CUSTOMERBUDGET
+			CREATE TABLE #CUSTOMERBUDGET (intId INT PRIMARY KEY, intEntityCustomerId INT, dtmBudgetBeginDate DATETIME)
 
+			;WITH BUDGETDATE AS (
+				SELECT dtmBudgetBeginDate	= C.dtmBudgetBeginDate
+					, intEntityCustomerId	= C.intEntityId
+				FROM tblARCustomer C 
+				WHERE C.intNoOfPeriods > 0
+				AND C.intEntityId = @entityId
+
+				UNION ALL
+
+				SELECT dtmBudgetBeginDate	= DATEADD(MONTH, 1, BD.dtmBudgetBeginDate)
+					, intEntityCustomerId	= C.intEntityId
+				FROM BUDGETDATE BD
+				INNER JOIN tblARCustomer C ON BD.intEntityCustomerId = C.intEntityId
+				WHERE DATEADD(MONTH, 1, BD.dtmBudgetBeginDate) <= DATEADD(MONTH, C.intNoOfPeriods - 1, C.dtmBudgetBeginDate)
+			)
+			INSERT INTO #CUSTOMERBUDGET
+			SELECT intId				= ROW_NUMBER() OVER (ORDER BY dtmBudgetBeginDate ASC)
+				, intEntityCustomerId	= intEntityCustomerId
+				, dtmBudgetBeginDate	= dtmBudgetBeginDate
+			FROM BUDGETDATE
+			OPTION (MAXRECURSION 0)
+
+			INSERT INTO tblARCustomerBudget WITH (TABLOCK) (
+				intEntityCustomerId
+				, dblBudgetAmount		
+				, dtmBudgetDate
+				, intConcurrencyId
+			)
+			SELECT intEntityCustomerId		= CC.intEntityCustomerId
+				, dblBudgetAmount			= C.dblMonthlyBudget
+				, dtmBudgetDate				= CC.dtmBudgetBeginDate
+				, intConcurrencyId			= 0
+			FROM tblARCustomer C
+			INNER JOIN #CUSTOMERBUDGET CC ON C.intEntityId = CC.intEntityCustomerId
 		end
 
 '
