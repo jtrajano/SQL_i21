@@ -70,7 +70,7 @@ BEGIN TRY
 			INNER JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = CD.intItemUOMId
 			INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId AND CUM.intUnitMeasureId = IUOM.intUnitMeasureId
 		WHERE CD.intContractStatusId IN (1,4) AND CD.dblBalance <> 0
-			AND dtmContractDate between '01/01/1900' and getdate()
+			--AND dtmContractDate between '01/01/1900' and getdate()
 	
 		declare @tblContractBalance as table (
 			intId int identity(1,1)
@@ -253,7 +253,7 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblBalance
+				, dblBalance = CASE WHEN t.intContractStatusId = 3 THEN 0 ELSE dblBalance END
 				, strTransactionReference = 'Contract Sequence Begin Balance'
 				, @intContractHeaderId
 				, @intContractDetailId
@@ -286,7 +286,8 @@ BEGIN TRY
 				WHERE intContractDetailId = @intContractDetailId
 				ORDER BY dtmHistoryCreated
 			) t
-
+			
+			-- SCENARIO: BALANCE CHANGE WITHOUT PRICING TYPE CHANGE
 			union  all
 			select
 				SH.dtmHistoryCreated
@@ -330,6 +331,62 @@ BEGIN TRY
 			and SH.ysnBalanceChange = 1
 			and SH.intPricingTypeId <> 5
 			AND SUH.intSequenceUsageHistoryId IS NULL
+			AND ((SH.intPricingTypeId = @intHeaderPricingType)
+					OR 
+				 (SH.intPricingTypeId <> @intHeaderPricingType
+					AND ISNULL(SH.ysnFuturesChange, 0) <> 1
+					AND ISNULL(SH.ysnBasisChange, 0) <> 1)
+				)
+
+			-- SCENARIO: BALANCE CHANGE WITH PRICING TYPE CHANGE (WHEN OLD IS UNPRICED AND UPDATED TO PRICED)
+			union  all
+			select
+				SH.dtmHistoryCreated
+				, @strContractNumber
+				, @intContractSeq
+				, @intContractTypeId
+				, dblBalance  = SH.dblBalance - SH.dblOldBalance
+				, strTransactionReference = 'Contract Sequence Balance Change'
+				, @intContractHeaderId
+				, @intContractDetailId
+				, intPricingTypeId  = @intHeaderPricingType 
+				, intTransactionReferenceId = SH.intContractHeaderId
+				, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
+				, @intCommodityId
+				, @strCommodityCode
+				, @intItemId
+				, SH.intEntityId
+				, @intLocationId
+				, @intFutureMarketId 
+				, @intFutureMonthId 
+				, @dtmStartDate 
+				, @dtmEndDate 
+				, @intQtyUOMId
+				, @dblFutures
+				, @dblBasis
+				, @intBasisUOMId 
+				, @intBasisCurrencyId 
+				, @intPriceUOMId 
+				, @intContractStatusId 
+				, @intBookId 
+				, @intSubBookId
+				, @intUserId 
+			from tblCTSequenceHistory SH
+			LEFT JOIN vyuCTSequenceUsageHistory SUH
+				ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+				AND SUH.strFieldName = 'Balance'
+				AND SUH.ysnDeleted = 0
+				AND SUH.intContractDetailId = @intContractDetailId
+			WHERE SH.intContractDetailId = @intContractDetailId
+			--and SH.ysnQtyChange = 1
+			and SH.ysnBalanceChange = 1
+			and SH.intPricingTypeId <> 5
+			AND SUH.intSequenceUsageHistoryId IS NULL
+			AND SH.intPricingTypeId <> @intHeaderPricingType
+			AND ( (SH.ysnFuturesChange = 1 AND SH.dblOldFutures IS NULL) 
+				 OR 
+				  (SH.ysnBasisChange = 1 AND SH.dblOldBasis IS NULL)
+				)
 			
 			union all
 			select 
@@ -1909,7 +1966,7 @@ BEGIN TRY
 		--				DERIVATIVES
 		--=======================================
 		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Derivatives')
-		
+
 		INSERT INTO @ExistingHistory(
 			  strBucketType
 			, strTransactionType
@@ -1969,27 +2026,29 @@ BEGIN TRY
 			, dblPrice = der.dblPrice
 			, intEntityId = der.intEntityId
 			, intUserId = der.intUserId
-			, der.intLocationId
+			, intLocationId = ISNULL(der.intLocationId, fot.intLocationId)
 			, cUOM.intCommodityUnitMeasureId
 			, strInOut = CASE WHEN UPPER(der.strNewBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
 			, strNotes = strNotes
 			, strMiscFields = NULL
-			, intOptionMonthId =  intOptionMonthId
+			, intOptionMonthId =  der.intOptionMonthId
 			, strOptionMonth =  strOptionMonth
-			, dblStrike =  dblStrike
-			, strOptionType =  strOptionType
+			, dblStrike =  der.dblStrike
+			, strOptionType =  der.strOptionType
 			, strInstrumentType =  strInstrumentType
 			, intBrokerageAccountId =  intBrokerId
 			, strBrokerAccount =  strBrokerAccount
 			, strBroker =  strBroker
 			, strBuySell =  strNewBuySell
-			, ysnPreCrush =  ISNULL(ysnPreCrush,0)
-			, strBrokerTradeNo =  strBrokerTradeNo
+			, ysnPreCrush =  ISNULL(der.ysnPreCrush,0)
+			, strBrokerTradeNo = der.strBrokerTradeNo
 			, intActionId  = 1 --Rebuild
 		FROM vyuRKGetFutOptTransactionHistory der
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
-		ORDER BY dtmTransactionDate
+		LEFT JOIN tblRKFutOptTransaction fot
+			ON fot.intFutOptTransactionId = der.intFutOptTransactionId
+		ORDER BY der.dtmTransactionDate
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
@@ -2367,84 +2426,91 @@ BEGIN TRY
 		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Inventory')
 		
 		INSERT INTO @ExistingHistory (	
-			strBatchId
-			,strBucketType
-			,strTransactionType
-			,intTransactionRecordId 
-			,intTransactionRecordHeaderId
-			,strDistributionType
-			,strTransactionNumber 
-			,dtmTransactionDate 
-			,intContractDetailId 
-			,intContractHeaderId 
-			,intTicketId 
-			,intCommodityId 
-			,intCommodityUOMId 
-			,intItemId 
-			,intBookId 
-			,intSubBookId 
-			,intLocationId 
-			,intFutureMarketId 
-			,intFutureMonthId 
-			,dblNoOfLots 
-			,dblQty 
-			,dblPrice 
-			,intEntityId 
-			,ysnDelete 
-			,intUserId 
-			,strNotes 	
-			,intActionId
+			  strBatchId
+			, strBucketType
+			, strTransactionType
+			, intTransactionRecordId 
+			, intTransactionRecordHeaderId
+			, strDistributionType
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intContractDetailId 
+			, intContractHeaderId 
+			, intTicketId 
+			, intCommodityId 
+			, intCommodityUOMId 
+			, intItemId 
+			, intBookId 
+			, intSubBookId 
+			, intLocationId 
+			, intFutureMarketId 
+			, intFutureMonthId 
+			, dblNoOfLots 
+			, dblQty 
+			, dblPrice 
+			, intEntityId 
+			, ysnDelete 
+			, intUserId 
+			, strNotes 	
+			, intActionId
 		)
 		SELECT
-			strBatchId
-			,strBucketType
-			,strTransactionType
-			,intTransactionRecordId 
-			,intTransactionRecordHeaderId 
-			,strDistributionType = ''
-			,strTransactionNumber 
-			,dtmTransactionDate 
-			,intContractDetailId 
-			,intContractHeaderId 
-			,intTicketId 
-			,intCommodityId 
-			,intCommodityUOMId 
-			,intItemId 
-			,intBookId 
-			,intSubBookId 
-			,intLocationId 
-			,intFutureMarketId 
-			,intFutureMonthId 
-			,dblNoOfLots 
-			,dblQty 
-			,dblPrice 
-			,intEntityId 
-			,ysnDelete 
-			,intUserId 
-			,strNotes 	
-			,intActionId  = 1 --Rebuild
+			  strBatchId
+			, strBucketType
+			, strTransactionType
+			, intTransactionRecordId 
+			, intTransactionRecordHeaderId 
+			, strDistributionType = ''
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intContractDetailId 
+			, intContractHeaderId 
+			, intTicketId 
+			, intCommodityId 
+			, intCommodityUOMId 
+			, intItemId 
+			, intBookId 
+			, intSubBookId 
+			, intLocationId 
+			, intFutureMarketId 
+			, intFutureMonthId 
+			, dblNoOfLots 
+			, dblQty 
+			, dblPrice 
+			, intEntityId 
+			, ysnDelete 
+			, intUserId 
+			, strNotes 	
+			, intActionId  = 1 --Rebuild
 		FROM (
 			SELECT 
-				strBatchId = t.strBatchId
-				,strBucketType = 'Company Owned'
-				,strTransactionType = v.strTransactionType
-				,intTransactionRecordId = t.intTransactionDetailId
-				,intTransactionRecordHeaderId = t.intTransactionId 
-				,strTransactionNumber = t.strTransactionId
-				,dtmTransactionDate = t.dtmDate
-				,intContractDetailId = NULL
-				,intContractHeaderId = NULL
-				,intTicketId = v.intTicketId
-				,intCommodityId = v.intCommodityId
-				,intCommodityUOMId = cum.intCommodityUnitMeasureId
-				,intItemId = t.intItemId
-				,intBookId = NULL
-				,intSubBookId = NULL
-				,intLocationId = v.intLocationId
-				,intFutureMarketId = NULL
-				,intFutureMonthId = NULL
-				,dblNoOfLots = NULL
-				,dblQty = SUM(t.dblQty)
+				  strBatchId = t.strBatchId
+				, strBucketType = 'Company Owned'
+				, strTransactionType = v.strTransactionType
+				, intTransactionRecordId = t.intTransactionDetailId
+				, intTransactionRecordHeaderId = t.intTransactionId 
+				, strTransactionNumber = t.strTransactionId
+				, dtmTransactionDate = t.dtmDate
+				, intContractDetailId = NULL
+				, intContractHeaderId = NULL
+				, intTicketId = v.intTicketId
+				, intCommodityId = v.intCommodityId
+				, intCommodityUOMId = cuomDefault.intCommodityUnitMeasureId
+				, intItemId = t.intItemId
+				, intBookId = NULL
+				, intSubBookId = NULL
+				, intLocationId = v.intLocationId
+				, intFutureMarketId = NULL
+				, intFutureMonthId = NULL
+				, dblNoOfLots = NULL
+				--,dblQty = SUM(t.dblQty)
+				, dblQty = ISNULL(
+							SUM(dbo.fnCalculateQtyBetweenUOM (
+									t.intItemUOMId
+									, iuomCDefault.intItemUOMId
+									, t.dblQty
+								))
+							, 0.00)
 				,dblPrice = AVG(t.dblCost)
 				,intEntityId = v.intEntityId
 				,ysnDelete = 0
@@ -2454,68 +2520,91 @@ BEGIN TRY
 			FROM	
 				tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
 					ON t.intInventoryTransactionId = v.intInventoryTransactionId
-				INNER JOIN tblICUnitMeasure u
-					ON u.strUnitMeasure = v.strUOM
-				INNER JOIN tblICCommodityUnitMeasure cum
-					ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId	
+				INNER JOIN tblICCommodityUnitMeasure cuomDefault
+					ON cuomDefault.intCommodityId = v.intCommodityId
+					AND cuomDefault.ysnDefault = 1
+				INNER JOIN tblICItemUOM iuomCDefault
+					ON iuomCDefault.intItemId = t.intItemId
+					AND iuomCDefault.intUnitMeasureId = cuomDefault.intUnitMeasureId
+				LEFT JOIN tblICItemUOM iuom
+					ON iuom.intItemUOMId = t.intItemUOMId
+				--INNER JOIN tblICUnitMeasure u
+				--	ON u.strUnitMeasure = v.strUOM
+				--INNER JOIN tblICCommodityUnitMeasure cum
+				--	ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId	
 			WHERE
 				t.dblQty <> 0 
 				AND v.ysnInTransit = 0
 				AND ISNULL(t.ysnIsUnposted,0) = 0
 				AND v.strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement')
 			GROUP BY 
-				t.strBatchId
-				,v.strTransactionType
-				,t.intTransactionDetailId
-				,t.intTransactionId
-				,t.strTransactionId
-				,t.dtmDate
-				,v.intTicketId
-				,v.intCommodityId
-				,cum.intCommodityUnitMeasureId
-				,t.intItemId
-				,v.intLocationId
-				,v.intEntityId
-				,t.intCreatedEntityId
-				,t.strDescription
-				,v.intSubLocationId
-				,v.intStorageLocationId
+				  t.strBatchId
+				, v.strTransactionType
+				, t.intTransactionDetailId
+				, t.intTransactionId
+				, t.strTransactionId
+				, t.dtmDate
+				, v.intTicketId
+				, v.intCommodityId
+				, cuomDefault.intCommodityUnitMeasureId
+				, t.intItemId
+				, v.intLocationId
+				, v.intEntityId
+				, t.intCreatedEntityId
+				, t.strDescription
+				, v.intSubLocationId
+				, v.intStorageLocationId
 
 			UNION ALL
 			SELECT 
-				strBatchId = t.strBatchId
-				,strBucketType = 'Company Owned'
-				,strTransactionType = v.strTransactionType
-				,intTransactionRecordId = t.intTransactionDetailId
-				,intTransactionRecordHeaderId = t.intTransactionId 
-				,strTransactionNumber = t.strTransactionId
-				,dtmTransactionDate = t.dtmDate
-				,intContractDetailId = iri.intContractDetailId
-				,intContractHeaderId = iri.intContractHeaderId
-				,intTicketId = v.intTicketId
-				,intCommodityId = v.intCommodityId
-				,intCommodityUOMId = cum.intCommodityUnitMeasureId
-				,intItemId = t.intItemId
-				,intBookId = NULL
-				,intSubBookId = NULL
-				,intLocationId = v.intLocationId
-				,intFutureMarketId = NULL
-				,intFutureMonthId = NULL
-				,dblNoOfLots = NULL
-				,dblQty = SUM(t.dblQty)
-				,dblPrice = AVG(t.dblCost)
-				,intEntityId = v.intEntityId
-				,ysnDelete = 0
-				,intUserId = t.intCreatedEntityId
-				,strNotes = t.strDescription
-				,intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
+				  strBatchId = t.strBatchId
+				, strBucketType = 'Company Owned'
+				, strTransactionType = v.strTransactionType
+				, intTransactionRecordId = t.intTransactionDetailId
+				, intTransactionRecordHeaderId = t.intTransactionId 
+				, strTransactionNumber = t.strTransactionId
+				, dtmTransactionDate = t.dtmDate
+				, intContractDetailId = iri.intContractDetailId
+				, intContractHeaderId = iri.intContractHeaderId
+				, intTicketId = v.intTicketId
+				, intCommodityId = v.intCommodityId
+				, intCommodityUOMId = cuomDefault.intCommodityUnitMeasureId
+				, intItemId = t.intItemId
+				, intBookId = NULL
+				, intSubBookId = NULL
+				, intLocationId = v.intLocationId
+				, intFutureMarketId = NULL
+				, intFutureMonthId = NULL
+				, dblNoOfLots = NULL
+				--, dblQty = SUM(t.dblQty)
+				, dblQty = ISNULL(
+							SUM(dbo.fnCalculateQtyBetweenUOM (
+									  t.intItemUOMId
+									, iuomCDefault.intItemUOMId
+									, t.dblQty
+								))
+							, 0.00)
+				, dblPrice = AVG(t.dblCost)
+				, intEntityId = v.intEntityId
+				, ysnDelete = 0
+				, intUserId = t.intCreatedEntityId
+				, strNotes = t.strDescription
+				, intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
 			FROM	
 				tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
 					ON t.intInventoryTransactionId = v.intInventoryTransactionId
-				INNER JOIN tblICUnitMeasure u
-					ON u.strUnitMeasure = v.strUOM
-				INNER JOIN tblICCommodityUnitMeasure cum
-					ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
+				INNER JOIN tblICCommodityUnitMeasure cuomDefault
+					ON cuomDefault.intCommodityId = v.intCommodityId
+					AND cuomDefault.ysnDefault = 1
+				INNER JOIN tblICItemUOM iuomCDefault
+					ON iuomCDefault.intItemId = t.intItemId
+					AND iuomCDefault.intUnitMeasureId = cuomDefault.intUnitMeasureId
+				LEFT JOIN tblICItemUOM iuom
+					ON iuom.intItemUOMId = t.intItemUOMId
+				--INNER JOIN tblICUnitMeasure u
+				--	ON u.strUnitMeasure = v.strUOM
+				--INNER JOIN tblICCommodityUnitMeasure cum
+				--	ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
 				INNER JOIN tblICInventoryReceiptItem iri 
 					ON iri.intInventoryReceiptItemId = t.intTransactionDetailId	
 			WHERE
@@ -2524,60 +2613,75 @@ BEGIN TRY
 				AND ISNULL(t.ysnIsUnposted,0) = 0
 				AND v.strTransactionType = 'Inventory Receipt'
 			GROUP BY 
-				t.strBatchId
-				,v.strTransactionType
-				,t.intTransactionDetailId
-				,t.intTransactionId
-				,t.strTransactionId
-				,t.dtmDate
-				,iri.intContractDetailId
-				,iri.intContractHeaderId
-				,v.intTicketId
-				,v.intCommodityId
-				,cum.intCommodityUnitMeasureId
-				,t.intItemId
-				,v.intLocationId
-				,v.intEntityId
-				,t.intCreatedEntityId
-				,t.strDescription
-				,v.intSubLocationId
-				,v.intStorageLocationId
+				  t.strBatchId
+				, v.strTransactionType
+				, t.intTransactionDetailId
+				, t.intTransactionId
+				, t.strTransactionId
+				, t.dtmDate
+				, iri.intContractDetailId
+				, iri.intContractHeaderId
+				, v.intTicketId
+				, v.intCommodityId
+				, cuomDefault.intCommodityUnitMeasureId
+				, t.intItemId
+				, v.intLocationId
+				, v.intEntityId
+				, t.intCreatedEntityId
+				, t.strDescription
+				, v.intSubLocationId
+				, v.intStorageLocationId
 
 			UNION ALL
 			SELECT 
-				strBatchId = t.strBatchId
-				,strBucketType = 'Company Owned'
-				,strTransactionType = v.strTransactionType
-				,intTransactionRecordId = t.intTransactionDetailId
-				,intTransactionRecordHeaderId = t.intTransactionId 
-				,strTransactionNumber = t.strTransactionId
-				,dtmTransactionDate = t.dtmDate
-				,intContractDetailId = isi.intLineNo
-				,intContractHeaderId = isi.intOrderId
-				,intTicketId = v.intTicketId
-				,intCommodityId = v.intCommodityId
-				,intCommodityUOMId = cum.intCommodityUnitMeasureId
-				,intItemId = t.intItemId
-				,intBookId = NULL
-				,intSubBookId = NULL
-				,intLocationId = v.intLocationId
-				,intFutureMarketId = NULL
-				,intFutureMonthId = NULL
-				,dblNoOfLots = NULL
-				,dblQty = SUM(t.dblQty)
-				,dblPrice = AVG(t.dblCost)
-				,intEntityId = v.intEntityId
-				,ysnDelete = 0
-				,intUserId = t.intCreatedEntityId
-				,strNotes = t.strDescription
-				,intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
+				  strBatchId = t.strBatchId
+				, strBucketType = 'Company Owned'
+				, strTransactionType = v.strTransactionType
+				, intTransactionRecordId = t.intTransactionDetailId
+				, intTransactionRecordHeaderId = t.intTransactionId 
+				, strTransactionNumber = t.strTransactionId
+				, dtmTransactionDate = t.dtmDate
+				, intContractDetailId = isi.intLineNo
+				, intContractHeaderId = isi.intOrderId
+				, intTicketId = v.intTicketId
+				, intCommodityId = v.intCommodityId
+				, intCommodityUOMId = cuomDefault.intCommodityUnitMeasureId
+				, intItemId = t.intItemId
+				, intBookId = NULL
+				, intSubBookId = NULL
+				, intLocationId = v.intLocationId
+				, intFutureMarketId = NULL
+				, intFutureMonthId = NULL
+				, dblNoOfLots = NULL
+				--, dblQty = SUM(t.dblQty)
+				, dblQty = ISNULL(
+							SUM(dbo.fnCalculateQtyBetweenUOM (
+									  t.intItemUOMId
+									, iuomCDefault.intItemUOMId
+									, t.dblQty
+								))
+							, 0.00)
+				, dblPrice = AVG(t.dblCost)
+				, intEntityId = v.intEntityId
+				, ysnDelete = 0
+				, intUserId = t.intCreatedEntityId
+				, strNotes = t.strDescription
+				, intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
 			FROM	
 				tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
 					ON t.intInventoryTransactionId = v.intInventoryTransactionId
-				INNER JOIN tblICUnitMeasure u
-					ON u.strUnitMeasure = v.strUOM
-				INNER JOIN tblICCommodityUnitMeasure cum
-					ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
+				INNER JOIN tblICCommodityUnitMeasure cuomDefault
+					ON cuomDefault.intCommodityId = v.intCommodityId
+					AND cuomDefault.ysnDefault = 1
+				INNER JOIN tblICItemUOM iuomCDefault
+					ON iuomCDefault.intItemId = t.intItemId
+					AND iuomCDefault.intUnitMeasureId = cuomDefault.intUnitMeasureId
+				LEFT JOIN tblICItemUOM iuom
+					ON iuom.intItemUOMId = t.intItemUOMId
+				--INNER JOIN tblICUnitMeasure u
+				--	ON u.strUnitMeasure = v.strUOM
+				--INNER JOIN tblICCommodityUnitMeasure cum
+				--	ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
 				INNER JOIN tblICInventoryShipmentItem isi 
 					ON isi.intInventoryShipmentItemId = t.intTransactionDetailId	
 			WHERE
@@ -2586,24 +2690,24 @@ BEGIN TRY
 				AND ISNULL(t.ysnIsUnposted,0) = 0
 				AND v.strTransactionType = 'Inventory Shipment'
 			GROUP BY 
-				t.strBatchId
-				,v.strTransactionType
-				,t.intTransactionDetailId
-				,t.intTransactionId
-				,t.strTransactionId
-				,t.dtmDate
-				,isi.intLineNo
-				,isi.intOrderId
-				,v.intTicketId
-				,v.intCommodityId
-				,cum.intCommodityUnitMeasureId
-				,t.intItemId
-				,v.intLocationId
-				,v.intEntityId
-				,t.intCreatedEntityId
-				,t.strDescription
-				,v.intSubLocationId
-				,v.intStorageLocationId
+				  t.strBatchId
+				, v.strTransactionType
+				, t.intTransactionDetailId
+				, t.intTransactionId
+				, t.strTransactionId
+				, t.dtmDate
+				, isi.intLineNo
+				, isi.intOrderId
+				, v.intTicketId
+				, v.intCommodityId
+				, cuomDefault.intCommodityUnitMeasureId
+				, t.intItemId
+				, v.intLocationId
+				, v.intEntityId
+				, t.intCreatedEntityId
+				, t.strDescription
+				, v.intSubLocationId
+				, v.intStorageLocationId
 
 			UNION ALL
 			SELECT strBatchId = t.strBatchId
@@ -2623,7 +2727,7 @@ BEGIN TRY
 											WHEN v.strTransactionType = 'Invoice' THEN id.intTicketId
 											WHEN v.strTransactionType = 'Outbound Shipment' THEN v.intTicketId END
 				, intCommodityId = v.intCommodityId
-				, intCommodityUOMId = cum.intCommodityUnitMeasureId
+				, intCommodityUOMId = cuomDefault.intCommodityUnitMeasureId
 				, intItemId = t.intItemId
 				, intBookId = NULL
 				, intSubBookId = NULL
@@ -2631,7 +2735,14 @@ BEGIN TRY
 				, intFutureMarketId = cd.intFutureMarketId
 				, intFutureMonthId = cd.intFutureMonthId
 				, dblNoOfLots = NULL
-				, dblQty = SUM(t.dblQty)
+				--, dblQty = SUM(t.dblQty)
+				, dblQty = ISNULL(
+							SUM(dbo.fnCalculateQtyBetweenUOM (
+									  t.intItemUOMId
+									, iuomCDefault.intItemUOMId
+									, t.dblQty
+								))
+							, 0.00)
 				, dblPrice = AVG(t.dblCost)
 				, intEntityId = v.intEntityId
 				, ysnDelete = 0
@@ -2640,8 +2751,16 @@ BEGIN TRY
 				, intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
 			FROM tblICInventoryTransaction t
 			INNER JOIN vyuICGetInventoryValuation v ON t.intInventoryTransactionId = v.intInventoryTransactionId
-			INNER JOIN tblICUnitMeasure u ON u.strUnitMeasure = v.strUOM
-			INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
+			INNER JOIN tblICCommodityUnitMeasure cuomDefault
+				ON cuomDefault.intCommodityId = v.intCommodityId
+				AND cuomDefault.ysnDefault = 1
+			INNER JOIN tblICItemUOM iuomCDefault
+				ON iuomCDefault.intItemId = t.intItemId
+				AND iuomCDefault.intUnitMeasureId = cuomDefault.intUnitMeasureId
+			LEFT JOIN tblICItemUOM iuom
+				ON iuom.intItemUOMId = t.intItemUOMId
+			--INNER JOIN tblICUnitMeasure u ON u.strUnitMeasure = v.strUOM
+			--INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
 			LEFT JOIN (
 				tblICInventoryShipmentItem sd
 				LEFT JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = sd.intInventoryShipmentId
@@ -2664,7 +2783,7 @@ BEGIN TRY
 				, v.intTicketId
 				, id.intTicketId
 				, v.intCommodityId
-				, cum.intCommodityUnitMeasureId
+				, cuomDefault.intCommodityUnitMeasureId
 				, t.intItemId
 				, v.intLocationId
 				, v.intEntityId
@@ -2692,7 +2811,7 @@ BEGIN TRY
 				, intContractHeaderId = ri.intContractHeaderId
 				, intTicketId = v.intTicketId
 				, intCommodityId = v.intCommodityId
-				, intCommodityUOMId = cum.intCommodityUnitMeasureId
+				, intCommodityUOMId = cuomDefault.intCommodityUnitMeasureId
 				, intItemId = t.intItemId
 				, intBookId = NULL
 				, intSubBookId = NULL
@@ -2700,7 +2819,14 @@ BEGIN TRY
 				, intFutureMarketId = cd.intFutureMarketId
 				, intFutureMonthId = cd.intFutureMonthId
 				, dblNoOfLots = NULL
-				, dblQty = SUM(t.dblQty)
+				--, dblQty = SUM(t.dblQty)
+				, dblQty = ISNULL(
+							SUM(dbo.fnCalculateQtyBetweenUOM (
+									  t.intItemUOMId
+									, iuomCDefault.intItemUOMId
+									, t.dblQty
+								))
+							, 0.00)
 				, dblPrice = AVG(t.dblCost)
 				, intEntityId = v.intEntityId
 				, ysnDelete = 0
@@ -2709,8 +2835,16 @@ BEGIN TRY
 				, intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
 			FROM tblICInventoryTransaction t
 			INNER JOIN vyuICGetInventoryValuation v ON t.intInventoryTransactionId = v.intInventoryTransactionId
-			INNER JOIN tblICUnitMeasure u ON u.strUnitMeasure = v.strUOM
-			INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
+			INNER JOIN tblICCommodityUnitMeasure cuomDefault
+				ON cuomDefault.intCommodityId = v.intCommodityId
+				AND cuomDefault.ysnDefault = 1
+			INNER JOIN tblICItemUOM iuomCDefault
+				ON iuomCDefault.intItemId = t.intItemId
+				AND iuomCDefault.intUnitMeasureId = cuomDefault.intUnitMeasureId
+			LEFT JOIN tblICItemUOM iuom
+				ON iuom.intItemUOMId = t.intItemUOMId
+			--INNER JOIN tblICUnitMeasure u ON u.strUnitMeasure = v.strUOM
+			--INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
 			LEFT JOIN tblICInventoryReceiptItem ri ON t.intTransactionDetailId = ri.intInventoryReceiptItemId AND v.strTransactionType = 'Inventory Receipt'
 			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intContractDetailId
 			WHERE t.dblQty <> 0 
@@ -2725,7 +2859,7 @@ BEGIN TRY
 				, t.dtmDate
 				, v.intTicketId
 				, v.intCommodityId
-				, cum.intCommodityUnitMeasureId
+				, cuomDefault.intCommodityUnitMeasureId
 				, t.intItemId
 				, v.intLocationId
 				, v.intEntityId
