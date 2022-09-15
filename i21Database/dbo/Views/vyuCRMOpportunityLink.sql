@@ -105,6 +105,7 @@
 			,t.strIndustrySegment
 			,u.strOpportunityType
 			,v.strBrand
+			,a.strOpportunityNumber
 		from
 			tblCRMOpportunity a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
