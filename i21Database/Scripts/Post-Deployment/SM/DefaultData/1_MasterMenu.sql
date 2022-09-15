@@ -10,8 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ledgers' AND strModuleName = 'General Ledger')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchases/Sales Summary Report' AND strModuleName = 'Ticket Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -4373,6 +4372,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Split Vie
 	VALUES (N'Split View', N'Ticket Management', @TicketManagementReportParentMenuId, N'Split View', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=SplitView&direct=true', N'small-menu-report', 0, 0, 0, 1, 7, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Reporting.view.ReportManager?group=Grain&report=SplitView&direct=true' WHERE strMenuName = 'Split View' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchases/Sales Summary Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Purchases/Sales Summary Report', N'Ticket Management', @TicketManagementReportParentMenuId, N'Purchases/Sales Summary Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=PurchaseSalesSummaryReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 8, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Reporting.view.ReportManager?group=Grain&report=SplitView&direct=true' WHERE strMenuName = 'Purchases/Sales Summary Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Ticket' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementCreateParentMenuId)
