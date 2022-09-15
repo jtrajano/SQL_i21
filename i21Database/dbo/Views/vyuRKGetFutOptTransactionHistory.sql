@@ -102,7 +102,7 @@ FROM (
 		, intLocationId = ISNULL(companyLoc.intCompanyLocationId, companyLoc2.intCompanyLocationId)
 		, strLocationName = CASE WHEN companyLoc.intCompanyLocationId IS NOT NULL 
 							THEN companyLoc.strLocationName
-							ELSE companyLoc2.intCompanyLocationId
+							ELSE companyLoc2.strLocationName
 							END
 		, History.dblContractSize
 		, History.intBookId
