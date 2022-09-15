@@ -1205,6 +1205,7 @@
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
     <Build Include="dbo\Tables\tblTMFillMethodSkyBitzRef.sql" />
+    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
