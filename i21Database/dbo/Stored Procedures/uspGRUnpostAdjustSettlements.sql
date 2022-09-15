@@ -16,7 +16,7 @@ BEGIN TRANSACTION
 BEGIN TRY
 
 SELECT @intTypeId = intTypeId
-	,@intBillId = intBillId
+	,@intBillId = strBillId
 	,@intUserId = intCreatedUserId
 	,@ysnBillPosted = ysnBillPosted
 FROM vyuGRSearchAdjustSettlements
@@ -119,8 +119,8 @@ SELECT [intAdjustSettlementId]
 	,[ysnTransferSettlement]
 	,[intTransferEntityId]
 	,[strTransferComments]
-	,[intBillId]
 	,[strBillId]
+	,[strBillNumbers]
 	--FREIGHT
 	,[dblFreightUnits]
 	,[dblFreightRate]
