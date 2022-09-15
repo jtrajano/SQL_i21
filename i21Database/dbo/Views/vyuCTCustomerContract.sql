@@ -87,8 +87,8 @@ AS
 			JOIN	tblICItemUOM					QU	ON  QU.intItemUOMId						=   CD.intItemUOMId
 			JOIN	tblICUnitMeasure				QM	ON  QM.intUnitMeasureId					=   QU.intUnitMeasureId
 
-	OUTER	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)			AD
-
+	--OUTER	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)			AD
+	LEFT	JOIN	dbo.vyuCTGetAdditionalColumnForDetailView AD ON AD.intContractDetailId 		=   CD.intContractDetailId
 	LEFT	JOIN	tblICItemUOM					WU	ON  WU.intItemUOMId						=   CD.intNetWeightUOMId
 	LEFT	JOIN	tblICUnitMeasure				WM	ON  WM.intUnitMeasureId					=   WU.intUnitMeasureId
 	LEFT	JOIN	tblICItemUOM					PU	ON  PU.intItemUOMId						=   AD.intSeqPriceUOMId

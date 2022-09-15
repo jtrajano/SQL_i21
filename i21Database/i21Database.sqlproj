@@ -874,6 +874,7 @@
     <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Views\vyuLGLoadOpenContractsWithAllocation.sql" />
+    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
