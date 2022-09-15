@@ -2,17 +2,26 @@
 	PRINT N'START TEMPORARY DECRYPT PASSWORDS'
 	BEGIN
 		
-		UPDATE	tblEMEntitySMTPInformation
-		SET		strPassword = dbo.fnAESDecryptASym(strPassword)
-		WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLEMENTITYSMTPINFORMATION')
+		BEGIN
+			UPDATE	tblEMEntitySMTPInformation
+			SET		strPassword = dbo.fnAESDecryptASym(strPassword)
+			WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+		END
 
-		UPDATE	tblSMInterCompany
-		SET		strPassword = dbo.fnAESDecryptASym(strPassword)
-		WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLSMINTERCOMPANY')
+		BEGIN
+			UPDATE	tblSMInterCompany
+			SET		strPassword = dbo.fnAESDecryptASym(strPassword)
+			WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+		END
 
-		UPDATE	tblRMConnection
-		SET		strPassword = dbo.fnAESDecryptASym(strPassword)
-		WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLRMCONNECTION')
+		BEGIN
+			UPDATE	tblRMConnection
+			SET		strPassword = dbo.fnAESDecryptASym(strPassword)
+			WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+		END
 
 	END
 	PRINT N'END TEMPORARY DECRYPT PASSWORDS'
