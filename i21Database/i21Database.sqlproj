@@ -848,6 +848,7 @@
     <Build Include="dbo\Functions\fnAPGetDetailSourceTransactionTaxes.sql" />
     <Build Include="dbo\Views\vyuARTaxGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
+    <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
