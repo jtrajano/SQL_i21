@@ -27,6 +27,7 @@
 	[strNewBuySell] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[dtmTransactionDate] [datetime] NOT NULL,
 	[strInternalTradeNo] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intLocationId] [int] NULL,
 	[strLocationName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[dblContractSize] [numeric](18, 6) NULL,
 	[intBookId] [int] NULL,
