@@ -6058,6 +6058,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 
 
+
 								SET @ysnUpdateCheckoutStatus = 1
 								SET @strStatusMsg = 'Success'
 								SET @ysnInvoiceStatus = 1
