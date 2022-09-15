@@ -1172,6 +1172,7 @@
     <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDispatchUpdateOrders.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
+    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
