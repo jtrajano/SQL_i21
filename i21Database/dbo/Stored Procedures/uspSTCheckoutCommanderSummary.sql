@@ -188,7 +188,19 @@ BEGIN
 										)
 						)
 					)
+					
+		DECLARE @intCustomerMopId as INT
+		SELECT @intCustomerMopId = intCustomerChargeMopId FROM tblSTStore 
+			WHERE intStoreId = @intStoreId
 
+		UPDATE tblSTCheckoutHeader  
+			SET dblCustomerChargeMOP = ISNULL(chk.dblMopInfoAmount, 0)
+		FROM @UDT_TransSummary chk
+		INNER JOIN tblSTPaymentOption sto
+			ON sto.strRegisterMop = ISNULL(chk.strSysId, '') COLLATE DATABASE_DEFAULT
+			AND sto.intPaymentOptionId = @intCustomerMopId
+			WHERE intCheckoutId = @intCheckoutId 
+				AND sto.intStoreId = @intStoreId
 
       
 		  -------------------------------------------------------------------------------------------------------------
@@ -199,6 +211,7 @@ BEGIN
                                        SELECT TOP 1 CAST(ISNULL(dblSummaryInfoCustomerCount, 0) AS DECIMAL(18, 6))
                                        FROM @UDT_TransSummary
                                  )
+			--  ,dblCustomerChargeMop = 
           WHERE intCheckoutId = @intCheckoutId
           -------------------------------------------------------------------------------------------------------------
           -------------------------------------- END CUSTOMER COUNT ---------------------------------------------------
