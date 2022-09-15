@@ -996,6 +996,7 @@
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
