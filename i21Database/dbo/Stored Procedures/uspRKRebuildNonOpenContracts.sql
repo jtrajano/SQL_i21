@@ -275,7 +275,7 @@ BEGIN
 			, @strContractNumber
 			, @intContractSeq
 			, @intContractTypeId
-			, dblBalance  
+			, dblBalance = CASE WHEN t.intContractStatusId = 3 THEN 0 ELSE dblBalance END
 			, strTransactionReference = 'Contract Sequence Begin Balance'
 			, @intContractHeaderId
 			, @intContractDetailId

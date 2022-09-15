@@ -99,8 +99,11 @@ FROM (
 		, History.strOldBuySell
 		, History.strNewBuySell	
 		, History.strInternalTradeNo
-		, intLocationId = Location.intCompanyLocationId
-		, History.strLocationName
+		, intLocationId = ISNULL(companyLoc.intCompanyLocationId, companyLoc2.intCompanyLocationId)
+		, strLocationName = CASE WHEN companyLoc.intCompanyLocationId IS NOT NULL 
+							THEN companyLoc.strLocationName
+							ELSE companyLoc2.intCompanyLocationId
+							END
 		, History.dblContractSize
 		, History.intBookId
 		, Book.strBook
@@ -128,7 +131,8 @@ FROM (
 	LEFT JOIN tblRKFuturesMonth RollMonth ON RollMonth.intFutureMarketId = Trans.intRollingMonthId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.strCommodityCode = History.strCommodity
 	LEFT JOIN tblRKOptionsMonth OptMonth ON OptMonth.strOptionMonth = History.strOptionMonth AND OptMonth.intFutureMarketId = FutMarket.intFutureMarketId
-	LEFT JOIN tblSMCompanyLocation Location ON Location.strLocationName = History.strLocationName
+	LEFT JOIN tblSMCompanyLocation companyLoc ON companyLoc.strLocationName = History.strLocationName
+	LEFT JOIN tblSMCompanyLocation companyLoc2 ON companyLoc2.intCompanyLocationId = History.intLocationId
 	LEFT JOIN tblCTBook Book ON Book.intBookId = History.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = History.intSubBookId
 	LEFT JOIN tblSMCurrency Currency ON Currency.strCurrency = History.strCurrency
