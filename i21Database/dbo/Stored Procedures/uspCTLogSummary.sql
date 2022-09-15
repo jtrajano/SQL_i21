@@ -4421,6 +4421,17 @@ BEGIN TRY
 				else
 				begin
 					SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN (@dblCurrentLoad - @dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE 0 END
+					if (@FinalQty = 0 and @strProcess = 'Fixation Detail Delete' and @TotalPriced > 0 and @dblAppliedQty > 0)
+					begin
+						declare
+							@dblRPQ numeric(36,20);
+
+						select @dblRPQ = @TotalPriced - @dblAppliedQty;
+						if (@dblRPQ = 0 and @TotalPriced = @dblCurrentQty)
+						begin
+							select @FinalQty = @dblCurrentQty;
+						end
+					end
 				end
 
 				-- Negate all the priced quantities
