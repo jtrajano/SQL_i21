@@ -210,7 +210,7 @@ BEGIN
 		DECLARE @dblCheckoutTotalDeposited AS DECIMAL(18,6)
 		DECLARE @dblCheckoutTotalCustomerPayments AS DECIMAL(18,6)
 		DECLARE @dblCheckoutCustomerChargeAmount AS DECIMAL(18,6)
-		DECLARE @strCheckoutType NVARCHAR(100)		
+		DECLARE @strCheckoutType NVARCHAR(100)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
 				, @strCurrentAllInvoiceIdList = strAllInvoiceIdList
