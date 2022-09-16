@@ -164,6 +164,7 @@
 	[strTaxPoint]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[strSourcedFrom]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblSurcharge]						NUMERIC(18, 6)									NULL,
+	[intOpportunityId]		    		INT												NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
@@ -192,7 +193,8 @@
 	CONSTRAINT [FK_tblARInvoice_tblARICT_intICTId] FOREIGN KEY ([intICTId]) REFERENCES [tblARICT]([intICTId]),
 	CONSTRAINT [FK_tblARInvoice_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
 	CONSTRAINT [FK_tblARInvoice_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
-	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId])
+	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId]),
+	CONSTRAINT [FK_tblARInvoice_tblCRMOpportunity_intOpportunityId] FOREIGN KEY (intOpportunityId) REFERENCES [tblCRMOpportunity](intOpportunityId),
 );
 --INDEXES
 GO

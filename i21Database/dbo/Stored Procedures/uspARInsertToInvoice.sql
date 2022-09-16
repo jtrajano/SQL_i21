@@ -52,7 +52,8 @@ DECLARE @EntityCustomerId		INT,
 		@EntityContactId		INT,
 		@StorageScheduleTypeId	INT,
 		@intLineOfBusinessId	INT,
-		@intSalesOrderId		INT
+		@intSalesOrderId		INT,
+		@intOpportunityId		INT
 
 DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId			INT, 
 							ysnIsInventory					BIT,
@@ -547,7 +548,8 @@ SELECT TOP 1
 		@SalesOrderComment		=   strComments,
 		@EntityContactId		=	intEntityContactId,
 		@intLineOfBusinessId	=	intLineOfBusinessId,
-		@intSalesOrderId		=	intSalesOrderId
+		@intSalesOrderId		=	intSalesOrderId,
+		@intOpportunityId		=   intOpportunityId
 FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
@@ -631,6 +633,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ShipToLocationId		=	@ShipToLocationId,
 							@BillToLocationId		=	@BillToLocationId,
 							@PeriodsToAccrue		=	@intAccrualPeriod,
+							@OpportunityId			=	@intOpportunityId,
 							
 							@ItemId					= 	@intNewSoftwareItemId,
 							@ItemDescription		=	@strNewSoftwareItemDescription,
@@ -914,6 +917,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@EntityContactId				= @EntityContactId
 					,@intLineOfBusinessId			= @intLineOfBusinessId
 					,@intSalesOrderId				= @intSalesOrderId
+					,@OpportunityId					= @intOpportunityId
 
 			IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0 
 				BEGIN

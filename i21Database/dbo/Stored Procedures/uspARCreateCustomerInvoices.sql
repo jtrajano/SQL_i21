@@ -179,7 +179,9 @@ INSERT INTO @InvoicesToGenerate (
 	,[strAcresApplied]					
 	,[strNutrientAnalysis]				
 	,[strBillingMethod]					
-	,[strApplicatorLicense])
+	,[strApplicatorLicense]
+	,[intOpportunityId]
+)
 SELECT
 	 [intId]							= [intId]
 	,[strTransactionType]				= [strTransactionType]
@@ -333,6 +335,7 @@ SELECT
 	,[strNutrientAnalysis]				= [strNutrientAnalysis]	
 	,[strBillingMethod]					= [strBillingMethod]
 	,[strApplicatorLicense]				= [strApplicatorLicense]
+	,[intOpportunityId]					= [intOpportunityId]
 FROM
 	@InvoiceEntries 
 
@@ -1366,7 +1369,9 @@ CREATE TABLE #CustomerInvoice
 	,[strAcresApplied]				NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strNutrientAnalysis]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
-	,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL)
+	,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,[intOpportunityId]				INT 											NULL
+)
 
 INSERT INTO #CustomerInvoice
 	([intInvoiceId]
@@ -1473,7 +1478,9 @@ INSERT INTO #CustomerInvoice
 	,[strAcresApplied]				
 	,[strNutrientAnalysis]		
 	,[strBillingMethod]			
-	,[strApplicatorLicense]	)
+	,[strApplicatorLicense]	
+	,[intOpportunityId]
+)
 SELECT
 	 [intInvoiceId]					= NULL
 	,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 AND RTRIM(LTRIM(ISNULL(ITG.strInvoiceOriginId,''))) <> '' THEN RTRIM(LTRIM(ITG.strInvoiceOriginId)) ELSE NULL END
@@ -1583,6 +1590,7 @@ SELECT
 	,[strNutrientAnalysis]			= ITG.[strNutrientAnalysis]
 	,[strBillingMethod]				= ITG.[strBillingMethod]
 	,[strApplicatorLicense]			= ITG.[strApplicatorLicense]
+	,[intOpportunityId]				= ITG.[intOpportunityId]
 FROM @InvoicesToGenerate ITG --WITH (NOLOCK)
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
 LEFT OUTER JOIN [tblEMEntityLocation] EL WITH (NOLOCK) ON ARC.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
@@ -1843,7 +1851,7 @@ INSERT(
 	,[strNutrientAnalysis]		
 	,[strBillingMethod]			
 	,[strApplicatorLicense]		
-	)
+)
 VALUES(
 	 [strInvoiceNumber]
 	,[strTransactionType]

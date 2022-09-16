@@ -108,7 +108,7 @@ BEGIN TRY
 		,[strNutrientAnalysis]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 		,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
 		,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
-
+	    ,[intOpportunityId]				INT 											NULL
 	)
 	
 	DECLARE  @QueryString AS VARCHAR(MAX)
@@ -276,7 +276,8 @@ BEGIN
 		,[strAcresApplied]		
 		,[strNutrientAnalysis]	
 		,[strBillingMethod]		
-		,[strApplicatorLicense]	
+		,[strApplicatorLicense]
+		,[intOpportunityId]	
 
 		,[intInvoiceDetailId]
 		,[intItemId]
@@ -427,7 +428,7 @@ BEGIN
 		,[strNutrientAnalysis]				= IE.[strNutrientAnalysis]	
 		,[strBillingMethod]					= IE.[strBillingMethod]
 		,[strApplicatorLicense]				= IE.[strApplicatorLicense]
-
+		,[intOpportunityId]					= IE.[intOpportunityId]
 
 		,[intInvoiceDetailId]				= IE.[intInvoiceDetailId]
 		,[intItemId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intItemId] ELSE NULL END) 
