@@ -127,7 +127,11 @@ BEGIN
 			END
 	FROM tblMFRecipeStage R
 	JOIN tblSMCompanyLocation CL ON CL.strLocationName = R.strLocationName
-	WHERE R.ysnInitialAckSent IS NULL
+	WHERE R.ysnInitialAckSent IS NULL AND R.intTrxSequenceNo IS NOT NULL
+	AND R.strSessionId IN (
+			SELECT strSessionId
+			FROM @tblMFSession
+			)
 
 	UPDATE R
 	SET ysnInitialAckSent = 1
