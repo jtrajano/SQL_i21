@@ -148,9 +148,13 @@ BEGIN
 									AND CAST(History.dtmCreateDateTime AS DATE) >= @dtmFromDate
 									AND CAST(History.dtmCreateDateTime AS DATE) <= @dtmToDate)
 								OR
-								((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-								AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
-								AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
+								(@strReportByDate = 'Batch Date'
+									AND CAST(History.dtmTransactionDate AS DATE) >= @dtmFromDate
+									AND CAST(History.dtmTransactionDate AS DATE) <= @dtmToDate)
+								OR 
+								(@strReportByDate = 'Filled Date'
+									AND CAST(History.dtmFilledDate AS DATE) >= @dtmFromDate
+									AND CAST(History.dtmFilledDate AS DATE) <= @dtmToDate)
 							))
 						OR @ysnDisableHistoricalDerivative = 1
 					)
