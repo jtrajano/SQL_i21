@@ -19,8 +19,8 @@ AS
 			,intCurrencyId			=	CD.intCurrencyId
 			,intForexRateType		=	CD.intRateTypeId
 			,strForexRateType		=	RT.strCurrencyExchangeRateType
-			,dblForexRate			=	CD.dblRate
-			,dblHistoricAmount		=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblFinalPrice ELSE CD.dblTotalCost END * CD.dblRate
+			,dblForexRate			=	CD.dblHistoricalRate
+			,dblHistoricAmount		=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblFinalPrice ELSE CD.dblTotalCost END * CD.dblHistoricalRate
 			,dblNewForexRate		=	0
 			,dblNewAmount			=	0
 			,dblUnrealizedDebitGain =	0
