@@ -4764,7 +4764,7 @@ BEGIN
 							) t																
 					WHERE	i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 					ORDER BY 
-						ri.intInventoryReceiptItemId ASC
+						ri.intInventoryReceiptItemId ASC					
 
 					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 					BEGIN 
@@ -4776,58 +4776,6 @@ BEGIN
 							,@strGLDescription
 
 						IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-
-						SET @intReturnValue = NULL 
-						INSERT INTO @GLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]					
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm] 
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]
-							,[dblDebitReport]
-							,[dblCreditForeign]
-							,[dblCreditReport]
-							,[dblReportingRate]
-							,[dblForeignRate]
-							,[intSourceEntityId]
-							,[intCommodityId]
-						)
-						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
-							@strBatchId
-							,'Inventory'
-							,@intEntityUserSecurityId
-							,@strGLDescription
-							,@receiptLocationId
-							,@intItemId
-							,@strTransactionId
-							,@intCategoryId
-
-						IF @intReturnValue <> 0 
-						BEGIN 
-							--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Receipt - Transfer Order'
-							GOTO _EXIT_WITH_ERROR
-						END 
 					END
 				END			
 
@@ -5010,61 +4958,60 @@ BEGIN
 								ON t.intInventoryTransactionId = lastRecord.intInventoryTransactionId
 					END 
 
-					--SET @intReturnValue = NULL 
-					--DELETE FROM @DummyGLEntries
-					--INSERT INTO @DummyGLEntries (
-					--		[dtmDate] 
-					--		,[strBatchId]
-					--		,[intAccountId]
-					--		,[dblDebit]
-					--		,[dblCredit]
-					--		,[dblDebitUnit]
-					--		,[dblCreditUnit]
-					--		,[strDescription]
-					--		,[strCode]
-					--		,[strReference]
-					--		,[intCurrencyId]
-					--		,[dblExchangeRate]
-					--		,[dtmDateEntered]
-					--		,[dtmTransactionDate]
-					--		,[strJournalLineDescription]
-					--		,[intJournalLineNo]
-					--		,[ysnIsUnposted]
-					--		,[intUserId]
-					--		,[intEntityId]
-					--		,[strTransactionId]
-					--		,[intTransactionId]
-					--		,[strTransactionType]
-					--		,[strTransactionForm] 
-					--		,[strModuleName]
-					--		,[intConcurrencyId]
-					--		,[dblDebitForeign]
-					--		,[dblDebitReport]
-					--		,[dblCreditForeign]
-					--		,[dblCreditReport]
-					--		,[dblReportingRate]
-					--		,[dblForeignRate]
-					--		,[strRateType]
-					--		,[intSourceEntityId]
-					--		,[intCommodityId]
-					--)			
-					--EXEC @intReturnValue = dbo.uspICCreateGLEntries
-					--	@strBatchId 
-					--	,@strAccountToCounterInventory
-					--	,@intEntityUserSecurityId
-					--	,@strGLDescription
-					--	,NULL 
-					--	,@intItemId -- This is only used when rebuilding the stocks.
-					--	,@strTransactionId -- This is only used when rebuilding the stocks.
-					--	,@intCategoryId
+					
+					BEGIN 
+						SET @intReturnValue = NULL 
+						INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[intSourceEntityId]
+							,[intCommodityId]
+						)
+						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
+							@strBatchId
+							,'Inventory'
+							,@intEntityUserSecurityId
+							,@strGLDescription
+							,@receiptLocationId
+							,@intItemId
+							,@strTransactionId
+							,@intCategoryId
 
-					--IF @intReturnValue <> 0 
-					--BEGIN 
-					--	--PRINT 'Error found in uspICCreateGLEntries for Transfer Orders'
-					--	GOTO _EXIT_WITH_ERROR
-					--END 
-
-					--select 'debug @DummyGLEntries', * from @DummyGLEntries
+						IF @intReturnValue <> 0 
+						BEGIN 
+							--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Receipt - Transfer Order'
+							GOTO _EXIT_WITH_ERROR
+						END 
+					END
 				END
 
 				-- Receive the other types of Inventory Receipt. 
