@@ -52,6 +52,7 @@ BEGIN
 		FROM tblICItem I
 		WHERE I.intCategoryId = @intCategoryId
 			AND I.strStatus = 'Active'
+			AND I.strItemNo <>'Futures Contract'
 	END
 
 	IF @intCompanyLocationId = 0
@@ -317,7 +318,8 @@ BEGIN
 			CASE 
 				WHEN S.intLoadDetailContainerLinkId IS NOT NULL
 					THEN 6 -->Approved Qty
-				ELSE 7 -->Not Approved Qty
+				When LW1.intLoadWarehouseId is not null Then  7 -->Not Approved Qty
+				Else 0
 				END
 			) AS intAttributeId
 		,@intUserId
@@ -332,7 +334,7 @@ BEGIN
 	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		AND S.intLoadContainerId = LDCL.intLoadContainerId
 		AND S.intSampleStatusId = 3 -->Approved
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT TOP 1 LW.intLoadWarehouseId
 		FROM tblLGLoadWarehouse LW
 		WHERE LW.intLoadId = L.intLoadId
@@ -355,7 +357,14 @@ BEGIN
 			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 				AND S1.intSampleStatusId = 4 -->Rejected)
 			)
-
+		AND (
+			CASE 
+				WHEN S.intLoadDetailContainerLinkId IS NOT NULL
+					THEN 6 -->Approved Qty
+				When LW1.intLoadWarehouseId is not null Then  7 -->Not Approved Qty
+				Else 0
+				END
+			)>0
 	INSERT INTO tblMFShortTermPlanningViewDetail (
 		intContractDetailId
 		,intLoadContainerId
@@ -474,6 +483,7 @@ BEGIN
 			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
 			,SS.dblQuantity - IsNULL(C2.dblQuantity, 0)
 		FROM tblCTContractDetail SS
+		JOIN tblCTContractHeader CH on CH.intContractHeaderId =SS.intContractHeaderId AND CH.intContractTypeId =1
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
@@ -512,6 +522,7 @@ BEGIN
 			,SS.dblNetWeight - IsNULL(C2.dblNet, 0)
 			,SS.dblQuantity - IsNULL(C2.dblQuantity, 0)
 		FROM tblCTContractDetail SS
+		JOIN tblCTContractHeader CH on CH.intContractHeaderId =SS.intContractHeaderId AND CH.intContractTypeId =1
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (

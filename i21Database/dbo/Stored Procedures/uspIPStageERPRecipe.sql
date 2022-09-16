@@ -327,7 +327,8 @@ BEGIN TRY
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
-					)
+					) 
+			Where TrxSequenceNo IS NOT NULL
 
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (
