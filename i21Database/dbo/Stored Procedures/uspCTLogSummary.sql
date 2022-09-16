@@ -4490,8 +4490,15 @@ BEGIN TRY
 				IF (@qtyDiff <> 0)
 				BEGIN
 					-- Qty Changed
-					SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
-										ELSE @dblCurrentQty - @prevOrigQty END
+					if (@qtyDiff > 0 and @TotalPriced > 0)
+					begin
+						set @FinalQty = @qtyDiff;
+					end
+					else
+					begin
+						SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
+											ELSE @dblCurrentQty - @prevOrigQty END
+					end
 				END
 				ELSE
 				BEGIN
