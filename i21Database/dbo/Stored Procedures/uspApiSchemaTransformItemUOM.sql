@@ -128,7 +128,7 @@ WHERE cte.RowNumber > 1;
 -- Duplicate stock units
 ;WITH cte AS
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.ysnIsStockUnit ORDER BY sr.ysnIsStockUnit) AS RowNumber
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strItemNo,sr.ysnIsStockUnit ORDER BY sr.ysnIsStockUnit) AS RowNumber
    FROM tblApiSchemaTransformItemUOM sr
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
 	AND sr.ysnIsStockUnit = 1
@@ -151,7 +151,7 @@ WHERE sr.guiApiUniqueId = @guiApiUniqueId
 
 ;WITH cte AS
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.ysnIsStockUnit ORDER BY sr.ysnIsStockUnit) AS RowNumber
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strItemNo, sr.ysnIsStockUnit ORDER BY sr.ysnIsStockUnit) AS RowNumber
    FROM tblApiSchemaTransformItemUOM sr
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
    AND sr.ysnIsStockUnit = 1
@@ -347,10 +347,9 @@ JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
 JOIN tblApiSchemaTransformItemUOM ux ON ux.strUOM = u.strUnitMeasure
    AND ux.strItemNo = i.strItemNo
 OUTER APPLY (
-   SELECT CAST(1 AS BIT) ysnYes
+  SELECT CAST(1 AS BIT) ysnYes
    FROM tblICItemUOM 
-   WHERE intItemId = i.intItemId
-      AND ysnStockUnit = 1
+   WHERE intItemId = i.intItemId AND ysnStockUnit = 1 AND intUnitMeasureId != iu.intUnitMeasureId
 ) hasStockUnit
 WHERE ux.guiApiUniqueId = @guiApiUniqueId
    AND @OverwriteExisting = 1
@@ -474,6 +473,7 @@ SELECT
 FROM tblICItem sr
 INNER JOIN tblApiSchemaTransformItemUOM u ON u.strItemNo = sr.strItemNo
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = sr.intItemId AND ysnStockUnit = 1)
+GROUP BY sr.strItemNo
 
 UPDATE log
 SET log.intTotalRowsImported = r.intCount
