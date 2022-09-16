@@ -42,6 +42,7 @@ BEGIN
 		FROM tblICItem I
 		WHERE I.intCategoryId = @intCategoryId
 			AND I.strStatus = 'Active'
+			AND I.strItemNo <>'Futures Contract'
 	END
 	ELSE
 	BEGIN
@@ -274,7 +275,8 @@ BEGIN
 			CASE 
 				WHEN S.intLoadDetailContainerLinkId IS NOT NULL
 					THEN 6 -->Approved Qty
-				ELSE 7 -->Not Approved Qty
+				When LW1.intLoadWarehouseId is not null Then  7 -->Not Approved Qty
+				Else 0
 				END
 			) AS intAttributeId
 		,LDCL.intLoadContainerId
@@ -290,7 +292,7 @@ BEGIN
 	LEFT JOIN tblQMSample S ON S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		AND S.intSampleStatusId = 3 -->Approved
 		AND S.intLoadContainerId = LDCL.intLoadContainerId
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT TOP 1 LW.intLoadWarehouseId
 		FROM tblLGLoadWarehouse LW
 		WHERE LW.intLoadId = L.intLoadId
@@ -312,7 +314,14 @@ BEGIN
 			WHERE S1.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 				AND S1.intSampleStatusId = 4 -->Rejected)
 			)
-
+		AND (
+			CASE 
+				WHEN S.intLoadDetailContainerLinkId IS NOT NULL
+					THEN 6 -->Approved Qty
+				When LW1.intLoadWarehouseId is not null Then  7 -->Not Approved Qty
+				Else 0
+				END
+			)>0
 	INSERT INTO #tblMFShortTermDemand (
 		intItemId
 		,intLocationId
@@ -471,6 +480,7 @@ BEGIN
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight - IsNULL(dblNet, 0))) AS dblQty
 		,12 AS intAttributeId -->Late Open Contracts
 	FROM tblCTContractDetail SS
+	JOIN tblCTContractHeader CH on CH.intContractHeaderId =SS.intContractHeaderId AND CH.intContractTypeId =1
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
@@ -500,6 +510,7 @@ BEGIN
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight - IsNULL(C2.dblNet, 0))) AS dblQty
 		,13 AS intAttributeId -->Forward Open Contracts
 	FROM tblCTContractDetail SS
+	JOIN tblCTContractHeader CH on CH.intContractHeaderId =SS.intContractHeaderId AND CH.intContractTypeId =1
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
