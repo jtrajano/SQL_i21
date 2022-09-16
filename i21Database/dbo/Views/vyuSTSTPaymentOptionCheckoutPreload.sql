@@ -27,3 +27,4 @@ INNER JOIN tblICItem item
 LEFT JOIN tblGLAccount gl
 	ON stpo.intAccountId = gl.intAccountId
 WHERE stpo.intPaymentOptionId NOT IN (ISNULL(st.intCustomerChargeMopId,0) , ISNULL(st.intCashTransctionMopId, 0))
+AND ISNULL(stpo.ysnDepositable,0) = 0
