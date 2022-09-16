@@ -10,3 +10,7 @@ CREATE TABLE tblICTransactionNodes (
 )
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICTransactionNodes]
+	ON [dbo].[tblICTransactionNodes](intTransactionId ASC, strTransactionNo ASC, strTransactionType ASC, strModuleName ASC)
+GO
