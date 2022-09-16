@@ -2121,10 +2121,13 @@ BEGIN
 	INNER JOIN tblICItemAccount ICIA ON IFC.intItemId = ICIA.intItemId
 	INNER JOIN tblGLAccountCategory GLAC ON ICIA.intAccountCategoryId = GLAC.intAccountCategoryId
 	OUTER APPLY (
-		SELECT bitOverriden, strOverrideAccount
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment
 		FROM dbo.[fnARGetOverrideAccount](ARPIH.[intAccountId], [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory), @OverrideCompanySegment, @OverrideLocationSegment, 0)
 	) OVERRIDESEGMENT
-	WHERE ((@OverrideLocationSegment = 1 OR @OverrideCompanySegment = 1) AND OVERRIDESEGMENT.bitOverriden = 0)
+	WHERE (
+		(@OverrideCompanySegment = 1 AND bitSameCompanySegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0) OR
+		(@OverrideLocationSegment = 1 AND bitSameLocationSegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0)
+	)
 	AND GLAC.strAccountCategory IN ('Cost of Goods', 'Sales Account', 'Inventory')
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2154,10 +2157,13 @@ BEGIN
 	INNER JOIN tblICItemAccount ICIA ON IFITC.intItemId = ICIA.intItemId
 	INNER JOIN tblGLAccountCategory GLAC ON ICIA.intAccountCategoryId = GLAC.intAccountCategoryId
 	OUTER APPLY (
-		SELECT bitOverriden, strOverrideAccount
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment
 		FROM dbo.[fnARGetOverrideAccount](ARPIH.[intAccountId], [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, GLAC.strAccountCategory), @OverrideCompanySegment, @OverrideLocationSegment, 0)
 	) OVERRIDESEGMENT
-	WHERE ((@OverrideLocationSegment = 1 OR @OverrideCompanySegment = 1) AND OVERRIDESEGMENT.bitOverriden = 0)
+	WHERE (
+		(@OverrideCompanySegment = 1 AND bitSameCompanySegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0) OR
+		(@OverrideLocationSegment = 1 AND bitSameLocationSegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0)
+	)
 	AND GLAC.strAccountCategory = 'Inventory In-Transit'
 
 	INSERT INTO tblARPostInvalidInvoiceData
