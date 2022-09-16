@@ -470,7 +470,7 @@ BEGIN
 					SELECT * INTO #tmpLineTax
 					FROM #tmpCustomerInvoiceTaxDetail
 					WHERE (( intKey - 100 ) = @intTaxKey)
-
+					and dblTotal <> 0
 					--SELECT * from #tmpLineTax
 
 					
