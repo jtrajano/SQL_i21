@@ -2114,7 +2114,7 @@ BEGIN
 		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment of AR Account for ' + GLAC.strAccountCategory + ' account category. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM @ItemsForCosting IFC
-	INNER JOIN tblARPostInvoiceDetail ARPID ON IFC.intTransactionDetailId = ARPID.intInvoiceDetailId AND @strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceDetail ARPID ON IFC.intTransactionDetailId = ARPID.intInvoiceDetailId AND strSessionId = @strSessionId
 	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId
 	INNER JOIN tblICItem ITEM ON IFC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IFC.intItemLocationId = IL.intItemLocationId
@@ -2150,7 +2150,7 @@ BEGIN
 		,[strPostingError]		= 'Unable to find the account of item ' + ITEM.strItemNo + ' that matches the segment of AR Account for ' + GLAC.strAccountCategory + ' account category. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM @ItemsForInTransitCosting IFITC
-	INNER JOIN tblARPostInvoiceDetail ARPID ON IFITC.intTransactionDetailId = ARPID.intInvoiceDetailId AND @strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceDetail ARPID ON IFITC.intTransactionDetailId = ARPID.intInvoiceDetailId AND strSessionId = @strSessionId
 	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId
 	INNER JOIN tblICItem ITEM ON IFITC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IFITC.intItemLocationId = IL.intItemLocationId
