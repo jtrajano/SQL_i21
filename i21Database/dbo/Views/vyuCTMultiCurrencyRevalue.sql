@@ -14,8 +14,8 @@ AS
 			,strContractNumber		=	CH.strContractNumber
 			,strItemId				=	IM.strItemNo
 			,dblQuantity			=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblQuantity ELSE CD.dblBalance END
-			,dblUnitPrice			=	CD.dblCashPrice
-			,dblAmount				=	CD.dblTotalCost
+			,dblUnitPrice			=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblCashPrice ELSE CD.dblCashPrice END
+			,dblAmount				=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblFinalPrice ELSE CD.dblTotalCost END
 			,intCurrencyId			=	CD.intCurrencyId
 			,intForexRateType		=	CD.intRateTypeId
 			,strForexRateType		=	RT.strCurrencyExchangeRateType
@@ -67,7 +67,7 @@ AS
 										END		COLLATE Latin1_General_CI_AS
 			,dblFinalPrice			=	PF.dblFinalPrice
 			,dblQuantity			=	SUM(ISNULL(PFD.dblQuantity,0))
-				
+			,dblCashPrice =   SUM(PFD.dblCashPrice)
 		FROM		tblCTPriceFixation			PF 	WITH (NOLOCK)
 		LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
 		LEFT JOIN (
