@@ -245,7 +245,7 @@ LEFT JOIN tblSOSalesOrder SO WITH (NOLOCK) ON INV.intSalesOrderId = SO.intSalesO
 LEFT JOIN tblCTBook CBOOK WITH (NOLOCK) ON INV.intBookId = CBOOK.intBookId
 LEFT JOIN tblCTSubBook CSBOOK WITH (NOLOCK) ON INV.intSubBookId = CSBOOK.intSubBookId
 LEFT JOIN tblLGLoad LG WITH (NOLOCK) ON INV.intLoadId = LG.intLoadId
-LEFT JOIN tblCRMOpportunity OPUR WITH (NOLOCK) ON SO.intOpportunityId = OPUR.intOpportunityId
+LEFT JOIN tblCRMOpportunity OPUR WITH (NOLOCK) ON INV.intOpportunityId = OPUR.intOpportunityId
 LEFT JOIN (
     SELECT intInvoiceId
 		 --, intCreditMemoId
