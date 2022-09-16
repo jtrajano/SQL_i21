@@ -282,10 +282,12 @@ BEGIN TRY
 	LEFT JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SL.intTransactionRecordId
 	LEFT JOIN tblGRCustomerStorage GR ON GR.intCustomerStorageId = SL.intTransactionRecordHeaderId
 	LEFT JOIN tblSCTicket T ON T.intTicketId = GR.intTicketId
+	LEFT JOIN tblGRSettleContract SC ON SC.intSettleStorageId = SS.intSettleStorageId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned' 
 	AND SL.strAction = 'Settle Storage - Company owned storage'
+	AND SC.intContractDetailId IS NULL
 
 	UNION ALL
 
