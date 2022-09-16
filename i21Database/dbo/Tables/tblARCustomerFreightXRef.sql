@@ -53,3 +53,7 @@ BEGIN
 	END
 END
 GO
+
+
+CREATE INDEX [IX_tblARCustomerFreightXRef_Main] ON [dbo].[tblTRLoadDistributionHeader] ([intInvoiceId] ASC)
+GO
