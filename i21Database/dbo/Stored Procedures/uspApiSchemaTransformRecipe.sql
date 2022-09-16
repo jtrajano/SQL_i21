@@ -494,6 +494,10 @@ FETCH NEXT FROM cur INTO
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
+	SET @intRecipeId = NULL;
+
+	SELECT @intRecipeId = intRecipeId FROM tblMFRecipe WHERE strName = @strRecipeName and intLocationId = @intCompanyLocationId
+
 	SELECT @intRecipeId = intRecipeId FROM tblMFRecipe WHERE strName = @strRecipeName
 
 	IF @OverwriteExisting = 0
