@@ -3927,7 +3927,9 @@ BEGIN TRY
 				end
 				else
 				begin
-					if (@strProcess <> 'Do Roll' and exists(select top 1 1 from @cbLogPrev where strTransactionType = 'Contract Balance' and intContractStatusId = 4 order by intId desc))
+					declare @intLastLogStatus int;
+					select top 1 @intLastLogStatus = intContractStatusId from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
+					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4)
 					begin
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					end
