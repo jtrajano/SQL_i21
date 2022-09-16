@@ -75,6 +75,7 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Exc
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax CNG', intMasterId = 12151
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Aviation Gasoline', intMasterId = 12152
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Jet Fuel', intMasterId = 12153
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'ID', strTaxCategory = 'ID Excise Tax Dyed Diesel', intMasterId = 12154
 
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'ID', @TaxCategories = @TaxCategoryID
 
@@ -279,6 +280,7 @@ INSERT INTO @TaxCategoryMT(
 SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Excise Tax Gasoline Gasohol Ethanol', intMasterId = 26143
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Excise Tax Aviation', intMasterId = 26144
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Excise Tax Diesel Clear', intMasterId = 26145
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MT', strTaxCategory = 'MT Excise Tax Dyed Diesel', intMasterId = 26146
 
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MT', @TaxCategories = @TaxCategoryMT
 
