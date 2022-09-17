@@ -89,10 +89,10 @@ SELECT
 								END
 	,CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN ''
-									ELSE
+									ELSE --CS.strStorageTicketNumber
 										CASE
-											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
-											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
+											WHEN (CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0) OR (CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0) THEN CS.strStorageTicketNumber--DeliverySheet.strDeliverySheetNumber
+											--WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
 											ELSE 
 												CASE 
 													WHEN TS.strTransferStorageTicket IS NULL 
