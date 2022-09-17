@@ -54,7 +54,7 @@ BEGIN TRY
 			@strCustomerContract		NVARCHAR(100),
 			@intContractTypeId			INT,
 			@strAddToPayableMessage		NVARCHAR(MAX),
-			@ysnCancelledLoad			bit = 0;
+			@ysnCancelledLoad			bit = 0; 
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
