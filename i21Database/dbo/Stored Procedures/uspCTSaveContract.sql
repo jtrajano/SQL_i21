@@ -60,7 +60,8 @@ BEGIN TRY
             @strLCType					NVARCHAR(100),
             @strLCNumber				NVARCHAR(50),
 			@ysnRoll				    BIT = 0,
-			@intCostTermId				INT
+			@intCostTermId				INT,
+			@ysnCancelledLoad			bit = 0;
 
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
