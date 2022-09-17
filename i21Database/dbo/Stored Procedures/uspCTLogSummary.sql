@@ -1634,6 +1634,7 @@ BEGIN TRY
 					AND cbl.intContractHeaderId = @intContractHeaderId
 					AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
 					and (select top 1 intHeaderPricingTypeId from @tmpContractDetail) <> 3
+					and bd.intItemId = cbl.intItemId
 				ORDER BY cbl.intContractBalanceLogId DESC
 			END
 			ELSE
