@@ -93,6 +93,9 @@ SET ANSI_WARNINGS ON
 			, [strTaxPoint]
 			, [intTaxLocationId]
 			, [ysnOverrideTaxGroup]
+			/*Quality and Optionality Premium*/
+			, [dblQualityPremium] 
+ 			, [dblOptionalityPremium] 
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -170,6 +173,10 @@ SET ANSI_WARNINGS ON
 			, [strTaxPoint]
 			, [intTaxLocationId]
 			, [ysnOverrideTaxGroup]
+
+			/*Quality and Optionality Premium*/
+			,GP.[dblQualityPremium] 
+ 			,GP.[dblOptionalityPremium] 
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT, DEFAULT) GP
 	END
 	

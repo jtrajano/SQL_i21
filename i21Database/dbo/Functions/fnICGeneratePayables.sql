@@ -120,6 +120,11 @@ RETURNS @table TABLE
 , [strTaxPoint]						NVARCHAR(50) NULL
 , [intTaxLocationId]				INT NULL 
 , [ysnOverrideTaxGroup]				BIT NULL 
+
+/*Quality and Optionality Premium*/
+,[dblQualityPremium]				NUMERIC(18, 6) DEFAULT 0
+,[dblOptionalityPremium]			NUMERIC(18, 6) DEFAULT 0
+
 )
 AS
 BEGIN
@@ -388,6 +393,10 @@ SELECT DISTINCT
 	, [intTaxLocationId]				= A.intTaxLocationId
 	, [ysnOverrideTaxGroup]				= B.ysnOverrideTaxGroup
 
+	/*Quality and Optionality Premium*/
+	,[dblQualityPremium] = LogisticsView.[dblQualityPremium] 
+ 	,[dblOptionalityPremium] = LogisticsView.[dblOptionalityPremium] 
+
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C 
@@ -479,6 +488,8 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			,ctUOM.strUnitMeasure
 			,J.dblFranchise
 			,CD.intPricingStatus
+			,CD.dblQualityPremium
+			,CD.dblOptionalityPremium
 		FROM 
 			tblCTContractHeader CH INNER JOIN tblCTContractDetail CD 
 				ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -550,6 +561,8 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		SELECT	
 				LogisticsView.strLoadNumber
 				,LogisticsView.dblNetWt
+				,LogisticsView.dblQualityPremium
+				,LogisticsView.dblOptionalityPremium
 		FROM	vyuICLoadContainersSearch LogisticsView 
 		WHERE	
 				(
@@ -858,6 +871,11 @@ SELECT DISTINCT
 		, [strTaxPoint]						= A.strTaxPoint
 		, [intTaxLocationId]				= A.intTaxLocationId
 		, [ysnOverrideTaxGroup]				= A.ysnOverrideTaxGroup
+
+		/*Quality and Optionality Premium*/
+		,[dblQualityPremium] = NULL
+ 		,[dblOptionalityPremium] = NULL
+
 FROM 
 	[vyuICChargesForBilling] A
 	INNER JOIN (
