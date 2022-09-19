@@ -231,8 +231,6 @@ INSERT INTO tblApiImportLogDetail
 			THEN 'Item: ' + ErrorEffectiveItemPrice.strItemNo + ' does not exist.'
 			WHEN ErrorEffectiveItemPrice.intErrorType = 6
 			THEN 'Unit of Measure: ' + ErrorEffectiveItemPrice.strFieldValue + ' does not exist.'
-			WHEN ErrorEffectiveItemPrice.intErrorType = 6
-			THEN 'Unit of Measure: ' + ErrorEffectiveItemPrice.strFieldValue + ' does not exist.'
 			WHEN ErrorEffectiveItemPrice.intErrorType = 7
 			THEN 'Unit of Measure: ' + ErrorEffectiveItemPrice.strFieldValue + ' is not configured on item: ' + ErrorEffectiveItemPrice.strItemNo + '.'
 			ELSE 'Location: ' + ErrorEffectiveItemPrice.strFieldValue + ' does not exist.'
