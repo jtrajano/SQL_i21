@@ -723,7 +723,7 @@ BEGIN
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I			 
 	WHERE ((I.strType <> 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM tblARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0)))
-	   OR (I.strType = 'Tax Adjustment' AND I.[dblInvoiceTotal] <> (SELECT SUM([dblTax]) FROM tblARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId)))
+	   OR (I.strType = 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ISNULL(I.[dblTax], 0.0)))
 	   AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData

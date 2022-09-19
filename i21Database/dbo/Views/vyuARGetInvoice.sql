@@ -405,7 +405,10 @@ OUTER APPLY(
 ) INTERCOMPANY
 LEFT JOIN
 (
-	SELECT  ysnReturned,intInvoiceId FROM tblARInvoice  WITH (NOLOCK) 
+	SELECT  
+		 ysnReturned
+		,intInvoiceId
+	FROM tblARInvoice  WITH (NOLOCK) 
 ) ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
 LEFT JOIN
 (

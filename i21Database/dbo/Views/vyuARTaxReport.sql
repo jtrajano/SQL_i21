@@ -136,6 +136,7 @@ SELECT
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,dblTotalAmount				= INVOICE.dblInvoiceTotal
 	,dblTotalAmountFunctional	= ROUND(INVOICE.dblInvoiceTotal * INVOICE.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+	,strRelatedInvoiceNumber	= CASE WHEN ISNULL(RelatedInvoice.strInvoiceNumber, '') = '' THEN INVOICE.strInvoiceOriginId ELSE RelatedInvoice.strInvoiceNumber END
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -402,4 +403,11 @@ OUTER APPLY (
 	WHERE intInvoiceId = INVOICE.intInvoiceId
 ) PAYMENT
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INVOICE.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INVOICE.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
+LEFT JOIN
+(
+	SELECT  
+		 intOriginalInvoiceId
+		,strInvoiceNumber
+	FROM tblARInvoice  WITH (NOLOCK) 
+) RelatedInvoice ON RelatedInvoice.intOriginalInvoiceId = INVOICE.intInvoiceId
 WHERE INVOICE.ysnPosted = 1
