@@ -12,17 +12,17 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Update consumption site's delivery details
--- UPDATE tcs
--- SET   tcs.dblLastDeliveredGal = CASE ISNULL(@ysnPost, 0) WHEN 1 THEN ISNULL(tcs.dblLastDeliveredGal, 0) + iri.dblOpenReceive ELSE ISNULL(tcs.dblLastDeliveredGal, 0) - iri.dblOpenReceive END
---     , tcs.dtmLastDeliveryDate = CASE ISNULL(@ysnPost, 0) WHEN 1 THEN ir.dtmReceiptDate ELSE cs.dtmLastDeliveryDate END
---     , tcs.intConcurrencyId = ISNULL(tcs.intConcurrencyId, 0) + 1
--- FROM tblICInventoryReceipt ir
--- JOIN tblICInventoryReceiptItem iri ON iri.intInventoryReceiptId = ir.intInventoryReceiptId
--- JOIN vyuTMCompanyConsumptionSite cs ON cs.intCompanyLocationId = ir.intLocationId
---     AND cs.ysnActive = 1
---     AND cs.intItemId = iri.intItemId
---     AND cs.intCompanyLocationSubLocationId = iri.intSubLocationId
--- JOIN tblTMCompanyConsumptionSite tcs ON tcs.intCompanyConsumptionSiteId = cs.intCompanyConsumptionSiteId
--- where ir.intInventoryReceiptId = @intReceiptId
+UPDATE tcs
+SET   tcs.dblLastDeliveredGal = CASE ISNULL(@ysnPost, 0) WHEN 1 THEN ISNULL(tcs.dblLastDeliveredGal, 0) + iri.dblOpenReceive ELSE ISNULL(tcs.dblLastDeliveredGal, 0) - iri.dblOpenReceive END
+    , tcs.dtmLastDeliveryDate = CASE ISNULL(@ysnPost, 0) WHEN 1 THEN ir.dtmReceiptDate ELSE cs.dtmLastDeliveryDate END
+    , tcs.intConcurrencyId = ISNULL(tcs.intConcurrencyId, 0) + 1
+FROM tblICInventoryReceipt ir
+JOIN tblICInventoryReceiptItem iri ON iri.intInventoryReceiptId = ir.intInventoryReceiptId
+JOIN vyuTMCompanyConsumptionSite cs ON cs.intCompanyLocationId = ir.intLocationId
+    AND cs.ysnActive = 1
+    AND cs.intItemId = iri.intItemId
+    AND cs.intCompanyLocationSubLocationId = iri.intSubLocationId
+JOIN tblTMCompanyConsumptionSite tcs ON tcs.intCompanyConsumptionSiteId = cs.intCompanyConsumptionSiteId
+where ir.intInventoryReceiptId = @intReceiptId
 
 END 
