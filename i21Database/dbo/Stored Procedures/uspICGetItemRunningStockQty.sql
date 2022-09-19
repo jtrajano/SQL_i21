@@ -18,7 +18,7 @@ SELECT
 	  Item.intItemId
 	, Item.strItemNo
 	, Item.strType
-	, strUnitMeasure = uom.strUnitMeasure
+	, strUnitMeasure = UnitofMeasure.strUnitMeasure
 	, lot.strLotNumber
 	, dblOnHand = 
 			CASE 
@@ -173,7 +173,7 @@ FROM
 					WHEN @intItemUOMId IS NOT NULL THEN @intItemUOMId	
 					ELSE StockUOM.intItemUOMId
 				END 
-	) uom
+	) UnitofMeasure
 
 	OUTER APPLY (
 		SELECT

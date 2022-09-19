@@ -74,6 +74,10 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , strCreditCode			= CUSTOMER.strCreditCode
 	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached
 	 , intCreditLimitReached	= DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
+	 , dblHighestDueAR			= CUSTOMER.dblHighestDueAR
+     , dblHighestAR             = CUSTOMER.dblHighestAR
+     , dtmHighestARDate         = CUSTOMER.dtmHighestARDate
+     , dtmHighestDueARDate      = CUSTOMER.dtmHighestDueARDate
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -108,6 +112,10 @@ INNER JOIN (
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached
+		 , dblHighestDueAR
+         , dblHighestAR
+         , dtmHighestARDate
+         , dtmHighestDueARDate
 	FROM dbo.tblARCustomer C WITH (NOLOCK)	
 	LEFT JOIN (
 		SELECT intTermID
@@ -225,7 +233,7 @@ LEFT JOIN (
 		 , intEntityId
 		 , ysnDefaultLocation
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
-) BILLTOLOCATION ON CUSTOMER.intEntityId = BILLTOLOCATION.intEntityId AND BILLTOLOCATION.ysnDefaultLocation=1
+) BILLTOLOCATION ON CUSTOMER.intEntityId = BILLTOLOCATION.intEntityId AND CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
 LEFT JOIN (
 	SELECT S.intEntityId
 		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END

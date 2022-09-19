@@ -587,7 +587,7 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
-			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN (CD.intSplitFromId, CD.intContractDetailId)
+			JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId IN ((case when @ysnMultiplePriceFixation = 1 then CD.intSplitFromId else CD.intContractDetailId end), CD.intContractDetailId)
 			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
@@ -596,6 +596,14 @@ BEGIN TRY
 				UPDATE	CH
 				SET		CH.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblPriceWORollArb,0)),
 						CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			END
+			ELSE
+			BEGIN
+				UPDATE	CH
+				SET		CH.intConcurrencyId		=	CH.intConcurrencyId + 1
 				FROM	tblCTContractHeader		CH
 				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
 				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
@@ -633,13 +641,16 @@ BEGIN TRY
 			, @logProcess NVARCHAR(50)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
 		SELECT @logProcess = @process + CASE WHEN @strAction = 'Reassign' THEN ' - Reassign' ELSE '' END
-		
-		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							 @intContractDetailId 	= 	@intContractDetailId,
-							 @strSource			 	= 	'Pricing',
-							 @strProcess		 	= 	@logProcess,
-							 @contractDetail 		= 	@contractDetails,
-							 @intUserId				= 	@intUserId
+
+		if exists (select top 1 1 from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId and isnull(intPreviousConcurrencyId,0) <> intConcurrencyId)
+		begin
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								 @intContractDetailId 	= 	@intContractDetailId,
+								 @strSource			 	= 	'Pricing',
+								 @strProcess		 	= 	@logProcess,
+								 @contractDetail 		= 	@contractDetails,
+								 @intUserId				= 	@intUserId
+		end
 
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0, @dtmLocalDate
 

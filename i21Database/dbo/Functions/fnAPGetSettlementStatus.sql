@@ -37,7 +37,8 @@ BEGIN
 				  INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
 				  INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
 				  INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
-				  INNER JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+				  --INNER JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+				  INNER JOIN tblGRSettleStorageBillDetail SSBD ON SSBD.intBillId = Bill.intBillId
 				  WHERE PYMT.strPaymentRecordNum = @strTransactionId
 			)
 	BEGIN

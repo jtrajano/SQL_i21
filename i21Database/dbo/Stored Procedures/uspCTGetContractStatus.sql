@@ -10,13 +10,15 @@ BEGIN TRY
 			@intContractStatusId	INT,
 			@dblScheduleQty			NUMERIC(18,6),
 			@dblBalance				NUMERIC(18,6),
-			@intShortCloseId		INT
+			@intShortCloseId		INT,
+			@intPricingTypeId		INT
 
 	SELECT	@dblQuantity			=	ISNULL(dblQuantity,0),
 			@dblAppliedQty			=	ISNULL(dblAppliedQty,0),
 			@intContractStatusId	=	ISNULL(intContractStatusId,0),
 			@dblScheduleQty			=	ISNULL(dblScheduleQty,0),
-			@dblBalance				=	ISNULL(dblBalance,0)
+			@dblBalance				=	ISNULL(dblBalance,0),
+			@intPricingTypeId		=	intPricingTypeId
 	FROM	vyuCTGridContractDetail
 	WHERE	intContractDetailId		=	@intContractDetailId
 
@@ -28,15 +30,22 @@ BEGIN TRY
 
 	IF	@intContractStatusId	=	1 --Open
 	BEGIN
-		DECLARE @shortCloseId INT
-		SELECT @shortCloseId = CASE WHEN dbo.fnCTGetSequenceReceiptReturnTotal(@intContractDetailId) = @dblQuantity THEN 6 ELSE 0 END
+		if (@intPricingTypeId = 5 and @dblBalance > 0)
+		begin
+			SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 1
+		end
+		else
+		begin
+			DECLARE @shortCloseId INT
+			SELECT @shortCloseId = CASE WHEN dbo.fnCTGetSequenceReceiptReturnTotal(@intContractDetailId) = @dblQuantity THEN 6 ELSE 0 END
 
-		IF @dblAppliedQty > 0 
-			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,6,@intShortCloseId)
-		ELSE IF @dblScheduleQty > 0
-			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,@shortCloseId,3,@intShortCloseId)
-		ELSE
-			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,@shortCloseId,2,3,@intShortCloseId)
+			IF @dblAppliedQty > 0 
+				SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,6,@intShortCloseId)
+			ELSE IF @dblScheduleQty > 0
+				SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,@shortCloseId,3,@intShortCloseId)
+			ELSE
+				SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,@shortCloseId,2,3,@intShortCloseId)
+		end
 	END
 	ELSE IF	@intContractStatusId	=	2 --Unconfirmed
 	BEGIN

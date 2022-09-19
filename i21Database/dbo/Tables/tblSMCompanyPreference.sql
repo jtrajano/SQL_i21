@@ -71,6 +71,8 @@
     [strADPassword] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnEnableUserActivityLog] BIT NOT NULL DEFAULT 0,
 	[strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [ysnLogPerformanceRuntime] BIT NOT NULL DEFAULT 0,
+    [dtmPerformanceLoggingEffectivity] DATETIME NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1,
 	[strApiHostUrl] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 )

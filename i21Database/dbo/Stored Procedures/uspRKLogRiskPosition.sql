@@ -1805,7 +1805,7 @@ BEGIN
 		, intInventoryReceiptItemId
 		, intLoadDetailId)
 	SELECT strBatchId
-		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETUTCDATE() END
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), dtmTransactionDate) ELSE GETUTCDATE() END
 		, strBucketType
 		, intActionId
 		, strAction = A.strActionIn 

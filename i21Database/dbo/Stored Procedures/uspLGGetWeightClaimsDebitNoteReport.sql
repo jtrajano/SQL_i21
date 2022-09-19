@@ -142,7 +142,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,CH.strCustomerContract
 	,CH.dblQuantity
 	,strCommodityUnitMeasure = CMUM.strUnitMeasure
-	,strContractQuantityInfo = LTRIM(dbo.fnRemoveTrailingZeroes(CH.dblQuantity)) + ' ' + CMUM.strUnitMeasure
+	,strContractQuantityInfo = LTRIM(dbo.fnRemoveTrailingZeroes(LD.dblQuantity)) + ' ' + CMUM.strUnitMeasure
 	,BA.strBankAccountNo
 	,BA.strIBAN
 	,BA.strSWIFT
@@ -219,6 +219,7 @@ JOIN (
 		,LOD.intItemUOMId
 		,LOD.intWeightItemUOMId
 		,LOD.intLoadDetailId
+		,LOD.dblQuantity
 	FROM tblLGLoadDetail LOD
 	WHERE LOD.intLoadId = @intLoadId
 	) LD ON WCD.intContractDetailId = LD.intPContractDetailId
@@ -326,6 +327,7 @@ GROUP BY WC.intWeightClaimId
 	,WCD.dblToNet
 	,WUOM.strUnitMeasure
 	,WUOM.strSymbol
+	,LD.dblQuantity
 	,LD.dblGross
 	,LD.dblTare
 	,LD.dblNet

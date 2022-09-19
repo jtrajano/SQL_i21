@@ -50,12 +50,12 @@ SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
 SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
-SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
-SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
-SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
-SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
-SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
-SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+SET @strCustomerNumberLocal				= ISNULL(@strCustomerNumber, '')
+SET @strAccountStatusCodeLocal			= ISNULL(@strAccountStatusCode, '')
+SET @strLocationNameLocal				= ISNULL(@strLocationName, '')
+SET @strCustomerNameLocal				= ISNULL(@strCustomerName, '')
+SET @strCustomerIdsLocal				= ISNULL(@strCustomerIds, '')
+SET @intEntityUserIdLocal				= ISNULL(@intEntityUserId, 0)
 SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
 
 --COMPANY INFO
@@ -65,9 +65,9 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
 IF (@@version NOT LIKE '%2008%')
-	BEGIN
-		SET @queryRunningBalance = ' ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
-	END
+BEGIN
+	SET @queryRunningBalance = ' ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+END
 
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
 IF(OBJECT_ID('tempdb..#BEGINNINGBALANCE') IS NOT NULL) DROP TABLE #BEGINNINGBALANCE
@@ -189,7 +189,7 @@ FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 WHERE @strLocationName IS NULL OR @strLocationName = strLocationName
 
 --CUSTOMER FILTERS
-IF @strCustomerNumberLocal IS NOT NULL
+IF ISNULL(@strCustomerNumberLocal, '') <> ''
 	BEGIN
 		INSERT INTO #CUSTOMERS (intEntityCustomerId)
 		SELECT TOP 1 intEntityCustomerId    = C.intEntityId 
@@ -199,7 +199,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 			AND C.strStatementFormat = 'Full Details - No Card Lock'
 			AND EC.strEntityNo = @strCustomerNumberLocal
 	END
-ELSE IF @strCustomerIdsLocal IS NOT NULL
+ELSE IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN
 		INSERT INTO #DELCUSTOMERS
 		SELECT DISTINCT intEntityCustomerId =  intID
@@ -220,13 +220,13 @@ ELSE
 		INNER JOIN (
 			SELECT intEntityId
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
+			WHERE (ISNULL(@strCustomerNameLocal, '') = '' OR strName = @strCustomerNameLocal)
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND C.strStatementFormat = 'Full Details - No Card Lock'
 END
 
-IF @strAccountStatusCodeLocal IS NOT NULL
+IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
     BEGIN
         DELETE FROM #CUSTOMERS
         WHERE intEntityCustomerId NOT IN (
@@ -463,6 +463,7 @@ INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocatio
 WHERE I.ysnPosted = 1
 	AND I.ysnCancelled = 0
 	AND I.ysnRejected = 0
+	AND I.ysnProcessedToNSF = 0
 	AND (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND (I.strInvoiceNumber IN (SELECT strInvoiceOriginId from tblARInvoice)  OR   I.ysnForgiven = 0  )))	
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	AND (I.strTransactionType <> 'Credit Memo' OR (I.strTransactionType = 'Credit Memo' AND I.ysnRefundProcessed <> 1 ))
@@ -580,7 +581,7 @@ LEFT JOIN (
 		 , strInvoiceType			= 'Payment'
 		 , strType					= NULL
 		 , strItemNo				= NULL
-		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(ISNULL(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
 		 , dblAmount				= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
@@ -599,6 +600,7 @@ LEFT JOIN (
 	INNER JOIN #COMPANYLOCATIONS CL ON P.intLocationId = CL.intCompanyLocationId
 	WHERE P.ysnPosted = 1
 	  AND P.ysnInvoicePrepayment = 0
+	  AND P.ysnProcessedToNSF = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 	  AND P.intPaymentId NOT IN (SELECT I.intPaymentId FROM dbo.tblARInvoice I WITH (NOLOCK) WHERE I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId IS NOT NULL AND I.ysnPosted = 1)
@@ -616,7 +618,7 @@ LEFT JOIN (
 		 , strInvoiceType			= 'Payment'
 		 , strType					= NULL
 		 , strItemNo				= NULL
-		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(ISNULL(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
 		 , dblAmount				= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
@@ -634,7 +636,7 @@ LEFT JOIN (
 		GROUP BY PD.intPaymentId
 	) PD ON P.intPaymentId = PD.intPaymentId
 	INNER JOIN #COMPANYLOCATIONS CL ON P.intCompanyLocationId = CL.intCompanyLocationId
-	WHERE P.ysnPosted = 1	  
+	WHERE P.ysnPosted = 1
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
 

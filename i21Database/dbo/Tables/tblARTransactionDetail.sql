@@ -38,3 +38,6 @@
 );
 GO
 CREATE INDEX [idx_tblARTransactionDetail] ON [dbo].[tblARTransactionDetail] (intTransactionId, intTransactionDetailId)
+GO
+CREATE INDEX [idx_tblARTransactionDetail_intTransactionDetailId] ON [dbo].[tblARTransactionDetail] (intTransactionDetailId)
+GO

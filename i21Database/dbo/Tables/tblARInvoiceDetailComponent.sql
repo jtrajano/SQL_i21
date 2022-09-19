@@ -11,3 +11,8 @@
     [intConcurrencyId]				INT CONSTRAINT [DF_tblARInvoiceDetailComponent_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARInvoiceDetailComponent_intInvoiceDetailComponentId] PRIMARY KEY CLUSTERED ([intInvoiceDetailComponentId] ASC)
 )
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetailComponent_intInvoiceDetailId]
+	ON [dbo].[tblARInvoiceDetailComponent] ([intInvoiceDetailId])
+INCLUDE ([intComponentItemId],[intItemUOMId],[dblQuantity],[dblUnitQuantity])
+GO

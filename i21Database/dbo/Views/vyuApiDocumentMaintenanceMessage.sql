@@ -10,6 +10,7 @@ SELECT
     , dm.strType
     , lob.strLineOfBusiness
     , e.strName strCustomer
+    , dm.strSource
 FROM vyuARDocumentMaintenanceMessageDetails md
 JOIN tblSMDocumentMaintenance dm ON dm.intDocumentMaintenanceId = md.intDocumentMaintenanceId
 LEFT JOIN tblSMLineOfBusiness lob ON lob.intLineOfBusinessId = dm.intLineOfBusinessId

@@ -5,12 +5,14 @@ SELECT
       t.ysnActive
     , t.ysnAllowEFT
     , t.intBalanceDue
+	, t.intDayofMonthDue
     , t.intDiscountDay
     , t.dblDiscountEP
     , t.intTermID
     , t.strTerm
     , t.strTermCode
     , t.strType
+	, t.dtmDueDate
     , created.dtmDate dtmDateCreated
 	, COALESCE(updated.dtmDate, created.dtmDate) dtmDateLastUpdated
 FROM tblSMTerm t

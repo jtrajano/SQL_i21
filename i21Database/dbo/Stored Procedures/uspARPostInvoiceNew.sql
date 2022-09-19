@@ -255,8 +255,11 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
 
 IF @Post = 1 AND @Recap = 0
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			@PostDate        = @PostDate
-		   ,@UserId          = @UserId
+		  @ysnPost	  	= 1
+		, @ysnRecap	  	= 0
+		, @dtmDatePost	= @PostDate
+		, @strBatchId	= @BatchIdUsed
+		, @intUserId	= @UserId
 
 --Removed excluded Invoices to post/unpost
 IF(@Exclude IS NOT NULL)
@@ -296,6 +299,8 @@ SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM ##ARInvalidInvoiceDat
 
 IF(@totalInvalid > 0)
 	BEGIN
+		IF @RaiseError = 1
+			SELECT TOP 1 @ErrorMerssage = strPostingError FROM ##ARInvalidInvoiceData
 
         UPDATE ILD
 		SET
@@ -392,8 +397,10 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 		IF @RaiseError = 1
 			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
-				RAISERROR(@ErrorMerssage, 11, 1)							
+				IF ISNULL(@ErrorMerssage, '') = ''
+					SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
+
+				RAISERROR(@ErrorMerssage, 11, 1)
 			END				
 		GOTO Post_Exit	
 	END
@@ -420,8 +427,11 @@ BEGIN TRY
 
 	IF @Post = 1 AND @Recap = 1
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
-			@PostDate        = @PostDate
-		   ,@UserId          = @UserId
+		  @ysnPost	  	= 1
+		, @ysnRecap	  	= 1
+		, @dtmDatePost	= @PostDate
+		, @strBatchId	= @BatchIdUsed
+		, @intUserId	= @UserId
 	
 	IF @Post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]	

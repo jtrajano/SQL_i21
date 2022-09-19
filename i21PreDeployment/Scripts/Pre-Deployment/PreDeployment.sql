@@ -65,6 +65,7 @@
 :r .\4_SM\1810_Fix_GL_Account.sql
 :r .\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql
 :r .\4_SM\12_MigrateRecentlyViewed.sql
+:r .\4_SM\2010_TemporaryDecryptPasswords.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
@@ -88,6 +89,7 @@
 :r .\7_AR\11_FixSalesOrderNullysnQuote.sql
 :r .\7_AR\12_MoveQuotePagesToLetters.sql
 :r .\7_AR\13_FixCustomerBillToShipTo.sql
+:r .\7_AR\14_RefreshARTempTables.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql

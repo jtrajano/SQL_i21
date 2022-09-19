@@ -125,6 +125,7 @@ FROM (
 	FROM #tempSecondToFirst b
 	WHERE b.strInternalTradeNo NOT IN (SELECT strInternalTradeNo FROM #tempFirstToSecond)
 ) t
+WHERE  ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0) <> 0
 
 
 

@@ -96,7 +96,7 @@ BEGIN
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strTransactionType ORDER BY c.intSummaryLogId DESC)
 			, dblTotal = c.dblOrigQty
-			, intCollateralId = c.intTransactionRecordId
+			, intCollateralId = c.intTransactionRecordHeaderId
 			, c.strLocationName
 			, c.intItemId
 			, c.strItemNo

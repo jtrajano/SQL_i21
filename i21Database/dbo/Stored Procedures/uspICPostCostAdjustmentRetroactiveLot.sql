@@ -277,15 +277,37 @@ BEGIN
 			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
 			AND cbOut.intRevalueLotId IS NULL 	
 	-- Negative stocks 
-	 UNION ALL 
-	SELECT	t.intInventoryTransactionId 
-			,2	
-	FROM	tblICInventoryLot cb INNER JOIN (
-				tblICInventoryLotOut cbOut INNER JOIN tblICInventoryTransaction t 
-					ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
-					AND cbOut.intRevalueLotId IS NOT NULL 					
-			)
-				ON cb.intInventoryLotId = cbOut.intRevalueLotId		
+	--UNION ALL 
+	--SELECT	t.intInventoryTransactionId 
+	--		,2	
+	--FROM	tblICInventoryLot cb INNER JOIN (
+	--			tblICInventoryLotOut cbOut INNER JOIN tblICInventoryTransaction t 
+	--				ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+	--				AND cbOut.intRevalueLotId IS NOT NULL 					
+	--		)
+	--			ON cb.intInventoryLotId = cbOut.intRevalueLotId		
+	--WHERE	cb.intItemId = @intItemId
+	--		AND cb.intItemLocationId = @intItemLocationId
+	--		AND cb.intTransactionId = @intSourceTransactionId
+	--		AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+	--		AND cb.strTransactionId = @strSourceTransactionId
+	--		AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+	--		AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
+	
+	-- Negative stocks 
+	UNION ALL 
+	SELECT	t.intInventoryTransactionId
+			,2 
+	FROM	tblICInventoryLotOut cbOut INNER JOIN tblICInventoryLot cb 
+				ON cbOut.intInventoryLotId = cb.intInventoryLotId
+			INNER JOIN tblICInventoryLot cbSource
+				ON cbSource.intInventoryLotId = cbOut.intRevalueLotId
+			INNER JOIN tblICInventoryTransaction t 
+				ON t.strTransactionId = cbSource.strTransactionId
+				AND t.intTransactionId = cbSource.intTransactionId
+				AND t.intTransactionDetailId = cbSource.intTransactionDetailId
+				AND t.intLotId = cbSource.intLotId
+				AND t.intInTransitSourceLocationId IS NULL 
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
 			AND cb.intTransactionId = @intSourceTransactionId
@@ -293,6 +315,7 @@ BEGIN
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
+			AND cbOut.intRevalueLotId IS NOT NULL 	
 END 
 
 -- Remember the original cost from the cost bucket

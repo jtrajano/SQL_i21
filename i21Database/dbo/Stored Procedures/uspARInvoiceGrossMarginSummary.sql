@@ -5,51 +5,79 @@ AS
 IF ISNULL(@ysnRebuild, 0) = 1
 	BEGIN
 		TRUNCATE TABLE tblARInvoiceGrossMarginSummary
-		INSERT INTO tblARInvoiceGrossMarginSummary (
+		
+		INSERT INTO tblARInvoiceGrossMarginSummary WITH (TABLOCK) (
 			  strType
 			, intInvoiceId
 			, dblAmount
 			, dtmDate
 			, intConcurrencyId
 		)
-		SELECT strType				= strType 
-		     , intInvoiceId			= intInvoiceId
-			 , dblAmount			= SUM(dblAmount)
-			 , dtmDate				= dtmDate
-			 , intConcurrencyId		= 1  
-		FROM vyuARInvoiceGrossMargin 
-		GROUP BY intInvoiceId
-		       , strType
-			   , dtmDate
+		SELECT strType			= 'Revenue'
+			, intIntInvoiceId	= SAR.intTransactionId
+			, dblAmount			= SUM(SAR.dblLineTotal)
+			, dtmDate			= SAR.dtmDate
+			, intConcurrencyId	= 1
+		FROM tblARSalesAnalysisStagingReport SAR 
+		GROUP BY SAR.intTransactionId, SAR.dtmDate
+
+		UNION ALL
+
+		SELECT strType			= 'Net'
+			, intIntInvoiceId	= SAR.intTransactionId
+			, dblAmount			= SUM(SAR.dblMargin)
+			, dtmDate			= SAR.dtmDate
+			, intConcurrencyId	= 1
+		FROM tblARSalesAnalysisStagingReport SAR 
+		GROUP BY SAR.intTransactionId, SAR.dtmDate
+
+		UNION ALL
+
+		SELECT strType			= 'Expense'
+			, intIntInvoiceId	= SAR.intTransactionId
+			, dblAmount			= SUM(SAR.dblTotalCost)
+			, dtmDate			= SAR.dtmDate
+			, intConcurrencyId	= 1
+		FROM tblARSalesAnalysisStagingReport SAR 
+		GROUP BY SAR.intTransactionId, SAR.dtmDate
 	END
 ELSE
 BEGIN
-	DECLARE @InvoiceMarginSummary TABLE (
-		  intInvoiceId	INT
-		, strType		NVARCHAR(100)
-		, dblAmount		NUMERIC(18, 6)
-		, dtmDate		DATETIME
-	)
-	
-	INSERT INTO @InvoiceMarginSummary (
-		  intInvoiceId
-		, strType
-		, dblAmount
-		, dtmDate
-	)
-	EXEC dbo.uspARInvoiceGrossMargin @InvoiceId
-
-    INSERT INTO tblARInvoiceGrossMarginSummary (
+    INSERT INTO tblARInvoiceGrossMarginSummary WITH (TABLOCK) (
 		  strType
 		, intInvoiceId
 		, dblAmount
 		, dtmDate
 		, intConcurrencyId
 	)
-    SELECT strType
-		, intInvoiceId
-		, dblAmount
-		, dtmDate
+    SELECT strType			= 'Revenue'
+		, intIntInvoiceId	= SAR.intTransactionId
+		, dblAmount			= SUM(SAR.dblLineTotal)
+		, dtmDate			= SAR.dtmDate
 		, intConcurrencyId	= 1
-	FROM @InvoiceMarginSummary
+	FROM tblARSalesAnalysisStagingReport SAR 
+	INNER JOIN @InvoiceId II ON SAR.intTransactionId = II.intHeaderId
+	GROUP BY SAR.intTransactionId, SAR.dtmDate
+
+	UNION ALL
+
+	SELECT strType			= 'Net'
+		, intIntInvoiceId	= SAR.intTransactionId
+		, dblAmount			= SUM(SAR.dblMargin)
+		, dtmDate			= SAR.dtmDate
+		, intConcurrencyId	= 1
+	FROM tblARSalesAnalysisStagingReport SAR 
+	INNER JOIN @InvoiceId II ON SAR.intTransactionId = II.intHeaderId
+	GROUP BY SAR.intTransactionId, SAR.dtmDate
+
+	UNION ALL
+
+	SELECT strType			= 'Expense'
+		, intIntInvoiceId	= SAR.intTransactionId
+		, dblAmount			= SUM(SAR.dblTotalCost)
+		, dtmDate			= SAR.dtmDate
+		, intConcurrencyId	= 1
+	FROM tblARSalesAnalysisStagingReport SAR 
+	INNER JOIN @InvoiceId II ON SAR.intTransactionId = II.intHeaderId
+	GROUP BY SAR.intTransactionId, SAR.dtmDate
 END

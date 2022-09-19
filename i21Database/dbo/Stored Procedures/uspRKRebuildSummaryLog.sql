@@ -529,6 +529,46 @@ BEGIN TRY
 			AND SUH.dblTransactionQuantity < 0
 
 			union all
+			select 
+				dtmHistoryCreated
+				, @strContractNumber
+				, @intContractSeq
+				, @intContractTypeId
+				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad ELSE SUH.dblTransactionQuantity END
+				, SUH.strScreenName  
+				, @intContractHeaderId
+				, @intContractDetailId
+				, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' THEN 1 ELSE SH.intPricingTypeId END
+				, intTransactionReferenceId = SUH.intExternalHeaderId
+				, strTransactionReferenceNo = SUH.strNumber
+				, @intCommodityId
+				, @strCommodityCode
+				, @intItemId
+				, intEntityId
+				, @intLocationId
+				, @intFutureMarketId 
+				, @intFutureMonthId 
+				, @dtmStartDate 
+				, @dtmEndDate 
+				, @intQtyUOMId
+				, @dblFutures
+				, @dblBasis
+				, @intBasisUOMId 
+				, @intBasisCurrencyId 
+				, @intPriceUOMId 
+				, @intContractStatusId 
+				, @intBookId 
+				, @intSubBookId
+				, SU.intUserId
+			from vyuCTSequenceUsageHistory SUH
+			inner join tblCTSequenceHistory SH on SH.intSequenceUsageHistoryId = SUH.intSequenceUsageHistoryId
+			inner join tblCTSequenceUsageHistory SU on SU.intSequenceUsageHistoryId = SUH.intSequenceUsageHistoryId
+			where ysnDeleted = 1
+			and SUH.strFieldName = 'Balance'
+			and SUH.intContractDetailId = @intContractDetailId
+			and SUH.strScreenName IN ('Settle Storage', 'Transfer Storage')
+
+			union all
 			select
 				dtmHistoryCreated
 				, @strContractNumber
@@ -3034,6 +3074,11 @@ BEGIN TRY
 		---------------------------------------------------------------------------------------------------
 		EXEC uspRKRebuildNonOpenContracts
 			@intMonthThreshold = 3
+
+		-------------------------------------------------------------------
+		-- FIX FOR COMMON ISSUES IN DERIVATIVES AFTER UPGRADING TO 20.1	 --
+		-------------------------------------------------------------------
+		EXEC uspRKFixDerivativeCommonIssues
 			
 		----------------------------------------------------
 		-- Run Integration scripts required after rebuild --
