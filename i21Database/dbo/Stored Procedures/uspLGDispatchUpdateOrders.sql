@@ -44,7 +44,7 @@ BEGIN
 			UPDATE TMD
 				SET ysnDispatched = 0
 					,strWillCallStatus = 'Routed'
-					,dtmDispatchingDate = DO.dtmDispatchDate
+					,dtmDispatchingDate = NULL
 					,intDriverID = COALESCE(DOR.intDriverEntityId, DO.intDriverEntityId, TMD.intDriverID)
 			FROM tblTMDispatch TMD
 				INNER JOIN tblLGDispatchOrderDetail DOD ON DOD.intTMDispatchId = TMD.intDispatchID
