@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspApiSchemaTransformEffectiveItemPrice 
+CREATE PROCEDURE uspApiSchemaTransformEffectiveItemPrice
 	@guiApiUniqueId UNIQUEIDENTIFIER,
 	@guiLogId UNIQUEIDENTIFIER
 AS
@@ -30,7 +30,8 @@ DECLARE @tblFilteredEffectiveItemPrice TABLE(
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	dblRetailPrice NUMERIC(38, 20) NULL,
-	dtmEffectiveDate DATETIME NULL
+	dtmEffectiveDate DATETIME NULL,
+	strItemNoUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 INSERT INTO @tblFilteredEffectiveItemPrice
 (
@@ -40,7 +41,8 @@ INSERT INTO @tblFilteredEffectiveItemPrice
 	strItemNo,
 	strLocation,
 	dblRetailPrice,
-	dtmEffectiveDate
+	dtmEffectiveDate,
+	strItemNoUOM
 )
 SELECT 
 	intKey,
@@ -49,7 +51,8 @@ SELECT
 	strItemNo,
 	strLocation,
 	dblRetailPrice,
-	dtmEffectiveDate
+	dtmEffectiveDate,
+	strItemNoUOM
 FROM
 tblApiSchemaTransformEffectiveItemPrice
 WHERE guiApiUniqueId = @guiApiUniqueId;
@@ -161,6 +164,28 @@ ON
 FilteredEffectiveItemPrice.strLocation = CompanyLocation.strLocationName
 WHERE
 CompanyLocation.intCompanyLocationId IS NULL
+UNION
+SELECT -- Invalid Unit Of Measure
+	strItemNo = FilteredEffectiveItemPrice.strItemNo,
+	strFieldValue = FilteredEffectiveItemPrice.strItemNoUOM,
+	intRowNumber = FilteredEffectiveItemPrice.intRowNumber,
+	intErrorType = 6
+FROM
+@tblFilteredEffectiveItemPrice FilteredEffectiveItemPrice 
+LEFT JOIN tblICUnitMeasure UnitOfMeasure ON FilteredEffectiveItemPrice.strItemNoUOM = UnitOfMeasure.strUnitMeasure
+WHERE
+UnitOfMeasure.intUnitMeasureId IS NULL
+UNION
+SELECT -- Invalid Item Unit Of Measure
+	strItemNo = FilteredEffectiveItemPrice.strItemNo,
+	strFieldValue = FilteredEffectiveItemPrice.strItemNoUOM,
+	intRowNumber = FilteredEffectiveItemPrice.intRowNumber,
+	intErrorType = 7
+FROM
+@tblFilteredEffectiveItemPrice FilteredEffectiveItemPrice 
+JOIN tblICItem Item ON FilteredEffectiveItemPrice.strItemNo = Item.strItemNo
+LEFT JOIN vyuICGetItemUOM ItemUOM ON FilteredEffectiveItemPrice.strItemNoUOM = ItemUOM.strUnitMeasure AND Item.intItemId = ItemUOM.intItemId
+WHERE ItemUOM.intItemUOMId IS NULL
 
 INSERT INTO tblApiImportLogDetail 
 	(
@@ -177,8 +202,10 @@ INSERT INTO tblApiImportLogDetail
 		guiApiImportLogDetailId = NEWID(),
 		guiApiImportLogId = @guiLogId,
 		strField = CASE
-			WHEN ErrorEffectiveItemPrice.intErrorType IN(1,2,3,5)
-			THEN 'Location'
+			WHEN ErrorEffectiveItemPrice.intErrorType IN(1,2,3,5) THEN 
+				'Location'
+			WHEN ErrorEffectiveItemPrice.intErrorType IN(6,7) THEN
+				'Item UOM '
 			ELSE 'Item No'
 		END,
 		strValue = ErrorEffectiveItemPrice.strFieldValue,
@@ -202,10 +229,14 @@ INSERT INTO tblApiImportLogDetail
 			THEN 'Location: ' + ErrorEffectiveItemPrice.strFieldValue + ' is not configured on item: ' + ErrorEffectiveItemPrice.strItemNo + '.'
 			WHEN ErrorEffectiveItemPrice.intErrorType = 4
 			THEN 'Item: ' + ErrorEffectiveItemPrice.strItemNo + ' does not exist.'
+			WHEN ErrorEffectiveItemPrice.intErrorType = 6
+			THEN 'Unit of Measure: ' + ErrorEffectiveItemPrice.strFieldValue + ' does not exist.'
+			WHEN ErrorEffectiveItemPrice.intErrorType = 7
+			THEN 'Unit of Measure: ' + ErrorEffectiveItemPrice.strFieldValue + ' is not configured on item: ' + ErrorEffectiveItemPrice.strItemNo + '.'
 			ELSE 'Location: ' + ErrorEffectiveItemPrice.strFieldValue + ' does not exist.'
 		END
 	FROM @tblErrorEffectiveItemPrice ErrorEffectiveItemPrice
-	WHERE ErrorEffectiveItemPrice.intErrorType IN(1, 2, 3, 4, 5)
+	WHERE ErrorEffectiveItemPrice.intErrorType IN(1, 2, 3, 4, 5, 6, 7)
 
 --Filter Effective Item Price to be removed
 
@@ -215,7 +246,7 @@ FROM
 	@tblFilteredEffectiveItemPrice FilteredEffectiveItemPrice
 	INNER JOIN @tblErrorEffectiveItemPrice ErrorEffectiveItemPrice
 		ON FilteredEffectiveItemPrice.intRowNumber = ErrorEffectiveItemPrice.intRowNumber
-WHERE ErrorEffectiveItemPrice.intErrorType IN(1, 2, 3, 4, 5)
+WHERE ErrorEffectiveItemPrice.intErrorType IN(1, 2, 3, 4, 5, 6, 7)
 
 --Transform and Insert statement
 
@@ -227,42 +258,40 @@ USING
 		intItemId = ItemLocation.intItemId,				
 		intItemLocationId = ItemLocation.intItemLocationId,
 		dblRetailPrice = NULLIF(FilteredEffectiveItemPrice.dblRetailPrice, 0),
-		dtmEffectiveRetailPriceDate = FilteredEffectiveItemPrice.dtmEffectiveDate
+		dtmEffectiveRetailPriceDate = FilteredEffectiveItemPrice.dtmEffectiveDate,
+		intItemUOMId = CASE WHEN UnitOfMeasure.intItemUOMId IS NULL THEN ItemUOM.intItemUOMId END
 	FROM @tblFilteredEffectiveItemPrice FilteredEffectiveItemPrice
-	LEFT JOIN
-	vyuICGetItemLocation ItemLocation
-		ON
-		FilteredEffectiveItemPrice.strItemNo = ItemLocation.strItemNo
-		AND
-		FilteredEffectiveItemPrice.strLocation = ItemLocation.strLocationName
+	LEFT JOIN vyuICGetItemLocation ItemLocation ON FilteredEffectiveItemPrice.strItemNo = ItemLocation.strItemNo 
+											   AND FilteredEffectiveItemPrice.strLocation = ItemLocation.strLocationName
+	LEFT JOIN vyuICGetEffectiveItemPrice UnitOfMeasure ON FilteredEffectiveItemPrice.strItemNoUOM = UnitOfMeasure.strUnitMeasure 
+											   AND FilteredEffectiveItemPrice.strLocation = UnitOfMeasure.strLocationName
+											   AND FilteredEffectiveItemPrice.strItemNo = UnitOfMeasure.strItemNo
+	OUTER APPLY (SELECT intItemUOMId
+				 FROM vyuICGetItemUOM ItemUOM
+				 JOIN tblICItem AS Item ON ItemUOM.intItemId  = Item.intItemId
+				 WHERE ItemUOM.strUnitMeasure = FilteredEffectiveItemPrice.strItemNoUOM 
+				   AND Item.strItemNo = FilteredEffectiveItemPrice.strItemNo) AS ItemUOM
 	
 ) AS SOURCE
 ON TARGET.intItemId = SOURCE.intItemId AND TARGET.intItemLocationId = SOURCE.intItemLocationId AND TARGET.dtmEffectiveRetailPriceDate = SOURCE.dtmEffectiveRetailPriceDate
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intItemId = SOURCE.intItemId,				
-		intItemLocationId = SOURCE.intItemLocationId,
-		dblRetailPrice = ISNULL(SOURCE.dblRetailPrice, TARGET.dblRetailPrice),
-		dtmEffectiveRetailPriceDate = SOURCE.dtmEffectiveRetailPriceDate,
-		dtmDateModified = GETUTCDATE()
+WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
+UPDATE SET guiApiUniqueId = SOURCE.guiApiUniqueId
+		 , dblRetailPrice = ISNULL(SOURCE.dblRetailPrice, TARGET.dblRetailPrice)
+		 , dtmEffectiveRetailPriceDate = SOURCE.dtmEffectiveRetailPriceDate
+		 , dtmDateModified = GETUTCDATE()
 WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intItemId,				
-		intItemLocationId,
-		dblRetailPrice,
-		dtmEffectiveRetailPriceDate,
-		dtmDateCreated
-	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intItemId,				
-		intItemLocationId,
-		dblRetailPrice,
-		dtmEffectiveRetailPriceDate,
-		GETUTCDATE()
+	INSERT (guiApiUniqueId
+		  , intItemId
+		  , intItemLocationId
+		  , dblRetailPrice
+		  , dtmEffectiveRetailPriceDate
+		  , dtmDateCreated
+		  , intItemUOMId)
+	VALUES (guiApiUniqueId
+		  , intItemId
+		  , intItemLocationId
+		  , dblRetailPrice
+		  , dtmEffectiveRetailPriceDate
+		  , GETUTCDATE()
+		  , intItemUOMId
 	);
