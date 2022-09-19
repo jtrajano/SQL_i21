@@ -7,7 +7,7 @@
 AS
 /** This SP is just to avoid confusion of the original SP name that
 has been reused for both inbound and outbound postings for other charges **/
-EXEC dbo.uspLGPostShipmentOtherCharges 
+EXEC dbo.uspLGPostInventoryShipmentOtherCharges 
 		@intLoadId
 		,@strBatchId
 		,@intEntityUserSecurityId
