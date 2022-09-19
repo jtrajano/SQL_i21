@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGPostInventoryShipmentOtherCharges]
-	@intInventoryShipmentId AS INT
+	@intLoadId AS INT
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT
@@ -14,7 +14,10 @@ BEGIN
 		,@strCurrencyId AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@strLocationName AS NVARCHAR(50)
+		,@intPurchaseSale AS INT
 END
+
+SELECT @intPurchaseSale = intPurchaseSale FROM tblLGLoad WHERE intLoadId = @intLoadId
 
 -- Get the functional currency
 BEGIN
@@ -26,7 +29,7 @@ END
 --Check if Cancelled
 BEGIN
 	DECLARE @ysnCancel AS BIT
-	SELECT @ysnCancel = ISNULL(ysnCancelled, 0) FROM tblLGLoad WHERE intLoadId = @intInventoryShipmentId
+	SELECT @ysnCancel = ISNULL(ysnCancelled, 0) FROM tblLGLoad WHERE intLoadId = @intLoadId
 END
 
 -- Validate 
@@ -42,10 +45,14 @@ BEGIN
 	INNER JOIN dbo.tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = LOAD.intLoadId
 	INNER JOIN dbo.tblLGLoadCost OtherCharge ON LOAD.intLoadId = OtherCharge.intLoadId AND OtherCharge.strEntityType = 'Vendor'
 	INNER JOIN tblICItem Item ON Item.intItemId = OtherCharge.intItemId
-	LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = LoadDetail.intSCompanyLocationId
+	LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = 
+		CASE 
+			WHEN @intPurchaseSale = 2 THEN LoadDetail.intSCompanyLocationId
+			WHEN @intPurchaseSale = 1 THEN LoadDetail.intPCompanyLocationId
+		END
 		AND ItemLocation.intItemId = Item.intItemId
 	WHERE ItemLocation.intItemLocationId IS NULL
-		AND LOAD.intLoadId = @intInventoryShipmentId
+		AND LOAD.intLoadId = @intLoadId
 
 	IF @intItemId IS NOT NULL
 	BEGIN
@@ -71,7 +78,7 @@ BEGIN
 	INNER JOIN tblICItem Item ON Item.intItemId = OtherCharge.intItemId
 	WHERE OtherCharge.ysnAccrue = 1
 		AND OtherCharge.intVendorId IS NULL
-		AND LOAD.intLoadId = @intInventoryShipmentId
+		AND LOAD.intLoadId = @intLoadId
 
 	IF @intItemId IS NOT NULL
 	BEGIN
@@ -92,7 +99,9 @@ BEGIN
 		,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
 	-- Initialize the module name
 	DECLARE @ModuleName AS NVARCHAR(50) = 'Logistics'
-		,@strTransactionForm AS NVARCHAR(50) = 'Outbound Shipment'
+		,@strTransactionForm AS NVARCHAR(50) =  
+			CASE WHEN @intPurchaseSale = 2 THEN 'Outbound Shipment'
+			WHEN @intPurchaseSale = 1 THEN 'Inbound Shipment' END
 		,@strCode AS NVARCHAR(10) = 'LG'
 	-- Get the GL Account ids to use for the other charges. 
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount;
@@ -118,8 +127,12 @@ BEGIN
 		INNER JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = LOAD.intLoadId
 		INNER JOIN dbo.tblLGLoadCost OtherCharges ON LOAD.intLoadId = OtherCharges.intLoadId AND OtherCharges.strEntityType = 'Vendor'
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = OtherCharges.intItemId
-			AND ItemLocation.intLocationId = LoadDetail.intSCompanyLocationId
-		WHERE OtherCharges.intLoadId = @intInventoryShipmentId
+			AND ItemLocation.intLocationId = 		
+			CASE 
+				WHEN @intPurchaseSale = 2 THEN LoadDetail.intSCompanyLocationId
+				WHEN @intPurchaseSale = 1 THEN LoadDetail.intPCompanyLocationId
+			END
+		WHERE OtherCharges.intLoadId = @intLoadId
 		) Query
 
 	-- Check for missing AP Clearing Account Id
@@ -243,8 +256,8 @@ BEGIN
 		,intTransactionTypeId
 		,intCurrencyId
 		,dblExchangeRate
-		,intInventoryShipmentItemId
-		,strInventoryTransactionTypeName
+		,intShipmentItemId
+		,strTransactionTypeName
 		,strTransactionForm
 		,ysnAccrue
 		,ysnPrice
@@ -266,7 +279,7 @@ BEGIN
 			,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId)
 			,dblExchangeRate = ISNULL(1, 1)
 			,ShipmentItem.intLoadDetailId
-			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionTypeName = TransType.strName
 			,strTransactionForm = 'Logistics'
 			,ShipmentCharges.ysnAccrue
 			,ShipmentCharges.ysnPrice
@@ -289,15 +302,27 @@ BEGIN
 			,intEntityId = 1
 		FROM dbo.tblLGLoad Shipment
 		INNER JOIN dbo.tblLGLoadDetail ShipmentItem ON Shipment.intLoadId = ShipmentItem.intLoadId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intSContractDetailId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = 
+				CASE 
+					WHEN @intPurchaseSale = 2 THEN ShipmentItem.intSContractDetailId
+					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPContractDetailId
+				END
 		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
 		INNER JOIN dbo.tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = Shipment.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
 		INNER JOIN tblICItem Charge ON Charge.intItemId = ShipmentCharges.intItemId
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ShipmentItem.intItemId
-			AND ItemLocation.intLocationId = ShipmentItem.intSCompanyLocationId
+			AND ItemLocation.intLocationId = 
+				CASE 
+					WHEN @intPurchaseSale = 2 THEN ShipmentItem.intSCompanyLocationId
+					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
+				END
 		LEFT JOIN dbo.tblICItemLocation ChargeItemLocation ON ChargeItemLocation.intItemId = ShipmentCharges.intItemId
-			AND ChargeItemLocation.intLocationId = ShipmentItem.intSCompanyLocationId
+			AND ChargeItemLocation.intLocationId = 
+				CASE 
+					WHEN @intPurchaseSale = 2 THEN ShipmentItem.intSCompanyLocationId
+					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
+				END
 		LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
 		OUTER APPLY (SELECT	TOP 1  
 						intForexRateTypeId = RD.intRateTypeId
@@ -309,7 +334,7 @@ BEGIN
 							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @intFunctionalCurrencyId) 
 								OR (ER.intFromCurrencyId = @intFunctionalCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
-		WHERE Shipment.intLoadId = @intInventoryShipmentId
+		WHERE Shipment.intLoadId = @intLoadId
 		)
 
 	INSERT INTO @ChargesGLEntries (
@@ -369,13 +394,13 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intInventoryShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId
 		,strTransactionId = ForGLEntries_CTE.strTransactionId
 		,intTransactionId = ForGLEntries_CTE.intTransactionId
-		,strTransactionType = ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionType = ForGLEntries_CTE.strTransactionTypeName
 		,strTransactionForm = ForGLEntries_CTE.strTransactionForm
 		,strModuleName = @ModuleName
 		,intConcurrencyId = 1
@@ -422,13 +447,13 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intInventoryShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId
 		,strTransactionId = ForGLEntries_CTE.strTransactionId
 		,intTransactionId = ForGLEntries_CTE.intTransactionId
-		,strTransactionType = ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionType = ForGLEntries_CTE.strTransactionTypeName
 		,strTransactionForm = ForGLEntries_CTE.strTransactionForm
 		,strModuleName = @ModuleName
 		,intConcurrencyId = 1
@@ -481,13 +506,13 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intInventoryShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId
 		,strTransactionId = ForGLEntries_CTE.strTransactionId
 		,intTransactionId = ForGLEntries_CTE.intTransactionId
-		,strTransactionType = ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionType = ForGLEntries_CTE.strTransactionTypeName
 		,strTransactionForm = ForGLEntries_CTE.strTransactionForm
 		,strModuleName = @ModuleName
 		,intConcurrencyId = 1
@@ -533,13 +558,13 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intInventoryShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId
 		,strTransactionId = ForGLEntries_CTE.strTransactionId
 		,intTransactionId = ForGLEntries_CTE.intTransactionId
-		,strTransactionType = ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionType = ForGLEntries_CTE.strTransactionTypeName
 		,strTransactionForm = ForGLEntries_CTE.strTransactionForm
 		,strModuleName = @ModuleName
 		,intConcurrencyId = 1

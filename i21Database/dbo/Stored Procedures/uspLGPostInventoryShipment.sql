@@ -278,7 +278,7 @@ BEGIN
 			,[dblForeignRate]
 			,[strRateType]
 		)	
-		EXEC @intReturnValue = dbo.uspLGPostInventoryShipmentOtherCharges 
+		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
 			@intTransactionId
 			,@strBatchId
 			,@intEntityUserSecurityId
@@ -750,7 +750,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 			)	
-			EXEC @intReturnValue = dbo.uspLGPostInventoryShipmentOtherCharges 
+			EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
