@@ -239,10 +239,6 @@ GO
 	PRINT N'END INSERT ACCOUNT TEMPLATE: Payroll'
 	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Petro'
 GO
-	
-		IF EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petrolac' AND strType = N'Primary') 
-			DELETE FROM tblGLCOATemplate WHERE strAccountTemplateName = 'Petrolac'
-
 		IF EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petro' AND strType = N'Primary') 
 			DELETE FROM tblGLCOATemplate WHERE strAccountTemplateName = 'Petro'
 	
@@ -250,7 +246,7 @@ GO
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Petro', N'Primary', 1)
 
 		DECLARE @intAccountTemplateId AS INT		
-			SET @intAccountTemplateId = SCOPE_IDENTITY()
+			SET @intAccountTemplateId = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petro' AND strType = N'Primary')
 	
 		DECLARE @GL_intAccountStructureId_Primary AS INT
 			SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
@@ -260,7 +256,7 @@ GO
 			SELECT '10100' strCode,'Cash On Hand' strDescription,'Cash Accounts' strAccountGroup,'Cash Account' strAccountCategory UNION
 			SELECT '10110','Petty Cash','Cash Accounts','Cash Account' UNION
 			SELECT '10599','Undeposited Funds','Undeposited Funds','Undeposited Funds' UNION
-			SELECT '10910','Cash Receivable Charge Cards','Current Assets','General' UNION
+			SELECT '10910','Cash Receivable Charge Cards','Current Assets','Cash Account' UNION
 			SELECT '11000','Accounts Receivable','Receivables','AR Account' UNION
 			SELECT '11010','A/R Employees','Receivables','General' UNION
 			SELECT '11100','Misc Accts Receivable','Receivables','General' UNION
@@ -471,6 +467,7 @@ GO
 			SELECT @intAccountTemplateId, strCode, strDescription, G.intAccountGroupId, C.intAccountCategoryId, @GL_intAccountStructureId_Primary, 1  FROM RawData A 
 			OUTER APPLY (SELECT TOP 1 intAccountCategoryId from tblGLAccountCategory where strAccountCategory = A.strAccountCategory)C
 			OUTER APPLY (SELECT TOP 1 intAccountGroupId from tblGLAccountGroup where strAccountGroup = A.strAccountGroup)G
+					
 GO
 
 	PRINT N'END INSERT ACCOUNT TEMPLATE: Petro'

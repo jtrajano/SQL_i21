@@ -1,528 +1,542 @@
 ﻿GO
-	PRINT 'Start generating default account categories'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Accounts Payable'
+GO
+	DECLARE @intAccountTemplateId int
+	DECLARE @tblTemp TABLE ( intId INT )
+	INSERT INTO @tblTemp (intId ) SELECT intAccountTemplateId FROM  tblGLCOATemplate WHERE  strType = N'Primary'
+
+	WHILE EXISTS ( SELECT 1 FROM @tblTemp )
+	BEGIN
+		SELECT TOP 1 @intAccountTemplateId = intId FROM @tblTemp
+		IF @intAccountTemplateId IS NOT NULL
+			IF NOT EXISTS(SELECT 1 FROM tblGLCOATemplateDetail WHERE @intAccountTemplateId = intAccountTemplateId)
+				DELETE FROM tblGLCOATemplate WHERE intAccountTemplateId =@intAccountTemplateId
+
+		DELETE FROM @tblTemp WHERE intId = @intAccountTemplateId
+	END
+GO
+
+	DELETE FROM tblGLCOATemplateDetail where strDescription in ('Beginning Inventory', 'Ending Inventory')
+
+	DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Accounts Payable' AND strType = N'Primary')
+	BEGIN
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Accounts Payable', N'Primary', 1)
+		
+		DECLARE @GL_intAccountTemplateId_AccountsPayable AS INT		
+		SET @GL_intAccountTemplateId_AccountsPayable = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Accounts Payable' AND strType = N'Primary')			
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'10000', N'Check book in Bank', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cash Accounts' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'18000', N'Supplies', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'20000', N'Accounts Payable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'44000', N'Credit Card Fee', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'55000', N'Purchases Discounts', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Purchases Discounts' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'60000', N'Miscellaneous Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'61500', N'Fee Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'35000', N'Owner''s Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Owners Equities' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'39000', N'Retained Earnings', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Retained Earnings' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'72500', N'Tax Expense ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AccountsPayable , N'99000', N'Wash Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+	END
+
+GO	
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Accounts Payable'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: AG Accounting'
 GO
 	
-SET  IDENTITY_INSERT tblGLAccountCategory ON
-	MERGE 
-	INTO	dbo.tblGLAccountCategory
-	WITH	(HOLDLOCK) 
-	AS		CategoryTable
-	USING	(
-			SELECT id = 1,name = 'AP Account'UNION ALL 
-			SELECT id = 2,name = 'AR Account'UNION ALL 
-			--SELECT id = 3,name = 'Begin Inventory'UNION ALL 
-			--SELECT id = 4,name = 'Broker Expense'UNION ALL 
-			SELECT id = 5,name = 'Cash Account'UNION ALL 
-			SELECT id = 6,name = 'Investment in Subsidiary'UNION ALL 
-			--SELECT id = 7,name = 'Contract Equity'UNION ALL 
-			--SELECT id = 8,name = 'Contract Purchase Gain/Loss'UNION ALL 
-			--SELECT id = 9,name = 'Contract Sales Gain/Loss'UNION ALL 
-			SELECT id = 10,name = 'Cost of Goods'UNION ALL 
-			--SELECT id = 11,name = 'Credit Card Fee'UNION ALL 
-			--SELECT id = 12,name = 'Currency Equity'UNION ALL 
-			--SELECT id = 13,name = 'Currency Purchase Gain/Loss'UNION ALL 
-			--SELECT id = 14,name = 'Currency Sales Gain/Loss'UNION ALL 
-			--SELECT id = 15,name = 'Deposit Account'UNION ALL 
-			SELECT id = 16,name = 'Discount Receivable'UNION ALL 
-			SELECT id = 17,name = 'DP Income'UNION ALL 
-			SELECT id = 18,name = 'DP Liability'UNION ALL 
-			--SELECT id = 19,name = 'End Inventory'UNION ALL 
-			--SELECT id = 20,name = 'Fee Expense'UNION ALL 
-			--SELECT id = 21,name = 'Fee Income'UNION ALL 
-			--SELECT id = 22,name = 'Freight AP Account'UNION ALL 
-			--SELECT id = 23,name = 'Freight Expenses'UNION ALL 
-			--SELECT id = 24,name = 'Freight Income'UNION ALL 
-			--SELECT id = 25,name = 'Interest Expense'UNION ALL 
-			SELECT id = 26,name = 'Interest Income'UNION ALL 
-			SELECT id = 27,name = 'Inventory' UNION ALL 
-			--SELECT id = 28,name = 'Options Expense'UNION ALL 
-			--SELECT id = 29,name = 'Options Income'UNION ALL 
-			--SELECT id = 30,name = 'Purchase Account'UNION ALL 
-			SELECT id = 31,name = 'Purchase Adv Account'UNION ALL 
-			SELECT id = 32,name = 'Rail Freight'UNION ALL 
-			SELECT id = 33,name = 'Sales Account'UNION ALL 
-			SELECT id = 34,name = 'Sales Adv Account'UNION ALL 
-			SELECT id = 35,name = 'Sales Discount'UNION ALL 
-			SELECT id = 36,name = 'Service Charges'UNION ALL 
-			--SELECT id = 37,name = 'Storage Expense'UNION ALL 
-			--SELECT id = 38,name = 'Storage Income'UNION ALL 
-			--SELECT id = 39,name = 'Storage Receivable'UNION ALL 
-			--SELECT id = 40,name = 'Variance Account'UNION ALL 
-			SELECT id = 41,name = 'Write Off'UNION ALL 
-			--SELECT id = 42,name = 'Write-Off Sold'UNION ALL 
-			--SELECT id = 43,name = 'Revalue Sold'UNION ALL 
-			SELECT id = 44,name = 'Auto-Variance'UNION ALL 
-			SELECT id = 45,name = 'AP Clearing'UNION ALL 
-			SELECT id = 46,name = 'Inventory In-Transit'UNION ALL 
-			SELECT id = 47,name = 'General'UNION ALL 
-			SELECT id = 48,name = 'Sales Tax Account'UNION ALL 
-			SELECT id = 49,name = 'Purchase Tax Account'UNION ALL 
-			SELECT id = 50,name = 'Undeposited Funds'UNION ALL 
-			SELECT id = 51,name = 'Inventory Adjustment'UNION ALL 
-			SELECT id = 52,name = 'Work In Progress'UNION ALL 
-			SELECT id = 53,name = 'Vendor Prepayments'UNION ALL 
-			SELECT id = 54,name = 'Customer Prepayments'UNION ALL 
-			SELECT id = 55,name = 'Other Charge Expense'UNION ALL 
-			SELECT id = 56,name = 'Other Charge Income' UNION ALL 
-			SELECT id = 57,name = 'Maintenance Sales' UNION ALL
-			SELECT id = 58,name = 'Deferred Revenue' UNION ALL
-			--SELECT id = 59,name = 'Deferred Payable'UNION ALL
-			SELECT id = 60,name = 'Unrealized Gain or Loss Accounts Receivable' UNION ALL --GL-3286
-			SELECT id = 61,name = 'Unrealized Gain or Loss Accounts Payable' UNION ALL --GL-3286
-			SELECT id = 62,name = 'Unrealized Gain or Loss Cash Management' UNION ALL --GL-3286
-			SELECT id = 63,name = 'Unrealized Gain or Loss Inventory' UNION ALL --GL-3286
-			SELECT id = 64,name = 'Unrealized Gain or Loss Contract Purchase' UNION ALL --GL-3286
-			SELECT id = 65,name = 'Unrealized Gain or Loss Contract Sales'  UNION ALL --GL-3286
-			SELECT id = 66,name = 'Unrealized Gain or Loss Offset AR' UNION ALL --GL-3286
-			SELECT id = 67,name = 'Unrealized Gain or Loss Offset AP' UNION ALL --GL-3286
-			SELECT id = 68,name = 'Unrealized Gain or Loss Offset CM' UNION ALL --GL-3286
-			SELECT id = 69,name = 'Unrealized Gain or Loss Offset Inventory' UNION ALL --GL-3286
-			SELECT id = 70,name = 'Unrealized Gain or Loss Offset Contract Purchase' UNION ALL --GL-3286
-			SELECT id = 71,name = 'Unrealized Gain or Loss Offset Contract Sales' UNION ALL--GL-3286
-			SELECT id = 72,name = 'Realized Gain or Loss Payables' UNION ALL--GL-3286
-			SELECT id = 73,name = 'Realized Gain or Loss Receivables' UNION ALL --GL-3286
-			SELECT id = 74,name = 'Unrealized Gain or Loss' UNION ALL --GL-3464
-			SELECT id = 75,name = 'Unrealized Futures Gain or Loss' UNION ALL --GL-3464
-			SELECT id = 76,name = 'Futures Trade Equity' UNION ALL --GL-3464
-			SELECT id = 77,name = 'Futures Gain or Loss Realized' UNION ALL --GL-3464
-			
-
-
-			SELECT id = 100, name = 'Mark to Market P&L' UNION ALL
-			SELECT id = 101, name = 'Mark to Market Offset' UNION ALL
-
-			SELECT id = 120, name = 'Unrealized Gain on Basis' UNION ALL
-			SELECT id = 121, name = 'Unrealized Gain on Futures' UNION ALL
-			SELECT id = 122, name = 'Unrealized Gain on Cash' UNION ALL
-			SELECT id = 123, name = 'Unrealized Gain on Ratio' UNION ALL
-			SELECT id = 124, name = 'Unrealized Loss on Basis' UNION ALL
-			SELECT id = 125, name = 'Unrealized Loss on Futures' UNION ALL
-			SELECT id = 126, name = 'Unrealized Loss on Cash' UNION ALL
-			SELECT id = 127, name = 'Unrealized Loss on Ratio' UNION ALL
-			SELECT id = 128, name = 'Unrealized Gain on Basis (Inventory Offset)' UNION ALL
-			SELECT id = 129, name = 'Unrealized Gain on Futures (Inventory Offset)' UNION ALL
-			SELECT id = 130, name = 'Unrealized Gain on Cash (Inventory Offset)' UNION ALL
-			SELECT id = 131, name = 'Unrealized Gain on Ratio (Inventory Offset)' UNION ALL
-			SELECT id = 132, name = 'Unrealized Gain on Intransit (Inventory Offset)' UNION ALL
-			SELECT id = 133, name = 'Unrealized Loss on Basis (Inventory Offset)' UNION ALL
-			SELECT id = 134, name = 'Unrealized Loss on Futures (Inventory Offset)' UNION ALL
-			SELECT id = 135, name = 'Unrealized Loss on Cash (Inventory Offset)' UNION ALL
-			SELECT id = 136, name = 'Unrealized Loss on Ratio (Inventory Offset)' UNION ALL
-			SELECT id = 137, name = 'Unrealized Loss on Intransit (Inventory Offset)' UNION ALL
-			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' UNION ALL
-			SELECT id = 139, name = 'Deferred Expense' UNION ALL 
-
-			SELECT id = 140, name = 'Unrealized Gain on Inventory (Inventory Offset)' UNION ALL
-			SELECT id = 141, name = 'Unrealized Loss on Inventory (Inventory Offset)' UNION ALL
-			SELECT id = 142, name = 'Unrealized Gain on Purchasing (AP Clearing)' UNION ALL
-			SELECT id = 143, name = 'Unrealized Loss on Purchasing (AP Clearing)' UNION ALL
-			
-			-- Fixed Asset Category
-			SELECT id = 144, name = 'Fixed Assets' UNION ALL
-			SELECT id = 145, name = 'Accumulated Depreciation' UNION ALL
-			SELECT id = 146, name = 'Fixed Asset Gain or Loss' UNION ALL
-			SELECT id = 147, name = 'Depreciation Expense' UNION ALL
-			SELECT id = 148, name = 'Realized Gain or Loss Fixed Asset' UNION --GL-8416
-
-			-- Bank Transfer Category
-			SELECT id = 150, name = 'Forex AP/AR' UNION ALL --GL-8243
-			SELECT id = 151, name = 'Forward Accrual Unrealized Gain or Loss' UNION ALL --GL-8410
-			SELECT id = 152, name = 'Swap Accrual Unrealized Gain or Loss' UNION ALL --GL-8410
-			SELECT id = 153, name = 'Forward Accrual Realized Gain or Loss' UNION ALL --GL-8410
-			SELECT id = 154, name = 'Swap Accrual Realized Gain or Loss' UNION ALL --GL-8410
-			SELECT id = 155, name = 'Bank Transfer In-Transit' UNION ALL --GL-8411 for intransit account 
-			SELECT id = 156, name = 'Cash Management Realized Gain or Loss' UNION ALL --GL-8529 For bank transfer gain loss intransit / transfer only
-
-			-- Fixed Asset Unrealized Gain or Loss
-			SELECT id = 160, name = 'Unrealized Gain or Loss Fixed Asset' UNION ALL --GL-8450
-			SELECT id = 161, name = 'Unrealized Gain or Loss Offset Fixed Asset' UNION ALL--GL-8450
-			
-			-- GL Revalue Accounts
-			SELECT id = 162, name = 'General Ledger Unrealized Gain or Loss' UNION ALL--GL-8450
-			SELECT id = 163, name = 'General Ledger Unrealized Gain or Loss Offset' UNION ALL --GL-8450
-			SELECT id = 164, name = 'In-Transit Direct'
-
-
-	) AS CategoryHardCodedValues
-		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
-
-	-- When id is matched, make sure the name and form are up-to-date.
-	WHEN MATCHED THEN 
-		UPDATE 
-		SET 	CategoryTable.strAccountCategory = CategoryHardCodedValues.name
-	-- When id is missing, then do an insert. 
-	WHEN NOT MATCHED BY TARGET THEN
-		INSERT (
-			intAccountCategoryId
-			,strAccountCategory
-			,intConcurrencyId
-		)
-		VALUES (
-			CategoryHardCodedValues.id
-			,CategoryHardCodedValues.name
-			,1
-		);
-	--WHEN NOT MATCHED BY SOURCE THEN
-	--DELETE;
-	SET  IDENTITY_INSERT tblGLAccountCategory OFF
+	DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	GO
-		PRINT 'Finished generating default account categories'
-	GO
-		PRINT 'Started removing unused account categories'
-	IF EXISTS (SELECT TOP 1  1 FROM tblGLAccountCategory WHERE strAccountCategory IN ('DP Income', 'DP Liability', 'Rail Freight'))
-	BEGIN --GL-4338
-		UPDATE t  SET intAccountCategoryId = 47  -- Set to General Category
-		FROM tblGLAccountSegment t JOIN tblGLAccountCategory g 
-		ON g.intAccountCategoryId = t.intAccountCategoryId WHERE strAccountCategory IN ('DP Income', 'DP Liability', 'Rail Freight')
-		DELETE FROM tblGLAccountCategory WHERE strAccountCategory IN ('DP Income', 'DP Liability', 'Rail Freight')
-
-	END
-	GO
-		PRINT 'Finished removing unused account categories'
-	GO
-
-
-BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
-		
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Cost of Goods')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'AG Accounting' AND strType = N'Primary')
 	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Cost of Goods'
-	END
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'AG Accounting', N'Primary', 1)
 		
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Inventory')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Inventory'
-	END	
+		DECLARE @GL_intAccountTemplateId_AGAccounting AS INT		
+		SET @GL_intAccountTemplateId_AGAccounting = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'AG Accounting' AND strType = N'Primary')			
+		
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'11000', N'Cash Clearing', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Undeposited Funds' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'12000', N'Accounts Receivable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Receivables' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'13000', N'Prepaid Credits', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Prepaids' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'14000', N'Prepaid Inventory', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Prepaids' AND strAccountType = N'Asset'), @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'16000', N'Inventories', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'18000', N'Supplies', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'21000', N'Pending Accounts Payable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'22000', N'Inspection Fee', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'23000', N'Federal Excise Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'24000', N'State Excise Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'25000', N'State Sales Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'26000', N'Prepaid Sales Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'27000', N'Locale Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'40000', N'Sales Default', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'45000', N'Discount Take', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Discounts' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'46000', N'Sales Ticket Variance', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'48000', N'Finance Charge', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'49000', N'Other Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'50000', N'Purchases Default', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Purchases' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'51000', N'Purchases Variance', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Purchases' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'55000', N'Purchases Discounts', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Purchases Discounts' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'61000', N'Write Off', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'63000', N'Cash Over/Short', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'64000', N'Freight Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'35000', N'Owner''s Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Owners Equities' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'39000', N'Retained Earnings', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Retained Earnings' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'72500', N'Tax Expense ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_AGAccounting , N'99000', N'Wash Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+	END
+
+GO	
+	PRINT N'END INSERT ACCOUNT TEMPLATE: AG Accounting'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: C-Store'
+GO
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Sales Account')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Sales Account'
-	END
-
-	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Storage Expense')
-	-- BEGIN
-	-- 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-	-- 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Storage Expense'
-	-- END
+	DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Revalue Sold')
-	-- BEGIN
-	-- 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-	-- 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Revalue Sold'
-	-- END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'AP Clearing')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'C-Store' AND strType = N'Primary')
 	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Clearing'
-	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Inventory In-Transit')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Inventory In-Transit'
-	END
-
-	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory =  'Write-Off Sold')
-	-- BEGIN
-	-- 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-	-- 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Write-Off Sold'
-	-- END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Auto-Variance')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Variance'
-	END
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Inventory Adjustment')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Inventory Adjustment'
-	END
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Work In Progress')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Work In Progress'
-	END
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'General')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'General'
-	END
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Other Charge Expense')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Expense'
-	END
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Other Charge Income')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income'
-	END
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Maintenance Sales')
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Maintenance Sales'
-	END	
-
-	DECLARE @strAccountCategory AS NVARCHAR(50)
-
-	SET @strAccountCategory  = 'Unrealized Gain on Basis'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END		
-	SET @strAccountCategory  = 'Unrealized Gain on Futures'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Cash'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Ratio'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Basis'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END
-	SET @strAccountCategory  = 'Unrealized Loss on Futures'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Cash'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Ratio'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Basis (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Futures (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Cash (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Ratio (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Intransit (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Basis (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Futures (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Cash (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Ratio (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Intransit (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Futures Gain or Loss Realized'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Futures Gain or Loss Realized Offset'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Deferred Expense'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-
-	SET @strAccountCategory  = 'Unrealized Gain on Inventory (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Inventory (Inventory Offset)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Gain on Purchasing (AP Clearing)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'Unrealized Loss on Purchasing (AP Clearing)'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-	SET @strAccountCategory  = 'In-Transit Direct'
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
-	BEGIN
-		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-	END	
-
-
-END
-GO
-	PRINT 'Start updating account group category ids'
-GO
-	BEGIN -- GROUP CATEGORY MAPPING
-		;WITH CTE(strAccountGroup, strAccountCategory)AS
-		(	SELECT 'Cash Accounts', 'Cash Account' UNION
-			SELECT 'Payables','AP Account'UNION
-			SELECT 'Receivables','AR Account' UNION
-			SELECT 'Undeposited Funds','Undeposited Funds'
-		)
-		UPDATE A 
-		SET A.intAccountCategoryId = C.intAccountCategoryId
-		FROM tblGLAccountGroup A
-		JOIN CTE B ON A.strAccountGroup = B.strAccountGroup
-		JOIN tblGLAccountCategory C ON C.strAccountCategory = B.strAccountCategory
-
-		UPDATE tblGLAccountCategory SET ysnRestricted = CASE 
-			WHEN strAccountCategory IN('Cash Account','AP Account','AR Account','Undeposited Funds') THEN 1 ELSE 0 END
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'C-Store', N'Primary', 1)
 		
-		--FOR GL ACCOUNT COMBO BOX FILTERING
-		UPDATE tblGLAccountCategory SET ysnGLRestricted  = 
-			case when strAccountCategory IN('Cash Account','AP Account','AR Account','Inventory','Vendor Prepayments') THEN 1 ELSE 0 END
+		DECLARE @GL_intAccountTemplateId_CStore AS INT		
+		SET @GL_intAccountTemplateId_CStore = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'C-Store' AND strType = N'Primary')			
 		
-		-- FOR AP ACCOUNT COMBO BOX FILTERING
-		UPDATE tblGLAccountCategory SET ysnAPRestricted = CASE WHEN strAccountCategory IN('AP Account','AR Account', 'Cash Account', 'Inventory', 'AP Clearing', ' Inventory In-Transit', 'Inventory Adjustment', 'Vendor Prepayments')
-		THEN 1 ELSE 0 END
-
-		
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'10000', N'Check book in Bank', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cash Accounts' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'11000', N'Cash Clearing', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Undeposited Funds' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'12000', N'Accounts Receivable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Receivables' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'12500', N'Credit Card Receivable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Receivables' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'16000', N'Inventories', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'40000', N'Sales Default', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'46000', N'Sales Ticket Variance', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'50000', N'Purchases Default', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Purchases' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'60000', N'Miscellaneous Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'61500', N'Fee Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'35000', N'Owner''s Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Owners Equities' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'39000', N'Retained Earnings', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Retained Earnings' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'72500', N'Tax Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_CStore , N'99000', N'Wash Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
 	END
-GO
-	PRINT 'Finished updating account group category ids'
-GO
-	PRINT 'Start converting account group to category'
-GO
-	EXEC dbo.[uspGLConvertAccountGroupToCategory]
-GO
-	PRINT 'Finished converting account group to category'
-GO
 
--- This will limit on what account type can be set on an account category
-BEGIN 
-	SET  IDENTITY_INSERT tblGLAccountCategoryType ON
-	MERGE 
-	INTO	dbo.tblGLAccountCategoryType
-	WITH	(HOLDLOCK) 
-	AS		CategoryTypeTable
-	USING	(
-		SELECT id = 1, categoryId = 5, name = 'Asset' UNION ALL --Cash Account
-		SELECT id = 2, categoryId = 5, name = 'Liability' UNION ALL --Cash Account
-		SELECT id = 3, categoryId = 100, name = 'Expense' UNION ALL --Mark to Market
-		SELECT id = 4, categoryId = 100, name = 'Revenue' UNION ALL --Mark to Market
-		SELECT id = 5, categoryId = 101, name = 'Asset' UNION ALL --Mark to Market Offset
-		SELECT id = 6, categoryId = 101, name = 'Liability' UNION ALL --Mark to Market Offset
-		SELECT id = 7, categoryId = 144, name = 'Asset' UNION ALL --Fixed Assets 
-		SELECT id = 8, categoryId = 144, name = 'Liability' UNION ALL --Fixed Assets 
-		SELECT id = 9, categoryId = 145, name = 'Asset' UNION ALL --Accumulated depreciation
-		SELECT id = 10, categoryId = 145, name = 'Liability' UNION ALL --Accumulated depreciation
-		SELECT id = 11, categoryId = 146, name = 'Expense' UNION ALL--Fixed asset Gain or loss
-		SELECT id = 12, categoryId = 146, name = 'Revenue' UNION ALL--Fixed asset Gain or loss
-		SELECT id = 13, categoryId = 147, name = 'Revenue' UNION ALL --Depreciation Expense
-		SELECT id = 14, categoryId = 147, name = 'Expense' --Depreciation Expense
-
-
-
-		
-	) AS CategoryTypeHardCodedValues
-			ON  CategoryTypeTable.intAccountCategoryTypeId = CategoryTypeHardCodedValues.id
-
-	-- When id is matched, make sure the name and form are up-to-date.
-	WHEN MATCHED THEN 
-		UPDATE 
-		SET 	CategoryTypeTable.intAccountCategoryId = CategoryTypeHardCodedValues.categoryId,
-		CategoryTypeTable.strAccountType = CategoryTypeHardCodedValues.name
-	-- When id is missing, then do an insert. 
-	WHEN NOT MATCHED BY TARGET THEN
-		INSERT (
-			intAccountCategoryTypeId
-			,intAccountCategoryId
-			,strAccountType
-		)
-		VALUES (
-			CategoryTypeHardCodedValues.id,
-			CategoryTypeHardCodedValues.categoryId,
-			CategoryTypeHardCodedValues.name
-		);
-	--WHEN NOT MATCHED BY SOURCE THEN
-	--DELETE;
-	SET  IDENTITY_INSERT tblGLAccountCategoryType OFF
+GO	
+	PRINT N'END INSERT ACCOUNT TEMPLATE: C-Store'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Fixed Asset'
+GO
 	
-END
+	DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Fixed Asset' AND strType = N'Primary') 
+	BEGIN
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Fixed Asset', N'Primary', 1)
+		
+		DECLARE @GL_intAccountTemplateId_FixedAsset AS INT		
+		SET @GL_intAccountTemplateId_FixedAsset = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Fixed Asset' AND strType = N'Primary')
+				
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'19000', N'Land', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Fixed Assets' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'19300', N'Land Improvements', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Fixed Assets' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'19500', N'Buildings', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Fixed Assets' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'19700', N'Equipment', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Fixed Assets' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'19900', N'Accumulated Depreciation', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Fixed Assets' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'19950', N'Goodwill', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Assets' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'35000', N'Owner''s Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Owners Equities' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'39000', N'Retained Earnings', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Retained Earnings' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'62000', N'Depreciation Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'72500', N'Tax Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ([intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_FixedAsset , N'99000', N'Wash Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+	END
+
+GO	
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Fixed Asset'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Grain'
 GO
 
+	DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Grain' AND strType = N'Primary') 
+	BEGIN
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Grain', N'Primary', 1)
+		
+		DECLARE @GL_intAccountTemplateId_Grain AS INT		
+		SET @GL_intAccountTemplateId_Grain = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Grain' AND strType = N'Primary')
+				
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'10000', N'Check book in Bank', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cash Accounts' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'11000', N'Cash Clearing', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Undeposited Funds' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'12000', N'Accounts Receivable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Receivables' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'12300', N'Discount Receivable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Receivables' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'12700', N'Storage Receivable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Receivables' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'16000', N'Inventories', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'20000', N'Accounts Payable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'23000', N'Federal Excise Tax ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'24000', N'State Excise Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'25000', N'State Sales Tax ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'26000', N'Prepaid Sales Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'27000', N'Locale Tax', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'29000', N'Freight Payable', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'29100', N'DP Liability', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'35000', N'Owner''s Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Owners Equities' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'39000', N'Retained Earnings', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Retained Earnings' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)		
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'40000', N'Sales Default', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'40300', N'DP Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'40500', N'Storage Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'41000', N'Freight Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'41500', N'Fee Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'42000', N'Interest Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'43000', N'Options Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'47000', N'Sales Advance ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'49000', N'Other Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1)		
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'50000', N'Purchases Default', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Purchases' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'57000', N'Purchase Advance', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Purchases' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'60000', N'Miscellaneous Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'61500', N'Fee Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'64000', N'Freight Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'70000', N'Storage Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'71000', N'Broker Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'71500', N'Rail Freight', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'72000', N'Interest Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'73000', N'Options Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'74000', N'Contract Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'75000', N'Contract Pur Gain/Loss', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'76000', N'Contract Sales Gain/Loss', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'77000', N'Currency Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'78000', N'Currency Pur Gain/Loss', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'79000', N'Currency Sales Gain/Loss', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'72500', N'Tax Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Grain , N'99000', N'Wash Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+	END	
+
+GO	
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Grain'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Payroll'
+GO
+	
+	DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Payroll' AND strType = N'Primary') 
+	BEGIN
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Payroll', N'Primary', 1)
+		
+		DECLARE @GL_intAccountTemplateId_Payroll AS INT		
+		SET @GL_intAccountTemplateId_Payroll = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Payroll' AND strType = N'Primary')
+				
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'10000', N'Check book in Bank', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cash Accounts' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'28000', N'Other Payroll Liability', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Tax Liabilities' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'28100', N'Federal Withholding', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Tax Liabilities' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'28200', N'State Withholding', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Tax Liabilities' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'28300', N'Social Security ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Tax Liabilities' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'28400', N'Medicare', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Tax Liabilities' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'35000', N'Owner''s Equity', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Owners Equities' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'39000', N'Retained Earnings', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Retained Earnings' AND strAccountType = N'Equity') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'52000', N'Wages Cogs', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Cogs' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'60100', N'Wages Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Earnings' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'60300', N'Payroll Taxes  Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Tax Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'60500', N'Payroll Other Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'72500', N'Tax Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId]) VALUES ( @GL_intAccountTemplateId_Payroll, N'99000', N'Wash Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1)
+	END
+
+GO	
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Payroll'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Petro'
+GO
+		IF EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petro' AND strType = N'Primary') 
+			DELETE FROM tblGLCOATemplate WHERE strAccountTemplateName = 'Petro'
+	
+	
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Petro', N'Primary', 1)
+
+		DECLARE @intAccountTemplateId AS INT		
+			SET @intAccountTemplateId = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petro' AND strType = N'Primary')
+	
+		DECLARE @GL_intAccountStructureId_Primary AS INT
+			SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+
+	
+		;WITH RawData AS (
+			SELECT '10100' strCode,'Cash On Hand' strDescription,'Cash Accounts' strAccountGroup,'Cash Account' strAccountCategory UNION
+			SELECT '10110','Petty Cash','Cash Accounts','Cash Account' UNION
+			SELECT '10599','Undeposited Funds','Undeposited Funds','Undeposited Funds' UNION
+			SELECT '10910','Cash Receivable Charge Cards','Current Assets','Cash Account' UNION
+			SELECT '11000','Accounts Receivable','Receivables','AR Account' UNION
+			SELECT '11010','A/R Employees','Receivables','General' UNION
+			SELECT '11100','Misc Accts Receivable','Receivables','General' UNION
+			SELECT '11200','Advance To Dealers','Receivables','General' UNION
+			SELECT '11300','Allw For Doubtful Accts Rec','Receivables','General' UNION
+			SELECT '11500','Intercompany','Receivables','General' UNION
+			SELECT '11600','Warranty Receivable','Receivables','General' UNION
+			SELECT '11700','Credit Card Receivable','Receivables','General' UNION
+			SELECT '11800','Fuel Taxes Receivable','Receivables','General' UNION
+			SELECT '11900','Credit Card Account','Receivables','General' UNION
+			SELECT '12000','Inventory Account','Inventories','Inventory' UNION
+			SELECT '13000','Prepaid Expense','Prepaids','General' UNION
+			SELECT '13100','Prepaid Insurance','Prepaids','General' UNION
+			SELECT '13200','Prepaid State Taxes','Prepaids','General' UNION
+			SELECT '13300','Prepaid Federal Taxes','Prepaids','General' UNION
+			SELECT '13400','Prepaid Property Taxes','Prepaids','General' UNION
+			SELECT '13500','Prepaid Lease','Prepaids','General' UNION
+			SELECT '13600','Vendor Prepaid','Prepaids','Vendor Prepayments' UNION
+			SELECT '13700','Customer Prepaid','Prepaids','Customer Prepayments' UNION
+			SELECT '14200','Clearing Account','Other Assets','General' UNION
+			SELECT '14400','Common Stock','Other Assets','General' UNION
+			SELECT '14500','Treasury Stock','Other Assets','General' UNION
+			SELECT '15100','Buildings','Fixed Assets','Fixed Assets' UNION
+			SELECT '15200','Land','Fixed Assets','Fixed Assets' UNION
+			SELECT '15300','Real Estate','Fixed Assets','Fixed Assets' UNION
+			SELECT '15400','Furniture/Fixtures','Fixed Assets','Fixed Assets' UNION
+			SELECT '15500','Improvements','Fixed Assets','Fixed Assets' UNION
+			SELECT '15600','Equipment','Fixed Assets','Fixed Assets' UNION
+			SELECT '15700','Vehicles','Fixed Assets','Fixed Assets' UNION
+			SELECT '16000','Organizational Expense','Fixed Assets','Fixed Assets' UNION
+			SELECT '16100','Goodwill','Fixed Assets','Fixed Assets' UNION
+			SELECT '16200','Capitalized Lease','Fixed Assets','Fixed Assets' UNION
+			SELECT '16300','Accumulated Depreciation','Fixed Assets','Accumulated Depreciation' UNION
+			SELECT '16400','Accum Amort Goodwill','Fixed Assets','Fixed Assets' UNION
+			SELECT '16500','Accum Amort Organ Exp','Fixed Assets','Fixed Assets' UNION
+			SELECT '21000','Accounts Payable','Payables','AP Account' UNION
+			SELECT '21010','Unbilled Liabilities','Liability','AP Clearing' UNION
+			SELECT '21020','Miscellaneous Acct Pay','Payables','General' UNION
+			SELECT '21030','Notes Payable','Current Liabilities','General' UNION
+			SELECT '21050','Credit Cards Clearing','Current Liabilities','General' UNION
+			SELECT '21200','Federal Income Tax Payable','Payroll Tax Liabilities','General' UNION
+			SELECT '21300','State Income Tax Payable','Payroll Tax Liabilities','General' UNION
+			SELECT '21600','Federal Income Tax Withheld','Payroll Tax Liabilities','General' UNION
+			SELECT '21800','FICA Tax Withheld','Payroll Tax Liabilities','General' UNION
+			SELECT '21810','FICA Deferred','Payroll Tax Liabilities','General' UNION
+			SELECT '21910','Insurance Withheld','Other Payables','General' UNION
+			SELECT '22210','Deferred Income Tax','Liability','General' UNION
+			SELECT '22300','Deferred Payable','Liability','General' UNION
+			SELECT '22310','Rent Payable','Other Payables','General' UNION
+			SELECT '22410','Loan Payable','Current Liabilities','General' UNION
+			SELECT '22510','Loan Payable (Interest)','Current Liabilities','General' UNION
+			SELECT '23000','Sales Tax','Sales Tax Payables','Sales Tax Account' UNION
+			SELECT '23100','Use Tax','Sales Tax Payables','General' UNION
+			SELECT '27200','Gas Tax Payable','Sales Tax Payables','General' UNION
+			SELECT '27210','Excise Tax Exempt','Sales Tax Payables','General' UNION
+			SELECT '27300','Diesel Tax Payable','Sales Tax Payables','General' UNION
+			SELECT '27400','Enviro Petroleum Fee','Sales Tax Payables','General' UNION
+			SELECT '29200','Fed Excise-Gas Payable','Sales Tax Payables','General' UNION
+			SELECT '29300','Fed Excise-DSL Payable','Sales Tax Payables','General' UNION
+			SELECT '29400','Federal Lust','Sales Tax Payables','General' UNION
+			SELECT '29500','Fed Environmental Fee Recovery','Sales Tax Payables','General' UNION
+			SELECT '29600','National Oilheat Alliance','Sales Tax Payables','General' UNION
+			SELECT '30000','Common Stock','Owners Equities','General' UNION
+			SELECT '30100','Paid In Surplus','Owners Equities','General' UNION
+			SELECT '30200','Retained Earnings','Retained Earnings','General' UNION
+			SELECT '30300','Distrib To Shareholders','Owners Equities','General' UNION
+			SELECT '40000','Supreme','Sales','General' UNION
+			SELECT '40100','Plus','Sales','General' UNION
+			SELECT '40200','Reg Unleaded','Sales','General' UNION
+			SELECT '40300','Diesel Clear','Sales','General' UNION
+			SELECT '40400','Propane','Sales','General' UNION
+			SELECT '40500','Diesel Dyed','Sales','General' UNION
+			SELECT '40600','Kerosene Clear','Sales','General' UNION
+			SELECT '40800','Kerosene Dyed','Sales','General' UNION
+			SELECT '42000','Supreme Non-Ethanol','Sales','General' UNION
+			SELECT '42100','Plus Non-Ethanol','Sales','General' UNION
+			SELECT '42200','Regular Non-Ethanol','Sales','General' UNION
+			SELECT '42300','Recreational Non-Ethanol','Sales','General' UNION
+			SELECT '44000','Automotive','Sales','General' UNION
+			SELECT '44100','Diesel Exhaust Fluid','Sales','General' UNION
+			SELECT '44200','Antifreeze','Sales','General' UNION
+			SELECT '44700','General Merchandise','Sales','General' UNION
+			SELECT '45000','Oil','Sales','General' UNION
+			SELECT '45100','Grease','Sales','General' UNION
+			SELECT '46000','Home Propane Appliances','Sales','General' UNION
+			SELECT '46100','Propane Tank Rental','Sales','General' UNION
+			SELECT '46200','Hvac Sales - Appliances','Sales','Sales Account' UNION
+			SELECT '46300','Hvac Service - Appliances','Sales','General' UNION
+			SELECT '46400','Deferred Revenue','Sales','General' UNION
+			SELECT '46500','Repair Parts','Sales','General' UNION
+			SELECT '46700','Labor Income','Sales','General' UNION
+			SELECT '47000','Special Purchases','Sales','General' UNION
+			SELECT '47600','Prompt Pay Discounts','Sales Discounts','General' UNION
+			SELECT '47700','ROE','Other Income','General' UNION
+			SELECT '48100','Rental Income','Sales','General' UNION
+			SELECT '48200','Interest Income','Other Income','General' UNION
+			SELECT '48210','Dividend Income','Other Income','General' UNION
+			SELECT '48300','Miscellaneous Income','Other Income','General' UNION
+			SELECT '48400','Gain-Sale Of Asset','Other Income','General' UNION
+			SELECT '48500','Bad Debt Recovery','Other Income','General' UNION
+			SELECT '48700','FICA Credit','Other Income','General' UNION
+			SELECT '48900','Other Income','Other Income','General' UNION
+			SELECT '49000','Sales Discounts','Sales Discounts','General' UNION
+			SELECT '49700','Freight Income','Sales','General' UNION
+			SELECT '49800','Core Charges','Sales','General' UNION
+			SELECT '49850','Tote Charges','Sales','General' UNION
+			SELECT '49900','Invoice Errors','Other Income','General' UNION
+			SELECT '50000','Supreme','Cost of Goods Sold','General' UNION
+			SELECT '50100','Plus','Cost of Goods Sold','General' UNION
+			SELECT '50200','Reg Unleaded','Cost of Goods Sold','General' UNION
+			SELECT '50300','Diesel Clear','Cost of Goods Sold','General' UNION
+			SELECT '50400','Propane','Cost of Goods Sold','General' UNION
+			SELECT '50500','Diesel Dyed','Cost of Goods Sold','General' UNION
+			SELECT '50600','Kerosene Clear','Cost of Goods Sold','General' UNION
+			SELECT '50800','Kerosene Dyed','Cost of Goods Sold','General' UNION
+			SELECT '51200','Federal Environmental Fee','Cost of Goods Sold','General' UNION
+			SELECT '52000','Supreme Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '52100','Plus Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '52200','Regular Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '52300','Recreational Non-Ethanol','Cost of Goods Sold','General' UNION
+			SELECT '54000','Automotive','Cost of Goods Sold','General' UNION
+			SELECT '54100','Diesel Exhaust Fluid','Cost of Goods Sold','General' UNION
+			SELECT '54200','Antifreeze','Cost of Goods Sold','General' UNION
+			SELECT '54700','General Merchandise','Cost of Goods Sold','General' UNION
+			SELECT '55000','Oil','Cost of Goods Sold','General' UNION
+			SELECT '55100','Grease','Cost of Goods Sold','General' UNION
+			SELECT '55200','Fuel','Cost of Goods Sold','General' UNION
+			SELECT '56000','Home Propane Equip','Cost of Goods Sold','General' UNION
+			SELECT '56100','Propane Tank Rental','Cost of Goods Sold','General' UNION
+			SELECT '56200','HVAC Sales','Cost of Goods Sold','General' UNION
+			SELECT '56300','HVAC Service','Cost of Goods Sold','General' UNION
+			SELECT '56500','Repair Parts','Cost of Goods Sold','General' UNION
+			SELECT '56700','Labor','Cost of Goods Sold','General' UNION
+			SELECT '57000','Special Purchases','Cost of Goods Sold','General' UNION
+			SELECT '57600','Prompt Pay Discount','Expense','General' UNION
+			SELECT '57700','ROI','Expense','General' UNION
+			SELECT '58300','Miscellaneous Expense','Expense','General' UNION
+			SELECT '59000','Purchase Discount','Expense','General' UNION
+			SELECT '59700','Freight Cost','Expense','General' UNION
+			SELECT '59800','Core Charges','Cost of Goods Sold','General' UNION
+			SELECT '59850','Tote Charges','Cost of Goods Sold','General' UNION
+			SELECT '59900','Invoice Errors','Expense','General' UNION
+			SELECT '50010','Officers Salary Expense','Payroll Earnings','General' UNION
+			SELECT '50110','Other Salary Expense','Payroll Earnings','General' UNION
+			SELECT '50210','Professional Services','Expense','General' UNION
+			SELECT '50310','Auto & Truck','Expense','General' UNION
+			SELECT '50410','Advertising','Expense','General' UNION
+			SELECT '50510','Donations','Expense','General' UNION
+			SELECT '50610','Dues & Subscriptions','Expense','General' UNION
+			SELECT '50700','Dues & Subscriptions','Expense','General' UNION
+			SELECT '50710','Write Off','Expense','Write Off' UNION
+			SELECT '50810','Bank Charges','Expense','General' UNION
+			SELECT '50900','Depreciation','Expense','Depreciation Expense' UNION
+			SELECT '51000','Insurance','Expense','General' UNION
+			SELECT '51100','Contract Labor','Expense','General' UNION
+			SELECT '51210','License & Taxes','Expense','General' UNION
+			SELECT '51300','Road Fuel Tax Expense','Expense','General' UNION
+			SELECT '51400','Business Franchise Tax','Expense','General' UNION
+			SELECT '51500','Meetings & Conventions','Expense','General' UNION
+			SELECT '51600','Travel','Expense','General' UNION
+			SELECT '51800','Office Expenses','Expense','General' UNION
+			SELECT '51900','Payroll Tax Expense','Expense','General' UNION
+			SELECT '52010','Property Rent','Expense','General' UNION
+			SELECT '52110','Repairs & Maintenance','Expense','General' UNION
+			SELECT '52150','Tank Repairs & Maintenance','Expense','General' UNION
+			SELECT '52210','Uniforms','Expense','General' UNION
+			SELECT '52310','Telephone','Expense','General' UNION
+			SELECT '52400','Utilities','Expense','General' UNION
+			SELECT '52500','Interest Expense','Expense','General' UNION
+			SELECT '52510','Deferred Payable Interest','Expense','General' UNION
+			SELECT '52600','Environmental Clean Up','Expense','General' UNION
+			SELECT '52700','Fuel Environment &Compliance Fee','Expense','General' UNION
+			SELECT '52800','Penalties & Fines','Expense','General' UNION
+			SELECT '52900','Over & Short Expense','Expense','General' UNION
+			SELECT '53000','Pension Plan Expense','Expense','General' UNION
+			SELECT '53100','Employee Benefits','Expense','General' UNION
+			SELECT '53200','Federal Income Tax','Expense','General' UNION
+			SELECT '53300','State Income Tax','Expense','General' UNION
+			SELECT '53400','B & O Tax','Expense','General' UNION
+			SELECT '53500','Workers'' Comp','Expense','General' UNION
+			SELECT '53600','Federal Unempl. Tax','Payroll Expenses','General' UNION
+			SELECT '53700','State Unempl. Tax','Payroll Expenses','General' UNION
+			SELECT '53800','Property Taxes','Expense','General' UNION
+			SELECT '53900','Rent - Equipment','Expense','General' UNION
+			SELECT '53910','Rent - Building','Expense','General' UNION
+			SELECT '54010','Services Reimbursement','Expense','General' UNION
+			SELECT '54110','Service Charges','Expense','Service Charges' UNION
+			SELECT '54210','Home Propane Expenses','Expense','General' UNION
+			SELECT '54400','Home Heat Parts & Service','Expense','General' UNION
+			SELECT '54500','Meals & Entertainment','Expense','General' UNION
+			SELECT '54800','Postage','Expense','General' UNION
+			SELECT '54900','Equipment Rental','Expense','General' UNION
+			SELECT '55010','Credit Card Fees','Expense','General' UNION
+			SELECT '55110','Commissions','Expense','General' UNION
+			SELECT '55210','Accident Expense','Expense','General' UNION
+			SELECT '55500','Regulation Expense','Expense','General' UNION
+			SELECT '55700','Inventory Variance','Expense','General' UNION
+			SELECT '56110','Amortization Exp Organization','Expense','General' UNION
+			SELECT '56510','Public & Comm Relations','Expense','General' UNION
+			SELECT '58400','Loss On Disposal Of Assets','Expense','General' UNION
+			SELECT '59710','Use Tax Expense','Expense','General' UNION
+			SELECT '59810','Loss On Abandonment','Expense','General' UNION
+			SELECT '59910','Overhead Distribution','Expense','General' UNION
+			SELECT '21100','Due From Account','Current Liabilities','General' UNION
+			SELECT '10920','Due to Account','Current Assets','General')	
+				
+			INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId],[intAccountCategoryId], [intAccountStructureId], [intConcurrencyId])
+			SELECT @intAccountTemplateId, strCode, strDescription, G.intAccountGroupId, C.intAccountCategoryId, @GL_intAccountStructureId_Primary, 1  FROM RawData A 
+			OUTER APPLY (SELECT TOP 1 intAccountCategoryId from tblGLAccountCategory where strAccountCategory = A.strAccountCategory)C
+			OUTER APPLY (SELECT TOP 1 intAccountGroupId from tblGLAccountGroup where strAccountGroup = A.strAccountGroup)G
+					
+GO
+
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Petro'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Inventory'
+GO
+
+DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Inventory' AND strType = N'Primary') 
+	BEGIN
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Inventory', N'Primary', 1)
+		
+		DECLARE @GL_intAccountTemplateId_Petrolac AS INT		
+		SET @GL_intAccountTemplateId_Petrolac = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Inventory' AND strType = N'Primary')
+										
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18000', N'Inventory Adjustment', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Inventory Adjustment'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18100', N'Inventory', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Inventory'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18200', N'Inventory In-Transit', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Inventory In-Transit'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18300', N'Work in Progress', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Work in Progress'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'21000', N'AP Clearing', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'AP Clearing'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'40000', N'Sales', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Sales Account'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'40100', N'Other Charge Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Other Charge Income'))		
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50100', N'Cost of Goods', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Cost of Goods'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50200', N'Auto Variance', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Auto-Variance'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50300', N'Write-off Sold ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Write-off Sold'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50400', N'Revalue Sold', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Revalue Sold'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50500', N'Other Charge Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Other Charge Expense'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50600', N'Service', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'General'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50700', N'Non Inventory', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'General'))		
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50800', N'Software', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'General'))
+	
+	END
+
+GO
+
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Inventory'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Sales'
+GO
+
+DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Sales' AND strType = N'Primary') 
+	BEGIN
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Sales', N'Primary', 1)
+		
+		DECLARE @GL_intAccountTemplateId_Petrolac AS INT		
+		SET @GL_intAccountTemplateId_Petrolac = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Sales' AND strType = N'Primary')
+										
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'12100', N'AR Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Receivables' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'AR Account'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'41100', N'Sales Discount', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Sales Discount'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'41200', N'Write-Off Sold', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Write-Off Sold'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'41300', N'Interest Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Interest Income'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'41400', N'Service Charges', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Service Charges'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'41700', N'Sales Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Sales Account'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'21100', N'Sales Tax Account', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales Tax Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Sales Tax Account'))		
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'15100', N'Undeposited Funds', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Undeposited Funds' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Undeposited Funds'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'41600', N'Maintenance Sales', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Maintenance Sales'))
+		
+	
+	END
+
+GO
+
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Sales'
+
+
+
+
+EXEC dbo.uspGLConvertAccountTemplateGroupToCategory
+GO
