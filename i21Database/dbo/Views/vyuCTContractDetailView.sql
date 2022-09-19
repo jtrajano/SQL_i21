@@ -32,7 +32,7 @@ AS
 			CD.intFarmFieldId,					CD.intRateTypeId,				CD.intCurrencyExchangeRateId,
 			CD.strItemSpecification,
 			CD.dblQualityPremium,
-			CD.dblOptionalityPremium,
+			CD.dblOptionalityPremium,			CD.strContractReference,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
