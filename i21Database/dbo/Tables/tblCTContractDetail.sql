@@ -240,6 +240,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strTaxLocation] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] [int] NULL,
 	ysnRoll BIT NULL DEFAULT 0, 
+	strContractReference NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 
 
 
