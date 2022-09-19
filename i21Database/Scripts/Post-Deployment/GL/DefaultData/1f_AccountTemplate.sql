@@ -256,7 +256,7 @@ GO
 			SELECT '10100' strCode,'Cash On Hand' strDescription,'Cash Accounts' strAccountGroup,'Cash Account' strAccountCategory UNION
 			SELECT '10110','Petty Cash','Cash Accounts','Cash Account' UNION
 			SELECT '10599','Undeposited Funds','Undeposited Funds','Undeposited Funds' UNION
-			SELECT '10910','Cash Receivable Charge Cards','Current Assets','General' UNION
+			SELECT '10910','Cash Receivable Charge Cards','Current Assets','Cash Account' UNION
 			SELECT '11000','Accounts Receivable','Receivables','AR Account' UNION
 			SELECT '11010','A/R Employees','Receivables','General' UNION
 			SELECT '11100','Misc Accts Receivable','Receivables','General' UNION
