@@ -585,11 +585,11 @@ BEGIN TRY
 			INNER JOIN tblICItemLocation IL ON IL.intLocationId = DH.intCompanyLocationId
 			WHERE DH.intLoadHeaderId = @intLoadHeaderId 
 			AND IL.intItemId = @intFreightItemId
-			AND DD.dblFreightRate > 0
+			AND ((DD.dblFreightRate > 0 AND IL.intItemLocationId IS NOT NULL) OR  DD.dblFreightRate = 0)
 			AND DH.strDestination = 'Customer')
 		BEGIN
 			DECLARE @strFreightError NVARCHAR(500) = NULL
-			SET @strFreightError = 'Incorrect Freight Item setup: Company Location is not properly set in Item ' + @strFreightItemNo + '. Please go to Item > Setup > Location'
+			SET @strFreightError = 'Incorrect Freight Item setup: Company Location is not properly set in Item ' + @strFreightItemNo + '. Please go to Item > Setup > Location.'
 			RAISERROR(@strFreightError, 16, 1)
 		END
 	END
@@ -611,14 +611,14 @@ BEGIN TRY
 		-- CHECK SURCHARGE ITEM LOCATION
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadDistributionHeader DH
 			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-			INNER JOIN tblICItemLocation IL ON IL.intLocationId = DH.intCompanyLocationId
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = DH.intCompanyLocationId
 			WHERE DH.intLoadHeaderId = @intLoadHeaderId 
 			AND IL.intItemId = @intSurchargeItemId
-			AND DD.dblDistSurcharge > 0
+			AND ((DD.dblDistSurcharge > 0 AND IL.intItemLocationId IS NOT NULL) OR  DD.dblDistSurcharge = 0)
 			AND DH.strDestination = 'Customer')
 		BEGIN
 			DECLARE @strSurchargeError NVARCHAR(500) = NULL
-			SET @strSurchargeError = 'Incorrect Surcharge Item setup: Company Location is not properly set in Item ' + @strSurchargeItemNo + '. Please go to Item > Setup > Location'
+			SET @strSurchargeError = 'Incorrect Surcharge Item setup: Company Location is not properly set in Item ' + @strSurchargeItemNo + '. Please go to Item > Setup > Location.'
 			RAISERROR(@strSurchargeError, 16, 1)
 		END
 	END
