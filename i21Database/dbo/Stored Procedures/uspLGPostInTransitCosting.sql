@@ -255,6 +255,47 @@ SET ANSI_WARNINGS ON
 		WHERE L.intLoadId = @intLoadId
 
 		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)	
+		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
+			@intLoadId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INBOUND_SHIPMENT_TYPE
+			,@ysnPost
+
+		INSERT INTO @GLEntries (
 			[dtmDate]
 			,[strBatchId]
 			,[intAccountId]
@@ -305,6 +346,47 @@ SET ANSI_WARNINGS ON
 	END
 	ELSE
 	BEGIN
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)	
+		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
+			@intLoadId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INBOUND_SHIPMENT_TYPE
+			,@ysnPost
+
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
