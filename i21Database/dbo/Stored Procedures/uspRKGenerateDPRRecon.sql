@@ -47,7 +47,11 @@ BEGIN TRY
 		[dblCash] NUMERIC(24, 10) NULL,
 		[intContractHeaderId] INT NULL,
 		[intTicketId] INT NULL,
-		[intLoadId] INT NULL
+		[intLoadId] INT NULL,
+		[strDistribution] NVARCHAR (50) COLLATE Latin1_General_CI_AS  NULL,
+		[strStorageSchedule] NVARCHAR (100) COLLATE Latin1_General_CI_AS  NULL,
+		[strSettlementTicket] NVARCHAR (100) COLLATE Latin1_General_CI_AS  NULL,
+		[strStatus] NVARCHAR (50) COLLATE Latin1_General_CI_AS  NULL
 	)
 
 
@@ -108,6 +112,10 @@ BEGIN TRY
 		,intContractHeaderId
 		,intTicketId
 		,intLoadId
+		,strDistribution
+		,strStorageSchedule
+		,strSettlementTicket
+		,strStatus
 	)
 	SELECT
 		intSort = 1
@@ -135,6 +143,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -179,6 +191,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -223,6 +239,10 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
@@ -268,6 +288,10 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = T.intTicketId
 		,intLoadId = NULL
+		,strDistribution  = CASE WHEN SL.strInOut = 'IN' THEN 'Distributed' ELSE 'Undistributed' END
+		,strStorageSchedule  = ST.strStorageTypeDescription
+		,strSettlementTicket = SL.strTransactionNumber
+		,strStatus  = CASE WHEN SL.strInOut = 'IN' THEN 'Posted' ELSE 'Unposted' END
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
@@ -283,6 +307,7 @@ BEGIN TRY
 	LEFT JOIN tblGRCustomerStorage GR ON GR.intCustomerStorageId = SL.intTransactionRecordHeaderId
 	LEFT JOIN tblSCTicket T ON T.intTicketId = GR.intTicketId
 	LEFT JOIN tblGRSettleContract SC ON SC.intSettleStorageId = SS.intSettleStorageId
+	LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = GR.intStorageTypeId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned' 
@@ -317,6 +342,10 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = T.intTicketId
 		,intLoadId = NULL
+		,strDistribution  = CASE WHEN SL.strInOut = 'OUT' THEN 'Distributed' ELSE 'Undistributed' END
+		,strStorageSchedule  = ST.strStorageTypeDescription
+		,strSettlementTicket = SL.strTransactionNumber
+		,strStatus  = CASE WHEN SL.strInOut = 'OUT' THEN 'Posted' ELSE 'Unposted' END
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
@@ -331,6 +360,7 @@ BEGIN TRY
 	LEFT JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SL.intTransactionRecordId
 	LEFT JOIN tblGRCustomerStorage GR ON GR.intCustomerStorageId = SL.intTransactionRecordHeaderId
 	LEFT JOIN tblSCTicket T ON T.intTicketId = GR.intTicketId
+	LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = GR.intStorageTypeId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Delayed Pricing' 
@@ -364,6 +394,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -409,6 +443,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -452,6 +490,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -496,6 +538,10 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = T.intTicketId
 		,intLoadId = T.intLoadId
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
@@ -543,6 +589,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -585,6 +635,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -632,6 +686,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -676,6 +734,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -720,6 +782,10 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
@@ -765,6 +831,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -810,6 +880,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -853,6 +927,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -897,6 +975,10 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = T.intTicketId
 		,intLoadId = T.intLoadId
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblRKSummaryLog SL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
@@ -944,6 +1026,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -986,6 +1072,10 @@ BEGIN TRY
 		,CBL.intContractHeaderId
 		,intTicketId = NULL
 		,intLoadId = NULL
+		,strDistribution  = ''
+		,strStorageSchedule  = ''
+		,strSettlementTicket = ''
+		,strStatus  = ''
 	FROM tblCTContractBalanceLog CBL
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
 	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
@@ -1187,6 +1277,10 @@ BEGIN TRY
 		,intContractHeaderId
 		,intTicketId
 		,intLoadId
+		,strDistribution
+		,strStorageSchedule 
+		,strSettlementTicket 
+		,strStatus
 	)
 	SELECT
 		@intDPRReconHeaderId
@@ -1215,6 +1309,10 @@ BEGIN TRY
 		,intContractHeaderId
 		,intTicketId
 		,intLoadId
+		,strDistribution
+		,strStorageSchedule 
+		,strSettlementTicket 
+		,strStatus
 	FROM @tblRKDPRReconContracts
 	
 	
