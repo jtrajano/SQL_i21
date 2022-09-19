@@ -69,7 +69,7 @@ BEGIN
 		@intReceiptId = @intTransactionId		
 
 	-- Consignment/Consumption Site integration
-	EXEC dbo.uspTMReceived @intTransactionId, @ysnPost, @intEntityUserSecurityId
+	--EXEC dbo.uspTMReceived @intTransactionId, @ysnPost, @intEntityUserSecurityId
 
 	-- Negate the Qty if posting an Inventory Return
 	UPDATE	@ItemsFromInventoryReceipt
