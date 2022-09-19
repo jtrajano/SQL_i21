@@ -4003,10 +4003,18 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev
+							UPDATE lp
 							SET strBatchId = @strBatchId
 								, strProcess = @strProcess
 								, dtmTransactionDate = @_dtmCurrent
+								, dblOrigQty = case when @strProcess = 'Save Contract' and lp.strTransactionReference = 'Inventory Receipt' then curr.dblOrigQty else lp.dblOrigQty end
+								, strTransactionReference = case when @strProcess = 'Save Contract' and lp.strTransactionReference = 'Inventory Receipt' then curr.strTransactionReference else lp.strTransactionReference end
+								, strTransactionReferenceNo = case when @strProcess = 'Save Contract' and lp.strTransactionReference = 'Inventory Receipt' then curr.strTransactionReferenceNo else lp.strTransactionReferenceNo end
+								, intTransactionReferenceId = case when @strProcess = 'Save Contract' and lp.strTransactionReference = 'Inventory Receipt' then curr.intTransactionReferenceId else lp.intTransactionReferenceId end
+								, intTransactionReferenceDetailId = case when @strProcess = 'Save Contract' and lp.strTransactionReference = 'Inventory Receipt' then curr.intTransactionReferenceDetailId else lp.intUserId end
+								, intUserId = case when @strProcess = 'Save Contract' and lp.strTransactionReference = 'Inventory Receipt' then curr.intUserId else lp.intUserId end
+							FROM @cbLogPrev lp
+							cross apply (SELECT * FROM @cbLogSpecific) curr
 
 							IF (@strProcess = 'Do Roll')
 							BEGIN
