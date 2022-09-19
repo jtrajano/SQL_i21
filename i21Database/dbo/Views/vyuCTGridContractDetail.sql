@@ -98,6 +98,7 @@ AS
 			CD.strVendorLotID,
 			CD.strInvoiceNo,
 			CD.strReference,
+			CD.strContractReference,
 			CD.strERPPONumber,
 			CD.strERPItemNumber,
 			CD.strERPBatchNumber,
