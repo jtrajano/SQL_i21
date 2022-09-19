@@ -28,9 +28,16 @@ BEGIN TRY
 	  , @intSurchargeItemId		INT
 	  , @ysnItemizeSurcharge	BIT
 	  , @HasBlend BIT = 0
+	  , @strFreightItemNo NVARCHAR(300) = NULL
+	  , @strSurchargeItemNo NVARCHAR(300) = NULL
 
-	SELECT @intFreightItemId = intFreightItemId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId
-	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+	SELECT @intFreightItemId = intFreightItemId, @strFreightItemNo = I.strItemNo
+	FROM tblTRLoadHeader H INNER JOIN tblICItem I ON I.intItemId = H.intFreightItemId
+	WHERE H.intLoadHeaderId = @intLoadHeaderId
+
+	SELECT TOP 1 @intSurchargeItemId = intItemId, @strSurchargeItemNo = strItemNo 
+	FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
@@ -571,6 +578,20 @@ BEGIN TRY
 			RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 			RETURN 0
 		END
+
+		-- CHECK FREIGHT ITEM LOCATION
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadDistributionHeader DH
+			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+			INNER JOIN tblICItemLocation IL ON IL.intLocationId = DH.intCompanyLocationId
+			WHERE DH.intLoadHeaderId = @intLoadHeaderId 
+			AND IL.intItemId = @intFreightItemId
+			AND DD.dblFreightRate > 0
+			AND DH.strDestination = 'Customer')
+		BEGIN
+			DECLARE @strFreightError NVARCHAR(500) = NULL
+			SET @strFreightError = 'Incorrect Freight Item setup: Company Location is not properly set in Item ' + @strFreightItemNo + '. Please go to Item > Setup > Location'
+			RAISERROR(@strFreightError, 16, 1)
+		END
 	END
 
 	IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
@@ -585,6 +606,20 @@ BEGIN TRY
 		BEGIN
 			RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 			RETURN 0
+		END
+
+		-- CHECK SURCHARGE ITEM LOCATION
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadDistributionHeader DH
+			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+			INNER JOIN tblICItemLocation IL ON IL.intLocationId = DH.intCompanyLocationId
+			WHERE DH.intLoadHeaderId = @intLoadHeaderId 
+			AND IL.intItemId = @intSurchargeItemId
+			AND DD.dblDistSurcharge > 0
+			AND DH.strDestination = 'Customer')
+		BEGIN
+			DECLARE @strSurchargeError NVARCHAR(500) = NULL
+			SET @strSurchargeError = 'Incorrect Surcharge Item setup: Company Location is not properly set in Item ' + @strSurchargeItemNo + '. Please go to Item > Setup > Location'
+			RAISERROR(@strSurchargeError, 16, 1)
 		END
 	END
 
