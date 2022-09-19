@@ -296,7 +296,8 @@ BEGIN
 	
 	-- Negative stocks 
 	UNION ALL 
-	SELECT	t.intInventoryTransactionId
+	SELECT	DISTINCT 
+			t.intInventoryTransactionId
 			,2 
 	FROM	tblICInventoryLotOut cbOut INNER JOIN tblICInventoryLot cb 
 				ON cbOut.intInventoryLotId = cb.intInventoryLotId
@@ -307,6 +308,7 @@ BEGIN
 				AND t.intTransactionId = cbSource.intTransactionId
 				AND t.intTransactionDetailId = cbSource.intTransactionDetailId
 				AND t.intLotId = cbSource.intLotId
+				AND ABS(t.dblQty) = ABS(cbOut.dblQty)
 				AND t.intInTransitSourceLocationId IS NULL 
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
