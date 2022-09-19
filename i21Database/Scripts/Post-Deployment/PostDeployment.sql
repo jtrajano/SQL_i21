@@ -107,6 +107,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
 :r .\SM\2110_FixUserSecurityAdminData.sql
 :r .\SM\2210_RemoveOldPowerBIData.sql
+:r .\SM\2210_EncryptPasswords.sql
+:r .\SM\2210_EncryptPasswords2.sql
+:r .\SM\2210_AttachmentsFileTypesFix.sql
 
 
 -- Canned Report
