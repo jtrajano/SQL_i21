@@ -13,6 +13,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @amountDue DECIMAL(18,2);
+DECLARE @discountAmt DECIMAL(18,6);
 
 IF @post = 0
 BEGIN
@@ -30,6 +31,7 @@ BEGIN
 									+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
 									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
+			@discountAmt = C.dblDiscount - ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),
 			tblAPBill.dblAmountDue = @amountDue, 
 			tblAPBill.ysnPaid = 0,
 			tblAPBill.dblPayment = C.dblPayment - 
@@ -39,7 +41,10 @@ BEGIN
 									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
 			tblAPBill.dtmDatePaid = NULL,
-			tblAPBill.dblDiscount = C.dblDiscount - ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),
+			tblAPBill.dblDiscount = CASE 
+										WHEN @discountAmt = 0 --if discount will be back to 0
+										THEN A2.dblDiscount --return the value of discount, this will be display on 'Terms Discount'
+									ELSE @discountAmt END,
 			tblAPBill.dblInterest = C.dblInterest - ABS(ISNULL(payDetails.dblInterest,0)),
 			tblAPBill.dtmInterestDate = ISNULL(latestPay.dtmDatePaid, NULL),
 			tblAPBill.dblWithheld = 0

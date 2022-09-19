@@ -180,67 +180,69 @@ BEGIN
 				
 				IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
 				BEGIN
-
-					--Add contract prepayment to voucher
+					IF ((SELECT TOP 1 ISNULL(ysnPosted,0) FROM tblAPBill WHERE intBillId = @intBillId) = 0)
 					BEGIN
-						IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
-							DROP TABLE #tmpContractPrepay
-
-						CREATE TABLE #tmpContractPrepay (
-							[intPrepayId] INT
-						);
-						DECLARE @Ids as Id
-				
-						INSERT INTO @Ids(intId)
-						SELECT DISTINCT
-							CT.intContractDetailId 
-						FROM tblICInventoryReceiptItem A 
-						INNER JOIN tblCTContractDetail CT 
-							ON CT.intContractDetailId = A.intContractDetailId
-						WHERE A.dblUnitCost > 0
-							AND A.intInventoryReceiptId = @intInventoryReceiptId
-
-						INSERT INTO #tmpContractPrepay(
-							[intPrepayId]
-						) 
-						SELECT intTransactionId FROM dbo.fnSCGetPrepaidIds(@Ids)
-				
-						SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
-						IF (@total > 0)
+						--Add contract prepayment to voucher
 						BEGIN
-							INSERT INTO @prePayId(
-								[intId]
-							)
-							SELECT [intId] = intPrepayId
-							FROM #tmpContractPrepay where intPrepayId > 0
+							IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
+								DROP TABLE #tmpContractPrepay
 
-							IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=0 AND intBillId = @intBillId)
+							CREATE TABLE #tmpContractPrepay (
+								[intPrepayId] INT
+							);
+							DECLARE @Ids as Id
+					
+							INSERT INTO @Ids(intId)
+							SELECT DISTINCT
+								CT.intContractDetailId 
+							FROM tblICInventoryReceiptItem A 
+							INNER JOIN tblCTContractDetail CT 
+								ON CT.intContractDetailId = A.intContractDetailId
+							WHERE A.dblUnitCost > 0
+								AND A.intInventoryReceiptId = @intInventoryReceiptId
+
+							INSERT INTO #tmpContractPrepay(
+								[intPrepayId]
+							) 
+							SELECT intTransactionId FROM dbo.fnSCGetPrepaidIds(@Ids)
+					
+							SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
+							IF (@total > 0)
 							BEGIN
-								EXEC uspAPApplyPrepaid @intBillId, @prePayId
-							END							
-							update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
+								INSERT INTO @prePayId(
+									[intId]
+								)
+								SELECT [intId] = intPrepayId
+								FROM #tmpContractPrepay where intPrepayId > 0
+
+								IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=0 AND intBillId = @intBillId)
+								BEGIN
+									EXEC uspAPApplyPrepaid @intBillId, @prePayId
+								END							
+								update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
+							END
 						END
-					END
 
-					SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
+						SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
 
-					EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
-					@type = N'AccountsPayable.view.Voucher',
-					@transactionEntityId = @intEntityId,
-					@currentUserEntityId = @intUserId,
-					@locationId = @intLocationId,
-					@amount = @dblTotal,
-					@requireApproval = @requireApproval OUTPUT
+						EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+						@type = N'AccountsPayable.view.Voucher',
+						@transactionEntityId = @intEntityId,
+						@currentUserEntityId = @intUserId,
+						@locationId = @intLocationId,
+						@amount = @dblTotal,
+						@requireApproval = @requireApproval OUTPUT
 
-					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
-					BEGIN
-						EXEC [dbo].[uspAPPostBill]
-						@post = 1
-						,@recap = 0
-						,@isBatch = 0
-						,@param = @intBillId
-						,@userId = @intUserId
-						,@success = @success OUTPUT
+						IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+						BEGIN
+							EXEC [dbo].[uspAPPostBill]
+							@post = 1
+							,@recap = 0
+							,@isBatch = 0
+							,@param = @intBillId
+							,@userId = @intUserId
+							,@success = @success OUTPUT
+						END
 					END
 				END
 

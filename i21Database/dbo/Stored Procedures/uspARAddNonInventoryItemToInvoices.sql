@@ -841,22 +841,7 @@ LEFT OUTER JOIN
 		ON IE.[intInvoiceId] = IP.[intInvoiceId]
 		AND (IE.[intId] = IP.[intId]
 			OR
-			IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])
---LEFT OUTER JOIN
---	(
---	SELECT
---		 [intAccountId] 
---		,[intCOGSAccountId] 
---		,[intSalesAccountId]
---		,[intInventoryAccountId]
---		,[intGeneralAccountId]	
---		,[intMaintenanceSalesAccountId]			
---		,[intItemId]
---		,[intLocationId]			
---	FROM vyuARGetItemAccount WITH (NOLOCK)
---	) Acct
---		ON IC.[intItemId] = Acct.[intItemId]
---		AND IL.[intLocationId] = Acct.[intLocationId]		
+			IE.[intInvoiceDetailId] = IP.[intInvoiceDetailId])	
 
 BEGIN TRY
 MERGE INTO tblARInvoiceDetail AS Target

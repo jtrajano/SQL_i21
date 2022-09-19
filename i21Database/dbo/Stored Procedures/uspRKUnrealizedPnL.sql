@@ -20,6 +20,10 @@ BEGIN
 		DROP TABLE #UnrealizedSettlePrice
 	IF OBJECT_ID('tempdb..#UnrealizedData') IS NOT NULL
 		DROP TABLE #UnrealizedData
+	IF OBJECT_ID('tempdb..#tmpLastSettleCount') IS NOT NULL
+		DROP TABLE #tmpLastSettleCount
+	IF OBJECT_ID('tempdb..#tmpMarginVariation') IS NOT NULL
+		DROP TABLE #tmpMarginVariation
 
 	SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(@dtmToDate, GETDATE()), 110), 110)
@@ -202,6 +206,67 @@ BEGIN
 	) t1
 	WHERE (dblLong <> 0 OR dblShort <> 0)
 	ORDER BY RowNum ASC
+	
+	SELECT dblLastSettle = count(dblLastSettle)
+		, p.intFutureMarketId
+		, pm.intFutureMonthId
+	INTO #tmpLastSettleCount
+	FROM tblRKFuturesSettlementPrice p
+	INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+	WHERE CAST(dtmPriceDate AS DATE) <= @dtmToDate
+	GROUP BY p.intFutureMarketId
+		, pm.intFutureMonthId
+
+	SELECT * 
+	INTO #tmpMarginVariation
+	FROM
+	(
+		SELECT dblVariationMarginBuy = lastSettle2.dblLastSettle - lastSettle1.dblLastSettle
+			, dblVariationMarginSell = lastSettle1.dblLastSettle - lastSettle2.dblLastSettle
+			, settleCount.intFutureMarketId
+			, settleCount.intFutureMonthId
+		FROM #tmpLastSettleCount settleCount
+		OUTER APPLY (
+			SELECT dblLastSettle
+			FROM (
+				SELECT TOP 2 ROW_NUMBER() OVER (
+						ORDER BY dtmPriceDate DESC
+						) intRowNum
+					, dblLastSettle
+				FROM tblRKFuturesSettlementPrice p
+				INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+				WHERE p.intFutureMarketId = settleCount.intFutureMarketId AND pm.intFutureMonthId = settleCount.intFutureMonthId 				
+				AND CAST(dtmPriceDate AS DATE) <= @dtmToDate
+				ORDER BY dtmPriceDate DESC
+				) t
+			WHERE intRowNum = 1
+		) lastSettle2
+		OUTER APPLY (
+			SELECT dblLastSettle
+			FROM (
+				SELECT TOP 2 ROW_NUMBER() OVER (
+						ORDER BY dtmPriceDate DESC
+						) intRowNum
+					,dblLastSettle
+				FROM tblRKFuturesSettlementPrice p
+				INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+				WHERE p.intFutureMarketId = settleCount.intFutureMarketId AND pm.intFutureMonthId = settleCount.intFutureMonthId 
+				AND CAST(dtmPriceDate AS DATE) <= @dtmToDate
+				ORDER BY dtmPriceDate DESC
+				) t
+			WHERE intRowNum = 2
+		) lastSettle1
+		WHERE settleCount.dblLastSettle > 1
+
+		UNION ALL
+
+		SELECT dblVariationMarginBuy = CAST(0 AS NUMERIC(18, 6))
+			, dblVariationMarginSell = CAST(0 AS NUMERIC(18, 6))
+			, intFutureMarketId
+			, intFutureMonthId
+		FROM #tmpLastSettleCount
+		WHERE dblLastSettle <= 1
+	) t
 
 	SELECT RowNum
 		, strMonthOrder = CASE WHEN ISNULL(RowNum, 0) <= 9 THEN '0' ELSE '' END + CONVERT(NVARCHAR, RowNum) + '-' + strMonthOrder
@@ -232,17 +297,25 @@ BEGIN
 		, dblMatchLong
 		, dblMatchShort
 		, dblNetPnL
-		, intFutureMarketId
-		, intFutureMonthId
+		, unrealized.intFutureMarketId
+		, unrealized.intFutureMonthId
 		, dblOriginalQty
 		, intFutOptTransactionHeaderId
 		, intCommodityId
 		, ysnExpired
-		, dblVariationMargin = dblNet * (ISNULL(dbo.fnRKGetVariationMargin(intFutOptTransactionId, @dtmToDate, dtmTradeDate), 0.0) * dblContractSize)
+		--, dblVariationMargin = dblNet * (ISNULL(dbo.fnRKGetVariationMargin(intFutOptTransactionId, @dtmToDate, dtmTradeDate), 0.0) * dblContractSize)
+		, dblVariationMargin = CASE WHEN dtmTradeDate = @dtmToDate THEN 0
+										WHEN dblLong1 <> 0 THEN dblNet * (ISNULL(marginVar.dblVariationMarginBuy, 0.0) * dblContractSize)
+										WHEN dblSell1 <> 0 THEN dblNet * (ISNULL(marginVar.dblVariationMarginSell, 0.0) * dblContractSize)
+										ELSE 0 
+										END
 		, dblInitialMargin
 		, LongWaitedPrice
 		, ShortWaitedPrice
 		, intSelectedInstrumentTypeId
-	FROM #UnrealizedData
+	FROM #UnrealizedData  unrealized
+	LEFT JOIN #tmpMarginVariation marginVar
+		ON marginVar.intFutureMarketId = unrealized.intFutureMarketId
+		AND marginVar.intFutureMonthId = unrealized.intFutureMonthId
 	WHERE ysnExpired = CASE WHEN @ysnExpired = 1 THEN ysnExpired ELSE 0 END
 END

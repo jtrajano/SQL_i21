@@ -35,7 +35,9 @@ DECLARE @intContractDetailId AS INT,
 		@intShipToId INT,
 		@intFreightTermId INT,
 		@strWhereFinalizedWeight NVARCHAR(20),
-		@strWhereFinalizedGrade NVARCHAR(20);
+		@strWhereFinalizedGrade NVARCHAR(20),
+		@intLoadDetailId INT, 
+		@intCustomerEntityLocationId INT;
 DECLARE @ysnDestinationWeightGrade BIT = 0
 
 DECLARE @SALES_CONTRACT AS INT = 1
@@ -48,6 +50,7 @@ DECLARE @intTicketItemUOMId INT,
 
 SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intLoadId = SC.intLoadId
+, @intLoadDetailId = SC.intLoadDetailId
 , @intContractDetailId = SC.intContractId 
 , @intItemId = SC.intItemId
 , @splitDistribution = SC.strDistributionOption
@@ -100,7 +103,18 @@ BEGIN
 END 
 
 -- Insert Entries to Stagging table that needs to processed to Shipment Load
-BEGIN 
+BEGIN 	
+
+	if isnull(@intLoadId, 0) > 0 and isnull(@intLoadDetailId, 0) > 0
+	begin
+		select @intCustomerEntityLocationId = null
+		select @intCustomerEntityLocationId = intCustomerEntityLocationId
+			from tblLGLoadDetail 
+				where intLoadDetailId = @intLoadDetailId and intLoadId = @intLoadId
+
+		select @intShipToId = isnull(@intCustomerEntityLocationId, @intShipToId)
+	end
+		
 
 	-- Non item contract
 	INSERT INTO @ShipmentStagingTable(
@@ -540,18 +554,18 @@ END
 															) / SE.dblQuantity
 														) * - 1--CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END
 													
-												WHEN IC.strCostMethod = 'Amount' THEN --0
-													CASE
-														WHEN SE.intOwnershipType = 2 THEN 0
-														WHEN SE.intOwnershipType = 1 THEN
-															CASE 
-																WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0))    
-																ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))  
-															END 
-															* - 1 --CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END
+												WHEN IC.strCostMethod = 'Amount' THEN 0
+													-- CASE
+													-- 	WHEN SE.intOwnershipType = 2 THEN 0
+													-- 	WHEN SE.intOwnershipType = 1 THEN
+													-- 		CASE 
+													-- 			WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0))    
+													-- 			ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))  
+													-- 		END 
+													-- 		* - 1 --CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END
 
 															
-													END
+													-- END
 												ELSE 0
 											END
 		,[intCostUOMId]						= CASE

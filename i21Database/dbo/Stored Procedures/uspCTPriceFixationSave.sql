@@ -600,6 +600,14 @@ BEGIN TRY
 				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
 				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 			END
+			ELSE
+			BEGIN
+				UPDATE	CH
+				SET		CH.intConcurrencyId		=	CH.intConcurrencyId + 1
+				FROM	tblCTContractHeader		CH
+				JOIN	tblCTPriceFixation		PF	ON	CH.intContractHeaderId = PF.intContractHeaderId
+				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			END
 		END
 		ELSE
 		BEGIN
@@ -633,13 +641,16 @@ BEGIN TRY
 			, @logProcess NVARCHAR(50)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
 		SELECT @logProcess = @process + CASE WHEN @strAction = 'Reassign' THEN ' - Reassign' ELSE '' END
-		
-		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							 @intContractDetailId 	= 	@intContractDetailId,
-							 @strSource			 	= 	'Pricing',
-							 @strProcess		 	= 	@logProcess,
-							 @contractDetail 		= 	@contractDetails,
-							 @intUserId				= 	@intUserId
+
+		if exists (select top 1 1 from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId and isnull(intPreviousConcurrencyId,0) <> intConcurrencyId)
+		begin
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								 @intContractDetailId 	= 	@intContractDetailId,
+								 @strSource			 	= 	'Pricing',
+								 @strProcess		 	= 	@logProcess,
+								 @contractDetail 		= 	@contractDetails,
+								 @intUserId				= 	@intUserId
+		end
 
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0, @dtmLocalDate
 

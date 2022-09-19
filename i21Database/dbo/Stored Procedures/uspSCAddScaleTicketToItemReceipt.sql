@@ -236,8 +236,8 @@ SELECT
 										END
 									END
 		,intShipFromEntityId		= SC.intEntityId
-		,[intLoadShipmentId] 		= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadId ELSE NULL END
-		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadDetailId ELSE NULL END
+		,[intLoadShipmentId] 		= NULL
+		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN LI.intSourceTransactionId ELSE NULL END
 		,intTaxGroupId				= CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
 										ELSE 
 											CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
@@ -383,7 +383,7 @@ END
 															
 													END
 												ELSE 0
-											END),0.0),2)
+											END),0.0),6)
 
 
 	,[intCostUOMId]						= CASE

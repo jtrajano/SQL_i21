@@ -27,6 +27,16 @@ BEGIN
 	DECLARE @Result VARCHAR(50)
 	DECLARE @i INT
 	DECLARE @run INT	
+	
+	
+	-- remove minus sign before applying thousands seperator
+    DECLARE @negative bit
+    IF CHARINDEX('-',@NumStr) > 0
+	BEGIN
+		SET @negative = 1
+		SET @NumStr =REPLACE(@NumStr,'-','')
+	END
+   
 
 	SELECT @i = CHARINDEX('.',@NumStr)
 	IF @i = 0 
@@ -60,6 +70,9 @@ BEGIN
 		SET @i = @i - 1
 		SET @run = @run + 1     
 	END
+
+	IF @negative = 1
+        SET @Result = '-' + @Result
 
 	RETURN @Result
 END

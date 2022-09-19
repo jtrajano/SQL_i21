@@ -313,7 +313,8 @@ INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
 WHERE I.ysnPosted = 1    
-  AND I.ysnCancelled = 0   
+  AND I.ysnCancelled = 0
+  AND I.ysnProcessedToNSF = 0   
   AND I.strType <> 'CF Tran'    
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))      
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal

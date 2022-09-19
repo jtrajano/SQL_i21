@@ -42,6 +42,10 @@ SELECT intEntityId				= Entity.intEntityId
 	 , strInternalNotes			= Con.strInternalNotes
 	 , strEmail					= Con.strEmail
 	 , intEntityLineOfBusinessIds	= STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
+	 , dblHighestDueAR			= Cus.dblHighestDueAR
+	 , dblHighestAR				= Cus.dblHighestAR
+	 , dtmHighestARDate			= Cus.dtmHighestARDate
+	 , dtmHighestDueARDate		= Cus.dtmHighestDueARDate
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 INNER JOIN [tblEMEntityToContact] as CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1

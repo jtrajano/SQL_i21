@@ -53,13 +53,13 @@ BEGIN
 		AND ID.intOriginalInvoiceId = R.intInvoiceId
 	) RI
 	WHERE (ID.intInventoryShipmentItemId IS NOT NULL OR ID.intLoadDetailId IS NOT NULL)
-	AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O'))
+	AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND TICKET.strInOutFlag = 'O'))
 	AND RI.[intInvoiceId] IS NULL
 	AND (
 			(ID.[strType] <> 'Provisional' AND ID.[ysnProvisionalWithGL] = 0)
 		OR
 			(ID.[strType] = 'Provisional' AND ID.[ysnProvisionalWithGL] = 1)
-		)	  
+		)
 
 	IF EXISTS(SELECT TOP 1 NULL FROM @tblItemsToUpdate)		
 		EXEC dbo.uspICIncreaseInTransitOutBoundQty @tblItemsToUpdate

@@ -56,7 +56,7 @@ UPDATE A
 SET ysnShow = CASE 
 				WHEN B.ysnStage = 1 AND B.intTypeId = 2 THEN 1
 				WHEN C.rowNum = 1 THEN 1
-				ELSE 0 
+				ELSE A.ysnShow
 			END
 
 --SELECT A.*,B.*,C.*

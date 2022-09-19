@@ -46,6 +46,7 @@ BEGIN
 				t.intItemId = l.intItemId
 				AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
 				AND ISNULL(t.intCategoryId, 0) <> ISNULL(l.intNewCategoryId, 0) 
+				AND t.dblQty <> 0 
 		) t
 	WHERE
 		t.intInventoryTransactionId IS NULL 

@@ -361,7 +361,9 @@ BEGIN
 								ELSE 
 									(CASE WHEN B.dblAmountDue = 0 
 										THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) 
-										ELSE (ISNULL(C.dblAmountDue,0) + B.dblPayment + B.dblDiscount - B.dblInterest) --this will handle issue on voiding which the first payment is voided
+										ELSE (ISNULL(C.dblAmountDue,0) + B.dblPayment 
+												+ (CASE WHEN B.dblDiscount  + B.dblAmountDue = B.dblPayment THEN B.dblDiscount ELSE 0 END)
+												- B.dblInterest) --this will handle issue on voiding which the first payment is voided
 									END)
 							END
 		,B.intOrigBillId = B.intBillId
@@ -376,12 +378,13 @@ BEGIN
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
+	DECLARE @paidDateDefault DATETIME = GETDATE()
 	UPDATE C
 		SET C.dblAmountDue = ABS(B.dblAmountDue),
 			C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END
+			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END,
 			-- C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13)
 			-- 							THEN (
 			-- 								CASE WHEN B.ysnOffset = 0
@@ -389,6 +392,9 @@ BEGIN
 			-- 							)
 			-- 							ELSE 0 END
 			--C.ysnPosted = CASE WHEN A.ysnPrepay = 1 THEN 0 ELSE 1 END
+			C.dblDiscount = CASE WHEN C.ysnDiscountOverride = 0 
+							THEN dbo.fnGetDiscountBasedOnTerm(@paidDateDefault, C.dtmBillDate, C.intTermsId, ABS(B.dblAmountDue)) 
+							ELSE C.dblDiscount END
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId

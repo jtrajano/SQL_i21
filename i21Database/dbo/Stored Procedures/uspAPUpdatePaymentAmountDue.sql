@@ -25,6 +25,8 @@ BEGIN
 						THEN 
 							CASE WHEN B.intPayScheduleId IS NULL
 							THEN
+							--unposting need to recalculate the discount
+							--discount may not be applicable if unposted because of terms
 							dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, 
 								(
 									--GET THE AMOUNT DUE ON VOUCHER FOR ACCURACY OF VALUE

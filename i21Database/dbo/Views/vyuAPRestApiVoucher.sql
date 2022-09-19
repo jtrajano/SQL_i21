@@ -39,7 +39,8 @@ SELECT
 	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
 	bill.ysnPrepayHasPayment,
 	bill.intShipToId,
-	shipTo.strLocationName strShipToLocation
+	shipTo.strLocationName strShipToLocation,
+	COALESCE(updated.dtmDate, created.dtmDate, CASE WHEN bill.dtmDateCreated IS NULL THEN bill.dtmDate ELSE DATEADD(dd, DATEDIFF(dd, 0,bill.dtmDateCreated), 0) END) dtmDateLastUpdated
 FROM
 	dbo.tblAPBill bill
 	INNER JOIN (dbo.tblAPVendor vendor INNER JOIN dbo.tblEMEntity entity ON vendor.[intEntityId] = entity.intEntityId)
@@ -59,7 +60,17 @@ FROM
 		ON entityLocation.intEntityLocationId = bill.intPayToAddressId
 	LEFT JOIN dbo.tblGLFiscalYearPeriod fiscalPeriod
 		ON bill.dtmDate BETWEEN fiscalPeriod.dtmStartDate AND fiscalPeriod.dtmEndDate OR bill.dtmDate = fiscalPeriod.dtmStartDate OR bill.dtmDate = fiscalPeriod.dtmEndDate
-	
-GO
-
-
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = bill.intBillId
+		AND au.strAction = 'Created'
+		AND au.strNamespace = 'AccountsPayable.view.Voucher'
+) created
+OUTER APPLY (
+	SELECT TOP 1 au.dtmDate
+	FROM vyuApiRecordAudit au
+	WHERE au.intRecordId = bill.intBillId
+		AND au.strAction = 'Updated'
+		AND au.strNamespace = 'AccountsPayable.view.Voucher'
+) updated

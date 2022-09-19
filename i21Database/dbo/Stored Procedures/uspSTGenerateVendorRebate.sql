@@ -232,9 +232,19 @@ BEGIN TRY
 			, strTrlUPC AS strSKUCode		-- 4
 			, strTrlUPC AS strUpcCode		-- Check digit is included. Since RJ and PM requires check digits
 			, strTrlDesc AS strSkuUpcDescription
-			, CASE WHEN DEPT.ysnTobacco = 1 THEN 'PACKS' ELSE 'CANS' END AS strUnitOfMeasure
+			, CASE WHEN UM.strUnitMeasure IS NOT NULL 
+				THEN UM.strUnitMeasure
+				ELSE
+					CASE WHEN DEPT.ysnTobacco = 1 
+						THEN 'PACKS' 
+						ELSE 'CANS' 
+					END 
+				END AS strUnitOfMeasure
 			, CASE WHEN strTrpPaycode != 'Change' THEN CAST(dblTrlQty as INT) ELSE 0 END AS intQuantitySold
-			, 1 AS intConsumerUnits
+			, CASE WHEN UOM.dblUnitQty IS NOT NULL
+						THEN UOM.dblUnitQty
+					ELSE 1
+				END AS intConsumerUnits
 			-- , CASE WHEN DEPT.ysnTobacco = 1 
 			-- 	AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 			-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -342,6 +352,10 @@ BEGIN TRY
 		JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
 		LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode ---->   Always compare UPC without check digit since Inventory UPC has no check digit, use IC intUpcCode
 		AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)	
+		LEFT JOIN tblICItemUOM UOM
+			ON UOM.intUpcCode = CAST(TR.strTrlUPCwithoutCheckDigit AS BIGINT)
+		LEFT JOIN tblICUnitMeasure UM
+			ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 		INNER JOIN (
 			SELECT DISTINCT intStoreId = Rebates.intStoreId
 				,ysnTobacco = Rebates.ysnTobacco

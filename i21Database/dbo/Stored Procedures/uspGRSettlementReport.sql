@@ -19,7 +19,6 @@ DECLARE @intBankAccountId AS INT
 	,@strPaymentNo AS NVARCHAR(40)
 
 DECLARE @xmlDocumentId AS INT
-DECLARE @companyLogo varbinary(max)
 
 DECLARE	@strCompanyName		NVARCHAR(500)
 	,@strAddress			NVARCHAR(500)
@@ -41,7 +40,13 @@ DECLARE @temp_xml_table TABLE
 	,[endgroup] NVARCHAR(50)
 	,[datatype] NVARCHAR(50)
 )
-	
+/*
+	Dev Note 
+	-- please update tblGRAPISettlementReport as well if there are new fields for this table variable
+	-- We have an actual table using the result of this procedure to export data 
+	-- So we have to make sure that the result of this procedure and the column fields on that table match	
+	-- MonGonzales
+*/
 DECLARE @Settlement AS TABLE 
 (
 	intBankAccountId					INT
@@ -75,6 +80,8 @@ DECLARE @Settlement AS TABLE
 	,strDiscountReadings				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,lblFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strFarmField						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strDriverName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strTruckName						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,dtmDate							DATETIME NULL
 	,dblGrossWeight					DECIMAL(24,10)
 	,dblTareWeight					DECIMAL(24,10)
@@ -115,7 +122,6 @@ DECLARE @Settlement AS TABLE
 	,dblPartialPrepaymentSubTotal		DECIMAL(24,10)
 	,dblPartialPrepayment				DECIMAL(24,10)
 	,lblPartialPrepayment			    NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	,blbHeaderLogo				    VARBINARY(max)
 	,intEntityId						INT
 	,strDeliveryDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strDeliverySheetNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -132,18 +138,6 @@ DECLARE @tblPayment AS TABLE
 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam
 
-SELECT
-	@companyLogo = blbFile
-FROM tblSMUpload
-WHERE intAttachmentId = 
-(
-	SELECT TOP 1
-		intAttachmentId
-	FROM tblSMAttachment
-	WHERE strScreen = 'SystemManager.CompanyPreference'
-		AND strComment = 'Header'
-	ORDER BY intAttachmentId DESC
-)
 
 INSERT INTO @temp_xml_table
 SELECT *
@@ -231,6 +225,8 @@ BEGIN
 				,strDiscountReadings				
 				,lblFarmField						
 				,strFarmField						
+				,strDriverName
+				,strTruckName					
 				,dtmDate							
 				,dblGrossWeight					
 				,dblTareWeight					
@@ -270,8 +266,7 @@ BEGIN
 				,lblCustomerPrepayment		    
 				,dblPartialPrepaymentSubTotal		
 				,dblPartialPrepayment				
-				,lblPartialPrepayment			    
-				,blbHeaderLogo
+				,lblPartialPrepayment
 				,intEntityId
 				,strDeliveryDate
 				,strDeliverySheetNumber
@@ -338,6 +333,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
@@ -442,7 +439,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
@@ -643,6 +639,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
@@ -743,7 +741,7 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
+				-- ,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
@@ -926,6 +924,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField				 	= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate					 	= Bill.dtmDate
 				,dblGrossWeight				 	= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight				 	=  ISNULL(SC.dblTareWeight, 0)
@@ -955,8 +955,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1012,7 +1012,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-			   ,blbHeaderLogo				 	= @companyLogo
 			   ,VENDOR.[intEntityId]
 			   ,strDeliveryDate				 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			   ,strDeliverySheetNumber			= NULL
@@ -1049,6 +1048,7 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -1056,8 +1056,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+					,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
 				ON tblOtherCharge.intBillId = Bill.intBillId			
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1219,6 +1221,8 @@ BEGIN
 													ELSE NULL 
 												END 		
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= NULL
+				,strTruckName					= NULL
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)
@@ -1248,8 +1252,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1305,7 +1309,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 				,strDeliverySheetNumber			= DS.strDeliverySheetNumber
@@ -1360,6 +1363,7 @@ BEGIN
 			LEFT JOIN (
 						SELECT 
 							A.intBillId
+							,isnull(A.intLinkingId, -90) as intLinkingId
 							,SUM(dblTotal) AS dblTotal
 							,SUM(dblTax) AS dblTax
 						FROM tblAPBillDetail A
@@ -1367,8 +1371,10 @@ BEGIN
 							ON A.intItemId = B.intItemId 
 								AND B.strType = 'Other Charge'
 						GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId			
+					ON tblOtherCharge.intBillId = Bill.intBillId	
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1531,6 +1537,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,INVRCPTITEM.dblGross)													
@@ -1635,7 +1643,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
@@ -1823,6 +1830,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= CASE 
 													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
@@ -1923,7 +1932,7 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
+				-- ,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,strDeliverySheetNumber			= NULL
@@ -2104,6 +2113,8 @@ BEGIN
 													ELSE NULL 
 												END
 				,strFarmField				 	= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= SC.strDriverName
+				,strTruckName					= SC.strTruckName
 				,dtmDate					 	= Bill.dtmDate
 				,dblGrossWeight				 	= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight				 	=  ISNULL(SC.dblTareWeight, 0)
@@ -2133,8 +2144,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2190,7 +2201,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-			   ,blbHeaderLogo				 	= @companyLogo
 			   ,VENDOR.[intEntityId]
 			   ,strDeliveryDate				 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			   ,strDeliverySheetNumber			= NULL
@@ -2220,6 +2230,7 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -2227,8 +2238,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId			
+				ON tblOtherCharge.intBillId = Bill.intBillId				
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -2390,6 +2403,8 @@ BEGIN
 													ELSE NULL 
 												END 		
 				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber
+				,strDriverName					= NULL
+				,strTruckName					= NULL
 				,dtmDate						= Bill.dtmDate
 				,dblGrossWeight					= ISNULL(SC.dblGrossWeight, 0)
 				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)
@@ -2419,8 +2434,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2476,7 +2491,6 @@ BEGIN
 													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj' 
 													ELSE NULL 
 												END
-				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 				,strDeliverySheetNumber			= DS.strDeliverySheetNumber

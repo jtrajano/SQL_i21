@@ -197,8 +197,8 @@ BEGIN
 	IF CHARINDEX('''', @strCustomerName) > 0 
 		SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
-	SET @strStatementSP = CASE WHEN @strStatementFormat = 'Balance Forward' THEN 'uspARCustomerStatementBalanceForwardReport'
-							   WHEN @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer') THEN 'uspARCustomerStatementReport'
+	SET @strStatementSP = CASE WHEN @strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward') THEN 'uspARCustomerStatementBalanceForwardReport'
+							   WHEN @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer', 'Zeeland Open Item') THEN 'uspARCustomerStatementReport'
 							   WHEN @strStatementFormat = 'Payment Activity' THEN 'uspARCustomerStatementPaymentActivityReport'
 							   WHEN @strStatementFormat = 'Full Details - No Card Lock' THEN 'uspARCustomerStatementFullDetailReport'
 							   WHEN @strStatementFormat = 'Budget Reminder' THEN 'uspARCustomerStatementBudgetReminderReport'
@@ -228,7 +228,7 @@ BEGIN
 		ORDER BY A.intAttachmentId DESC
 	) S
 	
-	IF @strStatementFormat = 'Balance Forward'
+	IF @strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 		BEGIN
 			EXEC dbo.uspARCustomerStatementBalanceForwardReport 
 				  @dtmDateTo					= @dtmDateTo
@@ -247,8 +247,9 @@ BEGIN
 				, @ysnEmailOnly					= @ysnEmailOnly
 				, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
+				, @strStatementFormat			= @strStatementFormat
 		END
-	ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
+	ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer', 'Zeeland Open Item')
 		BEGIN
 			EXEC dbo.uspARCustomerStatementReport
 				  @dtmDateTo					= @dtmDateTo

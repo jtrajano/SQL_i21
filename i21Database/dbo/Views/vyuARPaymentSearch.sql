@@ -17,7 +17,7 @@ SELECT intPaymentId				= P.intPaymentId
      , dblDiscount				= ISNULL(PD.dblDiscount, 0)
 	 , ysnPosted				= P.ysnPosted
 	 , strPaymentType			= 'Payment' COLLATE Latin1_General_CI_AS
-	 , strInvoices				= TRANSACTIONS.strTransactionId
+	 , strInvoices				= P.strInvoices
 	 , intLocationId			= P.intLocationId 
 	 , strLocationName			= CL.strLocationName
 	 , dtmBatchDate				= P.dtmBatchDate
@@ -52,6 +52,7 @@ FROM (
 		 , strPaymentInfo
 		 , ysnProcessedToNSF
 		 , intPeriodId
+		 , strInvoices
 	FROM dbo.tblARPayment WITH (NOLOCK)
 ) P 
 LEFT JOIN (
@@ -111,37 +112,6 @@ LEFT OUTER JOIN (
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) SMC ON P.intCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId
-											   AND ARP.strRecordNumber = P.strRecordNumber	
-OUTER APPLY (
-	SELECT strTransactionId = LEFT(strTransactionId, LEN(strTransactionId) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(T.strTransactionId AS VARCHAR(200))  + ', '
-		FROM (
-			SELECT strTransactionId = strInvoiceNumber
-			FROM dbo.tblARInvoice I WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intInvoiceId
-				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-				WHERE intPaymentId = P.intPaymentId
-				  AND intInvoiceId IS NOT NULL
-				  AND dblPayment <> 0
-			) ARDETAILS ON I.intInvoiceId = ARDETAILS.intInvoiceId
-
-			UNION ALL
-
-			SELECT strTransactionId = strBillId
-			FROM dbo.tblAPBill BILL WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intBillId
-				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-				WHERE intPaymentId = P.intPaymentId
-				  AND intBillId IS NOT NULL
-				  AND dblPayment <> 0
-			) BILLDETAILS ON BILL.intBillId = BILLDETAILS.intBillId
-		) T		
-		FOR XML PATH ('')
-	) TRANS (strTransactionId)
-) TRANSACTIONS
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (

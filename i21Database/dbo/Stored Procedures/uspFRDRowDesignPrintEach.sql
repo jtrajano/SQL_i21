@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspFRDRowDesignPrintEach]
 	@intRowId		AS INT,
-	@ysnSupressZero	AS BIT
+	@ysnSupressZero	AS BIT,
+	@intSegmentCode as int = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,13 +35,23 @@ DECLARE @ysnOverrideFormula BIT
 DECLARE @ysnOverrideColumnFormula BIT
 DECLARE @intSort INT
 DECLARE @queryString NVARCHAR(MAX)
+DECLARE @intSubRowDetailId NVARCHAR(MAX)  
 
 CREATE TABLE #tempGLAccount (
 		[intAccountId]		INT,
 		[strAccountId]		NVARCHAR(150),
 		[strAccountType]	NVARCHAR(MAX),
-		[strDescription]	NVARCHAR(MAX)
+		[strDescription]	NVARCHAR(MAX),
+		[intRowDetailId]  INT
 	);
+
+CREATE TABLE #tempGLAccount2 (    
+  [intAccountId]  INT,    
+  [strAccountId]  NVARCHAR(150),    
+  [strAccountType] NVARCHAR(MAX),    
+  [strDescription] NVARCHAR(MAX),   
+  [intRowDetailId]  INT
+ );   
 
 DECLARE @ConcurrencyId AS INT = (SELECT TOP 1 intConcurrencyId FROM tblFRRow WHERE intRowId = @intRowId)
 
@@ -82,13 +93,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 					@ysnForceReversedExpense	= [ysnForceReversedExpense],
 					@ysnOverrideFormula			= [ysnOverrideFormula],
 					@ysnOverrideColumnFormula	= [ysnOverrideColumnFormula],
-					@intSort					= [intSort]
+					@intSort					= [intSort],
+					@intSubRowDetailId			= [intRowDetailId]  
 				
 					FROM #tempRowDesignPrintEach ORDER BY [intSort]
 				
 		IF(@ysnSupressZero = 1 and @strAccountsType != 'RE')
 		BEGIN
-			SET @queryString = 'SELECT DISTINCT intAccountId, strAccountId, strAccountType, strDescription FROM ( ' +
+			SET @queryString = 'SELECT DISTINCT intAccountId, strAccountId, strAccountType, strDescription,'''+@intSubRowDetailId+''' FROM ( ' +
 									'SELECT DISTINCT A.intAccountId, strAccountId, strAccountGroup, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLSummary A ' +
 										'WHERE ' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ' +
 									'UNION ' +
@@ -100,11 +112,29 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		END
 		ELSE
 		BEGIN
-			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription FROM vyuGLAccountView where (' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ') AND intAccountId IS NOT NULL ORDER BY strAccountId'
+			SET @queryString = 'SELECT intAccountId, strAccountId, strAccountType, strAccountId + '' - '' + strDescription as strDescription,'''+@intSubRowDetailId+''' FROM vyuGLAccountView where (' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ') AND intAccountId IS NOT NULL ORDER BY strAccountId'
 		END
 
-		INSERT INTO #tempGLAccount
-		EXEC (@queryString)
+		INSERT INTO #tempGLAccount2    
+		EXEC (@queryString)   
+
+		IF @intSegmentCode <> 0
+			BEGIN	
+				INSERT INTO #tempGLAccount    		
+				SELECT T0.* FROM #tempGLAccount2 T0
+				INNER JOIN tblGLTempCOASegment T1
+				ON T0.intAccountId = T1.intAccountId
+				WHERE T1.Location in (select strSegmentCode from tblFRSegmentFilterGroupDetail where intSegmentFilterGroupId = @intSegmentCode)
+			END	
+		ELSE	
+			BEGIN	
+				INSERT INTO #tempGLAccount    
+				SELECT * FROM #tempGLAccount2   
+				
+				
+			END	
+		
+		TRUNCATE TABLE #tempGLAccount2    
 
 		DECLARE @intAccountId INT
 		DECLARE @strAccountId NVARCHAR(150)
@@ -112,7 +142,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		DECLARE @strAccountDescription NVARCHAR(MAX)
 		DECLARE @REAccount NVARCHAR(100)
 
-		WHILE EXISTS(SELECT 1 FROM #tempGLAccount)
+		WHILE EXISTS(SELECT 1 FROM #tempGLAccount WHERE intRowDetailId = @intSubRowDetailId)
 		BEGIN
 			SELECT TOP 1 @intAccountId			= [intAccountId],
 						 @strAccountId			= [strAccountId], 
@@ -160,6 +190,7 @@ DELETE #tempGLAccount
 DELETE #tempRowDesignPrintEach
 DELETE #tempRowDesign
 DROP TABLE #tempGLAccount
+DROP TABLE #tempGLAccount2
 DROP TABLE #tempRowDesignPrintEach
 DROP TABLE #tempRowDesign
 
@@ -167,4 +198,4 @@ DROP TABLE #tempRowDesign
 -- 	SCRIPT EXECUTION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
---EXEC [dbo].[uspFRDRowDesignPrintEach] 7
+--EXEC [dbo].[uspFRDRowDesignPrintEach1] 51,0,4   

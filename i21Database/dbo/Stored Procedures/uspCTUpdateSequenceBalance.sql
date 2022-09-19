@@ -141,6 +141,7 @@ BEGIN TRY
 			WHERE ISNULL(ysnDestinationWeightGradePost,0) = 0 AND intContractId = @intContractDetailId
 
 			SELECT @ysnCompleted = CASE WHEN @intPostedTicketDestinationWeightsAndGrades > 0 AND @intUnPostedTicketDestinationWeightsAndGrades = 0 THEN 1 ELSE 0 END
+			SELECT @ysnDWG = 1;
 		END
 	END
 
@@ -148,14 +149,24 @@ BEGIN TRY
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
 			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END,
 			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END,
-			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0
+			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0 and (CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END) > 0
 											THEN	(CASE	WHEN intContractStatusId = 5
 															THEN 1
 															ELSE intContractStatusId
 													END)
-											ELSE 5
+											ELSE
+												case
+													when @ysnDWG = 1 and @ysnCompleted = 0
+													then intContractStatusId
+													else 5
+												end
 									END
 	WHERE	intContractDetailId =	@intContractDetailId
+
+	update ch set ch.intConcurrencyId = ch.intConcurrencyId + 1
+	from tblCTContractDetail cd
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	where cd.intContractDetailId = @intContractDetailId
 
 	 /*
 	 CT-4516
@@ -170,7 +181,7 @@ BEGIN TRY
 		UPDATE tblCTContractDetail    
 		SET
 			intConcurrencyId = intConcurrencyId + 1,     
-			intContractStatusId = 	CASE WHEN @ysnCompleted = 0      
+			intContractStatusId = 	CASE WHEN @ysnCompleted = 0 and dblBalance > 0
 									THEN 	CASE WHEN intContractStatusId = 5     
 											THEN 1     
 											ELSE intContractStatusId     
@@ -178,6 +189,13 @@ BEGIN TRY
 									ELSE 5     
 									END    
 		WHERE intContractDetailId = @intAllocatedPurchaseContractDetailId  
+
+
+		update ch set ch.intConcurrencyId = ch.intConcurrencyId + 1
+		from tblCTContractDetail cd
+		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		where cd.intContractDetailId = @intAllocatedPurchaseContractDetailId
+	
 		select @intAllocatedPurchaseContractDetailId = min(intPContractDetailId) from tblLGAllocationDetail where intSContractDetailId = @intContractDetailId and intPContractDetailId > @intAllocatedPurchaseContractDetailId;
 
 	end  
