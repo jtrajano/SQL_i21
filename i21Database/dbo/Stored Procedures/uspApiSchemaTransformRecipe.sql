@@ -498,8 +498,6 @@ BEGIN
 
 	SELECT @intRecipeId = intRecipeId FROM tblMFRecipe WHERE strName = @strRecipeName and intLocationId = @intCompanyLocationId
 
-	SELECT @intRecipeId = intRecipeId FROM tblMFRecipe WHERE strName = @strRecipeName
-
 	IF @OverwriteExisting = 0
 	BEGIN
 		IF @intRecipeId IS NOT NULL
