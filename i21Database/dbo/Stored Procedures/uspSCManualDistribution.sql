@@ -87,6 +87,8 @@ DECLARE @ysnLoadContract BIT
 DECLARE @_dblQuantityPerLoad NUMERIC(18,6)
 DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strReceiptNumber NVARCHAR(50)
+DECLARE @_dblContractScheduled NUMERIC(38,20)
+DECLARE @_dblContractAvailable NUMERIC(38,20)
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -139,6 +141,26 @@ BEGIN
 
 END
 
+
+
+--GEt the current scheduled Qty of Contracts used
+IF OBJECT_ID (N'tempdb.dbo.#tmpContractSchedule') IS NOT NULL
+		DROP TABLE #tmpContractSchedule
+
+SELECT DISTINCT
+	dblScheduleQty
+	,dblAvailable = ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0)
+	,intContractDetailId
+INTO #tmpContractSchedule
+FROM tblCTContractDetail
+WHERE intContractDetailId IN (
+	SELECT DISTINCT intTransactionDetailId 
+	FROM @LineItem
+	WHERE intTransactionDetailId IS NOT NULL
+)
+
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, intLoadDetailId
@@ -186,8 +208,31 @@ OPEN intListCursor;
 							-- Adjust the contract Scheduled quantity based on the difference between the quantity/load and the units allocated
 							IF(@ysnLoadContract = 0)
 							BEGIN
+								SET @_dblContractScheduled = 0
+								SELECT TOP 1 
+									@_dblContractScheduled = dblScheduleQty
+									,@_dblContractAvailable = dblAvailable
+								FROM #tmpContractSchedule
+								WHERE intContractDetailId = @intLoopContractId
 								
 								SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQuantityPerLoad 
+
+								
+								IF(@dblLoopAdjustedScheduleQuantity < 0)
+								BEGIN
+									IF(@_dblContractScheduled < @_dblQuantityPerLoad)
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = 0
+									END
+								END
+								ELSE
+								BEGIN
+									IF(@_dblContractAvailable < @dblLoopAdjustedScheduleQuantity)
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @_dblContractAvailable
+									END
+								END
+									
 								IF(@dblLoopAdjustedScheduleQuantity <> 0)
 								BEGIN
 									EXEC	uspCTUpdateScheduleQuantity 
@@ -197,6 +242,7 @@ OPEN intListCursor;
 									@intExternalId			=	@intTicketId,
 									@strScreenName			=	'Auto - Scale'
 								END
+								
 								
 							END
 
