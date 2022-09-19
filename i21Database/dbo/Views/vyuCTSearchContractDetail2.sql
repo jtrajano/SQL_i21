@@ -284,6 +284,7 @@ SELECT a.intContractDetailId
 	, a.dblRate
 	, b.ysnReceivedSignedFixationLetter
 	, a.strReference
+	, a.strContractReference
 	, a.strRemark
 	, a.dblReservedQty
 	, strSalesperson = bw.strName
