@@ -152,7 +152,7 @@ BEGIN
 				FROM tblSTPaymentOption 
 				WHERE intStoreId = @intStoreId
 				AND strRegisterMop IS NOT NULL
-				AND ISNULL(ysnDepositable,0) = 0
+				AND ISNULL(ysnDepositable,0) = 1
 			END
             -- ======================================================================================================================
 			-- [END] - Create list of excluded MOP Id
@@ -485,7 +485,7 @@ BEGIN
 						FROM tblSTPaymentOption 
 						WHERE intStoreId = @intStoreId
 						AND strRegisterMop IS NOT NULL
-						AND ISNULL(ysnDepositable,0) = 0
+						AND ISNULL(ysnDepositable,0) = 1
 					   )  
 					END  
 				   ELSE  
@@ -505,7 +505,7 @@ BEGIN
 						FROM tblSTPaymentOption 
 						WHERE intStoreId = @intStoreId
 						AND strRegisterMop IS NOT NULL
-						AND ISNULL(ysnDepositable,0) = 0
+						AND ISNULL(ysnDepositable,0) = 1
 					   )  
 					END  
 				END
