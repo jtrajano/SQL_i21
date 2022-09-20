@@ -16,7 +16,8 @@ CREATE TABLE [dbo].[tblARInvoiceTaxReportStagingTable] (
 	[dblRate]							NUMERIC (18, 6)	NULL,
 	[dblTaxPerQty]						NUMERIC (18, 6)	NULL,
 	[dblComputedGrossPrice]				NUMERIC (18, 6)	NULL,
-	[ysnIncludeInvoicePrice]			BIT				NULL
+	[ysnIncludeInvoicePrice]			BIT				NULL,
+	[strException]						NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoiceTaxReportStagingTable] 
