@@ -18,7 +18,7 @@
 	[strBatchNumber] [nvarchar](100) COLLATE Latin1_General_CI_AS  NULL,
 	[strMemo] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[strToken] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
-	[strProcessData] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strProcessData] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dtmTransactionPostTime] [datetime] NULL,
 	[dtmDateModified] [datetime] NOT NULL,
 	[intEntityId] [int] NULL,
