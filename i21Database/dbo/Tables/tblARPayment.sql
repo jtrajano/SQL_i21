@@ -67,6 +67,9 @@ CREATE NONCLUSTERED INDEX [NC_tblARPayment_AgingSummary]
 ON [dbo].[tblARPayment] ([ysnPosted],[dtmDatePaid],[ysnProcessedToNSF])
 INCLUDE ([intEntityCustomerId],[intPaymentMethodId],[dblAmountPaid],[strRecordNumber],[ysnInvoicePrepayment])
 GO
+CREATE NONCLUSTERED INDEX [idx_tblARPayment_strPaymentInfo] 
+	ON [dbo].[tblARPayment] (strPaymentInfo)
+GO
 
 --TRIGGERS INSERT
 GO
