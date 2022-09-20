@@ -535,6 +535,7 @@ BEGIN TRY
 			, intBookId INT
 			, strSubBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intSubBookId INT
+			, intM2MTransactionTypeId INT
 		)
 
 		DECLARE @GetContractDetailView TABLE (intCommodityUnitMeasureId INT
@@ -2167,6 +2168,7 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, intM2MTransactionTypeId
 		) 
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -2267,6 +2269,7 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, intM2MTransactionTypeId = 1 -- Contract
 		FROM (
 			SELECT *	
 				, dblResult = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
@@ -2507,6 +2510,7 @@ BEGIN TRY
 				, intBookId
 				, strSubBook
 				, intSubBookId
+				, intM2MTransactionTypeId
 			)
 			SELECT DISTINCT intContractHeaderId
 				, intContractDetailId 
@@ -2607,6 +2611,7 @@ BEGIN TRY
 				, intBookId
 				, strSubBook
 				, intSubBookId
+				, intM2MTransactionTypeId = 1 -- Contract
 			FROM (
 				SELECT *
 					, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -2853,6 +2858,7 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, intM2MTransactionTypeId
 		)
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -2955,6 +2961,7 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, intM2MTransactionTypeId = 1 -- Contract
 		FROM (
 			SELECT *
 				, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -3279,6 +3286,7 @@ BEGIN TRY
 				, intBookId
 				, strSubBook
 				, intSubBookId
+				, intM2MTransactionTypeId
 			FROM @ListTransaction
 		) t
 		ORDER BY intCommodityId, strContractSeq DESC
@@ -3328,7 +3336,9 @@ BEGIN TRY
 				, dblOpenQty
 				, dblResult
 				, dblCashPrice
-				, intCurrencyId)
+				, intCurrencyId
+				, intM2MTransactionTypeId
+			)
 			SELECT * FROM (
 				SELECT strContractOrInventoryType
 					, strCommodityCode
@@ -3352,6 +3362,7 @@ BEGIN TRY
 					, SUM(dblOpenQty) dblResult
 					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, intMarketBasisUOM, dblCashOrFuture)
 					, intCurrencyId
+					, intM2MTransactionTypeId = 3 -- Inventory
 				FROM (
 					SELECT strContractOrInventoryType = 'Inventory'
 						, s.strLocationName
@@ -3521,7 +3532,9 @@ BEGIN TRY
 						, dblOpenQty
 						, dblResult
 						, dblCashPrice
-						, intCurrencyId)
+						, intCurrencyId
+						, intM2MTransactionTypeId
+					)
 					SELECT strContractOrInventoryType
 						, strCommodityCode
 						, intCommodityId
@@ -3544,6 +3557,7 @@ BEGIN TRY
 						, dblResult = 0
 						, dblCashPrice = 0
 						, intCurrencyId
+						, intM2MTransactionTypeId = 4 -- Collaterals
 					FROM #tempCollateral
 					WHERE intCollateralId = @intCollateralId
 				
@@ -3578,7 +3592,9 @@ BEGIN TRY
 				, dblOpenQty
 				, dblResult
 				, dblCashPrice
-				, intCurrencyId)
+				, intCurrencyId
+				, intM2MTransactionTypeId
+			)
 			SELECT * FROM (
 				SELECT strContractOrInventoryType
 					, strContractSeq
@@ -3603,6 +3619,7 @@ BEGIN TRY
 					, dblResult = dblOpenQty
 					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, intMarketBasisUOM, dblCashOrFuture)
 					, intCurrencyId
+					, intM2MTransactionTypeId
 				FROM (
 					SELECT strContractOrInventoryType = 'In-transit(I)'
 						, strContractSeq
@@ -3622,6 +3639,7 @@ BEGIN TRY
 						, intFutureMonthId = (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND dtmSpotDate < = @dtmCurrentDate AND intFutureMarketId = intFutureMarketId ORDER BY 1 DESC) 
 						, intFutureMarketId
 						, dblNotLotTrackedPrice = ISNULL(dbo.fnCalculateValuationAverageCost(intItemId, intItemLocationId, @dtmEndDate), 0)
+						, intM2MTransactionTypeId
 					FROM @ListTransaction t
 					OUTER APPLY (SELECT TOP 1 intUnitMeasureId
 									, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
@@ -3656,7 +3674,9 @@ BEGIN TRY
 				, dblFutures
 				, dblOpenQty
 				, dblInvFuturePrice
-				, intCurrencyId)
+				, intCurrencyId
+				, intM2MTransactionTypeId
+			)
 			SELECT strContractOrInventoryType = CASE WHEN strNewBuySell = 'Buy' THEN 'Futures(B)' ELSE 'Futures(S)' END
 				, intFutOptTransactionHeaderId
 				, strInternalTradeNo
@@ -3674,6 +3694,7 @@ BEGIN TRY
 				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
 				, DER.intCurrencyId
+				, intM2MTransactionTypeId = 2 -- Derivative
 			FROM fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', @dtmEndDate, 1) DER
 			LEFT JOIN @tblGetSettlementPrice SP ON SP.intFutureMarketId = DER.intFutureMarketId AND SP.intFutureMonthId = DER.intFutureMonthId
 			LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = DER.intFutureMarketId
@@ -3798,6 +3819,7 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, intM2MTransactionTypeId
 		INTO #tmpM2MTransaction
 		FROM (
 			SELECT intContractHeaderId
@@ -3923,6 +3945,7 @@ BEGIN TRY
 				, t.intBookId
 				, t.strSubBook
 				, t.intSubBookId
+				, intM2MTransactionTypeId
 			FROM (
 				SELECT t.*
 					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Unpriced' THEN dblConvertedFuturePrice
@@ -4095,6 +4118,7 @@ BEGIN TRY
 				, intBookId
 				, strSubBook
 				, intSubBookId
+				, intM2MTransactionTypeId
 			FROM #Temp 
 			WHERE dblOpenQty <> 0 AND intContractHeaderId IS NULL
 		)t 
@@ -4181,6 +4205,7 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, intM2MTransactionTypeId
 		)
 		SELECT * FROM #tmpM2MTransaction
 

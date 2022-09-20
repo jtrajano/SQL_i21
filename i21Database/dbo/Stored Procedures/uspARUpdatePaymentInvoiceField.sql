@@ -26,38 +26,17 @@ ALTER TABLE tblARPayment DISABLE TRIGGER trg_tblARPaymentUpdate
 ALTER TABLE tblARPaymentDetail DISABLE TRIGGER trg_tblARPaymentDetailUpdate
 
 UPDATE P
-
-SET strInvoices = TRANSACTIONS.strTransactionId
-
+SET strInvoices = TRANSACTIONS.strTransactionNumber
 FROM tblARPayment P
-INNER JOIN  @FinalPaymentId FP ON P.intPaymentId=FP.intId
-OUTER APPLY (
-	SELECT strTransactionId = LEFT(strTransactionId, LEN(strTransactionId) - 1) COLLATE Latin1_General_CI_AS
+INNER JOIN  @FinalPaymentId FP ON P.intPaymentId = FP.intId
+CROSS APPLY (
+	SELECT strTransactionNumber = LEFT(strTransactionNumber, LEN(strTransactionNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
-		SELECT CAST(T.strTransactionId AS VARCHAR(200))  + ', '
-		FROM (
-			SELECT strTransactionId = strInvoiceNumber
-			FROM dbo.tblARInvoice I WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intInvoiceId
-				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-				WHERE intPaymentId = P.intPaymentId
-				  AND intInvoiceId IS NOT NULL
-			) ARDETAILS ON I.intInvoiceId = ARDETAILS.intInvoiceId
-
-			UNION ALL
-
-			SELECT strTransactionId = strBillId
-			FROM dbo.tblAPBill BILL WITH(NOLOCK)
-			INNER JOIN (
-				SELECT intBillId
-				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
-				WHERE intPaymentId = P.intPaymentId
-				  AND intBillId IS NOT NULL
-			) BILLDETAILS ON BILL.intBillId = BILLDETAILS.intBillId
-		) T		
+		SELECT CAST(PD.strTransactionNumber AS VARCHAR(200))  + ', '
+		FROM tblARPaymentDetail PD
+		WHERE FP.intId = PD.intPaymentId
 		FOR XML PATH ('')
-	) TRANS (strTransactionId)
+	) TRANS (strTransactionNumber)
 ) TRANSACTIONS
 
 ALTER TABLE tblARPayment ENABLE TRIGGER trg_tblARPaymentDelete

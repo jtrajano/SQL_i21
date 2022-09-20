@@ -38,9 +38,9 @@ BEGIN
     ;WITH AGINGDATES AS (
         SELECT @dtmDateFrom as dtmDateFrom
         UNION ALL
-        SELECT DATEADD(DAY, 1, dtmDateFrom)
+        SELECT DATEADD(DAY, 30, dtmDateFrom)
         FROM AGINGDATES
-        WHERE DATEADD(DAY, 1, dtmDateFrom) <= @dtmDateTo
+        WHERE DATEADD(DAY, 30, dtmDateFrom) <= @dtmDateTo
     )
     INSERT INTO #AGINGDATES
     SELECT intId		= ROW_NUMBER() OVER (ORDER BY dtmDateFrom ASC)

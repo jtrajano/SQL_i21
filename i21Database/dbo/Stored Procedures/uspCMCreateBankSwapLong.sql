@@ -74,8 +74,8 @@ from tblCMBankTransfer  A
 OUTER APPLY(
 	SELECT TOP 1 dblCreditForeign, dblExchangeRate, intCurrencyExchangeRateTypeId, dblCredit
     FROM tblGLDetail 
-	WHERE intAccountId = @intBTSwapToFXGLAccountId
-	AND strTransactionId =A.strTransactionId
+	WHERE 
+	strTransactionId =A.strTransactionId
 	AND ysnIsUnposted = 0
 	and strJournalLineDescription = 'Currency Payable'
 	ORDER by intGLDetailId DESC
