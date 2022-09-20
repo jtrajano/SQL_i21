@@ -454,8 +454,7 @@ GO
 			WHEN strAccountCategory IN('Cash Account','AP Account','AR Account','Undeposited Funds') THEN 1 ELSE 0 END
 		
 		--FOR GL ACCOUNT COMBO BOX FILTERING
-		UPDATE tblGLAccountCategory SET ysnGLRestricted  = 
-			case when strAccountCategory = 'General' THEN 0 ELSE 1 END
+		UPDATE tblGLAccountCategory SET ysnGLRestricted  = CASE WHEN strAccountCategory = 'General' THEN 0 ELSE 1 END
 		
 		-- FOR AP ACCOUNT COMBO BOX FILTERING
 		UPDATE tblGLAccountCategory SET ysnAPRestricted = CASE WHEN strAccountCategory IN('AP Account','AR Account', 'Cash Account', 'Inventory', 'AP Clearing', ' Inventory In-Transit', 'Inventory Adjustment', 'Vendor Prepayments')
