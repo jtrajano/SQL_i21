@@ -9,12 +9,12 @@
 	,@intProfitCenterId				INT				= NULL OUTPUT
 AS	
 
-DECLARE  @strSalesCompanyLocation	NVARCHAR(250)	= NULL
-		,@ysnActive					BIT = 0
-		,@intCompanySegment			INT
-		,@OverrideCompanySegment	BIT
-		,@OverrideLocationSegment	BIT
-		,@intCompanyARAccountId		INT				= NULL
+DECLARE  @strSalesCompanyLocation			NVARCHAR(250)	= NULL
+		,@ysnActive							BIT = 0
+		,@intCompanySegment					INT
+		,@OverrideARAccountCompanySegment	BIT
+		,@OverrideARAccountLocationSegment	BIT
+		,@intCompanyARAccountId				INT				= NULL
 
 SELECT 
 	 @strSalesCompanyLocation	= strLocationName
@@ -24,21 +24,20 @@ FROM tblSMCompanyLocation
 WHERE intCompanyLocationId = @intCompanyLocationId
 
 SELECT TOP 1 
-	 @intCompanyARAccountId		= [intARAccountId]
-	,@OverrideCompanySegment	= ysnOverrideCompanySegment
-	,@OverrideLocationSegment	= ysnOverrideLocationSegment
+	 @intCompanyARAccountId				= [intARAccountId]
+	,@OverrideARAccountCompanySegment	= ysnOverrideARAccountCompanySegment
+	,@OverrideARAccountLocationSegment	= ysnOverrideARAccountLocationSegment
 FROM tblARCompanyPreference 
-WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0
 
 SET @intAccountId = [dbo].[fnARGetInvoiceTypeAccount](@strTransactionType, @intCompanyLocationId)
 
-IF (@OverrideLocationSegment = 1 AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
+IF (@OverrideARAccountLocationSegment = 1 AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideARAccountCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
 BEGIN
 	SET @strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
 						 @intAccountId
-						,CASE WHEN @OverrideLocationSegment = 1 THEN @intProfitCenterId ELSE NULL END
+						,CASE WHEN @OverrideARAccountLocationSegment = 1 THEN @intProfitCenterId ELSE NULL END
 						,NULL
-						,CASE WHEN @OverrideCompanySegment = 1 THEN @intCompanySegment ELSE NULL END
+						,CASE WHEN @OverrideARAccountCompanySegment = 1 THEN @intCompanySegment ELSE NULL END
 					  )
 
 	SELECT TOP 1
@@ -68,13 +67,13 @@ BEGIN
 	WHERE intAccountId = @intCompanyARAccountId 
 	AND ysnActive = 1
 
-	IF (@OverrideLocationSegment = 1 AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
+	IF (@OverrideARAccountLocationSegment = 1 AND ISNULL(@intProfitCenterId, 0) > 0) OR (@OverrideARAccountCompanySegment = 1 AND ISNULL(@intCompanySegment, 0) > 0)
 	BEGIN
 		SET @strAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
 							 @intAccountId
-							,CASE WHEN @OverrideLocationSegment = 1 THEN @intProfitCenterId ELSE NULL END
+							,CASE WHEN @OverrideARAccountLocationSegment = 1 THEN @intProfitCenterId ELSE NULL END
 							,NULL
-							,CASE WHEN @OverrideCompanySegment = 1 THEN @intCompanySegment ELSE NULL END
+							,CASE WHEN @OverrideARAccountCompanySegment = 1 THEN @intCompanySegment ELSE NULL END
 						  )
 
 		SELECT TOP 1
