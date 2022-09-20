@@ -852,6 +852,8 @@ BEGIN TRY
 
 					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
 
+					SELECT @intTransactionRefId = NULL
+
 					SELECT @intTransactionRefId = intTransactionId
 					FROM tblSMTransaction
 					WHERE intRecordId = @intNewPriceContractId
