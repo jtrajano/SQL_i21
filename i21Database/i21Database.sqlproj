@@ -849,6 +849,7 @@
     <Build Include="dbo\Views\vyuARTaxGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
     <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
