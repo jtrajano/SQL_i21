@@ -568,35 +568,36 @@ BEGIN
 	  AND INV.[ysnValidCreditCode] <> 1
 	  AND I.strSessionId = @strSessionId
 
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	--Approval
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]            = I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN VI.ysnHasCreditApprover = 0 THEN 'The Customer''s credit limit has been reached but there is no approver configured. This invoice cannot be posted without an authorized approver.' ELSE ISNULL(SMT.strApprovalStatus, 'Not Yet Approved') END
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceHeader I 
-	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
-	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
-	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
-	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
-	WHERE ISNULL(SMT.strApprovalStatus, '') <> 'Approved'
-	AND VI.ysnHasCreditApprover = 0
-    AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
-    AND ((I.dblInvoiceTotal + VI.dblARBalance > VI.dblCreditLimit) OR ISNULL(VI.dblCreditStopDays, 0) > 0)
-	AND I.strSessionId = @strSessionId
+	---REMOVING THIS VALIDATION SINCE THIS LOGIC WILL BE CHANGED IN AR-14378
+	-- INSERT INTO tblARPostInvalidInvoiceData
+	-- 	([intInvoiceId]
+	-- 	,[strInvoiceNumber]
+	-- 	,[strTransactionType]
+	-- 	,[intInvoiceDetailId]
+	-- 	,[intItemId]
+	-- 	,[strBatchId]
+	-- 	,[strPostingError]
+	-- 	,[strSessionId])
+	-- --Approval
+	-- SELECT
+	-- 	 [intInvoiceId]			= I.[intInvoiceId]
+	-- 	,[strInvoiceNumber]		= I.[strInvoiceNumber]        
+	-- 	,[strTransactionType]	= I.[strTransactionType]
+	-- 	,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+	-- 	,[intItemId]            = I.[intItemId]
+	-- 	,[strBatchId]			= I.[strBatchId]
+	-- 	,[strPostingError]		= CASE WHEN VI.ysnHasCreditApprover = 0 THEN 'The Customer''s credit limit has been reached but there is no approver configured. This invoice cannot be posted without an authorized approver.' ELSE ISNULL(SMT.strApprovalStatus, 'Not Yet Approved') END
+	-- 	,[strSessionId]			= @strSessionId
+	-- FROM tblARPostInvoiceHeader I 
+	-- INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	-- INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
+	-- INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
+	-- INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
+	-- WHERE ISNULL(SMT.strApprovalStatus, '') <> 'Approved'
+	--   AND VI.ysnHasCreditApprover = 0
+    --   AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
+    --   AND ((I.dblInvoiceTotal + VI.dblARBalance > VI.dblCreditLimit) OR ISNULL(VI.dblCreditStopDays, 0) > 0)
+	--   AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
