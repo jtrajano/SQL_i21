@@ -104,12 +104,12 @@ BEGIN TRANSACTION
   
  UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN   
  (   
-  'i21.view.UserRole',  
-  'i21.view.Letters',  
-  'i21.view.FileFieldMapping',  
-  'i21.view.SecurityPolicy',  
-  'i21.view.Signatures'  
-  --'i21.view.EntityUser'  
+  'SystemManager.view.UserRole',  
+  'SystemManager.view.Letters',  
+  'SystemManager.view.FileFieldMapping',  
+  'SystemManager.view.SecurityPolicy',  
+  'SystemManager.view.Signatures'  
+  --'SystemManager.view.EntityUser'  
  )  
   
  --*************UPDATE tblSMScreen GroupName WHEN generating listing for contact user*************--  

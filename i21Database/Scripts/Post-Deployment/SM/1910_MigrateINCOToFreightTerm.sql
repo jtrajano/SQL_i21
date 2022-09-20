@@ -34,7 +34,7 @@ BEGIN
 
 		
 			declare @screenId int
-			select @screenId = intScreenId from tblSMScreen where strNamespace = 'i21.view.FreightTerm'
+			select @screenId = intScreenId from tblSMScreen where strNamespace = 'SystemManager.view.FreightTerm'
 
 			if @screenId is not null
 			begin

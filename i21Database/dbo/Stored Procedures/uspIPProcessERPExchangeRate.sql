@@ -253,7 +253,7 @@ BEGIN TRY
 					WHERE intCurrencyExchangeRateId = @intCurrencyExchangeRateId
 
 					EXEC uspSMAuditLog @keyValue = @intCurrencyExchangeRateId
-						,@screenName = 'i21.view.CurrencyExchangeRate'
+						,@screenName = 'SystemManager.view.CurrencyExchangeRate'
 						,@entityId = @intUserId
 						,@actionType = 'Deleted'
 				END
@@ -298,7 +298,7 @@ BEGIN TRY
 					SELECT @intCurrencyExchangeRateDetailId = SCOPE_IDENTITY()
 
 					EXEC uspSMAuditLog @keyValue = @intCurrencyExchangeRateId
-						,@screenName = 'i21.view.CurrencyExchangeRate'
+						,@screenName = 'SystemManager.view.CurrencyExchangeRate'
 						,@entityId = @intUserId
 						,@actionType = 'Created'
 						,@actionIcon = 'small-new-plus'
@@ -428,7 +428,7 @@ BEGIN TRY
 					IF (LEN(@strDetails) > 1)
 					BEGIN
 						EXEC uspSMAuditLog @keyValue = @intCurrencyExchangeRateId
-							,@screenName = 'i21.view.CurrencyExchangeRate'
+							,@screenName = 'SystemManager.view.CurrencyExchangeRate'
 							,@entityId = @intUserId
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'

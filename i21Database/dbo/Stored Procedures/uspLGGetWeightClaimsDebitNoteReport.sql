@@ -97,7 +97,7 @@ SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
 	,@strPhone = tblSMCompanySetup.strPhone
 FROM tblSMCompanySetup
 left join tblSMCountry				rtCompanyCountry on lower(rtrim(ltrim(rtCompanyCountry.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-left join tblSMScreen				rtCompanyScreen on rtCompanyScreen.strNamespace = 'i21.view.Country'
+left join tblSMScreen				rtCompanyScreen on rtCompanyScreen.strNamespace = 'SystemManager.view.Country'
 left join tblSMTransaction			rtCompanyTransaction on rtCompanyTransaction.intScreenId = rtCompanyScreen.intScreenId and rtCompanyTransaction.intRecordId = rtCompanyCountry.intCountryID
 left join tblSMReportTranslation	rtCompanyTranslation on rtCompanyTranslation.intLanguageId = @intLaguageId and rtCompanyTranslation.intTransactionId = rtCompanyTransaction.intTransactionId and rtCompanyTranslation.strFieldName = 'Country'
 
@@ -268,7 +268,7 @@ OUTER APPLY (SELECT dblNet = SUM(IRI.dblNet)
 		) IRN
 
 left join tblSMCountry				rtELCountry on lower(rtrim(ltrim(rtELCountry.strCountry))) = lower(rtrim(ltrim(EL.strCountry)))
-left join tblSMScreen				rtELScreen on rtELScreen.strNamespace = 'i21.view.Country'
+left join tblSMScreen				rtELScreen on rtELScreen.strNamespace = 'SystemManager.view.Country'
 left join tblSMTransaction			rtELTransaction on rtELTransaction.intScreenId = rtELScreen.intScreenId and rtELTransaction.intRecordId = rtELCountry.intCountryID
 left join tblSMReportTranslation	rtELTranslation on rtELTranslation.intLanguageId = @intLaguageId and rtELTranslation.intTransactionId = rtELTransaction.intTransactionId and rtELTranslation.strFieldName = 'Country'
 	

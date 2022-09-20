@@ -247,7 +247,7 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry))) END
 	FROM	tblSMCompanySetup WITH (NOLOCK)
 	left join tblSMCountry				rtc9 WITH (NOLOCK) on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-	left join tblSMScreen				rts9 WITH (NOLOCK) on rts9.strNamespace = 'i21.view.Country'
+	left join tblSMScreen				rts9 WITH (NOLOCK) on rts9.strNamespace = 'SystemManager.view.Country'
 	left join tblSMTransaction			rtt9 WITH (NOLOCK) on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	left join tblSMReportTranslation	rtrt9 WITH (NOLOCK) on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
@@ -456,7 +456,7 @@ BEGIN TRY
 								ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
 								ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
 								ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + CHAR(13)+CHAR(10) +
-								ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',CY.intCountryID,@intLaguageId,'Country',CY.strCountry))) END,'')
+								ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country',CY.intCountryID,@intLaguageId,'Country',CY.strCountry))) END,'')
 					ELSE	'' 
 			END
 	FROM	vyuCTContractCostView	CC
@@ -495,7 +495,7 @@ BEGIN TRY
 			,strDestinationPointName				= (case when PO.strPositionType = 'Spot' then CT.strCity else SQ.strDestinationPointName end)
 			,strLoadingAndDestinationPointName		= SQ.strLoadingPointName + ' '+@rtTo+' ' + SQ.strDestinationPointName
 			,strWeight								= dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W1.intWeightGradeId,@intLaguageId,'Name',W1.strWeightGradeDesc)
-			,strTerm							    = dbo.fnCTGetTranslation('i21.view.Term',TM.intTermID,@intLaguageId,'Terms',TM.strTerm) 
+			,strTerm							    = dbo.fnCTGetTranslation('SystemManager.view.Term',TM.intTermID,@intLaguageId,'Terms',TM.strTerm) 
 			,strGrade								= dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W2.intWeightGradeId,@intLaguageId,'Name',W2.strWeightGradeDesc) 
 			,strQaulityAndInspection				= @rtStrQaulityAndInspection1 + ' ' + ' - ' + dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W2.intWeightGradeId,@intLaguageId,'Name',W2.strWeightGradeDesc) + ' '+@rtStrQaulityAndInspection2+' ' + @strCompanyName + '''s '+@rtStrQaulityAndInspection3+'.'
 			,strContractDocuments					= @strContractDocuments
@@ -503,8 +503,8 @@ BEGIN TRY
 			,strSecondHalfDocuments				    = LTRIM(@strSecondHalfDocuments)
 			,strArbitration							= @rtStrArbitration1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + '  '+@rtStrArbitration2+'. ' 
 														+ CHAR(13)+CHAR(10) +
-														@rtStrArbitration3 + ' ' + AB.strState +', '+ dbo.fnCTGetTranslation('i21.view.Country',RY.intCountryID,@intLaguageId,'Country',RY.strCountry)
-			,strGABArbitration						= ISNULL(NULLIF(AB.strState, ''), AB.strCity) +', '+ dbo.fnCTGetTranslation('i21.view.Country',RY.intCountryID,@intLaguageId,'Country',RY.strCountry)
+														@rtStrArbitration3 + ' ' + AB.strState +', '+ dbo.fnCTGetTranslation('SystemManager.view.Country',RY.intCountryID,@intLaguageId,'Country',RY.strCountry)
+			,strGABArbitration						= ISNULL(NULLIF(AB.strState, ''), AB.strCity) +', '+ dbo.fnCTGetTranslation('SystemManager.view.Country',RY.intCountryID,@intLaguageId,'Country',RY.strCountry)
 			,strBeGreenArbitration					=   AB.strCity
 			,strEQTArbitration						=   AB.strCity
 			,strCompanyAddress						=   @strCompanyName + ', '		  + CHAR(13)+CHAR(10) +
@@ -517,7 +517,7 @@ BEGIN TRY
 													  	ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState))   END,'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
-													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry))) END,'') +
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry))) END,'') +
 													  	CASE WHEN @ysnFairtrade = 1 THEN
 													  		ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
 													  	ELSE '' END													
@@ -527,7 +527,7 @@ BEGIN TRY
 													  	ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
-													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') +
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') +
 													  	CASE WHEN @ysnFairtrade = 1 THEN
 													  		ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
 													  	ELSE '' END
@@ -537,14 +537,14 @@ BEGIN TRY
 														ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
 														ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
-														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
+														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
 
 			,strBrokerAddress						=   LTRIM(RTRIM(EB.strEntityName)) +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')+ CHAR(13)+CHAR(10) +
 														ISNULL(LTRIM(RTRIM(EB.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(LTRIM(RTRIM(EB.strEntityCity)),'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EB.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EB.strEntityState))   END,'') + 
 														ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EB.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EB.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
-														ISNULL(CASE WHEN LTRIM(RTRIM(EB.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
+														ISNULL(CASE WHEN LTRIM(RTRIM(EB.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
 			,strBrokerCommissionMessage				= @rtStrBrokerCommissionMessage1 + ' ' + EB.strBrokerCommission + ' ' + @rtStrBrokerCommissionMessage2 + ' ' 
 														+ dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId, CASE WHEN EB.strPaidBy = 'Company' THEN 'us' ELSE EB.strPaidBy END) + ' ' + @rtStrBrokerCommissionMessage3
 			,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END

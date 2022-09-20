@@ -50,12 +50,12 @@ OUTER APPLY (
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = a.intActivityId
 		AND au.strAction = 'Created'
-		AND au.strNamespace = 'GlobalComponentEngine.view.Activity'
+		AND au.strNamespace = 'SystemManager.view.Activity'
 ) created
 OUTER APPLY (
 	SELECT TOP 1 au.dtmDate
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = a.intActivityId
 		AND au.strAction = 'Updated'
-		AND au.strNamespace = 'GlobalComponentEngine.view.Activity'
+		AND au.strNamespace = 'SystemManager.view.Activity'
 ) updated

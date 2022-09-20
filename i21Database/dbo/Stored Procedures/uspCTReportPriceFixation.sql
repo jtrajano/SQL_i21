@@ -174,7 +174,7 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry))) END
 	FROM	tblSMCompanySetup
 	left join tblSMCountry				rtc9 on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-	left join tblSMScreen				rts9 on rts9.strNamespace = 'i21.view.Country'
+	left join tblSMScreen				rts9 on rts9.strNamespace = 'SystemManager.view.Country'
 	left join tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	left join tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
@@ -249,7 +249,7 @@ BEGIN TRY
 													ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') +
 													ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCity)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCity))   END,'') + CHAR(13)+CHAR(10) + 
 															 
-													ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry))) END,'') 
+													ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry))) END,'') 
 												ELSE -- Seller (Vendor)
 													LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
 													ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
@@ -258,7 +258,7 @@ BEGIN TRY
 													ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCity)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCity))   END,'')  + CHAR(13)+CHAR(10) + 
 															
 															
-													ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'')
+													ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'')
 											END,
 			strAtlasOtherPartyAddress	=   LTRIM(RTRIM(EY.strEntityName)) + CHAR(13)+CHAR(10) +
 											ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +

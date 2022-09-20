@@ -100,7 +100,7 @@ BEGIN TRY
 			END
 	FROM tblSMCompanySetup WITH (NOLOCK)
 	LEFT JOIN tblSMCountry rtc9 WITH (NOLOCK) ON lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-	LEFT JOIN tblSMScreen rts9 WITH (NOLOCK) ON rts9.strNamespace = 'i21.view.Country'
+	LEFT JOIN tblSMScreen rts9 WITH (NOLOCK) ON rts9.strNamespace = 'SystemManager.view.Country'
 	LEFT JOIN tblSMTransaction rtt9 WITH (NOLOCK) ON rtt9.intScreenId = rts9.intScreenId
 		AND rtt9.intRecordId = rtc9.intCountryID
 	LEFT JOIN tblSMReportTranslation rtrt9 WITH (NOLOCK) ON rtrt9.intLanguageId = @intLanguageId
@@ -200,7 +200,7 @@ BEGIN TRY
 					END, '') + ISNULL(', ' + CASE 
 					WHEN LTRIM(RTRIM(E.strEntityCountry)) = ''
 						THEN NULL
-					ELSE CHAR(13) + CHAR(10) + LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country', rtc10.intCountryID, @intLanguageId, 'Country', rtc10.strCountry)))
+					ELSE CHAR(13) + CHAR(10) + LTRIM(RTRIM(dbo.fnCTGetTranslation('SystemManager.view.Country', rtc10.intCountryID, @intLanguageId, 'Country', rtc10.strCountry)))
 					END, '')
 			) AS strOtherPartyAddress
 		,ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY, @dtmSampleReceivedDate), 2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLanguageId, DATENAME(MONTH, @dtmSampleReceivedDate)), DATENAME(MONTH, @dtmSampleReceivedDate)) + ' ' + LEFT(DATENAME(YEAR, @dtmSampleReceivedDate), 4) AS strCompanyCityAndDate

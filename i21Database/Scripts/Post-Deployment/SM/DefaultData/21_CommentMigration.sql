@@ -126,7 +126,7 @@ GO
 	WHERE strModule = 'System Manager' AND strTransactionType = 'Activity'	
 
 	DECLARE @screenId AS INT
-	SELECT @screenId = intScreenId FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.Activity'
+	SELECT @screenId = intScreenId FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Activity'
 
 	--INSERT to tblSMTransaction from newly inserted activities
 	INSERT INTO tblSMTransaction (

@@ -16,12 +16,12 @@ OUTER APPLY (
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = lb.intLineOfBusinessId
 		AND au.strAction = 'Created'
-		AND au.strNamespace = 'i21.view.LineOfBusiness'
+		AND au.strNamespace = 'SystemManager.view.LineOfBusiness'
 ) created
 OUTER APPLY (
 	SELECT TOP 1 au.dtmDate
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = lb.intLineOfBusinessId
 		AND au.strAction = 'Updated'
-		AND au.strNamespace = 'i21.view.LineOfBusiness'
+		AND au.strNamespace = 'SystemManager.view.LineOfBusiness'
 ) updated

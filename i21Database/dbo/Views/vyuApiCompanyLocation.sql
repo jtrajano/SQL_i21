@@ -24,12 +24,12 @@ OUTER APPLY (
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = l.intCompanyLocationId
 		AND au.strAction = 'Created'
-		AND au.strNamespace = 'i21.view.CompanyLocation'
+		AND au.strNamespace = 'SystemManager.view.CompanyLocation'
 ) created
 OUTER APPLY (
 	SELECT TOP 1 au.dtmDate
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = l.intCompanyLocationId
 		AND au.strAction = 'Updated'
-		AND au.strNamespace = 'i21.view.CompanyLocation'
+		AND au.strNamespace = 'SystemManager.view.CompanyLocation'
 ) updated
