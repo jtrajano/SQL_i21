@@ -149,7 +149,26 @@ BEGIN
 				-- ======================================================================================================================
 				-- [END] - DELETE Payment Option that is not included
 				-- ======================================================================================================================
-              
+                
+				-- ======================================================================================================================
+				-- [START] - UPDATE tblSTCheckoutHeader dblCustomerChargeMOP
+				-- ======================================================================================================================
+					DECLARE @intCustomerMopId as INT
+					SELECT @intCustomerMopId = intCustomerChargeMopId FROM tblSTStore 
+					WHERE intStoreId = @intStoreId
+ 
+					UPDATE tblSTCheckoutHeader  
+						SET dblCustomerChargeMOP = ISNULL(chk.dblMiscellaneousSummaryAmount, 0)
+					FROM @UDT_MSM chk
+					INNER JOIN tblSTPaymentOption sto
+						ON sto.strRegisterMop = ISNULL(chk.strMiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT
+					AND sto.intPaymentOptionId = @intCustomerMopId
+					WHERE intCheckoutId = @intCheckoutId 
+						AND sto.intStoreId = @intStoreId
+				-- ======================================================================================================================
+				-- [END] - UPDATE tblSTCheckoutHeader dblCustomerChargeMOP
+				-- ======================================================================================================================
+				
       
 				----Update tblSTCheckoutPaymentOptions
 				Update dbo.tblSTCheckoutPaymentOptions
