@@ -14,4 +14,6 @@ GO
 	 	SELECT TOP 1 @intFiscalYearId = intFiscalYearId from tblGLCurrentFiscalYear
 		UPDATE fy SET ysnCurrent = 1 FROM tblGLFiscalYear fy JOIN tblGLCurrentFiscalYear cu on cu.intFiscalYearId =  fy.intFiscalYearId
 	 END
+
+	 UPDATE tblGLFiscalYearPeriod SET guidPostId = NEWID() WHERE guidPostId IS NULL
 GO
