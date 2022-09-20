@@ -7,9 +7,7 @@ RETURNS INT
 AS
 BEGIN
 	DECLARE 
-		 @intCompanySegment	INT = NULL
-		,@intARAccountId 	INT = NULL
-		,@intProfitCenterId	INT = NULL
+		 @intARAccountId 	INT = NULL
 		,@strARAccountId	NVARCHAR (40)
 
 	SELECT TOP 1 
@@ -18,27 +16,11 @@ BEGIN
 								WHEN 'Customer Prepayment' THEN intSalesAdvAcct
 								ELSE intARAccount
 							  END
-		,@intProfitCenterId	= intProfitCenter
-		,@intCompanySegment	= intCompanySegment
 	FROM tblSMCompanyLocation
 	WHERE intCompanyLocationId = @CompanyLocationId
 
 	IF @intARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 		SELECT TOP 1 @intARAccountId = [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0
-	
-	IF ISNULL(@intProfitCenterId, 0) > 0 OR ISNULL(@intCompanySegment, 0) > 0
-	BEGIN
-		SET @strARAccountId = [dbo].[fnGLGetOverrideAccountBySegment](
-								 @intARAccountId
-								,@intProfitCenterId
-								,NULL
-								,@intCompanySegment
-							  )
-
-		SELECT @intARAccountId = intAccountId
-		FROM tblGLAccount WITH(NOLOCK)
-		WHERE strAccountId = @strARAccountId
-	END
 
 	RETURN @intARAccountId
 END
