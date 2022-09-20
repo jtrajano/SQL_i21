@@ -117,7 +117,7 @@ BEGIN
 		tblICInventoryTransaction t INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
 		INNER JOIN #tmpCollateralCategories c
-			ON t.intCategoryId = c.intCategoryId
+			ON i.intCategoryId = c.intCategoryId
 		INNER JOIN tblICInventoryTransactionType ty
 			ON ty.intTransactionTypeId = t.intTransactionTypeId
 		CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
