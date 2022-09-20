@@ -460,8 +460,8 @@ GO
 			SELECT '59710','Use Tax Expense','Expense','General' UNION
 			SELECT '59810','Loss On Abandonment','Expense','General' UNION
 			SELECT '59910','Overhead Distribution','Expense','General' UNION
-			SELECT '21100','Due From Account','Current Liabilities','General' UNION
-			SELECT '10920','Due to Account','Current Assets','General')	
+			SELECT '21100','Due From Account','Current Liabilities','AR Account' UNION
+			SELECT '10920','Due to Account','Current Assets','AP Account')	
 				
 			INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId],[intAccountCategoryId], [intAccountStructureId], [intConcurrencyId])
 			SELECT @intAccountTemplateId, strCode, strDescription, G.intAccountGroupId, C.intAccountCategoryId, @GL_intAccountStructureId_Primary, 1  FROM RawData A 
