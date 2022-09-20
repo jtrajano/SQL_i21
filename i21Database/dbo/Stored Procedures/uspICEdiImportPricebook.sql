@@ -880,6 +880,46 @@ FROM tblICEdiPricebook
 WHERE (strAltUPCUOM1 = strAltUPCUOM2)
 /* End of Log of Alt UPC UOM & Item Unit Measure */
 
+/* Log duplicate UPC Selling Number. */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId
+)
+SELECT @LogId
+	 , 'Error'
+	 , ''
+	 , 'Selling UPC Number'
+	 , PriceBook.strSellingUpcNumber
+	 , 'Duplicate Selling UPC Number found.'
+	 , 'Skipped'
+	 , 'Record not imported.'
+	 , 1
+FROM tblICEdiPricebook AS PriceBook
+WHERE NULLIF(PriceBook.strItemNo, '') IS NULL
+GROUP By PriceBook.strSellingUpcNumber 
+HAVING COUNT(strSellingUpcNumber) > 1
+
+/* Remove the duplicate UPC Selling Number. */
+
+DELETE 
+FROM tblICEdiPricebook
+WHERE strSellingUpcNumber IN (SELECT strSellingUpcNumber
+							  FROM tblICEdiPricebook AS PriceBook
+							  WHERE NULLIF(PriceBook.strItemNo, '') IS NULL
+						      GROUP By PriceBook.strSellingUpcNumber 
+							  HAVING COUNT(strSellingUpcNumber) > 1
+
+)
+/* End of Log duplicate UPC Selling Number.*/
+
+
 
 
 SET @missingVendorCategoryXRef = @@ROWCOUNT;	
