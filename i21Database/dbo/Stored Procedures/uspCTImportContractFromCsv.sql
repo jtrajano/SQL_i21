@@ -166,10 +166,10 @@ BEGIN
 
 	DECLARE cur CURSOR LOCAL FAST_FORWARD
 	FOR
-	SELECT DISTINCT	MAX(intContractImportId), intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,MAX(dblHeaderQuantity),intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,MAX(intCreatedById),MAX(dtmCreated),1, 0, 0, ysnQuantityAtHeaderLevel
+	SELECT DISTINCT	MAX(intContractImportId), intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,MAX(dblHeaderQuantity),intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,MAX(intCreatedById),MAX(dtmCreated),1, 0, 0
 	FROM	#tmpExtracted
 	GROUP BY intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,
-		intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId, ysnQuantityAtHeaderLevel
+		intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId
 
 	OPEN cur
 
@@ -193,12 +193,50 @@ BEGIN
 		, @intConcurrencyId
 		, @ysnReceivedSignedFixationLetter
 		, @ysnReadOnlyInterCoContract
-		, @ysnQuantityAtHeaderLevel
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		BEGIN TRY
 		DELETE FROM #tmpContractHeader
+
+		SELECT TOP 1 @ysnQuantityAtHeaderLevel = ysnQuantityAtHeaderLevel
+		FROM #tmpExtracted
+		WHERE ISNULL(@intContractTypeId, 0) = ISNULL(intContractTypeId, 0)			
+			AND ISNULL(@dtmContractDate, @Date) = ISNULL(dtmContractDate, @Date)
+			AND ISNULL(@intCommodityId, 0) = ISNULL(intCommodityId, 0)
+			AND ISNULL(@intCommodityUOMId, 0) = ISNULL(intCommodityUOMId, 0)
+			AND ISNULL(@dblQuantity, 0) = ISNULL(dblQuantity, 0)
+			AND ISNULL(@intSalespersonId, 0) = ISNULL(intSalespersonId, 0)
+			AND ISNULL(@ysnSigned, 0) = ISNULL(ysnSigned, 0)
+			AND ISNULL(@strContractNumber, '') = ISNULL(strContractNumber, '')
+			AND ISNULL(@ysnPrinted, 0) = ISNULL(ysnPrinted, 0)
+			AND ISNULL(@intCropYearId, 0) = ISNULL(intCropYearId, 0)
+			AND ISNULL(@intPositionId, 0) = ISNULL(intPositionId, 0)
+			AND ISNULL(@intPricingTypeId, 0) = ISNULL(intPricingTypeId, 0)
+			AND ISNULL(intEntityId, 0) = ISNULL(@intContractEntityId, 0)
+
+		IF (SELECT COUNT(1) FROM #tmpExtracted
+			WHERE ISNULL(@intContractTypeId, 0) = ISNULL(intContractTypeId, 0)			
+				AND ISNULL(@dtmContractDate, @Date) = ISNULL(dtmContractDate, @Date)
+				AND ISNULL(@intCommodityId, 0) = ISNULL(intCommodityId, 0)
+				AND ISNULL(@intCommodityUOMId, 0) = ISNULL(intCommodityUOMId, 0)
+				AND ISNULL(@dblQuantity, 0) = ISNULL(dblQuantity, 0)
+				AND ISNULL(@intSalespersonId, 0) = ISNULL(intSalespersonId, 0)
+				AND ISNULL(@ysnSigned, 0) = ISNULL(ysnSigned, 0)
+				AND ISNULL(@strContractNumber, '') = ISNULL(strContractNumber, '')
+				AND ISNULL(@ysnPrinted, 0) = ISNULL(ysnPrinted, 0)
+				AND ISNULL(@intCropYearId, 0) = ISNULL(intCropYearId, 0)
+				AND ISNULL(@intPositionId, 0) = ISNULL(intPositionId, 0)
+				AND ISNULL(@intPricingTypeId, 0) = ISNULL(intPricingTypeId, 0)
+				AND ISNULL(intEntityId, 0) = ISNULL(@intContractEntityId, 0)
+				AND ISNULL(@ysnQuantityAtHeaderLevel,0) <> ysnQuantityAtHeaderLevel) > 0
+
+		BEGIN
+			SET @ErrMsg = 'Quantity at Header Level column must be the same for all sequences of the Contract.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
+		
 
 		INSERT INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter, ysnReadOnlyInterCoContract, ysnQuantityAtHeaderLevel)
 		SELECT @intContractTypeId
@@ -306,8 +344,7 @@ BEGIN
 			, 0
 			, 0
 		FROM #tmpExtracted
-		WHERE
-				ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
+		WHERE ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
 			AND ISNULL(intEntityId, 0) = ISNULL(@intContractEntityId, 0)
 			AND ISNULL(dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
 			AND ISNULL(intCommodityId, 0) = ISNULL(@intCommodityId, 0)
@@ -327,16 +364,34 @@ BEGIN
 		-- VALIDATE Qty At Header Level
 		IF ISNULL(@ysnQuantityAtHeaderLevel, 0) = 1
 		BEGIN
-			IF (SELECT COUNT(1) FROM (SELECT DISTINCT dblQuantity FROM #tmpContractDetail) tbl ) > 1
+			SELECT *
+			INTO #tmpDetails
+			FROM #tmpExtracted			
+			WHERE ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
+				AND ISNULL(intEntityId, 0) = ISNULL(@intContractEntityId, 0)
+				AND ISNULL(dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
+				AND ISNULL(intCommodityId, 0) = ISNULL(@intCommodityId, 0)
+				AND ISNULL(intCommodityUOMId, 0) = ISNULL(@intCommodityUOMId, 0)
+				AND ISNULL(intSalespersonId, 0) = ISNULL(@intSalespersonId, 0)
+				AND ISNULL(ysnSigned, 0) = ISNULL(@ysnSigned, 0)
+				AND ISNULL(strContractNumber, '') = ISNULL(@strContractNumber, '')
+				AND ISNULL(ysnPrinted, 0) = ISNULL(@ysnPrinted, 0)
+				AND ISNULL(intCropYearId, 0) = ISNULL(@intCropYearId, 0)
+				AND ISNULL(intPositionId, 0) = ISNULL(@intPositionId, 0)
+				AND ISNULL(intPricingTypeId, 0) = ISNULL(@intPricingTypeId, 0)
+
+			IF (SELECT COUNT(1) FROM (SELECT DISTINCT dblQuantity FROM #tmpDetails) tbl ) > 1
 			BEGIN
 				SET @ErrMsg = 'Quantity must be the same for Contracts whose Quantity is at the Header Level.'
 				RAISERROR(@ErrMsg,16,1)
 			END
-			--IF (SELECT COUNT(1) FROM (SELECT DISTINCT ysnQuantityAtHeaderLevel FROM #tmpContractDetail) tbl ) > 1
-			--BEGIN
-			--	SET @ErrMsg = 'Quantity at Header Level must be the same for all sequences of the Contract.'
-			--	RAISERROR(@ErrMsg,16,1)
-			--END
+			IF (SELECT COUNT(1) FROM (SELECT DISTINCT ysnQuantityAtHeaderLevel FROM #tmpDetails) tbl ) > 1
+			BEGIN
+				SET @ErrMsg = 'Quantity at Header Level column must be the same for all sequences of the Contract.'
+				RAISERROR(@ErrMsg,16,1)
+			END
+
+			DROP TABLE #tmpDetails
 		END
 
 		INSERT INTO tblCTContractDetail (
@@ -467,7 +522,6 @@ BEGIN
 			, @intConcurrencyId
 			, @ysnReceivedSignedFixationLetter
 			, @ysnReadOnlyInterCoContract
-			, @ysnQuantityAtHeaderLevel
 
 	END
 
