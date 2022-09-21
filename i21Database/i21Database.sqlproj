@@ -1176,6 +1176,7 @@
     <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
+    <Build Include="dbo\Tables\tblFRSubLedger.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
