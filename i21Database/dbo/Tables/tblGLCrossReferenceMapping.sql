@@ -5,6 +5,10 @@
 	[intAccountSystemId] INT NULL,
 	[ysnOutbound] BIT NULL,
 	[ysnInbound] BIT NULL,
+	[intLedgerId] INT NULL,
+	[intSubledgerId] INT NULL,
+	[strOldLedger] NVARCHAR(255) COLLATE Latin1_General_CI_AS,
+	[strOldSubledger] NVARCHAR(255) COLLATE Latin1_General_CI_AS,
 	[intConcurrencyId] INT
  CONSTRAINT [PK_tblGLCrossReferenceMapping] PRIMARY KEY CLUSTERED 
 (

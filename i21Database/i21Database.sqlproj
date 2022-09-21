@@ -1156,6 +1156,8 @@
     <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
     <Build Include="dbo\Tables\uspTRInsertLoadFromImport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRReprocessImportDtn.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

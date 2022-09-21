@@ -52,6 +52,10 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        ,C.intAccountId
        ,C.strDescription COLLATE Latin1_General_CI_AS AS strAccountDescription
        ,ISNULL(DC.strCurrency, S.strCurrency) COLLATE Latin1_General_CI_AS strCurrency
+       ,B.intLedgerId
+       ,B.intSubledgerId
+       ,L.strLedgerName COLLATE Latin1_General_CI_AS strLedgerName
+       ,LD.strLedgerName COLLATE Latin1_General_CI_AS strSubledgerName
 
        FROM tblGLJournal A
        INNER JOIN tblGLJournalDetail B
@@ -63,3 +67,7 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        ON C.intCurrencyID = S.intCurrencyID
        LEFT JOIN tblSMCurrency DC
        ON DC.intCurrencyID = B.intCurrencyId
+       LEFT JOIN tblGLLedger L
+       ON L.intLedgerId = B.intLedgerId
+       LEFT JOIN tblGLLedgerDetail LD
+       ON LD.intLedgerDetailId = B.intSubledgerId

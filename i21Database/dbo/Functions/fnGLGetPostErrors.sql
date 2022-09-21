@@ -52,7 +52,8 @@ RETURN (
 				SELECT DISTINCT A.intJournalId,
 					'This transaction cannot be posted because the currency is missing.' AS strMessage
 					FROM tblGLJournal A 
-					WHERE 0 = CASE WHEN ISNULL(A.intCurrencyId, '') = '' THEN 0 ELSE 1 END 
+					JOIN tblGLJournalDetail B ON B.intJournalId = A.intJournalId
+					WHERE 0 = CASE WHEN ISNULL(ISNULL(B.intCurrencyId, A.intCurrencyId), '') = '' THEN 0 ELSE 1 END 
 					  AND A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND @ysnPost = 1 
 				UNION
 				SELECT DISTINCT A.intJournalId,
