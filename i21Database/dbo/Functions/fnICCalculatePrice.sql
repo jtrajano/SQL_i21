@@ -20,6 +20,8 @@ BEGIN
 		SET @dblSalePrice = (@dblLastCost * (@dblAmount / 100.00)) + @dblLastCost
 	ELSE IF @strPricingMethod = 'Markup Avg Cost'
 		SET @dblSalePrice = (@dblAvgCost * (@dblAmount / 100.00)) + @dblAvgCost
+	ELSE IF @strPricingMethod = 'Percent of Margin' AND @dblAmount < 100
+		SET @dblSalePrice = @dblStandardCost / (1 - (@dblAmount / 100))
 	ELSE
 		SET @dblSalePrice = @dblProposedSalePrice
 	
