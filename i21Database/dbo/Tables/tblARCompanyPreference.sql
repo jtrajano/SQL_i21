@@ -83,6 +83,7 @@
 	[ysnEnableCustomStatement]              BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnEnableCustomStatement] DEFAULT ((0)),
 	[intFreightTermId]      				INT NULL,
 	[strProvisionalInvoiceOverpayment]  	NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Create Overpayment',
+	[strType]								NVARCHAR(25)   COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Standard',								
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
