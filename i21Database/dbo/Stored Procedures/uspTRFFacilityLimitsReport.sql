@@ -1246,7 +1246,7 @@ AS
 												(purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures) > 
  												(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
  												THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
- 												ELSE purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures -- Purchase Price
+ 												ELSE ISNULL(purchaseCTSeqHist.dblBasis, @dblZero) + ISNULL(purchaseCTSeqHist.dblFutures, @dblZero) -- Purchase Price
  												END
  									WHEN pContract.intBankValuationRuleId = 3 -- BANK VALUATION: Sale Price
  										THEN 
@@ -1266,7 +1266,7 @@ AS
  														THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
  														ELSE purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures -- Purchase Price
  														END
- 												ELSE saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures -- Sale Price
+ 												ELSE ISNULL(saleCTSeqHist.dblBasis, @dblZero) + ISNULL(saleCTSeqHist.dblFutures, @dblZero) -- Sale Price
  												END
  									WHEN pContract.intBankValuationRuleId = 5 -- BANK VALUATION: M2M
 										THEN 
