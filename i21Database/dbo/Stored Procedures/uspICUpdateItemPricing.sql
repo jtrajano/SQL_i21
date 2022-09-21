@@ -131,6 +131,7 @@ BEGIN
 			AND p.intItemLocationId = @intItemLocationId
 			AND p.strPricingMethod = 'Percent of Margin'
 			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
+			AND p.dblAmountPercent < 100
 END 
 
 -- Mark those that is finished with the updating. 
