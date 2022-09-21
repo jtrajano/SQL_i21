@@ -1201,6 +1201,8 @@
     <Build Include="dbo\Tables\tblGLLedgerAccount.sql" />
     <Build Include="dbo\Tables\tblGRAdjustSettlementsSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
