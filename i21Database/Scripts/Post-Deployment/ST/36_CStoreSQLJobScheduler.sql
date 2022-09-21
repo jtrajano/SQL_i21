@@ -1,1 +1,1 @@
-﻿GO	PRINT(N'Delete existing i21_CStore_Daily_Maintenance_Job job if exists')	IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs_view WHERE name = N'i21_CStore_Daily_Maintenance_Job')		EXEC msdb.dbo.sp_delete_job @job_name=N'i21_CStore_Daily_Maintenance_Job', @delete_unused_schedule=1GO
+﻿GO	PRINT(N'Delete existing i21_CStore_Daily_Maintenance_Job job if exists')	IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'i21_CStore_Daily_Maintenance_Job')		EXEC msdb.dbo.sp_delete_job @job_name=N'i21_CStore_Daily_Maintenance_Job', @delete_unused_schedule=1GO
