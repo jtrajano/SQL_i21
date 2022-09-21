@@ -1225,8 +1225,8 @@ AS
  		, dblBankValuation = CASE WHEN pContract.dblFinanceQty < 0 
 								AND ISNULL(sContract.dblFinanceQty, 0) <> 0 
 								AND sContract.dtmTFLogCreateDate >= pContract.dtmTFLogCreateDate
-							THEN sContract.dblFinanceQty 
-							ELSE pContract.dblFinanceQty	
+							THEN ABS(sContract.dblFinanceQty) 
+							ELSE ABS(pContract.dblFinanceQty) 	
 							END * 
 							(CASE	WHEN pContract.intBankValuationRuleId = 1 -- BANK VALUATION: Purchase Price
 										THEN 
