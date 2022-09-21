@@ -15,6 +15,8 @@ SET ANSI_WARNINGS OFF
 	DECLARE		@ErrMsg		NVARCHAR(MAX) = NULL;
 	DECLARE		@intSourceType INT;
 
+	SELECT @intSourceType = intSourceType FROM tblLGRoute WHERE intRouteId = @intRouteId
+
 	IF @ysnPost = 1 
 	BEGIN
 		/* Check for TM Orders that are already posted on another LCR */
@@ -29,7 +31,7 @@ SET ANSI_WARNINGS OFF
 		END
 
 		/* Check for TM Orders that are already Delivered */
-		SELECT TOP 1 @ErrMsg = 'Unable to Post. Order Number ' + LTRIM(RTRIM(TMD.strOrderNumber))  + ' is already Routed for another record.'
+		SELECT TOP 1 @ErrMsg = 'Unable to Post. Order Number ' + LTRIM(RTRIM(TMD.strOrderNumber))  + ' is already Delivered.'
 		FROM tblLGRouteOrder RO LEFT JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = RO.intDispatchID 
 		WHERE R.intSourceType = 2 AND RO.intDispatchID IS NOT NULL AND TMD.strWillCallStatus IN ('Delivered') AND R.intRouteId = @intRouteId
 
@@ -70,23 +72,30 @@ SET ANSI_WARNINGS OFF
 				R.strComments 
 			FROM tblLGRouteOrder RO 
 				JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
-			WHERE RO.intRouteId = @intRouteId AND R.intSourceType = 2 AND IsNull(intDispatchID, 0) <> 0 ORDER BY RO.intSequence ASC
+				LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = RO.intLoadDetailId
+				LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			WHERE RO.intRouteId = @intRouteId AND IsNull(RO.intDispatchID, 0) <> 0 ORDER BY RO.intSequence ASC
 
 			Exec dbo.uspTMUpdateRouteSequence @OrdersFromRouting
 
 			UPDATE tblLGRoute SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intRouteId = @intRouteId
-
-			SELECT @intSourceType = intSourceType FROM tblLGRoute WHERE intRouteId = @intRouteId
 			
-			IF (@intSourceType = 1) 
+			IF (@intSourceType IN (1, 3, 7)) 
 			BEGIN
-				UPDATE Load SET 
-					intDriverEntityId = Rte.intDriverEntityId
-				FROM tblLGLoad Load 
-				JOIN tblLGLoadDetail LD ON LD.intLoadId = Load.intLoadId
+				/* Update Load Schedule */
+				UPDATE L 
+					SET intDriverEntityId = Rte.intDriverEntityId
+						,ysnDispatched = 1
+						,intShipmentStatus = CASE WHEN (L.intShipmentStatus = 1) THEN 2 ELSE L.intShipmentStatus END
+						,dtmDispatchedDate = GETDATE()
+						,intDispatcherId = @intEntityUserSecurityId
+				FROM tblLGLoad L 
+				JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 				JOIN tblLGRouteOrder RO ON RO.intLoadDetailId = LD.intLoadDetailId
 				JOIN tblLGRoute Rte ON Rte.intRouteId = RO.intRouteId
-				WHERE Rte.intRouteId=@intRouteId
+				WHERE Rte.intRouteId = @intRouteId
+					AND ISNULL(L.ysnDispatched, 0) = 0
+					AND L.intTransUsedBy <> 1
 
 				UPDATE EL SET 
 					dblLatitude = RO.dblToLatitude
@@ -126,5 +135,22 @@ SET ANSI_WARNINGS OFF
 			Exec dbo.uspTMUpdateRouteSequence @OrdersFromRouting
 
 			UPDATE tblLGRoute SET ysnPosted = @ysnPost, dtmPostedDate=NULL WHERE intRouteId = @intRouteId
+
+			IF (@intSourceType IN (1, 3, 7)) 
+			BEGIN
+				/* Update Load Schedule */
+				UPDATE L 
+					SET ysnDispatched = 0
+						,intShipmentStatus = 1
+						,dtmDispatchedDate = NULL
+						,intDispatcherId = NULL
+				FROM tblLGLoad L 
+				JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+				JOIN tblLGRouteOrder RO ON RO.intLoadDetailId = LD.intLoadDetailId
+				JOIN tblLGRoute Rte ON Rte.intRouteId = RO.intRouteId
+				WHERE Rte.intRouteId = @intRouteId
+					AND L.intShipmentStatus = 2
+					AND L.intTransUsedBy <> 1
+			END
 	END
 GO
