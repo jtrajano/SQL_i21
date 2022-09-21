@@ -205,7 +205,12 @@ FROM
 							ROUND(
 								p.dblAverageCost * p.dblAmountPercent / 100 + p.dblAverageCost
 								, ISNULL(r.intRounding, 6)
-							) 
+							)
+						WHEN p.strPricingMethod = 'Percent of Margin' AND p.dblAmountPercent < 100 THEN 
+							ROUND(
+								(ISNULL(receiptOutputNewStandardCost.dblNewStandardCost, 0) / (1 - (p.dblAmountPercent / 100)))
+								, ISNULL(r.intRounding, 6)
+							)
 						ELSE 
 							p.dblSalePrice
 				END 
