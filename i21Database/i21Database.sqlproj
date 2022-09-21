@@ -1174,6 +1174,8 @@
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
