@@ -63,8 +63,8 @@ BEGIN TRY
 	DECLARE @LoadDetailUsedId Id
 	DECLARE @dtmTicketDate             DATETIME
 	DECLARE @intTicketSclaeSetupId    INT
-	DECLARE @intFutureMarketId INT
-	DECLARE @intFutureMonthId INT
+	-- DECLARE @intFutureMarketId INT
+	-- DECLARE @intFutureMonthId INT
 
 	DECLARE @_dblCurrentAvailable NUMERIC(38,20)
 
