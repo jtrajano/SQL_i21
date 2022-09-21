@@ -1131,9 +1131,7 @@
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
 	<Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleAsset.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGDispatchUpdateOrders.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
-    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
   </ItemGroup>
   <ItemGroup>
