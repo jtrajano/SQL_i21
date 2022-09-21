@@ -986,15 +986,11 @@ AS
  	, pContract.intContractDetailId
  	, ctSeqHist.ysnPriced
 	, pContract.intContractTypeId
-	, ctSeqHist.dblFutures
-	, ctSeqHist.dblBasis
  	INTO #tempContractSeqHistory
  	FROM #tempPurchaseContracts pContract
  	OUTER APPLY (
  		SELECT TOP 1 
  			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-			  , dblFutures
-			  , dblBasis
  		FROM tblCTSequenceHistory cb
  		WHERE cb.intContractDetailId = pContract.intContractDetailId
 		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
@@ -1006,22 +1002,16 @@ AS
  		, intContractDetailId
  		, ysnPriced
 		, intContractTypeId
-		, dblFutures
-		, dblBasis
  	) 
  	SELECT 
  	  sContract.intContractHeaderId
  	, sContract.intContractDetailId
  	, ctSeqHist.ysnPriced
 	, sContract.intContractTypeId
-	, ctSeqHist.dblFutures
-	, ctSeqHist.dblBasis
  	FROM #tempSaleContractInfo sContract
  	OUTER APPLY (
  		SELECT TOP 1 
  			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-			  , dblFutures
-			  , dblBasis
  		FROM tblCTSequenceHistory cb
  		WHERE cb.intContractDetailId = sContract.intContractDetailId
 		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
@@ -1141,12 +1131,12 @@ AS
  		, pContract.strPContractNumber
  		, pContract.strSupplier
  		, pContract.strPurchaseTerm
- 		, dblPurchaseBasis = ISNULL(purchaseCTSeqHist.dblBasis, @dblZero)
+ 		, dblPurchaseBasis = ISNULL(purchaseCB.dblBasis, @dblZero)
  		, dblPurchaseDifferential = ISNULL(pContract.dblPurchaseDifferential, @dblZero)
- 		, dblPurchaseFixed = ISNULL((purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures), @dblZero)
+ 		, dblPurchaseFixed = ISNULL((purchaseCB.dblBasis + purchaseCB.dblFutures), @dblZero)
  		, pContract.strPurchaseMarket
  		, pContract.strPurchaseMonth
- 		, dblPurchaseUnitPrice = ISNULL((purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures), @dblZero)
+ 		, dblPurchaseUnitPrice = ISNULL((purchaseCB.dblBasis + purchaseCB.dblFutures), @dblZero)
  		, pContract.strPurchaseCurrency
  		, dblPurchaseLots = ISNULL(pContract.dblPurchaseLots, @dblZero)
  		, dblPHedgedLots = ISNULL(pHedge.dblHedgedLots, @dblZero)
@@ -1181,13 +1171,13 @@ AS
  		, strSaleCountry = sContract.strCountry
  		, strSaleInvoiceNumber = sInvoice.strInvoiceNumber
  		, dtmSaleInvoiceDate = sInvoice.dtmInvoiceDate
- 		, dblSaleBasis = ISNULL(saleCTSeqHist.dblBasis,@dblZero) --sContract.dblSaleBasis
+ 		, dblSaleBasis = ISNULL(saleCB.dblBasis,@dblZero) --sContract.dblSaleBasis
  		, dblSaleDifferential = ISNULL(sContract.dblSaleDifferential, @dblZero)
- 		, dblSaleFixed = ISNULL((saleCTSeqHist.dblBasis + sContract.dblSaleDifferential), @dblZero) --sContract.dblSaleFixed
+ 		, dblSaleFixed = ISNULL((saleCB.dblBasis + sContract.dblSaleDifferential), @dblZero) --sContract.dblSaleFixed
  		, sContract.strSaleMarket
  		, sContract.strSaleMonth
  		, sContract.strSaleCurrency
- 		, dblSaleUnitPrice = ISNULL((saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures), @dblZero) --sContract.dblSaleUnitPrice
+ 		, dblSaleUnitPrice = ISNULL((saleCB.dblBasis + saleCB.dblFutures), @dblZero) --sContract.dblSaleUnitPrice
  		, strSaleShipmentStatus = sLoadShipment.strSaleShipmentStatus
  		, sLoadShipment.dtmSaleDeliveredDate
  		, strSaleInvoiceCurrency = sInvoice.strCurrency
@@ -1231,7 +1221,7 @@ AS
 							(CASE	WHEN pContract.intBankValuationRuleId = 1 -- BANK VALUATION: Purchase Price
 										THEN 
 											CASE WHEN purchaseCTSeqHist.ysnPriced = 1 
-												THEN  (purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures)  -- Purchase Price
+												THEN (purchaseCB.dblBasis + purchaseCB.dblFutures)  -- Purchase Price
 												ELSE 
 													-- Market Price
 													CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
@@ -1241,17 +1231,15 @@ AS
  									WHEN pContract.intBankValuationRuleId = 2 -- BANK VALUATION: Cost/M2M/Lower of Cost or Market
  										THEN 
  											 CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
-											 WHEN purchaseCTSeqHist.ysnPriced = 0
-													OR
-												(purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures) > 
+											 WHEN (purchaseCB.dblBasis + purchaseCB.dblFutures) > 
  												(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
  												THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
- 												ELSE purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures -- Purchase Price
+ 												ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
  												END
  									WHEN pContract.intBankValuationRuleId = 3 -- BANK VALUATION: Sale Price
  										THEN 
 											CASE WHEN saleCTSeqHist.ysnPriced = 1 
-												THEN (saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures) -- Sale Price
+												THEN (saleCB.dblBasis + saleCB.dblFutures) -- Sale Price
 												ELSE @dblZero
 												END
  									WHEN pContract.intBankValuationRuleId = 4 -- BANK VALUATION: LCM Lower of purchase or M2M unless sale is fixed
@@ -1260,13 +1248,13 @@ AS
  												THEN 
 													CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
  													WHEN purchaseCTSeqHist.ysnPriced = 0 
-														OR ((purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures) > 
+														OR ((purchaseCB.dblBasis + purchaseCB.dblFutures) > 
  															(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
 														   )
  														THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
- 														ELSE purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures -- Purchase Price
+ 														ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
  														END
- 												ELSE saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures -- Sale Price
+ 												ELSE saleCB.dblBasis + saleCB.dblFutures -- Sale Price
  												END
  									WHEN pContract.intBankValuationRuleId = 5 -- BANK VALUATION: M2M
 										THEN 
