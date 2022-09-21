@@ -11,6 +11,8 @@ BEGIN
 			,strWillCallStatus = CASE WHEN A.intRouteId IS NULL THEN 'Generated' ELSE 'Routed' END
 			,ysnReceived = 0
 			,dtmReceivedDate = NULL
+			,ysnDispatched = CASE WHEN A.intRouteId IS NULL THEN 0 ELSE 1 END
+			,dtmDispatchingDate = CASE WHEN A.intRouteId IS NULL THEN NULL ELSE GETDATE() END
 	FROM @RouteOrder A
 	WHERE tblTMDispatch.intDispatchID = A.intOrderId
 	AND strWillCallStatus <> 'Delivered'
