@@ -24,6 +24,12 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+	BEGIN
+		DECLARE @strNewStartingNumber AS NVARCHAR(50)
+		EXEC dbo.uspSMGetStartingNumber 155, @strNewStartingNumber OUTPUT
+	END   
+
 	IF @ysnPostOrUnPost = 0 AND @ysnRecap = 0
 	BEGIN
 		EXEC uspSMAuditLog 
