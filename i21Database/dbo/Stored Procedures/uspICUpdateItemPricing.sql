@@ -42,6 +42,8 @@ SET		p.dblSalePrice =
 						ROUND(p.dblLastCost * p.dblAmountPercent / 100 + p.dblLastCost, 6) 
 					WHEN p.strPricingMethod = 'Markup Avg Cost' THEN 
 						ROUND(p.dblAverageCost * p.dblAmountPercent / 100 + p.dblAverageCost, 6) 
+					WHEN p.strPricingMethod = 'Percent of Margin' AND p.dblAmountPercent < 100 THEN 
+						ROUND(p.dblStandardCost / (1 - (p.dblAmountPercent / 100)), 6)
 					ELSE 
 						p.dblSalePrice
 			END 
