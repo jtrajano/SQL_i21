@@ -78,7 +78,7 @@ BEGIN
 			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
 
 	UPDATE	pl
-	SET		pl.dblUnitPrice = ROUND((p.dblStandardCost + pl.dblAmountRate) * pl.dblUnit, 6) 
+	SET		pl.dblUnitPrice = ROUND((p.dblStandardCost / (1 - pl.dblAmountRate/100) * pl.dblUnit ), 6) 
 	FROM	tblICItemPricingLevel pl INNER JOIN tblICItemPricing p
 				ON pl.intItemId = p.intItemId
 				AND pl.intItemLocationId = p.intItemLocationId
@@ -86,6 +86,7 @@ BEGIN
 			AND p.intItemLocationId = @intItemLocationId
 			AND pl.strPricingMethod = 'Percent of Margin'
 			AND (p.ysnIsPendingUpdate = 1 OR ISNULL(@forceUpdate, 0) = 1)
+			AND pl.dblAmountRate < 100
 END 
 
 ----------------------------------------------------------
