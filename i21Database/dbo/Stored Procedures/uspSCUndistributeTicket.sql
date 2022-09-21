@@ -958,6 +958,9 @@ BEGIN TRY
 
 						DELETE FROM tblSCTicketDistributionAllocation
 						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketDirectBasisContract
+						WHERE intTicketId = @intTicketId
 					END
 				END
 			END
@@ -1180,6 +1183,27 @@ BEGIN TRY
 					BEGIN
 						EXEC uspSCRemoveDirectPayables @intTicketId, @intUserId
 						DELETE FROM tblSCTicketDirectAddPayable
+						WHERE intTicketId = @intTicketId
+					END
+
+					---REMOVE DISTRIBUTION ALLOCATION DETAILS
+					BEGIN
+						DELETE FROM tblSCTicketLoadUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketContractUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketSpotUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketStorageUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketDistributionAllocation
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketDirectBasisContract
 						WHERE intTicketId = @intTicketId
 					END
 				END 
