@@ -220,17 +220,23 @@ BEGIN
   	WHERE P.[ysnPost] = @OneBit
 
 	-- Delete Invoice with Zero Payment
-    DELETE FROM tblARPaymentDetail
+    DELETE PD
+    FROM tblARPaymentDetail PD
+    INNER JOIN (
+      SELECT DISTINCT PDD.intTransactionId 
+      FROM #ARPostPaymentDetail PDD
+      WHERE PDD.[ysnPost] = @OneBit
+    ) ARPD ON PD.intPaymentId = ARPD.intTransactionId
     WHERE [dblPayment] = @ZeroDecimal
       AND [dblWriteOffAmount] = @ZeroDecimal
       AND [dblDiscount] = @ZeroDecimal
-      AND (
-            [intInvoiceId] IN (SELECT [intInvoiceId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
-            OR
-            [intBillId] IN (SELECT [intBillId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
-            OR
-            ([intInvoiceId] IS NULL AND [intBillId] IS NULL AND [dblPayment] = @ZeroDecimal)
-        )
+      -- AND (
+      --       [intInvoiceId] IN (SELECT [intInvoiceId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
+      --       OR
+      --       [intBillId] IN (SELECT [intBillId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
+      --       OR
+      --       ([intInvoiceId] IS NULL AND [intBillId] IS NULL AND [dblPayment] = @ZeroDecimal)
+      --   )
 
     -- Update the posted flag in the transaction table
     UPDATE ARP
