@@ -29,6 +29,8 @@
     [dblCreditReport]	 NUMERIC(18, 6) NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
 	[intCurrencyId]     INT NULL,
+	[intLedgerId]       INT NULL,
+	[intSubledgerId]    INT NULL,
     CONSTRAINT [PK_tblGLJournalDetail] PRIMARY KEY CLUSTERED ([intJournalDetailId] ASC),
     CONSTRAINT [FK_tblGLJournalDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLJournalDetail_tblGLJournal] FOREIGN KEY ([intJournalId]) REFERENCES [dbo].[tblGLJournal] ([intJournalId]) ON DELETE CASCADE,
