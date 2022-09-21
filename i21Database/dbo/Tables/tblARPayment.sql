@@ -211,6 +211,7 @@ BEGIN
 			,p.dtmScheduledPayment			  = i.dtmScheduledPayment   
 			,p.strCreditCardStatus			  = i.strCreditCardStatus
 			,p.strCreditCardNote			  = i.strCreditCardNote
+			,p.strInvoices					  = i.strInvoices
 		FROM tblARPayment p
 		INNER JOIN inserted i
 			ON i.intPaymentId = p.intPaymentId

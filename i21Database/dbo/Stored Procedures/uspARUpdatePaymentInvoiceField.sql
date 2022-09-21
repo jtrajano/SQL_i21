@@ -21,12 +21,9 @@ ELSE
 		FROM @PaymentIds
 	END
 
-ALTER TABLE tblARPayment DISABLE TRIGGER trg_tblARPaymentDelete
-ALTER TABLE tblARPayment DISABLE TRIGGER trg_tblARPaymentUpdate
-ALTER TABLE tblARPaymentDetail DISABLE TRIGGER trg_tblARPaymentDetailUpdate
-
 UPDATE P
-SET strInvoices = TRANSACTIONS.strTransactionNumber
+SET strInvoices 		= TRANSACTIONS.strTransactionNumber
+  , intCurrentStatus	= 5
 FROM tblARPayment P
 INNER JOIN  @FinalPaymentId FP ON P.intPaymentId = FP.intId
 CROSS APPLY (
@@ -38,7 +35,3 @@ CROSS APPLY (
 		FOR XML PATH ('')
 	) TRANS (strTransactionNumber)
 ) TRANSACTIONS
-
-ALTER TABLE tblARPayment ENABLE TRIGGER trg_tblARPaymentDelete
-ALTER TABLE tblARPayment ENABLE TRIGGER trg_tblARPaymentUpdate
-ALTER TABLE tblARPaymentDetail ENABLE TRIGGER trg_tblARPaymentDetailUpdate
