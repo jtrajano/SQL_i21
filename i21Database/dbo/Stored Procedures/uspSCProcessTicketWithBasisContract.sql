@@ -43,7 +43,7 @@ BEGIN TRY
 					,@intLocationId = @intLocationId
 					,@dtmScaleDate = @dtmScaleDate
 					,@intUserId = @intUserId
-					,@intBillId = @intCreatedTransactionId
+					,@intBillId = @intCreatedTransactionId OUTPUT
 		END
 		ELSE
 		BEGIN
