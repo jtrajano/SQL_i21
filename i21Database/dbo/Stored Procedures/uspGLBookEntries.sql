@@ -102,6 +102,7 @@ BEGIN
 			,dtmDateEnteredMin
 			,[intCompanyLocationId]
 			,[intLedgerId]
+			,[intSubledgerId]
 	)
 	SELECT 
 			dbo.fnRemoveTimeOnDate(dtmDate)
@@ -151,6 +152,7 @@ BEGIN
 			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
 			,[intCompanyLocationId]
 			,[intLedgerId]
+			,[intSubledgerId]
 	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
