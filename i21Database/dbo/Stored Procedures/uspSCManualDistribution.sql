@@ -91,6 +91,17 @@ dECLARE @intTicketLoadDetailId INT
 DECLARE @_intContractItemUom  INT
 DECLARE @_dblContractScheduledQty NUMERIC (38,20)  
 
+DECLARE @_dblContractScheduled NUMERIC(38,20)
+DECLARE @_dblContractAvailable NUMERIC(38,20)
+DECLARE @_dblCurrentContractAvailable NUMERIC(38,20)
+DECLARE @_dblCurrentContractSchedule NUMERIC(38,20)
+
+DECLARE @_tmpContractSchedule TABLE(
+	intContractDetailId INT
+	,dblScheduleQty NUMERIC (38,20)
+	,dblAvailable NUMERIC (38,20)
+)
+
 SELECT	
 	@intTicketItemUOMId = SC.intItemUOMIdTo
 	, @intLoadId = SC.intLoadId
@@ -158,6 +169,27 @@ FROM @LineItem
 WHERE strDistributionOption <> @strTicketDistributionOption
 
 
+--GEt the current scheduled Qty of Contracts used
+IF OBJECT_ID (N'tempdb.dbo.#tmpContractSchedule') IS NOT NULL
+		DROP TABLE #tmpContractSchedule
+
+
+INSERT INTO @_tmpContractSchedule(
+	dblScheduleQty
+	,dblAvailable
+	,intContractDetailId
+)
+SELECT 
+	dblScheduleQty
+	,dblAvailable = ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0)
+	,intContractDetailId
+FROM tblCTContractDetail
+WHERE intContractDetailId IN (
+	SELECT DISTINCT intTransactionDetailId 
+	FROM @LineItem
+	WHERE intTransactionDetailId IS NOT NULL
+)
+
 
 if @strTicketDistributionOption = 'CNT' and not exists ( select top 1 1 
 															from #tmpManualDistributionLineItem
@@ -190,6 +222,22 @@ OPEN intListCursor;
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'  
 					BEGIN  
+						---Get the Initital/original Contract Schedule
+						IF NOT EXISTS(SELECT TOP 1 1 FROM  @_tmpContractSchedule WHERE intContractDetailId = @intLoopContractId)
+						BEGIN
+							INSERT INTO @_tmpContractSchedule(
+								dblScheduleQty
+								,dblAvailable
+								,intContractDetailId
+							)
+							SELECT 
+								dblScheduleQty
+								,dblAvailable = ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0)
+								,intContractDetailId
+							FROM tblCTContractDetail
+							WHERE intContractDetailId = @intLoopContractId
+						END
+
 						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)  
 						BEGIN  
 							--get contract Detail Id and quantity of the load detail  
@@ -225,24 +273,70 @@ OPEN intListCursor;
 							-- Adjust the contract Scheduled quantity based on the difference between the quantity/load and the units allocated
 							IF(@ysnLoadContract = 0)
 							BEGIN
+								SET @_dblContractScheduled = 0
+								SELECT TOP 1 
+									@_dblContractScheduled = dblScheduleQty
+									,@_dblContractAvailable = dblAvailable
+								FROM @_tmpContractSchedule
+								WHERE intContractDetailId = @intLoopContractId
+
+
+								SET @_dblCurrentContractSchedule = 0
+								SET @_dblCurrentContractAvailable = 0
+								SELECT TOP 1
+									@_dblCurrentContractAvailable =  ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0)
+									,@_dblCurrentContractSchedule = dblScheduleQty
+								FROM tblCTContractDetail
+								WHERE intContractDetailId = @intLoopContractId
+
+
 
 								SELECT TOP 1 
 									@_intLoadItemUOM = intItemUOMId
 								FROM tblLGLoadDetail WITH(NOLOCK)
 								WHERE intLoadDetailId = @intLoadDetailId
 
-								SET @_dblContractScheduledQty = dbo.fnCalculateQtyBetweenUOM(@_intContractItemUom,@intTicketItemUOMId,@_dblContractScheduledQty)
+								-- SET @_dblContractScheduledQty = dbo.fnCalculateQtyBetweenUOM(@_intContractItemUom,@intTicketItemUOMId,@_dblContractScheduledQty)
+
+								SET @_dblCurrentContractAvailable = dbo.fnCalculateQtyBetweenUOM(@_intContractItemUom,@intTicketItemUOMId,@_dblCurrentContractAvailable)
+								SET @_dblCurrentContractSchedule = dbo.fnCalculateQtyBetweenUOM(@_intContractItemUom,@intTicketItemUOMId,@_dblCurrentContractSchedule)
+								SET @_dblContractScheduled  = dbo.fnCalculateQtyBetweenUOM(@_intContractItemUom,@intTicketItemUOMId,@_dblContractScheduled)
 								
 								SET @_dblQtyToCompare = dbo.fnCalculateQtyBetweenUOM(@_intLoadItemUOM,@intTicketItemUOMId,@_dblQuantityPerLoad)	
-								IF (@_dblContractScheduledQty <  @_dblQtyToCompare)
+								
+								-- IF (@_dblContractScheduledQty <  @_dblQtyToCompare)
+								-- BEGIN
+								-- 	SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblContractScheduledQty
+								-- END
+								-- ELSE
+								-- BEGIN
+									
+								-- 	SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQtyToCompare
+								-- END
+
+								SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQtyToCompare
+
+								
+								IF(@dblLoopAdjustedScheduleQuantity < 0)
 								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblContractScheduledQty
+									IF(@_dblContractScheduled <= @dblLoopContractUnits)
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblContractScheduled
+										
+										IF(@dblLoopAdjustedScheduleQuantity >  @_dblCurrentContractAvailable)
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = @_dblCurrentContractAvailable
+										END
+									END
 								END
 								ELSE
 								BEGIN
-									
-									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQtyToCompare
+									IF(@_dblCurrentContractAvailable < @dblLoopAdjustedScheduleQuantity)
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @_dblCurrentContractAvailable
+									END
 								END
+
 								IF(@dblLoopAdjustedScheduleQuantity <> 0)
 								BEGIN
 									EXEC	uspCTUpdateScheduleQuantityUsingUOM 
