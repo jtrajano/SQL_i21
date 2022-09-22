@@ -1156,6 +1156,7 @@
     <Build Include="dbo\Stored Procedures\uspLGDispatchUpdateOrders.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
+    <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
