@@ -167,6 +167,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]
 			,[intCompanyLocationId]
 			,[intLedgerId]
+			,[intSubledgerId]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -222,7 +223,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger'
 			,[intCompanyLocationId]	= B.[intCompanyLocationId]
-			,[intLedgerId]			= B.[intLedgerId]
+			,[intLedgerId]			= A.[intLedgerId]
+			,[intSubledgerId]		= A.[intSubledgerId]
 		
 
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
@@ -272,6 +274,7 @@ ELSE
 			,[strModuleName]	
 			,[intCompanyLocationId]	
 			,[intLedgerId]
+			,[intSubledgerId]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -308,7 +311,8 @@ ELSE
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger' 
 			,[intCompanyLocationId]	= B.[intCompanyLocationId]
-			,[intLedgerId]			= B.[intLedgerId]
+			,[intLedgerId]			= A.[intLedgerId]
+			,[intSubledgerId]		= A.[intSubledgerId]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
@@ -467,6 +471,8 @@ BEGIN
 				,[strCheckBookNo]
 				,[strWorkArea]
 				,[intCurrencyExchangeRateTypeId]
+				,[intLedgerId]
+				,[intSubledgerId]
 				)
 			SELECT 
 				 [intLineNo]
@@ -495,6 +501,8 @@ BEGIN
 				,[strCheckBookNo]
 				,[strWorkArea]
 				,[intCurrencyExchangeRateTypeId]
+				,A.[intLedgerId]
+				,A.[intSubledgerId]
 			FROM [dbo].tblGLJournalDetail A
 			INNER join tblGLJournal C on A. intJournalId = C.intJournalId
 			OUTER APPLY dbo.fnGLGetExchangeRate(@intCurrencylId,A.intCurrencyExchangeRateTypeId,@dtmDate_NEW) B
