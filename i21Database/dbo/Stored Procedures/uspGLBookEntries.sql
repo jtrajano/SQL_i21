@@ -295,7 +295,6 @@ BEGIN
 	WHEN NOT MATCHED  THEN 
 		INSERT (
 			intAccountId
-			,intMultiCompanyId
 			,dtmDate
 			,dblDebit
 			,dblCredit
@@ -309,7 +308,6 @@ BEGIN
 		)
 		VALUES (
 			Source_Query.intAccountId
-			,@intMultCompanyId
 			,Source_Query.dtmDate
 			,Source_Query.dblDebit
 			,Source_Query.dblCredit
