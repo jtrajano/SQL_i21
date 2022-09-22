@@ -496,7 +496,7 @@ WHERE I.ysnPosted = 1
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
+INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
 	 , strCustomerNumber
 	 , strCustomerInfo
