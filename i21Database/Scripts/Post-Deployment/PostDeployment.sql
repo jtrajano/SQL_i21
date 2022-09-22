@@ -110,7 +110,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2210_EncryptPasswords.sql
 :r .\SM\2210_EncryptPasswords2.sql
 :r .\SM\2210_AttachmentsFileTypesFix.sql
-
+:r .\SM\2210_ReadCommittedSnapshot.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql

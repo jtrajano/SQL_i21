@@ -1,0 +1,42 @@
+﻿
+GO
+
+PRINT (N'/******************** BEGIN ALTER DATABASE SET READ_COMMITTED_SNAPSHOT ********************/')
+
+DECLARE @dbname sysname;
+DECLARE @query varchar(255);
+DECLARE @ysnSysadmin bit;
+
+SET @dbname = (SELECT DB_NAME(db_id()));
+SET @ysnSysadmin = IS_SRVROLEMEMBER('sysadmin');
+
+	PRINT(N'USER HAS SYSADMIN ROLE: ' + IIF(@ysnSysadmin = 1, 'YES', 'NO'));
+
+	IF(@ysnSysadmin = 1)
+		BEGIN
+				BEGIN TRY
+						--BEGIN TRANSACTION
+						-- CANNOT USE DBNAME AS VARIABLE ON ALTER DB SHOULD USE DYNAMIC QUERYING
+
+						-- USES ROW VERSIONING INSTEAD OF LOCKS
+						SET @query = 'ALTER DATABASE [' + @dbname + '] SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE';
+
+						-- EXECUTE DYNAMIC QUERY
+						EXEC(@query);
+					
+						PRINT(N'READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE: SUCCESS');
+						-- SEE IF CHANGES TOOK EFFECT
+						-- SELECT is_read_committed_snapshot_on FROM sys.databases WHERE name = @dbname
+				END TRY
+				BEGIN CATCH
+						PRINT(N'READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE: FAILED');
+				END CATCH
+		END
+	ELSE 
+		BEGIN
+			PRINT(N'READ_COMMITTED_SNAPSHOT ON: FAILED (USER NOT IN SYSADMIN ROLE)');
+		END
+		
+PRINT (N'/******************** BEGIN ALTER DATABASE SET READ_COMMITTED_SNAPSHOT ********************/')
+
+GO
