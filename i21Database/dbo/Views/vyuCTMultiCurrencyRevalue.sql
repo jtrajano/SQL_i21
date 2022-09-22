@@ -16,8 +16,8 @@ AS
 			,dblQuantity			=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblQuantity ELSE CD.dblBalance END
 			,dblUnitPrice			=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblCashPrice ELSE CD.dblCashPrice END
 			,dblAmount				=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblFinalPrice ELSE CD.dblTotalCost END
-			,intCurrencyId			=	CD.intCurrencyId
-			,intForexRateType		=	CD.intRateTypeId
+			,intCurrencyId			=	CD.intInvoiceCurrencyId
+			,intForexRateType		=	CD.intHistoricalRateTypeId
 			,strForexRateType		=	RT.strCurrencyExchangeRateType
 			,dblForexRate			=	CD.dblHistoricalRate
 			,dblHistoricAmount		=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblFinalPrice ELSE CD.dblTotalCost END * CD.dblHistoricalRate
