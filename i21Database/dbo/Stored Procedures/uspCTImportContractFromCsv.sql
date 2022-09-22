@@ -59,7 +59,7 @@ CREATE TABLE #tmpExtracted
 	dblFutures					NUMERIC(18,6),	dblBasis			NUMERIC(18,6),	dblCashPrice		NUMERIC(18,6),	intPriceItemUOMId	INT,
 	intStorageScheduleRuleId	INT,			intCurrencyId		INT,			dtmCreated			DATETIME,		intCreatedById		INT,
 	intConcurrencyId			INT,			dblTotalCost		NUMERIC(18,6),	intUnitMeasureId	INT,			strRemark			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-	dtmM2MDate					DATETIME,		ysnQuantityAtHeaderLevel	BIT
+	dtmM2MDate					DATETIME,		ysnQuantityAtHeaderLevel	BIT,	intInvoiceCurrencyId INT
 ); 
 
 IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -80,7 +80,7 @@ INSERT	INTO #tmpExtracted
 (
 	intContractImportId, intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,
 	intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-	intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId, dtmM2MDate, ysnQuantityAtHeaderLevel
+	intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId, dtmM2MDate, ysnQuantityAtHeaderLevel, intInvoiceCurrencyId
 )
 SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 		intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -114,7 +114,8 @@ SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strCo
 		intCurrencyId		=	CY.intCurrencyID,
 		intUnitMeasureId	=	QU.intUnitMeasureId,
 		dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate()),
-		ysnQuantityAtHeaderLevel	=	CASE WHEN CI.strQtyAtHeaderLevel = 'Yes' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+		ysnQuantityAtHeaderLevel	=	CASE WHEN CI.strQtyAtHeaderLevel = 'Yes' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
+		intInvoiceCurrencyId = cp.intDefaultCurrencyId
 
 FROM	tblCTContractImport			CI	LEFT
 JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -138,6 +139,7 @@ JOIN	vyuCTEntity					EY	ON	EY.strEntityName				=	CI.strEntityName
 										AND	EY.strEntityType	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 'Vendor' ELSE 'Customer' END LEFT
 JOIN	vyuCTEntity					SY	ON	SY.strEntityName	=	CI.strSalesperson
 										AND	SY.strEntityType	=	'Salesperson'	
+cross apply (select top 1 intDefaultCurrencyId from tblSMCompanyPreference) cp
 WHERE CI.guiUniqueId = @guiUniqueId
 
 IF EXISTS(SELECT * FROM #tmpExtracted)
@@ -310,7 +312,7 @@ BEGIN
 		DELETE FROM #tmpContractDetail
 
 		INSERT	INTO #tmpContractDetail(intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL
+			intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL, intInvoiceCurrencyId
 		)
 		SELECT
 			  @intContractHeaderId
@@ -343,6 +345,7 @@ BEGIN
 			, dtmM2MDate
 			, 0
 			, 0
+			, intInvoiceCurrencyId
 		FROM #tmpExtracted
 		WHERE ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
 			AND ISNULL(intEntityId, 0) = ISNULL(@intContractEntityId, 0)
@@ -424,7 +427,8 @@ BEGIN
 			, intNetWeightUOMId
 			, dtmM2MDate
 			, ysnProvisionalPNL
-			, ysnFinalPNL)
+			, ysnFinalPNL
+			, intInvoiceCurrencyId)
 		SELECT
 			  @intContractHeaderId
 			, intItemId
@@ -456,6 +460,7 @@ BEGIN
 			, dtmM2MDate
 			, 0
 			, 0
+			, intInvoiceCurrencyId
 		FROM #tmpExtracted
 		WHERE
 				ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
