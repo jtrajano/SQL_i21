@@ -11009,6 +11009,7 @@
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
     <Build Include="dbo\Functions\fnCTGetDefaultCurrencyExchangeRate.sql" />
     <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" /> 
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
