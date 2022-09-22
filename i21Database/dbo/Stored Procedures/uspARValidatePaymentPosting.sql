@@ -324,7 +324,7 @@ BEGIN
 	--OVERPAYMENT
 	INSERT INTO #ARPostOverPayment
 	SELECT DISTINCT A.[intPaymentId]
-	FROM tblARPayment A 
+	FROM tblARPayment A WITH (NOLOCK)
 	INNER JOIN (
 		SELECT DISTINCT [intTransactionId] 
 		FROM #ARPostPaymentHeader 
@@ -336,7 +336,7 @@ BEGIN
 	--PREPAYMENT
 	INSERT INTO #ARPostPrePayment
 	SELECT A.[intPaymentId]
-	FROM tblARPayment A 
+	FROM tblARPayment A WITH (NOLOCK)
 	INNER JOIN (
 		SELECT DISTINCT [intTransactionId] 
 		FROM #ARPostPaymentHeader 
