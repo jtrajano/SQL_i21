@@ -219,7 +219,7 @@ BEGIN
 	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblEMEntityLocation SHIPTO ON INV.intShipToLocationId = SHIPTO.intEntityLocationId
 	INNER JOIN tblEMEntityLocation BILLTO ON INV.intBillToLocationId = BILLTO.intEntityLocationId
-	WHERE SHIPTO.ysnActive = 0 OR BILLTO.ysnActive = 0
+	WHERE (SHIPTO.ysnActive = 0 OR BILLTO.ysnActive = 0)
 	  AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
