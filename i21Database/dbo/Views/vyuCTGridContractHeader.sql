@@ -169,7 +169,16 @@ AS
 			NM.dblHeaderAvailable,
 			CH.intProductTypeId,
 			NM.strHeaderProductType,
-			CH.ysnPrimeCustomer
+			CH.ysnPrimeCustomer,
+
+
+			CH.strPIN,
+			CH.dtmExpirationDate,
+			CH.intShipViaId,
+			NM.strShipVia,
+			CH.ysnPerpetual,
+			CH.ysnPriceInEffectByEndDateTime
+
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY
