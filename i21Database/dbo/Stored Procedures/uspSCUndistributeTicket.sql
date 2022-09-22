@@ -1520,7 +1520,7 @@ BEGIN TRY
 
 											SET @_dblLoadQtyVsUsedDiff = (SELECT @_dblCovertedLoadQtyUsed - @_dblLoadQuantity)
 
-											IF(@_dblLoadQtyVsUsedDiff > 0)
+											IF(@_dblLoadQtyVsUsedDiff <> 0)
 											BEGIN
 												SET @_dblLoadQtyVsUsedDiff = @_dblLoadQtyVsUsedDiff * -1
 												EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadQtyVsUsedDiff, @intUserId, @intTicketId, 'Auto - Scale', @_dblLoadItemUOMId
