@@ -4190,7 +4190,6 @@ BEGIN TRY
 					SELECT intPricingTypeId, strNotes FROM @cbLogSpecific
 				) tbl
 
-				select line=4194,ysnMatched=@ysnMatched,TotalBasis=@TotalBasis,TotalPriced=@TotalPriced,TotalHTA=@TotalHTA
 				IF @ysnMatched <> 1
 				BEGIN
 					IF (ISNULL(@TotalBasis, 0) <> 0)
@@ -4282,8 +4281,6 @@ BEGIN TRY
 							FROM @cbLogPrev lp
 							cross apply (SELECT * FROM @cbLogSpecific) curr
 
-							select line=4276,* from @cbLogPrev
-
 							IF (@strProcess = 'Do Roll')
 							BEGIN
 								UPDATE @cbLogPrev
@@ -4305,7 +4302,6 @@ BEGIN TRY
 						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty * - 1 FROM @cbLogPrev)
 										ELSE @TotalPriced END
 							, intPricingTypeId = CASE WHEN ISNULL(@truePreviousPricingType, 0) = 1 AND ISNULL(@truePricingTypeId, 0) <> 1 THEN @truePricingTypeId ELSE 1 END
-							, dblFutures = @dblPreviousFutures
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 					IF (ISNULL(@TotalHTA, 0) <> 0)
@@ -4646,7 +4642,6 @@ BEGIN TRY
 						UPDATE @cbLogSpecific
 						SET dblQty = 1
 							, intPricingTypeId = 1
-							, dblFutures = @dblPreviousFutures
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 				END
