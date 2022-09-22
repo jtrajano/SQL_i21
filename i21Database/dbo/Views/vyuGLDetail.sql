@@ -64,6 +64,7 @@ AS
         FP.strPeriod,
         CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
         L.strLedgerName,
+        LD.strLedgerName COLLATE Latin1_General_CI_AS strSubledgerName,
         A.intSubsidiaryCompanyId
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
@@ -75,6 +76,7 @@ AS
      LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
      LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
+     LEFT JOIN tblGLLedgerDetail LD ON LD.intLedgerDetailId = A.intSubledgerId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
