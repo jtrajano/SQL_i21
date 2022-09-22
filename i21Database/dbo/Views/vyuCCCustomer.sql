@@ -13,7 +13,7 @@ SELECT A.intSiteId,
 	C.strEntityNo AS strCustomerEntityNo,
 	C.strName AS strCustomerName
 	FROM dbo.tblCCSite AS A
-	INNER JOIN dbo.tblARCustomer AS B
+	INNER JOIN dbo.tblARCustomer AS B WITH (NOLOCK)
 		ON B.intEntityId = A.intCustomerId
 	INNER JOIN dbo.tblEMEntity AS C
 		ON C.intEntityId = B.intEntityId
