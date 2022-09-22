@@ -40,7 +40,7 @@ BEGIN
 	SET dblDebitUnit=dblCreditUnit,dblCreditUnit=0
 	where dblDebit > 0 and dblCreditUnit > 0 AND dblDebitUnit = 0
 	
-	UPDATE  tblGLJournalDetail
+	UPDATE  tblGLJournalDetail`
 	SET dblCreditUnit=dblDebitUnit,dblDebitUnit=0
 	where dblCredit > 0 and dblDebitUnit > 0 AND dblCreditUnit = 0
 	
