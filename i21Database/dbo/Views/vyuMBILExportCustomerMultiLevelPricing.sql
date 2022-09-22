@@ -30,5 +30,5 @@ CREATE VIEW [dbo].[vyuMBILExportCustomerMultiLevelPricing]
 		tblICItemPricingLevel PLEVEL ON ITEM.intItemId = PLEVEL.intItemId
 	INNER JOIN 
 		tblSMCompanyLocationPricingLevel CLEVEL ON PLEVEL.intCompanyLocationPricingLevelId = CLEVEL.intCompanyLocationPricingLevelId
-	INNER JOIN tblARCustomer CUSTOMER ON CLEVEL.strPricingLevelName = CUSTOMER.strLevel
+	INNER JOIN tblARCustomer CUSTOMER WITH (NOLOCK) ON CLEVEL.strPricingLevelName = CUSTOMER.strLevel
 	

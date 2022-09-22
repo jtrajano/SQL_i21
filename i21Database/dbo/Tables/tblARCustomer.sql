@@ -15,7 +15,7 @@
     [intAccountStatusId]              INT             NULL,
     [intSalespersonId]                INT             NULL,
     [strPricing]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strLevel]                        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strLevel]                        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [dblPercent]                      NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [strTimeZone]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnActive]                       BIT             CONSTRAINT [DF_tblARCustomer_ysnActive] DEFAULT ((1)) NOT NULL,
@@ -158,11 +158,8 @@
 );
 
 GO
---CREATE UNIQUE NONCLUSTERED INDEX [IX_tblARCustomer]
---    ON [dbo].[tblARCustomer]([strCustomerNumber] ASC);
-
-
---GO
+CREATE NONCLUSTERED INDEX [IX_tblARCustomer_strLevel] ON [dbo].[tblARCustomer] (strLevel)
+GO
 
 
 
