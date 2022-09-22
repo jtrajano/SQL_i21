@@ -15,5 +15,5 @@
 	CONSTRAINT [FK_tblARCustomerBudget_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE
 );
 GO
-CREATE INDEX [idx_tblARCustomerBudget] ON [dbo].[tblARCustomerBudget] (intEntityCustomerId)
+CREATE INDEX [idx_tblARCustomerBudget] ON [dbo].[tblARCustomerBudget] (intEntityCustomerId) INCLUDE (dtmBudgetDate)
 GO
