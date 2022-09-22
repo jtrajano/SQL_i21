@@ -229,35 +229,9 @@ BEGIN TRY
 			WHERE intContractFeedId = @intContractFeedId
 		END
 
-		SELECT @intBookId = intBookId
-			,@strCustomerContract = strCustomerContract
+		SELECT @strCustomerContract = strCustomerContract
 		FROM dbo.tblCTContractHeader
 		WHERE intContractHeaderId = @intContractHeaderId
-
-		SELECT @strBook = strBook
-		FROM dbo.tblCTBook
-		WHERE intBookId = @intBookId
-
-		-- Add all the extra columns which are not avail in feed table
-		IF NOT EXISTS (
-				SELECT 1
-				FROM tblIPThirdPartyContractFeed
-				WHERE intContractFeedId = @intContractFeedId
-				)
-			INSERT INTO tblIPThirdPartyContractFeed (
-				intContractFeedId
-				,strERPPONumber
-				,strRowState
-				,strBook
-				)
-			SELECT @intContractFeedId
-				,@strERPPONumber
-				,@strRowState
-				,@strBook
-
-		SELECT @strBook = strBook
-		FROM tblIPThirdPartyContractFeed
-		WHERE intContractFeedId = @intContractFeedId
 
 		IF @strCurrency='CAD'
 		BEGIN
@@ -298,8 +272,34 @@ BEGIN TRY
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intContractStatusId = intContractStatusId
 			,@intOrgContractStatusId = intContractStatusId
+			,@intBookId = intBookId
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
+
+		SELECT @strBook = strBook
+		FROM dbo.tblCTBook
+		WHERE intBookId = @intBookId
+
+		-- Add all the extra columns which are not avail in feed table
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tblIPThirdPartyContractFeed
+				WHERE intContractFeedId = @intContractFeedId
+				)
+			INSERT INTO tblIPThirdPartyContractFeed (
+				intContractFeedId
+				,strERPPONumber
+				,strRowState
+				,strBook
+				)
+			SELECT @intContractFeedId
+				,@strERPPONumber
+				,@strRowState
+				,@strBook
+
+		SELECT @strBook = strBook
+		FROM tblIPThirdPartyContractFeed
+		WHERE intContractFeedId = @intContractFeedId
 
 		IF ISNULL(@strVendorAccountNum, '') = ''
 		BEGIN
