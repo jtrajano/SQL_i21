@@ -1,4 +1,5 @@
-﻿Create VIEW [dbo].[vyuCTMultiCurrencyRevalue]
+﻿
+Create VIEW [dbo].[vyuCTMultiCurrencyRevalue]
 
 AS 
 
@@ -19,7 +20,7 @@ AS
 			,intCurrencyId			=	CD.intInvoiceCurrencyId
 			,intForexRateType		=	CD.intHistoricalRateTypeId
 			,strForexRateType		=	RT.strCurrencyExchangeRateType
-			,dblForexRate			=	CD.dblHistoricalRate
+			,dblForexRate			=	CASE WHEN CD.intPricingTypeId = 2 and t.strStatus is null THEN 1 ELSE CD.dblHistoricalRate END
 			,dblHistoricAmount		=	CASE WHEN t.strStatus = 'Partially Priced' THEN t.dblFinalPrice ELSE CD.dblTotalCost END * CD.dblHistoricalRate
 			,dblNewForexRate		=	0
 			,dblNewAmount			=	0
@@ -31,6 +32,8 @@ AS
 			,intLOBSegmentCodeId	=	LB.intSegmentCodeId
 			,CASE WHEN CH.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END dblAppliedQty
 			,CASE WHEN CD.intPricingTypeId = 1 THEN 0.00 ELSE ISNULL(CD.dblBalance, 0) *  ISNULL(LS.dblLastSettle, 0 ) END dblSettlementAmount
+		
+			
 	FROM	tblCTContractDetail				CD
 	JOIN	tblCTContractHeader				CH	ON	CD.intContractHeaderId				=	CH.intContractHeaderId
 	JOIN	tblCTContractType				CT	ON	CT.intContractTypeId				=	CH.intContractTypeId
@@ -60,9 +63,9 @@ AS
 
 	OUTER APPLY  (
 		SELECT 		intContractDetailId		=	PF.intContractDetailId
-			,strStatus				=	CASE WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END),0) = 0 
+			,strStatus				=	CASE WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE ISNULL(PFD.dblNoOfLots,0) END),0) = 0 
 												THEN 'Fully Priced' 
-												WHEN ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END),0) = 0 THEN 'Unpriced'
+												WHEN ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE ISNULL(PFD.dblNoOfLots,0) END),0) = 0 THEN 'Unpriced'
 												ELSE 'Partially Priced' 
 										END		COLLATE Latin1_General_CI_AS
 			,dblFinalPrice			=	PF.dblFinalPrice
@@ -92,6 +95,8 @@ AS
 
 	) t
 GO
+
+
 
 
 
