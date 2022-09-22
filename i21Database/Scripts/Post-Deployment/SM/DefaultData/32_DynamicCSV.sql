@@ -2805,7 +2805,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intCustomerLocationId = (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE strLocationName = @customer_location)
+				SET @intCustomerLocationId = (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE strLocationName = @customer_location and intEntityId=@intEntityCustomerId)
 			END
 		END
 
