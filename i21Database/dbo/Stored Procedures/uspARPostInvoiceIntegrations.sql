@@ -683,7 +683,7 @@ EXEC dbo.uspARInterCompanyIntegrationSource @BatchId = @BatchId, @Post = @Post, 
 --DELETE FROM POSTING QUEUE
 DELETE PQ
 FROM tblARPostingQueue PQ
-INNER JOIN tblARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
+INNER JOIN tblARPostInvoiceHeader II WITH (NOLOCK) ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
 WHERE II.strSessionId = @strSessionId
 
 --AUDIT LOG
