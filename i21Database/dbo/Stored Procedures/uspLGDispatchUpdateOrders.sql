@@ -28,23 +28,8 @@ BEGIN
 			/* Load Dispatched */
 			UPDATE TMD
 				SET ysnDispatched = 1
-					,strWillCallStatus = 'Dispatched'
-					,dtmDispatchingDate = DO.dtmDispatchDate
-					,intDriverID = COALESCE(DOR.intDriverEntityId, DO.intDriverEntityId, TMD.intDriverID)
-			FROM tblTMDispatch TMD
-				INNER JOIN tblLGDispatchOrderDetail DOD ON DOD.intTMDispatchId = TMD.intDispatchID
-				INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId
-				LEFT JOIN tblLGDispatchOrderRoute DOR ON DOR.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId
-			WHERE DO.intDispatchOrderId = @intDispatchOrderId
-				AND TMD.strWillCallStatus NOT IN ('Delivered')
-		END
-		ELSE IF (@intDispatchStatus IN (1,2))
-		BEGIN
-			/* Load Routed/Scheduled */
-			UPDATE TMD
-				SET ysnDispatched = 0
 					,strWillCallStatus = 'Routed'
-					,dtmDispatchingDate = NULL
+					,dtmDispatchingDate = DO.dtmDispatchDate
 					,intDriverID = COALESCE(DOR.intDriverEntityId, DO.intDriverEntityId, TMD.intDriverID)
 			FROM tblTMDispatch TMD
 				INNER JOIN tblLGDispatchOrderDetail DOD ON DOD.intTMDispatchId = TMD.intDispatchID
