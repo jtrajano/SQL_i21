@@ -16,7 +16,6 @@ SELECT     strJournalType ,
            strCurrency COLLATE Latin1_General_CI_AS strCurrency,
            ysnRecurringTemplate,
            fp.strPeriod,
-           l.strLedgerName,
            j.intCompanyLocationId,
            CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation
    FROM tblGLJournal j
@@ -27,7 +26,6 @@ SELECT     strJournalType ,
    LEFT JOIN tblEMEntity e ON e.intEntityId = j.intEntityId
    LEFT JOIN tblSMCurrency C ON C.intCurrencyID = j.intCurrencyId
    LEFT JOIN tblGLFiscalYearPeriod fp ON fp.intGLFiscalYearPeriodId = j.intFiscalPeriodId
-   LEFT JOIN tblGLLedger l ON l.intLedgerId = j.intLedgerId
    LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = j.intCompanyLocationId
    WHERE  strTransactionType IN ('General Journal','Recurring')
    AND  ISNULL(strSourceType,'') <> 'AA'
