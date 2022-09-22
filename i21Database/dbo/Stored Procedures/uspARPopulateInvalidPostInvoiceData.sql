@@ -92,19 +92,19 @@ BEGIN
 		 , [strBatchId]				= I.[strBatchId]
 		 , [strPostingError]		= 'Negative stock quantity is not allowed for Negative Stock at In-Transit Location.'
 		 , [strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceHeader I
+	FROM tblARPostInvoiceHeader I WITH (NOLOCK)
 	INNER JOIN (
 		SELECT DISTINCT COSTING.intTransactionId
 		     		  , COSTING.strTransactionId
-		FROM tblARPostItemsForInTransitCosting COSTING
+		FROM tblARPostItemsForInTransitCosting COSTING WITH (NOLOCK)
 		INNER JOIN (
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
 				 , ICT.intLotId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
-			FROM tblICInventoryTransaction ICT 
-			LEFT JOIN tblICInventoryActualCost IAC ON ICT.strTransactionId = IAC.strTransactionId AND ICT.intTransactionId = IAC.intTransactionId AND ICT.intTransactionDetailId = IAC.intTransactionDetailId
-			LEFT JOIN tblICInventoryLot IL ON ICT.strTransactionId = IL.strTransactionId AND ICT.intTransactionId = IL.intTransactionId AND ICT.intTransactionDetailId = IL.intTransactionDetailId AND ICT.intLotId = IL.intLotId AND ICT.intItemLocationId = IL.intItemLocationId
+			FROM tblICInventoryTransaction ICT WITH (NOLOCK)
+			LEFT JOIN tblICInventoryActualCost IAC WITH (NOLOCK) ON ICT.strTransactionId = IAC.strTransactionId AND ICT.intTransactionId = IAC.intTransactionId AND ICT.intTransactionDetailId = IAC.intTransactionDetailId
+			LEFT JOIN tblICInventoryLot IL WITH (NOLOCK) ON ICT.strTransactionId = IL.strTransactionId AND ICT.intTransactionId = IL.intTransactionId AND ICT.intTransactionDetailId = IL.intTransactionDetailId AND ICT.intLotId = IL.intLotId AND ICT.intItemLocationId = IL.intItemLocationId
 			WHERE ICT.ysnIsUnposted = 0
 			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
