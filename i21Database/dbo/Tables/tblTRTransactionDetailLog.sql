@@ -13,3 +13,7 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblTRTransactionDetailLog] PRIMARY KEY ([intTransactionDetailLogId]) 
 )
+GO
+
+CREATE INDEX [IX_tblTRTransactionDetailLog_intTransactionId] ON [dbo].[tblTRTransactionDetailLog] ([intTransactionId]) 
+GO 
