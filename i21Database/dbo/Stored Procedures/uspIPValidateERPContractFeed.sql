@@ -45,7 +45,7 @@ BEGIN
 		AND CD.intContractStatusId = 1
 		AND CH.intContractTypeId = 1
 	WHERE IsNULL(L.intCompanyLocationId, 0) <> IsNULL(CD.intCompanyLocationId, 0)
-		OR IsNULL(L.intHeaderBookId, 0) <> IsNULL(CH.intBookId, 0)
+		OR IsNULL(L.intHeaderBookId, 0) <> IsNULL(CD.intBookId, 0)
 
 	SELECT @intContractDetailId = NULL
 		,@intContractHeaderId = NULL
@@ -356,12 +356,12 @@ BEGIN
 			,@intDestinationPortId = intDestinationPortId
 			,@intCompanyLocationId = intCompanyLocationId
 			,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
+			,@intBookId = intBookId
 		FROM tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
 		SELECT @strContractNumber = strContractNumber
 			,@strVendorRefNo = strCustomerContract
-			,@intBookId = intBookId
 			,@intSubBookId = intSubBookId
 		FROM tblCTContractHeader WITH (NOLOCK)
 		WHERE intContractHeaderId = @intContractHeaderId
