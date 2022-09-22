@@ -299,6 +299,13 @@ BEGIN TRY
 			FROM dbo.tblICInventoryTransfer
 			WHERE intInventoryTransferId = @intInventoryTransferId
 
+			/* Reduce/Negate Reservation Stock
+			   @intWorkOrderId = Work Order ID
+			   8 = Consume (Transaction Type)
+			   1 = Posted
+			*/
+			EXEC dbo.uspICPostStockReservation @intWorkOrderId, 8, 1
+
 			EXEC dbo.uspICPostInventoryTransfer 0
 				,0
 				,@strTransferNo
