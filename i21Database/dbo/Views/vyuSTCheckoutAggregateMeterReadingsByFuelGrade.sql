@@ -4,6 +4,7 @@ SELECT		a.intPumpTotalsId as intFuelTotalSoldId,
 			a.intCheckoutId,
 			IL.strPassportFuelId1 as intProductNumber,
 			a.strDescription,
+			CAST(a.dblPrice AS DECIMAL(18,2)) AS dblPrice,
 			a.dblAmount as dblDollarsSold,
 			a.dblQuantity as dblGallonsSold,
 			Item.strItemNo
