@@ -25,4 +25,4 @@ LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocatio
 LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = EL.intTaxGroupId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DH.intCompanyLocationId
 LEFT JOIN vyuEMSalesperson SP ON SP.intEntityId = DH.intEntitySalespersonId
-LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId
+LEFT JOIN tblARInvoice I WITH (NOLOCK) ON I.intInvoiceId = DH.intInvoiceId
