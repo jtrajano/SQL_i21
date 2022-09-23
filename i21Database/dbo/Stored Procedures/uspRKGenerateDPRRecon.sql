@@ -239,7 +239,7 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
-		,strDistribution  = ''
+		,strDistribution  = CASE WHEN SL.strInOut = 'IN' THEN 'Distributed' ELSE 'Undistributed' END
 		,strStorageSchedule  = ''
 		,strSettlementTicket = ''
 		,strStatus  = ''
@@ -783,8 +783,8 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = SL.intTicketId
 		,intLoadId = NULL
-		,strDistribution  = ''
-		,strStorageSchedule  = ''
+		,strDistribution  = CASE WHEN SL.strInOut = 'IN' THEN 'Distributed' ELSE 'Undistributed' END
+		,strStorageSchedule  = ST.strStorageTypeDescription
 		,strSettlementTicket = ''
 		,strStatus  = ''
 	FROM tblRKSummaryLog SL
@@ -799,6 +799,7 @@ BEGIN TRY
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = SL.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId 
 	LEFT JOIN tblSCTicket T ON T.intTicketId = SL.intTicketId
+	LEFT JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = T.intStorageScheduleTypeId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned' 
