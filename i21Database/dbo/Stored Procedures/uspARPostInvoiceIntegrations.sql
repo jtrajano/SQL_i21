@@ -495,14 +495,16 @@ END
 UPDATE CUSTOMER
 SET [dtmCreditLimitReached] =  CASE WHEN ISNULL(CUSTOMER.[dblARBalance], 0) >= ISNULL(CUSTOMER.[dblCreditLimit], 0) THEN ISNULL(CUSTOMER.[dtmCreditLimitReached], INVOICE.[dtmPostDate]) ELSE NULL END
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-CROSS APPLY (
-	SELECT TOP 1 I.[dtmPostDate]
-	FROM tblARPostInvoiceHeader I
-	WHERE I.[intEntityCustomerId] = CUSTOMER.[intEntityId]
-	  AND I.strSessionId = @strSessionId
-	ORDER BY I.[dtmPostDate] DESC
-) INVOICE
-WHERE ISNULL(CUSTOMER.[dblCreditLimit], @ZeroDecimal) > @ZeroDecimal
+INNER JOIN (
+	SELECT [dtmPostDate]	 		= MAX(I.[dtmPostDate])
+		 , [intEntityCustomerId]	= I.intEntityCustomerId
+	FROM tblARPostInvoiceHeader I WITH (NOLOCK)
+	INNER JOIN tblARCustomer C WITH (NOLOCK) ON I.intEntityCustomerId = C.intEntityId
+	WHERE I.strSessionId = @strSessionId
+	  AND C.dblCreditLimit > 0	
+	GROUP BY I.intEntityCustomerId
+) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
+WHERE CUSTOMER.[dblCreditLimit] > @ZeroDecimal
 
 --UPDATE HIGHEST AR
 UPDATE CUSTOMER
@@ -511,7 +513,7 @@ SET dblHighestAR		= CUSTOMER.dblARBalance
 FROM dbo.tblARCustomer CUSTOMER
 INNER JOIN (
 	SELECT DISTINCT intEntityCustomerId
-	FROM tblARPostInvoiceHeader
+	FROM tblARPostInvoiceHeader WITH (NOLOCK)
 	WHERE strSessionId = @strSessionId
 ) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 WHERE CUSTOMER.dblARBalance > ISNULL(CUSTOMER.dblHighestAR, 0)
