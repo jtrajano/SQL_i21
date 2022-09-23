@@ -82,6 +82,8 @@ BEGIN TRY
 		DROP TABLE #CBBucket
 	IF OBJECT_ID('tempdb..#ContractStatus') IS NOT NULL
 		DROP TABLE #ContractStatus
+	IF OBJECT_ID('tempdb..#tempLatestContractDetails') IS NOT NULL
+		DROP TABLE #tempLatestContractDetails
 
 	IF (ISNULL(@intM2MHeaderId, 0) = 0) SET @intM2MHeaderId = NULL
 	IF (ISNULL(@intCommodityId, 0) = 0) SET @intCommodityId = NULL
@@ -616,29 +618,53 @@ BEGIN TRY
 		GROUP BY a.intContractDetailId, a.strContractNumber, strPricingType, a.strContractType, b.intCounter
 		HAVING SUM(dblQty) > 0
 
-		;WITH LatestContractDetails (
-				intContractHeaderId
-				,intContractDetailId
-				,dtmEndDate 
-				,dblBasis
-		) AS (
+		SELECT z.intContractHeaderId
+			, z.intContractDetailId
+			, z.dtmEndDate 
+			, z.dblBasis
+			, dblFutures = CASE WHEN ctd.intPricingTypeId = 1 AND pricingLatestDate.pricedCount = pricingByEndDate.pricedCount THEN ctd.dblFutures
+					ELSE z.dblFutures END
+			, z.intQtyUOMId
+			, ysnFullyPriced = CAST(CASE WHEN ctd.intPricingTypeId = 1 AND pricingLatestDate.pricedCount = pricingByEndDate.pricedCount THEN 1
+						ELSE 0 END AS bit)
+		INTO #tempLatestContractDetails
+		FROM
+		(
 			SELECT 
 				intContractHeaderId
 				,intContractDetailId
 				,dtmEndDate 
 				,dblBasis
+				,dblFutures
+				,intQtyUOMId
 			FROM (
 				SELECT 
-					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) DESC)
+					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY CASE WHEN CBL.strAction = 'Created Price' 
+													THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END DESC, intContractBalanceLogId DESC)
 					,*
 				FROM tblCTContractBalanceLog CBL
 				WHERE dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) <= @dtmEndDate
 				AND CBL.intCommodityId = ISNULL(@intCommodityId, CBL.intCommodityId)
 				AND CBL.strTransactionType = 'Contract Balance'
-				AND CBL.dblBasis IS NOT NULL
+				AND (CBL.dblBasis IS NOT NULL OR CBL.intPricingTypeId = 3)
 			) t
 			WHERE intRowNum = 1
-		)
+		) z
+		LEFT JOIN tblCTContractDetail ctd
+			ON ctd.intContractDetailId = z.intContractDetailId
+		OUTER APPLY (SELECT pricedCount = COUNT('') 
+					FROM tblCTPriceFixation pfh
+					JOIN tblCTPriceFixationDetail pfd 
+					ON pfh.intPriceFixationId = pfd.intPriceFixationId
+					WHERE pfh.intContractDetailId = z.intContractDetailId
+			) pricingLatestDate
+		OUTER APPLY (SELECT pricedCount = COUNT('') 
+					FROM tblCTPriceFixation pfh
+					JOIN tblCTPriceFixationDetail pfd 
+					ON pfh.intPriceFixationId = pfd.intPriceFixationId
+					WHERE pfh.intContractDetailId = z.intContractDetailId
+					AND pfd.dtmFixationDate <= @dtmEndDate
+			) pricingByEndDate
 
 		INSERT INTO @ContractBalance (intRowNum
 			, strCommodityCode
@@ -748,12 +774,12 @@ BEGIN TRY
 					, CBL.dtmStartDate
 					--, CBL.dtmEndDate
 					, dblQuantity = CBL.dblQty
-					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 OR CBL.intPricingTypeId = 3 THEN CBL.dblFutures ELSE NULL END 
-					--, dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
+					-- , dblFutures = CASE WHEN CBL.intPricingTypeId = 1 OR CBL.intPricingTypeId = 3 THEN CBL.dblFutures ELSE NULL END 
+					-- , dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
 					, dblCashPrice = CASE WHEN CBL.intPricingTypeId = 1 THEN ISNULL(CBL.dblFutures,0) + ISNULL(CBL.dblBasis,0) ELSE NULL END
 					, dblAmount = CASE WHEN CBL.intPricingTypeId = 1 THEN [dbo].[fnCTConvertQtyToStockItemUOM](CD.intItemUOMId, CBL.dblQty) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(CBL.dblFutures, 0) + ISNULL(CBL.dblBasis, 0))
 										ELSE NULL END
-					, CBL.intQtyUOMId
+					-- , CBL.intQtyUOMId
 					, CBL.intPricingTypeId
 					, CBL.intContractTypeId
 					, CBL.intLocationId
@@ -779,7 +805,7 @@ BEGIN TRY
 				LEFT JOIN #tmpPricingStatus stat ON stat.intContractDetailId = CBL.intContractDetailId
 				WHERE CBL.strTransactionType = 'Contract Balance'
 			) tbl
-			LEFT JOIN LatestContractDetails lcd
+			LEFT JOIN #tempLatestContractDetails lcd
 				ON lcd.intContractHeaderId = tbl.intContractHeaderId
 				AND lcd.intContractDetailId = tbl.intContractDetailId
 			WHERE intCommodityId = ISNULL(@intCommodityId, intCommodityId)
