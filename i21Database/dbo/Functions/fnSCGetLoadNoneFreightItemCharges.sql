@@ -115,6 +115,7 @@ BEGIN
 		WHERE LoadCost.dblRate != 0 
 			AND ISNULL(@intFreightItemId, 0) != CASE WHEN  ISNULL(@intFreightItemId, 0) = 0 THEN 1 ELSE LoadCost.intItemId END 
 			AND LoadCost.ysnAccrue = 1
+			AND (LoadCost.strEntityType <> 'Customer' OR LoadCost.strEntityType IS NULL)
 	END
 	ELSE
 	BEGIN
