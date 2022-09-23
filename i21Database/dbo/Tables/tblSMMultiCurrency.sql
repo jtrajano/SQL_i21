@@ -10,6 +10,7 @@
 	[intGeneralJournalRateTypeId]					INT NULL, 
 	[intFixedAssetsRateTypeId]						INT NULL, 
 	[intHelpdeskRateTypeId]							INT NULL,
+	[intMarkToMarketRateTypeId]						INT NULL,
 
 	/* Unrealized */
 	[intAccountsPayableUnrealizedId]				INT NULL,
