@@ -106,7 +106,9 @@ JOIN tblRKFuturesMonth fmh on fot.intFutureMonthId=fmh.intFutureMonthId
 JOIN tblEMEntity e on fot.intEntityId=e.intEntityId
 JOIN tblICCommodity c on fot.intCommodityId=c.intCommodityId
 JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=fot.intLocationId
-JOIN tblCTContractDetail cd ON  cs.intContractDetailId=cd.intContractDetailId  
+CROSS APPLY (
+	SELECT TOP 1 intContractDetailId, intPricingStatus, intPricingTypeId, dblQuantity  FROM tblCTContractDetail
+) cd
 LEFT JOIN tblCTBook b on b.intBookId = (select top 1 intBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId = (select top 1 intSubBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
 LEFT JOIN tblCTBook b1 on b1.intBookId = (select top 1 intBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
