@@ -678,7 +678,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\SC\Populate_Risk_Summary_Log.sql
 
 --FRM
-:r .\SM\2010_DefaultAdminUser.sql
+--:r .\SM\2010_DefaultAdminUser.sql
 
 
 --CCR
