@@ -760,7 +760,7 @@ BEGIN TRY
 				, strCustomerContract = ''
 				--, intFutureMarketId
 				--, intFutureMonthId
-				, strPricingStatus
+				, strPricingStatus = CASE WHEN lcd.ysnFullyPriced = 1 THEN 'Fully Priced' ELSE strPricingStatus END
 			FROM
 			(
 				SELECT dtmTransactionDate = CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END
@@ -810,6 +810,7 @@ BEGIN TRY
 				AND lcd.intContractDetailId = tbl.intContractDetailId
 			WHERE intCommodityId = ISNULL(@intCommodityId, intCommodityId)
 				AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
+				AND ((lcd.ysnFullyPriced = 0 AND tbl.intPricingTypeId = 2) OR tbl.intPricingTypeId <> 2 )
 			GROUP BY strCommodityCode
 				, intCommodityId
 				, tbl.intContractHeaderId
@@ -834,6 +835,7 @@ BEGIN TRY
 				--, intFutureMonthId
 				, strPricingStatus
 				, lcd.dblBasis
+				, lcd.ysnFullyPriced
 			HAVING SUM(dblQuantity) > 0	
 		) tbl
 		JOIN #ContractStatus cs ON cs.intContractDetailId = tbl.intContractDetailId
@@ -1405,7 +1407,9 @@ BEGIN TRY
 				, cd.strPosition
 				, strPeriod = RIGHT(CONVERT(VARCHAR(8), dtmStartDate, 3), 5) + '-' + RIGHT(CONVERT(VARCHAR(8), dtmEndDate, 3), 5)
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20), cd.dtmEndDate, 106), 4, 8)
-				, strPriOrNotPriOrParPriced = cd.strPricingStatus
+				, strPriOrNotPriOrParPriced = CASE WHEN cd.intPricingTypeId = 1 AND strPricingType = 'Priced' 
+								THEN 'Fully Priced'
+								ELSE cd.strPricingStatus END
 				, cd.intPricingTypeId
 				, cd.strPricingType
 				, cd.dblRatio
