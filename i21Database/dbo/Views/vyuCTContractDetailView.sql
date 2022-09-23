@@ -8,7 +8,7 @@ AS
 			IU.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
 			CD.dblFutures,						CD.dblBasis,					CD.intFutureMarketId,							
 			CD.intFutureMonthId,				CD.dblCashPrice,				CD.intCurrencyId,			
-			CASE WHEN smcp.intDefaultCurrencyId = isnull(CU.intMainCurrencyId,CD.intCurrencyId) THEN 1 WHEN smcp.intDefaultCurrencyId = CD.intInvoiceCurrencyId THEN CD.dblRate ELSE dbo.fnCTGetDefaultCurrencyExchangeRate(isnull(CU.intMainCurrencyId,CD.intCurrencyId),smcp.intDefaultCurrencyId) END as dblRate,										
+			CASE WHEN smcp.intDefaultCurrencyId = isnull(INV.intMainCurrencyId,CD.intInvoiceCurrencyId) THEN 1 ELSE dbo.fnCTGetDefaultCurrencyExchangeRate(isnull(INV.intMainCurrencyId,CD.intInvoiceCurrencyId),smcp.intDefaultCurrencyId) END as dblRate,
 			CD.intContractStatusId,				CD.intMarketZoneId,								
 			CD.intDiscountTypeId,				CD.intDiscountId,				CD.intContractOptHeaderId,						
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
@@ -325,3 +325,4 @@ AS
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId 
+ 	LEFT JOIN tblSMCurrency INV ON INV.intCurrencyID = CD.intInvoiceCurrencyId
