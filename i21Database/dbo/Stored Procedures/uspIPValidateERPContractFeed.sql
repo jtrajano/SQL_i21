@@ -47,6 +47,17 @@ BEGIN
 	WHERE IsNULL(L.intCompanyLocationId, 0) <> IsNULL(CD.intCompanyLocationId, 0)
 		OR IsNULL(L.intHeaderBookId, 0) <> IsNULL(CD.intBookId, 0)
 
+	UPDATE L
+	SET L.intCompanyLocationId = IsNULL(CD.intCompanyLocationId, 0)
+		,L.intHeaderBookId = IsNULL(CD.intBookId, 0)
+	FROM tblIPContractFeedLog L
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
+		AND CD.intContractStatusId = 1
+		AND CH.intContractTypeId = 1
+	WHERE IsNULL(L.intCompanyLocationId, 0) <> IsNULL(CD.intCompanyLocationId, 0)
+		OR IsNULL(L.intHeaderBookId, 0) <> IsNULL(CD.intBookId, 0)
+
 	SELECT @intContractDetailId = NULL
 		,@intContractHeaderId = NULL
 
@@ -107,12 +118,20 @@ BEGIN
 				,intStatusId = 6
 			WHERE intContractFeedId = @intOrgContractFeedId
 
-			SELECT @strSubLocation =NULL
-			SELECT TOP 1 @strSubLocation = strSubLocation
+			SELECT @strSubLocation =NULL,@strOldLocationName=NULL
+			SELECT TOP 1 @strSubLocation = strSubLocation,@strOldLocationName = strLocationName
 			FROM dbo.tblCTContractFeed
 			WHERE intContractDetailId = @intContractDetailId
 			AND intContractFeedId < @intOrgContractFeedId
 			ORDER BY intContractFeedId DESC
+
+			IF @strSubLocation IS NULL
+			BEGIN
+				SELECT TOP 1 @strSubLocation = strSubLocation,@strOldLocationName = strLocationName
+				FROM dbo.tblCTContractFeed
+				WHERE intContractDetailId = @intContractDetailId
+				ORDER BY intContractFeedId DESC
+			END
 
 			INSERT INTO tblCTContractFeed (
 				intContractHeaderId
