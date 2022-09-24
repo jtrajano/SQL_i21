@@ -516,7 +516,7 @@ INNER JOIN (
          , intEntityCustomerId  = P.intEntityCustomerId
     FROM dbo.#ARPostPaymentHeader P
     INNER JOIN tblARCustomer C WITH (NOLOCK) ON P.intEntityCustomerId = C.intEntityId    
-    WHERE P.intEntityCustomerId = CUSTOMER.intEntityId
+    WHERE P.intEntityCustomerId = C.intEntityId
       AND C.dblCreditLimit > 0
     GROUP BY P.intEntityCustomerId
 ) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
