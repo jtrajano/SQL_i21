@@ -162,6 +162,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblAddOnQuantity						= INV.dblAddOnQuantity
 	 , dblPriceAdjustment					= INV.dblPriceAdjustment
 	 , strBOLNumberDetail					= INV.strBOLNumberDetail
+	 , ysnTankRequired						= ITMNO.ysnTankRequired
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -250,7 +251,8 @@ LEFT JOIN (
 		 , strRequired
 		 , strMaintenanceCalculationMethod
 		 , dblDefaultFull
-		 , ysnAvailableTM							
+		 , ysnAvailableTM
+		 , ysnTankRequired							
 	FROM tblICItem ICITM WITH(NOLOCK)
 	LEFT JOIN tblSMModule MODULE WITH(NOLOCK) ON ICITM.intModuleId = MODULE.intModuleId
 ) ITMNO ON INV.intItemId = ITMNO.intItemId
