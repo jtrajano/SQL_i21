@@ -160,7 +160,8 @@ SELECT
 	ysnHasSubstitute = CAST(ISNULL(ItemSubstitute.ysnHasSubstitute, 0) AS BIT),
 	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
 	dblStandardWeight = StockUOM.dblStandardWeight,
-	dblReceiveStandardWeight = ReceiveUOM.dblStandardWeight
+	dblReceiveStandardWeight = ReceiveUOM.dblStandardWeight,
+	Item.ysnTankRequired
 FROM	
 	tblICItem Item 
 	LEFT JOIN (
