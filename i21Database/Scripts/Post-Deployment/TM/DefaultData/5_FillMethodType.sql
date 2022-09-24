@@ -36,3 +36,19 @@ END
 GO
 	PRINT N'END INSERT DEFAULT TM FILL METHOD TYPE'
 GO
+
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMFillMethodSkyBitzRef]') AND type in (N'U')) 
+BEGIN
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblTMFillMethodSkyBitzRef WHERE intFillMethodSkyBitzRefId = 1)
+	BEGIN
+		SET IDENTITY_INSERT tblTMFillMethodSkyBitzRef ON
+
+		INSERT INTO tblTMFillMethodSkyBitzRef (intFillMethodSkyBitzRefId)
+		VALUES (1)
+		SET IDENTITY_INSERT tblTMFillMethodSkyBitzRef OFF
+		
+	END
+
+END
