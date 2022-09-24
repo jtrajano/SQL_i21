@@ -73,23 +73,24 @@ BEGIN
 					ON ISNULL(CAST(Chk.intProductNumber AS NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 				WHERE CPT.intPumpTotalsId = @intPumpTotalsId
 
-				--- START INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....
-				-- MARGIN = ((Qty Sold) * (Unit Price)) - (Cost in Inventory)  - ((Qty Sold) * (Consignor Markup/dblConsCommissionRawMarkup))
-				-- COMMISSION = (MARGIN) * (Commission Rate/dblConsCommissionDealerPercentage)				
-
-				EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost, @intItemUOMId
-				SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0)) - (@dblQty * @dblMarkUp)
-				SET @dblCommission = @dblMargin * @dblDealerPercentage
-				SET @dblTotalCommission += @dblCommission
-
-				--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....
-				FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId
-			END
-			CLOSE MY_CURSOR
-			DEALLOCATE MY_CURSOR
-
-			UPDATE tblSTCheckoutHeader			 SET dblDealerCommission = @dblTotalCommission WHERE intCheckoutId = @intCheckoutId
-			UPDATE tblSTCheckoutDealerCommission SET dblCommissionAmount = @dblTotalCommission WHERE intCheckoutId = @intCheckoutId
+	--- START INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
+	-- MARGIN = ((Qty Sold) * (Unit Price)) - (Cost in Inventory)  - ((Qty Sold) * (Consignor Markup/dblConsCommissionRawMarkup))  
+	-- COMMISSION = (MARGIN) * (Commission Rate/dblConsCommissionDealerPercentage)      
+	--BEGIN TRAN  
+	EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId  
+	--ROLLBACK
+	SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp)  
+	SET @dblCommission = @dblMargin * @dblDealerPercentage  
+	SET @dblTotalCommission += @dblCommission  
+  
+	--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
+	FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId  
+END  
+CLOSE MY_CURSOR  
+DEALLOCATE MY_CURSOR  
+  
+UPDATE tblSTCheckoutHeader			 SET dblDealerCommission = @dblTotalCommission WHERE intCheckoutId = @intCheckoutId  
+UPDATE tblSTCheckoutDealerCommission SET dblCommissionAmount = @dblTotalCommission WHERE intCheckoutId = @intCheckoutId 
 
 			--SET @dblDealersCommission = @dblTotalCommission;
 
