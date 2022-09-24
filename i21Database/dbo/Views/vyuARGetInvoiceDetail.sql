@@ -176,6 +176,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strCategoryCode						= ICATEGORY.strCategoryCode
 	 , strCategoryDescription				= ICATEGORY.strDescription
 	 , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceDetailId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+	 , ysnTankRequired						= ITMNO.ysnTankRequired
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -274,7 +275,8 @@ LEFT JOIN (
 		 , strRequired
 		 , strMaintenanceCalculationMethod
 		 , dblDefaultFull
-		 , ysnAvailableTM							
+		 , ysnAvailableTM
+		 , ysnTankRequired							
 	FROM tblICItem ICITM WITH(NOLOCK)
 	LEFT JOIN tblSMModule MODULE WITH(NOLOCK) ON ICITM.intModuleId = MODULE.intModuleId
 ) ITMNO ON INV.intItemId = ITMNO.intItemId
