@@ -11,7 +11,10 @@ RETURN
 			intGrossNetUOMId = tblICItemUOM.intItemUOMId 
 	FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
 				ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
+			INNER JOIN tblICItem 
+				ON tblICItem.intItemId = tblICItemUOM.intItemId
 	WHERE	tblICItemUOM.intItemId = @intItemId
 			AND tblICItemUOM.ysnStockUnit = 1 
 			AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
 			AND dbo.fnGetItemLotType(@intItemId) <> 0 
+			AND tblICItem.ysnLotWeightsRequired = 1
