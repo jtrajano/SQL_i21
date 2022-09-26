@@ -67,4 +67,4 @@ INNER JOIN tblAPPayment APP ON APPD.[intPaymentId] = APP.[intPaymentId]
 WHERE ARI.[ysnPosted] = 1
   AND APPD.[dblPayment] <> @ZeroDecimal
 
-EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserEntityID
