@@ -13,7 +13,6 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @UserEntityID	INT = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId) 
 	  , @ActionType		NVARCHAR(50) = CASE WHEN @post = 1 THEN 'Post Settlement' ELSE 'UnPost Settlement' END
-	  , @InvoiceIds		NVARCHAR(MAX) = NULL
 	  , @ZeroDecimal	NUMERIC(18, 6) = 0
 		
 UPDATE ARI						
@@ -36,7 +35,31 @@ INNER JOIN tblAPPayment APP ON APPD.[intPaymentId] = APP.[intPaymentId]
 WHERE ARI.[ysnPosted] = 1
   AND APPD.[dblPayment] <> @ZeroDecimal
 
-SELECT @InvoiceIds = COALESCE(@InvoiceIds + ',' ,'') + CAST(ARI.[intInvoiceId] AS NVARCHAR(250))
+DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
+
+INSERT INTO @InvoiceLog(
+	 [strScreenName]
+	,[intKeyValueId]
+	,[intEntityId]
+	,[strActionType]
+	,[strDescription]
+	,[strActionIcon]
+	,[strChangeDescription]
+	,[strFromValue]
+	,[strToValue]
+	,[strDetails]
+)
+SELECT DISTINCT
+	 [strScreenName]			= 'AccountsReceivable.view.Invoice'
+	,[intKeyValueId]			= ARI.[intInvoiceId]
+	,[intEntityId]				= @UserEntityID
+	,[strActionType]			= @ActionType
+	,[strDescription]			= ''
+	,[strActionIcon]			= NULL
+	,[strChangeDescription]		= ''
+	,[strFromValue]				= ''
+	,[strToValue]				= ''
+	,[strDetails]				= NULL
 FROM @PaymentDetailId PID
 INNER JOIN tblAPPaymentDetail APPD ON PID.[intId] = APPD.[intPaymentDetailId]
 INNER JOIN tblARInvoice ARI ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
@@ -44,12 +67,4 @@ INNER JOIN tblAPPayment APP ON APPD.[intPaymentId] = APP.[intPaymentId]
 WHERE ARI.[ysnPosted] = 1
   AND APPD.[dblPayment] <> @ZeroDecimal
 
---Audit Log          
-EXEC dbo.uspSMAuditLog 
-		@keyValue			= @InvoiceIds						-- Primary Key Value of the Invoice. 
-		,@screenName		= 'AccountsReceivable.view.Invoice'	-- Screen Namespace
-		,@entityId			= @UserEntityID						-- Entity Id.
-		,@actionType		= @ActionType						-- Action Type
-		,@changeDescription	= ''								-- Description
-		,@fromValue			= ''								-- Previous Value
-		,@toValue			= ''								-- New Value
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
