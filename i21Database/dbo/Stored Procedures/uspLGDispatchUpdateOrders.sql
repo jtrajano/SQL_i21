@@ -31,6 +31,7 @@ BEGIN
 					,strWillCallStatus = 'Routed'
 					,dtmDispatchingDate = DO.dtmDispatchDate
 					,intDriverID = COALESCE(DOR.intDriverEntityId, DO.intDriverEntityId, TMD.intDriverID)
+					,intDispatchOrderId = DO.intDispatchOrderId
 			FROM tblTMDispatch TMD
 				INNER JOIN tblLGDispatchOrderDetail DOD ON DOD.intTMDispatchId = TMD.intDispatchID
 				INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId
@@ -46,6 +47,7 @@ BEGIN
 					,strWillCallStatus = 'Generated'
 					,dtmDispatchingDate = NULL
 					,intDriverID = COALESCE(DOR.intDriverEntityId, DO.intDriverEntityId, TMD.intDriverID)
+					,intDispatchOrderId = NULL
 				FROM tblTMDispatch TMD
 				INNER JOIN tblLGDispatchOrderDetail DOD ON DOD.intTMDispatchId = TMD.intDispatchID
 				INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId
