@@ -38,6 +38,7 @@
     [intContractId] INT NULL, 
     [ysnLockPrice] BIT NOT NULL DEFAULT 0, 
     [intRouteId] INT NULL, 
+	[intDispatchOrderId] INT NULL, 
     [ysnReceived] BIT NOT NULL DEFAULT 0, 
     [ysnLeakCheckRequired] BIT NOT NULL DEFAULT 0, 
     [dtmReceivedDate] DATETIME NULL, 
@@ -47,7 +48,8 @@
     [strOriginalPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
-	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])
+	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId]),
+	CONSTRAINT [FK_tblTMDispatch_tblLGDispatchOrder] FOREIGN KEY ([intDispatchOrderId]) REFERENCES [dbo].[tblLGDispatchOrder] ([intDispatchOrderId])
 );
 
 
