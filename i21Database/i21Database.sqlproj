@@ -1179,6 +1179,7 @@
     <Build Include="dbo\Tables\tblFRSubLedger.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_ReadCommittedSnapshot.sql" />
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
+    <Build Include="dbo\Views\vyuTMGetSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
