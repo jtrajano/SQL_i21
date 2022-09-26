@@ -295,30 +295,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                               BEGIN  
                                IF(@strGender IS NOT NULL AND @strGender != '')  
                                 BEGIN  
-                                  SELECT @EntityCount = COUNT(strEntityNo) FROM tblEMEntity WHERE strEntityNo = @EmployeeID
-                                  IF(@EntityCount != 0)
-                                    BEGIN
-                                      SET @ysnImport = 1 
-                                    END
-                                  ELSE
-                                    BEGIN
-                                      INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)  
-                                      SELECT TOP 1  
-                                        NEWID()  
-                                        , guiApiImportLogId = @guiLogId  
-                                        , strField = 'Entity'  
-                                        , strValue = @EmployeeID  
-                                        , strLogLevel = 'Error'  
-                                        , strStatus = 'Failed'  
-                                        , intRowNo = SE.intRowNumber  
-                                        , strMessage = 'Entity No already exist. Please try again.'  
-                                        FROM tblApiSchemaEmployee SE  
-                                      LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
-                                      WHERE SE.guiApiUniqueId = @guiApiUniqueId  
-                                      AND SE.strEmployeeId = @EmployeeID  
-                    
-                                      DELETE FROM #TempEmployeeDetails WHERE strEmployeeId = @EmployeeID  
-                                    END
+                                  SET @ysnImport = 1 
                                 END  
                                ELSE  
                                 BEGIN  
@@ -649,8 +626,12 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   
    IF @EntityId IS NULL  
     BEGIN  
-      
-     INSERT INTO tblEMEntity (  
+    
+    SELECT @EntityCount = COUNT(strEntityNo) FROM tblEMEntity WHERE strEntityNo = @EmployeeID
+
+    IF(@EntityCount != 0)
+    BEGIN
+      INSERT INTO tblEMEntity (  
       strName  
      ,ysnPrint1099  
      ,strContactNumber  
@@ -822,6 +803,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        c.strNotes,  
        c.intEntityId  
        FROM tblEMEntity c WHERE c.intEntityId = @NewId  
+    END
+
+     
   
      INSERT INTO tblPREmployee  
      (  
