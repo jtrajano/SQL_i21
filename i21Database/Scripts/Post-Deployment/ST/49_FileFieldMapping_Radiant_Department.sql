@@ -343,7 +343,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,12,3,'ActiveFlag','tblSTstgDepartmentSendFile','ActiveFlag',NULL,9,NULL,1,1)
+      (@intImportFileHeaderId,NULL,12,3,'ActiveFlag','tblSTstgDepartmentSendFile','ActiveFlagValue',NULL,9,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
