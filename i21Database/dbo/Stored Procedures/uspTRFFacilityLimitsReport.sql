@@ -982,24 +982,67 @@ AS
 			
  	-- Get Latest Pricing Status
  	SELECT 
- 	  pContract.intContractHeaderId
- 	, pContract.intContractDetailId
- 	, ctSeqHist.ysnPriced
-	, pContract.intContractTypeId
-	, ctSeqHist.dblFutures
-	, ctSeqHist.dblBasis
+ 			  pContract.intContractHeaderId
+ 			, pContract.intContractDetailId
+ 			, ctSeqHist.ysnPriced
+			, pContract.intContractTypeId
+			, dblFutures = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 2
+								THEN priceFixationDetail.dblFutures
+								ELSE ctSeqHist.dblFutures
+								END, @dblZero)
+			, dblBasis = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 3
+								THEN priceFixationDetailForHTA.dblBasis
+								ELSE ctSeqHist.dblBasis
+								END, @dblZero)
  	INTO #tempContractSeqHistory
  	FROM #tempPurchaseContracts pContract
  	OUTER APPLY (
  		SELECT TOP 1 
- 			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-			  , dblFutures
-			  , dblBasis
+ 			    ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , ysnPartialPrice = CASE WHEN cb.strPricingStatus = 'Partially Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , cb.dblFutures
+			  , cb.dblBasis
+			  , cb.intContractDetailId
+			  , cb.intPricingTypeId
+			  , cb.dblQuantity
  		FROM tblCTSequenceHistory cb
  		WHERE cb.intContractDetailId = pContract.intContractDetailId
 		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
  		ORDER BY cb.dtmHistoryCreated DESC
  	) ctSeqHist
+	OUTER APPLY (
+		-- Weighted Average Futures Price for Basis (Priced Qty) in Multiple Price Fixations
+		SELECT dblFutures = SUM(dblFutures) 
+		FROM
+		(
+			SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 2 
+		) t
+	) priceFixationDetail
+	OUTER APPLY (
+		-- Weighted Average Futures Price for HTA (Priced Qty) in Multiple Price Fixations
+		SELECT dblBasis = SUM(dblBasis) 
+		FROM
+		(
+			SELECT dblBasis = (pfd.dblBasis) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 3 
+		) t
+	) priceFixationDetailForHTA
+
 	
  	INSERT INTO #tempContractSeqHistory (
  		  intContractHeaderId
@@ -1010,23 +1053,68 @@ AS
 		, dblBasis
  	) 
  	SELECT 
- 	  sContract.intContractHeaderId
- 	, sContract.intContractDetailId
- 	, ctSeqHist.ysnPriced
-	, sContract.intContractTypeId
-	, ctSeqHist.dblFutures
-	, ctSeqHist.dblBasis
+ 			  sContract.intContractHeaderId
+ 			, sContract.intContractDetailId
+ 			, ctSeqHist.ysnPriced
+			, sContract.intContractTypeId
+			, dblFutures = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 2
+								THEN priceFixationDetail.dblFutures
+								ELSE ctSeqHist.dblFutures
+								END, @dblZero)
+			, dblBasis = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 3
+								THEN priceFixationDetailForHTA.dblBasis
+								ELSE ctSeqHist.dblBasis
+								END, @dblZero)
  	FROM #tempSaleContractInfo sContract
  	OUTER APPLY (
  		SELECT TOP 1 
- 			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-			  , dblFutures
-			  , dblBasis
+ 			    ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , ysnPartialPrice = CASE WHEN cb.strPricingStatus = 'Partially Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , ch.ysnMultiplePriceFixation
+			  , cb.dblFutures
+			  , cb.dblBasis
+			  , cb.intContractDetailId
+			  , cb.intPricingTypeId
+			  , cb.dblQuantity
  		FROM tblCTSequenceHistory cb
+		LEFT JOIN tblCTContractHeader ch
+			ON ch.intContractHeaderId = cb.intContractDetailId
  		WHERE cb.intContractDetailId = sContract.intContractDetailId
 		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
  		ORDER BY cb.dtmHistoryCreated DESC
  	) ctSeqHist
+	OUTER APPLY (
+		-- Weighted Average Futures Price for Basis (Priced Qty) in Multiple Price Fixations
+		SELECT dblFutures = SUM(dblFutures) 
+		FROM
+		(
+			SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 2 
+		) t
+	) priceFixationDetail
+	OUTER APPLY (
+		-- Weighted Average Futures Price for HTA (Priced Qty) in Multiple Price Fixations
+		SELECT dblBasis = SUM(dblBasis) 
+		FROM
+		(
+			SELECT dblBasis = (pfd.dblBasis) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 3 
+		) t
+	) priceFixationDetailForHTA
 
  	-- Get Latest Market Price
  	SELECT *
@@ -1183,7 +1271,7 @@ AS
  		, dtmSaleInvoiceDate = sInvoice.dtmInvoiceDate
  		, dblSaleBasis = ISNULL(saleCTSeqHist.dblBasis,@dblZero) --sContract.dblSaleBasis
  		, dblSaleDifferential = ISNULL(sContract.dblSaleDifferential, @dblZero)
- 		, dblSaleFixed = ISNULL((saleCTSeqHist.dblBasis + sContract.dblSaleDifferential), @dblZero) --sContract.dblSaleFixed
+ 		, dblSaleFixed = ISNULL((saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures), @dblZero) --sContract.dblSaleFixed
  		, sContract.strSaleMarket
  		, sContract.strSaleMonth
  		, sContract.strSaleCurrency
