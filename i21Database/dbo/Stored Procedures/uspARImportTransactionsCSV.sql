@@ -665,7 +665,7 @@ WHERE strTransactionType  IN ('Customer Prepayment') AND IL.intImportLogId = @Im
 		FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
-		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) <> 0 OR CTH.strContractNumber iS NULL)
+		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL)
 
 		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
