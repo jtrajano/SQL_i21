@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
+﻿CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
 AS
 
 
@@ -22,6 +19,7 @@ FROM
 ,strCFEmailDistributionOption			AS strEmailDistributionOption	
 ,arStaging.strCustomerNumber			AS strCustomerNumber	
 ,intEntityUserId	
+, ISNULL(dblCFTotalQuantity,0) AS dblTotalQuantity
 , CASE 
 			WHEN (ISNULL(strCFEmail,'') != '') AND (strCFEmailDistributionOption like '%CF Invoice%') THEN CAST(1 AS BIT)
 			ELSE CAST(0 AS BIT)
@@ -47,7 +45,8 @@ strCFEmailDistributionOption,
 arStaging.strCustomerNumber,
 intEntityUserId,
 dblCFTotalFuelExpensed,
-arCust.ysnActive) as tbl1
+arCust.ysnActive,
+dblCFTotalQuantity) as tbl1
 INNER JOIN 
 
 (SELECT intEntityCustomerId,
