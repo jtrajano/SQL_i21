@@ -20,7 +20,8 @@ begin
 			
 			join tblSCISBinSearch BinSearch
 				on	Ticket.intStorageLocationId = BinSearch.intStorageLocationId
-					and BinSearch.intStorageLocationId = @intStorageLocationId
+					and BinSearch.intStorageLocationId = @intStorageLocationId					
+     				and (BinSearch.dtmTrackingDate is null or Ticket.dtmTicketDateTime >= BinSearch.dtmTrackingDate) 
 			join tblSCISBinSearchDiscountHeader BinSearchDiscount
 				on BinSearch.intBinSearchId = BinSearchDiscount.intBinSearchId
 					and BinSearchDiscount.intItemId = @intItemId				
