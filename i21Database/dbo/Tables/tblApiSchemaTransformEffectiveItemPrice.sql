@@ -5,5 +5,6 @@ CREATE TABLE [dbo].[tblApiSchemaTransformEffectiveItemPrice] (
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The item number.
 	strLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The effective item price location.
 	dblRetailPrice NUMERIC(38, 20) NULL, -- The effective item price.
-	dtmEffectiveDate DATETIME NULL -- The item price effetive date
+	dtmEffectiveDate DATETIME NULL, -- The item price effetive date
+	strItemNoUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL -- The item price effetive date
 )
