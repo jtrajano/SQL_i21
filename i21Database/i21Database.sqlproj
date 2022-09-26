@@ -1192,6 +1192,7 @@
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExportTimberline.sql" />
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
+    <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
