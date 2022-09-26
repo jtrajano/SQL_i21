@@ -1186,6 +1186,7 @@
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
+    <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
