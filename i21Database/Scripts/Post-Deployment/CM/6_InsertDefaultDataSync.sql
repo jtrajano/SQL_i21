@@ -54,8 +54,7 @@ GO
 
 	
 	-- Insert data for showing all bank accounts in process payments
-	IF NOT EXISTS (SELECT 1 FROM tblCMBankAccountAll)
-		INSERT INTO tblCMBankAccountAll (intBankAccountId, strBankAccount, strBankName)
+	IF NOT EXISTS(SELECT 1 FROM tblCMBankAccountAll)
+	INSERT INTO tblCMBankAccountAll(intBankAccountId, strBankAccountNo, strBankName) 
 		SELECT -1, 'All Bank Accounts', 'All Banks'
-	GO
 GO
