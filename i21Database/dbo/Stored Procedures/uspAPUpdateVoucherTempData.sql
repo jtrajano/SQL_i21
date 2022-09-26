@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherTempData](
 	@voucherIds NVARCHAR(MAX) = NULL
 	,@paySchedIds NVARCHAR(MAX) = NULL
+	,@invoiceIds NVARCHAR(MAX) = NULL  
 	,@selectDue BIT = NULL
 	,@datePaid DATETIME = GETDATE
 	,@tempDiscount DECIMAL(18,6) = 0
@@ -28,19 +29,25 @@ BEGIN
 
 	DECLARE @vouchers NVARCHAR(MAX) = @voucherIds;
 	DECLARE @paySched NVARCHAR(MAX) = @paySchedIds;
+	DECLARE @invoices NVARCHAR(MAX) = @invoiceIds;  
 	DECLARE @voucherRecordsUpdated INT;
 	DECLARE @paySchedRecordsUpdated INT;
 	DECLARE @updatedPaymentAmt DECIMAL(18,2) = 0;
 	DECLARE @updatedWithheld DECIMAL(18,2) = 0;
 	DECLARE @amountDue DECIMAL(18,2);
 	DECLARE @ids AS Id;
+	DECLARE @idsInvoice AS Id;  
 	DECLARE @schedIds AS Id;
 	DECLARE @cntVoucher INT = 0;
+	DECLARE @cntInvoice INT = 0;
 	DECLARE @cntPaySched INT = 0;
 	DECLARE @vouchersForPaymentTran NVARCHAR(MAX);
 
 	INSERT INTO @ids
 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@vouchers) WHERE intID > 0
+
+	INSERT INTO @idsInvoice  
+ 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@invoices) WHERE intID > 0 
 
 	--REMOVE INVALID VOUCHERS
 	DELETE A
@@ -54,7 +61,20 @@ BEGIN
 	OR	B.dblAmountDue > B.dblTotal
 	)  
 
+	 --REMOVE INVALID INVOICES  
+	DELETE A  
+	FROM @idsInvoice A  
+	INNER JOIN tblARInvoice B ON A.intId = B.intInvoiceId  
+	WHERE   
+	(  
+		B.ysnPosted = 0   
+	OR 	B.ysnPaid = 1  
+	OR 	B.dblInvoiceTotal = 0  
+	OR 	B.dblAmountDue > B.dblInvoiceTotal  
+	)    
+
 	SELECT @cntVoucher = COUNT(*) FROM @ids
+	SELECT @cntInvoice = COUNT(*) FROM @idsInvoice  
 
 	IF OBJECT_ID('tempdb..#tmpNegativePayment') IS NOT NULL DROP TABLE #tmpNegativePayment
 	CREATE TABLE #tmpNegativePayment(intBillId INT);
@@ -313,6 +333,96 @@ BEGIN
 	-- 									FROM #tmpNegativePayment vouchers
 	-- 									FOR XML PATH('')),1,1,''
 	-- 								)
+	IF @cntInvoice > 0  
+	BEGIN  
+		
+		IF (SELECT COUNT(*) FROM @idsInvoice) > 1  
+		BEGIN  
+			--MULTIPLE UPDATE  
+			IF @selectDue IS NULL  
+			BEGIN  
+				MERGE tblAPPaymentIntegrationTransaction AS Target  
+				USING (  
+				SELECT  
+				*  
+				FROM @idsInvoice  
+				) AS Source  
+				ON Source.intId = Target.intInvoiceId  
+				
+				-- For Inserts  
+				WHEN NOT MATCHED BY Target THEN  
+				INSERT (intInvoiceId, ysnReadyForPayment)   
+				VALUES (Source.intId, 1)  
+				
+				-- For Updates  
+				WHEN MATCHED THEN UPDATE SET  
+				Target.intInvoiceId  = Source.intId;  
+			END  
+			ELSE  
+			BEGIN  
+				--MARK ALL DUE VOUCHERS AS READY FOR PAYMENT  
+				UPDATE voucher  
+				SET @updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest  
+				--,@amountDue = voucher.dblAmountDue  
+				,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END  
+				,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN  
+						CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))  
+						ELSE 0 END  
+				,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END  
+				,voucher.dblTempWithheld = @updatedWithheld  
+				,voucher.ysnReadyForPayment = CASE WHEN @selectDue = 1  
+						THEN   
+							CASE WHEN @datePaid >= dbo.fnGetDueDateBasedOnTerm(voucher.dtmDate, voucher.intTermsId)  
+							THEN 1  
+							ELSE 0  
+							END  
+						ELSE 0  
+						END  
+				FROM tblAPBill voucher  
+				INNER JOIN @ids ids ON voucher.intBillId = ids.intId  
+				INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId  
+				INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId  
+				OUTER APPLY (  
+				SELECT SUM(APD.dblAmountApplied) AS dblPayment  
+				FROM tblAPAppliedPrepaidAndDebit APD  
+				WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1  
+				) appliedPrepays  
+				WHERE voucher.ysnPosted = 1  
+				AND voucher.ysnPaid = 0  
+				AND voucher.dblTotal != 0  
+			END  
+		
+			SET @voucherRecordsUpdated = @@ROWCOUNT;  
+		END  
+		ELSE  
+		BEGIN  
+			MERGE tblAPPaymentIntegrationTransaction AS Target  
+			USING (  
+				SELECT  
+				*  
+				FROM @idsInvoice  
+			) AS Source  
+			ON Source.intId = Target.intInvoiceId  
+				
+			-- For Inserts  
+			WHEN NOT MATCHED BY Target THEN  
+				INSERT (intInvoiceId, ysnReadyForPayment)   
+				VALUES (Source.intId, 1)  
+				
+			-- For Updates  
+			WHEN MATCHED THEN UPDATE SET  
+				Target.intInvoiceId  = Source.intId,
+				Target.ysnReadyForPayment = @readyForPayment;  
+			
+			SET @voucherRecordsUpdated = @@ROWCOUNT;  
+		END  
+	
+	IF @cntInvoice != @voucherRecordsUpdated  
+	BEGIN  
+		RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);  
+	RETURN;  
+	END  
+ END
 
 
 	IF @transCount = 0 COMMIT TRANSACTION

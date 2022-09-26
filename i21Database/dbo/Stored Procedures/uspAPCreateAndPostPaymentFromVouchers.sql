@@ -5,6 +5,7 @@
 	@paymentMethod INT,
 	@datePaid DATETIME,
 	@voucherIds NVARCHAR(MAX),
+	@invoiceIds NVARCHAR(MAX),
 	@sort NVARCHAR(500),
 	@batchPaymentId NVARCHAR(255) OUTPUT,
 	@postedCount INT OUTPUT,
@@ -41,6 +42,7 @@ BEGIN
 	DECLARE @postError NVARCHAR(500);
 	DECLARE @payPrefix NVARCHAR(50);
 	DECLARE @ids AS Id;
+	DECLARE @invoices AS Id;
 	DECLARE @successPostPayment BIT;
 	DECLARE @totalUnpostedPayment INT = 0;
 	DECLARE @totalPostedPayment INT = 0;
@@ -52,6 +54,7 @@ BEGIN
 	CREATE TABLE #tmpMultiVouchers
 	(
 		intBillId INT,
+		intInvoiceId INT,
 		intPayToAddressId INT,
 		intEntityVendorId INT,
 		intPaymentId INT,
@@ -69,7 +72,7 @@ BEGIN
 	CREATE TABLE #tmpMultiVouchersCreatedPayment(intPartitionId INT, intCreatePaymentId INT);
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersAndPayment') IS NOT NULL DROP TABLE #tmpMultiVouchersAndPayment
-	CREATE TABLE #tmpMultiVouchersAndPayment(intBillId INT, intCreatePaymentId INT);
+	CREATE TABLE #tmpMultiVouchersAndPayment(intBillId INT, intInvoiceId INT, intCreatePaymentId INT);
 
 	IF OBJECT_ID('tempdb..#tmpPayableInvalidData') IS NOT NULL DROP TABLE  #tmpPayableInvalidData
 	CREATE TABLE #tmpPayableInvalidData (
@@ -82,6 +85,10 @@ BEGIN
 	INSERT INTO @ids
 	--USE DISTINCT TO REMOVE DUPLICATE BILL ID FOR SCHEDULE PAYMENT
 	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
+
+	INSERT INTO @invoices
+	--USE DISTINCT TO REMOVE DUPLICATE BILL ID FOR SCHEDULE PAYMENT
+	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@invoiceIds)
 
 	SELECT TOP 1
 		@currency = bank.intCurrencyId
@@ -157,32 +164,41 @@ BEGIN
 	IF OBJECT_ID('tempdb..#tmpPartitionedVouchers') IS NOT NULL DROP TABLE  #tmpPartitionedVouchers
 	SELECT 
 		result.* 
-		,voucher.ysnReadyForPayment
+		,CAST(1 AS BIT) ysnReadyForPayment--voucher.ysnReadyForPayment
 		,vendor.strVendorId
 		,entity.strName
 		,payTo.strCheckPayeeName
-		,voucher.dtmDueDate
-		,voucher.strBillId
-		,voucher.strVendorOrderNumber
-		,commodity.strCommodityCode
-		,term.strTerm
-		,voucher.dblTotal
-		,voucher.dblTempDiscount
-		,voucher.dblTempInterest
-		,voucher.dblAmountDue
+		,ISNULL(voucher.dtmDueDate, invoice.dtmDueDate) AS dtmDueDate
+		,ISNULL(voucher.strBillId, invoice.strInvoiceNumber) AS strBillId
+		,ISNULL(voucher.strVendorOrderNumber, invoice.strInvoiceNumber) AS strVendorOrderNumber
+		,ISNULL(commodity.strCommodityCode,commodityInvoice.strCommodityCode) AS strCommodityCode
+		--,term.strTerm
+		,ISNULL(voucher.dblTotal, invoice.dblInvoiceTotal) AS dblTotal
+		,ISNULL(voucher.dblTempDiscount,0) AS dblTempDiscount
+		,ISNULL(voucher.dblTempInterest,0) AS dblTempInterest
+		,ISNULL(voucher.dblAmountDue, invoice.dblAmountDue) AS dblAmountDue
 		,payMethod.strPaymentMethod
 		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
-		,strPayee = ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
+				,strPayee = CASE WHEN result.intInvoiceId > 0
+					THEN
+					ISNULL(payToInvoice.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
+					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(ISNULL(payToInvoice.strAddress,''), ISNULL(payToInvoice.strCity,''), ISNULL(payToInvoice.strState,''), ISNULL(payToInvoice.strZipCode,'')),'')
+					ELSE
+					ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
 					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(ISNULL(payTo.strAddress,''), ISNULL(payTo.strCity,''), ISNULL(payTo.strState,''), ISNULL(payTo.strZipCode,'')),'')
+					END
 		,intDefaultPayToBankAccountId = ISNULL(result.intPayToBankAccountId, eft.intEntityEFTInfoId)
 	INTO #tmpPartitionedVouchers 
-	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
-	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
+	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids, @invoices) result
+	LEFT JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
+	LEFT JOIN tblARInvoice invoice ON result.intInvoiceId = invoice.intInvoiceId
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
-		ON vendor.intEntityId = voucher.intEntityVendorId
+		ON vendor.intEntityId = result.intEntityVendorId
 	LEFT JOIN tblEMEntityLocation payTo ON voucher.intPayToAddressId = payTo.intEntityLocationId
-	LEFT JOIN tblSMTerm term ON voucher.intTermsId = term.intTermID
+	LEFT JOIN tblEMEntityLocation payToInvoice ON invoice.intBillToLocationId = payToInvoice.intEntityLocationId
+	--LEFT JOIN tblSMTerm term ON voucher.intTermsId = term.intTermID
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
+	LEFT JOIN vyuAPVoucherCommodity commodityInvoice ON invoice.intInvoiceId = commodityInvoice.intInvoiceId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID 
 	LEFT JOIN tblEMEntityEFTInformation eft ON eft.intEntityId = entity.intEntityId AND eft.ysnActive = 1 AND eft.ysnDefaultAccount = 1
 	OUTER APPLY (
@@ -205,6 +221,7 @@ BEGIN
 	INSERT INTO #tmpMultiVouchers
 	(
 		intBillId,
+		intInvoiceId,
 		intPayToAddressId,
 		intEntityVendorId,
 		intPaymentId,
@@ -217,7 +234,7 @@ BEGIN
 		intPartitionId
 	)
 	SELECT
-		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayToBankAccountId, intPartitionId
+		intBillId, intInvoiceId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayToBankAccountId, intPartitionId
 	FROM
 	(
 		SELECT 
@@ -387,16 +404,18 @@ BEGIN
 			ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 		END
 
-		INSERT INTO #tmpMultiVouchersAndPayment(intBillId, intCreatePaymentId)
+		INSERT INTO #tmpMultiVouchersAndPayment(intBillId, intInvoiceId, intCreatePaymentId)
 		SELECT 
-			vouchers.intBillId
+			trans.intBillId
+			,trans.intInvoiceId
 			,tmpPay.intCreatePaymentId
 		FROM #tmpMultiVouchersCreatedPayment tmpPay
-		INNER JOIN #tmpMultiVouchers vouchers ON tmpPay.intPartitionId = vouchers.intPartitionId 
+		INNER JOIN #tmpMultiVouchers trans ON tmpPay.intPartitionId = trans.intPartitionId 
 
 		INSERT INTO tblAPPaymentDetail(
 			[intPaymentId],
 			[intBillId],
+			[intInvoiceId],
 			[intAccountId],
 			[dblDiscount],
 			[dblWithheld],
@@ -409,6 +428,7 @@ BEGIN
 		SELECT 
 			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
 			[intBillId]			=	tmp.intBillId,
+			[intInvoiceId]		=	NULL,
 			[intAccountId]		=	CASE WHEN vouchers.ysnPrepayHasPayment = 0 AND vouchers.intTransactionType IN (2, 13) THEN details.intAccountId ELSE vouchers.intAccountId END,
 			[dblDiscount]		=	ISNULL(paySched.dblDiscount, vouchers.dblTempDiscount),
 			[dblWithheld]		=	vouchers.dblTempWithheld,
@@ -438,6 +458,24 @@ BEGIN
 		) details
 		LEFT JOIN tblAPVoucherPaymentSchedule paySched
 			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
+		UNION ALL
+		SELECT
+			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
+			[intBillId]			=	NULL,
+			[intInvoiceId]		=	tmp.intInvoiceId,
+			[intAccountId]		=	invoice.intAccountId,
+			[dblDiscount]		=	0,
+			[dblWithheld]		=	0,
+			[dblAmountDue]		=	invoice.dblAmountDue * (CASE WHEN invoice.strTransactionType IN ('Cash Refund','Credit Memo') THEN 1 ELSE -1 END),
+			[dblPayment]		=	invoice.dblAmountDue * (CASE WHEN invoice.strTransactionType IN ('Cash Refund','Credit Memo') THEN 1 ELSE -1 END),
+			[dblInterest]		=	0,
+			[dblTotal]			=	invoice.dblInvoiceTotal * (CASE WHEN invoice.strTransactionType IN ('Cash Refund','Credit Memo') THEN 1 ELSE -1 END),
+			[ysnOffset]			=	(CASE WHEN invoice.strTransactionType IN ('Cash Refund','Credit Memo') THEN 0 ELSE 1 END),
+			[intPayScheduleId]	=	NULL
+		FROM tblARInvoice invoice
+		INNER JOIN #tmpMultiVouchers tmp ON invoice.intInvoiceId = tmp.intInvoiceId
+		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intInvoiceId = tmpVoucherAndPay.intInvoiceId
+
 	END
 
 	SET @batchPaymentId = @batchId;
@@ -547,6 +585,13 @@ BEGIN
 		AND A.strPaymentRecordNum = B.strTransactionId
 	WHERE B.strBatchNumber = @batchIdUsed AND B.strMessage LIKE '%successfully%'
 	AND voucher.ysnReadyForPayment = 1
+
+	DELETE A
+	FROM tblAPPaymentIntegrationTransaction A
+	WHERE A.intInvoiceId IN (
+		SELECT tmpVoucherAndPay.intInvoiceId FROM #tmpMultiVouchersAndPayment tmpVoucherAndPay 
+		INNER JOIN tblAPPayment B ON B.intPaymentId = tmpVoucherAndPay.intCreatePaymentId
+	)
 
 	--UPDATE dblPaymentTemp and ysnInPayment
 	DECLARE @paymentIds AS NVARCHAR(MAX);
