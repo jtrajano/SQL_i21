@@ -65,6 +65,84 @@ BEGIN TRY
 		, dtmFilledDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		, strStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL)
 
+
+	SELECT DISTINCT import.strFilledDate
+	INTO #tmpFilledDates
+	FROM tblRKReconciliationBrokerStatementImport import
+	WHERE strFutMarketName = @strFutMarketName
+		AND strCommodityCode = @strCommodityCode
+		AND strName = @strName
+		AND strAccountNumber = CASE WHEN ISNULL(@strAccountNumber, '') = '' THEN strAccountNumber ELSE @strAccountNumber END
+		
+	DECLARE @tempStrDate NVARCHAR(100)
+		, @ysnWithIncorrectFormatDates BIT = 0
+
+	DECLARE @tblInvalidFilledDate TABLE (
+		strFilledDate NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	)
+
+	WHILE EXISTS (SELECT TOP 1 '' FROM #tmpFilledDates)
+	BEGIN
+		
+		SELECT TOP 1 @tempStrDate = strFilledDate FROM #tmpFilledDates
+
+		EXEC uspRKStringDateValidate @tempStrDate, @ysnWithIncorrectFormatDates OUTPUT
+
+		DELETE FROM #tmpFilledDates
+		WHERE strFilledDate = @tempStrDate 
+	
+		IF(@ysnWithIncorrectFormatDates = 0)
+		BEGIN
+			INSERT INTO @tblInvalidFilledDate (strFilledDate)
+			VALUES (@tempStrDate)
+		END
+	END
+	
+	DROP TABLE #tmpFilledDates
+
+	IF (SELECT COUNT('') FROM @tblInvalidFilledDate) > 0
+	BEGIN
+		INSERT INTO @tblFinalRec (strName
+			, strAccountNumber
+			, strFutMarketName
+			, strCommodityCode
+			, strBuySell
+			, dblNoOfContract
+			, strFutureMonth
+			, dblPrice
+			, dtmFilledDate
+			, ImportId
+			, strStatus)
+		SELECT import.strName
+			, import.strAccountNumber
+			, import.strFutMarketName
+			, import.strCommodityCode
+			, import.strBuySell
+			, dblNoOfContract = SUM(import.dblNoOfContract)
+			, strFutureMonth = REPLACE(import.strFutureMonth, '-', ' ')
+			, import.dblPrice
+			, dtmFilledDate = NULL
+			, ImportId = NULL
+			, strStatus = 'Invalid Filled Date Format'
+		FROM tblRKReconciliationBrokerStatementImport import
+		JOIN @tblInvalidFilledDate invalidFilledDates
+			ON invalidFilledDates.strFilledDate = import.strFilledDate
+		WHERE strFutMarketName = @strFutMarketName
+			AND strCommodityCode = @strCommodityCode
+			AND strName = @strName
+			AND strAccountNumber = CASE WHEN ISNULL(@strAccountNumber, '') = '' THEN strAccountNumber ELSE @strAccountNumber END
+		GROUP BY strName
+			, strAccountNumber
+			, strFutMarketName
+			, strCommodityCode
+			, strBuySell
+			, strFutureMonth
+			, dblPrice
+			, import.strFilledDate
+
+		GOTO EXIT_ROUTINE
+	END
+
 	--Invalid Filled Date
 	INSERT INTO @tblFinalRec (strName
 		, strAccountNumber
@@ -1413,6 +1491,8 @@ BEGIN TRY
 	DELETE FROM @ImportedRec
 	DELETE FROM @tblTransRec
 
+	EXIT_ROUTINE: 
+
 	BEGIN TRANSACTION
 	
 	DECLARE @intReconciliationBrokerStatementHeaderId INT
@@ -1542,8 +1622,8 @@ BEGIN TRY
 	COMMIT TRAN
 END TRY
 BEGIN CATCH
+	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION
 	SET @ErrMsg = ERROR_MESSAGE()
-	IF XACT_STATE() != 0 ROLLBACK TRANSACTION
 	IF @ErrMsg != ''
 	BEGIN
 		RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')
