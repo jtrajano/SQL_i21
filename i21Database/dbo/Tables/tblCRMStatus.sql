@@ -5,6 +5,7 @@
 	[strDescription] [nvarchar](150) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnActivity] [bit] NULL DEFAULT 0,
 	[ysnOpportunity] [bit] NULL DEFAULT 0,
+	[ysnDefaultReopen] [bit] NULL DEFAULT 0,
 	[ysnDefaultActivity] [bit] NULL DEFAULT 0,
 	[ysnDefaultOpportunity] [bit] NULL DEFAULT 0,
 	[strIcon] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
