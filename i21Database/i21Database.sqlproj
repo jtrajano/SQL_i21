@@ -1181,6 +1181,7 @@
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
     <Build Include="dbo\Views\vyuTMGetSite.sql" />
     <Build Include="dbo\Tables\tblAPPaymentIntegrationTransaction.sql" />
+    <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
