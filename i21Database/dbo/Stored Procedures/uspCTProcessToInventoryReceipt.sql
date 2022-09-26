@@ -136,8 +136,10 @@ AS
 				intBookId					=	CD.intBookId,
 				intSubBookId				=	CD.intSubBookId,
 				intLoadReceive				=	ISNULL(CD.dblBalanceLoad,0)		-	ISNULL(CD.dblScheduleLoad,0),
-				dblUnitRetail				=	CD.dblCashPrice
-
+				dblUnitRetail				=	CD.dblCashPrice,
+				strTaxPoint					=	case when isnull(CD.ysnTaxOverride,0) = 0 then null else CD.strTaxPoint end,
+				intTaxLocationId			=	case when isnull(CD.ysnTaxOverride,0) = 0 then null else CD.intTaxLocationId end,
+				intTaxGroupId				=	case when isnull(CD.ysnTaxOverride,0) = 0 then null else CD.intTaxGroupId end
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		--CT-7100 (ECOM commented this line for ECOM) --JOIN tblICItemUOM IU ON IU.intItemId = CD.intItemId AND IU.ysnStockUnit = 1		
