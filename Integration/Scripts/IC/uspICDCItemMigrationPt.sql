@@ -1175,4 +1175,17 @@ FROM
 	) iuFix 
 		ON iu.strLongUPCCode = iuFix.strLongUPCCode
 
+
+/* UPDATE Category of Item that doesn't have any Transactions or Audit log (Modification By Any User). */
+UPDATE Item
+SET Item.intCategoryId = (SELECT TOP 1 intCategoryId
+						  FROM tblICCategory AS Category 
+						  WHERE LOWER(Category.strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = LOWER(OriginItem.ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
+FROM tblICItem AS Item
+JOIN ptitmmst AS OriginItem ON RTRIM(OriginItem.ptitm_itm_no) COLLATE Latin1_General_CI_AS = Item.strItemNo
+WHERE Item.intItemId NOT IN (SELECT intItemId
+							 FROM tblICInventoryTransaction) OR intItemId NOT IN (SELECT intKeyValue
+																				  FROM tblSMAudit)
+
 GO
+
