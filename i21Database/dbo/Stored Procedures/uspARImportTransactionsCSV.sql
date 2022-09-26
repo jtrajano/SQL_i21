@@ -1490,7 +1490,7 @@ BEGIN
 
 					DELETE FROM #TempPrepaymentEntries WHERE intInvoiceId = @PrePayInvoiceId
 
-					EXEC uspARPostPayment @post = 1, @param = @PrePayInvoiceId, @raiseError = 1
+					EXEC uspARPostPayment @post = 1, @param = @PrepayPaymentId, @raiseError = 1
 
 			END
 			END TRY
