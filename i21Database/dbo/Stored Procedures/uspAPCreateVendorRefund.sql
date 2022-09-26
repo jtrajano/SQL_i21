@@ -18,6 +18,7 @@ DECLARE @transCount INT = @@TRANCOUNT;
 DECLARE @defaultCurrency INT;
 DECLARE @rateType INT;
 DECLARE @ids AS Id;
+DECLARE @invoiceIds AS Id;
 DECLARE @error NVARCHAR(250);
 DECLARE @paymentCreated NVARCHAR(MAX);
 DECLARE @batchIdUsed NVARCHAR(50);
@@ -49,7 +50,7 @@ SELECT
 	,payVouchers.intPaymentId
 	,payVouchers.intEntityVendorId
 	,ABS(payVouchers.dblTempPayment) 
-FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
+FROM dbo.fnAPPartitonPaymentOfVouchers(@ids, @invoiceIds) payVouchers
 WHERE payVouchers.dblTempPayment < 0
 
 IF NOT EXISTS(SELECT 1 FROM #tmpVouchersForPay)
