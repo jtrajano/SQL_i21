@@ -271,7 +271,7 @@ LEFT JOIN tblSMCity PDPort ON PDPort.intCityId = PDetail.intDestinationPortId
 LEFT JOIN tblCTCropYear CPY ON CPY.intCropYearId = LD.intCropYearId
 LEFT JOIN tblTRSupplyPoint PSP ON PSP.intEntityVendorId = PIndex.intVendorId AND PSP.intEntityLocationId = PIndex.intVendorLocationId
 LEFT JOIN tblICItem	IM ON IM.intItemId = PDetail.intItemId
-LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = PDetail.intContractDetailId
+LEFT JOIN vyuCTGetAdditionalColumnForDetailView AD ON AD.intContractDetailId = PDetail.intContractDetailId
 LEFT JOIN tblSMCurrency	CU ON CU.intCurrencyID = PDetail.intCurrencyId			
 LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId		
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId

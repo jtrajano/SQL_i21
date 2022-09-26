@@ -461,26 +461,6 @@ BEGIN
 						GOTO ExitWithRollback
 					END
 
-				-- DEALER COMMISSION ITEM ID
-				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intConsDealerCommissionItemId IS NULL)
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Missing setup of Dealer Commission item on Store Consignment configuration Setup tab'
-
-						-- ROLLBACK
-						GOTO ExitWithRollback
-					END
-					
-				-- Cash over/short item id
-				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NULL)
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Missing setup of over-short item on Store configuration Setup tab'
-
-						-- ROLLBACK
-						GOTO ExitWithRollback
-					END
-
 				-- Consignment validations
 				IF @ysnConsignmentStore = 1
 				BEGIN
@@ -498,6 +478,27 @@ BEGIN
 					INNER JOIN	tblEMEntity b
 					ON			a.intEntityId = b.intEntityId
 					WHERE		a.intEntityId = @intEntityCustomerId
+
+					-- DEALER COMMISSION ITEM ID
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intConsDealerCommissionItemId IS NULL)
+						BEGIN
+							SET @ysnUpdateCheckoutStatus = 0
+							SET @strStatusMsg = 'Missing setup of Dealer Commission item on Store Consignment configuration Setup tab'
+					
+							-- ROLLBACK
+							GOTO ExitWithRollback
+						END
+						
+					-- Cash over/short item id
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NULL)
+						BEGIN
+							SET @ysnUpdateCheckoutStatus = 0
+							SET @strStatusMsg = 'Missing setup of over-short item on Store configuration Setup tab'
+					
+							-- ROLLBACK
+							GOTO ExitWithRollback
+						END
+
 
 					IF @intPaymentMethod != @intCustomerPaymentMethod
 					BEGIN
@@ -5940,6 +5941,131 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					----------------------------------------------------------------------
 					-- END CREATE RECIEVE PAYMENTS from Customer Payments
 
+
+					-- Invoice Payment for Consignment
+					----------------------------------------------------------------------
+					-------------------------- Invoice Payment for Consignment -------------------------
+					----------------------------------------------------------------------
+					IF @ysnConsignmentStore = 1 AND @strInvoiceTransactionTypeMain = 'Invoice'
+						BEGIN
+								-- Use Recieve Payment UDP
+								INSERT INTO @PaymentsForInsert(
+										[intId]
+										,[strSourceTransaction]
+										,[intSourceId]
+										,[strSourceId]
+										,[intPaymentId]
+										,[intEntityCustomerId]
+										,[intCompanyLocationId]
+										,[intCurrencyId]
+										,[dtmDatePaid]
+										,[intPaymentMethodId]
+										,[strPaymentMethod]
+										,[strPaymentInfo]
+										,[strNotes]
+										,[intAccountId]
+										,[intBankAccountId]
+										,[intWriteOffAccountId]		
+										,[dblAmountPaid]
+										,[intExchangeRateTypeId]
+										,[dblExchangeRate]
+										,[strReceivePaymentType]
+										,[strPaymentOriginalId]
+										,[ysnUseOriginalIdAsPaymentNumber]
+										,[ysnApplytoBudget]
+										,[ysnApplyOnAccount]
+										,[ysnInvoicePrepayment]
+										,[ysnImportedFromOrigin]
+										,[ysnImportedAsPosted]
+										,[ysnAllowPrepayment]		
+										,[ysnPost]
+										,[ysnRecap]
+										,[ysnUnPostAndUpdate]
+										,[intEntityId]
+										--Detail																																															
+										,[intPaymentDetailId]
+										,[intInvoiceId]
+										,[strTransactionType]
+										,[intBillId]
+										,[strTransactionNumber]
+										,[intTermId]
+										,[intInvoiceAccountId]
+										,[ysnApplyTermDiscount]
+										,[dblDiscount]
+										,[dblDiscountAvailable]
+										,[dblInterest]
+										,[dblPayment]
+										,[strInvoiceReportNumber]
+										,[intCurrencyExchangeRateTypeId]
+										,[intCurrencyExchangeRateId]
+										,[dblCurrencyExchangeRate]
+										,[ysnAllowOverpayment]
+										,[ysnFromAP]
+										)								
+									SELECT
+										 [intId]								= @intCheckoutId -- ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
+										,[strSourceTransaction]					= 'Invoice'
+										,[intSourceId]							= @intCheckoutId
+										,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50)) --CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
+										,[intPaymentId]							= NULL									-- Payment Id(Insert new Invoice if NULL, else Update existing) 
+										,[intEntityCustomerId]					= @intEntityCustomerId
+										,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
+										,[intCurrencyId]						= @intCurrencyId
+										,[dtmDatePaid]							= @dtmCheckoutDate
+										,[intPaymentMethodId]					= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'ACH')
+										,[strPaymentMethod]						= 'ACH'
+										,[strPaymentInfo]						= ''
+										,[strNotes]								= 'Consignment Store Payment'
+										,[intAccountId]							= NULL		-- Account Id ([tblGLAccount].[intAccountId])
+										,[intBankAccountId]						= (SELECT intBankAccountId FROM tblSMCompanyLocation a
+																					INNER JOIN tblCMBankAccount b ON
+																					a.intCashAccount = b.intGLAccountId
+																					WHERE intCompanyLocationId = @intCompanyLocationId)
+										,[intWriteOffAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])	
+										,[dblAmountPaid]						= (SELECT dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intCreatedInvoiceId)
+										,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
+										,[dblExchangeRate]						= NULL
+										,[strReceivePaymentType]				= 'Cash Receipts'
+										,[strPaymentOriginalId]					= @intCheckoutId	-- Reference to the original/parent record
+																											-- This will also be used to create separate RCV for all rows in Customer Payments tab
+										,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
+										,[ysnApplytoBudget]						= 0
+										,[ysnApplyOnAccount]					= 0
+										,[ysnInvoicePrepayment]					= 0
+										,[ysnImportedFromOrigin]				= NULL
+										,[ysnImportedAsPosted]					= NULL
+										,[ysnAllowPrepayment]					= 0
+										,[ysnPost]								= 1			-- 1. Post, 0. UnPost
+										,[ysnRecap]								= @ysnRecap
+										,[ysnUnPostAndUpdate]					= NULL
+										,[intEntityId]							= @intCurrentUserId
+										--Detail																																															
+										,[intPaymentDetailId]					= NULL		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
+										,[intInvoiceId]							= @intCreatedInvoiceId --@intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
+										,[strTransactionType]					= NULL
+										,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
+										,[strTransactionNumber]					= NULL		-- Transaction Number 
+										,[intTermId]							= NULL		-- Term Id(If NULL, customer's default will be used) 
+										,[intInvoiceAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])
+										,[ysnApplyTermDiscount]					= 0
+										,[dblDiscount]							= 0.000000		-- Discount
+										,[dblDiscountAvailable]					= NULL		-- Discount 
+										,[dblInterest]							= 0.000000		-- Interest
+										,[dblPayment]							= (SELECT dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intCreatedInvoiceId)		-- Payment	
+										,[strInvoiceReportNumber]				= NULL		-- Transaction Number
+										,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
+										,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
+										,[dblCurrencyExchangeRate]				= NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate 
+										,[ysnAllowOverpayment]					= 0
+										,[ysnFromAP]							= NULL 
+									FROM tblSTCheckoutHeader CH
+									WHERE CH.intCheckoutId = @intCheckoutId
+						END
+					----------------------------------------------------------------------
+					----------------------- END Invoice Payment for Consignment ------------------------
+					----------------------------------------------------------------------
+					-- END CREATE RECEIVE PAYMENTS from Invoice Payment for Consignment
+
 					IF EXISTS(SELECT * FROM @PaymentsForInsert)
 						BEGIN
 
@@ -6459,6 +6585,133 @@ IF(@ysnDebug = CAST(1 AS BIT))
 										ORDER BY
 											[intId]
 
+
+									IF @ysnConsignmentStore = 1 AND @strInvoiceTransactionTypeMain = 'Invoice'
+									BEGIN
+											-- Use Recieve Payment UDP
+											INSERT INTO @PaymentsForInsert(
+													[intId]
+													,[strSourceTransaction]
+													,[intSourceId]
+													,[strSourceId]
+													,[intPaymentId]
+													,[intEntityCustomerId]
+													,[intCompanyLocationId]
+													,[intCurrencyId]
+													,[dtmDatePaid]
+													,[intPaymentMethodId]
+													,[strPaymentMethod]
+													,[strPaymentInfo]
+													,[strNotes]
+													,[intAccountId]
+													,[intBankAccountId]
+													,[intWriteOffAccountId]		
+													,[dblAmountPaid]
+													,[intExchangeRateTypeId]
+													,[dblExchangeRate]
+													,[strReceivePaymentType]
+													,[strPaymentOriginalId]
+													,[ysnUseOriginalIdAsPaymentNumber]
+													,[ysnApplytoBudget]
+													,[ysnApplyOnAccount]
+													,[ysnInvoicePrepayment]
+													,[ysnImportedFromOrigin]
+													,[ysnImportedAsPosted]
+													,[ysnAllowPrepayment]		
+													,[ysnPost]
+													,[ysnRecap]
+													,[ysnUnPostAndUpdate]
+													,[intEntityId]
+													--Detail																																															
+													,[intPaymentDetailId]
+													,[intInvoiceId]
+													,[strTransactionType]
+													,[intBillId]
+													,[strTransactionNumber]
+													,[intTermId]
+													,[intInvoiceAccountId]
+													,[ysnApplyTermDiscount]
+													,[dblDiscount]
+													,[dblDiscountAvailable]
+													,[dblInterest]
+													,[dblPayment]
+													,[strInvoiceReportNumber]
+													,[intCurrencyExchangeRateTypeId]
+													,[intCurrencyExchangeRateId]
+													,[dblCurrencyExchangeRate]
+													,[ysnAllowOverpayment]
+													,[ysnFromAP]
+													)								
+												SELECT
+													 [intId]								= @intCheckoutId -- ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
+													,[strSourceTransaction]					= 'Invoice'
+													,[intSourceId]							= @intCheckoutId
+													,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50)) --CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
+													,[intPaymentId]							= Payment.intPaymentId										-- Payment Id(Insert new Invoice if NULL, else Update existing) 
+													,[intEntityCustomerId]					= @intEntityCustomerId
+													,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
+													,[intCurrencyId]						= @intCurrencyId
+													,[dtmDatePaid]							= @dtmCheckoutDate
+													,[intPaymentMethodId]					= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'ACH')
+													,[strPaymentMethod]						= 'ACH'
+													,[strPaymentInfo]						= ''
+													,[strNotes]								= 'Consignment Store Payment'
+													,[intAccountId]							= NULL		-- Account Id ([tblGLAccount].[intAccountId])
+													,[intBankAccountId]						= (SELECT intBankAccountId FROM tblSMCompanyLocation a
+																								INNER JOIN tblCMBankAccount b ON
+																								a.intCashAccount = b.intGLAccountId
+																								WHERE intCompanyLocationId = @intCompanyLocationId)
+													,[intWriteOffAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])	
+													,[dblAmountPaid]						= (SELECT dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId  = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))
+													,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
+													,[dblExchangeRate]						= NULL
+													,[strReceivePaymentType]				= 'Cash Receipts'
+													,[strPaymentOriginalId]					= NULL	-- Reference to the original/parent record
+																														-- This will also be used to create separate RCV for all rows in Customer Payments tab
+													,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
+													,[ysnApplytoBudget]						= 0
+													,[ysnApplyOnAccount]					= 0
+													,[ysnInvoicePrepayment]					= 0
+													,[ysnImportedFromOrigin]				= NULL
+													,[ysnImportedAsPosted]					= NULL
+													,[ysnAllowPrepayment]					= 0
+													,[ysnPost]								= @ysnPost			-- 1. Post, 0. UnPost
+													,[ysnRecap]								= @ysnRecap
+													,[ysnUnPostAndUpdate]					= 1 -- To UNPOST
+													,[intEntityId]							= @intCurrentUserId
+													--Detail																																															
+													,[intPaymentDetailId]					= PaymentDetail.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
+													,[intInvoiceId]							= PaymentDetail.intInvoiceId --@intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
+													,[strTransactionType]					= NULL
+													,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
+													,[strTransactionNumber]					= NULL		-- Transaction Number 
+													,[intTermId]							= NULL		-- Term Id(If NULL, customer's default will be used) 
+													,[intInvoiceAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])
+													,[ysnApplyTermDiscount]					= 0
+													,[dblDiscount]							= 0.000000		-- Discount
+													,[dblDiscountAvailable]					= NULL		-- Discount 
+													,[dblInterest]							= 0.000000		-- Interest
+													,[dblPayment]							= (SELECT dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId  = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))		-- Payment	
+													,[strInvoiceReportNumber]				= NULL		-- Transaction Number
+													,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
+													,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
+													,[dblCurrencyExchangeRate]				= NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate 
+													,[ysnAllowOverpayment]					= 0
+													,[ysnFromAP]							= NULL 
+												FROM tblSTCheckoutHeader CH
+												JOIN tblARPaymentIntegrationLogDetail ILD
+													ON CH.intReceivePaymentsIntegrationLogId = ILD.intIntegrationLogId
+												JOIN tblARPayment Payment
+													ON ILD.intPaymentId = Payment.intPaymentId
+												INNER JOIN tblARPaymentDetail PaymentDetail
+													ON Payment.intPaymentId = PaymentDetail.intPaymentId
+												INNER JOIN tblARInvoice Inv
+													ON PaymentDetail.intInvoiceId = Inv.intInvoiceId
+												WHERE CH.intCheckoutId = @intCheckoutId
+													AND Inv.ysnPosted = 1
+													AND ILD.intPaymentDetailId IS NOT NULL
+									END
+
 									IF EXISTS(SELECT TOP 1 1 FROM @PaymentsForInsert)
 										BEGIN
 
@@ -6533,23 +6786,36 @@ IF(@ysnDebug = CAST(1 AS BIT))
 															BEGIN TRY
 																IF EXISTS(SELECT intPaymentId FROM tblARPayment WHERE intPaymentId = @intRCVPaymentIdLoop AND ysnPosted = 0)
 																	BEGIN
-																		-- Delete Recieve Payments
-																		EXEC [dbo].[uspARProcessPaymentFromInvoice]
-																			 @InvoiceId						= @intCPPInvoiceIdLoop -- Invoice Id of CPP
-																			,@EntityId						= 1			
-																			,@RaiseError					= 0				
-																			,@PaymentId						= @intRCVPaymentIdLoop OUTPUT
-																			,@ErrorMessage					= @ErrorMessage OUTPUT
-
-
 																		IF(@ErrorMessage IS NULL)
 																			BEGIN
+																				IF @ysnConsignmentStore = 1 AND @strInvoiceTransactionTypeMain = 'Invoice'
+																				BEGIN
+																					DECLARE @RCVId AS Id
+																				
+																					INSERT INTO @RCVId (intId)
+																					VALUES (@intRCVPaymentIdLoop)
+																				
+																					-- DELETE RCV
+																					EXEC [dbo].[uspARDeletePayment]
+																							@PaymentIds	= @RCVId,
+																							@intEntityUserId		= @intCurrentUserId
+																					--SELECT ''
+																				END
+																				ELSE
+																				BEGIN
+																					-- Delete Recieve Payments
+																					EXEC [dbo].[uspARProcessPaymentFromInvoice]
+																						 @InvoiceId						= @intCPPInvoiceIdLoop -- Invoice Id of CPP
+																						,@EntityId						= 1			
+																						,@RaiseError					= 0				
+																						,@PaymentId						= @intRCVPaymentIdLoop OUTPUT
+																						,@ErrorMessage					= @ErrorMessage OUTPUT
 
-																				-- DELETE CPP here
-																				EXEC [dbo].[uspARDeleteInvoice]
-																						@InvoiceId	= @intCPPInvoiceIdLoop,
-																						@UserId		= @intCurrentUserId
-
+																					-- DELETE CPP here
+																					EXEC [dbo].[uspARDeleteInvoice]
+																							@InvoiceId	= @intCPPInvoiceIdLoop,
+																							@UserId		= @intCurrentUserId
+																				END
 																			END
 																	END
 																ELSE 

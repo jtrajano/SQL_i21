@@ -3933,6 +3933,7 @@ BEGIN TRY
 					SELECT intPricingTypeId, strNotes FROM @cbLogSpecific
 				) tbl
 
+				select line=4194,ysnMatched=@ysnMatched,TotalBasis=@TotalBasis,TotalPriced=@TotalPriced,TotalHTA=@TotalHTA
 				IF @ysnMatched <> 1
 				BEGIN
 					IF (ISNULL(@TotalBasis, 0) <> 0)
@@ -3949,10 +3950,19 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev
+
+							UPDATE lp
 							SET strBatchId = @strBatchId
 								, strProcess = @strProcess
 								, dtmTransactionDate = @_dtmCurrent
+								, dblOrigQty = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.dblOrigQty else lp.dblOrigQty end
+								, strTransactionReference = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReference else lp.strTransactionReference end
+								, strTransactionReferenceNo = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReferenceNo else lp.strTransactionReferenceNo end
+								, intTransactionReferenceId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceId else lp.intTransactionReferenceId end
+								, intTransactionReferenceDetailId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceDetailId else lp.intUserId end
+								, intUserId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intUserId else lp.intUserId end
+							FROM @cbLogPrev lp
+							cross apply (SELECT * FROM @cbLogSpecific) curr
 
 							IF (@strProcess = 'Do Roll')
 							BEGIN
@@ -4002,10 +4012,20 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev
+							UPDATE lp
 							SET strBatchId = @strBatchId
 								, strProcess = @strProcess
 								, dtmTransactionDate = @_dtmCurrent
+								, dblOrigQty = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.dblOrigQty else lp.dblOrigQty end
+								, strTransactionReference = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReference else lp.strTransactionReference end
+								, strTransactionReferenceNo = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReferenceNo else lp.strTransactionReferenceNo end
+								, intTransactionReferenceId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceId else lp.intTransactionReferenceId end
+								, intTransactionReferenceDetailId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceDetailId else lp.intUserId end
+								, intUserId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intUserId else lp.intUserId end
+							FROM @cbLogPrev lp
+							cross apply (SELECT * FROM @cbLogSpecific) curr
+
+							select line=4276,* from @cbLogPrev
 
 							IF (@strProcess = 'Do Roll')
 							BEGIN
@@ -4028,7 +4048,6 @@ BEGIN TRY
 						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty * - 1 FROM @cbLogPrev)
 										ELSE @TotalPriced END
 							, intPricingTypeId = CASE WHEN ISNULL(@truePreviousPricingType, 0) = 1 AND ISNULL(@truePricingTypeId, 0) <> 1 THEN @truePricingTypeId ELSE 1 END
-							, dblFutures = @dblPreviousFutures
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 					IF (ISNULL(@TotalHTA, 0) <> 0)
@@ -4363,7 +4382,6 @@ BEGIN TRY
 						UPDATE @cbLogSpecific
 						SET dblQty = 1
 							, intPricingTypeId = 1
-							, dblFutures = @dblPreviousFutures
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 				END
