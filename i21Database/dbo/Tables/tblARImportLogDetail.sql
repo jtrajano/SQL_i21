@@ -28,6 +28,8 @@
 	[strPaymentMethod]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strCheckNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strBankAccountNo]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strContractNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intContractSeq]			INT NULL,
 	[dblAmountPaid]				NUMERIC(18,6) NULL,
 	[dblCOGSAmount]				NUMERIC(18,6) NULL,
 	[dblSubtotal]				NUMERIC(18,6) NULL,
