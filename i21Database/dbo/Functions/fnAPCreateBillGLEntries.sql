@@ -1001,7 +1001,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Tax Adjustment',
+		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,
