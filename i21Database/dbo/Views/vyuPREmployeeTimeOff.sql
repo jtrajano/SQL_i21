@@ -1,6 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuPREmployeeTimeOff]
-AS 
-
+﻿CREATE VIEW [dbo].[vyuPREmployeeTimeOff]  
+AS   
+  
 SELECT ETO.intEntityEmployeeId
 	,ET.intEntityId
 	,ETO.intEmployeeTimeOffId
@@ -25,7 +25,7 @@ SELECT ETO.intEntityEmployeeId
 	,EMP.intRank
 	,dblHoursUsed = ISNULL(TOYTD.dblHoursUsedYTD,0)
 	,dblBalance = (ETO.dblHoursCarryover + ETO.dblHoursEarned) - ETO.dblHoursUsed - ISNULL(TOYTD.dblHoursUsedYTD,0)
-	,ETO.dblHoursCarryover  
+	,ETO.dblHoursCarryover 
 	,dblAdjustments =  ETO.dblHoursUsed 
 FROM tblPREmployeeTimeOff ETO
 LEFT JOIN(
@@ -52,19 +52,30 @@ INNER JOIN(
 		SELECT E.intEntityId  
 			  ,dblHoursUsedYTD = SUM(
 										CASE WHEN PCTimeOff.intYear IS NOT NULL AND (T.strAwardPeriod = 'Anniversary Date') THEN 
-													CASE WHEN (PCTimeOff.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
-														AND (PCTimeOff.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  OR YEAR(PCTimeOff.dtmDateFrom) =  YEAR(GETDATE()) )
+													CASE WHEN (
+														PCTimeOff.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
+														AND 
+														(PCTimeOff.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  OR YEAR(PCTimeOff.dtmDateFrom) =  YEAR(GETDATE()) )
 														) THEN dblHours
-													ELSE 0
-
+													ELSE 
+														0
 													END
-											WHEN TOR.intYear IS NOT NULL AND  (T.strAwardPeriod = 'Anniversary Date') THEN 
-													CASE WHEN (TOR.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
-														AND (TOR.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  OR YEAR(TOR.dtmDateFrom) =  YEAR(GETDATE()) )
+											When TOR.intYear IS NOT NULL AND  (T.strAwardPeriod = 'Anniversary Date') THEN 
+													CASE WHEN (
+														TOR.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
+														AND 
+														(TOR.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  OR YEAR(TOR.dtmDateFrom) =  YEAR(GETDATE()) )
 														) THEN TOR.dblHoursTOR
 													ELSE 
 														0
 													END
+											WHEN PCTimeOff.intYear IS NOT NULL AND (T.strAwardPeriod = 'End of Year') THEN 
+													CASE WHEN (PCTimeOff.dtmDateFrom < DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1) 
+															AND PCTimeOff.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
+															) THEN dblHours
+													ELSE 0
+
+													END 
                                             WHEN TOR.intYear IS NOT NULL AND (T.strAwardPeriod = 'End of Year') THEN   
                                                 CASE WHEN (  TOR.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)    
 														AND (TOR.dtmDateFrom < DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1))  
@@ -72,6 +83,11 @@ INNER JOIN(
 												ELSE   
 													0	
 												END  
+											WHEN TOR.intYear IS NOT NULL  AND (T.strAwardPeriod = 'Start of Year') THEN
+												CASE WHEN TOR.intYear = YEAR(GETDATE())
+												THEN TOR.dblHoursTOR
+												ELSE 0
+												END
 											ELSE 
 												CASE WHEN PCTimeOff.intYear IS NOT NULL AND (PCTimeOff.intYear = YEAR(GETDATE())) THEN
 														dblHours
@@ -115,10 +131,11 @@ INNER JOIN(
 				)PCTimeOff
 				ON PCTimeOff.intEntityEmployeeId = E.intEntityId 
 				AND PCTimeOff.intTypeTimeoffId = T.intTypeTimeOffId
-   
+				AND T.dtmLastAward < PCTimeOff.dtmDateFrom
    			LEFT JOIN (	SELECT
 						intYear  = YEAR(dtmDateFrom)
 						,dtmDateFrom
+						,dtmDateTo
 						,intEntityEmployeeId
 						,intTypeTimeOffId
 						,dblHoursTOR = dblRequest
@@ -127,11 +144,12 @@ INNER JOIN(
 				)TOR
 				ON E.intEntityId = TOR.intEntityEmployeeId
 				AND T.intTypeTimeOffId = TOR.intTypeTimeOffId
-
+				AND ((PCTimeOff.intYear IS NOT NULL AND PCTimeOff.intYear = YEAR(TOR.dtmDateTo)) OR PCTimeOff.intYear IS NULL)
    			GROUP BY 
 			E.intEntityId
 			,T.intTypeTimeOffId   
 ) TOYTD 
 	ON ETO.intEntityEmployeeId = TOYTD.intEntityId 
-		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId
+	AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId
+  
 GO
