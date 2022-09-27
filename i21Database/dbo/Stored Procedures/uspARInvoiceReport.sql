@@ -301,7 +301,7 @@ SELECT
 	, intCompanyLocationId			= INV.intCompanyLocationId
 	, intEntityCustomerId			= INV.intEntityCustomerId
 	, strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' 
-										WHEN ISNULL(L.strCompanyName, '') <> '' THEN L.strCompanyName
+										WHEN (ISNULL(L.strCompanyName, '') <> '' AND SMLP.imgLogo IS NOT NULL) THEN L.strCompanyName
 										ELSE @strCompanyName END
 	, strCompanyAddress				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
 										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
