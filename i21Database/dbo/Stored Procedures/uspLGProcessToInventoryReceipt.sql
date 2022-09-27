@@ -1046,10 +1046,26 @@ BEGIN TRY
 			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 			,[intSourceType] = 2
 			,[strBillOfLadding] = L.strBLNumber
-			,[strCertificate] = CF.strCertificationName
-			,[intProducerId] = CC.intProducerId
-			,[strCertificateId] = CC.strCertificationId
-			,[strTrackingNumber] = CC.strTrackingNumber
+			,[strCertificate] = CASE WHEN 
+									(SELECT COUNT(1) FROM tblCTContractCertification WHERE intContractDetailId = CD.intContractDetailId) <= 1
+									THEN CF.strCertificationName
+									ELSE NULL
+								END
+			,[intProducerId] = CASE WHEN 
+									(SELECT COUNT(1) FROM tblCTContractCertification WHERE intContractDetailId = CD.intContractDetailId) <= 1
+									THEN CC.intProducerId
+									ELSE NULL
+								END
+			,[strCertificateId] = CASE WHEN 
+									(SELECT COUNT(1) FROM tblCTContractCertification WHERE intContractDetailId = CD.intContractDetailId) <= 1
+									THEN CC.strCertificationId
+									ELSE NULL
+								END
+			,[strTrackingNumber] = CASE WHEN 
+									(SELECT COUNT(1) FROM tblCTContractCertification WHERE intContractDetailId = CD.intContractDetailId) <= 1
+									THEN CC.strTrackingNumber
+									ELSE NULL
+								END
 		FROM tblLGLoad L 
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
