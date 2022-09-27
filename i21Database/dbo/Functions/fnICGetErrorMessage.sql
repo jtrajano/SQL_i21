@@ -279,7 +279,7 @@ BEGIN
 		WHEN @msgId = 80263 THEN 'Category changed for item %s.'
 		WHEN @msgId = 80264 THEN 'The item type for %s is not "stockable". Costing is not allowed.'
 		WHEN @msgId = 80265 THEN 'Cost adjustment for %s is missing. Stock rebuild will abort.'
-		WHEN @msgId = 80266 THEN 'Item %s Category %s does not exists on Storage Location Categories of %s.'
+		WHEN @msgId = 80266 THEN 'Item Category %s does not exists on Storage Location Categories of %s.'
 	END 
 
 	RETURN @msg
