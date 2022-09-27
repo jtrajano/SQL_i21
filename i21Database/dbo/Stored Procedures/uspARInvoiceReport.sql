@@ -171,8 +171,12 @@ SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
 	 , strInvoiceComments		= L.strInvoiceComments
 	 , strFullAddress			= L.strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(L.strCity, ''), '') + ISNULL(', ' + ISNULL(L.strStateProvince, ''), '') + ISNULL(', ' + ISNULL(L.strZipPostalCode, ''), '') + ISNULL(', ' + ISNULL(L.strCountry, ''), '')
+	 , intCompanySegment		= L.intCompanySegment
+	 , strCompanyName			= GLCD.strCompanyName
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
+LEFT JOIN tblGLAccountSegment GLAS ON L.intCompanySegment = GLAS.intAccountSegmentId
+LEFT JOIN tblGLCompanyDetails GLCD ON GLAS.intAccountSegmentId = GLCD.intAccountSegmentId
 
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE	
@@ -296,7 +300,9 @@ SELECT
 	 intInvoiceId					= INV.intInvoiceId
 	, intCompanyLocationId			= INV.intCompanyLocationId
 	, intEntityCustomerId			= INV.intEntityCustomerId
-	, strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
+	, strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' 
+										WHEN ISNULL(L.strCompanyName, '') <> '' THEN L.strCompanyName
+										ELSE @strCompanyName END
 	, strCompanyAddress				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
 										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 										WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
