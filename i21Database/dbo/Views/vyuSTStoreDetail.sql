@@ -28,8 +28,6 @@ SELECT ST.*
 	   , strConsBankDepositDraftId		 =	  Bank.strBankName + ' - ' + dbo.fnAESDecryptASym(ConsBankDepositDraftId.strBankAccountNo)
 	   , strConsARAccountId				 =	  ConsARAccountId.strAccountId
 	   , strConsFuelOverShortItem		 =    FuelItemOverShort.strItemNo
-	   , CustomerCharge.strDescription as strCustomerChargeDescription
-	   , CashTransaction.strDescription as strCashTransactionDescription
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
