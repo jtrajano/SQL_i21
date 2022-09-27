@@ -37,6 +37,7 @@
 	,@UnPostedExistingCount			INT								= 0				OUTPUT
 	,@BatchIdForExistingUnPostRecap	NVARCHAR(50)					= NULL			OUTPUT
 	,@RecapUnPostedExistingCount	INT								= 0				OUTPUT
+	,@RollBackAllTransaction		BIT 							= 0
 AS
 
 BEGIN
@@ -1396,7 +1397,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingUnPost = @batchIdUsed
 			SET @UnPostedExistingCount = @successfulCount
@@ -1448,7 +1450,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingUnPostRecap = @batchIdUsed
 			SET @RecapUnPostedExistingCount = @successfulCount
@@ -2572,7 +2575,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForNewPost = @batchIdUsed
 			SET @PostedNewCount = @successfulCount
@@ -2621,7 +2625,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError	
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForNewPostRecap = @batchIdUsed
 			SET @RecapNewCount = @successfulCount
@@ -2692,7 +2697,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingPost = @batchIdUsed
 			SET @PostedExistingCount  = @successfulCount
@@ -2742,7 +2748,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingRecap = @batchIdUsed
 			SET @RecapPostExistingCount  = @successfulCount
