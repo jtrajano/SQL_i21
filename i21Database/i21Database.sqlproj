@@ -1206,8 +1206,6 @@
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
     <Build Include="dbo\Tables\tblTMFillMethodSkyBitzRef.sql" />
     <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
-    <Build Include="dbo\Views\vyuTMGetSite.sql" />
-    <Build Include="dbo\Tables\tblAPPaymentIntegrationTransaction.sql" />
     <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
   </ItemGroup>
