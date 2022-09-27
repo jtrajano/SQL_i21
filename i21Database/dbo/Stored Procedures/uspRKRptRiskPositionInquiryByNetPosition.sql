@@ -103,6 +103,8 @@ SELECT @strUomType = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strUomType'
 
+SET @intDecimal = 4
+
 DECLARE @strCommodityCodeH NVARCHAR(100)
 DECLARE @strFutureMarketH NVARCHAR(100)
 DECLARE @strFutureMonthH NVARCHAR(100)
