@@ -17,10 +17,9 @@ SELECT
 	U.strStructureName  COLLATE Latin1_General_CI_AS strStructureName,
 	ISNULL(Mapping.c,0)  ysnUsed,
 	S.dtmObsoleteDate,
-	S.intConcurrencyId,
-	S.intCode,
 	CompanyDetails.intCompanyDetailsId,
-	CompanyDetails.strCompanyName
+	CompanyDetails.strCompanyName,
+	S.intConcurrencyId
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
 	dbo.tblGLAccountGroup AS G ON S.intAccountGroupId = G.intAccountGroupId LEFT OUTER JOIN
