@@ -111,7 +111,7 @@ BEGIN
     GROUP BY GL.intAccountId, strAccountId
 
 
-    SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountIdLoop, @intAccountId,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)
+    SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountId,@intAccountIdLoop, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)
 
 
     IF @newStrAccountId = ''
