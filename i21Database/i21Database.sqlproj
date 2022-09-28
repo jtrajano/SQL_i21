@@ -11400,6 +11400,7 @@
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAdminAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" /> 
   </ItemGroup>
   <ItemGroup>
