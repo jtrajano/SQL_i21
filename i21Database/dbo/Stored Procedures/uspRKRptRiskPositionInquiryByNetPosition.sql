@@ -103,6 +103,8 @@ SELECT @strUomType = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strUomType'
 
+SET @intDecimal = 4
+
 DECLARE @strCommodityCodeH NVARCHAR(100)
 DECLARE @strFutureMarketH NVARCHAR(100)
 DECLARE @strFutureMonthH NVARCHAR(100)
@@ -422,6 +424,31 @@ BEGIN
 	ORDER BY strGroup,
 		PriceStatus,
 		CASE WHEN strFutureMonth = 'Previous' THEN '01/01/1900' WHEN strFutureMonth = 'Total' THEN '01/01/9999' ELSE CONVERT(DATETIME, '01 ' + strFutureMonth) END
+
+	INSERT INTO #temp (
+		strGroup,
+		Selection,
+		PriceStatus,
+		strFutureMonth,
+		strAccountNumber,
+		dblNoOfContract,
+		intOrderByHeading
+		)
+	SELECT strGroup,
+		Selection,
+		PriceStatus,
+		strFutureMonth = 'Total',
+		strAccountNumber,
+		SUM(CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal))) dblNoOfContract,
+		intOrderByHeading
+	FROM #temp
+	GROUP BY strGroup,
+		Selection,
+		PriceStatus,
+		strAccountNumber,
+		intOrderByHeading
+	ORDER BY strGroup,
+		PriceStatus
 
 	SELECT row_number() OVER (
 			ORDER BY intRowNumber

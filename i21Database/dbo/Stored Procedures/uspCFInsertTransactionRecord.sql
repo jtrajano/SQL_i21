@@ -1476,13 +1476,13 @@ BEGIN
 			BEGIN
 				SET @ysnInvalid = 1
 			END
-			ELSE
-			BEGIN
-				IF(@ysnIgnoreVehicleError = 0)
-				BEGIN
-					SET @ysnInvalid = 1
-				END
-			END
+			-- ELSE
+			-- BEGIN
+			-- 	IF(@ysnIgnoreVehicleError = 0)
+			-- 	BEGIN
+			-- 		SET @ysnInvalid = 1
+			-- 	END
+			-- END
 		END
 		ELSE
 		BEGIN
@@ -1801,7 +1801,7 @@ BEGIN
 
 					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recalculate to remove this error and leave the vehicle as blank.')
 
-					SET @ysnInvalid = 1
+					--SET @ysnInvalid = 1
 				END
 			END
 		END

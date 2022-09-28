@@ -2126,9 +2126,11 @@ BEGIN
 		FROM dbo.[fnARGetOverrideAccount](ARPIH.[intAccountId], [dbo].[fnGetItemBaseGLAccount](IFC.intItemId, IFC.intItemLocationId, GLAC.strAccountCategory), @OverrideCompanySegment, @OverrideLocationSegment, 0)
 	) OVERRIDESEGMENT
 	WHERE (
-		(@OverrideCompanySegment = 1 AND bitSameCompanySegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0) OR
-		(@OverrideLocationSegment = 1 AND bitSameLocationSegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0)
+		(@OverrideCompanySegment = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+		OR
+		(@OverrideLocationSegment = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
 	)
+	AND OVERRIDESEGMENT.bitOverriden = 0
 	AND GLAC.strAccountCategory IN ('Cost of Goods', 'Sales Account', 'Inventory')
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2162,9 +2164,11 @@ BEGIN
 		FROM dbo.[fnARGetOverrideAccount](ARPIH.[intAccountId], [dbo].[fnGetItemBaseGLAccount](IFITC.intItemId, IFITC.intItemLocationId, GLAC.strAccountCategory), @OverrideCompanySegment, @OverrideLocationSegment, 0)
 	) OVERRIDESEGMENT
 	WHERE (
-		(@OverrideCompanySegment = 1 AND bitSameCompanySegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0) OR
-		(@OverrideLocationSegment = 1 AND bitSameLocationSegment = 0 AND OVERRIDESEGMENT.bitOverriden = 0)
+		(@OverrideCompanySegment = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+		OR
+		(@OverrideLocationSegment = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
 	)
+	AND OVERRIDESEGMENT.bitOverriden = 0
 	AND GLAC.strAccountCategory = 'Inventory In-Transit'
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2236,12 +2240,15 @@ BEGIN
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
-		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment
 		FROM dbo.[fnARGetOverrideAccount](I.[intSalesAccountId], @DueFromAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
 	) OVERRIDESEGMENT
-	WHERE OVERRIDESEGMENT.bitOverriden = 0
-	AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
-	AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+	WHERE (
+		(@AllowIntraCompanyEntries = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+		OR
+		(@AllowIntraLocationEntries = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
+	)
+	AND OVERRIDESEGMENT.bitOverriden = 0
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2363,11 +2370,21 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Revenue Account that matches the freight company and location segment of transport load. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](@FreightRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the freight revenue account that matches the freight company and location segment of transport load. Please add ' + dbo.fnGLGetOverrideAccountBySegment(@FreightRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I
+	OUTER APPLY (
+		SELECT intAccountId
+		FROM tblGLAccount
+		WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@FreightRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+	) GLACCOUNT
+	OUTER APPLY (
+		SELECT bitOverriden, bitSameCompanySegment, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](@FreightRevenueAccount, ISNULL(GLACCOUNT.intAccountId, 0), 1, 1, 0)
+	) OVERRIDESEGMENT
 	WHERE I.dblFreightCharge > 0
-	AND ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@FreightRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment]), 0) = 0
+	AND OVERRIDESEGMENT.bitOverriden = 0
+	AND (OVERRIDESEGMENT.bitSameCompanySegment = 0 OR OVERRIDESEGMENT.bitSameLocationSegment = 0)
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2387,11 +2404,21 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the From Account that matches the freight company and location segment of transport load. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the due from account that matches the freight company and location segment of transport load. Please add ' + dbo.fnGLGetOverrideAccountBySegment(@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I
+	OUTER APPLY (
+		SELECT intAccountId
+		FROM tblGLAccount
+		WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+	) GLACCOUNT
+	OUTER APPLY (
+		SELECT bitOverriden, bitSameCompanySegment, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](@DueFromAccountId, ISNULL(GLACCOUNT.intAccountId, 0), 1, 1, 0)
+	) OVERRIDESEGMENT
 	WHERE I.dblFreightCharge > 0
-	AND ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, I.[intFreightLocationSegment]), I.[intFreightCompanySegment]), 0) = 0
+	AND OVERRIDESEGMENT.bitOverriden = 0
+	AND (OVERRIDESEGMENT.bitSameCompanySegment = 0 OR OVERRIDESEGMENT.bitSameLocationSegment = 0)
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2411,7 +2438,7 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Freight Expense Account that matches the company and location segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the freight expense account that matches the company and location segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
@@ -2440,7 +2467,7 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Due To Account that matches the company and location segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the due to account that matches the company and location segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceDetail I
 	OUTER APPLY (
@@ -2517,11 +2544,21 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Surcharge Revenue Account that matches the freight company and location segment of transport load. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](@SurchargeRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the surcharge revenue account that matches the freight company and location segment of transport load. Please add ' + dbo.fnGLGetOverrideAccountBySegment(@SurchargeRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I
+	OUTER APPLY (
+		SELECT intAccountId
+		FROM tblGLAccount
+		WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@SurchargeRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+	) GLACCOUNT
+	OUTER APPLY (
+		SELECT bitOverriden, bitSameCompanySegment, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](@SurchargeRevenueAccount, ISNULL(GLACCOUNT.intAccountId, 0), 1, 1, 0)
+	) OVERRIDESEGMENT
 	WHERE I.dblSurcharge > 0
-	AND ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@SurchargeRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment]), 0) = 0
+	AND OVERRIDESEGMENT.bitOverriden = 0
+	AND (OVERRIDESEGMENT.bitSameCompanySegment = 0 OR OVERRIDESEGMENT.bitSameLocationSegment = 0)
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2541,11 +2578,21 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
 		,[intItemId]			= I.[intItemId] 
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to find the Due From Account that matches the freight company and location segment of transport load. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
+		,[strPostingError]		= 'Unable to find the due from account that matches the freight company and location segment of transport load. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment]) + ' to the chart of accounts.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I
+	OUTER APPLY (
+		SELECT intAccountId
+		FROM tblGLAccount
+		WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+	) GLACCOUNT
+	OUTER APPLY (
+		SELECT bitOverriden, bitSameCompanySegment, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](@DueFromAccountId, ISNULL(GLACCOUNT.intAccountId, 0), @OverrideCompanySegment, @OverrideLocationSegment, 0)
+	) OVERRIDESEGMENT
 	WHERE I.dblSurcharge > 0
-	AND ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, I.[intFreightLocationSegment]), I.[intFreightCompanySegment]), 0) = 0
+	AND OVERRIDESEGMENT.bitOverriden = 0
+	AND (OVERRIDESEGMENT.bitSameCompanySegment = 0 OR OVERRIDESEGMENT.bitSameLocationSegment = 0)
 	AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData

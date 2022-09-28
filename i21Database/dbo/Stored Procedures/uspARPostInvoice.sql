@@ -17,6 +17,7 @@
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@accrueLicense		AS BIT				= 0
 	,@raiseError		AS BIT				= 0
+	,@rollbackAll		AS BIT				= 0
 
  WITH RECOMPILE
 AS
@@ -339,7 +340,7 @@ END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM tblARPostInvoiceHeader WHERE strSessionId = @strRequestId
 			
-IF(@totalInvalid >= 1 AND @totalRecords <= 0)
+IF((@totalInvalid >= 1 AND @totalRecords <= 0) OR (@totalInvalid >= 1 AND @rollbackAll = 1))
 	BEGIN
 		IF @raiseError = 0
 		BEGIN
