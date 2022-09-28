@@ -1211,6 +1211,12 @@
     <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryShrinkSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryDiscountsSubReport.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettlementsForTransfer.sql" />
+    <Build Include="dbo\Tables\tblGRTransferFromSettlements.sql" />
+    <Build Include="dbo\Tables\tblGRTransferSettlementsHeader.sql" />
+    <Build Include="dbo\Tables\tblGRTransferToSettlements.sql" />
+    <Build Include="dbo\Tables\tblGRTransferToSettlementsReference.sql" />
+    <Build Include="dbo\Views\vyuGRTransferSettlements.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
