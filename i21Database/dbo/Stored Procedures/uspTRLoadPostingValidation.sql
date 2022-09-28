@@ -197,10 +197,10 @@ BEGIN TRY
 			END
 
 			-- CHECK FREIGHT ITEM COST UOM
-			IF(ISNULL(@strCostUOMFreight, '') = '')
-			BEGIN
-				RAISERROR('Incorrect Freight Item setup: Cost UOM should have a value.', 16, 1)
-			END
+			-- IF(ISNULL(@strCostUOMFreight, '') = '')
+			-- BEGIN
+			-- 	RAISERROR('Incorrect Freight Item setup: Cost UOM should have a value.', 16, 1)
+			-- END
 
 			-- CHECK SURCHARGE ITEM
 			SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
