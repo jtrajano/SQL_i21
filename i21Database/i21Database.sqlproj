@@ -1208,6 +1208,9 @@
     <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryShrinkSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryDiscountsSubReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
