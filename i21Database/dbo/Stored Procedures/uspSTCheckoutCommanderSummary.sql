@@ -19,11 +19,13 @@ BEGIN
 					  , @intCustomerChargeMopId INT
 					  , @intCashTransctionMopId INT
 					  , @ysnConsignmentStore BIT = 1
+					  , @dblConsMatchTolerance DECIMAL(18, 6)
 
 				SELECT @intStoreId			  = ch.intStoreId
 					 , @intCustomerChargeMopId = st.intCustomerChargeMopId
 					 , @intCashTransctionMopId = st.intCashTransctionMopId
 					 , @ysnConsignmentStore = st.ysnConsignmentStore
+					 , @dblConsMatchTolerance = st.dblConsMatchTolerance
 				FROM dbo.tblSTCheckoutHeader ch
 				INNER JOIN dbo.tblSTStore st
 					ON ch.intStoreId = st.intStoreId
@@ -338,6 +340,7 @@ BEGIN
           -------------------------------------------------------------------------------------------------------------
 		  DECLARE @dblAggregateMeterReadingsForDollars DECIMAL(18, 6)
 		  DECLARE @dblSummaryInfoFuelSales DECIMAL(18, 6)
+		  DECLARE @dblDifference DECIMAL(18, 6)
 		  
 		  SELECT 		TOP 1
 						@dblSummaryInfoFuelSales = CAST(ISNULL(dblSummaryInfoFuelSales, 0) AS DECIMAL(18, 6))
@@ -355,8 +358,9 @@ BEGIN
           WHERE intCheckoutId = @intCheckoutId
 		  
 		  SET @dblAggregateMeterReadingsForDollars = dbo.fnSTGetAggregateMeterReadingsForDollars(@intCheckoutId)
+		  SET @dblDifference = @dblAggregateMeterReadingsForDollars - @dblSummaryInfoFuelSales;
 		  
-		  IF (@dblAggregateMeterReadingsForDollars != @dblSummaryInfoFuelSales)
+		  IF (ABS(@dblDifference) > @dblConsMatchTolerance)
 			BEGIN
 				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
 				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Aggregate Meter Readings does not Match the Register''s Summary File value', 1)
