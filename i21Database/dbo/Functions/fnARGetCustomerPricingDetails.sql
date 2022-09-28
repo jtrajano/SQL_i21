@@ -112,7 +112,7 @@ BEGIN
 		,dblCustomerPrice
 		,strPricing
 		,strInvoiceType)
-	SELECT
+	SELECT TOP 1
 		SP.intSpecialPriceId
 		,SP.intEntityCustomerId
 		,SP.intEntityVendorId
