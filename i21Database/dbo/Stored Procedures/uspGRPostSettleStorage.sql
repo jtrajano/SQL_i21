@@ -636,7 +636,7 @@ BEGIN TRY
 					select sum(dblQtyReceived) as dblTotal
 						from tblAPBillDetail 
 							where intBillId in 
-								(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+								(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId  and intTransactionType = 1)) 
 							and intContractDetailId = a.intContractDetailId
 				) total_bill
 					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
@@ -671,7 +671,7 @@ BEGIN TRY
 						 select @cur_billed_per_contract_id = sum(ISNULL(dblQtyReceived,0))
 							from tblAPBillDetail 
 								where intBillId in 
-									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId and intTransactionType = 1)) 
 								and intContractDetailId = @cur_contract_id
 
 						--select '@cur_billed_per_contract_id',@cur_billed_per_contract_id
