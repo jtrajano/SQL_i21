@@ -438,7 +438,7 @@ BEGIN TRY
 					DECLARE @dblMissingQuantity DECIMAL(18,6) = @dblReceivedQuantity - @dblDistributedQuantity
 					
 					SET @strresult = @strDescription + ' received quantity ' + LTRIM(FORMAT(@dblReceivedQuantity, 'g17'))  + ' does not match distributed quantity ' + LTRIM(FORMAT(@dblDistributedQuantity, 'g17')) +
-					CHAR(13) + CHAR(10) + char(149) + ' Difference: ' +  LTRIM(@dblMissingQuantity, 'g17')) 
+					CHAR(13) + CHAR(10) + char(149) + ' Difference: ' +  LTRIM(FORMAT(@dblMissingQuantity, 'g17')) 
 					RAISERROR(@strresult, 16, 1)
 				END
 			END
