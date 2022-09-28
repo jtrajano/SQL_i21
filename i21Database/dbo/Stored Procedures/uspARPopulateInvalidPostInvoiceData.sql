@@ -2607,6 +2607,89 @@ BEGIN
 	AND ISNULL(LOB.intAccountId, 0) = 0
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 	AND ARPID.strSessionId = @strSessionId
+
+	--VALIDATE INVENTORY ACCOUNTS
+	DECLARE @InvalidItemsForPosting TABLE (
+		  intInvoiceId				INT
+		, intInvoiceDetailId		INT
+		, intItemId					INT
+		, intItemLocationId			INT
+		, strInvoiceNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strAccountCategory		NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	)
+
+	INSERT INTO @InvalidItemsForPosting (
+		  intInvoiceId
+		, intInvoiceDetailId
+		, intItemId
+		, intItemLocationId
+		, strInvoiceNumber
+		, strAccountCategory
+	)
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Inventory'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory') IS NULL	
+
+	UNION ALL
+
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Cost of Goods'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Cost of Goods') IS NULL
+
+	UNION ALL
+	
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Sales Account'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Sales Account') IS NULL
+
+	UNION ALL
+
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Inventory In-Transit'
+	FROM @ItemsForInTransitCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory In-Transit') IS NULL	
+	
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	SELECT
+		 [intInvoiceId]			= IC.intInvoiceId
+		,[strInvoiceNumber]		= IC.strInvoiceNumber
+		,[strTransactionType]	= 'Invoice'
+		,[intInvoiceDetailId]	= IC.intInvoiceDetailId
+		,[intItemId]			= IC.intItemId
+		,[strBatchId]			= @BatchId
+		,[strPostingError]		= ITEM.strItemNo + ' in ' + CL.strLocationName + ' is missing a GL account setup for ' + IC.strAccountCategory + ' account category.'
+		,[strSessionId]			= @strSessionId
+	FROM @InvalidItemsForPosting IC
+	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
+	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
+	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
 END
 
 IF @Post = @ZeroBit
