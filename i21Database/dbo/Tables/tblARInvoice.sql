@@ -165,6 +165,7 @@
 	[strSourcedFrom]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblSurcharge]						NUMERIC(18, 6)									NULL,
 	[intOpportunityId]		    		INT												NULL,
+	[strPrintFormat]					NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NOT NULL	DEFAULT (''),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
