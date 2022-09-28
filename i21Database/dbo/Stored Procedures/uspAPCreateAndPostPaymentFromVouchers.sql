@@ -200,7 +200,7 @@ BEGIN
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN vyuAPVoucherCommodity commodityInvoice ON invoice.intInvoiceId = commodityInvoice.intInvoiceId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID 
-	LEFT JOIN tblEMEntityEFTInformation eft ON eft.intEntityId = entity.intEntityId AND eft.ysnActive = 1 AND eft.ysnDefaultAccount = 1
+	LEFT JOIN tblEMEntityEFTInformation eft ON eft.intEntityId = entity.intEntityId AND eft.intCurrencyId = @currency AND eft.ysnActive = 1 AND eft.ysnDefaultAccount = 1
 	OUTER APPLY (
 		SELECT STUFF((
 			SELECT DISTINCT ' and ' + strName
