@@ -25,7 +25,8 @@ SELECT ST.*
 	   , strChangeFundBegBalanceItemId	 = 	  ChangeFundBegBalanceItem.strItemNo
 	   , strChangeFundEndBalanceItemId	 = 	  ChangeFundEndBalanceItem.strItemNo
 	   , strChangeFundReplenishItemId	 = 	  ChangeFundReplenishItem.strItemNo
-	   ,CustomerCharge.strDescription as strPaymentOptionDescription
+	   , CustomerCharge.strDescription as strCustomerChargeDescription
+	   , CashTransaction.strDescription as strCashTransactionDescription
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
