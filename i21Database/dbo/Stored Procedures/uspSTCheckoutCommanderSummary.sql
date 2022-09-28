@@ -340,7 +340,7 @@ BEGIN
           -------------------------------------------------------------------------------------------------------------
 		  DECLARE @dblAggregateMeterReadingsForDollars DECIMAL(18, 6)
 		  DECLARE @dblSummaryInfoFuelSales DECIMAL(18, 6)
-		  DECLARE @dblDifference DECIMAL(18, 6)
+		  DECLARE @dblDifference DECIMAL(18, 6) 
 		  
 		  IF @ysnConsignmentStore = 1
 		  BEGIN
