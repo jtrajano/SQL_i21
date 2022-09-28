@@ -367,7 +367,7 @@ BEGIN
 					INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
 					VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Aggregate Meter Readings does not Match the Register''s Summary File value', 1)
 				END
-		  END
+		  END 
           -------------------------------------------------------------------------------------------------------------
           ------------------------------------- END CONSIGNMENT DATA --------------------------------------------------
           -------------------------------------------------------------------------------------------------------------
