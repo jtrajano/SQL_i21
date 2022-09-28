@@ -151,6 +151,7 @@ SELECT
 	,strEntityLocationRemarks	= EMEL.strRemarks
 	,strFooterComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strFooterComments, ''), 0)
 	,dblTotal					= ARGID.dblTotal
+	,strReportType			= CASE WHEN ARI.strType = 'Provisional' THEN ARI.strType ELSE 'Commercial' END
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
