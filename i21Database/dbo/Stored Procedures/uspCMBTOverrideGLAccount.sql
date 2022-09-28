@@ -101,13 +101,8 @@ BEGIN
     WHERE GL.intAccountId <> @intAccountId
     GROUP BY GL.intAccountId, strAccountId
 
-    IF @ysnOverrideLocation = 1 
-        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(3,@strAccountId,@strAccountId1)
-    
-    IF @ysnOverrideCompany = 1
-        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(6,@strAccountId,@newStrAccountId)
+    SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountId,@intAccountIdLoop, @ysnOverrideLocation,0, @ysnOverrideCompany)
         
-
     IF @newStrAccountId = ''
     BEGIN
 	    SET @msg += '<li>Overriding ' + @strAccountId1 + ' encountered an unknow error.</li>'
