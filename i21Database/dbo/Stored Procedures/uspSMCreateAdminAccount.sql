@@ -11,7 +11,6 @@ BEGIN
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
 		
@@ -47,12 +46,12 @@ BEGIN
 			RAISERROR(@error, 16, 1);
 			
 		END
-		IF ISNULL(@email, '') NOT LIKE '%_@__%.__%'
-		BEGIN
-			SET @error =  'Email format is invalid.';
-			RAISERROR(@error, 16, 1);
+		--IF ISNULL(@email, '') NOT LIKE '%_@__%.__%'
+		--BEGIN
+		--	SET @error =  'Email format is invalid.';
+		--	RAISERROR(@error, 16, 1);
 			
-		END
+		--END
 
 		--check if email exists
 		IF EXISTS(SELECT 1 FROM tblEMEntity WHERE strEmail = ISNULL(@email, ''))
@@ -121,17 +120,24 @@ BEGIN
 			INSERT [dbo].[tblSMUserRole] ( [strName], [strDescription], [strMenu], [strMenuPermission], [strForm], [strRoleType], [ysnAdmin], [intConcurrencyId])
 				VALUES ( N'ADMINISTRATOR', N'ADMINISTRATOR - USE FOR IRELY TESTING', N'', N'', NULL, N'Administrator', 1, 1)
 		 
-				SET @intUserRoleId= (SELECT SCOPE_IDENTITY())
+				SET @intUserRoleId = (SELECT SCOPE_IDENTITY())
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @intUserRoleId = intUserRoleID FROM tblSMUserRole WHERE strName = 'ADMINISTRATOR'
 		END
 
 		--LOCATION
 		declare @intCompanyLocationId INT;
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE strLocationName = 'ADMIN LOCATION' )
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE strLocationNumber = '001' )
 		BEGIN
 			INSERT [dbo].[tblSMCompanyLocation] ( [strLocationName], [strLocationNumber], [strLocationType])
 
 			values ( N'ADMIN LOCATION', N'001', N'Office')
 			set @intCompanyLocationId = (select SCOPE_IDENTITY())
+		END
+		BEGIN
+			SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = '001'
 		END
 
 		--SECURITY
