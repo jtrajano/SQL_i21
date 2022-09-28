@@ -203,7 +203,7 @@ ELSE
 						BEGIN
 							UPDATE tblCMBankTransaction 
 								SET ysnPosted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 1 ELSE 0 END,
-									ysnCheckVoid = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, --REMOVED 123
+									ysnCheckVoid = CASE WHEN intBankTransactionTypeId IN (122) THEN 0 ELSE 1 END, --REMOVED 123
 									ysnClr = CASE WHEN intBankTransactionTypeId IN (122,123) THEN 0 ELSE 1 END, 
 									dtmDateReconciled = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, dtmCheckPrinted = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE dtmDate END, intBankFileAuditId = CASE WHEN intBankTransactionTypeId IN (122,123) THEN NULL ELSE intBankFileAuditId END, @isPostingSuccessful = 1 
 							WHERE strTransactionId = @strVoidTransactionId --AND intBankTransactionTypeId = @VOID_CHECK
