@@ -110,15 +110,9 @@ BEGIN
     WHERE GL.intAccountId <> @intAccountId
     GROUP BY GL.intAccountId, strAccountId
 
-    IF @ysnOverrideLocation = 1 
-        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(3,@strAccountId,@strAccountId1)
-    
-     IF @ysnOverrideLOB = 1
-        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(6,@strAccountId,@newStrAccountId)
-    
-    IF @ysnOverrideCompany = 1
-        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(6,@strAccountId,@newStrAccountId)
-        
+
+    SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountId,@intAccountIdLoop, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)
+
 
     IF @newStrAccountId = ''
     BEGIN
