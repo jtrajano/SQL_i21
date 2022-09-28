@@ -230,6 +230,7 @@ BEGIN TRY
 		i.strShortName AS strItemShortName, 
 		CL.strLocationName AS strLocation, 
 		UOM.strLongUPCCode AS strUpc, 
+		UM.strUnitMeasure AS strUOM, 
 		CAST(CAST(HP.dblSalePrice AS DECIMAL(8,2)) AS VARCHAR(MAX)) AS strPrice
 	FROM	tblICItem i CROSS APPLY (
 				SELECT	TOP 1
@@ -259,6 +260,8 @@ BEGIN TRY
 		ON IL.intLocationId = CL.intCompanyLocationId
 	INNER JOIN tblICItemUOM UOM
 		ON i.intItemId = UOM.intItemId
+	INNER JOIN tblICUnitMeasure UM
+		ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 	INNER JOIN vyuSTItemHierarchyPricing HP
 		ON i.intItemId = HP.intItemId
 			AND IL.intItemLocationId = HP.intItemLocationId
