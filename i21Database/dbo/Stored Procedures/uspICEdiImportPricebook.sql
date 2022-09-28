@@ -64,15 +64,11 @@ WHERE
 	p.strUniqueId = @UniqueId
 
 -- Clean the UPC codes 
-UPDATE p
-SET p.strSellingUpcNumber	= NULLIF(NULLIF(LTRIM(RTRIM(strSellingUpcNumber)), ''), '0') 
-  , p.strOrderCaseUpcNumber = NULLIF(NULLIF(LTRIM(RTRIM(strOrderCaseUpcNumber)), ''), '0') 
-  , p.strAltUPCNumber1		= NULLIF(NULLIF(LTRIM(RTRIM(strAltUPCNumber1)), ''), '0') 
-  , p.strAltUPCNumber2		= NULLIF(NULLIF(LTRIM(RTRIM(strAltUPCNumber2)), ''), '0') 
-FROM 
-	tblICEdiPricebook p
-WHERE 
-	p.strUniqueId = @UniqueId
+UPDATE tblICEdiPricebook SET strSellingUpcNumber	= NULLIF(NULLIF(LTRIM(RTRIM(strSellingUpcNumber)), ''), '0') 
+						   , strOrderCaseUpcNumber  = NULLIF(NULLIF(LTRIM(RTRIM(strOrderCaseUpcNumber)), ''), '0') 
+						   , strAltUPCNumber1		= NULLIF(NULLIF(LTRIM(RTRIM(strAltUPCNumber1)), ''), '0') 
+						   , strAltUPCNumber2		= NULLIF(NULLIF(LTRIM(RTRIM(strAltUPCNumber2)), ''), '0') 
+WHERE strUniqueId = @UniqueId
 
 -- Get the data for Vendor Item XRef
 DECLARE @vendorItemXRef AS TABLE (
@@ -102,87 +98,47 @@ WHERE
 	p.strUniqueId = @UniqueId
 
 -- Remove the duplicate records in tblICEdiPricebook
-;WITH deleteDuplicate_CTE (
-	intEdiPricebookId
-	,strSellingUpcNumber
-	,dblDuplicateCount
-)
-AS (
-	
-	SELECT 
-		p.intEdiPricebookId
-		,p.strSellingUpcNumber
-		,dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strSellingUpcNumber ORDER BY p.intEdiPricebookId, p.strSellingUpcNumber)
-	FROM 
-		tblICEdiPricebook p
-	WHERE 
-		p.strUniqueId = @UniqueId
+;WITH deleteDuplicate_CTE (intEdiPricebookId
+						 , strItemNo
+						 , dblDuplicateCount)
+AS (SELECT intEdiPricebookId
+		 , strItemNo
+		 , dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY strItemNo ORDER BY intEdiPricebookId, strItemNo)
+	FROM tblICEdiPricebook
+	WHERE strUniqueId = @UniqueId
 )
 DELETE FROM deleteDuplicate_CTE
 WHERE dblDuplicateCount > 1;
 
 -- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
 DELETE p
-FROM 
-	tblICEdiPricebook p
-	LEFT JOIN tblICItemUOM u 
-		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-	OUTER APPLY (
-		SELECT TOP 1 
-			i.intItemId 
-		FROM
-			tblICItem i 
-		WHERE
-			i.intItemId = u.intItemId
-			OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)
-	) i		
-	OUTER APPLY (			
-		SELECT TOP 1 
-			m.*
-		FROM tblICUnitMeasure m 
-		WHERE
-			m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
-		ORDER BY 
-			m.intUnitMeasureId 
-	) m
-	OUTER APPLY (
-		SELECT TOP 1 
-			s.*
-		FROM tblICUnitMeasure s 
-		WHERE
-			s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
-		ORDER BY 
-			m.intUnitMeasureId 
-	) s
-	OUTER APPLY (
-		SELECT TOP 1 
-			iu.intItemUOMId 
-		FROM 
-			tblICItemUOM iu
-		WHERE
-			iu.intItemId = i.intItemId
-			AND iu.ysnStockUnit = 1 
-	) stockUnit
-	OUTER APPLY (
-		SELECT TOP 1 
-			*
-		FROM 
-			tblICItemUOM dup
-		WHERE
-			dup.intItemId = i.intItemId
-			AND dup.intItemUOMId <> u.intItemUOMId
-			AND dup.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)
-	) dup
-WHERE
-	p.strUniqueId = @UniqueId
-	AND dup.intItemUOMId IS NOT NULL 
+FROM tblICEdiPricebook p
+LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2)
+OUTER APPLY (SELECT TOP 1 i.intItemId 
+			 FROM tblICItem i 
+			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i		
+OUTER APPLY (SELECT TOP 1 m.*
+			 FROM tblICUnitMeasure m 
+			 WHERE m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+		     ORDER BY m.intUnitMeasureId) m
+OUTER APPLY (SELECT TOP 1 s.*
+			 FROM tblICUnitMeasure s 
+			 WHERE s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+			 ORDER BY m.intUnitMeasureId) s
+OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
+			 FROM tblICItemUOM iu
+			 WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1) stockUnit
+OUTER APPLY (SELECT TOP 1 *
+			 FROM tblICItemUOM dup
+			 WHERE dup.intItemId = i.intItemId
+			   AND dup.intItemUOMId <> u.intItemUOMId
+			   AND dup.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)) dup
+WHERE p.strUniqueId = @UniqueId AND dup.intItemUOMId IS NOT NULL ;
 
 -- Get the duplicate count. 
 SELECT @duplicatePricebookCount = ISNULL(@originalPricebookCount, 0) - COUNT(1) 
-FROM 
-	tblICEdiPricebook p
-WHERE 
-	p.strUniqueId = @UniqueId
+FROM tblICEdiPricebook 
+WHERE strUniqueId = @UniqueId;
 
 -- Retrieve the Category -> Vendor Category XRef setup. 
 UPDATE p
@@ -387,7 +343,7 @@ SELECT
 	, NULL 
 	, NULL 
 	, dbo.fnFormatMessage(
-		'There are %i duplicate records(s) found in the file.'
+		'There are %i records(s) already exists.'
 		,@duplicatePricebookCount
 		,DEFAULT
 		,DEFAULT
@@ -403,7 +359,7 @@ SELECT
 	, 'Record not imported.'
 	, 1
 WHERE 
-	@duplicatePricebookCount <> 0 
+	@duplicatePricebookCount > 0 
 
 -- Log the records with missing Vendor-Category setup
 INSERT INTO tblICImportLogDetail(
@@ -608,17 +564,12 @@ SELECT @LogId
 	 , 'Record not imported.'
 	 , 1
 FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON (ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber OR u.intUpcCode = CASE WHEN p.strSellingUpcNumber IS NOT NULL AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') THEN 
-																																							CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
-																																					  ELSE 
-																																							CAST(NULL AS BIGINT) 	
-																																					  END)
 OUTER APPLY (SELECT TOP 1 i.intItemId 
 			 FROM tblICItem i 
-			 WHERE i.intItemId = u.intItemId OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)) i
+			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i
 OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
 			 FROM tblICItemUOM iu
-			 WHERE iu.intItemId = i.intItemId AND iu.strLongUPCCode = NULLIF(p.strAltUPCNumber1, '0')) existUOM
+			 WHERE iu.intItemId = i.intItemId AND iu.strLongUPCCode = NULLIF(p.strAltUPCNumber1, '')) existUOM
 WHERE p.strUniqueId = @UniqueId 
   AND i.intItemId IS NOT NULL 
   AND NULLIF(p.strAltUPCNumber1, '') IS NOT NULL 
@@ -925,315 +876,241 @@ WHERE strSellingUpcNumber IN (SELECT strSellingUpcNumber
 SET @missingVendorCategoryXRef = @@ROWCOUNT;	
 
 -- Update or Insert items based on the Category -> Vendor Category XRef. 
-INSERT INTO #tmpICEdiImportPricebook_tblICItem (
-	strAction 
-	,intBrandId_Old 
-	,intBrandId_New 
-	,strDescription_Old 
-	,strDescription_New 
-	,strShortName_Old 
-	,strShortName_New 
-	,strItemNo_Old 
-	,strItemNo_New 
-)
-SELECT 
-	[Changes].strAction
-	,[Changes].intBrandId_Old
-	,[Changes].intBrandId_New
-	,[Changes].strDescription_Old
-	,[Changes].strDescription_New
-	,[Changes].strShortName_Old
-	,[Changes].strShortName_New
-	,[Changes].strItemNo_Old
-	,[Changes].strItemNo_New
-FROM (
-	MERGE	
-	INTO	dbo.tblICItem
-	WITH	(HOLDLOCK) 
-	AS		Item
-	USING (	
-		SELECT i.intItemId 
-			 , intBrandId			= ISNULL(b.intBrandId, i.intBrandId)
-			 , strDescription		= CAST(ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription) AS NVARCHAR(250))
-			 , strShortName			= CAST(ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName) AS NVARCHAR(50))
-			 , b.intManufacturerId 
-			 , intDuplicateItemId	= dup.intItemId 
-			 , intStoreFamilyId		= sf.intSubcategoryId
-			 , intStoreClassId		= sc.intSubcategoryId
-			 , intSubcategoriesId   = ItemSubCategories.intSubcategoriesId
-			 , p.* 
-		FROM 
-			tblICEdiPricebook p
-			LEFT JOIN tblICItemUOM u 
-				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-				ON (
-					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
-					OR u.intUpcCode = 
-						CASE 
-							WHEN p.strSellingUpcNumber IS NOT NULL 
-								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
-								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
-							THEN 
-								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
-							ELSE 
-								CAST(NULL AS BIGINT) 	
-						END		
-				)
-			LEFT JOIN tblICItem i ON i.intItemId = u.intItemId
-			LEFT JOIN tblICBrand b ON b.strBrandName = p.strManufacturersBrandName	
-			LEFT JOIN tblSTSubcategory sc ON sc.strSubcategoryId = CAST(NULLIF(p.strProductClass, '') AS NVARCHAR(8)) AND sc.strSubcategoryType = 'C'
-			LEFT JOIN tblSTSubcategory sf ON sf.strSubcategoryId = CAST(NULLIF(p.strProductFamily, '') AS NVARCHAR(8)) AND sf.strSubcategoryType = 'F'
-			LEFT JOIN tblSTSubCategories ItemSubCategories ON ItemSubCategories.strSubCategory = CAST(NULLIF(p.strSubcategory, '') AS NVARCHAR(6))
-			OUTER APPLY (
-				SELECT TOP 1 
-					dup.*
-				FROM 
-					tblICItem dup
-				WHERE
-					dup.strItemNo = ISNULL(NULLIF(p.strItemNo, ''), p.strSellingUpcNumber)
-			) dup
-			
-		WHERE
-			p.strUniqueId = @UniqueId		
-	) AS Source_Query  
-		ON Item.intItemId = Source_Query.intItemId 
+INSERT INTO #tmpICEdiImportPricebook_tblICItem (strAction 
+											  , intBrandId_Old 
+											  , intBrandId_New 
+											  , strDescription_Old 
+											  , strDescription_New 
+											  , strShortName_Old 
+											  , strShortName_New 
+											  , strItemNo_Old 
+											  , strItemNo_New)
+SELECT [Changes].strAction
+	 , [Changes].intBrandId_Old
+	 , [Changes].intBrandId_New
+	 , [Changes].strDescription_Old
+	 , [Changes].strDescription_New
+	 , [Changes].strShortName_Old
+	 , [Changes].strShortName_New
+	 , [Changes].strItemNo_Old
+	 , [Changes].strItemNo_New
+FROM (MERGE	INTO dbo.tblICItem WITH	(HOLDLOCK) AS Item
+USING (	
+	SELECT Item.intItemId 
+		 , intBrandId			= ISNULL(b.intBrandId, Item.intBrandId)
+		 , strDescription		= CAST(ISNULL(NULLIF(Pricebook.strSellingUpcLongDescription, ''), Item.strDescription) AS NVARCHAR(250))
+		 , strShortName			= CAST(ISNULL(ISNULL(NULLIF(Pricebook.strSellingUpcShortDescription, ''), SUBSTRING(Pricebook.strSellingUpcLongDescription, 1, 15)), Item.strShortName) AS NVARCHAR(50))
+		 , b.intManufacturerId 
+		 , intDuplicateItemId	= dup.intItemId 
+		 , intStoreFamilyId		= sf.intSubcategoryId
+		 , intStoreClassId		= sc.intSubcategoryId
+		 , intSubcategoriesId   = ItemSubCategories.intSubcategoriesId
+		 , Pricebook.* 
+	FROM tblICEdiPricebook AS Pricebook
+	LEFT JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LOWER(Pricebook.strItemNo), '')
+	LEFT JOIN tblICBrand b ON b.strBrandName = Pricebook.strManufacturersBrandName	
+	LEFT JOIN tblSTSubcategory sc ON sc.strSubcategoryId = CAST(NULLIF(Pricebook.strProductClass, '') AS NVARCHAR(8)) AND sc.strSubcategoryType = 'C'
+	LEFT JOIN tblSTSubcategory sf ON sf.strSubcategoryId = CAST(NULLIF(Pricebook.strProductFamily, '') AS NVARCHAR(8)) AND sf.strSubcategoryType = 'F'
+	LEFT JOIN tblSTSubCategories ItemSubCategories ON CAST(NULLIF(LOWER(Pricebook.strSubcategory), '') AS NVARCHAR(6)) = LOWER(ItemSubCategories.strSubCategory)
+	OUTER APPLY (SELECT TOP 1 dup.*
+				 FROM tblICItem dup
+				 WHERE dup.strItemNo = NULLIF(Pricebook.strItemNo, '')) dup
+	WHERE Pricebook.strUniqueId = @UniqueId		
+) AS Source_Query ON Item.intItemId = Source_Query.intItemId 
 
-	-- If matched and it is allowed to update, update the item record. 
-	WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
-		UPDATE 
-		SET	intBrandId			= Source_Query.intBrandId
-		  , strDescription		= LEFT(Source_Query.strDescription, 250)
-		  , strShortName		= LEFT(Source_Query.strShortName, 50)
-		  , strItemNo			= ISNULL(LEFT(Source_Query.strItemNo, 50), LEFT(Source_Query.strSellingUpcNumber, 50))
-		  , dtmDateModified		= GETDATE()
-		  , intModifiedByUserId = @intUserId
-		  , intConcurrencyId	= Item.intConcurrencyId + 1
-		  ,	intStoreFamilyId	= Source_Query.intStoreFamilyId
-		  ,	intStoreClassId		= Source_Query.intStoreClassId
-		  , strType				= ISNULL(NULLIF(LEFT(Source_Query.strInventoryType, 50), ''), 'Inventory')
+/* If matched and it is allowed to update, update the item record. */ 
+WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
+	UPDATE SET intBrandId			= Source_Query.intBrandId
+		     , strDescription		= LEFT(Source_Query.strDescription, 250)
+		     , strShortName			= LEFT(Source_Query.strShortName, 50)
+		     , strItemNo			= (LEFT(Source_Query.strItemNo, 50))
+		     , dtmDateModified		= GETDATE()
+		     , intModifiedByUserId = @intUserId
+		     , intConcurrencyId		= Item.intConcurrencyId + 1
+		     , intStoreFamilyId		= Source_Query.intStoreFamilyId
+		     , intStoreClassId		= Source_Query.intStoreClassId
+		     , strType				= ISNULL(NULLIF(LEFT(Source_Query.strInventoryType, 50), ''), 'Inventory')
+		     , intSubcategoriesId	= Source_Query.intSubcategoriesId
 
-	-- If not found and it is allowed, insert a new item record.
-	WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intDuplicateItemId IS NULL THEN 
-		INSERT (strItemNo
-			  , strShortName
-			  , strType
-			  , strDescription
-			  , intManufacturerId
-			  , intBrandId
-			  , intCategoryId
-			  , strStatus
-			  , strInventoryTracking
-			  , strLotTracking
-			  , intLifeTime
-			  , dtmDateCreated
-			  , intCreatedByUserId
-			  , intDataSourceId
-			  , intConcurrencyId
-			  , intStoreFamilyId
-			  , intStoreClassId
-		)
-		VALUES (ISNULL(LEFT(Source_Query.strItemNo, 50), LEFT(Source_Query.strSellingUpcNumber, 50)) -- strItemNo
-			  , LEFT(Source_Query.strShortName, 50)													 -- strShortName
-			  , ISNULL(NULLIF(LEFT(Source_Query.strInventoryType, 50), ''), 'Inventory')						 -- strType
-			  , LEFT(Source_Query.strDescription, 250) --,strDescription
-			  , Source_Query.intManufacturerId --,intManufacturerId
-			  , Source_Query.intBrandId--,intBrandId
-			  , Source_Query.intCategoryId--,intCategoryId
-			  , 'Active'--,strStatus
-			  , 'Item Level'--,strInventoryTracking
-			  , 'No'--,strLotTracking
-			  , 0--,intLifeTime
-			  , GETDATE()--,dtmDateCreated
-			  , @intUserId --,intCreatedByUserId
-			  , 2--,intDataSourceId
-			  , 1--,intConcurrencyId
-			  , Source_Query.intStoreFamilyId
-			  , Source_Query.intStoreClassId
-		)
-	
-	OUTPUT 
-	$action
-	, deleted.intBrandId
-	, inserted.intBrandId 
-	, deleted.strDescription
-	, inserted.strDescription
-	, deleted.strShortName
-	, inserted.strShortName
-	, deleted.strItemNo
-	, inserted.strItemNo
-) AS [Changes] (
-	strAction
-	, intBrandId_Old
-	, intBrandId_New
-	, strDescription_Old
-	, strDescription_New
-	, strShortName_Old
-	, strShortName_New
-	, strItemNo_Old
-	, strItemNo_New
-);
+/* If not found and it is allowed, insert a new item record. */
+WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intDuplicateItemId IS NULL THEN 
+	INSERT (strItemNo
+		  , strShortName
+		  , strType
+		  , strDescription
+		  , intManufacturerId
+		  , intBrandId
+		  , intCategoryId
+		  , strStatus
+		  , strInventoryTracking
+		  , strLotTracking
+		  , intLifeTime
+		  , dtmDateCreated
+		  , intCreatedByUserId
+		  , intDataSourceId
+		  , intConcurrencyId
+		  , intStoreFamilyId
+		  , intStoreClassId
+		  , intSubcategoriesId)
+	VALUES (LEFT(Source_Query.strItemNo, 50)				-- strItemNo
+		  , LEFT(Source_Query.strShortName, 50)				-- strShortName
+		  , ISNULL(NULLIF(LEFT(Source_Query.strInventoryType, 50), ''), 'Inventory') -- strType
+		  , LEFT(Source_Query.strDescription, 250)			-- strDescription
+		  , Source_Query.intManufacturerId					-- intManufacturerId
+		  , Source_Query.intBrandId							-- intBrandId
+		  , Source_Query.intCategoryId						-- intCategoryId
+		  , 'Active'										-- strStatus
+		  , 'Item Level'									-- strInventoryTracking
+		  , 'No'											-- strLotTracking
+		  , 0												-- intLifeTime
+		  , GETDATE()										-- dtmDateCreated
+		  , @intUserId										-- intCreatedByUserId
+		  , 2												-- intDataSourceId
+		  , 1												-- intConcurrencyId
+		  , Source_Query.intStoreFamilyId
+		  , Source_Query.intStoreClassId
+		  , Source_Query.intSubcategoriesId)
+OUTPUT $action
+	 , deleted.intBrandId
+	 , inserted.intBrandId 
+	 , deleted.strDescription
+	 , inserted.strDescription
+	 , deleted.strShortName
+	 , inserted.strShortName
+	 , deleted.strItemNo
+	 , inserted.strItemNo) AS [Changes] (strAction
+									   , intBrandId_Old
+									   , intBrandId_New
+									   , strDescription_Old
+									   , strDescription_New
+									   , strShortName_Old
+									   , strShortName_New
+									   , strItemNo_Old
+									   , strItemNo_New);
 
-SELECT @updatedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'UPDATE'
-SELECT @insertedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'INSERT'
-SELECT @warningNotImported = COUNT(1) FROM tblICEdiPricebook WHERE strUniqueId = @UniqueId AND ysnAddNewRecords = 0 AND ysnUpdateExistingRecords = 0 AND ysnAddOrderingUPC = 0 AND ysnUpdatePrice = 0
+SELECT @updatedItem = COUNT(1) 
+FROM #tmpICEdiImportPricebook_tblICItem 
+WHERE strAction = 'UPDATE';
+
+SELECT @insertedItem = COUNT(1) 
+FROM #tmpICEdiImportPricebook_tblICItem 
+WHERE strAction = 'INSERT';
+
+SELECT @warningNotImported = COUNT(1) 
+FROM tblICEdiPricebook 
+WHERE strUniqueId = @UniqueId AND ysnAddNewRecords = 0 AND ysnUpdateExistingRecords = 0 AND ysnAddOrderingUPC = 0 AND ysnUpdatePrice = 0;
 
 -- Update or Insert Item UOM
-INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (
-	intItemId 
-	,intItemUOMId 
-	,strAction 
-	,intUnitMeasureId_Old 
-	,intUnitMeasureId_New 
-)
-SELECT 
-	[Changes].intItemId
-	,[Changes].intItemUOMId
-	,[Changes].strAction
-	,[Changes].intUnitMeasureId_Old
-	,[Changes].intUnitMeasureId_New
-FROM (
-	MERGE	
-	INTO	dbo.tblICItemUOM
-	WITH	(HOLDLOCK) 
-	AS		ItemUOM
-	USING (	
-		SELECT 
-			i.intItemId 
-			,u.intItemUOMId
-			,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)			
-			,ysnStockUnit = CASE WHEN stockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 			
-			,p.* 
-		FROM 
-			tblICEdiPricebook p
-			LEFT JOIN tblICItemUOM u 
-				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-				ON (
-					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
-					OR u.intUpcCode = 
-						CASE 
-							WHEN p.strSellingUpcNumber IS NOT NULL 
-								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
-								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (intItemId 
+												 , intItemUOMId 
+												 , strAction 
+												 , intUnitMeasureId_Old 
+												 , intUnitMeasureId_New)
+SELECT [Changes].intItemId
+	 , [Changes].intItemUOMId
+	 , [Changes].strAction
+	 , [Changes].intUnitMeasureId_Old
+	 , [Changes].intUnitMeasureId_New
+FROM (MERGE	INTO dbo.tblICItemUOM WITH (HOLDLOCK) AS ItemUOM
+USING (
+	SELECT i.intItemId 
+		 , u.intItemUOMId
+		 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)			
+		 , ysnStockUnit = CASE WHEN stockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 			
+		 , p.* 
+	FROM tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u ON (NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), RTRIM(LTRIM(u.strUpcCode))) = NULLIF(p.strSellingUpcNumber,'')
+							 OR u.intUpcCode = CASE WHEN NULLIF(p.strSellingUpcNumber,'') IS NOT NULL 
+							AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+							AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
 							THEN 
 								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
 							ELSE 
 								CAST(NULL AS BIGINT) 	
 						END		
 				)
-			OUTER APPLY (
-				SELECT TOP 1 
-					i.intItemId 
-				FROM
-					tblICItem i 
-				WHERE
-					i.intItemId = u.intItemId
-					OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)
-			) i			
-			OUTER APPLY (			
-				SELECT TOP 1 
-					m.*
-				FROM tblICUnitMeasure m 
-				WHERE
-					m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
-				ORDER BY 
-					m.intUnitMeasureId 
-			) m
-			OUTER APPLY (
-				SELECT TOP 1 
-					s.*
-				FROM tblICUnitMeasure s 
-				WHERE
-					s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
-				ORDER BY 
-					s.intUnitMeasureId 
-			) s
-			OUTER APPLY (
-				SELECT TOP 1 
-					iu.intItemUOMId 
-				FROM 
-					tblICItemUOM iu
-				WHERE
-					iu.intItemId = i.intItemId
-					AND iu.ysnStockUnit = 1 
-			) stockUnit
-		WHERE
-			p.strUniqueId = @UniqueId
-	) AS Source_Query  
-		ON ItemUOM.intItemUOMId = Source_Query.intItemUOMId
-		AND ItemUOM.intItemId = Source_Query.intItemId 
+	OUTER APPLY (SELECT TOP 1 i.intItemId 
+				 FROM tblICItem i 
+				 WHERE i.strItemNo = NULLIF(p.strItemNo, '')) i			
+	OUTER APPLY (SELECT TOP 1 m.*
+				 FROM tblICUnitMeasure m 
+				 WHERE m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+				 ORDER BY m.intUnitMeasureId) m
+	OUTER APPLY (SELECT TOP 1 s.*
+				 FROM tblICUnitMeasure s 
+				 WHERE s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+				 ORDER BY s.intUnitMeasureId) s
+	OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
+				 FROM tblICItemUOM iu
+				 WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1) stockUnit
+	WHERE p.strUniqueId = @UniqueId
+) AS Source_Query ON ItemUOM.intItemUOMId = Source_Query.intItemUOMId AND ItemUOM.intItemId = Source_Query.intItemId 
 			   
-	-- If matched and it is allowed to update, update the item uom record. 
-	WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
-		UPDATE 
-		SET	intUnitMeasureId	= Source_Query.intUnitMeasureId
-		  , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
-		  , intModifiedByUserId = @intUserId 
-		  , intConcurrencyId	= ItemUOM.intConcurrencyId + 1
-		  , intCheckDigit		= dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
-		  , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
+/* If matched and it is allowed to update, update the item uom record. */
+WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
+	UPDATE SET intUnitMeasureId		= Source_Query.intUnitMeasureId
+		     , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
+		     , intModifiedByUserId  = @intUserId 
+		     , intConcurrencyId		= ItemUOM.intConcurrencyId + 1
+		     , intCheckDigit		= dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
+		     , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
 
-	-- If not found and it is allowed, insert a new item uom record.
-	WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intItemId IS NOT NULL AND Source_Query.intUnitMeasureId IS NOT NULL THEN 
-		INSERT (			
-			intItemId
-			,intUnitMeasureId
-			,dblUnitQty
-			,strUpcCode
-			,strLongUPCCode
-			,intCheckDigit
-			,intModifier
-			,ysnStockUnit
-			,ysnAllowPurchase
-			,ysnAllowSale
-			,intConcurrencyId
-			,dtmDateCreated
-			,intCreatedByUserId
-			,intDataSourceId
-		)
-		VALUES ( 
-			Source_Query.intItemId --intItemId
-			,Source_Query.intUnitMeasureId --,intUnitMeasureId
-			,1--,dblUnitQty
-			,dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
-			,Source_Query.strSellingUpcNumber--,strLongUPCCode
-			,dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)--,intCheckDigit
-			,CAST(Source_Query.strUpcModifierNumber AS INT)--,intModifier
-			,Source_Query.ysnStockUnit--,ysnStockUnit
-			,1--,ysnAllowPurchase
-			,1--,ysnAllowSale
-			,1--,intConcurrencyId
-			,GETDATE()--,dtmDateCreated
-			,@intUserId--,intCreatedByUserId
-			,2--,intDataSourceId
-		)
-			
-	OUTPUT 
-	$action
-	, inserted.intItemId
-	, inserted.intItemUOMId
-	, deleted.intUnitMeasureId
-	, inserted.intUnitMeasureId
-) AS [Changes] (
-	strAction
-	, intItemId
-	, intItemUOMId
-	, intUnitMeasureId_Old
-	, intUnitMeasureId_New
-);	   	
+/* If not found and it is allowed, insert a new item uom record. */
+WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intItemId IS NOT NULL AND Source_Query.intUnitMeasureId IS NOT NULL THEN 
+	INSERT (intItemId
+		  , intUnitMeasureId
+		  , dblUnitQty
+		  , strUpcCode
+		  , strLongUPCCode
+		  , intCheckDigit
+		  , intModifier
+		  , ysnStockUnit
+		  , ysnAllowPurchase
+		  , ysnAllowSale
+		  , intConcurrencyId
+		  , dtmDateCreated
+		  , intCreatedByUserId
+		  , intDataSourceId)
+	VALUES (Source_Query.intItemId							-- intItemId
+		  , Source_Query.intUnitMeasureId					-- intUnitMeasureId
+		  , 1												-- dblUnitQty
+		  , dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
+		  , Source_Query.strSellingUpcNumber -- strLongUPCCode
+		  , dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
+		  , CAST(Source_Query.strUpcModifierNumber AS INT)	-- intModifier
+		  , Source_Query.ysnStockUnit						-- ysnStockUnit
+		  , 1												-- ysnAllowPurchase
+		  , 1												-- ysnAllowSale
+		  , 1												-- intConcurrencyId
+		  , GETDATE()										-- dtmDateCreated
+		  , @intUserId										-- intCreatedByUserId
+		  , 2)												-- intDataSourceId
+OUTPUT $action
+	 , inserted.intItemId
+	 , inserted.intItemUOMId
+	 , deleted.intUnitMeasureId
+	 , inserted.intUnitMeasureId) AS [Changes] (strAction
+											  , intItemId
+											  , intItemUOMId
+											  , intUnitMeasureId_Old
+											  , intUnitMeasureId_New);	   	
 	
-SELECT @updatedItemUOM = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemUOM WHERE strAction = 'UPDATE'
-SELECT @insertedItemUOM = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemUOM WHERE strAction = 'INSERT'
+SELECT @updatedItemUOM = COUNT(1) 
+FROM #tmpICEdiImportPricebook_tblICItemUOM 
+WHERE strAction = 'UPDATE';
+
+SELECT @insertedItemUOM = COUNT(1) 
+FROM #tmpICEdiImportPricebook_tblICItemUOM 
+WHERE strAction = 'INSERT';
 
 -- Create the valid list of 2nd UOM
 DECLARE @valid2ndUOM AS TABLE (intEdiPricebookId INT 
 							 , strLongUPCCode	 NVARCHAR(50) NULL 
-							 , strUpcCode		 NVARCHAR(50) NULL
-)
+							 , strUpcCode		 NVARCHAR(50) NULL)
 
 INSERT INTO @valid2ndUOM (intEdiPricebookId
 						, strLongUPCCode
-						, strUpcCode
-)
+						, strUpcCode)
 SELECT p.intEdiPricebookId
 	 , p.strOrderCaseUpcNumber
 	 , dbo.fnSTConvertUPCaToUPCe(p.strOrderCaseUpcNumber)
@@ -2906,80 +2783,53 @@ SELECT @updatedSpecialItemPricing = COUNT(1) FROM #tmpICEdiImportPricebook_tblIC
 SELECT @insertedSpecialItemPricing = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemSpecialPricing WHERE strAction = 'INSERT'
 
 -- Upsert the Item Vendor XRef (Cross Reference)
-INSERT INTO #tmpICEdiImportPricebook_tblICItemVendorXref (
-	intItemId
-	,strAction
-	,intVendorId_Old
-	,intVendorId_New
-	,strVendorProduct_Old
-	,strVendorProduct_New
-	,strProductDescription_Old
-	,strProductDescription_New
-)
-SELECT 
-	[Changes].intItemId
-	,[Changes].strAction
-	,[Changes].intVendorId_Old
-	,[Changes].intVendorId_New
-	,[Changes].strVendorProduct_Old
-	,[Changes].strVendorProduct_New
-	,[Changes].strProductDescription_Old
-	,[Changes].strProductDescription_New
-FROM (
-	MERGE	
-	INTO	dbo.tblICItemVendorXref 
-	WITH	(HOLDLOCK) 
-	AS		ItemVendorXref
-	USING (
-			SELECT 
-				i.intItemId 
-				,v.intEntityId 
-				,p.strSellingUpcNumber
-				,strVendorsItemNumberForOrdering = CAST(p.strVendorsItemNumberForOrdering AS NVARCHAR(50)) 
-				,strSellingUpcLongDescription = CAST(p.strSellingUpcLongDescription AS NVARCHAR(250)) 
-				,u.intItemUOMId 
-				,u.dblUnitQty
-			FROM 
-				@vendorItemXRef p 
-				INNER JOIN tblICItemUOM u 
-					--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-					ON (
-						ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
-						OR u.intUpcCode = 
-							CASE 
-								WHEN p.strSellingUpcNumber IS NOT NULL 
-									AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
-									AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
-								THEN 
-									CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
-								ELSE 
-									CAST(NULL AS BIGINT) 	
-							END		
-					)
-				INNER JOIN tblICItem i 
-					ON i.intItemId = u.intItemId
-				CROSS APPLY (
-					SELECT TOP 1 
-						v.* 
-					FROM 
-						vyuAPVendor v
-					WHERE 
-						(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-						OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-				) v				
-			WHERE
-				p.strUniqueId = @UniqueId
-	) AS Source_Query  
-		ON ItemVendorXref.intItemId = Source_Query.intItemId		
-		AND ItemVendorXref.intVendorId = Source_Query.intEntityId
-		AND ItemVendorXref.intItemLocationId IS NULL 
-	   
-	-- If matched, update the existing vendor xref 
-	WHEN MATCHED THEN 
-		UPDATE 
-		SET		
-			strVendorProduct = Source_Query.strVendorsItemNumberForOrdering  
-			,strProductDescription = Source_Query.strSellingUpcLongDescription
+INSERT INTO #tmpICEdiImportPricebook_tblICItemVendorXref (intItemId
+														, strAction
+														, intVendorId_Old
+														, intVendorId_New
+														, strVendorProduct_Old
+														, strVendorProduct_New
+														, strProductDescription_Old
+														, strProductDescription_New)
+SELECT [Changes].intItemId
+	 , [Changes].strAction
+	 , [Changes].intVendorId_Old
+	 , [Changes].intVendorId_New
+	 , [Changes].strVendorProduct_Old
+	 , [Changes].strVendorProduct_New
+	 , [Changes].strProductDescription_Old
+	 , [Changes].strProductDescription_New
+FROM (MERGE	INTO dbo.tblICItemVendorXref WITH (HOLDLOCK) AS	ItemVendorXref
+USING (
+	SELECT Item.intItemId 
+		 , Vendor.intEntityId 
+		 , VendorXRef.strSellingUpcNumber
+		 , strVendorsItemNumberForOrdering = CAST(VendorXRef.strVendorsItemNumberForOrdering AS NVARCHAR(50)) 
+		 , strSellingUpcLongDescription = CAST(VendorXRef.strSellingUpcLongDescription AS NVARCHAR(250)) 
+		 , ItemUOM.intItemUOMId 
+		 , ItemUOM.dblUnitQty
+	FROM @vendorItemXRef AS VendorXRef 
+	INNER JOIN tblICItem AS Item ON  LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(VendorXRef.strItemNo))), '')
+	INNER JOIN tblICItemUOM AS ItemUOM ON (ISNULL(NULLIF(RTRIM(LTRIM(ItemUOM.strLongUPCCode)), ''), RTRIM(LTRIM(ItemUOM.strUpcCode))) = VendorXRef.strSellingUpcNumber
+									   OR ItemUOM.intUpcCode = CASE WHEN VendorXRef.strSellingUpcNumber IS NOT NULL 
+																	 AND ISNUMERIC(RTRIM(LTRIM(VendorXRef.strSellingUpcNumber))) = 1 
+															     AND NOT (VendorXRef.strSellingUpcNumber LIKE '%.%' 
+																      OR VendorXRef.strSellingUpcNumber LIKE '%e%' 
+																	  OR VendorXRef.strSellingUpcNumber LIKE '%E%') THEN 
+																			CAST(RTRIM(LTRIM(VendorXRef.strSellingUpcNumber)) AS BIGINT) -- CASE First Value
+																	ELSE 
+																			CAST(NULL AS BIGINT) -- CASE Default Value
+															   END)
+	CROSS APPLY (SELECT TOP 1 v.* 
+				 FROM vyuAPVendor v
+				 WHERE (v.strVendorId = VendorXRef.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)) AS Vendor				
+	WHERE VendorXRef.strUniqueId = @UniqueId
+) AS Source_Query  ON ItemVendorXref.intItemId = Source_Query.intItemId	AND ItemVendorXref.intVendorId = Source_Query.intEntityId AND ItemVendorXref.intItemLocationId IS NULL 
+	
+/* If matched, update the existing vendor xref. */ 
+WHEN MATCHED THEN 
+	UPDATE SET strVendorProduct		 = Source_Query.strVendorsItemNumberForOrdering  
+			 , strProductDescription = Source_Query.strSellingUpcLongDescription
 
 	-- If none is found, insert a new vendor xref
 	WHEN NOT MATCHED THEN 
