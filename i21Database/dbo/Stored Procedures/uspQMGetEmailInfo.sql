@@ -51,14 +51,14 @@ ELSE IF @strMailType = 'Sample Print'
 
 SELECT @intEntityId		   = QualitySample.intPartyName
 	 , @strReferenceNo	   = ISNULL(QualitySample.strRefNo, '')
-	 , @strContractNumber  = QualitySample.strContractNumber
-	 , @strSampleStatus    = QualitySample.strStatus
+	 , @strContractNumber  = ISNULL(QualitySample.strContractNumber, '')
+	 , @strSampleStatus    = ISNULL(QualitySample.strStatus,'')
 	 , @strVendorRefNumber = ISNULL(ContractHeader.strCustomerContract, '')
-	 , @strSampleType	   = QualitySample.strSampleTypeName
-	 , @strDescription	   = QualitySample.strDescription
-	 , @strComment		   = QualitySample.strComment
-	 , @strBook			   = QualitySample.strBook
-	 , @strSampleNumber    = QualitySample.strSampleNumber
+	 , @strSampleType	   = ISNULL(QualitySample.strSampleTypeName, '')
+	 , @strDescription	   = ISNULL(QualitySample.strDescription, '')
+	 , @strComment		   = ISNULL(QualitySample.strComment, '')
+	 , @strBook			   = ISNULL(QualitySample.strBook, '')
+	 , @strSampleNumber    = ISNULL(QualitySample.strSampleNumber, '')
 FROM vyuQMSampleList AS QualitySample
 OUTER APPLY (SELECT TOP 1 CH.strCustomerContract
 			 FROM tblCTContractHeader CH
@@ -127,6 +127,3 @@ ELSE
 	
 		SELECT @Subject AS strSubject,@Filter AS strFilters,@body AS strMessage
 	END
-
-
-END
