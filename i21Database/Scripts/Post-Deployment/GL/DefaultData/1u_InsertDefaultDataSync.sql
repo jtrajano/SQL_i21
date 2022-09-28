@@ -1,19 +1,17 @@
-GO
-DECLARE @tblPeriod table (intFiscalPeriodId int, dtmStartDate DATETIME, dtmEndDate datetime)
-DECLARE @intFiscalPeriodId int, @dtmStartDate DATETIME, @dtmEndDate DATETIME
-INSERT INTO  @tblPeriod (intFiscalPeriodId , dtmStartDate, dtmEndDate )
-SELECT intGLFiscalYearPeriodId, dtmStartDate, dtmEndDate FROM tblGLFiscalYearPeriod 
-WHILE EXISTS(SELECT 1 FROM @tblPeriod)
-BEGIN
-	SELECT top 1 @intFiscalPeriodId = intFiscalPeriodId,@dtmStartDate =dtmStartDate,@dtmEndDate =dtmEndDate  FROM @tblPeriod ORDER BY dtmStartDate DESC
-	WHILE EXISTS(SELECT 1 FROM tblGLDetail WHERE  dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND ysnIsUnposted = 0 AND intFiscalPeriodId is null)
-	BEGIN
-		;WITH cte AS(
-			SELECT TOP 1000 intGLDetailId FROM tblGLDetail  WHERE dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND ysnIsUnposted = 0 AND intFiscalPeriodId IS NULL
-		)
 
-		UPDATE a SET intFiscalPeriodId = @intFiscalPeriodId FROM  tblGLDetail  a JOIN cte b on a.intGLDetailId = b.intGLDetailId
-	END
-	DELETE FROM @tblPeriod WHERE intFiscalPeriodId = @intFiscalPeriodId
-END
+GO
+    DECLARE @rowUpdated  NVARCHAR(20)	
+    WHILE EXISTS(SELECT 1 FROM tblGLDetail WHERE intFiscalPeriodId IS NULL)
+	  BEGIN
+		;WITH cte as(
+		    SELECT top 10000 intGLDetailId
+			from tblGLDetail WHERE intFiscalPeriodId IS NULL
+		)
+        UPDATE T SET intFiscalPeriodId = F.intGLFiscalYearPeriodId FROM tblGLDetail T 
+		JOIN cte C ON C.intGLDetailId = T.intGLDetailId
+        CROSS APPLY dbo.fnGLGetFiscalPeriod(T.dtmDate) F
+        SELECT  @rowUpdated = CONVERT( NVARCHAR(50) , @@ROWCOUNT )
+		PRINT ('Updated fiscal period of ' + @rowUpdated +  ' records in tblGLDetail')
+		
+	 END
 GO
