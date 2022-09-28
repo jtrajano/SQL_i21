@@ -91,7 +91,7 @@ BEGIN TRY
                             * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end)
         , strBorrowingFacilityBankRefNo = IC.strBankReferenceNo
         , ysnDeleted = @ysnDeleted
-        , intOverrideBankValuationId = cd.intBankValuationRuleId
+        , intOverrideBankValuationId = tf.intOverrideFacilityValuation
     FROM
         tblLGPickLotHeader PLH
         JOIN tblLGPickLotDetail PLD ON PLD.intPickLotHeaderId = PLH.intPickLotHeaderId
