@@ -27,7 +27,12 @@ WHERE A.strScreen = 'SystemManager.CompanyPreference'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat <> 'Format 1 - MCP'
+
+DELETE FROM tblARInvoiceReportStagingTable 
+WHERE	(intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND  strInvoiceFormat <> 'Format 1 - MCP')
+OR		dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) 
+OR		dtmCreated IS NULL
+
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
 	 , intCompanyLocationId
