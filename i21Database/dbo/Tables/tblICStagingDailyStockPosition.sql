@@ -9,7 +9,7 @@
 	intCategoryId INT NULL,		
 	strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,		
 	intLocationId INT NULL,		
-	strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,		
+	strLocationName NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,		
 	intItemId INT NULL,			
 	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
 	strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,		
