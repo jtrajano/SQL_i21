@@ -208,6 +208,7 @@ SELECT
 	,intProfitCenter					= CLOC.intProfitCenter
 	,ysnTaxAdjusted						= CAST(CASE WHEN RelatedInvoice.strType = 'Tax Adjustment' AND RelatedInvoice.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,strRelatedInvoiceNumber			= RelatedInvoice.strInvoiceNumber
+	,strPrintFormat						= INV.strPrintFormat
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
