@@ -939,62 +939,61 @@ BEGIN TRY
 					END
 				,L.intLocationId
 
-			/*In Transit Quantity*/
-			--INSERT INTO #tblMFInventory (
-			--	intItemId
-			--	,dblQty
-			--	,intAttributeId
-			--	,intMonthId
-			--	,intLocationId
-			--	)
-			--SELECT CASE 
-			--		WHEN I.ysnSpecificItemDescription = 1
-			--			THEN I.intItemId
-			--		ELSE I.intMainItemId
-			--		END AS intItemId
-			--	,sum(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, (
-			--				CASE 
-			--					WHEN L.intWeightUOMId IS NULL
-			--						THEN TD.dblQuantity
-			--					ELSE TD.dblNet
-			--					END
-			--				)) * I.dblRatio) AS dblIntrasitQty
-			--	,2 AS intAttributeId --Opening Inventory
-			--	,- 1 AS intMonthId
-			--	,L.intLocationId
-			--FROM @tblMFItemDetail I
-			--JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
-			--JOIN dbo.tblICInventoryTransferDetail TD ON TD.intNewLotId = L.intLotId
-			--	AND TD.intItemId = L.intItemId
-			--JOIN dbo.tblICInventoryTransfer T ON T.intInventoryTransferId = TD.intInventoryTransferId
-			--	AND T.intStatusId = 2 AND T.intFromLocationId = @intCompanyLocationId
-			--JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
-			--	AND L.intLocationId = IsNULL(@intCompanyLocationId, L.intLocationId)
-			--WHERE EXISTS (
-			--		SELECT *
-			--		FROM @tblMFRefreshtemStock EI
-			--		WHERE EI.intItemId = I.intItemId
-			--		)
-			--	AND (
-			--		CASE 
-			--			WHEN @ysnConsiderBookInDemandView = 1
-			--				THEN IsNULL(L.intBookId, 0)
-			--			ELSE IsNULL(@intBookId, 0)
-			--			END
-			--		) = IsNULL(@intBookId, 0)
-			--	AND (
-			--		CASE 
-			--			WHEN @ysnConsiderBookInDemandView = 1
-			--				THEN IsNULL(L.intSubBookId, 0)
-			--			ELSE IsNULL(@intSubBookId, 0)
-			--			END
-			--		) = IsNULL(@intSubBookId, 0)
-			--GROUP BY CASE 
-			--		WHEN I.ysnSpecificItemDescription = 1
-			--			THEN I.intItemId
-			--		ELSE I.intMainItemId
-			--		END
-			--	,L.intLocationId
+			INSERT INTO #tblMFInventory (
+				intItemId
+				,dblQty
+				,intAttributeId
+				,intMonthId
+				,intLocationId
+				)
+			SELECT CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intItemId
+					ELSE I.intMainItemId
+					END AS intItemId
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, (
+							CASE 
+								WHEN L.intWeightUOMId IS NULL
+									THEN TD.dblQuantity
+								ELSE TD.dblNet
+								END
+							)) * I.dblRatio) AS dblIntrasitQty
+				,2 AS intAttributeId --Opening Inventory
+				,- 1 AS intMonthId
+				,L.intLocationId
+			FROM @tblMFItemDetail I
+			JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
+			JOIN dbo.tblICInventoryTransferDetail TD ON TD.intNewLotId = L.intLotId
+				AND TD.intItemId = L.intItemId
+			JOIN dbo.tblICInventoryTransfer T ON T.intInventoryTransferId = TD.intInventoryTransferId
+				AND T.intStatusId = 2
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
+				AND L.intLocationId = IsNULL(@intCompanyLocationId, L.intLocationId)
+			WHERE EXISTS (
+					SELECT *
+					FROM @tblMFRefreshtemStock EI
+					WHERE EI.intItemId = I.intItemId
+					)
+				AND (
+					CASE 
+						WHEN @ysnConsiderBookInDemandView = 1
+							THEN IsNULL(L.intBookId, 0)
+						ELSE IsNULL(@intBookId, 0)
+						END
+					) = IsNULL(@intBookId, 0)
+				AND (
+					CASE 
+						WHEN @ysnConsiderBookInDemandView = 1
+							THEN IsNULL(L.intSubBookId, 0)
+						ELSE IsNULL(@intSubBookId, 0)
+						END
+					) = IsNULL(@intSubBookId, 0)
+			GROUP BY CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intItemId
+					ELSE I.intMainItemId
+					END
+				,L.intLocationId
 
 			INSERT INTO #tblMFDemand (
 				intItemId
