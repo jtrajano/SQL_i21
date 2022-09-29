@@ -42,6 +42,8 @@ SELECT
 	----Details from other table
 	,C.strItemNo
 	,D.strLotNumber
+	,D.strLotAlias
+	,D.strWarrantNo
 	,strStorageLocation = E.strSubLocationName
 	,strItemUOM = G.strUnitMeasure
 	,strWeightUOMId = I.strUnitMeasure

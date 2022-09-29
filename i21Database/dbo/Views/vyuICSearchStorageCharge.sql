@@ -39,6 +39,8 @@ SELECT
 	,G.strRateType
 	,H.strItemNo
 	,I.strLotNumber
+	,I.strLotAlias
+	,I.strWarrantNo
 	,strItemUOM = L.strUnitMeasure
 	,strWeightUOMId = N.strUnitMeasure
 	,strChargeItemNo = O.strItemNo
