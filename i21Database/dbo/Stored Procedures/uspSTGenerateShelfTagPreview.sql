@@ -281,8 +281,7 @@ BEGIN TRY
 			)	
 			AND
 			(
-				NOT EXISTS (SELECT TOP 1 1 FROM #tmpGenerateShelfTagItems_Items)
-				OR EXISTS (SELECT TOP 1 1 FROM #tmpGenerateShelfTagItems_Items WHERE intItemId = i.intItemId)			
+				EXISTS (SELECT TOP 1 1 FROM #tmpGenerateShelfTagItems_Items WHERE intItemId = i.intItemId)			
 			)	
 			AND UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' AND i.strShortName != '' AND i.strShortName IS NOT NULL
 	ORDER BY CL.strLocationName
