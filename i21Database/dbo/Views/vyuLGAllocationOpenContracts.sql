@@ -15,7 +15,7 @@ SELECT
 	,intContractBasisId = CH.intFreightTermId
 	,strINCOTerm = CB.strContractBasis
 	,dblDetailQuantity = CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END
-	,CD.intUnitMeasureId
+	,UOM.intUnitMeasureId
 	,UOM.strUnitMeasure
 	,UOM.strUnitType
 	,intPricingType = CD.intPricingTypeId
