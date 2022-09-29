@@ -152,11 +152,25 @@ SELECT
 	,strFooterComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strFooterComments, ''), 0)
 	,dblTotal					= ARGID.dblTotal
 	,strReportType				= CASE WHEN ARI.strType = 'Provisional' OR ARI.strPrintFormat = ISNULL('Provisional', '') THEN 'PROVISIONAL' ELSE 'COMMERCIAL' END
-FROM dbo.tblARInvoice ARI WITH (NOLOCK)
+	,dblAmountDue				= ARI.dblAmountDue
+	,dblShipmentNetWt			= ARGID.dblShipmentNetWt
+	,dblQtyShipped				= ARGID.dblQtyShipped
+	,strUnitMeasure				= ARGID.strUnitMeasure
+	,dblUnitPrice				= ARGID.dblUnitPrice
+	,strProvisionalInvoiceNumber= ISNULL(ARIP.strInvoiceNumber, '')
+	,dtmProvisionalDate			= ARIP.dtmDate
+	,dblProvisionalPayment		= ARIP.dblPayment
+	,dblProvisionalShipmentNetWt= ARGIDP.dblShipmentNetWt
+	,dblProvisionalQtyShipped	= ARGIDP.dblQtyShipped
+	,strProvisionalUnitMeasure	= ARGIDP.strUnitMeasure
+	,dblProvisionalUnitPrice	= ARGIDP.dblUnitPrice
+FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
 INNER JOIN tblEMEntityLocation EMEL WITH (NOLOCK) ON ARI.intShipToLocationId = EMEL.intEntityLocationId
 LEFT JOIN vyuARGetInvoiceDetail ARGID WITH (NOLOCK) ON ARI.intInvoiceId = ARGID.intInvoiceId
+LEFT JOIN tblARInvoice ARIP WITH (NOLOCK) ON ARI.intOriginalInvoiceId = ARIP.intInvoiceId AND ARIP.strType = 'Provisional'
+LEFT JOIN vyuARGetInvoiceDetail ARGIDP WITH (NOLOCK) ON ARIP.intInvoiceId = ARGIDP.intInvoiceId
 LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON ARGID.intContractDetailId = CTCDV.intContractDetailId
 LEFT JOIN tblICCommodity ICC WITH (NOLOCK) ON CTCDV.intCommodityId = ICC.intCommodityId
 LEFT JOIN tblLGLoad LGL WITH (NOLOCK) ON ARGID.strDocumentNumber = LGL.strLoadNumber AND ISNULL(ARGID.intLoadDetailId, 0) <> 0 AND ISNULL(LGL.strBLNumber,'') <> ''
