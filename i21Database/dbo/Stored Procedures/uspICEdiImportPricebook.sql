@@ -2801,30 +2801,49 @@ SELECT [Changes].intItemId
 	 , [Changes].strProductDescription_New
 FROM (MERGE	INTO dbo.tblICItemVendorXref WITH (HOLDLOCK) AS	ItemVendorXref
 USING (
-	SELECT Item.intItemId 
-		 , Vendor.intEntityId 
-		 , VendorXRef.strSellingUpcNumber
-		 , strVendorsItemNumberForOrdering = CAST(VendorXRef.strVendorsItemNumberForOrdering AS NVARCHAR(50)) 
-		 , strSellingUpcLongDescription = CAST(VendorXRef.strSellingUpcLongDescription AS NVARCHAR(250)) 
-		 , ItemUOM.intItemUOMId 
-		 , ItemUOM.dblUnitQty
-	FROM @vendorItemXRef AS VendorXRef 
-	INNER JOIN tblICItem AS Item ON  LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(VendorXRef.strItemNo))), '')
-	INNER JOIN tblICItemUOM AS ItemUOM ON (ISNULL(NULLIF(RTRIM(LTRIM(ItemUOM.strLongUPCCode)), ''), RTRIM(LTRIM(ItemUOM.strUpcCode))) = VendorXRef.strSellingUpcNumber
-									   OR ItemUOM.intUpcCode = CASE WHEN VendorXRef.strSellingUpcNumber IS NOT NULL 
-																	 AND ISNUMERIC(RTRIM(LTRIM(VendorXRef.strSellingUpcNumber))) = 1 
-															     AND NOT (VendorXRef.strSellingUpcNumber LIKE '%.%' 
-																      OR VendorXRef.strSellingUpcNumber LIKE '%e%' 
-																	  OR VendorXRef.strSellingUpcNumber LIKE '%E%') THEN 
-																			CAST(RTRIM(LTRIM(VendorXRef.strSellingUpcNumber)) AS BIGINT) -- CASE First Value
-																	ELSE 
-																			CAST(NULL AS BIGINT) -- CASE Default Value
-															   END)
-	CROSS APPLY (SELECT TOP 1 v.* 
-				 FROM vyuAPVendor v
-				 WHERE (v.strVendorId = VendorXRef.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)) AS Vendor				
-	WHERE VendorXRef.strUniqueId = @UniqueId
-) AS Source_Query  ON ItemVendorXref.intItemId = Source_Query.intItemId	AND ItemVendorXref.intVendorId = Source_Query.intEntityId AND ItemVendorXref.intItemLocationId IS NULL 
+	SELECT 
+				i.intItemId 
+				,v.intEntityId 
+				,p.strSellingUpcNumber
+				,strVendorsItemNumberForOrdering = CAST(p.strVendorsItemNumberForOrdering AS NVARCHAR(50)) 
+				,strSellingUpcLongDescription = CAST(p.strSellingUpcLongDescription AS NVARCHAR(250)) 
+				,u.intItemUOMId 
+				,u.dblUnitQty
+			FROM 
+				@vendorItemXRef p 
+				INNER JOIN tblICItemUOM u 
+					--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					ON (
+						ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+						OR u.intUpcCode = 
+							CASE 
+								WHEN p.strSellingUpcNumber IS NOT NULL 
+									AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+									AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+								THEN 
+									CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+								ELSE 
+									CAST(NULL AS BIGINT) 	
+							END		
+					)
+				INNER JOIN tblICItem i 
+					ON i.intItemId = u.intItemId
+				CROSS APPLY (
+					SELECT TOP 1 
+						v.* 
+					FROM 
+						vyuAPVendor v
+					WHERE 
+						(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+						OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+				) v				
+			WHERE
+				p.strUniqueId = @UniqueId
+	) AS Source_Query  
+		ON ItemVendorXref.intItemId = Source_Query.intItemId		
+		AND ItemVendorXref.intVendorId = Source_Query.intEntityId
+		AND ItemVendorXref.intItemLocationId IS NULL 
+	   
 	
 /* If matched, update the existing vendor xref. */ 
 WHEN MATCHED THEN 
