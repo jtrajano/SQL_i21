@@ -342,29 +342,32 @@ BEGIN
 		  DECLARE @dblSummaryInfoFuelSales DECIMAL(18, 6)
 		  DECLARE @dblDifference DECIMAL(18, 6)
 		  
-		  SELECT 		TOP 1
-						@dblSummaryInfoFuelSales = CAST(ISNULL(dblSummaryInfoFuelSales, 0) AS DECIMAL(18, 6))
-		  FROM 			@UDT_TransSummary
+		  IF @ysnConsignmentStore = 1
+		  BEGIN
+			  SELECT 		TOP 1
+							@dblSummaryInfoFuelSales = CAST(ISNULL(dblSummaryInfoFuelSales, 0) AS DECIMAL(18, 6))
+			  FROM 			@UDT_TransSummary
 		  
-          UPDATE dbo.tblSTCheckoutHeader
-          SET dblSummaryInfoFuelSales = @dblSummaryInfoFuelSales 
-          WHERE intCheckoutId = @intCheckoutId
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblSummaryInfoFuelSales = @dblSummaryInfoFuelSales 
+			  WHERE intCheckoutId = @intCheckoutId
 
-		  UPDATE dbo.tblSTCheckoutHeader
-          SET dblSummaryInfoPopPredispensedAmount = (
-									SELECT TOP 1 CAST(ISNULL(dblSummaryInfoPopPredispensedAmount, 0) AS DECIMAL(18, 6))
-									FROM @UDT_TransSummary
-								 ) 
-          WHERE intCheckoutId = @intCheckoutId
+			  UPDATE dbo.tblSTCheckoutHeader
+			  SET dblSummaryInfoPopPredispensedAmount = (
+										SELECT TOP 1 CAST(ISNULL(dblSummaryInfoPopPredispensedAmount, 0) AS DECIMAL(18, 6))
+										FROM @UDT_TransSummary
+									 ) 
+			  WHERE intCheckoutId = @intCheckoutId
 		  
-		  SET @dblAggregateMeterReadingsForDollars = dbo.fnSTGetAggregateMeterReadingsForDollars(@intCheckoutId)
-		  SET @dblDifference = @dblAggregateMeterReadingsForDollars - @dblSummaryInfoFuelSales;
+			  SET @dblAggregateMeterReadingsForDollars = dbo.fnSTGetAggregateMeterReadingsForDollars(@intCheckoutId)
+			  SET @dblDifference = @dblAggregateMeterReadingsForDollars - @dblSummaryInfoFuelSales;
 		  
-		  IF (ABS(@dblDifference) > @dblConsMatchTolerance)
-			BEGIN
-				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Aggregate Meter Readings does not Match the Register''s Summary File value', 1)
-			END
+			  IF (ABS(@dblDifference) > @dblConsMatchTolerance)
+				BEGIN
+					INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
+					VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Aggregate Meter Readings does not Match the Register''s Summary File value', 1)
+				END
+		  END
           -------------------------------------------------------------------------------------------------------------
           ------------------------------------- END CONSIGNMENT DATA --------------------------------------------------
           -------------------------------------------------------------------------------------------------------------
@@ -459,7 +462,7 @@ BEGIN
 					 WHERE tblSTCheckoutCashiers.intCheckoutId = @intCheckoutId    
 					END  
 				END
-			  ELSE -- Consignment (filter payment options, exclude MOPs that are not marked as depositable)
+			  ELSE -- Consignment (filter payment options, exclude MOPs that are marked as depositable)
 				BEGIN
 					IF NOT EXISTS (SELECT 1 FROM dbo.tblSTCheckoutCashiers WHERE intCheckoutId = @intCheckoutId)  
 					BEGIN  
