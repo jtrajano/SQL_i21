@@ -81,7 +81,6 @@ OUTER APPLY(
     ON V2.intContractDetailId = S2.intContractDetailId    
     WHERE --A.intSContractDetailId = S2.intContractDetailId    
     S2.intContractDetailId = A.intSContractDetailId  
-    AND S2.intRelatedSampleId = U.intSampleIdP
    AND V2.intContractStatusId NOT IN( 3, 5, 6 )  
 ) V    
 WHERE U.intSampleIdP IS NOT NULL OR V.intSampleIdS IS NOT NULL
