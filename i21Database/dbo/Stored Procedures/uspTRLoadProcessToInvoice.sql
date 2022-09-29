@@ -581,13 +581,13 @@ BEGIN TRY
 			RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 			RETURN 0
 		END
-		
+			
 		-- CHECK FREIGHT ITEM LOCATION
-		IF (SELECT COUNT(*) FROM #tmpSourceTable T 
+		IF ((SELECT COUNT(*) FROM #tmpSourceTable T 
 			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = T.intCompanyLocationId
 			AND T.dblFreightRate > 0 
 			AND IL.intItemLocationId IS NULL
-			AND IL.intItemId = @intFreightItemId) < 1
+			AND IL.intItemId = @intFreightItemId) < 1 AND (SELECT COUNT(*) FROM #tmpSourceTable) > 0)
 		BEGIN
 			DECLARE @strFreightError NVARCHAR(500) = NULL
 			SET @strFreightError = 'Incorrect Freight Item setup: Company Location is not properly set in Item ' + @strFreightItemNo + '. Please go to Item > Setup > Location.'
@@ -610,11 +610,11 @@ BEGIN TRY
 		END
 
 		-- CHECK SURCHARGE ITEM LOCATION
-		IF (SELECT COUNT(*) FROM #tmpSourceTable T 
+		IF ((SELECT COUNT(*) FROM #tmpSourceTable T 
 			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = T.intCompanyLocationId
 			AND T.dblSurcharge > 0 
 			AND IL.intItemLocationId IS NULL
-			AND IL.intItemId = @intSurchargeItemId) < 1
+			AND IL.intItemId = @intSurchargeItemId) < 1 AND (SELECT COUNT(*) FROM #tmpSourceTable) > 0)
 		BEGIN
 			DECLARE @strSurchargeError NVARCHAR(500) = NULL
 			SET @strSurchargeError = 'Incorrect Surcharge Item setup: Company Location is not properly set in Item ' + @strSurchargeItemNo + '. Please go to Item > Setup > Location.'
