@@ -6,7 +6,13 @@ BEGIN
 
 	INSERT INTO @InvoicesToProcess
 	SELECT intHeaderId, ISNULL(ysnForDelete, 0)
-	FROM @InvoiceIds
+	FROM @InvoiceIds II
+	INNER JOIN (
+		SELECT intInvoiceId
+		FROM tblARInvoiceDetail
+		WHERE intSalesOrderDetailId IS NOT NULL
+		GROUP BY intInvoiceId
+	) ID ON II.intHeaderId = ID.intInvoiceId
 		
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesToProcess)
 	BEGIN				

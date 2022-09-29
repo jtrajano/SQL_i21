@@ -51,17 +51,49 @@ INNER JOIN tblICStockReservation ICSR ON ARID.[intInvoiceId] = ICSR.[intTransact
 WHERE ICSR.[ysnPosted] <> ARID.[ysnPost]
   AND ICSR.intInventoryTransactionType = @TransactionTypeId
 
-WHILE EXISTS(SELECT NULL FROM @InvoiceIds)
+IF EXISTS(SELECT TOP 1 1 FROM @InvoiceIds)
 BEGIN
-    DECLARE @InvoiceId INT, @Post BIT
-    SELECT TOP 1 @InvoiceId = [intHeaderId], @Post = [ysnPost] FROM @InvoiceIds
+	DECLARE @ItemsToReserve AS ItemReservationTableType
 
-    EXEC    [dbo].[uspICPostStockReservation]
-                 @intTransactionId		= @InvoiceId
-                ,@intTransactionTypeId	= @TransactionTypeId
-                ,@ysnPosted				= @Post
+	INSERT INTO @ItemsToReserve (
+		  intItemId
+	    , intItemLocationId
+	    , intItemUOMId
+	    , intLotId
+	    , dblQty
+	    , intTransactionId
+	    , strTransactionId
+	    , intTransactionTypeId
+	    , intSubLocationId
+	    , intStorageLocationId
+	    , dtmDate
+	)
+	SELECT intItemId				= SR.intItemId
+		, intItemLocationId			= SR.intItemLocationId
+		, intItemUOMId				= SR.intItemUOMId
+		, intLotId					= SR.intLotId
+		, dblQty					= CASE WHEN I.ysnPost = 1 THEN -SR.dblQty ELSE SR.dblQty END
+		, intTransactionId			= SR.intTransactionId
+		, strTransactionId			= SR.strTransactionId
+		, intTransactionTypeId		= SR.intInventoryTransactionType
+		, intSubLocationId			= SR.intSubLocationId
+		, intStorageLocationId		= SR.intStorageLocationId
+		, dtmDate					= SR.dtmDate
+	FROM tblICStockReservation SR
+	INNER JOIN @InvoiceIds I ON SR.intTransactionId = I.intHeaderId
+	WHERE SR.intInventoryTransactionType = @TransactionTypeId
+	  AND SR.ysnPosted = I.ysnPost
 
-    DELETE FROM @InvoiceIds WHERE [intHeaderId] = @InvoiceId
+	IF EXISTS (SELECT TOP 1 1 FROM @ItemsToReserve) 
+		BEGIN 
+			EXEC dbo.uspICIncreaseReservedQty @ItemsToReserve
+
+			UPDATE SR 			
+			SET	ysnPosted = I.ysnPost
+			FROM tblICStockReservation SR
+			INNER JOIN @InvoiceIds I ON SR.intTransactionId = I.intHeaderId
+			WHERE SR.intInventoryTransactionType = @TransactionTypeId
+		END 
 END
 
 END TRY
