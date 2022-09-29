@@ -181,8 +181,53 @@ CREATE TABLE #TempMBILInvoiceItem (
 				, [ysnUseOriginIdAsInvoiceNumber]
 				, [intPerformerId]
 			)
+		-- SELECT 
+		-- 	 [intInvoiceId]
+		-- 	,[strTransactionType] = InvoiceItem.strType
+		-- 	,[strType] = 'Tank Delivery'
+		-- 	,[strSourceTransaction] = 'Mobile Billing'
+		-- 	,[intSourceId] = InvoiceItem.intInvoiceId
+		-- 	,[strSourceId] = InvoiceItem.strInvoiceNo
+		-- 	,[intEntityCustomerId] = InvoiceItem.intEntityCustomerId
+		-- 	,[intCompanyLocationId] = InvoiceItem.intLocationId
+		-- 	,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+		-- 	,[intEntityId] = @UserId
+		-- 	,[dtmDate] = InvoiceItem.dtmInvoiceDate
+		-- 	,[dtmDueDate] = NULL
+		-- 	,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
+		-- 	,[dtmPostDate] = InvoiceItem.dtmPostedDate
+		-- 	,[strComments] = InvoiceItem.strComments
+		-- 	,[ysnPost] = @ysnPost
+		-- 	,[intPaymentMethodId] = InvoiceItem.intPaymentMethodId
+		-- 	,[strItemDescription] = InvoiceItem.strItemDescription
+		-- 	,[intTaxGroupId] = NULL
+		-- 	,[intTermId] = InvoiceItem.intTermId
+		-- 	,[intTruckDriverId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
+		-- 	,[strPaymentInfo]
+		-- 	,[ysnRecap] = @ysnRecap
+		
+		-- 	--Detail																																															
+		-- 	,[intInvoiceDetailId] = InvoiceItem.inti21InvoiceDetailId
+		-- 	,[intItemId] = InvoiceItem.intItemId
+		-- 	,[ysnInventory] = 1
+		-- 	,[intItemUOMId] = InvoiceItem.intItemUOMId
+		-- 	,[dblQtyShipped] = InvoiceItem.dblQuantity
+		-- 	,[dblPrice] = InvoiceItem.dblPrice
+		-- 	,[dblUnitPrice] = (InvoiceItem.dblPrice / InvoiceItem.dblQuantity)
+		-- 	,[dblPercentFull] = InvoiceItem.dblPercentageFull
+		-- 	,[ysnRefreshPrice] = 0
+		-- 	,[ysnRecomputeTax] = 1
+		-- 	,[intContractDetailId] = InvoiceItem.intContractDetailId
+		-- 	,[intSiteId] = InvoiceItem.intSiteId
+		-- 	,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
+		-- 	,[ysnUseOriginIdAsInvoiceNumber] = 1
+		-- 	,[intPerformerId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
+
+		-- FROM vyuMBILInvoiceItem InvoiceItem
+		-- WHERE (inti21InvoiceId IS NULL OR inti21InvoiceId NOT IN (SELECT intInvoiceId FROM tblARInvoice)) AND intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+
 		SELECT 
-			 [intInvoiceId]
+			 InvoiceItem.[intInvoiceId]
 			,[strTransactionType] = InvoiceItem.strType
 			,[strType] = 'Tank Delivery'
 			,[strSourceTransaction] = 'Mobile Billing'
@@ -203,10 +248,10 @@ CREATE TABLE #TempMBILInvoiceItem (
 			,[intTaxGroupId] = NULL
 			,[intTermId] = InvoiceItem.intTermId
 			,[intTruckDriverId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-			,[strPaymentInfo]
+			,InvoiceItem.[strPaymentInfo]
 			,[ysnRecap] = @ysnRecap
 		
-			--Detail																																															
+			--Detail
 			,[intInvoiceDetailId] = InvoiceItem.inti21InvoiceDetailId
 			,[intItemId] = InvoiceItem.intItemId
 			,[ysnInventory] = 1
@@ -222,9 +267,10 @@ CREATE TABLE #TempMBILInvoiceItem (
 			,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
 			,[ysnUseOriginIdAsInvoiceNumber] = 1
 			,[intPerformerId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-
 		FROM vyuMBILInvoiceItem InvoiceItem
-		WHERE (inti21InvoiceId IS NULL OR inti21InvoiceId NOT IN (SELECT intInvoiceId FROM tblARInvoice)) AND intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+		INNER JOIN #TempMBILInvoice MBILI ON InvoiceItem.intInvoiceId = MBILI.intInvoiceId
+		LEFT JOIN tblARInvoice II ON InvoiceItem.inti21InvoiceId = II.intInvoiceId
+		WHERE InvoiceItem.inti21InvoiceId IS NULL OR II.intInvoiceId IS NULL
 
 		INSERT INTO @TaxDetails
 						(
@@ -290,24 +336,39 @@ CREATE TABLE #TempMBILInvoiceItem (
 		IF (ISNULL(@ysnRecap,0) = 0 AND (@ysnPost = 1))
 		BEGIN
 
-			CREATE TABLE #InvoiceTemp(intInvoiceId int)
-			INSERT INTO #InvoiceTemp(intInvoiceId) SELECT intInvoiceId FROM #TempMBILInvoice
+			-- CREATE TABLE #InvoiceTemp(intInvoiceId int)
+			-- INSERT INTO #InvoiceTemp(intInvoiceId) SELECT intInvoiceId FROM #TempMBILInvoice
 		
-			WHILE EXISTS(SELECT 1 FROM #TempMBILInvoice)
-			BEGIN
-				DECLARE @intInvoiceId INT = (SELECT TOP 1 intInvoiceId FROM #TempMBILInvoice)
+			-- WHILE EXISTS(SELECT 1 FROM #TempMBILInvoice)
+			-- BEGIN
+			-- 	DECLARE @intInvoiceId INT = (SELECT TOP 1 intInvoiceId FROM #TempMBILInvoice)
 
-				UPDATE Invoice
-				SET 
-					 Invoice.ysnPosted	     = (SELECT TOP 1 ysnPosted FROM tblARInvoice WHERE tblARInvoice.intEntityCustomerId = Invoice.intEntityCustomerId and tblARInvoice.intSourceId = @intInvoiceId and tblARInvoice.strType = 'Tank Delivery'  order by dtmDateCreated desc)
-					,Invoice.inti21InvoiceId = (SELECT TOP 1 intInvoiceId FROM tblARInvoice WHERE tblARInvoice.intEntityCustomerId = Invoice.intEntityCustomerId and tblARInvoice.intSourceId = @intInvoiceId and tblARInvoice.strType = 'Tank Delivery' order by dtmDateCreated desc)
-				FROM
-				tblMBILInvoice Invoice
-				WHERE Invoice.intInvoiceId = @intInvoiceId
+			-- 	UPDATE Invoice
+			-- 	SET 
+			-- 		 Invoice.ysnPosted	     = (SELECT TOP 1 ysnPosted FROM tblARInvoice WHERE tblARInvoice.intEntityCustomerId = Invoice.intEntityCustomerId and tblARInvoice.intSourceId = @intInvoiceId and tblARInvoice.strType = 'Tank Delivery'  order by dtmDateCreated desc)
+			-- 		,Invoice.inti21InvoiceId = (SELECT TOP 1 intInvoiceId FROM tblARInvoice WHERE tblARInvoice.intEntityCustomerId = Invoice.intEntityCustomerId and tblARInvoice.intSourceId = @intInvoiceId and tblARInvoice.strType = 'Tank Delivery' order by dtmDateCreated desc)
+			-- 	FROM
+			-- 	tblMBILInvoice Invoice
+			-- 	WHERE Invoice.intInvoiceId = @intInvoiceId
 
-				DELETE FROM #TempMBILInvoice WHERE intInvoiceId = @intInvoiceId
-			END
-			SELECT @SuccessfulCount  = count(1) FROM tblARInvoice ar INNER JOIN tblMBILInvoice mb ON ar.intInvoiceId = mb.inti21InvoiceId WHERE mb.intInvoiceId in(SELECT intInvoiceId FROM #InvoiceTemp) and ar.ysnPosted = 1
+			-- 	DELETE FROM #TempMBILInvoice WHERE intInvoiceId = @intInvoiceId
+			-- END
+			
+			--SELECT @SuccessfulCount  = count(1) FROM tblARInvoice ar INNER JOIN tblMBILInvoice mb ON ar.intInvoiceId = mb.inti21InvoiceId WHERE mb.intInvoiceId in(SELECT intInvoiceId FROM #InvoiceTemp) and ar.ysnPosted = 1
+
+			UPDATE MBILI
+			SET ysnPosted		 = I.ysnPosted
+			  , inti21InvoiceId	 = I.intInvoiceId
+			FROM tblMBILInvoice MBILI
+			INNER JOIN #TempMBILInvoice TMBIL ON MBILI.intInvoiceId = TMBIL.intInvoiceId
+			INNER JOIN tblARInvoice I ON MBILI.intInvoiceId = I.intSourceId AND MBILI.intEntityCustomerId = I.intEntityCustomerId
+			WHERE I.strType = 'Tank Delivery'
+
+			SELECT @SuccessfulCount  = count(1) 
+			FROM tblARInvoice ar 
+			INNER JOIN tblMBILInvoice mb ON ar.intInvoiceId = mb.inti21InvoiceId
+			INNER JOIN #TempMBILInvoice tmb ON mb.intInvoiceId = tmb.intInvoiceId
+			WHERE ar.ysnPosted = 1			
 		END
 
 		IF @BatchId IS NULL
