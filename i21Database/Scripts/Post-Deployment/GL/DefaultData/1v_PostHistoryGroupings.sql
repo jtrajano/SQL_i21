@@ -10,9 +10,9 @@ BEGIN
         MIN(dtmDateEntered)dtmDateEnteredMin, 
         ROW_NUMBER() OVER (PARTITION BY strTransactionId ORDER BY min(dtmDateEntered)) rowId
         FROM tblGLDetail 
+        WHERE strTransactionType <> 'Origin Journal'    
         GROUP BY strBatchId,dtmDateEntered,strTransactionId
     )
-
     UPDATE A 
     SET ysnPostAction = rowId%2 ,
     dtmDateEnteredMin = B.dtmDateEnteredMin
