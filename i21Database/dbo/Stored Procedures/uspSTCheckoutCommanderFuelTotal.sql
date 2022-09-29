@@ -298,23 +298,7 @@ BEGIN
 		BEGIN
 			--false
 			INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-			VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'W', 'Missing Dispenser Data', 1)
-
-			IF @ysnConsStopAutoProcessIfValuesDontMatch = 1
-			BEGIN
-				--INSERT STOP CONDITION
-				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing Dispenser Data', 1)
-			END
-			ELSE
-			BEGIN
-				IF @ysnConsMeterReadingsForDollars = 1
-				BEGIN
-					--INSERT STOP CONDITION
-					INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-					VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing Dispenser Data', 1)
-				END
-			END
+			VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing Dispenser Data', 1)
 		END
 
 		--CS-105 - First Day Setup for a Consignment Store does not show any values for Summary Totals or Aggregate Meter Readings by Fuel Grade
