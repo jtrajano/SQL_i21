@@ -127,3 +127,4 @@ ELSE
 	
 		SELECT @Subject AS strSubject,@Filter AS strFilters,@body AS strMessage
 	END
+END
