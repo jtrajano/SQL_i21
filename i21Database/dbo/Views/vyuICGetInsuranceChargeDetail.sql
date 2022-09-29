@@ -37,6 +37,8 @@ SELECT
 	,R.strReceiptNumber
 	,M.strLotNumber
 	,T.strPolicyNumber
+	,M.strLotAlias
+	,M.strWarrantNo
 FROM tblICInsuranceChargeDetail A
 LEFT JOIN tblSMCompanyLocationSubLocation C
 	ON A.intStorageLocationId = C.intCompanyLocationSubLocationId
@@ -63,7 +65,7 @@ LEFT JOIN tblICLot M
 LEFT JOIN tblCTContractDetail N
 	ON M.intContractDetailId = N.intContractDetailId
 LEFT JOIN tblCTContractHeader O
-	ON N.intContractHeaderId = N.intContractHeaderId
+	ON O.intContractHeaderId = N.intContractHeaderId
 LEFT JOIN tblICInventoryReceiptItemLot P
 	ON A.intInventoryReceiptItemLotId = P.intInventoryReceiptItemLotId
 LEFT JOIN tblICInventoryReceiptItem Q
