@@ -1217,6 +1217,8 @@
     <Build Include="dbo\Tables\tblGRTransferToSettlements.sql" />
     <Build Include="dbo\Tables\tblGRTransferToSettlementsReference.sql" />
     <Build Include="dbo\Views\vyuGRTransferSettlements.sql" />
+    <Build Include="dbo\Tables\tblFRSubLedger.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2210_ReadCommittedSnapshot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
