@@ -844,6 +844,7 @@
     <Build Include="dbo\Stored Procedures\uspLGPostOtherCharges.sql" />
     <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
     <Build Include="dbo\Tables\tblCTMTMPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTHedgeContractPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
