@@ -1196,6 +1196,8 @@ BEGIN TRY
 						BEGIN
 							SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
+							SET @strDetails = '{"change": "Details", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [' + @strDetails + ']}';
+
 							EXEC uspSMAuditLog @keyValue = @intSampleId
 								,@screenName = 'Quality.view.QualitySample'
 								,@entityId = @intUserId
