@@ -73,10 +73,10 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @TransactionTables)
 			,[intTransactionId]		= @TransactionId
 			,[intConcurrencyId]		= 0
 
-		DELETE 
-		FROM tblARPostingQueue
-		WHERE intTransactionId = @TransactionId
-		  AND strTransactionNumber = @TransactionNumber
+		-- DELETE 
+		-- FROM tblARPostingQueue
+		-- WHERE intTransactionId = @TransactionId
+		--   AND strTransactionNumber = @TransactionNumber
 			
 		DELETE FROM @TransactionTables WHERE intTransactionId = @TransactionId
 	END
