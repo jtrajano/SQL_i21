@@ -1030,19 +1030,19 @@ BEGIN TRY
 					DECLARE @strDetails NVARCHAR(MAX) = ''
 
 					IF (@strOldCustomerReference <> @strCustomerReference)
-						SET @strDetails += '{"change":"strCustomerReference","iconCls":"small-gear","from":"' + LTRIM(@strOldCustomerReference) + '","to":"' + LTRIM(@strCustomerReference) + '","leaf":true,"changeDescription":"Customer Ref."},'
+						SET @strDetails += '{"change":"strCustomerReference","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldCustomerReference, '')) + '","to":"' + LTRIM(ISNULL(@strCustomerReference, '')) + '","leaf":true,"changeDescription":"Customer Ref."},'
 
 					IF (@intOldPurchaseSale <> @intPurchaseSale)
-						SET @strDetails += '{"change":"intPurchaseSale","iconCls":"small-gear","from":"' + LTRIM(@intOldPurchaseSale) + '","to":"' + LTRIM(@intPurchaseSale) + '","leaf":true,"changeDescription":"intPurchaseSale"},'
+						SET @strDetails += '{"change":"intPurchaseSale","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@intOldPurchaseSale, '')) + '","to":"' + LTRIM(ISNULL(@intPurchaseSale, '')) + '","leaf":true,"changeDescription":"intPurchaseSale"},'
 
 					IF (@intOldPositionId <> @intPositionId)
-						SET @strDetails += '{"change":"intPositionId","iconCls":"small-gear","from":"' + LTRIM(@intOldPositionId) + '","to":"' + LTRIM(@intPositionId) + '","leaf":true,"changeDescription":"intPositionId"},'
+						SET @strDetails += '{"change":"intPositionId","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@intOldPositionId, '')) + '","to":"' + LTRIM(ISNULL(@intPositionId, '')) + '","leaf":true,"changeDescription":"intPositionId"},'
 
 					IF (@strOldOriginPort <> @strOriginPort)
-						SET @strDetails += '{"change":"strOriginPort","iconCls":"small-gear","from":"' + LTRIM(@strOldOriginPort) + '","to":"' + LTRIM(@strOriginPort) + '","leaf":true,"changeDescription":"Loading Port"},'
+						SET @strDetails += '{"change":"strOriginPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldOriginPort, '')) + '","to":"' + LTRIM(ISNULL(@strOriginPort, '')) + '","leaf":true,"changeDescription":"Loading Port"},'
 
 					IF (@strOldDestinationPort <> @strDestinationPort)
-						SET @strDetails += '{"change":"strDestinationPort","iconCls":"small-gear","from":"' + LTRIM(@strOldDestinationPort) + '","to":"' + LTRIM(@strDestinationPort) + '","leaf":true,"changeDescription":"Destination Port"},'
+						SET @strDetails += '{"change":"strDestinationPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldDestinationPort, '')) + '","to":"' + LTRIM(ISNULL(@strDestinationPort, '')) + '","leaf":true,"changeDescription":"Destination Port"},'
 
 					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETSPOL, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETSPOL, 101)))
 						SET @strDetails += '{"change":"dtmETSPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETSPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETSPOL, '')) + '","leaf":true,"changeDescription":"Instr ETD"},'
@@ -1057,37 +1057,37 @@ BEGIN TRY
 						SET @strDetails += '{"change":"dtmETAPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOL, '')) + '","leaf":true,"changeDescription":"Act. ETD"},'
 
 					IF (@strOldBookingReference <> @strBookingReference)
-						SET @strDetails += '{"change":"strBookingReference","iconCls":"small-gear","from":"' + LTRIM(@strOldBookingReference) + '","to":"' + LTRIM(@strBookingReference) + '","leaf":true,"changeDescription":"Booking Ref."},'
+						SET @strDetails += '{"change":"strBookingReference","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldBookingReference, '')) + '","to":"' + LTRIM(ISNULL(@strBookingReference, '')) + '","leaf":true,"changeDescription":"Booking Ref."},'
 
 					IF (ISNULL(@strOldServiceContractNumber, '') <> @strServiceContractNumber)
-						SET @strDetails += '{"change":"strServiceContractNumber","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldServiceContractNumber, '')) + '","to":"' + LTRIM(@strServiceContractNumber) + '","leaf":true,"changeDescription":"Service Contract No."},'
+						SET @strDetails += '{"change":"strServiceContractNumber","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldServiceContractNumber, '')) + '","to":"' + LTRIM(ISNULL(@strServiceContractNumber, '')) + '","leaf":true,"changeDescription":"Service Contract No."},'
 
 					IF (@strOldBLNumber <> @strBLNumber)
-						SET @strDetails += '{"change":"strBLNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldBLNumber) + '","to":"' + LTRIM(@strBLNumber) + '","leaf":true,"changeDescription":"BOL No."},'
+						SET @strDetails += '{"change":"strBLNumber","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldBLNumber, '')) + '","to":"' + LTRIM(ISNULL(@strBLNumber, '')) + '","leaf":true,"changeDescription":"BOL No."},'
 
 					IF (@strOldMVessel <> @strMVessel)
-						SET @strDetails += '{"change":"strMVessel","iconCls":"small-gear","from":"' + LTRIM(@strOldMVessel) + '","to":"' + LTRIM(@strMVessel) + '","leaf":true,"changeDescription":"MV Name"},'
+						SET @strDetails += '{"change":"strMVessel","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldMVessel, '')) + '","to":"' + LTRIM(ISNULL(@strMVessel, '')) + '","leaf":true,"changeDescription":"MV Name"},'
 
 					IF (@strOldMVoyageNumber <> @strMVoyageNumber)
-						SET @strDetails += '{"change":"strMVoyageNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldMVoyageNumber) + '","to":"' + LTRIM(@strMVoyageNumber) + '","leaf":true,"changeDescription":"MV Voyage No."},'
+						SET @strDetails += '{"change":"strMVoyageNumber","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldMVoyageNumber, '')) + '","to":"' + LTRIM(ISNULL(@strMVoyageNumber, '')) + '","leaf":true,"changeDescription":"MV Voyage No."},'
 
 					IF (@strOldShippingMode <> @strShippingMode)
-						SET @strDetails += '{"change":"strShippingMode","iconCls":"small-gear","from":"' + LTRIM(@strOldShippingMode) + '","to":"' + LTRIM(@strShippingMode) + '","leaf":true,"changeDescription":"Shipping Mode"},'
+						SET @strDetails += '{"change":"strShippingMode","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldShippingMode, '')) + '","to":"' + LTRIM(ISNULL(@strShippingMode, '')) + '","leaf":true,"changeDescription":"Shipping Mode"},'
 
 					IF (@intOldShippingLineEntityId <> @intShippingLineEntityId)
-						SET @strDetails += '{"change":"strShippingLine","iconCls":"small-gear","from":"' + LTRIM(@strOldShippingLine) + '","to":"' + LTRIM(@strShippingLine) + '","leaf":true,"changeDescription":"Shipping Line"},'
+						SET @strDetails += '{"change":"strShippingLine","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldShippingLine, '')) + '","to":"' + LTRIM(ISNULL(@strShippingLine, '')) + '","leaf":true,"changeDescription":"Shipping Line"},'
 
 					IF (ISNULL(@intOldForwardingAgentEntityId, 0) <> @intForwardingAgentEntityId)
-						SET @strDetails += '{"change":"strForwardingAgent","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldForwardingAgent, '')) + '","to":"' + LTRIM(@strForwardingAgent) + '","leaf":true,"changeDescription":"Forwarding Agent"},'
+						SET @strDetails += '{"change":"strForwardingAgent","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldForwardingAgent, '')) + '","to":"' + LTRIM(ISNULL(@strForwardingAgent, '')) + '","leaf":true,"changeDescription":"Forwarding Agent"},'
 
 					IF (@intOldNumberOfContainers <> @intNumberOfContainers)
-						SET @strDetails += '{"change":"intNumberOfContainers","iconCls":"small-gear","from":"' + LTRIM(@intOldNumberOfContainers) + '","to":"' + LTRIM(@intNumberOfContainers) + '","leaf":true,"changeDescription":"No. of Containers"},'
+						SET @strDetails += '{"change":"intNumberOfContainers","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@intOldNumberOfContainers, '')) + '","to":"' + LTRIM(ISNULL(@intNumberOfContainers, '')) + '","leaf":true,"changeDescription":"No. of Containers"},'
 
 					IF (@intOldContainerTypeId <> @intContainerTypeId)
-						SET @strDetails += '{"change":"strContainerType","iconCls":"small-gear","from":"' + LTRIM(@strOldContainerType) + '","to":"' + LTRIM(@strContainerType) + '","leaf":true,"changeDescription":"Container Type"},'
+						SET @strDetails += '{"change":"strContainerType","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldContainerType, '')) + '","to":"' + LTRIM(ISNULL(@strContainerType, '')) + '","leaf":true,"changeDescription":"Container Type"},'
 
 					IF (@strOldPackingDescription <> @strPackingDescription)
-						SET @strDetails += '{"change":"strPackingDescription","iconCls":"small-gear","from":"' + LTRIM(@strOldPackingDescription) + '","to":"' + LTRIM(@strPackingDescription) + '","leaf":true,"changeDescription":"Packing Description"},'
+						SET @strDetails += '{"change":"strPackingDescription","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldPackingDescription, '')) + '","to":"' + LTRIM(ISNULL(@strPackingDescription, '')) + '","leaf":true,"changeDescription":"Packing Description"},'
 
 					--IF (@dtmOldStartDate <> @dtmStartDate)
 					--	SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
@@ -1099,6 +1099,8 @@ BEGIN TRY
 					IF (LEN(@strDetails) > 1)
 					BEGIN
 						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+						SET @strDetails = '{"change": "Details", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [' + @strDetails + ']}';
 
 						EXEC uspSMAuditLog @keyValue = @intLoadId
 							,@screenName = 'Logistics.view.ShipmentSchedule'
@@ -2640,7 +2642,7 @@ BEGIN TRY
 											{  
 											"change":"strShipper",
 											"from":"' + LTRIM(ISNULL(@strContractPartyName, '')) + '",
-											"to":"' + LTRIM(@strPartyName) + '",
+											"to":"' + LTRIM(ISNULL(@strPartyName, '')) + '",
 											"leaf":true,
 											"iconCls":"small-gear",
 											"isField":true,
