@@ -4,11 +4,12 @@ DECLARE @dtmDate DATETIME = GETDATE();
 TRUNCATE TABLE tblGLTrialBalance
 INSERT into tblGLTrialBalance (
 			intAccountId
-			,intGLFiscalYearPeriodId
+			,intGLFiscalYearPeriodIdstrSourceKey
 			,YTDBalance
 			,MTDBalance
 			,dtmDateModified
 			,strPeriod
+			,strCurrency
 			,intConcurrencyId
 
 		)
@@ -20,6 +21,7 @@ SELECT
 			,ISNULL(VTB.MTDBalance,0)
 			,@dtmDate
 			,strPeriod
+			,strCurrency
 			,1
 FROM  vyuGLTrialBalanceRE_NonRE VTB
 

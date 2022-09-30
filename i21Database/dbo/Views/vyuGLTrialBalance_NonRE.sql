@@ -20,6 +20,7 @@ WITH DETAIL AS(
 SELECT
 	A.intAccountId, A.intFiscalYearId,A.intGLFiscalYearPeriodId
 	,A.PeriodStart
+	,D.intCurrencyId
 	,YTD =	SUM(ISNULL(D.dblDebit, 0) - ISNULL(D.dblCredit,0))
 	,MTD =	SUM(CASE WHEN D.dtmDate BETWEEN A.PeriodStart AND A.PeriodEnd
 				THEN ISNULL(D.dblDebit, 0) - ISNULL(D.dblCredit,0)
@@ -40,3 +41,4 @@ GROUP BY
 	,A.intFiscalYearId
 	,A.intGLFiscalYearPeriodId
 	,A.PeriodStart
+	,D.intCurrencyId
