@@ -665,8 +665,29 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 
 					select @ysnUseItemCommodityDiscountOriginImport = ysnUseItemCommodityDiscountOriginImport 
 						from tblGRCompanyPreference 
+					
+					SELECT
+					TOP 1
+						@IrelyAdminId = intEntityId
+					FROM 
+					tblSMUserSecurity 
+					WHERE ysnAdmin = 1 
+						AND ysnDisabled = 0
+					ORDER BY intEntityId ASC 
 
-					select @IrelyAdminId = intEntityId from tblEMEntityCredential where strUserName = ''irelyadmin''
+					IF(@IrelyAdminId IS NULL OR @IrelyAdminId <= 0)
+					BEGIN
+						SELECT
+						TOP 1
+							@IrelyAdminId = intEntityId
+						FROM 
+						tblSMUserSecurity 
+						WHERE ysnAdmin = 1 
+							AND ysnDisabled = 1
+						ORDER BY intEntityId ASC 
+
+
+					END
 
 					declare @scaleOperator nvarchar(20)
 					set @scaleOperator = ''One Weigh''
