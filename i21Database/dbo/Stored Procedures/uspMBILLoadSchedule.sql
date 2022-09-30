@@ -152,7 +152,8 @@ Delete From tblMBILPickupDetail Where intLoadDetailId NOT IN (Select intLoadDeta
   ,(Select top 1 [strLoadRefNo] from #loadOrder po Where po.intLoadId = a.intLoadId and isnull(po.intCustomerLocationId,0) = isnull(a.intCustomerLocationId,0) and isnull(po.intEntityLocationId,0) = isnull(a.intEntityLocationId ,0) and isnull([strLoadRefNo],'') <> '')  
   ,[intItemId]                                         
   ,[dblQuantity]                     
-  ,(Select top 1 [strPONumber] from #loadOrder po Where po.intLoadId = a.intLoadId and isnull(po.intCustomerLocationId,0) = isnull(a.intCustomerLocationId,0) and isnull(po.intEntityLocationId,0) = isnull(a.intEntityLocationId ,0) and isnull([strPONumber],'') <> '')   
+  ,(Select top 1 [strPONumber] from #loadOrder po Where po.intLoadId = a.intLoadId and isnull(po.intCustomerLocationId,0) = isnull(a.intCustomerLocationId,0) and isnull(po.intEntityLocationId,0) = isnull(a.intEntityLocationId ,0) and isnull([strPONumber],
+'') <> '')   
   ,[strItemUOM]          
     FROM #loadOrder a                                                  
  INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId                            
