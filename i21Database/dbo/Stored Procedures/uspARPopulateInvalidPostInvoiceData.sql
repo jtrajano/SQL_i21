@@ -3295,7 +3295,7 @@ BEGIN
 			  AND I.strSessionId = @strSessionId
 		END
 
-	INSERT INTO tblARPostInvoiceGLEntries WITH (TABLOCK)
+	INSERT INTO tblARPostInvoiceGLEntries
         ([dtmDate]
         ,[strBatchId]
         ,[intAccountId]
