@@ -35,7 +35,7 @@ SELECT TOP 1
 FROM tblARCompanyPreference
 
 --REVERSE PROVISIONAL INVOICE
-INSERT INTO tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT INTO tblARPostInvoiceGLEntries (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
