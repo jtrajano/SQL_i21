@@ -481,7 +481,7 @@ BEGIN
 					ON			a.intEntityId = b.intEntityId
 					WHERE		a.intEntityId = @intEntityCustomerId
 
-					IF @intPaymentMethod != @intCustomerPaymentMethod
+					IF @intPaymentMethod != @intCustomerPaymentMethod OR @intCustomerPaymentMethod IS NULL
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
 						SET @strStatusMsg = 'Missing or Incorrect Payment Method for the customer ' + @strCustomerName + '.'
