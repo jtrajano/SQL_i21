@@ -722,6 +722,8 @@ BEGIN TRY
 					BEGIN
 						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 
+						SET @strDetails = '{"change": "Details", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [' + @strDetails + ']}';
+
 						EXEC uspSMAuditLog @keyValue = @intItemId
 							,@screenName = 'Inventory.view.Item'
 							,@entityId = @intUserId
