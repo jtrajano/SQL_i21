@@ -141,8 +141,9 @@ LEFT JOIN tblSMCurrency ACU ON ACU.intCurrencyID = LC.intAmountCurrencyId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN (
-	SELECT SS.strStatus, S.intLoadContainerId
+	SELECT TOP 1 SS.strStatus, S.intLoadContainerId
 	FROM tblQMSample S
 	JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 	AND S.intTypeId =  1
+	 ORDER BY dtmTestedOn DESC 
 	) S ON S.intLoadContainerId = LC.intLoadContainerId 
