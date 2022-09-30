@@ -4,7 +4,7 @@ DECLARE @dtmDate DATETIME = GETDATE();
 TRUNCATE TABLE tblGLTrialBalance
 INSERT into tblGLTrialBalance (
 			intAccountId
-			,intGLFiscalYearPeriodIdstrSourceKey
+			,intGLFiscalYearPeriodId
 			,YTDBalance
 			,MTDBalance
 			,dtmDateModified
