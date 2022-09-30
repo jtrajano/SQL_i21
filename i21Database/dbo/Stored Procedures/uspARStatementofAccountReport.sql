@@ -315,9 +315,9 @@ BEGIN
 				, @ysnEmailOnly					= @ysnEmailOnly
 				, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
-				, @strStatementFormat			= @strStatementFormat
-				, @strCurrency					= @strCurrency
-				, @strReportComment				= @strReportComment
+				-- , @strStatementFormat			= @strStatementFormat
+				-- , @strCurrency					= @strCurrency
+				-- , @strReportComment				= @strReportComment
 		END
 	ELSE IF @strStatementFormat = 'Budget Reminder'
 		BEGIN
