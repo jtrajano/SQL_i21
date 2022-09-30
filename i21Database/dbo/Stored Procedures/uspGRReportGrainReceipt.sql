@@ -269,7 +269,7 @@ where Preference.intCommodityId = @intCommodityId
      ,SC.dtmTicketDateTime AS dtmTicketDateTime
   ,ctGrade.strWeightGradeDesc    
   ,@GRRGrade as dblGrade
-  
+  ,SC.strTicketStatus
  FROM tblSCTicket SC  
  JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId  
  JOIN tblICItem Item ON Item.intItemId = SC.intItemId  
