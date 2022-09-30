@@ -790,12 +790,14 @@ WHERE strTransactionType  IN ('Customer Prepayment') AND IL.intImportLogId = @Im
 		FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
+		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
 		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL)
 
 		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
-		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL) AND ysnSuccess =0) 
+		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
+		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL))  
 	
 		UPDATE tblARImportLog 
 		SET [intSuccessCount]	= intSuccessCount - @FailedCount
@@ -816,12 +818,15 @@ WHERE strTransactionType  IN ('Customer Prepayment') AND IL.intImportLogId = @Im
 		FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=ILD.intContractSeq
-		WHERE  IL.intImportLogId = @ImportLogId  and ISNULL(CTH.intContractSeq,0) = 0 AND ISNULL(CTH.intContractHeaderId, 0) = 0
+		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
+		WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(CTH.intContractHeaderId, 0) <> 0 and ISNULL(CTH.intContractSeq,0) = ILD.intContractSeq
 
 		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=ILD.intContractSeq
-		WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(CTH.intContractHeaderId, 0) = 0 and ISNULL(CTH.intContractSeq,0) = 0) 
+		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
+		WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(CTH.intContractHeaderId, 0) <> 0 and ISNULL(CTH.intContractSeq,0) = ILD.intContractSeq)
+	
 	
 		UPDATE tblARImportLog 
 		SET [intSuccessCount]	= intSuccessCount - @FailedCount
