@@ -81,13 +81,7 @@ SELECT   L.intLoadId
 		,PDetail.intContractSeq AS intPContractSeq
 		,SHeader.strContractNumber AS strSContractNumber
 		,SDetail.intContractSeq AS	intSContractSeq
-		,strSampleStatus = CASE WHEN EXISTS(SELECT 1 FROM tblQMSample WHERE strContainerNumber = LC.strContainerNumber AND tblQMSample.intTypeId = 1) 
-								THEN (SELECT TOP 1 SS.strStatus
-										FROM tblQMSample S
-										JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-										AND S.intTypeId = 1
-										AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
-								ELSE NULL END
+		,strSampleStatus = S.strStatus
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
 		,LSS.strShipmentStatus
@@ -146,3 +140,8 @@ LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intStaticValueCurrencyId
 LEFT JOIN tblSMCurrency ACU ON ACU.intCurrencyID = LC.intAmountCurrencyId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+LEFT JOIN (
+	SELECT SS.strStatus, S.intLoadContainerId
+	FROM tblQMSample S
+	JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+	) S ON S.intLoadContainerId = LC.intLoadContainerId
