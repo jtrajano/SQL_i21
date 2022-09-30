@@ -1219,6 +1219,7 @@
     <Build Include="dbo\Views\vyuGRTransferSettlements.sql" />
     <Build Include="dbo\Tables\tblFRSubLedger.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_ReadCommittedSnapshot.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1497,7 +1498,7 @@
     <Build Include="dbo\Tables\tblTMRegulatorType.sql" />
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
-	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReading.sql" />
     <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Tables\tblTMSite.sql">
@@ -11440,7 +11441,7 @@
     <Build Include="dbo\Stored Procedures\uspARCustomAgingReport.sql" />
     <None Include="Scripts\Post-Deployment\SM\2220_MigrateLabels.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
