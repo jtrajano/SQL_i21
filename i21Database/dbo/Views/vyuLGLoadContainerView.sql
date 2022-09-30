@@ -144,4 +144,5 @@ LEFT JOIN (
 	SELECT SS.strStatus, S.intLoadContainerId
 	FROM tblQMSample S
 	JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-	) S ON S.intLoadContainerId = LC.intLoadContainerId
+	AND S.intTypeId =  1
+	) S ON S.intLoadContainerId = LC.intLoadContainerId 
