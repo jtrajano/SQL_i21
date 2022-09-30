@@ -69,6 +69,12 @@ set a.strType = b.strType
 From tblMBILLoadHeader a
 inner join #loadOrder b on b.intLoadId = a.intLoadId
 Where a.intDriverId = @intDriverId
+		   
+UPDATE a 
+SET a.intDriverId = b.intDriverEntityId
+FROM tblMBILLoadHeader a  
+INNER JOIN tblLGLoad b ON b.intLoadId = a.intLoadId
+WHERE (a.intDriverId = @intDriverId or b.intDriverEntityId = @intDriverId) AND a.ysnPosted = 0
 
 INSERT INTO tblMBILLoadHeader(intLoadId                  
         ,strLoadNumber                  
