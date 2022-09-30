@@ -113,6 +113,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2210_RemoveOriginIntegration.sql
 :r .\SM\2210_AttachmentsFileTypesFix.sql
 :r .\SM\2210_ReadCommittedSnapshot.sql
+:r .\SM\2220_HideScreenLabel.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
