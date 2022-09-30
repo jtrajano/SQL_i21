@@ -4,7 +4,8 @@ SELECT		a.intStoreId,
 			a.intStoreNo,
 			a.strDescription,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
-			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity
+			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity,
+			dbo.fnSTGetCurrentBusinessDay(a.intStoreId) as dtmCurrentBusinessDay
 FROM		tblSTStore a
 LEFT JOIN	(	SELECT		intStoreId,
 							ysnInternetConnectivity,

@@ -55,6 +55,13 @@ BEGIN TRY
 					,@intInvoiceId = @intCreatedTransactionId OUTPUT
 		END
 
+		IF(ISNULL(@intCreatedTransactionId,0) > 0)
+		BEGIN
+			UPDATE tblSCTicketDirectBasisContract 
+			SET ysnProcessed = 1
+			WHERE intTicketId = @intTicketId
+		END
+
 	END
 
 	IF @transCount = 0 COMMIT TRAN

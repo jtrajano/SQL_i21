@@ -9,6 +9,7 @@ INSERT into tblGLTrialBalance (
 			,MTDBalance
 			,dtmDateModified
 			,strPeriod
+			,strCurrency
 			,intConcurrencyId
 
 		)
@@ -20,6 +21,7 @@ SELECT
 			,ISNULL(VTB.MTDBalance,0)
 			,@dtmDate
 			,strPeriod
+			,strCurrency
 			,1
 FROM  vyuGLTrialBalanceRE_NonRE VTB
 

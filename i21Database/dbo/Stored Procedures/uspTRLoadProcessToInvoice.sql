@@ -581,15 +581,13 @@ BEGIN TRY
 			RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 			RETURN 0
 		END
-
+			
 		-- CHECK FREIGHT ITEM LOCATION
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadDistributionHeader DH
-			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-			INNER JOIN tblICItemLocation IL ON IL.intLocationId = DH.intCompanyLocationId
-			WHERE DH.intLoadHeaderId = @intLoadHeaderId 
-			AND IL.intItemId = @intFreightItemId
-			AND ((DD.dblFreightRate > 0 AND IL.intItemLocationId IS NOT NULL) OR  DD.dblFreightRate = 0)
-			AND DH.strDestination = 'Customer')
+		IF ((SELECT COUNT(*) FROM #tmpSourceTable T 
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = T.intCompanyLocationId
+			AND T.dblFreightRate > 0 
+			AND IL.intItemLocationId IS NULL
+			AND IL.intItemId = @intFreightItemId) < 1 AND (SELECT COUNT(*) FROM #tmpSourceTable) > 0)
 		BEGIN
 			DECLARE @strFreightError NVARCHAR(500) = NULL
 			SET @strFreightError = 'Incorrect Freight Item setup: Company Location is not properly set in Item ' + @strFreightItemNo + '. Please go to Item > Setup > Location.'
@@ -612,13 +610,11 @@ BEGIN TRY
 		END
 
 		-- CHECK SURCHARGE ITEM LOCATION
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRLoadDistributionHeader DH
-			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = DH.intCompanyLocationId
-			WHERE DH.intLoadHeaderId = @intLoadHeaderId 
-			AND IL.intItemId = @intSurchargeItemId
-			AND ((DD.dblDistSurcharge > 0 AND IL.intItemLocationId IS NOT NULL) OR  DD.dblDistSurcharge = 0)
-			AND DH.strDestination = 'Customer')
+		IF ((SELECT COUNT(*) FROM #tmpSourceTable T 
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = T.intCompanyLocationId
+			AND T.dblSurcharge > 0 
+			AND IL.intItemLocationId IS NULL
+			AND IL.intItemId = @intSurchargeItemId) < 1 AND (SELECT COUNT(*) FROM #tmpSourceTable) > 0)
 		BEGIN
 			DECLARE @strSurchargeError NVARCHAR(500) = NULL
 			SET @strSurchargeError = 'Incorrect Surcharge Item setup: Company Location is not properly set in Item ' + @strSurchargeItemNo + '. Please go to Item > Setup > Location.'
@@ -1589,6 +1585,7 @@ BEGIN TRY
 			,@ErrorMessage		= @ErrorMessage OUTPUT
 			,@CreatedIvoices	= @CreatedInvoices OUTPUT
 			,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
+			,@RollBackAllTransaction = 1
 
 	-- Unpost Blending Transaction
 	IF (ISNULL(@ysnPostOrUnPost, 0) = 0 AND @HasBlend = 1)

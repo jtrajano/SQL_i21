@@ -67,7 +67,7 @@ BEGIN
 	--BEGIN TRAN  
 	EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId  
 	--ROLLBACK
-	SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0)) - (@dblQty * @dblMarkUp)  
+	SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp)  
 	SET @dblCommission = @dblMargin * @dblDealerPercentage  
 	SET @dblTotalCommission += @dblCommission  
   

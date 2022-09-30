@@ -1179,6 +1179,11 @@
     <Build Include="dbo\Tables\tblFRSubLedger.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_ReadCommittedSnapshot.sql" />
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
+    <Build Include="dbo\Views\vyuTMGetSite.sql" />
+    <Build Include="dbo\Tables\tblAPPaymentIntegrationTransaction.sql" />
+    <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMDeliveryHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -7399,6 +7404,7 @@
     <Build Include="dbo\Functions\fnSTRetailRounding.sql" />
     <Build Include="dbo\Functions\fnSTUPCRemoveLeadingZero.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTags.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTagPreview.sql" />
     <None Include="Scripts\Post-Deployment\PAT\2_MigrateStockRecords.sql" />
     <None Include="Scripts\Post-Deployment\PAT\3_UpdateIssueStockNo.sql" />
     <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
@@ -11400,7 +11406,9 @@
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAdminAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" /> 
+    <Build Include="dbo\Functions\fnGLGetBeginningBalance_ForTB.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

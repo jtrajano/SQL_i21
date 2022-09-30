@@ -124,6 +124,7 @@ DECLARE @LineOfBusiness4Count AS INT
 DECLARE @LineOfBusiness5Count AS INT  
 DECLARE @CountryCount AS INT  
 DECLARE @RankCount AS INT  
+DECLARE @EntityCount AS INT  
   
 DECLARE @ysnImport as BIT  
   
@@ -294,7 +295,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
                               BEGIN  
                                IF(@strGender IS NOT NULL AND @strGender != '')  
                                 BEGIN  
-                                 SET @ysnImport = 1  
+                                  SET @ysnImport = 1 
                                 END  
                                ELSE  
                                 BEGIN  
@@ -625,8 +626,12 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   
    IF @EntityId IS NULL  
     BEGIN  
-      
-     INSERT INTO tblEMEntity (  
+    
+    SELECT @EntityCount = COUNT(strEntityNo) FROM tblEMEntity WHERE strEntityNo = @EmployeeID
+
+    IF(@EntityCount != 0)
+    BEGIN
+      INSERT INTO tblEMEntity (  
       strName  
      ,ysnPrint1099  
      ,strContactNumber  
@@ -798,6 +803,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        c.strNotes,  
        c.intEntityId  
        FROM tblEMEntity c WHERE c.intEntityId = @NewId  
+    END
+
+     
   
      INSERT INTO tblPREmployee  
      (  

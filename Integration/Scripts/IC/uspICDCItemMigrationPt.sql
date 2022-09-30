@@ -1175,7 +1175,6 @@ FROM
 	) iuFix 
 		ON iu.strLongUPCCode = iuFix.strLongUPCCode
 
-GO
 
 /* UPDATE Category of Item that doesn't have any Transactions or Audit log (Modification By Any User). */
 UPDATE Item
@@ -1187,3 +1186,6 @@ JOIN ptitmmst AS OriginItem ON RTRIM(OriginItem.ptitm_itm_no) COLLATE Latin1_Gen
 WHERE Item.intItemId NOT IN (SELECT intItemId
 							 FROM tblICInventoryTransaction) OR intItemId NOT IN (SELECT intKeyValue
 																				  FROM tblSMAudit)
+
+GO
+

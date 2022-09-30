@@ -3896,7 +3896,23 @@ BEGIN TRY
 			END			
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 4)
 			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1 --, intActionId = 61
+				declare @dblLogSpecificQty numeric(18,6), @intLogSpecificPricingTypeId int;
+				select @dblLogSpecificQty = dblQty, @intLogSpecificPricingTypeId = intPricingTypeId from @cbLogSpecific;
+
+				if (@intHeaderPricingTypeId = 2 and @intSequencePricingTypeId = 1 and not exists (select top 1 1 from @cbLogPrev where intPricingTypeId = 1))
+				begin
+					UPDATE @cbLogSpecific SET dblQty = abs(dblQty) * -1, intPricingTypeId = 2
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				end
+				else
+				begin
+					if (@strProcess <> 'Do Roll' and exists(select top 1 1 from @cbLogPrev where strTransactionType = 'Contract Balance' and intContractStatusId = 4 order by intId desc))
+					begin
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					end
+				end
+
+				UPDATE @cbLogSpecific SET dblQty = @dblLogSpecificQty * - 1, intPricingTypeId = @intLogSpecificPricingTypeId
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				if (@strProcess = 'Do Roll')
@@ -3933,6 +3949,7 @@ BEGIN TRY
 					SELECT intPricingTypeId, strNotes FROM @cbLogSpecific
 				) tbl
 
+				select line=4194,ysnMatched=@ysnMatched,TotalBasis=@TotalBasis,TotalPriced=@TotalPriced,TotalHTA=@TotalHTA
 				IF @ysnMatched <> 1
 				BEGIN
 					IF (ISNULL(@TotalBasis, 0) <> 0)
@@ -3949,10 +3966,19 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev
+
+							UPDATE lp
 							SET strBatchId = @strBatchId
 								, strProcess = @strProcess
 								, dtmTransactionDate = @_dtmCurrent
+								, dblOrigQty = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.dblOrigQty else lp.dblOrigQty end
+								, strTransactionReference = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReference else lp.strTransactionReference end
+								, strTransactionReferenceNo = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReferenceNo else lp.strTransactionReferenceNo end
+								, intTransactionReferenceId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceId else lp.intTransactionReferenceId end
+								, intTransactionReferenceDetailId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceDetailId else lp.intUserId end
+								, intUserId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intUserId else lp.intUserId end
+							FROM @cbLogPrev lp
+							cross apply (SELECT * FROM @cbLogSpecific) curr
 
 							IF (@strProcess = 'Do Roll')
 							BEGIN
@@ -4002,10 +4028,20 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev
+							UPDATE lp
 							SET strBatchId = @strBatchId
 								, strProcess = @strProcess
 								, dtmTransactionDate = @_dtmCurrent
+								, dblOrigQty = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.dblOrigQty else lp.dblOrigQty end
+								, strTransactionReference = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReference else lp.strTransactionReference end
+								, strTransactionReferenceNo = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.strTransactionReferenceNo else lp.strTransactionReferenceNo end
+								, intTransactionReferenceId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceId else lp.intTransactionReferenceId end
+								, intTransactionReferenceDetailId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intTransactionReferenceDetailId else lp.intUserId end
+								, intUserId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intUserId else lp.intUserId end
+							FROM @cbLogPrev lp
+							cross apply (SELECT * FROM @cbLogSpecific) curr
+
+							select line=4276,* from @cbLogPrev
 
 							IF (@strProcess = 'Do Roll')
 							BEGIN

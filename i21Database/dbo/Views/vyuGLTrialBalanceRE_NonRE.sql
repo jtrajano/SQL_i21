@@ -1,9 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuGLTrialBalanceRE_NonRE]
 AS
 WITH BeginningBalance AS(
-	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD  FROM vyuGLTrialBalance_NonRE 
+	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD, intCurrencyId  FROM vyuGLTrialBalance_NonRE 
 	UNION ALL
-	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD FROM  vyuGLTrialBalance_RE 
+	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD,intCurrencyId FROM  vyuGLTrialBalance_RE 
 )
 SELECT 
 ISNULL(B.MTD,0)MTDBalance,
@@ -16,7 +16,7 @@ ISNULL(G.strAccountType,'')strAccountType ,
 ISNULL(A.strCashFlow,'')strCashFlow,
 SUBSTRING(A.strAccountId, 1, P.intLength) strCode ,
 ISNULL(A.strComments,'') strComments,
-ISNULL(strCurrency,'') strCurrency,
+ISNULL(SM.strCurrency,'') strCurrency,
 ISNULL(A.strDescription,'') strDescription,
 ISNULL(A.strNote,'')strNote,
 ISNULL(U.strUOMCode,'')strUOMCode,
@@ -31,6 +31,7 @@ LEFT JOIN tblGLFiscalYearPeriod F on F.intGLFiscalYearPeriodId = B.intGLFiscalYe
 LEFT JOIN tblSMCurrency C on C.intCurrencyID = A.intCurrencyID
 LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
 LEFT JOIN tblGLAccountUnit U on U.intAccountUnitId = A.intAccountUnitId
+LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID = B.intCurrencyId
 CROSS APPLY(
 	SELECT top 1 intLength, intAccountStructureId FROM tblGLAccountStructure WHERE strType = 'Primary'
 )P

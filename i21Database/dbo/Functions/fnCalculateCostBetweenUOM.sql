@@ -42,45 +42,12 @@ BEGIN
 					WHEN ItemUOMTo.dblUnitQty = 1 THEN 
 						dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
 
-					WHEN ItemUOMFrom.dblUnitQty < 1
-						 AND ItemUOMFrom.dblUnitQty < ItemUOMTo.dblUnitQty THEN 
-													
-						dbo.fnMultiply (
-							dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
-							,ItemUOMTo.dblUnitQty
-						)
-
-					-- This is like Cost is in LB but weight is MT (Metric Ton). 
-					WHEN ItemUOMFrom.dblUnitQty < ItemUOMTo.dblUnitQty THEN 						
-
-						--dbo.fnMultiply (
-						--	dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
-						--	,ItemUOMTo.dblUnitQty 
-						--)
-
-						dbo.fnDivide(
-							dbo.fnMultiply(@dblCost, ItemUOMFrom.dblUnitQty)
-							,ItemUOMTo.dblUnitQty 
-						)							
-
-					-- This is like the cost in MT but the weight is in LB. 
-					WHEN ItemUOMFrom.dblUnitQty > ItemUOMTo.dblUnitQty THEN 
-
-						--dbo.fnDivide(
-						--	dbo.fnMultiply(@dblCost, ItemUOMFrom.dblUnitQty)
-						--	,ItemUOMTo.dblUnitQty 
-						--)							
-
-						dbo.fnMultiply (
-							dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
-							,ItemUOMTo.dblUnitQty 
-						)
-
 					ELSE 
-						dbo.fnDivide(
-							dbo.fnMultiply(@dblCost, ItemUOMFrom.dblUnitQty)
+						dbo.fnMultiply (
+							dbo.fnDivide(@dblCost, ItemUOMFrom.dblUnitQty)
 							,ItemUOMTo.dblUnitQty 
-						)					
+						)						
+
 			END 
 	FROM	(
 				SELECT	ItemUOM.dblUnitQty 

@@ -87,6 +87,8 @@ DECLARE	@EntityCustomerId			INT
 ,@ysnOrigin						BIT				= 0
 ,@ysnRecap						BIT			 	= 0
 ,@ysnImpactInventory			BIT			 	= 1
+,@ContractNumber				NVARCHAR(50)	= NULL
+,@SequenceNumber				NVARCHAR(10)	= NULL
 
 BEGIN TRY
 --VALIDATE
@@ -733,6 +735,59 @@ BEGIN
 
 END
 
+	
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+WHERE strTransactionType  IN ('Customer Prepayment') AND IL.intImportLogId = @ImportLogId)
+	BEGIN 
+
+		UPDATE ILD
+		SET [ysnImported]		= 0
+		   ,[ysnSuccess]        = 0
+		   ,[strEventResult]	= 'The Contract Number provided does not exists. '
+		FROM tblARImportLogDetail ILD
+		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
+		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL)
+
+		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
+		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL) AND ysnSuccess =0) 
+	
+		UPDATE tblARImportLog 
+		SET [intSuccessCount]	= intSuccessCount - @FailedCount
+		  , [intFailedCount]	= intFailedCount + @FailedCount
+		WHERE [intImportLogId]  = @ImportLogId
+
+	END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+WHERE strTransactionType  IN ('Customer Prepayment') AND IL.intImportLogId = @ImportLogId)
+	BEGIN 
+
+		UPDATE ILD
+		SET [ysnImported]		= 0
+		   ,[ysnSuccess]        = 0
+		   ,[strEventResult]	= 'The Contract Sequence provided does not exists. '
+		FROM tblARImportLogDetail ILD
+		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=ILD.intContractSeq
+		WHERE  IL.intImportLogId = @ImportLogId  and ISNULL(CTH.intContractSeq,0) = 0 AND ISNULL(CTH.intContractHeaderId, 0) = 0
+
+		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=ILD.intContractSeq
+		WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(CTH.intContractHeaderId, 0) = 0 and ISNULL(CTH.intContractSeq,0) = 0) 
+	
+		UPDATE tblARImportLog 
+		SET [intSuccessCount]	= intSuccessCount - @FailedCount
+		  , [intFailedCount]	= intFailedCount + @FailedCount
+		WHERE [intImportLogId]  = @ImportLogId
+		
+	END
+
 INSERT INTO @InvoicesForImport
 SELECT ILD.intImportLogDetailId,ILD.strTransactionType,ysnImported,ILD.ysnSuccess,IL.ysnRecap FROM tblARImportLogDetail ILD
 INNER JOIN tblARImportLog  IL ON ILD.intImportLogId=IL.intImportLogId
@@ -834,6 +889,7 @@ BEGIN
 			,[dblSubCurrencyRate]
 			,[ysnUseOriginIdAsInvoiceNumber]
 			,[ysnImpactInventory]
+			,[intPrepayTypeId]		    
 			)
 			SELECT 
 			D.intImportLogDetailId
@@ -942,6 +998,7 @@ BEGIN
 			,[dblSubCurrencyRate]		= 1.000000
 			,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(D.strTransactionNumber, '') <> '' AND  D.strCustomerNumber <> '9998' THEN 1 ELSE 0 END
 			,[ysnImpactInventory]		= 1
+			,[intPrepayTypeId]		    = NULL
 			 FROM
 			[tblARImportLogDetail] D
 			INNER JOIN [tblARImportLog] H ON D.[intImportLogId] = H.[intImportLogId] 
@@ -1068,6 +1125,7 @@ BEGIN
 				,[dblSubCurrencyRate]		= 1.000000
 				,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(ILD.strTransactionNumber, '') <> '' AND  ILD.strCustomerNumber <> '9998' THEN 1 ELSE 0 END
 				,[ysnImpactInventory]		= 1
+				,[intPrepayTypeId]		    = NULL
 				FROM
 					tblARImportLogDetail ILD
 				INNER JOIN
@@ -1130,10 +1188,10 @@ BEGIN
 				,[intSourceId]				= D.intImportLogDetailId
 				,[strSourceId]				= CAST(D.intImportLogDetailId AS NVARCHAR(250))
 				,[intInvoiceId]				= NULL
-				,[intEntityCustomerId]		= C.intEntityId
-				,[intCompanyLocationId]		= L.intCompanyLocationId
+				,[intEntityCustomerId]		= CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.intEntityCustomerId ELSE C.intEntityId END  
+				,[intCompanyLocationId]		= CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.intCompanyLocationId ELSE L.intCompanyLocationId END 
 				,[intCurrencyId]			= @DefaultCurrencyId
-				,[intTermId]				= T.intTermID
+				,[intTermId]				= CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.intTermId ELSE T.intTermID END 
 				,[dtmDate]					= D.dtmDate
 				,[dtmDueDate]				= CAST(dbo.fnGetDueDateBasedOnTerm(D.dtmDate, C.intTermsId) AS DATE)
 				,[dtmShipDate]				= D.dtmDate
@@ -1174,15 +1232,15 @@ BEGIN
 				,[ysnImportedFromOrigin]	= CASE WHEN D.ysnOrigin = 1 THEN 1 ELSE 0 END
 				,[ysnImportedAsPosted]		= CASE WHEN D.ysnOrigin = 1 THEN 1 ELSE 0 END
 				,[intInvoiceDetailId]		= NULL
-				,[intItemId]				= NULL
+				,[intItemId]				= CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.intItemId ELSE NULL END
 				,[ysnInventory]				= 0
-				,[strItemDescription]		= D.strItemDescription
-				,[intOrderUOMId]			= NULL
-				,[dblQtyOrdered]			= 1
-				,[intItemUOMId]				= NULL
-				,[dblQtyShipped]			= 1
+				,[strItemDescription]		=  CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.strItemDescription ELSE D.strItemDescription END
+				,[intOrderUOMId]			=  CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.intOrderUOMId ELSE NULL END
+				,[dblQtyOrdered]			=  CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.dblShipQuantity ELSE 1 END
+				,[intItemUOMId]				=  CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.intItemUOMId ELSE NULL END
+				,[dblQtyShipped]			=  CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.dblShipQuantity ELSE 1 END
 				,[dblDiscount]				= ISNULL(ABS(D.dblDiscount), @ZeroDecimal)
-				,[dblPrice]					= ABS(ISNULL(D.dblSubtotal, @ZeroDecimal))	
+				,[dblPrice]					= CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  CTH.dblCashPrice ELSE ABS(ISNULL(D.dblSubtotal, @ZeroDecimal)) END		
 				,[ysnRefreshPrice]			= 0
 				,[strMaintenanceType]		= NULL
 				,[strFrequency]				= NULL
@@ -1200,8 +1258,8 @@ BEGIN
 				,[strShipmentNumber]		= NULL
 				,[intSalesOrderDetailId]	= NULL
 				,[strSalesOrderNumber]		= NULL
-				,[intContractHeaderId]		= NULL
-				,[intContractDetailId]		= NULL
+				,[intContractHeaderId]		= CTH.intContractHeaderId
+				,[intContractDetailId]		= CTH.intContractDetailId
 				,[intShipmentPurchaseSalesContractId]	= NULL
 				,[intTicketId]				= NULL
 				,[intTicketHoursWorkedId]	= NULL
@@ -1225,6 +1283,7 @@ BEGIN
 				,[dblSubCurrencyRate]		= 1.000000
 				,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(D.strTransactionNumber, '') <> '' AND  D.strCustomerNumber <> '9998' THEN 1 ELSE 0 END
 				,[ysnImpactInventory]		= 1
+				,[intPrepayTypeId]		    = CASE WHEN ISNULL(CTH.intContractDetailId, 0) <> 0 THEN  2 ELSE NULL END
 				FROM
 				 [tblARImportLogDetail] D
 				 INNER JOIN [tblARImportLog] H ON D.[intImportLogId] = H.[intImportLogId] 
@@ -1234,6 +1293,7 @@ BEGIN
 				 LEFT JOIN tblARSalesperson SP ON D.strSalespersonNumber = SP.strSalespersonId
 				 LEFT JOIN tblSMTaxGroup TAX ON TAX.strTaxGroup = D.strTaxGroup
 				 LEFT JOIN tblSMTerm T ON T.strTerm = D.strTerms
+				 LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=D.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=D.intContractSeq
 				 WHERE @ImportFormat <> @IMPORTFORMAT_CARQUEST AND @IsTank = 0   AND H.intImportLogId=@ImportLogId AND ISNULL(ysnImported, 0) = 0 AND ISNULL(ysnSuccess, 0) = 1
 
 			IF @IsTank = 1
@@ -1403,6 +1463,45 @@ BEGIN
 							END
 
 
+			BEGIN TRY
+
+			IF OBJECT_ID('tempdb..#TempPrepaymentEntries') IS NOT NULL DROP TABLE  #TempPrepaymentEntries
+
+			SELECT ARI.* INTO #TempPrepaymentEntries  from  tblARInvoice ARI
+						INNER JOIN tblARInvoiceIntegrationLogDetail I ON ARI.intInvoiceId= I.intInvoiceId AND I.intSourceId=ARI.intSourceId
+						INNER JOIN tblARImportLogDetail ILD ON ILD.strTransactionNumber = ARI.strInvoiceNumber 
+						AND intImportLogId= @ImportLogId
+						WHERE I.intIntegrationLogId	= @intInvoiceLogId 
+						AND ILD.dtmDatePaid IS NOT NULL	 
+						AND I.strTransactionType = 'Customer Prepayment' 
+
+			
+			WHILE EXISTS(SELECT intInvoiceId  FROM #TempPrepaymentEntries)
+			BEGIN 
+	
+				DECLARE @PrePayInvoiceId INT , @PrepayPaymentId INT 
+					SELECT TOP 1 @PrePayInvoiceId =EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
+
+					EXEC [dbo].[uspARProcessPaymentFromInvoice]
+						 @InvoiceId		= @PrePayInvoiceId 
+						,@EntityId		= @UserEntityId
+						,@RaiseError	= 0
+						,@PaymentId		= @PrepayPaymentId OUTPUT
+
+					DELETE FROM #TempPrepaymentEntries WHERE intInvoiceId = @PrePayInvoiceId
+
+					EXEC uspARPostPayment @post = 1, @param = @PrepayPaymentId, @raiseError = 1
+
+			END
+			END TRY
+			BEGIN CATCH
+
+				SET @ErrorMessage = ERROR_MESSAGE();
+
+			END CATCH
+
+
+
 			UPDATE ILD
 			SET [intConversionAccountId] = @ConversionAccountId
 			FROM  tblARImportLogDetail ILD
@@ -1426,8 +1525,10 @@ BEGIN
 				INNER JOIN tblARInvoice ARI ON ARI.strInvoiceOriginId = ILD.strTransactionNumber 
 				INNER JOIN tblARInvoiceIntegrationLogDetail I ON ARI.intInvoiceId= I.intSourceId AND ARI.strInvoiceNumber = I.strSourceId 
 				WHERE  IL.intImportLogId = @ImportLogId  AND ILD.strEventResult = 'Unable to find an open fiscal year period to match the transaction date.'
+		
 
 			END
+
 END
 
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport  where strTransactionType = 'Sales Order')

@@ -295,7 +295,8 @@ BEGIN
 				, FOTH.intFutOptTransactionHeaderId
 				, FOT.strBrokerTradeNo
 				, FOT.strNotes
-				, FOT.ysnPreCrush
+				, ysnPreCrush = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.ysnPreCrush
+										ELSE ISNULL(History.ysnPreCrush, FOT.ysnPreCrush) END
 				, FOT.ysnExpired
 				, intBookId = History.intBookId
 				, strBook = History.strBook COLLATE Latin1_General_CI_AS
@@ -410,7 +411,8 @@ BEGIN
 				, FOTH.intFutOptTransactionHeaderId
 				, FOT.strBrokerTradeNo
 				, FOT.strNotes
-				, FOT.ysnPreCrush
+				, ysnPreCrush = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.ysnPreCrush
+										ELSE ISNULL(History.ysnPreCrush, FOT.ysnPreCrush) END
 				, FOT.ysnExpired
 				, intBookId = History.intBookId 
 				, strBook = History.strBook COLLATE Latin1_General_CI_AS

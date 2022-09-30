@@ -516,13 +516,16 @@ INNER JOIN (
 UPDATE CUSTOMER
 SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN PAYMENT.dtmDatePaid ELSE NULL END
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-CROSS APPLY (
-    SELECT TOP 1 P.dtmDatePaid
+INNER JOIN (
+    SELECT dtmDatePaid          = MAX(P.dtmDatePaid)
+         , intEntityCustomerId  = P.intEntityCustomerId
     FROM dbo.#ARPostPaymentHeader P
-    WHERE P.intEntityCustomerId = CUSTOMER.intEntityId
-    ORDER BY P.dtmDatePaid DESC
-) PAYMENT
-WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
+    INNER JOIN tblARCustomer C WITH (NOLOCK) ON P.intEntityCustomerId = C.intEntityId    
+    WHERE P.intEntityCustomerId = C.intEntityId
+      AND C.dblCreditLimit > 0
+    GROUP BY P.intEntityCustomerId
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
+WHERE CUSTOMER.dblCreditLimit > 0
 
 --UPDATE HIGHEST AR
 UPDATE CUSTOMER

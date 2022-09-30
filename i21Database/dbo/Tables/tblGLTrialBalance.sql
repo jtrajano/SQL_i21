@@ -2,6 +2,7 @@
 	intTrialBalanceId int IDENTITY(1,1) NOT NULL,
 	intAccountId int NOT NULL,
     strTransactionId nvarchar(40) COLLATE Latin1_General_CI_AS NULL,
+	strCurrency NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	MTDBalance numeric (38, 6) NULL,
 	YTDBalance numeric(38, 6) NULL,
 	intGLFiscalYearPeriodId int NULL,

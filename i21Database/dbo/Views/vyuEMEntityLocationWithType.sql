@@ -3,7 +3,6 @@ AS
 SELECT intEntityLocationId			= EL.intEntityLocationId
 	 , intEntityId					= EL.intEntityId
 	 , strLocationName				= EL.strLocationName
-	 , strCheckPayeeName			= EL.strCheckPayeeName
 	 , strAddress					= EL.strAddress
 	 , strCity						= EL.strCity
 	 , strCountry					= EL.strCountry
