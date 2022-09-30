@@ -118,12 +118,12 @@ SELECT CD.intContractDetailId
 	,ysnAllowReweighs = WW.ysnPayablesOnShippedWeights
 	,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CD.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 	,CH.intTermId
-	,GCD.intTaxGroupId
-	,GCD.strTaxGroup
+	,CD.intTaxGroupId
+	,TG.strTaxGroup
 FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 CROSS JOIN tblCTContractHeader CH
 INNER JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-INNER JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+INNER JOIN vyuCTGetAdditionalColumnForDetailView  AD ON CD.intContractDetailId = AD.intContractDetailId
 INNER JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 INNER JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -159,7 +159,7 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
 LEFT JOIN tblSMTerm TM ON TM.intTermID = CH.intTermId
-LEFT JOIN vyuCTGridContractDetail GCD ON GCD.intContractDetailId = CD.intContractDetailId
+LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId =	CD.intTaxGroupId
 OUTER APPLY (
 	SELECT TOP 1
 		S.intContractDetailId
