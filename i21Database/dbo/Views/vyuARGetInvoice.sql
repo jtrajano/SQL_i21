@@ -159,7 +159,7 @@ SELECT
 	,dblProvisionalPayment				= CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblProvisionalAmount > 0 THEN PROVISIONALPAYMENT.dblPayment ELSE 0 END 
 	,dblProvisionalBasePayment			= CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblBaseProvisionalAmount > 0 THEN PROVISIONALPAYMENT.dblBasePayment ELSE 0 END 
 	,ysnHasCreditApprover				= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
-	,dblCreditStopDays					= CUSTOMERAGING.dblCreditStopDays
+	,dblCreditStopDays					= ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
 	,intCreditStopDays					= CUS.intCreditStopDays
 	,ysnInvoiceReturned					= ISNULL(RETURNINVOICE.ysnReturned,0)
 	,ysnInterCompany					= ISNULL(INV.ysnInterCompany,0)
