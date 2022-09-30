@@ -149,10 +149,10 @@ BEGIN TRY
 	ELSE
 		ROLLBACK TRANSACTION @Savepoint
     
-    DELETE  Q
-    FROM tblARPostingQueue Q
-    INNER JOIN tblARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
-	WHERE I.strSessionId = @strSessionId
+    -- DELETE  Q
+    -- FROM tblARPostingQueue Q
+    -- INNER JOIN tblARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
+	-- WHERE I.strSessionId = @strSessionId
     
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 

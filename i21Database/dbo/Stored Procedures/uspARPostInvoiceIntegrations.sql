@@ -682,11 +682,11 @@ EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdat
 --CREATE INVENTORY RECEIPT TO ANOTHER COMPANY
 EXEC dbo.uspARInterCompanyIntegrationSource @BatchId = @BatchId, @Post = @Post, @strSessionId = @strSessionId
 
---DELETE FROM POSTING QUEUE
-DELETE PQ
-FROM tblARPostingQueue PQ
-INNER JOIN tblARPostInvoiceHeader II WITH (NOLOCK) ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
-WHERE II.strSessionId = @strSessionId
+-- --DELETE FROM POSTING QUEUE
+-- DELETE PQ
+-- FROM tblARPostingQueue PQ
+-- INNER JOIN tblARPostInvoiceHeader II WITH (NOLOCK) ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
+-- WHERE II.strSessionId = @strSessionId
 
 --AUDIT LOG
 BEGIN

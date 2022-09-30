@@ -1105,7 +1105,7 @@ WHERE I.[intInvoiceId] = @InvoiceId
 	END
 END
 
-INSERT INTO tblARPostInvoiceGLEntries WITH (TABLOCK)
+INSERT INTO tblARPostInvoiceGLEntries
 	([dtmDate]
 	,[strBatchId]
 	,[intAccountId]
