@@ -21,7 +21,7 @@ SELECT TSH.intTransferSettlementHeaderId
 	,intTransferBillId 		= TSR.intBillToId
 	,strTransferBillId 		= AP_FROM_TR.strBillId
 	--TO
-	,intTransferToSettlementId
+	,intTransferToSettlementId = TS_TO.intTransferToSettlementId
 	,intEntityTransferId 	= TS_TO.intEntityId
 	,strEntityTransferNo 	= EM_TO.strEntityNo
 	,strEntityTransferName 	= EM_TO.strName
