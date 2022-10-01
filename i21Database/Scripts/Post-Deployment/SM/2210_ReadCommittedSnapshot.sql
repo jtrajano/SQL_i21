@@ -10,11 +10,11 @@ DECLARE @ysnSysadmin bit;
 SET @dbname = (SELECT DB_NAME(db_id()));
 SET @ysnSysadmin = IS_SRVROLEMEMBER('sysadmin');
 
-	PRINT(N'USER HAS SYSADMIN ROLE: ' + IIF(@ysnSysadmin = 1, 'YES', 'NO'));
-
 	IF(@ysnSysadmin = 1)
 		BEGIN
 				BEGIN TRY
+
+						PRINT(N'USER HAS SYSADMIN ROLE');
 						--BEGIN TRANSACTION
 						-- CANNOT USE DBNAME AS VARIABLE ON ALTER DB SHOULD USE DYNAMIC QUERYING
 
