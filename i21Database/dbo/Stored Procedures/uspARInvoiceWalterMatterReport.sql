@@ -152,6 +152,11 @@ SELECT
 	,strFooterComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strFooterComments, ''), 0)
 	,dblTotal					= ARGID.dblTotal
 	,strReportType				= CASE WHEN ARI.strType = 'Provisional' OR ARI.strPrintFormat = ISNULL('Provisional', '') THEN 'PROVISIONAL' ELSE 'COMMERCIAL' END
+	,strRelatedInvoiceRemarks	= CASE 
+									WHEN ARIR.strType = 'Provisional' THEN 'Replaces Provisional Invoice: ' + + ARIR.strInvoiceNumber
+									WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.intOriginalInvoiceId, 0) <> 0 THEN 'Cancels Invoice: ' + + ARIR.strInvoiceNumber
+									ELSE ''
+								  END
 	,dblAmountDue				= ARI.dblAmountDue
 	,dblShipmentNetWt			= ARGID.dblShipmentNetWt
 	,dblQtyShipped				= ARGID.dblQtyShipped
@@ -164,6 +169,7 @@ SELECT
 	,dblProvisionalQtyShipped	= ARGIDP.dblQtyShipped
 	,strProvisionalUnitMeasure	= ARGIDP.strUnitMeasure
 	,dblProvisionalUnitPrice	= ARGIDP.dblUnitPrice
+	,strTransactionType			= ARI.strTransactionType
 FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
