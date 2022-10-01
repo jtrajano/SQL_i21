@@ -9525,6 +9525,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Functions\fnCTGetOverage.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
