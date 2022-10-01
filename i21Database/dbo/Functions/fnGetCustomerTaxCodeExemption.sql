@@ -30,21 +30,28 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
-	DECLARE	@TaxCodeExemption	NVARCHAR(500)
-			,@ExemptionPercent	NUMERIC(18,6)
-			,@TaxExempt			BIT
-			,@InvalidSetup		BIT
-			,@State				NVARCHAR(100)
-			,@SiteNumberId		INT
+	DECLARE	@TaxCodeExemption		NVARCHAR(500)
+			,@ExemptionPercent		NUMERIC(18,6)
+			,@TaxExempt				BIT
+			,@InvalidSetup			BIT
+			,@State					NVARCHAR(100)
+			,@SiteNumberId			INT
+			,@CustomerApplySalesTax	BIT = 0
+			,@CustomerTaxExempt 	BIT = 0
 	
 	SET @TaxCodeExemption = NULL
 	SET @ExemptionPercent = 0.00000
 	SET @TaxExempt = 0
 	SET @InvalidSetup = 0
 	SET @DisregardExemptionSetup = ISNULL(@DisregardExemptionSetup, 0)
+
+	SELECT @CustomerApplySalesTax 	= ysnApplySalesTax
+		 , @CustomerTaxExempt		= ysnTaxExempt
+	FROM tblARCustomer
+	WHERE intEntityId = @CustomerId 
 	
 	--Customer
-	IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId AND ISNULL([ysnTaxExempt],0) = 1)
+	IF ISNULL(@CustomerTaxExempt, 0) = 1
 		SET @TaxCodeExemption = 'Customer is tax exempted; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
@@ -115,6 +122,26 @@ BEGIN
 			RETURN 	
 		END
 
+	SELECT TOP 1 @TaxCodeExemption =  'Customer doesn''t apply Sales Tax; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+	FROM tblSMTaxGroupCode SMTGC
+	INNER JOIN tblSMTaxGroup SMTG ON SMTGC.[intTaxGroupId] = SMTG.[intTaxGroupId] 
+	INNER JOIN tblSMTaxCode SMTC ON SMTGC.[intTaxCodeId] = SMTC.[intTaxCodeId] 
+	INNER JOIN tblSMTaxClass SMTCL ON SMTC.[intTaxClassId] = SMTCL.[intTaxClassId]
+	WHERE @CustomerApplySalesTax = 0
+	  AND SMTCL.strTaxClass LIKE '%Sales Tax%'
+	  AND SMTGC.[intTaxCodeId] = @TaxCodeId
+	  AND SMTGC.[intTaxGroupId] = @TaxGroupId		
+
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
 
 	SELECT TOP 1
 		@TaxCodeExemption =  'Tax Code ''' + SMTC.[strTaxCode] +  ''' under Tax Group  ''' + SMTG.strTaxGroup + ''' has an exemption set for item category ''' + ICC.[strCategoryCode] + ''''
