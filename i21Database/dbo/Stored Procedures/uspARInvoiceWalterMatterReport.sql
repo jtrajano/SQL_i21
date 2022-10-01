@@ -157,12 +157,16 @@ SELECT
 									WHEN ISNULL(ARI.strPrintFormat, '') <> '' THEN ARI.strPrintFormat + ' '
 									ELSE ''
 								  END + 'Invoice No: ' + ARI.strInvoiceNumber
+	,strRelatedInvoiceRemarks	= CASE 
+									WHEN ARIR.strType = 'Provisional' THEN 'Replaces Provisional Invoice: ' + + ARIR.strInvoiceNumber
+									WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.intOriginalInvoiceId, 0) <> 0 THEN 'Cancels Invoice: ' + + ARIR.strInvoiceNumber
+									ELSE ''
+								  END
 	,dblAmountDue				= ARI.dblAmountDue
 	,dblShipmentNetWt			= ARGID.dblShipmentNetWt
 	,dblQtyShipped				= ARGID.dblQtyShipped
 	,strUnitMeasure				= ARGID.strUnitMeasure
 	,dblUnitPrice				= ARGID.dblUnitPrice
-	,strRelatedInvoiceNumber	= ISNULL(ARIR.strInvoiceNumber, '')
 	,dtmRelatedDate				= ARIR.dtmDate
 	,dblRelatedPayment			= ARIR.dblPayment
 	,dblRelatedShipmentNetWt	= ARGIDR.dblShipmentNetWt
@@ -170,6 +174,7 @@ SELECT
 	,strRelatedUnitMeasure		= ARGIDR.strUnitMeasure
 	,dblRelatedUnitPrice		= ARGIDR.dblUnitPrice
 	,strRelatedType				= ARIR.strType
+	,strTransactionType			= ARI.strTransactionType
 FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
