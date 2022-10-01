@@ -151,6 +151,12 @@ SELECT
 	,strEntityLocationRemarks	= EMELS.strRemarks
 	,strFooterComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strFooterComments, ''), 0)
 	,dblTotal					= ARGID.dblTotal
+	,strReportIdentifier		= CASE 
+									WHEN ARI.strType = 'Provisional' THEN 'Provisional ' 
+									WHEN ARIR.strType = 'Provisional' THEN 'Commercial ' 
+									WHEN ISNULL(ARI.strPrintFormat, '') <> '' THEN ARI.strPrintFormat + ' '
+									ELSE ''
+								  END + 'Invoice No: ' + ARI.strInvoiceNumber COLLATE Latin1_General_CI_AS
 	,strRelatedInvoiceRemarks	= CASE 
 									WHEN ARIR.strType = 'Provisional' THEN 'Replaces Provisional Invoice: ' + + ARIR.strInvoiceNumber
 									WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.intOriginalInvoiceId, 0) <> 0 THEN 'Cancels Invoice: ' + ARIR.strInvoiceNumber
