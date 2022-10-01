@@ -774,6 +774,7 @@ CROSS APPLY (
 
 INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	  intInvoiceId
+	, intEntityCustomerId
 	, intCompanyLocationId
 	, strCompanyName
 	, strCompanyAddress
@@ -875,7 +876,8 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	, strLogoType
 )
 SELECT 
-	 intInvoiceId
+	  intInvoiceId
+	, intEntityCustomerId
 	, intCompanyLocationId
 	, strCompanyName
 	, strCompanyAddress

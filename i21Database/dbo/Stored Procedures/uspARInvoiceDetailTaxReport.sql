@@ -45,10 +45,7 @@ SELECT [intTransactionId]			= ID.intInvoiceId
 	, [dblTaxPerQty]				= CASE WHEN ISNULL(ID.dblQtyShipped, 0) <> 0 THEN IDT.dblAdjustedTax / ID.dblQtyShipped ELSE 0 END
 	, [dblComputedGrossPrice]		= ISNULL(ID.dblComputedGrossPrice, 0)	
 	, [ysnIncludeInvoicePrice]		= ISNULL(SMT.ysnIncludeInvoicePrice, 0)
-	, [strException]				= CASE WHEN CHARINDEX('Tax Exemption > ', IDT.strNotes) > 0 
-										  THEN SUBSTRING(IDT.strNotes, CHARINDEX('-', IDT.strNotes) + 2, CHARINDEX('; Start Date:', IDT.strNotes) - CHARINDEX('-', IDT.strNotes) - 2)
-										  ELSE ''
-									  END
+	, [strException]				= CASE WHEN ISNULL(IDT.ysnTaxExempt, 0) = 1 THEN ISNULL(ARCTTE.strException, '') ELSE '' END
 FROM tblARInvoiceDetailTax IDT 	
 INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 INNER JOIN (
@@ -56,6 +53,7 @@ INNER JOIN (
 				  , strInvoiceFormat
 				  , strType
 				  , intEntityCustomerId
+				  , dtmPostDate
 	FROM tblARInvoiceReportStagingTable
 	WHERE intEntityUserId = @intEntityUserId 
 	AND strRequestId = @strRequestId 
@@ -63,5 +61,13 @@ INNER JOIN (
 ) I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 INNER JOIN tblSMTaxClass TC ON SMT.intTaxClassId = TC.intTaxClassId	
-WHERE ((IDT.ysnTaxExempt = 1) OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
+OUTER APPLY (
+	SELECT TOP 1 strException
+	FROM tblARCustomerTaxingTaxException
+	WHERE intEntityCustomerId = I.intEntityCustomerId
+	AND ((I.dtmPostDate >= dtmStartDate AND dtmEndDate IS NULL) OR (I.dtmPostDate BETWEEN dtmStartDate AND dtmEndDate))
+	AND ((intTaxCodeId = SMT.intTaxCodeId AND intTaxClassId = TC.intTaxClassId) OR (ISNULL(intTaxCodeId, 0) = 0 AND intTaxClassId = TC.intTaxClassId) OR (intTaxCodeId = SMT.intTaxCodeId AND ISNULL(intTaxClassId, 0) = 0))
+	ORDER BY intTaxCodeId DESC, intTaxClassId DESC, dtmStartDate DESC, dtmEndDate DESC, intEntityCustomerLocationId DESC, intItemId DESC, intCategoryId DESC
+) ARCTTE
+WHERE ((IDT.ysnTaxExempt = 1 AND ISNULL(ARCTTE.strException, '') <> '') OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
 	AND ID.intItemId <> ISNULL(@intItemForFreightId, 0)
