@@ -1742,7 +1742,7 @@ BEGIN TRY
 		BEGIN
 			DELETE IDT
 			FROM tblARInvoiceDetailTax IDT
-			INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = IDT.intInvoiceDetailId
+			INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
 			WHERE [intInvoiceId]  = @ExistingInvoiceId
 			
 			DELETE FROM tblARInvoiceDetail
