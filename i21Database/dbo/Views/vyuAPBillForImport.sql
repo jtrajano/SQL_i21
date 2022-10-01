@@ -164,4 +164,7 @@ FROM (
 	WHERE voucher.intTransactionType IN (1)
 	AND voucher.intTransactionReversed IS NULL
 	AND voucher.ysnIsPaymentScheduled = 1
+	--http://inet.irelyserver.com/display/AP/Deferred+taxes+can+have+same+invoice+number
+	--EXCLUSION BASE ON SPEC, THIS WILL NOT SHOW ON VALIDATION RESULT AS ALREADY PAID
+	AND paySched.ysnPaid = 0
 ) forPayment

@@ -53,18 +53,58 @@ BEGIN TRY
 		IF NULLIF(@billIds, '') IS NOT NULL
 		BEGIN
 			EXEC uspAPCreatePayment @userId, @bankAccountId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
-			
+		
 			UPDATE PD
-			SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
-				PD.dblPayment = ISNULL(I.dblPayment, 0),
-				PD.dblInterest = ISNULL(I.dblInterest, 0),
-				PD.dblAmountDue = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
-				PD.dblTotal = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - I.dblInterest) ELSE PD.dblTotal END
+			SET PD.dblDiscount = ISNULL(forPayment.dblDiscount, 0),
+				PD.dblPayment = ISNULL(forPayment.dblPayment, 0),
+				PD.dblInterest = ISNULL(forPayment.dblInterest, 0),
+				PD.dblAmountDue = CASE WHEN forPayment.intId IS NOT NULL THEN ((forPayment.dblPayment + forPayment.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
+				PD.dblTotal = CASE WHEN forPayment.intId IS NOT NULL THEN ((forPayment.dblPayment + forPayment.dblDiscount) - forPayment.dblInterest) ELSE PD.dblTotal END
 			FROM tblAPPaymentDetail PD
 			INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 			LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
-			LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber) AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
-			WHERE PD.intPaymentId = @createdPaymentId
+			OUTER APPLY (
+				SELECT
+					I.*
+				FROM tblAPImportPaidVouchersForPayment I 
+				WHERE 
+					I.strBillId = B.strBillId 
+				AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber) 
+				AND I.dblPayment = ISNULL(PS.dblPayment, B.dblAmountDue)
+				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
+			) forPayment
+			WHERE PD.intPaymentId = @createdPaymentId;
+
+			--UNPAY THOSE DUPLICATE, THE SAME AMOUNT AND INVOICE #, SELECT ONLY THE EARLIEST DUE DATE
+			WITH cteDup (
+				intId,
+				intBillId,
+				intEarliestDue
+			) AS (
+				SELECT 
+					PS.intId,
+					PS.intBillId,
+					ROW_NUMBER() OVER (PARTITION BY PS.intBillId, PS.dblPayment ORDER BY PS.dtmDueDate DESC) intEarliestDue
+				FROM tblAPVoucherPaymentSchedule PS 
+				WHERE PS.ysnPaid = 0
+			)
+
+			UPDATE PD
+			SET
+				PD.dblPayment = 0,
+				PD.dblAmountDue = PD.dblTotal
+			FROM tblAPPaymentDetail PD
+			INNER JOIN (
+				SELECT A.intBillId, B.intId, B.intEarliestDue
+				FROM cteDup A
+				INNER JOIN cteDup B ON A.intBillId = B.intBillId
+				WHERE 
+					A.intEarliestDue > 1
+			) dupPay
+			ON dupPay.intBillId = PD.intBillId AND dupPay.intEarliestDue = 1
+			AND PD.intPayScheduleId = dupPay.intId
+			WHERE PD.intPaymentId = @createdPaymentId;
+			--END
 
 			EXEC uspAPUpdateVoucherPayment @createdPaymentId, NULL
 
