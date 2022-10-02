@@ -44,4 +44,4 @@ LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = tcd.intItemUOMId
 LEFT JOIN tblICUnitMeasure uom ON uom.intUnitMeasureId = iUOM.intUnitMeasureId
 LEFT JOIN tblICCommodity com ON com.intCommodityId = tc.intCommodityId
 LEFT JOIN tblICCommodityAttribute pt ON pt.intCommodityAttributeId = tc.intProductTypeId AND pt.strType = 'ProductType'
-LEFT JOIN tblICCommodityAttribute pl ON pt.intCommodityAttributeId = tc.intProductLineId AND pt.strType = 'ProductLine'
+LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = tc.intProductLineId
