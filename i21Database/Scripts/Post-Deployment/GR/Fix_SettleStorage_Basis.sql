@@ -1,18 +1,18 @@
 ﻿PRINT '--START: Fix Net Settlement for Settle Storage against Basis Contracts--'
-IF (SELECT 1 FROM tblGRSettleContractPriceFixationDetail WHERE intPriceFixationDetailId NOT IN (SELECT intPriceFixationDetailId FROM tblCTPriceFixationDetail)) = 1
+IF (SELECT TOP 1 1 FROM tblGRSettleContractPriceFixationDetail WHERE intPriceFixationDetailId NOT IN (SELECT intPriceFixationDetailId FROM tblCTPriceFixationDetail)) = 1
 BEGIN
 	UPDATE tblGRSettleContractPriceFixationDetail SET intPriceFixationDetailId = NULL WHERE intPriceFixationDetailId NOT IN (SELECT intPriceFixationDetailId FROM tblCTPriceFixationDetail)
 END
 
-IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_NAME ='FK_tblGRSettleContractPriceFixationDetail_tblCTPriceFixationDetail_intPriceFixationDetailId')
+IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_NAME ='FK_tblGRSettleContractPriceFixationDetail_tblCTPriceFixationDetail_intPriceFixationDetailId')
 BEGIN	
 	ALTER TABLE tblGRSettleContractPriceFixationDetail
 	ADD CONSTRAINT [FK_tblGRSettleContractPriceFixationDetail_tblCTPriceFixationDetail_intPriceFixationDetailId] 
 		FOREIGN KEY ([intPriceFixationDetailId]) REFERENCES [dbo].[tblCTPriceFixationDetail] ([intPriceFixationDetailId]) ON DELETE CASCADE
 END
 
-IF EXISTS(SELECT 1 FROM tblGRSettleContractPriceFixationDetail)
-	AND (SELECT 1 FROM tblGRSettleContractPriceFixationDetail WHERE intPriceFixationDetailId IS NULL) = 1
+IF EXISTS(SELECT TOP 1 1 FROM tblGRSettleContractPriceFixationDetail)
+	AND (SELECT TOP 1 1 FROM tblGRSettleContractPriceFixationDetail WHERE intPriceFixationDetailId IS NULL) = 1
 BEGIN
 	TRUNCATE TABLE tblGRSettleContractPriceFixationDetail
 
