@@ -19,5 +19,5 @@
     CONSTRAINT [FK_tblCTTermCost_DestinationTerm] FOREIGN KEY ([intDestinationTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
 	CONSTRAINT [FK_tblCTTermCost_Commodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 	CONSTRAINT [FK_tblCTTermCost_ProductType] FOREIGN KEY ([intProductTypeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
-	CONSTRAINT [FK_tblCTTermCost_ProductLine] FOREIGN KEY ([intProductLineId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
+	CONSTRAINT [FK_tblCTTermCost_ProductLine] FOREIGN KEY ([intProductLineId]) REFERENCES [tblICCommodityProductLine]([intCommodityProductLineId]), 
 )
