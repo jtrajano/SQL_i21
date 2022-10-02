@@ -407,6 +407,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
 :R .\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql
 
+:R .\GR\Fix_SettleStorage_Basis.sql
+
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
