@@ -418,6 +418,8 @@ print 'BEGIN POST DEPLOYMENT'
 
 :R .\GR\Fix_SettleStorage_Basis.sql
 
+:R .\GR\Fix_SettleStorage_Basis.sql
+
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
