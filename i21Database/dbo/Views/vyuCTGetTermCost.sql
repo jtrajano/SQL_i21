@@ -26,6 +26,6 @@ JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = tc.intDestinationP
 JOIN tblSMFreightTerms LoadingTerm ON LoadingTerm.intFreightTermId = tc.intLoadingTermId
 JOIN tblSMFreightTerms DestinationTerm ON DestinationTerm.intFreightTermId = tc.intDestinationTermId
 JOIN tblARMarketZone mz ON mz.intMarketZoneId = tc.intMarketZoneId
-JOIN tblICCommodity com ON com.intCommodityId = tc.intCommodityId
+LEFT JOIN tblICCommodity com ON com.intCommodityId = tc.intCommodityId
 LEFT JOIN tblICCommodityAttribute pt ON pt.intCommodityAttributeId = tc.intProductTypeId AND pt.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute pl ON pt.intCommodityAttributeId = tc.intProductLineId AND pt.strType = 'ProductLine'
