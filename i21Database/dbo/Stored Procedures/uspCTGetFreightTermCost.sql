@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetFreightTermCost]
 	@intContractTypeId INT
 	, @intCommodityId INT
+	, @intProductTypeId INT = NULL
+	, @intProductLineId INT = NULL
 	, @intItemId INT
 	, @intFromPortId INT
 	, @intToPortId INT
@@ -74,6 +76,9 @@ BEGIN TRY
 		AND intLoadingTermId = @intFromTermId
 		AND intDestinationTermId = @intToTermId
 		AND intMarketZoneId = @intMarketZoneId
+		AND intCommodityId = @intCommodityId
+		AND ISNULL(intProductTypeId, ISNULL(@intProductTypeId, 0)) = ISNULL(@intProductTypeId, 0)
+		AND ISNULL(intProductLineId, ISNULL(@intProductLineId, 0)) = ISNULL(@intProductLineId, 0)
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCosts)
 	BEGIN
