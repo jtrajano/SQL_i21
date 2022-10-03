@@ -11,14 +11,6 @@ RETURNS @tbl TABLE (
 )
 AS
 BEGIN
---DECLARE @tbl TABLE (
---	intBillDetailItemId INT
---	,intBillDetailOtherChargeItemId INT
---	,intTypeId INT
---	,ysnShow BIT
---	,ysnStage BIT
---)
-
 INSERT INTO @tbl
 SELECT * FROM (
 SELECT intBillDetailItemId = BD.intBillDetailId
@@ -31,7 +23,8 @@ SELECT intBillDetailItemId = BD.intBillDetailId
 	END
 	,ysnShow = CASE 
 		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NULL THEN 0 --SPOT
-		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN 1 --CONTRACT
+		--WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN 1 --CONTRACT
+		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN CASE WHEN BD2.ysnStage = 0 AND BD2.intSettleStorageId IS NULL THEN 0 ELSE 1 END --CONTRACT
 		WHEN BD.intCustomerStorageId IS NOT NULL THEN 1 --SETTLE STORAGE
 		ELSE 1
 	END
