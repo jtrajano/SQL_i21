@@ -269,7 +269,7 @@ INNER JOIN(
 		
 					WHEN YEAR(dtmDateFrom) IS NOT NULL  AND (ET.strAwardPeriod = 'Start of Year') THEN    
 						CASE WHEN YEAR(dtmDateFrom) = YEAR(GETDATE()) 
-							THEN dblHours ELSE 0
+							THEN dblRequest ELSE 0
 							--OR (dtmDateFrom  <= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) AND PC.dtmPosted >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired))
 							--THEN dblHours    
 						--ELSE   
