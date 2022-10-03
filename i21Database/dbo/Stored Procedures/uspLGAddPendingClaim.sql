@@ -98,8 +98,8 @@ BEGIN
 						,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 						,dblFranchisePercent = WG.dblFranchise
 						,dblFranchise = WG.dblFranchise / 100
-						,dblFranchiseWt = CASE WHEN (CLNW.dblLinkNetWt * WG.dblFranchise / 100) <> 0.0
-										THEN (CLNW.dblLinkNetWt * WG.dblFranchise / 100)
+						,dblFranchiseWt = CASE WHEN ((CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100) <> 0.0
+										THEN ((CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
 									ELSE 0.0 END
 						,dblWeightLoss = CASE WHEN (RI.dblNet - CLNW.dblLinkNetWt) < 0.0
 											THEN (RI.dblNet - CLNW.dblLinkNetWt)
@@ -260,8 +260,8 @@ BEGIN
 							,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 							,dblFranchisePercent = WG.dblFranchise
 							,dblFranchise = WG.dblFranchise / 100
-							,dblFranchiseWt = CASE WHEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100) <> 0.0
-													THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100)
+							,dblFranchiseWt = CASE WHEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) ELSE LD.dblNet END) * WG.dblFranchise / 100) <> 0.0
+													THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) ELSE LD.dblNet END) * WG.dblFranchise / 100)
 												ELSE 0.0 END
 							,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
 													THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
