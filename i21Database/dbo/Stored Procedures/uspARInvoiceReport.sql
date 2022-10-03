@@ -172,11 +172,11 @@ SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strInvoiceComments		= L.strInvoiceComments
 	 , strFullAddress			= L.strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(L.strCity, ''), '') + ISNULL(', ' + ISNULL(L.strStateProvince, ''), '') + ISNULL(', ' + ISNULL(L.strZipPostalCode, ''), '') + ISNULL(', ' + ISNULL(L.strCountry, ''), '')
 	 , intCompanySegment		= L.intCompanySegment
-	 , strCompanyName			= GLCD.strCompanyName
+	 , strCompanyName			= VCRH.strCompanyName
+	 , strCompanyAddress		= VCRH.strAddress
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
-LEFT JOIN tblGLAccountSegment GLAS ON L.intCompanySegment = GLAS.intAccountSegmentId
-LEFT JOIN tblGLCompanyDetails GLCD ON GLAS.intAccountSegmentId = GLCD.intAccountSegmentId
+LEFT JOIN vyuARCompanyReportHeader VCRH ON L.intCompanyLocationId = VCRH.intCompanyLocationId
 
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE	
@@ -301,13 +301,15 @@ SELECT
 	, intCompanyLocationId			= INV.intCompanyLocationId
 	, intEntityCustomerId			= INV.intEntityCustomerId
 	, strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' 
-										WHEN (ISNULL(L.strCompanyName, '') <> '' AND SMLP.imgLogo IS NOT NULL) THEN L.strCompanyName
+										WHEN (ISNULL(L.strCompanyName, '') <> '') THEN L.strCompanyName
 										ELSE @strCompanyName END
-	, strCompanyAddress				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+	, strCompanyAddress				= CASE WHEN (ISNULL(L.strCompanyAddress, '') <> '') THEN L.strCompanyAddress
+										WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
 										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 										WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
 									END
-	, strCompanyInfo				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+	, strCompanyInfo				= CASE WHEN (ISNULL(L.strCompanyAddress, '') <> '') THEN L.strCompanyAddress
+										WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
 										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 										WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
 									END  + CHAR(10) + ISNULL(@strEmail,'')   + CHAR(10) + ISNULL(@strPhone,'')
