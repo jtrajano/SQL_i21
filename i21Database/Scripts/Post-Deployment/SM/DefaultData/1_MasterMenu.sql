@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ledgers' AND strModuleName = 'General Ledger')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Eliminating Entries' AND strModuleName = 'General Ledger')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1306,6 +1306,10 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Trial Balance Detail' AND strM
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger By Account ID Detail' AND strModuleName ='General Ledger' AND strCategory = 'Report'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Audit Adjustment' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+
+-- STRICTLY FOR 22.1DEV ONLY
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Eliminating Entries' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
+
 /* END OF DELETING */
 
 /* FINANCIAL REPORT DESIGNER */
