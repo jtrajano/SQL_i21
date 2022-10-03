@@ -86,7 +86,17 @@ SET		pl.dblUnitPrice =
 						(p.dblStandardCost / (1 - (pl.dblAmountRate / 100)))
 						,ISNULL(r.intRounding, 6)
 					) 
-				)				
+				)
+				
+			WHEN pl.strPricingMethod = 'Discount Retail Price' THEN 
+				dbo.fnCalculateCostBetweenUOM (
+					stockUOM.intItemUOMId		
+					,pl.intItemUnitMeasureId
+					,ROUND(
+						(p.dblSalePrice - (p.dblSalePrice * pl.dblAmountRate / 100))
+						,ISNULL(r.intRounding, 6)
+					) 
+				)		
 
 			ELSE 
 				pl.dblUnitPrice
