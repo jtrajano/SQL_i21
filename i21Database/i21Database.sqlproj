@@ -11455,6 +11455,7 @@
     <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
     <None Include="Scripts\Post-Deployment\SM\2220_HideScreenLabel.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
+    <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
