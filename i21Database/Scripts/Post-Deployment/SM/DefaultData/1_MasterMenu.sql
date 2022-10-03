@@ -1318,6 +1318,10 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Trial Balance Detail' AND strM
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger By Account ID Detail' AND strModuleName ='General Ledger' AND strCategory = 'Report'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Audit Adjustment' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+
+-- STRICTLY FOR 22.2DEV ONLY (PLEASE DO NOT UNCOMMENT FOR 22.2 AND UP)
+--DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Eliminating Entries' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerActivitiesParentMenuId
+
 /* END OF DELETING */
 
 /* FINANCIAL REPORT DESIGNER */
