@@ -247,6 +247,10 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'ID Excise Tax LNG', strState = 'ID', strFormCode = '1450', strScheduleCode = '6', strType = 'LNG', strCriteria = '= 0', intMasterId = 12779
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'ID Excise Tax CNG', strState = 'ID', strFormCode = '1450', strScheduleCode = '9', strType = 'CNG', strCriteria = '= 0', intMasterId = 12780
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'ID Excise Tax LNG', strState = 'ID', strFormCode = '1450', strScheduleCode = '9', strType = 'LNG', strCriteria = '= 0', intMasterId = 12781
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'ID Excise Tax Dyed Diesel', strState = 'ID', strFormCode = '1450', strScheduleCode = '1', strType = 'Dyed Diesel', strCriteria = '<> 0', intMasterId = 12782
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'ID Excise Tax Dyed Diesel', strState = 'ID', strFormCode = '1450', strScheduleCode = '2', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 12783
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'ID Excise Tax Dyed Diesel', strState = 'ID', strFormCode = '1450', strScheduleCode = '6', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 12784
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'ID Excise Tax Dyed Diesel', strState = 'ID', strFormCode = '1450', strScheduleCode = '9', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 12785
 
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
