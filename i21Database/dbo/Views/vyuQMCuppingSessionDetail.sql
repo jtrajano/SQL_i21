@@ -34,6 +34,8 @@ SELECT intCuppingSessionId			= CS.intCuppingSessionId
 	 , strSessionStatus 			= STAT2.strStatus
 	 , intSamplingCriteriaId		= S.intSamplingCriteriaId
 	 , intRepresentingUOMId			= S.intRepresentingUOMId
+	 , strSalesContracts			= fnQMGetAllocatedSalesContracts.strSalesContracts
+	 , strCustomers					= fnQMGetAllocatedSalesContracts.strCustomers
 FROM tblQMCuppingSession CS
 INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
@@ -54,3 +56,4 @@ LEFT JOIN tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId 
 LEFT JOIN tblEMEntity E ON S.intEntityId = E.intEntityId
 LEFT JOIN tblQMSamplingCriteria SC ON S.intSamplingCriteriaId = SC.intSamplingCriteriaId
 LEFT JOIN tblICUnitMeasure UM ON S.intRepresentingUOMId = UM.intUnitMeasureId
+OUTER APPLY dbo.fnQMGetAllocatedSalesContracts(CT.intContractTypeId, S.intContractDetailId)fnQMGetAllocatedSalesContracts
