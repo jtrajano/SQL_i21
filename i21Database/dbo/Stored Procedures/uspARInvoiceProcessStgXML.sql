@@ -323,17 +323,10 @@ BEGIN TRY
 
 			IF @intUserId IS NULL
 			BEGIN
-				IF EXISTS (
-						SELECT 1
-						FROM tblSMUserSecurity
-						WHERE strUserName = 'irelyadmin'
-						)
-					SELECT TOP 1 @intUserId = intEntityId
-					FROM tblSMUserSecurity
-					WHERE strUserName = 'irelyadmin'
-				ELSE
-					SELECT TOP 1 @intUserId = intEntityId
-					FROM tblSMUserSecurity
+				SELECT TOP 1 @intUserId = S.intEntityId
+				FROM tblSMUserSecurity S
+				WHERE S.ysnAdmin = 1 
+				ORDER BY S.intEntityId ASC				
 			END
 
 			EXEC sp_xml_removedocument @idoc
