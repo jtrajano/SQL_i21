@@ -1399,85 +1399,108 @@ SELECT @CashManagementMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu W
 /* ADD TO RESPECTIVE CATEGORY */
 UPDATE tblSMMasterMenu SET intParentMenuID = @CashManagementActivitiesParentMenuId WHERE intParentMenuID =  @CashManagementParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @CashManagementMaintenanceParentMenuId WHERE intParentMenuID =  @CashManagementParentMenuId AND strCategory = 'Maintenance'
+DECLARE @intSort INT = 0
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank Deposits' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CashManagement.view.BankDeposit?showSearch=true' WHERE strMenuName = N'Bank Deposits' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BankDeposit?showSearch=true' WHERE strMenuName = N'Bank Deposits' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
+SET  @intSort +=1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Deposit Batch Entry' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Bank Deposit Batch Entry', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Bank Deposit Batch Entry', N'Activity', N'Screen', N'CashManagement.view.BankTransactionsBatchEntry?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Bank Deposit Batch Entry', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Bank Deposit Batch Entry', N'Activity', N'Screen', N'CashManagement.view.BankTransactionsBatchEntry?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.BankTransactionsBatchEntry?showSearch=true' WHERE strMenuName = 'Bank Deposit Batch Entry' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort =@intSort, strCommand = N'CashManagement.view.BankTransactionsBatchEntry?showSearch=true' WHERE strMenuName = 'Bank Deposit Batch Entry' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
+SET  @intSort +=1
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank Transactions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'CashManagement.view.BankTransactions?showSearch=true' WHERE strMenuName = N'Bank Transactions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BankTransactions?showSearch=true' WHERE strMenuName = N'Bank Transactions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
+SET  @intSort +=1
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank Transfers' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'CashManagement.view.BankTransfer?showSearch=true' WHERE strMenuName = N'Bank Transfers' 
+UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BankTransfer?showSearch=true' WHERE strMenuName = N'Bank Transfers' 
 AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
-
+SET  @intSort +=1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cash Swap' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Cash Swap', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Cash Swap', N'Activity', N'Screen', N'CashManagement.view.BankSwap?showSearch=true'
-	, N'small-menu-activity', 0, 0, 0, 1, 4, 1)
+	, N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'CashManagement.view.BankSwap?showSearch=true' 
+	UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BankSwap?showSearch=true' 
 	WHERE strMenuName = 'Cash Swap' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
 
 
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Miscellaneous Checks' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 --UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'CashManagement.view.MiscellaneousChecks?showSearch=true' WHERE strMenuName = N'Miscellaneous Checks' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
-
+SET  @intSort +=1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Batch Posting', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Batch Posting', N'Activity', N'Screen', N'i21.view.BatchPosting?module=Cash Management', N'small-menu-activity', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Batch Posting', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Batch Posting', N'Activity', N'Screen', N'i21.view.BatchPosting?module=Cash Management', N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'i21.view.BatchPosting?module=Cash Management' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
-
+	UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'i21.view.BatchPosting?module=Cash Management' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+SET  @intSort +=1
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank Account Register' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'CashManagement.view.BankAccountRegister' WHERE strMenuName = N'Bank Account Register' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BankAccountRegister' WHERE strMenuName = N'Bank Account Register' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
+SET  @intSort +=1
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank Reconciliation' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'CashManagement.view.BankReconciliation' WHERE strMenuName = N'Bank Reconciliation' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BankReconciliation' WHERE strMenuName = N'Bank Reconciliation' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
+SET  @intSort +=1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Loan' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Bank Loan', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Bank Loan', N'Activity', N'Screen', N'CashManagement.view.BankLoan?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
+	VALUES (N'Bank Loan', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Bank Loan', N'Activity', N'Screen', N'CashManagement.view.BankLoan?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'CashManagement.view.BankLoan?showSearch=true' WHERE strMenuName = 'Bank Loan' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BankLoan?showSearch=true' WHERE strMenuName = 'Bank Loan' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
 DELETE FROM  tblSMMasterMenu WHERE strMenuName = 'Process Payments' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
+SET  @intSort +=1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process AP Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Process AP Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AP Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=&strModule=AP&intTransactionType=16', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Process AP Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AP Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=&strModule=AP&intTransactionType=16', N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=&strModule=AP&intTransactionType=16', intSort = 9 WHERE strMenuName = 'Process AP Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
-
+SET  @intSort +=1
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process AR Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Process AR Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AR Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', N'small-menu-activity', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Process AR Payments ', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Process AR Payments ', N'Activity', N'Screen', N'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', intSort = 10 WHERE strMenuName = 'Process AR Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.ProcessPayments?strProcessType=ACH From Customer&strModule=AR&intTransactionType=22', intSort = @intSort WHERE strMenuName = 'Process AR Payments ' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+
+SET  @intSort +=1
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email AP Remittance' 
+AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], 
+	[strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Email AP Remittance', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Email AP Remittance'
+	, N'Activity', N'Screen'
+	, N'CashManagement.view.EmailRemittance'
+	, N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
+ELSE
+	UPDATE tblSMMasterMenu 
+	SET strCommand = N'CashManagement.view.EmailRemittance', 
+	intSort = @intSort WHERE strMenuName = 'Email AP Remittance' AND strModuleName = 'Cash Management' 
+	AND intParentMenuID = @CashManagementActivitiesParentMenuId
 
 
+SET  @intSort +=1
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 ELSE
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 11, 1)
-
+	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
+SET  @intSort +=1
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
-	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'CashManagement.view.PostCommissions' WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = @intSort, strCommand = N'CashManagement.view.PostCommissions' WHERE strMenuName = N'Post Commissions' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 ELSE
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Post Commissions', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Post Commissions', N'Activity', N'Screen', N'CashManagement.view.PostCommissions', N'small-menu-activity', 0, 0, 0, 1, 12, 1)
+	VALUES (N'Post Commissions', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Post Commissions', N'Activity', N'Screen', N'CashManagement.view.PostCommissions', N'small-menu-activity', 0, 0, 0, 1, @intSort, 1)
 
-
+SET  @intSort =0
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Banks' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CashManagement.view.Banks?showSearch=true' WHERE strMenuName = N'Banks' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementMaintenanceParentMenuId
 
