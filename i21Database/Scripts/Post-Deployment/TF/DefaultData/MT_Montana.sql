@@ -276,6 +276,19 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Aviation', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '8', strType = 'Jet Fuel', strCriteria = '= 0', intMasterId = 26751
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Aviation', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '10Y', strType = 'Aviation', strCriteria = '= 0', intMasterId = 26752
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Aviation', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '10Y', strType = 'Jet Fuel', strCriteria = '= 0', intMasterId = 26753
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Dyed Diesel', strCriteria = '<> 0', intMasterId = 26754
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '2', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26755
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '2A', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26756
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '4B', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26757
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '5', strType = 'Dyed Diesel', strCriteria = '<> 0', intMasterId = 26758
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '5R', strType = 'Dyed Diesel', strCriteria = '<> 0', intMasterId = 26759
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '6', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26760
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '7ID', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26761
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '7WY', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26762
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '7UT', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26763
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '7B', strType = 'Dyed Diesel', strCriteria = '<> 0', intMasterId = 26764
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '8', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26765
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Dyed Diesel', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '10Y', strType = 'Dyed Diesel', strCriteria = '= 0', intMasterId = 26766
 
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
