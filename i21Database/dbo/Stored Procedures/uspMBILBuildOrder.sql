@@ -14,13 +14,23 @@ BEGIN
 END
 ELSE
 BEGIN
-	DELETE tblMBILOrder WHERE intDriverId = @intDriverId AND intOrderId NOT IN (SELECT intOrderId FROM tblMBILInvoice WHERE intOrderId IS NOT NULL)
+	DELETE tblMBILOrder 
+	WHERE intDriverId = @intDriverId AND 
+	NOT EXISTS (
+		SELECT intOrderId FROM tblMBILInvoice
+		WHERE tblMBILInvoice.intOrderId = tblMBILOrder.intOrderId
+	)
 END
 
 -- ++++++ CLEAN-OUT ORDERS WITH POSTED INVOICE  ++++++ --
-BEGIN
-	DELETE tblMBILOrder WHERE intOrderId IN (SELECT intOrderId FROM tblMBILInvoice WHERE ysnPosted = 1)
-END
+--BEGIN
+--	DELETE tblMBILOrder 
+--	WHERE NOT EXISTS (
+--		SELECT intOrderId FROM tblMBILInvoice
+--		WHERE tblMBILInvoice.intOrderId = tblMBILOrder.intOrderId
+--		AND ysnPosted = 1
+--	)
+--END
 
 ---- ++++++ CALL TM SP FOR OVERRAGE ++++++
 --DECLARE  @TMDispatchId INT = NULL
@@ -77,12 +87,15 @@ LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblARCustomer Customer ON Customer.intEntityId =  C.intEntityId
 WHERE Dispatch.intDriverID = @intDriverId AND 
-	  TMOrder.strOrderNumber NOT IN(SELECT strOrderNumber COLLATE Latin1_General_CI_AS 
-									FROM tblMBILOrder 
-									WHERE intDriverId = @intDriverId AND
-										  intOrderId IN (SELECT intOrderId 
-														 FROM tblMBILInvoice 
-														 WHERE intOrderId IS NOT NULL))
+	  NOT EXISTS (SELECT strOrderNumber COLLATE Latin1_General_CI_AS 
+					FROM tblMBILOrder 
+					WHERE intDriverId = @intDriverId AND
+					EXISTS (
+							SELECT intOrderId FROM tblMBILInvoice
+							WHERE tblMBILInvoice.intOrderId = tblMBILOrder.intOrderId
+							AND intOrderId IS NOT NULL
+						)
+					AND TMOrder.strOrderNumber = tblMBILOrder.strOrderNumber COLLATE Latin1_General_CI_AS)
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
 INSERT INTO tblMBILOrder(intDispatchId
@@ -112,8 +125,8 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
+LEFT JOIN tblSMTerm ON tblSMTerm.intTermID = #Dispatch.intTermId
 WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Dispatched','Routed')
-		AND intTermId IN (SELECT intTermID from tblSMTerm)
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
