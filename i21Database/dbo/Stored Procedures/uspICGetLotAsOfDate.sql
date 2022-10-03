@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICGetLotAsOfDate]
-	@intItemId AS INT,
+	@intItemId AS INT = NULL,
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,
 	@intStorageLocationId AS INT = NULL,
