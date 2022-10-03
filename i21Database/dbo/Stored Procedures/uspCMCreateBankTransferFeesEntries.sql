@@ -101,7 +101,7 @@ BEGIN
             SET 
             dblCredit = dblCredit + @dblFees ,
             dblExchangeRate = @dblExchangeRate,
-            dblCreditForeign = ROUND(((dblCredit + @dblFees) / @dblExchangeRate),2)
+            dblCreditForeign = dblCreditForeign + @dblFeesForeign
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
@@ -183,7 +183,7 @@ BEGIN
             UPDATE A   
             SET dblDebit = dblDebit - @dblFees ,
             dblExchangeRate = @dblExchangeRate,
-            dblDebitForeign = ROUND(((dblDebit - @dblFees) / @dblExchangeRate),2)
+            dblDebitForeign = dblDebitForeign - @dblFeesForeign
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
