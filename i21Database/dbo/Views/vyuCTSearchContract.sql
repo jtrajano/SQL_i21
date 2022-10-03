@@ -74,7 +74,7 @@ AS
 			CH.strSalesperson,
 			CH.strCPContract,
 			CH.strCounterParty,
-			ISNULL(TR.ysnApproved,0) AS ysnApproved,
+			ISNULL(TR.ysnApproved,0) AS ysnApproved2,
 			CH.intDefaultCommodityUnitMeasureId,
 			CH.ysnBrokerage,
 			CH.strBook,
