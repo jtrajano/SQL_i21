@@ -20,7 +20,7 @@ BEGIN
 		FROM
 			vyuCTShipmentStatus
 		WHERE
-			isnull(intPContractDetailId,0) = 2705
+			isnull(intPContractDetailId,0) = @intContractDetailId
 			AND ((intShipmentType = 2 AND strShipmentStatus <> 'Scheduled') OR intShipmentType = 1)
 
 		union all
@@ -33,7 +33,7 @@ BEGIN
 		FROM
 			vyuCTShipmentStatus
 		WHERE
-			isnull(intSContractDetailId,0) = 2705
+			isnull(intSContractDetailId,0) = @intContractDetailId
 			AND ((intShipmentType = 2 AND strShipmentStatus <> 'Scheduled') OR intShipmentType = 1)
 	) tbl
 	WHERE intNumberId = 1
