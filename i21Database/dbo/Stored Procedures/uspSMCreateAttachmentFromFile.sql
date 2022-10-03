@@ -245,6 +245,7 @@ BEGIN
 					FROM #TempFileExtension a  
 					LEFT OUTER JOIN #TempFileExtensionMime b On a.RowNum = b.RowNum 
 					WHERE LOWER(a.[Description]) = LOWER(@fileExtension)
+				SET @fileTypeMime = LTRIM(RTRIM(REPLACE(REPLACE(REPLACE(REPLACE(@fileTypeMime, CHAR(10), CHAR(32)),CHAR(13), CHAR(32)),CHAR(160), CHAR(32)),CHAR(9),CHAR(32))))
 				SELECT @namespace = strNamespace FROM tblSMScreen WHERE intScreenId = @screenId
 
 				IF ISNULL(@screenNamespace, '') <> ''
