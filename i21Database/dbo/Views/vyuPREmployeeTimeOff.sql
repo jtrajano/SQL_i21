@@ -166,7 +166,8 @@ INNER JOIN(
 					WHEN YEAR(dtmDateFrom) IS NOT NULL  AND (ET.strAwardPeriod = 'Start of Year') THEN    
 						CASE WHEN YEAR(dtmDateFrom) = YEAR(GETDATE()) 
 							OR (dtmDateFrom  <= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) AND PC.dtmPosted >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired))
-							THEN dblHours    
+							THEN 
+								CASE WHEN dtmDateFrom >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) THEN dblHours ELSE 0 END
 						ELSE   
 							CASE WHEN YEAR(ET.dtmLastAward) = YEAR(GETDATE()) THEN 0 ELSE dblHours END   
 						END    
@@ -340,7 +341,7 @@ INNER JOIN(
 		
 					WHEN YEAR(dtmDateFrom) IS NOT NULL  AND (ET.strAwardPeriod = 'Start of Year') THEN    
 						CASE WHEN YEAR(dtmDateFrom) = YEAR(GETDATE())    
-							THEN dblRequest    
+							THEN CASE WHEN dtmDateFrom >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) THEN dblRequest ELSE 0 END    
 					ELSE     
 						CASE WHEN YEAR(ET.dtmLastAward) = YEAR(GETDATE()) THEN 0 ELSE dblRequest END  
 					END    
