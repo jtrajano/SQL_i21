@@ -11422,6 +11422,7 @@
     <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalance_ForTB.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
+    <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
