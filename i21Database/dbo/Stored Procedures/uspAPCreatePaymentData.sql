@@ -42,7 +42,6 @@ BEGIN
 	DECLARE @rate DECIMAL(18,6) = 1;
 	DECLARE @rateType INT;
 	DECLARE @currency INT, @functionalCurrency INT;
-	DECLARE @bankToAccount INT = NULL;
 	
 
 	SELECT 
@@ -151,12 +150,6 @@ BEGIN
 		END
 	END
 
-	--Assign pay to bank account if ACH payment method
-	IF @paymentMethodId = 2
-	BEGIN
-		SELECT TOP 1 @bankToAccount = intEntityEFTInfoId FROM tblEMEntityEFTInformation WHERE intEntityId = @vendorId AND intCurrencyId = @currency AND ysnActive = 1 AND ysnDefaultAccount = 1
-	END
-
 	----Compute Discount Here, if there is no value computed or added
 	--UPDATE A
 	--	SET dblDiscount = CAST(dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmBillDate, A.intTermsId, A.dblTotal) AS DECIMAL(18,2))
@@ -226,7 +219,6 @@ BEGIN
 	INSERT INTO tblAPPayment(
 		[intAccountId],
 		[intBankAccountId],
-		[intPayToBankAccountId],
 		[intPaymentMethodId],
 		[intPayToAddressId],
 		[intCompanyLocationId],
@@ -247,7 +239,6 @@ BEGIN
 	SELECT
 		[intAccountId]			= @bankGLAccountId,
 		[intBankAccountId]		= @bankAccount,
-		[intPayToBankAccountId]	= @bankToAccount,
 		[intPaymentMethodId]	= @paymentMethod,
 		[intPayToAddressId]		= @payToAddress,
 		[intCompanyLocationId]  = @location,
@@ -273,7 +264,6 @@ BEGIN
 	 @userId NVARCHAR(50),
 	 @bankGLAccountId INT,
 	 @bankAccount INT,
-	 @bankToAccount INT,
 	 @paymentMethod INT,
 	 @vendorId INT,
 	 @paymentInfo NVARCHAR(10),
@@ -294,7 +284,6 @@ BEGIN
 	 @billId = NULL,
 	 @bankGLAccountId = @intGLBankAccountId,
 	 @bankAccount = @intBankAccountId,
-	 @bankToAccount = @bankToAccount,
 	 @paymentMethod = @paymentMethodId,
 	 @paymentInfo = @paymentInfo,
 	 @paymentRecordNum = @paymentRecordNum,
