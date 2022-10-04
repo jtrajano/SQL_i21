@@ -8163,6 +8163,7 @@
     <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
     <Build Include="dbo\Tables\tblICBackupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDModuleAccess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
