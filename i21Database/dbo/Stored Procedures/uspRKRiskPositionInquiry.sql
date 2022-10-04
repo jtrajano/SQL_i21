@@ -104,6 +104,8 @@ BEGIN
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, dblHedgedLots DECIMAL(24, 10)
+		, dblToBeHedgedLots DECIMAL(24, 10)
 	)
 
 	DECLARE @PricedContractList AS TABLE (strFutureMonth NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
@@ -144,6 +146,8 @@ BEGIN
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, dblHedgedLots DECIMAL(24, 10)
+		, dblToBeHedgedLots DECIMAL(24, 10)
 	)
 
 	INSERT INTO @PricedContractList
@@ -187,6 +191,8 @@ BEGIN
 		, strClass = class.strDescription
 		, strCertificationName = certification.strCertificationName
 		, strCropYear = cropYear.strCropYear
+		, cv.dblHedgedLots
+		, cv.dblToBeHedgedLots
 	FROM vyuRKRiskPositionContractDetail cv
 	JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
 	JOIN tblICCommodityUnitMeasure um2 ON um2.intUnitMeasureId = ffm.intUnitMeasureId AND um2.intCommodityId = cv.intCommodityId
@@ -246,6 +252,8 @@ BEGIN
 			, strClass 
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM @PricedContractList cv
 		WHERE cv.intPricingTypeId = 1 AND ysnDeltaHedge = 0
 		
@@ -282,6 +290,8 @@ BEGIN
 			, strClass 
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
@@ -323,7 +333,9 @@ BEGIN
 				, strSeason 
 				, strClass 
 				, strCertificationName
-				, strCropYear
+				, strCropYear 
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 0
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -361,6 +373,8 @@ BEGIN
 			, strClass 
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
@@ -404,6 +418,8 @@ BEGIN
 				, strClass 
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 0
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -444,6 +460,8 @@ BEGIN
 			, strClass 
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM @PricedContractList cv
 		WHERE cv.intPricingTypeId = 1 AND ysnDeltaHedge = 1
 		
@@ -480,6 +498,8 @@ BEGIN
 			, strClass 
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
@@ -523,6 +543,8 @@ BEGIN
 				, strClass 
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 1
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -560,6 +582,8 @@ BEGIN
 			, strClass 
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
@@ -602,6 +626,8 @@ BEGIN
 				, strClass 
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND intPricingTypeId <> 1 AND ISNULL(ysnDeltaHedge, 0) = 1
 		) t WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
@@ -634,6 +660,8 @@ BEGIN
 		, strClass
 		, strCertificationName
 		, strCropYear
+		, dblHedgedLots
+		, dblToBeHedgedLots
 	)
 	SELECT Selection
 		, PriceStatus
@@ -662,6 +690,8 @@ BEGIN
 		, strClass
 		, strCertificationName
 		, strCropYear
+		, dblHedgedLots
+		, dblToBeHedgedLots
 	FROM (
 		SELECT *
 		FROM (
@@ -692,6 +722,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #ContractTransaction
 			WHERE intPricingTypeId <> 1 AND dtmFutureMonthsDate < @dtmFutureMonthsDate
 				AND intCommodityId = @intCommodityId AND intFutureMarketId = @intFutureMarketId
@@ -724,6 +756,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #ContractTransaction
 			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -759,6 +793,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #ContractTransaction
 			WHERE intPricingTypeId = 1 AND dtmFutureMonthsDate < @dtmFutureMonthsDate
 				AND intCommodityId = @intCommodityId AND intFutureMarketId = @intFutureMarketId
@@ -791,6 +827,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #ContractTransaction
 			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -826,6 +864,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -861,6 +901,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -896,6 +938,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -931,6 +975,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM #DeltaPrecent
 			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -964,6 +1010,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT DISTINCT Selection = 'Terminal position (a. in lots )'
 				, PriceStatus = 'Broker Account'
@@ -992,6 +1040,8 @@ BEGIN
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
 				, strCropYear = cropYear.strCropYear
+				, dblHedgedLots = NULL
+				, dblToBeHedgedLots = NULL
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId 
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1046,6 +1096,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT DISTINCT Selection = 'Terminal position (b. in ' + @strUnitMeasure + ' )'
 				, PriceStatus = 'Broker Account'
@@ -1075,6 +1127,8 @@ BEGIN
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
 				, strCropYear = cropYear.strCropYear
+				, dblHedgedLots = NULL
+				, dblToBeHedgedLots = NULL
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1165,6 +1219,8 @@ BEGIN
 			, strClass = class.strDescription
 			, strCertificationName = certification.strCertificationName
 			, strCropYear = cropYear.strCropYear
+			, dblHedgedLots = NULL
+			, dblToBeHedgedLots = NULL
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1221,6 +1277,8 @@ BEGIN
 		, strClass
 		, strCertificationName
 		, strCropYear
+		, dblHedgedLots
+		, dblToBeHedgedLots
 	FROM (
 		SELECT Selection
 			, PriceStatus
@@ -1249,6 +1307,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT DISTINCT Selection = 'Terminal position (a. in lots )'
 				, PriceStatus = 'Broker Account'
@@ -1277,6 +1337,8 @@ BEGIN
 				, strClass = class.strDescription
 				, strCertificationName = certification.strCertificationName
 				, strCropYear = cropYear.strCropYear
+				, dblHedgedLots = NULL
+				, dblToBeHedgedLots = NULL
 			FROM tblRKFutOptTransaction ft
 			JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1366,6 +1428,8 @@ BEGIN
 			, strClass = class.strDescription
 			, strCertificationName = certification.strCertificationName
 			, strCropYear = cropYear.strCropYear
+			, dblHedgedLots = NULL
+			, dblToBeHedgedLots = NULL
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 		JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1423,6 +1487,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
 				, dblNoOfContract = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, (dblNoOfContract)) * @dblContractSize
@@ -1449,6 +1515,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM (
 				SELECT DISTINCT Selection = 'Terminal position (b. in ' + @strUnitMeasure + ' )'
 					, PriceStatus = 'Broker Account'
@@ -1478,6 +1546,8 @@ BEGIN
 					, strClass = class.strDescription
 					, strCertificationName = certification.strCertificationName
 					, strCropYear = cropYear.strCropYear
+					, dblHedgedLots = NULL
+					, dblToBeHedgedLots = NULL
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 1
@@ -1532,6 +1602,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM (
 				SELECT DISTINCT Selection = 'Delta options'
 					, PriceStatus = 'Broker Account'
@@ -1569,6 +1641,8 @@ BEGIN
 					, strClass = class.strDescription
 					, strCertificationName = certification.strCertificationName
 					, strCropYear = cropYear.strCropYear
+					, dblHedgedLots = NULL
+					, dblToBeHedgedLots = NULL
 				FROM tblRKFutOptTransaction ft
 				INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 				INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
@@ -1627,6 +1701,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		)
 		SELECT Selection
 			, PriceStatus
@@ -1655,6 +1731,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT Selection = 'Net market risk'
 				, PriceStatus = 'Net market risk'
@@ -1683,6 +1761,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @List
 			WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'b. Priced / Outright - (Outright position)'
 			GROUP BY strFutureMonth
@@ -1706,6 +1786,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			
 			UNION ALL SELECT Selection = 'Net market risk'
 				, PriceStatus = 'Net market risk'
@@ -1734,6 +1816,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @List
 			WHERE PriceStatus = 'F&O' AND Selection LIKE ('Total F&O%')
 			GROUP BY strFutureMonth
@@ -1758,6 +1842,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			
 			UNION ALL SELECT Selection = 'Net market risk'
 				, PriceStatus = 'Net market risk'
@@ -1786,6 +1872,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @List
 			WHERE PriceStatus = 'b. fixed' AND Selection = ('Specialities & Low grades') 
 			GROUP BY strFutureMonth
@@ -1810,6 +1898,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 		) t
 		GROUP BY Selection
 			, PriceStatus
@@ -1835,6 +1925,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		
 		--- Switch Position ---------
 		INSERT INTO @List (Selection
@@ -1864,6 +1956,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		)
 		SELECT Selection
 			, PriceStatus
@@ -1892,6 +1986,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM (
 			SELECT Selection = 'Switch position'
 				, PriceStatus = 'Switch position'
@@ -1920,6 +2016,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @List
 			WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)' AND strAccountNumber LIKE '%Purchase%'
 			
@@ -1950,6 +2048,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @List
 			WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)' AND strAccountNumber LIKE '%Sale%'
 			
@@ -1980,6 +2080,8 @@ BEGIN
 				, strClass
 				, strCertificationName
 				, strCropYear
+				, dblHedgedLots
+				, dblToBeHedgedLots
 			FROM @List
 			WHERE PriceStatus = 'F&O' AND Selection = 'F&O'
 		) t
@@ -2152,6 +2254,8 @@ BEGIN
 			, strClass
 			, strCertificationName
 			, strCropYear
+			, dblHedgedLots
+			, dblToBeHedgedLots
 		FROM @List
 		ORDER BY intOrderByHeading
 			, intOrderBySubHeading
