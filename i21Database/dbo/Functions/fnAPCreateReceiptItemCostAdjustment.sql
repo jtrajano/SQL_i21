@@ -250,13 +250,19 @@ BEGIN
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	C3.intSettleStorageId
 			,[intSourceTransactionDetailId] 	=	C2.intSettleStorageTicketId
-			,[strSourceTransactionId] 			=	C3.strStorageTicket
+			,[strSourceTransactionId] 			=	SS.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		--INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRStorageType StorageType 
@@ -324,13 +330,19 @@ BEGIN
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	C3.intSettleStorageId
 			,[intSourceTransactionDetailId] 	=	case when OLDG.intId is not null then  C2.intSettleStorageTicketId else SC.intSettleContractId end
-			,[strSourceTransactionId] 			=	C3.strStorageTicket
+			,[strSourceTransactionId] 			=	SS.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		--INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId	
 		INNER JOIN tblGRStorageType StorageType 
@@ -448,7 +460,13 @@ BEGIN
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		--INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
@@ -516,7 +534,13 @@ BEGIN
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		--INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
@@ -684,7 +708,13 @@ BEGIN
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		--INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C 
 			ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId AND C.ysnTransferStorage = 1 AND C.intDeliverySheetId IS NOT NULL
@@ -749,7 +779,13 @@ BEGIN
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		--INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId AND C.ysnTransferStorage = 1 AND C.intDeliverySheetId IS NOT NULL
 		INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
