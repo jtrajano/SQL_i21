@@ -20,13 +20,14 @@ ST.ysnConsAddOutsideFuelDiscounts,
 CH.dblEditableAggregateMeterReadingsForDollars AS dblEditableAggregateMeterReadingsForDollars,
 (SELECT dbo.fnSTGetDepartmentTotalsForFuel(CH.intCheckoutId)) AS dblDepartmentTotalsForFuel,
 (SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) AS  dblGrossFuelSales,
-((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - CH.dblDealerCommission) AS dblCalculatedBankDeposit,
+((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - ((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) + CH.dblDealerCommission)) AS dblCalculatedBankDeposit,
 (CASE WHEN ST.ysnConsMeterReadingsForDollars = 0 AND ST.ysnConsAddOutsideFuelDiscounts = 1 THEN 'Department Total For Fuel + Outside Discounts' 
 WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 1 THEN 'Meter Readings for Dollars + Outside Discounts' 
 WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 'Meter Readings for Dollars' 
 WHEN ST.ysnConsMeterReadingsForDollars = 0 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 'Department Total For Fuel' END) AS strGrossFuelSalesFormula,
 CH.dblEditableOutsideFuelDiscount AS dblOutsideFuelDiscounts,
-(SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) AS dblTotalAmountOfDepositablePaymentMethods
+(SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) AS dblTotalAmountOfDepositablePaymentMethods,
+CH.dblDealerCommission
 FROM dbo.tblSTStore ST
 JOIN tblSMCompanyLocation SMCL
 	ON ST.intCompanyLocationId = SMCL.intCompanyLocationId
