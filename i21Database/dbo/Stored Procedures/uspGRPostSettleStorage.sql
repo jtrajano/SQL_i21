@@ -3612,7 +3612,7 @@ BEGIN TRY
 					, 'Settlement'
 					, dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
 					, SV.intContractHeaderId
-					, GETDATE()
+					, @dtmClientPostDate
 					, @intSettleStorageId
 					, @strSettleTicket
 					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0) + isnull(@sum_e, 0)) * SV.[dblUnits]
