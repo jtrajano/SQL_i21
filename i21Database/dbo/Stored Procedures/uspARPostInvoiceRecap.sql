@@ -156,7 +156,7 @@ BEGIN TRY
     
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 
-	INSERT INTO tblGLPostRecap WITH (TABLOCK) (
+	INSERT INTO tblGLPostRecap (
 		 [strTransactionId]
 		,[intTransactionId]
 		,[intAccountId]
