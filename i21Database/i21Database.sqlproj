@@ -1185,6 +1185,7 @@
     <Build Include="dbo\Tables\tblApiSchemaTMDeliveryHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
     <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMDeliveryHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
