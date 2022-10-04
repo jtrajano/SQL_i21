@@ -39,7 +39,8 @@ BEGIN
 		,strSampleStatus = (SELECT TOP 1 SSA.strStatus
 							FROM tblQMSample SAM 
 							JOIN tblQMSampleStatus SSA ON SSA.intSampleStatusId = SAM.intSampleStatusId
-							WHERE SAM.intLoadContainerId = LC.intLoadContainerId AND SAM.intTypeId = 1)
+							WHERE SAM.intLoadContainerId = LC.intLoadContainerId AND SAM.intTypeId = 1
+							ORDER BY dtmTestedOn DESC)
 		,NULL AS ysnSendIntegrationRequest
 		,NULL AS ysnReverseIntegrationRequest
 	FROM tblLGLoad L

@@ -19,6 +19,11 @@ DECLARE @intEntityId		INT
 	  , @strSampleStatus	NVARCHAR(MAX) = ''
 	  , @strContractNumber	NVARCHAR(MAX) = ''
 	  , @strVendorRefNumber NVARCHAR(MAX) = ''
+	  , @strSampleType		NVARCHAR(MAX) = ''
+	  , @strDescription		NVARCHAR(MAX) = ''
+	  , @strComment			NVARCHAR(MAX) = ''
+	  , @strBook			NVARCHAR(MAX) = ''
+	  , @strSampleNumber	NVARCHAR(MAX) = ''
 
 DECLARE @loop TABLE
 (
@@ -46,9 +51,14 @@ ELSE IF @strMailType = 'Sample Print'
 
 SELECT @intEntityId		   = QualitySample.intPartyName
 	 , @strReferenceNo	   = ISNULL(QualitySample.strRefNo, '')
-	 , @strContractNumber  = QualitySample.strContractNumber
-	 , @strSampleStatus    = QualitySample.strStatus
+	 , @strContractNumber  = ISNULL(QualitySample.strContractNumber, '')
+	 , @strSampleStatus    = ISNULL(QualitySample.strStatus,'')
 	 , @strVendorRefNumber = ISNULL(ContractHeader.strCustomerContract, '')
+	 , @strSampleType	   = ISNULL(QualitySample.strSampleTypeName, '')
+	 , @strDescription	   = ISNULL(QualitySample.strDescription, '')
+	 , @strComment		   = ISNULL(QualitySample.strComment, '')
+	 , @strBook			   = ISNULL(QualitySample.strBook, '')
+	 , @strSampleNumber    = ISNULL(QualitySample.strSampleNumber, '')
 FROM vyuQMSampleList AS QualitySample
 OUTER APPLY (SELECT TOP 1 CH.strCustomerContract
 			 FROM tblCTContractHeader CH
@@ -78,11 +88,20 @@ END
 /* Strauss Template Sample Print Template */
 IF @intEmailTemplate = 1
 	BEGIN
-		SET @Subject = 'Sample evaluation Strauss '+ @strContractNumber +' Counterparty Ref '+ @strVendorRefNumber
+		SET @Subject = @strSampleStatus + ' - '+ @strSampleType + ' - Strauss Conract No.' + @strContractNumber +' Counterparty Ref '+ @strVendorRefNumber
 		SET @body +='<!DOCTYPE html>'
 		SET @body +='<html>'
 		SET @body +='<body>Dear All, <br><br>'
-		SET @body += 'Please be informed sample ref #<strong>' + @strReferenceNo + '</strong> was <strong>'+ @strSampleStatus +'</strong>.'
+		SET @body += 'Please find the details of the sample below: <br>'
+		SET @body += '<p style="margin-left:30px">Sample Type: <strong>'+ @strSampleType +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Description: <strong>'+ @strDescription +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Sample Number: <strong>'+ @strSampleNumber +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Book: <strong>'+ @strBook +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Contract Number: <strong>'+ @strContractNumber +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Counterparty CTR Number: <strong>'+ @strVendorRefNumber +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Reference No: <strong>'+ @strReferenceNo +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Sample Status: <strong>'+ @strSampleStatus +'</strong></p>'
+		SET @body += '<p style="margin-left:30px">Comments: <strong>'+ @strComment +'</strong></p>'
 		SET @body += '<br><br>'
 		SET @body +='Sincerely, <br>'
 		SET @body +=(select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId)
@@ -108,6 +127,4 @@ ELSE
 	
 		SELECT @Subject AS strSubject,@Filter AS strFilters,@body AS strMessage
 	END
-
-
 END

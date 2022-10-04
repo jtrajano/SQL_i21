@@ -24,3 +24,10 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblICTransactionLinks_Source]
 	ON [dbo].[tblICTransactionLinks](intSrcId ASC, strSrcTransactionNo ASC, strSrcTransactionType ASC, strSrcModuleName ASC)
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICTransactionLinks_Both]
+	ON [dbo].[tblICTransactionLinks](
+		intSrcId ASC, strSrcTransactionNo ASC, strSrcTransactionType ASC, strSrcModuleName ASC
+		,intDestId ASC, strDestTransactionNo ASC, strDestTransactionType ASC, strDestModuleName ASC
+	)
+GO

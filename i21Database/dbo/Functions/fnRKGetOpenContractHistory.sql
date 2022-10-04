@@ -1,6 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetOpenContractHistory] (
-	@dtmFromDate DATETIME
-	, @dtmToDate DATETIME)
+	@dtmFromDate DATE
+	, @dtmToDate DATE)
 
 RETURNS @Result TABLE (intFutOptTransactionId INT
 	, strInstrumentType NVARCHAR(20)
@@ -10,8 +10,11 @@ RETURNS @Result TABLE (intFutOptTransactionId INT
 AS
 
 BEGIN
-	SET @dtmFromDate = CAST(FLOOR(CAST(@dtmFromDate AS FLOAT)) AS DATETIME)
-	SET @dtmToDate = CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)
+	DECLARE @strReportByDate NVARCHAR(50) = NULL
+	--SET @dtmFromDate = CAST(FLOOR(CAST(@dtmFromDate AS FLOAT)) AS DATETIME)
+	--SET @dtmToDate = CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)
+
+	SELECT TOP 1 @strReportByDate = strReportByDate FROM tblRKCompanyPreference
 	
 	INSERT INTO @Result(intFutOptTransactionId
 		, strInstrumentType
@@ -22,8 +25,8 @@ BEGIN
 		, 'Buy'
 		, SUM(mf.dblMatchQty)
 	FROM tblRKOptionsMatchPnS mf
-	WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-		AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+	WHERE CAST(mf.dtmMatchDate AS DATE) >= @dtmFromDate
+	AND CAST(mf.dtmMatchDate AS DATE) <= @dtmToDate
 	GROUP BY mf.intLFutOptTransactionId
 
 	UNION ALL SELECT DISTINCT mf.intSFutOptTransactionId
@@ -31,8 +34,8 @@ BEGIN
 		, 'Sell'
 		, - SUM(mf.dblMatchQty)
 	FROM tblRKOptionsMatchPnS mf
-	WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-		AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+	WHERE CAST(mf.dtmMatchDate AS DATE) >= @dtmFromDate
+	AND CAST(mf.dtmMatchDate AS DATE) <= @dtmToDate
 	GROUP BY mf.intSFutOptTransactionId
 
 	UNION ALL 
@@ -42,20 +45,34 @@ BEGIN
 		, 'Buy' as strBuySell
 		, SUM(mf.dblMatchQty) as dblMatchContract
 	FROM tblRKMatchDerivativesHistory mf
-	WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-		AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+	WHERE (  @strReportByDate <> 'Create Date'
+			 AND CAST(mf.dtmMatchDate AS DATE) >= @dtmFromDate
+			 AND CAST(mf.dtmMatchDate AS DATE) <= @dtmToDate
+		  )
+			OR
+		  (	 @strReportByDate = 'Create Date'
+			 AND CAST(mf.dtmTransactionDate AS DATE) >= @dtmFromDate
+			 AND CAST(mf.dtmTransactionDate AS DATE) <= @dtmToDate
+		  )
 	GROUP BY mf.intLFutOptTransactionId
 
 	UNION ALL 
 
 	SELECT mf.intSFutOptTransactionId
-		, 'Futures' as strInstrumentType
-		, 'Sell' as strBuySell
-		, - SUM(mf.dblMatchQty) as dblMatchContract
-	FROM tblRKMatchDerivativesHistory mf
-	WHERE CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-		AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
-	GROUP BY mf.intSFutOptTransactionId
+			, 'Futures' as strInstrumentType
+			, 'Sell' as strBuySell
+			, - SUM(mf.dblMatchQty) as dblMatchContract
+		FROM tblRKMatchDerivativesHistory mf
+		WHERE (  @strReportByDate <> 'Create Date'
+			 AND CAST(mf.dtmMatchDate AS DATE) >= @dtmFromDate
+			 AND CAST(mf.dtmMatchDate AS DATE) <= @dtmToDate
+		  )
+			OR
+		  (	 @strReportByDate = 'Create Date'
+			 AND CAST(mf.dtmTransactionDate AS DATE) >= @dtmFromDate
+			 AND CAST(mf.dtmTransactionDate AS DATE) <= @dtmToDate
+		  )
+		GROUP BY mf.intSFutOptTransactionId
 
 	RETURN
 END

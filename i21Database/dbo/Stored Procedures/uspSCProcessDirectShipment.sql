@@ -990,115 +990,74 @@ BEGIN TRY
 				END
 			END
 		
-			SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
-			INNER JOIN tblCTPriceFixation CPX
-				ON CPX.intPriceFixationId = CTP.intPriceFixationId
-			INNER JOIN tblCTContractDetail CT
-				ON CPX.intContractDetailId = CT.intContractDetailId
-			INNER JOIN tblSCTicket SC
-				ON SC.intContractId = CT.intContractDetailId
-			WHERE CT.intContractDetailId = @intTicketId
+			-- SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
+			-- INNER JOIN tblCTPriceFixation CPX
+			-- 	ON CPX.intPriceFixationId = CTP.intPriceFixationId
+			-- INNER JOIN tblCTContractDetail CT
+			-- 	ON CPX.intContractDetailId = CT.intContractDetailId
+			-- INNER JOIN tblSCTicket SC
+			-- 	ON SC.intContractId = CT.intContractDetailId
+			-- WHERE CT.intContractDetailId = @intTicketId
 
-			IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
-			INNER JOIN tblCTPriceFixation CPX
-				ON CPX.intPriceFixationId = CTP.intPriceFixationId
-			INNER JOIN tblCTContractDetail CT
-				ON CPX.intContractDetailId = CT.intContractDetailId
-			INNER JOIN tblSCTicket SC
-				ON SC.intContractId = CT.intContractDetailId
-			WHERE  SC.intTicketId = @intTicketId))
-
-			--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
-			BEGIN
-
-				--- COntract
-				INSERT INTO tblSCTicketDirectBasisContract(
-					intTicketId
-					,intContractDetailId
-					,ysnProcessed
-				)
-				SELECT 
-					A.intTicketId
-					,A.intContractDetailId
-					,ysnProcessed = 0
-				FROM tblSCTicketContractUsed A
-				INNER JOIN tblCTContractDetail B
-					ON A.intContractDetailId = B.intContractDetailId
-				INNER JOIN tblCTContractHeader C
-					ON B.intContractHeaderId = C.intContractHeaderId
-				WHERE A.intTicketId = @intTicketId
-					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
-				
-
-				--LOAD
-				INSERT INTO tblSCTicketDirectBasisContract(
-					intTicketId
-					,intContractDetailId
-					,ysnProcessed
-				)
-				SELECT 
-					A.intTicketId
-					,B.intContractDetailId 
-					,ysnProcessed = 0
-				FROM tblSCTicketLoadUsed A
-				INNER JOIN tblLGLoadDetail E
-					ON A.intLoadDetailId = E.intLoadDetailId
-				INNER JOIN tblCTContractDetail B
-					ON E.intSContractDetailId = B.intContractDetailId
-				INNER JOIN tblCTContractHeader C
-					ON B.intContractHeaderId = C.intContractHeaderId
-				WHERE A.intTicketId = @intTicketId
-					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
-			END
-
-			--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
-			BEGIN
-
-				--- COntract
-				INSERT INTO tblSCTicketDirectBasisContract(
-					intTicketId
-					,intContractDetailId
-					,ysnProcessed
-				)
-				SELECT 
-					A.intTicketId
-					,A.intContractDetailId
-					,ysnProcessed = 0
-				FROM tblSCTicketContractUsed A
-				INNER JOIN tblCTContractDetail B
-					ON A.intContractDetailId = B.intContractDetailId
-				INNER JOIN tblCTContractHeader C
-					ON B.intContractHeaderId = C.intContractHeaderId
-				WHERE A.intTicketId = @intTicketId
-					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
-				
-
-				--LOAD
-				INSERT INTO tblSCTicketDirectBasisContract(
-					intTicketId
-					,intContractDetailId
-					,ysnProcessed
-				)
-				SELECT 
-					A.intTicketId
-					,B.intContractDetailId 
-					,ysnProcessed = 0
-				FROM tblSCTicketLoadUsed A
-				INNER JOIN tblLGLoadDetail E
-					ON A.intLoadDetailId = E.intLoadDetailId
-				INNER JOIN tblCTContractDetail B
-					ON E.intSContractDetailId = B.intContractDetailId
-				INNER JOIN tblCTContractHeader C
-					ON B.intContractHeaderId = C.intContractHeaderId
-				WHERE A.intTicketId = @intTicketId
-					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
-			END
-
-
+			-- IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
+			-- INNER JOIN tblCTPriceFixation CPX
+			-- 	ON CPX.intPriceFixationId = CTP.intPriceFixationId
+			-- INNER JOIN tblCTContractDetail CT
+			-- 	ON CPX.intContractDetailId = CT.intContractDetailId
+			-- INNER JOIN tblSCTicket SC
+			-- 	ON SC.intContractId = CT.intContractDetailId
+			-- WHERE  SC.intTicketId = @intTicketId))
 
 			---CREATE INVOICE
 			BEGIN
 				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
+			END
+
+			----Check if Invoice is created if no invoice then insert in tblSCTicketDirectBasisContract
+			IF(ISNULL(@intInvoiceId,0) = 0)
+			BEGIN
+				--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
+				BEGIN
+
+					--- COntract
+					INSERT INTO tblSCTicketDirectBasisContract(
+						intTicketId
+						,intContractDetailId
+						,ysnProcessed
+					)
+					SELECT 
+						A.intTicketId
+						,A.intContractDetailId
+						,ysnProcessed = 0
+					FROM tblSCTicketContractUsed A
+					INNER JOIN tblCTContractDetail B
+						ON A.intContractDetailId = B.intContractDetailId
+					INNER JOIN tblCTContractHeader C
+						ON B.intContractHeaderId = C.intContractHeaderId
+					WHERE A.intTicketId = @intTicketId
+						AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+					
+
+					--LOAD
+					INSERT INTO tblSCTicketDirectBasisContract(
+						intTicketId
+						,intContractDetailId
+						,ysnProcessed
+					)
+					SELECT 
+						A.intTicketId
+						,B.intContractDetailId 
+						,ysnProcessed = 0
+					FROM tblSCTicketLoadUsed A
+					INNER JOIN tblLGLoadDetail E
+						ON A.intLoadDetailId = E.intLoadDetailId
+					INNER JOIN tblCTContractDetail B
+						ON E.intSContractDetailId = B.intContractDetailId
+					INNER JOIN tblCTContractHeader C
+						ON B.intContractHeaderId = C.intContractHeaderId
+					WHERE A.intTicketId = @intTicketId
+						AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+				END
 			END
 
 			---UPDATE DIRECT IN TRANSIT

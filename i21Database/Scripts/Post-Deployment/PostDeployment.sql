@@ -112,6 +112,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2210_EncryptPasswords.sql
 :r .\SM\2210_EncryptPasswords2.sql
 :r .\SM\2220_MigrateLabels.sql
+:r .\SM\2210_RemoveOriginIntegration.sql
+:r .\SM\2210_AttachmentsFileTypesFix.sql
+:r .\SM\2210_ReadCommittedSnapshot.sql
+:r .\SM\2220_HideScreenLabel.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -311,6 +315,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
+:r .\AR\DefaultData\38_UpdateDefaultData.sql
 :r .\AR\DefaultData\39_UpdateCreditCardCompanyPreference.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
@@ -474,6 +479,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
 :R .\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql
 :R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
+
+:R .\GR\Fix_SettleStorage_Basis.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

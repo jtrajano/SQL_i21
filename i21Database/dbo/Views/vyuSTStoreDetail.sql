@@ -31,6 +31,7 @@ SELECT ST.*
 	   , strConsFuelOverShortItem			 =    FuelItemOverShort.strItemNo
 	   , CustomerCharge.strDescription as strCustomerChargeDescription
 	   , CashTransaction.strDescription as strCashTransactionDescription
+	   , strConsFuelDiscountItem			 =    FuelDiscountItem.strItemNo
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
@@ -77,6 +78,8 @@ LEFT JOIN tblICItem FuelItemOverShort
 	ON ST.intConsFuelOverShortItemId = FuelItemOverShort.intItemId
 LEFT JOIN tblICItem DealerCommissionItem 
 	ON ST.intConsDealerCommissionItemId = DealerCommissionItem.intItemId
+LEFT JOIN tblICItem FuelDiscountItem 
+	ON ST.intConsFuelDiscountItemId = FuelDiscountItem.intItemId
 LEFT JOIN tblCMBankAccount ConsBankDepositDraftId
 	ON ST.intConsBankDepositDraftId = ConsBankDepositDraftId.intGLAccountId
 LEFT JOIN tblCMBank Bank

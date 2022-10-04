@@ -37,6 +37,7 @@
 	,@UnPostedExistingCount			INT								= 0				OUTPUT
 	,@BatchIdForExistingUnPostRecap	NVARCHAR(50)					= NULL			OUTPUT
 	,@RecapUnPostedExistingCount	INT								= 0				OUTPUT
+	,@RollBackAllTransaction		BIT 							= 0
 AS
 
 BEGIN
@@ -1396,7 +1397,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingUnPost = @batchIdUsed
 			SET @UnPostedExistingCount = @successfulCount
@@ -1448,7 +1450,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingUnPostRecap = @batchIdUsed
 			SET @RecapUnPostedExistingCount = @successfulCount
@@ -1737,8 +1740,10 @@ BEGIN TRY
 		--RESET Invoice Details						
 		IF (ISNULL(@ExistingInvoiceId, 0) <> 0 AND ISNULL(@ResetDetails,0) = 1)
 		BEGIN
-			DELETE FROM tblARInvoiceDetailTax 
-			WHERE [intInvoiceDetailId] IN (SELECT [intInvoiceDetailId] FROM tblARInvoiceDetail  WHERE [intInvoiceId] = @ExistingInvoiceId)
+			DELETE IDT
+			FROM tblARInvoiceDetailTax IDT
+			INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
+			WHERE [intInvoiceId]  = @ExistingInvoiceId
 			
 			DELETE FROM tblARInvoiceDetail
 			WHERE [intInvoiceId]  = @ExistingInvoiceId
@@ -2572,7 +2577,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForNewPost = @batchIdUsed
 			SET @PostedNewCount = @successfulCount
@@ -2621,7 +2627,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError	
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForNewPostRecap = @batchIdUsed
 			SET @RecapNewCount = @successfulCount
@@ -2692,7 +2699,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingPost = @batchIdUsed
 			SET @PostedExistingCount  = @successfulCount
@@ -2742,7 +2750,8 @@ BEGIN TRY
 			@batchIdUsed		= @batchIdUsed OUTPUT,
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
-			@raiseError			= @RaiseError
+			@raiseError			= @RaiseError,
+			@rollbackAll		= @RollBackAllTransaction
 
 			SET @BatchIdForExistingRecap = @batchIdUsed
 			SET @RecapPostExistingCount  = @successfulCount

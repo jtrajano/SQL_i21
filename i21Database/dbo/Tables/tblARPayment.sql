@@ -67,6 +67,10 @@ CREATE NONCLUSTERED INDEX [NC_tblARPayment_AgingSummary]
 ON [dbo].[tblARPayment] ([ysnPosted],[dtmDatePaid],[ysnProcessedToNSF])
 INCLUDE ([intEntityCustomerId],[intPaymentMethodId],[dblAmountPaid],[strRecordNumber],[ysnInvoicePrepayment])
 GO
+CREATE INDEX [idx_tblARPayment_strPaymentInfo] 
+	ON [dbo].[tblARPayment] (ysnPosted, strPaymentInfo) 
+INCLUDE (intEntityCustomerId, dtmDatePaid, dblAmountPaid)
+GO
 
 --TRIGGERS INSERT
 GO
@@ -208,6 +212,7 @@ BEGIN
 			,p.dtmScheduledPayment			  = i.dtmScheduledPayment   
 			,p.strCreditCardStatus			  = i.strCreditCardStatus
 			,p.strCreditCardNote			  = i.strCreditCardNote
+			,p.strInvoices					  = i.strInvoices
 		FROM tblARPayment p
 		INNER JOIN inserted i
 			ON i.intPaymentId = p.intPaymentId

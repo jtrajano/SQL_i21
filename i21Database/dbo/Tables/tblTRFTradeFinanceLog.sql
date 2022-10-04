@@ -57,3 +57,7 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblTRFTradeFinanceLog_intContractHeaderId]
 	ON [dbo].[tblTRFTradeFinanceLog] ([intContractHeaderId]);   
 GO 
+
+CREATE NONCLUSTERED INDEX IX_tblTRFTradeFinanceLog_strTradeFinanceTransaction
+	ON [dbo].[tblTRFTradeFinanceLog] ([strTradeFinanceTransaction])
+GO

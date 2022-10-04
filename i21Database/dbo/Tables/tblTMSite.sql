@@ -84,7 +84,7 @@
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     [intRowNumber] INT NULL,
 
-    [strDeliveryMode]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT('Metered') NOT NULL,
+    --[strDeliveryMode]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT('Metered') NOT NULL,
     [ysnNoRainyDayDelivery]     BIT             DEFAULT 0 NOT NULL,
     [strDeliveryStatus]         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 

@@ -8,4 +8,9 @@
 	CONSTRAINT [PK_tblARCustomerAccountStatus] PRIMARY KEY CLUSTERED ([intCustomerAccountStatusId] ASC),
     CONSTRAINT [FK_tblARCustomerAccountStatus_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARCustomerAccountStatus_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
-)
+);
+GO
+CREATE INDEX [idx_tblARCustomerAccountStatus_intEntityCustomerId] ON [dbo].[tblARCustomerAccountStatus] (intEntityCustomerId) INCLUDE (intAccountStatusId)
+GO
+CREATE INDEX [idx_tblARCustomerAccountStatus_intAccountStatusId] ON [dbo].[tblARCustomerAccountStatus] (intAccountStatusId) INCLUDE (intEntityCustomerId)
+GO

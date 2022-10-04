@@ -1,0 +1,1 @@
+﻿UPDATE tblSMCompanyPreference SET ysnLegacyIntegration = 0

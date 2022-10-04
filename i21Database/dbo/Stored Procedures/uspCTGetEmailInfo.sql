@@ -111,6 +111,7 @@ BEGIN
 	SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId
 
 	SELECT @intSalespersonId = intSalespersonId FROM @loop
+	SELECT @strSalespersonName = strName FROM tblEMEntity WHERE intEntityId = @intSalespersonId
 
 	IF @strMailType = 'Contract'
 	BEGIN
@@ -245,6 +246,12 @@ BEGIN
 	IF (@strMailType IN ('Sample Instruction', 'Release Instruction', 'Release Instructions') or (@strMailType = 'Contract' and @strDefaultContractReport = 'ContractJDE'))
 		SET @body += '<br>'
 	SET @body +=@strThanks+'<br><br>'
+
+	IF @strMailType = 'Item Contract'
+	BEGIN
+	SET @body +='Sincerely, <br> '+@strSalespersonName
+	END
+	ELSE
 	SET @body +='Sincerely, <br>'
 		
 	if (@strMailType = 'Contract')

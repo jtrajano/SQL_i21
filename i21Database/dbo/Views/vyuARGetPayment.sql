@@ -56,6 +56,8 @@ SELECT intPaymentId						= P.intPaymentId
 	 , dtmScheduledPayment				= P.dtmScheduledPayment
 	 , strCreditCardStatus				= P.strCreditCardStatus
 	 , strCreditCardNote				= P.strCreditCardNote
+	 , strAddress						= C.strAddress
+	 , strZipCode						= C.strZipCode
 FROM tblARPayment P WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch C ON C.intEntityId = P.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = P.intLocationId

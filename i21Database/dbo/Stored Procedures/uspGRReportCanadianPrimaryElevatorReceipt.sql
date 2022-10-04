@@ -208,7 +208,7 @@ BEGIN TRY
 		,'WARNING: The right of the holder of this receipt to obtain delivery of the grain described in the receipt may be altered by the issuer by notice'
 		 + CHAR(13) + CHAR(10)+'altered by the issuer by notice to the last holder known to the issuer. Every holder of a receipt should immediately notify the issuer of their name and address'
 		 AS strWarning
-
+		,SC.strTicketStatus
 	FROM tblSCTicket SC
 	JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
 	JOIN tblICItem Item ON Item.intItemId = SC.intItemId

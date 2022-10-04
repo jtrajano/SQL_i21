@@ -150,7 +150,7 @@ ELSE
 	END
 
 --HEADER
-INSERT tblARPostInvoiceHeader WITH (TABLOCK)
+INSERT INTO tblARPostInvoiceHeader
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -329,7 +329,7 @@ SELECT
     ,[intFreightLocationSegment]        = ARI.[intFreightLocationSegment]
     ,[dblSurcharge]                     = ARI.[dblSurcharge]
     ,[intCompanySegment]                = SMCL.[intCompanySegment]
-FROM tblARInvoice ARI
+FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN tblEMEntity EM ON ARC.intEntityId = EM.intEntityId 
@@ -343,14 +343,14 @@ WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer P
 UPDATE HEADER
 SET ysnForApproval = CAST(1 AS BIT)
   , strDescription = FAT.strApprovalStatus
-FROM tblARPostInvoiceHeader HEADER
+FROM tblARPostInvoiceHeader HEADER WITH (NOLOCK)
 INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
 WHERE FAT.strScreenName = 'Invoice'
   AND HEADER.strSessionId = @strSessionId
 
 --DETAIL
 --INVENTORY
-INSERT tblARPostInvoiceDetail WITH (TABLOCK)
+INSERT INTO tblARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -658,8 +658,8 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
-FROM tblARPostInvoiceHeader ARI
-INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
+INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN tblICItem ICI WITH(NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
 LEFT OUTER JOIN tblICCategory ICC WITH(NOLOCK) ON ICI.[intCategoryId] = ICC.[intCategoryId]
@@ -680,7 +680,7 @@ WHERE ICI.strType IN ('Inventory', 'Finished Good', 'Raw Material')
   AND ARI.strSessionId = @strSessionId
 
 --NON-INVENTORY
-INSERT tblARPostInvoiceDetail WITH (TABLOCK)
+INSERT INTO tblARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1048,8 +1048,8 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
-FROM tblARPostInvoiceHeader ARI
-INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
+INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
 LEFT OUTER JOIN tblICCategory ICC WITH (NOLOCK) ON ICI.[intCategoryId] = ICC.[intCategoryId]
@@ -1057,12 +1057,12 @@ LEFT OUTER JOIN tblICItemLocation ICIL WITH (NOLOCK) ON ICI.[intItemId] = ICIL.[
 LEFT OUTER JOIN tblICItemPricing ICIP WITH (NOLOCK) ON ICI.[intItemId] = ICIP.[intItemId] AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
 LEFT OUTER JOIN tblICItemUOM ICIU WITH (NOLOCK) ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH (NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
-LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
+LEFT OUTER JOIN tblGLAccount GL WITH (NOLOCK) ON ARID.intSalesAccountId = GL.intAccountId
 WHERE ICI.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material')
   AND ARI.strSessionId = @strSessionId
 
 --MISC ITEMS
-INSERT tblARPostInvoiceDetail WITH (TABLOCK)
+INSERT INTO tblARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1362,11 +1362,11 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
-FROM tblARPostInvoiceHeader ARI
-INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
+INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH(NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
-LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
+LEFT OUTER JOIN tblGLAccount GL WITH (NOLOCK) ON ARID.intSalesAccountId = GL.intAccountId
 WHERE (ARID.[intItemId] IS NULL OR ARID.[intItemId] = 0)
   AND ARI.strSessionId = @strSessionId
 
@@ -1394,12 +1394,12 @@ WHERE ID.strSessionId = @strSessionId
 
 UPDATE ID
 SET dblQtyUnitOrGross = CASE WHEN SP.strGrossOrNet = 'Net' THEN DI.dblDistributionNetSalesUnits ELSE DI.dblDistributionGrossSalesUnits END
-FROM tblARPostInvoiceHeader I
-INNER JOIN tblARPostInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadDistributionHeaderId = I.intLoadDistributionHeaderId
-INNER JOIN tblTRLoadDistributionDetail DI ON ID.intLoadDistributionDetailId = DI.intLoadDistributionDetailId
-INNER JOIN tblTRLoadReceipt LR ON DH.intLoadHeaderId = LR.intLoadHeaderId
-INNER JOIN tblTRSupplyPoint SP ON LR.intSupplyPointId = SP.intSupplyPointId
+FROM tblARPostInvoiceHeader I WITH (NOLOCK)
+INNER JOIN tblARPostInvoiceDetail ID WITH (NOLOCK) ON I.intInvoiceId = ID.intInvoiceId
+INNER JOIN tblTRLoadDistributionHeader DH WITH (NOLOCK) ON DH.intLoadDistributionHeaderId = I.intLoadDistributionHeaderId
+INNER JOIN tblTRLoadDistributionDetail DI WITH (NOLOCK) ON ID.intLoadDistributionDetailId = DI.intLoadDistributionDetailId
+INNER JOIN tblTRLoadReceipt LR WITH (NOLOCK) ON DH.intLoadHeaderId = LR.intLoadHeaderId
+INNER JOIN tblTRSupplyPoint SP WITH (NOLOCK) ON LR.intSupplyPointId = SP.intSupplyPointId
 WHERE I.intLoadDistributionHeaderId IS NOT NULL
   AND ID.intLoadDistributionDetailId IS NOT NULL
   AND I.strSessionId = @strSessionId

@@ -98,7 +98,15 @@ SELECT
 	B.dblOptionalityPremium,
 	lot.strLotNumber,
 	SG.intStorageChargeId,
-	ichrgedtl.intInsuranceChargeDetailId
+	ichrgedtl.intInsuranceChargeDetailId,
+	B.[intSaleYear],
+	B.[strSaleNumber],
+	B.[dtmSaleDate], 
+	B.[strVendorLotNumber],
+	B.[strPreInvoiceGarden],
+	B.[strPreInvoiceGardenNumber],
+	B.[strBook],
+	B.[strSubBook]
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 

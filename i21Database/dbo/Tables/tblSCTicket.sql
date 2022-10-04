@@ -216,7 +216,10 @@ CREATE NONCLUSTERED INDEX [IX_tblSCTicket_strTicketStatus]
 	INCLUDE ([strTicketNumber],[strInOutFlag],[dtmTicketDateTime],[intProcessingLocationId],[strTruckName],[strDriverName],[dblNetUnits],[strCustomerReference],[intItemId],[intEntityId],[intDeliverySheetId])
 
 GO
-
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_dtmTicketDateTime] ON [dbo].[tblSCTicket](
+	[dtmTicketDateTime] ASC
+);
+GO
 CREATE NONCLUSTERED INDEX [IX_tblSCTicket_6_2143072608__K2_K1_K99_K93_K14_K15_K91_K150_K134_K98_K149_K94_K126_K125_K71_K108_3_4_5_6_7_8_9_10_11_] ON [dbo].[tblSCTicket]
 (
 	[strTicketStatus] ASC,

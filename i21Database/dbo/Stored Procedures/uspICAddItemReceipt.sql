@@ -2197,7 +2197,10 @@ BEGIN
 		-- Update Cost UOM Id if null
 		UPDATE tblICInventoryReceiptItem
 		SET intCostUOMId = intUnitMeasureId
-		WHERE dblUnitCost > 0 AND intCostUOMId IS NULL
+		WHERE
+			intInventoryReceiptId = @inventoryReceiptId
+			AND dblUnitCost > 0 
+			AND intCostUOMId IS NULL
 
 		-- Calculate the other charges
 		BEGIN 			

@@ -5,7 +5,7 @@ PRINT N'START: POPULATING VOUCHER PAY TO BANK ACCOUNT'
 UPDATE B
 SET B.intPayToBankAccountId = EFT.intEntityEFTInfoId
 FROM tblAPBill B
-INNER JOIN tblEMEntityEFTInformation EFT ON EFT.intEntityId = B.intEntityVendorId AND EFT.intCurrencyId = B.intCurrencyId AND EFT.ysnDefaultAccount = 1
+INNER JOIN tblEMEntityEFTInformation EFT ON EFT.intEntityId = B.intEntityVendorId AND EFT.intCurrencyId = B.intCurrencyId AND EFT.ysnActive = 1 AND EFT.ysnDefaultAccount = 1
 WHERE B.intPayToBankAccountId IS NULL
 
 PRINT N'SUCCESS: POPULATING VOUCHER PAY TO BANK ACCOUNT'

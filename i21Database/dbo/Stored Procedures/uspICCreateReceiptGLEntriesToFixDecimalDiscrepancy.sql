@@ -269,9 +269,9 @@ BEGIN
 			,[strTransactionForm] = ty.strTransactionForm
 			,[strModuleName] = @ModuleName
 			,[intConcurrencyId] = 1
-			,[dblDebitForeign] = Credit.[Value]	
+			,[dblDebitForeign] = CreditForeign.[Value]	
 			,[dblDebitReport] = NULL 
-			,[dblCreditForeign]	= Debit.[Value]
+			,[dblCreditForeign]	= DebitForeign.[Value]
 			,[dblCreditReport]	= NULL
 			,[dblReportingRate]	= t.dblForexRate
 			,[dblForeignRate] = t.dblForexRate
@@ -312,10 +312,10 @@ BEGIN
 			) t
 			CROSS APPLY dbo.fnGetDebit(
 				ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)
-			) Debit
+			) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(
 				ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)
-			) Credit
+			) CreditForeign
 			INNER JOIN tblGLAccount ga 
 				ON ga.intAccountId = glAccnt.intInventoryAdjustmentAccountId
 			LEFT JOIN tblICInventoryTransactionType ty
@@ -447,10 +447,10 @@ BEGIN
 					AND t.intItemId = d.intItemId
 			) t
 			CROSS APPLY dbo.fnGetDebit(
-				ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)
+				ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0)
 			) Debit
 			CROSS APPLY dbo.fnGetCredit(
-				ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)
+				ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0)
 			) Credit
 			INNER JOIN tblGLAccount ga 
 				ON ga.intAccountId = glAccnt.intInventoryAdjustmentAccountId

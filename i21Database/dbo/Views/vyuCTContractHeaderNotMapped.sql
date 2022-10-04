@@ -91,7 +91,8 @@ AS
 						dblHeaderBalance = cd.dblHeaderBalance,
 						dblHeaderAvailable = cd.dblHeaderAvailable,
 						strHeaderProductType = HPT.strDescription,
-						strApprovalStatus = app.strApprovalStatus
+						strApprovalStatus = app.strApprovalStatus,
+						strShipVia = SV.strName
 				FROM	tblCTContractHeader						CH	
 				
 				JOIN	tblEMEntity								EY	ON	EY.intEntityId						=		CH.intEntityId
@@ -103,6 +104,7 @@ AS
 					where cd.intContractHeaderId = CH.intContractHeaderId
 				) cd
 			LEFT	JOIN	tblEMEntity							SP	ON	SP.intEntityId						=		CH.intSalespersonId									
+			LEFT	JOIN	tblEMEntity							SV	ON	SV.intEntityId						=		CH.intShipViaId									
 			LEFT	JOIN	tblEMEntity							CN	ON	CN.intEntityId						=		CH.intEntityContactId				
 			LEFT	JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					
 			LEFT	JOIN	tblEMEntity							CU	ON	CU.intEntityId						=		CH.intCounterPartyId				

@@ -1201,6 +1201,28 @@
     <Build Include="dbo\Tables\tblGLLedgerAccount.sql" />
     <Build Include="dbo\Tables\tblGRAdjustSettlementsSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
+    <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
+    <Build Include="dbo\Tables\tblTMFillMethodSkyBitzRef.sql" />
+    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryShrinkSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRPurchaseSalesSummaryDiscountsSubReport.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettlementsForTransfer.sql" />
+    <Build Include="dbo\Tables\tblGRTransferFromSettlements.sql" />
+    <Build Include="dbo\Tables\tblGRTransferSettlementsHeader.sql" />
+    <Build Include="dbo\Tables\tblGRTransferToSettlements.sql" />
+    <Build Include="dbo\Tables\tblGRTransferToSettlementsReference.sql" />
+    <Build Include="dbo\Views\vyuGRTransferSettlements.sql" />
+    <Build Include="dbo\Tables\tblFRSubLedger.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2210_ReadCommittedSnapshot.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
+    <Build Include="dbo\Tables\tblFRSubLedger.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1488,6 +1510,7 @@
     </Build>
     <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMReceived.sql" />
     <Build Include="dbo\Tables\tblTMSiteDevice.sql" />
     <Build Include="dbo\Tables\tblTMSiteDeviceLink.sql" />
     <Build Include="dbo\Tables\tblTMSiteJulianCalendar.sql" />
@@ -7418,6 +7441,7 @@
     <Build Include="dbo\Functions\fnSTRetailRounding.sql" />
     <Build Include="dbo\Functions\fnSTUPCRemoveLeadingZero.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTags.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTagPreview.sql" />
     <None Include="Scripts\Post-Deployment\PAT\2_MigrateStockRecords.sql" />
     <None Include="Scripts\Post-Deployment\PAT\3_UpdateIssueStockNo.sql" />
     <None Include="Scripts\Post-Deployment\PAT\4_UpdateRetiredStockNo.sql" />
@@ -11422,6 +11446,9 @@
     <None Include="Scripts\Post-Deployment\SM\2220_MigrateLabels.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\0_UpdateScreenNamesForSenchaUniversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2220_HideScreenLabel.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

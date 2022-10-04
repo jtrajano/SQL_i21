@@ -35,7 +35,7 @@ SELECT TOP 1
 FROM tblARCompanyPreference
 
 --REVERSE PROVISIONAL INVOICE
-INSERT INTO tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT INTO tblARPostInvoiceGLEntries (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1090,7 +1090,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@FreightRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[intAccountId]                 = GLACCOUNT.intAccountId
     ,[dblDebit]                     = @ZeroDecimal
     ,[dblCredit]                    = I.[dblFreightCharge]
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1123,6 +1123,11 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceHeader I
+OUTER APPLY (
+	SELECT intAccountId
+	FROM tblGLAccount
+	WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@FreightRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+) GLACCOUNT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblFreightCharge] > 0
@@ -1167,7 +1172,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[intAccountId]                 = GLACCOUNT.intAccountId
     ,[dblDebit]                     = I.[dblFreightCharge]
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1200,6 +1205,11 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceHeader I
+OUTER APPLY (
+	SELECT intAccountId
+	FROM tblGLAccount
+	WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+) GLACCOUNT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblFreightCharge] > 0
@@ -1406,7 +1416,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@SurchargeRevenueAccount, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[intAccountId]                 = GLACCOUNT.intAccountId
     ,[dblDebit]                     = @ZeroDecimal
     ,[dblCredit]                    = I.[dblSurcharge]
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1439,6 +1449,11 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceHeader I
+OUTER APPLY (
+	SELECT intAccountId
+	FROM tblGLAccount
+	WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@SurchargeRevenueAccount, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+) GLACCOUNT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblSurcharge] > 0
@@ -1483,7 +1498,7 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 )
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = [dbo].[fnGetGLAccountIdFromProfitCenter]([dbo].[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, I.[intFreightLocationSegment]), I.[intFreightCompanySegment])
+    ,[intAccountId]                 = GLACCOUNT.intAccountId
     ,[dblDebit]                     = I.[dblSurcharge]
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1516,6 +1531,11 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
 FROM tblARPostInvoiceHeader I
+OUTER APPLY (
+	SELECT intAccountId
+	FROM tblGLAccount
+	WHERE strAccountId = dbo.fnGLGetOverrideAccountBySegment(@DueFromAccountId, I.[intFreightLocationSegment], NULL, I.[intFreightCompanySegment])
+) GLACCOUNT
 WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[ysnFromProvisional] = 0
   AND I.[dblSurcharge] > 0

@@ -36,8 +36,8 @@ BEGIN TRY
 			@dblHeaderQuantity	NUMERIC(18,6),
 			@dblTotalHeaderApplied NUMERIC(18,6),
 			@ysnQuantityAtHeaderLevel bit = 0,
-			@dblSequenceOrigBalance NUMERIC(18,6)
-			
+			@dblSequenceOrigBalance NUMERIC(18,6),
+			@ysnIsDWG				BIT = 0
 	
 	BEGINING:
 
@@ -160,6 +160,7 @@ BEGIN TRY
 			WHERE ISNULL(ysnDestinationWeightGradePost,0) = 0 AND intContractId = @intContractDetailId
 
 			SELECT @ysnCompleted = CASE WHEN @intPostedTicketDestinationWeightsAndGrades > 0 AND @intUnPostedTicketDestinationWeightsAndGrades = 0 THEN 1 ELSE 0 END
+			SELECT @ysnIsDWG = 1;
 		END
 	END
 
@@ -172,7 +173,12 @@ BEGIN TRY
 															THEN 1
 															ELSE intContractStatusId
 													END)
-											ELSE 5
+											ELSE
+												case
+													when @ysnIsDWG = 1 and @ysnCompleted = 0
+													then intContractStatusId
+													else 5
+												end
 									END
 	WHERE	intContractDetailId =	@intContractDetailId
 

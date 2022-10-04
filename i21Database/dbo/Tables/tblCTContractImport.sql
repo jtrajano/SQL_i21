@@ -29,6 +29,7 @@
 	[strCurrency] [nvarchar](50)  COLLATE Latin1_General_CI_AS NULL,
 	[strPriceUOM] [nvarchar](50)  COLLATE Latin1_General_CI_AS NULL,
 	[strRemark] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
+	[strQtyAtHeaderLevel] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL,
 	[ysnImported] [bit] NULL,
 	[intImportedById] [int] NULL,
 	[dtmImported] [datetime] NULL,

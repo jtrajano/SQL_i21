@@ -101,7 +101,13 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 
 	[intProductTypeId] INT NULL,
 	[ysnPrimeCustomer] BIT DEFAULT ((0)),
-	
+		
+	--SkyBitzIntegration
+	[strPIN] NVARCHAR(50),
+	[dtmExpirationDate] DATETIME NULL, 
+	[intShipViaId] INT NULL,
+	[ysnPerpetual] BIT DEFAULT(0),
+	[ysnPriceInEffectByEndDateTime] BIT DEFAULT(0),
 	--CT-7027
 	--[intLastEntityId] INT NULL,
     -- CT-5315

@@ -42,3 +42,9 @@ CREATE TABLE tblARPostItemsForCosting (
 GO
 CREATE INDEX [idx_tblARPostItemsForCosting_strSessionId] ON [dbo].[tblARPostItemsForCosting] (strSessionId)
 GO
+CREATE INDEX [idx_tblARPostItemsForCosting_strType] ON [dbo].[tblARPostItemsForCosting] (strType)
+GO
+CREATE INDEX [idx_tblARPostItemsForCosting_intTransactionId] ON [dbo].[tblARPostItemsForCosting] (intTransactionId)
+GO
+CREATE INDEX [idx_tblARPostItemsForCosting_strTransactionId] ON [dbo].[tblARPostItemsForCosting] (strTransactionId)
+GO

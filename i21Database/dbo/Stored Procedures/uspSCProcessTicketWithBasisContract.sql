@@ -43,7 +43,7 @@ BEGIN TRY
 					,@intLocationId = @intLocationId
 					,@dtmScaleDate = @dtmScaleDate
 					,@intUserId = @intUserId
-					,@intBillId = @intCreatedTransactionId
+					,@intBillId = @intCreatedTransactionId OUTPUT
 		END
 		ELSE
 		BEGIN
@@ -53,6 +53,13 @@ BEGIN TRY
 					,@intLocationId = @intLocationId
 					,@intUserId = @intUserId
 					,@intInvoiceId = @intCreatedTransactionId OUTPUT
+		END
+
+		IF(ISNULL(@intCreatedTransactionId,0) > 0)
+		BEGIN
+			UPDATE tblSCTicketDirectBasisContract 
+			SET ysnProcessed = 1
+			WHERE intTicketId = @intTicketId
 		END
 
 	END
