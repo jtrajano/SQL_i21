@@ -74,7 +74,6 @@ OUTER APPLY	(
 		FROM vyuAPBillForImport
 		WHERE intEntityVendorId = A.intEntityVendorId
 			AND ISNULL(strPaymentScheduleNumber, strVendorOrderNumber) = A.strVendorOrderNumber
-			AND ISNULL(dblTotal, dblAmountDue) = A.dblPayment --Amount of Payment Schedule should be match as well
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
