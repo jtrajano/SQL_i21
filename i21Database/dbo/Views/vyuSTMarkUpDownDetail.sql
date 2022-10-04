@@ -111,11 +111,11 @@ LEFT JOIN tblICItemUOM UOM
 	ON markDetail.intItemUOMId = UOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure UM
 	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
-INNER JOIN vyuSTItemHierarchyPricing vyupriceHierarchy
+LEFT JOIN vyuSTItemHierarchyPricing vyupriceHierarchy
 	ON item.intItemId = vyupriceHierarchy.intItemId 
 	AND itemLoc.intItemLocationId = vyupriceHierarchy.intItemLocationId
 	AND UOM.intItemUOMId = vyupriceHierarchy.intItemUOMId
-INNER JOIN ( 
+LEFT JOIN ( 
 	SELECT SIP.intItemId, intItemLocationId, SIP.intItemUOMId,
 		CASE WHEN UOM.ysnStockUnit = 1
 			THEN dblSalePrice 
