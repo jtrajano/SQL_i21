@@ -15,6 +15,7 @@
 	[intInventoryReceiptId] INT NULL,
 	[intBillId] INT NULL,
     [ysnValid] BIT,
+    [ysnReImport] BIT NULL DEFAULT((0)),
     [strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
     [dblDeferredAmt1] DECIMAL(18,6) NULL,

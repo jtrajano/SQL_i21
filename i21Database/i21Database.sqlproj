@@ -1184,6 +1184,7 @@
     <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTMDeliveryHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
+    <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11407,7 +11408,7 @@
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAdminAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalance_ForTB.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
   </ItemGroup>
