@@ -221,6 +221,8 @@ AS
 		, CD.intTaxGroupId
 		, CD.intTaxLocationId
 		, EFT.strAccountNumber
+		, CD.dtmEtaPol
+		, CD.dtmEtaPod
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
