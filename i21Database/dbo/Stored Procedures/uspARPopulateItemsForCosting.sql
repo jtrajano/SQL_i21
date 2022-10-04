@@ -353,4 +353,44 @@ WHERE
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadDetailId IS NULL OR (ARID.intLoadDetailId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
+--CREDIT MEMO FROM RETURNED INVOICE WITH INVENTORY SHIPMENT
+UPDATE COST
+SET [intItemUOMId]      = ISI.[intItemUOMId]    
+   ,[dblUOMQty]			= ICIU.[dblUnitQty]
+   ,[dblCost]			= ISNULL(dbo.fnMultiply (dbo.fnMultiply (CASE WHEN dbo.fnGetCostingMethod(ID.[intItemId], ID.[intItemLocationId]) = @AVERAGECOST THEN 
+																				dbo.fnGetItemAverageCost(ID.[intItemId], ID.[intItemLocationId], ISI.intItemUOMId) 
+																			  ELSE 
+																				 ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISI.[intItemUOMId], ISNULL(ICSUOM.[intItemUOMId], ISI.[intItemUOMId]), ICIP.[dblLastCost]), @ZeroDecimal)  
+																		 END
+																,ID.[dblSplitPercent])
+															,ICIU.[dblUnitQty]
+														),@ZeroDecimal)
+	
+FROM #ARItemsForCosting COST
+INNER JOIN #ARPostInvoiceDetail ID ON COST.intTransactionId = ID.intInvoiceId AND COST.intTransactionDetailId = ID.intInvoiceDetailId
+INNER JOIN tblICItem ICI WITH(NOLOCK) ON ID.intItemId = ICI.intItemId
+INNER JOIN tblARInvoice I WITH(NOLOCK) ON ID.intInvoiceId = I.intInvoiceId
+INNER JOIN tblICInventoryShipmentItem ISI WITH(NOLOCK) ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
+INNER JOIN tblICItemLocation ICIL WITH(NOLOCK) ON ICI.[intItemId] = ICIL.[intItemId] AND I.[intCompanyLocationId] = ICIL.[intLocationId]
+LEFT OUTER JOIN tblICItemPricing ICIP WITH(NOLOCK) ON ICI.[intItemId] = ICIP.[intItemId] AND ICIL.intItemLocationId = ICIP.intItemLocationId
+INNER JOIN (
+	SELECT I.intInvoiceId 
+	FROM tblARInvoice I WITH (NOLOCK)
+	WHERE I.ysnReturned = 1 
+	  AND I.ysnPosted = 1 
+	  AND I.strTransactionType = 'Invoice'
+) ARRETURN ON I.[intOriginalInvoiceId] = ARRETURN.[intInvoiceId] 
+INNER JOIN tblICItemUOM ICIU WITH(NOLOCK) ON ISI.[intItemUOMId] = ICIU.[intItemUOMId]
+CROSS APPLY (
+     SELECT TOP 1 [intItemId], [intItemUOMId] 
+     FROM tblICItemUOM IUOM WITH(NOLOCK) 
+     WHERE IUOM.[ysnStockUnit] = 1
+       AND ID.[intItemId] = IUOM.[intItemId]
+) ICSUOM
+WHERE ID.strTransactionType = 'Credit Memo'
+  AND ARRETURN.intInvoiceId IS NOT NULL
+  AND COST.intItemUOMId <> ISI.intItemUOMId
+  AND ID.intContractDetailId IS NOT NULL
+  AND ID.ysnStockTracking = 1
+  
 RETURN 1
