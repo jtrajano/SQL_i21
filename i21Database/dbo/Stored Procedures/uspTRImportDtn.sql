@@ -83,9 +83,9 @@ BEGIN
 				SELECT @intInventoryReceiptId = IR.intInventoryReceiptId, @ysnInventoryPosted = IR.ysnPosted
 				FROM tblTRImportDtnDetail DD
 				INNER JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId = DD.intEntityVendorId
-				AND CONVERT(DATE, IR.dtmReceiptDate) = DD.dtmInvoiceDate 
+				--AND CONVERT(DATE, IR.dtmReceiptDate) = DD.dtmInvoiceDate 
 				AND IR.strBillOfLading = DD.strBillOfLading
-				AND IR.dblGrandTotal = DD.dblInvoiceAmount
+				--AND IR.dblGrandTotal = DD.dblInvoiceAmount
 				WHERE DD.intImportDtnDetailId = @intImportDtnDetailId
 				AND IR.intSourceType = 3
 				--AND IR.ysnPosted = 1

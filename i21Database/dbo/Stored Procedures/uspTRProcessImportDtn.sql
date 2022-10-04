@@ -24,17 +24,21 @@ BEGIN
 			DD.intInventoryReceiptId,
 			DD.intTermId,
 			DD.strInvoiceNo,
-			DD.dtmDueDate
+			DD.dtmDueDate,
+			DD.dblInvoiceAmount,
+			DD.intEntityVendorId
 		FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
 
 		DECLARE @intImportDtnDetailId INT = NULL,
 			@intInventoryReceiptId INT = NULL,
 			@intTermId INT = NULL,
 			@strInvoiceNo NVARCHAR(100) = NULL,
-			@dtmDueDate DATETIME = NULL
+			@dtmDueDate DATETIME = NULL,
+			@dblInvoiceAmount DECIMAL(18,6) = NULL,
+			@intEntityVendorId INT = NULL
 	
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate
+		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 
@@ -55,92 +59,152 @@ BEGIN
 					SELECT @intExistBillId = intBillId FROM tblAPBillDetail BD 
 						INNER JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
 						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+					
+					-- ADD ADJUSTMENT
+					DECLARE @dblAdjustment DECIMAL(18,6) = NULL,
+						@dblAdjustmentTolerance DECIMAL(18,6) = NULL,
+						@intAdjAccountId INT = NULL,
+						@intQtyToBill INT = 1
 
-					-- CREATE VOUCHER		
-					IF (@intExistBillId IS NULL)
-					BEGIN			
-						DECLARE @ysnVoucherSuccess BIT = 0
-						BEGIN TRY
-							
-							EXEC [dbo].[uspICProcessToBill] 
-								@intReceiptId = @intInventoryReceiptId
-								,@intUserId = @intUserId
-								,@intBillId = @intBillId OUTPUT
-								,@strBillIds = @strBillId OUTPUT
-								,@intScreenId = NULL
+					SELECT TOP 1 @intAdjAccountId = intAdjustmentAccountId, @dblAdjustmentTolerance = dblAdjustmentTolerance FROM tblTRCompanyPreference
 
-							SET @ysnVoucherSuccess = 1	
+					SELECT @dblAdjustment = dblGrandTotal - @dblInvoiceAmount 
+					FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-						END TRY
-						BEGIN CATCH
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
-						END CATCH
-							
-						IF(@ysnVoucherSuccess = 1)
-						BEGIN
-							IF (@intBillId IS NULL)
-							BEGIN
-								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
-							END
-						END
+					IF (@dblAdjustment < 0)
+					BEGIN
+						SET @intQtyToBill = -1
+						SET @dblAdjustment = @dblAdjustment * -1
+					END
+					
 
+					IF(@dblAdjustment > @dblAdjustmentTolerance AND @dblAdjustment > 0)
+					BEGIN
+						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Variance is greater than allowed')
 					END
 					ELSE
 					BEGIN
-						SET @intBillId = @intExistBillId
-						UPDATE tblTRImportDtnDetail SET intBillId = @intExistBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
-						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
-					END
+						-- CREATE VOUCHER		
+						IF (@intExistBillId IS NULL)
+						BEGIN			
+							DECLARE @ysnVoucherSuccess BIT = 0
+							BEGIN TRY
 
-					IF(@intBillId IS NOT NULL)
-					BEGIN
-						IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intBillId AND ysnPosted = 0)
-						BEGIN
-						-- ADD PAYMENT
-							EXEC [dbo].[uspTRImportDtnVoucherPayment] 
-								@intBillId = @intBillId,
-								@intImportLoadId = @intImportLoadId,
-								@intImportDtnDetailId = @intImportDtnDetailId
+								EXEC [dbo].[uspICProcessToBill] 
+									@intReceiptId = @intInventoryReceiptId
+									,@intUserId = @intUserId
+									,@intBillId = @intBillId OUTPUT
+									,@strBillIds = @strBillId OUTPUT
+									,@intScreenId = NULL
 
-						--TR-1730
-							UPDATE tblAPBill SET strVendorOrderNumber = @strInvoiceNo where intBillId = @intBillId
-						END
-					END
+								SET @ysnVoucherSuccess = 1	
 
-					-- POST VOUCHER
-					DECLARE @success BIT = NULL
+							END TRY
+							BEGIN CATCH
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
+							END CATCH
 
-					IF (@intBillId IS NOT NULL)
-					BEGIN
-						BEGIN TRY
+							IF(@ysnVoucherSuccess = 1)
+							BEGIN
+								IF (@intBillId IS NULL)
+								BEGIN
+									SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
+								END
+							END
 
-							EXEC [dbo].[uspAPPostBill]
-								@post = 1
-								,@recap = 0
-								,@isBatch = 0
-								,@transactionType = 'Transport Load'
-								,@param = @intBillId
-								,@userId = @intUserId
-								,@success = @success OUTPUT
-
-						END TRY
-						BEGIN CATCH
-							SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
-						END CATCH
-
-						IF (@success = 0)
-						BEGIN
-							SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
-							SELECT TOP 1 dbo.fnTRMessageConcat(@strMessage,strMessage) FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
 						END
 						ELSE
 						BEGIN
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher successfully posted')
+							SET @intBillId = @intExistBillId
+							UPDATE tblTRImportDtnDetail SET intBillId = @intExistBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
+							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
+						END
+
+						IF(@intBillId IS NOT NULL)
+						BEGIN
+							IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intBillId AND ysnPosted = 0)
+							BEGIN
+
+								IF( @dblAdjustment > 0)
+								BEGIN
+									DECLARE @VoucherPayable AS VoucherPayable,
+									@VoucherDetailTax AS VoucherDetailTax,
+									@errorAdjustment NVARCHAR(1000) = NULL
+
+
+									IF(@intAdjAccountId IS NOT NULL) 
+									BEGIN
+
+
+										INSERT INTO @VoucherPayable (intTransactionType, intEntityVendorId, intAccountId, intBillId, dblCost,dblQuantityToBill)
+
+										SELECT 	intTransactionType		= 1
+											,intEntityVendorId			= @intEntityVendorId
+											,intAccountId				= @intAdjAccountId
+											,intBillId					= @intBillId
+											,dblCost					= @dblAdjustment
+											,dblQuantityToBill			= @intQtyToBill
+
+										EXEC [dbo].[uspAPAddVoucherDetail] 
+											@voucherDetails = @VoucherPayable
+											,@voucherPayableTax = @VoucherDetailTax
+											,@throwError = 0
+											,@error = @errorAdjustment OUTPUT
+
+
+										IF (@errorAdjustment IS NOT NULL)
+										BEGIN	
+											SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @errorAdjustment)
+										END
+									END
+
+								END
+
+								-- ADD PAYMENT
+								EXEC [dbo].[uspTRImportDtnVoucherPayment] 
+									@intBillId = @intBillId,
+									@intImportLoadId = @intImportLoadId,
+									@intImportDtnDetailId = @intImportDtnDetailId
+
+								--TR-1730
+								UPDATE tblAPBill SET strVendorOrderNumber = @strInvoiceNo where intBillId = @intBillId
+							END
+						END
+
+						-- POST VOUCHER
+						DECLARE @success BIT = NULL
+
+						IF (@intBillId IS NOT NULL)
+						BEGIN
+							BEGIN TRY
+
+								EXEC [dbo].[uspAPPostBill]
+									@post = 1
+									,@recap = 0
+									,@isBatch = 0
+									,@transactionType = 'Transport Load'
+									,@param = @intBillId
+									,@userId = @intUserId
+									,@success = @success OUTPUT
+
+							END TRY
+							BEGIN CATCH
+								SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
+							END CATCH
+
+							IF (@success = 0)
+							BEGIN
+								SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
+								SELECT TOP 1 dbo.fnTRMessageConcat(@strMessage,strMessage) FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
+							END
+							ELSE
+							BEGIN
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher successfully posted')
+							END
 						END
 					END
-					
 				END
 				ELSE
 				BEGIN
@@ -168,7 +232,7 @@ BEGIN
 				RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
 			END CATCH
 
-			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate
+			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId
 		END
 		CLOSE @CursorTran  
 		DEALLOCATE @CursorTran
