@@ -70,7 +70,7 @@ BEGIN TRY
 				WHERE 
 					I.strBillId = B.strBillId 
 				AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber) 
-				AND I.dblPayment = ISNULL(PS.dblPayment, B.dblAmountDue)
+				AND I.dblPayment = ISNULL(PS.dblPayment - PS.dblDiscount, B.dblAmountDue)
 				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
 			) forPayment
 			WHERE PD.intPaymentId = @createdPaymentId;

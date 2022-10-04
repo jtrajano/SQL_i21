@@ -21,7 +21,7 @@ LEFT JOIN tblGLVendorMapping VM ON VM.intVendorMappingId = I.intEntityVendorId
 LEFT JOIN tblGLVendorMappingDetail MD ON MD.intVendorMappingId = VM.intVendorMappingId AND MD.strMapVendorName = I.strEntityVendorName
 
 ;WITH cte AS (
-	SELECT ROW_NUMBER() OVER(PARTITION BY A.strVendorOrderNumber ORDER BY A.intId) intRow,
+	SELECT ROW_NUMBER() OVER(PARTITION BY A.strVendorOrderNumber, A.dblPayment ORDER BY A.intId) intRow,
 	A.intId
 	FROM tblAPImportPaidVouchersForPayment A
 )
