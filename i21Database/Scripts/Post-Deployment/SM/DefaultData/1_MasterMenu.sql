@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deployment Type' AND strModuleName = 'Help Desk')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reprocess Vendor Invoice' AND strModuleName = 'Transports')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6440,6 +6440,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Tr
 	VALUES (N'Import Transport Load - Pending', N'Transports', @TransportsImportParentMenuId, N'Import Transport Load - Pending', N'Import', N'Screen', N'Transports.view.ImportLoadList', N'small-menu-import', 0, 0, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportLoadList', intSort = 0 WHERE strMenuName = 'Import Transport Load - Pending' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reprocess Vendor Invoice' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Reprocess Vendor Invoice', N'Transports', @TransportsImportParentMenuId, N'Reprocess Vendor Invoice', N'Import', N'Screen', N'Transports.view.ReprocessImportVendorInvoice?showSearch=true', N'small-menu-import', 0, 0, 0, 1, 3, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ReprocessImportVendorInvoice?showSearch=true', intSort = 3 WHERE strMenuName = 'Reprocess Vendor Invoice' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
