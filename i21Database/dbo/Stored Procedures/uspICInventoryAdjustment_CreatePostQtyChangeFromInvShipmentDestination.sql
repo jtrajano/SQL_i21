@@ -98,8 +98,16 @@ BEGIN
 			, si.intOwnershipType
 			, sc.intTicketId
 			, inv.intInvoiceId
-			, si.intOrderId
-			, si.intLineNo
+			, CASE WHEN dbo.fnCTGetOverage(ABS(dbo.fnCalculateQtyBetweenUOM(si.intItemUOMId, stockUOM.intItemUOMId, CASE WHEN @ysnPost = 1 THEN (si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) ELSE -(si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) END)), si.intInventoryShipmentItemId, 1) <> 0 THEN
+						NULL
+				   ELSE
+						si.intOrderId
+			  END
+			, CASE WHEN dbo.fnCTGetOverage(ABS(dbo.fnCalculateQtyBetweenUOM(si.intItemUOMId, stockUOM.intItemUOMId, CASE WHEN @ysnPost = 1 THEN (si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) ELSE -(si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) END)), si.intInventoryShipmentItemId, 1) <> 0 THEN
+						NULL
+				   ELSE
+						si.intLineNo
+			  END
 			, s.intEntityCustomerId
 
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
