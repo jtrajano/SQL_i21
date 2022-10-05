@@ -9,8 +9,4 @@ SELECT
 	,ysnEnableCreditCardProcessing
 	,strPaymentPortal
 	,strPaymentExternalLink
-	,intExpressAccountID
-	,strExpressAccountToken
-	,intExpressAcceptorID
-	,intExpressApplicationID
 FROM tblARCompanyPreference
