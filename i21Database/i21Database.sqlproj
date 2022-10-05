@@ -1187,6 +1187,9 @@
     <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMDeliveryHistory.sql" />
     <Build Include="dbo\Tables\tblSMTooltip.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAccountSegmentPartition.sql" />
+    <Build Include="dbo\Tables\tblGLCOAImportStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportCOAFromCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
