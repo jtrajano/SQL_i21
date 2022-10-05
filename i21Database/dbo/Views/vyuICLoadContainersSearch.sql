@@ -17,6 +17,8 @@ SELECT
 	, dblFranchise = NULL
 	, strContainerNumber = LoadContainer.strContainerNumber
 	, LoadContainer.dblNetWt
+	, LoadDetail.dblQualityPremium
+	, LoadDetail.dblOptionalityPremium	
 FROM tblLGLoad [Load]
 	INNER JOIN tblLGLoadDetail LoadDetail ON [Load].intLoadId = LoadDetail.intLoadId
 	LEFT OUTER JOIN tblLGLoadDetailContainerLink ContainerLink ON ContainerLink.intLoadDetailId = LoadDetail.intLoadDetailId

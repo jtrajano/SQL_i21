@@ -7,6 +7,7 @@
 	, @strSource NVARCHAR(50)
 	, @strProcess NVARCHAR(50)
 	, @intUserId INT
+	, @ysnCancelledLoad int = 0
 
 AS
 
@@ -405,6 +406,13 @@ BEGIN TRY
 		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
 
 		SELECT @intSequenceHistoryCount = COUNT(*) FROM #tempSequenceHistoryCompare
+
+		declare @intLastEntryUsageHistoryId int;
+		select top 1 @intLastEntryUsageHistoryId = intSequenceUsageHistoryId from #tempSequenceHistoryCompare;
+		if (@intLastEntryUsageHistoryId is null and isnull(@ysnCancelledLoad,0) = 0)
+		begin
+			update #tempSequenceHistoryCompare set intSequenceUsageHistoryId = null;
+		end
 
 		SELECT @intValidSequenceHistoryCount = COUNT(*) FROM (
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare

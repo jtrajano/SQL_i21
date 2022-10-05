@@ -6,6 +6,13 @@ SELECT		a.intStoreId,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
 			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity
 FROM		tblSTStore a
-LEFT JOIN	tblSTSiteStatus b
+LEFT JOIN	(	SELECT		intStoreId,
+							ysnInternetConnectivity,
+							ysnRegisterConnectivity,
+							dtmStatusDate
+				FROM		tblSTSiteStatus
+				WHERE		intSiteStatusId IN (	SELECT		MAX(intSiteStatusId) 
+													FROM		tblSTSiteStatus
+													GROUP BY	intStoreId)) b
 ON			a.intStoreId = b.intStoreId AND
-			DATEDIFF(MINUTE, b.dtmStatusDate, GETDATE()) <= 6
+			DATEDIFF(MINUTE, b.dtmStatusDate, GETDATE()) <= 3

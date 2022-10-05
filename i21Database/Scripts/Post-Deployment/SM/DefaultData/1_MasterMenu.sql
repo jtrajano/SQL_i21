@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Coworker Supervisor' AND strModuleName = 'Help Desk')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ledgers' AND strModuleName = 'General Ledger')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1204,6 +1204,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Change C
 	VALUES (N'Change Category', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Change Category', N'Maintenance', N'Screen', N'GeneralLedger.view.ChangeCategory?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'GeneralLedger.view.ChangeCategory?showSearch=true' WHERE strMenuName = N'Change Category' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Ledgers' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Ledgers', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Ledgers', N'Maintenance', N'Screen', N'GeneralLedger.view.Ledger?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'GeneralLedger.view.Ledger?showSearch=true' WHERE strMenuName = N'Ledgers' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Import GL from Subledger' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerImportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -3761,7 +3768,7 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Position Report', strDescription = 'Po
 UPDATE tblSMMasterMenu SET strMenuName = N'Coverage/Risk Inquiry', strDescription = N'Coverage/Risk Inquiry' WHERE strMenuName = 'Coverage Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Mark To Market', strDescription = N'Mark To Market' WHERE strMenuName = 'M2M Inquiry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Profit and Loss Analysis', strDescription = N'Profit and Loss Analysis'  WHERE strMenuName = 'PnL Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = N'Position Reconciliation Report', strDescription = N'Position Reconciliation Report' WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+--UPDATE tblSMMasterMenu SET strMenuName = N'Position Reconciliation Report', strDescription = N'Position Reconciliation Report' WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
 /* END OF RENAMING  */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId)
@@ -4006,10 +4013,16 @@ ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'RiskManagement.view.DPRHeader?isReport=true' WHERE strMenuName = 'Daily Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'DPR Summary Log', N'Risk Management', @RiskManagementReportParentMenuId, N'DPR Summary Log', N'Report', N'Screen', N'RiskManagement.view.DPRSummaryLog?showSearch=true', N'small-menu-report', 1, 0, 0, 1, 0, 1)
-ELSE
+ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'RiskManagement.view.DPRSummaryLog?showSearch=true' WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'DPR Reconciliation Report', N'Risk Management', @RiskManagementReportParentMenuId, N'DPR Reconciliation Report', N'Report', N'Screen', N'RiskManagement.view.DPRReconciliation', N'small-menu-report', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'RiskManagement.view.DPRReconciliation' WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Derivatives Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -4037,6 +4050,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Market Exchange' AND strModuleN
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1
 
 --DELETE DUPLICATE DATA
 DECLARE @BrokerageAccountsCount INT

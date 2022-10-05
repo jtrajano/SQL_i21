@@ -104,7 +104,7 @@ begin
 					where ' + @final_condition
 
 
-	print @sqlcmd
+	-- print @sqlcmd
 	exec (@sqlcmd)
 	
 

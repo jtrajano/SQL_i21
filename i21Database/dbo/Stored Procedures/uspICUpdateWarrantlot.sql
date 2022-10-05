@@ -157,7 +157,21 @@ BEGIN
 		
 		
 		
-		
+		IF(ISNULL(@strWarrantNo,'') = '')
+		BEGIN
+			SET @strWarrantNo = @strOldWarrantNo
+		END
+		IF(ISNULL(@strWarrantStatus,'') = '')
+		BEGIN
+			SET @strWarrantStatus = @strOldWarrantStatus
+			SET @intWarrantStatus = @intOldWarrantStatus
+
+		END
+		IF(ISNULL(@intTradeFinanceId ,0) = 0)
+		BEGIN
+			SET @intTradeFinanceId = @intOldTradeFinanceId
+			SET @strTradeFinanceNumber = @strOldTradeFinanceNumber
+		END
 	END
 	ELSE
 	BEGIN

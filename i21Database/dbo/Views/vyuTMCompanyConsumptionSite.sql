@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuTMCompanyConsumptionSite]
+﻿CREATE VIEW [dbo].[vyuTMCompanyConsumptionSite]
 	AS 
 SELECT CS.intCompanyConsumptionSiteId, 
 C.intCompanyLocationId,

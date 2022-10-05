@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspMFUpdateTask (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].[uspMFUpdateTask] (@strXML NVARCHAR(MAX))
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -433,9 +433,23 @@ BEGIN TRY
 																								   LEFT JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId AND RI.intItemId = @intItemId 
 																								   WHERE OD.intOrderHeaderId = @intOrderHeaderId AND OD.intItemId = @intItemId 
 																								   GROUP BY RI.dblUpperTolerance,T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight
-																								   HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0) * dblUpperTolerance / 100) + (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0)))
+																								   HAVING  ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0) * dblUpperTolerance / 100) + (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0)))
 			BEGIN
 				RAISERROR ('Task Qty cannot be greater than Upper Tolerance.', 16, 1)
+				RETURN
+		END
+
+		IF @strPickByFullPallet = 'False' AND @strRestrictPickQtyByRequiredQty = 'True' AND EXISTS(SELECT 1
+																								   FROM tblMFOrderDetail OD
+																								   LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId AND OD.intOrderHeaderId = T.intOrderHeaderId
+																								   LEFT JOIN tblMFStageWorkOrder SWO ON OD.intOrderHeaderId = SWO.intOrderHeaderId
+																								   LEFT JOIN tblMFRecipe R ON SWO.intItemId = R.intItemId 
+																								   LEFT JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId AND RI.intItemId = @intItemId 
+																								   WHERE OD.intOrderHeaderId = @intOrderHeaderId AND OD.intItemId = @intItemId 
+																								   GROUP BY RI.dblLowerTolerance,T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight
+																								   HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) < (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0)) - (ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, OD.dblWeight), 0) * dblLowerTolerance / 100))
+			BEGIN
+				RAISERROR ('Task Qty cannot be less than Lower Tolerance.', 16, 1)
 				RETURN
 		END
 	END
@@ -594,6 +608,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-GO
-
-

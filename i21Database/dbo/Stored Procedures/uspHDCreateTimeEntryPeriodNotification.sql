@@ -47,6 +47,12 @@ WHERE intTimeEntryPeriodId = @TimeEntryPeriodId AND
 
 --SELECT @FirstWarningDate, @SencondWarningDate, @LockoutDate, @BillingStartDate, @BillingEndDate, @strWarningType, @RequiredHours
 
+--Start Sync Time Off Request
+
+EXEC [dbo].[uspHDSyncTimeOffRequest] @TimeEntryPeriodDetailId
+
+--End Sync Time Off Request
+
 
 IF @strWarningType IS NULL
 	RETURN
@@ -67,7 +73,8 @@ WHERE ISNULL(a.strEmail, '') <> '' AND
 	  a.ysnVendor = CONVERT(BIT, 0) AND
 	  a.ysnTimeEntryExempt = CONVERT(BIT, 0) AND
       c.strFiscalYear = DATEPART(YEAR, GETDATE()) AND
-	  c.ysnActive = CONVERT(bit, 1)
+	  c.ysnActive = CONVERT(bit, 1) AND
+	  a.ysnDisabled = CONVERT(BIT, 0)
 
 OPEN EmployeeLoop
 FETCH NEXT FROM EmployeeLoop INTO @EntityId
@@ -76,7 +83,7 @@ BEGIN
     
 	DECLARE @TotalHours INT = 0
 
-	SELECT @TotalHours = SUM(intHours) from tblHDTicketHoursWorked
+	SELECT @TotalHours = SUM(intHours) from vyuHDTicketHoursWorked
 	WHERE intAgentEntityId = @EntityId AND
 		  dtmDate >= @BillingStartDate AND
 		  dtmDate <= @BillingEndDate

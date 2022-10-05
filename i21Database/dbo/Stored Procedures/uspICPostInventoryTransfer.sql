@@ -856,6 +856,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
@@ -951,6 +952,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
@@ -1159,6 +1161,7 @@ BEGIN
 	IF (@ysnGLEntriesRequired = 1 AND EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock))
 		OR (EXISTS (SELECT TOP 1 1 FROM @GLEntries)) 
 	BEGIN 
+		UPDATE @GLEntries SET dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
 	END
 	

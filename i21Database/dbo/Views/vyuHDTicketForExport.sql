@@ -6,9 +6,9 @@ AS
 	select
 		tic.intTicketId
 		,tic.strTicketNumber
-		,strSubject = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strSubject), '&nbsp', ' ')
+		,strSubject = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strSubject), '&nbsp', ' ') COLLATE Latin1_General_CI_AS
 		,typ.strType
-		,sta.strStatus
+		,sta.strStatus				
 		,strStatusIcon = sta.strIcon
 		,strStatusFontColor = sta.strFontColor
 		,strStatusBackColor = sta.strBackColor
@@ -46,8 +46,8 @@ AS
 		,strLastCommentedBy = lastcomment.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
 		,strCompanyLocation = camloc.strLocationName
 		,strEntityLocation = enloc.strLocationName
-		,strDescription = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strDescription), '&nbsp', ' ')
-		,strResolution = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strResolution), '&nbsp', ' ')
+		,strDescription = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strDescription), '&nbsp', ' ') COLLATE Latin1_General_CI_AS
+		,strResolution = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strResolution), '&nbsp', ' ') COLLATE Latin1_General_CI_AS
 		,tic.strImageId
 		,tic.strFeedbackComment
 		,strCampaignName = null
@@ -113,3 +113,4 @@ AS
 		left join tblHDUpgradeType ut on ut.intUpgradeTypeId = tic.intUpgradeTypeId
 		left join tblHDVersion uv on uv.intVersionId = tic.intUpgradeTargetVersionId
 		left join tblHDTicketRootCause rc on rc.intRootCauseId = tic.intRootCauseId
+GO

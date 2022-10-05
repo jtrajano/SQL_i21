@@ -363,7 +363,7 @@ BEGIN
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
 	SELECT A.intPaycheckId, A.intEmployeeDeductionId, A.intTypeDeductionId, A.strPaidBy, A.intAccountId, A.ysnIsExpense, ysnSplit = CASE WHEN (B.intEmployeeLocationDistributionId IS NULL) THEN 0 ELSE A.ysnSplit END,
 			dblTotal = ISNULL(A.dblTotal, 0), dblPercentage = ISNULL(ISNULL(B.dblPercentage, D.dblDepartmentPercent), 0), 
-			C.intDepartmentId, intProfitCenter = ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
+			C.intDepartmentId, intProfitCenter = ISNULL(B.intProfitCenter, C.intProfitCenter), CASE WHEN (A.ysnSplit = 1 ) THEN  F.intLOB ELSE C.intLOB END
 	FROM (
 		  SELECT PD.intPaycheckId, PD.intEmployeeDeductionId, PC.intEntityEmployeeId, PD.strPaidBy, intAccountId = PD.intAccountId, ysnIsExpense = 0,
 			ysnSplit = ED.ysnUseLocationDistribution, PD.intTypeDeductionId, dblTotal
@@ -384,6 +384,11 @@ BEGIN
 			ON A.ysnSplit = 0 OR B.intEmployeeLocationDistributionId IS NULL
 		LEFT JOIN tblPRDepartment C 
 			ON D.intEmployeeDepartmentId = C.intDepartmentId
+		LEFT JOIN (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) E
+		ON A.ysnSplit = 1 
+
+		LEFT JOIN tblPRDepartment F
+		ON E.intEmployeeDepartmentId = F.intDepartmentId 
 	WHERE A.dblTotal <> 0
 	AND intPaycheckId = @intPaycheckId
 
@@ -516,7 +521,8 @@ BEGIN
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
 	SELECT A.intPaycheckId, A.intTypeTaxId, A.strPaidBy, A.intAccountId,  A.ysnIsExpense, ysnSplit = CASE WHEN (B.intEmployeeLocationDistributionId IS NULL) THEN 0 ELSE A.ysnSplit END,
 			dblTotal = ISNULL(A.dblTotal, 0), dblPercentage = ISNULL(ISNULL(B.dblPercentage, D.dblDepartmentPercent), 0), 
-			C.intDepartmentId, intProfitCenter = ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
+			C.intDepartmentId, intProfitCenter = ISNULL(B.intProfitCenter, C.intProfitCenter)
+			,CASE WHEN (A.ysnSplit = 1 ) THEN  F.intLOB ELSE C.intLOB END
 	FROM (
 		  SELECT PT.intPaycheckId, PC.intEntityEmployeeId, PT.strPaidBy, intAccountId = PT.intAccountId, ysnIsExpense = 0,
 			ysnSplit = ET.ysnUseLocationDistribution, PT.intTypeTaxId, dblTotal
@@ -537,6 +543,11 @@ BEGIN
 			ON A.ysnSplit = 0 OR B.intEmployeeLocationDistributionId IS NULL
 		LEFT JOIN tblPRDepartment C 
 			ON D.intEmployeeDepartmentId = C.intDepartmentId
+		LEFT JOIN (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) E
+		ON A.ysnSplit = 1 
+
+		LEFT JOIN tblPRDepartment F
+		ON E.intEmployeeDepartmentId = F.intDepartmentId
 	WHERE A.dblTotal <> 0
 	AND intPaycheckId = @intPaycheckId
 

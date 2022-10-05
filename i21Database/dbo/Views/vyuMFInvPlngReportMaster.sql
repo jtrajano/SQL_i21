@@ -8,7 +8,7 @@ SELECT IRM.intInvPlngReportMasterID,IRM.strInvPlngReportName
 	,CL.strLocationName
 	,UM.strUnitMeasure
 	--,DH.strDemandName 
-	,'' AS strDemandName
+	,'' COLLATE Latin1_General_CI_AS AS strDemandName
 	,IRM.dtmDate
 	,B.strBook
 	,SB.strSubBook

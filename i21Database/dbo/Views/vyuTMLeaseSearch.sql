@@ -34,8 +34,7 @@ AS
 								SUM(ISNULL(dblQuantityDelivered,0.0)) 
 							  FROM tblTMDeliveryHistory 
 							  WHERE intSiteID = F.intSiteID
-							  AND dtmInvoiceDate >= ISNULL(A.dtmLastLeaseBillingDate, '1/1/1900')
-							  AND dtmInvoiceDate <=  ISNULL(DATEADD(dd,-1 ,HH.dtmStartDate), '1/1/1900')), 0.0)  
+							  AND dtmInvoiceDate >= ISNULL(A.dtmLastLeaseBillingDate, '1/1/1900')), 0.0)  
 			,dblLeaseBillingMinimum = (SELECT TOP 1 dblMinimumUsage 
 												FROM tblTMLeaseMinimumUse 
 												WHERE dblSiteCapacity >= ISNULL(F.dblTotalCapacity,0) 

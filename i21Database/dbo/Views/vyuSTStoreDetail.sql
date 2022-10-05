@@ -17,17 +17,18 @@ SELECT ST.*
 	   , CL.strLocationName
 	   , CL.strLocationType
 	   , EM.strEntityNo AS strVendorId
-	   , strATMFundBegBalanceItemId 	 = 	  ATMFundBegBalanceItem.strItemNo
-	   , strATMFundReplenishedItemId	 = 	  ATMFundReplenishedItem.strItemNo
-	   , strATMFundWithdrawalItemId		 = 	  ATMFundWithdrawalItem.strItemNo
-	   , strATMFundEndBalanceItemId		 = 	  ATMFundEndBalanceItem.strItemNo
-	   , strATMFundVarianceItemId		 = 	  ATMFundVarianceItem.strItemNo
-	   , strChangeFundBegBalanceItemId	 = 	  ChangeFundBegBalanceItem.strItemNo
-	   , strChangeFundEndBalanceItemId	 = 	  ChangeFundEndBalanceItem.strItemNo
-	   , strChangeFundReplenishItemId	 = 	  ChangeFundReplenishItem.strItemNo
-	   , strConsBankDepositDraftId		 =	  Bank.strBankName + ' - ' + dbo.fnAESDecryptASym(ConsBankDepositDraftId.strBankAccountNo)
-	   , strConsARAccountId				 =	  ConsARAccountId.strAccountId
-	   , strConsFuelOverShortItem		 =    FuelItemOverShort.strItemNo
+	   , strATMFundBegBalanceItemId 		 = 	  ATMFundBegBalanceItem.strItemNo
+	   , strATMFundReplenishedItemId		 = 	  ATMFundReplenishedItem.strItemNo
+	   , strATMFundWithdrawalItemId			 = 	  ATMFundWithdrawalItem.strItemNo
+	   , strATMFundEndBalanceItemId			 = 	  ATMFundEndBalanceItem.strItemNo
+	   , strATMFundVarianceItemId			 = 	  ATMFundVarianceItem.strItemNo
+	   , strChangeFundBegBalanceItemId		 = 	  ChangeFundBegBalanceItem.strItemNo
+	   , strChangeFundEndBalanceItemId		 = 	  ChangeFundEndBalanceItem.strItemNo
+	   , strChangeFundReplenishItemId		 = 	  ChangeFundReplenishItem.strItemNo
+	   , strConsBankDepositDraftId			 =	  Bank.strBankName + ' - ' + dbo.fnAESDecryptASym(ConsBankDepositDraftId.strBankAccountNo)
+	   , strConsDelearCommissionARAccountId	 =	  ConsARAccountId.strAccountId
+	   , strConsDealerCommissionItem		 =    DealerCommissionItem.strItemNo
+	   , strConsFuelOverShortItem			 =    FuelItemOverShort.strItemNo
 	   , CustomerCharge.strDescription as strCustomerChargeDescription
 	   , CashTransaction.strDescription as strCashTransactionDescription
 FROM tblSTStore ST
@@ -74,9 +75,11 @@ LEFT JOIN tblICItem ChangeFundReplenishItem
 	ON ST.intChangeFundReplenishItemId = ChangeFundReplenishItem.intItemId
 LEFT JOIN tblICItem FuelItemOverShort 
 	ON ST.intConsFuelOverShortItemId = FuelItemOverShort.intItemId
+LEFT JOIN tblICItem DealerCommissionItem 
+	ON ST.intConsDealerCommissionItemId = DealerCommissionItem.intItemId
 LEFT JOIN tblCMBankAccount ConsBankDepositDraftId
 	ON ST.intConsBankDepositDraftId = ConsBankDepositDraftId.intGLAccountId
 LEFT JOIN tblCMBank Bank
 	ON ConsBankDepositDraftId.intBankId = Bank.intBankId
 LEFT JOIN tblGLAccount ConsARAccountId
-	ON ST.intConsARAccountId = ConsARAccountId.intAccountId
+	ON ST.intConsDelearCommissionARAccountId = ConsARAccountId.intAccountId

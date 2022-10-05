@@ -103,7 +103,7 @@ BEGIN TRY
 		--SELECT '@SettleStorages',* FROM @SettleStorages
 
 	INSERT INTO @billList 
-	SELECT DISTINCT ISNULL(SS.intBillId,SSB.intSettleStorageBillDetailId)
+	SELECT DISTINCT COALESCE(SSB.intBillId,SS.intBillId)
 	FROM tblGRSettleStorage SS
 	INNER JOIN @SettleStorages _SS
 		ON _SS.intId = SS.intSettleStorageId
@@ -557,7 +557,7 @@ BEGIN TRY
 				[intCustomerStorageId] = [intCustomerStorageId]
 				,[intContractHeaderId]  = [intContractHeaderId]
 				,[dblUnits]				= [dblUnits]
-				,[dtmHistoryDate]		= GETDATE()
+				,[dtmHistoryDate]		= [dtmHistoryDate]--GETDATE()
 				,[strType]				= 'Reverse Settlement'
 				,[intUserId]			= @UserId
 				,[strSettleTicket]		= [strSettleTicket]

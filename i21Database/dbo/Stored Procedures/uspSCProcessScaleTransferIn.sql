@@ -108,7 +108,8 @@ BEGIN TRY
 			,intItemUOMId				= SC.intItemUOMIdTo
 			,intGrossNetUOMId			= CASE
 											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
-											WHEN ISNULL(lot.intWeightUOMId,0) > 0 THEN SC.intItemUOMIdFrom
+											WHEN ISNULL(lot.intWeightUOMId,0) > 0 AND lot.intWeightUOMId <> lot.intItemUOMId THEN 
+												SC.intItemUOMIdFrom
 											ELSE SC.intItemUOMIdTo
 										END
 			,intCostUOMId				= InnerICTran.intItemUOMId
@@ -131,12 +132,14 @@ BEGIN TRY
 			,dblFreightRate				= SC.dblFreightRate
 			,dblGross					=  CASE
 											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (SCMatch.dblGrossWeight - SCMatch.dblTareWeight)
-											WHEN ISNULL(lot.intWeightUOMId,0) > 0 THEN (SCMatch.dblGrossWeight - SCMatch.dblTareWeight)
+											WHEN ISNULL(lot.intWeightUOMId,0) > 0 AND lot.intWeightUOMId <> lot.intItemUOMId THEN 
+												(SCMatch.dblGrossWeight - SCMatch.dblTareWeight)
 											ELSE SCMatch.dblGrossUnits
 										END
 			,dblNet						= CASE
 											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SCMatch.intItemUOMIdTo, SCMatch.intItemUOMIdFrom, SCMatch.dblNetUnits)
-											WHEN ISNULL(lot.intWeightUOMId,0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SCMatch.intItemUOMIdTo, SCMatch.intItemUOMIdFrom, SCMatch.dblNetUnits)
+											WHEN ISNULL(lot.intWeightUOMId,0) > 0 AND lot.intWeightUOMId <> lot.intItemUOMId THEN 
+												dbo.fnCalculateQtyBetweenUOM(SCMatch.intItemUOMIdTo, SCMatch.intItemUOMIdFrom, SCMatch.dblNetUnits)
 											ELSE SCMatch.dblNetUnits 
 										END
 			,intSourceId                    = SC.intTicketId

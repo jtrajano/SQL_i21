@@ -331,11 +331,10 @@ UPDATE IC
 SET strSourceType = 'Transport'
   , strSourceNumber	= LH.strTransaction
 FROM tblARPostItemsForCosting IC
-INNER JOIN tblARPostInvoiceHeader I WITH (NOLOCK) ON IC.intTransactionId = I.intInvoiceId AND IC.strTransactionId = I.strInvoiceNumber
+INNER JOIN tblARInvoice I WITH (NOLOCK) ON IC.intTransactionId = I.intInvoiceId AND IC.strTransactionId = I.strInvoiceNumber
 INNER JOIN tblTRLoadDistributionHeader DH WITH (NOLOCK) ON I.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId 
 INNER JOIN tblTRLoadHeader LH WITH (NOLOCK) ON DH.intLoadHeaderId = LH.intLoadHeaderId
 WHERE IC.strType = 'Transport Delivery'
   AND IC.strSessionId = @strSessionId
-  AND I.strSessionId = @strSessionId
 
 RETURN 1

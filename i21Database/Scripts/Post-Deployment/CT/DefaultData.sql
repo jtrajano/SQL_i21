@@ -2,6 +2,10 @@
 SET ysnFreightTermCost = ISNULL(ysnFreightTermCost, 0)
 	, ysnAutoCalculateFreightTermCost = ISNULL(ysnAutoCalculateFreightTermCost, 0)
 
+UPDATE tblCTContractCondition
+SET ysnPrimeCustomer = 0
+WHERE ISNULL(ysnPrimeCustomer, 0) = 0
+
 --INSERT BASIS COST DEFAULTS IF NO ROWS
 IF NOT EXISTS(SELECT 1 FROM  tblCTBasisCost)
 BEGIN

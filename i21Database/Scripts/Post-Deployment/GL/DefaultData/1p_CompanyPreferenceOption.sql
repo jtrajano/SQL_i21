@@ -71,4 +71,15 @@ BEGIN
         UPDATE tblGLCompanyPreferenceOption set strOverrideREArray = @str 
 
 END
+
 GO
+IF EXISTS (SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnREOverrideLocation =1 OR ysnREOverrideLOB = 1 OR ysnREOverrideCompany =1 )
+    UPDATE tblGLCompanyPreferenceOption SET ysnREOverride =1
+
+GO
+
+IF EXISTS (SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnRevalOverrideLocation =1 OR ysnRevalOverrideLOB = 1 OR ysnRevalOverrideCompany =1 )
+    UPDATE tblGLCompanyPreferenceOption SET ysnRevalOverride =1
+
+GO
+

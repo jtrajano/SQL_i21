@@ -124,6 +124,7 @@
 	ysnCheckForMissingItemBookInAOPScreen BIT NOT NULL DEFAULT 0,
 	ysnEnableAdditionalFieldsOnSliceScreen BIT NOT NULL DEFAULT 0,
 	intQualityDecimals INT NOT NULL DEFAULT 2,
+    intCIFInstoreId INT NULL, 
 	ysnSpreadValueNotToBeAddedToFuturesInRollContract BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),

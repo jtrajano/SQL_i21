@@ -55,8 +55,7 @@ IF @strLocationNameLocal IS NOT NULL
 
 IF @strStatementFormat <> 'Balance Forward'
 BEGIN
-	EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom 					= @dtmAsOfDateFrom
-											, @dtmDateTo 					= @dtmAsOfDate
+	EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
 											, @intEntityUserId 				= @intEntityUserId
 											, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
 											, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal

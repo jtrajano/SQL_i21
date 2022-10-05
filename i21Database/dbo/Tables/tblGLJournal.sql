@@ -28,11 +28,26 @@
     [ysnRecurringTemplate] BIT NULL, 
 	[ysnExported] BIT NULL,
 	[intCurrencyExchangeRateId] INT NULL,
+    [intCompanyLocationId]  INT NULL,
     CONSTRAINT [PK_tblGLJournal] PRIMARY KEY CLUSTERED ([intJournalId] ASC),
 	CONSTRAINT [FK_tblGLJournal_tblSMCurrency] FOREIGN KEY([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblGLJournal_tblGLFiscalYearPeriod] FOREIGN KEY([intFiscalPeriodId], [intFiscalYearId])REFERENCES [dbo].[tblGLFiscalYearPeriod] ([intGLFiscalYearPeriodId], [intFiscalYearId]),
 	CONSTRAINT [FK_tblGLJournal_tblSMCurrencyExchangeRate] FOREIGN KEY([intCurrencyExchangeRateId])REFERENCES [dbo].[tblSMCurrencyExchangeRate] ([intCurrencyExchangeRateId])
 );
+
+GO
+
+CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
+ON [dbo].[tblGLJournal]
+FOR DELETE 
+AS
+BEGIN
+    DELETE R
+    FROM [DELETED] J JOIN tblSMRecurringTransaction R ON J.intJournalId = R.intTransactionId AND J.strJournalId = R.strTransactionNumber
+    WHERE J.ysnRecurringTemplate = 1
+END
+
+
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Journal Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLJournal', @level2type=N'COLUMN',@level2name=N'intJournalId' 
 GO

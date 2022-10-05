@@ -3,7 +3,7 @@
 CREATE TABLE [dbo].[tblCMBorrowingFacilityLimit](
 	intBorrowingFacilityLimitId        INT IDENTITY(1,1)   NOT NULL,
 	intBorrowingFacilityId              INT                 NOT NULL,
-    strBorrowingFacilityLimit           NVARCHAR(40)        NOT NULL,
+    strBorrowingFacilityLimit           NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
     dblLimit                            DECIMAL(18,6)       NOT NULL,
     intConcurrencyId                    INT                 NOT NULL,
  CONSTRAINT [PK_BorrowingFacilityLimitId] PRIMARY KEY CLUSTERED 

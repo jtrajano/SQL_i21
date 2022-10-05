@@ -267,6 +267,7 @@ WITH ForGLEntries_CTE (
 	,strTransactionForm
 	,strDescription
 	,dblForexRate
+	,strRateType
 	,intSourceEntityId
 	,intCommodityId
 )
@@ -289,6 +290,7 @@ AS
 			,t.strTransactionForm 
 			,t.strDescription
 			,t.dblForexRate
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,t.intSourceEntityId
 			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
@@ -298,6 +300,8 @@ AS
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			--AND t.intFobPointId IS NOT NULL 	
 			AND t.intInTransitSourceLocationId IS NOT NULL 
@@ -339,6 +343,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,strRateType				= ForGLEntries_CTE.strRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE  
@@ -413,6 +418,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,strRateType				= ForGLEntries_CTE.strRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
@@ -490,6 +496,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,strRateType				= ForGLEntries_CTE.strRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
@@ -563,6 +570,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 

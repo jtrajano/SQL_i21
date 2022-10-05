@@ -466,6 +466,7 @@ WHERE I.ysnPosted = 1
 	AND I.ysnProcessedToNSF = 0
 	AND (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND (I.strInvoiceNumber IN (SELECT strInvoiceOriginId from tblARInvoice)  OR   I.ysnForgiven = 0  )))	
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND (I.strTransactionType <> 'Credit Memo' OR (I.strTransactionType = 'Credit Memo' AND I.ysnRefundProcessed <> 1 ))
 
 --STATEMENT TRANSACTIONS
 INSERT INTO #STATEMENTREPORT WITH (TABLOCK) (

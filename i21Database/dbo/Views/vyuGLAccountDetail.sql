@@ -27,7 +27,9 @@ AS
 				sg.ysnGLRestricted, 
 				sg.ysnAPRestricted,
 				account.intUnnaturalAccountId,
-				unnaturalAccount.strAccountId COLLATE Latin1_General_CI_AS strUnnaturalAccountId
+				unnaturalAccount.strAccountId COLLATE Latin1_General_CI_AS strUnnaturalAccountId,
+				account.intLocationSegmentId,
+				locationSegment.strCode COLLATE Latin1_General_CI_AS strLocationSegmentId
 FROM            dbo.tblGLAccount account 
 				CROSS APPLY (
 					SELECT 
@@ -50,6 +52,7 @@ FROM            dbo.tblGLAccount account
 				LEFT JOIN dbo.tblGLCOACrossReference coa  on account.intAccountId =inti21Id
 				LEFT JOIN dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId
 				LEFT JOIN dbo.tblGLAccount unnaturalAccount on unnaturalAccount.intAccountId = account.intUnnaturalAccountId
+				LEFT JOIN dbo.tblGLAccountSegment locationSegment ON locationSegment.intAccountSegmentId = account.intLocationSegmentId
 GO
 
 

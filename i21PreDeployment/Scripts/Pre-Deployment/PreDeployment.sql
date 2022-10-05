@@ -71,6 +71,7 @@
 :r .\4_SM\12_MigrateRecentlyViewed.sql
 :r .\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql
 :r .\4_SM\2120_DropAxxisTempTables.sql
+:r .\4_SM\2010_TemporaryDecryptPasswords.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
@@ -80,6 +81,7 @@
 :r .\6_GL\5_1710.sql
 :r .\6_GL\6_1910.sql
 :r .\6_GL\7_2110.sql
+:r .\6_GL\8_2210.sql
 
 -- AR
 :r .\7_AR\00_DropTriggers.sql

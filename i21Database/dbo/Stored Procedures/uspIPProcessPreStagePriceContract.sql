@@ -25,6 +25,17 @@ BEGIN TRY
 	WHERE PS.strFeedStatus IS NULL
 		AND CH.intContractHeaderRefId IS NOT NULL
 
+	INSERT INTO @tblCTPriceContractPreStage
+	SELECT PS.intPriceContractPreStageId
+	FROM dbo.tblCTPriceContractPreStage PS
+	WHERE PS.strFeedStatus IS NULL
+		AND PS.strRowState = 'Delete'
+		AND PS.intPriceContractId IN (
+			SELECT PS1.intPriceContractId
+			FROM tblCTPriceContractPreStage PS1
+			WHERE PS1.strFeedStatus = 'Processed'
+			)
+
 	SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
 	FROM @tblCTPriceContractPreStage
 

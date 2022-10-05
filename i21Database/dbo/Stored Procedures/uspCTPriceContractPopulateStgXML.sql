@@ -49,20 +49,21 @@ BEGIN TRY
 
 	IF @strRowState = 'Delete'
 	BEGIN
-		INSERT INTO tblCTPriceContractStage (
-			intPriceContractId
-			,strRowState
-			,intEntityId
-			,strTransactionType
-			,intMultiCompanyId
-			)
-		SELECT intPriceContractId = @intPriceContractId
-			,strRowState = @strRowState
-			,intEntityId = @intToEntityId
-			,strTransactionType = @strToTransactionType
-			,intMultiCompanyId = @intToCompanyId
+		Goto SkipPopulateXML
+		--INSERT INTO tblCTPriceContractStage (
+		--	intPriceContractId
+		--	,strRowState
+		--	,intEntityId
+		--	,strTransactionType
+		--	,intMultiCompanyId
+		--	)
+		--SELECT intPriceContractId = @intPriceContractId
+		--	,strRowState = @strRowState
+		--	,intEntityId = @intToEntityId
+		--	,strTransactionType = @strToTransactionType
+		--	,intMultiCompanyId = @intToCompanyId
 
-		RETURN
+		--RETURN
 	END
 
 	SELECT @strPriceContractNo = strPriceContractNo
@@ -216,6 +217,7 @@ BEGIN TRY
 			,NULL
 			,NULL
 	END
+	SkipPopulateXML:
 
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)

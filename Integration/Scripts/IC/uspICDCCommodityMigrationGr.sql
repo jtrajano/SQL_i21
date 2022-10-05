@@ -71,21 +71,8 @@ where upper(rtrim(oc.gacom_un_desc)) <> 'LB'
 ----====================================STEP 4======================================
 --For grain only business, Setup a category for each commodity. Category is required for i21
 --for grain & ag business, setup a category for commodites which does not have an associated ag item
-insert into tblICCategory (
-	strCategoryCode
-	, strDescription
-	, strInventoryType
-	, intCostingMethod
-	, strInventoryTracking
-	, intConcurrencyId
-)
-select 
-	rtrim(gacom_com_cd)
-	, rtrim(gacom_desc)
-	, NULL -- 'Inventory' strInventoryType
-	, 1 CostingMethod
-	, 'Item Level' InventoryTracking
-	, 1 intConcurrencyId
+insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
+select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
 left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)  COLLATE SQL_Latin1_General_CP1_CS_AS
 where C.intCategoryId is null AND  NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
@@ -110,6 +97,7 @@ join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_C
 left join tblICItem I on I.strItemNo = rtrim(gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 where I.intItemId is null and  NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd))
 
+SET ANSI_WARNINGS ON
 
 ----=======================STEP 7===========================================
 ----insert uom for items from the commodity table
@@ -122,6 +110,7 @@ join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.strCommodityCode = I.strItemNo
 where NOT EXISTS (select intItemId from tblICItemUOM where intItemId = I.intItemId and intUnitMeasureId = CM.intUnitMeasureId))
 
+SET ANSI_WARNINGS OFF
 ----==========================STEP 8=======================================
 ----insert locations for items created from commodity. Origin does not have locations mapped to commodity. So all locations has to be added by default
 --**************************************************************************************
@@ -185,22 +174,23 @@ join gacdcmst od on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS 
 left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)+'GrainDiscount'  COLLATE SQL_Latin1_General_CP1_CS_AS
 where C.intCategoryId is null
 
-
+SET ANSI_WARNINGS ON
 ----====================================STEP 10======================================
 --convert discount codes as other charge items from discount code table. 
 
 insert into tblICItem 
 (strItemNo, strDescription, strShortName,strType, strInventoryTracking, strLotTracking, intCommodityId, intCategoryId, strStatus,
-intLifeTime, strCostType, strCostMethod,ysnAccrue)
+intLifeTime, strCostType, strCostMethod,ysnAccrue, ysnInventoryCost)
 select rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd), rtrim(gacdc_com_cd)+' '+rtrim(gacdc_desc), rtrim(oc.gacdc_cd) strShortName,'Other Charge' strInventoryType, 'Item Level' InventoryTracking, 'No' LotTracking,
 ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1 intLifeTime, 'Grain Discount' strCostType
-,'Per Unit' strCostMethod, 1 ysnAccrue
+,'Per Unit' strCostMethod, 1 ysnAccrue,0 ysnInventoryCost
 from gacdcmst oc 
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd)+'GrainDiscount' COLLATE SQL_Latin1_General_CP1_CS_AS
 left join tblICItem  I on I.strItemNo = rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd)  COLLATE SQL_Latin1_General_CP1_CS_AS
 where I.intItemId is null
 
+SET ANSI_WARNINGS ON
 ----=======================STEP 11===========================================
 ----insert uom for discount items from the commodity table
 INSERT INTO tblICItemUOM 
@@ -211,7 +201,7 @@ join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.intCommodityId = I.intCommodityId
 where I.strCostType = 'Grain Discount'
 and  NOT EXISTS (select intItemId from tblICItemUOM where intItemId = I.intItemId and intUnitMeasureId = CM.intUnitMeasureId)
-
+SET ANSI_WARNINGS OFF
 
 ---================================STEP 12=============================================
 --Add locations for discount items
@@ -253,6 +243,7 @@ join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_C
 LEFT JOIN tblICItem Item ON Item.strItemNo=LTRIM(RTRIM(gacom_com_cd))+' Freight' COLLATE  SQL_Latin1_General_CP1_CS_AS 
 		WHERE Item.strItemNo IS NULL
 		
+SET ANSI_WARNINGS ON
 ----====================================STEP 15===========================================
 ----insert uom for Freight items from the commodity table
 INSERT INTO tblICItemUOM 
@@ -262,7 +253,7 @@ from tblICCommodityUnitMeasure CM
 join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.intCommodityId = I.intCommodityId
 where I.strCostType = 'Freight'	and  NOT EXISTS (select intItemId from tblICItemUOM where intItemId = I.intItemId and intUnitMeasureId = CM.intUnitMeasureId)
-
+SET ANSI_WARNINGS OFF
 
 ---=====================================STEP 16=============================================
 --Add locations for discount items
@@ -302,9 +293,13 @@ WHERE NOT EXISTS (select * from tblICItemLocation where intItemId = I.intItemId 
 --join gacommst cmst on strDiscountId COLLATE SQL_Latin1_General_CP1_CS_AS = CAST(gacom_def_disc_schd_no AS VARCHAR(15)) COLLATE SQL_Latin1_General_CP1_CS_AS
 --) as St
 --where St.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = tblICCommodity.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
+SET ANSI_WARNINGS ON
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
 UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
+SET ANSI_WARNINGS OFF
 
 GO
+
+
 

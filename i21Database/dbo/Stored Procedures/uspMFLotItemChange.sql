@@ -70,6 +70,7 @@ BEGIN TRY
 		,@ysnLotExistsInDestinationLocation BIT
 		,@intNewParentLotId INT
 		,@strAdjustmentNo nvarchar(50)
+		,@strPrimaryStatus nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -317,6 +318,11 @@ BEGIN TRY
 		FROM tblICParentLot
 		WHERE intParentLotId = @intParentLotId
 
+		Select @strPrimaryStatus=strPrimaryStatus
+		from tblICLotStatus
+		Where intLotStatusId=@intLotStatusId
+
+
 		INSERT INTO tblIPLotItemChangeFeed (
 			strCompanyLocation
 			,intActionId
@@ -332,6 +338,7 @@ BEGIN TRY
 			,strReasonCode
 			,strNotes
 			,strAdjustmentNo
+			,strLotStatus
 			)
 		SELECT strCompanyLocation = @strLotOrigin
 			,intActionId = 1
@@ -347,6 +354,7 @@ BEGIN TRY
 			,strReasonCode = @strReasonCode
 			,strNotes = @strNotes
 			,strAdjustmentNo=@strAdjustmentNo
+			,strLotStatus=@strPrimaryStatus
 	END
 	ELSE
 	BEGIN

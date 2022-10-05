@@ -1,4 +1,4 @@
-CREATE TABLE [dbo].[tblTMCompanyConsumptionSite]
+﻿CREATE TABLE [dbo].[tblTMCompanyConsumptionSite]
 (
 	[intCompanyConsumptionSiteId] INT NOT NULL IDENTITY,
 	[intCompanyLocationId] INT NOT NULL,

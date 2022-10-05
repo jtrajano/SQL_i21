@@ -10,7 +10,7 @@ ysnError = case when strError is null then cast(0 as bit) else cast(1 as bit) en
 A.strError,
 BS.strBankDescription,
 ysnMatched = CASE WHEN ISNULL(BS.intImportStatus,0) = 1 THEN 1 ELSE 0 END,
-strTransactionMatched = ''
+strTransactionMatched = '' COLLATE Latin1_General_CI_AS
 from tblCMBankStatementImportLogDetail A join tblCMBankStatementImportLog B on B.intImportBankStatementLogId = A.intImportBankStatementLogId  
 left join  
 tblCMBankStatementImport BS on BS.intBankStatementImportId = A.intBankStatementImportId

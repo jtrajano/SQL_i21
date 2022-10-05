@@ -117,6 +117,40 @@ BEGIN
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+WHERE  IL.intImportLogId = @ImportLogId
+GROUP BY ILD.strTransactionNumber
+HAVING COUNT(1) > 1)
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'Invoice:' + RTRIM(LTRIM(ISNULL(ILD.strTransactionNumber,''))) + ' has duplicates! (' + ISNULL(CAST((SELECT COUNT(1) FROM tblARImportLogDetail SILD WHERE SILD.intImportLogId = @ImportLogId AND SILD.strTransactionNumber = ILD.strTransactionNumber) AS VARCHAR(5)), '0') + '). '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	WHERE  IL.intImportLogId = @ImportLogId 
+		AND ILD.strTransactionNumber IN (SELECT strTransactionNumber FROM tblARImportLogDetail  ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId
+			GROUP BY ILD.strTransactionNumber
+			HAVING COUNT(1) > 1)
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ILD.strTransactionNumber IN (SELECT strTransactionNumber FROM tblARImportLogDetail  ILD
+			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+			WHERE  IL.intImportLogId = @ImportLogId
+			GROUP BY ILD.strTransactionNumber
+			HAVING COUNT(1) > 1)) 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
 IF EXISTS (SELECT top 1 1 FROM tblSOSalesOrder SO
 			INNER JOIN tblARImportLogDetail ILD  ON SO.strSalesOrderOriginId = ILD.strTransactionNumber  AND LEN(RTRIM(LTRIM(ISNULL(SO.strSalesOrderOriginId,'')))) > 0
 			INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
@@ -191,41 +225,24 @@ BEGIN
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail ILD
-INNER JOIN (
-	SELECT strTransactionNumber
-	FROM tblARImportLogDetail
-	WHERE strTransactionNumber IS NOT NULL
-	  AND strTransactionNumber <> ''
-	  AND intImportLogId = @ImportLogId 
-	GROUP BY strTransactionNumber
-	HAVING COUNT(1) > 1
-) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
-WHERE ILD.intImportLogId = @ImportLogId)
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+WHERE  IL.intImportLogId = @ImportLogId AND ILD.strCustomerNumber <> '' AND C.ysnActive = 0)
 BEGIN 
 	UPDATE ILD
 	SET [ysnImported]		= 0
 	   ,[ysnSuccess]        = 0
-	   ,[strEventResult]	= 'Transaction Number provided has duplicates.'
+	   ,[strEventResult]	= 'The Customer Number provided is In-active. '
 	FROM tblARImportLogDetail ILD
-	INNER JOIN (
-	SELECT strTransactionNumber
-		FROM tblARImportLogDetail
-		WHERE strTransactionNumber IS NOT NULL
-		  AND strTransactionNumber <> ''
-		  AND intImportLogId = @ImportLogId 
-		GROUP BY strTransactionNumber
-		HAVING COUNT(1) > 1
-	) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
-	WHERE ILD.intImportLogId = @ImportLogId
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND C.ysnActive = 0
 
-	SET @FailedCount = (
-		SELECT COUNT(ysnSuccess) 
-		FROM tblARImportLogDetail ILD
-		WHERE ILD.intImportLogId = @ImportLogId 
-		  AND ysnSuccess = 0 
-		  AND strEventResult = 'Transaction Number provided has duplicates.'		  
-	)  
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess = 0 AND C.ysnActive = 0) 
 	
 	UPDATE tblARImportLog 
 	SET [intSuccessCount]	= intSuccessCount - @FailedCount
@@ -233,6 +250,89 @@ BEGIN
 	WHERE [intImportLogId]  = @ImportLogId
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail ILD
+INNER JOIN (
+    SELECT strTransactionNumber
+    FROM tblARImportLogDetail
+    WHERE strTransactionNumber IS NOT NULL
+      AND strTransactionNumber <> ''
+      AND intImportLogId = @ImportLogId 
+    GROUP BY strTransactionNumber
+    HAVING COUNT(1) > 1
+) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
+WHERE ILD.intImportLogId = @ImportLogId)
+BEGIN 
+    UPDATE ILD
+    SET [ysnImported]        = 0
+       ,[ysnSuccess]        = 0
+       ,[strEventResult]    = 'Transaction Number provided has duplicates.'
+    FROM tblARImportLogDetail ILD
+    INNER JOIN (
+    SELECT strTransactionNumber
+        FROM tblARImportLogDetail
+        WHERE strTransactionNumber IS NOT NULL
+          AND strTransactionNumber <> ''
+          AND intImportLogId = @ImportLogId 
+        GROUP BY strTransactionNumber
+        HAVING COUNT(1) > 1
+    ) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
+    WHERE ILD.intImportLogId = @ImportLogId
+
+    SET @FailedCount = (
+        SELECT COUNT(ysnSuccess) 
+        FROM tblARImportLogDetail ILD
+        WHERE ILD.intImportLogId = @ImportLogId 
+          AND ysnSuccess = 0 
+          AND strEventResult = 'Transaction Number provided has duplicates.'          
+    )  
+    
+    UPDATE tblARImportLog 
+    SET [intSuccessCount]    = intSuccessCount - @FailedCount
+      , [intFailedCount]    = intFailedCount + @FailedCount
+    WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail ILD
+INNER JOIN (
+    SELECT strTransactionNumber
+    FROM tblARImportLogDetail
+    WHERE strTransactionNumber IS NOT NULL
+      AND strTransactionNumber <> ''
+      AND intImportLogId = @ImportLogId 
+    GROUP BY strTransactionNumber
+    HAVING COUNT(1) > 1
+) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
+WHERE ILD.intImportLogId = @ImportLogId)
+BEGIN 
+    UPDATE ILD
+    SET [ysnImported]        = 0
+       ,[ysnSuccess]        = 0
+       ,[strEventResult]    = 'Transaction Number provided has duplicates.'
+    FROM tblARImportLogDetail ILD
+    INNER JOIN (
+    SELECT strTransactionNumber
+        FROM tblARImportLogDetail
+        WHERE strTransactionNumber IS NOT NULL
+          AND strTransactionNumber <> ''
+          AND intImportLogId = @ImportLogId 
+        GROUP BY strTransactionNumber
+        HAVING COUNT(1) > 1
+    ) ILD2 ON ILD.strTransactionNumber = ILD2.strTransactionNumber
+    WHERE ILD.intImportLogId = @ImportLogId
+
+    SET @FailedCount = (
+        SELECT COUNT(ysnSuccess) 
+        FROM tblARImportLogDetail ILD
+        WHERE ILD.intImportLogId = @ImportLogId 
+          AND ysnSuccess = 0 
+          AND strEventResult = 'Transaction Number provided has duplicates.'          
+    )  
+    
+    UPDATE tblARImportLog 
+    SET [intSuccessCount]    = intSuccessCount - @FailedCount
+      , [intFailedCount]    = intFailedCount + @FailedCount
+    WHERE [intImportLogId]  = @ImportLogId
+END
 
 IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
 INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
@@ -417,6 +517,31 @@ BEGIN
 	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
 	LEFT JOIN tblARSalesperson S on ILD.strSalespersonNumber=S.strSalespersonId
 	WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 AND @IsTank = 0 AND ISNULL(intSalespersonId, 0) = 0 AND ILD.strSalespersonNumber <> '') 
+	
+	UPDATE tblARImportLog 
+	SET [intSuccessCount]	= intSuccessCount - @FailedCount
+	  , [intFailedCount]	= intFailedCount + @FailedCount
+	WHERE [intImportLogId]  = @ImportLogId
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblARImportLogDetail  ILD
+INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+WHERE  IL.intImportLogId = @ImportLogId AND (C.strCreditCode = 'COD' OR C.dblCreditLimit IS NULL) AND ILD.strTransactionType <> 'Cash')
+BEGIN 
+	UPDATE ILD
+	SET [ysnImported]		= 0
+	   ,[ysnSuccess]        = 0
+	   ,[strEventResult]	= 'Customer Credit Limit is either blank or COD! Only Cash Sale transaction is allowed. '
+	FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId  AND (C.strCreditCode = 'COD' OR C.dblCreditLimit IS NULL) AND ILD.strTransactionType <> 'Cash'
+
+	SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
+	INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
+	LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber 
+	WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND (C.strCreditCode = 'COD' OR C.dblCreditLimit IS NULL) AND ILD.strTransactionType <> 'Cash')
 	
 	UPDATE tblARImportLog 
 	SET [intSuccessCount]	= intSuccessCount - @FailedCount
@@ -665,14 +790,12 @@ WHERE strTransactionType  IN ('Customer Prepayment') AND IL.intImportLogId = @Im
 		FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
-		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
 		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL)
 
 		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
-		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
-		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL))  
+		WHERE  IL.intImportLogId = @ImportLogId AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber iS NULL) AND ysnSuccess =0) 
 	
 		UPDATE tblARImportLog 
 		SET [intSuccessCount]	= intSuccessCount - @FailedCount
@@ -693,15 +816,12 @@ WHERE strTransactionType  IN ('Customer Prepayment') AND IL.intImportLogId = @Im
 		FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=ILD.intContractSeq
-		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
-		WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(CTH.intContractHeaderId, 0) <> 0 and ISNULL(CTH.intContractSeq,0) = ILD.intContractSeq
+		WHERE  IL.intImportLogId = @ImportLogId  and ISNULL(CTH.intContractSeq,0) = 0 AND ISNULL(CTH.intContractHeaderId, 0) = 0
 
 		SET @FailedCount = (SELECT COUNT(ysnSuccess) FROM tblARImportLogDetail ILD
 		INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
 		LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=ILD.intContractSeq
-		LEFT JOIN tblCTContractDetail CTD ON CTH.intContractDetailId=CTD.intContractDetailId  AND CTD.intContractStatusId IN (1,4)
-		WHERE  IL.intImportLogId = @ImportLogId AND ISNULL(CTH.intContractHeaderId, 0) <> 0 and ISNULL(CTH.intContractSeq,0) = ILD.intContractSeq)
-	
+		WHERE  IL.intImportLogId = @ImportLogId AND ysnSuccess =0 AND ISNULL(CTH.intContractHeaderId, 0) = 0 and ISNULL(CTH.intContractSeq,0) = 0) 
 	
 		UPDATE tblARImportLog 
 		SET [intSuccessCount]	= intSuccessCount - @FailedCount

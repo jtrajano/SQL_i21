@@ -138,6 +138,8 @@ AS
 			,CP.ysnCheckForMissingItemBookInAOPScreen
 			,CP.ysnEnableAdditionalFieldsOnSliceScreen
 			,CP.intQualityDecimals
+			,CP.intCIFInstoreId
+			,strCIFInstore = CIFI.strItemNo
 			,CP.ysnSpreadValueNotToBeAddedToFuturesInRollContract
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
@@ -153,3 +155,4 @@ AS
 	LEFT JOIN	tblICItem					FCI	ON	FCI.intItemId				=	CP.intFinanceCostId
 	LEFT JOIN	tblICItem					DFI	ON	DFI.intItemId				=	CP.intDefaultFreightItemId
 	LEFT JOIN	tblICItem					DII	ON	DII.intItemId				=	CP.intDefaultInsuranceItemId
+	LEFT JOIN	tblICItem					CIFI	ON	CIFI.intItemId			=	CP.intCIFInstoreId

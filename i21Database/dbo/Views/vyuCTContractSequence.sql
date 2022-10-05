@@ -60,6 +60,7 @@ AS
 			CD.dblRate,
 			CD.intInvoiceCurrencyId,
 			strInvoiceCurrency = ICU.strCurrency,
+			CD.intCurrencyExchangeRateId,
 			strVendorLotID = case when ltrim(rtrim(CD.strVendorLotID)) = '' then null else CD.strVendorLotID end,
 			strReference = case when ltrim(rtrim(CD.strReference)) = '' then null else CD.strReference end
 	FROM	tblCTContractDetail			CD	

@@ -2646,7 +2646,9 @@ BEGIN
 	FROM tblARPostInvoiceHeader ARPIH
 	INNER JOIN tblARPostInvoiceDetail ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
 	OUTER APPLY (
-		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPID.[intSalesAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
+		SELECT TOP 1 
+			 intAccountId		= ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPID.[intSalesAccountId], ISNULL(intSegmentCodeId, 0)), 0)
+			,intSegmentCodeId
 		FROM tblSMLineOfBusiness
 		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
 	) LOB
@@ -2654,6 +2656,54 @@ BEGIN
 	AND ISNULL(LOB.intAccountId, 0) = 0
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 	AND ARPID.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--Location Account Override For Freight and Surcharge (Item > Setup > Cost Tab)
+	SELECT
+		 [intInvoiceId]			= ARID.[intInvoiceId]
+		,[strInvoiceNumber]		= ARID.[strInvoiceNumber]		
+		,[strTransactionType]	= ARID.[strTransactionType]
+		,[intInvoiceDetailId]	= ARID.[intInvoiceDetailId] 
+		,[intItemId]			= ARID.[intItemId] 
+		,[strBatchId]			= ARID.[strBatchId]
+		,[strPostingError]		= 'Unable to find the account that matches the location segment of freight override. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](IA.intOtherChargeIncomeAccountId, OVERRIDEFREIGHTLOCATION.intSegmentCodeId, NULL, NULL) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail ARID
+	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId AND ARID.strSessionId = @strSessionId
+	INNER JOIN tblARPostInvoiceItemAccount IA ON ARID.[intItemId] = IA.[intItemId] AND ARID.[intCompanyLocationId] = IA.[intLocationId] AND IA.strSessionId = @strSessionId
+	OUTER APPLY (
+		SELECT TOP 1 
+			 intItemId			= ISNULL(ICFO.intItemId, 0)
+			,intAccountId		= ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](IA.intOtherChargeIncomeAccountId, ISNULL(SMCL.intProfitCenter, 0)), 0)
+			,intSegmentCodeId	= ISNULL(SMCL.intProfitCenter, 0)
+		FROM tblICFreightOverride ICFO
+		INNER JOIN (
+			SELECT ARPID2.intItemId
+			FROM tblARPostInvoiceDetail ARPID1
+			CROSS JOIN tblARPostInvoiceDetail ARPID2
+			WHERE ARPID1.intLoadDistributionDetailId = ARID.intLoadDistributionDetailId
+			AND ARPID2.intLoadDistributionDetailId = ARID.intLoadDistributionDetailId
+			AND ARPID1.intItemId = ARID.intItemId
+			AND ARPID1.strSessionId = @strSessionId
+			AND ARPID2.strSessionId = @strSessionId
+			AND ISNULL(ARPID1.intLoadDistributionDetailId, 0) <> 0
+		) ITEMFREIGHT 
+		ON ICFO.intItemId = ARID.intItemId
+		AND ICFO.intFreightOverrideItemId = ITEMFREIGHT.intItemId
+		INNER JOIN tblSMCompanyLocation SMCL ON ICFO.intCompanyLocationId = SMCL.intCompanyLocationId
+		GROUP BY ICFO.intItemId, ICFO.intFreightOverrideItemId, ICFO.intCompanyLocationId, SMCL.intProfitCenter
+	) OVERRIDEFREIGHTLOCATION
+	WHERE ARID.[strItemType] IN ('Non-Inventory', 'Service', 'Other Charge')
+	AND ISNULL(OVERRIDEFREIGHTLOCATION.intItemId, 0) <> 0
+	AND ISNULL(OVERRIDEFREIGHTLOCATION.intAccountId, 0) = 0
 
 	--VALIDATE INVENTORY ACCOUNTS
 	DECLARE @InvalidItemsForPosting TABLE (

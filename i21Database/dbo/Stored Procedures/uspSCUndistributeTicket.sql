@@ -952,6 +952,9 @@ BEGIN TRY
 
 						DELETE FROM tblSCTicketDistributionAllocation
 						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketDirectBasisContract
+						WHERE intTicketId = @intTicketId
 					END
 				END
 			END
@@ -1050,6 +1053,62 @@ BEGIN TRY
 					FROM vyuSCTicketScreenView SC
 					WHERE intTicketId = @intTicketId
 
+
+
+					--Re-add Schedule
+					declare @CurrentTicketContractUsedId int
+
+					select @CurrentTicketContractUsedId = min(intTicketContractUsed)
+					from tblSCTicketContractUsed
+					where intTicketId = @intTicketId
+			
+					
+
+					
+					--Remove loop schedule
+					while @CurrentTicketContractUsedId is not null			
+					begin 
+
+						select 
+							@intLoopContractDetailId = intContractDetailId
+							,@dblLoopScheduleQty = -dblScheduleQty
+						from tblSCTicketContractUsed
+						where intTicketContractUsed = @CurrentTicketContractUsedId
+
+						-- EXEC uspSCUpdateContractSchedule
+						-- 	@intContractDetailId = @intLoopContractDetailId
+						-- 	,@dblQuantity = @dblLoopScheduleQty
+						-- 	,@intUserId = @intUserId
+						-- 	,@intExternalId = @intTicketId
+						-- 	,@strScreenName = 'Scale'
+
+						EXEC uspCTUpdateSequenceBalance 
+							@intContractDetailId = @intLoopContractDetailId
+							,@dblQuantityToUpdate = @dblLoopScheduleQty
+							,@intUserId	= @intUserId
+							,@intExternalId	= @intTicketId
+							,@strScreenName	= 'Scale'
+							
+
+						select @CurrentTicketContractUsedId = min(intTicketContractUsed)
+						from tblSCTicketContractUsed
+						where intTicketId = @intTicketId 
+							and intTicketContractUsed > @CurrentTicketContractUsedId
+				
+					end
+
+					EXEC uspSCUpdateContractSchedule
+						@intContractDetailId = @intTicketContractDetailId
+						,@dblQuantity = @dblTicketScheduledQty
+						,@intUserId = @intUserId
+						,@intExternalId = @intTicketId
+						,@strScreenName = 'Scale'
+
+
+
+
+
+
 					IF(@strTicketType = 'Direct Out' and ((LOWER(ISNULL(@strGrade,'Origin')) <> 'destination') AND LOWER(ISNULL(@strWght,'Origin')) <> 'destination'))
 					BEGIN
 						--No updating of Schedule and balances since unposting of invoice updates the contract schedule and balances
@@ -1118,6 +1177,27 @@ BEGIN TRY
 					BEGIN
 						EXEC uspSCRemoveDirectPayables @intTicketId, @intUserId
 						DELETE FROM tblSCTicketDirectAddPayable
+						WHERE intTicketId = @intTicketId
+					END
+
+					---REMOVE DISTRIBUTION ALLOCATION DETAILS
+					BEGIN
+						DELETE FROM tblSCTicketLoadUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketContractUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketSpotUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketStorageUsed
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketDistributionAllocation
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketDirectBasisContract
 						WHERE intTicketId = @intTicketId
 					END
 				END 
@@ -1476,6 +1556,15 @@ BEGIN TRY
 						WHERE intTicketId = @intTicketId
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
+
+						--Check for Ticket In-Transit and make sure to change it back to spot Distribution
+						IF (SELECT TOP 1 ysnTicketInTransit FROM tblSCTicket WHERE intTicketId = @intTicketId) = 1
+						BEGIN
+							UPDATE tblSCTicket
+							SET  strDistributionOption = 'SPT'
+								,intStorageScheduleTypeId = -3
+							WHERE intTicketId = @intTicketId
+						END
 
 						---- Update contract schedule based on ticket schedule qty
 

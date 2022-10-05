@@ -308,6 +308,7 @@ BEGIN TRY
 					SELECT TOP 1 NULL
 					FROM @tblICItemPricing
 					WHERE strRowState = 'Updated'
+						AND dblOldStandardCost <> dblNewStandardCost
 					)
 			BEGIN
 				SELECT @intItemPricingId = NULL

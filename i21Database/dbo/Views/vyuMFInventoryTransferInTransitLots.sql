@@ -73,7 +73,7 @@ SELECT cl.intCompanyLocationId
 FROM dbo.tblICInventoryTransferDetail ITD
 JOIN dbo.tblICInventoryTransfer IT ON IT.intInventoryTransferId = ITD.intInventoryTransferId
 	AND ysnShipmentRequired = 1
-	AND IT.intStatusId = 2
+	--AND IT.intStatusId = 2
 JOIN dbo.tblICStatus S ON S.intStatusId = IT.intStatusId
 JOIN dbo.tblICLot l ON l.intLotId = ITD.intLotId
 JOIN dbo.tblICItem i ON i.intItemId = l.intItemId

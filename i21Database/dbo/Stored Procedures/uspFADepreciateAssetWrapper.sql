@@ -9,7 +9,9 @@ CREATE PROCEDURE [dbo].[uspFADepreciateAssetWrapper]
 AS    
 EXEC uspFADepreciateMultipleAsset  
 @Id,  
-1,  
+1,
+NULL,
+NULL,
 @ysnPost,  
 @ysnRecap,  
 @intEntityId,  
@@ -34,6 +36,8 @@ IF @ysnPost =1
 		EXEC uspFADepreciateMultipleAsset  
 		@Id1,  
 		2,  	
+		NULL,
+		NULL,
 		@ysnPost,  
 		@ysnRecap,  
 		@intEntityId,  

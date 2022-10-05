@@ -28,7 +28,7 @@
     when T.intActionId = 2 then 'Clear Check' 
     when T.intActionId = 3 then 'Bank Transfer'
     when T.intActionId = 4 then 'Bank Deposit' 
-    else ''END strActionType
+    else ''END COLLATE Latin1_General_CI_AS strActionType
 
  FROM tblCMResponsiblePartyTask T
  JOIN tblCMBankStatementImport S ON S.intBankStatementImportId = T.intBankStatementImportId

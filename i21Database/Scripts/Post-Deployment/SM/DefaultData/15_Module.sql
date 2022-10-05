@@ -1377,6 +1377,7 @@ GO
 		   [strPrefix]						=		N'ED',
 		   [ysnAddonComponent]              =       1
 
+
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'VOIPstudio')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
 	SELECT [intModuleId]					=		134,

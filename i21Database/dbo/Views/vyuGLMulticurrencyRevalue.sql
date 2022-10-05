@@ -22,9 +22,9 @@ SELECT
 	strType = CASE WHEN strTransactionType = 'Purchase' THEN 'Payables' ELSE CASE WHEN  strTransactionType = 'Sales' THEN 'Receivables' END END  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId
 FROM vyuCTMultiCurrencyRevalue
- UNION ALL
+UNION ALL
 SELECT 
 	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,strTransactionId  COLLATE Latin1_General_CI_AS strTransactionId,strTransactionDate dtmDate,
 	strTransactionDueDate dtmDueDate,strVendorName  COLLATE Latin1_General_CI_AS strVendorName,strCommodity  COLLATE Latin1_General_CI_AS strCommodity,

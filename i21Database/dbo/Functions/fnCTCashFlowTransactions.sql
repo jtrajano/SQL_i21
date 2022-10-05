@@ -39,7 +39,7 @@ BEGIN
 		,strTransactionType = ct.strContractType
 		,intCurrencyId  = cd.intInvoiceCurrencyId
 		,dtmDate = isnull(cd.dtmCashFlowDate,cd.dtmEndDate)
-		,dblAmount = (((cd.dblBalance - isnull(dblScheduleQty,0)) / cd.dblQuantity) * cd.dblTotalCost) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,0) then 1 else 100 end) end) 
+		,dblAmount = (((cd.dblBalance - isnull(dblScheduleQty,0)) / cd.dblQuantity) * cd.dblTotalCost) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,cd.intCurrencyId) then 1 else 100 end) end) 
 		,intBankAccountId = cd.intBankAccountId
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId
@@ -68,7 +68,7 @@ BEGIN
 		,strTransactionType = ct.strContractType
 		,intCurrencyId  = cd.intInvoiceCurrencyId
 		,dtmDate = isnull(cd.dtmCashFlowDate,cd.dtmEndDate)
-		,dblAmount = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,QU.intUnitMeasureId,QUB.intUnitMeasureId,((cd.dblBalance - isnull(cd.dblScheduleQty,0))) * ((sp.dblLastSettle + cd.dblBasis) / (case when cb.intMainCurrencyId is null then 1 else 100 end))) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,0) then 1 else 100 end) end) 
+		,dblAmount = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,QU.intUnitMeasureId,QUB.intUnitMeasureId,((cd.dblBalance - isnull(cd.dblScheduleQty,0))) * ((sp.dblLastSettle + cd.dblBasis) / (case when cb.intMainCurrencyId is null then 1 else 100 end))) * (case when isnull(cu.intCurrencyID,0) <> cd.intInvoiceCurrencyId and isnull(cm.intCurrencyID,0) <> cd.intInvoiceCurrencyId then cd.dblRate else (case when cd.intInvoiceCurrencyId = isnull(cm.intCurrencyID,cd.intCurrencyId) then 1 else 100 end) end) 
 		,intBankAccountId = cd.intBankAccountId
 		,intGLAccountId = null
 		,intCompanyLocationId = cd.intCompanyLocationId
@@ -149,16 +149,23 @@ BEGIN
 								)
 							) * CASE WHEN CD1.intCurrencyId != CD1.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							WHEN CC.strCostMethod = 'Percentage'
-							THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD1.dblQuantity)
-							*	(CASE WHEN ISNULL(CD1.dblCashPrice, 0.00) <> 0.00 THEN CD1.dblCashPrice
-																 WHEN CD1.intPricingTypeId = 2 THEN
-																	CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT,1) THEN ISNULL(CD1.dblBudgetPrice,0) ELSE ISNULL(FSPM.dblLastSettle,0) + CD1.dblBasis END
-															ELSE NULL END
-																		
-									/ (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
-							
-							* (CC.dblRate/100) * ISNULL(CC.dblFX, 1)
-						END
+							THEN 
+								
+									CASE WHEN CD1.intPricingTypeId <> 2 THEN
+										dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD1.dblQuantity) 
+										* (CD1.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+										* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+									ELSE
+										CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT, 1) THEN  
+											CD1.dblTotalBudget  * (CC.dblRate/100) * ISNULL(CC.dblFX, 1)
+										ELSE
+											dbo.fnCTConvertQuantityToTargetItemUOM(CD1.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD1.dblQuantity) 
+											* ((FSPM.dblLastSettle + CD1.dblBasis) / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))
+											* CC.dblRate/100 * ISNULL(CC.dblFX, 1)
+										END
+									END
+
+							END
 					)
 					/
 					(
@@ -178,7 +185,12 @@ BEGIN
 				LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = CD1.intPriceItemUOMId
 				LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CC.intCurrencyId
 				LEFT JOIN	tblSMCurrency		CY2	ON	CY2.intCurrencyID		=	CD1.intCurrencyId
-				LEFT JOIN  tblRKFuturesSettlementPrice FSP on FSP.intFutureMarketId = CD1.intFutureMarketId
+				LEFT JOIN  (
+					select intFutureMarketId, MAX(intFutureSettlementPriceId) intFutureSettlementPriceId, MAX( dtmPriceDate) dtmPriceDate
+					from tblRKFuturesSettlementPrice a
+					Group by intFutureMarketId, intCommodityMarketId
+	
+				) FSP on FSP.intFutureMarketId = CD1.intFutureMarketId
 				LEFT JOIN tblRKFutSettlementPriceMarketMap FSPM on FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId and CD1.intFutureMonthId = FSPM.intFutureMonthId
 			WHERE
 				CD1.intContractDetailId = cd.intContractDetailId

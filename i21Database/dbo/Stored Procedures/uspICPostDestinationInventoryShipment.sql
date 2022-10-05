@@ -21,6 +21,8 @@ SET ANSI_WARNINGS ON
 
 DECLARE @strShipmentNumber AS NVARCHAR(50) 
 DECLARE @strInvoiceNumber AS NVARCHAR(50) 
+DECLARE @strBillId AS NVARCHAR(50) 
+DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @intShipmentId INT
 DECLARE @intReturnValue AS INT 
@@ -40,9 +42,9 @@ DECLARE @strDescription AS NVARCHAR(100)
 -- Validate the items.
 BEGIN 
 	DECLARE @InvalidItemId AS INT
-			,@strItemNo AS NVARCHAR(50)
 			,@strItemType AS NVARCHAR(50) 
 
+	SET @strItemNo = NULL
 	SELECT	TOP 1 
 			@InvalidItemId = i.intItemId
 			,@strItemNo = i.strItemNo
@@ -125,9 +127,10 @@ BEGIN
 	END
 END
 
--- Validate if the shipment is already posted. 
+
 IF @ysnPost = 0 AND @ysnRecap = 0 
 BEGIN 
+	-- Validate if the shipment is already posted. 
 	SET @strInvoiceNumber = NULL 
 	SET @strShipmentNumber = NULL 
 	SELECT	TOP 1 
@@ -142,6 +145,34 @@ BEGIN
 	BEGIN
 		-- 'Unable to Unpost the Destination Qty because {Shipment Number} is already unposted.'
 		EXEC uspICRaiseError 80194, 'Unpost', @strShipmentNumber, 'unposted'; 
+		GOTO _ExitWithError
+	END
+
+	-- Validate if it has an existing voucher. 
+	SET @strItemNo = NULL 
+	SELECT TOP 1 			
+		@strShipmentNumber = s.strShipmentNumber
+		,@strBillId = b.strBillId
+		,@strItemNo = c.strItemNo
+	FROM	
+		tblICInventoryShipment s INNER JOIN tblICInventoryShipmentCharge sCharge
+			ON sCharge.intInventoryShipmentId = s.intInventoryShipmentId
+		INNER JOIN tblICItem c
+			ON c.intItemId = sCharge.intChargeId
+		INNER JOIN @DestinationItems d
+			ON s.intInventoryShipmentId = d.intInventoryShipmentId
+		INNER JOIN tblAPBillDetail bd 
+			ON bd.intInventoryShipmentChargeId = sCharge.intInventoryShipmentChargeId
+			AND bd.intItemId = sCharge.intChargeId
+		INNER JOIN tblAPBill b
+			ON b.intBillId = bd.intBillId
+		
+	IF	@strShipmentNumber IS NOT NULL 
+		AND @strBillId IS NOT NULL 
+		AND @strItemNo IS NOT NULL 
+	BEGIN
+		-- '{Other Charge} is currently in a Voucher. Please remove it in {Voucher No} first before you can unpost the Destination Weight/Grade.'
+		EXEC uspICRaiseError 80271, @strItemNo, @strBillId; 
 		GOTO _ExitWithError
 	END
 END
@@ -549,7 +580,7 @@ IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 BEGIN 
 	-- Update the date and transaction type. 
 	UPDATE @GLEntries
-	SET dtmDate = @dtmDate
+	SET dtmDate = dbo.fnRemoveTimeOnDate(@dtmDate) 
 		,strTransactionType = @strTransactionType
 		
 	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 

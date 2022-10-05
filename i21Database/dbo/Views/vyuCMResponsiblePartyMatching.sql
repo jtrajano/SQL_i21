@@ -12,7 +12,7 @@ WHEN A.intActionId = 4 THEN 'Create Bank Deposit'
 WHEN A.intActionId = 5 THEN 'Clear Bank Deposit'
 WHEN A.intActionId = 6 THEN 'Clear Bank Withdrawal'
 ELSE 'ignore'
-END,
+END COLLATE Latin1_General_CI_AS,
 C.strAccountId strPrimaryAccount,
 D.strBankAccountNo strPrimaryBank,
 E.strBankAccountNo strOffsetBank

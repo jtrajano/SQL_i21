@@ -79,6 +79,7 @@ SET	@dblMinimumUnitsOut = 0
 	        and CF.intCategoryId = @intCategoryid
             and CF.intEntityLocationId = @intShipToId	
 			and CF.intShipViaId = @intShipViaId
+		ORDER BY CF.dblFreightRate DESC
 
 		IF(@intFreightXRefId IS NULL)
 		BEGIN
@@ -101,10 +102,36 @@ SET	@dblMinimumUnitsOut = 0
 	           	and CF.intCategoryId = @intCategoryid
                 and CF.intEntityLocationId = @intShipToId
 				and CF.intShipViaId IS NULL
+			ORDER BY CF.dblFreightRate DESC
 		END
+
+		IF(@intFreightXRefId IS NULL AND @intShipViaId IS NULL)
+		BEGIN
+			-- FOR MULTIPLE SAME CUSTOMER LOC, ZIP CODE, CATEGORY
+			select top 1 @intFreightXRefId = CF.intFreightXRefId,
+				@ysnFreightOnly = CF.ysnFreightOnly,
+				@strFreightType = CF.strFreightType,
+	           	@intEntityShipViaId = CF.intShipViaId,
+	           	@intMiles = convert(int,CF.dblFreightMiles),
+				@dblFreightRateIn = ISNULL(CF.dblFreightRateIn, 0),
+	           	@dblFreightRateOut = ISNULL(CF.dblFreightRate, 0),
+	           	@ysnFreightInPrice = CF.ysnFreightInPrice, 
+				@dblMinimumUnitsIn =  ISNULL(CF.dblMinimumUnitsIn, 0),
+	           	@dblMinimumUnitsOut = ISNULL(CF.dblMinimumUnits, 0),
+				@intTariffType  = CF.intEntityTariffTypeId,
+				@dblSurchargeRateOut = ISNULL(CF.dblSurchargeOut, 0)
+	    	from tblARCustomerFreightXRef CF 
+			join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
+			where CF.intEntityCustomerId = @intEntityCustomerId 
+	      		and CF.strZipCode = @strZipCode
+	        	and CF.intCategoryId = @intCategoryid
+				and CF.intEntityLocationId = @intShipToId
+			ORDER BY CF.dblFreightRate DESC
+		END
+
     END
-	 ELSE
-	 BEGIN
+	ELSE
+	BEGIN
 	    select top 1 @ysnFreightOnly = convert(bit,0),
 	                @strFreightType = BPF.strFreightType,
 	           		@intEntityShipViaId = BPF.intShipViaId,
@@ -121,7 +148,7 @@ SET	@dblMinimumUnitsOut = 0
 	           			and BPF.intCategoryId = @intCategoryid
                         and BPF.intCompanyLocationId = @intShipToId
 
-     END
+    END
 
 
 
@@ -168,11 +195,35 @@ SET	@dblMinimumUnitsOut = 0
 
      IF isNull(@strFreightType,0) = 'Miles'
 	 BEGIN
-	
-
 		 IF @ysnToBulkPlant = 0
 		    BEGIN
-	 
+				
+				IF(@intShipViaId IS NULL)
+				BEGIN
+					-- FOR MULTIPLE SAME CUSTOMER LOC, ZIP CODE, CATEGORY
+					SELECT TOP 1 @intEntityShipViaId = TA.intEntityId,
+						@intMiles = convert(int,CF.dblFreightMiles),
+						@intTariffType  = CF.intEntityTariffTypeId
+					FROM tblARCustomerFreightXRef CF 
+					INNER JOIN tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
+					CROSS JOIN [tblEMEntityTariff] TA 
+	                LEFT JOIN [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
+	  	       		LEFT JOIN [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId
+					WHERE CF.intEntityCustomerId = @intEntityCustomerId 
+						and CF.strZipCode = @strZipCode
+						and CF.intCategoryId = @intCategoryid
+						and CF.intEntityLocationId = @intShipToId
+						AND CF.strFreightType = 'Miles'
+						AND TA.dtmEffectiveDate <= @dtmInvoiceDate
+						AND  (@intMiles  >= TM.intFromMiles 
+		       		        and @intMiles  <= TM.intToMiles)
+						AND CF.intEntityTariffTypeId = TA.intEntityTariffTypeId
+						AND CF.intCategoryId = TC.intCategoryId
+						AND  (CF.dblFreightMiles  >= TM.intFromMiles 
+		       		        and CF.dblFreightMiles  <= TM.intToMiles)
+					ORDER BY TM.dblInvoiceRatePerUnit DESC
+				END
+			
 	           select top 1 @dblInvoiceRatePerUnit = TM.dblInvoiceRatePerUnit from [tblEMEntityTariff] TA
 	                       join [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
 	  	       		      left join [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId

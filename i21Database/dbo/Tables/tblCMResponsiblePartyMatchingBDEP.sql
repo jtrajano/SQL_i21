@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP](
 	[intResponsiblePartyMatchingBDEPId] [int] IDENTITY(1,1) NOT NULL,
 	[intLocationSegmentId] [int] NULL,
 	[intAccountId] INT NULL,
-	[strContains] [nvarchar](100) NULL,
+	[strContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intResponsiblePartyMatchingId] [int] NOT NULL,
  CONSTRAINT [PK_tblCMResponsiblePartyMatchingBDEP] PRIMARY KEY CLUSTERED

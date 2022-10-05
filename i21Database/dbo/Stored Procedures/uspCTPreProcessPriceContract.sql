@@ -171,6 +171,8 @@ BEGIN
 			FROM    
 				@PriceContractXML pc    
 
+			update tblCTPriceFixation set intPreviousConcurrencyId = intConcurrencyId WHERE intPriceContractId = @intPriceContractId;
+
 			--------------------------    
 			-- Call all validations --    
 			--------------------------    
