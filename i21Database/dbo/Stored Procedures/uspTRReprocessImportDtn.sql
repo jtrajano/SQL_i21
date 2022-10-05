@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspTRProcessImportDtn]
-	@intImportLoadId INT,
+﻿CREATE PROCEDURE [dbo].[uspTRReprocessImportDtn]
+	@strIds NVARCHAR(MAX),
 	@intUserId INT
 AS
 	
@@ -15,6 +15,10 @@ BEGIN
 	DECLARE @ErrorSeverity INT
 	DECLARE @ErrorState INT
 
+	SELECT *
+	INTO #tmpIds
+	FROM dbo.fnSplitStringWithTrim(@strIds, ',')
+
 		
 	BEGIN TRY
 
@@ -26,8 +30,10 @@ BEGIN
 			DD.strInvoiceNo,
 			DD.dtmDueDate,
 			DD.dblInvoiceAmount,
-			DD.intEntityVendorId
-		FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
+			DD.intEntityVendorId,
+			DD.intImportDtnId
+		FROM tblTRImportDtnDetail DD
+		WHERE DD.intImportDtnDetailId IN (SELECT Item FROM #tmpIds)
 
 		DECLARE @intImportDtnDetailId INT = NULL,
 			@intInventoryReceiptId INT = NULL,
@@ -35,10 +41,11 @@ BEGIN
 			@strInvoiceNo NVARCHAR(100) = NULL,
 			@dtmDueDate DATETIME = NULL,
 			@dblInvoiceAmount DECIMAL(18,6) = NULL,
-			@intEntityVendorId INT = NULL
+			@intEntityVendorId INT = NULL,
+			@intImportLoadId INT = NULL
 	
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId
+		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 
@@ -53,7 +60,7 @@ BEGIN
 				, @intEntityVendorId = @intEntityVendorId
 				, @intUserId = @intUserId
 
-			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId
+			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId
 		END
 		CLOSE @CursorTran  
 		DEALLOCATE @CursorTran
