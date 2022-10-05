@@ -521,7 +521,7 @@ BEGIN TRY
 							SET @dblInreaseSchBy  = (@dblNetUnits - @dblTicketScheduledQuantity)
 
 							---Check if contract available qty can accomodate the increase in schedule
-							IF(@_dblCurrentAvailable <  @dblInreaseSchBy AND @_dblCurrentAvailable > 0)
+							IF(@_dblCurrentAvailable <  @dblInreaseSchBy AND @_dblCurrentAvailable >= 0)
 							BEGIN
 								SET @dblInreaseSchBy = @_dblCurrentAvailable
 							END
