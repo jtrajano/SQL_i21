@@ -389,8 +389,7 @@ BEGIN
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 	DECLARE @paidDateDefault DATETIME = GETDATE()
 	UPDATE C
-		SET C.dblAmountDue = CASE WHEN B.ysnOffset = 0 AND C.intTransactionType IN (2, 13) THEN ABS(B.dblAmountDue) + ABS(B.dblPayment) ELSE ABS(B.dblAmountDue) END,
-			C.ysnPaid = 0,
+		SET C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
 			C.dblPayment = (CASE WHEN C.intTransactionType IN (2, 13) AND C.dblPayment = 0 THEN C.dblTotal ELSE C.dblPayment END) - ABS(B.dblPayment + B.dblDiscount),
