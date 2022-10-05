@@ -320,6 +320,8 @@
     <Build Include="dbo\Stored Procedures\uspCFCalculateTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPRReconSummary.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMDeliveryHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMDeliveryHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
