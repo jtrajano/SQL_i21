@@ -221,7 +221,7 @@ BEGIN
 
 	--update the association to the payment
 	UPDATE payDetail
-		SET payDetail.intBillId = @prepayCreated, payDetail.dblAmountDue = payDetail.dblTotal
+		SET payDetail.intBillId = @prepayCreated
 	FROM tblAPPaymentDetail payDetail 
 	WHERE 
 		payDetail.intPaymentId = @currentPaymentId
