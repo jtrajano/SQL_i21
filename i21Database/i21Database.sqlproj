@@ -1223,6 +1223,9 @@
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
     <Build Include="dbo\Tables\tblFRSubLedger.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAccountSegmentPartition.sql" />
+    <Build Include="dbo\Tables\tblGLCOAImportStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportCOAFromCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
