@@ -207,7 +207,7 @@ BEGIN
 		WHEN @msgId = 80191 THEN '%s is using %s. Price down is only allowed for %s currency. Please change the currency or uncheck the Price Down.'
 		WHEN @msgId = 80192 THEN 'The %s is not posted. Destination Qty can only be updated on a posted shipment.'
 		WHEN @msgId = 80193 THEN 'Please unpost and delete %s first. Destination Qty in %s will not be updated if it has an invoice already.'
-		WHEN @msgId = 80194 THEN 'Unable to %s the Destination Qty because %s is already %s.'
+		WHEN @msgId = 80194 THEN 'Unable to Post the Destination Qty because %s is already posted.'
 		WHEN @msgId = 80195 THEN 'Unable to unpost %s because you need to unpost the Destination Qty first.'
 		WHEN @msgId = 80196 THEN '%s will have a negative cost. Negative cost is not allowed.'
 		WHEN @msgId = 80197 THEN 'Unable to post %s. Functional currency is not set for the company.'
@@ -285,6 +285,7 @@ BEGIN
 		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
 		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
 		WHEN @msgId = 80271 THEN '%s is currently in a Voucher. Please remove it in %s first before you can unpost the Destination Weight/Grade.'
+		WHEN @msgId = 80272 THEN 'Item Category %s does not exists on Storage %s.'
 	END 
 
 	RETURN @msg COLLATE Latin1_General_CI_AS
