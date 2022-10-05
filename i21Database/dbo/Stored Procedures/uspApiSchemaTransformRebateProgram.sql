@@ -360,13 +360,25 @@ LEFT JOIN tblICItem i ON i.strItemNo = rp.strItemNo
 	OR i.strDescription = rp.strItemName
 JOIN tblVRProgram p ON p.strVendorProgram = rp.strVendorProgram
 	AND p.guiApiUniqueId = @guiApiUniqueId
-LEFT JOIN tblICItemVendorXref xi ON xi.strVendorProduct = rp.strVendorItemNo
-	AND xi.intVendorSetupId = p.intVendorSetupId
+OUTER APPLY (
+	SELECT TOP 1 xxi.intItemId
+	FROM tblICItemVendorXref xxi
+	WHERE xxi.strVendorProduct = rp.strVendorItemNo
+	AND xxi.intVendorSetupId = p.intVendorSetupId
+) xi
 LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = rp.strRebateUOM
-LEFT JOIN tblVRUOMXref xu ON xu.strVendorUOM = rp.strVendorRebateUOM
-	AND xu.intVendorSetupId = p.intVendorSetupId
-LEFT JOIN tblICCategoryVendor xc ON xc.strVendorDepartment = rp.strVendorCategory
-	AND xc.intVendorSetupId = p.intVendorSetupId
+OUTER APPLY (
+	SELECT TOP 1 intUnitMeasureId 
+	FROM tblVRUOMXref 
+	WHERE strVendorUOM = rp.strVendorRebateUOM
+	AND intVendorSetupId = p.intVendorSetupId
+) xu
+OUTER APPLY (
+	SELECT TOP 1 intCategoryId
+	FROM tblICCategoryVendor
+	WHERE strVendorDepartment = rp.strVendorCategory
+	AND intVendorSetupId = p.intVendorSetupId
+) xc
 OUTER APPLY (
 	SELECT TOP 1 intUnitMeasureId
 	FROM tblICItemUOM
