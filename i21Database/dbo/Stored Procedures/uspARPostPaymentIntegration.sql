@@ -110,7 +110,15 @@ BEGIN
     FROM tblARPayment A
     INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
     INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
-    INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId				
+    INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
+
+    UPDATE C
+    SET C.ysnPaidCPP = 0
+    FROM tblARPayment A
+    INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
+    INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
+    INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
+    WHERE C.strTransactionType = 'Customer Prepayment'
 
     UPDATE tblARPaymentDetail
     SET dblAmountDue     = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) - ISNULL(A.dblWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblPayment)
@@ -211,9 +219,6 @@ BEGIN
 	 ) ACCPERIOD
   	WHERE P.[ysnPost] = @OneBit
 
-
-
-
 	-- Delete Invoice with Zero Payment
     DELETE PD
     FROM tblARPaymentDetail PD
@@ -299,7 +304,7 @@ BEGIN
       AND B.[ysnPost] = @OneBit	
 
 	--Paid if prepayment
-	UPDATE C
+	  UPDATE C
     SET C.ysnPaidCPP = 1
     FROM #ARPostPaymentDetail B
     INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId

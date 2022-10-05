@@ -6,7 +6,7 @@ SELECT RI.intRecipeItemId
 	,I.strItemNo
 	,I.strDescription
 	,I.strType
-	,'1' AS strIndicator
+	,'1' COLLATE Latin1_General_CI_AS AS strIndicator
 	,I.intItemId AS intBundleItemId
 	,I.strItemNo AS strComponent
 FROM tblMFRecipeItem RI
@@ -21,7 +21,7 @@ SELECT RI.intRecipeItemId
 	,'' AS strItemNo
 	,I.strDescription
 	,I.strType
-	,'2' AS strIndicator
+	,'2' COLLATE Latin1_General_CI_AS AS strIndicator
 	,IB.intBundleItemId
 	,I.strItemNo AS strComponent
 FROM tblMFRecipeItem RI

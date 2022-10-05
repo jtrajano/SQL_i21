@@ -19,6 +19,7 @@ SELECT
 	S.dtmObsoleteDate,
 	CompanyDetails.intCompanyDetailsId,
 	CompanyDetails.strCompanyName,
+	S.intCode,
 	S.intConcurrencyId
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN

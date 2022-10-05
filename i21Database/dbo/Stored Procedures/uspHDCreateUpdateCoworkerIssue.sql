@@ -13,51 +13,25 @@ SET ANSI_WARNINGS ON
 
 BEGIN
 
+			DECLARE @intTimeEntryPeriodDetail INT = @TimeEntryPeriodDetailId,
+					@strFiscalYear NVARCHAR(10) = NULL
+
+
 			DELETE FROM tblHDCoworkerIssue
 			WHERE intUserId = @UserId AND
 				  intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
 
 			--Start Sync Time Off Request
 
-		    DECLARE @intTimeEntryPeriodDetail INT = @TimeEntryPeriodDetailId,
-					@dtmDateFrom DATE = NULL,
-					@dtmDateTo DATE = NULL,
-					@strFiscalYear NVARCHAR(10) = NULL
+			EXEC [dbo].[uspHDSyncTimeOffRequest] @intTimeEntryPeriodDetail
 
-			SELECT TOP 1 @dtmDateFrom		 = a.dtmBillingPeriodStart 
-						,@dtmDateTo			 = a.dtmBillingPeriodEnd
-						,@strFiscalYear		 = b.strFiscalYear
+			--End Sync Time Off Request
+
+			SELECT TOP 1 @strFiscalYear		 = b.strFiscalYear
 			FROM tblHDTimeEntryPeriodDetail a
 					INNER JOIN tblHDTimeEntryPeriod b
 			ON a.intTimeEntryPeriodId = b.intTimeEntryPeriodId
 			WHERE intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail
-
-			DECLARE @intEntityEmployeeId INT
-
-			DECLARE EmployeeLoop CURSOR 
-			  LOCAL STATIC READ_ONLY FORWARD_ONLY
-			FOR 
-
-			SELECT intEntityEmployeeId 
-			FROM tblPRTimeOffRequest TimeOffRequest
-			WHERE TimeOffRequest.dtmDateFrom <= @dtmDateTo AND 
-				  TimeOffRequest.dtmDateFrom >= @dtmDateFrom
-			GROUP BY intEntityEmployeeId
-
-			OPEN EmployeeLoop
-			FETCH NEXT FROM EmployeeLoop INTO @intEntityEmployeeId
-			WHILE @@FETCH_STATUS = 0
-			BEGIN 
-  
-				EXEC [dbo].[uspHDGenerateTimeOffRequest] @intEntityEmployeeId
-
-				FETCH NEXT FROM EmployeeLoop INTO @intEntityEmployeeId
-			END
-			CLOSE EmployeeLoop
-			DEALLOCATE EmployeeLoop
-
-			--End Sync Time Off Request
-
 
 			INSERT INTO tblHDCoworkerIssue		
 				(	
@@ -71,7 +45,7 @@ BEGIN
 				)
 
 				SELECT   [intUserId]					= @UserId
-						,[intTimeEntryPeriodDetailId]	= @TimeEntryPeriodDetailId
+						,[intTimeEntryPeriodDetailId]	= @intTimeEntryPeriodDetail
 						,[intEntityId]					= CoworkerIssues.intEntityId
 						,[strAgentName]					= CoworkerIssues.strFullName
 						,[ysnActive]					= CoworkerIssues.ysnActive
@@ -104,7 +78,7 @@ BEGIN
 								   ,dtmBillingPeriodStart
 								   ,dtmBillingPeriodEnd
 							FROM tblHDTimeEntryPeriodDetail
-							WHERE intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+							WHERE intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail
 						) TimeEntryPeriodDetail
 						OUTER APPLY(
 								SELECT	 TOP 1 intEntityId			  = CoworkerGoals.intEntityId
@@ -113,7 +87,7 @@ BEGIN
 										INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
 								ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalId
 								WHERE CoworkerGoals.intEntityId = Agent.intEntityId AND
-									  CoworkerGoalDetail.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId AND
+									  CoworkerGoalDetail.intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail AND
 									  CoworkerGoals.strFiscalYear = @strFiscalYear
 						) CoworkerGoalTimeEntryperiodDetails
 						OUTER APPLY(
@@ -122,13 +96,13 @@ BEGIN
 										 ,dblTotalHours							= AgentTimeEntryPeriodDetailSummary.dblTotalHours
 							FROM tblHDAgentTimeEntryPeriodDetailSummary AgentTimeEntryPeriodDetailSummary
 							WHERE AgentTimeEntryPeriodDetailSummary.intEntityId = Agent.intEntityId AND
-								  AgentTimeEntryPeriodDetailSummary.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+								  AgentTimeEntryPeriodDetailSummary.intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail
 						) AgentTimeEntryPeriodDetailSummaries
 						OUTER APPLY(
 							SELECT TOP 1  TimeEntry.intTimeEntryId
 										 ,TimeEntry.intEntityId
 							FROM tblHDTimeEntry TimeEntry
-							WHERE TimeEntry.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId AND
+							WHERE TimeEntry.intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail AND
 								  TimeEntry.intEntityId = Agent.intEntityId
 						) TimeEntry
 						OUTER APPLY(
@@ -163,7 +137,7 @@ BEGIN
 				CoworkerIssues.strNoCoworkerGoal != '' OR
 				CoworkerIssues.strNoTimeEntryOrInsufficientHours != '' OR
 				CoworkerIssues.strUnapprovedTimeEntry != '' ) 
-				AND intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+				AND intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail
 			
 END
 GO

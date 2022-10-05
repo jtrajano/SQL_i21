@@ -253,10 +253,12 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoice_dtmDate]
 	ON [dbo].[tblARInvoice] ([dtmDate])
 GO
-CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intEntityId_strTransactionType] 
-    ON [dbo].[tblARInvoice] (intEntityId, strTransactionType)
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intTransactionId]
+	ON [dbo].[tblARInvoice] ([intTransactionId])
 GO
-
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intEntityId_strTransactionType] 
+	ON [dbo].[tblARInvoice] (intEntityId, strTransactionType)
+GO
 --TRIGGERS INSERT
 GO
 CREATE TRIGGER trgInvoiceNumber

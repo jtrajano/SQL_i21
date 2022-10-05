@@ -415,8 +415,8 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Schedule')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 40
-		   ,[strTransactionType] = N'Batch Load'
-		   ,[strPrefix]   = N'BLS-'
+		   	,[strTransactionType] 	= N'Batch Load'
+		   	,[strPrefix]   			= N'BLS-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1

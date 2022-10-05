@@ -1,10 +1,9 @@
 ﻿CREATE VIEW vyuLGPickOpenInventoryLots
 AS 
 SELECT *, 
-	dblAllocReserved = (dblAllocatedQty + dblReservedQty),
-	dblBalance = (dblOriginalQty - (dblAllocatedQty + dblReservedQty)), 
-	dblAvailToSell = CASE WHEN (((dblAllocatedQty + dblReservedQty) > 0) AND (dblUnPickedQty > (dblOriginalQty - (dblAllocatedQty + dblReservedQty)))) 
-						THEN (dblOriginalQty - (dblAllocatedQty + dblReservedQty)) ELSE dblUnPickedQty END,
+	dblBalance = (dblOriginalQty - dblAllocReserved), 
+	dblAvailToSell = CASE WHEN ((dblAllocReserved > 0) AND (dblUnPickedQty > (dblOriginalQty - dblAllocReserved))) 
+						THEN (dblOriginalQty - dblAllocReserved) ELSE dblUnPickedQty END,
 	dblNetWeight = dbo.fnMultiply(dbo.fnDivide(dblNetWeightFull, dblQty), dblUnPickedQty),
 	dblGrossWeight = dbo.fnMultiply(dbo.fnDivide(dblGrossWeightFull, dblQty), dblUnPickedQty),
 	dblTareWeight = dbo.fnMultiply(dbo.fnDivide(dblTareWeightFull, dblQty), dblUnPickedQty)
@@ -152,6 +151,7 @@ FROM (
 	   ,Lot.strWarrantNo
 	   ,Lot.intWarrantStatus
 	   ,WS.strWarrantStatus
+	   ,dblAllocReserved = (ISNULL(AL.dblAllocatedQty, 0) + ISNULL(SR.dblReservedQty, 0) ) - ISNULL(PL.dblLotPickedQty, 0)
 	FROM tblICLot Lot
 		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
@@ -217,6 +217,9 @@ FROM (
 					WHERE SR.intLotId = Lot.intLotId AND SR.ysnPosted <> 1) SR
 		OUTER APPLY (SELECT dblAllocatedQty = SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL 
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
+		OUTER APPLY (SELECT dblLotPickedQty = SUM(PLD.dblLotPickedQty) FROM tblLGPickLotDetail PLD
+					LEFT JOIN tblLGAllocationDetail AL ON AL.intAllocationDetailId = PLD.intAllocationDetailId
+					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) PL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
 		AND Receipt.ysnPosted = 1

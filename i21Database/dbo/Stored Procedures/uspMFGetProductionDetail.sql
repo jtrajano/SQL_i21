@@ -221,7 +221,7 @@ BEGIN
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
 		,L.dblLastCost 
-		,W.dblItemValue 
+		,ISNULL(W.dblItemValue, L.dblLastCost) AS dblItemValue
 		,W.strComment AS strRemarks
 	FROM dbo.tblMFWorkOrderProducedLot W
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId

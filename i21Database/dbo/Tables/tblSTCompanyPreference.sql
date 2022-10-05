@@ -7,7 +7,9 @@
 	[strStoreBasePath]			            NVARCHAR (250) NULL,    
     [intConcurrencyId]                      INT            CONSTRAINT [DF_tblSTCompanyPreference_intConcurrencyId] DEFAULT ((1)) NULL,
     [strPollingStatusReportTime]			NVARCHAR (30)  NULL,
-    [strPollingStatusReportEmailAddress]	NVARCHAR (500) NULL,
+    [strPollingStatusReportEmailAddress]	NVARCHAR (250) NULL,
+    [strPollingStatusReportEmailAddressSecond] NVARCHAR(250) NULL, 
+    [strPollingStatusReportEmailAddressThird] NVARCHAR(250) NULL, 
     CONSTRAINT [PK_tblSTCompanyPreference]  PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC) WITH (FILLFACTOR = 70)
 );
 

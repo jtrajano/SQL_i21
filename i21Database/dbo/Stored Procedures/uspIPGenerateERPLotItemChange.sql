@@ -76,7 +76,8 @@ BEGIN TRY
 		 +'<StorageUnit>'+ IsNULL(strStorageUnit,'')  +'</StorageUnit>'  
 		 +'<ReasonCode>'+ dbo.fnEscapeXML(IsNULL(strReasonCode,''))  +'</ReasonCode>'  
 		 +'<Notes>'+ dbo.fnEscapeXML(IsNULL(strNotes,''))  +'</Notes>'  
-		  +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  
+		 +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  
+		 +'<LotStatus>'+ IsNULL(strLotStatus,'')  +'</LotStatus>'  
 		FROM tblIPLotItemChangeFeed
 		WHERE intLotItemChangeFeedId = @intLotItemChangeFeedId
 

@@ -107,8 +107,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
 :r .\SM\2110_FixUserSecurityAdminData.sql
 :r .\SM\2210_RemoveOldPowerBIData.sql
---:r .\SM\2210_EncryptPasswords.sql
---:r .\SM\2210_EncryptPasswords2.sql
+:r .\SM\2210_EncryptPasswords.sql
+:r .\SM\2210_EncryptPasswords2.sql
 :r .\SM\2210_AttachmentsFileTypesFix.sql
 
 
@@ -251,6 +251,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
+:r .\GL\DefaultData\1x_RecurringTransaction.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 :r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
@@ -309,6 +310,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
+:r .\AR\DefaultData\38_UpdateDefaultData.sql
 :r .\AR\DefaultData\39_UpdateCreditCardCompanyPreference.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
@@ -366,6 +368,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\InsertClearingTransactionsToClearingTable.sql
 :r .\AP\PopulateVoucherPayToBankAccount.sql
 :r .\AP\PopulateVoucherAverageExchangeRate.sql
+:r .\AP\UpdateVendorStorePassword.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -398,6 +401,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\30_InventoryValuationAccountIds.sql
 :r .\IC\31_WarrantStatus.sql
 :r .\IC\32_Family_Class_Initial_Adjustment.sql
+:r .\IC\32_InventoryJournalLineDescription.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -606,6 +610,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\45_FileFieldMapping_Commander_PopCfg.sql
 :r .\ST\46_FileFieldMapping_Commander_Tank.sql
 :r .\ST\47_FileFieldMapping_Commander_Loyalty.sql
+:r .\ST\48_FileFieldMapping_Commander_TierProduct.sql
+:r .\ST\49_FileFieldMapping_Radiant_Department.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql

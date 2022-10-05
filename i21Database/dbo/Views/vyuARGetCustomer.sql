@@ -177,7 +177,6 @@ SELECT intEntityId							= C.intEntityId
 	, ysnExemptCreditCardFee				= C.ysnExemptCreditCardFee
 	, intDefaultPayToBankAccountId		    = C.intDefaultPayToBankAccountId
 	, strDefaultPayToBankAccountNo		    = C.strDefaultPayToBankAccountNo
-     , ysnLoadToLoad		                = C.ysnLoadToLoad
   , strDeliveryDocument					= C.strDeliveryDocument
 FROM tblARCustomer C
 INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId

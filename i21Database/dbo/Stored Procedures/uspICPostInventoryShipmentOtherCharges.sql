@@ -450,7 +450,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryShipmentItemId' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId
@@ -510,7 +510,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryShipmentItemId' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId
@@ -576,7 +576,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryShipmentItemId' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId
@@ -633,7 +633,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblForexRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = 'InventoryShipmentItemId' 
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId

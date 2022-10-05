@@ -40,7 +40,7 @@ FROM
   ON EScreen.intScreenId = EntityAPP.intScreenId 
 
  LEFT JOIN tblSMUserSecurityRequireApprovalFor APP  
-     ON EMP.intEntityId = APP.intEntityUserSecurityId  
+     ON EMP.intEntityId = APP.intEntityUserSecurityId  AND APP.intScreenId = (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strNamespace = 'Payroll.view.TimeOffRequest')
  LEFT JOIN tblSMScreen APPScreen  
      ON APP.intScreenId = APPScreen.intScreenId  
  

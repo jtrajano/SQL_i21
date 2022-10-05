@@ -66,6 +66,7 @@ BEGIN TRY
 			@strBrkgCommn				NVARCHAR(MAX),
 			@strApplicableLaw			NVARCHAR(MAX),
 			@strGeneralCondition		NVARCHAR(MAX),
+			@strPrimeCustomerCondition	NVARCHAR(MAX),
 			@ysnExternal				BIT,
 			@intStraussCompanyId INT,
 			@intMultiCompanyParentId INT = 0
@@ -290,10 +291,11 @@ BEGIN TRY
 
 	SELECT	@strContractConditions = STUFF(								
 			(
-					SELECT	CHAR(13)+CHAR(10) + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
+					SELECT	CHAR(13)+CHAR(10) + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription)
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
+						AND ISNULL(CD.ysnPrimeCustomer, 0) = 0
 					ORDER BY DM.strConditionName		
 					FOR XML PATH(''), TYPE				
 			   ).value('.','varchar(max)')
@@ -302,7 +304,24 @@ BEGIN TRY
 	FROM	tblCTContractHeader CH WITH (NOLOCK)						
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
-	SELECT	@strApplicableLaw = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
+	SELECT	@strPrimeCustomerCondition = STUFF(								
+			(
+					SELECT	CHAR(13) + CHAR(10) + DM.strConditionName + ' ' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription)
+					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
+					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
+					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
+						AND ISNULL(CD.ysnPrimeCustomer, 0) = 1
+					ORDER BY DM.strConditionName		
+					FOR XML PATH(''), TYPE				
+			   ).value('.','varchar(max)')
+			   ,1,2, ''						
+			)  				
+	FROM	tblCTContractHeader CH WITH (NOLOCK)						
+	WHERE	CH.intContractHeaderId = @intContractHeaderId
+
+	
+
+	SELECT	@strApplicableLaw = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',CD.strConditionDescription)
 	FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 	JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
@@ -311,10 +330,10 @@ BEGIN TRY
 	SELECT	@strGeneralCondition = STUFF(								
 			(
 					SELECT	--CHAR(13)+CHAR(10) + 
-							'  </br>' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,1,'Description',DM.strConditionDesc)
+							'  </br>' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,1,'Description',CD.strConditionDescription)
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
-					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) LIKE	'%GENERAL_CONDITION')
+					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(CD.strConditionDescription) LIKE	'%GENERAL_CONDITION')
 					ORDER BY DM.intConditionId		
 					FOR XML PATH(''), TYPE				
 			   ).value('.','varchar(max)')
@@ -808,6 +827,8 @@ BEGIN TRY
 		    ,strStraussShipment      = datename(m,SQ.dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end)   
 		    ,strStraussShipmentLabel      = (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end) 
 			,intContractTypeId						=	CH.intContractTypeId
+			,ysnPrimeCustomer = ISNULL(CH.ysnPrimeCustomer, 0)
+			,strPrimeCustomerCondition = CASE WHEN ISNULL(CH.ysnPrimeCustomer, 0) = 1 THEN @strPrimeCustomerCondition END
 
 	FROM	tblCTContractHeader				CH
 	JOIN	tblICCommodity					CM	WITH (NOLOCK) ON	CM.intCommodityId				=	CH.intCommodityId
@@ -819,6 +840,7 @@ BEGIN TRY
 												AND EV.strEntityType				=	'Vendor'					
 	LEFT JOIN	vyuCTEntity					EC	WITH (NOLOCK) ON	EC.intEntityId					=	CH.intCounterPartyId  
 												AND EC.strEntityType				=	'Customer'		
+	LEFT JOIN tblICCommodityAttribute	ICA ON ICA.intCommodityAttributeId = CH.intProductTypeId
 	LEFT JOIN 
 	(
 		SELECT c.intContractHeaderId,

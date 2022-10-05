@@ -1758,6 +1758,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -1952,6 +1953,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -1996,6 +1998,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
@@ -2165,6 +2168,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -2209,6 +2213,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
@@ -2582,53 +2587,6 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 	
-	-- Process the decimal discrepancy
-	BEGIN 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]	
-				,[dblDebitReport]	
-				,[dblCreditForeign]	
-				,[dblCreditReport]	
-				,[dblReportingRate]	
-				,[dblForeignRate]
-				,[strRateType]
-				,[intSourceEntityId]
-				,[intCommodityId]
-		)
-		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
-			@strReceiptNumber = @strTransactionId
-			,@strBatchId = @strBatchId
-			,@GLEntries = @GLEntries
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-	END	
-
 	-- Process the GL entries for Missing Stocks
 	BEGIN 
 		IF EXISTS (SELECT TOP 1 1 FROM @MissingLotsForPost)
@@ -2675,6 +2633,53 @@ BEGIN
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 		END
 	END 
+
+	-- Process the decimal discrepancy
+	BEGIN 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+		)
+		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+			@strReceiptNumber = @strTransactionId
+			,@strBatchId = @strBatchId
+			,@GLEntries = @GLEntries
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -2734,7 +2739,7 @@ BEGIN
 				,@intEntityUserSecurityId
 			;
 		END 
-		
+
 		-- Unpost the company owned stocks. 
 		-- This will also include the unposting of the missing lots. 
 		INSERT INTO @GLEntries (
@@ -2887,6 +2892,54 @@ BEGIN
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
+		---- Unpost the the decimal discrepancy
+		--BEGIN 
+		--	INSERT INTO @GLEntries (
+		--			[dtmDate] 
+		--			,[strBatchId]
+		--			,[intAccountId]
+		--			,[dblDebit] 
+		--			,[dblCredit]					
+		--			,[dblDebitUnit]
+		--			,[dblCreditUnit]
+		--			,[strDescription]
+		--			,[strCode]
+		--			,[strReference]
+		--			,[intCurrencyId]
+		--			,[dblExchangeRate]
+		--			,[dtmDateEntered]
+		--			,[dtmTransactionDate]
+		--			,[strJournalLineDescription]
+		--			,[intJournalLineNo]
+		--			,[ysnIsUnposted]
+		--			,[intUserId]
+		--			,[intEntityId]
+		--			,[strTransactionId]
+		--			,[intTransactionId]
+		--			,[strTransactionType]
+		--			,[strTransactionForm]
+		--			,[strModuleName]
+		--			,[intConcurrencyId]
+		--			,[dblDebitForeign]
+		--			,[dblDebitReport]	
+		--			,[dblCreditForeign]	
+		--			,[dblCreditReport]	
+		--			,[dblReportingRate]	
+		--			,[dblForeignRate]
+		--			,[strRateType]
+		--			,[intSourceEntityId]
+		--			,[intCommodityId]
+		--	)
+		--	EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+		--		@strReceiptNumber = @strTransactionId
+		--		,@strBatchId = @strBatchId
+		--		,@GLEntries = @GLEntries
+		--		,@intEntityUserSecurityId = @intEntityUserSecurityId
+		--		,@ysnPost = 0 
+
+		--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		--END	
+
 		-- Reduce the Gross weight for the lots when unposting the receipt. 
 		UPDATE dbo.tblICLot
 		SET		dblGrossWeight = Lot.dblGrossWeight - ItemLot.dblGrossWeight
@@ -2981,7 +3034,7 @@ BEGIN
 			WHERE
 				strTransactionId = @strTransactionId
 				AND ysnIsUnposted = 0 
-		END 
+		END 		
 	END 	
 END   
 
@@ -3246,6 +3299,7 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 OR EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
+		UPDATE @GLEntries SET dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
 

@@ -1358,7 +1358,7 @@ BEGIN
 		DECLARE @intPrcItemUOMId			INT
 		DECLARE @dblPrcPriceOut				NUMERIC(18,6)	
 		DECLARE @strPrcPricingOut			NVARCHAR(MAX)		
-		DECLARE @intPrcAvailableQuantity	INT				
+		DECLARE @intPrcAvailableQuantity	NUMERIC(18,6)				
 		DECLARE @dblPrcOriginalPrice		NUMERIC(18,6)	
 		DECLARE @intPrcContractHeaderId		INT				
 		DECLARE @intPrcContractDetailId		INT				
@@ -1801,7 +1801,7 @@ BEGIN
 
 					INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid Vehicle # '+ @strVehicleId +' , setup vehicle in Card Accounts to correct, or recalculate to remove this error and leave the vehicle as blank.')
 
-					SET @ysnInvalid = 1
+					--SET @ysnInvalid = 1
 				END
 			END
 		END
@@ -2483,52 +2483,52 @@ BEGIN
 		------------------------------------------------------------
 
 
-		--DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
-		--DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
-		--DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
-		--DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
-		--DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
-		--DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
-		--DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
-		--DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
-		--DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
-		--DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
-		--DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
-		--DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
+		DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
+		DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
+		DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
+		DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
+		DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
+		DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
+		DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
+		DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
+		DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
+		DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
+		DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
+		DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
 
-		--SELECT TOP 1
-		--  @dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
-		--, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
-		--, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
-		--, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
-		--, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
-		--, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
-		--, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
-		--, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
-		--, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
-		--, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
-		--, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
-		--, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
-		--FROM tblCFTransaction
-		--WHERE intTransactionId = @Pk 
+		SELECT TOP 1
+		 @dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
+		, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
+		, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
+		, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
+		, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
+		, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
+		, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
+		, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
+		, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
+		, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
+		, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
+		, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
+		FROM tblCFTransaction
+		WHERE intTransactionId = @Pk 
 
 		EXEC [uspCFTransactionAuditLog] 
 			@processName					= 'Import Transaction'
 			,@keyValue						= @Pk
 			,@entityId						= @intUserId
 			,@action						= ''
-			--,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
-			--,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
-			--,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
-			--,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
-			--,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
-			--,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
-			--,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
-			--,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
-			--,@strFromPriceMethod			= @strAuditPriceMethod			
-			--,@strFromPriceBasis				= @strAuditPriceBasis			
-			--,@strFromPriceProfileId			= @strAuditPriceProfileId		
-			--,@strFromPriceIndexId			= @strAuditPriceIndexId			
+			,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
+			,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
+			,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
+			,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
+			,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
+			,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
+			,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
+			,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
+			,@strFromPriceMethod			= @strAuditPriceMethod			
+			,@strFromPriceBasis				= @strAuditPriceBasis			
+			,@strFromPriceProfileId			= @strAuditPriceProfileId		
+			,@strFromPriceIndexId			= @strAuditPriceIndexId			
 
 	
 

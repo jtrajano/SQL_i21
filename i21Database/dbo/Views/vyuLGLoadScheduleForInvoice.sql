@@ -161,5 +161,32 @@ INNER JOIN (
 	) ICI ON LD.[intItemId] = ICI.[intItemId]
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-OUTER APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+OUTER APPLY (
+	SELECT intContractDetailId	= CTD.intContractDetailId
+		 , ysnSeqSubCurrency	= CY.ysnSubCurrency
+		 , dblPriceUOMQuantity	= ISNULL([dbo].[fnCalculateQtyBetweenUOM](CTD.intItemUOMId, ISNULL(ISNULL(CTD.intPriceItemUOMId, CTD.intAdjItemUOMId), CTD.intItemUOMId), 1.000000),ISNULL(CTD.dblQuantity, 0.000000))		 
+		 , intSeqCurrencyId		= CASE WHEN CTD.ysnUseFXPrice = 1 AND CTD.intCurrencyExchangeRateId IS NOT NULL AND CTD.dblRate IS NOT NULL AND CTD.intFXPriceUOMId IS NOT NULL  
+									   THEN ISNULL(CURTO.intFromCurrencyId, CURFROM.intToCurrencyId)
+									   ELSE CTD.intCurrencyId
+								  END
+		 , intSeqPriceUOMId		= CASE WHEN CTD.ysnUseFXPrice = 1 AND CTD.intCurrencyExchangeRateId IS NOT NULL AND CTD.dblRate IS NOT NULL AND CTD.intFXPriceUOMId IS NOT NULL  
+									   THEN CTD.intFXPriceUOMId
+									   ELSE ISNULL(CTD.intPriceItemUOMId, CTD.intAdjItemUOMId)
+								  END
+	FROM tblCTContractDetail CTD WITH (NOLOCK)
+	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CTD.intCurrencyId
+	OUTER APPLY (
+		SELECT TOP 1 intFromCurrencyId
+		FROM tblSMCurrencyExchangeRate 
+		WHERE intCurrencyExchangeRateId = CTD.intCurrencyExchangeRateId 
+			AND intToCurrencyId = CTD.intCurrencyId
+	) CURTO
+	OUTER APPLY (
+		SELECT TOP 1 intToCurrencyId
+		FROM tblSMCurrencyExchangeRate 
+		WHERE intCurrencyExchangeRateId = CTD.intCurrencyExchangeRateId 
+			AND intFromCurrencyId = CTD.intCurrencyId
+	) CURFROM
+	WHERE CTD.intContractDetailId = CD.intContractDetailId 
+) AD
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = AD.intSeqCurrencyId

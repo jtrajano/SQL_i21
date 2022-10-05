@@ -5,6 +5,7 @@
 	,@OnlyUseShipmentPrice 			AS BIT  = 0
 	,@IgnoreNoAvailableItemError 	AS BIT  = 0
 	,@dtmShipmentDate				AS DATETIME = NULL
+	,@intScaleTicketId				AS INT = NULL
 AS
 
 BEGIN
@@ -786,6 +787,161 @@ INNER JOIN tblSOSalesOrderDetailTax SOSODT ON EFI.[intTempDetailIdForTaxes] = SO
 ORDER BY EFI.[intSalesOrderDetailId] ASC
 	   , SOSODT.[intSalesOrderDetailTaxId] ASC
 
+--SCALE IN-TRANSIT TICKET
+DECLARE @intScaleItemInTransitId	INT = NULL
+	  , @intScaleItemUOMId			INT = NULL
+	  , @intScaleInventoryItemId	INT = NULL
+
+SELECT TOP 1 @intScaleTicketId			= CASE WHEN T.ysnTicketApplied = 1 AND T.ysnTicketInTransit = 1 THEN T.intTicketId ELSE NULL END
+		   , @intScaleItemInTransitId	= T.intItemId
+		   , @intScaleItemUOMId			= T.intItemUOMIdTo
+FROM tblSCTicket T 
+WHERE T.intTicketId = @intScaleTicketId 
+
+SELECT TOP 1 @intScaleInventoryItemId = intInventoryShipmentItemId
+FROM @EntriesForInvoice 
+WHERE intTicketId = @intScaleTicketId
+
+IF @intScaleTicketId IS NOT NULL AND @intScaleInventoryItemId IS NOT NULL
+	BEGIN
+		DELETE FROM @EntriesForInvoice WHERE intTicketId = @intScaleTicketId AND intItemId = @intScaleItemInTransitId
+
+		INSERT INTO @EntriesForInvoice (
+			  strSourceTransaction
+			, intSourceId
+			, strSourceId
+			, intEntityCustomerId
+			, intCompanyLocationId
+			, intCurrencyId
+			, intPeriodsToAccrue
+			, dtmDate
+			, dtmShipDate
+			, intEntitySalespersonId
+			, intFreightTermId
+			, strBOLNumber
+			, strComments
+			, intShipToLocationId
+			, ysnTemplate
+			, ysnForgiven
+			, ysnCalculated
+			, ysnSplitted
+			, intContractHeaderId
+			, intEntityId
+			, ysnResetDetails
+			, ysnRecap
+			, ysnPost
+			, intItemId
+			, intTicketId
+			, ysnInventory
+			, strDocumentNumber
+			, strItemDescription
+			, intOrderUOMId
+			, dblQtyOrdered
+			, intItemUOMId
+			, intPriceUOMId
+			, dblContractPriceUOMQty
+			, dblQtyShipped
+			, dblDiscount
+			, dblItemWeight
+			, intItemWeightUOMId
+			, dblPrice
+			, dblUnitPrice
+			, strPricing
+			, ysnRefreshPrice
+			, ysnRecomputeTax
+			, intInventoryShipmentItemId
+			, intInventoryShipmentChargeId
+			, strShipmentNumber
+			, strSalesOrderNumber
+			, intContractDetailId
+			, ysnClearDetailTaxes
+			, dblSubCurrencyRate
+			, intStorageLocationId
+			, intCompanyLocationSubLocationId
+			, intSubLocationId
+		)
+		SELECT strSourceTransaction
+			, intSourceId
+			, strSourceId
+			, intEntityCustomerId
+			, intCompanyLocationId			= E.intCompanyLocationId
+			, intCurrencyId					= E.intCurrencyId
+			, intPeriodsToAccrue
+			, dtmDate
+			, dtmShipDate
+			, intEntitySalespersonId
+			, intFreightTermId				= E.intFreightTermId
+			, strBOLNumber	
+			, strComments					= E.strComments
+			, intShipToLocationId
+			, ysnTemplate
+			, ysnForgiven
+			, ysnCalculated
+			, ysnSplitted
+			, intContractHeaderId			= INTRANSIT.intContractHeaderId
+			, intEntityId					= E.intEntityId
+			, ysnResetDetails
+			, ysnRecap
+			, ysnPost
+			, intItemId						= INTRANSIT.intItemId
+			, intTicketId					= INTRANSIT.intTicketId
+			, ysnInventory
+			, strDocumentNumber
+			, strItemDescription
+			, intOrderUOMId
+			, dblQtyOrdered
+			, intItemUOMId					= INTRANSIT.intItemUOMId
+			, intPriceUOMId
+			, dblContractPriceUOMQty
+			, dblQtyShipped					= INTRANSIT.dblQty
+			, dblDiscount
+			, dblItemWeight
+			, intItemWeightUOMId
+			, dblPrice						= INTRANSIT.dblPrice
+			, dblUnitPrice					= INTRANSIT.dblPrice
+			, strPricing
+			, ysnRefreshPrice
+			, ysnRecomputeTax
+			, intInventoryShipmentItemId	= @intScaleInventoryItemId
+			, intInventoryShipmentChargeId	= NULL
+			, strShipmentNumber
+			, strSalesOrderNumber
+			, intContractDetailId			= INTRANSIT.intContractDetailId
+			, ysnClearDetailTaxes
+			, dblSubCurrencyRate
+			, intStorageLocationId			= E.intStorageLocationId
+			, intCompanyLocationSubLocationId
+			, intSubLocationId				= E.intSubLocationId
+		FROM (
+			SELECT intContractHeaderId	= CD.intContractHeaderId
+				 , intContractDetailId	= CD.intContractDetailId
+				 , intItemUOMId			= CD.intItemUOMId
+				 , intTicketId			= TCU.intTicketId
+				 , dblQty				= TCU.dblScheduleQty
+				 , intItemId			= CD.intItemId
+				 , dblPrice				= CD.dblCashPrice
+			FROM tblSCTicketContractUsed TCU 
+			INNER JOIN tblCTContractDetail CD ON TCU.intContractDetailId = CD.intContractDetailId
+			WHERE TCU.intTicketId = @intScaleTicketId
+
+			UNION ALL
+
+			SELECT intContractHeaderId	= NULL
+				 , intContractDetailId	= NULL
+				 , intItemUOMId			= @intScaleItemUOMId
+				 , intTicketId			= TSU.intTicketId
+				 , dblQty				= TSU.dblQty
+				 , intItemId			= @intScaleItemInTransitId
+				 , dblPrice				= ISNULL(TSU.dblUnitFuture, 0) + ISNULL(TSU.dblUnitBasis, 0)
+			FROM tblSCTicketSpotUsed TSU
+			WHERE TSU.intTicketId = @intScaleTicketId
+		) INTRANSIT
+		CROSS APPLY (
+			SELECT TOP 1 *
+			FROM @EntriesForInvoice
+		) E		
+	END
+
 --GET DISTINCT SHIP TO FROM CONTRACT DETAIL
 IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomer WHERE ISNULL(strBatchInvoiceBy, '') <> '' AND intEntityId = @EntityCustomerId)
 	BEGIN
@@ -924,7 +1080,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
                         WHERE intContractDetailId = @intContractDetailToDeleteId
                     END
 
-				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
+				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(dblQuantity, 0) > 0) AND @dblQtyShipped > 0
 					BEGIN
 						DECLARE @intPriceFixationDetailId		INT = NULL
 							, @dblQuantity					NUMERIC(18, 6) = 0
@@ -935,7 +1091,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 								   , @dblFinalPrice					= dblFinalPrice
 						FROM #FIXATION 
 						WHERE intPriceFixationId = @intPriceFixationId
-						AND ISNULL(ysnProcessed, 0) = 0
+						  AND ISNULL(dblQuantity, 0) > 0
 						ORDER BY intPriceFixationDetailId
 						
 						IF @dblOriginalQtyShipped = @dblQtyShipped AND @dblQuantity > 0
@@ -1184,9 +1340,10 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 							END
 												
 						UPDATE #FIXATION 
-						SET ysnProcessed = CAST(1 AS BIT)
+						SET ysnProcessed 	= CAST(1 AS BIT)
+						  , dblQuantity		= dblQuantity - @dblOriginalQtyShipped
 						WHERE intPriceFixationId = @intPriceFixationId
-						AND intPriceFixationDetailId = @intPriceFixationDetailId
+						  AND intPriceFixationDetailId = @intPriceFixationDetailId
 					END
 				
 				DELETE FROM #CONTRACTSPRICING WHERE intInvoiceEntriesId = @intInvoiceEntriesId

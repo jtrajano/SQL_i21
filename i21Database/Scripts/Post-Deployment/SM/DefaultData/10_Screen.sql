@@ -707,8 +707,13 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.FreightTerm') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Freight Terms', N'Freight Terms', N'i21.view.FreightTerm', N'System Manager', N'tblSMFreightTerm', 1, N'System Manager')
+		VALUES (N'Freight Term', N'Freight Term', N'i21.view.FreightTerm', N'System Manager', N'tblSMFreightTerm', 1, N'System Manager')
 	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET strScreenId = 'Freight Term', strScreenName = 'Freight Term' WHERE strNamespace = 'i21.view.FreightTerm'
+	END
+	DELETE FROM tblSMScreen WHERE strNamespace = 'i21.view.FreightTerms'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.City') 
 	BEGIN
@@ -1299,7 +1304,9 @@ GO
 		WHERE strNamespace = 'Payroll.view.TimeApproval'
 	END
 
-
-
-
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.Allocation') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'', N'Allocation', N'Logistics.view.Allocation', N'Logistics', NULL, 1, N'Logistics')
+	END
 GO

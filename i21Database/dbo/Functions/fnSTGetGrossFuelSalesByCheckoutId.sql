@@ -10,12 +10,12 @@ AS BEGIN
 	DECLARE @ysnConsAddOutsideFuelDiscounts BIT
 	DECLARE @dblEditableAggregateMeterReadingsForDollars DECIMAL(18,6) = 0 
 	DECLARE @dblDepartmentTotalForFuel DECIMAL(18,6) = 0 
-	DECLARE @dblLoyaltyPpgDiscount DECIMAL(18,6) = 0
+	DECLARE @dblEditableOutsideFuelDiscount DECIMAL(18,6) = 0
 	DECLARE @dblGrossFuelSales DECIMAL(18,6) = 0
 
 	SELECT	@intStoreId = intStoreId,
 			@dblEditableAggregateMeterReadingsForDollars = ISNULL(dblEditableAggregateMeterReadingsForDollars, 0),
-			@dblLoyaltyPpgDiscount = ISNULL(dblLoyaltyPpgDiscount, 0)
+			@dblEditableOutsideFuelDiscount = ISNULL(dblEditableOutsideFuelDiscount, 0)
 	FROM	tblSTCheckoutHeader 
 	WHERE	intCheckoutId = @intCheckoutId
 
@@ -28,7 +28,7 @@ AS BEGIN
 		BEGIN
 		IF @ysnConsAddOutsideFuelDiscounts = 1
 			BEGIN
-				SET @dblGrossFuelSales = @dblEditableAggregateMeterReadingsForDollars + @dblLoyaltyPpgDiscount
+				SET @dblGrossFuelSales = @dblEditableAggregateMeterReadingsForDollars + @dblEditableOutsideFuelDiscount
 			END
 		ELSE
 			BEGIN
@@ -37,16 +37,11 @@ AS BEGIN
 		END
 	ELSE
 		BEGIN
-			SELECT			@dblDepartmentTotalForFuel =ISNULL(SUM(dblTotalSalesAmountComputed), 0)
-			FROM			tblSTCheckoutDepartmetTotals a
-			INNER JOIN		tblICItem b
-			ON				a.intItemId = b.intItemId
-			WHERE			a.intCheckoutId = @intCheckoutId AND
-							b.ysnFuelItem = 1
+			SET @dblDepartmentTotalForFuel = dbo.fnSTGetDepartmentTotalsForFuel(@intCheckoutId)
 
 			IF @ysnConsAddOutsideFuelDiscounts = 1
 				BEGIN
-					SET @dblGrossFuelSales = @dblDepartmentTotalForFuel + @dblLoyaltyPpgDiscount
+					SET @dblGrossFuelSales = @dblDepartmentTotalForFuel + @dblEditableOutsideFuelDiscount
 				END
 			ELSE
 				BEGIN

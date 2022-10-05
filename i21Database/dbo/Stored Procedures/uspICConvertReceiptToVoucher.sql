@@ -157,6 +157,10 @@ BEGIN
 			, [strComments]
 			, [strTaxPoint]
 			, [intTaxLocationId]
+			, [ysnOverrideTaxGroup]
+			/*Quality and Optionality Premium*/
+			,[dblQualityPremium] 
+ 			,[dblOptionalityPremium] 
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -235,6 +239,10 @@ BEGIN
 		, [strComments]
 		, [strTaxPoint]
 		, [intTaxLocationId]
+		, [ysnOverrideTaxGroup]
+		/*Quality and Optionality Premium*/
+		,GP.[dblQualityPremium] 
+ 		,GP.[dblOptionalityPremium] 
 	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1, @strType) GP
 
 	END 

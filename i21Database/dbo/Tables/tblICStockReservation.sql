@@ -34,6 +34,11 @@ CREATE NONCLUSTERED INDEX [IX_tblICStockReservation]
 	ON [dbo].[tblICStockReservation]([intItemId] ASC, [intLocationId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [intLotId] ASC, [intSubLocationId] ASC, [intStorageLocationId] ASC)
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICStockReservation_Post]
+	ON [dbo].[tblICStockReservation]([intTransactionId] ASC, [intInventoryTransactionType] ASC)
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

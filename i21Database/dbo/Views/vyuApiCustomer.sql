@@ -59,6 +59,7 @@ SELECT [EntityId]			= e.intEntityId
      , [SalespersonId]      = e.intSalespersonId
      , [ContactId]          = e.intEntityContactId
 	 , [WarehouseId]		= e.intWarehouseId
+	 , [DefaultLocationId]  = e.intDefaultLocationId
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId

@@ -221,7 +221,7 @@ BEGIN
 	LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
 
 	--MANUAL SPOT FROM TICKET
-	SELECT @dblQtyOverAged = @dblQtyOverAged - SUM(ID.dblQtyShipped)
+	SELECT @dblQtyOverAged = @dblQtyOverAged - ISNULL(SUM(ID.dblQtyShipped), 0)
 	FROM tblARInvoiceDetail ID
 	INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId AND ID.intItemId = IDD.intItemId
 	INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId

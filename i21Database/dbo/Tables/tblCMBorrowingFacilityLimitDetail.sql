@@ -3,7 +3,7 @@
 CREATE TABLE [dbo].[tblCMBorrowingFacilityLimitDetail](
 	intBorrowingFacilityLimitDetailId        INT IDENTITY(1,1)   NOT NULL,
 	intBorrowingFacilityLimitId              INT                 NOT NULL,
-    strLimitDescription				         NVARCHAR(100)       NOT NULL,
+    strLimitDescription				         NVARCHAR(100)       COLLATE Latin1_General_CI_AS NOT NULL,
     dblLimit	                             DECIMAL(18,6)       NOT NULL,
 	dblHaircut	                             DECIMAL(18,6)       NOT NULL,
 	ysnDefault								 BIT				 NOT NULL,

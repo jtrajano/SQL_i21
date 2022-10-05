@@ -185,9 +185,21 @@ BEGIN
 				intContractDetailId
 			)
 			SELECT
-				strAction						= CASE WHEN @intAction = 1 THEN 'Created Voucher' 
-														WHEN @intAction = 2 THEN 'Updated Voucher'
-														ELSE 'Deleted Voucher'
+				strAction						= CASE WHEN @intAction = 1 THEN 'Created ' + 
+																				CASE B.intTransactionType
+																					WHEN 1 THEN 'Voucher' 
+																					WHEN 2 THEN 'Vendor Prepayment'
+																				END
+														WHEN @intAction = 2 THEN 'Updated ' + 
+																				CASE B.intTransactionType
+																					WHEN 1 THEN 'Voucher' 
+																					WHEN 2 THEN 'Vendor Prepayment'
+																				END
+														ELSE 'Deleted ' + 
+																				CASE B.intTransactionType
+																					WHEN 1 THEN 'Voucher' 
+																					WHEN 2 THEN 'Vendor Prepayment'
+																				END
 													END, 
 				strTransactionType				= 'Purchasing',
 				strTradeFinanceTransaction		= B.strFinanceTradeNo,
@@ -205,7 +217,7 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= BD.dblTotal + BD.dblTax,
-				strBankApprovalStatus			= '',
+				strBankApprovalStatus			= ap.strApprovalStatus,
 				dtmAppliedToTransactionDate		= B.dtmBillDate,
 				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
@@ -217,6 +229,8 @@ BEGIN
 			INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
 			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
+			LEFT JOIN tblCTContractDetail ctd ON BD.intContractDetailId = ctd.intContractDetailId
+			LEFT JOIN tblCTApprovalStatusTF ap ON ap.intApprovalStatusId = ctd.intApprovalStatusId
 			WHERE NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
 				  OR NULLIF(B.intBankId, 0) IS NOT NULL
 				  OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
@@ -276,7 +290,7 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= PD.dblPayment,
-				strBankApprovalStatus			= '',
+				strBankApprovalStatus			= ap.strApprovalStatus,
 				dtmAppliedToTransactionDate		= P.dtmDatePaid,
 				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
@@ -290,6 +304,8 @@ BEGIN
 			INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
 			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
+			LEFT JOIN tblCTContractDetail ctd ON BD.intContractDetailId = ctd.intContractDetailId
+			LEFT JOIN tblCTApprovalStatusTF ap ON ap.intApprovalStatusId = ctd.intApprovalStatusId
 			WHERE (NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
 				  OR NULLIF(B.intBankId, 0) IS NOT NULL
 				  OR NULLIF(B.intBankAccountId, 0) IS NOT NULL

@@ -92,15 +92,15 @@ CREATE TABLE #STATEMENTREPORT (
 	, dblAmount					NUMERIC(18,6) NULL DEFAULT 0
 	, dblQuantity				NUMERIC(18,6) NULL DEFAULT 0
 	, dblInvoiceDetailTotal		NUMERIC(18,6) NULL DEFAULT 0
-	, strTransactionType		NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strInvoiceType			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strType					NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
-	, strPONumber				NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
-	, strItemNo					NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL
+	, strTransactionType		NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strInvoiceType			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strType					NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strPONumber				NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
+	, strItemNo					NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strItemDescription		NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
 	, strFullAddress			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	, strStatementFooterComment	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
-	, strPaymentMethod			NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL
+	, strPaymentMethod			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 )
 CREATE NONCLUSTERED INDEX [NC_Index_#STATEMENTTABLE_A1] ON [#STATEMENTREPORT]([intEntityCustomerId], [intInvoiceId], [strTransactionType], [strType])
 CREATE TABLE #CUSTOMERS (
@@ -466,6 +466,7 @@ WHERE I.ysnPosted = 1
 	AND I.ysnProcessedToNSF = 0
 	AND (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND (I.strInvoiceNumber IN (SELECT strInvoiceOriginId from tblARInvoice)  OR   I.ysnForgiven = 0  )))	
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND (I.strTransactionType <> 'Credit Memo' OR (I.strTransactionType = 'Credit Memo' AND I.ysnRefundProcessed <> 1 ))
 
 --STATEMENT TRANSACTIONS
 INSERT INTO #STATEMENTREPORT WITH (TABLOCK) (

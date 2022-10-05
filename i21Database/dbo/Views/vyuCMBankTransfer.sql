@@ -15,7 +15,7 @@ CASE WHEN intBankTransferTypeId = 1 THEN 'Bank Transfer'
  WHEN intBankTransferTypeId = 3 THEN 'Bank Forward'   
  WHEN intBankTransferTypeId = 4 THEN 'Swap Short'   
  WHEN intBankTransferTypeId = 5 THEN 'Swap Long' 
-END strBankTransferTypeId,
+END COLLATE Latin1_General_CI_AS strBankTransferTypeId,
 CASE WHEN A.intRateTypeIdAmountFrom = 99999 THEN 'Historic Rate' ELSE J.strCurrencyExchangeRateType  END strRateTypeAmountFrom,
 K.strCurrencyExchangeRateType strRateTypeAmountTo,
 L.strCurrencyExchangeRateType strRateTypeFeesFrom,
@@ -31,12 +31,12 @@ OUTER APPLY(
  )C  
   
 OUTER APPLY(  
- SELECT TOP 1 strBankName strBankFrom, strBankAccountNo strBankAccountNoFrom, strCurrency strCurrencyFrom, strGLAccountId strGLAccountIdFrom, strCbkNo strCbkNoFrom
+ SELECT TOP 1 ISNULL(strNickname, strBankName) strBankFrom, strBankAccountNo strBankAccountNoFrom, strCurrency strCurrencyFrom, strGLAccountId strGLAccountIdFrom, strCbkNo strCbkNoFrom
  FROM vyuCMBankAccount 
  WHERE intBankAccountId =  A.intBankAccountIdFrom  
 )D  
 OUTER APPLY(  
- SELECT TOP 1  strBankName strBankTo, strBankAccountNo strBankAccountNoTo, strCurrency strCurrencyTo, strGLAccountId strGLAccountIdTo, strCbkNo strCbkNoTo
+ SELECT TOP 1 ISNULL(strNickname, strBankName) strBankTo, strBankAccountNo strBankAccountNoTo, strCurrency strCurrencyTo, strGLAccountId strGLAccountIdTo, strCbkNo strCbkNoTo
  FROM vyuCMBankAccount WHERE intBankAccountId =  A.intBankAccountIdTo  
 )E  
 OUTER APPLY(  

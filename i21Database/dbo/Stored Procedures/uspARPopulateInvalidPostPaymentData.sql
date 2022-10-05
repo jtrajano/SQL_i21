@@ -38,27 +38,6 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
-	--Undeposited Funds Account	
-    SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'The Undeposited Funds account in Company Location - ' + P.[strLocationName]  + ' was not set.'
-    FROM
-        #ARPostPaymentHeader P
-    WHERE
-        P.[ysnPost] = @OneBit
-        AND ISNULL(P.[intUndepositedFundsId], 0) = 0
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
 	--AR Account
     SELECT
          [intTransactionId]         = P.[intTransactionId]
@@ -1557,6 +1536,34 @@ BEGIN
         AND P.[intTransactionId] <> ARPD.[intPaymentId]
     INNER JOIN (SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
         ON  ARPD.[intPaymentId] =  ARP.[intPaymentId] 
+    WHERE
+        P.[ysnPost] = @ZeroBit
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Invoice associated with Customer Prepayment	
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'There''s a prepayment(' + ARI.[strInvoiceNumber] + ') created from ' + P.[strTransactionId] + ' and applied to ' + ASSOCIATED_ARI.[strInvoiceNumber] + '.'
+	FROM
+		#ARPostPaymentHeader P
+    INNER JOIN (SELECT [intInvoiceId], [ysnPosted], [strComments], [intPaymentId], [strTransactionType], [strInvoiceNumber] FROM tblARInvoice) ARI
+        ON  (P.[strTransactionId] = ARI.[strComments] OR P.[intTransactionId] = ARI.[intPaymentId])
+        AND ARI.[strTransactionType] = 'Customer Prepayment'
+    INNER JOIN (SELECT [intInvoiceId], [intPrepaymentId], [ysnApplied] FROM tblARPrepaidAndCredit) ARPAC
+        ON  ARI.[intInvoiceId] =  ARPAC.[intPrepaymentId]
+        AND ARPAC.[ysnApplied] = 1
+	INNER JOIN (SELECT [intInvoiceId], [strInvoiceNumber] FROM tblARInvoice) ASSOCIATED_ARI
+        ON  ARPAC.[intInvoiceId] =  ASSOCIATED_ARI.[intInvoiceId] 
     WHERE
         P.[ysnPost] = @ZeroBit
 

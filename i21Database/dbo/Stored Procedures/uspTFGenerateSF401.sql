@@ -52,6 +52,7 @@ DECLARE @DateEnd DATETIME
 DECLARE @LicenseNumber NVARCHAR(50)
 DECLARE @MotorCarrier NVARCHAR(50)
 DECLARE @EIN NVARCHAR(50)
+DECLARE @CompanyName NVARCHAR(50)
 
 	SELECT TOP 1 @TA = intTaxAuthorityId,
 			@TACode = strTaxAuthorityCode,
@@ -72,12 +73,17 @@ DECLARE @EIN NVARCHAR(50)
 		WHERE strFormCode = @FormCodeParam 
 		AND strTemplateItemId = 'SF-401-MotorCarrier'
 
+	SELECT TOP 1 @CompanyName = strConfiguration 
+		FROM vyuTFGetReportingComponentConfiguration 
+		WHERE strFormCode = @FormCodeParam 
+		AND strTemplateItemId = 'SF-401-CompanyName'
+
 	SELECT TOP 1 @EIN = strEin FROM tblSMCompanySetup
 
 	INSERT INTO tblTFTransactionSummary (strSummaryGuid, intTaxAuthorityId, strFormCode, strScheduleCode, strSegment, dtmDateRun, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strTaxPayerName, 
 		 		strFEINSSN, strEmail, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strContactName, strLicenseNumber, strMotorCarrier)
 
-	SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, strCompanyName,
+	SELECT TOP 1 @Guid, @TA, @FormCodeParam, '', 'Header', @DatePeriod,@DateBegin,@DateEnd, CASE WHEN LTRIM(RTRIM(ISNULL(@CompanyName, ''))) = '' THEN strCompanyName ELSE @CompanyName END,
 					@EIN, strContactEmail, strTaxAddress, strCity, strState, strZipCode, strContactPhone, strContactName, @LicenseNumber, @MotorCarrier from tblTFCompanyPreference
 
 -- ======================== DETAIL ==============================

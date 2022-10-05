@@ -43,7 +43,7 @@ BEGIN TRY
 					,@intLocationId = @intLocationId
 					,@dtmScaleDate = @dtmScaleDate
 					,@intUserId = @intUserId
-					,@intBillId = @intCreatedTransactionId
+					,@intBillId = @intCreatedTransactionId OUTPUT
 		END
 		ELSE
 		BEGIN
@@ -52,7 +52,7 @@ BEGIN TRY
 					,@intEntityId = @intEntityId
 					,@intLocationId = @intLocationId
 					,@intUserId = @intUserId
-					,@intBillId = @intCreatedTransactionId
+					,@intInvoiceId = @intCreatedTransactionId OUTPUT
 		END
 
 	END

@@ -15,4 +15,16 @@ END
 
 PRINT('/*******************  END DELETING OLD POWER BI DATA *******************/')
 
+
+
+PRINT('/*******************  BEGIN UPDATING POWER BI EMPTY SCHEDULE *******************/')
+IF EXISTS(SELECT TOP 1 1 FROM tblSMPowerBIDataset WHERE ISNULL(dtmNextRefresh, '') = '')
+BEGIN
+	UPDATE tblSMPowerBIDataset SET strFrequency = 'None'
+	WHERE ISNULL(dtmNextRefresh, '') = ''
+END
+
+
+PRINT('/*******************  END UPDATING POWER BI EMPTY SCHEDULE *******************/')
+
 GO

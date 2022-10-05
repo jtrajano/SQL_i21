@@ -51,8 +51,8 @@ SELECT
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOD.strOrderNumber
 	,DOD.strOrderType
-	,strEntityName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (strOrderType IN ('Transfer')) THEN CL.strLocationName ELSE E.strName END
-	,strLocationName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (strOrderType IN ('Transfer')) THEN CLSL.strSubLocationName ELSE EL.strLocationName END
+	,strEntityName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (DOD.strOrderType IN ('Transfer')) THEN CL.strLocationName ELSE E.strName END
+	,strLocationName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (DOD.strOrderType IN ('Transfer')) THEN CLSL.strSubLocationName ELSE EL.strLocationName END
 	,DOD.strEntityContact
 	,DOD.strAddress
 	,DOD.strCity

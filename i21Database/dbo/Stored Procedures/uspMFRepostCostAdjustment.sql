@@ -480,7 +480,7 @@ BEGIN TRY
 	IF EXISTS (
 			SELECT TOP 1 1
 			FROM @adjustedEntries
-			)
+	)
 	BEGIN
 		-- Get a new batch id to repost the cost adjustment. 
 		EXEC uspSMGetStartingNumber 3
@@ -579,11 +579,11 @@ BEGIN TRY
 				END
 		END
 	END
-	ELSE 
-	BEGIN 			
-		-- 'Cost adjustment for {Batch Id} is missing. Stock rebuild will abort.'
-		EXEC uspICRaiseError 80265, @strCostAdjustmentBatchId; 	
-	END 
+	--ELSE 
+	--BEGIN 			
+	--	-- 'Cost adjustment for {Batch Id} is missing. Stock rebuild will abort.'
+	--	EXEC uspICRaiseError 80265, @strCostAdjustmentBatchId; 	
+	--END 
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

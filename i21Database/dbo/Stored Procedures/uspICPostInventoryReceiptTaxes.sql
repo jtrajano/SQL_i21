@@ -305,6 +305,7 @@ BEGIN
 		,intSourceEntityId
 		,intCommodityId
 		,intTaxTransactionTypeId 
+		,strJournalLineDescription
 	)
 	AS 
 	(
@@ -343,6 +344,7 @@ BEGIN
 				,intSourceEntityId					= Receipt.intEntityVendorId 
 				,intCommodityId						= item.intCommodityId
 				,intTaxTransactionTypeId			= 1
+				,strJournalLineDescription			= 'InventoryReceiptItemTaxId'
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -413,6 +415,7 @@ BEGIN
 				,intSourceEntityId					= Receipt.intEntityVendorId
 				,intCommodityId						= item.intCommodityId
 				,intTaxTransactionTypeId			= 2
+				,strJournalLineDescription			= 'InventoryReceiptChargeTaxId'
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -479,6 +482,7 @@ BEGIN
 				,intSourceEntityId					= ReceiptCharge.intEntityVendorId
 				,intCommodityId						= item.intCommodityId
 				,intTaxTransactionTypeId			= 3
+				,strJournalLineDescription			= 'InventoryReceiptChargeTaxId'
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -534,6 +538,7 @@ BEGIN
 				,intSourceEntityId					= Receipt.intEntityVendorId 
 				,intCommodityId						= NULL 
 				,intTaxTransactionTypeId			= 4
+				,strJournalLineDescription			= 'InventoryReceiptTaxId'
 		FROM	dbo.tblICInventoryReceipt Receipt 
 				INNER JOIN dbo.vyuICGetInventoryReceiptTax ReceiptTaxes
 					ON Receipt.intInventoryReceiptId = ReceiptTaxes.intInventoryReceiptId
@@ -565,7 +570,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = ForGLEntries_CTE.strJournalLineDescription
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -624,7 +629,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = ForGLEntries_CTE.strJournalLineDescription
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 

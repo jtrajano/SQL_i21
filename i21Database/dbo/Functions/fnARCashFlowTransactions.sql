@@ -19,9 +19,10 @@ AS
 BEGIN
 	DECLARE	 @intEntityUserId	INT = 1
 
-	SELECT @intEntityUserId = intEntityId
-	FROM tblEMEntityCredential
-	WHERE strUserName = 'irelyadmin'
+	SELECT TOP 1 @intEntityUserId = S.intEntityId
+	FROM tblSMUserSecurity S
+	WHERE S.ysnAdmin = 1 
+	ORDER BY S.intEntityId ASC
 
 	INSERT INTO @returntable
 	SELECT

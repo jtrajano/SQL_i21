@@ -207,7 +207,7 @@ BEGIN
 				@approvalFor, 
 				@amount, 
 				@currencyId, 
-				'Wating for Approval' 
+				'Waiting for Approval' 
 
 			SELECT @transactionId = SCOPE_IDENTITY() 
 
@@ -220,7 +220,7 @@ BEGIN
 				strApprovalFor = @approvalFor,
 				dblAmount = @amount,
 				intCurrencyId = @currencyId,
-				strApprovalStatus = 'Wating for Approval'
+				strApprovalStatus = 'Waiting for Approval'
 			WHERE intTransactionId = @transactionId
 
 			PRINT('updating transaction')

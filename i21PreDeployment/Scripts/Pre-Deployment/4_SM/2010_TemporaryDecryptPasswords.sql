@@ -23,13 +23,6 @@
 			WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
 		END
 
-		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLGRUSERPREFERENCE') 
-		BEGIN
-			UPDATE	tblGRUserPreference
-			SET		strProviderPassword = dbo.fnAESDecryptASym(strProviderPassword)
-			WHERE	dbo.fnAESDecryptASym(strProviderPassword) IS NOT NULL
-		END
-
 	END
 	PRINT N'END TEMPORARY DECRYPT PASSWORDS'
 GO

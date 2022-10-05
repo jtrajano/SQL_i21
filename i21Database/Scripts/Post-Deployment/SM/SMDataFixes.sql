@@ -332,3 +332,13 @@ GO
 	INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID
 	WHERE strMenuName IN ('Import', 'Import Vouchers from Origin') AND strModuleName = 'Accounts Payable'
 GO
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMTransaction WHERE LOWER(strApprovalStatus) = 'wating for submit')
+	BEGIN
+		UPDATE tblSMTransaction SET strApprovalStatus = 'Waiting for Submit' WHERE LOWER(strApprovalStatus) = 'wating for submit'
+	END
+GO
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMTransaction WHERE LOWER(strApprovalStatus) = 'wating for approval')
+	BEGIN
+		UPDATE tblSMTransaction SET strApprovalStatus = 'Waiting for Approval' WHERE LOWER(strApprovalStatus) = 'wating for approval'
+	END
+GO

@@ -58,7 +58,11 @@ BEGIN TRY
 			@ysnEnableLetterOfCredit    BIT = 0,
 			@intLCApplicantId			INT,
             @strLCType					NVARCHAR(100),
-            @strLCNumber				NVARCHAR(50)
+            @strLCNumber				NVARCHAR(50),
+			@ysnRoll				    BIT = 0,
+			@intCostTermId				INT,
+			@ysnCancelledLoad   		bit = 0;
+
 
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
@@ -276,7 +280,9 @@ BEGIN TRY
 				@dblBasis			=	NULL,
 				@dblOriginalBasis	=	NULL,
 				@ysnSlice			=	NULL,
-				@strLCNumber		=	null
+				@strLCNumber		=	null,
+				@ysnRoll			=	null,
+				@intCostTermId		=	NULL
 
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
 				@dblCashPrice		=	dblCashPrice,
@@ -297,7 +303,9 @@ BEGIN TRY
 				@intCurrencyId		=	intCurrencyId,
 				@strLCNumber		=	strLCNumber,
 				@intLCApplicantId	=	intLCApplicantId,
-				@strLCType			=	strLCType
+				@strLCType			=	strLCType,
+				@ysnRoll			=	ysnRoll,
+				@intCostTermId		=	intCostTermId
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
 		WHERE	intContractDetailId =	@intContractDetailId 
@@ -346,6 +354,101 @@ BEGIN TRY
 				, @strModuleName = 'Contract Management'
 
 			UPDATE @CDTableUpdate SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
+
+			-- RECALCULATE Cost Term
+			IF (ISNULL(@intCostTermId, 0) <> 0)
+			BEGIN
+				DECLARE @intCommodityId INT
+					, @intItemId INT
+					, @intFromPortId INT
+					, @intToPortId INT
+					, @intFromTermId INT
+					, @intToTermId INT
+					, @dtmDate DATETIME
+					, @intMarketZoneId INT
+					, @intInvoiceCurrencyId INT
+					, @intRateTypeId INT
+					, @intSequenceCurrencyId INT
+					, @intDefaultFreightId INT
+					, @intDefaultInsuranceId INT
+					, @intDetailPricingTypeId INT
+					, @ysnEnableBudgetForBasisPricing BIT
+					, @dblTotalBudget NUMERIC(18, 6)
+					, @dblTotalCost NUMERIC(18, 6)
+
+				DECLARE @CostItems AS TABLE (intCostItemId INT
+					, strCostItem NVARCHAR(100)
+					, intEntityId INT
+					, strEntityName NVARCHAR(100)
+					, intCurrencyId INT
+					, strCurrency NVARCHAR(100)
+					, intItemUOMId INT
+					, strUnitMeasure NVARCHAR(100)
+					, strCostMethod NVARCHAR(50)
+					, dblRate NUMERIC(18, 6)
+					, dblAmount NUMERIC(18, 6)
+					, dblFX NUMERIC(18, 6))
+				
+				SELECT @intCommodityId = ch.intCommodityId
+					, @intItemId = cd.intItemId
+					, @intFromPortId = cd.intLoadingPortId
+					, @intToPortId = cd.intDestinationPortId
+					, @intFromTermId = ch.intFreightTermId
+					, @intToTermId = cd.intCostTermId
+					, @dtmDate = ch.dtmContractDate
+					, @intMarketZoneId = cd.intMarketZoneId
+					, @intInvoiceCurrencyId = cd.intInvoiceCurrencyId
+					, @intRateTypeId = cd.intRateTypeId
+					, @intSequenceCurrencyId = cd.intCurrencyId
+					, @dblTotalBudget = dblTotalBudget
+					, @dblTotalCost = dblTotalCost
+				FROM tblCTContractDetail cd
+				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+
+				SELECT @intDefaultFreightId = intDefaultFreightItemId
+					, @intDefaultInsuranceId = intDefaultInsuranceItemId
+					, @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing
+				FROM tblCTCompanyPreference
+
+				INSERT INTO @CostItems
+				EXEC uspCTGetFreightTermCost
+					@intContractTypeId = @intContractTypeId
+					, @intCommodityId = @intCommodityId
+					, @intItemId = @intItemId
+					, @intFromPortId = @intFromPortId
+					, @intToPortId = @intToPortId
+					, @intFromTermId = @intFromTermId
+					, @intToTermId = @intToTermId
+					, @dtmDate = @dtmDate
+					, @intMarketZoneId = @intMarketZoneId
+					, @intInvoiceCurrencyId = @intInvoiceCurrencyId
+					, @intRateTypeId = @intRateTypeId
+					, @ysnWarningMessage = 0
+					, @intSequenceCurrencyId = @intSequenceCurrencyId
+
+				IF EXISTS (SELECT TOP 1 1 FROM @CostItems)
+				BEGIN
+					UPDATE tblCTContractCost
+					SET intItemUOMId = tblUpdate.intItemUOMId
+						, dblFX = tblUpdate.dblFX
+						, dblRate = tblUpdate.dblRate						
+					FROM (
+						SELECT cc.intContractCostId
+							, ci.intItemUOMId
+							, ci.dblFX
+							, dblRate = CASE WHEN cc.intItemId = @intDefaultInsuranceId THEN 
+												CASE WHEN @intDetailPricingTypeId = 2 AND @ysnEnableBudgetForBasisPricing = 1 THEN @dblTotalBudget * ci.dblAmount
+													ELSE @dblTotalCost * ci.dblAmount END
+											ELSE ci.dblRate END
+							, dblRemainingPercent = 100
+							, dtmAccrualDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+						FROM tblCTContractCost cc
+						JOIN @CostItems ci ON ci.intCostItemId = cc.intItemId
+						WHERE intContractDetailId = @intContractDetailId
+					) tblUpdate WHERE tblUpdate.intContractCostId = tblCTContractCost.intContractCostId
+
+				END
+			END
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
@@ -395,9 +498,12 @@ BEGIN TRY
 		BEGIN
 			UPDATE @CDTableUpdate SET dblOriginalBasis = @dblBasis WHERE intContractDetailId = @intContractDetailId;
 
-			--DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
-			--EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
-			--ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			IF ISNULL(@ysnRoll,0) = 0
+			BEGIN
+				DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+				EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
+				ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			END	
 		END
 
 		IF @intPricingTypeId IN (1,2,8)
@@ -519,8 +625,20 @@ BEGIN TRY
 			WHERE	ysnBasisContract = 1
 		END;
 
+		select @ysnCancelledLoad = 0
 		IF @intContractStatusId IN (3,6)
 		BEGIN
+			if exists (
+			SELECT	top 1 1
+			FROM	tblLGLoad			LO
+			JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId			=	LO.intLoadId and ISNULL(LD.intSContractDetailId,LD.intPContractDetailId) = @intContractDetailId
+			WHERE	intTicketId IS NULL 
+			AND		LO.intShipmentStatus IN (1, 7)
+			AND		LO.intShipmentType <> 2)
+			begin
+				select @ysnCancelledLoad = 1;
+			end
+
 			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
 		END
 
@@ -602,7 +720,8 @@ BEGIN TRY
 	EXEC	uspCTCreateDetailHistory		@intContractHeaderId 	= @intContractHeaderId,
 											@strSource 				= 'Contract',
 											@strProcess 			= 'Save Contract',
-											@intUserId				= @userId	
+											@intUserId				= @userId,
+											@ysnCancelledLoad		= @ysnCancelledLoad
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
 
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true
