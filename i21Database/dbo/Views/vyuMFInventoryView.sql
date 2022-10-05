@@ -92,14 +92,14 @@ SELECT l.intLotId
 		WHEN l.intWeightUOMId IS NULL
 			THEN l.dblQty
 		ELSE l.dblWeight
-		END - ISNULL(S.dblWeight, 0) dblAvailableQty
+		END - ISNULL(S.dblWeight, 0)-IsNULL(LI.dblReservedQtyInTBS,0) dblAvailableQty
 	,Convert(DECIMAL(18, 4), (
 			(
 				CASE 
 					WHEN l.intWeightUOMId IS NULL
 						THEN l.dblQty
 					ELSE l.dblWeight
-					END - ISNULL(S.dblWeight, 0)
+					END - ISNULL(S.dblWeight, 0)-IsNULL(LI.dblReservedQtyInTBS,0)
 				) / CASE 
 				WHEN ISNULL(l.dblWeightPerQty, 0) = 0
 					THEN 1
@@ -156,6 +156,7 @@ SELECT l.intLotId
 	,CD.strERPBatchNumber
 	,i.strExternalGroup
 	,PT.strPricingType
+	,IsNULL(LI.dblReservedQtyInTBS,0) AS dblReservedQtyInTBS
 FROM dbo.tblICLot l
 JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 JOIN dbo.tblICCategory ic ON ic.intCategoryId = i.intCategoryId
