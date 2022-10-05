@@ -812,6 +812,64 @@ END
 GO
 
 GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Late Shipment' AND [strType] = N'Contract')
+BEGIN
+	DECLARE @intMaxSortOrder INT
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Late Shipment',
+			[strType]        	=        N'Contract',
+			[strMessage]		=        N'{0} {1} {2} Late Shipment.',
+			[strQuery]  		=        N'
+											select
+												distinct cd.intContractHeaderId
+											from
+												tblCTContractDetail cd
+												JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
+												cross join tblCTAction ac
+												cross join tblCTEvent ev
+												join tblCTEventRecipient er on er.intEventId = ev.intEventId
+											where
+												cd.intContractStatusId in (1,4)
+												and ac.strActionName = ''Late Shipment''
+												and ev.intActionId = ac.intActionId
+												and getdate() between
+													(case when ev.strReminderCondition = ''day(s) before due date'' then dateadd(day,ev.intDaysToRemind * -1,cd.dtmEndDate) else cd.dtmEndDate end)
+													and
+													(case when ev.strReminderCondition = ''day(s) before due date'' then cd.dtmEndDate else dateadd(day,ev.intDaysToRemind,cd.dtmEndDate) end)
+												AND er.intEntityId = {0}
+										  ',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Late Shipment', 
+			[intSort]            =        isnull(@intMaxSortOrder,0) + 1
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage] = N'{0} {1} {2} Late Shipment.',
+		[strQuery]=   N'
+						select
+							distinct cd.intContractHeaderId
+						from
+							tblCTContractDetail cd
+							JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
+							cross join tblCTAction ac
+							cross join tblCTEvent ev
+							join tblCTEventRecipient er on er.intEventId = ev.intEventId
+						where
+							cd.intContractStatusId in (1,4)
+							and ac.strActionName = ''Late Shipment''
+							and ev.intActionId = ac.intActionId
+							and getdate() between
+								(case when ev.strReminderCondition = ''day(s) before due date'' then dateadd(day,ev.intDaysToRemind * -1,cd.dtmEndDate) else cd.dtmEndDate end)
+								and
+								(case when ev.strReminderCondition = ''day(s) before due date'' then cd.dtmEndDate else dateadd(day,ev.intDaysToRemind,cd.dtmEndDate) end)
+							AND er.intEntityId = {0}
+					   '
+	WHERE [strReminder] = N'Late Shipment' AND [strType] = N'Contract' 
+END
+GO
+
+GO
 IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unapproved Contract' AND [strType] = N'Quality Sample')
 BEGIN
 	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
