@@ -1201,8 +1201,6 @@ BEGIN TRY
 					,intCompanyId
 					,intINCOLocationTypeId
 					,intLastModifiedById
-					,intProductTypeId
-					,ysnPrimeCustomer
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1268,8 +1266,6 @@ BEGIN TRY
 					,@intCompanyRefId
 					,@intINCOLocationTypeId
 					,@intUserId
-					,intProductTypeId
-					,ysnPrimeCustomer
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						--strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						dtmContractDate DATETIME
@@ -1321,8 +1317,6 @@ BEGIN TRY
 						,strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS
 						,ysnReceivedSignedFixationLetter BIT
 						,strCustomerContract NVARCHAR(30) Collate Latin1_General_CI_AS
-						,intProductTypeId INT
-						,ysnPrimeCustomer BIT
 						) x
 
 				EXEC uspCTGetTableDataInXML '#tmpContractHeader'
@@ -1478,9 +1472,7 @@ BEGIN TRY
 						,CH.strExternalEntity = CH1.strExternalEntity
 						,CH.strExternalContractNumber = CH1.strExternalContractNumber
 						,CH.intLastModifiedById = CH1.intLastModifiedById
-						,CH.intProductTypeId = CH1.intProductTypeId
-						,CH.ysnPrimeCustomer = CH1.ysnPrimeCustomer
-					FROM CH.tblCTContractHeader CH
+					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
 

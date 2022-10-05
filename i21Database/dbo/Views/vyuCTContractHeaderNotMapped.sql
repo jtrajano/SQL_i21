@@ -88,8 +88,8 @@ AS
 						ST.strSampleTypeName,
 						CY.ysnCheckMissingStandardPriceInContract,
 						dblHeaderBalance = cd.dblHeaderBalance,
-						dblHeaderAvailable = cd.dblHeaderAvailable,
-						strHeaderProductType = HPT.strDescription
+						dblHeaderAvailable = cd.dblHeaderAvailable
+
 				FROM	tblCTContractHeader						CH	
 				
 				JOIN	tblEMEntity								EY	ON	EY.intEntityId						=		CH.intEntityId
@@ -144,7 +144,6 @@ AS
 				
 			LEFT	JOIN	tblCTBook							BK	ON	BK.intBookId						=		CH.intBookId						
 			LEFT	JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						
-			LEFT	JOIN	tblICCommodityAttribute				HPT ON HPT.intCommodityAttributeId			=		CH.intProductTypeId
 						
 			OUTER APPLY (
 			SELECT TOP 1 PF.intPriceFixationId, 

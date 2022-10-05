@@ -110,8 +110,6 @@ BEGIN TRY
 		,ysnBrokerage							 BIT
 		,intCompanyId							 INT
 		,intContractHeaderRefId					 INT
-		,intProductTypeId						 INT
-		,ysnPrimeCustomer						 BIT
 	  )
 	
 	 DECLARE @tblCTContractDetail AS TABLE
@@ -687,9 +685,7 @@ BEGIN TRY
 							,SH.ysnMailSent						 = 	CH.ysnMailSent						
 							,SH.strAmendmentLog					 = 	CH.strAmendmentLog					
 							,SH.ysnBrokerage					 = 	CH.ysnBrokerage					
-							,SH.intCompanyId					 = 	CH.intCompanyId
-							,SH.intProductTypeId				 =  CH.intProductTypeId
-							,SH.ysnPrimeCustomer				 =  CH.ysnPrimeCustomer
+							,SH.intCompanyId					 = 	CH.intCompanyId					
 						FROM tblCTContractHeader SH  
 						JOIN @tblCTContractHeader CH ON CH.intContractHeaderId = SH.intContractHeaderRefId
 

@@ -98,9 +98,6 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[ysnPrintCropYear] BIT default ((0)),
 	[ysnSupplyPointContract] BIT default ((0)),
 	[ysnQuantityAtHeaderLevel] BIT default ((0)),
-
-	[intProductTypeId] INT NULL,
-	[ysnPrimeCustomer] BIT DEFAULT ((0)),
 	
 	--CT-7027
 	--[intLastEntityId] INT NULL,
