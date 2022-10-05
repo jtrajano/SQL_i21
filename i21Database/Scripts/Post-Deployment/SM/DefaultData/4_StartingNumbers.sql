@@ -1712,6 +1712,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Account Category' AND [strModule] = 'General Ledger')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 179
+			,[strTransactionType]	= N'Opportunity'
+			,[strPrefix]			= N'OP-'
+			,[intNumber]			= 0
+			,[strModule]			= 'CRM'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Opportunity' AND [strModule] = 'CRM')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
