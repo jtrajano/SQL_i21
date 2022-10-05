@@ -367,7 +367,7 @@ END
 
 UPDATE tblARPostInvoiceGLEntries
 SET [strSessionId] = @strSessionId
-WHERE strSessionId IS NULL 
+WHERE strBatchId = @BatchId
 
 UPDATE tblARPostInvoiceGLEntries
 SET [dtmDateEntered] = @PostDate
