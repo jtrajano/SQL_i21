@@ -1154,6 +1154,8 @@
     <Build Include="dbo\Stored Procedures\uspLGDispatchUpdateOrders.sql" />
     <Build Include="dbo\Tables\tblAPPaymentIntegrationTransaction.sql" />
     <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
+    <Build Include="dbo\Tables\uspTRInsertLoadFromImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRReprocessImportDtn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
