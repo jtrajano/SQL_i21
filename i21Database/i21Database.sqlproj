@@ -1143,6 +1143,8 @@
     <Build Include="dbo\Tables\tblSMLicenseSavedFeature.sql" />
     <Build Include="dbo\Tables\tblSMLicenseRegisteredFeature.sql" />
     <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
+    <Build Include="dbo\Tables\uspTRInsertLoadFromImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRReprocessImportDtn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
