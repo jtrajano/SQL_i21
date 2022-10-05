@@ -237,7 +237,11 @@ BEGIN
 					, [intPumpCardCouponId]			= UOM.intItemUOMId
 					, [intCategoryId]			    = I.intCategoryId
 					, [strDescription]				= I.strDescription
-					, [dblPrice]					= CAST((ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))
+					, [dblPrice]					= CASE WHEN ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)),1) = 0
+														THEN 0
+														ELSE
+														CAST((ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))
+														END
 					, [dblQuantity]					= ISNULL(CAST(Chk.dblGallonsSold as decimal(18,6)), 0)
 					, [dblAmount]					= ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) --just based the readings on the meter readings
 					, [intConcurrencyId]			= 0
@@ -258,7 +262,11 @@ BEGIN
 			ELSE
 			BEGIN
 				UPDATE CPT
-					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.dblDollarsSold AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblGallonsSold AS DECIMAL(18,6)),0),0)
+					SET CPT.[dblPrice] = CASE WHEN NULLIF(CAST(Chk.dblGallonsSold AS DECIMAL(18,6)),0) = 0
+											THEN 0
+											ELSE
+											ISNULL(NULLIF(CAST(Chk.dblDollarsSold AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblGallonsSold AS DECIMAL(18,6)),0),0)
+											END
 						, CPT.[dblQuantity] = CAST(ISNULL(Chk.dblGallonsSold, 0) AS DECIMAL(18,6))
 						, CPT.[dblAmount] = CAST(ISNULL(Chk.dblDollarsSold, 0) AS DECIMAL(18,6)) --just based the readings on the meter readings
 					FROM dbo.tblSTCheckoutPumpTotals CPT
