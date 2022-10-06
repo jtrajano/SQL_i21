@@ -9220,6 +9220,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
