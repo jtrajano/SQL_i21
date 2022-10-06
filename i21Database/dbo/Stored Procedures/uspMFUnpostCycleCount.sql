@@ -218,7 +218,7 @@ BEGIN TRY
 			,[dblQty]
 			,[dblUOMQty]
 			,[intCostUOMId] = t.[intItemUOMId]
-			,[dblNewValue] = IsNULL(Round(PL.dblItemValue,2,1), t.dblValue)
+			,[dblNewValue] = ROUND(IsNULL(t.dblValue,PL.dblItemValue), 2, 1)
 			,[intCurrencyId]
 			,[intTransactionId] = t.intRelatedTransactionId
 			,[intTransactionDetailId] = t.intTransactionDetailId
