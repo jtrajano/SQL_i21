@@ -206,9 +206,113 @@ BEGIN
 	')
 END
 
+GO
+/*
+	
+	,
+	,
+	,
+	,
+	,
+
+*/
+--Additional Discount Column for Weskan Grain
+DECLARE @_TempGrainDiscountCounter INT = 13
+DECLARE @_TempGrainDiscountSqlCommand NVARCHAR(1000)
+BEGIN
+	SET @_TempGrainDiscountCounter = 13
+	WHILE(@_TempGrainDiscountCounter <= 25)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'gasctmst' AND [COLUMN_NAME] = 'gasct_disc_cd_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR)) 
+		BEGIN
+			SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE gasctmst ADD [gasct_disc_cd_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR) + '] [char](2) NULL'
+			EXEC(@_TempGrainDiscountSqlCommand);
+		END	
+		SET @_TempGrainDiscountCounter = @_TempGrainDiscountCounter + 1
+	END		
+END
+BEGIN
+	SET @_TempGrainDiscountCounter = 13
+	WHILE(@_TempGrainDiscountCounter <= 25)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'gasctmst' AND [COLUMN_NAME] = 'gasct_reading_'  + CAST(@_TempGrainDiscountCounter AS NVARCHAR)) 
+		BEGIN			
+			SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE gasctmst ADD [gasct_reading_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR) + '] [decimal](7, 3) NULL'
+			EXEC(@_TempGrainDiscountSqlCommand);
+		END
+		SET @_TempGrainDiscountCounter = @_TempGrainDiscountCounter + 1
+	END		
+END
+BEGIN
+	SET @_TempGrainDiscountCounter = 13
+	WHILE(@_TempGrainDiscountCounter <= 25)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'gasctmst' AND [COLUMN_NAME] = 'gasct_disc_calc_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR)) 
+		BEGIN			
+			SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE gasctmst ADD [gasct_disc_calc_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR) + '] [char](1) NULL'
+			EXEC(@_TempGrainDiscountSqlCommand);
+		END
+		SET @_TempGrainDiscountCounter = @_TempGrainDiscountCounter + 1
+	END		
+END
+BEGIN
+	SET @_TempGrainDiscountCounter = 13
+	WHILE(@_TempGrainDiscountCounter <= 25)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'gasctmst' AND [COLUMN_NAME] = 'gasct_un_disc_amt_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR)) 
+		BEGIN			
+			SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE gasctmst ADD [gasct_un_disc_amt_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR) + '] [decimal](9, 6) NULL' 
+			EXEC(@_TempGrainDiscountSqlCommand);
+		END
+		SET @_TempGrainDiscountCounter = @_TempGrainDiscountCounter + 1
+	END		
+END
+BEGIN
+	SET @_TempGrainDiscountCounter = 13
+	WHILE(@_TempGrainDiscountCounter <= 25)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'gasctmst' AND [COLUMN_NAME] = 'gasct_shrk_what_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR)) 
+		BEGIN			
+			SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE gasctmst ADD [gasct_shrk_what_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR) + '] [char](1) NULL'
+			EXEC(@_TempGrainDiscountSqlCommand);
+		END
+		SET @_TempGrainDiscountCounter = @_TempGrainDiscountCounter + 1
+	END		
+END
+BEGIN
+	SET @_TempGrainDiscountCounter = 13
+	WHILE(@_TempGrainDiscountCounter <= 25)
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'gasctmst' AND [COLUMN_NAME] = 'gasct_shrk_pct_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR)) 
+		BEGIN			
+			SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE gasctmst ADD [gasct_shrk_pct_' + CAST(@_TempGrainDiscountCounter AS NVARCHAR) + '] [decimal](7, 4) NULL'
+			EXEC(@_TempGrainDiscountSqlCommand);
+		END
+		SET @_TempGrainDiscountCounter = @_TempGrainDiscountCounter + 1
+	END		
+END
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblGRCompanyPreference' AND [COLUMN_NAME] = 'strSpecialTicketImportImplementation') 
+BEGIN			
+	SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE tblGRCompanyPreference ADD [strSpecialTicketImportImplementation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL'
+	EXEC(@_TempGrainDiscountSqlCommand);
+END
+IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSCTicketLVStaging' AND [COLUMN_NAME] = 'intSubLocationId') 
+BEGIN			
+	SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE tblSCTicketLVStaging ADD [intSubLocationId] INT NULL'
+	EXEC(@_TempGrainDiscountSqlCommand);
+END
+IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSCTicketLVStaging' AND [COLUMN_NAME] = 'intStorageLocationId') 
+BEGIN			
+	SET @_TempGrainDiscountSqlCommand = 'ALTER TABLE tblSCTicketLVStaging ADD [intStorageLocationId] INT NULL'
+	EXEC(@_TempGrainDiscountSqlCommand);
+END
+
 
 
 GO
+
 
 IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gasctmst') = 1
 	BEGIN
@@ -870,7 +974,90 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						) LG
 
 						set @newLVTicket = SCOPE_IDENTITY()
-					
+
+						IF EXISTS(SELECT TOP 1 1 FROM tblGRCompanyPreference WHERE strSpecialTicketImportImplementation =''WESKAN GRAIN'')
+						BEGIN
+							DECLARE @Weskan_bin NVARCHAR(50) 
+							DECLARE @Weskan_split NVARCHAR(4)
+							DECLARE @Weskan_intScaleSetupId INT 
+							DECLARE @Weskan_intStorageLocationId INT 
+							DECLARE @Weskan_intStorageUnitId INT 
+							DECLARE @Weskan_intEntityId INT 
+							DECLARE @Weskan_intSplitId INT 
+
+
+							SELECT
+								@Weskan_bin = strBinNumber,
+								@Weskan_split = strSplitNumber,
+								@Weskan_intScaleSetupId = intScaleSetupId,
+								@Weskan_intEntityId = intEntityId
+							FROM
+								tblSCTicketLVStaging
+								WHERE intTicketLVStagingId = @newLVTicket							
+							IF @Weskan_intScaleSetupId IS NOT NULL
+							BEGIN
+								SELECT
+									@Weskan_intStorageLocationId = intSubLocationId
+								FROM 
+								tblSCScaleSetup
+									WHERE intScaleSetupId = @Weskan_intScaleSetupId
+							END
+
+							IF ( @Weskan_intStorageLocationId IS NOT NULL AND ( @Weskan_bin IS NOT NULL AND @Weskan_bin <> '''' ) )
+							BEGIN
+								SELECT
+									@Weskan_intStorageUnitId = intStorageLocationId
+								FROM tblICStorageLocation	
+									WHERE strName = @Weskan_bin
+										AND intSubLocationId = @Weskan_intStorageLocationId								
+							END
+							
+							IF (@Weskan_split IS NOT NULL AND @Weskan_split <> '''' AND ISNUMERIC(@Weskan_split) = 1)
+							BEGIN
+								IF EXISTS(SELECT TOP 1 1 
+											FROM
+											tblEMEntitySplit
+											WHERE intEntityId = @Weskan_intEntityId
+											AND intSplitId = CAST(@Weskan_split AS INT))
+								BEGIN
+									SET @Weskan_intSplitId = CAST(@Weskan_split AS INT)
+								END
+							END
+
+							UPDATE 								
+							tblSCTicketLVStaging
+								SET strBinNumber = NULL
+									, strSplitNumber = NULL
+									, intSubLocationId = @Weskan_intStorageLocationId
+									, intStorageLocationId = @Weskan_intStorageUnitId
+									, intSplitId = @Weskan_intSplitId
+									, intStorageScheduleTypeId = CASE WHEN strDistributionOption = ''SPT'' 
+																THEN -4 					
+																ELSE
+																	intStorageScheduleTypeId
+																END
+									, strDistributionOption = CASE WHEN strDistributionOption = ''SPT'' 
+																THEN ''SPL'' 					
+																ELSE
+																	strDistributionOption
+																END
+									
+								WHERE intTicketLVStagingId = @newLVTicket
+
+
+
+							SELECT
+								@Weskan_bin = NULL
+								,@Weskan_split = NULL
+								,@Weskan_intScaleSetupId = NULL
+								,@Weskan_intStorageLocationId = NULL
+								,@Weskan_intStorageUnitId = NULL
+								,@Weskan_intEntityId = NULL
+								,@Weskan_intSplitId = NULL
+
+						END
+
+
 						INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)						
 						SELECT 
 						DISTINCT 
@@ -974,6 +1161,45 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								UNION ALL
 									SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
 									FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
+								UNION ALL								
+									SELECT gasct_disc_cd_13,gasct_reading_13,gasct_disc_calc_13,gasct_un_disc_amt_13,gasct_shrk_what_13,gasct_shrk_pct_13,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_13 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_14,gasct_reading_14,gasct_disc_calc_14,gasct_un_disc_amt_14,gasct_shrk_what_14,gasct_shrk_pct_14,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_14 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_15,gasct_reading_15,gasct_disc_calc_15,gasct_un_disc_amt_15,gasct_shrk_what_15,gasct_shrk_pct_15,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_15 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_16,gasct_reading_16,gasct_disc_calc_16,gasct_un_disc_amt_16,gasct_shrk_what_16,gasct_shrk_pct_16,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_16 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_17,gasct_reading_17,gasct_disc_calc_17,gasct_un_disc_amt_17,gasct_shrk_what_17,gasct_shrk_pct_17,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_17 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_18,gasct_reading_18,gasct_disc_calc_18,gasct_un_disc_amt_18,gasct_shrk_what_18,gasct_shrk_pct_18,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_18 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_19,gasct_reading_19,gasct_disc_calc_19,gasct_un_disc_amt_19,gasct_shrk_what_19,gasct_shrk_pct_19,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_19 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_20,gasct_reading_20,gasct_disc_calc_20,gasct_un_disc_amt_20,gasct_shrk_what_20,gasct_shrk_pct_20,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_20 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_21,gasct_reading_21,gasct_disc_calc_21,gasct_un_disc_amt_21,gasct_shrk_what_21,gasct_shrk_pct_21,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_21 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_22,gasct_reading_22,gasct_disc_calc_22,gasct_un_disc_amt_22,gasct_shrk_what_22,gasct_shrk_pct_22,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_22 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_23,gasct_reading_23,gasct_disc_calc_23,gasct_un_disc_amt_23,gasct_shrk_what_23,gasct_shrk_pct_23,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_23 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_24,gasct_reading_24,gasct_disc_calc_24,gasct_un_disc_amt_24,gasct_shrk_what_24,gasct_shrk_pct_24,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_24 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_25,gasct_reading_25,gasct_disc_calc_25,gasct_un_disc_amt_25,gasct_shrk_what_25,gasct_shrk_pct_25,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_25 IS NOT NULL
 						)b 
 						INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
 						INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
@@ -991,6 +1217,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						--
 
 						INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
+							AND i.intCommodityId = k.intCommodityId
 						INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
 						WHERE b.gasct_disc_cd is not null 
 							and k.strInOutFlag <> ''O''
@@ -1019,8 +1246,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRD_CROSS_REF.intDiscountId = isnull(TicketStaging.intDiscountId, ic.intScheduleDiscountId)
 
 								INNER JOIN INSERTED IR  ON TicketStaging.intOriginTicketId= IR.A4GLIdentity									
-								INNER JOIN tblICItem i on i.intItemId = DiscountScheduleCode.intItemId
-							
+								INNER JOIN tblICItem i on i.intItemId = DiscountScheduleCode.intItemId									
+									AND i.intCommodityId = TicketStaging.intCommodityId
 								
 								left join
 								(
@@ -1114,6 +1341,46 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								UNION ALL
 									SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
 									FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_13,gasct_reading_13,gasct_disc_calc_13,gasct_un_disc_amt_13,gasct_shrk_what_13,gasct_shrk_pct_13,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_13 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_14,gasct_reading_14,gasct_disc_calc_14,gasct_un_disc_amt_14,gasct_shrk_what_14,gasct_shrk_pct_14,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_14 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_15,gasct_reading_15,gasct_disc_calc_15,gasct_un_disc_amt_15,gasct_shrk_what_15,gasct_shrk_pct_15,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_15 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_16,gasct_reading_16,gasct_disc_calc_16,gasct_un_disc_amt_16,gasct_shrk_what_16,gasct_shrk_pct_16,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_16 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_17,gasct_reading_17,gasct_disc_calc_17,gasct_un_disc_amt_17,gasct_shrk_what_17,gasct_shrk_pct_17,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_17 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_18,gasct_reading_18,gasct_disc_calc_18,gasct_un_disc_amt_18,gasct_shrk_what_18,gasct_shrk_pct_18,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_18 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_19,gasct_reading_19,gasct_disc_calc_19,gasct_un_disc_amt_19,gasct_shrk_what_19,gasct_shrk_pct_19,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_19 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_20,gasct_reading_20,gasct_disc_calc_20,gasct_un_disc_amt_20,gasct_shrk_what_20,gasct_shrk_pct_20,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_20 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_21,gasct_reading_21,gasct_disc_calc_21,gasct_un_disc_amt_21,gasct_shrk_what_21,gasct_shrk_pct_21,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_21 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_22,gasct_reading_22,gasct_disc_calc_22,gasct_un_disc_amt_22,gasct_shrk_what_22,gasct_shrk_pct_22,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_22 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_23,gasct_reading_23,gasct_disc_calc_23,gasct_un_disc_amt_23,gasct_shrk_what_23,gasct_shrk_pct_23,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_23 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_24,gasct_reading_24,gasct_disc_calc_24,gasct_un_disc_amt_24,gasct_shrk_what_24,gasct_shrk_pct_24,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_24 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_25,gasct_reading_25,gasct_disc_calc_25,gasct_un_disc_amt_25,gasct_shrk_what_25,gasct_shrk_pct_25,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_25 IS NOT NULL
+								
 						)b 
 						on TicketStaging.intOriginTicketId =  b.A4GLIdentity AND (b.gasct_disc_cd is not null and b.gasct_disc_cd <> '''')
 							 AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS

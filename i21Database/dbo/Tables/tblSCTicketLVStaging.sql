@@ -85,5 +85,9 @@
 	[intLoadId] INT NULL,
 	[strContractLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
 	[strImportFailedReason] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
+	
+	[intSubLocationId] INT NULL, --Storage Location
+	[intStorageLocationId] INT NULL, --Storage Unit
+	
 	CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketLVStagingId]) 
 )
