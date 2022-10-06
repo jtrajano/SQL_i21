@@ -1,5 +1,6 @@
 CREATE TABLE tblARPostItemsForContracts (
-	  [intInvoiceId]					INT NOT NULL
+	  [intId]                           INT IDENTITY (1, 1) NOT NULL
+	, [intInvoiceId]					INT NOT NULL
 	, [intInvoiceDetailId]				INT NOT NULL
 	, [intOriginalInvoiceId]			INT NULL
 	, [intOriginalInvoiceDetailId]		INT NULL
@@ -20,6 +21,7 @@ CREATE TABLE tblARPostItemsForContracts (
 	, [strBatchId]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, [ysnFromReturn]					BIT NULL DEFAULT 0
     , [strSessionId]                    NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL
+	, CONSTRAINT [PK_tblARPostItemsForContracts_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO
 CREATE INDEX [idx_tblARPostItemsForContracts_strSessionId] ON [dbo].[tblARPostItemsForContracts] (strSessionId)
