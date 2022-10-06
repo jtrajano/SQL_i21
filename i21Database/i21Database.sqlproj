@@ -9890,6 +9890,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPRReconDiagnostic.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
