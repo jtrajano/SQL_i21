@@ -134,10 +134,10 @@ JOIN	tblRKFutureMarket			MA	ON	LTRIM(RTRIM(LOWER(MA.strFutMarketName))) =	LTRIM(
 JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
 										AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
 										AND	(YEAR(MO.dtmFutureMonthsDate) % 100) = CI.intYear		LEFT
-JOIN	vyuCTEntity					EY	ON	EY.strEntityName				=	CI.strEntityName	
-										AND ISNULL(EY.strEntityNumber,'')	= ISNULL(CI.strEntityNo,'')	
+JOIN	vyuCTEntity					EY	ON	LTRIM(RTRIM(EY.strEntityName)) = LTRIM(RTRIM(CI.strEntityName))
+										AND LTRIM(RTRIM(ISNULL(EY.strEntityNumber,'')))	= LTRIM(RTRIM(ISNULL(CI.strEntityNo,'')))
 										AND	EY.strEntityType	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 'Vendor' ELSE 'Customer' END LEFT
-JOIN	vyuCTEntity					SY	ON	SY.strEntityName	=	CI.strSalesperson
+JOIN	vyuCTEntity					SY	ON	LTRIM(RTRIM(SY.strEntityName))	=	LTRIM(RTRIM(CI.strSalesperson))
 										AND	SY.strEntityType	=	'Salesperson'	
 cross apply (select top 1 intDefaultCurrencyId from tblSMCompanyPreference) cp
 WHERE CI.guiUniqueId = @guiUniqueId
