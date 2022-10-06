@@ -10,7 +10,7 @@ LEFT JOIN (
 		SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax) * dblRate) / SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) AS dblAverageExchangeRate
 	FROM tblAPBillDetail dtl
 	GROUP BY dtl.intBillId
-	HAVING SUM((ISNULL(NULLIF(dblTotal,0),1))) > 0
+	HAVING SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) > 0
 ) BD ON B.intBillId = BD.intBillId
 
 UPDATE B
@@ -23,6 +23,6 @@ LEFT JOIN (
 		SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax) * dblRate) / SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) AS dblAverageExchangeRate
 	FROM tblAPBillDetailArchive dtl
 	GROUP BY dtl.intBillId
-	HAVING SUM((ISNULL(NULLIF(dblTotal,0),1))) > 0
+	HAVING SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) > 0
 ) BD ON B.intBillId = BD.intBillId
 PRINT N'SUCCESS: POPULATING VOUCHER AVERAGE EXCHANGE RATE'
