@@ -20,6 +20,11 @@ DECLARE @ReservationToClear AS ItemReservationTableType
 DECLARE @ItemsToReserveAggregrate AS ItemReservationTableType
 DECLARE @intLoadDetailPickLotId INT
 
+IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+BEGIN
+	RETURN 0
+END
+
  IF OBJECT_ID('tempdb..#tblLoadDetailPickLots ') IS NOT NULL  
  DROP TABLE #tblLoadDetailPickLots 
  
