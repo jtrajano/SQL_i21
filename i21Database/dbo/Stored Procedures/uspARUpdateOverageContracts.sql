@@ -153,14 +153,32 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0
 		RETURN;
 	END
 
-IF ISNULL(@ysnFromSalesOrder, 0) = 0 
-	BEGIN
-		SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyOrdered ELSE ISI.dblQuantity END)
-		FROM tblARInvoiceDetail ID
-		INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
-		INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
-		LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
-	END 
+IF ISNULL(@ysnFromSalesOrder, 0) = 0
+BEGIN
+	SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 
+												      THEN IDD.dblQtyOrdered 
+													  ELSE CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) = 0 
+															    THEN CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END
+																ELSE ISI.dblQuantity
+														   END
+												 END)
+	FROM tblARInvoiceDetail ID
+	INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
+	INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+	INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId 
+	LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
+
+	--MANUAL SPOT FROM TICKET
+	SELECT @dblQtyOverAged = @dblQtyOverAged - ISNULL(SUM(ID.dblQtyShipped), 0)
+	FROM tblARInvoiceDetail ID
+	INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId AND ID.intItemId = IDD.intItemId
+	INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+	LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
+	WHERE ID.intContractDetailId IS NULL
+	  AND ID.intTicketId IS NOT NULL
+	  AND ID.intInventoryShipmentItemId IS NOT NULL
+	  AND ID.intItemId IS NOT NULL
+END 
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 	BEGIN
