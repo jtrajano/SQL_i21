@@ -14,10 +14,11 @@ BEGIN
 
     Declare @sContract Varchar(MAX), @sBuyer Varchar(MAX)
 
-    SELECT   @sContract = COALESCE(@sContract + ', ' + strSalesContractNumber, strSalesContractNumber),
+    SELECT   @sContract = COALESCE(@sContract + ', ' + REPLACE(strSContractNumber ,'/',' - '), REPLACE(strSContractNumber ,'/',' - ')),
             @sBuyer = COALESCE(@sBuyer + ', ' + strBuyer, strBuyer)
     FROM vyuLGAllocatedContracts
     WHERE intPContractDetailId = @intPContractDetailId
+	GROUP BY strSContractNumber, strBuyer
 
     INSERT INTO @t VALUES(@sContract,@sBuyer  )
 
