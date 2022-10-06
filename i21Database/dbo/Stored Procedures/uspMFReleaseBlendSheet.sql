@@ -1937,6 +1937,8 @@ BEGIN TRY
 			,@intUserId
 			,'Added'
 
+		Exec dbo.uspMFDeleteTrialBlendSheetReservation @intWorkOrderId=@intWorkOrderId
+
 		SET @intNoOfSheet = @intNoOfSheet - 1
 	END
 

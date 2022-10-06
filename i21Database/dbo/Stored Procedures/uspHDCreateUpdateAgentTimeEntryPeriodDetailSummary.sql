@@ -46,6 +46,14 @@ BEGIN
 			,@dblActualAnnualBudget				NUMERIC(18,6)
 			,@dblActualWeeklyBudget				NUMERIC(18,6)
 			,@intRequiredHours					INT
+			,@intTimeEntryPeriodId				INT
+			,@strBillingPeriodName				NVARCHAR(100)
+			,@strName							NVARCHAR(100)
+
+	SELECT TOP 1 @strName = strFullName
+	FROM vyuHDAgentDetail
+	WHERE intEntityId = @EntityId AND
+		  ysnDisabled = CONVERT(BIT, 0)
 
 	SELECT  --[intEntityId]							= @EntityId
 		    @intTimeEntryPeriodDetailId				= TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
@@ -67,6 +75,8 @@ BEGIN
 		   ,@dblActualAnnualBudget					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualAnnualBudget], 0) 
 		   ,@dblActualWeeklyBudget					= ISNULL(TimeEntryPeriodDetailInfo.[dblActualWeeklyBudget], 0) 
 		   ,@intRequiredHours						= ISNULL(TimeEntryPeriodDetailInfo.[intRequiredHours], 0) 
+		   ,@intTimeEntryPeriodId					= ISNULL(TimeEntryPeriod.intTimeEntryPeriodId, 0) 
+		   ,@strBillingPeriodName					= TimeEntryPeriodDetailInfo.[strBillingPeriodName]
 		   --,[intConcurrencyId]						= 1
 		FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail
 				INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
@@ -108,6 +118,7 @@ BEGIN
 														  END 
 					,[dblActualAnnualBudget]			= AgentInfoAnnually.[totalBaseAmount]
 					,[dblActualWeeklyBudget]			= AgentInfoWeekly.[totalBaseAmount]
+					,[strBillingPeriodName]				= LTRIM(RTRIM(REPLACE(SUBSTRING(LTRIM(RTRIM(TimeEntryPeriodDetail.strBillingPeriodName)),1,CHARINDEX(' ',LTRIM(RTRIM(TimeEntryPeriodDetail.strBillingPeriodName)),1)),',', ''))) + ' ' + FORMAT(TimeEntryPeriodDetail.intBillingPeriod, '00')
 			FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail 
 				INNER JOIN tblHDTimeEntryPeriod TimeEntryPeriod
 			ON TimeEntryPeriod.intTimeEntryPeriodId = TimeEntryPeriodDetail.intTimeEntryPeriodId
@@ -290,7 +301,11 @@ BEGIN
 		       ,[dblAnnualBudget]						= @dblAnnualBudget						
 		       ,[dblActualAnnualBudget]					= @dblActualAnnualBudget					
 		       ,[dblActualWeeklyBudget]					= @dblActualWeeklyBudget					
-		       ,[intRequiredHours]						= @intRequiredHours		
+		       ,[intRequiredHours]						= @intRequiredHours	
+			   ,[intTimeEntryPeriodId]					= @intTimeEntryPeriodId
+			   ,[strBillingPeriodName]					= @strBillingPeriodName
+			   ,[strName]								= @strName
+			   ,[dblWeeklyBudget]						= @dblBudgetedHours
 			WHERE [intEntityId] = @EntityId AND
 				  [intTimeEntryPeriodDetailId] = @TimeEntryPeriodDetailId 
 
@@ -321,6 +336,11 @@ BEGIN
 				,[dblActualWeeklyBudget]
 				,[intRequiredHours]						
 				,[intConcurrencyId] 
+				,[intTimeEntryPeriodId]
+				,[strBillingPeriodName]
+				,[strName]
+				,[dblWeeklyBudget]	
+
 		)
 
 		SELECT  [intEntityId]							= @EntityId
@@ -344,27 +364,12 @@ BEGIN
 		       ,[dblActualWeeklyBudget]					= @dblActualWeeklyBudget					
 		       ,[intRequiredHours]						= @intRequiredHours						
 		       ,[intConcurrencyId]						= 1
+			   ,[intTimeEntryPeriodId]					= @intTimeEntryPeriodId
+			   ,[strBillingPeriodName]					= @strBillingPeriodName
+			   ,[strName]								= @strName
+			   ,[dblWeeklyBudget]						= @dblBudgetedHours
 
 	END
-
-	--DELETE FROM tblHDAgentTimeEntryPeriodDetailSummary
-	--WHERE [intEntityId] = @EntityId AND
-	--	  [intTimeEntryPeriodDetailId] = @TimeEntryPeriodDetailId
-
-	--DECLARE @dblUtilizationWeekly INT = 0,
-	--		@dblUtilizationAnnually INT = 0,
-	--		@dblUtilizationMonthly INT = 0
-
-	--SELECT TOP 1 @dblUtilizationWeekly	 = intUtilizationTargetWeekly
-	--			,@dblUtilizationAnnually = intUtilizationTargetAnnual
-	--			,@dblUtilizationMonthly  = intUtilizationTargetMonthly
-	--FROM tblHDCoworkerGoal
-	--WHERE intEntityId = @EntityId
-
-
-	
-
-
 END
 
 GO

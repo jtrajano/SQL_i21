@@ -97,6 +97,8 @@ BEGIN TRY
 			RaisError(@strErrMsg,16,1)
 		End
 
+		Exec dbo.uspMFDeleteTrialBlendSheetReservation @intWorkOrderId=@intWorkOrderId
+
 		If @intStatusId in (2,9) or (@intTransactionFrom=4 and @intStatusId=10)
 		Begin			
 			Delete from tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
