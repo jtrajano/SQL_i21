@@ -1228,6 +1228,10 @@
     <Build Include="dbo\Stored Procedures\uspGLImportCOAFromCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateTrialBlendSheetReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteTrialBlendSheetReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncAgentTimeEntrySummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncAgentTimeEntrySummaryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateCoworkerWeeklyBudget.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntrySummaryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
