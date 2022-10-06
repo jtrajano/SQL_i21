@@ -191,17 +191,17 @@ INSERT INTO tblARPostItemsForCosting
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
-	,[intItemLocationId]		= IST.intItemLocationId
+	,[intItemLocationId]		= ILOC.intItemLocationId
 	,[intItemUOMId]				= dbo.fnGetMatchingItemUOMId(ARIC.[intBundleItemId], ARIC.intItemUnitMeasureId)
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ICIUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
-	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @AVERAGECOST THEN 
-																							dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) 
+	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], ILOC.[intItemLocationId]) = @AVERAGECOST THEN 
+																							dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], ILOC.[intItemLocationId], ARIC.[intItemUnitMeasureId]) 
 																						ELSE 
-																							IST.[dblLastCost]  
+																							IPP.[dblLastCost]  
 																				END 
 																				,ARID.[dblSplitPercent]
 																		), ICIUOM.[dblUnitQty]
@@ -220,9 +220,9 @@ SELECT
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
-    ,[dblUnitRetail]			= CASE WHEN IST.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
-	,[intCategoryId]			= IST.[intCategoryId]
-	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
+    ,[dblUnitRetail]			= CASE WHEN CAT.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
+	,[intCategoryId]			= ICI.[intCategoryId]
+	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], ILOC.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[strBOLNumber]				= ARID.strBOLNumber 
@@ -234,12 +234,10 @@ INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.[intBundleItemId] = ICI.[intItemId]
 LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
-LEFT OUTER JOIN
-	(SELECT [intItemId], [intItemLocationId], intLocationId, dblLastCost, [intCategoryId], ysnRetailValuation FROM vyuICGetItemStock WITH (NOLOCK)) IST
-		ON ARIC.[intBundleItemId] = IST.[intItemId]
-		AND ARID.[intCompanyLocationId] = IST.[intLocationId]	
+LEFT JOIN tblICCategory CAT ON ICI.intCategoryId = CAT.intCategoryId
+LEFT JOIN tblICItemPricing IPP ON IPP.intItemId = ICI.intItemId AND IPP.intItemLocationId = ILOC.intItemLocationId
 LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]				 				 
-WHERE (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
+WHERE (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], ILOC.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
 	AND (
 		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0) AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR

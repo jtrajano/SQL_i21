@@ -23,16 +23,11 @@ BEGIN
 			
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
 
-	SELECT
-		 @TaxVendorId = VI.intVendorId
-	FROM
-		tblICItem I
-	INNER JOIN
-		vyuICGetItemStock VI
-			ON I.intItemId = VI.intItemId
-	WHERE
-		I.intItemId = @ItemId
-		AND VI.[intLocationId] = @CompanyLocationId	
+	SELECT @TaxVendorId = IL.intVendorId
+	FROM tblICItem I
+	INNER JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+	WHERE I.intItemId = @ItemId
+	  AND IL.[intLocationId] = @CompanyLocationId
 
 	DECLARE @TaxGroupId INT
 	SET @TaxGroupId = NULL	

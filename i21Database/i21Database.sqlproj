@@ -3143,8 +3143,7 @@
     <Build Include="dbo\Tables\tblWHTaskType.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
-    <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
-    <Build Include="dbo\Functions\fnGetItemPricing.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />    
     <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
@@ -6750,8 +6749,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddInvoicesTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
-    <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrualNew.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />    
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
