@@ -12,6 +12,7 @@ SET ANSI_WARNINGS OFF
 BEGIN
 	DECLARE @ItemsToDeductOnHand AS ItemCostingTableType	
 	DECLARE @IsCreditMemo BIT = 0
+
 	IF (SELECT TOP 1 strTransactionType FROM tblARInvoice WHERE intInvoiceId = @TransactionId) = 'Credit Memo'
 		BEGIN
 			SET @IsCreditMemo = 1
@@ -36,14 +37,15 @@ BEGIN
 		, [intTransactionId]
 		, [intTransactionDetailId] 
 		, [strTransactionId]
-		, [intTransactionTypeId])
+		, [intTransactionTypeId]
+	)
 	SELECT ID.intItemId
 		, IL.intItemLocationId
 		, ID.intItemUOMId
 		, I.dtmDate
 		, ID.dblQtyShipped
 		, UOM.dblUnitQty
-		, IST.dblLastCost
+		, IPP.dblLastCost
 		, 0
 		, ID.dblPrice
 		, I.intCurrencyId
@@ -53,10 +55,10 @@ BEGIN
 		, I.strInvoiceNumber
 		, 7
 	FROM tblARInvoiceDetail ID
-		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-		INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
-		INNER JOIN tblICItemUOM UOM ON UOM.intItemUOMId = ID.intItemUOMId
-		LEFT OUTER JOIN vyuICGetItemStock IST ON ID.intItemId = IST.intItemId  AND I.intCompanyLocationId = IST.intLocationId 
+	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
+	INNER JOIN tblICItemUOM UOM ON UOM.intItemUOMId = ID.intItemUOMId
+	INNER JOIN tblICItemPricing IPP WITH(NOLOCK) ON IPP.intItemId = ID.intItemId AND IPP.intItemLocationId = IL.intItemLocationId	 
 	WHERE ID.intInvoiceId = @TransactionId 
 		AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
 		
@@ -94,7 +96,6 @@ END
 -- Do an upsert for the Item Stock table when updating the On Hand Qty
 MERGE	
 INTO	dbo.tblICItemStock 
-WITH	(HOLDLOCK) 
 AS		ItemStock	
 USING (
 		SELECT	intItemId
@@ -132,7 +133,6 @@ WHEN NOT MATCHED THEN
 -- Do an upsert for the Item Stock UOM table when updating the On Hand Qty
 MERGE	
 INTO	dbo.tblICItemStockUOM
-WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
 		SELECT	intItemId
