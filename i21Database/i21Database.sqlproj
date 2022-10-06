@@ -9243,6 +9243,7 @@
     <None Include="Scripts\Post-Deployment\SM\2010_EncryptPasswords.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
