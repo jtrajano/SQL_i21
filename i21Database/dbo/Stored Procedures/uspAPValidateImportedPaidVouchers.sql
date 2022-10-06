@@ -76,7 +76,7 @@ OUTER APPLY	(
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM vyuAPBillForImport forImport
 		WHERE forImport.intEntityVendorId = A.intEntityVendorId 
-			AND ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber) = A.strVendorOrderNumber
+			AND TRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber)) = A.strVendorOrderNumber
 			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest) --Amount of Payment Schedule should be match as well
 	) voucher
 	WHERE voucher.intRow = cte.intRow
