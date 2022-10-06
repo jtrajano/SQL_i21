@@ -804,6 +804,10 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        c.intEntityId  
        FROM tblEMEntity c WHERE c.intEntityId = @NewId  
     END
+    ELSE
+    BEGIN
+      SELECT @NewId = intEntityId FROM tblEMEntity WHERE strEntityNo = @EmployeeID
+    END
 
      
   
