@@ -1196,6 +1196,8 @@
     <Build Include="dbo\Stored Procedures\uspHDSyncAgentTimeEntrySummaryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateCoworkerWeeklyBudget.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntrySummaryDetail.sql" />
+    <Build Include="dbo\Tables\tblARCompanyReportHeader.sql" />
+    <Build Include="dbo\Views\vyuARCompanyReportHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
