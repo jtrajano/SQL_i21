@@ -1773,8 +1773,6 @@ BEGIN
 		SET @strItemXml += '<ORDERPR_UN>' + ISNULL(@strPriceUOM, '') + '</ORDERPR_UN>'
 		SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
 		SET @strItemXml += '<PRICE_UNIT>' + IsNULL(@strFLOId, 1) + '</PRICE_UNIT>'
-		SET @strItemXml += '<CERT_BODY>' + dbo.fnEscapeXML(ISNULL(@strVendorLotID, '')) + '</CERT_BODY>'
-		SET @strItemXml += '<CERT_COST>' + dbo.fnEscapeXML(ISNULL(@strReference, '')) + '</CERT_COST>'
 		SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 		SET @strItemXml += '</E1BPMEOUTITEM>'
 	END
@@ -1832,8 +1830,6 @@ BEGIN
 
 		SET @strItemXml += '<TARGET_QTY>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblQuantity)), '') + '</TARGET_QTY>'
 		--SET @strItemXml += '<NET_PRICE>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), @dblUnitCashPrice)), '0.00') + '</NET_PRICE>'
-		SET @strItemXml += '<CERT_BODY>' + dbo.fnEscapeXML(ISNULL(@strVendorLotID, '')) + '</CERT_BODY>'
-		SET @strItemXml += '<CERT_COST>' + dbo.fnEscapeXML(ISNULL(@strReference, '')) + '</CERT_COST>'
 		SET @strItemXml += '<TAX_CODE>' + 'S0' + '</TAX_CODE>'
 		SET @strItemXml += '</E1BPMEOUTITEM>'
 		SET @strItemXml += '<E1BPMEOUTITEMX>'
@@ -1876,6 +1872,17 @@ BEGIN
 	BEGIN
 		SET @strTextXml += '<E1BPMEOUTTEXT>'
 		SET @strTextXml += '<TEXT_LINE>' + ISNULL(@strPrintableRemarks, '') + '</TEXT_LINE>'
+		SET @strTextXml += '</E1BPMEOUTTEXT>'
+
+		
+		SET @strTextXml += '<E1BPMEOUTTEXT>'
+		SET @strTextXml += '<TEXT_ID>' + 'A02' + '</TEXT_ID>'
+
+		IF ISNULL(@strVendorLotID, '') = '' AND ISNULL(@strReference, '') = ''
+			SET @strTextXml += '<TEXT_LINE>' + '' + '</TEXT_LINE>'
+		ELSE
+			SET @strTextXml += '<TEXT_LINE>' + dbo.fnEscapeXML(ISNULL(@strVendorLotID, '')) + '/' + dbo.fnEscapeXML(ISNULL(@strReference, '')) + '</TEXT_LINE>'
+		
 		SET @strTextXml += '</E1BPMEOUTTEXT>'
 
 		IF UPPER(@strRowState) = 'ADDED'
