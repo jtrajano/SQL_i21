@@ -14,8 +14,21 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
-	IF(@strScreenName <> 'TM - Generate Order')
+	---Temp fix for TM-3529 and TM 3534
+	----------------------------------------------------------
+	----------------------------------------------------------
+	IF( @strScreenName = 'TM - Generate Order')
 	BEGIN
+		RETURN
+	END
+
+	IF(@strScreenName <> 'TM - Generate Order' AND EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND strComments LIKE 'Automatic Order%'))
+	BEGIN
+		RETURN
+	END
+	----------------------------------------------------------
+	----------------------------------------------------------
+
 	IF(@dblQuantity > 0)
 	BEGIN
 		IF(@intContractDetailId IS NOT NULL)
@@ -87,5 +100,5 @@ BEGIN
 		END
 
 	END
-	END
+	
 END
