@@ -97,10 +97,8 @@ BEGIN
 		,@PromotionType	= ICISP.strPromotionType
 		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, @ZeroDecimal)/ISNULL(ICISP.dblUnit, @ZeroDecimal)) * @UOMQuantity, @ZeroDecimal) ELSE @ZeroDecimal END)
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
-	FROM
-		tblICItemSpecialPricing ICISP
-	WHERE
-		ISNULL(ICISP.strPromotionType, '') <> ''
+	FROM tblICItemSpecialPricing ICISP WITH (NOLOCK)
+	WHERE ISNULL(ICISP.strPromotionType, '') <> ''
 		AND ICISP.strPromotionType <> 'Terms Discount Exempt'
 		AND ICISP.intItemId = @ItemId 
 		AND ICISP.intItemLocationId = @ItemLocationId 
@@ -157,13 +155,10 @@ BEGIN
 					,@PriceBasis	= dbo.fnCalculateCostBetweenUOM(PL.intItemUnitMeasureId, @ItemUOMId, PL.dblUnitPrice)
 					,@Deviation		= @ZeroDecimal
 					,@Pricing		= 'Inventory - Pricing Level'
-				FROM 
-				tblICItemPricingLevel PL
-				INNER JOIN tblSMCompanyLocationPricingLevel CPL 
-					ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId
-				INNER JOIN vyuICGetItemStock VIS 
-					ON PL.intItemId = VIS.intItemId
-					AND PL.intItemLocationId = VIS.intItemLocationId															
+				FROM tblICItemPricingLevel PL WITH (NOLOCK)
+				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId
+				INNER JOIN tblICItem ITEM ON PL.intItemId = ITEM.intItemId
+				INNER JOIN tblICItemLocation IL ON ITEM.intItemId = IL.intItemId AND PL.intItemLocationId = IL.intItemLocationId				
 				WHERE 
 					CPL.strPricingLevelName = @PriceLevel	
 					AND PL.intItemId = @ItemId
@@ -190,28 +185,13 @@ BEGIN
 		,@PriceBasis	= ICPL.dblUnitPrice		
 		,@Deviation		= @ZeroDecimal		
 		,@Pricing		= 'Inventory - Pricing Level'		
-	FROM
-		tblICItemPricingLevel ICPL
-	INNER JOIN vyuICGetItemStock ICGIS
-			ON ICPL.intItemId = ICGIS.intItemId
-			AND ICPL.intItemLocationId = ICGIS.intItemLocationId
-	INNER JOIN tblSMCompanyLocationPricingLevel SMPL
-			ON 
-			ICGIS.intLocationId = SMPL.intCompanyLocationId 
-			AND ICPL.intCompanyLocationPricingLevelId = SMPL.intCompanyLocationPricingLevelId --ICPL.strPriceLevel = SMPL.strPricingLevelName							
-	INNER JOIN
-		tblEMEntityLocation EMEL
-			ON ICGIS.intLocationId = EMEL.intWarehouseId 
-			AND EMEL.ysnDefaultLocation = 1
-	INNER JOIN
-		tblARCustomer ARC
-			ON EMEL.intEntityId = ARC.[intEntityId] 
-			AND SMPL.intCompanyLocationPricingLevelId  = ARC.intCompanyLocationPricingLevelId			
-	INNER JOIN vyuICGetItemStock VIS
-			ON ICPL.intItemId = VIS.intItemId
-			AND ICPL.intItemLocationId = VIS.intItemLocationId											
-	WHERE
-		ARC.[intEntityId] = @CustomerId
+	FROM tblICItemPricingLevel ICPL WITH (NOLOCK)
+	INNER JOIN tblICItem ITEM ON ICPL.intItemId = ITEM.intItemId
+	INNER JOIN tblICItemLocation IL ON ITEM.intItemId = IL.intItemId AND ICPL.intItemLocationId = IL.intItemLocationId
+	INNER JOIN tblSMCompanyLocationPricingLevel SMPL ON IL.intLocationId = SMPL.intCompanyLocationId AND ICPL.intCompanyLocationPricingLevelId = SMPL.intCompanyLocationPricingLevelId --ICPL.strPriceLevel = SMPL.strPricingLevelName							
+	INNER JOIN tblEMEntityLocation EMEL ON IL.intLocationId = EMEL.intWarehouseId AND EMEL.ysnDefaultLocation = 1
+	INNER JOIN tblARCustomer ARC ON EMEL.intEntityId = ARC.[intEntityId] AND SMPL.intCompanyLocationPricingLevelId  = ARC.intCompanyLocationPricingLevelId			
+	WHERE ARC.[intEntityId] = @CustomerId
 		AND ICPL.intItemId = @ItemId
 		AND ICPL.intItemLocationId = @ItemLocationId
 		AND ICPL.intItemUnitMeasureId = @ItemUOMId

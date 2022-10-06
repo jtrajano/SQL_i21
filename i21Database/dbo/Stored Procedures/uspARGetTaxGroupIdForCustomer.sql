@@ -35,10 +35,10 @@ BEGIN
 	INNER JOIN tblICItem I ON P.intItemId = I.intItemId
 
 	UPDATE P
-	SET intVendorId = VI.intVendorId
+	SET intVendorId = IL.intVendorId
 	FROM @CustomerTaxGroupId P 
 	INNER JOIN tblICItem I ON P.intItemId = I.intItemId
-	INNER JOIN vyuICGetItemStock VI ON I.intItemId = VI.intItemId AND VI.intLocationId = P.intCompanyLocationId	
+	INNER JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId AND IL.intLocationId = P.intCompanyLocationId	
 	
 	--Consumption Site
 	UPDATE P
