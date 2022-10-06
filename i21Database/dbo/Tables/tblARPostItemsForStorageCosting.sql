@@ -1,5 +1,6 @@
 CREATE TABLE tblARPostItemsForStorageCosting (
-	  [intItemId]						INT NOT NULL
+	  [intId]                   		INT IDENTITY (1, 1) NOT NULL
+	, [intItemId]						INT NOT NULL
 	, [intItemLocationId]				INT NULL
 	, [intItemUOMId]					INT NOT NULL
 	, [dtmDate]							DATETIME NOT NULL
@@ -31,6 +32,7 @@ CREATE TABLE tblARPostItemsForStorageCosting (
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL DEFAULT 0
 	, [strBOLNumber]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
 	, [strSessionId]                    NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL
+	, CONSTRAINT [PK_tblARPostItemsForStorageCosting_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO
 CREATE INDEX [idx_tblARPostItemsForStorageCosting_strSessionId] ON [dbo].[tblARPostItemsForStorageCosting] (strSessionId)
