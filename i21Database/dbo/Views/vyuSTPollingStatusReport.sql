@@ -10,6 +10,7 @@ stcp.strGuid,
 stcp.dtmCheckoutProcessDate, 
 CASE WHEN CH.strCheckoutCloseDate IS NULL THEN stcp.dtmCheckoutProcessDate + 1 ELSE CAST(CH.strCheckoutCloseDate AS DATETIME) + 1 END AS dtmCurrentBusinessDay, 
 CASE WHEN CH.strCheckoutCloseDate IS NULL THEN stcp.dtmCheckoutProcessDate ELSE CAST(CH.strCheckoutCloseDate AS DATETIME) END AS strCheckoutCloseDate, 
+ISNULL(CH.dtmCheckoutDate, CH.dtmCountDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription, 
 stcpew.strMessageType, 
@@ -26,4 +27,5 @@ INNER JOIN dbo.tblSTStore AS sts
 LEFT OUTER JOIN dbo.tblSTCheckoutHeader CH
 	ON stcp.intCheckoutId = CH.intCheckoutId
 GROUP BY stcp.intStoreId, stcpew.intCheckoutProcessId, stcpew.intCheckoutProcessErrorWarningId, stcp.intCheckoutId, 
-stcp.strGuid, stcp.dtmCheckoutProcessDate, sts.intStoreNo, sts.strDescription, stcpew.strMessageType, stcpew.strMessage, CH.strCheckoutCloseDate
+stcp.strGuid, stcp.dtmCheckoutProcessDate, CH.dtmCheckoutDate, CH.dtmCountDate, sts.intStoreNo, sts.strDescription, stcpew.strMessageType, stcpew.strMessage, CH.strCheckoutCloseDate
+HAVING CH.dtmCheckoutDate IS NOT NULL
