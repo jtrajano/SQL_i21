@@ -1,5 +1,6 @@
 CREATE TABLE tblARPostItemsForInTransitCosting (
-	  [intItemId]						INT NOT NULL
+	  [intId]                   		INT IDENTITY (1, 1) NOT NULL
+	, [intItemId]						INT NOT NULL
 	, [intItemLocationId]				INT NULL
 	, [intItemUOMId]					INT NOT NULL
 	, [dtmDate]							DATETIME NOT NULL
@@ -28,6 +29,7 @@ CREATE TABLE tblARPostItemsForInTransitCosting (
     , [intTicketId]                     INT NULL
     , [intSourceEntityId]				INT NULL
     , [strSessionId]                    NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL
+	, CONSTRAINT [PK_tblARPostItemsForInTransitCosting_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO
 CREATE INDEX [idx_tblARPostItemsForInTransitCosting_strSessionId] ON [dbo].[tblARPostItemsForInTransitCosting] (strSessionId)

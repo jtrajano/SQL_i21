@@ -12,12 +12,9 @@ SELECT
     ,dtmDate                = dtmDate
     ,strDescription         = I.strComments
     ,intCompanyLocationId   = intCompanyLocationId
-FROM
-	tblARInvoice I
-INNER JOIN tblARCustomer C
-ON I.intEntityCustomerId = C.intEntityId
-WHERE 
-	strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash') 
+FROM tblARInvoice I WITH (NOLOCK)
+INNER JOIN tblARCustomer C WITH (NOLOCK) ON I.intEntityCustomerId = C.intEntityId
+WHERE strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash') 
 	AND ysnPosted = 0  
 	AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) 
 	AND (ISNULL(intTransactionId, 0) = 0 AND I.strType <> 'CF Tran') 
@@ -38,7 +35,5 @@ SELECT
     ,dtmDate                = dtmDatePaid
     ,strDescription         = strNotes
     ,intCompanyLocationId   = intLocationId 
-FROM
-	tblARPayment
-WHERE
-	ysnPosted = 0
+FROM tblARPayment WITH (NOLOCK)
+WHERE ysnPosted = 0
