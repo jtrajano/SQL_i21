@@ -61,7 +61,7 @@ SELECT
    FROM vyuQMSampleList S1 
    LEFT JOIN vyuLGAllocatedContracts A ON A.intPContractDetailId = S1.intContractDetailId
 	OUTER APPLY(
-		SELECT strEntityName,dblNetWeight,strNetWeightUOM,strFreightTerm,strINCOLocation,intContractStatusId,
+		SELECT strEntityName,dblNetWeight,strNetWeightUOM,strFreightTerm,strINCOLocation,intContractStatusId,dblAllocatedQty,
       intContractHeaderId,intContractSeq,dtmStartDate,dtmEndDate,intContractDetailId,strContractNumber
 		FROM vyuCTContractDetailView WHERE intContractDetailId = S1.intContractDetailId 
 		AND intContractStatusId NOT in(3,5,6) AND intContractTypeId =1
