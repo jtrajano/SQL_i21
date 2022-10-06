@@ -156,19 +156,24 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			Bill.intBillId
+			,BD_ITEM.intBillDetailId
 			,APD.intPaymentId
 			,SUM(BD.dblTotal) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
-			ON Bill.intBillId = APD.intBillId 				
+			ON Bill.intBillId = APD.intBillId
 				AND APD.dblPayment <> 0
 				AND Bill.intTransactionType NOT IN (2,3)
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 			AND BD.intScaleTicketId IS NULL
-		GROUP BY Bill.intBillId, APD.intPaymentId
-	) BillAdjustments ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
-		AND BillAdjustments.intBillId = Bill.intBillId
+		JOIN (tblAPBillDetail BD_ITEM JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND strType = 'Inventory')
+			ON BD_ITEM.intBillId = Bill.intBillId
+		GROUP BY Bill.intBillId,APD.intPaymentId,BD_ITEM.intBillDetailId
+	) BillAdjustments 
+		ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
+			AND BillAdjustments.intBillId = Bill.intBillId
+			AND BillAdjustments.intBillDetailId = tblOtherCharge.intBillDetailId
 	LEFT JOIN (
 		SELECT 
 			PYMT.intPaymentId
