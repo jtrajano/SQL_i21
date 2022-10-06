@@ -12,7 +12,9 @@ SET ANSI_WARNINGS ON
 DECLARE @ErrorMessage NVARCHAR(4000)
 		,@ErrorSeverity INT
 		,@ErrorState INT
-		,@intTicketId INT;
+		,@intTicketId INT
+		,@intSplitId INT
+		,@intEntityId INT;
 
 BEGIN TRY
 		IF @ysnPosted = 1
@@ -151,15 +153,67 @@ BEGIN TRY
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,1
-					,Setup.[intSubLocationId] 
-					,Setup.[intStorageLocationId]
+					,ISNULL(TicketStaging.intSubLocationId,Setup.[intSubLocationId])
+					,ISNULL(TicketStaging.intStorageLocationId,Setup.[intStorageLocationId])
+					
 				FROM [dbo].[tblSCTicketLVStaging] TicketStaging
 					left join ( select intScaleSetupId,intSubLocationId,intStorageLocationId  from tblSCScaleSetup) Setup
 						on TicketStaging.intScaleSetupId = Setup.intScaleSetupId
 					WHERE intTicketLVStagingId = @intTicketLVStagingId
 
 				SELECT @intTicketId = SCOPE_IDENTITY()
+				
+				SELECT
+					@intSplitId = intSplitId
+					,@intEntityId = intEntityId
+				FROM
+				tblSCTicket
+				WHERE intTicketId = @intTicketId
 
+				IF @intSplitId IS NOT NULL 
+					AND @intSplitId > 0 
+					AND EXISTS(SELECT TOP 1 1 FROM tblEMEntitySplit WHERE intSplitId = @intSplitId and intEntityId = @intEntityId)
+				BEGIN
+					INSERT INTO tblSCTicketSplit(
+						intTicketId
+						, intCustomerId
+						, dblSplitPercent
+						, intStorageScheduleTypeId
+						, strDistributionOption
+						, intStorageScheduleId
+						, intConcurrencyId
+					)
+					SELECT 
+						@intTicketId as intTicketId
+						,intEntityId as intCustomerId
+						,dblSplitPercent as dblSplitPercent	
+						,STORAGE_TYPE.intStorageScheduleTypeId AS intStorageScheduleTypeId
+						,STORAGE_TYPE.strStorageTypeCode AS strDistributionOption
+						,NULL AS intStorageScheduleId
+						,1 AS intConcurrencyId
+					FROM 
+					tblEMEntitySplitDetail SPLIT_DETAIL
+						JOIN tblGRStorageType STORAGE_TYPE
+							ON SPLIT_DETAIL.strOption = STORAGE_TYPE.strStorageTypeDescription
+					WHERE strOption <> 'Storage Type' 
+						AND intSplitId = @intSplitId
+					UNION ALL
+					SELECT 						
+						@intTicketId as intTicketId
+						,intEntityId as intCustomerId
+						,dblSplitPercent as dblSplitPercent	
+						,STORAGE_TYPE.intStorageScheduleTypeId AS intStorageScheduleTypeId
+						,STORAGE_TYPE.strStorageTypeCode AS strDistributionOption
+						,NULL AS intStorageScheduleId
+						,1 AS intConcurrencyId
+					FROM 
+					tblEMEntitySplitDetail SPLIT_DETAIL
+						JOIN tblGRStorageType STORAGE_TYPE
+							ON SPLIT_DETAIL.intStorageScheduleTypeId= STORAGE_TYPE.intStorageScheduleTypeId
+					WHERE strOption = 'Storage Type' 
+						AND intSplitId = @intSplitId
+				END 
+				
 				INSERT INTO tblQMTicketDiscount(
 					[dblGradeReading]
 					,[dblShrinkPercent]
