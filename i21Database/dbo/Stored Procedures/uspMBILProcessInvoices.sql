@@ -180,7 +180,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 			, [intPerformerId]
 		)
 	SELECT 
-		 [intInvoiceId]
+		 InvoiceItem.[intInvoiceId]
 		,[strTransactionType] = InvoiceItem.strType
 		,[strType] = 'Tank Delivery'
 		,[strSourceTransaction] = 'Mobile Billing'
