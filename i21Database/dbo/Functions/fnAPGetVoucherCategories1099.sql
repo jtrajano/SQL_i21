@@ -61,8 +61,8 @@ BEGIN
 	ELSE IF @intType = 6
 	BEGIN
 		INSERT INTO @tblResults
-		SELECT 0 ,  'Gross Payment Card/Third Party Network' UNION
-		SELECT 1 ,  'Card Not Present'
+		SELECT 1 ,  'Gross Payment Card/Third Party Network' UNION
+		SELECT 2 ,  'Card Not Present'
 	END
 	RETURN;
 END
