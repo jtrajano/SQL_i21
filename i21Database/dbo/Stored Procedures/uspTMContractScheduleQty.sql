@@ -14,6 +14,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
+	IF(@strScreenName <> 'TM - Generate Order')
+	BEGIN
 	IF(@dblQuantity > 0)
 	BEGIN
 		IF(@intContractDetailId IS NOT NULL)
@@ -59,7 +61,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-	 	-- IF NEGATIVE QTY THEN REMOVE FROM SCHEDULED QTY
+		-- IF NEGATIVE QTY THEN REMOVE FROM SCHEDULED QTY
 		SELECT @intContractDetailId = O.intContractDetailId  
 			, @dblQuantity = O.dblQuantity * -1
 			, @intUserId = D.intUserID
@@ -84,5 +86,6 @@ BEGIN
 			END
 		END
 
+	END
 	END
 END
