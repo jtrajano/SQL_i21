@@ -216,6 +216,8 @@ AS
 				WHERE  G.strPartitionGroup = @strGroup
 					AND I.intPartitionType > 0
 
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType > 3)
+				BEGIN
 				-- Check COA Cross Reference
 				INSERT INTO tblGLCOACrossReference
 						([inti21Id],
@@ -245,13 +247,14 @@ AS
 
 				   'Legacy'					AS strCompanyId,
 				   1
-			FROM tblGLCOAImportStaging2 B
-				JOIN tblGLAccount A
-					ON A.intAccountId = B.intAccountId
-			WHERE B.strPartitionGroup = @strGroup
-				AND A.strAccountId NOT IN (SELECT stri21Id
-										  FROM   tblGLCOACrossReference
-										  WHERE  strCompanyId = 'Legacy')
+				FROM tblGLCOAImportStaging2 B
+					JOIN tblGLAccount A
+						ON A.intAccountId = B.intAccountId
+				WHERE B.strPartitionGroup = @strGroup
+					AND A.strAccountId NOT IN (SELECT stri21Id
+											  FROM   tblGLCOACrossReference
+											  WHERE  strCompanyId = 'Legacy')
+				END
 			END
 		END
 	
