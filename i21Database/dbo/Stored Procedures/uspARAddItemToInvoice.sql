@@ -540,7 +540,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemCurrencyExchangeRateId
 				,@ItemCurrencyExchangeRate
 				,ISNULL(@ItemSubCurrencyId, @CurrencyId)
-				,@ItemSubCurrencyRate
+				,(CASE WHEN (ISNULL(@ItemSubCurrencyId, 0) = 0 OR ISNULL((SELECT TOP 1 [ysnSubCurrency] FROM tblSMCurrency where [intCurrencyID] = @ItemSubCurrencyId), 0) = 0) THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END)
 				,@ItemIsBlended
 				,@ItemSubFormula
 				,@ItemRecipeId
