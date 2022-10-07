@@ -38,6 +38,7 @@ BEGIN
 			,@SiteNumberId			INT
 			,@CustomerApplySalesTax	BIT = 0
 			,@CustomerTaxExempt 	BIT = 0
+			,@SiteTaxable 			BIT = 0
 	
 	SET @TaxCodeExemption = NULL
 	SET @ExemptionPercent = 0.00000
@@ -68,6 +69,7 @@ BEGIN
 	IF ISNULL(@SiteId, 0) <> 0
 		BEGIN
 			SELECT TOP 1 @SiteNumberId = intSiteNumber
+					   , @SiteTaxable = ISNULL(ysnTaxable, 0)
 			FROM tblTMSite 
 			WHERE intSiteID = @SiteId
 		END
@@ -127,7 +129,7 @@ BEGIN
 	INNER JOIN tblSMTaxGroup SMTG ON SMTGC.[intTaxGroupId] = SMTG.[intTaxGroupId] 
 	INNER JOIN tblSMTaxCode SMTC ON SMTGC.[intTaxCodeId] = SMTC.[intTaxCodeId] 
 	INNER JOIN tblSMTaxClass SMTCL ON SMTC.[intTaxClassId] = SMTCL.[intTaxClassId]
-	WHERE @CustomerApplySalesTax = 0
+	WHERE @CustomerApplySalesTax = 0 AND @SiteTaxable = 0
 	  AND SMTCL.strTaxClass LIKE '%Sales Tax%'
 	  AND SMTGC.[intTaxCodeId] = @TaxCodeId
 	  AND SMTGC.[intTaxGroupId] = @TaxGroupId		
