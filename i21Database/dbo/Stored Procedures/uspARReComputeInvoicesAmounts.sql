@@ -15,9 +15,13 @@ DECLARE  @ZeroDecimal	DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
 
 INSERT INTO @tblInvoiceIds
-SELECT DISTINCT intHeaderId FROM @InvoiceIds
+SELECT DISTINCT intHeaderId 
+FROM @InvoiceIds II
+INNER JOIN tblARInvoice I ON II.intHeaderId = I.intInvoiceId
+WHERE I.strType = 'Transport Delivery'
 
-EXEC dbo.uspARCalculateInvoiceDeliveryFee @tblInvoiceIds
+IF EXISTS (SELECT TOP 1 1 FROM @tblInvoiceIds)
+	EXEC dbo.uspARCalculateInvoiceDeliveryFee @tblInvoiceIds
 
 UPDATE ARID
 SET dblCurrencyExchangeRate	= CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END
