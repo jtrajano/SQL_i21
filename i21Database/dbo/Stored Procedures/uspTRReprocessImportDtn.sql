@@ -59,6 +59,7 @@ BEGIN
 				, @dblInvoiceAmount = @dblInvoiceAmount
 				, @intEntityVendorId = @intEntityVendorId
 				, @intUserId = @intUserId
+				, @ysnOverrideTolerance = 1
 
 			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId
 		END
