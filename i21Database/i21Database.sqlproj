@@ -1126,7 +1126,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
-	  <Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_AttachmentsFileTypesFix.sql" />
     <Build Include="dbo\Tables\tblGLLedgerDetail.sql" />
@@ -1136,6 +1136,7 @@
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPostUnpostToSAPStaging.sql" />
     <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGDispatchLoadSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11322,16 +11323,16 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
-	<ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
-		<HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
-		<SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-		<DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
-	</ArtifactReference>
-	<ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
-	    <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
-	    <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-	    <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
-	</ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategory.sql" />
