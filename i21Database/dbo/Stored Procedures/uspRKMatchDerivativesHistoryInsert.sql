@@ -47,6 +47,17 @@ BEGIN
 END
 ELSE --FOR DELETE
 BEGIN
+	DECLARE @intMatchNo INT
+		, @strUserName NVARCHAR(200)
+
+	SELECT @intMatchNo = intMatchNo FROM tblRKMatchFuturesPSHeader WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+	SELECT TOP 1 @strUserName = strName FROM tblEMEntity WHERE intEntityId = @userId 
+
+	IF ISNULL(@intMatchNo, 0) <> 0 AND ISNULL(@strUserName, '') <> ''
+	BEGIN
+		EXEC uspRKPostUnpostToSAPStaging @intMatchNo, 0, @strUserName
+	END
+	
 	SELECT intFutOptTransactionId
 	INTO #tmpDerivativesToDelete 
 	FROM (

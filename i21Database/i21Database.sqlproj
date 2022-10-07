@@ -1201,6 +1201,7 @@
     <Build Include="dbo\Tables\tblCRMHubspotConfig.sql" />
     <Build Include="dbo\Tables\tblCRMHubspotScope.sql" />
     <Build Include="dbo\Views\vyuCRMSetting.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPostUnpostToSAPStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

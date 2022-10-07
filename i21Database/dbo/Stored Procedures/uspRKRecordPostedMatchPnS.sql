@@ -62,58 +62,60 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	INSERT INTO tblRKStgMatchPnS (intConcurrencyId
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, dblMatchQty
-		, dblNetPnL
-		, dblGrossPnL
-		, strStatus
-		, strBrokerName
-		, strBrokerAccount
-		, dtmPostingDate
-		, strUserName
-		, strBook
-		, strSubBook
-		, strLocationName
-		, strFutMarketName
-		, ysnPost)
-	SELECT 0
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, @strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, dblMatchQty = ISNULL((SELECT SUM(ISNULL(dblMatchQty, 0))
-								FROM tblRKMatchFuturesPSDetail m
-								WHERE intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId), 0)
-		, @dblNetPnL
-		, @dblGrossPL
-		, ''
-		, @BrokerName
-		, @BrokerAccount
-		, dtmMatchDate
-		, @strUserName
-		, @strBook
-		, @strSubBook
-		, @strLocationName
-		, @strFutMarketName
-		, 1
-	FROM tblRKMatchFuturesPSHeader h
-	WHERE intMatchNo = @intMatchNo
+	-- COMMENTED DUE TO ADJUSTMENTS UNDER RM-4975 
+	-- INSERTING TO SAP STAGING MOVED TO BE BASED ON COMPANY CONFIG (ysnEnableMatchPostToSAPStaging)
+	--INSERT INTO tblRKStgMatchPnS (intConcurrencyId
+	--	, intMatchFuturesPSHeaderId
+	--	, intMatchNo
+	--	, dtmMatchDate
+	--	, strCurrency
+	--	, intCompanyLocationId
+	--	, intCommodityId
+	--	, intFutureMarketId
+	--	, intFutureMonthId
+	--	, intEntityId
+	--	, intBrokerageAccountId
+	--	, dblMatchQty
+	--	, dblNetPnL
+	--	, dblGrossPnL
+	--	, strStatus
+	--	, strBrokerName
+	--	, strBrokerAccount
+	--	, dtmPostingDate
+	--	, strUserName
+	--	, strBook
+	--	, strSubBook
+	--	, strLocationName
+	--	, strFutMarketName
+	--	, ysnPost)
+	--SELECT 0
+	--	, intMatchFuturesPSHeaderId
+	--	, intMatchNo
+	--	, dtmMatchDate
+	--	, @strCurrency
+	--	, intCompanyLocationId
+	--	, intCommodityId
+	--	, intFutureMarketId
+	--	, intFutureMonthId
+	--	, intEntityId
+	--	, intBrokerageAccountId
+	--	, dblMatchQty = ISNULL((SELECT SUM(ISNULL(dblMatchQty, 0))
+	--							FROM tblRKMatchFuturesPSDetail m
+	--							WHERE intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId), 0)
+	--	, @dblNetPnL
+	--	, @dblGrossPL
+	--	, ''
+	--	, @BrokerName
+	--	, @BrokerAccount
+	--	, dtmMatchDate
+	--	, @strUserName
+	--	, @strBook
+	--	, @strSubBook
+	--	, @strLocationName
+	--	, @strFutMarketName
+	--	, 1
+	--FROM tblRKMatchFuturesPSHeader h
+	--WHERE intMatchNo = @intMatchNo
 
 	UPDATE tblRKMatchFuturesPSHeader
 	SET ysnPosted = 1
