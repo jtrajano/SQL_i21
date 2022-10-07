@@ -34,5 +34,9 @@ BEGIN
 	EXEC sp_rename 'dbo.tblCMBankTransfer.dblHistoricRate', 'dblRateAmountFrom', 'COLUMN';  
 END
 
+GO
+--GL-9315 ysnEmailSent will be non nullable in Post deployment
+UPDATE tblCMBankTransaction set ysnEmailSent = 0 WHERE ysnEmailSent IS NULL
 
+GO
 
