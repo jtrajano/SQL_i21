@@ -23,6 +23,8 @@ SELECT mh.*
 	, dblFutCommission = SUM(md.dblFutCommission)
 	, intBankTransactionId = bankTransaction.intBankTransactionId
 	, strBankTransactionId = bankTransaction.strBankTransactionId
+	, cp.ysnEnableMatchPostToSAPStaging
+	, ysnSapPosted = sapStg.ysnPost
 FROM tblRKMatchFuturesPSHeader mh
 LEFT JOIN vyuRKMatchedPSTransaction md ON md.intMatchFuturesPSHeaderId = mh.intMatchFuturesPSHeaderId
 LEFT JOIN tblSMCompanyLocation cl ON mh.intCompanyLocationId = cl.intCompanyLocationId
@@ -48,6 +50,16 @@ OUTER APPLY (
 	WHERE intMatchDerivativeNo = mh.intMatchNo
 	AND btType.strBankTransactionTypeName = 'Broker Settlement'
 ) bankTransaction
+OUTER APPLY (
+	SELECT TOP 1 ysnEnableMatchPostToSAPStaging = ISNULL(ysnEnableMatchPostToSAPStaging, CAST(0 AS BIT))
+	FROM tblRKCompanyPreference
+) cp
+OUTER APPLY (
+	SELECT TOP 1 ysnPost = ISNULL(ysnPost, CAST(0 AS BIT))
+	FROM tblRKStgMatchPnS sap
+	WHERE sap.intMatchNo = mh.intMatchNo
+	ORDER BY intStgMatchPnSId DESC
+) sapStg
 GROUP BY mh.intMatchFuturesPSHeaderId
 	, mh.intMatchNo
 	, mh.dtmMatchDate
@@ -84,3 +96,5 @@ GROUP BY mh.intMatchFuturesPSHeaderId
 	, bankTransaction.intBankTransactionId
 	, bankTransaction.strBankTransactionId
 	, mh.ysnCommissionPosted
+	, cp.ysnEnableMatchPostToSAPStaging
+	, sapStg.ysnPost
