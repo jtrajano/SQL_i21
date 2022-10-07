@@ -20,61 +20,63 @@ BEGIN TRY
 	WHERE EC.strUserName = @strUserName
 	
 	BEGIN TRANSACTION
-	INSERT INTO tblRKStgMatchPnS(intConcurrencyId
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, dblMatchQty
-		, dblCommission
-		, dblNetPnL
-		, dblGrossPnL
-		, strBrokerName
-		, strBrokerAccount
-		, dtmPostingDate
-		, strStatus
-		, strMessage
-		, strUserName
-		, strReferenceNo
-		, strLocationName
-		, strFutMarketName
-		, strBook
-		, strSubBook
-		, ysnPost)
-	SELECT TOP 1 1
-		, intMatchFuturesPSHeaderId
-		, intMatchNo
-		, dtmMatchDate
-		, strCurrency
-		, intCompanyLocationId
-		, intCommodityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, intEntityId
-		, intBrokerageAccountId
-		, -dblMatchQty
-		, dblCommission
-		, case when dblNetPnL<0 then abs(dblNetPnL) else -dblNetPnL end dblNetPnL
-		, case when dblGrossPnL<0 then abs(dblGrossPnL) else -dblGrossPnL end dblGrossPnL
-		, strBrokerName
-		, strBrokerAccount
-		, dtmPostingDate
-		, '' strStatus
-		, strMessage
-		, @strUserName
-		, strReferenceNo
-		, strLocationName
-		, strFutMarketName
-		, strBook
-		, strSubBook
-		, 0
-	FROM tblRKStgMatchPnS WHERE intMatchNo = @intMatchNo ORDER BY intStgMatchPnSId DESC
+	-- COMMENTED DUE TO ADJUSTMENTS UNDER RM-4975 
+	-- INSERTING TO SAP STAGING MOVED TO BE BASED ON COMPANY CONFIG (ysnEnableMatchPostToSAPStaging)
+	--INSERT INTO tblRKStgMatchPnS(intConcurrencyId
+	--	, intMatchFuturesPSHeaderId
+	--	, intMatchNo
+	--	, dtmMatchDate
+	--	, strCurrency
+	--	, intCompanyLocationId
+	--	, intCommodityId
+	--	, intFutureMarketId
+	--	, intFutureMonthId
+	--	, intEntityId
+	--	, intBrokerageAccountId
+	--	, dblMatchQty
+	--	, dblCommission
+	--	, dblNetPnL
+	--	, dblGrossPnL
+	--	, strBrokerName
+	--	, strBrokerAccount
+	--	, dtmPostingDate
+	--	, strStatus
+	--	, strMessage
+	--	, strUserName
+	--	, strReferenceNo
+	--	, strLocationName
+	--	, strFutMarketName
+	--	, strBook
+	--	, strSubBook
+	--	, ysnPost)
+	--SELECT TOP 1 1
+	--	, intMatchFuturesPSHeaderId
+	--	, intMatchNo
+	--	, dtmMatchDate
+	--	, strCurrency
+	--	, intCompanyLocationId
+	--	, intCommodityId
+	--	, intFutureMarketId
+	--	, intFutureMonthId
+	--	, intEntityId
+	--	, intBrokerageAccountId
+	--	, -dblMatchQty
+	--	, dblCommission
+	--	, case when dblNetPnL<0 then abs(dblNetPnL) else -dblNetPnL end dblNetPnL
+	--	, case when dblGrossPnL<0 then abs(dblGrossPnL) else -dblGrossPnL end dblGrossPnL
+	--	, strBrokerName
+	--	, strBrokerAccount
+	--	, dtmPostingDate
+	--	, '' strStatus
+	--	, strMessage
+	--	, @strUserName
+	--	, strReferenceNo
+	--	, strLocationName
+	--	, strFutMarketName
+	--	, strBook
+	--	, strSubBook
+	--	, 0
+	--FROM tblRKStgMatchPnS WHERE intMatchNo = @intMatchNo ORDER BY intStgMatchPnSId DESC
 	
 	--GL Account Validation
 	IF ((SELECT COUNT(intAccountId) FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId AND intAccountId IS NULL) > 0)
