@@ -23,9 +23,13 @@ SET @ZeroDecimal = 0.000000
 SET @InvoiceIdLocal = @InvoiceId
 
 INSERT INTO @InvoiceIds
-SELECT @InvoiceIdLocal
+SELECT I.intInvoiceId
+FROM tblARInvoice I
+WHERE I.strType = 'Transport Delivery'
+  AND I.intInvoiceId = @InvoiceIdLocal
 
-EXEC dbo.uspARCalculateInvoiceDeliveryFee @InvoiceIds
+IF EXISTS (SELECT TOP 1 1 FROM @InvoiceIds)
+	EXEC dbo.uspARCalculateInvoiceDeliveryFee @InvoiceIds
 
 UPDATE tblARInvoiceDetail
 SET [dblCurrencyExchangeRate]	= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END
