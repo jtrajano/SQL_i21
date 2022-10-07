@@ -69,7 +69,7 @@ BEGIN TRY
 				FROM tblAPImportPaidVouchersForPayment I 
 				WHERE 
 					I.strBillId = B.strBillId 
-				AND I.strVendorOrderNumber = TRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber))
+				AND I.strVendorOrderNumber = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)))
 				AND ((I.dblPayment + I.dblDiscount) - I.dblInterest) = ISNULL(PS.dblPayment, B.dblAmountDue)
 				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
 			) forPayment
