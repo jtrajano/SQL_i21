@@ -39,27 +39,27 @@ BEGIN TRY
 
 	IF (@ysnDispatch = 1 AND @ysnDispatched = 1)
 	BEGIN
-		RAISERROR('Transaction is already Dispatched.', 16, 1)
+		RETURN;
 	END
 
 	IF (@ysnDispatch = 0 AND @ysnDispatched = 0)
 	BEGIN
-		RAISERROR('Transaction is not Dispatched.', 16, 1)
+		RETURN;
 	END
 
 	/* Validate Details */
 	IF (@intTransactionType <> 2)
 	BEGIN
-		SELECT TOP 1 @ErrMsg = 'Item Location ' + CL.strLocationName + 'is invalid or missing for ' + I.strItemNo
+		SELECT TOP 1 @ErrMsg = 'Location ''' + CL.strLocationName + ''' is invalid or missing for Item ''' + I.strDescription + ''''
 		FROM tblLGLoadDetail LD
 			INNER JOIN tblICItem I ON I.intItemId = LD.intItemId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intPCompanyLocationId
 		WHERE intLoadId = @intTransactionId
 			AND NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblICItemLocation WHERE intItemId = LD.intItemId AND intLocationId = LD.intPCompanyLocationId)
 	END
-	ELSE IF (@intTransactionType <> 1)
+	IF (@intTransactionType <> 1)
 	BEGIN
-		SELECT TOP 1 @ErrMsg = 'Item Location ' + CL.strLocationName + 'is invalid or missing for ' + I.strItemNo
+		SELECT TOP 1 @ErrMsg = 'Location ''' + CL.strLocationName + ''' is invalid or missing for Item ''' + I.strDescription + ''''
 		FROM tblLGLoadDetail LD
 			INNER JOIN tblICItem I ON I.intItemId = LD.intItemId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intSCompanyLocationId
