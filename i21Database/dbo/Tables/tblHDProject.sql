@@ -61,6 +61,9 @@
 	[ysnMultipleCustomer] bit not null default convert(bit,0),
 	[intTargetVersionId] [int] null,
 	[strProjectImageId] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
+    [intDataConversionLead] [int] null,
+    [intCustomerSuccessManager] [int] null,
+    [intImplementationLead] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
@@ -80,7 +83,10 @@
     CONSTRAINT [FK_tblHDProjectProject_tblHDMilestone_intMilestoneId] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblHDMilestone] ([intMilestoneId]),
     CONSTRAINT [FK_tblHDProjectProject_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblHDProjectProject_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
-    CONSTRAINT [FK_tblHDProject_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
+    CONSTRAINT [FK_tblHDProject_tblEMEntity_intLostToCompetitorId] FOREIGN KEY ([intLostToCompetitorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
+    CONSTRAINT [FK_tblHDProject_tblEMEntity_intDataConversionLead] FOREIGN KEY ([intDataConversionLead]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+    CONSTRAINT [FK_tblHDProject_tblEMEntity_intCustomerSuccessManager] FOREIGN KEY ([intCustomerSuccessManager]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+    CONSTRAINT [FK_tblHDProject_tblEMEntity_intImplementationLead] FOREIGN KEY ([intImplementationLead]) REFERENCES [dbo].tblEMEntity ([intEntityId])
 	--[intOpportunitySourceId]
 )
 
