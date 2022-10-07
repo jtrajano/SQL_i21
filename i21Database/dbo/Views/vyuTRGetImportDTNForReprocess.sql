@@ -2,7 +2,7 @@
 
 AS
 
-SELECT h.intImportDtnId
+SELECT DISTINCT h.intImportDtnId
 	, d.intImportDtnDetailId
 	, h.strFileName
 	, h.dtmImportDate
