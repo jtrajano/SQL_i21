@@ -339,13 +339,16 @@ SET ysnIsInvoicePositive = CAST(0 AS BIT)
 WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
   AND strSessionId = @strSessionId
 
-UPDATE HEADER
-SET ysnForApproval = CAST(1 AS BIT)
-  , strDescription = FAT.strApprovalStatus
-FROM tblARPostInvoiceHeader HEADER WITH (NOLOCK)
-INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
-WHERE FAT.strScreenName = 'Invoice'
-  AND HEADER.strSessionId = @strSessionId
+IF EXISTS (SELECT TOP 1 1 FROM vyuARForApprovalTransction)
+    BEGIN
+        UPDATE HEADER
+        SET ysnForApproval = CAST(1 AS BIT)
+        , strDescription = FAT.strApprovalStatus
+        FROM tblARPostInvoiceHeader HEADER WITH (NOLOCK)
+        INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
+        WHERE FAT.strScreenName = 'Invoice'
+        AND HEADER.strSessionId = @strSessionId
+    END
 
 --DETAIL
 --INVENTORY
