@@ -8,6 +8,7 @@
 	, @dblInvoiceAmount NUMERIC(18, 6)
 	, @intEntityVendorId INT
 	, @intUserId INT
+	, @ysnOverrideTolerance BIT = 0
 
 AS
 
@@ -52,7 +53,7 @@ BEGIN
 				SET @dblAdjustment = @dblAdjustment * -1
 			END
 			
-			IF(@dblAdjustment > @dblAdjustmentTolerance AND @dblAdjustment > 0)
+			IF (@dblAdjustment > @dblAdjustmentTolerance AND @dblAdjustment > 0) AND (@ysnOverrideTolerance = 0)
 			BEGIN
 				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Variance is greater than allowed')
 			END
@@ -186,7 +187,10 @@ BEGIN
 
 		IF(ISNULL(@strMessage, '') != '')
 		BEGIN
-			UPDATE tblTRImportDtnDetail SET strMessage = @strMessage WHERE intImportDtnDetailId = @intImportDtnDetailId 
+			--IF (@strMessage = 'Variance is greater than allowed')
+			UPDATE tblTRImportDtnDetail SET strMessage = @strMessage
+				--, ysnValid = 
+			WHERE intImportDtnDetailId = @intImportDtnDetailId 
 		END	
 
 		IF @@TRANCOUNT > 0 COMMIT TRANSACTION

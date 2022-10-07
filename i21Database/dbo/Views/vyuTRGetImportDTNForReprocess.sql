@@ -16,7 +16,7 @@ SELECT h.intImportDtnId
 	, v.strBillId
 	, d.strMessage
 	, ysnSuccess = ISNULL(d.ysnValid, CAST(0 AS BIT))
-	, ysnVarianceIssue = CASE WHEN ISNULL(d.ysnValid, CAST(0 AS BIT)) = 0 AND d.strMessage LIKE '%Variance is greater than allowed%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	, ysnVarianceIssue = CASE WHEN d.strMessage LIKE '%Variance is greater than allowed%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblTRImportDtn h
 JOIN tblTRImportDtnDetail d ON d.intImportDtnId = h.intImportDtnId
 LEFT JOIN tblICInventoryReceipt ir ON ir.intInventoryReceiptId = d.intInventoryReceiptId
