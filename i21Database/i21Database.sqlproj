@@ -11585,4 +11585,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\QM\2_SetDefaultData.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\40_UpdateSchedulePaymentMethod.sql" />
+  </ItemGroup>
 </Project>

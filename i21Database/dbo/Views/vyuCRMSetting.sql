@@ -7,11 +7,7 @@ SELECT
 	,CF.ysnHubspotIntegration
 	,HC.strHsClientId
 	,HC.strHsClientSecret
-	,HC.strHsInstallationUrl
-	,HC.strHsTokenUrl
-	,HC.strHsApiUrl
-	,HC.strHsi21RedirectUrl
-	,HC.strHsi21AuthorizeUrl
+	,HC.strHsRedirectUrl
 	,HC.strHsRefreshToken
 	,HC.strScopesId
 FROM            

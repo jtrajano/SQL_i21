@@ -713,6 +713,8 @@ print 'BEGIN POST DEPLOYMENT'
 --CRM
 :R .\CRM\SplitCRMData.sql
 :R .\CRM\RenameCRMScreen.sql
+:R .\CRM\SetOpportunityNumber.sql
+:R .\CRM\CRMHubspotDefaults.sql
 
 -- Card Fueling
 :r .\CF\1_ImportMapping.sql
