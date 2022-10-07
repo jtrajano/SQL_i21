@@ -272,20 +272,10 @@ BEGIN TRY
 				delete from @DirectTickets where intTicketId = @intDirectTicketId;
 			end
 
-			DECLARE @ticketId INT
-			SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket with (nolock) WHERE intTicketType = 6 AND intContractId = @intContractDetailId
-			IF @ticketId IS NOT NULL
-			BEGIN
-				DECLARE @newInvoiceId INT
-				EXEC uspSCCreateInvoiceForPostedDestinationWeightsAndGrades @ticketId, @intUserId, @newInvoiceId OUTPUT
-			END
-			ELSE
-			BEGIN
-				if (@ysnProcessPricing = 1)
-				begin
-					EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
-				end
-			END			
+			if (@ysnProcessPricing = 1)
+			begin
+				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
+			end
 		END
 
 	/*(CT-4647) - this block will re-order the pricing number upon deleting pricing layer.*/
