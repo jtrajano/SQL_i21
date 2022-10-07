@@ -612,6 +612,7 @@ BEGIN
 											strActionType,
 											strUpcCode,
 											strDescription,
+											strUnitMeasure,
 											dblSalePrice,
 											ysnSalesTaxed,
 											ysnIdRequiredLiquor,
@@ -626,6 +627,7 @@ BEGIN
 											strActionType = t1.strActionType,
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
+											strUnitMeasure = t1.strUnitMeasure,
 											dblSalePrice = CASE
 																	WHEN (GETDATE() BETWEEN t1.dtmBeginDate AND t1.dtmEndDate)
 																		THEN t1.dblUnitAfterDiscount 
@@ -656,6 +658,7 @@ BEGIN
 														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 														, IUOM.strLongUPCCode AS strUpcCode
 														, I.strDescription AS strDescription
+														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
 														, IL.intItemLocationId AS intItemLocationId
 														, IL.ysnTaxFlag1 AS ysnSalesTaxed
@@ -1042,6 +1045,7 @@ BEGIN
 							strActionType,
 							strUpcCode,
 							strDescription,
+							strUnitMeasure,
 							dblSalePrice,
 							ysnSalesTaxed,
 							ysnIdRequiredLiquor,
@@ -1056,6 +1060,7 @@ BEGIN
 							strActionType = t1.strActionType,
 							strUpcCode = t1.strUpcCode,
 							strDescription = t1.strDescription,
+							strUnitMeasure = t1.strUnitMeasure,
 							dblSalePrice = t1.dblSalePrice,
 							ysnSalesTaxed = t1.ysnSalesTaxed,
 							ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -1073,6 +1078,7 @@ BEGIN
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 									, IUOM.strLongUPCCode AS strUpcCode
 									, I.strDescription AS strDescription
+									, IUM.strUnitMeasure AS strUnitMeasure
 									, CASE  WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
 											WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
 																							WHERE EIP.intItemLocationId = IL.intItemLocationId
