@@ -1198,6 +1198,9 @@
     <Build Include="dbo\Views\vyuHDTimeEntrySummaryDetail.sql" />
     <Build Include="dbo\Tables\tblARCompanyReportHeader.sql" />
     <Build Include="dbo\Views\vyuARCompanyReportHeader.sql" />
+    <Build Include="dbo\Tables\tblCRMHubspotConfig.sql" />
+    <Build Include="dbo\Tables\tblCRMHubspotScope.sql" />
+    <Build Include="dbo\Views\vyuCRMSetting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3143,7 +3146,7 @@
     <Build Include="dbo\Tables\tblWHTaskType.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
-    <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />    
+    <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
@@ -6749,7 +6752,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddInvoicesTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />    
+    <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
@@ -11654,5 +11657,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AR\DefaultData\40_UpdateSchedulePaymentMethod.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
   </ItemGroup>
 </Project>
