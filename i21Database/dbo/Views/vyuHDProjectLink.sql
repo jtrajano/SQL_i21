@@ -81,6 +81,12 @@
 			,strParentProjectName = (select top 1 strParentProjectName from parentproject where intProjectId = a.intProjectId)
 			,p.intOpportunityId
 			,strOpportunityName = p.strName
+			,intDataConversionLead = a.intDataConversionLead
+			,intCustomerSuccessManager = a.intCustomerSuccessManager
+			,intImplementationLead = a.intImplementationLead
+			,strDataConversionLead = DataConversionLead.strName
+			,strCustomerSuccessManager = CustomerSuccessManager.strName
+			,strImplementationLead = ImplementationLead.strName
 		from
 			tblHDProject a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -91,6 +97,10 @@
 			left join tblEMEntity k on k.intEntityId = a.intInternalSalesPerson
 			left join tblEMEntity l on l.intEntityId = a.intCustomerProjectManager
 			left join tblEMEntity m on m.intEntityId = a.intCustomerLeadershipSponsor
+			left join tblEMEntity DataConversionLead on DataConversionLead.intEntityId = a.intDataConversionLead
+			left join tblEMEntity CustomerSuccessManager on CustomerSuccessManager.intEntityId = a.intCustomerSuccessManager
+			left join tblEMEntity ImplementationLead on ImplementationLead.intEntityId = a.intImplementationLead
 			left join tblHDVersion n on n.intVersionId = a.intTargetVersionId
 			left join tblCRMOpportunityProject o on o.intProjectId = a.intProjectId
 			left join tblCRMOpportunity p on p.intOpportunityId = o.intOpportunityId
+GO
