@@ -128,6 +128,11 @@ SELECT DT.intDepartmentTotalId
 			ELSE 0
 		END AS dblCalculatedInvoicePrice
 FROM tblSTCheckoutDepartmetTotals DT
+INNER JOIN tblSTCheckoutHeader CH
+	ON DT.intCheckoutId = CH.intCheckoutId
+INNER JOIN tblSTStore ST
+	ON CH.intStoreId = CH.intStoreId
+	AND ISNULL(ST.ysnConsMeterReadingsForDollars,0) = 0
 INNER JOIN tblICItem Item
 	ON DT.intItemId = Item.intItemId
 INNER JOIN tblICCategory Cat
