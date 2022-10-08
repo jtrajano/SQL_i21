@@ -99,6 +99,7 @@ BEGIN TRY
 				, CD.strSeason
 				, CD.strClass
 				, CD.strProductLine
+				, dblDefaultFx = null
 			FROM tblCTContractHeader			CH	
 			JOIN tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 			JOIN tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
@@ -241,6 +242,7 @@ BEGIN TRY
 				, ICC.strSeason
 				, ICC.strClass
 				, ICC.strProductLine
+				, dblDefaultFx = dFx.dblRate
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 			JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
@@ -268,6 +270,17 @@ BEGIN TRY
 					UNION ALL SELECT dblQuantity FROM tblCTContractDetail WHERE intSplitFromId = CD.intContractDetailId
 				) tbl
 			) tblQuantity
+			cross apply (
+				select top 1
+					erd.dblRate
+				from
+					tblSMCurrencyExchangeRateDetail erd
+				where
+					erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId
+					and erd.dtmValidFromDate <= getdate()
+				order by
+					erd.dtmValidFromDate desc
+			) dFx
 			where
 				CD.dblNoOfLots IS NOT NULL		 
 				AND	ISNULL(CD.ysnMultiplePriceFixation, 0) = 0
