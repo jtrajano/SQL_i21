@@ -2169,15 +2169,18 @@ FROM #tmpICEdiImportPricebook_tblICEffectiveItemPrice
 WHERE strAction = 'INSERT';
 
 -- Update or Insert the Item Pricing Level
-INSERT INTO #tmpICEdiImportPricebook_tblICItemPriceLevel (strAction
-														, intItemId
-														, intItemLocationId	
-														, intItemPricingLevelId)
-SELECT [Changes].strAction 
+INSERT INTO #tmpICEdiImportPricebook_tblICItemPriceLevel (
+	strAction
+	, intItemId
+	, intItemLocationId	
+	, intItemPricingLevelId
+)
+SELECT 
+	[Changes].strAction 
 	 , [Changes].intItemId
 	 , [Changes].intItemLocationId 	
 	 , [Changes].intItemPricingLevelId 	
-FROM (MERGE	INTO dbo.tblICItemPricingLevel WITH (HOLDLOCK) AS ItemPriceLevel 
+FROM  (MERGE INTO dbo.tblICItemPricingLevel WITH (HOLDLOCK) AS ItemPriceLevel 
 USING (
 	SELECT Item.intItemId
 		 , ItemLocation.intItemLocationId
@@ -2188,15 +2191,28 @@ USING (
 		 , dtmDateCreated					= GETUTCDATE()		
 		 , intCreatedByUserId				= @intUserId
 		 , ysnUpdatePrice					= Pricebook.ysnUpdatePrice
+		 , intCompanyLocationPricingLevelId = CompanyPricingLevel.intCompanyLocationPricingLevelId
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	OUTER APPLY (SELECT loc.intCompanyLocationId 					
-				 FROM @ValidLocations loc 
-				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	OUTER APPLY (
+		SELECT loc.intCompanyLocationId 					
+		FROM 
+			@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+				ON loc.intCompanyLocationId = cl.intCompanyLocationId
+	) AS ValidLocation
+	OUTER APPLY (
+		SELECT TOP 1 
+			pl.intCompanyLocationPricingLevelId
+		FROM 
+			tblSMCompanyLocationPricingLevel pl
+		WHERE
+			pl.intCompanyLocationId = ValidLocation.intCompanyLocationId 	
+	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
 	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strItemUnitOfMeasure)))
 	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strCaseRetailPrice, '') AS NUMERIC(38, 20)) <> 0
-	UNION
+	
+	UNION ALL 
 	SELECT Item.intItemId
 		, ItemLocation.intItemLocationId
 		, ItemUOM.intItemUOMId
@@ -2206,15 +2222,27 @@ USING (
 		, dtmDateCreated = GETUTCDATE()		
 		, intCreatedByUserId	= @intUserId
 		, ysnUpdatePrice = Pricebook.ysnUpdatePrice
+		, intCompanyLocationPricingLevelId = CompanyPricingLevel.intCompanyLocationPricingLevelId
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	OUTER APPLY (SELECT loc.intCompanyLocationId 					
-				 FROM @ValidLocations loc 
-				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	OUTER APPLY (
+		SELECT	loc.intCompanyLocationId 					
+		FROM	@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+				ON loc.intCompanyLocationId = cl.intCompanyLocationId
+	) AS ValidLocation
+	OUTER APPLY (
+		SELECT TOP 1 
+			pl.intCompanyLocationPricingLevelId
+		FROM 
+			tblSMCompanyLocationPricingLevel pl
+		WHERE
+			pl.intCompanyLocationId = ValidLocation.intCompanyLocationId 	
+	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
 	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1)))
 	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice1, '') AS NUMERIC(38, 20)) <> 0
-	UNION
+	
+	UNION ALL 
 	SELECT Item.intItemId
 		 , ItemLocation.intItemLocationId
 		 , ItemUOM.intItemUOMId
@@ -2224,18 +2252,31 @@ USING (
 		 , dtmDateCreated = GETUTCDATE()		
 		 , intCreatedByUserId	= @intUserId
 		 , ysnUpdatePrice = Pricebook.ysnUpdatePrice
+		 , intCompanyLocationPricingLevelId = CompanyPricingLevel.intCompanyLocationPricingLevelId
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	OUTER APPLY (SELECT loc.intCompanyLocationId 					
-				 FROM @ValidLocations loc 
-				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	OUTER APPLY (
+		SELECT loc.intCompanyLocationId 					
+		FROM 
+			@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+				ON loc.intCompanyLocationId = cl.intCompanyLocationId
+		) AS ValidLocation
+	OUTER APPLY (
+		SELECT TOP 1 
+			pl.intCompanyLocationPricingLevelId
+		FROM 
+			tblSMCompanyLocationPricingLevel pl
+		WHERE
+			pl.intCompanyLocationId = ValidLocation.intCompanyLocationId 	
+	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
 	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2)))
 	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) <> 0
-) AS Source_Query ON ItemPriceLevel.intItemId = Source_Query.intItemId
-				 AND ItemPriceLevel.intItemLocationId = Source_Query.intItemLocationId
-				 AND ItemPriceLevel.intItemUnitMeasureId = Source_Query.intItemUOMId
-				 AND CONVERT(DATE, ItemPriceLevel.dtmEffectiveDate, 101) = CONVERT(DATE, Source_Query.dtmEffectiveDate, 101) 
+) AS Source_Query 
+	ON ItemPriceLevel.intItemId = Source_Query.intItemId
+	AND ItemPriceLevel.intItemLocationId = Source_Query.intItemLocationId
+	AND ItemPriceLevel.intItemUnitMeasureId = Source_Query.intItemUOMId
+	AND CONVERT(DATE, ItemPriceLevel.dtmEffectiveDate, 101) = CONVERT(DATE, Source_Query.dtmEffectiveDate, 101) 
 
 -- If matched, update the existing item pricing level
 WHEN MATCHED AND Source_Query.ysnUpdatePrice = 1 THEN
@@ -2244,36 +2285,42 @@ WHEN MATCHED AND Source_Query.ysnUpdatePrice = 1 THEN
 			 , ItemPriceLevel.intModifiedByUserId = @intUserId
 
 -- If none is found, insert a new item pricing level
-WHEN NOT MATCHED THEN 
-	INSERT (intItemId				
-		  , intCompanyLocationPricingLevelId	
-		  , intItemLocationId	
-		  , intItemUnitMeasureId	
-		  , dblUnitPrice		
-		  , dtmEffectiveDate
-		  , dtmDateCreated		
-		  , intCreatedByUserId
-		  , strDataSource
-		  , strPricingMethod
-		  , dblUnit)
-	 VALUES (Source_Query.intItemId				
-		   , Source_Query.intCompanyLocationId	
-		   , Source_Query.intItemLocationId	
-		   , Source_Query.intItemUOMId	
-		   , Source_Query.dblUnitPrice		
-		   , Source_Query.dtmEffectiveDate			
-		   , Source_Query.dtmDateCreated		
-		   , Source_Query.intCreatedByUserId
-		   , 'Import CSV'
-		   , 'None'
-		   , 1)
+WHEN NOT MATCHED AND Source_Query.intCompanyLocationPricingLevelId IS NOT NULL THEN 
+	INSERT (
+		intItemId				
+		, intCompanyLocationPricingLevelId	
+		, intItemLocationId	
+		, intItemUnitMeasureId	
+		, dblUnitPrice		
+		, dtmEffectiveDate
+		, dtmDateCreated		
+		, intCreatedByUserId
+		, strDataSource
+		, strPricingMethod
+		, dblUnit
+	)
+	 VALUES (
+		Source_Query.intItemId				
+		, Source_Query.intCompanyLocationPricingLevelId	
+		, Source_Query.intItemLocationId	
+		, Source_Query.intItemUOMId	
+		, Source_Query.dblUnitPrice		
+		, Source_Query.dtmEffectiveDate			
+		, Source_Query.dtmDateCreated		
+		, Source_Query.intCreatedByUserId
+		, 'Import CSV'
+		, 'None'
+		, 1
+	)
 OUTPUT $action
 	 , inserted.intItemId 
 	 , inserted.intItemLocationId			
-	 , inserted.intItemPricingLevelId) AS [Changes] (strAction
-													 , intItemId 
-													 , intItemLocationId 
-													 , intItemPricingLevelId);
+	 , inserted.intItemPricingLevelId) AS [Changes] (
+		strAction
+		, intItemId 
+		, intItemLocationId 
+		, intItemPricingLevelId
+	);
 
 SELECT @updatedEffectiveItemPricing = COUNT(1) 
 FROM #tmpICEdiImportPricebook_tblICItemPriceLevel 
