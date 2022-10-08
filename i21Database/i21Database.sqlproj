@@ -851,6 +851,7 @@
     <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPostOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspCTHedgeContractPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetOfferList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
