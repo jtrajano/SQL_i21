@@ -310,15 +310,6 @@ BEGIN
 				AND t.intLotId = cbSource.intLotId
 				AND ABS(t.dblQty) = ABS(cbOut.dblQty)
 				AND t.intInTransitSourceLocationId IS NULL 
-	 UNION ALL 
-	SELECT	t.intInventoryTransactionId 
-			,2	
-	FROM	tblICInventoryLot cb INNER JOIN (
-				tblICInventoryLotOut cbOut INNER JOIN tblICInventoryTransaction t 
-					ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
-					AND cbOut.intRevalueLotId IS NOT NULL 					
-			)
-				ON cb.intInventoryLotId = cbOut.intRevalueLotId		
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
 			AND cb.intTransactionId = @intSourceTransactionId
@@ -326,6 +317,7 @@ BEGIN
 			AND cb.strTransactionId = @strSourceTransactionId
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
+			AND cbOut.intRevalueLotId IS NOT NULL 	
 END 
 
 -- Remember the original cost from the cost bucket
