@@ -571,7 +571,8 @@ SET @query = '
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		AND D.strAccountCategory = ''AP Account''
-) SubQuery
+) SubQuery '
++ CASE WHEN ISNULL(@filter,'') != '' THEN ' WHERE ' + @filter ELSE '' END + '
 	GROUP BY 
 		intEntityVendorId
 		,strVendorId
@@ -590,10 +591,10 @@ BEGIN
 	SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 END
 
-IF ISNULL(@filter,'') != ''
-BEGIN
-	SET @query = @query + ' WHERE ' + @filter
-END
+-- IF ISNULL(@filter,'') != ''
+-- BEGIN
+-- 	SET @query = @query + ' WHERE ' + @filter
+-- END
 
 --PRINT @filter
 --PRINT @query
