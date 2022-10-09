@@ -176,7 +176,7 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	JOIN @tblMFItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intWeightUOMId
-	WHERE L.dblQty > 0
+	WHERE L.dblQty > 0 AND L.intLotStatusId=1
 	GROUP BY L.intItemId
 		,L.intLocationId
 
@@ -485,9 +485,10 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
 	OUTER APPLY (
-		SELECT Sum(dblNet) dblNet
-			,Sum(dblQuantity) dblQuantity
+		SELECT Sum(LD.dblNet) dblNet
+			,Sum(LD.dblQuantity) dblQuantity
 		FROM tblLGLoadDetail LD
+		JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
 		WHERE LD.intPContractDetailId = SS.intContractDetailId
 		) C2
 	WHERE SS.intContractStatusId IN (
@@ -515,9 +516,10 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
 	OUTER APPLY (
-		SELECT Sum(dblNet) dblNet
-			,Sum(dblQuantity) dblQuantity
+		SELECT Sum(LD.dblNet) dblNet
+			,Sum(LD.dblQuantity) dblQuantity
 		FROM tblLGLoadDetail LD
+		JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
 		WHERE LD.intPContractDetailId = SS.intContractDetailId
 		) C2
 	WHERE SS.intContractStatusId IN (
