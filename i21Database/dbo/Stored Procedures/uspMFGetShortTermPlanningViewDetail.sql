@@ -218,7 +218,7 @@ BEGIN
 	JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = L.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = IU2.intUnitMeasureId
-	WHERE L.dblQty > 0
+	WHERE L.dblQty > 0 AND L.intLotStatusId=1
 	GROUP BY L.intContractDetailId
 		,L.intItemId
 		,L.intLocationId
@@ -487,9 +487,10 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
-				,Sum(dblQuantity) dblQuantity
+			SELECT Sum(LD.dblNet) dblNet
+				,Sum(LD.dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
+			JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
 		WHERE SS.intContractStatusId IN (
@@ -526,9 +527,10 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
-				,Sum(dblQuantity) dblQuantity
+			SELECT Sum(LD.dblNet) dblNet
+				,Sum(LD.dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
+			JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
 		WHERE SS.intContractStatusId IN (
