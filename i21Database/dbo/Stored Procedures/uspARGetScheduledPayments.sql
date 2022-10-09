@@ -62,7 +62,7 @@ BEGIN TRY
 
 	SELECT TOP 1 @intCompanyLocationId  = CP.intPaymentsLocationId
 			   , @intBankAccountId		= BA.intBankAccountId
-	FROM tblSMCompanyPreference CP
+	FROM tblARCompanyPreference CP
 	INNER JOIN tblSMCompanyLocation CL ON CP.intPaymentsLocationId = CL.intCompanyLocationId
 	LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 	WHERE CL.ysnLocationActive = 1
