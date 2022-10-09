@@ -85,9 +85,9 @@ BEGIN
 			DECLARE @strCreditCardConvenienceFee NVARCHAR(100) = NULL
 				   ,@intPaymentsLocationId INT = NULL
 
-			SELECT @intPaymentsLocationId = intPaymentsLocationId,
-				   @strCreditCardConvenienceFee = strCreditCardConvenienceFee
-			FROM tblSMCompanyPreference
+			SELECT TOP 1 @intPaymentsLocationId = intPaymentsLocationId
+				   	   , @strCreditCardConvenienceFee = strCreditCardConvenienceFee
+			FROM tblARCompanyPreference
 
 			IF @ysnScheduledPayment = 1 AND @strCreditCardNumber IS NULL
 				SELECT @strCreditCardNumber = strCreditCardNumber FROM tblEMEntityCardInformation WHERE intEntityCardInfoId = @intEntityCardInfoId
