@@ -61,7 +61,7 @@ BEGIN
 		INNER JOIN @InvoiceIds II ON ARI.[intInvoiceId] = II.[intHeaderId]
 		INNER JOIN tblICItemUOM ICIUOM  WITH (NOLOCK) ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 		INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
-		INNER JOIN tblICItemLocation IL ON ITEM.intItemId = ITEM.intItemId AND ARI.intCompanyLocationId = IL.intLocationId
+		INNER JOIN tblICItemLocation IL ON IL.intItemId = ITEM.intItemId AND ARI.intCompanyLocationId = IL.intLocationId
 		WHERE ARI.[intInvoiceId] = @InvoiceId
 			AND ITEM.strType = 'Inventory'
 			AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
