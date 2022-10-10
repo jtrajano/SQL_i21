@@ -343,7 +343,7 @@ BEGIN
 						 ELSE LGAS.strAllocationStatus  END)
 						
 		  ,strShipmentStatus = ''--ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
-		  ,strReference = ISNULL(LGAS.strAllocationNumber,AH.strAllocationNumber)
+		  ,strReference =  ISNULL(ISNULL(LGAS.strAllocationNumber,AH.strAllocationNumber),'A- '+CH.strContractNumber)
 		  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus in ( 'Reserved') THEN  CTD.dblQuantity
 							  WHEN LGAS.strAllocationStatus in ( 'Unallocated') THEN  CTD.dblQuantity
 							  WHEN LGAS.strAllocationStatus in ( 'Partially Allocated', 'Allocated') THEN  -LGAS.dblAllocatedQuantity --ALLOCATED QTY
@@ -695,7 +695,7 @@ BEGIN
 		  ,dblQuantity = CASE WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
 							  WHEN LGAS.strAllocationStatus = 'Allocated' THEN  LGAS.dblAllocatedQuantity - CTD.dblQuantity --ALLOCATED QTY
 							  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  TQ.dblTotalQty-- PARTIALLY ALLOCATED QTY
-							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN LGD.dblQuantity 		--SHIPPED LS QTY=
+							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN TQ.dblTotalQty 		--SHIPPED LS QTY=
 						 ELSE CTD.dblQuantity - ISNULL(CTD.dblScheduleQty,0) END --OPEN CT QTY 
 		,strPacking = UM.strUnitMeasure
 		,dblOfferCost = CTD.dblCashPrice			
