@@ -270,13 +270,13 @@ BEGIN
   
     IF ISNULL(@intBTForwardToFXGLAccountId ,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
         GOTO Post_Rollback  
     END  
   
     IF ISNULL(@intBTForwardFromFXGLAccountId,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
         GOTO Post_Rollback  
     END  
 END  
