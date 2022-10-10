@@ -148,7 +148,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND (RI.[intInvoiceId] IS NULL OR (RI.[intInvoiceId] IS NOT NULL AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
 	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
-	AND (T.intTicketType <> 6 AND T.intTicketTypeId <> 9 AND T.strInOutFlag <> 'O')
+	AND (ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.intTicketTypeId, 0 ) <> 9)
 	AND ID.intContractDetailId IS NOT NULL
 
 --DESTINATION WEIGHTS/GRADES
@@ -241,7 +241,7 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #TBLTOPROCESS)
 		  AND ID.intShipmentPurchaseSalesContractId IS NULL
 		  AND (I.intLoadDetailId IS NULL OR (I.intLoadDetailId IS NOT NULL AND ID.strPricing = 'Subsystem - Ticket Management'))
 		  AND (I.[strItemType] IS NOT NULL AND I.[strItemType] <> 'Other Charge')
-		  AND (T.intTicketType <> 6 AND T.intTicketTypeId <> 9 AND T.strInOutFlag <> 'O')
+		  AND (ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.intTicketTypeId, 0 ) <> 9)
 		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId, CD.intItemId, CD.intItemUOMId, CH.intEntityId, T.intTicketTypeId, T.intTicketType, T.strInOutFlag, CH.ysnLoad, CD.dblScheduleQty
 	END
 
