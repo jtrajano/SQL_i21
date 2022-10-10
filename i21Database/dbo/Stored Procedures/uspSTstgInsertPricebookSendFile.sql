@@ -217,7 +217,7 @@ BEGIN
 			ON itemLoc.intLocationId = store.intCompanyLocationId
 		INNER JOIN @tempTableItems temp
 			ON item.intItemId = temp.intItemId
-		WHERE item.ysnFuelItem = CAST(0 AS BIT) 
+		WHERE ISNULL(item.ysnFuelItem, 0) = CAST(0 AS BIT) 
 			AND store.intStoreId = @intStoreId
 			AND uom.strLongUPCCode IS NOT NULL
 			AND uom.strLongUPCCode <> ''
@@ -447,7 +447,7 @@ BEGIN
 							AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 						LEFT JOIN tblICItemUOM uomDepositPlu
 							ON IL.intDepositPLUId = uomDepositPlu.intItemUOMId
-						WHERE item.ysnFuelItem = CAST(0 AS BIT) 
+						WHERE ISNULL(item.ysnFuelItem, 0) = CAST(0 AS BIT) 
 							AND ST.intStoreId = @intStoreId
 							AND IUOM.strLongUPCCode IS NOT NULL
 							AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
@@ -651,7 +651,7 @@ BEGIN
 										FROM  
 										(
 										SELECT *,
-												rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+												rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId, t.strUnitMeasure ORDER BY (SELECT NULL))
 											FROM 
 												(
 													SELECT DISTINCT
@@ -695,7 +695,7 @@ BEGIN
 														AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 													LEFT JOIN tblICItemSpecialPricing SplPrc 
 														ON SplPrc.intItemId = I.intItemId
-													WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+													WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 														AND ST.intStoreId = @intStoreId
 														AND IUOM.strLongUPCCode IS NOT NULL
 														AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
@@ -852,7 +852,7 @@ BEGIN
 							ON Prc.intItemLocationId = IL.intItemLocationId
 						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
-						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 
 						AND ST.intStoreId = @intStoreId
 
@@ -999,7 +999,7 @@ BEGIN
 							ON Prc.intItemLocationId = IL.intItemLocationId
 						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
-						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 
 						AND ST.intStoreId = @intStoreId
 						AND (
@@ -1071,7 +1071,7 @@ BEGIN
 						FROM  
 						(
 							SELECT *,
-									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId, t.strUnitMeasure ORDER BY (SELECT NULL))
 							FROM 
 							(
 								SELECT DISTINCT
@@ -1119,7 +1119,7 @@ BEGIN
 									ON Prc.intItemLocationId = IL.intItemLocationId
 								LEFT JOIN tblICItemSpecialPricing SplPrc 
 									ON SplPrc.intItemId = I.intItemId
-								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+								WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 									AND ST.intStoreId = @intStoreId
 									AND IUOM.strLongUPCCode IS NOT NULL
 									--AND IUOM.strLongUPCCode <> ''
@@ -1418,7 +1418,7 @@ BEGIN
 									ON I.intItemId = itemPricing.intItemId
 									AND IL.intItemLocationId = itemPricing.intItemLocationId
 									AND IUOM.intItemUOMId = itemPricing.intItemUOMId
-								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+								WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 									AND ST.intStoreId = @intStoreId
 									AND IUOM.strLongUPCCode IS NOT NULL
 									--AND IUOM.strLongUPCCode <> ''
