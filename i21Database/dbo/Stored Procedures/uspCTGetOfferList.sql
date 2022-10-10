@@ -255,8 +255,8 @@ BEGIN
 	LEFT JOIN tblLGPickLotHeader		PLH  WITH (NOLOCK)ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
 	WHERE
-	CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY	
-	AND CH.intContractTypeId = 1
+	--CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY	
+	CH.intContractTypeId = 1
 	AND PLH.intPickLotHeaderId <> 0
 	) a
 	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
@@ -440,8 +440,8 @@ BEGIN
 	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.intAllocationHeaderId = AD.intAllocationHeaderId OR ISNULL(LGAS.strPurchaseContractNumber,LGAS.strSalesContractNumber) = CH.strContractNumber  
 	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
 	WHERE
-	CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY	
-	AND CH.intContractTypeId = 1
+	--CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY	
+	CH.intContractTypeId = 1
 	AND LGAS.strAllocationStatus IN ('Allocated', 'Partially Allocated','Unallocated', 'Reserved') 
 	OR LGAS.strAllocationStatus IN (CASE WHEN @YsnyAllocated = 1 then LGAS.strAllocationStatus ELSE NULL END)
 	) a
@@ -783,7 +783,7 @@ BEGIN
 	) TQ
 	WHERE
 	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
-	AND CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY
+	--AND CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY
 	) a
 	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
