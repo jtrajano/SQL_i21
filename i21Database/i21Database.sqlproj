@@ -11429,6 +11429,8 @@
     <Build Include="dbo\Functions\fnGLGetBeginningBalance_ForTB.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
     <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
+    <Build Include="dbo\Views\vyuQMPurchaseSampleLinked.sql" />
+    <Build Include="dbo\Views\vyuQMSaleSampleNotLinked.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
