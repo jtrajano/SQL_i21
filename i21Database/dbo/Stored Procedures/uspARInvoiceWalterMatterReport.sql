@@ -145,10 +145,10 @@ SELECT
 	,dblInvoiceSubtotal			= ARI.dblInvoiceSubtotal
 	,dblTax						= ARI.dblTax
 	,dblInvoiceTotal			= ARI.dblInvoiceTotal
-	,strVATNo					= ISNULL(EMEL.strVATNo, '')
-	,strOurFiscalRepName		= EMEL.strOurFiscalRepName
-	,strOurFiscalRepAddress		= EMEL.strOurFiscalRepAddress
-	,strEntityLocationRemarks	= EMEL.strRemarks
+	,strVATNo					= ISNULL(EMELS.strVATNo, '')
+	,strOurFiscalRepName		= EMELS.strOurFiscalRepName
+	,strOurFiscalRepAddress		= EMELS.strOurFiscalRepAddress
+	,strEntityLocationRemarks	= EMELS.strRemarks
 	,strFooterComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strFooterComments, ''), 0)
 	,dblTotal					= ARGID.dblTotal
 	,strRelatedInvoiceRemarks	= CASE 
@@ -170,10 +170,12 @@ SELECT
 	,dblProvisionalUnitPrice	= ARGIDP.dblUnitPrice
 	,strRelatedType				= ARIR.strType
 	,strTransactionType			= ARI.strTransactionType
+	,strBuyer					= ISNULL(RTRIM(EMELB.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(ARI.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToState, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToCountry, ''), '')
 FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
-INNER JOIN tblEMEntityLocation EMEL WITH (NOLOCK) ON ARI.intShipToLocationId = EMEL.intEntityLocationId
+INNER JOIN tblEMEntityLocation EMELS WITH (NOLOCK) ON ARI.intShipToLocationId = EMELS.intEntityLocationId
+INNER JOIN tblEMEntityLocation EMELB ON ARI.intBillToLocationId = EMELB.intEntityLocationId
 LEFT JOIN vyuARGetInvoiceDetail ARGID WITH (NOLOCK) ON ARI.intInvoiceId = ARGID.intInvoiceId
 LEFT JOIN tblARInvoice ARIR WITH (NOLOCK) ON ARI.intOriginalInvoiceId = ARIR.intInvoiceId
 LEFT JOIN vyuARGetInvoiceDetail ARGIDP WITH (NOLOCK) ON ARIR.intInvoiceId = ARGIDP.intInvoiceId
