@@ -1,15 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuLGAllocationStatus]
 AS
 	SELECT 
-		intAllocationHeaderId,
+		V.intAllocationHeaderId,
 		strAllocationStatus = CASE 
 								WHEN dblPContractAllocatedQty = dblPDetailQuantity THEN 'Allocated'
 								WHEN dblPContractAllocatedQty < dblPDetailQuantity THEN 'Partially Allocated' END,
-		strAllocationNumber,
-		dblAllocatedQuantity = dblPContractAllocatedQty,
-		strPurchaseContractNumber,
-		strSalesContractNumber
-	FROM vyuLGAllocatedContracts
+		V.strAllocationNumber,
+		dblAllocatedQuantity = ALD.dblPAllocatedQty,
+		V.strPurchaseContractNumber,
+		V.strSalesContractNumber,
+		dblReservedQuantity = NULL
+	FROM vyuLGAllocatedContracts V
+	LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId  = V.intAllocationDetailId
 
 	UNION ALL
 
@@ -19,7 +21,8 @@ AS
 		strAllocationNumber = NULL,
 		dblAllocatedQuantity,
 		strPurchaseContractNumber = CASE WHEN intPurchaseSale = 1 THEN strContractNumber ELSE NULL END,
-		strSalesContractNumber = CASE WHEN intPurchaseSale = 2 THEN strContractNumber ELSE NULL END 
+		strSalesContractNumber = CASE WHEN intPurchaseSale = 2 THEN strContractNumber ELSE NULL END,
+		dblReservedQuantity = NULL
 	FROM vyuLGAllocationOpenContracts WHERE dblAllocatedQuantity = 0
 
 	UNION ALL
@@ -28,9 +31,10 @@ AS
 		intAllocationHeaderId = NULL,
 		strAllocationStatus = 'Reserved',
 		strAllocationNumber = NULL,
-		dblAllocatedQuantity = 0,
+		dblAllocatedQuantity = NULL,
 		strPurchaseContractNumber = CASE WHEN intPurchaseSale = 1 THEN strContractNumber ELSE NULL END,
-		strSalesContractNumber = CASE WHEN intPurchaseSale = 2 THEN strContractNumber ELSE NULL END 
+		strSalesContractNumber = CASE WHEN intPurchaseSale = 2 THEN strContractNumber ELSE NULL END ,
+		R.dblReservedQuantity
 	FROM tblLGReservation R
 	LEFT JOIN tblCTContractDetail CD ON R.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
