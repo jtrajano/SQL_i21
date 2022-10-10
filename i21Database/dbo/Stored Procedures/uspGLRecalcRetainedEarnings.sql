@@ -68,24 +68,19 @@ BEGIN
 	END  
 END
 
-IF EXISTS(SELECT 1 FROM @tblPeriod where intIncomeSummaryAccount IS NULL )
+IF EXISTS(SELECT 1 FROM @tblPeriod where ISNULL(intIncomeSummaryAccount,0) = 0 )
 BEGIN
 	SET @result = 'Fiscal year has missing Income Summary GL Account'   
 	GOTO _end
 END
-IF EXISTS(SELECT 1 FROM @tblPeriod where intRetainAccount IS NULL )
+IF EXISTS(SELECT 1 FROM @tblPeriod where ISNULL(intRetainAccount,0) = 0 )
 BEGIN
-
 	SET @result = 'Fiscal year has missing Retain Earnings GL Account'   
 	GOTO _end
 END
-        
-        
     
 WHILE EXISTS (SELECT 1 FROM  @tblPeriod)        
 BEGIN        
-        
-    
     SELECT TOP 1 @intGLFiscalYearPeriodId =intGLFiscalYearPeriodId,@strPeriod = strPeriod,        
     @dtmStartDate =  dtmStartDate, @dtmEndDate =dtmEndDate,@strGUID = guidPostId,    
     @intRetainAccount=intRetainAccount,@intIncomeSummaryAccount= intIncomeSummaryAccount    
