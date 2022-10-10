@@ -1236,6 +1236,7 @@
     <Build Include="dbo\Tables\tblCTContractDetailImportHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessContractDetailImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPostUnpostToSAPStaging.sql" />
+    <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
