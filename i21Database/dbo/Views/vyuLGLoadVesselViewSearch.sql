@@ -104,6 +104,7 @@ SELECT  L.intLoadId
 	   ,SB.strSubBook
 	   ,strVendor = VEN.strName
 	   ,LD.intVendorEntityId
+	   ,L.intUserLoc
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId

@@ -131,6 +131,7 @@ SELECT
 	,strRegistration = CASE WHEN L.ysn4cRegistration = 1 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
 	,L.intBookId
 	,L.intSubBookId
+	,L.intUserLoc
 FROM tblLGLoadWarehouse LW
 	JOIN tblLGLoad L ON L.intLoadId = LW.intLoadId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
