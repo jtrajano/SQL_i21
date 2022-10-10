@@ -1135,6 +1135,7 @@
     <Build Include="dbo\Stored Procedures\uspHDSyncTimeOffRequest.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPostUnpostToSAPStaging.sql" />
+    <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
