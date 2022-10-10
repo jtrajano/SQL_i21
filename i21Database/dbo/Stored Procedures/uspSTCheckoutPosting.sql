@@ -933,6 +933,7 @@ BEGIN
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
 								AND CH.intStoreId = ST.intStoreId	
+								--AND TPI.intStoreId = ST.intStoreId
 							JOIN vyuEMEntityCustomerSearch vC 
 								ON ST.intCheckoutCustomerId = vC.intEntityId
 							LEFT OUTER JOIN
