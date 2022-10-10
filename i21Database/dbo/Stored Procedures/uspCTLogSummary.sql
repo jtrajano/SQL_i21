@@ -2157,7 +2157,11 @@ BEGIN TRY
 				FROM @cbLogTemp				
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0 AND strTransactionReference <> 'Transfer Storage' AND intPricingTypeId <> 5 AND @strProcess <> 'Update Sequence Balance - DWG')
-				OR EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0 AND intPricingTypeId = 5 AND strTransactionReference <> 'Settle Storage' AND @strProcess <> 'Update Sequence Balance - DWG')
+				OR (
+					EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0 AND intPricingTypeId = 5 AND strTransactionReference <> 'Settle Storage' AND @strProcess <> 'Update Sequence Balance - DWG')
+					AND
+					EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE intPricingTypeId = 5 AND strTransactionReference <> 'Inventory Receipt' AND @strProcess <> 'Update Sequence Quantity')
+					)
 			BEGIN
 				SET @ysnUnposted = 1
 				
@@ -3412,6 +3416,13 @@ BEGIN TRY
 			where
 				curr.intId = @intId
 		)
+		begin
+			SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
+            continue;
+		end
+
+		--Don't log DP contract in unposting IR in Update Sequence Quantity process
+		if exists (select top 1 1 from @cbLogCurrent where intId = @intId and intPricingTypeId = 5 and strTransactionReference = 'Inventory Receipt' and @strProcess = 'Update Sequence Quantity')
 		begin
 			SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
             continue;
