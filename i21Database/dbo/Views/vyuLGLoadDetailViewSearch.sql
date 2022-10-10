@@ -268,6 +268,7 @@ SELECT   L.intLoadId
 		,strClass = Class.strDescription
 		,strProductLine = ProductLine.strDescription
 		,Item.strMarketValuation
+		,strOrderNumber = LD.strOrderNumber
 		,L.intUserLoc
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
