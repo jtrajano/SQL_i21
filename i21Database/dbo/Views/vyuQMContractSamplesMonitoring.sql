@@ -1,4 +1,4 @@
-ALTER VIEW vyuQMContractSamplesMonitoring AS 
+CREATE VIEW vyuQMContractSamplesMonitoring AS 
 
 WITH QUERY AS
 (
