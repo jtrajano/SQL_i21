@@ -225,6 +225,7 @@ SELECT   L.intLoadId
 		,strClass = Class.strDescription
 		,strProductLine = ProductLine.strDescription
 		,Item.strMarketValuation
+		,strOrderNumber = LD.strOrderNumber
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 JOIN vyuLGShipmentStatus LGSS ON LGSS.intLoadId = L.intLoadId
