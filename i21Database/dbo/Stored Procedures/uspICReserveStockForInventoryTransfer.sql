@@ -67,9 +67,11 @@ BEGIN
 		t.intInventoryTransferId = @intTransactionId
 		AND i.strType IN ('Inventory', 'Finished Good', 'Raw Material')
 		AND td.intOwnershipType = @Ownership_Own
+		AND (t.ysnPosted = 0 OR t.ysnPosted IS NULL) 
 END
 
 -- Do the reservations
+IF EXISTS (SELECT TOP 1 1 FROM @ItemsToReserve) 
 BEGIN 
 	-- Validate the reservation 
 	EXEC @intReturn = dbo.uspICValidateStockReserves 
