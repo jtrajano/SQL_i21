@@ -50,8 +50,8 @@ OUTER APPLY (
 		AND intContractStatusId NOT IN( 3, 5, 6 )   
 		AND intContractTypeId = 1
 	)V1
-      
-    WHERE S1.strContractType='Purchase' and A.intPContractDetailId = S1.intContractDetailId    
+    WHERE S1.strContractType='Purchase' 
+    AND A.intPContractDetailId = S1.intContractDetailId    
 -- 
 ) U    
 OUTER APPLY(    
@@ -86,9 +86,7 @@ OUTER APPLY(
 		AND intContractStatusId NOT IN( 3, 5, 6 )   
 		AND intContractTypeId =2
 	)V2 
-    WHERE --A.intSContractDetailId = S2.intContractDetailId    
-	S2.strContractType = 'Sale' and
-    S2.intRelatedSampleId = U.intSampleIdP
-
+    WHERE A.intSContractDetailId = S2.intContractDetailId   
+    AND S2.strContractType = 'Sale'
 ) V    
 WHERE U.intSampleIdP IS NOT NULL OR V.intSampleIdS IS NOT NULL
