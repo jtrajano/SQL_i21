@@ -203,7 +203,8 @@ BEGIN
 			@dtmNextDeliveryDate datetime = NULL,
 			@dtmRunOutDate datetime = NULL,
 			@dtmForecastedDelivery datetime = NULL,
-			@intRowNumber INT = NULL
+			@intRowNumber INT = NULL,
+			@strCustomerEntityNo nvarchar(200) = NULL
 	
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
@@ -282,7 +283,8 @@ BEGIN
 		ysnManualAdjustment,
 		dtmNextDeliveryDate,
 		dtmRunOutDate,
-		dtmForecastedDelivery
+		dtmForecastedDelivery,
+		strCustomerEntityNo
 	from  [dbo].[tblApiSchemaTMDeliveryHistory]
 		WHERE guiApiUniqueId = @guiApiUniqueId
 
@@ -295,7 +297,7 @@ BEGIN
 									@intWillCallPriority,@dblWillCallTotal,@strWillCallComments,@dtmWillCallCallInDate,@strWillCallUser,@ysnWillCallPrinted,@dtmWillCallDispatch,@strWillCallOrderNumber,@strWillCallContractNumber,@dtmWillCallDeliveryDate,
 									@dblWillCallDeliveryQuantity,@dblWillCallDeliveryPrice,@dblWillCallDeliveryTotal,@strInvoiceDetail,@dtmSiteLastDelivery,@dblSitePreviousBurnRate,@dblSiteBurnRate,@dtmSiteOnHoldStartDate,@dtmSiteOnHoldEndDate,
 									@ysnSiteHoldDDCalculations,@ysnSiteOnHold,@dblSiteLastDeliveredGal,@ysnSiteDeliveryTicketPrinted,@dblSiteDegreeDayBetweenDelivery,@intSiteNextDeliveryDegreeDay,@dblSiteLastGalsInTank,@dblSiteEstimatedPercentLeft,
-									@dtmSiteLastReadingUpdate,@ysnMeterReading,@strWillCallRoute,@dtmCreatedDate,@ysnWillCallLeakCheckRequired,@dblWillCallOriginalPercentLeft,@ysnManualAdjustment,@dtmNextDeliveryDate,@dtmRunOutDate,@dtmForecastedDelivery
+									@dtmSiteLastReadingUpdate,@ysnMeterReading,@strWillCallRoute,@dtmCreatedDate,@ysnWillCallLeakCheckRequired,@dblWillCallOriginalPercentLeft,@ysnManualAdjustment,@dtmNextDeliveryDate,@dtmRunOutDate,@dtmForecastedDelivery,@strCustomerEntityNo
 
 	WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -310,9 +312,11 @@ BEGIN
 			Declare @intWillCallContractId int = null
 			Declare @intWillCallRouteId int = null
 			Declare @intWillCallDispatchId int = null
+			Declare @intCustomerId int = null
 
+			set @intCustomerId = (select T.intCustomerID from tblEMEntity E	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1	INNER JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId where E.strEntityNo = @strCustomerEntityNo)
 			set @intUserID	= (SELECT top 1 US.intEntityId FROM tblSMUserSecurity US INNER JOIN tblEMEntity E ON E.intEntityId = US.intEntityId where E.strName = @strUserName)
-			set @intSiteID = (select top 1 intSiteID from tblTMSite where intSiteNumber = @intSiteNumber)	
+			set @intSiteID = (select top 1 intSiteID from tblTMSite where intSiteNumber = @intSiteNumber and intCustomerID = @intCustomerId)	
 			set @strSalesPersonID =	(select top 1 a.intEntityId from tblEMEntity as a left join tblEMEntityType as b on b.intEntityId = a.intEntityId AND b.strType = 'Salesperson' WHERE b.intEntityTypeId IS NULL and a.strName = @strUserName)
 			set @intWillCallDriverId =	(select top 1 a.intEntityId from tblEMEntity as a left join tblEMEntityType as b on b.intEntityId = a.intEntityId AND b.strType = 'Salesperson' WHERE b.intEntityTypeId IS NULL and a.strName = @strUserName)
 			set @intWillCallProductId =	(select top 1 intItemId from tblICItem where strDescription = @strWillCallProduct) 	
@@ -663,12 +667,12 @@ BEGIN
 									
 										update [dbo].[tblTMDeliveryHistoryDetail]
 												set strInvoiceNumber = @strInvoiceNumber,
-												dblQuantityDelivered = @dblQtyShipped,
+												dblQuantityDelivered = @dblQtyShipped2,
 												strItemNumber = @strProductDelivered,
 												intDeliveryHistoryID = @intDeliveryHistoryID,
-												dblPercentAfterDelivery = @dblPercentFull,
-												dblExtendedAmount = @dblTotal,
-												intInvoiceDetailId = @intInvoiceDetailId
+												dblPercentAfterDelivery = @dblPercentFull2,
+												dblExtendedAmount = @dblTotal2,
+												intInvoiceDetailId = @intInvoiceDetailId2
 											where intInvoiceDetailId = @intInvoiceDetailId2
 
 											FETCH NEXT FROM DataCursor3 INTO  @intInvoiceDetailId2,@dblQtyShipped,@dblTotal,@dblPercentFull
@@ -726,7 +730,7 @@ BEGIN
 									@intWillCallPriority,@dblWillCallTotal,@strWillCallComments,@dtmWillCallCallInDate,@strWillCallUser,@ysnWillCallPrinted,@dtmWillCallDispatch,@strWillCallOrderNumber,@strWillCallContractNumber,@dtmWillCallDeliveryDate,
 									@dblWillCallDeliveryQuantity,@dblWillCallDeliveryPrice,@dblWillCallDeliveryTotal,@strInvoiceDetail,@dtmSiteLastDelivery,@dblSitePreviousBurnRate,@dblSiteBurnRate,@dtmSiteOnHoldStartDate,@dtmSiteOnHoldEndDate,
 									@ysnSiteHoldDDCalculations,@ysnSiteOnHold,@dblSiteLastDeliveredGal,@ysnSiteDeliveryTicketPrinted,@dblSiteDegreeDayBetweenDelivery,@intSiteNextDeliveryDegreeDay,@dblSiteLastGalsInTank,@dblSiteEstimatedPercentLeft,
-									@dtmSiteLastReadingUpdate,@ysnMeterReading,@strWillCallRoute,@dtmCreatedDate,@ysnWillCallLeakCheckRequired,@dblWillCallOriginalPercentLeft,@ysnManualAdjustment,@dtmNextDeliveryDate,@dtmRunOutDate,@dtmForecastedDelivery
+									@dtmSiteLastReadingUpdate,@ysnMeterReading,@strWillCallRoute,@dtmCreatedDate,@ysnWillCallLeakCheckRequired,@dblWillCallOriginalPercentLeft,@ysnManualAdjustment,@dtmNextDeliveryDate,@dtmRunOutDate,@dtmForecastedDelivery,@strCustomerEntityNo
 	END
 	CLOSE DataCursor
 	DEALLOCATE DataCursor
