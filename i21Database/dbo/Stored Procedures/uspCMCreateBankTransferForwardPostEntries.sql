@@ -19,13 +19,13 @@ DECLARE @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Det
   
     IF ISNULL(@intBTForwardToFXGLAccountId ,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
         RETURN
     END  
   
     IF ISNULL(@intBTForwardFromFXGLAccountId,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
         RETURN
     END  
 
