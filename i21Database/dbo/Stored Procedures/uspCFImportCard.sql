@@ -194,7 +194,7 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 																	ISNULL((
 																		SELECT TOP 1 1 
 																		FROM cflocmst
-																		WHERE CAST(ISNULL(cfloc_ignore_card,0) AS INT)= CAST(ISNULL(cfcus_card_no,0) AS INT)
+																		WHERE CAST(ISNULL(cfloc_ignore_card,0) AS BIGINT)= CAST(ISNULL(cfcus_card_no,0) AS BIGINT)
 																			AND  cfloc_network_id = cfcus_network_id
 																	),0)
 																END
