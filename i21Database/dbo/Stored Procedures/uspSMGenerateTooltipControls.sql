@@ -1,10 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMGenerateTooltipControls]
 	AS
 BEGIN
+		BEGIN TRY
+			BEGIN TRANSACTION
 
- IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblSMTooltip')
-		   BEGIN TRY
-			   INSERT INTO [dbo].[tblSMTooltip]
+				DELETE FROM tblSMTooltip
+
+				INSERT INTO tblSMTooltip
 				SELECT DISTINCT
 					A.intScreenId,
 					strControlId,
@@ -17,14 +19,14 @@ BEGIN
 					NULL,
 					'Top',
 					0
-				FROM [tblSMControl] A
-				LEFT JOIN [tblSMScreen] B ON B.intScreenId = A.intScreenId
+				FROM tblSMControl A
+				LEFT JOIN tblSMScreen B ON B.intScreenId = A.intScreenId
 
 				UPDATE tblSMCompanySetup
 				SET ysnTooltipListingUpdated = 1
-			
-		   END TRY
-				BEGIN CATCH
-						PRINT(N'INSERT CONTROLS TO TOOLTIPS FAILED');
-				END CATCH
+				COMMIT TRANSACTION
+		END TRY
+		BEGIN CATCH
+				ROLLBACK TRANSACTION
+		END CATCH
 END
