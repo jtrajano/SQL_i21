@@ -3,11 +3,8 @@
  SELECT  
 	A.*,
     S1.intSampleId intSampleIdP,    
-    V1.strEntityName strEntityNameP,    
     S1.dblSampleQty dblSampleQtyP,    
     S1.strSampleUOM strSampleUOMP,    
-    V1.dblNetWeight dblNetWeightP,    
-    V1.strNetWeightUOM strNetWeightUOMP,    
     S1.dblRepresentingQty dblRepresentingQtyP,    
     S1.strItemNo strItemNoP,    
     S1.strSampleNumber strSampleNumberP,    
@@ -19,15 +16,24 @@
     S1.strCourier strCourierP,    
     S1.dtmSampleReceivedDate dtmSampleReceivedDateP,    
     S1.strStatus strStatusP,    
-    S1.strLotNumber strLotNumberP,   
-    V1.strFreightTerm strFreightTermP,    
-    V1.strINCOLocation strINCOLocationP,    
-    V1.intContractStatusId intContractStatusIdP,
-	V1.intContractHeaderId intContractHeaderIdP,
+    S1.strLotNumber strLotNumberP,
+	V1.*,
 	V.*
     FROM vyuQMSampleList S1   
 	OUTER APPLY(
-		SELECT strEntityName,dblNetWeight,strNetWeightUOM ,strFreightTerm ,strINCOLocation,intContractStatusId,intContractHeaderId 
+		SELECT 
+		dtmStartDate dtmStartDateP, --con   
+		dtmEndDate dtmEndDateP, --c
+		intContractSeq intSequenceP, --c    
+		intContractDetailId intContractDetailIdP,    --c
+		strContractNumber strContractNumberP,    --
+		strEntityName strEntityNameP,
+		dblNetWeight dblNetWeightP,
+		strNetWeightUOM strNetWeightUOMP,
+		strFreightTerm strFreightTermP,
+		strINCOLocation strINCOLocationP,
+		intContractStatusId intContractStatusIdP,
+		intContractHeaderId intContractHeaderIdP
         FROM vyuCTContractDetailView
 		WHERE intContractDetailId = S1.intContractDetailId    
 		AND intContractStatusId NOT IN( 3, 5, 6 )   
@@ -50,16 +56,22 @@
 		S2.dtmSampleReceivedDate dtmSampleReceivedDateS,    
 		S2.strStatus strStatusS,    
 		S2.strLotNumber strLotNumberS,  
-		V2.strEntityName strEntityNameS,   
-		V2.dblNetWeight dblNetWeightS,    
-		V2.strNetWeightUOM strNetWeightUOMS,  
-		V2.strFreightTerm strFreightTermS,    
-		V2.strINCOLocation strINCOLocationS,    
-		V2.intContractStatusId intContractStatusIdS,
-		V2.intContractHeaderId intContractHeaderIdS
+		V2.*
 		FROM vyuQMSampleList S2     
 		OUTER APPLY(
-			SELECT strEntityName,dblNetWeight,strNetWeightUOM ,strFreightTerm ,strINCOLocation,intContractStatusId,intContractHeaderId 
+			SELECT 
+			dtmStartDate dtmStartDateS, --con   
+			dtmEndDate dtmEndDateS, --c
+			intContractSeq intSequenceS, --c    
+			intContractDetailId intContractDetailIdS,    --c
+			strContractNumber strContractNumberS,    --
+			strEntityName strEntityNameS,
+			dblNetWeight dblNetWeightS,
+			strNetWeightUOM strNetWeightUOMS,
+			strFreightTerm strFreightTermS,
+			strINCOLocation strINCOLocationS,
+			intContractStatusId intContractStatusIdS,
+			intContractHeaderId intContractHeaderIdS
 			FROM vyuCTContractDetailView
 			WHERE intContractDetailId = S2.intContractDetailId  
 			AND intContractStatusId NOT IN( 3, 5, 6 )   
@@ -71,26 +83,16 @@
 		S2.intRelatedSampleId = S1.intSampleId
 	
 	)V
+
 	OUTER APPLY(
 		SELECT 
-		strAllocationNumber,    
-		intAllocationDetailId,    
-		dtmPStartDate dtmStartDateP,    
-		dtmPEndDate dtmEndDateP,
-		intPContractSeq intSequenceP,    
-		intSContractSeq intSequenceS,    
-		dtmSStartDate dtmStartDateS,    
-		dtmSEndDate dtmEndDateS,    
-		intPContractDetailId intContractDetailIdP,    
-		strPContractNumber strContractNumberP,    
-		intSContractDetailId intContractDetailIdS,    
-		strSContractNumber strContractNumberS,    
-		dblSAllocatedQty,    
-		dblPAllocatedQty
+		strAllocationNumber,    ---a
+		intAllocationDetailId,    --a
+		dblSAllocatedQty,    --a
+		dblPAllocatedQty --a
 		FROM  vyuLGAllocatedContracts 
 		WHERE  intPContractDetailId = S1.intContractDetailId    
 	)A
-      
     WHERE S1.strContractType='Purchase' --and A.intPContractDetailId = S1.intContractDetailId
 	
 
