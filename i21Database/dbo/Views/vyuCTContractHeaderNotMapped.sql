@@ -165,9 +165,8 @@ AS
 
 			Outer Apply(
 				select tr.intRecordId, 
-					   strApprovalStatus =	CASE WHEN tr.strApprovalStatus in ('Waiting for Submit','Waiting for Approval','Approved') THEN  
-												CASE WHEN tr.strApprovalStatus = 'Approved with Modifications' then 'Approved' ELSE tr.strApprovalStatus END
-											ELSE '' END
+					   strApprovalStatus =	CASE WHEN tr.strApprovalStatus in ('Approved with Modifications') THEN  'Approved' 
+												 WHEN tr.strApprovalStatus in ('No Need for Approval') THEN '' ELSE tr.strApprovalStatus END
 				from
 					tblSMScreen sc
 					join tblSMTransaction tr on tr.intScreenId = sc.intScreenId
