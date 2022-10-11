@@ -30,7 +30,8 @@ values
 
 ----=====================================STEP 3=========================================
 --update all items in origin contract with commodity code
-
+ALTER TABLE tblICItem
+NOCHECK CONSTRAINT CK_AllowCommodityChange
 
 update I set intCommodityId = (select intCommodityId from tblICCommodity where strCommodityCode = 'Pt')
 from tblICItem I 
