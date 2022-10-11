@@ -198,7 +198,8 @@ SELECT
    ,ysnStoreManager = vst.ysnIsUserStoreManager  
    ,ysnStopCondition = chk.ysnStopCondition  
       ,dblEditableAggregateMeterReadingsForDollars = chk.dblEditableAggregateMeterReadingsForDollars  
-      ,dblEditableOutsideFuelDiscount = chk.dblEditableOutsideFuelDiscount  
+      ,dblEditableOutsideFuelDiscount = chk.dblEditableOutsideFuelDiscount 
+      ,chk.dblEditableInsideFuelDiscount  
       ,ysnConsMeterReadingsForDollars = st.ysnConsMeterReadingsForDollars  
       ,ysnConsAddOutsideFuelDiscounts = st.ysnConsAddOutsideFuelDiscounts  
       ,dblTotalAmountOfDepositablePaymentMethods = dbo.fnSTTotalAmountOfDepositablePaymentMethods(chk.intCheckoutId)  
@@ -325,6 +326,7 @@ GROUP BY
    ,chk.intEntityId  
    ,chk.dblEditableAggregateMeterReadingsForDollars  
    ,chk.dblEditableOutsideFuelDiscount  
+   ,chk.dblEditableInsideFuelDiscount  
       ,st.ysnConsMeterReadingsForDollars  
       ,st.ysnConsAddOutsideFuelDiscounts  
       ,st.ysnConsignmentStore
