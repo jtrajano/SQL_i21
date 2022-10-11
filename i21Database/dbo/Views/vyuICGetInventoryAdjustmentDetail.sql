@@ -90,6 +90,7 @@ SELECT
 	, Adj.strInvoiceNumber
 	, Adj.strShipmentNumber
 	, Adj.strReceiptNumber
+	, Item.ysnLotWeightsRequired
 FROM tblICInventoryAdjustmentDetail AdjDetail
 LEFT JOIN vyuICGetInventoryAdjustment Adj ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation NewLocation ON NewLocation.intCompanyLocationId = AdjDetail.intNewLocationId
