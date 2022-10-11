@@ -102,7 +102,7 @@ LEFT JOIN tblICCommodityUnitMeasure		CD	WITH (NOLOCK) ON	CD.intCommodityId					=
 LEFT JOIN tblICUnitMeasure				U1	WITH (NOLOCK) ON	U1.intUnitMeasureId					=	CS.intUnitMeasureId
 LEFT JOIN tblICCommodityUnitMeasure		CM	WITH (NOLOCK) ON	CM.intCommodityUnitMeasureId		=	CH.intCommodityUOMId
 LEFT JOIN tblICCommodityAttribute		CA	WITH (NOLOCK) ON	CA.intCommodityAttributeId			=	CH.intProductTypeId
-cross apply (
+outer apply (
 	select
 		cd.intContractHeaderId
 		, dblTotalBalance = SUM(F.dblBalance)
