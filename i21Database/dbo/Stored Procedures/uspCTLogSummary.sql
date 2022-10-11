@@ -3956,7 +3956,6 @@ BEGIN TRY
 					SELECT intPricingTypeId, strNotes FROM @cbLogSpecific
 				) tbl
 
-				select line=4194,ysnMatched=@ysnMatched,TotalBasis=@TotalBasis,TotalPriced=@TotalPriced,TotalHTA=@TotalHTA
 				IF @ysnMatched <> 1
 				BEGIN
 					IF (ISNULL(@TotalBasis, 0) <> 0)
@@ -4047,8 +4046,6 @@ BEGIN TRY
 								, intUserId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intUserId else lp.intUserId end
 							FROM @cbLogPrev lp
 							cross apply (SELECT * FROM @cbLogSpecific) curr
-
-							select line=4276,* from @cbLogPrev
 
 							IF (@strProcess = 'Do Roll')
 							BEGIN
