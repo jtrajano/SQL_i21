@@ -3343,8 +3343,8 @@ BEGIN
 												--										THEN ISNULL(CH.dblCashOverShort, 0)
 												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
 												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
-												,[dblPrice]					= ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0) + ISNULL(CH.dblEditableInsideFuelDiscount, 0))
-
+												,[dblPrice]					= CASE WHEN @ysnConsIncludeInsideDiscount = 1 THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0) + ISNULL(CH.dblEditableInsideFuelDiscount, 0))
+																				ELSE ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0)) END
 												,[ysnRefreshPrice]			= 0
 												,[strMaintenanceType]		= NULL
 												,[strFrequency]				= NULL
