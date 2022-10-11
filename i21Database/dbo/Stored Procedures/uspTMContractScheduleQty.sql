@@ -33,7 +33,7 @@ BEGIN
 				DECLARE @dblAvailable DECIMAL(18,6) = NULL
 
 				--Get the available quantity of the contract
-				SELECT @dblAvailable = B.dblBalance - B.dblScheduleQty
+				SELECT @dblAvailable = ISNULL(B.dblBalance,0) - ISNULL(B.dblScheduleQty,0)
 				FROM tblCTContractHeader A
 				INNER JOIN tblCTContractDetail B
 					ON A.intContractHeaderId = B.intContractHeaderId
