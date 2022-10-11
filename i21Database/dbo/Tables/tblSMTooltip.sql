@@ -9,5 +9,6 @@
 	[strControlType] NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[strScreenName] NVARCHAR(500)	COLLATE Latin1_General_CI_AS NULL,
 	[strTooltip] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strPlacement] NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]  INT NOT NULL DEFAULT 1,
 )
