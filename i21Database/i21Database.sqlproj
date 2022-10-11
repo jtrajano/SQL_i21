@@ -1136,6 +1136,8 @@
     <Build Include="dbo\Stored Procedures\uspRKPostUnpostToSAPStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutValidatePaymentMethod.sql" />
     <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
+    <Build Include="dbo\Tables\tblARCompanyReportHeader.sql" />
+    <Build Include="dbo\Views\vyuARCompanyReportHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
