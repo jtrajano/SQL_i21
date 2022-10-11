@@ -1,8 +1,4 @@
-﻿IF EXISTS(SELECT TOP 1 1 from sys.procedures WHERE name = 'uspSMGenerateTooltipControls')
-	DROP PROCEDURE uspSMGenerateTooltipControls
-GO
-
-CREATE PROCEDURE [dbo].[uspSMGenerateTooltipControls]
+﻿CREATE PROCEDURE [dbo].[uspSMGenerateTooltipControls]
 	AS
 BEGIN
 
