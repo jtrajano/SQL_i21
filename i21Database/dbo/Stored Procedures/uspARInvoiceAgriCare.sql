@@ -134,7 +134,7 @@ SELECT
 	,strComments			= dbo.fnEliminateHTMLTags(ISNULL(HEADER.strMessage, ARI.strComments), 0) 
 	,strFooterComments		= dbo.fnEliminateHTMLTags(ISNULL(FOOTER.strMessage, ARI.strFooterComments), 0)
 	,strTerm				= TERM.strTerm
-	,strBillTo				= ISNULL(RTRIM(ENTITYLOCATION.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strBillToCity), '') + ISNULL(RTRIM(', ' + ARI.strBillToState), '') + ISNULL(RTRIM(', ' + ARI.strBillToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strBillToCountry), '')
+	,strBillTo				= ISNULL(RTRIM(ARI.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strBillToCity), '') + ISNULL(RTRIM(', ' + ARI.strBillToState), '') + ISNULL(RTRIM(', ' + ARI.strBillToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strBillToCountry), '')
 	,strShipTo				= ISNULL(RTRIM(ARI.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strShipToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strShipToCity), '') + ISNULL(RTRIM(', ' + ARI.strShipToState), '') + ISNULL(RTRIM(', ' + ARI.strShipToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strShipToCountry), '')	 
 	,dtmOrderDate			= SO.dtmDate
 	,dtmDate				= ARI.dtmDate
