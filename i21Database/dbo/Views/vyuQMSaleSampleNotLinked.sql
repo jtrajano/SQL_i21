@@ -3,9 +3,9 @@
  SELECT  
 	A.*,
     null intSampleIdP,    
-    0 dblSampleQtyP,    
+    NULL dblSampleQtyP,    
     '' COLLATE Latin1_General_CI_AS strSampleUOMP,   
-    0 dblRepresentingQtyP,    
+    NULL dblRepresentingQtyP,    
     '' COLLATE Latin1_General_CI_AS strItemNoP,    
     '' COLLATE Latin1_General_CI_AS strSampleNumberP,    
     '' COLLATE Latin1_General_CI_AS strSampleTypeP,    
@@ -23,7 +23,7 @@
 	NULL intContractDetailIdP,    --c
 	'' COLLATE Latin1_General_CI_AS strContractNumberP,    --
 	'' COLLATE Latin1_General_CI_AS strEntityNameP,
-	0 dblNetWeightP,
+	NULL dblNetWeightP,
 	'' COLLATE Latin1_General_CI_AS strNetWeightUOMP,
 	'' COLLATE Latin1_General_CI_AS strFreightTermP,
 	'' COLLATE Latin1_General_CI_AS strINCOLocationP,
@@ -60,8 +60,6 @@
 		strINCOLocation strINCOLocationS,
 		intContractStatusId intContractStatusIdS,
 		intContractHeaderId intContractHeaderIdS
-       
-
         FROM vyuCTContractDetailView
 		WHERE intContractDetailId = S1.intContractDetailId    
 		AND intContractStatusId NOT IN( 3, 5, 6 )   
@@ -70,15 +68,14 @@
 	
 	OUTER APPLY(
 		SELECT 
-		strAllocationNumber,    ---a
-		intAllocationDetailId,    --a
-		dblSAllocatedQty,    --a
-		dblPAllocatedQty --a
+		sum(dblSAllocatedQty)dblSAllocatedQty,    --a
+		sum(dblPAllocatedQty) dblPAllocatedQty --a
 		FROM  vyuLGAllocatedContracts 
 		WHERE  intSContractDetailId = S1.intContractDetailId       
+		group by intSContractDetailId
 	)A
       
-    WHERE S1.strContractType='Sale' --and A.intPContractDetailId = S1.intContractDetailId
-	AND ISNULL(S1.intRelatedSampleId,0) = 0
-	
+    WHERE
+	ISNULL(S1.intRelatedSampleId,0) = 0
+	and charindex('S',S1.strContractNumber)=1	
 

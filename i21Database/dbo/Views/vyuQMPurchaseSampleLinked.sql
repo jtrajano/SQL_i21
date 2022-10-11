@@ -37,7 +37,6 @@
         FROM vyuCTContractDetailView
 		WHERE intContractDetailId = S1.intContractDetailId    
 		AND intContractStatusId NOT IN( 3, 5, 6 )   
-		AND intContractTypeId = 1
 	)V1
 	OUTER APPLY(
 		 SELECT     
@@ -75,24 +74,20 @@
 			FROM vyuCTContractDetailView
 			WHERE intContractDetailId = S2.intContractDetailId  
 			AND intContractStatusId NOT IN( 3, 5, 6 )   
-			AND intContractTypeId =2
 		)V2 
 		
-		WHERE --A.intSContractDetailId = S2.intContractDetailId    
-		S2.strContractType = 'Sale' and
+		WHERE 
 		S2.intRelatedSampleId = S1.intSampleId
-	
+		 and charindex('S',S2.strContractNumber)=1	
 	)V
 
 	OUTER APPLY(
 		SELECT 
-		strAllocationNumber,    ---a
-		intAllocationDetailId,    --a
-		dblSAllocatedQty,    --a
-		dblPAllocatedQty --a
+		sum(dblSAllocatedQty)dblSAllocatedQty,    --a
+		sum(dblPAllocatedQty)dblPAllocatedQty  --a
 		FROM  vyuLGAllocatedContracts 
 		WHERE  intPContractDetailId = S1.intContractDetailId    
+		group by intPContractDetailId
 	)A
-    WHERE S1.strContractType='Purchase' --and A.intPContractDetailId = S1.intContractDetailId
-	
-
+   
+  where  charindex('P', S1.strContractNumber) =1
