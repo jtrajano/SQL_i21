@@ -26,5 +26,6 @@ intBankId
 ,strSwiftCode
 ,strBICCode
 ,ysnInternational
+,ysnCreditSuisse
 ,intConcurrencyId
 FROM dbo.tblCMBank
