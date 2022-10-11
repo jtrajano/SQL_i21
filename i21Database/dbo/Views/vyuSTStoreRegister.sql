@@ -27,7 +27,7 @@ SELECT
  , rt.strRegisterClass
  , rt.strSapphireIpAddress
  , rt.strSAPPHIREUserName
- , strSAPPHIREPassword = dbo.fnAESDecryptASym(rt.strSAPPHIREPassword)
+ , strSAPPHIREPassword = dbo.fnAESDecryptASym(rt.strSAPPHIREPassword) COLLATE Latin1_General_CI_AS  
  , hs.intHandheldScannerId
  , ISNULL(rt.intSAPPHIRECheckoutPullTimePeriodId, 0) AS intSAPPHIRECheckoutPullTimePeriodId
  , CASE

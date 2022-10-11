@@ -27,7 +27,7 @@ FROM
 		, UM.strUnitMeasure
 		, retail.dblRetailPrice
 		, retail.dtmEffectiveRetailPriceDate
-		, 'R' AS strType
+		, 'R' COLLATE Latin1_General_CI_AS AS strType
 		, retail.intConcurrencyId
 	FROM tblICEffectiveItemPrice retail
 	INNER JOIN tblICItemLocation ItemLoc
@@ -53,7 +53,7 @@ FROM
 		, UM.strUnitMeasure
 		, sp.dblUnitAfterDiscount
 		, sp.dtmBeginDate
-		, 'P' AS strType
+		, 'P' COLLATE Latin1_General_CI_AS AS strType
 		, sp.intConcurrencyId
 	FROM tblICItemSpecialPricing sp
 	LEFT JOIN tblICItemLocation ItemLoc
