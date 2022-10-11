@@ -85,7 +85,7 @@ SELECT   L.intLoadId
 								THEN (SELECT TOP 1 SS.strStatus
 										FROM tblQMSample S
 										JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-										AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
+										AND S.intLoadContainerId  = LC.intLoadContainerId  ORDER BY dtmTestedOn DESC)
 								ELSE NULL END
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
