@@ -265,7 +265,7 @@ AS
 		UPDATE tblGLCOAImportStaging2 SET ysnProcessed = 1 WHERE strPartitionGroup = @strGroup
 	END
 
-	EXEC dbo.uspGLUpdateAccountLocationId
+
 
 	IF EXISTS (SELECT TOP 1 1
 				FROM   sys.objects
