@@ -7,7 +7,11 @@ SELECT
       ,chk.[intShiftNo]  
       ,chk.[strCheckoutType]  
       ,chk.[strManagersName]  
-      ,chk.[strManagersPassword]
+      ,[strManagersPassword] = CASE
+					WHEN (chk.[strManagersPassword]  IS NOT NULL AND chk.[strManagersPassword]  != '')
+						THEN dbo.fnAESDecryptASym(chk.[strManagersPassword])
+					ELSE NULL
+				    END COLLATE Latin1_General_CI_AS
       ,chk.[dtmShiftDateForImport]  
       ,chk.[dtmShiftClosedDate]  
       ,chk.[strCheckoutCloseDate]  
