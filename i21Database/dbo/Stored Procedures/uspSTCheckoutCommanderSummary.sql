@@ -353,7 +353,7 @@ BEGIN
 			  WHERE intCheckoutId = @intCheckoutId
 
 			  UPDATE dbo.tblSTCheckoutHeader
-			  SET dblSummaryInfoPopPredispensedAmount = (
+			  SET dblOutsideFuelDiscount = (
 										SELECT TOP 1 CAST(ISNULL(dblSummaryInfoPopPredispensedAmount, 0) AS DECIMAL(18, 6))
 										FROM @UDT_TransSummary
 									 ) 
