@@ -343,16 +343,14 @@ BEGIN
 						 ELSE LGAS.strAllocationStatus  END)
 						
 		  ,strShipmentStatus = ''--ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
-		  ,strReference =  ISNULL(ISNULL(LGAS.strAllocationNumber,AH.strAllocationNumber),'A- '+CH.strContractNumber)
-		  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus in ( 'Reserved') THEN  CTD.dblQuantity
+		  ,strReference =  CASE WHEN LGAS.strAllocationStatus = 'Reserved' AND LGAS.strAllocationNumber IS NULL THEN 'R-'+CH.strContractNumber 
+								ELSE ISNULL(ISNULL(LGAS.strAllocationNumber,AH.strAllocationNumber),'A- '+CH.strContractNumber) END
+		  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus in ( 'Reserved') THEN  -LGAS.dblReservedQuantity
 							  WHEN LGAS.strAllocationStatus in ( 'Unallocated') THEN  CTD.dblQuantity
 							  WHEN LGAS.strAllocationStatus in ( 'Partially Allocated', 'Allocated') THEN  -LGAS.dblAllocatedQuantity --ALLOCATED QTY
 							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN LGD.dblQuantity 		--SHIPPED LS QTY
 							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN IRI.dblNet --IN STORE IR QTY
 						 ELSE CTD.dblQuantity - ISNULL(CTD.dblScheduleQty,0) END
-						--RESERVED QTY
-						--PICKED LOTS QTY
-						--SHIPPING SI QTY
 		  ,strPacking = UM.strUnitMeasure
 		  ,dblOfferCost = CTD.dblCashPrice			
 		  ,PT.strPricingType
@@ -388,10 +386,10 @@ BEGIN
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff = CTD.dblBasis
-		,dblFreightOffer = CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END --FreightCost of LS cost Tab
-		,dblCIFInStore =  CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END --CIF Item setup in Company Config CIF Charge from IR
+		,dblFreightOffer = 0.00 --FreightCost of LS cost Tab
+		,dblCIFInStore =  0.00
 		,dblCUMStorage = 0.00 --FOR CLARIFICATION TO IR IC-10764
-		,dblCUMFinancing = ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0) --IR Line value * (Current date - Payment Date) * Interest rate
+		,dblCUMFinancing = 0.00--ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0) --IR Line value * (Current date - Payment Date) * Interest rate
 		,dblSwitchCost = 0.00--For Future Column N/A
 		,ysnPostedIR = IR.ysnPosted
 		,intCompanyLocationId = CTD.intCompanyLocationId
@@ -443,7 +441,6 @@ BEGIN
 	--CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY	
 	CH.intContractTypeId = 1
 	AND LGAS.strAllocationStatus IN ('Allocated', 'Partially Allocated','Unallocated', 'Reserved') 
-	OR LGAS.strAllocationStatus IN (CASE WHEN @YsnyAllocated = 1 then LGAS.strAllocationStatus ELSE NULL END)
 	) a
 	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
@@ -529,10 +526,10 @@ BEGIN
 						  CASE WHEN IRI.intLoadShipmentId <> 0 THEN IR.strReceiptNumber 
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
 						  ELSE CH.strContractNumber + '-' + CAST (CTD.intContractSeq AS VARCHAR(10)) END
-		  ,dblQuantity = CASE WHEN IR.ysnPosted = 1 THEN IRI.dblOrderQty ELSE ( --UNSOLD QTY 
+		  ,dblQuantity = CASE WHEN IR.ysnPosted = 1 THEN TQ.dblTotalQty ELSE ( --UNSOLD QTY 
 						 CASE WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  LGAS.dblAllocatedQuantity --ALLOCATED QTY
-							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN LGD.dblQuantity 		--SHIPPED LS QTY
-							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN IRI.dblNet --IN STORE IR QTY
+							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN TQ.dblTotalQty	--SHIPPED LS QTY
+							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN TQ.dblTotalQty --IN STORE IR QTY
 						 ELSE CTD.dblQuantity - ISNULL(CTD.dblScheduleQty,0) END ) --OPEN CT QTY  
 						 END
 		  ,strPacking = UM.strUnitMeasure
@@ -569,9 +566,9 @@ BEGIN
 		,strStorageLocation = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN CSL.strSubLocationName		
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
-		,dblBasisDiff = CTD.dblBasis
-		,dblFreightOffer = CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END --FreightCost of LS cost Tab
-		,dblCIFInStore =  CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END --CIF Item setup in Company Config CIF Charge from IR
+		,dblBasisDiff = ISNULL(CTD.dblBasis,0.00)
+		,dblFreightOffer = ISNULL(CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00) --FreightCost of LS cost Tab
+		,dblCIFInStore =  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount) --CIF Item setup in Company Config CIF Charge from IR
 		,dblCUMStorage = 0.00 --FOR CLARIFICATION TO IR IC-10764
 		,dblCUMFinancing = ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0) --IR Line value * (Current date - Payment Date) * Interest rate
 		,dblSwitchCost = 0.00--For Future Column N/A
@@ -617,9 +614,21 @@ BEGIN
 	LEFT JOIN tblICItem					IFC  WITH (NOLOCK)ON IFC.intItemId = CP.intDefaultFreightItemId
 	LEFT JOIN tblLGLoadCost				LGC  WITH (NOLOCK)ON LGC.intItemId =  CP.intDefaultFreightItemId AND LGC.intLoadId = LGL.intLoadId
 	LEFT JOIN tblLGLoadCost				LGCInStore  WITH (NOLOCK)ON LGCInStore.intItemId =  CP.intCIFInstoreId AND LGC.intLoadId = LGL.intLoadId
-	LEFT JOIN tblICInventoryReceiptCharge IRC WITH (NOLOCK)ON IRC.intLoadShipmentId = LGL.intLoadId AND IRC.intLoadShipmentCostId = LGCInStore.intLoadCostId
+	--LEFT JOIN tblICInventoryReceiptCharge IRC WITH (NOLOCK)ON IRC.intLoadShipmentId = LGL.intLoadId AND IRC.intLoadShipmentCostId = LGCInStore.intLoadCostId
 	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.intAllocationHeaderId = AD.intAllocationHeaderId OR ISNULL(LGAS.strPurchaseContractNumber,LGAS.strSalesContractNumber) = CH.strContractNumber  
 	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
+	OUTER APPLY(
+		SELECT DISTINCT CASE WHEN IRI.intInventoryReceiptId <> 0 THEN SUM(dblOrderQty) ELSE SUM(LGL.dblQuantity) END dblTotalQty
+		FROM tblLGLoadDetail LGL
+		LEFT JOIN tblCTContractDetail CTD1  WITH (NOLOCK) ON LGL.intPContractDetailId = CTD1.intContractDetailId
+		LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLoadShipmentId = LGL.intLoadId
+		WHERE CTD1.intContractDetailId = CTD.intContractDetailId
+		GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
+	) TQ
+	OUTER APPLY (
+		SELECT SUM(dblAmount) AS dblAmount FROM tblICInventoryReceiptCharge IRC
+		WHERE  IRC.intLoadShipmentId = LGL.intLoadId
+	) IRC
 	WHERE
 	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
 	AND LGAS.strAllocationStatus IN ('Allocated', 'Partially Allocated', 'Unallocated')
@@ -628,7 +637,7 @@ BEGIN
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
 	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
 	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
-
+	
 	--VIEW FOR AVAILABLE BALANCE
 	UNION ALL 
 	SELECT DISTINCT
@@ -793,6 +802,3 @@ BEGIN
 	END
 	
 END
-
-
-
