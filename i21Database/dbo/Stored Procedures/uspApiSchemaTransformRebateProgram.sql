@@ -345,7 +345,7 @@ INSERT INTO tblVRProgramItem (
 )
 SELECT
 	  COALESCE(xi.intItemId, i.intItemId)
-	, COALESCE(xc.intCategoryId, i.intCategoryId)
+	, COALESCE(xc.intCategoryId, cat.intCategoryId, i.intCategoryId)
 	, rp.strRebateBy
 	, rp.dblRebateRate
 	, rp.dtmBeginDate
@@ -378,7 +378,9 @@ OUTER APPLY (
 	FROM tblICCategoryVendor
 	WHERE strVendorDepartment = rp.strVendorCategory
 	AND intVendorSetupId = p.intVendorSetupId
+	AND NULLIF(rp.strCategory, '') IS NULL
 ) xc
+LEFT JOIN tblICCategory cat ON cat.strCategoryCode = rp.strCategory OR cat.strDescription = rp.strCategory
 OUTER APPLY (
 	SELECT TOP 1 intUnitMeasureId
 	FROM tblICItemUOM
@@ -395,7 +397,6 @@ WHERE rp.guiApiUniqueId = @guiApiUniqueId
 			AND strLogLevel = 'Error'
 			AND strAction = 'Skipped'
 	)
-
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
@@ -423,29 +424,41 @@ INSERT INTO tblVRProgramCustomer (
 	, intEntityId
 	, intProgramId
 )
-SELECT ct.Id, 1, ct.EntityId, ct.ProgramId
-FROM (
-	SELECT
-		@guiApiUniqueId Id
-		, COALESCE(xc.intEntityId, c.intEntityId, nc.intEntityId) EntityId
-		, p.intProgramId ProgramId
-		, vs.intVendorSetupId VendorSetupId
-		, vts.strVendorProgram
-	FROM tblApiSchemaTransformRebateProgram vts
-	LEFT JOIN vyuAPVendor v ON v.strName = vts.strVendor OR v.strVendorId = vts.strVendor
-	LEFT JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
-	LEFT JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
-	LEFT JOIN tblVRCustomerXref x ON x.intVendorSetupId = vs.intVendorSetupId
-		AND x.strVendorCustomer = vts.strVendorCustomer
-	LEFT JOIN vyuARCustomer xc ON xc.intEntityId = x.intEntityId
-	LEFT JOIN vyuARCustomer nc ON nc.strName = vts.strCustomerName
-	LEFT JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
-		AND p.strVendorProgram = vts.strVendorProgram
-	WHERE vts.guiApiUniqueId = @guiApiUniqueId
-	GROUP BY xc.intEntityId, c.intEntityId, nc.intEntityId, p.intProgramId, vs.intVendorSetupId, vts.strVendorProgram
-) ct
-WHERE ct.EntityId IS NOT NULL
-GROUP BY ct.Id, ct.EntityId, ct.ProgramId, ct.VendorSetupId
+SELECT
+	  @guiApiUniqueId, 1
+	, c.intEntityId
+	, p.intProgramId
+FROM tblApiSchemaTransformRebateProgram vts
+LEFT JOIN vyuAPVendor v ON v.strName = vts.strVendor OR v.strVendorId = vts.strVendor
+LEFT JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer OR c.strName = vts.strCustomerName
+LEFT JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
+	AND p.strVendorProgram = vts.strVendorProgram
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+GROUP BY c.intEntityId, p.intProgramId, vs.intVendorSetupId, vts.strVendorProgram
+
+INSERT INTO tblVRProgramCustomer (
+	  guiApiUniqueId
+	, intConcurrencyId
+	, intEntityId
+	, intProgramId
+)
+SELECT
+	  @guiApiUniqueId, 1
+	, c.intEntityId
+	, p.intProgramId
+FROM tblApiSchemaTransformRebateProgram vts
+LEFT JOIN vyuAPVendor v ON v.strName = vts.strVendor OR v.strVendorId = vts.strVendor
+LEFT JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+LEFT JOIN tblVRCustomerXref x ON x.intVendorSetupId = vs.intVendorSetupId
+	AND x.strVendorCustomer = vts.strVendorCustomer
+JOIN vyuARCustomer c ON c.intEntityId = x.intEntityId
+LEFT JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
+	AND p.strVendorProgram = vts.strVendorProgram
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NULLIF(vts.strCustomer, '') IS NULL
+GROUP BY c.intEntityId, c.strName, c.strCustomerNumber, p.intProgramId, vs.intVendorSetupId, vts.strVendorProgram
+
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
