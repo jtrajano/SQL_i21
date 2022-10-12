@@ -5,7 +5,7 @@
 	@intContractDetailId INT = NULL,
 	@intUserId INT = NULL,
 	@ysnThrowError BIT = 1,
-	@dblOverrage NUMERIC(18,6) = 0 OUTPUT,
+	@dblOverage NUMERIC(18,6) = 0 OUTPUT,
 	@strErrorMessage NVARCHAR(MAX) = '' OUTPUT
 AS
 
@@ -23,7 +23,7 @@ BEGIN
 	DECLARE @transCount INT = @@TRANCOUNT;
 
 	BEGIN TRY
-	IF @transCount = 0 BEGIN TRANSACTION
+		IF @transCount = 0 BEGIN TRANSACTION
 
 		IF(@dblQuantity > 0)
 		BEGIN
@@ -33,7 +33,7 @@ BEGIN
 				DECLARE @dblAvailable DECIMAL(18,6) = NULL
 
 				--Get the available quantity of the contract
-				SELECT @dblAvailable = ISNULL(B.dblBalance,0) - ISNULL(B.dblScheduleQty,0)
+				SELECT @dblAvailable = ISNULL(B.dblBalance,0.0) - ISNULL(B.dblScheduleQty,0.0)
 				FROM tblCTContractHeader A
 				INNER JOIN tblCTContractDetail B
 					ON A.intContractHeaderId = B.intContractHeaderId
@@ -49,8 +49,8 @@ BEGIN
 					BEGIN
 						SET @dblQuantityToUpdate = @dblAvailable
 
-						--get The overrage
-						SET @dblOverrage = @dblQuantity - @dblAvailable
+						--get The overage
+						SET @dblOverage = @dblQuantity - @dblAvailable
 					END
 					ELSE
 					BEGIN
@@ -68,12 +68,14 @@ BEGIN
 				END
 				ELSE
 				BEGIN
-					SET @dblOverrage = @dblQuantity
+					SET @dblOverage = @dblQuantity
 				END
 			END
 		END
 		ELSE
 		BEGIN
+			SET @dblOverage = 0
+			/*
 			-- IF NEGATIVE QTY THEN REMOVE FROM SCHEDULED QTY
 			SELECT @intContractDetailId = O.intContractDetailId  
 				, @dblQuantity = O.dblQuantity * -1
@@ -98,9 +100,45 @@ BEGIN
 						, @strScreenName = @strScreenName
 				END
 			END
+			*/
+			
+			DECLARE @dblScheduleQty DECIMAL(18,6) = NULL
+
+			--Get the available quantity of the contract
+			SELECT @dblScheduleQty = ISNULL(B.dblScheduleQty,0)
+			FROM tblCTContractHeader A
+			INNER JOIN tblCTContractDetail B
+				ON A.intContractHeaderId = B.intContractHeaderId
+			WHERE B.intContractDetailId = @intContractDetailId
+
+			--Check if the SCheduled qty of contract is greater thant the quantity if not then remove all the schedule quantity of the contract
+			IF(@dblScheduleQty > ABS(@dblQuantity))
+			BEGIN
+				IF(@dblQuantity <> 0)
+				BEGIN
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
+							, @dblQuantityToUpdate = @dblQuantity 
+							, @intUserId = @intUserId
+							, @intExternalId = @intSiteId
+							, @strScreenName = @strScreenName
+				END
+			END
+			ELSE
+			BEGIN
+				IF(@dblScheduleQty <> 0)
+				BEGIN
+					SET @dblScheduleQty = @dblScheduleQty * -1
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
+							, @dblQuantityToUpdate = @dblScheduleQty
+							, @intUserId = @intUserId
+							, @intExternalId = @intSiteId
+							, @strScreenName = @strScreenName
+				END
+			END
 
 		END
 
+		IF @transCount = 0 COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 		SELECT 
