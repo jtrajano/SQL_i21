@@ -1206,6 +1206,7 @@
     <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
     <Build Include="dbo\Tables\tblSMLicenseSavedFeature.sql" />
     <Build Include="dbo\Tables\tblSMLicenseRegisteredFeature.sql" />
+    <Build Include="dbo\Tables\tblHDDeploymentType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
