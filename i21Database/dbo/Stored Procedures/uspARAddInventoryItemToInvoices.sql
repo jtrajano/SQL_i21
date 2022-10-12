@@ -141,27 +141,75 @@ AND NOT EXISTS(	SELECT NULL
 				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
 				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
--- UNION ALL
+UNION ALL
 
--- SELECT
--- 	 [intId]				= IT.[intId]
--- 	,[strMessage]			= 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
--- 	,[strTransactionType]	= IT.[strTransactionType]
--- 	,[strType]				= IT.[strType]
--- 	,[strSourceTransaction]	= IT.[strSourceTransaction]
--- 	,[intSourceId]			= IT.[intSourceId]
--- 	,[strSourceId]			= IT.[strSourceId]
--- 	,[intInvoiceId]			= IT.[intInvoiceId]
--- FROM @ItemEntries IT
--- INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDetailId
--- INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
--- WHERE IT.strTransactionType = 'Invoice'
---   AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
---   AND IT.strType = 'Tank Delivery'
+SELECT
+	 [intId]				= IT.[intId]
+	,[strMessage]			= 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
+	,[strTransactionType]	= IT.[strTransactionType]
+	,[strType]				= IT.[strType]
+	,[strSourceTransaction]	= IT.[strSourceTransaction]
+	,[intSourceId]			= IT.[intSourceId]
+	,[strSourceId]			= IT.[strSourceId]
+	,[intInvoiceId]			= IT.[intInvoiceId]
+FROM @ItemEntries IT
+INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDetailId
+INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+WHERE IT.strTransactionType = 'Invoice'
+  AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+  AND IT.strType = 'Tank Delivery'
 
-DELETE I
-FROM tblARInvoice I
-INNER JOIN @InvalidRecords IR ON IR.intInvoiceId = I.intInvoiceId
+DECLARE @TankDeliveries 	[InvoicePostingTable]
+
+INSERT INTO @TankDeliveries (
+	  intInvoiceId
+	, dtmDate
+	, strInvoiceNumber
+	, strTransactionType
+	, intItemId
+	, strBatchId
+	, intEntityId
+	, intUserId
+	, intSiteId
+	, ysnLeaseBilling
+)
+SELECT DISTINCT 
+	  intInvoiceId			= IT.intInvoiceId
+	, dtmDate				= IT.dtmDate
+	, strInvoiceNumber		= IT.strSourceId
+	, strTransactionType	= IT.strTransactionType
+	, intItemId				= IT.intItemId
+	, strBatchId			= NULL
+	, intEntityId			= IT.intEntityId
+	, intUserId				= @UserId
+	, intSiteId				= IT.intSiteId
+	, ysnLeaseBilling		= IT.ysnLeaseBilling
+FROM @ItemEntries IT
+WHERE IT.intSiteId IS NOT NULL
+
+IF EXISTS (SELECT TOP 1 1 FROM @TankDeliveries)
+	BEGIN
+		INSERT INTO @InvalidRecords(
+			 [intId]
+			,[strMessage]		
+			,[strTransactionType]
+			,[strType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intInvoiceId]
+		)
+		SELECT [intId]				= IT.intId
+			,[strMessage]			= TM.[strPostingError]
+			,[strTransactionType]	= IT.[strTransactionType]
+			,[strType]				= IT.[strType]
+			,[strSourceTransaction] = IT.[strSourceTransaction]
+			,[intSourceId]			= IT.[intSourceId]
+			,[strSourceId]			= IT.[strSourceId]
+			,[intInvoiceId]			= IT.[intInvoiceId]
+		FROM @ItemEntries IT
+		INNER JOIN [dbo].[fnTMGetInvalidInvoicesForSync](@TankDeliveries, 1) TM ON IT.intInvoiceId = TM.intInvoiceId
+	END
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
@@ -170,11 +218,9 @@ BEGIN
 	RETURN 0;
 END
 
-
 DELETE FROM V
 FROM @ItemEntries V
 WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
-
 	
 IF ISNULL(@RaiseError,0) = 0	
 BEGIN
@@ -183,6 +229,10 @@ BEGIN
 	ELSE
 		SAVE TRANSACTION @Savepoint
 END
+
+DELETE I
+FROM tblARInvoice I
+INNER JOIN @InvalidRecords IR ON IR.intInvoiceId = I.intInvoiceId
 	
 DECLARE  @IntegrationLog InvoiceIntegrationLogStagingTable
 DELETE FROM @IntegrationLog
@@ -1472,4 +1522,3 @@ RETURN 1;
 	
 	
 END
-GO

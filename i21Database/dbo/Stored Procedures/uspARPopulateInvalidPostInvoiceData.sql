@@ -1856,6 +1856,8 @@ BEGIN
 		, strBatchId
 		, intEntityId
 		, intUserId
+		, intSiteId
+		, ysnLeaseBilling
 	)
     SELECT intInvoiceId			= PID.intInvoiceId
 		, dtmDate				= PID.dtmDate
@@ -1866,8 +1868,11 @@ BEGIN
 		, strBatchId			= PID.strBatchId
 		, intEntityId			= PID.intEntityId
 		, intUserId				= PID.intUserId
+		, intSiteId				= PID.intSiteId
+		, ysnLeaseBilling		= PID.ysnLeaseBilling
 	FROM ##ARPostInvoiceDetail PID 
-	INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
+	INNER JOIN tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID]
+	WHERE PID.intSiteId IS NOT NULL
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2632,6 +2637,8 @@ BEGIN
 		, strBatchId
 		, intEntityId
 		, intUserId
+		, intSiteId
+		, ysnLeaseBilling
 	)
     SELECT intInvoiceId			= PID.intInvoiceId
 		, dtmDate				= PID.dtmDate
@@ -2642,6 +2649,8 @@ BEGIN
 		, strBatchId			= PID.strBatchId
 		, intEntityId			= PID.intEntityId
 		, intUserId				= PID.intUserId
+		, intSiteId				= PID.intSiteId
+		, ysnLeaseBilling		= PID.ysnLeaseBilling
 	FROM ##ARPostInvoiceDetail PID 
 	INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
 

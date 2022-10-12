@@ -74,7 +74,7 @@ SELECT [intInvoiceId]						= I.[intInvoiceId]
 	, [intOriginalInvoiceDetailId]			= ID.[intOriginalInvoiceDetailId]
 	, [ysnLeaseBilling]						= ID.[ysnLeaseBilling]				
 FROM tblARInvoice I
-INNER JOIN @InvoiceIdToProcess INVOICEIDS ON I.intInvoiceId = INVOICEIDS.intHeaderId
+INNER JOIN @InvoiceIdToProcess INVOICEIDS ON I.intInvoiceId = INVOICEIDS.intHeaderId AND ISNULL(INVOICEIDS.ysnRecap, 0) = 0
 INNER JOIN tblARInvoiceDetail ID ON I.[intInvoiceId] = ID.[intInvoiceId]
 LEFT JOIN tblICItem II ON ID.intItemId = II.intItemId
 LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId
