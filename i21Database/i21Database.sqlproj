@@ -9244,6 +9244,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
