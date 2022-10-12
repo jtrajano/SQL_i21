@@ -1069,6 +1069,8 @@
     <Build Include="dbo\Tables\tblGRDeletedAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostAdjustSettlements.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAdjustSettlementsForPurchase.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAdjustSettlementsForSales.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateTaxForTexasLoadingFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePayableTaxForTexasLoadingFee.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDeposit.sql" />
