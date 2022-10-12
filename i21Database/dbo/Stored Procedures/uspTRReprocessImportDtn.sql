@@ -18,7 +18,6 @@ BEGIN
 	SELECT *
 	INTO #tmpIds
 	FROM dbo.fnSplitStringWithTrim(@strIds, ',')
-
 		
 	BEGIN TRY
 
