@@ -38,12 +38,14 @@ BEGIN
 	INSERT INTO @voucherPayable
 	(
 		intTransactionType
-		,intEntityVendorId		
+		,intEntityVendorId
+		,intLocationId
 		,intShipToId
 		,intItemId
 		,dblQuantityToBill
 		,dblOrderQty
 		,dblCost
+		--,intAPAccount
 		,intAccountId
 		,strVendorOrderNumber
 		,strMiscDescription
@@ -53,6 +55,7 @@ BEGIN
 		,intContractSeqId
 		,intTermId
 		,ysnStage
+		,strCheckComment
 	)
 	SELECT
 		intTransactionType		= CASE
@@ -61,6 +64,7 @@ BEGIN
 										CASE WHEN ADJ.dblAdjustmentAmount < 0 THEN 3 /*DM*/ ELSE 1 END --BL
 								END
 		,intEntityVendorId		= CASE WHEN ADJ.intSplitId IS NULL THEN ADJ.intEntityId ELSE EM.intEntityId END
+		,intLocationId			= ADJ.intCompanyLocationId
 		,intShipToId			= ADJ.intCompanyLocationId
 		,intItemId				= CASE 
 									WHEN @intAdjustmentTypeId = 1 THEN CD.intItemId
@@ -94,6 +98,7 @@ BEGIN
 										END
 									ELSE CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ADJ.dblAdjustmentAmount) ELSE (ABS(ADJ.dblAdjustmentAmount) * (ESD.dblSplitPercent / 100)) END
 								END
+		--,intAPAccount			= 
 		,intAccountId			= intGLAccountId
 		,strVendorOrderNumber	= strTicketNumber
 		,strMiscDescription		= CASE 
@@ -122,6 +127,7 @@ BEGIN
 									ELSE AP.intTermsId
 								END
 		,ysnStage				= 0
+		,strCheckComment		= ADJ.strComments
 	FROM @AdjustSettlementsStagingTable ADJ
 	LEFT JOIN tblAPVendor AP
 		ON AP.intEntityId = ADJ.intEntityId

@@ -19,7 +19,11 @@ DECLARE @intBillId INT
 DECLARE @BillIds NVARCHAR(MAX)
 DECLARE @success AS BIT
 DECLARE @intItemId INT
-
+DECLARE @batchIdUsed NVARCHAR(50)
+DECLARE @param NVARCHAR(MAX)
+DECLARE @strBillId NVARCHAR(40)
+DECLARE @Ids AS Id
+DECLARE @intId INT
 BEGIN TRANSACTION
 BEGIN TRY
 
@@ -145,9 +149,85 @@ BEGIN
 	END	
 END
 
+--DELETE THE EXISTING RECORD BEFORE PROCESSING A NEW ONE
+DECLARE @ysnTransactionExists BIT
+SELECT @ysnTransactionExists = CASE WHEN ISNULL(strBillNumbers,'') = '' THEN 0 ELSE 1 END
+	,@param = REPLACE(strBillNumbers,'|^|',',')
+FROM vyuGRSearchAdjustSettlements
+WHERE intAdjustSettlementId = @intAdjustSettlementId
+
+IF @ysnTransactionExists = 1
+BEGIN
+	INSERT INTO @Ids
+	SELECT value FROM dbo.fnCommaSeparatedValueToTable(@param)
+
+	DELETE FROM tblGRAdjustSettlementsSplit WHERE intAdjustSettlementId = @intAdjustSettlementId
+	UPDATE tblGRAdjustSettlements SET intBillId = NULL WHERE intAdjustSettlementId = @intAdjustSettlementId
+
+	IF @intTypeId = 1 --PURCHASE
+	BEGIN
+		--Step 1: Unpost
+		IF @intAdjustmentTypeId = 1 --ADVANCE
+		BEGIN
+			EXEC [dbo].[uspAPPostVoucherPrepay]
+				@post = 0
+				,@recap = 0
+				,@param = @param
+				,@batchId = DEFAULT
+				,@userId = @intUserId
+				,@success = @success OUTPUT
+				,@batchIdUsed = @batchIdUsed OUTPUT
+		END
+		ELSE
+		BEGIN
+			EXEC [dbo].[uspAPPostBill] 
+				@post = 0
+				,@recap = 0
+				,@isBatch = 0
+				,@param = @param
+				,@userId = @intUserId
+				,@transactionType = NULL
+				,@success = @success OUTPUT
+		END
+
+		
+		--Step 2: Delete
+		WHILE EXISTS(SELECT 1 FROM @Ids)
+		BEGIN
+			SELECT TOP 1 @intId = intId FROM @Ids
+
+			EXEC dbo.uspAPDeleteVoucher
+				@intBillId = @intId
+				,@UserId = @intUserId
+				,@callerModule = 1 --Grain
+
+			DELETE FROM @Ids WHERE intId = @intId
+		END
+	END
+	ELSE --SALES
+	BEGIN
+		--Step 1: Unpost
+		EXEC dbo.uspARPostInvoice @param = @param, @post = 0, @recap = 0, @userId = @intUserId, @raiseError = 1
+
+		--Step 2: Delete
+		WHILE EXISTS(SELECT 1 FROM @Ids)
+		BEGIN
+			SELECT TOP 1 @intId = intId FROM @Ids
+
+			EXEC dbo.uspARDeleteInvoice
+				@InvoiceId = @intId
+				,@UserId = @intUserId
+
+			DELETE FROM @Ids WHERE intId = @intId
+		END		
+	END
+END
+
 IF @intTypeId = 1 --PURCHASE
 /*************CREATE VOUCHER/VENDOR PREPAY/DEBIT MEMO****************/
 BEGIN
+	SET @param = NULL
+
 	EXEC [dbo].[uspGRAdjustSettlementsForPurchase]
 		@intUserId = @intUserId
 		,@intItemId = @intItemId
@@ -158,18 +238,31 @@ BEGIN
 		,@BillIds = @BillIds OUTPUT
 
 	UPDATE tblGRAdjustSettlements SET intBillId = @intBillId WHERE intAdjustSettlementId = @intAdjustSettlementId
-
-	DECLARE @param NVARCHAR(MAX)
+	
 	SET @param = CASE WHEN @intBillId IS NULL THEN @BillIds ELSE CAST(@intBillId AS NVARCHAR) END
-
-	EXEC [dbo].[uspAPPostBill] 
-		@post = 1
-		,@recap = 0
-		,@isBatch = 0
-		,@param = @param
-		,@userId = @intUserId
-		,@transactionType = NULL
-		,@success = @success OUTPUT
+	
+	IF @intAdjustmentTypeId = 1 --ADVANCE
+	BEGIN
+		EXEC [dbo].[uspAPPostVoucherPrepay]
+			@post = 1
+			,@recap = 0
+			,@param = @param
+			,@batchId = DEFAULT
+			,@userId = @intUserId
+			,@success = @success OUTPUT
+			,@batchIdUsed = @batchIdUsed OUTPUT
+	END
+	ELSE
+	BEGIN
+		EXEC [dbo].[uspAPPostBill] 
+			@post = 1
+			,@recap = 0
+			,@isBatch = 0
+			,@param = @param
+			,@userId = @intUserId
+			,@transactionType = NULL
+			,@success = @success OUTPUT
+	END	
 
 	UPDATE tblGRAdjustSettlements SET ysnPosted = 1 WHERE intAdjustSettlementId = @intAdjustSettlementId
 
@@ -182,7 +275,7 @@ BEGIN
 END
 ELSE --SALES
 BEGIN
-	DECLARE @strBillId NVARCHAR(40)
+	SET @strBillId = NULL
 	EXEC [dbo].[uspGRAdjustSettlementsForSales]
 		@intUserId = @intUserId
 		,@intItemId = @intItemId

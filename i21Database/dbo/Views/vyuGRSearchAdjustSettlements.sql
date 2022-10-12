@@ -55,8 +55,16 @@ SELECT
 						ISNULL(AP.strBillId,STUFF(_strVoucherNumbers.strVoucherNumbers,1,1,'')) 
 					ELSE ISNULL(AR.strInvoiceNumber,STUFF(_strInvoiceNumbers.strInvoiceNumbers,1,1,''))
 				END
-	,ysnBillPosted = CASE WHEN ASTR.intTypeId = 1 THEN AP.ysnPosted ELSE AR.ysnPosted END
-	,ysnBillPaid = CASE WHEN ASTR.intTypeId = 1 THEN AP.ysnPaid ELSE AR.ysnPaid END
+	,ysnBillPosted = CASE WHEN ASTR.intTypeId = 1 THEN ISNULL(AP.ysnPosted,SPLIT.ysnPosted) ELSE AR.ysnPosted END
+	,ysnBillPaid = CAST(CASE 
+						WHEN ASTR.intTypeId = 1 THEN 
+							ISNULL(CASE 
+								WHEN ASTR.intAdjustmentTypeId = 1 THEN
+									CASE WHEN PD.intPaymentId IS NOT NULL THEN 1 ELSE 0 END
+								ELSE AP.ysnPaid 
+							END,SPLIT.ysnPaymentExists)
+						ELSE AR.ysnPaid END
+					AS BIT)
 FROM tblGRAdjustSettlements ASTR
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = ASTR.intEntityId
@@ -81,6 +89,19 @@ INNER JOIN tblGRAdjustmentType AST
 	ON AST.intAdjustmentTypeId = ASTR.intAdjustmentTypeId
 LEFT JOIN tblAPBill AP
 	ON (AP.intBillId = ASTR.intBillId AND ASTR.intTypeId = 1)
+LEFT JOIN tblAPPaymentDetail PD
+	ON PD.intBillId = AP.intBillId
+LEFT JOIN (
+	SELECT TOP 1 A.intAdjustSettlementId
+		,B.ysnPosted
+		,ysnPaymentExists = CASE WHEN C.intBillId IS NULL THEN 0 ELSE 1 END
+	FROM tblGRAdjustSettlementsSplit A
+	INNER JOIN tblAPBill B
+		ON B.intBillId = A.intBillId
+	LEFT JOIN tblAPPaymentDetail C
+		ON C.intBillId = B.intBillId
+	WHERE B.ysnPosted = 1 AND C.intBillId IS NOT NULL
+) SPLIT ON SPLIT.intAdjustSettlementId = ASTR.intAdjustSettlementId
 LEFT JOIN tblARInvoice AR
 	ON (AR.intInvoiceId = ASTR.intBillId AND ASTR.intTypeId = 2)
 OUTER APPLY (
@@ -116,3 +137,5 @@ OUTER APPLY (
 		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strInvoiceNumbers
 ) AS _strInvoiceNumbers
 GO
+
+

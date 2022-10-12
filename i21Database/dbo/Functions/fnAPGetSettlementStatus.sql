@@ -39,7 +39,17 @@ BEGIN
 				  INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
 				  --INNER JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
 				  INNER JOIN tblGRSettleStorageBillDetail SSBD ON SSBD.intBillId = Bill.intBillId
-				  WHERE PYMT.strPaymentRecordNum = @strTransactionId
+				WHERE PYMT.strPaymentRecordNum = @strTransactionId
+				UNION ALL
+				SELECT TOP 1 1 
+				FROM tblAPPayment PYMT 
+				INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+				INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+				INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+				INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+				--INNER JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+				INNER JOIN tblGRAdjustSettlements SSBD ON (SSBD.intBillId = Bill.intBillId AND SSBD.intTypeId = 1)
+				WHERE PYMT.strPaymentRecordNum = @strTransactionId
 			)
 	BEGIN
 		SET @hasSettlement = 1
