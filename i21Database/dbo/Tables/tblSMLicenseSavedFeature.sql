@@ -8,6 +8,5 @@
 	[intConcurrencyId]					INT DEFAULT ((1)) NOT NULL,
 
 	CONSTRAINT [PK_tblSMCustomerLicenceFeature] PRIMARY KEY CLUSTERED ([intLicenseSavedFeatureId] ASC),
-	CONSTRAINT [FK_tblSMCustomerLicenceFeature_tblARCustomerLicenseInformation] FOREIGN KEY ([intCustomerLicenseInformationId]) REFERENCES [dbo].[tblARCustomerLicenseInformation] ([intCustomerLicenseInformationId]) ON DELETE CASCADE,
-	CONSTRAINT [UC_tblSMLicenseSavedFeature] UNIQUE (strKey)
+	CONSTRAINT [FK_tblSMCustomerLicenceFeature_tblARCustomerLicenseInformation] FOREIGN KEY ([intCustomerLicenseInformationId]) REFERENCES [dbo].[tblARCustomerLicenseInformation] ([intCustomerLicenseInformationId]) ON DELETE CASCADE
 )
