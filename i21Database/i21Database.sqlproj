@@ -2510,7 +2510,6 @@
     <Build Include="dbo\Stored Procedures\uspSTCopyCategoryLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMassAddLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTUpdateModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridUpdateCostAndPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPricePreview.sql" />
