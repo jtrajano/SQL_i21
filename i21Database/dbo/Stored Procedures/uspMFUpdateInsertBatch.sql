@@ -107,7 +107,7 @@ END
 ELSE
 BEGIN
 
-	EXEC uspSMGetStartingNumber 176 , @strBatchId OUT
+	EXEC uspSMGetStartingNumber 181 , @strBatchId OUT
 
 	INSERT INTO tblMFBatch(
 		strBatchId

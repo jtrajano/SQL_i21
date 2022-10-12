@@ -1741,6 +1741,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Opportunity' AND [strModule] = 'CRM')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 181
+	
+			,[strTransactionType]	= N'Batch'
+			,[strPrefix]			= N'B-'
+			,[intNumber]			= 0
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch' AND [strModule] = 'Manufacturing')
 
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
