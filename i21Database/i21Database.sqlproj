@@ -11026,6 +11026,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateTooltipControls.sql" />
   </ItemGroup>
   <ItemGroup>
