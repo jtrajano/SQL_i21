@@ -183,6 +183,12 @@
 			RETURN
 		END
 
+		IF(@ts_capacity = 0)
+		BEGIN
+			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
+			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			RETURN
+		END
 		--Get the event ID of the tank monitor reading event
 		SET @TankMonitorEventID = (SELECT TOP 1 intEventTypeID FROM tblTMEventType WHERE strDefaultEventType = 'Event-021')
 	
