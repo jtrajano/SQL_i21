@@ -28,7 +28,8 @@ BEGIN
 		DECLARE @CursorTran AS CURSOR
 
 		SET @CursorTran = CURSOR FOR
-		SELECT D.intImportDtnDetailId
+		SELECT D.intImportDtnId
+			, D.intImportDtnDetailId
 			, D.strSeller
 			, D.strTerm
 			, D.ysnValid
@@ -40,7 +41,7 @@ BEGIN
 		BEGIN TRANSACTION
 
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @strSeller, @strTerm, @ysnValid, @strMessage
+		FETCH NEXT FROM @CursorTran INTO @intImportDtnId, @intImportDtnDetailId, @strSeller, @strTerm, @ysnValid, @strMessage
 		WHILE @@FETCH_STATUS = 0
 		BEGIN		
 
@@ -118,14 +119,20 @@ BEGIN
 				UPDATE tblTRImportDtnDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportDtnDetailId = @intImportDtnDetailId 
 			END
 
-			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @strSeller, @strTerm, @ysnValid, @strMessage
+			FETCH NEXT FROM @CursorTran INTO @intImportDtnId, @intImportDtnDetailId, @strSeller, @strTerm, @ysnValid, @strMessage
 		END
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran
 
 		COMMIT TRANSACTION
 
+		-- Call Import Processing right after loading
+		EXEC uspTRProcessImportDtn @intImportLoadId = @intImportDtnId
+			, @intUserId = @intUserId
+
 		SELECT @return = intImportDtnId FROM tblTRImportDtn WHERE guidImportIdentifier = @guidImportIdentifier
+
+
 
 	END TRY
 	BEGIN CATCH
