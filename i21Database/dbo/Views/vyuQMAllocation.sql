@@ -42,13 +42,17 @@ OUTER APPLY (
     V1.strINCOLocation strINCOLocationP,    
     V1.intContractStatusId intContractStatusIdP,
 	V1.intContractHeaderId intContractHeaderIdP
-    FROM    
-    vyuQMSampleList S1    
-    LEFT JOIN     
-    vyuCTContractDetailView V1    
-    ON V1.intContractDetailId = S1.intContractDetailId    
-    WHERE A.intPContractDetailId = S1.intContractDetailId    
-AND V1.intContractStatusId NOT IN( 3, 5, 6 )    
+    FROM vyuQMSampleList S1   
+	 OUTER APPLY(
+		SELECT strEntityName,dblNetWeight,strNetWeightUOM ,strFreightTerm ,strINCOLocation,intContractStatusId,intContractHeaderId 
+        FROM vyuCTContractDetailView
+		WHERE intContractDetailId = S1.intContractDetailId    
+		AND intContractStatusId NOT IN( 3, 5, 6 )   
+		AND intContractTypeId = 1
+	)V1
+      
+    WHERE S1.strContractType='Purchase' and A.intPContractDetailId = S1.intContractDetailId    
+-- 
 ) U    
 OUTER APPLY(    
     SELECT 
@@ -74,14 +78,17 @@ OUTER APPLY(
     V2.strINCOLocation strINCOLocationS,    
     V2.intContractStatusId intContractStatusIdS,
 	V2.intContractHeaderId intContractHeaderIdS
-    FROM     
-    vyuQMSampleList S2     
-    LEFT JOIN     
-    vyuCTContractDetailView V2     
-    ON V2.intContractDetailId = S2.intContractDetailId    
+    FROM vyuQMSampleList S2     
+    OUTER APPLY(
+		SELECT strEntityName,dblNetWeight,strNetWeightUOM ,strFreightTerm ,strINCOLocation,intContractStatusId,intContractHeaderId 
+        FROM vyuCTContractDetailView
+		WHERE intContractDetailId = S2.intContractDetailId  
+		AND intContractStatusId NOT IN( 3, 5, 6 )   
+		AND intContractTypeId =2
+	)V2 
     WHERE --A.intSContractDetailId = S2.intContractDetailId    
-    S2.intContractDetailId = A.intSContractDetailId  
-    AND S2.intRelatedSampleId = U.intSampleIdP
-   AND V2.intContractStatusId NOT IN( 3, 5, 6 )  
+	S2.strContractType = 'Sale' and
+    S2.intRelatedSampleId = U.intSampleIdP
+
 ) V    
 WHERE U.intSampleIdP IS NOT NULL OR V.intSampleIdS IS NOT NULL
