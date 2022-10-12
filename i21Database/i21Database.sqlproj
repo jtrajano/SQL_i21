@@ -1145,6 +1145,7 @@
     <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
     <Build Include="dbo\Tables\uspTRInsertLoadFromImport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRReprocessImportDtn.sql" />
+    <Build Include="dbo\Tables\tblHDDeploymentType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
