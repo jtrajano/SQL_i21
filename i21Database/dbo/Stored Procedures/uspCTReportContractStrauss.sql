@@ -155,7 +155,7 @@ BEGIN TRY
 											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
 											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
 											WHERE ISNULL(AAP.ysnAmendment,0) = 1
-												AND AL.dtmHistoryCreated >= @dtmApproveDate
+												AND AL.dtmHistoryCreated <= @dtmApproveDate
 											FOR XML PATH('')
 											), 1, 1, '')
 
@@ -164,7 +164,7 @@ BEGIN TRY
 											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
 											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
 											WHERE ISNULL(AAP.ysnAmendment,0) = 1
-												AND AL.dtmHistoryCreated >= @dtmApproveDate 
+												AND AL.dtmHistoryCreated <= @dtmApproveDate 
 											order by AL.dtmHistoryCreated DESC )
 
 	END
