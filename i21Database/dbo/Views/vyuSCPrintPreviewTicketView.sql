@@ -1,4 +1,9 @@
-﻿CREATE VIEW dbo.vyuSCPrintPreviewTicketView
+﻿/*
+	DEVOPER'S NOTEBOOK
+	IMPORTAN NOTE - ANY MODIFICATION HERE SHOULD BE APPLIED TO uspSCPrintPrewviewTicketViewReport AS WELL
+	THANK YOU
+*/
+CREATE VIEW dbo.vyuSCPrintPreviewTicketView
 AS SELECT 
 	SC.intTicketId
 	,(CASE WHEN
