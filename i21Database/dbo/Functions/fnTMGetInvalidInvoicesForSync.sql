@@ -33,23 +33,23 @@ BEGIN
 										'Site total capacity is Zero.'
 									WHEN E.intClockID IS NULL THEN
 										'The Site Clock Location does not exists in Tank Management.'
-									WHEN D.strClassFillOption = 'No' AND D.intProduct <> B.intItemId AND G.strType <> 'Service'  THEN
+									WHEN D.strClassFillOption = 'No' AND D.intProduct <> C.intItemId AND G.strType <> 'Service'  THEN
 										'The Invoice item is different than the site item.'
 									WHEN D.strClassFillOption = 'Product Class' AND F.intCategoryId <> G.intCategoryId AND G.strType <> 'Service' THEN
 										'The Invoice item class is different than the site item class.'
-									WHEN G.strType = 'Service' AND B.intPerformerId IS NULL THEN
+									WHEN G.strType = 'Service' AND C.intPerformerId IS NULL THEN
 										'Performer is not specified for item'
 									WHEN H.intClockID IS NULL THEN
 										'Invoice date does not have a matching Clock Reading record.'
 									ELSE ''
 								END)
 		FROM tblARInvoice A
-		INNER JOIN tblARInvoiceDetail B
-			ON A.intInvoiceId = B.intInvoiceId
+		--INNER JOIN tblARInvoiceDetail B
+		--	ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN @Invoices C
 			ON A.intInvoiceId = C.intInvoiceId
 		INNER JOIN tblTMSite D
-			ON B.intSiteId = D.intSiteID
+			ON C.intSiteId = D.intSiteID
 		INNER JOIN tblTMClock E
 			ON D.intClockID = E.intClockID
 		LEFT JOIN tblTMDegreeDayReading H
@@ -58,16 +58,16 @@ BEGIN
 		LEFT JOIN tblICItem F
 			ON D.intProduct = F.intItemId
 		LEFT JOIN tblICItem G
-			ON B.intItemId = G.intItemId
-		LEFT JOIN tblTMSiteDevice I
-			ON D.intSiteID = I.intSiteID
-		LEFT JOIN tblTMDevice	J
-			ON I.intDeviceId = J.intDeviceId
-		LEFT JOIN tblTMDeviceType K
-			ON J.intDeviceTypeId = K.intDeviceTypeId
-				AND K.strDeviceType <> 'Flow Meter'
-		WHERE B.intSiteId IS NOT NULL	
-			AND ISNULL(B.ysnLeaseBilling,0) <> 1
+			ON C.intItemId = G.intItemId
+		-- LEFT JOIN tblTMSiteDevice I
+		-- 	ON D.intSiteID = I.intSiteID
+		-- LEFT JOIN tblTMDevice	J
+		-- 	ON I.intDeviceId = J.intDeviceId
+		-- LEFT JOIN tblTMDeviceType K
+		-- 	ON J.intDeviceTypeId = K.intDeviceTypeId
+		-- 		AND K.strDeviceType <> 'Flow Meter'
+		WHERE C.intSiteId IS NOT NULL	
+			AND ISNULL(C.ysnLeaseBilling,0) <> 1
 			AND D.strBillingBy <> 'Flow Meter'
 
 		UNION ALL
@@ -83,12 +83,12 @@ BEGIN
 										'Site is a Flow Meter but dont have a flow meter type device record.'
 								END)
 		FROM tblARInvoice A
-		INNER JOIN tblARInvoiceDetail B
-			ON A.intInvoiceId = B.intInvoiceId
+		--INNER JOIN tblARInvoiceDetail B
+		--	ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN @Invoices C
 			ON A.intInvoiceId = C.intInvoiceId
 		INNER JOIN tblTMSite D
-			ON B.intSiteId = D.intSiteID
+			ON C.intSiteId = D.intSiteID
 		INNER JOIN tblTMClock E
 			ON D.intClockID = E.intClockID
 		LEFT JOIN tblTMDegreeDayReading H
@@ -97,7 +97,7 @@ BEGIN
 		LEFT JOIN tblICItem F
 			ON D.intProduct = F.intItemId
 		LEFT JOIN tblICItem G
-			ON B.intItemId = G.intItemId
+			ON C.intItemId = G.intItemId
 		LEFT JOIN (
 			SELECT 
 				I.intSiteID
@@ -114,7 +114,7 @@ BEGIN
 			FROM tblTMSite I) J
 			ON D.intSiteID = J.intSiteID
 		WHERE D.strBillingBy = 'Flow Meter'
-			AND ISNULL(B.ysnLeaseBilling,0) <> 1
+			AND ISNULL(C.ysnLeaseBilling,0) <> 1
 
 
 		---------------------------------------------------------------------------------------------------------------
@@ -131,12 +131,12 @@ BEGIN
 			,C.[strBatchId]	
 			,[strPostingError] = 'Consumption Site record is locked.'
 		FROM tblARInvoice A
-		INNER JOIN tblARInvoiceDetail B
-			ON A.intInvoiceId = B.intInvoiceId
+		--INNER JOIN tblARInvoiceDetail B
+		--	ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN @Invoices C
 			ON A.intInvoiceId = C.intInvoiceId
 		INNER JOIN tblTMSite D
-			ON B.intSiteId = D.intSiteID
+			ON C.intSiteId = D.intSiteID
 		INNER JOIN tblSMTransaction E
 			ON D.intCustomerID = E.intRecordId
 		INNER JOIN tblSMScreen F
