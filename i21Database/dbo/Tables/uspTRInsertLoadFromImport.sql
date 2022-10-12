@@ -21,7 +21,6 @@ BEGIN
 	BEGIN TRANSACTION
 	
 	BEGIN TRY
-
 		DECLARE @strMessage NVARCHAR(MAX) = NULL
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId AND ysnPosted = 1)
@@ -42,9 +41,9 @@ BEGIN
 				, @intAdjAccountId INT = NULL
 				, @intQtyToBill INT = 1
 
-			SELECT TOP 1 @intAdjAccountId = intAdjustmentAccountId, @dblAdjustmentTolerance = dblAdjustmentTolerance FROM tblTRCompanyPreference
+			SELECT TOP 1 @intAdjAccountId = intAdjustmentAccountId, @dblAdjustmentTolerance = ISNULL(dblAdjustmentTolerance, 0) FROM tblTRCompanyPreference
 
-			SELECT @dblAdjustment = dblGrandTotal - @dblInvoiceAmount 
+			SELECT @dblAdjustment = @dblInvoiceAmount - dblGrandTotal
 			FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 			IF (@dblAdjustment < 0)
@@ -174,23 +173,52 @@ BEGIN
 					END
 				END
 			END
+
+			IF (@dblAdjustment <> 0) AND (ISNULL(@intBillId, 0) <> 0)
+			BEGIN
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ' (With Variance)')
+			END
 		END
 		ELSE
 		BEGIN
-			SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Does not match to any Inventory Receipt')
+			IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId)
+			BEGIN
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Inventory Receipt is not posted')
+			END
+			ELSE
+			BEGIN
+				DECLARE @BOL NVARCHAR(50)
+				SELECT @BOL = strBillOfLading FROM tblTRImportDtnDetail WHERE intImportDtnDetailId = @intImportDtnDetailId
+
+				IF EXISTS (
+					SELECT TOP 1 1 FROM tblTRLoadReceipt lr
+					JOIN tblTRLoadHeader lh ON lh.intLoadHeaderId = lr.intLoadHeaderId
+					WHERE lr.intTerminalId = @intEntityVendorId
+						AND lr.strBillOfLading = @BOL
+						AND ISNULL(lh.ysnPosted, 0) = 0)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Transport Load is not posted')
+				END
+				ELSE
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Does not match to any Inventory Receipt')
+				END
+			END			
 		END
 
 		IF(@intBillId IS NOT NULL)
 		BEGIN
-			UPDATE tblTRImportDtnDetail SET intBillId = @intBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
+			UPDATE tblTRImportDtnDetail
+			SET intBillId = @intBillId
+			WHERE intImportDtnDetailId = @intImportDtnDetailId
 		END
 
 		IF(ISNULL(@strMessage, '') != '')
 		BEGIN
-			--IF (@strMessage = 'Variance is greater than allowed')
-			UPDATE tblTRImportDtnDetail SET strMessage = @strMessage
-				--, ysnValid = 
-			WHERE intImportDtnDetailId = @intImportDtnDetailId 
+			UPDATE tblTRImportDtnDetail
+			SET strMessage = @strMessage + CASE WHEN @ysnOverrideTolerance = 1 THEN ' (Reprocess)' ELSE '' END
+				, ysnValid = CASE WHEN @strMessage LIKE '%Voucher successfully posted%' OR @strMessage LIKE '%Voucher cannot be posted%' THEN 1 ELSE 0 END
+			WHERE intImportDtnDetailId = @intImportDtnDetailId
 		END	
 
 		IF @@TRANCOUNT > 0 COMMIT TRANSACTION
