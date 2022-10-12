@@ -1,9 +1,10 @@
 CREATE PROCEDURE uspGLRecalcRetainedEarnings    
-    @intFiscalYearId INT = NULL,    
-    @intGLFiscalYearPeriodId INT = NULL,    
-    @intOpen SMALLINT = NULL,    
+    @intFiscalYearId INT,    
+    @intGLFiscalYearPeriodId INT ,
+	@ysnAllFiscalYear BIT,
+    @intOpen SMALLINT,    
     @intEntityId INT,    
-    @result NVARCHAR(30) OUTPUT      
+    @result NVARCHAR(100) OUTPUT      
 AS      
       
 DECLARE @dtmStartDate DATETIME        
@@ -25,54 +26,61 @@ dtmStartDate DATETIME ,
 dtmEndDate  DATETIME)        
     
 DECLARE @strGUID NVARCHAR(40)        
-        
-DECLARE @tblFiscalYear TABLE (    
-intFiscalYearId INT,    
-intRetainAccount INT,     
-intIncomeSummaryAccount INT)    
-    
-IF ISNULL(@intFiscalYearId,0) <> 0     
-BEGIN    
-    INSERT INTO @tblFiscalYear (intFiscalYearId,intRetainAccount,intIncomeSummaryAccount)    
-    SELECT        
-    intFiscalYearId,    
-    intRetainAccount,        
-    intIncomeSummaryAccount        
-    FROM tblGLFiscalYear WHERE ISNULL(@intFiscalYearId,intFiscalYearId) = intFiscalYearId    
-    
-    INSERT INTO @tblPeriod (intGLFiscalYearPeriodId, guidPostId, intRetainAccount, intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate)        
-    SELECT intGLFiscalYearPeriodId,CAST(guidPostId AS NVARCHAR(40)),B.intRetainAccount, B.intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate        
-    FROM tblGLFiscalYearPeriod A    
-    JOIN @tblFiscalYear B ON A.intFiscalYearId = B.intFiscalYearId    
-    WHERE ISNULL(ysnOpen,0) =     
-    CASE WHEN @intOpen = 1 THEN 1    
-    WHEN @intOpen = 0 THEN 0    
-    ELSE ISNULL(ysnOpen,0)    
-    END    
-    SET @intGLFiscalYearPeriodId = NULL    
-END    
-IF ISNULL(@intGLFiscalYearPeriodId,0) <> 0    
-BEGIN    
-    INSERT INTO @tblPeriod (intGLFiscalYearPeriodId, guidPostId, intRetainAccount, intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate)        
-    SELECT intGLFiscalYearPeriodId,CAST(A.guidPostId AS NVARCHAR(40)),B.intRetainAccount, B.intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate        
-    FROM tblGLFiscalYearPeriod A JOIN tblGLFiscalYear B ON A.intFiscalYearId = B.intFiscalYearId    
-    WHERE intGLFiscalYearPeriodId =@intGLFiscalYearPeriodId    
-    AND ISNULL(ysnOpen,0) =     
-            CASE WHEN @intOpen = 1 THEN 1    
-            WHEN @intOpen = 0 THEN 0    
-            ELSE ISNULL(ysnOpen,0)    
-        END    
-END    
-    
---DELETE FROM tblGLDetail WHERE strBatchId IN (SELECT guidPostId FROM @tblFiscalYear)    
---DELETE FROM tblGLPostRecap WHERE strBatchId IN (SELECT guidPostId FROM @tblFiscalYear)    
-    
-        
+
+IF @ysnAllFiscalYear = 1
+BEGIN	
+		INSERT INTO @tblPeriod (intGLFiscalYearPeriodId, guidPostId, intRetainAccount, 
+		intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate)        
+		SELECT intGLFiscalYearPeriodId,CAST(guidPostId AS NVARCHAR(40)),B.intRetainAccount, 
+		B.intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate 
+		FROM tblGLFiscalYearPeriod A    
+		JOIN tblGLFiscalYear B ON A.intFiscalYearId = B.intFiscalYearId    
+		WHERE ISNULL(ysnOpen,0) =     
+		CASE WHEN @intOpen = 1 THEN 1    
+		WHEN @intOpen = 0 THEN 0    
+		ELSE ISNULL(ysnOpen,0)    
+		END    
+END
+ELSE
+BEGIN
+	IF @intFiscalYearId > 0     
+	BEGIN	
+		INSERT INTO @tblPeriod (intGLFiscalYearPeriodId, guidPostId, intRetainAccount, intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate)        
+		SELECT intGLFiscalYearPeriodId,CAST(guidPostId AS NVARCHAR(40)),B.intRetainAccount, B.intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate        
+		FROM tblGLFiscalYearPeriod A    
+		JOIN tblGLFiscalYear B ON A.intFiscalYearId = B.intFiscalYearId    
+		WHERE 
+		B.intFiscalYearId = @intFiscalYearId AND
+		ISNULL(ysnOpen,0) =     
+		CASE WHEN @intOpen = 1 THEN 1    
+		WHEN @intOpen = 0 THEN 0    
+		ELSE ISNULL(ysnOpen,0)    
+		END    
+	END    
+	ELSE
+	IF @intGLFiscalYearPeriodId > 0    
+	BEGIN    
+		INSERT INTO @tblPeriod (intGLFiscalYearPeriodId, guidPostId, intRetainAccount, intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate)        
+		SELECT intGLFiscalYearPeriodId,CAST(A.guidPostId AS NVARCHAR(40)),B.intRetainAccount, B.intIncomeSummaryAccount, strPeriod, dtmStartDate, dtmEndDate        
+		FROM tblGLFiscalYearPeriod A JOIN tblGLFiscalYear B ON A.intFiscalYearId = B.intFiscalYearId    
+		WHERE intGLFiscalYearPeriodId =@intGLFiscalYearPeriodId    
+		    
+	END  
+END
+
+IF EXISTS(SELECT 1 FROM @tblPeriod where ISNULL(intIncomeSummaryAccount,0) = 0 )
+BEGIN
+	SET @result = 'Fiscal year has missing Income Summary GL Account'   
+	GOTO _end
+END
+IF EXISTS(SELECT 1 FROM @tblPeriod where ISNULL(intRetainAccount,0) = 0 )
+BEGIN
+	SET @result = 'Fiscal year has missing Retain Earnings GL Account'   
+	GOTO _end
+END
     
 WHILE EXISTS (SELECT 1 FROM  @tblPeriod)        
 BEGIN        
-        
-    
     SELECT TOP 1 @intGLFiscalYearPeriodId =intGLFiscalYearPeriodId,@strPeriod = strPeriod,        
     @dtmStartDate =  dtmStartDate, @dtmEndDate =dtmEndDate,@strGUID = guidPostId,    
     @intRetainAccount=intRetainAccount,@intIncomeSummaryAccount= intIncomeSummaryAccount    
@@ -136,9 +144,8 @@ BEGIN
         
     DELETE FROM @tblPeriod WHERE @intGLFiscalYearPeriodId = intGLFiscalYearPeriodId        
         
-END        
-        
-        
+END
+
 --REVERSED BY INCOME SUMMARY ACCOUNT        
 INSERT INTO @RevalTableType(          
     [strTransactionId]          
@@ -264,18 +271,15 @@ SELECT
 FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A           
         
 IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
-BEGIN        
-    
-EXEC uspGLPostRecap @RecapTableType, @intEntityId          
-EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
-SET @result = 'Error overriding accounts.'      
-GOTO _end      
+BEGIN
+    EXEC uspGLPostRecap @RecapTableType, @intEntityId          
+    EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
+    SET @result = 'Error overriding accounts.'  
+    GOTO _end      
 END        
         
 EXEC uspGLBookEntries @RecapTableType, 1, 1 ,1         
       
                 
 SET @result = 'Posted'      
-        
-        
  _end: 

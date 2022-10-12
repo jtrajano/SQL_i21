@@ -438,17 +438,8 @@ BEGIN
 					delete from @DirectTickets where intTicketId = @intDirectTicketId;
 				end
 
-				DECLARE @ticketId INT
-				SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket with (nolock) WHERE intTicketType = 6 AND intContractId = @intContractDetailId
-				IF @ticketId IS NOT NULL
-				BEGIN
-					DECLARE @newInvoiceId INT
-					EXEC uspSCCreateInvoiceForPostedDestinationWeightsAndGrades @ticketId, @intUserId, @newInvoiceId OUTPUT
-				END
-				ELSE
-				BEGIN
-					EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
-				END			
+				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1;
+				
 			END
 
 			Update

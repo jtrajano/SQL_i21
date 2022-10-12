@@ -54,7 +54,7 @@ SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPre
 SET @NewAccountId = (SELECT TOP 1 [intGLAccountId] FROM tblCMBankAccount WHERE [intBankAccountId] = @BankAccountId)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
-SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblSMCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
+SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblARCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 
 SELECT TOP 1 

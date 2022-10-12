@@ -74,6 +74,7 @@ SELECT LC.intLoadCostId
 	  ,BO.strBook
 	  ,L.intSubBookId
 	  ,SB.strSubBook
+	  ,L.intUserLoc
 FROM tblLGLoadCost LC
 JOIN tblEMEntity E ON E.intEntityId = LC.intVendorId
 JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId

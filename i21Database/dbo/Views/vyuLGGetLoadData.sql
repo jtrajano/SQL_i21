@@ -254,6 +254,7 @@ SELECT
     ,intTaxLocationId = L.intTaxLocationId
     ,ysnTaxPointOverride = L.ysnTaxPointOverride
     ,ysnTaxLocationOverride = L.ysnTaxLocationOverride
+    ,L.intUserLoc
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId

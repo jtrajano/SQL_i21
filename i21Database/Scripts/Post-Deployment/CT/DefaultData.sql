@@ -83,3 +83,13 @@ MERGE INTO tblCTAmendmentApproval AS destination
 				,SourceData.strType
 		);	
 END	
+
+--UPDATE CT REFERENCE AMENDFIELDS INCLUDE INCOLOCATION PORT 
+BEGIN 
+	IF NOT EXISTS (SELECT 1  FROM tblCTCompanyPreference where strAmendmentFields LIKE '%INCO%' ) 
+	AND EXISTS (SELECT 1 FROM tblCTAmendmentApproval where strDataIndex = 'intINCOLocationTypeId' and ysnApproval = 1)
+	BEGIN 
+		UPDATE tblCTCompanyPreference
+		SET strAmendmentFields = strAmendmentFields+',intINCOLocationTypeId'
+	END
+END  

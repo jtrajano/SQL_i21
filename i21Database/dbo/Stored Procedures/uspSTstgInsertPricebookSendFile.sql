@@ -217,7 +217,7 @@ BEGIN
 			ON itemLoc.intLocationId = store.intCompanyLocationId
 		INNER JOIN @tempTableItems temp
 			ON item.intItemId = temp.intItemId
-		WHERE item.ysnFuelItem = CAST(0 AS BIT) 
+		WHERE ISNULL(item.ysnFuelItem, 0) = CAST(0 AS BIT) 
 			AND store.intStoreId = @intStoreId
 			AND uom.strLongUPCCode IS NOT NULL
 			AND uom.strLongUPCCode <> ''
@@ -447,7 +447,7 @@ BEGIN
 							AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 						LEFT JOIN tblICItemUOM uomDepositPlu
 							ON IL.intDepositPLUId = uomDepositPlu.intItemUOMId
-						WHERE item.ysnFuelItem = CAST(0 AS BIT) 
+						WHERE ISNULL(item.ysnFuelItem, 0) = CAST(0 AS BIT) 
 							AND ST.intStoreId = @intStoreId
 							AND IUOM.strLongUPCCode IS NOT NULL
 							AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
@@ -612,6 +612,7 @@ BEGIN
 											strActionType,
 											strUpcCode,
 											strDescription,
+											strUnitMeasure,
 											dblSalePrice,
 											ysnSalesTaxed,
 											ysnIdRequiredLiquor,
@@ -626,6 +627,7 @@ BEGIN
 											strActionType = t1.strActionType,
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
+											strUnitMeasure = t1.strUnitMeasure,
 											dblSalePrice = CASE
 																	WHEN (GETDATE() BETWEEN t1.dtmBeginDate AND t1.dtmEndDate)
 																		THEN t1.dblUnitAfterDiscount 
@@ -649,13 +651,14 @@ BEGIN
 										FROM  
 										(
 										SELECT *,
-												rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+												rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId, t.strUnitMeasure ORDER BY (SELECT NULL))
 											FROM 
 												(
 													SELECT DISTINCT
 														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 														, IUOM.strLongUPCCode AS strUpcCode
 														, I.strDescription AS strDescription
+														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
 														, IL.intItemLocationId AS intItemLocationId
 														, IL.ysnTaxFlag1 AS ysnSalesTaxed
@@ -692,7 +695,7 @@ BEGIN
 														AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 													LEFT JOIN tblICItemSpecialPricing SplPrc 
 														ON SplPrc.intItemId = I.intItemId
-													WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+													WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 														AND ST.intStoreId = @intStoreId
 														AND IUOM.strLongUPCCode IS NOT NULL
 														AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
@@ -849,7 +852,7 @@ BEGIN
 							ON Prc.intItemLocationId = IL.intItemLocationId
 						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
-						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 
 						AND ST.intStoreId = @intStoreId
 
@@ -996,7 +999,7 @@ BEGIN
 							ON Prc.intItemLocationId = IL.intItemLocationId
 						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
-						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 
 						AND ST.intStoreId = @intStoreId
 						AND (
@@ -1042,6 +1045,7 @@ BEGIN
 							strActionType,
 							strUpcCode,
 							strDescription,
+							strUnitMeasure,
 							dblSalePrice,
 							ysnSalesTaxed,
 							ysnIdRequiredLiquor,
@@ -1056,6 +1060,7 @@ BEGIN
 							strActionType = t1.strActionType,
 							strUpcCode = t1.strUpcCode,
 							strDescription = t1.strDescription,
+							strUnitMeasure = t1.strUnitMeasure,
 							dblSalePrice = t1.dblSalePrice,
 							ysnSalesTaxed = t1.ysnSalesTaxed,
 							ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -1066,13 +1071,14 @@ BEGIN
 						FROM  
 						(
 							SELECT *,
-									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId, t.strUnitMeasure ORDER BY (SELECT NULL))
 							FROM 
 							(
 								SELECT DISTINCT
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 									, IUOM.strLongUPCCode AS strUpcCode
 									, I.strDescription AS strDescription
+									, IUM.strUnitMeasure AS strUnitMeasure
 									, CASE  WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
 											WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
 																							WHERE EIP.intItemLocationId = IL.intItemLocationId
@@ -1113,7 +1119,7 @@ BEGIN
 									ON Prc.intItemLocationId = IL.intItemLocationId
 								LEFT JOIN tblICItemSpecialPricing SplPrc 
 									ON SplPrc.intItemId = I.intItemId
-								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+								WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 									AND ST.intStoreId = @intStoreId
 									AND IUOM.strLongUPCCode IS NOT NULL
 									--AND IUOM.strLongUPCCode <> ''
@@ -1412,7 +1418,7 @@ BEGIN
 									ON I.intItemId = itemPricing.intItemId
 									AND IL.intItemLocationId = itemPricing.intItemLocationId
 									AND IUOM.intItemUOMId = itemPricing.intItemUOMId
-								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+								WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 									AND ST.intStoreId = @intStoreId
 									AND IUOM.strLongUPCCode IS NOT NULL
 									--AND IUOM.strLongUPCCode <> ''

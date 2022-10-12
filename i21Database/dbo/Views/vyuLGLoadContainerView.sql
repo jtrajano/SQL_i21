@@ -152,6 +152,7 @@ SELECT   L.intLoadId
 		,L.strMVessel
 		,L.strMVoyageNumber
 		,L.strIMONumber
+		,L.intUserLoc
 FROM 
 tblLGLoadContainer LC
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
