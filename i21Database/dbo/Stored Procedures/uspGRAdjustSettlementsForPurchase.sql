@@ -5,8 +5,8 @@
 	,@intContractDetailId INT = NULL
 	,@intAdjustmentTypeId INT
 	,@AdjustSettlementsStagingTable AdjustSettlementsStagingTable READONLY
-	,@intBillId INT NULL OUTPUT
-	,@BillIds NVARCHAR(MAX) NULL OUTPUT
+	,@intBillId INT = NULL OUTPUT
+	,@BillIds NVARCHAR(MAX) = NULL OUTPUT
 )
 AS
 BEGIN
