@@ -84,6 +84,7 @@ BEGIN
 	--12-->Late Open Contracts
 	--13-->Forward Open Contracts
 	--14-->No ETA
+	--15-->Not AVailable Inventory
 	IF OBJECT_ID('tempdb..#tblMFShortTermDemand') IS NOT NULL
 		DROP TABLE #tblMFShortTermDemand
 
@@ -177,6 +178,24 @@ BEGIN
 	JOIN @tblMFItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intWeightUOMId
 	WHERE L.dblQty > 0 AND L.intLotStatusId=1
+	GROUP BY L.intItemId
+		,L.intLocationId
+
+	INSERT INTO #tblMFShortTermDemand (
+		intItemId
+		,intLocationId
+		,dblQty
+		,intAttributeId
+		)
+	SELECT L.intItemId
+		,L.intLocationId AS intLocationId
+		,Sum(dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, L.dblWeight)) AS dblQty
+		,15 AS intAttributeId -->NOT Available Inventory
+	FROM tblICLot L
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
+	JOIN @tblMFItem I ON I.intItemId = L.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intWeightUOMId
+	WHERE L.dblQty > 0 AND L.intLotStatusId<>1
 	GROUP BY L.intItemId
 		,L.intLocationId
 
@@ -526,7 +545,7 @@ BEGIN
 			1
 			,4
 			)
-		AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
+		AND SS.dtmStartDate BETWEEN @dtmCurrentMonthStartDate
 			AND @dtmAfter80Days
 		AND SS.dblQuantity - IsNULL(C2.dblQuantity, 0) > 0
 	GROUP BY I.intItemId
@@ -601,6 +620,7 @@ BEGIN
 		,[12] AS dblLateOpenContracts
 		,[13] AS dblForwardOpenContracts
 		,[14] AS dblNoETA
+		,[15] AS dblNotAvailableInventory
 	FROM (
 		SELECT *
 		FROM #tblMFShortTermDemand
@@ -620,6 +640,7 @@ BEGIN
 				,[12]
 				,[13]
 				,[14]
+				,[15]
 				)) AS pvt
 	JOIN dbo.tblICItem I ON I.intItemId = pvt.intItemId
 	JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
