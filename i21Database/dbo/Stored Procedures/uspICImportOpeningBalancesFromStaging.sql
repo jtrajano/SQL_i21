@@ -155,16 +155,23 @@ BEGIN
 				,intRecordNo = CAST(ROW_NUMBER() OVER (ORDER BY intImportStagingOpeningBalanceId) AS INT)
 			FROM tblICImportStagingOpeningBalance a 
 		) a
-		LEFT JOIN tblICItem i
-			ON a.strItemNo = i.strItemNo 
-		LEFT JOIN tblICItemUOM iu
-			ON iu.intItemId = i.intItemId
-		LEFT JOIN tblICUnitMeasure u
-			ON u.intUnitMeasureId = iu.intUnitMeasureId
-			AND u.strUnitMeasure = a.strUOM
+		OUTER APPLY (
+			SELECT TOP 1
+				i.intItemId
+				,u.intUnitMeasureId
+				,i.strItemNo
+			FROM 
+				tblICItem i	LEFT JOIN tblICItemUOM iu
+					ON iu.intItemId = i.intItemId
+				LEFT JOIN tblICUnitMeasure u
+					ON u.intUnitMeasureId = iu.intUnitMeasureId					
+			WHERE
+				i.strItemNo = a.strItemNo 
+				AND u.strUnitMeasure = a.strUOM
+		) b	
 	WHERE 
-		u.intUnitMeasureId IS NULL 
-		AND i.intItemId IS NOT NULL 
+		b.intUnitMeasureId IS NULL 
+		AND b.intItemId IS NOT NULL 	
 
 	SET @row_errors = ISNULL(@row_errors, 0) + @@ROWCOUNT
 END
