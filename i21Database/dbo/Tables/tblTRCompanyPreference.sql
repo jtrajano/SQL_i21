@@ -21,6 +21,8 @@
 	[strRackPriceImportReceivingFolder] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strRackPriceImportProcessingFolder] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strRackPriceImportArchiveFolder] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	[intAdjustmentAccountId] INT NULL,
+	[dblAdjustmentTolerance] DECIMAL (18,6) NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	[ysnFreightInRequired] BIT NULL,	
 	[ysnComboFreight] BIT NULL,

@@ -46,6 +46,7 @@
 	[dblTempPayment] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblTempInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[dblAverageExchangeRate] DECIMAL (18, 6) NULL,
     [intTransactionType] INT NOT NULL DEFAULT 0, 
     [intPurchaseOrderId] INT NULL, 
 	[strPONumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
@@ -91,7 +92,6 @@
 	[dtmOrigDateDeleted] DATETIME NULL,
 	[ysnOverrideCashFlow] BIT NULL DEFAULT 0,
 	[dtmCashFlowDate] DATETIME NULL,
-	[dblAverageExchangeRate] DECIMAL (18, 6) NULL
     CONSTRAINT [PK_dbo.tblAPBillArchive] PRIMARY KEY CLUSTERED ([intBillId] ASC),
 	CONSTRAINT [UK_dbo.tblAPBillArchive_strBillId] UNIQUE (strBillId)
 );

@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblSTCheckoutProcess]
 	[intCheckoutId]				INT NULL,
     [intStoreId]                INT NOT NULL,
     [dtmCheckoutProcessDate]	DATETIME NOT NULL,
-    [strGuid]					NVARCHAR(50) NOT NULL,
+    [strGuid]					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
     [intConcurrencyId]			INT NOT NULL, 
     CONSTRAINT [PK_tblSTCheckoutProcess_intCheckoutProcessId] PRIMARY KEY ([intCheckoutProcessId]), 
     CONSTRAINT [FK_tblSTCheckoutProcess_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE,

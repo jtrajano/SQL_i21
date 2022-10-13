@@ -5,6 +5,10 @@
 	,@ysnAddClaim BIT = 1
 AS
 BEGIN
+	DECLARE @ysnAllowPendingClaimsWoClaimableWt BIT
+	SELECT @ysnAllowPendingClaimsWoClaimableWt = ysnAllowPendingClaimsWoClaimableWt
+	FROM tblLGCompanyPreference
+
 	IF (@ysnAddClaim = 1)
 	BEGIN
 		IF (@intPurchaseSale IN (1, 3))
@@ -177,7 +181,7 @@ BEGIN
 							AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale
 											AND intLoadContainerId = CLNW.intLoadContainerId)
 						) LI
-					WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1
+					WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1 OR ISNULL(@ysnAllowPendingClaimsWoClaimableWt, 0) = 1
 				END
 				ELSE
 				BEGIN
@@ -329,7 +333,7 @@ BEGIN
 								AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 								AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale)
 							) LI
-						WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1
+						WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1 OR ISNULL(@ysnAllowPendingClaimsWoClaimableWt, 0) = 1
 					END
 			END
 

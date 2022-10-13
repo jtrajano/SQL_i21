@@ -43,14 +43,16 @@ BEGIN TRY
 		UPDATE L
 		SET intShipmentStatus = CASE WHEN (TL.ysnPosted = 1) THEN 
 										CASE WHEN (L.intPurchaseSale = 1) THEN 4 ELSE 6 END
-									ELSE
-										CASE WHEN (L.ysnDispatched = 1) THEN 2 ELSE 1 END
+									ELSE 
+										CASE WHEN (L.intLoadHeaderId IS NOT NULL) THEN 3
+											 WHEN L.ysnDispatched = 1 THEN 2
+											 ELSE 1 END
 									END
-			,ysnPosted = TL.ysnPosted
+			,ysnInProgress = CASE WHEN (L.intLoadHeaderId IS NOT NULL AND ISNULL(TL.ysnPosted, 0) = 0) THEN 1 ELSE 0 END
+			,ysnPosted = ISNULL(TL.ysnPosted, 0)
 		FROM tblLGLoad L
-		INNER JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = L.intLoadHeaderId
+		LEFT JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = L.intLoadHeaderId
 		WHERE L.intLoadId = @intLoadId AND intTransUsedBy = 3
-
 	END
 
 	UPDATE tblLGLoad SET 

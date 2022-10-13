@@ -18,7 +18,7 @@ stcpew.strMessage,
 0 AS intProcessedStore, 
 0 AS intStoreWithError, 
 0 AS rn, 
-'' AS strReportFilter
+'' COLLATE Latin1_General_CI_AS AS strReportFilter
 FROM dbo.tblSTCheckoutProcessErrorWarning AS stcpew 
 INNER JOIN dbo.tblSTCheckoutProcess AS stcp 
 	ON stcpew.intCheckoutProcessId = stcp.intCheckoutProcessId 

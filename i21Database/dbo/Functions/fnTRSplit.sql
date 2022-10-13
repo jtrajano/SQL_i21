@@ -4,7 +4,7 @@ CREATE FUNCTION [dbo].fnTRSplit (
 )
 
 RETURNS @Items TABLE (
-      Item   VARCHAR(max) COLLATE Latin1_General_CI_AS
+      Item   NVARCHAR(max) COLLATE Latin1_General_CI_AS
 )
 
 AS

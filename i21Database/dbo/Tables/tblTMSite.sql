@@ -872,3 +872,6 @@ CREATE NONCLUSTERED INDEX [IX_tblTMSite_intCustomerID_intSiteID_intTaxStateID_in
 	[intProduct] ASC
 )
 GO
+
+CREATE INDEX [IX_tblTMSite_intUserID] ON [dbo].[tblTMSite] ([intUserID])
+GO 

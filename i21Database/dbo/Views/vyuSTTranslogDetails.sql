@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSTTranslogDetails]
+﻿CREATE  VIEW [dbo].[vyuSTTranslogDetails]
 AS
 
 SELECT intTranslogId AS intId
@@ -46,7 +46,7 @@ SELECT intTranslogId AS intId
 			END) 
 		AS DECIMAL(18,2))  AS dblTrlUnitPrice
 
-	,  CASE WHEN strTrlModifier like '%1'
+	,  CASE WHEN strTrlModifier like '%1' COLLATE Latin1_General_CI_AS
 		        THEN  dblTrlQty * 2
 				ELSE dblTrlQty 
 				END AS dblTrlQty  
@@ -95,7 +95,7 @@ FROM
 	   , TR.strTrLoyaltyProgramProgramID	
 	   , TR.strTrLoyaltyProgramTrloAccount	
 	   , TR.strTrLoyaltyProgramTrloEntryMeth
-       , CONVERT(VARCHAR, TR.dtmDate, 23) AS dtmDate
+       , CONVERT(VARCHAR, TR.dtmDate, 23) COLLATE Latin1_General_CI_AS AS dtmDate
        , CAST(TR.intCashierPosNum AS INT) AS intCashierPosNum
        , CAST(TR.intStoreId AS INT) AS intStoreId
        , CAST(TR.intStoreNumber AS INT) AS intStoreNo
@@ -107,7 +107,7 @@ FROM
        , TR.strCashier
        , TR.intTrTickNumTrSeq -- Added 09/08/2021
 	   , TR.dblTrlPrcOvrd 
-       , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
+       , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) COLLATE Latin1_General_CI_AS as Hr
        , CAST(RIGHT(intCashierPosNum , 1) AS INT) AS intRegister
        , CAST((CASE WHEN LEN(strTrlFuelBasePrice) > 0
                            THEN 1
@@ -126,9 +126,9 @@ FROM
                     THEN 'D' --Department 
             WHEN strTrlUPC IS NOT NULL
                     THEN 'I' --Normal Item 
-            END 
+            END COLLATE Latin1_General_CI_AS
         AS strItemType
-		,SUM(CASE WHEN strTransType like '%refund%' or strTrLineType like '%void%' --  Added 11/17/2021
+		,SUM(CASE WHEN strTransType like '%refund%' COLLATE Latin1_General_CI_AS or strTrLineType like '%void%' COLLATE Latin1_General_CI_AS --  Added 11/17/2021
 		        then  TR.dblTrlQty * -1
 				Else TR.dblTrlQty 
 				END) as dblTrlQty 
@@ -153,10 +153,10 @@ FROM
 		--AND strTrLineType<>'preFuel')
 		WHERE (strTransRollback IS NULL
 		AND strTransFuelPrepay IS NULL
-		AND strTransType <> 'suspended sale'
-		AND strTransType <> 'refund void'
-		AND strTransType <> 'void'
-		AND strTrLineType <>'preFuel')
+		AND strTransType <> 'suspended sale' COLLATE Latin1_General_CI_AS 
+		AND strTransType <> 'refund void' COLLATE Latin1_General_CI_AS 
+		AND strTransType <> 'void' COLLATE Latin1_General_CI_AS
+		AND strTrLineType <>'preFuel' COLLATE Latin1_General_CI_AS )
 
 		--ST-2090 - Added group by to get the correct mix and match line total on all scenarios -- 02/10/2022
 		GROUP BY
@@ -167,7 +167,7 @@ FROM
        , TR.strTrlDept
        , TR.strTrlNetwCode
        , TR.strTrlUPC
-       , dbo.fnSTUPCRemoveLeadingZero(strTrlUPC) 
+       , dbo.fnSTUPCRemoveLeadingZero(strTrlUPC) COLLATE Latin1_General_CI_AS
        , TR.strTrpPaycode
        , TR.strTrpCardInfoTrpcCCName
        , TR.strTrlDesc
@@ -183,7 +183,7 @@ FROM
 	   , TR.strTrLoyaltyProgramProgramID	
 	   , TR.strTrLoyaltyProgramTrloAccount	
 	   , TR.strTrLoyaltyProgramTrloEntryMeth
-       , CONVERT(VARCHAR, TR.dtmDate, 23) 
+       , CONVERT(VARCHAR, TR.dtmDate, 23)  COLLATE Latin1_General_CI_AS
        , CAST(TR.intCashierPosNum AS INT) 
        , CAST(TR.intStoreId AS INT) 
        , CAST(TR.intStoreNumber AS INT)
@@ -214,7 +214,7 @@ FROM
                     THEN 'D' --Department 
             WHEN strTrlUPC IS NOT NULL
                     THEN 'I' --Normal Item 
-            END 
+            END COLLATE Latin1_General_CI_AS
 	     --Flips sign for quantity. If both "refund" and "void" are on the same line, sign does not need flipped.
 													 
 

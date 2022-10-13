@@ -167,6 +167,48 @@ BEGIN TRY
 		
 	UNION ALL	
 
+	--Replaced existing Item with new Item with Contract
+	SELECT
+		  [intInvoiceDetailId]			= D.intInvoiceDetailId
+		, [intContractDetailId]			= D.[intContractDetailId]
+		, [intTicketId]					= D.[intTicketId]
+		, [intInventoryShipmentItemId]	= D.[intInventoryShipmentItemId]
+		, [intItemUOMId]				= D.[intItemUOMId]
+		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
+		, [intLoadDetailId]				= D.[intLoadDetailId]
+		, [intSiteId]					= TD.intSiteId
+	FROM
+		@ItemsFromInvoice I
+	INNER JOIN
+		tblARInvoiceDetail D
+			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN
+		tblICItem ITEM
+			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN
+		tblARInvoice H
+			ON	D.[intInvoiceId] = H.[intInvoiceId]				
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND D.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType IN ('Cash', 'Invoice')
+	INNER JOIN
+		tblCTContractDetail CD
+			ON D.intContractDetailId = CD.intContractDetailId
+	WHERE
+		D.intContractDetailId IS NOT NULL
+		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
+		AND D.[intInventoryShipmentItemId] IS NULL
+		AND (D.[intSalesOrderDetailId] IS NULL OR D.strPricing = 'MANUAL OVERRIDE')
+		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
+		AND D.intItemId <> TD.intItemId
+		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
+		-- AND ISNULL(D.intLoadDetailId, 0) = 0 FOR AR-8652
+		AND ISNULL(H.intTransactionId, 0) = 0
+
+	UNION ALL	
+
 	--Deleted Item
 	SELECT [intInvoiceDetailId]			= TD.intTransactionDetailId
 		, [intContractDetailId]			= TD.[intContractDetailId]

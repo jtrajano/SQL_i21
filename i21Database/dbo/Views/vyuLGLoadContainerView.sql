@@ -84,50 +84,7 @@ SELECT   L.intLoadId
 		,strSampleStatus = S.strStatus
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
-		,strShipmentStatus = CASE L.intShipmentStatus
-								WHEN 1 THEN 
-									CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
-												AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
-										THEN 'Expired'
-										ELSE 'Scheduled' END
-								WHEN 2 THEN 'Dispatched'
-								WHEN 3 THEN 
-									CASE WHEN (L.ysnDocumentsApproved = 1 
-											AND L.dtmDocumentsApproved IS NOT NULL
-											AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-											AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-											THEN 'Documents Approved'
-										WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-										WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-										ELSE 'Inbound Transit' END
-								WHEN 4 THEN 'Received'
-								WHEN 5 THEN 
-									CASE WHEN (L.ysnDocumentsApproved = 1 
-											AND L.dtmDocumentsApproved IS NOT NULL
-											AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-											AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-											THEN 'Documents Approved'
-										WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-										WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-										ELSE 'Outbound Transit' END
-								WHEN 6 THEN 
-									CASE WHEN (L.ysnDocumentsApproved = 1 
-											AND L.dtmDocumentsApproved IS NOT NULL
-											AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-											AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-											THEN 'Documents Approved'
-										WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-										WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-										ELSE 'Delivered' END
-								WHEN 7 THEN 
-									CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
-											ELSE 'Shipping Instruction Created' END
-								WHEN 8 THEN 'Partial Shipment Created'
-								WHEN 9 THEN 'Full Shipment Created'
-								WHEN 10 THEN 'Cancelled'
-								WHEN 11 THEN 'Invoiced'
-								WHEN 12 THEN 'Rejected'
-								ELSE '' END COLLATE Latin1_General_CI_AS
+		,LSS.strShipmentStatus
 		,LDCL.dblReceivedQty AS dblContainerReceivedQty
 		,CAST((CASE WHEN ISNULL(LDCL.dblReceivedQty ,0) = 0 THEN 0 ELSE 1 END) AS BIT) AS  ysnReceived
 		,PDetail.dblCashPrice AS dblPCashPrice
@@ -158,6 +115,7 @@ tblLGLoadContainer LC
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+JOIN vyuLGShipmentStatus LSS ON LSS.intLoadId = L.intLoadId
 LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = LC.intWeightUnitMeasureId
 LEFT JOIN tblICUnitMeasure LCIU ON LCIU.intUnitMeasureId = LC.intUnitMeasureId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
