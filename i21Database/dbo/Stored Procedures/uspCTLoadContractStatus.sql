@@ -86,22 +86,23 @@ BEGIN TRY
 				PD.[dblNoOfLots],
 				PD.dblFinalPrice,
 				CM.strUnitMeasure strPricingUOM,
-				SY.dtmMatchDate,
-				SY.dblHedgedLots,
-				FO.dblPrice,
+				dtmMatchDate = case when PD.ysnHedge = 1 then SY.dtmMatchDate else ph.dtmMatchDate end,  
+				dblHedgedLots = case when PD.ysnHedge = 1 then SY.dblHedgedLots else ph.dblHedgeNoOfLots end,  
+				dblPrice = case when PD.ysnHedge = 1 then FO.dblPrice else ph.dblHedgePrice end,  
 				MM.strUnitMeasure strHedgeUOM,
 				PF.intPriceContractId,
 				PC.strPriceContractNo,
 				PD.dblFutures, 
-				intHedgedLots = SY.dblHedgedLots
+				intHedgedLots = case when PD.ysnHedge = 1 then SY.dblHedgedLots else ph.dblHedgeNoOfLots end  
 
 		FROM	tblCTPriceFixationDetail			PD
+		cross apply (select top 1 ysnEnableHedgingInAssignDerivatives from tblCTCompanyPreference) cp
 		JOIN	tblCTPriceFixation					PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId	
 														AND	PF.intContractHeaderId			=   @intContractHeaderId		
 		JOIN	tblCTPriceContract					PC	ON	PC.intPriceContractId			=	PF.intPriceContractId		LEFT
 		JOIN	tblRKAssignFuturesToContractSummary SY 	ON	SY.intFutOptTransactionId		=	PD.intFutOptTransactionId	LEFT
 		JOIN	tblRKFutOptTransaction				FO	ON	FO.intFutOptTransactionId		=	SY.intFutOptTransactionId	LEFT
-		JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId			=	FO.intFutureMarketId		LEFT
+		JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId			=	case when cp.ysnEnableHedgingInAssignDerivatives = 1 then PD.intFutureMarketId	else FO.intFutureMarketId end	LEFT
 		JOIN	tblICUnitMeasure					MM	ON	MM.intUnitMeasureId				=	MA.intUnitMeasureId			LEFT
 		JOIN	tblCTContractHeader					CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId		LEFT
 		JOIN	tblCTContractDetail					CD	ON	CD.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  CD.intContractDetailId	ELSE PF.intContractDetailId	END
@@ -110,6 +111,7 @@ BEGIN TRY
 		JOIN	tblICItemUOM						IU	ON	IU.intItemId					=	CD.intItemId				
 														AND	IU.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT
 		JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId	
+		left join dbo.fnCTPriceHedge(0,@intContractDetailId) ph on ph.intPriceFixationDetailId = PD.intPriceFixationDetailId
 		WHERE   PF.intPriceFixationId	IS NOT NULL 
 		AND		CD.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  CD.intContractDetailId	ELSE @intContractDetailId	END
 
