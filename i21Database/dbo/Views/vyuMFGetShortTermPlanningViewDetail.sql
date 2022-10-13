@@ -31,33 +31,33 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 	,C2.strCertificationName AS strCertification
 	,E.strName AS strVendor
 	,CASE 
-		WHEN D.intAttributeId IN (5,12,13)
+		WHEN D.intAttributeId IN (5,12,13,15)
 			THEN D.dblQty
 		ELSE LC.dblQuantity-ISNULL(LDCL.dblReceivedQty, 0)
 		END dblQty
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,15)
 			THEN D.strQtyUOM
 		ELSE LCIU.strUnitMeasure
 		END AS strQtyUOM
 	,CASE 
-		WHEN D.intAttributeId IN (5,12,13)
+		WHEN D.intAttributeId IN (5,12,13,15)
 			THEN D.dblWeight
 		ELSE LC.dblNetWt-(dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, CD.intUnitMeasureId, IU.intUnitMeasureId,  ISNULL(LDCL.dblReceivedQty, 0)))
 		END AS dblWeight
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,15)
 			THEN D.strWeightUOM
 		ELSE LCWU.strUnitMeasure
 		END AS strWeightUOM
 	,Comm.strCommodityCode strCommodity
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,15)
 			THEN D.strContainerNumber
 		ELSE LC.strContainerNumber
 		END strContainerNo
 	,CASE 
-		WHEN D.intAttributeId = 5
+		WHEN D.intAttributeId IN (5,15)
 			THEN D.strMarks
 		ELSE LC.strMarks
 		END AS strMarks
@@ -96,6 +96,8 @@ SELECT CONVERT(INT, ROW_NUMBER() OVER (
 			THEN 'Forward Open Contracts'
 		WHEN intAttributeId = 14
 			THEN 'No ETA'
+		WHEN intAttributeId = 15
+			THEN 'Not Available Inventory'
 		END strContainerStatus
 	,(
 		CASE 
