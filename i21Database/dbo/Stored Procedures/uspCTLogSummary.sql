@@ -5042,7 +5042,10 @@ BEGIN TRY
 							BEGIN
 								if exists (select top 1 1 from @cbLogSpecific where dblOrigQty > @TotalPriced and @intHeaderPricingTypeId = 2 and @intSequencePricingTypeId = 2)
 								begin
-									UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 2, intActionId =  18
+									UPDATE @cbLogSpecific SET
+										dblQty = dblQty * - 1
+										,intPricingTypeId = case when @ysnUnposted = 1 and @TotalPriced > 0 then 1 else 2 end
+										,intActionId =  case when intContractTypeId = 1 and @ysnUnposted = 1 and @TotalPriced > 0 then 47 else 18 end
 								end
 								else
 								begin
