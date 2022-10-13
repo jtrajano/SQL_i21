@@ -6,11 +6,11 @@ BEGIN
 
 	SET @strOwnershipType = 
 		CASE 
-			WHEN @intOwnershipType = 2 THEN 'Own'
+			WHEN @intOwnershipType = 1 THEN 'Own'
 			WHEN @intOwnershipType = 2 THEN 'Storage'
 			WHEN @intOwnershipType = 3 THEN 'Consigned Purchase'
 			ELSE 'Blank'
-	END
+	END COLLATE Latin1_General_CI_AS
 
-	RETURN @strOwnershipType;
+	RETURN @strOwnershipType COLLATE Latin1_General_CI_AS;
 END
