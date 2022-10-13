@@ -12,8 +12,8 @@ SELECT
    ,strEmail = case when load.strType = 'Outbound' then company.strEmail else entity.strEmail end                   
    ,strPhone = case when load.strType = 'Outbound' then company.strPhone else entity.strPhone end            
    ,load.strType                    
-   ,load.strLoadNumber     
-   --,isnull(detail.strPONumber,'') strPONumber
+   ,load.strLoadNumber                
+   ,isnull(detail.strPONumber,'')strPONumber                  
    ,isnull(strTerminalRefNo,'')strTerminalRefNo                    
    ,strSeller = Seller.strName                    
    ,strSalesPerson = Salesperson.strName                    
@@ -53,7 +53,7 @@ Group by detail.intLoadHeaderId
    ,case when load.strType = 'Outbound' then company.strPhone else entity.strPhone end            
    ,load.strType        
    ,load.strLoadNumber   
-   --,isnull(detail.strPONumber,'')  
+   ,isnull(detail.strPONumber,'')  
    ,isnull(strTerminalRefNo,'')                 
    ,Seller.strName                    
    ,Salesperson.strName                    
