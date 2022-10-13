@@ -955,8 +955,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
+				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal,0)--ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(BillByReceipt.dblTax,0)) + (ISNULL(BillByReceipt.dblTotal,0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -965,9 +965,9 @@ BEGIN
 				,OutboundGrossDollars			= 0 
 				,InboundTax						= BillDtl.dblTax 
 				,OutboundTax					= 0
-				,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundDiscount				= ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundDiscount				= 0 
-				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundNetDue					= 0 
 				,VoucherAdjustment				= ISNULL(tblAdjustment.dblTotal, 0) 
 				,SalesAdjustment				= Invoice.dblPayment 
@@ -1045,21 +1045,30 @@ BEGIN
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
-			LEFT JOIN (
-					SELECT 
-						A.intBillId
-						,isnull(A.intLinkingId, -90) as intLinkingId
-						,SUM(dblTotal) AS dblTotal
-						,SUM(dblTax) AS dblTax
-					FROM tblAPBillDetail A
-					JOIN tblICItem B 
-						ON A.intItemId = B.intItemId 
-							AND B.strType = 'Other Charge'
-					GROUP BY A.intBillId
-					,isnull(A.intLinkingId, -90)
-				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId			
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
+				LEFT JOIN (
+						SELECT 
+							intBillDetailId
+							,SUM(dblAmount) AS dblTotal 
+							,SUM(dblTax) AS dblTax
+						FROM vyuGRSettlementSubReport 
+						GROUP BY intBillDetailId
+					) BillByReceipt 
+					ON BillByReceipt.intBillDetailId = BillDtl.intBillDetailId
+			--LEFT JOIN (
+			--		SELECT 
+			--			A.intBillId
+			--			,isnull(A.intLinkingId, -90) as intLinkingId
+			--			,SUM(dblTotal) AS dblTotal
+			--			,SUM(dblTax) AS dblTax
+			--		FROM tblAPBillDetail A
+			--		JOIN tblICItem B 
+			--			ON A.intItemId = B.intItemId 
+			--				AND B.strType = 'Other Charge'
+			--		GROUP BY A.intBillId
+			--		,isnull(A.intLinkingId, -90)
+			--) tblOtherCharge 
+			--	ON tblOtherCharge.intBillId = Bill.intBillId			
+			--		and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1252,8 +1261,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
+				,TotalDiscount					=ISNULL(BillByReceipt.dblTotal,0) --ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(BillByReceipt.dblTax,0)) + (ISNULL(BillByReceipt.dblTotal,0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1262,9 +1271,9 @@ BEGIN
 				,OutboundGrossDollars			= 0 
 				,InboundTax						= BillDtl.dblTax 
 				,OutboundTax					= 0
-				,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundDiscount				= ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundDiscount				= 0 
-				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundNetDue					= 0 
 				,VoucherAdjustment				= ISNULL(tblAdjustment.dblTotal, 0) 
 				,SalesAdjustment				= Invoice.dblPayment 
@@ -1362,19 +1371,28 @@ BEGIN
 				ON ES.intSplitId = DS.intSplitId
 			LEFT JOIN (
 						SELECT 
-							A.intBillId
-							,isnull(A.intLinkingId, -90) as intLinkingId
-							,SUM(dblTotal) AS dblTotal
+							intBillDetailId
+							,SUM(dblAmount) AS dblTotal 
 							,SUM(dblTax) AS dblTax
-						FROM tblAPBillDetail A
-						JOIN tblICItem B 
-							ON A.intItemId = B.intItemId 
-								AND B.strType = 'Other Charge'
-						GROUP BY A.intBillId
-							,isnull(A.intLinkingId, -90)
-					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId	
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
+						FROM vyuGRSettlementSubReport 
+						GROUP BY intBillDetailId
+					) BillByReceipt 
+					ON BillByReceipt.intBillDetailId = BillDtl.intBillDetailId
+			--LEFT JOIN (
+			--			SELECT 
+			--				A.intBillId
+			--				,isnull(A.intLinkingId, -90) as intLinkingId
+			--				,SUM(dblTotal) AS dblTotal
+			--				,SUM(dblTax) AS dblTax
+			--			FROM tblAPBillDetail A
+			--			JOIN tblICItem B 
+			--				ON A.intItemId = B.intItemId 
+			--					AND B.strType = 'Other Charge'
+			--			GROUP BY A.intBillId
+			--				,isnull(A.intLinkingId, -90)
+			--		) tblOtherCharge 
+			--		ON tblOtherCharge.intBillId = Bill.intBillId	
+			--		and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -2144,8 +2162,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
+				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal,0)--ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(BillByReceipt.dblTax,0)) + (ISNULL(BillByReceipt.dblTotal,0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2154,9 +2172,9 @@ BEGIN
 				,OutboundGrossDollars			= 0 
 				,InboundTax						= BillDtl.dblTax 
 				,OutboundTax					= 0
-				,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundDiscount				= ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundDiscount				= 0 
-				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundNetDue					= 0 
 				,VoucherAdjustment				= ISNULL(tblAdjustment.dblTotal, 0) 
 				,SalesAdjustment				= Invoice.dblPayment 
@@ -2228,20 +2246,29 @@ BEGIN
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
 			LEFT JOIN (
-					SELECT 
-						A.intBillId
-						,isnull(A.intLinkingId, -90) as intLinkingId
-						,SUM(dblTotal) AS dblTotal
-						,SUM(dblTax) AS dblTax
-					FROM tblAPBillDetail A
-					JOIN tblICItem B 
-						ON A.intItemId = B.intItemId 
-							AND B.strType = 'Other Charge'
-					GROUP BY A.intBillId
-							,isnull(A.intLinkingId, -90)
-				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId				
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
+						SELECT 
+							intBillDetailId
+							,SUM(dblAmount) AS dblTotal 
+							,SUM(dblTax) AS dblTax
+						FROM vyuGRSettlementSubReport 
+						GROUP BY intBillDetailId
+					) BillByReceipt 
+					ON BillByReceipt.intBillDetailId = BillDtl.intBillDetailId
+			--LEFT JOIN (
+			--		SELECT 
+			--			A.intBillId
+			--			,isnull(A.intLinkingId, -90) as intLinkingId
+			--			,SUM(dblTotal) AS dblTotal
+			--			,SUM(dblTax) AS dblTax
+			--		FROM tblAPBillDetail A
+			--		JOIN tblICItem B 
+			--			ON A.intItemId = B.intItemId 
+			--				AND B.strType = 'Other Charge'
+			--		GROUP BY A.intBillId
+			--				,isnull(A.intLinkingId, -90)
+			--	) tblOtherCharge 
+			--	ON tblOtherCharge.intBillId = Bill.intBillId				
+			--		and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -2434,8 +2461,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
+				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal,0)--ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(BillByReceipt.dblTax,0)) + (ISNULL(BillByReceipt.dblTotal,0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2444,9 +2471,9 @@ BEGIN
 				,OutboundGrossDollars			= 0 
 				,InboundTax						= BillDtl.dblTax 
 				,OutboundTax					= 0
-				,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundDiscount				= ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundDiscount				= 0 
-				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0) 
+				,InboundNetDue					= BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(BillByReceipt.dblTotal,0)
 				,OutboundNetDue					= 0 
 				,VoucherAdjustment				= ISNULL(tblAdjustment.dblTotal, 0) 
 				,SalesAdjustment				= Invoice.dblPayment 
@@ -2537,16 +2564,25 @@ BEGIN
 				ON ES.intSplitId = DS.intSplitId
 			LEFT JOIN (
 						SELECT 
-							A.intBillId
-							,SUM(dblTotal) AS dblTotal
+							intBillDetailId
+							,SUM(dblAmount) AS dblTotal 
 							,SUM(dblTax) AS dblTax
-						FROM tblAPBillDetail A
-						JOIN tblICItem B 
-							ON A.intItemId = B.intItemId 
-								AND B.strType = 'Other Charge'
-						GROUP BY A.intBillId
-					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId			
+						FROM vyuGRSettlementSubReport 
+						GROUP BY intBillDetailId
+					) BillByReceipt 
+					ON BillByReceipt.intBillDetailId = BillDtl.intBillDetailId
+			--LEFT JOIN (
+			--			SELECT 
+			--				A.intBillId
+			--				,SUM(dblTotal) AS dblTotal
+			--				,SUM(dblTax) AS dblTax
+			--			FROM tblAPBillDetail A
+			--			JOIN tblICItem B 
+			--				ON A.intItemId = B.intItemId 
+			--					AND B.strType = 'Other Charge'
+			--			GROUP BY A.intBillId
+			--		) tblOtherCharge 
+			--		ON tblOtherCharge.intBillId = Bill.intBillId			
 			INNER JOIN (
 						SELECT 
 							A.intBillId
