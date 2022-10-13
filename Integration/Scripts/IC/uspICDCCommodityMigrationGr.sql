@@ -1,5 +1,5 @@
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspICDCCommodityMigrationGr]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [uspICDCCommodityMigrationGr]; 
+	DROP PROCEDURE [dbo].[uspICDCCommodityMigrationGr]; 
 GO 
 
 CREATE PROCEDURE [dbo].[uspICDCCommodityMigrationGr]
