@@ -7,9 +7,16 @@
 AS
 
 BEGIN
+	
 	SELECT intCompanyLocationId = intId
 	INTO #LicensedLocation
 	FROM @Locations
+
+	IF (SELECT COUNT(*) FROM #LicensedLocation) = 0
+	BEGIN
+		INSERT INTO #LicensedLocation
+		SELECT @intLocationId
+	END
 	
 	DECLARE @intCommodityUnitMeasureId AS INT
 		,@intCommodityStockUOMId INT
@@ -62,8 +69,8 @@ BEGIN
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmDate,@intCommodityId,NULL) CompOwn
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
-		AND CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
-		AND CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
+			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 	
 	--=============================
 	-- Customer Owned
@@ -90,8 +97,8 @@ BEGIN
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CusOwn.strDistributionType
 	WHERE ISNULL(CusOwn.strStorageType,'') <> 'ITR' AND CusOwn.intTypeId IN (1,3,4,5,8,9)
 		AND CusOwn.intItemId = ISNULL(@intItemId,CusOwn.intItemId)
-		AND CusOwn.intLocationId = ISNULL(@intLocationId,CusOwn.intLocationId)
-		AND CusOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND (CusOwn.intLocationId = ISNULL(@intLocationId,CusOwn.intLocationId)
+			OR CusOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 		AND CusOwn.dblTotal <> 0
 
 	--=============================
@@ -116,8 +123,8 @@ BEGIN
 		,OnHold.strLocationName
 	FROM dbo.fnRKGetBucketOnHold(@dtmDate,@intCommodityId,NULL) OnHold
 	WHERE OnHold.intItemId = ISNULL(@intItemId,OnHold.intItemId)
-		AND OnHold.intLocationId = ISNULL(@intLocationId,OnHold.intLocationId)
-		AND OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND (OnHold.intLocationId = ISNULL(@intLocationId,OnHold.intLocationId)
+			OR OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 			
 	DECLARE @tblResultInventory TABLE 
 	(

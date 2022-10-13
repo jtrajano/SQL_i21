@@ -149,6 +149,13 @@ BEGIN
 	FROM tblSMCompanyLocation
 	WHERE ysnLicensed = ISNULL(@ysnLicensed,ysnLicensed)
 END
+ELSE
+BEGIN
+	INSERT INTO #Locations
+	SELECT intCompanyLocationId, strLocationName 
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = @intLocationId
+END
 ;
 
 /* Inventory Opening Balance*/
@@ -189,9 +196,9 @@ INNER JOIN tblSMCompanyLocation CL
 WHERE t.ysnIsUnposted <> 1
 	AND t.dtmDate < @dtmReportDate 
 	AND I.intCommodityId = ISNULL(@intCommodityId, I.intCommodityId)
-	--AND ((CL.ysnLicensed = COALESCE(@ysnLicensed,CL.ysnLicensed) AND CL.intCompanyLocationId = ISNULL(@intLocationId,CL.intCompanyLocationId))
-	--		OR CL.intCompanyLocationId = @intLocationId
-	--	)
+	AND ((CL.ysnLicensed = COALESCE(@ysnLicensed,CL.ysnLicensed) AND CL.intCompanyLocationId = ISNULL(@intLocationId,CL.intCompanyLocationId))
+			OR CL.intCompanyLocationId = @intLocationId
+		)
 GROUP BY t.intItemId
 		,ItemLocation.intLocationId
 		,t.intLotId
@@ -639,10 +646,15 @@ BEGIN
 			,CusOwn.strLocationName
 			,CusOwn.strCommodityCode
 		FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL) CusOwn
+		INNER JOIN (
+			SELECT strTransactionNumber
+				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
+			GROUP BY strTransactionNumber
+		) A ON A.strTransactionNumber = CusOwn.strTransactionNumber AND A.total <> 0	
 		LEFT JOIN tblGRStorageType ST 
 			ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-		WHERE CusOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-			AND CusOwn.intCommodityId = @intCommodityId2
+		WHERE CusOwn.intCommodityId = @intCommodityId2
 		UNION ALL
 		SELECT
 			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
@@ -654,8 +666,13 @@ BEGIN
 			,OH.strLocationName
 			,OH.strCommodityCode
 		FROM dbo.fnRKGetBucketOnHold(@dtmReportDate,@intCommodityId,NULL) OH
-		WHERE OH.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-			AND OH.intCommodityId = @intCommodityId2
+		INNER JOIN (
+			SELECT strTransactionNumber
+				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+			FROM dbo.fnRKGetBucketOnHold(@dtmReportDate,@intCommodityId,NULL) OH
+			GROUP BY strTransactionNumber
+		) A ON A.strTransactionNumber = OH.strTransactionNumber AND A.total <> 0
+		WHERE OH.intCommodityId = @intCommodityId2
 	) t
 	GROUP BY
 		dtmDate
@@ -664,6 +681,10 @@ BEGIN
 		,intLocationId
 		,strLocationName
 		,strCommodityCode
+
+	DELETE A
+	FROM #CustomerOwnership A
+	WHERE intLocationId NOT IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 	INSERT INTO @StorageTypes
 	SELECT 
@@ -1156,11 +1177,16 @@ BEGIN
 			,OH.strLocationName
 			,OH.strCommodityCode
 		FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
+		INNER JOIN (
+			SELECT strTransactionNumber
+				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+			FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
+			GROUP BY strTransactionNumber
+		) A ON A.strTransactionNumber = OH.strTransactionNumber AND A.total <> 0
 		LEFT JOIN tblGRStorageType ST 
 			ON ST.strStorageTypeDescription = OH.strDistributionType 
 				AND ysnDPOwnedType = 1
-		WHERE OH.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation2)
-			AND OH.intCommodityId = @intCommodityId2
+		WHERE OH.intCommodityId = @intCommodityId2
 	) t
 	GROUP BY
 		dtmDate
@@ -1169,6 +1195,10 @@ BEGIN
 		,intLocationId
 		,strLocationName
 		,strCommodityCode
+
+	DELETE A
+	FROM #DelayedPricing A
+	WHERE intLocationId NOT IN (SELECT intCompanyLocationId FROM #LicensedLocation2)
 
 	WHILE EXISTS(SELECT 1 FROM @StorageTypes)
 	BEGIN
