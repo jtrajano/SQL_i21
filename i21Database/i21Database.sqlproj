@@ -3507,7 +3507,7 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" /> 
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
