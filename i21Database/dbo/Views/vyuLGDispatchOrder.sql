@@ -18,6 +18,9 @@ SELECT
 	,DO.intTerminalControlNumberId
 	,DO.intCompanyLocationId
 	,DO.intCompanyLocationSubLocationId
+	,DO.intSellerId
+	,strSeller = SL.strName
+	,DO.strLoadRef
 	,strOriginType = CASE (DO.intOriginType) 
 		WHEN 1 THEN 'Location' 
 		ELSE 'Terminal' END COLLATE Latin1_General_CI_AS
@@ -76,6 +79,7 @@ SELECT
 FROM tblLGDispatchOrder DO
 	LEFT JOIN tblEMEntity SV ON SV.intEntityId = DO.intEntityShipViaId
 	LEFT JOIN tblEMEntity DV ON DV.intEntityId = DO.intDriverEntityId
+	LEFT JOIN tblEMEntity SL ON SL.intEntityId = DO.intSellerId
 	LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = DO.intEntityShipViaTruckId
 	LEFT JOIN tblSMShipViaTrailer SVTL ON SVTL.intEntityShipViaTrailerId = DO.intEntityShipViaTrailerId
 	LEFT JOIN tblEMEntity V ON V.intEntityId = DO.intVendorId
