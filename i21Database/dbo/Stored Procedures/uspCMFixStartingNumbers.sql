@@ -28,10 +28,9 @@ BEGIN
 		SET @intNumber = NULL
 		
 		-- Retrieve the highest number part in the transaction id. 
-		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))			
-		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
-					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
-		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
+		SELECT	@intNumber =MAX(CAST( SUBSTRING(strTransactionId, PATINDEX('%[0-9]%',strTransactionId), PATINDEX('%[0-9][^0-9]%', strTransactionId + 't') - PATINDEX('%[0-9]%', strTransactionId) + 1) AS INT))
+		FROM	dbo.tblCMBankTransaction t
+		WHERE	strTransactionId LIKE @strPrefix +'%'
 		
 		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
@@ -64,10 +63,9 @@ BEGIN
 		SET @intNumber = NULL
 		
 		-- Retrieve the highest number part in the transaction id. 
-		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))	
-		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
-					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
-		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
+		SELECT	@intNumber =MAX(CAST( SUBSTRING(strTransactionId, PATINDEX('%[0-9]%',strTransactionId), PATINDEX('%[0-9][^0-9]%', strTransactionId + 't') - PATINDEX('%[0-9]%', strTransactionId) + 1) AS INT))
+		FROM	dbo.tblCMBankTransaction t 			
+		WHERE	strTransactionId LIKE @strPrefix +'%'
 		
 		IF (@intNumber IS NOT NULL)	
 		BEGIN 		
@@ -101,7 +99,7 @@ BEGIN
 		SET @intNumber = NULL
 		
 		-- Retrieve the highest number part in the transaction id. 
-		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))	
+		SELECT	@intNumber =MAX(CAST( SUBSTRING(strTransactionId, PATINDEX('%[0-9]%',strTransactionId), PATINDEX('%[0-9][^0-9]%', strTransactionId + 't') - PATINDEX('%[0-9]%', strTransactionId) + 1) AS INT))
 		FROM	dbo.tblCMBankTransfer 
 		
 		IF (@intNumber IS NOT NULL)	
@@ -135,10 +133,9 @@ BEGIN
 		SET @intNumber = NULL
 		
 		-- Retrieve the highest number part in the transaction id. 
-		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))	
-		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
-					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
-		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
+		SELECT	@intNumber =MAX(CAST( SUBSTRING(strTransactionId, PATINDEX('%[0-9]%',strTransactionId), PATINDEX('%[0-9][^0-9]%', strTransactionId + 't') - PATINDEX('%[0-9]%', strTransactionId) + 1) AS INT))	
+		FROM	dbo.tblCMBankTransaction t 
+		WHERE	strTransactionId LIKE @strPrefix +'%'
 		
 		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
@@ -171,10 +168,9 @@ BEGIN
 		SET @intNumber = NULL
 		
 		-- Retrieve the highest number part in the transaction id. 
-		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))			
-		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
-					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
-		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
+		SELECT	@intNumber =MAX(CAST( SUBSTRING(strTransactionId, PATINDEX('%[0-9]%',strTransactionId), PATINDEX('%[0-9][^0-9]%', strTransactionId + 't') - PATINDEX('%[0-9]%', strTransactionId) + 1) AS INT))	
+		FROM	dbo.tblCMBankTransaction t 	
+		WHERE	strTransactionId LIKE @strPrefix +'%'
 		
 		IF (@intNumber IS NOT NULL)	
 		BEGIN
@@ -207,7 +203,7 @@ BEGIN
 		SET @intNumber = NULL
 		
 		-- Retrieve the highest number part in the transaction id. 
-		SELECT	@intNumber = MAX(CAST(REPLACE(strBankStatementImportId, @strPrefix, '') AS INT))	
+		SELECT	@intNumber =MAX(CAST( SUBSTRING(strBankStatementImportId, PATINDEX('%[0-9]%',strBankStatementImportId), PATINDEX('%[0-9][^0-9]%', strBankStatementImportId + 't') - PATINDEX('%[0-9]%', strBankStatementImportId) + 1) AS INT))
 		FROM	dbo.tblCMBankStatementImport
 		
 		IF (@intNumber IS NOT NULL)	
