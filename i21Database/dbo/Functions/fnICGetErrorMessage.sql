@@ -222,7 +222,7 @@ BEGIN
 		WHEN @msgId = 80206 THEN 'Price UOM Id is invalid or missing for item %s.'
 		WHEN @msgId = 80207 THEN 'Lot type of %s is different from %s. Items should have the same lot types.'
 		WHEN @msgId = 80208 THEN 'Unable to post lot %s. Only active lots are allowed to be shipped.'
-		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add %s inventory to it'
+		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add inventory on %s type.'
 		WHEN @msgId = 80210 THEN 'Invalid Producer. %s is not configured as a Producer type. Please check the Entity setup.'
 		WHEN @msgId = 80211 THEN 'Certificate %s is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
 		WHEN @msgId = 80212 THEN 'Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'

@@ -78,7 +78,7 @@ BEGIN
 			,[dblWeight]				= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblNewWeight ELSE 0 END
 			,[intWeightUOMId]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId) ELSE NULL END
 			,[strReceiptNumber]			= Header.strAdjustmentNo
-			,[intOwnershipType]			= Detail.intOwnershipType
+			,[intOwnershipType]			= ISNULL(NULLIF(Detail.intOwnershipType, 0), 1) 
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
 			,[dblWeightPerQty]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN dbo.fnCalculateWeightUnitQty(Detail.dblNewQuantity, Detail.dblNewWeight) ELSE NULL END
 			,[strTransactionId]			= Header.strAdjustmentNo
