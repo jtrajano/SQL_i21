@@ -30,6 +30,7 @@ SELECT
 	,strTrailerNumber = SVTL.strTrailerNumber
 	,strCompartmentNumber = SVTC.strCompartmentNumber
 	,strDriver = DR.strName
+	,strSalesperson = SP.strName
 	,strFromEntity = CASE WHEN (V.intEntityId IS NOT NULL) THEN V.strName ELSE CL.strLocationName END
 	,strFromLocation = CASE WHEN (V.intEntityId IS NOT NULL) THEN VL.strLocationName ELSE CLSL.strSubLocationName END 
 	,DOD.intSequence
@@ -65,6 +66,7 @@ SELECT
 	,DOD.dblStandardWeight
 	,DOD.strOrderComments
 	,DOD.strDeliveryComments
+	,DOD.strPONumber
 	,DO.intConcurrencyId
 FROM 
 tblLGDispatchOrderDetail DOD
@@ -75,6 +77,7 @@ LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = ISNULL(DOD.intE
 LEFT JOIN tblSMShipViaTrailer SVTL ON SVTL.intEntityShipViaTrailerId = ISNULL(DOD.intEntityShipViaTrailerId, DO.intEntityShipViaTrailerId)
 LEFT JOIN tblSMShipViaTrailerCompartment SVTC ON SVTC.intEntityShipViaTrailerCompartmentId = DOD.intEntityShipViaCompartmentId
 LEFT JOIN tblEMEntity DR ON DR.intEntityId = ISNULL(DOD.intDriverEntityId, DO.intDriverEntityId)
+LEFT JOIN tblEMEntity SP ON SP.intEntityId = DOD.intSalespersonId
 LEFT JOIN tblEMEntity E ON E.intEntityId = DOD.intEntityId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DOD.intEntityLocationId
 LEFT JOIN tblEMEntity V ON V.intEntityId = DOD.intVendorId
