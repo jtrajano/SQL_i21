@@ -1645,6 +1645,7 @@ BEGIN TRY
 					AND cbl.intContractHeaderId = @intContractHeaderId
 					AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
 					and (select top 1 intHeaderPricingTypeId from @tmpContractDetail) <> 3
+					and bd.intItemId = cbl.intItemId
 				ORDER BY cbl.intContractBalanceLogId DESC
 			END
 			ELSE
@@ -4519,8 +4520,15 @@ BEGIN TRY
 				IF (@qtyDiff <> 0)
 				BEGIN
 					-- Qty Changed
-					SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
-										ELSE @dblCurrentQty - @prevOrigQty END
+					if (@qtyDiff > 0 and @TotalPriced > 0)
+					begin
+						set @FinalQty = @qtyDiff;
+					end
+					else
+					begin
+						SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
+											ELSE @dblCurrentQty - @prevOrigQty END
+					end
 				END
 				ELSE
 				BEGIN
