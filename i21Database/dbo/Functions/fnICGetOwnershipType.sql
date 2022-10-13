@@ -6,9 +6,10 @@ BEGIN
 
 	SET @strOwnershipType = 
 		CASE 
+			WHEN @intOwnershipType = 2 THEN 'Own'
 			WHEN @intOwnershipType = 2 THEN 'Storage'
 			WHEN @intOwnershipType = 3 THEN 'Consigned Purchase'
-			ELSE 'Own'
+			ELSE 'Blank'
 	END
 
 	RETURN @strOwnershipType;
