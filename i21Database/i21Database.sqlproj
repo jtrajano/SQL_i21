@@ -11516,6 +11516,8 @@
     <Build Include="dbo\Stored Procedures\uspMFPartialUpdateBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateInsertBatch.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
+    <Build Include="dbo\Tables\tblQMGardenMark.sql" />
+    <Build Include="dbo\Views\vyuQMGetGardenMark.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
