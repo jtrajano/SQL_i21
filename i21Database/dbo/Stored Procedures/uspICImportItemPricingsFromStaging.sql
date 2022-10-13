@@ -100,7 +100,7 @@ WHEN MATCHED THEN
 		, dblAmountPercent		= ISNULL(source.dblAmountPercent, [target].dblAmountPercent)
 		, dblSalePrice			= ISNULL(source.dblSalePrice, [target].dblSalePrice)
 		, dblMSRPPrice			= ISNULL(source.dblMSRPPrice, [target].dblMSRPPrice)
-		, strPricingMethod		= ISNULL(source.strPricingMethod, [target].strPricingMethod)
+		, strPricingMethod		= COALESCE(source.strPricingMethod, [target].strPricingMethod, 'None')
 		, dblLastCost			= ISNULL(source.dblLastCost, [target].dblLastCost)
 		, dblStandardCost		= ISNULL(source.dblStandardCost, [target].dblStandardCost)
 		, dblAverageCost		= ISNULL(source.dblAverageCost, [target].dblAverageCost)
