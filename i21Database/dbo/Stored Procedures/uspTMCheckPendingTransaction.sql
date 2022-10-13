@@ -5,7 +5,7 @@ AS
 BEGIN
 	IF((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1)
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblTMCOBOLWRITE WHERE CONVERT(INT, InvoiceDate) <= CONVERT(INT,@strDate))
+		IF EXISTS(SELECT TOP 1 1 FROM tblTMCOBOLWRITE WHERE CONVERT(INT, InvoiceDate) <= CONVERT(INT,@strDate COLLATE Latin1_General_CI_AS))
 		BEGIN
 			SET @hasPending = 1
 		END
@@ -22,7 +22,7 @@ BEGIN
 					ON A.intInvoiceId = B.intInvoiceId
 				  WHERE A.intSiteId IS NOT NULL 
 					AND B.ysnPosted <> 1
-					AND B.dtmDate <= CONVERT(DATETIME,@strDate))
+					AND B.dtmDate <= CONVERT(DATETIME,@strDate COLLATE Latin1_General_CI_AS))
 		BEGIN
 			SET @hasPending = 1
 		END 

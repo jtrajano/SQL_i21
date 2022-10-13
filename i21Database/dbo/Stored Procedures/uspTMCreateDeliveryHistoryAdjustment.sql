@@ -146,10 +146,10 @@ BEGIN
 	)
 	SELECT TOP 1
 		intSiteID									= @intSiteId
-		,strInvoiceNumber							= @strInvoiceNumber
-		,strBulkPlantNumber							= @strLocationName
+		,strInvoiceNumber							= @strInvoiceNumber COLLATE Latin1_General_CI_AS
+		,strBulkPlantNumber							= @strLocationName COLLATE Latin1_General_CI_AS
 		,dtmInvoiceDate								= @dtmInvoiceDate
-		,strProductDelivered						= @strItemNo
+		,strProductDelivered						= @strItemNo COLLATE Latin1_General_CI_AS
 		,dblQuantityDelivered						= @dblQuantity
 		,intDegreeDayOnDeliveryDate					= @intInvoiceDegreeDay
         ,intDegreeDayOnLastDeliveryDate				= @intDegreeDayOnLastDeliveryDate

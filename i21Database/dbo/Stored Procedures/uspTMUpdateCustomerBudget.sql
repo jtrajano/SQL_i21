@@ -29,7 +29,7 @@ BEGIN
 			,@intEntityCustomerId = intEntityCustomerId
 		FROM #tmpCustomerBudget
 
-		IF(@strCalculation = 'Next Year')
+		IF(@strCalculation COLLATE Latin1_General_CI_AS = 'Next Year')
 		BEGIN
 			--UPDATE CUSTOMER info
 			EXEC uspEMUpdateCustomerTable 'dblMonthlyBudget', @strBudgetAmountForBudgetBilling, @intEntityCustomerId, @EntityId

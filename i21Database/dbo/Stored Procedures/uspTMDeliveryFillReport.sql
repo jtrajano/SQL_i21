@@ -19,7 +19,7 @@ BEGIN
 		--/><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dblQuantity</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Decimal</datatype></filter><filter><fieldname>dblEstimatedPercentLeft</fieldname><condition>Less Than Or Equal</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Decimal</datatype></filter><filter><fieldname>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>DateTime</datatype></filter><filter><fieldname>ysnOnHold</fieldname><condition>Equal To</condition><from>False</from><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Bool</datatype></filter><filter><fieldname>ysnPending</fieldname><condition>Equal To</condition><from>False</from><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Bool</datatype></filter></filters><options><option><name>List Unit Price</name><enable>True</enable></option><option><name>Print Delivery Address</name><enable>True</enable></option><option><name>Print Tank Info</name><enable>True</enable></option><option><name>Print Customer A/R Balance</name><enable>True</enable></option><option><name>Print Consumption Site Instructions</name><enable>True</enable></option><option><name>Print Consumption Site Comments</name><enable>True</enable></option><option><name>Print Contracts</name><enable>True</enable></option><option><name>Print Regulator Info</name><enable>True</enable></option><option><name>Print On Hold Detail​</name><enable>True</enable></option><option><name>Include Consumption Site in the same Fill Group</name><enable>True</enable></option></options></xmlparam>';
 
 	SET NOCOUNT ON;
-	IF (ISNULL(@xmlParam,'') = '')
+	IF (ISNULL(@xmlParam COLLATE Latin1_General_CI_AS,'') = '')
 	BEGIN 
 		SELECT 
 			intCustomerID = 0
@@ -98,7 +98,7 @@ BEGIN
 		
 		SET @whereClause = ''
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
+		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam 
 		
 		DECLARE @temp_params TABLE ([fieldname] NVARCHAR(50)
 				, condition NVARCHAR(20)      
