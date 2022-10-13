@@ -11333,9 +11333,7 @@
     <Build Include="dbo\Tables\tblSMTermPullPoint.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMCreateAdminAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" /> 
-    <Build Include="dbo\Functions\fnGLGetBeginningBalance_ForTB.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -11343,16 +11341,16 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
-	<ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
-		<HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
-		<SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-		<DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
-	</ArtifactReference>
-	<ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
-	    <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
-	    <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-	    <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
-	</ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategory.sql" />
