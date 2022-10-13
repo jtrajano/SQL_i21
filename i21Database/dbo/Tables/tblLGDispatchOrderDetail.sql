@@ -8,6 +8,7 @@
 	[intOrderStatus] INT NULL,
 	[strOrderNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strOrderType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
+	[strPONumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intSequence] INT NULL,
 	[intLoadSeq] INT NULL,
 	[intEntityId] INT NULL,
@@ -46,6 +47,7 @@
 	[intEntityShipViaTrailerId] INT NULL,
 	[intEntityShipViaCompartmentId] INT NULL, 
 	[intDriverEntityId] INT NULL, 
+	[intSalespersonId] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT((1)),
 
     CONSTRAINT [PK_tblLGDispatchOrderDetail] PRIMARY KEY ([intDispatchOrderDetailId]),
