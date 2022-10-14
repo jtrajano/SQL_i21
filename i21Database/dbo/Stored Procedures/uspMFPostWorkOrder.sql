@@ -1313,6 +1313,7 @@ BEGIN TRY
 
 			UPDATE PL
 			SET PL.dblItemValue = CostAdj.dblNewValue
+			  , PL.dblFirstItemValue = CostAdj.dblNewValue
 			FROM @adjustedEntries CostAdj
 			JOIN dbo.tblMFWorkOrderProducedLot PL ON PL.intWorkOrderProducedLotId = CostAdj.intTransactionDetailId
 
