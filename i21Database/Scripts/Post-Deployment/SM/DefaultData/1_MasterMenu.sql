@@ -3596,7 +3596,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'INCO Term
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 16, strCommand = N'ContractManagement.view.TermCost?showSearch=true' WHERE strMenuName = 'INCO Term and Cost' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Offer Lists' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Offer Lists' AND strModuleName = 'Contract Management')
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Offer Lists', N'Contract Management',@ContractManagementMaintenanceParentMenuId, N'Offer Lists', N'Report', N'Screen', N'ContractManagement.view.OfferList', N'small-menu-report', 0, 0, 0, 1, 17, 1)
 ELSE
