@@ -218,6 +218,7 @@ BEGIN TRY
 		, [intItemUOMId]				= D.[intItemUOMId]
 		, [dblQty]						= dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
 		, [intLoadDetailId]				= D.[intLoadDetailId]
+		, [intSiteId]					= TD.intSiteId
 	FROM
 		@ItemsFromInvoice I
 	INNER JOIN
