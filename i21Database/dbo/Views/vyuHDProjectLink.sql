@@ -87,6 +87,10 @@
 			,strDataConversionLead = DataConversionLead.strName
 			,strCustomerSuccessManager = CustomerSuccessManager.strName
 			,strImplementationLead = ImplementationLead.strName
+			,strSmartSheetLink = a.strSmartSheetLink
+			,strDeploymentType = DeploymentType.strDeploymentType
+			,strEnvironmentLink = a.strEnvironmentLink
+			,intDeploymentTypeId = a.intDeploymentTypeId
 		from
 			tblHDProject a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -103,4 +107,5 @@
 			left join tblHDVersion n on n.intVersionId = a.intTargetVersionId
 			left join tblCRMOpportunityProject o on o.intProjectId = a.intProjectId
 			left join tblCRMOpportunity p on p.intOpportunityId = o.intOpportunityId
+			left join tblHDDeploymentType DeploymentType on DeploymentType.intDeploymentTypeId = a.intDeploymentTypeId
 GO
