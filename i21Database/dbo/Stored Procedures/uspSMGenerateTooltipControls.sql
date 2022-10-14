@@ -21,13 +21,12 @@ BEGIN
 					ELSE B.strScreenName
 					END AS strScreenName,
 					NULL,
-					'Top',
-					
 					CASE WHEN A.intParentScreenId != 0
 					THEN 
 						(SELECT strScreenName FROM tblSMScreen WHERE intScreenId = A.intParentScreenId)
 					ELSE ''
 				END AS strParentScreen,
+				'Top',
 				0
 				FROM tblSMControl A
 				LEFT JOIN tblSMScreen B ON B.intScreenId = A.intScreenId
