@@ -91,7 +91,7 @@ BEGIN
 		WHEN @msgId = 80075 THEN 'Item %s is invalid. It must be lot tracked.'
 		WHEN @msgId = 80076 THEN 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
 		WHEN @msgId = 80077 THEN 'Unable to update %s. It is posted. Please unpost it first.'
-		WHEN @msgId = 80078 THEN 'Inventory variance is created. The current item valuation is %c. The new valuation is (Qty x New Average Cost) %c x %c = %c.'
+		WHEN @msgId = 80078 THEN 'Inventory variance is created. Current valuation is %c. New valuation is (Qty x New Avg Cost) %c x %c = %c.'
 		WHEN @msgId = 80079 THEN 'Item UOM for %s is invalid or missing.'
 		WHEN @msgId = 80080 THEN 'Item UOM %s for %s is invalid or missing.'
 		WHEN @msgId = 80081 THEN 'Net quantity mismatch. It is %f on item %s but the total net from the lot(s) is %f.'
