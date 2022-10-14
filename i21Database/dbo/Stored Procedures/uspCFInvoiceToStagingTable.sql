@@ -1039,6 +1039,8 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.intCFDiscountDay					=	  cfAccntTerm.intDiscountDay
 				,tblARCustomerStatementStagingTable.strCFTermType						=	  cfAccntTerm.strType
 				,tblARCustomerStatementStagingTable.intCFTermID							=	  cfAccntTerm.intTermsCode
+				,tblARCustomerStatementStagingTable.strCFTerm						   = 		cfAccntTerm.strTerm			
+				,tblARCustomerStatementStagingTable.strCFTermCode					   = 		cfAccntTerm.strTermCode
 
 				--,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
 				--																				FROM    dbo.vyuARCustomerContacts as arCustCont
