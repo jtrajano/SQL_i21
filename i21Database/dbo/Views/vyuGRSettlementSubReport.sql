@@ -282,7 +282,40 @@ FROM
 				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL))
 			AND (MC.intBillDetailItemId = BillDtl.intBillDetailId AND MC.intBillDetailOtherChargeItemId = BillDtl2.intBillDetailId AND MC.ysnShow = 1)
    )t3 
-	WHERE t3.intItemId IS NOT NULL 
+	WHERE t3.intItemId IS NOT NULL
+
+	UNION ALL
+	--manually added item in the voucher but as a misc field only
+	SELECT 
+		intBillDetailIdItem				= BD_ITEM.intBillDetailId
+		,strId							= AP.strBillId
+		,intBillId						= AP.intBillId
+		,intItemId						= NULL
+		,strDiscountCode				= NULL
+		,strDiscountCodeDescription		= BD.strMiscDescription
+		,dblDiscountAmount				= BD.dblCost
+		,dblShrinkPercent				= 0
+		,dblGradeReading				= NULL
+		,dblAmount						= BD.dblTotal
+		,intContractDetailId			= BD_ITEM.intContractDetailId
+		,dblTax							= BD.dblTax
+		,dblNetTotal					= BD.dblTotal + ISNULL(BD.dblTax,0)
+		,strTaxClass					= TaxClass.strTaxClass
+	FROM tblAPBillDetail BD
+	INNER JOIN (
+		tblAPBillDetail BD_ITEM
+		INNER JOIN tblICItem IC
+			ON IC.intItemId = BD_ITEM.intItemId
+				AND IC.strType = 'Inventory'
+	) ON BD.intBillId = BD_ITEM.intBillId
+	INNER JOIN tblAPBill AP
+		ON AP.intBillId = BD.intBillId
+	LEFT JOIN vyuAPBillDetailTax Tax 
+			ON BD.intBillDetailId = Tax.intBillDetailId
+	LEFT JOIN tblSMTaxClass TaxClass 
+		ON Tax.intTaxClassId = TaxClass.intTaxClassId
+	WHERE BD.intItemId IS NULL AND BD.ysnStage = 0
+		AND (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL) 
 )t
 GO
 
