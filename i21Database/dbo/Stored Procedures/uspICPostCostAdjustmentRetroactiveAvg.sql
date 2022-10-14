@@ -1071,6 +1071,7 @@ BEGIN
 				,[intForexRateTypeId]
 				,[dblForexRate]
 				,[dtmDateCreated]
+				,[dblComputedValue]
 		)			
 	SELECT	
 			[intItemId]								= @intItemId
@@ -1119,6 +1120,9 @@ BEGIN
 			,[intForexRateTypeId]					= NULL 
 			,[dblForexRate]							= 1 
 			,[dtmDateCreated]						= GETUTCDATE()
+			,[dblComputedValue]						= 
+					dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
+					- dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
 	FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 				ON ItemPricing.intItemId = Stock.intItemId
 				AND ItemPricing.intItemLocationId = Stock.intItemLocationId

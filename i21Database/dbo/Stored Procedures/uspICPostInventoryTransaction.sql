@@ -112,6 +112,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intCompanyLocationId]
 		,[dtmDateCreated]
 		,[intTransactionItemUOMId]
+		,[dblComputedValue]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -155,6 +156,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intCompanyLocationId]				= [location].intCompanyLocationId
 		,[dtmDateCreated]					= GETUTCDATE()
 		,[intTransactionItemUOMId]			= @intTransactionItemUOMId
+		,[dblComputedValue]					= dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(@dblCost, 0)) + ISNULL(@dblValue, 0)
 FROM	tblICItem i 
 		CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 WHERE	i.intItemId = @intItemId

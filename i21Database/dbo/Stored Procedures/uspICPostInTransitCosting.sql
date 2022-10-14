@@ -430,6 +430,7 @@ BEGIN
 					,[dblForexRate]
 					,[intCompanyLocationId]
 					,[dtmDateCreated]
+					,[dblComputedValue]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -479,6 +480,7 @@ BEGIN
 				,[dblForexRate]							= @dblForexRate
 				,[intCompanyLocationId]					= [location].intCompanyLocationId
 				,[dtmDateCreated]						= GETUTCDATE()
+				,[dblComputedValue]						= -currentValuation.floatingValue
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItem i
 					ON i.intItemId = iWithZeroStock.intItemId
 				INNER JOIN tblICItemLocation il
