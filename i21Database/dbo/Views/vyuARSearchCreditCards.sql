@@ -23,7 +23,7 @@ OUTER APPLY (
 			   , dblDinersClubPercentage
 			   , dblChinaUnionPayPercentage
 			   , strCreditCardConvenienceFee
-	FROM tblSMCompanyPreference
+	FROM tblARCompanyPreference
 ) CP
 WHERE ECI.strToken IS NOT NULL
   AND DATEADD(MONTH, 1 , CAST(REPLACE(ECI.strCardExpDate,'/','/01/') AS DATETIME)) > CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
