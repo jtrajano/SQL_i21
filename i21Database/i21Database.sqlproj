@@ -450,6 +450,10 @@
     <Build Include="dbo\Stored Procedures\uspGLGetAccountSegmentPartition.sql" />
     <Build Include="dbo\Tables\tblGLCOAImportStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportCOAFromCSV.sql" />
+    <Build Include="dbo\Tables\tblRKDPRInTransitHelperLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

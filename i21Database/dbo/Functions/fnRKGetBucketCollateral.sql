@@ -107,7 +107,7 @@ BEGIN
 			, c.intContractDetailId
 			, strContractNumber
 			, intContractSeq
-			, c.dtmTransactionDate
+			, dtmTransactionDate = Col.dtmOpenDate
 			, dblOriginalQuantity = ISNULL(c.dblOrigQty, 0)
 			, dblRemainingQuantity = c.dblOrigQty
 			, c.intCommodityId
