@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{2e49b212-114b-4cfd-a343-2a2061e987bc}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -1146,6 +1146,10 @@
     <Build Include="dbo\Tables\uspTRInsertLoadFromImport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRReprocessImportDtn.sql" />
     <Build Include="dbo\Tables\tblHDDeploymentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAccountSegmentPartition.sql" />
+    <Build Include="dbo\Tables\tblGLCOAImportStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportCOAFromCSV.sql" />
+    <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11330,9 +11334,7 @@
     <Build Include="dbo\Tables\tblSMTermPullPoint.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMCreateAdminAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" /> 
-    <Build Include="dbo\Functions\fnGLGetBeginningBalance_ForTB.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -11340,13 +11342,13 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
-      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
-    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\msdb.dacpac">
-      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\msdb.dacpac</HintPath>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
     </ArtifactReference>
