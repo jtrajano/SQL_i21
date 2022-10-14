@@ -59,17 +59,17 @@ BEGIN
 		CLOSE @CursorTran  
 		DEALLOCATE @CursorTran
 
-		IF EXISTS (SELECT TOP 1 1 FROM tblTRImportDtnDetail id
+		IF EXISTS (SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess id
 					WHERE intImportDtnId <> @intImportLoadId
-						AND ISNULL(id.ysnValid, 0) = 0
-						AND ISNULL(id.ysnReImport, 0) = 0)
+						AND ISNULL(ysnSuccess, 0) = 0
+						AND ISNULL(ysnVarianceIssue, 0) = 0)
 		BEGIN
 			DECLARE	@strIds AS NVARCHAR(MAX)
-			SELECT @strIds = STUFF((SELECT ', ' + LTRIM(id.intImportDtnDetailId)
-									FROM tblTRImportDtnDetail id
+			SELECT @strIds = STUFF((SELECT DISTINCT ', ' + LTRIM(id.intImportDtnDetailId)
+									FROM vyuTRGetImportDTNForReprocess id
 									WHERE intImportDtnId <> @intImportLoadId
-										AND ISNULL(id.ysnValid, 0) = 0
-										AND ISNULL(id.ysnReImport, 0) = 0
+										AND ISNULL(id.ysnSuccess, 0) = 0
+										AND ISNULL(id.ysnVarianceIssue, 0) = 0
 									FOR XML PATH('')
 								),1,2, '')
 
