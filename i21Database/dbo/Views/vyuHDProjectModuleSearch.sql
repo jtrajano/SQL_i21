@@ -12,9 +12,10 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 	   ,strTrainer					= Trainer.strName
 	   ,strContact					= Contact.strName
 	   ,dblQuotedHours				= ISNULL(ProjectModule.dblQuotedHours, 0)
-	   ,intCustomerId				= Project.intCustomerId
 	   ,dblActualBillableHours		= ISNULL(ProjectTickets.dblActualHours, 0)
 	   ,dblHoursOverShort			= ISNULL(ProjectModule.dblQuotedHours,0) - ISNULL(ProjectTickets.dblActualHours,0)
+	   ,intCustomerId				= Project.intCustomerId
+	   ,strCustomerName				= Customer.strName
 	   ,strPercentComplete			= CASE WHEN ISNULL(ProjectTickets.dblQuotedHours, 0) = 0
 											THEN '0%'
 										ELSE CONVERT(NVARCHAR(10), CONVERT(INT,ROUND(ProjectTickets.dblBillablehours / ProjectTickets.dblQuotedHours, 2) * 100)) + '%'
@@ -50,6 +51,8 @@ ON Contact.intEntityId = ProjectModule.intContactId
 			  ProjectTickets.strModule = SMModule.strModule	
 		GROUP BY ProjectTickets.intTicketStatusId
 		) ProjectTickets
+		INNER JOIN tblEMEntity Customer
+ON Customer.intEntityId = Project.intCustomerId
 WHERE Project.strType = 'HD' 
 
 GO
