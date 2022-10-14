@@ -69,7 +69,6 @@
 :r "..\Scripts\IC\uspICDCItemMigrationPt.sql" 
 :r "..\Scripts\IC\uspICDCItemMigrationAg.sql" 
 
-
 ---- CUSTOMER PORTAL
 --:r "..\dbo\Views\vyuCPAgcusMst.sql"
 --:r "..\dbo\Views\vyuCPBABusinessSummary.sql"

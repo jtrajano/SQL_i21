@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{2e49b212-114b-4cfd-a343-2a2061e987bc}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -372,6 +372,7 @@
     <Build Include="dbo\Tables\tblCMCashFlowReportSummaryDetail.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportSummaryDetail.sql" />
     <Build Include="dbo\Functions\fnCMCashFlowTransactions.sql" />
+    <Build Include="dbo\Functions\fnCMGetFEINByCompanyLocation.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportBucketType.sql" />
     <None Include="Scripts\Post-Deployment\CM\13_InsertDefaultCashFlowReportBucketType.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFFacilityLimitsReport.sql" />
@@ -915,7 +916,6 @@
     <Build Include="dbo\Stored Procedures\uspARCalculateInvoiceDeliveryFee.sql" />
     <Build Include="dbo\Functions\fnSTGetGrossFuelSalesByCheckoutId.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCreateDepositToBankAccount.sql" />
-    <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
     <Build Include="dbo\Tables\tblCTBasisCost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadBasisCost.sql" />
     <Build Include="dbo\Views\vyuCTContractBasisCostView.sql" />
@@ -973,7 +973,6 @@
     <Build Include="dbo\Functions\fnAPGetAccountBudgetWarning.sql" />
     <Build Include="dbo\Functions\fnCMGetDetailsOfCharges.sql" />
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
-    <Build Include="dbo\Functions\fnCRMCoalesceAddon.sql" />
     <Build Include="dbo\Functions\fnGetIncrementalAmount.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountBySegment2.sql" />
     <Build Include="dbo\Functions\fnLGGetSupplyPointContractData.sql" />
@@ -1072,6 +1071,12 @@
     <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryTransferIntegration.sql" />
     <Build Include="dbo\Views\vyuICCategoryAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
+    <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
+    <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
+    <Build Include="dbo\Tables\tblHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Views\vyuHDCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDSyncCoworkerSuperVisor.sql" />
+    <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <Build Include="dbo\Tables\tblICFreightOverride.sql" />
     <Build Include="dbo\Views\vyuICGetFreightOverride.sql" />
     <Build Include="dbo\Tables\tblGLChangeAccountCategory.sql" />
@@ -1207,6 +1212,11 @@
     <Build Include="dbo\Tables\tblSMLicenseSavedFeature.sql" />
     <Build Include="dbo\Tables\tblSMLicenseRegisteredFeature.sql" />
     <Build Include="dbo\Tables\tblHDDeploymentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTInsertRequiredXMLFileConfigForConsignment.sql" />
+    <Build Include="dbo\Tables\tblRKDPRInTransitHelperLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10937,11 +10947,18 @@
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
+    <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
+    <Build Include="dbo\Views\vyuApiRecordAuditPivot.sql" />
+    <Build Include="dbo\Views\vyuApiSalesperson.sql" />
+    <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
+    <Build Include="dbo\Views\vyuApiTerm.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
-    <Build Include="dbo\Stored Procedures\uspARAddDiscountsCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
     <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPopulateTaxFromOrigin.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetailSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
     <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
@@ -10960,6 +10977,7 @@
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
@@ -11026,6 +11044,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1x_RecurringTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateTooltipControls.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -11435,19 +11454,21 @@
     <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
     <Build Include="dbo\Views\vyuQMPurchaseSampleLinked.sql" />
     <Build Include="dbo\Views\vyuQMSaleSampleNotLinked.sql" />
+    <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
+    <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
-      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
-    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\msdb.dacpac">
-      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\msdb.dacpac</HintPath>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
     </ArtifactReference>

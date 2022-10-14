@@ -14,11 +14,20 @@ BEGIN
 					null,
 				NULL,
 					strControlType,
-					B.strScreenName,
-	
+					--B.strScreenName,
+					CASE WHEN A.intParentScreenId != 0
+					THEN 
+						 B.strScreenName + ' - ' +  B.strModule
+					ELSE B.strScreenName
+					END AS strScreenName,
 					NULL,
 					'Top',
-					0
+					0,
+					CASE WHEN A.intParentScreenId != 0
+					THEN 
+						(SELECT strScreenName  FROM tblSMScreen WHERE intScreenId = A.intParentScreenId)
+					ELSE ''
+				END AS strParentScreen
 				FROM tblSMControl A
 				LEFT JOIN tblSMScreen B ON B.intScreenId = A.intScreenId
 

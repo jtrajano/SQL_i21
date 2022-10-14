@@ -49,7 +49,7 @@ BEGIN
 
 	EXEC uspTMValidateInvoiceForSync @InvoiceId, @ResultLog OUT
 	
-	IF((SELECT CASE WHEN @ResultLog LIKE '%Exception%' THEN 1 ELSE 0 END) = 1)
+	IF((SELECT CASE WHEN @ResultLog COLLATE Latin1_General_CI_AS LIKE '%Exception%' THEN 1 ELSE 0 END) = 1)
 	BEGIN
 		GOTO DONESYNCHING
 	END
