@@ -535,7 +535,7 @@ BEGIN
 		  ,strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
 		  ,strReferencePrimary = CASE WHEN IRI.intLoadShipmentId <> 0 THEN IR.strReceiptNumber 
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
-						  ELSE CH.strContractNumber + '-' + CAST (CTD.intContractSeq AS VARCHAR(10)) END
+						  ELSE CH.strContractNumber END
 		  ,strReference = --ALWAYS GET THE LAST LATEST TRANSACTION CT> SI > LS > IR
 						  CASE WHEN IRI.intLoadShipmentId <> 0 THEN IR.strReceiptNumber 
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
@@ -730,8 +730,8 @@ BEGIN
 						 ELSE LGAS.strAllocationStatus  END)
 						
 		  ,strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
-		  ,strReferencePrimary = CH.strContractNumber + '-' + CAST (CTD.intContractSeq AS VARCHAR(10))
-		  ,strReference = CH.strContractNumber + '-' + CAST (CTD.intContractSeq AS VARCHAR(10))
+		  ,strReferencePrimary = CH.strContractNumber
+		  ,strReference = CH.strContractNumber 
 		  ,dblQuantity = CTD.dblQuantity
 		  ,strPacking = UM.strUnitMeasure
 		  ,dblOfferCost = CTD.dblCashPrice			
@@ -903,13 +903,14 @@ BEGIN
 						 ELSE 'Unsold'  END)
 						
 		  ,strShipmentStatus = ''
-		  ,strReferencePrimary =CH.strContractNumber
+		  ,strReferencePrimary ='Unsold- '+ CH.strContractNumber
 		  ,strReference = NULL
-		  ,dblQuantity = CASE WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
+		  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN   CTD.dblQuantity --ALLOCATED QTY
+							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
 							  WHEN LGAS.strAllocationStatus = 'Allocated' THEN  LGAS.dblAllocatedQuantity - CTD.dblQuantity --ALLOCATED QTY
 							  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  TQ.dblTotalQty-- PARTIALLY ALLOCATED QTY
 							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN TQ.dblTotalQty 		--SHIPPED LS QTY=
-						 ELSE CTD.dblQuantity - ISNULL(CTD.dblScheduleQty,0) END --OPEN CT QTY 
+						 ELSE CTD.dblQuantity  END --OPEN CT QTY 
 		,strPacking = UM.strUnitMeasure
 		,dblOfferCost = CTD.dblCashPrice			
 		,strPricingType = ''
