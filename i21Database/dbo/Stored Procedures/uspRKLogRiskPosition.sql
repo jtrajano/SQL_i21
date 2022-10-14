@@ -135,6 +135,17 @@ BEGIN
 		, intInventoryReceiptItemId INT NULL
 		, intLoadDetailId INT NULL)
 
+
+	DECLARE @DPRInTransitHelperLog AS TABLE (
+		[dtmDate] DATETIME,
+		[intCommodityId] INT,
+		[intTransactionReferenceId] INT NOT NULL, 
+		[intInvoiceId] INT NULL,
+		[intInventoryReceiptId] INT NULL,
+		[strBucketType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[dblQty] NUMERIC(24, 10) NULL
+	)
+
 	SELECT @intTotal = COUNT(*) FROM @SummaryLogs
 
 	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs ORDER BY dtmTransactionDate
@@ -1060,6 +1071,39 @@ BEGIN
 				, @intTicketId
 				, @intUserId
 				, @strNotes
+
+
+				--TODO: Get In-Transit off-setting entry
+				IF @strBucketType = 'Sales In-Transit' AND @strTransactionType IN ('Invoice')
+				BEGIN
+					
+					INSERT INTO @DPRInTransitHelperLog
+					select 
+						 @dtmTransactionDate
+						,@intCommodityId
+						,intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
+						,intInvoiceId = @intTransactionRecordHeaderId
+						,intInventoryReceiptId = NULL
+						,@strBucketType
+						,@dblQty
+						
+
+				END
+
+				IF @strBucketType = 'Purchase In-Transit' AND @strTransactionType IN ('Inventory Receipt')
+				BEGIN
+					INSERT INTO @DPRInTransitHelperLog
+					select 
+						 @dtmTransactionDate
+						,@intCommodityId
+						,intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
+						,intInvoiceId = NULL
+						,intInventoryReceiptId = @intTransactionRecordHeaderId
+						,@strBucketType
+						,@dblQty
+
+				END
+
 		END
 
 		--------------------------------------
@@ -1871,6 +1915,27 @@ BEGIN
 	ORDER BY dtmTransactionDate
 
 	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Bulk Insert done.')
+
+
+	INSERT INTO tblRKDPRInTransitHelperLog (
+		dtmDate
+		,intCommodityId
+		,intTransactionReferenceId
+		,intInvoiceId
+		,intInventoryReceiptId
+		,strBucketType
+		,dblQty
+	)
+	SELECT
+		dtmDate
+		,intCommodityId
+		,intTransactionReferenceId
+		,intInvoiceId
+		,intInventoryReceiptId
+		,strBucketType
+		,dblQty
+	FROM @DPRInTransitHelperLog
+	ORDER BY dtmDate
 
 	DROP TABLE #tmpSummaryLogs
 END

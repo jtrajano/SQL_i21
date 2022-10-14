@@ -9253,6 +9253,10 @@
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
+    <Build Include="dbo\Tables\tblRKDPRInTransitHelperLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

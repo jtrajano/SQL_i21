@@ -402,5 +402,37 @@ BEGIN
 
 END
 
+GO
+IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table begenning data')
+BEGIN
+
+	insert into tblRKDPRInTransitHelperLog (
+
+		dtmDate
+		,intCommodityId
+		,intTransactionReferenceId
+		,intInvoiceId
+		,intInventoryReceiptId
+		,strBucketType
+		,dblQty
+	)
+	select 
+		 dtmDate = SL.dtmTransactionDate
+		,SL.intCommodityId
+		,intTransactionReferenceId = SI.intInventoryShipmentId
+		,intInvoiceId = SL.intTransactionRecordHeaderId
+		,intInventoryReceiptId = NULL
+		,SL.strBucketType
+		,dblQty = SL.dblOrigQty
+	from tblRKSummaryLog SL
+	inner join tblARInvoiceDetail ID ON ID.intInvoiceDetailId = SL.intTransactionRecordId
+	inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
+	where SL.strBucketType = 'Sales In-Transit'
+	and SL.strTransactionType = 'Invoice'
+
+    --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for DPR In-Transit Helper Log table begenning data','1')
+END   
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
