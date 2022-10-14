@@ -344,14 +344,14 @@ INSERT INTO tblVRProgramItem (
 	, guiApiUniqueId
 )
 SELECT
-	  COALESCE(xi.intItemId, i.intItemId)
-	, COALESCE(xc.intCategoryId, cat.intCategoryId, i.intCategoryId)
+	  COALESCE(i.intItemId, xi.intItemId)
+	, COALESCE(i.intCategoryId, xc.intCategoryId, cat.intCategoryId)
 	, rp.strRebateBy
 	, rp.dblRebateRate
 	, rp.dtmBeginDate
 	, rp.dtmEndDate
 	, p.intProgramId
-	, COALESCE(xu.intUnitMeasureId, u.intUnitMeasureId, du.intUnitMeasureId, 0)
+	, COALESCE(u.intUnitMeasureId, xu.intUnitMeasureId, du.intUnitMeasureId, 0)
 	, 1
 	, rp.intRowNumber
 	, @guiApiUniqueId
