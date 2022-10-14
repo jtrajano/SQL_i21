@@ -268,6 +268,7 @@ BEGIN
 			,[intTicketId]
 			,[strAccountIdInventory]
 			,[strAccountIdInTransit]
+			,[dblComputedValue]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -312,7 +313,8 @@ BEGIN
 			,[intTicketId]							= ActualTransaction.intTicketId
 			,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
 			,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
-
+			,[dblComputedValue]						= 
+						dbo.fnMultiply(-ActualTransaction.dblQty, ActualTransaction.dblCost) + -ActualTransaction.dblValue
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
@@ -629,7 +631,7 @@ BEGIN
 						,[intCompanyLocationId]
 						,[strAccountIdInventory]
 						,[strAccountIdInTransit]
-
+						,[dblComputedValue]
 				)			
 			SELECT	
 					[intItemId]								= @intItemId
@@ -677,7 +679,9 @@ BEGIN
 					,[intCompanyLocationId]					= [location].intCompanyLocationId
 					,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
 					,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
-
+					,[dblComputedValue]						= 
+												dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
+												- dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) 
 			FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 						ON ItemPricing.intItemId = Stock.intItemId
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId

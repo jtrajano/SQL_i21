@@ -874,6 +874,9 @@ BEGIN
 	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
 			,@intInventoryTransactionId AS INT 
 
+	-- Get the default currency ID
+	DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')	
+
 	-- Get the qualified items for auto-negative. 
 	INSERT INTO @ItemsForAutoNegative (
 			intItemId
@@ -979,7 +982,7 @@ BEGIN
 				,@dblCost = 0
 				,@dblValue = @dblAutoVariance
 				,@dblSalesPrice = 0
-				,@intCurrencyId = NULL 
+				,@intCurrencyId = @intFunctionalCurrencyId 
 				,@intTransactionId = @intTransactionId
 				,@intTransactionDetailId = @intTransactionDetailId
 				,@strTransactionId = @strTransactionId
@@ -1102,7 +1105,7 @@ BEGIN
 				,@dblCost = 0
 				,@dblValue = @dblAutoVariance
 				,@dblSalesPrice = 0
-				,@intCurrencyId = NULL 
+				,@intCurrencyId = @intFunctionalCurrencyId 
 				,@intTransactionId = @intTransactionId
 				,@intTransactionDetailId = @intTransactionDetailId
 				,@strTransactionId = @strTransactionId

@@ -69,6 +69,9 @@ DECLARE @intItemId AS INT
 
 DECLARE @intTransactionId_AutoNegative AS INT
 		,@strTransactionId_AutoNegative AS NVARCHAR(40)
+
+-- Get the default currency ID
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 		
 -- Get the list of items to unpost
 BEGIN 
@@ -360,6 +363,7 @@ BEGIN
 			,[intTicketId]
 			,[strAccountIdInventory]
 			,[strAccountIdInTransit]
+			,[dblComputedValue]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -374,7 +378,7 @@ BEGIN
 			,[dblValue]								= -ActualTransaction.dblValue
 			,[dblUnitRetail]						= ActualTransaction.dblUnitRetail 
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
-			,[intCurrencyId]						= ActualTransaction.intCurrencyId
+			,[intCurrencyId]						= ISNULL(ActualTransaction.intCurrencyId, @intFunctionalCurrencyId)
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
 			,[intTransactionId]						= ActualTransaction.intTransactionId
 			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
@@ -410,7 +414,7 @@ BEGIN
 			,[intTicketId]							= ActualTransaction.intTicketId
 			,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
 			,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
-
+			,[dblComputedValue]						= dbo.fnMultiply(-ActualTransaction.dblQty, ActualTransaction.dblCost) + -ActualTransaction.dblValue
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId				
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
@@ -833,7 +837,9 @@ BEGIN
 						,[intCompanyLocationId]
 						,[strAccountIdInventory]
 						,[strAccountIdInTransit]
-				)		
+						,[dtmDateCreated]
+						,[dblComputedValue]
+				)			
 			SELECT	
 					[intItemId]								= @intItemId
 					,[intItemLocationId]					= @intItemLocationId
@@ -847,7 +853,7 @@ BEGIN
 					,[dblValue]								=	dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
 																- dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) 
 					,[dblSalesPrice]						= 0
-					,[intCurrencyId]						= NULL -- @intCurrencyId
+					,[intCurrencyId]						= @intFunctionalCurrencyId -- @intCurrencyId
 					,[dblExchangeRate]						= 1 -- @dblExchangeRate
 					,[intTransactionId]						= @intTransactionId_AutoNegative
 					,[strTransactionId]						= @strTransactionId_AutoNegative
@@ -879,6 +885,10 @@ BEGIN
 					,[intCompanyLocationId]					= [location].intCompanyLocationId
 					,[strAccountIdInventory]				= glAccountIdInventory.strAccountId
 					,[strAccountIdInTransit]				= glAccountIdInTransit.strAccountId
+					,[dtmDateCreated]						= GETUTCDATE()
+					,[dblComputedValue]						= 
+								dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
+								- dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 			FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 						ON ItemPricing.intItemId = Stock.intItemId
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId

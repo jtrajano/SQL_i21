@@ -73,6 +73,9 @@ BEGIN
 	)
 END
 
+-- Get the default currency ID
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+		
 
 DECLARE @ItemsToPost AS ItemCostingTableType
 
@@ -1311,6 +1314,7 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[dtmDateCreated]
+					,[dblComputedValue]
 			)			
 		SELECT	
 				[intItemId]								= @intItemId
@@ -1324,7 +1328,7 @@ BEGIN
 				,[dblCost]								= 0
 				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= NULL -- @intCurrencyId
+				,[intCurrencyId]						= @intFunctionalCurrencyId -- @intCurrencyId
 				,[dblExchangeRate]						= 1 -- @dblExchangeRate
 				,[intTransactionId]						= @intTransactionId
 				,[strTransactionId]						= @strTransactionId
@@ -1357,6 +1361,7 @@ BEGIN
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[dtmDateCreated]						= GETUTCDATE()
+				,[dblComputedValue]						= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -1436,6 +1441,7 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[dtmDateCreated]
+					,[dblComputedValue]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -1482,6 +1488,7 @@ BEGIN
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[dtmDateCreated]						= GETUTCDATE()
+				,[dblComputedValue]						= -currentValuation.floatingValue
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId

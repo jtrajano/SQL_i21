@@ -396,6 +396,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\24_PopulateTransactionUOM.sql 
 :r .\IC\25_TransactionTypeRename.sql 
 :r .\IC\26_LockAvgCost.sql 
+:r .\IC\26_ComputedValueField.sql 
 :r .\IC\27_ActivateItemLocations.sql 
 :r .\IC\28_PopulateICAPClearing.sql 
 :r .\IC\29_CleanupObjects.sql
