@@ -1212,6 +1212,7 @@
     <Build Include="dbo\Tables\tblSMLicenseSavedFeature.sql" />
     <Build Include="dbo\Tables\tblSMLicenseRegisteredFeature.sql" />
     <Build Include="dbo\Tables\tblHDDeploymentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTInsertRequiredXMLFileConfigForConsignment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -4297,7 +4298,7 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" /> 
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />
@@ -10972,7 +10973,7 @@
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
-	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
@@ -11457,16 +11458,16 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
-	<ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
-		<HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
-		<SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-		<DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
-	</ArtifactReference>
-	<ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
-	    <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
-	    <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-	    <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
-	</ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\120\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategory.sql" />
