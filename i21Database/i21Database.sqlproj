@@ -1169,6 +1169,7 @@
     <Build Include="dbo\Tables\tblCRMHubspotScope.sql" />
     <Build Include="dbo\Views\vyuCRMSetting.sql" />
     <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTInsertRequiredXMLFileConfigForConsignment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
