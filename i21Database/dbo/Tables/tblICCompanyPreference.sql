@@ -28,5 +28,6 @@
     [ysnValidateReceiptTotal] BIT NULL DEFAULT(0),
 	[intItemIdHolderForReceiptImport] INT NULL, 
 	[ysnUpdateSMTransaction] BIT NULL DEFAULT(0),
+	[ysnMigrateComputedValueField] BIT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
