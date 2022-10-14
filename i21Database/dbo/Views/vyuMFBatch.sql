@@ -44,7 +44,7 @@ SELECT
     A.strLeafManufacturingType,
     A.strLeafSize,
     A.strLeafStyle,
-    A.intBookId,
+    A.intMixingUnitLocationId,
     A.dblPackagesBought,
     A.strTeaOrigin,
     A.intOriginalItemId,
@@ -92,6 +92,7 @@ SELECT
     A.strQualityComments,
     A.strRareEarth,
     strParentBatchId = B.strBatchId,
+    A.intTinId
     A.intConcurrencyId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B
