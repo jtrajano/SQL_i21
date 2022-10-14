@@ -9201,7 +9201,7 @@
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
-	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
@@ -9247,6 +9247,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
+    <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
