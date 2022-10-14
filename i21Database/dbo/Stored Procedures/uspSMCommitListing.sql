@@ -50,6 +50,7 @@ BEGIN TRANSACTION
   strControlType,  
   strContainer,  
   intScreenId,  
+  intParentScreenId,
   intConcurrencyId  
  )  
  SELECT   
@@ -59,6 +60,7 @@ BEGIN TRANSACTION
   A.strControlType,  
   A.strContainer,  
   C.intScreenId,  
+  A.intParentScreenId,
   A.intConcurrencyId  
  FROM tblSMControlStage A  
   INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId  
