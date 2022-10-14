@@ -242,6 +242,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	ysnRoll BIT NULL DEFAULT 0, 
 	dtmEtaPol datetime null,
 	dtmEtaPod datetime null,
+	strContractReference NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 
 
 
