@@ -6,7 +6,7 @@ SELECT DISTINCT h.intImportDtnId
 	, d.intImportDtnDetailId
 	, h.strFileName
 	, h.dtmImportDate
-	, d.strSeller
+	, strSeller = ISNULL(em.strName, d.strSeller)
 	, d.strBillOfLading
 	, lh.strTransaction
 	, ir.strReceiptNumber
@@ -20,6 +20,7 @@ SELECT DISTINCT h.intImportDtnId
 FROM tblTRImportDtn h
 JOIN tblTRImportDtnDetail d ON d.intImportDtnId = h.intImportDtnId
 LEFT JOIN tblICInventoryReceipt ir ON ir.intInventoryReceiptId = d.intInventoryReceiptId
+LEFT JOIN tblEMEntity em ON em.intEntityId = ir.intEntityVendorId
 LEFT JOIN tblAPBill v ON v.intBillId = d.intBillId
 LEFT JOIN tblTRLoadReceipt lr ON lr.intInventoryReceiptId = ir.intInventoryReceiptId
 LEFT JOIN tblTRLoadHeader lh ON lh.intLoadHeaderId = lr.intLoadHeaderId
