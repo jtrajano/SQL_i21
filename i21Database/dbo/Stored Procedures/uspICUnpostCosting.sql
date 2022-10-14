@@ -353,6 +353,12 @@ BEGIN
 			,[strActualCostId]
 			,[intSourceEntityId]
 			,[intCompanyLocationId]
+			,[dtmDateCreated]
+			,[strSourceType]
+			,[strSourceNumber]
+			,[strBOLNumber]
+			,[intTicketId]
+			,[dblComputedValue]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -396,6 +402,12 @@ BEGIN
 			,[strActualCostId]						= ActualTransaction.strActualCostId
 			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 			,[intCompanyLocationId]					= ActualTransaction.intCompanyLocationId
+			,[dtmDateCreated]						= GETUTCDATE()
+			,[strSourceType]						= ActualTransaction.strSourceType
+			,[strSourceNumber]						= ActualTransaction.strSourceNumber
+			,[strBOLNumber]							= ActualTransaction.strBOLNumber
+			,[intTicketId]							= ActualTransaction.intTicketId
+			,[dblComputedValue]						= dbo.fnMultiply(-ActualTransaction.dblQty, ActualTransaction.dblCost) + -ActualTransaction.dblValue
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId				
 	
@@ -788,6 +800,8 @@ BEGIN
 						,[intConcurrencyId]
 						,[strDescription]
 						,[intCompanyLocationId]
+						,[dtmDateCreated]
+						,[dblComputedValue]
 				)			
 			SELECT	
 					[intItemId]								= @intItemId
@@ -832,6 +846,10 @@ BEGIN
 																, DEFAULT
 															)
 					,[intCompanyLocationId]					= [location].intCompanyLocationId
+					,[dtmDateCreated]						= GETUTCDATE()
+					,[dblComputedValue]						= 
+								dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
+								- dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 			FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 						ON ItemPricing.intItemId = Stock.intItemId
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId
