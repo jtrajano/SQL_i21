@@ -31,9 +31,10 @@ BEGIN
 			DECLARE @voucherItem AS VoucherPayable
 			DECLARE @intExistBillId INT = NULL
 
-			SELECT @intExistBillId = intBillId FROM tblAPBillDetail BD
-			INNER JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-			WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+			SELECT TOP 1 @intExistBillId = intBillId
+			FROM tblAPBillDetail BD
+			JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+			WHERE RI.intInventoryReceiptId = @intInventoryReceiptId			
 					
 			-- ADD ADJUSTMENT
 			DECLARE @dblAdjustment DECIMAL(18,6) = NULL
@@ -52,7 +53,13 @@ BEGIN
 				SET @dblAdjustment = @dblAdjustment * -1
 			END
 			
-			IF (@dblAdjustment > @dblAdjustmentTolerance AND @dblAdjustment > 0) AND (@ysnOverrideTolerance = 0)
+			IF (ISNULL(@intExistBillId, 0) <> 0)
+			BEGIN
+				SET @intBillId = @intExistBillId
+				UPDATE tblTRImportDtnDetail SET intBillId = @intExistBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
+			END
+			ELSE IF (@dblAdjustment > @dblAdjustmentTolerance AND @dblAdjustment > 0) AND (@ysnOverrideTolerance = 0)
 			BEGIN
 				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Variance is greater than allowed')
 			END
@@ -86,12 +93,6 @@ BEGIN
 							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
 						END
 					END
-				END
-				ELSE
-				BEGIN
-					SET @intBillId = @intExistBillId
-					UPDATE tblTRImportDtnDetail SET intBillId = @intExistBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
-					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
 				END
 
 				IF(@intBillId IS NOT NULL)
