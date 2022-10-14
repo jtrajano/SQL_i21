@@ -11526,6 +11526,7 @@
     <Build Include="dbo\Tables\tblQMImportLog.sql" />
     <Build Include="dbo\Tables\tblQMImportGardenMark.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportGardenMark.sql" />
+    <Build Include="dbo\Views\vyuMFBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -90,6 +90,7 @@ CREATE  TABLE tblMFBatch
 	strReserveMU NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS  NULL,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	intConcurrencyId INT NULL,
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intSales] ASC,
