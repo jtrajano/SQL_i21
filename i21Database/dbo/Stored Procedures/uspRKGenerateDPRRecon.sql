@@ -204,6 +204,7 @@ BEGIN TRY
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
+	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CBL.intContractDetailId AND CD.intParentDetailId IS NULL
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Created Contract'
@@ -749,6 +750,7 @@ BEGIN TRY
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
+	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CBL.intContractDetailId AND CD.intParentDetailId IS NULL
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Created Contract'
