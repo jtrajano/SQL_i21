@@ -298,14 +298,11 @@ BEGIN
 									ELSE 'Invoice' END
 		
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId
-	
+		
 	IF(@InvoiceNumber IS NOT NULL)
 	BEGIN
-		IF EXISTS (SELECT NULL FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceNumber)
+		WHILE EXISTS (SELECT TOP 1 1 FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceNumber)
 			BEGIN
-				SET @InvoiceNumber = NULL
-				
-				-- UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
 
