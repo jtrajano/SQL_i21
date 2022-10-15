@@ -22,7 +22,7 @@ BEGIN
 	RETURN @return
 END
 
-IF LEN(TRIM(RTRIM(@strBatchId)))=0
+IF LEN(LTRIM(RTRIM(@strBatchId)))=0
 BEGIN
 	RAISERROR('Batch Id parameter is empty', 16,1)
 	RETURN @return
