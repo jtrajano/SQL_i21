@@ -157,7 +157,7 @@ BEGIN
 	) ON ES.intSplitId = ADJ.intSplitId	
 	LEFT JOIN tblICItem ICF
 		ON ICF.intItemId = @intFreightItemId
-		select '@voucherPayable',* from @voucherPayable
+		-- '@voucherPayable',* from @voucherPayable
 
 	UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1, dblOrderQty = dblOrderQty * -1 WHERE dblQuantityToBill < 0 AND intTransactionType = 1
 
