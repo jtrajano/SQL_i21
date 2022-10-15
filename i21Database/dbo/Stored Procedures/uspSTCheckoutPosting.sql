@@ -495,6 +495,7 @@ BEGIN
 				BEGIN
 					DECLARE		@intPaymentMethod INT = 0
 					DECLARE		@intCustomerPaymentMethod INT = 0
+					DECLARE		@intVendorPaymentMethod INT = 0
 					DECLARE		@strCustomerName NVARCHAR(150) = ''
 
 					SELECT		@intPaymentMethod = intPaymentMethodID 
@@ -537,10 +538,35 @@ BEGIN
 						GOTO ExitWithRollback
 					END
 
+					--VENDOR VALIDATION
+					IF NOT EXISTS(SELECT '' FROM  tblAPVendor WHERE intEntityId = @intEntityCustomerId)
+						BEGIN
+							SET @ysnUpdateCheckoutStatus = 0
+							SET @strStatusMsg = 'Customer ' + @strCustomerName + ' was not configured as a vendor.'
+						
+							-- ROLLBACK
+							GOTO ExitWithRollback
+						END
+					ELSE
+						BEGIN
+							SELECT		@intVendorPaymentMethod = a.intPaymentMethodId
+							FROM		tblAPVendor a
+							WHERE		a.intEntityId = @intEntityCustomerId
+
+							IF @intPaymentMethod != @intVendorPaymentMethod OR @intVendorPaymentMethod IS NULL
+							BEGIN
+								SET @ysnUpdateCheckoutStatus = 0
+								SET @strStatusMsg = 'Missing or Incorrect Payment Method for the vendor ' + @strCustomerName + '.'
+
+								-- ROLLBACK
+								GOTO ExitWithRollback
+							END
+						END
+
 					IF NOT EXISTS(SELECT '' FROM tblEMEntityEFTInformation WHERE intEntityId = @intEntityCustomerId AND intBankId IS NOT NULL)
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Missing EFT/ACH setup for the customer ' + @strCustomerName + '.'
+						SET @strStatusMsg = 'Missing EFT/ACH setup for entity ' + @strCustomerName + '.'
 
 						-- ROLLBACK
 						GOTO ExitWithRollback
