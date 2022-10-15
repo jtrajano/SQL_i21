@@ -198,7 +198,11 @@ BEGIN TRY
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0)
 					AND ((SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0)
 					AND (tblTRLoadReceipt.strOrigin = 'Terminal' AND tblTRLoadDistributionHeader.strDestination = 'Location'
-						OR tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Location' )					
+						OR tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Location' )
+					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
+						OR Transporter.intEntityId IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
+					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
+						OR Transporter.intEntityId NOT IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0))	
 			) tblTFTransaction
 		END
 
