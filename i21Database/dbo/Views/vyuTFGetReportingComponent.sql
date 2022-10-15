@@ -31,6 +31,8 @@ SELECT RC.intReportingComponentId
 	, dbo.fnTFCoalesceTransactionSource(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeTransactionSource
 	, dbo.fnTFCoalesceCardFuelingSite(RC.intReportingComponentId, 1) COLLATE Latin1_General_CI_AS strIncludeCardFuelingSites
 	, dbo.fnTFCoalesceCardFuelingSite(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeCardFuelingSites
+	, dbo.fnTFCoalesceCarrier(RC.intReportingComponentId, 1) COLLATE Latin1_General_CI_AS strIncludeCarriers
+	, dbo.fnTFCoalesceCarrier(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeCarriers
 FROM tblTFReportingComponent RC
 LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = RC.intTaxAuthorityId
 LEFT JOIN tblTFComponentType CType ON CType.intComponentTypeId = RC.intComponentTypeId
