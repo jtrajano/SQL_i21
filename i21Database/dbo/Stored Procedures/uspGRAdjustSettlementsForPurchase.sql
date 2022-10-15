@@ -16,6 +16,7 @@ BEGIN
 	DECLARE @voucherPayableTax VoucherDetailTax
 	DECLARE @createdVouchersId NVARCHAR(MAX)
 	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @detailCreated Id
 
 	SET @intPrepayTypeId = CASE WHEN @intAdjustmentTypeId = 1 THEN CASE WHEN @intContractDetailId IS NULL THEN 1 /*Standard*/ ELSE 2 /*Unit*/ END ELSE NULL END
 
@@ -42,10 +43,13 @@ BEGIN
 		,intLocationId
 		,intShipToId
 		,intItemId
+		,intWeightUOMId
+		,dblNetWeight
+		,intCostUOMId
+		--,intOrderUOMId
 		,dblQuantityToBill
 		,dblOrderQty
 		,dblCost
-		--,intAPAccount
 		,intAccountId
 		,strVendorOrderNumber
 		,strMiscDescription
@@ -69,8 +73,11 @@ BEGIN
 		,intItemId				= CASE 
 									WHEN @intAdjustmentTypeId = 1 THEN CD.intItemId
 									WHEN @intAdjustmentTypeId = 2 THEN @intFreightItemId								
-									ELSE NULL --3
+									ELSE CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN ADJ.intItemId ELSE NULL END
 								END
+		,intWeightUOMId			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE NULL END
+		,dblNetWeight			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE NULL END
+		,dblNetWeight			= 1
 		,dblQuantityToBill		= CASE 
 									WHEN @intAdjustmentTypeId = 1 AND ADJ.intContractDetailId IS NOT NULL THEN ROUND(ADJ.dblAdjustmentAmount / CD.dblCashPrice,6)
 									WHEN @intAdjustmentTypeId = 2 THEN
@@ -98,7 +105,6 @@ BEGIN
 										END
 									ELSE CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ADJ.dblAdjustmentAmount) ELSE (ABS(ADJ.dblAdjustmentAmount) * (ESD.dblSplitPercent / 100)) END
 								END
-		--,intAPAccount			= 
 		,intAccountId			= intGLAccountId
 		,strVendorOrderNumber	= strTicketNumber
 		,strMiscDescription		= CASE 
@@ -129,6 +135,10 @@ BEGIN
 		,ysnStage				= 0
 		,strCheckComment		= ADJ.strComments
 	FROM @AdjustSettlementsStagingTable ADJ
+	LEFT JOIN tblICItemUOM b 
+		ON b.intItemId = ADJ.intItemId 
+			--AND b.intUnitMeasureId = @intUnitMeasureId
+			AND b.ysnStockUnit = 1
 	LEFT JOIN tblAPVendor AP
 		ON AP.intEntityId = ADJ.intEntityId
 	LEFT JOIN (
@@ -147,7 +157,7 @@ BEGIN
 	) ON ES.intSplitId = ADJ.intSplitId	
 	LEFT JOIN tblICItem ICF
 		ON ICF.intItemId = @intFreightItemId
-		--select '@voucherPayable',* from @voucherPayable
+		select '@voucherPayable',* from @voucherPayable
 
 	UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1, dblOrderQty = dblOrderQty * -1 WHERE dblQuantityToBill < 0 AND intTransactionType = 1
 
@@ -158,6 +168,70 @@ BEGIN
 		,@throwError = 1
 		,@error = @ErrMsg
 		,@createdVouchersId = @createdVouchersId OUTPUT
+
+	IF @intAdjustmentTypeId = 3 AND ISNULL((SELECT dblCkoffAdjustment FROM @AdjustSettlementsStagingTable),0) <> 0
+	BEGIN
+		INSERT INTO @detailCreated
+		SELECT intBillDetailId
+		FROM tblAPBillDetail BD
+		INNER JOIN (
+			SELECT value FROM dbo.fnCommaSeparatedValueToTable(@createdVouchersId)
+		) BL
+			ON BL.value = BD.intBillId
+
+		UPDATE APD
+		SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
+				CASE WHEN APB.intShipFromEntityId != APB.intEntityVendorId THEN APB.intShipFromEntityId ELSE APB.intEntityVendorId END,
+				APB.intShipToId,
+				--APD.intItemId,
+				NULL,
+				APB.intShipFromId,
+				EM.intFreightTermId,
+				default
+			)
+		FROM tblAPBillDetail APD 
+		INNER JOIN tblAPBill APB
+			ON APD.intBillId = APB.intBillId
+		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+		INNER JOIN @detailCreated ON intBillDetailId = intId
+		WHERE APD.intTaxGroupId IS NULL
+
+		--calculate the tax first to get the rate
+		EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+		--update qty, cost and tax based on the rate above
+		UPDATE APD
+		SET dblQtyOrdered	= ROUND((CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) ELSE (ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ESD.dblSplitPercent / 100)) END) / BDT.dblRate,6)
+			,dblCost		= CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) ELSE (ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) * (ESD.dblSplitPercent / 100)) END / ROUND((CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) ELSE (ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ESD.dblSplitPercent / 100)) END) / BDT.dblRate,6)
+		FROM tblAPBillDetail APD 
+		INNER JOIN tblAPBill APB
+			ON APD.intBillId = APB.intBillId
+		INNER JOIN tblAPBillDetailTax BDT
+			ON BDT.intBillDetailId = APD.intBillDetailId
+		INNER JOIN @detailCreated 
+			ON APD.intBillDetailId = intId
+		INNER JOIN @AdjustSettlementsStagingTable ADJ
+			ON ADJ.intEntityId = APB.intEntityVendorId
+		LEFT JOIN (
+			tblEMEntitySplit ES
+			INNER JOIN tblEMEntitySplitDetail ESD
+				ON ESD.intSplitId = ES.intSplitId
+			INNER JOIN tblEMEntity EM
+				ON EM.intEntityId = ESD.intEntityId
+		) ON ES.intSplitId = ADJ.intSplitId
+		WHERE APD.dblTax <> 0
+
+		UPDATE APD
+		SET dblQtyReceived = dblQtyOrdered
+			,dblNetWeight	= dblQtyOrdered
+		FROM tblAPBillDetail APD 
+		INNER JOIN @detailCreated 
+			ON APD.intBillDetailId = intId
+		WHERE APD.dblTax <> 0
+
+		--recalculate the tax with the updated qty
+		EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+	END
 
 	IF @createdVouchersId IS NOT NULL
 	BEGIN
