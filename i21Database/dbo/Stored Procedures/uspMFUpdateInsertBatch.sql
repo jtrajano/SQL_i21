@@ -4,7 +4,7 @@ CREATE PROCEDURE uspMFUpdateInsertBatch
 AS
 
 SELECT TOP 1 @strBatchId = strBatchId FROM tblMFBatch A
-JOIN MFBatchTableType B
+JOIN @MFBatchTableType B
 ON 
 A.intSalesYear = B.intSalesYear
 AND A.intSales = B.intSales
