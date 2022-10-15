@@ -89,7 +89,7 @@ BEGIN TRY
 	  AND GM.dtmCertifiedDate > GM.dtmExpiryDate
 
 	UPDATE #GARDENMARKS
-	SET ysnSuccess = CASE WHEN LTRIM(TRIM(strErrorMsg)) = '' THEN 1 ELSE 0 END
+	SET ysnSuccess = CASE WHEN LTRIM(RTRIM(strErrorMsg)) = '' THEN 1 ELSE 0 END
 
 	UPDATE IGM
 	SET ysnSuccess		= GM.ysnSuccess
