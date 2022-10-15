@@ -51,7 +51,7 @@ BEGIN
 	strLeafManufacturingType		 = T.strLeafManufacturingType,
 	strLeafSize						 = T.strLeafSize,
 	strLeafStyle					 = T.strLeafStyle,
-	intBookId						 = T.intBookId,
+	--intBookId						 = T.intBookId,
 	dblPackagesBought				 = T.dblPackagesBought,
 	strTeaOrigin					 = T.strTeaOrigin,
 	intOriginalItemId				 = T.intOriginalItemId,
@@ -152,7 +152,7 @@ BEGIN
 		,strLeafManufacturingType
 		,strLeafSize
 		,strLeafStyle
-		,intBookId
+		-- ,intBookId
 		,dblPackagesBought
 		,strTeaOrigin
 		,intOriginalItemId
@@ -243,7 +243,7 @@ BEGIN
 		,strLeafManufacturingType
 		,strLeafSize
 		,strLeafStyle
-		,intBookId
+		-- ,intBookId
 		,dblPackagesBought
 		,strTeaOrigin
 		,intOriginalItemId

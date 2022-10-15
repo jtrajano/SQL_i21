@@ -92,7 +92,7 @@ SELECT
     A.strQualityComments,
     A.strRareEarth,
     strParentBatchId = B.strBatchId,
-    A.intTinId
+    A.intTinId,
     A.intConcurrencyId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B
