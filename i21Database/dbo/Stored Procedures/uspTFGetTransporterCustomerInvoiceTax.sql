@@ -135,8 +135,8 @@ BEGIN TRY
 						, tblSMTransportationMode.strCode
 						, Transporter.strName AS strTransporterName
 						, Transporter.strFederalTaxId AS strTransporterFederalTaxId
-						, NULL AS strConsignorName
-						, NULL AS strConsignorFederalTaxId
+						, Seller.str1099Name AS strConsignorName
+						, Seller.strFederalTaxId AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
@@ -354,8 +354,8 @@ BEGIN TRY
 						, tblSMTransportationMode.strCode
 						, Transporter.strName AS strTransporterName
 						, Transporter.strFederalTaxId AS strTransporterFederalTaxId
-						, NULL AS strConsignorName
-						, NULL AS strConsignorFederalTaxId
+						, Seller.str1099Name AS strConsignorName
+						, Seller.strFederalTaxId AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
