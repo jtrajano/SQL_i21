@@ -152,8 +152,8 @@ BEGIN TRY
 					, tblSMTransportationMode.strCode
 					, Transporter.strName AS strTransporterName
 					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
-					, NULL AS strConsignorName
-					, NULL AS strConsignorFederalTaxId
+					, Seller.str1099Name AS strConsignorName
+					, Seller.strFederalTaxId AS strConsignorFederalTaxId
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
@@ -198,6 +198,7 @@ BEGIN TRY
 					LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
 						LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
 							LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
+							LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 						LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 							LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 							--LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId
@@ -359,8 +360,8 @@ BEGIN TRY
 					, tblSMTransportationMode.strCode
 					, Transporter.strName AS strTransporterName
 					, Transporter.strFederalTaxId AS strTransporterFederalTaxId
-					, NULL AS strConsignorName
-					, NULL AS strConsignorFederalTaxId
+					, Seller.str1099Name AS strConsignorName
+					, Seller.strFederalTaxId AS strConsignorFederalTaxId
 					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
@@ -404,6 +405,7 @@ BEGIN TRY
 					LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
 						LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
 							LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId
+							LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 						LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 							LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 							--LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId
@@ -752,8 +754,8 @@ BEGIN TRY
 					, tblSMTransportationMode.strCode
 					, tblEMEntity.strName AS strTransporterName
 					, tblEMEntity.strFederalTaxId AS strTransporterFederalTaxId
-					, tblEMEntity.strName AS strConsignorName
-					, tblEMEntity.strFederalTaxId AS strConsignorFederalTaxId
+					, Seller.str1099Name AS strConsignorName
+					, Seller.strFederalTaxId AS strConsignorFederalTaxId
 					, EntityAPVendor.strName AS strVendorName
 					, EntityAPVendor.strFederalTaxId AS strVendorFederalTaxId
 					, tblTFCompanyPreference.strCompanyName
@@ -799,7 +801,8 @@ BEGIN TRY
 					LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
 					LEFT JOIN tblSMShipVia ON tblTRLoadHeader.intShipViaId = tblSMShipVia.intEntityId 
 					LEFT JOIN tblEMEntity ON tblSMShipVia.intEntityId = tblEMEntity.intEntityId 
-					LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode	
+					LEFT JOIN tblSMTransportationMode ON  tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
+					LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 				LEFT JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					LEFT JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId
 					LEFT JOIN tblSMTaxCode AS TaxCodeCategory ON TaxCodeCategory.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
