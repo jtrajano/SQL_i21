@@ -99,7 +99,9 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -155,6 +157,8 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, Seller.str1099Name
+					, Seller.strFederalTaxId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -173,6 +177,7 @@ BEGIN TRY
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+					LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 				LEFT JOIN (
 					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
 					FROM tblAPBillDetail 
@@ -292,7 +297,9 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -348,6 +355,8 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, Seller.str1099Name
+					, Seller.strFederalTaxId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -365,6 +374,7 @@ BEGIN TRY
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+					LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 				LEFT JOIN (
 					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
 					FROM tblAPBillDetail 
@@ -549,7 +559,9 @@ BEGIN TRY
 				, dblQtyShipped
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -614,6 +626,8 @@ BEGIN TRY
 				, strContactName
 				, strEmail
 				, strImportVerificationNumber
+				, strConsignorName
+				, REPLACE(strConsignorFederalTaxId, '-', '')
 			FROM @tmpTransaction Trans
 		END
 
