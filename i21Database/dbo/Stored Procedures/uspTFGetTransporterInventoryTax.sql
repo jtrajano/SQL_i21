@@ -98,7 +98,9 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -152,6 +154,8 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, Seller.str1099Name
+					, Seller.strFederalTaxId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -169,6 +173,7 @@ BEGIN TRY
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
 						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId 
 						LEFT JOIN tblSMTransportationMode ON tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
+						LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 				INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId 
 					LEFT JOIN tblSMCompanyLocation DestinationLoc ON DestinationLoc.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLoc ON CustomerLoc.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
@@ -264,7 +269,9 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -318,6 +325,8 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, Seller.str1099Name
+					, Seller.strFederalTaxId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -334,6 +343,7 @@ BEGIN TRY
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
 						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId 
 						LEFT JOIN tblSMTransportationMode ON tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode
+						LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 				INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId 
 					LEFT JOIN tblSMCompanyLocation DestinationLoc ON DestinationLoc.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLoc ON CustomerLoc.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
@@ -516,7 +526,9 @@ BEGIN TRY
 				, dblQtyShipped
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -579,6 +591,8 @@ BEGIN TRY
 				, strContactName
 				, strEmail
 				, strImportVerificationNumber
+				, strConsignorName
+				, REPLACE(strConsignorFederalTaxId, '-', '')
 			FROM @TFTransaction Trans
 		END
 
