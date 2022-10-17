@@ -463,7 +463,7 @@ BEGIN TRY
 	AND strAction IN('Updated Contract','Re-opened Sequence')
 	AND CBL.intContractTypeId = 1 --Purchase
 	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
-	AND CBL.dblQty != CBL.dblOrigQty
+	AND (CBL.dblQty != CBL.dblOrigQty AND CBL.intPricingTypeId <> 3)
 
 	UNION ALL
 
@@ -904,7 +904,7 @@ BEGIN TRY
 	AND strAction IN('Updated Contract','Re-opened Sequence')
 	AND CBL.intContractTypeId = 2 --Sales
 	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
-	AND CBL.dblQty != CBL.dblOrigQty
+	AND (CBL.dblQty != CBL.dblOrigQty AND CBL.intPricingTypeId <> 3)
 
 	UNION ALL
 
