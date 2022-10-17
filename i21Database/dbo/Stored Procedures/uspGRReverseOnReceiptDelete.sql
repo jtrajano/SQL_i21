@@ -50,7 +50,7 @@ BEGIN TRY
 				END
 				ELSE IF EXISTS(SELECT 1 FROM [tblGRStorageHistory] WHERE [intCustomerStorageId] = @intCustomerStorageId AND strType = 'Transfer')
 				BEGIN
-					RAISERROR('The Grain Ticket of this receipt has transferred.',16, 1);
+					RAISERROR('The Grain Ticket of this receipt has been transferred.',16, 1);
 				END
 				ELSE IF EXISTS(SELECT 1 FROM [tblGRCustomerStorage] WHERE [intCustomerStorageId] = @intCustomerStorageId AND dblOriginalBalance < > dblOpenBalance)
 				BEGIN
