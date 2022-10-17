@@ -229,6 +229,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
 :r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
+:r .\GL\DefaultData\1x_RecurringTransaction.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -344,6 +345,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\22_InventoryValuationPerformance.sql
 :r .\IC\24_PopulateTransactionUOM.sql 
 :r .\IC\25_TransactionTypeRename.sql 
+:r .\IC\26_ComputedValueField.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -415,6 +417,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
 :R .\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql
 :R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
+
+:R .\GR\Fix_SettleStorage_Basis.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

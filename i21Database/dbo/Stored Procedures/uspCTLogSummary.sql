@@ -3911,9 +3911,7 @@ BEGIN TRY
 				end
 				else
 				begin
-					declare @intLastLogStatus int;
-					select top 1 @intLastLogStatus = intContractStatusId from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
-					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4)
+					if (@strProcess <> 'Do Roll' and exists(select top 1 1 from @cbLogPrev where strTransactionType = 'Contract Balance' and intContractStatusId = 4 order by intId desc))
 					begin
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					end
@@ -5033,7 +5031,10 @@ BEGIN TRY
 							BEGIN
 								if exists (select top 1 1 from @cbLogSpecific where dblOrigQty > @TotalPriced and @intHeaderPricingTypeId = 2 and @intSequencePricingTypeId = 2)
 								begin
-									UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 2, intActionId =  18
+									UPDATE @cbLogSpecific SET
+										dblQty = dblQty * - 1
+										,intPricingTypeId = case when @ysnUnposted = 1 and @TotalPriced > 0 then 1 else 2 end
+										,intActionId =  case when intContractTypeId = 1 and @ysnUnposted = 1 and @TotalPriced > 0 then 47 else 18 end
 								end
 								else
 								begin

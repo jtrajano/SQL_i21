@@ -67,10 +67,15 @@ BEGIN
 	UPDATE #tmpEmployees
 	SET ysnForReset = CASE WHEN (
 								 (strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR(dtmNextAward)  )
-								OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))
-								OR (strAwardPeriod = 'Paycheck')
+								OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(GETDATE()) > YEAR(dtmLastAward))
 								) THEN 1 
-							ELSE 0 END
+							ELSE
+								CASE WHEN CONVERT(DATE ,GETDATE()) >= CONVERT(DATE,dtmNextAward)  AND CONVERT(DATE,dtmLastAward) < CONVERT(DATE,dtmNextAward) THEN  
+									1  
+								ELSE  
+									0   
+								END 
+							END
 
 	DECLARE @intEmployeeId INT
 	DECLARE @intYearsOfService INT
@@ -119,8 +124,8 @@ BEGIN
 		UPDATE EOT
 			SET dblHoursUsed = CASE WHEN (T.ysnForReset = 1) THEN 0 ELSE EOT.dblHoursUsed END
 				,dblHoursCarryover = CASE WHEN (T.ysnForReset = 1) THEN 
-											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < dblMaxCarryover) 
-												THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))
+											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsedReset, 0)) < dblMaxCarryover) 
+												THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsedReset, 0))
 											ELSE dblMaxCarryover END
 									ELSE dblHoursCarryover END
 				,dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN 0

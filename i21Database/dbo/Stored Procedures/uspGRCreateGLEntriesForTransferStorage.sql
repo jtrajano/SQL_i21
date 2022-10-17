@@ -731,12 +731,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END
 			,dblDebitReport				= NULL
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END
 			,dblCreditReport			= NULL
@@ -797,12 +797,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END
 			,dblDebitReport				= NULL
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END
 			,dblCreditReport			= NULL
@@ -868,12 +868,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END
 			,dblDebitReport				= NULL
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END
 			,dblCreditReport			= NULL
@@ -934,12 +934,12 @@ BEGIN
 			,strModuleName    = @ModuleName  
 			,intConcurrencyId   = 1  
 			,dblDebitForeign   = CASE   
-					WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value   
+					WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value   
 					ELSE 0   
 					END  
 			,dblDebitReport    = NULL  
 			,dblCreditForeign   = CASE   
-					WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value   
+					WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value   
 					ELSE 0   
 					END  
 			,dblCreditReport   = NULL  
@@ -1003,12 +1003,12 @@ BEGIN
 				,strModuleName				= @ModuleName
 				,intConcurrencyId			= 1
 				,dblDebitForeign			= CASE 
-												WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+												WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 												ELSE 0 
 											END 
 				,dblDebitReport				= NULL 
 				,dblCreditForeign			= CASE 
-												WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+												WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 												ELSE 0 
 											END  
 				,dblCreditReport			= NULL 
@@ -1061,12 +1061,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END  
 			,dblDebitReport				= NULL 
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END 
 			,dblCreditReport			= NULL 
@@ -1126,12 +1126,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END 
 			,dblDebitReport				= NULL 
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END  
 			,dblCreditReport			= NULL 
@@ -1183,12 +1183,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END  
 			,dblDebitReport				= NULL 
 			,dblCreditForeign			= CASE
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END 
 			,dblCreditReport			= NULL 
@@ -1247,12 +1247,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END 
 			,dblDebitReport				= NULL 
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END  
 			,dblCreditReport			= NULL 
@@ -1304,12 +1304,12 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
 											ELSE 0 
 										END  
 			,dblDebitReport				= NULL 
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
 											ELSE 0 
 										END 
 			,dblCreditReport			= NULL 

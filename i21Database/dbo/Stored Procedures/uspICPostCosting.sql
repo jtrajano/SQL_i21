@@ -960,6 +960,7 @@ BEGIN
 					,[dblForexRate]
 					,[intCompanyLocationId]
 					,[dtmDateCreated]
+					,[dblComputedValue]
 			)			
 		SELECT	
 				[intItemId]								= @intItemId
@@ -1008,6 +1009,7 @@ BEGIN
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[intCompanyLocationId]					= [location].intCompanyLocationId
 				,[dtmDateCreated]						= GETUTCDATE()
+				,[dblComputedValue]						= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - itemTotal.itemTotalValue
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -1103,6 +1105,7 @@ BEGIN
 					,[dblForexRate]
 					,[intCompanyLocationId]
 					,[dtmDateCreated]
+					,[dblComputedValue]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -1151,6 +1154,7 @@ BEGIN
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[intCompanyLocationId]					= cl.intCompanyLocationId
 				,[dtmDateCreated]						= GETUTCDATE()
+				,[dblComputedValue]						= -currentValuation.floatingValue
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId
