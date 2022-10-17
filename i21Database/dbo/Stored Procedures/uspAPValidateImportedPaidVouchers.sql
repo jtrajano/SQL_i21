@@ -49,14 +49,17 @@ UPDATE A
 					WHEN 
 						((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue  AND B.intTransactionType = 1
 					THEN 'Overpayment'
-						WHEN 
+					WHEN 
 						A.dblPayment < B.dblAmountDue AND B.intTransactionType = 3
 					THEN 'Underpayment'
 					WHEN 
 						((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue  AND B.intTransactionType = 1
 					THEN 'Underpayment'
+					WHEN 
+						B.intPayScheduleId IS NOT NULL AND P.strPaymentRecordNum IS NOT NULL
+					THEN 'Already included in payment' + P.strPaymentRecordNum
 					WHEN
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > ABS((B.dblTotal - B.dblPaymentTemp))
+						B.intPayScheduleId IS NULL AND ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > ABS((B.dblTotal - B.dblPaymentTemp))
 					THEN 'Already included in payment' + P.strPaymentRecordNum
 					WHEN 
 						B.intBillId IS NULL
