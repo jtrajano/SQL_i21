@@ -76,7 +76,6 @@ SELECT
     A.dblTeaTaste,
     A.dblTeaVolume,
     A.intTealingoItemId,
-    A.strTinNumber,
     A.dtmWarehouseArrival,
     A.intYearManufacture,
     A.strPackageSize,
@@ -92,8 +91,9 @@ SELECT
     A.strQualityComments,
     A.strRareEarth,
     strParentBatchId = B.strBatchId,
-    A.intTinId,
+    TIN.strTINNumber,
+    TIN.intTINClearanceId,
     A.intConcurrencyId
 FROM tblMFBatch A
-LEFT JOIN tblMFBatch B
-ON A.intParentBatchId = B.intBatchId
+LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
+OUTER APPLY(SELECT TOP 1 intTINClearanceId, strTINNumber FROM  tblQMTINClearance  WHERE intBatchId = A.intBatchId )TIN
