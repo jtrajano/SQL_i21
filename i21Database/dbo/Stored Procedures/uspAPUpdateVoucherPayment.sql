@@ -130,18 +130,12 @@ BEGIN TRY
 			(
 				SELECT
 					PD.dblPayment,
-					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblDiscount 
-					--WHEN B.ysnDiscountOverride = 1 THEN PD.dblDiscount 
-					ELSE 0 END
-					AS dblDiscount,
-					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblInterest 
-					ELSE 0 END
-					AS dblInterest,
+					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblDiscount ELSE 0 END AS dblDiscount,
+					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblInterest ELSE 0 END AS dblInterest,
 					PD.intBillId
 				FROM tblAPPaymentDetail PD
 				INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
-				WHERE 
-					PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
+				WHERE PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1 AND PD.dblPayment <> 0
 			) tmpPayDetails
 			GROUP BY intBillId
 		) payDetails 
@@ -152,8 +146,7 @@ BEGIN TRY
 				SUM(PD.dblDiscount) dblDiscount
 			FROM tblAPPaymentDetail PD
 			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
-			WHERE 
-				PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
+			WHERE PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1 AND PD.dblPayment <> 0
 			GROUP BY PD.intBillId
 		) paySchedDetails
 		OUTER APPLY (
@@ -210,18 +203,12 @@ BEGIN TRY
 			(
 				SELECT
 					PD.dblPayment,
-					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblDiscount 
-					--WHEN B.ysnDiscountOverride = 1 THEN PD.dblDiscount 
-					ELSE 0 END
-					AS dblDiscount,
-					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblInterest 
-					ELSE 0 END
-					AS dblInterest,
+					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblDiscount ELSE 0 END AS dblDiscount,
+					CASE WHEN PD.dblPayment + PD.dblDiscount - PD.dblInterest = PD.dblAmountDue THEN PD.dblInterest ELSE 0 END AS dblInterest,
 					PD.intBillId
 				FROM tblAPPaymentDetail PD
 				INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
-				WHERE 
-					PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
+				WHERE PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
 			) tmpPayDetails
 			GROUP BY intBillId
 		) payDetails 
@@ -232,8 +219,7 @@ BEGIN TRY
 				SUM(PD.dblDiscount) dblDiscount
 			FROM tblAPPaymentDetail PD
 			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
-			WHERE 
-				PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
+			WHERE PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1 AND PD.dblPayment <> 0
 			GROUP BY PD.intBillId
 		) paySchedDetails
 		OUTER APPLY (
