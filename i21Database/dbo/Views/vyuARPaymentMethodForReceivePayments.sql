@@ -27,10 +27,10 @@ SELECT
 	,strCardType			= ECI.strCardType
 	,dblConvenienceFee		= CASE WHEN UPPER(ECI.strCardType) = 'VISA' THEN CAST(ISNULL(dblVisaPercentage, 0) AS NUMERIC(18, 6))
 								WHEN UPPER(ECI.strCardType) = 'MASTERCARD' THEN CAST(ISNULL(dblMastercardPercentage, 0) AS NUMERIC(18, 6))
-								WHEN UPPER(ECI.strCardType) = 'AMERICAN EXPRESS' THEN CAST(ISNULL(dblAmericanExpressPercentage, 0) AS NUMERIC(18, 6))
+								WHEN UPPER(ECI.strCardType) IN ('AMERICAN EXPRESS', 'AMEX') THEN CAST(ISNULL(dblAmericanExpressPercentage, 0) AS NUMERIC(18, 6))
 								WHEN UPPER(ECI.strCardType) = 'DISCOVER' THEN CAST(ISNULL(dblDiscoverPercentage, 0) AS NUMERIC(18, 6))
 								WHEN UPPER(ECI.strCardType) = 'DINERS CLUB' THEN CAST(ISNULL(dblDinersClubPercentage, 0) AS NUMERIC(18, 6))
-								WHEN UPPER(ECI.strCardType) = 'CHINA UNION PAY' THEN CAST(ISNULL(dblChinaUnionPayPercentage, 0) AS NUMERIC(18, 6))
+								WHEN UPPER(ECI.strCardType) IN ('CHINA UNION PAY', 'UNION PAY') THEN CAST(ISNULL(dblChinaUnionPayPercentage, 0) AS NUMERIC(18, 6))
 							  END
 	,strConvenienceFeeType	= CP.strCreditCardConvenienceFee
 	,ysnExemptCreditCardFee	= ISNULL(C.ysnExemptCreditCardFee, 0)
