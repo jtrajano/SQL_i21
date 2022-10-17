@@ -69,7 +69,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId)
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= COALESCE(Detail.dblNewWeight, Detail.dblNewQuantity, 0)
+			,dblQty					= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN ISNULL(Detail.dblNewWeight, 0) ELSE ISNULL(Detail.dblNewQuantity, 0) END
 			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
 			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
@@ -102,7 +102,7 @@ BEGIN
 						 WHERE intItemId = Detail.intItemId) AS Category
 	WHERE	
 		Header.intInventoryAdjustmentId = @intTransactionId
-		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+		AND ISNULL(NULLIF(Detail.intOwnershipType, 0), @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 		AND Item.strLotTracking <> 'No'
 	UNION ALL
 	SELECT 	intItemId				= Detail.intItemId
@@ -144,7 +144,7 @@ BEGIN
 						 WHERE intItemId = Detail.intItemId) AS Category
 	WHERE	
 		Header.intInventoryAdjustmentId = @intTransactionId
-		AND ISNULL(Detail.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+		AND ISNULL(NULLIF(Detail.intOwnershipType, 0), @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 		AND Item.strLotTracking = 'No'
 
 	-- Call the post routine

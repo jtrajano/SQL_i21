@@ -120,6 +120,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[strSourceNumber]
 		,[strBOLNumber]
 		,[intTicketId]
+		,[dblComputedValue]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -167,6 +168,7 @@ SELECT	[intItemId]							= @intItemId
 		,[strSourceNumber]					= @strSourceNumber
 		,[strBOLNumber]						= @strBOLNumber
 		,[intTicketId]						= @intTicketId
+		,[dblComputedValue]					= dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(@dblCost, 0)) + ISNULL(@dblValue, 0)
 FROM	tblICItem i 
 		CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 WHERE	i.intItemId = @intItemId

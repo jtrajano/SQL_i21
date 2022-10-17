@@ -24,5 +24,6 @@
     [intCreatedByUserId] INT NULL,
     [intModifiedByUserId] INT NULL,
     [ysnIsCountSheetMultiFilter] BIT NULL DEFAULT(1),
+	[ysnMigrateComputedValueField] BIT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

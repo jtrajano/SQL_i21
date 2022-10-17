@@ -167,6 +167,21 @@ BEGIN TRY
 		END
 	END
 
+	--6. Voucher deletion
+	BEGIN
+		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
+		BEGIN
+			SELECT @BillId = intId FROM @billListForDeletion
+			delete from tblCTPriceFixationDetailAPAR where intBillId = @BillId;
+			EXEC uspAPDeleteVoucher 
+				@BillId
+				,@UserId
+				,@callerModule = 1					
+
+			DELETE FROM @billListForDeletion WHERE intId = @BillId
+		END
+	END
+
 	WHILE EXISTS(SELECT 1 FROM @SettleStorages)
 	BEGIN
 		--WE SHOULD CLEAR THE STORAGE HISTORY STAGING TABLE
@@ -609,19 +624,19 @@ BEGIN TRY
 	END
 
 	--6. Voucher deletion
-	BEGIN
-		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
-		BEGIN
-			SELECT @BillId = intId FROM @billListForDeletion
+	--BEGIN
+	--	WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
+	--	BEGIN
+	--		SELECT @BillId = intId FROM @billListForDeletion
 
-			EXEC uspAPDeleteVoucher 
-				@BillId
-				,@UserId
-				,@callerModule = 1					
+	--		EXEC uspAPDeleteVoucher 
+	--			@BillId
+	--			,@UserId
+	--			,@callerModule = 1					
 
-			DELETE FROM @billListForDeletion WHERE intId = @BillId
-		END
-	END
+	--		DELETE FROM @billListForDeletion WHERE intId = @BillId
+	--	END
+	--END
 
 	SettleStorage_Exit:
 END TRY
