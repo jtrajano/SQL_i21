@@ -57,6 +57,7 @@ BEGIN
 				, @strDeferredInvoiceNo8 NVARCHAR(50) = NULL
 				, @strDeferredInvoiceNo9 NVARCHAR(50) = NULL
 				, @strDeferredInvoiceNo10 NVARCHAR(50) = NULL
+				, @strInvoiceNo NVARCHAR(50) = NULL
 
 			SELECT @dblDeferredAmt1 = dblDeferredAmt1
 				,@dtmDeferredDate1 = dtmDeferredDate1
@@ -89,6 +90,7 @@ BEGIN
 				,@strDeferredInvoiceNo8 = strDeferredInvoiceNo8
 				,@strDeferredInvoiceNo9 = strDeferredInvoiceNo9
 				,@strDeferredInvoiceNo10 = strDeferredInvoiceNo10
+				,@strInvoiceNo = strInvoiceNo
 			FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
 						
 			SELECT @intTermId = intTermsId, @dblAmountDue = dblAmountDue FROM tblAPBill B WHERE B.intBillId = @intBillId
@@ -121,7 +123,7 @@ BEGIN
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ''
+				strPaymentScheduleNumber = @strInvoiceNo
 			UNION ALL
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
