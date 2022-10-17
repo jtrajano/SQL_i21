@@ -80,7 +80,8 @@ OUTER APPLY	(
 		FROM vyuAPBillForImport forImport
 		WHERE forImport.intEntityVendorId = A.intEntityVendorId 
 			AND LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = A.strVendorOrderNumber
-			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest) --Amount of Payment Schedule should be match as well
+			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
+			AND ISNULL(forImport.dblTempDiscount, 0) = A.dblDiscount
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
