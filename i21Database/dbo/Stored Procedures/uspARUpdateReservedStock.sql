@@ -105,7 +105,7 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
 				(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
 			)
 		OR 
-			NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+			NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < ISNULL([dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]), ARID.[dblQtyShipped]))
 				
 		)
 			
