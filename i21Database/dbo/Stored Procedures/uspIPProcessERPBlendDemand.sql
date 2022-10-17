@@ -40,8 +40,11 @@ BEGIN TRY
 		,@strProductionOrder NVARCHAR(50)
 		,@strDemandNo NVARCHAR(50)
 		,@intBlendRequirementId INT
+		,@strIsInitialAckReq NVARCHAR(50)
 
 	SELECT @strProductionOrder = dbo.[fnIPGetSAPIDOCTagValue]('Blend Demand', 'Type')
+
+	SELECT @strIsInitialAckReq = dbo.[fnIPGetSAPIDOCTagValue]('Blend Demand', 'IsInitialAckReq')
 
 	IF @strProductionOrder IS NULL
 		OR @strProductionOrder = ''
@@ -51,6 +54,16 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		SELECT @strProductionOrder = 'True'
+	END
+
+	IF @strIsInitialAckReq IS NULL
+		OR @strProductionOrder = ''
+	BEGIN
+		SELECT @strIsInitialAckReq = 'True'
+	END
+	ELSE
+	BEGIN
+		SELECT @strIsInitialAckReq = 'False'
 	END
 
 	DECLARE @tblIPBendDemandStage TABLE (intBendDemandStageId INT)
@@ -401,7 +414,7 @@ BEGIN TRY
 						,1 intStatusId
 						,NULL intOrderId
 						,@strOrderNo
-						,IsNULL(@strDemandType,'Production line')
+						,IsNULL(@strDemandType, 'Production line')
 						,@intUserId
 						,@dtmCreatedDate
 						,@intUserId
@@ -447,8 +460,8 @@ BEGIN TRY
 						,@intUnitMeasureId
 						,@dtmDueDate
 						,@intLocationId
-						,2
-						,@dblQuantity
+						,1
+						,0
 						,@intUserId
 						,@dtmCreatedDate
 						,@intUserId
@@ -493,12 +506,13 @@ BEGIN TRY
 					UPDATE tblMFBlendRequirement
 					SET intItemId = @intItemId
 						,dblQuantity = @dblQuantity
-						,intUOMId=@intUnitMeasureId
+						,intUOMId = @intUnitMeasureId
 						,intManufacturingCellId = @intManufacturingCellId
 						,intMachineId = @intMachineId
 						,dtmDueDate = @dtmDueDate
 						,dtmLastModified = @dtmCreatedDate
 						,intConcurrencyId = intConcurrencyId + 1
+						,dblBlenderSize = @dblQuantity
 					WHERE strReferenceNo = @strOrderNo
 				END
 			END
@@ -636,43 +650,46 @@ BEGIN TRY
 		WHERE intBendDemandStageId > @intBendDemandStageId
 	END
 
-	IF ISNULL(@strFinalErrMsg, '') <> ''
+	IF @strIsInitialAckReq = 'True'
 	BEGIN
-		INSERT INTO dbo.tblIPInitialAck (
-			intTrxSequenceNo
-			,strCompanyLocation
-			,dtmCreatedDate
-			,strCreatedBy
-			,intMessageTypeId
-			,intStatusId
-			,strStatusText
-			)
-		SELECT @intTrxSequenceNo
-			,@strCompanyLocation
-			,@dtmCreatedDate
-			,@strCreatedBy
-			,10 AS intMessageTypeId
-			,0 AS intStatusId
-			,@strFinalErrMsg AS strStatusText
-	END
-	ELSE
-	BEGIN
-		INSERT INTO dbo.tblIPInitialAck (
-			intTrxSequenceNo
-			,strCompanyLocation
-			,dtmCreatedDate
-			,strCreatedBy
-			,intMessageTypeId
-			,intStatusId
-			,strStatusText
-			)
-		SELECT @intTrxSequenceNo
-			,@strCompanyLocation
-			,@dtmCreatedDate
-			,@strCreatedBy
-			,10 AS intMessageTypeId
-			,1 AS intStatusId
-			,'Success' AS strStatusText
+		IF ISNULL(@strFinalErrMsg, '') <> ''
+		BEGIN
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,10 AS intMessageTypeId
+				,0 AS intStatusId
+				,@strFinalErrMsg AS strStatusText
+		END
+		ELSE
+		BEGIN
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,10 AS intMessageTypeId
+				,1 AS intStatusId
+				,'Success' AS strStatusText
+		END
 	END
 
 	UPDATE tblIPBendDemandStage
