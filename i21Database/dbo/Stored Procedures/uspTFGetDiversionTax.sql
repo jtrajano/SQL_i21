@@ -106,7 +106,7 @@ BEGIN TRY
 				, tblTFReportingComponent.strScheduleCode
 				, strType = tblTFReportingComponent.strType
 				, tblTRLoadDistributionDetail.intItemId
-				, tblTRLoadHeader.strDiversionNumber--, tblTRLoadReceipt.strBillOfLading--
+				, tblTRLoadReceipt.strBillOfLading
 				, tblTRLoadDistributionDetail.dblUnits AS dblReceived
 				, tblTRLoadDistributionDetail.dblUnits AS dblGross
 				, tblTRLoadDistributionDetail.dblUnits AS dblNet
