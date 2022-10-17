@@ -9246,6 +9246,7 @@
     <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
