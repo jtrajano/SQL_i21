@@ -114,6 +114,7 @@ BEGIN
 			ON IC.intItemId = LoadCost.intItemId
 		WHERE LoadCost.dblRate != 0 
 			AND ISNULL(@intFreightItemId, 0) != CASE WHEN  ISNULL(@intFreightItemId, 0) = 0 THEN 1 ELSE LoadCost.intItemId END 
+			AND (LoadCost.strEntityType <> 'Customer' OR LoadCost.strEntityType IS NULL)
 	END
 	ELSE
 	BEGIN

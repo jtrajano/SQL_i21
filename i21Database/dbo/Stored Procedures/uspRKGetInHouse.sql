@@ -15,7 +15,7 @@ BEGIN
 	WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 										WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 	
-	DECLARE @intCommodityUnitMeasureId AS INT
+	DECLARE @intCommodityUnitMeasureId AS INT 
 		, @intCommodityStockUOMId INT
 	
 	SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
@@ -65,7 +65,10 @@ BEGIN
 							END
 		, strTransactionType
 		, strTransactionId  = strTransactionNumber
-		, intTransactionId = intTransactionRecordHeaderId
+		, intTransactionId = CASE WHEN strTransactionType = 'Storage Settlement' 
+								THEN intTransactionRecordId
+								ELSE intTransactionRecordHeaderId
+								END
 		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
 			WHEN (SELECT TOP 1 1 FROM #tmpDelayedPricing dp
 					WHERE dp.intTransactionRecordId = CompOwn.intTransactionRecordId
@@ -113,7 +116,7 @@ BEGIN
 							END
 		, strTransactionType
 		, strTransactionId  = strTransactionNumber
-		, intTransactionId = intTransactionRecordId
+		, intTransactionId = intTransactionRecordId 
 		, ST.strStorageTypeCode
 		,strOwnership = 'Customer Owned'
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmToTransactionDate,@intCommodityId,NULL) CusOwn

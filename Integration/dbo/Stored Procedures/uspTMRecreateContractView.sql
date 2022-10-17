@@ -146,11 +146,11 @@ BEGIN
 				,vwcnt_loc_no= F.strLocationName COLLATE Latin1_General_CI_AS
 				,vwcnt_alt_cnt_no=''''
 				,vwcnt_amt_orig= ISNULL(B.dblCashPrice,0.0) * ISNULL(B.dblOriginalQty,0.0)
-				,vwcnt_amt_bal= ISNULL(B.dblBalance,0.0) * ISNULL(B.dblCashPrice,0.0)
+				,vwcnt_amt_bal= (ISNULL(B.dblBalance,0) - ISNULL(B.dblScheduleQty,0))	* ISNULL(B.dblCashPrice,0.0)
 				,vwcnt_due_rev_dt= B.dtmEndDate
 				,vwcnt_hdr_comments=A.strInternalComment COLLATE Latin1_General_CI_AS
 				,vwcnt_un_orig=ISNULL(B.dblOriginalQty,0.0)
-				,vwcnt_un_bal= B.dblBalance
+				,vwcnt_un_bal= ISNULL(B.dblBalance,0) - ISNULL(B.dblScheduleQty,0)
 				,vwcnt_lc1_yn=''''  COLLATE Latin1_General_CI_AS
 				,vwcnt_lc2_yn='''' COLLATE Latin1_General_CI_AS
 				,vwcnt_lc3_yn='''' COLLATE Latin1_General_CI_AS

@@ -285,7 +285,7 @@ BEGIN TRY
 		, intTicketId					= P.intTicketId
 		, intInventoryShipmentItemId	= P.intInventoryShipmentItemId
 		, intItemUOMId					= P.intItemUOMId
-		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL
+		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL AND @TransactionId IS NOT NULL
 													THEN 
 														CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
 																THEN (ABS(P.dblQty) - TMO.dblQuantity)

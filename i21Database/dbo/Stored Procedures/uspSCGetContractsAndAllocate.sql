@@ -65,6 +65,8 @@ BEGIN TRY
 	DECLARE @intFutureMonthId INT
 	DECLARE @dblDPRiskCost NUMERIC(18,6)
 
+	DECLARE @_dblCurrentAvailable NUMERIC(38,20)
+
 	DECLARE @strEntityNo NVARCHAR(200)
 	DECLARE @errorMessage NVARCHAR(500)
 	
@@ -400,6 +402,7 @@ BEGIN TRY
 											THEN	ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
 											ELSE	ISNULL(CD.dblBalance,0)--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
 									END,
+				@_dblCurrentAvailable  = ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0),
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId,
 				@dblScheduleQty	=	ISNULL(CD.dblScheduleQty,0),
@@ -510,7 +513,22 @@ BEGIN TRY
 						BEGIN
 							SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
 						END
-						
+						ELSE
+						BEGIN
+							---This block should only be utilized if using the auto distribution
+							---if code pass here and not from auto distribution need to review
+
+							SET @dblInreaseSchBy  = (@dblNetUnits - @dblTicketScheduledQuantity)
+
+							---Check if contract available qty can accomodate the increase in schedule
+							IF(@_dblCurrentAvailable <  @dblInreaseSchBy AND @_dblCurrentAvailable >= 0)
+							BEGIN
+								SET @dblInreaseSchBy = @_dblCurrentAvailable
+							END
+							
+						END
+
+
 						IF(ISNULL(@dblInreaseSchBy,0) <> 0)
 						BEGIN
 							EXEC	uspCTUpdateScheduleQuantity 

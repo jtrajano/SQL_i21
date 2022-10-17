@@ -21,7 +21,6 @@ IF OBJECT_ID('tempdb..#INVOICES') IS NOT NULL DROP TABLE #INVOICES
 IF OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL DROP TABLE #CUSTOMERS
 IF OBJECT_ID('tempdb..#ITEMS') IS NOT NULL DROP TABLE #ITEMS
 IF OBJECT_ID('tempdb..#COMPANYLOCATIONS') IS NOT NULL DROP TABLE #COMPANYLOCATIONS
-IF OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL DROP TABLE #CATEGORIES
 IF OBJECT_ID('tempdb..#TYPES') IS NOT NULL DROP TABLE #TYPES
 
 -- Declare the variables.
@@ -125,11 +124,6 @@ SELECT TOP 1 @strItemNo = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strItemNo'
 
-SELECT TOP 1    @strCategoryCode = REPLACE(ISNULL([from], ''), '''''', '''')
-               ,@strCategoryCodeCondition = [condition]
-FROM @temp_xml_table
-WHERE [fieldname] = 'strCategoryCode'
-
 SELECT TOP 1 @strSalespersonName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strSalespersonName'
@@ -163,11 +157,6 @@ CREATE TABLE #TAXCODES (
     , [strTaxCode]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
 )
 
-INSERT INTO #TAXCODES
-SELECT intTaxCodeId
-     , strTaxCode
-FROM tblSMTaxCode TC
-
 IF(OBJECT_ID('tempdb..#TAXCLASS') IS NOT NULL)
 BEGIN
     DROP TABLE #TAXCLASS
@@ -176,11 +165,6 @@ CREATE TABLE #TAXCLASS (
       [intTaxClassId]	INT             NOT NULL
     , [strTaxClass]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
 )
-
-INSERT INTO #TAXCLASS
-SELECT intTaxClassId
-     , strTaxClass
-FROM tblSMTaxClass TC
 
 IF(OBJECT_ID('tempdb..#TAXGROUP') IS NOT NULL)
 BEGIN
@@ -191,11 +175,6 @@ CREATE TABLE #TAXGROUP (
     , [strTaxGroup]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
 )
 
-INSERT INTO #TAXGROUP
-SELECT intTaxGroupId
-     , strTaxGroup
-FROM tblSMTaxGroup TG
-
 IF(OBJECT_ID('tempdb..#TAXREPORTTYPE') IS NOT NULL)
 BEGIN
     DROP TABLE #TAXREPORTTYPE
@@ -205,11 +184,6 @@ CREATE TABLE #TAXREPORTTYPE (
     , [strType]		        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
 )
 
-INSERT INTO #TAXREPORTTYPE
-SELECT intTaxReportTypeId
-     , strType
-FROM tblSMTaxReportType TRT
-
 IF(OBJECT_ID('tempdb..#TAXSTATE') IS NOT NULL)
 BEGIN
     DROP TABLE #TAXSTATE
@@ -218,11 +192,17 @@ CREATE TABLE #TAXSTATE (
       [strState]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
 )
 
-INSERT INTO #TAXSTATE
-SELECT DISTINCT strState
-FROM tblSMTaxCode TC
+IF(OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL)
+BEGIN
+    DROP TABLE #CATEGORIES
+END
+CREATE TABLE #CATEGORIES (
+       [intCategoryId]		INT
+	 , [strCategoryCode]  NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL 
+	 , [strDescription]   NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
+)
 
-WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strTaxCode', 'strState', 'strTaxReportType', 'strTaxClass', 'strTaxGroup'))
+WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strTaxCode', 'strState', 'strTaxReportType', 'strTaxClass', 'strTaxGroup', 'strCategoryCode'))
     BEGIN
         SELECT TOP 1 @condition = [condition]
 				   , @from		= REPLACE(ISNULL([from], ''), '''''', '''')
@@ -230,18 +210,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strT
 				   , @fieldname = [fieldname]
 				   , @id		= [id]
 		FROM @temp_xml_table 
-		WHERE [fieldname] IN ('strTaxCode', 'strState', 'strTaxReportType', 'strTaxClass', 'strTaxGroup')
-
-        IF @fieldname = 'strTaxCode' AND ISNULL(@from, '') <> ''
-            DELETE FROM #TAXCODES
-        ELSE IF @fieldname = 'strState' AND ISNULL(@from, '') <> ''
-            DELETE FROM #TAXSTATE
-        ELSE IF @fieldname = 'strTaxReportType' AND ISNULL(@from, '') <> ''
-            DELETE FROM #TAXREPORTTYPE
-        ELSE IF @fieldname = 'strTaxClass' AND ISNULL(@from, '') <> ''
-            DELETE FROM #TAXCLASS
-        ELSE IF @fieldname = 'strTaxGroup' AND ISNULL(@from, '') <> ''
-            DELETE FROM #TAXGROUP         
+		WHERE [fieldname] IN ('strTaxCode', 'strState', 'strTaxReportType', 'strTaxClass', 'strTaxGroup', 'strCategoryCode')
 
         IF UPPER(@condition) = UPPER('Equal To')
 			BEGIN
@@ -283,6 +252,15 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strT
                              , strTaxGroup
                         FROM tblSMTaxGroup TG
                         WHERE TG.strTaxGroup = @from
+                    END
+                ELSE IF @fieldname = 'strCategoryCode'
+                    BEGIN
+                        INSERT INTO #CATEGORIES
+						SELECT	intCategoryId
+							, strCategoryCode
+							, strDescription
+						FROM tblICCategory IC
+					   WHERE IC.strCategoryCode = @from
                     END
             END
         ELSE IF UPPER(@condition) = UPPER('Not Equal To')
@@ -326,15 +304,71 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strT
                         FROM tblSMTaxGroup TG
                         WHERE TG.strTaxGroup <> @from
                     END
+                ELSE IF @fieldname = 'strCategoryCode'
+                    BEGIN
+                        INSERT INTO #CATEGORIES
+						SELECT	intCategoryId
+							, strCategoryCode
+							, strDescription
+						FROM tblICCategory IC
+					   WHERE IC.strCategoryCode <> @from
+                    END
             END
 
-        DELETE FROM @temp_xml_table WHERE [fieldname] = @fieldname
+        DELETE FROM @temp_xml_table WHERE [id] = @id
 		SET @condition = NULL
 		SET @from = NULL
 		SET @to = NULL
 		SET @fieldname = NULL
 		SET @id =  NULL
     END
+
+-- IF TEMP TABLE DOES NOT HAVE VALUE
+IF NOT EXISTS (SELECT TOP 1 NULL FROM #CATEGORIES)
+BEGIN 
+INSERT INTO #CATEGORIES
+SELECT DISTINCT intCategoryId, strCategoryCode, strDescription
+FROM tblICCategory TC
+END
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM #TAXSTATE)
+BEGIN
+INSERT INTO #TAXSTATE
+SELECT DISTINCT strState
+FROM tblSMTaxCode TC
+END
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM #TAXREPORTTYPE)
+BEGIN
+INSERT INTO #TAXREPORTTYPE
+SELECT intTaxReportTypeId
+     , strType
+FROM tblSMTaxReportType TRT
+END
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM #TAXGROUP)
+BEGIN
+INSERT INTO #TAXGROUP
+SELECT intTaxGroupId
+     , strTaxGroup
+FROM tblSMTaxGroup TG
+END
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM #TAXCLASS)
+BEGIN
+INSERT INTO #TAXCLASS
+SELECT intTaxClassId
+     , strTaxClass
+FROM tblSMTaxClass TC
+END
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM #TAXCODES)
+BEGIN
+INSERT INTO #TAXCODES
+SELECT intTaxCodeId
+     , strTaxCode
+FROM tblSMTaxCode TC
+END
 
 --#CUSTOMERS
 SELECT intEntityCustomerId  	= C.intEntityId 
@@ -368,16 +402,6 @@ SELECT intCompanyLocationId
 INTO #LOCATIONS
 FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 WHERE (@strLocationNumber IS NULL OR strLocationNumber = @strLocationNumber)
-
---#CATEGORIES
-SELECT intCategoryId
-	 , strCategoryCode
-	 , strDescription
-INTO #CATEGORIES
-FROM dbo.tblICCategory WITH (NOLOCK)
-WHERE   @strCategoryCode IS NULL
-OR (strCategoryCode = @strCategoryCode AND @strCategoryCodeCondition = 'Equal To')
-OR (strCategoryCode <> @strCategoryCode AND @strCategoryCodeCondition = 'Not Equal To')
 
 --#ITEMS
 SELECT I.intItemId
@@ -814,7 +838,7 @@ BEGIN
             INNER JOIN #TAXGROUP TG ON OTR.strTaxGroup = TG.strTaxGroup
             INNER JOIN #TAXCLASS TCC ON OTR.strTaxClass = TCC.strTaxClass
             INNER JOIN #TAXREPORTTYPE TRT ON OTR.strType = TRT.strType
-            WHERE (
+            WHERE ( 
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'
                         AND dblTotalTax <> @ZeroDecimal
