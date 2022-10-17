@@ -37,6 +37,22 @@ BEGIN TRY
 		,@strDemandType NVARCHAR(50)
 		,@intCounter INT = 1
 		,@intLineTrxSequenceNo BIGINT
+		,@strProductionOrder NVARCHAR(50)
+		,@strDemandNo NVARCHAR(50)
+		,@intBlendRequirementId INT
+
+	SELECT @strProductionOrder = dbo.[fnIPGetSAPIDOCTagValue]('Blend Demand', 'Type')
+
+	IF @strProductionOrder IS NULL
+		OR @strProductionOrder = ''
+	BEGIN
+		SELECT @strProductionOrder = 'False'
+	END
+	ELSE
+	BEGIN
+		SELECT @strProductionOrder = 'True'
+	END
+
 	DECLARE @tblIPBendDemandStage TABLE (intBendDemandStageId INT)
 
 	INSERT INTO @tblIPBendDemandStage (intBendDemandStageId)
@@ -300,51 +316,192 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			IF @intCounter = 1
+			IF @strProductionOrder = 'False'
 			BEGIN
-				DELETE
-				FROM dbo.tblMFBlendDemand
-				WHERE intLocationId = @intLocationId
+				IF @intCounter = 1
+				BEGIN
+					DELETE
+					FROM dbo.tblMFBlendDemand
+					WHERE intLocationId = @intLocationId
 
-				SELECT @intCounter = @intCounter + 1
+					SELECT @intCounter = @intCounter + 1
+				END
+
+				INSERT INTO dbo.tblMFBlendDemand (
+					strDemandNo
+					,intLocationId
+					,intItemId
+					,dblQuantity
+					,intManufacturingCellId
+					,intMachineId
+					,dtmDueDate
+					,intStatusId
+					,intOrderId
+					,strOrderNo
+					,strOrderType
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+					,intConcurrencyId
+					,intCompanyId
+					)
+				SELECT @strOrderNo AS strDemandNo
+					,@intLocationId
+					,@intItemId
+					,@dblQuantity
+					,@intManufacturingCellId
+					,@intMachineId
+					,@dtmDueDate
+					,1 intStatusId
+					,NULL intOrderId
+					,@strOrderNo
+					,@strDemandType
+					,@intUserId
+					,@dtmCreatedDate
+					,@intUserId
+					,@dtmCreatedDate
+					,1 AS intConcurrencyId
+					,NULL AS intCompanyId
 			END
+			ELSE
+			BEGIN
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblMFBlendDemand
+						WHERE strOrderNo = @strOrderNo
+						)
+				BEGIN
+					INSERT INTO dbo.tblMFBlendDemand (
+						strDemandNo
+						,intLocationId
+						,intItemId
+						,dblQuantity
+						,intManufacturingCellId
+						,intMachineId
+						,dtmDueDate
+						,intStatusId
+						,intOrderId
+						,strOrderNo
+						,strOrderType
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						,intConcurrencyId
+						,intCompanyId
+						)
+					SELECT @strOrderNo AS strDemandNo
+						,@intLocationId
+						,@intItemId
+						,@dblQuantity
+						,@intManufacturingCellId
+						,@intMachineId
+						,@dtmDueDate
+						,1 intStatusId
+						,NULL intOrderId
+						,@strOrderNo
+						,IsNULL(@strDemandType,'Production line')
+						,@intUserId
+						,@dtmCreatedDate
+						,@intUserId
+						,@dtmCreatedDate
+						,1 AS intConcurrencyId
+						,NULL AS intCompanyId
 
-			INSERT INTO dbo.tblMFBlendDemand (
-				strDemandNo
-				,intLocationId
-				,intItemId
-				,dblQuantity
-				,intManufacturingCellId
-				,intMachineId
-				,dtmDueDate
-				,intStatusId
-				,intOrderId
-				,strOrderNo
-				,strOrderType
-				,intCreatedUserId
-				,dtmCreated
-				,intLastModifiedUserId
-				,dtmLastModified
-				,intConcurrencyId
-				,intCompanyId
-				)
-			SELECT @strOrderNo AS strDemandNo
-				,@intLocationId
-				,@intItemId
-				,@dblQuantity
-				,@intManufacturingCellId
-				,@intMachineId
-				,@dtmDueDate
-				,1 intStatusId
-				,NULL intOrderId
-				,@strOrderNo
-				,@strDemandType
-				,@intUserId
-				,@dtmCreatedDate
-				,@intUserId
-				,@dtmCreatedDate
-				,1 AS intConcurrencyId
-				,NULL AS intCompanyId
+					EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+						,@intItemId = @intItemId
+						,@intManufacturingId = NULL
+						,@intSubLocationId = NULL
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 46
+						,@ysnProposed = 0
+						,@strPatternString = @strDemandNo OUTPUT
+
+					INSERT INTO tblMFBlendRequirement (
+						strDemandNo
+						,intItemId
+						,dblQuantity
+						,intUOMId
+						,dtmDueDate
+						,intLocationId
+						,intStatusId
+						,dblIssuedQty
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						,intMachineId
+						,strReferenceNo
+						,intManufacturingCellId
+						,dblBlenderSize
+						,dblEstNoOfBlendSheet
+						,intConcurrencyId
+						)
+					VALUES (
+						@strDemandNo
+						,@intItemId
+						,@dblQuantity
+						,@intUnitMeasureId
+						,@dtmDueDate
+						,@intLocationId
+						,2
+						,@dblQuantity
+						,@intUserId
+						,@dtmCreatedDate
+						,@intUserId
+						,@dtmCreatedDate
+						,@intMachineId
+						,@strOrderNo
+						,@intManufacturingCellId
+						,@dblQuantity
+						,1
+						,1
+						)
+
+					SELECT @intBlendRequirementId = SCOPE_IDENTITY()
+
+					INSERT INTO tblMFBlendRequirementRule (
+						intBlendRequirementId
+						,intBlendSheetRuleId
+						,strValue
+						,intSequenceNo
+						)
+					SELECT @intBlendRequirementId
+						,a.intBlendSheetRuleId
+						,b.strValue
+						,a.intSequenceNo
+					FROM tblMFBlendSheetRule a
+					JOIN tblMFBlendSheetRuleValue b ON a.intBlendSheetRuleId = b.intBlendSheetRuleId
+						AND b.ysnDefault = 1
+				END
+				ELSE
+				BEGIN
+					UPDATE tblMFBlendDemand
+					SET strDemandNo = @strOrderNo
+						,intItemId = @intItemId
+						,dblQuantity = @dblQuantity
+						,intManufacturingCellId = @intManufacturingCellId
+						,intMachineId = @intMachineId
+						,dtmDueDate = @dtmDueDate
+						,dtmLastModified = @dtmCreatedDate
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE strOrderNo = @strOrderNo
+
+					UPDATE tblMFBlendRequirement
+					SET intItemId = @intItemId
+						,dblQuantity = @dblQuantity
+						,intUOMId=@intUnitMeasureId
+						,intManufacturingCellId = @intManufacturingCellId
+						,intMachineId = @intMachineId
+						,dtmDueDate = @dtmDueDate
+						,dtmLastModified = @dtmCreatedDate
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE strReferenceNo = @strOrderNo
+				END
+			END
 
 			MOVE_TO_ARCHIVE:
 
