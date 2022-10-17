@@ -12,7 +12,7 @@ BEGIN
 	SELECT @dtmRebuildEndDate = DATEADD(dd, 0, DATEDIFF(dd, 0, @dtmRebuildEndDate)) 
 
 	--========== GET CONTRACTS WITHOUT CONTRACT BALANCE LOGS WITHIN THRESHOLD ====================
-	
+	 
 	IF OBJECT_ID('tempdb..#tmpNonOpenContractsToRebuild') IS NOT NULL
  		DROP TABLE #tmpNonOpenContractsToRebuild
 	IF OBJECT_ID('tempdb..#tempContracts') IS NOT NULL
@@ -308,7 +308,8 @@ BEGIN
 			WHERE intContractDetailId = @intContractDetailId
 			ORDER BY dtmHistoryCreated
 		) t
-
+		
+		-- SCENARIO: BALANCE CHANGE WITHOUT PRICING TYPE CHANGE
 		union  all
 		select
 			SH.dtmHistoryCreated
@@ -345,7 +346,6 @@ BEGIN
 		LEFT JOIN vyuCTSequenceUsageHistory SUH
 			ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
 			AND SUH.strFieldName = 'Balance'
-			AND SUH.ysnDeleted = 0
 			AND SUH.intContractDetailId = @intContractDetailId
 		WHERE SH.intContractDetailId = @intContractDetailId
 		--and SH.ysnQtyChange = 1
@@ -353,7 +353,168 @@ BEGIN
 		and SH.intPricingTypeId <> 5 
 		AND SH.intContractStatusId NOT IN (3, 6)-- NOT INCLUDE CANCELLED AND SHORT CLOSE (SEPARATE PART)
 		AND SUH.intSequenceUsageHistoryId IS NULL
+		AND ((SH.intPricingTypeId = @intHeaderPricingType)
+				OR 
+				(SH.intPricingTypeId <> @intHeaderPricingType
+				AND ISNULL(SH.ysnFuturesChange, 0) <> 1
+				AND ISNULL(SH.ysnBasisChange, 0) <> 1)
+			)
 
+		-- SCENARIO: BALANCE CHANGE WITH PRICING TYPE CHANGE (WHEN OLD IS UNPRICED AND UPDATED TO PRICED)
+		union  all
+		select
+			SH.dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  = SH.dblBalance - SH.dblOldBalance
+			, strTransactionReference = 'Contract Sequence Balance Change'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, intPricingTypeId  = @intHeaderPricingType 
+			, intTransactionReferenceId = SH.intContractHeaderId
+			, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, SH.intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		from tblCTSequenceHistory SH
+		LEFT JOIN vyuCTSequenceUsageHistory SUH
+			ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+			AND SUH.strFieldName = 'Balance'
+			AND SUH.intContractDetailId = @intContractDetailId
+		WHERE SH.intContractDetailId = @intContractDetailId
+		--and SH.ysnQtyChange = 1
+		and SH.ysnBalanceChange = 1
+		and SH.intPricingTypeId <> 5
+		AND SH.intContractStatusId NOT IN (3, 6)-- NOT INCLUDE CANCELLED AND SHORT CLOSE (SEPARATE PART)
+		AND SUH.intSequenceUsageHistoryId IS NULL
+		AND SH.intPricingTypeId <> @intHeaderPricingType
+		AND ( (SH.ysnFuturesChange = 1 AND  SH.dblOldFutures IS NULL) 
+				OR 
+				(SH.ysnBasisChange = 1 AND SH.dblOldBasis IS NULL)
+			)
+		
+		-- SCENARIO: BALANCE CHANGE WITH PRICING TYPE CHANGE (WHEN OLD IS PRICED AND UPDATED TO FUTURES OR BASIS PRICE)
+		union  all
+		select
+			SH.dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  = SH.dblBalance - SH.dblOldBalance
+			, strTransactionReference = 'Contract Sequence Balance Change'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, intPricingTypeId  = SH.intPricingTypeId 
+			, intTransactionReferenceId = SH.intContractHeaderId
+			, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, SH.intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		from tblCTSequenceHistory SH
+		LEFT JOIN vyuCTSequenceUsageHistory SUH
+			ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+			AND SUH.strFieldName = 'Balance'
+			AND SUH.intContractDetailId = @intContractDetailId
+		WHERE SH.intContractDetailId = @intContractDetailId
+		--and SH.ysnQtyChange = 1
+		and SH.ysnBalanceChange = 1
+		and SH.intPricingTypeId <> 5
+		AND SH.intContractStatusId NOT IN (3, 6)-- NOT INCLUDE CANCELLED AND SHORT CLOSE (SEPARATE PART)
+		AND SUH.intSequenceUsageHistoryId IS NULL
+		AND SH.intPricingTypeId <> @intHeaderPricingType
+		AND ( (SH.ysnFuturesChange = 1 AND SH.intPricingTypeId = 1 AND SH.dblOldFutures IS NULL) 
+				 OR 
+				  (SH.ysnBasisChange = 1 AND SH.intPricingTypeId = 1 AND SH.dblOldBasis IS NULL)
+				)
+		AND SH.strPricingStatus <> 'Fully Priced'
+		--AND ( (SH.ysnFuturesChange = 1 AND SH.intPricingTypeId = 1 AND SH.dblOldFutures IS NOT NULL) 
+		--		OR 
+		--		(SH.ysnBasisChange = 1 AND SH.intPricingTypeId = 1 AND SH.dblOldBasis IS NOT NULL)
+		--	)
+		
+		-- SCENARIO: BALANCE CHANGE WITHOUT PRICING TYPE CHANGE (WITH SEQUENCE USAGE HISTORY = 'Price Contract')
+		union  all
+		select
+			SH.dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  = SH.dblBalance - SH.dblOldBalance
+			, strTransactionReference = 'Contract Sequence Balance Change'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, intPricingTypeId  = SH.intPricingTypeId --  CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN 2 ELSE SH.intPricingTypeId END
+			, intTransactionReferenceId = SH.intContractHeaderId
+			, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, SH.intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		from tblCTSequenceHistory SH
+		LEFT JOIN vyuCTSequenceUsageHistory SUH
+			ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+			AND SUH.strFieldName = 'Balance'
+			AND SUH.intContractDetailId = @intContractDetailId
+		WHERE SH.intContractDetailId = @intContractDetailId
+		and SH.ysnBalanceChange = 1
+		and SH.intPricingTypeId <> 5
+		AND SUH.intSequenceUsageHistoryId IS NOT NULL
+		AND SUH.strScreenName = 'Price Contract'
+		AND ((SH.intPricingTypeId = @intHeaderPricingType)
+				OR 
+				(SH.intPricingTypeId <> @intHeaderPricingType
+				AND ISNULL(SH.ysnFuturesChange, 0) <> 1
+				AND ISNULL(SH.ysnBasisChange, 0) <> 1)
+			)
+			
 		union all
 		select 
 			dtmHistoryCreated
@@ -366,7 +527,14 @@ BEGIN
 			, SUH.strScreenName  
 			, @intContractHeaderId
 			, @intContractDetailId
-			, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' THEN 1 ELSE SH.intPricingTypeId END
+			, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
+									AND (SH.dblOldBalance <= SH.dblBalance
+										  OR
+										 (SH.dblOldBalance > SH.dblBalance AND SH.dblOldBalance > SH.dblQtyUnpriced AND (SH.dblOldBalance - SH.dblBalance) <> SH.dblQtyUnpriced)
+										  OR 
+										 ((SH.dblQuantity - SH.dblOldBalance) <= SH.dblQtyPriced AND (SH.dblQuantity - SH.dblOldBalance) + (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+										)
+							THEN 1 ELSE SH.intPricingTypeId END
 			, intTransactionReferenceId = SUH.intExternalHeaderId
 			, strTransactionReferenceNo = SUH.strNumber
 			, @intCommodityId
@@ -394,7 +562,53 @@ BEGIN
 		where ysnDeleted = 0
 		and SUH.strFieldName = 'Balance'
 		and SUH.intContractDetailId = @intContractDetailId
+		AND SH.dblOldBalance IS NOT NULL
 		
+		union all
+		select 
+			dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
+							ELSE ((SH.dblOldBalance - SH.dblBalance) - ABS(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END)) * -1 END
+			, SUH.strScreenName  
+			, @intContractHeaderId
+			, @intContractDetailId
+			, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
+											AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0 
+									THEN 1 ELSE SH.intPricingTypeId END
+			, intTransactionReferenceId = SUH.intExternalHeaderId
+			, strTransactionReferenceNo = SUH.strNumber
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, SU.intUserId
+		from vyuCTSequenceUsageHistory SUH
+		inner join tblCTSequenceHistory SH on SH.intSequenceUsageHistoryId = SUH.intSequenceUsageHistoryId
+		inner join tblCTSequenceUsageHistory SU on SU.intSequenceUsageHistoryId = SUH.intSequenceUsageHistoryId
+		where ysnDeleted = 0
+		and SUH.strFieldName = 'Balance'
+		and SUH.intContractDetailId = @intContractDetailId
+		AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0
+		AND (SH.dblOldBalance - SH.dblBalance) * -1 < (CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END) 
+		AND SH.dblOldBalance IS NOT NULL
+
 		-- DELETED ORIG QTY
 		UNION ALL
 		SELECT
@@ -403,14 +617,21 @@ BEGIN
 			, @intContractSeq
 			, @intContractTypeId
 			, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 
-											THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
-											ELSE SUH.dblTransactionQuantity END
+												THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
+												ELSE SUH.dblTransactionQuantity END 
 			, SUH.strScreenName  
 			, @intContractHeaderId
 			, @intContractDetailId
 			, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
-											AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0 
-									THEN 1 ELSE SH.intPricingTypeId END
+									AND (SH.dblOldBalance <= SH.dblBalance
+										  OR
+										 (SH.dblOldBalance > SH.dblBalance AND SH.dblOldBalance > SH.dblQtyUnpriced AND (SH.dblOldBalance - SH.dblBalance) <> SH.dblQtyUnpriced)
+										)
+									AND (SH.dblQuantity - SH.dblOldBalance) <= SH.dblQtyPriced
+									AND ((SH.dblOldBalance > SH.dblBalance AND (SH.dblQuantity - SH.dblOldBalance) + (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+											OR (SH.dblOldBalance < SH.dblBalance AND (SH.dblQuantity - SH.dblOldBalance) - (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+										)
+							THEN 1 ELSE SH.intPricingTypeId END
 			, intTransactionReferenceId = SUH.intExternalHeaderId
 			, strTransactionReferenceNo = SUH.strNumber
 			, @intCommodityId
@@ -440,13 +661,24 @@ BEGIN
 					, ctUH.dtmTransactionDate
 			FROM tblCTSequenceUsageHistory ctUH
 			WHERE ctUH.intExternalHeaderId = SUH.intExternalHeaderId
+			AND ctUH.intContractDetailId = @intContractDetailId
 			AND ctUH.strFieldName = 'Balance'
 			AND SUH.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
 		) negateHistory
 		where ysnDeleted = 1
 		AND SUH.strFieldName = 'Balance'
 		AND SUH.intContractDetailId = @intContractDetailId
-		AND SUH.dblTransactionQuantity < 0
+		AND ((SH.intContractTypeId = 1 AND SUH.dblTransactionQuantity < 0)
+				OR
+				(SH.intContractTypeId = 2 AND SUH.dblTransactionQuantity > 0)
+			)
+		AND SUH.strScreenName NOT IN ('Settle Storage', 'Transfer Storage')
+		AND SH.dblOldBalance IS NOT NULL
+		--AND (SH.dblBalance - SH.dblOldBalance) <> dblQtyPriced
+		AND (	SH.dblOldBalance < SH.dblBalance
+				OR
+				(SH.dblOldBalance > SH.dblBalance) AND (SH.dblBalance - SH.dblOldBalance) <> dblQtyPriced
+		)
 
 		UNION ALL
 		-- DELETED NEGATE QTY
@@ -455,15 +687,26 @@ BEGIN
 			, @strContractNumber
 			, @intContractSeq
 			, @intContractTypeId
-			, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 
+			, dblTransactionQuantity = CASE WHEN @ysnLoad = 1 
 											THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
-											ELSE SUH.dblTransactionQuantity END  * -1
+											ELSE SUH.dblTransactionQuantity END * -1
 			, SUH.strScreenName  
 			, @intContractHeaderId
 			, @intContractDetailId
-			, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
-											AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0 
-									THEN 1 ELSE SH.intPricingTypeId END
+			, intPricingTypeId = CASE WHEN  (currentPricingType.strPricingStatus = 'Fully Priced' AND currentPricingType.dblQtyPriced <> 0)
+											OR
+											(	SH.strPricingStatus = 'Partially Priced' 
+												AND (	(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0)
+														OR
+														((SH.dblBalance - SH.dblOldBalance) = SH.dblQtyPriced)
+													)
+												AND (SH.dblQuantity - SH.dblOldBalance) <= SH.dblQtyPriced
+												AND ((SH.dblOldBalance > SH.dblBalance AND (SH.dblQuantity - SH.dblOldBalance) + (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+														OR (SH.dblOldBalance < SH.dblBalance AND (SH.dblQuantity - SH.dblOldBalance) - (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+													)
+											)
+									THEN 1 
+									ELSE currentPricingType.intPricingTypeId END
 			, intTransactionReferenceId = SUH.intExternalHeaderId
 			, strTransactionReferenceNo = SUH.strNumber
 			, @intCommodityId
@@ -493,13 +736,28 @@ BEGIN
 					, ctUH.dtmTransactionDate
 			FROM tblCTSequenceUsageHistory ctUH
 			WHERE ctUH.intExternalHeaderId = SUH.intExternalHeaderId
+			AND ctUH.intContractDetailId = @intContractDetailId
 			AND ctUH.strFieldName = 'Balance'
 			AND SUH.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
 		) negateHistory
+		OUTER APPLY (
+			SELECT TOP 1 intPricingTypeId
+				, strPricingStatus
+				, dblQtyPriced
+			FROM tblCTSequenceHistory seqHist
+			WHERE seqHist.dtmHistoryCreated <= negateHistory.dtmTransactionDate
+			AND seqHist.intContractDetailId = @intContractDetailId
+			ORDER BY seqHist.dtmHistoryCreated DESC
+		) currentPricingType
 		where ysnDeleted = 1
 		AND SUH.strFieldName = 'Balance'
 		AND SUH.intContractDetailId = @intContractDetailId
-		AND SUH.dblTransactionQuantity < 0
+		AND ((SH.intContractTypeId = 1 AND SUH.dblTransactionQuantity < 0)
+				OR
+				(SH.intContractTypeId = 2 AND SUH.dblTransactionQuantity > 0)
+			)
+		AND SUH.strScreenName NOT IN ('Settle Storage', 'Transfer Storage')
+		AND SH.dblOldBalance IS NOT NULL
 	
 		union all
 		select 
@@ -540,6 +798,7 @@ BEGIN
 		and SUH.strFieldName = 'Balance'
 		and SUH.intContractDetailId = @intContractDetailId
 		and SUH.strScreenName IN ('Settle Storage', 'Transfer Storage')
+		AND SH.dblOldBalance IS NOT NULL
 
 		union all
 		select
@@ -625,15 +884,18 @@ BEGIN
 			, @strContractNumber
 			, @intContractSeq
 			, @intContractTypeId
-			, dblQuantity = CASE WHEN	strPricingStatus <> 'Unpriced'
+			, dblQuantity = CASE WHEN (strPricingStatus <> 'Unpriced'
 										AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation) 
 												OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
+										)
 									THEN dblActualPriceFixation 
 								WHEN SH.dblBalance < dblActualPriceFixation THEN SH.dblBalance
 								WHEN  strPricingStatus = 'Unpriced' THEN SH.dblBalance * -1
 								ELSE dblActualPriceFixation - dblCumulativeBalance END
-			, strTransactionReference = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
-											THEN 'Basis - Price Fixation'	
+			, strTransactionReference =  CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 AND SH.intLagPricingTypeId <> 1
+												THEN 'Basis - Price Fixation'
+											WHEN ISNULL(P.intPriceFixationId, 0) = 0 AND SH.intLagPricingTypeId = 1
+												THEN 'Updated Contract'
 											ELSE 'Price Fixation' 
 											END
 			, @intContractHeaderId
@@ -664,13 +926,20 @@ BEGIN
 			, @intBookId 
 			, @intSubBookId
 			, intUserId = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 THEN @intUserId ELSE P.intUserId END
-		from  (
-			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
-				,dblActualPriceFixation = origctsh.dblQtyPriced - (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
-				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
-				,dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
-				,intLagPricingTypeId = lagctsh.intPricingTypeId
-				,origctsh.* 
+		FROM  (
+			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced 
+												OR
+											(lagctsh.strPricingStatus = 'Unpriced'
+												AND origctsh.strPricingStatus <> 'Unpriced')
+									THEN 1 ELSE 0 END
+					, dblActualPriceFixation = 
+								(CASE WHEN origctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE origctsh.dblQtyPriced END) 
+								- (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
+					, dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, intLagPricingTypeId = lagctsh.intPricingTypeId
+					, strLagPricingStatus = lagctsh.strPricingStatus
+					, origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
 			(
@@ -691,7 +960,15 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 
+					AND ( SH.dblQuantity = SH.dblQtyPriced
+							OR
+							(SH.dblQuantity <> SH.dblQtyPriced AND SH.dblBalance > (SH.dblQuantity - SH.dblQtyPriced) AND SH.strPricingStatus = 'Partially Priced')
+							OR
+							(SH.dblQtyPriced = 0 AND SH.strPricingStatus = 'Unpriced')
+						)
+					AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced')
+				)
 				OR
 					(ISNULL(P.intPriceFixationId, 0) = 0
 					AND SH.ysnFuturesChange = 1
@@ -699,6 +976,7 @@ BEGIN
 					AND SH.strPricingType IN ('Priced','Basis')
 					)
 				)
+		
 
 		union all -- Counter entry when price fixing a Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
 		select 
@@ -713,13 +991,15 @@ BEGIN
 								WHEN SH.dblBalance < dblActualPriceFixation THEN SH.dblBalance
 								WHEN  strPricingStatus = 'Unpriced' THEN SH.dblBalance * -1
 								ELSE dblActualPriceFixation - dblCumulativeBalance END * -1
-			, strTransactionReference = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
-											THEN 'Basis - Price Fixation'
+			, strTransactionReference = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 AND SH.intLagPricingTypeId <> 1
+												THEN 'Basis - Price Fixation'
+											WHEN ISNULL(P.intPriceFixationId, 0) = 0 AND SH.intLagPricingTypeId = 1
+												THEN 'Updated Contract'
 											ELSE 'Price Fixation' 
 											END
 			, @intContractHeaderId
 			, @intContractDetailId
-			, 2
+			, CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 AND SH.intLagPricingTypeId = 1 THEN 1 ELSE 2 END
 			, intTransactionReferenceId = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 
 											THEN SH.intContractHeaderId 
 											ELSE P.intPriceFixationId END
@@ -745,13 +1025,20 @@ BEGIN
 			, @intBookId 
 			, @intSubBookId
 			, intUserId = CASE WHEN ISNULL(P.intPriceFixationId, 0) = 0 THEN @intUserId ELSE P.intUserId END
-		from  (
-			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
-				,dblActualPriceFixation = origctsh.dblQtyPriced - (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END) -- 1000
-				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance -- 1969
-				,dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END) -- 0
-				,intLagPricingTypeId = lagctsh.intPricingTypeId
-				,origctsh.* 
+		FROM  (
+			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced 
+												OR
+											(lagctsh.strPricingStatus = 'Unpriced'
+												AND origctsh.strPricingStatus <> 'Unpriced')
+									THEN 1 ELSE 0 END
+					, dblActualPriceFixation = 
+								(CASE WHEN origctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE origctsh.dblQtyPriced END) 
+								- (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
+					, dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, intLagPricingTypeId = lagctsh.intPricingTypeId
+					, strLagPricingStatus = lagctsh.strPricingStatus
+					, origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
 			(
@@ -772,16 +1059,25 @@ BEGIN
 		WHERE SH.intContractDetailId = @intContractDetailId 
 		AND @intHeaderPricingType = 2
 		AND SUH.intSequenceUsageHistoryId IS NULL
-		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced'))
+		AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 
+					AND ( SH.dblQuantity = SH.dblQtyPriced
+							OR
+							(SH.dblQuantity <> SH.dblQtyPriced AND SH.dblBalance > (SH.dblQuantity- SH.dblQtyPriced) AND SH.strPricingStatus = 'Partially Priced')
+							OR
+							(SH.dblQtyPriced = 0 AND SH.strPricingStatus = 'Unpriced')
+						)
+					AND (SH.intLagPricingTypeId <> SH.intPricingTypeId OR SH.strPricingStatus = 'Partially Priced')
+				)
 				OR
 					(ISNULL(P.intPriceFixationId, 0) = 0
 					AND SH.ysnFuturesChange = 1
 					AND SH.ysnCashPriceChange = 1
 					AND SH.strPricingType IN ('Priced','Basis')
+					AND SH.intLagPricingTypeId <> SH.intPricingTypeId
 					)
 				)
 
-		union all
+		union all -- Header is Priced
 		select 
 			dtmHistoryCreated
 			, @strContractNumber
@@ -819,13 +1115,20 @@ BEGIN
 			, @intBookId 
 			, @intSubBookId
 			, P.intUserId 
-		from  (
-			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
-				,dblActualPriceFixation = origctsh.dblQtyPriced - (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
-				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
-				,dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
-				,intLagPricingTypeId = lagctsh.intPricingTypeId
-				,origctsh.* 
+		FROM  (
+			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced 
+												OR
+											(lagctsh.strPricingStatus = 'Unpriced'
+												AND origctsh.strPricingStatus <> 'Unpriced')
+									THEN 1 ELSE 0 END
+					, dblActualPriceFixation = 
+								(CASE WHEN origctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE origctsh.dblQtyPriced END) 
+								- (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
+					, dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, intLagPricingTypeId = lagctsh.intPricingTypeId
+					, strLagPricingStatus = lagctsh.strPricingStatus
+					, origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
 			(
@@ -878,13 +1181,20 @@ BEGIN
 			, @intBookId 
 			, @intSubBookId
 			, P.intUserId  
-		from  (
-			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced THEN 1 ELSE 0 END
-				,dblActualPriceFixation = origctsh.dblQtyPriced - (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
-				,dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
-				,dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
-				,intLagPricingTypeId = lagctsh.intPricingTypeId
-				,origctsh.* 
+		FROM  (
+			SELECT ysnIsPricing = CASE WHEN origctsh.dblQtyPriced <> lagctsh.dblQtyPriced 
+												OR
+											(lagctsh.strPricingStatus = 'Unpriced'
+												AND origctsh.strPricingStatus <> 'Unpriced')
+									THEN 1 ELSE 0 END
+					, dblActualPriceFixation = 
+								(CASE WHEN origctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE origctsh.dblQtyPriced END) 
+								- (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, dblCumulativeBalance =  origctsh.dblQuantity - origctsh.dblBalance
+					, dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
+					, intLagPricingTypeId = lagctsh.intPricingTypeId
+					, strLagPricingStatus = lagctsh.strPricingStatus
+					, origctsh.* 
 			FROM #tmpCTSequenceHistory origctsh
 			OUTER APPLY 
 			(
@@ -946,7 +1256,6 @@ BEGIN
 		) sh 
 		JOIN tblCTContractDetail ctd
 		ON ctd.intContractDetailId = sh.intContractDetailId
-
 		
 		UNION ALL -- Cancelled and Short Closed Contracts (UNPRICED PART)
 		SELECT 
@@ -963,7 +1272,7 @@ BEGIN
 			, strTransactionReference = 'Updated Contract'
 			, @intContractHeaderId
 			, @intContractDetailId
-			, intPricingTypeId = @intHeaderPricingType -- CASE WHEN @intHeaderPricingType = 2 AND @intPricingTypeId = 1 THEN ctd.intPricingTypeId ELSE sh.intPricingTypeId END
+			, intPricingTypeId = CASE WHEN @intHeaderPricingType = 1 AND sh.intPricingTypeId <> 1 THEN sh.intPricingTypeId ELSE @intHeaderPricingType END 
 			, intTransactionReferenceId = sh.intContractHeaderId
 			, strTransactionReferenceNo = strContractNumber + '-' + cast(sh.intContractSeq as nvarchar(10))
 			, @intCommodityId
@@ -1548,6 +1857,7 @@ BEGIN
 					, ctUH.dtmTransactionDate
 			FROM tblCTSequenceUsageHistory ctUH
 			WHERE ctUH.intExternalHeaderId = suh.intExternalHeaderId
+			AND ctUH.intContractDetailId = @intContractDetailId
 			AND ctUH.strFieldName = 'Balance'
 			AND suh.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
 		) negateHistory
@@ -1606,6 +1916,7 @@ BEGIN
 					, ctUH.dtmTransactionDate
 			FROM tblCTSequenceUsageHistory ctUH
 			WHERE ctUH.intExternalHeaderId = suh.intExternalHeaderId
+			AND ctUH.intContractDetailId = @intContractDetailId
 			AND ctUH.strFieldName = 'Balance'
 			AND suh.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
 		) negateHistory
@@ -1900,11 +2211,18 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 		FROM
-		(	SELECT * 
+		(	SELECT ctsh.* 
 			FROM tblCTSequenceHistory ctsh
+			LEFT JOIN tblCTWeightGrade ctWG
+				ON (	ctWG.intWeightGradeId = ctsh.intWeightId
+						OR ctWG.intWeightGradeId = ctsh.intGradeId
+					)
+				AND ctWG.strWhereFinalized = 'Destination'
+				AND ctsh.intContractTypeId = 2
 			WHERE ctsh.intContractDetailId IN (SELECT intContractDetailId FROM #tblBasisDeliveries)
 			AND ctsh.intContractStatusId IN (3, 6) -- Cancelled and Short Closed
 			AND ctsh.ysnStatusChange = 1
+			AND ctWG.intWeightGradeId IS NULL
 		) sh
 
 		UNION ALL -- Cancelled and Short Closed Contracts (Reopened)
@@ -1936,11 +2254,18 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 		from 
-		(	SELECT *
+		(	SELECT ctsh.*
 			FROM tblCTSequenceHistory ctsh
+				LEFT JOIN tblCTWeightGrade ctWG
+				ON (	ctWG.intWeightGradeId = ctsh.intWeightId
+						OR ctWG.intWeightGradeId = ctsh.intGradeId
+					)
+				AND ctWG.strWhereFinalized = 'Destination'
+				AND ctsh.intContractTypeId = 2
 			WHERE ctsh.intContractDetailId IN (SELECT intContractDetailId FROM #tblBasisDeliveries)
 			AND ctsh.intContractStatusId IN (4) -- Reopened
 			AND ctsh.ysnStatusChange = 1
+			AND ctWG.intWeightGradeId IS NULL
 		) sh 
 
 		UNION ALL
