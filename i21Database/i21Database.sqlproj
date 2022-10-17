@@ -1143,9 +1143,6 @@
     <Build Include="dbo\Stored Procedures\uspGLImportCOAFromCSV.sql" />
     <Build Include="dbo\Tables\tblARCompanyReportHeader.sql" />
     <Build Include="dbo\Views\vyuARCompanyReportHeader.sql" />
-    <Build Include="dbo\Tables\tblCRMHubspotConfig.sql" />
-    <Build Include="dbo\Tables\tblCRMHubspotScope.sql" />
-    <Build Include="dbo\Views\vyuCRMSetting.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPostUnpostToSAPStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDispatchLoadSchedule.sql" />
     <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
