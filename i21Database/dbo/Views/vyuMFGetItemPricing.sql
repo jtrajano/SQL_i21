@@ -13,6 +13,7 @@ SELECT Item.intItemId
 	 , Category.strCategoryCode
 	 , Item.strRequired
 	 , ISNULL(ItemPricing.dblSalePrice, 0) AS dblSalePrice
+	 , CompanyLocation.intCompanyLocationId AS intCompanyLocationId
 FROM tblICItem AS Item 
 JOIN tblICItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId
 JOIN tblICItemPricing AS ItemPricing ON Item.intItemId = ItemPricing.intItemId
@@ -37,5 +38,6 @@ SELECT intItemId
 	 , '' AS strCategoryCode
 	 , '' AS strRequired
 	 , 0 AS dblSalePrice
+	 , 0 AS intCompanyLocationId
 FROM tblICItem 
 WHERE strType in ('Comment','Other Charge')
