@@ -36,7 +36,7 @@ UPDATE A
 					THEN 'Voucher already paid.'
 					WHEN 
 						B.ysnPosted = 0
-					THEN 'Voucher is not yet posted'
+					THEN 'Voucher is not yet posted.'
 					WHEN 
 						A.dblPayment > 0 AND B.intTransactionType != 1
 					THEN 'Amount is positive. Voucher type is expected.'
@@ -45,22 +45,25 @@ UPDATE A
 					THEN 'Amount is negative. Debit Memo type is expected.'
 					WHEN 
 						A.dblPayment > B.dblAmountDue AND B.intTransactionType = 3
-					THEN 'Overpayment'
+					THEN 'Overpayment.'
 					WHEN 
 						((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue  AND B.intTransactionType = 1
-					THEN 'Overpayment'
+					THEN 'Overpayment.'
 					WHEN 
 						A.dblPayment < B.dblAmountDue AND B.intTransactionType = 3
-					THEN 'Underpayment'
+					THEN 'Underpayment.'
 					WHEN 
 						((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue  AND B.intTransactionType = 1
-					THEN 'Underpayment'
+					THEN 'Underpayment.'
 					WHEN 
 						B.intPayScheduleId IS NOT NULL AND P.strPaymentRecordNum IS NOT NULL
-					THEN 'Already included in payment' + P.strPaymentRecordNum
+					THEN 'Already included in payment' + P.strPaymentRecordNum + '.'
 					WHEN
-						B.intPayScheduleId IS NULL AND ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > ABS((B.dblTotal - B.dblPaymentTemp))
-					THEN 'Already included in payment' + P.strPaymentRecordNum
+						B.intPayScheduleId IS NULL AND ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) >= ABS((B.dblTotal - B.dblPaymentTemp))
+					THEN 'Already included in payment' + P.strPaymentRecordNum + '.'
+					WHEN 
+						cte.intRow	> 1 AND B.intBillId IS NULL
+					THEN 'Duplicate row entry.'
 					WHEN 
 						B.intBillId IS NULL
 					THEN CASE
