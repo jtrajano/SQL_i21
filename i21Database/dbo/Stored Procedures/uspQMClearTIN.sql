@@ -18,24 +18,24 @@ BEGIN TRY
 	IF @strTINIds IS NOT NULL
 		BEGIN
 			INSERT INTO #TIN
-			SELECT TIN.intTINClearanceId
-				 , TIN.intBatchId
-				 , B.strBatchId
-	
+			SELECT intTINClearanceId	= TIN.intTINClearanceId
+				 , intBatchId			= TIN.intBatchId
+				 , strBatchId			= B.strBatchId	
 			FROM tblQMTINClearance TIN
 			INNER JOIN fnGetRowsFromDelimitedValues(@strTINIds) ID ON TIN.intTINClearanceId = ID.intID
 			LEFT JOIN tblMFBatch B ON TIN.intBatchId = B.intBatchId
+			WHERE ISNULL(B.dblTotalQuantity, 0) = 0
 		END
-	--ELSE
-	--	BEGIN
-	--		INSERT INTO #TIN
-	--		SELECT intTINClearanceId	= TIN.intTINClearanceId
-	--			 , intBatchId			= TIN.intBatchId
-	--			 , strBatchId			= B.strBatchId	
-	--		FROM tblQMTINClearance TIN
-	--		LEFT JOIN tblMFBatch B ON TIN.intBatchId = B.intBatchId
-	--		WHERE TIN.
-	--	END
+	ELSE
+		BEGIN
+			INSERT INTO #TIN
+			SELECT intTINClearanceId	= TIN.intTINClearanceId
+				 , intBatchId			= TIN.intBatchId
+				 , strBatchId			= B.strBatchId	
+			FROM tblQMTINClearance TIN
+			LEFT JOIN tblMFBatch B ON TIN.intBatchId = B.intBatchId
+			WHERE ISNULL(B.dblTotalQuantity, 0) = 0
+		END
 
 	UPDATE TIN
 	SET ysnEmpty	= CAST(1 AS BIT)
