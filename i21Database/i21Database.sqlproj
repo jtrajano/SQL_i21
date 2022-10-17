@@ -10247,6 +10247,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
