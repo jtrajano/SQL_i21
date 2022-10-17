@@ -17,7 +17,8 @@ BEGIN
 					--B.strScreenName,
 					CASE WHEN A.intParentScreenId != 0
 					THEN 
-						 B.strScreenName + ' - ' +  B.strModule
+						 --B.strScreenName + ': ' +  B.strModule improve script
+						 'Company Configuration: ' + B.strModule
 					ELSE B.strScreenName
 					END AS strScreenName,
 					NULL,

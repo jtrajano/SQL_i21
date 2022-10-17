@@ -69,7 +69,8 @@ BEGIN TRANSACTION
   
  UPDATE tblSMControl  
  SET strControlName = A.strControlName,  
-  strControlType = A.strControlType  
+  strControlType = A.strControlType,
+  intParentScreenId = A.intParentScreenId
  FROM tblSMControlStage A  
   INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId  
   INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace  
