@@ -9227,6 +9227,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
