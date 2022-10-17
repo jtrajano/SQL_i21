@@ -19,6 +19,7 @@
 	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intSourceType] INT NULL,
 	[intSellerId] INT NULL,
+	[intSalespersonId] INT NULL,
 	[strLoadRef] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NULL DEFAULT((1)), 
 
