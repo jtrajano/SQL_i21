@@ -11050,6 +11050,7 @@
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateTooltipControls.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
