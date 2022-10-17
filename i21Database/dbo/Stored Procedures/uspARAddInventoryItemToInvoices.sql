@@ -34,7 +34,7 @@ IF EXISTS(SELECT TOP 1 NULL FROM @ItemEntries WHERE ISNULL(ysnConvertToStockUOM,
 	BEGIN
 		UPDATE @ItemEntries
 		SET intItemUOMId 	= dbo.fnGetItemStockUOM(intItemId)
-		  , dblQtyShipped	= dbo.fnICConvertUOMtoStockUnit(intItemId, intItemUOMId, dblQtyShipped)
+		  , dblQtyShipped	= ISNULL(dbo.fnICConvertUOMtoStockUnit(intItemId, intItemUOMId, dblQtyShipped), dblQtyShipped)
 		WHERE ISNULL(ysnConvertToStockUOM, 0) = 1
 	END
 
