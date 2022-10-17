@@ -124,6 +124,7 @@ AS
 	
 SELECT 
 	v.*
+	,permission.intEntityContactId
 FROM 
 	[vyuICGetInventoryReceiptSearch] v
 	CROSS APPLY (
