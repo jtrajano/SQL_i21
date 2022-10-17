@@ -190,3 +190,5 @@ LEFT JOIN (
 ) GHistory
     on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
         and ST.ysnDPOwnedType = 1
+--NOTE: this is just a temporary WHERE condition but expect an increase in execution time when calling this view
+WHERE CS.intCustomerStorageId NOT IN (SELECT intCustomerStorageId FROM vyuGRDPStorageLoadOutSearchView)

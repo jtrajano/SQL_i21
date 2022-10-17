@@ -1272,6 +1272,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
+    <Build Include="dbo\Views\vyuGRDPStorageLoadOutSearchView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
