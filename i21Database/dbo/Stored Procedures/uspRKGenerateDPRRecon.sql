@@ -463,7 +463,7 @@ BEGIN TRY
 	AND strAction IN('Updated Contract','Re-opened Sequence')
 	AND CBL.intContractTypeId = 1 --Purchase
 	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
-	AND CBL.dblQty != CBL.dblOrigQty
+	AND (CBL.dblQty != CBL.dblOrigQty AND CBL.intPricingTypeId <> 3)
 
 	UNION ALL
 
@@ -852,7 +852,7 @@ BEGIN TRY
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
-	AND strAction IN ('Created Price','Deleted Pricing')
+	AND strAction IN ('Created Price','Deleted Pricing','Updated Contract')
 	AND CBL.intContractTypeId = 2 --Sales
 	AND CBL.intPricingTypeId = 1
 	AND CH.intPricingTypeId = 2
@@ -904,6 +904,7 @@ BEGIN TRY
 	AND strAction IN('Updated Contract','Re-opened Sequence')
 	AND CBL.intContractTypeId = 2 --Sales
 	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
+	AND (CBL.dblQty != CBL.dblOrigQty AND CBL.intPricingTypeId <> 3)
 
 	UNION ALL
 
