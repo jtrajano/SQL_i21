@@ -289,7 +289,7 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,intTicketId = T.intTicketId
 		,intLoadId = NULL
-		,strDistribution  = CASE WHEN SL.strInOut = 'IN' THEN 'Distributed' ELSE 'Undistributed' END
+		,strDistribution  = CASE WHEN T.strTicketStatus = 'C'  THEN 'Distributed' ELSE 'Undistributed' END
 		,strStorageSchedule  = ST.strStorageTypeDescription
 		,strSettlementTicket = SL.strTransactionNumber
 		,strStatus  = CASE WHEN SL.strInOut = 'IN' THEN 'Posted' ELSE 'Unposted' END
