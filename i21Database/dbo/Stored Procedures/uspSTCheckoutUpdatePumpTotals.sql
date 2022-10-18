@@ -16,7 +16,10 @@ BEGIN
 		UPDATE			CPT
 		SET				CPT.dblQuantity = Chk.dblSumGallonsSold, 
 						CPT.dblAmount = Chk.dblSumDollarsSold, 
-						CPT.dblPrice = CAST((ISNULL(CAST(Chk.dblSumDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblSumGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))
+						CPT.dblPrice = CASE WHEN ISNULL(CAST(Chk.dblSumGallonsSold as decimal(18,6)),1) = 0
+										THEN 0
+										ELSE CAST((ISNULL(CAST(Chk.dblSumDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblSumGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))
+										END
 		FROM			dbo.tblSTCheckoutPumpTotals CPT
 		INNER JOIN		(	SELECT		intCheckoutId, 
 										intItemUOMId, 
@@ -32,7 +35,10 @@ BEGIN
 		
 		INSERT INTO dbo.tblSTCheckoutPumpTotals(intCheckoutId, intPumpCardCouponId, intCategoryId, strDescription, dblPrice , dblQuantity, dblAmount, intConcurrencyId)
 		SELECT		@intCheckoutId , Chk.intItemUOMId , I.intCategoryId , I.strDescription,  
-					CAST((ISNULL(CAST(Chk.dblSumDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblSumGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6)), 
+					CASE WHEN ISNULL(CAST(Chk.dblSumGallonsSold as decimal(18,6)),1) = 0
+					THEN 0
+					ELSE CAST((ISNULL(CAST(Chk.dblSumDollarsSold as decimal(18,6)),0) / ISNULL(CAST(Chk.dblSumGallonsSold as decimal(18,6)),1)) AS DECIMAL(18,6))
+					END, 
 					ISNULL(CAST(Chk.dblSumGallonsSold as decimal(18,6)), 0), 
 					ISNULL(CAST(Chk.dblSumDollarsSold as decimal(18,6)),0),  
 					0
