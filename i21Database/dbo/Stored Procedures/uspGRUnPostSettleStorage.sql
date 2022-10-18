@@ -540,11 +540,6 @@ BEGIN TRY
 			-- 	--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
 			-- 	DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 			-- END
-			
-			DELETE FROM tblGRSettleStorageTicket 
-			where intSettleStorageId = @intParentSettleStorageId 
-				and intCustomerStorageId = @intCustomerStorageId 
-				and dblUnits = 0
 
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
