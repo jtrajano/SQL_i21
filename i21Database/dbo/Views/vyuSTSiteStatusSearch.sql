@@ -16,4 +16,4 @@ LEFT JOIN	(	SELECT		intStoreId,
 													FROM		tblSTSiteStatus
 													GROUP BY	intStoreId)) b
 ON			a.intStoreId = b.intStoreId AND
-			DATEDIFF(MINUTE, b.dtmStatusDate, GETDATE()) <= 1
+			DATEDIFF(MINUTE, b.dtmStatusDate, GETDATE()) <= 2
