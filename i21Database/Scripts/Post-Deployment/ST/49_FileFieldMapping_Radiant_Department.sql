@@ -343,7 +343,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,12,3,'ActiveFlag','tblSTstgDepartmentSendFile','ActiveFlagValue',NULL,9,NULL,1,1)
+      (@intImportFileHeaderId,NULL,12,3,'ActiveFlag',NULL,NULL,NULL,9,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -354,8 +354,8 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intLevel] = 12
        ,[intPosition] = 3
        ,[strXMLTag] = 'ActiveFlag'
-       ,[strTable] = 'tblSTstgDepartmentSendFile'
-       ,[strColumnName] = 'ActiveFlagValue'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
        ,[strDataType] = NULL
        ,[intLength] = 9
        ,[strDefaultValue] = NULL
@@ -397,7 +397,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,14,5,'PaymentSystemsProductCode','tblSTstgDepartmentSendFile','PaymentSystemsProductCode',NULL,9,NULL,1,1)
+      (@intImportFileHeaderId,NULL,14,5,'SalesRestrictCode','tblSTstgDepartmentSendFile','SalesRestrictCode',NULL,9,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 14 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -407,9 +407,9 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 14
        ,[intPosition] = 5
-       ,[strXMLTag] = 'PaymentSystemsProductCode'
+       ,[strXMLTag] = 'SalesRestrictCode'
        ,[strTable] = 'tblSTstgDepartmentSendFile'
-       ,[strColumnName] = 'PaymentSystemsProductCode'
+       ,[strColumnName] = 'SalesRestrictCode'
        ,[strDataType] = NULL
        ,[intLength] = 9
        ,[strDefaultValue] = NULL

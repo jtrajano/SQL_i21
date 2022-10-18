@@ -419,6 +419,7 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --LEVEL 15
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 15
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
@@ -428,7 +429,6 @@ BEGIN
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 15
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -444,6 +444,10 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intConcurrencyId] = 2
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
+
+--Delete Rows Not Included in LEVEL 14   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+
 
 --LEVEL 16
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 16 AND intImportFileHeaderId = @intImportFileHeaderId)
@@ -865,34 +869,5 @@ END
 
 --Delete Rows Not Included in LEVEL 14   Attributes(1x)
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
-
-
---LEVEL 20   Attributes(1x)
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 20 AND strXMLTag = 'ComboItemQuantity'
-IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
-BEGIN
-  INSERT INTO [dbo].[tblSMXMLTagAttribute]
-      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
-  VALUES 
-      (@intImportFileColumnDetailId,1,'uom','tblSTstgComboSalesFile','ComboItemQuantityUOM',NULL,0,2)
-END
-ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
-BEGIN
-  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
-  UPDATE[dbo].[tblSMXMLTagAttribute]
-  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
-       ,[intSequence] = 1
-       ,[strTagAttribute] = 'uom'
-       ,[strTable] = 'tblSTstgComboSalesFile'
-       ,[strColumnName] = 'ComboItemQuantityUOM'
-       ,[strDefaultValue] = NULL
-       ,[ysnActive] = 0
-       ,[intConcurrencyId] = 2
-  WHERE intTagAttributeId = @intTagAttributeId
-END
-
---Delete Rows Not Included in LEVEL 20   Attributes(1x)
-DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
-
 
 GO

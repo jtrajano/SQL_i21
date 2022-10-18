@@ -781,16 +781,17 @@ BEGIN
 									ELSE 2048
 								END [SalesRestrictCode]
 							, IUOM.dblUnitQty [SellingUnits]
-							, CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
+							, ISNULL((CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
 									WHEN IL.ysnTaxFlag3 = 1 THEN R.intTaxStrategyIdForTax3 WHEN IL.ysnTaxFlag4 = 1 THEN R.intTaxStrategyIdForTax4
-									ELSE R.intNonTaxableStrategyId
-								END [TaxStrategyID]	
+									WHEN R.intNonTaxableStrategyId IS NOT NULL THEN R.intNonTaxableStrategyId
+									ELSE 0 END), 0)
+								AS [TaxStrategyID]	
 							, 'ICR' [ProhibitSaleLocationType]	
-							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'Yes' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'Yes' 
-									ELSE 'Yes'
+							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'yes' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'yes' 
+									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
 							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
 							, 0 [PriceMethodCode]
@@ -927,16 +928,17 @@ BEGIN
 									ELSE 2048
 								END [SalesRestrictCode]
 							, IUOM.dblUnitQty [SellingUnits]
-							, CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
+							, ISNULL((CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
 									WHEN IL.ysnTaxFlag3 = 1 THEN R.intTaxStrategyIdForTax3 WHEN IL.ysnTaxFlag4 = 1 THEN R.intTaxStrategyIdForTax4
-									ELSE R.intNonTaxableStrategyId
-								END [TaxStrategyID]	
+									WHEN R.intNonTaxableStrategyId IS NOT NULL THEN R.intNonTaxableStrategyId
+									ELSE 0 END), 0)
+								AS [TaxStrategyID]
 							, 'ICR' [ProhibitSaleLocationType]	
-							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'Yes' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'Yes' 
-									ELSE 'Yes'
+							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'yes' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'yes' 
+									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
 							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
 							, 0 [PriceMethodCode]
