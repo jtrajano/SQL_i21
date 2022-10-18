@@ -1280,6 +1280,9 @@
     <Build Include="dbo\vyuQMUserLocation.sql" />
     <Build Include="dbo\Tables\tblMFLocationLeadTime.sql" />
     <Build Include="dbo\Views\vyuMFLocationLeadTime.sql" />
+    <Build Include="dbo\Tables\tblQMAuction.sql" />
+    <Build Include="dbo\Tables\tblQMCatalogueType.sql" />
+    <Build Include="dbo\Tables\tblQMSaleYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
