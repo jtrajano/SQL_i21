@@ -75,7 +75,6 @@ CREATE TYPE MFBatchTableType AS TABLE
 	dblTeaTaste NUMERIC(18,6) ,
 	dblTeaVolume NUMERIC(18,6) ,
 	intTealingoItemId INT ,
-	strTinNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	dtmWarehouseArrival DATETIME ,
 	intYearManufacture INT ,
 	strPackageSize NVARCHAR(50) COLLATE Latin1_General_CI_AS,
