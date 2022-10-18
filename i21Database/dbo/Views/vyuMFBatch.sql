@@ -1,4 +1,4 @@
-CREATE VIEW vyuMFBatch   
+CREATE VIEW dbo.vyuMFBatch   
 AS  
 SELECT
     A.intBatchId,
@@ -91,9 +91,9 @@ SELECT
     A.strQualityComments,
     A.strRareEarth,
     strParentBatchId = B.strBatchId,
-    TIN.strTINNumber,
-    TIN.intTINClearanceId,
+    C.strTINNumber,
+    C.intTINClearanceId,
     A.intConcurrencyId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
-OUTER APPLY(SELECT TOP 1 intTINClearanceId, strTINNumber FROM  tblQMTINClearance  WHERE intBatchId = A.intBatchId )TIN
+OUTER APPLY(SELECT TOP 1 intTINClearanceId, strTINNumber FROM  tblQMTINClearance  WHERE intBatchId = A.intBatchId )C
