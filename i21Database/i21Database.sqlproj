@@ -1277,6 +1277,8 @@
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
     <Build Include="dbo\vyuQMUserLocation.sql" />
+    <Build Include="dbo\Tables\tblMFLocationLeadTime.sql" />
+    <Build Include="dbo\Views\vyuMFLocationLeadTime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
