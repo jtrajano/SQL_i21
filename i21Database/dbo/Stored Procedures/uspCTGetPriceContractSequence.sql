@@ -242,7 +242,7 @@ BEGIN TRY
 				, ICC.strSeason
 				, ICC.strClass
 				, ICC.strProductLine
-				, dblDefaultFx = dFx.dblRate
+				, dblDefaultFx = (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId order by erd.dtmValidFromDate desc)
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 			LEFT JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
@@ -270,17 +270,6 @@ BEGIN TRY
 					UNION ALL SELECT dblQuantity FROM tblCTContractDetail WHERE intSplitFromId = CD.intContractDetailId
 				) tbl
 			) tblQuantity
-			cross apply (
-				select top 1
-					erd.dblRate
-				from
-					tblSMCurrencyExchangeRateDetail erd
-				where
-					erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId
-					and erd.dtmValidFromDate <= getdate()
-				order by
-					erd.dtmValidFromDate desc
-			) dFx
 			where
 				CD.dblNoOfLots IS NOT NULL		 
 				AND	ISNULL(CD.ysnMultiplePriceFixation, 0) = 0
