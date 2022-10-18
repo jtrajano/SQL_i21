@@ -5,7 +5,8 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	,@intEntityId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intDPContractId AS INT
-	,@intStorageScheduleId AS INT = NULL
+	,@intStorageScheduleId AS INT = NULL	
+	,@ysnDoNotReturn BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -263,7 +264,9 @@ BEGIN TRY
 						SELECT strOwnedPhysicalStock FROM tblGRStorageType WHERE strStorageTypeCode = @strDistributionOption
 					) GR
 			WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
-			RETURN
+			
+			IF @ysnDoNotReturn = 0 
+				RETURN
 		END
 	END
 

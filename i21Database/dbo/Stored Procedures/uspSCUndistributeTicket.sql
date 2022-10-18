@@ -1483,6 +1483,9 @@ BEGIN TRY
 								END
 							
 								EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
+								
+								EXEC [dbo].[uspGRReverseOnShipmentDelete] @InventoryShipmentId;
+								
 								EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 								EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
 
