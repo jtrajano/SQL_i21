@@ -7,22 +7,10 @@ AS
 
 DECLARE @strRequestId NVARCHAR(200) = NEWID()
 
-IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #INVOICES
-END
-IF(OBJECT_ID('tempdb..#ORDERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #ORDERS
-END
-IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #CUSTOMERS
-END
-IF(OBJECT_ID('tempdb..#TRANSACTIONS') IS NOT NULL)
-BEGIN
-    DROP TABLE #TRANSACTIONS
-END
+IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL) DROP TABLE #INVOICES
+IF(OBJECT_ID('tempdb..#ORDERS') IS NOT NULL) DROP TABLE #ORDERS
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
+IF(OBJECT_ID('tempdb..#TRANSACTIONS') IS NOT NULL) DROP TABLE #TRANSACTIONS
 
 DECLARE @intNewPerformanceLogId	INT = NULL
 
@@ -91,7 +79,8 @@ CREATE TABLE #TRANSACTIONS (
 	[intInvoiceDetailId]		INT NULL,
 	[dblRebateAmount]			NUMERIC(18, 6) NULL,
 	[dblBuybackAmount]			NUMERIC(18, 6) NULL,
-	[strAccountingPeriod]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL
+	[strAccountingPeriod]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+	[intPeriodsToAccrue]		INT NULL
 );
 
 --INVOICES
@@ -151,6 +140,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 			, [dblRebateAmount]
 			, [dblBuybackAmount]
 			, [strAccountingPeriod]
+			, [intPeriodsToAccrue]
 		)
 		SELECT strRecordNumber			= ARI.strInvoiceNumber
 			, strInvoiceOriginId		= ARI.strInvoiceOriginId
@@ -249,6 +239,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 			, dblRebateAmount			= ARID.dblRebateAmount
 			, dblBuybackAmount			= ARID.dblBuybackAmount
 			, strAccountingPeriod	    = AccPeriod.strPeriod
+			, intPeriodsToAccrue		= ARI.intPeriodsToAccrue
 		FROM tblARInvoiceDetail ARID 
 		INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId	
 		INNER JOIN #INVOICES II ON ARI.intInvoiceId = II.intInvoiceId
@@ -384,6 +375,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 			, dblRebateAmount			= ARID.dblRebateAmount
 			, dblBuybackAmount			= ARID.dblBuybackAmount
 			, strAccountingPeriod	    = AccPeriod.strPeriod
+			, intPeriodsToAccrue		= ARI.intPeriodsToAccrue
 		FROM tblARInvoiceDetail ARID 
 		INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 		INNER JOIN #INVOICES II ON ARI.intInvoiceId = II.intInvoiceId
@@ -791,6 +783,7 @@ INSERT INTO tblARSalesAnalysisStagingReport (
 	, dblBuybackAmount
 	, strAccountStatusCode
     , strAccountingPeriod
+	, intPeriodsToAccrue
 )
 SELECT strRecordNumber			= SAR.strRecordNumber
 	  , strInvoiceOriginId		= SAR.strInvoiceOriginId
@@ -905,6 +898,7 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	 , dblBuybackAmount			= SAR.dblBuybackAmount
 	 , strAccountStatusCode 	= C.strAccountStatusCode
      , strAccountingPeriod	    = SAR.strAccountingPeriod
+	 , intPeriodsToAccrue		= SAR.intPeriodsToAccrue
 FROM #TRANSACTIONS SAR
 LEFT JOIN tblGLAccount GA ON SAR.intItemAccountId = GA.intAccountId
 INNER JOIN tblSMCompanyLocation L ON SAR.intCompanyLocationId = L.intCompanyLocationId
@@ -981,6 +975,7 @@ GROUP BY
 	, SAR.intInvoiceDetailId
 	, C.strAccountStatusCode
 	, SAR.strAccountingPeriod
+	, SAR.intPeriodsToAccrue
 
 IF ISNULL(@intNewPerformanceLogId, 0) <> 0 AND ISNULL(@ysnRebuild, 0) = 1
 	BEGIN
