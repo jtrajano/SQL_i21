@@ -1713,7 +1713,7 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Account Category' AND [strModule] = 'General Ledger')
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 179
+	SELECT	[intStartingNumberId]	= 180
 			,[strTransactionType]	= N'Opportunity'
 			,[strPrefix]			= N'OP-'
 			,[intNumber]			= 0
