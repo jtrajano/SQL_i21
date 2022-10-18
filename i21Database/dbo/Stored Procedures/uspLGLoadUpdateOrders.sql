@@ -12,7 +12,7 @@ BEGIN
 
 	IF (@intSourceType = 8) /* Update TM Orders Status */
 	BEGIN
-		IF (@intShipmentStatus = 2) 
+		IF (@intShipmentStatus IN (2, 3)) 
 		BEGIN
 			/* LS Dispatched */
 			UPDATE TMD

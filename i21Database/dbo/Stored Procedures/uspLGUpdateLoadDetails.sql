@@ -53,18 +53,34 @@ BEGIN TRY
 		FROM tblLGLoad L
 		LEFT JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = L.intLoadHeaderId
 		WHERE L.intLoadId = @intLoadId AND intTransUsedBy = 3
+
+		UPDATE LD
+		SET dblDeliveredQuantity = TLDD.dblUnits
+			,dblDeliveredGross = TLDD.dblDistributionGrossSalesUnits
+			,dblDeliveredTare = TLDD.dblDistributionNetSalesUnits - TLDD.dblDistributionGrossSalesUnits
+			,dblDeliveredNet = TLDD.dblDistributionNetSalesUnits
+		FROM tblLGLoadDetail LD
+		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblTRLoadDistributionDetail TLDD ON TLDD.intLoadDetailId = LD.intLoadDetailId
+		WHERE LD.intLoadId = @intLoadId AND L.intTransUsedBy = 3
+	END
+	ELSE
+	BEGIN
+		UPDATE tblLGLoad SET 
+			ysnInProgress=@ysnInProgress,
+			dtmDeliveredDate=@dtmDeliveredDate,
+			intConcurrencyId	=	intConcurrencyId + 1
+		WHERE intLoadId=@intLoadId
+
+		IF (ISNULL(@dblDeliveredQuantity, 0) <> 0)
+		BEGIN
+			UPDATE tblLGLoadDetail SET 
+				dblDeliveredQuantity=@dblDeliveredQuantity,
+				intConcurrencyId	=	intConcurrencyId + 1
+			WHERE intLoadDetailId=@intLoadDetailId
+		END
 	END
 
-	UPDATE tblLGLoad SET 
-		ysnInProgress=@ysnInProgress,
-		dtmDeliveredDate=@dtmDeliveredDate,
-		intConcurrencyId	=	intConcurrencyId + 1
-	WHERE intLoadId=@intLoadId
-
-	UPDATE tblLGLoadDetail SET 
-		dblDeliveredQuantity=@dblDeliveredQuantity,
-		intConcurrencyId	=	intConcurrencyId + 1
-	WHERE intLoadDetailId=@intLoadDetailId
 END TRY
 
 BEGIN CATCH
