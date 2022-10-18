@@ -5,6 +5,7 @@
 	intCompanyId INT NULL,
 	[intSampleTypeId] INT NOT NULL, 
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[intCompanyLocationId] INT, 
 	[intParentSampleId] INT, 
 	[strSampleRefNo] NVARCHAR(30) COLLATE Latin1_General_CI_AS, 
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
