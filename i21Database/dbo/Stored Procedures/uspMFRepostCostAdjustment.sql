@@ -308,6 +308,42 @@ BEGIN TRY
 				AND intWorkOrderId = @intWorkOrderId
 			)
 
+	/* Update dblItemValue of tblMFWorkOrderProducedLot, this will prevent making any variance on cost adjustment.*/
+	UPDATE PL
+	SET dblItemValue = Round(CASE 
+				WHEN @strInstantConsumption = 'False'
+					THEN (
+							CASE 
+								WHEN IsNULL(RI.dblPercentage, 0) = 0
+									THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)
+								ELSE ((@dblNewCost * RI.dblPercentage / 100 / (SELECT TOP 1 SUM(dbo.fnMFConvertQuantityToTargetItemUOM(MPL.intItemUOMId, IsNULL(IU.intItemUOMId, MPL.intItemUOMId), MPL.dblQuantity)) OVER (PARTITION BY MPL.intItemId)
+																				FROM dbo.tblMFWorkOrderProducedLot MPL
+																				JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = MPL.intWorkOrderId
+																				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = MPL.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
+																				LEFT JOIN tblICLot L ON L.intLotId = MPL.intProducedLotId
+																				LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = MPL.intStorageLocationId
+																				LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId AND RI.intItemId = MPL.intItemId AND RI.intRecipeItemTypeId = 2
+																				WHERE MPL.intItemId = PL.intItemId AND MPL.intWorkOrderId = @intWorkOrderId AND MPL.ysnProductionReversed = 0 AND MPL.intItemId IN (SELECT intItemId
+																																																				    FROM dbo.tblMFWorkOrderRecipeItem
+																																																				    WHERE intRecipeItemTypeId = 2 
+																																																					  AND ysnConsumptionRequired = 1 
+																																																					  AND intWorkOrderId = @intWorkOrderId)
+																				)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity))
+								END
+							)
+				ELSE (@dblNewUnitCost * @dblProduceQty * RI.dblPercentage / 100) - (IsNULL(PL.dblOtherCharges, 0) + ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0)))
+				END, 2)
+	FROM dbo.tblMFWorkOrderProducedLot PL
+	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
+	LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
+	LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId AND RI.intItemId = PL.intItemId AND RI.intRecipeItemTypeId = 2
+	WHERE PL.intWorkOrderId = @intWorkOrderId
+		AND PL.ysnProductionReversed = 0
+		AND PL.intItemId IN (SELECT intItemId
+							 FROM dbo.tblMFWorkOrderRecipeItem
+							 WHERE intRecipeItemTypeId = 2 AND ysnConsumptionRequired = 1 AND intWorkOrderId = @intWorkOrderId)
 	DELETE
 	FROM @GLEntries
 
