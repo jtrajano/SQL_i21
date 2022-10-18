@@ -1,50 +1,34 @@
 ﻿CREATE VIEW [dbo].[vyuEMCustomerSpecialPriceSearch]
-	AS 
-
-	select 
-		special_price.intEntityCustomerId [intEntityId],
-		special_price.intEntityCustomerId,
-		strCustomerLocation = cus_location.strLocationName,
-		special_price.strPriceBasis,
-		special_price.strCostToUse,
-		strVendorId = vend.strVendorId,
-		strItemNo = item.strItemNo,
-		strVendorLocationName =  vend_location.strLocationName,
-		category.strCategoryCode,
-		special_price.strCustomerGroup,
-		dblDeviation = special_price.dblDeviation + special_price.dblDeviation2 + special_price.dblDeviation3 + special_price.dblDeviation4,
-		special_price.strLineNote,
-		special_price.dtmBeginDate,
-		special_price.dtmEndDate,
-		strVendorRankId =vend_rank.strVendorId,
-		strItemRankId = item_rank.strItemNo,
-		strVendorRankLocationName = vend_location_rank.strLocationName,
-		special_price.strInvoiceType,
-		ent.strName,
-		ent.strEntityNo,
-		intWarehouseId = isnull(eloc.intWarehouseId, -99)
-
-		from tblARCustomerSpecialPrice special_price
-		inner join tblEMEntity ent
-			on special_price.intEntityCustomerId = ent.intEntityId			
-		inner join tblEMEntityLocation eloc
-			on ent.intEntityId = eloc.intEntityId and eloc.ysnDefaultLocation = 1	
-		left join [tblEMEntityLocation] cus_location
-			on cus_location.intEntityId = special_price.intEntityCustomerId
-				and special_price.intCustomerLocationId = cus_location.intEntityLocationId
-		left join tblAPVendor vend
-			on vend.[intEntityId] = special_price.intEntityVendorId	
-		left join tblAPVendor vend_rank
-			on vend_rank.[intEntityId] = special_price.intRackVendorId
-		left join tblICItem item
-			on item.intItemId = special_price.intItemId
-		left join tblICItem item_rank
-			on item_rank.intItemId = special_price.intRackItemId
-		left join [tblEMEntityLocation] vend_location
-			on vend_location.intEntityId = vend.[intEntityId]
-				and vend_location.intEntityLocationId = special_price.intEntityLocationId
-		left join [tblEMEntityLocation] vend_location_rank
-			on vend_location_rank.intEntityId = vend_rank.[intEntityId]
-				and vend_location_rank.intEntityLocationId = special_price.intRackLocationId
-		left join tblICCategory category
-			on category.intCategoryId = special_price.intCategoryId
+AS 
+SELECT intEntityId				= SP.intEntityCustomerId
+	 , intEntityCustomerId		= SP.intEntityCustomerId
+	 , strCustomerLocation		= CL.strLocationName
+	 , strPriceBasis			= SP.strPriceBasis
+	 , strCostToUse				= SP.strCostToUse
+	 , strVendorId				= V.strVendorId
+	 , strItemNo				= I.strItemNo
+	 , strVendorLocationName	= VL.strLocationName
+	 , strCategoryCode			= CAT.strCategoryCode
+	 , strCustomerGroup			= SP.strCustomerGroup
+	 , dblDeviation				= ISNULL(SP.dblDeviation, 0) + ISNULL(SP.dblDeviation2, 0) + ISNULL(SP.dblDeviation3, 0) + ISNULL(SP.dblDeviation4, 0)
+	 , strLineNote				= SP.strLineNote
+	 , dtmBeginDate				= SP.dtmBeginDate
+	 , dtmEndDate				= SP.dtmEndDate
+	 , strVendorRankId			= VR.strVendorId
+	 , strItemRankId			= IR.strItemNo
+	 , strVendorRankLocationName = VLR.strLocationName
+	 , strInvoiceType			= SP.strInvoiceType
+	 , strName					= E.strName
+	 , strEntityNo				= E.strEntityNo
+	 , intWarehouseId			= ISNULL(EL.intWarehouseId, -99)
+FROM tblARCustomerSpecialPrice SP
+INNER JOIN tblEMEntity E ON SP.intEntityCustomerId = E.intEntityId			
+INNER JOIN tblEMEntityLocation EL ON E.intEntityId = EL.intEntityId and EL.ysnDefaultLocation = 1	
+LEFT JOIN tblEMEntityLocation CL ON CL.intEntityId = SP.intEntityCustomerId AND SP.intCustomerLocationId = CL.intEntityLocationId
+LEFT JOIN tblAPVendor V ON V.intEntityId = SP.intEntityVendorId	
+LEFT JOIN tblAPVendor VR ON VR.intEntityId = SP.intRackVendorId
+LEFT JOIN tblICItem I ON I.intItemId = SP.intItemId
+LEFT JOIN tblICItem IR ON IR.intItemId = SP.intRackItemId
+LEFT JOIN tblEMEntityLocation VL ON VL.intEntityId = V.intEntityId AND VL.intEntityLocationId = SP.intEntityLocationId
+LEFT JOIN tblEMEntityLocation VLR ON VLR.intEntityId = VR.intEntityId AND VLR.intEntityLocationId = SP.intRackLocationId
+LEFT JOIN tblICCategory CAT ON CAT.intCategoryId = SP.intCategoryId
