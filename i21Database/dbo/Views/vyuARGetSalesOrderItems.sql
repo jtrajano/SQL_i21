@@ -43,10 +43,10 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , strType							= SODETAIL.strType
 	 , strBundleType					= SODETAIL.strBundleType
 	 , strLotTracking					= SODETAIL.strLotTracking
-	 , intContractSeq					= CONTRACTS.intContractSeq
-	 , strContractNumber				= CONTRACTS.strContractNumber
-	 , strItemContractNumber			= ITEMCONTRACTS.strItemContractNumber
-	 , intItemContractSeq				= ITEMCONTRACTS.intItemContractSeq
+	 , intContractSeq					= CD.intContractSeq
+	 , strContractNumber				= CH.strContractNumber
+	 , strItemContractNumber			= ICH.strContractNumber
+	 , intItemContractSeq				= ICD.intLineNo
 	 , strItemNo						= SODETAIL.strItemNo
 	 , strUnitMeasure					= UOM.strUnitMeasure
 	 , strPriceUnitMeasure				= PUOM.strUnitMeasure
@@ -110,18 +110,10 @@ INNER JOIN (
 		 , ITEM.strLotTracking
 		 , ITEM.strBundleType
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
-	LEFT JOIN (
-	SELECT intItemId
-		 , strDescription
-		 , strItemNo
-		 , strType
-		 , strLotTracking
-		 , strBundleType
-	FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
-			ON SOD.intItemId = ITEM.intItemId
-	WHERE SOD.dblQtyShipped < SOD.dblQtyOrdered
-		AND (SOD.intItemId IS NOT NULL OR (SOD.intItemId IS NULL AND ISNULL(SOD.strItemDescription, '') <> ''))
-		AND ISNULL(ITEM.strBundleType, '') <> 'Option'
+	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON SOD.intItemId = ITEM.intItemId
+	WHERE ((SOD.dblQtyOrdered > 0 AND SOD.dblQtyShipped < SOD.dblQtyOrdered) OR (SOD.dblQtyOrdered < 0 AND SOD.dblQtyShipped > SOD.dblQtyOrdered))
+	  AND (SOD.intItemId IS NOT NULL OR (SOD.intItemId IS NULL AND ISNULL(SOD.strItemDescription, '') <> ''))
+	  AND ISNULL(ITEM.strBundleType, '') <> 'Option'
 
 	UNION ALL
 
@@ -171,115 +163,27 @@ INNER JOIN (
 		 , ITEMCOMP.strLotTracking
 		 , ITEMCOMP.strBundleType
 	FROM  vyuARGetItemComponents COMP
-	INNER JOIN 
-		dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
-				ON COMP.intItemId = SOD.intItemId
-	INNER JOIN (
-		SELECT intItemId
-			 , strDescription
-			 , strItemNo
-			 , strType
-			 , strLotTracking
-			 , strBundleType
-		FROM dbo.tblICItem WITH (NOLOCK)) ITEMCOMP
-			ON COMP.intComponentItemId = ITEMCOMP.intItemId
-	LEFT JOIN (
-		SELECT intItemId
-			 , strDescription
-			 , strItemNo
-			 , strType
-			 , strLotTracking
-			 , strBundleType
-		FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
-			ON SOD.intItemId = ITEM.intItemId
-	WHERE SOD.dblQtyShipped < SOD.dblQtyOrdered
-		AND SOD.intItemId IS NOT NULL
-		AND ISNULL(ITEM.strBundleType, '') = 'Option'
-
+	INNER JOIN tblSOSalesOrderDetail SOD WITH (NOLOCK) ON COMP.intItemId = SOD.intItemId
+	INNER JOIN tblICItem ITEMCOMP WITH (NOLOCK) ON COMP.intComponentItemId = ITEMCOMP.intItemId
+	INNER JOIN tblICItem ITEM WITH (NOLOCK) ON SOD.intItemId = ITEM.intItemId
+	WHERE ((SOD.dblQtyOrdered > 0 AND SOD.dblQtyShipped < SOD.dblQtyOrdered) OR (SOD.dblQtyOrdered < 0 AND SOD.dblQtyShipped > SOD.dblQtyOrdered))
+	  AND SOD.intItemId IS NOT NULL
+	  AND ISNULL(ITEM.strBundleType, '') = 'Option'
 ) SODETAIL ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
-INNER JOIN (
-	SELECT intEntityId
-		 , strName
-	FROM dbo.tblEMEntity WITH (NOLOCK)
-) E ON SO.intEntityCustomerId = E.intEntityId
-INNER JOIN (
-	SELECT intCompanyLocationId
-		 , strLocationName
-	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) LOCATION ON SO.intCompanyLocationId = LOCATION.intCompanyLocationId
-LEFT JOIN (
-	SELECT intItemId
-		 , intUnitMeasureId
-		 , intItemUOMId
-	FROM dbo.tblICItemUOM WITH (NOLOCK)
-) ICUOM ON SODETAIL.intItemId = ICUOM.intItemId
-       AND SODETAIL.intItemUOMId = ICUOM.intItemUOMId
-LEFT JOIN (
-	SELECT intUnitMeasureId
-		 , strUnitMeasure
-	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-) UOM ON ICUOM.intUnitMeasureId = UOM.intUnitMeasureId
-LEFT JOIN (
-	SELECT intItemId
-		 , intUnitMeasureId
-		 , intItemUOMId
-	FROM dbo.tblICItemUOM WITH (NOLOCK)
-) ICPUOM ON SODETAIL.intItemId = ICPUOM.intItemId
-       AND SODETAIL.intItemUOMId = ICPUOM.intItemUOMId
-LEFT JOIN (
-	SELECT intUnitMeasureId
-		 , strUnitMeasure
-	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-) PUOM ON ICPUOM.intUnitMeasureId = PUOM.intUnitMeasureId
-LEFT JOIN (
-	SELECT CH.intContractHeaderId
-		 , CD.intContractDetailId
-		 , CD.intContractSeq
-		 , strContractNumber
-	FROM dbo.tblCTContractHeader CH WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intContractHeaderId
-			 , intContractDetailId
-			 , intContractSeq
-		FROM dbo.tblCTContractDetail WITH (NOLOCK)
-	) CD ON CH.intContractHeaderId = CD.intContractHeaderId
-) CONTRACTS ON SODETAIL.intContractHeaderId = CONTRACTS.intContractHeaderId
-	       AND SODETAIL.intContractDetailId = CONTRACTS.intContractDetailId
-LEFT JOIN (
-	SELECT ICH.intItemContractHeaderId
-		 , ICD.intItemContractDetailId
-		 , strItemContractNumber = strContractNumber
-		 , intItemContractSeq	 = intLineNo
-	FROM dbo.tblCTItemContractHeader ICH WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intItemContractHeaderId
-			 , intItemContractDetailId
-			 , intLineNo
-		FROM dbo.tblCTItemContractDetail
-	) ICD ON ICH.intItemContractHeaderId = ICD.intItemContractHeaderId
-) ITEMCONTRACTS ON SODETAIL.intItemContractHeaderId = ITEMCONTRACTS.intItemContractHeaderId
-	           AND SODETAIL.intItemContractDetailId = ITEMCONTRACTS.intItemContractDetailId 
-LEFT OUTER JOIN (
-	SELECT intCurrencyID
-		 , intCent
-		 , strCurrency
-	FROM dbo.tblSMCurrency WITH (NOLOCK)
-) CURRENCY ON SODETAIL.intSubCurrencyId = CURRENCY.intCurrencyID
-LEFT JOIN ( 
-	SELECT intStorageLocationId
-		 , strName 
-	FROM tblICStorageLocation WITH (NOLOCK) 
-) STOLOC ON STOLOC.intStorageLocationId = SODETAIL.intStorageLocationId
-LEFT JOIN ( 
-	SELECT intCompanyLocationSubLocationId
-	     , strSubLocationName 
-	FROM tblSMCompanyLocationSubLocation WITH (NOLOCK)
-) SUBLOC ON SUBLOC.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId
-LEFT JOIN (
-	SELECT intTaxGroupId
-		 , strTaxGroup
-	FROM dbo.tblSMTaxGroup WITH (NOLOCK)
-) TAXGROUP ON TAXGROUP.intTaxGroupId = SODETAIL.intTaxGroupId
+INNER JOIN tblEMEntity E WITH (NOLOCK) ON SO.intEntityCustomerId = E.intEntityId
+INNER JOIN tblSMCompanyLocation [LOCATION] WITH (NOLOCK) ON SO.intCompanyLocationId = [LOCATION].intCompanyLocationId
+LEFT JOIN tblICItemUOM ICUOM WITH (NOLOCK) ON SODETAIL.intItemId = ICUOM.intItemId AND SODETAIL.intItemUOMId = ICUOM.intItemUOMId
+LEFT JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON ICUOM.intUnitMeasureId = UOM.intUnitMeasureId
+LEFT JOIN tblICItemUOM ICPUOM WITH (NOLOCK) ON SODETAIL.intItemId = ICPUOM.intItemId AND SODETAIL.intItemUOMId = ICPUOM.intItemUOMId
+LEFT JOIN tblICUnitMeasure PUOM WITH (NOLOCK) ON ICPUOM.intUnitMeasureId = PUOM.intUnitMeasureId
+LEFT JOIN tblCTContractDetail CD WITH (NOLOCK) ON SODETAIL.intContractDetailId = CD.intContractDetailId
+LEFT JOIN tblCTContractHeader CH WITH (NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId
+LEFT JOIN tblCTItemContractDetail ICD WITH (NOLOCK) ON SODETAIL.intItemContractDetailId = ICD.intItemContractDetailId
+LEFT JOIN tblCTItemContractHeader ICH WITH (NOLOCK) ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
+LEFT JOIN tblSMCurrency CURRENCY WITH (NOLOCK) ON SODETAIL.intSubCurrencyId = CURRENCY.intCurrencyID
+LEFT JOIN tblICStorageLocation STOLOC WITH (NOLOCK) ON STOLOC.intStorageLocationId = SODETAIL.intStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SUBLOC WITH (NOLOCK) ON SUBLOC.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId
+LEFT JOIN tblSMTaxGroup TAXGROUP WITH (NOLOCK) ON TAXGROUP.intTaxGroupId = SODETAIL.intTaxGroupId
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
   AND SO.intSalesOrderId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order')
