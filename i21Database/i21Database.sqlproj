@@ -11555,6 +11555,7 @@
     <Build Include="dbo\Views\vyuQMSearchTINClearance.sql" />
     <Build Include="dbo\Stored Procedures\uspQMClearTIN.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateTINBatchId.sql" />
+	<Build Include="dbo\Stored Procedures\uspSMTransactionInsertApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
