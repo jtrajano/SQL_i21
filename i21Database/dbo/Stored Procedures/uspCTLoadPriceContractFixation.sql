@@ -174,7 +174,7 @@ BEGIN TRY
 				ICC.strSeason,
 				ICC.strClass,
 				ICC.strProductLine,
-				dblDefaultFx = dFx.dblRate
+				dblDefaultFx = (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId and erd.dtmValidFromDate <= getdate() order by erd.dtmValidFromDate desc)
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -187,17 +187,6 @@ BEGIN TRY
 		LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 		LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 		LEFT	JOIN	vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
-		cross apply (
-			select top 1
-				erd.dblRate
-			from
-				tblSMCurrencyExchangeRateDetail erd
-			where
-				erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId
-				and erd.dtmValidFromDate <= getdate()
-			order by
-				erd.dtmValidFromDate desc
-		) dFx
 
 		--INSERT INTO @temp 
 
