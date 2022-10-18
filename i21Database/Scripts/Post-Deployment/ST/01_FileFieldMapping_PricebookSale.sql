@@ -343,7 +343,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,12,1,'POSCodeFormat','tblSTstgPricebookSendFile','POSCodeFormat',NULL,11,NULL,1,11)
+      (@intImportFileHeaderId,NULL,12,1,'POSCodeFormat',NULL,NULL,NULL,11,NULL,1,11)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -354,8 +354,8 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intLevel] = 12
        ,[intPosition] = 1
        ,[strXMLTag] = 'POSCodeFormat'
-       ,[strTable] = 'tblSTstgPricebookSendFile'
-       ,[strColumnName] = 'POSCodeFormat'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
        ,[strDataType] = NULL
        ,[intLength] = 11
        ,[strDefaultValue] = NULL
@@ -775,7 +775,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,28,1,'radiant:ProhibitSaleLocation','tblSTstgPricebookSendFile','ProhibitSaleLocationValue',NULL,27,NULL,1,17)
+      (@intImportFileHeaderId,NULL,28,1,'radiant:ProhibitSaleLocation',NULL,NULL,NULL,27,NULL,1,17)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 28 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -786,8 +786,8 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intLevel] = 28
        ,[intPosition] = 1
        ,[strXMLTag] = 'radiant:ProhibitSaleLocation'
-       ,[strTable] = 'tblSTstgPricebookSendFile'
-       ,[strColumnName] = 'ProhibitSaleLocationValue'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
        ,[strDataType] = NULL
        ,[intLength] = 27
        ,[strDefaultValue] = NULL
@@ -1103,6 +1103,29 @@ BEGIN
        ,[strTagAttribute] = 'type'
        ,[strTable] = 'tblSTstgPricebookSendFile'
        ,[strColumnName] = 'ProhibitSaleLocationType'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 28 AND strXMLTag = 'radiant:ProhibitSaleLocation'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'value','tblSTstgPricebookSendFile','ProhibitSaleLocationValue',NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'value'
+       ,[strTable] = 'tblSTstgPricebookSendFile'
+       ,[strColumnName] = 'ProhibitSaleLocationValue'
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
