@@ -1273,6 +1273,9 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
     <Build Include="dbo\Views\vyuGRDPStorageLoadOutSearchView.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCarrier.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
     <Build Include="dbo\vyuQMUserLocation.sql" />
   </ItemGroup>
   <ItemGroup>
