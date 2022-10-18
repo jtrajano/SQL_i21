@@ -375,3 +375,10 @@ select @intNumber += 1;
 update tblSMStartingNumber set intNumber = case when intNumber < @intNumber then @intNumber else intNumber end where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No' and isnull(ysnUseLocation,0) = 0 and isnull(ysnSuffixYear,0) = 0;
 
 GO
+
+update tblSMGridLayout set strGridLayoutFields = replace(strGridLayoutFields,
+'{"strFieldName":"strOrigin","strDataType":"string","strDisplayName":"Origin","strControlType":"gridcolumn","strControlAlignment":"left","ysnHidden":false,"dblWidth":100,"dblFlex":0,"intIndex":25,"strSort":null,"ysnGroup":null,"hideable":true,"minWidth":50}',
+'{"strFieldName":"strOrigin","strDataType":"string","strDisplayName":"Origin","strControlType":"gridcolumn","strControlAlignment":"left","ysnHidden":true,"dblWidth":100,"dblFlex":0,"intIndex":25,"strSort":null,"ysnGroup":null,"hideable":true,"minWidth":50}')
+where intUserId = 6503 and strGridLayoutName = 'SSSPOT KPI Report'
+
+GO
