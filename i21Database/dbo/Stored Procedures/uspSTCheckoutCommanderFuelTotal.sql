@@ -309,6 +309,12 @@ BEGIN
 			VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing Dispenser Data', 1)
 		END
 
+		--CS-105 - First Day Setup for a Consignment Store does not show any values for Summary Totals or Aggregate Meter Readings by Fuel Grade
+		IF ((SELECT COUNT('') FROM tblSTCheckoutHeader WHERE intStoreId = @intStoreId AND strCheckoutType = 'Automatic') = 1)
+		BEGIN
+			EXEC uspSTCheckoutUpdatePumpTotals @intCheckoutId, @ysnSuccess OUT, @strMessage OUT
+		END
+
 		--delete stored temp data in tblSTCheckoutFuelTotalSold
 		DELETE tblSTCheckoutFuelTotalSold WHERE intCheckoutId = @intCheckoutId
 		
