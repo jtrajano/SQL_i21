@@ -4,6 +4,12 @@ GO
 
 	IF EXISTS (SELECT * FROM tblSMStartingNumber WHERE strPrefix = 'OP-')
 	BEGIN
+
+		IF (SELECT COUNT(*) FROM tblCRMOpportunity WHERE strOpportunityNumber NOT LIKE 'OP-%' AND strOpportunityNumber IS NOT NULL) > 0
+		BEGIN
+			UPDATE tblCRMOpportunity SET strOpportunityNumber = NULL WHERE strOpportunityNumber NOT LIKE 'OP-%' AND strOpportunityNumber IS NOT NULL
+		END
+
 		WHILE (SELECT COUNT(*) FROM tblCRMOpportunity WHERE strOpportunityNumber IS NULL) > 0
 		BEGIN
 			DECLARE @output NVARCHAR(40)
