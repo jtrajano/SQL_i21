@@ -157,7 +157,7 @@ BEGIN TRY
 							INNER JOIN tblGRSettleStorageTicket GRT ON GRT.intSettleStorageId = GRS.intSettleStorageId
 							INNER JOIN tblGRCustomerStorage GRC ON GRC.intCustomerStorageId = GRT.intCustomerStorageId
 						WHERE GRC.intTicketId = @intTicketId
-
+							AND GRS.intParentSettleStorageId IS NOT NULL
 						DECLARE settleStorageCursor CURSOR LOCAL FAST_FORWARD
 						FOR
 						SELECT intSettleStorageId FROM #tmpSettleStorage

@@ -547,15 +547,13 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				IF(SELECT dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId AND intCustomerStorageId = @intCustomerStorageId) <> @dblUnitsUnposted
-				BEGIN
-					UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
-				END
-				ELSE
-				BEGIN
-					DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
-				END
+				UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
 			END
+			
+			DELETE FROM tblGRSettleStorageTicket 
+			where intSettleStorageId = @intParentSettleStorageId 
+				and intCustomerStorageId = @intCustomerStorageId 
+				and dblUnits = 0
 
 			--5. Removing Voucher
 			begin
