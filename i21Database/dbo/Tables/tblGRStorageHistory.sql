@@ -80,3 +80,7 @@ CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intTicketId] ON [dbo].[tblGRSt
 	[intTicketId] ASC
 )
 GO 
+
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intInventoryShipmentId]
+ON [dbo].[tblGRStorageHistory] ([intInventoryShipmentId])
+GO
