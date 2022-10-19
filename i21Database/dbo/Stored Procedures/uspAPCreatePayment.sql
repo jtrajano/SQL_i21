@@ -190,7 +190,7 @@ BEGIN
 	--If pay to bank account is not existing use the default if ACH
 	IF @bankToAccount IS NULL AND @paymentMethodId = 2
 	BEGIN
-		SELECT TOP 1 @bankToAccount = intEntityEFTInfoId FROM tblEMEntityEFTInformation WHERE intEntityId = @vendorId AND intCurrencyId = @currency AND ysnActive = 1 AND ysnDefaultAccount = 1
+		SELECT TOP 1 @bankToAccount = intEntityEFTInfoId FROM tblEMEntityEFTInformation WHERE intEntityId = @vendorId AND ysnActive = 1 AND ysnDefaultAccount = 1
 	END
 
 	--Compute Discount Here, if there is no value computed or added
