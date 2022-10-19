@@ -58,7 +58,7 @@ SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
-IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS
+IF(OBJECT_ID('tempdb..#BUDGET2CUSTOMERS') IS NOT NULL) DROP TABLE #BUDGET2CUSTOMERS
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
 IF(OBJECT_ID('tempdb..#BALANCEFORWARDAGING') IS NOT NULL) DROP TABLE #BALANCEFORWARDAGING
 IF(OBJECT_ID('tempdb..#POSTEDINVOICES') IS NOT NULL) DROP TABLE #POSTEDINVOICES
@@ -81,6 +81,7 @@ CREATE TABLE #CUSTOMERS (
 	, dblARBalance					NUMERIC(18, 6)
 	, ysnStatementCreditLimit		BIT
 	, strComment					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
+	, intTermsId					INT				NULL
 )
 CREATE TABLE #STATEMENTREPORT (
 	   intId						INT IDENTITY (2, 1) NOT NULL
@@ -185,7 +186,7 @@ CREATE NONCLUSTERED INDEX [NC_Index_#APPLIEDPPREPAYMENTS_BUDGETREMINDER2] ON [#A
 --FILTER CUSTOMER
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit, intTermsId)
 		SELECT TOP 1 intEntityCustomerId		= C.intEntityId 
 			       , strCustomerNumber			= C.strCustomerNumber
 				   , strCustomerName			= EC.strName
@@ -194,6 +195,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 				   , dblCreditAvailable			= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
 				   , dblARBalance				= C.dblARBalance
 				   , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
+				   , intTermsId					= C.intTermsId
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
@@ -203,10 +205,10 @@ IF @strCustomerNumberLocal IS NOT NULL
 ELSE IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
 		SELECT DISTINCT intEntityCustomerId = intID
-		INTO #ADCUSTOMERS
+		INTO #BUDGET2CUSTOMERS
 		FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)
 
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit, intTermsId)
 		SELECT intEntityCustomerId		= C.intEntityId 
 			 , strCustomerNumber		= C.strCustomerNumber
 			 , strCustomerName      	= EC.strName
@@ -215,15 +217,16 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 			 , dblCreditAvailable		= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
 			 , dblARBalance				= C.dblARBalance        
 			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
+			 , intTermsId				= C.intTermsId
 		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN #ADCUSTOMERS CUSTOMERS ON C.intEntityId = CUSTOMERS.intEntityCustomerId
+		INNER JOIN #BUDGET2CUSTOMERS CUSTOMERS ON C.intEntityId = CUSTOMERS.intEntityCustomerId
 		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND C.strStatementFormat = 'Budget Reminder Alternate 2'
 	END
 ELSE
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit, intTermsId)
 		SELECT intEntityCustomerId		= C.intEntityId 
 			 , strCustomerNumber		= C.strCustomerNumber
 			 , strCustomerName			= EC.strName
@@ -232,6 +235,7 @@ ELSE
 			 , dblCreditAvailable		= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
 			 , dblARBalance				= C.dblARBalance
 			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
+			 , intTermsId				= C.intTermsId
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 )) OR @ysnActiveCustomersLocal = 0)
@@ -705,7 +709,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , strFullAddress				= C.strFullAddress
 			 , strStatementFooterComment	= C.strStatementFooterComment
 			 , dtmDate						= CB.dtmBudgetDate
-			 , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, CB.dtmBudgetDate))
+			 , dtmDueDate					= dbo.fnGetDueDateBasedOnTerm(DATEADD(MONTH, -1, CB.dtmBudgetDate), C.intTermsId)-- DATEADD(DAY, -1, DATEADD(MONTH, 1, CB.dtmBudgetDate))
 			 , dblPayment					= 0.00
 			 , dblAmountDue					= CB.dblBudgetAmount - CB.dblAmountPaid
 			 , dblCreditLimit				= C.dblCreditLimit
@@ -716,7 +720,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , dtmDateCreated				= CB.dtmBudgetDate
         FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
-        WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+        WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromBudget AND @dtmDateToLocal
           AND CB.dblAmountPaid < CB.dblBudgetAmount
 	END
 
