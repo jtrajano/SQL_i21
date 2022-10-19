@@ -15,6 +15,7 @@ RETURNS TABLE AS RETURN
 	SELECT
 		forPay.intForPaymentId
 		,forPay.intBillId
+		,forPay.intInvoiceId
 		,forPay.intEntityVendorId
 		,forPay.intTransactionType
 		,forPay.intPayToAddressId
@@ -29,27 +30,35 @@ RETURNS TABLE AS RETURN
 		,forPay.strBillId
 		,forPay.dblTotal
 		,forPay.dblDiscount
-		,dblTempDiscount =  CAST(CASE WHEN voucher.intTransactionType = 1 
-									THEN 
-									(
-										CASE WHEN voucher.ysnDiscountOverride = 1 AND NULLIF(forPay.intPayScheduleId,0) IS NULL
-												THEN voucher.dblDiscount
-											WHEN forPay.intPayScheduleId > 0
-												THEN forPay.dblTempDiscount
-												--calculate discount base on voucher date to make sure there is a discount
-												--always discount bypasses due date
-											WHEN forPay.ysnPymtCtrlAlwaysDiscount = 1 
-												THEN dbo.fnGetDiscountBasedOnTerm(voucher.dtmBillDate, voucher.dtmBillDate, forPay.intTermsId, forPay.dblTotal)
-											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmBillDate, forPay.intTermsId, forPay.dblTotal)
-										END
-									) 
-							ELSE 0 END AS DECIMAL(18,2))
+		,dblTempDiscount =  CASE WHEN forPay.intBillId > 0
+							THEN
+								CAST(CASE WHEN voucher.intTransactionType = 1 
+										THEN 
+										(
+											CASE WHEN voucher.ysnDiscountOverride = 1 AND NULLIF(forPay.intPayScheduleId,0) IS NULL
+													THEN voucher.dblDiscount
+												WHEN forPay.intPayScheduleId > 0
+													THEN forPay.dblTempDiscount
+													--calculate discount base on voucher date to make sure there is a discount
+													--always discount bypasses due date
+												WHEN forPay.ysnPymtCtrlAlwaysDiscount = 1 
+													THEN dbo.fnGetDiscountBasedOnTerm(voucher.dtmBillDate, voucher.dtmBillDate, forPay.intTermsId, forPay.dblTotal)
+												ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmBillDate, forPay.intTermsId, forPay.dblTotal)
+											END
+										) 
+								ELSE 0 END AS DECIMAL(18,2))
+							ELSE 0
+							END
 		,forPay.dblInterest 
-		,dblTempInterest = CAST(CASE WHEN voucher.intTransactionType = 1 AND
+		,dblTempInterest = CASE WHEN forPay.intBillId > 0
+							THEN
+								CAST(CASE WHEN voucher.intTransactionType = 1 AND
 											(voucher.dtmInterestDate IS NULL OR @datePaid > voucher.dtmInterestDate)
 								THEN
 									dbo.fnGetInterestBasedOnTerm(forPay.dblAmountDue, voucher.dtmBillDate, @datePaid, voucher.dtmInterestDate, forPay.intTermsId)
 								ELSE 0 END AS DECIMAL(18,2))
+							ELSE 0
+							END
 		,forPay.dblAmountDue
 		,forPay.dblPayment
 		,forPay.dblTempPayment
@@ -80,16 +89,17 @@ RETURNS TABLE AS RETURN
 		,forPay.ysnOffset
 		,entityGroup.strEntityGroupName
 		,forPay.strPaymentScheduleNumber
-		,voucher.intPayFromBankAccountId
+		,forPay.intPayFromBankAccountId
 		,account.strBankAccountNo strPayFromBankAccount
-		,voucher.intPayToBankAccountId
+		,forPay.intPayToBankAccountId
 		,eft.strAccountNumber strPayToBankAccount
 		,accountDetail.strAccountId strAPAccount
 	FROM vyuAPBillForPayment forPay
-	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
-	LEFT JOIN tblAPPaymentDetail payDetail
-		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
-		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
+	LEFT JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
+	LEFT JOIN tblARInvoice invoice ON invoice.intInvoiceId = forPay.intInvoiceId
+	-- LEFT JOIN tblAPPaymentDetail payDetail
+	-- 	ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
+	-- 	AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	LEFT JOIN vyuCMBankAccount account ON account.intBankAccountId = voucher.intPayFromBankAccountId
 	LEFT JOIN vyuAPEntityEFTInformation eft ON eft.intEntityEFTInfoId = voucher.intPayToBankAccountId
 	LEFT JOIN vyuGLAccountDetail accountDetail ON accountDetail.intAccountId = voucher.intAccountId

@@ -1152,6 +1152,7 @@
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDispatchUpdateOrders.sql" />
+    <Build Include="dbo\Tables\tblAPPaymentIntegrationTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
