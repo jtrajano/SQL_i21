@@ -239,6 +239,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intTaxGroupId] [int] NULL,
 	[strTaxLocation] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] [int] NULL,
+	[intMTMPointId] [int] NULL,
 
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),

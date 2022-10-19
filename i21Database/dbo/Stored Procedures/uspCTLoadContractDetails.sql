@@ -629,6 +629,8 @@ BEGIN TRY
 		, CD.dblHistoricalRate
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
+		, CD.intMTMPointId
+		,strMTMPoint = mtmp.strMTMPoint
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -715,6 +717,7 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
 	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
+	left join tblCTMTMPoint mtmp on mtmp.intMTMPointId = CD.intMTMPointId
 
 	ORDER BY CD.intContractSeq
 
