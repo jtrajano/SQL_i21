@@ -45,6 +45,7 @@ SELECT CD.intContractDetailId
 	,IB.strItemNo AS strBundleItemNo
 	,CH.dblQuantity AS dblHeaderQuantity
 	,U2.strUnitMeasure AS strHeaderUnitMeasure
+	,CD.intCompanyLocationId
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId

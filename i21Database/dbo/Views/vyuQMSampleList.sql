@@ -106,6 +106,7 @@ SELECT S.intSampleId
 	,intContractSequence = CD.intContractSeq
 	,strContractType = CT.strContractType
 	,strPacking = '' COLLATE Latin1_General_CI_AS
+	,S.intCompanyLocationId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
