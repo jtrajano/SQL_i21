@@ -1284,6 +1284,7 @@
     <Build Include="dbo\Tables\tblQMCatalogueType.sql" />
     <Build Include="dbo\Tables\tblQMSaleYear.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromDirectFile.sql" />
+    <Build Include="dbo\Tables\tblQMSampleOtherBuyers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
