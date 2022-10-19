@@ -30,7 +30,8 @@ BEGIN
 			DD.dtmDueDate,
 			DD.dblInvoiceAmount,
 			DD.intEntityVendorId,
-			DD.intImportDtnId
+			DD.intImportDtnId,
+			ysnOverrideTolerance = CASE WHEN DD.strMessage LIKE '%Variance is greater than allowed%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 		FROM tblTRImportDtnDetail DD
 		WHERE DD.intImportDtnDetailId IN (SELECT Item FROM #tmpIds)
 
@@ -41,12 +42,56 @@ BEGIN
 			@dtmDueDate DATETIME = NULL,
 			@dblInvoiceAmount DECIMAL(18,6) = NULL,
 			@intEntityVendorId INT = NULL,
-			@intImportLoadId INT = NULL
+			@intImportLoadId INT = NULL,
+			@ysnOverrideTolerance BIT = NULL
 	
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId
+		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
+			
+			IF (ISNULL(@intInventoryReceiptId, 0) = 0) OR (ISNULL(@intEntityVendorId, 0) = 0)
+			BEGIN
+				DECLARE @intSellerId INT = NULL
+					, @strSeller NVARCHAR(100) = NULL
+					, @strBOL NVARCHAR(50) = NULL
+
+				SELECT TOP 1 @strSeller = strSeller
+					, @strBOL = strBillOfLading
+				FROM tblTRImportDtnDetail
+				WHERE intImportDtnDetailId = @intImportDtnDetailId
+
+				IF (ISNULL(@intEntityVendorId, 0) = 0)
+				BEGIN
+					SELECT @intSellerId = V.intVendorId
+					FROM vyuTRCrossReferenceDtn V
+					WHERE V.intCrossReferenceId = 2
+					AND V.strImportValue = @strSeller
+
+					IF (ISNULL(@intSellerId, 0) <> 0)
+					BEGIN
+						UPDATE tblTRImportDtnDetail SET intEntityVendorId = @intSellerId WHERE intImportDtnDetailId = @intImportDtnDetailId
+						SET @intEntityVendorId = @intSellerId
+					END
+				END
+
+				IF (ISNULL(@intInventoryReceiptId, 0) = 0) AND (ISNULL(@intEntityVendorId, 0) <> 0)
+				BEGIN
+					DECLARE @ysnInventoryPosted BIT = NULL
+
+					SELECT TOP 1 @intInventoryReceiptId = IR.intInventoryReceiptId
+					FROM tblICInventoryReceipt IR
+					WHERE IR.intEntityVendorId = @intEntityVendorId
+						AND IR.strBillOfLading = @strBOL
+						AND IR.intSourceType = 3
+						AND IR.strReceiptType = 'Direct'
+
+					IF (ISNULL(@intInventoryReceiptId, 0) <> 0)
+					BEGIN
+						UPDATE tblTRImportDtnDetail SET intInventoryReceiptId = @intInventoryReceiptId WHERE intImportDtnDetailId = @intImportDtnDetailId
+					END					
+				END
+			END
 
 			EXEC uspTRInsertLoadFromImport 
 				@intImportLoadId = @intImportLoadId
@@ -58,9 +103,9 @@ BEGIN
 				, @dblInvoiceAmount = @dblInvoiceAmount
 				, @intEntityVendorId = @intEntityVendorId
 				, @intUserId = @intUserId
-				, @ysnOverrideTolerance = 1
+				, @ysnOverrideTolerance = @ysnOverrideTolerance
 
-			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId
+			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance
 		END
 		CLOSE @CursorTran  
 		DEALLOCATE @CursorTran
