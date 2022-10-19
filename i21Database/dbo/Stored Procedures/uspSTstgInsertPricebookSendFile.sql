@@ -748,7 +748,7 @@ BEGIN
 																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 																ELSE Prc.dblSalePrice
 								END AS [InventoryValuePrice]
-							, Cat.strCategoryCode [MerchandiseCode]
+							, CategoryLoc.strCashRegisterDepartment [MerchandiseCode]
 							, CASE WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate 
 									THEN SplPrc.dblUnitAfterDiscount 
 								   WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
@@ -827,6 +827,8 @@ BEGIN
 						FROM tblICItem I
 						JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = I.intCategoryId
+						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
+							ON Cat.intCategoryId = CategoryLoc.intCategoryId
 						JOIN 
 						(
 							SELECT DISTINCT intItemId FROM @tempTableItems 
@@ -838,6 +840,7 @@ BEGIN
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
 							ON IL.intLocationId = ST.intCompanyLocationId
+							AND CategoryLoc.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -897,7 +900,7 @@ BEGIN
 																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 									ELSE Prc.dblSalePrice
 								END AS[InventoryValuePrice]
-							, Cat.strCategoryCode [MerchandiseCode]
+							, CategoryLoc.strCashRegisterDepartment [MerchandiseCode]
 							, CASE WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
 								   WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
 																									WHERE EIP.intItemLocationId = IL.intItemLocationId
@@ -981,11 +984,14 @@ BEGIN
 							ON tmpItem.intItemId = I.intItemId 
 						JOIN tblICItemLocation IL 
 							ON IL.intItemId = I.intItemId
+						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
+							ON Cat.intCategoryId = CategoryLoc.intCategoryId
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
 							--ON ST.intStoreId = SubCat.intStoreId
 							ON IL.intLocationId = ST.intCompanyLocationId
+							AND CategoryLoc.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
