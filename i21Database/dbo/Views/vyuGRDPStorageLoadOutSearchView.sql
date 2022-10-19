@@ -3,6 +3,7 @@ AS
 SELECT 
 	intCustomerStorageId		  	= CS.intCustomerStorageId
 	,intTransactionId			  	= CS.intTicketId
+	,strTransactionCode				= 'SC' COLLATE Latin1_General_CI_AS
 	,intEntityId				  	= CS.intEntityId
 	,strName					  	= E.strName  
 	,strStorageTicketNumber			= CS.strStorageTicketNumber
