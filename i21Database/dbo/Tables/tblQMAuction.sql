@@ -68,7 +68,7 @@
 	[strComments3] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 
 	CONSTRAINT [PK_tblQMAuction] PRIMARY KEY ([intAuctionId]), 
-	CONSTRAINT [FK_tblQMAuction_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [tblQMSample]([intSampleId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblQMAuction_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [tblQMSample]([intSampleId]),
 	CONSTRAINT [FK_tblQMAuction_tblQMSaleYear] FOREIGN KEY ([intSaleYearId]) REFERENCES [tblQMSaleYear]([intSaleYearId]),
 	CONSTRAINT [FK_tblQMAuction_tblQMCatalogueType] FOREIGN KEY ([intCatalogueTypeId]) REFERENCES [tblQMCatalogueType]([intCatalogueTypeId]),
 	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES [tblEMEntity]([intEntityId]),
