@@ -212,6 +212,7 @@ BEGIN TRY
 						INNER JOIN tblGRSettleStorageTicket GRT ON GRT.intSettleStorageId = GRS.intSettleStorageId
 						INNER JOIN tblGRCustomerStorage GRC ON GRC.intCustomerStorageId = GRT.intCustomerStorageId
 					WHERE GRC.intTicketId = @intTicketId
+							AND GRS.intParentSettleStorageId IS NOT NULL
 
 					DECLARE settleStorageCursor CURSOR LOCAL FAST_FORWARD
 					FOR
@@ -1482,6 +1483,9 @@ BEGIN TRY
 								END
 							
 								EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
+								
+								EXEC [dbo].[uspGRReverseOnShipmentDelete] @InventoryShipmentId;
+								
 								EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 								EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
 

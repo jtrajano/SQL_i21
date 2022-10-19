@@ -1276,6 +1276,14 @@
     <Build Include="dbo\Functions\fnTFCoalesceCarrier.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseOnShipmentDelete.sql" />
+    <Build Include="dbo\vyuQMUserLocation.sql" />
+    <Build Include="dbo\Tables\tblMFLocationLeadTime.sql" />
+    <Build Include="dbo\Views\vyuMFLocationLeadTime.sql" />
+    <Build Include="dbo\Tables\tblQMAuction.sql" />
+    <Build Include="dbo\Tables\tblQMCatalogueType.sql" />
+    <Build Include="dbo\Tables\tblQMSaleYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromDirectFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

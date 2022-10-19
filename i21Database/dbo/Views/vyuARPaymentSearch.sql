@@ -47,7 +47,7 @@ LEFT JOIN tblCMBank B WITH (NOLOCK) ON B.intBankId = BA.intBankId
 INNER JOIN tblSMCompanyLocation CL WITH (NOLOCK) ON P.intLocationId = CL.intCompanyLocationId
 LEFT OUTER JOIN tblEMEntity POSTEDBY WITH (NOLOCK) ON P.intPostedById = POSTEDBY.intEntityId
 LEFT OUTER JOIN tblSMCurrency SMC WITH (NOLOCK) ON P.intCurrencyId = SMC.intCurrencyID
-LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId
+LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId AND ARP.strRecordNumber = P.strRecordNumber
 LEFT JOIN tblGLFiscalYearPeriod AccPeriod ON P.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 LEFT JOIN (
      SELECT intPaymentId
