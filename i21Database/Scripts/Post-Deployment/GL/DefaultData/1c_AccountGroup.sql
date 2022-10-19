@@ -634,15 +634,17 @@ BEGIN
 
 		PRINT N'END INSERT DEFAULT SUB GROUPS: Payroll Tax Expenses'
 		PRINT N'BEGIN INSERT DEFAULT SUB GROUPS: Payroll Expenses'
-
-		IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE (strAccountGroup = N'Payroll Expense' OR strAccountGroup = N'Payroll Expenses') AND strAccountType = N'Expense' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL))
+		IF (SELECT COUNT(*) FROM tblGLAccountGroup WHERE strAccountGroup IN( N'Payroll Expenses',  N'Payroll Expense')) = 1
 		BEGIN
-			UPDATE tblGLAccountGroup SET strAccountGroup = 'Payroll Expenses'
-										, intSort = 500500
-										, strAccountGroupNamespace = 'System'
-										, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Expense' AND strAccountType = N'Expense' AND intParentGroupId = 0) 
-										WHERE  (strAccountGroup = N'Payroll Expense' OR strAccountGroup = N'Payroll Expenses') AND strAccountType = N'Expense' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL)
-		END	
+			IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE (strAccountGroup = N'Payroll Expense' OR strAccountGroup = N'Payroll Expenses') AND strAccountType = N'Expense' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL))
+			BEGIN
+				UPDATE tblGLAccountGroup SET strAccountGroup = 'Payroll Expenses'
+											, intSort = 500500
+											, strAccountGroupNamespace = 'System'
+											, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Expense' AND strAccountType = N'Expense' AND intParentGroupId = 0) 
+											WHERE  (strAccountGroup = N'Payroll Expense' OR strAccountGroup = N'Payroll Expenses') AND strAccountType = N'Expense' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL)
+			END	
+		END
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Expenses' AND strAccountType = N'Expense')
 		BEGIN
 			INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupId], [intGroup], [intSort], [intConcurrencyId], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Payroll Expenses', N'Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Expense' AND strAccountType = N'Expense') , 1, 500500, 1, NULL, NULL, N'System')
