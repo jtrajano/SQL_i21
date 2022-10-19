@@ -1152,7 +1152,6 @@
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDispatchUpdateOrders.sql" />
-    <Build Include="dbo\Tables\tblAPPaymentIntegrationTransaction.sql" />
     <Build Include="dbo\Views\vyuTRGetImportDTNForReprocess.sql" />
     <Build Include="dbo\Tables\uspTRInsertLoadFromImport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRReprocessImportDtn.sql" />
@@ -11336,7 +11335,6 @@
     <Build Include="dbo\Tables\tblSMTermPullPoint.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLRecalcAll.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
