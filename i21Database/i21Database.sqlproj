@@ -1272,6 +1272,19 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
+    <Build Include="dbo\Views\vyuGRDPStorageLoadOutSearchView.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceCarrier.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseOnShipmentDelete.sql" />
+    <Build Include="dbo\vyuQMUserLocation.sql" />
+    <Build Include="dbo\Tables\tblMFLocationLeadTime.sql" />
+    <Build Include="dbo\Views\vyuMFLocationLeadTime.sql" />
+    <Build Include="dbo\Tables\tblQMAuction.sql" />
+    <Build Include="dbo\Tables\tblQMCatalogueType.sql" />
+    <Build Include="dbo\Tables\tblQMSaleYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromDirectFile.sql" />
+    <Build Include="dbo\Tables\tblQMSampleOtherBuyers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11101,6 +11114,8 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateTooltipControls.sql" />
+    <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11523,6 +11538,14 @@
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
     <Build Include="dbo\Tables\tblQMGardenMark.sql" />
     <Build Include="dbo\Views\vyuQMGetGardenMark.sql" />
+    <Build Include="dbo\Tables\tblQMImportLog.sql" />
+    <Build Include="dbo\Tables\tblQMImportGardenMark.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportGardenMark.sql" />
+    <Build Include="dbo\Views\vyuMFBatch.sql" />
+    <Build Include="dbo\Tables\tblQMTINClearance.sql" />
+    <Build Include="dbo\Views\vyuQMSearchTINClearance.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMClearTIN.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateTINBatchId.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

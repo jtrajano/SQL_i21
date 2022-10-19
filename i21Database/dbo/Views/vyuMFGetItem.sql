@@ -12,7 +12,7 @@ SELECT Item.intItemId
 	 , UnitMeasure.strUnitMeasure AS strStockUOM 
 	 , Category.strCategoryCode
 	 , Item.strRequired
-	 , ISNULL(ItemPricing.dblSalePrice, 0) AS dblSalePrice
+	-- , ISNULL(ItemPricing.dblSalePrice, 0) AS dblSalePrice
 FROM tblICItem AS Item 
 JOIN tblICItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId
 JOIN tblICItemPricing AS ItemPricing ON Item.intItemId = ItemPricing.intItemId
@@ -34,6 +34,6 @@ SELECT intItemId
 	 , '' AS strStockUOM
 	 , '' AS strCategoryCode
 	 , '' AS strRequired
-	 , 0 AS dblSalePrice
+	-- , 0 AS dblSalePrice
 FROM tblICItem 
 WHERE strType in ('Comment','Other Charge')

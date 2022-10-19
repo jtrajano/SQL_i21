@@ -43,8 +43,10 @@ CREATE  TABLE tblMFBatch
 	strLeafManufacturingType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strLeafSize NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strLeafStyle NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
-	intBookId INT  NULL,
+	intMixingUnitLocationId INT  NULL,
 	dblPackagesBought NUMERIC(18,6)  NULL,
+	intItemUOMId INT NULL,
+	intWeightUOMId	INT NULL,
 	strTeaOrigin NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intOriginalItemId INT NOT NULL,
 	dblPackagesPerPallet NUMERIC(18,6)  NULL,
@@ -75,7 +77,6 @@ CREATE  TABLE tblMFBatch
 	dblTeaTaste NUMERIC(18,6)  NULL,
 	dblTeaVolume NUMERIC(18,6)  NULL,
 	intTealingoItemId INT  NULL,
-	strTinNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	dtmWarehouseArrival DATETIME  NULL,
 	intYearManufacture INT  NULL,
 	strPackageSize NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -90,6 +91,7 @@ CREATE  TABLE tblMFBatch
 	strReserveMU NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS  NULL,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	intConcurrencyId INT NULL,
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intSales] ASC,

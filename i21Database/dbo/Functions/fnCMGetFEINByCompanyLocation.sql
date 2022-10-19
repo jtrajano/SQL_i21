@@ -9,41 +9,45 @@ RETURNS @tbl TABLE(
 AS
 BEGIN
 
-DECLARE @intLocationSegmentId int , @intCompanySegmentId INT, @intCompanyLocationId INT, @strFEIN NVARCHAR(10) = '', @strError NVARCHAR(200)
-SELECT  @intLocationSegmentId = L.intAccountSegmentId, @intCompanySegmentId = C.intAccountSegmentId from tblCMBankAccount A  
-OUTER apply(
-	select  intAccountSegmentId from vyuGLLocationAccountId where intGLAccountId = intAccountId
-)L
-OUTER apply(
-	select  intAccountSegmentId from vyuGLCompanyAccountId where intGLAccountId = intAccountId
-)C
-WHERE @intBankAccountId = intBankAccountId
-
-
 DECLARE @ysnHasLocation BIT = 0
-DECLARE @ysnHasComopany BIT = 0
+DECLARE @ysnHasCompany BIT = 0
+DECLARE @intAccountId INT
 
-SELECT @ysnHasLocation = 1 FROM tblSMCompanyLocation WHERE intProfitCenter = @intLocationSegmentId
+SELECT TOP 1 @ysnHasLocation  = 1 FROM tblGLAccountStructure WHERE intStructureType = 3
+SELECT TOP 1 @ysnHasCompany  = 1 FROM tblGLAccountStructure WHERE intStructureType = 6
 
-IF (@ysnHasLocation = 1)
+SELECT TOP 1 @intAccountId =intGLAccountId FROM tblCMBankAccount A   WHERE intBankAccountId = @intBankAccountId
+
+DECLARE @intAccountSegmentIdLocation INT
+DECLARE @intAccountSegmentIdCompany INT
+
+IF @ysnHasLocation =1
+	SELECT  @intAccountSegmentIdLocation = intAccountSegmentId from vyuGLLocationAccountId where @intAccountId = intAccountId
+
+IF @ysnHasCompany = 1
+	SELECT  @intAccountSegmentIdCompany = intAccountSegmentId from vyuGLCompanyAccountId where @intAccountId = intAccountId
+
+IF @ysnHasLocation = 1 AND @ysnHasCompany = 1
+	INSERT INTO @tbl(FEIN, Error)
+	SELECT TOP 1 strFEIN, '' FROM tblSMCompanyLocation 
+	WHERE intProfitCenter = @intAccountSegmentIdLocation AND intCompanySegment = @intAccountSegmentIdCompany
+
+IF @ysnHasLocation = 1 AND @ysnHasCompany = 0
+	INSERT INTO @tbl(FEIN, Error)
+	SELECT TOP 1 strFEIN, '' FROM tblSMCompanyLocation 
+	WHERE intProfitCenter = @intAccountSegmentIdLocation
+
+
+IF NOT EXISTS(SELECT 1 FROM  @tbl)
 BEGIN
-	SELECT TOP 1 @ysnHasComopany = 1 FROM tblSMCompanyLocation WHERE intProfitCenter = @intLocationSegmentId AND intCompanySegment = @intCompanySegmentId
-END
 
-
-IF @ysnHasLocation = 0 OR @ysnHasComopany = 0
-BEGIN
-		SET @strError = 'FEIN was not found. Please fill up the FEIN and make sure that Location and Company Segment of the Bank GL Account is setup in a Company Location.'
-END
-ELSE
-BEGIN
-	SELECT TOP 1 @strFEIN = strFEIN from tblSMCompanyLocation A
-	WHERE intCompanySegment = @intCompanySegmentId AND intProfitCenter = @intLocationSegmentId
+	INSERT INTO @tbl (
+		 Error
+	)
+	SELECT
+	'FEIN was not found. Please fill up the FEIN and make sure that Location and/or Company Segment of the Bank GL Account is setup in a Company Location.'
 
 END
-
-INSERT INTO @tbl ( FEIN, Error ) SELECT @strFEIN, @strError
-
 RETURN
 
 END

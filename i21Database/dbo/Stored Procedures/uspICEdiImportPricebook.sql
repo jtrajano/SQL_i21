@@ -16,11 +16,11 @@ DECLARE @LogId INT
 SELECT @LogId = intImportLogId FROM tblICImportLog WHERE strUniqueId = @UniqueId
 
 IF(@LogId IS NULL AND @UniqueId IS NOT NULL)
-BEGIN
-	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, strUniqueId, intConcurrencyId)
-	SELECT 'Import Pricebook successful', 'EDI', @strFileType, @strFileName, GETDATE(), @intUserId, @UniqueId, 1
-	SET @LogId = @@IDENTITY
-END
+	BEGIN
+		INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, strUniqueId, intConcurrencyId)
+		SELECT 'Import Pricebook successful', 'EDI', @strFileType, @strFileName, GETDATE(), @intUserId, @UniqueId, 1
+		SET @LogId = @@IDENTITY
+	END
 
 -- Remove the bad records from previous import
 DELETE tblICEdiPricebook WHERE strUniqueId <> @UniqueId OR strUniqueId IS NULL
@@ -76,6 +76,7 @@ DECLARE @vendorItemXRef AS TABLE (strSellingUpcNumber				NVARCHAR(50)  COLLATE L
 								, strSellingUpcLongDescription		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 								, strVendorId						NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL
 								, strItemNo							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+								, strUpcModifierNumber				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 								, strUniqueId						UNIQUEIDENTIFIER NULL
 )
 
@@ -84,12 +85,14 @@ INSERT INTO @vendorItemXRef (strSellingUpcNumber
 						   , strSellingUpcLongDescription 
 						   , strVendorId 
 						   , strItemNo
+						   , strUpcModifierNumber
 						   , strUniqueId)
 SELECT DISTINCT strSellingUpcNumber 
 			  , strVendorsItemNumberForOrdering 
 			  , strSellingUpcLongDescription 
 			  , strVendorId 
 			  , strItemNo
+			  , strUpcModifierNumber
 			  , strUniqueId 
 FROM tblICEdiPricebook
 WHERE strUniqueId = @UniqueId;
@@ -110,7 +113,7 @@ WHERE dblDuplicateCount > 1;
 -- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
 DELETE p
 FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2)
+LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS INT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''),1))
 OUTER APPLY (SELECT TOP 1 i.intItemId 
 			 FROM tblICItem i 
 			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i		
@@ -133,7 +136,7 @@ OUTER APPLY (SELECT TOP 1 *
 WHERE p.strUniqueId = @UniqueId AND dup.intItemUOMId IS NOT NULL ;
 
 -- Get the duplicate count. 
-SELECT @duplicatePricebookCount = ISNULL(@originalPricebookCount, 0) - COUNT(1) 
+SELECT @duplicatePricebookCount = @originalPricebookCount - COUNT(1) 
 FROM tblICEdiPricebook 
 WHERE strUniqueId = @UniqueId;
 
@@ -285,41 +288,76 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL
 -------------------------------------------------
 
 -- Log the records with invalid Vendor Ids. 
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, p.intRecordNumber
-	, 'strVendorId'
-	, p.strVendorId
-	, 'Cannot find the Vendor that matches: ' + p.strVendorId
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-FROM 
-	tblICEdiPricebook p
-	OUTER APPLY (
-		SELECT TOP 1 
-			v.* 
-		FROM 
-			vyuAPVendor v
-		WHERE 
-			(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-			OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-	) v	
-WHERE 
-	v.intEntityId IS NULL 
-	AND p.strUniqueId = @UniqueId
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId)
+SELECT @LogId
+	 , 'Error'
+	 , p.intRecordNumber
+	 , 'strVendorId'
+	 , p.strVendorId
+	 , 'Cannot find the Vendor that matches: ' + p.strVendorId
+	 , 'Skipped'
+	 , 'Record not imported.'
+	 , 1
+FROM tblICEdiPricebook p
+OUTER APPLY (SELECT TOP 1 v.* 
+			 FROM vyuAPVendor v
+			 WHERE (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)) v	
+WHERE v.intEntityId IS NULL AND p.strUniqueId = @UniqueId
+
+/* Log the records with invalid Selling UPC */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId)
+SELECT @LogId
+	 , 'Error'
+	 , p.intRecordNumber
+	 , 'Selling UPC Number'		
+	 , strSellingUpcNumber
+	 , 'Invalid UPC Format or Value.'
+	 , 'Skipped'			
+	 , 'Record not imported.'
+	 , 1
+FROM tblICEdiPricebook p
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL;
+
+/* Log the records with invalid Order Case UPC */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId)
+SELECT @LogId
+	 , 'Error'
+	 , p.intRecordNumber
+	 , 'Order Case UPC Number'
+	 ,  strOrderCaseUpcNumber
+	 , 'Invalid UPC Format or Value.'
+	 , 'Skipped'			
+	 , 'Record not imported.'
+	 , 1
+FROM tblICEdiPricebook p
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strOrderCaseUpcNumber,'') IS NOT NULL;
+
 
 -- Log the records with duplicate records
 INSERT INTO tblICImportLogDetail(
@@ -572,6 +610,7 @@ WHERE p.strUniqueId = @UniqueId
   AND NULLIF(p.strAltUPCNumber1, '') IS NOT NULL 
   AND p.ysnAddOrderingUPC = 1 
   AND existUOM.intItemUOMId IS NOT NULL  
+  AND (p.strAltUPCModifier1 <> p.strAltUPCModifier2 AND p.strAltUPCModifier1 <> strUpcModifierNumber)
 
 IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
 	GOTO _Exit_With_Errors
@@ -614,6 +653,7 @@ WHERE p.strUniqueId = @UniqueId
   AND NULLIF(p.strAltUPCNumber2, '') IS NOT NULL 
   AND p.ysnAddOrderingUPC = 1 
   AND existUOM.intItemUOMId IS NOT NULL  
+  AND (p.strAltUPCModifier1 <> p.strAltUPCModifier2 AND p.strAltUPCModifier2 <> strUpcModifierNumber)
 
 IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
 	GOTO _Exit_With_Errors
@@ -828,7 +868,7 @@ FROM tblICEdiPricebook
 WHERE (strAltUPCUOM1 = strAltUPCUOM2)
 /* End of Log of Alt UPC UOM & Item Unit Measure */
 
-/* Log duplicate UPC Selling Number. */
+/* Log Duplicate UPC with modifier. */
 
 INSERT INTO tblICImportLogDetail(intImportLogId
 							   , strType
@@ -843,28 +883,42 @@ INSERT INTO tblICImportLogDetail(intImportLogId
 SELECT @LogId
 	 , 'Error'
 	 , ''
-	 , 'Selling UPC Number'
-	 , PriceBook.strSellingUpcNumber
-	 , 'Duplicate Selling UPC Number found.'
+	 , 'Selling UPC Number / Alternate UPC 1 / Alternate UPC 2'
+	 , DuplicateUPC.strSellingUpcNumber
+	 , 'Duplicate UPC Number with the same Modifier found.'
 	 , 'Skipped'
 	 , 'Record not imported.'
 	 , 1
-FROM tblICEdiPricebook AS PriceBook
-WHERE NULLIF(PriceBook.strItemNo, '') IS NULL
-GROUP By PriceBook.strSellingUpcNumber 
-HAVING COUNT(strSellingUpcNumber) > 1
+FROM(
+	 SELECT strSellingUpcNumber
+	 FROM tblICEdiPricebook 
+	 WHERE (strSellingUpcNumber = strAltUPCNumber1 AND strUpcModifierNumber = strAltUPCModifier1) 
+	    OR (strSellingUpcNumber = strAltUPCNumber2 AND strUpcModifierNumber = strAltUPCModifier2)
+	    OR (strAltUPCNumber1 = strAltUPCNumber2 AND strAltUPCNumber1 = strAltUPCModifier2)
+	 UNION
+	 SELECT P.strSellingUpcNumber
+	 FROM tblICEdiPricebook AS P 
+	 JOIN tblICEdiPricebook AS P1 ON ((P.strSellingUpcNumber = P1.strSellingUpcNumber AND P.strUpcModifierNumber = P1.strUpcModifierNumber) 
+	 						      OR (P.strAltUPCNumber1 = P1.strAltUPCNumber1 AND P.strAltUPCModifier1 = P1.strAltUPCModifier1) 
+	 						      OR (P.strAltUPCNumber2 = P1.strAltUPCNumber2 AND P.strAltUPCModifier1 = P1.strAltUPCModifier2))
+								  AND (P.strItemNo <> P1.strItemNo)) AS DuplicateUPC
 
 /* Remove the duplicate UPC Selling Number. */
 
 DELETE 
 FROM tblICEdiPricebook
-WHERE strSellingUpcNumber IN (SELECT strSellingUpcNumber
-							  FROM tblICEdiPricebook AS PriceBook
-							  WHERE NULLIF(PriceBook.strItemNo, '') IS NULL
-						      GROUP By PriceBook.strSellingUpcNumber 
-							  HAVING COUNT(strSellingUpcNumber) > 1
-
-)
+WHERE intEdiPricebookId IN  (SELECT intEdiPricebookId
+							 FROM tblICEdiPricebook 
+							 WHERE (strSellingUpcNumber = strAltUPCNumber1 AND strUpcModifierNumber = strAltUPCModifier1) 
+								OR (strSellingUpcNumber = strAltUPCNumber2 AND strUpcModifierNumber = strAltUPCModifier2)
+								OR (strAltUPCNumber1 = strAltUPCNumber2 AND strAltUPCNumber1 = strAltUPCModifier2)
+							 UNION
+							 SELECT P.intEdiPricebookId
+							 FROM tblICEdiPricebook AS P 
+							 JOIN tblICEdiPricebook AS P1 ON ((P.strSellingUpcNumber = P1.strSellingUpcNumber AND P.strUpcModifierNumber = P1.strUpcModifierNumber) 
+	 													  OR (P.strAltUPCNumber1 = P1.strAltUPCNumber1 AND P.strAltUPCModifier1 = P1.strAltUPCModifier1) 
+	 													  OR (P.strAltUPCNumber2 = P1.strAltUPCNumber2 AND P.strAltUPCModifier1 = P1.strAltUPCModifier2))
+														  AND (P.strItemNo <> P1.strItemNo))
 /* End of Log duplicate UPC Selling Number.*/
 
 
@@ -1010,37 +1064,26 @@ SELECT [Changes].intItemId
 	 , [Changes].intUnitMeasureId_New
 FROM (MERGE	INTO dbo.tblICItemUOM WITH (HOLDLOCK) AS ItemUOM
 USING (
-	SELECT i.intItemId 
-		 , u.intItemUOMId
-		 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)			
-		 , ysnStockUnit = CASE WHEN stockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 			
-		 , p.* 
-	FROM tblICEdiPricebook p
-	LEFT JOIN tblICItemUOM u ON (NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), RTRIM(LTRIM(u.strUpcCode))) = NULLIF(p.strSellingUpcNumber,'')
-							 OR u.intUpcCode = CASE WHEN NULLIF(p.strSellingUpcNumber,'') IS NOT NULL 
-							AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
-							AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
-							THEN 
-								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
-							ELSE 
-								CAST(NULL AS BIGINT) 	
-						END		
-				)
-	OUTER APPLY (SELECT TOP 1 i.intItemId 
-				 FROM tblICItem i 
-				 WHERE i.strItemNo = NULLIF(p.strItemNo, '')) i			
-	OUTER APPLY (SELECT TOP 1 m.*
-				 FROM tblICUnitMeasure m 
-				 WHERE m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
-				 ORDER BY m.intUnitMeasureId) m
-	OUTER APPLY (SELECT TOP 1 s.*
-				 FROM tblICUnitMeasure s 
-				 WHERE s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
-				 ORDER BY s.intUnitMeasureId) s
+	SELECT Item.intItemId 
+		 , ItemUOM.intItemUOMId
+		 , intUnitMeasureId = COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)			
+		 , ysnStockUnit = CASE WHEN StockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 			
+		 , Pricebook.* 
+	FROM tblICEdiPricebook AS Pricebook
+	INNER JOIN tblICItem AS Item ON Item.strItemNo = NULLIF(Pricebook.strItemNo, '') 		
+	LEFT JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.intModifier = NULLIF(Pricebook.strUpcModifierNumber,'') AND ItemUOM.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
+	OUTER APPLY (SELECT TOP 1 *
+				 FROM tblICUnitMeasure 
+				 WHERE strUnitMeasure = NULLIF(Pricebook.strItemUnitOfMeasure, '')
+				 ORDER BY intUnitMeasureId) AS UnitMeasure
+	OUTER APPLY (SELECT TOP 1 *
+				 FROM tblICUnitMeasure 
+				 WHERE strSymbol = NULLIF(Pricebook.strItemUnitOfMeasure, '')
+				 ORDER BY intUnitMeasureId) AS Symbol
 	OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
 				 FROM tblICItemUOM iu
-				 WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1) stockUnit
-	WHERE p.strUniqueId = @UniqueId
+				 WHERE iu.intItemId = Item.intItemId AND iu.ysnStockUnit = 1) AS StockUnit
+	WHERE Pricebook.strUniqueId = @UniqueId
 ) AS Source_Query ON ItemUOM.intItemUOMId = Source_Query.intItemUOMId AND ItemUOM.intItemId = Source_Query.intItemId 
 			   
 /* If matched and it is allowed to update, update the item uom record. */
@@ -1175,7 +1218,9 @@ SELECT
 	,dtmDateCreated = GETDATE()
 	,intCreatedByUserId = @intUserId
 	,intDataSourceId = 2
-	,1
+	, CASE WHEN p.strOrderCaseUpcNumber = p.strSellingUpcNumber THEN CAST(p.strUpcModifierNumber AS INT) + 1
+		   ELSE 1
+	  END
 FROM 
 	tblICEdiPricebook p
 	INNER JOIN @valid2ndUOM v
@@ -1265,51 +1310,53 @@ WHERE
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
 -- Create the valid list of 1st Alternate UOM
-DECLARE @validAlternate1UOM AS TABLE (intEdiPricebookId INT 
-									, strLongUPCCode	NVARCHAR(50) NULL 
-									, strUpcCode		NVARCHAR(50) NULL
-)
+--DECLARE @validAlternate1UOM AS TABLE (intEdiPricebookId INT 
+--									, strLongUPCCode	NVARCHAR(50) NULL 
+--									, strUpcCode		NVARCHAR(50) NULL
+--)
 
-INSERT INTO @validAlternate1UOM (intEdiPricebookId
-					    	   , strLongUPCCode
-					    	   , strUpcCode
-)
-SELECT p.intEdiPricebookId
-	 , p.strAltUPCNumber1
-	 , dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber1)
-FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-OUTER APPLY (SELECT TOP 1 i.intItemId 
-			 FROM tblICItem i 
-			 WHERE i.intItemId = u.intItemId OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)) i		
-WHERE p.strUniqueId = @UniqueId
-  AND i.intItemId IS NOT NULL 
-  AND (NULLIF(p.strAltUPCQuantity1, '') IS NOT NULL AND NULLIF(p.strAltUPCUOM1, '') IS NOT NULL)
-  AND p.ysnAddOrderingUPC = 1
+--INSERT INTO @validAlternate1UOM (intEdiPricebookId
+--					    	   , strLongUPCCode
+--					    	   , strUpcCode
+--)
+--SELECT p.intEdiPricebookId
+--	 , p.strAltUPCNumber1
+--	 , dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber1)
+--FROM tblICEdiPricebook p
+--LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+--OUTER APPLY (SELECT TOP 1 i.intItemId 
+--			 FROM tblICItem i 
+--			 WHERE i.intItemId = u.intItemId OR i.strItemNo = NULLIF(p.strItemNo ,'')) i		
+--WHERE p.strUniqueId = @UniqueId
+--  AND i.intItemId IS NOT NULL 
+--  AND (NULLIF(p.strAltUPCQuantity1, '') IS NOT NULL AND NULLIF(p.strAltUPCUOM1, '') IS NOT NULL) 
+--  AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber1),'') IS NOT NULL
+--  AND p.ysnAddOrderingUPC = 1
 
-SELECT @duplicateAlternate1UOMUPCCode = @@ROWCOUNT;
+--SELECT @duplicateAlternate1UOMUPCCode = @@ROWCOUNT;
 
--- Remove the duplicate records in @validAlternate1UOM
-;WITH deleteDuplicateAlternate1UOMLongUPC_CTE (intEdiPricebookId
-											 , strLongUPCCode
-											 , dblDuplicateCount
-)
-AS (SELECT p.intEdiPricebookId
-		 , p.strLongUPCCode
-		 , dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
-	FROM @validAlternate1UOM p
-	WHERE p.strLongUPCCode IS NOT NULL		
-)
-DELETE FROM deleteDuplicateAlternate1UOMLongUPC_CTE
-WHERE dblDuplicateCount > 1;
+---- Remove the duplicate records in @validAlternate1UOM
+--;WITH deleteDuplicateAlternate1UOMLongUPC_CTE (intEdiPricebookId
+--											 , strLongUPCCode
+--											 , dblDuplicateCount
+--)
+--AS (SELECT p.intEdiPricebookId
+--		 , p.strLongUPCCode
+--		 , dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
+--	FROM @validAlternate1UOM p
+--	WHERE p.strLongUPCCode IS NOT NULL		
+--)
+--DELETE FROM deleteDuplicateAlternate1UOMLongUPC_CTE
+--WHERE dblDuplicateCount > 1;
 
--- Remove the duplicate records in @validAlternate1UOM
-DELETE p 
-FROM tblICItemUOM iu RIGHT JOIN @validAlternate1UOM p ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
-WHERE iu.intItemUOMId IS NOT NULL ;
+---- Remove the duplicate records in @validAlternate1UOM
+--DELETE p 
+--FROM tblICItemUOM iu 
+--RIGHT JOIN @validAlternate1UOM p ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
+--WHERE iu.intItemUOMId IS NOT NULL ;
 
-SELECT @duplicateAlternate1UOMUPCCode = ISNULL(@duplicateAlternate1UOMUPCCode, 0) - COUNT(1) 
-FROM  @validAlternate1UOM
+--SELECT @duplicateAlternate1UOMUPCCode = ISNULL(@duplicateAlternate1UOMUPCCode, 0) - COUNT(1) 
+--FROM  @validAlternate1UOM
 
 -- Insert Alternate1 UOM
 INSERT INTO tblICItemUOM (intItemId
@@ -1329,7 +1376,7 @@ INSERT INTO tblICItemUOM (intItemId
 SELECT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity1 AS NUMERIC(38, 20)) 
-	 , strUpcCode = v.strUpcCode
+	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(strAltUPCNumber1)
 	 , strLongUPCCode = p.strAltUPCNumber1
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale1, '') IS NULL THEN NULL 
@@ -1344,9 +1391,13 @@ SELECT intItemId = i.intItemId
 	 , dtmDateCreated = GETDATE()
 	 , intCreatedByUserId = @intUserId
 	 , intDataSourceId = 2
-	 , ISNULL(p.strAltUPCModifier1, 1)
+	 , CASE WHEN p.strSellingUpcNumber = p.strOrderCaseUpcNumber AND p.strSellingUpcNumber = p.strAltUPCNumber1 THEN CAST(p.strUpcModifierNumber AS INT) + 2
+			WHEN (p.strSellingUpcNumber = p.strAltUPCNumber1) AND (p.strOrderCaseUpcNumber <> p.strAltUPCNumber1) THEN CAST(p.strUpcModifierNumber AS INT) + 1
+			WHEN (p.strSellingUpcNumber <> p.strAltUPCNumber1) AND (p.strOrderCaseUpcNumber = p.strAltUPCNumber1) THEN 2
+			ELSE ISNULL(p.strAltUPCModifier1, 1)
+	   END
 FROM tblICEdiPricebook p
-INNER JOIN @validAlternate1UOM v ON p.intEdiPricebookId = v.intEdiPricebookId
+--INNER JOIN @validAlternate1UOM v ON p.intEdiPricebookId = v.intEdiPricebookId
 LEFT JOIN tblICItemUOM u ON (ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber OR u.intUpcCode = CASE WHEN p.strSellingUpcNumber IS NOT NULL 
 																																								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
 																																								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
@@ -1369,18 +1420,19 @@ OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1) stockUnit
 OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
 			 FROM tblICItemUOM iu
-			 WHERE iu.intItemId = i.intItemId AND (iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId) OR iu.strLongUPCCode = NULLIF(p.strAltUPCNumber1, '0'))) existUOM
+			 WHERE iu.intItemId = i.intItemId AND (iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId) OR (iu.strLongUPCCode = NULLIF(p.strAltUPCNumber1, '0')) AND NULLIF(p.strAltUPCModifier1, '') = iu.intModifier)) existUOM
 OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 FROM tblICItemUOM iu
-			 WHERE iu.strLongUPCCode = p.strAltUPCNumber1) existUPCCode
+			 WHERE iu.strLongUPCCode = p.strAltUPCNumber1 AND iu.intModifier = CAST(ISNULL(NULLIF(p.strAltUPCModifier1, ''), 1) AS INT)) existUPCCode
 WHERE p.strUniqueId = @UniqueId
   AND i.intItemId IS NOT NULL 
   AND NULLIF(p.strAltUPCQuantity1, '') IS NOT NULL 
   AND NULLIF(p.strAltUPCUOM1, '') IS NOT NULL 
   AND p.ysnAddOrderingUPC = 1
-  AND stockUnit.intItemUOMId IS NOT NULL 
-  AND existUOM.intItemUOMId IS NULL  
+  AND stockUnit.intItemUOMId IS NOT NULL	
+  AND existUOM.intItemUOMId IS NULL   
   AND existUPCCode.intItemUOMId IS NULL 
+  AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber1),'') IS NOT NULL
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
@@ -1406,6 +1458,7 @@ OUTER APPLY (SELECT TOP 1 i.intItemId
 WHERE p.strUniqueId = @UniqueId
   AND i.intItemId IS NOT NULL 
   AND (NULLIF(p.strAltUPCQuantity2, '') IS NOT NULL AND NULLIF(p.strAltUPCUOM2, '') IS NOT NULL)
+  AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2),'') IS NOT NULL
   AND p.ysnAddOrderingUPC = 1
 
 SELECT @duplicateAlternate2UOMUPCCode = @@ROWCOUNT;
@@ -1450,7 +1503,7 @@ INSERT INTO tblICItemUOM (intItemId
 SELECT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity2 AS NUMERIC(38, 20)) 
-	 , strUpcCode = v.strUpcCode
+	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(strAltUPCNumber2)
 	 , strLongUPCCode = p.strAltUPCNumber2
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale2, '') IS NULL THEN NULL 
@@ -1465,9 +1518,17 @@ SELECT intItemId = i.intItemId
 	 , dtmDateCreated = GETDATE()
 	 , intCreatedByUserId = @intUserId
 	 , intDataSourceId = 2
-	 , ISNULL(p.strAltUPCModifier2, 1)
+	 , CASE WHEN p.strSellingUpcNumber = p.strOrderCaseUpcNumber AND p.strSellingUpcNumber = p.strAltUPCNumber1 AND p.strAltUPCNumber1 = p.strAltUPCNumber2 THEN CAST(p.strUpcModifierNumber AS INT) + 3
+			WHEN (p.strSellingUpcNumber = p.strAltUPCNumber1) AND (p.strAltUPCNumber1 = p.strAltUPCNumber2) AND (p.strOrderCaseUpcNumber <> p.strAltUPCNumber1)  THEN CAST(p.strUpcModifierNumber AS INT) + 2
+			WHEN (p.strSellingUpcNumber = p.strOrderCaseUpcNumber) AND (p.strOrderCaseUpcNumber = p.strAltUPCNumber2) AND (p.strSellingUpcNumber <> p.strAltUPCNumber1) THEN CAST(p.strUpcModifierNumber AS INT) + 2
+			WHEN (p.strAltUPCNumber1 = p.strOrderCaseUpcNumber) AND (p.strOrderCaseUpcNumber = p.strAltUPCNumber2) AND (p.strSellingUpcNumber <> p.strAltUPCNumber2) THEN 3
+			WHEN (p.strOrderCaseUpcNumber <> p.strAltUPCNumber2 AND p.strAltUPCNumber2 <> p.strAltUPCNumber1) AND (p.strSellingUpcNumber = p.strAltUPCNumber2) THEN ISNULL(p.strAltUPCModifier1, CAST(p.strUpcModifierNumber AS INT) + 1) 
+			WHEN (p.strSellingUpcNumber <> p.strAltUPCNumber2 AND p.strAltUPCNumber2 <> p.strAltUPCNumber1) AND (p.strOrderCaseUpcNumber = p.strAltUPCNumber2) THEN 2
+			WHEN (p.strSellingUpcNumber <> p.strAltUPCNumber2 AND p.strAltUPCNumber2 <> p.strOrderCaseUpcNumber) AND (p.strAltUPCNumber1 = p.strAltUPCNumber2) THEN 2
+			ELSE ISNULL(p.strAltUPCModifier1, 1)
+	   END
 FROM tblICEdiPricebook p
-INNER JOIN @validAlternate2UOM v ON p.intEdiPricebookId = v.intEdiPricebookId
+--INNER JOIN @validAlternate2UOM v ON p.intEdiPricebookId = v.intEdiPricebookId
 LEFT JOIN tblICItemUOM u ON (ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber OR u.intUpcCode = CASE WHEN p.strSellingUpcNumber IS NOT NULL 
 																																								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
 																																								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
@@ -1490,7 +1551,7 @@ OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1) stockUnit
 OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
 			 FROM tblICItemUOM iu
-			 WHERE iu.intItemId = i.intItemId AND (iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId) OR iu.strLongUPCCode = NULLIF(p.strAltUPCNumber2, '0'))) existUOM
+			 WHERE iu.intItemId = i.intItemId AND (iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId) OR (iu.strLongUPCCode = NULLIF(p.strAltUPCNumber2, '0')) AND NULLIF(p.strAltUPCModifier2, '') = iu.intModifier)) existUOM
 OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 FROM tblICItemUOM iu
 			 WHERE iu.strLongUPCCode = p.strAltUPCNumber2) existUPCCode
@@ -1502,27 +1563,20 @@ WHERE p.strUniqueId = @UniqueId
   AND stockUnit.intItemUOMId IS NOT NULL 
   AND existUOM.intItemUOMId IS NULL  
   AND existUPCCode.intItemUOMId IS NULL 
+  AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2),'') IS NOT NULL
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
 -- Insert the Product Sub Category if it does not exists 
-INSERT INTO tblSTSubcategory (
-	strSubcategoryType
-	,strSubcategoryId
-	,intConcurrencyId
-)
-SELECT 
-	DISTINCT 
-	strSubcategoryType = 'C'
-	,strSubcategoryId = CAST(p.strProductClass AS NVARCHAR(8)) 
-	,intConcurrencyId = 1	
-FROM 
-	tblICEdiPricebook p LEFT JOIN tblSTSubcategory sc 
-		ON sc.strSubcategoryId = CAST(NULLIF(p.strProductClass, '') AS NVARCHAR(8))
-		AND sc.strSubcategoryType = 'C'
-WHERE
-	sc.intSubcategoryId IS NULL 
-	AND NULLIF(p.strProductClass, '') IS NOT NULL 
+INSERT INTO tblSTSubcategory (strSubcategoryType
+							, strSubcategoryId
+							, intConcurrencyId)
+SELECT DISTINCT strSubcategoryType	= 'C'
+			  , strSubcategoryId	= CAST(p.strProductClass AS NVARCHAR(8)) 
+			  , intConcurrencyId	= 1	
+FROM tblICEdiPricebook p 
+LEFT JOIN tblSTSubcategory sc ON sc.strSubcategoryId = CAST(NULLIF(p.strProductClass, '') AS NVARCHAR(8)) AND sc.strSubcategoryType = 'C'
+WHERE sc.intSubcategoryId IS NULL AND NULLIF(p.strProductClass, '') IS NOT NULL 
 
 SET @insertedProductClass = ISNULL(@insertedProductClass, 0) + @@ROWCOUNT;
 
@@ -1575,6 +1629,33 @@ BEGIN
 			FROM @Locations
 		END
 END 
+
+
+/* Log Pricing Level*/
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId
+)
+SELECT @LogId
+	 , 'Warning'
+	 , ''
+	 , 'Pricing Level'
+	 ,  CompanyLocation.strLocationName
+	 , 'Location does not have Pricing Level'
+	 , 'Skipped'
+	 , 'Pricing Level not Imported'
+	 , 1
+FROM @ValidLocations AS ValidLocation 
+INNER JOIN tblSMCompanyLocation CompanyLocation ON ValidLocation.intCompanyLocationId = CompanyLocation.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocationPricingLevel AS PricingLevel ON PricingLevel.intCompanyLocationId = CompanyLocation.intCompanyLocationId 	
+WHERE PricingLevel.intCompanyLocationPricingLevelId IS NULL
 
 -- Upsert the Item Location 
 INSERT INTO #tmpICEdiImportPricebook_tblICItemLocation (
@@ -2143,7 +2224,7 @@ WHEN NOT MATCHED THEN
 		  , intCreatedByUserId
 		  , intDataSourceId
 		  , intImportFlagInternal)
-	VALUES (Source_Query.intItemId				
+	VALUES (Source_Query.intItemId				  
 		  , Source_Query.intItemLocationId	
 		  , Source_Query.intItemUOMId	
 		  , Source_Query.dblRetailPrice		
@@ -2239,8 +2320,8 @@ USING (
 			pl.intCompanyLocationId = ValidLocation.intCompanyLocationId 	
 	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1)))
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice1, '') AS NUMERIC(38, 20)) <> 0
+	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1))) AND ItemUOM.intModifier = NULLIF(Pricebook.strAltUPCModifier1,'')
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice1, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber1) IS NOT NULL
 	
 	UNION ALL 
 	SELECT Item.intItemId
@@ -2270,8 +2351,8 @@ USING (
 			pl.intCompanyLocationId = ValidLocation.intCompanyLocationId 	
 	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2)))
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) <> 0
+	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2))) AND ItemUOM.intModifier = NULLIF(Pricebook.strAltUPCModifier2,'')
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
 ) AS Source_Query 
 	ON ItemPriceLevel.intItemId = Source_Query.intItemId
 	AND ItemPriceLevel.intItemLocationId = Source_Query.intItemLocationId
@@ -2357,8 +2438,8 @@ USING (
 				 FROM @ValidLocations loc 
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strOrderPackageDescription)))
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0
+	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1)))
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber1) IS NOT NULL
 	UNION
 	SELECT Item.intItemId
 		 , ItemLocation.intItemLocationId
@@ -2375,8 +2456,8 @@ USING (
 				 FROM @ValidLocations loc 
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId 
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strItemUnitOfMeasure)))
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0
+	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2)))
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
 ) AS Source_Query ON EffectiveItemCost.intItemId = Source_Query.intItemId 
 			     AND EffectiveItemCost.intItemLocationId = Source_Query.intItemLocationId
 			     AND CONVERT(DATE, EffectiveItemCost.dtmEffectiveCostDate, 101) = CONVERT(DATE, Source_Query.dtmEffectiveDate, 101) 
@@ -2447,16 +2528,7 @@ USING (
 		 , Pricebook.ysnUpdatePrice
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	INNER JOIN tblICItemUOM AS UnitOfMeasure ON (ISNULL(NULLIF(RTRIM(LTRIM(UnitOfMeasure.strLongUPCCode)), ''), RTRIM(LTRIM(UnitOfMeasure.strUpcCode))) = Pricebook.strSellingUpcNumber
-							   OR UnitOfMeasure.intUpcCode = CASE WHEN Pricebook.strSellingUpcNumber IS NOT NULL 
-																   AND ISNUMERIC(RTRIM(LTRIM(Pricebook.strSellingUpcNumber))) = 1 
-															   AND NOT (Pricebook.strSellingUpcNumber LIKE '%.%' 
-																	 OR Pricebook.strSellingUpcNumber LIKE '%e%' 
-																	 OR Pricebook.strSellingUpcNumber LIKE '%E%') THEN 
-																		CAST(RTRIM(LTRIM(Pricebook.strSellingUpcNumber)) AS BIGINT) -- CASE First Value.
-																  ELSE 
-																		CAST(NULL AS BIGINT) -- CASE Default Value. 	
-															 END)
+	INNER JOIN tblICItemUOM AS UnitOfMeasure ON UnitOfMeasure.intItemId = Item.intItemId AND UnitOfMeasure.intModifier = NULLIF(Pricebook.strUpcModifierNumber,'') AND UnitOfMeasure.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
 	OUTER APPLY (SELECT loc.intCompanyLocationId 
 					  , l.*
 				 FROM @ValidLocations loc 
@@ -2562,16 +2634,7 @@ USING (
 		 , ItemUOM.dblUnitQty
 	FROM @vendorItemXRef AS VendorXRef 
 	INNER JOIN tblICItem AS Item ON  LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(VendorXRef.strItemNo))), '')
-	INNER JOIN tblICItemUOM AS ItemUOM ON (ISNULL(NULLIF(RTRIM(LTRIM(ItemUOM.strLongUPCCode)), ''), RTRIM(LTRIM(ItemUOM.strUpcCode))) = VendorXRef.strSellingUpcNumber
-									   OR ItemUOM.intUpcCode = CASE WHEN VendorXRef.strSellingUpcNumber IS NOT NULL 
-																	 AND ISNUMERIC(RTRIM(LTRIM(VendorXRef.strSellingUpcNumber))) = 1 
-															     AND NOT (VendorXRef.strSellingUpcNumber LIKE '%.%' 
-																      OR VendorXRef.strSellingUpcNumber LIKE '%e%' 
-																	  OR VendorXRef.strSellingUpcNumber LIKE '%E%') THEN 
-																			CAST(RTRIM(LTRIM(VendorXRef.strSellingUpcNumber)) AS BIGINT) -- CASE First Value
-																	ELSE 
-																			CAST(NULL AS BIGINT) -- CASE Default Value
-															   END)
+	INNER JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.intModifier = NULLIF(VendorXRef.strUpcModifierNumber,'') AND ItemUOM.strLongUPCCode =  NULLIF(VendorXRef.strSellingUpcNumber,'')	
 	CROSS APPLY (SELECT TOP 1 v.* 
 				 FROM vyuAPVendor v
 				 WHERE (v.strVendorId = VendorXRef.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)) AS Vendor				
@@ -2687,6 +2750,33 @@ BEGIN
 		intImportLogId = @LogId
 		AND @ErrorCount > 0
 	
+	-- Log when Add Ordering UPC, Add Record, Update Record or Update Price was not checked.
+	IF @warningNotImported <> 0
+	BEGIN
+		INSERT INTO tblICImportLogDetail
+		( intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId)
+
+		SELECT @LogId
+			 , 'Warning'
+			 , intRecordNumber
+			 , 'Vendor Category'
+			 , strVendorCategory
+			 , 'Import does not happen because the Vendor Category is not enabled for Add Ordering UPC, Add Record, Update Record or Update Price.'
+			 , 'Skipped'
+			 , 'Record not imported.'
+			 , 1
+		FROM tblICEdiPricebook 
+		WHERE strUniqueId = @UniqueId AND ysnAddNewRecords = 0 AND ysnUpdateExistingRecords = 0 AND ysnAddOrderingUPC = 0 AND ysnUpdatePrice = 0;
+	END;
+
 	-- Log when Add Ordering UPC, Add Record, Update Record or Update Price was not checked.
 	IF @warningNotImported <> 0
 	BEGIN

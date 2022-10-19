@@ -149,11 +149,14 @@ BEGIN TRY
 			AND T.intRecordId = @intContractHeaderId
 		ORDER BY intApprovalId
 
+		IF EXISTS (SELECT 1 FROM tblCTSequenceAmendmentLog WHERE intSequenceHistoryId = (SELECT TOP  1 intSequenceHistoryId FROM @tblSequenceHistoryId))
+		BEGIN
+		PRINT 1
 		SELECT  @strAmendedColumns = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
 											FROM tblCTAmendmentApproval AAP
 											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
-											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
+											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId 
 											WHERE ISNULL(AAP.ysnAmendment,0) = 1
 												--AND AL.dtmHistoryCreated <= @dtmApproveDate
 											FOR XML PATH('')
@@ -166,6 +169,26 @@ BEGIN TRY
 											WHERE ISNULL(AAP.ysnAmendment,0) = 1
 												--AND AL.dtmHistoryCreated <= @dtmApproveDate 
 											order by AL.dtmHistoryCreated DESC )
+		END
+		ELSE
+		BEGIN
+		PRINT 2
+		SELECT  @strAmendedColumns = STUFF((
+											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
+											FROM tblCTAmendmentApproval AAP
+											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId = @intContractHeaderId 
+											JOIN tblCTSequenceHistory SH  ON SH.intContractHeaderId = @intContractHeaderId
+											WHERE ISNULL(AAP.ysnAmendment,0) = 1
+											FOR XML PATH('')
+											), 1, 1, '')
+
+		SELECT  @strAmendedDate = (SELECT TOP 1 CONVERT(VARCHAR(20),AL.dtmHistoryCreated, 3)   
+											FROM tblCTAmendmentApproval AAP
+											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId = @intContractHeaderId 
+											JOIN tblCTSequenceHistory SH  ON SH.intContractHeaderId = @intContractHeaderId 
+											WHERE ISNULL(AAP.ysnAmendment,0) = 1 
+											order by AL.dtmHistoryCreated DESC )
+		END
 
 	END
 

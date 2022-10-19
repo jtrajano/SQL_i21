@@ -90,6 +90,7 @@ SELECT CH.intContractHeaderId
 	, CH.ysnQuantityAtHeaderLevel
 	, CH.intProductTypeId
 	, strHeaderProductType = CA.strDescription
+	, CH.intCompanyLocationId
 FROM tblCTContractHeader				CH	WITH (NOLOCK)
 JOIN tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=	CH.intContractTypeId
 JOIN tblEMEntity						EY	WITH (NOLOCK) ON	EY.intEntityId						=	CH.intEntityId

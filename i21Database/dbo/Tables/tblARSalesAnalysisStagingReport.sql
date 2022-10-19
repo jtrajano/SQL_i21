@@ -17,6 +17,7 @@ CREATE TABLE [dbo].[tblARSalesAnalysisStagingReport](
     [intItemAccountId]					INT NULL,
     [intCurrencyId]						INT NULL,
     [intInvoiceDetailId] 				INT NULL,
+	[intPeriodsToAccrue]				INT NULL,
     [dtmDate]							DATETIME NULL,
     [dblQtyOrdered]						NUMERIC(18, 6) NULL,
 	[dblQtyShipped]						NUMERIC(18, 6) NULL,

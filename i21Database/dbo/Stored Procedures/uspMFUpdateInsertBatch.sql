@@ -4,7 +4,7 @@ CREATE PROCEDURE uspMFUpdateInsertBatch
 AS
 
 SELECT TOP 1 @strBatchId = strBatchId FROM tblMFBatch A
-JOIN MFBatchTableType B
+JOIN @MFBatchTableType B
 ON 
 A.intSalesYear = B.intSalesYear
 AND A.intSales = B.intSales
@@ -51,7 +51,6 @@ BEGIN
 	strLeafManufacturingType		 = T.strLeafManufacturingType,
 	strLeafSize						 = T.strLeafSize,
 	strLeafStyle					 = T.strLeafStyle,
-	intBookId						 = T.intBookId,
 	dblPackagesBought				 = T.dblPackagesBought,
 	strTeaOrigin					 = T.strTeaOrigin,
 	intOriginalItemId				 = T.intOriginalItemId,
@@ -83,7 +82,6 @@ BEGIN
 	dblTeaTaste						 = T.dblTeaTaste,
 	dblTeaVolume					 = T.dblTeaVolume,
 	intTealingoItemId				 = T.intTealingoItemId,
-	strTinNumber					 = T.strTinNumber,
 	dtmWarehouseArrival				 = T.dtmWarehouseArrival,
 	intYearManufacture				 = T.intYearManufacture,
 	strPackageSize					 = T.strPackageSize,
@@ -152,7 +150,6 @@ BEGIN
 		,strLeafManufacturingType
 		,strLeafSize
 		,strLeafStyle
-		,intBookId
 		,dblPackagesBought
 		,strTeaOrigin
 		,intOriginalItemId
@@ -184,7 +181,6 @@ BEGIN
 		,dblTeaTaste
 		,dblTeaVolume
 		,intTealingoItemId
-		,strTinNumber
 		,dtmWarehouseArrival
 		,intYearManufacture
 		,strPackageSize
@@ -243,7 +239,6 @@ BEGIN
 		,strLeafManufacturingType
 		,strLeafSize
 		,strLeafStyle
-		,intBookId
 		,dblPackagesBought
 		,strTeaOrigin
 		,intOriginalItemId
@@ -275,7 +270,6 @@ BEGIN
 		,dblTeaTaste
 		,dblTeaVolume
 		,intTealingoItemId
-		,strTinNumber
 		,dtmWarehouseArrival
 		,intYearManufacture
 		,strPackageSize

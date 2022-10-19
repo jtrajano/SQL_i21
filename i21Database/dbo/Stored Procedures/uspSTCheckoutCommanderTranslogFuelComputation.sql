@@ -29,7 +29,8 @@ JOIN dbo.tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = IL.intLocationId
 JOIN dbo.tblSTStore S 
 	ON S.intCompanyLocationId = CL.intCompanyLocationId
-WHERE S.intStoreId = @intStoreId
+WHERE S.intStoreId = @intStoreId AND 
+	UOM.intItemUOMId IN (SELECT intItemUOMId FROM tblSTPumpItem WHERE intStoreId = @intStoreId) 
 
 
 END

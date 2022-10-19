@@ -5,6 +5,7 @@
 	intCompanyId INT NULL,
 	[intSampleTypeId] INT NOT NULL, 
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[intCompanyLocationId] INT, 
 	[intParentSampleId] INT, 
 	[strSampleRefNo] NVARCHAR(30) COLLATE Latin1_General_CI_AS, 
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
@@ -118,6 +119,7 @@
 	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMSample_tblQMSamplingCriteria] FOREIGN KEY ([intSamplingCriteriaId]) REFERENCES [tblQMSamplingCriteria]([intSamplingCriteriaId]),
 	CONSTRAINT [FK_tblQMSample_tblQMCuppingSessionDetail] FOREIGN KEY ([intCuppingSessionDetailId]) REFERENCES [tblQMCuppingSessionDetail]([intCuppingSessionDetailId]) ON DELETE CASCADE
+
 )
 GO
 CREATE STATISTICS [_dta_stat_1863273993_4_11_1] ON [dbo].[tblQMSample]([strSampleNumber], [intContractDetailId], [intSampleId])

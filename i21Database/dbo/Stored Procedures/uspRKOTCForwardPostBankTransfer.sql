@@ -64,8 +64,8 @@ BEGIN TRY
 		, intCurrencyExchangeRateTypeId = otc.intCurrencyExchangeRateTypeId -- Currency Pair
 		, dtmAccrual = otc.dtmTransactionDate
 		, dtmDate = otc.dtmMaturityDate
-		, dblAmountForeignFrom = otc.dblContractAmount -- Buy Amount
-		, dblAmountForeignTo = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+		, dblAmountForeignFrom = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+		, dblAmountForeignTo = otc.dblContractAmount -- Buy Amount
 		, intFutOptTransactionId = otc.intFutOptTransactionId
 		, intFutOptTransactionHeaderId = otc.intFutOptTransactionHeaderId
 		, strDerivativeId = otc.strInternalTradeNo
