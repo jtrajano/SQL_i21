@@ -107,6 +107,7 @@ SELECT S.intSampleId
 	,strContractType = CT.strContractType
 	,strPacking = '' COLLATE Latin1_General_CI_AS
 	,S.intCompanyLocationId
+	,CompanyLocation.strLocationName AS strCompanyLocationName
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -152,4 +153,5 @@ LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND ETC.ys
 LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId
+LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
 WHERE S.intTypeId = 1
