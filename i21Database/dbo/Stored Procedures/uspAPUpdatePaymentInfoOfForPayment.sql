@@ -15,7 +15,6 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 	DECLARE @ids AS Id;
-	DECLARE @invoiceIds AS Id;
 	DECLARE @transCount INT = @@TRANCOUNT;
 	DECLARE @startNumber INT;
 	DECLARE @prefix NVARCHAR(50);
@@ -29,7 +28,7 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#tmpPartitionedVouchers') IS NOT NULL DROP TABLE  #tmpPartitionedVouchers
 	SELECT partitioned.*
 	INTO #tmpPartitionedVouchers 
-	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids, @invoiceIds) partitioned
+	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) partitioned
 
 	SELECT * FROM #tmpPartitionedVouchers 
 
