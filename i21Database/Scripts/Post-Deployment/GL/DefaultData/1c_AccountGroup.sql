@@ -165,7 +165,12 @@ BEGIN
 
 		PRINT N'END INSERT DEFAULT SUB GROUPS: Prepaid'
 		PRINT N'BEGIN INSERT DEFAULT SUB GROUPS: Inventories'
+	
 
+
+		IF (SELECT COUNT(*) FROM tblGLAccountGroup WHERE strAccountGroup IN( N'Inventory',  N'Inventories')) = 1
+		BEGIN
+	 
 		IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE (strAccountGroup = N'Inventory' OR strAccountGroup = N'Inventories') AND strAccountType = N'Asset' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL))
 		BEGIN
 			UPDATE tblGLAccountGroup SET strAccountGroup = 'Inventories'
@@ -174,6 +179,9 @@ BEGIN
 										, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Current Assets' AND strAccountType = N'Asset') 
 										WHERE  (strAccountGroup = N'Inventory' OR strAccountGroup = N'Inventories') AND strAccountType = N'Asset' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL)
 		END		
+		END
+	
+
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset')
 		BEGIN
 			INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupId], [intGroup], [intSort], [intConcurrencyId], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Inventories', N'Asset', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Current Assets' AND strAccountType = N'Asset') , 1, 100150, 1, NULL, NULL, N'System')
@@ -294,13 +302,16 @@ BEGIN
 		PRINT N'END INSERT DEFAULT SUB GROUPS: Sales Tax Payables'
 		PRINT N'BEGIN INSERT DEFAULT SUB GROUPS: Payroll Tax Liabilities'
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE (strAccountGroup = N'Payroll Tax Liability' OR strAccountGroup = N'Payroll Tax Liabilities') AND strAccountType = N'Liability' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL))
+		IF (SELECT COUNT(*) FROM tblGLAccountGroup WHERE strAccountGroup IN(  'Payroll Tax Liabilities',  'Payroll Tax Liability')) = 1
 		BEGIN
-			UPDATE tblGLAccountGroup SET strAccountGroup = 'Payroll Tax Liabilities'
-										, intSort = 200140
-										, strAccountGroupNamespace = 'System'
-										, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Current Liabilities' AND strAccountType = N'Liability') 
-										WHERE  (strAccountGroup = N'Payroll Tax Liability' OR strAccountGroup = N'Payroll Tax Liabilities') AND strAccountType = N'Liability' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL)
+			IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE (strAccountGroup = N'Payroll Tax Liability' OR strAccountGroup = N'Payroll Tax Liabilities') AND strAccountType = N'Liability' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL))
+			BEGIN
+				UPDATE tblGLAccountGroup SET strAccountGroup = 'Payroll Tax Liabilities'
+											, intSort = 200140
+											, strAccountGroupNamespace = 'System'
+											, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Current Liabilities' AND strAccountType = N'Liability') 
+											WHERE  (strAccountGroup = N'Payroll Tax Liability' OR strAccountGroup = N'Payroll Tax Liabilities') AND strAccountType = N'Liability' AND (strAccountGroupNamespace != 'System' OR strAccountGroupNamespace IS NULL)
+			END
 		END
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Payroll Tax Liabilities' AND strAccountType = N'Liability')
 		BEGIN
