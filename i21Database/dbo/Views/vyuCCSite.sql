@@ -18,7 +18,7 @@ SELECT A.intSiteId
 	,A.intCreditCardReceivableAccountId
 	,A.intFeeExpenseAccountId
 	,strEmail = STUFF(
-		(SELECT ',' + CAST(Contact.strEmail AS NVARCHAR) 
+		(SELECT ',' + CAST(Contact.strEmail AS NVARCHAR(75)) 
 			FROM (SELECT strEmail 
 				FROM tblEMEntityToContact I 
 				LEFT JOIN tblEMEntity J ON J.intEntityId = I.intEntityContactId
