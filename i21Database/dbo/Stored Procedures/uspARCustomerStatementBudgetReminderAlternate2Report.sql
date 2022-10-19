@@ -22,6 +22,7 @@ SET XACT_ABORT ON
 
 DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @dtmDateFromLocal					AS DATETIME			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
+	  , @dtmDateFromBudget					AS DATETIME			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 	  , @dtmBalanceForwardDateLocal			AS DATETIME			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 	  , @ysnPrintZeroBalanceLocal			AS BIT				= ISNULL(@ysnPrintZeroBalance, 0)
 	  , @ysnPrintCreditBalanceLocal			AS BIT				= ISNULL(@ysnPrintCreditBalance, 1)
@@ -828,7 +829,7 @@ OUTER APPLY (
 	WHERE BUDGET.intEntityCustomerId = SR.intEntityCustomerId
 	  AND BUDGET.dtmBudgetDate <= NEAREST.dtmBudgetDate
 	  AND BUDGET.dtmBudgetDate <= @dtmDateToLocal
-	  AND BUDGET.dtmBudgetDate >=@dtmDateFrom
+	  AND BUDGET.dtmBudgetDate >= @dtmDateFromBudget
 ) BUDGETNOWDUE
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Budget Reminder Alternate 2'

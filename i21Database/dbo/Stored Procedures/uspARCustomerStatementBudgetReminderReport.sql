@@ -22,6 +22,7 @@ SET XACT_ABORT ON
 
 DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @dtmDateFromLocal					AS DATETIME			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
+	  , @dtmDateFromBudget					AS DATETIME			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 	  , @dtmBalanceForwardDateLocal			AS DATETIME			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 	  , @ysnPrintZeroBalanceLocal			AS BIT				= ISNULL(@ysnPrintZeroBalance, 0)
 	  , @ysnPrintCreditBalanceLocal			AS BIT				= ISNULL(@ysnPrintCreditBalance, 1)
@@ -571,7 +572,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
         FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
-        WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+        WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromBudget AND @dtmDateToLocal
           AND CB.dblAmountPaid < CB.dblBudgetAmount
 	END
 
