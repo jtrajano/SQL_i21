@@ -10,6 +10,7 @@
 	, @intBookId INT = NULL
 	, @intSubBookId INT = NULL
 	, @strPositionBy NVARCHAR(100) = NULL
+	, @strOriginIds NVARCHAR(500) = NULL
 
 AS
 
@@ -35,6 +36,29 @@ BEGIN
 	IF ISNULL(@intForecastWeeklyConsumptionUOMId, 0) = 0
 	BEGIN
 		SET @intForecastWeeklyConsumptionUOMId = @intUOMId
+	END
+
+	DECLARE @ysnSelectAllOrigin BIT = 0
+
+	SELECT intCountryID = CAST(a.Item AS INT)
+	INTO #tmpOriginIds
+	FROM [dbo].[fnSplitString](@strOriginIds, ',') a
+	WHERE @strPositionBy = 'Origin'
+
+	DELETE FROM #tmpOriginIds
+	WHERE intCountryID = 0
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpOriginIds)
+	BEGIN
+		INSERT INTO #tmpOriginIds 
+		SELECT -1
+		
+		INSERT INTO #tmpOriginIds
+		SELECT DISTINCT intCountryID
+		FROM tblICCommodityAttribute
+		WHERE strType = 'Origin'
+
+		SELECT @ysnSelectAllOrigin = 1
 	END
 
 	DECLARE @strUnitMeasure NVARCHAR(MAX)
@@ -152,7 +176,12 @@ BEGIN
 
 	INSERT INTO @PricedContractList
 	SELECT fm.strFutureMonth
-		, strAccountNumber = strContractType + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(ca.strDescription, '') ELSE ISNULL(cv.strEntityName, '') END
+		, strAccountNumber = strContractType + ' - ' + CASE WHEN @strPositionBy = 'Product Type' 
+															THEN ISNULL(ca.strDescription, '') 
+															WHEN @strPositionBy = 'Origin'
+															THEN ISNULL(origin.strDescription, '(Blank)')
+															ELSE ISNULL(cv.strEntityName, '') 
+															END
 		, dblNoOfContract = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN ISNULL(dblBalance, 0)
 				ELSE (CASE WHEN intContractStatusId = 6 THEN (ISNULL(dblDetailQuantity, 0) - ISNULL(dblBalance, 0)) ELSE dblDetailQuantity END) END)
 		, strTradeNo = LEFT(strContractType, 1) + ' - ' + strContractNumber + ' - ' + CONVERT(NVARCHAR, intContractSeq)
@@ -216,6 +245,13 @@ BEGIN
 		AND cv.intContractStatusId NOT IN (2, 3)
 		AND ISNULL(intBookId, 0) = ISNULL(@intBookId, ISNULL(intBookId, 0))
 		AND ISNULL(intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(intSubBookId, 0))
+		AND (@strPositionBy <> 'Origin'
+			OR
+			 (@strPositionBy = 'Origin' 
+			  AND (ISNULL(origin.intCountryID, 0) = 0 AND -1 IN (SELECT intCountryID FROM #tmpOriginIds)
+				  OR origin.intCountryID IN (SELECT intCountryID FROM #tmpOriginIds)
+				  )
+			 ))
 
 	SELECT *
 	INTO #ContractTransaction
@@ -429,7 +465,7 @@ BEGIN
 	INTO #DeltaPrecent
 	FROM (
 		SELECT strFutureMonth
-			, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
+			, strAccountNumber = strAccountNumber + ' (Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
 			, dblNoOfContract = ((CASE WHEN intPricingTypeId = 8 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,dblQuantity * dblRatioContractSize) ELSE dblNoOfContract END) * dblDeltaPercent) / 100
 			, strTradeNo
 			, TransactionDate
@@ -502,7 +538,7 @@ BEGIN
 			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
-				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
+				, strAccountNumber = strAccountNumber + ' (Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
 				, dblNoOfContract = 0
 				, strTradeNo
 				, TransactionDate
@@ -586,7 +622,7 @@ BEGIN
 			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
-				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
+				, strAccountNumber = strAccountNumber + ' (Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
 				, dblNoOfContract = 0
 				, strTradeNo
 				, TransactionDate
@@ -2263,4 +2299,6 @@ BEGIN
 					WHEN strFutureMonth ='Total' THEN '01/01/9999'
 					WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) 
 	END
+
+	DROP TABLE #tmpOriginIds
 END

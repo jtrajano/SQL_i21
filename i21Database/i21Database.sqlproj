@@ -856,6 +856,7 @@
     <Build Include="dbo\Functions\fnAPGetDetailSourceTransactionTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetOriginalTax.sql" />
     <Build Include="dbo\Functions\fnFAMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetOriginByCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
