@@ -49,7 +49,8 @@ GO
 			SELECT id = 121,	name = 'Void Paycheck'			,debitCredit ='C'	UNION ALL 
 			SELECT id = 122,	name = 'Void ACH'				,debitCredit ='C'	UNION ALL 
 			SELECT id = 123,	name = 'Void Direct Deposit'	,debitCredit ='C'	UNION ALL
-			SELECT id = 124,	name = 'NSF'					,debitCredit ='D'
+			SELECT id = 124,	name = 'NSF'					,debitCredit ='D'	UNION ALL
+			SELECT id = 125,	name = 'ACH Credit'				,debitCredit ='C'
 			
 	) AS BankTransactionTypeHardCodedValues
 		ON  BankTransactionTypeTable.intBankTransactionTypeId = BankTransactionTypeHardCodedValues.id
