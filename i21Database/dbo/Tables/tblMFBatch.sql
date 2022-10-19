@@ -45,6 +45,8 @@ CREATE  TABLE tblMFBatch
 	strLeafStyle NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intMixingUnitLocationId INT  NULL,
 	dblPackagesBought NUMERIC(18,6)  NULL,
+	intItemUOMId INT NULL,
+	intWeightUOMId	INT NULL,
 	strTeaOrigin NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intOriginalItemId INT NOT NULL,
 	dblPackagesPerPallet NUMERIC(18,6)  NULL,

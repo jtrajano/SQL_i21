@@ -46,6 +46,8 @@ SELECT
     A.strLeafStyle,
     A.intMixingUnitLocationId,
     A.dblPackagesBought,
+    A.intItemUOMId,
+	A.intWeightUOMId,
     A.strTeaOrigin,
     A.intOriginalItemId,
     A.dblPackagesPerPallet,
