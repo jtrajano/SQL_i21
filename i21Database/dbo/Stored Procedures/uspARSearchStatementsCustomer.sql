@@ -24,6 +24,7 @@ DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @ysnDetailedFormatLocal		AS BIT				= 0
 	  , @ysnPrintCreditBalanceLocal AS BIT				= 1
 	  , @ysnIncludeWriteOffLocal    AS BIT              = 0
+	  , @ysnIncludeBudgetLocal		AS BIT 				= 0
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
@@ -31,6 +32,7 @@ SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
 SET @ysnDetailedFormatLocal		= ISNULL(@ysnDetailedFormat, 0)
 SET @ysnPrintCreditBalanceLocal = ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeWriteOffLocal    = ISNULL(@ysnIncludeWriteOffPayment, 0)
+SET @ysnIncludeBudgetLocal    	= ISNULL(@ysnIncludeBudget, 0)
 
 IF @strAsOfDateFrom <> ''
 	SET @dtmAsOfDateFrom		= ISNULL(CONVERT(DATETIME, @strAsOfDateFrom), GETDATE())
@@ -83,32 +85,41 @@ INSERT INTO tblARSearchStatementCustomer (
 	, intConcurrencyId
 	, intEntityUserId
 )
-SELECT intEntityCustomerId	= AGING.intEntityCustomerId
-	, strCustomerNumber		= AGING.strCustomerNumber
-	, strCustomerName		= AGING.strCustomerName
-	, dblTotalAR			= CASE WHEN ISNULL(@strStatementFormat, 'Open Item') = 'Full Details - No Card Lock' THEN AGING.dblTotalAR - ISNULL(dblFuture, 0) ELSE AGING.dblTotalAR END
-	, dblTotalAR			= CASE WHEN ISNULL(@strStatementFormat, 'Open Item') = 'Full Details - No Card Lock' THEN AGING.dblTotalAR - ISNULL(dblFuture, 0) ELSE AGING.dblTotalAR END
+SELECT intEntityCustomerId	= CUS.intEntityId
+	, strCustomerNumber		= CUS.strCustomerNumber
+	, strCustomerName		= E.strName
+	, dblTotalAR			= CASE WHEN ISNULL(@strStatementFormat, 'Open Item') = 'Full Details - No Card Lock' THEN ISNULL(AGING.dblTotalAR, 0) - ISNULL(dblFuture, 0) ELSE ISNULL(AGING.dblTotalAR, 0) + ISNULL(BUDGET.dblAmountDue, 0) END
+	, dblTotalAR			= CASE WHEN ISNULL(@strStatementFormat, 'Open Item') = 'Full Details - No Card Lock' THEN ISNULL(AGING.dblTotalAR, 0) - ISNULL(dblFuture, 0) ELSE ISNULL(AGING.dblTotalAR, 0) + ISNULL(BUDGET.dblAmountDue, 0)END
 	, ysnHasEmailSetup		= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	, intConcurrencyId		= 1
 	, intEntityUserId		= @intEntityUserId
-FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
-INNER JOIN (
-	SELECT intEntityId
-	FROM tblARCustomer WITH (NOLOCK)
-	WHERE (@ysnDetailedFormatLocal = 0 AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = ISNULL(@strStatementFormat, 'Open Item')) OR @ysnDetailedFormatLocal = 1
-) C ON AGING.intEntityCustomerId = C.intEntityId
+FROM tblARCustomer CUS
+INNER JOIN tblEMEntity E ON CUS.intEntityId = E.intEntityId
+LEFT JOIN tblARCustomerAgingStagingTable AGING WITH (NOLOCK) ON CUS.intEntityId = AGING.intEntityCustomerId
+														    AND AGING.intEntityUserId = @intEntityUserId
+															AND AGING.strAgingType = 'Summary'
+LEFT JOIN (
+	SELECT intEntityCustomerId	= CB.intEntityCustomerId
+	     , dblBudgetAmount		= SUM(dblBudgetAmount)
+		 , dblAmountPaid		= SUM(dblAmountPaid)
+		 , dblAmountDue			= SUM(dblBudgetAmount) - SUM(dblAmountPaid)
+	FROM tblARCustomerBudget CB
+	WHERE CB.dtmBudgetDate BETWEEN @dtmAsOfDateFrom AND @dtmAsOfDate
+	  AND CB.dblAmountPaid < CB.dblBudgetAmount
+	  AND @ysnIncludeBudgetLocal = 1
+	GROUP BY CB.intEntityCustomerId
+) BUDGET ON CUS.intEntityId = BUDGET.intEntityCustomerId
 OUTER APPLY (
 	SELECT intEmailSetupCount = COUNT(*) 
 	FROM dbo.vyuARCustomerContacts CC WITH (NOLOCK)
-	WHERE CC.intCustomerEntityId = AGING.intEntityCustomerId 
+	WHERE CC.intCustomerEntityId = CUS.intEntityId 
 		AND ISNULL(CC.strEmail, '') <> '' 
 		AND CC.strEmailDistributionOption LIKE '%Statements%'
 ) EMAILSETUP
-WHERE (@ysnPrintZeroBalance = 1 OR (@ysnPrintZeroBalance = 0 and ISNULL(AGING.dblTotalAR, 0) <> 0 ))
-AND (@ysnPrintCreditBalanceLocal = 1 OR (@ysnPrintCreditBalanceLocal = 0 AND ISNULL(AGING.dblTotalAR, 0) > 0))
-AND AGING.intEntityUserId = @intEntityUserId
-AND AGING.strAgingType = 'Summary'
-
+WHERE (@ysnPrintZeroBalance = 1 OR (@ysnPrintZeroBalance = 0 AND ISNULL(AGING.dblTotalAR, 0) + ISNULL(BUDGET.dblAmountDue, 0) <> 0 ))
+  AND (@ysnPrintCreditBalanceLocal = 1 OR (@ysnPrintCreditBalanceLocal = 0 AND ISNULL(AGING.dblTotalAR, 0) + ISNULL(BUDGET.dblAmountDue, 0) > 0))
+  AND (@ysnDetailedFormatLocal = 0 AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = ISNULL(@strStatementFormat, 'Open Item')) OR @ysnDetailedFormatLocal = 1
+  
 IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
 	BEGIN
 		DELETE FROM tblARSearchStatementCustomer
