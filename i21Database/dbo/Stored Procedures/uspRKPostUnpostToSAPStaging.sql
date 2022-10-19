@@ -61,6 +61,17 @@ BEGIN
 	LEFT JOIN tblSMCurrency curr
 		ON curr.intCurrencyID = bankAcct.intCurrencyId
 	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+	
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId)
+	BEGIN
+		IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId AND ysnSubCurrency = 1)
+		BEGIN
+			SELECT @intCurrencyId = intMainCurrencyId
+			FROM tblSMCurrency
+			WHERE intCurrencyID = @intCurrencyId
+				AND ysnSubCurrency = 1
+		END
+	END
 
 	SELECT @strCurrency = strCurrency
 	FROM tblSMCurrency
