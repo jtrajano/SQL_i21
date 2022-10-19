@@ -202,7 +202,7 @@ BEGIN
 	SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 
 												      THEN IDD.dblQtyOrdered 
 													  ELSE CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) = 0 
-															    THEN CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END
+															    THEN CASE WHEN ISI.dblDestinationQuantity > CTD.dblQuantity THEN CTD.dblQuantity ELSE ISI.dblDestinationQuantity END
 																ELSE ISI.dblQuantity
 														   END
 												 END)
@@ -259,8 +259,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0 AND @intContractDetailId IS NOT NULL AND @dblQtyOverAged > 0
 			BEGIN
 				UPDATE ID
-				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
-												THEN CTD.dblOriginalQty 
+				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblQuantity 
+												THEN CTD.dblQuantity 
 												ELSE 
 													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
 														THEN ISI.dblQuantity + CTD.dblBalance
@@ -268,8 +268,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 													END
 											END
 									, ISI.dblQuantity)
-				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
-												THEN CTD.dblOriginalQty 
+				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblQuantity 
+												THEN CTD.dblQuantity 
 												ELSE 
 													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
 														THEN ISI.dblQuantity + CTD.dblBalance
