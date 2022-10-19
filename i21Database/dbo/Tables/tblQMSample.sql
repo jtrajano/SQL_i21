@@ -79,7 +79,6 @@
 	intRelatedSampleId INT NULL,
 	intTypeId INT NOT NULL DEFAULT (1), -- 1 = Regular Sample, 2 = Cupping Session Sample
 	intCuppingSessionDetailId INT NULL,
-	[intAuctionId] INT NULL, 
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
@@ -119,8 +118,7 @@
 	CONSTRAINT [FK_tblQMSample_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMSample_tblQMSamplingCriteria] FOREIGN KEY ([intSamplingCriteriaId]) REFERENCES [tblQMSamplingCriteria]([intSamplingCriteriaId]),
-	CONSTRAINT [FK_tblQMSample_tblQMCuppingSessionDetail] FOREIGN KEY ([intCuppingSessionDetailId]) REFERENCES [tblQMCuppingSessionDetail]([intCuppingSessionDetailId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblQMSample_tblQMAuction] FOREIGN KEY ([intAuctionId]) REFERENCES [tblQMAuction]([intAuctionId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblQMSample_tblQMCuppingSessionDetail] FOREIGN KEY ([intCuppingSessionDetailId]) REFERENCES [tblQMCuppingSessionDetail]([intCuppingSessionDetailId]) ON DELETE CASCADE
 
 )
 GO
