@@ -480,7 +480,8 @@ BEGIN TRY
 		[intBankValuationRuleId]			,
 		[strComments]			,
 		[strTaxPoint]			,
-		[intTaxLocationId]
+		[intTaxLocationId]		,
+		[intProfitCenter]
 	)
 	VALUES (
 		[intTermsId]			,
@@ -538,7 +539,8 @@ BEGIN TRY
 		[intBankValuationRuleId]			,
 		[strComments]			,
 		[strTaxPoint]			,
-		[intTaxLocationId]
+		[intTaxLocationId]		,
+		[intProfitCenter]
 	)
 	OUTPUT 
 		inserted.intBillId 
