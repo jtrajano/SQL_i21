@@ -1283,7 +1283,10 @@ BEGIN
 					--AND dbo.fnDateGreaterThanEquals(t2.dtmDate, t.[dtmStartOfMonth]) = 1
 					--AND dbo.fnDateLessThanEquals(t2.dtmDate, t.[dtmEndOfMonth]) = 1
 				ORDER BY
-					t2.dtmDate DESC, t2.id DESC, t2.intSortByQty DESC
+					t2.dtmDate DESC
+					,t2.sortId DESC 
+					--, t2.id DESC
+					--, t2.intSortByQty DESC
 			) t2
 	END
 	ELSE 
