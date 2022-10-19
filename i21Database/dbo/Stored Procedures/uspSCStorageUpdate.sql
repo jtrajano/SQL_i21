@@ -204,69 +204,74 @@ BEGIN TRY
 		ELSE
 		BEGIN 
 			SET @dblNetUnits = @dblNetUnits * -1
-			IF @intGRStorageId > 0
-			BEGIN
-				SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
-			END
-
-			SELECT intItemId = ScaleTicket.intItemId
-					,intLocationId = ItemLocation.intItemLocationId 
-					,intItemUOMId = ItemUOM.intItemUOMId
-					,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-					,dblQty = @dblNetUnits 
-					,dblUOMQty = ItemUOM.dblUnitQty
-					,dblCost = 
-					CASE 
-						WHEN ISNULL(@intDPContractId,0) > 0 THEN 
-						ISNULL(
-							(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
-							FROM dbo.fnRKGetFutureAndBasisPrice (2,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
-							LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
-							LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
-						)
-						WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
-					END
-				
-					,dblSalesPrice = 0
-					,intCurrencyId = ScaleTicket.intCurrencyId
-					,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-					,intTransactionId = ScaleTicket.intTicketId
-					,intTransactionDetailId =
-					CASE 
-						WHEN ISNULL(@intDPContractId,0) > 0 THEN @intDPContractId
-						WHEN ISNULL(@intDPContractId,0) = 0 THEN NULL
-					END
-					,strTransactionId = ScaleTicket.strTicketNumber
-					,intTransactionTypeId = @intDirectType 
-					,intLotId = NULL 
-					,intSubLocationId = ScaleTicket.intSubLocationId
-					,intStorageLocationId = ScaleTicket.intStorageLocationId
-					,ysnIsStorage = 
-					CASE 
-						WHEN ISNULL(@intDPContractId,0) > 0 THEN 0
-						WHEN ISNULL(@intDPContractId,0) = 0 THEN 
-						CASE 
-							WHEN ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Customer' THEN 1
-							ELSE 0
-						END
-					END
-					,strSourceTransactionId  = @strDistributionOption
-					,intStorageScheduleTypeId = @intGRStorageId
-					,ysnAllowVoucher = 0
-			FROM	dbo.tblSCTicket ScaleTicket
-					INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
-					INNER JOIN tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-					LEFT JOIN tblICCommodity IC ON IC.intCommodityId = ScaleTicket.intCommodityId
-					OUTER APPLY(
-						SELECT dtmEndDate,intContractDetailId,intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ISNULL(@intDPContractId,0)
-					) CNT
-					OUTER APPLY(
-						SELECT strOwnedPhysicalStock FROM tblGRStorageType WHERE strStorageTypeCode = @strDistributionOption
-					) GR
-			WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 			
-			IF @ysnDoNotReturn = 0 
-				RETURN
+			IF @intTicketType = 1
+			BEGIN
+				
+				IF @intGRStorageId > 0
+				BEGIN
+					SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
+				END
+
+				SELECT intItemId = ScaleTicket.intItemId
+						,intLocationId = ItemLocation.intItemLocationId 
+						,intItemUOMId = ItemUOM.intItemUOMId
+						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+						,dblQty = @dblNetUnits 
+						,dblUOMQty = ItemUOM.dblUnitQty
+						,dblCost =  
+						CASE 
+							WHEN ISNULL(@intDPContractId,0) > 0 THEN 
+							ISNULL(
+								(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
+								FROM dbo.fnRKGetFutureAndBasisPrice (2,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
+								LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
+								LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
+							)
+							WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
+						END				
+						,dblSalesPrice = 0
+						,intCurrencyId = ScaleTicket.intCurrencyId
+						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+						,intTransactionId = ScaleTicket.intTicketId
+						,intTransactionDetailId =
+						CASE 
+							WHEN ISNULL(@intDPContractId,0) > 0 THEN @intDPContractId
+							WHEN ISNULL(@intDPContractId,0) = 0 THEN NULL
+						END
+						,strTransactionId = ScaleTicket.strTicketNumber
+						,intTransactionTypeId = @intDirectType 
+						,intLotId = NULL 
+						,intSubLocationId = ScaleTicket.intSubLocationId
+						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,ysnIsStorage = 
+						CASE 
+							WHEN ISNULL(@intDPContractId,0) > 0 THEN 0
+							WHEN ISNULL(@intDPContractId,0) = 0 THEN 
+							CASE 
+								WHEN ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Customer' THEN 1
+								ELSE 0
+							END
+						END
+						,strSourceTransactionId  = @strDistributionOption
+						,intStorageScheduleTypeId = @intGRStorageId
+						,ysnAllowVoucher = 0
+				FROM	dbo.tblSCTicket ScaleTicket
+						INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
+						INNER JOIN tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+						LEFT JOIN tblICCommodity IC ON IC.intCommodityId = ScaleTicket.intCommodityId
+						OUTER APPLY(
+							SELECT dtmEndDate,intContractDetailId,intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ISNULL(@intDPContractId,0)
+						) CNT
+						OUTER APPLY(
+							SELECT strOwnedPhysicalStock FROM tblGRStorageType WHERE strStorageTypeCode = @strDistributionOption
+						) GR
+				WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
+			
+				IF @ysnDoNotReturn = 0 
+					RETURN
+			END
+			
 		END
 	END
 
