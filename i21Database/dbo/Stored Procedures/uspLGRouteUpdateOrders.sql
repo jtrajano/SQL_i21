@@ -130,7 +130,7 @@ SET ANSI_WARNINGS OFF
 				JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
 				JOIN tblTMDispatch D ON D.intDispatchID = RO.intDispatchID
 				LEFT JOIN tblTMSite S ON S.intSiteID = D.intSiteID
-			WHERE RO.intRouteId = @intRouteId AND R.intSourceType = 2 AND IsNull(RO.intDispatchID, 0) <> 0 ORDER BY RO.intSequence ASC
+			WHERE RO.intRouteId = @intRouteId AND IsNull(RO.intDispatchID, 0) <> 0 ORDER BY RO.intSequence ASC
 			
 			Exec dbo.uspTMUpdateRouteSequence @OrdersFromRouting
 
