@@ -852,6 +852,7 @@
     <Build Include="dbo\Stored Procedures\uspLGPostOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspCTHedgeContractPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetOfferList.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetOriginByCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

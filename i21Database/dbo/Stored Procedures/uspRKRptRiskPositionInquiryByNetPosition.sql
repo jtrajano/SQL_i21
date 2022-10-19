@@ -199,6 +199,8 @@ DECLARE @temp AS TABLE (
 	, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblHedgedLots DECIMAL(24, 10)
+	, dblToBeHedgedLots DECIMAL(24, 10)
 	)
 
 DECLARE @intRiskViewId INT
@@ -241,6 +243,8 @@ BEGIN
 		, strClass
 		, strCertificationName 
 		, strCropYear 
+		, dblHedgedLots
+		, dblToBeHedgedLots
 		)
 	EXEC uspRKRiskPositionInquiry @intCommodityId = @intCommodityId,
 		@intCompanyLocationId = @intCompanyLocationId,

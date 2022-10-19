@@ -14,7 +14,8 @@ DECLARE @idoc INT,
 	@strPositionBy NVARCHAR(100) = NULL,
 	@dtmPositionAsOf DATETIME = NULL,
 	@strReportName NVARCHAR(100) = NULL,
-	@strUomType NVARCHAR(100) = NULL
+	@strUomType NVARCHAR(100) = NULL,
+	@strOriginIds NVARCHAR(500) = NULL
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL
@@ -101,6 +102,10 @@ WHERE [fieldname] = 'strReportName'
 SELECT @strUomType = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strUomType'
+
+SELECT @strOriginIds = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strOriginIds'
 
 DECLARE @strCommodityCodeH NVARCHAR(100)
 DECLARE @strFutureMarketH NVARCHAR(100)
@@ -199,6 +204,8 @@ DECLARE @temp AS TABLE (
 	, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblHedgedLots DECIMAL(24, 10)
+	, dblToBeHedgedLots DECIMAL(24, 10)
 	)
 
 DECLARE @intRiskViewId INT
@@ -206,7 +213,6 @@ DECLARE @intRiskViewId INT
 SELECT TOP 1 @intRiskViewId = intRiskViewId
 	, @ysnSubTotalByBook = ysnSubTotalByBook
 FROM tblRKCompanyPreference
-
 
 IF (@intRiskViewId = 1)
 BEGIN
@@ -241,6 +247,8 @@ BEGIN
 		, strClass
 		, strCertificationName 
 		, strCropYear 
+		, dblHedgedLots
+		, dblToBeHedgedLots
 		)
 	EXEC uspRKRiskPositionInquiry @intCommodityId = @intCommodityId,
 		@intCompanyLocationId = @intCompanyLocationId,
@@ -252,7 +260,8 @@ BEGIN
 		@intForecastWeeklyConsumptionUOMId = @intForecastWeeklyConsumptionUOMId,
 		@intBookId = @intBookId,
 		@intSubBookId = @intSubBookId,
-		@strPositionBy = @strPositionBy
+		@strPositionBy = @strPositionBy,
+		@strOriginIds = @strOriginIds
 
 	UPDATE @temp
 	SET strGroup = CASE WHEN Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') THEN Selection WHEN Selection = 'Specialities & Low grades' THEN Selection WHEN Selection = 'Total speciality delta fixed' THEN Selection WHEN Selection = 'Terminal position (a. in lots )' THEN Selection WHEN Selection = 'Terminal position (Avg Long Price)' THEN Selection WHEN Selection LIKE ('%Terminal position (b.%') THEN Selection WHEN Selection = 'Delta options' THEN Selection WHEN Selection = 'F&O' THEN '8.' + Selection WHEN Selection LIKE ('%Total F&O(b. in%') THEN Selection WHEN Selection IN ('Outright coverage', 'Net market risk') THEN Selection WHEN Selection IN ('Switch position', 'Futures required') THEN Selection END
