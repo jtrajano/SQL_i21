@@ -8,7 +8,7 @@ AS
 BEGIN
 	DECLARE @strValue NVARCHAR(MAX)
 	
-	SELECT @strValue = COALESCE(@strValue + ',', '') + strShipVia
+	SELECT @strValue = COALESCE(@strValue + '||', '') + strShipVia
 	FROM vyuTFGetReportingComponentCarrier
 	WHERE intReportingComponentId = @intReportingComponentId
 	AND ysnInclude = @ysnInclude 
