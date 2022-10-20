@@ -479,18 +479,12 @@ BEGIN
 	END
 END
 
--- Check if sub location and storage locations are valid. 
+-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
-	DECLARE @ysnValidLocation BIT
-	EXEC dbo.uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT, @strItemNo OUTPUT 
-
-	IF @ysnValidLocation = 0
-	BEGIN 
-		-- The sub location and storage unit in {Item No} does not match.
-		EXEC uspICRaiseError 80087, @strItemNo
-		GOTO With_Rollback_Exit
-	END 
-END
+	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+	EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
+END 
 
 -- Get the next batch number
 BEGIN 
@@ -498,13 +492,6 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
 	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
 END
-
--- Call Starting number for Receipt Detail Update to prevent deadlocks. 
-BEGIN
-	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
-	EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
-	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
-END 
 
 -- Create and validate the lot numbers
 IF @ysnPost = 1
