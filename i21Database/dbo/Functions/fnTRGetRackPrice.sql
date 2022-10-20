@@ -2,7 +2,8 @@
 (
 	 @dtmEffectiveDateTime AS DATETIME,	
 	 @intSupplyPointId AS INT,
-	 @intItemId AS INT
+	 @intItemId AS INT,
+	 @strRackPriceToUse nvarchar(50) = ''
 )
 RETURNS decimal(18,6)
 
@@ -10,7 +11,7 @@ AS
 
 BEGIN
 	DECLARE @RackPrice decimal(18,6)
-	DECLARE @strRackPriceToUse nvarchar(50)
+	--DECLARE @strRackPriceToUse nvarchar(50)
 	DECLARE @intRackSupplyPointId as int
 	
 	SELECT @intRackSupplyPointId = intRackPriceSupplyPointId FROM tblTRSupplyPoint WHERE intSupplyPointId = @intSupplyPointId
@@ -19,10 +20,13 @@ BEGIN
 	BEGIN
 	   SET @intRackSupplyPointId = @intSupplyPointId
     END
-
-	SELECT TOP 1 @strRackPriceToUse = strRackPriceToUse FROM tblTRCompanyPreference
 	
-	IF (@strRackPriceToUse IS NULL)
+	if(ISNULL(@strRackPriceToUse, '') = '')
+	BEGIN
+	SELECT TOP 1 @strRackPriceToUse = strRackPriceToUse FROM tblTRCompanyPreference
+	END
+	
+	IF (ISNULL(@strRackPriceToUse, '') = '')
 	BEGIN
 		SET @RackPrice = 0
 	END
