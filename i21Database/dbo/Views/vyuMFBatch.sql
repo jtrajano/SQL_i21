@@ -56,7 +56,6 @@ SELECT
     A.strSampleBoxNumber,
     A.dblSellingPrice,
     A.dtmStock,
-    A.strStorageLocation,
     A.strSubChannel,
     A.ysnStrategic,
     A.strTeaLingoSubCluster,
@@ -95,7 +94,17 @@ SELECT
     strParentBatchId = B.strBatchId,
     C.strTINNumber,
     C.intTINClearanceId,
+    strStorageLocation = D.strSubLocationName,
+    strStorageUnit = E.strName,
+    A.intStorageLocationId,
+    A.intStorageUnitId,
     A.intConcurrencyId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 OUTER APPLY(SELECT TOP 1 intTINClearanceId, strTINNumber FROM  tblQMTINClearance  WHERE intBatchId = A.intBatchId )C
+OUTER APPLY( 
+    SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
+    WHERE A.intStorageLocationId = intCompanyLocationSubLocationId
+)D
+OUTER APPLY( SELECT TOP 1 strName FROM tblICStorageLocation ICS
+WHERE A.intStorageUnitId = ICS.intStorageLocationId)E

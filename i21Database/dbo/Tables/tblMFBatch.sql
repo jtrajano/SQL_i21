@@ -55,7 +55,6 @@ CREATE  TABLE tblMFBatch
 	strSampleBoxNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	dblSellingPrice NUMERIC(18,6)  NULL,
 	dtmStock DATETIME  NULL,
-	strStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strSubChannel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	ysnStrategic BIT  NULL,
 	strTeaLingoSubCluster NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
@@ -91,6 +90,8 @@ CREATE  TABLE tblMFBatch
 	strReserveMU NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS  NULL,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	intStorageLocationId  INT NULL,
+	intStorageUnitId  INT NULL,
 	intConcurrencyId INT NULL,
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (

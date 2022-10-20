@@ -55,7 +55,6 @@ CREATE TYPE MFBatchTableType AS TABLE
 	strSampleBoxNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	dblSellingPrice NUMERIC(18,6) ,
 	dtmStock DATETIME ,
-	strStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	strSubChannel NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	ysnStrategic BIT ,
 	strTeaLingoSubCluster NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
@@ -90,5 +89,7 @@ CREATE TYPE MFBatchTableType AS TABLE
 	strProductionSite NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	strReserveMU NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS ,
-	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intStorageLocationId  INT NULL,
+	intStorageUnitId  INT NULL
 )
