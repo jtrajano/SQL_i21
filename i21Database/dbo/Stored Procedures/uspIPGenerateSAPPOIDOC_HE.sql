@@ -1876,7 +1876,7 @@ BEGIN
 
 		
 		SET @strTextXml += '<E1BPMEOUTTEXT>'
-		SET @strTextXml += '<TEXT_ID>' + 'A02' + '</TEXT_ID>'
+		SET @strTextXml += '<TEXT_ID>' + 'A03' + '</TEXT_ID>'
 
 		IF ISNULL(@strVendorLotID, '') = '' AND ISNULL(@strReference, '') = ''
 			SET @strTextXml += '<TEXT_LINE>' + '' + '</TEXT_LINE>'
