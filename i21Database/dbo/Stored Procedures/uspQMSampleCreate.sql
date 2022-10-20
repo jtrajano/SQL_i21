@@ -17,6 +17,7 @@ BEGIN TRY
 
 	DECLARE @strLotNumber NVARCHAR(50)
 	DECLARE @intLocationId INT
+	DECLARE @intCompanyLocationId INT
 	DECLARE @intShiftId INT
 	DECLARE @dtmBusinessDate DATETIME
 	DECLARE @dtmCreated DATETIME = GETDATE()
@@ -65,6 +66,7 @@ BEGIN TRY
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
+		,@intCompanyLocationId = intCompanyLocationId
 		,@intInventoryReceiptId = intInventoryReceiptId
 		,@intInventoryShipmentId = intInventoryShipmentId
 		,@intWorkOrderId = intWorkOrderId
@@ -82,6 +84,7 @@ BEGIN TRY
 		,@intRelatedSampleId = intRelatedSampleId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
+			,intCompanyLocationId INT
 			,strLotNumber NVARCHAR(50)
 			,intLocationId INT
 			,intInventoryReceiptId INT
@@ -338,6 +341,7 @@ BEGIN TRY
 		intConcurrencyId
 		,intSampleTypeId
 		,strSampleNumber
+		,intCompanyLocationId
 		,intParentSampleId
 		,intRelatedSampleId
 		,strSampleRefNo
@@ -414,6 +418,7 @@ BEGIN TRY
 	SELECT 1
 		,intSampleTypeId
 		,@strSampleNumber
+		,@intCompanyLocationId
 		,intParentSampleId
 		,intRelatedSampleId
 		,strSampleRefNo

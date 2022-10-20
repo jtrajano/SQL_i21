@@ -1,10 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuQMUserLocation]
 AS
 
-SELECT strLocationName
-	 , intEntityUserSecurityId
+SELECT intEntityUserSecurityId
 	 , intEntityId
 	 , intUserRoleId
 	 , CompanyLocation.intCompanyLocationId
+	 , CompanyLocation.strLocationName AS strCompanyLocationName
 FROM tblSMUserSecurityCompanyLocationRolePermission AS UserLocationRole
 JOIN tblSMCompanyLocation AS CompanyLocation ON UserLocationRole.intCompanyLocationId = CompanyLocation.intCompanyLocationId
