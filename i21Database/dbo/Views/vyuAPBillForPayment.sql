@@ -7,7 +7,6 @@ SELECT
 FROM (
 	SELECT 
 		voucher.intBillId
-		,intInvoiceId = NULL
 		,voucher.intEntityVendorId
 		,voucher.intTransactionType
 		,voucher.ysnReadyForPayment
@@ -74,8 +73,6 @@ FROM (
 		,voucher.ysnInPayment
 		,0 AS ysnInPaymentSched
 		,NULL AS strPaymentScheduleNumber
-		,voucher.intPayFromBankAccountId
-		,voucher.intPayToBankAccountId
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId
@@ -101,7 +98,6 @@ FROM (
 	UNION ALL
 	SELECT 
 		voucher.intBillId
-		,intInvoiceId = NULL
 		,voucher.intEntityVendorId
 		,voucher.intTransactionType
 		,paySched.ysnReadyForPayment
@@ -157,8 +153,6 @@ FROM (
 		,voucher.ysnInPayment
 		,paySched.ysnInPayment AS ysnInPaymentSched
 		,paySched.strPaymentScheduleNumber
-		,voucher.intPayFromBankAccountId
-		,voucher.intPayToBankAccountId
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId
@@ -175,73 +169,4 @@ FROM (
 	AND voucher.intTransactionReversed IS NULL
 	AND voucher.ysnIsPaymentScheduled = 1 --AP-7092
 	AND paySched.ysnPaid = 0
-	UNION ALL
-	SELECT  
-		intBillId     = A.intBillId  
-		,intInvoiceId    = A.intInvoiceId  
-		,intEntityVendorId   = A.intEntityCustomerId  
-		,intTransactionType   = 30  
-		,ysnReadyForPayment   = ISNULL(invoicesPay.ysnReadyForPayment,0)
-		,dtmDueDate  
-		,dtmCashFlowDate   = A.dtmDueDate  
-		,dtmDate  
-		,dtmBillDate    = A.dtmDate  
-		,intAccountId  
-		,strAccountId    = A.strAccountNumber  
-		,strVendorOrderNumber  = A.strInvoiceNumber  
-		,strBillId     = A.strInvoiceNumber  
-		,dblTotal     = A.dblInvoiceTotal * (CASE WHEN A.strTransactionType IN ('Cash Refund','Credit Memo') THEN 1 ELSE -1 END)  
-		,dblDiscount  
-		,dblTempDiscount   = 0  
-		,dblInterest  
-		,dblTempInterest   = 0  
-		,dblAmountDue    = A.dblAmountDue * (CASE WHEN A.strTransactionType IN ('Cash Refund','Credit Memo') THEN 1 ELSE -1 END)  
-		,dblPayment  
-		,dblTempPayment    = 0  
-		,dblWithheld    = 0  
-		,dblTempWithheld   = 0  
-		,strTempPaymentInfo   = NULL  
-		,strReference    = A.strCustomerReferences  
-		,intCurrencyId    = A.intCurrencyId  
-		,ysnPosted  
-		,ysnDiscountOverride  = CAST(0 AS BIT)  
-		,intPayToAddressId   = payTo.intEntityLocationId  
-		,ysnPrepayHasPayment  = CAST(0 AS BIT)  
-		,intPaymentMethodId   = vendor.intPaymentMethodId  
-		,ysnOneBillPerPayment  = vendor.ysnOneBillPerPayment  
-		,ysnPymtCtrlAlwaysDiscount  
-		,ysnWithholding  
-		,strPaymentMethod  
-		,strVendorId  
-		,strCommodityCode  
-		,strTerm  
-		,intTermsId     = A.intTermId  
-		,ysnDeferredPay    = 0  
-		,strName  
-		,strCheckPayeeName  
-		,intPayScheduleId   = NULL  
-		,ysnDeferredPayment   = CAST(0 AS BIT)  
-		,ysnPastDue     = dbo.fnIsDiscountPastDue(A.intTermId, GETDATE(), A.dtmDate)  
-		,ysnOffset     = CAST(CASE  
-				WHEN A.strTransactionType IN ('Cash Refund','Credit Memo') THEN 0  
-				ELSE 1  
-				END AS BIT)  
-		,dblPaymentTemp    = NULL  
-		,ysnInPayment    = CAST(0 AS BIT)  
-		,ysnInPaymentSched   = CAST(0 AS BIT)  
-		,strPaymentScheduleNumber = NULL  
-		,vendor.intPayFromBankAccountId
-		,A.intPayToBankAccountId
-		FROM vyuARInvoicesForPayment A  
-		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
-		ON vendor.intEntityId = A.intEntityCustomerId  
-		LEFT JOIN tblEMEntityLocation payTo ON vendor.intEntityId = payTo.intEntityId AND payTo.ysnDefaultLocation = 1  
-		LEFT JOIN vyuAPVoucherCommodity commodity ON A.intBillId = commodity.intBillId  
-		LEFT JOIN tblAPPaymentIntegrationTransaction invoicesPay ON A.intInvoiceId = invoicesPay.intInvoiceId
-		WHERE  
-			A.intInvoiceId > 0  
-		AND A.dblAmountDue != 0  
-		AND A.ysnForgiven != 1  
-		AND A.strTransactionType IN ('Invoice','Cash','Cash Refund','Credit Memo','Debit memo')  
-		AND A.strType != 'CF Tran'  
 ) forPayment
