@@ -684,7 +684,22 @@ ELSE
 			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, NULL, 1, 1, @RaiseError 
 					
 			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToAddPre
-		END				
+		END
+
+    --UPDATE ACCOUNTING PERIOD FOR CPP FROM INVOICE SCREEN
+  UPDATE ARI
+  SET intPeriodId = GL.intGLFiscalYearPeriodId
+  FROM tblARInvoice ARI
+  INNER JOIN #ARPostPaymentHeader PH ON ARI.intPaymentId = PH.intTransactionId
+  CROSS APPLY (
+    SELECT TOP 1 P.intGLFiscalYearPeriodId 
+    FROM tblGLFiscalYearPeriod P
+    WHERE ARI.dtmPostDate BETWEEN dtmStartDate AND dtmEndDate
+    ORDER BY intGLFiscalYearPeriodId DESC
+  ) GL 
+  WHERE ARI.intPeriodId IS NULL
+    AND ARI.strTransactionType = 'Customer Prepayment'
+
 									
 	END			
 
