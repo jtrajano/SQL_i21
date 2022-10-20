@@ -73,6 +73,7 @@ FROM
 				AND ISNULL(Receipt.intCurrencyId, 1) = ISNULL(ReceiptCharge.intCurrencyId, ISNULL(Receipt.intCurrencyId, 1)) 	
 	) charges
 WHERE 
-	(r.intInventoryReceiptId = @ReceiptId OR @ReceiptId IS NULL) 
+	--(r.intInventoryReceiptId = @ReceiptId OR @ReceiptId IS NULL)
+	r.intInventoryReceiptId = @ReceiptId 
 	AND (@ForceRecalc = 1 OR (r.dtmLastCalculateTotals IS NULL OR r.dtmDateModified > r.dtmLastCalculateTotals))
 	
