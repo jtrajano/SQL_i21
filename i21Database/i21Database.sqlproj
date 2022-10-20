@@ -1286,6 +1286,7 @@
     <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromDirectFile.sql" />
     <Build Include="dbo\Tables\tblQMSampleOtherBuyers.sql" />
     <Build Include="dbo\Views\vyuQMItemLocation.sql" />
+    <Build Include="dbo\Views\vyuQMShipmentContainerContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
