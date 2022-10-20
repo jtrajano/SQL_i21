@@ -50,7 +50,7 @@ FROM (
 		 , intPricingTypeId			= CC.intPricingTypeId
 		 , strPricingType			= CC.strPricingType
 		 , dblOrderPrice			= CC.dblOrderPrice
-		 , dblCashPrice				= CASE WHEN CC.intOrderUOMId <> CC.intPriceItemUOMId THEN CC.dblUnitPrice ELSE CC.dblCashPrice END
+		 , dblCashPrice				= CC.dblCashPrice
 		 , intSubCurrencyId			= CC.intSubCurrencyId
 		 , dblSubCurrencyRate		= CC.dblSubCurrencyRate
 		 , strSubCurrency			= CC.strSubCurrency
