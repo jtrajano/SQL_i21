@@ -9534,7 +9534,7 @@
     <None Include="Scripts\Post-Deployment\AP\PopulateVoucherAverageExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceReportFields.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
-	<Build Include="dbo\Stored Procedures\uspSMTransactionInsertApproval.sql" />
+	<Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
