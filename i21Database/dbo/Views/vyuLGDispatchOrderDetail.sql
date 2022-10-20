@@ -75,6 +75,7 @@ SELECT
 	,SVTC.dblCapacity
 	,DOD.intSalespersonId
 	,strSalesperson = SP.strName
+	,DOD.strLoadRef
 	,DOD.intConcurrencyId
 FROM tblLGDispatchOrderDetail DOD 
 LEFT JOIN tblICItem I ON I.intItemId = DOD.intItemId
