@@ -4953,11 +4953,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Additiona
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'Manufacturing.view.AdditionalBasis?showSearch=true' WHERE strMenuName = 'Additional Basis' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Location Lead Time' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lead Time' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Location Lead Time', N'Manufacturing', @ManufacturingMaintenanceParentMenuId, N'Location Lead Time', N'Maintenance', N'Screen', N'Manufacturing.view.LocationLeadTime', N'small-menu-maintenance', 0, 0, 0, 1, 12, 1)
+	VALUES (N'Lead Time', N'Manufacturing', @ManufacturingMaintenanceParentMenuId, N'Lead Time', N'Maintenance', N'Screen', N'Manufacturing.view.LocationLeadTime', N'small-menu-maintenance', 0, 0, 0, 1, 12, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'Manufacturing.view.LocationLeadTime' WHERE strMenuName = 'Location Lead Time' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'Manufacturing.view.LocationLeadTime' WHERE strMenuName = 'Lead Time' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId
 
 -- View
 
@@ -5081,6 +5081,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Contamination Group' AND strMod
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Item Contamination' AND strModuleName = 'Manufacturing'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Traceability By Parent Lot' AND strModuleName = 'Manufacturing'
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Location Lead Time' AND strModuleName = 'Manufacturing'
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Commitment Pricing' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
 /* End of Delete */
 
