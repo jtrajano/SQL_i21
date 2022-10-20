@@ -46,6 +46,7 @@ DECLARE @intId AS INT
 		,@strSourceNumber AS NVARCHAR(100)
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
+		,@intCompanyLocationId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -1245,7 +1246,7 @@ BEGIN
 				ON tp.intItemId = tmp.intItemId
 				AND tp.intItemLocationId = tmp.intItemLocationId
 				AND tp.strTransactionId = tmp.strTransactionId
-				AND tmp.strBatchId = @strBatchId
+				AND tmp.strBatchId = @strBatchId			
 	WHERE	dbo.fnGetCostingMethod(tp.intItemId, tp.intItemLocationId) = @AVERAGECOST
 			AND tp.dblQty > 0 
 
@@ -1277,6 +1278,15 @@ BEGIN
 				,@strTransactionId		= strTransactionId
 				,@dtmDate				= dtmDate
 		FROM	@ItemsForAutoNegative
+
+		SELECT 
+			@intCompanyLocationId = cl.intCompanyLocationId 
+		FROM			
+			tblICItemLocation il INNER JOIN tblSMCompanyLocation cl
+				ON cl.intCompanyLocationId = il.intLocationId 
+		WHERE
+			il.intItemId = @intItemId
+			AND il.intItemLocationId = @intItemLocationId 
 
 		INSERT INTO dbo.tblICInventoryTransaction (
 					[intItemId]
@@ -1310,6 +1320,7 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[dtmDateCreated]
+					,[intCompanyLocationId]
 			)			
 		SELECT	
 				[intItemId]								= @intItemId
@@ -1356,6 +1367,7 @@ BEGIN
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[dtmDateCreated]						= GETUTCDATE()
+				,[intCompanyLocationId]					= @intCompanyLocationId
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -1435,6 +1447,7 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[dtmDateCreated]
+					,[intCompanyLocationId]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -1481,6 +1494,7 @@ BEGIN
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[dtmDateCreated]						= GETUTCDATE()
+				,[intCompanyLocationId]					= cl.intCompanyLocationId 
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId
