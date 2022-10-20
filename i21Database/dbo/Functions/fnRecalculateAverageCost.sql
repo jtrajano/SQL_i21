@@ -18,7 +18,8 @@ BEGIN
 				) 
 			,@dblTotalInventoryValue = 
 				ROUND(
-					SUM(dbo.fnMultiply(dblQty, dblCost) + ISNULL(dblValue, 0))	
+					--SUM(dbo.fnMultiply(dblQty, dblCost) + ISNULL(dblValue, 0))	
+					SUM(dblComputedValue) 
 					,6
 				)
 	FROM	dbo.tblICInventoryTransaction
