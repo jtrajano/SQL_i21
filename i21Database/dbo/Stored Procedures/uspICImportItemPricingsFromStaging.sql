@@ -280,7 +280,7 @@ WHEN NOT MATCHED THEN
 		, dblAmountPercent		
 		, dblSalePrice			
 		, dblMSRPPrice			
-		, strPricingMethod		
+		, ISNULL(strPricingMethod, 'None') 
 		, dblLastCost			
 		, dblStandardCost		
 		, dblAverageCost		
