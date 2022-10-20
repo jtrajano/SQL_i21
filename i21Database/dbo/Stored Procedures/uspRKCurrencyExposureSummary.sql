@@ -36,11 +36,11 @@ BEGIN
 	SELECT '3. Stock Value '
 		, SUM(dblQty * (ISNULL(dblSettlementPrice, 0) + ISNULL(dblMarketPremium, 0))) dblValue
 	FROM (
-		SELECT [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId)
+		SELECT [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId, DEFAULT)
 				* dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, (SELECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth mon
 																	WHERE ysnExpired = 0 AND dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId
 																	ORDER BY 1 DESC), @dtmFutureClosingDate) dblSettlementPrice
-			, [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId)
+			, [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId, DEFAULT)
 				* dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, um.intUnitMeasureId, fm.intUnitMeasureId, dblBasis) dblMarketPremium
 			, l.dblQty
 		FROM tblCTContractHeader ch
@@ -71,7 +71,7 @@ BEGIN
 			, u.intUnitMeasureId
 			, cd.intCurrencyId
 			, ch.intCompanyId
-			, dblPrice = [dbo].[fnRKGetCurrencyConvertion](cd.intCurrencyId, @intCurrencyId) * (dbo.fnRKGetSequencePrice(cd.intContractDetailId, dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId, @dtmFutureClosingDate), @dtmFutureClosingDate))
+			, dblPrice = [dbo].[fnRKGetCurrencyConvertion](cd.intCurrencyId, @intCurrencyId, DEFAULT) * (dbo.fnRKGetSequencePrice(cd.intContractDetailId, dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId, @dtmFutureClosingDate), @dtmFutureClosingDate))
 		FROM tblCTContractHeader ch
 		JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId AND ch.intContractTypeId = 2
 		JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
