@@ -17,7 +17,7 @@ SELECT LG.intLoadId
 	, dblInboundPrice = CASE WHEN (LG.strType != 'Outbound') THEN ISNULL(CASE WHEN LG.dblPCashPrice IS NOT NULL OR LG.dblPCashPrice != 0
 																			THEN LG.dblPCashPrice
 																		WHEN LG.dblPCashPrice IS NULL OR LG.dblPCashPrice = 0
-																			THEN [dbo].[fnTRGetRackPrice](LG.dtmScheduledDate, SP.intSupplyPointId, LG.intItemId)
+																			THEN [dbo].[fnTRGetRackPrice](LG.dtmScheduledDate, SP.intSupplyPointId, LG.intItemId,DEFAULT)
 																		END, 0)
 							WHEN LG.strType = 'Outbound' AND ISNULL(LG.dblSCashPrice, 0) = 0 THEN ItemS.dblReceiveLastCost 
 							ELSE ISNULL(LG.dblSCashPrice, 0) END
