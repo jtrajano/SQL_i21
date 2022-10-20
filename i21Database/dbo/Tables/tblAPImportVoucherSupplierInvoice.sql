@@ -1,0 +1,31 @@
+﻿CREATE TABLE [dbo].[tblAPImportVoucherSupplierInvoice]
+(
+	[intSaleYear] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strSubBook] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strSaleNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strCatalogueType] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strVendorId] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strChannel] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strInvoiceNumber] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strBook] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dtmDate] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dtmExpectedDate] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dtmBillDate] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strLotNumber] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblCost] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblQtyReceived] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strPackageBreakups] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strPreInvoiceGarden] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strPreInvoiceGrade] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strPreInvoiceGardenInvoiceNumber] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strPurchaseType] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strDocumentNumber] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblWeightBreakup1] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblWeightBreakup1Bags] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblWeightBreakup2] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[dblWeightBreakup2Bags] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[dblWeightBreakup3] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[dblWeightBreakup3Bags] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[strStorageLocation] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL
+)
+

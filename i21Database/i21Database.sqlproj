@@ -1318,6 +1318,8 @@
     <Build Include="dbo\Stored Procedures\uspGRUnpostSettleStorageOutbound.sql" />
     <Build Include="dbo\Views\vyuMFCustomTrialBlendSheet.sql" />
     <Build Include="dbo\Views\vyuMFCustomTrialBlendSheetDetail.sql" />
+    <Build Include="dbo\Tables\tblAPImportVoucherSupplierInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherSupplierInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

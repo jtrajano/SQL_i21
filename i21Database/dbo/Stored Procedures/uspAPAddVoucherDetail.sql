@@ -277,6 +277,15 @@ SELECT TOP 100 PERCENT
 	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
 	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
 	,ysnOverrideTaxGroup				=	A.ysnOverrideTaxGroup
+	/*Supplier Invoice*/
+	,intSaleYear						=	A.intSaleYear
+	,strSaleNumber						=	A.strSaleNumber
+	,dtmSaleDate						=	A.dtmSaleDate
+	,strVendorLotNumber					=	A.strVendorLotNumber
+	,strPreInvoiceGarden				=	A.strPreInvoiceGarden
+	,strPreInvoiceGardenNumber			=	A.strPreInvoiceGardenNumber
+	,strBook							=	A.strBook
+	,strSubBook							=	A.strSubBook
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -497,6 +506,15 @@ INSERT
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	/*Supplier Invoice*/
+	,intSaleYear						
+	,strSaleNumber						
+	,dtmSaleDate						
+	,strVendorLotNumber					
+	,strPreInvoiceGarden				
+	,strPreInvoiceGardenNumber			
+	,strBook							
+	,strSubBook							
 )
 VALUES
 (
@@ -600,6 +618,15 @@ VALUES
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	/*Supplier Invoice*/
+	,intSaleYear						
+	,strSaleNumber						
+	,dtmSaleDate						
+	,strVendorLotNumber					
+	,strPreInvoiceGarden				
+	,strPreInvoiceGardenNumber			
+	,strBook							
+	,strSubBook		
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 
