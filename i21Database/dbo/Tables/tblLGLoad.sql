@@ -210,6 +210,11 @@
 [intTaxLocationId] INT NULL,
 [ysnTaxLocationOverride] BIT NULL,
 
+[ysnProvisionalReleased] BIT NULL,
+[ysnFinalReleased] BIT NULL,
+[dtmProvisionalReleased] DATETIME NULL,
+[dtmFinalReleased] DATETIME NULL,
+
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

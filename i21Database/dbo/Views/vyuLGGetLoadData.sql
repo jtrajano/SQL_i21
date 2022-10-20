@@ -251,6 +251,10 @@ SELECT
     ,intTaxLocationId = L.intTaxLocationId
     ,ysnTaxPointOverride = L.ysnTaxPointOverride
     ,ysnTaxLocationOverride = L.ysnTaxLocationOverride
+    ,ysnProvisionalReleased = L.ysnProvisionalReleased
+    ,ysnFinalReleased = L.ysnFinalReleased
+    ,dtmProvisionalReleased = L.dtmProvisionalReleased
+    ,dtmFinalReleased = L.dtmFinalReleased
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
