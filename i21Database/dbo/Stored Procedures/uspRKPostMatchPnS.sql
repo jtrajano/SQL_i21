@@ -225,8 +225,8 @@ BEGIN TRY
 			, strAccountId
 			, strAccountDescription
 			-- CONVERSION TO FUNCTIONAL CURRENCY DUE TO CHANGES FOR POSTING TO BANK TRANSACTION
-			, dblDebit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId) * dblDebit, 2)
-			, dblCredit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId) * dblCredit, 2)
+			, dblDebit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, DEFAULT) * dblDebit, 2)
+			, dblCredit = ROUND(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, DEFAULT) * dblCredit, 2)
 			, dblDebitUnit = ROUND(dblDebitUnit, 2)
 			, dblCreditUnit = ROUND(dblCreditUnit, 2)
 			, intCurrencyId
