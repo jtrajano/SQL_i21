@@ -7,6 +7,14 @@ UPDATE tblARCompanyPreference SET ysnEnableCustomStatement = CAST(0 AS BIT) WHER
 GO
 print('/*******************  BEGIN Update tblARCompanyPreference  *******************/')
 
+print('/*******************  BEGIN Update tblARCustomer *******************/')
+GO
+
+UPDATE tblARCustomer SET ysnUpdatedAppliedSalesTax = 1, ysnApplySalesTax = 1 WHERE ysnUpdatedAppliedSalesTax IS NULL OR ysnUpdatedAppliedSalesTax = 0
+
+GO
+print('/*******************  BEGIN Update tblARCustomer  *******************/')
+
 print('/*******************  BEGIN Update tblARInvoice *******************/')
 GO
 
