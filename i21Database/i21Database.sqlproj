@@ -1287,6 +1287,13 @@
     <Build Include="dbo\Tables\tblQMSampleOtherBuyers.sql" />
     <Build Include="dbo\Views\vyuQMItemLocation.sql" />
     <Build Include="dbo\Views\vyuQMShipmentContainerContract.sql" />
+    <Build Include="dbo\Tables\tblGLIntraCompanyAccountSegment.sql" />
+    <Build Include="dbo\Views\vyuGLIntraCompanyAccountSegment.sql" />
+    <Build Include="dbo\Tables\tblGLMaskedAccountStructureTemp.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAccountStructureWithMaskedPrimaryAndCompany.sql" />
+    <Build Include="dbo\Functions\fnGLGetIntraCompanyAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLBuildIntraCompanyAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateIntraCompanyEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
