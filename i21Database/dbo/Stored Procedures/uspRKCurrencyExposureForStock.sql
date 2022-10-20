@@ -24,11 +24,11 @@ BEGIN
 								AND dtmSpotDate <= GETDATE()
 								AND mon.intFutureMarketId = fm.intFutureMarketId
 							ORDER BY 1 DESC)
-			, dblSettlementPrice = [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId)
+			, dblSettlementPrice = [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId, DEFAULT)
 									* dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, (SELECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth mon
 																							WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId
 																							ORDER BY 1 DESC), @dtmClosingPrice)
-			, dblMarketPremium = [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId)
+			, dblMarketPremium = [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId, DEFAULT)
 								* dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, um.intUnitMeasureId, fm.intUnitMeasureId, dblBasis)
 			, strMarketPremiumUOM = (c.strCurrency + '/' + um.strUnitMeasure) COLLATE Latin1_General_CI_AS
 			, strMarketPriceUOM = cur.strCurrency

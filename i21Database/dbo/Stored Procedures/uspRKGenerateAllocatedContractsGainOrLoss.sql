@@ -318,17 +318,17 @@ SELECT
 										END	
 	,strPurchasePricingType = P_PT.strPricingType
 	,dblPurchaseContractBasis = (CASE WHEN PCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intBasisUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblBasis) ELSE PCD.dblBasis END / CASE WHEN P_BasisCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_BasisCur.ysnSubCurrency = 1 then  P_BasisCur.intMainCurrencyId else  P_BasisCur.intCurrencyID end, @intCurrencyId) 
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_BasisCur.ysnSubCurrency = 1 then  P_BasisCur.intMainCurrencyId else  P_BasisCur.intCurrencyID end, @intCurrencyId, DEFAULT) 
 									ELSE  CASE WHEN case when P_BasisCur.ysnSubCurrency = 1 then  P_BasisCur.intMainCurrencyId else  P_BasisCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
 									END)
 	,strPurchaseInvoiceStatus = PCD.strFinancialStatus
 	,dblPurchaseContractRatio = PCD.dblRatio
 	,dblPurchaseContractFutures = (CASE WHEN PCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intPriceItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblFutures) ELSE PCD.dblFutures END / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end, @intCurrencyId) 
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end, @intCurrencyId, DEFAULT) 
 									ELSE  CASE WHEN case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
 									END)
 	,dblPurchaseContractCash =  (CASE WHEN PCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(PCD.intPriceItemUOMId, P_HeaderPriceUOM.intItemUOMId, PCD.dblCashPrice) ELSE PCD.dblCashPrice END / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end, @intCurrencyId) 
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end, @intCurrencyId, DEFAULT) 
 									ELSE  CASE WHEN case when P_PriceCur.ysnSubCurrency = 1 then  P_PriceCur.intMainCurrencyId else  P_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
 									END)
 	,dblPurchaseContractCosts = NULL
@@ -396,17 +396,17 @@ SELECT
 										END	
 	,strSalesPricingType = S_PT.strPricingType
 	,dblSalesContractBasis = (CASE WHEN SCD.dblBasis IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intBasisUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblBasis) ELSE SCD.dblBasis END / CASE WHEN S_BasisCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-							* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_BasisCur.ysnSubCurrency = 1 then  S_BasisCur.intMainCurrencyId else  S_BasisCur.intCurrencyID end, @intCurrencyId) 
+							* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_BasisCur.ysnSubCurrency = 1 then  S_BasisCur.intMainCurrencyId else  S_BasisCur.intCurrencyID end, @intCurrencyId, DEFAULT) 
 									ELSE  CASE WHEN case when S_BasisCur.ysnSubCurrency = 1 then  S_BasisCur.intMainCurrencyId else  S_BasisCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
 									END)
 	,strSalesInvoiceStatus = SCD.strFinancialStatus
 	,dblSalesContractRatio = SCD.dblRatio
 	,dblSalesContractFutures =  (CASE WHEN SCD.dblFutures IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intPriceItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblFutures) ELSE SCD.dblFutures END / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end, @intCurrencyId) 
+								* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end, @intCurrencyId, DEFAULT) 
 									ELSE  CASE WHEN case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
 									END)
 	,dblSalesContractCash = (CASE WHEN SCD.dblCashPrice IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(SCD.intPriceItemUOMId, S_HeaderPriceUOM.intItemUOMId, SCD.dblCashPrice) ELSE SCD.dblCashPrice END / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-							* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end, @intCurrencyId) 
+							* (CASE WHEN ISNULL(PCD.dblRate,0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end, @intCurrencyId, DEFAULT) 
 									ELSE  CASE WHEN case when S_PriceCur.ysnSubCurrency = 1 then  S_PriceCur.intMainCurrencyId else  S_PriceCur.intCurrencyID end <> @intCurrencyId THEN ISNULL(PCD.dblRate, 0) ELSE 1 END
 									END)
 	,dblSalesContractCosts = NULL
