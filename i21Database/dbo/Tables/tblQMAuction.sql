@@ -6,6 +6,7 @@
 	[intSaleYearId] INT, 
 	[strSaleYear] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[dblSaleNumber] NUMERIC(18, 0) NULL,
+	[dtmSaleDate] DATETIME NULL, 
 	[intCatalogueTypeId] INT NULL, 
 	[strCatalogueType] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[dtmPromptDate] DATETIME NULL, 
@@ -79,9 +80,9 @@
 	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
 	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intPurchaseGroupId] FOREIGN KEY ([intPurchaseGroupId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
 	CONSTRAINT [FK_tblQMAuction_tblSMCurrency] FOREIGN KEY (intCurrencyId) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
-	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intuserId] FOREIGN KEY ([intEvaluatorsCodeAtTBOId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
+	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intEvaluatorsCodeAtTBOId] FOREIGN KEY ([intEvaluatorsCodeAtTBOId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]), -- User
 	CONSTRAINT [FK_tblQMAuction_tblSMCity_intFromLocationCodeId] FOREIGN KEY ([intFromLocationCodeId]) REFERENCES [dbo].[tblSMCity]([intCityId]),
-	CONSTRAINT [FK_tblQMAuction_tblICCommodityAttribute] FOREIGN KEY ([intColourId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), 
+	CONSTRAINT [FK_tblQMAuction_tblICCommodityAttribute] FOREIGN KEY ([intColourId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Season
 	CONSTRAINT [FK_tblQMAuction_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblQMAuction_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
 )
