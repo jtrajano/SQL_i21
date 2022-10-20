@@ -28,7 +28,6 @@ BEGIN
 	DECLARE @rateType INT;
 	DECLARE @withHoldAccount INT = NULL;
 	DECLARE @withholdPercent DECIMAL(18,6);
-	DECLARE @paymentCompanyLocation INT;
 	DECLARE @bankGLAccountId INT;
 	DECLARE @rate DECIMAL(18,6) = 1;
 	DECLARE @currency INT;
@@ -62,6 +61,7 @@ BEGIN
 		strPaymentInfo NVARCHAR(50),
 		strPayee NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
 		intPayToBankAccountId INT NULL,
+		intShipToId INT NULL,
 		intSortId INT IDENTITY(1,1)
 	);
 
@@ -130,11 +130,6 @@ BEGIN
 		RAISERROR('User is required.', 16, 1);
 		RETURN;
 	END
-
-	SELECT
-		@paymentCompanyLocation = intCompanyLocationId
-	FROM tblSMUserSecurity
-	WHERE intEntityId = @currentUser;
 
 	SELECT TOP 1
 		@withHoldAccount = B.intWithholdAccountId
@@ -214,10 +209,11 @@ BEGIN
 		strPayee,
 		ysnLienExists,
 		intPayToBankAccountId,
+		intShipToId,
 		intPartitionId
 	)
 	SELECT
-		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayToBankAccountId, intPartitionId
+		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayToBankAccountId, intShipToId, intPartitionId
 	FROM
 	(
 		SELECT 
@@ -257,6 +253,8 @@ BEGIN
 		--GET DEFAULT COMPANY CONFIGURATIONS
 		SELECT @instructionCode = intInstructionCode FROM tblAPCompanyPreference
 
+		SELECT * FROM #tmpMultiVouchers
+
 		MERGE INTO tblAPPayment AS destination
 		USING
 		(
@@ -268,7 +266,7 @@ BEGIN
 														THEN 3 --Debit Memos and Payments
 														ELSE @paymentMethod END,
 				[intPayToAddressId]					= 	vouchersPay.intPayToAddressId,
-				[intCompanyLocationId]  			= 	@paymentCompanyLocation,
+				[intCompanyLocationId]  			= 	vouchersPay.intShipToId,
 				[intCurrencyId]						= 	@currency,
 				[intEntityVendorId]					= 	vouchersPay.intEntityVendorId,
 				[intCurrencyExchangeRateTypeId]		=	@rateType,
@@ -309,6 +307,7 @@ BEGIN
 				vouchersPay.dblWithheld,
 				vouchersPay.ysnLienExists,
 				vouchersPay.intPayToBankAccountId,
+				vouchersPay.intShipToId,
 				vouchersPay.intPartitionId
 			ORDER BY MIN(vouchersPay.intSortId)
 		) AS SourceData
