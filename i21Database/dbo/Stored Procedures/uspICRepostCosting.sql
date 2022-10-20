@@ -46,6 +46,7 @@ DECLARE @intId AS INT
 		,@strSourceNumber AS NVARCHAR(100)
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
+		,@intCompanyLocationId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -1249,7 +1250,7 @@ BEGIN
 				ON tp.intItemId = tmp.intItemId
 				AND tp.intItemLocationId = tmp.intItemLocationId
 				AND tp.strTransactionId = tmp.strTransactionId
-				AND tmp.strBatchId = @strBatchId
+				AND tmp.strBatchId = @strBatchId			
 	WHERE	dbo.fnGetCostingMethod(tp.intItemId, tp.intItemLocationId) = @AVERAGECOST
 			AND tp.dblQty > 0 
 			AND tp.intTransactionTypeId NOT IN (
@@ -1412,6 +1413,15 @@ BEGIN
 				ON i2p.intLotId = lot.intLotId
 	WHERE	ROUND(lot.dblQty, 6) = 0
 
+	SELECT 
+		@intCompanyLocationId = cl.intCompanyLocationId 
+	FROM			
+		tblICItemLocation il INNER JOIN tblSMCompanyLocation cl
+			ON cl.intCompanyLocationId = il.intLocationId 
+	WHERE
+		il.intItemId = @intItemId
+		AND il.intItemLocationId = @intItemLocationId 
+
 	IF EXISTS (SELECT TOP 1 1 FROM @LotsWithZeroStock) 
 	BEGIN 
 		INSERT INTO dbo.tblICInventoryTransaction (
@@ -1445,6 +1455,9 @@ BEGIN
 					,[strDescription]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[dtmDateCreated]
+					,[dblComputedValue]
+					,[intCompanyLocationId]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -1491,6 +1504,9 @@ BEGIN
 														)
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
+				,[dtmDateCreated]						= GETUTCDATE()
+				,[dblComputedValue]						= -currentValuation.floatingValue
+				,[intCompanyLocationId]					= @intCompanyLocationId
 		FROM	@LotsWithZeroStock iWithZeroStock INNER JOIN tblICLot lot
 						ON iWithZeroStock.intLotId = lot.intLotId
 				INNER JOIN tblICItem i
@@ -1510,6 +1526,11 @@ BEGIN
 							AND t.intLotId = lot.intLotId
 				) currentValuation
 		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
+
+		-- Delete the item and item-location from the table variable. 
+		DELETE FROM	@ItemsForAutoNegative
+		WHERE	intItemId = @intItemId 
+				AND intItemLocationId = @intItemLocationId
 	END 
 END 
 
