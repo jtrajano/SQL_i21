@@ -90,6 +90,10 @@ BEGIN
 					BEGIN
 						IF (@intBillId IS NULL)
 						BEGIN
+							IF (@dblAdjustment > @dblAdjustmentTolerance AND @dblAdjustment > 0)
+							BEGIN
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Variance is greater than allowed')
+							END
 							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
 						END
 					END
@@ -108,14 +112,16 @@ BEGIN
 
 							IF (@intAdjAccountId IS NOT NULL) 
 							BEGIN
-								INSERT INTO @VoucherPayable (intTransactionType, intEntityVendorId, intAccountId, intBillId, dblCost,dblQuantityToBill)
-
+								INSERT INTO @VoucherPayable (intTransactionType, intEntityVendorId, intAccountId, intBillId, dblCost,dblQuantityToBill, dblOrderQty, ysnStage)
 								SELECT 	intTransactionType		= 1
 									,intEntityVendorId			= @intEntityVendorId
 									,intAccountId				= @intAdjAccountId
 									,intBillId					= @intBillId
 									,dblCost					= @dblAdjustment
 									,dblQuantityToBill			= @intQtyToBill
+									,dblQtyOrdered				= @intQtyToBill
+									,ysnStage					= 0
+
 
 								EXEC [dbo].[uspAPAddVoucherDetail] 
 									@voucherDetails = @VoucherPayable
