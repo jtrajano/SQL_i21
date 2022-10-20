@@ -7,6 +7,7 @@
     [dtmValidTo] DATETIME NOT NULL, 
 	[strPropertyRangeText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS CONSTRAINT [DF_tblQMProductPropertyValidityPeriod_strPropertyRangeText] DEFAULT '', 
 	[dblMinValue] NUMERIC(18, 6) NULL,
+	[dblPinpointValue] NUMERIC(18, 6) NULL,
 	[dblMaxValue] NUMERIC(18, 6) NULL,
 	[dblLowValue] NUMERIC(18, 6) NULL,
 	[dblHighValue] NUMERIC(18, 6) NULL,
