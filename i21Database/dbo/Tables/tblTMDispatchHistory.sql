@@ -44,6 +44,10 @@
 	[dtmCreated]				DATETIME NOT NULL DEFAULT GETDATE(),
     [dtmReceivedDate] DATETIME NULL, 
 	[intPaymentId] INT NULL, 
+    [dblRegularPrice]           NUMERIC (18, 6) DEFAULT 0 NULL,
+    [dblOverageQty] NUMERIC(18,6) DEFAULT 0 NULL,
+	[dblOveragePrice] NUMERIC(18,6) DEFAULT 0 NULL,
+    [strOriginalPricingMethod] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTMDispatchHistory] PRIMARY KEY CLUSTERED ([intDispatchSyncId] ASC), 
 );
 
