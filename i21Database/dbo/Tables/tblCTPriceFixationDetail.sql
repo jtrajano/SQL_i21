@@ -69,3 +69,5 @@
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixationDetail_intPriceFixationId] ON [dbo].[tblCTPriceFixationDetail](intPriceFixationId);
 GO
+CREATE INDEX [idx_tblCTPriceFixationDetail_tblARInvoiceDetail] ON [dbo].[tblCTPriceFixationDetail] (intInvoiceDetailId, intPriceFixationDetailId) 
+GO

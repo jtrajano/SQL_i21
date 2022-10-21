@@ -23,7 +23,8 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId) ON DELETE CASCADE
 )
 GO
-
+CREATE INDEX [idx_tblCTPriceFixationDetailAPAR_tblARInvoiceDetail] ON [dbo].[tblCTPriceFixationDetailAPAR] (intInvoiceDetailId, intPriceFixationDetailAPARId) 
+GO
 CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
     ON [dbo].[tblCTPriceFixationDetailAPAR]
     FOR INSERT
