@@ -741,30 +741,9 @@ BEGIN
 							, IUM.strUnitMeasure [PosCodeModifierName] 
 							, '0' [PosCodeModifierValue] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [ActiveFlagValue]
-							, CASE WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = IL.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-																ELSE Prc.dblSalePrice
-								END AS [InventoryValuePrice]
+							, itemPricing.dblSalePrice AS [InventoryValuePrice]
 							, CategoryLoc.strCashRegisterDepartment [MerchandiseCode]
-							, CASE WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate 
-									THEN SplPrc.dblUnitAfterDiscount 
-								   WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																						WHERE EIP.intItemLocationId = IL.intItemLocationId
-																						AND GETDATE() >= dtmEffectiveRetailPriceDate
-																						ORDER BY dtmEffectiveRetailPriceDate ASC))
-																	THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-								ELSE 
-									Prc.dblSalePrice 
-							END  [RegularSellPrice]
+							, itemPricing.dblSalePrice AS [RegularSellPrice]
 							, I.strDescription [Description]
 							, 'item' [LinkCodeType]
 							, NULL [LinkCodeValue]
@@ -854,6 +833,10 @@ BEGIN
 							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
+						JOIN vyuSTItemHierarchyPricing itemPricing
+							ON I.intItemId = itemPricing.intItemId
+							AND IL.intItemLocationId = itemPricing.intItemLocationId
+							AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
 						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
@@ -893,28 +876,9 @@ BEGIN
 							, IUM.strUnitMeasure [PosCodeModifierName] 
 							, '0' [PosCodeModifierValue] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [ActiveFlagValue]
-							, CASE WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = IL.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-									ELSE Prc.dblSalePrice
-								END AS[InventoryValuePrice]
+							, itemPricing.dblSalePrice AS [InventoryValuePrice]
 							, CategoryLoc.strCashRegisterDepartment [MerchandiseCode]
-							, CASE WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
-								   WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																									WHERE EIP.intItemLocationId = IL.intItemLocationId
-																									AND GETDATE() >= dtmEffectiveRetailPriceDate
-																									ORDER BY dtmEffectiveRetailPriceDate ASC))
-																				THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																										WHERE EIP.intItemLocationId = IL.intItemLocationId
-																										AND GETDATE() >= dtmEffectiveRetailPriceDate
-																										ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-									ELSE Prc.dblSalePrice 
-								END  [RegularSellPrice]
+							, itemPricing.dblSalePrice AS [RegularSellPrice]
 							, I.strDescription [Description]
 							, 'item' [LinkCodeType]
 							, NULL [LinkCodeValue]
@@ -1005,6 +969,10 @@ BEGIN
 							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
+						JOIN vyuSTItemHierarchyPricing itemPricing
+							ON I.intItemId = itemPricing.intItemId
+							AND IL.intItemLocationId = itemPricing.intItemLocationId
+							AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
 						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
