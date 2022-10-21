@@ -9232,6 +9232,7 @@
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
 
   	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
