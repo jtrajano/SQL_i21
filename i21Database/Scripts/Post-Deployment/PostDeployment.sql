@@ -554,6 +554,8 @@ print 'BEGIN POST DEPLOYMENT'
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 :r .\QM\2_SetDefaultData.sql
+:r .\QM\3_CreateOfferSampleOutbound.sql
+
 
 -- C-Store Module
 :r .\ST\01_FileFieldMapping_PricebookSale.sql
