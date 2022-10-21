@@ -23,6 +23,7 @@ DECLARE @blbLogo 				VARBINARY (MAX)  = NULL
 	  , @strPhone				NVARCHAR(100) = NULL
 	  , @strCompanyName			NVARCHAR(200) = NULL
 	  , @strCompanyFullAddress	NVARCHAR(500) = NULL
+	  , @strBerryOilAddress		NVARCHAR(500) = NULL
 	  , @dtmDateNow				DATETIME = NULL
 
 --LOGO
@@ -51,6 +52,7 @@ ORDER BY intCompanyPreferenceId DESC
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
+		   , @strBerryOilAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strPhone, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strEmail, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strWebSite, ''), '')
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
@@ -70,11 +72,11 @@ FROM tblSMCompanyLocation L
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE intEntityUserId = @intEntityUserId 
   AND strRequestId = @strRequestId 
-  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2')
+  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil')
 
 --MAIN QUERY
 SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
-	 , strCompanyAddress		= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+	 , strCompanyAddress		= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN CASE WHEN SELECTEDINV.strInvoiceFormat <> 'Format 9 - Berry Oil' THEN @strCompanyFullAddress ELSE @strBerryOilAddress END
 									   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 									   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
 								  END
@@ -104,7 +106,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId,0)
 	 , intSiteId				= INVOICEDETAIL.intSiteId
 	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
-	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 5 - Honstein' THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
+	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('Format 5 - Honstein', 'Format 9 - Berry Oil') THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
 	 , strItemNo				= INVOICEDETAIL.strItemNo
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strContractNo			= INVOICEDETAIL.strContractNo
@@ -420,7 +422,7 @@ OUTER APPLY (
 ) [MESSAGES]
 WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strRequestId = @strRequestId
-  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Format 9 - Berry Oil')
 
 --HONSTEIN TAX DETAILS
 IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 5 - Honstein')
@@ -619,4 +621,47 @@ BEGIN
 		AND STAGING.strRequestId = @strRequestId
 		AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
 		AND STAGING.strItemNo <> 'State Sales Tax'
+END
+ELSE IF EXISTS (SELECT TOP 1 1 FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 9 - Berry Oil')
+BEGIN
+	INSERT INTO tblARInvoiceTaxReportStagingTable (
+		  [intTransactionId]
+		, [intTransactionDetailId]
+		, [intTransactionDetailTaxId]
+		, [intTaxCodeId]
+		, [intEntityUserId]
+		, [strRequestId]
+		, [strTaxTransactionType]
+		, [strCalculationMethod]
+		, [strTaxCode]
+		, [strDescription]
+		, [strTaxClass]
+		, [strInvoiceFormat]
+		, [dblAdjustedTax]
+		, [dblRate]
+	)
+	SELECT [intTransactionId]			= I.intInvoiceId
+		, [intTransactionDetailId]		= ID.intInvoiceDetailId
+		, [intTransactionDetailTaxId]	= IDT.intInvoiceDetailTaxId
+		, [intTaxCodeId]				= IDT.intTaxCodeId
+		, [intEntityUserId]				= @intEntityUserId
+		, [strRequestId]				= @strRequestId
+		, [strTaxTransactionType]		= 'Invoice'
+		, [strCalculationMethod]		= IDT.strCalculationMethod
+		, [strTaxCode]					= SMT.strTaxCode
+		, [strDescription]				= SMT.strDescription
+		, [strTaxClass]					= TC.strTaxClass
+		, [strInvoiceFormat]			= I.strInvoiceFormat
+		, [dblAdjustedTax]				= IDT.dblAdjustedTax
+		, [dblRate]						= IDT.dblRate		
+	FROM (
+		SELECT DISTINCT intInvoiceId
+					  , strInvoiceFormat
+		FROM #INVOICES
+	) I
+	INNER JOIN tblARInvoiceDetail ID WITH (NOLOCK) ON I.intInvoiceId = ID.intInvoiceId
+	INNER JOIN tblARInvoiceDetailTax IDT WITH (NOLOCK) ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
+	INNER JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
+	INNER JOIN tblSMTaxClass TC ON SMT.intTaxClassId = TC.intTaxClassId
+	WHERE IDT.dblAdjustedTax <> 0
 END
