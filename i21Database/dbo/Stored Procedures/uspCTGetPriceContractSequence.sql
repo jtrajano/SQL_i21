@@ -99,6 +99,7 @@ BEGIN TRY
 				, CD.strSeason
 				, CD.strClass
 				, CD.strProductLine
+				, dblDefaultFx = null
 			FROM tblCTContractHeader			CH	
 			JOIN tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 			JOIN tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
@@ -241,6 +242,7 @@ BEGIN TRY
 				, ICC.strSeason
 				, ICC.strClass
 				, ICC.strProductLine
+				, dblDefaultFx = (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId order by erd.dtmValidFromDate desc)
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 			JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 

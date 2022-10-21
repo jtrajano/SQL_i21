@@ -7,6 +7,7 @@ SELECT
 	B.intPaymentDetailId,
 	C.strLocationName,
 	D.strBankAccountNo,
+	D.strNickname,
 	F.strName AS strVendor,
 	G.strLocationName  AS strPayTo,
 	H.strPaymentMethod,

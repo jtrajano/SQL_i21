@@ -27,6 +27,9 @@ SELECT
 	,F.dblAmount
 	,M.intBillId
 	,M.strBillId
+	,Lot.strLotNumber
+	,Lot.strLotAlias
+	,Lot.strWarrantNo
 FROM tblICInsuranceCharge A
 LEFT JOIN tblEMEntity B
 	ON A.intInsurerId = B.intEntityId
@@ -51,6 +54,8 @@ LEFT JOIN vyuRKGetM2MHeader E
 -----------------Detail
 LEFT JOIN tblICInsuranceChargeDetail F
 	ON A.intInsuranceChargeId = F.intInsuranceChargeId
+LEFT JOIN tblICLot Lot
+	ON Lot.intLotId = F.intLotId 
 OUTER APPLY (
 	SELECT strLocationName = STUFF(
 		(	SELECT 

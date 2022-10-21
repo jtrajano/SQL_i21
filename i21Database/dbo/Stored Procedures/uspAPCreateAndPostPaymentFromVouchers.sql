@@ -28,7 +28,6 @@ BEGIN
 	DECLARE @rateType INT;
 	DECLARE @withHoldAccount INT = NULL;
 	DECLARE @withholdPercent DECIMAL(18,6);
-	DECLARE @paymentCompanyLocation INT;
 	DECLARE @bankGLAccountId INT;
 	DECLARE @rate DECIMAL(18,6) = 1;
 	DECLARE @currency INT;
@@ -61,6 +60,8 @@ BEGIN
 		dblWithheld DECIMAL(18,2),
 		strPaymentInfo NVARCHAR(50),
 		strPayee NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
+		intPayToBankAccountId INT NULL,
+		intShipToId INT NULL,
 		intSortId INT IDENTITY(1,1)
 	);
 
@@ -130,11 +131,6 @@ BEGIN
 		RETURN;
 	END
 
-	SELECT
-		@paymentCompanyLocation = intCompanyLocationId
-	FROM tblSMUserSecurity
-	WHERE intEntityId = @currentUser;
-
 	SELECT TOP 1
 		@withHoldAccount = B.intWithholdAccountId
 		,@withholdPercent = B.dblWithholdPercent
@@ -171,9 +167,9 @@ BEGIN
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
 		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
-		
 		,strPayee = ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
 					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(ISNULL(payTo.strAddress,''), ISNULL(payTo.strCity,''), ISNULL(payTo.strState,''), ISNULL(payTo.strZipCode,'')),'')
+		,intDefaultPayToBankAccountId = ISNULL(result.intPayToBankAccountId, eft.intEntityEFTInfoId)
 	INTO #tmpPartitionedVouchers 
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
@@ -183,6 +179,7 @@ BEGIN
 	LEFT JOIN tblSMTerm term ON voucher.intTermsId = term.intTermID
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID 
+	LEFT JOIN tblEMEntityEFTInformation eft ON eft.intEntityId = entity.intEntityId AND eft.ysnActive = 1 AND eft.ysnDefaultAccount = 1
 	OUTER APPLY (
 		SELECT STUFF((
 			SELECT DISTINCT ' and ' + strName
@@ -211,10 +208,12 @@ BEGIN
 		strPaymentInfo,
 		strPayee,
 		ysnLienExists,
+		intPayToBankAccountId,
+		intShipToId,
 		intPartitionId
 	)
 	SELECT
-		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intPartitionId
+		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayToBankAccountId, intShipToId, intPartitionId
 	FROM
 	(
 		SELECT 
@@ -254,6 +253,8 @@ BEGIN
 		--GET DEFAULT COMPANY CONFIGURATIONS
 		SELECT @instructionCode = intInstructionCode FROM tblAPCompanyPreference
 
+		SELECT * FROM #tmpMultiVouchers
+
 		MERGE INTO tblAPPayment AS destination
 		USING
 		(
@@ -265,7 +266,7 @@ BEGIN
 														THEN 3 --Debit Memos and Payments
 														ELSE @paymentMethod END,
 				[intPayToAddressId]					= 	vouchersPay.intPayToAddressId,
-				[intCompanyLocationId]  			= 	@paymentCompanyLocation,
+				[intCompanyLocationId]  			= 	vouchersPay.intShipToId,
 				[intCurrencyId]						= 	@currency,
 				[intEntityVendorId]					= 	vouchersPay.intEntityVendorId,
 				[intCurrencyExchangeRateTypeId]		=	@rateType,
@@ -286,6 +287,7 @@ BEGIN
 				[intConcurrencyId]					= 	0,
 				[strBatchId]						=	@batchId,
 				[intInstructionCode]				= 	@instructionCode,
+				[intPayToBankAccountId]				=	vouchersPay.intPayToBankAccountId,
 				[intPaymentId]						=	vouchersPay.intPaymentId,
 				[intPartitionId]					=	vouchersPay.intPartitionId
 				-- [strBillIds]						=	STUFF((
@@ -304,6 +306,8 @@ BEGIN
 				vouchersPay.strPayee,
 				vouchersPay.dblWithheld,
 				vouchersPay.ysnLienExists,
+				vouchersPay.intPayToBankAccountId,
+				vouchersPay.intShipToId,
 				vouchersPay.intPartitionId
 			ORDER BY MIN(vouchersPay.intSortId)
 		) AS SourceData
@@ -335,7 +339,8 @@ BEGIN
 			[intEntityId],
 			[intConcurrencyId],
 			[strBatchId],
-			[intInstructionCode]
+			[intInstructionCode],
+			[intPayToBankAccountId]
 		)
 		VALUES(
 			[intAccountId],
@@ -362,7 +367,8 @@ BEGIN
 			[intEntityId],
 			[intConcurrencyId],
 			[strBatchId],
-			[intInstructionCode]
+			[intInstructionCode],
+			[intPayToBankAccountId]
 		)
 		OUTPUT SourceData.intPartitionId, inserted.intPaymentId INTO #tmpMultiVouchersCreatedPayment;
 

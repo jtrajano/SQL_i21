@@ -2,7 +2,11 @@
 
 AS
 
-SELECT DISTINCT CT.strContractType
+SELECT *
+		, dblToBeHedgedLots = CASE WHEN dblDetailNoOfLots IS NULL THEN dblHeaderNoOfLots - dblHedgedLots 
+								ELSE dblDetailNoOfLots - dblHedgedLots END
+	FROM (
+	SELECT DISTINCT CT.strContractType
 	, CD.dblBalance
 	, dblDetailQuantity = ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblInvoicedQty, 0)
 	, CH.strContractNumber
@@ -37,6 +41,10 @@ SELECT DISTINCT CT.strContractType
 	, intLocationId = CD.intCompanyLocationId
 	, Location.strLocationName
 	, intCropYearId = CH.intCropYearId 
+	, dblHedgedLots = ISNULL((SELECT SUM(AD.dblHedgedLots)
+									FROM tblRKAssignFuturesToContractSummary AD
+									GROUP BY AD.intContractDetailId
+									HAVING CD.intContractDetailId = AD.intContractDetailId), 0)
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId NOT IN (2, 3)
 JOIN tblRKFuturesMonth FM on FM.intFutureMonthId = CD.intFutureMonthId
@@ -47,3 +55,4 @@ JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = CD.intComp
 LEFT JOIN tblCTBook book ON book.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = CD.intSubBookId
 WHERE CD.dblQuantity > ISNULL(CD.dblInvoicedQty, 0)
+) t1
