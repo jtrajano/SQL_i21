@@ -1294,7 +1294,7 @@
     <Build Include="dbo\Functions\fnGLGetIntraCompanyAccounts.sql" />
     <Build Include="dbo\Functions\fnGLBuildIntraCompanyAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateIntraCompanyEntries.sql" />
-    <Build Include="dbo\Views\vyuMFGUserLocation.sql" />
+    <Build Include="dbo\Views\vyuMFUserLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11558,7 +11558,7 @@
     <Build Include="dbo\Views\vyuQMSearchTINClearance.sql" />
     <Build Include="dbo\Stored Procedures\uspQMClearTIN.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateTINBatchId.sql" />
-	<Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

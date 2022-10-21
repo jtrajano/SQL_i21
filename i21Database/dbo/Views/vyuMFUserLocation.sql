@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuMFGUserLocation]
+﻿CREATE VIEW [dbo].[vyuMFUserLocation]
 AS 
 SELECT intEntityUserSecurityId
 	 , intEntityId
