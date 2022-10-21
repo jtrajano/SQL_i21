@@ -98,6 +98,11 @@ SELECT
     strStorageUnit = E.strName,
     A.intStorageLocationId,
     A.intStorageUnitId,
+    A.strFreightAgent,
+	A.strSealNumber,
+	A.strContainerType,
+	A.strVoyage,
+	A.strVessel 
     A.intConcurrencyId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId

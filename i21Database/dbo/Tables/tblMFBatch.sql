@@ -92,6 +92,11 @@ CREATE  TABLE tblMFBatch
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intStorageLocationId  INT NULL,
 	intStorageUnitId  INT NULL,
+	strFreightAgent NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strSealNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strVoyage NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strVessel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intConcurrencyId INT NULL,
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
