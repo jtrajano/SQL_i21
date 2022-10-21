@@ -378,7 +378,7 @@ BEGIN
 		DECLARE @intInterCompanyVendorId INT
 		DECLARE @strInterCompanyVendorId NVARCHAR(50)
 
-		SELECT @strInterCompanyVendorId = [strInterCompanyVendorId], @intInterCompanyVendorId = [intInterCompanyVendorId] FROM #ARPostInvoiceHeader
+		SELECT @strInterCompanyVendorId = [strInterCompanyVendorId], @intInterCompanyVendorId = [intInterCompanyVendorId] FROM tblARPostInvoiceHeader
 		SELECT @ysnVendorExistQuery = N'SELECT @ysnVendorExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblAPVendor WHERE intEntityId = ''' + CAST(@intInterCompanyVendorId AS NVARCHAR(50)) + ''''
 
 		SET @ysnVendorExistParam = N'@ysnVendorExist int OUTPUT'
@@ -428,7 +428,7 @@ BEGIN
 
 		INSERT INTO #ARInterCompanyItem
 		SELECT DISTINCT PID.strItemNo
-		FROM #ARPostInvoiceDetail PID
+		FROM tblARPostInvoiceDetail PID
 		INNER JOIN tblICItem ICI
 		ON PID.intItemId = ICI.intItemId
 
@@ -493,7 +493,7 @@ BEGIN
 
 		INSERT INTO #ARInterCompanyFreightTerm
 		SELECT DISTINCT SMFT.strFreightTerm
-		FROM #ARPostInvoiceDetail PID
+		FROM tblARPostInvoiceDetail PID
 		INNER JOIN tblSMFreightTerms SMFT
 		ON PID.intFreightTermId = SMFT.intFreightTermId
 
@@ -2868,7 +2868,7 @@ BEGIN
 		DECLARE @strBillId NVARCHAR(500) = ''
 		DECLARE @strInterCompanyReceiptNumber NVARCHAR(50)
 
-		SELECT @strInterCompanyReceiptNumber = [strReceiptNumber] FROM #ARPostInvoiceHeader
+		SELECT @strInterCompanyReceiptNumber = [strReceiptNumber] FROM tblARPostInvoiceHeader
 		SELECT @ysnVoucherExistQuery = N'SELECT @strBillId = APB.strBillId 
 										 FROM [' + @strDatabaseName + '].[dbo].tblICInventoryReceipt ICIR 
 										 INNER JOIN [' + @strDatabaseName + '].[dbo].tblICInventoryReceiptItem ICIRI 
@@ -2904,7 +2904,7 @@ BEGIN
 				,[strBatchId]			= I.[strBatchId]
 				,[strPostingError]		= 'Unable to unpost. The inventory receipt (' + @strInterCompanyReceiptNumber + ') has a voucher (' + @strBillId + ') in company ' + ISNULL(@strCompanyName, '') + '.'
 				,[strSessionId]			= @strSessionId
-			FROM #ARPostInvoiceHeader I
+			FROM tblARPostInvoiceHeader I
 			WHERE I.ysnInterCompany = 1
 		END
 	END
