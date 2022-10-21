@@ -60,7 +60,6 @@ BEGIN
 	strSampleBoxNumber				 = T.strSampleBoxNumber,
 	dblSellingPrice					 = T.dblSellingPrice,
 	dtmStock						 = T.dtmStock,
-	strStorageLocation				 = T.strStorageLocation,
 	strSubChannel					 = T.strSubChannel,
 	ysnStrategic					 = T.ysnStrategic,
 	strTeaLingoSubCluster			 = T.strTeaLingoSubCluster,
@@ -95,7 +94,16 @@ BEGIN
 	strProductionSite				 = T.strProductionSite,
 	strReserveMU					 = T.strReserveMU,
 	strQualityComments				 = T.strQualityComments,
-	strRareEarth					 = T.strRareEarth
+	strRareEarth					 = T.strRareEarth,
+	intItemUOMId					 = T.intItemUOMId,
+	intWeightUOMId					 = T.intWeightUOMId,				
+	intStorageLocationId			 = T.intStorageLocationId,
+	intStorageUnitId				 = T.intStorageUnitId,  
+	strFreightAgent					 = T.strFreightAgent, 
+	strSealNumber					 = T.strSealNumber,
+	strContainerType				 = T.strContainerType,
+	strVoyage					 	 = T.strVoyage,
+	strVessel					 	 = T.strVessel
 	FROM tblMFBatch A
 	OUTER APPLY(
 		SELECT * FROM @MFBatchTableType
@@ -159,7 +167,6 @@ BEGIN
 		,strSampleBoxNumber
 		,dblSellingPrice
 		,dtmStock
-		,strStorageLocation
 		,strSubChannel
 		,ysnStrategic
 		,strTeaLingoSubCluster
@@ -194,7 +201,17 @@ BEGIN
 		,strProductionSite
 		,strReserveMU
 		,strQualityComments
-		,strRareEarth)
+		,strRareEarth
+		,intItemUOMId
+		,intWeightUOMId
+		,intStorageLocationId
+		,intStorageUnitId
+		,strFreightAgent
+		,strSealNumber
+		,strContainerType
+		,strVoyage
+		,strVessel
+		)
 
 	 SELECT 
 		@strBatchId
@@ -248,7 +265,6 @@ BEGIN
 		,strSampleBoxNumber
 		,dblSellingPrice
 		,dtmStock
-		,strStorageLocation
 		,strSubChannel
 		,ysnStrategic
 		,strTeaLingoSubCluster
@@ -284,5 +300,14 @@ BEGIN
 		,strReserveMU
 		,strQualityComments
 		,strRareEarth
+		,intItemUOMId
+		,intWeightUOMId
+		,intStorageLocationId
+		,intStorageUnitId
+		,strFreightAgent
+		,strSealNumber
+		,strContainerType
+		,strVoyage
+		,strVessel
 	FROM @MFBatchTableType
 END
