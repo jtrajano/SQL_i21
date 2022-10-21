@@ -51,7 +51,7 @@ BEGIN
 
     -- Total Invoice Amount
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Invoice Amount', 0, 13, 1)
+	VALUES (@FileHeaderId, 'Invoice Amount', 0, 15, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -85,14 +85,6 @@ BEGIN
 	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
 	VALUES (@FileHeaderId, @DetailId, 7, 'tblTRImportDtnDetail', 'dtmDueDate', 1, 1)
 
-END
-ELSE
-BEGIN
-	SELECT TOP 1 @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle
-	-- Total Invoice Amount
-	UPDATE tblSMImportFileRecordMarker SET intPosition = 13 
-	WHERE intImportFileHeaderId = @FileHeaderId 
-	AND strRecordMarker =  'Invoice Amount'
 END
 GO
 
