@@ -14,5 +14,6 @@
     CONSTRAINT [FK_tblVRRebate_tblARInvoiceDetail] FOREIGN KEY (intInvoiceDetailId) REFERENCES [tblARInvoiceDetail]([intInvoiceDetailId]),
 	CONSTRAINT [FK_tblVRRebate_tblVRProgram] FOREIGN KEY (intProgramId) REFERENCES [tblVRProgram]([intProgramId]),
 );
+GO
 CREATE INDEX [idx_tblVRRebate_tblARInvoiceDetail] ON [dbo].[tblVRRebate] (intInvoiceDetailId, intRebateId) 
 GO
