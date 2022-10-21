@@ -9251,6 +9251,7 @@
   	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
     <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
     <Build Include="dbo\Functions\uspGRGetInventoryTransfers.sql" />
+    <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
