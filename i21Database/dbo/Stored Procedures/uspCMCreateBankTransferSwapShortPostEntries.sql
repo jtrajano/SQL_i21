@@ -24,7 +24,7 @@ END
 SELECT TOP 1 @intRealizedGainOnSwap = intGainOnSwapRealizedId FROM tblSMMultiCurrency
   IF ISNULL(@intRealizedGainOnSwap,0) = 0
 BEGIN    
-    RAISERROR('Cannot find the Realized Gin on Swap GL Account ID Setting in Company Configuration.', 11, 1)      
+    RAISERROR('Cannot find the Realized Gain on Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
@@ -147,13 +147,13 @@ DECLARE @intBTSwapToFXGLAccountId INT  -- payable
 SELECT TOP 1 @intBTSwapToFXGLAccountId = intBTSwapToFXGLAccountId, @intBTSwapFromFXGLAccountId = intBTSwapFromFXGLAccountId 
 FROM tblCMCompanyPreferenceOption    
 
-IF @intBTSwapToFXGLAccountId IS NULL    
+IF ISNULL(@intBTSwapToFXGLAccountId,0) = 0   
 BEGIN    
     RAISERROR('Cannot find the Account Payable Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
-IF @intBTSwapFromFXGLAccountId IS NULL    
+IF ISNULL(@intBTSwapFromFXGLAccountId,0) = 0   
 BEGIN    
     RAISERROR('Cannot find the Account Receivable Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
