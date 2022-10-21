@@ -102,7 +102,7 @@ SELECT
 	A.strSealNumber,
 	A.strContainerType,
 	A.strVoyage,
-	A.strVessel 
+	A.strVessel,
     A.intConcurrencyId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
