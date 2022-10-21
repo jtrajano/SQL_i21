@@ -86,7 +86,10 @@ BEGIN TRY
 					PS.intBillId,
 					ROW_NUMBER() OVER (PARTITION BY PS.intBillId, PS.dblPayment ORDER BY PS.dtmDueDate DESC) intEarliestDue
 				FROM tblAPVoucherPaymentSchedule PS 
+				INNER JOIN (tblAPPaymentDetail payDetail INNER JOIN tblAPPayment pay ON pay.intPaymentId = payDetail.intPaymentId)
+					ON PS.intBillId = payDetail.intBillId
 				WHERE PS.ysnPaid = 0
+				AND pay.intPaymentId = @createdPaymentId
 			)
 
 			UPDATE PD
