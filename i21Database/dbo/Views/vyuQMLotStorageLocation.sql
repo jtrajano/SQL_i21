@@ -5,7 +5,7 @@ SELECT L.intLotId
 	,SL.intStorageLocationId
 	,SL.strName
 	,CL.intCompanyLocationSubLocationId
-	,CL.strSubLocationName,
+	,CL.strSubLocationName
 	,CL.intCompanyLocationId
 FROM tblICStorageLocation SL
 JOIN tblICLot L ON L.intStorageLocationId = SL.intStorageLocationId
