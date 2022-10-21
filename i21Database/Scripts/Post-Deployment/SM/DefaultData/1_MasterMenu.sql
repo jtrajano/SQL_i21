@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Offer Lists' AND strModuleName = 'Contract Management')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deployment Type' AND strModuleName = 'Help Desk')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -3657,12 +3657,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Overview'
 	VALUES (N'Overview', N'Contract Management', @ContractManagementReportParentMenuId, N'Overview', N'Report', N'Screen', N'ContractManagement.view.Overview?showSearch=true', N'small-menu-report', 1, 1, 0, 1, 4, 0)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'ContractManagement.view.Overview?showSearch=true' WHERE strMenuName = 'Overview' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Offer Lists' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Offer Lists', N'Contract Management', @ContractManagementReportParentMenuId, N'Offer Lists', N'Report', N'Screen', N'ContractManagement.view.OfferList', N'small-menu-report', 1, 1, 0, 1, 5, 0)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'ContractManagement.view.OfferList' WHERE strMenuName = 'Offer Lists' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Contract' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
