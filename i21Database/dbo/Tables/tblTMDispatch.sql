@@ -441,10 +441,15 @@ CREATE TRIGGER [dbo].[trgAfterInsertTMDispatch]
         declare @willCallPrefix nvarchar(20);
 		declare @newId int;
 
-		select @newId = i.intDispatchID from inserted i;
+		-- select @newId = i.intDispatchID from inserted i;
 		set @willCallPrefix = (select strPrefix from tblSMStartingNumber where strModule = 'Tank Management' and strTransactionType = 'Will Call');
 
-		update tblTMDispatch set strOrderNumber = @willCallPrefix + convert(nvarchar(10),@newId) where intDispatchID = @newId;
-		update tblSMStartingNumber set intNumber = (@newId + 1) where strModule = 'Tank Management' and strTransactionType = 'Will Call';
+		-- update tblTMDispatch set strOrderNumber = @willCallPrefix + convert(nvarchar(10),@newId) where intDispatchID = @newId;
+		-- update tblSMStartingNumber set intNumber = (@newId + 1) where strModule = 'Tank Management' and strTransactionType = 'Will Call';
+        UPDATE tblTMDispatch 
+		SET strOrderNumber = @willCallPrefix + convert(nvarchar(10),inserted.intDispatchID) 
+		FROM inserted
+		where tblTMDispatch.intDispatchID = inserted.intDispatchID
+			AND tblTMDispatch.strOrderNumber IS NULL
 
     END
