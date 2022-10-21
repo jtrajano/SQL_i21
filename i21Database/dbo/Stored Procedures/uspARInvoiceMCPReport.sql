@@ -624,6 +624,7 @@ BEGIN
 END
 ELSE IF EXISTS (SELECT TOP 1 1 FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 9 - Berry Oil')
 BEGIN
+	DELETE FROM tblARInvoiceTaxReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 9 - Berry Oil'
 	INSERT INTO tblARInvoiceTaxReportStagingTable (
 		  [intTransactionId]
 		, [intTransactionDetailId]
