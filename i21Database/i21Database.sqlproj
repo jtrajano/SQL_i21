@@ -8164,6 +8164,7 @@
     <Build Include="dbo\Tables\tblICBackupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDModuleAccess.sql" />
+	<Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
