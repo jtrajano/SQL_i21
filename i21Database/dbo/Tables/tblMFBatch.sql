@@ -8,10 +8,14 @@ CREATE  TABLE tblMFBatch
 	strTeaType NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intBrokerId INT NOT NULL,
 	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	intBuyingCenterLocationId INT NOT NULL,
+	intBuyingCenterLocationId INT NOT NULL, -- company location id
 	intParentBatchId INT NULL,
+	intStorageLocationId  INT NULL, -- sub location
+	intStorageUnitId  INT NULL, -- ic location broker warehouse
 	intInventoryReceiptId INT NULL,
 	intSampleId INT NULL,
+	intItemUOMId INT NULL,
+	intWeightUOMId	INT NULL,
 	intContractDetailId INT NULL,
 	str3PLStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strSupplierReference NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL ,
@@ -21,7 +25,6 @@ CREATE  TABLE tblMFBatch
 	dblBasePrice  NUMERIC(18,6)  NULL,
 	ysnBoughtAsReserved BIT  NULL,
 	ysnBoughtPrice BIT  NULL,
-	intBrokerWarehouseId INT  NULL,
 	dblBulkDensity  NUMERIC(18,6)  NULL,
 	strBuyingOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intSubBookId INT  NULL,
@@ -45,8 +48,7 @@ CREATE  TABLE tblMFBatch
 	strLeafStyle NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intMixingUnitLocationId INT  NULL,
 	dblPackagesBought NUMERIC(18,6)  NULL,
-	intItemUOMId INT NULL,
-	intWeightUOMId	INT NULL,
+
 	strTeaOrigin NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intOriginalItemId INT NOT NULL,
 	dblPackagesPerPallet NUMERIC(18,6)  NULL,
@@ -90,8 +92,7 @@ CREATE  TABLE tblMFBatch
 	strReserveMU NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS  NULL,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
-	intStorageLocationId  INT NULL,
-	intStorageUnitId  INT NULL,
+
 	strFreightAgent NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strSealNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,

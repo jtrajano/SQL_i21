@@ -22,6 +22,10 @@ BEGIN
 	intInventoryReceiptId			 = T.intInventoryReceiptId,
 	intSampleId						 = T.intSampleId,
 	intContractDetailId				 = T.intContractDetailId,
+	intItemUOMId					 = T.intItemUOMId,
+	intWeightUOMId					 = T.intWeightUOMId,				
+	intStorageLocationId			 = T.intStorageLocationId,
+	intStorageUnitId				 = T.intStorageUnitId,  
 	str3PLStatus					 = T.str3PLStatus,
 	strAirwayBillCode				 = T.strAirwayBillCode,
 	strAWBSampleReceived			 = T.strAWBSampleReceived,
@@ -29,7 +33,6 @@ BEGIN
 	dblBasePrice					 = T.dblBasePrice,
 	ysnBoughtAsReserved				 = T.ysnBoughtAsReserved,
 	ysnBoughtPrice					 = T.ysnBoughtPrice,
-	intBrokerWarehouseId			 = T.intBrokerWarehouseId,
 	dblBulkDensity					 = T.dblBulkDensity,
 	strBuyingOrderNumber			 = T.strBuyingOrderNumber,
 	intSubBookId					 = T.intSubBookId,
@@ -95,10 +98,6 @@ BEGIN
 	strReserveMU					 = T.strReserveMU,
 	strQualityComments				 = T.strQualityComments,
 	strRareEarth					 = T.strRareEarth,
-	intItemUOMId					 = T.intItemUOMId,
-	intWeightUOMId					 = T.intWeightUOMId,				
-	intStorageLocationId			 = T.intStorageLocationId,
-	intStorageUnitId				 = T.intStorageUnitId,  
 	strFreightAgent					 = T.strFreightAgent, 
 	strSealNumber					 = T.strSealNumber,
 	strContainerType				 = T.strContainerType,
@@ -124,9 +123,13 @@ BEGIN
 		,intBrokerId
 		,strVendorLotNumber
 		,intBuyingCenterLocationId
+		,intStorageLocationId
+		,intStorageUnitId
 		,intParentBatchId
 		,intInventoryReceiptId
 		,intSampleId
+		,intItemUOMId
+		,intWeightUOMId
 		,intContractDetailId
 		,str3PLStatus
 		,strSupplierReference
@@ -136,7 +139,6 @@ BEGIN
 		,dblBasePrice
 		,ysnBoughtAsReserved
 		,ysnBoughtPrice
-		,intBrokerWarehouseId
 		,dblBulkDensity
 		,strBuyingOrderNumber
 		,intSubBookId
@@ -202,10 +204,6 @@ BEGIN
 		,strReserveMU
 		,strQualityComments
 		,strRareEarth
-		,intItemUOMId
-		,intWeightUOMId
-		,intStorageLocationId
-		,intStorageUnitId
 		,strFreightAgent
 		,strSealNumber
 		,strContainerType
@@ -222,9 +220,13 @@ BEGIN
 		,intBrokerId
 		,strVendorLotNumber
 		,intBuyingCenterLocationId
+		,intStorageLocationId
+		,intStorageUnitId
 		,intParentBatchId
 		,intInventoryReceiptId
 		,intSampleId
+		,intItemUOMId
+		,intWeightUOMId
 		,intContractDetailId
 		,str3PLStatus
 		,strSupplierReference
@@ -234,7 +236,6 @@ BEGIN
 		,dblBasePrice
 		,ysnBoughtAsReserved
 		,ysnBoughtPrice
-		,intBrokerWarehouseId
 		,dblBulkDensity
 		,strBuyingOrderNumber
 		,intSubBookId
@@ -300,10 +301,7 @@ BEGIN
 		,strReserveMU
 		,strQualityComments
 		,strRareEarth
-		,intItemUOMId
-		,intWeightUOMId
-		,intStorageLocationId
-		,intStorageUnitId
+
 		,strFreightAgent
 		,strSealNumber
 		,strContainerType
