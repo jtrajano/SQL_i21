@@ -1,7 +1,6 @@
 CREATE PROCEDURE uspMFPartialUpdateBatch
-	@strBatchId NVARCHAR(50),
 	@column NVARCHAR(MAX), --this should be comma separated and end with ','
-	@MFBatchTableType MFBatchTableType READONLY
+	@MFBatchTableType MFBatchTableType READONLY -- must contain strbatchid value
 AS
 DECLARE @tblColumn TABLE (col nvarchar(40))
 DECLARE @col NVARCHAR(40)
@@ -22,9 +21,9 @@ BEGIN
 	RETURN @return
 END
 
-IF LEN(LTRIM(RTRIM(@strBatchId)))=0
+IF EXISTS(SELECT 1 FROM @MFBatchTableType WHERE LTRIM(RTRIM(isnull(strBatchId,''))) = '')
 BEGIN
-	RAISERROR('Batch Id parameter is empty', 16,1)
+	RAISERROR('Batch Id field is empty', 16,1)
 	RETURN @return
 END
 
@@ -61,7 +60,7 @@ BEGIN
 	SELECT TOP 1 @col = col FROM @tblColumn
 	IF CHARINDEX (LOWER(@col)+',', @column ) > 0 -- checks colum with comma to be sure the whole column is compared
 	BEGIN
-		SET @Sql = @Sql + @col +'= T.' + @col + ',' 
+		SET @Sql = @Sql + @col +'= B.' + @col + ',' 
 	END
 	DELETE FROM @tblColumn WHERE @col = col
 END
@@ -70,10 +69,10 @@ BEGIN
 	SET @Sql = SUBSTRING(@Sql,1 ,LEN(@Sql)-1)
 	SET @Sql =
 	'UPDATE A SET ' + @Sql + 
-	' FROM tblMFBatch A OUTER APPLY(SELECT * FROM @_MFBatchTableType)T WHERE @_strBatchId = strBatchId'
+	' FROM tblMFBatch A JOIN @_MFBatchTableType B ON A.strBatchId = B.strBatchId'
 	EXECUTE sp_executesql @Sql,
-	N'@_strBatchId NVARCHAR(50), @_column NVARCHAR(MAX),@_MFBatchTableType MFBatchTableType',
-	@_strBatchId=@strBatchId,@_column=@column, @_MFBatchTableType=@MFBatchTableType
+	N'@_column NVARCHAR(MAX),@_MFBatchTableType MFBatchTableType READONLY',
+	@_column=@column, @_MFBatchTableType=@MFBatchTableType
 
 	SET @return = 1
 END

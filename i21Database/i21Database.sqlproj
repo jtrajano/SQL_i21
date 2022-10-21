@@ -11542,6 +11542,7 @@
     <Build Include="dbo\Views\vyuQMSaleSampleNotLinked.sql" />
     <Build Include="dbo\User Defined Types\MFBatchTableType.sql" />
     <Build Include="dbo\Tables\tblMFBatch.sql" />
+    <Build Include="dbo\Tables\tblMFBatchLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPartialUpdateBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateInsertBatch.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />

@@ -50,7 +50,7 @@ CREATE  TABLE tblMFBatch
 	dblPackagesBought NUMERIC(18,6)  NULL,
 
 	strTeaOrigin NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
-	intOriginalItemId INT NOT NULL,
+	intOriginalItemId INT NULL,
 	dblPackagesPerPallet NUMERIC(18,6)  NULL,
 	strPlant NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	dblTotalQuantity NUMERIC(18,6)  NULL,

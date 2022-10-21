@@ -1,5 +1,7 @@
 CREATE TYPE MFBatchTableType AS TABLE
 (
+	intId INT IDENTITY(1,1),
+	strBatchId NVARCHAR(50 )COLLATE Latin1_General_CI_AS ,
 	intSales INT ,
 	intSalesYear INT ,
 	dtmSalesDate DATETIME ,
