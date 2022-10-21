@@ -12,15 +12,15 @@ SELECT Item.intItemId
 	 , UnitMeasure.strUnitMeasure AS strStockUOM 
 	 , Category.strCategoryCode
 	 , Item.strRequired
-	 , ISNULL(ItemPricing.dblSalePrice, 0) AS dblSalePrice
-	 , CompanyLocation.intCompanyLocationId AS intCompanyLocationId
+	 , ISNULL(SalePrice.dblSalePrice, 0) AS dblSalePrice
 FROM tblICItem AS Item 
 JOIN tblICItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId
 JOIN tblICItemPricing AS ItemPricing ON Item.intItemId = ItemPricing.intItemId
 JOIN tblICUnitMeasure AS UnitMeasure ON ItemUOM.intUnitMeasureId = UnitMeasure.intUnitMeasureId
-JOIN tblICItemLocation AS ItemLocation ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-JOIN tblSMCompanyLocation AS CompanyLocation ON ItemLocation.intLocationId = CompanyLocation.intCompanyLocationId
 LEFT JOIN tblICCategory AS Category ON Item.intCategoryId = Category.intCategoryId
+OUTER APPLY (SELECT TOP 1 dblSalePrice 
+			 FROM tblICItemPricing
+			 WHERE intItemId = Item.intItemId) AS SalePrice
 WHERE ItemUOM.ysnStockUnit = 1 
   AND Item.strStatus = 'Active' 
   AND Item.strType NOT IN ('Comment','Other Charge')
@@ -38,6 +38,5 @@ SELECT intItemId
 	 , '' AS strCategoryCode
 	 , '' AS strRequired
 	 , 0 AS dblSalePrice
-	 , 0 AS intCompanyLocationId
 FROM tblICItem 
 WHERE strType in ('Comment','Other Charge')
