@@ -3224,7 +3224,7 @@ BEGIN TRY
 				, convert(decimal(24, 6), dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(PriceSourceUOMId, 0) = 0 THEN intPriceUOMId ELSE PriceSourceUOMId END, intPriceUOMId, dblCash)) as dblCash
 				, dblCosts as dblCosts
 				, dblMarketRatio
-				, dblMarketBasis = case when @ysnCanadianCustomer = 1 THEN dblMarketBasis
+				, dblMarketBasis = case when @ysnCanadianCustomer = 1 OR @strRateType = 'Configuration' THEN dblMarketBasis
 					else convert(decimal(24, 6), CASE WHEN ISNULL(dblRate, 0) = 0 THEN dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 THEN intMainCurrencyId ELSE intCurrencyId END, @intCurrencyId, @intMarkToMarketRateTypeId) * dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intMarketBasisUOMId, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOMId END, intPriceUOMId, ISNULL(dblMarketBasis, 0))
 													else case when case when ysnSubCurrency = 1 THEN intMainCurrencyId ELSE intCurrencyId END <> @intCurrencyId
 																then dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intMarketBasisUOMId, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOMId END, intPriceUOMId, ISNULL(dblMarketBasis, 0)) * dblRate
@@ -3863,7 +3863,7 @@ BEGIN TRY
 				, dblMarketBasis = (CASE WHEN strPricingType ! = 'HTA' THEN
 										CASE WHEN @ysnCanadianCustomer = 1 
 											THEN ISNULL(dblMarketBasis, 0) * dblRateMB
-										ELSE ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0) END
+										ELSE (ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0)) * dblRateMB END
 									ELSE 0 END)
 				, dblMarketRatio
 				, dblFuturePrice = dblConvertedFuturePrice --Market Futures
