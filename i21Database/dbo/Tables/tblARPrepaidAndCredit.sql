@@ -22,4 +22,8 @@
 	CONSTRAINT [FK_tblARPrepaidAndCredit_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY ([intInvoiceDetailId]) REFERENCES [dbo].[tblARInvoiceDetail]([intInvoiceDetailId]),
 	CONSTRAINT [FK_tblARPrepaidAndCredit_tblARInvoice_intPrepaymentId] FOREIGN KEY ([intPrepaymentId]) REFERENCES [dbo].[tblARInvoice]([intInvoiceId]),
 	CONSTRAINT [FK_tblARPrepaidAndCredit_tblARInvoiceDetail_intPrepaymentDetailId] FOREIGN KEY ([intPrepaymentDetailId]) REFERENCES [dbo].[tblARInvoiceDetail]([intInvoiceDetailId])
-)
+);
+CREATE INDEX [idx_tblARPrepaidAndCredit_tblARInvoiceDetail_intInvoiceDetailId] ON [dbo].[tblARPrepaidAndCredit] (intInvoiceDetailId, intPrepaidAndCreditId) 
+GO
+CREATE INDEX [idx_tblARPrepaidAndCredit_tblARInvoiceDetail_intPrepaymentDetailId] ON [dbo].[tblARPrepaidAndCredit] (intPrepaymentDetailId, intPrepaidAndCreditId) 
+GO

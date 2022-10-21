@@ -9,5 +9,6 @@
 	CONSTRAINT [PK_tblARInvoiceAccrual_intInvoiceAccrualId] PRIMARY KEY CLUSTERED ([intInvoiceAccrualId] ASC),
 	CONSTRAINT [FK_tblARInvoiceAccrual_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]),
 	CONSTRAINT [FK_tblARInvoiceACcrual_tblARInvoiceDetail] FOREIGN KEY ([intInvoiceDetailId]) REFERENCES [dbo].[tblARInvoiceDetail] ([intInvoiceDetailId]) ON DELETE CASCADE
-
-)
+);
+CREATE INDEX [idx_tblARInvoiceAccrual_tblARInvoiceDetail] ON [dbo].[tblARInvoiceAccrual] (intInvoiceDetailId, intInvoiceAccrualId) 
+GO

@@ -15,3 +15,5 @@
 	
 )
 GO
+CREATE INDEX [idx_tblBBBuybackDetail_tblARInvoiceDetail] ON [dbo].[tblBBBuybackDetail] (intInvoiceDetailId, intBuybackDetailId) 
+GO
