@@ -13,6 +13,7 @@ CREATE  TABLE tblMFBatch
 	intStorageLocationId  INT NULL, -- sub location
 	intStorageUnitId  INT NULL, -- ic location broker warehouse
 	intInventoryReceiptId INT NULL,
+	intBrokerWarehouseId INT  NULL,
 	intSampleId INT NULL,
 	intItemUOMId INT NULL,
 	intWeightUOMId	INT NULL,

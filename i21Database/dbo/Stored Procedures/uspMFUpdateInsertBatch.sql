@@ -66,6 +66,7 @@ BEGIN
 		intWeightUOMId					 = T.intWeightUOMId,				
 		intStorageLocationId			 = T.intStorageLocationId,
 		intStorageUnitId				 = T.intStorageUnitId,  
+		intBrokerWarehouseId			 = T.intBrokerWarehouseId,
 		str3PLStatus					 = T.str3PLStatus,
 		strAirwayBillCode				 = T.strAirwayBillCode,
 		strAWBSampleReceived			 = T.strAWBSampleReceived,
@@ -168,6 +169,7 @@ BEGIN
 			,intBuyingCenterLocationId
 			,intStorageLocationId
 			,intStorageUnitId
+			,intBrokerWarehouseId
 			,intParentBatchId
 			,intInventoryReceiptId
 			,intSampleId
@@ -265,6 +267,7 @@ BEGIN
 			,intBuyingCenterLocationId
 			,intStorageLocationId
 			,intStorageUnitId
+			,intBrokerWarehouseId
 			,intParentBatchId
 			,intInventoryReceiptId
 			,intSampleId

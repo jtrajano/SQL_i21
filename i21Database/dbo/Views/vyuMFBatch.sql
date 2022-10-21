@@ -17,6 +17,8 @@ SELECT
     strStorageUnit = E.strName, -- ic location
     A.intParentBatchId, -- parent batch
     strParentBatchId = B.strBatchId, -- parent batch
+    A.intBrokerWarehouseId,
+    strBrokerWarehouse = BR.strSubLocationName,
     TIN.strTINNumber, -- tin clearance
     TIN.intTINClearanceId, -- tin clearance
     A.intInventoryReceiptId,
@@ -116,6 +118,10 @@ OUTER APPLY(
     FROM tblSMCompanyLocation 
     WHERE intCompanyLocationId = A.intBuyingCenterLocationId    
 )CL
+OUTER APPLY( 
+    SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
+    WHERE A.intBrokerWarehouseId = intCompanyLocationSubLocationId
+)BR
 OUTER APPLY( 
     SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
     WHERE A.intStorageLocationId = intCompanyLocationSubLocationId
