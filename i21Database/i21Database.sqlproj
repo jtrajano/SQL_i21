@@ -9220,9 +9220,11 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
-    
-    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
+  	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
+    <Build Include="dbo\Functions\uspGRGetInventoryTransfers.sql" />
+    <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
