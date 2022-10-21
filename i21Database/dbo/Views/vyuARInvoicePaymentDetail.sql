@@ -7,7 +7,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , dtmDueDate			= I.dtmDueDate
 	 , intPaymentId			= PAYMENTS.intPaymentId
 	 , dblTotalPayment		= CASE WHEN I.strTransactionType = 'Cash' AND ISNULL(PAYMENTS.dblTotalPayment, 0.00) = 0
-								THEN ISNULL((CASE WHEN I.ysnPaid = 0 THEN I.dblAmountDue - I.dblDiscountAvailable ELSE I.dblAmountDue END), 0) 
+								THEN ISNULL(I.dblInvoiceTotal, 0) 
 								ELSE ISNULL(PAYMENTS.dblTotalPayment, 0.00) END
 	 , strRecordNumber		= PAYMENTS.strRecordNumber
 	 , strPaymentMethod		= CASE WHEN I.strTransactionType = 'Cash' AND PAYMENTS.strPaymentMethod IS NULL
