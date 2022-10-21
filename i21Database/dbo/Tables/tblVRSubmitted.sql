@@ -7,5 +7,6 @@
 	CONSTRAINT [PK_tblVRSubmitted] PRIMARY KEY CLUSTERED([intSubmittedId] ASC), 
     CONSTRAINT [FK_tblVRSubmitted_tblARInvoiceDetail] FOREIGN KEY (intInvoiceDetailId) REFERENCES [tblARInvoiceDetail]([intInvoiceDetailId]),
 );
+GO
 CREATE INDEX [idx_tblVRSubmitted_tblARInvoiceDetail] ON [dbo].[tblVRSubmitted] (intInvoiceDetailId, intSubmittedId) 
 GO
