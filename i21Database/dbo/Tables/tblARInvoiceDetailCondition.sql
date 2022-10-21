@@ -7,4 +7,6 @@
 	CONSTRAINT [PK_tblARInvoiceDetailCondition_intInvoiceDetailConditionId] PRIMARY KEY CLUSTERED (intInvoiceDetailConditionId ASC),
 	CONSTRAINT [FK_tblARInvoiceDetailCondition_tblARInvoiceDetail] FOREIGN KEY ([intInvoiceDetailId]) REFERENCES [dbo].[tblARInvoiceDetail] ([intInvoiceDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDetailCondition_tblCTCondition] FOREIGN KEY ([intConditionId]) REFERENCES [dbo].[tblCTCondition] ([intConditionId]) ON DELETE CASCADE
-)
+);
+CREATE INDEX [idx_tblARInvoiceDetailCondition_tblARInvoiceDetail] ON [dbo].[tblARInvoiceDetailCondition] (intInvoiceDetailId, intInvoiceDetailConditionId) 
+GO

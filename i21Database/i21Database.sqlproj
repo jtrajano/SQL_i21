@@ -11126,6 +11126,7 @@
     <Build Include="dbo\Stored Procedures\uspSMGenerateTooltipControls.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
+    <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11543,6 +11544,7 @@
     <Build Include="dbo\Views\vyuQMSaleSampleNotLinked.sql" />
     <Build Include="dbo\User Defined Types\MFBatchTableType.sql" />
     <Build Include="dbo\Tables\tblMFBatch.sql" />
+    <Build Include="dbo\Tables\tblMFBatchLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPartialUpdateBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateInsertBatch.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
@@ -11556,6 +11558,7 @@
     <Build Include="dbo\Views\vyuQMSearchTINClearance.sql" />
     <Build Include="dbo\Stored Procedures\uspQMClearTIN.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateTINBatchId.sql" />
+	<Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

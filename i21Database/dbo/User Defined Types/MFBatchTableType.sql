@@ -1,14 +1,16 @@
-
-
 CREATE TYPE MFBatchTableType AS TABLE
 (
+	intId INT IDENTITY(1,1),
+	strBatchId NVARCHAR(50 )COLLATE Latin1_General_CI_AS ,
 	intSales INT ,
 	intSalesYear INT ,
 	dtmSalesDate DATETIME ,
 	strTeaType NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	intBrokerId INT ,
 	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
-	intBuyingCenterLocationId INT ,
+	intBuyingCenterLocationId INT , -- company
+	intStorageLocationId  INT NULL, -- sub location
+	intStorageUnitId  INT NULL, -- ic location
 	intParentBatchId INT,
 	intInventoryReceiptId INT,
 	intSampleId INT,
@@ -21,7 +23,6 @@ CREATE TYPE MFBatchTableType AS TABLE
 	dblBasePrice  NUMERIC(18,6) ,
 	ysnBoughtAsReserved BIT ,
 	ysnBoughtPrice BIT ,
-	intBrokerWarehouseId INT ,
 	dblBulkDensity  NUMERIC(18,6) ,
 	strBuyingOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	intSubBookId INT ,
@@ -90,6 +91,10 @@ CREATE TYPE MFBatchTableType AS TABLE
 	strReserveMU NVARCHAR(50) COLLATE Latin1_General_CI_AS ,
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS ,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	intStorageLocationId  INT NULL,
-	intStorageUnitId  INT NULL
+	strFreightAgent NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strSealNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strVoyage NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strVessel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	intConcurrencyId INT NULL
 )

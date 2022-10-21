@@ -643,6 +643,7 @@ BEGIN TRY
 		,dtmValidTo
 		,strPropertyRangeText
 		,dblMinValue
+		,dblPinpointValue
 		,dblMaxValue
 		,dblLowValue
 		,dblHighValue
@@ -683,6 +684,7 @@ BEGIN TRY
 		,dtmValidTo
 		,strPropertyRangeText
 		,dblMinValue
+		,dblPinpointValue
 		,dblMaxValue
 		,dblLowValue
 		,dblHighValue
@@ -725,6 +727,7 @@ BEGIN TRY
 			,dtmValidTo DATETIME
 			,strPropertyRangeText NVARCHAR(MAX)
 			,dblMinValue NUMERIC(18, 6)
+			,dblPinpointValue NUMERIC(18, 6)
 			,dblMaxValue NUMERIC(18, 6)
 			,dblLowValue NUMERIC(18, 6)
 			,dblHighValue NUMERIC(18, 6)
