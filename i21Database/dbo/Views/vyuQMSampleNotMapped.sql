@@ -1,4 +1,4 @@
-﻿ALTER VIEW vyuQMSampleNotMapped
+﻿CREATE VIEW vyuQMSampleNotMapped
 AS
 SELECT S.intSampleId
 	,ST.intControlPointId
