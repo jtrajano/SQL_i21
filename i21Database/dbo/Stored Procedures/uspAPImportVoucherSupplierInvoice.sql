@@ -32,7 +32,7 @@ BEGIN
 			FIELDTERMINATOR = '','',
 			ROWTERMINATOR = ''\n'',
 			ROWS_PER_BATCH = 10000, 
-			FIRSTROW = 1,
+			FIRSTROW = 2,
 			TABLOCK,
 			ERRORFILE = ''' + @errorFile + '''
 			)'
@@ -44,22 +44,43 @@ DECLARE @voucherTotal DECIMAL(18,2);
 
 SELECT
 	DENSE_RANK() OVER(ORDER BY A.strInvoiceNumber, C.intEntityId) AS intPartitionId,
-	intEntityVendorId	=	C.intEntityId,
-	dtmDate				=	CAST(A.dtmDate AS DATETIME),
-	dtmBillDate				=	CAST(A.dtmBillDate AS DATETIME),
-	strVendorOrderNumber=	A.strInvoiceNumber,
-	dtmExpectedDate		=	CAST(A.dtmExpectedDate AS DATETIME),
-    dblQuantityToBill	=	CAST(A.dblQtyReceived AS DECIMAL(38,20)),
-    dblCost				=	CAST(A.dblCOst AS DECIMAL(38,15)),
-	/*Supplier Invoice*/
-	intSaleYear			=	CAST(A.intSaleYear AS INT),
-	strSaleNumber		=	CAST(A.strSaleNumber AS NVARCHAR(50)),
-	dtmSaleDate			=	CAST(A.dtmSaleDate AS DATETIME),
-	strVendorLotNumber	=	CAST(A.strLotNumber AS NVARCHAR(50)),
-	strPreInvoiceGarden	=	CAST(A.strPreInvoiceGarden AS NVARCHAR(50)),
-	strPreInvoiceGardenNumber	=	CAST(A.strPreInvoiceGardenNumber AS NVARCHAR(50)),
-	strBook				=	CAST(A.strBook AS NVARCHAR(50)),
-	strSubBook			=	CAST(A.strSubBook AS NVARCHAR(50))
+	intEntityVendorId					=	C.intEntityId,
+	dtmDate								=	CAST(REPLACE(A.dtmDate,'.','/') AS DATETIME),
+	dtmBillDate							=	CAST(REPLACE(A.dtmSaleDate,'.','/') AS DATETIME),
+	strVendorOrderNumber				=	A.strInvoiceNumber,
+	dtmExpectedDate						=	CAST(REPLACE(A.dtmExpectedDate,'.','/') AS DATETIME),
+    dblQuantityToBill					=	CAST(A.dblQtyReceived AS DECIMAL(38,20)),
+    dblCost								=	CAST(A.dblCost AS DECIMAL(38,15)),
+	/*Supplier Invoice*/				
+	intSaleYear							=	CAST(A.intSaleYear AS INT),
+	strSaleNumber						=	CAST(A.strSaleNo AS NVARCHAR(50)),
+	strVendorLotNumber					=	CAST(A.strLotNumber AS NVARCHAR(50)),
+	strPreInvoiceGarden					=	CAST(A.strPreInvoiceGarden AS NVARCHAR(50)),
+	strPreInvoiceGardenInvoiceNumber	=	CAST(A.strPreInvoiceGardenInvoiceNumber AS NVARCHAR(50)),
+	strBook								=	CAST(A.strBook AS NVARCHAR(50)),
+	strSubBook							=	CAST(A.strSubBook AS NVARCHAR(50)),
+	/*Others*/		
+	strStorageLocation					=	CAST(A.strStorageLocation AS NVARCHAR(50)),
+	intStorageLocationId				=	D.intStorageLocationId,
+	strLotNumber						=	CAST(A.strLotNumber AS NVARCHAR(50)),
+	intLotId							=	E.intLotId,
+	/*Not exists in i21*/		
+	strCatalogueType					=	A.strCatalogueType,
+	strChannel							=	A.strChannel,
+	strPackageBreakups					=	A.strPackageBreakups,
+	strPurchaseType						=	A.strPurchaseType,
+	strDocumentNumber					=	A.strDocumentNumber,
+	dblWeightBreakup1					=	A.dblWeightBreakup1,
+	dblWeightBreakup1Bags				=	A.dblWeightBreakup1Bags,
+	dblWeightBreakup2					=	A.dblWeightBreakup2,
+	dblWeightBreakup2Bags				=	A.dblWeightBreakup2Bags,
+	dblWeightBreakup3					=	A.dblWeightBreakup3,
+	dblWeightBreakup3Bags				=	A.dblWeightBreakup3Bags,
+	dblWeightBreakup4Bags				=	A.dblWeightBreakup4Bags,
+	dblWeightBreakup5					=	A.dblWeightBreakup5,
+	dblWeightBreakup5Bags				=	A.dblWeightBreakup5Bags
 INTO #tmpConvertedSupplierInvoiceData
 FROM tblAPImportVoucherSupplierInvoice A
 LEFT JOIN tblAPVendor C ON C.strVendorId = A.strVendorId
+LEFT JOIN tblICStorageLocation D ON A.strStorageLocation = D.strName
+LEFT JOIN tblICLot E ON A.strLotNumber = E.strLotNumber
