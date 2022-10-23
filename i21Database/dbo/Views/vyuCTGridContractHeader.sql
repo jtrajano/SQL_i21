@@ -177,7 +177,11 @@ AS
 			CH.intShipViaId,
 			NM.strShipVia,
 			CH.ysnPerpetual,
-			CH.ysnPriceInEffectByEndDateTime
+			CH.ysnPriceInEffectByEndDateTime,
+			CH.strContractBase,
+			CH.dblValue,
+			CH.intValueCurrencyId,
+			NM.strValueCurrency
 
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId

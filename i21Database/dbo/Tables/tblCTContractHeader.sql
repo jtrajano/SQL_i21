@@ -108,6 +108,9 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intShipViaId] INT NULL,
 	[ysnPerpetual] BIT DEFAULT(0),
 	[ysnPriceInEffectByEndDateTime] BIT DEFAULT(0),
+	[strContractBase] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[dblValue] numeric(18,6) NULL,
+	[intValueCurrencyId] INT NULL,
 	--CT-7027
 	--[intLastEntityId] INT NULL,
     -- CT-5315
