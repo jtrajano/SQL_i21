@@ -7,6 +7,6 @@ AS
 SELECT
 intAccountSegmentId = NULL,
 intAccountId = NULL,
-strCode  = '''',
+strCode  = '',
 strDescription  = '',
 strAccountId = ''
