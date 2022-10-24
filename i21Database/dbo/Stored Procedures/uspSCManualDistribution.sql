@@ -215,6 +215,8 @@ OPEN intListCursor;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
+			SET @ysnDPStorage = NULL
+			
 			IF ISNULL(@intStorageScheduleTypeId,0) > 0
 				SELECT	@ysnDPStorage = ST.ysnDPOwnedType, @ysnCustomerStorage = ysnCustomerStorage FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
 
