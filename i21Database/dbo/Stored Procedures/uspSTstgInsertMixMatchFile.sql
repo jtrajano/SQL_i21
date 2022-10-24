@@ -596,12 +596,12 @@ BEGIN
 					ON ST.intCompanyLocationId = L.intCompanyLocationId 
 				JOIN tblSTRegister R 
 					ON R.intStoreId = ST.intStoreId
-				JOIN tblSTPromotionItemList PIL 
-					ON PIL.intStoreId = ST.intStoreId
-				JOIN tblSTPromotionSalesList PSL 
-					ON PSL.intStoreId = ST.intStoreId --AND Cat.intCategoryId = PSL.intCategoryId
-				JOIN tblSTPromotionSalesListDetail PSLD 
+				INNER JOIN tblSTPromotionSalesList PSL
+					ON PSL.intStoreId = ST.intStoreId
+				INNER JOIN tblSTPromotionSalesListDetail PSLD
 					ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+				INNER JOIN tblSTPromotionItemList PIL 
+					ON PSLD.intPromoItemListId = PIL.intPromoItemListId
 				WHERE R.intRegisterId = @intRegisterId 
 					AND ST.intStoreId = @intStoreId 
 					AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
