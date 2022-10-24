@@ -63,6 +63,8 @@
     [intGrossRevenue] INT NULL,
     [strOpportunityDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [intBrandMaintenanceId] INT NULL,
+    [strRelatedOpportunityId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+    [strRelatedOpportunity] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 
 	[strOpportunityNumber] NVARCHAR(250) NULL, 
     CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),

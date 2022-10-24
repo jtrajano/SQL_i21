@@ -1295,6 +1295,7 @@
     <Build Include="dbo\Functions\fnGLBuildIntraCompanyAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateIntraCompanyEntries.sql" />
     <Build Include="dbo\Views\vyuMFUserLocation.sql" />
+    <Build Include="dbo\Tables\tblCRMOpportunityRelatedOpportunity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
