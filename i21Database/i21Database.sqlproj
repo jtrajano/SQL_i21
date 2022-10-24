@@ -10954,6 +10954,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
+  	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
