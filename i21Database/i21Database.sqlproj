@@ -1220,6 +1220,7 @@
     <Build Include="dbo\Functions\fnTFCoalesceCarrier.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
