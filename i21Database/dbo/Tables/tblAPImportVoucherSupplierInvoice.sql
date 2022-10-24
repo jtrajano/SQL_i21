@@ -24,7 +24,7 @@
 	[strPackageBreakups] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strPreInvoiceGarden] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strPreInvoiceGrade] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	[strPreInvoiceGardenInvoiceNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strPreInvoiceGardenNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strPurchaseType] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strDocumentNumber] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[dblWeightBreakup1] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
