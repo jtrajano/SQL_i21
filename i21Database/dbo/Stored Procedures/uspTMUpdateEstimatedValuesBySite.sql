@@ -76,11 +76,19 @@ BEGIN
 										END
 											/(CASE WHEN ISNULL(dblTotalCapacity,1) = 0 THEN 1 ELSE ISNULL(dblTotalCapacity,1) END) * 100
 
-		FROM (SELECT * FROM tblTMSite) A
+		FROM 	(SELECT dtmLastReadingUpdate
+						,dtmLastDeliveryDate
+						,dblSummerDailyUse 
+						,dblBurnRate
+						,dblWinterDailyUse
+						,ysnActive
+						,dblTotalCapacity
+						,dblTotalReserve
+				FROM tblTMSite) A
 		WHERE tblTMDispatch.intSiteID = @intSiteId 
-			AND CAST((ISNULL(A.dtmLastDeliveryDate,'1900-01-01')) as DATETIME) < @LastReadingDate
+			AND ((A.dtmLastDeliveryDate IS NOT NULL AND A.dtmLastDeliveryDate < @LastReadingDate) OR (A.dtmLastDeliveryDate IS NULL AND CAST('1900-01-01' AS DATETIME) < @LastReadingDate)) --CAST((ISNULL(A.dtmLastDeliveryDate,'1900-01-01')) as DATETIME) < @LastReadingDate
 			AND A.ysnActive = 1
-			AND CAST((ISNULL(A.dtmLastReadingUpdate,'1900-01-01')) as DATETIME) < @LastReadingDate
+			AND ((A.dtmLastReadingUpdate IS NOT NULL AND A.dtmLastReadingUpdate < @LastReadingDate) OR (A.dtmLastReadingUpdate IS NULL AND CAST('1900-01-01' AS DATETIME) < @LastReadingDate)) --CAST((ISNULL(A.dtmLastReadingUpdate,'1900-01-01')) as DATETIME) < @LastReadingDate
 
 
 
@@ -164,9 +172,9 @@ BEGIN
 											/(CASE WHEN ISNULL(dblTotalCapacity,1) = 0 THEN 1 ELSE ISNULL(dblTotalCapacity,1) END) * 100
 
 		WHERE intSiteID = @intSiteId
-			AND CAST((ISNULL(dtmLastDeliveryDate,'1900-01-01')) as DATETIME) < @LastReadingDate
+			AND ((dtmLastDeliveryDate IS NOT NULL AND dtmLastDeliveryDate < @LastReadingDate) OR (dtmLastDeliveryDate IS NULL AND CAST('1900-01-01' AS DATETIME) < @LastReadingDate))--CAST((ISNULL(dtmLastDeliveryDate,'1900-01-01')) as DATETIME) < @LastReadingDate
 			AND ysnActive = 1
-			AND CAST((ISNULL(dtmLastReadingUpdate,'1900-01-01')) as DATETIME) < @LastReadingDate
+			AND ((dtmLastReadingUpdate IS NOT NULL AND dtmLastReadingUpdate < @LastReadingDate) OR (dtmLastReadingUpdate IS NULL AND CAST('1900-01-01' AS DATETIME) < @LastReadingDate))--CAST((ISNULL(dtmLastReadingUpdate,'1900-01-01')) as DATETIME) < @LastReadingDate
 
 		UPDATE tblTMSite
 		SET dblEstimatedGallonsLeft = 0
