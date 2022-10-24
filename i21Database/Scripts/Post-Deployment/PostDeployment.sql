@@ -258,7 +258,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 :r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
-
+:r .\GL\Views\vyuGLLineOfBusinessAccountId.sql
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
 
