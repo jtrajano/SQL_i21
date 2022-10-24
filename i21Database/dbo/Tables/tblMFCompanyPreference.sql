@@ -100,5 +100,6 @@
 	ysnWOAutoSelectBOMServiceItems BIT,
 	ysnRecipeBySite Bit,
 	ysnConsiderBookInDemandView BIT,
+	ysnRecipeHeaderValidation BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
