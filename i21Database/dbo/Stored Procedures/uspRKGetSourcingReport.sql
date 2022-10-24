@@ -157,7 +157,10 @@ DECLARE @GetStandardQty AS TABLE (intRowNum INT
 		, strItemNo NVARCHAR(100)
 		, strProductType NVARCHAR(100)
 		, strCurrency NVARCHAR(100)
-		, strUnitMeasure NVARCHAR(100))
+		, strUnitMeasure NVARCHAR(100)
+		, strFutureMarket NVARCHAR(100)
+		, strFutureMonth NVARCHAR(100)
+	)
 	
 INSERT INTO @GetStandardQty(intRowNum
 	, intContractDetailId
@@ -188,7 +191,10 @@ INSERT INTO @GetStandardQty(intRowNum
 	, strItemNo
 	, strProductType
 	, strCurrency
-	, strUnitMeasure)
+	, strUnitMeasure
+	, strFutureMarket
+	, strFutureMonth
+)
 EXEC [uspRKSourcingReportDetail] @dtmFromDate = @dtmFromDate
 	, @dtmToDate = @dtmToDate
 	, @intCommodityId = @intCommodityId
