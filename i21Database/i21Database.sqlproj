@@ -1300,6 +1300,7 @@
     <None Include="Scripts\Post-Deployment\QM\4_UpdateSampleCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuQMSearchCommodityAttributeAuction.sql" />
     <Build Include="dbo\Views\vyuQMSearchCommodityAttribute2.sql" />
+    <Build Include="dbo\Tables\tblQMImportCatalogue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
