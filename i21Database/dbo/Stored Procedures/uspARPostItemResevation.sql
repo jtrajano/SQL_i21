@@ -82,7 +82,7 @@ BEGIN
 	FROM tblICStockReservation SR
 	INNER JOIN @InvoiceIds I ON SR.intTransactionId = I.intHeaderId
 	WHERE SR.intInventoryTransactionType = @TransactionTypeId
-	  AND SR.ysnPosted = I.ysnPost
+	--   AND SR.ysnPosted = I.ysnPost
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsToReserve) 
 		BEGIN 
