@@ -1298,6 +1298,8 @@
     <Build Include="dbo\Tables\tblCRMOpportunityRelatedOpportunity.sql" />
     <None Include="Scripts\Post-Deployment\QM\3_CreateOfferSampleOutbound.sql" />
     <None Include="Scripts\Post-Deployment\QM\4_UpdateSampleCompanyLocation.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityAttributeAuction.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCommodityAttribute2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

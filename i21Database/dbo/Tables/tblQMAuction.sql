@@ -60,6 +60,8 @@
 	[strSampleBoxNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intBrandId] INT NULL,
 	[strBrand] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intValuationGroupId] INT NULL,
+	[strValuationGroupName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strMusterLot] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strMissingLot] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intMarketZoneId] INT NULL,
@@ -75,7 +77,7 @@
 	CONSTRAINT [FK_tblQMAuction_tblQMCatalogueType_intCatalogueTypeId] FOREIGN KEY ([intCatalogueTypeId]) REFERENCES [dbo].[tblQMCatalogueType]([intCatalogueTypeId]),
 	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMAuction_tblICCommodityAttribute2_intLeafCategoryId] FOREIGN KEY ([intLeafCategoryId]) REFERENCES [dbo].[tblICCommodityAttribute2]([intCommodityAttributeId2]),
-	CONSTRAINT [FK_tblQMAuction_tblICCommodityAttribute1_intManufacturingLeafTypeId] FOREIGN KEY ([intManufacturingLeafTypeId]) REFERENCES [dbo].[tblICCommodityAttribute1]([intCommodityAttributeId1]),
+	CONSTRAINT [FK_tblQMAuction_tblICCommodityAttribute_intManufacturingLeafTypeId] FOREIGN KEY ([intManufacturingLeafTypeId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]),
 	CONSTRAINT [FK_tblQMAuction_tblQMGardenMark_intGardenMarkId] FOREIGN KEY ([intGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark]([intGardenMarkId]),
 	CONSTRAINT [FK_tblQMAuction_tblICCommodityProductLine_intProductLineId] FOREIGN KEY ([intProductLineId]) REFERENCES [dbo].[tblICCommodityProductLine]([intCommodityProductLineId]),
 	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intProducerId_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
@@ -85,7 +87,8 @@
 	CONSTRAINT [FK_tblQMAuction_tblSMCity_intFromLocationCodeId] FOREIGN KEY ([intFromLocationCodeId]) REFERENCES [dbo].[tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblQMAuction_tblICCommodityAttribute_intSeasonId] FOREIGN KEY ([intSeasonId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Color
 	CONSTRAINT [FK_tblQMAuction_tblICCommodityAttribute_intGradeId] FOREIGN KEY ([intGradeId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Grade
-	CONSTRAINT [FK_tblQMAuction_tblICBrand_intBrandId] FOREIGN KEY ([intBrandId]) REFERENCES [dbo].[tblICBrand]([intBrandId]),
+	CONSTRAINT [FK_tblQMAuction_tblICBrand_intBrandId] FOREIGN KEY ([intBrandId]) REFERENCES [dbo].[tblICBrand]([intBrandId]), -- Size
+	CONSTRAINT [FK_tblQMAuction_tblCTValuationGroup_intValuationGroupId] FOREIGN KEY ([intValuationGroupId]) REFERENCES [dbo].[tblCTValuationGroup]([intValuationGroupId]), -- Leaf Style
 	CONSTRAINT [FK_tblQMAuction_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblQMAuction_tblICStorageLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
 )

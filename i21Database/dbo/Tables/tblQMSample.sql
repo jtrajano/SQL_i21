@@ -143,6 +143,8 @@
 	[strSampleBoxNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intBrandId] INT NULL,
 	--[strBrand] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intValuationGroupId] INT NULL,
+	--[strValuationGroupName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strMusterLot] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strMissingLot] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intMarketZoneId] INT NULL,
@@ -186,21 +188,23 @@
 	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMSample_tblQMSamplingCriteria] FOREIGN KEY ([intSamplingCriteriaId]) REFERENCES [tblQMSamplingCriteria]([intSamplingCriteriaId]),
 	CONSTRAINT [FK_tblQMSample_tblQMCuppingSessionDetail] FOREIGN KEY ([intCuppingSessionDetailId]) REFERENCES [tblQMCuppingSessionDetail]([intCuppingSessionDetailId]) ON DELETE CASCADE,
+	
 	CONSTRAINT [FK_tblQMSample_tblQMSaleYear_intSaleYearId] FOREIGN KEY ([intSaleYearId]) REFERENCES [dbo].[tblQMSaleYear]([intSaleYearId]),
 	CONSTRAINT [FK_tblQMSample_tblQMCatalogueType_intCatalogueTypeId] FOREIGN KEY ([intCatalogueTypeId]) REFERENCES [dbo].[tblQMCatalogueType]([intCatalogueTypeId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute2_intLeafCategoryId] FOREIGN KEY ([intLeafCategoryId]) REFERENCES [dbo].[tblICCommodityAttribute2]([intCommodityAttributeId2]),
-	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute1_intManufacturingLeafTypeId] FOREIGN KEY ([intManufacturingLeafTypeId]) REFERENCES [dbo].[tblICCommodityAttribute1]([intCommodityAttributeId1]),
+	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute_intManufacturingLeafTypeId] FOREIGN KEY ([intManufacturingLeafTypeId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Product Type
 	CONSTRAINT [FK_tblQMSample_tblQMGardenMark_intGardenMarkId] FOREIGN KEY ([intGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark]([intGardenMarkId]),
 	CONSTRAINT [FK_tblQMSample_tblICCommodityProductLine_intProductLineId] FOREIGN KEY ([intProductLineId]) REFERENCES [dbo].[tblICCommodityProductLine]([intCommodityProductLineId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
-	CONSTRAINT [FK_tblQMSample_tblEMEntity_intPurchaseGroupId] FOREIGN KEY ([intPurchaseGroupId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
+	CONSTRAINT [FK_tblQMSample_tblSMPurchasingGroup_intPurchaseGroupId] FOREIGN KEY ([intPurchaseGroupId]) REFERENCES [dbo].[tblSMPurchasingGroup]([intPurchasingGroupId]),  
 	CONSTRAINT [FK_tblQMSample_tblSMCurrency_intCurrencyId] FOREIGN KEY (intCurrencyId) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intEvaluatorsCodeAtTBOId] FOREIGN KEY ([intEvaluatorsCodeAtTBOId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]), -- User
 	CONSTRAINT [FK_tblQMSample_tblSMCity_intFromLocationCodeId] FOREIGN KEY ([intFromLocationCodeId]) REFERENCES [dbo].[tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute_intSeasonId] FOREIGN KEY ([intSeasonId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Color
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute_intGradeId] FOREIGN KEY ([intGradeId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Grade
 	CONSTRAINT [FK_tblQMSample_tblICBrand_intBrandId] FOREIGN KEY ([intBrandId]) REFERENCES [dbo].[tblICBrand]([intBrandId]), -- Size
+	CONSTRAINT [FK_tblQMSample_tblCTValuationGroup_intValuationGroupId] FOREIGN KEY ([intValuationGroupId]) REFERENCES [dbo].[tblCTValuationGroup]([intValuationGroupId]), -- Leaf Style
 	CONSTRAINT [FK_tblQMSample_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblQMSample_tblICStorageLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
 
