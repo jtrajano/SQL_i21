@@ -1296,6 +1296,8 @@
     <Build Include="dbo\Stored Procedures\uspGLCreateIntraCompanyEntries.sql" />
     <Build Include="dbo\Views\vyuMFUserLocation.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityRelatedOpportunity.sql" />
+    <Build Include="Scripts\Post-Deployment\QM\3_CreateOfferSampleOutbound.sql" />
+    <Build Include="Scripts\Post-Deployment\QM\4_UpdateSampleCompanyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
