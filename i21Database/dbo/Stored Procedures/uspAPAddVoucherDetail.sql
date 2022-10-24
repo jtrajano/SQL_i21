@@ -286,6 +286,8 @@ SELECT TOP 100 PERCENT
 	,strPreInvoiceGardenNumber			=	A.strPreInvoiceGardenNumber
 	,strBook							=	A.strBook
 	,strSubBook							=	A.strSubBook
+	/**/
+	,dtmExpectedDate					=	A.dtmExpectedDate
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -514,7 +516,9 @@ INSERT
 	,strPreInvoiceGarden				
 	,strPreInvoiceGardenNumber			
 	,strBook							
-	,strSubBook							
+	,strSubBook			
+	/**/
+	,dtmExpectedDate				
 )
 VALUES
 (
@@ -627,6 +631,8 @@ VALUES
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook		
+	/**/
+	,dtmExpectedDate
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 
