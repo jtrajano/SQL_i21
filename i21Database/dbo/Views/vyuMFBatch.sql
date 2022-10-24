@@ -86,6 +86,8 @@ SELECT
     A.dblTeaTaste,
     A.dblTeaVolume,
     A.intTealingoItemId,
+    Item.strItemNo,
+    strItemDescription = Item.strDescription,
     A.dtmWarehouseArrival,
     A.intYearManufacture,
     A.strPackageSize,
@@ -105,7 +107,10 @@ SELECT
 	A.strContainerType,
 	A.strVoyage,
 	A.strVessel,
-    A.intConcurrencyId
+    A.intConcurrencyId,
+	strItemUOM = UOM.strUnitMeasure,
+	strWeightUOM = WUOM.strUnitMeasure,
+	strPackageUOM = PUOM.strUnitMeasure
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 OUTER APPLY(
@@ -130,3 +135,15 @@ OUTER APPLY(
     SELECT TOP 1 strName FROM tblICStorageLocation ICS
     WHERE A.intStorageUnitId = ICS.intStorageLocationId
 )E
+OUTER APPLY(
+    SELECT TOP 1 strItemNo,strDescription  FROM tblICItem WHERE intItemId = A.intTealingoItemId
+)Item
+OUTER APPLY(
+	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intItemUOMId
+)UOM
+OUTER APPLY(
+	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intWeightUOMId
+)WUOM
+OUTER APPLY(
+	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intPackageUOMId
+)PUOM
