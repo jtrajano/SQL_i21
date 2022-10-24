@@ -126,7 +126,7 @@
 	[dblGrossWeight] NUMERIC(18, 6) NULL,
 	[dblTareWeight] NUMERIC(18, 6) NULL,
 	[dblNetWeight] NUMERIC(18, 6) NULL,
-	[strLotNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strVendorLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[str3PLStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strAdditionalSupplierReference] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intAWBSampleReceived] BIGINT NULL,
