@@ -285,22 +285,32 @@ SELECT DISTINCT [intInvoiceId] = PID.[intInvoiceId]
 FROM tblARPostInvoiceDetail PID
 INNER JOIN dbo.tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID] 
 WHERE PID.strSessionId = @strSessionId
-							
-WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForSync)
-BEGIN
-	DECLARE @intInvoiceForSyncId INT
-		  , @ResultLogForSync NVARCHAR(MAX)
-														
-	SELECT TOP 1 @intInvoiceForSyncId = [intInvoiceId] 
-	FROM @TankDeliveryForSync 
-	ORDER BY [intInvoiceId]
 
-	IF @Post = 1
-		EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId, @UserId, @ResultLogForSync OUT
-	ELSE 
+IF(@Post = 1)
+BEGIN
+	DECLARE @InvoicesToSyncTable Id
+
+	INSERT INTO @InvoicesToSyncTable (intId)
+	SELECT DISTINCT intInvoiceId FROM @TankDeliveryForSync
+
+	EXEC uspTMBatchSyncInvoiceToDeliveryHistory @InvoicesToSyncTable, @UserId  
+END
+ELSE
+BEGIN
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForSync)
+	BEGIN
+		DECLARE @intInvoiceForSyncId INT
+			, @ResultLogForSync NVARCHAR(MAX)
+															
+		SELECT TOP 1 @intInvoiceForSyncId = [intInvoiceId] 
+		FROM @TankDeliveryForSync 
+		ORDER BY [intInvoiceId]
+
+		
 		EXEC dbo.uspTMUnSyncInvoiceFromDeliveryHistory @intInvoiceForSyncId, @ResultLogForSync OUT
-											
-	DELETE FROM @TankDeliveryForSync WHERE [intInvoiceId] = @intInvoiceForSyncId
+												
+		DELETE FROM @TankDeliveryForSync WHERE [intInvoiceId] = @intInvoiceForSyncId
+	END
 END
 END
 
