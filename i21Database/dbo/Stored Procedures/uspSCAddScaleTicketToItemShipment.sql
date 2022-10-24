@@ -1723,13 +1723,23 @@ END
 
 	SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
 	IF(@checkContract > 0)
+	BEGIN
 		UPDATE @ShipmentStagingTable SET intOrderType = 1
 		WHERE intOrderType <> 5
 
+		UPDATE @ShipmentChargeStagingTable SET intOrderType = 1
+		WHERE intOrderType <> 5
+	END
+
 	SELECT @checkContract = COUNT(intOrderType) FROM @ShipmentStagingTable WHERE intOrderType = 1;
 	IF(@checkContract > 0)
+	BEGIN
 		UPDATE @ShipmentStagingTable SET intOrderType = 1
 		WHERE intOrderType <> 5
+		
+		UPDATE @ShipmentChargeStagingTable SET intOrderType = 1
+		WHERE intOrderType <> 5		
+	END
 
 	SELECT @total = COUNT(*) FROM @ShipmentStagingTable;
 	IF (@total = 0)
