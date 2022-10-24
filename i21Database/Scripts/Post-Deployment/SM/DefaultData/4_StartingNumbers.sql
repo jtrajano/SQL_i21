@@ -1721,6 +1721,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Opportunity' AND [strModule] = 'CRM')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 182
+			,[strTransactionType]	= N'Catalogue Reconciliation'
+			,[strPrefix]			= N'CR-'
+			,[intNumber]			= 0
+			,[strModule]			= 'Quality'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Opportunity' AND [strModule] = 'CRM')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
