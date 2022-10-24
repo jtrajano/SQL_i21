@@ -628,19 +628,7 @@ BEGIN
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
 											strUnitMeasure = t1.strUnitMeasure,
-											dblSalePrice = CASE
-																	WHEN (GETDATE() BETWEEN t1.dtmBeginDate AND t1.dtmEndDate)
-																		THEN t1.dblUnitAfterDiscount 
-																	WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = t1.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = t1.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-																	ELSE t1.dblSalePrice
-																END,
+											dblSalePrice = t1.dblSalePrice,
 
 											ysnSalesTaxed = t1.ysnSalesTaxed,
 											ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -837,8 +825,6 @@ BEGIN
 							ON I.intItemId = itemPricing.intItemId
 							AND IL.intItemLocationId = itemPricing.intItemLocationId
 							AND IUOM.intItemUOMId = itemPricing.intItemUOMId
-						LEFT JOIN tblICItemSpecialPricing SplPrc 
-							ON SplPrc.intItemId = I.intItemId
 						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 
 						AND ST.intStoreId = @intStoreId
@@ -1055,17 +1041,7 @@ BEGIN
 									, IUOM.strLongUPCCode AS strUpcCode
 									, I.strDescription AS strDescription
 									, IUM.strUnitMeasure AS strUnitMeasure
-									, CASE  WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
-											WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = IL.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-										ELSE Prc.dblSalePrice 
-									END AS dblSalePrice
+									, itemPricing.dblSalePrice AS dblSalePrice
 									, IL.ysnTaxFlag1 AS ysnSalesTaxed
 									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
 									, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
@@ -1093,8 +1069,10 @@ BEGIN
 									ON R.intStoreId = ST.intStoreId
 								JOIN tblICItemPricing Prc 
 									ON Prc.intItemLocationId = IL.intItemLocationId
-								LEFT JOIN tblICItemSpecialPricing SplPrc 
-									ON SplPrc.intItemId = I.intItemId
+								JOIN vyuSTItemHierarchyPricing itemPricing
+									ON I.intItemId = itemPricing.intItemId
+									AND IL.intItemLocationId = itemPricing.intItemLocationId
+									AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 								WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 									AND ST.intStoreId = @intStoreId
 									AND IUOM.strLongUPCCode IS NOT NULL
