@@ -11172,6 +11172,8 @@
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
+    
+    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
