@@ -17,7 +17,7 @@ BEGIN
 	DECLARE @ErrorState INT
 
 	BEGIN TRY
-		
+			
 		DECLARE @intTermId INT = NULL
 		DECLARE @dtmDueDate DATETIME = NULL
 		DECLARE @dblAmountDue NUMERIC(18,6) = NULL
@@ -120,15 +120,26 @@ BEGIN
 			ysnScheduleDiscountOverride = 0,
 			dblDiscount = 0,
 			strPaymentScheduleNumber = @strInvoiceNo
-		UNION ALL
-		SELECT intBillId = @intBillId,
-			intTermsId = @intTermId,
-			dtmDueDate = @dtmDeferredDate1,
-			dblPayment = @dblDeferredAmt1,
-			ysnPaid = 0,
-			ysnScheduleDiscountOverride = 0,
-			dblDiscount = 0,
-			strPaymentScheduleNumber = @strDeferredInvoiceNo1
+
+		IF(ISNULL(@dblDeferredAmt1, 0) > 0)
+		BEGIN
+			INSERT INTO @PaymentSchedule ([intBillId],
+				[intTermsId],
+				[dtmDueDate],
+				[dblPayment],
+				[ysnPaid],
+				[ysnScheduleDiscountOverride],
+				[dblDiscount],
+				strPaymentScheduleNumber)
+			SELECT intBillId = @intBillId,
+				intTermsId = @intTermId,
+				dtmDueDate = @dtmDeferredDate1,
+				dblPayment = @dblDeferredAmt1,
+				ysnPaid = 0,
+				ysnScheduleDiscountOverride = 0,
+				dblDiscount = 0,
+				strPaymentScheduleNumber = @strDeferredInvoiceNo1
+		END
 
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0)
 		BEGIN
