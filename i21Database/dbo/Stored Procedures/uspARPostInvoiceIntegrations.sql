@@ -276,7 +276,7 @@ BEGIN
 	INSERT INTO @InvoicesToSyncTable (intId)
 	SELECT DISTINCT intInvoiceId FROM @TankDeliveryForSync
 
-	EXEC uspTMSyncBatchInvoiceToDeliveryHistory @InvoicesToSyncTable, @UserId  
+	EXEC uspTMBatchSyncInvoiceToDeliveryHistory @InvoicesToSyncTable, @UserId  
 END
 ELSE
 BEGIN
