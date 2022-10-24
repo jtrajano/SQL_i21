@@ -76,8 +76,8 @@ BEGIN
 									ELSE CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN ADJ.intItemId ELSE NULL END
 								END
 		,intWeightUOMId			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE NULL END
-		,dblNetWeight			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE NULL END
-		,dblNetWeight			= 1
+		,dblNetWeight			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE 0 END
+		,intCostUOMId			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE NULL END
 		,dblQuantityToBill		= CASE 
 									WHEN @intAdjustmentTypeId = 1 AND ADJ.intContractDetailId IS NOT NULL THEN ROUND(ADJ.dblAdjustmentAmount / CD.dblCashPrice,6)
 									WHEN @intAdjustmentTypeId = 2 THEN
