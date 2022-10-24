@@ -46,4 +46,5 @@
 		,strTempInvoiceReportNumber			NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
 		,strUserId							NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
 		,strDiscountSchedule				NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
+		,dblAccountTotalQuantity			NUMERIC(18,6)			  NULL
 )
