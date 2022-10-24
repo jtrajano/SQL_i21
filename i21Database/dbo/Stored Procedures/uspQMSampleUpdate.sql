@@ -19,6 +19,7 @@ BEGIN TRY
  DECLARE @intCurrentSampleStatusId INT  
  DECLARE @intShipperEntityId INT  
  DECLARE @ysnEnableParentLot BIT  
+   ,@intCompanyLocationId INT  
    ,@intSampleTypeId INT  
   ,@dblSampleQty NUMERIC(18, 6)  
   ,@intLotId INT  
@@ -75,7 +76,8 @@ BEGIN TRY
    ,intRelatedSampleId INT  
    )  
    
- SELECT @intSampleId = intSampleId  
+ SELECT @intSampleId = intSampleId
+  ,@intCompanyLocationId = intCompanyLocationId
   ,@strMarks = strMarks  
   ,@intPreviousSampleStatusId = intSampleStatusId  
   ,@dblSampleQty = dblSampleQty  
@@ -90,6 +92,7 @@ BEGIN TRY
   ,@intContractDetailId = intContractDetailId  
  FROM OPENXML(@idoc, 'root', 2) WITH (  
    intSampleId INT  
+   ,intCompanyLocationId INT
    ,strMarks NVARCHAR(100)  
    ,intSampleStatusId INT  
    ,dblSampleQty NUMERIC(18, 6)  
@@ -279,6 +282,7 @@ BEGIN TRY
  UPDATE tblQMSample  
  SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1  
   ,intSampleTypeId = x.intSampleTypeId  
+  ,intCompanyLocationId = x.intCompanyLocationId  
   ,intProductTypeId = x.intProductTypeId  
   ,intProductValueId = x.intProductValueId  
   ,intSampleStatusId = x.intSampleStatusId  
@@ -345,6 +349,7 @@ BEGIN TRY
   ,dtmLastModified = x.dtmLastModified  
  FROM OPENXML(@idoc, 'root', 2) WITH (  
    intSampleTypeId INT  
+   ,intCompanyLocationId INT  
    ,intProductTypeId INT  
    ,intProductValueId INT  
    ,intSampleStatusId INT  

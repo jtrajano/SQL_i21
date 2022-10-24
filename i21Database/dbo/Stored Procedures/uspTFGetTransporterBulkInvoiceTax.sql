@@ -98,7 +98,9 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intLoadDistributionDetailId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblTRLoadDistributionDetail.intLoadDistributionDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -152,6 +154,8 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, Seller.str1099Name
+					, Seller.strFederalTaxId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -160,6 +164,7 @@ BEGIN TRY
 				INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblTRLoadDistributionDetail.intLoadDistributionHeaderId 
 					LEFT JOIN tblSMCompanyLocation DestinationLoc ON DestinationLoc.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId	
 				INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+					LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 					LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
 						LEFT JOIN tblEMEntity AS Transporter ON Transporter.intEntityId = tblSMShipVia.intEntityId 
 						LEFT JOIN tblSMTransportationMode ON tblSMTransportationMode.strDescription = tblSMShipVia.strTransportationMode

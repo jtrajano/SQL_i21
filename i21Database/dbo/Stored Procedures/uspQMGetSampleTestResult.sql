@@ -37,6 +37,7 @@ BEGIN
 		,TR.dtmValidTo
 		,TR.strPropertyRangeText
 		,TR.dblMinValue
+		,TR.dblPinpointValue
 		,TR.dblMaxValue
 		,TR.dblLowValue
 		,TR.dblHighValue

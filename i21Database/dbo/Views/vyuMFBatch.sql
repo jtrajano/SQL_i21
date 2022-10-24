@@ -1,16 +1,26 @@
 CREATE VIEW dbo.vyuMFBatch   
 AS  
 SELECT
-    A.intBatchId,
-    A.strBatchId,
-    A.intSales,
-    A.intSalesYear,
-    A.dtmSalesDate,
-    A.strTeaType,
-    A.intBrokerId,
-    A.strVendorLotNumber,
-    A.intBuyingCenterLocationId,
-    A.intParentBatchId,
+    A.intBatchId,--unique
+    A.strBatchId,--unique
+    A.intSales,--unique
+    A.intSalesYear,--unique
+    A.dtmSalesDate,--unique
+    A.strTeaType,--unique
+    A.intBrokerId,--unique
+    A.strVendorLotNumber,--unique
+    A.intBuyingCenterLocationId, -- company id--unique
+    strCompanyLocation = CL.strLocationName, -- company 
+    A.intStorageLocationId, --- sub location id
+    strStorageLocation = D.strSubLocationName, -- sub location
+    A.intStorageUnitId, --- ic location
+    strStorageUnit = E.strName, -- ic location
+    A.intParentBatchId, -- parent batch
+    strParentBatchId = B.strBatchId, -- parent batch
+    A.intBrokerWarehouseId,
+    strBrokerWarehouse = BR.strSubLocationName,
+    TIN.strTINNumber, -- tin clearance
+    TIN.intTINClearanceId, -- tin clearance
     A.intInventoryReceiptId,
     A.intSampleId,
     A.intContractDetailId,
@@ -22,7 +32,6 @@ SELECT
     A.dblBasePrice,
     A.ysnBoughtAsReserved,
     A.ysnBoughtPrice,
-    A.intBrokerWarehouseId,
     A.dblBulkDensity,
     A.strBuyingOrderNumber,
     A.intSubBookId,
@@ -56,7 +65,6 @@ SELECT
     A.strSampleBoxNumber,
     A.dblSellingPrice,
     A.dtmStock,
-    A.strStorageLocation,
     A.strSubChannel,
     A.ysnStrategic,
     A.strTeaLingoSubCluster,
@@ -92,10 +100,33 @@ SELECT
     A.strReserveMU,
     A.strQualityComments,
     A.strRareEarth,
-    strParentBatchId = B.strBatchId,
-    C.strTINNumber,
-    C.intTINClearanceId,
+    A.strFreightAgent,
+	A.strSealNumber,
+	A.strContainerType,
+	A.strVoyage,
+	A.strVessel,
     A.intConcurrencyId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
-OUTER APPLY(SELECT TOP 1 intTINClearanceId, strTINNumber FROM  tblQMTINClearance  WHERE intBatchId = A.intBatchId )C
+OUTER APPLY(
+    SELECT TOP 1 intTINClearanceId, strTINNumber 
+    FROM  tblQMTINClearance  
+    WHERE intBatchId = A.intBatchId 
+)TIN
+OUTER APPLY(
+    SELECT TOP 1 strLocationName 
+    FROM tblSMCompanyLocation 
+    WHERE intCompanyLocationId = A.intBuyingCenterLocationId    
+)CL
+OUTER APPLY( 
+    SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
+    WHERE A.intBrokerWarehouseId = intCompanyLocationSubLocationId
+)BR
+OUTER APPLY( 
+    SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
+    WHERE A.intStorageLocationId = intCompanyLocationSubLocationId
+)D
+OUTER APPLY( 
+    SELECT TOP 1 strName FROM tblICStorageLocation ICS
+    WHERE A.intStorageUnitId = ICS.intStorageLocationId
+)E

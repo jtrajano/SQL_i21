@@ -259,11 +259,9 @@ BEGIN
 		
 END
 
-IF NOT EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MerchandiseCode')
+IF EXISTS(SELECT 1 FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MerchandiseCode')
 BEGIN
-	INSERT INTO [dbo].[tblSMImportFileColumnDetail]
-	SELECT @intImportFileHeaderId, NULL, 18,		2, 'MerchandiseCode', 'tblSTstgPromotionItemListSend', 'MerchandiseCode'
-			   , NULL, 13, '', 1, 1		   
+	DELETE FROM [dbo].[tblSMImportFileColumnDetail] Where intImportFileHeaderId = @intImportFileHeaderId AND strXMLTag = 'MerchandiseCode'	   
 END
 
 GO

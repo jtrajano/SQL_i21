@@ -18,4 +18,7 @@ CREATE TABLE [dbo].[tblMBILInvoiceItem](
     CONSTRAINT [FK_tblMBILInvoiceItem_tblCTContractDetail] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
 	CONSTRAINT [FK_tblMBILInvoiceItem_tblARInvoiceDetail] FOREIGN KEY ([inti21InvoiceDetailId]) REFERENCES [tblARInvoiceDetail]([intInvoiceDetailId]), 
     CONSTRAINT [FK_tblMBILInvoiceItem_tblMBILInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblMBILInvoice]([intInvoiceId]) ON DELETE CASCADE
-)
+);
+GO
+CREATE INDEX [idx_tblMBILInvoiceItem_tblARInvoiceDetail] ON [dbo].[tblMBILInvoiceItem] (inti21InvoiceDetailId, intInvoiceItemId) 
+GO

@@ -7763,4 +7763,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strTerm" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="81cb61a2-6f95-4e96-a76f-f9b5c7bc3bff" ChangeDateTime="10/19/2022 11:14:20">
+    <Property Name="ElementName" Value="[dbo].[tblQMSampleOtherBuyers].[intBuyerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblQMSampleOtherBuyers]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBuyer1Id" />
+  </Operation>
 </Operations>

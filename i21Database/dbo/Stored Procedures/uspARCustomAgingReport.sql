@@ -477,42 +477,42 @@ BEGIN
 
 	SELECT TOP 1 @intBucket1From	= ISNULL(intAgeFrom, 0)
 			   , @intBucket1To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket1		= ISNULL(strCustomTitle, strOriginalBucket)
+			   , @strBucket1		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket1	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = 'Current'
 
 	SELECT TOP 1 @intBucket2From	= ISNULL(intAgeFrom, 0)
 			   , @intBucket2To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket2		= ISNULL(strCustomTitle, strOriginalBucket)
+			   , @strBucket2		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket2	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '1-10 Days'
 
 	SELECT TOP 1 @intBucket3From	= ISNULL(intAgeFrom, 0)
 			   , @intBucket3To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket3		= ISNULL(strCustomTitle, strOriginalBucket)
+			   , @strBucket3		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket3	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '11-30 Days'
 
 	SELECT TOP 1 @intBucket4From	= ISNULL(intAgeFrom, 0)
 			   , @intBucket4To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket4		= ISNULL(strCustomTitle, strOriginalBucket)
+			   , @strBucket4		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket4	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '31-60 Days'
 
 	SELECT TOP 1 @intBucket5From	= ISNULL(intAgeFrom, 0)
 			   , @intBucket5To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket5		= ISNULL(strCustomTitle, strOriginalBucket)
+			   , @strBucket5		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket5	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '61-90 Days'
 
 	SELECT TOP 1 @intBucket6From	= ISNULL(intAgeFrom, 0)
 			   , @intBucket6To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket6		= ISNULL(strCustomTitle, strOriginalBucket)
+			   , @strBucket6		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket6	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = 'Over 90 Days'

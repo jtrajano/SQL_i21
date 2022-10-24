@@ -628,19 +628,7 @@ BEGIN
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
 											strUnitMeasure = t1.strUnitMeasure,
-											dblSalePrice = CASE
-																	WHEN (GETDATE() BETWEEN t1.dtmBeginDate AND t1.dtmEndDate)
-																		THEN t1.dblUnitAfterDiscount 
-																	WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = t1.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = t1.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-																	ELSE t1.dblSalePrice
-																END,
+											dblSalePrice = t1.dblSalePrice,
 
 											ysnSalesTaxed = t1.ysnSalesTaxed,
 											ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
@@ -741,30 +729,9 @@ BEGIN
 							, IUM.strUnitMeasure [PosCodeModifierName] 
 							, '0' [PosCodeModifierValue] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [ActiveFlagValue]
-							, CASE WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = IL.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-																ELSE Prc.dblSalePrice
-								END AS [InventoryValuePrice]
-							, Cat.strCategoryCode [MerchandiseCode]
-							, CASE WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate 
-									THEN SplPrc.dblUnitAfterDiscount 
-								   WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																						WHERE EIP.intItemLocationId = IL.intItemLocationId
-																						AND GETDATE() >= dtmEffectiveRetailPriceDate
-																						ORDER BY dtmEffectiveRetailPriceDate ASC))
-																	THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-								ELSE 
-									Prc.dblSalePrice 
-							END  [RegularSellPrice]
+							, itemPricing.dblSalePrice AS [InventoryValuePrice]
+							, CategoryLoc.strCashRegisterDepartment [MerchandiseCode]
+							, itemPricing.dblSalePrice AS [RegularSellPrice]
 							, I.strDescription [Description]
 							, 'item' [LinkCodeType]
 							, NULL [LinkCodeValue]
@@ -784,16 +751,17 @@ BEGIN
 									ELSE 2048
 								END [SalesRestrictCode]
 							, IUOM.dblUnitQty [SellingUnits]
-							, CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
+							, ISNULL((CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
 									WHEN IL.ysnTaxFlag3 = 1 THEN R.intTaxStrategyIdForTax3 WHEN IL.ysnTaxFlag4 = 1 THEN R.intTaxStrategyIdForTax4
-									ELSE R.intNonTaxableStrategyId
-								END [TaxStrategyID]	
+									WHEN R.intNonTaxableStrategyId IS NOT NULL THEN R.intNonTaxableStrategyId
+									ELSE 0 END), 0)
+								AS [TaxStrategyID]	
 							, 'ICR' [ProhibitSaleLocationType]	
-							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'Yes' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'Yes' 
-									ELSE 'Yes'
+							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'yes' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'yes' 
+									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
 							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
 							, 0 [PriceMethodCode]
@@ -829,6 +797,8 @@ BEGIN
 						FROM tblICItem I
 						JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = I.intCategoryId
+						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
+							ON Cat.intCategoryId = CategoryLoc.intCategoryId
 						JOIN 
 						(
 							SELECT DISTINCT intItemId FROM @tempTableItems 
@@ -840,6 +810,7 @@ BEGIN
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
 							ON IL.intLocationId = ST.intCompanyLocationId
+							AND CategoryLoc.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -850,8 +821,10 @@ BEGIN
 							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
-						LEFT JOIN tblICItemSpecialPricing SplPrc 
-							ON SplPrc.intItemId = I.intItemId
+						JOIN vyuSTItemHierarchyPricing itemPricing
+							ON I.intItemId = itemPricing.intItemId
+							AND IL.intItemLocationId = itemPricing.intItemLocationId
+							AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 						AND R.intRegisterId = @intRegisterId 
 						AND ST.intStoreId = @intStoreId
@@ -889,28 +862,9 @@ BEGIN
 							, IUM.strUnitMeasure [PosCodeModifierName] 
 							, '0' [PosCodeModifierValue] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [ActiveFlagValue]
-							, CASE WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = IL.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-									ELSE Prc.dblSalePrice
-								END AS[InventoryValuePrice]
-							, Cat.strCategoryCode [MerchandiseCode]
-							, CASE WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
-								   WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																									WHERE EIP.intItemLocationId = IL.intItemLocationId
-																									AND GETDATE() >= dtmEffectiveRetailPriceDate
-																									ORDER BY dtmEffectiveRetailPriceDate ASC))
-																				THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																										WHERE EIP.intItemLocationId = IL.intItemLocationId
-																										AND GETDATE() >= dtmEffectiveRetailPriceDate
-																										ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-									ELSE Prc.dblSalePrice 
-								END  [RegularSellPrice]
+							, itemPricing.dblSalePrice AS [InventoryValuePrice]
+							, CategoryLoc.strCashRegisterDepartment [MerchandiseCode]
+							, itemPricing.dblSalePrice AS [RegularSellPrice]
 							, I.strDescription [Description]
 							, 'item' [LinkCodeType]
 							, NULL [LinkCodeValue]
@@ -930,16 +884,17 @@ BEGIN
 									ELSE 2048
 								END [SalesRestrictCode]
 							, IUOM.dblUnitQty [SellingUnits]
-							, CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
+							, ISNULL((CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
 									WHEN IL.ysnTaxFlag3 = 1 THEN R.intTaxStrategyIdForTax3 WHEN IL.ysnTaxFlag4 = 1 THEN R.intTaxStrategyIdForTax4
-									ELSE R.intNonTaxableStrategyId
-								END [TaxStrategyID]	
+									WHEN R.intNonTaxableStrategyId IS NOT NULL THEN R.intNonTaxableStrategyId
+									ELSE 0 END), 0)
+								AS [TaxStrategyID]
 							, 'ICR' [ProhibitSaleLocationType]	
-							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'Yes' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'No' 
-									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'Yes' 
-									ELSE 'Yes'
+							, CASE WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') = '102') THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.3' AND ISNULL(SubCat.strRegProdCode, '40') <> '102') THEN 'yes' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 1) THEN 'no' 
+									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'yes' 
+									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
 							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
 							, 0 [PriceMethodCode]
@@ -982,11 +937,14 @@ BEGIN
 							ON tmpItem.intItemId = I.intItemId 
 						JOIN tblICItemLocation IL 
 							ON IL.intItemId = I.intItemId
+						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
+							ON Cat.intCategoryId = CategoryLoc.intCategoryId
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
 							--ON ST.intStoreId = SubCat.intStoreId
 							ON IL.intLocationId = ST.intCompanyLocationId
+							AND CategoryLoc.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -997,6 +955,10 @@ BEGIN
 							ON R.intRegisterId = ST.intRegisterId
 						JOIN tblICItemPricing Prc 
 							ON Prc.intItemLocationId = IL.intItemLocationId
+						JOIN vyuSTItemHierarchyPricing itemPricing
+							ON I.intItemId = itemPricing.intItemId
+							AND IL.intItemLocationId = itemPricing.intItemLocationId
+							AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 						LEFT JOIN tblICItemSpecialPricing SplPrc 
 							ON SplPrc.intItemId = I.intItemId
 						WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
@@ -1079,17 +1041,7 @@ BEGIN
 									, IUOM.strLongUPCCode AS strUpcCode
 									, I.strDescription AS strDescription
 									, IUM.strUnitMeasure AS strUnitMeasure
-									, CASE  WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
-											WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-																							WHERE EIP.intItemLocationId = IL.intItemLocationId
-																							AND GETDATE() >= dtmEffectiveRetailPriceDate
-																							ORDER BY dtmEffectiveRetailPriceDate ASC))
-																		THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-																								WHERE EIP.intItemLocationId = IL.intItemLocationId
-																								AND GETDATE() >= dtmEffectiveRetailPriceDate
-																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-										ELSE Prc.dblSalePrice 
-									END AS dblSalePrice
+									, itemPricing.dblSalePrice AS dblSalePrice
 									, IL.ysnTaxFlag1 AS ysnSalesTaxed
 									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
 									, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
@@ -1117,8 +1069,10 @@ BEGIN
 									ON R.intStoreId = ST.intStoreId
 								JOIN tblICItemPricing Prc 
 									ON Prc.intItemLocationId = IL.intItemLocationId
-								LEFT JOIN tblICItemSpecialPricing SplPrc 
-									ON SplPrc.intItemId = I.intItemId
+								JOIN vyuSTItemHierarchyPricing itemPricing
+									ON I.intItemId = itemPricing.intItemId
+									AND IL.intItemLocationId = itemPricing.intItemLocationId
+									AND IUOM.intItemUOMId = itemPricing.intItemUOMId
 								WHERE ISNULL(I.ysnFuelItem, 0) = CAST(0 AS BIT) 
 									AND ST.intStoreId = @intStoreId
 									AND IUOM.strLongUPCCode IS NOT NULL

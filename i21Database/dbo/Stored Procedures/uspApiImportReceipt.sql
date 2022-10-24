@@ -21,7 +21,15 @@ OUTER APPLY (
 ) x
 WHERE rs.guiUniqueId = @guiUniqueId
 AND v.ysnPymtCtrlActive = 1
-AND e.ysnActive = 1
+--AND e.ysnActive = 1
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The Payment Control of the vendor with an ''' + CAST(rs.intEntityId AS NVARCHAR(50)) + ''' is not active.', 'entityId', 'Error',  CAST(rs.intEntityId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging rs
+JOIN tblAPVendor v ON v.intEntityId = rs.intEntityId
+JOIN tblEMEntity e ON e.intEntityId = v.intEntityId
+WHERE rs.guiUniqueId = @guiUniqueId
+	AND (ISNULL(v.ysnPymtCtrlActive, 0) = 0)
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))

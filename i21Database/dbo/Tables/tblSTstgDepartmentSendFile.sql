@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[tblSTstgDepartmentSendFile]
     [MerchandiseCode] INT NULL, 
     [ActiveFlagValue] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[MerchandiseCodeDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-    [PaymentSystemsProductCode] INT NULL, 
+    [SalesRestrictCode] INT NULL, 
     [TaxStrategyID] INT NULL, 
     CONSTRAINT [PK_tblSTstgDepartmentSendFile] PRIMARY KEY ([intDepartmentSendFile])  
 )

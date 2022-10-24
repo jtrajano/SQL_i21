@@ -302,29 +302,29 @@ BEGIN
 			)
 		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR (TE.[strState] = @State AND @State = @TaxState) OR LEN(LTRIM(RTRIM(ISNULL(@State,'')))) <= 0 )
 		--AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR ISNULL(TE.[intTaxCodeId], 0) = 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
-	ORDER BY
-		(
-			(CASE WHEN ISNULL(TE.[intCardId],0) = 0 THEN 0 ELSE 1 END)
-			+
-			(CASE WHEN ISNULL(TE.[intVehicleId],0) = 0 THEN 0 ELSE 1 END)
-			+
-			(CASE WHEN ISNULL(TE.[intSiteNumber],0) = 0 THEN 0 ELSE 1 END)		
-		) DESC
-		,(
-			(CASE WHEN ISNULL(TE.[intEntityCustomerLocationId],0) = 0 THEN 0 ELSE 1 END)
-			+
-			(CASE WHEN ISNULL(TE.[intItemId],0) = 0 THEN 0 ELSE 1 END)
-			+
-			(CASE WHEN ISNULL(TE.[intCategoryId],0) = 0 THEN 0 ELSE 1 END)
-			+
-			(CASE WHEN ISNULL(TE.[intTaxCodeId],0) = 0 THEN 0 ELSE 1 END)
-			+
-			(CASE WHEN ISNULL(TE.[intTaxClassId],0) = 0 THEN 0 ELSE 1 END)
-			+
-			(CASE WHEN LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 THEN 0 ELSE 1 END)
-		) DESC
-		,ISNULL(TE.[dtmStartDate], @TransactionDate) ASC
-		,ISNULL(TE.[dtmEndDate], @TransactionDate) DESC
+	-- ORDER BY
+	-- 	(
+	-- 		(CASE WHEN ISNULL(TE.[intCardId],0) = 0 THEN 0 ELSE 1 END)
+	-- 		+
+	-- 		(CASE WHEN ISNULL(TE.[intVehicleId],0) = 0 THEN 0 ELSE 1 END)
+	-- 		+
+	-- 		(CASE WHEN ISNULL(TE.[intSiteNumber],0) = 0 THEN 0 ELSE 1 END)		
+	-- 	) DESC
+	-- 	,(
+	-- 		(CASE WHEN ISNULL(TE.[intEntityCustomerLocationId],0) = 0 THEN 0 ELSE 1 END)
+	-- 		+
+	-- 		(CASE WHEN ISNULL(TE.[intItemId],0) = 0 THEN 0 ELSE 1 END)
+	-- 		+
+	-- 		(CASE WHEN ISNULL(TE.[intCategoryId],0) = 0 THEN 0 ELSE 1 END)
+	-- 		+
+	-- 		(CASE WHEN ISNULL(TE.[intTaxCodeId],0) = 0 THEN 0 ELSE 1 END)
+	-- 		+
+	-- 		(CASE WHEN ISNULL(TE.[intTaxClassId],0) = 0 THEN 0 ELSE 1 END)
+	-- 		+
+	-- 		(CASE WHEN LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 THEN 0 ELSE 1 END)
+	-- 	) DESC
+	-- 	,ISNULL(TE.[dtmStartDate], @TransactionDate) ASC
+	-- 	,ISNULL(TE.[dtmEndDate], @TransactionDate) DESC
 		
 		
 	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1

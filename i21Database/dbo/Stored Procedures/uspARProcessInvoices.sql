@@ -1740,11 +1740,6 @@ BEGIN TRY
 		--RESET Invoice Details						
 		IF (ISNULL(@ExistingInvoiceId, 0) <> 0 AND ISNULL(@ResetDetails,0) = 1)
 		BEGIN
-			DELETE IDT
-			FROM tblARInvoiceDetailTax IDT
-			INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
-			WHERE [intInvoiceId]  = @ExistingInvoiceId
-			
 			DELETE FROM tblARInvoiceDetail
 			WHERE [intInvoiceId]  = @ExistingInvoiceId
 			

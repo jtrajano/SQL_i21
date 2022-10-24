@@ -8,10 +8,15 @@ CREATE  TABLE tblMFBatch
 	strTeaType NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intBrokerId INT NOT NULL,
 	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	intBuyingCenterLocationId INT NOT NULL,
+	intBuyingCenterLocationId INT NOT NULL, -- company location id
 	intParentBatchId INT NULL,
+	intStorageLocationId  INT NULL, -- sub location
+	intStorageUnitId  INT NULL, -- ic location broker warehouse
 	intInventoryReceiptId INT NULL,
+	intBrokerWarehouseId INT  NULL,
 	intSampleId INT NULL,
+	intItemUOMId INT NULL,
+	intWeightUOMId	INT NULL,
 	intContractDetailId INT NULL,
 	str3PLStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strSupplierReference NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL ,
@@ -21,7 +26,6 @@ CREATE  TABLE tblMFBatch
 	dblBasePrice  NUMERIC(18,6)  NULL,
 	ysnBoughtAsReserved BIT  NULL,
 	ysnBoughtPrice BIT  NULL,
-	intBrokerWarehouseId INT  NULL,
 	dblBulkDensity  NUMERIC(18,6)  NULL,
 	strBuyingOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intSubBookId INT  NULL,
@@ -45,17 +49,15 @@ CREATE  TABLE tblMFBatch
 	strLeafStyle NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intMixingUnitLocationId INT  NULL,
 	dblPackagesBought NUMERIC(18,6)  NULL,
-	intItemUOMId INT NULL,
-	intWeightUOMId	INT NULL,
+
 	strTeaOrigin NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
-	intOriginalItemId INT NOT NULL,
+	intOriginalItemId INT NULL,
 	dblPackagesPerPallet NUMERIC(18,6)  NULL,
 	strPlant NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	dblTotalQuantity NUMERIC(18,6)  NULL,
 	strSampleBoxNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	dblSellingPrice NUMERIC(18,6)  NULL,
 	dtmStock DATETIME  NULL,
-	strStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strSubChannel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	ysnStrategic BIT  NULL,
 	strTeaLingoSubCluster NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
@@ -91,6 +93,12 @@ CREATE  TABLE tblMFBatch
 	strReserveMU NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS  NULL,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+
+	strFreightAgent NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strSealNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strVoyage NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	strVessel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intConcurrencyId INT NULL,
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (

@@ -39,6 +39,7 @@ DECLARE @intContractDetailId AS INT,
 		@intLoadDetailId INT, 
 		@intCustomerEntityLocationId INT;
 DECLARE @ysnDestinationWeightGrade BIT = 0
+DECLARE @_intStorageHistoryId INT
 
 DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
@@ -1794,6 +1795,31 @@ BEGIN
 	FROM	#tmpAddItemShipmentResult 
 
 	SET @InventoryShipmentId = @ShipmentId
+	
+	SET @_intStorageHistoryId = 0
+
+	SELECT TOP 1
+		@_intStorageHistoryId = SH.intStorageHistoryId
+	FROM tblGRStorageHistory SH
+	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
+	JOIN tblICInventoryShipment AS ISI ON ISI.intEntityCustomerId=CS.intEntityId 
+	WHERE SH.[strType] IN ('From Scale', 'From Delivery Sheet')
+	AND ISI.intInventoryShipmentId=@InventoryShipmentId 
+	AND ISNULL(SH.intInventoryShipmentId,0) = 0
+
+	IF(ISNULL(@_intStorageHistoryId,0) > 0)
+	BEGIN
+		UPDATE SH  
+		SET SH.[intInventoryShipmentId] = @InventoryShipmentId
+		FROM tblGRStorageHistory SH
+		WHERE SH.intStorageHistoryId = @_intStorageHistoryId
+
+
+		-- EXEC uspGRRiskSummaryLog @_intStorageHistoryId
+	END
+
+
+
 
 	DELETE FROM #tmpAddItemShipmentResult 
 	WHERE intInventoryShipmentId = @ShipmentId

@@ -2809,6 +2809,25 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 		END
 
+		IF(@price_basis = '''')
+		BEGIN
+			SET @strPriceBasis = NULL
+		END
+		ELSE
+		BEGIN
+			IF (@price_basis NOT IN (''X'', ''F'', ''C'', ''A'', ''S'', ''M'', ''R'', ''V'', ''T'', ''L'', ''O''))
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage
+					= @ValidationMessage + '' '' + ''price_basis : '' + @price_basis
+						+ '' is not Exist''
+			END
+			ELSE
+			BEGIN
+				SET @strPriceBasis = @price_basis
+			END
+		END
+
 		IF(@origin_vendor_no = '''')
 		BEGIN
 			SET @intEntityVendorId = NULL
@@ -2940,7 +2959,7 @@ UPDATE tblSMCSVDynamicImport SET
 
 		IF(@end_date = '''')
 		BEGIN
-			SET @IsValid = 1
+			SET @end_date = NULL
 		END
 		ELSE
 		BEGIN
