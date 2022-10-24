@@ -858,6 +858,7 @@
     <Build Include="dbo\Functions\fnFAMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetOriginByCommodity.sql" />
     <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
+    <Build Include="dbo\Functions\fnAPGetOverrideLineOfBusinessAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
