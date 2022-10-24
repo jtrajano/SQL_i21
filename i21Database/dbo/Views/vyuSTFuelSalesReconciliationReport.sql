@@ -21,10 +21,10 @@ CH.dblEditableAggregateMeterReadingsForDollars AS dblEditableAggregateMeterReadi
 (SELECT dbo.fnSTGetDepartmentTotalsForFuel(CH.intCheckoutId)) AS dblDepartmentTotalsForFuel,
 (SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) AS  dblGrossFuelSales,
 ((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - ((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) + CH.dblDealerCommission)) AS dblCalculatedBankDeposit,
-(CASE WHEN ST.ysnConsMeterReadingsForDollars = 0 AND ST.ysnConsAddOutsideFuelDiscounts = 1 THEN 'Department Total For Fuel + Inside/Outside Fuel Discounts' 
-WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 1 THEN 'Meter Readings for Dollars + Outside Fuel  Discounts' 
-WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 'Meter Readings for Dollars Only' 
-WHEN ST.ysnConsMeterReadingsForDollars = 0 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 'Department Total For Fuel Only' END) AS strGrossFuelSalesFormula,
+(CASE WHEN ST.ysnConsMeterReadingsForDollars = 0 AND ST.ysnConsAddOutsideFuelDiscounts = 1 THEN 'Department Total For Fuel + Inside/Outside Fuel Discounts' COLLATE Latin1_General_CI_AS 
+WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 1 THEN 'Meter Readings for Dollars + Outside Fuel  Discounts' COLLATE Latin1_General_CI_AS 
+WHEN ST.ysnConsMeterReadingsForDollars = 1 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 'Meter Readings for Dollars Only' COLLATE Latin1_General_CI_AS 
+WHEN ST.ysnConsMeterReadingsForDollars = 0 AND ST.ysnConsAddOutsideFuelDiscounts = 0 THEN 'Department Total For Fuel Only' COLLATE Latin1_General_CI_AS END) AS strGrossFuelSalesFormula,
 ISNULL(CH.dblEditableOutsideFuelDiscount,0) AS dblOutsideFuelDiscounts,
 ISNULL(CH.dblEditableInsideFuelDiscount,0) AS dblInsideFuelDiscounts,
 (SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) AS dblTotalAmountOfDepositablePaymentMethods,
