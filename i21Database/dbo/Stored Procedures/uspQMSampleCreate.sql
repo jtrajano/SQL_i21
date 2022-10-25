@@ -410,6 +410,55 @@ BEGIN TRY
 		,intSamplingCriteriaId
 		,strSendSampleTo
 		,strRepresentLotNumber
+		, intSaleYearId 
+  		, intSaleNumber 
+		, strChopNumber 
+		, dtmSaleDate   
+		, intCatalogueTypeId 
+		, dtmPromptDate   
+		, intBrokerId 
+		, intGradeId 
+		, intLeafCategoryId 
+		, intManufacturingLeafTypeId 
+		, intSeasonId 
+		, intGardenMarkId 
+		, dtmManufacturingDate   
+		, intTotalNumberOfPackageBreakups 
+		, dblNetWtPerPackages
+		, intNoOfPackages 
+		, dblNetWtSecondPackageBreak 
+		, intNoOfPackagesSecondPackageBreak 
+		, dblNetWtThirdPackageBreak 
+		, intNoOfPackagesThirdPackageBreak 
+		, intProductLineId 
+		, ysnOrganic 
+		, dblSupplierValuationPrice
+		, intProducerId 
+		, intPurchaseGroupId 
+		, strERPRefNo 
+		, dblGrossWeight
+		, dblTareWeight 
+		, dblNetWeight
+		, strBatchNo 
+		, str3PLStatus 
+		, strAdditionalSupplierReference 
+		, intAWBSampleReceived 
+		, strAWBSampleReference 
+		, dblBasePrice
+		, ysnBoughtAsReserve
+		, intCurrencyId 
+		, ysnEuropeanCompliantFlag 
+		, intEvaluatorsCodeAtTBOId 
+		, intFromLocationCodeId
+		, strSampleBoxNumber 
+		, intBrandId 
+		, intValuationGroupId 
+		, strMusterLot  
+		, strMissingLot 
+		, intMarketZoneId 
+		, intDestinationStorageLocationId 
+		, strComments2 
+		, strComments3  
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -487,6 +536,55 @@ BEGIN TRY
 		,CASE intSamplingCriteriaId WHEN 0 THEN NULL ELSE intSamplingCriteriaId END intSamplingCriteriaId
 		,strSendSampleTo
 		,strRepresentLotNumber
+		, intSaleYearId 
+  		, intSaleNumber 
+		, strChopNumber 
+		, dtmSaleDate   
+		, intCatalogueTypeId 
+		, dtmPromptDate   
+		, intBrokerId 
+		, intGradeId 
+		, intLeafCategoryId 
+		, intManufacturingLeafTypeId 
+		, intSeasonId 
+		, intGardenMarkId 
+		, dtmManufacturingDate   
+		, intTotalNumberOfPackageBreakups 
+		, dblNetWtPerPackages
+		, intNoOfPackages 
+		, dblNetWtSecondPackageBreak 
+		, intNoOfPackagesSecondPackageBreak 
+		, dblNetWtThirdPackageBreak 
+		, intNoOfPackagesThirdPackageBreak 
+		, intProductLineId 
+		, ysnOrganic 
+		, dblSupplierValuationPrice
+		, intProducerId 
+		, intPurchaseGroupId 
+		, strERPRefNo 
+		, dblGrossWeight
+		, dblTareWeight 
+		, dblNetWeight
+		, strBatchNo 
+		, str3PLStatus 
+		, strAdditionalSupplierReference 
+		, intAWBSampleReceived 
+		, strAWBSampleReference 
+		, dblBasePrice
+		, ysnBoughtAsReserve
+		, intCurrencyId 
+		, ysnEuropeanCompliantFlag 
+		, intEvaluatorsCodeAtTBOId 
+		, intFromLocationCodeId
+		, strSampleBoxNumber 
+		, intBrandId 
+		, intValuationGroupId 
+		, strMusterLot  
+		, strMissingLot 
+		, intMarketZoneId 
+		, intDestinationStorageLocationId 
+		, strComments2 
+		, strComments3  
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -553,6 +651,55 @@ BEGIN TRY
 			,intSamplingCriteriaId INT
 			,strSendSampleTo NVARCHAR(50)
 			,strRepresentLotNumber NVARCHAR(50)
+			, intSaleYearId INT
+  		    , intSaleNumber INT
+		    , strChopNumber NVARCHAR(50)
+		    , dtmSaleDate DATETIME  
+		    , intCatalogueTypeId INT
+		    , dtmPromptDate DATETIME  
+		    , intBrokerId INT
+		    , intGradeId INT
+		    , intLeafCategoryId INT
+		    , intManufacturingLeafTypeId INT
+		    , intSeasonId INT
+		    , intGardenMarkId INT
+		    , dtmManufacturingDate DATETIME  
+		    , intTotalNumberOfPackageBreakups INT
+		    , dblNetWtPerPackages NUMERIC(18, 6)
+		    , intNoOfPackages INT
+		    , dblNetWtSecondPackageBreak NUMERIC(18, 6)
+		    , intNoOfPackagesSecondPackageBreak INT
+		    , dblNetWtThirdPackageBreak NUMERIC(18, 6)
+		    , intNoOfPackagesThirdPackageBreak INT
+		    , intProductLineId INT
+		    , ysnOrganic BIT
+		    , dblSupplierValuationPrice NUMERIC(18, 6)
+		    , intProducerId INT
+		    , intPurchaseGroupId INT
+		    , strERPRefNo NVARCHAR(50) 
+		    , dblGrossWeight NUMERIC(18, 6)
+		    , dblTareWeight NUMERIC(18, 6)
+		    , dblNetWeight NUMERIC(18, 6)
+		    , strBatchNo NVARCHAR(50) 
+		    , str3PLStatus NVARCHAR(50) 
+		    , strAdditionalSupplierReference NVARCHAR(50) 
+		    , intAWBSampleReceived INT
+		    , strAWBSampleReference NVARCHAR(50) 
+		    , dblBasePrice NUMERIC(18, 6)
+		    , ysnBoughtAsReserve BIT
+		    , intCurrencyId INT
+		    , ysnEuropeanCompliantFlag BIT
+		    , intEvaluatorsCodeAtTBOId INT
+		    , intFromLocationCodeId INT
+		    , strSampleBoxNumber NVARCHAR(50) 
+		    , intBrandId INT
+		    , intValuationGroupId INT
+		    , strMusterLot NVARCHAR(50) 
+		    , strMissingLot NVARCHAR(50) 
+		    , intMarketZoneId INT
+		    , intDestinationStorageLocationId INT
+		    , strComments2 NVARCHAR(MAX) 
+		    , strComments3 NVARCHAR(MAX)   
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

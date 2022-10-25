@@ -194,7 +194,6 @@
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute2_intLeafCategoryId] FOREIGN KEY ([intLeafCategoryId]) REFERENCES [dbo].[tblICCommodityAttribute2]([intCommodityAttributeId2]),
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute_intManufacturingLeafTypeId] FOREIGN KEY ([intManufacturingLeafTypeId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Product Type
-	CONSTRAINT [FK_tblQMSample_tblQMGardenMark_intGardenMarkId] FOREIGN KEY ([intGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark]([intGardenMarkId]),
 	CONSTRAINT [FK_tblQMSample_tblICCommodityProductLine_intProductLineId] FOREIGN KEY ([intProductLineId]) REFERENCES [dbo].[tblICCommodityProductLine]([intCommodityProductLineId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
 	CONSTRAINT [FK_tblQMSample_tblSMPurchasingGroup_intPurchaseGroupId] FOREIGN KEY ([intPurchaseGroupId]) REFERENCES [dbo].[tblSMPurchasingGroup]([intPurchasingGroupId]),  
@@ -207,7 +206,6 @@
 	CONSTRAINT [FK_tblQMSample_tblCTValuationGroup_intValuationGroupId] FOREIGN KEY ([intValuationGroupId]) REFERENCES [dbo].[tblCTValuationGroup]([intValuationGroupId]), -- Leaf Style
 	CONSTRAINT [FK_tblQMSample_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblQMSample_tblICStorageLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
-
 )
 GO
 CREATE STATISTICS [_dta_stat_1863273993_4_11_1] ON [dbo].[tblQMSample]([strSampleNumber], [intContractDetailId], [intSampleId])

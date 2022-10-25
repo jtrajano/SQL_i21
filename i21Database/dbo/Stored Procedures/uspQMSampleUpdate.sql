@@ -344,6 +344,55 @@ BEGIN TRY
   ,ysnImpactPricing = x.ysnImpactPricing  
   ,intSamplingCriteriaId = CASE x.intSamplingCriteriaId WHEN 0 THEN NULL ELSE x.intSamplingCriteriaId END  
   ,strSendSampleTo = x.strSendSampleTo  
+  , intSaleYearId = x.intSaleYearId
+  , intSaleNumber = x.intSaleNumber
+  , dtmSaleDate = CASE WHEN x.dtmSaleDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmSaleDate END  
+  , intCatalogueTypeId = x.intCatalogueTypeId
+  , dtmPromptDate = CASE WHEN x.dtmPromptDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmPromptDate END  
+  , strChopNumber = x.strChopNumber
+  , intBrokerId = x.intBrokerId
+  , intGradeId = x.intGradeId
+  , intLeafCategoryId = x.intLeafCategoryId
+  , intManufacturingLeafTypeId = CASE WHEN x.intManufacturingLeafTypeId = CAST('' AS DATETIME) THEN NULL ELSE x.intManufacturingLeafTypeId END 
+  , intSeasonId = x.intSeasonId
+  , intGardenMarkId = x.intGardenMarkId
+  , dtmManufacturingDate = x.dtmManufacturingDate
+  , intTotalNumberOfPackageBreakups = x.intTotalNumberOfPackageBreakups
+  , dblNetWtPerPackages = x.dblNetWtPerPackages
+  , intNoOfPackages = x.intNoOfPackages
+  , dblNetWtSecondPackageBreak = x.dblNetWtSecondPackageBreak
+  , intNoOfPackagesSecondPackageBreak = x.intNoOfPackagesSecondPackageBreak
+  , dblNetWtThirdPackageBreak = x.dblNetWtThirdPackageBreak
+  , intNoOfPackagesThirdPackageBreak = x.intNoOfPackagesThirdPackageBreak
+  , intProductLineId = x.intProductLineId
+  , ysnOrganic = x.ysnOrganic
+  , dblSupplierValuationPrice = x.dblSupplierValuationPrice
+  , intProducerId = x.intProducerId
+  , intPurchaseGroupId = x.intPurchaseGroupId
+  , strERPRefNo = x.strERPRefNo
+  , dblGrossWeight = x.dblGrossWeight
+  , dblTareWeight = x.dblTareWeight
+  , dblNetWeight = x.dblNetWeight
+  , strBatchNo = x.strBatchNo
+  , str3PLStatus = x.str3PLStatus
+  , strAdditionalSupplierReference = x.strAdditionalSupplierReference
+  , intAWBSampleReceived = x.intAWBSampleReceived
+  , strAWBSampleReference = x.strAWBSampleReference
+  , dblBasePrice = x.dblBasePrice
+  , ysnBoughtAsReserve = x.ysnBoughtAsReserve
+  , intCurrencyId = x.intCurrencyId
+  , ysnEuropeanCompliantFlag = x.ysnEuropeanCompliantFlag
+  , intEvaluatorsCodeAtTBOId = x.intEvaluatorsCodeAtTBOId
+  , intFromLocationCodeId = x.intFromLocationCodeId
+  , strSampleBoxNumber = x.strSampleBoxNumber
+  , intBrandId = x.intBrandId
+  , intValuationGroupId = x.intValuationGroupId
+  , strMusterLot = x.strMusterLot
+  , strMissingLot = x.strMissingLot
+  , intMarketZoneId = x.intMarketZoneId
+  , intDestinationStorageLocationId = x.intDestinationStorageLocationId
+  , strComments2 = x.strComments2
+  , strComments3 = x.strComments3
   ,strRepresentLotNumber = x.strRepresentLotNumber  
   ,intLastModifiedUserId = x.intLastModifiedUserId  
   ,dtmLastModified = x.dtmLastModified  
@@ -410,10 +459,59 @@ BEGIN TRY
    ,ysnImpactPricing BIT  
    ,intSamplingCriteriaId INT  
    ,strSendSampleTo NVARCHAR(50)  
-   ,strRepresentLotNumber NVARCHAR(50)  
+   ,strRepresentLotNumber NVARCHAR(50)
+   , intSaleYearId INT
+   , intSaleNumber INT
+   , strChopNumber NVARCHAR(50)
+   , dtmSaleDate DATETIME  
+   , intCatalogueTypeId INT
+   , dtmPromptDate DATETIME  
+   , intBrokerId INT
+   , intGradeId INT
+   , intLeafCategoryId INT
+   , intManufacturingLeafTypeId INT
+   , intSeasonId INT
+   , intGardenMarkId INT
+   , dtmManufacturingDate DATETIME  
+   , intTotalNumberOfPackageBreakups INT
+   , dblNetWtPerPackages NUMERIC(18, 6)
+   , intNoOfPackages INT
+   , dblNetWtSecondPackageBreak NUMERIC(18, 6)
+   , intNoOfPackagesSecondPackageBreak INT
+   , dblNetWtThirdPackageBreak NUMERIC(18, 6)
+   , intNoOfPackagesThirdPackageBreak INT
+   , intProductLineId INT
+   , ysnOrganic BIT
+   , dblSupplierValuationPrice NUMERIC(18, 6)
+   , intProducerId INT
+   , intPurchaseGroupId INT
+   , strERPRefNo NVARCHAR(50) 
+   , dblGrossWeight NUMERIC(18, 6)
+   , dblTareWeight NUMERIC(18, 6)
+   , dblNetWeight NUMERIC(18, 6)
+   , strBatchNo NVARCHAR(50) 
+   , str3PLStatus NVARCHAR(50) 
+   , strAdditionalSupplierReference NVARCHAR(50) 
+   , intAWBSampleReceived INT
+   , strAWBSampleReference NVARCHAR(50) 
+   , dblBasePrice NUMERIC(18, 6)
+   , ysnBoughtAsReserve BIT
+   , intCurrencyId INT
+   , ysnEuropeanCompliantFlag BIT
+   , intEvaluatorsCodeAtTBOId INT
+   , intFromLocationCodeId INT
+   , strSampleBoxNumber NVARCHAR(50) 
+   , intBrandId INT
+   , intValuationGroupId INT
+   , strMusterLot NVARCHAR(50) 
+   , strMissingLot NVARCHAR(50) 
+   , intMarketZoneId INT
+   , intDestinationStorageLocationId INT
+   , strComments2 NVARCHAR(MAX) 
+   , strComments3 NVARCHAR(MAX)   
    ,intLastModifiedUserId INT  
    ,dtmLastModified DATETIME  
-   ,strRowState NVARCHAR(50)  
+   ,strRowState NVARCHAR(50)
    ) x  
  WHERE dbo.tblQMSample.intSampleId = @intSampleId  
   AND x.strRowState = 'MODIFIED'  
