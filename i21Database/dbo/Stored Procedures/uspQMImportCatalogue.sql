@@ -7,11 +7,7 @@ BEGIN TRY
 
 	-- Validate Key Fields
     UPDATE IMP
-    SET strLogResult = 'Incorrect Fields: ' + TRIM (', ' FROM (
-            CASE WHEN CL.strLocationName IS NULL THEN 'BUYING CENTER, ' ELSE '' END
-            + CASE WHEN CT.intCatalogueTypeId IS NULL THEN 'CATALOGUE TYPE, ' ELSE '' END
-            + CASE WHEN E.intEntityId IS NULL THEN 'SUPPLIER, ' ELSE '' END
-        ))
+    SET strLogResult = 'Incorrect Fields: ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage),charindex(',',reverse(MSG.strLogMessage))+1,len(MSG.strLogMessage)))
         ,ysnSuccess = 0
         ,ysnProcessed = 1
     FROM tblQMImportCatalogue IMP
@@ -21,6 +17,13 @@ BEGIN TRY
         ON CT.strCatalogueType = IMP.strCatalogueType
     LEFT JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
         ON E.strName = IMP.strSupplier
+    -- Format log message
+    OUTER APPLY (
+        SELECT strLogMessage =
+            CASE WHEN CL.strLocationName IS NULL THEN 'BUYING CENTER, ' ELSE '' END
+            + CASE WHEN CT.intCatalogueTypeId IS NULL THEN 'CATALOGUE TYPE, ' ELSE '' END
+            + CASE WHEN E.intEntityId IS NULL THEN 'SUPPLIER, ' ELSE '' END
+    ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND (
         CL.intCompanyLocationId IS NULL

@@ -7,19 +7,7 @@ BEGIN TRY
 
     -- Validate Foreign Key Fields
     UPDATE IMP
-    SET strLogResult = 'Incorrect Field(s): ' + TRIM (', ' FROM (
-            CASE WHEN (GRADE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strGrade, '') <> '') THEN 'GRADE, ' ELSE '' END
-            + CASE WHEN (LEAF_TYPE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strManufacturingLeafType, '') <> '') THEN 'MANUFACTURING LEAF TYPE, ' ELSE '' END
-            + CASE WHEN (SEASON.intCommodityAttributeId IS NULL AND ISNULL(IMP.strSeason, '') <> '') THEN 'SEASON, ' ELSE '' END
-            + CASE WHEN (GARDEN.intGardenMarkId IS NULL AND ISNULL(IMP.strGardenMark, '') <> '') THEN 'GARDEN MARK, ' ELSE '' END
-            + CASE WHEN (ORIGIN.intCountryID IS NULL AND ISNULL(IMP.strGardenGeoOrigin, '') <> '') THEN 'GARDEN GEO ORIGIN, ' ELSE '' END
-            + CASE WHEN (WAREHOUSE_CODE.intStorageLocationId IS NULL AND ISNULL(IMP.strWarehouseCode, '') <> '') THEN 'WAREHOUSE CODE, ' ELSE '' END
-            + CASE WHEN (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '') THEN 'SUSTAINABILITY, ' ELSE '' END
-            + CASE WHEN (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '') THEN 'EVALUATORS CODE AT TBO, ' ELSE '' END
-            + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
-            + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '') THEN 'CHANNEL / SUB CHANNEL, ' ELSE '' END
-            + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
-        ))
+    SET strLogResult = 'Incorrect Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage),charindex(',',reverse(MSG.strLogMessage))+1,len(MSG.strLogMessage)))
         ,ysnSuccess = 0
         ,ysnProcessed = 1
     FROM tblQMImportCatalogue IMP
@@ -45,7 +33,21 @@ BEGIN TRY
     LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel + IMP.strSubChannel
     -- Sample Type
     LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
-
+    -- Format log message
+    OUTER APPLY (
+        SELECT strLogMessage = 
+            CASE WHEN (GRADE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strGrade, '') <> '') THEN 'GRADE, ' ELSE '' END
+            + CASE WHEN (LEAF_TYPE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strManufacturingLeafType, '') <> '') THEN 'MANUFACTURING LEAF TYPE, ' ELSE '' END
+            + CASE WHEN (SEASON.intCommodityAttributeId IS NULL AND ISNULL(IMP.strSeason, '') <> '') THEN 'SEASON, ' ELSE '' END
+            + CASE WHEN (GARDEN.intGardenMarkId IS NULL AND ISNULL(IMP.strGardenMark, '') <> '') THEN 'GARDEN MARK, ' ELSE '' END
+            + CASE WHEN (ORIGIN.intCountryID IS NULL AND ISNULL(IMP.strGardenGeoOrigin, '') <> '') THEN 'GARDEN GEO ORIGIN, ' ELSE '' END
+            + CASE WHEN (WAREHOUSE_CODE.intStorageLocationId IS NULL AND ISNULL(IMP.strWarehouseCode, '') <> '') THEN 'WAREHOUSE CODE, ' ELSE '' END
+            + CASE WHEN (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '') THEN 'SUSTAINABILITY, ' ELSE '' END
+            + CASE WHEN (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '') THEN 'EVALUATORS CODE AT TBO, ' ELSE '' END
+            + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
+            + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '') THEN 'CHANNEL / SUB CHANNEL, ' ELSE '' END
+            + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
+    ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND (
         (GRADE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strGrade, '') <> '')
