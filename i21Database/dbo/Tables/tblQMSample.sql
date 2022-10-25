@@ -142,7 +142,7 @@
 	--[strFromLocationCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strSampleBoxNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intBrandId] INT NULL,
-	--[strBrand] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	--[strBrandCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intValuationGroupId] INT NULL,
 	--[strValuationGroupName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strMusterLot] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

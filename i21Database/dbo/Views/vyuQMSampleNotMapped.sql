@@ -54,16 +54,17 @@ SELECT S.intSampleId
 	, BR.strName AS strBroker
 	, Grade.strDescription AS strGrade
 	, LeafCategory.strAttribute2 AS strLeafCategory
-	, MLT.strAttribute1 AS strManufacturingLeafType
+	, MLT.strDescription AS strManufacturingLeafType
 	, Season.strDescription AS strSeason
 	, GardenMark.strGardenMark AS strGardenMark
 	, ProductLine.strDescription AS strProductLine
-	, Producer.strName AS strProducer
+	, Producer.strName AS strProducer 
 	, PG.strName AS strPurchaseGroup
 	, Currency.strCurrency AS strCurrency
 	, ECT.strName AS strEvaluatorsCodeAtTBO
 	, City.strCity AS strFromLocationCode
 	, Size.strBrandCode AS strBrandCode
+	, VG.strName AS strValuationGroupName
 	, MarketZone.strMarketZoneCode AS strMarketZoneCode
 	, DSL.strName AS strDestinationStorageLocationName
 FROM tblQMSample S
@@ -106,7 +107,7 @@ LEFT JOIN vyuEMEntity BR ON BR.intEntityId = S.intBrokerId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = S.intGradeId
 	AND Grade.strType = 'Grade'
 LEFT JOIN tblICCommodityAttribute2 LeafCategory ON LeafCategory.intCommodityAttributeId2 = S.intLeafCategoryId
-LEFT JOIN tblICCommodityAttribute1 MLT ON MLT.intCommodityAttributeId1 = S.intManufacturingLeafTypeId
+LEFT JOIN tblICCommodityAttribute MLT ON MLT.intCommodityAttributeId = S.intManufacturingLeafTypeId
 LEFT JOIN tblQMGardenMark GardenMark ON GardenMark.intGardenMarkId = S.intGardenMarkId
 LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = S.intGradeId
 	AND Grade.strType = 'Season'
@@ -121,3 +122,4 @@ LEFT JOIN tblSMCity City ON City.intCityId = S.intFromLocationCodeId
 LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
 LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
 LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
+LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
