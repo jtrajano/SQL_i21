@@ -1677,9 +1677,11 @@ BEGIN
 		@_intStorageHistoryId = SH.intStorageHistoryId
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
-	JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
+	JOIN tblSCTicket Ticket 
+		ON CS.intTicketId = Ticket.intTicketId
+	--JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
 	WHERE SH.[strType] IN ('From Scale', 'From Delivery Sheet')
-	AND IR.intInventoryReceiptId=@InventoryReceiptId 
+	AND Ticket.intInventoryReceiptId = @InventoryReceiptId 
 	AND ISNULL(SH.intInventoryReceiptId,0) = 0
 
 	IF(ISNULL(@_intStorageHistoryId,0) > 0)

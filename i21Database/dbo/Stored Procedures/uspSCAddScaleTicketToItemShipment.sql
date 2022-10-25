@@ -1805,16 +1805,24 @@ BEGIN
 	FROM	#tmpAddItemShipmentResult 
 
 	SET @InventoryShipmentId = @ShipmentId
-	
+
+
+	UPDATE	SC
+	SET		SC.intInventoryShipmentId = addResult.intInventoryShipmentId
+	FROM	dbo.tblSCTicket SC INNER JOIN tblICInventoryShipmentItem addResult
+			ON SC.intTicketId = addResult.intSourceId
+	WHERE	addResult.intInventoryShipmentId = @InventoryShipmentId
+
+
 	SET @_intStorageHistoryId = 0
 
 	SELECT TOP 1
 		@_intStorageHistoryId = SH.intStorageHistoryId
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
-	JOIN tblICInventoryShipment AS ISI ON ISI.intEntityCustomerId=CS.intEntityId 
+	JOIN tblSCTicket AS TICKET ON CS.intTicketId = TICKET.intTicketId
 	WHERE SH.[strType] IN ('From Scale', 'From Delivery Sheet')
-	AND ISI.intInventoryShipmentId=@InventoryShipmentId 
+	AND TICKET.intInventoryShipmentId=@InventoryShipmentId 
 	AND ISNULL(SH.intInventoryShipmentId,0) = 0
 
 	IF(ISNULL(@_intStorageHistoryId,0) > 0)
@@ -1838,11 +1846,7 @@ END
 --SELECT @InventoryShipmentId = MAX(intInventoryShipmentId) from tblICInventoryShipmentItem
 --WHERE intSourceId = @intTicketId
 
-UPDATE	SC
-SET		SC.intInventoryShipmentId = addResult.intInventoryShipmentId
-FROM	dbo.tblSCTicket SC INNER JOIN tblICInventoryShipmentItem addResult
-		ON SC.intTicketId = addResult.intSourceId
-WHERE	addResult.intInventoryShipmentId = @InventoryShipmentId
+
 
 exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
 
