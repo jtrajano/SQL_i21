@@ -105,6 +105,16 @@ WHERE i.intItemId IS NULL
 	AND r.guiUniqueId = @guiUniqueId
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The receiveUOMId ''' + CAST(ri.intReceiveUOMId AS NVARCHAR(50)) + ''' is not valid for the itemId ''' + CAST(ri.intItemId AS NVARCHAR(50)) + '''', 'receiveUOMId', 'Error',  CAST(ri.intReceiveUOMId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging r
+INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
+LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
+LEFT JOIN tblICItemUOM uom ON uom.intUnitMeasureId = ri.intReceiveUOMId
+    AND uom.intItemId = i.intItemId
+WHERE uom.intUnitMeasureId IS NULL 
+	AND r.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'The costUOMId ''' + CAST(ri.intCostUOMId AS NVARCHAR(50)) + ''' is not valid for the chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + '''', 'costUOMId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
 FROM tblRestApiReceiptStaging r
 INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
@@ -170,7 +180,7 @@ SELECT
 
 	, il.intItemLocationId
 	, ri.intItemId
-	, ri.intReceiveUOMId
+	, um.intItemUOMId
 	, r.intCurrencyId
 	, r.intFreightTermId
 	, r.strVendorRefNo
@@ -194,6 +204,8 @@ FROM tblRestApiReceiptStaging r
 	INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
 	INNER JOIN tblICItemLocation il ON il.intItemId = ri.intItemId
 		AND il.intLocationId = r.intLocationId
+    LEFT JOIN tblICItemUOM um ON um.intItemId = ri.intItemId
+        AND um.intUnitMeasureId = ri.intReceiveUOMId
 WHERE r.guiUniqueId = @guiUniqueId
 
 INSERT INTO @OtherCharges(
