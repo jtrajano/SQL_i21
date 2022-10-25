@@ -66,25 +66,25 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTReg
 
 	PRINT('Start Encryption tblSTCheckoutHeader')
 			EXEC('
-					UPDATE tblSTCheckoutHeader SET strManagersPassword = dbo.fnAESEncryptASym(strManagersPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strManagersPassword),,'''')  <> '''' 
+					UPDATE tblSTCheckoutHeader SET strManagersPassword = dbo.fnAESEncryptASym(strManagersPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strManagersPassword),'''')  <> '''' 
 			')
 	PRINT('End Encryption tblSTCheckoutHeader')
 
 	PRINT('Start Encryption tblSTGenerateVendorRebateHistory')
 			EXEC('
-					UPDATE tblSTGenerateVendorRebateHistory SET strPassword = dbo.fnAESEncryptASym(strPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strPassword),,'''')  <> '''' 
+					UPDATE tblSTGenerateVendorRebateHistory SET strPassword = dbo.fnAESEncryptASym(strPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strPassword),'''')  <> '''' 
 			')
 	PRINT('End Encryption tblSTGenerateVendorRebateHistory')
 
 	PRINT('Start Encryption tblSTRegister')
 			EXEC('
-					UPDATE tblSTRegister SET strFTPPassword = dbo.fnAESEncryptASym(strFTPPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strFTPPassword),,'''')  <> '''' 
+					UPDATE tblSTRegister SET strFTPPassword = dbo.fnAESEncryptASym(strFTPPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strFTPPassword),'''')  <> '''' 
 			')
 			EXEC('
-					UPDATE tblSTRegister SET strIrelyPassword = dbo.fnAESEncryptASym(strIrelyPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyPassword),,'''')  <> '''' 
+					UPDATE tblSTRegister SET strIrelyPassword = dbo.fnAESEncryptASym(strIrelyPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyPassword),'''')  <> '''' 
 			')
 			EXEC('
-					UPDATE tblSTRegister SET strIrelyReEnterPassword = dbo.fnAESEncryptASym(strIrelyReEnterPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyReEnterPassword),,'''')  <> '''' 
+					UPDATE tblSTRegister SET strIrelyReEnterPassword = dbo.fnAESEncryptASym(strIrelyReEnterPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyReEnterPassword),'''')  <> '''' 
 			')
 	PRINT('End Encryption tblSTRegister')
 	
