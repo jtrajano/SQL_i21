@@ -381,7 +381,7 @@ BEGIN TRY
 		,I.strItemNo
 		,CBL.dtmCreatedDate
 		,CBL.dtmTransactionDate
-		,CBL.dblQty
+		,CBL.dblOrigQty
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+ Purchase Basis Pricing'
@@ -822,7 +822,7 @@ BEGIN TRY
 		,I.strItemNo
 		,CBL.dtmCreatedDate
 		,CBL.dtmTransactionDate
-		,CBL.dblQty
+		,CBL.dblOrigQty
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+ Sales Basis Pricing'
