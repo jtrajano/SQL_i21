@@ -657,7 +657,7 @@ BEGIN TRY
 		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
 		,[strBankTradeReference]			= @BankTradeReference
-		,[dblLoanAmount]					= @LoanAmount
+		,[dblLoanAmount]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @LoanAmount ELSE NULL END
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
@@ -666,7 +666,7 @@ BEGIN TRY
 		,[intFreightCompanySegment]			= @FreightCompanySegment
 		,[intFreightLocationSegment]		= @FreightLocationSegment
 		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
-		,[strSourcedFrom]					= @SourcedFrom
+		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
 		,[dblSurcharge]						= @Surcharge
