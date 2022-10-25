@@ -31,7 +31,7 @@ JOIN tblICUnitMeasure UM
 	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 JOIN tblICItemLocation IL 
 	ON UOM.intItemId = IL.intItemId 
-JOIN tblSTStore ST 
+LEFT JOIN tblSTStore ST 
 	ON IL.intLocationId = ST.intCompanyLocationId
 LEFT JOIN tblSTSubcategory AS Family 
 	ON Family.intSubcategoryId = IL.intFamilyId 
