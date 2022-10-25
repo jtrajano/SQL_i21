@@ -361,7 +361,7 @@ BEGIN TRY
                     DECLARE @intSampleId INT = SCOPE_IDENTITY()
                     
                     UPDATE tblQMImportCatalogue
-                    SET intSampleId = @intSampleID
+                    SET intSampleId = @intSampleId
                     WHERE intImportCatalogueId = @intImportCatalogueId
 
                     INSERT INTO tblQMAuction (
