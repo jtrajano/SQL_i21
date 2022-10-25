@@ -585,11 +585,12 @@ BEGIN TRY
 	WHERE strCode = 'IC'
 	  AND strSessionId = @strRequestId
 
-    DECLARE @InvalidGLEntries AS TABLE
-        ([strTransactionId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    DECLARE @InvalidGLEntries AS TABLE (
+         [strTransactionId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL INDEX ix_@InvalidGLEntries NONCLUSTERED
         ,[strText]          NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
         ,[intErrorCode]     INT
-        ,[strModuleName]    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
+        ,[strModuleName]    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	)
 
     INSERT INTO @InvalidGLEntries (
 		  [strTransactionId]
@@ -631,17 +632,20 @@ BEGIN TRY
 		RAISERROR(@ErrorMerssage, 11, 1)
 	END
 
-    DELETE FROM tblARPostInvoiceGLEntries
-    WHERE [strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
-	  AND strSessionId = @strRequestId
+    DELETE PGE
+	FROM tblARPostInvoiceGLEntries PGE
+	INNER JOIN @InvalidGLEntries GL ON PGE.strTransactionId = GL.strTransactionId
+	WHERE strSessionId = @strRequestId
 
-    DELETE FROM tblARPostInvoiceHeader
-    WHERE [strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
-	  AND strSessionId = @strRequestId
+    DELETE PIH 
+	FROM tblARPostInvoiceHeader PIH
+	INNER JOIN @InvalidGLEntries GL ON PIH.strInvoiceNumber = GL.strTransactionId
+	WHERE strSessionId = @strRequestId
 
-    DELETE FROM tblARPostInvoiceDetail
-    WHERE [strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
-	  AND strSessionId = @strRequestId
+    DELETE PID
+	FROM tblARPostInvoiceDetail PID
+	INNER JOIN @InvalidGLEntries GL ON PID.strInvoiceNumber = GL.strTransactionId
+	WHERE strSessionId = @strRequestId
 
     EXEC [dbo].[uspARBookInvoiceGLEntries]
             @Post    		= @post
