@@ -84,7 +84,7 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     [ysnBoughtAsReserve] BIT DEFAULT 0,
     [strCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [ysnEuropeanCompliantFlag] BIT DEFAULT 0,
-    [intEvaluatorsCodeAtTBOId] INT NULL,
+    [strEvaluatorsCodeAtTBO] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strEvaluatorsRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFromLocationCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSampleBoxNumberTBO] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -95,4 +95,8 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     CONSTRAINT [FK_tblQMImportLogCatalogue_tblQMImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblQMImportLog] ([intImportLogId]),
     CONSTRAINT [FK_tblQMImportLogCatalogue_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_intImportLogId]
+    ON [dbo].[tblQMImportCatalogue]([intImportLogId] ASC)
 GO

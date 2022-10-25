@@ -1303,6 +1303,8 @@
     <Build Include="dbo\Tables\tblQMImportCatalogue.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostSettleStorageOutbound.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageTicketsFromDPLoadOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportCatalogue.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportCatalogueMain.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
