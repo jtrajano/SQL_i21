@@ -632,13 +632,13 @@ BEGIN TRY
 		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
 		,[strBankTransactionId]				= @BankTransactionId
-		,[dblLoanAmount]					= @LoanAmount
+		,[dblLoanAmount]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @LoanAmount ELSE NULL END
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
 		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
-		,[strSourcedFrom]					= @SourcedFrom
+		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
 	FROM	

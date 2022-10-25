@@ -165,8 +165,8 @@ SET
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
-WHERE
-	[intInvoiceId] = @InvoiceIdLocal
+	,[dblLoanAmount]						= CASE WHEN ISNULL(strTransactionNo, '') <> '' THEN ISNULL([dblInvoiceSubtotal], @ZeroDecimal) ELSE NULL END
+WHERE [intInvoiceId] = @InvoiceIdLocal
 
 
 --IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
