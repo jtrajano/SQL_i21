@@ -81,7 +81,7 @@
 	CONSTRAINT [FK_tblQMAuction_tblQMGardenMark_intGardenMarkId] FOREIGN KEY ([intGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark]([intGardenMarkId]),
 	CONSTRAINT [FK_tblQMAuction_tblICCommodityProductLine_intProductLineId] FOREIGN KEY ([intProductLineId]) REFERENCES [dbo].[tblICCommodityProductLine]([intCommodityProductLineId]),
 	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intProducerId_intProducerId] FOREIGN KEY ([intProducerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
-	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intPurchaseGroupId_intPurchaseGroupId] FOREIGN KEY ([intPurchaseGroupId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),  
+	CONSTRAINT [FK_tblQMAuction_tblSMPurchasingGroup_intPurchaseGroupId] FOREIGN KEY ([intPurchaseGroupId]) REFERENCES [dbo].[tblSMPurchasingGroup]([intPurchasingGroupId]),  
 	CONSTRAINT [FK_tblQMAuction_tblSMCurrency_intCurrencyId] FOREIGN KEY (intCurrencyId) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblQMAuction_tblEMEntity_intEvaluatorsCodeAtTBOId] FOREIGN KEY ([intEvaluatorsCodeAtTBOId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]), -- User
 	CONSTRAINT [FK_tblQMAuction_tblSMCity_intFromLocationCodeId] FOREIGN KEY ([intFromLocationCodeId]) REFERENCES [dbo].[tblSMCity]([intCityId]),

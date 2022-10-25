@@ -1305,6 +1305,9 @@
     <Build Include="dbo\Views\vyuGRGetStorageTicketsFromDPLoadOut.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportCatalogue.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportCatalogueMain.sql" />
+    <Build Include="dbo\Views\vyuQMSearchEntityUser.sql" />
+    <Build Include="dbo\Views\vyuQMSearchCity.sql" />
+    <Build Include="dbo\Views\vyuQMSearchBrand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
