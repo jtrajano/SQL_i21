@@ -2344,6 +2344,64 @@ BEGIN
 	AND ISNULL(LOB.intAccountId, 0) = 0
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 	AND ARPID.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	SELECT
+		 [intInvoiceId]			= ARPIH.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPIH.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPIH.[strTransactionType]
+		,[intInvoiceDetailId]	= ARPIH.[intInvoiceDetailId] 
+		,[intItemId]			= ARPIH.[intItemId] 
+		,[strBatchId]			= ARPIH.[strBatchId]
+		,[strPostingError]		= 'Invoice ' + ARPIH.strInvoiceOriginId + ' is not yet posted.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	INNER JOIN tblARInvoice ARI ON ARPIH.intOriginalInvoiceId = ARI.intInvoiceId
+	WHERE ARPIH.strType = 'Tax Adjustment'
+	AND ARI.ysnPosted = 0
+	AND strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check line of business segment of AR Account
+	SELECT
+		 [intInvoiceId]			= ARPIH.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPIH.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPIH.[strTransactionType]
+		,[intInvoiceDetailId]	= NULL 
+		,[intItemId]			= NULL 
+		,[strBatchId]			= ARPIH.[strBatchId]
+		,[strPostingError]		= 'Unable to find the AR account that matches the line of business. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](ARPIH.[intAccountId], NULL, LOB.intSegmentCodeId, NULL) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	OUTER APPLY (
+		SELECT TOP 1 ysnOverrideARAccountLineOfBusinessSegment
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPIH.[intAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
+	) LOB
+	WHERE ARCP.ysnOverrideARAccountLineOfBusinessSegment = 1
+	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+	AND ARPIH.strSessionId = @strSessionId
 END
 
 IF @Post = @ZeroBit
