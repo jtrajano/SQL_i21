@@ -192,6 +192,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
+	 , dblPercentage						= INV.dblPercentage
+	 , dblProvisionalTotal					= INV.dblProvisionalTotal
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
