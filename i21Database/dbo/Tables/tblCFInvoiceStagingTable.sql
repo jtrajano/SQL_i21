@@ -163,6 +163,7 @@
 	[ysnSummaryByDeptDriverPinProd]   BIT			  NULL,
 	[strDepartmentGrouping]           NVARCHAR(MAX)	  NULL,
     [strProductDescriptionForTotals]  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [dblAccountTotalQuantity]		  NUMERIC(18,6)			  NULL
     CONSTRAINT [UserAndTransactionIdAndStatementType] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC, [strStatementType] ASC) WITH (FILLFACTOR = 70)
 );
 
