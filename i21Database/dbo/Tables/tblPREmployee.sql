@@ -74,7 +74,7 @@ BEGIN
 	IF UPDATE (strSocialSecurity)
 	BEGIN
 		UPDATE tblPREmployee
-		SET strSocialSecurity = dbo.fnAESEncryptASym(@SSNumber)
+		SET strSocialSecurity = CASE WHEN LEN(strSocialSecurity) > 300 THEN strSocialSecurity ELSE dbo.fnAESEncryptASym(@SSNumber) END
 		WHERE intEntityId = @EmployeeID
 	END
 	DELETE FROM @inserted WHERE intEntityId = @EmployeeID
@@ -101,7 +101,7 @@ BEGIN
 	IF UPDATE (strSocialSecurity)
 	BEGIN
 		UPDATE tblPREmployee
-		SET strSocialSecurity = dbo.fnAESEncryptASym(@SSNumber)
+		SET strSocialSecurity = CASE WHEN LEN(strSocialSecurity) > 300 THEN strSocialSecurity ELSE dbo.fnAESEncryptASym(@SSNumber) END
 		WHERE intEntityId = @EmployeeID
 	END
 	DELETE FROM @inserted WHERE intEntityId = @EmployeeID
