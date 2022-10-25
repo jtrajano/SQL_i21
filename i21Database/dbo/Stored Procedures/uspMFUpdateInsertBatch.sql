@@ -11,33 +11,43 @@ DECLARE @tbl TABLE ( intId int)
 --DECLARE @dtmCurrent DATETIME = GETDATE()
 DECLARE @id INT 
 DECLARE @strBatchId NVARCHAR(40), @intBatchId INT
+DECLARE @errorMessage NVARCHAR(300)=''
 
 
 INSERT INTO @tbl(intId)
 SELECT intId FROM @MFBatchTableType
 
-_begin:
 WHILE EXISTS (SELECT 1 FROM @tbl)
 BEGIN
 
 	SELECT TOP 1  @id = intId FROM @tbl
 
-	IF EXISTS( SELECT 1 FROM  @MFBatchTableType 
-	WHERE @id = intId AND(
-	ISNULL(intSales,0) = 0 OR
-	ISNULL(intSalesYear,0) = 0 OR
-	dtmSalesDate IS NULL OR
-	RTRIM(LTRIM(strTeaType)) = '' OR
-	ISNULL(intBrokerId,0) = 0 OR
-	RTRIM(LTRIM(strVendorLotNumber)) = '' OR
-	ISNULL(intBuyingCenterLocationId,0) = 0 )
-	)
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND ISNULL(intSales,0) = 0) 
+		SELECT @errorMessage = 'No of Sales (intSalesId) is missing' ELSE
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND ISNULL(intSalesYear,0) = 0) 
+		SELECT @errorMessage = 'Sales year (intSalesYear) is missing' ELSE
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND dtmSalesDate IS NULL) 
+		SELECT @errorMessage = 'Sales date (dtmSalesDate) is missing' ELSE
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND RTRIM(LTRIM(strTeaType))  = '') 
+		SELECT @errorMessage = 'Tea type (strTeaType) is missing' ELSE
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND ISNULL(intBrokerId,0) = 0) 
+		SELECT @errorMessage = 'Broker Id (intBrokerId) is missing' ELSE
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND RTRIM(LTRIM(strVendorLotNumber)) = '') 
+		SELECT @errorMessage = 'Vendor Lot Number (strVendorLotNumber) is missing' ELSE
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND ISNULL(intBuyingCenterLocationId,0) = 0) 
+		SELECT @errorMessage = 'Auction center (intBuyingCenterLocationId) is missing' ELSE
+	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND ISNULL(intSubBookId,0)= 0 )
+		SELECT @errorMessage = 'Channel (intSubBookId) is missing'
+
+	IF @errorMessage <> ''
 	BEGIN
 		--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult)
 		--SELECT @guidBatchLogId, 'Unique key(s) have no value(s).No action taken.'
-		DELETE FROM @tbl WHERE intId = @id
-		goto _begin
+		RAISERROR(@errorMessage,16, 1)
+		RETURN -1
 	END
+		
+
 
 
 	SELECT @strBatchId = A.strBatchId ,
@@ -52,6 +62,7 @@ BEGIN
 	AND A.intBrokerId = B.intBrokerId
 	AND A.strVendorLotNumber = B.strVendorLotNumber
 	AND A.intBuyingCenterLocationId =B.intBuyingCenterLocationId
+	AND A.intSubBookId = B.intSubBookId
 	WHERE B.intId = @id
 
 	IF @strBatchId IS NOT NULL
@@ -76,7 +87,6 @@ BEGIN
 		ysnBoughtPrice					 = T.ysnBoughtPrice,
 		dblBulkDensity					 = T.dblBulkDensity,
 		strBuyingOrderNumber			 = T.strBuyingOrderNumber,
-		intSubBookId					 = T.intSubBookId,
 		strContainerNumber				 = T.strContainerNumber,
 		intCurrencyId					 = T.intCurrencyId,
 		dtmProductionBatch				 = T.dtmProductionBatch,
@@ -363,3 +373,5 @@ BEGIN
 	DELETE FROM  @tbl WHERE @id = intId
 
 END
+
+RETURN 1

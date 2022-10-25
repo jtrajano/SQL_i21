@@ -99,16 +99,13 @@ CREATE  TABLE tblMFBatch
 	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strVoyage NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strVessel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	intReasonCodeId INT NULL,
+	dtmSplit DATETIME NULL,
+	strNotes NVARCHAR(max) COLLATE Latin1_General_CI_AS  NULL,
 	intConcurrencyId INT NULL,
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
-        [intSales] ASC,
-        [intSalesYear] ASC,
-        [dtmSalesDate] ASC,
-        [strTeaType] ASC,
-        [intBrokerId] ASC,
-        [strVendorLotNumber] ASC,
-        [intBuyingCenterLocationId] ASC
+        [intBatchId] ASC
     )
 ) ON [PRIMARY]
 GO
