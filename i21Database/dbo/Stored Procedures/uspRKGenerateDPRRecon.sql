@@ -381,7 +381,7 @@ BEGIN TRY
 		,I.strItemNo
 		,CBL.dtmCreatedDate
 		,CBL.dtmTransactionDate
-		,CBL.dblOrigQty
+		,dblQty = CASE WHEN strAction = 'Created Price' THEN CBL.dblOrigQty  ELSE CBL.dblQty END
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+ Purchase Basis Pricing'
@@ -411,10 +411,11 @@ BEGIN TRY
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
-	AND strAction IN ('Created Price','Deleted Pricing', 'Updated Contract')
+	AND strAction IN ('Created Price','Deleted Pricing', 'Updated Contract', 'Price Updated')
 	AND CBL.intContractTypeId = 1 --Purchase
 	AND CBL.intPricingTypeId = 1
 	AND CH.intPricingTypeId = 2
+	AND CBL.dblQty > 1
 
 	UNION ALL
 
@@ -822,7 +823,7 @@ BEGIN TRY
 		,I.strItemNo
 		,CBL.dtmCreatedDate
 		,CBL.dtmTransactionDate
-		,CBL.dblOrigQty
+		,dblQty = CASE WHEN strAction = 'Created Price' THEN CBL.dblOrigQty  ELSE CBL.dblQty END
 		,UM.strUnitMeasure
 		,EC.strUserName
 		,strBucketName = '+ Sales Basis Pricing'
@@ -852,10 +853,11 @@ BEGIN TRY
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 	AND CBL.intCommodityId = @intCommodityId
-	AND strAction IN ('Created Price','Deleted Pricing','Updated Contract')
+	AND strAction IN ('Created Price','Deleted Pricing','Updated Contract', 'Price Updated')
 	AND CBL.intContractTypeId = 2 --Sales
 	AND CBL.intPricingTypeId = 1
 	AND CH.intPricingTypeId = 2
+	AND CBL.dblQty > 1
 
 	UNION ALL
 
