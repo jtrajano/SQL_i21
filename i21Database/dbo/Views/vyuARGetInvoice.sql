@@ -209,6 +209,8 @@ SELECT
 	,ysnTaxAdjusted						= CAST(CASE WHEN RelatedInvoice.strType = 'Tax Adjustment' AND RelatedInvoice.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,strRelatedInvoiceNumber			= RelatedInvoice.strInvoiceNumber
 	,strPrintFormat						= INV.strPrintFormat
+	,dblPercentage						= INV.dblPercentage
+	,dblProvisionalTotal				= INV.dblProvisionalTotal
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 

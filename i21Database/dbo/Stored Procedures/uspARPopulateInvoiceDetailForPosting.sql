@@ -244,6 +244,9 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
     ,[intLineOfBusinessId]
+    ,[dblPercentage]
+    ,[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -270,8 +273,7 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblCurrencyExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
-											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
+    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -310,7 +312,7 @@ SELECT
     ,[intEntityId]                      = ARI.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]	= @AllowOtherUserToPost    
-    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
+    ,[ysnProvisionalWithGL]             = CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END
     ,[ysnExcludeInvoiceFromPayment]     = @ExcludeInvoiceFromPayment
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnCancelled]                     = ARI.[ysnCancelled]
@@ -333,6 +335,9 @@ SELECT
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
     ,[intLineOfBusinessId]              = ARI.[intLineOfBusinessId]
+    ,[dblPercentage]                    = ARI.[dblPercentage]
+    ,[dblProvisionalTotal]              = ARI.[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]          = ROUND(ARI.[dblProvisionalTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -506,6 +511,9 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,[dblPercentage]
+    ,[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -532,8 +540,10 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
-											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
+    ,[dblBaseInvoiceTotal]              = CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 
+                                            THEN ARI.[dblBaseInvoiceTotal] 
+											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+                                          END
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -660,6 +670,9 @@ SELECT
     ,[ysnAllowIntraEntries]             = @AllowIntraEntries
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,[dblPercentage]                    = ARID.[dblPercentage]
+    ,[dblProvisionalTotal]              = ARID.[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]          = ROUND(ARID.[dblProvisionalTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
