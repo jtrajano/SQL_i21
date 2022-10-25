@@ -170,7 +170,8 @@
     [dblDiscountedTotalNetAmount]	        NUMERIC(18,6) NULL,
     [dblDiscountedTotalAmount]		        NUMERIC(18,6) NULL,
     [dblDiscountedTotalTaxAmount]	        NUMERIC(18,6) NULL,
-    [dblAccountTotalLessAllDiscount]	    NUMERIC(18,6) NULL
+    [dblAccountTotalLessAllDiscount]	    NUMERIC(18,6) NULL,
+    [dblAccountTotalQuantity]		        NUMERIC(18,6) NULL
     CONSTRAINT [UserAndTransactionIdAndStatementType] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC, [strStatementType] ASC) WITH (FILLFACTOR = 70)
 );
 
