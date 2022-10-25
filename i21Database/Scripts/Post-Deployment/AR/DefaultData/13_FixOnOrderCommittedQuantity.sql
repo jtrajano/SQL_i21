@@ -46,19 +46,19 @@ FROM (
 			  AND SO.strTransactionType = 'Order'
 			GROUP BY SOD.intItemId, SO.intCompanyLocationId
 
-			UNION ALL
+			-- UNION ALL
 
-            SELECT ID.intItemId
-                    , I.intCompanyLocationId
-                    , dblCommitted = SUM(dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped))
-            FROM tblARInvoiceDetail ID
-                INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-            WHERE dbo.fnIsStockTrackingItem(ID.intItemId) = 1
-                AND I.ysnPosted = 0
-                AND I.strTransactionType NOT IN ('Service Charge', 'Credit Memo')
-                AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
-                AND ISNULL(ID.intSalesOrderDetailId, 0) = 0
-            GROUP BY ID.intItemId, I.intCompanyLocationId
+            -- SELECT ID.intItemId
+            --         , I.intCompanyLocationId
+            --         , dblCommitted = SUM(dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped))
+            -- FROM tblARInvoiceDetail ID
+            --     INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+            -- WHERE dbo.fnIsStockTrackingItem(ID.intItemId) = 1
+            --     AND I.ysnPosted = 0
+            --     AND I.strTransactionType NOT IN ('Service Charge', 'Credit Memo')
+            --     AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+            --     AND ISNULL(ID.intSalesOrderDetailId, 0) = 0
+            -- GROUP BY ID.intItemId, I.intCompanyLocationId
 		) TBL
 		GROUP BY intItemId, intCompanyLocationId
 	) AS SO
@@ -126,21 +126,21 @@ FROM (
 			  AND SO.strTransactionType = 'Order'
 			GROUP BY SOD.intItemId, SO.intCompanyLocationId, SOD.intStorageLocationId, SOD.intSubLocationId
 
-			UNION ALL
+			-- UNION ALL
 
-            SELECT intItemId			= ID.intItemId
-                 , intCompanyLocationId	= I.intCompanyLocationId
-				 , intStorageLocationId	= ID.intStorageLocationId
-				 , intSubLocationId		= ID.intSubLocationId
-                 , dblCommitted 		= SUM(dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped))
-            FROM tblARInvoiceDetail ID
-                INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-            WHERE dbo.fnIsStockTrackingItem(ID.intItemId) = 1
-                AND I.ysnPosted = 0
-                AND I.strTransactionType NOT IN ('Service Charge', 'Credit Memo')
-                AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
-                AND ISNULL(ID.intSalesOrderDetailId, 0) = 0
-            GROUP BY ID.intItemId, I.intCompanyLocationId, ID.intStorageLocationId, ID.intSubLocationId
+            -- SELECT intItemId			= ID.intItemId
+            --      , intCompanyLocationId	= I.intCompanyLocationId
+			-- 	 , intStorageLocationId	= ID.intStorageLocationId
+			-- 	 , intSubLocationId		= ID.intSubLocationId
+            --      , dblCommitted 		= SUM(dbo.fnICConvertUOMtoStockUnit(ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped))
+            -- FROM tblARInvoiceDetail ID
+            --     INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+            -- WHERE dbo.fnIsStockTrackingItem(ID.intItemId) = 1
+            --     AND I.ysnPosted = 0
+            --     AND I.strTransactionType NOT IN ('Service Charge', 'Credit Memo')
+            --     AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+            --     AND ISNULL(ID.intSalesOrderDetailId, 0) = 0
+            -- GROUP BY ID.intItemId, I.intCompanyLocationId, ID.intStorageLocationId, ID.intSubLocationId
 		) TBL
 		GROUP BY intItemId, intCompanyLocationId, intStorageLocationId, intSubLocationId
 	) AS SO
