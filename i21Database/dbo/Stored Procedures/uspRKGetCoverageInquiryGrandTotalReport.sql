@@ -172,7 +172,10 @@ DECLARE @tmpRawData AS TABLE (intRowNumber1 INT
 		, intBookId INT
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
-		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	)
 
 INSERT INTO @tmpRawData
 EXEC uspRKRiskPositionInquiryBySummary
