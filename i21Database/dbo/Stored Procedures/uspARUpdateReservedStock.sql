@@ -38,7 +38,7 @@ INSERT INTO @items (
 	,[intOwnershipTypeId]						--INT NULL DEFAULT 1	-- Ownership type of the item.  
 )
 SELECT [intItemId]			= ARID.[intItemId]
-	,[intItemLocationId]	= ICGIS.[intItemLocationId]
+	,[intItemLocationId]	= IL.[intItemLocationId]
 	,[intItemUOMId]			= ARID.[intItemUOMId]
 	,[intLotId]				= ARIDL.intLotId
 	,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
@@ -48,46 +48,22 @@ SELECT [intItemId]			= ARID.[intItemId]
 	,[strTransactionId]		= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]	= @TransactionTypeId
 	,[intOwnershipTypeId]	= @Ownership_Own
-FROM (
-	SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
-	FROM tblARInvoiceDetail WITH (NOLOCK)
-) ARID
+FROM tblARInvoiceDetail ARID WITH (NOLOCK)
+INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 LEFT JOIN tblARInvoiceDetailLot ARIDL ON ARID.intInvoiceDetailId = ARIDL.intInvoiceDetailId
-INNER JOIN (
-	SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] 
-	FROM tblARInvoice WITH (NOLOCK)
-) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-INNER JOIN (
-	SELECT [intItemId], [strType], [strManufactureType], [ysnAutoBlend] 
-	FROM tblICItem WITH (NOLOCK)
-) ICI ON ARID.[intItemId] = ICI.[intItemId]
-INNER JOIN (
-	SELECT [intItemUOMId] 
-	FROM tblICItemUOM WITH (NOLOCK)
-) ICIUOM ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
-LEFT OUTER JOIN (
-	SELECT [intItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] 
-	FROM vyuICGetItemStock WITH (NOLOCK)
-) ICGIS ON ARID.[intItemId] = ICGIS.[intItemId] AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId]
+INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
+INNER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
+INNER JOIN tblICItemLocation IL WITH(NOLOCK) ON ICI.intItemId = IL.intItemId AND ARI.intCompanyLocationId = IL.intLocationId
 LEFT OUTER JOIN vyuSCTicketScreenView SC ON ARID.[intTicketId] = SC.[intTicketId]
 WHERE ISNULL(@FromPosting, 0 ) = 0
-  AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
+  AND ICI.strType = 'Inventory'
   AND ARI.[intInvoiceId] = @InvoiceId
   AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-  AND ARI.strType NOT IN ('Transport Delivery')
+  AND ARI.strType NOT IN ('Transport Delivery', 'POS')
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intLoadDetailId] IS NULL		
   AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
-  AND (
-		(
-			ICI.[strManufactureType] <> 'Finished Good'
-			OR
-			(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
-		)
-	OR 
-		NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
-				
-	)
+  AND ISNULL(ICI.[ysnAutoBlend], 0) = 0
 	
 UNION ALL
 
@@ -102,36 +78,25 @@ SELECT [intItemId]			= ICGIS.[intComponentItemId]
 	,[strTransactionId]		= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]	= @TransactionTypeId
 	,[intOwnershipTypeId]	= @Ownership_Own
-FROM (
-	SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
-	FROM tblARInvoiceDetail WITH (NOLOCK)
-) ARID
+FROM tblARInvoiceDetail ARID WITH (NOLOCK)
 LEFT JOIN tblARInvoiceDetailLot ARIDL ON ARID.intInvoiceDetailId = ARIDL.intInvoiceDetailId
-INNER JOIN (
-	SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] 
-	FROM tblARInvoice WITH (NOLOCK)
-) ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-INNER JOIN (
-	SELECT [intItemId], [strType], [strManufactureType], [ysnAutoBlend] 
-	FROM tblICItem WITH (NOLOCK)
-) ICI ON ARID.[intItemId] = ICI.[intItemId]
-INNER JOIN (
-	SELECT [intItemUOMId] 
-	FROM tblICItemUOM WITH (NOLOCK)
-) ICIUOM ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
+INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
+INNER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 LEFT OUTER JOIN (
 	SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor, intStockUOMId 
 	FROM vyuICGetBundleItemStock WITH (NOLOCK)
 ) ICGIS ON ARID.[intItemId] = ICGIS.[intBundleItemId] AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
-LEFT OUTER JOIN vyuSCTicketScreenView SC ON ARID.[intTicketId] = SC.[intTicketId]
+LEFT JOIN tblSCTicket SC ON ARID.[intTicketId] = SC.[intTicketId]
+LEFT JOIN tblSCListTicketTypes SCT on SCT.intTicketType = SCT.intTicketType AND SCT.strInOutIndicator = SC.strInOutFlag
 WHERE ISNULL(@FromPosting, 0 ) = 0
-  AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 0
+  AND ICI.strType = 'Inventory'
   AND ARI.[intInvoiceId] = @InvoiceId
   AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-  AND ARI.strType NOT IN ('Transport Delivery')
+  AND ARI.strType NOT IN ('Transport Delivery', 'POS')
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intLoadDetailId] IS NULL  
-  AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
+  AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SCT.[strTicketType],'') <> 'Direct Out'))
   AND ICGIS.[intComponentItemId] IS NOT NULL
   AND (
 			(
@@ -140,21 +105,24 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
 				(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
 			)
 		OR 
-			NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+			NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < ISNULL([dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]), ARID.[dblQtyShipped]))
 				
 		)
 			
-IF (ISNULL(@FromPosting, 0 ) = 0)
+IF (ISNULL(@FromPosting, 0 ) = 0) 
 	BEGIN		
 		DECLARE @strInvalidItemNo AS NVARCHAR(50) 		
 		DECLARE @intInvalidItemId AS INT
 		DECLARE @intReturn AS INT
 		SET  @intReturn = 0 
 		
+		IF @Post = 1
+		BEGIN
 		-- Validate the reservation 
 		EXEC @intReturn = dbo.uspICValidateStockReserves @items
 														,@strInvalidItemNo OUTPUT 
-														,@intInvalidItemId OUTPUT 
+														,@intInvalidItemId OUTPUT
+		END
 
 		IF @intReturn <> 0 
 			RETURN @intReturn
@@ -198,5 +166,3 @@ IF ISNULL(@FromPosting, 0 ) = 1
 										     , @ysnPosted				= @Post
 	 
 END
-
-GO
