@@ -57,3 +57,5 @@ CREATE INDEX [idx_tblARPostInvoiceGLEntries_strTransactionId_strSessionId] ON [d
 GO
 CREATE INDEX [idx_tblARPostInvoiceGLEntries_strSessionId_strBatchId] ON [dbo].[tblARPostInvoiceGLEntries] (strSessionId) INCLUDE (strBatchId)
 GO
+CREATE INDEX [idx_tblARPostInvoiceGLEntries_strSessionId_intSourceEntityId] ON [dbo].[tblARPostInvoiceGLEntries] (strSessionId, intSourceEntityId) INCLUDE (intTransactionId, strTransactionId)
+GO
