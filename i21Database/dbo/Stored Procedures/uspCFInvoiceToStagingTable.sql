@@ -290,6 +290,7 @@ BEGIN TRY
 	,dblAccountTotalDiscount
 	,dblAccountTotalLessDiscount
 	,dblAccountTotalDiscountQuantity
+	,dblAccountTotalQuantity
 	,dblDiscountEP
 	,dblAPR
 	,ysnPrintMiscellaneous
@@ -573,6 +574,7 @@ BEGIN TRY
 	,ISNULL(dblAccountTotalDiscount				,0) AS dblAccountTotalDiscount
 	,ISNULL(dblAccountTotalLessDiscount			,0) AS dblAccountTotalLessDiscount
 	,ISNULL(dblAccountTotalDiscountQuantity		,0) AS dblAccountTotalDiscountQuantity
+	,ISNULL(dblAccountTotalQuantity				,0) AS dblAccountTotalQuantity
 	,ISNULL(dblDiscountEP						,0) AS dblDiscountEP
 	,dblAPR
 	,ysnPrintMiscellaneous
@@ -1034,7 +1036,7 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.dblCFAccountTotalDiscount		   = 		cfInv.dblAccountTotalDiscount	
 				,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		ISNULL(cfInv.dblFeeAmount,0)
 				,tblARCustomerStatementStagingTable.dblCFInvoiceTotal				   = 		cfInv.dblInvoiceTotal			
-				,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblTotalQuantity			
+				,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblAccountTotalQuantity			
 				,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
 				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption	   = 		cfInv.strEmailDistributionOption
 				,tblARCustomerStatementStagingTable.strCFEmail						   = 		cfInv.strEmail			
@@ -1227,7 +1229,7 @@ BEGIN TRY
 					,tblARCustomerStatementStagingTable.dblCFAccountTotalDiscount		   = 		cfInv.dblAccountTotalDiscount	
 					,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		ISNULL(cfInv.dblFeeAmount,0)			
 					,tblARCustomerStatementStagingTable.dblCFInvoiceTotal				   = 		cfInv.dblInvoiceTotal			
-					,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblTotalQuantity			
+					,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblAccountTotalQuantity			
 					,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
 					,tblARCustomerStatementStagingTable.strCFEmailDistributionOption	   = 		cfInv.strEmailDistributionOption
 					,tblARCustomerStatementStagingTable.strCFEmail						   = 		cfInv.strEmail			
