@@ -18,21 +18,33 @@ SET ANSI_WARNINGS OFF
 		,[intLicenseAccountId]			INT
 		,[intMaintenanceAccountId]		INT
 	)
-	DECLARE  @AllowIntraCompanyEntries		BIT
-			,@AllowIntraLocationEntries		BIT
-			,@AllowSingleLocationEntries	BIT
-			,@OverrideCompanySegment		BIT
-			,@OverrideLocationSegment		BIT
-			,@OverrideLineOfBusinessSegment	BIT
+	DECLARE  @OverrideCompanySegment					BIT
+			,@OverrideLocationSegment					BIT
+			,@OverrideLineOfBusinessSegment				BIT
+			,@OverrideARAccountLineOfBusinessSegment	BIT
 
 	SELECT TOP 1
-		 @AllowIntraCompanyEntries		= ysnAllowIntraCompanyEntries
-		,@AllowIntraLocationEntries		= ysnAllowIntraLocationEntries
-		,@AllowSingleLocationEntries	= ysnAllowSingleLocationEntries
-		,@OverrideCompanySegment		= ysnOverrideCompanySegment
-		,@OverrideLocationSegment		= ysnOverrideLocationSegment
-		,@OverrideLineOfBusinessSegment	= ysnOverrideLineOfBusinessSegment
+		 @OverrideCompanySegment				= ysnOverrideCompanySegment
+		,@OverrideLocationSegment				= ysnOverrideLocationSegment
+		,@OverrideLineOfBusinessSegment			= ysnOverrideLineOfBusinessSegment
+		,@OverrideARAccountLineOfBusinessSegment= ysnOverrideARAccountLineOfBusinessSegment
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+	
+	--AR ACCOUNT	
+	UPDATE ARI
+	SET ARI.intAccountId = CASE WHEN @OverrideARAccountLineOfBusinessSegment = 1
+								THEN ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, ISNULL(LOB.intSegmentCodeId, 0)), ARI.intAccountId)
+								ELSE ARI.intAccountId
+							END
+	FROM tblARInvoice ARI WITH (NOLOCK)
+	INNER JOIN tblARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
+	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
+	OUTER APPLY (
+		SELECT TOP 1 intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARI.intLineOfBusinessId, 0)
+	) LOB
+	WHERE PID.strSessionId = @strSessionId
 
 	INSERT INTO @LineItemAccounts (
 		  [intDetailId]
