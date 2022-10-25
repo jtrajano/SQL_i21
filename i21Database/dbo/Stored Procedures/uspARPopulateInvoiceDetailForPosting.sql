@@ -236,6 +236,9 @@ INSERT INTO tblARPostInvoiceHeader
     ,[intFreightLocationSegment]
     ,[dblSurcharge]
     ,[intCompanySegment]
+    ,[dblPercentage]
+    ,[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -300,7 +303,7 @@ SELECT
     ,[intEntityId]                      = ARI.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]	= @AllowOtherUserToPost    
-    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
+    ,[ysnProvisionalWithGL]             = CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END
     ,[ysnExcludeInvoiceFromPayment]     = @ExcludeInvoiceFromPayment
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnCancelled]                     = ARI.[ysnCancelled]
@@ -326,7 +329,10 @@ SELECT
     ,[intFreightLocationSegment]        = ARI.[intFreightLocationSegment]
     ,[dblSurcharge]                     = ARI.[dblSurcharge]
     ,[intCompanySegment]                = SMCL.[intCompanySegment]
-FROM tblARInvoice ARI WITH (NOLOCK)
+    ,[dblPercentage]                    = ARI.[dblPercentage]
+    ,[dblProvisionalTotal]              = ARI.[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]          = ROUND(ARI.[dblProvisionalTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN tblEMEntity EM ON ARC.intEntityId = EM.intEntityId 
@@ -502,6 +508,9 @@ INSERT INTO tblARPostInvoiceDetail
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[dblSurcharge]
+    ,[dblPercentage]
+    ,[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -655,8 +664,11 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
-FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
-INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+    ,[dblPercentage]                    = ARID.[dblPercentage]
+    ,[dblProvisionalTotal]              = ARID.[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]          = ROUND(ARID.[dblProvisionalTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+FROM tblARPostInvoiceHeader ARI
+INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN tblICItem ICI WITH(NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
 LEFT OUTER JOIN tblICCategory ICC WITH(NOLOCK) ON ICI.[intCategoryId] = ICC.[intCategoryId]

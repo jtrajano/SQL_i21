@@ -210,6 +210,8 @@ SELECT
 	,strPrintFormat						= INV.strPrintFormat
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
+	,dblPercentage						= INV.dblPercentage
+	,dblProvisionalTotal				= INV.dblProvisionalTotal
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
