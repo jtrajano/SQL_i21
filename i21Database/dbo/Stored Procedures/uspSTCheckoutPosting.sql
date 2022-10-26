@@ -906,9 +906,9 @@ BEGIN
 																						
 
 										,[dblDiscount]				= 0
-										
-										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
-
+										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6)
+										--,[dblPrice]					= CASE WHEN @ysnConsignmentStore = 1 THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity																		
+										--								ELSE ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) END
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
 										,[strFrequency]				= NULL
