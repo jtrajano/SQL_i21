@@ -8,6 +8,7 @@ SELECT
     A.dtmSalesDate,--unique
     A.strTeaType,--unique
     A.intBrokerId,--unique
+    strBroker = Broker.strName,
     A.strVendorLotNumber,--unique
     A.intBuyingCenterLocationId, -- company id--unique
     strCompanyLocation = CL.strLocationName, -- company 
@@ -147,3 +148,6 @@ OUTER APPLY(
 OUTER APPLY(
 	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intPackageUOMId
 )PUOM
+OUTER APPLY(
+    SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = A.intBrokerId
+)Broker
