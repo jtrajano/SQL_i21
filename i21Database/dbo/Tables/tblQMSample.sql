@@ -202,7 +202,7 @@
 	CONSTRAINT [FK_tblQMSample_tblSMCity_intFromLocationCodeId] FOREIGN KEY ([intFromLocationCodeId]) REFERENCES [dbo].[tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute_intSeasonId] FOREIGN KEY ([intSeasonId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Color
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute_intGradeId] FOREIGN KEY ([intGradeId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), -- Grade
-	CONSTRAINT [FK_tblQMSample_tblICBrand_intBrandId] FOREIGN KEY ([intBrandId]) REFERENCES [dbo].[tblICBrand]([intBrandId]), -- Size
+	--CONSTRAINT [FK_tblQMSample_tblICBrand_intBrandId] FOREIGN KEY ([intBrandId]) REFERENCES [dbo].[tblICBrand]([intBrandId]), -- Size
 	CONSTRAINT [FK_tblQMSample_tblCTValuationGroup_intValuationGroupId] FOREIGN KEY ([intValuationGroupId]) REFERENCES [dbo].[tblCTValuationGroup]([intValuationGroupId]), -- Leaf Style
 	CONSTRAINT [FK_tblQMSample_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblQMSample_tblICStorageLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
