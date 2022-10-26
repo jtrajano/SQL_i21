@@ -6,7 +6,7 @@ DECLARE @strStructureName NVARCHAR(20)
 SELECT TOP 1 @strStructureName = strStructureName FROM tblGLAccountStructure WHERE intStructureType = 5 
 
 
-IF ISNULL(@strStructureName,'') = ''
+IF ISNULL(@strStructureName,'') <> ''
 BEGIN
 	EXEC('
 	CREATE VIEW dbo.vyuGLLineOfBusinessAccountId
