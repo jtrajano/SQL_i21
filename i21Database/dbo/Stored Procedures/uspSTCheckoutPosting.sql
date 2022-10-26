@@ -1681,7 +1681,7 @@ BEGIN
 											,[dblSubCurrencyRate]		= 1.000000
 											--,0
 											--,1
-								FROM vyuSTCheckoutDepartmentInvoiceEntries DT
+								FROM vyuSTConsCheckoutDepartmentInvoiceEntries DT
 								JOIN tblICItem I 
 									ON DT.intItemId = I.intItemId
 
