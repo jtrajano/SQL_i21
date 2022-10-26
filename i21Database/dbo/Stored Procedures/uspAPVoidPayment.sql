@@ -93,8 +93,8 @@ BEGIN
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentKeys)
 
 	--DELETE FROM #tmpPayables
-	IF OBJECT_ID('dbo.[UK_dbo.tblAPPayment_strPaymentRecordNum]', 'UQ') IS NOT NULL 
-	ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum]
+	-- IF OBJECT_ID('dbo.[UK_dbo.tblAPPayment_strPaymentRecordNum]', 'UQ') IS NOT NULL 
+	-- ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum]
 
 	--Insert new payment records
 	MERGE INTO tblAPPayment
@@ -112,6 +112,7 @@ BEGIN
 			[intUnitOfMeasureId],
 			[strPaymentInfo],
 			[strCheckMessage],
+			[strPaymentRecordNum],
 			[strNotes],
 			[dtmDatePaid],
 			[dblAmountPaid],
@@ -144,6 +145,7 @@ BEGIN
 			p.[intUnitOfMeasureId],
 			p.[strPaymentInfo],
 			p.[strCheckMessage],
+			p.[strPaymentRecordNum] + 'V',
 			p.[strNotes],
 			p.[dtmDatePaid],
 			p.[dblAmountPaid],
@@ -233,7 +235,7 @@ BEGIN
 
 	IF @isSuccessful = 0
 	BEGIN
-		ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
+		--ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 		RAISERROR('There was an error on reversing bank transaction.', 16, 1);
 	END
 
@@ -327,7 +329,7 @@ BEGIN
 		EXEC uspGLBookEntries @GLEntries, 1
 	END TRY
 	BEGIN CATCH
-		ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
+		--ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
 		RAISERROR(@error, 16, 1);
 	END CATCH
@@ -435,7 +437,7 @@ BEGIN
 	WHERE B.intPaymentId IN (SELECT intId FROM @paymentKeys)
 	AND A.intTransactionType = 8
 
-	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
+	--ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
 	
 	DECLARE @strDescription AS NVARCHAR(100),@PaymentId AS NVARCHAR(50);
 	DECLARE @paymentCounter INT = 0, @totalRecords INT = 0, @Id NVARCHAR(50);
