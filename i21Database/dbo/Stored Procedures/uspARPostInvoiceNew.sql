@@ -621,7 +621,6 @@ BEGIN TRY
         ,[strText]          NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
         ,[intErrorCode]     INT
         ,[strModuleName]    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-		,INDEX ix_@InvalidGLEntries NONCLUSTERED(strTransactionId)
 	)
 
     INSERT INTO @InvalidGLEntries (
