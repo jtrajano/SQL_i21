@@ -110,7 +110,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2210_EncryptPasswords.sql
 :r .\SM\2210_EncryptPasswords2.sql
 :r .\SM\2220_MigrateLabels.sql
-:r .\SM\2210_RemoveOriginIntegration.sql
 :r .\SM\2210_AttachmentsFileTypesFix.sql
 :r .\SM\2210_ReadCommittedSnapshot.sql
 :r .\SM\2220_HideScreenLabel.sql
