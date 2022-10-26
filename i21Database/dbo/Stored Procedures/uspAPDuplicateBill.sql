@@ -182,6 +182,14 @@ ON 1 = 0
 			[intPurchaseDetailId],
 			[intContractHeaderId],
 			[intContractDetailId],
+			[intScaleTicketId],
+			[intBuybackChargeId],
+			[intTicketDistributionAllocationId],
+			[intContractSeq],
+			[intPriceFixationDetailId],
+			[intCustomerStorageId],
+			[intSettleStorageId],
+			[intStorageLocationId],
 			[intPrepayTypeId],
 			[intTaxGroupId],
 			[dblTotal],
@@ -198,6 +206,7 @@ ON 1 = 0
 			[dtmExpectedDate], 
 			[int1099Form], 
 			[int1099Category], 
+			[intLocationId],
 			[intLineNo]
 		)
 		VALUES
@@ -212,6 +221,14 @@ ON 1 = 0
 			[intPurchaseDetailId],
 			[intContractHeaderId],
 			[intContractDetailId],
+			[intScaleTicketId],
+			[intBuybackChargeId],
+			[intTicketDistributionAllocationId],
+			[intContractSeq],
+			[intPriceFixationDetailId],
+			[intCustomerStorageId],
+			[intSettleStorageId],
+			[intStorageLocationId],
 			[intPrepayTypeId],
 			[intTaxGroupId],
 			[dblTotal],
@@ -228,6 +245,7 @@ ON 1 = 0
 			[dtmExpectedDate], 
 			[int1099Form], 
 			[int1099Category], 
+			[intLocationId],
 			[intLineNo]
 		)
 		OUTPUT inserted.intBillDetailId, A.intBillDetailId INTO @billDetailTaxes(intCreatedBillDetailId, originalBillDetailId); --get the new and old bill detail id
