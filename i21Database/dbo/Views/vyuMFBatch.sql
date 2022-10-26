@@ -111,7 +111,8 @@ SELECT
     A.intConcurrencyId,
 	strItemUOM = UOM.strUnitMeasure,
 	strWeightUOM = WUOM.strUnitMeasure,
-	strPackageUOM = PUOM.strUnitMeasure
+	strPackageUOM = PUOM.strUnitMeasure,
+    LOT.intLotId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 OUTER APPLY(
@@ -151,3 +152,6 @@ OUTER APPLY(
 OUTER APPLY(
     SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = A.intBrokerId
 )Broker
+OUTER APPLY(
+     SELECT TOP 1 intLotId FROM tblMFLotInventory WHERE intBatchId = A.intBatchId
+)LOT
