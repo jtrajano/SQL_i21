@@ -469,16 +469,6 @@ BEGIN
 						-- ROLLBACK
 						GOTO ExitWithRollback
 					END
-
-				-- DEALER COMMISSION ITEM ID
-				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intConsDealerCommissionItemId IS NULL)
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Missing setup of Dealer Commission item on Store Consignment configuration Setup tab'
-
-						-- ROLLBACK
-						GOTO ExitWithRollback
-					END
 					
 				-- Cash over/short item id
 				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NULL)
