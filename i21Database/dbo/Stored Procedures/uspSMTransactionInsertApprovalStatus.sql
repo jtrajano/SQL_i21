@@ -47,17 +47,31 @@ BEGIN
 		RAISERROR(N'The screen is not configured for approval!', 16, 1);
 		RETURN @result
 	END
-	SELECT TOP 1 @intTransactionId = intTransactionId FROM tblSMTransaction WHERE intScreenId = @intScreenId AND intRecordId = @recordId
-	IF ISNULL(@intTransactionId, 0) = 0
-	BEGIN
-		RAISERROR(N'The transaction cannot be found! Please check your record id and screen namespace.', 16, 1);
-		RETURN @result
-	END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = ISNULL(@intEntityId, 0))
 	BEGIN
 		RAISERROR(N'The Entity id cannot be found!', 16, 1);
 		RETURN @result
 	END
+
+
+	SELECT TOP 1 @intTransactionId = intTransactionId FROM tblSMTransaction WHERE intScreenId = @intScreenId AND intRecordId = @recordId
+	IF ISNULL(@intTransactionId, 0) = 0
+	BEGIN
+		-- RAISERROR(N'The transaction cannot be found! Please check your record id and screen namespace.', 16, 1);
+		-- RETURN @result
+		INSERT INTO tblSMTransaction (
+			intScreenId,
+			intRecordId,
+			intConcurrencyId
+		)
+		VALUES (
+			@intScreenId,
+			@recordId,
+			1
+		)
+		SELECT @intTransactionId = SCOPE_IDENTITY()
+	END
+	
 	
 	-------------START THE INSERT-------------
 	SET @result = 1
@@ -67,7 +81,7 @@ BEGIN
 
 		UPDATE tblSMApproval SET ysnCurrent = 0 WHERE intTransactionId = @intTransactionId
 		UPDATE tblSMTransaction SET strApprovalStatus = @status WHERE intTransactionId = @intTransactionId
-		SELECT @intOrder = intOrder FROM tblSMApproval WHERE intTransactionId = @intTransactionId
+		SELECT @intOrder = MAX(intOrder) FROM tblSMApproval WHERE intTransactionId = @intTransactionId
 		INSERT INTO tblSMApproval (
 			intTransactionId,
 			intScreenId,
