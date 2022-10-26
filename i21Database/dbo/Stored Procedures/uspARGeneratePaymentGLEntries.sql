@@ -20,6 +20,16 @@ DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
 IF @Post = 1
 BEGIN
+    DECLARE @OverrideCompanySegment         BIT
+           ,@OverrideLocationSegment        BIT
+           ,@OverrideLineOfBusinessSegment  BIT
+
+    SELECT TOP 1 
+         @OverrideCompanySegment        = ysnOverrideCompanySegment
+        ,@OverrideLocationSegment       = ysnOverrideLocationSegment
+        ,@OverrideLineOfBusinessSegment = ysnOverrideLineOfBusinessSegment
+    FROM tblARCompanyPreference
+
     INSERT #ARPaymentGLEntries
         ([dtmDate]
         ,[strBatchId]
@@ -67,10 +77,7 @@ BEGIN
 	SELECT
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = (CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
-												WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
-												ELSE P.[intAccountId]
-										  END)
+		,[intAccountId]                 = ACCOUNT.intAccountId
 		,[dblDebit]                     = P.[dblBaseAmountPaid]
 		,[dblCredit]                    = @ZeroDecimal
 		,[dblDebitUnit]                 = @ZeroDecimal
@@ -112,6 +119,19 @@ BEGIN
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentHeader P
+    OUTER APPLY (
+	    SELECT TOP 1 intAccountId = intOverrideAccount
+        FROM dbo.[fnARGetOverrideAccount](
+                 P.[intARAccountId]
+                ,CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
+				    WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
+			        ELSE P.[intAccountId]
+				 END
+                ,@OverrideCompanySegment
+				,@OverrideLocationSegment
+				,0
+			 )
+    ) ACCOUNT
 	WHERE
 		P.[ysnPost] = 1
 
@@ -448,7 +468,7 @@ BEGIN
 	SELECT
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = P.[intWriteOffAccountDetailId]
+		,[intAccountId]                 = WRITEOFFDETAIL.[intAccountId]
 		,[dblDebit]                     = CASE WHEN P.[dblAdjustedBaseWriteOffAmount] > 0 THEN P.[dblAdjustedBaseWriteOffAmount] ELSE 0 END
 		,[dblCredit]                    = CASE WHEN P.[dblAdjustedBaseWriteOffAmount] < 0 THEN ABS(P.[dblAdjustedBaseWriteOffAmount]) ELSE 0 END
 		,[dblDebitUnit]                 = @ZeroDecimal
@@ -490,6 +510,10 @@ BEGIN
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
+    OUTER APPLY (
+	    SELECT TOP 1 intAccountId = intOverrideAccount
+        FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+    ) WRITEOFFDETAIL
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
@@ -745,7 +769,7 @@ BEGIN
 	SELECT
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = P.[intGainLossAccount]
+		,[intAccountId]                 = GAINLOSS.[intAccountId]
 		,[dblDebit]                     = CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) ELSE @ZeroDecimal END
 		,[dblCredit]                    = CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN @ZeroDecimal ELSE ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) END
 		,[dblDebitUnit]                 = @ZeroDecimal
@@ -787,6 +811,10 @@ BEGIN
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
+    OUTER APPLY (
+	    SELECT TOP 1 intAccountId = intOverrideAccount
+	    FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+    ) GAINLOSS
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
@@ -936,7 +964,7 @@ BEGIN
 	SELECT
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = P.[intTransactionAccountId]
+		,[intAccountId]                 = WRITEOFF.[intAccountId]
 		,[dblDebit]                     = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblBaseWriteOffAmount]) ELSE 0 END
 		,[dblCredit]                    = CASE WHEN P.[dblBaseWriteOffAmount] > 0 THEN P.[dblBaseWriteOffAmount] ELSE 0 END
 		,[dblDebitUnit]                 = @ZeroDecimal
@@ -978,6 +1006,10 @@ BEGIN
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
+    OUTER APPLY (
+	    SELECT TOP 1 intAccountId = intOverrideAccount
+        FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intTransactionAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+    ) WRITEOFF
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
