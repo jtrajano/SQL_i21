@@ -2988,9 +2988,9 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[strSessionId]                 = @strSessionId
 FROM tblARPostInvoiceDetail I
 LEFT OUTER JOIN tblARPostInvoiceItemAccount IA ON I.[intItemId] = IA.[intItemId] AND I.[intCompanyLocationId] = IA.[intLocationId]
+AND IA.strSessionId = @strSessionId
 WHERE I.[dblBaseDiscountAmount] <> @ZeroDecimal
   AND I.strSessionId = @strSessionId
-  AND IA.strSessionId = @strSessionId
 
 --DIRECT OUT TICKET (COGS)
 INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
