@@ -345,18 +345,26 @@ BEGIN TRY
   ,intSamplingCriteriaId = CASE x.intSamplingCriteriaId WHEN 0 THEN NULL ELSE x.intSamplingCriteriaId END  
   ,strSendSampleTo = x.strSendSampleTo  
   , intSaleYearId = x.intSaleYearId
+  , strSaleYear = x.strSaleYear
   , intSaleNumber = x.intSaleNumber
   , dtmSaleDate = CASE WHEN x.dtmSaleDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmSaleDate END  
   , intCatalogueTypeId = x.intCatalogueTypeId
+  , strCatalogueType = x.strCatalogueType
   , dtmPromptDate = CASE WHEN x.dtmPromptDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmPromptDate END  
   , strChopNumber = x.strChopNumber
   , intBrokerId = x.intBrokerId
+  , strBroker = x.strBroker
   , intGradeId = x.intGradeId
+  , strGrade = x.strGrade
   , intLeafCategoryId = x.intLeafCategoryId
-  , intManufacturingLeafTypeId = CASE WHEN x.intManufacturingLeafTypeId = CAST('' AS DATETIME) THEN NULL ELSE x.intManufacturingLeafTypeId END 
+  , strLeafCategory = x.strLeafCategory
+  , intManufacturingLeafTypeId = x.intManufacturingLeafTypeId
+  , strManufacturingLeafType = x.strManufacturingLeafType
   , intSeasonId = x.intSeasonId
+  , strSeason = x.strSeason
   , intGardenMarkId = x.intGardenMarkId
-  , dtmManufacturingDate = x.dtmManufacturingDate
+  , strGardenMark = x.strGardenMark
+  , dtmManufacturingDate = CASE WHEN x.dtmManufacturingDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmManufacturingDate END 
   , intTotalNumberOfPackageBreakups = x.intTotalNumberOfPackageBreakups
   , dblNetWtPerPackages = x.dblNetWtPerPackages
   , intNoOfPackages = x.intNoOfPackages
@@ -365,10 +373,13 @@ BEGIN TRY
   , dblNetWtThirdPackageBreak = x.dblNetWtThirdPackageBreak
   , intNoOfPackagesThirdPackageBreak = x.intNoOfPackagesThirdPackageBreak
   , intProductLineId = x.intProductLineId
+  , strProductLine = x.strProductLine
   , ysnOrganic = x.ysnOrganic
   , dblSupplierValuationPrice = x.dblSupplierValuationPrice
   , intProducerId = x.intProducerId
+  , strProducer = x.strProducer
   , intPurchaseGroupId = x.intPurchaseGroupId
+  , strPurchaseGroup = x.strPurchaseGroup
   , strERPRefNo = x.strERPRefNo
   , dblGrossWeight = x.dblGrossWeight
   , dblTareWeight = x.dblTareWeight
@@ -381,16 +392,23 @@ BEGIN TRY
   , dblBasePrice = x.dblBasePrice
   , ysnBoughtAsReserve = x.ysnBoughtAsReserve
   , intCurrencyId = x.intCurrencyId
+  , strCurrency = x.strCurrency
   , ysnEuropeanCompliantFlag = x.ysnEuropeanCompliantFlag
   , intEvaluatorsCodeAtTBOId = x.intEvaluatorsCodeAtTBOId
+  , strEvaluatorsCodeAtTBO = x.strEvaluatorsCodeAtTBO
   , intFromLocationCodeId = x.intFromLocationCodeId
+  , strFromLocationCode = x.strFromLocationCode
   , strSampleBoxNumber = x.strSampleBoxNumber
   , intBrandId = x.intBrandId
+  , strBrandCode = x.strBrandCode
   , intValuationGroupId = x.intValuationGroupId
+  , strValuationGroupName = x.strValuationGroupName
   , strMusterLot = x.strMusterLot
   , strMissingLot = x.strMissingLot
   , intMarketZoneId = x.intMarketZoneId
+  , strMarketZoneCode = x.strMarketZoneCode
   , intDestinationStorageLocationId = x.intDestinationStorageLocationId
+  , strDestinationStorageLocationName = x.strDestinationStorageLocationName
   , strComments2 = x.strComments2
   , strComments3 = x.strComments3
   ,strRepresentLotNumber = x.strRepresentLotNumber  
@@ -461,17 +479,25 @@ BEGIN TRY
    ,strSendSampleTo NVARCHAR(50)  
    ,strRepresentLotNumber NVARCHAR(50)
    , intSaleYearId INT
+   , strSaleYear NVARCHAR(50)
    , intSaleNumber INT
    , strChopNumber NVARCHAR(50)
    , dtmSaleDate DATETIME  
    , intCatalogueTypeId INT
+   , strCatalogueType NVARCHAR(50)
    , dtmPromptDate DATETIME  
    , intBrokerId INT
+   , strBroker NVARCHAR(50)
    , intGradeId INT
+   , strGrade NVARCHAR(50)
    , intLeafCategoryId INT
+   , strLeafCategory NVARCHAR(50)
    , intManufacturingLeafTypeId INT
+   , strManufacturingLeafType NVARCHAR(50)
    , intSeasonId INT
+   , strSeason NVARCHAR(50)
    , intGardenMarkId INT
+   , strGardenMark NVARCHAR(50)
    , dtmManufacturingDate DATETIME  
    , intTotalNumberOfPackageBreakups INT
    , dblNetWtPerPackages NUMERIC(18, 6)
@@ -481,10 +507,13 @@ BEGIN TRY
    , dblNetWtThirdPackageBreak NUMERIC(18, 6)
    , intNoOfPackagesThirdPackageBreak INT
    , intProductLineId INT
+   , strProductLine NVARCHAR(50)
    , ysnOrganic BIT
    , dblSupplierValuationPrice NUMERIC(18, 6)
    , intProducerId INT
+   , strProducer NVARCHAR(50)
    , intPurchaseGroupId INT
+   , strPurchaseGroup NVARCHAR(50)
    , strERPRefNo NVARCHAR(50) 
    , dblGrossWeight NUMERIC(18, 6)
    , dblTareWeight NUMERIC(18, 6)
@@ -497,16 +526,23 @@ BEGIN TRY
    , dblBasePrice NUMERIC(18, 6)
    , ysnBoughtAsReserve BIT
    , intCurrencyId INT
+   , strCurrency NVARCHAR(50)
    , ysnEuropeanCompliantFlag BIT
    , intEvaluatorsCodeAtTBOId INT
+   , strEvaluatorsCodeAtTBO NVARCHAR(50)
    , intFromLocationCodeId INT
+   , strFromLocationCode NVARCHAR(50)
    , strSampleBoxNumber NVARCHAR(50) 
    , intBrandId INT
+   , strBrandCode NVARCHAR(50)
    , intValuationGroupId INT
+   , strValuationGroupName NVARCHAR(50)
    , strMusterLot NVARCHAR(50) 
    , strMissingLot NVARCHAR(50) 
    , intMarketZoneId INT
+   , strMarketZoneCode NVARCHAR(50)
    , intDestinationStorageLocationId INT
+   , strDestinationStorageLocationName NVARCHAR(50)
    , strComments2 NVARCHAR(MAX) 
    , strComments3 NVARCHAR(MAX)   
    ,intLastModifiedUserId INT  
