@@ -23,7 +23,8 @@ BEGIN
 			@strHaulerZip			NVARCHAR(MAX),
 			@strUserFullName		NVARCHAR(100),
 			@strUserEmailId			NVARCHAR(100),
-			@strUserPhoneNo			NVARCHAR(50)
+			@strUserPhoneNo			NVARCHAR(50),
+			@intReleaseOrderType	INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -63,6 +64,10 @@ BEGIN
 	SELECT	@strUserName = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strUserName' 
+
+	SELECT	@intReleaseOrderType = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intReleaseOrderType' 
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 		,@strCompanyAddress = strAddress
@@ -160,6 +165,10 @@ BEGIN
 		  ,blbFooterLogo = LOGO.blbFooterLogo
 		  ,strHeaderLogoType = LOGO.strHeaderLogoType
 		  ,strFooterLogoType = LOGO.strFooterLogoType
+		  ,strReleaseOrderType = CASE 
+									WHEN @intReleaseOrderType = 1 THEN 'Provisional Release Order'
+									WHEN @intReleaseOrderType = 2 THEN 'Final Release Order'
+								ELSE NULL END
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
