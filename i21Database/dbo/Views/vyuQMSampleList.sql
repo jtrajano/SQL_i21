@@ -108,6 +108,74 @@ SELECT S.intSampleId
 	,strPacking = '' COLLATE Latin1_General_CI_AS
 	,S.intCompanyLocationId
 	,CompanyLocation.strLocationName AS strCompanyLocationName
+	-- Auction
+	,S.intSaleYearId
+	,S.strSaleYear
+	,S.intSaleNumber
+	,S.strChopNumber
+	,S.dtmSaleDate
+	,S.intCatalogueTypeId
+	,S.strCatalogueType
+	,S.dtmPromptDate
+	,S.intBrokerId
+	,S.strBroker
+	,S.intGradeId
+	--,S.strGrade
+	,S.intLeafCategoryId
+	,S.strLeafCategory
+	,S.intManufacturingLeafTypeId
+	,S.strManufacturingLeafType
+	,S.intSeasonId
+	--,S.strSeason
+	,S.intGardenMarkId
+	,S.strGardenMark
+	,S.dtmManufacturingDate
+	,S.intTotalNumberOfPackageBreakups
+	,S.dblNetWtPerPackages
+	,S.intNoOfPackages 
+	,S.dblNetWtSecondPackageBreak
+	,S.intNoOfPackagesSecondPackageBreak
+	,S.dblNetWtThirdPackageBreak
+	,S.intNoOfPackagesThirdPackageBreak
+	,S.intProductLineId
+	--,S.strProductLine
+	,S.ysnOrganic
+	,S.dblSupplierValuationPrice
+	,S.intProducerId
+	,S.strProducer
+	,S.intPurchaseGroupId
+	,S.strPurchaseGroup
+	,S.strERPRefNo
+	,S.dblGrossWeight
+	,S.dblTareWeight
+	,S.dblNetWeight
+	,S.strBatchNo
+	,S.str3PLStatus
+	,S.strAdditionalSupplierReference
+	,S.intAWBSampleReceived
+	,S.strAWBSampleReference
+	,S.dblBasePrice
+	,S.ysnBoughtAsReserve
+	,S.intCurrencyId
+	,S.strCurrency
+	,S.ysnEuropeanCompliantFlag
+	,S.intEvaluatorsCodeAtTBOId
+	,S.strEvaluatorsCodeAtTBO
+	,S.intFromLocationCodeId
+	,S.strFromLocationCode
+	,S.strSampleBoxNumber
+	,S.intBrandId
+	,S.strBrandCode
+	,S.intValuationGroupId
+	,S.strValuationGroupName
+	,S.strMusterLot
+	,S.strMissingLot
+	,S.intMarketZoneId
+	,S.strMarketZoneCode
+	,S.intDestinationStorageLocationId
+	,S.strDestinationStorageLocationName
+	,S.strComments2
+	,S.strComments3
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
