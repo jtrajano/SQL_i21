@@ -16,6 +16,7 @@ SELECT
 	,[strAccountNumber]					= ARIFP.[strAccountNumber]
 	,[strAddress]						= ARIFP.[strAddress]
 	,[intAccountId]						= ARIFP.[intAccountId]
+	,[strAccountId]						= GLA.[strAccountId]
 	,[intCurrencyId]					= ARIFP.[intCurrencyId]	
 	,[dtmDate]							= ARIFP.[dtmDate]
 	,[dtmDueDate]						= ARIFP.[dtmDueDate]
@@ -360,3 +361,4 @@ FROM (
 	) ARIFP
 LEFT OUTER JOIN tblSMTerm SMT WITH (NOLOCK) ON ARIFP.intTermId = SMT.intTermID
 LEFT OUTER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
+LEFT OUTER JOIN tblGLAccount GLA WITH (NOLOCK) ON ARIFP.intAccountId = GLA.intAccountId
