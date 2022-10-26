@@ -151,6 +151,7 @@ SELECT
 	,dblPrice				= ARGID.dblPrice
 	,dblTotal				= ARGID.dblTotal
 	,intInventoryShipmentChargeId = ISNULL(ARGID.intInventoryShipmentChargeId,0)
+	,intInvoiceDetailLotId	= ARGIDL.intInvoiceDetailLotId
 	,blbLogo                = ISNULL(SMLP.imgLogo, @blbLogo)
 	,strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
