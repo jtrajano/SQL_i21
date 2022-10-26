@@ -108,6 +108,7 @@ BEGIN
 END
 
 GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Employee Id',
     @level0type = N'SCHEMA',
