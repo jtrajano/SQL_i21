@@ -116,24 +116,30 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
-	--Company segment override for writeoff
+	--Segment override for writeoff
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
         ,[strTransactionId]         = P.[strTransactionId]
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the writeoff account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+        ,[strError]                 = 'Unable to find the writeoff override account that matches the segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 	FROM #ARPostPaymentDetail P
     OUTER APPLY (
-		SELECT strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], 1, 0, 0)
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment, bitSameLineOfBusinessSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
     AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-    AND @OverrideCompanySegment = 1
-    AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+    AND (
+		(@OverrideCompanySegment = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+		OR
+		(@OverrideLocationSegment = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
+        OR
+		(@OverrideLineOfBusinessSegment = 1 AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0)
+	)
+    AND OVERRIDESEGMENT.bitOverriden = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -142,75 +148,27 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
-	--Location segment override for writeoff
+	--Segment override for undeposited fund
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
         ,[strTransactionId]         = P.[strTransactionId]
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the writeoff account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-	FROM #ARPostPaymentDetail P
-    OUTER APPLY (
-		SELECT strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], 0, 1, 0)
-	) OVERRIDESEGMENT
-    WHERE P.[ysnPost] = @OneBit
-    AND P.[intInvoiceId] IS NOT NULL
-    AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-    AND @OverrideLocationSegment = 1
-    AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Line of Business segment override for writeoff
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the writeoff account that matches the line of business of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-	FROM #ARPostPaymentDetail P
-    OUTER APPLY (
-		SELECT strOverrideAccount, bitSameLineOfBusinessSegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], 0, 0, 1)
-	) OVERRIDESEGMENT
-    WHERE P.[ysnPost] = @OneBit
-    AND P.[intInvoiceId] IS NOT NULL
-    AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-    AND @OverrideLineOfBusinessSegment = 1
-    AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Company segment override for undeposited fund
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the undeposited fund account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+        ,[strError]                 = 'Unable to find the undeposited fund override account that matches the segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 	FROM #ARPostPaymentHeader P
     OUTER APPLY (
-		SELECT strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intAccountId], 1, 0, 0)
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND ISNULL(P.[intUndepositedFundsId], 0) = 0
-    AND @OverrideLocationSegment = 1
-    AND OVERRIDESEGMENT.bitSameCompanySegment = 0
+    AND (
+		(@OverrideCompanySegment = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+		OR
+		(@OverrideLocationSegment = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
+	)
+    AND OVERRIDESEGMENT.bitOverriden = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -219,107 +177,32 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
-	--Location segment override for undeposited fund
+	--Segment override for realized gain or loss account
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
         ,[strTransactionId]         = P.[strTransactionId]
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the undeposited fund account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-	FROM #ARPostPaymentHeader P
-    OUTER APPLY (
-		SELECT strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intAccountId], 0, 1, 0)
-	) OVERRIDESEGMENT
-    WHERE P.[ysnPost] = @OneBit
-    AND ISNULL(P.[intUndepositedFundsId], 0) = 0
-    AND @OverrideLocationSegment = 1
-    AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Company segment override for realized gain or loss account
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the company of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+        ,[strError]                 = 'Unable to find the realized gain or loss override account that matches the segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 	FROM #ARPostPaymentDetail P
     OUTER APPLY (
-		SELECT strOverrideAccount, bitSameCompanySegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], 1, 0, 0)
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment, bitSameLineOfBusinessSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
     AND ISNULL(P.[intGainLossAccount],0) <> 0
     AND P.[strTransactionType] <> 'Claim'
     AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
-    AND @OverrideLocationSegment = 1
-    AND OVERRIDESEGMENT.bitSameCompanySegment = 0
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Location segment override for realized gain or loss account
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the location of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-	FROM #ARPostPaymentDetail P
-    OUTER APPLY (
-		SELECT strOverrideAccount, bitSameLocationSegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], 0, 1, 0)
-	) OVERRIDESEGMENT
-    WHERE P.[ysnPost] = @OneBit
-    AND P.[intInvoiceId] IS NOT NULL
-    AND ISNULL(P.[intGainLossAccount],0) <> 0
-    AND P.[strTransactionType] <> 'Claim'
-    AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
-    AND @OverrideLocationSegment = 1
-    AND OVERRIDESEGMENT.bitSameLocationSegment = 0
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Line of business segment override for realized gain or loss account
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the realized gain or loss account that matches the line of business of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
-	FROM #ARPostPaymentDetail P
-    OUTER APPLY (
-		SELECT strOverrideAccount, bitSameLineOfBusinessSegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], 0, 0, 1)
-	) OVERRIDESEGMENT
-    WHERE P.[ysnPost] = @OneBit
-    AND P.[intInvoiceId] IS NOT NULL
-    AND ISNULL(P.[intGainLossAccount],0) <> 0
-    AND P.[strTransactionType] <> 'Claim'
-    AND ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount]))  <> @ZeroDecimal
-    AND @OverrideLineOfBusinessSegment = 1
-    AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0
+    AND (
+		(@OverrideCompanySegment = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+		OR
+		(@OverrideLocationSegment = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
+        OR
+		(@OverrideLineOfBusinessSegment = 1 AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0)
+	)
+    AND OVERRIDESEGMENT.bitOverriden = 0
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
