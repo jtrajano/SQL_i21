@@ -187,8 +187,7 @@ BEGIN
 				ELSE
 					'100'
 			END
-			,
-			C.intDepartmentId, 
+			,C.intDepartmentId, 
 			--for profit center
 			CASE WHEN(EE.ysnUseLocationDistribution = 1 OR C.intDepartmentId IS NULL or C.intDepartmentId = '')
 				THEN	
@@ -196,9 +195,8 @@ BEGIN
 				ELSE
 					ISNULL(C.intProfitCenter, NULL)
 			END
-			,
-			
-			C.intLOB, intWCCodeId = A.intWorkersCompensationId	
+			,C.intLOB
+			,intWCCodeId = A.intWorkersCompensationId	
 	FROM (
 	      SELECT intPaycheckEarningId, PE.intPaycheckId, PE.intEmployeeEarningId, tblPRPaycheck.intEntityEmployeeId, PE.intAccountId,
 			PE.intTypeEarningId, PE.strCalculationType, intEmployeeDepartmentId, intWorkersCompensationId, dblTotal 
