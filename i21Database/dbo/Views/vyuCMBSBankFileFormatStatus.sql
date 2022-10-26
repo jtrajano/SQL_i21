@@ -3,6 +3,7 @@ CREATE VIEW vyuCMBSBankFileFormatStatus
 AS
 SELECT intBankFileFormatId 'BankFileFormatId'
 	, FileFormatName
+	, ysnSystemGenerated
 	,[tblCMBankTransaction.dblAmount] 'Amount'
 	,[tblCMBankTransaction.dblWithdrawalAmount] 'Debit'
 	,[tblCMBankTransaction.dblDepositAmount] 'Credit'
@@ -12,7 +13,7 @@ SELECT intBankFileFormatId 'BankFileFormatId'
 	,[Bank Description] 'BankDescription'
 FROM
 (
-SELECT A.intBankFileFormatId,A.strName FileFormatName ,  A.strName, B.strFieldName from tblCMBankFileFormat A
+SELECT A.intBankFileFormatId,A.strName FileFormatName ,  A.strName, B.strFieldName, ysnSystemGenerated from tblCMBankFileFormat A
 LEFT JOIN
 tblCMBankFileFormatDetail B ON A.intBankFileFormatId = B.intBankFileFormatId
 WHERE A.intBankFileType = 3
