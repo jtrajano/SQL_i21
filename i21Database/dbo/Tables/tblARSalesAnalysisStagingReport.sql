@@ -68,6 +68,7 @@ CREATE TABLE [dbo].[tblARSalesAnalysisStagingReport](
 	CONSTRAINT [PK_tblARSalesAnalysisStagingReport_intSalesAnalysisStagingReportId] PRIMARY KEY CLUSTERED ([intSalesAnalysisStagingReportId] ASC)
 );
 GO
-CREATE NONCLUSTERED INDEX [IX_tblARSalesAnalysisStagingReport_strRecordNumber]
-	ON [dbo].[tblARSalesAnalysisStagingReport] ([strRecordNumber])
+CREATE NONCLUSTERED INDEX [IX_tblARSalesAnalysisStagingReport_strRecordNumber] ON [dbo].[tblARSalesAnalysisStagingReport] ([strRecordNumber])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARSalesAnalysisStagingReport_strTransactionType] ON [dbo].[tblARSalesAnalysisStagingReport] (intTransactionId, intSalesAnalysisStagingReportId) INCLUDE (strTransactionType)
 GO
