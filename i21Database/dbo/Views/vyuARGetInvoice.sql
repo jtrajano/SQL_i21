@@ -211,7 +211,7 @@ SELECT
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
 	,dblPercentage						= INV.dblPercentage
-	,dblProvisionalTotal				= INV.dblProvisionalTotal
+	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 

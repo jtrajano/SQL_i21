@@ -166,7 +166,7 @@
 	[dblSurcharge]						NUMERIC(18, 6)									NULL,
 	[intOpportunityId]		    		INT												NULL,
 	[strPrintFormat]					NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NOT NULL	DEFAULT (''),
-	[dblPercentage]						NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
+	[dblPercentage]						NUMERIC(18, 6)									NOT NULL	DEFAULT ((100)),
 	[dblProvisionalTotal]				NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
