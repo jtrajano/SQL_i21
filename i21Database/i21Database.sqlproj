@@ -1221,6 +1221,8 @@
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
+    <Build Include="dbo\Tables\tblICTally.sql" />
+    <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
