@@ -76,7 +76,9 @@ LEFT JOIN (
   FROM tblMBILInvoiceItem item        
   GROUP BY item.intInvoiceId) tax ON Invoice.intInvoiceId = tax.intInvoiceId
 LEFT JOIN (
-	Select TMOrder.intOrderId from tblMBILOrder TMOrder
-	INNER JOIN tblMBILDeliveryDetail loadDeliveryDtl on TMOrder.intDispatchId = loadDeliveryDtl.intTMDispatchId
-	Where loadDeliveryDtl.ysnDelivered = 1
+	 SELECT TMOrder.intOrderId from tblMBILOrder TMOrder  
+	 INNER JOIN tblMBILDeliveryDetail loadDeliveryDtl ON TMOrder.intDispatchId = loadDeliveryDtl.intTMDispatchId  
+	 INNER JOIN tblMBILDeliveryHeader loadDeliveryHdr ON loadDeliveryHdr.intDeliveryHeaderId = loadDeliveryDtl.intDeliveryHeaderId
+	 INNER JOIN tblTRLoadHeader TRLoad ON TRLoad.intMobileLoadHeaderId = loadDeliveryHdr.intLoadHeaderId 
+	 WHERE loadDeliveryDtl.ysnDelivered = 1
 ) transportDelivery on Invoice.intOrderId = transportDelivery.intOrderId
