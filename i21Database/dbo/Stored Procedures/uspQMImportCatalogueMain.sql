@@ -125,6 +125,19 @@ BEGIN TRY
         ,@dtmDateCreated DATETIME
     
     DECLARE @intSampleId INT
+    DECLARE @intItemId INT
+    DECLARE @intCategoryId INT
+    DECLARE @intValidDate INT
+
+    SELECT @intValidDate = (
+			SELECT DATEPART(dy, GETDATE())
+			)
+
+    SELECT TOP 1
+        @intItemId = [intDefaultItemId]
+        ,@intCategoryId = I.intCategoryId
+    FROM tblQMCatalogueImportDefaults CID
+    INNER JOIN tblICItem I ON I.intItemId = CID.intDefaultItemId
 
     -- Loop through each valid import detail
     DECLARE @C AS CURSOR;
@@ -388,10 +401,10 @@ BEGIN TRY
                 intConcurrencyId = 1
                 ,intSampleTypeId = @intSampleTypeId
                 ,strSampleNumber = @strSampleNumber
-                ,intProductTypeId = 2
-                ,intProductValueId = (SELECT TOP 1 [intDefaultItemId] FROM tblQMCatalogueImportDefaults)
+                ,intProductTypeId = 2 -- Item
+                ,intProductValueId = @intItemId
                 ,intSampleStatusId = 1 -- Received
-                ,intItemId = (SELECT TOP 1 [intDefaultItemId] FROM tblQMCatalogueImportDefaults)
+                ,intItemId = @intItemId
                 ,intCountryID = @intOriginId
                 ,intEntityId = @intSupplierEntityId
                 ,dtmSampleReceivedDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
@@ -455,10 +468,6 @@ BEGIN TRY
                 ,strComments3 = @strComments3
             
             SET @intSampleId = SCOPE_IDENTITY()
-            
-            UPDATE tblQMImportCatalogue
-            SET intSampleId = @intSampleId
-            WHERE intImportCatalogueId = @intImportCatalogueId
 
             INSERT INTO tblQMAuction (
                 intConcurrencyId
@@ -551,6 +560,161 @@ BEGIN TRY
                 ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
+            
+            -- Sample Detail
+            INSERT INTO tblQMSampleDetail (
+                intConcurrencyId
+                ,intSampleId
+                ,intAttributeId
+                ,strAttributeValue
+                ,intListItemId
+                ,ysnIsMandatory
+                ,intCreatedUserId
+                ,dtmCreated
+                ,intLastModifiedUserId
+                ,dtmLastModified
+            )
+            SELECT 1
+                ,@intSampleId
+                ,A.intAttributeId
+                ,ISNULL(A.strAttributeValue, '') AS strAttributeValue
+                ,A.intListItemId
+                ,ST.ysnIsMandatory
+                ,@intEntityUserId
+                ,@dtmDateCreated
+                ,@intEntityUserId
+                ,@dtmDateCreated
+            FROM tblQMSampleTypeDetail ST
+            JOIN tblQMAttribute A ON A.intAttributeId = ST.intAttributeId
+            WHERE ST.intSampleTypeId = @intSampleTypeId
+
+            DECLARE @intProductId INT
+            -- Template
+            IF (ISNULL(@intItemId, 0) > 0 AND ISNULL(@intSampleTypeId, 0) > 0)
+            BEGIN
+                SELECT @intProductId = (
+                        SELECT P.intProductId
+                        FROM tblQMProduct AS P
+                        JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+                        WHERE P.intProductTypeId = 2 -- Item
+                            AND P.intProductValueId = @intItemId
+                            AND PC.intSampleTypeId = @intSampleTypeId
+                            AND P.ysnActive = 1
+                        )
+
+                IF (@intProductId IS NULL AND ISNULL(@intCategoryId, 0) > 0)
+                    SELECT @intProductId = (
+                            SELECT P.intProductId
+                            FROM tblQMProduct AS P
+                            JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+                            WHERE P.intProductTypeId = 1 -- Item Category
+                                AND P.intProductValueId = @intCategoryId
+                                AND PC.intSampleTypeId = @intSampleTypeId
+                                AND P.ysnActive = 1
+                            )
+            END
+        
+            -- Insert Test Result
+            INSERT INTO tblQMTestResult (
+                intConcurrencyId
+                ,intSampleId
+                ,intProductId
+                ,intProductTypeId
+                ,intProductValueId
+                ,intTestId
+                ,intPropertyId
+                ,strPanelList
+                ,strPropertyValue
+                ,dtmCreateDate
+                ,strResult
+                ,ysnFinal
+                ,strComment
+                ,intSequenceNo
+                ,dtmValidFrom
+                ,dtmValidTo
+                ,strPropertyRangeText
+                ,dblMinValue
+                ,dblPinpointValue
+                ,dblMaxValue
+                ,dblLowValue
+                ,dblHighValue
+                ,intUnitMeasureId
+                ,strFormulaParser
+                ,dblCrdrPrice
+                ,dblCrdrQty
+                ,intProductPropertyValidityPeriodId
+                ,intPropertyValidityPeriodId
+                ,intControlPointId
+                ,intParentPropertyId
+                ,intRepNo
+                ,strFormula
+                ,intListItemId
+                ,strIsMandatory
+                ,dtmPropertyValueCreated
+                ,intCreatedUserId
+                ,dtmCreated
+                ,intLastModifiedUserId
+                ,dtmLastModified
+                )
+            SELECT DISTINCT 1
+                ,@intSampleId
+                ,@intProductId
+                ,2 -- Item
+                ,@intItemId
+                ,PP.intTestId
+                ,PP.intPropertyId
+                ,''
+                ,''
+                ,@dtmDateCreated
+                ,''
+                ,0
+                ,''
+                ,PP.intSequenceNo
+                ,PPV.dtmValidFrom
+                ,PPV.dtmValidTo
+                ,PPV.strPropertyRangeText
+                ,PPV.dblMinValue
+                ,PPV.dblPinpointValue
+                ,PPV.dblMaxValue
+                ,PPV.dblLowValue
+                ,PPV.dblHighValue
+                ,PPV.intUnitMeasureId
+                ,PP.strFormulaParser
+                ,NULL
+                ,NULL
+                ,PPV.intProductPropertyValidityPeriodId
+                ,NULL
+                ,PC.intControlPointId
+                ,NULL
+                ,0
+                ,PP.strFormulaField
+                ,NULL
+                ,PP.strIsMandatory
+                ,NULL
+                ,@intEntityUserId
+                ,@dtmDateCreated
+                ,@intEntityUserId
+                ,@dtmDateCreated
+            FROM tblQMProduct AS PRD
+            JOIN tblQMProductControlPoint PC ON PC.intProductId = PRD.intProductId
+            JOIN tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
+            JOIN tblQMProductTest AS PT ON PT.intProductId = PP.intProductId
+                AND PT.intProductId = PRD.intProductId
+            JOIN tblQMTest AS T ON T.intTestId = PP.intTestId
+                AND T.intTestId = PT.intTestId
+            JOIN tblQMTestProperty AS TP ON TP.intPropertyId = PP.intPropertyId
+                AND TP.intTestId = PP.intTestId
+                AND TP.intTestId = T.intTestId
+                AND TP.intTestId = PT.intTestId
+            JOIN tblQMProperty AS PRT ON PRT.intPropertyId = PP.intPropertyId
+                AND PRT.intPropertyId = TP.intPropertyId
+            JOIN tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+            WHERE PRD.intProductId = @intProductId
+                AND PC.intSampleTypeId = @intSampleTypeId
+                AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
+                    AND DATEPART(dy, PPV.dtmValidTo)
+            ORDER BY PP.intSequenceNo
+            -- End Insert Test Result
 
             -- TODO: Audit Logs here
         END
