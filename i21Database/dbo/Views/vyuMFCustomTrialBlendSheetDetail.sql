@@ -11,9 +11,9 @@ SELECT ysnKeep											-- KEEP
 	 , WorkOrderInputLot.intLotId
 	 , Lot.strLotNumber									-- Batch
 	 , dblTBSQuantity									-- Weigh Up (Grams)
-     , Batch.strBuyingOrderNumber						-- Purchase Order
+     , Batch.strERPPONumber								-- Purchase Order
 	 , Batch.strTeaGardenChopInvoiceNumber				-- Chop
-	 , Batch.intGardenMarkId							-- Mark
+	 , GardenMark.strGardenMark							-- Mark
 	 , Batch.strLeafGrade								-- Grade
 	 , Item.strItemNo									-- Tea Item
 	 , Batch.dblTeaTaste								-- T
@@ -29,4 +29,6 @@ SELECT ysnKeep											-- KEEP
 FROM tblMFWorkOrderInputLot AS WorkOrderInputLot
 LEFT JOIN tblICLot AS Lot ON WorkOrderInputLot.intLotId = Lot.intLotId
 LEFT JOIN tblICItem AS Item ON WorkOrderInputLot.intItemId = Item.intItemId
-LEFT JOIN tblMFBatch AS Batch ON WorkOrderInputLot.intLotId = Lot.intLotId AND Lot.strLotNumber = Batch.strBuyingOrderNumber
+LEFT JOIN tblMFLotInventory AS LotInventory ON WorkOrderInputLot.intLotId = LotInventory.intLotId
+LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId 
+LEFT JOIN tblQMGardenMark AS GardenMark ON Batch.intGardenMarkId = GardenMark.intGardenMarkId
