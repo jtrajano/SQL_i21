@@ -1,8 +1,9 @@
 CREATE VIEW [dbo].[vyuICGetItemStock]
 AS 
 
+
 SELECT 
-	intKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intItemId, ItemLocation.intLocationId, ItemStock.intItemStockId) AS INT),
+	intKey = row_no.intKey, 
 	Item.intItemId,
 	Item.strItemNo,
 	Item.strShortName,
@@ -281,3 +282,10 @@ FROM
 		WHERE ItemAddOn.intItemId = Item.intItemId
 		AND ChargeItem.strType = 'Other Charge'
 	) AddOnOtherCharge
+
+	LEFT JOIN tblICTally row_no
+		ON row_no.intId1 = Item.intItemId
+		AND (
+			row_no.intId2 = ItemLocation.intLocationId 
+			OR (row_no.intId2 IS NULL AND ItemLocation.intLocationId IS NULL) 
+		)
