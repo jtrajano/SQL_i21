@@ -1309,4 +1309,16 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'', N'Allocation', N'Logistics.view.Allocation', N'Logistics', NULL, 1, N'Logistics')
 	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.CatalogueReconciliation')
+		BEGIN
+			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
+			VALUES (N'', N'Catalogue Reconciliation', N'Quality.view.CatalogueReconciliation', N'Quality', N'', 1,  0)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMScreen
+			SET  ysnApproval = 1
+			WHERE strNamespace = 'Quality.view.CatalogueReconciliation'
+		END
 GO
