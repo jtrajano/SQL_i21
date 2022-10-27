@@ -394,6 +394,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\30_InventoryValuationAccountIds.sql
 :r .\IC\31_WarrantStatus.sql
 :r .\IC\32_InventoryJournalLineDescription.sql
+:r .\IC\33_InventoryTally.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -410,6 +411,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
 :r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
 :r .\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql
+
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
