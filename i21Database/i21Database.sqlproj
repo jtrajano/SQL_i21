@@ -1315,6 +1315,7 @@
     <Build Include="dbo\Views\vyuCTCurrencyExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportSupplierEvaluation.sql" />
     <Build Include="dbo\Tables\tblQMCatalogueImportDefaults.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnpostSettleStorageOutbound.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
