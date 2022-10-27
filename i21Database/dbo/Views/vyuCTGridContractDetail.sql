@@ -337,6 +337,7 @@ AS
 			, strVendorLocation = null
 			, CD.dtmEtaPol
 			, CD.dtmEtaPod
+			, GM.strGardenMark
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -443,6 +444,7 @@ AS
 	LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
 	LEFT	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	
 	LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId		
+	LEFT	JOIN	tblQMGardenMark					GM	ON	GM.intGardenMarkId = CD.intGardenMarkId
 
 	LEFT    JOIN	(
 						SELECT	 intPriceFixationId,
