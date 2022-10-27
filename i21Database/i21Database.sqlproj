@@ -1311,6 +1311,7 @@
     <Build Include="dbo\Views\vyuQMSearchStorageLocation.sql" />
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
+    <Build Include="dbo\Tables\tblCTReasonCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -8908,7 +8909,7 @@
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
-	<Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
+    <Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />

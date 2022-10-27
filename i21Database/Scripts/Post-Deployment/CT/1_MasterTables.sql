@@ -304,8 +304,7 @@ GO
 GO
 IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 1)
 BEGIN
-	INSERT INTO tblCTContractStatus(intContract
-	Id,strContract
+	INSERT INTO tblCTContractStatus(intContractId,strContract
 	,intConcurrencyId)
 	SELECT 1,'Open',1	
 END
@@ -313,12 +312,10 @@ GO
 
 GO
 IF NOT EXISTS(SELECT * FROM tblCTContract
-WHERE intContract
-Id = 2)
+WHERE intContractId = 2)
 BEGIN
 	INSERT INTO tblCTContract
-	(intContract
-	Id,strContract
+	(intContractId,strContract
 	,intConcurrencyId)
 	SELECT 2,'Unconfirmed',1	
 END
@@ -335,12 +332,10 @@ GO
 
 GO
 IF NOT EXISTS(SELECT * FROM tblCTContract
-WHERE intContract
-Id = 4)
+WHERE intContractId = 4)
 BEGIN
 	INSERT INTO tblCTContract
-	(intContract
-	Id,strContractStatus,intConcurrencyId)
+	(intContractId,strContractStatus,intConcurrencyId)
 	SELECT 4,'Re-Open',1	
 END
 GO
@@ -860,22 +855,16 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApproval
-TF WHERE intApproval
-Id = 3)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalTF WHERE intApprovalId = 3)
 BEGIN
-	INSERT INTO tblCTApproval
-	TF
+	INSERT INTO tblCTApprovalTF
 	select 3, 'Rejected', 1
 END
 GO
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApproval
-TF WHERE intApproval
-Id = 4)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalTF WHERE intApprovalId = 4)
 BEGIN
-	INSERT INTO tblCTApproval
-	TF
+	INSERT INTO tblCTApprovalTF
 	select 4, 'Cancelled', 1
 END
 ELSE 
