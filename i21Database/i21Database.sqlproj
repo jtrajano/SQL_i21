@@ -1140,6 +1140,8 @@
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
     <Build Include="dbo\Views\vyuHDProjectModuleSearch.sql" />
     <Build Include="dbo\Tables\tblHDDeploymentType.sql" />
+    <Build Include="dbo\Tables\tblICTally.sql" />
+    <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
