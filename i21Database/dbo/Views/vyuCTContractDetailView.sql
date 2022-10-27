@@ -224,6 +224,7 @@ AS
 		, CD.dtmEtaPol
 		, CD.dtmEtaPod
 		, CD.intGardenMarkId
+		, CD.intReasonCodeId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

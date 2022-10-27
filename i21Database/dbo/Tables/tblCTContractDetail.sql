@@ -244,6 +244,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dtmEtaPod datetime null,
 	strContractReference NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intGardenMarkId] [int] NULL,
+	[intReasonCodeId] [int] NULL,
 
 
 
