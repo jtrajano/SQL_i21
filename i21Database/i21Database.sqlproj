@@ -1309,6 +1309,8 @@
     <Build Include="dbo\Views\vyuQMSearchCity.sql" />
     <Build Include="dbo\Views\vyuQMSearchBrand.sql" />
     <Build Include="dbo\Views\vyuQMSearchStorageLocation.sql" />
+    <Build Include="dbo\Tables\tblICTally.sql" />
+    <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
