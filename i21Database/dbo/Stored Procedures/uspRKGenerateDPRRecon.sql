@@ -691,6 +691,7 @@ BEGIN TRY
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Short Closed Sequence'
 	AND CBL.intContractTypeId = 1 --Purchase
+	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 
 	UNION ALL
 
@@ -1214,6 +1215,7 @@ BEGIN TRY
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Short Closed Sequence'
 	AND CBL.intContractTypeId = 2 --Sales
+	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 
 	UNION ALL
 
