@@ -82,7 +82,6 @@
     [intSurchargeExpenseAccount]			INT NULL,
 	[ysnEnableCustomStatement]              BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnEnableCustomStatement] DEFAULT ((0)),
 	[intFreightTermId]      				INT NULL,
-	[strProvisionalInvoiceOverpayment]  	NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Create Overpayment',
 	[strType]								NVARCHAR(25)   COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Standard',								
 	[ysnOverrideARAccountCompanySegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountCompanySegment] DEFAULT((0)),
 	[ysnOverrideARAccountLocationSegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountLocationSegment] DEFAULT((0)),
