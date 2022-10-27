@@ -218,7 +218,7 @@ BEGIN TRY
 	END
 
 	--DELETE STR-XXXX IF ALL MAIN SETTLEMENT HAVE ALREADY BEEN UNPOSTED
-	IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = intParentSettleStorageId)
+	IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 	BEGIN
 		DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
 	END
