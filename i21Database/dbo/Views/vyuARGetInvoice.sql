@@ -209,7 +209,7 @@ SELECT
 	,strRelatedInvoiceNumber			= RELATEDINVOICE.strInvoiceNumber
 	,strPrintFormat						= INV.strPrintFormat
 	,dblPercentage						= INV.dblPercentage
-	,dblProvisionalTotal				= INV.dblProvisionalTotal
+	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
