@@ -454,6 +454,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeExclude.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -730,7 +731,7 @@
     <Build Include="dbo\Tables\tblTMRegulatorType.sql" />
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
-	<Build Include="dbo\Tables\tblTMImportTankReading.sql" />
+    <Build Include="dbo\Tables\tblTMImportTankReading.sql" />
     <Build Include="dbo\Tables\tblTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Views\vyuTMImportTankReadingDetail.sql" />
     <Build Include="dbo\Tables\tblTMSite.sql">
@@ -3513,7 +3514,7 @@
     <None Include="Scripts\Utility\IC\Repost Costing\WM\uspICDetectBadOnHand.sql" />
     <Build Include="dbo\Views\vyuGLSegmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOffHours.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" /> 
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WorkOrder.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutHeader.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutShiftPhysicalItem.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutDepartmetTotals.sql" />

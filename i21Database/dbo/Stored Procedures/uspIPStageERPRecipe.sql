@@ -177,6 +177,7 @@ BEGIN TRY
 			LEFT JOIN tblICItem I ON I.strItemNo = x.ItemNo Collate Latin1_General_CI_AS
 			LEFT JOIN tblIPCommodityManufacturingProcess CP ON CP.intCommodityId = I.intCommodityId
 			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = CP.intManufacturingProcessId
+			WHERE NOT EXISTS(SELECT *FROM tblMFRecipeExclude E WHERE E.strERPRecipeNo=x.ERPRecipeNo)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strERPRecipeNo, '') + ','
 			FROM @tblIPRecipeName
@@ -258,8 +259,10 @@ BEGIN TRY
 					,YearValidation INT
 					,parentId BIGINT '@parentId'
 					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation'
+					,ERPRecipeNo NVARCHAR(50) Collate Latin1_General_CI_AS '../ERPRecipeNo'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
+			WHERE NOT EXISTS(SELECT *FROM tblMFRecipeExclude E WHERE E.strERPRecipeNo=x.ERPRecipeNo)
 
 			UPDATE RI
 			SET strRecipeHeaderItemNo = R.strItemNo
