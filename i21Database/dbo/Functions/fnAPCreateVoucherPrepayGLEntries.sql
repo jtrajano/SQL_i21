@@ -85,7 +85,7 @@ BEGIN
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]           =	1,
+		[dblExchangeRate]           =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	1,
 		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 2 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
@@ -99,7 +99,7 @@ BEGIN
 		[dblCreditForeign]          =	0,
 		[dblCreditReport]           =	0,
 		[dblReportingRate]          =	0,
-		[dblForeignRate]            =	Details.dblRate,
+		[dblForeignRate]            =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[strRateType]				=	Details.strCurrencyExchangeRateType
 	FROM tblAPBill voucher
 	INNER JOIN @prepayReversalIds prepaid ON voucher.intBillId = prepaid.intId
@@ -128,7 +128,7 @@ BEGIN
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]           =	1,
+		[dblExchangeRate]           =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	Details.intBillDetailId,
 		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 2 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
@@ -142,7 +142,7 @@ BEGIN
 		[dblCreditForeign]          =	(CASE WHEN ISNULL(NULLIF(Details.dblRate,0),1) != 1 THEN Details.dblTotal ELSE 0 END),
 		[dblCreditReport]           =	0,
 		[dblReportingRate]          =	0,
-		[dblForeignRate]            =	Details.dblRate,
+		[dblForeignRate]            =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[strRateType]				=	Details.strCurrencyExchangeRateType
 	FROM tblAPBill voucher
 	INNER JOIN @prepayReversalIds prepaid ON voucher.intBillId = prepaid.intId
