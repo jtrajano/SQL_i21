@@ -2,7 +2,7 @@ CREATE PROCEDURE uspMFSplitBatch
 	@MFBatchSplitTable MFBatchSplitTableType READONLY
 AS	
 DECLARE @intBatchId INT
-DECLARE @tbl TABLE (intBatchid int)
+DECLARE @tbl TABLE (intBatchId int)
 
 INSERT INTO @tbl
 SELECT intBatchId FROM @MFBatchSplitTable
