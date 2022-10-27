@@ -70,9 +70,9 @@ BEGIN TRY
     IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Catalogue')
         EXEC uspQMImportCatalogueMain @intImportLogId
 
-    -- -- Tasting Score Import
-    -- IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Tasting Score')
-    --     EXEC uspQMImportCatalogueMain @intImportLogId
+    -- Tasting Score Import
+    IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Tasting Score')
+        EXEC uspQMImportTastingScore @intImportLogId
 
     -- Supplier Evaluation Import
     IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Supplier Evaluation')

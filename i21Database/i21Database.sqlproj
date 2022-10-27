@@ -1321,6 +1321,7 @@
     <Build Include="dbo\Tables\tblAPImportVoucherSupplierInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherSupplierInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportInitialBuy.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportTastingScore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
