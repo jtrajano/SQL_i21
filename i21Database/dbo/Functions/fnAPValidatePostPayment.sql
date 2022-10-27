@@ -266,13 +266,14 @@ BEGIN
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'Posting negative amount is not allowed. You may want to create a deposit instead.',
+			'Posting negative amount is not allowed for non-eCheck payment method. You may want to create a deposit instead.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			A.dblAmountPaid < 0
+			AND A.intPaymentMethodId != 6
 
 		--BILL(S) ALREADY PAID IN FULL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
