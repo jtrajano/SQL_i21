@@ -1160,6 +1160,8 @@
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerExport.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalSubledgerCurrencyExport.sql" />
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
+    <Build Include="dbo\Tables\tblICTally.sql" />
+    <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
