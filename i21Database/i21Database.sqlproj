@@ -1313,6 +1313,8 @@
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
     <Build Include="dbo\Tables\tblCTReasonCode.sql" />
     <Build Include="dbo\Views\vyuCTCurrencyExchangeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportSupplierEvaluation.sql" />
+    <Build Include="dbo\Tables\tblQMCatalogueImportDefaults.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

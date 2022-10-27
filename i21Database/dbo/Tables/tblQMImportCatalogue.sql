@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
 	[intImportLogId] INT NOT NULL,
     [ysnSuccess] BIT NULL,
     [ysnProcessed] BIT NOT NULL DEFAULT(0),
-    [strLogResult] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+    [strLogResult] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 
     -- Main Fields
 	[intSampleId] INT NULL,
