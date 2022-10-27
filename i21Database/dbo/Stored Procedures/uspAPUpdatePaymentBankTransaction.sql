@@ -74,7 +74,8 @@ BEGIN
 	)
 	SELECT
 		[strTransactionId] = A.strPaymentRecordNum,
-		[intBankTransactionTypeId] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'echeck' THEN 20 
+		[intBankTransactionTypeId] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'echeck' AND A.dblAmountPaid > 0 THEN 20 
+									WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'echeck' AND A.dblAmountPaid < 0 THEN 120 
 										WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'ach' THEN 22
 										WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'check' THEN 16  
 										ELSE 20 END,
@@ -96,8 +97,8 @@ BEGIN
 		[strCity] = E.strCity,
 		[strState] = E.strState,
 		[strCountry] = E.strCountry,
-		[dblAmount] = A.dblAmountPaid,
-		[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
+		[dblAmount] = ABS(A.dblAmountPaid),
+		[strAmountInWords] = dbo.fnConvertNumberToWord(ABS(A.dblAmountPaid)),
 		[strMemo] = A.strNotes,
 		[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,
 		--[ysnCheckToBePrinted] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'Cash' THEN 0 ELSE 1 END,
