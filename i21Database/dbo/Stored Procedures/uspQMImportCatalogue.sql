@@ -78,9 +78,9 @@ BEGIN TRY
     IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Supplier Evaluation')
         EXEC uspQMImportSupplierEvaluation @intImportLogId
 
-    -- -- Initial Buy Import
-    -- IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Initial Buy')
-    --     EXEC uspQMImportCatalogueMain @intImportLogId
+    -- Initial Buy Import
+    IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Initial Buy')
+        EXEC uspQMImportInitialBuy @intImportLogId
 
     -- -- Contract Line Allocation Import
     -- IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Contract Line Allocation')

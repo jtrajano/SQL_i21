@@ -1320,6 +1320,7 @@
     <Build Include="dbo\Views\vyuMFCustomTrialBlendSheetDetail.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherSupplierInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherSupplierInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportInitialBuy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
