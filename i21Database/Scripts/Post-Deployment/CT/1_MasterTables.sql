@@ -304,8 +304,7 @@ GO
 GO
 IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 1)
 BEGIN
-	INSERT INTO tblCTContractStatus(intContractId,strContract
-	,intConcurrencyId)
+	INSERT INTO tblCTContractStatus(intContractId,strContract,intConcurrencyId)
 	SELECT 1,'Open',1	
 END
 GO
@@ -315,8 +314,7 @@ IF NOT EXISTS(SELECT * FROM tblCTContract
 WHERE intContractId = 2)
 BEGIN
 	INSERT INTO tblCTContract
-	(intContractId,strContract
-	,intConcurrencyId)
+	(intContractId,strContract,intConcurrencyId)
 	SELECT 2,'Unconfirmed',1	
 END
 GO
