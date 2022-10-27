@@ -403,27 +403,38 @@ BEGIN
 END
 
 GO
-IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table begenning data')
+
+IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table begenning data')
+BEGIN
+	DELETE FROM tblRKDPRInTransitHelperLog
+	
+	DELETE FROM tblEMEntityPreferences
+	WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table begenning data'
+END
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table beginning data')
 BEGIN
 
 	insert into tblRKDPRInTransitHelperLog (
 
-		dtmDate
-		,intCommodityId
-		,intTransactionReferenceId
-		,intInvoiceId
-		,intInventoryReceiptId
-		,strBucketType
-		,dblQty
+		  dtmDate
+		, intCommodityId
+		, intTransactionReferenceId
+		, intInvoiceId
+		, intInventoryReceiptId
+		, strBucketType
+		, dblQty
+		, intContractDetailId
 	)
 	select 
-		 dtmDate = SL.dtmTransactionDate
-		,SL.intCommodityId
-		,intTransactionReferenceId = SI.intInventoryShipmentId
-		,intInvoiceId = SL.intTransactionRecordHeaderId
-		,intInventoryReceiptId = NULL
-		,SL.strBucketType
-		,dblQty = SL.dblOrigQty
+		  dtmDate = SL.dtmTransactionDate
+		, SL.intCommodityId
+		, intTransactionReferenceId = SI.intInventoryShipmentId
+		, intInvoiceId = SL.intTransactionRecordHeaderId
+		, intInventoryReceiptId = NULL
+		, SL.strBucketType
+		, dblQty = SL.dblOrigQty
+		, intContractDetailId = SL.intContractDetailId
 	from tblRKSummaryLog SL
 	inner join tblARInvoiceDetail ID ON ID.intInvoiceDetailId = SL.intTransactionRecordId
 	inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
@@ -431,7 +442,7 @@ BEGIN
 	and SL.strTransactionType = 'Invoice'
 
     --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
-    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for DPR In-Transit Helper Log table begenning data','1')
+    INSERT INTO tblEMEntityPreferences (strPreference, strValue) VALUES ('RM data fix for DPR In-Transit Helper Log table beginning data','1')
 END   
 
 print('/*******************  END Risk Management Data Fixess *******************/')
