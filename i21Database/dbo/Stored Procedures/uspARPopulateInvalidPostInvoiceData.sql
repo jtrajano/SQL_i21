@@ -1506,6 +1506,7 @@ BEGIN
 		, intEntityId
 		, intUserId
 		, intSiteId
+		, intPerformerId
 		, ysnLeaseBilling
 	)
 	SELECT intInvoiceId			= PID.intInvoiceId
@@ -1518,6 +1519,7 @@ BEGIN
 		, intEntityId			= PID.intEntityId
 		, intUserId				= PID.intUserId
 		, intSiteId				= PID.intSiteId
+		, intPerformerId		= PID.intPerformerId
 		, ysnLeaseBilling		= PID.ysnLeaseBilling
 	FROM ##ARPostInvoiceDetail PID 
 	INNER JOIN tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID]
@@ -2182,6 +2184,7 @@ BEGIN
 		, intEntityId
 		, intUserId
 		, intSiteId
+		, intPerformerId
 		, ysnLeaseBilling
 	)
 	SELECT intInvoiceId			= PID.intInvoiceId
@@ -2194,6 +2197,7 @@ BEGIN
 		, intEntityId			= PID.intEntityId
 		, intUserId				= PID.intUserId
 		, intSiteId				= PID.intSiteId
+		, intPerformerId		= PID.intPerformerId
 		, ysnLeaseBilling		= PID.ysnLeaseBilling
 	FROM ##ARPostInvoiceDetail PID 
 	INNER JOIN tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID]
