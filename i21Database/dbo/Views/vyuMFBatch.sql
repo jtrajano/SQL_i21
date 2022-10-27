@@ -103,15 +103,21 @@ SELECT
     A.strReserveMU,
     A.strQualityComments,
     A.strRareEarth,
+    A.strERPPONumber,
     A.strFreightAgent,
 	A.strSealNumber,
 	A.strContainerType,
 	A.strVoyage,
 	A.strVessel,
+    A.intReasonCodeId,
+    A.strNotes,
+    A.dtmSplit,
     A.intConcurrencyId,
 	strItemUOM = UOM.strUnitMeasure,
 	strWeightUOM = WUOM.strUnitMeasure,
 	strPackageUOM = PUOM.strUnitMeasure,
+    Reason.strReasonCode,
+    LOT.strLotNumber,
     LOT.intLotId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
@@ -153,5 +159,10 @@ OUTER APPLY(
     SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = A.intBrokerId
 )Broker
 OUTER APPLY(
-     SELECT TOP 1 intLotId FROM tblMFLotInventory WHERE intBatchId = A.intBatchId
+    SELECT TOP 1 MF.intLotId, IC.strLotNumber
+    FROM tblMFLotInventory MF JOIN tblICLot IC ON MF.intLotId = IC.intLotId 
+    WHERE MF.intBatchId = A.intBatchId
 )LOT
+OUTER APPLY (
+    SELECT TOP 1  strReasonCode FROM tblMFReasonCode WHERE intReasonCodeId = A.intReasonCodeId
+)Reason

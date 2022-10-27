@@ -149,6 +149,7 @@ BEGIN
 		strReserveMU					 = T.strReserveMU,
 		strQualityComments				 = T.strQualityComments,
 		strRareEarth					 = T.strRareEarth,
+		strERPPONumber					 = T.strERPPONumber,
 		strFreightAgent					 = T.strFreightAgent, 
 		strSealNumber					 = T.strSealNumber,
 		strContainerType				 = T.strContainerType,
@@ -259,6 +260,7 @@ BEGIN
 			,strReserveMU
 			,strQualityComments
 			,strRareEarth
+			,strERPPONumber
 			,strFreightAgent
 			,strSealNumber
 			,strContainerType
@@ -357,6 +359,7 @@ BEGIN
 			,strReserveMU
 			,strQualityComments
 			,strRareEarth
+			,strERPPONumber
 			,strFreightAgent
 			,strSealNumber
 			,strContainerType

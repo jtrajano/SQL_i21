@@ -214,7 +214,7 @@ BEGIN
 				,[strVessel]
 				,[intConcurrencyId] =1
 				,[intReasonCodeId] = B.intSplitReasonCodeId
-				,[dtmSplit] = B.dtmSplitChild
+				,[dtmSplit] = B.dtmSplit
 				,[strNotes] = B.strSplitNotes
 				FROM tblMFBatch A JOIN @MFBatchSplitTable B ON
 				A.intBatchId = B.intBatchId
@@ -225,8 +225,6 @@ BEGIN
 		dblPackagesBought = (dblTotalQuantity-B.dblSplitQuantity)/ dblWeightPerUnit
 		FROM tblMFBatch A JOIN @MFBatchSplitTable B ON A.intBatchId = B.intBatchId
 		WHERE B.intBatchId =@intBatchId
-
-
 	END
 	ELSE
 	BEGIN
@@ -244,8 +242,6 @@ BEGIN
 		dblPackagesBought = 0
 		FROM tblMFBatch A JOIN @MFBatchSplitTable B ON A.intBatchId = B.intBatchId
 		where B.intBatchId =@intBatchId
-
-
 	END
 	DELETE FROM @tbl WHERE intBatchId = @intBatchId
 END

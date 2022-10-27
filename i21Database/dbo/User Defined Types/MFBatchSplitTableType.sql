@@ -10,7 +10,7 @@ CREATE  TYPE MFBatchSplitTableType AS TABLE
     dblSplitWeightPerUnit DECIMAL(18,6),
     intSplitReasonCodeId INT,
     strSplitNotes NVARCHAR(MAX),
-	dtmSplitChild DATETIME NULL,
+	dtmSplit DATETIME NULL,
 	ysnSplit BIT
 )
 
