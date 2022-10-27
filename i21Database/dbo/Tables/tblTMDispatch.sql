@@ -450,6 +450,6 @@ CREATE TRIGGER [dbo].[trgAfterInsertTMDispatch]
 		SET strOrderNumber = @willCallPrefix + convert(nvarchar(10),inserted.intDispatchID) 
 		FROM inserted
 		where tblTMDispatch.intDispatchID = inserted.intDispatchID
-			AND tblTMDispatch.strOrderNumber IS NULL
+			-- AND tblTMDispatch.strOrderNumber IS NULL
 
     END
