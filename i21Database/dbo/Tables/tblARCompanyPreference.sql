@@ -55,7 +55,6 @@
 	[ysnOverrideCompanySegment]					BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideCompanySegment] DEFAULT((0)),
 	[ysnOverrideLocationSegment]				BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLocationSegment] DEFAULT((0)),
 	[ysnOverrideLineOfBusinessSegment]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLineOfBusinessSegment] DEFAULT((0)),
-	[strProvisionalInvoiceOverpayment]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Create Overpayment',
 	[ysnOverrideARAccountLineOfBusinessSegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountLineOfBusinessSegment] DEFAULT((0)),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
