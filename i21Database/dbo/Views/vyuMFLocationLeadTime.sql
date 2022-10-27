@@ -10,10 +10,10 @@ intLocationLeadTimeId,
 [intBuyingCenterId],
 [strBuyingCenter] = LOC.strLocationName,
 [intReceivingStorageLocation],
-[strReceivingStorageLocation] = SLOC.strName,
+[strReceivingStorageLocation] = SLOC.strSubLocationName,
 [intChannelId],
 [strChannel] = SBOOK.strSubBook,
-[intReceivingPlantId] = SLOC.intLocationId,
+[intReceivingPlantId] = SLOC.intCompanyLocationId,
 [strReceivingPlant] = RLOC.strLocationName,
 [intPortOfDispatchId],
 [strPortOfDispatch],
@@ -29,6 +29,6 @@ FROM
 tblMFLocationLeadTime LLT
 
 INNER JOIN tblSMCompanyLocation LOC ON LLT.intBuyingCenterId = LOC.intCompanyLocationId
-INNER JOIN tblICStorageLocation SLOC ON SLOC.intStorageLocationId=LLT.intReceivingStorageLocation
+INNER JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=LLT.intReceivingStorageLocation
 INNER JOIN tblCTSubBook SBOOK ON SBOOK.intSubBookId=LLT.intChannelId
-LEFT JOIN tblSMCompanyLocation RLOC ON SLOC.intLocationId = RLOC.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocation RLOC ON SLOC.intCompanyLocationId = RLOC.intCompanyLocationId
