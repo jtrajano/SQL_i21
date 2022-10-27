@@ -50,8 +50,8 @@ BEGIN
 			, intItemId = LR.intItemId
 			, intItemUOMId = NULL
 			, LR.intContractDetailId
-		FROM tblTRLoadReceipt LR
-			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
+		FROM tblTRLoadReceipt LR WITH (NOLOCK)
+			LEFT JOIN tblTRLoadHeader LH WITH (NOLOCK) ON LH.intLoadHeaderId = LR.intLoadHeaderId
 			LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = LR.intInventoryReceiptId
 			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
 		WHERE LH.intLoadHeaderId = @TransactionId
@@ -66,12 +66,12 @@ BEGIN
 			, intItemId = LR.intItemId
 			, intItemUOMId = NULL
 			, LR.intContractDetailId
-		FROM tblTRLoadReceipt LR
-			LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
+		FROM tblTRLoadReceipt LR WITH (NOLOCK)
+			LEFT JOIN tblTRLoadHeader LH WITH (NOLOCK) ON LH.intLoadHeaderId = LR.intLoadHeaderId
 			LEFT JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = LR.intInventoryTransferId
 			LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
-			LEFT JOIN tblTRLoadDistributionHeader DH ON LH.intLoadHeaderId = DH.intLoadHeaderId		
-			LEFT JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+			LEFT JOIN tblTRLoadDistributionHeader DH WITH (NOLOCK) ON LH.intLoadHeaderId = DH.intLoadHeaderId		
+			LEFT JOIN tblTRLoadDistributionDetail DD WITH (NOLOCK) ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 		WHERE LH.intLoadHeaderId = @TransactionId
 			AND ((LR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 				OR (LR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND LR.intCompanyLocationId != DH.intCompanyLocationId)
@@ -87,8 +87,8 @@ BEGIN
 			, intItemId = NULL
 			, intItemUOMId = NULL
 			, DD.intContractDetailId
-		FROM tblTRLoadDistributionHeader DH
-			LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+		FROM tblTRLoadDistributionHeader DH WITH (NOLOCK)
+			LEFT JOIN tblTRLoadDistributionDetail DD WITH (NOLOCK) ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 		WHERE DH.intLoadHeaderId = @TransactionId
 			AND DH.strDestination = 'Customer'
 			AND ISNULL(DD.intLoadDistributionDetailId, '') <> ''
