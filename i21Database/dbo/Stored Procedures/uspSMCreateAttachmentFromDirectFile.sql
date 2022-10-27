@@ -4,6 +4,7 @@
 	@fileName			NVARCHAR(500),
 	@fileExtension		NVARCHAR(100),
 	@screenNamespace	NVARCHAR(500),
+	@intEntityId		INT,
 	@throwError			BIT = 1,
 	@attachmentId		INT OUTPUT,
 	@error				NVARCHAR(1000) = NULL OUTPUT 
@@ -182,6 +183,18 @@ BEGIN
 				RETURN;
 			END
 
+			-- Get first admin user id(intEntityId) if no supplied id in parameter
+			IF(@intEntityId IS NULL)
+			BEGIN
+				SELECT TOP 1 @intEntityId = intEntityId FROM tblSMUserSecurity where ysnAdmin = 1 and ysnDisabled = 0
+			END
+
+			-- Get first admin user id(intEntityId) if no admin that are not disabled
+			IF(@intEntityId IS NULL)
+			BEGIN
+				SELECT TOP 1 @intEntityId = intEntityId FROM tblSMUserSecurity where ysnAdmin = 1
+			END
+
 			--------------------------------------------------UPLOAD--------------------------------------------------
 			-- SET @sql = N'SET @paramOut = (SELECT * FROM  OPENROWSET(BULK N''' + @fullFilePath + ''', SINGLE_BLOB) AS import)'
 			-- EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @fileContent OUTPUT;
@@ -235,6 +248,7 @@ BEGIN
 				, intSize
 				, intConcurrencyId
 				,intTransactionId
+				,intEntityId
 			)
 			VALUES (
 				@fileName + '.' + @fileExtension
@@ -246,6 +260,7 @@ BEGIN
 				, DATALENGTH(@fileContent)
 				, 1
 				,@transactionId
+				, @intEntityId
 			)
 				
 			SET @attachmentId = SCOPE_IDENTITY()

@@ -304,21 +304,26 @@ GO
 GO
 IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 1)
 BEGIN
-	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	INSERT INTO tblCTContractStatus(intContractId,strContract
+	,intConcurrencyId)
 	SELECT 1,'Open',1	
 END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 2)
+IF NOT EXISTS(SELECT * FROM tblCTContract
+WHERE intContractId = 2)
 BEGIN
-	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	INSERT INTO tblCTContract
+	(intContractId,strContract
+	,intConcurrencyId)
 	SELECT 2,'Unconfirmed',1	
 END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 3)
+IF NOT EXISTS(SELECT * FROM tblCTContract
+WHERE intContractStatusId = 3)
 BEGIN
 	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
 	SELECT 3,'Cancelled',1	
@@ -326,9 +331,11 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 4)
+IF NOT EXISTS(SELECT * FROM tblCTContract
+WHERE intContractId = 4)
 BEGIN
-	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	INSERT INTO tblCTContract
+	(intContractId,strContractStatus,intConcurrencyId)
 	SELECT 4,'Re-Open',1	
 END
 GO
@@ -661,6 +668,17 @@ BEGIN
 END
 GO
 
+
+
+GO
+IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'intGardenMarkId' AND strType = '2.Sequence')
+BEGIN
+    INSERT INTO tblCTAmendmentApproval(strDataIndex,strDataField,intConcurrencyId,strType)
+    SELECT 'intGardenMarkId','Garden',1,'2.Sequence'
+END
+GO
+
+
 GO
 IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'intSubBookId' AND strType = '2.Sequence')
 BEGIN
@@ -837,16 +855,16 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 3)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalTF WHERE intApprovalId = 3)
 BEGIN
-	INSERT INTO tblCTApprovalStatusTF
+	INSERT INTO tblCTApprovalTF
 	select 3, 'Rejected', 1
 END
 GO
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalTF WHERE intApprovalId = 4)
 BEGIN
-	INSERT INTO tblCTApprovalStatusTF
+	INSERT INTO tblCTApprovalTF
 	select 4, 'Cancelled', 1
 END
 ELSE 

@@ -16,13 +16,13 @@ BEGIN TRY
     -- Manufacturing Leaf Type
     LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.strType = 'ProductType' AND LEAF_TYPE.strDescription = IMP.strManufacturingLeafType
     -- Season
-    LEFT JOIN tblICCommodityAttribute SEASON ON SEASON.strType = 'Season' AND SEASON.strDescription = IMP.strSeason
+    LEFT JOIN tblICCommodityAttribute SEASON ON SEASON.strType = 'Season' AND SEASON.strDescription = IMP.strColour
     -- Garden Mark
     LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
     -- Garden Geo Origin
-    LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strCountry = IMP.strGardenGeoOrigin
+    LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
     -- Warehouse Code
-    LEFT JOIN tblICStorageLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strName = IMP.strWarehouseCode
+    LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode
     -- Sustainability
     LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.strDescription = IMP.strSustainability
     -- Evaluator's Code at TBO
@@ -38,10 +38,10 @@ BEGIN TRY
         SELECT strLogMessage = 
             CASE WHEN (GRADE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strGrade, '') <> '') THEN 'GRADE, ' ELSE '' END
             + CASE WHEN (LEAF_TYPE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strManufacturingLeafType, '') <> '') THEN 'MANUFACTURING LEAF TYPE, ' ELSE '' END
-            + CASE WHEN (SEASON.intCommodityAttributeId IS NULL AND ISNULL(IMP.strSeason, '') <> '') THEN 'SEASON, ' ELSE '' END
+            + CASE WHEN (SEASON.intCommodityAttributeId IS NULL AND ISNULL(IMP.strColour, '') <> '') THEN 'SEASON, ' ELSE '' END
             + CASE WHEN (GARDEN.intGardenMarkId IS NULL AND ISNULL(IMP.strGardenMark, '') <> '') THEN 'GARDEN MARK, ' ELSE '' END
             + CASE WHEN (ORIGIN.intCountryID IS NULL AND ISNULL(IMP.strGardenGeoOrigin, '') <> '') THEN 'GARDEN GEO ORIGIN, ' ELSE '' END
-            + CASE WHEN (WAREHOUSE_CODE.intStorageLocationId IS NULL AND ISNULL(IMP.strWarehouseCode, '') <> '') THEN 'WAREHOUSE CODE, ' ELSE '' END
+            + CASE WHEN (WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL AND ISNULL(IMP.strWarehouseCode, '') <> '') THEN 'WAREHOUSE CODE, ' ELSE '' END
             + CASE WHEN (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '') THEN 'SUSTAINABILITY, ' ELSE '' END
             + CASE WHEN (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '') THEN 'EVALUATORS CODE AT TBO, ' ELSE '' END
             + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
@@ -49,13 +49,14 @@ BEGIN TRY
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
+    AND IMP.ysnSuccess = 1
     AND (
         (GRADE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strGrade, '') <> '')
         OR (LEAF_TYPE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strManufacturingLeafType, '') <> '')
-        OR (SEASON.intCommodityAttributeId IS NULL AND ISNULL(IMP.strSeason, '') <> '')
+        OR (SEASON.intCommodityAttributeId IS NULL AND ISNULL(IMP.strColour, '') <> '')
         OR (GARDEN.intGardenMarkId IS NULL AND ISNULL(IMP.strGardenMark, '') <> '')
         OR (ORIGIN.intCountryID IS NULL AND ISNULL(IMP.strGardenGeoOrigin, '') <> '')
-        OR (WAREHOUSE_CODE.intStorageLocationId IS NULL AND ISNULL(IMP.strWarehouseCode, '') <> '')
+        OR (WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL AND ISNULL(IMP.strWarehouseCode, '') <> '')
         OR (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '')
         OR (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '')
         OR (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '')
@@ -87,7 +88,7 @@ BEGIN TRY
         ,@strGardenMark NVARCHAR(100)
         ,@intOriginId INT
         ,@strCountry NVARCHAR(100)
-        ,@intStorageLocationId INT
+        ,@intCompanyLocationSubLocationId INT
         ,@dtmManufacturingDate DATETIME
         ,@dblSampleQty NUMERIC(18, 6)
         ,@intTotalNumberOfPackageBreakups BIGINT
@@ -122,6 +123,8 @@ BEGIN TRY
         ,@strBatchNo NVARCHAR(50)
         ,@intEntityUserId INT
         ,@dtmDateCreated DATETIME
+    
+    DECLARE @intSampleId INT
 
     -- Loop through each valid import detail
     DECLARE @C AS CURSOR;
@@ -148,7 +151,7 @@ BEGIN TRY
             ,strGardenMark = GARDEN.strGardenMark
             ,intOriginId = ORIGIN.intCountryID
             ,strCountry = ORIGIN.strCountry
-            ,intStorageLocationId = WAREHOUSE_CODE.intStorageLocationId
+            ,intCompanyLocationSubLocationId = WAREHOUSE_CODE.intCompanyLocationSubLocationId
             ,dtmManufacturingDate = IMP.dtmManufacturingDate
             ,dblSampleQty = IMP.dblTotalQtyOffered
             ,intTotalNumberOfPackageBreakups = IMP.intTotalNumberOfPackageBreakups
@@ -185,25 +188,26 @@ BEGIN TRY
             ,dtmDateCreated = GETDATE()
         FROM tblQMImportCatalogue IMP
         INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
+        -- Sale Year
         LEFT JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
         -- Company Location
         LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = IMP.strBuyingCenter
         -- Catalogue Type
         LEFT JOIN tblQMCatalogueType CT ON CT.strCatalogueType = IMP.strCatalogueType
         -- Supplier
-        LEFT JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId) ON E.strName = IMP.strSupplier
+        LEFT JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId) ON V.strVendorAccountNum = IMP.strSupplier
         -- Grade
         LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.strType = 'Grade' AND GRADE.strDescription = IMP.strGrade
         -- Manufacturing Leaf Type
         LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.strType = 'ProductType' AND LEAF_TYPE.strDescription = IMP.strManufacturingLeafType
         -- Season
-        LEFT JOIN tblICCommodityAttribute SEASON ON SEASON.strType = 'Season' AND SEASON.strDescription = IMP.strSeason
+        LEFT JOIN tblICCommodityAttribute SEASON ON SEASON.strType = 'Season' AND SEASON.strDescription = IMP.strColour
         -- Garden Mark
         LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
         -- Garden Geo Origin
-        LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strCountry = IMP.strGardenGeoOrigin
+        LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
         -- Warehouse Code
-        LEFT JOIN tblICStorageLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strName = IMP.strWarehouseCode
+        LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode
         -- Sustainability
         LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.strDescription = IMP.strSustainability
         -- Evaluator's Code at TBO
@@ -241,7 +245,7 @@ BEGIN TRY
         ,@strGardenMark
         ,@intOriginId
         ,@strCountry
-        ,@intStorageLocationId
+        ,@intCompanyLocationSubLocationId
         ,@dtmManufacturingDate
         ,@dblSampleQty
         ,@intTotalNumberOfPackageBreakups
@@ -278,285 +282,348 @@ BEGIN TRY
         ,@dtmDateCreated
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-        BEGIN TRY
-            BEGIN TRAN
-                -- If sample does not exist yet
-                IF NOT EXISTS (
-                    SELECT 1
-                    FROM tblQMSample S
-                    INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
-                    INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-                    INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
-                    INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
-                        ON E.intEntityId = S.intEntityId
-                    WHERE A.intSaleYearId = @intSaleYearId
-                    AND CL.intCompanyLocationId = @intCompanyLocationId
-                    AND A.intSaleNumber = @intSaleNumber
-                    AND CT.intCatalogueTypeId = @intCatalogueTypeId
-                    AND E.intEntityId = @intSupplierEntityId
-                    AND S.strRefNo = @strRefNo
+        SET @intSampleId = NULL
+
+        SELECT @intSampleId = S.intSampleId
+        FROM tblQMSample S
+        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
+        INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
+            ON V.intEntityId = S.intEntityId
+        WHERE S.strSaleYear = @strSaleYear
+        AND CL.intCompanyLocationId = @intCompanyLocationId
+        AND S.intSaleNumber = @intSaleNumber
+        AND CT.intCatalogueTypeId = @intCatalogueTypeId
+        AND E.intEntityId = @intSupplierEntityId
+        AND S.strRepresentLotNumber = @strRefNo
+        -- If sample does not exist yet
+
+        IF @intSampleId IS NULL
+        BEGIN
+            --New Sample Creation
+            EXEC uspMFGeneratePatternId @intCategoryId = NULL
+                ,@intItemId = NULL
+                ,@intManufacturingId = NULL
+                ,@intSubLocationId = NULL
+                ,@intLocationId = @intCompanyLocationId
+                ,@intOrderTypeId = NULL
+                ,@intBlendRequirementId = NULL
+                ,@intPatternCode = 62
+                ,@ysnProposed = 0
+                ,@strPatternString = @strSampleNumber OUTPUT
+
+            -- Insert Entry in Sample Table
+            INSERT INTO tblQMSample (
+                intConcurrencyId
+                ,intSampleTypeId
+                ,strSampleNumber
+                ,intProductTypeId
+                ,intProductValueId
+                ,intSampleStatusId
+                ,intItemId
+                ,intCountryID
+                ,intEntityId
+                ,dtmSampleReceivedDate
+                ,dblRepresentingQty
+                ,intSampleUOMId
+                ,intRepresentingUOMId
+                ,strRepresentLotNumber
+                ,dtmTestingStartDate
+                ,dtmTestingEndDate
+                ,dtmSamplingEndDate
+                ,strCountry
+                ,intLocationId
+                ,intCompanyLocationId
+                ,intCompanyLocationSubLocationId
+                ,strComment
+                ,intCreatedUserId
+                ,dtmCreated
+
+                -- Auction Fields
+                ,intSaleYearId
+                ,strSaleYear
+                ,intSaleNumber
+                ,dtmSaleDate
+                ,intCatalogueTypeId
+                ,strCatalogueType
+                ,dtmPromptDate
+                ,strChopNumber
+                ,intGradeId
+                ,strGrade
+                ,intManufacturingLeafTypeId
+                ,strManufacturingLeafType
+                ,intSeasonId
+                ,strSeason
+                ,intGardenMarkId
+                ,strGardenMark
+                ,dtmManufacturingDate
+                ,intTotalNumberOfPackageBreakups
+                ,dblNetWtPerPackages
+                ,intNoOfPackages
+                ,dblNetWtSecondPackageBreak
+                ,intNoOfPackagesSecondPackageBreak
+                ,dblNetWtThirdPackageBreak
+                ,intNoOfPackagesThirdPackageBreak
+                ,intProductLineId
+                ,strProductLine
+                ,ysnOrganic
+                ,dblGrossWeight
+                ,strBatchNo
+                ,str3PLStatus
+                ,strAdditionalSupplierReference
+                ,intAWBSampleReceived
+                ,strAWBSampleReference
+                ,dblBasePrice
+                ,ysnBoughtAsReserve
+                ,ysnEuropeanCompliantFlag
+                ,intEvaluatorsCodeAtTBOId
+                ,strEvaluatorsCodeAtTBO
+                ,intFromLocationCodeId
+                ,strFromLocationCode
+                ,strSampleBoxNumber
+                ,strComments3
                 )
-                BEGIN
-                    --New Sample Creation
-                    EXEC uspMFGeneratePatternId @intCategoryId = NULL
-                        ,@intItemId = NULL
-                        ,@intManufacturingId = NULL
-                        ,@intSubLocationId = NULL
-                        ,@intLocationId = @intCompanyLocationId
-                        ,@intOrderTypeId = NULL
-                        ,@intBlendRequirementId = NULL
-                        ,@intPatternCode = 62
-                        ,@ysnProposed = 0
-                        ,@strPatternString = @strSampleNumber OUTPUT
+            SELECT
+                intConcurrencyId = 1
+                ,intSampleTypeId = @intSampleTypeId
+                ,strSampleNumber = @strSampleNumber
+                ,intProductTypeId = 2
+                ,intProductValueId = (SELECT TOP 1 [intDefaultItemId] FROM tblQMCatalogueImportDefaults)
+                ,intSampleStatusId = 1 -- Received
+                ,intItemId = (SELECT TOP 1 [intDefaultItemId] FROM tblQMCatalogueImportDefaults)
+                ,intCountryID = @intOriginId
+                ,intEntityId = @intSupplierEntityId
+                ,dtmSampleReceivedDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+                ,dblRepresentingQty = @dblSampleQty
+                ,intSampleUOMId = (SELECT TOP 1 [intDefaultSampleUOMId] FROM tblQMCatalogueImportDefaults)
+                ,intRepresentingUOMId = (SELECT TOP 1 [intDefaultRepresentingUOMId] FROM tblQMCatalogueImportDefaults)
+                ,strRepresentLotNumber = @strRefNo
+                ,dtmTestingStartDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+                ,dtmTestingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+                ,dtmSamplingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+                ,strCountry = @strCountry
+                ,intLocationId = @intCompanyLocationId
+                ,intCompanyLocationId = @intCompanyLocationId
+                ,intCompanyLocationId = @intCompanyLocationSubLocationId
+                ,strComment = @strComments
+                ,intCreatedUserId = @intEntityUserId
+                ,dtmCreated = @dtmDateCreated
 
-                    -- Insert Entry in Sample Table
-                    INSERT INTO tblQMSample (
-                        intConcurrencyId
-                        ,intSampleTypeId
-                        ,strSampleNumber
-                        ,intProductTypeId
-                        ,intProductValueId
-                        ,intSampleStatusId
-                        ,intItemId
-                        ,intCountryID
-                        ,intEntityId
-                        ,dtmSampleReceivedDate
-                        ,dblSampleQty
-                        ,intSampleUOMId
-                        ,strRefNo
-                        ,dtmTestingStartDate
-                        ,dtmTestingEndDate
-                        ,dtmSamplingEndDate
-                        ,strCountry
-                        ,intLocationId
-                        ,intCompanyLocationId
-                        ,strComment
-                        ,intCreatedUserId
-                        ,dtmCreated
-                        )
-                    SELECT
-                        intConcurrencyId = 1
-                        ,intSampleTypeId = @intSampleTypeId
-                        ,strSampleNumber = @strSampleNumber
-                        ,intProductTypeId = 2
-                        ,intProductValueId = NULL -- intItemId
-                        ,intSampleStatusId = 1 -- Received
-                        ,intItemId = NULL
-                        ,intCountryID = @intOriginId
-                        ,intEntityId = @intSupplierEntityId
-                        ,dtmSampleReceivedDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-                        ,dblSampleQty = @dblSampleQty
-                        ,intSampleUOMId = NULL
-                        ,strRefNo = @strRefNo
-                        ,dtmTestingStartDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-                        ,dtmTestingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-                        ,dtmSamplingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-                        ,strCountry = @strCountry
-                        ,intLocationId = @intCompanyLocationId
-                        ,intCompanyLocationId = @intCompanyLocationId
-                        ,strComment = @strComments
-                        ,intCreatedUserId = @intEntityUserId
-                        ,dtmCreated = @dtmDateCreated
-                    
-                    DECLARE @intSampleId INT = SCOPE_IDENTITY()
-                    
-                    UPDATE tblQMImportCatalogue
-                    SET intSampleId = @intSampleId
-                    WHERE intImportCatalogueId = @intImportCatalogueId
-
-                    INSERT INTO tblQMAuction (
-                        intConcurrencyId
-                        ,intSampleId
-                        ,intSaleYearId
-                        ,strSaleYear
-                        ,intSaleNumber
-                        ,dtmSaleDate
-                        ,intCatalogueTypeId
-                        ,strCatalogueType
-                        ,dtmPromptDate
-                        ,strChopNumber
-                        ,intGradeId
-                        ,strGrade
-                        ,intManufacturingLeafTypeId
-                        ,strManufacturingLeafType
-                        ,intSeasonId
-                        ,strSeason
-                        ,intGardenMarkId
-                        ,strGardenMark
-                        ,dtmManufacturingDate
-                        ,intTotalNumberOfPackageBreakups
-                        ,dblNetWtPerPackages
-                        ,intNoOfPackages
-                        ,dblNetWtSecondPackageBreak
-                        ,intNoOfPackagesSecondPackageBreak
-                        ,dblNetWtThirdPackageBreak
-                        ,intNoOfPackagesThirdPackageBreak
-                        ,intProductLineId
-                        ,strProductLine
-                        ,ysnOrganic
-                        ,dblGrossWeight
-                        ,strBatchNo
-                        ,str3PLStatus
-                        ,strAdditionalSupplierReference
-                        ,intAWBSampleReceived
-                        ,strAWBSampleReference
-                        ,dblBasePrice
-                        ,ysnBoughtAsReserve
-                        ,ysnEuropeanCompliantFlag
-                        ,intEvaluatorsCodeAtTBOId
-                        ,strEvaluatorsCodeAtTBO
-                        ,intFromLocationCodeId
-                        ,strFromLocationCode
-                        ,strSampleBoxNumber
-                        ,strComments3
-                    )
-                    SELECT
-                        intConcurrencyId = 1
-                        ,intSampleId = @intSampleId
-                        ,intSaleYearId = @intSaleYearId
-                        ,strSaleYear = @strSaleYear
-                        ,intSaleNumber = @intSaleNumber
-                        ,dtmSaleDate = @dtmSaleDate
-                        ,intCatalogueTypeId = @intCatalogueTypeId
-                        ,strCatalogueType = @strCatalogueType
-                        ,dtmPromptDate = @dtmPromptDate
-                        ,strChopNumber = @strChopNumber
-                        ,intGradeId = @intGradeId
-                        ,strGrade = @strGrade
-                        ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                        ,strManufacturingLeafType = @strManufacturingLeafType
-                        ,intSeasonId = @intSeasonId
-                        ,strSeason = @strSeason
-                        ,intGardenMarkId = @intGardenMarkId
-                        ,strGardenMark = @strGardenMark
-                        ,dtmManufacturingDate = @dtmManufacturingDate
-                        ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                        ,dblNetWtPerPackages = @dblNetWtPerPackages
-                        ,intNoOfPackages = @intNoOfPackages
-                        ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
-                        ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                        ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
-                        ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
-                        ,intProductLineId = @intProductLineId
-                        ,strProductLine = @strProductLine
-                        ,ysnOrganic = @ysnOrganic
-                        ,dblGrossWeight = @dblGrossWeight
-                        ,strBatchNo = @strBatchNo
-                        ,str3PLStatus = @str3PLStatus
-                        ,strAdditionalSupplierReference = @strAdditionalSupplierReference
-                        ,intAWBSampleReceived = @intAWBSampleReceived
-                        ,strAWBSampleReference = @strAWBSampleReference
-                        ,dblBasePrice = @dblBasePrice
-                        ,ysnBoughtAsReserve = @ysnBoughtAsReserve
-                        ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
-                        ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                        ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
-                        ,intFromLocationCodeId = @intFromLocationCodeId
-                        ,strFromLocationCode = @strFromLocationCode
-                        ,strSampleBoxNumber = @strSampleBoxNumber
-                        ,strComments3 = @strComments3
-
-                    -- TODO: Audit Logs here
-                END
-                -- Update if combination exists
-                ELSE
-                BEGIN
-                    UPDATE S
-                    SET
-                        strRefNo = @strRefNo
-                        ,intCountryID = @intOriginId
-                        ,dblSampleQty = @dblSampleQty
-                        ,strCountry = @strCountry
-                        ,strComment = @strComments
-                        ,intLastModifiedUserId = @intEntityUserId
-                        ,dtmLastModified = @dtmDateCreated
-                    FROM tblQMSample S
-                    INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
-                    INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-                    INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
-                    INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
-                        ON E.intEntityId = S.intEntityId
-                    WHERE A.intSaleYearId = @intSaleYearId
-                    AND CL.intCompanyLocationId = @intCompanyLocationId
-                    AND A.intSaleNumber = @intSaleNumber
-                    AND CT.intCatalogueTypeId = @intCatalogueTypeId
-                    AND E.intEntityId = @intSupplierEntityId
-                    AND S.strRefNo = @strRefNo
-
-                    UPDATE A
-                    SET
-                        intConcurrencyId = A.intConcurrencyId + 1
-                        ,intSampleId = @intSampleId
-                        ,intSaleYearId = @intSaleYearId
-                        ,strSaleYear = @strSaleYear
-                        ,intSaleNumber = @intSaleNumber
-                        ,dtmSaleDate = @dtmSaleDate
-                        ,intCatalogueTypeId = @intCatalogueTypeId
-                        ,strCatalogueType = @strCatalogueType
-                        ,dtmPromptDate = @dtmPromptDate
-                        ,strChopNumber = @strChopNumber
-                        ,intGradeId = @intGradeId
-                        ,strGrade = @strGrade
-                        ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                        ,strManufacturingLeafType = @strManufacturingLeafType
-                        ,intSeasonId = @intSeasonId
-                        ,strSeason = @strSeason
-                        ,intGardenMarkId = @intGardenMarkId
-                        ,strGardenMark = @strGardenMark
-                        ,dtmManufacturingDate = @dtmManufacturingDate
-                        ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                        ,dblNetWtPerPackages = @dblNetWtPerPackages
-                        ,intNoOfPackages = @intNoOfPackages
-                        ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
-                        ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                        ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
-                        ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
-                        ,intProductLineId = @intProductLineId
-                        ,strProductLine = @strProductLine
-                        ,ysnOrganic = @ysnOrganic
-                        ,dblGrossWeight = @dblGrossWeight
-                        ,strBatchNo = @strBatchNo
-                        ,str3PLStatus = @str3PLStatus
-                        ,strAdditionalSupplierReference = @strAdditionalSupplierReference
-                        ,intAWBSampleReceived = @intAWBSampleReceived
-                        ,strAWBSampleReference = @strAWBSampleReference
-                        ,dblBasePrice = @dblBasePrice
-                        ,ysnBoughtAsReserve = @ysnBoughtAsReserve
-                        ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
-                        ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                        ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
-                        ,intFromLocationCodeId = @intFromLocationCodeId
-                        ,strFromLocationCode = @strFromLocationCode
-                        ,strSampleBoxNumber = @strSampleBoxNumber
-                        ,strComments3 = @strComments3
-                    FROM tblQMSample S
-                    INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
-                    INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-                    INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
-                    INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
-                        ON E.intEntityId = S.intEntityId
-                    WHERE A.intSaleYearId = @intSaleYearId
-                    AND CL.intCompanyLocationId = @intCompanyLocationId
-                    AND A.intSaleNumber = @intSaleNumber
-                    AND CT.intCatalogueTypeId = @intCatalogueTypeId
-                    AND E.intEntityId = @intSupplierEntityId
-                    AND S.strRefNo = @strRefNo
-
-                END
-            COMMIT TRAN
-        END TRY
-        BEGIN CATCH
-            DECLARE @strErrorMsgDetail NVARCHAR(MAX) = NULL
-            SET @strErrorMsgDetail = ERROR_MESSAGE()
-
-            ROLLBACK TRAN
-
+                -- Auction Fields
+                ,intSaleYearId = @intSaleYearId
+                ,strSaleYear = @strSaleYear
+                ,intSaleNumber = @intSaleNumber
+                ,dtmSaleDate = @dtmSaleDate
+                ,intCatalogueTypeId = @intCatalogueTypeId
+                ,strCatalogueType = @strCatalogueType
+                ,dtmPromptDate = @dtmPromptDate
+                ,strChopNumber = @strChopNumber
+                ,intGradeId = @intGradeId
+                ,strGrade = @strGrade
+                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
+                ,strManufacturingLeafType = @strManufacturingLeafType
+                ,intSeasonId = @intSeasonId
+                ,strSeason = @strSeason
+                ,intGardenMarkId = @intGardenMarkId
+                ,strGardenMark = @strGardenMark
+                ,dtmManufacturingDate = @dtmManufacturingDate
+                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
+                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNoOfPackages = @intNoOfPackages
+                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
+                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
+                ,intProductLineId = @intProductLineId
+                ,strProductLine = @strProductLine
+                ,ysnOrganic = @ysnOrganic
+                ,dblGrossWeight = @dblGrossWeight
+                ,strBatchNo = @strBatchNo
+                ,str3PLStatus = @str3PLStatus
+                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
+                ,intAWBSampleReceived = @intAWBSampleReceived
+                ,strAWBSampleReference = @strAWBSampleReference
+                ,dblBasePrice = @dblBasePrice
+                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
+                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
+                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
+                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
+                ,intFromLocationCodeId = @intFromLocationCodeId
+                ,strFromLocationCode = @strFromLocationCode
+                ,strSampleBoxNumber = @strSampleBoxNumber
+                ,strComments3 = @strComments3
+            
+            SET @intSampleId = SCOPE_IDENTITY()
+            
             UPDATE tblQMImportCatalogue
-            SET ysnSuccess = 0
-                ,ysnProcessed = 1
-                ,strLogResult = @strErrorMsgDetail
+            SET intSampleId = @intSampleId
             WHERE intImportCatalogueId = @intImportCatalogueId
-        END CATCH
+
+            INSERT INTO tblQMAuction (
+                intConcurrencyId
+                ,intSampleId
+                ,intSaleYearId
+                ,strSaleYear
+                ,intSaleNumber
+                ,dtmSaleDate
+                ,intCatalogueTypeId
+                ,strCatalogueType
+                ,dtmPromptDate
+                ,strChopNumber
+                ,intGradeId
+                ,strGrade
+                ,intManufacturingLeafTypeId
+                ,strManufacturingLeafType
+                ,intSeasonId
+                ,strSeason
+                ,intGardenMarkId
+                ,strGardenMark
+                ,dtmManufacturingDate
+                ,intTotalNumberOfPackageBreakups
+                ,dblNetWtPerPackages
+                ,intNoOfPackages
+                ,dblNetWtSecondPackageBreak
+                ,intNoOfPackagesSecondPackageBreak
+                ,dblNetWtThirdPackageBreak
+                ,intNoOfPackagesThirdPackageBreak
+                ,intProductLineId
+                ,strProductLine
+                ,ysnOrganic
+                ,dblGrossWeight
+                ,strBatchNo
+                ,str3PLStatus
+                ,strAdditionalSupplierReference
+                ,intAWBSampleReceived
+                ,strAWBSampleReference
+                ,dblBasePrice
+                ,ysnBoughtAsReserve
+                ,ysnEuropeanCompliantFlag
+                ,intEvaluatorsCodeAtTBOId
+                ,strEvaluatorsCodeAtTBO
+                ,intFromLocationCodeId
+                ,strFromLocationCode
+                ,strSampleBoxNumber
+                ,strComments3
+            )
+            SELECT
+                intConcurrencyId = 1
+                ,intSampleId = @intSampleId
+                ,intSaleYearId = @intSaleYearId
+                ,strSaleYear = @strSaleYear
+                ,intSaleNumber = @intSaleNumber
+                ,dtmSaleDate = @dtmSaleDate
+                ,intCatalogueTypeId = @intCatalogueTypeId
+                ,strCatalogueType = @strCatalogueType
+                ,dtmPromptDate = @dtmPromptDate
+                ,strChopNumber = @strChopNumber
+                ,intGradeId = @intGradeId
+                ,strGrade = @strGrade
+                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
+                ,strManufacturingLeafType = @strManufacturingLeafType
+                ,intSeasonId = @intSeasonId
+                ,strSeason = @strSeason
+                ,intGardenMarkId = @intGardenMarkId
+                ,strGardenMark = @strGardenMark
+                ,dtmManufacturingDate = @dtmManufacturingDate
+                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
+                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNoOfPackages = @intNoOfPackages
+                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
+                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
+                ,intProductLineId = @intProductLineId
+                ,strProductLine = @strProductLine
+                ,ysnOrganic = @ysnOrganic
+                ,dblGrossWeight = @dblGrossWeight
+                ,strBatchNo = @strBatchNo
+                ,str3PLStatus = @str3PLStatus
+                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
+                ,intAWBSampleReceived = @intAWBSampleReceived
+                ,strAWBSampleReference = @strAWBSampleReference
+                ,dblBasePrice = @dblBasePrice
+                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
+                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
+                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
+                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
+                ,intFromLocationCodeId = @intFromLocationCodeId
+                ,strFromLocationCode = @strFromLocationCode
+                ,strSampleBoxNumber = @strSampleBoxNumber
+                ,strComments3 = @strComments3
+
+            -- TODO: Audit Logs here
+        END
+        -- Update if combination exists
+        ELSE
+        BEGIN
+            UPDATE S
+            SET
+                strRepresentLotNumber = @strRefNo
+                ,intCountryID = @intOriginId
+                ,dblRepresentingQty = @dblSampleQty
+                ,strCountry = @strCountry
+                ,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
+                ,strComment = @strComments
+                ,intLastModifiedUserId = @intEntityUserId
+                ,dtmLastModified = @dtmDateCreated
+            FROM tblQMSample S
+            WHERE S.intSampleId = @intSampleId
+
+            UPDATE A
+            SET
+                intConcurrencyId = A.intConcurrencyId + 1
+                ,intSaleYearId = @intSaleYearId
+                ,strSaleYear = @strSaleYear
+                ,intSaleNumber = @intSaleNumber
+                ,dtmSaleDate = @dtmSaleDate
+                ,intCatalogueTypeId = @intCatalogueTypeId
+                ,strCatalogueType = @strCatalogueType
+                ,dtmPromptDate = @dtmPromptDate
+                ,strChopNumber = @strChopNumber
+                ,intGradeId = @intGradeId
+                ,strGrade = @strGrade
+                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
+                ,strManufacturingLeafType = @strManufacturingLeafType
+                ,intSeasonId = @intSeasonId
+                ,strSeason = @strSeason
+                ,intGardenMarkId = @intGardenMarkId
+                ,strGardenMark = @strGardenMark
+                ,dtmManufacturingDate = @dtmManufacturingDate
+                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
+                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNoOfPackages = @intNoOfPackages
+                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
+                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
+                ,intProductLineId = @intProductLineId
+                ,strProductLine = @strProductLine
+                ,ysnOrganic = @ysnOrganic
+                ,dblGrossWeight = @dblGrossWeight
+                ,strBatchNo = @strBatchNo
+                ,str3PLStatus = @str3PLStatus
+                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
+                ,intAWBSampleReceived = @intAWBSampleReceived
+                ,strAWBSampleReference = @strAWBSampleReference
+                ,dblBasePrice = @dblBasePrice
+                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
+                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
+                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
+                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
+                ,intFromLocationCodeId = @intFromLocationCodeId
+                ,strFromLocationCode = @strFromLocationCode
+                ,strSampleBoxNumber = @strSampleBoxNumber
+                ,strComments3 = @strComments3
+            FROM tblQMSample S
+            INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
+            WHERE S.intSampleId = @intSampleId
+
+        END
+
+        UPDATE tblQMImportCatalogue
+        SET intSampleId = @intSampleId
+        WHERE intImportCatalogueId = @intImportCatalogueId
 
         FETCH NEXT FROM @C INTO
             @intImportCatalogueId
@@ -580,7 +647,7 @@ BEGIN TRY
             ,@strGardenMark
             ,@intOriginId
             ,@strCountry
-            ,@intStorageLocationId
+            ,@intCompanyLocationSubLocationId
             ,@dtmManufacturingDate
             ,@dblSampleQty
             ,@intTotalNumberOfPackageBreakups
@@ -625,7 +692,6 @@ BEGIN CATCH
 	DECLARE @strErrorMsg NVARCHAR(MAX) = NULL
 
 	SET @strErrorMsg = ERROR_MESSAGE()
-	ROLLBACK TRANSACTION
 
 	RAISERROR(@strErrorMsg, 11, 1) 
 END CATCH

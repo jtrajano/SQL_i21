@@ -20,6 +20,8 @@ DECLARE  @dtmDateTo				DATETIME
 		,@strInvoiceIds			AS NVARCHAR(MAX)
 	    , @intItemForFreightId			INT = NULL
 
+IF(OBJECT_ID('tempdb..#LOCATIONS') IS NOT NULL) DROP TABLE #LOCATIONS
+
 -- Sanitize the @xmlParam
 IF LTRIM(RTRIM(@xmlParam)) = ''
 BEGIN 
@@ -111,6 +113,15 @@ SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
+--LOCATIONS
+SELECT intCompanyLocationId		= L.intCompanyLocationId
+	 , strLocationName			= L.strLocationName
+	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
+	 , strInvoiceComments		= L.strInvoiceComments
+	 , strFullAddress			= L.strAddress + CHAR(13) + char(10) + ISNULL(ISNULL(L.strCity, ''), '') + ISNULL(', ' + ISNULL(L.strStateProvince, ''), '') + ISNULL(', ' + ISNULL(L.strZipPostalCode, ''), '') + ISNULL(', ' + ISNULL(L.strCountry, ''), '')
+INTO #LOCATIONS
+FROM tblSMCompanyLocation L
+
 
 SELECT
 	 intInvoiceId			= ARI.intInvoiceId
@@ -119,8 +130,11 @@ SELECT
 	,intEntityCustomerId	= ARI.intEntityCustomerId
 	,intCompanyLocationId	= ARI.intCompanyLocationId
 	,intInvoiceDetailId		= ISNULL(ARGID.intInvoiceDetailId, 0)
-	,strCompanyName			= @strCompanyName
-	,strCompanyAddress		= @strCompanyFullAddress
+	,strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
+	,strCompanyAddress		= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+									   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
+									   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
+							   END
 	,strInvoiceNumber		= ARI.strInvoiceNumber
 	,strCustomerNumber	     =ARCS.strCustomerNumber
 	,strCustomerName		= ARCS.strName
@@ -136,7 +150,7 @@ SELECT
 	,strTerm				= TERM.strTerm
 	,strBillTo				= ISNULL(RTRIM(ARI.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strBillToCity), '') + ISNULL(RTRIM(', ' + ARI.strBillToState), '') + ISNULL(RTRIM(', ' + ARI.strBillToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strBillToCountry), '')
 	,strShipTo				= ISNULL(RTRIM(ARI.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strShipToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strShipToCity), '') + ISNULL(RTRIM(', ' + ARI.strShipToState), '') + ISNULL(RTRIM(', ' + ARI.strShipToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strShipToCountry), '')	 
-	,dtmOrderDate			= SO.dtmDate
+	,dtmOrderDate			= ISNULL(SOI.dtmDate ,SO.dtmDate)
 	,dtmDate				= ARI.dtmDate
 	,dtmShipDate			= ARI.dtmShipDate
 	,dtmDueDate				= ARI.dtmDueDate
@@ -151,11 +165,13 @@ SELECT
 	,dblPrice				= ARGID.dblPrice
 	,dblTotal				= ARGID.dblTotal
 	,intInventoryShipmentChargeId = ISNULL(ARGID.intInventoryShipmentChargeId,0)
+	,intInvoiceDetailLotId	= ARGIDL.intInvoiceDetailLotId
 	,blbLogo                = ISNULL(SMLP.imgLogo, @blbLogo)
 	,strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
+INNER JOIN #LOCATIONS L ON ARI.intCompanyLocationId = L.intCompanyLocationId
 LEFT JOIN vyuARGetInvoiceDetail ARGID WITH (NOLOCK) ON ARI.intInvoiceId = ARGID.intInvoiceId
 LEFT JOIN vyuARGetInvoiceDetailLot ARGIDL ON ARGID.intInvoiceDetailId=ARGIDL.intInvoiceDetailId
 LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ARI.intSalesOrderId
@@ -163,6 +179,12 @@ LEFT JOIN tblSMFreightTerms FREIGHT ON ARI.intFreightTermId = FREIGHT.intFreight
 INNER JOIN tblSMTerm TERM ON ARI.intTermId = TERM.intTermID
 LEFT JOIN tblEMEntityLocation ENTITYLOCATION ON ENTITYLOCATION.intEntityLocationId = ARI.intBillToLocationId
 LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND (ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
+OUTER APPLY (
+	select top 1 dtmDate,ARID.intInvoiceId from tblARInvoiceDetail ARID
+	INNER JOIN tblICInventoryShipmentItem ISI on ISI.intInventoryShipmentItemId =ARID.intInventoryShipmentItemId
+	INNER JOIN tblSOSalesOrder SO on SO.intSalesOrderId=ISI.intOrderId
+	WHERE ARID.intInvoiceId = ARI.intInvoiceId
+)SOI 
 LEFT JOIN (
 	SELECT intInvoiceId			= ID.intInvoiceId
 		 , dblSSTTax 			= SUM(CASE WHEN UPPER(strTaxClass) = 'STATE SALES TAX (SST)' OR ID.dblComputedGrossPrice = 0 THEN dblAdjustedTax ELSE 0 END)

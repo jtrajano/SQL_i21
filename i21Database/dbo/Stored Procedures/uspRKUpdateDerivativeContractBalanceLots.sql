@@ -14,16 +14,21 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 
-	IF @strType = 'Sale'
+	DECLARE @ysnLocked BIT
+
+	SELECT  @ysnLocked = ISNULL(ysnLocked,0) FROM vyuRKFutOptTranForNotMapping WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+	IF @ysnLocked = 0
 	BEGIN
-		UPDATE tblRKFutOptTransaction SET dblSContractBalanceLots = ISNULL(dblSContractBalanceLots,0) + @dblBalanceLots WHERE intFutOptTransactionId = @intFutOptTransactionId
-	END
+
+		IF @strType = 'Sale'
+		BEGIN
+			UPDATE tblRKFutOptTransaction SET dblSContractBalanceLots = ISNULL(dblSContractBalanceLots,0) + @dblBalanceLots WHERE intFutOptTransactionId = @intFutOptTransactionId
+		END
 	
-	IF @strType = 'Purchase'
-	BEGIN
-		UPDATE tblRKFutOptTransaction SET dblPContractBalanceLots = ISNULL(dblPContractBalanceLots,0) + @dblBalanceLots WHERE intFutOptTransactionId = @intFutOptTransactionId
+		IF @strType = 'Purchase'
+		BEGIN
+			UPDATE tblRKFutOptTransaction SET dblPContractBalanceLots = ISNULL(dblPContractBalanceLots,0) + @dblBalanceLots WHERE intFutOptTransactionId = @intFutOptTransactionId
+		END
 	END
-
 END
-
-

@@ -1309,6 +1309,13 @@
     <Build Include="dbo\Views\vyuQMSearchCity.sql" />
     <Build Include="dbo\Views\vyuQMSearchBrand.sql" />
     <Build Include="dbo\Views\vyuQMSearchStorageLocation.sql" />
+    <Build Include="dbo\Tables\tblICTally.sql" />
+    <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
+    <Build Include="dbo\Tables\tblCTReasonCode.sql" />
+    <Build Include="dbo\Views\vyuCTCurrencyExchangeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportSupplierEvaluation.sql" />
+    <Build Include="dbo\Tables\tblQMCatalogueImportDefaults.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnpostSettleStorageOutbound.sql" />
     <Build Include="dbo\Views\vyuMFCustomTrialBlendSheet.sql" />
     <Build Include="dbo\Views\vyuMFCustomTrialBlendSheetDetail.sql" />
   </ItemGroup>
@@ -10677,6 +10684,7 @@
     <Build Include="dbo\Stored Procedures\uspIPAddPendingClaim.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDModuleAccess.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />

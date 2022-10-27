@@ -634,6 +634,10 @@ BEGIN TRY
 		, strQualityDescription = IB.strDescription
 		, CD.dtmEtaPol
 		, CD.dtmEtaPod
+		, CD.intGardenMarkId
+		, GM.strGardenMark
+		, CD.intReasonCodeId
+		, RC.strReasonCode
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -720,7 +724,8 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
 	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
-
+	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
+	LEFT JOIN tblCTReasonCode RC on RC.intReasonCodeId = CD.intReasonCodeId
 	ORDER BY CD.intContractSeq
 
 	DROP TABLE #tmpContractDetail
