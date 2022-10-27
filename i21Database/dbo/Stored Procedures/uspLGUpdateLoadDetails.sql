@@ -66,7 +66,7 @@ BEGIN TRY
 
 		/* When posting TR, check if any Orders were removed, if so, removed them from LS */
 		IF EXISTS (SELECT TOP 1 1 FROM tblLGLoad L INNER JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = L.intLoadHeaderId 
-			WHERE L.intLoadId = @intLoadId AND L.intTransUsedBy = 3 AND TL.ysnPosted = 1)
+			WHERE L.intLoadId = @intLoadId AND L.intTransUsedBy = 3 AND @ysnInProgress = 0)
 		BEGIN
 			--Insert to temp table
 			IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpLoadDetail')) DROP TABLE #tmpLoadDetail
@@ -83,7 +83,7 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadDistributionDetail TLD ON TLD.intLoadDetailId = LD.intLoadDetailId
 				LEFT JOIN tblTRLoadDistributionHeader TLH ON TLH.intLoadDistributionHeaderId = TLD.intLoadDistributionHeaderId
 				LEFT JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = TLH.intLoadHeaderId
-			WHERE L.intTransUsedBy = 3 AND L.intLoadId = @intLoadId AND TLD.intLoadDetailId IS NULL AND TL.ysnPosted = 1
+			WHERE L.intTransUsedBy = 3 AND L.intLoadId = @intLoadId AND TLD.intLoadDetailId IS NULL
 
 			DECLARE @detailId INT, @intItemUOMId INT, @intUserId INT, @intTMDispatchId INT
 
