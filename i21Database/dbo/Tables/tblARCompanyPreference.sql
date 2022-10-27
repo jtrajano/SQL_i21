@@ -100,7 +100,7 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightRevenueAccount] FOREIGN KEY ([intFreightRevenueAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightExpenseAccount] FOREIGN KEY ([intFreightExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFeeGeneralLedgerAccountId] FOREIGN KEY ([intFeeGeneralLedgerAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeRevenueAccount] FOREIGN KEY ([intSurchargeRevenueAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeExpenseAccount] FOREIGN KEY ([intSurchargeExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
