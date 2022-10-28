@@ -11,9 +11,9 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 	   ,strDataConversionExpert		= DataConversionExpert.strName
 	   ,strTrainer					= Trainer.strName
 	   ,strContact					= Contact.strName
-	   ,dblQuotedHours				= ISNULL(ProjectModule.dblQuotedHours, 0)
+	   ,dblQuotedHours				= ISNULL(ProjectTickets.dblQuotedHours, 0)
 	   ,dblActualBillableHours		= ISNULL(ProjectTickets.dblActualHours, 0)
-	   ,dblHoursOverShort			= ISNULL(ProjectModule.dblQuotedHours,0) - ISNULL(ProjectTickets.dblActualHours,0)
+	   ,dblHoursOverShort			= ISNULL(ProjectTickets.dblQuotedHours,0) - ISNULL(ProjectTickets.dblActualHours,0)
 	   ,intCustomerId				= Project.intCustomerId
 	   ,strCustomerName				= Customer.strName
 	   ,strPercentComplete			= CASE WHEN ISNULL(ProjectTickets.dblQuotedHours, 0) = 0
