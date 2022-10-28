@@ -20,7 +20,7 @@
 		@intImportTankReadingId INT = NULL,
 		@intRecord INT = NULL
 	AS  
-	BEGIN 
+		BEGIN 
 
 		--Return 0 = no match site
 		--SET @resultLog = 'hello'
@@ -172,6 +172,7 @@
 		END
 
 		-- Check if site has tank
+		SET @TankMonitorEventID = (SELECT TOP 1 intEventTypeID FROM tblTMEventType WHERE strDefaultEventType = 'Event-021')
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMSiteDevice SD
 			INNER JOIN tblTMDevice D ON D.intDeviceId = SD.intDeviceId
 			INNER JOIN tblTMDeviceType DT ON DT.intDeviceTypeId = D.intDeviceTypeId
@@ -179,18 +180,79 @@
 			AND SD.intSiteID = @siteId)
 		BEGIN
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			print 'capacity <> 0'
+			--add insert to event
+			INSERT INTO tblTMEvent (dtmDate
+								,intEventTypeID
+								,intUserID
+								,dtmLastUpdated
+								,intSiteID
+								,strLevel
+								,dtmTankMonitorReading
+								,strDescription
+								,intDeviceId
+								,intPerformerID
+								)
+						VALUES (
+								DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
+								,@TankMonitorEventID
+								,@userID
+								,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
+								,@siteId
+								,'Consumption Site'
+								,@rpt_date_ti
+								,(	  'Tank Serial Number: ' + ISNULL(@ts_tankserialnum COLLATE Latin1_General_CI_AS,'') + CHAR(10)
+									+ 'Monitor Serial Number: ' + ISNULL(@tx_serialnum COLLATE Latin1_General_CI_AS,'') + CHAR(10) 
+									+ 'Date: ' + CAST (@rpt_date_ti AS NVARCHAR(25)) + CHAR(10)
+									+ 'Percent Full: ' + CAST(ISNULL(@tk_level,0.0) AS NVARCHAR(10)) + CHAR(10) 
+									+ (case when @is_wesroc = 1 then 'Inside Temperature: ' + CAST(ISNULL(@base_temp COLLATE Latin1_General_CI_AS,'') AS NVARCHAR(20)) + CHAR(10) else '' end)
+								)
+								,0
+								,0	
+								)		 
+
 			RETURN
 		END
 
 		IF(@ts_capacity = 0)
 		BEGIN
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			print 'capacity = 0'			
+		    --add insert to event
+			INSERT INTO tblTMEvent (dtmDate
+								,intEventTypeID
+								,intUserID
+								,dtmLastUpdated
+								,intSiteID
+								,strLevel
+								,dtmTankMonitorReading
+								,strDescription
+								,intDeviceId
+								,intPerformerID
+								)
+						VALUES (
+								DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
+								,@TankMonitorEventID
+								,@userID
+								,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
+								,@siteId
+								,'Consumption Site'
+								,@rpt_date_ti
+								,(	  'Tank Serial Number: ' + ISNULL(@ts_tankserialnum COLLATE Latin1_General_CI_AS,'') + CHAR(10)
+									+ 'Monitor Serial Number: ' + ISNULL(@tx_serialnum COLLATE Latin1_General_CI_AS,'') + CHAR(10) 
+									+ 'Date: ' + CAST (@rpt_date_ti AS NVARCHAR(25)) + CHAR(10)
+									+ 'Percent Full: ' + CAST(ISNULL(@tk_level,0.0) AS NVARCHAR(10)) + CHAR(10) 
+									+ (case when @is_wesroc = 1 then 'Inside Temperature: ' + CAST(ISNULL(@base_temp COLLATE Latin1_General_CI_AS,'') AS NVARCHAR(20)) + CHAR(10) else '' end)
+								)
+								,0
+								,0	
+								)	
 			RETURN
 		END
 		--Get the event ID of the tank monitor reading event
-		SET @TankMonitorEventID = (SELECT TOP 1 intEventTypeID FROM tblTMEventType WHERE strDefaultEventType = 'Event-021')
+		--SET @TankMonitorEventID = (SELECT TOP 1 intEventTypeID FROM tblTMEventType WHERE strDefaultEventType = 'Event-021')
 	
 		--Check for previous tank monitor reading or duplicate reading
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti AND intSiteID = @siteId ))	
@@ -646,4 +708,3 @@
 		VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
 
 	END
-	
