@@ -192,6 +192,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
 	 , dblPercentage						= INV.dblPercentage
 	 , dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblTotal END
+	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -345,6 +346,7 @@ LEFT JOIN (
 	SELECT intCategoryId
 		 , strCategoryCode
 		 , strDescription
+		 , intLineOfBusinessId
 	FROM tblICCategory WITH(NOLOCK)
 ) ICATEGORY ON INV.intCategoryId = ICATEGORY.intCategoryId
 LEFT JOIN (
