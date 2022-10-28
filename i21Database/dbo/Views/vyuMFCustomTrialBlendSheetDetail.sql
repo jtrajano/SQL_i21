@@ -7,7 +7,9 @@ AS
 	Created By: Jonathan Valenzuela
 	Date: 10/26/2022
 *****************************************************************/
-SELECT ysnKeep											-- KEEP 
+SELECT (CASE WHEN ysnKeep = 1 THEN 'KEEP'
+			ELSE ''
+		END) AS ysnKeep									-- KEEP 
 	 , WorkOrderInputLot.intLotId
 	 , Lot.strLotNumber									-- Batch
 	 , dblTBSQuantity									-- Weigh Up (Grams)
@@ -26,6 +28,7 @@ SELECT ysnKeep											-- KEEP
 	 , Batch.strTasterComments							-- Comments
 	 , WorkOrderInputLot.dblQuantity					-- Wght
 	 , WorkOrderInputLot.dblIssuedQuantity
+	 , WorkOrderInputLot.intWorkOrderId
 FROM tblMFWorkOrderInputLot AS WorkOrderInputLot
 LEFT JOIN tblICLot AS Lot ON WorkOrderInputLot.intLotId = Lot.intLotId
 LEFT JOIN tblICItem AS Item ON WorkOrderInputLot.intItemId = Item.intItemId
