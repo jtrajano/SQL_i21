@@ -190,6 +190,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
 	 , strReasonablenessComment				= INV.strReasonablenessComment
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
+	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -343,6 +344,7 @@ LEFT JOIN (
 	SELECT intCategoryId
 		 , strCategoryCode
 		 , strDescription
+		 , intLineOfBusinessId
 	FROM tblICCategory WITH(NOLOCK)
 ) ICATEGORY ON INV.intCategoryId = ICATEGORY.intCategoryId
 LEFT JOIN (
