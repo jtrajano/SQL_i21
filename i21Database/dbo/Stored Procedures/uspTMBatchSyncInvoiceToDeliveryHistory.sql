@@ -530,7 +530,7 @@ BEGIN
 						,dtmRunOutDate
 						,dtmForecastedDelivery
 					)
-					SELECT TOP 1
+					SELECT
 						strInvoiceNumber = C.strInvoiceNumber
 						,strBulkPlantNumber = D.strLocationName
 						,dtmInvoiceDate = C.dtmDate
