@@ -42,6 +42,7 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.dtmReceiptDate
 	,Lot.strLotStatus
 	,Lot.strCondition
+	,Lot.strMarks
 FROM vyuLGPickOpenInventoryLots Lot
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemLotId = Lot.intInventoryReceiptItemLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
