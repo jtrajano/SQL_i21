@@ -125,12 +125,13 @@ CREATE TABLE #tblInOut2
 
 CREATE TABLE #tblInTransit
 (
-	dblInTransitQty				DECIMAL(18,6),
-	intCommodityId				INT,
-	strCommodityCode			VARCHAR(MAX) COLLATE Latin1_General_CI_AS
-	,intCompanyLocationId		INT
-	,strLocationName			NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,strUOM						NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	dblInTransitQty DECIMAL(18,6)
+	,intCommodityId INT
+	,strCommodityCode VARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,intCompanyLocationId INT
+	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strUOM NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	,dtmDate DATETIME	
 )
 
 CREATE TABLE #tblInTransit2
@@ -144,8 +145,8 @@ CREATE TABLE #tblInTransit2
 
 CREATE TABLE #Locations
 (
-	intCompanyLocationId	INT,
-	strLocationName			VARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	intCompanyLocationId INT,
+	strLocationName VARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
 DECLARE @Locs AS Id
 
@@ -280,7 +281,7 @@ GROUP BY t.intItemId
 
 INSERT INTO @InventoryData
 SELECT 1,
-	   'INVENTORY BALANCE' AS label
+	   'PHYSICAL INVENTORY BEGINNING' AS label
 	   ,'' AS [Sign]
 	   ,SUM(ISNULL(OP.dblQty,0))
 	   ,Commodity.strCommodityCode
@@ -303,7 +304,7 @@ INSERT INTO @tblCommodities
 SELECT DISTINCT ID.intCommodityId
 	,ID.strCommodityCode
 FROM @InventoryData ID
-WHERE strLabel = 'INVENTORY BALANCE'
+WHERE strLabel = 'PHYSICAL INVENTORY BEGINNING'
 
 DECLARE @intCompanyLocationId INT
 DECLARE @strLocationName NVARCHAR(200)
@@ -377,7 +378,7 @@ BEGIN
 			,@strLocationName
 			,@strUOM
 		FROM #tblInOut
-		WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment')
+		WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment','Invoice')
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
 
@@ -570,7 +571,7 @@ END
 INSERT INTO @InventoryData
 SELECT
 	7
-	,'NET ELEVATOR INVENTORY'
+	,'PHYSICAL INVENTORY ENDING'
 	,''
 	,SUM(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END)
 	,strCommodityCode
@@ -654,7 +655,7 @@ INSERT INTO @tblCommodities
 SELECT DISTINCT ID.intCommodityId
 	,ID.strCommodityCode
 FROM @InventoryData ID
-WHERE strLabel = 'INVENTORY BALANCE'
+WHERE strLabel = 'PHYSICAL INVENTORY BEGINNING'
 
 /*==START==STORAGE OBLIGATION==*/
 WHILE EXISTS(SELECT TOP 1 1 FROM @tblCommodities)
@@ -679,10 +680,56 @@ BEGIN
 	INTO #LicensedLocation
 	FROM @InventoryData
 
-	SELECT
+	SELECT *
+	INTO #CustomerOwnershipALL
+	FROM (
+		SELECT
+			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
+			,strDistributionType
+			,strTransactionNumber
+			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
+			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
+			,ST.intStorageScheduleTypeId
+			,CusOwn.strStorageTypeCode
+			,CusOwn.intLocationId
+			,CusOwn.strLocationName
+			,CusOwn.strCommodityCode
+		FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL) CusOwn
+		LEFT JOIN tblGRStorageType ST 
+			ON ST.strStorageTypeDescription = CusOwn.strDistributionType
+		WHERE CusOwn.intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT
+			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
+			,strTransactionNumber
+			,strDistributionType
+			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
+			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
+			,intStorageScheduleTypeId = -5
+			,''
+			,OH.intLocationId
+			,OH.strLocationName
+			,OH.strCommodityCode
+		FROM dbo.fnRKGetBucketOnHold(@dtmReportDate,@intCommodityId,NULL) OH
+		WHERE OH.intCommodityId = @intCommodityId2
+	) t
+
+	DELETE A
+	FROM #CustomerOwnershipALL A
+	WHERE intLocationId NOT IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+
+	INSERT INTO @StorageTypes
+	SELECT DISTINCT
+		a.intStorageScheduleTypeId
+		,strStorageTypeDescription 
+	FROM #CustomerOwnershipALL a
+	INNER JOIN tblGRStorageType ST
+		ON ST.intStorageScheduleTypeId = a.intStorageScheduleTypeId
+
+	SELECT 
 		intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
 		,dtmDate
-		,strDistribution = strDistributionType
+		,strDistribution = strDistributionType		
 		,dblIn = SUM(dblIn)
 		,dblOut = SUM(dblOut)
 		,dblNet = SUM(dblIn) - SUM(dblOut)
@@ -690,46 +737,8 @@ BEGIN
 		,intLocationId
 		,strLocationName
 		,strCommodityCode
-	INTO #CustomerOwnership
-	FROM (
-		SELECT
-			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
-			,strDistributionType
-			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
-			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
-			,ST.intStorageScheduleTypeId
-			,CusOwn.intLocationId
-			,CusOwn.strLocationName
-			,CusOwn.strCommodityCode
-		FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL) CusOwn
-		INNER JOIN (
-			SELECT strTransactionNumber
-				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
-			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
-			GROUP BY strTransactionNumber
-		) A ON A.strTransactionNumber = CusOwn.strTransactionNumber AND A.total <> 0	
-		LEFT JOIN tblGRStorageType ST 
-			ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-		WHERE CusOwn.intCommodityId = @intCommodityId2
-		UNION ALL
-		SELECT
-			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
-			,strDistributionType
-			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
-			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
-			,intStorageScheduleTypeId = -5
-			,OH.intLocationId
-			,OH.strLocationName
-			,OH.strCommodityCode
-		FROM dbo.fnRKGetBucketOnHold(@dtmReportDate,@intCommodityId,NULL) OH
-		INNER JOIN (
-			SELECT strTransactionNumber
-				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
-			FROM dbo.fnRKGetBucketOnHold(@dtmReportDate,@intCommodityId,NULL) OH
-			GROUP BY strTransactionNumber
-		) A ON A.strTransactionNumber = OH.strTransactionNumber AND A.total <> 0
-		WHERE OH.intCommodityId = @intCommodityId2
-	) t
+	INTO #CustomerOwnershipBal
+	FROM #CustomerOwnershipALL AA
 	GROUP BY
 		dtmDate
 		,strDistributionType
@@ -738,17 +747,32 @@ BEGIN
 		,strLocationName
 		,strCommodityCode
 
-	DELETE A
-	FROM #CustomerOwnership A
-	WHERE intLocationId NOT IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-
-	INSERT INTO @StorageTypes
 	SELECT 
-		a.intStorageScheduleTypeId
-		,strStorageTypeDescription 
-	FROM #CustomerOwnership a
-	INNER JOIN tblGRStorageType ST
-		ON ST.intStorageScheduleTypeId = a.intStorageScheduleTypeId
+		intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
+		,dtmDate
+		,strDistribution = strDistributionType		
+		,dblIn = SUM(dblIn)
+		,dblOut = SUM(dblOut)
+		,dblNet = SUM(dblIn) - SUM(dblOut)
+		,intStorageScheduleTypeId
+		,intLocationId
+		,strLocationName
+		,strCommodityCode
+	INTO #CustomerOwnershipIncDec
+	FROM #CustomerOwnershipALL AA
+	INNER JOIN (
+		SELECT strTransactionNumber,strStorageTypeCode
+			,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+		FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
+		GROUP BY strTransactionNumber,strStorageTypeCode
+	) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0	 AND A.strStorageTypeCode = AA.strStorageTypeCode
+	GROUP BY
+		dtmDate
+		,strDistributionType
+		,intStorageScheduleTypeId
+		,intLocationId
+		,strLocationName
+		,strCommodityCode
 
 	WHILE EXISTS(SELECT 1 FROM @StorageTypes)
 	BEGIN
@@ -759,13 +783,13 @@ BEGIN
 			,@strStorageTypeDescription	= strStorageTypeDescription
 		FROM @StorageTypes
 
-		SET @intTotalRowCnt = CASE WHEN (SELECT ISNULL(MAX(intRowNum),0) FROM @StorageObligationData) = 0 THEN 12 ELSE (SELECT MAX(intRowNum) + 1 FROM @StorageObligationData WHERE strLabel = 'TOTAL ' + @prevStorageType) END
+		SET @intTotalRowCnt = CASE WHEN (SELECT ISNULL(MAX(intRowNum),0) FROM @StorageObligationData) = 0 THEN 12 ELSE (SELECT MAX(intRowNum) + 1 FROM @StorageObligationData WHERE strLabel = @prevStorageType + ' ENDING') END
 
 		--(OPENING) BALANCE
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 2
 			,@intStorageScheduleTypeId
-			,strDistribution + ' BALANCE'
+			,strDistribution + ' BEGINNING'
 			,''
 			,NET = SUM(dblIn) - SUM(dblOut)
 			,strCommodityCode
@@ -773,7 +797,7 @@ BEGIN
 			,intLocationId
 			,strLocationName
 			,@strUOM
-		FROM #CustomerOwnership 
+		FROM #CustomerOwnershipBal 
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
 			AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 		GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode
@@ -782,7 +806,7 @@ BEGIN
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 3
 			,DD.intStorageScheduleTypeId
-			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BALANCE','INCREASE') ELSE A.STRLABEL END
+			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BEGINNING','INCREASE') ELSE A.STRLABEL END
 			,CASE WHEN A.STRSIGN IS NULL THEN '+' ELSE A.STRSIGN END
 			,CASE WHEN A.TOTAL IS NULL THEN 0 ELSE A.TOTAL END
 			,DD.strCommodityCode
@@ -800,7 +824,8 @@ BEGIN
 				,intCommodityId2 = @intCommodityId2
 				,intLocationId
 				,strLocationName
-			FROM #CustomerOwnership C
+			FROM #CustomerOwnershipIncDec C
+			--) A ON A.strTransactionNumber = C.strTransactionNumber AND A.total <> 0	
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
 				AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 				AND (intStorageScheduleTypeId = DD.intStorageScheduleTypeId AND intLocationId = DD.intCompanyLocationId)
@@ -811,7 +836,7 @@ BEGIN
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 4
 			,DD.intStorageScheduleTypeId
-			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BALANCE','DECREASE') ELSE A.STRLABEL END
+			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BEGINNING','DECREASE') ELSE A.STRLABEL END
 			,CASE WHEN A.STRSIGN IS NULL THEN '-' ELSE A.STRSIGN END
 			,CASE WHEN A.TOTAL IS NULL THEN 0 ELSE A.TOTAL END
 			,DD.strCommodityCode
@@ -830,13 +855,13 @@ BEGIN
 				,intCommodityId2 = @intCommodityId2
 				,intLocationId
 				,strLocationName
-			FROM #CustomerOwnership 
+			FROM #CustomerOwnershipIncDec 
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
 				AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 				AND (intStorageScheduleTypeId = DD.intStorageScheduleTypeId AND intLocationId = DD.intCompanyLocationId)
 			GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode		
 		) A
-		WHERE DD.strLabel LIKE '%BALANCE'
+		WHERE DD.strLabel LIKE '%BEGINNING'
 
 		INSERT INTO @StorageObligationData
 		SELECT * FROM @StorageObligationDataDUMMY
@@ -845,7 +870,7 @@ BEGIN
 		INSERT INTO @StorageObligationData
 		SELECT @intTotalRowCnt + 5
 			,@intStorageScheduleTypeId
-			,'TOTAL ' + @strStorageTypeDescription
+			,@strStorageTypeDescription + ' ENDING'
 			,''
 			,SUM(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END)
 			,strCommodityCode
@@ -878,7 +903,9 @@ BEGIN
 	END
 
 	DROP TABLE #LicensedLocation
-	DROP TABLE #CustomerOwnership
+	DROP TABLE #CustomerOwnershipALL
+	DROP TABLE #CustomerOwnershipBal
+	DROP TABLE #CustomerOwnershipIncDec
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
 END
@@ -889,7 +916,7 @@ INSERT INTO @StorageObligationData
 SELECT
 	@intTotalRowCnt + 2
 	,0
-	,'TOTAL STORAGE OBLIGATION'
+	,'TOTAL STORAGE OBLIGATION BEGINNING'
 	,''
 	,SUM(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END)
 	,strCommodityCode
@@ -898,7 +925,67 @@ SELECT
 	,strLocationName
 	,strUOM
 FROM @StorageObligationData
-WHERE strLabel LIKE '%TOTAL%'
+WHERE strLabel LIKE '%BEGINNING%'
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+
+INSERT INTO @StorageObligationData
+SELECT
+	@intTotalRowCnt + 3
+	,0
+	,'TOTAL STORAGE OBLIGATION INCREASE'
+	,'+'
+	,SUM(dblUnits)
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+FROM @StorageObligationData
+WHERE strLabel LIKE '%INCREASE%'
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+
+INSERT INTO @StorageObligationData
+SELECT
+	@intTotalRowCnt + 4
+	,0
+	,'TOTAL STORAGE OBLIGATION DECREASE'
+	,'-'
+	,SUM(dblUnits)
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+FROM @StorageObligationData
+WHERE strLabel LIKE '%DECREASE%'
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+
+INSERT INTO @StorageObligationData
+SELECT
+	@intTotalRowCnt + 5
+	,0
+	,'TOTAL STORAGE OBLIGATION ENDING'
+	,''
+	,SUM(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END)
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+FROM @StorageObligationData
+WHERE strLabel LIKE '%ENDING%'
 GROUP BY strCommodityCode
 	,intCommodityId
 	,intCompanyLocationId
@@ -908,7 +995,7 @@ GROUP BY strCommodityCode
 --BLANK SPACE
 INSERT INTO @StorageObligationData
 SELECT
-	@intTotalRowCnt + 3
+	@intTotalRowCnt + 6
 	,0
 	,''
 	,''
@@ -932,7 +1019,7 @@ SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @StorageObligationData)
 INSERT INTO @InventoryData
 SELECT 
 	1
-	,'INVENTORY BALANCE'
+	,'PHYSICAL INVENTORY BEGINNING'
 	,''
 	,0
 	,A.strCommodityCode
@@ -947,14 +1034,14 @@ WHERE (
 		WHEN strLabel = 'SHIPPED' AND dblUnits <> 0 THEN 1
 		ELSE 0
 	END) = 1
-	AND NOT EXISTS(SELECT 1 FROM @InventoryData WHERE strLabel = 'INVENTORY BALANCE')
+	AND NOT EXISTS(SELECT 1 FROM @InventoryData WHERE strLabel = 'PHYSICAL INVENTORY BEGINNING')
 
 
 /* COMPANY OWNED */
 INSERT INTO @InventoryData
 SELECT 
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
-	,'COMPANY-OWNED BEGINNING BALANCE'
+	,'TOTAL COMPANY OWNED BEGINNING (INC DP)'
 	,''
 	,A.dblUnits - ISNULL(B.dblUnits,0)
 	,A.strCommodityCode
@@ -970,7 +1057,7 @@ FROM (
 		,strLocationName
 		,strUOM
 	FROM @InventoryData
-	WHERE strLabel IN ('INVENTORY BALANCE')
+	WHERE strLabel IN ('PHYSICAL INVENTORY BEGINNING')
 	GROUP BY strCommodityCode
 		,intCommodityId
 		,intCompanyLocationId
@@ -1207,7 +1294,7 @@ FROM @StorageObligationData
 INSERT INTO @ReportData
 SELECT
 	@intTotalRowCnt + 2
-	,'TOTAL STORAGE OBLIGATION'
+	,'TOTAL STORAGE OBLIGATION BEGINNING'
 	,''
 	,0
 	,strCommodityCode
@@ -1217,7 +1304,7 @@ SELECT
 	,dtmReportDate
 	,strUOM
 FROM @ReportData
-WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%TOTAL%')
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%BEGINNING%')
 GROUP BY strCommodityCode
 	,intCommodityId
 	,intCompanyLocationId
@@ -1228,6 +1315,69 @@ GROUP BY strCommodityCode
 INSERT INTO @ReportData
 SELECT
 	@intTotalRowCnt + 3
+	,'TOTAL STORAGE OBLIGATION INCREASE'
+	,'+'
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%INCREASE%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 4
+	,'TOTAL STORAGE OBLIGATION DECREASE'
+	,'-'
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%DECREASE%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 5
+	,'TOTAL STORAGE OBLIGATION ENDING'
+	,'-'
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%ENDING%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 6
 	,''
 	,''
 	,0
@@ -1246,98 +1396,6 @@ GROUP BY strCommodityCode
 	,strUOM
 	,dtmReportDate
 /***END===STILL ADD TOTAL STORAGE OBLIGATION IF THERE'S NONE ON SPECIFIC LOCATIONS****/
-
-IF EXISTS (SELECT * FROM tempdb.sys.tables WHERE name = '#DPR')
-	DROP TABLE #VouchersPostedButNotPaid
-
-SELECT dblQty = BILL.dblQty
-	,BILL.intCommodityId
-	,BILL.strCommodityCode
-	,intLocationId = LO.intId
-	,CL.strLocationName
-	,BILL.strUnitMeasure
-INTO #VouchersPostedButNotPaid
-FROM @Locs LO
-INNER JOIN tblSMCompanyLocation CL
-	ON CL.intCompanyLocationId = LO.intId
-OUTER APPLY (
-	SELECT dblQty = SUM(ISNULL(BD.dblQtyReceived,0))
-		,CO.intCommodityId
-		,CO.strCommodityCode
-		,AP.intShipToId
-		,UOM.strUnitMeasure
-	FROM tblAPBillDetail BD
-	INNER JOIN tblAPBill AP
-		ON AP.intBillId = BD.intBillId
-	INNER JOIN tblICItem IC
-		ON IC.intItemId = BD.intItemId
-			AND IC.strType = 'Inventory'
-	INNER JOIN tblICCommodity CO
-		ON CO.intCommodityId = IC.intCommodityId
-	INNER JOIN tblICCommodityUnitMeasure UM
-		ON UM.intCommodityId = IC.intCommodityId
-			AND ysnStockUnit = 1
-	INNER JOIN tblICUnitMeasure UOM
-		ON UOM.intUnitMeasureId = UM.intUnitMeasureId
-	INNER JOIN tblGRSettleStorageBillDetail SBD
-		ON SBD.intBillId = BD.intBillId
-	INNER JOIN tblGRSettleStorageTicket SST
-		ON SST.intSettleStorageId = SBD.intSettleStorageId
-	INNER JOIN tblGRCustomerStorage CS
-		ON CS.intCustomerStorageId = SST.intCustomerStorageId
-	INNER JOIN tblGRStorageType ST
-		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-			AND ST.ysnDPOwnedType = 0
-	WHERE AP.ysnPosted = 1 
-		AND AP.ysnPaid = 0
-		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), AP.dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
-		AND IC.intCommodityId = ISNULL(@intCommodityId,IC.intCommodityId)
-		AND AP.intTransactionType = 1
-		AND AP.intShipToId = LO.intId
-	GROUP BY CO.intCommodityId
-		,CO.strCommodityCode
-		,BD.intLocationId
-		,AP.intShipToId
-		,UOM.strUnitMeasure
-) BILL
-
-UPDATE NP
-SET intCommodityId = ID.intCommodityId
-	,strCommodityCode = ID.strCommodityCode
-	,intLocationId = ID.intCompanyLocationId
-	,strLocationName = ID.strLocationName
-	,strUnitMeasure = ID.strUOM
-FROM #VouchersPostedButNotPaid NP
-INNER JOIN @InventoryData ID
-	ON ID.intCompanyLocationId = NP.intLocationId
-WHERE ID.strLabel = 'COMPANY-OWNED BEGINNING BALANCE'
-	AND NP.dblQty IS NULL
-
-INSERT INTO @InventoryData
-SELECT 
-	(SELECT MAX(intRowNum) FROM @InventoryData) + 1
-	,'COMPANY-OWNED (PAID)'
-	,'-'
-	,0
-	,strCommodityCode
-	,intCommodityId
-	,intLocationId
-	,strLocationName
-	,strUnitMeasure
-FROM #VouchersPostedButNotPaid
-
-INSERT INTO @InventoryData
-SELECT 
-	(SELECT MAX(intRowNum) FROM @InventoryData) + 1
-	,'COMPANY-OWNED (PRICED BUT NOT PAID)'
-	,'+'
-	,dblQty
-	,strCommodityCode
-	,intCommodityId
-	,intLocationId
-	,strLocationName
-	,strUnitMeasure
-FROM #VouchersPostedButNotPaid
 /* END COMPANY OWNED */
 
 --BLANK SPACE
@@ -1354,7 +1412,7 @@ SELECT
 	,@dtmReportDate
 	,strUOM
 FROM @ReportData
-WHERE strLabel IN ('TOTAL INVENTORY','TOTAL STORAGE OBLIGATION')
+WHERE strLabel IN ('PHYSICAL INVENTORY ENDING')
 GROUP BY strCommodityCode
 	,intCommodityId
 	,intCompanyLocationId
@@ -1368,7 +1426,7 @@ INSERT INTO @tblCommodities
 SELECT DISTINCT ID.intCommodityId
 	,ID.strCommodityCode
 FROM @InventoryData ID
-WHERE strLabel = 'INVENTORY BALANCE'
+WHERE strLabel = 'PHYSICAL INVENTORY BEGINNING'
 
 INSERT INTO @StorageTypes
 SELECT 
@@ -1401,6 +1459,28 @@ BEGIN
 		,strLocationName
 	INTO #LicensedLocation2
 	FROM @InventoryData
+	
+	SELECT
+		dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
+		,strTransactionNumber
+		,strDistributionType
+		,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
+		,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
+		,ST.intStorageScheduleTypeId
+		,OH.strStorageTypeCode
+		,OH.intLocationId
+		,OH.strLocationName
+		,OH.strCommodityCode
+	INTO #DelayedPricingALL
+	FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
+	LEFT JOIN tblGRStorageType ST 
+		ON ST.strStorageTypeDescription = OH.strDistributionType 
+			AND ysnDPOwnedType = 1
+	WHERE OH.intCommodityId = @intCommodityId2	
+
+	DELETE A
+	FROM #DelayedPricingALL A
+	WHERE intLocationId NOT IN (SELECT intCompanyLocationId FROM #LicensedLocation2)
 
 	SELECT
 		intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
@@ -1413,29 +1493,8 @@ BEGIN
 		,intLocationId
 		,strLocationName
 		,strCommodityCode
-	INTO #DelayedPricing
-	FROM (
-		SELECT
-			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
-			,strDistributionType
-			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
-			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
-			,ST.intStorageScheduleTypeId
-			,OH.intLocationId
-			,OH.strLocationName
-			,OH.strCommodityCode
-		FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
-		INNER JOIN (
-			SELECT strTransactionNumber
-				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
-			FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
-			GROUP BY strTransactionNumber
-		) A ON A.strTransactionNumber = OH.strTransactionNumber AND A.total <> 0
-		LEFT JOIN tblGRStorageType ST 
-			ON ST.strStorageTypeDescription = OH.strDistributionType 
-				AND ysnDPOwnedType = 1
-		WHERE OH.intCommodityId = @intCommodityId2
-	) t
+	INTO #DelayedPricingBal
+	FROM #DelayedPricingALL AA
 	GROUP BY
 		dtmDate
 		,strDistributionType
@@ -1444,9 +1503,32 @@ BEGIN
 		,strLocationName
 		,strCommodityCode
 
-	DELETE A
-	FROM #DelayedPricing A
-	WHERE intLocationId NOT IN (SELECT intCompanyLocationId FROM #LicensedLocation2)
+	SELECT
+		intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
+		,dtmDate
+		,strDistribution = strDistributionType
+		,dblIn = SUM(dblIn)
+		,dblOut = SUM(dblOut)
+		,dblNet = SUM(dblIn) - SUM(dblOut)
+		,intStorageScheduleTypeId
+		,intLocationId
+		,strLocationName
+		,strCommodityCode
+	INTO #DelayedPricingIncDec
+	FROM #DelayedPricingALL AA
+	INNER JOIN (
+		SELECT strTransactionNumber,strStorageTypeCode
+			,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+		FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
+		GROUP BY strTransactionNumber,strStorageTypeCode
+	) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeCode = AA.strStorageTypeCode
+	GROUP BY
+		dtmDate
+		,strDistributionType
+		,intStorageScheduleTypeId
+		,intLocationId
+		,strLocationName
+		,strCommodityCode
 
 	WHILE EXISTS(SELECT 1 FROM @StorageTypes)
 	BEGIN
@@ -1457,13 +1539,13 @@ BEGIN
 			,@strStorageTypeDescription	= strStorageTypeDescription
 		FROM @StorageTypes
 
-		SET @intTotalRowCnt = CASE WHEN (SELECT ISNULL(MAX(intRowNum),0) FROM @StorageObligationData) = 0 THEN 100 ELSE (SELECT MAX(intRowNum) + 1 FROM @StorageObligationData WHERE strLabel = @prevStorageType + ' ENDING BALANCE') END
+		SET @intTotalRowCnt = CASE WHEN (SELECT ISNULL(MAX(intRowNum),0) FROM @StorageObligationData) = 0 THEN 100 ELSE (SELECT MAX(intRowNum) + 1 FROM @StorageObligationData WHERE strLabel = @prevStorageType + ' ENDING') END
 
 		--(OPENING) BALANCE
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 1
 			,@intStorageScheduleTypeId
-			,strDistribution + ' BEGINNING BALANCE'
+			,strDistribution + ' BEGINNING'
 			,''
 			,NET = SUM(dblIn) - SUM(dblOut)
 			,strCommodityCode
@@ -1471,7 +1553,7 @@ BEGIN
 			,intLocationId
 			,strLocationName
 			,@strUOM
-		FROM #DelayedPricing 
+		FROM #DelayedPricingBal
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
 			AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 		GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode
@@ -1479,7 +1561,7 @@ BEGIN
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 1
 			,@intStorageScheduleTypeId
-			,@strStorageTypeDescription + ' BEGINNING BALANCE'
+			,@strStorageTypeDescription + ' BEGINNING'
 			,''
 			,0
 			,@strCommodityCode
@@ -1490,14 +1572,14 @@ BEGIN
 		FROM #LicensedLocation2 A
 		LEFT JOIN @StorageObligationDataDUMMY B
 			ON B.intCompanyLocationId = A.intCompanyLocationId
-				AND B.strLabel LIKE '%BEGINNING BALANCE'
+				AND B.strLabel LIKE '%BEGINNING'
 		WHERE B.intCompanyLocationId IS NULL
 		
 		--INCREASE FOR THE DAY
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 2
 			,DD.intStorageScheduleTypeId
-			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BEGINNING BALANCE','INCREASE') ELSE A.STRLABEL END
+			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BEGINNING','INCREASE') ELSE A.STRLABEL END
 			,CASE WHEN A.STRSIGN IS NULL THEN '+' ELSE A.STRSIGN END
 			,CASE WHEN A.TOTAL IS NULL THEN 0 ELSE A.TOTAL END
 			,DD.strCommodityCode
@@ -1515,7 +1597,7 @@ BEGIN
 				,intCommodityId2 = @intCommodityId2
 				,intLocationId
 				,strLocationName
-			FROM #DelayedPricing C
+			FROM #DelayedPricingIncDec C
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
 				AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 				AND (intStorageScheduleTypeId = DD.intStorageScheduleTypeId AND intLocationId = DD.intCompanyLocationId)
@@ -1543,7 +1625,7 @@ BEGIN
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 3
 			,DD.intStorageScheduleTypeId
-			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BEGINNING BALANCE','DECREASE') ELSE A.STRLABEL END
+			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BEGINNING','DECREASE') ELSE A.STRLABEL END
 			,CASE WHEN A.STRSIGN IS NULL THEN '-' ELSE A.STRSIGN END
 			,CASE WHEN A.TOTAL IS NULL THEN 0 ELSE A.TOTAL END
 			,DD.strCommodityCode
@@ -1562,13 +1644,13 @@ BEGIN
 				,intCommodityId2 = @intCommodityId2
 				,intLocationId
 				,strLocationName
-			FROM #DelayedPricing 
+			FROM #DelayedPricingIncDec
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
 				AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 				AND (intStorageScheduleTypeId = DD.intStorageScheduleTypeId AND intLocationId = DD.intCompanyLocationId)
 			GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode		
 		) A
-		WHERE DD.strLabel LIKE '%BALANCE'
+		WHERE DD.strLabel LIKE '%BEGINNING'
 
 		INSERT INTO @StorageObligationDataDUMMY
 		SELECT @intTotalRowCnt + 3
@@ -1594,7 +1676,7 @@ BEGIN
 		INSERT INTO @StorageObligationData
 		SELECT @intTotalRowCnt + 4
 			,@intStorageScheduleTypeId
-			,@strStorageTypeDescription + ' ENDING BALANCE'
+			,@strStorageTypeDescription + ' ENDING'
 			,''
 			,SUM(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END)
 			,strCommodityCode
@@ -1626,149 +1708,50 @@ BEGIN
 	END
 
 	DROP TABLE #LicensedLocation2
-	DROP TABLE #DelayedPricing
+	DROP TABLE #DelayedPricingALL
+	DROP TABLE #DelayedPricingBal
+	DROP TABLE #DelayedPricingIncDec
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
 END
 
---UPDATE COMPANY-OWNED STOCKS, SUBTRACT THE DP
-UPDATE ID
-SET dblUnits = ID.dblUnits - SD.dblUnits
-FROM @InventoryData ID
-INNER JOIN @StorageObligationData SD
-	ON SD.intCompanyLocationId = ID.intCompanyLocationId
-WHERE ID.strLabel = 'COMPANY-OWNED BEGINNING BALANCE'
-	AND SD.strLabel LIKE '%BEGINNING BALANCE'
-
---UPDATE COMPANY-OWNED (PAID)
-UPDATE A
-SET dblUnits = B.dblTotal
-FROM @InventoryData A
-INNER JOIN (
-	SELECT dblTotal = SUM(dblUnits)
-		,strCommodityCode
-		,intCommodityId
-		,intCompanyLocationId
-		,strLocationName
-		,strUOM
-	FROM @InventoryData
-	WHERE strLabel IN ('COMPANY-OWNED (PRICED BUT NOT PAID)','COMPANY-OWNED BEGINNING BALANCE')
-	GROUP BY strCommodityCode
-		,intCommodityId
-		,intCompanyLocationId
-		,strLocationName
-		,strUOM
-) B
-	ON B.strCommodityCode = A.strCommodityCode
-		AND B.intCommodityId = A.intCommodityId
-		AND B.intCompanyLocationId = A.intCompanyLocationId
-		AND B.strLocationName = A.strLocationName
-		AND B.strUOM = A.strUOM
-WHERE strLabel = 'COMPANY-OWNED (PAID)'
-
 SET @intTotalRowCnt = ISNULL((SELECT MAX(intRowNum) FROM @StorageObligationData),100)
+
+--UPDATE COMPANY-OWNED STOCKS, ADD THE DP
+UPDATE ID
+SET intRowNum = @intTotalRowCnt + 21
+FROM @InventoryData ID
+WHERE ID.strLabel = 'TOTAL COMPANY OWNED BEGINNING (INC DP)'
+
+UPDATE ID
+SET intRowNum = @intTotalRowCnt + 22
+FROM @InventoryData ID
+WHERE ID.strLabel = 'TOTAL COMPANY OWNED INCREASE (INC DP)'
+
+UPDATE ID
+SET intRowNum = @intTotalRowCnt + 23
+FROM @InventoryData ID
+WHERE ID.strLabel = 'TOTAL COMPANY OWNED DECREASE (INC DP)'
 
 INSERT INTO @InventoryData
 SELECT 
-	@intTotalRowCnt + 21
-	,'COMPANY-OWNED ENDING BALANCE'
+	@intTotalRowCnt + 24
+	,'TOTAL COMPANY OWNED ENDING (INC DP)'
 	,''
-	,ID.dblUnits + ISNULL(SD.dblUnits,0)
+	,SUM(CASE WHEN strSign = '-' THEN -ID.dblUnits ELSE ID.dblUnits END)
 	,ID.strCommodityCode
 	,ID.intCommodityId
 	,ID.intCompanyLocationId
 	,ID.strLocationName
 	,ID.strUOM
 FROM @InventoryData ID
-LEFT JOIN @StorageObligationData SD
-	ON SD.intCompanyLocationId = ID.intCompanyLocationId
-		AND SD.strLabel LIKE '%ENDING BALANCE'
-WHERE ID.strLabel = 'COMPANY-OWNED BEGINNING BALANCE'
-
---BLANK SPACE
-INSERT INTO @ReportData
-SELECT
-	@intTotalRowCnt + 22
-	,''
-	,''
-	,NULL
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,@dtmReportDate
-	,strUOM
-FROM @InventoryData
-GROUP BY strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,strUOM
+WHERE ID.strLabel LIKE '% (INC DP)'
+GROUP BY ID.strCommodityCode
+	,ID.intCommodityId
+	,ID.intCompanyLocationId
+	,ID.strLocationName
+	,ID.strUOM
 /*==END==DP STORAGE==*/
-
-/*==START==STORAGE CAPACITY AND STORAGE AVAILABLE==*/
-IF EXISTS (SELECT * FROM tempdb.sys.tables WHERE name = '#tmpSubLocationDetails')
-	DROP TABLE #tmpSubLocationDetails
-
-SELECT LD.strCommodityCode
-	,CO.intCommodityId
-	,LD.intCompanyLocationId
-	,LD.strLocation
-	,dblCapacity = SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(AA.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,dblCapacity),0))
-	,dblAvailable = SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(AA.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,dblAvailable),0))
-	,UOM.strUnitMeasure
-INTO #tmpSubLocationDetails
-FROM vyuICGetSubLocationBinDetails LD
-INNER JOIN tblICCommodity CO
-	ON CO.strCommodityCode = LD.strCommodityCode
-INNER JOIN tblICCommodityUnitMeasure UM
-	ON UM.intCommodityId = CO.intCommodityId
-		AND UM.ysnStockUnit = 1
-INNER JOIN tblICUnitMeasure UOM
-	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
-OUTER APPLY (
-	SELECT A.intCommodityUnitMeasureId
-	FROM tblICCommodityUnitMeasure A
-	INNER JOIN tblICUnitMeasure UOM2
-		ON UOM2.strUnitMeasure = LD.strItemUOM
-			AND UOM2.intUnitMeasureId = A.intUnitMeasureId
-) AA
-INNER JOIN @Locs LO
-	ON LO.intId = LD.intCompanyLocationId
-WHERE CO.intCommodityId = ISNULL(@intCommodityId, CO.intCommodityId)
-GROUP BY LD.strCommodityCode
-	,CO.intCommodityId
-	,LD.intCompanyLocationId
-	,LD.strLocation
-	,UOM.strUnitMeasure
-
-
-INSERT INTO @InventoryData
-SELECT 
-	@intTotalRowCnt + 23
-	,'TOTAL STORAGE CAPACITY'
-	,''
-	,CASE WHEN dblCapacity = 0 THEN NULL ELSE dblAvailable END
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocation
-	,strUnitMeasure
-FROM #tmpSubLocationDetails
-
-INSERT INTO @InventoryData
-SELECT 
-	@intTotalRowCnt + 24
-	,'TOTAL CAPACITY AVAILABLE'
-	,''
-	,CASE WHEN dblAvailable = 0 THEN NULL ELSE dblAvailable END
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocation
-	,strUnitMeasure
-FROM #tmpSubLocationDetails
-/*==END==STORAGE CAPACITY AND STORAGE AVAILABLE==*/
 
 /*==START==REPORT DATA==*/
 INSERT INTO @ReportData
@@ -1810,10 +1793,12 @@ SET intRowNum = B.intRowNum
 FROM @ReportData A
 OUTER APPLY (
 	SELECT TOP 1 intRowNum
+		,strLabel
 	FROM @ReportData
-	WHERE strLabel = 'TOTAL STORAGE OBLIGATION'
+	WHERE strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
 ) B
-WHERE A.strLabel = 'TOTAL STORAGE OBLIGATION'
+WHERE A.strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
+	AND A.strLabel = B.strLabel
 
 IF(SELECT COUNT(*) FROM @Locs) > 1
 BEGIN
@@ -1839,18 +1824,12 @@ BEGIN
 		,strUOM
 END
 
---SET THE dblUnits OF COMPANY-OWNED (PAID) TO ABS
-UPDATE A
-SET dblUnits = ABS(dblUnits)
-FROM @ReportData A
-WHERE A.strLabel = 'COMPANY-OWNED (PAID)'
-
 DECLARE @LocsWithNoInventory AS Id
 
 INSERT INTO @LocsWithNoInventory
 SELECT DISTINCT intCompanyLocationId 
 FROM @ReportData 
-WHERE (strLabel = 'TOTAL INVENTORY' AND dblUnits = 0)
+WHERE (strLabel = 'PHYSICAL INVENTORY ENDING' AND dblUnits = 0)
 
 DELETE A
 FROM @ReportData A
