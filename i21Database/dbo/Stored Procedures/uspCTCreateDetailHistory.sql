@@ -84,7 +84,8 @@ BEGIN TRY
 		, dblCashPrice NUMERIC(18,6)
 		, intPriceItemUOMId INT
 		, intBookId INT
-		, intSubBookId INT)
+		, intSubBookId INT
+		 , intGardenMarkId INT)
 	
 	SELECT TOP 1 @strScreenName = strScreenName FROM tblCTSequenceUsageHistory WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
 
@@ -176,7 +177,8 @@ BEGIN TRY
 		, dblCashPrice
 		, intPriceItemUOMId
 		, intBookId
-		, intSubBookId)
+		, intSubBookId
+		, intGardenMarkId)
 	SELECT intContractHeaderId
 		, t1.intContractDetailId
 		, intContractStatusId
@@ -194,6 +196,7 @@ BEGIN TRY
 		, intPriceItemUOMId
 		, intBookId
 		, intSubBookId
+		, intGardenMarkId
 	FROM (SELECT *
 		FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
 						FROM tblCTSequenceHistory
@@ -255,7 +258,9 @@ BEGIN TRY
 		, intSequenceUsageHistoryId
 		, dtmDateAdded
 		, intUserId
-		, intFreightTermId)
+		, intFreightTermId
+		, intGardenMarkId
+        , intReasonCodeId)
 	OUTPUT inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 	SELECT CD.intContractHeaderId
 		, CD.intContractDetailId
@@ -328,6 +333,8 @@ BEGIN TRY
 		, CASE WHEN @ysnUseContractDate = 1 THEN GETDATE() ELSE NULL END
 		, intUserId = @intUserId
 		, intFreightTermId = CH.intFreightTermId
+		, CD.intGardenMarkId
+        , CD.intReasonCodeId
 	FROM	tblCTContractDetail			CD with (nolock)
 	JOIN	tblCTContractHeader			CH with (nolock)  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 	JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
@@ -423,7 +430,7 @@ BEGIN TRY
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1)
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1  and 1=0) --CT-7774 disabled for now
 		BEGIN
 			DELETE
 			FROM tblCTSequenceHistory
@@ -707,7 +714,8 @@ BEGIN TRY
 				, strItemChanged
 				, strOldValue
 				, strNewValue
-				, intConcurrencyId)
+				, intConcurrencyId
+				 , intReasonCodeId)
 			--intContractStatusId
 			SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
 				, dtmHistoryCreated			= GETDATE()
@@ -718,6 +726,7 @@ BEGIN TRY
 				, strOldValue			    = PreviousType.strContractStatus
 				, strNewValue		        = CurrentType.strContractStatus
 				, intConcurrencyId		    = 1
+				, intReasonCodeId           = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId		  =  CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail				PreviousRow			ON PreviousRow.intContractStatusId       <>  CurrentRow.intContractStatusId
@@ -735,6 +744,7 @@ BEGIN TRY
 				, strOldValue			    = Convert(Nvarchar,PreviousRow.dtmStartDate,101)
 				, strNewValue		        = Convert(Nvarchar,CurrentRow.dtmStartDate,101)
 				, intConcurrencyId		    = 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId				 =  CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail				PreviousRow			ON Convert(Nvarchar,PreviousRow.dtmStartDate,101) <> Convert(Nvarchar,CurrentRow.dtmStartDate,101)
@@ -750,6 +760,7 @@ BEGIN TRY
 				, strOldValue			    = Convert(Nvarchar,PreviousRow.dtmEndDate,101)
 				, strNewValue		        = Convert(Nvarchar,CurrentRow.dtmEndDate,101)
 				, intConcurrencyId		    = 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId			    =  CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON  Convert(Nvarchar,PreviousRow.dtmEndDate,101) <> Convert(Nvarchar,CurrentRow.dtmEndDate,101)
@@ -765,6 +776,7 @@ BEGIN TRY
 				, strOldValue			    =  PreviousType.strItemNo
 				, strNewValue		        =  CurrentType.strItemNo
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   PreviousRow.intItemId         <> CurrentRow.intItemId
@@ -782,6 +794,7 @@ BEGIN TRY
 				, strOldValue			    =  LTRIM(PreviousRow.dblQuantity)  
 				, strNewValue		        =  LTRIM(CurrentRow.dblQuantity)
 				, intConcurrencyId			= 1 
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId     =  CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail				PreviousRow			ON   PreviousRow.dblQuantity		    <> CurrentRow.dblQuantity
@@ -797,6 +810,7 @@ BEGIN TRY
 				, strOldValue			    = U21.strUnitMeasure
 				, strNewValue		        = U2.strUnitMeasure
 				, intConcurrencyId			= 1 
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   PreviousRow.intItemUOMId        <> CurrentRow.intItemUOMId
@@ -817,6 +831,7 @@ BEGIN TRY
 				, strOldValue			    = PreviousType.strFutMarketName
 				, strNewValue		        = CurrentType.strFutMarketName
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	 CurrentRow
 			JOIN @SCOPE_IDENTITY		 NewRecords			ON		    NewRecords.intSequenceHistoryId     =   CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail				 PreviousRow		ON   ISNULL(CurrentRow.intFutureMarketId,0)     <>  ISNULL(PreviousRow.intFutureMarketId,0)
@@ -834,6 +849,7 @@ BEGIN TRY
 				, strOldValue			    = PreviousType.strCurrency
 				, strNewValue		        = CurrentType.strCurrency
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   CurrentRow.intCurrencyId        <> PreviousRow.intCurrencyId
@@ -851,6 +867,7 @@ BEGIN TRY
 				, strOldValue			    = PreviousType.strFutureMonth
 				, strNewValue		        = CurrentType.strFutureMonth
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	 CurrentRow
 			JOIN @SCOPE_IDENTITY		 NewRecords			ON	NewRecords.intSequenceHistoryId			= CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				 PreviousRow		ON	ISNULL(CurrentRow.intFutureMonthId  ,0)   <>  ISNULL(PreviousRow.intFutureMonthId ,0)
@@ -869,6 +886,7 @@ BEGIN TRY
 				, strOldValue			    = LTRIM(PreviousRow.dblFutures)
 				, strNewValue		        = LTRIM(CurrentRow.dblFutures)
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0)
@@ -885,6 +903,7 @@ BEGIN TRY
 				, strOldValue			    = LTRIM(PreviousRow.dblBasis)
 				, strNewValue		        = LTRIM(CurrentRow.dblBasis)
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords          ON   NewRecords.intSequenceHistoryId  = CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.dblBasis,0)    <> ISNULL(PreviousRow.dblBasis,0)
@@ -900,6 +919,7 @@ BEGIN TRY
 				, strOldValue			    = LTRIM(PreviousRow.dblCashPrice)
 				, strNewValue		        = LTRIM(CurrentRow.dblCashPrice)
 				, intConcurrencyId			= 1 
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.dblCashPrice,0)  <> ISNULL(PreviousRow.dblCashPrice,0)
@@ -916,6 +936,7 @@ BEGIN TRY
 				, strOldValue			    =  U21.strUnitMeasure
 				, strNewValue		        =  U2.strUnitMeasure
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @tblDetail				PreviousRow			ON   CurrentRow.intPriceItemUOMId    <> PreviousRow.intPriceItemUOMId
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
@@ -936,6 +957,7 @@ BEGIN TRY
 				, strOldValue			    =  oldBook.strBook
 				, strNewValue		        =  newBook.strBook
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.intBookId,0)    <> ISNULL(PreviousRow.intBookId,0)
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
@@ -954,6 +976,7 @@ BEGIN TRY
 				, strOldValue			    =  oldSubBook.strSubBook
 				, strNewValue		        =  newSubBook.strSubBook
 				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.intSubBookId,0)    <> ISNULL(PreviousRow.intSubBookId,0)
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
@@ -972,6 +995,7 @@ BEGIN TRY
 				, strOldValue			    =  PreviousType.strCity
 				, strNewValue		        =  CurrentType.strCity
 				, intConcurrencyId			=  1
+				, null
 			FROM tblCTSequenceHistory	CurrentRow								
 			LEFT JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			outer apply(select intCityId, strCity from tblSMCity where ISNULL(intCityId,0)	        =	ISNULL(@ContractHeaderIntINCOLocationTypeId,0))			CurrentType			
