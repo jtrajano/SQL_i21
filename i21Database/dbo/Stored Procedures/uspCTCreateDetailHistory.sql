@@ -984,6 +984,26 @@ BEGIN TRY
 			LEFT JOIN tblCTSubBook oldSubBook on ISNULL(oldSubBook.intSubBookId,0) = ISNULL(PreviousRow.intSubBookId,0)
 			WHERE ISNULL(oldSubBook.intSubBookId,0) <> ISNULL(newSubBook.intSubBookId,0)
 				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	
+
+
+			--Garden
+			UNION SELECT intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+				, dtmHistoryCreated			= GETDATE()
+				, intContractHeaderId	    = @intContractHeaderId
+				, intContractDetailId	    = CurrentRow.intContractDetailId
+				, intAmendmentApprovalId	= 24
+				, strItemChanged		    = 'Garden'
+				, strOldValue			    =  oldGarden.strGardenMark
+				, strNewValue		        =  newGarden.strGardenMark
+				, intConcurrencyId			= 1
+				, intReasonCodeId          = CurrentRow.intReasonCodeId
+			FROM tblCTSequenceHistory	CurrentRow
+			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.intGardenMarkId,0)    <> ISNULL(PreviousRow.intGardenMarkId,0)
+			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+			LEFT JOIN tblQMGardenMark newGarden on ISNULL(newGarden.intGardenMarkId,0) = ISNULL(CurrentRow.intGardenMarkId,0)
+			LEFT JOIN tblQMGardenMark oldGarden on ISNULL(oldGarden.intGardenMarkId,0) = ISNULL(PreviousRow.intGardenMarkId,0)
+			WHERE ISNULL(oldGarden.intGardenMarkId,0) <> ISNULL(newGarden.intGardenMarkId,0)
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	
 				
 			--intINCOLocationTypeId
 			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
