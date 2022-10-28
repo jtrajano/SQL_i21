@@ -15,3 +15,7 @@ CREATE INDEX [idx_tblARPostInvalidInvoiceData_intInvoiceId] ON [dbo].[tblARPostI
 GO
 CREATE INDEX [idx_tblARPostInvalidInvoiceData_strSessionId] ON [dbo].[tblARPostInvalidInvoiceData] (strSessionId)
 GO
+CREATE INDEX [idx_tblARPostInvalidInvoiceData_strBatchId_strSessionId] ON [dbo].[tblARPostInvalidInvoiceData] (strSessionId) INCLUDE (strBatchId)
+GO
+CREATE INDEX [idx_tblARPostInvalidInvoiceData_strSessionId_intInvoiceId] ON [dbo].[tblARPostInvalidInvoiceData] (strSessionId) INCLUDE (intInvoiceId)
+GO
