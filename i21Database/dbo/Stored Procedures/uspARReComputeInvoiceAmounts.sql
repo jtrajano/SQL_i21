@@ -153,7 +153,7 @@ SET  [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
-	,[dblLoanAmount]						= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+	,[dblLoanAmount]						= CASE WHEN ISNULL(strTransactionNo, '') <> '' THEN ISNULL([dblInvoiceSubtotal], @ZeroDecimal) ELSE NULL END
 WHERE [intInvoiceId] = @InvoiceIdLocal
 
 UPDATE I

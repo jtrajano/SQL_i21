@@ -179,7 +179,7 @@ BEGIN
 						, CatLoc.strCashRegisterDepartment AS [MerchandiseCode] 
 						, 'yes' AS [ActiveFlagValue] 
 						, Cat.strDescription AS [strDescription] 
-						, ISNULL(IL.intProductCodeId, 0) AS [SalesRestrictCode]
+						, ISNULL(SR.strRegProdCode, 0) AS [SalesRestrictCode]
 						, ISNULL((CASE	
 							WHEN IL.ysnTaxFlag1 = 1 
 								THEN R.intTaxStrategyIdForTax1 
@@ -203,6 +203,8 @@ BEGIN
 						ON CatLoc.intGeneralItemId = I.intItemId
 					JOIN tblICItemLocation IL 
 						ON IL.intItemId = I.intItemId
+					LEFT JOIN tblSTSubcategoryRegProd SR 
+						ON SR.intRegProdId = IL.intProductCodeId
 					JOIN tblSTStore ST 
 						ON IL.intLocationId = ST.intCompanyLocationId
 					JOIN tblSTRegister R 
