@@ -50,6 +50,7 @@ WHERE A.COLUMN_NAME NOT IN(
 	AND C.COLUMN_NAME = A.COLUMN_NAME
 	and T.CONSTRAINT_TYPE='PRIMARY KEY'
 	UNION SELECT 'intBatchId' UNION SELECT 'strBatchId'
+	UNION SELECT 'intConcurrencyId'
 )
 AND A.TABLE_NAME = N'tblMFBatch'
 
@@ -60,15 +61,14 @@ BEGIN
 	SELECT TOP 1 @col = col FROM @tblColumn
 	IF CHARINDEX (LOWER(@col)+',', @column ) > 0 -- checks colum with comma to be sure the whole column is compared
 	BEGIN
-		SET @Sql = @Sql + @col +'= B.' + @col + ',' 
+		SET @Sql = @Sql + @col +'= B.' + @col + ', ' 
 	END
 	DELETE FROM @tblColumn WHERE @col = col
 END
 IF LEN(@Sql) > 0
 BEGIN
-	SET @Sql = SUBSTRING(@Sql,1 ,LEN(@Sql)-1)
 	SET @Sql =
-	'UPDATE A SET ' + @Sql + 
+	'UPDATE A SET ' + @Sql + ' intConcurrencyId = A.intConcurrencyId + 1' +
 	' FROM tblMFBatch A JOIN @_MFBatchTableType B ON A.strBatchId = B.strBatchId'
 	EXECUTE sp_executesql @Sql,
 	N'@_column NVARCHAR(MAX),@_MFBatchTableType MFBatchTableType READONLY',
