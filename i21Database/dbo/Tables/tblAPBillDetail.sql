@@ -117,7 +117,7 @@
 	[dblNumberOfPackages2] DECIMAL(18,6),
 	[dblNetWeightPerPackage3] DECIMAL(18,6),
 	[dblNumberOfPackages3] DECIMAL(18,6),
-	[strPurchaseGroup] NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strPurchaseGroup] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
