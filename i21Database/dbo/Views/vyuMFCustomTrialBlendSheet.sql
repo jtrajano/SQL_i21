@@ -11,7 +11,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , CompanyLocation.strLocationName								-- Plant
 	 , WorkOrder.strReferenceNo										-- Order Nbr
 	 , Item.strItemNo												-- Blend Code
-	 , FORMAT(WorkOrder.dtmCreated, 'dd.MM.yyyy') AS  dtmCreated	-- Date Created
+	 , FORMAT(WorkOrder.dtmCreated, 'dd,MM,yyyy') AS  dtmCreated	-- Date Created
 	 , BlendRequirement.dblEstNoOfBlendSheet						-- Mixes
 	 , WorkOrderInputLotQuantity.dblIssuedQuantity					-- Parts
 	 , BlendRequirement.dblBlenderSize								-- Net Wt per mix
@@ -20,7 +20,6 @@ FROM tblMFWorkOrder AS WorkOrder
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON WorkOrder.intLocationId = CompanyLocation.intCompanyLocationId
 LEFT JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId
 LEFT JOIN tblMFBlendRequirement AS BlendRequirement ON WorkOrder.intBlendRequirementId = BlendRequirement.intBlendRequirementId
-LEFT JOIN tblMFWorkOrderInputLot AS WorkOrderInputLot ON WorkOrder.intWorkOrderId = WorkOrderInputLot.intWorkOrderId
 OUTER APPLY (SELECT SUM(dblIssuedQuantity) AS dblIssuedQuantity
 			 FROM tblMFWorkOrderInputLot
 			 WHERE intWorkOrderId = WorkOrder.intWorkOrderId) AS WorkOrderInputLotQuantity
