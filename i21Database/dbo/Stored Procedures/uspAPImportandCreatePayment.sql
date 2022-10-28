@@ -70,7 +70,7 @@ BEGIN TRY
 				WHERE 
 					I.strBillId = B.strBillId 
 				AND I.strVendorOrderNumber = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)))
-				AND ((I.dblPayment + I.dblDiscount) - I.dblInterest) = ISNULL(PS.dblPayment, B.dblAmountDue)
+				AND ((I.dblPayment + I.dblDiscount) - I.dblInterest) = ISNULL(PS.dblPayment, B.dblAmountDue * (CASE WHEN B.intTransactionType = 1 THEN 1 ELSE  -1 END))
 				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
 			) forPayment
 			WHERE PD.intPaymentId = @createdPaymentId;
