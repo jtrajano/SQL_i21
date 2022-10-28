@@ -11594,6 +11594,7 @@
     <Build Include="dbo\Tables\tblQMCatalogueReconciliationDetail.sql" />
     <Build Include="dbo\Views\vyuQMSearchPreInvoiceCatalogueReconciliation.sql" />
     <Build Include="dbo\Views\vyuQMSearchApprovedPreInvoiceReconciliation.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMPostCatalogueReconciliation.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
