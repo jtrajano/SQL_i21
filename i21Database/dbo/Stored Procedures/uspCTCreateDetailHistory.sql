@@ -57,7 +57,6 @@ BEGIN TRY
 		, @ContractHeaderIntGradeId INT
 		, @ContractHeaderIntWeightId INT
 		, @ContractHeaderIntFreightTermId INT
-		, @ContractHeaderIntINCOLocationTypeId INT
 	
 	DECLARE @HeaderLastModificationIntEntityId INT
 		, @HeaderLastModificationIntPositionId INT
@@ -66,7 +65,6 @@ BEGIN TRY
 		, @HeaderLastModificationIntGradeId INT
 		, @HeaderLastModificationIntWeightId INT
 		, @HeaderLastModificationIntFreightTermId INT
-		, @HeaderLastModificationIntINCOLocationTypeId INT
 		
 	DECLARE @tblDetail AS TABLE (intContractHeaderId INT
 		, intContractDetailId INT
@@ -84,7 +82,8 @@ BEGIN TRY
 		, dblCashPrice NUMERIC(18,6)
 		, intPriceItemUOMId INT
 		, intBookId INT
-		, intSubBookId INT)
+		, intSubBookId INT
+		, intGardenMarkId INT)
 	
 	SELECT TOP 1 @strScreenName = strScreenName FROM tblCTSequenceUsageHistory WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
 
@@ -104,7 +103,6 @@ BEGIN TRY
 			, @ContractHeaderIntGradeId = intGradeId
 			, @ContractHeaderIntWeightId = intWeightId
 			, @ContractHeaderIntFreightTermId = intFreightTermId
-			, @ContractHeaderIntINCOLocationTypeId = intINCOLocationTypeId
 
 
 		FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
@@ -142,7 +140,6 @@ BEGIN TRY
 		, @HeaderLastModificationIntGradeId = intGradeId
 		, @HeaderLastModificationIntWeightId = intWeightId
 		, @HeaderLastModificationIntFreightTermId = intFreightTermId
-		, @HeaderLastModificationIntINCOLocationTypeId = intINCOLocationTypeId
 	FROM tblCTContractHeaderLastModification
 	WHERE intContractHeaderId = @intContractHeaderId
 
@@ -153,7 +150,6 @@ BEGIN TRY
 		or isnull(@ContractHeaderIntGradeId,0) <> isnull(@HeaderLastModificationIntGradeId, 0)
 		or isnull(@ContractHeaderIntWeightId,0) <> isnull(@HeaderLastModificationIntWeightId, 0)
 		or isnull(@ContractHeaderIntFreightTermId,0) <> isnull(@HeaderLastModificationIntFreightTermId, 0)
-		or isnull(@ContractHeaderIntINCOLocationTypeId,0) <> isnull(@HeaderLastModificationIntINCOLocationTypeId, 0)
 	)
 	begin
 		set @ysnHasModification = 1
@@ -176,7 +172,8 @@ BEGIN TRY
 		, dblCashPrice
 		, intPriceItemUOMId
 		, intBookId
-		, intSubBookId)
+		, intSubBookId
+		, intGardenMarkId)
 	SELECT intContractHeaderId
 		, t1.intContractDetailId
 		, intContractStatusId
@@ -194,6 +191,7 @@ BEGIN TRY
 		, intPriceItemUOMId
 		, intBookId
 		, intSubBookId
+		, intGardenMarkId
 	FROM (SELECT *
 		FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
 						FROM tblCTSequenceHistory
@@ -255,7 +253,8 @@ BEGIN TRY
 		, intSequenceUsageHistoryId
 		, dtmDateAdded
 		, intUserId
-		, intFreightTermId)
+		, intFreightTermId
+		, intGardenMarkId)
 	OUTPUT inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 	SELECT CD.intContractHeaderId
 		, CD.intContractDetailId
@@ -328,6 +327,7 @@ BEGIN TRY
 		, CASE WHEN @ysnUseContractDate = 1 THEN GETDATE() ELSE NULL END
 		, intUserId = @intUserId
 		, intFreightTermId = CH.intFreightTermId
+		, CD.intGardenMarkId
 	FROM	tblCTContractDetail			CD with (nolock)
 	JOIN	tblCTContractHeader			CH with (nolock)  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 	JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
@@ -423,7 +423,7 @@ BEGIN TRY
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1)
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1 AND 1=0) --CT-7774 disabled for now
 		BEGIN
 			DELETE
 			FROM tblCTSequenceHistory
@@ -694,8 +694,6 @@ BEGIN TRY
 							and strDataIndex = 'intWeightId'
 							and isnull(@ContractHeaderIntWeightId, 0) <> isnull(@HeaderLastModificationIntWeightId, 0)
 
-														
-
 			END
 
 
@@ -944,6 +942,24 @@ BEGIN TRY
 			WHERE ISNULL(oldBook.intBookId,0) <> ISNULL(newBook.intBookId,0)
 				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
 			
+			--Garden
+			UNION SELECT intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+				, dtmHistoryCreated			= GETDATE()
+				, intContractHeaderId	    = @intContractHeaderId
+				, intContractDetailId	    = CurrentRow.intContractDetailId
+				, intAmendmentApprovalId	= 24
+				, strItemChanged		    = 'Garden'
+				, strOldValue			    =  oldGarden.strGardenMark
+				, strNewValue		        =  newGarden.strGardenMark
+				, intConcurrencyId			= 1
+			FROM tblCTSequenceHistory	CurrentRow
+			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.intGardenMarkId,0)    <> ISNULL(PreviousRow.intGardenMarkId,0)
+			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+			LEFT JOIN tblQMGardenMark newGarden on ISNULL(newGarden.intGardenMarkId,0) = ISNULL(CurrentRow.intGardenMarkId,0)
+			LEFT JOIN tblQMGardenMark oldGarden on ISNULL(oldGarden.intGardenMarkId,0) = ISNULL(PreviousRow.intGardenMarkId,0)
+			WHERE ISNULL(oldGarden.intGardenMarkId,0) <> ISNULL(newGarden.intGardenMarkId,0)
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	
+
 			--Sub Book
 			UNION SELECT intSequenceHistoryId    = NewRecords.intSequenceHistoryId
 				, dtmHistoryCreated			= GETDATE()
@@ -960,27 +976,7 @@ BEGIN TRY
 			LEFT JOIN tblCTSubBook newSubBook on ISNULL(newSubBook.intSubBookId,0) = ISNULL(CurrentRow.intSubBookId,0)
 			LEFT JOIN tblCTSubBook oldSubBook on ISNULL(oldSubBook.intSubBookId,0) = ISNULL(PreviousRow.intSubBookId,0)
 			WHERE ISNULL(oldSubBook.intSubBookId,0) <> ISNULL(newSubBook.intSubBookId,0)
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	
-				
-			--intINCOLocationTypeId
-			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
-				, dtmHistoryCreated			= GETDATE()
-				, intContractHeaderId	    = @intContractHeaderId
-				, intContractDetailId		= CurrentRow.intContractDetailId
-				, intAmendmentApprovalId	= 22
-				, strItemChanged			= 'Port / City'
-				, strOldValue			    =  PreviousType.strCity
-				, strNewValue		        =  CurrentType.strCity
-				, intConcurrencyId			=  1
-			FROM tblCTSequenceHistory	CurrentRow								
-			LEFT JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
-			outer apply(select intCityId, strCity from tblSMCity where ISNULL(intCityId,0)	        =	ISNULL(@ContractHeaderIntINCOLocationTypeId,0))			CurrentType			
-			outer apply(select intCityId, strCity from tblSMCity where ISNULL(intCityId,0)	        =	ISNULL(@HeaderLastModificationIntINCOLocationTypeId,0))			PreviousType
-			cross apply tblCTAmendmentApproval CTA
-				where CTA.strType = '1.Header' 
-					and CTA.ysnAmendment = 1 
-					and CTA.strDataIndex = 'intINCOLocationTypeId'
-					and isnull(@ContractHeaderIntINCOLocationTypeId, 0) <> isnull(@HeaderLastModificationIntINCOLocationTypeId, 0)		
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
 		END     
 	END
 END TRY
