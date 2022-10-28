@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherSupplierInvoice]
 	@file NVARCHAR(500) = NULL,
 	@userId INT,
-	@intVendorId INT,
+	@intVendorId INT = NULL,
 	@importLogId INT OUTPUT
 AS
 
