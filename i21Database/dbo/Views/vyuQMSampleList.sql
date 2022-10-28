@@ -176,6 +176,48 @@ SELECT S.intSampleId
 	,S.strDestinationStorageLocationName
 	,S.strComments2
 	,S.strComments3
+	-- Initial Buy
+	,SOB.intOtherBuyerId
+	,SOB.intBuyer1Id
+	,SOB.strBuyer1
+	,SOB.dblB1QtyBought
+	,SOB.intB1QtyUOMId
+	,SOB.strB1QtyUOM
+	,SOB.dblB1Price
+	,SOB.intB1PriceUOMId
+	,SOB.strB1PriceUOM
+	,SOB.intBuyer2Id
+	,SOB.strBuyer2
+	,SOB.dblB2QtyBought
+	,SOB.intB2QtyUOMId
+	,SOB.strB2QtyUOM
+	,SOB.dblB2Price
+	,SOB.intB2PriceUOMId
+	,SOB.strB2PriceUOM
+	,SOB.intBuyer3Id
+	,SOB.strBuyer3
+	,SOB.dblB3QtyBought
+	,SOB.intB3QtyUOMId
+	,SOB.strB3QtyUOM
+	,SOB.dblB3Price
+	,SOB.intB3PriceUOMId
+	,SOB.strB3PriceUOM
+	,SOB.intBuyer4Id
+	,SOB.strBuyer4
+	,SOB.dblB4QtyBought
+	,SOB.intB4QtyUOMId
+	,SOB.strB4QtyUOM
+	,SOB.dblB4Price
+	,SOB.intB4PriceUOMId
+	,SOB.strB4PriceUOM
+	,SOB.intBuyer5Id
+	,SOB.strBuyer5
+	,SOB.dblB5QtyBought
+	,SOB.intB5QtyUOMId
+	,SOB.strB5QtyUOM
+	,SOB.dblB5Price
+	,SOB.intB5PriceUOMId
+	,SOB.strB5PriceUOM
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -222,4 +264,5 @@ LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
+LEFT JOIN tblQMSampleOtherBuyers SOB ON SOB.intSampleId = S.intSampleId
 WHERE S.intTypeId = 1

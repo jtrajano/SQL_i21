@@ -6,6 +6,7 @@
 	[intSampleTypeId] INT NOT NULL, 
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intCompanyLocationId] INT, 
+	[intOtherBuyerId] INT,
 	[intParentSampleId] INT, 
 	[strSampleRefNo] NVARCHAR(30) COLLATE Latin1_General_CI_AS, 
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
@@ -153,6 +154,7 @@
 	[strDestinationStorageLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[strComments2] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strComments3] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	-- 
 		
 	CONSTRAINT [PK_tblQMSample] PRIMARY KEY ([intSampleId]), 
 	CONSTRAINT [AK_tblQMSample_strSampleNumber] UNIQUE ([strSampleNumber]), 
