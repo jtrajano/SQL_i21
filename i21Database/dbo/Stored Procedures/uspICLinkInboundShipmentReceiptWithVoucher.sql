@@ -69,9 +69,14 @@ SELECT TRI.intInventoryReceiptItemId, TBD.intBillDetailId
 FROM #tempTblICInventoryReceiptItem TRI
 INNER JOIN #tempTblAPBillDetail TBD ON TBD.intId = TRI.intId
 
-SELECT * FROM #tempLink
-
 UPDATE BD
 SET BD.intInventoryReceiptItemId = TL.intInventoryReceiptItemId
 FROM tblAPBillDetail BD
 INNER JOIN #tempLink TL ON BD.intBillDetailId = TL.intBillDetailId
+
+UPDATE tblAPBillDetail
+SET ysnStage = 0
+WHERE
+	intContractDetailId = @intContractDetailId
+	AND intLoadDetailId = @intLoadDetailId
+	AND intInventoryReceiptItemId = NULL
