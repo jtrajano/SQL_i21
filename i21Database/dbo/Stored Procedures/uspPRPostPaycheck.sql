@@ -399,7 +399,7 @@ BEGIN
 	--PERFORM GL ACCOUNT SEGMENT SWITCHING
 	UPDATE #tmpDeduction 
 	SET intAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB)
-	WHERE ysnSplit = 1 OR (ysnSplit = 0 AND intDepartmentId IS NOT NULL AND intLOB IS NOT NULL)
+	WHERE ysnSplit = 1 OR (ysnSplit = 0 AND intDepartmentId IS NOT NULL)-- AND intLOB IS NOT NULL)
 
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Deduction to Temporary Table to Distribute Amounts
