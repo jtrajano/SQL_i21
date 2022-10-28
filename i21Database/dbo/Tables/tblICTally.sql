@@ -1,6 +1,6 @@
 ﻿CREATE TABLE tblICTally (
 	[intKey] INT NOT NULL IDENTITY, 
-	[intId1] INT NOT NULL,
+	[intId1] INT NULL,
 	[intId2] INT NULL
 )
 GO
