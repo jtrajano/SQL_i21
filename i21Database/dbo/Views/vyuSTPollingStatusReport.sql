@@ -7,6 +7,17 @@ stcpew.intCheckoutProcessId,
 stcpew.intCheckoutProcessErrorWarningId, 
 stcp.intCheckoutId, 
 stcp.strGuid, 
+FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
+(SELECT COUNT('') FROM (SELECT DISTINCT  intStoreId FROM tblSTCheckoutProcess WHERE FORMAT(dtmCheckoutProcessDate, 'd','us') = FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') GROUP BY intStoreId) a) AS intProcessedStore,
+(
+	SELECT COUNT('') FROM (SELECT DISTINCT  intStoreId 
+	FROM tblSTCheckoutProcess cp
+	JOIN tblSTCheckoutProcessErrorWarning spew
+		ON cp.intCheckoutProcessId = spew.intCheckoutProcessId
+	WHERE FORMAT(dtmCheckoutProcessDate, 'd','us') = FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') 
+	AND (spew.strMessageType = 'F' OR spew.strMessageType = 'S')
+	GROUP BY intStoreId) a
+) AS intStoreWithError,
 stcp.dtmCheckoutProcessDate, 
 CAST((CASE WHEN CH.strCheckoutCloseDate IS NULL THEN DATEADD(DAY, 1, stcp.dtmCheckoutProcessDate) ELSE DATEADD(DAY, 1, CH.strCheckoutCloseDate) END) AS DATETIME) AS dtmCurrentBusinessDay, 
 CAST((CASE WHEN CH.strCheckoutCloseDate IS NULL THEN stcp.dtmCheckoutProcessDate ELSE CAST(CH.strCheckoutCloseDate AS VARCHAR(50)) END) AS VARCHAR(50)) AS strCheckoutCloseDate, 
@@ -14,9 +25,7 @@ ISNULL(CH.dtmCheckoutDate, CH.dtmCountDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription, 
 stcpew.strMessageType, 
-stcpew.strMessage, 
-0 AS intProcessedStore, 
-0 AS intStoreWithError, 
+stcpew.strMessage,
 0 AS rn, 
 '' AS strReportFilter
 FROM dbo.tblSTCheckoutProcessErrorWarning AS stcpew 
