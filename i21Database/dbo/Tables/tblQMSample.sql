@@ -7,7 +7,7 @@
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intCompanyLocationId] INT, 
 	[intOtherBuyerId] INT NULL,
-	--[intInitialBuyId] INT NULL,
+	[intInitialBuyId] INT NULL,
 	[intParentSampleId] INT, 
 	[strSampleRefNo] NVARCHAR(30) COLLATE Latin1_General_CI_AS, 
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
@@ -210,7 +210,7 @@
 	CONSTRAINT [FK_tblQMSample_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblQMSample_tblICStorageLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
 	CONSTRAINT [FK_tblQMSample_tblQMSampleOtherBuyers_intOtherBuyerId] FOREIGN KEY ([intOtherBuyerId]) REFERENCES [dbo].[tblQMSampleOtherBuyers]([intOtherBuyerId]),
-	--CONSTRAINT [FK_tblQMSample_tblQMSampleInitialBuy_intInitialBuyId] FOREIGN KEY ([intInitialBuyId]) REFERENCES [dbo].[tblQMSampleInitialBuy]([intInitialBuyId])
+	CONSTRAINT [FK_tblQMSample_tblQMSampleInitialBuy_intInitialBuyId] FOREIGN KEY ([intInitialBuyId]) REFERENCES [dbo].[tblQMSampleInitialBuy]([intInitialBuyId])
 
 )
 GO

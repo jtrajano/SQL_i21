@@ -10,6 +10,7 @@
     [dblPrice] NUMERIC(18, 6) NULL, 
     [intPriceUOMId] INT NULL,
 	[strPriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
+	[intInitialBuyerNo] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblQMSampleInitialBuy] PRIMARY KEY ([intInitialBuyId]),
 	CONSTRAINT [FK_tblQMSampleInitialBuy_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId]),
