@@ -101,5 +101,6 @@
 	ysnRecipeBySite Bit,
 	ysnConsiderBookInDemandView BIT,
 	ysnRecipeHeaderValidation BIT,
+	dblTrialBlendSheetSize NUMERIC(18,6) NULL,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
