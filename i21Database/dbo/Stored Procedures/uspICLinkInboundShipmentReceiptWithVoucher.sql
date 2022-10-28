@@ -79,4 +79,4 @@ SET ysnStage = 0
 WHERE
 	intContractDetailId = @intContractDetailId
 	AND intLoadDetailId = @intLoadDetailId
-	AND intInventoryReceiptItemId = NULL
+	AND intInventoryReceiptItemId IS NULL
