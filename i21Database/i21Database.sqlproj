@@ -7285,6 +7285,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateOHEx2.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOHTR2.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOHMF2.sql" />
+    <Build Include="dbo\Stored Procedures\uspVRCreateDebitMemoOrVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspVRInsertCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspVRUpdateCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
