@@ -29,6 +29,8 @@ SELECT
 	, strVendorName = vendorEntity.strName
 	, companyLocation.strLocationName
 	, strVendorCustomer = customerEntity.strName
+	, dm.strBillId strDebitMemoVoucherNumber
+	, dm.intBillId intDebitMemoVoucherId
 FROM tblVRRebate rebate
 	INNER JOIN tblARInvoiceDetail invoiceDetail ON invoiceDetail.intInvoiceDetailId = rebate.intInvoiceDetailId
 	INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId
@@ -43,3 +45,8 @@ FROM tblVRRebate rebate
 	INNER JOIN tblAPVendor vendor ON vendor.intEntityId = vendorSetup.intEntityId
 	INNER JOIN tblEMEntity vendorEntity ON vendorEntity.intEntityId = vendor.intEntityId
 	INNER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = invoice.intCompanyLocationId
+	OUTER APPLY (
+		SELECT TOP 1 b.strBillId, b.intBillId
+		FROM tblAPBill b
+		WHERE b.strVendorOrderNumber = invoice.strInvoiceNumber
+	) dm
