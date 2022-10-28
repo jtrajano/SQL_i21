@@ -169,7 +169,7 @@ BEGIN TRY
 					,ValidFrom DATETIME
 					,ValidTo DATETIME
 					,StorageLocation NVARCHAR(50)
-					,ERPRecipeNo NVARCHAR(50)
+					,ERPRecipeNo NVARCHAR(50) Collate Latin1_General_CI_AS
 					,ProcessName NVARCHAR(50)
 					,Active INT
 					) x
