@@ -53,7 +53,7 @@ BEGIN TRY
         OR (B3PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB3PriceUOM, '') <> '')
         OR (COMPANY_CODE.intPurchasingGroupId IS NULL AND ISNULL(IMP.strB1CompanyCode, '') <> '')
         OR (BOOK.intBookId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '')
-        OR (CURRENCY.intConcurrencyId IS NULL AND ISNULL(IMP.strCurrency, '') <> '')
+        OR (CURRENCY.intCurrencyID IS NULL AND ISNULL(IMP.strCurrency, '') <> '')
     )
     -- End Validation   
 
@@ -139,7 +139,7 @@ BEGIN TRY
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.intSaleNumber = IMP.intSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
-            AND V.strVendorAccountNum = IMP.strSupplier
+            AND E.strName = IMP.strSupplier
             AND S.strRepresentLotNumber = IMP.strLotNumber
         LEFT JOIN tblQMSampleOtherBuyers SOB ON SOB.intSampleId = S.intSampleId
         WHERE IMP.intImportLogId = @intImportLogId

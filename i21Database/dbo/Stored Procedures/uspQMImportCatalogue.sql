@@ -48,7 +48,7 @@ BEGIN TRY
     LEFT JOIN tblQMCatalogueType CT
         ON CT.strCatalogueType = IMP.strCatalogueType
     LEFT JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
-        ON V.strVendorAccountNum = IMP.strSupplier
+        ON E.strName = IMP.strSupplier
     LEFT JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
     -- Format log message
     OUTER APPLY (

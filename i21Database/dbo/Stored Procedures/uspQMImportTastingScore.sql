@@ -48,6 +48,8 @@ BEGIN TRY
         ,@intSampleId INT
         ,@intValuationGroupId INT -- Style
         ,@strValuationGroup NVARCHAR(50)
+        ,@strOrigin NVARCHAR(50)
+        ,@strSustainability NVARCHAR(50)
         ,@strMusterLot NVARCHAR(50)
 	    ,@strMissingLot NVARCHAR(50)
         ,@strComments2 NVARCHAR(MAX)
@@ -88,6 +90,8 @@ BEGIN TRY
             ,intSampleId = S.intSampleId
             ,intValuationGroupId = STYLE.intValuationGroupId
             ,strValuationGroup = STYLE.strName
+            ,strOrigin = ORIGIN.strISOCode
+            ,strSustainability = SUSTAINABILITY.strDescription
             ,strMusterLot = IMP.strMusterLot
             ,strMissingLot = IMP.strMissingLot
             ,strComments2 = IMP.strTastersRemarks
@@ -107,6 +111,8 @@ BEGIN TRY
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
+        LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+        LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
         INNER JOIN (
             tblQMImportCatalogue IMP INNER JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
             INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
@@ -123,7 +129,7 @@ BEGIN TRY
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.intSaleNumber = IMP.intSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
-            AND V.strVendorAccountNum = IMP.strSupplier
+            AND E.strName = IMP.strSupplier
             AND S.strRepresentLotNumber = IMP.strLotNumber
         WHERE IMP.intImportLogId = @intImportLogId
             AND IMP.ysnSuccess = 1
@@ -140,6 +146,8 @@ BEGIN TRY
         ,@intSampleId
         ,@intValuationGroupId
         ,@strValuationGroup
+        ,@strOrigin
+        ,@strSustainability
         ,@strMusterLot
 	    ,@strMissingLot
         ,@strComments2
@@ -155,6 +163,32 @@ BEGIN TRY
         ,@strMouthFeel
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+
+        DECLARE @intOriginalItemId INT
+        SELECT @intOriginalItemId = intItemId
+        FROM tblQMSample WHERE intSampleId = @intSampleId
+
+        SELECT 
+                ISNULL(@strBrand, '') -- Leaf Size
+                + '%' -- To be updated by sub cluster
+                + ISNULL(@strValuationGroup, '') -- Leaf Style
+                + ISNULL(@strOrigin, '') -- Origin
+                + '-'
+                + ISNULL(@strSustainability, '') -- Rain Forest / Sustainability
+
+        IF @intItemId IS NULL
+            SELECT TOP 1 @intItemId = I.intItemId
+            FROM tblICItem I
+            -- TODO: To update filter once Sub Cluster is provided
+            WHERE I.strItemNo LIKE 
+                ISNULL(@strBrand, '') -- Leaf Size
+                + '%' -- To be updated by sub cluster
+                + ISNULL(@strValuationGroup, '') -- Leaf Style
+                + ISNULL(@strOrigin, '') -- Origin
+                + '-'
+                + ISNULL(@strSustainability, '') -- Rain Forest / Sustainability
+
+        SELECT @intItemId
 
         UPDATE S
         SET
@@ -217,7 +251,7 @@ BEGIN TRY
         END
 
         -- Clear test properties of the default item
-        IF EXISTS(SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND intItemId <> @intItemId)
+        IF ISNULL(@intOriginalItemId, 0) <> ISNULL(@intItemId, 0)
         BEGIN
             DELETE FROM tblQMTestResult WHERE intSampleId = @intSampleId
             -- Insert Test Result
@@ -511,6 +545,8 @@ BEGIN TRY
             ,@intSampleId
             ,@intValuationGroupId
             ,@strValuationGroup
+            ,@strOrigin
+            ,@strSustainability
             ,@strMusterLot
             ,@strMissingLot
             ,@strComments2
