@@ -64,12 +64,12 @@ BEGIN TRY
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 
-		SELECT @dblL1Gross = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode = '1'
-		SELECT @dblL1Net = ISNULL(SUM(dblNet),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode = '1'
-		SELECT @dblL2Gross = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode = '2'
-		SELECT @dblL2Net = ISNULL(SUM(dblNet),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode = '2'
-		SELECT @dblL3Gross = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode = '3'
-		SELECT @dblL3Net = ISNULL(SUM(dblNet),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode = '3'
+		SELECT @dblL1Gross = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode IN ('1','1_Bulk','1_Cust')
+		SELECT @dblL1Net = ISNULL(SUM(dblNet),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode IN ('1','1_Bulk','1_Cust')
+		SELECT @dblL2Gross = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode IN ('2','1_Bulk','1_Cust')
+		SELECT @dblL2Net = ISNULL(SUM(dblNet),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode IN ('2','1_Bulk','1_Cust')
+		SELECT @dblL3Gross = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode IN ('3','1_Bulk','1_Cust')
+		SELECT @dblL3Net = ISNULL(SUM(dblNet),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-507' AND strScheduleCode IN ('3','1_Bulk','1_Cust')
 
 		SET @dblL4Gross = @dblL1Gross + @dblL2Gross + @dblL3Gross
 		SET @dblL4Net  = @dblL1Net + @dblL2Net + @dblL3Net
