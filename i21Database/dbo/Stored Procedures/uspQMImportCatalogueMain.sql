@@ -33,6 +33,8 @@ BEGIN TRY
     LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel + IMP.strSubChannel
     -- Sample Type
     LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
+    -- Net Weight Per Packages / Quantity UOM
+    LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -47,6 +49,7 @@ BEGIN TRY
             + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
             + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '') THEN 'CHANNEL / SUB CHANNEL, ' ELSE '' END
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
+            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0) THEN 'NET WEIGHT PER PACKAGES, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
@@ -62,6 +65,7 @@ BEGIN TRY
         OR (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '')
         OR (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '')
         OR (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
+        OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0)
     )
     -- End Validation
 
@@ -93,6 +97,7 @@ BEGIN TRY
         ,@dblSampleQty NUMERIC(18, 6)
         ,@intTotalNumberOfPackageBreakups BIGINT
         ,@dblNetWtPerPackages NUMERIC(18, 6)
+        ,@intRepresentingUOMId INT
         ,@intNoOfPackages BIGINT
         ,@dblNetWtSecondPackageBreak NUMERIC(18, 6)
         ,@intNoOfPackagesSecondPackageBreak BIGINT
@@ -169,6 +174,7 @@ BEGIN TRY
             ,dblSampleQty = IMP.dblTotalQtyOffered
             ,intTotalNumberOfPackageBreakups = IMP.intTotalNumberOfPackageBreakups
             ,dblNetWtPerPackages = IMP.dblNetWtPerPackages
+            ,intRepresentingUOMId = UOM.intUnitMeasureId
             ,intNoOfPackages = IMP.intNoOfPackages
             ,dblNetWtSecondPackageBreak = IMP.dblNetWtSecondPackageBreak
             ,intNoOfPackagesSecondPackageBreak = IMP.intNoOfPackagesSecondPackageBreak
@@ -208,7 +214,7 @@ BEGIN TRY
         -- Catalogue Type
         LEFT JOIN tblQMCatalogueType CT ON CT.strCatalogueType = IMP.strCatalogueType
         -- Supplier
-        LEFT JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId) ON V.strVendorAccountNum = IMP.strSupplier
+        LEFT JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId) ON E.strName = IMP.strSupplier
         -- Grade
         LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.strType = 'Grade' AND GRADE.strDescription = IMP.strGrade
         -- Manufacturing Leaf Type
@@ -231,6 +237,8 @@ BEGIN TRY
         LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel + IMP.strSubChannel
         -- Sample Type
         LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
+        -- Net Weight Per Packages / Quantity UOM
+        LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
 
         WHERE IMP.intImportLogId = @intImportLogId
         AND IMP.ysnSuccess = 1
@@ -263,6 +271,7 @@ BEGIN TRY
         ,@dblSampleQty
         ,@intTotalNumberOfPackageBreakups
         ,@dblNetWtPerPackages
+        ,@intRepresentingUOMId
         ,@intNoOfPackages
         ,@dblNetWtSecondPackageBreak
         ,@intNoOfPackagesSecondPackageBreak
@@ -314,6 +323,14 @@ BEGIN TRY
 
         IF @intSampleId IS NULL
         BEGIN
+
+            -- Assign sample type based on mapping table if it is not supplied in the template
+            IF @intSampleTypeId IS NULL AND @strSubBook IS NOT NULL
+                SELECT @intSampleTypeId = SBSTM.intSampleTypeId
+                FROM tblQMSubBookSampleTypeMapping SBSTM
+                INNER JOIN tblCTSubBook SB ON SB.intSubBookId = SBSTM.intSubBookId
+                WHERE SB.strSubBook = @strSubBook
+
             --New Sample Creation
             EXEC uspMFGeneratePatternId @intCategoryId = NULL
                 ,@intItemId = NULL
@@ -338,6 +355,7 @@ BEGIN TRY
                 ,intCountryID
                 ,intEntityId
                 ,dtmSampleReceivedDate
+                ,dblSampleQty
                 ,dblRepresentingQty
                 ,intSampleUOMId
                 ,intRepresentingUOMId
@@ -408,9 +426,10 @@ BEGIN TRY
                 ,intCountryID = @intOriginId
                 ,intEntityId = @intSupplierEntityId
                 ,dtmSampleReceivedDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-                ,dblRepresentingQty = @dblSampleQty
+                ,dblSampleQty = @dblSampleQty
+                ,dblRepresentingQty = CASE WHEN ISNULL(@intNoOfPackages, 0) IS NOT NULL THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE NULL END
                 ,intSampleUOMId = (SELECT TOP 1 [intDefaultSampleUOMId] FROM tblQMCatalogueImportDefaults)
-                ,intRepresentingUOMId = (SELECT TOP 1 [intDefaultRepresentingUOMId] FROM tblQMCatalogueImportDefaults)
+                ,intRepresentingUOMId = @intRepresentingUOMId
                 ,strRepresentLotNumber = @strRefNo
                 ,dtmTestingStartDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
                 ,dtmTestingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
@@ -725,7 +744,9 @@ BEGIN TRY
             SET
                 strRepresentLotNumber = @strRefNo
                 ,intCountryID = @intOriginId
-                ,dblRepresentingQty = @dblSampleQty
+                ,dblSampleQty = @dblSampleQty
+                ,dblRepresentingQty = CASE WHEN ISNULL(@intNoOfPackages, 0) IS NOT NULL THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE NULL END
+                ,intRepresentingUOMId = @intRepresentingUOMId
                 ,strCountry = @strCountry
                 ,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
                 ,strComment = @strComments
@@ -816,6 +837,7 @@ BEGIN TRY
             ,@dblSampleQty
             ,@intTotalNumberOfPackageBreakups
             ,@dblNetWtPerPackages
+            ,@intRepresentingUOMId
             ,@intNoOfPackages
             ,@dblNetWtSecondPackageBreak
             ,@intNoOfPackagesSecondPackageBreak

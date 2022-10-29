@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherSupplierInvoice]
 	@file NVARCHAR(500) = NULL,
 	@userId INT,
-	@intVendorId INT,
+	@intVendorId INT = NULL,
 	@importLogId INT OUTPUT
 AS
 
@@ -69,15 +69,15 @@ SELECT
 	/*Not exists in i21*/		
 	strCatalogueType					=	A.strCatalogueType,
 	strChannel							=	A.strChannel,
-	strPackageBreakups					=	A.strPackageBreakups,
+	strPackageBreakups					=	CAST(A.strPackageBreakups AS DECIMAL(18,6)),
 	strPurchaseType						=	A.strPurchaseType,
 	strDocumentNumber					=	A.strDocumentNumber,
-	dblWeightBreakup1					=	A.dblWeightBreakup1,
-	dblWeightBreakup1Bags				=	A.dblWeightBreakup1Bags,
-	dblWeightBreakup2					=	A.dblWeightBreakup2,
-	dblWeightBreakup2Bags				=	A.dblWeightBreakup2Bags,
-	dblWeightBreakup3					=	A.dblWeightBreakup3,
-	dblWeightBreakup3Bags				=	A.dblWeightBreakup3Bags,
+	dblWeightBreakup1					=	CAST(A.dblWeightBreakup1 AS DECIMAL(18,6)),
+	dblWeightBreakup1Bags				=	CAST(A.dblWeightBreakup1Bags AS DECIMAL(18,6)),
+	dblWeightBreakup2					=	CAST(A.dblWeightBreakup2 AS DECIMAL(18,6)),
+	dblWeightBreakup2Bags				=	CAST(A.dblWeightBreakup2Bags AS DECIMAL(18,6)),
+	dblWeightBreakup3					=	CAST(A.dblWeightBreakup3 AS DECIMAL(18,6)),
+	dblWeightBreakup3Bags				=	CAST(A.dblWeightBreakup3Bags AS DECIMAL(18,6)),
 	dblWeightBreakup4					=	A.dblWeightBreakup4,
 	dblWeightBreakup4Bags				=	A.dblWeightBreakup4Bags,
 	dblWeightBreakup5					=	A.dblWeightBreakup5,
@@ -110,6 +110,13 @@ INSERT INTO @voucherPayables
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook			
+	,dblPackageBreakups
+	,dblNetWeightPerPackage
+	,dblNumberOfPackages
+	,dblNetWeightPerPackage2
+	,dblNumberOfPackages2
+	,dblNetWeightPerPackage3
+	,dblNumberOfPackages3
 	,ysnStage
 )
 SELECT
@@ -132,6 +139,13 @@ SELECT
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook		
+	,dblPackageBreakups
+	,dblNetWeightPerPackage
+	,dblNumberOfPackages
+	,dblNetWeightPerPackage2
+	,dblNumberOfPackages2
+	,dblNetWeightPerPackage3
+	,dblNumberOfPackages3
 	,0
 FROM #tmpConvertedSupplierInvoiceData A
 

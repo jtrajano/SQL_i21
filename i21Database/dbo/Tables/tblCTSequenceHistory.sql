@@ -76,7 +76,9 @@
 	ysnCashPriceChange		BIT,
 	intSequenceUsageHistoryId	INT,
 	dtmDateAdded			DATETIME NULL,
-    intFreightTermId        INT
+    intFreightTermId        INT,
+    intGardenMarkId        INT,
+    intReasonCodeId        INT
 	
 
     CONSTRAINT [PK_tblCTSequenceHistory_intSequenceHistoryId] PRIMARY KEY CLUSTERED (intSequenceHistoryId ASC)--,

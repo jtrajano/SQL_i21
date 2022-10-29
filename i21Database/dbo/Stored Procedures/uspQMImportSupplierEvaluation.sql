@@ -30,7 +30,7 @@ BEGIN TRY
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.intSaleNumber = IMP.intSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
-            AND V.strVendorAccountNum = IMP.strSupplier
+            AND E.strName = IMP.strSupplier
             AND S.strRepresentLotNumber = IMP.strLotNumber
         WHERE IMP.intImportLogId = @intImportLogId
             AND IMP.ysnSuccess = 1

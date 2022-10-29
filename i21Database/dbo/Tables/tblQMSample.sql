@@ -6,6 +6,8 @@
 	[intSampleTypeId] INT NOT NULL, 
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intCompanyLocationId] INT, 
+	[intOtherBuyerId] INT NULL,
+	[intInitialBuyId] INT NULL,
 	[intParentSampleId] INT, 
 	[strSampleRefNo] NVARCHAR(30) COLLATE Latin1_General_CI_AS, 
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
@@ -153,6 +155,7 @@
 	[strDestinationStorageLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[strComments2] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strComments3] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	-- 
 		
 	CONSTRAINT [PK_tblQMSample] PRIMARY KEY ([intSampleId]), 
 	CONSTRAINT [AK_tblQMSample_strSampleNumber] UNIQUE ([strSampleNumber]), 
@@ -206,6 +209,9 @@
 	CONSTRAINT [FK_tblQMSample_tblCTValuationGroup_intValuationGroupId] FOREIGN KEY ([intValuationGroupId]) REFERENCES [dbo].[tblCTValuationGroup]([intValuationGroupId]), -- Leaf Style
 	CONSTRAINT [FK_tblQMSample_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblQMSample_tblICStorageLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
+	CONSTRAINT [FK_tblQMSample_tblQMSampleOtherBuyers_intOtherBuyerId] FOREIGN KEY ([intOtherBuyerId]) REFERENCES [dbo].[tblQMSampleOtherBuyers]([intOtherBuyerId]),
+	CONSTRAINT [FK_tblQMSample_tblQMSampleInitialBuy_intInitialBuyId] FOREIGN KEY ([intInitialBuyId]) REFERENCES [dbo].[tblQMSampleInitialBuy]([intInitialBuyId])
+
 )
 GO
 CREATE STATISTICS [_dta_stat_1863273993_4_11_1] ON [dbo].[tblQMSample]([strSampleNumber], [intContractDetailId], [intSampleId])

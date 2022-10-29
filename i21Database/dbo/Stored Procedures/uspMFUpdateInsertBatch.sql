@@ -154,7 +154,8 @@ BEGIN
 		strSealNumber					 = T.strSealNumber,
 		strContainerType				 = T.strContainerType,
 		strVoyage					 	 = T.strVoyage,
-		strVessel					 	 = T.strVessel
+		strVessel					 	 = T.strVessel,
+		intConcurrencyId				 = intConcurrencyId + 1
 		FROM tblMFBatch A
 		OUTER APPLY(
 			SELECT * FROM @MFBatchTableType WHERE @id = intId
@@ -266,6 +267,7 @@ BEGIN
 			,strContainerType
 			,strVoyage
 			,strVessel
+			,intConcurrencyId
 			)
 
 		SELECT 
@@ -365,6 +367,7 @@ BEGIN
 			,strContainerType
 			,strVoyage
 			,strVessel
+			,1
 		FROM @MFBatchTableType WHERE intId = @id
 
 

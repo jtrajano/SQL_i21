@@ -321,6 +321,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ',',
 			strUserFullName = CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END,
 			strExternalPONumber = CD.strERPPONumber,
+			strSalesERPPONumber = SCD.strERPPONumber,
 			strNumberOfContainers = CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')',
 			CType.strContainerType,
 			strLogisticsCompanyName = @strLogisticsCompanyName,
