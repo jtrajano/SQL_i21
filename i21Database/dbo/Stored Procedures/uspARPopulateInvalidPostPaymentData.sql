@@ -109,6 +109,39 @@ BEGIN
     WHERE UPPER(PM.strPaymentMethod) = 'WRITE OFF'
       AND GLAD.strAccountCategory = 'AR Account'
 
+    INSERT INTO #ARInvalidPaymentData (
+         [intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError]
+    )
+    --Segment override for writeoff
+    SELECT [intTransactionId]       = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to find the writeoff override account that matches the segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+    FROM #ARPostPaymentHeader P
+    INNER JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
+    INNER JOIN vyuGLAccountDetail GLAD ON P.intWriteOffAccountId = GLAD.intAccountId
+    OUTER APPLY (
+		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment, bitSameLineOfBusinessSegment
+		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
+    WHERE UPPER(PM.strPaymentMethod) = 'WRITE OFF'
+    AND GLAD.strAccountCategory = 'AR Account'
+    AND (
+        (@OverrideCompanySegment = 1 AND OVERRIDESEGMENT.bitSameCompanySegment = 0)
+        OR
+        (@OverrideLocationSegment = 1 AND OVERRIDESEGMENT.bitSameLocationSegment = 0)
+        OR
+        (@OverrideLineOfBusinessSegment = 1 AND OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0)
+    )
+    AND OVERRIDESEGMENT.bitOverriden = 0
+
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
@@ -116,18 +149,18 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
-	--Segment override for writeoff
+	--Segment override for writeoff detail
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
         ,[strTransactionId]         = P.[strTransactionId]
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Unable to find the writeoff override account that matches the segment of the AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
+        ,[strError]                 = 'Unable to find the writeoff override account that matches the segment of the invoice AR Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.'
 	FROM #ARPostPaymentDetail P
     OUTER APPLY (
 		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment, bitSameLineOfBusinessSegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intWriteOffAccountDetailId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
@@ -188,7 +221,7 @@ BEGIN
 	FROM #ARPostPaymentDetail P
     OUTER APPLY (
 		SELECT bitOverriden, strOverrideAccount, bitSameCompanySegment, bitSameLocationSegment, bitSameLineOfBusinessSegment
-		FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
     WHERE P.[ysnPost] = @OneBit
     AND P.[intInvoiceId] IS NOT NULL
