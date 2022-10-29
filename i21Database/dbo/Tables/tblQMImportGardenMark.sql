@@ -15,7 +15,7 @@ CREATE TABLE [dbo].[tblQMImportGardenMark]
     [intConcurrencyId]		    INT NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblQMImportGardenMark_intImportGardenMarkId] PRIMARY KEY CLUSTERED ([intImportGardenMarkId] ASC),    
     CONSTRAINT [FK_tblQMImportGardenMark_tblQMImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblQMImportLog]([intImportLogId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblQMImportGardenMark_tblQMGardenMark_intGardenMarkId] FOREIGN KEY ([intGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark] ([intGardenMarkId])
+    CONSTRAINT [FK_tblQMImportGardenMark_tblQMGardenMark_intGardenMarkId] FOREIGN KEY ([intGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark] ([intGardenMarkId]) ON DELETE CASCADE
 );
 GO
 CREATE INDEX [idx_tblQMImportGardenMark_intImportLogId] ON [dbo].[tblQMImportGardenMark] (intImportLogId)
