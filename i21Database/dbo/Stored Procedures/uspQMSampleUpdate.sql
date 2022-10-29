@@ -968,6 +968,84 @@ BEGIN TRY
    WHERE x.intTestResultId = dbo.tblQMTestResult.intTestResultId  
     AND x.strRowState = 'DELETE'  
    )  
+
+   -- Sample Initial Buy Create, Update, Delete  
+ --INSERT INTO dbo.tblQMSampleInitialBuy(
+	--	intConcurrencyId
+	--	,intSampleId
+	--	,intInitialBuyId
+	--	,intBuyerId
+	--	,strBuyerName
+	--	,dblQtyBought
+	--	,intQtyUOMId
+	--	,strQtyUOM
+	--	,dblPrice
+	--	,intPriceUOMId
+	--	,strPriceUOM
+	--	)
+	--SELECT 1
+	--	,@intSampleId
+	--	,intInitialBuyId
+	--	,intBuyerId
+	--	,strBuyerName
+	--	,dblQtyBought
+	--	,intQtyUOMId
+	--	,strQtyUOM
+	--	,dblPrice
+	--	,intPriceUOMId
+	--	,strPriceUOM
+	--FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (
+	--		intInitialBuyId INT
+	--		,intBuyerId INT
+	--		,strBuyerName NVARCHAR(50)
+	--		,dblQtyBought NUMERIC(18, 6)
+	--		,intQtyUOMId INT
+	--		,strQtyUOM NVARCHAR(50)
+	--		,dblPrice NUMERIC(18, 6)
+	--		,intPriceUOMId INT
+	--		,strPriceUOM NVARCHAR(50)
+	--		,strRowState NVARCHAR(50) 
+	--		) x
+ --WHERE x.strRowState = 'ADDED'  
+  
+ UPDATE dbo.tblQMSampleInitialBuy  
+ SET intBuyerId = x.intBuyerId  
+  ,strBuyerName = x.strBuyerName  
+  ,dblQtyBought = x.dblQtyBought  
+  ,intQtyUOMId = x.intQtyUOMId  
+  ,strQtyUOM = x.strQtyUOM  
+  ,dblPrice = x.dblPrice  
+  ,intPriceUOMId = x.intPriceUOMId  
+  ,strPriceUOM = x.strPriceUOM 
+  ,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1  
+ FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (  
+   intInitialBuyId INT
+   ,intBuyerId INT
+   ,strBuyerName NVARCHAR(50)
+   ,dblQtyBought NUMERIC(18, 6)
+   ,intQtyUOMId INT
+   ,strQtyUOM NVARCHAR(50)
+   ,dblPrice NUMERIC(18, 6)
+   ,intPriceUOMId INT
+   ,strPriceUOM NVARCHAR(50)
+   ,intUnitMeasureId INT  
+   ,strRowState NVARCHAR(50)  
+   ) x  
+ WHERE x.intInitialBuyId = dbo.tblQMSampleInitialBuy.intInitialBuyId  
+  AND x.strRowState = 'MODIFIED'  
+  
+ DELETE  
+ FROM dbo.tblQMSampleInitialBuy  
+ WHERE intSampleId = @intSampleId  
+  AND EXISTS (  
+   SELECT *  
+   FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (  
+     intInitialBuyId INT  
+     ,strRowState NVARCHAR(50)  
+     ) x  
+   WHERE x.intInitialBuyId = dbo.tblQMSampleInitialBuy.intInitialBuyId   
+    AND x.strRowState = 'DELETE'  
+   )  
   
  EXEC sp_xml_removedocument @idoc  
  SET @idoc = 0  
