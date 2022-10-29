@@ -638,6 +638,7 @@ BEGIN TRY
 		, GM.strGardenMark
 		, CD.intReasonCodeId
 		, RC.strReasonCode
+		, CD.dblConvertedNetWeight
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId

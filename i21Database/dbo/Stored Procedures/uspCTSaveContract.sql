@@ -318,7 +318,7 @@ BEGIN TRY
 		end
 
 		
-		IF EXISTS (SELECT TOP 1 1 FROM tblCTCompanyPreference where ysnEnablePackingWeightAdjustment = 0)
+		IF EXISTS (SELECT TOP 1 1 FROM tblCTCompanyPreference where ysnEnablePackingWeightAdjustment = 0 and ysnEnableNetWeightAdjustment = 0)
 		BEGIN
 			SELECT @dblCorrectNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
 
