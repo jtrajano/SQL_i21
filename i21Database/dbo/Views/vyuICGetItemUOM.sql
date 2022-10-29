@@ -28,6 +28,7 @@ ItemUOM.intItemUOMId
 , ItemUOM.dblMaxQty
 , ItemUOM.dblStandardWeight
 , ItemUOM.intSort
+, ItemUOM.intModifier
 FROM tblICItemUOM ItemUOM
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemUOM.intWeightUOMId
