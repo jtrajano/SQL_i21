@@ -14,13 +14,15 @@
 	@tblTypeServiceCharge		[dbo].[ServiceChargeTableType] READONLY,
 	@tblTypeServiceChargeByCB	[dbo].[ServiceChargeTableType] READONLY
 AS 
-	DECLARE @dateNow				DATE = CAST(GETDATE() AS DATE),			
-			@dblInvoiceTotal		NUMERIC(18,6) = 0,
-			@NewInvoiceId			INT,
-			@newComment				NVARCHAR(500) = NULL,
-			@intServiceChargeId		INT,
-			@intServiceChargeIdByCB INT,
-			@intCompTermsId			INT
+	DECLARE @dateNow							DATE = CAST(GETDATE() AS DATE),			
+			@dblInvoiceTotal					NUMERIC(18,6) = 0,
+			@NewInvoiceId						INT,
+			@newComment							NVARCHAR(500) = NULL,
+			@intServiceChargeId					INT,
+			@intServiceChargeIdByCB				INT,
+			@intCompTermsId						INT,
+			@intDefaultCurrencyId				INT = 0,
+			@intAccountsReceivableRateTypeId	INT = 0
 
 	SELECT TOP 1 @intCompTermsId = intServiceChargeTermId FROM tblARCompanyPreference
 
@@ -31,6 +33,9 @@ AS
 
 	IF ISNULL(@intCurrencyId, 0) = 0
 		SELECT TOP 1 @intCurrencyId = intCurrencyId FROM tblARCustomer WHERE [intEntityId] = @intEntityCustomerId
+
+	SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
+	SELECT TOP 1 @intAccountsReceivableRateTypeId = intAccountsReceivableRateTypeId FROM tblSMMultiCurrency
 
 	DECLARE @tempServiceChargeTable TABLE (
 		 [intServiceChargeId]	INT
@@ -189,6 +194,10 @@ AS
 				,[intContractDetailId]
 				,[dblServiceChargeAPR]
 				,[intConcurrencyId]
+				,[intSubCurrencyId]
+				,[dblCurrencyExchangeRate]
+				,[intCurrencyExchangeRateId]
+				,[intCurrencyExchangeRateTypeId]
 			)
 			SELECT 	
 				 @NewInvoiceId
@@ -206,7 +215,29 @@ AS
 				,[intContractDetailId]
 				,[dblServiceChargeAPR]
 				,0
-			FROM @tblTypeServiceCharge WHERE intServiceChargeId = @intServiceChargeId
+				,@intCurrencyId
+				,CASE WHEN @intDefaultCurrencyId = @intCurrencyId THEN 1 ELSE ISNULL(CE.dblRate, 1) END
+				,CASE WHEN @intDefaultCurrencyId = @intCurrencyId THEN NULL ELSE CE.intCurrencyExchangeRateId END
+				,CASE WHEN @intDefaultCurrencyId = @intCurrencyId THEN NULL ELSE CE.intCurrencyExchangeRateTypeId END
+			FROM @tblTypeServiceCharge 
+			OUTER APPLY (
+				SELECT TOP 1 
+					 SMCERD.dblRate
+					,SMCERD.intCurrencyExchangeRateId
+					,SMCERT.intCurrencyExchangeRateTypeId
+				FROM tblSMCurrencyExchangeRateDetail SMCERD
+				INNER JOIN tblSMCurrencyExchangeRate SMCER 
+				ON SMCERD.intCurrencyExchangeRateId = SMCER.intCurrencyExchangeRateId 
+				AND SMCER.intFromCurrencyId = @intCurrencyId
+				AND SMCER.intToCurrencyId = @intDefaultCurrencyId
+				INNER JOIN tblSMCurrencyExchangeRateType AS SMCERT 
+				ON SMCERD.intRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+				AND SMCERT.intCurrencyExchangeRateTypeId = @intAccountsReceivableRateTypeId
+				WHERE SMCERD.dtmValidFromDate <= @dateNow
+				ORDER BY SMCERD.dtmValidFromDate DESC
+			) CE
+			WHERE intServiceChargeId = @intServiceChargeId
+
 
 			DELETE FROM @tempServiceChargeTable WHERE intServiceChargeId = @intServiceChargeId
 			
