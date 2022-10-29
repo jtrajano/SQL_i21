@@ -517,6 +517,13 @@ INSERT
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook			
+	,dblPackageBreakups
+	,dblNetWeightPerPackage
+	,dblNumberOfPackages
+	,dblNetWeightPerPackage2
+	,dblNumberOfPackages2
+	,dblNetWeightPerPackage3
+	,dblNumberOfPackages3
 	/**/
 	,dtmExpectedDate				
 )
@@ -631,6 +638,13 @@ VALUES
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook		
+	,dblPackageBreakups
+	,dblNetWeightPerPackage
+	,dblNumberOfPackages
+	,dblNetWeightPerPackage2
+	,dblNumberOfPackages2
+	,dblNetWeightPerPackage3
+	,dblNumberOfPackages3
 	/**/
 	,dtmExpectedDate
 )
