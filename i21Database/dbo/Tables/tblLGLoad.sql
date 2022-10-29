@@ -203,6 +203,7 @@
 [dtmDateApproved] DATETIME NULL,
 [strWarrantNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intWarrantStatus] INT NULL,
+[intBankId] INT NULL,
 
 [strTaxPoint] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 [ysnTaxPointOverride] BIT NULL,
