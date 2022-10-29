@@ -512,7 +512,7 @@ BEGIN
 		#ARPostPaymentDetail P
     OUTER APPLY (
 	    SELECT TOP 1 intAccountId = intOverrideAccount
-        FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intWriteOffAccountDetailId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+        FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intWriteOffAccountDetailId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
     ) WRITEOFFDETAIL
 	WHERE
 			P.[ysnPost] = 1
@@ -813,7 +813,7 @@ BEGIN
 		#ARPostPaymentDetail P
     OUTER APPLY (
 	    SELECT TOP 1 intAccountId = intOverrideAccount
-	    FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	    FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
     ) GAINLOSS
 	WHERE
 			P.[ysnPost] = 1
@@ -1008,7 +1008,7 @@ BEGIN
 		#ARPostPaymentDetail P
     OUTER APPLY (
 	    SELECT TOP 1 intAccountId = intOverrideAccount
-        FROM dbo.[fnARGetOverrideAccount](P.[intARAccountId], P.[intTransactionAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+        FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intTransactionAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
     ) WRITEOFF
 	WHERE
 			P.[ysnPost] = 1
@@ -1386,7 +1386,7 @@ BEGIN
     INNER JOIN
         tblGLDetail GLD
             ON PID.[intTransactionId] = GLD.[intTransactionId]
-            AND PID.[strTransactionId] = GLD.[strTransactionId]							 
+            AND PID.[strTransactionId] = GLD.[strTransactionId]
     WHERE
          GLD.[ysnIsUnposted] = 0
     ORDER BY
