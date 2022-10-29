@@ -27,10 +27,10 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , intSaleYear							= BD.intSaleYear
      , strBuyingCenter						= CL.strLocationName
      , strSaleNumber						= BD.strSaleNumber
-     , strTeaType							= CAST('Tea Type' AS NVARCHAR(100))
+     , strTeaType							= CT.strCatalogueType
      , strSupplier							= E.strName
-     , strChannel							= BD.strSubBook
-     , strCompanyCode						= BD.strPurchaseGroup
+     , strChannel							= SB.strSubBook
+     , strCompanyCode						= PG.strName
      , dtmPromptDate						= BD.dtmExpectedDate
      , dtmSaleDate							= BD.dtmSaleDate
      , strLotNo							= BD.strVendorLotNumber
@@ -57,5 +57,8 @@ INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
 LEFT JOIN tblEMEntity E ON B.intEntityVendorId = E.intEntityId
 LEFT JOIN tblSMCompanyLocation CL ON B.intShipToId = CL.intCompanyLocationId
 LEFT JOIN tblICStorageLocation SL ON BD.intStorageLocationId = SL.intStorageLocationId
+LEFT JOIN tblCTSubBook SB ON BD.intSubBookId = SB.intSubBookId
+LEFT JOIN tblSMPurchasingGroup PG ON BD.intPurchasingGroupId = PG.intPurchasingGroupId
+LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
 LEFT JOIN tblSMTransaction SMT ON SMT.intRecordId = CR.intCatalogueReconciliationId AND SMT.strTransactionNo = CR.strReconciliationNumber
 LEFT JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'CatalogueReconciliation'
