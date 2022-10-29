@@ -8,7 +8,7 @@ SELECT intBillDetailId					    = BD.intBillDetailId
     , strSupplier							      = E.strName
     , strChannel							      = BD.strSubBook
     , strSupplierPreInvoiceNo			  = B.strVendorOrderNumber
-	  , strCompanyCode						    = CAST('Company Code' AS NVARCHAR(100))
+	  , strCompanyCode						    = BD.strPurchaseGroup
 	  , dtmSupplierPreInvoiceDate		  = B.dtmDate
 	  , dtmPromptDate						      = BD.dtmExpectedDate
 	  , dtmSaleDate							      = BD.dtmSaleDate
@@ -24,12 +24,12 @@ SELECT intBillDetailId					    = BD.intBillDetailId
                                            ELSE CAST('Voucher' AS NVARCHAR(100))
                                       END
     , strPreInvoiceDocumentNo				= B.strBillId
-    , dblNetWtPackages						  = CAST(50 AS NUMERIC(18,6))
-    , dblNoPackages						      = CAST(60.8 AS NUMERIC(18,6))
-    , dblNetWt2ndPackages					  = CAST(70 AS NUMERIC(18,6))
-    , dblNo2ndPackages						  = CAST(808.6 AS NUMERIC(18,6))
-    , dblNetWt3rdPackages					  = CAST(90.68 AS NUMERIC(18,6))
-    , dblNo3rdPackages						  = CAST(660.68 AS NUMERIC(18,6))
+    , dblNetWtPackages						  = BD.dblNetWeightPerPackage
+    , dblNoPackages						      = BD.dblNumberOfPackages
+    , dblNetWt2ndPackages					  = BD.dblNetWeightPerPackage2
+    , dblNo2ndPackages						  = BD.dblNumberOfPackages2
+    , dblNetWt3rdPackages					  = BD.dblNetWeightPerPackage3
+    , dblNo3rdPackages						  = BD.dblNumberOfPackages3
     , strWarehouseCode						  = SL.strName
 FROM tblAPBillDetail BD
 INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId

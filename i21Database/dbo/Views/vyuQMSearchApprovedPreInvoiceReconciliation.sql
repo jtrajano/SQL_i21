@@ -30,25 +30,25 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , strTeaType							= CAST('Tea Type' AS NVARCHAR(100))
      , strSupplier							= E.strName
      , strChannel							= BD.strSubBook
-     , strCompanyCode						= CAST('Company Code' AS NVARCHAR(100))
+     , strCompanyCode						= BD.strPurchaseGroup
      , dtmPromptDate						= BD.dtmExpectedDate
      , dtmSaleDate							= BD.dtmSaleDate
      , strLotNo							= BD.strVendorLotNumber
      , dblSupplierPreInvoicePrice			     = BD.dblCost
      , dblPreInvoiceLotQty					= BD.dblQtyReceived
-     , dblTotalNoPackageBreakups			     = CAST(30 AS NUMERIC(18,6))
+     , dblTotalNoPackageBreakups			     = BD.dblPackageBreakups
      , strPreInvoiceGardenInvoiceNo			= BD.strPreInvoiceGardenNumber
      , strPreInvoicePurchaseType			     = CASE WHEN B.intTransactionType = 2 THEN CAST('Vendor Prepayment' AS NVARCHAR(100))
                                                          WHEN B.intTransactionType = 3 THEN CAST('Debit Memo' AS NVARCHAR(100))
                                                          ELSE CAST('Voucher' AS NVARCHAR(100))
                                                     END
      , strPreInvoiceDocumentNo				= B.strBillId
-     , dblNetWtPackages						= CAST(50 AS NUMERIC(18,6))
-     , dblNoPackages						= CAST(60.8 AS NUMERIC(18,6))
-     , dblNetWt2ndPackages					= CAST(70 AS NUMERIC(18,6))
-     , dblNo2ndPackages						= CAST(808.6 AS NUMERIC(18,6))
-     , dblNetWt3rdPackages					= CAST(90.68 AS NUMERIC(18,6))
-     , dblNo3rdPackages						= CAST(660.68 AS NUMERIC(18,6))
+     , dblNetWtPackages						= BD.dblNetWeightPerPackage
+     , dblNoPackages						= BD.dblNumberOfPackages
+     , dblNetWt2ndPackages					= BD.dblNetWeightPerPackage2
+     , dblNo2ndPackages						= BD.dblNumberOfPackages2
+     , dblNetWt3rdPackages					= BD.dblNetWeightPerPackage3
+     , dblNo3rdPackages						= BD.dblNumberOfPackages3
      , strWarehouseCode						= SL.strName
 FROM tblQMCatalogueReconciliationDetail CRD 
 INNER JOIN tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId
