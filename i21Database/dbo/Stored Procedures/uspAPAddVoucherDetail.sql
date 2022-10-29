@@ -515,8 +515,8 @@ INSERT
 	,strVendorLotNumber					
 	,strPreInvoiceGarden				
 	,strPreInvoiceGardenNumber			
-	,strBook							
-	,strSubBook			
+	,intBookId							
+	,intSubBookId	
 	,dblPackageBreakups
 	,dblNetWeightPerPackage
 	,dblNumberOfPackages
@@ -636,8 +636,8 @@ VALUES
 	,strVendorLotNumber					
 	,strPreInvoiceGarden				
 	,strPreInvoiceGardenNumber			
-	,strBook							
-	,strSubBook		
+	,intBookId							
+	,intSubBookId		
 	,dblPackageBreakups
 	,dblNetWeightPerPackage
 	,dblNumberOfPackages
