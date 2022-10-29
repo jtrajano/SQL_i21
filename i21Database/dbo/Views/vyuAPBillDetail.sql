@@ -105,8 +105,10 @@ SELECT
 	B.[strVendorLotNumber],
 	B.[strPreInvoiceGarden],
 	B.[strPreInvoiceGardenNumber],
-	B.[strBook],
-	B.[strSubBook]
+	book.[strBook],
+	subBook.[strSubBook],
+	cgt.strCatalogueType,
+	pg.strName AS strPurchasingGroup
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -187,3 +189,7 @@ LEFT JOIN (tblICInsuranceCharge ichrge
 		ON ichrgedtl.intInsuranceChargeDetailId = B.intInsuranceChargeDetailId
 LEFT JOIN tblICLot lot
 	ON lot.intLotId = B.intLotId
+LEFT JOIN tblQMCatalogueType cgt ON cgt.intCatalogueTypeId = B.intCatalogueTypeId
+LEFT JOIN tblCTBook book ON book.intBookId = B.intBookId
+LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = B.intSubBookId
+LEFT JOIN tblSMPurchasingGroup pg ON pg.intPurchasingGroupId = B.intPurchasingGroupId
