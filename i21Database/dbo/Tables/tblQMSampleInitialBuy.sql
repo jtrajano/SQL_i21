@@ -15,6 +15,6 @@
     CONSTRAINT [PK_tblQMSampleInitialBuy] PRIMARY KEY ([intInitialBuyId]),
 	CONSTRAINT [FK_tblQMSampleInitialBuy_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId]),
     CONSTRAINT [FK_tblQMSampleInitialBuy_tblEMEntity_intBuyerId] FOREIGN KEY ([intBuyerId]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
-	CONSTRAINT [FK_tblQMSampleInitialBuy_tblICItemUOM_intQtyUOMId] FOREIGN KEY ([intQtyUOMId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId]),
-	CONSTRAINT [FK_tblQMSampleInitialBuy_tblICItemUOM_intPriceUOMId] FOREIGN KEY ([intPriceUOMId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId])
+	--CONSTRAINT [FK_tblQMSampleInitialBuy_tblICUnitMeasure_intQtyUOMId] FOREIGN KEY ([intQtyUOMId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
+	--CONSTRAINT [FK_tblQMSampleInitialBuy_tblICUnitMeasure_intPriceUOMId] FOREIGN KEY ([intPriceUOMId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 )
