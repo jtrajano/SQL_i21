@@ -45,6 +45,8 @@ BEGIN TRY
         ,@intSampleStatusId INT
         ,@intBookId INT
         ,@dblCashPrice NUMERIC(18, 6)
+        ,@ysnSampleContractItemMatch BIT
+        ,@strSampleNumber NVARCHAR(30)
 
     DECLARE @MFBatchTableType MFBatchTableType
 
@@ -59,6 +61,8 @@ BEGIN TRY
             ,intSampleStatusId = SAMPLE_STATUS.intSampleStatusId
             ,intBookId = BOOK.intBookId
             ,dblCashPrice = IMP.dblBoughtPrice
+            ,ysnSampleContractItemMatch = CASE WHEN CD.intItemId = S.intItemId THEN 1 ELSE 0 END
+            ,strSampleNumber = S.strSampleNumber
         FROM tblQMSample S
         INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
@@ -95,12 +99,28 @@ BEGIN TRY
         ,@intSampleStatusId
         ,@intBookId
         ,@dblCashPrice
+        ,@ysnSampleContractItemMatch
+        ,@strSampleNumber
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+        -- If the contract and sample item does not match, throw an error
+        IF @ysnSampleContractItemMatch = 0
+        BEGIN
+            UPDATE tblQMImportCatalogue
+            SET
+                ysnSuccess = 0
+                ,ysnProcessed = 1
+                ,strLogResult = 'The item in contract does not match the item in sample ' + @strSampleNumber + '.'
+            WHERE intImportCatalogueId = @intImportCatalogueId
+            GOTO CONT
+        END
+
         -- Update Sample
         UPDATE S
         SET
             intConcurrencyId = S.intConcurrencyId + 1
+            ,intProductTypeId = 8 --Contract Line Item
+            ,intProductValueId = @intContractDetailId
             ,intContractHeaderId = @intContractHeaderId
             ,intContractDetailId = @intContractDetailId
             ,intSampleStatusId = @intSampleStatusId
@@ -114,13 +134,21 @@ BEGIN TRY
             intConcurrencyId = CD.intConcurrencyId + 1
             ,dblCashPrice = @dblCashPrice
         FROM tblCTContractDetail CD
+        INNER JOIN tblQMSample S ON S.intContractDetailId = CD.intContractDetailId AND S.intItemId = CD.intItemId
         WHERE CD.intContractHeaderId = @intContractHeaderId
         AND CD.intContractDetailId = @intContractDetailId
+
+        UPDATE tblQMTestResult
+        SET
+            intProductTypeId = 8 --Contract Line Item
+            ,intProductValueId = @intContractDetailId
+        WHERE intSampleId = @intSampleId
 
         UPDATE tblQMImportCatalogue
         SET intSampleId = @intSampleId
         WHERE intImportCatalogueId = @intImportCatalogueId
 
+        CONT:
         FETCH NEXT FROM @C INTO
             @intImportCatalogueId
             ,@intSampleId
@@ -129,6 +157,8 @@ BEGIN TRY
             ,@intSampleStatusId
             ,@intBookId
             ,@dblCashPrice
+            ,@ysnSampleContractItemMatch
+            ,@strSampleNumber
     END
     CLOSE @C
 	DEALLOCATE @C

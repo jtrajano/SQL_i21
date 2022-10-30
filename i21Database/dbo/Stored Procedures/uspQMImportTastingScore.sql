@@ -65,14 +65,14 @@ BEGIN TRY
         ,@strMouthFeel NVARCHAR(MAX)
 
     DECLARE @intValidDate INT
+        ,@intDefaultItemId INT
+        ,@intDefaultCategoryId INT
 
-    SELECT @intValidDate = (
-			SELECT DATEPART(dy, GETDATE())
-			)
+    SELECT @intValidDate = (SELECT DATEPART(dy, GETDATE()))
 
     SELECT TOP 1
-        @intItemId = [intDefaultItemId]
-        ,@intCategoryId = I.intCategoryId
+        @intDefaultItemId = [intDefaultItemId]
+        ,@intDefaultCategoryId = I.intCategoryId
     FROM tblQMCatalogueImportDefaults CID
     INNER JOIN tblICItem I ON I.intItemId = CID.intDefaultItemId
 
@@ -167,26 +167,42 @@ BEGIN TRY
         DECLARE @intOriginalItemId INT
         SELECT @intOriginalItemId = intItemId
         FROM tblQMSample WHERE intSampleId = @intSampleId
-
-        SELECT 
-                ISNULL(@strBrand, '') -- Leaf Size
-                + '%' -- To be updated by sub cluster
-                + ISNULL(@strValuationGroup, '') -- Leaf Style
-                + ISNULL(@strOrigin, '') -- Origin
-                + '-'
-                + ISNULL(@strSustainability, '') -- Rain Forest / Sustainability
-
+        
         IF @intItemId IS NULL
-            SELECT TOP 1 @intItemId = I.intItemId
-            FROM tblICItem I
-            -- TODO: To update filter once Sub Cluster is provided
-            WHERE I.strItemNo LIKE 
-                ISNULL(@strBrand, '') -- Leaf Size
+            SELECT @intItemId = ITEM.intItemId
+            FROM tblQMSample S
+            INNER JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+            INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+            INNER JOIN tblICItem ITEM ON ITEM.strItemNo LIKE 
+                @strBrand -- Leaf Size
+                -- TODO: To update filter once Sub Cluster is provided
                 + '%' -- To be updated by sub cluster
-                + ISNULL(@strValuationGroup, '') -- Leaf Style
-                + ISNULL(@strOrigin, '') -- Origin
+                + @strValuationGroup -- Leaf Style
+                + ORIGIN.strISOCode -- Origin
                 + '-'
-                + ISNULL(@strSustainability, '') -- Rain Forest / Sustainability
+                + SUSTAINABILITY.strDescription -- Rain Forest / Sustainability
+
+        -- If Tealingo Item is provided in the template but does not match the testing score, throw an error
+        IF (@intItemId IS NOT NULL AND dbo.fnQMValidateTealingoItemTastingScore(
+                @intItemId
+                ,CASE WHEN ISNULL(@strAppearance, '') = '' THEN NULL ELSE CAST(@strAppearance AS NUMERIC(18,6)) END -- APPEARANCE
+                ,CASE WHEN ISNULL(@strHue, '') = '' THEN NULL ELSE CAST(@strHue AS NUMERIC(18,6)) END -- HUE
+                ,CASE WHEN ISNULL(@strIntensity, '') = '' THEN NULL ELSE CAST(@strIntensity AS NUMERIC(18,6)) END -- INTENSITY
+                ,CASE WHEN ISNULL(@strTaste, '') = '' THEN NULL ELSE CAST(@strTaste AS NUMERIC(18,6)) END -- TASTE
+                ,CASE WHEN ISNULL(@strMouthFeel, '') = '' THEN NULL ELSE CAST(@strMouthFeel AS NUMERIC(18,6)) END -- MOUTH FEEL
+            ) = 0
+        )
+        BEGIN
+            UPDATE tblQMImportCatalogue
+            SET strLogResult = 'WARNING: Import successful but the tasting score does not match the Tealingo item''s pinpoint values.'
+            WHERE intImportCatalogueId = @intImportCatalogueId
+        END
+        
+        -- If Tealingo item cannot be determined, fallback to default item.
+        IF @intItemId IS NULL
+            SELECT
+                @intItemId = @intDefaultItemId
+                ,@intCategoryId = @intDefaultCategoryId
 
         SELECT @intItemId
 
@@ -534,6 +550,7 @@ BEGIN TRY
         SET intSampleId = @intSampleId
         WHERE intImportCatalogueId = @intImportCatalogueId
 
+        CONT:
         FETCH NEXT FROM @C INTO
             @intImportCatalogueId
             ,@intSampleTypeId

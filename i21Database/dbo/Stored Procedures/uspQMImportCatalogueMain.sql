@@ -752,6 +752,50 @@ BEGIN TRY
                 ,strComment = @strComments
                 ,intLastModifiedUserId = @intEntityUserId
                 ,dtmLastModified = @dtmDateCreated
+
+                -- Auction Fields
+                ,intSaleYearId = @intSaleYearId
+                ,strSaleYear = @strSaleYear
+                ,intSaleNumber = @intSaleNumber
+                ,dtmSaleDate = @dtmSaleDate
+                ,intCatalogueTypeId = @intCatalogueTypeId
+                ,strCatalogueType = @strCatalogueType
+                ,dtmPromptDate = @dtmPromptDate
+                ,strChopNumber = @strChopNumber
+                ,intGradeId = @intGradeId
+                ,strGrade = @strGrade
+                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
+                ,strManufacturingLeafType = @strManufacturingLeafType
+                ,intSeasonId = @intSeasonId
+                ,strSeason = @strSeason
+                ,intGardenMarkId = @intGardenMarkId
+                ,strGardenMark = @strGardenMark
+                ,dtmManufacturingDate = @dtmManufacturingDate
+                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
+                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNoOfPackages = @intNoOfPackages
+                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
+                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
+                ,intProductLineId = @intProductLineId
+                ,strProductLine = @strProductLine
+                ,ysnOrganic = @ysnOrganic
+                ,dblGrossWeight = @dblGrossWeight
+                ,strBatchNo = @strBatchNo
+                ,str3PLStatus = @str3PLStatus
+                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
+                ,intAWBSampleReceived = @intAWBSampleReceived
+                ,strAWBSampleReference = @strAWBSampleReference
+                ,dblBasePrice = @dblBasePrice
+                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
+                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
+                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
+                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
+                ,intFromLocationCodeId = @intFromLocationCodeId
+                ,strFromLocationCode = @strFromLocationCode
+                ,strSampleBoxNumber = @strSampleBoxNumber
+                ,strComments3 = @strComments3
             FROM tblQMSample S
             WHERE S.intSampleId = @intSampleId
 

@@ -1329,6 +1329,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTime.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateFeedXML_SAP.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageXML_SAP.sql" />
+    <Build Include="dbo\Functions\fnQMGetTealingoItemFromFieldMapping.sql" />
+    <Build Include="dbo\Functions\fnQMValidateTealingoItemTastingScore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

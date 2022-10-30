@@ -83,8 +83,8 @@ BEGIN TRY
         EXEC uspQMImportInitialBuy @intImportLogId
 
     -- -- Contract Line Allocation Import
-    -- IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Contract Line Allocation')
-    --     EXEC uspQMImportCatalogueMain @intImportLogId
+    IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Contract Line Allocation')
+        EXEC uspQMImportContractAllocation @intImportLogId
 
 	COMMIT TRANSACTION
 END TRY
