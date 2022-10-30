@@ -77,6 +77,8 @@ FROM (
 		,strShippingLine = ISNULL(ESLP.strName, ESLS.strName)
 		,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CDS.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 		,intShipmentType = 1
+		,CHS.intFreightTermId
+		,FT.strFreightTerm
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 	JOIN tblCTContractDetail CDP ON CDP.intContractDetailId = AD.intPContractDetailId
@@ -133,6 +135,7 @@ FROM (
 	LEFT JOIN tblEMEntity ESLS ON ESLS.intEntityId = CDS.intShippingLineId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
+	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CHS.intFreightTermId
 	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
 					FROM tblSMTransaction TRN INNER JOIN tblSMScreen SCR 
 					ON TRN.intScreenId = SCR.intScreenId AND SCR.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments' )
@@ -238,6 +241,8 @@ FROM (
 		,strShippingLine = ISNULL(ESLP.strName, ESLS.strName)
 		,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CDS.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 		,intShipmentType = 2
+		,CHS.intFreightTermId
+		,FT.strFreightTerm
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 	JOIN tblCTContractDetail CDP ON CDP.intContractDetailId = AD.intPContractDetailId
@@ -305,6 +310,7 @@ FROM (
 	LEFT JOIN tblEMEntity ESLS ON ESLS.intEntityId = CDS.intShippingLineId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
+	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CHS.intFreightTermId
 	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
 					FROM tblSMTransaction TRN INNER JOIN tblSMScreen SCR 
 					ON TRN.intScreenId = SCR.intScreenId AND SCR.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments' )
