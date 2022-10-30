@@ -34,7 +34,11 @@ BEGIN
 									WHEN E.intClockID IS NULL THEN
 										'The Site Clock Location does not exists in Tank Management.'
 									WHEN D.strClassFillOption = 'No' AND D.intProduct <> C.intItemId AND G.strType <> 'Service'  THEN
-										'The Invoice item is different than the site item.'
+										CONCAT('The Invoice item is different than the site item for Customer: '
+										, ISNULL(L.strName,''), ', Customer Location: '
+										, ISNULL(M.strLocationName,''), ', Item: '
+										, ISNULL(G.strItemNo,''), ', and Site: '
+										, (CASE WHEN D.intSiteNumber < 9 THEN '000' + CONVERT(VARCHAR, D.intSiteNumber) ELSE '00' + CONVERT(VARCHAR,D.intSiteNumber) END ))
 									WHEN D.strClassFillOption = 'Product Class' AND F.intCategoryId <> G.intCategoryId AND G.strType <> 'Service' THEN
 										'The Invoice item class is different than the site item class.'
 									WHEN G.strType = 'Service' AND C.intPerformerId IS NULL THEN
@@ -59,6 +63,10 @@ BEGIN
 			ON D.intProduct = F.intItemId
 		LEFT JOIN tblICItem G
 			ON C.intItemId = G.intItemId
+		LEFT JOIN tblEMEntity L
+			ON A.intEntityCustomerId = L.intEntityId
+		LEFT JOIN tblEMEntityLocation M
+			ON A.intShipToLocationId = M.intEntityLocationId
 		-- LEFT JOIN tblTMSiteDevice I
 		-- 	ON D.intSiteID = I.intSiteID
 		-- LEFT JOIN tblTMDevice	J
