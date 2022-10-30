@@ -10,6 +10,7 @@
 	[strMarketerAccountNo] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 	[strMarketerEmail] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 	[strDataFileTemplate] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+	strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strReimbursementType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblVRVendorSetup_strReimbursementType] DEFAULT (N'AP'),
 	[intAccountId] INT NULL,
 	[intConcurrencyId] INT DEFAULT 0 NOT NULL,
