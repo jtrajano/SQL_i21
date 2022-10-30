@@ -35,9 +35,10 @@ SELECT (CASE WHEN ysnKeep = 1 THEN 'KEEP'
 	 , dblWeightPerQty		= CAST(Lot.dblWeightPerQty AS NUMERIC(38,0))					-- Weight Per Qty
 	 , strFW				= ISNULL(strFW, '')												-- FW
 	 , dblSumQuantity		= CAST(WorkOrderInputLotQty.dblSumQuantity AS NUMERIC(38,0))	-- Sum Qty ***
-	 , strTIN = ''
+	 , TinClearance.strTINNumber															-- TIN Number
 	 , dblWorkOrderQty		= CAST(WorkOrder.dblQuantity AS NUMERIC(38,0))					-- Work Order Quantity
 	 , intAge				= DATEDIFF(DD, WorkOrderInputLot.dtmCreated, GETDATE())			-- Age
+	 , strLeaf				= Batch.strLeafSize + ' - ' + Batch.strLeafStyle				-- Leaf 
 FROM tblMFWorkOrderInputLot AS WorkOrderInputLot
 LEFT JOIN tblICLot AS Lot ON WorkOrderInputLot.intLotId = Lot.intLotId
 LEFT JOIN tblICItem AS Item ON WorkOrderInputLot.intItemId = Item.intItemId
@@ -51,3 +52,6 @@ OUTER APPLY (SELECT TOP 1 dblEstNoOfBlendSheet
 OUTER APPLY (SELECT TOP 1 SUM(dblQuantity) AS dblSumQuantity
 			 FROM tblMFWorkOrderInputLot
 			 WHERE intWorkOrderId = WorkOrderInputLot.intWorkOrderId) AS WorkOrderInputLotQty
+OUTER APPLY (SELECT TOP 1 strTINNumber
+			 FROM tblQMTINClearance
+			 ORDER BY intTINClearanceId DESC) AS TinClearance
