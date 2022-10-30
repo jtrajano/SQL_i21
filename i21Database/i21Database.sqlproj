@@ -1325,6 +1325,10 @@
     <Build Include="dbo\Tables\tblQMSampleInitialBuy.sql" />
     <Build Include="dbo\Tables\tblQMSubBookSampleTypeMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportContractAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPO.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTime.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateFeedXML_SAP.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageXML_SAP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
