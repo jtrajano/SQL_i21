@@ -31,6 +31,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     dblShippingInstructionQty NUMERIC(18, 6) NULL, 
 	dblNetWeight NUMERIC(38, 20) NULL, 
 	dblConvertedNetWeight NUMERIC(38, 20) NULL, 
+	dblConvertedQuantity NUMERIC(38, 20) NULL, 
 	intNetWeightUOMId int NULL,	
 	intUnitMeasureId int NULL,
 	intCategoryUOMId INT NULL, 	
