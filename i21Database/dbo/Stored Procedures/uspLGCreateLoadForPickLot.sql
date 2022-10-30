@@ -32,11 +32,14 @@ BEGIN TRY
 	DECLARE @intBookId INT
 	DECLARE @intSubBookId INT
 	DECLARE @intPickLotDetailId INT
+	DECLARE @ysnDefaultFreightTermsFromCt BIT
+	DECLARE @intNumAllocInfo INT
 
 	SELECT @intTransportationMode = intDefaultTransportationMode
 		,@intTransUsedBy = intTransUsedBy
 		,@intPositionId = intDefaultPositionId
-		,@intFreightTerm = intDefaultFreightTermId 
+		,@intFreightTerm = intDefaultFreightTermId
+		,@ysnDefaultFreightTermsFromCt = ysnDefaultFreightTermsFromCt
 	FROM tblLGCompanyPreference
 
 	SELECT @intCurrencyId = intDefaultCurrencyId
@@ -83,6 +86,29 @@ BEGIN TRY
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 	WHERE PLH.intPickLotHeaderId = @intPickLotHeaderId 
 
+	SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
+	FROM @tblAllocationInfo
+
+	SELECT @intNumAllocInfo = COUNT(*) FROM @tblAllocationInfo
+
+	IF (@ysnDefaultFreightTermsFromCt = 1)
+	BEGIN
+		IF (@intNumAllocInfo = 1)
+		BEGIN
+			SELECT @intSContractDetailId = intSContractDetailId
+			FROM tblLGAllocationDetail AD
+			INNER JOIN @tblAllocationInfo AI ON AI.intAllocationDetailId = AD.intAllocationDetailId
+
+			SELECT @intFreightTerm = intFreightTermId
+			FROM tblCTContractDetail
+			WHERE intContractDetailId = @intSContractDetailId
+		END
+		ELSE
+		BEGIN
+			SET @intFreightTerm = NULL
+		END
+	END
+
 	INSERT INTO tblLGLoad (
 		dtmScheduledDate
 		,intConcurrencyId
@@ -119,9 +145,6 @@ BEGIN TRY
 		,@intSubBookId
 
 	SELECT @intLoadId = SCOPE_IDENTITY()
-
-	SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
-	FROM @tblAllocationInfo
 
 	WHILE (ISNULL(@intMinAllocationRecordId, 0) > 0)
 	BEGIN
