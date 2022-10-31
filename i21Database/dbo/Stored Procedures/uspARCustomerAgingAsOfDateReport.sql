@@ -16,6 +16,7 @@
 	, @ysnExcludeAccountStatus		BIT = 0
 	, @ysnOverrideCashFlow  		BIT = 0
 	, @strReportLogId				NVARCHAR(MAX) = NULL
+	, @strAgingType					NVARCHAR(10) = 'Summary'
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
@@ -410,8 +411,8 @@ WHERE ysnPosted = 1
 		OR 
 		SC.intInvoiceId IS NOT NULL
 	)
-	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+ AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
+ AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
@@ -494,8 +495,48 @@ WHERE I.ysnPosted = 1
   AND (I.strInvoiceOriginId IS NOT NULL AND I.strInvoiceOriginId <> '')
   AND (RI.ysnReturned IS NULL OR RI.ysnReturned = 0)
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+
+DECLARE @intBucket1From	INT = 0, @intBucket1To	INT = 0
+	  , @intBucket2From	INT = 0, @intBucket2To	INT = 10
+	  , @intBucket3From	INT = 10, @intBucket3To	INT = 30
+	  , @intBucket4From	INT = 30, @intBucket4To	INT = 60
+	  , @intBucket5From	INT = 60, @intBucket5To	INT = 90
+	  , @intBucket6From	INT = 90, @intBucket6To	INT = 0
+
+IF @strAgingType = 'Custom'
+	BEGIN
+		SELECT TOP 1 @intBucket1From	= ISNULL(intAgeFrom, 0)
+				   , @intBucket1To		= ISNULL(intAgeTo, 99999999)
+		FROM tblARCustomAgingSetupBucket
+		WHERE strOriginalBucket = 'Current'
+
+		SELECT TOP 1 @intBucket2From	= ISNULL(intAgeFrom, 0)
+				   , @intBucket2To		= ISNULL(intAgeTo, 99999999)
+		FROM tblARCustomAgingSetupBucket
+		WHERE strOriginalBucket = '1-10 Days'
+
+		SELECT TOP 1 @intBucket3From	= ISNULL(intAgeFrom, 0)
+				   , @intBucket3To		= ISNULL(intAgeTo, 99999999)
+		FROM tblARCustomAgingSetupBucket
+		WHERE strOriginalBucket = '11-30 Days'
+
+		SELECT TOP 1 @intBucket4From	= ISNULL(intAgeFrom, 0)
+				   , @intBucket4To		= ISNULL(intAgeTo, 99999999)
+		FROM tblARCustomAgingSetupBucket
+		WHERE strOriginalBucket = '31-60 Days'
+
+		SELECT TOP 1 @intBucket5From	= ISNULL(intAgeFrom, 0)
+				   , @intBucket5To		= ISNULL(intAgeTo, 99999999)
+		FROM tblARCustomAgingSetupBucket
+		WHERE strOriginalBucket = '61-90 Days'
+
+		SELECT TOP 1 @intBucket6From	= ISNULL(intAgeFrom, 0)
+				   , @intBucket6To		= ISNULL(intAgeTo, 99999999)
+		FROM tblARCustomAgingSetupBucket
+		WHERE strOriginalBucket = 'Over 90 Days'
+	END
 	
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = @strAgingType
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
 	 , strCustomerNumber
@@ -552,12 +593,12 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strSourceTransaction	= @strSourceTransactionLocal
 	 , strCompanyName		= @strCompanyName
 	 , strCompanyAddress	= @strCompanyAddress
-	 , strAgingType			= 'Summary'
+	 , strAgingType			= @strAgingType
 	 , strReportLogId		= @strReportLogId
 	 , strLogoType			= @strLogoType
 	 , blbLogo				= @blbLogo
-FROM
-(SELECT A.intEntityCustomerId
+FROM (
+SELECT intEntityCustomerId	= B.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
      , dblFuture            = SUM(B.dblFuture)
 	 , dbl0Days				= SUM(B.dbl0Days)
@@ -570,151 +611,140 @@ FROM
      , dblAmountPaid        = SUM(B.dblAmountPaid)
      , dblCredits           = SUM(B.dblAvailableCredit) * -1
 	 , dblPrepayments		= SUM(B.dblPrepayments) * -1     
-FROM
+FROM (
+	SELECT intEntityCustomerId		= TBL.intEntityCustomerId
+		, intInvoiceId				= TBL.intInvoiceId
+		, dblAmountPaid				= TBL.dblAmountPaid
+		, dblTotalDue				= dblInvoiceTotal - dblAmountPaid
+		, dblAvailableCredit		= TBL.dblAvailableCredit
+		, dblPrepayments			= TBL.dblPrepayments
+		, dblFuture					= CASE WHEN strType = 'CF Tran' 
+										   THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 
+									  END
+		, dbl0Days					= CASE WHEN ((DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) <= 0 AND @strAgingType = 'Summary') OR										   
+										         (DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) BETWEEN @intBucket1From AND @intBucket1To AND @strAgingType = 'Custom')) AND strType <> 'CF Tran' 
+										   THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0
+									  END
+		, dbl10Days					= CASE WHEN DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) > @intBucket2From AND DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) <= @intBucket2To AND strType <> 'CF Tran'
+										   THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 
+									  END 
+		, dbl30Days					= CASE WHEN DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) > @intBucket3From AND DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) <= @intBucket3To AND strType <> 'CF Tran'
+										   THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 
+									  END 
+		, dbl60Days					= CASE WHEN DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) > @intBucket4From AND DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) <= @intBucket4To AND strType <> 'CF Tran'
+										   THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 
+									  END 
+		, dbl90Days					= CASE WHEN DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) > @intBucket5From AND DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) <= @intBucket5To AND strType <> 'CF Tran'
+										   THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 
+									  END 
+		, dbl91Days					= CASE WHEN ((DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) > @intBucket6From AND @strAgingType = 'Summary') OR
+												 (DATEDIFF(DAYOFYEAR, (CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END), @dtmDateToLocal) BETWEEN @intBucket6From AND @intBucket6To AND @strAgingType = 'Custom')) AND strType <> 'CF Tran' 
+										   THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 
+									  END 
+	FROM (
+		--INVOICES
+		SELECT I.intInvoiceId
+			  , dblAmountPaid		= 0
+			  , dblInvoiceTotal		= ISNULL(dblInvoiceTotal,0)
+			  , dblAmountDue		= 0    
+			  , I.dtmDueDate    
+			  , I.dtmDate  
+			  , I.intEntityCustomerId
+			  , dblAvailableCredit	= 0
+			  , dblPrepayments		= 0
+			  , I.strType
+		FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
+		WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
 
-(SELECT I.intInvoiceId
-      , I.intEntityCustomerId
-	  , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
-				 ELSE CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 0 THEN 'Current'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 10 THEN '1 - 10 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 30 THEN '11 - 30 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 60 THEN '31 - 60 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) <= 90 THEN '61 - 90 Days'
-	    			       WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal) > 90 THEN 'Over 90' END
-				 END
-FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
-WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
+		UNION ALL
 
-) AS A  
+		--CREDIT MEMOS/OVERPAYMENTS
+		SELECT I.intInvoiceId
+			 , dblAmountPaid		= 0
+			 , dblInvoiceTotal		= CASE WHEN I.strType = 'CF Tran' THEN (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)) * -1 ELSE 0 END
+			 , dblAmountDue			= 0    
+			 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+			 , dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
+			 , I.intEntityCustomerId
+			 , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) END
+			 , dblPrepayments		= 0
+			 , I.strType
+		FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
+		LEFT JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
+		LEFT JOIN (
+			SELECT dblPayment = SUM(dblPayment) + SUM(dblWriteOffAmount)
+				 , PD.intInvoiceId
+			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
+			GROUP BY PD.intInvoiceId
+		) PD ON I.intInvoiceId = PD.intInvoiceId
+		LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+		WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
 
-LEFT JOIN
-          
-(SELECT DISTINCT 
-      intEntityCustomerId
-    , intInvoiceId  
-	, dblAmountPaid
-    , dblTotalDue	= dblInvoiceTotal - dblAmountPaid
-    , dblAvailableCredit
-	, dblPrepayments
-	, CASE WHEN strType = 'CF Tran' 
-			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dblFuture
-    , CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 0 AND strType <> 'CF Tran'
-			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl0Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 0  AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 10 AND strType <> 'CF Tran'
-			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl10Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 10 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 30 AND strType <> 'CF Tran'
-			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl30Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 30 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 60 AND strType <> 'CF Tran'
-			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl60Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 60 AND DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) <= 90 AND strType <> 'CF Tran'
-			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl90Days
-	, CASE WHEN DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN TBL.dtmDate ELSE TBL.dtmDueDate END ), @dtmDateToLocal) > 90 AND strType <> 'CF Tran'
-			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl91Days
-FROM
-(SELECT I.intInvoiceId
-      , dblAmountPaid		= 0
-      , dblInvoiceTotal		= ISNULL(dblInvoiceTotal,0)
-      , dblAmountDue		= 0    
-      , I.dtmDueDate    
-	  , I.dtmDate  
-      , I.intEntityCustomerId
-      , dblAvailableCredit	= 0
-	  , dblPrepayments		= 0
-	  , I.strType
-FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
-WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
+		UNION ALL
 
-UNION ALL
-
-SELECT I.intInvoiceId
-     , dblAmountPaid		= 0
-     , dblInvoiceTotal		= CASE WHEN I.strType = 'CF Tran' THEN (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)) * -1 ELSE 0 END
-     , dblAmountDue			= 0    
-     , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
-	 , dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
-     , I.intEntityCustomerId
-     , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) END
-	 , dblPrepayments		= 0
-	 , I.strType
-FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
-	LEFT JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
-	LEFT JOIN (
-		SELECT dblPayment = SUM(dblPayment) + SUM(dblWriteOffAmount)
-			 , PD.intInvoiceId
-		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
-		GROUP BY PD.intInvoiceId
-	) PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
-    AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-
-UNION ALL
-
-SELECT I.intInvoiceId
-     , dblAmountPaid		= 0
-     , dblInvoiceTotal		= 0
-     , dblAmountDue			= 0    
-     , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
-	 , dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
-     , I.intEntityCustomerId
-     , dblAvailableCredit	= 0
-	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
-	 , I.strType
-FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
-	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
-	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
-WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
-    AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+		--PREPAYMENTS
+		SELECT I.intInvoiceId
+			 , dblAmountPaid		= 0
+			 , dblInvoiceTotal		= 0
+			 , dblAmountDue			= 0    
+			 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
+			 , dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
+			 , I.intEntityCustomerId
+			 , dblAvailableCredit	= 0
+			 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
+			 , I.strType
+		FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
+		INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
+		LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
+		LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+		WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
 	                                          
-UNION ALL
-            
-SELECT I.intInvoiceId
-    , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
-    , dblInvoiceTotal		= 0
-    , dblAmountDue			= 0
-    , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
-	, dtmDate				= ISNULL(I.dtmDate, GETDATE())
-    , I.intEntityCustomerId
-    , dblAvailableCredit	= 0
-	, dblPrepayments		= 0
-	, I.strType
-FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
-LEFT JOIN (
-	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) + SUM(ISNULL(dblWriteOffAmount, 0)) - SUM(ISNULL(dblInterest, 0))
-	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-	INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId
-	GROUP BY PD.intInvoiceId
+		UNION ALL
+        
+		--AR/AP PAYMENTS AND CASH REFUND
+		SELECT I.intInvoiceId
+			, dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
+			, dblInvoiceTotal		= 0
+			, dblAmountDue			= 0
+			, dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
+			, dtmDate				= ISNULL(I.dtmDate, GETDATE())
+			, I.intEntityCustomerId
+			, dblAvailableCredit	= 0
+			, dblPrepayments		= 0
+			, I.strType
+		FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
+		INNER JOIN (
+			SELECT PD.intInvoiceId
+				 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) + SUM(ISNULL(dblWriteOffAmount, 0)) - SUM(ISNULL(dblInterest, 0))
+			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+			INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId
+			GROUP BY PD.intInvoiceId
 
-	UNION ALL 
+			UNION ALL 
 
-	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= ABS((SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))))
-	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intPaymentId
-		FROM dbo.tblAPPayment WITH (NOLOCK)
-		WHERE ysnPosted = 1
-		  AND dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	) P ON PD.intPaymentId = P.intPaymentId
-	WHERE PD.intInvoiceId IS NOT NULL
-	GROUP BY PD.intInvoiceId
+			SELECT PD.intInvoiceId
+				 , dblTotalPayment		= ABS((SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))))
+			FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
+			INNER JOIN (
+				SELECT intPaymentId
+				FROM dbo.tblAPPayment WITH (NOLOCK)
+				WHERE ysnPosted = 1
+				  AND dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			) P ON PD.intPaymentId = P.intPaymentId
+			WHERE PD.intInvoiceId IS NOT NULL
+			GROUP BY PD.intInvoiceId
 
-	UNION ALL
+			UNION ALL
 
-	SELECT intInvoiceId			= intOriginalInvoiceId
-		 , dblTotalPayment		= dblInvoiceTotal
-	FROM #CASHRETURNS
-) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
-WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
+			SELECT intInvoiceId			= intOriginalInvoiceId
+				 , dblTotalPayment		= dblInvoiceTotal
+			FROM #CASHRETURNS
+		) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
+		WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
-) AS TBL) AS B
-          
-ON
-A.intEntityCustomerId	 = B.intEntityCustomerId
-AND A.intInvoiceId		 = B.intInvoiceId
+	) AS TBL
 
-GROUP BY A.intEntityCustomerId) AS AGING
+) AS B
+
+GROUP BY B.intEntityCustomerId) AS AGING
 INNER JOIN #ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
-ORDER BY strCustomerName

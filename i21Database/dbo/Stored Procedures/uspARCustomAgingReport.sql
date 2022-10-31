@@ -197,23 +197,22 @@ BEGIN
 	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
 	VALUES (@strReportLogId, GETDATE())
 
-	EXEC dbo.uspARCustomerAgingDetailAsOfDateReport  @dtmDateFrom				= @dtmDateFrom
-												   , @dtmDateTo					= @dtmDateTo
-												   , @strSourceTransaction		= @strSourceTransaction	
-												   , @strCustomerIds			= @strCustomerIds
-												   , @strSalespersonIds			= @strSalespersonIds
-												   , @strCompanyLocationIds		= @strCompanyLocationIds
-												   , @strAccountStatusIds		= @strAccountStatusIds	
-												   , @intEntityUserId			= @intEntityUserId
-												   , @ysnPaidInvoice			= NULL
-												   , @ysnInclude120Days			= 0
-												   , @ysnExcludeAccountStatus	= 0
-												   , @intGracePeriod			= 0
-												   , @ysnOverrideCashFlow  		= @ysnOverrideCashFlow
-												   , @strReportLogId			= @strReportLogId
+	EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom				= @dtmDateFrom
+										    , @dtmDateTo				= @dtmDateTo
+										    , @strSourceTransaction		= @strSourceTransaction	
+										    , @strCustomerIds			= @strCustomerIds
+										    , @strSalespersonIds		= @strSalespersonIds
+										    , @strCompanyLocationIds	= @strCompanyLocationIds
+										    , @strAccountStatusIds		= @strAccountStatusIds	
+										    , @intEntityUserId			= @intEntityUserId
+										    , @ysnExcludeAccountStatus	= 0
+										    , @ysnOverrideCashFlow  	= @ysnOverrideCashFlow
+										    , @strReportLogId			= @strReportLogId
+											, @strAgingType				= 'Custom'
 
 	EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
 								, @intEntityUserId = @intEntityUserId
+								, @strAgingType	= 'Custom'
 															
 	--ROLL CREDITS
 	IF(OBJECT_ID('tempdb..#CUSTOMERSWITHCREDITS') IS NOT NULL) DROP TABLE #CUSTOMERSWITHCREDITS
@@ -224,7 +223,7 @@ BEGIN
 			INTO #CUSTOMERSWITHCREDITS
 			FROM tblARCustomerAgingStagingTable
 			WHERE intEntityUserId = @intEntityUserId 
-			  AND strAgingType = 'Detail'
+			  AND strAgingType = 'Custom'
 			  AND strReportLogId = @strReportLogId
 			GROUP BY intEntityCustomerId 
 			HAVING SUM(ABS(ISNULL(dblCredits, 0)) + ABS(ISNULL(dblPrepayments, 0))) <> 0
@@ -245,7 +244,7 @@ BEGIN
 					INTO #OPENCREDITS
 					FROM tblARCustomerAgingStagingTable
 					WHERE intEntityUserId = @intEntityUserId 
-					  AND strAgingType = 'Detail'
+					  AND strAgingType = 'Custom'
 					  AND strReportLogId = @strReportLogId
 					  AND intEntityCustomerId = @intEntityCustomerId
 					  AND strTransactionType IN ('Overpayment', 'Customer Prepayment', 'Credit Memo')
@@ -257,7 +256,7 @@ BEGIN
 					INTO #OPENINVOICES
 					FROM tblARCustomerAgingStagingTable
 					WHERE intEntityUserId = @intEntityUserId 
-					  AND strAgingType = 'Detail'
+					  AND strAgingType = 'Custom'
 					  AND strReportLogId = @strReportLogId
 					  AND intEntityCustomerId = @intEntityCustomerId
 					  AND strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Credit Memo')
@@ -301,14 +300,14 @@ BEGIN
 											  , dbl121Days	= CASE WHEN ISNULL(dbl121Days, 0) <> 0 THEN dbl121Days - @dblCreditToApply END
 											  , dblTotalDue = dblTotalDue - @dblCreditToApply
 											WHERE intEntityUserId = @intEntityUserId
-											  AND strAgingType = 'Detail' 
+											  AND strAgingType = 'Custom' 
 											  AND strReportLogId = @strReportLogId
 											  AND intInvoiceId = @intInvoiceId
 											  AND strRecordNumber IS NULL
 
 											DELETE FROM tblARCustomerAgingStagingTable 
 											WHERE intEntityUserId = @intEntityUserId 
-											  AND strAgingType = 'Detail' 
+											  AND strAgingType = 'Custom' 
 											  AND strReportLogId = @strReportLogId
 											  AND intInvoiceId = @intPrepaidId
 
@@ -328,13 +327,13 @@ BEGIN
 											  , dblPrepayments = dblPrepayments + @dblInvoiceDue
 											  , dblPrepaids = dblPrepaids + @dblInvoiceDue
 											WHERE intEntityUserId = @intEntityUserId
-											  AND strAgingType = 'Detail' 
+											  AND strAgingType = 'Custom' 
 											  AND strReportLogId = @strReportLogId
 											  AND intInvoiceId = @intPrepaidId										  
 
 											DELETE FROM tblARCustomerAgingStagingTable 
 											WHERE intEntityUserId = @intEntityUserId
-											  AND strAgingType = 'Detail'
+											  AND strAgingType = 'Custom'
 											  AND strReportLogId = @strReportLogId
 											  AND intInvoiceId = @intInvoiceId
 
@@ -368,7 +367,7 @@ BEGIN
 			INTO #CUSTOMERWITHBALANCES
 			FROM tblARCustomerAgingStagingTable
 			WHERE intEntityUserId = @intEntityUserId
-			AND strAgingType = 'Detail'
+			AND strAgingType = 'Custom'
 			AND strReportLogId = @strReportLogId
 			AND (
 				   ((ISNULL(dbl0Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current')))
@@ -382,7 +381,7 @@ BEGIN
 
 			DELETE FROM tblARCustomerAgingStagingTable
 			WHERE intEntityUserId = @intEntityUserId 
-			  AND strAgingType = 'Detail'
+			  AND strAgingType = 'Custom'
 			  AND strReportLogId = @strReportLogId
 			  AND intEntityCustomerId  IN (SELECT intEntityCustomerId FROM #CUSTOMERWITHBALANCES)
 			  AND  (
@@ -399,7 +398,7 @@ BEGIN
 			FROM tblARCustomerAgingStagingTable AGING
 			LEFT JOIN #CUSTOMERWITHBALANCES BAL ON AGING.intEntityCustomerId = BAL.intEntityCustomerId
 			WHERE intEntityUserId = @intEntityUserId 
-			  AND strAgingType = 'Detail'
+			  AND strAgingType = 'Custom'
 			  AND strReportLogId = @strReportLogId
 			  AND ISNULL(BAL.intEntityCustomerId, 0) = 0
 			  AND strTransactionType NOT IN  ('Credit Memo','Customer Prepayment')  
@@ -411,14 +410,14 @@ BEGIN
 	INNER JOIN (
 		SELECT intEntityCustomerId 
 		FROM tblARCustomerAgingStagingTable 
-		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Custom'
 		GROUP BY intEntityCustomerId 
 		HAVING SUM(ISNULL(dblTotalAR, 0)) = 0
 			AND SUM(ISNULL(dblCredits, 0)) = 0
 			AND SUM(ISNULL(dblPrepayments, 0)) = 0
 	) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
 	WHERE AGING.intEntityUserId = @intEntityUserId
-	  AND AGING.strAgingType = 'Detail'
+	  AND AGING.strAgingType = 'Custom'
 	  AND strReportLogId = @strReportLogId
 
 	--PRINT ONLY CUSTOMERS OVER CREDIT LIMIT
@@ -429,29 +428,29 @@ BEGIN
 			INNER JOIN (
 				SELECT intEntityCustomerId 
 				FROM tblARCustomerAgingStagingTable
-				WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+				WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Custom'
 				GROUP BY intEntityCustomerId 
 				HAVING AVG(ISNULL(dblCreditLimit, 0)) > SUM(ISNULL(dblTotalAR, 0))
 					OR (AVG(ISNULL(dblCreditLimit, 0)) = 0 AND SUM(ISNULL(dblTotalAR, 0)) = 0)
 					OR AVG(ISNULL(dblCreditLimit, 0)) = 0
 			) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
 			WHERE AGING.intEntityUserId = @intEntityUserId
-			AND AGING.strAgingType = 'Detail'
+			AND AGING.strAgingType = 'Custom'
 			AND strReportLogId = @strReportLogId
 		END
 
-	IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND strReportLogId = @strReportLogId)
+	IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Custom' AND strReportLogId = @strReportLogId)
 		BEGIN
 			UPDATE AGING
 			SET  dblTotalCustomerAR = ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) + ISNULL(dbl120Days, 0) + ISNULL(dbl121Days, 0) + ISNULL(dblCredits, 0) + ISNULL(dblPrepayments, 0)
 				,strReportLogId = @strReportLogId
 			FROM tblARCustomerAgingStagingTable AGING
 			WHERE intEntityUserId = @intEntityUserId 
-			  AND strAgingType = 'Detail'
+			  AND strAgingType = 'Custom'
 			  AND strReportLogId = @strReportLogId
 		END
 	
-	IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable AGING WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND strReportLogId = @strReportLogId)
+	IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable AGING WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Custom' AND strReportLogId = @strReportLogId)
 		BEGIN
 			INSERT INTO tblARCustomerAgingStagingTable (
 				  strCompanyName
@@ -464,55 +463,43 @@ BEGIN
 				 , strCompanyAddress	= @strCompanyAddress
 				 , dtmAsOfDate			= @dtmDateTo
 				 , intEntityUserId		= @intEntityUserId
-				 , strAgingType			= 'Detail'			
+				 , strAgingType			= 'Custom'			
 		END
 
 	--AGING BUCKET
-	DECLARE @intBucket1From	INT = 0, @intBucket1To	INT = 0, @strBucket1	NVARCHAR(100), @ysnShowBucket1	BIT = 0
-		  , @intBucket2From	INT = 0, @intBucket2To	INT = 0, @strBucket2	NVARCHAR(100), @ysnShowBucket2	BIT = 0
-		  , @intBucket3From	INT = 0, @intBucket3To	INT = 0, @strBucket3	NVARCHAR(100), @ysnShowBucket3	BIT = 0
-		  , @intBucket4From	INT = 0, @intBucket4To	INT = 0, @strBucket4	NVARCHAR(100), @ysnShowBucket4	BIT = 0
-		  , @intBucket5From	INT = 0, @intBucket5To	INT = 0, @strBucket5	NVARCHAR(100), @ysnShowBucket5	BIT = 0
-		  , @intBucket6From	INT = 0, @intBucket6To	INT = 0, @strBucket6	NVARCHAR(100), @ysnShowBucket6	BIT = 0
+	DECLARE @strBucket1	NVARCHAR(100), @ysnShowBucket1	BIT = 0
+		  , @strBucket2	NVARCHAR(100), @ysnShowBucket2	BIT = 0
+		  , @strBucket3	NVARCHAR(100), @ysnShowBucket3	BIT = 0
+		  , @strBucket4	NVARCHAR(100), @ysnShowBucket4	BIT = 0
+		  , @strBucket5	NVARCHAR(100), @ysnShowBucket5	BIT = 0
+		  , @strBucket6	NVARCHAR(100), @ysnShowBucket6	BIT = 0
 
-	SELECT TOP 1 @intBucket1From	= ISNULL(intAgeFrom, 0)
-			   , @intBucket1To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket1		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
+	SELECT TOP 1 @strBucket1		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket1	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = 'Current'
 
-	SELECT TOP 1 @intBucket2From	= ISNULL(intAgeFrom, 0)
-			   , @intBucket2To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket2		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
+	SELECT TOP 1 @strBucket2		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket2	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '1-10 Days'
 
-	SELECT TOP 1 @intBucket3From	= ISNULL(intAgeFrom, 0)
-			   , @intBucket3To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket3		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
+	SELECT TOP 1 @strBucket3		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket3	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '11-30 Days'
 
-	SELECT TOP 1 @intBucket4From	= ISNULL(intAgeFrom, 0)
-			   , @intBucket4To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket4		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
+	SELECT TOP 1 @strBucket4		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket4	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '31-60 Days'
 
-	SELECT TOP 1 @intBucket5From	= ISNULL(intAgeFrom, 0)
-			   , @intBucket5To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket5		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
+	SELECT TOP 1 @strBucket5		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket5	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = '61-90 Days'
 
-	SELECT TOP 1 @intBucket6From	= ISNULL(intAgeFrom, 0)
-			   , @intBucket6To		= ISNULL(intAgeTo, 99999999)
-			   , @strBucket6		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
+	SELECT TOP 1 @strBucket6		= ISNULL(NULLIF(strCustomTitle, ''), strOriginalBucket)
 			   , @ysnShowBucket6	= ISNULL(ysnShow, 1)
 	FROM tblARCustomAgingSetupBucket
 	WHERE strOriginalBucket = 'Over 90 Days'
@@ -561,16 +548,16 @@ BEGIN
 		, strCustomerInfo			= CA.strCustomerInfo
 		, strCompanyName			= @strCompanyName
 		, strCompanyAddress			= @strCompanyAddress
-		, dblCreditLimit			= MIN(CA.dblCreditLimit)
-		, dblTotalAR				= SUM(CA.dblTotalAR)
-		, dblTotalCustomerAR		= SUM(CA.dblTotalCustomerAR)
-		, dblFuture					= SUM(dblFuture)
-		, dblBucket1				= SUM(CASE WHEN ISNULL(CA.intAge, 0) BETWEEN @intBucket1From AND @intBucket1To THEN CA.dblTotalAR ELSE 0 END)
-		, dblBucket2				= SUM(CASE WHEN ISNULL(CA.intAge, 0) BETWEEN @intBucket2From AND @intBucket2To THEN CA.dblTotalAR ELSE 0 END)
-		, dblBucket3				= SUM(CASE WHEN ISNULL(CA.intAge, 0) BETWEEN @intBucket3From AND @intBucket3To THEN CA.dblTotalAR ELSE 0 END)
-		, dblBucket4				= SUM(CASE WHEN ISNULL(CA.intAge, 0) BETWEEN @intBucket4From AND @intBucket4To THEN CA.dblTotalAR ELSE 0 END)
-		, dblBucket5				= SUM(CASE WHEN ISNULL(CA.intAge, 0) BETWEEN @intBucket5From AND @intBucket5To THEN CA.dblTotalAR ELSE 0 END)
-		, dblBucket6				= SUM(CASE WHEN ISNULL(CA.intAge, 0) BETWEEN @intBucket6From AND @intBucket6To THEN CA.dblTotalAR ELSE 0 END)
+		, dblCreditLimit			= CA.dblCreditLimit
+		, dblTotalAR				= CA.dblTotalAR
+		, dblTotalCustomerAR		= CA.dblTotalCustomerAR
+		, dblFuture					= CA.dblFuture
+		, dblBucket1				= CA.dbl0Days
+		, dblBucket2				= CA.dbl10Days
+		, dblBucket3				= CA.dbl30Days
+		, dblBucket4				= CA.dbl60Days
+		, dblBucket5				= CA.dbl90Days
+		, dblBucket6				= CA.dbl91Days
 		, strBucket1				= @strBucket1
 		, strBucket2				= @strBucket2
 		, strBucket3				= @strBucket3
@@ -583,14 +570,13 @@ BEGIN
 		, ysnShowBucket4			= ISNULL(@ysnShowBucket4, 1)
 		, ysnShowBucket5			= ISNULL(@ysnShowBucket5, 1)
 		, ysnShowBucket6			= ISNULL(@ysnShowBucket6, 1)
-		, dblCredits				= SUM(CA.dblCredits)
-		, dblPrepayments			= SUM(CA.dblPrepayments)
+		, dblCredits				= CA.dblCredits
+		, dblPrepayments			= CA.dblPrepayments
 		, strReportLogId			= @strReportLogId
 	FROM tblARCustomerAgingStagingTable CA 
 	WHERE CA.intEntityUserId = @intEntityUserId 
-	  AND CA.strAgingType = 'Detail' 
+	  AND CA.strAgingType = 'Custom' 
 	  AND CA.strReportLogId = @strReportLogId 
-	GROUP BY CA.intEntityCustomerId, CA.strCustomerName, CA.strCustomerNumber, CA.strCustomerInfo
 	
 	IF ISNULL(@intNewPerformanceLogId, 0) <> 0
 	BEGIN

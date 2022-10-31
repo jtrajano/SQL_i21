@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGLAccountReport]
 	  @dtmAsOfDate			DATETIME = NULL
 	, @intEntityUserId		INT = NULL
+	, @strAgingType			NVARCHAR(10) = 'Summary'
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -96,5 +97,5 @@ OUTER APPLY (
 		 , dblTotalReportBalance    = SUM(dblTotalAR)
 	FROM tblARCustomerAgingStagingTable
 	WHERE intEntityUserId = @intEntityUserId
-	  AND strAgingType = 'Summary'
+	  AND strAgingType = @strAgingType
 ) AGING
