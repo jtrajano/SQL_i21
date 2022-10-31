@@ -174,12 +174,12 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intAccountId]                 = I.[intAccountId]
     ,[dblDebit]                     = CASE 
                                         WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseInvoiceTotal] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseInvoiceTotal] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblCredit]                    = CASE 
                                         WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseInvoiceTotal] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseInvoiceTotal] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblDebitUnit]                 = CASE 
@@ -212,22 +212,22 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = CASE 
                                         WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblDebitReport]               = CASE 
                                         WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblCreditForeign]             = CASE 
                                         WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblCreditReport]              = CASE 
                                         WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblInvoiceTotal] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblReportingRate]             = I.[dblAverageExchangeRate]
@@ -628,11 +628,11 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblDebit]                     = CASE 
                                         WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) 
                                         THEN @ZeroDecimal 
-                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END
+                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END
                                       END
     ,[dblCredit]                    = CASE 
                                         WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END 
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END 
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblDebitUnit]                 = CASE 
@@ -666,21 +666,21 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblDebitForeign]              = CASE 
                                         WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) 
                                         THEN @ZeroDecimal 
-                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
+                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
                                       END
     ,[dblDebitReport]               = CASE 
                                         WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) 
                                         THEN @ZeroDecimal 
-                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
+                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
                                       END
     ,[dblCreditForeign]             = CASE 
                                         WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblCreditReport]              = CASE 
                                         WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
@@ -1077,10 +1077,10 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intAccountId]                 = I.[intSalesAccountId]
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') 
                                         THEN @ZeroDecimal 
-                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END 
+                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END 
                                       END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END 
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseLineItemGLAmount] END 
                                         ELSE @ZeroDecimal
                                       END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') 
@@ -1111,18 +1111,18 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') 
                                         THEN @ZeroDecimal 
-                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
+                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
                                       END
     ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') 
                                         THEN @ZeroDecimal 
-                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
+                                        ELSE CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END 
                                       END
     ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] > 0 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
+                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblProvisionalTotal] ELSE I.[dblLineItemGLAmount] END
                                         ELSE @ZeroDecimal 
                                       END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
