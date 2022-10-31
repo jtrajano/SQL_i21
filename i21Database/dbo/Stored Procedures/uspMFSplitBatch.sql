@@ -196,7 +196,7 @@ BEGIN
 				,[dtmWarehouseArrival]
 				,[intYearManufacture]
 				,[strPackageSize]
-				,[intPackageUOMId]= B.intSplitPackageUOMId
+				,[intPackageUOMId]
 				,[dblTareWeight]
 				,[strTaster]
 				,[strFeedStock]
