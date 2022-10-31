@@ -66,22 +66,7 @@ BEGIN
 		FETCH NEXT	FROM loc_cursor	INTO @adjLoc
 
 	WHILE @@FETCH_STATUS = 0
-	BEGIN
-	    SELECT COUNT(*)
-		FROM	tblICItem inv INNER JOIN gaposmst itmGr 
-					ON LTRIM(RTRIM(inv.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(itmGr.gapos_com_cd)) COLLATE Latin1_General_CI_AS
-				LEFT JOIN tblICItemUOM uom 
-					on uom.intItemId = inv.intItemId 
-				left join tblICStorageLocation sl 
-					on LTRIM(RTRIM(sl.strName)) COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(itmGr.gapos_loc_no)) COLLATE Latin1_General_CI_AS	
-		WHERE	
-			(
-				(gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0 
-				OR (gapos_stor_1 + gapos_stor_2 + gapos_stor_3 + gapos_stor_4 + gapos_stor_5 + gapos_stor_6 + gapos_stor_7 + gapos_stor_8 <> 0)
-			)
-			AND LTRIM(RTRIM(gapos_loc_no)) COLLATE Latin1_General_CI_AS = @adjLoc COLLATE Latin1_General_CI_AS
-			AND inv.strType = 'Inventory'
-		
+	BEGIN	
 	    SELECT @cnt = COUNT(*)
 		FROM	tblICItem inv INNER JOIN gaposmst itmGr 
 					ON LTRIM(RTRIM(inv.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(itmGr.gapos_com_cd)) COLLATE Latin1_General_CI_AS
