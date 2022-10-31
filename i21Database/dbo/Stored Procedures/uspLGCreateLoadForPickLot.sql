@@ -99,9 +99,9 @@ BEGIN TRY
 			FROM tblLGAllocationDetail AD
 			INNER JOIN @tblAllocationInfo AI ON AI.intAllocationDetailId = AD.intAllocationDetailId
 
-			SELECT @intFreightTerm = intFreightTermId
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @intSContractDetailId
+			SELECT @intFreightTerm = CH.intFreightTermId
+			FROM tblCTContractHeader CH
+			INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = @intSContractDetailId
 		END
 		ELSE
 		BEGIN
