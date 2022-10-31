@@ -247,61 +247,50 @@ ELSE
 			, strFreeTime					= NULL
 			, strReceivedBy					= NULL
 			, strComment					= SO.strComments
-			, intItemId						= SODETAIL.intItemId
-			, intOwnershipType				= CASE WHEN SODETAIL.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
-			, dblQuantity					= SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)
+			, intItemId						= SOD.intItemId
+			, intOwnershipType				= CASE WHEN SOD.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
+			, dblQuantity					= SOD.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SOD.dblQtyShipped)
 			, intItemUOMId					= ITEMUOM.intItemUOMId
-			, intPriceUOMId					= SODETAIL.intItemUOMId
+			, intPriceUOMId					= SOD.intItemUOMId
 			, intItemLotGroup				= NULL
-			, intOrderId					= SODETAIL.intSalesOrderId
+			, intOrderId					= SOD.intSalesOrderId
 			, intSourceId					= NULL
-			, intLineNo						= SODETAIL.intSalesOrderDetailId
-			, intSubLocationId				= COALESCE(SODETAIL.intSubLocationId, STORAGELOCATION.intSubLocationId, ITEMLOCATION.intSubLocationId)
-			, intStorageLocationId			= COALESCE(SODETAIL.intStorageLocationId, ITEMLOCATION.intStorageLocationId)
+			, intLineNo						= SOD.intSalesOrderDetailId
+			, intSubLocationId				= COALESCE(SOD.intSubLocationId, SL.intSubLocationId, IL.intSubLocationId)
+			, intStorageLocationId			= COALESCE(SOD.intStorageLocationId, IL.intStorageLocationId)
 			, intCurrencyId					= SO.intCurrencyId
 			, intWeightUOMId				= NULL
-			, dblUnitPrice					= SODETAIL.dblPrice
+			, dblUnitPrice					= SOD.dblPrice
 			, intDockDoorId					= NULL
-			, strNotes						= SODETAIL.strComments
+			, strNotes						= SOD.strComments
 			, intGradeId					= NULL
 			, intDiscountSchedule			= NULL
-			, intStorageScheduleTypeId		= SODETAIL.intStorageScheduleTypeId
-			, intForexRateTypeId			= SODETAIL.intCurrencyExchangeRateTypeId
-			, dblForexRate					= SODETAIL.dblCurrencyExchangeRate
+			, intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
+			, intForexRateTypeId			= SOD.intCurrencyExchangeRateTypeId
+			, dblForexRate					= SOD.dblCurrencyExchangeRate
 		FROM dbo.tblSOSalesOrder SO	
-		INNER JOIN dbo.tblSOSalesOrderDetail SODETAIL 
-			ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
-		INNER JOIN tblICItem ITEM
-			ON ITEM.intItemId = SODETAIL.intItemId 
-			AND ((ITEM.strType <> 'Bundle' AND dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 1) 
-			OR (ITEM.strType = 'Bundle' AND ISNULL(ITEM.strBundleType, 'Kit') = 'Kit'))
-			AND  CASE WHEN (ITEM.strType = 'Bundle') THEN 
+		INNER JOIN dbo.tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
+		INNER JOIN tblICItem ITEM ON ITEM.intItemId = SOD.intItemId 
+			AND ((ITEM.strType <> 'Bundle' AND ITEM.strType = 'Inventory') 
+			  OR (ITEM.strType = 'Bundle' AND ISNULL(ITEM.strBundleType, 'Kit') = 'Kit'))
+			AND CASE WHEN (ITEM.strType = 'Bundle') THEN 
 				CASE WHEN ISNULL(ITEM.ysnListBundleSeparately, 0) = 0 THEN 1 ELSE 0 END
 			 ELSE 1 END = 1
-		INNER JOIN dbo.tblICItemUOM ITEMUOM 
-			ON ITEMUOM.intItemId = SODETAIL.intItemId 
-			AND ITEMUOM.intItemUOMId = SODETAIL.intItemUOMId 
-		INNER JOIN dbo.tblICItemLocation ITEMLOCATION 
-			ON ITEMLOCATION.intItemId = SODETAIL.intItemId 
-			AND SO.intCompanyLocationId = ITEMLOCATION.intLocationId
-		LEFT JOIN tblSMCompanyLocationSubLocation SUBLOCATION
-			ON SUBLOCATION.intCompanyLocationId = ITEMLOCATION.intLocationId
-			AND SUBLOCATION.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId				
-		LEFT JOIN dbo.tblICStorageLocation STORAGELOCATION 
-			ON STORAGELOCATION.intLocationId = ITEMLOCATION.intLocationId
-			AND STORAGELOCATION.intSubLocationId = SUBLOCATION.intCompanyLocationSubLocationId
-			AND STORAGELOCATION.intStorageLocationId = SODETAIL.intStorageLocationId	
+		INNER JOIN dbo.tblICItemUOM ITEMUOM ON ITEMUOM.intItemId = SOD.intItemId AND ITEMUOM.intItemUOMId = SOD.intItemUOMId 
+		INNER JOIN dbo.tblICItemLocation IL ON IL.intItemId = SOD.intItemId AND SO.intCompanyLocationId = IL.intLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation SUBL ON SUBL.intCompanyLocationId = IL.intLocationId AND SUBL.intCompanyLocationSubLocationId = SOD.intSubLocationId				
+		LEFT JOIN dbo.tblICStorageLocation SL ON SL.intLocationId = IL.intLocationId AND SL.intSubLocationId = SUBL.intCompanyLocationSubLocationId AND SL.intStorageLocationId = SOD.intStorageLocationId	
 		OUTER APPLY (
 			SELECT intSalesOrderDetailId
 					, dblQtyShipped = SUM(dblQtyShipped)
 			FROM dbo.tblARInvoiceDetail ID
-			WHERE ID.intSalesOrderDetailId = SODETAIL.intSalesOrderDetailId
+			WHERE ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 			GROUP BY ID.intSalesOrderDetailId
 		) INVOICEDETAIL
 		WHERE SO.intSalesOrderId = @SalesOrderId
-		  AND (SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)) > 0
+		  AND (SOD.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SOD.dblQtyShipped)) > 0
 
-		INSERT INTO @Charges(
+		INSERT INTO @Charges (
 			  intOrderType
 			, intSourceType
 			, intEntityCustomerId
@@ -325,7 +314,6 @@ ELSE
 			, strChargesLink
 			, strAllocatePriceBy
 		)
-
 		SELECT intOrderType			= @SALES_ORDER_TYPE
 			, intSourceType			= 0
 			, intEntityCustomerId	= SO.intEntityCustomerId
@@ -349,15 +337,41 @@ ELSE
 			, strChargesLink		= NULL
 			, strAllocatePriceBy	= NULL
 		FROM dbo.tblSOSalesOrder SO	
-		INNER JOIN dbo.tblSOSalesOrderDetail SODETAIL 
-				ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
-		INNER JOIN tblCTContractHeader Header
-			ON Header.intContractHeaderId = SODETAIL.intContractHeaderId
-		INNER JOIN tblCTContractDetail Detail
-			ON Detail.intContractHeaderId = Header.intContractHeaderId
-		INNER JOIN tblCTContractCost Cost
-			ON Detail.intContractDetailId = Cost.intContractDetailId
+		INNER JOIN dbo.tblSOSalesOrderDetail SODETAIL ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
+		INNER JOIN tblCTContractHeader Header ON Header.intContractHeaderId = SODETAIL.intContractHeaderId
+		INNER JOIN tblCTContractDetail Detail ON Detail.intContractHeaderId = Header.intContractHeaderId
+		INNER JOIN tblCTContractCost Cost ON Detail.intContractDetailId = Cost.intContractDetailId
 		WHERE SO.intSalesOrderId = @SalesOrderId
+
+		UNION ALL
+
+		SELECT intOrderType			= @SALES_ORDER_TYPE
+			, intSourceType			= 0
+			, intEntityCustomerId	= SO.intEntityCustomerId
+			, dtmShipDate			= SO.dtmDate
+			, intShipFromLocationId	= SO.intCompanyLocationId
+			, intShipToLocationId	= SO.intShipToLocationId
+			, intFreightTermId		= SO.intFreightTermId
+			, intContractId			= NULL
+			, intContractDetailId	= NULL
+			, intChargeId			= SOD.intItemId
+			, strCostMethod			= 'Amount'
+			, dblRate				= NULL
+			, intCostUOMId			= SOD.intItemUOMId
+			, intCurrency			= SO.intCurrencyId
+			, dblAmount				= SOD.dblQtyOrdered * SOD.dblPrice
+			, ysnAccrue				= 0
+			, intEntityVendorId		= NULL
+			, ysnPrice				= 0
+			, intForexRateTypeId	= SOD.intCurrencyExchangeRateTypeId
+			, dblForexRate			= SOD.dblCurrencyExchangeRate
+			, strChargesLink		= NULL
+			, strAllocatePriceBy	= NULL
+		FROM dbo.tblSOSalesOrder SO	
+		INNER JOIN dbo.tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
+		INNER JOIN tblICItem ITEM ON SOD.intItemId = ITEM.intItemId
+		WHERE SO.intSalesOrderId = @SalesOrderId
+		  AND ITEM.strType = 'Other Charge'
 
 		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
 		BEGIN 
@@ -384,10 +398,19 @@ ELSE
 
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @InventoryShipmentId, 'Inventory', 0
 
+		UPDATE SOD
+		SET dblQtyShipped = SOD.dblQtyOrdered
+		FROM tblSOSalesOrderDetail SOD
+		INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+		INNER JOIN tblICItem ITEM ON SOD.intItemId = ITEM.intItemId		
+		WHERE SOD.intSalesOrderId = @SalesOrderId
+		  AND ITEM.strType = 'Other Charge'
+
 		UPDATE tblSOSalesOrder
 		SET dtmProcessDate = GETDATE()
 		  , ysnProcessed   = 1
 		  , ysnShipped     = 1
+		  , strOrderStatus	= 'Closed'
 		WHERE intSalesOrderId = @SalesOrderId
 
 		        --INSERT TO TRANSACTION LINKS
