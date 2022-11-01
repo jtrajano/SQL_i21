@@ -245,19 +245,33 @@ WHERE ysnPosted = 1
 --UPDATE INVOICES
 UPDATE I
 SET I.ysnPaid			= 0
-  , I.dblPayment		= I.dblPayment - ABS(ISNULL(PAYMENTS.dblPayment, 0))
-  , I.dblBasePayment	= I.dblBasePayment - ABS(ISNULL(PAYMENTS.dblBasePayment, 0))
-  , I.dblAmountDue		= I.dblAmountDue + ABS(ISNULL(PAYMENTS.dblPayment, 0)) + ABS(ISNULL(PAYMENTS.dblDiscount, 0))
-  , I.dblBaseAmountDue	= I.dblBaseAmountDue + ABS(ISNULL(PAYMENTS.dblBasePayment, 0)) + ABS(ISNULL(PAYMENTS.dblBaseDiscount, 0))
+  , I.dblPayment		= CASE WHEN I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId = PAYMENTS.intPaymentId
+							THEN 0
+							ELSE I.dblPayment - ABS(ISNULL(PAYMENTS.dblPayment, 0))
+						  END
+  , I.dblBasePayment	= CASE WHEN I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId = PAYMENTS.intPaymentId
+							THEN 0
+							ELSE I.dblBasePayment - ABS(ISNULL(PAYMENTS.dblBasePayment, 0))
+						  END
+  , I.dblAmountDue		= CASE WHEN I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId = PAYMENTS.intPaymentId
+							THEN 0
+							ELSE I.dblAmountDue + ABS(ISNULL(PAYMENTS.dblPayment, 0)) + ABS(ISNULL(PAYMENTS.dblDiscount, 0))
+						  END
+  , I.dblBaseAmountDue	= CASE WHEN I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId = PAYMENTS.intPaymentId
+							THEN 0
+							ELSE I.dblBaseAmountDue + ABS(ISNULL(PAYMENTS.dblBasePayment, 0)) + ABS(ISNULL(PAYMENTS.dblBaseDiscount, 0))
+						  END
   , I.dblDiscount		= I.dblDiscount - ABS(ISNULL(PAYMENTS.dblDiscount, 0))
   , I.dblBaseDiscount	= I.dblBaseDiscount - ABS(ISNULL(PAYMENTS.dblBaseDiscount, 0))
 FROM tblARInvoice I
 INNER JOIN (
-	SELECT PD.intInvoiceId
-		 , PD.dblPayment
-		 , PD.dblBasePayment
-		 , PD.dblDiscount
-		 , PD.dblBaseDiscount		 
+	SELECT 
+		 PD.intInvoiceId
+		,PD.intPaymentId	
+		,PD.dblPayment
+		,PD.dblBasePayment
+		,PD.dblDiscount
+		,PD.dblBaseDiscount		 
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN #SELECTEDPAYMENTS P ON PD.intPaymentId = P.intTransactionId AND P.strTransactionType = 'Payment'
 ) PAYMENTS ON I.intInvoiceId = PAYMENTS.intInvoiceId
