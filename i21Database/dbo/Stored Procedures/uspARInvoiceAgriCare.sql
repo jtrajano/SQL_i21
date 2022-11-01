@@ -143,7 +143,7 @@ SELECT
 	,strItemDescription		= ARGID.strItemDescription
 	,strQtyShipped			= CONVERT(VARCHAR,CAST(ARGID.dblQtyShipped AS MONEY),1) + ' ' + ARGID.strUnitMeasure
 	,strFreightTerm         = FREIGHT.strFreightTerm
-	,strSalespersonName     = ARGID.strSalespersonName
+	,strSalespersonName     = SP.strName
 	,strPONumber			= ARI.strPONumber
 	,strComments			= dbo.fnEliminateHTMLTags(ISNULL(HEADER.strMessage, ARI.strComments), 0) 
 	,strFooterComments		= dbo.fnEliminateHTMLTags(ISNULL(FOOTER.strMessage, ARI.strFooterComments), 0)
@@ -172,6 +172,7 @@ FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
 INNER JOIN #LOCATIONS L ON ARI.intCompanyLocationId = L.intCompanyLocationId
+LEFT JOIN tblEMEntity SP ON ARI.intEntitySalespersonId = SP.intEntityId
 LEFT JOIN vyuARGetInvoiceDetail ARGID WITH (NOLOCK) ON ARI.intInvoiceId = ARGID.intInvoiceId
 LEFT JOIN vyuARGetInvoiceDetailLot ARGIDL ON ARGID.intInvoiceDetailId=ARGIDL.intInvoiceDetailId
 LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ARI.intSalesOrderId
