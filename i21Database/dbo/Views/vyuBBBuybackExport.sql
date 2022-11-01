@@ -39,7 +39,7 @@ AS
 			  WHEN A.intSalesOrderId > 0 THEN 'Sales'
 			  ELSE ''
 		 END AS strTransactionType
-		 , D.ysnChevronUploaded
+		, D.ysnChevronUploaded
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
