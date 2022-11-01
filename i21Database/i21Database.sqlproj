@@ -1335,6 +1335,8 @@
     <Build Include="dbo\Functions\fnQMGetSampleTastingScore.sql" />
     <Build Include="dbo\Functions\fnQMGetTealingoItemFromFieldMappingAndTastingScore.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateIntegrationPrice.sql" />
+    <Build Include="dbo\Tables\tblIPContractedStockPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPContractedStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
