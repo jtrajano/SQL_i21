@@ -248,7 +248,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intGardenMarkId] [int] NULL,
 	[intReasonCodeId] [int] NULL,
 
-
+	dblPurchasePrice NUMERIC(18, 6) NULL DEFAULT(0),
+	dblLandedPrice NUMERIC(18, 6) NULL DEFAULT(0),
+	dblSalesPrice NUMERIC(18, 6) NULL DEFAULT(0),
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

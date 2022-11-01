@@ -351,6 +351,9 @@ SELECT a.intContractDetailId
 	, a.dtmEtaPol
 	, a.dtmEtaPod
 	, a.intCompanyLocationId
+	, a.dblPurchasePrice
+	, a.dblLandedPrice
+	, a.dblSalesPrice
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId

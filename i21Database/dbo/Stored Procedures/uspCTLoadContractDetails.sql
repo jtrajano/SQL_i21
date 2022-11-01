@@ -640,6 +640,9 @@ BEGIN TRY
 		, RC.strReasonCode
 		, CD.dblConvertedNetWeight
 		, CD.dblConvertedQuantity
+		, CD.dblPurchasePrice
+		, CD.dblLandedPrice
+		, CD.dblSalesPrice
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId

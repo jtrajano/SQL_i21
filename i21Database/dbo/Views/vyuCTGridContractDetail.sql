@@ -340,6 +340,9 @@ AS
 			, GM.strGardenMark
 			, CD.intReasonCodeId
 			, RC.strReasonCode
+			, CD.dblPurchasePrice
+			, CD.dblLandedPrice
+			, CD.dblSalesPrice
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId

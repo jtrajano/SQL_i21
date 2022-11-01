@@ -1334,6 +1334,7 @@
     <Build Include="dbo\Functions\fnQMGetTealingoItemPinpointValues.sql" />
     <Build Include="dbo\Functions\fnQMGetSampleTastingScore.sql" />
     <Build Include="dbo\Functions\fnQMGetTealingoItemFromFieldMappingAndTastingScore.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateIntegrationPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
