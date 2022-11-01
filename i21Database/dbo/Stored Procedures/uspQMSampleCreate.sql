@@ -951,41 +951,41 @@ BEGIN TRY
 			,dtmLastModified DATETIME
 			)
 
-	INSERT INTO dbo.tblQMSampleInitialBuy(
-		intConcurrencyId
-		,intSampleId
-		,intInitialBuyId
-		,intBuyerId
-		,strBuyerName
-		,dblQtyBought
-		,intQtyUOMId
-		,strQtyUOM
-		,dblPrice
-		,intPriceUOMId
-		,strPriceUOM
-		)
-	SELECT 1
-		,@intSampleId
-		,intInitialBuyId
-		,intBuyerId
-		,strBuyerName
-		,dblQtyBought
-		,intQtyUOMId
-		,strQtyUOM
-		,dblPrice
-		,intPriceUOMId
-		,strPriceUOM
-	FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (
-			intInitialBuyId INT
-			,intBuyerId INT
-			,strBuyerName NVARCHAR(50)
-			,dblQtyBought NUMERIC(18, 6)
-			,intQtyUOMId INT
-			,strQtyUOM NVARCHAR(50)
-			,dblPrice NUMERIC(18, 6)
-			,intPriceUOMId INT
-			,strPriceUOM NVARCHAR(50)
-			)
+	--INSERT INTO dbo.tblQMSampleInitialBuy(
+	--	intConcurrencyId
+	--	,intSampleId
+	--	,intInitialBuyId
+	--	,intBuyerId
+	--	,strBuyerName
+	--	,dblQtyBought
+	--	,intQtyUOMId
+	--	,strQtyUOM
+	--	,dblPrice
+	--	,intPriceUOMId
+	--	,strPriceUOM
+	--	)
+	--SELECT 1
+	--	,@intSampleId
+	--	,intInitialBuyId
+	--	,intBuyerId
+	--	,strBuyerName
+	--	,dblQtyBought
+	--	,intQtyUOMId
+	--	,strQtyUOM
+	--	,dblPrice
+	--	,intPriceUOMId
+	--	,strPriceUOM
+	--FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (
+	--		intInitialBuyId INT
+	--		,intBuyerId INT
+	--		,strBuyerName NVARCHAR(50)
+	--		,dblQtyBought NUMERIC(18, 6)
+	--		,intQtyUOMId INT
+	--		,strQtyUOM NVARCHAR(50)
+	--		,dblPrice NUMERIC(18, 6)
+	--		,intPriceUOMId INT
+	--		,strPriceUOM NVARCHAR(50)
+	--		)
 
 	SELECT @strSampleNumber AS strSampleNumber
 
