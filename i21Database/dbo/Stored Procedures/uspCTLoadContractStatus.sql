@@ -6,8 +6,10 @@ AS
 
 BEGIN TRY
 	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@intContractHeaderId	INT
+			@intContractHeaderId	INT,
+			@ysnEnableHedgingInAssignDerivatives BIT = 0;
 
+	select top 1 @ysnEnableHedgingInAssignDerivatives = isnull(ysnEnableHedgingInAssignDerivatives,0) from tblCTCompanyPreference;
 	SELECT @intContractHeaderId = intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
 	IF @strGrid = 'vyuCTContStsContractSummary'
@@ -96,13 +98,12 @@ BEGIN TRY
 				intHedgedLots = case when PD.ysnHedge = 1 then SY.dblHedgedLots else ph.dblHedgeNoOfLots end  
 
 		FROM	tblCTPriceFixationDetail			PD
-		cross apply (select top 1 ysnEnableHedgingInAssignDerivatives from tblCTCompanyPreference) cp
 		JOIN	tblCTPriceFixation					PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId	
 														AND	PF.intContractHeaderId			=   @intContractHeaderId		
 		JOIN	tblCTPriceContract					PC	ON	PC.intPriceContractId			=	PF.intPriceContractId		LEFT
 		JOIN	tblRKAssignFuturesToContractSummary SY 	ON	SY.intFutOptTransactionId		=	PD.intFutOptTransactionId	LEFT
 		JOIN	tblRKFutOptTransaction				FO	ON	FO.intFutOptTransactionId		=	SY.intFutOptTransactionId	LEFT
-		JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId			=	case when cp.ysnEnableHedgingInAssignDerivatives = 1 then PD.intFutureMarketId	else FO.intFutureMarketId end	LEFT
+		JOIN	tblRKFutureMarket					MA	ON	MA.intFutureMarketId			=	case when @ysnEnableHedgingInAssignDerivatives = 1 then PD.intFutureMarketId	else FO.intFutureMarketId end	LEFT
 		JOIN	tblICUnitMeasure					MM	ON	MM.intUnitMeasureId				=	MA.intUnitMeasureId			LEFT
 		JOIN	tblCTContractHeader					CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId		LEFT
 		JOIN	tblCTContractDetail					CD	ON	CD.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN  CD.intContractDetailId	ELSE PF.intContractDetailId	END
@@ -133,15 +134,38 @@ BEGIN TRY
 				CF.strHedgeUOM strHedgeUOM,
 				0 intPriceContractId,
 				'' strPriceContractNo,
-				 dblFutures = CF.dblFuturesPrice,
+				dblFutures = CF.dblFuturesPrice,
 				intHedgedLots  = CF.dblHedgeNoOfLots
 		FROM [vyuCTContractFutures] CF
 		INNER JOIN tblCTContractDetail					CD	on CF.intContractDetailId = CD.intContractDetailId
 		INNER JOIN tblCTContractHeader					CH	on CH.intContractHeaderId = CD.intContractHeaderId	
 		LEFT JOIN  tblICItemUOM							IU	ON	IU.intItemUOMId					=	CD.intPriceItemUOMId				
-		LEFT JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	IU.intUnitMeasureId					
+		LEFT JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	IU.intUnitMeasureId
 		WHERE  CH.intPricingTypeId = 1 and CD.intContractDetailId = @intContractDetailId
 		
+		UNION ALL
+
+		SELECT	 0 intAssignFuturesToContractSummaryId,
+				0 intPriceFixationDetailId,
+				CD.intContractDetailId,
+				NULL dtmFixationDate,
+				null [dblNoOfLots],
+				dblCashPrice dblFinalPrice,
+				CM.strUnitMeasure strPricingUOM,
+				CF.dtmMatchDate,
+				dblHedgedLots = CF.dblHedgeNoOfLots,
+				CF.dblHedgePrice dblPrice, 
+				CM.strUnitMeasure strHedgeUOM,
+				0 intPriceContractId,
+				'' strPriceContractNo,
+				dblFutures = CD.dblFutures,
+				intHedgedLots  = CF.dblHedgeNoOfLots
+		FROM dbo.fnCTPriceHedge(0,@intContractDetailId) CF
+		INNER JOIN tblCTContractDetail					CD	on CF.intPriceFixationDetailId = CD.intContractDetailId
+		INNER JOIN tblCTContractHeader					CH	on CH.intContractHeaderId = CD.intContractHeaderId	
+		LEFT JOIN  tblICItemUOM							IU	ON	IU.intItemUOMId					=	CD.intPriceItemUOMId				
+		LEFT JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	IU.intUnitMeasureId
+		WHERE  CH.intPricingTypeId = 1 and CD.intContractDetailId = @intContractDetailId
 
 	END
 	ELSE IF @strGrid = 'vyuCTContStsQuality'

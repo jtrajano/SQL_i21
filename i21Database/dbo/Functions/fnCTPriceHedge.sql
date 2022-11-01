@@ -127,126 +127,229 @@ BEGIN
 		tblRKFutOptTransaction t
 		join tblRKAssignFuturesToContractSummary s on s.intFutOptTransactionId = t.intFutOptTransactionId
 		left join tblRKFuturesMonth fm on fm.intFutureMonthId = t.intFutureMonthId
-		left join tblEMEntity e on e.intEntityId = t.intTraderId
 		left join tblRKBrokerageAccount a on a.intBrokerageAccountId = t.intBrokerageAccountId
+		left join tblEMEntity e on e.intEntityId = t.intEntityId
 	where
 		s.intContractDetailId = @intContractDetailId
 	order by
 		s.intAssignFuturesToContractSummaryId
 
-	if exists (select top 1 1 from @pricingLots) and exists (select top 1 1 from @hedgeLots)
+	if exists (select top 1 1 from @hedgeLots)
 	begin
 
-		while exists (select top 1 1 from @pricingLots)
+		if exists (select top 1 1 from @pricingLots)
 		begin
 
-			while exists (select top 1 1 from @hedgeLots)
+			while exists (select top 1 1 from @pricingLots)
 			begin
-				select top 1
-					@intPriceFixationDetailId = intPriceFixationDetailId
-					,@dblNoOfLots = dblNoOfLots
-				from
-					@pricingLots;
 
-				select top 1
-					@intFutOptTransactionId = intFutOptTransactionId
-					,@strInternalTradeNo = strInternalTradeNo
-					,@ysnIsHedged = ysnIsHedged
-					,@dblPrice = dblPrice
-					,@intFutureMonthId = intFutureMonthId
-					,@intTraderId = intTraderId
-					,@intBrokerageAccountId = intBrokerageAccountId
-					,@dblHedgedLots = dblHedgedLots
-					,@strHedgeMonth = strHedgeMonth
-					,@strBroker = strBroker
-					,@strAccount = strAccount
-					,@dtmMatchDate = dtmMatchDate
-				from
-					@hedgeLots;
-
-				if (@dblNoOfLots = @dblHedgedLots)
+				while exists (select top 1 1 from @hedgeLots)
 				begin
-					insert into @tableTemp
-						select
-							intPriceFixationDetailId  = @intPriceFixationDetailId
-							,ysnHedge  = 1
-							,dblHedgePrice  = @dblPrice
-							,intHedgeFutureMonthId = @intFutureMonthId
-							,intBrokerId = @intTraderId
-							,intBrokerageAccountId  = @intBrokerageAccountId
-							,intFutOptTransactionId = @intFutOptTransactionId
-							,dblHedgeNoOfLots = @dblHedgedLots
-							,strHedgeMonth = @strHedgeMonth
-							,strBroker = @strBroker
-							,strAccount = @strAccount
-							,intFutOptTransactionId = @intFutOptTransactionId
-							,strInternalTradeNo = @strInternalTradeNo
-							,dtmMatchDate = @dtmMatchDate
+					select top 1
+						@intPriceFixationDetailId = intPriceFixationDetailId
+						,@dblNoOfLots = dblNoOfLots
+					from
+						@pricingLots;
 
-					delete from @hedgeLots where intFutOptTransactionId = @intFutOptTransactionId;
-					delete from @pricingLots where intPriceFixationDetailId = @intPriceFixationDetailId;
+					select top 1
+						@intFutOptTransactionId = intFutOptTransactionId
+						,@strInternalTradeNo = strInternalTradeNo
+						,@ysnIsHedged = ysnIsHedged
+						,@dblPrice = dblPrice
+						,@intFutureMonthId = intFutureMonthId
+						,@intTraderId = intTraderId
+						,@intBrokerageAccountId = intBrokerageAccountId
+						,@dblHedgedLots = dblHedgedLots
+						,@strHedgeMonth = strHedgeMonth
+						,@strBroker = strBroker
+						,@strAccount = strAccount
+						,@dtmMatchDate = dtmMatchDate
+					from
+						@hedgeLots;
 
-					if not exists (select top 1 1 from @hedgeLots) or not exists (select top 1 1 from @pricingLots)
+					if (@dblNoOfLots = @dblHedgedLots)
 					begin
-						delete @hedgeLots;
-						delete @pricingLots;
+						insert into @tableTemp
+							select
+								intPriceFixationDetailId  = @intPriceFixationDetailId
+								,ysnHedge  = 1
+								,dblHedgePrice  = @dblPrice
+								,intHedgeFutureMonthId = @intFutureMonthId
+								,intBrokerId = @intTraderId
+								,intBrokerageAccountId  = @intBrokerageAccountId
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,dblHedgeNoOfLots = @dblHedgedLots
+								,strHedgeMonth = @strHedgeMonth
+								,strBroker = @strBroker
+								,strAccount = @strAccount
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,strInternalTradeNo = @strInternalTradeNo
+								,dtmMatchDate = @dtmMatchDate
+
+						delete from @hedgeLots where intFutOptTransactionId = @intFutOptTransactionId;
+						delete from @pricingLots where intPriceFixationDetailId = @intPriceFixationDetailId;
+
+						if not exists (select top 1 1 from @hedgeLots) or not exists (select top 1 1 from @pricingLots)
+						begin
+							delete @hedgeLots;
+							delete @pricingLots;
+						end
 					end
-				end
-				else if (@dblNoOfLots > @dblHedgedLots)
-				begin
-					insert into @tableTemp
-						select
-							intPriceFixationDetailId  = @intPriceFixationDetailId
-							,ysnHedge  = 1
-							,dblHedgePrice  = @dblPrice
-							,intHedgeFutureMonthId = @intFutureMonthId
-							,intBrokerId = @intTraderId
-							,intBrokerageAccountId  = @intBrokerageAccountId
-							,intFutOptTransactionId = @intFutOptTransactionId
-							,dblHedgeNoOfLots = @dblHedgedLots
-							,strHedgeMonth = @strHedgeMonth
-							,strBroker = @strBroker
-							,strAccount = @strAccount
-							,intFutOptTransactionId = @intFutOptTransactionId
-							,strInternalTradeNo = @strInternalTradeNo
-							,dtmMatchDate = @dtmMatchDate
-
-					delete from @hedgeLots where intFutOptTransactionId = @intFutOptTransactionId;
-					update @pricingLots set dblNoOfLots -= @dblHedgedLots where intPriceFixationDetailId = @intPriceFixationDetailId;
-
-					if not exists (select top 1 1 from @hedgeLots)
+					else if (@dblNoOfLots > @dblHedgedLots)
 					begin
-						delete @pricingLots;
+						insert into @tableTemp
+							select
+								intPriceFixationDetailId  = @intPriceFixationDetailId
+								,ysnHedge  = 1
+								,dblHedgePrice  = @dblPrice
+								,intHedgeFutureMonthId = @intFutureMonthId
+								,intBrokerId = @intTraderId
+								,intBrokerageAccountId  = @intBrokerageAccountId
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,dblHedgeNoOfLots = @dblHedgedLots
+								,strHedgeMonth = @strHedgeMonth
+								,strBroker = @strBroker
+								,strAccount = @strAccount
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,strInternalTradeNo = @strInternalTradeNo
+								,dtmMatchDate = @dtmMatchDate
+
+						delete from @hedgeLots where intFutOptTransactionId = @intFutOptTransactionId;
+						update @pricingLots set dblNoOfLots -= @dblHedgedLots where intPriceFixationDetailId = @intPriceFixationDetailId;
+
+						if not exists (select top 1 1 from @hedgeLots)
+						begin
+							delete @pricingLots;
+						end
 					end
-				end
-				else if (@dblNoOfLots < @dblHedgedLots)
-				begin
-					insert into @tableTemp
-						select
-							intPriceFixationDetailId  = @intPriceFixationDetailId
-							,ysnHedge  = 1
-							,dblHedgePrice  = @dblPrice
-							,intHedgeFutureMonthId = @intFutureMonthId
-							,intBrokerId = @intTraderId
-							,intBrokerageAccountId  = @intBrokerageAccountId
-							,intFutOptTransactionId = @intFutOptTransactionId
-							,dblHedgeNoOfLots = @dblNoOfLots
-							,strHedgeMonth = @strHedgeMonth
-							,strBroker = @strBroker
-							,strAccount = @strAccount
-							,intFutOptTransactionId = @intFutOptTransactionId
-							,strInternalTradeNo = @strInternalTradeNo
-							,dtmMatchDate = @dtmMatchDate
-
-					delete from @pricingLots where intPriceFixationDetailId = @intPriceFixationDetailId;
-					update @hedgeLots set dblHedgedLots -= @dblNoOfLots where intFutOptTransactionId = @intFutOptTransactionId;
-
-					if not exists (select top 1 1 from @pricingLots)
+					else if (@dblNoOfLots < @dblHedgedLots)
 					begin
-						delete @hedgeLots;
+						insert into @tableTemp
+							select
+								intPriceFixationDetailId  = @intPriceFixationDetailId
+								,ysnHedge  = 1
+								,dblHedgePrice  = @dblPrice
+								,intHedgeFutureMonthId = @intFutureMonthId
+								,intBrokerId = @intTraderId
+								,intBrokerageAccountId  = @intBrokerageAccountId
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,dblHedgeNoOfLots = @dblNoOfLots
+								,strHedgeMonth = @strHedgeMonth
+								,strBroker = @strBroker
+								,strAccount = @strAccount
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,strInternalTradeNo = @strInternalTradeNo
+								,dtmMatchDate = @dtmMatchDate
+
+						delete from @pricingLots where intPriceFixationDetailId = @intPriceFixationDetailId;
+						update @hedgeLots set dblHedgedLots -= @dblNoOfLots where intFutOptTransactionId = @intFutOptTransactionId;
+
+						if not exists (select top 1 1 from @pricingLots)
+						begin
+							delete @hedgeLots;
+						end
 					end
+				
 				end
+
+			end
+
+		end
+		else
+		begin
 			
+			if exists (select top 1 1 from tblCTContractDetail cd join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId where cd.intContractDetailId = @intContractDetailId and ch.intPricingTypeId = 1)
+			begin
+
+				select @dblNoOfLots = cd.dblNoOfLots from tblCTContractDetail cd where cd.intContractDetailId = @intContractDetailId;
+
+				while (exists (select top 1 1 from @hedgeLots) and isnull(@dblNoOfLots,0) > 0)
+				begin
+					select top 1
+						@intFutOptTransactionId = intFutOptTransactionId
+						,@strInternalTradeNo = strInternalTradeNo
+						,@ysnIsHedged = ysnIsHedged
+						,@dblPrice = dblPrice
+						,@intFutureMonthId = intFutureMonthId
+						,@intTraderId = intTraderId
+						,@intBrokerageAccountId = intBrokerageAccountId
+						,@dblHedgedLots = dblHedgedLots
+						,@strHedgeMonth = strHedgeMonth
+						,@strBroker = strBroker
+						,@strAccount = strAccount
+						,@dtmMatchDate = dtmMatchDate
+					from
+						@hedgeLots;
+
+					if (@dblNoOfLots = @dblHedgedLots)
+					begin
+
+						insert into @tableTemp
+							select
+								intPriceFixationDetailId  = @intContractDetailId
+								,ysnHedge  = 1
+								,dblHedgePrice  = @dblPrice
+								,intHedgeFutureMonthId = @intFutureMonthId
+								,intBrokerId = @intTraderId
+								,intBrokerageAccountId  = @intBrokerageAccountId
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,dblHedgeNoOfLots = @dblNoOfLots
+								,strHedgeMonth = @strHedgeMonth
+								,strBroker = @strBroker
+								,strAccount = @strAccount
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,strInternalTradeNo = @strInternalTradeNo
+								,dtmMatchDate = @dtmMatchDate
+
+						select @dblNoOfLots = 0;
+						delete @hedgeLots where intFutOptTransactionId = @intFutOptTransactionId;
+					end
+					else if (@dblNoOfLots < @dblHedgedLots)
+					begin
+						insert into @tableTemp
+							select
+								intPriceFixationDetailId  = @intContractDetailId
+								,ysnHedge  = 1
+								,dblHedgePrice  = @dblPrice
+								,intHedgeFutureMonthId = @intFutureMonthId
+								,intBrokerId = @intTraderId
+								,intBrokerageAccountId  = @intBrokerageAccountId
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,dblHedgeNoOfLots = @dblNoOfLots
+								,strHedgeMonth = @strHedgeMonth
+								,strBroker = @strBroker
+								,strAccount = @strAccount
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,strInternalTradeNo = @strInternalTradeNo
+								,dtmMatchDate = @dtmMatchDate
+
+						select @dblNoOfLots = 0;
+						update @hedgeLots set dblHedgedLots -= @dblNoOfLots where intFutOptTransactionId = @intFutOptTransactionId;
+					end
+					else if (@dblNoOfLots > @dblHedgedLots)
+					begin
+						insert into @tableTemp
+							select
+								intPriceFixationDetailId  = @intContractDetailId
+								,ysnHedge  = 1
+								,dblHedgePrice  = @dblPrice
+								,intHedgeFutureMonthId = @intFutureMonthId
+								,intBrokerId = @intTraderId
+								,intBrokerageAccountId  = @intBrokerageAccountId
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,dblHedgeNoOfLots = @dblHedgedLots
+								,strHedgeMonth = @strHedgeMonth
+								,strBroker = @strBroker
+								,strAccount = @strAccount
+								,intFutOptTransactionId = @intFutOptTransactionId
+								,strInternalTradeNo = @strInternalTradeNo
+								,dtmMatchDate = @dtmMatchDate
+
+						select @dblNoOfLots -= @dblHedgedLots;
+						delete @hedgeLots where intFutOptTransactionId = @intFutOptTransactionId;
+					end
+
+				end
 			end
 
 		end
