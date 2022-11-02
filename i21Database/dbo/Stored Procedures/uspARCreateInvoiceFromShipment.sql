@@ -65,7 +65,7 @@ SELECT
 	,@ShipDate					= ICIS.[dtmShipDate]
 	,@PostDate					= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
 	,@CalculatedDate			= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
-	,@EntitySalespersonId		= ISNULL(ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId]), SO.intEntitySalespersonId)
+	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
 	,@PONumber					= SO.[strPONumber]
