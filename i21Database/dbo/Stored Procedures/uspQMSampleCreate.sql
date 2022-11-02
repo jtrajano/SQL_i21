@@ -963,6 +963,10 @@ BEGIN TRY
 	--	,dblPrice
 	--	,intPriceUOMId
 	--	,strPriceUOM
+	--	,intCreatedUserId
+	--	,dtmCreated
+	--	,intLastModifiedUserId
+	--	,dtmLastModified
 	--	)
 	--SELECT 1
 	--	,@intSampleId
@@ -975,6 +979,10 @@ BEGIN TRY
 	--	,dblPrice
 	--	,intPriceUOMId
 	--	,strPriceUOM
+	--	,intCreatedUserId
+	--	,dtmCreated
+	--	,intLastModifiedUserId
+	--	,dtmLastModified
 	--FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (
 	--		intInitialBuyId INT
 	--		,intBuyerId INT
@@ -985,6 +993,10 @@ BEGIN TRY
 	--		,dblPrice NUMERIC(18, 6)
 	--		,intPriceUOMId INT
 	--		,strPriceUOM NVARCHAR(50)
+	--		,intCreatedUserId INT
+	--		,dtmCreated DATETIME
+	--		,intLastModifiedUserId INT
+	--		,dtmLastModified DATETIME
 	--		)
 
 	SELECT @strSampleNumber AS strSampleNumber
