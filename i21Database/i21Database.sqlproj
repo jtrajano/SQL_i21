@@ -1337,6 +1337,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateIntegrationPrice.sql" />
     <Build Include="dbo\Tables\tblIPContractedStockPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPContractedStock.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTankReadings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
