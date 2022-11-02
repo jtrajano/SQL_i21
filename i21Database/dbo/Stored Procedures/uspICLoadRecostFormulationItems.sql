@@ -180,10 +180,16 @@ FROM
 	CROSS APPLY (
 		SELECT 
 			dblNewStandardCost = 			
-			dbo.fnMultiply(
-				ISNULL(recipeInput.dblTotalInputCost, 0)
-				,dbo.fnDivide(ISNULL(recipeOutput.dblCostAllocationPercentage, 100), 100) 
-			)	
+				dbo.fnDivide(
+					dbo.fnMultiply(
+						ISNULL(recipeInput.dblTotalInputCost, 0)
+						,dbo.fnDivide(
+							ISNULL(recipeOutput.dblCostAllocationPercentage, 100)
+							, 100
+						) 
+					)
+					,ISNULL(recipeOutput.dblQuantity, 0) 
+				)
 	) receiptOutputNewStandardCost 
 
 	CROSS APPLY (
