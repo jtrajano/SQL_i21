@@ -149,7 +149,7 @@ BEGIN TRY
 	+ '<SaleNumber>' + ltrim(IsNULL(B.intSales, '')) + '</SaleNumber>' 
 	+ '<BrokerCode>' + IsNULL(BK.strName, '') + '</BrokerCode>' 
 	+ '<AuctionCenter>' + IsNULL(SM.strLocationName, '') + '</AuctionCenter>' 
-	+ '<BoughtPrice>' + Ltrim(IsNULL(B.ysnBoughtPrice, '')) + '</BoughtPrice>' 
+	--+ '<BoughtPrice>' + Ltrim(IsNULL(B.ysnBoughtPrice, '')) + '</BoughtPrice>' 
 	+ '<LandedPrice>' + ltrim(IsNULL(B.dblLandedPrice, '')) + '</LandedPrice>' 
 	+ '<TinNo>' + IsNULL(T.strTINNumber , '') + '</TinNo>' 
 	+ '<TBO>' + IsNULL(SM.strLocationName, '') + '</TBO>' 
