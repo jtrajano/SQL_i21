@@ -32,7 +32,7 @@ SELECT
     A.strAWBSampleReference,
     A.dblBasePrice,
     A.ysnBoughtAsReserved,
-    A.ysnBoughtPrice,
+    A.dblBoughtPrice,
     A.dblBulkDensity,
     A.strBuyingOrderNumber,
     A.intSubBookId,
