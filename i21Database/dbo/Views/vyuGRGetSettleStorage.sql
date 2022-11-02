@@ -119,6 +119,8 @@ SELECT
 	,dtmVoucherPosted = Bill.dtmDate
 	,ysnBillPosted = Bill.ysnPosted
 	,ysnBillPaid = Bill.ysnPaid
+	,SS.intInvoiceId
+	,AR.strInvoiceNumber
 FROM tblGRSettleStorage SS
 LEFT JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
@@ -150,6 +152,8 @@ LEFT JOIN tblAPBill Bill
 	ON Bill.intBillId = SS.intBillId
 LEFT JOIN tblSCTicket SC
 	ON SC.intTicketId = CS.intTicketId
+LEFT JOIN tblARInvoice AR
+	ON AR.intInvoiceId = SS.intInvoiceId
 LEFT JOIN (tblSCDeliverySheet DeliverySheet 
 			INNER JOIN tblSCDeliverySheetSplit DSS	
 				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId

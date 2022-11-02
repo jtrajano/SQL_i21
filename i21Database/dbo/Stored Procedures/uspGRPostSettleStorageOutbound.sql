@@ -244,7 +244,7 @@ BEGIN TRY
 				AND intTransactionTypeId = 1 --From Scale
 		) DP
 		WHERE SS.intSettleStorageId = @intId
-		select '@SettleStorages',* from @SettleStorages
+		--select '@SettleStorages',* from @SettleStorages
 		--calculate storage charges which will be deducted to the invoice
 		--build the settlement items for invoice
 		SELECT @intCnt = MIN(intCnt) FROM @SettleStorages
@@ -477,7 +477,7 @@ BEGIN TRY
 				WHERE intItemId = @intInventoryItemId
 			END
 			/**********END: INVENTORY ITEM**********/
-
+			
 			/**********START: REDUCE CONTRACTS**********/	
 			IF ISNULL(@intDPContractDetailId,0) > 0
 			BEGIN
@@ -608,15 +608,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemLocation IL
 			ON IL.intItemId = SI.intItemId
 				AND IL.intLocationId = CS.intCompanyLocationId
-		--OUTER APPLY (
-		--	SELECT intItemLocationId
-		--	FROM tblICItemLocation
-		--	WHERE intItemId = SI.intItemId
-		--		AND intLocationId = CS.intCompanyLocationId
-		--		AND SI.intItemTypeId = 1
-		--) IL
 
-				select '@EntriesForInvoice',* from @EntriesForInvoice
 		EXEC [dbo].[uspARProcessInvoices] 
 			@InvoiceEntries = @EntriesForInvoice
 			,@LineItemTaxEntries = @TaxDetails
@@ -633,6 +625,7 @@ BEGIN TRY
 			(							 
 				[intCustomerStorageId]
 				,[intInvoiceId]
+				,[strInvoice]
 				,[intSettleStorageId]
 				,[strSettleTicket]
 				,[intContractHeaderId]
@@ -647,6 +640,7 @@ BEGIN TRY
 			SELECT 
 				[intCustomerStorageId]		= ARD.intCustomerStorageId														
 				,[intInvoiceId]				= AR.intInvoiceId
+				,[strInvoice]				= AR.strInvoiceNumber
 				,[intSettleStorageId]		= @intId
 				,[strSettleTicket]			= ARD.strDocumentNumber
 				,[intContractHeaderId]		= ARD.intContractHeaderId
@@ -667,10 +661,19 @@ BEGIN TRY
 				ON SI.value = AR.intInvoiceId
 						
 			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryData, @intHistoryStorageId, ''
+
+			UPDATE SS
+			SET intInvoiceId = SH.intInvoiceId
+			FROM tblGRSettleStorage SS
+			INNER JOIN tblGRStorageHistory SH
+				ON SH.intSettleStorageId = SS.intSettleStorageId
+			WHERE SS.intSettleStorageId = @intId
 		END
+
+		UPDATE tblGRSettleStorage SET ysnPosted = 1 WHERE intSettleStorageId = @intId
 		
 		--get the next intSettleStorageId
-		SELECT @intId = MIN(intId) FROM @createdSettleStorages WHERE intId <> @intId
+		SELECT @intId = MIN(intId) FROM @createdSettleStorages WHERE intId > @intId
 	END
 
 	UPDATE tblGRSettleStorage SET ysnPosted = 1 WHERE intSettleStorageId = @intSettleStorageId

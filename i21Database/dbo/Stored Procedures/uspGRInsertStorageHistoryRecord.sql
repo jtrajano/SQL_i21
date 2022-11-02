@@ -40,6 +40,7 @@ BEGIN TRY
 		,strVoucher
 		,dblOldCost
 		,intTransferStorageReferenceId
+		,strInvoice
 	 )
 	 SELECT intCustomerStorageId
 		,intSettleStorageId
@@ -68,6 +69,7 @@ BEGIN TRY
 		,strVoucher
 		,dblOldCost
 		,intTransferStorageReferenceId
+		,strInvoice
 	FROM @StorageHistoryData
 
     IF (SELECT COUNT(*) FROM @StorageHistoryData) > 0
@@ -118,7 +120,8 @@ BEGIN TRY
 			[strTransferTicket],
 			[strSettleTicket],
 			[strVoucher],
-			[intTransferStorageReferenceId]
+			[intTransferStorageReferenceId],
+			[strInvoice]
 		) 
 		OUTPUT INSERTED.intStorageHistoryId INTO @intIds(intId)
 		SELECT 
@@ -149,7 +152,8 @@ BEGIN TRY
 			[strTransferTicket]			    = SH.strTransferTicket,
 			[strSettleTicket]			    = SH.strSettleTicket,
 			[strVoucher]				    = SH.strVoucher,
-			[intTransferStorageReferenceId] = SH.intTransferStorageReferenceId
+			[intTransferStorageReferenceId] = SH.intTransferStorageReferenceId,
+			[strInvoice]					= SH.strInvoice
 		FROM @StorageHistoryDataDummy SH
 		WHERE intId = @intId
 
@@ -159,7 +163,7 @@ BEGIN TRY
 		select @strStorageHistoryIds =  @strStorageHistoryIds + cast(intId as nvarchar) + ',' from @intIds
 
 
-		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,5,3) OR (intTransactionTypeId = 4 AND strType = 'Settlement')))
+		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,5,3) OR (intTransactionTypeId = 4 AND strType = 'Settlement')) OR (strType = 'Reverse Settlement' AND ISNULL(strInvoice,'') <> '' ))
 		BEGIN
 			EXEC uspGRRiskSummaryLog @intStorageHistoryId
 		END

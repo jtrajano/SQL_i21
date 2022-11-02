@@ -12,7 +12,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	,intTicketId						= SH.intTicketId
 	,strScaleTicket						= SC.strTicketNumber
 	,intInvoiceId						= SH.intInvoiceId
-	,strInvoice							= Inv.strInvoiceNumber
+	,strInvoice							= ISNULL(Inv.strInvoiceNumber,SH.strInvoice)
 	,intSettleStorageId					= SH.intSettleStorageId
 	,strSettleTicket					= SH.strSettleTicket
 	,intBillId							= SH.intBillId

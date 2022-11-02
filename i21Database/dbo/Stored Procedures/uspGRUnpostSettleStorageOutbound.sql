@@ -71,8 +71,9 @@ BEGIN TRY
 		--2. delete invoice
 		IF @intInvoiceId IS NOT NULL
 		BEGIN
-			--set intInvoiceId to NULL in tblGRStorageHistoryId to avoid FK error
+			--set intInvoiceId to NULL in tblGRStorageHistoryId and tblGRSettleStorage to avoid FK error
 			UPDATE tblGRStorageHistory SET intInvoiceId = NULL WHERE intSettleStorageId = @intId
+			UPDATE tblGRSettleStorage SET intInvoiceId = NULL WHERE intSettleStorageId = @intId
 
 			EXEC dbo.uspARDeleteInvoice @intInvoiceId, @intUserId
 		END
@@ -152,10 +153,10 @@ BEGIN TRY
 				,[strType]
 				,[intUserId]
 				,[strSettleTicket]
+				,[strInvoice]
 				,[intTransactionTypeId]
 				,[dblPaidAmount]
-				,[strVoucher]
-				,[ysnPost]
+				,[ysnPost]				
 			)
 			SELECT 
 				[intCustomerStorageId] = [intCustomerStorageId]
@@ -165,13 +166,13 @@ BEGIN TRY
 				,[strType]				= 'Reverse Settlement'
 				,[intUserId]			= @intUserId
 				,[strSettleTicket]		= [strSettleTicket]
+				,[strInvoice]			= [strInvoice]
 				,[intTransactionTypeId]	= 4
 				,[dblPaidAmount]		= [dblPaidAmount]
-				,[strVoucher]           = strVoucher
 				,1
 			FROM tblGRStorageHistory
 			WHERE intSettleStorageId = @intId
-
+		
 			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
 			--2.2 NULL intSettleStorageId in tblGRStorageHistory
@@ -214,7 +215,7 @@ BEGIN TRY
 		DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intId		
 		
 		--get the next settlement that will be unposted
-		SELECT @intId = MIN(intId) FROM @STR_Ids WHERE intId <> @intId		
+		SELECT @intId = MIN(intId) FROM @STR_Ids WHERE intId > @intId		
 	END
 
 	--DELETE STR-XXXX IF ALL MAIN SETTLEMENT HAVE ALREADY BEEN UNPOSTED
