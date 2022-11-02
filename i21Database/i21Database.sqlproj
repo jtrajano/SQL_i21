@@ -5524,7 +5524,7 @@
     <Build Include="dbo\Views\vyuARGetApproverEmail.sql" />
     <Build Include="dbo\Views\vyuGRGetAllStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountSchedule.sql" />
-    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" 
+    <Build Include="dbo\Views\vyuSTStorePumpItemList.sql" />
     <Build Include="dbo\Views\vyuSTFuelTanks.sql" />
     <Build Include="dbo\Views\vyuSTStoreFuelTanks.sql" />
     <Build Include="dbo\Views\vyuSTPumpItemList.sql" />
