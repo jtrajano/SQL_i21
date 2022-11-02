@@ -529,7 +529,16 @@ BEGIN TRY
 				--	ON SS.intSettleStorageId = SST.intSettleStorageId
 				--		AND SS.intSettleStorageId = @intParentSettleStorageId
 
-				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
+				--UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
+
+				UPDATE 
+					SETTLE_CONTRACT
+						SET dblUnits = SETTLE_CONTRACT.dblUnits - ABS(CONTRACT_INCREMENT.dblUnits) 
+					FROM tblGRSettleContract SETTLE_CONTRACT			
+					JOIN @tblContractIncrement CONTRACT_INCREMENT
+						ON SETTLE_CONTRACT.intContractDetailId = CONTRACT_INCREMENT.intContractDetailId
+				WHERE intSettleStorageId = @intParentSettleStorageId
+				
 			END
 
 			SELECT @dblUnitsUnposted = dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intSettleStorageId
