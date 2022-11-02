@@ -35,6 +35,8 @@ BEGIN TRY
     LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
     -- Net Weight Per Packages / Quantity UOM
     LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
+    -- Broker
+    LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -50,6 +52,7 @@ BEGIN TRY
             + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '') THEN 'CHANNEL / SUB CHANNEL, ' ELSE '' END
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
             + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0) THEN 'NET WEIGHT PER PACKAGES, ' ELSE '' END
+            + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
@@ -66,6 +69,7 @@ BEGIN TRY
         OR (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '')
         OR (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
         OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0)
+        OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
     )
     -- End Validation
 
@@ -128,6 +132,8 @@ BEGIN TRY
         ,@strBatchNo NVARCHAR(50)
         ,@intEntityUserId INT
         ,@dtmDateCreated DATETIME
+        ,@intBrokerId INT
+        ,@strBroker NVARCHAR(100)
     
     DECLARE @intSampleId INT
     DECLARE @intItemId INT
@@ -205,6 +211,8 @@ BEGIN TRY
             ,strBatchNo = IMP.strBatchNo
             ,intEntityUserId = IL.intEntityId
             ,dtmDateCreated = GETDATE()
+            ,intBrokerId = BROKERS.intEntityId
+            ,strBroker = BROKERS.strName
         FROM tblQMImportCatalogue IMP
         INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
         -- Sale Year
@@ -239,6 +247,8 @@ BEGIN TRY
         LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
         -- Net Weight Per Packages / Quantity UOM
         LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
+        -- Broker
+        LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
 
         WHERE IMP.intImportLogId = @intImportLogId
         AND IMP.ysnSuccess = 1
@@ -302,6 +312,8 @@ BEGIN TRY
         ,@strBatchNo
         ,@intEntityUserId
         ,@dtmDateCreated
+        ,@intBrokerId
+        ,@strBroker
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
         SET @intSampleId = NULL
@@ -414,6 +426,8 @@ BEGIN TRY
                 ,strFromLocationCode
                 ,strSampleBoxNumber
                 ,strComments3
+                ,intBrokerId
+                ,strBroker
                 )
             SELECT
                 intConcurrencyId = 1
@@ -485,6 +499,8 @@ BEGIN TRY
                 ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
+                ,intBrokerId = @intBrokerId
+                ,strBroker = @strBroker
             
             SET @intSampleId = SCOPE_IDENTITY()
 
@@ -533,6 +549,8 @@ BEGIN TRY
                 ,strFromLocationCode
                 ,strSampleBoxNumber
                 ,strComments3
+                ,intBrokerId
+                ,strBroker
             )
             SELECT
                 intConcurrencyId = 1
@@ -579,6 +597,8 @@ BEGIN TRY
                 ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
+                ,intBrokerId = @intBrokerId
+                ,strBroker = @strBroker
             
             -- Sample Detail
             INSERT INTO tblQMSampleDetail (
@@ -796,6 +816,8 @@ BEGIN TRY
                 ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
+                ,intBrokerId = @intBrokerId
+                ,strBroker = @strBroker
             FROM tblQMSample S
             WHERE S.intSampleId = @intSampleId
 
@@ -844,6 +866,8 @@ BEGIN TRY
                 ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
+                ,intBrokerId = @intBrokerId
+                ,strBroker = @strBroker
             FROM tblQMSample S
             INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
             WHERE S.intSampleId = @intSampleId
@@ -912,6 +936,8 @@ BEGIN TRY
             ,@strBatchNo
             ,@intEntityUserId
             ,@dtmDateCreated
+            ,@intBrokerId
+            ,@strBroker
     END
     CLOSE @C
 	DEALLOCATE @C

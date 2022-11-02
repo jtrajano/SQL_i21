@@ -358,7 +358,7 @@ BEGIN TRY
             ,intSalesYear = CAST(S.strSaleYear AS INT)
             ,dtmSalesDate = S.dtmSaleDate
             ,strTeaType = S.strManufacturingLeafType
-            ,intBrokerId = S.intForwardingAgentId
+            ,intBrokerId = S.intBrokerId
             ,strVendorLotNumber = S.strRepresentLotNumber
             ,intBuyingCenterLocationId = S.intCompanyLocationId
             ,intStorageLocationId = S.intStorageLocationId
