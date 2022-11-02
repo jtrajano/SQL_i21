@@ -1259,6 +1259,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutFuelInventory.sql" />
     <Build Include="dbo\Views\vyuSTGetFuelInventory.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_UserRoleAdvancePermission.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTankReadings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
