@@ -23,7 +23,7 @@ CREATE TYPE MFBatchTableType AS TABLE
 	strAWBSampleReference NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dblBasePrice  NUMERIC(18,6) NULL,
 	ysnBoughtAsReserved BIT NULL,
-	dblBoughtPrice BIT NULL,
+	dblBoughtPrice NUMERIC(18,6) NULL,
 	dblBulkDensity  NUMERIC(18,6) NULL,
 	strBuyingOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intSubBookId INT NULL,
