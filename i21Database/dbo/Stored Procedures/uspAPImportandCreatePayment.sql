@@ -134,6 +134,7 @@ BEGIN TRY
 					AND csv.strVendorOrderNumber = PS.strPaymentScheduleNumber
 				) csvRec
 				WHERE PS.ysnPaid = 0
+				AND payDetail.dblPayment != 0
 				AND pay.intPaymentId = @createdPaymentId
 				AND dupPS.intIdCount IS NOT NULL
 				AND dupPS.intIdCount > csvRec.intCSVIdCount --PS Selected is greater than the csv rec
