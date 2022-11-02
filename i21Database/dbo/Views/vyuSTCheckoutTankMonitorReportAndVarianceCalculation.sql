@@ -1,4 +1,4 @@
-CREATE VIEW vyuSTStoreFuelTanks
+CREATE VIEW vyuSTCheckoutTankMonitorReportAndVarianceCalculation
 AS
 SELECT		b.intTankReadingsId as intTankReadingsId,
 			a.intCheckoutId,
