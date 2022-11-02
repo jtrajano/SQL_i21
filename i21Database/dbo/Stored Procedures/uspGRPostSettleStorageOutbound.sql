@@ -504,14 +504,15 @@ BEGIN TRY
 			/**********END: REDUCE CONTRACT**********/
 
 			--UPDATE OPEN BALANCE
-			UPDATE tblGRCustomerStorage SET dblOpenBalance = dblOpenBalance - (@dblUnits * -1) WHERE intCustomerStorageId = @intCustomerStorageId
+			UPDATE tblGRCustomerStorage SET dblOpenBalance = dblOpenBalance - (CASE WHEN @dblUnits > 0 THEN @dblUnits ELSE @dblUnits* -1 END) WHERE intCustomerStorageId = @intCustomerStorageId
 
-			SELECT @intCnt = MIN(intCnt) FROM @SettleStorages WHERE intCnt <> @intCnt
+			SELECT @intCnt = MIN(intCnt) FROM @SettleStorages WHERE intCnt > @intCnt
 		END
 		--update tblGLAccount set intAccountGroupId = 5 where strDescription like '%STORAGE EXPENSE%'
 		--SELECT '@SettlementItemsForInvoice',* FROM @SettlementItemsForInvoice
 		--calculate discounts which will be deducted to the invoice
 		--create invoice
+		DELETE FROM @EntriesForInvoice
 		INSERT INTO @EntriesForInvoice (
 			[strTransactionType]
 			,[strType]

@@ -128,9 +128,9 @@ BEGIN TRY
 
 				SELECT TOP 1 @intCnt			= intCnt 
 					,@intContractDetailId		= intContractDetailId
-					,@dblSettledUnitsInContract	= dblUnits --* -1
+					,@dblSettledUnitsInContract	= dblUnits * -1
 				FROM @ContractDetailIds
-
+				
 				EXEC uspCTUpdateSequenceBalance 
 					@intContractDetailId = @intContractDetailId
 					,@dblQuantityToUpdate = @dblSettledUnitsInContract
