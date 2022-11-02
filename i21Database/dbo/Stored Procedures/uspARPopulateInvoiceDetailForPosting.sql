@@ -628,7 +628,7 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -956,7 +956,7 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblBaseTotal * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -1329,7 +1329,11 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
+<<<<<<< HEAD
     ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+=======
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblBaseTotal * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+>>>>>>> c3cb521def (AR-14915)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
