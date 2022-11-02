@@ -356,7 +356,7 @@ ELSE
 			, dblAmount				= SOD.dblQtyOrdered * SOD.dblPrice
 			, ysnAccrue				= 0
 			, intEntityVendorId		= NULL
-			, ysnPrice				= 0
+			, ysnPrice				= 1
 			, intForexRateTypeId	= SOD.intCurrencyExchangeRateTypeId
 			, dblForexRate			= SOD.dblCurrencyExchangeRate
 			, strChargesLink		= NULL
