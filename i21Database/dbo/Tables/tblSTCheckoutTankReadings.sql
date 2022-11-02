@@ -11,6 +11,7 @@
 	[dblSumOfDeliveriesPerTank] DECIMAL(18, 6) NULL,
 	[dblTankVolume] DECIMAL(18, 6) NULL,
 	[dblCalculatedVariance] DECIMAL(18, 6) NULL,
+    [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutTankReadings_intTankReadingsId] PRIMARY KEY ([intTankReadingsId]), 
     CONSTRAINT [FK_tblSTCheckoutTankReadings_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSTCheckoutTankReadings_tblTMDevice] FOREIGN KEY ([intDeviceId]) REFERENCES [dbo].[tblTMDevice] ([intDeviceId]),
