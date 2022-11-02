@@ -982,6 +982,7 @@ BEGIN TRY
 	--	,dblPrice
 	--	,intPriceUOMId
 	--	,strPriceUOM
+	--	,intSequenceNo
 	--	,intCreatedUserId
 	--	,dtmCreated
 	--	,intLastModifiedUserId
@@ -998,6 +999,7 @@ BEGIN TRY
 	--	,dblPrice
 	--	,intPriceUOMId
 	--	,strPriceUOM
+	--	,intSequenceNo
 	--	,intCreatedUserId
 	--	,dtmCreated
 	--	,intLastModifiedUserId
@@ -1012,6 +1014,7 @@ BEGIN TRY
 	--		,dblPrice NUMERIC(18, 6)
 	--		,intPriceUOMId INT
 	--		,strPriceUOM NVARCHAR(50)
+	--		,intSequenceNo INT
 	--		,intCreatedUserId INT
 	--		,dtmCreated DATETIME
 	--		,intLastModifiedUserId INT
@@ -1029,8 +1032,9 @@ BEGIN TRY
   ,dblPrice = x.dblPrice  
   ,intPriceUOMId = x.intPriceUOMId  
   ,strPriceUOM = x.strPriceUOM 
-  --,intLastModifiedUserId = x.intLastModifiedUserId  
-  --,dtmLastModified = x.dtmLastModified  
+  ,intSequenceNo = x.intSequenceNo
+  ,intLastModifiedUserId = x.intLastModifiedUserId  
+  ,dtmLastModified = x.dtmLastModified  
   ,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1  
  FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (  
    intInitialBuyId INT
@@ -1042,8 +1046,9 @@ BEGIN TRY
    ,dblPrice NUMERIC(18, 6)
    ,intPriceUOMId INT
    ,strPriceUOM NVARCHAR(50)
-   --,intLastModifiedUserId INT  
-   --,dtmLastModified DATETIME  
+   ,intSequenceNo INT
+   ,intLastModifiedUserId INT  
+   ,dtmLastModified DATETIME  
    ,strRowState NVARCHAR(50)  
    ) x  
  WHERE x.intInitialBuyId = dbo.tblQMSampleInitialBuy.intInitialBuyId  

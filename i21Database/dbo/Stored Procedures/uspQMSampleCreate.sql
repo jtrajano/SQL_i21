@@ -963,6 +963,7 @@ BEGIN TRY
 	--	,dblPrice
 	--	,intPriceUOMId
 	--	,strPriceUOM
+	--  ,intSequenceNo
 	--	,intCreatedUserId
 	--	,dtmCreated
 	--	,intLastModifiedUserId
@@ -979,6 +980,7 @@ BEGIN TRY
 	--	,dblPrice
 	--	,intPriceUOMId
 	--	,strPriceUOM
+	--  ,intSequenceNo
 	--	,intCreatedUserId
 	--	,dtmCreated
 	--	,intLastModifiedUserId
@@ -993,6 +995,7 @@ BEGIN TRY
 	--		,dblPrice NUMERIC(18, 6)
 	--		,intPriceUOMId INT
 	--		,strPriceUOM NVARCHAR(50)
+	--		,intSequenceNo INT
 	--		,intCreatedUserId INT
 	--		,dtmCreated DATETIME
 	--		,intLastModifiedUserId INT
