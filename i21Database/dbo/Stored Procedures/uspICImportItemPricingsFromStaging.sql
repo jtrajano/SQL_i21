@@ -199,7 +199,7 @@ SELECT
 	, dblAmountPercent		= NULLIF(s.dblAmountPercent, 0)
 	, dblSalePrice			= NULLIF(s.dblRetailPrice, 0)
 	, dblMSRPPrice			= NULLIF(s.dblMSRP, 0)
-	, strPricingMethod		= ISNULL(s.strPricingMethod, 'None')
+	, strPricingMethod		= s.strPricingMethod
 	, dblLastCost			= NULLIF(s.dblLastCost, 0)
 	, dblStandardCost		= NULLIF(s.dblStandardCost, 0)
 	, dblAverageCost		= NULLIF(s.dblAverageCost, 0)
@@ -280,7 +280,7 @@ WHEN NOT MATCHED THEN
 		, dblAmountPercent		
 		, dblSalePrice			
 		, dblMSRPPrice			
-		, strPricingMethod		
+		, ISNULL(strPricingMethod, 'None')		
 		, dblLastCost			
 		, dblStandardCost		
 		, dblAverageCost		
