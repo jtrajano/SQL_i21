@@ -99,7 +99,7 @@ SELECT
 		 CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
-		,strPayee =  Payee.Name 
+		,strPayee = ISNULL(CHK.strCheckPayee,CHK.strPayee)
 		,strPayeeAddress = Address.Value
 		,strAmountInWords = AmtInWords.Val
 		,CHK.strMemo
@@ -162,34 +162,6 @@ FROM	dbo.tblCMBankTransaction CHK
 		(
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
 		)AmtInWords
-		OUTER APPLY(
-			SELECT
-			CASE WHEN PYMT.ysnOverrideCheckPayee = 1 THEN 
-					PYMT.strOverridePayee
-			ELSE	
-			CASE
-			WHEN	(SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 AND ISNULL(PYMT.ysnOverrideLien, 0) = 0 
-			THEN
-				ISNULL(RTRIM(CHK.strPayee) + ' ' + 
-					(STUFF((SELECT DISTINCT ' and ' + strName
-                        FROM tblAPVendorLien LIEN
-						INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
-						WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
-						AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
-						AND LIEN.intCommodityId IN (
-							SELECT intCommodityId 
-							FROM tblAPPayment Pay 
-							INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-							INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-							WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
-					,1, 1, ''))
-				,CHK.strPayee)
-			ELSE
-				CHK.strPayee
-			END
-			END Name
-		
-		) Payee
 		OUTER APPLY (
 			SELECT 
 			CASE WHEN ISNULL(PYMT.ysnOverrideCheckPayee, 0) = 0
