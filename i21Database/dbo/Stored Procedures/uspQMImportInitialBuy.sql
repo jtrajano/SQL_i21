@@ -277,7 +277,7 @@ BEGIN TRY
             ,strAWBSampleReference
             ,dblBasePrice
             ,ysnBoughtAsReserved
-            ,ysnBoughtPrice
+            ,dblBoughtPrice
             ,dblBulkDensity
             ,strBuyingOrderNumber
             ,intSubBookId
@@ -375,7 +375,7 @@ BEGIN TRY
             ,strAWBSampleReference = S.strAWBSampleReference
             ,dblBasePrice = S.dblBasePrice
             ,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-            ,ysnBoughtPrice = NULL
+            ,dblBoughtPrice = NULL
             ,dblBulkDensity = NULL
             ,strBuyingOrderNumber = IMP.strBuyingOrderNumber
             ,intSubBookId = S.intSubBookId
