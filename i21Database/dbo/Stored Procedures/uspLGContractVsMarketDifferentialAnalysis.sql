@@ -140,6 +140,7 @@ FROM
 		LEFT JOIN tblSMCurrency SMCUR ON SMCUR.intCurrencyID = SCUR.intMainCurrencyId
 		LEFT JOIN tblSMCurrency FMCUR ON FMCUR.intCurrencyID = FM.intCurrencyId
 		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PUOM.intUnitMeasureId
+		LEFT JOIN tblCTContractDetail FSCD ON FSCD.intContractHeaderId = SCH.intContractHeaderId AND FSCD.intContractSeq = 1
 		/* Origin Default Port */
 		OUTER APPLY (SELECT TOP 1 strOriginDefaultPort = OGCDP.strCity 
 					 FROM tblSMCountry OGC 
@@ -154,10 +155,10 @@ FROM
 					 WHERE SCH.intCommodityId = MTMBD.intCommodityId
 						AND SCD.intItemId = MTMBD.intItemId
 						AND SCD.intFutureMarketId = MTMBD.intFutureMarketId
-						AND DATEADD(ms, -3, DATEADD(DD, 1, SCH.dtmContractDate)) >= MTMB.dtmM2MBasisDate
 						AND (MTMBD.intContractTypeId IS NULL OR MTMBD.intContractTypeId = 2)
 						AND MTMB.strPricingType = 'Mark to Market'
-					 ORDER BY MTMB.dtmM2MBasisDate DESC
+					 ORDER BY 
+						ABS(DATEDIFF(HH, DATEADD(DD, -60, FSCD.dtmStartDate), MTMB.dtmM2MBasisDate)) ASC
 					 ) MB
 		/* Payment Terms Adjustment Basis */
 		OUTER APPLY (SELECT TOP 1 PTSA.strMasterRecord, PTSA.intCurrencyId, PTUOM.intItemUOMId,
