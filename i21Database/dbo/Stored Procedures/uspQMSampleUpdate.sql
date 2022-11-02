@@ -346,7 +346,7 @@ BEGIN TRY
   ,strSendSampleTo = x.strSendSampleTo  
   , intSaleYearId = x.intSaleYearId
   , strSaleYear = x.strSaleYear
-  , intSaleNumber = x.intSaleNumber
+  , strSaleNumber = x.strSaleNumber
   , dtmSaleDate = CASE WHEN x.dtmSaleDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmSaleDate END  
   , intCatalogueTypeId = x.intCatalogueTypeId
   , strCatalogueType = x.strCatalogueType
@@ -480,7 +480,7 @@ BEGIN TRY
    ,strRepresentLotNumber NVARCHAR(50)
    , intSaleYearId INT
    , strSaleYear NVARCHAR(50)
-   , intSaleNumber INT
+   , strSaleNumber NVARCHAR(50)
    , strChopNumber NVARCHAR(50)
    , dtmSaleDate DATETIME  
    , intCatalogueTypeId INT

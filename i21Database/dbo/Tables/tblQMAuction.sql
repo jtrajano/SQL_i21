@@ -5,7 +5,7 @@
 	[intSampleId] INT NOT NULL, 
 	[intSaleYearId] INT, 
 	[strSaleYear] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[intSaleNumber] BIGINT NULL,
+	[strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmSaleDate] DATETIME NULL, 
 	[intCatalogueTypeId] INT NULL, 
 	[strCatalogueType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

@@ -412,7 +412,7 @@ BEGIN TRY
 		,strRepresentLotNumber
 		, intSaleYearId 
 		, strSaleYear
-  		, intSaleNumber 
+  		, strSaleNumber 
 		, strChopNumber 
 		, dtmSaleDate   
 		, intCatalogueTypeId 
@@ -556,7 +556,7 @@ BEGIN TRY
 		,strRepresentLotNumber
 		, intSaleYearId 
 		, strSaleYear
-  		, intSaleNumber 
+  		, strSaleNumber 
 		, strChopNumber 
 		, dtmSaleDate   
 		, intCatalogueTypeId 
@@ -688,7 +688,7 @@ BEGIN TRY
 			,strSendSampleTo NVARCHAR(50)
 			,strRepresentLotNumber NVARCHAR(50)
 			, intSaleYearId INT
-  		    , intSaleNumber INT
+  		    , strSaleNumber NVARCHAR(50)
 			, strSaleYear NVARCHAR(50)
 		    , strChopNumber NVARCHAR(50)
 		    , dtmSaleDate DATETIME  

@@ -111,7 +111,7 @@ SELECT S.intSampleId
 	-- Auction
 	,S.intSaleYearId
 	,S.strSaleYear
-	,S.intSaleNumber
+	,S.strSaleNumber
 	,S.strChopNumber
 	,S.dtmSaleDate
 	,S.intCatalogueTypeId
