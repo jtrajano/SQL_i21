@@ -33,6 +33,7 @@ SELECT
 	,CheckAmount				    = CheckAmount				 			
 FROM 
 (
+	--Distribution Type: Contract, Spot
 	SELECT 
 		intPaymentId					= PYMT.intPaymentId
 		,strPaymentNo					= PYMT.strPaymentRecordNum
@@ -63,10 +64,10 @@ FROM
 												WHEN BillDtl.intInventoryReceiptChargeId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
 												ELSE ISNULL(BillByReceipt.dblTax, 0)
 											END
-		,InboundDiscount				= CASE 
+		,InboundDiscount				= (CASE 
 											WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 											ELSE ISNULL(BillByReceipt.dblTotal, 0)
-										END
+										END) - ISNULL(BillAdjustments.dblTotal,0)
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN Bill.intTransactionType = 2 then 0
@@ -75,10 +76,10 @@ FROM
 												END
 											) +											
 											( 
-												CASE 													
+												(CASE 													
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
-												END
+												END) - ISNULL(BillAdjustments.dblTotal,0)
 											) +
 											-- Include tax for discounts/other charges
 											CASE 
@@ -156,7 +157,7 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			Bill.intBillId
-			,BD_ITEM.intBillDetailId
+			,BD.intBillDetailId
 			,APD.intPaymentId
 			,SUM(BD.dblTotal) dblTotal
 		FROM tblAPPaymentDetail APD
@@ -167,9 +168,18 @@ FROM
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 			AND BD.intScaleTicketId IS NULL
-		JOIN (tblAPBillDetail BD_ITEM JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND strType = 'Inventory')
-			ON BD_ITEM.intBillId = Bill.intBillId
-		GROUP BY Bill.intBillId,APD.intPaymentId,BD_ITEM.intBillDetailId
+		OUTER APPLY (
+			SELECT TOP 1 
+				BD_ITEM.intBillDetailId
+				,BD_ITEM.intContractDetailId
+			FROM tblAPBillDetail BD_ITEM
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD_ITEM.intItemId
+					AND IC.strType = 'Inventory'
+			WHERE (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL) 
+				AND BD_ITEM.intBillId = BD.intBillId
+		) B
+		GROUP BY Bill.intBillId,APD.intPaymentId,BD.intBillDetailId
 	) BillAdjustments 
 		ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
 			AND BillAdjustments.intBillId = Bill.intBillId
