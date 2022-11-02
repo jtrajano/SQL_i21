@@ -242,7 +242,7 @@ begin try
 			where intInventoryReceiptItemId = @intInventoryReceiptItemId;
 
 			--Check if Load base contract
-			select @ysnLoad = ysnLoad 
+			select @ysnLoad = ysnLoad, @intContractHeaderId = ch.intContractHeaderId 
 			from
 				tblCTContractDetail cd
 				inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -281,8 +281,8 @@ begin try
 			from  
 				vyuCTGetAvailablePriceForVoucher  ap
 				left join @consumedPrice cp on cp.intPriceFixationDetailId = isnull(ap.intPriceFixationDetailId,ap.intContractDetailId)
-			where  
-				ap.intContractDetailId = @intContractDetailId  
+			where
+				ap.intContractHeaderId = @intContractHeaderId and isnull(ap.intContractDetailId,0) = case when ap.ysnMultiplePriceFixation = 1 then 0 else @intContractDetailId end
 			order by ap.intPriceFixationDetailId 
 
 			/*Loop Pricing*/
