@@ -154,19 +154,8 @@ AS
 		-----AP Reimbursement Type
 		SELECT TOP 1
 			@strReimbursementNo = strReimbursementNo
-		FROM tblBBBuyback
-
-		---Check for AP account int company location
-		SELECT TOP 1 
-			@intAPAccount = intAPAccount 
-			,@strCompanyLocation = strLocationName
-		FROM tblSMCompanyLocation WHERE intCompanyLocationId =  @CompanyLocation
-
-		IF(@intAPAccount IS NULL)
-		BEGIN
-			SET @strPostingError = 'Invalid default AP Account for company location "' + @strCompanyLocation + '".'
-			GOTO ENDPOST
-		END
+		FROM tblBBBuyback 
+		WHERE intBuybackId = @intBuyBackId
 
 		---Staging 
 		SELECT 
@@ -181,11 +170,12 @@ AS
 		FROM tblBBBuybackDetail A
 		INNER JOIN tblICItem B
 			ON A.intItemId = B.intItemId
+		JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = A.intInvoiceDetailId
+		JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
 		INNER JOIN tblICItemLocation C
 			ON B.intItemId = C.intItemId
-				AND intLocationId =  @CompanyLocation
+				AND intLocationId = iv.intCompanyLocationId
 		WHERE intBuybackId = @intBuyBackId
-
 
 		---Check for Other Charge income account.
 		IF EXISTS(SELECT TOP 1 1 FROM #tmpStagingInsert WHERE intAccountId IS NULL)
