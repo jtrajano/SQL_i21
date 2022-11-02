@@ -73,7 +73,31 @@ BEGIN TRY
 				AND ((I.dblPayment + I.dblDiscount) - I.dblInterest) = ISNULL(PS.dblPayment, B.dblAmountDue * (CASE WHEN B.intTransactionType = 1 THEN 1 ELSE  -1 END))
 				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
 			) forPayment
-			WHERE PD.intPaymentId = @createdPaymentId;
+			WHERE 
+				PD.intPaymentId = @createdPaymentId
+			AND PD.dblPayment > 0;
+
+			UPDATE PD
+			SET PD.dblDiscount = ISNULL(forPayment.dblDiscount, 0),
+				PD.dblPayment = ISNULL(forPayment.dblPayment, 0),
+				PD.dblInterest = ISNULL(forPayment.dblInterest, 0),
+				PD.dblAmountDue = CASE WHEN forPayment.intId IS NOT NULL THEN ((forPayment.dblPayment + forPayment.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
+				PD.dblTotal = CASE WHEN forPayment.intId IS NOT NULL THEN ((forPayment.dblPayment + forPayment.dblDiscount) - forPayment.dblInterest) ELSE PD.dblTotal END
+			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+			LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
+			OUTER APPLY (
+				SELECT
+					I.*
+				FROM tblAPImportPaidVouchersForPayment I 
+				WHERE 
+					I.strBillId = B.strBillId 
+				--AND I.strVendorOrderNumber = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)))
+				AND ((I.dblPayment + I.dblDiscount) - I.dblInterest) = ISNULL(PS.dblPayment, B.dblAmountDue * (CASE WHEN B.intTransactionType = 1 THEN 1 ELSE  -1 END))
+				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
+			) forPayment
+			WHERE PD.intPaymentId = @createdPaymentId
+			AND PD.dblPayment < 0;
 
 			--UNPAY THOSE DUPLICATE, THE SAME AMOUNT AND INVOICE #, SELECT ONLY THE EARLIEST DUE DATE
 			WITH cteDup (
