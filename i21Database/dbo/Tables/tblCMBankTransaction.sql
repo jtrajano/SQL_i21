@@ -9,6 +9,7 @@
 	[intCurrencyExchangeRateTypeId] INT NULL,
     [dtmDate]                  DATETIME         NOT NULL,
     [strPayee]                 NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
+    [strCheckPayee]            NVARCHAR (500)   COLLATE Latin1_General_CI_AS NULL,
     [intPayeeId]               INT              NULL,
     [strAddress]               NVARCHAR (65)    COLLATE Latin1_General_CI_AS NULL,
     [strZipCode]               NVARCHAR (42)    COLLATE Latin1_General_CI_AS NULL,
