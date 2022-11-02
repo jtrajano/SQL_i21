@@ -3,6 +3,7 @@
 AS
 
 SELECT intId
+	, intContractHeaderId
 	, intContractDetailId
 	, intPriceFixationId
 	, intPriceFixationDetailId
@@ -20,9 +21,11 @@ SELECT intId
 	, intCompanyLocationId
 	, intPriceContractId
 	, strPriceContractNo
+	, ysnMultiplePriceFixation
 FROM (
 	SELECT
 		intId = pfd.intPriceFixationDetailId
+		, pf.intContractHeaderId
 		, pf.intContractDetailId
 		, pf.intPriceFixationId
 		, pfd.intPriceFixationDetailId
@@ -38,18 +41,21 @@ FROM (
 		, cd.intCompanyLocationId 
 		, pc.intPriceContractId
 		, pc.strPriceContractNo
+		, ysnMultiplePriceFixation = 0
 	FROM tblCTPriceFixation pf
 	LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId      
 	LEFT JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId      
 	LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId      
 	LEFT JOIN tblCTPriceFixationDetailAPAR ap ON ap.intPriceFixationDetailId = pfd.intPriceFixationDetailId      
-	LEFT JOIN tblAPBillDetail bd ON bd.intBillDetailId = ap.intBillDetailId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intInventoryReceiptChargeId is null
+	LEFT JOIN tblAPBillDetail bd ON bd.intBillDetailId = ap.intBillDetailId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
 	LEFT JOIN tblICCommodityUnitMeasure co ON co.intCommodityUnitMeasureId = pfd.intPricingUOMId      
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = cd.intItemId AND iu.intUnitMeasureId = co.intUnitMeasureId
 	OUTER APPLY (
 		SELECT TOP 1 ysnMultiplePriceFixation  from tblCTContractHeader a where a.intContractHeaderId = cd.intContractHeaderId
 	) ct
-	GROUP BY pf.intContractDetailId
+	GROUP BY 
+		pf.intContractHeaderId
+		, pf.intContractDetailId
 		, pf.intPriceFixationId
 		, pfd.intPriceFixationDetailId
 		, pfd.dtmFixationDate
@@ -68,8 +74,68 @@ FROM (
 		, pc.strPriceContractNo
 		, ct.ysnMultiplePriceFixation
 		, cd.dblCashPrice
-	UNION ALL SELECT
+
+	UNION ALL
+
+
+	SELECT
+		intId = pfd.intPriceFixationDetailId
+		, pf.intContractHeaderId
+		, pf.intContractDetailId
+		, pf.intPriceFixationId
+		, pfd.intPriceFixationDetailId
+		, pfd.dtmFixationDate
+		, pfd.dblQuantity
+		, pfd.dblLoadPriced
+		, dblFinalprice = dbo.fnCTConvertToSeqFXCurrency(cd.intContractDetailId, pc.intFinalCurrencyId, iu.intItemUOMId, (CASE WHEN ct.ysnMultiplePriceFixation = 1 THEN cd.dblCashPrice ELSE  pfd.dblFinalPrice END))
+		, dblBilledQuantity = (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN ISNULL(SUM(dbo.fnCTConvertQtyToTargetItemUOM(bd.intUnitOfMeasureId, cd.intItemUOMId, bd.dblQtyReceived)), 0) ELSE pfd.dblQuantity END)
+		, intBilledLoad = (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN 0 ELSE ISNULL(COUNT(DISTINCT bd.intBillId), 0) END)
+		, intPriceItemUOMId = pfd.intQtyItemUOMId
+		, cd.intPricingTypeId
+		, cd.intFreightTermId 
+		, cd.intCompanyLocationId 
+		, pc.intPriceContractId
+		, pc.strPriceContractNo
+		, ysnMultiplePriceFixation = 1
+	FROM tblCTPriceFixation pf
+	JOIN tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
+	join tblCTContractDetail cd on cd.intContractHeaderId = ch.intContractHeaderId and cd.intContractSeq = 1
+	LEFT JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId      
+	LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
+	LEFT JOIN tblAPBillDetail bd ON bd.intContractHeaderId = ch.intContractHeaderId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
+	LEFT JOIN tblICCommodityUnitMeasure co ON co.intCommodityUnitMeasureId = pfd.intPricingUOMId      
+	LEFT JOIN tblICItemUOM iu ON iu.intItemId = cd.intItemId AND iu.intUnitMeasureId = co.intUnitMeasureId
+	OUTER APPLY (
+		SELECT TOP 1 ysnMultiplePriceFixation  from tblCTContractHeader a where a.intContractHeaderId = cd.intContractHeaderId
+	) ct
+	WHERE ch.ysnMultiplePriceFixation = 1
+	GROUP BY
+		pf.intContractHeaderId
+		, pf.intContractDetailId
+		, pf.intPriceFixationId
+		, pfd.intPriceFixationDetailId
+		, pfd.dtmFixationDate
+		, pfd.dblQuantity
+		, pfd.dblLoadPriced
+		, cd.intContractDetailId
+		, pc.intFinalCurrencyId
+		, iu.intItemUOMId
+		, pfd.dblFinalPrice
+		, cd.intNoOfLoad
+		, cd.intPricingTypeId
+		, cd.intFreightTermId
+		, cd.intCompanyLocationId
+		, pfd.intQtyItemUOMId
+		, pc.intPriceContractId
+		, pc.strPriceContractNo
+		, ct.ysnMultiplePriceFixation
+		, cd.dblCashPrice
+
+	UNION ALL
+	
+	SELECT
 		intId = cd.intContractDetailId
+		, cd.intContractHeaderId
 		, cd.intContractDetailId
 		, intPriceFixationId = NULL
 		, intPriceFixationDetailId = NULL
@@ -85,18 +151,21 @@ FROM (
 		, cd.intCompanyLocationId
 		, intPriceContractId = NULL
 		, strPriceContractNo = NULL
+		, ysnMultiplePriceFixation = ch.ysnMultiplePriceFixation
 	FROM tblCTContractDetail cd
-	LEFT JOIN tblAPBillDetail bd1 ON bd1.intContractDetailId = cd.intContractDetailId AND ISNULL(bd1.intSettleStorageId, 0) = 0 AND bd1.intInventoryReceiptChargeId IS NULL
+	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	LEFT JOIN tblAPBillDetail bd1 ON bd1.intContractDetailId = cd.intContractDetailId AND ISNULL(bd1.intSettleStorageId, 0) = 0 AND bd1.intInventoryReceiptChargeId IS NULL and bd1.intItemId = cd.intItemId
 	LEFT JOIN tblAPBill b ON b.intBillId = bd1.intBillId AND b.intTransactionType = 1
-	LEFT JOIN tblAPBillDetail bd ON bd.intContractDetailId = cd.intContractDetailId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intBillId = b.intBillId AND bd.intInventoryReceiptChargeId IS NULL
+	LEFT JOIN tblAPBillDetail bd ON bd.intContractDetailId = cd.intContractDetailId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intBillId = b.intBillId AND bd.intInventoryReceiptChargeId IS NULL and bd.intItemId = cd.intItemId
 	CROSS APPLY (
 		SELECT intPricingCount = COUNT(*)
 		FROM tblCTPriceFixation pf
-		WHERE pf.intContractDetailId = cd.intContractDetailId
+		WHERE isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then 0 else cd.intContractDetailId end) and pf.intContractHeaderId = ch.intContractHeaderId
 	) noPrice
 	WHERE cd.dblCashPrice IS NOT NULL
 		AND noPrice.intPricingCount = 0
 	GROUP BY cd.intContractDetailId
+		, cd.intContractHeaderId
 		, cd.dblQuantity
 		, cd.dblQuantityPerLoad
 		, cd.intCurrencyId
@@ -107,6 +176,7 @@ FROM (
 		, cd.intFreightTermId
 		, cd.intCompanyLocationId
 		, cd.intItemUOMId
+		, ch.ysnMultiplePriceFixation
 ) tbl
 WHERE (tbl.dblQuantity - tbl.dblBilledQuantity) > 0
 	OR (tbl.dblLoadPriced - tbl.intBilledLoad) > 0
