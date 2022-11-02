@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblARInvoiceTaxReportStagingTable] (
 	[intTaxCodeId]						INT				NULL,
 	[intEntityUserId]					INT             NULL,
 	[strRequestId]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strTaxTransactionType]				NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
+	[strTaxTransactionType]				NVARCHAR (10)	COLLATE Latin1_General_CI_AS NULL,
 	[strCalculationMethod]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strTaxCode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strDescription]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -17,7 +17,7 @@ CREATE TABLE [dbo].[tblARInvoiceTaxReportStagingTable] (
 	[dblTaxPerQty]						NUMERIC (18, 6)	NULL,
 	[dblComputedGrossPrice]				NUMERIC (18, 6)	NULL,
 	[ysnIncludeInvoicePrice]			BIT				NULL,
-	[strException]						NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL,
+	[strException]						NVARCHAR (200)	COLLATE Latin1_General_CI_AS NULL,
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoiceTaxReportStagingTable] 

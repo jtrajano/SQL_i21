@@ -1223,6 +1223,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTankReadings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -8823,7 +8824,7 @@
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
-	<Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
+    <Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />
@@ -11060,6 +11061,8 @@
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
+    
+    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

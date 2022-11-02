@@ -34,6 +34,7 @@ BEGIN
   [intFiscalPeriodId],    
   [intTaskId],  
   [strPayee],    
+  [strCheckPayee],
   [intPayeeId],    
   [strAddress],    
   [strZipCode],    
@@ -72,6 +73,7 @@ BEGIN
   [intFiscalPeriodId] = F.intGLFiscalYearPeriodId, -- remove this in 20.1    
   [intTaskId],  
   [strPayee],    
+  [strCheckPayee],
   [intPayeeId],    
   [strAddress],    
   [strZipCode],    
