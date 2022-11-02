@@ -10,7 +10,7 @@
     [dblPrice] NUMERIC(18, 6) NULL, 
     [intPriceUOMId] INT NULL,
 	[strPriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
-	[intSequenceNo] INT NOT NULL CONSTRAINT [DF_tblQMSampleInitialBuy_intSequenceNo] DEFAULT 1, 
+	[intSequenceNo] INT NULL CONSTRAINT [DF_tblQMSampleInitialBuy_intSequenceNo] DEFAULT 1, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
 	[intCreatedUserId] INT NULL,
 	[dtmCreated] DATETIME NULL CONSTRAINT [DF_tblQMSampleInitialBuy_dtmCreated] DEFAULT GETDATE(),
