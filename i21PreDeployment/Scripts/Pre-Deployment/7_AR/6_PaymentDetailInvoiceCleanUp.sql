@@ -56,9 +56,9 @@ BEGIN
 
 	IF @intPaymentMethodId IS NOT NULL
 		BEGIN
-			SELECT intPaymentId
-					, strRecordNumber
-					, strPaymentMethod
+			SELECT P.intPaymentId
+				 , P.strRecordNumber
+				 , P.strPaymentMethod
 			INTO #PAYMENTS
 			FROM tblARPayment P
 			WHERE intPaymentMethodId = 0
