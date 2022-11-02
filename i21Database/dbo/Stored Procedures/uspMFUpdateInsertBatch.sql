@@ -84,7 +84,7 @@ BEGIN
 		strAWBSampleReference			 = T.strAWBSampleReference,
 		dblBasePrice					 = T.dblBasePrice,
 		ysnBoughtAsReserved				 = T.ysnBoughtAsReserved,
-		ysnBoughtPrice					 = T.ysnBoughtPrice,
+		dblBoughtPrice					 = T.dblBoughtPrice,
 		dblBulkDensity					 = T.dblBulkDensity,
 		strBuyingOrderNumber			 = T.strBuyingOrderNumber,
 		strContainerNumber				 = T.strContainerNumber,
@@ -195,7 +195,7 @@ BEGIN
 			,strAWBSampleReference
 			,dblBasePrice
 			,ysnBoughtAsReserved
-			,ysnBoughtPrice
+			,dblBoughtPrice
 			,dblBulkDensity
 			,strBuyingOrderNumber
 			,intSubBookId
@@ -295,7 +295,7 @@ BEGIN
 			,strAWBSampleReference
 			,dblBasePrice
 			,ysnBoughtAsReserved
-			,ysnBoughtPrice
+			,dblBoughtPrice
 			,dblBulkDensity
 			,strBuyingOrderNumber
 			,intSubBookId
