@@ -137,7 +137,7 @@ BEGIN TRY
             LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
         ) ON S.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
-            AND S.intSaleNumber = IMP.intSaleNumber
+            AND S.strSaleNumber = IMP.strSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
             AND E.strName = IMP.strSupplier
             AND S.strRepresentLotNumber = IMP.strLotNumber
@@ -354,7 +354,7 @@ BEGIN TRY
         )
         SELECT
             strBatchId = S.strBatchNo
-            ,intSales = S.intSaleNumber
+            ,intSales = CAST(S.strSaleNumber AS INT)
             ,intSalesYear = CAST(S.strSaleYear AS INT)
             ,dtmSalesDate = S.dtmSaleDate
             ,strTeaType = S.strManufacturingLeafType

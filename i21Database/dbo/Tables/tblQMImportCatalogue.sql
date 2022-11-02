@@ -11,7 +11,7 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
 	[intSampleId] INT NULL,
     [strSaleYear] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strBuyingCenter] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    [intSaleNumber] BIGINT NULL,
+    [strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strCatalogueType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSupplier] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strChannel] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

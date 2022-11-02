@@ -75,7 +75,7 @@ BEGIN TRY
         ,@intSaleYearId INT
         ,@strSaleYear NVARCHAR(50)
         ,@intCompanyLocationId INT
-        ,@intSaleNumber BIGINT
+        ,@strSaleNumber NVARCHAR(50)
         ,@intCatalogueTypeId INT
 	    ,@strCatalogueType NVARCHAR(50)
         ,@intSupplierEntityId INT
@@ -152,7 +152,7 @@ BEGIN TRY
             ,intSaleYearId = SY.intSaleYearId
             ,strSaleYear = SY.strSaleYear
             ,intCompanyLocationId = CL.intCompanyLocationId
-            ,intSaleNumber = IMP.intSaleNumber
+            ,strSaleNumber = IMP.strSaleNumber
             ,intCatalogueTypeId = CT.intCatalogueTypeId
             ,strCatalogueType = CT.strCatalogueType
             ,intSupplierEntityId = E.intEntityId
@@ -249,7 +249,7 @@ BEGIN TRY
 		,@intSaleYearId
         ,@strSaleYear
         ,@intCompanyLocationId
-        ,@intSaleNumber
+        ,@strSaleNumber
         ,@intCatalogueTypeId
 	    ,@strCatalogueType
         ,@intSupplierEntityId
@@ -315,7 +315,7 @@ BEGIN TRY
             ON V.intEntityId = S.intEntityId
         WHERE S.strSaleYear = @strSaleYear
         AND CL.intCompanyLocationId = @intCompanyLocationId
-        AND S.intSaleNumber = @intSaleNumber
+        AND S.strSaleNumber = @strSaleNumber
         AND CT.intCatalogueTypeId = @intCatalogueTypeId
         AND E.intEntityId = @intSupplierEntityId
         AND S.strRepresentLotNumber = @strRefNo
@@ -374,7 +374,7 @@ BEGIN TRY
                 -- Auction Fields
                 ,intSaleYearId
                 ,strSaleYear
-                ,intSaleNumber
+                ,strSaleNumber
                 ,dtmSaleDate
                 ,intCatalogueTypeId
                 ,strCatalogueType
@@ -445,7 +445,7 @@ BEGIN TRY
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
                 ,strSaleYear = @strSaleYear
-                ,intSaleNumber = @intSaleNumber
+                ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
                 ,strCatalogueType = @strCatalogueType
@@ -493,7 +493,7 @@ BEGIN TRY
                 ,intSampleId
                 ,intSaleYearId
                 ,strSaleYear
-                ,intSaleNumber
+                ,strSaleNumber
                 ,dtmSaleDate
                 ,intCatalogueTypeId
                 ,strCatalogueType
@@ -539,7 +539,7 @@ BEGIN TRY
                 ,intSampleId = @intSampleId
                 ,intSaleYearId = @intSaleYearId
                 ,strSaleYear = @strSaleYear
-                ,intSaleNumber = @intSaleNumber
+                ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
                 ,strCatalogueType = @strCatalogueType
@@ -756,7 +756,7 @@ BEGIN TRY
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
                 ,strSaleYear = @strSaleYear
-                ,intSaleNumber = @intSaleNumber
+                ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
                 ,strCatalogueType = @strCatalogueType
@@ -804,7 +804,7 @@ BEGIN TRY
                 intConcurrencyId = A.intConcurrencyId + 1
                 ,intSaleYearId = @intSaleYearId
                 ,strSaleYear = @strSaleYear
-                ,intSaleNumber = @intSaleNumber
+                ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
                 ,strCatalogueType = @strCatalogueType
@@ -859,7 +859,7 @@ BEGIN TRY
             ,@intSaleYearId
             ,@strSaleYear
             ,@intCompanyLocationId
-            ,@intSaleNumber
+            ,@strSaleNumber
             ,@intCatalogueTypeId
             ,@strCatalogueType
             ,@intSupplierEntityId

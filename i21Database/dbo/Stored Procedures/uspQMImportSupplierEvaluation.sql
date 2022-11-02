@@ -28,7 +28,7 @@ BEGIN TRY
         )
             ON S.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
-            AND S.intSaleNumber = IMP.intSaleNumber
+            AND S.strSaleNumber = IMP.strSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
             AND E.strName = IMP.strSupplier
             AND S.strRepresentLotNumber = IMP.strLotNumber
