@@ -121,3 +121,4 @@ LEFT JOIN tblGRTransferStorageReference TSR
 LEFT JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSR.intTransferStorageId
 WHERE CS.dblOpenBalance > 0
+    AND [dbo].[fnGRCheckStorageIfFromLoadOut](CS.intCustomerStorageId) = 0

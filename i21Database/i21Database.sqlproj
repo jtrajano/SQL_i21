@@ -1339,6 +1339,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPContractedStock.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutTankReadings.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutTankMonitorReportAndVarianceCalculation.sql" />
+    <Build Include="dbo\Functions\fnGRCheckSettlementIfFromLoadOut.sql" />
+    <Build Include="dbo\Functions\fnGRCheckStorageIfFromLoadOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

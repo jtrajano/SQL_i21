@@ -121,6 +121,7 @@ SELECT
 	,ysnBillPaid = Bill.ysnPaid
 	,SS.intInvoiceId
 	,AR.strInvoiceNumber
+	,ysnDPLoadOut = dbo.[fnGRCheckSettlementIfFromLoadOut](SS.intSettleStorageId)
 FROM tblGRSettleStorage SS
 LEFT JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
