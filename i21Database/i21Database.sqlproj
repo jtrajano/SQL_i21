@@ -1221,6 +1221,9 @@
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
+    <Build Include="dbo\Tables\tblICTally.sql" />
+    <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTankReadings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -7219,6 +7222,8 @@
     <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
     <Build Include="dbo\Tables\tblBBCustomerLocationXref.sql" />
+    <Build Include="dbo\Tables\tblBBChevronExportBuybackLogDetail.sql" />
+    <Build Include="dbo\Tables\tblVRChevronExportRebateLogDetail.sql" />
     <Build Include="dbo\Tables\tblICAdjustInventoryTerms.sql" />
     <None Include="Scripts\Post-Deployment\IC\11_AdjustmentInventoryTerms.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipment.sql" />
@@ -7297,6 +7302,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateOHEx2.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOHTR2.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateOHMF2.sql" />
+    <Build Include="dbo\Stored Procedures\uspVRCreateDebitMemoOrVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspVRInsertCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspVRUpdateCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
@@ -8818,7 +8824,7 @@
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
-	<Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
+    <Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />
@@ -11055,6 +11061,8 @@
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
+    
+    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

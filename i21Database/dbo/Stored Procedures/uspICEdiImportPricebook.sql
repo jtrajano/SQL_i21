@@ -324,13 +324,13 @@ INSERT INTO tblICImportLogDetail(intImportLogId
 							   , strAction
 							   , intConcurrencyId)
 SELECT @LogId
-	 , 'Error'
+	 , 'Warning'
 	 , p.intRecordNumber
 	 , 'Selling UPC Number'		
 	 , strSellingUpcNumber
 	 , 'Invalid UPC Format or Value.'
-	 , 'Skipped'			
-	 , 'Record not imported.'
+	 , 'Imported'			
+	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
 WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL;
@@ -347,13 +347,13 @@ INSERT INTO tblICImportLogDetail(intImportLogId
 							   , strAction
 							   , intConcurrencyId)
 SELECT @LogId
-	 , 'Error'
+	 , 'Warning'
 	 , p.intRecordNumber
 	 , 'Order Case UPC Number'
 	 ,  strOrderCaseUpcNumber
 	 , 'Invalid UPC Format or Value.'
-	 , 'Skipped'			
-	 , 'Record not imported.'
+	 , 'Imported'			
+	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
 WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strOrderCaseUpcNumber,'') IS NOT NULL;
@@ -1432,7 +1432,7 @@ WHERE p.strUniqueId = @UniqueId
   AND stockUnit.intItemUOMId IS NOT NULL	
   AND existUOM.intItemUOMId IS NULL   
   AND existUPCCode.intItemUOMId IS NULL 
-  AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber1),'') IS NOT NULL
+  --AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber1),'') IS NOT NULL
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
@@ -1458,7 +1458,7 @@ OUTER APPLY (SELECT TOP 1 i.intItemId
 WHERE p.strUniqueId = @UniqueId
   AND i.intItemId IS NOT NULL 
   AND (NULLIF(p.strAltUPCQuantity2, '') IS NOT NULL AND NULLIF(p.strAltUPCUOM2, '') IS NOT NULL)
-  AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2),'') IS NOT NULL
+  --AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2),'') IS NOT NULL
   AND p.ysnAddOrderingUPC = 1
 
 SELECT @duplicateAlternate2UOMUPCCode = @@ROWCOUNT;
@@ -1563,7 +1563,7 @@ WHERE p.strUniqueId = @UniqueId
   AND stockUnit.intItemUOMId IS NOT NULL 
   AND existUOM.intItemUOMId IS NULL  
   AND existUPCCode.intItemUOMId IS NULL 
-  AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2),'') IS NOT NULL
+  --AND NULLIF(dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2),'') IS NOT NULL
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
@@ -2321,7 +2321,10 @@ USING (
 	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
 	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1))) AND ItemUOM.intModifier = NULLIF(Pricebook.strAltUPCModifier1,'')
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice1, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber1) IS NOT NULL
+	WHERE 
+		Pricebook.strUniqueId = @UniqueId 
+		AND CAST(NULLIF(Pricebook.strAltUPCPrice1, '') AS NUMERIC(38, 20)) <> 0 
+		--AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber1) IS NOT NULL
 	
 	UNION ALL 
 	SELECT Item.intItemId
@@ -2352,7 +2355,10 @@ USING (
 	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
 	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2))) AND ItemUOM.intModifier = NULLIF(Pricebook.strAltUPCModifier2,'')
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
+	WHERE 
+		Pricebook.strUniqueId = @UniqueId 
+		AND CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) <> 0 
+		--AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
 ) AS Source_Query 
 	ON ItemPriceLevel.intItemId = Source_Query.intItemId
 	AND ItemPriceLevel.intItemLocationId = Source_Query.intItemLocationId
@@ -2457,7 +2463,10 @@ USING (
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId 
 	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2)))
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
+	WHERE 
+		Pricebook.strUniqueId = @UniqueId 
+		AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 
+		--AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
 ) AS Source_Query ON EffectiveItemCost.intItemId = Source_Query.intItemId 
 			     AND EffectiveItemCost.intItemLocationId = Source_Query.intItemLocationId
 			     AND CONVERT(DATE, EffectiveItemCost.dtmEffectiveCostDate, 101) = CONVERT(DATE, Source_Query.dtmEffectiveDate, 101) 

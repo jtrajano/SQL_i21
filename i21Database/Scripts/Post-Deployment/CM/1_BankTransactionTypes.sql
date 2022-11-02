@@ -46,11 +46,11 @@ GO
 			SELECT id =	29,		name = 'Treasury Stock Purchase',debitCredit ='D'   UNION ALL
 			SELECT id = 103,	name = 'Void Misc Check'		,debitCredit ='C'	UNION ALL 
 			SELECT id = 116,	name = 'Void AP Payment'		,debitCredit ='C'	UNION ALL 
+			SELECT id = 120,	name = 'Negative AP eCheck'     ,debitCredit ='C'	UNION ALL 
 			SELECT id = 121,	name = 'Void Paycheck'			,debitCredit ='C'	UNION ALL 
 			SELECT id = 122,	name = 'Void ACH'				,debitCredit ='C'	UNION ALL 
 			SELECT id = 123,	name = 'Void Direct Deposit'	,debitCredit ='C'	UNION ALL
-			SELECT id = 124,	name = 'NSF'					,debitCredit ='D'	UNION ALL
-			SELECT id = 125,	name = 'ACH Credit'				,debitCredit ='C'
+			SELECT id = 124,	name = 'NSF'					,debitCredit ='D'
 			
 	) AS BankTransactionTypeHardCodedValues
 		ON  BankTransactionTypeTable.intBankTransactionTypeId = BankTransactionTypeHardCodedValues.id

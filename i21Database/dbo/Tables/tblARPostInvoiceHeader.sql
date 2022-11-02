@@ -183,3 +183,5 @@ CREATE INDEX [idx_tblARPostInvoiceHeader_strTransactionType_strSessionId] ON [db
 GO
 CREATE INDEX [idx_tblARPostInvoiceHeader_strInvoiceNumber_strSessionId] ON [dbo].[tblARPostInvoiceHeader] (strSessionId, strInvoiceNumber)
 GO
+CREATE INDEX [idx_tblARPostInvoiceHeader_strSessionId_intInvoiceId] ON [dbo].[tblARPostInvoiceHeader] (strSessionId) INCLUDE (intInvoiceId)
+GO

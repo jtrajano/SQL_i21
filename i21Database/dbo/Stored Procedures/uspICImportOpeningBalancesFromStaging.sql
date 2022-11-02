@@ -126,7 +126,7 @@ END
 -- Validate the UOM
 IF @LogId IS NOT NULL 
 BEGIN 
-	-- Log Invalid company locations
+	-- Log Invalid UOM
 	INSERT INTO tblICImportLogDetail(
 		intImportLogId
 		,strType
@@ -179,7 +179,7 @@ END
 -- Validate the Weight UOM
 IF @LogId IS NOT NULL 
 BEGIN 
-	-- Log Invalid company locations
+	-- Log Invalid Weight UOM
 	INSERT INTO tblICImportLogDetail(
 		intImportLogId
 		,strType
@@ -207,18 +207,25 @@ BEGIN
 				a.* 
 				,intRecordNo = CAST(ROW_NUMBER() OVER (ORDER BY intImportStagingOpeningBalanceId) AS INT)
 			FROM tblICImportStagingOpeningBalance a 
-		) a		
-		LEFT JOIN tblICItem i
-			ON a.strItemNo = i.strItemNo 
-		LEFT JOIN tblICItemUOM iu
-			ON iu.intItemId = i.intItemId
-		LEFT JOIN tblICUnitMeasure u
-			ON u.intUnitMeasureId = iu.intUnitMeasureId
-			AND u.strUnitMeasure = a.strWeightUOM
+		) a
+		OUTER APPLY (
+			SELECT TOP 1
+				i.intItemId
+				,u.intUnitMeasureId
+				,i.strItemNo
+			FROM 
+				tblICItem i	LEFT JOIN tblICItemUOM iu
+					ON iu.intItemId = i.intItemId
+				LEFT JOIN tblICUnitMeasure u
+					ON u.intUnitMeasureId = iu.intUnitMeasureId					
+			WHERE
+				i.strItemNo = a.strItemNo 
+				AND u.strUnitMeasure = a.strWeightUOM
+		) b	
 	WHERE 
-		u.intUnitMeasureId IS NULL 
+		b.intUnitMeasureId IS NULL 
+		AND b.intItemId IS NOT NULL 	
 		AND NULLIF(RTRIM(LTRIM(a.strWeightUOM)), '') IS NOT NULL 
-		AND i.intItemId IS NOT NULL 
 
 	SET @row_errors = ISNULL(@row_errors, 0) + @@ROWCOUNT
 END
