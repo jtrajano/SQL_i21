@@ -55,6 +55,8 @@
 	[ysnOverrideCompanySegment]					BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideCompanySegment] DEFAULT((0)),
 	[ysnOverrideLocationSegment]				BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLocationSegment] DEFAULT((0)),
 	[ysnOverrideLineOfBusinessSegment]			BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideLineOfBusinessSegment] DEFAULT((0)),
+	[ysnOverrideARAccountCompanySegment]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountCompanySegment] DEFAULT((0)),
+	[ysnOverrideARAccountLocationSegment]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountLocationSegment] DEFAULT((0)),
 	[ysnOverrideARAccountLineOfBusinessSegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountLineOfBusinessSegment] DEFAULT((0)),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
