@@ -107,6 +107,14 @@ SELECT
 	B.[strPreInvoiceGardenNumber],
 	book.[strBook],
 	subBook.[strSubBook],
+	B.[dblPackageBreakups],
+	B.[dblNetWeightPerPackage],
+	B.[dblNumberOfPackages],
+	B.[dblNetWeightPerPackage2],
+	B.[dblNumberOfPackages2],
+	B.[dblNetWeightPerPackage3],
+	B.[dblNumberOfPackages3],
+	B.[intPurchasingGroupId],
 	cgt.strCatalogueType,
 	pg.strName AS strPurchasingGroup
 FROM dbo.tblAPBill A
