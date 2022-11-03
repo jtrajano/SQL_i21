@@ -105,7 +105,8 @@ SELECT	i21.intBankAccountId
 		,i21.strCbkNo
 		,i21.intConcurrencyId
 		,i21.intPayToDown
-		,i21.strACHClientId
+		,i21.strMT101Prefix1
+		,i21.strMT101Prefix2
 		,i21.intResponsibleEntityId
 		,strResponsibleEntity = E.strName
 		,i21.strCorrespondingBank
@@ -250,7 +251,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId
 						,strCbkNo
 						,intPayToDown
-						,strACHClientId
+						,strMT101Prefix1
+						,strMT101Prefix2
 						,intResponsibleEntityId
 						,ysnABREnable
 						,intABRDaysNoRef
@@ -343,7 +345,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId					= i.intConcurrencyId
 						,strCbkNo							= i.strCbkNo
 						,intPayToDown						= i.intPayToDown
-						,strACHClientId						= i.strACHClientId
+						,strMT101Prefix1					= i.strMT101Prefix1
+						,strMT101Prefix2					= i.strMT101Prefix2		
 						,intResponsibleEntityId				= i.intResponsibleEntityId
 						,ysnABREnable						= i.ysnABREnable
 						,intABRDaysNoRef					= i.intABRDaysNoRef
@@ -459,7 +462,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
-					,strACHClientId						= i.strACHClientId
+					,strMT101Prefix1					= i.strMT101Prefix1
+					,strstrMT101Prefix2					= i.strMT101Prefix2
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
