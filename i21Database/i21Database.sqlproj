@@ -1228,6 +1228,8 @@
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutTankReadings.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutTankMonitorReportAndVarianceCalculation.sql" />
+    <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11065,8 +11067,8 @@
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
-    
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Functions\uspGRGetInventoryTransfers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

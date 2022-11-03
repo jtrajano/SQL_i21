@@ -180,7 +180,7 @@
 			AND SD.intSiteID = @siteId)
 		BEGIN
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1, 'Site has no tank')
 			print 'capacity <> 0'
 			--add insert to event
 			INSERT INTO tblTMEvent (dtmDate
@@ -218,7 +218,7 @@
 		IF(@ts_capacity = 0)
 		BEGIN
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Site has no tank')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1, 'Site has no tank')
 			print 'capacity = 0'			
 		    --add insert to event
 			INSERT INTO tblTMEvent (dtmDate
