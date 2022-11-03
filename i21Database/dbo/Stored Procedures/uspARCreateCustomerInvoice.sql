@@ -664,11 +664,15 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[dblFreightCharge]					= @FreightCharge
-		,[intFreightCompanySegment]			= @FreightCompanySegment
-		,[intFreightLocationSegment]		= @FreightLocationSegment
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
-		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
+		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
+												THEN @SourcedFrom 
+												ELSE 
+													CASE WHEN ISNULL(@BankAccountId, '') = '' AND ISNULL([dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId), '') <> '' 
+														THEN 'Customer'
+														ELSE NULL
+													END
+											  END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
 		,[dblSurcharge]						= @Surcharge
