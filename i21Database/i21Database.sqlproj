@@ -1343,6 +1343,7 @@
     <Build Include="dbo\Functions\fnGRCheckStorageIfFromLoadOut.sql" />
     <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
     <Build Include="dbo\Views\vyuQMUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblIPRefreshTokenEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
