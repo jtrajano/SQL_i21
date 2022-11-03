@@ -375,7 +375,7 @@ BEGIN TRY
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END
 
-		IF @dblQty > 0
+		IF (@dblQty > 0 OR @ForDelete = 1)
 		BEGIN
 			
 		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing IN ('Subsystem - Direct', 'MANUAL OVERRIDE')	
