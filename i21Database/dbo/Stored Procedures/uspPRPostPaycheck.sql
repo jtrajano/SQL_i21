@@ -181,33 +181,37 @@ BEGIN
 	INSERT INTO #tmpEarning (intPaycheckEarningId, intPaycheckId, intEmployeeEarningId, intTypeEarningId, intAccountId, dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB, intWCCodeId)
 	SELECT DISTINCT A.intPaycheckEarningId, A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, ISNULL(A.dblTotal, 0) as dblTotal,
 			---for dblPercentage
-			CASE WHEN(ysnUseLocationDistribution = 1 OR C.intDepartmentId IS NULL or C.intDepartmentId = '')
+			CASE WHEN(EE.ysnUseLocationDistribution = 1 OR C.intDepartmentId IS NULL or C.intDepartmentId = '')
 				THEN	
 					ISNULL(B.dblPercentage, 0)
 				ELSE
 					'100'
 			END
-			,
-			C.intDepartmentId, 
+			,C.intDepartmentId, 
 			--for profit center
-			CASE WHEN(ysnUseLocationDistribution = 1 OR C.intDepartmentId IS NULL or C.intDepartmentId = '')
+			CASE WHEN(EE.ysnUseLocationDistribution = 1 OR C.intDepartmentId IS NULL or C.intDepartmentId = '')
 				THEN	
 					ISNULL(B.intProfitCenter, C.intProfitCenter)
 				ELSE
-					ISNULL(C.intProfitCenter, B.intProfitCenter)
+					ISNULL(C.intProfitCenter, NULL)
 			END
-			,
-			
-			C.intLOB, intWCCodeId = A.intWorkersCompensationId	
-	FROM (SELECT intPaycheckEarningId, tblPRPaycheckEarning.intPaycheckId, intEmployeeEarningId, intEntityEmployeeId, intAccountId,
-			intTypeEarningId, strCalculationType, intEmployeeDepartmentId, intWorkersCompensationId, dblTotal 
-		  FROM tblPRPaycheckEarning INNER JOIN tblPRPaycheck ON tblPRPaycheckEarning.intPaycheckId = tblPRPaycheck.intPaycheckId) A 
+			,C.intLOB
+			,intWCCodeId = A.intWorkersCompensationId	
+	FROM (
+	      SELECT intPaycheckEarningId, PE.intPaycheckId, PE.intEmployeeEarningId, tblPRPaycheck.intEntityEmployeeId, PE.intAccountId,
+			PE.intTypeEarningId, PE.strCalculationType, intEmployeeDepartmentId, intWorkersCompensationId, dblTotal 
+			,EE.ysnUseLocationDistribution
+		  FROM tblPRPaycheckEarning PE INNER JOIN tblPRPaycheck ON PE.intPaycheckId = tblPRPaycheck.intPaycheckId
+		  INNER JOIN tblPREmployeeEarning  EE ON PE.intTypeEarningId  = EE.intTypeEarningId
+		  
+		  ) A 
 		LEFT JOIN tblPREmployeeLocationDistribution B
 				ON A.intEntityEmployeeId = B.intEntityEmployeeId AND B.dblPercentage <> 0
+				AND EXISTS(select TOP 1 ysnUseLocationDistribution FROM  tblPREmployeeEarning EE WHERE A.intTypeEarningId = EE.intTypeEarningId  AND EE.ysnUseLocationDistribution  = 1) 
 		LEFT JOIN tblPRDepartment C 
 				ON A.intEmployeeDepartmentId = C.intDepartmentId
 		LEFT JOIN tblPREmployeeEarning EE
-				ON A.intEmployeeEarningId = EE.intEmployeeEarningId			
+				ON A.intEmployeeEarningId = EE.intEmployeeEarningId		
 	WHERE A.dblTotal <> 0 AND A.strCalculationType <> 'Fringe Benefit'
 	AND intPaycheckId =@intPaycheckId
 	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION

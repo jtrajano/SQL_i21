@@ -35,6 +35,9 @@
 			,strPriorityFontColor = prio.strFontColor
 			,strPriorityIcon = prio.strIcon
 			,dblNonBillableHours = isnull((select sum(nb.intHours) from tblHDTicketHoursWorked nb where nb.intTicketId = t.intTicketId and nb.ysnBillable = convert(bit, 0)),0)
+			,strResolutionTrainingManualLink	= t.strResolutionTrainingManualLink
+			,strResolutionTrainingAgendaLink	= t.strResolutionTrainingAgendaLink
+			,strResolutionSOPLink				= t.strResolutionSOPLink
 		from
 			tblHDTicket t
 			/*
