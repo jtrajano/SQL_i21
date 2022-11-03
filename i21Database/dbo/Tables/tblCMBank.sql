@@ -22,7 +22,6 @@
 	[ysnDelete]				BIT            NULL,
 	[dtmDateDeleted]		DATETIME	   NULL,
 	[ysnInternational]		BIT			   NULL,
-	[ysnCreditSuisse]		BIT			   NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([intBankId] ASC)
 );
@@ -65,7 +64,6 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 				   ,[ysnDelete]
 				   ,[dtmDateDeleted]
 				   ,[ysnInternational]
-				   ,[ysnCreditSuisse]
 				   ,[intConcurrencyId]
 				)
 				OUTPUT 	inserted.intBankId
@@ -91,7 +89,6 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 						,[ysnDelete]			= i.ysnDelete
 						,[dtmDateDeleted]		= i.dtmDateDeleted
 						,[ysnInternational]		= i.ysnInternational
-						,[ysnCreditSuisse]		= i.ysnCreditSuisse
 						,[intConcurrencyId]		= i.intConcurrencyId
 				FROM	inserted i
 
@@ -139,7 +136,6 @@ BEGIN
     ,ysnDelete              = i.ysnDelete
     ,dtmDateDeleted         = i.dtmDateDeleted
 	,ysnInternational		= i.ysnInternational
-	,ysnCreditSuisse		= i.ysnCreditSuisse
     ,intConcurrencyId      	= i.intConcurrencyId
     FROM inserted i
     WHERE tblCMBank.intBankId = i.intBankId
