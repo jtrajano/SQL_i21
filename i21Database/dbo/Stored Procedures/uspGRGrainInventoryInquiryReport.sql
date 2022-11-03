@@ -110,18 +110,18 @@ CREATE TABLE #tblInOut
 	strLocationName VARCHAR(200) COLLATE Latin1_General_CI_AS
 )
 
-CREATE TABLE #tblInOut2
-(
-	dtmDate DATETIME,
-	dblInvIn DECIMAL(18,6),
-	dblInvOut DECIMAL(18,6),
-	dblAdjustments DECIMAL(18,6),
-	strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	intCommodityId INT,
-	strOwnership VARCHAR(50) COLLATE Latin1_General_CI_AS,
-	intCompanyLocationId INT,
-	strLocationName VARCHAR(200) COLLATE Latin1_General_CI_AS
-)
+--CREATE TABLE #tblInOut2
+--(
+--	dtmDate DATETIME,
+--	dblInvIn DECIMAL(18,6),
+--	dblInvOut DECIMAL(18,6),
+--	dblAdjustments DECIMAL(18,6),
+--	strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+--	intCommodityId INT,
+--	strOwnership VARCHAR(50) COLLATE Latin1_General_CI_AS,
+--	intCompanyLocationId INT,
+--	strLocationName VARCHAR(200) COLLATE Latin1_General_CI_AS
+--)
 
 CREATE TABLE #tblInTransit
 (
@@ -324,13 +324,13 @@ BEGIN
 		,@Locations = @Locs
 		,@intLocationId = @intLocationId
 
-	DELETE FROM #tblInOut2
-	INSERT INTO #tblInOut2
-	EXEC uspGRGetInventoryTransfers
-		@dtmDate = @dtmReportDate
-		,@intCommodityId = @intCommodityId2
-		,@Locations = @Locs
-		,@intLocationId = @intLocationId
+	--DELETE FROM #tblInOut2
+	--INSERT INTO #tblInOut2
+	--EXEC uspGRGetInventoryTransfers
+	--	@dtmDate = @dtmReportDate
+	--	,@intCommodityId = @intCommodityId2
+	--	,@Locations = @Locs
+	--	,@intLocationId = @intLocationId
 
 		--select '#tblInOut',* from #tblInOut
 
@@ -384,7 +384,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut2 
+		FROM #tblInOut 
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
@@ -399,7 +399,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut2 
+		FROM #tblInOut
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
