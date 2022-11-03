@@ -28,10 +28,8 @@ BEGIN
 		SELECT @errorMessage = 'Sales year (intSalesYear) is missing' ELSE
 	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND dtmSalesDate IS NULL) 
 		SELECT @errorMessage = 'Sales date (dtmSalesDate) is missing' ELSE
-	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND RTRIM(LTRIM(strTeaType))  = '') 
+    IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND RTRIM(LTRIM(strTeaType))  = '') 
 		SELECT @errorMessage = 'Tea type (strTeaType) is missing' ELSE
-	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND ISNULL(intBrokerId,0) = 0) 
-		SELECT @errorMessage = 'Broker Id (intBrokerId) is missing' ELSE
 	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND RTRIM(LTRIM(strVendorLotNumber)) = '') 
 		SELECT @errorMessage = 'Vendor Lot Number (strVendorLotNumber) is missing' ELSE
 	IF EXISTS( SELECT 1 FROM  @MFBatchTableType WHERE @id = intId AND ISNULL(intBuyingCenterLocationId,0) = 0) 
@@ -59,7 +57,6 @@ BEGIN
 	AND A.intSales = B.intSales
 	AND A.dtmSalesDate = B.dtmSalesDate
 	AND A.strTeaType = B.strTeaType
-	AND A.intBrokerId = B.intBrokerId
 	AND A.strVendorLotNumber = B.strVendorLotNumber
 	AND A.intBuyingCenterLocationId =B.intBuyingCenterLocationId
 	AND A.intSubBookId = B.intSubBookId
@@ -77,6 +74,7 @@ BEGIN
 		intWeightUOMId					 = T.intWeightUOMId,				
 		intStorageLocationId			 = T.intStorageLocationId,
 		intStorageUnitId				 = T.intStorageUnitId,  
+		intBrokerId						 = T.intBrokerId,
 		intBrokerWarehouseId			 = T.intBrokerWarehouseId,
 		str3PLStatus					 = T.str3PLStatus,
 		strAirwayBillCode				 = T.strAirwayBillCode,

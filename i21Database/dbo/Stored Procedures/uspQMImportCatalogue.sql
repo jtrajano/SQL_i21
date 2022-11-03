@@ -21,7 +21,7 @@ BEGIN TRY
         SELECT strLogMessage =
             CASE WHEN ISNULL(IMP.strSaleYear, '') = '' THEN 'SALE YEAR, ' ELSE '' END
             + CASE WHEN ISNULL(IMP.strBuyingCenter, '') = '' THEN 'BUYING CENTER, ' ELSE '' END
-            + CASE WHEN ISNULL(IMP.intSaleNumber, 0) = 0 THEN 'SALE NUMBER, ' ELSE '' END
+            + CASE WHEN ISNULL(IMP.strSaleNumber, 0) = 0 THEN 'SALE NUMBER, ' ELSE '' END
             + CASE WHEN ISNULL(IMP.strCatalogueType, '') = '' THEN 'CATALOGUE TYPE, ' ELSE '' END
             + CASE WHEN ISNULL(IMP.strSupplier, '') = '' THEN 'SUPPLIER, ' ELSE '' END
             + CASE WHEN ISNULL(IMP.strLotNumber, '') = '' THEN 'LOT NUMBER, ' ELSE '' END
@@ -31,7 +31,7 @@ BEGIN TRY
     AND (
         ISNULL(IMP.strSaleYear, '') = ''
         OR ISNULL(IMP.strBuyingCenter, '') = ''
-        OR ISNULL(IMP.intSaleNumber, 0) = 0
+        OR ISNULL(IMP.strSaleNumber, '') = ''
         OR ISNULL(IMP.strCatalogueType, '') = ''
         OR ISNULL(IMP.strSupplier, '') = ''
         OR ISNULL(IMP.strLotNumber, '') = ''

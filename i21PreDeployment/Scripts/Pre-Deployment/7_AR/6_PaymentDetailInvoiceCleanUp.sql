@@ -56,12 +56,15 @@ BEGIN
 
 	IF @intPaymentMethodId IS NOT NULL
 		BEGIN
-			SELECT intPaymentId
-					, strRecordNumber
-					, strPaymentMethod
+			SELECT P.intPaymentId
+				 , P.strRecordNumber
+				 , P.strPaymentMethod
 			INTO #PAYMENTS
 			FROM tblARPayment P
+			LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
 			WHERE intPaymentMethodId = 0
+			   OR PM.intPaymentMethodID IS NULL
+			   OR intPaymentMethodId IS NULL
 
 			UPDATE P
 			SET intPaymentMethodId	= CASE WHEN PM.intPaymentMethodID IS NULL THEN @intPaymentMethodId ELSE PM.intPaymentMethodID END

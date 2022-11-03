@@ -11,7 +11,7 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
 	[intSampleId] INT NULL,
     [strSaleYear] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strBuyingCenter] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    [intSaleNumber] BIGINT NULL,
+    [strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strCatalogueType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSupplier] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strChannel] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
@@ -90,6 +90,7 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     [strSampleBoxNumberTBO] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strBatchNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSampleTypeName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strBroker] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 
 	CONSTRAINT [PK_tblQMImportCatalogue_intImportCatalogueId] PRIMARY KEY CLUSTERED ([intImportCatalogueId] ASC),
     CONSTRAINT [FK_tblQMImportCatalogue_tblQMImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblQMImportLog] ([intImportLogId]),

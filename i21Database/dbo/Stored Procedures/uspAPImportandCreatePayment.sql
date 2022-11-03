@@ -113,6 +113,7 @@ BEGIN TRY
 				INNER JOIN (tblAPPaymentDetail payDetail INNER JOIN tblAPPayment pay ON pay.intPaymentId = payDetail.intPaymentId)
 					ON PS.intBillId = payDetail.intBillId
 				WHERE PS.ysnPaid = 0
+				AND payDetail.dblPayment != 0
 				AND pay.intPaymentId = @createdPaymentId
 			)
 

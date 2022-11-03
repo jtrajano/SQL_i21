@@ -80,6 +80,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	), ' ', '')  COLLATE Latin1_General_CI_AS AS strBillIds  
 	,SH.intUserId
 	,SH.dtmDistributionDate
+	,ysnDPLoadOut = dbo.[fnGRCheckSettlementIfFromLoadOut](SH.intSettleStorageId)
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -283,6 +284,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	), ' ', '')  COLLATE Latin1_General_CI_AS AS strBillIds  
 	,SH.intUserId
 	,SH.dtmDistributionDate
+	,ysnDPLoadOut = CAST(0 AS BIT)
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -487,6 +489,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	), ' ', '')  COLLATE Latin1_General_CI_AS AS strBillIds  
 	,SH.intUserId
 	,SH.dtmDistributionDate
+	,ysnDPLoadOut = CAST(0 AS BIT)
 FROM tblGRStorageHistory SH2
 LEFT JOIN vyuGRTransferStorageSplit TSplit
 	ON SH2.intCustomerStorageId = TSplit.intTransferToCustomerStorageId
