@@ -64,7 +64,7 @@ BEGIN TRY
 		[strCommodityCode] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[strLocationName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[strBroker] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[strBrokerTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
+		[strBrokerTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 		[strBrokerAccount] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[strTrader] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dblOrigNoOfLots]  NUMERIC(24, 10) NOT NULL,
@@ -452,52 +452,84 @@ BEGIN TRY
 	UNION ALL
 
 	SELECT
-		intSort = 5
-		,CL.strLocationName
-		,E.strName
-		,C.strCommodityCode
-		,strContractType = 'Purchase'
-		,CS.strContractStatus
-		,CBL.strContractNumber
-		,CBL.intContractSeq
-		,I.strItemNo
-		,CBL.dtmCreatedDate
-		,CBL.dtmTransactionDate
-		,CBL.dblQty
-		,UM.strUnitMeasure
-		,EC.strUserName
-		,strBucketName = '+ Purchase Qty Adjustment'
+		intSort
+		,strLocationName
+		,strName
+		,strCommodityCode
+		,strContractType 
+		,strContractStatus
+		,strContractNumber
+		,intContractSeq
+		,strItemNo
+		,dtmCreatedDate
+		,dtmTransactionDate
+		,dblQty
+		,strUnitMeasure
+		,strUserName
+		,strBucketName 
 		,strAction
-		,PT.strPricingType
-		,strTicketNumber = NULL
-		,strLoadNumber = NULL
-		,dblLoadQty = NULL
-		,dblReceivedQty  = NULL
-		,dblCash = NULL
-		,CBL.intContractHeaderId
-		,intTicketId = NULL
-		,intLoadId = NULL
-		,strDistribution  = ''
-		,strStorageSchedule  = ''
-		,strSettlementTicket = ''
-		,strStatus  = ''
-	FROM tblCTContractBalanceLog CBL
-	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
-	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
-	INNER JOIN tblICCommodity C ON C.intCommodityId = CBL.intCommodityId
-	INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = CBL.intContractStatusId 
-	INNER JOIN tblICItem I ON I.intItemId = CBL.intItemId
-	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
-	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
-	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
-	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CBL.intPricingTypeId
-	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
-	AND CBL.intCommodityId = @intCommodityId
-	AND strAction IN('Updated Contract')
-	AND CBL.intContractTypeId = 1 --Purchase
-	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
-	AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
-
+		,strPricingType
+		,strTicketNumber
+		,strLoadNumber
+		,dblLoadQty
+		,dblReceivedQty
+		,dblCash
+		,intContractHeaderId
+		,intTicketId
+		,intLoadId
+		,strDistribution 
+		,strStorageSchedule 
+		,strSettlementTicket 
+		,strStatus 
+	FROM (
+		SELECT
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY dtmCreatedDate ORDER BY intContractBalanceLogId DESC)
+			,intSort = 5
+			,CL.strLocationName
+			,E.strName
+			,C.strCommodityCode
+			,strContractType = 'Purchase'
+			,CS.strContractStatus
+			,CBL.strContractNumber
+			,CBL.intContractSeq
+			,I.strItemNo
+			,CBL.dtmCreatedDate
+			,CBL.dtmTransactionDate
+			,CBL.dblQty
+			,UM.strUnitMeasure
+			,EC.strUserName
+			,strBucketName = '+ Purchase Qty Adjustment'
+			,strAction
+			,PT.strPricingType
+			,strTicketNumber = NULL
+			,strLoadNumber = NULL
+			,dblLoadQty = NULL
+			,dblReceivedQty  = NULL
+			,dblCash = NULL
+			,CBL.intContractHeaderId
+			,intTicketId = NULL
+			,intLoadId = NULL
+			,strDistribution  = ''
+			,strStorageSchedule  = ''
+			,strSettlementTicket = ''
+			,strStatus  = ''
+		FROM tblCTContractBalanceLog CBL
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
+		INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
+		INNER JOIN tblICCommodity C ON C.intCommodityId = CBL.intCommodityId
+		INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = CBL.intContractStatusId 
+		INNER JOIN tblICItem I ON I.intItemId = CBL.intItemId
+		INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
+		INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+		INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
+		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CBL.intPricingTypeId
+		WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
+		AND CBL.intCommodityId = @intCommodityId
+		AND strAction IN('Updated Contract')
+		AND CBL.intContractTypeId = 1 --Purchase
+		AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
+		AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
+	) t WHERE intRowNum = 1
 	UNION ALL
 
 	SELECT
@@ -691,6 +723,7 @@ BEGIN TRY
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Short Closed Sequence'
 	AND CBL.intContractTypeId = 1 --Purchase
+	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 
 	UNION ALL
 
@@ -973,53 +1006,85 @@ BEGIN TRY
 	) t WHERE intRowNum = 1
 
 	UNION ALL
-
 	SELECT
-		intSort = 15
-		,CL.strLocationName
-		,E.strName
-		,C.strCommodityCode
-		,strContractType = 'Sales'
-		,CS.strContractStatus
-		,CBL.strContractNumber
-		,CBL.intContractSeq
-		,I.strItemNo
-		,CBL.dtmCreatedDate
-		,CBL.dtmTransactionDate
-		,CBL.dblQty
-		,UM.strUnitMeasure
-		,EC.strUserName
-		,strBucketName = '+ Sales Qty Adjustment'
+		intSort
+		,strLocationName
+		,strName
+		,strCommodityCode
+		,strContractType 
+		,strContractStatus
+		,strContractNumber
+		,intContractSeq
+		,strItemNo
+		,dtmCreatedDate
+		,dtmTransactionDate
+		,dblQty
+		,strUnitMeasure
+		,strUserName
+		,strBucketName 
 		,strAction
-		,PT.strPricingType
-		,strTicketNumber = NULL
-		,strLoadNumber = NULL
-		,dblLoadQty = NULL
-		,dblReceivedQty  = NULL
-		,dblCash = NULL
-		,CBL.intContractHeaderId
-		,intTicketId = NULL
-		,intLoadId = NULL
-		,strDistribution  = ''
-		,strStorageSchedule  = ''
-		,strSettlementTicket = ''
-		,strStatus  = ''
-	FROM tblCTContractBalanceLog CBL
-	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
-	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
-	INNER JOIN tblICCommodity C ON C.intCommodityId = CBL.intCommodityId
-	INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = CBL.intContractStatusId 
-	INNER JOIN tblICItem I ON I.intItemId = CBL.intItemId
-	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
-	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
-	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
-	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CBL.intPricingTypeId
-	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
-	AND CBL.intCommodityId = @intCommodityId
-	AND strAction IN('Updated Contract')
-	AND CBL.intContractTypeId = 2 --Sales
-	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
-	AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
+		,strPricingType
+		,strTicketNumber
+		,strLoadNumber
+		,dblLoadQty
+		,dblReceivedQty
+		,dblCash
+		,intContractHeaderId
+		,intTicketId
+		,intLoadId
+		,strDistribution 
+		,strStorageSchedule 
+		,strSettlementTicket 
+		,strStatus 
+	FROM (
+		SELECT
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY dtmCreatedDate ORDER BY intContractBalanceLogId DESC)
+			,intSort = 15
+			,CL.strLocationName
+			,E.strName
+			,C.strCommodityCode
+			,strContractType = 'Sales'
+			,CS.strContractStatus
+			,CBL.strContractNumber
+			,CBL.intContractSeq
+			,I.strItemNo
+			,CBL.dtmCreatedDate
+			,CBL.dtmTransactionDate
+			,CBL.dblQty
+			,UM.strUnitMeasure
+			,EC.strUserName
+			,strBucketName = '+ Sales Qty Adjustment'
+			,strAction
+			,PT.strPricingType
+			,strTicketNumber = NULL
+			,strLoadNumber = NULL
+			,dblLoadQty = NULL
+			,dblReceivedQty  = NULL
+			,dblCash = NULL
+			,CBL.intContractHeaderId
+			,intTicketId = NULL
+			,intLoadId = NULL
+			,strDistribution  = ''
+			,strStorageSchedule  = ''
+			,strSettlementTicket = ''
+			,strStatus  = ''
+		FROM tblCTContractBalanceLog CBL
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
+		INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
+		INNER JOIN tblICCommodity C ON C.intCommodityId = CBL.intCommodityId
+		INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = CBL.intContractStatusId 
+		INNER JOIN tblICItem I ON I.intItemId = CBL.intItemId
+		INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
+		INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+		INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
+		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CBL.intPricingTypeId
+		WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
+		AND CBL.intCommodityId = @intCommodityId
+		AND strAction IN('Updated Contract')
+		AND CBL.intContractTypeId = 2 --Sales
+		AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
+		AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
+	) t WHERE intRowNum = 1
 
 	UNION ALL
 
@@ -1214,6 +1279,7 @@ BEGIN TRY
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction = 'Short Closed Sequence'
 	AND CBL.intContractTypeId = 2 --Sales
+	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 
 	UNION ALL
 
