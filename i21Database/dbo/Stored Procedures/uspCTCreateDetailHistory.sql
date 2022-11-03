@@ -85,7 +85,8 @@ BEGIN TRY
 		, intPriceItemUOMId INT
 		, intBookId INT
 		, intSubBookId INT
-		 , intGardenMarkId INT)
+		 , intGardenMarkId INT
+		 , intReasonCodeId INT)
 	
 	SELECT TOP 1 @strScreenName = strScreenName FROM tblCTSequenceUsageHistory WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
 
@@ -178,7 +179,8 @@ BEGIN TRY
 		, intPriceItemUOMId
 		, intBookId
 		, intSubBookId
-		, intGardenMarkId)
+		, intGardenMarkId
+		, intReasonCodeId)
 	SELECT intContractHeaderId
 		, t1.intContractDetailId
 		, intContractStatusId
@@ -197,6 +199,7 @@ BEGIN TRY
 		, intBookId
 		, intSubBookId
 		, intGardenMarkId
+		, intReasonCodeId
 	FROM (SELECT *
 		FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
 						FROM tblCTSequenceHistory
