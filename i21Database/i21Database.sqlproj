@@ -1124,7 +1124,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMEvent.sql" />
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorStorePassword.sql" />
-	<Build Include="dbo\Stored Procedures\uspSTCSCalculateDealerCommission.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSCalculateDealerCommission.sql" />
     <Build Include="dbo\Views\vyuLGShipmentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountRange.sql" />
@@ -1161,6 +1161,7 @@
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
+    <Build Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -8757,7 +8758,7 @@
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
-	<Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
+    <Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />
