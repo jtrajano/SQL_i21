@@ -9231,6 +9231,7 @@
     <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
 
+  	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
