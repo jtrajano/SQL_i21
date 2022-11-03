@@ -94,15 +94,15 @@ BEGIN
 					,[totalNonBillableHours]			= AgentInfoWeekly.[totalNonBillableHours]
 					,[vlHolidaySickHours]				= ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoWeekly.totalHolidayHours, 0)
 					,[intRequiredHours]					= ISNULL(TimeEntryPeriodDetail.intRequiredHours, 0)
-					,[dblActualUtilizationWeekly]		= CASE WHEN ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) = 0
+					,[dblActualUtilizationWeekly]		= CASE WHEN ( ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ( ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoWeekly.totalHolidayHours, 0) ) ) = 0
 																	THEN 0
 															   ELSE AgentInfoWeekly.[totalBillableHours] / ( ISNULL(TotalWeeklyRequiredHours.totalHours, 0) - ( ISNULL(WeeklyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoWeekly.totalHolidayHours, 0) ) ) * 100
 														  END 
-					,[dblActualUtilizationAnnually]		= CASE WHEN ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) = 0
+					,[dblActualUtilizationAnnually]		= CASE WHEN ( ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ( ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoAnnually.totalHolidayHours, 0) ) ) = 0
 																	THEN 0
 															   ELSE AgentInfoAnnually.[totalBillableHours] / ( ISNULL(TotalAnnualRequiredHours.totalHours, 0) - ( ISNULL(AnnuallyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoAnnually.totalHolidayHours, 0) ) ) * 100
 														   END 
-					,[dblActualUtilizationMonthly]		= CASE WHEN ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) = 0
+					,[dblActualUtilizationMonthly]		= CASE WHEN ( ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ( ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoMonthly.totalHolidayHours, 0) ) ) = 0
 																	THEN 0
 															   ELSE AgentInfoMonthly.[totalBillableHours] / ( ISNULL(TotalMonthlyRequiredHours.totalHours, 0) - ( ISNULL(MonthlyVacationHolidaySick.dblRequest, 0) + ISNULL(AgentInfoMonthly.totalHolidayHours, 0) ) ) * 100
 														  END 
