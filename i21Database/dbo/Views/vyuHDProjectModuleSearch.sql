@@ -37,19 +37,24 @@ ON Trainer.intEntityId = ProjectModule.intTrainerId
 		LEFT JOIN vyuHDProjectCustomerContact Contact
 ON Contact.intEntityId = ProjectModule.intContactId
 		OUTER APPLY(
-		
-		SELECT dblActualHours		= SUM(ISNULL(ProjectTickets.dblActualHours, 0))
-			  ,dblQuotedHours		= SUM(ISNULL(ProjectTickets.dblQuotedHours, 0))
-			  ,dblBillablehours     = CASE WHEN ProjectTickets.intTicketStatusId = 2
-											THEN SUM(ISNULL(ProjectTickets.dblQuotedHours, 0))
-											ELSE SUM(ISNULL(ProjectTickets.dblActualHours, 0))
-									  END
-		FROM tblHDProjectTask ProjectTask
-				INNER JOIN vyuHDProjectTickets ProjectTickets
-		ON ProjectTickets.intTicketId = ProjectTask.intTicketId
-		WHERE ProjectTask.intProjectId = Project.intProjectId AND
-			  ProjectTickets.strModule = SMModule.strModule	
-		GROUP BY ProjectTickets.intTicketStatusId
+
+			SELECT     dblActualHours		= SUM(ISNULL(ProjectTicketsPerStatus.dblActualHours, 0))
+					  ,dblQuotedHours		= SUM(ISNULL(ProjectTicketsPerStatus.dblQuotedHours, 0))
+					  ,dblBillablehours     = SUM(ISNULL(ProjectTicketsPerStatus.dblBillablehours, 0))
+			FROM (
+				SELECT dblActualHours		= SUM(ISNULL(ProjectTickets.dblActualHours, 0))
+					  ,dblQuotedHours		= SUM(ISNULL(ProjectTickets.dblQuotedHours, 0))
+					  ,dblBillablehours     = CASE WHEN ProjectTickets.intTicketStatusId = 2
+													THEN SUM(ISNULL(ProjectTickets.dblQuotedHours, 0))
+													ELSE SUM(ISNULL(ProjectTickets.dblActualHours, 0))
+											  END
+				FROM tblHDProjectTask ProjectTask
+						INNER JOIN vyuHDProjectTickets ProjectTickets
+				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+				WHERE ProjectTask.intProjectId = Project.intProjectId AND
+					  ProjectTickets.strModule = SMModule.strModule	
+				GROUP BY ProjectTickets.intTicketStatusId
+				) ProjectTicketsPerStatus
 		) ProjectTickets
 		INNER JOIN tblEMEntity Customer
 ON Customer.intEntityId = Project.intCustomerId
