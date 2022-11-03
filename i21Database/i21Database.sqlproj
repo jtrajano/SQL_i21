@@ -255,9 +255,13 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
     <Build Include="dbo\Functions\fnApiCalculateTaxOnTax.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaTransformHasField.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaTransformMapField.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformSourceField.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformMappedField.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
     <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomer.sql" />
