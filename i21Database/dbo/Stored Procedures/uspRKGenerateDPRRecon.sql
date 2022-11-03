@@ -401,7 +401,7 @@ BEGIN TRY
 		,strStatus 
 	FROM (
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId ORDER BY intContractBalanceLogId DESC)
 			,intSort = 4
 			,CL.strLocationName
 			,E.strName
@@ -959,7 +959,7 @@ BEGIN TRY
 		,strStatus 
 	FROM (
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId ORDER BY intContractBalanceLogId DESC)
 			,intSort = 14
 			,CL.strLocationName
 			,E.strName
