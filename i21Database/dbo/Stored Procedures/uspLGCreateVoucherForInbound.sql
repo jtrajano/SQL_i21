@@ -263,7 +263,13 @@ BEGIN TRY
 						ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
+			,[dblCost] = (CASE WHEN intPurchaseSale = 3 
+							THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+							ELSE 
+								CASE WHEN AD.ysnValidFX = 1 THEN CT.dblFXPrice
+								ELSE ISNULL(LD.dblUnitPrice, 0)
+								END
+							END)
 			,[dblOptionalityPremium] = LD.dblOptionalityPremium
 			,[dblQualityPremium] = LD.dblQualityPremium
 			,[dblCostUnitQty] = CAST(ISNULL(AD.dblCostUnitQty,1) AS DECIMAL(38,20))
@@ -278,8 +284,9 @@ BEGIN TRY
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
+									WHEN CT.dblHistoricalRate IS NOT NULL THEN CT.dblHistoricalRate
 									WHEN AD.ysnValidFX = 1 THEN 
-									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 											THEN CT.dblRate --functional price to foreign FX, use contract FX rate
 										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId = @DefaultCurrencyId)
 											THEN 1 --foreign price to functional FX, use 1
