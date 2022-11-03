@@ -304,6 +304,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 													 AND ISNULL(ICI.strLotTracking, 'No')	<> 'No'
 													 AND ICIT.intItemUOMId 					IS NOT NULL
 													 AND ICIT.intTransactionTypeId 			<> 1
+													 AND ICIT.intInTransitSourceLocationId 	IS NOT NULL
 			INNER JOIN tblICItemUOM UOM ON ICISI.intItemUOMId = UOM.intItemUOMId	
 			INNER JOIN tblICLot ICL ON ICIT.intLotId = ICL.intLotId
 								   AND ICISI.intItemUOMId = (CASE WHEN (ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1) THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
