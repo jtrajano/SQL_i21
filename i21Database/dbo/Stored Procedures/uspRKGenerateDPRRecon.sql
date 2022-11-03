@@ -672,6 +672,8 @@ BEGIN TRY
 	INNER JOIN tblICItem I ON I.intItemId = SL.intItemId
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+	INNER JOIN tblICInventoryReceiptItem R ON R.intSourceId = T.intTicketId
+	INNER JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = R.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
@@ -1228,6 +1230,8 @@ BEGIN TRY
 	INNER JOIN tblICItem I ON I.intItemId = SL.intItemId
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+	INNER JOIN tblICInventoryShipmentItem S ON S.intSourceId = T.intTicketId
+	INNER JOIN tblARInvoiceDetail ID ON ID.intInventoryShipmentItemId = S.intInventoryShipmentItemId AND ID.intInventoryShipmentChargeId IS NULL
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
