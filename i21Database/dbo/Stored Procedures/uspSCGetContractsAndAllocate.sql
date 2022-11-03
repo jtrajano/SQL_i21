@@ -200,12 +200,12 @@ BEGIN TRY
 		IF(ISNULL((SELECT TOP 1 intAllowOtherLocationContracts FROM tblSCScaleSetup WHERE intScaleSetupId = @intTicketSclaeSetupId),0) = 2)
         BEGIN
             SELECT    TOP    1    @intContractDetailId    =    intContractDetailId
-            FROM fnSCGetDPContract(@locationId,@intEntityId,@intItemId,'I',@dtmTicketDate)
+            FROM fnSCGetDPContract(@locationId,@intEntityId,@intItemId, @strInOutFlag ,@dtmTicketDate)
         END
         ELSE
         BEGIN
             SELECT    TOP    1    @intContractDetailId    =    intContractDetailId
-            FROM fnSCGetDPContract(NULL,@intEntityId,@intItemId,'I',@dtmTicketDate)
+            FROM fnSCGetDPContract(NULL,@intEntityId,@intItemId, @strInOutFlag ,@dtmTicketDate)
         END
 
 		-- If there is still no existing DP contract selected, try to search for an existing DP contract with end date later than the ticket date and then adjust it's start date
