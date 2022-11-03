@@ -1161,7 +1161,7 @@
     <Build Include="dbo\Views\vyuGLSearchLedgerAccount.sql" />
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
