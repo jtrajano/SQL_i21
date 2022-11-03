@@ -3868,7 +3868,15 @@ BEGIN TRY
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = @_action
+						if exists (select top 1 1 from @cbLogSpecific where intPricingTypeId = 6)
+						begin
+							UPDATE @cbLogSpecific SET dblQty = abs(@dblCash) * - 1, intActionId = @_action
+						end
+						else
+						begin
+							UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = @_action
+						end
+      
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 				
