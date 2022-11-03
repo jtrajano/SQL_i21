@@ -1,25 +1,26 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceAgingReport]
 AS
 
+SELECT * FROM (
 	SELECT  strInvoiceNumber							= STAGING.strInvoiceNumber
 		  , intInvoiceId								= STAGING.intInvoiceId
 		  , strBOLNumber								= STAGING.strBOLNumber
 		  , intEntityCustomerId							= STAGING.intEntityCustomerId
-		  , dblTotalAR									= STAGING.dblTotalAR
-		  , dblFuture									= STAGING.dblFuture
-		  , dbl0Days									= STAGING.dbl0Days
-		  , dbl10Days									= STAGING.dbl10Days
-		  , dbl30Days									= STAGING.dbl30Days
-		  , dbl60Days									= STAGING.dbl60Days
-		  , dbl90Days									= STAGING.dbl90Days
-		  , dbl91Days									= STAGING.dbl120Days +  STAGING.dbl121Days 
-		  , dblTotalDue									= STAGING.dblTotalDue
-		  , dblAmountPaid								= STAGING.dblAmountPaid
+		  , dblTotalAR									= SUM(STAGING.dblTotalAR)
+		  , dblFuture									= SUM(STAGING.dblFuture)
+		  , dbl0Days									= SUM(STAGING.dbl0Days)
+		  , dbl10Days									= SUM(STAGING.dbl10Days)
+		  , dbl30Days									= SUM(STAGING.dbl30Days)
+		  , dbl60Days									= SUM(STAGING.dbl60Days)
+		  , dbl90Days									= SUM(STAGING.dbl90Days)
+		  , dbl91Days									= SUM(STAGING.dbl120Days +  STAGING.dbl121Days) 
+		  , dblTotalDue									= SUM(STAGING.dblTotalDue)
+		  , dblAmountPaid								= SUM(STAGING.dblAmountPaid)
 		  , dblInvoiceTotal								= STAGING.dblInvoiceTotal
 		  , dblCredits									= STAGING.dblCredits
 		  , dblPrepayments								= STAGING.dblPrepayments
 		  , dblPrepaids									= STAGING.dblPrepaids
-		  , dtmDate										= STAGING.dtmDate
+		  , dtmDate										= INVOICE.dtmDate
 		  , dtmDueDate									= STAGING.dtmDueDate
 		  , intCompanyLocationId						= STAGING.intCompanyLocationId
 		  , strTransactionType							= STAGING.strTransactionType
@@ -45,6 +46,7 @@ AS
 				 , intCurrencyId
 				 , intShipToLocationId
 				 , intBillToLocationId
+				 , dtmDate
 		 FROM tblARInvoice WITH (NOLOCK) 
 	) INVOICE  
 	ON STAGING.intInvoiceId = INVOICE.intInvoiceId
@@ -114,4 +116,33 @@ AS
 	) COMPANYLOCATION 
 	ON COMPANYLOCATION.intCompanyLocationId = STAGING.intCompanyLocationId
 	WHERE strAgingType = 'Detail'
+	GROUP BY
+	 STAGING.strInvoiceNumber
+	,STAGING.intInvoiceId
+	,STAGING.strBOLNumber
+	,STAGING.intEntityCustomerId
+	,STAGING.dblInvoiceTotal
+	,STAGING.dblCredits
+	,STAGING.dblPrepayments
+	,STAGING.dblPrepaids
+	,INVOICE.dtmDate
+	,STAGING.dtmDueDate
+	,STAGING.intCompanyLocationId
+	,STAGING.strTransactionType
+	,STAGING.dblCreditLimit
+	,STAGING.strCustomerName
+	,STAGING.strCustomerNumber
+	,STAGING.intEntityUserId
+	,INVOICE.intCurrencyId
+	,INVOICE.intAccountId
+	,AccPeriod.strAccountingPeriod
+	,SHIPTOLOCATION.strAddress
+	,BILLTOLOCATION.strAddress
+	,DEFAULTLOCATION.strAddress
+	,CUSTOMER.strDefaultShipTo
+	,CUSTOMER.strDefaultBillTo
+	,CUR.strCurrency
+	,CUR.strDescription
+	,COMPANYLOCATION.strLocationName
+	)AGING
 GO
