@@ -21,6 +21,7 @@ PIVOT (
 	)
 ) AS PivotTable
 
+
 -- Remove duplicate vendor from file
 -- ;WITH cte AS
 -- (
@@ -57,12 +58,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'Vendor') 
 	, strValue = vts.strVendor
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The vendor "' + vts.strVendor + '" does not exist.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'GLAccount') + ' "' + vts.strVendor + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
@@ -73,12 +74,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer No') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'CustomerNo') 
 	, strValue = vts.strCustomer
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The customer "' + vts.strCustomer + '" does not exist.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'CustomerNo')  + ' "' + vts.strCustomer + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
@@ -90,12 +91,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Name') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'CustomerName') 
 	, strValue = vts.strCustomerName
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The customer "' + vts.strCustomerName + '" does not exist.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'CustomerName') + ' "' + vts.strCustomerName + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN vyuARCustomer c ON c.strName = vts.strCustomerName
@@ -108,12 +109,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Customer') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCustomer') 
 	, strValue = vts.strVendorCustomer
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The vendor''s customer "' + vts.strVendorCustomer + '" already exists.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCustomer') + ' "' + vts.strVendorCustomer + '" already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
@@ -134,12 +135,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Category') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'Category') 
 	, strValue = vts.strCategory
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The category "' + vts.strCategory + '" does not exist.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'Category')  + ' "' + vts.strCategory + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN tblICCategory c ON c.strCategoryCode = vts.strCategory OR c.strDescription = vts.strCategory
@@ -151,12 +152,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Category') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCategory') 
 	, strValue = vts.strVendorCategory
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The vendor''s category "' + vts.strVendorCategory + '" for "' + vts.strCategory + '" already exists.'
+	, strMessage = 'The ' +  dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCategory')  + '"' + vts.strVendorCategory + '" for "' + vts.strCategory + '"already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
@@ -179,12 +180,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField =  dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM') 
+	, strField =  dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'UnitMeasure') 
 	, strValue = vts.strUnitMeasure
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The unit of measure "' + vts.strUnitMeasure + '" does not exist.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'UnitMeasure')  + ' "' + vts.strUnitMeasure + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
@@ -196,12 +197,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'UnitMeasure') 
 	, strValue = vts.strVendorUnitMeasure
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The unit of measure "' + vts.strVendorUnitMeasure + '" for "' + vts.strUnitMeasure + '" already exists.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'UnitMeasure')  + ' "' + vts.strVendorUnitMeasure + '" for "' + vts.strUnitMeasure + '" already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
@@ -222,12 +223,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item No') 
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'ItemNo') 
 	, strValue = vts.strItemNo
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The item no. "' + vts.strItemNo + '" does not exist.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'ItemNo') + ' "' + vts.strItemNo + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN tblICItem i ON i.strItemNo = vts.strItemNo
@@ -240,12 +241,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item Name')
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'ItemName')
 	, strValue = vts.strItemName
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The item name "' + vts.strItemName + '" does not exist.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'ItemName') + ' "' + vts.strItemName + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN tblICItem i ON i.strDescription = vts.strItemName
@@ -258,7 +259,7 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Item')
+	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorItemNo')
 	, strValue = vts.strVendorItemNo
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
@@ -389,10 +390,10 @@ UPDATE vs
 SET 
 	  vs.guiApiUniqueId = @guiApiUniqueId
 	, vs.intRowNumber = sr.intRowNumber
-	, vs.strExportFilePath = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Export File Path') WHEN 1 THEN sr.strExportFilePath ELSE vs.strExportFilePath END
-	, vs.strExportFileType = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Export File Type') WHEN 1 THEN sr.strExportFileType ELSE vs.strExportFileType END
-	, vs.strCompany1Id = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Company ID1') WHEN 1 THEN sr.strCompany1Id ELSE vs.strCompany1Id END
-	, vs.strCompany2Id = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Company ID2') WHEN 1 THEN sr.strCompany2Id ELSE vs.strCompany2Id END
+	, vs.strExportFilePath = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'ExportFilePath') WHEN 1 THEN sr.strExportFilePath ELSE vs.strExportFilePath END
+	, vs.strExportFileType = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'ExportFileType') WHEN 1 THEN sr.strExportFileType ELSE vs.strExportFileType END
+	, vs.strCompany1Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company1Id') WHEN 1 THEN sr.strCompany1Id ELSE vs.strCompany1Id END
+	, vs.strCompany2Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company2Id') WHEN 1 THEN sr.strCompany2Id ELSE vs.strCompany2Id END
 	, vs.intConcurrencyId = ISNULL(vs.intConcurrencyId, 1) + 1
 FROM tblVRVendorSetup vs
 JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId
