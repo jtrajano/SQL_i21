@@ -94,6 +94,7 @@
     --Advance Bank Recon fields
     [ysnABREnable]                     BIT            NULL,
     [intABRDaysNoRef]                  INT            NULL,
+    [ysnHideInAllBankAccounts]         BIT            NULL, 
     --Advance Bank Recon fields
     [strNickname]                      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCMBankAccount] PRIMARY KEY CLUSTERED ([intBankAccountId] ASC),
