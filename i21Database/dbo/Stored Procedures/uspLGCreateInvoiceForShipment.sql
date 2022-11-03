@@ -410,9 +410,9 @@ DECLARE
 			,[ysnVirtualMeterReading]				= 0
 			,[ysnClearDetailTaxes]					= 0
 			,[intTempDetailIdForTaxes]				= NULL
-			,[intCurrencyExchangeRateTypeId]		= CD.intRateTypeId
+			,[intCurrencyExchangeRateTypeId]		= ISNULL(CD.intHistoricalRateTypeId, CD.intRateTypeId)
 			,[intCurrencyExchangeRateId]			= CD.intCurrencyExchangeRateId
-			,[dblCurrencyExchangeRate]				= CD.dblRate
+			,[dblCurrencyExchangeRate]				= ISNULL(CD.dblHistoricalRate, CD.dblRate)
 			,[intSubCurrencyId]						= AD.intSeqCurrencyId 
 			,[dblSubCurrencyRate]					= CASE WHEN AD.ysnSeqSubCurrency = 1
 															THEN CU.intCent
@@ -697,9 +697,9 @@ DECLARE
 			,[ysnVirtualMeterReading]				= 0
 			,[ysnClearDetailTaxes]					= 0
 			,[intTempDetailIdForTaxes]				= NULL
-			,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId] 
+			,[intCurrencyExchangeRateTypeId]		= ISNULL(CD.intHistoricalRateTypeId, ARSI.[intCurrencyExchangeRateTypeId])
 			,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId] 
-			,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate] 
+			,[dblCurrencyExchangeRate]				= ISNULL(CD.dblHistoricalRate, ARSI.[dblCurrencyExchangeRate])
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 			,[dblQualityPremium]					= LD.dblQualityPremium
@@ -724,6 +724,7 @@ DECLARE
 		FROM vyuARShippedItems ARSI
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARSI.intLoadDetailId
 			LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 			OUTER APPLY (
 				SELECT cp.* 
 					,dblPrevRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice prcp
