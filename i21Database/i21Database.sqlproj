@@ -1342,6 +1342,7 @@
     <Build Include="dbo\Functions\fnGRCheckSettlementIfFromLoadOut.sql" />
     <Build Include="dbo\Functions\fnGRCheckStorageIfFromLoadOut.sql" />
     <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
+    <Build Include="dbo\Views\vyuQMUnitMeasure.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11177,7 +11178,6 @@
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
-    <Build Include="dbo\Functions\uspGRGetInventoryTransfers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

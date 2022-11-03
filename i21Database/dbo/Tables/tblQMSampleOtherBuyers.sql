@@ -43,6 +43,11 @@
     [intB5PriceUOMId] INT NULL,
 	[strB5PriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
     [intConcurrencyId] INT NULL DEFAULT 0, 
-    CONSTRAINT [PK_tblQMSampleOtherBuyers] PRIMARY KEY ([intOtherBuyerId])
+    CONSTRAINT [PK_tblQMSampleOtherBuyers] PRIMARY KEY ([intOtherBuyerId]),
+    CONSTRAINT [FK_tblQMSampleOtherBuyers_tblEMEntity_intBuyer1Id] FOREIGN KEY ([intBuyer1Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblQMSampleOtherBuyers_tblEMEntity_intBuyer2Id] FOREIGN KEY ([intBuyer2Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblQMSampleOtherBuyers_tblEMEntity_intBuyer3Id] FOREIGN KEY ([intBuyer3Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblQMSampleOtherBuyers_tblEMEntity_intBuyer4Id] FOREIGN KEY ([intBuyer4Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblQMSampleOtherBuyers_tblEMEntity_intBuyer5Id] FOREIGN KEY ([intBuyer5Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId])
 
 )

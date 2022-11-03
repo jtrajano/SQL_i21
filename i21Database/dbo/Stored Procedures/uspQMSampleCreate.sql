@@ -476,7 +476,47 @@ BEGIN TRY
 		, intDestinationStorageLocationId 
 		, strDestinationStorageLocationName
 		, strComments2 
-		, strComments3  
+		, strComments3 
+		, intBuyer1Id
+		, strBuyer1
+		, dblB1QtyBought
+		, intB1QtyUOMId
+		, strB1QtyUOM
+		, dblB1Price
+		, intB1PriceUOMId
+		, strB1PriceUOM
+		, intBuyer2Id
+		, strBuyer2
+		, dblB2QtyBought
+		, intB2QtyUOMId
+		, strB2QtyUOM
+		, dblB2Price
+		, intB2PriceUOMId
+		, strB2PriceUOM
+		, intBuyer3Id
+		, strBuyer3
+		, dblB3QtyBought
+		, intB3QtyUOMId
+		, strB3QtyUOM
+		, dblB3Price
+		, intB3PriceUOMId
+		, strB3PriceUOM
+		, intBuyer4Id
+		, strBuyer4
+		, dblB4QtyBought
+		, intB4QtyUOMId
+		, strB4QtyUOM
+		, dblB4Price
+		, intB4PriceUOMId
+		, strB4PriceUOM
+		, intBuyer5Id
+		, strBuyer5
+		, dblB5QtyBought
+		, intB5QtyUOMId
+		, strB5QtyUOM
+		, dblB5Price
+		, intB5PriceUOMId
+		, strB5PriceUOM
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -621,6 +661,46 @@ BEGIN TRY
 		, strDestinationStorageLocationName
 		, strComments2 
 		, strComments3  
+		, intBuyer1Id
+		, strBuyer1
+		, dblB1QtyBought
+		, intB1QtyUOMId
+		, strB1QtyUOM
+		, dblB1Price
+		, intB1PriceUOMId
+		, strB1PriceUOM
+		, intBuyer2Id
+		, strBuyer2
+		, dblB2QtyBought
+		, intB2QtyUOMId
+		, strB2QtyUOM
+		, dblB2Price
+		, intB2PriceUOMId
+		, strB2PriceUOM
+		, intBuyer3Id
+		, strBuyer3
+		, dblB3QtyBought
+		, intB3QtyUOMId
+		, strB3QtyUOM
+		, dblB3Price
+		, intB3PriceUOMId
+		, strB3PriceUOM
+		, intBuyer4Id
+		, strBuyer4
+		, dblB4QtyBought
+		, intB4QtyUOMId
+		, strB4QtyUOM
+		, dblB4Price
+		, intB4PriceUOMId
+		, strB4PriceUOM
+		, intBuyer5Id
+		, strBuyer5
+		, dblB5QtyBought
+		, intB5QtyUOMId
+		, strB5QtyUOM
+		, dblB5Price
+		, intB5PriceUOMId
+		, strB5PriceUOM
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -754,6 +834,46 @@ BEGIN TRY
 			, strDestinationStorageLocationName NVARCHAR(50)
 		    , strComments2 NVARCHAR(MAX) 
 		    , strComments3 NVARCHAR(MAX)   
+			, intBuyer1Id INT
+			, strBuyer1 NVARCHAR(50)
+			, dblB1QtyBought NUMERIC(18, 6)
+			, intB1QtyUOMId INT
+			, strB1QtyUOM NVARCHAR(50)
+			, dblB1Price NUMERIC(18, 6)
+			, intB1PriceUOMId INT
+			, strB1PriceUOM NVARCHAR(50)
+			, intBuyer2Id INT
+			, strBuyer2 NVARCHAR(50)
+			, dblB2QtyBought NUMERIC(18, 6)
+			, intB2QtyUOMId INT
+			, strB2QtyUOM NVARCHAR(50)
+			, dblB2Price NUMERIC(18, 6)
+			, intB2PriceUOMId INT
+			, strB2PriceUOM NVARCHAR(50)
+			, intBuyer3Id INT
+			, strBuyer3 NVARCHAR(50)
+			, dblB3QtyBought NUMERIC(18, 6)
+			, intB3QtyUOMId INT
+			, strB3QtyUOM NVARCHAR(50)
+			, dblB3Price NUMERIC(18, 6)
+			, intB3PriceUOMId INT
+			, strB3PriceUOM NVARCHAR(50)
+			, intBuyer4Id INT
+			, strBuyer4 NVARCHAR(50)
+			, dblB4QtyBought NUMERIC(18, 6)
+			, intB4QtyUOMId INT
+			, strB4QtyUOM NVARCHAR(50)
+			, dblB4Price NUMERIC(18, 6)
+			, intB4PriceUOMId INT
+			, strB4PriceUOM NVARCHAR(50)
+			, intBuyer5Id INT
+			, strBuyer5 NVARCHAR(50)
+			, dblB5QtyBought NUMERIC(18, 6)
+			, intB5QtyUOMId INT
+			, strB5QtyUOM NVARCHAR(50)
+			, dblB5Price NUMERIC(18, 6)
+			, intB5PriceUOMId INT
+			, strB5PriceUOM NVARCHAR(50)
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
@@ -950,57 +1070,6 @@ BEGIN TRY
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			)
-
-	--INSERT INTO dbo.tblQMSampleInitialBuy(
-	--	intConcurrencyId
-	--	,intSampleId
-	--	,intInitialBuyId
-	--	,intBuyerId
-	--	,strBuyerName
-	--	,dblQtyBought
-	--	,intQtyUOMId
-	--	,strQtyUOM
-	--	,dblPrice
-	--	,intPriceUOMId
-	--	,strPriceUOM
-	--  ,intSequenceNo
-	--	,intCreatedUserId
-	--	,dtmCreated
-	--	,intLastModifiedUserId
-	--	,dtmLastModified
-	--	)
-	--SELECT 1
-	--	,@intSampleId
-	--	,intInitialBuyId
-	--	,intBuyerId
-	--	,strBuyerName
-	--	,dblQtyBought
-	--	,intQtyUOMId
-	--	,strQtyUOM
-	--	,dblPrice
-	--	,intPriceUOMId
-	--	,strPriceUOM
-	--  ,intSequenceNo
-	--	,intCreatedUserId
-	--	,dtmCreated
-	--	,intLastModifiedUserId
-	--	,dtmLastModified
-	--FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (
-	--		intInitialBuyId INT
-	--		,intBuyerId INT
-	--		,strBuyerName NVARCHAR(50)
-	--		,dblQtyBought NUMERIC(18, 6)
-	--		,intQtyUOMId INT
-	--		,strQtyUOM NVARCHAR(50)
-	--		,dblPrice NUMERIC(18, 6)
-	--		,intPriceUOMId INT
-	--		,strPriceUOM NVARCHAR(50)
-	--		,intSequenceNo INT
-	--		,intCreatedUserId INT
-	--		,dtmCreated DATETIME
-	--		,intLastModifiedUserId INT
-	--		,dtmLastModified DATETIME
-	--		)
 
 	SELECT @strSampleNumber AS strSampleNumber
 

@@ -411,6 +411,46 @@ BEGIN TRY
   , strDestinationStorageLocationName = x.strDestinationStorageLocationName
   , strComments2 = x.strComments2
   , strComments3 = x.strComments3
+  , intBuyer1Id = x.intBuyer1Id
+  , strBuyer1 = x.strBuyer1
+  , dblB1QtyBought = x.dblB1QtyBought
+  , intB1QtyUOMId = x.intB1QtyUOMId
+  , strB1QtyUOM = x.strB1QtyUOM
+  , dblB1Price = x.dblB1Price
+  , intB1PriceUOMId = x.intB1PriceUOMId
+  , strB1PriceUOM = x.strB1PriceUOM
+  , intBuyer2Id = x.intBuyer2Id
+  , strBuyer2 = x.strBuyer2
+  , dblB2QtyBought = x.dblB2QtyBought
+  , intB2QtyUOMId = x.intB2QtyUOMId
+  , strB2QtyUOM = x.strB2QtyUOM
+  , dblB2Price = x.dblB2Price
+  , intB2PriceUOMId = x.intB2PriceUOMId
+  , strB2PriceUOM = x.strB2PriceUOM
+  , intBuyer3Id = x.intBuyer3Id
+  , strBuyer3 = x.strBuyer3
+  , dblB3QtyBought = x.dblB3QtyBought
+  , intB3QtyUOMId = x.intB3QtyUOMId
+  , strB3QtyUOM = x.strB3QtyUOM
+  , dblB3Price = x.dblB3Price
+  , intB3PriceUOMId = x.intB3PriceUOMId
+  , strB3PriceUOM = x.strB3PriceUOM
+  , intBuyer4Id = x.intBuyer4Id
+  , strBuyer4 = x.strBuyer4
+  , dblB4QtyBought = x.dblB4QtyBought
+  , intB4QtyUOMId = x.intB4QtyUOMId
+  , strB4QtyUOM = x.strB4QtyUOM
+  , dblB4Price = x.dblB4Price
+  , intB4PriceUOMId = x.intB4PriceUOMId
+  , strB4PriceUOM = x.strB4PriceUOM
+  , intBuyer5Id = x.intBuyer5Id
+  , strBuyer5 = x.strBuyer5
+  , dblB5QtyBought = x.dblB5QtyBought
+  , intB5QtyUOMId = x.intB5QtyUOMId
+  , strB5QtyUOM = x.strB5QtyUOM
+  , dblB5Price = x.dblB5Price
+  , intB5PriceUOMId = x.intB5PriceUOMId
+  , strB5PriceUOM = x.strB5PriceUOM
   ,strRepresentLotNumber = x.strRepresentLotNumber  
   ,intLastModifiedUserId = x.intLastModifiedUserId  
   ,dtmLastModified = x.dtmLastModified  
@@ -545,6 +585,46 @@ BEGIN TRY
    , strDestinationStorageLocationName NVARCHAR(50)
    , strComments2 NVARCHAR(MAX) 
    , strComments3 NVARCHAR(MAX)   
+   , intBuyer1Id INT
+   , strBuyer1 NVARCHAR(50)
+   , dblB1QtyBought NUMERIC(18, 6)
+   , intB1QtyUOMId INT
+   , strB1QtyUOM NVARCHAR(50)
+   , dblB1Price NUMERIC(18, 6)
+   , intB1PriceUOMId INT
+   , strB1PriceUOM NVARCHAR(50)
+   , intBuyer2Id INT
+   , strBuyer2 NVARCHAR(50)
+   , dblB2QtyBought NUMERIC(18, 6)
+   , intB2QtyUOMId INT
+   , strB2QtyUOM NVARCHAR(50)
+   , dblB2Price NUMERIC(18, 6)
+   , intB2PriceUOMId INT
+   , strB2PriceUOM NVARCHAR(50)
+   , intBuyer3Id INT
+   , strBuyer3 NVARCHAR(50)
+   , dblB3QtyBought NUMERIC(18, 6)
+   , intB3QtyUOMId INT
+   , strB3QtyUOM NVARCHAR(50)
+   , dblB3Price NUMERIC(18, 6)
+   , intB3PriceUOMId INT
+   , strB3PriceUOM NVARCHAR(50)
+   , intBuyer4Id INT
+   , strBuyer4 NVARCHAR(50)
+   , dblB4QtyBought NUMERIC(18, 6)
+   , intB4QtyUOMId INT
+   , strB4QtyUOM NVARCHAR(50)
+   , dblB4Price NUMERIC(18, 6)
+   , intB4PriceUOMId INT
+   , strB4PriceUOM NVARCHAR(50)
+   , intBuyer5Id INT
+   , strBuyer5 NVARCHAR(50)
+   , dblB5QtyBought NUMERIC(18, 6)
+   , intB5QtyUOMId INT
+   , strB5QtyUOM NVARCHAR(50)
+   , dblB5Price NUMERIC(18, 6)
+   , intB5PriceUOMId INT
+   , strB5PriceUOM NVARCHAR(50)
    ,intLastModifiedUserId INT  
    ,dtmLastModified DATETIME  
    ,strRowState NVARCHAR(50)
@@ -966,104 +1046,6 @@ BEGIN TRY
      ,strRowState NVARCHAR(50)  
      ) x  
    WHERE x.intTestResultId = dbo.tblQMTestResult.intTestResultId  
-    AND x.strRowState = 'DELETE'  
-   )  
-
-   -- Sample Initial Buy Create, Update, Delete  
- --INSERT INTO dbo.tblQMSampleInitialBuy(
-	--	intConcurrencyId
-	--	,intSampleId
-	--	,intInitialBuyId
-	--	,intBuyerId
-	--	,strBuyerName
-	--	,dblQtyBought
-	--	,intQtyUOMId
-	--	,strQtyUOM
-	--	,dblPrice
-	--	,intPriceUOMId
-	--	,strPriceUOM
-	--	,intSequenceNo
-	--	,intCreatedUserId
-	--	,dtmCreated
-	--	,intLastModifiedUserId
-	--	,dtmLastModified
-	--	)
-	--SELECT 1
-	--	,@intSampleId
-	--	,intInitialBuyId
-	--	,intBuyerId
-	--	,strBuyerName
-	--	,dblQtyBought
-	--	,intQtyUOMId
-	--	,strQtyUOM
-	--	,dblPrice
-	--	,intPriceUOMId
-	--	,strPriceUOM
-	--	,intSequenceNo
-	--	,intCreatedUserId
-	--	,dtmCreated
-	--	,intLastModifiedUserId
-	--	,dtmLastModified
-	--FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (
-	--		intInitialBuyId INT
-	--		,intBuyerId INT
-	--		,strBuyerName NVARCHAR(50)
-	--		,dblQtyBought NUMERIC(18, 6)
-	--		,intQtyUOMId INT
-	--		,strQtyUOM NVARCHAR(50)
-	--		,dblPrice NUMERIC(18, 6)
-	--		,intPriceUOMId INT
-	--		,strPriceUOM NVARCHAR(50)
-	--		,intSequenceNo INT
-	--		,intCreatedUserId INT
-	--		,dtmCreated DATETIME
-	--		,intLastModifiedUserId INT
-	--		,dtmLastModified DATETIME
-	--		,strRowState NVARCHAR(50) 
-	--		) x
- --WHERE x.strRowState = 'ADDED'  
-  
- UPDATE dbo.tblQMSampleInitialBuy  
- SET intBuyerId = x.intBuyerId  
-  ,strBuyerName = x.strBuyerName  
-  ,dblQtyBought = x.dblQtyBought  
-  ,intQtyUOMId = x.intQtyUOMId  
-  ,strQtyUOM = x.strQtyUOM  
-  ,dblPrice = x.dblPrice  
-  ,intPriceUOMId = x.intPriceUOMId  
-  ,strPriceUOM = x.strPriceUOM 
-  ,intSequenceNo = x.intSequenceNo
-  ,intLastModifiedUserId = x.intLastModifiedUserId  
-  ,dtmLastModified = x.dtmLastModified  
-  ,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1  
- FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (  
-   intInitialBuyId INT
-   ,intBuyerId INT
-   ,strBuyerName NVARCHAR(50)
-   ,dblQtyBought NUMERIC(18, 6)
-   ,intQtyUOMId INT
-   ,strQtyUOM NVARCHAR(50)
-   ,dblPrice NUMERIC(18, 6)
-   ,intPriceUOMId INT
-   ,strPriceUOM NVARCHAR(50)
-   ,intSequenceNo INT
-   ,intLastModifiedUserId INT  
-   ,dtmLastModified DATETIME  
-   ,strRowState NVARCHAR(50)  
-   ) x  
- WHERE x.intInitialBuyId = dbo.tblQMSampleInitialBuy.intInitialBuyId  
-  AND x.strRowState = 'MODIFIED'  
-  
- DELETE  
- FROM dbo.tblQMSampleInitialBuy  
- WHERE intSampleId = @intSampleId  
-  AND EXISTS (  
-   SELECT *  
-   FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (  
-     intInitialBuyId INT  
-     ,strRowState NVARCHAR(50)  
-     ) x  
-   WHERE x.intInitialBuyId = dbo.tblQMSampleInitialBuy.intInitialBuyId   
     AND x.strRowState = 'DELETE'  
    )  
   
