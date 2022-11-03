@@ -1341,6 +1341,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutTankMonitorReportAndVarianceCalculation.sql" />
     <Build Include="dbo\Functions\fnGRCheckSettlementIfFromLoadOut.sql" />
     <Build Include="dbo\Functions\fnGRCheckStorageIfFromLoadOut.sql" />
+    <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
