@@ -98,6 +98,9 @@
 	ysnImported BIT NULL DEFAULT((0)),
 	strMessage NVARCHAR(250) NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
+	[strReference] [nvarchar](100) NULL,
+	[dtmEtaPod] [date] NULL,
+	[dtmEtaPol] [date] NULL,
     CONSTRAINT [PK_tblCTContractDetailImport_intContractDetailImportId] PRIMARY KEY CLUSTERED (intContractDetailImportId ASC), 
     CONSTRAINT [FK_tblCTContractDetailImport_tblCTContractDetailImportHeader] FOREIGN KEY ([intContractDetailImportHeaderId]) REFERENCES [tblCTContractDetailImportHeader]([intContractDetailImportHeaderId]) ON DELETE CASCADE
 

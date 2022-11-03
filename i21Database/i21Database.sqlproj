@@ -1344,6 +1344,8 @@
     <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
     <Build Include="dbo\Views\vyuQMUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblIPRefreshTokenEntity.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailImport.sql" />
+    <Build Include="dbo\Tables\tblCTErrorImportLogs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
