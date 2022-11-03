@@ -9249,6 +9249,7 @@
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
   	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
