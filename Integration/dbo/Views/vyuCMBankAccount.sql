@@ -116,7 +116,6 @@ BEGIN
 				,i21.intPayToDown
 				,i21.strMT101Prefix1
 				,i21.strMT101Prefix2
-				,i21.ysnHideInAllBankAccounts
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
 				,i21.strCorrespondingBank
@@ -349,7 +348,6 @@ BEGIN
 					,intPayToDown
 					,strMT101Prefix1
 					,strMT101Prefix2
-					,ysnHideInAllBankAccounts
 					,intResponsibleEntityId
 					,strCorrespondingBank
 					,ysnABREnable
@@ -444,7 +442,6 @@ BEGIN
 					,intPayToDown						= i.intPayToDown
 					,strMT101Prefix1					= i.strMT101Prefix1
 					,strMT101Prefix2					= i.strMT101Prefix2
-					,ysnHideInAllBankAccounts			= i.ysnHideInAllBankAccounts
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
@@ -657,7 +654,6 @@ BEGIN
 					,intPayToDown						= i.intPayToDown
 					,strMT101Prefix1					= i.strMT101Prefix1
 					,strMT101Prefix2					= i.strMT101Prefix2
-					,ysnHideInAllBankAccounts			= i.ysnHideInAllBankAccounts
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable

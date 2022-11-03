@@ -107,7 +107,6 @@ SELECT	i21.intBankAccountId
 		,i21.intPayToDown
 		,i21.strMT101Prefix1
 		,i21.strMT101Prefix2
-		,i21.ysnHideInAllBankAccounts
 		,i21.intResponsibleEntityId
 		,strResponsibleEntity = E.strName
 		,i21.strCorrespondingBank
@@ -254,7 +253,6 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intPayToDown
 						,strMT101Prefix1
 						,strMT101Prefix2
-						,ysnHideInAllBankAccounts
 						,intResponsibleEntityId
 						,ysnABREnable
 						,intABRDaysNoRef
@@ -349,7 +347,6 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intPayToDown						= i.intPayToDown
 						,strMT101Prefix1					= i.strMT101Prefix1
 						,strMT101Prefix2					= i.strMT101Prefix2		
-						,ysnHideInAllBankAccounts			= i.ysnHideInAllBankAccounts
 						,intResponsibleEntityId				= i.intResponsibleEntityId
 						,ysnABREnable						= i.ysnABREnable
 						,intABRDaysNoRef					= i.intABRDaysNoRef
@@ -467,7 +464,6 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intPayToDown						= i.intPayToDown
 					,strMT101Prefix1					= i.strMT101Prefix1
 					,strMT101Prefix2					= i.strMT101Prefix2
-					,ysnHideInAllBankAccounts			= i.ysnHideInAllBankAccounts
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
