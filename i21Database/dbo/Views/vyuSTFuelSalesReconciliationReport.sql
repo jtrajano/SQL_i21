@@ -29,8 +29,8 @@ ISNULL(CH.dblEditableOutsideFuelDiscount,0) AS dblOutsideFuelDiscounts,
 ISNULL(CH.dblEditableInsideFuelDiscount,0) AS dblInsideFuelDiscounts,
 (SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) AS dblTotalAmountOfDepositablePaymentMethods,
 CH.dblDealerCommission,
-(CASE WHEN ((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - ((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) + CH.dblDealerCommission)) > 0 THEN 'Calculated Bank Deposit'
-WHEN ((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - ((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) + CH.dblDealerCommission)) < 0 THEN 'Calculated Bank Withdrawal'
+(CASE WHEN ((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - ((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) + CH.dblDealerCommission)) > 0 THEN 'Calculated Bank Withdrawal'
+WHEN ((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - ((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) + CH.dblDealerCommission)) < 0 THEN 'Calculated Bank Deposit'
 ELSE 'BALANCE' END) AS strCalculatedBankAmountLabel,
 ABS((SELECT dbo.fnSTGetGrossFuelSalesByCheckoutId(CH.intCheckoutId)) - ((SELECT dbo.fnSTTotalAmountOfDepositablePaymentMethods(CH.intCheckoutId)) + CH.dblDealerCommission)) AS dblCalculatedBankAmount,
 (CASE WHEN ST.ysnConsMeterReadingsForDollars = 0 THEN 'Department Total for Fuel' COLLATE Latin1_General_CI_AS 
