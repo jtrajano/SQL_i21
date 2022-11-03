@@ -237,62 +237,20 @@ WHERE ISNULL(strLotTracking, '') <> 'No'
 -- ItemUOM data migration from ptitmmst origin table to tblICItemUOM i21 table 
 -- Section 2
 --------------------------------------------------------------------------------------------------------------------------------------------
+
+/* Origin Item UOM Table. */
 DECLARE @ItemUoms TABLE (
-	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
-	strUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
-	strPack NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
-	strUpcCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	dblPackQty NUMERIC(38, 20),
-	ysnStockUnit BIT,
-	ysnAllowSale BIT,
-	ysnAllowPurchase BIT
+	  strItemNo			NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	, strUnit			NVARCHAR(100)	COLLATE Latin1_General_CI_AS 
+	, strPack			NVARCHAR(100)	COLLATE Latin1_General_CI_AS 
+	, strUpcCode		NVARCHAR(100)	COLLATE Latin1_General_CI_AS
+	, dblPackQty		NUMERIC(38, 20)
+	, ysnStockUnit		BIT
+	, ysnAllowSale		BIT
+	, ysnAllowPurchase	BIT
 )
 
-INSERT INTO @ItemUoms (
-	strItemNo
-	, strUnit
-	, strPack
-	, strUpcCode
-	, dblPackQty
-	, ysnAllowPurchase
-	, ysnAllowSale
-	, ysnStockUnit
-)
-SELECT DISTINCT 
-	ptitm_itm_no = LTRIM(RTRIM(ptitm_itm_no))
-	,ptitm_unit = LTRIM(RTRIM(ptitm_unit))
-	,ptitm_pak_desc = LTRIM(RTRIM(ptitm_pak_desc))
-	,strUpcCode = 
-		CASE 
-			WHEN LTRIM(RTRIM(min(ptitm_upc_code))) = '' THEN NULL 
-			ELSE LTRIM(RTRIM(min(ptitm_upc_code))) 
-		END 
-	,ptitm_pak_qty = MIN(ptitm_pak_qty)
-	,ysnAllowPurchase = 1
-	,ysnAllowSale = 1
-	,ysnStockUnit = 0
-FROM   
-	ptitmmst p 
-WHERE 
-	RTRIM(LTRIM(ptitm_phys_inv_yno)) <> 'O'	
-GROUP BY 
-	ptitm_itm_no
-	,ptitm_unit
-	,ptitm_pak_desc
-
-DELETE u
-FROM @ItemUoms u
-WHERE 
-	EXISTS (
-		SELECT * 
-		FROM 
-			tblICItemUOM x INNER JOIN tblICItem z 
-				on z.intItemId = x.intItemId
-		WHERE 
-			z.strItemNo = u.strItemNo 
-			AND LTRIM(RTRIM(LOWER(u.strUpcCode))) = LTRIM(RTRIM(LOWER(x.strUpcCode)))
-	)
-
+/* Pack UOM Table. */
 DECLARE @PackUnits TABLE (
 	intItemId INT,
 	intUnitMeasureId INT,
@@ -303,6 +261,7 @@ DECLARE @PackUnits TABLE (
 	ysnAllowPurchase BIT
 )
 
+/* Base UOM Table. */
 DECLARE @BaseUnits TABLE (
 	intItemId INT,
 	intUnitMeasureId INT,
@@ -313,38 +272,104 @@ DECLARE @BaseUnits TABLE (
 	ysnAllowPurchase BIT
 )
 
-INSERT INTO @BaseUnits(
-	intItemId
-	, intUnitMeasureId
-	, dblUnitQty
-	, strUpcCode
-	, ysnStockUnit
-	, ysnAllowPurchase
-	, ysnAllowSale
+
+INSERT INTO @ItemUoms (strItemNo
+					 , strUnit
+					 , strPack
+					 , strUpcCode
+					 , dblPackQty
+					 , ysnAllowPurchase
+					 , ysnAllowSale
+					 , ysnStockUnit)
+SELECT DISTINCT ptitm_itm_no	= LTRIM(RTRIM(ptitm_itm_no))
+			  , ptitm_unit		= LTRIM(RTRIM(ptitm_unit))
+			  , ptitm_pak_desc	= LTRIM(RTRIM(ptitm_pak_desc))
+			  , strUpcCode		= CASE WHEN LTRIM(RTRIM(min(ptitm_upc_code))) = '' THEN NULL 
+									   ELSE LTRIM(RTRIM(min(ptitm_upc_code))) 
+								  END 
+			  , ptitm_pak_qty	= MIN(ptitm_pak_qty)
+			  , ysnAllowPurchase = 1
+			  , ysnAllowSale	= 1
+			  , ysnStockUnit	= 0
+FROM ptitmmst p 
+WHERE RTRIM(LTRIM(ptitm_phys_inv_yno)) <> 'O'	
+GROUP BY ptitm_itm_no
+	   , ptitm_unit
+	   , ptitm_pak_desc
+
+
+/* Remove Existing Pack UOM. */
+DELETE PackUOM
+FROM @ItemUoms AS PackUOM
+WHERE EXISTS (SELECT * 
+			  FROM tblICItemUOM AS ItemUOM 
+			  INNER JOIN tblICItem AS Item on Item.intItemId = ItemUOM.intItemId
+			  INNER JOIN tblICUnitMeasure AS UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			  WHERE Item.strItemNo = PackUOM.strItemNo AND UPPER(UOM.strUnitMeasure) = UPPER(PackUOM.strPack))
+
+/* Create Pack UOM Record. */
+INSERT INTO @PackUnits (intItemId
+					  , intUnitMeasureId
+					  , dblUnitQty
+					  , ysnStockUnit
+					  , ysnAllowPurchase
+					  , ysnAllowSale
+					  , strUpcCode)
+SELECT inv.intItemId
+	 , u.intUnitMeasureId
+	 , uom.dblPackQty
+	 , 0 ysnStockUnit
+	 , 1 ysnAllowPurchase
+	 , 1 ysnAllowSale
+	 , uom.strUpcCode
+FROM @ItemUoms uom
+INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
+INNER JOIN tblICUnitMeasure u ON UPPER(u.strUnitMeasure) = UPPER(uom.strPack)
+WHERE NULLIF(uom.strPack, '') IS NOT NULL;
+
+
+/* Remove Duplicate Pack UOM. */
+;WITH CTE AS 
+(
+	SELECT intItemId
+		 , intUnitMeasureId
+		 , ROW_NUMBER() OVER (PARTITION BY intItemId, intUnitMeasureId ORDER BY intItemId, intUnitMeasureId) RowNumber
+	FROM @PackUnits
 )
-SELECT 
-	inv.intItemId
-	, u.intUnitMeasureId
-	, 1
-	--, uom.strUpcCode
-	--upccode should not be set for stock unit when there are packing units.
-	,strUpcCode = 
-		CASE 
-			WHEN strUnit <> strPack THEN strUpcCode
-			ELSE null
-		END
-	, 1 ysnStockUnit
-	, 1 ysnAllowPurchase
-	, 1 ysnAllowSale
-FROM 
-	@ItemUoms uom
-	INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
-	INNER JOIN tblICUnitMeasure u ON UPPER(u.strUnitMeasure) = UPPER(uom.strUnit)
-WHERE 
-	NULLIF(uom.strUnit, '') IS NOT NULL
-	AND NOT EXISTS(
-		SELECT * FROM tblICItemUOM WHERE intItemId = inv.intItemId AND intUnitMeasureId = u.intUnitMeasureId
-	)
+DELETE
+FROM CTE 
+WHERE RowNumber > 1
+
+/* Remove Existing Base UOM. */
+DELETE BaseUOM
+FROM @ItemUoms AS BaseUOM
+WHERE EXISTS (SELECT * 
+			  FROM tblICItemUOM AS ItemUOM 
+			  INNER JOIN tblICItem AS Item on Item.intItemId = ItemUOM.intItemId
+			  INNER JOIN tblICUnitMeasure AS UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			  WHERE Item.strItemNo = BaseUOM.strItemNo AND UPPER(UOM.strUnitMeasure) = UPPER(BaseUOM.strUnit))
+
+/* Create Base UOM Record. */
+INSERT INTO @BaseUnits(intItemId
+					 , intUnitMeasureId
+					 , dblUnitQty
+					 , strUpcCode
+					 , ysnStockUnit
+					 , ysnAllowPurchase
+					 , ysnAllowSale)
+SELECT inv.intItemId
+	 , u.intUnitMeasureId
+	 , 1
+	 , strUpcCode = CASE WHEN strUnit <> strPack THEN strUpcCode
+					     ELSE null
+					END
+	 , 1 ysnStockUnit
+	 , 1 ysnAllowPurchase
+	 , 1 ysnAllowSale
+FROM @ItemUoms uom
+INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
+INNER JOIN tblICUnitMeasure u ON UPPER(u.strUnitMeasure) = UPPER(uom.strUnit)
+WHERE NULLIF(uom.strUnit, '') IS NOT NULL; 
 
 ;WITH CTE AS 
 (
@@ -398,6 +423,7 @@ INSERT (
 	, ysnAllowPurchase
 	, ysnAllowSale
 	, intConcurrencyId
+	, intModifier
 )
 VALUES (
 	Source.intItemId
@@ -408,6 +434,7 @@ VALUES (
 	, Source.ysnAllowPurchase
 	, Source.ysnAllowSale
 	, Source.intConcurrencyId
+	, 1
 )
 ;
 
@@ -422,79 +449,33 @@ VALUES (
 --and ysnStockUnit = 1
 --and p.ptitm_unit <> p.ptitm_pak_de
 
----- =============================== PACK UNITS ================================================================================
- INSERT INTO @PackUnits(
-	intItemId
-	, intUnitMeasureId
-	, dblUnitQty
-	, strUpcCode
-	, ysnStockUnit
-	, ysnAllowPurchase
-	, ysnAllowSale
-)
-SELECT 
-	inv.intItemId
-	, u.intUnitMeasureId
-	, uom.dblPackQty
-	, uom.strUpcCode
-	, 0 ysnStockUnit
-	, 1 ysnAllowPurchase
-	, 1 ysnAllowSale
-FROM 
-	@ItemUoms uom
-	INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
-	INNER JOIN tblICUnitMeasure u ON UPPER(u.strUnitMeasure) = UPPER(uom.strPack)
-WHERE 
-	NULLIF(uom.strPack, '') IS NOT NULL
-	AND NOT EXISTS(
-			SELECT * 
-			FROM tblICItemUOM
-			WHERE intItemId = inv.intItemId AND (intUnitMeasureId = u.intUnitMeasureId OR LTRIM(RTRIM(LOWER(strUpcCode))) = LTRIM(RTRIM(LOWER(uom.strUpcCode))))
-	)
-
-;WITH CTE AS 
+MERGE INTO tblICItemUOM AS Target USING 
 (
-	SELECT intItemId, intUnitMeasureId, ROW_NUMBER() OVER 
-	(
-		PARTITION BY intItemId, intUnitMeasureId ORDER BY intItemId, intUnitMeasureId
-	) RowNumber
-	FROM  @PackUnits
-)
-DELETE
-FROM CTE 
-WHERE RowNumber > 1
-
-MERGE INTO tblICItemUOM AS Target
-USING (
-	SELECT pu.intItemId, pu.intUnitMeasureId, pu.dblUnitQty, pu.strUpcCode, 0 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId
+	SELECT pu.intItemId
+		 , pu.intUnitMeasureId
+		 , pu.dblUnitQty
+		 , pu.strUpcCode
+		 , 0 ysnStockUnit
+		 , 1 ysnAllowPurchase
+		 , 1 ysnAllowSale
+		 , 1 intConcurrencyId
 	FROM @PackUnits pu
-) AS Source ON 
---no need to check upccode match
---((Source.strUpcCode = Target.strUpcCode AND Source.strUpcCode IS NOT NULL) OR 
---(Source.strUpcCode IS NULL AND Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId))
-(Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId)
+) AS Source ON (Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId)
 WHEN NOT MATCHED THEN
-INSERT (
-	intItemId
-	, intUnitMeasureId
-	, dblUnitQty
-	, strUpcCode
-	, ysnStockUnit
-	, ysnAllowPurchase
-	, ysnAllowSale
-	, intConcurrencyId
-)
-VALUES(
-	Source.intItemId
-	, Source.intUnitMeasureId
-	, Source.dblUnitQty
-	, Source.strUpcCode
-	, Source.ysnStockUnit
-	, Source.ysnAllowPurchase
-	, Source.ysnAllowSale
-	, Source.intConcurrencyId
-)
-;
+INSERT (intItemId
+	  , intUnitMeasureId
+	  , dblUnitQty
+	  , ysnStockUnit
+	  , ysnAllowPurchase
+	  , ysnAllowSale
+	  , intConcurrencyId)
+VALUES (Source.intItemId
+	  , Source.intUnitMeasureId
+	  , Source.dblUnitQty
+	  , Source.ysnStockUnit
+	  , Source.ysnAllowPurchase
+	  , Source.ysnAllowSale
+	  , Source.intConcurrencyId);
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- ItemLocation data migration from ptlocmst/ptitmmst origin tables to tblICItemLocation i21 table 
@@ -1188,4 +1169,3 @@ WHERE Item.intItemId NOT IN (SELECT intItemId
 																				  FROM tblSMAudit)
 
 GO
-
