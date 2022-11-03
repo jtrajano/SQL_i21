@@ -463,7 +463,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
 					,strMT101Prefix1					= i.strMT101Prefix1
-					,strstrMT101Prefix2					= i.strMT101Prefix2
+					,strMT101Prefix2					= i.strMT101Prefix2
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
