@@ -292,8 +292,8 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 				 , intLineNo					= ICISI.intLineNo
 				 , intItemId					= ICISI.intItemId
 				 , intItemUOMId					= ICISI.intItemUOMId
-				 , dblCost 						= ABS(AVG(ICIT.dblQty * ICIT.dblCost))
-				 , dblUnitQty					= AVG(UOM.dblUnitQty)
+				 , dblCost 						= CASE WHEN ICI.ysnSeparateStockForUOMs = 1 THEN ABS(AVG(ICIT.dblQty * ICIT.dblCost)) ELSE ABS(AVG(UOM.dblUnitQty * ICIT.dblCost)) END 
+	 			 , dblUnitQty					= CASE WHEN ICI.ysnSeparateStockForUOMs = 1 THEN AVG(ICIT.dblQty) ELSE AVG(UOM.dblUnitQty) END 
 			FROM tblICInventoryShipmentItem ICISI
 			INNER JOIN tblICInventoryShipment ICIS ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 			INNER JOIN tblICItem ICI ON ICISI.intItemId = ICI.intItemId
@@ -311,7 +311,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 			INNER JOIN tblICItemUOM UOM ON ICISI.intItemUOMId = UOM.intItemUOMId	
 			INNER JOIN tblICLot ICL ON ICIT.intLotId = ICL.intLotId
 								   AND ICISI.intItemUOMId = (CASE WHEN (ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1) THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
-			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
+			GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId, ICI.ysnSeparateStockForUOMs
 		) AS LOTTED ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 					AND ARID.intItemId					= LOTTED.intItemId				
 					AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
