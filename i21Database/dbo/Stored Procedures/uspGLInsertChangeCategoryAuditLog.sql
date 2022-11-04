@@ -18,7 +18,6 @@ AS
 		,@strNewAccountCategory NVARCHAR(50)
 		,@ysnGoLive BIT
 		,@dtmDate DATETIME
-		,@dtmDateLimit DATETIME
 		,@ErrorMessage NVARCHAR(MAX)
 
 	SELECT
@@ -52,9 +51,6 @@ AS
 		intAccountSegmentId INT,
 		ysnProcessed BIT
 	)
-
-	IF @ysnGoLive = 1
-		SELECT @dtmDateLimit = DATEADD(YEAR, 1, @dtmDate)
 
 	-- Get all affected accounts
 	INSERT INTO @tbl
@@ -117,7 +113,7 @@ AS
 				,ISNULL(BeginningBalance.beginBalance, 0)
 			FROM [dbo].[tblGLAccount] A
 			OUTER APPLY (
-				SELECT beginBalance FROM [dbo].[fnGLGetBeginningBalanceAndUnitTB](A.strAccountId, GETDATE(), -1)
+				SELECT beginBalance FROM [dbo].[fnGLGetBeginningBalanceAndUnit](A.strAccountId, GETDATE())
 			) BeginningBalance
 			WHERE A.intAccountId = @intCurrentAccountId
 		END
@@ -139,14 +135,11 @@ AS
 				,@intNewAccountCategoryId
 				,@intEntityId
 				,GETDATE()
-				,ISNULL(EndBalance.beginBalance, 0) - ISNULL(StartBalance.beginBalance, 0)
+				,ISNULL(ForwardBalance.beginBalance, 0)
 			FROM [dbo].[tblGLAccount] A
 			OUTER APPLY (
-				SELECT beginBalance FROM [dbo].[fnGLGetBeginningBalanceAndUnit](A.strAccountId, @dtmDate)
-			) StartBalance
-			OUTER APPLY (
-				SELECT beginBalance FROM [dbo].[fnGLGetBeginningBalanceAndUnit](A.strAccountId, @dtmDateLimit)
-			) EndBalance
+				SELECT beginBalance FROM [dbo].[fnGLGetForwardBalanceAndUnit](A.strAccountId, @dtmDate)
+			) ForwardBalance
 			WHERE A.intAccountId = @intCurrentAccountId
 		END
 
