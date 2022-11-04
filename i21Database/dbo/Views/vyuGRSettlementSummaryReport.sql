@@ -733,6 +733,7 @@ FROM
 	WHERE (BillDtl.intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
 		AND (intSettleStorageId IS NULL AND intCustomerStorageId IS NULL)
 		AND Item.strType <> 'Other Charge'
+		AND (SELECT dbo.fnGRCheckBillIfFromAdjustSettlements(Bill.intBillId)) = 0
 	GROUP BY 
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
