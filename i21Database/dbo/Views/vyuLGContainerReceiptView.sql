@@ -32,7 +32,7 @@ JOIN tblICItem AS I ON I.intItemId = ld.intItemId
 JOIN tblEMEntity AS E ON E.intEntityId = CH.intEntityId
 LEFT JOIN tblICInventoryReceiptItem AS Lot
   ON Lot.intContainerId = Cont.intLoadContainerId
-  AND Lot.intLoadShipmentDetailId = ld.intLoadDetailId
+  AND ISNULL(Lot.intLoadShipmentDetailId, Lot.intSourceId) = ld.intLoadDetailId
 LEFT JOIN tblICInventoryReceiptItemLot AS Lt ON Lt.intInventoryReceiptItemId = Lot.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation AS SL ON SL.intCompanyLocationSubLocationId = Lot.intSubLocationId
 LEFT JOIN tblICItemUOM AS Lotuom ON Lotuom.intItemId = Lot.intItemId AND Lotuom.intItemUOMId = Lot.intUnitMeasureId
