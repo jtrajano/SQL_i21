@@ -63,7 +63,7 @@ AS
         A.dtmDateEnteredMin,
         FP.strPeriod,
         CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
-        RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_A strCurrencyExchangeRateType
+        RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS strCurrencyExchangeRateType
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
