@@ -191,7 +191,7 @@ BEGIN
 		,@AmountDue					= @ZeroDecimal
 		,@Payment					= @ZeroDecimal
 		,@EntitySalespersonId		= ARC.[intSalespersonId]
-		,@FreightTermId				= L.intFreightTermId
+		,@FreightTermId				= CH.intFreightTermId
 		,@ShipViaId					= CD.intShipViaId
 		,@PaymentMethodId			= NULL
 		,@InvoiceOriginId			= NULL
