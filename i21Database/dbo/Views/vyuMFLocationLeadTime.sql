@@ -4,15 +4,15 @@ AS
 
 SELECT 
 
-intLocationLeadTimeId,
+[intLocationLeadTimeId],
 [intOriginId],
 [strOrigin],
 [intBuyingCenterId],
 [strBuyingCenter] = LOC.strLocationName,
 [intReceivingStorageLocation],
-[strReceivingStorageLocation] = SLOC.strSubLocationName,
+[strReceivingStorageLocation] = SLOC.strSubLocationDescription,
 [intChannelId],
-[strChannel] = SBOOK.strSubBook,
+[strChannel] = MZ.strMarketZoneCode,
 [intReceivingPlantId] = SLOC.intCompanyLocationId,
 [strReceivingPlant] = RLOC.strLocationName,
 [intPortOfDispatchId],
@@ -30,5 +30,5 @@ tblMFLocationLeadTime LLT
 
 INNER JOIN tblSMCompanyLocation LOC ON LLT.intBuyingCenterId = LOC.intCompanyLocationId
 INNER JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=LLT.intReceivingStorageLocation
-INNER JOIN tblCTSubBook SBOOK ON SBOOK.intSubBookId=LLT.intChannelId
+INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId=LLT.intChannelId
 LEFT JOIN tblSMCompanyLocation RLOC ON SLOC.intCompanyLocationId = RLOC.intCompanyLocationId
