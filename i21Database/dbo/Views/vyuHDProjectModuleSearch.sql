@@ -20,6 +20,8 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 											THEN '0%'
 										ELSE CONVERT(NVARCHAR(10), CONVERT(INT,ROUND(ProjectTickets.dblBillablehours / ProjectTickets.dblQuotedHours, 2) * 100)) + '%'
 									END
+	   ,strPhase					= ProjectModule.strPhase
+	   ,strComment					= ProjectModule.strComment
 
 FROM tblHDProjectModule ProjectModule
 		INNER JOIN tblHDProject Project

@@ -9,6 +9,8 @@
 	[intSort] [int] NULL,
 	[intDataConversionExpertId] [int] NULL,
 	[intTrainerId] [int] NULL,
+	[strPhase] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+	[strComment] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDProjectModule] PRIMARY KEY CLUSTERED ([intProjectModuleId] ASC),
 	CONSTRAINT [UNQ_ProjectModule] UNIQUE ([intProjectId],[intModuleId]),
