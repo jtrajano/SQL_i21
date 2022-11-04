@@ -378,7 +378,7 @@ BEGIN TRY
 					AND R.intLocationId = @intLocationId
 					AND intRecipeItemTypeId = 1
 					AND R.intWorkOrderId = @intWorkOrderId
-					AND CI.dblQty > (dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, R.intItemUOMId, RI.dblCalculatedUpperTolerance) * @dblPlannedQuantity / R.dblQuantity)
+					AND CI.dblQty > (dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity)
 					AND IsNULL(RI.dblUpperTolerance, 0) > 0
 				)
 		BEGIN
@@ -394,7 +394,7 @@ BEGIN TRY
 				AND R.intLocationId = @intLocationId
 				AND intRecipeItemTypeId = 1
 				AND R.intWorkOrderId = @intWorkOrderId
-				AND CI.dblQty > (dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, R.intItemUOMId, RI.dblCalculatedUpperTolerance)  * @dblPlannedQuantity / R.dblQuantity)
+				AND CI.dblQty > (RI.dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity)
 				AND IsNULL(RI.dblUpperTolerance, 0) > 0
 
 			SELECT @strInputItemNo = strItemNo
@@ -413,9 +413,7 @@ BEGIN TRY
 			RETURN
 		END
 
-
-		
-			IF EXISTS (
+		IF EXISTS (
 				SELECT 1
 				FROM dbo.tblMFWorkOrderRecipe R
 				JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
@@ -426,7 +424,7 @@ BEGIN TRY
 					AND R.intLocationId = @intLocationId
 					AND intRecipeItemTypeId = 1
 					AND R.intWorkOrderId = @intWorkOrderId
-					AND (dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, R.intItemUOMId, RI.dblCalculatedLowerTolerance) * @dblPlannedQuantity / R.dblQuantity) > CI.dblQty
+					AND (RI.dblCalculatedLowerTolerance * @dblPlannedQuantity / R.dblQuantity) > CI.dblQty
 				)
 		BEGIN
 			SELECT TOP 1 @intInputItemId = RI.intItemId
@@ -441,7 +439,7 @@ BEGIN TRY
 				AND R.intLocationId = @intLocationId
 				AND intRecipeItemTypeId = 1
 				AND R.intWorkOrderId = @intWorkOrderId
-				AND (dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, R.intItemUOMId, RI.dblCalculatedLowerTolerance) * @dblPlannedQuantity / R.dblQuantity) > CI.dblQty
+				AND (dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity) > CI.dblQty
 
 			SELECT @strInputItemNo = strItemNo
 			FROM tblICItem
