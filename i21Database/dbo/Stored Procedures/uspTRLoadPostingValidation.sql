@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[uspTRLoadPostingValidation]
 	@intLoadHeaderId AS INT
 	, @ysnPostOrUnPost AS BIT
 	, @intUserId AS INT
-
+	, @ysnForcePost AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -72,12 +72,14 @@ BEGIN TRY
 		, @ysnComboFreight BIT
 		, @dblComboSurcharge DECIMAL(18, 6) = 0
 		, @ysnAllowDifferentUnits BIT
+		, @intLoadId INT
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
 		, @intSeller = TL.intSellerId
 		, @intDriver = TL.intDriverId
 		, @intFreightItemId = TL.intFreightItemId
+		, @intLoadId = TL.intLoadId
 	FROM tblTRLoadHeader TL
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 
@@ -320,6 +322,58 @@ BEGIN TRY
 				RAISERROR('Gross and Net Quantity cannot be 0', 16, 1)
 			END
 		END
+
+		--## START Validate TM Orders  
+		IF(@intLoadId IS NOT NULL AND @ysnForcePost = 0)
+		BEGIN
+			SELECT DispatchedLoad.intLoadId
+			, DispatchedLoad.strLoadNumber
+			, DispatchedLoad.strOrderNumber
+			, DispatchedLoad.intTMDispatchId
+			, DispatchedLoad.strCustomerNumber
+			, DispatchedLoad.intLoadDetailId
+			, DistributionDetail.intLoadDistributionDetailId
+			INTO #UndistributedTMOrderList
+			FROM
+			vyuTRDispatchedLoad DispatchedLoad
+				LEFT JOIN tblTRLoadDistributionDetail DistributionDetail 
+				 ON DispatchedLoad.intLoadDetailId = DistributionDetail.intLoadDetailId
+			WHERE
+				DispatchedLoad.intLoadId = @intLoadId AND
+				DispatchedLoad.intTMDispatchId IS NOT NULL AND
+				DistributionDetail.intLoadDistributionDetailId IS NULL
+	
+			DECLARE @strCustomer AS NVARCHAR(250) = NULL
+			DECLARE @strTmoNumber AS NVARCHAR(20) = NULL
+			DECLARE @strLoadNumber AS NVARCHAR(20) = NULL
+			DECLARE @intLoadDetailId AS INT
+			DECLARE @strErrorResult AS NVARCHAR(MAX) = ''
+			DECLARE @ysnHasError AS BIT = 0
+
+			WHILE EXISTS (SELECT TOP 1 1 FROM #UndistributedTMOrderList)
+			BEGIN
+				SET @ysnHasError = 1
+
+				SELECT TOP 1 
+					@strCustomer = strCustomerNumber,
+					@strTmoNumber = strOrderNumber,
+					@strLoadNumber = strLoadNumber,
+					@intLoadDetailId = intLoadDetailId
+				FROM #UndistributedTMOrderList
+
+				SET @strErrorResult += 'Customer ' + RTRIM(LTRIM(@strCustomer)) + ' with TM Order ' + RTRIM(LTRIM(@strTmoNumber)) + ' in Load Schedule ' + + RTRIM(LTRIM(@strLoadNumber)) + ' is missing. </br>'
+				DELETE FROM #UndistributedTMOrderList WHERE intLoadDetailId = @intLoadDetailId
+			END
+			DROP TABLE #UndistributedTMOrderList
+
+			IF (@ysnHasError = 1)
+			BEGIN
+				SET @strErrorResult += '</br>Would you like to continue?'
+				RAISERROR(@strErrorResult , 16, 1)  
+			END
+		END
+		--## END Validate TM Orders 
+  
 
 		IF EXISTS (SELECT TOP 1 1 FROM tblTRLoadReceipt TR
 		LEFT JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = TR.intLoadHeaderId
