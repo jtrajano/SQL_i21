@@ -25,7 +25,7 @@ SELECT L.strLoadNumber
 	,E.intEntityId
 	,E.strName AS strEntityName
 	,'Inbound' COLLATE Latin1_General_CI_AS AS strShipmentType
-	,COALESCE(L.intCompanyLocationId, L.intCompanyId, CH.intCompanyId, CH.intCompanyLocationId) AS intCompanyLocationId
+	,COALESCE(L.intCompanyLocationId, L.intCompanyId, CH.intCompanyId, CH.intCompanyLocationId, CD.intCompanyLocationId) AS intCompanyLocationId
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -69,7 +69,7 @@ SELECT L.strLoadNumber
 	,E.intEntityId
 	,E.strName AS strEntityName
 	,'Outbound' COLLATE Latin1_General_CI_AS AS strShipmentType
-	,COALESCE(L.intCompanyLocationId, L.intCompanyId, CH.intCompanyId, CH.intCompanyLocationId) AS intCompanyLocationId
+	,COALESCE(L.intCompanyLocationId, L.intCompanyId, CH.intCompanyId, CH.intCompanyLocationId, CD.intCompanyLocationId) AS intCompanyLocationId
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
