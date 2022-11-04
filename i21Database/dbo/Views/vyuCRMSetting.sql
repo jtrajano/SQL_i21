@@ -13,6 +13,7 @@ SELECT
 	,HC.strHsi21RedirectUrl
 	,HC.strHsi21AuthorizeUrl
 	,HC.strHsRefreshToken
+	,HC.strScopesId
 FROM            
 	[dbo].[tblCRMSetting] AS S,
     [dbo].[tblCRMHubspotConfig] AS HC,

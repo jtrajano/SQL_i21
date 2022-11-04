@@ -25,6 +25,7 @@ GO
 			strHsi21RedirectUrl, 
 			strHsi21AuthorizeUrl, 
 			strHsRefreshToken,
+			strScopesId,
 			intConcurrencyId
 		) 
 		VALUES (
@@ -36,6 +37,7 @@ GO
 			'https://helpdesk.irely.com/irelyi21Live/authenticatehubspot', 
 			null,
 			null, 
+			'1,2',
 			1
 		)
 	END
