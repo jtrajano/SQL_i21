@@ -25,15 +25,15 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'Vendor')
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor')
 	, strValue = vts.strVendor
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'Vendor') + ' "' + vts.strVendor + '" does not exist.'
+	, strMessage = 'The vendor "' + vts.strVendor + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
-LEFT JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+LEFT JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND v.intEntityId IS NULL
 
@@ -41,12 +41,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'BuybackExportFileType')
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Export File Type')
 	, strValue = vts.strBuybackExportFileType
 	, strLogLevel = 'Warning'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'Invalid ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'BuybackExportFileType') + ' "' + vts.strBuybackExportFileType + '". Valid types are: CSV, TXT, XML.'
+	, strMessage = 'Invalid export file type "' + vts.strBuybackExportFileType + '". Valid types are: CSV, TXT, XML.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -57,12 +57,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'ReimbursementType')
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Reimbursement Type')
 	, strValue = vts.strReimbursementType
 	, strLogLevel = 'Warning'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'Invalid ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'ReimbursementType') + ' "' + vts.strReimbursementType + '". Valid types are: AP, AR.'
+	, strMessage = 'Invalid reimbursement type "' + vts.strReimbursementType + '". Valid types are: AP, AR.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -73,12 +73,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCustomerLocation') 
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') 
 	, strValue = vts.strVendorCustomerLocation
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCustomerLocation') + ' "' + vts.strLocation + '" does not exist.'
+	, strMessage = 'The customer location "' + vts.strLocation + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
 LEFT JOIN tblEMEntityLocation el ON el.strLocationName = vts.strLocation
@@ -90,15 +90,15 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCustomerLocation') 
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Customer Location') 
 	, strValue = vts.strLocation
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'VendorCustomerLocation') + ' "' + vts.strLocation + '" is not setup for the vendor .'
+	, strMessage = 'The vendor''s customer location "' + vts.strLocation + '" is not setup for the vendor .'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
-LEFT JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+LEFT JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 LEFT JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 LEFT JOIN tblEMEntityLocation el ON el.strLocationName = vts.strLocation
 	AND el.intEntityId = v.intEntityId
@@ -110,12 +110,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'GLAccount') 
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Income GL Account') 
 	, strValue = vts.strGLAccount
 	, strLogLevel = 'Warning'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapHasField(@guiApiUniqueId, 'GLAccount') + ' "' + vts.strGLAccount + '" is invalid.'
+	, strMessage = 'The GL account "' + vts.strGLAccount + '" is invalid.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
 OUTER APPLY (
@@ -165,7 +165,7 @@ SELECT
 	, @guiApiUniqueId
 	, vs.intRowNumber
 FROM tblApiSchemaTransformBuybackVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 OUTER APPLY (
 	SELECT TOP 1 intAccountId
 	FROM vyuGLAccountDetail
@@ -222,7 +222,7 @@ DECLARE @ForUpdates TABLE (strVendorNumber NVARCHAR(400) COLLATE Latin1_General_
 INSERT INTO @ForUpdates
 SELECT v.strVendorId, vs.intRowNumber
 FROM tblApiSchemaTransformBuybackVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId 
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 1
@@ -231,16 +231,16 @@ UPDATE vs
 SET 
 	  vs.guiApiUniqueId = @guiApiUniqueId
 	, vs.intRowNumber = sr.intRowNumber
-	, vs.strBuybackExportFilePath = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'BuybackExportFilePath') WHEN 1 THEN sr.strBuybackExportFilePath ELSE vs.strBuybackExportFilePath END
-	, vs.strBuybackExportFileType = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'BuybackExportFileType') WHEN 1 THEN sr.strBuybackExportFileType ELSE vs.strBuybackExportFileType END
-	, vs.strCompany1Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company1Id') WHEN 1 THEN sr.strCompany1Id ELSE vs.strCompany1Id END
-	, vs.strCompany2Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company2Id') WHEN 1 THEN sr.strCompany2Id ELSE vs.strCompany2Id END
-	, vs.strReimbursementType = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'ReimbursementType') WHEN 1 THEN sr.strReimbursementType ELSE vs.strReimbursementType END
+	, vs.strBuybackExportFilePath = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Export File Path') WHEN 1 THEN sr.strBuybackExportFilePath ELSE vs.strBuybackExportFilePath END
+	, vs.strBuybackExportFileType = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Export File Type') WHEN 1 THEN sr.strBuybackExportFileType ELSE vs.strBuybackExportFileType END
+	, vs.strCompany1Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company ID1') WHEN 1 THEN sr.strCompany1Id ELSE vs.strCompany1Id END
+	, vs.strCompany2Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company ID2') WHEN 1 THEN sr.strCompany2Id ELSE vs.strCompany2Id END
+	, vs.strReimbursementType = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Reimbursement Type') WHEN 1 THEN sr.strReimbursementType ELSE vs.strReimbursementType END
 	, vs.intConcurrencyId = ISNULL(vs.intConcurrencyId, 1) + 1
-	, vs.intAccountId = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'GLAccount') WHEN 1 THEN a.intAccountId ELSE vs.intAccountId END
+	, vs.intAccountId = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Income GL Account') WHEN 1 THEN a.intAccountId ELSE vs.intAccountId END
 FROM tblVRVendorSetup vs
-JOIN tblAPVendor v ON v.intEntityId = vs.intEntityId
-JOIN tblApiSchemaTransformBuybackVendorSetup sr ON sr.strVendor = v.strVendorId
+JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId
+JOIN tblApiSchemaTransformBuybackVendorSetup sr ON sr.strVendor = v.strVendorId OR sr.strVendor = v.strName
 OUTER APPLY (
 	SELECT TOP 1 intAccountId
 	FROM vyuGLAccountDetail
@@ -267,7 +267,7 @@ DECLARE @CustomerLocationForUpdates TABLE (intVendorSetupId INT, intEntityLocati
 INSERT INTO @CustomerLocationForUpdates
 SELECT e.intVendorSetupId, xc.intEntityLocationId, xc.strVendorCustomerLocation, xc.strVendorShipTo, xc.strVendorSoldTo, vs.intRowNumber
 FROM tblApiSchemaTransformBuybackVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblEMEntityLocation l ON l.intEntityId = v.intEntityId
 JOIN tblBBCustomerLocationXref xc ON xc.intVendorSetupId = e.intVendorSetupId
@@ -286,7 +286,7 @@ SET   xc.guiApiUniqueId = @guiApiUniqueId
 FROM tblBBCustomerLocationXref xc
 JOIN tblApiSchemaTransformBuybackVendorSetup vs ON xc.intVendorSetupId = xc.intVendorSetupId
 	AND xc.strVendorCustomerLocation = vs.strVendorCustomerLocation
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblEMEntityLocation l ON l.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
