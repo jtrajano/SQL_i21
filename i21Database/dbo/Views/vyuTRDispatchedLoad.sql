@@ -89,6 +89,8 @@ SELECT LG.intLoadId
 	, strSupplyPointGrossOrNet = SP.strGrossOrNet
 	, strSaleUnits = CEL.strSaleUnits
 	, strFreightSalesUnit = SP.strFreightSalesUnit
+	, LG.intTMDispatchId  
+	, LG.strOrderNumber  
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
