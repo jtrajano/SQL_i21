@@ -51,7 +51,7 @@ AS
 	-- Get all affected accounts
 	INSERT INTO @tbl
 	SELECT
-		ROW_NUMBER() OVER(ORDER BY Mapping.intAccountId ASC), Mapping.intAccountId, AccountSegment.intAccountCategoryId, AccountSegment.intAccountSegmentId, 0
+		ROW_NUMBER() OVER(ORDER BY intAccountId ASC), Mapping.intAccountId, AccountSegment.intAccountCategoryId, AccountSegment.intAccountSegmentId, 0
 	FROM [dbo].[tblGLAccountSegment] AccountSegment
 	JOIN [dbo].[tblGLAccountSegmentMapping] Mapping
 		ON Mapping.intAccountSegmentId = AccountSegment.intAccountSegmentId
@@ -107,7 +107,7 @@ AS
 			,ISNULL(BeginningBalance.beginBalance, 0)
 		FROM [dbo].[tblGLAccount] A
 		OUTER APPLY (
-			SELECT beginBalance FROM [dbo].[fnGLGetBeginningBalanceAndUnitTB](A.strAccountId, GETDATE(), -1)
+			SELECT * FROM [dbo].[fnGLGetBeginningBalanceAndUnitTB](A.strAccountId, GETDATE(), -1)
 		) BeginningBalance
 		WHERE A.intAccountId = @intCurrentAccountId
 
