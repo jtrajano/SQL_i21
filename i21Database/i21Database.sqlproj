@@ -855,6 +855,11 @@
     <Build Include="dbo\Stored Procedures\uspRKGetOriginByCommodity.sql" />
     <Build Include="dbo\Tables\tblCTMTMPoint.sql" />
     <Build Include="dbo\Functions\fnAPGetOverrideLineOfBusinessAccount.sql" />
+    <Build Include="dbo\Tables\tblGLChangeAccountCategory.sql" />
+    <Build Include="dbo\Tables\tblGLChangeAccountCategoryDetail.sql" />
+    <Build Include="dbo\Views\vyuGLChangeAccountCategory.sql" />
+    <Build Include="dbo\Views\vyuGLChangeAccountCategoryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertChangeCategoryAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -950,6 +955,7 @@
     <Folder Include="Scripts\Utility\IC\DPR" />
     <Folder Include="Scripts\Utility\SC" />
     <Folder Include="Scripts\Utility\GR\" />
+    <Folder Include="Scripts\Post-Deployment\GL\Views\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
