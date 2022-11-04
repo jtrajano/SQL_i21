@@ -64,6 +64,7 @@
     [intDataConversionLead] [int] null,
     [intCustomerSuccessManager] [int] null,
     [intImplementationLead] [int] null,
+    [intExecutiveSponsor] [int] null,
     [strSmartSheetLink] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
     [strEnvironmentLink] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
     [intDeploymentTypeId] [int] null,
@@ -90,6 +91,7 @@
     CONSTRAINT [FK_tblHDProject_tblEMEntity_intDataConversionLead] FOREIGN KEY ([intDataConversionLead]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [FK_tblHDProject_tblEMEntity_intCustomerSuccessManager] FOREIGN KEY ([intCustomerSuccessManager]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [FK_tblHDProject_tblEMEntity_intImplementationLead] FOREIGN KEY ([intImplementationLead]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
+    CONSTRAINT [FK_tblHDProject_tblEMEntity_intExecutiveSponsor] FOREIGN KEY ([intExecutiveSponsor]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [FK_tblHDProject_tblHDDeploymentType_intDeploymentTypeId] FOREIGN KEY ([intDeploymentTypeId]) REFERENCES [dbo].tblHDDeploymentType ([intDeploymentTypeId])
 	--[intOpportunitySourceId]
 )
