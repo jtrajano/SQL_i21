@@ -62,7 +62,8 @@ AS
         A.ysnPostAction,
         A.dtmDateEnteredMin,
         FP.strPeriod,
-        CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation
+        CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
+        RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_A strCurrencyExchangeRateType
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -72,6 +73,7 @@ AS
      LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
      LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
      LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
+     LEFT JOIN tblSMCurrencyExchangeRateType RateType ON RateType.intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
