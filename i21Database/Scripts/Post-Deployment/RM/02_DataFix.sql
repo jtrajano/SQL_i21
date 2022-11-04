@@ -319,7 +319,7 @@ BEGIN
 		, intLFutOptTransactionId
 		, intSFutOptTransactionId
 		, dtmMatchDate
-		, strUserName = (select top 1 strUserName from tblSMUserSecurity where ysnAdmin = 1 order by intEntityId)
+		, strUserName = 'aussup'
 	FROM tblRKMatchFuturesPSDetail psd
 	LEFT JOIN tblRKMatchFuturesPSHeader psh ON psh.intMatchFuturesPSHeaderId = psd.intMatchFuturesPSHeaderId
 	WHERE intLFutOptTransactionId NOT IN (SELECT intLFutOptTransactionId FROM tblRKMatchDerivativesHistory)
