@@ -42,6 +42,7 @@ SELECT  L.intLoadId
 	   ,strTerminal =  Terminal.strName
 	   ,[strShippingLine] =  ShippingLine.strName
 	   ,[strForwardingAgent] = ForwardingAgent.strName
+	   ,[strShipper] = Shipper.strName
 	   ,[strInsurer] = Insurer.strName
 	   ,[strInsuranceItem] = INS.strItemNo
 	   ,[strInsuranceCurrency] = Currency.strCurrency
@@ -68,6 +69,7 @@ JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = L.intShipperEntityId
 LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
 LEFT JOIN tblICItem INS ON INS.intItemId = L.intInsuranceItemId

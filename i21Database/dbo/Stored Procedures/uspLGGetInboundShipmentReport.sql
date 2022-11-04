@@ -598,7 +598,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN [tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.ysnDefaultLocation = 1
 		LEFT JOIN tblEMEntity InsurEntity ON InsurEntity.intEntityId = L.intInsurerEntityId
 		LEFT JOIN [tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.ysnDefaultLocation = 1	
-		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
+		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = ISNULL(L.intShipperEntityId, CD.intShipperId)
 		LEFT JOIN [tblEMEntityLocation] SpLocation ON SpLocation.intEntityId = Shipper.intEntityId and SpLocation.ysnDefaultLocation = 1
 		
 		LEFT JOIN tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId

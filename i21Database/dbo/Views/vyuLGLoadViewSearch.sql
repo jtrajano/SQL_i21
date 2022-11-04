@@ -79,6 +79,7 @@ SELECT L.intLoadId
 	,CT.strContainerType
 	,strForwardingAgent = ForwardingAgent.strName
 	,strShippingLine = ShippingLine.strName
+	,strShipper = Shipper.strName
 	,strInsurer = Insurer.strName
 	,strTerminal = Terminal.strName
 	,L.strCourierTrackingNumber
@@ -133,6 +134,10 @@ OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
 			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
 			WHERE strType = 'Forwarding Agent'
 			and ET.intEntityId = L.intForwardingAgentEntityId) ForwardingAgent
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Vendor'
+			and ET.intEntityId = L.intShipperEntityId) Shipper
 OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
 			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
 			WHERE strType = 'Insurer'
