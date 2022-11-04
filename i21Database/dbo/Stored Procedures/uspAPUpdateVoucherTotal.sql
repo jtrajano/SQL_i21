@@ -15,7 +15,7 @@ DECLARE @posted BIT;
 DECLARE @shipToId INT;
 DECLARE @detailTotal DECIMAL(18,2);
 DECLARE @qty DECIMAL(38,15);
-DECLARE @unitQty DECIMAL(38,20);
+DECLARE @cost DECIMAL(38, 20);
 
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -27,45 +27,22 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--UPDATE DETAIL TOTAL
 	UPDATE A
 		SET --A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
-		@qty							=	CASE WHEN A.intComputeTotalOption = 0 OR A.intComputeTotalOption IS NULL
-											THEN (CASE WHEN A.dblNetWeight != 0 THEN A.dblNetWeight ELSE A.dblQtyReceived END)
-											ELSE A.dblQtyReceived END,
-		@unitQty						=	CASE WHEN A.intComputeTotalOption = 0 OR A.intComputeTotalOption IS NULL
-											THEN (CASE WHEN A.dblNetWeight != 0 THEN A.dblWeightUnitQty ELSE A.dblUnitQty END)
-											ELSE A.dblUnitQty END,
-		@detailTotal					=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL--C.intTransactionType = 11
-											THEN 
-												--WEIGHT CLAIM ALWAYS USE THE QTY RECEIVED BECAUSE THAT IS THE CLAIM QTY CREATED BY LG, NET WEIGHT IS JUST FOR DISPLAY
-												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
-												THEN
-													CAST((A.dblQtyReceived) *  (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
-												ELSE 
-													CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
-												END),0)
-											ELSE
-												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
-												THEN (
-													CAST(A.dblCost / ISNULL(C.intSubCurrencyCents,1)  * @qty * @unitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2))
-												)
-												ELSE (
-													CAST(A.dblCost  * @qty * @unitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
-												)
-												END),0)
-											END,	
-			[dblTotal]					=	@detailTotal,
-			[dblClaimAmount]			=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL --C.intTransactionType = 11 
-											THEN 
-												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
-												THEN
-													CAST((A.dblQtyReceived) *  (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
-												ELSE 
-													CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
-												END),0)
-											ELSE 0 END,
-			[dbl1099]					=	CASE WHEN C.intTransactionType = 9 
+		@qty							=	CASE 
+												WHEN A.intComputeTotalOption = 0 AND A.intWeightUOMId IS NOT NULL AND WC.intWeightClaimDetailId IS NULL
+											 		THEN A.dblNetWeight * A.dblWeightUnitQty
+												ELSE A.dblQtyReceived * A.dblUnitQty 
+											END,
+		@cost							=	CASE 
+												WHEN A.ysnSubCurrency <> 0
+													THEN A.dblCost / ISNULL(C.intSubCurrencyCents, 1)
+												ELSE A.dblCost
+											END / ISNULL(A.dblCostUnitQty, 1),
+		@detailTotal					=	CAST(@qty *  @cost  AS DECIMAL(18,2)),
+		[dblTotal]						=	@detailTotal,
+		[dblClaimAmount]				=	@detailTotal,
+		[dbl1099]						=	CASE WHEN C.intTransactionType = 9 
 											THEN @detailTotal
 											ELSE 0 END
-
 	FROM tblAPBillDetail A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
