@@ -33,7 +33,7 @@ GO
 			'https://app.hubspot.com/oauth/authorize', 
 			'https://api.hubapi.com/oauth/v1/token',
 			'https://api.hubapi.com',
-			'http://localhost/22.1Dev/authenticatehubspot', 
+			'https://helpdesk.irely.com/irelyi21Live/authenticatehubspot', 
 			null,
 			null, 
 			1
