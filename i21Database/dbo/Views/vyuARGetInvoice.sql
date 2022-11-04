@@ -35,8 +35,8 @@ SELECT
 	,dblBaseInterest					= INV.dblBaseInterest
 	,dblAmountDue						= INV.dblAmountDue
 	,dblBaseAmountDue					= INV.dblBaseAmountDue
-	,dblPayment							= INV.dblPayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblPayment,0) ELSE 0 END 
-	,dblBasePayment						= INV.dblBasePayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment,0) ELSE 0 END 
+	,dblPayment							= INV.dblPayment + CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN ISNULL(RELATEDINVOICE.dblPayment, 0) ELSE 0 END 
+	,dblBasePayment						= INV.dblBasePayment + CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN ISNULL(RELATEDINVOICE.dblBasePayment, 0) ELSE 0 END 
 	,dblProvisionalAmount				= INV.dblProvisionalAmount
 	,dblBaseProvisionalAmount			= INV.dblBaseProvisionalAmount
 	,dblCurrencyExchangeRate			= INV.dblCurrencyExchangeRate
@@ -156,8 +156,8 @@ SELECT
 	,ysnServiceChargeCredit				= INV.ysnServiceChargeCredit
 	,blbSignature						= INV.blbSignature
 	,ysnHasPricingLayer                 = CASE WHEN ISNULL(APAR.intInvoiceId,0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
-	,dblProvisionalPayment				= CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 THEN PROVISIONALPAYMENT.dblPayment ELSE 0 END 
-	,dblProvisionalBasePayment			= CASE WHEN ysnFromProvisional = 1 AND dblBaseProvisionalAmount > 0 THEN PROVISIONALPAYMENT.dblBasePayment ELSE 0 END 
+	,dblProvisionalPayment				= CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 THEN RELATEDINVOICE.dblPayment ELSE 0 END 
+	,dblProvisionalBasePayment			= CASE WHEN ysnFromProvisional = 1 AND dblBaseProvisionalAmount > 0 THEN RELATEDINVOICE.dblBasePayment ELSE 0 END 
 	,ysnHasCreditApprover				= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 	,dblCreditStopDays					= CUSTOMERAGING.dblCreditStopDays
 	,intCreditStopDays					= CUS.intCreditStopDays
@@ -205,6 +205,10 @@ SELECT
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 	,intProfitCenter					= CLOC.intProfitCenter
+	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE.strType = 'Tax Adjustment' AND RELATEDINVOICE.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
+	,strRelatedInvoiceNumber			= RELATEDINVOICE.strInvoiceNumber
+	,dblPercentage						= INV.dblPercentage
+	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -370,12 +374,6 @@ LEFT JOIN (
     INNER JOIN tblCTPriceFixationDetailAPAR APAR ON ID.intInvoiceDetailId = APAR.intInvoiceDetailId
     GROUP BY ID.intInvoiceId
 ) APAR ON APAR.intInvoiceId = INV.intInvoiceId
-LEFT OUTER JOIN (
-	SELECT  intInvoiceId,PD.dblPayment,dblBasePayment,P.ysnPosted
-	FROM	tblARPaymentDetail PD
-	INNER JOIN tblARPayment P
-	ON PD.intPaymentId = P.intPaymentId
-) PROVISIONALPAYMENT ON PROVISIONALPAYMENT.intInvoiceId = INV.intOriginalInvoiceId AND PROVISIONALPAYMENT.ysnPosted = 1
 OUTER APPLY(
 	SELECT COUNT(ARC.intEntityId) AS intApproverCount
 	FROM dbo.tblARCustomer ARC
@@ -408,6 +406,17 @@ LEFT JOIN
 (
 	SELECT  ysnReturned,intInvoiceId FROM tblARInvoice  WITH (NOLOCK) 
 ) ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
+LEFT JOIN
+(
+	SELECT  
+		 intInvoiceId
+		,ysnPosted
+		,strType
+		,strInvoiceNumber
+		,dblPayment
+		,dblBasePayment
+	FROM tblARInvoice  WITH (NOLOCK) 
+) RELATEDINVOICE ON RELATEDINVOICE.intInvoiceId = INV.intOriginalInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
 LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId,0)
 LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId,0)

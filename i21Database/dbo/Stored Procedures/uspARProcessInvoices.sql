@@ -2380,7 +2380,7 @@ BEGIN TRY
 						AND @UpdateAvailableDiscount = 0
 						
 					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
-									@TaxDetails	= @TaxDetails
+								 @TaxDetails	= @TaxDetails
 								,@UserId		= @EntityId
 								,@ClearExisting	= @ClearDetailTaxes
 								,@RaiseError	= @RaiseError
@@ -2746,7 +2746,7 @@ SELECT EFP.* INTO #TempPrepaymentEntries FROM #EntriesForProcessing EFP JOIN tbl
 WHILE EXISTS(SELECT intInvoiceId  FROM #TempPrepaymentEntries)
 BEGIN 
 	DECLARE @PrePayInvoiceId INT , @PrepayPaymentId INT 
-		SELECT TOP 1 @PrePayInvoiceId =EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
+		SELECT TOP 1 @PrePayInvoiceId = EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
 
 		EXEC [dbo].[uspARProcessPaymentFromInvoice]
 			 @InvoiceId		= @PrePayInvoiceId 
