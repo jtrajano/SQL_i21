@@ -66,8 +66,8 @@ FROM
 											END
 		,InboundDiscount				= (CASE 
 											WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
-											ELSE ISNULL(BillByReceipt.dblTotal, 0)
-										END) - ISNULL(BillAdjustments.dblTotal,0)
+											ELSE ISNULL(BillByReceipt.dblTotal, 0) - ISNULL(BillAdjustments.dblTotal,0)
+										END) 
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN Bill.intTransactionType = 2 then 0
@@ -155,13 +155,12 @@ FROM
 		AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	-- MANUALLY ADDED LINE ITEMS IN THE MAIN VOUCHER FROM SCALE TICKET
 	LEFT JOIN (
-		SELECT DISTINCT
+		SELECT
 			Bill.intBillId
-			,BD_ITEM.intBillDetailId
+			--,BD.intBillDetailId
+			,B.intBillDetailId
 			,APD.intPaymentId
-			--,C.rowNum
 			,SUM(BD.dblTotal) dblTotal
-			--,MC.ysnShow,MC.ysnStage
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId
@@ -170,25 +169,23 @@ FROM
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 			AND BD.intScaleTicketId IS NULL
-		JOIN (tblAPBillDetail BD_ITEM JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND strType = 'Inventory')
-			ON BD_ITEM.intBillId = Bill.intBillId
-		LEFT JOIN (
-			SELECT bd.intBillDetailId
-				,itemBillDetailId = BD_ITEM.intBillDetailId
-				,rowNum = ROW_NUMBER() OVER (PARTITION BY bd.intBillDetailId ORDER BY BD_ITEM.intBillDetailId ASC)
-			FROM tblAPBillDetail bd
-			JOIN (tblAPBillDetail BD_ITEM JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND strType = 'Inventory')
-				ON BD_ITEM.intBillId = bd.intBillId
-			WHERE bd.ysnStage = 0
-		) C ON C.intBillDetailId = BD.intBillDetailId
-			AND C.itemBillDetailId = BD_ITEM.intBillDetailId
-		OUTER APPLY dbo.fnGRSettlementManualChargeItem(BD.intBillId) MC
-		WHERE ((MC.ysnStage = 0 AND MC.ysnShow = 1 AND C.rowNum = 1) OR (MC.ysnStage = 0 AND MC.ysnShow = 0 AND intTypeId = 1))
-		GROUP BY Bill.intBillId,APD.intPaymentId,BD_ITEM.intBillDetailId
+			and BD.intItemId IS NOT NULL
+		OUTER APPLY (
+			SELECT TOP 1 
+				BD_ITEM.intBillDetailId
+				,BD_ITEM.intContractDetailId
+			FROM tblAPBillDetail BD_ITEM
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD_ITEM.intItemId
+					AND IC.strType = 'Inventory'
+			WHERE (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL) 
+				AND BD_ITEM.intBillId = BD.intBillId
+		) B
+		GROUP BY Bill.intBillId,APD.intPaymentId,B.intBillDetailId--,BD.intBillDetailId
 	) BillAdjustments 
 		ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
 			AND BillAdjustments.intBillId = Bill.intBillId
-			AND (BillAdjustments.intBillDetailId = tblOtherCharge.intBillDetailId)-- OR tblOtherCharge.intBillDetailId IS NULL)
+			AND BillAdjustments.intBillDetailId = tblOtherCharge.intBillDetailId
 	LEFT JOIN (
 		SELECT 
 			PYMT.intPaymentId
@@ -870,3 +867,5 @@ GROUP BY
 	,CheckAmount
 	,ISNULL(AdditionalTax.dblTax, 0)
 GO
+
+

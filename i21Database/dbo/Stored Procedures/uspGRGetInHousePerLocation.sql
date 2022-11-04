@@ -31,6 +31,7 @@ BEGIN
 		Id INT IDENTITY
 		,dtmDate DATETIME
 		,dblTotal NUMERIC(18,6)
+		,strTransactionNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strDistribution NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strOwnership NVARCHAR(20) COLLATE Latin1_General_CI_AS
@@ -44,6 +45,7 @@ BEGIN
 	INSERT INTO @tblResult (
 		dtmDate
 		,dblTotal
+		,strTransactionNo
 		,strTransactionType
 		,strDistribution
 		,strOwnership
@@ -53,6 +55,7 @@ BEGIN
 	SELECT
 		  dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
 		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
+		,CompOwn.strTransactionNumber
 		,strTransactionType
 		,CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
 			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
@@ -71,7 +74,8 @@ BEGIN
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
-	
+		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
+
 	--=============================
 	-- Customer Owned
 	--=============================
@@ -206,8 +210,11 @@ BEGIN
 			,strOwnership
 			,intCompanyLocationId
 			,strLocationName
-		FROM @tblResult
+		FROM @tblResult A
+		JOIN tblICInventoryTransfer IT
+			ON IT.strTransferNo = A.strTransactionNo
 		WHERE strTransactionType IN ('Inventory Transfer')
+			--AND B.TOTAL <> 0
 		AND dblTotal > 0
 		GROUP BY dtmDate
 			,strDistribution 
@@ -242,8 +249,11 @@ BEGIN
 			,strOwnership
 			,intCompanyLocationId
 			,strLocationName
-		FROM @tblResult
+		FROM @tblResult A
+		JOIN tblICInventoryTransfer IT
+			ON IT.strTransferNo = A.strTransactionNo
 		WHERE strTransactionType IN ('Inventory Transfer')
+			--AND B.TOTAL <> 0
 		AND dblTotal < 0
 		GROUP BY dtmDate
 			,strDistribution 
@@ -351,7 +361,7 @@ BEGIN
 			,intCompanyLocationId
 			,strLocationName
 		FROM @tblResult
-		WHERE strTransactionType IN ('Inventory Shipment')
+		WHERE strTransactionType IN ('Inventory Shipment', 'Invoice')
 		GROUP BY dtmDate
 			,strDistribution 
 			,strTransactionType
