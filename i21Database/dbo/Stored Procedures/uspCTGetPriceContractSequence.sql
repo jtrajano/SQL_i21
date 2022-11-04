@@ -242,7 +242,7 @@ BEGIN TRY
 				, ICC.strSeason
 				, ICC.strClass
 				, ICC.strProductLine
-				, dblDefaultFx = (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId order by erd.dtmValidFromDate desc)
+				, dblDefaultFx = case when isnull(CD.intCurrencyExchangeRateId,0) = 0 then 1 else (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId order by erd.dtmValidFromDate desc) end
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 			JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
