@@ -7,7 +7,11 @@ SELECT
 	,CF.ysnHubspotIntegration
 	,HC.strHsClientId
 	,HC.strHsClientSecret
-	,HC.strHsRedirectUrl
+	,HC.strHsInstallationUrl
+	,HC.strHsTokenUrl
+	,HC.strHsApiUrl
+	,HC.strHsi21RedirectUrl
+	,HC.strHsi21AuthorizeUrl
 	,HC.strHsRefreshToken
 	,S.intFreightTermId
 	,FT.strFreightTerm
