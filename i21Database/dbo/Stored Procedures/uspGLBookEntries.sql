@@ -264,8 +264,9 @@ BEGIN
 						,dblCreditForeign = SUM(CASE WHEN @ysnPost = 1 THEN CreditForeign.Value ELSE DebitForeign.Value * -1 END)
 						,dblDebitUnit = SUM(CASE WHEN @ysnPost = 1 THEN DebitUnit.Value ELSE CreditUnit.Value * -1 END)
 						,dblCreditUnit = SUM(CASE WHEN @ysnPost = 1 THEN CreditUnit.Value ELSE DebitUnit.Value * -1 END)	
-						,intCurrencyId					
+						,intCurrencyId = ISNULL(intCurrencyId, 0)				
 						,intLedgerId = ISNULL(intLedgerId,0)
+						,intSubledgerId = ISNULL(intSubledgerId, 0)
 				FROM	@GLEntries GLEntries
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
@@ -275,7 +276,7 @@ BEGIN
 												- ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblCredit ELSE GLEntries.dblCreditForeign END, 0))  CreditForeign
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
-				GROUP BY intAccountId, dbo.fnRemoveTimeOnDate(GLEntries.dtmDate), strCode, intCurrencyId, intLedgerId
+				GROUP BY intAccountId, dbo.fnRemoveTimeOnDate(GLEntries.dtmDate), strCode, intCurrencyId, intLedgerId, intSubledgerId
 	) AS Source_Query  
 		ON gl_summary.intAccountId = Source_Query.intAccountId
 		AND gl_summary.strCode = Source_Query.strCode 
@@ -295,6 +296,7 @@ BEGIN
 				,dblDebitUnit = gl_summary.dblDebitUnit + Source_Query.dblDebitUnit
 				,intCurrencyId = gl_summary.intCurrencyId 
 				,intLedgerId = gl_summary.intLedgerId
+				,intSubledgerId = gl_summary.intSubledgerId
 				,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
 	-- Insert a new gl summary record 
@@ -311,6 +313,7 @@ BEGIN
 			,strCode
 			,intCurrencyId
 			,intLedgerId
+			,intSubledgerId
 			,intConcurrencyId
 		)
 		VALUES (
@@ -325,6 +328,7 @@ BEGIN
 			,Source_Query.strCode
 			,Source_Query.intCurrencyId
 			,Source_Query.intLedgerId
+			,Source_Query.intSubledgerId
 			,1
 		);
 END;
