@@ -219,12 +219,12 @@ SELECT
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					=  CASE
-										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
-										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnMultiply( dbo.fnDivide(LI.dblQty,SC.dblNetUnits), (SC.dblGrossWeight - SC.dblTareWeight))
+										ELSE dbo.fnMultiply(dbo.fnDivide(LI.dblQty, SC.dblNetUnits), SC.dblGrossUnits)
 									END
 		,dblNet						= CASE
 										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN 
-											CASE WHEN SC.dblShrink > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty) ELSE (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight) END
+											CASE WHEN SC.dblShrink > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty) ELSE dbo.fnMultiply( dbo.fnDivide(LI.dblQty,SC.dblNetUnits), (SC.dblGrossWeight - SC.dblTareWeight)) END
 										ELSE LI.dblQty 
 									END
 		,intFreightTermId			= COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)
