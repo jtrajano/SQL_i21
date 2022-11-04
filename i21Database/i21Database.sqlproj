@@ -850,6 +850,7 @@
     <Build Include="dbo\Views\vyuGLChangeAccountCategory.sql" />
     <Build Include="dbo\Views\vyuGLChangeAccountCategoryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertChangeCategoryAuditLog.sql" />
+    <Build Include="dbo\Functions\fnGLPrimaryAccountHasBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
