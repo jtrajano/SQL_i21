@@ -11,5 +11,5 @@
 	[intConcurrencyId]			INT DEFAULT 1		NOT NULL,
 
 	CONSTRAINT [PK_tblGLChangeAccountCategoryDetail] PRIMARY KEY CLUSTERED ([intTransactionDetailId] ASC),
-	CONSTRAINT [FK_tblGLChangeAccountCategoryDetail_tblGLChangeAccountCategory] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblGLChangeAccountCategory]([intTransactionId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblGLChangeAccountCategoryDetail_tblGLChangeAccountCategory] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblGLChangeAccountCategory]([intTransactionId]) ON DELETE CASCADE
 )
