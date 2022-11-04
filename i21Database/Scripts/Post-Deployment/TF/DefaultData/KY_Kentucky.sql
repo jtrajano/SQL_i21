@@ -147,7 +147,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10I', strScheduleName = 'Delivered for Farming, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 380, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172091, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10J', strScheduleName = 'Delivered for Residential Heating, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 390, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172092, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10Y', strScheduleName = 'Delivered to Railroads, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 400, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172093, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '72A138', strScheduleName = '', strType = '', strNote = 'Main Form', strTransactionType = '', intSort = 410, strStoredProcedure = '', intMasterId = 172094, intComponentTypeId = 2
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '72A138', strScheduleName = '', strType = '', strNote = 'Main Form', strTransactionType = '', intSort = 450, strStoredProcedure = '', intMasterId = 172094, intComponentTypeId = 2
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'KY EDI', strFormName = 'KY EDI', strScheduleCode = 'EDI', strScheduleName = '', strType = '', strNote = 'KY EDI File', strTransactionType = '', intSort = 1000, strStoredProcedure = '', intMasterId = 172095, intComponentTypeId = 3
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A089', strFormName = 'Gasoline Dealer Return', strScheduleCode = '3OH', strScheduleName = 'Imported from OH, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 73, strStoredProcedure = 'uspTFGetTransporterInventoryTax', intMasterId = 172096, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A089', strFormName = 'Gasoline Dealer Return', strScheduleCode = '3VA', strScheduleName = 'Imported from VA, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 75, strStoredProcedure = 'uspTFGetTransporterInventoryTax', intMasterId = 172097, intComponentTypeId = 1
@@ -173,6 +173,39 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A099', strFormName = 'KY Transporters Return', strScheduleCode = '14'	, strScheduleName =	'Delivery Schedule (To Bulk)'	  , strType = 'Special Fuels'	, strNote = '' , strTransactionType = 'Invoice'	, intSort = 910	,strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax'		, intMasterId = 172115	, intComponentTypeId =	1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A099', strFormName = 'KY Transporters Return', strScheduleCode = '14_C'	, strScheduleName =	'Delivery Schedule (To Customer)' , strType = 'Gasoline'		, strNote = '' , strTransactionType = 'Invoice'	, intSort = 920	,strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax'	, intMasterId = 172116	, intComponentTypeId =	1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A099', strFormName = 'KY Transporters Return', strScheduleCode = '14_C'	, strScheduleName =	'Delivery Schedule (To Customer)' , strType = 'Special Fuels'	, strNote = '' , strTransactionType = 'Invoice'	, intSort = 930	,strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax'	, intMasterId = 172117	, intComponentTypeId =	1
+
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '1_TR', strScheduleName = 'Received, KY Tax Paid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 411, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172118 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '2_TR', strScheduleName = 'Received from Licensed Distributor, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 412, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172119 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '2A_TR', strScheduleName = 'Received from Terminals, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 413, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172120 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '2B_TR', strScheduleName = 'Blendable Stock Received, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 414, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172121 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '3IL_TR', strScheduleName = 'Imported from IL, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 415, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172122 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '3IN_TR', strScheduleName = 'Imported from IN, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 416, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172123 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '3TN_TR', strScheduleName = 'Imported from TN, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 417, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172124 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DIL_TR', strScheduleName = 'Sold for Import from IL, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 418, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172125 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DIN_TR', strScheduleName = 'Sold for Import from IN, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 419, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172126 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DTN_TR', strScheduleName = 'Sold for Import from TN, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 420, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172127 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '6_TR', strScheduleName = 'Delivered to Licensed Distributors, KY Tax Not Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 421, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172128		, intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7IL_TR', strScheduleName = 'Exported to IL', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 422, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172129 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7IN_TR', strScheduleName = 'Exported to IN', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 423, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172130 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7TN_TR', strScheduleName = 'Exported to TN', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 424, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172131 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '8_TR', strScheduleName = 'Delivered to US Government, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 425, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172132 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '9_TR', strScheduleName = 'Delivered to State and Local Government, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 426, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172133 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10A_TR', strScheduleName = 'Sold for Non-highway Use', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 427, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172134 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10G_TR', strScheduleName = 'Delivered to Non-profit Religious, Charitable, or Educational Organizations', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 428,	strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax',		intMasterId = 172135		, intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10I_TR', strScheduleName = 'Delivered for Farming, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 429, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172136 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10J_TR', strScheduleName = 'Delivered for Residential Heating, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 430, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172137 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '10Y_TR', strScheduleName = 'Delivered to Railroads, Tax Exempt', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 431, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172138 , intComponentTypeId =	1
+						
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '3OH_TR', strScheduleName = 'Imported from OH, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 432, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172139 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '3VA_TR', strScheduleName = 'Imported from VA, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 433, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172140 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '3WV_TR', strScheduleName = 'Imported from WV, KY Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 434, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172141 , intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DOH_TR', strScheduleName = 'Sold for Import from OH, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 435, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172142		, intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DVA_TR', strScheduleName = 'Sold for Import from VA, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 436, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172143		, intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DWV_TR', strScheduleName = 'Sold for Import from WV, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 437, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172144		, intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7OH_TR', strScheduleName = 'Exported to OH', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 438, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172145		, intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7VA_TR', strScheduleName = 'Exported to VA', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 439, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172146		, intComponentTypeId =	1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7WV_TR', strScheduleName = 'Exported to WV', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 440, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172147		, intComponentTypeId =	1
+
 	
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -246,6 +279,29 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DOH', strType = '', strCriteria = '<> 0', intMasterId = 17946
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DVA', strType = '', strCriteria = '<> 0', intMasterId = 17947
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DWV', strType = '', strCriteria = '<> 0', intMasterId = 17948
+
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strCriteria = '= 0', intMasterId = 17949
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strCriteria = '= 0', intMasterId = 17950
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strCriteria = '= 0', intMasterId = 17951
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strCriteria = '= 0', intMasterId = 17952
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strCriteria = '= 0', intMasterId = 17953
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strCriteria = '= 0', intMasterId = 17954
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strCriteria = '= 0', intMasterId = 17955
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strCriteria = '= 0', intMasterId = 17956
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strCriteria = '= 0', intMasterId = 17957
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strCriteria = '= 0', intMasterId = 17958
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strCriteria = '= 0', intMasterId = 17959
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strCriteria = '<> 0', intMasterId = 17960
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strCriteria = '<> 0', intMasterId = 17961
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strCriteria = '<> 0', intMasterId = 17962
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strCriteria = '<> 0', intMasterId = 17963
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strCriteria = '= 0', intMasterId = 17964
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '', strCriteria = '= 0', intMasterId = 17965
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '', strCriteria = '= 0', intMasterId = 17966
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '', strCriteria = '= 0', intMasterId = 17967
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '', strCriteria = '<> 0', intMasterId = 17968
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '', strCriteria = '<> 0', intMasterId = 17969
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '', strCriteria = '<> 0', intMasterId = 17970
 
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
@@ -1428,6 +1484,729 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A099', strScheduleCode = '14_C', strType = 'Special Fuels', intMasterId = 179368
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A099', strScheduleCode = '14_C', strType = 'Special Fuels', intMasterId = 179369
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A099', strScheduleCode = '14_C', strType = 'Special Fuels', intMasterId = 179370
+
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179371
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179372
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179373
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179374
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179375
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179376
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179377
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179378
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179379
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179380
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179381
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179382
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179383
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179384
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179385
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179386
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179387
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179388
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179389
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179390
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179391
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179392
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179393
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '1_TR', strType = '',	intMasterId = 179394
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179395
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179396
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179397
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179398
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179399
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179400
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179401
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179402
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179403
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179404
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179405
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179406
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179407
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179408
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179409
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179410
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179411
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179412
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179413
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179414
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179415
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179416
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179417
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '',	intMasterId = 179418
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179419
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179420
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179421
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179422
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179423
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179424
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179425
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179426
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179427
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179428
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179429
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179430
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179431
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179432
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179433
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179434
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179435
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179436
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179437
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179438
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179439
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179440
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179441
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '',	intMasterId = 179442
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179443
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179444
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179445
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179446
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179447
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179448
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179449
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179450
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179451
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179452
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179453
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179454
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179455
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179456
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179457
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179458
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179459
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179460
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179461
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179462
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179463
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179464
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179465
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '',	intMasterId = 179466
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179467
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179468
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179469
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179470
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179471
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179472
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179473
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179474
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179475
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179476
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179477
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179478
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179479
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179480
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179481
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179482
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179483
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179484
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179485
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179486
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179487
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179488
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179489
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '',	intMasterId = 179490
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179491
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179492
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179493
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179494
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179495
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179496
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179497
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179498
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179499
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179500
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179501
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179502
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179503
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179504
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179505
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179506
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179507
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179508
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179509
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179510
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179511
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179512
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179513
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '',	intMasterId = 179514
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179515
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179516
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179517
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179518
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179519
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179520
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179521
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179522
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179523
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179524
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179525
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179526
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179527
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179528
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179529
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179530
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179531
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179532
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179533
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179534
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179535
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179536
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179537
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '2_TR', strType = '',	intMasterId = 179538
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179539
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179540
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179541
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179542
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179543
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179544
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179545
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179546
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179547
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179548
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179549
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179550
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179551
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179552
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179553
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179554
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179555
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179556
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179557
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179558
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179559
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179560
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179561
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '',	intMasterId = 179562
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179563
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179564
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179565
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179566
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179567
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179568
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179569
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179570
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179571
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179572
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179573
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179574
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179575
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179576
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179577
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179578
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179579
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179580
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179581
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179582
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179583
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179584
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179585
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '',	intMasterId = 179586
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179587
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179588
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179589
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179590
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179591
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179592
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179593
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179594
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179595
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179596
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179597
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179598
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179599
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179600
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179601
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179602
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179603
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179604
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179605
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179606
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179607
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179608
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179609
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '',	intMasterId = 179610
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179611
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179612
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179613
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179614
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179615
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179616
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179617
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179618
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179619
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179620
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179621
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179622
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179623
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179624
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179625
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179626
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179627
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179628
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179629
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179630
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179631
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179632
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179633
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '',	intMasterId = 179634
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179635
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179636
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179637
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179638
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179639
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179640
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179641
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179642
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179643
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179644
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179645
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179646
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179647
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179648
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179649
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179650
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179651
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179652
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179653
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179654
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179655
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179656
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179657
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '',	intMasterId = 179658
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179659
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179660
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179661
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179662
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179663
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179664
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179665
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179666
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179667
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179668
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179669
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179670
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179671
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179672
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179673
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179674
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179675
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179676
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179677
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179678
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179679
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179680
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179681
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '',	intMasterId = 179682
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179683
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179684
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179685
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179686
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179687
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179688
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179689
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179690
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179691
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179692
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179693
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179694
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179695
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179696
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179697
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179698
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179699
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179700
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179701
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179702
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179703
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179704
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179705
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '',	intMasterId = 179706
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179707
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179708
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179709
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179710
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179711
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179712
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179713
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179714
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179715
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179716
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179717
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179718
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179719
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179720
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179721
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179722
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179723
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179724
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179725
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179726
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179727
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179728
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179729
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '',	intMasterId = 179730
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179731
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179732
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179733
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179734
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179735
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179736
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179737
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179738
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179739
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179740
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179741
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179742
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179743
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179744
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179745
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179746
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179747
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179748
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179749
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179750
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179751
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179752
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179753
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '6_TR', strType = '',	intMasterId = 179754
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179755
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179756
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179757
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179758
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179759
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179760
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179761
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179762
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179763
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179764
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179765
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179766
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179767
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179768
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179769
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179770
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179771
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179772
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179773
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179774
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179775
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179776
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179777
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '',	intMasterId = 179778
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179779
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179780
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179781
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179782
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179783
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179784
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179785
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179786
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179787
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179788
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179789
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179790
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179791
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179792
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179793
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179794
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179795
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179796
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179797
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179798
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179799
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179800
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179801
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '',	intMasterId = 179802
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179803
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179804
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179805
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179806
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179807
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179808
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179809
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179810
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179811
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179812
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179813
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179814
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179815
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179816
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179817
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179818
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179819
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179820
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179821
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179822
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179823
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179824
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179825
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '',	intMasterId = 179826
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179827
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179828
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179829
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179830
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179831
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179832
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179833
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179834
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179835
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179836
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179837
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179838
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179839
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179840
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179841
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179842
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179843
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179844
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179845
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179846
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179847
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179848
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179849
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '8_TR', strType = '',	intMasterId = 179850
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179851
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179852
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179853
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179854
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179855
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179856
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179857
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179858
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179859
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179860
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179861
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179862
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179863
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179864
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179865
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179866
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179867
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179868
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179869
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179870
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179871
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179872
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179873
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '9_TR', strType = '',	intMasterId = 179874
+	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179875
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179876
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179877
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179878
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179879
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179880
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179881
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179882
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179883
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179884
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179885
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179886
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179887
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179888
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179889
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179890
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179891
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179892
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179893
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179894
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179895
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179896
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179897
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '',	intMasterId = 179898
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179899
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179900
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179901
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179902
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179903
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179904
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179905
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179906
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179907
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179908
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179909
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179910
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179911
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179912
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179913
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179914
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179915
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179916
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179917
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179918
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179919
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179920
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179921
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '',	intMasterId = 179922
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179923
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179924
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179925
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179926
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179927
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179928
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179929
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179930
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179931
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179932
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179933
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179934
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179935
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179936
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179937
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179938
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179939
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179940
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179941
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179942
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179943
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179944
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179945
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '',	intMasterId = 179946
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179947
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179948
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179949
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179950
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179951
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179952
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179953
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179954
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179955
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179956
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179957
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179958
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179959
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179960
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179961
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179962
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179963
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179964
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179965
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179966
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179967
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179968
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179969
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '',	intMasterId = 179970
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179971
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179972
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179973
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179974
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179975
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179976
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179977
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179978
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179979
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179980
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179981
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179982
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179983
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179984
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179985
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179986
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179987
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179988
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179989
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179990
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179991
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179992
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179993
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '',	intMasterId = 179994
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 179995
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 179996
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 179997
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 179998
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 179999
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180000
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180001
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180002
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180003
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180004
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180005
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180006
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180007
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180008
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180009
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180010
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180011
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180012
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180013
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180014
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180015
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180016
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180017
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '',	intMasterId = 180018
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180019
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180020
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180021
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180022
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180023
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180024
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180025
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180026
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180027
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180028
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180029
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180030
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180031
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180032
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180033
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180034
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180035
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180036
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180037
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180038
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180039
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180040
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180041
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '',	intMasterId = 180042
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180043
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180044
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180045
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180046
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180047
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180048
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180049
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180050
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180051
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180052
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180053
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180054
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180055
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180056
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180057
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180058
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180059
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180060
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180061
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180062
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180063
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180064
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180065
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '',	intMasterId = 180066
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180067
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180068
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180069
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180070
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180071
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180072
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180073
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180074
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180075
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180076
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180077
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180078
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180079
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180080
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180081
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180082
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180083
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180084
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180085
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180086
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180087
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180088
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180089
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '',	intMasterId = 180090
+
 	
 	
 	INSERT INTO @ValidOriginStates(
@@ -1480,6 +2259,31 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7OH', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171119
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7VA', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171120
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7WV', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171121
+
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171122
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171123
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171124
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171125
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171126
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strState = 'KY', strStatus = 'Include',		intMasterId = 171127
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171128
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171129
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strState = 'IL', strStatus = 'Include',	intMasterId = 171130
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strState = 'IN', strStatus = 'Include',	intMasterId = 171131
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strState = 'TN', strStatus = 'Include',	intMasterId = 171132
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strState = 'KY', strStatus = 'Include',		intMasterId = 171133
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171134
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171135
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171136
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strState = 'KY', strStatus = 'Include',		intMasterId = 171137
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strState = 'KY', strStatus = 'Include',		intMasterId = 171138
+
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '', strState = 'OH', strStatus = 'Include',		intMasterId = 171139
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '', strState = 'VA', strStatus = 'Include',		intMasterId = 171140
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '', strState = 'WV', strStatus = 'Include',		intMasterId = 171141
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '', strState = 'KY', strStatus = 'Include',		intMasterId = 171142
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '', strState = 'KY', strStatus = 'Include',		intMasterId = 171143
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '', strState = 'KY', strStatus = 'Include',		intMasterId = 171144
 
 
 	INSERT INTO @ValidDestinationStates(
@@ -1534,6 +2338,32 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7OH', strType = '', strState = 'OH', strStatus = 'Include', intMasterId = 171082
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7VA', strType = '', strState = 'VA', strStatus = 'Include', intMasterId = 171083
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7WV', strType = '', strState = 'WV', strStatus = 'Include', intMasterId = 171084
+
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strState = 'KY', strStatus = 'Include',   intMasterId = 171085
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171086
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171087
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171088
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171089
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171090
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171091
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171092
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171093
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171094
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171095
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171096
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171097
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strState = 'IL', strStatus = 'Include', intMasterId = 171098
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strState = 'IN', strStatus = 'Include', intMasterId = 171099
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strState = 'TN', strStatus = 'Include', intMasterId = 171100
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171101
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strState = 'KY', strStatus = 'Include',	intMasterId = 171102
+
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171103
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171104
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171105
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '', strState = 'OH', strStatus = 'Include', intMasterId = 171106
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '', strState = 'VA', strStatus = 'Include', intMasterId = 171107
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '', strState = 'WV', strStatus = 'Include', intMasterId = 171108
 
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
@@ -1638,6 +2468,9 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'KY EDI', strScheduleCode = 'EDI', strType = '', strTemplateItemId = 'KYEDI-LicNumGD', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '29', strDescription = 'Gasoline Return License Number (GD999999999)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '29', ysnOutputDesigner = 0, strInputType = NULL, intMasterId = 171248
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'KY EDI', strScheduleCode = 'EDI', strType = '', strTemplateItemId = 'KYEDI-LicNumSF', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '30', strDescription = 'Special Fuels Retrun License Number (SF999999999)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '30', ysnOutputDesigner = 0, strInputType = NULL, intMasterId = 171249
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'KY EDI', strScheduleCode = 'EDI', strType = '', strTemplateItemId = 'KYEDI-LicNumTR', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '31', strDescription = 'Transporters Return License Number (TR999999999)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = '1', ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '31', ysnOutputDesigner = 0, strInputType = NULL, intMasterId = 171250
+
+
+
 
 	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
@@ -2438,6 +3271,268 @@ where RC.intTaxAuthorityId = @TaxAuthorityId ORDER BY RCF.intMasterId
 	UNION ALL SELECT intScheduleColumnId = 0 , strFormCode = '72A099' , strScheduleCode = '14_C' ,strType = 'Special Fuels' , strColumn = 'strBillOfLading'        , strCaption = 'Doc Num' , strFormat = '' , strFooter = 'No'        , intWidth = 0, ysnFromConfiguration = 0 , intMasterId = 1726782 
 	UNION ALL SELECT intScheduleColumnId = 0 , strFormCode = '72A099' , strScheduleCode = '14_C' ,strType = 'Special Fuels' , strColumn = 'dblGross'        , strCaption = 'Gross Gals' , strFormat = '' , strFooter = 'No'        , intWidth = 0, ysnFromConfiguration = 0 , intMasterId = 1726783 
     UNION ALL SELECT intScheduleColumnId = 0 , strFormCode = '72A099' , strScheduleCode = '14_C' ,strType = 'Special Fuels' , strColumn = 'dblNet'        , strCaption = 'Net Gals' , strFormat = '' , strFooter = 'No'        , intWidth = 0, ysnFromConfiguration = 0 , intMasterId = 1726784 
+
+
+	UNION ALL SELECT intScheduleColumnId = 92, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726785
+UNION ALL SELECT intScheduleColumnId = 93, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726786
+UNION ALL SELECT intScheduleColumnId = 94, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726787
+UNION ALL SELECT intScheduleColumnId = 95, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726788
+UNION ALL SELECT intScheduleColumnId = 96, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726789
+UNION ALL SELECT intScheduleColumnId = 97, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726790
+UNION ALL SELECT intScheduleColumnId = 98, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726791
+UNION ALL SELECT intScheduleColumnId = 99, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726792
+UNION ALL SELECT intScheduleColumnId = 100, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726793
+UNION ALL SELECT intScheduleColumnId = 101, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726794
+UNION ALL SELECT intScheduleColumnId = 102, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726795
+UNION ALL SELECT intScheduleColumnId = 103, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726796
+UNION ALL SELECT intScheduleColumnId = 104, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726797
+UNION ALL SELECT intScheduleColumnId = 105, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726798
+UNION ALL SELECT intScheduleColumnId = 106, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726799
+UNION ALL SELECT intScheduleColumnId = 107, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726800
+UNION ALL SELECT intScheduleColumnId = 108, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726801
+UNION ALL SELECT intScheduleColumnId = 109, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726802
+UNION ALL SELECT intScheduleColumnId = 110, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726803
+UNION ALL SELECT intScheduleColumnId = 111, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726804
+UNION ALL SELECT intScheduleColumnId = 112, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726805
+UNION ALL SELECT intScheduleColumnId = 113, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726806
+UNION ALL SELECT intScheduleColumnId = 114, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726807
+UNION ALL SELECT intScheduleColumnId = 115, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726808
+UNION ALL SELECT intScheduleColumnId = 116, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726809
+UNION ALL SELECT intScheduleColumnId = 117, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726810
+UNION ALL SELECT intScheduleColumnId = 118, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726811
+UNION ALL SELECT intScheduleColumnId = 119, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726812
+UNION ALL SELECT intScheduleColumnId = 120, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726813
+UNION ALL SELECT intScheduleColumnId = 121, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726814
+UNION ALL SELECT intScheduleColumnId = 122, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726815
+UNION ALL SELECT intScheduleColumnId = 123, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726816
+UNION ALL SELECT intScheduleColumnId = 124, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726817
+UNION ALL SELECT intScheduleColumnId = 125, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726818
+UNION ALL SELECT intScheduleColumnId = 126, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726819
+UNION ALL SELECT intScheduleColumnId = 127, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726820
+UNION ALL SELECT intScheduleColumnId = 128, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726821
+UNION ALL SELECT intScheduleColumnId = 129, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726822
+UNION ALL SELECT intScheduleColumnId = 130, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726823
+UNION ALL SELECT intScheduleColumnId = 131, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726824
+UNION ALL SELECT intScheduleColumnId = 132, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726825
+UNION ALL SELECT intScheduleColumnId = 133, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726826
+UNION ALL SELECT intScheduleColumnId = 134, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726827
+UNION ALL SELECT intScheduleColumnId = 135, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726828
+UNION ALL SELECT intScheduleColumnId = 136, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726829
+UNION ALL SELECT intScheduleColumnId = 137, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726830
+UNION ALL SELECT intScheduleColumnId = 138, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726831
+UNION ALL SELECT intScheduleColumnId = 139, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726832
+UNION ALL SELECT intScheduleColumnId = 140, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726833
+UNION ALL SELECT intScheduleColumnId = 141, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726834
+UNION ALL SELECT intScheduleColumnId = 142, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726835
+UNION ALL SELECT intScheduleColumnId = 143, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726836
+UNION ALL SELECT intScheduleColumnId = 144, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726837
+UNION ALL SELECT intScheduleColumnId = 145, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726838
+UNION ALL SELECT intScheduleColumnId = 146, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726839
+UNION ALL SELECT intScheduleColumnId = 147, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726840
+UNION ALL SELECT intScheduleColumnId = 148, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726841
+UNION ALL SELECT intScheduleColumnId = 149, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726842
+UNION ALL SELECT intScheduleColumnId = 150, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726843
+UNION ALL SELECT intScheduleColumnId = 151, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726844
+UNION ALL SELECT intScheduleColumnId = 152, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726845
+UNION ALL SELECT intScheduleColumnId = 153, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726846
+UNION ALL SELECT intScheduleColumnId = 154, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726847
+UNION ALL SELECT intScheduleColumnId = 155, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726848
+UNION ALL SELECT intScheduleColumnId = 156, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726849
+UNION ALL SELECT intScheduleColumnId = 157, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726850
+UNION ALL SELECT intScheduleColumnId = 158, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726851
+UNION ALL SELECT intScheduleColumnId = 159, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726852
+UNION ALL SELECT intScheduleColumnId = 160, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726853
+UNION ALL SELECT intScheduleColumnId = 161, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726854
+UNION ALL SELECT intScheduleColumnId = 162, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726855
+UNION ALL SELECT intScheduleColumnId = 163, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726856
+UNION ALL SELECT intScheduleColumnId = 164, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726857
+UNION ALL SELECT intScheduleColumnId = 165, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726858
+UNION ALL SELECT intScheduleColumnId = 166, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726859
+UNION ALL SELECT intScheduleColumnId = 167, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726860
+UNION ALL SELECT intScheduleColumnId = 168, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726861
+UNION ALL SELECT intScheduleColumnId = 169, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726862
+UNION ALL SELECT intScheduleColumnId = 170, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726863
+UNION ALL SELECT intScheduleColumnId = 171, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726864
+UNION ALL SELECT intScheduleColumnId = 172, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726865
+UNION ALL SELECT intScheduleColumnId = 173, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726866
+UNION ALL SELECT intScheduleColumnId = 174, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strTerminalControlNumber', strCaption = 'Terminal', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726867
+UNION ALL SELECT intScheduleColumnId = 175, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726868
+UNION ALL SELECT intScheduleColumnId = 176, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726869
+UNION ALL SELECT intScheduleColumnId = 177, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strVendorName', strCaption = 'Seller Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726870
+UNION ALL SELECT intScheduleColumnId = 178, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Seller FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726871
+UNION ALL SELECT intScheduleColumnId = 179, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726872
+UNION ALL SELECT intScheduleColumnId = 180, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726873
+UNION ALL SELECT intScheduleColumnId = 181, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726874
+UNION ALL SELECT intScheduleColumnId = 182, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726875
+UNION ALL SELECT intScheduleColumnId = 183, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726876
+UNION ALL SELECT intScheduleColumnId = 184, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726877
+UNION ALL SELECT intScheduleColumnId = 185, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726878
+UNION ALL SELECT intScheduleColumnId = 186, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726879
+UNION ALL SELECT intScheduleColumnId = 187, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726880
+UNION ALL SELECT intScheduleColumnId = 188, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726881
+UNION ALL SELECT intScheduleColumnId = 189, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726882
+UNION ALL SELECT intScheduleColumnId = 190, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726883
+UNION ALL SELECT intScheduleColumnId = 191, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726884
+UNION ALL SELECT intScheduleColumnId = 192, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726885
+UNION ALL SELECT intScheduleColumnId = 193, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726886
+UNION ALL SELECT intScheduleColumnId = 194, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726887
+UNION ALL SELECT intScheduleColumnId = 195, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726888
+UNION ALL SELECT intScheduleColumnId = 196, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726889
+UNION ALL SELECT intScheduleColumnId = 197, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726890
+UNION ALL SELECT intScheduleColumnId = 198, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726891
+UNION ALL SELECT intScheduleColumnId = 199, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726892
+UNION ALL SELECT intScheduleColumnId = 200, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726893
+UNION ALL SELECT intScheduleColumnId = 201, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726894
+UNION ALL SELECT intScheduleColumnId = 202, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726895
+UNION ALL SELECT intScheduleColumnId = 203, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726896
+UNION ALL SELECT intScheduleColumnId = 204, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726897
+UNION ALL SELECT intScheduleColumnId = 205, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726898
+UNION ALL SELECT intScheduleColumnId = 206, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726899
+UNION ALL SELECT intScheduleColumnId = 207, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726900
+UNION ALL SELECT intScheduleColumnId = 208, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726901
+UNION ALL SELECT intScheduleColumnId = 209, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726902
+UNION ALL SELECT intScheduleColumnId = 210, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726903
+UNION ALL SELECT intScheduleColumnId = 211, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726904
+UNION ALL SELECT intScheduleColumnId = 212, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726905
+UNION ALL SELECT intScheduleColumnId = 213, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726906
+UNION ALL SELECT intScheduleColumnId = 214, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726907
+UNION ALL SELECT intScheduleColumnId = 215, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726908
+UNION ALL SELECT intScheduleColumnId = 216, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726909
+UNION ALL SELECT intScheduleColumnId = 217, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726910
+UNION ALL SELECT intScheduleColumnId = 218, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726911
+UNION ALL SELECT intScheduleColumnId = 219, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726912
+UNION ALL SELECT intScheduleColumnId = 220, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726913
+UNION ALL SELECT intScheduleColumnId = 221, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726914
+UNION ALL SELECT intScheduleColumnId = 222, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726915
+UNION ALL SELECT intScheduleColumnId = 223, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726916
+UNION ALL SELECT intScheduleColumnId = 224, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726917
+UNION ALL SELECT intScheduleColumnId = 225, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726918
+UNION ALL SELECT intScheduleColumnId = 226, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726919
+UNION ALL SELECT intScheduleColumnId = 227, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726920
+UNION ALL SELECT intScheduleColumnId = 228, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726921
+UNION ALL SELECT intScheduleColumnId = 229, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726922
+UNION ALL SELECT intScheduleColumnId = 230, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726923
+UNION ALL SELECT intScheduleColumnId = 231, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726924
+UNION ALL SELECT intScheduleColumnId = 232, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726925
+UNION ALL SELECT intScheduleColumnId = 233, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726926
+UNION ALL SELECT intScheduleColumnId = 234, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726927
+UNION ALL SELECT intScheduleColumnId = 235, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726928
+UNION ALL SELECT intScheduleColumnId = 236, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726929
+UNION ALL SELECT intScheduleColumnId = 237, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726930
+UNION ALL SELECT intScheduleColumnId = 238, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726931
+UNION ALL SELECT intScheduleColumnId = 239, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726932
+UNION ALL SELECT intScheduleColumnId = 240, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726933
+UNION ALL SELECT intScheduleColumnId = 241, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726934
+UNION ALL SELECT intScheduleColumnId = 242, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726935
+UNION ALL SELECT intScheduleColumnId = 243, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726936
+UNION ALL SELECT intScheduleColumnId = 244, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726937
+UNION ALL SELECT intScheduleColumnId = 245, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726938
+UNION ALL SELECT intScheduleColumnId = 246, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726939
+UNION ALL SELECT intScheduleColumnId = 247, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726940
+UNION ALL SELECT intScheduleColumnId = 248, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726941
+UNION ALL SELECT intScheduleColumnId = 249, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726942
+UNION ALL SELECT intScheduleColumnId = 250, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726943
+UNION ALL SELECT intScheduleColumnId = 251, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726944
+UNION ALL SELECT intScheduleColumnId = 252, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726945
+UNION ALL SELECT intScheduleColumnId = 253, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726946
+UNION ALL SELECT intScheduleColumnId = 254, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726947
+UNION ALL SELECT intScheduleColumnId = 255, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726948
+UNION ALL SELECT intScheduleColumnId = 256, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726949
+UNION ALL SELECT intScheduleColumnId = 257, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726950
+UNION ALL SELECT intScheduleColumnId = 258, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726951
+UNION ALL SELECT intScheduleColumnId = 259, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726952
+UNION ALL SELECT intScheduleColumnId = 260, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726953
+UNION ALL SELECT intScheduleColumnId = 261, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726954
+UNION ALL SELECT intScheduleColumnId = 262, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726955
+UNION ALL SELECT intScheduleColumnId = 263, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726956
+UNION ALL SELECT intScheduleColumnId = 264, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726957
+UNION ALL SELECT intScheduleColumnId = 265, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726958
+UNION ALL SELECT intScheduleColumnId = 266, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726959
+UNION ALL SELECT intScheduleColumnId = 267, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726960
+UNION ALL SELECT intScheduleColumnId = 268, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726961
+UNION ALL SELECT intScheduleColumnId = 269, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726962
+UNION ALL SELECT intScheduleColumnId = 270, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726963
+UNION ALL SELECT intScheduleColumnId = 271, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726964
+UNION ALL SELECT intScheduleColumnId = 272, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726965
+UNION ALL SELECT intScheduleColumnId = 273, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,	intMasterId = 1726966
+UNION ALL SELECT intScheduleColumnId = 274, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                          	intMasterId = 1726967
+UNION ALL SELECT intScheduleColumnId = 275, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                        	intMasterId = 1726968
+UNION ALL SELECT intScheduleColumnId = 276, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                 	intMasterId = 1726969
+UNION ALL SELECT intScheduleColumnId = 277, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                             	intMasterId = 1726970
+UNION ALL SELECT intScheduleColumnId = 278, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                         	intMasterId = 1726971
+UNION ALL SELECT intScheduleColumnId = 279, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                 	intMasterId = 1726972
+UNION ALL SELECT intScheduleColumnId = 280, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                             	intMasterId = 1726973
+UNION ALL SELECT intScheduleColumnId = 281, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                     	intMasterId = 1726974
+UNION ALL SELECT intScheduleColumnId = 282, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                  	intMasterId = 1726975
+UNION ALL SELECT intScheduleColumnId = 283, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                 	intMasterId = 1726976
+UNION ALL SELECT intScheduleColumnId = 284, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                       	intMasterId = 1726977
+UNION ALL SELECT intScheduleColumnId = 285, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                  	intMasterId = 1726978
+UNION ALL SELECT intScheduleColumnId = 286, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                          	intMasterId = 1726979
+UNION ALL SELECT intScheduleColumnId = 287, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                        	intMasterId = 1726980
+UNION ALL SELECT intScheduleColumnId = 288, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                 	intMasterId = 1726981
+UNION ALL SELECT intScheduleColumnId = 289, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                             	intMasterId = 1726982
+UNION ALL SELECT intScheduleColumnId = 290, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                         	intMasterId = 1726983
+UNION ALL SELECT intScheduleColumnId = 291, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1726984
+UNION ALL SELECT intScheduleColumnId = 292, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                           	intMasterId = 1726985
+UNION ALL SELECT intScheduleColumnId = 293, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                   	intMasterId = 1726986
+UNION ALL SELECT intScheduleColumnId = 294, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1726987
+UNION ALL SELECT intScheduleColumnId = 295, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1726988
+UNION ALL SELECT intScheduleColumnId = 296, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                     	intMasterId = 1726989
+UNION ALL SELECT intScheduleColumnId = 297, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1726990
+UNION ALL SELECT intScheduleColumnId = 298, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                        	intMasterId = 1726991
+UNION ALL SELECT intScheduleColumnId = 299, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                      	intMasterId = 1726992
+UNION ALL SELECT intScheduleColumnId = 300, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1726993
+UNION ALL SELECT intScheduleColumnId = 301, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                           	intMasterId = 1726994
+UNION ALL SELECT intScheduleColumnId = 302, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                       	intMasterId = 1726995
+UNION ALL SELECT intScheduleColumnId = 303, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1726996
+UNION ALL SELECT intScheduleColumnId = 304, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                           	intMasterId = 1726997
+UNION ALL SELECT intScheduleColumnId = 305, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                   	intMasterId = 1726998
+UNION ALL SELECT intScheduleColumnId = 306, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1726999
+UNION ALL SELECT intScheduleColumnId = 307, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727000
+UNION ALL SELECT intScheduleColumnId = 308, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                     	intMasterId = 1727001
+UNION ALL SELECT intScheduleColumnId = 309, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1727002
+UNION ALL SELECT intScheduleColumnId = 310, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                        	intMasterId = 1727003
+UNION ALL SELECT intScheduleColumnId = 311, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                      	intMasterId = 1727004
+UNION ALL SELECT intScheduleColumnId = 312, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727005
+UNION ALL SELECT intScheduleColumnId = 313, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                           	intMasterId = 1727006
+UNION ALL SELECT intScheduleColumnId = 314, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                       	intMasterId = 1727007
+UNION ALL SELECT intScheduleColumnId = 315, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727008
+UNION ALL SELECT intScheduleColumnId = 316, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                           	intMasterId = 1727009
+UNION ALL SELECT intScheduleColumnId = 317, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                   	intMasterId = 1727010
+UNION ALL SELECT intScheduleColumnId = 318, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1727011
+UNION ALL SELECT intScheduleColumnId = 319, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727012
+UNION ALL SELECT intScheduleColumnId = 320, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                     	intMasterId = 1727013
+UNION ALL SELECT intScheduleColumnId = 321, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1727014
+UNION ALL SELECT intScheduleColumnId = 322, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                        	intMasterId = 1727015
+UNION ALL SELECT intScheduleColumnId = 323, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                      	intMasterId = 1727016
+UNION ALL SELECT intScheduleColumnId = 324, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727017
+UNION ALL SELECT intScheduleColumnId = 325, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                           	intMasterId = 1727018
+UNION ALL SELECT intScheduleColumnId = 326, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                       	intMasterId = 1727019
+UNION ALL SELECT intScheduleColumnId = 327, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727020
+UNION ALL SELECT intScheduleColumnId = 328, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                           	intMasterId = 1727021
+UNION ALL SELECT intScheduleColumnId = 329, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                   	intMasterId = 1727022
+UNION ALL SELECT intScheduleColumnId = 330, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1727023
+UNION ALL SELECT intScheduleColumnId = 331, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727024
+UNION ALL SELECT intScheduleColumnId = 332, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                     	intMasterId = 1727025
+UNION ALL SELECT intScheduleColumnId = 333, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1727026
+UNION ALL SELECT intScheduleColumnId = 334, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                        	intMasterId = 1727027
+UNION ALL SELECT intScheduleColumnId = 335, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                      	intMasterId = 1727028
+UNION ALL SELECT intScheduleColumnId = 336, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727029
+UNION ALL SELECT intScheduleColumnId = 337, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                           	intMasterId = 1727030
+UNION ALL SELECT intScheduleColumnId = 338, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                       	intMasterId = 1727031
+UNION ALL SELECT intScheduleColumnId = 339, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727032
+UNION ALL SELECT intScheduleColumnId = 340, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                           	intMasterId = 1727033
+UNION ALL SELECT intScheduleColumnId = 341, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                   	intMasterId = 1727034
+UNION ALL SELECT intScheduleColumnId = 342, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1727035
+UNION ALL SELECT intScheduleColumnId = 343, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727036
+UNION ALL SELECT intScheduleColumnId = 344, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                     	intMasterId = 1727037
+UNION ALL SELECT intScheduleColumnId = 345, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                	intMasterId = 1727038
+UNION ALL SELECT intScheduleColumnId = 346, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                        	intMasterId = 1727039
+UNION ALL SELECT intScheduleColumnId = 347, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Date Shipped', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                      	intMasterId = 1727040
+UNION ALL SELECT intScheduleColumnId = 348, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'strBillofLading', strCaption = 'Document No', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                               	intMasterId = 1727041
+UNION ALL SELECT intScheduleColumnId = 349, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                           	intMasterId = 1727042
+UNION ALL SELECT intScheduleColumnId = 350, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0,                                                       	intMasterId = 1727043
+
 	
 	EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 	
@@ -2525,11 +3620,46 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7VA', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 173015
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7WV', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 173016
 
+
+	
+
 	--MFT-1704
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A099', strScheduleCode = '14'	, strType = 'Gasoline'		, ysnStatus = 1, intFrequency = 1, intMasterId =	173017
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A099', strScheduleCode = '14'	, strType = 'Special Fuels'	, ysnStatus = 1, intFrequency = 1, intMasterId =	173018
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A099', strScheduleCode = '14_C', strType = 'Gasoline'		, ysnStatus = 1, intFrequency = 1, intMasterId =	173019
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A099', strScheduleCode = '14_C', strType = 'Special Fuels'	, ysnStatus = 1, intFrequency = 1, intMasterId =	173020
+	
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '1_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173021
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '10A_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173022
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '10G_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173023
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '10I_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173024
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '10J_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173025
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '10Y_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173026
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '2_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173027
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '2A_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173028
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '2B_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173029
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '3IL_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173030
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '3IN_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173031
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '3TN_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173032
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '5DIL_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173033
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '5DIN_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173034
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '5DTN_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173035
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '6_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173036
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7IL_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173037
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7IN_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173038
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7TN_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173039
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '8_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173040
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '9_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173041
+		
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '3OH_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173042
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '3VA_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173043
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '3WV_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173044
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '5DOH_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173045
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '5DVA_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173046
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '5DWV_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173047
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7OH_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173048
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7VA_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173049
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = '72A138', strScheduleCode = '7WV_TR', strType = '', ysnStatus = 1, intFrequency = 1,	intMasterId =	173050
 
 	
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
