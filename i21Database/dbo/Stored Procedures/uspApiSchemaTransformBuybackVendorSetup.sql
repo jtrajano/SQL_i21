@@ -261,8 +261,8 @@ WHERE sr.guiApiUniqueId = @guiApiUniqueId
 
 DECLARE @CustomerLocationForUpdates TABLE (intVendorSetupId INT, intEntityLocationId INT, 
 	strVendorCustomerLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
-	strVendorShipTo NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL,
-	strVendorSoldTo NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL,
+	strVendorShipTo NVARCHAR(20) COLLATE Latin1_General_CI_AS,
+	strVendorSoldTo NVARCHAR(20) COLLATE Latin1_General_CI_AS,
 	intRowNumber INT NULL)
 INSERT INTO @CustomerLocationForUpdates
 SELECT e.intVendorSetupId, xc.intEntityLocationId, xc.strVendorCustomerLocation, xc.strVendorShipTo, xc.strVendorSoldTo, vs.intRowNumber
@@ -296,8 +296,8 @@ DECLARE @UniqueCustomerLocations TABLE (
 	  intEntityLocationId INT
 	, intVendorSetupId INT
 	, strVendorCustomerLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-	, strVendorShipTo NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL
-	, strVendorSoldTo NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL
+	, strVendorShipTo NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+	, strVendorSoldTo NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 	, guiApiUniqueId UNIQUEIDENTIFIER
 	, intRowNumber INT
 )
@@ -320,7 +320,7 @@ SELECT
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformBuybackVendorSetup vts
-JOIN tblEMEntity e ON e.strEntityNo = vts.strVendor
+JOIN tblEMEntity e ON e.strEntityNo = vts.strVendor OR e.strName = vts.strVendor
 JOIN tblAPVendor v ON e.intEntityId = v.intEntityId
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblEMEntityLocation l ON e.intEntityId = l.intEntityId
