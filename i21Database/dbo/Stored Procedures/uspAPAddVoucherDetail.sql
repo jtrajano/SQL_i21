@@ -154,16 +154,16 @@ SELECT TOP 100 PERCENT
 	,dblWeight							=	A.dblWeight
 	/*Cost info*/						
 	,intCostUOMId						=	A.intCostUOMId
-	-- ,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- ,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 	-- 											THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
 	-- 										ELSE A.intCostUOMId END
-	-- ,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- ,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 	-- 											THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
 	-- 										ELSE A.dblCostUnitQty END
 	,dblCostUnitQty						=	A.dblCostUnitQty
 	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
 	,dblCost							=	A.dblCost + ISNULL(A.dblQualityPremium, 0) + ISNULL(A.dblOptionalityPremium, 0)
-	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
 	-- 													THEN ctDetail.dblSeqPrice
 	-- 												ELSE 
@@ -175,10 +175,10 @@ SELECT TOP 100 PERCENT
 	-- 										ELSE A.dblCost END
 	,dblOldCost							=	A.dblOldCost
 	/*Quantity info*/					
-	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 												THEN ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
 											ELSE A.intQtyToBillUOMId END
-	,dblUnitQty							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	,dblUnitQty							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 												THEN 
 												(
 													CASE WHEN ctDetail.intContractDetailId IS NOT NULL
@@ -188,7 +188,7 @@ SELECT TOP 100 PERCENT
 											ELSE A.dblQtyToBillUnitQty END
 	/*Ordered and Received should always the same*/
 	,dblQtyOrdered						=	CASE WHEN A.dblQuantityToBill < 0 THEN ABS(A.dblOrderQty) * -1 ELSE ABS(A.dblOrderQty) END
-	,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 												THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 														THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
 													ELSE A.dblQuantityToBill END)
@@ -338,21 +338,21 @@ DECLARE @qtyToBillFromDev DECIMAL(38,15);
 UPDATE A
 	SET 
 		@qtyToBill = ISNULL(
-							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityToBill)
 									ELSE vp.dblQuantityToBill END)
 							ELSE vp.dblQuantityToBill END
 							,0),
 		@qtyBilled = ISNULL(
-							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityBilled)
 									ELSE vp.dblQuantityBilled END)
 							ELSE vp.dblQuantityBilled END
 							,0),
 		@qtyToBillFromDev = ISNULL(
-							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, A.dblQtyReceived)
 									ELSE A.dblQtyReceived END)
