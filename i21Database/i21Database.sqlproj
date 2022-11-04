@@ -1346,6 +1346,7 @@
     <Build Include="dbo\Tables\tblIPRefreshTokenEntity.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailImport.sql" />
     <Build Include="dbo\Tables\tblCTErrorImportLogs.sql" />
+    <Build Include="dbo\Functions\fnGRCheckBillIfFromAdjustSettlements.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
