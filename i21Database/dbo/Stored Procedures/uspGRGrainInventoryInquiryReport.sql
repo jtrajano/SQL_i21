@@ -363,7 +363,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut 
+		FROM #tblInOut
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
@@ -1107,7 +1107,7 @@ FROM (
 		,strUOM
 	FROM @InventoryData
 	WHERE (
-		strLabel IN ('RECEIVED','INTERNAL TRANSFERS RECEIVED','NET ADJUSTMENTS')
+		strLabel IN ('INTERNAL TRANSFERS RECEIVED','NET ADJUSTMENTS')
 	)
 	GROUP BY strCommodityCode
 		,intCommodityId
