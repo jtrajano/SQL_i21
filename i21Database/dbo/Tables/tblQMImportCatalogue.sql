@@ -15,7 +15,6 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     [strCatalogueType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSupplier] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strChannel] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-    [strSubChannel] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strLotNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS,
     [strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intContractItem] INT NULL,

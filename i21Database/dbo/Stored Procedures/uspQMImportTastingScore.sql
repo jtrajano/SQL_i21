@@ -221,6 +221,7 @@ BEGIN TRY
             ,intItemId = @intItemId
             ,intLastModifiedUserId = @intEntityUserId
             ,dtmLastModified = @dtmDateCreated
+            ,intSampleStatusId = 3 -- Approved
         FROM tblQMSample S
         WHERE S.intSampleId = @intSampleId
 

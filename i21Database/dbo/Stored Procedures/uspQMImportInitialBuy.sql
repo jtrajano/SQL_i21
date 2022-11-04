@@ -311,7 +311,6 @@ BEGIN TRY
             ,strSampleBoxNumber
             ,dblSellingPrice
             ,dtmStock
-            ,strSubChannel
             ,ysnStrategic
             ,strTeaLingoSubCluster
             ,dtmSupplierPreInvoiceDate
@@ -409,7 +408,6 @@ BEGIN TRY
             ,strSampleBoxNumber = S.strSampleBoxNumber
             ,dblSellingPrice = S.dblSupplierValuationPrice
             ,dtmStock = NULL
-            ,strSubChannel = IMP.strSubChannel
             ,ysnStrategic = NULL
             ,strTeaLingoSubCluster = NULL
             ,dtmSupplierPreInvoiceDate = NULL
