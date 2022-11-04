@@ -87,10 +87,10 @@ FROM (
 		, pfd.dtmFixationDate
 		, pfd.dblQuantity
 		, pfd.dblLoadPriced
-		, dblFinalprice = dbo.fnCTConvertToSeqFXCurrency(cd.intContractDetailId, pc.intFinalCurrencyId, iu.intItemUOMId, (CASE WHEN ct.ysnMultiplePriceFixation = 1 THEN cd.dblCashPrice ELSE  pfd.dblFinalPrice END))
+		, dblFinalprice = dbo.fnCTConvertToSeqFXCurrency(cd.intContractDetailId, pc.intFinalCurrencyId, iu.intItemUOMId, cd.dblCashPrice)
 		, dblBilledQuantity = (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN ISNULL(SUM(dbo.fnCTConvertQtyToTargetItemUOM(bd.intUnitOfMeasureId, cd.intItemUOMId, bd.dblQtyReceived)), 0) ELSE pfd.dblQuantity END)
 		, intBilledLoad = (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN 0 ELSE ISNULL(COUNT(DISTINCT bd.intBillId), 0) END)
-		, intPriceItemUOMId = pfd.intQtyItemUOMId
+		, intPriceItemUOMId = cd.intItemUOMId
 		, cd.intPricingTypeId
 		, cd.intFreightTermId 
 		, cd.intCompanyLocationId 
@@ -105,9 +105,6 @@ FROM (
 	LEFT JOIN tblAPBillDetail bd ON bd.intContractHeaderId = ch.intContractHeaderId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
 	LEFT JOIN tblICCommodityUnitMeasure co ON co.intCommodityUnitMeasureId = pfd.intPricingUOMId      
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = cd.intItemId AND iu.intUnitMeasureId = co.intUnitMeasureId
-	OUTER APPLY (
-		SELECT TOP 1 ysnMultiplePriceFixation  from tblCTContractHeader a where a.intContractHeaderId = cd.intContractHeaderId
-	) ct
 	WHERE ch.ysnMultiplePriceFixation = 1
 	GROUP BY
 		pf.intContractHeaderId
@@ -125,10 +122,9 @@ FROM (
 		, cd.intPricingTypeId
 		, cd.intFreightTermId
 		, cd.intCompanyLocationId
-		, pfd.intQtyItemUOMId
+		, cd.intItemUOMId
 		, pc.intPriceContractId
 		, pc.strPriceContractNo
-		, ct.ysnMultiplePriceFixation
 		, cd.dblCashPrice
 
 	UNION ALL
