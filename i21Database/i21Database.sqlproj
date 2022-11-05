@@ -857,6 +857,7 @@
     <Build Include="dbo\Stored Procedures\uspSMGetOriginalTax.sql" />
     <Build Include="dbo\Functions\fnFAMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetOriginByCommodity.sql" />
+    <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
