@@ -22,6 +22,7 @@ BEGIN TRY
 			,@ysnExternal							BIT
 			,@strAmendedColumns						NVARCHAR(MAX)
 			,@strAmendedDate						NVARCHAR(200)
+			,@strAmendedTerm						NVARCHAR(200)
 			,@strSequenceHistoryId					NVARCHAR(MAX)
 			,@strCompanyName						NVARCHAR(500)
 			,@strPackingDescription					NVARCHAR(100)
@@ -189,6 +190,11 @@ BEGIN TRY
 											WHERE ISNULL(AAP.ysnAmendment,0) = 1 
 											order by AL.dtmHistoryCreated DESC )
 		END
+
+		SELECT @strAmendedTerm = (SELECT strNewValue
+									FROM tblCTAmendmentApproval AAP
+									JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId =  @intContractHeaderId  
+									WHERE ISNULL(AAP.ysnAmendment,0) = 1 and strItemChanged = 'Terms' )
 
 	END
 
@@ -387,6 +393,7 @@ BEGIN TRY
 													END + '</span>'
 		 ,dtmContractDate						= CH.dtmContractDate
 		 ,strContractNumberStrauss				= CH.strContractNumber + (CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns, '')))) = 0 OR (@strTransactionApprovalStatus = 'Waiting for Submit' OR @strTransactionApprovalStatus = 'Waiting for Approval') THEN '' ELSE ' - AMENDMENT' END) + (CASE WHEN @strAmendedDate  IS NULL THEN '' ELSE ' - ('+ @strAmendedDate + ')' END)
+		 ,strAmendedTerm						= ISNULL(@strAmendedTerm,NULL)
 		 ,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
