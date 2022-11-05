@@ -404,6 +404,7 @@ WHERE ILD.intImportLogId = @ImportLogId
   AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber IS NULL)
   AND ISNULL(ysnSuccess, 1) = 1
   AND ILD.strContractNumber IS NOT NULL
+  AND ISNULL(ILD.strContractNumber, '') <> ''
 
 --CONTRACT SEQUENCE DOES NOT EXISTS
 UPDATE ILD
@@ -417,7 +418,7 @@ WHERE IL.intImportLogId = @ImportLogId
  AND ISNULL(CTH.intContractSeq,0) = 0 
  AND ISNULL(CTH.intContractHeaderId, 0) = 0
  AND ISNULL(ysnSuccess, 1) = 1
- AND ILD.intContractSeq IS NOT NULL
+ AND ISNULL(ILD.intContractSeq, 0) <> 0
 
 INSERT INTO @InvoicesForImport
 SELECT ILD.intImportLogDetailId,ILD.strTransactionType,ysnImported,ILD.ysnSuccess,IL.ysnRecap FROM tblARImportLogDetail ILD
