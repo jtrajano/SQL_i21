@@ -284,8 +284,17 @@ SELECT TOP 100 PERCENT
 	,strVendorLotNumber					=	A.strVendorLotNumber
 	,strPreInvoiceGarden				=	A.strPreInvoiceGarden
 	,strPreInvoiceGardenNumber			=	A.strPreInvoiceGardenNumber
+	,intBookId							=	A.intBookId
 	,strBook							=	A.strBook
+	,intSubBookId						=	A.intSubBookId
 	,strSubBook							=	A.strSubBook
+	,A.dblPackageBreakups
+	,A.dblNetWeightPerPackage
+	,A.dblNumberOfPackages
+	,A.dblNetWeightPerPackage2
+	,A.dblNumberOfPackages2
+	,A.dblNetWeightPerPackage3
+	,A.dblNumberOfPackages3
 	/**/
 	,dtmExpectedDate					=	A.dtmExpectedDate
 INTO #tmpVoucherPayableData
