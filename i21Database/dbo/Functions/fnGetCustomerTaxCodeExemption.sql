@@ -30,15 +30,16 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
-	DECLARE	@TaxCodeExemption		NVARCHAR(500)
-			,@ExemptionPercent		NUMERIC(18,6)
-			,@TaxExempt				BIT
-			,@InvalidSetup			BIT
-			,@State					NVARCHAR(100)
-			,@SiteNumberId			INT
-			,@CustomerApplySalesTax	BIT = 0
-			,@CustomerTaxExempt 	BIT = 0
-			,@SiteTaxable 			BIT = 0
+	DECLARE	@TaxCodeExemption			NVARCHAR(500)
+			,@ExemptionPercent			NUMERIC(18,6)
+			,@TaxExempt					BIT
+			,@InvalidSetup				BIT
+			,@State						NVARCHAR(100)
+			,@SiteNumberId				INT
+			,@CustomerApplySalesTax		BIT = 0
+			,@CustomerApplyPrepaidTax	BIT = 0
+			,@CustomerTaxExempt 		BIT = 0
+			,@SiteTaxable 				BIT = 0
 	
 	SET @TaxCodeExemption = NULL
 	SET @ExemptionPercent = 0.00000
@@ -47,6 +48,7 @@ BEGIN
 	SET @DisregardExemptionSetup = ISNULL(@DisregardExemptionSetup, 0)
 
 	SELECT @CustomerApplySalesTax 	= ysnApplySalesTax
+	 	 , @CustomerApplyPrepaidTax	= ysnApplyPrepaidTax
 		 , @CustomerTaxExempt		= ysnTaxExempt
 	FROM tblARCustomer
 	WHERE intEntityId = @CustomerId 
@@ -131,6 +133,28 @@ BEGIN
 	INNER JOIN tblSMTaxClass SMTCL ON SMTC.[intTaxClassId] = SMTCL.[intTaxClassId]
 	WHERE @CustomerApplySalesTax = 0 AND @SiteTaxable = 0
 	  AND SMTCL.strTaxClass LIKE '%Sales Tax%'
+	  AND SMTGC.[intTaxCodeId] = @TaxCodeId
+	  AND SMTGC.[intTaxGroupId] = @TaxGroupId		
+
+	IF LEN(RTRIM(LTRIM(ISNULL(@TaxCodeExemption,'')))) > 0 AND @DisregardExemptionSetup <> 1
+		BEGIN
+			INSERT INTO @returntable
+			SELECT 
+				 [ysnTaxExempt] = 1
+				,[ysnInvalidSetup] = @InvalidSetup
+				,[strExemptionNotes] = @TaxCodeExemption
+				,[dblExemptionPercent] = @ExemptionPercent
+			RETURN 	
+		END
+
+	SELECT TOP 1 @TaxCodeExemption =  'Customer doesn''t apply Prepaid Tax; Date: ' + CONVERT(NVARCHAR(20), GETDATE(), 101) + ' ' + CONVERT(NVARCHAR(20), GETDATE(), 114)
+	FROM tblSMTaxGroupCode SMTGC
+	INNER JOIN tblSMTaxGroup SMTG ON SMTGC.[intTaxGroupId] = SMTG.[intTaxGroupId] 
+	INNER JOIN tblSMTaxCode SMTC ON SMTGC.[intTaxCodeId] = SMTC.[intTaxCodeId] 
+	INNER JOIN tblSMTaxClass SMTCL ON SMTC.[intTaxClassId] = SMTCL.[intTaxClassId]
+	LEFT JOIN tblSMTaxReportType TRT ON SMTCL.intTaxReportTypeId = TRT.intTaxReportTypeId
+	WHERE @CustomerApplyPrepaidTax = 0
+	  AND ((TRT.intTaxReportTypeId IS NULL AND SMTCL.strTaxClass LIKE '%Prepaid Tax%') OR (TRT.intTaxReportTypeId IS NOT NULL AND TRT.strType = 'Prepaid Sales Tax'))
 	  AND SMTGC.[intTaxCodeId] = @TaxCodeId
 	  AND SMTGC.[intTaxGroupId] = @TaxGroupId		
 
