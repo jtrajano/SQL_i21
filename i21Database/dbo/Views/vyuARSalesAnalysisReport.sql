@@ -162,11 +162,12 @@ AS (
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId		
 												 AND ISNULL(ICI.strLotTracking, 'No')	<> 'No'
+												 AND ICIT.intInTransitSourceLocationId 	IS NULL
 												 AND ICIT.intItemUOMId 					IS NOT NULL
 												 AND ICIT.intTransactionTypeId 			<> 1
 		INNER JOIN tblICItemUOM UOM ON ICISI.intItemUOMId = UOM.intItemUOMId	
 		INNER JOIN tblICLot ICL ON ICIT.intLotId = ICL.intLotId
-							   AND ICISI.intItemUOMId = (CASE WHEN (ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1) THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
+							   --AND ICISI.intItemUOMId = (CASE WHEN (ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1) THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
 	) AS LOTTED ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 				AND ARID.intItemId					= LOTTED.intItemId				
