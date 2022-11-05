@@ -861,6 +861,7 @@
     <Build Include="dbo\Views\vyuGLChangeAccountCategoryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertChangeCategoryAuditLog.sql" />
     <Build Include="dbo\Functions\fnGLGetForwardBalanceAndUnit.sql" />
+    <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
