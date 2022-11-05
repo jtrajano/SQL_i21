@@ -399,10 +399,11 @@ SET [ysnImported]		= 0
   , [strEventResult]	= 'The Contract Number provided does not exists. '
 FROM tblARImportLogDetail ILD
 INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
-LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale'
+LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber = ILD.strContractNumber AND CTH.strContractType = 'Sale'
 WHERE ILD.intImportLogId = @ImportLogId 
   AND (ISNULL(CTH.intContractHeaderId, 0) = 0 OR CTH.strContractNumber IS NULL)
   AND ISNULL(ysnSuccess, 1) = 1
+  AND ILD.strContractNumber IS NOT NULL
 
 --CONTRACT SEQUENCE DOES NOT EXISTS
 UPDATE ILD
@@ -411,11 +412,12 @@ SET [ysnImported]		= 0
   , [strEventResult]	= 'The Contract Sequence provided does not exists. '
 FROM tblARImportLogDetail ILD
 INNER JOIN tblARImportLog IL ON ILD.intImportLogId = IL.intImportLogId
-LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber=ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq=ILD.intContractSeq
+LEFT JOIN vyuARPrepaymentContractDefault CTH ON CTH.strContractNumber = ILD.strContractNumber AND CTH.strContractType = 'Sale' AND CTH.intContractSeq = ILD.intContractSeq
 WHERE IL.intImportLogId = @ImportLogId 
  AND ISNULL(CTH.intContractSeq,0) = 0 
  AND ISNULL(CTH.intContractHeaderId, 0) = 0
  AND ISNULL(ysnSuccess, 1) = 1
+ AND ILD.intContractSeq IS NOT NULL
 
 INSERT INTO @InvoicesForImport
 SELECT ILD.intImportLogDetailId,ILD.strTransactionType,ysnImported,ILD.ysnSuccess,IL.ysnRecap FROM tblARImportLogDetail ILD
