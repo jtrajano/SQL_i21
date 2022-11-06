@@ -436,7 +436,7 @@ BEGIN
 			, intOverrideBankValuationId
 		)
 		SELECT
-			strAction = 'Created Shipment'
+			strAction = CASE WHEN @ysnDelete = 1 THEN 'Deleted ' ELSE 'Created ' END + 'Shipment'
 			, strTransactionType = 'Logistics'
 			, intTradeFinanceTransactionId = TF.intTradeFinanceId
 			, strTradeFinanceTransaction = TF.strTradeFinanceNumber
