@@ -1051,6 +1051,7 @@ SELECT @warningNotImported = COUNT(1)
 FROM tblICEdiPricebook 
 WHERE strUniqueId = @UniqueId AND ysnAddNewRecords = 0 AND ysnUpdateExistingRecords = 0 AND ysnAddOrderingUPC = 0 AND ysnUpdatePrice = 0;
 
+;
 -- Update or Insert Item UOM
 INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (
 	intItemId 
@@ -1071,7 +1072,8 @@ WITH (HOLDLOCK) AS ItemUOM
 		SELECT Item.intItemId 
 			 , ItemUOM.intItemUOMId
 			 , intUnitMeasureId = COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)			
-			 , ysnStockUnit = CASE WHEN StockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 			
+			 , ysnStockUnit = CASE WHEN StockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 
+			 , strLongUPCCode = dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(NULLIF(Pricebook.strSellingUpcNumber,'')))
 			 , Pricebook.* 
 		FROM 
 			tblICEdiPricebook AS Pricebook
@@ -1079,7 +1081,8 @@ WITH (HOLDLOCK) AS ItemUOM
 				ON Item.strItemNo = NULLIF(Pricebook.strItemNo, '') 		
 			LEFT JOIN tblICItemUOM AS ItemUOM 
 				ON ItemUOM.intItemId = Item.intItemId 				
-				AND ItemUOM.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
+				AND dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(ItemUOM.strLongUPCCode))
+					= dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(NULLIF(Pricebook.strSellingUpcNumber,'')))
 				AND (
 					ItemUOM.intModifier = NULLIF(Pricebook.strUpcModifierNumber,'') 
 					OR (NULLIF(ItemUOM.intModifier, 0) IS NULL AND NULLIF(Pricebook.strUpcModifierNumber,'') IS NULL) 
@@ -1118,6 +1121,7 @@ THEN
 		     , intConcurrencyId		= ItemUOM.intConcurrencyId + 1
 		     , intCheckDigit		= dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
 		     , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
+			 , strLongUPCCode		= Source_Query.strLongUPCCode
 
 /* If not found and it is allowed, insert a new item uom record. */
 WHEN 
