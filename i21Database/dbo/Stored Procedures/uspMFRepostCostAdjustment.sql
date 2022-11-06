@@ -528,6 +528,8 @@ BEGIN TRY
 			@adjustedEntries
 			,@strBatchIdForRepost
 			,@userId
+			,1
+			,1
 
 		IF @intReturnValue <> 0
 		BEGIN
