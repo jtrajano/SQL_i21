@@ -1347,6 +1347,8 @@
     <Build Include="dbo\Views\vyuCTContractDetailImport.sql" />
     <Build Include="dbo\Tables\tblCTErrorImportLogs.sql" />
     <Build Include="dbo\Functions\fnGRCheckBillIfFromAdjustSettlements.sql" />
+    <Build Include="dbo\Tables\tblIPAuctionStockPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPAuctionStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
