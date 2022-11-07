@@ -104,6 +104,7 @@ CREATE TABLE ##CANCELLEDINVOICE (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
 	 , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	 , strDocumentNumber			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	 , ysnPaid						BIT												NULL
 )
 CREATE TABLE ##CANCELLEDCMINVOICE (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
