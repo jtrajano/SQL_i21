@@ -529,6 +529,7 @@ BEGIN TRY
 		AND CBL.intContractTypeId = 1 --Purchase
 		AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 		AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
+		AND CBL.strTransactionType = 'Contract Balance'
 	) t WHERE intRowNum = 1
 	UNION ALL
 
@@ -626,6 +627,7 @@ BEGIN TRY
 	AND CBL.intCommodityId = @intCommodityId
 	AND strAction IN('Created Contract')
 	AND CBL.intContractTypeId = 1 --Purchase
+	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 
 	UNION ALL
 
@@ -1084,6 +1086,7 @@ BEGIN TRY
 		AND CBL.intContractTypeId = 2 --Sales
 		AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 		AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
+		AND CBL.strTransactionType = 'Contract Balance'
 	) t WHERE intRowNum = 1
 
 	UNION ALL
