@@ -15,39 +15,66 @@ GO
 GO
 
 	IF NOT EXISTS (SELECT * FROM tblCRMHubspotConfig)
-	BEGIN
-		INSERT INTO tblCRMHubspotConfig (
-			strHsClientId,
-			strHsClientSecret, 
-			strHsInstallationUrl, 
-			strHsTokenUrl,
-			strHsApiUrl,
-			strHsi21RedirectUrl, 
-			strHsi21AuthorizeUrl, 
-			strHsRefreshToken,
-			strScopesId,
-			intConcurrencyId
-		) 
-		VALUES (
-			'9caabd67-35fa-4883-86f6-3a941d350439',
-			'ea8ce734-02de-4224-9502-2d7499a2a687', 
-			'https://app.hubspot.com/oauth/authorize', 
-			'https://api.hubapi.com/oauth/v1/token',
-			'https://api.hubapi.com',
-			'https://helpdesk.irely.com/irelyi21Live/authenticatehubspot', 
-			null,
-			null, 
-			'1,2',
-			1
-		)
-	END
+		BEGIN
+			INSERT INTO tblCRMHubspotConfig (
+				strHsClientId,
+				strHsClientSecret, 
+				strHsInstallationUrl, 
+				strHsTokenUrl,
+				strHsApiUrl,
+				strHsi21RedirectUrl, 
+				strHsi21AuthorizeUrl, 
+				strHsRefreshToken,
+				strScopesId,
+				intConcurrencyId
+			) 
+			VALUES (
+				'9caabd67-35fa-4883-86f6-3a941d350439',
+				'ea8ce734-02de-4224-9502-2d7499a2a687', 
+				'https://app.hubspot.com/oauth/authorize', 
+				'https://api.hubapi.com/oauth/v1/token',
+				'https://api.hubapi.com',
+				'https://helpdesk.irely.com/irelyi21Live/authenticatehubspot', 
+				null,
+				null, 
+				'1,2',
+				1
+			)
+		END
+	ELSE 
+		BEGIN
+			IF NOT EXISTS(SELECT strHsInstallationUrl FROM tblCRMHubspotConfig)
+				BEGIN
+					UPDATE tblCRMHubspotConfig SET strHsInstallationUrl = 'https://app.hubspot.com/oauth/authorize'
+				END
+
+			IF NOT EXISTS(SELECT strHsTokenUrl FROM tblCRMHubspotConfig)
+				BEGIN
+					UPDATE tblCRMHubspotConfig SET strHsTokenUrl = 'https://api.hubapi.com/oauth/v1/token'
+				END
+
+			IF NOT EXISTS(SELECT strHsApiUrl FROM tblCRMHubspotConfig)
+				BEGIN
+					UPDATE tblCRMHubspotConfig SET strHsApiUrl = 'https://api.hubapi.com'
+				END
+
+			IF NOT EXISTS(SELECT strHsi21RedirectUrl FROM tblCRMHubspotConfig)
+				BEGIN
+					UPDATE tblCRMHubspotConfig SET strHsi21RedirectUrl = 'https://helpdesk.irely.com/irelyi21Live/authenticatehubspot'
+				END
+
+			IF NOT EXISTS(SELECT strScopesId FROM tblCRMHubspotConfig)
+				BEGIN
+					UPDATE tblCRMHubspotConfig SET strScopesId = '1,2'
+				END
+		END
 
 	IF NOT EXISTS (SELECT * FROM tblCRMHubspotScope WHERE strScope = 'crm.objects.companies.read')
 	BEGIN
 		INSERT INTO tblCRMHubspotScope (strScope, strDescription, ysnEnabled, intConcurrencyId) VALUES ('crm.objects.companies.read', 'Read companies', 1, 1)
 	END
 
-	IF NOT EXISTS (SELECT * FROM tblCRMHubspotScope WHERE strScope = 'crm.objects.companies.read')
+	IF NOT EXISTS (SELECT * FROM tblCRMHubspotScope WHERE strScope = 'crm.objects.contacts.read')
 	BEGIN
 		INSERT INTO tblCRMHubspotScope (strScope, strDescription, ysnEnabled, intConcurrencyId) VALUES ('crm.objects.contacts.read', 'Read contacts', 1, 1)
 	END
