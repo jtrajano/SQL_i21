@@ -281,7 +281,7 @@ BEGIN
 		,dtmInvoiceDate = Inv.dtmDate
 		,dtmPostDate = Inv.dtmPostDate
 		,strInvoicePaymentInformation = @strPaymentInfo 
-		,strWarehouse = SWH.strSubLocationName
+		,strWarehouse = ISNULL(LWH.strSubLocationName, SWH.strSubLocationName)
 		,strWarehouseCondition = (SELECT TOP 1 CASE WHEN ISNULL(ID.strItemDescription, '') = '' 
 									THEN I.strDescription ELSE ID.strItemDescription END
 								  FROM tblARInvoiceDetail ID
@@ -329,6 +329,9 @@ BEGIN
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
+	OUTER APPLY (SELECT TOP 1 LWHSL.strSubLocationName FROM tblLGLoadWarehouse LWH 
+					LEFT JOIN tblSMCompanyLocationSubLocation LWHSL ON LWHSL.intCompanyLocationSubLocationId = LWH.intSubLocationId
+					WHERE LWH.intLoadId = L.intLoadId) LWH
 	OUTER APPLY (SELECT TOP 1 strContainerNumber = Cont.strContainerNumber, strLotNumber = Cont.strLotNumber, strMarks = Cont.strMarks FROM tblLGLoadDetailContainerLink LDCLink
 					LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
 					WHERE LDCLink.intLoadDetailId = ReceiptItem.intSourceId) Cont
