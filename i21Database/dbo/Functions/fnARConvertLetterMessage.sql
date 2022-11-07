@@ -14,6 +14,9 @@ DECLARE @BinMessageOut		VARBINARY(MAX)
 		, @strPlaceHolder		VARCHAR(MAX)
 		, @strPlaceValue		NVARCHAR(MAX)
 		, @temp_newHTMLMessage NVARCHAR(MAX)
+		, @PlaceHolderStartPosition	INT
+		, @PlaceHolderLen	INT
+		, @temp_PlaceHolder NVARCHAR(MAX)
 
 DECLARE @TempPlaceHolderTable TABLE  (
 	 intPlaceHolderId	INT
@@ -37,7 +40,17 @@ BEGIN
 	FROM
 		@TempPlaceHolderTable
 
-	SET @temp_newHTMLMessage =  (REPLACE(dbo.fnARRemoveWhiteSpace(@newHTMLMessage), dbo.fnARRemoveWhiteSpace(@strPlaceHolder), ISNULL(@strPlaceValue,'')))
+	IF CHARINDEX(dbo.fnARRemoveWhiteSpace(@strPlaceHolder), dbo.fnARRemoveWhiteSpace(@newHTMLMessage)) <> 0 AND @strPlaceHolder LIKE '%</table>%'
+	BEGIN
+		SET @PlaceHolderStartPosition = CHARINDEX (SUBSTRING((@strPlaceHolder), 1, 25), (@newHTMLMessage))
+		SET @PlaceHolderLen = LEN(@strPlaceHolder)
+		SET @temp_PlaceHolder = SUBSTRING(@newHTMLMessage, @PlaceHolderStartPosition, @PlaceHolderLen)
+		SET @temp_newHTMLMessage =  (REPLACE(TRIM(@newHTMLMessage), TRIM(@temp_PlaceHolder), ISNULL(@strPlaceValue,'')))
+	END
+	ELSE
+	BEGIN
+		SET @temp_newHTMLMessage =  (REPLACE(TRIM(@newHTMLMessage), TRIM(@strPlaceHolder), ISNULL(@strPlaceValue,'')))
+	END
 	
 	IF	@temp_newHTMLMessage IS NOT NULL AND LEN(LTRIM(RTRIM(@temp_newHTMLMessage))) <> 0
 			BEGIN
