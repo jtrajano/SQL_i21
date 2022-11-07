@@ -69,6 +69,8 @@ SELECT CD.intContractDetailId
 	,CD.strPackingDescription
 	,intShippingLineEntityId = CD.intShippingLineId
 	,strShippingLine = ShipLine.strName
+	,intShipperEntityId = CD.intShipperId
+	,strShipper = Shipper.strName
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
 	,Cont.strContainerType
@@ -141,6 +143,7 @@ LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 LEFT JOIN tblEMEntity ShipLine ON ShipLine.intEntityId = CD.intShippingLineId
+LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
 LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
