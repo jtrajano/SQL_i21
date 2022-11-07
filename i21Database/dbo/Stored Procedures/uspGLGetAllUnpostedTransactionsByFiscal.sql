@@ -183,6 +183,7 @@ BEGIN
 				dtmDate, 
 				'CM' 
 				FROM vyuCMUnpostedTransaction --CM
+				WHERE strTransactionId  NOT LIKE ('P%') --PCHK, PAY Transations are excluded
 		)
 		INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
 		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, MIN(dtmDate) from Transactions T
