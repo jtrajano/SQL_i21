@@ -540,11 +540,11 @@ BEGIN TRY
    , strGardenMark NVARCHAR(50)
    , dtmManufacturingDate DATETIME  
    , intTotalNumberOfPackageBreakups INT
-   , intNetWtPerPackages INT
+   , intNetWtPerPackagesUOMId INT
    , intNoOfPackages INT
-   , intNetWtSecondPackageBreak INT
+   , intNetWtSecondPackageBreakUOMId INT
    , intNoOfPackagesSecondPackageBreak INT
-   , intNetWtThirdPackageBreak INT
+   , intNetWtThirdPackageBreakUOMId INT
    , intNoOfPackagesThirdPackageBreak INT
    , intProductLineId INT
    , strProductLine NVARCHAR(50)
