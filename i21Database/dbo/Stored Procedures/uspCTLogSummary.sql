@@ -480,7 +480,8 @@ BEGIN TRY
 			, intSubBookId INT
 			, intOrderBy INT
 			, intUserId INT
-			, dblQuantity NUMERIC(18, 6));
+			, dblQuantity NUMERIC(18, 6)
+			, ysnQuantityChange bit);
 
 		INSERT INTO @sequenceHistory (Row_Num
 			, intSequenceHistoryId
@@ -519,7 +520,8 @@ BEGIN TRY
 			, intSubBookId
 			, intOrderBy
 			, intUserId
-			, dblQuantity)
+			, dblQuantity
+			, ysnQuantityChange)
 		SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.intSequenceHistoryId DESC) AS Row_Num
 			, sh.intSequenceHistoryId
 			, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
@@ -558,6 +560,7 @@ BEGIN TRY
 			, intOrderBy = 1
 			, sh.intUserId
 			, sh.dblQuantity
+			, ysnQuantityChange = sh.ysnQtyChange
 		FROM tblCTSequenceHistory sh
 		INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 		WHERE intSequenceUsageHistoryId IS NULL
@@ -726,6 +729,7 @@ BEGIN TRY
 				, @dblBalanceChange NUMERIC(18, 6) = 0
 				, @dblQtyPriced NUMERIC(18, 6)
 				, @dblQtyUnPriced NUMERIC(18, 6)
+				, @ysnQuantityChange bit
 
 			SELECT TOP 1 @prevStatus = intContractStatusId
 			FROM @cbLogPrev
@@ -736,6 +740,7 @@ BEGIN TRY
 			SELECT TOP 1 @dblBalanceChange = dblDynamicQty
 				, @dblQtyPriced = ISNULL(dblQtyPriced, 0)
 				, @dblQtyUnPriced = ISNULL(dblQtyUnpriced, 0)
+				, @ysnQuantityChange = ysnQuantityChange
 			FROM @sequenceHistory
 			WHERE Row_Num = 1
 
@@ -3932,7 +3937,7 @@ BEGIN TRY
 				begin
 					declare @intLastLogStatus int;
 					select top 1 @intLastLogStatus = intContractStatusId from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
-					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4)
+					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4 and isnull(@ysnQuantityChange,0) = 0)
 					begin
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					end
