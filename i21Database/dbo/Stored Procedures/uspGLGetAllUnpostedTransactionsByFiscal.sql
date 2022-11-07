@@ -180,6 +180,7 @@ BEGIN
 				dtmDate, 
 				'CM' 
 				FROM vyuCMUnpostedTransaction --CM
+				WHERE strTransactionId  NOT LIKE ('P%') --PCHK, PAY Transations are excluded
 		)
 		INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate, strModule)
 		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,T.strModule from Transactions T
