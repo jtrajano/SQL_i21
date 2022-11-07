@@ -114,7 +114,7 @@ BEGIN
 				,i21.strCbkNo
 				,i21.intConcurrencyId
 				,i21.intPayToDown
-				,i21.strACHClientId
+				,i21.strMT101ACH_FileNameFormat
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
 				,i21.strCorrespondingBank
@@ -345,7 +345,7 @@ BEGIN
 					,intConcurrencyId
 					,strCbkNo
 					,intPayToDown
-					,strACHClientId
+					,strMT101ACH_FileNameFormat
 					,intResponsibleEntityId
 					,strCorrespondingBank
 					,ysnABREnable
@@ -438,7 +438,7 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
-					,strACHClientId						= i.strACHClientId
+					,strMT101ACH_FileNameFormat						= i.strMT101ACH_FileNameFormat
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
@@ -649,7 +649,7 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
-					,strACHClientId						= i.strACHClientId
+					,strMT101ACH_FileNameFormat						= i.strMT101ACH_FileNameFormat
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable

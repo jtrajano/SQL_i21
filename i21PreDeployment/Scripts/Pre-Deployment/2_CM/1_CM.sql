@@ -33,6 +33,3 @@ BEGIN
 	EXEC sp_rename 'dbo.tblCMBankTransfer.dblRate', 'dblRateAmountTo', 'COLUMN';  
 	EXEC sp_rename 'dbo.tblCMBankTransfer.dblHistoricRate', 'dblRateAmountFrom', 'COLUMN';  
 END
-
-
-

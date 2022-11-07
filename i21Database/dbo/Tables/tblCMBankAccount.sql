@@ -86,7 +86,7 @@
     [strCbkNo]                         NVARCHAR (2)   COLLATE Latin1_General_CI_AS NOT NULL,
     [intConcurrencyId]                 INT            DEFAULT 1 NOT NULL,
     [intPayToDown]                     INT            DEFAULT 0 NULL,
-    [strACHClientId]                   NVARCHAR(30)   COLLATE Latin1_General_CI_AS NULL,
+    [strMT101ACH_FileNameFormat]       NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL,
     [intResponsibleEntityId]           INT            NULL,
     [strPaymentInstructions]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCorrespondingBank]             NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL,
