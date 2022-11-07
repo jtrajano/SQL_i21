@@ -3,7 +3,7 @@
 	[intDeliveryUpdateId] INT IDENTITY (1, 1) NOT NULL,
 	[intSiteId] INT NOT NULL,
 	[intDispatchId] INT NULL,
-	[strSource] NVARCHAR(50) NULL,
+	[strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDeliveryDate] DATETIME NULL,
 	[dblDeliveryQuantity] DECIMAL(18, 6) NULL,
 	[dblDeliveryPrice] DECIMAL(18, 6) NULL,
