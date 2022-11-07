@@ -10,7 +10,7 @@ SELECT
 [intBuyingCenterId],
 [strBuyingCenter] = LOC.strLocationName,
 [intReceivingStorageLocation],
-[strReceivingStorageLocation] = SLOC.strSubLocationDescription,
+[strReceivingStorageLocation] = SLOC.strSubLocationName,
 [intChannelId],
 [strChannel] = MZ.strMarketZoneCode,
 [intReceivingPlantId] = SLOC.intCompanyLocationId,
