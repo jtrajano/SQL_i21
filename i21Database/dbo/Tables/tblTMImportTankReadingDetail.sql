@@ -13,6 +13,6 @@
 	[intRecord] INT NULL,
 	CONSTRAINT [PK_tblTMImportTankReadingDetail] PRIMARY KEY CLUSTERED ([intImportTankReadingDetailId] ASC),
 	CONSTRAINT [FK_tblTMImportTankReadingDetail_tblTMImportTankReading] FOREIGN KEY ([intImportTankReadingId]) REFERENCES [dbo].[tblTMImportTankReading] ([intImportTankReadingId]),
-	CONSTRAINT [FK_tblTMImportTankReadingDetail_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
+	--CONSTRAINT [FK_tblTMImportTankReadingDetail_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [FK_tblTMImportTankReadingDetail_tblTMSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 )
