@@ -222,20 +222,21 @@ WHERE I.ysnPosted = 1
 INSERT INTO ##CANCELLEDINVOICE (
 	 intInvoiceId
 	,strInvoiceNumber
+	,ysnPaid
 )
-SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber from tblARInvoice INVCANCELLED
+SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid from tblARInvoice INVCANCELLED
 WHERE ysnCancelled =1 
 AND ysnPosted =1
 AND INVCANCELLED.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
---@CANCELLEDINVOICE
+--@CANCELLEDCMINVOICE
 INSERT INTO ##CANCELLEDCMINVOICE (
 	 intInvoiceId
 	,strInvoiceNumber
 )
 SELECT CM.intInvoiceId,CM.strInvoiceNumber from tblARInvoice CM
-where CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM ##CANCELLEDINVOICE)
+where CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM ##CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
 AND CM.ysnPosted =1  
 AND CM.strTransactionType = 'Credit Memo'
 AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
