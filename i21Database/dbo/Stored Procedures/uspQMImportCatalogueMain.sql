@@ -55,9 +55,9 @@ BEGIN TRY
             + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
             + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') <> '') THEN 'CHANNEL, ' ELSE '' END
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
-            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0) THEN 'NET WEIGHT PER PACKAGES, ' ELSE '' END
-            + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtSecondPackageBreak, 0) <> 0) THEN 'NET WEIGHT 2ND PACKAGE-BREAK, ' ELSE '' END
-            + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtThirdPackageBreak, 0) <> 0) THEN 'NET WEIGHT 3RD PACKAGE-BREAK, ' ELSE '' END
+            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0) THEN 'NO OF PACKAGES UOM, ' ELSE '' END
+            + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtSecondPackageBreak, 0) <> 0) THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
+            + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtThirdPackageBreak, 0) <> 0) THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
