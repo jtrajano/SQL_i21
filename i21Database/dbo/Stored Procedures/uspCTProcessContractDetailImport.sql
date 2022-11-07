@@ -1,4 +1,5 @@
-﻿Create PROCEDURE [dbo].[uspCTProcessContractDetailImport]
+﻿
+Create PROCEDURE [dbo].[uspCTProcessContractDetailImport]
 	@intUserId INT,
 	@strFileName NVARCHAR(100),
 	@guiUniqueId UNIQUEIDENTIFIER
@@ -145,6 +146,7 @@ BEGIN
 			, ci.strMessage
 		INTO #tmpList
 		FROM tblCTContractDetailImport ci
+		LEFT JOIN tblCTContractHeader ch on ch.strContractNumber = ci.strContractNumber collate database_default
 		LEFT JOIN tblCTContractStatus cs ON cs.strContractStatus = ci.strStatus collate database_default
 		LEFT JOIN tblSMCompanyLocation cl ON cl.strLocationName = ci.strLocation collate database_default
 		LEFT JOIN tblCTBook bk ON bk.strBook = ci.strBook collate database_default
@@ -191,11 +193,12 @@ BEGIN
 		LEFT JOIN tblSMCity dc ON dc.strCity = ci.strDestinationCity  collate database_default
 		--ci.strShippineLine
 			--, ci.strShipper
-		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.strSubLocationName = ci.strStorageLocation   collate database_default AND sl.intCompanyLocationId = cl.intCompanyLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.strSubLocationName = ci.strStorageLocation   collate database_default AND sl.intCompanyLocationId = ch.intCompanyLocationId
 		-- Storage Unit
 
 		--Garden
 		LEFT JOIN tblQMGardenMark gm on gm.strGardenMark = ci.strGarden collate database_default
+		
 		where ci.guiUniqueId = @guiUniqueId
 
 
@@ -389,11 +392,24 @@ BEGIN
 		END
 
 
+		IF EXISTS(SELECT TOP 1 1 FROM #tmpList where isnull(intMarketZoneId,0) = 0 and strMarketZone <> '')
+		BEGIN
+		INSERT INTO tblCTErrorImportLogs
+			SELECT guiUniqueId
+				   ,'Invalid Market Zone'
+				   ,strContractNumber
+				   ,intSequence
+				   ,'Fail'
+				   ,1
+			FROM #tmpList 
+			WHERE guiUniqueId = @guiUniqueId AND isnull(intMarketZoneId,0) = 0 and strMarketZone <> ''
+		END
+
+
 		SELECT * FROM #tmpList
 
 
 		DROP TABLE #tmpList
 
 	END
-END 
-
+END
