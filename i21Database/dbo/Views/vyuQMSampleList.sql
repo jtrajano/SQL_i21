@@ -131,11 +131,14 @@ SELECT S.intSampleId
 	,S.strGardenMark
 	,S.dtmManufacturingDate
 	,S.intTotalNumberOfPackageBreakups
-	,S.dblNetWtPerPackages
+	,S.intNetWtPerPackagesUOMId
+	,strNetWtPerPackagesUOM = PWUOM1.strUnitMeasure
 	,S.intNoOfPackages 
-	,S.dblNetWtSecondPackageBreak
+	,S.intNetWtSecondPackageBreakUOMId
+	,strNetWtSecondPackageBreakUOM = PWUOM2.strUnitMeasure
 	,S.intNoOfPackagesSecondPackageBreak
-	,S.dblNetWtThirdPackageBreak
+	,S.intNetWtThirdPackageBreakUOMId
+	,strNetWtThirdPackageBreakUOM = PWUOM3.strUnitMeasure
 	,S.intNoOfPackagesThirdPackageBreak
 	,S.intProductLineId
 	--,S.strProductLine
@@ -265,4 +268,7 @@ LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
 LEFT JOIN tblQMSampleOtherBuyers SOB ON SOB.intSampleId = S.intSampleId
+LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPackagesUOMId
+LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
+LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
 WHERE S.intTypeId = 1

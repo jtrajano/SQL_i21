@@ -432,11 +432,11 @@ BEGIN TRY
 		, strGardenMark
 		, dtmManufacturingDate   
 		, intTotalNumberOfPackageBreakups 
-		, dblNetWtPerPackages
+		, intNetWtPerPackagesUOMId
 		, intNoOfPackages 
-		, dblNetWtSecondPackageBreak 
+		, intNetWtSecondPackageBreakUOMId 
 		, intNoOfPackagesSecondPackageBreak 
-		, dblNetWtThirdPackageBreak 
+		, intNetWtThirdPackageBreakUOMId 
 		, intNoOfPackagesThirdPackageBreak 
 		, intProductLineId 
 		, strProductLine
@@ -616,11 +616,11 @@ BEGIN TRY
 		, strGardenMark
 		, dtmManufacturingDate   
 		, intTotalNumberOfPackageBreakups 
-		, dblNetWtPerPackages
+		, intNetWtPerPackagesUOMId
 		, intNoOfPackages 
-		, dblNetWtSecondPackageBreak 
+		, intNetWtSecondPackageBreakUOMId 
 		, intNoOfPackagesSecondPackageBreak 
-		, dblNetWtThirdPackageBreak 
+		, intNetWtThirdPackageBreakUOMId 
 		, intNoOfPackagesThirdPackageBreak 
 		, intProductLineId 
 		, strProductLine
@@ -789,11 +789,11 @@ BEGIN TRY
 			, strGardenMark NVARCHAR(50)
 		    , dtmManufacturingDate DATETIME  
 		    , intTotalNumberOfPackageBreakups INT
-		    , dblNetWtPerPackages NUMERIC(18, 6)
+		    , intNetWtPerPackagesUOMId INT
 		    , intNoOfPackages INT
-		    , dblNetWtSecondPackageBreak NUMERIC(18, 6)
+		    , intNetWtSecondPackageBreakUOMId INT
 		    , intNoOfPackagesSecondPackageBreak INT
-		    , dblNetWtThirdPackageBreak NUMERIC(18, 6)
+		    , intNetWtThirdPackageBreakUOMId INT
 		    , intNoOfPackagesThirdPackageBreak INT
 		    , intProductLineId INT
 			, strProductLine NVARCHAR(50)

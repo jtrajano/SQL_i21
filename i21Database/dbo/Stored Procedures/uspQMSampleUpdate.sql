@@ -366,11 +366,11 @@ BEGIN TRY
   , strGardenMark = x.strGardenMark
   , dtmManufacturingDate = CASE WHEN x.dtmManufacturingDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmManufacturingDate END 
   , intTotalNumberOfPackageBreakups = x.intTotalNumberOfPackageBreakups
-  , dblNetWtPerPackages = x.dblNetWtPerPackages
+  , intNetWtPerPackagesUOMId = x.intNetWtPerPackagesUOMId
   , intNoOfPackages = x.intNoOfPackages
-  , dblNetWtSecondPackageBreak = x.dblNetWtSecondPackageBreak
+  , intNetWtSecondPackageBreakUOMId = x.intNetWtSecondPackageBreakUOMId
   , intNoOfPackagesSecondPackageBreak = x.intNoOfPackagesSecondPackageBreak
-  , dblNetWtThirdPackageBreak = x.dblNetWtThirdPackageBreak
+  , intNetWtThirdPackageBreakUOMId = x.intNetWtThirdPackageBreakUOMId
   , intNoOfPackagesThirdPackageBreak = x.intNoOfPackagesThirdPackageBreak
   , intProductLineId = x.intProductLineId
   , strProductLine = x.strProductLine
@@ -540,11 +540,11 @@ BEGIN TRY
    , strGardenMark NVARCHAR(50)
    , dtmManufacturingDate DATETIME  
    , intTotalNumberOfPackageBreakups INT
-   , dblNetWtPerPackages NUMERIC(18, 6)
+   , intNetWtPerPackages INT
    , intNoOfPackages INT
-   , dblNetWtSecondPackageBreak NUMERIC(18, 6)
+   , intNetWtSecondPackageBreak INT
    , intNoOfPackagesSecondPackageBreak INT
-   , dblNetWtThirdPackageBreak NUMERIC(18, 6)
+   , intNetWtThirdPackageBreak INT
    , intNoOfPackagesThirdPackageBreak INT
    , intProductLineId INT
    , strProductLine NVARCHAR(50)

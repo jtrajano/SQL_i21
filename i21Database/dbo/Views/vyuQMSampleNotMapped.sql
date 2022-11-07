@@ -67,6 +67,9 @@ SELECT S.intSampleId
 	--, VG.strName AS strValuationGroupName
 	--, MarketZone.strMarketZoneCode AS strMarketZoneCode
 	--, DSL.strName AS strDestinationStorageLocationName
+	,strNetWtPerPackagesUOM = PWUOM1.strUnitMeasure
+	,strNetWtSecondPackageBreakUOM = PWUOM2.strUnitMeasure
+	,strNetWtThirdPackageBreakUOM = PWUOM2.strUnitMeasure
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -100,6 +103,9 @@ LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
 LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intCuppingSessionDetailId = S.intCuppingSessionDetailId
 LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
+LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPackagesUOMId
+LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
+LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
 --LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
 --LEFT JOIN tblQMCatalogueType CatalogueType ON CatalogueType.intCatalogueTypeId = S.intCatalogueTypeId 
 --LEFT JOIN vyuEMEntity BR ON BR.intEntityId = S.intBrokerId

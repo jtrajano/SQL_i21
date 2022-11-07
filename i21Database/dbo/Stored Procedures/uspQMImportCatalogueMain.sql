@@ -108,12 +108,12 @@ BEGIN TRY
         ,@dtmManufacturingDate DATETIME
         ,@dblSampleQty NUMERIC(18, 6)
         ,@intTotalNumberOfPackageBreakups BIGINT
-        ,@dblNetWtPerPackages NUMERIC(18, 6)
+        ,@intNetWtPerPackagesUOMId INT
         ,@intRepresentingUOMId INT
         ,@intNoOfPackages BIGINT
-        ,@dblNetWtSecondPackageBreak NUMERIC(18, 6)
+        ,@intNetWtSecondPackageBreakUOMId INT
         ,@intNoOfPackagesSecondPackageBreak BIGINT
-        ,@dblNetWtThirdPackageBreak NUMERIC(18, 6)
+        ,@intNetWtThirdPackageBreakUOMId INT
         ,@intNoOfPackagesThirdPackageBreak BIGINT
         ,@intProductLineId INT
 	    ,@strProductLine NVARCHAR(50)
@@ -187,12 +187,12 @@ BEGIN TRY
             ,dtmManufacturingDate = IMP.dtmManufacturingDate
             ,dblSampleQty = IMP.dblTotalQtyOffered
             ,intTotalNumberOfPackageBreakups = IMP.intTotalNumberOfPackageBreakups
-            ,dblNetWtPerPackages = IMP.dblNetWtPerPackages
+            ,intNetWtPerPackagesUOMId = UOM.intUnitMeasureId
             ,intRepresentingUOMId = UOM.intUnitMeasureId
             ,intNoOfPackages = IMP.intNoOfPackages
-            ,dblNetWtSecondPackageBreak = IMP.dblNetWtSecondPackageBreak
+            ,intNetWtSecondPackageBreakUOMId = UOM2.intUnitMeasureId
             ,intNoOfPackagesSecondPackageBreak = IMP.intNoOfPackagesSecondPackageBreak
-            ,dblNetWtThirdPackageBreak = IMP.dblNetWtThirdPackageBreak
+            ,intNetWtThirdPackageBreakUOMId = UOM3.intUnitMeasureId
             ,intNoOfPackagesThirdPackageBreak = IMP.intNoOfPackagesThirdPackageBreak
             ,intProductLineId = SUSTAINABILITY.intCommodityProductLineId
             ,strProductLine = SUSTAINABILITY.strDescription
@@ -292,12 +292,12 @@ BEGIN TRY
         ,@dtmManufacturingDate
         ,@dblSampleQty
         ,@intTotalNumberOfPackageBreakups
-        ,@dblNetWtPerPackages
+        ,@intNetWtPerPackagesUOMId
         ,@intRepresentingUOMId
         ,@intNoOfPackages
-        ,@dblNetWtSecondPackageBreak
+        ,@intNetWtSecondPackageBreakUOMId
         ,@intNoOfPackagesSecondPackageBreak
-        ,@dblNetWtThirdPackageBreak
+        ,@intNetWtThirdPackageBreakUOMId
         ,@intNoOfPackagesThirdPackageBreak
         ,@intProductLineId
 	    ,@strProductLine
@@ -414,11 +414,11 @@ BEGIN TRY
                 ,strGardenMark
                 ,dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages
+                ,intNetWtPerPackagesUOMId
                 ,intNoOfPackages
-                ,dblNetWtSecondPackageBreak
+                ,intNetWtSecondPackageBreakUOMId
                 ,intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak
+                ,intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak
                 ,intProductLineId
                 ,strProductLine
@@ -487,11 +487,11 @@ BEGIN TRY
                 ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
                 ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNetWtSecondPackageBreakUOMId = @intNetWtSecondPackageBreakUOMId
                 ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNetWtThirdPackageBreakUOMId = @intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
                 ,strProductLine = @strProductLine
@@ -537,11 +537,8 @@ BEGIN TRY
                 ,strGardenMark
                 ,dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages
                 ,intNoOfPackages
-                ,dblNetWtSecondPackageBreak
                 ,intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak
                 ,intNoOfPackagesThirdPackageBreak
                 ,intProductLineId
                 ,strProductLine
@@ -585,11 +582,8 @@ BEGIN TRY
                 ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
                 ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
                 ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
                 ,strProductLine = @strProductLine
@@ -804,11 +798,11 @@ BEGIN TRY
                 ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
                 ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNetWtSecondPackageBreakUOMId = @intNetWtSecondPackageBreakUOMId
                 ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNetWtThirdPackageBreakUOMId = @intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
                 ,strProductLine = @strProductLine
@@ -854,11 +848,8 @@ BEGIN TRY
                 ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
                 ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
                 ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
                 ,strProductLine = @strProductLine
@@ -916,12 +907,12 @@ BEGIN TRY
             ,@dtmManufacturingDate
             ,@dblSampleQty
             ,@intTotalNumberOfPackageBreakups
-            ,@dblNetWtPerPackages
+            ,@intNetWtPerPackagesUOMId
             ,@intRepresentingUOMId
             ,@intNoOfPackages
-            ,@dblNetWtSecondPackageBreak
+            ,@intNetWtSecondPackageBreakUOMId
             ,@intNoOfPackagesSecondPackageBreak
-            ,@dblNetWtThirdPackageBreak
+            ,@intNetWtThirdPackageBreakUOMId
             ,@intNoOfPackagesThirdPackageBreak
             ,@intProductLineId
             ,@strProductLine
