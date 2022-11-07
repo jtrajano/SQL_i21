@@ -136,6 +136,7 @@ BEGIN TRY
         ,@strFromLocationCode NVARCHAR(50)
         ,@strSampleBoxNumber NVARCHAR(50)
         ,@strSubBook NVARCHAR(100)
+        ,@intSubBookId INT
         ,@intSampleTypeId INT
         ,@strBatchNo NVARCHAR(50)
         ,@intEntityUserId INT
@@ -214,7 +215,8 @@ BEGIN TRY
             ,intFromLocationCodeId = FROM_LOC_CODE.intCityId
             ,strFromLocationCode = FROM_LOC_CODE.strCity
             ,strSampleBoxNumber = IMP.strSampleBoxNumberTBO
-            ,strSubBook = IMP.strChannel
+            ,strSubBook = SUBBOOK.strSubBook
+            ,intSubBookId = SUBBOOK.intSubBookId
             ,intSampleTypeId = SAMPLE_TYPE.intSampleTypeId
             ,strBatchNo = IMP.strBatchNo
             ,intEntityUserId = IL.intEntityId
@@ -320,6 +322,7 @@ BEGIN TRY
         ,@strFromLocationCode
         ,@strSampleBoxNumber
         ,@strSubBook
+        ,@intSubBookId
         ,@intSampleTypeId
         ,@strBatchNo
         ,@intEntityUserId
@@ -394,6 +397,7 @@ BEGIN TRY
                 ,strComment
                 ,intCreatedUserId
                 ,dtmCreated
+                ,intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId
@@ -467,6 +471,7 @@ BEGIN TRY
                 ,strComment = @strComments
                 ,intCreatedUserId = @intEntityUserId
                 ,dtmCreated = @dtmDateCreated
+                ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
@@ -778,6 +783,7 @@ BEGIN TRY
                 ,strComment = @strComments
                 ,intLastModifiedUserId = @intEntityUserId
                 ,dtmLastModified = @dtmDateCreated
+                ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
@@ -935,6 +941,7 @@ BEGIN TRY
             ,@strFromLocationCode
             ,@strSampleBoxNumber
             ,@strSubBook
+            ,@intSubBookId
             ,@intSampleTypeId
             ,@strBatchNo
             ,@intEntityUserId
