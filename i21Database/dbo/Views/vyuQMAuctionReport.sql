@@ -1,19 +1,19 @@
 CREATE VIEW vyuQMAuctionReport
 AS
 SELECT intSampleId					= S.intSampleId
-	 , strSampleNumber				= S.strSampleNumber
+	 , strSaleNumber				= S.strSaleNumber
 	 , strSampleNote				= S.strSampleNote
 	 , strBrokerName				= E.strName
 	 , strAuctionPrice				= CAST('0.00-0.00' AS NVARCHAR(100))
 	 , strWarehouse					= SL.strSubLocationName
 	 , dblSupplierValuationPrice	= ISNULL(S.dblSupplierValuationPrice, 0)
-	 , strLotNumber					= S.strLotNumber
+	 , strLotNumber					= S.strRepresentLotNumber
 	 , strGrade						= S.strGrade
-	 , strInvoiceNumber				= CAST('ML2021' AS NVARCHAR(100))
-	 , dblQuantity					= S.dblRepresentingQty
+	 , strInvoiceNumber				= S.strChopNumber
+	 , dblQuantity					= ISNULL(S.dblRepresentingQty, 0)
 	 , strQtyUOM					= UOM.strUnitMeasure
-	 , dblWeight					= ISNULL(S.dblNetWeight, 0)
-	 , dblWeightPerQty				= ISNULL(S.dblNetWtPerPackages, 0)
+	 , dblWeight					= ISNULL(S.dblSampleQty, 0)
+	 , dblWeightPerQty				= CASE WHEN ISNULL(S.dblRepresentingQty, 0) <> 0 THEN ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0)  ELSE ISNULL(S.dblSampleQty, 0) END 
 	 , dblBasePrice					= ISNULL(S.dblBasePrice, 0)
 	 , strSupplier					= SUP.strName
 	 , strTeaLingoItem				= ITEM.strItemNo
@@ -33,3 +33,4 @@ OUTER APPLY (
 	FROM tblSMCompanySetup
 	ORDER BY intCompanySetupID ASC
 ) COMP
+WHERE S.strSaleNumber IS NOT NULL
