@@ -66,7 +66,7 @@ FROM
 											END
 		,InboundDiscount				= (CASE 
 											WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
-											ELSE ISNULL(BillByReceipt.dblTotal, 0)
+											ELSE ISNULL(BillByReceipt.dblTotal, 0) 
 										END) - ISNULL(BillAdjustments.dblTotal,0)
 		,InboundNetDue					= SUM(
 												CASE 
