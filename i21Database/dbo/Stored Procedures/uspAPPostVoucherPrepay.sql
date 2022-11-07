@@ -28,6 +28,7 @@ DECLARE @validVoucherPrepay Id;
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
+DECLARE @validBillIds NVARCHAR(MAX)
 
 CREATE TABLE #tmpInvalidVoucherPrepayData (
 	[strError] [NVARCHAR](1000),
@@ -235,6 +236,15 @@ UPDATE GL SET intSourceEntityId = BL.intEntityVendorId
 FROM @GLEntries GL
 JOIN tblAPBill BL
 ON GL.strTransactionId = BL.strBillId
+
+IF EXISTS(SELECT TOP 1 1 FROM @validVoucherPrepay)
+BEGIN
+	SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intId)
+	FROM @validVoucherPrepay
+	ORDER BY intId
+
+	EXEC uspAPUpdateAccountOnPost @validBillIds
+END
 
 IF @recap = 0
 BEGIN
