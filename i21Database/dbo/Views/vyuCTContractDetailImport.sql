@@ -69,7 +69,7 @@ FROM tblCTContractDetailImport				CD
 LEFT JOIN tblCTContractHeader				CH		ON CH.strContractNumber			=	CD.strContractNumber	collate database_default
 LEFT JOIN tblSMCompanyLocation				CL		ON CL.strLocationName			=	CD.strLocation			collate database_default
 LEFT JOIN tblCTBook							B		ON B.strBook					=	CD.strBook				collate database_default
-LEFT JOIN tblCTSubBook						SB		ON SB.strSubBook				=	CD.strSubBook			collate database_default
+LEFT JOIN tblCTSubBook						SB		ON SB.strSubBook				=	CD.strSubBook			collate database_default AND SB.intBookId =B.intBookId 
 LEFT JOIN tblICItem							IT		ON IT.strItemNo					=	CD.strItem				collate database_default
 LEFT JOIN tblSMPurchasingGroup				PG		ON PG.strName					=	CD.strPurchasingGroup	collate database_default
 LEFT JOIN tblQMGardenMark					GM		ON GM.strGardenMark				=	CD.strGarden			collate database_default
@@ -85,7 +85,7 @@ LEFT JOIN tblSMCurrency						PCUR	ON PCUR.strCurrency				=	CD.strPriceCurrency		
 LEFT JOIN tblSMFreightTerms					FT		ON FT.strFreightTerm			=	CD.strFreightTerms		collate database_default
 LEFT JOIN tblSMCity							LP		ON LP.strCity					=	CD.strLoadingPoint		collate database_default
 LEFT JOIN tblSMCity							DP		ON DP.strCity					=	CD.strDestinationPoint  collate database_default
-LEFT JOIN tblSMCompanyLocationSubLocation	SL		ON SL.strSubLocationName		=	CD.strStorageLocation  collate database_default
+LEFT JOIN tblSMCompanyLocationSubLocation	SL		ON SL.strSubLocationName		=	CD.strStorageLocation  collate database_default AND SL.intCompanyLocationId = CH.intCompanyLocationId
 LEFT JOIN tblARMarketZone					MZ		ON MZ.strMarketZoneCode			=	CD.strMarketZone		collate database_default
 LEFT JOIN vyuCTInventoryItem				II		ON II.intItemId					=	IT.intItemId	AND II.intLocationId = CH.intCompanyLocationId
 GO

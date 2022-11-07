@@ -150,7 +150,7 @@ BEGIN
 		LEFT JOIN tblCTContractStatus cs ON cs.strContractStatus = ci.strStatus collate database_default
 		LEFT JOIN tblSMCompanyLocation cl ON cl.strLocationName = ci.strLocation collate database_default
 		LEFT JOIN tblCTBook bk ON bk.strBook = ci.strBook collate database_default
-		LEFT JOIN tblCTSubBook sbk ON sbk.strSubBook = ci.strSubBook  collate database_default
+		LEFT JOIN tblCTSubBook sbk ON sbk.strSubBook = ci.strSubBook  collate database_default AND bk.intBookId =sbk.intBookId 
 		-- Contract Item
 		LEFT JOIN tblICItem it ON it.strItemNo = ci.strItem  collate database_default
 		LEFT JOIN tblSMPurchasingGroup pg ON pg.strName = ci.strPurchasingGroup  collate database_default
