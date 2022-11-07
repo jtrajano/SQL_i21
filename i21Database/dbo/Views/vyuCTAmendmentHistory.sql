@@ -64,7 +64,7 @@ FROM
 		LEFT JOIN tblICCommodity	       CO  ON CO.intCommodityId			 = CH.intCommodityId
 		LEFT JOIN tblSMCompanyLocation	   CL  ON CL.intCompanyLocationId    = CD.intCompanyLocationId
 		LEFT JOIN vyuEMEntity			   CS  ON CS.intEntityId	 		= CH.intSalespersonId
-		LEFT JOIN tblCTReasonCode		   RC  ON RC.intReasonCodeId		= CD.intReasonCodeId
+		LEFT JOIN tblCTReasonCode		   RC  ON RC.intReasonCodeId		= SAL.intReasonCodeId
 	) tblAmendment
 	GROUP BY
 		intSequenceAmendmentLogId,
