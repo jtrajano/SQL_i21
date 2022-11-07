@@ -436,9 +436,6 @@ BEGIN TRY
 	IF EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
-			OUTER APPLY (SELECT CASE WHEN COUNT(WL.intItemId) = 0 THEN 1 ELSE COUNT(WL.intItemId) END AS InputLot
-					  FROM tblMFWorkOrderInputLot AS WL
-					  WHERE WL.intWorkOrderId = @intWorkOrderId AND WL.intItemId = tblMFProductionSummary.intItemId AND ysnConsumptionReversed <> 1) AS WL
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemTypeId IN (
 					1
@@ -450,19 +447,16 @@ BEGIN TRY
 			)
 	BEGIN
 		SELECT @strConsumedQuantity = dblConsumedQuantity - dblYieldQuantity
-			,@strLowerToleranceQty = (dblLowerToleranceQty * WL.InputLot)
+			,@strLowerToleranceQty = dblLowerToleranceQty
 			,@intInputItemId = intItemId
 		FROM tblMFProductionSummary
-		OUTER APPLY (SELECT CASE WHEN COUNT(WL.intItemId) = 0 THEN 1 ELSE COUNT(WL.intItemId) END AS InputLot
-					  FROM tblMFWorkOrderInputLot AS WL
-					  WHERE WL.intWorkOrderId = @intWorkOrderId AND WL.intItemId = tblMFProductionSummary.intItemId AND ysnConsumptionReversed <> 1) AS WL
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemTypeId IN (
 				1
 				,3
 				)
 			AND dblYieldQuantity > 0
-			AND dblConsumedQuantity - dblYieldQuantity < (dblLowerToleranceQty * WL.InputLot)
+			AND dblConsumedQuantity - dblYieldQuantity < dblLowerToleranceQty
 
 		SELECT @strItemNo = strItemNo
 		FROM tblICItem
@@ -482,33 +476,27 @@ BEGIN TRY
 	IF EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
-			OUTER APPLY (SELECT CASE WHEN COUNT(WL.intItemId) = 0 THEN 1 ELSE COUNT(WL.intItemId) END AS InputLot
-						 FROM tblMFWorkOrderInputLot AS WL
-						 WHERE WL.intWorkOrderId = @intWorkOrderId AND WL.intItemId = tblMFProductionSummary.intItemId AND ysnConsumptionReversed <> 1) AS WL
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemTypeId IN (
 					1
 					,3
 					)
 				AND dblYieldQuantity < 0
-				AND dblConsumedQuantity + abs(dblYieldQuantity) > (dblUpperToleranceQty	 * WL.InputLot)	 
+				AND dblConsumedQuantity + abs(dblYieldQuantity) > dblUpperToleranceQty
 				AND dblRequiredQty <> dblUpperToleranceQty
 			)
 	BEGIN
 		SELECT @strConsumedQuantity = dblConsumedQuantity + abs(dblYieldQuantity)
-			,@strUpperToleranceQty = (dblUpperToleranceQty	 * WL.InputLot)
+			,@strUpperToleranceQty = dblUpperToleranceQty
 			,@intInputItemId = intItemId
-		FROM tblMFProductionSummary 
-		OUTER APPLY (SELECT CASE WHEN COUNT(WL.intItemId) = 0 THEN 1 ELSE COUNT(WL.intItemId) END AS InputLot
-					FROM tblMFWorkOrderInputLot AS WL
-					WHERE WL.intWorkOrderId = @intWorkOrderId AND WL.intItemId = tblMFProductionSummary.intItemId AND ysnConsumptionReversed <> 1) AS WL
+		FROM tblMFProductionSummary
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemTypeId IN (
 				1
 				,3
 				)
 			AND dblYieldQuantity < 0
-			AND dblConsumedQuantity + abs(dblYieldQuantity) > (dblUpperToleranceQty	 * WL.InputLot)	 
+			AND dblConsumedQuantity + abs(dblYieldQuantity) > dblUpperToleranceQty
 
 		SELECT @strItemNo = strItemNo
 		FROM tblICItem
