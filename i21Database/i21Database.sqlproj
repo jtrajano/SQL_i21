@@ -1166,6 +1166,10 @@
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
+    <Build Include="dbo\Tables\tblCRMHubspotConfig.sql" />
+    <Build Include="dbo\Tables\tblCRMHubspotScope.sql" />
+    <Build Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
+    <Build Include="dbo\Views\vyuCRMSetting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10964,7 +10968,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
-  	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11584,8 +11588,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\QM\2_SetDefaultData.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\40_UpdateSchedulePaymentMethod.sql" />
   </ItemGroup>
 </Project>
