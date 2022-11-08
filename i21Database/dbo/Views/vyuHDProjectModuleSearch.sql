@@ -22,7 +22,12 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 									END
 	   ,strPhase					= ProjectModule.strPhase
 	   ,strComment					= ProjectModule.strComment
-
+	   ,dtmStartDate				= ProjectTicketStartDate.dtmStartDate
+	   ,dtmCompleted				= CASE WHEN ProjectTicketStatus.intTicketStatusId IS NOT NULL	
+												THEN NULL
+										   ELSE ProjectTicketCompletedDate.dtmCompleted
+									  END
+	   ,dtmDueDate					= ProjectTicketDueDate.dtmDueDate
 FROM tblHDProjectModule ProjectModule
 		INNER JOIN tblHDProject Project
 ON ProjectModule.intProjectId = Project.intProjectId
@@ -58,8 +63,48 @@ ON Contact.intEntityId = ProjectModule.intContactId
 				GROUP BY ProjectTickets.intTicketStatusId
 				) ProjectTicketsPerStatus
 		) ProjectTickets
+		OUTER APPLY(
+
+			SELECT	   TOP 1 dtmStartDate = ProjectTickets.dtmStartDate
+			FROM tblHDProjectTask ProjectTask
+					INNER JOIN vyuHDProjectTickets ProjectTickets
+			ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+			WHERE ProjectTask.intProjectId = Project.intProjectId AND
+				  ProjectTickets.strModule = SMModule.strModule	
+			ORDER BY ProjectTickets.dtmStartDate
+		) ProjectTicketStartDate
+		OUTER APPLY(
+
+			SELECT	   TOP 1 dtmDueDate = ProjectTickets.dtmDueDate
+			FROM tblHDProjectTask ProjectTask
+					INNER JOIN vyuHDProjectTickets ProjectTickets
+			ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+			WHERE ProjectTask.intProjectId = Project.intProjectId AND
+				  ProjectTickets.strModule = SMModule.strModule	
+			ORDER BY ProjectTickets.dtmDueDate DESC
+		) ProjectTicketDueDate
+		OUTER APPLY(
+
+			SELECT	   TOP 1 dtmCompleted = ProjectTickets.dtmCompleted
+			FROM tblHDProjectTask ProjectTask
+					INNER JOIN vyuHDProjectTickets ProjectTickets
+			ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+			WHERE ProjectTask.intProjectId = Project.intProjectId AND
+				  ProjectTickets.strModule = SMModule.strModule	
+			ORDER BY ProjectTickets.dtmCompleted DESC
+		) ProjectTicketCompletedDate
+		OUTER APPLY(
+
+			SELECT	   TOP 1 intTicketStatusId = ProjectTickets.intTicketStatusId
+			FROM tblHDProjectTask ProjectTask
+					INNER JOIN vyuHDProjectTickets ProjectTickets
+			ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+			WHERE ProjectTask.intProjectId = Project.intProjectId AND
+				  ProjectTickets.strModule = SMModule.strModule	AND
+				  ProjectTickets.intTicketStatusId <> 2					
+		) ProjectTicketStatus
 		INNER JOIN tblEMEntity Customer
 ON Customer.intEntityId = Project.intCustomerId
-WHERE Project.strType = 'HD' 
+WHERE Project.strType = 'HD'
 
 GO
