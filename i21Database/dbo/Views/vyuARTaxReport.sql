@@ -136,6 +136,7 @@ SELECT
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,dtmDateCreated				= CAST(INVOICE.dtmDateCreated AS DATE)
 	,dtmUpdatedDate				= CAST(AUDITLOG.dtmUpdatedDate AS DATE)
+	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
