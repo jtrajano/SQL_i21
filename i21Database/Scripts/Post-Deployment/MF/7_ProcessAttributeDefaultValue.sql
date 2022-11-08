@@ -3131,7 +3131,9 @@ IF NOT EXISTS (
 	SELECT intManufacturingProcessId
 		,122
 		,'True'
-		,1
+		,(SELECT TOP 1 intCompanyLocationId 
+		  FROM tblSMCompanyLocation
+		  ORDER BY intCompanyLocationId ASC)
 		,1
 		,GETDATE()
 		,1
