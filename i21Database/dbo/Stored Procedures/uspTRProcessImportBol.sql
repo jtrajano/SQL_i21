@@ -35,10 +35,11 @@ BEGIN
 			@intLoadHeaderId INT = NULL,
 			@intSellerId INT = NULL,
 			@intFreightItemId INT = NULL,
-			@intUserId INT = NULL
+			@intUserId INT = NULL,
+			@ysnAllowDiffUnits BIT = 0
 
 		-- GET DEFAULT SELLER
-		SELECT TOP 1 @intSellerId = intSellerId, @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference 
+		SELECT TOP 1 @intSellerId = intSellerId, @intFreightItemId = intItemForFreightId, @ysnAllowDiffUnits = ISNULL(ysnAllowDifferentUnits, 0) FROM tblTRCompanyPreference 
 
 		SELECT TOP 1 @intUserId = intUserId FROM tblTRImportLoad WHERE intImportLoadId = @intImportLoadId
 
@@ -439,6 +440,13 @@ BEGIN
 					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum, dblFreightRate = @dblBlendFreightRateDistribution 
 					WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
 
+					IF(@ysnAllowDiffUnits = 1)
+					BEGIN
+						UPDATE tblTRLoadDistributionDetail SET dblDistributionGrossSalesUnits = @dblSum, dblDistributionNetSalesUnits = @dblSum
+						WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+					END
+					
+
 					UPDATE tblTRLoadReceipt SET dblFreightRate = @dblBlendFreightRateReceipt, dblPurSurcharge = @dblBlendSurchargeReceipt 
 					WHERE intLoadHeaderId = @intLoadHeaderId 
 					AND intItemId = @intDDPullProductId
@@ -559,11 +567,19 @@ BEGIN
 						,@InvoiceType=N'Transport Delivery'		
 						,@Price = @dblNonBlendPrice OUTPUT	
 
+					DECLARE @strShipToGrossNet NVARCHAR(10) = ''
+					IF(@ysnAllowDiffUnits = 1)
+					BEGIN
+						SELECT TOP 1 @strShipToGrossNet = ISNULL(strSaleUnits,'') FROM tblEMEntityLocation WHERE intEntityLocationId = @intShipToId
+					END
+
 					INSERT INTO tblTRLoadDistributionDetail(intLoadDistributionHeaderId, 
 						strBillOfLading, 
 						strReceiptLink,
 						intItemId, 
 						dblUnits,
+						dblDistributionGrossSalesUnits,
+						dblDistributionNetSalesUnits,
 						dblPrice, 
 						dblFreightRate, 
 						dblDistSurcharge, 
@@ -575,6 +591,30 @@ BEGIN
 						@strNonBlendReceiptLink ,
 						@intNonBlendDropProductId,
 						CASE WHEN @strNonBlendGrossNet = 'Gross' THEN @dblNonBlendDropGross ELSE @dblNonBlendDropNet END,
+						CASE 
+							WHEN @ysnAllowDiffUnits = 1 THEN
+								CASE
+									WHEN @strShipToGrossNet = 'Gross' THEN @dblNonBlendDropGross
+									WHEN @strShipToGrossNet = 'Net' THEN @dblNonBlendDropNet
+									WHEN @strShipToGrossNet = '' THEN
+										CASE 
+											WHEN @strNonBlendGrossNet = 'Net' THEN @dblNonBlendDropNet ELSE @dblNonBlendDropGross
+										END
+									END
+							ELSE NULL
+						END,
+						CASE 
+							WHEN @ysnAllowDiffUnits = 1 THEN
+								CASE
+									WHEN @strShipToGrossNet = 'Gross' THEN @dblNonBlendDropGross
+									WHEN @strShipToGrossNet = 'Net' THEN @dblNonBlendDropNet
+									WHEN @strShipToGrossNet = '' THEN
+										CASE 
+											WHEN @strNonBlendGrossNet = 'Net' THEN @dblNonBlendDropNet ELSE @dblNonBlendDropGross
+										END
+									END
+							ELSE NULL
+						END,
 						@dblNonBlendPrice,
 						@dblFreightRateDistribution,
 						@dblSurchargeDistribution,
