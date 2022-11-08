@@ -38,6 +38,7 @@ BEGIN
     END
     
     IF COL_LENGTH('dbo.tblGLCompanyPreferenceOption', 'ysnREOverride') IS NOT NULL
+    AND EXISTS(SELECT 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tblGLDataFixLog')
     BEGIN
     EXEC ('
         UPDATE tblGLCompanyPreferenceOption SET ysnREOverride = 0, ysnREOverrideLocation = 0 , ysnREOverrideLOB=0, ysnREOverrideCompany = 0
