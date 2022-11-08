@@ -401,7 +401,7 @@ BEGIN TRY
 		,strStatus 
 	FROM (
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId, strAction ORDER BY intContractBalanceLogId DESC)
 			,intSort = 4
 			,CL.strLocationName
 			,E.strName
@@ -413,7 +413,7 @@ BEGIN TRY
 			,I.strItemNo
 			,CBL.dtmCreatedDate
 			,CBL.dtmTransactionDate
-			,dblQty = CBL.dblOrigQty
+			,dblQty = CASE WHEN strAction = 'Deleted Pricing' THEN CBL.dblOrigQty * -1 ELSE CBL.dblOrigQty END
 			,UM.strUnitMeasure
 			,EC.strUserName
 			,strBucketName = '+ Purchase Basis Pricing'
@@ -674,6 +674,8 @@ BEGIN TRY
 	INNER JOIN tblICItem I ON I.intItemId = SL.intItemId
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+	INNER JOIN tblICInventoryReceiptItem R ON R.intSourceId = T.intTicketId
+	INNER JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = R.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
@@ -959,7 +961,7 @@ BEGIN TRY
 		,strStatus 
 	FROM (
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId, strAction ORDER BY intContractBalanceLogId DESC)
 			,intSort = 14
 			,CL.strLocationName
 			,E.strName
@@ -971,7 +973,7 @@ BEGIN TRY
 			,I.strItemNo
 			,CBL.dtmCreatedDate
 			,CBL.dtmTransactionDate
-			,dblQty = CBL.dblOrigQty
+			,dblQty = CASE WHEN strAction = 'Deleted Pricing' THEN CBL.dblOrigQty * -1 ELSE CBL.dblOrigQty END
 			,UM.strUnitMeasure
 			,EC.strUserName
 			,strBucketName = '+ Sales Basis Pricing'
@@ -1231,6 +1233,8 @@ BEGIN TRY
 	INNER JOIN tblICItem I ON I.intItemId = SL.intItemId
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
+	INNER JOIN tblICInventoryShipmentItem S ON S.intSourceId = T.intTicketId
+	INNER JOIN tblARInvoiceDetail ID ON ID.intInventoryShipmentItemId = S.intInventoryShipmentItemId AND ID.intInventoryShipmentChargeId IS NULL
 	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
