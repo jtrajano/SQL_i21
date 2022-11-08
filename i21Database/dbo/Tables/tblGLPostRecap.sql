@@ -40,7 +40,8 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     strNewAccountIdOverride nvarchar(40) Collate Latin1_General_CI_AS,
     intNewAccountIdOverride INT,
     strOverrideAccountError nvarchar(800) Collate Latin1_General_CI_AS,
-    
+    ysnIntraCompanyEntry BIT NULL,
+
     [intConcurrencyId]          INT              DEFAULT 1 NOT NULL
 		
  CONSTRAINT [PK_tblGLPostRecap] PRIMARY KEY CLUSTERED 

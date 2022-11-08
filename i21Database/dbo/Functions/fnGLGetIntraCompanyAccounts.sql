@@ -13,28 +13,14 @@ AS
 BEGIN
 	-- Contruct Accounts
 	INSERT INTO @tblAccounts([strAccountId], [strAccountType],[intTransactionCompanySegmentId], [intInterCompanySegmentId])
-	SELECT DISTINCT -- Transaction Company Due From
-		dbo.fnGLBuildIntraCompanyAccount(IntraCompany.strDueFromSegment, IntraCompany.strTransactionCompanySegment) COLLATE Latin1_General_CI_AS,
-		'Transaction Company Due From',
-		IntraCompany.intTransactionCompanySegmentId,
-		IntraCompany.intTransactionCompanySegmentId
-	FROM vyuGLIntraCompanyAccountSegment IntraCompany
-	UNION ALL
-	SELECT DISTINCT -- Transaction Company Due To
-		dbo.fnGLBuildIntraCompanyAccount(IntraCompany.strDueToSegment, IntraCompany.strTransactionCompanySegment) COLLATE Latin1_General_CI_AS,
-		'Transaction Company Due To',
-		IntraCompany.intTransactionCompanySegmentId,
-		IntraCompany.intTransactionCompanySegmentId
-	FROM vyuGLIntraCompanyAccountSegment IntraCompany
-	UNION ALL
-	SELECT -- Inter Company Due From
+	SELECT DISTINCT -- Inter Company Due From
 		dbo.fnGLBuildIntraCompanyAccount(IntraCompany.strDueFromSegment, IntraCompany.strInterCompanySegment) COLLATE Latin1_General_CI_AS,
 		'Inter Company Due From',
 		IntraCompany.intTransactionCompanySegmentId,
 		IntraCompany.intInterCompanySegmentId
 	FROM vyuGLIntraCompanyAccountSegment IntraCompany
 	UNION ALL
-	SELECT -- Inter Company Due To
+	SELECT DISTINCT -- Inter Company Due To
 		dbo.fnGLBuildIntraCompanyAccount(IntraCompany.strDueToSegment, IntraCompany.strInterCompanySegment) COLLATE Latin1_General_CI_AS,
 		'Inter Company Due To',
 		IntraCompany.intTransactionCompanySegmentId,

@@ -265,6 +265,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intCompanyLocationId]
+				,[ysnIntraCompanyEntry]
 			)
 			EXEC [dbo].[uspGLCreateIntraCompanyEntries] @JournalIds = @tmpValidJournals, @strBatchId = @strBatchId, @intEntityId = @intEntityId, @ysnAudit = @ysnAudit
 		END
@@ -387,6 +388,7 @@ ELSE
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intCompanyLocationId]
+				,[ysnIntraCompanyEntry]
 			)
 			EXEC [dbo].[uspGLCreateIntraCompanyEntries] @JournalIds = @tmpValidJournals, @strBatchId = @strBatchId, @intEntityId = @intEntityId, @ysnAudit = @ysnAudit
 		END
