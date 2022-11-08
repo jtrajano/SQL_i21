@@ -134,7 +134,7 @@ SELECT
 	,ysnOverrideTaxPoint        = CAST(CASE WHEN ISNULL(INVOICE.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
 	,ysnOverrideTaxLocation     = CAST(CASE WHEN ISNULL(INVOICE.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
-	,strRelatedInvoiceNumber	= CASE WHEN ISNULL(RelatedInvoice.strInvoiceNumber, '') = '' THEN INVOICE.strInvoiceOriginId ELSE RelatedInvoice.strInvoiceNumber END
+	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -401,11 +401,4 @@ OUTER APPLY (
 	WHERE intInvoiceId = INVOICE.intInvoiceId
 ) PAYMENT
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INVOICE.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INVOICE.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
-LEFT JOIN
-(
-	SELECT  
-		 intOriginalInvoiceId
-		,strInvoiceNumber
-	FROM tblARInvoice  WITH (NOLOCK) 
-) RelatedInvoice ON RelatedInvoice.intOriginalInvoiceId = INVOICE.intInvoiceId
 WHERE INVOICE.ysnPosted = 1
