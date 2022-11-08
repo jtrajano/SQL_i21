@@ -22,7 +22,7 @@ BEGIN TRY
   
   if @intSupplyPointId != 0
   BEGIN 
-       select top 1 @dblQuotePrice = QD.dblQuotePrice from dbo.tblTRQuoteHeader QH
+       select top 1 @dblQuotePrice = (QD.dblQuotePrice - ISNULL(QD.dblFreightRate, 0)) from dbo.tblTRQuoteHeader QH
 	      join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
        where QH.intEntityCustomerId =@intEntityCustomerId
          and QD.intItemId = @intItemId
@@ -34,7 +34,7 @@ BEGIN TRY
   END
   else
   BEGIN
-     select top 1 @dblQuotePrice = QD.dblQuotePrice from dbo.tblTRQuoteHeader QH
+     select top 1 @dblQuotePrice = (QD.dblQuotePrice - ISNULL(QD.dblFreightRate, 0)) from dbo.tblTRQuoteHeader QH
 	      join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
        where QH.intEntityCustomerId =@intEntityCustomerId
          and QD.intItemId = @intItemId
