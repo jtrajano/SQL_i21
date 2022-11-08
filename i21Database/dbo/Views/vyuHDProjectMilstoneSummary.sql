@@ -38,14 +38,74 @@
 			,dblQuotedHours = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
 			,dblActualHours = isnull(sum(b.dblActualHours),0.00)
 			,dblOverShort = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00) - isnull(sum(b.dblActualHours),0.00)
+			,dtmStartDate				= ProjectTicketStartDate.dtmStartDate
+			,dtmDueDate					= ProjectTicketDueDate.dtmDueDate
+			,dtmCompleted				= CASE WHEN ProjectTicketStatus.intTicketStatusId IS NOT NULL	
+													THEN NULL
+											   ELSE ProjectTicketCompletedDate.dtmCompleted
+										  END
+		    ,strStatus					= CASE WHEN ProjectTicketStatus.intTicketStatusId IS NOT NULL	
+													THEN 'Open'
+											   ELSE 'Closed'
+										  END
 		from
 			tblHDMilestone a
 			join tblHDTicket b on b.intMilestoneId = a.intMilestoneId
 			join tblHDProjectTask c on c.intTicketId = b.intTicketId
 			join tblHDProject d on d.intProjectId = c.intProjectId
+			OUTER APPLY(
+
+				SELECT	   TOP 1 dtmStartDate = ProjectTickets.dtmStartDate
+				FROM tblHDProjectTask ProjectTask
+						INNER JOIN tblHDTicket ProjectTickets
+				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+				WHERE ProjectTask.intProjectId = d.intProjectId AND
+					  ProjectTickets.intMilestoneId = a.intMilestoneId	
+				ORDER BY ProjectTickets.dtmStartDate
+
+			) ProjectTicketStartDate
+			OUTER APPLY(
+
+				SELECT	   TOP 1 dtmDueDate = ProjectTickets.dtmDueDate
+				FROM tblHDProjectTask ProjectTask
+						INNER JOIN tblHDTicket ProjectTickets
+				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+				WHERE ProjectTask.intProjectId = d.intProjectId AND
+					  ProjectTickets.intMilestoneId = a.intMilestoneId	
+				ORDER BY ProjectTickets.dtmDueDate DESC
+
+			) ProjectTicketDueDate
+			OUTER APPLY(
+
+				SELECT	   TOP 1 dtmCompleted = ProjectTickets.dtmCompleted
+				FROM tblHDProjectTask ProjectTask
+						INNER JOIN tblHDTicket ProjectTickets
+				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+				WHERE ProjectTask.intProjectId = d.intProjectId AND
+					  ProjectTickets.intMilestoneId = a.intMilestoneId	
+				ORDER BY ProjectTickets.dtmCompleted DESC
+
+			) ProjectTicketCompletedDate
+			OUTER APPLY(
+
+				SELECT	   TOP 1 intTicketStatusId = ProjectTickets.intTicketStatusId
+				FROM tblHDProjectTask ProjectTask
+						INNER JOIN tblHDTicket ProjectTickets
+				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
+				WHERE ProjectTask.intProjectId = d.intProjectId AND
+					  ProjectTickets.intMilestoneId = a.intMilestoneId AND
+					  ProjectTickets.intTicketStatusId <> 2	
+					  				
+			) ProjectTicketStatus
 		group by
 			d.intProjectId
 			,a.intMilestoneId
 			,a.intPriority
 			,a.strMileStone
 			,a.strDescription
+			,ProjectTicketStartDate.dtmStartDate
+			,ProjectTicketDueDate.dtmDueDate
+			,ProjectTicketStatus.intTicketStatusId
+			,ProjectTicketCompletedDate.dtmCompleted
+
+GO
