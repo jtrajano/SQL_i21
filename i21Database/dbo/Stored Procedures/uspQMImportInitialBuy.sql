@@ -23,6 +23,22 @@ BEGIN TRY
     LEFT JOIN tblICUnitMeasure B3QUOM ON B3QUOM.strSymbol = IMP.strB3QtyUOM
     -- Buyer3 Price UOM
     LEFT JOIN tblICUnitMeasure B3PUOM ON B3PUOM.strSymbol = IMP.strB3PriceUOM
+    -- Buyer4 Quantity UOM
+    LEFT JOIN tblICUnitMeasure B4QUOM ON B4QUOM.strSymbol = IMP.strB4QtyUOM
+    -- Buyer4 Price UOM
+    LEFT JOIN tblICUnitMeasure B4PUOM ON B4PUOM.strSymbol = IMP.strB4PriceUOM
+    -- Buyer5 Quantity UOM
+    LEFT JOIN tblICUnitMeasure B5QUOM ON B5QUOM.strSymbol = IMP.strB5QtyUOM
+    -- Buyer5 Price UOM
+    LEFT JOIN tblICUnitMeasure B5PUOM ON B5PUOM.strSymbol = IMP.strB5PriceUOM
+    -- Buyer2 Code
+    LEFT JOIN vyuEMSearchEntityBuyer B2CODE ON B2CODE.strName = IMP.strB2Code
+    -- Buyer3 Code
+    LEFT JOIN vyuEMSearchEntityBuyer B3CODE ON B3CODE.strName = IMP.strB3Code
+    -- Buyer4 Code
+    LEFT JOIN vyuEMSearchEntityBuyer B4CODE ON B4CODE.strName = IMP.strB4Code
+    -- Buyer5 Code
+    LEFT JOIN vyuEMSearchEntityBuyer B5CODE ON B5CODE.strName = IMP.strB5Code
     -- Buyer1 Company Code
     LEFT JOIN tblSMPurchasingGroup COMPANY_CODE ON COMPANY_CODE.strName = IMP.strB1CompanyCode
     -- Buyer1 Group Number
@@ -34,10 +50,18 @@ BEGIN TRY
         SELECT strLogMessage = 
             CASE WHEN (B1QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB1QtyUOM, '') <> '') THEN 'BUYER1 QTY UOM, ' ELSE '' END
             + CASE WHEN (B1PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB1PriceUOM, '') <> '') THEN 'BUYER1 PRICE UOM, ' ELSE '' END
+            + CASE WHEN (B2CODE.intEntityId IS NULL AND ISNULL(IMP.strB2Code, '') <> '') THEN 'BUYER2 CODE, ' ELSE '' END
             + CASE WHEN (B2QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB2QtyUOM, '') <> '') THEN 'BUYER2 QTY UOM, ' ELSE '' END
             + CASE WHEN (B2PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB2PriceUOM, '') <> '') THEN 'BUYER2 PRICE UOM, ' ELSE '' END
+            + CASE WHEN (B3CODE.intEntityId IS NULL AND ISNULL(IMP.strB3Code, '') <> '') THEN 'BUYER3 CODE, ' ELSE '' END
             + CASE WHEN (B3QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB3QtyUOM, '') <> '') THEN 'BUYER3 QTY UOM, ' ELSE '' END
             + CASE WHEN (B3PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB3PriceUOM, '') <> '') THEN 'BUYER3 PRICE UOM, ' ELSE '' END
+            + CASE WHEN (B4CODE.intEntityId IS NULL AND ISNULL(IMP.strB4Code, '') <> '') THEN 'BUYER4 CODE, ' ELSE '' END
+            + CASE WHEN (B4QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB4QtyUOM, '') <> '') THEN 'BUYER4 QTY UOM, ' ELSE '' END
+            + CASE WHEN (B4PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB4PriceUOM, '') <> '') THEN 'BUYER4 PRICE UOM, ' ELSE '' END
+            + CASE WHEN (B5CODE.intEntityId IS NULL AND ISNULL(IMP.strB5Code, '') <> '') THEN 'BUYER5 CODE, ' ELSE '' END
+            + CASE WHEN (B5QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB5QtyUOM, '') <> '') THEN 'BUYER5 QTY UOM, ' ELSE '' END
+            + CASE WHEN (B5PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB5PriceUOM, '') <> '') THEN 'BUYER5 PRICE UOM, ' ELSE '' END
             + CASE WHEN (BOOK.intBookId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '') THEN 'BUYER1 COMPANY CODE, ' ELSE '' END
             + CASE WHEN (COMPANY_CODE.intPurchasingGroupId IS NULL AND ISNULL(IMP.strB1CompanyCode, '') <> '') THEN 'BUYER1 GROUP NUMBER, ' ELSE '' END
             + CASE WHEN (CURRENCY.intConcurrencyId IS NULL AND ISNULL(IMP.strCurrency, '') <> '') THEN 'CURRENCY, ' ELSE '' END
@@ -47,10 +71,18 @@ BEGIN TRY
     AND (
         (B1QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB1QtyUOM, '') <> '')
         OR (B1PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB1PriceUOM, '') <> '')
+        OR (B2CODE.intEntityId IS NULL AND ISNULL(IMP.strB2Code, '') <> '')
         OR (B2QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB2QtyUOM, '') <> '')
         OR (B2PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB2PriceUOM, '') <> '')
+        OR (B3CODE.intEntityId IS NULL AND ISNULL(IMP.strB3Code, '') <> '')
         OR (B3QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB3QtyUOM, '') <> '')
         OR (B3PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB3PriceUOM, '') <> '')
+        OR (B4CODE.intEntityId IS NULL AND ISNULL(IMP.strB4Code, '') <> '')
+        OR (B4QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB4QtyUOM, '') <> '')
+        OR (B4PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB4PriceUOM, '') <> '')
+        OR (B5CODE.intEntityId IS NULL AND ISNULL(IMP.strB5Code, '') <> '')
+        OR (B5QUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB5QtyUOM, '') <> '')
+        OR (B5PUOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strB5PriceUOM, '') <> '')
         OR (COMPANY_CODE.intPurchasingGroupId IS NULL AND ISNULL(IMP.strB1CompanyCode, '') <> '')
         OR (BOOK.intBookId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '')
         OR (CURRENCY.intCurrencyID IS NULL AND ISNULL(IMP.strCurrency, '') <> '')
@@ -60,25 +92,51 @@ BEGIN TRY
     DECLARE
         @intImportCatalogueId INT
         ,@intSampleId INT
-        ,@intOtherBuyerId INT
         ,@intPurchasingGroupId INT
         ,@strPurchasingGroup NVARCHAR(150)
         ,@intBookId INT
         ,@strBook NVARCHAR(100)
         ,@intCurrencyId INT
         ,@strCurrency NVARCHAR(50)
+        -- B1
         ,@dblB1QtyBought NUMERIC(18, 6)
         ,@intB1QtyUOMId INT
+        ,@strB1QtyUOM NVARCHAR(50)
         ,@dblB1Price NUMERIC(18, 6)
         ,@intB1PriceUOMId INT
+        ,@strB1PriceUOM NVARCHAR(50)
+        -- B2
+        ,@strB2Code NVARCHAR(50)
         ,@dblB2QtyBought NUMERIC(18, 6)
         ,@intB2QtyUOMId INT
+        ,@strB2QtyUOM NVARCHAR(50)
         ,@dblB2Price NUMERIC(18, 6)
         ,@intB2PriceUOMId INT
+        ,@strB2PriceUOM NVARCHAR(50)
+        -- B3
+        ,@strB3Code NVARCHAR(50)
         ,@dblB3QtyBought NUMERIC(18, 6)
         ,@intB3QtyUOMId INT
+        ,@strB3QtyUOM NVARCHAR(50)
         ,@dblB3Price NUMERIC(18, 6)
         ,@intB3PriceUOMId INT
+        ,@strB3PriceUOM NVARCHAR(50)
+        -- B4
+        ,@strB4Code NVARCHAR(50)
+        ,@dblB4QtyBought NUMERIC(18, 6)
+        ,@intB4QtyUOMId INT
+        ,@strB4QtyUOM NVARCHAR(50)
+        ,@dblB4Price NUMERIC(18, 6)
+        ,@intB4PriceUOMId INT
+        ,@strB4PriceUOM NVARCHAR(50)
+        -- B5
+        ,@strB5Code NVARCHAR(50)
+        ,@dblB5QtyBought NUMERIC(18, 6)
+        ,@intB5QtyUOMId INT
+        ,@strB5QtyUOM NVARCHAR(50)
+        ,@dblB5Price NUMERIC(18, 6)
+        ,@intB5PriceUOMId INT
+        ,@strB5PriceUOM NVARCHAR(50)
 
     DECLARE @MFBatchTableType MFBatchTableType
 
@@ -88,25 +146,51 @@ BEGIN TRY
         SELECT
             intImportCatalogueId = IMP.intImportCatalogueId
             ,intSampleId = S.intSampleId
-            ,intOtherBuyerId = SOB.intOtherBuyerId
             ,intPurchasingGroupId = COMPANY_CODE.intPurchasingGroupId
             ,strPurchasingGroup = COMPANY_CODE.strName
             ,intBookId = BOOK.intBookId
             ,strBook = BOOK.strBook
             ,intCurrencyId = CURRENCY.intCurrencyID
             ,strCurrency = CURRENCY.strCurrency
+            -- B1
             ,dblB1QtyBought = IMP.dblB1QtyBought
             ,intB1QtyUOMId = B1QUOM.intUnitMeasureId
+            ,strB1QtyUOM = B1QUOM.strUnitMeasure
             ,dblB1Price = IMP.dblB1Price
             ,intB1PriceUOMId = B1PUOM.intUnitMeasureId
+            ,strB1PriceUOM = B1PUOM.strUnitMeasure
+            -- B2
+            ,strB2Code = B2CODE.strName
             ,dblB2QtyBought = IMP.dblB2QtyBought
             ,intB2QtyUOMId = B2QUOM.intUnitMeasureId
+            ,strB2QtyUOM = B2QUOM.strSymbol
             ,dblB2Price = IMP.dblB2Price
             ,intB2PriceUOMId = B2PUOM.intUnitMeasureId
+            ,strB2PriceUOM = B2PUOM.strUnitMeasure
+            -- B3
+            ,strB3Code = B3CODE.strName
             ,dblB3QtyBought = IMP.dblB3QtyBought
             ,intB3QtyUOMId = B3QUOM.intUnitMeasureId
+            ,strB3QtyUOM = B3QUOM.strUnitMeasure
             ,dblB3Price = IMP.dblB3Price
             ,intB3PriceUOMId = B3PUOM.intUnitMeasureId
+            ,strB3PriceUOM = B3PUOM.strUnitMeasure
+            -- B4
+            ,strB4Code = B4CODE.strName
+            ,dblB4QtyBought = IMP.dblB4QtyBought
+            ,intB4QtyUOMId = B4QUOM.intUnitMeasureId
+            ,strB4QtyUOM = B4QUOM.strUnitMeasure
+            ,dblB4Price = IMP.dblB4Price
+            ,intB4PriceUOMId = B4PUOM.intUnitMeasureId
+            ,strB4PriceUOM = B4PUOM.strUnitMeasure
+            -- B5
+            ,strB5Code = B5CODE.strName
+            ,dblB5QtyBought = IMP.dblB5QtyBought
+            ,intB5QtyUOMId = B5QUOM.intUnitMeasureId
+            ,strB5QtyUOM = B5QUOM.strUnitMeasure
+            ,dblB5Price = IMP.dblB5Price
+            ,intB5PriceUOMId = B5PUOM.intUnitMeasureId
+            ,strB5PriceUOM = B5PUOM.strUnitMeasure
         FROM tblQMSample S
         INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
@@ -129,6 +213,22 @@ BEGIN TRY
             LEFT JOIN tblICUnitMeasure B3QUOM ON B3QUOM.strSymbol = IMP.strB3QtyUOM
             -- Buyer3 Price UOM
             LEFT JOIN tblICUnitMeasure B3PUOM ON B3PUOM.strSymbol = IMP.strB3PriceUOM
+            -- Buyer4 Quantity UOM
+            LEFT JOIN tblICUnitMeasure B4QUOM ON B4QUOM.strSymbol = IMP.strB4QtyUOM
+            -- Buyer4 Price UOM
+            LEFT JOIN tblICUnitMeasure B4PUOM ON B4PUOM.strSymbol = IMP.strB4PriceUOM
+            -- Buyer5 Quantity UOM
+            LEFT JOIN tblICUnitMeasure B5QUOM ON B5QUOM.strSymbol = IMP.strB5QtyUOM
+            -- Buyer5 Price UOM
+            LEFT JOIN tblICUnitMeasure B5PUOM ON B5PUOM.strSymbol = IMP.strB5PriceUOM
+            -- Buyer2 Code
+            LEFT JOIN vyuEMSearchEntityBuyer B2CODE ON B2CODE.strName = IMP.strB2Code
+            -- Buyer3 Code
+            LEFT JOIN vyuEMSearchEntityBuyer B3CODE ON B3CODE.strName = IMP.strB3Code
+            -- Buyer4 Code
+            LEFT JOIN vyuEMSearchEntityBuyer B4CODE ON B4CODE.strName = IMP.strB4Code
+            -- Buyer5 Code
+            LEFT JOIN vyuEMSearchEntityBuyer B5CODE ON B5CODE.strName = IMP.strB5Code
             -- Buyer1 Company Code
             LEFT JOIN tblSMPurchasingGroup COMPANY_CODE ON COMPANY_CODE.strName = IMP.strB1CompanyCode
             -- Buyer1 Group Number
@@ -141,7 +241,6 @@ BEGIN TRY
             AND CT.strCatalogueType = IMP.strCatalogueType
             AND E.strName = IMP.strSupplier
             AND S.strRepresentLotNumber = IMP.strLotNumber
-        LEFT JOIN tblQMSampleOtherBuyers SOB ON SOB.intSampleId = S.intSampleId
         WHERE IMP.intImportLogId = @intImportLogId
             AND IMP.ysnSuccess = 1
 
@@ -149,104 +248,98 @@ BEGIN TRY
 	FETCH NEXT FROM @C INTO
 		@intImportCatalogueId
         ,@intSampleId
-        ,@intOtherBuyerId
         ,@intPurchasingGroupId
         ,@strPurchasingGroup
         ,@intBookId
         ,@strBook
         ,@intCurrencyId
         ,@strCurrency
+        -- B1
         ,@dblB1QtyBought
         ,@intB1QtyUOMId
+        ,@strB1QtyUOM
         ,@dblB1Price
         ,@intB1PriceUOMId
+        ,@strB1PriceUOM
+        -- B2
+        ,@strB2Code
         ,@dblB2QtyBought
         ,@intB2QtyUOMId
+        ,@strB2QtyUOM
         ,@dblB2Price
         ,@intB2PriceUOMId
+        ,@strB2PriceUOM
+        -- B3
+        ,@strB3Code
         ,@dblB3QtyBought
         ,@intB3QtyUOMId
+        ,@strB3QtyUOM
         ,@dblB3Price
         ,@intB3PriceUOMId
+        ,@strB3PriceUOM
+        -- B4
+        ,@strB4Code
+        ,@dblB4QtyBought
+        ,@intB4QtyUOMId
+        ,@strB4QtyUOM
+        ,@dblB4Price
+        ,@intB4PriceUOMId
+        ,@strB4PriceUOM
+        -- B5
+        ,@strB5Code
+        ,@dblB5QtyBought
+        ,@intB5QtyUOMId
+        ,@strB5QtyUOM
+        ,@dblB5Price
+        ,@intB5PriceUOMId
+        ,@strB5PriceUOM
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 
         UPDATE S
         SET
-            intConcurrencyId = A.intConcurrencyId + 1
+            intConcurrencyId = S.intConcurrencyId + 1
             ,intCurrencyId = @intCurrencyId
             ,strCurrency = @strCurrency
             ,intPurchaseGroupId = @intPurchasingGroupId
             ,strPurchaseGroup = @strPurchasingGroup
             ,intBookId = @intBookId
+            -- Initial Buy
+            -- B1
+            ,dblB1QtyBought = @dblB1QtyBought
+            ,intB1QtyUOMId = @intB1QtyUOMId
+            ,dblB1Price = @dblB1Price
+            ,intB1PriceUOMId = @intB1PriceUOMId
+            -- B2
+            ,dblB2QtyBought = @dblB2QtyBought
+            ,intB2QtyUOMId = @intB2QtyUOMId
+            ,strB2QtyUOM = @strB2QtyUOM
+            ,dblB2Price = @dblB2Price
+            ,intB2PriceUOMId = @intB2PriceUOMId
+            ,strB2PriceUOM = @strB2PriceUOM
+            -- B3
+            ,dblB3QtyBought = @dblB3QtyBought
+            ,intB3QtyUOMId = @intB3QtyUOMId
+            ,strB3QtyUOM = @strB3QtyUOM
+            ,dblB3Price = @dblB3Price
+            ,intB3PriceUOMId = @intB3PriceUOMId
+            ,strB3PriceUOM = @strB3PriceUOM
+            -- B4
+            ,dblB4QtyBought = @dblB4QtyBought
+            ,intB4QtyUOMId = @intB4QtyUOMId
+            ,strB4QtyUOM = @strB4QtyUOM
+            ,dblB4Price = @dblB4Price
+            ,intB4PriceUOMId = @intB4PriceUOMId
+            ,strB4PriceUOM = @strB4PriceUOM
+            -- B5
+            ,dblB5QtyBought = @dblB5QtyBought
+            ,intB5QtyUOMId = @intB5QtyUOMId
+            ,strB5QtyUOM = @strB5QtyUOM
+            ,dblB5Price = @dblB5Price
+            ,intB5PriceUOMId = @intB5PriceUOMId
+            ,strB5PriceUOM = @strB5PriceUOM
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         WHERE S.intSampleId = @intSampleId
-
-        UPDATE S
-        SET
-            intConcurrencyId = A.intConcurrencyId + 1
-            ,intCurrencyId = @intCurrencyId
-            ,strCurrency = @strCurrency
-            ,intPurchaseGroupId = @intPurchasingGroupId
-            ,strPurchaseGroup = @strPurchasingGroup
-            ,intBookId = @intBookId
-        FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
-        WHERE S.intSampleId = @intSampleId
-
-        IF @intOtherBuyerId IS NULL
-        BEGIN
-            INSERT INTO tblQMSampleOtherBuyers (
-                intSampleId
-                ,dblB1QtyBought
-                ,intB1QtyUOMId
-                ,dblB1Price
-                ,intB1PriceUOMId
-                ,dblB2QtyBought
-                ,intB2QtyUOMId
-                ,dblB2Price
-                ,intB2PriceUOMId
-                ,dblB3QtyBought
-                ,intB3QtyUOMId
-                ,dblB3Price
-                ,intB3PriceUOMId
-            )
-            SELECT
-                intSampleId = @intSampleId
-                ,dblB1QtyBought = @dblB1QtyBought
-                ,intB1QtyUOMId = @intB1QtyUOMId
-                ,dblB1Price = @dblB1Price
-                ,intB1PriceUOMId = @intB1PriceUOMId
-                ,dblB2QtyBought = @dblB2QtyBought
-                ,intB2QtyUOMId = @intB2QtyUOMId
-                ,dblB2Price = @dblB2Price
-                ,intB2PriceUOMId = @intB2PriceUOMId
-                ,dblB3QtyBought = @dblB3QtyBought
-                ,intB3QtyUOMId = @intB3QtyUOMId
-                ,dblB3Price = @dblB3Price
-                ,intB3PriceUOMId = @intB3PriceUOMId
-        END
-        ELSE
-        BEGIN
-            UPDATE SOB
-            SET
-                dblB1QtyBought = @dblB1QtyBought
-                ,intB1QtyUOMId = @intB1QtyUOMId
-                ,dblB1Price = @dblB1Price
-                ,intB1PriceUOMId = @intB1PriceUOMId
-                ,dblB2QtyBought = @dblB2QtyBought
-                ,intB2QtyUOMId = @intB2QtyUOMId
-                ,dblB2Price = @dblB2Price
-                ,intB2PriceUOMId = @intB2PriceUOMId
-                ,dblB3QtyBought = @dblB3QtyBought
-                ,intB3QtyUOMId = @intB3QtyUOMId
-                ,dblB3Price = @dblB3Price
-                ,intB3PriceUOMId = @intB3PriceUOMId
-                ,intConcurrencyId = SOB.intConcurrencyId + 1
-            FROM tblQMSampleOtherBuyers SOB
-            WHERE SOB.intSampleId = @intSampleId
-        END
 
         UPDATE tblQMImportCatalogue
         SET intSampleId = @intSampleId
@@ -473,25 +566,51 @@ BEGIN TRY
         FETCH NEXT FROM @C INTO
             @intImportCatalogueId
             ,@intSampleId
-            ,@intOtherBuyerId
             ,@intPurchasingGroupId
             ,@strPurchasingGroup
             ,@intBookId
             ,@strBook
             ,@intCurrencyId
             ,@strCurrency
+            -- B1
             ,@dblB1QtyBought
             ,@intB1QtyUOMId
+            ,@strB1QtyUOM
             ,@dblB1Price
             ,@intB1PriceUOMId
+            ,@strB1PriceUOM
+            -- B2
+            ,@strB2Code
             ,@dblB2QtyBought
             ,@intB2QtyUOMId
+            ,@strB2QtyUOM
             ,@dblB2Price
             ,@intB2PriceUOMId
+            ,@strB2PriceUOM
+            -- B3
+            ,@strB3Code
             ,@dblB3QtyBought
             ,@intB3QtyUOMId
+            ,@strB3QtyUOM
             ,@dblB3Price
             ,@intB3PriceUOMId
+            ,@strB3PriceUOM
+            -- B4
+            ,@strB4Code
+            ,@dblB4QtyBought
+            ,@intB4QtyUOMId
+            ,@strB4QtyUOM
+            ,@dblB4Price
+            ,@intB4PriceUOMId
+            ,@strB4PriceUOM
+            -- B5
+            ,@strB5Code
+            ,@dblB5QtyBought
+            ,@intB5QtyUOMId
+            ,@strB5QtyUOM
+            ,@dblB5Price
+            ,@intB5PriceUOMId
+            ,@strB5PriceUOM
     END
     CLOSE @C
 	DEALLOCATE @C

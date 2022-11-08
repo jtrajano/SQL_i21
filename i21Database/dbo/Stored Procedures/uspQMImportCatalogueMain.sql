@@ -34,11 +34,11 @@ BEGIN TRY
     -- Sample Type
     LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
     -- Net Weight Per Packages / Quantity UOM
-    LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
+    LEFT JOIN tblICUnitMeasure UOM ON IMP.strNoOfPackagesUOM IS NOT NULL AND UOM.strSymbol = IMP.strNoOfPackagesUOM
     -- Net Weight 2nd Package-Break / Quantity UOM
-    LEFT JOIN tblICUnitMeasure UOM2 ON IMP.dblNetWtSecondPackageBreak IS NOT NULL AND UOM2.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtSecondPackageBreak) AS NVARCHAR(50)) + '%'
+    LEFT JOIN tblICUnitMeasure UOM2 ON IMP.strNoOfPackagesSecondPackageBreakUOM IS NOT NULL AND UOM2.strSymbol = IMP.strNoOfPackagesSecondPackageBreakUOM
     -- Net Weight 3rd Package-Break / Quantity UOM
-    LEFT JOIN tblICUnitMeasure UOM3 ON IMP.dblNetWtThirdPackageBreak IS NOT NULL AND UOM3.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtThirdPackageBreak) AS NVARCHAR(50)) + '%'
+    LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
     -- Broker
     LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
     -- Format log message
@@ -55,9 +55,9 @@ BEGIN TRY
             + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
             + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') <> '') THEN 'CHANNEL, ' ELSE '' END
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
-            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0) THEN 'NO OF PACKAGES UOM, ' ELSE '' END
-            + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtSecondPackageBreak, 0) <> 0) THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
-            + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtThirdPackageBreak, 0) <> 0) THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
+            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '') THEN 'NO OF PACKAGES UOM, ' ELSE '' END
+            + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
+            + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
@@ -74,9 +74,9 @@ BEGIN TRY
         OR (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '')
         OR (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') <> '')
         OR (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
-        OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0)
-        OR (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtSecondPackageBreak, 0) <> 0)
-        OR (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtThirdPackageBreak, 0) <> 0)
+        OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '')
+        OR (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '')
+        OR (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '')
         OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
     )
     -- End Validation
@@ -256,11 +256,11 @@ BEGIN TRY
         -- Sample Type
         LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
         -- Net Weight Per Packages / Quantity UOM
-        LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
+        LEFT JOIN tblICUnitMeasure UOM ON IMP.strNoOfPackagesUOM IS NOT NULL AND UOM.strSymbol = IMP.strNoOfPackagesUOM
         -- Net Weight 2nd Package-Break / Quantity UOM
-        LEFT JOIN tblICUnitMeasure UOM2 ON IMP.dblNetWtSecondPackageBreak IS NOT NULL AND UOM2.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtSecondPackageBreak) AS NVARCHAR(50)) + '%'
+        LEFT JOIN tblICUnitMeasure UOM2 ON IMP.strNoOfPackagesSecondPackageBreakUOM IS NOT NULL AND UOM2.strSymbol = IMP.strNoOfPackagesSecondPackageBreakUOM
         -- Net Weight 3rd Package-Break / Quantity UOM
-        LEFT JOIN tblICUnitMeasure UOM3 ON IMP.dblNetWtThirdPackageBreak IS NOT NULL AND UOM3.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtThirdPackageBreak) AS NVARCHAR(50)) + '%'
+        LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
         -- Broker
         LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
 
