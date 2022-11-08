@@ -401,7 +401,7 @@ BEGIN TRY
 		,strStatus 
 	FROM (
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId ORDER BY intContractBalanceLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId, strAction ORDER BY intContractBalanceLogId DESC)
 			,intSort = 4
 			,CL.strLocationName
 			,E.strName
@@ -413,7 +413,7 @@ BEGIN TRY
 			,I.strItemNo
 			,CBL.dtmCreatedDate
 			,CBL.dtmTransactionDate
-			,dblQty = CBL.dblOrigQty
+			,dblQty = CASE WHEN strAction = 'Deleted Pricing' THEN CBL.dblOrigQty * -1 ELSE CBL.dblOrigQty END
 			,UM.strUnitMeasure
 			,EC.strUserName
 			,strBucketName = '+ Purchase Basis Pricing'
@@ -961,7 +961,7 @@ BEGIN TRY
 		,strStatus 
 	FROM (
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId ORDER BY intContractBalanceLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId, strAction ORDER BY intContractBalanceLogId DESC)
 			,intSort = 14
 			,CL.strLocationName
 			,E.strName
@@ -973,7 +973,7 @@ BEGIN TRY
 			,I.strItemNo
 			,CBL.dtmCreatedDate
 			,CBL.dtmTransactionDate
-			,dblQty = CBL.dblOrigQty
+			,dblQty = CASE WHEN strAction = 'Deleted Pricing' THEN CBL.dblOrigQty * -1 ELSE CBL.dblOrigQty END
 			,UM.strUnitMeasure
 			,EC.strUserName
 			,strBucketName = '+ Sales Basis Pricing'
