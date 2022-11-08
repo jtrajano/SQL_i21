@@ -38,6 +38,9 @@
 			,strResolutionTrainingManualLink	= t.strResolutionTrainingManualLink
 			,strResolutionTrainingAgendaLink	= t.strResolutionTrainingAgendaLink
 			,strResolutionSOPLink				= t.strResolutionSOPLink
+			,dtmStartDate						= t.dtmStartDate
+			,dtmCompleted						= t.dtmCompleted
+			,strNote							= t.strNote
 		from
 			tblHDTicket t
 			/*
@@ -53,3 +56,5 @@
 			left outer join tblHDProjectTask task on task.intTicketId = t.intTicketId
 			left outer join tblHDTicketPriority prio on prio.intTicketPriorityId = t.intTicketPriorityId
 		where t.intTicketTypeId not in (select top 1 intTicketTypeId from tblHDTicketType where strType = 'Template')
+
+GO
