@@ -1168,7 +1168,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
     <Build Include="dbo\Tables\tblCRMHubspotConfig.sql" />
     <Build Include="dbo\Tables\tblCRMHubspotScope.sql" />
-    <Build Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
+    <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
     <Build Include="dbo\Views\vyuCRMSetting.sql" />
   </ItemGroup>
   <ItemGroup>
