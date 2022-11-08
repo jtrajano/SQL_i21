@@ -45,11 +45,11 @@ BEGIN
 		SET @PlaceHolderStartPosition = CHARINDEX (SUBSTRING((@strPlaceHolder), 1, 25), (@newHTMLMessage))
 		SET @PlaceHolderLen = LEN(@strPlaceHolder)
 		SET @temp_PlaceHolder = SUBSTRING(@newHTMLMessage, @PlaceHolderStartPosition, @PlaceHolderLen)
-		SET @temp_newHTMLMessage =  (REPLACE(TRIM(@newHTMLMessage), TRIM(@temp_PlaceHolder), ISNULL(@strPlaceValue,'')))
+		SET @temp_newHTMLMessage =  (REPLACE(LTRIM(RTRIM(@newHTMLMessage)), LTRIM(RTRIM(@temp_PlaceHolder)), ISNULL(@strPlaceValue,'')))
 	END
 	ELSE
 	BEGIN
-		SET @temp_newHTMLMessage =  (REPLACE(TRIM(@newHTMLMessage), TRIM(@strPlaceHolder), ISNULL(@strPlaceValue,'')))
+		SET @temp_newHTMLMessage =  (REPLACE(LTRIM(RTRIM(@newHTMLMessage)), LTRIM(RTRIM(@strPlaceHolder)), ISNULL(@strPlaceValue,'')))
 	END
 	
 	IF	@temp_newHTMLMessage IS NOT NULL AND LEN(LTRIM(RTRIM(@temp_newHTMLMessage))) <> 0
