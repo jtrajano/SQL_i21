@@ -106,6 +106,7 @@ BEGIN TRY
         ,@intB1PriceUOMId INT
         ,@strB1PriceUOM NVARCHAR(50)
         -- B2
+        ,@intBuyer2Id INT
         ,@strB2Code NVARCHAR(50)
         ,@dblB2QtyBought NUMERIC(18, 6)
         ,@intB2QtyUOMId INT
@@ -114,6 +115,7 @@ BEGIN TRY
         ,@intB2PriceUOMId INT
         ,@strB2PriceUOM NVARCHAR(50)
         -- B3
+        ,@intBuyer3Id INT
         ,@strB3Code NVARCHAR(50)
         ,@dblB3QtyBought NUMERIC(18, 6)
         ,@intB3QtyUOMId INT
@@ -122,6 +124,7 @@ BEGIN TRY
         ,@intB3PriceUOMId INT
         ,@strB3PriceUOM NVARCHAR(50)
         -- B4
+        ,@intBuyer4Id INT
         ,@strB4Code NVARCHAR(50)
         ,@dblB4QtyBought NUMERIC(18, 6)
         ,@intB4QtyUOMId INT
@@ -130,6 +133,7 @@ BEGIN TRY
         ,@intB4PriceUOMId INT
         ,@strB4PriceUOM NVARCHAR(50)
         -- B5
+        ,@intBuyer5Id INT
         ,@strB5Code NVARCHAR(50)
         ,@dblB5QtyBought NUMERIC(18, 6)
         ,@intB5QtyUOMId INT
@@ -160,6 +164,7 @@ BEGIN TRY
             ,intB1PriceUOMId = B1PUOM.intUnitMeasureId
             ,strB1PriceUOM = B1PUOM.strUnitMeasure
             -- B2
+            ,intBuyer2Id = B2CODE.intEntityId
             ,strB2Code = B2CODE.strName
             ,dblB2QtyBought = IMP.dblB2QtyBought
             ,intB2QtyUOMId = B2QUOM.intUnitMeasureId
@@ -168,6 +173,7 @@ BEGIN TRY
             ,intB2PriceUOMId = B2PUOM.intUnitMeasureId
             ,strB2PriceUOM = B2PUOM.strUnitMeasure
             -- B3
+            ,intBuyer3Id = B3CODE.intEntityId
             ,strB3Code = B3CODE.strName
             ,dblB3QtyBought = IMP.dblB3QtyBought
             ,intB3QtyUOMId = B3QUOM.intUnitMeasureId
@@ -176,6 +182,7 @@ BEGIN TRY
             ,intB3PriceUOMId = B3PUOM.intUnitMeasureId
             ,strB3PriceUOM = B3PUOM.strUnitMeasure
             -- B4
+            ,intBuyer4Id = B4CODE.intEntityId
             ,strB4Code = B4CODE.strName
             ,dblB4QtyBought = IMP.dblB4QtyBought
             ,intB4QtyUOMId = B4QUOM.intUnitMeasureId
@@ -184,6 +191,7 @@ BEGIN TRY
             ,intB4PriceUOMId = B4PUOM.intUnitMeasureId
             ,strB4PriceUOM = B4PUOM.strUnitMeasure
             -- B5
+            ,intBuyer5Id = B5CODE.intEntityId
             ,strB5Code = B5CODE.strName
             ,dblB5QtyBought = IMP.dblB5QtyBought
             ,intB5QtyUOMId = B5QUOM.intUnitMeasureId
@@ -262,6 +270,7 @@ BEGIN TRY
         ,@intB1PriceUOMId
         ,@strB1PriceUOM
         -- B2
+        ,@intBuyer2Id
         ,@strB2Code
         ,@dblB2QtyBought
         ,@intB2QtyUOMId
@@ -270,6 +279,7 @@ BEGIN TRY
         ,@intB2PriceUOMId
         ,@strB2PriceUOM
         -- B3
+        ,@intBuyer3Id
         ,@strB3Code
         ,@dblB3QtyBought
         ,@intB3QtyUOMId
@@ -278,6 +288,7 @@ BEGIN TRY
         ,@intB3PriceUOMId
         ,@strB3PriceUOM
         -- B4
+        ,@intBuyer4Id
         ,@strB4Code
         ,@dblB4QtyBought
         ,@intB4QtyUOMId
@@ -286,6 +297,7 @@ BEGIN TRY
         ,@intB4PriceUOMId
         ,@strB4PriceUOM
         -- B5
+        ,@intBuyer5Id
         ,@strB5Code
         ,@dblB5QtyBought
         ,@intB5QtyUOMId
@@ -308,9 +320,13 @@ BEGIN TRY
             -- B1
             ,dblB1QtyBought = @dblB1QtyBought
             ,intB1QtyUOMId = @intB1QtyUOMId
+            ,strB1QtyUOM = @strB1QtyUOM
             ,dblB1Price = @dblB1Price
             ,intB1PriceUOMId = @intB1PriceUOMId
+            ,strB1PriceUOM = @strB1PriceUOM
             -- B2
+            ,intBuyer2Id = @intBuyer2Id
+            ,strBuyer2 = @strB2Code
             ,dblB2QtyBought = @dblB2QtyBought
             ,intB2QtyUOMId = @intB2QtyUOMId
             ,strB2QtyUOM = @strB2QtyUOM
@@ -318,6 +334,8 @@ BEGIN TRY
             ,intB2PriceUOMId = @intB2PriceUOMId
             ,strB2PriceUOM = @strB2PriceUOM
             -- B3
+            ,intBuyer3Id = @intBuyer3Id
+            ,strBuyer3 = @strB3Code
             ,dblB3QtyBought = @dblB3QtyBought
             ,intB3QtyUOMId = @intB3QtyUOMId
             ,strB3QtyUOM = @strB3QtyUOM
@@ -325,6 +343,8 @@ BEGIN TRY
             ,intB3PriceUOMId = @intB3PriceUOMId
             ,strB3PriceUOM = @strB3PriceUOM
             -- B4
+            ,intBuyer4Id = @intBuyer4Id
+            ,strBuyer4 = @strB4Code
             ,dblB4QtyBought = @dblB4QtyBought
             ,intB4QtyUOMId = @intB4QtyUOMId
             ,strB4QtyUOM = @strB4QtyUOM
@@ -332,6 +352,8 @@ BEGIN TRY
             ,intB4PriceUOMId = @intB4PriceUOMId
             ,strB4PriceUOM = @strB4PriceUOM
             -- B5
+            ,intBuyer5Id = @intBuyer5Id
+            ,strBuyer5 = @strB5Code
             ,dblB5QtyBought = @dblB5QtyBought
             ,intB5QtyUOMId = @intB5QtyUOMId
             ,strB5QtyUOM = @strB5QtyUOM
@@ -580,6 +602,7 @@ BEGIN TRY
             ,@intB1PriceUOMId
             ,@strB1PriceUOM
             -- B2
+            ,@intBuyer2Id
             ,@strB2Code
             ,@dblB2QtyBought
             ,@intB2QtyUOMId
@@ -588,6 +611,7 @@ BEGIN TRY
             ,@intB2PriceUOMId
             ,@strB2PriceUOM
             -- B3
+            ,@intBuyer3Id
             ,@strB3Code
             ,@dblB3QtyBought
             ,@intB3QtyUOMId
@@ -596,6 +620,7 @@ BEGIN TRY
             ,@intB3PriceUOMId
             ,@strB3PriceUOM
             -- B4
+            ,@intBuyer4Id
             ,@strB4Code
             ,@dblB4QtyBought
             ,@intB4QtyUOMId
@@ -604,6 +629,7 @@ BEGIN TRY
             ,@intB4PriceUOMId
             ,@strB4PriceUOM
             -- B5
+            ,@intBuyer5Id
             ,@strB5Code
             ,@dblB5QtyBought
             ,@intB5QtyUOMId
