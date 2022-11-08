@@ -333,8 +333,11 @@ AS
 			, CD.dblHistoricalRate
 			, CD.intHistoricalRateTypeId
 			, strHistoricalRateType = HRT.strCurrencyExchangeRateType
+			, strLogisticsLeadName = LL.strName
+			, CD.intLogisticsLeadId
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
+	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
 	LEFT JOIN tblSMCountry credC on credC.intCountryID = CD.intLCPlaceOfIssuingId
 	LEFT JOIN tblSMTerm credT on credT.intTermID = CD.intLCPaymentTermId

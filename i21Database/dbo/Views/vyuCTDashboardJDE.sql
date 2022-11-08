@@ -206,6 +206,7 @@ SELECT CD.intContractDetailId
 	, CH.intSubBookId AS intHeaderSubBookId
 	, CD.intBookId AS intDetailBookId
 	, CD.intSubBookId AS intDetailSubBookId
+	, LL.strName AS strLogisticsLeadName
 FROM tblCTContractDetail CD WITH(NOLOCK)
 JOIN tblCTContractHeader CH WITH(NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId
@@ -257,4 +258,5 @@ LEFT JOIN tblRKFutureMarket AS FM ON FM.intFutureMarketId = CD.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth AS MO ON MO.intFutureMonthId = CD.intFutureMonthId
 LEFT JOIN tblICCommodity AS CO ON CO.intCommodityId = CH.intCommodityId
 LEFT JOIN tblSMCompanyLocation AS CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 WHERE CD.intContractStatusId IN(1, 2, 4);
