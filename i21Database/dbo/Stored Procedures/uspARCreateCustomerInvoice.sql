@@ -566,6 +566,7 @@ BEGIN TRY
 		,[dblSurcharge]
 		,[intOpportunityId]
 		,[strPaymentInstructions]
+		,strPrintFormat
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -671,6 +672,7 @@ BEGIN TRY
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
 		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
+		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
