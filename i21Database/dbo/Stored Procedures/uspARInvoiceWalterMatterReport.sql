@@ -144,7 +144,7 @@ SELECT
 	,blbFooterLogo				= SMLPF.imgLogo
 	,dblInvoiceSubtotal			= ARI.dblInvoiceSubtotal
 	,dblTax						= ARI.dblTax
-	,dblInvoiceTotal			= ARI.dblInvoiceTotal
+	,dblInvoiceTotal			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' AND ARI.ysnPosted = 0 THEN 0 ELSE ARI.dblInvoiceTotal END
 	,strVATNo					= ISNULL(EMELS.strVATNo, '')
 	,strOurFiscalRepName		= EMELS.strOurFiscalRepName
 	,strOurFiscalRepAddress		= EMELS.strOurFiscalRepAddress
