@@ -70,7 +70,8 @@ ON Contact.intEntityId = ProjectModule.intContactId
 					INNER JOIN vyuHDProjectTickets ProjectTickets
 			ON ProjectTickets.intTicketId = ProjectTask.intTicketId
 			WHERE ProjectTask.intProjectId = Project.intProjectId AND
-				  ProjectTickets.strModule = SMModule.strModule	
+				  ProjectTickets.strModule = SMModule.strModule	AND
+				  ProjectTickets.dtmStartDate IS NOT NULL
 			ORDER BY ProjectTickets.dtmStartDate
 		) ProjectTicketStartDate
 		OUTER APPLY(
@@ -80,7 +81,8 @@ ON Contact.intEntityId = ProjectModule.intContactId
 					INNER JOIN vyuHDProjectTickets ProjectTickets
 			ON ProjectTickets.intTicketId = ProjectTask.intTicketId
 			WHERE ProjectTask.intProjectId = Project.intProjectId AND
-				  ProjectTickets.strModule = SMModule.strModule	
+				  ProjectTickets.strModule = SMModule.strModule	AND
+				  ProjectTickets.dtmDueDate IS NOT NULL
 			ORDER BY ProjectTickets.dtmDueDate DESC
 		) ProjectTicketDueDate
 		OUTER APPLY(
@@ -90,7 +92,8 @@ ON Contact.intEntityId = ProjectModule.intContactId
 					INNER JOIN vyuHDProjectTickets ProjectTickets
 			ON ProjectTickets.intTicketId = ProjectTask.intTicketId
 			WHERE ProjectTask.intProjectId = Project.intProjectId AND
-				  ProjectTickets.strModule = SMModule.strModule	
+				  ProjectTickets.strModule = SMModule.strModule	AND 
+				  ProjectTickets.dtmCompleted IS NOT NULL
 			ORDER BY ProjectTickets.dtmCompleted DESC
 		) ProjectTicketCompletedDate
 		OUTER APPLY(

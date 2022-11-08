@@ -60,7 +60,8 @@
 						INNER JOIN tblHDTicket ProjectTickets
 				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
 				WHERE ProjectTask.intProjectId = d.intProjectId AND
-					  ProjectTickets.intMilestoneId = a.intMilestoneId	
+					  ProjectTickets.intMilestoneId = a.intMilestoneId AND
+				  ProjectTickets.dtmStartDate IS NOT NULL
 				ORDER BY ProjectTickets.dtmStartDate
 
 			) ProjectTicketStartDate
@@ -71,7 +72,8 @@
 						INNER JOIN tblHDTicket ProjectTickets
 				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
 				WHERE ProjectTask.intProjectId = d.intProjectId AND
-					  ProjectTickets.intMilestoneId = a.intMilestoneId	
+					  ProjectTickets.intMilestoneId = a.intMilestoneId AND
+				      ProjectTickets.dtmDueDate IS NOT NULL	
 				ORDER BY ProjectTickets.dtmDueDate DESC
 
 			) ProjectTicketDueDate
@@ -82,7 +84,8 @@
 						INNER JOIN tblHDTicket ProjectTickets
 				ON ProjectTickets.intTicketId = ProjectTask.intTicketId
 				WHERE ProjectTask.intProjectId = d.intProjectId AND
-					  ProjectTickets.intMilestoneId = a.intMilestoneId	
+					  ProjectTickets.intMilestoneId = a.intMilestoneId AND 
+					  ProjectTickets.dtmCompleted IS NOT NULL
 				ORDER BY ProjectTickets.dtmCompleted DESC
 
 			) ProjectTicketCompletedDate
