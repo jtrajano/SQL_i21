@@ -547,6 +547,7 @@ BEGIN TRY
 		,[strTaxPoint]
 		,[strPaymentInstructions]
 		,[intPayToCashBankAccountId]
+		,strPrintFormat
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -657,6 +658,7 @@ BEGIN TRY
 		,[strTaxPoint]						= @TaxPoint
 		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
 		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
+		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
