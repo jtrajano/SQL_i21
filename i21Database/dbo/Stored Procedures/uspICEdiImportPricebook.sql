@@ -1983,48 +1983,123 @@ FROM #tmpICEdiImportPricebook_tblICItemLocation
 WHERE strAction = 'INSERT';
 
 -- Upsert the Item Pricing
-INSERT INTO #tmpICEdiImportPricebook_tblICItemPricing (strAction
-													 , intItemId
-													 , intItemLocationId	
-													 , intItemPricingId)
-SELECT [Changes].strAction
-	 , [Changes].intItemId
-	 , [Changes].intItemLocationId 	
-	 , [Changes].intItemPricingId 	
-FROM (MERGE	INTO dbo.tblICItemPricing WITH (HOLDLOCK) AS ItemPricing
-USING (
+INSERT INTO #tmpICEdiImportPricebook_tblICItemPricing (
+	strAction
+	, intItemId
+	, intItemLocationId	
+	, intItemPricingId
+)
+SELECT 
+	[Changes].strAction
+	, [Changes].intItemId
+	, [Changes].intItemLocationId 	
+	, [Changes].intItemPricingId 	
+FROM (
+	MERGE	INTO dbo.tblICItemPricing WITH (HOLDLOCK) AS ItemPricing
+USING 
+	(
 	SELECT Item.intItemId
 		 , ItemLocation.intItemLocationId
 		 , Price.intItemPricingId
-		 , dblSalePrice			= CAST(CASE WHEN ISNUMERIC(Pricebook.strRetailPrice) = 1 THEN Pricebook.strRetailPrice ELSE Price.dblSalePrice END AS NUMERIC(38, 20))
-		 , dblStandardCost		= ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-											  ELSE NULL 
-										 END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-											   ELSE NULL
-											   END, Price.dblStandardCost)
-		 , dblLastCost			= ISNULL(NULLIF(Price.dblLastCost, 0), ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-																				   ELSE NULL 
-																			  END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-																						 ELSE NULL 
-																					END, Price.dblLastCost))
-		 , dblAverageCost = ISNULL(NULLIF(Price.dblAverageCost, 0), ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-																			    ELSE NULL 
-																		   END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-																					  ELSE NULL 
-																				 END, Price.dblAverageCost))
+		 , dblSalePrice	= 
+				CAST(
+						CASE 
+							WHEN ISNUMERIC(Pricebook.strRetailPrice) = 1 THEN 
+								Pricebook.strRetailPrice 
+							ELSE 
+								Price.dblSalePrice 
+						END 
+					AS NUMERIC(38, 20)
+				)
+		 , dblStandardCost = 
+				ISNULL(
+					CASE 
+						WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN 
+							CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+						ELSE NULL 
+					END 
+					/ 
+					CASE 
+						WHEN 
+							ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 
+							AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN 
+								CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
+						ELSE 
+							NULL
+					END
+					, Price.dblStandardCost
+				)
+		 , dblLastCost = 
+				ISNULL(
+					NULLIF(Price.dblLastCost, 0)
+					,ISNULL(
+						CASE 
+							WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN 
+								CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+							ELSE 
+								NULL 
+						END 
+						/ 
+						CASE 
+							WHEN 
+								ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 
+								AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 
+							THEN 
+								CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
+							ELSE 
+								NULL 
+						END
+						, Price.dblLastCost
+					)
+				)
+		 , dblAverageCost = 
+			ISNULL(
+				NULLIF(Price.dblAverageCost, 0)
+				,ISNULL(
+					CASE 
+						WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN 
+							CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+						ELSE 
+							NULL 
+					END 
+					/ 
+					CASE 
+						WHEN 
+							ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 
+							AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 
+						THEN 
+							CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
+						ELSE 
+							NULL 
+						END
+						, Price.dblAverageCost
+					)
+				)
 		 , Pricebook.ysnAddOrderingUPC
 		 , Pricebook.ysnUpdateExistingRecords
 		 , Pricebook.ysnAddNewRecords
 		 , Pricebook.ysnUpdatePrice
-	FROM tblICEdiPricebook Pricebook
-	INNER JOIN tblICItem Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	OUTER APPLY (SELECT loc.intCompanyLocationId 
-					  , l.*
-				FROM @ValidLocations loc INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId
-				INNER JOIN tblICItemLocation l ON l.intItemId = Item.intItemId AND l.intLocationId = loc.intCompanyLocationId) As ItemLocation
-	LEFT JOIN tblICItemPricing AS Price ON Price.intItemId = Item.intItemId AND Price.intItemLocationId = ItemLocation.intItemLocationId
-	WHERE Pricebook.strUniqueId = @UniqueId
-) AS Source_Query ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
+	FROM 
+		tblICEdiPricebook Pricebook	INNER JOIN tblICItem Item 
+			ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+		OUTER APPLY (
+			SELECT 
+				loc.intCompanyLocationId 
+				, l.*
+			FROM 
+				@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+					ON loc.intCompanyLocationId = cl.intCompanyLocationId
+				INNER JOIN tblICItemLocation l 
+					ON l.intItemId = Item.intItemId 
+					AND l.intLocationId = loc.intCompanyLocationId
+		) As ItemLocation
+		LEFT JOIN tblICItemPricing AS Price 
+			ON Price.intItemId = Item.intItemId 
+			AND Price.intItemLocationId = ItemLocation.intItemLocationId
+	WHERE 
+		Pricebook.strUniqueId = @UniqueId
+) AS Source_Query 
+	ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
 	   
 /* If matched, update the existing item pricing. */
 WHEN MATCHED AND Source_Query.ysnUpdatePrice = 1 THEN 
