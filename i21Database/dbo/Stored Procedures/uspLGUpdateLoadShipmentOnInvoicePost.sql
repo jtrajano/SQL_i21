@@ -27,7 +27,6 @@ BEGIN TRY
 	DECLARE @intOutboundLoadDetailId INT
 	DECLARE @intInboundLoadDetailId INT
 	DECLARE @strInvoiceType NVARCHAR(100)
-	DECLARE @ysnFromReturn BIT
 
 	DECLARE @tblInvoiceDetail TABLE (
 		intRecordId INT IDENTITY(1, 1)
@@ -61,18 +60,9 @@ BEGIN TRY
 		FROM @tblInvoiceDetail
 		WHERE intRecordId = @intMinRecordId
 
-		SELECT @strInvoiceType = strType
-			,@ysnFromReturn = CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN 1 ELSE 0 END
-		FROM tblARInvoice I
-		OUTER APPLY (
-			SELECT TOP 1 intInvoiceId 
-			FROM tblARInvoice RET
-			WHERE RET.strTransactionType = 'Invoice'
-			  AND RET.ysnReturned = 1
-			  AND RET.strInvoiceNumber = I.strInvoiceOriginId
-			  AND RET.intInvoiceId = I.intOriginalInvoiceId
-		) RI
-		WHERE I.intInvoiceId = @InvoiceId
+		SELECT @strInvoiceType = strType 
+		FROM tblARInvoice 
+		WHERE intInvoiceId = @InvoiceId
 
 		SELECT @intPContractDetailId = intPContractDetailId
 		      ,@intSContractDetailId = intSContractDetailId
@@ -161,25 +151,14 @@ BEGIN TRY
 
 		IF ISNULL(@Post,0) = 1
 		BEGIN
-			IF(@strInvoiceType IN ('Provisional', 'Standard') AND ISNULL(@ysnFromReturn, 0) = 0)
+			IF(@strInvoiceType IN ('Provisional', 'Standard'))
 			BEGIN
 				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId
-			END
-			ELSE IF(ISNULL(@ysnFromReturn, 0) = 1)
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12, 10)
 			END
 		END
 		ELSE 
 		BEGIN
-			IF (ISNULL(@ysnFromReturn, 0) = 1)
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12)
-			END
-			ELSE
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
-			END
+			UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
 		END
 
 		SELECT @intMinRecordId = MIN(intRecordId)
