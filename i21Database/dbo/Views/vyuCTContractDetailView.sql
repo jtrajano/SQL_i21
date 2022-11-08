@@ -220,6 +220,8 @@ AS
 		, CD.intTaxGroupId
 		, CD.intTaxLocationId
 		, EFT.strAccountNumber
+		, LL.strName AS strLogisticsLeadName
+		, CD.intLogisticsLeadId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -326,3 +328,4 @@ AS
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId 
  	LEFT JOIN tblSMCurrency INV ON INV.intCurrencyID = CD.intInvoiceCurrencyId
+	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId

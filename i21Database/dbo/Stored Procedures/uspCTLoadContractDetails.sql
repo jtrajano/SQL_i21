@@ -534,7 +534,6 @@ BEGIN TRY
 		, intDestinationLeadTime = ISNULL(DestinationPort.intLeadTime, 0)
 		, intDestinationLeadTimeSource = ISNULL(DestinationPort.intLeadTimeAtSource, 0)
 		, intFreightRateMatrixLeadTime = ISNULL(FRM.intLeadTime, 0)
-
 		, CD.strFinanceTradeNo
 		, CD.intBankAccountId
 		, BK.intBankId
@@ -630,7 +629,9 @@ BEGIN TRY
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
 		, CD.intMTMPointId
-		,strMTMPoint = mtmp.strMTMPoint
+		, strMTMPoint = mtmp.strMTMPoint
+		, strLogisticsLeadName = LL.strName
+		, CD.intLogisticsLeadId
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -716,8 +717,10 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
-	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
-	left join tblCTMTMPoint mtmp on mtmp.intMTMPointId = CD.intMTMPointId
+	LEFT JOIN tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId	
+	LEFT JOIN tblCTMTMPoint mtmp on mtmp.intMTMPointId = CD.intMTMPointId
+	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
+
 
 	ORDER BY CD.intContractSeq
 

@@ -150,6 +150,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     dtmFinalPNL DATETIME NULL,
 	intPricingStatus INT,
 	dtmStartDateUTC datetime NULL,
+	intLogisticsLeadId INT NULL,
 	-- Reference Pricing
 	dblRefFuturesQty NUMERIC(18, 6) NULL,
 	intRefFuturesItemUOMId INT NULL,
