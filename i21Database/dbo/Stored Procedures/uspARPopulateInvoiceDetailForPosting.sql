@@ -939,7 +939,7 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -1312,7 +1312,7 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
