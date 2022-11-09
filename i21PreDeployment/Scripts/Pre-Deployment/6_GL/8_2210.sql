@@ -47,7 +47,7 @@ BEGIN
 			EXEC(''
             UPDATE tblGLCompanyPreferenceOption SET ysnREOverride = 0, ysnREOverrideLocation = 0 , ysnREOverrideLOB=0, ysnREOverrideCompany = 0
             INSERT INTO tblGLDataFixLog (dtmDate, strDescription)
-            VALUES (GETDATE(),  ''''Reset Retained Earnings Posting''''))'')
+            VALUES (GETDATE(),  ''''Reset Retained Earnings Posting'''')'')
         END
         
     END')
