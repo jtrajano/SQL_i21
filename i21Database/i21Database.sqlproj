@@ -855,6 +855,7 @@
     <Build Include="dbo\Views\vyuICTaxLocationForDestination.sql" />
     <Build Include="dbo\Functions\fnAPGetDetailSourceTransactionTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetOriginalTax.sql" />
+    <Build Include="dbo\Functions\fnFAMultiCurrencyRevalue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
