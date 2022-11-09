@@ -9,12 +9,12 @@ SELECT
 [strOrigin],
 [intBuyingCenterId],
 [strBuyingCenter] = LOC.strLocationName,
+[intReceivingPlantId], 
+[strReceivingPlant],
 [intReceivingStorageLocation],
 [strReceivingStorageLocation] = SLOC.strSubLocationName,
 [intChannelId],
 [strChannel] = MZ.strMarketZoneCode,
-[intReceivingPlantId] = SLOC.intCompanyLocationId,
-[strReceivingPlant] = RLOC.strLocationName,
 [intPortOfDispatchId],
 [strPortOfDispatch],
 [intPortOfArrivalId],
@@ -23,7 +23,7 @@ SELECT
 [dblPortToPort],
 [dblPortToMixingUnit],
 [dblMUToAvailableForBlending],
-[intEntityId]
+[intEntityId] = LLT.intEntityId
 
 FROM 
 tblMFLocationLeadTime LLT
