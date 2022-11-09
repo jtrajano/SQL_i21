@@ -7,7 +7,7 @@ SELECT intTeaTypeId				= S.intSampleTypeId
 	 , intBrokerId				= S.intBrokerId
 
 	 , strYear					= DATENAME(YEAR, S.dtmSaleDate)
-	 , strSaleNumber			= S.strSampleNote
+	 , strSaleNumber			= S.strSaleNumber
 	 , strMonth					= DATENAME(MONTH, S.dtmSaleDate)
 	 , strTeaType				= ST.strSampleTypeName
 	 , strTeaGroup				= IC.strDescription
@@ -17,51 +17,49 @@ SELECT intTeaTypeId				= S.intSampleTypeId
 	 , strBrokerName			= E.strName
 	 , strBrokerNo				= E.strEntityNo
 	 
-	 , intNoOfPackages			= S.intNoOfPackages
-	 , dblWeight				= INITUOM.dblWeight
-	 , dblBoughtPrice			= IB.dblPrice
-	 , dblBoughtKgs				= INITUOM.dblWeight
-	 , dblBoughtPackage			= IB.dblQtyBought
+	 , intNoOfPackages			= CAST(ISNULL(S.intNoOfPackages, 0) AS NUMERIC(18, 6))
+	 , dblWeight				= ISNULL(INITUOM.dblWeight, 0)
+	 , dblBoughtPrice			= ISNULL(S.dblBasePrice, 0)
+	 , dblBoughtKgs				= ISNULL(INITUOM.dblWeight, 0)
+	 , dblBoughtPackage			= CAST(ISNULL(S.intNoOfPackages, 0) AS NUMERIC(18, 6))
 	 
-	 , dblBuyer1Price			= OB.dblB1Price
-	 , dblBuyer1Kgs				= B1UOM.dblWeight
-	 , dblBuyer1NetSavingValue	= ISNULL(OB.dblB1Price, 0) - ISNULL(IB.dblPrice, 0) * ISNULL(B1UOM.dblWeight, 1)
-	 , dblBuyer1PriceDiff		= ISNULL(OB.dblB1Price, 0) - ISNULL(IB.dblPrice, 0)
-	 , dblBuyer1Package			= OB.dblB1QtyBought
+	 , dblBuyer1Price			= ISNULL(S.dblB1Price, 0)
+	 , dblBuyer1Kgs				= ISNULL(B1UOM.dblWeight, 0)
+	 , dblBuyer1NetSavingValue	= ISNULL(S.dblB1Price, 0) - ISNULL(S.dblBasePrice, 0) * ISNULL(B1UOM.dblWeight, 1)
+	 , dblBuyer1PriceDiff		= ISNULL(S.dblB1Price, 0) - ISNULL(S.dblBasePrice, 0)
+	 , dblBuyer1Package			= ISNULL(S.dblB1QtyBought, 0)
 
-	 , dblBuyer2Price			= OB.dblB2Price
-	 , dblBuyer2Kgs				= B2UOM.dblWeight
-	 , dblBuyer2NetSavingValue	= ISNULL(OB.dblB2Price, 0) - ISNULL(IB.dblPrice, 0) * ISNULL(B2UOM.dblWeight, 1)
-	 , dblBuyer2PriceDiff		= ISNULL(OB.dblB2Price, 0) - ISNULL(IB.dblPrice, 0)
-	 , dblBuyer2Package			= OB.dblB2QtyBought
+	 , dblBuyer2Price			= ISNULL(S.dblB2Price, 0)
+	 , dblBuyer2Kgs				= ISNULL(B2UOM.dblWeight, 0)
+	 , dblBuyer2NetSavingValue	= ISNULL(S.dblB2Price, 0) - ISNULL(S.dblBasePrice, 0) * ISNULL(B2UOM.dblWeight, 1)
+	 , dblBuyer2PriceDiff		= ISNULL(S.dblB2Price, 0) - ISNULL(S.dblBasePrice, 0)
+	 , dblBuyer2Package			= ISNULL(S.dblB2QtyBought, 0)
 
-	 , dblBuyer3Price			= OB.dblB3Price
-	 , dblBuyer3Kgs				= B3UOM.dblWeight
-	 , dblBuyer3NetSavingValue	= ISNULL(OB.dblB3Price, 0) - ISNULL(IB.dblPrice, 0) * ISNULL(B3UOM.dblWeight, 1)
-	 , dblBuyer3PriceDiff		= ISNULL(OB.dblB3Price, 0) - ISNULL(IB.dblPrice, 0)
-	 , dblBuyer3Package			= OB.dblB3QtyBought
+	 , dblBuyer3Price			= ISNULL(S.dblB3Price, 0)
+	 , dblBuyer3Kgs				= ISNULL(B3UOM.dblWeight, 0)
+	 , dblBuyer3NetSavingValue	= ISNULL(S.dblB3Price, 0) - ISNULL(S.dblBasePrice, 0) * ISNULL(B3UOM.dblWeight, 1)
+	 , dblBuyer3PriceDiff		= ISNULL(S.dblB3Price, 0) - ISNULL(S.dblBasePrice, 0)
+	 , dblBuyer3Package			= ISNULL(S.dblB3QtyBought, 0)
 
-	 , dblBuyer4Price			= OB.dblB4Price
-	 , dblBuyer4Kgs				= B4UOM.dblWeight
-	 , dblBuyer4NetSavingValue	= ISNULL(OB.dblB4Price, 0) - ISNULL(IB.dblPrice, 0) * ISNULL(B4UOM.dblWeight, 1)
-	 , dblBuyer4PriceDiff		= ISNULL(OB.dblB4Price, 0) - ISNULL(IB.dblPrice, 0)
-	 , dblBuyer4Package			= OB.dblB4QtyBought
+	 , dblBuyer4Price			= ISNULL(S.dblB4Price, 0)
+	 , dblBuyer4Kgs				= ISNULL(B4UOM.dblWeight, 0)
+	 , dblBuyer4NetSavingValue	= ISNULL(S.dblB4Price, 0) - ISNULL(S.dblBasePrice, 0) * ISNULL(B4UOM.dblWeight, 1)
+	 , dblBuyer4PriceDiff		= ISNULL(S.dblB4Price, 0) - ISNULL(S.dblBasePrice, 0)
+	 , dblBuyer4Package			= ISNULL(S.dblB4QtyBought, 0)
 
-	 , dblBuyer5Price			= OB.dblB5Price
-	 , dblBuyer5Kgs				= B5UOM.dblWeight 
-	 , dblBuyer5NetSavingValue	= ISNULL(OB.dblB5Price, 0) - ISNULL(IB.dblPrice, 0) * ISNULL(B5UOM.dblWeight, 1)
-	 , dblBuyer5PriceDiff		= ISNULL(OB.dblB5Price, 0) - ISNULL(IB.dblPrice, 0)
-	 , dblBuyer5Package			= OB.dblB5QtyBought
+	 , dblBuyer5Price			= ISNULL(S.dblB5Price, 0)
+	 , dblBuyer5Kgs				= ISNULL(B5UOM.dblWeight, 0)
+	 , dblBuyer5NetSavingValue	= ISNULL(S.dblB5Price, 0) - ISNULL(S.dblBasePrice, 0) * ISNULL(B5UOM.dblWeight, 1)
+	 , dblBuyer5PriceDiff		= ISNULL(S.dblB5Price, 0) - ISNULL(S.dblBasePrice, 0)
+	 , dblBuyer5Package			= ISNULL(S.dblB5QtyBought, 0)
 FROM tblQMSample S 
-INNER JOIN tblQMSampleInitialBuy IB ON S.intInitialBuyId = IB.intInitialBuyId AND S.intSampleId = IB.intSampleId
-INNER JOIN tblQMSampleOtherBuyers OB ON S.intOtherBuyerId = OB.intOtherBuyerId AND S.intSampleId = OB.intSampleId
 INNER JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
 LEFT JOIN tblEMEntity E ON S.intBrokerId = E.intEntityId
-LEFT JOIN tblICItemUOM INITUOM ON IB.intQtyUOMId = INITUOM.intItemUOMId AND S.intItemId = INITUOM.intItemId
-LEFT JOIN tblICItemUOM B1UOM ON OB.intB1QtyUOMId = B1UOM.intItemUOMId AND S.intItemId = B1UOM.intItemId
-LEFT JOIN tblICItemUOM B2UOM ON OB.intB2QtyUOMId = B2UOM.intItemUOMId AND S.intItemId = B2UOM.intItemId
-LEFT JOIN tblICItemUOM B3UOM ON OB.intB3QtyUOMId = B3UOM.intItemUOMId AND S.intItemId = B3UOM.intItemId
-LEFT JOIN tblICItemUOM B4UOM ON OB.intB4QtyUOMId = B4UOM.intItemUOMId AND S.intItemId = B4UOM.intItemId
-LEFT JOIN tblICItemUOM B5UOM ON OB.intB5QtyUOMId = B5UOM.intItemUOMId AND S.intItemId = B5UOM.intItemId
+LEFT JOIN tblICItemUOM INITUOM ON S.intNetWtPerPackagesUOMId = INITUOM.intItemUOMId AND S.intItemId = INITUOM.intItemId
+LEFT JOIN tblICItemUOM B1UOM ON S.intB1QtyUOMId = B1UOM.intItemUOMId AND S.intItemId = B1UOM.intItemId
+LEFT JOIN tblICItemUOM B2UOM ON S.intB2QtyUOMId = B2UOM.intItemUOMId AND S.intItemId = B2UOM.intItemId
+LEFT JOIN tblICItemUOM B3UOM ON S.intB3QtyUOMId = B3UOM.intItemUOMId AND S.intItemId = B3UOM.intItemId
+LEFT JOIN tblICItemUOM B4UOM ON S.intB4QtyUOMId = B4UOM.intItemUOMId AND S.intItemId = B4UOM.intItemId
+LEFT JOIN tblICItemUOM B5UOM ON S.intB5QtyUOMId = B5UOM.intItemUOMId AND S.intItemId = B5UOM.intItemId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
-LEFT JOIN tblICCommodityAttribute IC ON ITEM.intCommodityId = IC.intCommodityId
+LEFT JOIN tblICCommodity IC ON ITEM.intCommodityId = IC.intCommodityId
