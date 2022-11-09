@@ -765,6 +765,8 @@ BEGIN TRY
 						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END,
 						CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
 						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 and isnull(@dblFixationFX,0) <> 0 and isnull(@dblFixationFX,0) <> 1 then 1 else CD.ysnUseFXPrice end
+						,CD.dblBudgetPrice = null
+						,CD.dblTotalBudget = null
 				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
@@ -861,6 +863,8 @@ BEGIN TRY
 						CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END,
 						CD.dblRate	= case when @ysnEnableFXFieldInContractPricing = 1 then @dblFixationFX else CD.dblRate end,
 						CD.ysnUseFXPrice	= case when @ysnEnableFXFieldInContractPricing = 1 and isnull(@dblFixationFX,0) <> 0 and isnull(@dblFixationFX,0) <> 1 then 1 else CD.ysnUseFXPrice end
+						,CD.dblBudgetPrice = null
+						,CD.dblTotalBudget = null
 				FROM	tblCTContractDetail	CD WITH (ROWLOCK) 
 				JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 				JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
