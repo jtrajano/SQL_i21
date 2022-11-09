@@ -41,6 +41,8 @@
 			,dtmStartDate						= t.dtmStartDate
 			,dtmCompleted						= t.dtmCompleted
 			,strNote							= t.strNote
+			,strCompletedDate = CONVERT(nvarchar(10),t.dtmCompleted,101) COLLATE Latin1_General_CI_AS
+			,strStartDate = CONVERT(nvarchar(10),t.dtmStartDate,101) COLLATE Latin1_General_CI_AS
 		from
 			tblHDTicket t
 			/*
