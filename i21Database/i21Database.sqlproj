@@ -1350,6 +1350,7 @@
     <Build Include="dbo\Tables\tblIPAuctionStockPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPAuctionStock.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
+    <Build Include="dbo\Tables\tblAPVendorCompanyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
