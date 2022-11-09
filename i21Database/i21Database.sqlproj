@@ -1172,6 +1172,7 @@
     <Build Include="dbo\Views\vyuCRMSetting.sql" />
     <Build Include="dbo\Stored Procedures\uspSTInsertRequiredXMLFileConfigForConsignment.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
