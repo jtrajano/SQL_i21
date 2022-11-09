@@ -639,7 +639,7 @@ BEGIN
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = P.[intTransactionAccountId]
 		,[dblDebit]                     = @ZeroDecimal
-		,[dblCredit]                    = P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)
+		,[dblCredit]                    = P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal) - ISNULL(P.dblBaseCreditCardFee, @ZeroDecimal)
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
 		,[strDescription]               = 'Payment for ' + P.strTransactionNumber
@@ -663,7 +663,7 @@ BEGIN
 		,[dblDebitForeign]              = @ZeroDecimal
 		,[dblDebitReport]               = @ZeroDecimal
 		,[dblCreditForeign]             = P.[dblPayment]
-		,[dblCreditReport]              = P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)
+		,[dblCreditReport]              = P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal) - ISNULL(P.dblBaseCreditCardFee, @ZeroDecimal)
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
 		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
 		,[strRateType]                  = P.[strRateType]
