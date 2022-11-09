@@ -561,8 +561,9 @@ BEGIN
 		,[strPostingError]		= 'Customer credit limit is either blank or COD! Only Cash Sale transaction is allowed.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I 
-	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId                      
-	WHERE I.[dblCustomerCreditLimit] IS NULL 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblARCustomer CUS ON I.intEntityCustomerId = CUS.intEntityId
+	WHERE CUS.strCreditCode = 'COD'
 	  AND I.[strTransactionType] NOT IN ('Cash', 'Cash Refund')
 	  AND I.[strType] != 'POS'	
 	  AND INV.[ysnValidCreditCode] <> 1

@@ -231,11 +231,12 @@ SET [ysnImported]		= 0
   , [strEventResult]	= 'The Freight Term provided does not exists. '
 FROM tblARImportLogDetail ILD
 LEFT JOIN tblSMFreightTerms F ON ILD.strFreightTerm = F.strFreightTerm
-LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
+LEFT JOIN tblARCustomer C ON C.strCustomerNumber = ILD.strCustomerNumber
 LEFT JOIN tblEMEntityLocation EL  ON EL.intEntityId = C.intEntityId 
 WHERE ILD.intImportLogId = @ImportLogId AND ISNULL(C.intEntityId, 0) > 0 
   AND @IsTank = 0 
-  AND EL.ysnDefaultLocation=1 
+  AND ISNULL(ILD.strFreightTerm, '') <> ''
+  AND EL.ysnDefaultLocation = 1 
   AND ISNULL(F.intFreightTermId, 0) = 0
   AND ISNULL(ysnSuccess, 1) = 1
 
@@ -271,12 +272,12 @@ WHERE ILD.intImportLogId = @ImportLogId
 UPDATE ILD
 SET [ysnImported]		= 0
   , [ysnSuccess]		= 0
-  , [strEventResult]	= 'Customer Credit Limit is either blank or COD! Only Cash Sale transaction is allowed. '
+  , [strEventResult]	= 'Customer credit limit is either blank or COD! Only Cash Sale transaction is allowed.'
 FROM tblARImportLogDetail ILD
 INNER JOIN tblARCustomer C ON C.strCustomerNumber = ILD.strCustomerNumber 
 WHERE ILD.intImportLogId = @ImportLogId  
-  AND (C.strCreditCode = 'COD' OR C.dblCreditLimit IS NULL) 
-  AND ILD.strTransactionType <> 'Cash'
+  AND C.strCreditCode = 'COD'
+  AND ILD.strTransactionType NOT IN ('Cash', 'Cash Refund')
   AND ISNULL(ysnSuccess, 1) = 1
 
 --TAX GROUP
