@@ -81,6 +81,7 @@ BEGIN TRY
 			,[dblQty]
 			,[intGrossNetUOMId]
 			,[dblGross]
+			,[dblTare]
 			,[dblNet]
 			,[dblCost]
 			,[intCostUOMId]
@@ -129,6 +130,13 @@ BEGIN TRY
 			,[dblGross] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
 							THEN ISNULL(LDCL.dblLinkGrossWt, LD.dblGross)
 							ELSE LD.dblGross - ISNULL(LD.dblDeliveredGross,0) END
+			,[dblTare] = 
+					CASE 
+						WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN 
+							ISNULL(LDCL.dblLinkTareWt, LD.dblTare)
+						ELSE 
+							LD.dblTare - ISNULL(LD.dblDeliveredTare,0) 
+					END
 			,[dblNet] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
 							THEN ISNULL(LDCL.dblLinkNetWt, LD.dblNet)
 							ELSE LD.dblNet -ISNULL(LD.dblDeliveredNet,0) END
@@ -577,6 +585,7 @@ BEGIN TRY
 				,[dblQty]
 				,[intGrossNetUOMId]
 				,[dblGross]
+				,[dblTare]
 				,[dblNet]
 				,[dblCost]
 				,[intCostUOMId]
@@ -625,6 +634,17 @@ BEGIN TRY
 								ELSE 
 									ISNULL(LDCL.dblLinkGrossWt, 0)
 								END
+				,[dblTare] = 
+						CASE 
+							WHEN ISNULL(LDCL.dblReceivedQty, 0) <> 0 THEN
+								--dbo.fnCalculateQtyBetweenUOM(
+								--	LD.intItemUOMId
+								--	, COALESCE(LCUOM.intItemUOMId, LD.intWeightItemUOMId, CD.intNetWeightUOMId)
+								--	, ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0))
+								NULL 
+							ELSE 
+								ISNULL(LDCL.dblLinkTareWt, 0)
+						END
 				,[dblNet] = CASE WHEN ISNULL(LDCL.dblReceivedQty, 0) <> 0 THEN
 								dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, COALESCE(LCUOM.intItemUOMId, LD.intWeightItemUOMId, CD.intNetWeightUOMId),
 									ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0))
@@ -733,6 +753,7 @@ BEGIN TRY
 				,[dblQty]
 				,[intGrossNetUOMId]
 				,[dblGross]
+				,[dblTare]
 				,[dblNet]
 				,[dblCost]
 				,[intCostUOMId]
@@ -776,6 +797,7 @@ BEGIN TRY
 				,[dblQty] = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0)
 				,[intGrossNetUOMId] = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId)
 				,[dblGross] = LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
+				,[dblTare] = LD.dblTare - ISNULL(LD.dblDeliveredTare,0)
 				,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
 				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
 				,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
