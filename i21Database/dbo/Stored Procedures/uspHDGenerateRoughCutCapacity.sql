@@ -161,7 +161,7 @@ INSERT INTO tblHDRoughCountCapacity
      )
 
 	--FROM TIME ENTRY
-   select   
+   select distinct
       intSourceEntityId = b.intAssignedToEntity  
       ,strSourceName = c.strName  
       ,intTicketId = b.intTicketId  
@@ -218,14 +218,6 @@ INSERT INTO tblHDRoughCountCapacity
    where  
 	convert(int, convert(nvarchar(8), a.dtmDate, 112)) between @intDateFrom and @intDateTo
 	and b.intAssignedToEntity is not null and b.intAssignedToEntity <> 0
-   group by
-	 intAssignedToEntity
-	,a.intAgentEntityId 
-	,c.strName  
-	,b.intTicketId
-	,b.strTicketNumber 
-	,b.intCustomerId
-	,d.strName  
 
 	----FROM ACTIVITY SCREEN
 	--union all
