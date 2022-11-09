@@ -144,7 +144,7 @@ BEGIN
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, DISCOUNT.POS+1))) AS INTEREST(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, INTEREST.POS+1))) AS CREDITCARDFEE(POS)
 
-			SELECT @dblTotalPayment = SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblCreditCardFee, 0))
+			SELECT @dblTotalPayment = SUM(ISNULL(dblPayment, 0))
 			FROM #INVOICEANDPAYMENT
 			
 			INSERT INTO @EntriesForPayment (
