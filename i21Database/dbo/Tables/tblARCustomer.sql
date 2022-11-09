@@ -74,6 +74,7 @@
 	[ysnHDBillableSupport]			  BIT             DEFAULT ((0)) NOT NULL,
     [ysnUAP]			              BIT             DEFAULT ((0)) NOT NULL,
     [strScreenConnectLink]			  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
+	[intCustomerSuccessManager]		  INT			  NULL,
 	[intTaxCodeId]					  INT			  NULL,
 	[intContractGroupId]			  INT			  NULL,
 	[intBuybackGroupId]				  INT			  NULL,
