@@ -1164,6 +1164,7 @@
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
