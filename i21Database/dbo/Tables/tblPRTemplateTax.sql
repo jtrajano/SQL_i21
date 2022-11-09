@@ -23,6 +23,8 @@
     [ysnDefault]          BIT             DEFAULT ((1)) NULL,
     [intSort]             INT             NULL,
     [intConcurrencyId]    INT             DEFAULT ((1)) NULL,
+    [ysnUseLocationDistribution] BIT      DEFAULT ((1)) NOT NULL,
+    [ysnUseLocationDistributionExpense] BIT      DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK_tblPRTemplateTax] PRIMARY KEY CLUSTERED ([intTemplateTaxId] ASC),
     CONSTRAINT [FK_tblPRTemplateTax_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [dbo].[tblPRTemplate] ([intTemplateId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPRTemplateTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId]), 
