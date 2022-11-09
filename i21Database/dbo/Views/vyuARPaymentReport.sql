@@ -61,7 +61,7 @@ FROM (
 		 , dblDiscount          = ISNULL(ARPD.dblDiscount, 0.00)
 		 , dblWriteOffAmount	= ISNULL(ARPD.dblWriteOffAmount, 0.00)
 		 , dblCreditCardFee		= ISNULL(ARPD.dblCreditCardFee, 0.00)
-		 , dblPayment           = ISNULL(ARPD.dblPayment, 0.00) + ISNULL(ARPD.dblCreditCardFee, 0.00)
+		 , dblPayment           = ISNULL(ARPD.dblPayment, 0.00)
 	FROM tblARPayment ARP
 	LEFT OUTER JOIN (
 		SELECT PD.intPaymentId
