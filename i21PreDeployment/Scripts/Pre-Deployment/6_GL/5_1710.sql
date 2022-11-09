@@ -12,8 +12,10 @@
 GO
 PRINT 'Begin removing unreferenced entry in tblGLCrossReferenceMapping'
 GO
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCrossReferenceMapping]') AND type in (N'U')) 
-	DELETE FROM tblGLCrossReferenceMapping WHERE intAccountSystemId NOT IN(SELECT intAccountSystemId FROM tblGLAccountSystem)
+IF EXISTS(SELECT 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tblGLCrossReferenceMapping')
+AND EXISTS(SELECT 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tblGLAccountSystem')
+    EXEC ('
+	DELETE FROM tblGLCrossReferenceMapping WHERE intAccountSystemId NOT IN(SELECT intAccountSystemId FROM tblGLAccountSystem)')
 GO
 PRINT 'Finished removing unreferenced entry in tblGLCrossReferenceMapping'
 GO
