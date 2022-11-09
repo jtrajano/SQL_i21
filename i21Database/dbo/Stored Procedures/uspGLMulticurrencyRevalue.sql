@@ -223,7 +223,7 @@ BEGIN
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
-FROM vyuFAMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
+FROM dbo.fnFAMultiCurrencyRevalue(@dtmDate) A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
 AND ISNULL(dblForexRate, 1) <> 1
 END
