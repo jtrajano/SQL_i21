@@ -45,6 +45,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 	,[intGrossNetUOMId] INT NULL							-- The Gross/Net UOM used for the item.
 	,[dblGross] NUMERIC(38, 20) NULL 
+	,[dblTare] NUMERIC(38, 20) NULL 
 	,[dblNet] NUMERIC(38, 20) NULL 
 	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0			-- Fuel Surcharge	
 	,[ysnFreightInPrice] BIT NULL DEFAULT 0					-- Freight should be included In Price
