@@ -69,7 +69,6 @@ BEGIN TRY
 			FROM tblARInvoice RET
 			WHERE RET.strTransactionType = 'Invoice'
 			  AND RET.ysnReturned = 1
-			  AND RET.strInvoiceNumber = I.strInvoiceOriginId
 			  AND RET.intInvoiceId = I.intOriginalInvoiceId
 		) RI
 		WHERE I.intInvoiceId = @InvoiceId
