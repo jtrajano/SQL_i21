@@ -172,7 +172,11 @@ BEGIN
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId
-						AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						--AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						AND (
+							t.intTransactionDetailId = groupedQty.intTransactionDetailId
+							OR (t.intTransactionDetailId IS NULL AND groupedQty.intTransactionDetailId IS NULL)
+						)
 						AND t.strBatchId = groupedQty.strBatchId
 						AND t.intItemId = groupedQty.intItemId
 						AND t.intItemLocationId = groupedQty.intItemLocationId
@@ -273,7 +277,11 @@ BEGIN
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId
-						AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						--AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						AND (
+							t.intTransactionDetailId = groupedQty.intTransactionDetailId
+							OR (t.intTransactionDetailId IS NULL AND groupedQty.intTransactionDetailId IS NULL)
+						)
 						AND t.strBatchId = groupedQty.strBatchId
 						AND t.intItemId = groupedQty.intItemId
 						AND t.intItemLocationId = groupedQty.intItemLocationId
@@ -427,7 +435,11 @@ BEGIN
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId
-						AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						--AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						AND (
+							t.intTransactionDetailId = groupedQty.intTransactionDetailId
+							OR (t.intTransactionDetailId IS NULL AND groupedQty.intTransactionDetailId IS NULL)
+						)
 						AND t.strBatchId = groupedQty.strBatchId
 						AND t.intItemId = groupedQty.intItemId
 						AND t.intItemLocationId = groupedQty.intItemLocationId
@@ -528,7 +540,11 @@ BEGIN
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId
-						AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						--AND t.intTransactionDetailId = groupedQty.intTransactionDetailId
+						AND (
+							t.intTransactionDetailId = groupedQty.intTransactionDetailId
+							OR (t.intTransactionDetailId IS NULL AND groupedQty.intTransactionDetailId IS NULL)
+						)
 						AND t.strBatchId = groupedQty.strBatchId
 						AND t.intItemId = groupedQty.intItemId
 						AND t.intItemLocationId = groupedQty.intItemLocationId
