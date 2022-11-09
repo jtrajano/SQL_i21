@@ -12,6 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
 DECLARE @intItemId INT
+DECLARE @intNewItemLocationId INT
 
 DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[intLocationId] [int] NULL,
@@ -163,6 +164,17 @@ FROM @New NewDetails
 LEFT JOIN tblICItemLocation ItemLocation
 	ON ItemLocation.intLocationId = NewDetails.intLocationId AND ItemLocation.intItemId = NewDetails.intItemId
 WHERE ItemLocation.intItemLocationId IS NULL
+
+SET @intNewItemLocationId = SCOPE_IDENTITY()
+
+
+INSERT INTO tblICItemPricing (intItemId, intItemLocationId) 
+SELECT  NewDetails.intItemId
+	, @intNewItemLocationId
+FROM @New NewDetails
+LEFT JOIN tblICItemPricing ItemPricing
+	ON ItemPricing.intItemLocationId = @intNewItemLocationId AND ItemPricing.intItemId = NewDetails.intItemId
+WHERE ItemPricing.intItemPricingId IS NULL
 
 -- Add the audit logs
 BEGIN
