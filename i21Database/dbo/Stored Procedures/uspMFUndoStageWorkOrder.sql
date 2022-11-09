@@ -265,7 +265,7 @@ BEGIN TRY
 			EXEC uspICInventoryAdjustment_CreatePostLotMerge
 				-- Parameters for filtering:
 				@intItemId = @intInputItemId
-				,@dtmDate = NULL
+				,@dtmDate = @dtmProductionDate
 				,@intLocationId = @intLocationId
 				,@intSubLocationId = @intSubLocationId
 				,@intStorageLocationId = @intStorageLocationId
