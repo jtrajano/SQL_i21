@@ -109,6 +109,8 @@ SELECT intEntityId							= C.intEntityId
      , ysnHDBillableSupport					= C.ysnHDBillableSupport
      , ysnUAP								= C.ysnUAP
      , strScreenConnectLink					= C.strScreenConnectLink
+     , intCustomerSuccessManager			= C.intCustomerSuccessManager
+     , strCustomerSuccessManager			= ECSM.strName
      , intTaxCodeId							= C.intTaxCodeId
      , intContractGroupId					= C.intContractGroupId
      , intBuybackGroupId					= C.intBuybackGroupId
@@ -207,6 +209,7 @@ LEFT JOIN tblSMApprovalList SMPD ON C.intPastDueApprovalId = SMPD.intApprovalLis
 LEFT JOIN tblSMApprovalList SMPC ON C.intPriceChangeApprovalId = SMPC.intApprovalListId
 LEFT JOIN tblEMEntity RCUST ON C.intReferredByCustomer = RCUST.intEntityId
 LEFT JOIN tblSMInterCompany SIC ON C.intInterCompanyId = SIC.intInterCompanyId
+LEFT JOIN tblEMEntity ECSM ON C.intCustomerSuccessManager = ECSM.intEntityId
 OUTER APPLY (
 	SELECT TOP 1 strPassword
 		 , strEntityContactName
