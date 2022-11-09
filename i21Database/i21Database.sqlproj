@@ -1231,6 +1231,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutTankMonitorReportAndVarianceCalculation.sql" />
     <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
