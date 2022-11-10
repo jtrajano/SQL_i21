@@ -9248,10 +9248,10 @@
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
-  	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
     <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
-    <Build Include="dbo\Functions\uspGRGetInventoryTransfers.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
