@@ -121,6 +121,10 @@
 		,intCustomerCurrencyId = a2.intCurrencyId
 		,intCustomerShipToLocationId = a2.intShipToId
 		,intCustomerLocationId = (select top 1 intWarehouseId from tblEMEntityLocation where intEntityId = a.intCustomerId)
+		,a.dtmStartDate
+		,strDueDateTime = CONVERT(nvarchar(30),a.dtmDueDate,22) COLLATE Latin1_General_CI_AS
+	    ,strCompletedDate = CONVERT(nvarchar(10),a.dtmCompleted,101) COLLATE Latin1_General_CI_AS
+		,strStartDate = CONVERT(nvarchar(10),a.dtmStartDate,101) COLLATE Latin1_General_CI_AS
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
