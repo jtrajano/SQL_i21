@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCTLoadContractStatus]
+﻿
+Create PROCEDURE [dbo].[uspCTLoadContractStatus]
 
 	@intContractDetailId INT,
 	@strGrid NVARCHAR(100)
@@ -498,7 +499,11 @@ BEGIN TRY
 					ISNULL(SI.intWeightUOMId,LD.intWeightItemUOMId) AS intWeightUOMId,
 					SH.intInventoryShipmentId,
 					LO.intLoadId
-
+					,strReleaseStatus = CASE WHEN (ISNULL(LO.ysnFinalReleased, 0) = 1) THEN 'Final Released'
+										   WHEN (ISNULL(LO.ysnProvisionalReleased, 0) = 1) THEN 'Provisional Released'
+										   ELSE NULL
+										END
+					
 			FROM	tblLGPickLotDetail				PL
 			JOIN	tblLGPickLotHeader				LH	ON	LH.intPickLotHeaderId			=	PL.intPickLotHeaderId
 			JOIN	tblLGAllocationDetail			AD	ON	AD.intAllocationDetailId		=	PL.intAllocationDetailId								
@@ -533,7 +538,11 @@ BEGIN TRY
 					LD.intItemId,
 					LD.intWeightItemUOMId,
 					SH.intInventoryShipmentId,
-					LO.intLoadId
+					LO.intLoadId,
+					CASE WHEN (ISNULL(LO.ysnFinalReleased, 0) = 1) THEN 'Final Released'
+						WHEN (ISNULL(LO.ysnProvisionalReleased, 0) = 1) THEN 'Provisional Released'
+						ELSE NULL
+					END
 
 			UNION ALL
 				
@@ -546,6 +555,10 @@ BEGIN TRY
 					ISNULL(SI.intWeightUOMId,LD.intWeightItemUOMId) AS intWeightUOMId,
 					SH.intInventoryShipmentId,
 					LO.intLoadId
+					,strReleaseStatus = CASE WHEN (ISNULL(LO.ysnFinalReleased, 0) = 1) THEN 'Final Released'
+										   WHEN (ISNULL(LO.ysnProvisionalReleased, 0) = 1) THEN 'Provisional Released'
+										   ELSE NULL
+										END
 
 			FROM	tblLGPickLotDetail				PL
 			JOIN	tblLGPickLotHeader				LH	ON	LH.intPickLotHeaderId			=	PL.intPickLotHeaderId
@@ -581,7 +594,11 @@ BEGIN TRY
 					LD.intItemId,
 					LD.intWeightItemUOMId,
 					SH.intInventoryShipmentId,
-					LO.intLoadId
+					LO.intLoadId,
+					CASE WHEN (ISNULL(LO.ysnFinalReleased, 0) = 1) THEN 'Final Released'
+						WHEN (ISNULL(LO.ysnProvisionalReleased, 0) = 1) THEN 'Provisional Released'
+						ELSE NULL
+					END
 		)t
 	END
 	ELSE IF @strGrid = 'vyuCTContStsCustomerInvoice'

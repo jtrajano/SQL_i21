@@ -1,4 +1,8 @@
-﻿CREATE VIEW [dbo].[vyuCTContStsPickedLot]
+﻿USE [WAMANEW]
+GO
+
+/****** Object:  View [dbo].[vyuCTContStsPickedLot]    Script Date: 11/10/2022 12:40:41 PM ******/
+Create VIEW [dbo].[vyuCTContStsPickedLot]
 
 AS
 
@@ -8,6 +12,11 @@ AS
 			LT.strLotNumber,
 			LT.strMarkings,
 			dbo.fnCTConvertQuantityToTargetItemUOM(LT.intItemId,PL.intLotUnitMeasureId,LP.intWeightUOMId,PL.dblLotPickedQty) dblPickedQty
+			,strWarrantStatus = CASE LT.intWarrantStatus  
+									  WHEN 1 THEN 'Pledged'  
+									  WHEN 2 THEN 'Partially Released'  
+									  WHEN 3 THEN 'Released'  
+								END COLLATE Latin1_General_CI_AS  
 	FROM	tblLGPickLotDetail		PL
 	JOIN	tblLGPickLotHeader		LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
 	JOIN	tblICLot				LT	ON	LT.intLotId					=	PL.intLotId
@@ -22,8 +31,17 @@ AS
 			LT.strLotNumber,
 			LT.strMarkings,
 			dbo.fnCTConvertQuantityToTargetItemUOM(LT.intItemId,PL.intSaleUnitMeasureId,LP.intWeightUOMId,PL.dblSalePickedQty)  dblPickedQty
+			,strWarrantStatus = CASE LT.intWarrantStatus  
+									  WHEN 1 THEN 'Pledged'  
+									  WHEN 2 THEN 'Partially Released'  
+									  WHEN 3 THEN 'Released'  
+								END COLLATE Latin1_General_CI_AS  
 	FROM	tblLGPickLotDetail		PL
 	JOIN	tblLGPickLotHeader		LH	ON	LH.intPickLotHeaderId		=	PL.intPickLotHeaderId
 	JOIN	tblICLot				LT	ON	LT.intLotId					=	PL.intLotId
 	JOIN	tblLGAllocationDetail	AD	ON	AD.intAllocationDetailId	=	PL.intAllocationDetailId	CROSS	
-	APPLY	tblLGCompanyPreference		LP 	
+	APPLY	tblLGCompanyPreference		LP
+GO
+
+
+
