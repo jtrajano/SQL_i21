@@ -52,14 +52,14 @@ END
 
 IF @strFromFiscalYear > @strToFiscalYear
 BEGIN
-	SET @ErrorMessage = 'From Fiscal Year should be less than To Fiscal Year.'
+	SET @ErrorMessage = 'To Fiscal Year should not be less than From Fiscal Year.'
 
 	RETURN
 END
 
 IF @strFromFiscalYear = @strToFiscalYear
 BEGIN
-	SET @ErrorMessage = 'From Fiscal Year should be the same with To Fiscal Year.'
+	SET @ErrorMessage = 'From Fiscal Year should not be the same To Fiscal Year.'
 
 	RETURN
 END
