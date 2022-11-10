@@ -120,13 +120,13 @@ SELECT S.intSampleId
 	,S.intBrokerId
 	,S.strBroker
 	,S.intGradeId
-	--,S.strGrade
+	,S.strGrade AS strTeaGrade
 	,S.intLeafCategoryId
 	,S.strLeafCategory
 	,S.intManufacturingLeafTypeId
 	,S.strManufacturingLeafType
 	,S.intSeasonId
-	--,S.strSeason
+	,S.strSeason AS strColor
 	,S.intGardenMarkId
 	,S.strGardenMark
 	,S.dtmManufacturingDate
@@ -141,7 +141,7 @@ SELECT S.intSampleId
 	,strNetWtThirdPackageBreakUOM = PWUOM3.strUnitMeasure
 	,S.intNoOfPackagesThirdPackageBreak
 	,S.intProductLineId
-	--,S.strProductLine
+	,S.strProductLine AS strSustainability
 	,S.ysnOrganic
 	,S.dblSupplierValuationPrice
 	,S.intProducerId
