@@ -311,7 +311,7 @@ BEGIN
 						,dblGallonsInTankAfterDelivery = A.dblGalsAfterDelivery
 					FROM (
 						SELECT 
-							intRow = ROW_NUMBER() OVER(PARTITION BY Z.intDeliveryHistoryID ORDER BY dblPercentAfterDelivery DESC)
+							intRow = ROW_NUMBER() OVER(PARTITION BY Z.intDeliveryHistoryID ORDER BY Z.dblPercentAfterDelivery DESC)
 							,Z.dblPercentAfterDelivery
 							,Z.strInvoiceNumber
 							,Z.strItemNumber

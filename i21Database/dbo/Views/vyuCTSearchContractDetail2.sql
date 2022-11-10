@@ -157,9 +157,9 @@ SELECT a.intContractDetailId
 																	ELSE CASE WHEN s.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received'
 																			ELSE NULL END END
 								ELSE a.strFinancialStatus END
-	, dblPricedQty = CASE WHEN a.intPricingTypeId = 2 OR t.dblPricedQuantity IS NOT NULL THEN ISNULL(t.dblPricedQuantity, 0)
+	, dblPricedQty = CASE WHEN a.intPricingTypeId in (2,5) OR t.dblPricedQuantity IS NOT NULL THEN ISNULL(t.dblPricedQuantity, 0)
 						ELSE a.dblQuantity END
-	, dblUnPricedQty = CASE WHEN a.intPricingTypeId = 2 OR t.dblPricedQuantity IS NOT NULL THEN a.dblQuantity - ISNULL(t.dblPricedQuantity, 0)
+	, dblUnPricedQty = CASE WHEN a.intPricingTypeId in (2,5) OR t.dblPricedQuantity IS NOT NULL THEN a.dblQuantity - ISNULL(t.dblPricedQuantity, 0)
 							ELSE 0.00 END
 	, dblActualLots = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(w.dblUnitQty, 0) = 0 THEN NULL
 							WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(w.dblUnitQty, 0) THEN a.dblQuantity

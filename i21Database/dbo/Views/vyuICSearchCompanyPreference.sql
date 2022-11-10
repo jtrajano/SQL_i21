@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetCompanyPreference]
+﻿CREATE VIEW [dbo].[vyuICSearchCompanyPreference]
 AS
 
 SELECT 
