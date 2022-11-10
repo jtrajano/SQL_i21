@@ -2795,11 +2795,6 @@ BEGIN
 	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
-	FROM tblARPostInvoiceHeader ARPIH
-	INNER JOIN tblARInvoice ARI ON ARPIH.intOriginalInvoiceId = ARI.intInvoiceId
-	WHERE ARPIH.strType = 'Tax Adjustment'
-	AND ARI.ysnPosted = 0
-	AND strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]

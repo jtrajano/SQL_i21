@@ -64,29 +64,50 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTReg
 -- Start: Encryption
 ----------------------------------------------------------------------------------------------------------------------------------
 
-	PRINT('Start Encryption tblSTCheckoutHeader')
+	IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTCheckoutHeader'  and COLUMN_NAME = 'strManagersPassword') 
+	BEGIN
+		PRINT('Start Encryption tblSTCheckoutHeader')
 			EXEC('
-					UPDATE tblSTCheckoutHeader SET strManagersPassword = dbo.fnAESEncryptASym(strManagersPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strManagersPassword),,'''')  <> '''' 
+					UPDATE tblSTCheckoutHeader SET strManagersPassword = dbo.fnAESEncryptASym(strManagersPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strManagersPassword),'''')  <> '''' 
 			')
-	PRINT('End Encryption tblSTCheckoutHeader')
+		PRINT('End Encryption tblSTCheckoutHeader')	
+	END
 
-	PRINT('Start Encryption tblSTGenerateVendorRebateHistory')
+	IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTGenerateVendorRebateHistory'  and COLUMN_NAME = 'strPassword') 
+	BEGIN
+		PRINT('Start Encryption tblSTGenerateVendorRebateHistory')
 			EXEC('
-					UPDATE tblSTGenerateVendorRebateHistory SET strPassword = dbo.fnAESEncryptASym(strPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strPassword),,'''')  <> '''' 
+					UPDATE tblSTGenerateVendorRebateHistory SET strPassword = dbo.fnAESEncryptASym(strPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strPassword),'''')  <> '''' 
 			')
-	PRINT('End Encryption tblSTGenerateVendorRebateHistory')
+		PRINT('End Encryption tblSTGenerateVendorRebateHistory')
+	END
 
-	PRINT('Start Encryption tblSTRegister')
+	IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTRegister'  and COLUMN_NAME = 'strFTPPassword') 
+	BEGIN
+		PRINT('Start Encryption tblSTRegister strFTPPassword')
 			EXEC('
-					UPDATE tblSTRegister SET strFTPPassword = dbo.fnAESEncryptASym(strFTPPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strFTPPassword),,'''')  <> '''' 
+					UPDATE tblSTRegister SET strFTPPassword = dbo.fnAESEncryptASym(strFTPPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strFTPPassword),'''')  <> '''' 
 			')
+		PRINT('End Encryption tblSTRegister strFTPPassword')
+	END
+
+	IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTRegister'  and COLUMN_NAME = 'strIrelyPassword') 
+	BEGIN
+		PRINT('Start Encryption tblSTRegister strIrelyPassword')
 			EXEC('
-					UPDATE tblSTRegister SET strIrelyPassword = dbo.fnAESEncryptASym(strIrelyPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyPassword),,'''')  <> '''' 
+					UPDATE tblSTRegister SET strIrelyPassword = dbo.fnAESEncryptASym(strIrelyPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyPassword),'''')  <> '''' 
 			')
+		PRINT('End Encryption tblSTRegister strIrelyPassword')
+	END
+
+	IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTRegister'  and COLUMN_NAME = 'strIrelyReEnterPassword') 
+	BEGIN
+		PRINT('Start Encryption tblSTRegister strIrelyReEnterPassword')
 			EXEC('
-					UPDATE tblSTRegister SET strIrelyReEnterPassword = dbo.fnAESEncryptASym(strIrelyReEnterPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyReEnterPassword),,'''')  <> '''' 
+					UPDATE tblSTRegister SET strIrelyReEnterPassword = dbo.fnAESEncryptASym(strIrelyReEnterPassword) WHERE ISNULL(dbo.fnAESEncryptASym(strIrelyReEnterPassword),'''')  <> '''' 
 			')
-	PRINT('End Encryption tblSTRegister')
+		PRINT('End Encryption tblSTRegister strIrelyReEnterPassword')
+	END
 	
 ----------------------------------------------------------------------------------------------------------------------------------
 -- End: Encryption
