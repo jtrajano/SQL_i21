@@ -335,9 +335,8 @@ BEGIN TRY
 
         SELECT @intSampleId = S.intSampleId
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
         WHERE S.strSaleYear = @strSaleYear
@@ -520,96 +519,6 @@ BEGIN TRY
                 ,strBroker = @strBroker
             
             SET @intSampleId = SCOPE_IDENTITY()
-
-            INSERT INTO tblQMAuction (
-                intConcurrencyId
-                ,intSampleId
-                ,intSaleYearId
-                ,strSaleYear
-                ,strSaleNumber
-                ,dtmSaleDate
-                ,intCatalogueTypeId
-                ,strCatalogueType
-                ,dtmPromptDate
-                ,strChopNumber
-                ,intGradeId
-                ,strGrade
-                ,intManufacturingLeafTypeId
-                ,strManufacturingLeafType
-                ,intSeasonId
-                ,strSeason
-                ,intGardenMarkId
-                ,strGardenMark
-                ,dtmManufacturingDate
-                ,intTotalNumberOfPackageBreakups
-                ,intNoOfPackages
-                ,intNoOfPackagesSecondPackageBreak
-                ,intNoOfPackagesThirdPackageBreak
-                ,intProductLineId
-                ,strProductLine
-                ,ysnOrganic
-                ,dblGrossWeight
-                ,strBatchNo
-                ,str3PLStatus
-                ,strAdditionalSupplierReference
-                ,intAWBSampleReceived
-                ,strAWBSampleReference
-                ,dblBasePrice
-                ,ysnBoughtAsReserve
-                ,ysnEuropeanCompliantFlag
-                ,intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO
-                ,intFromLocationCodeId
-                ,strFromLocationCode
-                ,strSampleBoxNumber
-                ,strComments3
-                ,intBrokerId
-                ,strBroker
-            )
-            SELECT
-                intConcurrencyId = 1
-                ,intSampleId = @intSampleId
-                ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
-                ,strSaleNumber = @strSaleNumber
-                ,dtmSaleDate = @dtmSaleDate
-                ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
-                ,dtmPromptDate = @dtmPromptDate
-                ,strChopNumber = @strChopNumber
-                ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
-                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
-                ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
-                ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
-                ,dtmManufacturingDate = @dtmManufacturingDate
-                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,intNoOfPackages = @intNoOfPackages
-                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
-                ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
-                ,ysnOrganic = @ysnOrganic
-                ,dblGrossWeight = @dblGrossWeight
-                ,strBatchNo = @strBatchNo
-                ,str3PLStatus = @str3PLStatus
-                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
-                ,intAWBSampleReceived = @intAWBSampleReceived
-                ,strAWBSampleReference = @strAWBSampleReference
-                ,dblBasePrice = @dblBasePrice
-                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
-                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
-                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
-                ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
-                ,strSampleBoxNumber = @strSampleBoxNumber
-                ,strComments3 = @strComments3
-                ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
             
             -- Sample Detail
             INSERT INTO tblQMSampleDetail (
@@ -773,7 +682,8 @@ BEGIN TRY
         BEGIN
             UPDATE S
             SET
-                strRepresentLotNumber = @strRefNo
+                intConcurrencyId = S.intConcurrencyId + 1
+                ,strRepresentLotNumber = @strRefNo
                 ,intCountryID = @intOriginId
                 ,dblSampleQty = @dblSampleQty
                 ,dblRepresentingQty = CASE WHEN ISNULL(@intNoOfPackages, 0) IS NOT NULL THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE NULL END
@@ -831,54 +741,6 @@ BEGIN TRY
                 ,intBrokerId = @intBrokerId
                 ,strBroker = @strBroker
             FROM tblQMSample S
-            WHERE S.intSampleId = @intSampleId
-
-            UPDATE A
-            SET
-                intConcurrencyId = A.intConcurrencyId + 1
-                ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
-                ,strSaleNumber = @strSaleNumber
-                ,dtmSaleDate = @dtmSaleDate
-                ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
-                ,dtmPromptDate = @dtmPromptDate
-                ,strChopNumber = @strChopNumber
-                ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
-                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
-                ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
-                ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
-                ,dtmManufacturingDate = @dtmManufacturingDate
-                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,intNoOfPackages = @intNoOfPackages
-                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
-                ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
-                ,ysnOrganic = @ysnOrganic
-                ,dblGrossWeight = @dblGrossWeight
-                ,strBatchNo = @strBatchNo
-                ,str3PLStatus = @str3PLStatus
-                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
-                ,intAWBSampleReceived = @intAWBSampleReceived
-                ,strAWBSampleReference = @strAWBSampleReference
-                ,dblBasePrice = @dblBasePrice
-                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
-                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
-                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
-                ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
-                ,strSampleBoxNumber = @strSampleBoxNumber
-                ,strComments3 = @strComments3
-                ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
-            FROM tblQMSample S
-            INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
             WHERE S.intSampleId = @intSampleId
 
         END

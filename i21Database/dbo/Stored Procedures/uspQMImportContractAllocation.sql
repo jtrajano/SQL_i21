@@ -64,9 +64,8 @@ BEGIN TRY
             ,ysnSampleContractItemMatch = CASE WHEN CD.intItemId = S.intItemId THEN 1 ELSE 0 END
             ,strSampleNumber = S.strSampleNumber
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
         INNER JOIN (
