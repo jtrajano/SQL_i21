@@ -11,7 +11,7 @@ SELECT DD.intLoadDistributionDetailId
 	, DD.intTaxGroupId
 	, TG.strTaxGroup
 	, DD.intSiteId
-	, RIGHT('0000'+CAST(S.intSiteNumber AS NVARCHAR(4)),4) strSiteNumber
+	, RIGHT('0000'+CAST(S.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS strSiteNumber
 FROM tblTRLoadDistributionDetail DD
 LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 LEFT JOIN vyuICGetItemLocation IL ON IL.intItemId = DD.intItemId AND IL.intLocationId = DH.intCompanyLocationId
