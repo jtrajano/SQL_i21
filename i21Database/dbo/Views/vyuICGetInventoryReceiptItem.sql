@@ -22,7 +22,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.strSourceNumber
 	, ReceiptItem.intItemId
 	, Item.strItemNo
-	, strItemDescription = COALESCE(ItemUOM.strUPCDescription, Item.strDescription)
+	, strItemDescription = Item.strDescription
 	, dblQtyToReceive = ReceiptItem.dblOpenReceive
 	, intLoadToReceive = ReceiptItem.intLoadReceive
 	, ReceiptItem.dblUnitCost
@@ -97,10 +97,10 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.intBookId
 	, Receipt.intSubBookId
-	, ReceiptItem.ysnWeighed
-	, ReceiptItem.dblTare
-	, ReceiptItem.dblTarePerQuantity
-	, ReceiptItem.ysnOverrideTaxGroup
+	, CAST(0 AS BIT) ysnWeighed
+	, CAST(0 AS NUMERIC(30, 20)) dblTare
+	, CAST(0 AS BIT) dblTarePerQuantity
+	, CAST(0 AS BIT) ysnOverrideTaxGroup
 
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
