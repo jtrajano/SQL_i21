@@ -96,6 +96,10 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, strVoucherNo = voucher.strBillId
 	, Receipt.intBookId
 	, Receipt.intSubBookId
+	, CAST(0 AS BIT) ysnWeighed
+	, CAST(0 AS NUMERIC(30, 20)) dblTare
+	, CAST(0 AS BIT) dblTarePerQuantity
+	, CAST(0 AS BIT) ysnOverrideTaxGroup
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
