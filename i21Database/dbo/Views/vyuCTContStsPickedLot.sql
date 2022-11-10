@@ -1,7 +1,4 @@
-﻿USE [WAMANEW]
-GO
-
-/****** Object:  View [dbo].[vyuCTContStsPickedLot]    Script Date: 11/10/2022 12:40:41 PM ******/
+﻿
 Create VIEW [dbo].[vyuCTContStsPickedLot]
 
 AS
