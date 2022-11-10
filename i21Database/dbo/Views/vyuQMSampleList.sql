@@ -181,45 +181,45 @@ SELECT S.intSampleId
 	,S.strComments3
 	-- Initial Buy
 	,S.intBuyer1Id
-	,S.strBuyer1
+	,B1.strName AS strBuyer1
 	,S.dblB1QtyBought
 	,S.intB1QtyUOMId
-	,S.strB1QtyUOM
+	,QB1.strUnitMeasure AS strB1QtyUOM
 	,S.dblB1Price
 	,S.intB1PriceUOMId
-	,S.strB1PriceUOM
+	,PUOM1.strUnitMeasure AS strB1PriceUOM
 	,S.intBuyer2Id
-	,S.strBuyer2
+	,B2.strName AS strBuyer2
 	,S.dblB2QtyBought
 	,S.intB2QtyUOMId
-	,S.strB2QtyUOM
+	,QB2.strUnitMeasure AS strB2QtyUOM
 	,S.dblB2Price
 	,S.intB2PriceUOMId
-	,S.strB2PriceUOM
+	,PUOM2.strUnitMeasure AS strB2PriceUOM
 	,S.intBuyer3Id
-	,S.strBuyer3
+	,B3.strName AS strBuyer3
 	,S.dblB3QtyBought
 	,S.intB3QtyUOMId
-	,S.strB3QtyUOM
+	,QB3.strUnitMeasure AS strB3QtyUOM
 	,S.dblB3Price
 	,S.intB3PriceUOMId
-	,S.strB3PriceUOM
+	,PUOM3.strUnitMeasure AS strB3PriceUOM
 	,S.intBuyer4Id
-	,S.strBuyer4
+	,B4.strName AS strBuyer4
 	,S.dblB4QtyBought
 	,S.intB4QtyUOMId
-	,S.strB4QtyUOM
+	,QB4.strUnitMeasure AS strB4QtyUOM
 	,S.dblB4Price
 	,S.intB4PriceUOMId
-	,S.strB4PriceUOM
+	,PUOM4.strUnitMeasure AS strB4PriceUOM
 	,S.intBuyer5Id
-	,S.strBuyer5
+	,B5.strName AS strBuyer5
 	,S.dblB5QtyBought
 	,S.intB5QtyUOMId
-	,S.strB5QtyUOM
+	,QB5.strUnitMeasure AS strB5QtyUOM
 	,S.dblB5Price
 	,S.intB5PriceUOMId
-	,S.strB5PriceUOM
+	,PUOM5.strUnitMeasure AS strB5PriceUOM
 	,S.intBatchId
 	,Batch.strBatchId
 FROM dbo.tblQMSample S
@@ -272,6 +272,21 @@ LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPack
 LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
 LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
 LEFT JOIN tblMFBatch AS Batch ON S.intBatchId = Batch.intBatchId
+LEFT JOIN tblEMEntity B1 ON B1.intEntityId = S.intBuyer1Id
+LEFT JOIN tblEMEntity B2 ON B2.intEntityId = S.intBuyer2Id
+LEFT JOIN tblEMEntity B3 ON B3.intEntityId = S.intBuyer3Id
+LEFT JOIN tblEMEntity B4 ON B4.intEntityId = S.intBuyer4Id
+LEFT JOIN tblEMEntity B5 ON B5.intEntityId = S.intBuyer5Id
+LEFT JOIN tblICUnitMeasure QB1 ON QB1.intUnitMeasureId = S.intB1QtyUOMId
+LEFT JOIN tblICUnitMeasure QB2 ON QB2.intUnitMeasureId = S.intB2QtyUOMId
+LEFT JOIN tblICUnitMeasure QB3 ON QB3.intUnitMeasureId = S.intB3QtyUOMId
+LEFT JOIN tblICUnitMeasure QB4 ON QB4.intUnitMeasureId = S.intB4QtyUOMId
+LEFT JOIN tblICUnitMeasure QB5 ON QB5.intUnitMeasureId = S.intB5QtyUOMId
+LEFT JOIN tblICUnitMeasure PUOM1 ON PUOM1.intUnitMeasureId = S.intB1PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM2 ON PUOM2.intUnitMeasureId = S.intB2PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM3 ON PUOM3.intUnitMeasureId = S.intB3PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM4 ON PUOM4.intUnitMeasureId = S.intB4PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM5 ON PUOM5.intUnitMeasureId = S.intB5PriceUOMId
 WHERE S.intTypeId = 1
 GO
 
