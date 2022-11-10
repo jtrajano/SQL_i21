@@ -137,18 +137,18 @@ BEGIN
 		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
 	DECLARE @CREDITMEMOPAIDREFUNDED TABLE (
-		 intInvoiceId			INT												NOT NULL PRIMARY KEY
-		,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		 intInvoiceId		INT												NOT NULL PRIMARY KEY
+		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 		,strDocumentNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
 	DECLARE @CANCELLEDINVOICE TABLE (
-		intInvoiceId			INT												NOT NULL PRIMARY KEY
-		,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-		,ysnPaid				BIT												NULL
+		 intInvoiceId		INT												NOT NULL PRIMARY KEY
+		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		,ysnPaid			BIT												NULL
 	)
 	DECLARE @CANCELLEDCMINVOICE TABLE (
-		intInvoiceId			INT												NOT NULL PRIMARY KEY
-		,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		 intInvoiceId		INT												NOT NULL PRIMARY KEY
+		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
 
 	DECLARE @POSTEDINVOICES TABLE (
@@ -369,23 +369,23 @@ BEGIN
 		AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 		AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
-	--@CANCELLEDINVOICE
 	INSERT INTO @CANCELLEDINVOICE (
 		 intInvoiceId
 		,strInvoiceNumber
 		,ysnPaid
 	)
-	SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid from tblARInvoice INVCANCELLED
+	SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid 
+	FROM tblARInvoice INVCANCELLED
 	WHERE ysnCancelled =1 and ysnPosted =1
 	AND INVCANCELLED.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
-	--@CANCELLEDINVOICE
 	INSERT INTO @CANCELLEDCMINVOICE (
 		 intInvoiceId
 		,strInvoiceNumber
 	)
-	SELECT CM.intInvoiceId,CM.strInvoiceNumber from tblARInvoice CM
-	where CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
+	SELECT CM.intInvoiceId,CM.strInvoiceNumber 
+	FROM tblARInvoice CM
+	WHERE CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
 	AND CM.ysnPosted =1
 	AND CM.strTransactionType = 'Credit Memo'
 	AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -493,13 +493,13 @@ BEGIN
 	  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 	GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
-	DELETE FROM  @POSTEDINVOICES
+	DELETE FROM @POSTEDINVOICES
 	WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM @CASHREFUNDS CF INNER  JOIN @CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber) 
 
-	DELETE FROM  @POSTEDINVOICES
+	DELETE FROM @POSTEDINVOICES
 	WHERE intInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE)
 
-	DELETE FROM  @POSTEDINVOICES
+	DELETE FROM @POSTEDINVOICES
 	WHERE intInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDCMINVOICE)
 
 	--@CASHRETURNS
