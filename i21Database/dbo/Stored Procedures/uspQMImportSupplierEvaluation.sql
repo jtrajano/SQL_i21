@@ -18,9 +18,8 @@ BEGIN TRY
             ,dblSupplierValuationPrice = IMP.dblSupplierValuation
             ,intSampleId = S.intSampleId
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
         INNER JOIN (
@@ -48,14 +47,6 @@ BEGIN TRY
             intConcurrencyId = S.intConcurrencyId + 1
             ,dblSupplierValuationPrice = @dblSupplierValuationPrice
         FROM tblQMSample S
-        WHERE S.intSampleId = @intSampleId
-
-        UPDATE A
-        SET
-            intConcurrencyId = A.intConcurrencyId + 1
-            ,dblSupplierValuationPrice = @dblSupplierValuationPrice
-        FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         WHERE S.intSampleId = @intSampleId
 
         UPDATE tblQMImportCatalogue

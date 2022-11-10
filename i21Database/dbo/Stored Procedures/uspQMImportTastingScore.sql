@@ -106,9 +106,8 @@ BEGIN TRY
             ,strTaste = IMP.strTaste
             ,strMouthFeel = IMP.strMouthfeel
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
         LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
@@ -223,22 +222,6 @@ BEGIN TRY
             ,dtmLastModified = @dtmDateCreated
             ,intSampleStatusId = 3 -- Approved
         FROM tblQMSample S
-        WHERE S.intSampleId = @intSampleId
-
-        UPDATE A
-        SET
-            intConcurrencyId = A.intConcurrencyId + 1
-            ,intSeasonId = @intColourId
-            ,strSeason = @strColour
-            ,intBrandId = @intBrandId
-            ,strBrand = @strBrand
-            ,intValuationGroupId = @intValuationGroupId
-            ,strValuationGroupName = @strValuationGroup
-            ,strMusterLot = @strMusterLot
-            ,strMissingLot = @strMissingLot
-            ,strComments2 = @strComments2
-        FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         WHERE S.intSampleId = @intSampleId
 
         DECLARE @intProductId INT

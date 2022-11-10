@@ -121,10 +121,9 @@ BEGIN TRY
 	SELECT S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
-		,Sum(OB.dblB1QtyBought) LastWeekBought
-		,SUM(OB.dblB1QtyBought * OB.dblB1Price) / Sum(OB.dblB1QtyBought) dblLastPrice
+		,Sum(S.dblB1QtyBought) LastWeekBought
+		,SUM(S.dblB1QtyBought * S.dblB1Price) / Sum(S.dblB1QtyBought) dblLastPrice
 	FROM tblQMSample S
-	JOIN tblQMSampleOtherBuyers OB ON OB.intSampleId = S.intSampleId
 	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId
 	WHERE dtmBusinessDate BETWEEN GetDATE() - 7
 			AND GETDATE()
@@ -140,10 +139,9 @@ BEGIN TRY
 	SELECT S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
-		,Sum(OB.dblB1QtyBought)
-		,SUM(OB.dblB1QtyBought * OB.dblB1Price) / Sum(OB.dblB1QtyBought) dblLastPrice
+		,Sum(S.dblB1QtyBought)
+		,SUM(S.dblB1QtyBought * S.dblB1Price) / Sum(S.dblB1QtyBought) dblLastPrice
 	FROM tblQMSample S
-	JOIN tblQMSampleOtherBuyers OB ON OB.intSampleId = S.intSampleId
 	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId
 	WHERE dtmBusinessDate BETWEEN GetDATE() - 28
 			AND GETDATE()
