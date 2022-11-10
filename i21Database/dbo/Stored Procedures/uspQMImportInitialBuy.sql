@@ -159,46 +159,32 @@ BEGIN TRY
             -- B1
             ,dblB1QtyBought = IMP.dblB1QtyBought
             ,intB1QtyUOMId = B1QUOM.intUnitMeasureId
-            ,strB1QtyUOM = B1QUOM.strUnitMeasure
             ,dblB1Price = IMP.dblB1Price
             ,intB1PriceUOMId = B1PUOM.intUnitMeasureId
-            ,strB1PriceUOM = B1PUOM.strUnitMeasure
             -- B2
             ,intBuyer2Id = B2CODE.intEntityId
-            ,strB2Code = B2CODE.strName
             ,dblB2QtyBought = IMP.dblB2QtyBought
             ,intB2QtyUOMId = B2QUOM.intUnitMeasureId
-            ,strB2QtyUOM = B2QUOM.strSymbol
             ,dblB2Price = IMP.dblB2Price
             ,intB2PriceUOMId = B2PUOM.intUnitMeasureId
-            ,strB2PriceUOM = B2PUOM.strUnitMeasure
             -- B3
             ,intBuyer3Id = B3CODE.intEntityId
-            ,strB3Code = B3CODE.strName
             ,dblB3QtyBought = IMP.dblB3QtyBought
             ,intB3QtyUOMId = B3QUOM.intUnitMeasureId
-            ,strB3QtyUOM = B3QUOM.strUnitMeasure
             ,dblB3Price = IMP.dblB3Price
             ,intB3PriceUOMId = B3PUOM.intUnitMeasureId
-            ,strB3PriceUOM = B3PUOM.strUnitMeasure
             -- B4
             ,intBuyer4Id = B4CODE.intEntityId
-            ,strB4Code = B4CODE.strName
             ,dblB4QtyBought = IMP.dblB4QtyBought
             ,intB4QtyUOMId = B4QUOM.intUnitMeasureId
-            ,strB4QtyUOM = B4QUOM.strUnitMeasure
             ,dblB4Price = IMP.dblB4Price
             ,intB4PriceUOMId = B4PUOM.intUnitMeasureId
-            ,strB4PriceUOM = B4PUOM.strUnitMeasure
             -- B5
             ,intBuyer5Id = B5CODE.intEntityId
-            ,strB5Code = B5CODE.strName
             ,dblB5QtyBought = IMP.dblB5QtyBought
             ,intB5QtyUOMId = B5QUOM.intUnitMeasureId
-            ,strB5QtyUOM = B5QUOM.strUnitMeasure
             ,dblB5Price = IMP.dblB5Price
             ,intB5PriceUOMId = B5PUOM.intUnitMeasureId
-            ,strB5PriceUOM = B5PUOM.strUnitMeasure
         FROM tblQMSample S
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
