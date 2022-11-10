@@ -101,46 +101,32 @@ BEGIN TRY
         -- B1
         ,@dblB1QtyBought NUMERIC(18, 6)
         ,@intB1QtyUOMId INT
-        ,@strB1QtyUOM NVARCHAR(50)
         ,@dblB1Price NUMERIC(18, 6)
         ,@intB1PriceUOMId INT
-        ,@strB1PriceUOM NVARCHAR(50)
         -- B2
         ,@intBuyer2Id INT
-        ,@strB2Code NVARCHAR(50)
         ,@dblB2QtyBought NUMERIC(18, 6)
         ,@intB2QtyUOMId INT
-        ,@strB2QtyUOM NVARCHAR(50)
         ,@dblB2Price NUMERIC(18, 6)
         ,@intB2PriceUOMId INT
-        ,@strB2PriceUOM NVARCHAR(50)
         -- B3
         ,@intBuyer3Id INT
-        ,@strB3Code NVARCHAR(50)
         ,@dblB3QtyBought NUMERIC(18, 6)
         ,@intB3QtyUOMId INT
-        ,@strB3QtyUOM NVARCHAR(50)
         ,@dblB3Price NUMERIC(18, 6)
         ,@intB3PriceUOMId INT
-        ,@strB3PriceUOM NVARCHAR(50)
         -- B4
         ,@intBuyer4Id INT
-        ,@strB4Code NVARCHAR(50)
         ,@dblB4QtyBought NUMERIC(18, 6)
         ,@intB4QtyUOMId INT
-        ,@strB4QtyUOM NVARCHAR(50)
         ,@dblB4Price NUMERIC(18, 6)
         ,@intB4PriceUOMId INT
-        ,@strB4PriceUOM NVARCHAR(50)
         -- B5
         ,@intBuyer5Id INT
-        ,@strB5Code NVARCHAR(50)
         ,@dblB5QtyBought NUMERIC(18, 6)
         ,@intB5QtyUOMId INT
-        ,@strB5QtyUOM NVARCHAR(50)
         ,@dblB5Price NUMERIC(18, 6)
         ,@intB5PriceUOMId INT
-        ,@strB5PriceUOM NVARCHAR(50)
 
     DECLARE @MFBatchTableType MFBatchTableType
 
@@ -250,46 +236,32 @@ BEGIN TRY
         -- B1
         ,@dblB1QtyBought
         ,@intB1QtyUOMId
-        ,@strB1QtyUOM
         ,@dblB1Price
         ,@intB1PriceUOMId
-        ,@strB1PriceUOM
         -- B2
         ,@intBuyer2Id
-        ,@strB2Code
         ,@dblB2QtyBought
         ,@intB2QtyUOMId
-        ,@strB2QtyUOM
         ,@dblB2Price
         ,@intB2PriceUOMId
-        ,@strB2PriceUOM
         -- B3
         ,@intBuyer3Id
-        ,@strB3Code
         ,@dblB3QtyBought
         ,@intB3QtyUOMId
-        ,@strB3QtyUOM
         ,@dblB3Price
         ,@intB3PriceUOMId
-        ,@strB3PriceUOM
         -- B4
         ,@intBuyer4Id
-        ,@strB4Code
         ,@dblB4QtyBought
         ,@intB4QtyUOMId
-        ,@strB4QtyUOM
         ,@dblB4Price
         ,@intB4PriceUOMId
-        ,@strB4PriceUOM
         -- B5
         ,@intBuyer5Id
-        ,@strB5Code
         ,@dblB5QtyBought
         ,@intB5QtyUOMId
-        ,@strB5QtyUOM
         ,@dblB5Price
         ,@intB5PriceUOMId
-        ,@strB5PriceUOM
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 
@@ -305,46 +277,32 @@ BEGIN TRY
             -- B1
             ,dblB1QtyBought = @dblB1QtyBought
             ,intB1QtyUOMId = @intB1QtyUOMId
-            ,strB1QtyUOM = @strB1QtyUOM
             ,dblB1Price = @dblB1Price
             ,intB1PriceUOMId = @intB1PriceUOMId
-            ,strB1PriceUOM = @strB1PriceUOM
             -- B2
             ,intBuyer2Id = @intBuyer2Id
-            ,strBuyer2 = @strB2Code
             ,dblB2QtyBought = @dblB2QtyBought
             ,intB2QtyUOMId = @intB2QtyUOMId
-            ,strB2QtyUOM = @strB2QtyUOM
             ,dblB2Price = @dblB2Price
             ,intB2PriceUOMId = @intB2PriceUOMId
-            ,strB2PriceUOM = @strB2PriceUOM
             -- B3
             ,intBuyer3Id = @intBuyer3Id
-            ,strBuyer3 = @strB3Code
             ,dblB3QtyBought = @dblB3QtyBought
             ,intB3QtyUOMId = @intB3QtyUOMId
-            ,strB3QtyUOM = @strB3QtyUOM
             ,dblB3Price = @dblB3Price
             ,intB3PriceUOMId = @intB3PriceUOMId
-            ,strB3PriceUOM = @strB3PriceUOM
             -- B4
             ,intBuyer4Id = @intBuyer4Id
-            ,strBuyer4 = @strB4Code
             ,dblB4QtyBought = @dblB4QtyBought
             ,intB4QtyUOMId = @intB4QtyUOMId
-            ,strB4QtyUOM = @strB4QtyUOM
             ,dblB4Price = @dblB4Price
             ,intB4PriceUOMId = @intB4PriceUOMId
-            ,strB4PriceUOM = @strB4PriceUOM
             -- B5
             ,intBuyer5Id = @intBuyer5Id
-            ,strBuyer5 = @strB5Code
             ,dblB5QtyBought = @dblB5QtyBought
             ,intB5QtyUOMId = @intB5QtyUOMId
-            ,strB5QtyUOM = @strB5QtyUOM
             ,dblB5Price = @dblB5Price
             ,intB5PriceUOMId = @intB5PriceUOMId
-            ,strB5PriceUOM = @strB5PriceUOM
         FROM tblQMSample S
         WHERE S.intSampleId = @intSampleId
 
@@ -582,46 +540,32 @@ BEGIN TRY
             -- B1
             ,@dblB1QtyBought
             ,@intB1QtyUOMId
-            ,@strB1QtyUOM
             ,@dblB1Price
             ,@intB1PriceUOMId
-            ,@strB1PriceUOM
             -- B2
             ,@intBuyer2Id
-            ,@strB2Code
             ,@dblB2QtyBought
             ,@intB2QtyUOMId
-            ,@strB2QtyUOM
             ,@dblB2Price
             ,@intB2PriceUOMId
-            ,@strB2PriceUOM
             -- B3
             ,@intBuyer3Id
-            ,@strB3Code
             ,@dblB3QtyBought
             ,@intB3QtyUOMId
-            ,@strB3QtyUOM
             ,@dblB3Price
             ,@intB3PriceUOMId
-            ,@strB3PriceUOM
             -- B4
             ,@intBuyer4Id
-            ,@strB4Code
             ,@dblB4QtyBought
             ,@intB4QtyUOMId
-            ,@strB4QtyUOM
             ,@dblB4Price
             ,@intB4PriceUOMId
-            ,@strB4PriceUOM
             -- B5
             ,@intBuyer5Id
-            ,@strB5Code
             ,@dblB5QtyBought
             ,@intB5QtyUOMId
-            ,@strB5QtyUOM
             ,@dblB5Price
             ,@intB5PriceUOMId
-            ,@strB5PriceUOM
     END
     CLOSE @C
 	DEALLOCATE @C
