@@ -107,6 +107,16 @@ CREATE TABLE #INVOICES (
 )
 CREATE NONCLUSTERED INDEX [NC_Index_#INVOICES_STATEMENTDETAIL] ON [#INVOICES]([intEntityCustomerId])
 
+DECLARE @CANCELLEDINVOICE TABLE (
+	 intInvoiceId		INT												NOT NULL PRIMARY KEY
+	,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,ysnPaid			BIT												NULL
+)
+DECLARE @CANCELLEDCMINVOICE TABLE (
+	 intInvoiceId		INT												NOT NULL PRIMARY KEY
+	,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+)
+
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
@@ -189,16 +199,110 @@ ELSE
 
 IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
-ELSE 			  
+ELSE
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 	
 SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
 --FILTER CUSTOMERS
 IF ISNULL(@strCustomerName, '') <> ''
+BEGIN
+	INSERT INTO #CUSTOMERS (
+		 intEntityCustomerId
+		,strCustomerNumber
+		,strCustomerName
+		,dblCreditLimit
+		,dblARBalance
+		,ysnStatementCreditLimit
+	)
+	SELECT TOP 1 
+		 intEntityCustomerId	= C.intEntityId 
+		,strCustomerNumber		= C.strCustomerNumber
+		,strCustomerName		= EC.strName
+		,dblCreditLimit			= C.dblCreditLimit
+		,dblARBalance			= C.dblARBalance   
+		,ysnStatementCreditLimit= C.ysnStatementCreditLimit     
+	FROM tblARCustomer C WITH (NOLOCK)
+	INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
+	WHERE C.ysnActive = 1
+	AND EC.strName = @strCustomerName
+END
+ELSE IF ISNULL(@strCustomerIds, '') <> ''
+BEGIN
+	SELECT DISTINCT intEntityCustomerId = intID
+	INTO #ADCUSTOMERS
+	FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIds)
+
+	INSERT INTO #CUSTOMERS (
+		 intEntityCustomerId
+		,strCustomerNumber
+		,strCustomerName
+		,dblCreditLimit
+		,dblARBalance
+		,ysnStatementCreditLimit
+	)
+	SELECT 
+		 intEntityCustomerId	= C.intEntityId 
+		,strCustomerNumber		= C.strCustomerNumber
+		,strCustomerName		= EC.strName
+		,dblCreditLimit			= C.dblCreditLimit
+		,dblARBalance			= C.dblARBalance
+		,ysnStatementCreditLimit= C.ysnStatementCreditLimit
+	FROM tblARCustomer C WITH (NOLOCK)
+	INNER JOIN #ADCUSTOMERS CUSTOMERS ON C.intEntityId = CUSTOMERS.intEntityCustomerId
+	INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
+	WHERE C.ysnActive = 1
+END
+ELSE IF ISNULL(@strCustomerNumber, '') <> ''
+BEGIN
+	IF ISNULL(@conditionCustomerNumber, '') = 'Starts With'
 	BEGIN
 		INSERT INTO #CUSTOMERS (
-			  intEntityCustomerId
+			 intEntityCustomerId
+			,strCustomerNumber
+			,strCustomerName
+			,dblCreditLimit
+			,dblARBalance
+			,ysnStatementCreditLimit
+		)
+		SELECT 
+			 intEntityCustomerId	= C.intEntityId 
+			,strCustomerNumber		= C.strCustomerNumber
+			,strCustomerName		= EC.strName
+			,dblCreditLimit			= C.dblCreditLimit
+			,dblARBalance			= C.dblARBalance
+			,ysnStatementCreditLimit= C.ysnStatementCreditLimit
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
+		WHERE C.ysnActive = 1
+			AND C.strCustomerNumber LIKE @strCustomerNumber+'%'
+	END 
+	IF ISNULL(@conditionCustomerNumber, '') = 'Ends With'
+	BEGIN
+		INSERT INTO #CUSTOMERS (
+			 intEntityCustomerId
+			,strCustomerNumber
+			,strCustomerName
+			,dblCreditLimit
+			,dblARBalance
+			,ysnStatementCreditLimit
+		)
+		SELECT 
+			 intEntityCustomerId	= C.intEntityId 
+			,strCustomerNumber		= C.strCustomerNumber
+			,strCustomerName		= EC.strName
+			,dblCreditLimit			= C.dblCreditLimit
+			,dblARBalance			= C.dblARBalance
+			,ysnStatementCreditLimit= C.ysnStatementCreditLimit
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
+		WHERE C.ysnActive = 1
+			AND C.strCustomerNumber LIKE '%'+@strCustomerNumber
+	END 
+	IF ISNULL(@conditionCustomerNumber, '') = 'Equal To'
+	BEGIN
+		INSERT INTO #CUSTOMERS (
+				intEntityCustomerId
 			, strCustomerNumber
 			, strCustomerName
 			, dblCreditLimit
@@ -206,24 +310,20 @@ IF ISNULL(@strCustomerName, '') <> ''
 			, ysnStatementCreditLimit
 		)
 		SELECT TOP 1 intEntityCustomerId	= C.intEntityId 
-			   , strCustomerNumber			= C.strCustomerNumber
-			   , strCustomerName			= EC.strName
-			   , dblCreditLimit				= C.dblCreditLimit
-			   , dblARBalance				= C.dblARBalance   
-			   , ysnStatementCreditLimit	= C.ysnStatementCreditLimit     
+				, strCustomerNumber			= C.strCustomerNumber
+				, strCustomerName			= EC.strName
+				, dblCreditLimit			= C.dblCreditLimit
+				, dblARBalance				= C.dblARBalance
+				, ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE C.ysnActive = 1
-		  AND EC.strName = @strCustomerName
-	END
-ELSE IF ISNULL(@strCustomerIds, '') <> ''
+			AND C.strCustomerNumber = @strCustomerNumber
+	END 
+	IF ISNULL(@conditionCustomerNumber, '') = 'Not Equal To'
 	BEGIN
-		SELECT DISTINCT intEntityCustomerId = intID
-		INTO #ADCUSTOMERS
-		FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIds)
-
 		INSERT INTO #CUSTOMERS (
-			  intEntityCustomerId
+				intEntityCustomerId
 			, strCustomerNumber
 			, strCustomerName
 			, dblCreditLimit
@@ -231,160 +331,74 @@ ELSE IF ISNULL(@strCustomerIds, '') <> ''
 			, ysnStatementCreditLimit
 		)
 		SELECT intEntityCustomerId		= C.intEntityId 
-			 , strCustomerNumber		= C.strCustomerNumber
-			 , strCustomerName			= EC.strName
-			 , dblCreditLimit			= C.dblCreditLimit
-			 , dblARBalance				= C.dblARBalance
-			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
+			, strCustomerNumber			= C.strCustomerNumber
+			, strCustomerName			= EC.strName
+			, dblCreditLimit			= C.dblCreditLimit
+			, dblARBalance				= C.dblARBalance
+			, ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN #ADCUSTOMERS CUSTOMERS ON C.intEntityId = CUSTOMERS.intEntityCustomerId
 		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
 		WHERE C.ysnActive = 1
-	END
-ELSE IF ISNULL(@strCustomerNumber, '') <> ''
+	END 
+	IF ISNULL(@conditionCustomerNumber, '') = 'Like'
 	BEGIN
-		IF ISNULL(@conditionCustomerNumber, '') = 'Starts With'
-		BEGIN
-			INSERT INTO #CUSTOMERS (
-				  intEntityCustomerId
-				, strCustomerNumber
-				, strCustomerName
-				, dblCreditLimit
-				, dblARBalance
-				, ysnStatementCreditLimit
-			)
-			SELECT intEntityCustomerId			= C.intEntityId 
-					, strCustomerNumber			= C.strCustomerNumber
-					, strCustomerName			= EC.strName
-					, dblCreditLimit			= C.dblCreditLimit
-					, dblARBalance				= C.dblARBalance
-					, ysnStatementCreditLimit	= C.ysnStatementCreditLimit
-			FROM tblARCustomer C WITH (NOLOCK)
-			INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
-			WHERE C.ysnActive = 1
-			  AND C.strCustomerNumber LIKE @strCustomerNumber+'%'
-		END 
-		IF ISNULL(@conditionCustomerNumber, '') = 'Ends With'
-		BEGIN
-			INSERT INTO #CUSTOMERS (
-				  intEntityCustomerId
-				, strCustomerNumber
-				, strCustomerName
-				, dblCreditLimit
-				, dblARBalance
-				, ysnStatementCreditLimit
-			)
-			SELECT intEntityCustomerId		= C.intEntityId 
-				, strCustomerNumber			= C.strCustomerNumber
+		INSERT INTO #CUSTOMERS (
+				intEntityCustomerId
+			, strCustomerNumber
+			, strCustomerName
+			, dblCreditLimit
+			, dblARBalance
+			, ysnStatementCreditLimit
+		)
+		SELECT intEntityCustomerId		= C.intEntityId 
+				, strCustomerNumber		= C.strCustomerNumber
 				, strCustomerName			= EC.strName
 				, dblCreditLimit			= C.dblCreditLimit
 				, dblARBalance				= C.dblARBalance
 				, ysnStatementCreditLimit	= C.ysnStatementCreditLimit
-			FROM tblARCustomer C WITH (NOLOCK)
-			INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
-			WHERE C.ysnActive = 1
-			  AND C.strCustomerNumber LIKE '%'+@strCustomerNumber
-		END 
-		IF ISNULL(@conditionCustomerNumber, '') = 'Equal To'
-		BEGIN
-			INSERT INTO #CUSTOMERS (
-				  intEntityCustomerId
-				, strCustomerNumber
-				, strCustomerName
-				, dblCreditLimit
-				, dblARBalance
-				, ysnStatementCreditLimit
-			)
-			SELECT TOP 1 intEntityCustomerId	= C.intEntityId 
-					, strCustomerNumber			= C.strCustomerNumber
-					, strCustomerName			= EC.strName
-					, dblCreditLimit			= C.dblCreditLimit
-					, dblARBalance				= C.dblARBalance
-					, ysnStatementCreditLimit	= C.ysnStatementCreditLimit
-			FROM tblARCustomer C WITH (NOLOCK)
-			INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
-			WHERE C.ysnActive = 1
-			  AND C.strCustomerNumber = @strCustomerNumber
-		END 
-		IF ISNULL(@conditionCustomerNumber, '') = 'Not Equal To'
-		BEGIN
-			INSERT INTO #CUSTOMERS (
-				  intEntityCustomerId
-				, strCustomerNumber
-				, strCustomerName
-				, dblCreditLimit
-				, dblARBalance
-				, ysnStatementCreditLimit
-			)
-			SELECT intEntityCustomerId		= C.intEntityId 
-				, strCustomerNumber			= C.strCustomerNumber
-				, strCustomerName			= EC.strName
-				, dblCreditLimit			= C.dblCreditLimit
-				, dblARBalance				= C.dblARBalance
-				, ysnStatementCreditLimit	= C.ysnStatementCreditLimit
-			FROM tblARCustomer C WITH (NOLOCK)
-			INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
-			WHERE C.ysnActive = 1
-		END 
-		IF ISNULL(@conditionCustomerNumber, '') = 'Like'
-		BEGIN
-			INSERT INTO #CUSTOMERS (
-				  intEntityCustomerId
-				, strCustomerNumber
-				, strCustomerName
-				, dblCreditLimit
-				, dblARBalance
-				, ysnStatementCreditLimit
-			)
-			SELECT intEntityCustomerId		= C.intEntityId 
-				 , strCustomerNumber		= C.strCustomerNumber
-				 , strCustomerName			= EC.strName
-				 , dblCreditLimit			= C.dblCreditLimit
-				 , dblARBalance				= C.dblARBalance
-				 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
-			FROM tblARCustomer C WITH (NOLOCK)
-			INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
-			WHERE C.ysnActive = 1
-			  AND C.strCustomerNumber LIKE '%'+@strCustomerNumber+'%'
-		END 
-	END
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
+		WHERE C.ysnActive = 1
+			AND C.strCustomerNumber LIKE '%'+@strCustomerNumber+'%'
+	END 
+END
 ELSE
-	BEGIN
-		INSERT INTO #CUSTOMERS (
-			  intEntityCustomerId
-			, strCustomerNumber
-			, strCustomerName
-			, dblCreditLimit
-			, dblARBalance
-			, ysnStatementCreditLimit
-		)
-		SELECT intEntityCustomerId		= C.intEntityId 
-			 , strCustomerNumber		= C.strCustomerNumber
-			 , strCustomerName			= EC.strName
-			 , dblCreditLimit			= C.dblCreditLimit
-			 , dblARBalance				= C.dblARBalance
-			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
-		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
-		WHERE C.ysnActive = 1
-	END
+BEGIN
+	INSERT INTO #CUSTOMERS (
+			intEntityCustomerId
+		, strCustomerNumber
+		, strCustomerName
+		, dblCreditLimit
+		, dblARBalance
+		, ysnStatementCreditLimit
+	)
+	SELECT intEntityCustomerId		= C.intEntityId 
+			, strCustomerNumber		= C.strCustomerNumber
+			, strCustomerName			= EC.strName
+			, dblCreditLimit			= C.dblCreditLimit
+			, dblARBalance				= C.dblARBalance
+			, ysnStatementCreditLimit	= C.ysnStatementCreditLimit
+	FROM tblARCustomer C WITH (NOLOCK)
+	INNER JOIN tblEMEntity EC WITH (NOLOCK) ON C.intEntityId = EC.intEntityId
+	WHERE C.ysnActive = 1
+END
 
 --FILTER CUSTOMER BY EMAIL SETUP
 IF @ysnEmailOnly IS NOT NULL
-	BEGIN
-		DELETE C
-		FROM #CUSTOMERS C
-		OUTER APPLY (
-			SELECT intEmailSetupCount = COUNT(*) 
-			FROM tblARCustomer CC
-			INNER JOIN tblEMEntityToContact CONT ON CC.intEntityId = CONT.intEntityId 
-			INNER JOIN tblEMEntity E ON CONT.intEntityContactId = E.intEntityId 
-			WHERE E.strEmail <> '' 
-			  AND E.strEmail IS NOT NULL
-			  AND E.strEmailDistributionOption LIKE '%Statements%'
-		) EMAILSETUP
-		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
-	END
+BEGIN
+	DELETE C
+	FROM #CUSTOMERS C
+	OUTER APPLY (
+		SELECT intEmailSetupCount = COUNT(*) 
+		FROM tblARCustomer CC
+		INNER JOIN tblEMEntityToContact CONT ON CC.intEntityId = CONT.intEntityId 
+		INNER JOIN tblEMEntity E ON CONT.intEntityContactId = E.intEntityId 
+		WHERE E.strEmail <> '' 
+			AND E.strEmail IS NOT NULL
+			AND E.strEmailDistributionOption LIKE '%Statements%'
+	) EMAILSETUP
+	WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
+END
 
 --CUSTOMER_ADDRESS
 UPDATE C
@@ -460,9 +474,30 @@ LEFT JOIN (
     GROUP BY PD.intInvoiceId, I.strInvoiceNumber
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId AND I.strInvoiceNumber = PAYMENT.strTransactionNumber
 WHERE I.ysnPosted = 1   
-  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))   
-  AND I.dtmPostDate <= @dtmDateTo  
-  AND I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, 0) <> 0
+AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))   
+AND I.dtmPostDate <= @dtmDateTo  
+AND I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, 0) <> 0
+
+INSERT INTO @CANCELLEDINVOICE (
+	 intInvoiceId
+	,strInvoiceNumber
+	,ysnPaid
+)
+SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid 
+FROM tblARInvoice INVCANCELLED
+WHERE ysnCancelled =1 and ysnPosted =1
+AND INVCANCELLED.dtmPostDate BETWEEN @dtmDateFrom AND @dtmDateTo	
+
+INSERT INTO @CANCELLEDCMINVOICE (
+	 intInvoiceId
+	,strInvoiceNumber
+)
+SELECT CM.intInvoiceId,CM.strInvoiceNumber 
+FROM tblARInvoice CM
+WHERE CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
+AND CM.ysnPosted =1
+AND CM.strTransactionType = 'Credit Memo'
+AND CM.dtmPostDate BETWEEN @dtmDateFrom AND @dtmDateTo
 
 --MONTHLY BUDGET
 UPDATE I
@@ -482,7 +517,7 @@ FROM (
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo			= @dtmDateTo
 										  , @intEntityUserId	= @intEntityUserId
 										  , @strCustomerIds		= @strCustomerIdsLocal
- 
+
 --#STATEMENTREPORT
 INSERT INTO @temp_statement_table (
 	   strReferenceNumber
@@ -556,6 +591,12 @@ LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 
 DELETE FROM @temp_statement_table
 WHERE strReferenceNumber IN (SELECT strInvoiceNumber FROM dbo.tblARInvoice WITH (NOLOCK) WHERE strType = 'CF Tran' AND strTransactionType NOT IN ('Debit Memo'))
+
+DELETE FROM @temp_statement_table
+WHERE strReferenceNumber IN (SELECT strInvoiceNumber FROM @CANCELLEDINVOICE)
+
+DELETE FROM @temp_statement_table
+WHERE strReferenceNumber IN (SELECT strInvoiceNumber FROM @CANCELLEDCMINVOICE)
 
 SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
 	 , strTransactionType			= STATEMENTREPORT.strTransactionType
