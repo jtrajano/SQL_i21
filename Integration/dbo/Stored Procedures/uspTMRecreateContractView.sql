@@ -172,7 +172,7 @@ BEGIN
  			FROM tblCTContractHeader A
 			INNER JOIN vyuCTContractHeaderNotMapped H
 				ON A.intContractHeaderId = H.intContractHeaderId
-			INNER JOIN tblCTContractDetail B
+			INNER JOIN vyuCTContractDetail B
 				ON A.intContractHeaderId = B.intContractHeaderId
 			INNER JOIN tblEMEntity C
 				ON A.intEntityId = C.intEntityId

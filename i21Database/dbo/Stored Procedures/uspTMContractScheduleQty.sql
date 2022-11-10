@@ -35,7 +35,7 @@ BEGIN
 				--Get the available quantity of the contract
 				SELECT @dblAvailable = ISNULL(B.dblBalance,0.0) - ISNULL(B.dblScheduleQty,0.0)
 				FROM tblCTContractHeader A
-				INNER JOIN tblCTContractDetail B
+				INNER JOIN vyuCTContractDetail B
 					ON A.intContractHeaderId = B.intContractHeaderId
 				WHERE B.intContractDetailId = @intContractDetailId
 
@@ -107,7 +107,7 @@ BEGIN
 			--Get the available quantity of the contract
 			SELECT @dblScheduleQty = ISNULL(B.dblScheduleQty,0)
 			FROM tblCTContractHeader A
-			INNER JOIN tblCTContractDetail B
+			INNER JOIN vyuCTContractDetail B
 				ON A.intContractHeaderId = B.intContractHeaderId
 			WHERE B.intContractDetailId = @intContractDetailId
 
