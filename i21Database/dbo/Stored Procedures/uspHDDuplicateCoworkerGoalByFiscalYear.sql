@@ -173,7 +173,7 @@ BEGIN
 	ELSE
 	BEGIN
 
-		SET @ErrorMessage = 'There are coworker goal/s that are already exist.'
+		SET @ErrorMessage = 'There are coworker goal/s that already exist.'
 
 	END
 
