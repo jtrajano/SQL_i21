@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuQMSampleList
+﻿CREATE VIEW [dbo].[vyuQMSampleList]
 AS
 SELECT S.intSampleId
 	,S.strSampleNumber
@@ -120,13 +120,13 @@ SELECT S.intSampleId
 	,S.intBrokerId
 	,S.strBroker
 	,S.intGradeId
-	,S.strGrade AS strTeaGrade
+	--,S.strGrade
 	,S.intLeafCategoryId
 	,S.strLeafCategory
 	,S.intManufacturingLeafTypeId
 	,S.strManufacturingLeafType
 	,S.intSeasonId
-	,S.strSeason AS strColor
+	--,S.strSeason
 	,S.intGardenMarkId
 	,S.strGardenMark
 	,S.dtmManufacturingDate
@@ -141,7 +141,7 @@ SELECT S.intSampleId
 	,strNetWtThirdPackageBreakUOM = PWUOM3.strUnitMeasure
 	,S.intNoOfPackagesThirdPackageBreak
 	,S.intProductLineId
-	,S.strProductLine AS strSustainability
+	--,S.strProductLine
 	,S.ysnOrganic
 	,S.dblSupplierValuationPrice
 	,S.intProducerId
@@ -221,6 +221,8 @@ SELECT S.intSampleId
 	,S.dblB5Price
 	,S.intB5PriceUOMId
 	,S.strB5PriceUOM
+	,S.intBatchId
+	,Batch.strBatchId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -271,4 +273,8 @@ LEFT JOIN tblQMSampleOtherBuyers SOB ON SOB.intSampleId = S.intSampleId
 LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPackagesUOMId
 LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
 LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
+LEFT JOIN tblMFBatch AS Batch ON S.intBatchId = Batch.intBatchId
 WHERE S.intTypeId = 1
+GO
+
+

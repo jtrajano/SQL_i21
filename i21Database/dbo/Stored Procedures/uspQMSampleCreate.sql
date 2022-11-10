@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspQMSampleCreate @strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE [dbo].[uspQMSampleCreate] @strXml NVARCHAR(Max)
 	,@strSampleNumber NVARCHAR(30) OUTPUT
 	,@intSampleId INT OUTPUT
 AS
@@ -521,6 +521,7 @@ BEGIN TRY
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,intBatchId
 		)
 	SELECT 1
 		,intSampleTypeId
@@ -705,6 +706,7 @@ BEGIN TRY
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,intBatchId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intParentSampleId INT
@@ -878,6 +880,7 @@ BEGIN TRY
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
+			,intBatchId INT
 			)
 
 	SELECT @intSampleId = SCOPE_IDENTITY()

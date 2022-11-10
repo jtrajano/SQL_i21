@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuQMSampleNotMapped
+﻿CREATE VIEW [dbo].[vyuQMSampleNotMapped]
 AS
 SELECT S.intSampleId
 	,ST.intControlPointId
@@ -70,6 +70,8 @@ SELECT S.intSampleId
 	,strNetWtPerPackagesUOM = PWUOM1.strUnitMeasure
 	,strNetWtSecondPackageBreakUOM = PWUOM2.strUnitMeasure
 	,strNetWtThirdPackageBreakUOM = PWUOM2.strUnitMeasure
+	,S.intBatchId
+	,Batch.strBatchId
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -106,6 +108,7 @@ LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = Co
 LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPackagesUOMId
 LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
 LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
+LEFT JOIN tblMFBatch AS Batch ON S.intBatchId = Batch.intBatchId
 --LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
 --LEFT JOIN tblQMCatalogueType CatalogueType ON CatalogueType.intCatalogueTypeId = S.intCatalogueTypeId 
 --LEFT JOIN vyuEMEntity BR ON BR.intEntityId = S.intBrokerId
@@ -129,3 +132,6 @@ LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPa
 --LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
 --LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
 --LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
+GO
+
+
