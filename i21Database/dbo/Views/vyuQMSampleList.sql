@@ -180,7 +180,6 @@ SELECT S.intSampleId
 	,S.strComments2
 	,S.strComments3
 	-- Initial Buy
-	,S.intOtherBuyerId
 	,S.intBuyer1Id
 	,S.strBuyer1
 	,S.dblB1QtyBought
