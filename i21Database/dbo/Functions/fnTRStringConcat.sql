@@ -11,13 +11,13 @@ BEGIN
 
 	IF(@strOriginalMsg IS NULL OR @strOriginalMsg = '')
 	BEGIN
-		SET @strConcatMsg = @strAddMsg
+		SET @strConcatMsg = @strAddMsg COLLATE Latin1_General_CI_AS
 	END
 	ELSE
 	BEGIN
-		SET @strConcatMsg = @strOriginalMsg + @strSeparator + @strAddMsg
+		SET @strConcatMsg = @strOriginalMsg + @strSeparator + @strAddMsg COLLATE Latin1_General_CI_AS
 	END
 
-	RETURN @strConcatMsg
+	RETURN @strConcatMsg COLLATE Latin1_General_CI_AS
 END
 GO

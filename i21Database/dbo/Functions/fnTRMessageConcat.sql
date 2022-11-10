@@ -1,21 +1,21 @@
 ﻿CREATE FUNCTION [dbo].[fnTRMessageConcat]
 (
-	@strOriginalMsg NVARCHAR(MAX)
+	@strOriginalMsg NVARCHAR(MAX) 
 	,@strAddMsg NVARCHAR(MAX)
 )
 RETURNS NVARCHAR(MAX)
 AS
 BEGIN
-	DECLARE @strConcatMsg NVARCHAR(MAX) = NULL
+	DECLARE @strConcatMsg NVARCHAR(MAX)  = NULL
 
 	IF(@strOriginalMsg IS NULL OR @strOriginalMsg = '')
 	BEGIN
-		SET @strConcatMsg = @strAddMsg
+		SET @strConcatMsg = @strAddMsg COLLATE Latin1_General_CI_AS
 	END
 	ELSE
 	BEGIN
-		SET @strConcatMsg = @strOriginalMsg + ', ' + @strAddMsg
+		SET @strConcatMsg = @strOriginalMsg + ', ' + @strAddMsg COLLATE Latin1_General_CI_AS
 	END
 
-	RETURN @strConcatMsg
+	RETURN @strConcatMsg COLLATE Latin1_General_CI_AS
 END

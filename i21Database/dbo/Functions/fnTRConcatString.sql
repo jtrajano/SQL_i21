@@ -11,7 +11,7 @@ AS
 BEGIN
      declare @rowsCount INT
 declare @i INT = 1
-declare @names varchar(max) = ''
+declare @names varchar(max) = '' COLLATE Latin1_General_CI_AS
 
 DECLARE @MyTable TABLE
 (
@@ -69,7 +69,7 @@ begin
  END
  set @i = @i + 1
 end
-return @names
+return @names COLLATE Latin1_General_CI_AS
 
 END 
 GO
