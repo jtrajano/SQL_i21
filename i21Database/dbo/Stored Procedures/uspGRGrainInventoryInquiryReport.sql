@@ -136,6 +136,8 @@ CREATE TABLE #tblInTransit
 CREATE TABLE #tblInTransit2
 (
 	dtmDate DATETIME
+	,intLocationId INT
+	,strLocationName NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	,dblBeginningSalesInTransit DECIMAL(18,6)
 	,dblSalesInTransit DECIMAL(18,6)
 )
@@ -330,6 +332,15 @@ BEGIN
 		,@Locations = @Locs
 		,@intLocationId = @intLocationId
 
+	--for in transit
+	DELETE FROM #tblInTransit2
+	INSERT INTO #tblInTransit2
+	EXEC uspGRGetInTransitPerLocation
+		@dtmDate = @dtmReportDate
+		,@intCommodityId = @intCommodityId
+		,@intLocationId = @intLocationId
+		,@Locations = @Locs
+
 	--ALL LOCATIONS (#Location) SHOULD HAVE THESE ITEMS
 	WHILE EXISTS(SELECT TOP 1 1 FROM #Locations)
 	BEGIN
@@ -417,69 +428,8 @@ BEGIN
 				AND dtmDate IS NOT NULL
 				AND intCompanyLocationId = @intCompanyLocationId
 		) ADJ
-
-		/*INSERT INTO @InventoryData
-		SELECT 11
-			,'INVENTORY IN TRANSIT DECREASE'
-			,'-'
-			,ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
-			,@strCommodityCode
-			,@intCommodityId2
-			,@intCompanyLocationId
-			,@strLocationName
-			,@strUOM
-		FROM #tblInOut
-		WHERE strTransactionType IN ('Invoice')
-			AND dtmDate IS NOT NULL
-			AND intCompanyLocationId = @intCompanyLocationId
-
-		IF NOT EXISTS(SELECT 1 FROM @InventoryData WHERE strLabel = 'INVENTORY IN TRANSIT DECREASE')
-		BEGIN
-			INSERT INTO @InventoryData
-			SELECT 11
-				,'INVENTORY IN TRANSIT DECREASE'
-				,'-'
-				,0
-				,@strCommodityCode
-				,@intCommodityId2
-				,@intCompanyLocationId
-				,@strLocationName
-				,@strUOM
-			FROM @InventoryData
-			WHERE strLabel = 'INVENTORY IN TRANSIT DECREASE'
-				AND intCompanyLocationId = @intCompanyLocationId
-		END
-
-		INSERT INTO #tblInTransit
-		SELECT 
-			SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UOM.intOrigUOM,@intCommodityUnitMeasureId,dblInTransitQty))
-			,@intCommodityId2
-			,@strCommodityCode
-			,@intCompanyLocationId
-			,@strLocationName
-			,@strUOM
-		FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId2, @dtmReportDate) InTran
-		INNER JOIN tblSMCompanyLocation CL
-			ON CL.intCompanyLocationId = InTran.intItemLocationId
-		OUTER APPLY (
-			SELECT intOrigUOM = COM.intCommodityUnitMeasureId
-			FROM tblICCommodityUnitMeasure COM
-			INNER JOIN tblICUnitMeasure UM
-				ON UM.strUnitMeasure = InTran.strUnitMeasure
-					AND UM.intUnitMeasureId = COM.intUnitMeasureId
-			WHERE intCommodityId = @intCommodityId2
-		) UOM
-		WHERE CL.intCompanyLocationId = @intCompanyLocationId
-		*/
-
-		/* IN TRANSIT */
-		DELETE FROM #tblInTransit2
-		INSERT INTO #tblInTransit2
-		EXEC uspGRGetInTransitPerLocation
-			@dtmDate = @dtmReportDate
-			,@intCommodityId = @intCommodityId
-			,@intLocationId = @intLocationId
-
+		
+		/* IN TRANSIT */	
 		INSERT INTO @InventoryData
 		SELECT 
 			9
@@ -497,8 +447,11 @@ BEGIN
 				TOTAL = ISNULL(dblBeginningSalesInTransit,0)-- - CASE WHEN ISNULL(dblSalesInTransit,0) < 0 THEN 0 ELSE ISNULL(dblSalesInTransit,0) END
 			FROM #tblInTransit2
 			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) < @dtmReportDate
+				AND intCompanyLocationId = @intCompanyLocationId
 		) I
 		WHERE ID.strLabel = 'PHYSICAL INVENTORY BEGINNING'
+			AND ID.intCompanyLocationId = @intCompanyLocationId
+			AND ID.intCommodityId = @intCommodityId
 		GROUP BY ID.strCommodityCode
 			,ID.intCommodityId
 			,ID.intCompanyLocationId
@@ -522,8 +475,11 @@ BEGIN
 				TOTAL = ISNULL(dblBeginningSalesInTransit,0)
 			FROM #tblInTransit2
 			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
+				AND intCompanyLocationId = @intCompanyLocationId
 		) I
 		WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
+			AND ID.intCompanyLocationId = @intCompanyLocationId
+			AND ID.intCommodityId = @intCommodityId
 		GROUP BY ID.strCommodityCode
 			,ID.intCommodityId
 			,ID.intCompanyLocationId
@@ -532,7 +488,7 @@ BEGIN
 
 		INSERT INTO @InventoryData
 		SELECT 
-			10
+			11
 			,'INVENTORY IN TRANSIT DECREASE'
 			,'-'
 			, ABS(SUM(ISNULL(I.TOTAL,0)))
@@ -547,8 +503,11 @@ BEGIN
 				TOTAL = ISNULL(dblSalesInTransit,0)
 			FROM #tblInTransit2
 			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
+				AND intCompanyLocationId = @intCompanyLocationId
 		) I
 		WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
+			AND ID.intCompanyLocationId = @intCompanyLocationId
+			AND ID.intCommodityId = @intCommodityId
 		GROUP BY ID.strCommodityCode
 			,ID.intCommodityId
 			,ID.intCompanyLocationId
@@ -568,6 +527,8 @@ BEGIN
 			,strUOM
 		FROM @InventoryData
 		WHERE strLabel LIKE 'INVENTORY IN TRANSIT%'
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND intCommodityId = @intCommodityId
 		GROUP BY strCommodityCode
 			,intCommodityId
 			,intCompanyLocationId
@@ -588,6 +549,9 @@ BEGIN
 			,@dtmReportDate
 			,strUOM
 		FROM @InventoryData
+		WHERE intCommodityId = @intCommodityId
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND strLabel = 'INVENTORY IN TRANSIT ENDING'
 		GROUP BY strCommodityCode
 			,intCommodityId
 			,intCompanyLocationId
@@ -799,7 +763,7 @@ BEGIN
 
 		--(OPENING) BALANCE
 		INSERT INTO @StorageObligationDataDUMMY
-		SELECT @intTotalRowCnt + 1
+		SELECT @intTotalRowCnt + 2
 			,@intStorageScheduleTypeId
 			,strDistribution + ' BALANCE'
 			,''
@@ -816,7 +780,7 @@ BEGIN
 		
 		--INCREASE FOR THE DAY
 		INSERT INTO @StorageObligationDataDUMMY
-		SELECT @intTotalRowCnt + 2
+		SELECT @intTotalRowCnt + 3
 			,DD.intStorageScheduleTypeId
 			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BALANCE','INCREASE') ELSE A.STRLABEL END
 			,CASE WHEN A.STRSIGN IS NULL THEN '+' ELSE A.STRSIGN END
@@ -845,7 +809,7 @@ BEGIN
 
 		--DECREASE FOR THE DAY
 		INSERT INTO @StorageObligationDataDUMMY
-		SELECT @intTotalRowCnt + 3
+		SELECT @intTotalRowCnt + 4
 			,DD.intStorageScheduleTypeId
 			,CASE WHEN A.STRLABEL IS NULL THEN REPLACE(DD.strLabel,'BALANCE','DECREASE') ELSE A.STRLABEL END
 			,CASE WHEN A.STRSIGN IS NULL THEN '-' ELSE A.STRSIGN END
@@ -879,7 +843,7 @@ BEGIN
 
 		--TOTAL FOR THE DAY
 		INSERT INTO @StorageObligationData
-		SELECT @intTotalRowCnt + 4
+		SELECT @intTotalRowCnt + 5
 			,@intStorageScheduleTypeId
 			,'TOTAL ' + @strStorageTypeDescription
 			,''
@@ -894,7 +858,7 @@ BEGIN
 
 		--SPACE FOR EVERY STORAGE TYPE
 		INSERT INTO @StorageObligationData
-		SELECT @intTotalRowCnt + 5
+		SELECT @intTotalRowCnt + 6
 			,@intStorageScheduleTypeId
 			,''
 			,''
