@@ -44,7 +44,6 @@ IF(OBJECT_ID('tempdb..#CASHRETURNS') IS NOT NULL) DROP TABLE #CASHRETURNS
 IF(OBJECT_ID('tempdb..#FORGIVENSERVICECHARGE') IS NOT NULL) DROP TABLE #FORGIVENSERVICECHARGE
 IF(OBJECT_ID('tempdb..#AGINGSTAGING') IS NOT NULL) DROP TABLE #AGINGSTAGING
 IF(OBJECT_ID('tempdb..#AGINGGLACCOUNTS') IS NOT NULL) DROP TABLE #AGINGGLACCOUNTS
-IF(OBJECT_ID('tempdb..#ADCUSTOMERS') IS NOT NULL) DROP TABLE #ADCUSTOMERS
 IF(OBJECT_ID('tempdb..#ADSALESPERSON') IS NOT NULL) DROP TABLE #ADSALESPERSON
 IF(OBJECT_ID('tempdb..#ADLOCATION') IS NOT NULL) DROP TABLE #ADLOCATION
 IF(OBJECT_ID('tempdb..#ADACCOUNTSTATUS') IS NOT NULL) DROP TABLE #ADACCOUNTSTATUS
@@ -59,12 +58,6 @@ CREATE TABLE #DELACCOUNTSTATUS (intAccountStatusId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADSALESPERSON (intSalespersonId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADLOCATION (intCompanyLocationId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADACCOUNTSTATUS (intAccountStatusId INT, intEntityCustomerId INT)
-CREATE TABLE #ADCUSTOMERS (
-	    intEntityCustomerId			INT	NOT NULL PRIMARY KEY
-	  , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	  , strCustomerName				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	  , dblCreditLimit				NUMERIC(18, 6)
-)
 CREATE TABLE #AGINGPOSTEDINVOICES (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
 	 , intEntityCustomerId			INT												NOT NULL
@@ -139,6 +132,23 @@ CREATE TABLE #CREDITMEMOPAIDREFUNDED (
 	 , strDocumentNumber			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 )
 
+DECLARE @ADCUSTOMERS TABLE (
+	    intEntityCustomerId			INT	NOT NULL PRIMARY KEY
+	  , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	  , strCustomerName				NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	  , dblCreditLimit				NUMERIC(18, 6)
+)
+
+DECLARE @CANCELLEDINVOICE TABLE (
+	 intInvoiceId		INT												NOT NULL PRIMARY KEY
+	,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	,ysnPaid			BIT												NULL
+)
+DECLARE @CANCELLEDCMINVOICE TABLE (
+	 intInvoiceId		INT												NOT NULL PRIMARY KEY
+	,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+)
+
 SET @dtmDateFromLocal				= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 SET	@dtmDateToLocal					= ISNULL(@dtmDateTo, GETDATE())
 SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')
@@ -171,7 +181,7 @@ IF ISNULL(@strCustomerIdsLocal, '') <> ''
 		SELECT DISTINCT intEntityCustomerId =  intID
 		FROM dbo.fnGetRowsFromDelimitedValues(@strCustomerIdsLocal)		
 
-		INSERT INTO #ADCUSTOMERS (
+		INSERT INTO @ADCUSTOMERS (
 			  intEntityCustomerId
 			, strCustomerNumber
 			, strCustomerName
@@ -187,7 +197,7 @@ IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	END
 ELSE
 	BEGIN
-		INSERT INTO #ADCUSTOMERS (
+		INSERT INTO @ADCUSTOMERS (
 			  intEntityCustomerId
 			, strCustomerNumber
 			, strCustomerName
@@ -240,14 +250,14 @@ IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
 		IF ISNULL(@ysnExcludeAccountStatus, 0) = 0
 			BEGIN
 				DELETE CUSTOMERS 
-				FROM #ADCUSTOMERS CUSTOMERS
+				FROM @ADCUSTOMERS CUSTOMERS
 				LEFT JOIN #ADACCOUNTSTATUS ACCSTATUS ON CUSTOMERS.intEntityCustomerId = ACCSTATUS.intEntityCustomerId
 				WHERE ACCSTATUS.intAccountStatusId IS NULL
 			END
 		ELSE 
 			BEGIN
 				DELETE CUSTOMERS 
-				FROM #ADCUSTOMERS CUSTOMERS
+				FROM @ADCUSTOMERS CUSTOMERS
 				INNER JOIN #ADACCOUNTSTATUS ACCSTATUS ON CUSTOMERS.intEntityCustomerId = ACCSTATUS.intEntityCustomerId
 				WHERE ACCSTATUS.intAccountStatusId IS NOT NULL
 			END
@@ -271,7 +281,7 @@ SELECT intPaymentId
 	 , ysnInvoicePrepayment
 	 , intPaymentMethodId
 FROM dbo.tblARPayment P WITH (NOLOCK)
-INNER JOIN #ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
 LEFT JOIN (
 	SELECT intTransactionId, dtmDate, strTransactionType
 	FROM dbo.tblARNSFStagingTableDetail
@@ -316,7 +326,7 @@ INSERT INTO #FORGIVENSERVICECHARGE (
 SELECT SC.intInvoiceId
 	 , SC.strInvoiceNumber
 FROM tblARInvoice I
-INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
 WHERE I.strInvoiceOriginId IS NOT NULL 
@@ -334,7 +344,7 @@ INSERT INTO #CREDITMEMOPAIDREFUNDED (
 )
 SELECT I.intInvoiceId,I.strInvoiceNumber,REFUND.strDocumentNumber
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 INNER JOIN(
 	SELECT ID.strDocumentNumber from tblARInvoice INV
@@ -387,7 +397,7 @@ SELECT I.intInvoiceId
 	 , I.dblInterest
 	 , I.ysnForgiven
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
@@ -401,6 +411,27 @@ WHERE ysnPosted = 1
 	)
  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
  AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+INSERT INTO @CANCELLEDINVOICE (
+	 intInvoiceId
+	,strInvoiceNumber
+	,ysnPaid
+)
+SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid 
+FROM tblARInvoice INVCANCELLED
+WHERE ysnCancelled =1 and ysnPosted =1
+AND INVCANCELLED.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+
+INSERT INTO @CANCELLEDCMINVOICE (
+	 intInvoiceId
+	,strInvoiceNumber
+)
+SELECT CM.intInvoiceId,CM.strInvoiceNumber 
+FROM tblARInvoice CM
+WHERE CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
+AND CM.ysnPosted =1
+AND CM.strTransactionType = 'Credit Memo'
+AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
@@ -452,7 +483,7 @@ SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 	, dblRefundTotal		= SUM(ID.dblTotal)
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
@@ -460,8 +491,14 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
-DELETE FROM  #AGINGPOSTEDINVOICES
+DELETE FROM #AGINGPOSTEDINVOICES
 WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM #CASHREFUNDS CF INNER  JOIN #CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber)
+
+DELETE FROM #AGINGPOSTEDINVOICES
+WHERE intInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE)
+
+DELETE FROM #AGINGPOSTEDINVOICES
+WHERE intInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDCMINVOICE)
 
 --#CASHRETURNS
 INSERT INTO #CASHRETURNS (
@@ -730,5 +767,6 @@ FROM (
 
 ) AS B
 
-GROUP BY B.intEntityCustomerId) AS AGING
-INNER JOIN #ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
+GROUP BY A.intEntityCustomerId) AS AGING
+INNER JOIN @ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
+ORDER BY strCustomerName
