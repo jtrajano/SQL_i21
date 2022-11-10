@@ -140,10 +140,13 @@ AS
 
  	-- Get All Contracts and filter by facility and transaction date
  	SELECT  DISTINCT
- 		  intContractHeaderId
+ 		  intContractHeaderId = tlog.intContractHeaderId
  		, intContractDetailId
+		, intContractTypeId = CD.intContractTypeId
  	INTO #tempTradeLogContracts
  	FROM tblTRFTradeFinanceLog tlog
+	JOIN tblCTContractHeader CD
+		ON CD.intContractHeaderId = tlog.intContractHeaderId
  	JOIN #tempFacilityInfo facility
  		ON tlog.intBorrowingFacilityId = facility.intBorrowingFacilityId
 	OUTER APPLY (
@@ -164,6 +167,12 @@ AS
  	AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
 	AND ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
+ 	-- Get Purchase Contract's Allocated Sale Contract
+ 	SELECT DISTINCT intPContractDetailId
+ 		, intSContractDetailId
+ 	INTO #tempContractPair
+ 	FROM tblLGAllocationDetail allocation
+ 	WHERE intPContractDetailId IN (SELECT intContractDetailId FROM #tempTradeLogContracts WHERE intContractTypeId = 1)
 
  	SELECT  
  		  tlog.intContractHeaderId
@@ -195,12 +204,25 @@ AS
 		, tlog.strOverrideBankValuation
 		, tlog.strBankTradeReference
 		, tlog.dblFinanceQty
+		, tContract.intContractTypeId
+		, intPContractDetailId = CASE WHEN tContract.intContractTypeId = 1 
+									THEN tlog.intContractDetailId 
+									ELSE saleCTPair.intPContractDetailId END
+		, intSContractDetailId = CASE WHEN tContract.intContractTypeId = 2 
+									THEN tlog.intContractDetailId 
+									ELSE purchaseCTPair.intSContractDetailId END
  	INTO #tempTradeFinanceLog
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempTradeLogContracts tContract
  		ON	tContract.intContractDetailId = tlog.intContractDetailId
  		AND CAST(tlog.dtmCreatedDate AS DATE) >= @dtmStartDate
  		AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
+	LEFT JOIN #tempContractPair purchaseCTPair
+		ON purchaseCTPair.intPContractDetailId = tlog.intContractDetailId
+		AND tContract.intContractTypeId = 1
+	LEFT JOIN #tempContractPair saleCTPair
+		ON saleCTPair.intSContractDetailId = tlog.intContractDetailId
+		AND tContract.intContractTypeId = 2
 	OUTER APPLY (
 		SELECT TOP 1 ysnDeleted = CAST(1 AS BIT)
 		FROM tblTRFTradeFinanceLog delTLog
@@ -215,9 +237,8 @@ AS
 	) deletedRecord
 	WHERE ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
- 	SELECT intContractHeaderId
- 		, intContractDetailId
- 		, dtmTransactionDate
+
+ 	SELECT dtmTransactionDate
  		, intBankTransactionId
  		, dblTransactionAmountAllocated
  		, dblTransactionAmountActual
@@ -247,11 +268,13 @@ AS
 		, strBankTradeReference
 		, dblFinanceQty
 		, dtmCreatedDate
+		, intPContractDetailId
+		, intSContractDetailId
  	INTO #tempLatestLogValues
  	FROM 
  	(
  		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreatedDate DESC)
+ 			intRowNum = ROW_NUMBER() OVER (PARTITION BY intPContractDetailId, intSContractDetailId ORDER BY dtmCreatedDate DESC)
  			, *
  		FROM #tempTradeFinanceLog
  	) t
@@ -300,7 +323,7 @@ AS
  	JOIN tblCTContractHeader cth
  		ON cth.intContractHeaderId = ctd.intContractHeaderId
  	JOIN #tempLatestLogValues latestLog
- 		ON latestLog.intContractDetailId = ctd.intContractDetailId
+ 		ON latestLog.intPContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail sublimit
 		ON sublimit.intBorrowingFacilityLimitDetailId = latestLog.intSublimitId
 	LEFT JOIN tblCMBankValuationRule valRule
@@ -712,14 +735,6 @@ AS
 	AND voucher.intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM #tempReceiptInfo)
 
 
- 	-- Get Purchase Contract's Allocated Sale Contract
- 	SELECT DISTINCT intPContractDetailId
- 		, intSContractDetailId
- 	INTO #tempContractPair
- 	FROM tblLGAllocationDetail allocation
- 	WHERE intPContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
-
-
  	-- Allocated Sale Contract Hedge Info
  	SELECT 
  		  HedgeSummary.intContractDetailId
@@ -789,7 +804,7 @@ AS
  	LEFT JOIN tblSMTerm term
  		ON term.intTermID = cth.intTermId
 	LEFT JOIN #tempLatestLogValues latestLog
-		ON latestLog.intContractDetailId = ctd.intContractDetailId
+		ON latestLog.intSContractDetailId = ctd.intContractDetailId
 	WHERE ctd.intContractDetailId IN (SELECT intSContractDetailId FROM #tempContractPair)
 	AND cth.intContractTypeId = 2 -- SALE CONTRACTS ONLY
 
