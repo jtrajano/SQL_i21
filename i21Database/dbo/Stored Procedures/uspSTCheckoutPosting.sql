@@ -1617,33 +1617,10 @@ BEGIN
 																			WHEN @strInvoiceTransactionTypeMain = @strCASH
 																				THEN ISNULL(DT.dblCalculatedInvoiceQty, 0)
 																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-																				THEN CASE
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) > 0)
-																							-- Refference:  http://jira.irelyserver.com/browse/ST-1558
-																							-- If Positive flip the sign to negative
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * -1)
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) < 0)
-																							-- If Negative flip the sign to positive
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * 1)
-																					END
-																		END
-
+																				THEN ISNULL(DT.dblCalculatedInvoiceQty, 0) * -1
+																				END
 											,[dblDiscount]				= 0
-											,[dblPrice]					=  
-																		CASE
-																			WHEN @strInvoiceTransactionTypeMain = @strCASH
-																				THEN DT.dblCalculatedInvoicePrice
-																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-																				THEN CASE
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) > 0)
-																							-- Refference:  http://jira.irelyserver.com/browse/ST-1558
-																							-- If Positive flip the sign to negative
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * -1) * DT.dblCalculatedInvoicePrice
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) < 0)
-																							-- If Negative flip the sign to positive
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * 1) * DT.dblCalculatedInvoicePrice
-																					END
-																		END
+											,[dblPrice]					=  DT.dblCalculatedInvoicePrice
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
