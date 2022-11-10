@@ -493,7 +493,7 @@ BEGIN TRY
 							WHERE	intPriceFixationId = @intPriceFixationId 
 							AND		intPriceFixationDetailId < @intPriceFixationDetailId
 
-							IF @dblRemainingQty <= @dblReceived
+							IF @dblRemainingQty <= @dblReceived and isnull(@dblTotalIVForSHQty,0) = 0
 							BEGIN						
 								INSERT	INTO @tblToProcess
 								SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblRemainingQty,@intPriceFixationDetailId, @strTransactionType
