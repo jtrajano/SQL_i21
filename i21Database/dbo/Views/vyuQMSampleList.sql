@@ -268,7 +268,6 @@ LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
-LEFT JOIN tblQMSampleOtherBuyers SOB ON SOB.intSampleId = S.intSampleId
 LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPackagesUOMId
 LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
 LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
