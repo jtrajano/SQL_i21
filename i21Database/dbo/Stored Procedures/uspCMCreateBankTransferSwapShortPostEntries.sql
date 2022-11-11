@@ -320,7 +320,7 @@ END
         ,[intAccountId]          = @intBTSwapFromFXGLAccountId
         ,[dblDebit]              = dblAmountFrom
         ,[dblCredit]             = 0
-        ,[dblDebitForeign]       = dblAmountFrom
+        ,[dblDebitForeign]       = dblAmountForeignFrom
         ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
