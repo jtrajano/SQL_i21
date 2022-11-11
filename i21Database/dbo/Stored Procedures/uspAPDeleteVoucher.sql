@@ -32,6 +32,22 @@ BEGIN TRY
 	DECLARE @voucherBillDetailIds AS Id;
 	DECLARE @vendorOrderNumber NVARCHAR(100);
 
+	-- Checked if module is AP Voucher and the voucher is generated from Ticket with type of Direct  
+	IF @callerModule = 0 AND EXISTS (  
+		SELECT 1  
+		FROM tblAPBillDetail bill  
+		INNER JOIN tblSCTicket tkt  
+		ON intScaleTicketId = tkt.intTicketId  
+		INNER JOIN tblSCListTicketTypes ltt  
+		ON tkt.intTicketTypeId = ltt.intTicketTypeId  
+		WHERE bill.intBillId = @intBillId  
+		AND ltt.strTicketType = 'Direct In')
+
+	BEGIN  
+		RAISERROR('Unable to delete. Please use ticket screen to delete the voucher',16,1)  
+	RETURN;    
+	END  
+
 	IF(NOT EXISTS(SELECT 1 FROM dbo.tblAPBill WHERE intBillId = @intBillId))
 	BEGIN
 		RAISERROR('Voucher already deleted.',16,1)
