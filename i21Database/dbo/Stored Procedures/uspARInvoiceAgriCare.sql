@@ -136,7 +136,8 @@ SELECT
 	,strTerm				= TERM.strTerm
 	,strBillTo				= ISNULL(RTRIM(ARI.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strBillToCity), '') + ISNULL(RTRIM(', ' + ARI.strBillToState), '') + ISNULL(RTRIM(', ' + ARI.strBillToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strBillToCountry), '')
 	,strShipTo				= ISNULL(RTRIM(ARI.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strShipToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strShipToCity), '') + ISNULL(RTRIM(', ' + ARI.strShipToState), '') + ISNULL(RTRIM(', ' + ARI.strShipToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strShipToCountry), '')	 
-	,dtmOrderDate			= SO.dtmDate
+	,strSalesOrderNumber	= ISNULL(SOI.strSalesOrderNumber ,SO.strSalesOrderNumber)
+	,dtmOrderDate			= ISNULL(SOI.dtmDate ,SO.dtmDate)
 	,dtmDate				= ARI.dtmDate
 	,dtmShipDate			= ARI.dtmShipDate
 	,dtmDueDate				= ARI.dtmDueDate
@@ -164,6 +165,12 @@ LEFT JOIN tblSMFreightTerms FREIGHT ON ARI.intFreightTermId = FREIGHT.intFreight
 INNER JOIN tblSMTerm TERM ON ARI.intTermId = TERM.intTermID
 LEFT JOIN tblEMEntityLocation ENTITYLOCATION ON ENTITYLOCATION.intEntityLocationId = ARI.intBillToLocationId
 LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND (ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
+OUTER APPLY (
+	select top 1 dtmDate, ARID.intInvoiceId, SO.strSalesOrderNumber from tblARInvoiceDetail ARID
+	INNER JOIN tblICInventoryShipmentItem ISI on ISI.intInventoryShipmentItemId =ARID.intInventoryShipmentItemId
+	INNER JOIN tblSOSalesOrder SO on SO.intSalesOrderId=ISI.intOrderId
+	WHERE ARID.intInvoiceId = ARI.intInvoiceId
+)SOI 
 LEFT JOIN (
 	SELECT intInvoiceId			= ID.intInvoiceId
 		 , dblSSTTax 			= SUM(CASE WHEN UPPER(strTaxClass) = 'STATE SALES TAX (SST)' OR ID.dblComputedGrossPrice = 0 THEN dblAdjustedTax ELSE 0 END)
