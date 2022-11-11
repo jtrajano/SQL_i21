@@ -22,10 +22,9 @@ BEGIN TRY
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
-        INNER JOIN (
-            tblQMImportCatalogue IMP INNER JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
-        )
-            ON S.strSaleYear = IMP.strSaleYear
+        INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+        INNER JOIN tblQMImportCatalogue IMP
+            ON SY.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.strSaleNumber = IMP.strSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType

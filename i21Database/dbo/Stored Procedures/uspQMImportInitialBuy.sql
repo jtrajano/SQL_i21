@@ -176,10 +176,9 @@ BEGIN TRY
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
+        INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
         INNER JOIN (
             tblQMImportCatalogue IMP
-            -- Sale Year
-            INNER JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
             -- Buyer1 Quantity UOM
             LEFT JOIN tblICUnitMeasure B1QUOM ON B1QUOM.strSymbol = IMP.strB1QtyUOM
             -- Buyer1 Price UOM
@@ -214,7 +213,7 @@ BEGIN TRY
             LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strB1GroupNumber
             -- Currency
             LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
-        ) ON S.strSaleYear = IMP.strSaleYear
+        ) ON SY.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.strSaleNumber = IMP.strSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
@@ -269,9 +268,7 @@ BEGIN TRY
         SET
             intConcurrencyId = S.intConcurrencyId + 1
             ,intCurrencyId = @intCurrencyId
-            ,strCurrency = @strCurrency
             ,intPurchaseGroupId = @intPurchasingGroupId
-            ,strPurchaseGroup = @strPurchasingGroup
             ,intBookId = @intBookId
             -- Initial Buy
             -- B1
@@ -412,9 +409,9 @@ BEGIN TRY
         SELECT
             strBatchId = S.strBatchNo
             ,intSales = CAST(S.strSaleNumber AS INT)
-            ,intSalesYear = CAST(S.strSaleYear AS INT)
+            ,intSalesYear = CAST(SY.strSaleYear AS INT)
             ,dtmSalesDate = S.dtmSaleDate
-            ,strTeaType = S.strManufacturingLeafType
+            ,strTeaType = LEAF_TYPE.strDescription
             ,intBrokerId = S.intBrokerId
             ,strVendorLotNumber = S.strRepresentLotNumber
             ,intBuyingCenterLocationId = S.intCompanyLocationId
@@ -442,7 +439,7 @@ BEGIN TRY
             ,dtmTeaAvailableFrom = NULL
             ,strDustContent = NULL
             ,ysnEUCompliant = S.ysnEuropeanCompliantFlag
-            ,strTBOEvaluatorCode = S.strEvaluatorsCodeAtTBO
+            ,strTBOEvaluatorCode = ECTBO.strName
             ,strEvaluatorRemarks = S.strComments3
             ,dtmExpiration = NULL
             ,intFromPortId = NULL
@@ -450,8 +447,8 @@ BEGIN TRY
             ,dtmInitialBuy = NULL
             ,dblWeightPerUnit = NULL
             ,dblLandedPrice = NULL
-            ,strLeafCategory = S.strLeafCategory
-            ,strLeafManufacturingType = S.strManufacturingLeafType
+            ,strLeafCategory = LEAF_CATEGORY.strAttribute2
+            ,strLeafManufacturingType = LEAF_TYPE.strDescription
             ,strLeafSize = BRAND.strBrandCode
             ,strLeafStyle = STYLE.strName
             ,intBookId = S.intBookId
@@ -469,7 +466,7 @@ BEGIN TRY
             ,ysnStrategic = NULL
             ,strTeaLingoSubCluster = NULL
             ,dtmSupplierPreInvoiceDate = NULL
-            ,strSustainability = S.strProductLine
+            ,strSustainability = SUSTAINABILITY.strDescription
             ,strTasterComments = S.strComments2
             ,dblTeaAppearance = CASE WHEN ISNULL(APPEARANCE.strPropertyValue, '') = '' THEN NULL ELSE CAST(APPEARANCE.strPropertyValue AS NUMERIC(18,6)) END
             ,strTeaBuyingOffice = IMP.strBuyingCenter
@@ -479,7 +476,7 @@ BEGIN TRY
             ,strTeaGroup = NULL
             ,dblTeaHue = CASE WHEN ISNULL(HUE.strPropertyValue, '') = '' THEN NULL ELSE CAST(HUE.strPropertyValue AS NUMERIC(18,6)) END
             ,dblTeaIntensity = CASE WHEN ISNULL(INTENSITY.strPropertyValue, '') = '' THEN NULL ELSE CAST(INTENSITY.strPropertyValue AS NUMERIC(18,6)) END
-            ,strLeafGrade = S.strGrade
+            ,strLeafGrade = GRADE.strDescription
             ,dblTeaMoisture = NULL
             ,dblTeaMouthFeel = CASE WHEN ISNULL(MOUTH_FEEL.strPropertyValue, '') = '' THEN NULL ELSE CAST(MOUTH_FEEL.strPropertyValue AS NUMERIC(18,6)) END
             ,ysnTeaOrganic = S.ysnOrganic
@@ -507,6 +504,7 @@ BEGIN TRY
             ,strVessel = NULL
         FROM tblQMSample S
         INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
+        INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
         LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
         LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
         -- Appearance
@@ -521,6 +519,16 @@ BEGIN TRY
         OUTER APPLY (SELECT TR.strPropertyValue FROM tblQMTestResult TR JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId AND P.strPropertyName = 'Mouth Feel' WHERE TR.intSampleId = S.intSampleId) MOUTH_FEEL
         -- Colour
         LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
+        -- Manufacturing Leaf Type
+        LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.intCommodityAttributeId = S.intManufacturingLeafTypeId
+        -- Evaluator's Code at TBO
+        LEFT JOIN tblEMEntity ECTBO ON ECTBO.intEntityId = S.intEvaluatorsCodeAtTBOId
+        -- Leaf Category
+        LEFT JOIN tblICCommodityAttribute2 LEAF_CATEGORY ON LEAF_CATEGORY.intCommodityAttributeId2 = S.intLeafCategoryId
+        -- Sustainability / Rainforest
+        LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+        -- Grade
+        LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
         WHERE S.intSampleId = @intSampleId
         AND IMP.intImportLogId = @intImportLogId
 

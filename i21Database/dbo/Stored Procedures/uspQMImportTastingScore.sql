@@ -110,10 +110,11 @@ BEGIN TRY
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
+        INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
         LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
         LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
         INNER JOIN (
-            tblQMImportCatalogue IMP INNER JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
+            tblQMImportCatalogue IMP
             INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
             -- Colour
             LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season' AND COLOUR.strDescription = IMP.strColour
@@ -124,7 +125,7 @@ BEGIN TRY
             -- Tealingo Item
             LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
         )
-            ON S.strSaleYear = IMP.strSaleYear
+            ON SY.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.strSaleNumber = IMP.strSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
@@ -209,11 +210,8 @@ BEGIN TRY
         SET
             intConcurrencyId = S.intConcurrencyId + 1
             ,intSeasonId = @intColourId
-            ,strSeason = @strColour
             ,intBrandId = @intBrandId
-            ,strBrandCode = @strBrand
             ,intValuationGroupId = @intValuationGroupId
-            ,strValuationGroupName = @strValuationGroup
             ,strMusterLot = @strMusterLot
             ,strMissingLot = @strMissingLot
             ,strComments2 = @strComments2

@@ -8,7 +8,7 @@ SELECT intSampleId					= S.intSampleId
 	 , strWarehouse					= SL.strSubLocationName
 	 , dblSupplierValuationPrice	= ISNULL(S.dblSupplierValuationPrice, 0)
 	 , strLotNumber					= S.strRepresentLotNumber
-	 , strGrade						= S.strGrade
+	 , strGrade						= GRADE.strDescription
 	 , strInvoiceNumber				= S.strChopNumber
 	 , dblQuantity					= ISNULL(S.dblRepresentingQty, 0)
 	 , strQtyUOM					= UOM.strUnitMeasure
@@ -28,6 +28,7 @@ LEFT JOIN tblEMEntity E ON S.intBrokerId = E.intEntityId
 LEFT JOIN tblSMCompanyLocationSubLocation SL ON S.intCompanyLocationSubLocationId = SL.intCompanyLocationSubLocationId
 LEFT JOIN tblICUnitMeasure UOM ON S.intRepresentingUOMId = UOM.intUnitMeasureId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
+LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
 OUTER APPLY (
 	SELECT TOP 1 *
 	FROM tblSMCompanySetup

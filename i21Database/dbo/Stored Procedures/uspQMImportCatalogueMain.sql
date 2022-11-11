@@ -339,7 +339,8 @@ BEGIN TRY
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
-        WHERE S.strSaleYear = @strSaleYear
+        LEFT JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+        WHERE SY.strSaleYear = @strSaleYear
         AND CL.intCompanyLocationId = @intCompanyLocationId
         AND S.strSaleNumber = @strSaleNumber
         AND CT.intCatalogueTypeId = @intCatalogueTypeId
@@ -400,21 +401,15 @@ BEGIN TRY
 
                 -- Auction Fields
                 ,intSaleYearId
-                ,strSaleYear
                 ,strSaleNumber
                 ,dtmSaleDate
                 ,intCatalogueTypeId
-                ,strCatalogueType
                 ,dtmPromptDate
                 ,strChopNumber
                 ,intGradeId
-                ,strGrade
                 ,intManufacturingLeafTypeId
-                ,strManufacturingLeafType
                 ,intSeasonId
-                ,strSeason
                 ,intGardenMarkId
-                ,strGardenMark
                 ,dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups
                 ,intNetWtPerPackagesUOMId
@@ -424,7 +419,6 @@ BEGIN TRY
                 ,intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak
                 ,intProductLineId
-                ,strProductLine
                 ,ysnOrganic
                 ,dblGrossWeight
                 ,strBatchNo
@@ -436,13 +430,10 @@ BEGIN TRY
                 ,ysnBoughtAsReserve
                 ,ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO
                 ,intFromLocationCodeId
-                ,strFromLocationCode
                 ,strSampleBoxNumber
                 ,strComments3
                 ,intBrokerId
-                ,strBroker
                 )
             SELECT
                 intConcurrencyId = 1
@@ -474,21 +465,15 @@ BEGIN TRY
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
                 ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
                 ,dtmPromptDate = @dtmPromptDate
                 ,strChopNumber = @strChopNumber
                 ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
                 ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
                 ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
                 ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
                 ,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
@@ -498,7 +483,6 @@ BEGIN TRY
                 ,intNetWtThirdPackageBreakUOMId = @intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
                 ,strBatchNo = @strBatchNo
@@ -510,13 +494,10 @@ BEGIN TRY
                 ,ysnBoughtAsReserve = @ysnBoughtAsReserve
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
                 ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
             
             SET @intSampleId = SCOPE_IDENTITY()
             
@@ -697,21 +678,15 @@ BEGIN TRY
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
                 ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
                 ,dtmPromptDate = @dtmPromptDate
                 ,strChopNumber = @strChopNumber
                 ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
                 ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
                 ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
                 ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
                 ,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
@@ -721,7 +696,6 @@ BEGIN TRY
                 ,intNetWtThirdPackageBreakUOMId = @intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
                 ,strBatchNo = @strBatchNo
@@ -733,13 +707,10 @@ BEGIN TRY
                 ,ysnBoughtAsReserve = @ysnBoughtAsReserve
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
                 ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
             FROM tblQMSample S
             WHERE S.intSampleId = @intSampleId
 
