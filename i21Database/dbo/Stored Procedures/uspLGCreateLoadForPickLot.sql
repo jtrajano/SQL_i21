@@ -184,7 +184,7 @@ BEGIN TRY
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
 			,PLD.dblSalePickedQty
-			,0
+			,PLD.dblTareWt
 			,AD.intAllocationDetailId
 			,1
 			,PLH.intCustomerEntityId
