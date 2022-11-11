@@ -23,4 +23,5 @@ intBankId
 ,ysnDelete
 ,dtmDateDeleted
 ,intConcurrencyId
+,ysnInvalidRTN
 FROM dbo.tblCMBank
