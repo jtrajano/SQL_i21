@@ -108,7 +108,7 @@ BEGIN
 	SELECT @Condition = COALESCE(@Condition + '<li>', '') + CTC.strConditionName + ' - ' + LC.strConditionDescription + '</li>'
 	FROM tblLGLoadCondition LC
 	INNER JOIN tblCTCondition CTC ON LC.intConditionId = CTC.intConditionId
-	WHERE intLoadId = 100004398
+	WHERE intLoadId = @intLoadId
 	SET @Condition = @Condition +'</ol>'
 
 SELECT *
