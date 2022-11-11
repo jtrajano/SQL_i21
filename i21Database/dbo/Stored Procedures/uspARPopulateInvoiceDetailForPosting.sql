@@ -175,7 +175,6 @@ INSERT INTO tblARPostInvoiceHeader
     ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]
     ,[dblShipping]
     ,[dblBaseShipping]
     ,[dblTax]
@@ -263,8 +262,6 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblCurrencyExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
-											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -378,7 +375,6 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]
     ,[dblShipping]
     ,[dblBaseShipping]
     ,[dblTax]
@@ -532,8 +528,6 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
-											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -708,7 +702,6 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]
     ,[dblShipping]
     ,[dblBaseShipping]
     ,[dblTax]
@@ -862,8 +855,6 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
-											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -1090,7 +1081,6 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]
     ,[dblShipping]
     ,[dblBaseShipping]
     ,[dblTax]
@@ -1240,8 +1230,6 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = (CASE WHEN ISNULL(ARI.[dblBaseInvoiceTotal], 0) <> 0 THEN ARI.[dblBaseInvoiceTotal] 
-											ELSE ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) END)
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -1412,6 +1400,25 @@ INNER JOIN (
     SELECT
          intInvoiceId = intInvoiceId
         ,dblBaseTotal = SUM(dblBaseTotal) + SUM(dblBaseTax)
+    FROM tblARPostInvoiceDetail
+    WHERE strSessionId = @strSessionId
+    GROUP BY intInvoiceId
+) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
+WHERE strSessionId = @strSessionId
+
+UPDATE ARPID
+SET dblBaseInvoiceTotal = ARPIH.dblBaseInvoiceTotal
+FROM tblARPostInvoiceDetail ARPID
+INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId AND ARPID.strSessionId = ARPIH.strSessionId
+WHERE ARPID.strSessionId = @strSessionId
+
+UPDATE ARPIH
+SET dblBaseInvoiceTotal = ARPID.dblBaseTotal
+FROM tblARPostInvoiceHeader ARPIH
+INNER JOIN (
+    SELECT
+         intInvoiceId = intInvoiceId
+        ,dblBaseTotal = SUM(dblBaseTotal)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
