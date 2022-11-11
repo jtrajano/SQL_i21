@@ -35,6 +35,7 @@ SELECT CD.intContractDetailId
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
+	,CD.dtmUpdatedAvailabilityDate
 	,CD.dtmCashFlowDate
 	,E.intDefaultLocationId
 	,dblScheduleQty = CASE WHEN (ShipType.intShipmentType = 2) THEN ISNULL(CD.dblShippingInstructionQty, 0) ELSE ISNULL(CD.dblScheduleQty, 0) END
