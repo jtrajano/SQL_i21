@@ -1165,6 +1165,10 @@
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
+    <Build Include="dbo\Tables\tblCRMHubspotConfig.sql" />
+    <Build Include="dbo\Tables\tblCRMHubspotScope.sql" />
+    <Build Include="dbo\Views\vyuCRMSetting.sql" />
+    <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -8754,7 +8758,7 @@
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
-	<Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
+    <Build Include="dbo\Views\vyuSTConsCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />
@@ -10956,7 +10960,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
-  	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
