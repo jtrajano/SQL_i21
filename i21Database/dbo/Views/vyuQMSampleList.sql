@@ -110,25 +110,25 @@ SELECT S.intSampleId
 	,CompanyLocation.strLocationName AS strCompanyLocationName
 	-- Auction
 	,S.intSaleYearId
-	,S.strSaleYear
+	,SaleYear.strSaleYear AS strSaleYear 
 	,S.strSaleNumber
 	,S.strChopNumber
 	,S.dtmSaleDate
 	,S.intCatalogueTypeId
-	,S.strCatalogueType
+	,CatalogueType.strCatalogueType AS strCatalogueType 
 	,S.dtmPromptDate
 	,S.intBrokerId
-	,S.strBroker
+	,BR.strName AS strBroker
 	,S.intGradeId
-	,S.strGrade AS strTeaGrade
+	,Grade.strDescription AS strTeaGrade
 	,S.intLeafCategoryId
-	,S.strLeafCategory
+	,LeafCategory.strAttribute2 AS strLeafCategory
 	,S.intManufacturingLeafTypeId
-	,S.strManufacturingLeafType
+	,MLT.strDescription AS strManufacturingLeafType
 	,S.intSeasonId
-	,S.strSeason AS strColor
+	,Season.strDescription AS strColor
 	,S.intGardenMarkId
-	,S.strGardenMark
+	,GardenMark.strGardenMark AS strGardenMark
 	,S.dtmManufacturingDate
 	,S.intTotalNumberOfPackageBreakups
 	,S.intNetWtPerPackagesUOMId
@@ -141,13 +141,13 @@ SELECT S.intSampleId
 	,strNetWtThirdPackageBreakUOM = PWUOM3.strUnitMeasure
 	,S.intNoOfPackagesThirdPackageBreak
 	,S.intProductLineId
-	,S.strProductLine AS strSustainability
+	,ProductLine.strDescription AS strSustainability
 	,S.ysnOrganic
 	,S.dblSupplierValuationPrice
 	,S.intProducerId
-	,S.strProducer
+	,Producer.strName AS strProducer 
 	,S.intPurchaseGroupId
-	,S.strPurchaseGroup
+	,PG.strName AS strPurchaseGroup
 	,S.strERPRefNo
 	,S.dblGrossWeight
 	,S.dblTareWeight
@@ -160,23 +160,23 @@ SELECT S.intSampleId
 	,S.dblBasePrice
 	,S.ysnBoughtAsReserve
 	,S.intCurrencyId
-	,S.strCurrency
+	,Currency.strCurrency AS strCurrency
 	,S.ysnEuropeanCompliantFlag
 	,S.intEvaluatorsCodeAtTBOId
-	,S.strEvaluatorsCodeAtTBO
+	,ECT.strName AS strEvaluatorsCodeAtTBO
 	,S.intFromLocationCodeId
-	,S.strFromLocationCode
+	,City.strCity AS strFromLocationCode
 	,S.strSampleBoxNumber
 	,S.intBrandId
-	,S.strBrandCode
+	,Size.strBrandCode AS strBrandCode
 	,S.intValuationGroupId
-	,S.strValuationGroupName
+	,VG.strName AS strValuationGroupName
 	,S.strMusterLot
 	,S.strMissingLot
 	,S.intMarketZoneId
-	,S.strMarketZoneCode
+	,MarketZone.strMarketZoneCode AS strMarketZoneCode
 	,S.intDestinationStorageLocationId
-	,S.strDestinationStorageLocationName
+	,DSL.strName AS strDestinationStorageLocationName
 	,S.strComments2
 	,S.strComments3
 	-- Initial Buy
@@ -287,6 +287,24 @@ LEFT JOIN tblICUnitMeasure PUOM2 ON PUOM2.intUnitMeasureId = S.intB2PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM3 ON PUOM3.intUnitMeasureId = S.intB3PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM4 ON PUOM4.intUnitMeasureId = S.intB4PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM5 ON PUOM5.intUnitMeasureId = S.intB5PriceUOMId
+LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
+LEFT JOIN tblQMCatalogueType CatalogueType ON CatalogueType.intCatalogueTypeId = S.intCatalogueTypeId 
+LEFT JOIN tblEMEntity BR ON BR.intEntityId = S.intBrokerId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = S.intGradeId
+LEFT JOIN tblICCommodityAttribute2 LeafCategory ON LeafCategory.intCommodityAttributeId2 = S.intLeafCategoryId
+LEFT JOIN tblICCommodityAttribute MLT ON MLT.intCommodityAttributeId = S.intManufacturingLeafTypeId
+LEFT JOIN tblQMGardenMark GardenMark ON GardenMark.intGardenMarkId = S.intGardenMarkId
+LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = S.intSeasonId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = S.intProductLineId
+LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = S.intProducerId
+LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = S.intPurchaseGroupId
+LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = S.intCurrencyId
+LEFT JOIN tblEMEntity ECT ON ECT.intEntityId = S.intEvaluatorsCodeAtTBOId
+LEFT JOIN tblSMCity City ON City.intCityId = S.intFromLocationCodeId
+LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
+LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
+LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
+LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
 WHERE S.intTypeId = 1
 GO
 

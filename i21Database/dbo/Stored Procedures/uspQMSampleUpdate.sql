@@ -345,25 +345,17 @@ BEGIN TRY
   ,intSamplingCriteriaId = CASE x.intSamplingCriteriaId WHEN 0 THEN NULL ELSE x.intSamplingCriteriaId END  
   ,strSendSampleTo = x.strSendSampleTo  
   , intSaleYearId = x.intSaleYearId
-  , strSaleYear = x.strSaleYear
   , strSaleNumber = x.strSaleNumber
   , dtmSaleDate = CASE WHEN x.dtmSaleDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmSaleDate END  
   , intCatalogueTypeId = x.intCatalogueTypeId
-  , strCatalogueType = x.strCatalogueType
   , dtmPromptDate = CASE WHEN x.dtmPromptDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmPromptDate END  
   , strChopNumber = x.strChopNumber
   , intBrokerId = x.intBrokerId
-  , strBroker = x.strBroker
   , intGradeId = x.intGradeId
-  , strGrade = x.strGrade
   , intLeafCategoryId = x.intLeafCategoryId
-  , strLeafCategory = x.strLeafCategory
   , intManufacturingLeafTypeId = x.intManufacturingLeafTypeId
-  , strManufacturingLeafType = x.strManufacturingLeafType
   , intSeasonId = x.intSeasonId
-  , strSeason = x.strSeason
   , intGardenMarkId = x.intGardenMarkId
-  , strGardenMark = x.strGardenMark
   , dtmManufacturingDate = CASE WHEN x.dtmManufacturingDate = CAST('' AS DATETIME) THEN NULL ELSE x.dtmManufacturingDate END 
   , intTotalNumberOfPackageBreakups = x.intTotalNumberOfPackageBreakups
   , intNetWtPerPackagesUOMId = x.intNetWtPerPackagesUOMId
@@ -373,13 +365,10 @@ BEGIN TRY
   , intNetWtThirdPackageBreakUOMId = x.intNetWtThirdPackageBreakUOMId
   , intNoOfPackagesThirdPackageBreak = x.intNoOfPackagesThirdPackageBreak
   , intProductLineId = x.intProductLineId
-  , strProductLine = x.strProductLine
   , ysnOrganic = x.ysnOrganic
   , dblSupplierValuationPrice = x.dblSupplierValuationPrice
   , intProducerId = x.intProducerId
-  , strProducer = x.strProducer
   , intPurchaseGroupId = x.intPurchaseGroupId
-  , strPurchaseGroup = x.strPurchaseGroup
   , strERPRefNo = x.strERPRefNo
   , dblGrossWeight = x.dblGrossWeight
   , dblTareWeight = x.dblTareWeight
@@ -392,65 +381,43 @@ BEGIN TRY
   , dblBasePrice = x.dblBasePrice
   , ysnBoughtAsReserve = x.ysnBoughtAsReserve
   , intCurrencyId = x.intCurrencyId
-  , strCurrency = x.strCurrency
   , ysnEuropeanCompliantFlag = x.ysnEuropeanCompliantFlag
   , intEvaluatorsCodeAtTBOId = x.intEvaluatorsCodeAtTBOId
-  , strEvaluatorsCodeAtTBO = x.strEvaluatorsCodeAtTBO
   , intFromLocationCodeId = x.intFromLocationCodeId
-  , strFromLocationCode = x.strFromLocationCode
   , strSampleBoxNumber = x.strSampleBoxNumber
   , intBrandId = x.intBrandId
-  , strBrandCode = x.strBrandCode
   , intValuationGroupId = x.intValuationGroupId
-  , strValuationGroupName = x.strValuationGroupName
   , strMusterLot = x.strMusterLot
   , strMissingLot = x.strMissingLot
   , intMarketZoneId = x.intMarketZoneId
-  , strMarketZoneCode = x.strMarketZoneCode
   , intDestinationStorageLocationId = x.intDestinationStorageLocationId
-  , strDestinationStorageLocationName = x.strDestinationStorageLocationName
   , strComments2 = x.strComments2
   , strComments3 = x.strComments3
   , intBuyer1Id = x.intBuyer1Id
-  --, strBuyer1 = x.strBuyer1
   , dblB1QtyBought = x.dblB1QtyBought
   , intB1QtyUOMId = x.intB1QtyUOMId
-  --, strB1QtyUOM = x.strB1QtyUOM
   , dblB1Price = x.dblB1Price
   , intB1PriceUOMId = x.intB1PriceUOMId
-  --, strB1PriceUOM = x.strB1PriceUOM
   , intBuyer2Id = x.intBuyer2Id
-  --, strBuyer2 = x.strBuyer2
   , dblB2QtyBought = x.dblB2QtyBought
   , intB2QtyUOMId = x.intB2QtyUOMId
-  --, strB2QtyUOM = x.strB2QtyUOM
   , dblB2Price = x.dblB2Price
   , intB2PriceUOMId = x.intB2PriceUOMId
-  --, strB2PriceUOM = x.strB2PriceUOM
   , intBuyer3Id = x.intBuyer3Id
-  --, strBuyer3 = x.strBuyer3
   , dblB3QtyBought = x.dblB3QtyBought
   , intB3QtyUOMId = x.intB3QtyUOMId
-  --, strB3QtyUOM = x.strB3QtyUOM
   , dblB3Price = x.dblB3Price
   , intB3PriceUOMId = x.intB3PriceUOMId
-  --, strB3PriceUOM = x.strB3PriceUOM
   , intBuyer4Id = x.intBuyer4Id
-  --, strBuyer4 = x.strBuyer4
   , dblB4QtyBought = x.dblB4QtyBought
   , intB4QtyUOMId = x.intB4QtyUOMId
-  --, strB4QtyUOM = x.strB4QtyUOM
   , dblB4Price = x.dblB4Price
   , intB4PriceUOMId = x.intB4PriceUOMId
-  --, strB4PriceUOM = x.strB4PriceUOM
   , intBuyer5Id = x.intBuyer5Id
-  --, strBuyer5 = x.strBuyer5
   , dblB5QtyBought = x.dblB5QtyBought
   , intB5QtyUOMId = x.intB5QtyUOMId
-  --, strB5QtyUOM = x.strB5QtyUOM
   , dblB5Price = x.dblB5Price
   , intB5PriceUOMId = x.intB5PriceUOMId
-  --, strB5PriceUOM = x.strB5PriceUOM
   ,strRepresentLotNumber = x.strRepresentLotNumber  
   ,intLastModifiedUserId = x.intLastModifiedUserId  
   ,dtmLastModified = x.dtmLastModified  
@@ -519,25 +486,17 @@ BEGIN TRY
    ,strSendSampleTo NVARCHAR(50)  
    ,strRepresentLotNumber NVARCHAR(50)
    , intSaleYearId INT
-   , strSaleYear NVARCHAR(50)
    , strSaleNumber NVARCHAR(50)
    , strChopNumber NVARCHAR(50)
    , dtmSaleDate DATETIME  
    , intCatalogueTypeId INT
-   , strCatalogueType NVARCHAR(50)
    , dtmPromptDate DATETIME  
    , intBrokerId INT
-   , strBroker NVARCHAR(50)
    , intGradeId INT
-   , strGrade NVARCHAR(50)
    , intLeafCategoryId INT
-   , strLeafCategory NVARCHAR(50)
    , intManufacturingLeafTypeId INT
-   , strManufacturingLeafType NVARCHAR(50)
    , intSeasonId INT
-   , strSeason NVARCHAR(50)
    , intGardenMarkId INT
-   , strGardenMark NVARCHAR(50)
    , dtmManufacturingDate DATETIME  
    , intTotalNumberOfPackageBreakups INT
    , intNetWtPerPackagesUOMId INT
@@ -547,13 +506,10 @@ BEGIN TRY
    , intNetWtThirdPackageBreakUOMId INT
    , intNoOfPackagesThirdPackageBreak INT
    , intProductLineId INT
-   , strProductLine NVARCHAR(50)
    , ysnOrganic BIT
    , dblSupplierValuationPrice NUMERIC(18, 6)
    , intProducerId INT
-   , strProducer NVARCHAR(50)
    , intPurchaseGroupId INT
-   , strPurchaseGroup NVARCHAR(50)
    , strERPRefNo NVARCHAR(50) 
    , dblGrossWeight NUMERIC(18, 6)
    , dblTareWeight NUMERIC(18, 6)
@@ -566,65 +522,43 @@ BEGIN TRY
    , dblBasePrice NUMERIC(18, 6)
    , ysnBoughtAsReserve BIT
    , intCurrencyId INT
-   , strCurrency NVARCHAR(50)
    , ysnEuropeanCompliantFlag BIT
    , intEvaluatorsCodeAtTBOId INT
-   , strEvaluatorsCodeAtTBO NVARCHAR(50)
    , intFromLocationCodeId INT
-   , strFromLocationCode NVARCHAR(50)
    , strSampleBoxNumber NVARCHAR(50) 
    , intBrandId INT
-   , strBrandCode NVARCHAR(50)
    , intValuationGroupId INT
-   , strValuationGroupName NVARCHAR(50)
    , strMusterLot NVARCHAR(50) 
    , strMissingLot NVARCHAR(50) 
    , intMarketZoneId INT
-   , strMarketZoneCode NVARCHAR(50)
    , intDestinationStorageLocationId INT
-   , strDestinationStorageLocationName NVARCHAR(50)
    , strComments2 NVARCHAR(MAX) 
    , strComments3 NVARCHAR(MAX)   
    , intBuyer1Id INT
-   --, strBuyer1 NVARCHAR(50)
    , dblB1QtyBought NUMERIC(18, 6)
    , intB1QtyUOMId INT
-   --, strB1QtyUOM NVARCHAR(50)
    , dblB1Price NUMERIC(18, 6)
    , intB1PriceUOMId INT
-   --, strB1PriceUOM NVARCHAR(50)
    , intBuyer2Id INT
-   --, strBuyer2 NVARCHAR(50)
    , dblB2QtyBought NUMERIC(18, 6)
    , intB2QtyUOMId INT
-   --, strB2QtyUOM NVARCHAR(50)
    , dblB2Price NUMERIC(18, 6)
    , intB2PriceUOMId INT
-   --, strB2PriceUOM NVARCHAR(50)
    , intBuyer3Id INT
-   --, strBuyer3 NVARCHAR(50)
    , dblB3QtyBought NUMERIC(18, 6)
    , intB3QtyUOMId INT
-   --, strB3QtyUOM NVARCHAR(50)
    , dblB3Price NUMERIC(18, 6)
    , intB3PriceUOMId INT
-   --, strB3PriceUOM NVARCHAR(50)
    , intBuyer4Id INT
-   --, strBuyer4 NVARCHAR(50)
    , dblB4QtyBought NUMERIC(18, 6)
    , intB4QtyUOMId INT
-   --, strB4QtyUOM NVARCHAR(50)
    , dblB4Price NUMERIC(18, 6)
    , intB4PriceUOMId INT
-   --, strB4PriceUOM NVARCHAR(50)
    , intBuyer5Id INT
-   --, strBuyer5 NVARCHAR(50)
    , dblB5QtyBought NUMERIC(18, 6)
    , intB5QtyUOMId INT
-   --, strB5QtyUOM NVARCHAR(50)
    , dblB5Price NUMERIC(18, 6)
    , intB5PriceUOMId INT
-   --, strB5PriceUOM NVARCHAR(50)
    ,intLastModifiedUserId INT  
    ,dtmLastModified DATETIME  
    ,strRowState NVARCHAR(50)
