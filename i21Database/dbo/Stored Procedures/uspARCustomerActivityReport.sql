@@ -850,6 +850,7 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 		)  PostDatePayment ON PostDatePayment.strRecordNumber2=ARST.strTransactionNumber 
 		OUTER APPLY(
 		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		WHERE intEntityUserId = @intEntityUserId and intEntityCustomerId in (SELECT intEntityCustomerId from @tblCustomers)
 		)Recap
 
 		WHERE intEntityUserId = @intEntityUserId)NST
@@ -860,6 +861,7 @@ ELSE
 		SELECT * FROM tblARCustomerActivityStagingTable 
 		OUTER APPLY(
 		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		WHERE intEntityUserId = @intEntityUserId and intEntityCustomerId in (SELECT intEntityCustomerId from @tblCustomers)
 		)Recap
 		WHERE intEntityUserId = @intEntityUserId 
 		ORDER BY strCustomerName
