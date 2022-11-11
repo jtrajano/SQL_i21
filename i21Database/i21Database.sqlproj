@@ -863,6 +863,7 @@
     <Build Include="dbo\Functions\fnGLGetForwardBalanceAndUnit.sql" />
     <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
     <Build Include="dbo\Functions\fnFAMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGFetchExistingConditions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
