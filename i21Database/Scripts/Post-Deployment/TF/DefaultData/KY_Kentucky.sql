@@ -329,6 +329,28 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5D_VA_TR', strType = '', strCriteria = '<> 0', intMasterId = 17969
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = '72A138', strScheduleCode = '5D_WV_TR', strType = '', strCriteria = '<> 0', intMasterId = 17970
 
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '1_TR', strType = '', strCriteria = '<> 0',		intMasterId = 17971
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '2_TR', strType = '', strCriteria = '= 0',			intMasterId = 17972
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '2A_TR', strType = '', strCriteria = '= 0',		intMasterId = 17973
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '2B_TR', strType = '', strCriteria = '= 0',		intMasterId = 17974
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '3_IL_TR', strType = '', strCriteria = '= 0',		intMasterId = 17975
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '3_IN_TR', strType = '', strCriteria = '= 0',		intMasterId = 17976
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '3_TN_TR', strType = '', strCriteria = '= 0',		intMasterId = 17977
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '3_OH_TR', strType = '', strCriteria = '= 0',		intMasterId = 17978
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '3_VA_TR', strType = '', strCriteria = '= 0',		intMasterId = 17979
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '3_WV_TR', strType = '', strCriteria = '= 0',		intMasterId = 17980
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '5D_IL_TR', strType = '', strCriteria = '<> 0',	intMasterId = 17981
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '5D_IN_TR', strType = '', strCriteria = '<> 0',	intMasterId = 17982
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '5D_TN_TR', strType = '', strCriteria = '<> 0',	intMasterId = 17983
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '5D_OH_TR', strType = '', strCriteria = '<> 0',	intMasterId = 17984
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '5D_VA_TR', strType = '', strCriteria = '<> 0',	intMasterId = 17985
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '5D_WV_TR', strType = '', strCriteria = '<> 0',	intMasterId = 17986
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '6_TR', strType = '', strCriteria = '= 0',			intMasterId = 17987
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '8_TR', strType = '', strCriteria = '= 0',			intMasterId = 17988
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = '72A089', strScheduleCode = '10I_TR', strType = '', strCriteria = '= 0',		intMasterId = 17989
+
+
+
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
 
