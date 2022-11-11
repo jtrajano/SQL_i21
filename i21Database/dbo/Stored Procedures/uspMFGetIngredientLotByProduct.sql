@@ -147,7 +147,9 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
+			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
+			AND SUOM.intItemId = I.intItemId
 		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
@@ -370,7 +372,9 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = L.intItemUOMId
 		JOIN dbo.tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		LEFT JOIN dbo.tblICItemUOM RUOM ON RUOM.intItemUOMId = RI.intItemUOMId
+			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
+			AND SUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
