@@ -111,6 +111,11 @@ BEGIN
 	WHERE intLoadId = @intLoadId
 	SET @Condition = @Condition +'</ol>'
 
+	IF @Condition = '<ol></ol>'
+	BEGIN
+		SET @Condition = NULL
+	END
+
 SELECT *
 	,strConsigneeInfo = LTRIM(RTRIM(
 		CASE WHEN ISNULL(strConsignee, '') = '' THEN '' ELSE strConsignee + CHAR(13) END 
