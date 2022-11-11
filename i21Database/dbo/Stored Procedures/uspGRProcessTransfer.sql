@@ -19,7 +19,7 @@ BEGIN TRY
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT --new customer storage id
 	DECLARE @intStorageHistoryId INT = 0
-	DECLARE @intDecimalPrecision INT = 20
+	--DECLARE @intDecimalPrecision INT = 20
 	DECLARE @intTransferStorageSplitId INT
 	DECLARE @XML NVARCHAR(MAX)
 	DECLARE @strScreenName NVARCHAR(50)
@@ -37,7 +37,7 @@ BEGIN TRY
 		,dblSplitPercent NUMERIC(38,20)
 		,dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
 	)
-	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
+	--SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 	DECLARE @intTransferStorageReferenceId INT
 
 	---START---TRANSACTIONS FOR THE SOURCE-----	
@@ -48,7 +48,7 @@ BEGIN TRY
 			WHERE B.intTransferStorageId = @intTransferStorageId AND B.dblOriginalUnits <> A.dblOpenBalance
 	)
 	BEGIN
-		DECLARE @TicketNo VARCHAR(50)
+		DECLARE @TicketNo VARCHAR(500)
 
 		SELECT @TicketNo = STUFF((
 			SELECT ',' + strStorageTicketNumber 
@@ -110,15 +110,7 @@ BEGIN TRY
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 	END
-	CLOSE c; DEALLOCATE c;
-
-	--update the source's customer storage open balance
-	UPDATE A
-	SET A.dblOpenBalance 	= ROUND(B.dblOriginalUnits - B.dblDeductedUnits,@intDecimalPrecision)
-	FROM tblGRCustomerStorage A 
-	INNER JOIN tblGRTransferStorageSourceSplit B 
-		ON B.intSourceCustomerStorageId = A.intCustomerStorageId
-	WHERE B.intTransferStorageId = @intTransferStorageId
+	CLOSE c; DEALLOCATE c;	
 		
 	DELETE FROM @StorageHistoryStagingTable
 	--insert history for the old (source) customer storage		
@@ -215,7 +207,7 @@ BEGIN TRY
 		,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 		,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 		,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
-		,[dblQuantity]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+		,[dblQuantity]						= ROUND(CS.dblOpenBalance * (TransferStorageSplit.dblSplitPercent / 100),20) --SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 		,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 		,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 		,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
@@ -245,9 +237,9 @@ BEGIN TRY
 		,[intTicketId]						= CS.intTicketId
 		,[intDeliverySheetId]				= CS.intDeliverySheetId
 		,[ysnTransferStorage]				= 1
-		,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
+		,[dblGrossQuantity]					= ROUND(((CS.dblOpenBalance * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,20)--ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,20)
 		,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
-		,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+		,[dblUnitQty]						= ROUND(CS.dblOpenBalance * (TransferStorageSplit.dblSplitPercent / 100),20)--SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 		,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
 	FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
@@ -367,13 +359,43 @@ BEGIN TRY
 	SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds
 	SET @intTransferStorageReferenceId = @@ROWCOUNT
 
+	--update the source's customer storage open balance
+	UPDATE A
+	SET A.dblOpenBalance = ROUND(A.dblOpenBalance - B.dblTotalTransfer,20)
+	FROM tblGRCustomerStorage A 
+	INNER JOIN (
+		SELECT intTransferStorageId
+			,intSourceCustomerStorageId
+			,dblTotalTransfer = ROUND(SUM(dblUnitQty),20)
+		FROM tblGRTransferStorageReference
+		GROUP BY intTransferStorageId
+			,intSourceCustomerStorageId
+	) B
+		ON B.intSourceCustomerStorageId = A.intCustomerStorageId
+	WHERE B.intTransferStorageId = @intTransferStorageId
+
+	--UPDATE tblGRTransferStorageSourceSplit to match the total units in tblGRTransferStorageReference
+	UPDATE A
+	SET dblDeductedUnits = B.dblTotalTransfer
+	FROM tblGRTransferStorageSourceSplit A
+	INNER JOIN (
+		SELECT intTransferStorageId
+			,intSourceCustomerStorageId
+			,dblTotalTransfer = SUM(dblUnitQty)
+		FROM tblGRTransferStorageReference
+		GROUP BY intTransferStorageId
+			,intSourceCustomerStorageId
+	) B
+		ON B.intTransferStorageId = A.intTransferStorageId
+			AND B.intSourceCustomerStorageId = A.intSourceCustomerStorageId
+	WHERE A.intTransferStorageId = @intTransferStorageId
 	--
 	IF(ISNULL(@intTransferStorageReferenceId,0) > 0)
 	BEGIN
 			DECLARE @ItemsToPost AS ItemCostingTableType
 			INSERT INTO @ItemsToPost 
 			(
-					intItemId
+				intItemId
 				,intItemLocationId
 				,intItemUOMId
 				,dtmDate
@@ -1116,7 +1138,9 @@ BEGIN TRY
 	--strTransferTicket is being used by RM, we need to update the strTransferTicket so that they won't to look at our table just to get its corresponding string
 	UPDATE tblGRStorageHistory 
 	SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
-	WHERE intTransferStorageId = @intTransferStorageId	
+	WHERE intTransferStorageId = @intTransferStorageId
+
+
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
