@@ -24,7 +24,8 @@ BEGIN
 			@strUserPhoneNo				NVARCHAR(100),
 			@strUserEmailId				NVARCHAR(100),
 			@strContainerQtyUOM			NVARCHAR(100),
-			@strPackingUOM				NVARCHAR(100)
+			@strPackingUOM				NVARCHAR(100),
+			@Condition					VARCHAR(8000) 
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -102,6 +103,13 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE intLoadId = @intLoadId
 	GROUP BY UOM.strUnitMeasure
+
+	SET @Condition = '<ol>'
+	SELECT @Condition = COALESCE(@Condition + '<li>', '') + CTC.strConditionName + ' - ' + LC.strConditionDescription + '</li>'
+	FROM tblLGLoadCondition LC
+	INNER JOIN tblCTCondition CTC ON LC.intConditionId = CTC.intConditionId
+	WHERE intLoadId = 100004398
+	SET @Condition = @Condition +'</ol>'
 
 SELECT *
 	,strConsigneeInfo = LTRIM(RTRIM(
@@ -186,6 +194,7 @@ SELECT *
 	,strShipmentPeriod
 	,strDestinationCity
 	,strMarkingInstruction
+	,strConditions = @Condition
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
