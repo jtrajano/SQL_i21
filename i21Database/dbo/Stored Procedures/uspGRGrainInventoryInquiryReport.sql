@@ -1016,6 +1016,11 @@ GROUP BY strCommodityCode
 
 SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @StorageObligationData)
 
+IF ISNULL(@intTotalRowCnt,0) = 0
+BEGIN
+	SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @InventoryData) 
+END
+
 /* ADD INVENTORY BALANCE IF IT DOES NOT EXIST */
 INSERT INTO @InventoryData
 SELECT 
