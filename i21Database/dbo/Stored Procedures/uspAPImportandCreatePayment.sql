@@ -100,20 +100,43 @@ BEGIN TRY
 			AND PD.dblPayment < 0;
 
 			--UNPAY THOSE DUPLICATE, THE SAME AMOUNT AND INVOICE #, SELECT ONLY THE EARLIEST DUE DATE
-			WITH cteDup (
+			;WITH cteDup (
 				intId,
 				intBillId,
-				intEarliestDue
+				intEarliestDue,
+				intCSVIdCount
 			) AS (
 				SELECT 
 					PS.intId,
 					PS.intBillId,
-					ROW_NUMBER() OVER (PARTITION BY PS.intBillId, PS.dblPayment ORDER BY PS.dtmDueDate DESC) intEarliestDue
+					--PS.strPaymentScheduleNumber,
+					ROW_NUMBER() OVER (PARTITION BY PS.intBillId, PS.dblPayment, PS.strPaymentScheduleNumber ORDER BY PS.dtmDueDate DESC) intEarliestDue,
+					csvRec.intCSVIdCount
 				FROM tblAPVoucherPaymentSchedule PS 
 				INNER JOIN (tblAPPaymentDetail payDetail INNER JOIN tblAPPayment pay ON pay.intPaymentId = payDetail.intPaymentId)
 					ON PS.intBillId = payDetail.intBillId
+				INNER JOIN tblAPBill bill
+					ON PS.intBillId = bill.intBillId
+				OUTER APPLY (
+					--query only those PS with duplicate
+					SELECT COUNT(paySched.intId) intIdCount
+					FROM tblAPVoucherPaymentSchedule paySched
+					WHERE paySched.intBillId = payDetail.intBillId
+					GROUP BY paySched.dblPayment, paySched.strPaymentScheduleNumber
+					HAVING COUNT(paySched.intId) > 1
+				) dupPS
+				OUTER APPLY (
+					SELECT	COUNT(csv.intId) intCSVIdCount
+					FROM tblAPImportPaidVouchersForPayment csv
+					WHERE 
+						csv.strBillId = bill.strBillId
+					AND csv.dblPayment = payDetail.dblPayment
+					AND csv.strVendorOrderNumber = PS.strPaymentScheduleNumber
+				) csvRec
 				WHERE PS.ysnPaid = 0
 				AND pay.intPaymentId = @createdPaymentId
+				AND dupPS.intIdCount IS NOT NULL
+				AND dupPS.intIdCount > csvRec.intCSVIdCount --PS Selected is greater than the csv rec
 			)
 
 			UPDATE PD
@@ -122,15 +145,16 @@ BEGIN TRY
 				PD.dblAmountDue = PD.dblTotal
 			FROM tblAPPaymentDetail PD
 			INNER JOIN (
-				SELECT A.intBillId, B.intId, B.intEarliestDue
+				SELECT A.intBillId, A.intId, A.intEarliestDue, A.intCSVIdCount
 				FROM cteDup A
-				INNER JOIN cteDup B ON A.intBillId = B.intBillId
-				WHERE 
-					A.intEarliestDue > 1
+				--INNER JOIN cteDup B ON A.intBillId = B.intBillId
+				--WHERE 
+				--	A.intEarliestDue > 1
 			) dupPay
-			ON dupPay.intBillId = PD.intBillId AND dupPay.intEarliestDue = 1
+			ON dupPay.intBillId = PD.intBillId --AND dupPay.intEarliestDue = 1
 			AND PD.intPayScheduleId = dupPay.intId
-			WHERE PD.intPaymentId = @createdPaymentId;
+			WHERE PD.intPaymentId = @createdPaymentId
+			AND dupPay.intEarliestDue <= dupPay.intCSVIdCount
 			--END
 
 			EXEC uspAPUpdateVoucherPayment @createdPaymentId, NULL
