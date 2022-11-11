@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFProcessWorkOrder (
-	@intProducedItemId INT
+		@intProducedItemId INT
 	,@intUserId INT
 	,@intLocationId INT
 	,@strBatchId NVARCHAR(50) OUTPUT
@@ -102,7 +102,7 @@ BEGIN
 
 	SELECT @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
 
-	SELECT @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intTransferToStorageLocationId) + '</intStorageLocationId>'
+	SELECT @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, ISNULL(@intTransferToStorageLocationId, 0)) + '</intStorageLocationId>'
 
 	SELECT @strProduceXml = @strProduceXml + '<intUserId>' + convert(VARCHAR, @intUserId) + '</intUserId>'
 
@@ -148,9 +148,9 @@ BEGIN
 
 		SELECT @strConsumeXml = @strConsumeXml + '<intItemIssuedUOMId>' + convert(VARCHAR, @intConsumedItemUOMId) + '</intItemIssuedUOMId>'
 
-		SELECT @strConsumeXml = @strConsumeXml + '<intSubLocationId>' + convert(VARCHAR, @intSubLocationId) + '</intSubLocationId>'
+		SELECT @strConsumeXml = @strConsumeXml + '<intSubLocationId>' + convert(VARCHAR, ISNULL(@intSubLocationId,0 )) + '</intSubLocationId>'
 
-		SELECT @strConsumeXml = @strConsumeXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
+		SELECT @strConsumeXml = @strConsumeXml + '<intStorageLocationId>' + convert(VARCHAR, ISNULL(@intStorageLocationId, 0)) + '</intStorageLocationId>'
 
 		SELECT @strConsumeXml = @strConsumeXml + '</lot>'
 
