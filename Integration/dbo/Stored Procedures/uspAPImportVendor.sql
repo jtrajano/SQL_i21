@@ -310,6 +310,7 @@ BEGIN
 	SELECT ssvnd_vnd_no INTO #tmpssvndmst 
 	FROM ssvndmst A
 		where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
+		and ssvnd_vnd_no in (SELECT ssvnd_vnd_no FROM ssvndmst B WHERE B.ssvnd_vnd_no = B.ssvnd_pay_to)
 
 
 	INSERT INTO #tmpssvndmst  (ssvnd_vnd_no)	
