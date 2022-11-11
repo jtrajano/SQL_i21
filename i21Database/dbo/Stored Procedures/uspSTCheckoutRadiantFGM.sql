@@ -175,6 +175,27 @@ BEGIN
 					WHERE CPT.intCheckoutId = @intCheckoutId
 			END
 
+		
+			UPDATE
+				dept
+			SET
+				dept.dblTotalSalesAmountComputed = pump.dblAmount,
+				dept.intItemsSold = pump.dblQuantity
+			FROM
+				tblSTCheckoutDepartmetTotals AS dept
+				INNER JOIN (
+					SELECT 
+						intCategoryId,
+						SUM(dblQuantity) AS dblQuantity, 
+						SUM(dblAmount) AS dblAmount
+					FROM tblSTCheckoutPumpTotals
+					WHERE intCheckoutId = @intCheckoutId
+					GROUP BY intCategoryId
+				) AS pump
+					ON pump.intCategoryId = dept.intCategoryId
+			WHERE
+				dept.intCheckoutId = @intCheckoutId
+
 
 
 		SET @intCountRows = 1
