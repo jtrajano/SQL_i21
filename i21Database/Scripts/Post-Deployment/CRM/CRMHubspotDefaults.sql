@@ -43,27 +43,27 @@ GO
 		END
 	ELSE 
 		BEGIN
-			IF NOT EXISTS(SELECT strHsInstallationUrl FROM tblCRMHubspotConfig)
+			IF (SELECT strHsInstallationUrl FROM tblCRMHubspotConfig) IS NULL
 				BEGIN
 					UPDATE tblCRMHubspotConfig SET strHsInstallationUrl = 'https://app.hubspot.com/oauth/authorize'
 				END
 
-			IF NOT EXISTS(SELECT strHsTokenUrl FROM tblCRMHubspotConfig)
+			IF (SELECT strHsTokenUrl FROM tblCRMHubspotConfig) IS NULL
 				BEGIN
 					UPDATE tblCRMHubspotConfig SET strHsTokenUrl = 'https://api.hubapi.com/oauth/v1/token'
 				END
 
-			IF NOT EXISTS(SELECT strHsApiUrl FROM tblCRMHubspotConfig)
+			IF (SELECT strHsApiUrl FROM tblCRMHubspotConfig) IS NULL
 				BEGIN
 					UPDATE tblCRMHubspotConfig SET strHsApiUrl = 'https://api.hubapi.com'
 				END
 
-			IF NOT EXISTS(SELECT strHsi21RedirectUrl FROM tblCRMHubspotConfig)
+			IF (SELECT strHsi21RedirectUrl FROM tblCRMHubspotConfig) IS NULL
 				BEGIN
 					UPDATE tblCRMHubspotConfig SET strHsi21RedirectUrl = 'https://helpdesk.irely.com/irelyi21Live/authenticatehubspot'
 				END
 
-			IF NOT EXISTS(SELECT strScopesId FROM tblCRMHubspotConfig)
+			IF (SELECT strScopesId FROM tblCRMHubspotConfig) IS NULL
 				BEGIN
 					UPDATE tblCRMHubspotConfig SET strScopesId = '1,2'
 				END
