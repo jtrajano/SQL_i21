@@ -10,6 +10,7 @@ SELECT  intProjectModuleId			= ProjectModule.intProjectModuleId
 	   ,strProjectManager			= ImplementationLead.strName
 	   ,strDataConversionExpert		= DataConversionExpert.strName
 	   ,strTrainer					= Trainer.strName
+	   ,strCustomerSuperUser		= CustomerSuperUser.strName
 	   ,strContact					= Contact.strName
 	   ,dblQuotedHours				= ISNULL(ProjectTickets.dblQuotedHours, 0)
 	   ,dblActualBillableHours		= ISNULL(ProjectTickets.dblActualHours, 0)
@@ -41,6 +42,8 @@ ON ImplementationLead.intEntityId = ProjectModule.intProjectManagerId
 ON DataConversionExpert.intEntityId = ProjectModule.intDataConversionExpertId
 		LEFT JOIN tblEMEntity Trainer
 ON Trainer.intEntityId = ProjectModule.intTrainerId
+		LEFT JOIN tblEMEntity CustomerSuperUser
+ON CustomerSuperUser.intEntityId = ProjectModule.intCustomerSuperUserId
 		LEFT JOIN vyuHDProjectCustomerContact Contact
 ON Contact.intEntityId = ProjectModule.intContactId
 		OUTER APPLY(
