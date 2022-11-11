@@ -326,6 +326,11 @@ SELECT
 	,[ysnTaxOnly]		
 FROM tblAPVoucherPayableTaxStaging WHERE intVoucherPayableId = @payableId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM @payables)
+BEGIN
+	RAISERROR('Payable is already vouchered.', 16, 1);
+END
+
 EXEC uspAPCreateVoucher @voucherPayables = @payables, @voucherPayableTax = @payableTaxes, @userId = @userId, @createdVouchersId = @bills OUT
 
 SET @billCreated = @bills;
