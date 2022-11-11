@@ -27,12 +27,21 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 -- Start the transaction 
-BEGIN TRANSACTION
 
 IF @userId IS NULL
 BEGIN
 	RAISERROR('User is required', 16, 1);
+	RETURN;
 END
+
+IF NULLIF(@param, '') IS NULL AND NULLIF(@billBatchId,'') IS NULL
+BEGIN
+	RAISERROR('@param is empty. No voucher to post.', 16, 1);
+	RETURN;
+END
+
+-- Start the transaction 
+BEGIN TRANSACTION
 
 --DECLARE @success BIT
 --DECLARE @successfulCount INT
@@ -126,10 +135,39 @@ BEGIN
 	WHERE EXISTS(SELECT * FROM #tmpBillsExclude B WHERE A.intBillId = B.intID)
 END
 
+DECLARE @idForPost As Id;
+--INSERT BILL THAT IS NOT YET IN tblAPBillForPosting
+--DO NOT ALLOW PARALLEL EXECUTION OF POSTING TO INSERT WHILE INSERT IS NOT DONE
+--THE LOCK WILL RELEASE ON COMMIT/ROLLBACK TRANSACTION
+INSERT INTO tblAPBillForPosting WITH(TABLOCKX)(intBillId, ysnIsPost)
+OUTPUT inserted.intBillId INTO @idForPost
+SELECT 
+	A.intBillId 
+	,@post
+FROM #tmpPostBillData A
+LEFT JOIN tblAPBillForPosting B ON A.intBillId = B.intBillId
+WHERE B.intId IS NULL
+
+--GET ALL intBillId WHICH IS ALREADY IN tblAPBillForPosting
+--BUT uspAPPostBill calls again for the same intBillId
+--DELETE THE intBillId ON THE LIST OF FOR POST VOUCHERS
+--THAT IS ALREADY PART OF tblAPBillForPosting
+DELETE A  
+FROM #tmpPostBillData A  
+LEFT JOIN @idForPost B ON A.intBillId = B.intId  
+LEFT JOIN tblAPBill C ON A.intBillId = C.intBillId
+WHERE B.intId IS NULL OR (C.ysnPosted = 1 AND @post = 1) OR (C.ysnPosted = 0 AND @post = 0)
+
 --SET THE UPDATED @billIds
 SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
+
+IF NULLIF(@billIds, '') IS NULL
+BEGIN
+	RAISERROR('Posting/unposting already in process or already posted.', 16, 1);
+	GOTO Post_Rollback
+END
 
 --Update the prepay and debit memo
 EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
@@ -144,7 +182,7 @@ BEGIN
 	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
 
-	IF @transactionType IS NULL
+	IF ISNULL(NULLIF(@transactionType,''),'') = ''
 	BEGIN
 		SET @transactionType = 'Voucher';
 	END
@@ -1569,6 +1607,11 @@ ELSE
 
 		SET @success = 1
 		SET @successfulCount = @totalRecords
+
+		--CLEAN UP TRACKER FOR POSTING
+		DELETE A
+		FROM tblAPBillForPosting A
+
 		RETURN;
 
 	END
@@ -1636,3 +1679,6 @@ Post_Cleanup:
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPostBillData')) DROP TABLE #tmpPostBillData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvalidBillData')) DROP TABLE #tmpInvalidBillData
+--CLEAN UP TRACKER FOR POSTING
+	DELETE A
+	FROM tblAPBillForPosting A
