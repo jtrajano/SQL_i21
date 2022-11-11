@@ -54,52 +54,53 @@ IF @Post = 1
 BEGIN
 	--UPDATE INVOICE FIELDS
     UPDATE ARI						
-    SET ARI.ysnPosted					= 1
-	  , ARI.ysnProcessed				= CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ARI.strType = 'POS' THEN 1 ELSE 0 END
-      , ARI.ysnPaid						= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') OR ARI.dblAmountDue = @ZeroDecimal THEN 1 ELSE 0 END)
-      , ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash')
+    SET 
+		 ARI.ysnPosted					= 1
+		,ARI.ysnProcessed				= CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ARI.strType = 'POS' THEN 1 ELSE 0 END
+		,ARI.ysnPaid					= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') OR ARI.dblAmountDue = @ZeroDecimal THEN 1 ELSE 0 END)
+		,ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash')
 											THEN @ZeroDecimal
 											ELSE (
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
 													THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
-													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
+													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(ARIR.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARIR.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
 												END) 
 											END)
-       , ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash')
+		,ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash')
 											THEN @ZeroDecimal 
 											ELSE (
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
 													THEN ABS(ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal))
-													ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
+													ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(ARIR.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARIR.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
 												END) 
 											END)
-       , ARI.dblDiscount				= @ZeroDecimal
-       , ARI.dblBaseDiscount			= @ZeroDecimal
-       , ARI.dblDiscountAvailable		= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
-       , ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
-       , ARI.dblInterest				= @ZeroDecimal
-       , ARI.dblBaseInterest			= @ZeroDecimal
-       , ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
-       , ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
-       , ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
-       , ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
-       , ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
+		,ARI.dblDiscount				= @ZeroDecimal
+		,ARI.dblBaseDiscount			= @ZeroDecimal
+		,ARI.dblDiscountAvailable		= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
+		,ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
+		,ARI.dblInterest				= @ZeroDecimal
+		,ARI.dblBaseInterest			= @ZeroDecimal
+		,ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+		,ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
+		,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+		,ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
+		,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
+		,ARI.intPeriodId       		    = ACCPERIOD.intGLFiscalYearPeriodId									  
     FROM tblARPostInvoiceHeader PID
     INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId
-	LEFT JOIN (
-		SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
-		FROM tblARPaymentDetail PD
-		INNER JOIN tblARPayment P
-		ON PD.intPaymentId = P.intPaymentId
-	) PROVISIONALPAYMENT ON PROVISIONALPAYMENT.intInvoiceId = ARI.intOriginalInvoiceId AND PROVISIONALPAYMENT.ysnPosted = 1
+	OUTER APPLY (
+		SELECT P.intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod P
+		WHERE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmEndDate) + 1, 0)) = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, ARI.dtmPostDate) + 1, 0))
+	) ACCPERIOD
+	LEFT JOIN tblARInvoice ARIR ON ARIR.intInvoiceId = ARI.intOriginalInvoiceId AND ARIR.ysnPosted = 1
 	WHERE PID.strSessionId = @strSessionId
 
 	UPDATE ARI
@@ -173,43 +174,44 @@ BEGIN
 	--UPDATE INVOICE FIELDS
 	BEGIN
 		UPDATE ARI
-		SET ARI.ysnPosted					= 0
-			, ARI.ysnPaid						= 0
-			, ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash')
+		SET 
+			 ARI.ysnPosted					= 0
+			,ARI.ysnPaid					= 0
+			,ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash')
 												THEN @ZeroDecimal
 												ELSE (
 													CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 													THEN 
 														CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
 														THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
-														ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
+														ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(ARIR.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARIR.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 														END
 													ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
 													END) 
 												END)
-			, ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash')
+			,ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash')
 												THEN @ZeroDecimal 
 												ELSE (
 													CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 													THEN 
 														CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
 														THEN ABS(ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal))
-														ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
+														ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(ARIR.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARIR.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
 														END
 													ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
 													END) 
 												END)
-			, ARI.dblDiscount				= @ZeroDecimal
-			, ARI.dblBaseDiscount			= @ZeroDecimal
-			, ARI.dblDiscountAvailable		= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
-			, ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
-			, ARI.dblInterest				= @ZeroDecimal
-			, ARI.dblBaseInterest			= @ZeroDecimal
-			, ARI.dblPayment				= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END
-			, ARI.dblBasePayment			= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END
-			, ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
-			, ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
-			, ARI.intPeriodId				= NULL
+			,ARI.dblDiscount				= @ZeroDecimal
+			,ARI.dblBaseDiscount			= @ZeroDecimal
+			,ARI.dblDiscountAvailable		= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
+			,ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
+			,ARI.dblInterest				= @ZeroDecimal
+			,ARI.dblBaseInterest			= @ZeroDecimal
+			,ARI.dblPayment					= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END
+			,ARI.dblBasePayment				= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END
+			,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
+			,ARI.intPeriodId				= NULL
 		FROM tblARPostInvoiceHeader PID
 		INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId 					
 		CROSS APPLY (
@@ -217,12 +219,7 @@ BEGIN
 			FROM tblARPrepaidAndCredit 
 			WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1
 		) PPC
-		LEFT OUTER JOIN (
-			SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
-			FROM	tblARPaymentDetail PD
-			INNER JOIN tblARPayment P
-			ON PD.intPaymentId = P.intPaymentId
-		) PROVISIONALPAYMENT ON PROVISIONALPAYMENT.intInvoiceId = ARI.intOriginalInvoiceId AND PROVISIONALPAYMENT.ysnPosted = 1
+		LEFT OUTER JOIN tblARInvoice ARIR ON ARIR.intInvoiceId = ARI.intOriginalInvoiceId AND ARIR.ysnPosted = 1
 		WHERE PID.strSessionId = @strSessionId
 	END
 																
