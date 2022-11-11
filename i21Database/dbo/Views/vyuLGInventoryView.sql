@@ -54,6 +54,9 @@ FROM (
 		,strContainerNumber = Shipment.strContainerNumber
 		,strMarks = Shipment.strMarks
 		,strLotNumber = '' COLLATE Latin1_General_CI_AS
+		,strLotAlias = '' COLLATE Latin1_General_CI_AS
+		,strWarrantNo = '' COLLATE Latin1_General_CI_AS
+		,strWarrantStatus = '' COLLATE Latin1_General_CI_AS
 		,strWarehouse = Shipment.strSubLocationName
 		,strLocationName = Shipment.strLocationName
 		,strCondition = '' COLLATE Latin1_General_CI_AS
@@ -136,6 +139,9 @@ FROM (
 		,strContainerNumber = Spot.strContainerNumber
 		,strMarks = Spot.strMarkings
 		,strLotNumber = Spot.strLotNumber
+		,strLotAlias = Spot.strLotAlias
+		,strWarrantNo = Spot.strWarrantNo
+		,strWarrantStatus = Spot.strWarrantStatus
 		,strWarehouse = Spot.strSubLocationName
 		,strLocationName = Spot.strLocationName
 		,strCondition = Spot.strCondition
@@ -215,6 +221,9 @@ FROM (
 		,strContainerNumber = LC.strContainerNumber
 		,strMarks = LC.strMarks
 		,strLotNumber = LC.strLotNumber
+		,strLotAlias = '' COLLATE Latin1_General_CI_AS
+		,strWarrantNo = '' COLLATE Latin1_General_CI_AS
+		,strWarrantStatus = '' COLLATE Latin1_General_CI_AS
 		,strWarehouse = '' COLLATE Latin1_General_CI_AS
 		,strLocationName = '' COLLATE Latin1_General_CI_AS
 		,strCondition = '' COLLATE Latin1_General_CI_AS
@@ -337,6 +346,9 @@ FROM (
 		,strContainerNumber = NULL
 		,strMarks = NULL
 		,strLotNumber = NULL
+		,strLotAlias = NULL
+		,strWarrantNo = NULL
+		,strWarrantStatus = NULL
 		,strWarehouse = WH.strSubLocationName
 		,strLocationName = WHU.strName
 		,strCondition = '' COLLATE Latin1_General_CI_AS
