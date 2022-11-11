@@ -60,7 +60,8 @@ AS
 			CD.dblRate,
 			CD.intInvoiceCurrencyId,
 			strInvoiceCurrency = ICU.strCurrency,
-			CD.intCurrencyExchangeRateId
+			CD.intCurrencyExchangeRateId,
+			strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
