@@ -208,8 +208,6 @@ SELECT
 	,intProfitCenter					= CLOC.intProfitCenter
 	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE.strType = 'Tax Adjustment' AND RELATEDINVOICE.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,strRelatedInvoiceNumber			= RELATEDINVOICE.strInvoiceNumber
-	,dblPercentage						= INV.dblPercentage
-	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
