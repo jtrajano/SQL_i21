@@ -1405,4 +1405,23 @@ INNER JOIN tblTRSupplyPoint SP WITH (NOLOCK) ON LR.intSupplyPointId = SP.intSupp
 WHERE ID.strSessionId = @strSessionId
   AND DH.strDestination = 'Customer'
 
+UPDATE ARPIH
+SET dblBaseInvoiceTotal = ARPID.dblBaseTotal
+FROM tblARPostInvoiceHeader ARPIH
+INNER JOIN (
+    SELECT
+         intInvoiceId = intInvoiceId
+        ,dblBaseTotal = SUM(dblBaseTotal) + SUM(dblBaseTax)
+    FROM tblARPostInvoiceDetail
+    WHERE strSessionId = @strSessionId
+    GROUP BY intInvoiceId
+) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
+WHERE strSessionId = @strSessionId
+
+UPDATE ARPID
+SET dblBaseInvoiceTotal = ARPIH.dblBaseInvoiceTotal
+FROM tblARPostInvoiceDetail ARPID
+INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId AND ARPID.strSessionId = ARPIH.strSessionId
+WHERE ARPID.strSessionId = @strSessionId
+
 RETURN 1
