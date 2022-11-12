@@ -62,6 +62,18 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+
+		--CM Voiding Validation
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT C.strText,
+				'Payable',
+				A.strPaymentRecordNum,
+				A.intPaymentId
+		FROM    tblAPPayment A INNER JOIN tblCMBankTransaction B
+					ON A.strPaymentRecordNum = B.strTransactionId
+					AND intPaymentId IN (SELECT intId FROM @paymentIds)
+				CROSS APPLY dbo.fnGetBankTransactionReversalErrors(B.intTransactionId) C
+				
 		--DO NOT ALLOW TO UNPOST/VOID IF IT IS ALREADY APPLIED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
