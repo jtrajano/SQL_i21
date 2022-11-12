@@ -293,14 +293,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= CASE WHEN @ysnMultiCurrency = 0 
-										THEN B.totalDepre 
-										ELSE 
-											CASE WHEN B.totalForeignDepre > 0 
-												THEN ROUND((B.totalForeignDepre * @dblRate), 2) 
-												ELSE B.totalDepre 
-											END 
-										END
+			,[dblDebit]				= B.totalDepre
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE B.totalForeignDepre END
 			,[dblCreditForeign]		= 0
@@ -386,8 +379,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 											THEN B.dblAssetValue - B.totalDepre - @dblDispositionAmount ELSE 0 
 											END
 										ELSE
-											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) > 0
-												THEN ROUND(((B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2) 
+											CASE WHEN (B.dblAssetValue - (B.totalDepre / @dblRate) - @dblDispositionAmount) > 0
+												THEN ROUND(((B.dblAssetValue -(B.totalDepre / @dblRate) - @dblDispositionAmount) * @dblCurrentRate), 2) 
 												ELSE 0
 										END
 									  END
@@ -397,8 +390,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 											THEN ABS(B.dblAssetValue - B.totalDepre - @dblDispositionAmount) ELSE 0 
 											END
 										ELSE
-											CASE WHEN (B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) < 0
-												THEN ROUND((ABS(B.dblAssetValue - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2)
+											CASE WHEN (B.dblAssetValue - (B.totalDepre / @dblRate) - @dblDispositionAmount) < 0
+												THEN ROUND((ABS(B.dblAssetValue - (B.totalDepre / @dblRate) - @dblDispositionAmount) * @dblCurrentRate), 2)
 												ELSE 0
 										END
 									  END
@@ -502,14 +495,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= CASE WHEN ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) > 0
+			,[dblDebit]				= CASE WHEN ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND(((B.totalDepre / @dblRate) * (@dblRate - @dblCurrentRate)), 2) > 0
 										THEN 
-											ROUND((B.dblAssetValue* (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2)
+											ROUND((B.dblAssetValue* (@dblRate - @dblCurrentRate)), 2) - ROUND(((B.totalDepre / @dblRate) * (@dblRate - @dblCurrentRate)), 2)
 										ELSE 0
 									  END
-			,[dblCredit]			= CASE WHEN ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) < 0
+			,[dblCredit]			= CASE WHEN ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND(((B.totalDepre / @dblRate) * (@dblRate - @dblCurrentRate)), 2) < 0
 										THEN 
-											ABS(ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2))
+											ABS(ROUND((B.dblAssetValue * (@dblRate - @dblCurrentRate)), 2) - ROUND(((B.totalDepre / @dblRate) * (@dblRate - @dblCurrentRate)), 2))
 										ELSE 0
 									  END
 			,[dblDebitForeign]		= 0
@@ -542,7 +535,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> B.dblAssetValue
 			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
 			AND @dblRate <> @dblCurrentRate AND ((B.dblAssetValue - B.totalForeignDepre) <> 0)
-
 
 		BEGIN TRY
 			EXEC uspGLBookEntries @GLEntries, @ysnPost
