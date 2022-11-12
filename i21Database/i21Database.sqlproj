@@ -8924,14 +8924,14 @@
     <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
   	<Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildCustomerAgingDetailReport.sql" />
-  	<Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
+    <Build Include="dbo\Tables\tblSCScaleStationDefaultByDistribution.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementFormat.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementFormat.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPricingInvoice.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
-
+    <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
