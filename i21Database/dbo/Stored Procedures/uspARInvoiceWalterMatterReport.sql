@@ -151,26 +151,32 @@ SELECT
 	,strEntityLocationRemarks	= EMEL.strRemarks
 	,strFooterComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strFooterComments, ''), 0)
 	,dblTotal					= ARGID.dblTotal
+	,strRelatedInvoiceRemarks	= CASE 
+									WHEN ARIR.strType = 'Provisional' THEN 'Replaces Provisional Invoice: ' + + ARIR.strInvoiceNumber
+									WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.intOriginalInvoiceId, 0) <> 0 THEN 'Cancels Invoice: ' + ARIR.strInvoiceNumber
+									ELSE ''
+								  END
 	,dblAmountDue				= ARI.dblAmountDue
 	,dblShipmentNetWt			= ARGID.dblShipmentNetWt
 	,dblQtyShipped				= ARGID.dblQtyShipped
 	,strUnitMeasure				= ARGID.strUnitMeasure
 	,dblUnitPrice				= ARGID.dblUnitPrice
-	,strProvisionalInvoiceNumber= ISNULL(ARIP.strInvoiceNumber, '')
-	,dtmProvisionalDate			= ARIP.dtmDate
-	,dblProvisionalPayment		= ARIP.dblPayment
+	,strProvisionalInvoiceNumber= ISNULL(ARIR.strInvoiceNumber, '')
+	,dtmProvisionalDate			= ARIR.dtmDate
+	,dblProvisionalPayment		= ARIR.dblPayment
 	,dblProvisionalShipmentNetWt= ARGIDP.dblShipmentNetWt
 	,dblProvisionalQtyShipped	= ARGIDP.dblQtyShipped
 	,strProvisionalUnitMeasure	= ARGIDP.strUnitMeasure
 	,dblProvisionalUnitPrice	= ARGIDP.dblUnitPrice
+	,strRelatedType				= ARIR.strType
 	,strTransactionType			= ARI.strTransactionType
 FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
 INNER JOIN tblEMEntityLocation EMEL WITH (NOLOCK) ON ARI.intShipToLocationId = EMEL.intEntityLocationId
 LEFT JOIN vyuARGetInvoiceDetail ARGID WITH (NOLOCK) ON ARI.intInvoiceId = ARGID.intInvoiceId
-LEFT JOIN tblARInvoice ARIP WITH (NOLOCK) ON ARI.intOriginalInvoiceId = ARIP.intInvoiceId AND ARIP.strType = 'Provisional'
-LEFT JOIN vyuARGetInvoiceDetail ARGIDP WITH (NOLOCK) ON ARIP.intInvoiceId = ARGIDP.intInvoiceId
+LEFT JOIN tblARInvoice ARIR WITH (NOLOCK) ON ARI.intOriginalInvoiceId = ARIR.intInvoiceId
+LEFT JOIN vyuARGetInvoiceDetail ARGIDP WITH (NOLOCK) ON ARIR.intInvoiceId = ARGIDP.intInvoiceId
 LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON ARGID.intContractDetailId = CTCDV.intContractDetailId
 LEFT JOIN tblICCommodity ICC WITH (NOLOCK) ON CTCDV.intCommodityId = ICC.intCommodityId
 LEFT JOIN tblLGLoad LGL WITH (NOLOCK) ON ARGID.strDocumentNumber = LGL.strLoadNumber AND ISNULL(ARGID.intLoadDetailId, 0) <> 0 AND ISNULL(LGL.strBLNumber,'') <> ''
