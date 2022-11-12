@@ -557,6 +557,19 @@ BEGIN
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
+		--PAYMENT CLEARED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Cannot unpost transaction. Payment has been cleared',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND B.ysnClr = 1
+
+
 		--Do not allow to unpost if there is latest payment made
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
