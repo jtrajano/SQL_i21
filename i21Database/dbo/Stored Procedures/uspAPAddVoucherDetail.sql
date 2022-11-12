@@ -289,11 +289,11 @@ SELECT TOP 100 PERCENT
 	,intSubBookId						=	A.intSubBookId
 	,strSubBook							=	A.strSubBook
 	,A.dblPackageBreakups
-	,A.dblNetWeightPerPackage
+	,A.intNumOfPackagesUOM
 	,A.dblNumberOfPackages
-	,A.dblNetWeightPerPackage2
+	,A.intNumOfPackagesUOM2
 	,A.dblNumberOfPackages2
-	,A.dblNetWeightPerPackage3
+	,A.intNumOfPackagesUOM3
 	,A.dblNumberOfPackages3
 	/**/
 	,dtmExpectedDate					=	A.dtmExpectedDate
@@ -527,11 +527,11 @@ INSERT
 	,intBookId							
 	,intSubBookId	
 	,dblPackageBreakups
-	,dblNetWeightPerPackage
+	,intNumOfPackagesUOM1
 	,dblNumberOfPackages
-	,dblNetWeightPerPackage2
+	,intNumOfPackagesUOM2
 	,dblNumberOfPackages2
-	,dblNetWeightPerPackage3
+	,intNumOfPackagesUOM3
 	,dblNumberOfPackages3
 	/**/
 	,dtmExpectedDate				
@@ -648,11 +648,11 @@ VALUES
 	,intBookId							
 	,intSubBookId		
 	,dblPackageBreakups
-	,dblNetWeightPerPackage
+	,intNumOfPackagesUOM
 	,dblNumberOfPackages
-	,dblNetWeightPerPackage2
+	,intNumOfPackagesUOM2
 	,dblNumberOfPackages2
-	,dblNetWeightPerPackage3
+	,intNumOfPackagesUOM3
 	,dblNumberOfPackages3
 	/**/
 	,dtmExpectedDate
