@@ -128,9 +128,9 @@ INNER JOIN (
 		,APBDT.dblAdjustedTax
     FROM tblAPBillDetailTax APBDT
 	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = APBDT.intTaxGroupId
-    LEFT JOIN tblSMTaxCode STC ON APBDT.intTaxCodeId = STC.intTaxCodeId
-	LEFT JOIN tblGLAccount GL ON STC.intPurchaseTaxAccountId = GL.intAccountId
-    LEFT JOIN tblSMTaxClass SMTC ON APBDT.intTaxClassId = SMTC.intTaxClassId
+    LEFT JOIN tblSMTaxCode STC ON STC.intTaxCodeId = APBDT.intTaxCodeId
+	LEFT JOIN tblGLAccount GL ON GL.intAccountId = APBDT.intAccountId
+    LEFT JOIN tblSMTaxClass SMTC ON SMTC.intTaxClassId = APBDT.intTaxClassId
 	WHERE APBDT.ysnCheckOffTax = 0
 ) RT ON APBD.intBillDetailId = RT.intBillDetailId
 LEFT OUTER JOIN tblSMTaxGroup SMTG ON ISNULL(APBD.intTaxGroupId, RT.intTaxGroupId) = SMTG.intTaxGroupId
