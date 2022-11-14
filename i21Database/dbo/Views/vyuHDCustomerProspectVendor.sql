@@ -6,11 +6,8 @@
 			,strName
 			,strType
 			,ysnActive
-			,strLinesOfBusinessId
-			,strLinesOfBusiness
-			,intCustomerSuccessManager
-			,strCustomerSuccessManager
-
+				,strLinesOfBusinessId
+				,strLinesOfBusiness
 		from
 		(
 			select
@@ -37,8 +34,6 @@
 				,ysnActive = a.ysnActive
 				,strLinesOfBusinessId = dbo.fnCRMCoalesceLinesOfBusinessId(a.intEntityId) COLLATE Latin1_General_CI_AS 
 				,strLinesOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(a.intEntityId) COLLATE Latin1_General_CI_AS 
-				,intCustomerSuccessManager = Customer.intCustomerSuccessManager
-				,strCustomerSuccessManager = CustomerSuccessManager.strName
 			from
 				tblEMEntity a
 				left join tblEMEntityType d on d.intEntityId = a.intEntityId and d.strType = 'Customer'
@@ -47,8 +42,6 @@
 				left join tblEMEntityType g on g.intEntityId = a.intEntityId and g.strType = 'Competitor'
 				left join tblEMEntityType h on h.intEntityId = a.intEntityId and h.strType = 'Partner'
 				left join tblEMEntityType i on i.intEntityId = a.intEntityId and i.strType = 'Employee'
-				left join tblARCustomer   Customer on Customer.intEntityId = a.intEntityId
-				left join tblEMEntity CustomerSuccessManager on CustomerSuccessManager.intEntityId = Customer.intCustomerSuccessManager
 			where
 				a.intEntityId in (select b.[intEntityId] from tblAPVendor b union select c.[intEntityId] from tblARCustomer c)
 		) as result
