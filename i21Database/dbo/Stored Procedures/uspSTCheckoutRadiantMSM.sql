@@ -164,6 +164,8 @@ BEGIN
 						ON sto.strRegisterMop = ISNULL(chk.strMiscellaneousSummarySubCodeModifier, '') COLLATE DATABASE_DEFAULT
 					AND sto.intPaymentOptionId = @intCustomerMopId
 					WHERE intCheckoutId = @intCheckoutId 
+						AND chk.strMiscellaneousSummaryCode = '19' 
+						AND chk.strMiscellaneousSummarySubCode = '1'
 						AND sto.intStoreId = @intStoreId
 				-- ======================================================================================================================
 				-- [END] - UPDATE tblSTCheckoutHeader dblCustomerChargeMOP
