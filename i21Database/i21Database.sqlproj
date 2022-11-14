@@ -1354,6 +1354,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageContractHeader_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessContractHeader_EK.sql" />
     <Build Include="dbo\Views\vyuQMCatalogueOverview.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateEmail_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

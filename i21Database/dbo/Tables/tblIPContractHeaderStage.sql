@@ -1,5 +1,6 @@
 ﻿CREATE TABLE tblIPContractHeaderStage (
 	intContractHeaderStageId INT IDENTITY(1, 1)
+	,intDocNo INT
 	,strSender NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strContractNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmContractDate DATETIME
