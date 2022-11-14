@@ -7,7 +7,11 @@ SELECT
       ,chk.[intShiftNo]  
       ,chk.[strCheckoutType]  
       ,chk.[strManagersName]  
-      ,chk.[strManagersPassword]
+      ,[strManagersPassword] = CASE
+					WHEN (chk.[strManagersPassword]  IS NOT NULL AND chk.[strManagersPassword]  != '')
+						THEN dbo.fnAESDecryptASym(chk.[strManagersPassword])
+					ELSE NULL
+				    END COLLATE Latin1_General_CI_AS
       ,chk.[dtmShiftDateForImport]  
       ,chk.[dtmShiftClosedDate]  
       ,chk.[strCheckoutCloseDate]  
@@ -198,7 +202,9 @@ SELECT
    ,ysnStoreManager = vst.ysnIsUserStoreManager  
    ,ysnStopCondition = chk.ysnStopCondition  
       ,dblEditableAggregateMeterReadingsForDollars = chk.dblEditableAggregateMeterReadingsForDollars  
-      ,dblEditableOutsideFuelDiscount = chk.dblEditableOutsideFuelDiscount  
+      ,dblEditableOutsideFuelDiscount = chk.dblEditableOutsideFuelDiscount 
+      ,dblEditableInsideFuelDiscount = chk.dblEditableInsideFuelDiscount  
+	  ,dblFuelDeposit = chk.dblFuelDeposit
       ,ysnConsMeterReadingsForDollars = st.ysnConsMeterReadingsForDollars  
       ,ysnConsAddOutsideFuelDiscounts = st.ysnConsAddOutsideFuelDiscounts  
       ,dblTotalAmountOfDepositablePaymentMethods = dbo.fnSTTotalAmountOfDepositablePaymentMethods(chk.intCheckoutId)  
@@ -207,6 +213,7 @@ SELECT
       ,chk.[intConcurrencyId]    
       ,st.ysnConsignmentStore  
 	  ,chk.[dblCustomerChargeMOP]  
+	  ,ISNULL(Inv.strInvoiceNumber,'---') AS strInvoiceNumber
 FROM tblSTCheckoutHeader chk  
 INNER JOIN vyuSTStoreOnUserRole vst  
  ON chk.intStoreId = vst.intStoreId  
@@ -325,7 +332,10 @@ GROUP BY
    ,chk.intEntityId  
    ,chk.dblEditableAggregateMeterReadingsForDollars  
    ,chk.dblEditableOutsideFuelDiscount  
+   ,chk.dblEditableInsideFuelDiscount 
+   ,chk.dblFuelDeposit 
       ,st.ysnConsMeterReadingsForDollars  
       ,st.ysnConsAddOutsideFuelDiscounts  
       ,st.ysnConsignmentStore
 	  ,po.dblAmount
+	  ,Inv.strInvoiceNumber

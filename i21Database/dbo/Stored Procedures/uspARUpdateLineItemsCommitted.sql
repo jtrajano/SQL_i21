@@ -34,7 +34,7 @@ BEGIN
 	--SO shipped
 	SELECT
 		[intItemId]					=	ARID.[intItemId]
-		,[intItemLocationId]		=	ICGIS.[intItemLocationId]
+		,[intItemLocationId]		=	IL.[intItemLocationId]
 		,[intItemUOMId]				=	SOTD.[intItemUOMId]
 		,[dtmDate]					=	ARI.[dtmDate]
 		,[dblQty]					=	(CASE
@@ -52,7 +52,7 @@ BEGIN
 												dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOTD.intItemUOMId, ARID.dblQtyShipped)
 										END)
 		,[dblUOMQty]				=	ICIUOM.[dblUnitQty]
-		,[dblCost]					=	ICGIS.[dblLastCost]
+		,[dblCost]					=	IPP.[dblLastCost]
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	ARID.[dblPrice]
 		,[intCurrencyId]			=	ARI.[intCurrencyId]
@@ -64,26 +64,15 @@ BEGIN
 		,[intLotId]					=	ARID.[intLotId]
 		,[intSubLocationId]			=	SOTD.[intSubLocationId]
 		,[intStorageLocationId]		=	SOTD.[intStorageLocationId]
-	FROM 
-		(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [intSalesOrderDetailId], [dblPrice], [intInventoryShipmentItemId], [dblQtyOrdered], [dblQtyShipped], [intLotId], [intItemUOMId], [intLoadDetailId] FROM tblARInvoiceDetail WITH(NOLOCK)) ARID
-	INNER JOIN
-		(SELECT [intInvoiceId], [strInvoiceNumber], [intCurrencyId], [dtmDate], [intCompanyLocationId], [strTransactionType], [intTransactionId] FROM tblARInvoice  WITH(NOLOCK)) ARI
-			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	INNER JOIN
-		(SELECT [intSalesOrderDetailId], [intItemId], [intSubLocationId], [intItemUOMId], [intStorageLocationId], [dblQtyOrdered], [dblQtyShipped] FROM tblSOSalesOrderDetail WITH(NOLOCK)) SOTD
-			ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
-	INNER JOIN
-		(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NOLOCK)) ICIUOM 
-			ON ICIUOM.[intItemUOMId] = SOTD.[intItemUOMId]	
-	LEFT OUTER JOIN
-		(SELECT [intLocationId], [intItemId], [dblLastCost], [intItemLocationId] FROM vyuICGetItemStock WITH(NOLOCK)) ICGIS
-			ON SOTD.[intItemId] = ICGIS.[intItemId] 
-			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId]
-	INNER JOIN
-		@InvoiceIds II
-			ON ARI.[intInvoiceId]  = II.[intHeaderId] 
-	WHERE 
-		[dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
+	FROM tblARInvoiceDetail ARID WITH(NOLOCK)
+	INNER JOIN tblARInvoice ARI WITH(NOLOCK) ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	INNER JOIN tblSOSalesOrderDetail SOTD WITH(NOLOCK) ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
+	INNER JOIN tblICItemUOM ICIUOM WITH(NOLOCK) ON ICIUOM.[intItemUOMId] = SOTD.[intItemUOMId]
+	INNER JOIN tblICItem ITEM WITH(NOLOCK) ON ARID.intItemId = ITEM.intItemId
+	INNER JOIN tblICItemLocation IL WITH(NOLOCK) ON ITEM.intItemId = IL.intItemId AND ARI.intCompanyLocationId = IL.intLocationId
+	INNER JOIN tblICItemPricing IPP WITH(NOLOCK) ON IPP.intItemId = ITEM.intItemId AND IPP.intItemLocationId = IL.intItemLocationId
+	INNER JOIN @InvoiceIds II ON ARI.[intInvoiceId]  = II.[intHeaderId] 
+	WHERE ITEM.strType = 'Inventory'
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
 		AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
@@ -95,12 +84,12 @@ BEGIN
 	--SO shipped --Component
 	SELECT
 		[intItemId]					=	ARIDC.[intComponentItemId]
-		,[intItemLocationId]		=	ICGIS.[intItemLocationId]
+		,[intItemLocationId]		=	IL.[intItemLocationId]
 		,[intItemUOMId]				=	ARIDC.[intItemUOMId]
 		,[dtmDate]					=	ARI.[dtmDate]
 		,[dblQty]					=	dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped]) * ARIDC.[dblQuantity] 
 		,[dblUOMQty]				=	ARIDC.[dblUnitQuantity] 
-		,[dblCost]					=	ICGIS.[dblLastCost]
+		,[dblCost]					=	IPP.[dblLastCost]
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	ARID.[dblPrice]
 		,[intCurrencyId]			=	ARI.[intCurrencyId]
@@ -112,26 +101,15 @@ BEGIN
 		,[intLotId]					=	ARID.[intLotId]
 		,[intSubLocationId]			=	SOTD.[intSubLocationId]
 		,[intStorageLocationId]		=	SOTD.[intStorageLocationId]
-	FROM 
-		(SELECT [intComponentItemId], [intItemUOMId], [dblQuantity], [dblUnitQuantity], [intInvoiceDetailId] FROM tblARInvoiceDetailComponent WITH (NOLOCK)) ARIDC
-	INNER JOIN 
-		(SELECT [intInvoiceId], [intInvoiceDetailId], [intSalesOrderDetailId], [dblPrice], [intInventoryShipmentItemId], [dblQtyShipped], [intItemUOMId], [intLotId], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-			ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
-	INNER JOIN
-		(SELECT [intInvoiceId], [dtmDate], [intCurrencyId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [intTransactionId] FROM tblARInvoice WITH (NOLOCK)) ARI
-			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	INNER JOIN
-		(SELECT [intSalesOrderDetailId], [intSubLocationId], [intStorageLocationId], [dblQtyOrdered], [intItemUOMId] FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOTD
-			ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
-	LEFT OUTER JOIN
-		(SELECT [intItemId], [intLocationId], [intItemLocationId], [dblLastCost] FROM vyuICGetItemStock WITH (NOLOCK)) ICGIS
-			ON ARIDC.[intComponentItemId] = ICGIS.[intItemId] 
-			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId]
-	INNER JOIN
-		@InvoiceIds II
-			ON ARI.[intInvoiceId]  = II.[intHeaderId]
-	WHERE 
-		[dbo].[fnIsStockTrackingItem](ARIDC.[intComponentItemId]) = 1
+	FROM tblARInvoiceDetailComponent ARIDC WITH (NOLOCK)
+	INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARIDC.[intInvoiceDetailId] = ARID.[intInvoiceDetailId] 
+	INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	INNER JOIN tblSOSalesOrderDetail SOTD WITH (NOLOCK) ON ARID.[intSalesOrderDetailId] = SOTD.[intSalesOrderDetailId] 
+	INNER JOIN tblICItem ITEM WITH(NOLOCK) ON ARIDC.[intComponentItemId] = ITEM.intItemId
+	INNER JOIN tblICItemLocation IL WITH(NOLOCK) ON ITEM.intItemId = IL.intItemId AND ARI.intCompanyLocationId = IL.intLocationId
+	INNER JOIN tblICItemPricing IPP WITH(NOLOCK) ON IPP.intItemId = ITEM.intItemId AND IPP.intItemLocationId = IL.intItemLocationId	
+	INNER JOIN @InvoiceIds II ON ARI.[intInvoiceId]  = II.[intHeaderId]
+	WHERE ITEM.strType = 'Inventory'
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
 		AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 
 		AND ISNULL(ARID.[intLoadDetailId], 0) = 0 
@@ -141,14 +119,9 @@ BEGIN
 				
 		
 	UPDATE I
-		
-	SET
-		I.dblQty = I.dblQty * (CASE WHEN ISNULL(II.[ysnForDelete], 0) = 1 THEN -1 ELSE 1 END)		
-	FROM
-		@items I
-	INNER JOIN
-		@InvoiceIds II
-			ON I.[intTransactionId]  = II.[intHeaderId]
+	SET I.dblQty = I.dblQty * (CASE WHEN ISNULL(II.[ysnForDelete], 0) = 1 THEN -1 ELSE 1 END)		
+	FROM @items I
+	INNER JOIN @InvoiceIds II ON I.[intTransactionId]  = II.[intHeaderId]
 
 	EXEC uspICIncreaseOrderCommitted @items
 	 

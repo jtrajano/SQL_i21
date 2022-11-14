@@ -17,7 +17,9 @@ SELECT     strJournalType ,
            ysnRecurringTemplate,
            fp.strPeriod,
            j.intCompanyLocationId,
-           CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation
+           CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
+           j.intCompanySegmentId,
+           CompanySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegment
    FROM tblGLJournal j
    OUTER APPLY (SELECT  j.strJournalId,
           SUM(ISNULL(d.dblCredit,0.0)) dblCredit,
@@ -27,6 +29,7 @@ SELECT     strJournalType ,
    LEFT JOIN tblSMCurrency C ON C.intCurrencyID = j.intCurrencyId
    LEFT JOIN tblGLFiscalYearPeriod fp ON fp.intGLFiscalYearPeriodId = j.intFiscalPeriodId
    LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = j.intCompanyLocationId
+   LEFT JOIN tblGLAccountSegment CompanySegment ON CompanySegment.intAccountSegmentId = j.intCompanySegmentId
    WHERE  strTransactionType IN ('General Journal','Recurring')
    AND  ISNULL(strSourceType,'') <> 'AA'
 GO

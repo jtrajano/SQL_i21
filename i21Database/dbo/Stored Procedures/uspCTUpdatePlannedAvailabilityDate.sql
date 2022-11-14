@@ -90,8 +90,8 @@ as
 
 		if (@dtmCalculatedPlannedAvailabilityDate <> @dtmCurrentPlannedAvailabilityDate)
 		begin
-			
-			select top 1 @intUserId = intEntityId from tblEMEntityCredential where lower(rtrim(ltrim(strUserName))) = 'irelyadmin';
+			SELECT TOP 1 @intUserId = intEntityId FROM tblSMUserSecurity WHERE ysnAdmin = 1
+			--select top 1 @intUserId = intEntityId from tblEMEntityCredential where lower(rtrim(ltrim(strUserName))) = 'irelyadmin';
 
 			update
 				tblCTContractDetail

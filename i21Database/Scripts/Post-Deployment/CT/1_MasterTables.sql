@@ -328,7 +328,7 @@ GO
 GO
 IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 4)
 BEGIN
-	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	 INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
 	SELECT 4,'Re-Open',1	
 END
 GO
@@ -661,6 +661,17 @@ BEGIN
 END
 GO
 
+
+
+GO
+IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'intGardenMarkId' AND strType = '2.Sequence')
+BEGIN
+    INSERT INTO tblCTAmendmentApproval(strDataIndex,strDataField,intConcurrencyId,strType)
+    SELECT 'intGardenMarkId','Garden',1,'2.Sequence'
+END
+GO
+
+
 GO
 IF NOT EXISTS(select * from tblCTAmendmentApproval WHERE strDataIndex = 'intSubBookId' AND strType = '2.Sequence')
 BEGIN
@@ -839,14 +850,14 @@ GO
 GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 3)
 BEGIN
-	INSERT INTO tblCTApprovalStatusTF
+	 INSERT INTO tblCTApprovalStatusTF
 	select 3, 'Rejected', 1
 END
 GO
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
 BEGIN
-	INSERT INTO tblCTApprovalStatusTF
+	 INSERT INTO tblCTApprovalStatusTF
 	select 4, 'Cancelled', 1
 END
 ELSE 

@@ -90,6 +90,7 @@ SELECT CH.intContractHeaderId
 	, CH.ysnQuantityAtHeaderLevel
 	, CH.intProductTypeId
 	, strHeaderProductType = CA.strDescription
+	, CH.intCompanyLocationId
 FROM tblCTContractHeader				CH	WITH (NOLOCK)
 JOIN tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=	CH.intContractTypeId
 JOIN tblEMEntity						EY	WITH (NOLOCK) ON	EY.intEntityId						=	CH.intEntityId
@@ -103,7 +104,7 @@ LEFT JOIN tblICCommodityUnitMeasure		CD	WITH (NOLOCK) ON	CD.intCommodityId					=
 LEFT JOIN tblICUnitMeasure				U1	WITH (NOLOCK) ON	U1.intUnitMeasureId					=	CS.intUnitMeasureId
 LEFT JOIN tblICCommodityUnitMeasure		CM	WITH (NOLOCK) ON	CM.intCommodityUnitMeasureId		=	CH.intCommodityUOMId
 LEFT JOIN tblICCommodityAttribute		CA	WITH (NOLOCK) ON	CA.intCommodityAttributeId			=	CH.intProductTypeId
-cross apply (
+outer apply (
 	select
 		cd.intContractHeaderId
 		, dblTotalBalance = SUM(F.dblBalance)

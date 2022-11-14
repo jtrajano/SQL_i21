@@ -85,11 +85,11 @@ BEGIN
 			DECLARE @strCreditCardConvenienceFee NVARCHAR(100) = NULL
 				   ,@intPaymentsLocationId INT = NULL
 
-			SELECT @intPaymentsLocationId = intPaymentsLocationId,
-				   @strCreditCardConvenienceFee = strCreditCardConvenienceFee
-			FROM tblSMCompanyPreference
+			SELECT TOP 1 @intPaymentsLocationId = intPaymentsLocationId
+				   	   , @strCreditCardConvenienceFee = strCreditCardConvenienceFee
+			FROM tblARCompanyPreference
 
-			IF @ysnScheduledPayment = 1 AND @strCreditCardNumber IS NULL
+			IF ISNULL(@intEntityCardInfoId, 0) <> 0
 				SELECT @strCreditCardNumber = strCreditCardNumber FROM tblEMEntityCardInformation WHERE intEntityCardInfoId = @intEntityCardInfoId
 
 			IF @intPaymentsLocationId IS NOT NULL
@@ -210,7 +210,7 @@ BEGIN
 				, intAccountId					= INVOICE.intAccountId
 				, intBankAccountId				= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0) OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN @intBankAccountId ELSE NULL END
 				, dblAmountPaid					= ISNULL(@dblTotalPayment, 0)
-				, ysnPost						= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND @strPaymentMethod <> 'ACH') OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN 1 ELSE 0 END
+				, ysnPost						= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND @strPaymentMethod <> 'ACH') OR (ISNULL(@ysnScheduledPayment, 0) = 0 AND ISNULL(@intEntityCardInfoId, 0) = 0)THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
 				, intInvoiceId					= INVOICE.intInvoiceId

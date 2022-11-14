@@ -2781,7 +2781,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intEntityCustomerId =   (Select intEntityId from tblARCustomer  where strCustomerNumber  = @customer_id)
+				SET @intEntityCustomerId =   (Select TOP 1 intEntityId from tblARCustomer  where strCustomerNumber  = @customer_id)
 			END
 		END
 
@@ -2805,7 +2805,26 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intCustomerLocationId = (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE strLocationName = @customer_location and intEntityId=@intEntityCustomerId)
+				SET @intCustomerLocationId = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE strLocationName = @customer_location and intEntityId=@intEntityCustomerId)
+			END
+		END
+
+		IF(@price_basis = '''')
+		BEGIN
+			SET @strPriceBasis = NULL
+		END
+		ELSE
+		BEGIN
+			IF (@price_basis NOT IN (''X'', ''F'', ''C'', ''A'', ''S'', ''M'', ''R'', ''V'', ''T'', ''L'', ''O''))
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage
+					= @ValidationMessage + '' '' + ''price_basis : '' + @price_basis
+						+ '' is not Exist''
+			END
+			ELSE
+			BEGIN
+				SET @strPriceBasis = @price_basis
 			END
 		END
 
@@ -2830,7 +2849,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intEntityVendorId =   (Select intEntityId from tblAPVendor  where strVendorId  = @origin_vendor_no)
+				SET @intEntityVendorId =   (Select TOP 1 intEntityId from tblAPVendor  where strVendorId  = @origin_vendor_no)
 			END
 		END
 
@@ -2855,7 +2874,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-					SET @intRackLocationId =   (Select intCompanyLocationId from tblSMCompanyLocation  where  strLocationNumber = @origin_vendor_location)
+					SET @intRackLocationId =   (Select TOP 1 intCompanyLocationId from tblSMCompanyLocation  where  strLocationNumber = @origin_vendor_location)
 			END
 		END
 
@@ -2873,7 +2892,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intItemId =   (Select intItemId from tblICItem  where  strItemNo = @item_no)
+				SET @intItemId =   (Select TOP 1 intItemId from tblICItem  where  strItemNo = @item_no)
 			END
 		END
 
@@ -2897,7 +2916,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intCategoryId =  (Select intCategoryId from tblICCategory  where  strCategoryCode = @item_category)
+				SET @intCategoryId =  (Select TOP 1 intCategoryId from tblICCategory  where  strCategoryCode = @item_category)
 			END
 		END
 
@@ -2940,7 +2959,7 @@ UPDATE tblSMCSVDynamicImport SET
 
 		IF(@end_date = '''')
 		BEGIN
-			SET @IsValid = 1
+			SET @end_date = NULL
 		END
 		ELSE
 		BEGIN
@@ -2976,7 +2995,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE 
 			BEGIN
-				SET @intRackVendorId =  (Select intEntityId from tblAPVendor  where  strVendorId = @fixed_rack_vendor_no)
+				SET @intRackVendorId =  (Select TOP 1 intEntityId from tblAPVendor  where  strVendorId = @fixed_rack_vendor_no)
 			END
 		END
 
@@ -3001,7 +3020,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intRackItemId =  (Select intItemId from tblICItem  where  strItemNo = @fixed_rack_no)
+				SET @intRackItemId =  (Select TOP 1 intItemId from tblICItem  where  strItemNo = @fixed_rack_no)
 			END
 		END
 
@@ -3026,7 +3045,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intRackLocationId =  (Select intEntityLocationId from tblEMEntityLocation  where  strLocationName = @fixed_rack_vendor_location)
+				SET @intRackLocationId =  (Select TOP 1 intEntityLocationId from tblEMEntityLocation  where  strLocationName = @fixed_rack_vendor_location)
 			END
 		END
 

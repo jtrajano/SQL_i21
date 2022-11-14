@@ -92,7 +92,8 @@ AS
 						dblHeaderAvailable = cd.dblHeaderAvailable,
 						strHeaderProductType = HPT.strDescription,
 						strApprovalStatus = app.strApprovalStatus,
-						strShipVia = SV.strName
+						strShipVia = SV.strName,
+						strValueCurrency = VC.strCurrency
 				FROM	tblCTContractHeader						CH	
 				
 				JOIN	tblEMEntity								EY	ON	EY.intEntityId						=		CH.intEntityId
@@ -141,6 +142,7 @@ AS
 				
 			LEFT	JOIN	tblSMCurrency						CR	ON	CR.intCurrencyID					=		MA.intCurrencyId					
 			LEFT	JOIN	tblSMCurrency						MR	ON	MR.intCurrencyID					=		CR.intMainCurrencyId				
+			LEFT	JOIN	tblSMCurrency						VC	ON	VC.intCurrencyID					=		CH.intValueCurrencyId
 			LEFT	JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId 
 			LEFT	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId					
 			LEFT	JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				
@@ -165,9 +167,8 @@ AS
 
 			Outer Apply(
 				select tr.intRecordId, 
-					   strApprovalStatus =	CASE WHEN tr.strApprovalStatus in ('Waiting for Submit','Waiting for Approval','Approved') THEN  
-												CASE WHEN tr.strApprovalStatus = 'Approved with Modifications' then 'Approved' ELSE tr.strApprovalStatus END
-											ELSE '' END
+					   strApprovalStatus =	CASE WHEN tr.strApprovalStatus in ('Approved with Modifications') THEN  'Approved' 
+												 WHEN tr.strApprovalStatus in ('No Need for Approval') THEN '' ELSE tr.strApprovalStatus END
 				from
 					tblSMScreen sc
 					join tblSMTransaction tr on tr.intScreenId = sc.intScreenId

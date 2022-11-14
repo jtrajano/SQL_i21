@@ -388,9 +388,9 @@ BEGIN TRY
 		BEGIN
 			DECLARE		@AuditLogEntityId INT = 0
 
-			SELECT		@AuditLogEntityId = intEntityId
-			FROM		tblEMEntityCredential
-			WHERE		strUserName = 'irelyadmin'
+			--SELECT		@AuditLogEntityId = intEntityId
+			--FROM		tblEMEntityCredential
+			--WHERE		strUserName = 'irelyadmin'
 
 			IF (ISNULL(@AuditLogEntityId, 0) = 0)
 			BEGIN

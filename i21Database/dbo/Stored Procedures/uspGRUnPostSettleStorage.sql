@@ -167,6 +167,21 @@ BEGIN TRY
 		END
 	END
 
+	--6. Voucher deletion
+	BEGIN
+		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
+		BEGIN
+			SELECT @BillId = intId FROM @billListForDeletion
+			delete from tblCTPriceFixationDetailAPAR where intBillId = @BillId;
+			EXEC uspAPDeleteVoucher 
+				@BillId
+				,@UserId
+				,@callerModule = 1					
+
+			DELETE FROM @billListForDeletion WHERE intId = @BillId
+		END
+	END
+
 	WHILE EXISTS(SELECT 1 FROM @SettleStorages)
 	BEGIN
 		--WE SHOULD CLEAR THE STORAGE HISTORY STAGING TABLE
@@ -612,7 +627,15 @@ BEGIN TRY
 			) CS
 			WHERE intSettleStorageId = @intParentSettleStorageId
 
-			UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
+			--UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
+
+				UPDATE 
+					SETTLE_CONTRACT
+						SET dblUnits = SETTLE_CONTRACT.dblUnits - ABS(CONTRACT_INCREMENT.dblUnits) 
+					FROM tblGRSettleContract SETTLE_CONTRACT			
+					JOIN @tblContractIncrement CONTRACT_INCREMENT
+						ON SETTLE_CONTRACT.intContractDetailId = CONTRACT_INCREMENT.intContractDetailId
+				WHERE intSettleStorageId = @intParentSettleStorageId
 			UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
 		END
 		-- Delete, the storage tickets that does not have units left
@@ -661,19 +684,19 @@ BEGIN TRY
 	END
 
 	--6. Voucher deletion
-	BEGIN
-		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
-		BEGIN
-			SELECT @BillId = intId FROM @billListForDeletion
+	--BEGIN
+	--	WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
+	--	BEGIN
+	--		SELECT @BillId = intId FROM @billListForDeletion
 
-			EXEC uspAPDeleteVoucher 
-				@BillId
-				,@UserId
-				,@callerModule = 1					
+	--		EXEC uspAPDeleteVoucher 
+	--			@BillId
+	--			,@UserId
+	--			,@callerModule = 1					
 
-			DELETE FROM @billListForDeletion WHERE intId = @BillId
-		END
-	END
+	--		DELETE FROM @billListForDeletion WHERE intId = @BillId
+	--	END
+	--END
 
 	SettleStorage_Exit:
 END TRY

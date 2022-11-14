@@ -98,6 +98,7 @@ AS
 			CD.strVendorLotID,
 			CD.strInvoiceNo,
 			CD.strReference,
+			CD.strContractReference,
 			CD.strERPPONumber,
 			CD.strERPItemNumber,
 			CD.strERPBatchNumber,
@@ -334,6 +335,14 @@ AS
 			, CD.intHistoricalRateTypeId
 			, strHistoricalRateType = HRT.strCurrencyExchangeRateType
 			, strVendorLocation = null
+			, CD.dtmEtaPol
+			, CD.dtmEtaPod
+			, GM.strGardenMark
+			, CD.intReasonCodeId
+			, RC.strReasonCode
+			, CD.dblPurchasePrice
+			, CD.dblLandedPrice
+			, CD.dblSalesPrice
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -440,6 +449,8 @@ AS
 	LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
 	LEFT	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	
 	LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId		
+	LEFT	JOIN	tblQMGardenMark					GM	ON	GM.intGardenMarkId = CD.intGardenMarkId
+	LEFT	JOIN	tblCTReasonCode					RC	ON	RC.intReasonCodeId = CD.intReasonCodeId
 
 	LEFT    JOIN	(
 						SELECT	 intPriceFixationId,

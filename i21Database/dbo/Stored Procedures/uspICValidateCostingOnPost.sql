@@ -35,6 +35,9 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strFunctionalCurrencyId NVARCHAR(50)
 		,@intErrorCode AS INT
 		,@strText AS NVARCHAR(2000) 
+		,@strStorageLocationName AS NVARCHAR(2000)
+		,@ysnStorageCategorize AS BIT
+		,@strCategory AS NVARCHAR(2000)
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -348,3 +351,29 @@ BEGIN
 	EXEC uspICRaiseError 80264, @strItemNo;
 	RETURN -80264
 END 
+
+-- Check if the storage location categories match the item category.
+SELECT @strItemNo = NULL, @intItemId = NULL, @ysnStorageCategorize = 0
+SELECT TOP 1 @strItemNo				 = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		   , @intItemId				 = Item.intItemId
+		   , @strStorageLocationName = StorageLocation.strName
+		   , @ysnStorageCategorize   = StorageCategory.ysnCategorize
+		   , @strCategory			 = Category.strCategoryCode
+FROM @ItemsToValidate AS ValidateItem
+INNER JOIN tblICItem AS Item ON ValidateItem.intItemId = Item.intItemId
+INNER JOIN tblICCategory AS Category ON Item.intCategoryId = Category.intCategoryId
+INNER JOIN tblICStorageLocation AS StorageLocation ON ValidateItem.intStorageLocationId = StorageLocation.intStorageLocationId
+OUTER APPLY (SELECT CASE WHEN COUNT(intStorageLocationCategoryId) > 0 THEN 1 ELSE 0 END AS ysnCategorize 
+			 FROM tblICStorageLocationCategory
+			 WHERE intStorageLocationId = ValidateItem.intStorageLocationId) AS StorageCategory
+WHERE Item.intCategoryId NOT IN (SELECT intCategoryId
+							     FROM tblICStorageLocationCategory
+							     WHERE intStorageLocationId = ValidateItem.intStorageLocationId)
+
+
+IF @intItemId IS NOT NUll AND @ysnStorageCategorize = 1
+	BEGIN
+		-- '{Item Category} does not exists on Storage Unit Categories'
+		EXEC uspICRaiseError 80272, @strCategory, @strStorageLocationName
+		RETURN -80272
+	END

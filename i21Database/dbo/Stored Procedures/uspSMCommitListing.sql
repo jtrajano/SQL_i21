@@ -100,7 +100,8 @@ BEGIN TRANSACTION
   
  -- UPDATE Company Setup  
  UPDATE tblSMCompanySetup   
- SET ysnScreenControlListingUpdated = 1  
+ SET ysnScreenControlListingUpdated = 1,
+ ysnTooltipListingUpdated = 0
   
  UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN   
  (   

@@ -2,29 +2,27 @@
 --POPULATE EMPTY VOUCHER AVERAGE EXCHANGE RATE
 UPDATE B
 --SET B.dblAverageExchangeRate = CASE WHEN B.ysnOrigin = 1 THEN 1 ELSE (BD.dblTotalUSD / B.dblTotal) END
-SET B.dblAverageExchangeRate = CASE WHEN B.ysnOrigin = 1 THEN 1 ELSE BD.dblAverageExchangeRate END
+SET B.dblAverageExchangeRate = CASE WHEN B.ysnOrigin = 1 OR B.dblTotal = 0 THEN 1 ELSE ISNULL(BD.dblAverageExchangeRate,1) END
 FROM tblAPBill B
-OUTER APPLY (
-	SELECT COUNT(*) intDetailCount, SUM((dblTotal + dblTax) * dblRate) / SUM((dblTotal + dblTax))  AS dblAverageExchangeRate
-	--SUM((dblTotal + dblTax)) dblTotal, SUM((dblTotal + dblTax) * dblRate) dblTotalUSD
-	FROM tblAPBillDetail
-	WHERE intBillId = B.intBillId
-	
-) BD
-WHERE B.dblTotal <> 0 AND BD.intDetailCount > 0
+LEFT JOIN (
+	SELECT 
+		intBillId,
+		SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax) * dblRate) / SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) AS dblAverageExchangeRate
+	FROM tblAPBillDetail dtl
+	GROUP BY dtl.intBillId
+	HAVING SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) > 0
+) BD ON B.intBillId = BD.intBillId
 
---POPULATE EMPTY VOUCHER AVERAGE EXCHANGE RATE (ARCHIVED)
 UPDATE B
 --SET B.dblAverageExchangeRate = CASE WHEN B.ysnOrigin = 1 THEN 1 ELSE (BD.dblTotalUSD / B.dblTotal) END
-SET B.dblAverageExchangeRate = CASE WHEN B.ysnOrigin = 1 THEN 1 ELSE BD.dblAverageExchangeRate END
+SET B.dblAverageExchangeRate = CASE WHEN B.ysnOrigin = 1 OR B.dblTotal = 0 THEN 1 ELSE ISNULL(BD.dblAverageExchangeRate,1) END
 FROM tblAPBillArchive B
-OUTER APPLY (
-	SELECT COUNT(*) intDetailCount, SUM((dblTotal + dblTax) * dblRate) / SUM((dblTotal + dblTax))  AS dblAverageExchangeRate
-	--SUM((dblTotal + dblTax)) dblTotal, SUM((dblTotal + dblTax) * dblRate) dblTotalUSD
-	FROM tblAPBillDetailArchive
-	WHERE intBillId = B.intBillId
-	
-) BD
-WHERE B.dblTotal <> 0 AND BD.intDetailCount > 0
-
+LEFT JOIN (
+	SELECT 
+		intBillId,
+		SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax) * dblRate) / SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) AS dblAverageExchangeRate
+	FROM tblAPBillDetailArchive dtl
+	GROUP BY dtl.intBillId
+	HAVING SUM((ISNULL(NULLIF(dblTotal,0),1) + dblTax)) > 0
+) BD ON B.intBillId = BD.intBillId
 PRINT N'SUCCESS: POPULATING VOUCHER AVERAGE EXCHANGE RATE'

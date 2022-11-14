@@ -588,6 +588,12 @@ BEGIN TRY
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 171
 
+	--Voucher Prepayment Type
+	UPDATE A
+		SET A.intNumber = @prepaidStartNum
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 20
+
 	UPDATE A
 		SET A.intBillId = B.intBillId
 	FROM @voucherPayablesData A

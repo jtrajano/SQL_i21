@@ -16,6 +16,8 @@ SELECT
 	,dblExchangeRate = ISNULL(Detail.dblExchangeRate, 1)
 	,RateType.strCurrencyExchangeRateType
 	,Header.ysnPosted
+	,GLAccount.intLocationSegmentId
+	,GLAccount.intCompanySegmentId
 	,Detail.intConcurrencyId
 FROM tblCMBankTransactionDetail Detail
 INNER JOIN tblCMBankTransaction Header
@@ -24,6 +26,8 @@ INNER JOIN tblGLAccount Account
 	ON Account.intAccountId = Detail.intGLAccountId
 INNER JOIN tblCMBankAccount BankAccount
 	ON BankAccount.intBankAccountId = Header.intBankAccountId
+INNER JOIN tblGLAccount GLAccount
+	ON GLAccount.intAccountId = Detail.intGLAccountId
 LEFT JOIN tblCMBankTransactionType TransactionType
 	ON TransactionType.intBankTransactionTypeId = Header.intBankTransactionTypeId
 LEFT JOIN tblSMCurrency Currency

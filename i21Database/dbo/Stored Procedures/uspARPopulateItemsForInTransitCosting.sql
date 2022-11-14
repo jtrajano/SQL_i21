@@ -17,7 +17,7 @@ FROM tblICInventoryTransactionType WITH (NOLOCK)
 WHERE [strName] = 'Invoice'
 ORDER BY intTransactionTypeId
 
-INSERT INTO tblARPostItemsForInTransitCosting WITH (TABLOCK)
+INSERT INTO tblARPostItemsForInTransitCosting
 	([intItemId] 
 	,[intItemLocationId] 
 	,[intItemUOMId] 

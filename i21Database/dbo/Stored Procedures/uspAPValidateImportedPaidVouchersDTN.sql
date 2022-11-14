@@ -15,7 +15,9 @@ DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION; 
 
 UPDATE I
-SET I.intEntityVendorId = ISNULL(MD.intEntityVendorId, -1), I.strNotes = CASE WHEN MD.intEntityVendorId IS NULL THEN 'Vendor Mapping not found.' ELSE NULL END
+SET 
+	I.intEntityVendorId = ISNULL(MD.intEntityVendorId, -1), I.strNotes = CASE WHEN MD.intEntityVendorId IS NULL THEN 'Vendor Mapping not found.' ELSE NULL END
+	,I.dblDiscount = ABS(I.dblDiscount)
 FROM tblAPImportPaidVouchersForPayment I
 LEFT JOIN tblGLVendorMapping VM ON VM.intVendorMappingId = I.intEntityVendorId
 LEFT JOIN tblGLVendorMappingDetail MD ON MD.intVendorMappingId = VM.intVendorMappingId AND MD.strMapVendorName = I.strEntityVendorName
@@ -71,9 +73,10 @@ OUTER APPLY	(
 	SELECT *
 	FROM (
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
-		FROM vyuAPBillForImport
-		WHERE intEntityVendorId = A.intEntityVendorId
-			AND ISNULL(strPaymentScheduleNumber, strVendorOrderNumber) = A.strVendorOrderNumber
+		FROM vyuAPBillForImport forImport
+		WHERE forImport.intEntityVendorId = A.intEntityVendorId
+			AND ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber) = A.strVendorOrderNumber
+			AND ISNULL(forImport.dblTotal - forImport.dblTempDiscount, forImport.dblAmountDue) = (A.dblPayment + A.dblDiscount)--Amount of Payment Schedule should be match as well
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B

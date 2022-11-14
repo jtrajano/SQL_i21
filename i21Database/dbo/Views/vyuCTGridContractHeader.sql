@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCTGridContractHeader]
+CREATE VIEW [dbo].[vyuCTGridContractHeader]
 
 AS 
 
@@ -177,7 +177,13 @@ AS
 			CH.intShipViaId,
 			NM.strShipVia,
 			CH.ysnPerpetual,
-			CH.ysnPriceInEffectByEndDateTime
+			CH.ysnPriceInEffectByEndDateTime,
+			CH.strContractBase,
+			CH.dblValue,
+			CH.intValueCurrencyId,
+			NM.strValueCurrency,
+			CH.dtmPeriodStartDate,
+			CH.dtmPeriodEndDate
 
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId

@@ -99,7 +99,9 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -155,6 +157,8 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, Seller.str1099Name
+					, Seller.strFederalTaxId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -173,6 +177,7 @@ BEGIN TRY
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+					LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 				LEFT JOIN (
 					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
 					FROM tblAPBillDetail 
@@ -230,6 +235,10 @@ BEGIN TRY
 					AND (SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 					--AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 					--AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
+					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
+						OR Transporter.intEntityId IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
+					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
+						OR Transporter.intEntityId NOT IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0))	
 				) tblTFTransaction
 		END
 		ELSE
@@ -288,7 +297,9 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -344,6 +355,8 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, Seller.str1099Name
+					, Seller.strFederalTaxId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -361,6 +374,7 @@ BEGIN TRY
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+					LEFT JOIN tblEMEntity AS Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
 				LEFT JOIN (
 					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
 					FROM tblAPBillDetail 
@@ -418,6 +432,10 @@ BEGIN TRY
 					AND (SELECT COUNT(*) FROM tblTFReportingComponentCustomer WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 					--AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
 					--AND (SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
+					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
+						OR Transporter.intEntityId IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
+					AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
+						OR Transporter.intEntityId NOT IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0))	
 				) tblTFTransaction
 		END
 
@@ -541,7 +559,9 @@ BEGIN TRY
 				, dblQtyShipped
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strConsignorName
+				, strConsignorFederalTaxId)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -606,6 +626,8 @@ BEGIN TRY
 				, strContactName
 				, strEmail
 				, strImportVerificationNumber
+				, strConsignorName
+				, REPLACE(strConsignorFederalTaxId, '-', '')
 			FROM @tmpTransaction Trans
 		END
 

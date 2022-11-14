@@ -57,4 +57,8 @@ BEGIN
 	FROM tblARCustomerLicenseModule
 	WHERE intCustomerLicenseInformationId = @intCustomerLicenseInformationId
 
+	INSERT INTO tblSMLicenseSavedFeature([intCustomerLicenseInformationId], [strKey], [strValue], [intConcurrencyId])
+	SELECT @newCustomerLicenseInformationId, [strKey], [strValue], 1
+	FROM tblSMLicenseSavedFeature
+	WHERE intCustomerLicenseInformationId = @intCustomerLicenseInformationId
 END

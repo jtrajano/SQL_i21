@@ -34,9 +34,6 @@ DECLARE	@ARAccount                      INT
        ,@OneDecimal                     DECIMAL(18,6)
        ,@OneHundredDecimal              DECIMAL(18,6)
        ,@Param2                         NVARCHAR(MAX)
-       ,@OverrideCompanySegment         BIT
-       ,@OverrideLocationSegment        BIT
-       ,@OverrideLineOfBusinessSegment  BIT
 
 SET @ZeroDecimal = 0.000000
 SET @OneDecimal = 1.000000
@@ -54,14 +51,8 @@ SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPre
 SET @NewAccountId = (SELECT TOP 1 [intGLAccountId] FROM tblCMBankAccount WHERE [intBankAccountId] = @BankAccountId)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
-SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblSMCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
+SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblARCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
-
-SELECT TOP 1 
-     @OverrideCompanySegment        = ysnOverrideCompanySegment
-    ,@OverrideLocationSegment       = ysnOverrideLocationSegment
-    ,@OverrideLineOfBusinessSegment = ysnOverrideLineOfBusinessSegment
-FROM tblARCompanyPreference
 
 --Header
 INSERT INTO #ARPostPaymentHeader
@@ -177,13 +168,13 @@ SELECT
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
-    ,[intAccountId]                     = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1) AND UNDEPOSITED.intAccountId <> 0 THEN UNDEPOSITED.intAccountId ELSE ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]) END
+    ,[intAccountId]                     = ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId])
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
     ,[intARAccountId]                   = ISNULL(SMCL.[intARAccount], @ARAccount)
     ,[intDiscountAccount]               = ISNULL(SMCL.[intSalesDiscounts], @DiscountAccount)
     ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
     ,[intCFAccountId]                   = @CFAccount
-    ,[intGainLossAccount]               = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1) AND GAINLOSS.intAccountId <> 0 THEN GAINLOSS.intAccountId ELSE @GainLossAccount END
+    ,[intGainLossAccount]               = @GainLossAccount
     ,[intCreditCardFeeAccountId]        = @CreditCardAccountId
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
@@ -267,14 +258,6 @@ LEFT OUTER JOIN (
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
-OUTER APPLY (
-	SELECT TOP 1 intAccountId = intOverrideAccount
-    FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), ISNULL(ISNULL(@NewAccountId, SMCL.[intUndepositedFundsId]), ARP.[intAccountId]), @OverrideCompanySegment, @OverrideLocationSegment, 0)
-) UNDEPOSITED
-OUTER APPLY (
-	SELECT TOP 1 intAccountId = intOverrideAccount
-	FROM dbo.[fnARGetOverrideAccount](ISNULL(SMCL.[intARAccount], @ARAccount), @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-) GAINLOSS
 WHERE
 	NOT EXISTS(SELECT NULL FROM #ARPostPaymentHeader PH WHERE PH.[intTransactionId] = ARP.[intPaymentId])
     AND (
@@ -423,7 +406,7 @@ SELECT
     ,[intEntityId]                      = ARP.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]   = @AllowOtherUserToPost
-    ,[ysnWithinAccountingDate]          = @ZeroBit --ISNULL(dbo.isOpenAccountingDate(ARP.[dtmDatePaid]), @ZeroBit)
+    ,[ysnWithinAccountingDate]          = @ZeroBit
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
     ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
@@ -815,7 +798,7 @@ SELECT
 	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = CAST(ARP.[dtmDatePaid] AS DATE)
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
-    ,[intWriteOffAccountId]             = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1) AND ISNULL(WRITEOFF.intAccountId, 0) <> 0 THEN WRITEOFF.intAccountId ELSE ARP.[intWriteOffAccountId] END
+    ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
     ,[intAccountId]                     = ARP.[intAccountId]
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
     ,[intARAccountId]                   = ARP.[intARAccountId]
@@ -864,7 +847,7 @@ SELECT
     ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
     ,[ysnForgiven]                      = ARI.[ysnForgiven]
 	,[intBillId]                        = NULL
-    ,[intWriteOffAccountDetailId]       = CASE WHEN (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1 OR @OverrideLineOfBusinessSegment = 1) AND ISNULL(WRITEOFFDETAIL.intAccountId, 0) <> 0 THEN WRITEOFFDETAIL.intAccountId ELSE ARPD.[intWriteOffAccountId] END
+    ,[intWriteOffAccountDetailId]       = ARPD.[intWriteOffAccountId]
     ,[strTransactionNumber]             = ARI.[strInvoiceNumber]
     ,[strTransactionType]               = ARI.[strTransactionType]
     ,[strType]                          = ARI.[strType]
@@ -895,14 +878,6 @@ INNER JOIN
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
-OUTER APPLY (
-	SELECT TOP 1 intAccountId = intOverrideAccount
-    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARP.[intWriteOffAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-) WRITEOFF
-OUTER APPLY (
-	SELECT TOP 1 intAccountId = intOverrideAccount
-    FROM dbo.[fnARGetOverrideAccount](ARP.[intARAccountId], ARPD.[intWriteOffAccountId], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-) WRITEOFFDETAIL
 
 INSERT INTO #ARPostPaymentDetail
     ([intTransactionId]

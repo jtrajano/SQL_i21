@@ -378,7 +378,7 @@ BEGIN
 		DECLARE @intInterCompanyVendorId INT
 		DECLARE @strInterCompanyVendorId NVARCHAR(50)
 
-		SELECT @strInterCompanyVendorId = [strInterCompanyVendorId], @intInterCompanyVendorId = [intInterCompanyVendorId] FROM #ARPostInvoiceHeader
+		SELECT @strInterCompanyVendorId = [strInterCompanyVendorId], @intInterCompanyVendorId = [intInterCompanyVendorId] FROM tblARPostInvoiceHeader
 		SELECT @ysnVendorExistQuery = N'SELECT @ysnVendorExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblAPVendor WHERE intEntityId = ''' + CAST(@intInterCompanyVendorId AS NVARCHAR(50)) + ''''
 
 		SET @ysnVendorExistParam = N'@ysnVendorExist int OUTPUT'
@@ -428,7 +428,7 @@ BEGIN
 
 		INSERT INTO #ARInterCompanyItem
 		SELECT DISTINCT PID.strItemNo
-		FROM #ARPostInvoiceDetail PID
+		FROM tblARPostInvoiceDetail PID
 		INNER JOIN tblICItem ICI
 		ON PID.intItemId = ICI.intItemId
 
@@ -493,7 +493,7 @@ BEGIN
 
 		INSERT INTO #ARInterCompanyFreightTerm
 		SELECT DISTINCT SMFT.strFreightTerm
-		FROM #ARPostInvoiceDetail PID
+		FROM tblARPostInvoiceDetail PID
 		INNER JOIN tblSMFreightTerms SMFT
 		ON PID.intFreightTermId = SMFT.intFreightTermId
 
@@ -561,8 +561,9 @@ BEGIN
 		,[strPostingError]		= 'Customer credit limit is either blank or COD! Only Cash Sale transaction is allowed.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I 
-	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId                      
-	WHERE I.[dblCustomerCreditLimit] IS NULL 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblARCustomer CUS ON I.intEntityCustomerId = CUS.intEntityId
+	WHERE CUS.strCreditCode = 'COD'
 	  AND I.[strTransactionType] NOT IN ('Cash', 'Cash Refund')
 	  AND I.[strType] != 'POS'	
 	  AND INV.[ysnValidCreditCode] <> 1
@@ -1654,6 +1655,9 @@ BEGIN
 		, strBatchId
 		, intEntityId
 		, intUserId
+		, intSiteId
+		, intPerformerId
+		, ysnLeaseBilling
 	)
     SELECT intInvoiceId			= PID.intInvoiceId
 		, dtmDate				= PID.dtmDate
@@ -1664,9 +1668,13 @@ BEGIN
 		, strBatchId			= PID.strBatchId
 		, intEntityId			= PID.intEntityId
 		, intUserId				= PID.intUserId
+		, intSiteId				= PID.intSiteId
+		, intPerformerId		= PID.intPerformerId
+		, ysnLeaseBilling		= PID.ysnLeaseBilling
 	FROM tblARPostInvoiceDetail PID 
-	INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
+	INNER JOIN tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID]
 	WHERE PID.strSessionId = @strSessionId
+	  AND PID.intSiteId IS NOT NULL
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
@@ -2787,6 +2795,40 @@ BEGIN
 	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check line of business segment of AR Account
+	SELECT
+		 [intInvoiceId]			= ARPIH.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPIH.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPIH.[strTransactionType]
+		,[intInvoiceDetailId]	= NULL 
+		,[intItemId]			= NULL 
+		,[strBatchId]			= ARPIH.[strBatchId]
+		,[strPostingError]		= 'Unable to find the AR account that matches the line of business. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](ARPIH.[intAccountId], NULL, LOB.intSegmentCodeId, NULL) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	OUTER APPLY (
+		SELECT TOP 1 ysnOverrideARAccountLineOfBusinessSegment
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPIH.[intAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
+	) LOB
+	WHERE ARCP.ysnOverrideARAccountLineOfBusinessSegment = 1
+	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+	AND ARPIH.strSessionId = @strSessionId
 END
 
 IF @Post = @ZeroBit
@@ -2868,7 +2910,7 @@ BEGIN
 		DECLARE @strBillId NVARCHAR(500) = ''
 		DECLARE @strInterCompanyReceiptNumber NVARCHAR(50)
 
-		SELECT @strInterCompanyReceiptNumber = [strReceiptNumber] FROM #ARPostInvoiceHeader
+		SELECT @strInterCompanyReceiptNumber = [strReceiptNumber] FROM tblARPostInvoiceHeader
 		SELECT @ysnVoucherExistQuery = N'SELECT @strBillId = APB.strBillId 
 										 FROM [' + @strDatabaseName + '].[dbo].tblICInventoryReceipt ICIR 
 										 INNER JOIN [' + @strDatabaseName + '].[dbo].tblICInventoryReceiptItem ICIRI 
@@ -2904,7 +2946,7 @@ BEGIN
 				,[strBatchId]			= I.[strBatchId]
 				,[strPostingError]		= 'Unable to unpost. The inventory receipt (' + @strInterCompanyReceiptNumber + ') has a voucher (' + @strBillId + ') in company ' + ISNULL(@strCompanyName, '') + '.'
 				,[strSessionId]			= @strSessionId
-			FROM #ARPostInvoiceHeader I
+			FROM tblARPostInvoiceHeader I
 			WHERE I.ysnInterCompany = 1
 		END
 	END
@@ -3134,6 +3176,9 @@ BEGIN
 		, strBatchId
 		, intEntityId
 		, intUserId
+		, intSiteId
+		, intPerformerId
+		, ysnLeaseBilling
 	)
     SELECT intInvoiceId			= PID.intInvoiceId
 		, dtmDate				= PID.dtmDate
@@ -3144,6 +3189,9 @@ BEGIN
 		, strBatchId			= PID.strBatchId
 		, intEntityId			= PID.intEntityId
 		, intUserId				= PID.intUserId
+		, intSiteId				= PID.intSiteId
+		, intPerformerId		= PID.intPerformerId
+		, ysnLeaseBilling		= PID.ysnLeaseBilling
 	FROM tblARPostInvoiceDetail PID 
 	INNER JOIN tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID]
 	WHERE PID.intSiteId IS NOT NULL

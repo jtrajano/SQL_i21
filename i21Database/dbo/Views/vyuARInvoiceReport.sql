@@ -108,6 +108,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , blbLogo					= CASE WHEN ISNULL(ARPREFERENCE.ysnStretchLogo, 0) = 1 THEN ISNULL(STRETCHEDLOGO.blbLogo, LOGO.blbLogo) ELSE LOGO.blbLogo END
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , intContractSeq			= INVOICEDETAIL.intContractSeq
+	 , strPaymentInfo			= INV.strPaymentInfo
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -148,6 +150,7 @@ LEFT JOIN (
 		 , UOM.strUnitMeasure
 		 , CONTRACTS.dblBalance
 		 , CONTRACTS.strContractNumber
+		 , CONTRACTS.intContractSeq
 		 , TAX.intTaxCodeId
 		 , TAX.dblAdjustedTax
 		 , TAX.strTaxCode
@@ -211,11 +214,13 @@ LEFT JOIN (
 			 , CD.intContractDetailId
 			 , CD.dblBalance
 			 , strContractNumber
+			 , CD.intContractSeq
 		FROM dbo.tblCTContractHeader CH WITH (NOLOCK)
 		LEFT JOIN (
 			SELECT intContractHeaderId
 				 , intContractDetailId
 				 , dblBalance
+				 , intContractSeq
 			FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 	) CONTRACTS ON ID.intContractDetailId = CONTRACTS.intContractDetailId

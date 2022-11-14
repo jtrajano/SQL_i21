@@ -171,15 +171,19 @@ SELECT intCompanyLocationId		= L.intCompanyLocationId
 	 , strUseLocationAddress	= ISNULL(L.strUseLocationAddress, 'No')
 	 , strInvoiceComments		= L.strInvoiceComments
 	 , strFullAddress			= L.strAddress + CHAR(13) + CHAR(10) + ISNULL(ISNULL(L.strCity, ''), '') + ISNULL(', ' + ISNULL(L.strStateProvince, ''), '') + ISNULL(', ' + ISNULL(L.strZipPostalCode, ''), '') + ISNULL(', ' + ISNULL(L.strCountry, ''), '')
+	 , intCompanySegment		= L.intCompanySegment
+	 , strCompanyName			= VCRH.strCompanyName
+	 , strCompanyAddress		= VCRH.strAddress
 INTO #LOCATIONS
 FROM tblSMCompanyLocation L
+LEFT JOIN vyuARCompanyReportHeader VCRH ON L.intCompanyLocationId = VCRH.intCompanyLocationId
 
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE	
 (
    intEntityUserId = @intEntityUserId 
    AND strRequestId = @strRequestId 
-   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil')
 )
 OR		dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) 
 OR		dtmCreated IS NULL
@@ -296,12 +300,16 @@ SELECT
 	 intInvoiceId					= INV.intInvoiceId
 	, intCompanyLocationId			= INV.intCompanyLocationId
 	, intEntityCustomerId			= INV.intEntityCustomerId
-	, strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
-	, strCompanyAddress				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+	, strCompanyName				= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' 
+										WHEN (ISNULL(L.strCompanyName, '') <> '') THEN L.strCompanyName
+										ELSE @strCompanyName END
+	, strCompanyAddress				= CASE WHEN (ISNULL(L.strCompanyAddress, '') <> '') THEN L.strCompanyAddress
+										WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
 										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 										WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
 									END
-	, strCompanyInfo				= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+	, strCompanyInfo				= CASE WHEN (ISNULL(L.strCompanyAddress, '') <> '') THEN L.strCompanyAddress
+										WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
 										WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 										WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
 									END  + CHAR(10) + ISNULL(@strEmail,'')   + CHAR(10) + ISNULL(@strPhone,'')
@@ -1002,4 +1010,4 @@ WHERE intEntityUserId = @intEntityUserId
   AND strRequestId = @strRequestId 
   AND ysnIncludeInvoicePrice = 1
   AND strInvoiceType = 'Transport Delivery'
-  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2')
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil')

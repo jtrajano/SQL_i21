@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[tblSTGenerateVendorRebateHistory]
 	[strProtocol] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strHost] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strUsername] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strPassword] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[strPassword] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intPortNo] [int] NULL,
 	[ysnResubmit] [bit] NULL,
 	[ysnSuccess] [bit] NULL,

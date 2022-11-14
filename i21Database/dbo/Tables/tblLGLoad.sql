@@ -68,6 +68,7 @@
 [strIMONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intForwardingAgentEntityId] INT NULL,
 [strForwardingAgentRef] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[intShipperEntityId] INT NULL,
 [intInsurerEntityId] INT NULL,
 [intInsuranceItemId] INT NULL,
 [strInsurancePolicyRefNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
@@ -211,6 +212,8 @@
 [intTaxLocationId] INT NULL,
 [ysnTaxLocationOverride] BIT NULL,
 
+[intUserLoc] INT NULL,
+
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -236,6 +239,7 @@ CONSTRAINT [FK_tblLGLoad_tblEMEntity_intShippingLineEntityId_intEntityId] FOREIG
 CONSTRAINT [FK_tblLGLoad_tblEMEntity_intForwardingAgentEntityId_intEntityId] FOREIGN KEY ([intForwardingAgentEntityId]) REFERENCES tblEMEntity([intEntityId]),
 CONSTRAINT [FK_tblLGLoad_tblICItem_intInsuranceItemId] FOREIGN KEY ([intInsuranceItemId]) REFERENCES [tblICItem]([intItemId]),
 CONSTRAINT [FK_tblLGLoad_tblSMCurrency_intInsuranceCurrencyId_intCurrencyID] FOREIGN KEY ([intInsuranceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+CONSTRAINT [FK_tblLGLoad_tblEMEntity_intShipperEntityId_intEntityId] FOREIGN KEY ([intShipperEntityId]) REFERENCES tblEMEntity([intEntityId]),
 CONSTRAINT [FK_tblLGLoad_tblEMEntity_intInsurerEntityId_intEntityId] FOREIGN KEY ([intInsurerEntityId]) REFERENCES tblEMEntity([intEntityId]),
 
 CONSTRAINT [FK_tblLGLoad_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),

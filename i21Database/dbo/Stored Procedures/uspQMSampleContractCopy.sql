@@ -243,6 +243,7 @@ BEGIN TRY
 		,dtmValidTo
 		,strPropertyRangeText
 		,dblMinValue
+		,dblPinpointValue
 		,dblMaxValue
 		,dblLowValue
 		,dblHighValue
@@ -282,6 +283,7 @@ BEGIN TRY
 		,dtmValidTo
 		,strPropertyRangeText
 		,dblMinValue
+		,dblPinpointValue
 		,dblMaxValue
 		,dblLowValue
 		,dblHighValue

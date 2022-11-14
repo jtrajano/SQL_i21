@@ -316,6 +316,7 @@ BEGIN
 
 	EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
 								, @intEntityUserId = @intEntityUserId
+								, @strAgingType = 'Summary'
 							
 	--ROLL CREDITS
 	IF(OBJECT_ID('tempdb..#CUSTOMERSWITHCREDITS') IS NOT NULL)

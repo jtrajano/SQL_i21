@@ -230,8 +230,8 @@ BEGIN TRY
 				LEFT JOIN (
 					SELECT SP.intSpecialPriceId
 						, SP.dblDeviation
-						, dblRackPrice = (CASE WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, OriginRack.intSupplyPointId, SP.intItemId)
-											WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, FixedRack.intSupplyPointId, SP.intRackItemId) END)
+						, dblRackPrice = (CASE WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, OriginRack.intSupplyPointId, SP.intItemId, SP.strCostToUse)
+											WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, FixedRack.intSupplyPointId, SP.intRackItemId, SP.strCostToUse) END)
 					FROM tblARCustomerSpecialPrice SP
 					LEFT JOIN vyuTRSupplyPointView OriginRack ON OriginRack.intEntityVendorId = SP.intEntityVendorId
 						AND OriginRack.intEntityLocationId = SP.intEntityLocationId

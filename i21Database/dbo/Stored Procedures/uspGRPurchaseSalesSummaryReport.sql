@@ -62,7 +62,6 @@ BEGIN TRY
 	SELECT TOP 1 @ysnPrintConsolidatedTotals = CONVERT(BIT, [from])
 	FROM @temp_xml_table WHERE [fieldname] = 'ysnPrintConsolidatedTotals'
 
-
 	IF EXISTS (SELECT 1 FROM @temp_xml_table X WHERE [fieldname] = 'strLocationName')
 		INSERT INTO @tblLocationId
 		SELECT Z.intCompanyLocationId FROM @temp_xml_table X
@@ -131,10 +130,15 @@ BEGIN TRY
 			,[dblPurchasePaidAmountSpot]		= ISNULL(PAID_TICKET.dblPurchasePaidAmountSpot, 0) + ISNULL(PAID_STORAGE.dblPurchasePaidAmountSpot, 0)
 
 			-- Adjustments
-			,[dblPurchaseAdjustment]			= 0
+			,[dblPurchaseAdjustment]			= ISNULL(ADJUSTMENT.dblPurchaseAdjustment, 0)
 
-			,[dblPurchaseStorageEarnedDP]		= 0
-			,[dblPurchaseStorageEarnedOS]		= 0
+			,[dblPurchaseStorageEarnedDP]		= STORAGE_EARNED.dblPurchaseStorageEarnedDP
+			,[dblPurchaseStorageEarnedOS]		= STORAGE_EARNED.dblPurchaseStorageEarnedOS
+
+			-- WAP
+			,[dblPurchaseBasisWAPNet]			=	(ISNULL(PAID_TICKET.dblPurchaseBasisTotal, 0) + ISNULL(PAID_STORAGE.dblPurchaseBasisTotal, 0)) / (ISNULL(PAID_TICKET.dblPurchasePaidUnitsNet, 1) + ISNULL(PAID_STORAGE.dblPurchasePaidUnitsNet, 1))
+			,[dblPurchaseWAPGross]				=	(ISNULL(PAID_TICKET.dblPurchasePriceTotal, 0) + ISNULL(PAID_STORAGE.dblPurchasePriceTotal, 0)) / (ISNULL(PAID_TICKET.dblPurchasePaidUnitsGross, 1) + ISNULL(PAID_STORAGE.dblPurchasePaidUnitsGross, 1))
+			,[dblPurchaseWAPNet]				=	(ISNULL(PAID_TICKET.dblPurchasePriceTotal, 0) + ISNULL(PAID_STORAGE.dblPurchasePriceTotal, 0)) / (ISNULL(PAID_TICKET.dblPurchasePaidUnitsNet, 1) + ISNULL(PAID_STORAGE.dblPurchasePaidUnitsNet, 1))
 		FROM MainCTE MC
 		LEFT JOIN (
 			SELECT
@@ -158,11 +162,96 @@ BEGIN TRY
 				AND CS.ysnTransferStorage = 0
 			LEFT JOIN tblGRStorageType ST
 				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			LEFT JOIN tblCTContractDetail CD
+				ON CD.intContractHeaderId = IRI.intContractHeaderId
+				AND CD.intContractDetailId = IRI.intContractDetailId
 			WHERE T.dtmTicketDateTime BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
 			GROUP BY IR.intLocationId, I.intCommodityId
 		) INBOUND
 			ON MC.intCommodityId = INBOUND.intCommodityId
 			AND MC.intCompanyLocationId = INBOUND.intCompanyLocationId
+		LEFT JOIN (
+			SELECT
+				[intCompanyLocationId]			=	IR.intLocationId
+				,[intCommodityId]				=	I.intCommodityId
+				,[dblPurchaseBasisTotal]		=	SUM(TSU.dblUnitBasis * IRI.dblNet)
+			FROM tblSCTicket T
+			INNER JOIN tblICItem I
+				ON I.intItemId = T.intItemId
+			INNER JOIN tblICInventoryReceiptItem IRI
+				ON IRI.intSourceId = T.intTicketId
+				AND T.intItemId = IRI.intItemId
+			INNER JOIN tblICInventoryReceipt IR
+				ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+				AND IR.intSourceType = 1
+			LEFT JOIN tblGRCustomerStorage CS
+				ON CS.intTicketId = T.intTicketId
+				AND CS.ysnTransferStorage = 0
+			LEFT JOIN tblGRStorageType ST
+				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			INNER JOIN tblSCTicketSpotUsed TSU
+				ON TSU.intTicketId = T.intTicketId
+				AND TSU.intEntityId = IR.intEntityVendorId
+			INNER JOIN tblAPBillDetail BD
+				ON BD.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+				AND BD.intItemId = IRI.intItemId
+			INNER JOIN tblAPBill B
+				ON B.intBillId = BD.intBillId
+			INNER JOIN tblAPPaymentDetail PD
+				ON PD.intBillId = B.intBillId
+			INNER JOIN tblAPPayment P
+				ON P.intPaymentId = PD.intPaymentId
+			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
+			GROUP BY IR.intLocationId, I.intCommodityId
+		) WAP_SPOT
+			ON MC.intCommodityId = WAP_SPOT.intCommodityId
+			AND MC.intCompanyLocationId = WAP_SPOT.intCompanyLocationId
+		LEFT JOIN (
+			SELECT
+				[intCompanyLocationId]			=	IR.intLocationId
+				,[intCommodityId]				=	I.intCommodityId
+				,[dblPurchaseBasisTotal]		=	SUM(IRI.dblNet * dbo.fnCalculateQtyBetweenUOM(CD.intBasisUOMId, IRI.intUnitMeasureId, CD.dblBasis))
+			FROM tblSCTicket T
+			INNER JOIN tblICItem I
+				ON I.intItemId = T.intItemId
+			INNER JOIN tblICInventoryReceiptItem IRI
+				ON IRI.intSourceId = T.intTicketId
+				AND T.intItemId = IRI.intItemId
+			INNER JOIN tblICInventoryReceipt IR
+				ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+				AND IR.intSourceType = 1
+			LEFT JOIN tblGRCustomerStorage CS
+				ON CS.intTicketId = T.intTicketId
+				AND CS.ysnTransferStorage = 0
+			LEFT JOIN tblGRStorageType ST
+				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			INNER JOIN tblCTContractDetail CD
+				ON CD.intContractHeaderId = IRI.intContractHeaderId
+				AND CD.intContractDetailId = IRI.intContractDetailId
+			INNER JOIN tblAPBillDetail BD
+				ON BD.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+				AND BD.intItemId = IRI.intItemId
+			INNER JOIN tblAPBill B
+				ON B.intBillId = BD.intBillId
+			INNER JOIN tblAPPaymentDetail PD
+				ON PD.intBillId = B.intBillId
+			INNER JOIN tblAPPayment P
+				ON P.intPaymentId = PD.intPaymentId
+			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
+			GROUP BY IR.intLocationId, I.intCommodityId
+		) WAP_CONTRACT
+			ON MC.intCommodityId = WAP_CONTRACT.intCommodityId
+			AND MC.intCompanyLocationId = WAP_CONTRACT.intCompanyLocationId
 		LEFT JOIN (
 			SELECT
 				[intCompanyLocationId]			=	IT.intToLocationId
@@ -213,6 +302,21 @@ BEGIN TRY
 				,[dblPurchasePaidAmountDP]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 1 THEN BD.dblTotal+ BD.dblTax ELSE 0 END)
 				,[dblPurchasePaidAmountContract]	=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL THEN BD.dblTotal + BD.dblTax ELSE 0 END)
 				,[dblPurchasePaidAmountSpot]		=	SUM(CASE WHEN BD.intContractDetailId IS NULL THEN BD.dblTotal + BD.dblTax ELSE 0 END)
+
+				,[dblPurchaseBasisTotal]			=	SUM(
+															CASE WHEN BD.intContractDetailId IS NOT NULL THEN
+																CASE 
+																	WHEN ISNULL(BD.intUnitOfMeasureId,0) > 0 AND ISNULL(BD.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,BD.intCostUOMId,BD.dblNetWeight) 
+																	ELSE BD.dblNetWeight
+																END
+															ELSE 0 END
+															*
+															CASE WHEN CD.intContractDetailId IS NULL THEN 0 ELSE dbo.fnCalculateQtyBetweenUOM(CD.intBasisUOMId, BD.intUnitOfMeasureId, CD.dblBasis) END
+														)
+				,[dblPurchasePriceTotal]			=	SUM(BD.dblTotal)
+
+				,[dblPurchasePaidUnitsGross]		=	SUM(IRI.dblGross)
+				,[dblPurchasePaidUnitsNet]			=	SUM(IRI.dblNet)
 			FROM tblSCTicket T
 			INNER JOIN tblICItem I
 				ON I.intItemId = T.intItemId
@@ -236,8 +340,14 @@ BEGIN TRY
 				AND CS.ysnTransferStorage = 0
 			LEFT JOIN tblGRStorageType ST
 				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			LEFT JOIN tblCTContractDetail CD
+				ON CD.intContractDetailId = BD.intContractDetailId
 			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
 				AND P.ysnPosted = 1
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
 			GROUP BY IR.intLocationId, I.intCommodityId		
 		) PAID_TICKET
 			ON MC.intCommodityId = PAID_TICKET.intCommodityId
@@ -267,6 +377,21 @@ BEGIN TRY
 				,[dblPurchasePaidAmountDP]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 1 THEN BD.dblTotal+ BD.dblTax ELSE 0 END)
 				,[dblPurchasePaidAmountContract]	=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL THEN BD.dblTotal + BD.dblTax ELSE 0 END)
 				,[dblPurchasePaidAmountSpot]		=	SUM(CASE WHEN BD.intContractDetailId IS NULL THEN BD.dblTotal + BD.dblTax ELSE 0 END)
+
+				,[dblPurchaseBasisTotal]			=	SUM(
+															CASE WHEN BD.intContractDetailId IS NOT NULL THEN
+																CASE 
+																	WHEN ISNULL(BD.intUnitOfMeasureId,0) > 0 AND ISNULL(BD.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,BD.intCostUOMId,BD.dblNetWeight) 
+																	ELSE BD.dblNetWeight
+																END
+															ELSE 0 END
+															*
+															CASE WHEN CD.intContractDetailId IS NULL THEN SS.dblFuturesBasis ELSE dbo.fnCalculateQtyBetweenUOM(CD.intBasisUOMId, BD.intUnitOfMeasureId, CD.dblBasis) END
+														)
+				,[dblPurchasePriceTotal]			=	SUM(BD.dblTotal)
+
+				,[dblPurchasePaidUnitsGross]		=	SUM(SST.dblUnits * (CS.dblGrossQuantity / CS.dblOriginalBalance))
+				,[dblPurchasePaidUnitsNet]			=	SUM(SST.dblUnits)
 			FROM tblGRSettleStorage SS
 			INNER JOIN tblGRSettleStorageTicket SST
 				ON SST.intSettleStorageId = SS.intSettleStorageId
@@ -289,16 +414,72 @@ BEGIN TRY
 			INNER JOIN tblAPPaymentDetail PD
 				ON PD.intBillId = B.intBillId
 			INNER JOIN tblAPPayment P
-				ON P.intPaymentId = PD.intPaymentId			
+				ON P.intPaymentId = PD.intPaymentId
+			LEFT JOIN tblCTContractDetail CD
+				ON CD.intContractDetailId = BD.intContractDetailId
 			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
 				AND ST.ysnDPOwnedType = 0
 				AND P.ysnPosted = 1
 				AND MC.intCommodityId = I.intCommodityId
 				AND MC.intCompanyLocationId = SS.intCompanyLocationId
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE B.intEntityVendorId = intId))
 		) PAID_STORAGE
-		-- OUTER APPLY (
-
-		-- ) STORAGE_EARNED
+		OUTER APPLY (
+			SELECT
+				[dblPurchaseStorageEarnedDP]			=	-SUM(CASE WHEN ST.ysnDPOwnedType = 1 THEN BD.dblTotal ELSE 0 END)
+				,[dblPurchaseStorageEarnedOS]			=	-SUM(CASE WHEN ST.ysnDPOwnedType = 0 THEN BD.dblTotal ELSE 0 END)
+			FROM tblGRSettleStorage SS
+			INNER JOIN tblGRSettleStorageTicket SST
+				ON SST.intSettleStorageId = SS.intSettleStorageId
+			INNER JOIN tblGRCustomerStorage CS
+				ON CS.intCustomerStorageId = SST.intCustomerStorageId
+				AND CS.ysnTransferStorage = 0
+			INNER JOIN tblICItem I
+				ON I.intItemId = CS.intItemId
+			INNER JOIN tblGRStorageType ST
+				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			INNER JOIN tblGRSettleStorageBillDetail SSBD
+				ON SSBD.intSettleStorageId = SS.intSettleStorageId
+			INNER JOIN tblAPBill B
+				ON B.intBillId = SSBD.intBillId
+			INNER JOIN tblAPBillDetail BD
+				ON BD.intBillId = B.intBillId
+				AND BD.intSettleStorageId = SS.intSettleStorageId
+				AND BD.intCustomerStorageId = CS.intCustomerStorageId
+			INNER JOIN tblICItem SC
+				ON SC.strType = 'Other Charge' 
+				AND SC.strCostType = 'Storage Charge'
+				AND SC.intItemId = BD.intItemId
+			INNER JOIN tblAPPaymentDetail PD
+				ON PD.intBillId = B.intBillId
+			INNER JOIN tblAPPayment P
+				ON P.intPaymentId = PD.intPaymentId
+			LEFT JOIN tblCTContractDetail CD
+				ON CD.intContractDetailId = BD.intContractDetailId
+			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND P.ysnPosted = 1
+				AND MC.intCommodityId = I.intCommodityId
+				AND MC.intCompanyLocationId = SS.intCompanyLocationId
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE B.intEntityVendorId = intId))
+		) STORAGE_EARNED
+		OUTER APPLY (
+			SELECT
+				dblPurchaseAdjustment = SUM(ISNULL(SAS.dblAdjustmentAmount, 0))
+			FROM vyuGRSearchAdjustSettlements SAS
+			INNER JOIN tblICItem I2
+				ON I2.intItemId = SAS.intItemId
+			INNER JOIN tblICCommodity C2
+				ON C2.intCommodityId = I2.intCommodityId
+			WHERE MC.intCommodityId = C2.intCommodityId
+				AND MC.intCompanyLocationId = SAS.intCompanyLocationId
+				AND SAS.intTypeId = 1 -- Purchase
+		) ADJUSTMENT
 	),
 	-- SALES CTE
 	SalesCTE AS (
@@ -307,8 +488,8 @@ BEGIN TRY
 			,[intCommodityId]					= MC.intCommodityId
 
 			,[dblSalesGrainTransfer]			= ISNULL(TRANS.dblSalesGrainTransfer, 0)
-			,[dblSalesGrainContract]			= ISNULL(OUTBOUND.dblSalesGrainContract, 0)
-			,[dblSalesGrainSpot]				= ISNULL(OUTBOUND.dblSalesGrainSpot, 0)
+			,[dblSalesGrainContract]			= ISNULL(OUTBOUND.dblSalesGrainContract, 0) + ISNULL(OUTBOUND_D.dblSalesGrainContract, 0)
+			,[dblSalesGrainSpot]				= ISNULL(OUTBOUND.dblSalesGrainSpot, 0) + ISNULL(OUTBOUND_D.dblSalesGrainSpot, 0)
 
 			-- Paid Units
 			,[dblSalesPaidUnitsContract]		= ISNULL(PAID_TICKET.dblSalesPaidUnitsContract, 0)
@@ -319,7 +500,12 @@ BEGIN TRY
 			,[dblSalesPaidAmountSpot]			= ISNULL(PAID_TICKET.dblSalesPaidAmountSpot, 0)
 
 			-- Adjustments
-			,[dblSalesAdjustment]				= 0
+			,[dblSalesAdjustment]				=	ISNULL(ADJUSTMENT.dblSalesAdjustment, 0)
+
+			-- WAP
+			,[dblSalesBasisWAPNet]				=	(ISNULL(WAP_CONTRACT.dblSalesBasisTotal, 0) + ISNULL(WAP_SPOT.dblSalesBasisTotal, 0)) / ISNULL(PAID_TICKET.dblSalesPaidUnitsNet, 1)
+			,[dblSalesWAPGross]					=	(ISNULL(WAP_CONTRACT.dblSalesPriceTotal, 0) + ISNULL(WAP_SPOT.dblSalesPriceTotal, 0)) / ISNULL(PAID_TICKET.dblSalesPaidUnitsGross, 1)
+			,[dblSalesWAPNet]					=	(ISNULL(WAP_CONTRACT.dblSalesPriceTotal, 0) + ISNULL(WAP_SPOT.dblSalesPriceTotal, 0)) / ISNULL(PAID_TICKET.dblSalesPaidUnitsNet, 1)
 		FROM PurchaseCTE MC
 		LEFT JOIN (
 			SELECT
@@ -342,15 +528,115 @@ BEGIN TRY
 				ON CD.intContractHeaderId = SI.intOrderId
 				AND CD.intContractDetailId = SI.intLineNo
 			WHERE T.dtmTicketDateTime BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
-				AND (CD.intMarketZoneId IS NULL
-					OR (CD.intMarketZoneId IS NOT NULL AND CD.intMarketZoneId IN (SELECT intId FROM @tblMarketZoneId)))
-				AND ((EXISTS(SELECT 1 FROM @tblEntityId) AND S.intEntityCustomerId IN (SELECT intId FROM @tblEntityId))
-					OR NOT EXISTS (SELECT 1 FROM @tblEntityId)
-				)
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
 			GROUP BY S.intShipFromLocationId, CO.intCommodityId
 		) OUTBOUND
 			ON MC.intCommodityId = OUTBOUND.intCommodityId
 			AND MC.intCompanyLocationId = OUTBOUND.intCompanyLocationId
+		LEFT JOIN ( -- Destination qty adjustments for the selected period
+			SELECT
+				[intCommodityId]				=	CO.intCommodityId
+				,[intCompanyLocationId]			=	S.intShipFromLocationId
+				,[dblSalesGrainContract]		=	SUM(CASE WHEN CD.intContractDetailId IS NOT NULL THEN SI.dblDestinationQuantity - SI.dblQuantity ELSE 0 END)
+				,[dblSalesGrainSpot]			=	SUM(CASE WHEN CD.intContractDetailId IS NULL THEN SI.dblDestinationQuantity - SI.dblQuantity ELSE 0 END)
+			FROM tblSCTicket T
+			INNER JOIN tblICItem I
+				ON I.intItemId = T.intItemId
+			INNER JOIN tblICCommodity CO
+				ON CO.intCommodityId = I.intCommodityId
+			INNER JOIN tblICInventoryShipmentItem SI
+				ON SI.intSourceId = T.intTicketId
+				AND T.intItemId = SI.intItemId
+			INNER JOIN tblICInventoryShipment S
+				ON S.intInventoryShipmentId = SI.intInventoryShipmentId
+				AND S.intSourceType = 1
+			LEFT JOIN tblCTContractDetail CD
+				ON CD.intContractHeaderId = SI.intOrderId
+				AND CD.intContractDetailId = SI.intLineNo
+			WHERE S.dtmDestinationDate BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+			GROUP BY S.intShipFromLocationId, CO.intCommodityId
+		) OUTBOUND_D
+			ON MC.intCommodityId = OUTBOUND_D.intCommodityId
+			AND MC.intCompanyLocationId = OUTBOUND_D.intCompanyLocationId
+		LEFT JOIN (
+			SELECT
+				[intCommodityId]				=	CO.intCommodityId
+				,[intCompanyLocationId]			=	S.intShipFromLocationId
+				,[dblSalesBasisTotal]			=	SUM(TSU.dblUnitBasis * SI.dblQuantity)
+				,[dblSalesPriceTotal]			=	SUM(PD.dblBaseInvoiceTotal)
+			FROM tblSCTicket T
+			INNER JOIN tblICItem I
+				ON I.intItemId = T.intItemId
+			INNER JOIN tblICCommodity CO
+				ON CO.intCommodityId = I.intCommodityId
+			INNER JOIN tblICInventoryShipmentItem SI
+				ON SI.intSourceId = T.intTicketId
+				AND T.intItemId = SI.intItemId
+			INNER JOIN tblICInventoryShipment S
+				ON S.intInventoryShipmentId = SI.intInventoryShipmentId
+				AND S.intSourceType = 1
+			INNER JOIN tblSCTicketSpotUsed TSU
+				ON TSU.intTicketId = T.intTicketId
+				AND TSU.intEntityId = S.intEntityCustomerId
+			INNER JOIN tblARInvoiceDetail ID
+				ON ID.intInventoryShipmentItemId = SI.intInventoryShipmentItemId
+			INNER JOIN tblARInvoice INV
+				ON INV.intInvoiceId = ID.intInvoiceId
+			INNER JOIN tblARPaymentDetail PD
+				ON PD.intInvoiceId = INV.intInvoiceId
+			INNER JOIN tblARPayment P
+				ON P.intPaymentId = PD.intPaymentId
+			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+			GROUP BY S.intShipFromLocationId, CO.intCommodityId
+		) WAP_SPOT
+			ON MC.intCommodityId = WAP_SPOT.intCommodityId
+			AND MC.intCompanyLocationId = WAP_SPOT.intCompanyLocationId
+		LEFT JOIN (
+			SELECT
+				[intCommodityId]				=	CO.intCommodityId
+				,[intCompanyLocationId]			=	S.intShipFromLocationId
+				,[dblSalesBasisTotal]			=	SUM(SI.dblQuantity * dbo.fnCalculateQtyBetweenUOM(CD.intBasisUOMId, SI.intItemUOMId, CD.dblBasis))
+				,[dblSalesPriceTotal]			=	SUM(PD.dblBaseInvoiceTotal)
+			FROM tblSCTicket T
+			INNER JOIN tblICItem I
+				ON I.intItemId = T.intItemId
+			INNER JOIN tblICCommodity CO
+				ON CO.intCommodityId = I.intCommodityId
+			INNER JOIN tblICInventoryShipmentItem SI
+				ON SI.intSourceId = T.intTicketId
+				AND T.intItemId = SI.intItemId
+			INNER JOIN tblICInventoryShipment S
+				ON S.intInventoryShipmentId = SI.intInventoryShipmentId
+				AND S.intSourceType = 1
+			INNER JOIN tblCTContractDetail CD
+				ON CD.intContractHeaderId = SI.intOrderId
+				AND CD.intContractDetailId = SI.intLineNo
+			INNER JOIN tblARInvoiceDetail ID
+				ON ID.intInventoryShipmentItemId = SI.intInventoryShipmentItemId
+			INNER JOIN tblARInvoice INV
+				ON INV.intInvoiceId = ID.intInvoiceId
+			INNER JOIN tblARPaymentDetail PD
+				ON PD.intInvoiceId = INV.intInvoiceId
+			INNER JOIN tblARPayment P
+				ON P.intPaymentId = PD.intPaymentId
+			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+			GROUP BY S.intShipFromLocationId, CO.intCommodityId
+		) WAP_CONTRACT
+			ON MC.intCommodityId = WAP_CONTRACT.intCommodityId
+			AND MC.intCompanyLocationId = WAP_CONTRACT.intCompanyLocationId
 		LEFT JOIN (
 			SELECT
 				[intCompanyLocationId]			=	IT.intToLocationId
@@ -382,8 +668,11 @@ BEGIN TRY
 				,[dblSalesPaidUnitsContract]		=	SUM(CASE WHEN ID.intContractDetailId IS NOT NULL THEN ID.dblQtyShipped ELSE 0 END)
 				,[dblSalesPaidUnitsSpot]			=	SUM(CASE WHEN ID.intContractDetailId IS NULL THEN ID.dblQtyShipped ELSE 0 END)
 				-- Paid Amounts
-				,[dblSalesPaidAmountContract]	=	SUM(CASE WHEN ID.intContractDetailId IS NOT NULL THEN ID.dblTotal + ID.dblTotalTax ELSE 0 END)
-				,[dblSalesPaidAmountSpot]		=	SUM(CASE WHEN ID.intContractDetailId IS NULL THEN ID.dblTotal + ID.dblTotalTax ELSE 0 END)
+				,[dblSalesPaidAmountContract]		=	SUM(CASE WHEN ID.intContractDetailId IS NOT NULL THEN ID.dblTotal + ID.dblTotalTax ELSE 0 END)
+				,[dblSalesPaidAmountSpot]			=	SUM(CASE WHEN ID.intContractDetailId IS NULL THEN ID.dblTotal + ID.dblTotalTax ELSE 0 END)
+				
+				,[dblSalesPaidUnitsGross]			=	SUM(SI.dblGross)
+				,[dblSalesPaidUnitsNet]				=	SUM(SI.dblQuantity)
 			FROM tblSCTicket T
 			INNER JOIN tblICItem I
 				ON I.intItemId = T.intItemId
@@ -408,15 +697,26 @@ BEGIN TRY
 				ON P.intPaymentId = PD.intPaymentId
 			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
 				AND P.ysnPosted = 1
-				AND (CD.intMarketZoneId IS NULL
-					OR (CD.intMarketZoneId IS NOT NULL AND CD.intMarketZoneId IN (SELECT intId FROM @tblMarketZoneId)))
-				AND ((EXISTS(SELECT 1 FROM @tblEntityId) AND S.intEntityCustomerId IN (SELECT intId FROM @tblEntityId))
-					OR NOT EXISTS (SELECT 1 FROM @tblEntityId)
-				)
+				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
 			GROUP BY S.intShipFromLocationId, CO.intCommodityId
 		) PAID_TICKET
 			ON MC.intCommodityId = PAID_TICKET.intCommodityId
 			AND MC.intCompanyLocationId = PAID_TICKET.intCompanyLocationId
+		OUTER APPLY (
+			SELECT
+				dblSalesAdjustment = SUM(ISNULL(SAS.dblAdjustmentAmount, 0))
+			FROM vyuGRSearchAdjustSettlements SAS
+			INNER JOIN tblICItem I2
+				ON I2.intItemId = SAS.intItemId
+			INNER JOIN tblICCommodity C2
+				ON C2.intCommodityId = I2.intCommodityId
+			WHERE MC.intCommodityId = C2.intCommodityId
+				AND MC.intCompanyLocationId = SAS.intCompanyLocationId
+				AND SAS.intTypeId = 2 -- Sales
+		) ADJUSTMENT
 	)
 	-- MAIN QUERY
 	SELECT
@@ -442,6 +742,9 @@ BEGIN TRY
 		,[P].[dblPurchaseAdjustment]
 		,[P].[dblPurchaseStorageEarnedDP]
 		,[P].[dblPurchaseStorageEarnedOS]
+		,[P].[dblPurchaseWAPGross]
+		,[P].[dblPurchaseWAPNet]
+		,[P].[dblPurchaseBasisWAPNet]
 		-- Sales
 		,[S].[dblSalesGrainTransfer]
 		,[S].[dblSalesGrainContract]
@@ -451,6 +754,9 @@ BEGIN TRY
 		,[S].[dblSalesPaidAmountContract]
 		,[S].[dblSalesPaidAmountSpot]
 		,[S].[dblSalesAdjustment]
+		,[S].[dblSalesWAPGross]
+		,[S].[dblSalesWAPNet]
+		,[S].[dblSalesBasisWAPNet]
 		-- XML
 		,[strXML]							= @xmlParam
 	FROM PurchaseCTE P

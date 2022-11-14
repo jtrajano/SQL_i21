@@ -277,6 +277,26 @@ SELECT TOP 100 PERCENT
 	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
 	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
 	,ysnOverrideTaxGroup				=	A.ysnOverrideTaxGroup
+	/*Supplier Invoice*/
+	,intSaleYear						=	A.intSaleYear
+	,strSaleNumber						=	A.strSaleNumber
+	,dtmSaleDate						=	A.dtmSaleDate
+	,strVendorLotNumber					=	A.strVendorLotNumber
+	,strPreInvoiceGarden				=	A.strPreInvoiceGarden
+	,strPreInvoiceGardenNumber			=	A.strPreInvoiceGardenNumber
+	,intBookId							=	A.intBookId
+	,strBook							=	A.strBook
+	,intSubBookId						=	A.intSubBookId
+	,strSubBook							=	A.strSubBook
+	,A.dblPackageBreakups
+	,A.intNumOfPackagesUOM
+	,A.dblNumberOfPackages
+	,A.intNumOfPackagesUOM2
+	,A.dblNumberOfPackages2
+	,A.intNumOfPackagesUOM3
+	,A.dblNumberOfPackages3
+	/**/
+	,dtmExpectedDate					=	A.dtmExpectedDate
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -497,6 +517,24 @@ INSERT
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	/*Supplier Invoice*/
+	,intSaleYear						
+	,strSaleNumber						
+	,dtmSaleDate						
+	,strVendorLotNumber					
+	,strPreInvoiceGarden				
+	,strPreInvoiceGardenNumber			
+	,intBookId							
+	,intSubBookId	
+	,dblPackageBreakups
+	,intNumOfPackagesUOM1
+	,dblNumberOfPackages
+	,intNumOfPackagesUOM2
+	,dblNumberOfPackages2
+	,intNumOfPackagesUOM3
+	,dblNumberOfPackages3
+	/**/
+	,dtmExpectedDate				
 )
 VALUES
 (
@@ -600,6 +638,24 @@ VALUES
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	/*Supplier Invoice*/
+	,intSaleYear						
+	,strSaleNumber						
+	,dtmSaleDate						
+	,strVendorLotNumber					
+	,strPreInvoiceGarden				
+	,strPreInvoiceGardenNumber			
+	,intBookId							
+	,intSubBookId		
+	,dblPackageBreakups
+	,intNumOfPackagesUOM
+	,dblNumberOfPackages
+	,intNumOfPackagesUOM2
+	,dblNumberOfPackages2
+	,intNumOfPackagesUOM3
+	,dblNumberOfPackages3
+	/**/
+	,dtmExpectedDate
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 

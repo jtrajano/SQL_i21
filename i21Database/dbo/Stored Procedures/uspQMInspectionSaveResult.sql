@@ -199,6 +199,7 @@ BEGIN TRY
 			,dtmValidTo
 			,strPropertyRangeText
 			,dblMinValue
+			,dblPinpointValue
 			,dblMaxValue
 			,dblLowValue
 			,dblHighValue
@@ -230,6 +231,7 @@ BEGIN TRY
 			,PPV.dtmValidTo
 			,PPV.strPropertyRangeText
 			,PPV.dblMinValue
+			,PPV.dblPinpointValue
 			,PPV.dblMaxValue
 			,PPV.dblLowValue
 			,PPV.dblHighValue

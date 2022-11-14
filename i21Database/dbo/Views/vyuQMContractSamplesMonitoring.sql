@@ -1,4 +1,6 @@
-CREATE VIEW vyuQMContractSamplesMonitoring AS WITH QUERY AS
+CREATE VIEW vyuQMContractSamplesMonitoring AS 
+
+WITH QUERY AS
 (
    SELECT
       strAllocationNumber,
@@ -60,7 +62,7 @@ CREATE VIEW vyuQMContractSamplesMonitoring AS WITH QUERY AS
       intContractStatusIdS,
       intContractHeaderIdS 
    FROM
-      vyuQMSampleNotAllocated 
+      vyuQMPurchaseSampleLinked
    UNION
    SELECT
       strAllocationNumber,
@@ -122,7 +124,7 @@ CREATE VIEW vyuQMContractSamplesMonitoring AS WITH QUERY AS
       intContractStatusIdS,
       intContractHeaderIdS 
    FROM
-      vyuQMAllocation 
+      vyuQMSaleSampleNotLinked 
 ),
 _orderQuery as(
 SELECT

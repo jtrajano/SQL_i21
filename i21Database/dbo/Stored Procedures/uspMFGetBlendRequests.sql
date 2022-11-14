@@ -15,7 +15,8 @@ If @intWorkOrderId=0
 	CASE Month(GETDATE()) 
 			WHEN 1 THEN bg.dblJan WHEN 2 THEN bg.dblFeb WHEN 3 THEN bg.dblMar WHEN 4 THEN bg.dblApr WHEN 5 THEN bg.dblMay WHEN 6 THEN bg.dblJun 
 			WHEN 7 THEN bg.dblJul WHEN 8 THEN bg.dblAug WHEN 9 THEN bg.dblSep WHEN 10 THEN bg.dblOct WHEN 11 THEN bg.dblNov WHEN 12 THEN bg.dblDec 
-		END AS dblAffordabilityCost  
+		END AS dblAffordabilityCost,
+	CompanyLocation.strLocationName AS strCompanyLocationName
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
@@ -26,6 +27,7 @@ If @intWorkOrderId=0
 	Left Join tblMFManufacturingCell mc on a.intManufacturingCellId=mc.intManufacturingCellId
 	Left Join tblMFRecipe r on a.intItemId=r.intItemId AND a.intLocationId=r.intLocationId AND r.ysnActive=1
 	Left Join tblMFBudget bg on a.intItemId=bg.intItemId AND a.intLocationId=bg.intLocationId AND bg.intYear=YEAR(GETDATE()) AND bg.intBudgetTypeId=2
+	left join tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
 	Where a.intStatusId=1
 
 --Positive means WorkOrderId
@@ -33,7 +35,8 @@ If @intWorkOrderId>0
 	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,
 	Case When (a.dblQuantity - ISNULL(a.dblIssuedQty,0))<=0 then 0 Else (a.dblQuantity - ISNULL(a.dblIssuedQty,0)) End AS dblQuantity,
 	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,a.intManufacturingCellId,
-	h.dblStandardCost,f.intManufacturingProcessId  
+	h.dblStandardCost,f.intManufacturingProcessId,
+	CompanyLocation.strLocationName AS strCompanyLocationName
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
@@ -42,6 +45,7 @@ If @intWorkOrderId>0
 	Join tblMFWorkOrder f on a.intBlendRequirementId=f.intBlendRequirementId
 	Left Join tblICItemLocation g on b.intItemId=g.intItemId and g.intLocationId=a.intLocationId
 	Left Join tblICItemPricing h on h.intItemId=b.intItemId And g.intItemLocationId=h.intItemLocationId
+	left join tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
 	Where f.intWorkOrderId=@intWorkOrderId
 
 --Negative means BlendRequirementId
@@ -49,7 +53,8 @@ If @intWorkOrderId<0
 	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,
 	Case When (a.dblQuantity - ISNULL(a.dblIssuedQty,0))<=0 then 0 Else (a.dblQuantity - ISNULL(a.dblIssuedQty,0)) End AS dblQuantity,
 	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,a.intManufacturingCellId,
-	h.dblStandardCost
+	h.dblStandardCost,
+	CompanyLocation.strLocationName AS strCompanyLocationName
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
@@ -57,4 +62,5 @@ If @intWorkOrderId<0
 	Left Join tblMFRecipe e on a.intItemId=e.intItemId And a.intLocationId=e.intLocationId And e.ysnActive=1 
 	Left Join tblICItemLocation g on b.intItemId=g.intItemId and g.intLocationId=a.intLocationId
 	Left Join tblICItemPricing h on h.intItemId=b.intItemId And g.intItemLocationId=h.intItemLocationId
+	left join tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
 	Where a.intBlendRequirementId=ABS(@intWorkOrderId)

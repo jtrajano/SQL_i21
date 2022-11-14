@@ -566,15 +566,10 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 	OUTER APPLY (
 	
 		select	intPriceFixationId	=		PF.intPriceFixationId
-			   , ysnApproved		=		CASE WHEN ISNULL(PF.dblTotalLots,0) - ISNULL(PF.dblLotsFixed,0) = 0 THEN 
-												CASE WHEN strApprovalStatus in ('Approved', 'Approved with Modifications') THEN 1 ELSE 0 END
-											ELSE 0 END 
-			   , strApprovalStatus	=		CASE WHEN ISNULL(PF.dblTotalLots,0) - ISNULL(PF.dblLotsFixed,0) = 0 THEN 
-												CASE WHEN strApprovalStatus in ('Approved', 'Approved with Modifications') THEN 'Approved' 
+			   , ysnApproved		=		CASE WHEN strApprovalStatus in ('Approved', 'Approved with Modifications') THEN 1 ELSE 0 END
+			   , strApprovalStatus	=		CASE WHEN strApprovalStatus in ('Approved', 'Approved with Modifications') THEN 'Approved' 
 													 WHEN strApprovalStatus in ('Waiting for Submit', 'Waiting for Approval') THEN strApprovalStatus
-												ELSE '' END
-										    ELSE '' END 
-
+											ELSE '' END
 		from tblCTPriceFixation PF 
 		LEFT JOIN (
 			select intRecordId, strApprovalStatus

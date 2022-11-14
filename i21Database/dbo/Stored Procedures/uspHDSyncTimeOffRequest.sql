@@ -44,6 +44,7 @@ BEGIN
 			BEGIN 
   
 				EXEC [dbo].[uspHDGenerateTimeOffRequest] @intEntityEmployeeId
+				EXEC [dbo].[uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary] @intEntityEmployeeId, @intTimeEntryPeriodDetail, 0
 
 				FETCH NEXT FROM EmployeeLoop INTO @intEntityEmployeeId
 			END

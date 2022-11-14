@@ -54,8 +54,9 @@ DECLARE @InvoiceDetail AS TABLE  (
 
 IF(OBJECT_ID('tempdb..#ADJUSTEDTAXCODE') IS NOT NULL) DROP TABLE #ADJUSTEDTAXCODE 
 CREATE TABLE #ADJUSTEDTAXCODE (
-	intTaxCodeId		INT,
-	dblAdjustedTax		NUMERIC(18,6)
+	intInvoiceDetailTaxId	INT PRIMARY KEY,
+	intTaxCodeId			INT,
+	dblAdjustedTax			NUMERIC(18,6)
 );
 CREATE NONCLUSTERED INDEX [idx_#ADJUSTEDTAXCODE_intTaxCodeId] ON [#ADJUSTEDTAXCODE] (intTaxCodeId)
 
@@ -125,7 +126,12 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			SET @TaxGroupId = NULL
 
 		DELETE FROM #ADJUSTEDTAXCODE
-		INSERT INTO #ADJUSTEDTAXCODE([intTaxCodeId], [dblAdjustedTax]) SELECT [intTaxCodeId], [dblAdjustedTax] FROM tblARInvoiceDetailTax WHERE [intInvoiceDetailId] = @InvoiceDetailId AND ysnTaxAdjusted = 1
+		INSERT INTO #ADJUSTEDTAXCODE([intInvoiceDetailTaxId], [intTaxCodeId], [dblAdjustedTax]) 
+		SELECT [intInvoiceDetailTaxId], [intTaxCodeId], [dblAdjustedTax] 
+		FROM tblARInvoiceDetailTax 
+		WHERE [intInvoiceDetailId] = @InvoiceDetailId 
+		  AND ysnTaxAdjusted = 1
+
 		DELETE FROM tblARInvoiceDetailTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
 		IF (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemType,'') = 'Other Charge') OR (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemPrice,0) = 0)
@@ -195,7 +201,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[dblAdjustedTax]		= ATC.[dblAdjustedTax]
 			,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ATC.[dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 		FROM [tblARInvoiceDetailTax] IDT
-		INNER JOIN #ADJUSTEDTAXCODE ATC ON IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
+		INNER JOIN #ADJUSTEDTAXCODE ATC ON IDT.[intInvoiceDetailTaxId] = ATC.[intInvoiceDetailTaxId] AND IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
 		WHERE IDT.[intInvoiceDetailId] = @InvoiceDetailId
 				
 		SELECT

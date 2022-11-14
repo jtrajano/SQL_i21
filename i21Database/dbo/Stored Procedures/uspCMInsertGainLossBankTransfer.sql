@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]
 @intDefaultCurrencyId INT,
-@strDescription nvarchar(300),
 @intBankTransferTypeId INT,
 @intGLAccountIdTo INT,
 @strTransactionId NVARCHAR(40),
@@ -72,7 +71,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			,[dblCreditForeign]		= case when BankFrom.gainLoss >= 0 then BankFrom.gainLoss  else 0 end
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
+			,[strDescription]		= 'Gain / Loss Bank Transfer From'
 			,[strCode]				= A.strCode
 			,[strReference]			= BankFrom.strReferenceFrom
 			,[intCurrencyId]		= @intDefaultCurrencyId
@@ -108,7 +107,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			,[dblCreditForeign]		= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
+			,[strDescription]		= 'Gain / Loss Bank Transfer To' --'Gain / Loss on Multicurrency Bank Transfer'
 			,[strCode]				= A.strCode
 			,[strReference]			= BankTo.strReferenceTo
 			,[intCurrencyId]		= @intDefaultCurrencyId

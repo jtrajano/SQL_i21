@@ -71,6 +71,11 @@ INCLUDE ( 	[strName], [intEntityClassId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXIST
 GO
 CREATE NONCLUSTERED INDEX [IX_tblEMEntity_strName]
 	ON [dbo].[tblEMEntity] ([strName])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblEMEntity_strEntityNo]ON [dbo].[tblEMEntity] ([strEntityNo])
+GO
+
 
 
 

@@ -266,13 +266,14 @@ BEGIN
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'Posting negative amount is not allowed. You may want to create a deposit instead.',
+			'Posting negative amount is not allowed for non-eCheck payment method. You may want to create a deposit instead.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			A.dblAmountPaid < 0
+			AND A.intPaymentMethodId != 6
 
 		--BILL(S) ALREADY PAID IN FULL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -366,18 +367,18 @@ BEGIN
 		-- GROUP BY A.strPaymentRecordNum, A.intPaymentId
 		-- HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'You cannot post with negative amount if payment method is not a Refund.',
-			'Payable',
-			A.strPaymentRecordNum,
-			A.intPaymentId
-		FROM tblAPPayment A
-		WHERE A.dblAmountPaid < 0 
-		AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
-		AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE (C.intTransactionType = 2 OR C.intTransactionType = 13) AND B.intPaymentId IN (SELECT intId FROM @paymentIds))
-				AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)) = 1)
-		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		-- SELECT 
+		-- 	'You cannot post with negative amount if payment method is not a Refund.',
+		-- 	'Payable',
+		-- 	A.strPaymentRecordNum,
+		-- 	A.intPaymentId
+		-- FROM tblAPPayment A
+		-- WHERE A.dblAmountPaid < 0 
+		-- AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
+		-- AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE (C.intTransactionType = 2 OR C.intTransactionType = 13) AND B.intPaymentId IN (SELECT intId FROM @paymentIds))
+		-- 		AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)) = 1)
+		-- AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		
 			
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

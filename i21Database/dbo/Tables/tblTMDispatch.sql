@@ -38,6 +38,7 @@
     [intContractId] INT NULL, 
     [ysnLockPrice] BIT NOT NULL DEFAULT 0, 
     [intRouteId] INT NULL, 
+	[intDispatchOrderId] INT NULL, 
     [ysnReceived] BIT NOT NULL DEFAULT 0, 
     [ysnLeakCheckRequired] BIT NOT NULL DEFAULT 0, 
     [dtmReceivedDate] DATETIME NULL, 
@@ -47,7 +48,8 @@
     [strOriginalPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
-	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])
+	CONSTRAINT [FK_tblTMDispatch_tblLGRoute] FOREIGN KEY ([intRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId]),
+	CONSTRAINT [FK_tblTMDispatch_tblLGDispatchOrder] FOREIGN KEY ([intDispatchOrderId]) REFERENCES [dbo].[tblLGDispatchOrder] ([intDispatchOrderId])
 );
 
 
@@ -441,10 +443,15 @@ CREATE TRIGGER [dbo].[trgAfterInsertTMDispatch]
         declare @willCallPrefix nvarchar(20);
 		declare @newId int;
 
-		select @newId = i.intDispatchID from inserted i;
+		-- select @newId = i.intDispatchID from inserted i;
 		set @willCallPrefix = (select strPrefix from tblSMStartingNumber where strModule = 'Tank Management' and strTransactionType = 'Will Call');
 
-		update tblTMDispatch set strOrderNumber = @willCallPrefix + convert(nvarchar(10),@newId) where intDispatchID = @newId;
-		update tblSMStartingNumber set intNumber = (@newId + 1) where strModule = 'Tank Management' and strTransactionType = 'Will Call';
+		-- update tblTMDispatch set strOrderNumber = @willCallPrefix + convert(nvarchar(10),@newId) where intDispatchID = @newId;
+		-- update tblSMStartingNumber set intNumber = (@newId + 1) where strModule = 'Tank Management' and strTransactionType = 'Will Call';
+        UPDATE tblTMDispatch 
+		SET strOrderNumber = @willCallPrefix + convert(nvarchar(10),inserted.intDispatchID) 
+		FROM inserted
+		where tblTMDispatch.intDispatchID = inserted.intDispatchID
+			-- AND tblTMDispatch.strOrderNumber IS NULL
 
     END

@@ -43,6 +43,7 @@
 	[strLoadDirectionMsg]	NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnUpdateLoadDirections] [bit] NULL,
 	[ysnPrintLoadDirections] [bit] NULL,
+	[dblPrintableBags] NUMERIC(18, 6) NULL,
 	[dtmPickUpFrom] DATETIME NULL,
 	[dtmPickUpTo] DATETIME NULL,
 	[dtmDeliveryFrom] DATETIME NULL,

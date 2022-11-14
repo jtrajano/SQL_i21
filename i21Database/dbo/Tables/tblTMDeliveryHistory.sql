@@ -76,7 +76,9 @@
 	[ysnManualAdjustment] BIT NOT NULL DEFAULT 0,
     [dtmNextDeliveryDate] DATETIME NULL, 
     [dtmRunOutDate] DATETIME NULL, 
-    [dtmForecastedDelivery] DATETIME NULL
+    [dtmForecastedDelivery] DATETIME NULL,
+    [guiApiUniqueId] [uniqueidentifier] NULL,
+    [intRowNumber] [int] NULL
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMDeliveryHistory_tblLGRoute] FOREIGN KEY ([intWillCallRouteId]) REFERENCES [dbo].[tblLGRoute] ([intRouteId])

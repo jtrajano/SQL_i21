@@ -957,6 +957,8 @@ BEGIN
 				,intConcurrencyId
 				,intOwnershipType
 				,dblGross
+				,dblTare
+				,dblTarePerQuantity
 				,dblNet
 				,intCostUOMId
 				,intDiscountSchedule
@@ -1046,6 +1048,8 @@ BEGIN
 										  END
 				,dblGross				= --CASE WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL ELSE RawData.dblGross END
 										  RawData.dblGross
+				,dblTare				= RawData.dblTare
+				,dblTarePerQuantity		= dbo.fnDivide(ISNULL(RawData.dblTare, 0), ISNULL(RawData.dblQty, 0)) 
 				,dblNet					= --CASE WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL ELSE RawData.dblNet END
 										  RawData.dblNet
 				,intCostUOMId			= RawData.intCostUOMId

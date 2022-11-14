@@ -5,7 +5,7 @@ AS
 
 DECLARE @intItemForFreightId	INT = (SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference)
 
-DELETE FROM tblARInvoiceTaxReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+DELETE FROM tblARInvoiceTaxReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil')
 INSERT INTO tblARInvoiceTaxReportStagingTable (
 	  [intTransactionId]
 	, [intTransactionDetailId]
@@ -57,7 +57,7 @@ INNER JOIN (
 	FROM tblARInvoiceReportStagingTable
 	WHERE intEntityUserId = @intEntityUserId 
 	AND strRequestId = @strRequestId 
-	AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+	AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil')
 ) I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 INNER JOIN tblSMTaxClass TC ON SMT.intTaxClassId = TC.intTaxClassId	
@@ -69,5 +69,9 @@ OUTER APPLY (
 	AND ((intTaxCodeId = SMT.intTaxCodeId AND intTaxClassId = TC.intTaxClassId) OR (ISNULL(intTaxCodeId, 0) = 0 AND intTaxClassId = TC.intTaxClassId) OR (intTaxCodeId = SMT.intTaxCodeId AND ISNULL(intTaxClassId, 0) = 0))
 	ORDER BY intTaxCodeId DESC, intTaxClassId DESC, dtmStartDate DESC, dtmEndDate DESC, intEntityCustomerLocationId DESC, intItemId DESC, intCategoryId DESC
 ) ARCTTE
-WHERE ((IDT.ysnTaxExempt = 1 AND ISNULL(ARCTTE.strException, '') <> '') OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
-	AND ID.intItemId <> ISNULL(@intItemForFreightId, 0)
+WHERE (
+	(IDT.ysnTaxExempt = 1 AND ISNULL(ARCTTE.strException, '') <> '') 
+	OR 
+	(IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0)
+)
+AND ID.intItemId <> ISNULL(@intItemForFreightId, 0)

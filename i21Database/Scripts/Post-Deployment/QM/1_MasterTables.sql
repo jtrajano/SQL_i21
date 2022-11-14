@@ -426,6 +426,13 @@ BEGIN
 	VALUES(12,'Work Order','Work Order',0)
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 13)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(13,'Batch','Batch',0)
+END
+GO
 -- Drop unwanted tables
 GO
 IF EXISTS(SELECT * FROM sysobjects where xtype = 'U' and name = 'tblQMDocumentFile')

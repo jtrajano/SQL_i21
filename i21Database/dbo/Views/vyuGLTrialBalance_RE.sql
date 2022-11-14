@@ -20,13 +20,16 @@ SELECT
 	Fiscal.intGLFiscalYearPeriodId,
 	Fiscal.PeriodStart,
 	PeriodEnd.beginBalance YTD,
+	PeriodEnd.intCurrencyId intCurrencyId,
 	PERIODACTIVITY.beginningBalance MTD
 FROM DETAIL Fiscal
-OUTER APPLY dbo.fnGLGetBeginningBalanceAndUnitRETB(Fiscal.strAccountId,DATEADD(DAY, 1, Fiscal.PeriodEnd)) PeriodEnd
+OUTER APPLY dbo.fnGLGetBeginningBalance_ForTB(Fiscal.strAccountId,DATEADD(DAY, 1, Fiscal.PeriodEnd)) PeriodEnd
 OUTER APPLY(
 	SELECT  SUM(isnull(dblDebit,0) - isnull(dblCredit,0)) beginningBalance
 	FROM tblGLAccount A LEFT JOIN  tblGLDetail D on D.intAccountId = A.intAccountId
 	WHERE D.dtmDate Between Fiscal.PeriodStart and Fiscal.PeriodEnd and D.ysnIsUnposted = 0
 	AND Fiscal.intAccountId = A.intAccountId
+	AND PeriodEnd.intCurrencyId = D.intCurrencyId
+	GROUP BY A.intAccountId, D.intCurrencyId
 )PERIODACTIVITY
 

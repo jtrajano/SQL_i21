@@ -41,6 +41,7 @@ BEGIN
 		,PV.dtmValidTo
 		,PV.strPropertyRangeText
 		,PV.dblMinValue
+		,PV.dblPinpointValue
 		,PV.dblMaxValue
 		,PV.dblLowValue
 		,PV.dblHighValue

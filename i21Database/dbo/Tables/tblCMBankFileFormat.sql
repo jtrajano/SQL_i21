@@ -11,6 +11,8 @@
 	[dtmDateDeleted]		DATETIME	   NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     [ysnContainsHeader]     BIT            NULL,
+    [ysnDontResetIdentity]  BIT            NULL,
+    [ysnSystemGenerated]    BIT            NULL,
     CONSTRAINT [PK_tblCMBankFileFormat] PRIMARY KEY CLUSTERED ([intBankFileFormatId] ASC),
     UNIQUE NONCLUSTERED ([strName] ASC)
 );

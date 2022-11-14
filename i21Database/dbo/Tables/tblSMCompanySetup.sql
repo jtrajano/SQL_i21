@@ -23,6 +23,7 @@
     [ysnScreenControlListingUpdated] BIT NULL,
 	[ysnScreenLabelListingUpdated] BIT NULL, 
 	[ysnAuditBatchMigrated] BIT DEFAULT 1 NULL,
+    [ysnTooltipListingUpdated] BIT NULL, 
 	[intMultiCompanyId] INT NULL,
     [ysnDoingMigration] BIT NULL,
     [dtmMigrationStarted] DATETIME NULL,

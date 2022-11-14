@@ -135,6 +135,18 @@ BEGIN
 		, intInventoryReceiptItemId INT NULL
 		, intLoadDetailId INT NULL)
 
+
+	DECLARE @DPRInTransitHelperLog AS TABLE (
+		[dtmDate] DATETIME,
+		[intCommodityId] INT,
+		[intTransactionReferenceId] INT NOT NULL, 
+		[intInvoiceId] INT NULL,
+		[intInventoryReceiptId] INT NULL,
+		[strBucketType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[dblQty] NUMERIC(24, 10) NULL,
+		[intContractDetailId] INT NULL
+	)
+
 	SELECT @intTotal = COUNT(*) FROM @SummaryLogs
 
 	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs ORDER BY dtmTransactionDate
@@ -1060,6 +1072,59 @@ BEGIN
 				, @intTicketId
 				, @intUserId
 				, @strNotes
+
+
+				--TODO: Get In-Transit off-setting entry
+				IF @strBucketType = 'Sales In-Transit' AND @strTransactionType IN ('Invoice')
+				BEGIN
+					
+					INSERT INTO @DPRInTransitHelperLog (
+							  dtmDate
+							, intCommodityId
+							, intTransactionReferenceId
+							, intInvoiceId
+							, intInventoryReceiptId
+							, strBucketType
+							, dblQty
+							, intContractDetailId
+					)
+					SELECT 
+						  @dtmTransactionDate
+						, @intCommodityId
+						, intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
+						, intInvoiceId = @intTransactionRecordHeaderId
+						, intInventoryReceiptId = NULL
+						, @strBucketType
+						, @dblQty
+						, @intContractDetailId
+						
+
+				END
+
+				IF @strBucketType = 'Purchase In-Transit' AND @strTransactionType IN ('Inventory Receipt')
+				BEGIN
+					INSERT INTO @DPRInTransitHelperLog (
+							  dtmDate
+							, intCommodityId
+							, intTransactionReferenceId
+							, intInvoiceId
+							, intInventoryReceiptId
+							, strBucketType
+							, dblQty
+							, intContractDetailId
+					)
+					SELECT 
+						  @dtmTransactionDate
+						, @intCommodityId
+						, intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
+						, intInvoiceId = NULL
+						, intInventoryReceiptId = @intTransactionRecordHeaderId
+						, @strBucketType
+						, @dblQty
+						, @intContractDetailId
+
+				END
+
 		END
 
 		--------------------------------------
@@ -1871,6 +1936,29 @@ BEGIN
 	ORDER BY dtmTransactionDate
 
 	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Bulk Insert done.')
+
+
+	INSERT INTO tblRKDPRInTransitHelperLog (
+		  dtmDate
+		, intCommodityId
+		, intTransactionReferenceId
+		, intInvoiceId
+		, intInventoryReceiptId
+		, strBucketType
+		, dblQty
+		, intContractDetailId
+	)
+	SELECT
+		  dtmDate
+		, intCommodityId
+		, intTransactionReferenceId
+		, intInvoiceId
+		, intInventoryReceiptId
+		, strBucketType
+		, dblQty
+		, intContractDetailId
+	FROM @DPRInTransitHelperLog
+	ORDER BY dtmDate
 
 	DROP TABLE #tmpSummaryLogs
 END

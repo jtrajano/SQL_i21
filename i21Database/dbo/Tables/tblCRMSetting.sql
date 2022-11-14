@@ -2,6 +2,7 @@
 (
 	[intCrmSettingId] [int] IDENTITY(1,1) NOT NULL,
 	[strSignatureFormat] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
+    [intFreightTermId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblCRMSettings] PRIMARY KEY CLUSTERED ([intCrmSettingId] ASC)
 )

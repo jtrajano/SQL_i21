@@ -25,7 +25,7 @@ FROM
 		, CompanyLoc.strLocationName
 		, cost.dblCost
 		, cost.dtmEffectiveCostDate
-		, 'R' AS strType
+		, 'R' COLLATE Latin1_General_CI_AS  AS strType
 		, cost.intConcurrencyId
 	FROM tblICEffectiveItemCost cost
 	INNER JOIN tblICItemLocation ItemLoc
@@ -46,7 +46,7 @@ FROM
 		, ISNULL(CompanyLoc.strLocationName, '') AS strLocationName
 		, sp.dblCost
 		, sp.dtmBeginDate
-		, 'P' AS strType
+		, 'P' COLLATE Latin1_General_CI_AS  AS strType
 		, sp.intConcurrencyId
 	FROM tblICItemSpecialPricing sp
 	LEFT JOIN tblICItemLocation ItemLoc

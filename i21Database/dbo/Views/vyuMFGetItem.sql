@@ -1,14 +1,39 @@
 ﻿CREATE VIEW [dbo].[vyuMFGetItem]
 	AS 
-Select 
-i.intItemId,i.strItemNo,i.strDescription,i.strType,i.intCategoryId,i.strStatus,i.strInventoryTracking,
-iu.intItemUOMId AS intStockItemUOMId,iu.intUnitMeasureId AS intStockUOMId ,um.strUnitMeasure AS strStockUOM,cg.strCategoryCode,i.strRequired
-From tblICItem i 
-Join tblICItemUOM iu on i.intItemId=iu.intItemId
-Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-Left Join tblICCategory cg on i.intCategoryId=cg.intCategoryId
-Where  iu.ysnStockUnit=1 AND i.strStatus='Active' AND i.strType not in ('Comment','Other Charge')
+SELECT Item.intItemId
+	 , Item.strItemNo
+	 , Item.strDescription
+	 , Item.strType
+	 , Item.intCategoryId
+	 , Item.strStatus
+	 , Item.strInventoryTracking
+	 , ItemUOM.intItemUOMId AS intStockItemUOMId
+	 , ItemUOM.intUnitMeasureId AS intStockUOMId 
+	 , UnitMeasure.strUnitMeasure AS strStockUOM 
+	 , Category.strCategoryCode
+	 , Item.strRequired
+	-- , ISNULL(ItemPricing.dblSalePrice, 0) AS dblSalePrice
+FROM tblICItem AS Item 
+JOIN tblICItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId
+JOIN tblICItemPricing AS ItemPricing ON Item.intItemId = ItemPricing.intItemId
+JOIN tblICUnitMeasure AS UnitMeasure ON ItemUOM.intUnitMeasureId = UnitMeasure.intUnitMeasureId
+LEFT JOIN tblICCategory AS Category ON Item.intCategoryId = Category.intCategoryId
+WHERE ItemUOM.ysnStockUnit = 1 
+  AND Item.strStatus = 'Active' 
+  AND Item.strType NOT IN ('Comment','Other Charge')
 UNION
-Select intItemId,strItemNo,strDescription,strType,
-0 intCategoryId,'' strStatus,'' strInventoryTracking,0 intStockItemUOMId,0 intStockUOMId,'' strStockUOM,'' strCategoryCode,'' strRequired
-From tblICItem Where strType in ('Comment','Other Charge')
+SELECT intItemId
+	 , strItemNo
+	 , strDescription
+	 , strType
+	 , 0 AS intCategoryId
+	 , '' AS strStatus
+	 , '' AS strInventoryTracking
+	 , 0 AS intStockItemUOMId
+	 , 0 AS intStockUOMId
+	 , '' AS strStockUOM
+	 , '' AS strCategoryCode
+	 , '' AS strRequired
+	-- , 0 AS dblSalePrice
+FROM tblICItem 
+WHERE strType in ('Comment','Other Charge')

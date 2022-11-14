@@ -28,9 +28,16 @@ BEGIN TRY
 	  , @intSurchargeItemId		INT
 	  , @ysnItemizeSurcharge	BIT
 	  , @HasBlend BIT = 0
+	  , @strFreightItemNo NVARCHAR(300) = NULL
+	  , @strSurchargeItemNo NVARCHAR(300) = NULL
 
-	SELECT @intFreightItemId = intFreightItemId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId
-	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+	SELECT @intFreightItemId = intFreightItemId, @strFreightItemNo = I.strItemNo
+	FROM tblTRLoadHeader H INNER JOIN tblICItem I ON I.intItemId = H.intFreightItemId
+	WHERE H.intLoadHeaderId = @intLoadHeaderId
+
+	SELECT TOP 1 @intSurchargeItemId = intItemId, @strSurchargeItemNo = strItemNo 
+	FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
@@ -574,6 +581,18 @@ BEGIN TRY
 			RAISERROR('Freight Item doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 			RETURN 0
 		END
+			
+		-- CHECK FREIGHT ITEM LOCATION
+		IF ((SELECT COUNT(*) FROM #tmpSourceTable T 
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = T.intCompanyLocationId
+			AND T.dblFreightRate > 0 
+			AND IL.intItemLocationId IS NULL
+			AND IL.intItemId = @intFreightItemId) < 1 AND (SELECT COUNT(*) FROM #tmpSourceTable) > 0)
+		BEGIN
+			DECLARE @strFreightError NVARCHAR(500) = NULL
+			SET @strFreightError = 'Incorrect Freight Item setup: Company Location is not properly set in Item ' + @strFreightItemNo + '. Please go to Item > Setup > Location.'
+			RAISERROR(@strFreightError, 16, 1)
+		END
 	END
 
 	IF (@ysnItemizeSurcharge = 1 AND ISNULL(@intSurchargeItemId, 0) > 0)
@@ -588,6 +607,18 @@ BEGIN TRY
 		BEGIN
 			RAISERROR('Surcharge doesn''t have default Sales UOM and stock UOM.', 11, 1) 
 			RETURN 0
+		END
+
+		-- CHECK SURCHARGE ITEM LOCATION
+		IF ((SELECT COUNT(*) FROM #tmpSourceTable T 
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = T.intCompanyLocationId
+			AND T.dblSurcharge > 0 
+			AND IL.intItemLocationId IS NULL
+			AND IL.intItemId = @intSurchargeItemId) < 1 AND (SELECT COUNT(*) FROM #tmpSourceTable) > 0)
+		BEGIN
+			DECLARE @strSurchargeError NVARCHAR(500) = NULL
+			SET @strSurchargeError = 'Incorrect Surcharge Item setup: Company Location is not properly set in Item ' + @strSurchargeItemNo + '. Please go to Item > Setup > Location.'
+			RAISERROR(@strSurchargeError, 16, 1)
 		END
 	END
 

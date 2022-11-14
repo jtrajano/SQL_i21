@@ -310,7 +310,19 @@ DECLARE @ysnHasEFTBudget BIT = 0
 
 IF EXISTS (SELECT TOP 1 NULL FROM tblARPaymentDetail WHERE intInvoiceId IS NULL AND intBillId IS NULL AND intPaymentId = @PaymentId)
 	SET @ysnHasEFTBudget = CAST(1 AS BIT)
-	
+
+--UPDATE ACCOUNTING PERIOD
+UPDATE ARI
+SET intPeriodId = GL.intGLFiscalYearPeriodId
+FROM tblARInvoice ARI 
+CROSS APPLY (
+	SELECT TOP 1 P.intGLFiscalYearPeriodId 
+	FROM tblGLFiscalYearPeriod P
+	WHERE ARI.dtmPostDate BETWEEN dtmStartDate AND dtmEndDate
+	ORDER BY intGLFiscalYearPeriodId DESC
+) GL 
+WHERE ARI.intInvoiceId = @NewId
+
 ---ADD CPP INVOICE TO PAYMENT DETAIL
 IF(ISNULL(@NewInvoiceId, 0) <> 0) AND @PostPrepayment = 1AND @ysnHasEFTBudget = 0
 	BEGIN 

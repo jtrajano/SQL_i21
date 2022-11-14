@@ -540,25 +540,22 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -SourceTransaction.dblQty
+			,dblQty					= 
+									dbo.fnCalculateQtyBetweenUOM (
+										dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId) 
+										,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)) 
+										,-SourceTransaction.dblQty
+									)
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= 
-									--dbo.fnCalculateCostBetweenUOM( 
-									--	dbo.fnGetItemStockUOM(Detail.intNewItemId)
-									--	,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
-									--	,ISNULL(Detail.dblNewCost, SourceTransaction.dblCost)
-									--)
-									CASE 
-										WHEN Detail.dblNewCost IS NULL THEN 
-											SourceTransaction.dblCost
-										ELSE
-											Detail.dblNewCost
-											--dbo.fnCalculateCostBetweenUOM ( 
-											--	dbo.fnGetItemStockUOM(Detail.intNewItemId)
-											--	,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
-											--	,Detail.dblNewCost
-											--)
-									END
+									ISNULL(
+										Detail.dblNewCost
+										,dbo.fnCalculateCostBetweenUOM(
+											dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId) 
+											,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)) 
+											,SourceTransaction.dblCost
+										)
+									)
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -589,7 +586,7 @@ BEGIN
 
 			LEFT JOIN dbo.tblICItemUOM NewItemUOM
 				ON NewItemUOM.intItemId = Detail.intNewItemId
-				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId)
+				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, ISNULL(Detail.intItemUOMId, SourceTransaction.intItemUOMId)) 
 
 			LEFT JOIN dbo.tblICLot NewLot
 				ON NewLot.intLotId = Detail.intNewLotId
@@ -604,9 +601,23 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -SourceTransaction.dblQty
+			,dblQty					= -- -SourceTransaction.dblQty
+									dbo.fnCalculateQtyBetweenUOM (
+										dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId) 
+										,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)) 
+										,-SourceTransaction.dblQty
+									)
 			,dblUOMQty				= NewItemUOM.dblUnitQty
-			,dblCost				= Detail.dblNewCost
+			,dblCost				= --Detail.dblNewCost
+									ISNULL(
+										Detail.dblNewCost
+										,dbo.fnCalculateCostBetweenUOM(
+											dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId) 
+											,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)) 
+											,SourceTransaction.dblCost
+										)
+									)
+
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -636,7 +647,7 @@ BEGIN
 
 			LEFT JOIN dbo.tblICItemUOM NewItemUOM
 				ON NewItemUOM.intItemId = Detail.intNewItemId
-				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId)
+				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, ISNULL(Detail.intItemUOMId, SourceTransaction.intItemUOMId)) 
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Item.strLotTracking = 'No'

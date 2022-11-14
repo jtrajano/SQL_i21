@@ -36,18 +36,19 @@ BEGIN
 				b.intFuelingPositionId,
 				b.intProductNumber ,
 				I.strDescription,
-				a.dblFuelVolume as dblPriorGallons,
-				a.dblFuelMoney as dblPriorDollars,
+				ISNULL(a.dblFuelVolume, 0) as dblPriorGallons,
+				ISNULL(a.dblFuelMoney, 0) as dblPriorDollars,
 				b.dblFuelVolume as dblCurrentGallons,
 				b.dblFuelMoney as dblCurrentDollars,
-				b.dblFuelVolume - a.dblFuelVolume as 'dblGallonsSold',
-				b.dblFuelMoney - a.dblFuelMoney as 'dblDollarsSold'
-	FROM		previous_day_reading a
-	INNER JOIN	current_day_reading b
+				b.dblFuelVolume - ISNULL(a.dblFuelVolume, 0) as 'dblGallonsSold',
+				b.dblFuelMoney - ISNULL(a.dblFuelMoney, 0) as 'dblDollarsSold'
+	FROM		current_day_reading b			
+	LEFT JOIN	previous_day_reading a
 	ON			a.intProductNumber = b.intProductNumber AND
 				a.intFuelingPositionId = b.intFuelingPositionId
 	JOIN dbo.tblICItemLocation IL 
-	ON ISNULL(CAST(b.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+	ON ISNULL(CAST(b.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, '')) AND
+				IL.intLocationId = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
 	 JOIN dbo.tblICItem I 
 		ON I.intItemId = IL.intItemId
 	 JOIN dbo.tblICItemUOM UOM 

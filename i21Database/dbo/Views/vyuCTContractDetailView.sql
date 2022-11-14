@@ -32,7 +32,7 @@ AS
 			CD.intFarmFieldId,					CD.intRateTypeId,				CD.intCurrencyExchangeRateId,
 			CD.strItemSpecification,
 			CD.dblQualityPremium,
-			CD.dblOptionalityPremium,
+			CD.dblOptionalityPremium,			CD.strContractReference,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -221,6 +221,10 @@ AS
 		, CD.intTaxGroupId
 		, CD.intTaxLocationId
 		, EFT.strAccountNumber
+		, CD.dtmEtaPol
+		, CD.dtmEtaPod
+		, CD.intGardenMarkId
+		, CD.intReasonCodeId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -325,6 +329,7 @@ AS
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId 
+	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
     cross apply (
      select
      dblHeaderBalance = CH.dblHeaderQuantity - sum(cd.dblQuantity - cd.dblBalance)

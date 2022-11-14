@@ -57,15 +57,15 @@ BEGIN TRY
 		SELECT 
 			intEntityId = 1
 		, strDescription = otc.strReference -- Notes
-		, intBankAccountIdFrom = otc.intBuyBankAccountId
-		, intBankAccountIdTo = otc.intBankAccountId 
-		, intGLAccountIdFrom = buyBA.intGLAccountId
-		, intGLAccountIdTo = sellBA.intGLAccountId
+		, intBankAccountIdFrom = otc.intBankAccountId 
+		, intBankAccountIdTo = otc.intBuyBankAccountId
+		, intGLAccountIdFrom = sellBA.intGLAccountId
+		, intGLAccountIdTo = buyBA.intGLAccountId
 		, intCurrencyExchangeRateTypeId = otc.intCurrencyExchangeRateTypeId -- Currency Pair
 		, dtmAccrual = otc.dtmTransactionDate
 		, dtmDate = otc.dtmMaturityDate
-		, dblAmountForeignFrom = otc.dblContractAmount -- Buy Amount
-		, dblAmountForeignTo = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+		, dblAmountForeignFrom = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+		, dblAmountForeignTo = otc.dblContractAmount -- Buy Amount
 		, intFutOptTransactionId = otc.intFutOptTransactionId
 		, intFutOptTransactionHeaderId = otc.intFutOptTransactionHeaderId
 		, strDerivativeId = otc.strInternalTradeNo

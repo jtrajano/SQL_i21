@@ -70,6 +70,7 @@ FROM (
 	  AND CM.intSourceTransactionId IS NULL	  
 	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) NOT IN (UPPER('Write Off'), UPPER('CF Invoice'))
 	  AND (ISNULL(PAYMENT.dblAmountPaid, 0) > 0 OR (ISNULL(PAYMENT.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('ACH','Prepay', 'Cash', 'Manual Credit Card', 'Debit Card')))
+	  AND ISNULL(SMPM.ysnUserDefined, 0) = 0
 
 	UNION ALL	
 	

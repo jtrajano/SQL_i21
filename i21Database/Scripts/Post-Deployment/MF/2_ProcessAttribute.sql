@@ -764,11 +764,11 @@ BEGIN
         ,5
         ,2
         ,0
-        ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId Order by DisplayMember'
+        ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId UNION Select NULL as ValueMember, '''' as DisplayMember Order by DisplayMember'
 END
 Else
 Begin
-	Update tblMFAttribute SEt intAttributeTypeId =1,strSQL='select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId Order by DisplayMember' Where intAttributeId = 36
+	Update tblMFAttribute SEt intAttributeTypeId =1,strSQL='select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember from tblICStorageLocation SL JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId Where intLocationId=@intLocationId UNION Select NULL as ValueMember, '''' as DisplayMember Order by DisplayMember' Where intAttributeId = 36
 End
 GO
 

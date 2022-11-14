@@ -1,26 +1,32 @@
-﻿CREATE PROC uspMFGetRecipeItemByProduct (
-	@intItemId INT
-	,@intLocationId INT
-	,@intWorkOrderId INT = 0
-	)
+﻿CREATE PROCEDURE [dbo].[uspMFGetRecipeItemByProduct] (
+	@intItemId		INT
+  , @intLocationId	INT
+  , @intWorkOrderId INT = 0
+  , @dtmPlannedDate DATETIME = NULL
+)
 AS
 BEGIN
 	--To get all the input item for the selected workorder
-	DECLARE @dtmCurrentDate DATETIME
-		,@dtmCurrentDateTime DATETIME
-		,@intDayOfYear INT
-		,@intManufacturingProcessId INT
-		,@strPackagingCategory NVARCHAR(50)
-		,@intPMCategoryId INT
-		,@dblCalculatedQuantity DECIMAL(24, 10)
-		,@intItemUOMId INT
-		,@intUnitMeasureId INT
+	DECLARE @dtmCurrentDate				DATETIME
+		  , @dtmCurrentDateTime			DATETIME
+		  , @intDayOfYear				INT
+		  , @intManufacturingProcessId	INT
+		  , @strPackagingCategory		NVARCHAR(50)
+		  , @intPMCategoryId			INT
+		  , @dblCalculatedQuantity		DECIMAL(24, 10)
+		  , @intItemUOMId				INT
+		  , @intUnitMeasureId			INT
+		  , @ysnRecipeHeaderValidation  BIT = 0
 
-	SELECT @dtmCurrentDateTime = GETDATE()
+
+	SELECT @dtmCurrentDateTime = GETDATE(), @dtmPlannedDate = ISNULL(@dtmPlannedDate, GETDATE()) 
 
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
 	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDateTime)
+
+	SELECT @ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
+	FROM tblMFCompanyPreference;
 
 	IF @intWorkOrderId = 0
 	BEGIN
@@ -66,9 +72,13 @@ BEGIN
 		JOIN tblMFRecipeItemType rt ON rt.intRecipeItemTypeId = ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
-			AND r.ysnActive = 1
-			AND (
-				ri.intRecipeItemTypeId = 2
+			AND ri.intRecipeId = (SELECT TOP 1 intRecipeId
+								FROM tblMFRecipe
+								WHERE intItemId = @intItemId AND intLocationId = @intLocationId AND 
+										((@ysnRecipeHeaderValidation = 0 AND ysnActive = 1) OR (@ysnRecipeHeaderValidation = 1 AND @dtmPlannedDate <= dtmValidTo AND @dtmPlannedDate >= dtmValidFrom))
+								ORDER BY dtmCreated DESC)
+			--AND r.ysnActive = 1
+			AND (ri.intRecipeItemTypeId = 2
 				OR (
 					ri.intRecipeItemTypeId = 1
 					AND (
@@ -133,7 +143,12 @@ BEGIN
 		JOIN tblMFRecipeItemType rt ON rt.intRecipeItemTypeId = ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
-			AND r.ysnActive = 1
+			--AND r.ysnActive = 1
+			AND ri.intRecipeId = (SELECT TOP 1 intRecipeId
+													FROM tblMFRecipe
+													WHERE intItemId = @intItemId AND intLocationId = @intLocationId AND 
+														 ((@ysnRecipeHeaderValidation = 0 AND ysnActive = 1) OR (@ysnRecipeHeaderValidation = 1 AND @dtmPlannedDate <= dtmValidTo AND @dtmPlannedDate >= dtmValidFrom))
+													ORDER BY dtmCreated DESC)
 			AND (
 				ri.intRecipeItemTypeId = 2
 				OR (
@@ -151,7 +166,7 @@ BEGIN
 							)
 						)
 					)
-				)
+			)
 		ORDER BY rt.strName
 			,ri.intRecipeItemId
 	END
@@ -287,7 +302,12 @@ BEGIN
 		JOIN tblMFRecipeItemType rt ON rt.intRecipeItemTypeId = ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
-			AND r.ysnActive = 1
+			--AND r.ysnActive = 1
+			AND ri.intRecipeId = (SELECT TOP 1 intRecipeId
+													FROM tblMFRecipe
+													WHERE intItemId = @intItemId AND intLocationId = @intLocationId AND 
+														 ((@ysnRecipeHeaderValidation = 0 AND ysnActive = 1) OR (@ysnRecipeHeaderValidation = 1 AND @dtmPlannedDate <= dtmValidTo AND @dtmPlannedDate >= dtmValidFrom))
+													ORDER BY dtmCreated DESC)
 			AND (
 				ri.intRecipeItemTypeId = 2
 				OR (
@@ -411,7 +431,12 @@ BEGIN
 		JOIN tblMFRecipeItemType rt ON rt.intRecipeItemTypeId = ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
-			AND r.ysnActive = 1
+			--AND r.ysnActive = 1
+			AND ri.intRecipeId = (SELECT TOP 1 intRecipeId
+													FROM tblMFRecipe
+													WHERE intItemId = @intItemId AND intLocationId = @intLocationId AND 
+														 ((@ysnRecipeHeaderValidation = 0 AND ysnActive = 1) OR (@ysnRecipeHeaderValidation = 1 AND @dtmPlannedDate <= dtmValidTo AND @dtmPlannedDate >= dtmValidFrom))
+													ORDER BY dtmCreated DESC)
 			AND (
 				ri.intRecipeItemTypeId = 2
 				OR (

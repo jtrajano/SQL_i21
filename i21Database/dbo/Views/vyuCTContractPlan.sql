@@ -52,7 +52,8 @@ AS
 			CL.strLocationName,
 			IB.strInsuranceBy,
 			CQ.strContainerType,
-			CT.strCity					AS strArbitration
+			CT.strCity					AS strArbitration,
+			CP.strContractBase
 
 	FROM	tblCTContractPlan		CP	LEFT
 	JOIN	tblEMEntity				SP	ON	SP.intEntityId				=		CP.intSalespersonId					LEFT

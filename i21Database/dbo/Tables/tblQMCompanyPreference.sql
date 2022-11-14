@@ -25,7 +25,9 @@
 	intDefaultSampleStatusId INT DEFAULT(5),
 	ysnSetDefaultReceivedDateInSampleScreen BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnSetDefaultReceivedDateInSampleScreen] DEFAULT 1,
 	intCuppingSessionLimit INT DEFAULT(18),
-	intSamplePrintEmailTemplate INT NULL DEFAULT 0
+	intSamplePrintEmailTemplate INT NULL DEFAULT 0,
+	ysnAllowEditingAfterSampleApproveReject BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnAllowEditingAfterSampleApproveReject] DEFAULT 0,
+	ysnAllowEditingTheItemNo BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnAllowEditingTheItemNo] DEFAULT 0,
 	CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intRejectLotStatus] FOREIGN KEY ([intRejectLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),

@@ -1046,17 +1046,11 @@ BEGIN TRY
 				--AND CE.strEntityNo <> ''
 				IF @intUserId IS NULL
 				BEGIN
-					IF EXISTS (
-							SELECT 1
-							FROM tblSMUserSecurity
-							WHERE strUserName = 'irelyadmin'
-							)
-						SELECT TOP 1 @intUserId = intEntityId
-						FROM tblSMUserSecurity
-						WHERE strUserName = 'irelyadmin'
+				IF EXISTS (SELECT TOP 1 intEntityId FROM tblSMUserSecurity WHERE ysnAdmin = 1)
+						 SELECT TOP 1 @intUserId = intEntityId FROM tblSMUserSecurity WHERE ysnAdmin = 1
 					ELSE
 						SELECT TOP 1 @intUserId = intEntityId
-						FROM tblSMUserSecurity
+						FROM tblSMUserSecurity	
 				END
 
 				SELECT @intFreightTermId = intFreightTermId

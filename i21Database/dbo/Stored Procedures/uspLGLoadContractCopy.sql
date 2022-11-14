@@ -107,6 +107,7 @@ BEGIN TRY
 		,strFVoyageNumber
 		,intForwardingAgentEntityId
 		,strForwardingAgentRef
+		,intShipperEntityId
 		,intInsurerEntityId
 		,dblInsuranceValue
 		,intInsuranceCurrencyId
@@ -230,6 +231,7 @@ BEGIN TRY
 		,strFVoyageNumber
 		,intForwardingAgentEntityId
 		,strForwardingAgentRef
+		,intShipperEntityId
 		,intInsurerEntityId
 		,dblInsuranceValue
 		,intInsuranceCurrencyId

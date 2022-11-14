@@ -19,7 +19,7 @@ BEGIN
 
 			DELETE FROM tblHDCoworkerIssue
 			WHERE intUserId = @UserId AND
-				  intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+				  intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail
 
 			--Start Sync Time Off Request
 
@@ -57,7 +57,7 @@ BEGIN
 						   ,intTimeEntryPeriodDetailId						= ISNULL(TimeEntryPeriodDetail.intTimeEntryPeriodDetailId, 0)
 						   ,intEntityId										= Agent.intEntityId
 						   ,ysnActive										= ISNULL(CoworkerGoalTimeEntryperiodDetails.ysnActive, 0)
-						   ,strNoCoworkerGoal								= CASE WHEN CoworkerGoalTimeEntryperiodDetails.intEntityId IS NULL AND hw.intTicketHoursWorkedId IS NOT NULL
+						   ,strNoCoworkerGoal								= CASE WHEN CoworkerGoalTimeEntryperiodDetails.intEntityId IS NULL AND AgentTimeEntryPeriodDetailSummaries.dblTotalHours > 0
 																						THEN 'No Coworker Goal Setup but has time entry. '
 																					ELSE ''
 																			  END
@@ -68,7 +68,7 @@ BEGIN
 																					ELSE ''
 																			  END
 						   ,strInactiveWithTimeEntry						=  ''
-						   ,strUnapprovedTimeEntry					      =  CASE WHEN  hw.intTicketHoursWorkedId IS NOT NULL AND ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
+						   ,strUnapprovedTimeEntry					      =  CASE WHEN  AgentTimeEntryPeriodDetailSummaries.dblTotalHours > 0 AND ApprovalInfo.strStatus IS NOT NULL AND ( ApprovalInfo.strStatus NOT IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
 																						THEN 'Has unapproved Time Entry.'
 																					ELSE ''
 																			 END 
@@ -105,15 +105,15 @@ BEGIN
 							WHERE TimeEntry.intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail AND
 								  TimeEntry.intEntityId = Agent.intEntityId
 						) TimeEntry
-						OUTER APPLY(
-							SELECT TOP 1 a.intTicketHoursWorkedId 
-							FROM vyuHDTicketHoursWorked a 
-								INNER JOIN tblEMEntity b 
-							ON a.intAgentEntityId = b.intEntityId
-							WHERE a.dtmDate >= TimeEntryPeriodDetail.dtmBillingPeriodStart AND a.dtmDate <= TimeEntryPeriodDetail.dtmBillingPeriodEnd AND
-								  b.intEntityId = TimeEntry.intEntityId
+						--OUTER APPLY(
+						--	SELECT TOP 1 a.intTicketHoursWorkedId 
+						--	FROM vyuHDTicketHoursWorked a 
+						--		INNER JOIN tblEMEntity b 
+						--	ON a.intAgentEntityId = b.intEntityId
+						--	WHERE a.dtmDate >= TimeEntryPeriodDetail.dtmBillingPeriodStart AND a.dtmDate <= TimeEntryPeriodDetail.dtmBillingPeriodEnd AND
+						--		  b.intEntityId = TimeEntry.intEntityId
 					
-						) hw
+						--) hw
 						OUTER APPLY(
 							SELECT  strStatus = Approval.strStatus 
 							FROM tblSMApproval Approval
