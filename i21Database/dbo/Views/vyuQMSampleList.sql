@@ -220,8 +220,6 @@ SELECT S.intSampleId
 	,S.dblB5Price
 	,S.intB5PriceUOMId
 	,PUOM5.strUnitMeasure AS strB5PriceUOM
-	,S.intBatchId
-	,Batch.strBatchId
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -271,7 +269,6 @@ LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = Co
 LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPackagesUOMId
 LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
 LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
-LEFT JOIN tblMFBatch AS Batch ON S.intBatchId = Batch.intBatchId
 LEFT JOIN tblEMEntity B1 ON B1.intEntityId = S.intBuyer1Id
 LEFT JOIN tblEMEntity B2 ON B2.intEntityId = S.intBuyer2Id
 LEFT JOIN tblEMEntity B3 ON B3.intEntityId = S.intBuyer3Id
