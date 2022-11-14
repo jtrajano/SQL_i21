@@ -242,12 +242,18 @@ DECLARE
           ,[dtmTransactionDate]   
           ,[dblDebit]      
           ,[dblCredit]
-          ,[dblDebitForeign] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN 0 ELSE [dblDebitForeign]  END
-          ,[dblCreditForeign] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN 0 ELSE [dblCreditForeign] END
+          ,[dblDebitForeign] = CASE WHEN A.strModule IN ('GL', 'CM', 'CM Forwards', 'CM In-Transit', 'CM Swaps')
+                                    THEN CASE WHEN A.OffSet = 1 THEN 0 ELSE [dblDebitForeign]  END
+                                    ELSE [dblDebitForeign] END
+          ,[dblCreditForeign] = CASE WHEN A.strModule IN ('GL', 'CM', 'CM Forwards', 'CM In-Transit', 'CM Swaps')
+                                    THEN CASE WHEN A.OffSet = 1 THEN 0 ELSE [dblCreditForeign] END
+                                    ELSE [dblCreditForeign] END
           ,[dtmDate]      
           ,[ysnIsUnposted]    
           ,[intConcurrencyId]    
-          ,[intCurrencyId] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN [intDetailCurrencyId] ELSE [intCurrencyId] END
+          ,[intCurrencyId] = CASE WHEN A.strModule IN ('GL', 'CM', 'CM Forwards', 'CM In-Transit', 'CM Swaps')
+                                    THEN CASE WHEN A.OffSet = 1 THEN [intDetailCurrencyId] ELSE [intCurrencyId] END
+                                    ELSE [intCurrencyId] END
           ,[intUserId]     
           ,[intEntityId]     
           ,[dtmDateEntered]    
