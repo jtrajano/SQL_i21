@@ -68,6 +68,7 @@
     [strSmartSheetLink] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
     [strEnvironmentLink] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
     [intDeploymentTypeId] [int] null,
+    [dblTotalEstimatedHours]					NUMERIC(18, 6) NULL DEFAULT 0,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
