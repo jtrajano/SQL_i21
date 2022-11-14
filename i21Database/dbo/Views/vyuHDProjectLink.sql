@@ -93,6 +93,7 @@
 			,strDeploymentType = DeploymentType.strDeploymentType
 			,strEnvironmentLink = a.strEnvironmentLink
 			,intDeploymentTypeId = a.intDeploymentTypeId
+			,dblTotalEstimatedHours = a.dblTotalEstimatedHours
 		from
 			tblHDProject a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
