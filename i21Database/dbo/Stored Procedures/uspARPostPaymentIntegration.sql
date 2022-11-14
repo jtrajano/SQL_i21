@@ -95,7 +95,7 @@ BEGIN
 						                END	
     FROM tblARPayment A
     INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
-    INNER JOIN B ON A.intPaymentId = B.intPaymentId
+    INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
     INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
     LEFT OUTER JOIN (
 		SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
