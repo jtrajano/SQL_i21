@@ -70,6 +70,21 @@ SELECT S.intSampleId
 	,strNetWtPerPackagesUOM = PWUOM1.strUnitMeasure
 	,strNetWtSecondPackageBreakUOM = PWUOM2.strUnitMeasure
 	,strNetWtThirdPackageBreakUOM = PWUOM2.strUnitMeasure	
+	,B1.strName AS strBuyer1
+	,B2.strName AS strBuyer2
+	,B3.strName AS strBuyer3
+	,B4.strName AS strBuyer4
+	,B5.strName AS strBuyer5
+	,QB1.strUnitMeasure AS strB1QtyUOM
+	,QB2.strUnitMeasure AS strB2QtyUOM
+	,QB3.strUnitMeasure AS strB3QtyUOM
+	,QB4.strUnitMeasure AS strB4QtyUOM
+	,QB5.strUnitMeasure AS strB5QtyUOM
+	,PUOM1.strUnitMeasure AS strB1PriceUOM
+	,PUOM2.strUnitMeasure AS strB2PriceUOM
+	,PUOM3.strUnitMeasure AS strB3PriceUOM
+	,PUOM4.strUnitMeasure AS strB4PriceUOM
+	,PUOM5.strUnitMeasure AS strB5PriceUOM
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
