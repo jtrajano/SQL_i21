@@ -377,8 +377,8 @@ DECLARE
           ,[dtmTransactionDate]  
           ,[dblCredit]  
           ,[dblDebit]
-          ,[dblDebitForeign]  
           ,[dblCreditForeign]  
+          ,[dblDebitForeign]  
           ,[dtmDate] = U.dtmReverseDate  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
