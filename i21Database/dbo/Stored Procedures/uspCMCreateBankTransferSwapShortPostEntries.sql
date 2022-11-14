@@ -289,9 +289,9 @@ END
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTSwapToFXGLAccountId
         ,[dblDebit]              = 0
-        ,[dblCredit]             = dblAmountFrom
+        ,[dblCredit]             = dblPayableFn -- dblAmountFrom
         ,[dblDebitForeign]       = 0
-        ,[dblCreditForeign]      = dblAmountFrom/dblRateAmountTo  
+        ,[dblCreditForeign]      = dblPayableFx -- dblAmountFrom/dblRateAmountTo  
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -318,9 +318,9 @@ END
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTSwapFromFXGLAccountId
-        ,[dblDebit]              = dblAmountFrom
+        ,[dblDebit]              = dblReceivableFn-- dblAmountFrom
         ,[dblCredit]             = 0
-        ,[dblDebitForeign]       = dblAmountForeignFrom
+        ,[dblDebitForeign]       = dblReceivableFx-- dblAmountForeignFrom
         ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      

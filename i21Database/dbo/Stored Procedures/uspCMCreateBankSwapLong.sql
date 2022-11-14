@@ -44,6 +44,10 @@ dblCrossRate,
 dblReverseRate,
 dblAmountSettlementFrom,
 dblRateAmountSettlementFrom,
+dblReceivableFn,
+dblReceivableFx,
+dblPayableFn,
+dblPayableFx,
 intConcurrencyId
 )
 select 
@@ -58,8 +62,8 @@ intCurrencyIdAmountFrom,
 dblAmountTo = dblAmountFrom,
 dblAmountForeignTo = dblAmountForeignFrom,
 dblRateAmountFrom,
-GLDetail.dblCreditForeign,
-GLDetail.dblCredit,
+dblPayableFx, --GLDetail.dblCreditForeign,
+dblPayableFn, --GLDetail.dblCredit,
 GLDetail.dblExchangeRate,
 intRateTypeIdAmountFrom = GLDetail.intCurrencyExchangeRateTypeId,
 DATEADD(DAY, 1, dtmDate),
@@ -69,6 +73,10 @@ ROUND(dblAmountFrom/dblAmountTo,6),
 ROUND(dblAmountTo/dblAmountFrom,6),
 dblAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN GLDetail.dblCreditForeign ELSE 0 END,
 dblRateAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN 1 ELSE 0 END,
+dblReceivableFn=dblPayableFn,
+dblReceivableFx=dblPayableFx,
+dblPayableFn=dblReceivableFn,
+dblPayableFx=dblReceivableFx,
 1
 from tblCMBankTransfer  A
 OUTER APPLY(
