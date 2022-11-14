@@ -161,7 +161,7 @@ SELECT
 	,ysnHasCreditApprover				= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 	,dblCreditStopDays					= ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
 	,intCreditStopDays					= CUS.intCreditStopDays
-	,ysnInvoiceReturned					= ISNULL(RETURNINVOICE.ysnReturned,0)
+	,ysnInvoiceReturned					= ISNULL(RELATEDINVOICE.ysnReturned,0)
 	,ysnInterCompany					= ISNULL(INV.ysnInterCompany,0)
 	,ysnImportFromCSV					= ISNULL(INV.ysnImportFromCSV,0)
 	,strInterCompanyName				= INTERCOMPANY.strCompanyName
@@ -209,6 +209,8 @@ SELECT
 	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE.strType = 'Tax Adjustment' AND RELATEDINVOICE.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,strRelatedInvoiceNumber			= RELATEDINVOICE.strInvoiceNumber
 	,strPrintFormat						= INV.strPrintFormat
+	,intOpportunityId					= INV.intOpportunityId
+	,strOpportunityName					= OPUR.strName
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -326,10 +328,6 @@ OUTER APPLY(
 ) INTERCOMPANY
 LEFT JOIN
 (
-	SELECT  ysnReturned,intInvoiceId FROM tblARInvoice  WITH (NOLOCK) 
-) ReturnInvoice ON ReturnInvoice.intInvoiceId = INV.intOriginalInvoiceId
-LEFT JOIN
-(
 	SELECT  
 		 intInvoiceId
 		,ysnPosted
@@ -337,6 +335,7 @@ LEFT JOIN
 		,strInvoiceNumber
 		,dblPayment
 		,dblBasePayment
+		,ysnReturned
 	FROM tblARInvoice  WITH (NOLOCK) 
 ) RELATEDINVOICE ON RELATEDINVOICE.intInvoiceId = INV.intOriginalInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
