@@ -193,6 +193,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
 	 , ysnTankRequired						= ITMNO.ysnTankRequired
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
+	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
