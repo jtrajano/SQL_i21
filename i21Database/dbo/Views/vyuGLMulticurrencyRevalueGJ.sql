@@ -29,6 +29,7 @@ SELECT   strTransactionType		=	GJ.strTransactionType
 FROM tblGLJournal GJ JOIN tblGLJournalDetail GJD ON GJ.intJournalId = GJD.intJournalId
 LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = GJD.intCurrencyExchangeRateTypeId
 LEFT JOIN tblSMCompanyPreference CP on CP.intDefaultCurrencyId = GJD.intCurrencyId
+LEFT JOIN tblGLAccount AC ON AC.intAccountId = GJD.intAccountId
 WHERE ysnPosted = 1 
 AND CP.intDefaultCurrencyId IS NULL
-
+AND AC.ysnRevalue = 1
