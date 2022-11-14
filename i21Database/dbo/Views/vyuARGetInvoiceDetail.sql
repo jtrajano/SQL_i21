@@ -191,6 +191,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strReasonablenessComment				= INV.strReasonablenessComment
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
+	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
