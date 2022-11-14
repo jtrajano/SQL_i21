@@ -42,6 +42,7 @@ declare
 	,@intNumber int
 	,@ysnMultiplePriceFixation bit
 	,@dblFixedLots numeric(18,6)
+	,@strLotCalculationType nvarchar(50)
 	;
 
 begin try
@@ -149,6 +150,7 @@ begin try
 		/*Create Price Fixation Detail record*/
 		
 		select @intStartingNumberId = intStartingNumberId from tblSMStartingNumber where strModule = 'Contract Management' and strTransactionType = 'Price Fixation Trade No';
+		select @strLotCalculationType = strLotCalculationType from tblCTCompanyPreference
 
 		exec dbo.uspSMGetStartingNumber 
 			@intStartingNumberId  = @intStartingNumberId
@@ -226,7 +228,7 @@ begin try
 		update
 			tblCTPriceFixation
 		set
-			dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot
+			dblLotsFixed = CASE WHEN @strLotCalculationType = 'Ask' THEN ROUND(@dblTotalPricedQuantity / @dblQuantityPerLot,2) ELSE @dblTotalPricedQuantity / @dblQuantityPerLot END
 			,dblPriceWORollArb = @dblTotalWeightedAvg / @dblTotalPricedLots
 		where
 			intPriceFixationId = @intPriceFixationId;
