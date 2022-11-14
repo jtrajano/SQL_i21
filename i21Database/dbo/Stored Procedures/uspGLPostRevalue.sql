@@ -242,12 +242,12 @@ DECLARE
           ,[dtmTransactionDate]   
           ,[dblDebit]      
           ,[dblCredit]
-          ,[dblDebitForeign] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN [dblDebitForeign] ELSE 0 END
-          ,[dblCreditForeign] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN [dblCreditForeign] ELSE 0 END
+          ,[dblDebitForeign] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN 0 ELSE [dblDebitForeign]  END
+          ,[dblCreditForeign] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN 0 ELSE [dblCreditForeign] END
           ,[dtmDate]      
           ,[ysnIsUnposted]    
           ,[intConcurrencyId]    
-          ,[intCurrencyId] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN [intCurrencyId] ELSE [intDetailCurrencyId] END
+          ,[intCurrencyId] = CASE WHEN [strJournalLineDescription] LIKE '%Offset Revalue%' THEN [intDetailCurrencyId] ELSE [intCurrencyId] END
           ,[intUserId]     
           ,[intEntityId]     
           ,[dtmDateEntered]    
