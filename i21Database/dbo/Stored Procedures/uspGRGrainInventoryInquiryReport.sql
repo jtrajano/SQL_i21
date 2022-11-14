@@ -1046,7 +1046,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED BEGINNING (INC DP)'
 	,''
-	,ISNULL(A.dblUnits,0) - ISNULL(B.dblUnits,0)
+	,A.dblUnits - ISNULL(B.dblUnits,0)
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1092,14 +1092,14 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED INCREASE (INC DP)'
 	,'+'
-	,ISNULL(A.dblUnits,0) + ISNULL(B.dblUnits,0)
+	,A.dblUnits + ISNULL(B.dblUnits,0)
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
 	,A.strLocationName
 	,A.strUOM
 FROM (
-	SELECT SUM(ISNULL(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END,0)) dblUnits
+	SELECT SUM(dblUnits) dblUnits
 		,strCommodityCode
 		,intCommodityId
 		,intCompanyLocationId
@@ -1107,7 +1107,8 @@ FROM (
 		,strUOM
 	FROM @InventoryData
 	WHERE (
-		strLabel IN ('RECEIVED','INTERNAL TRANSFERS RECEIVED','NET ADJUSTMENTS')
+		strLabel IN ('RECEIVED','INTERNAL TRANSFERS RECEIVED')
+			OR (strLabel = 'NET ADJUSTMENTS' AND strSign = '+')
 	)
 	GROUP BY strCommodityCode
 		,intCommodityId
@@ -1140,7 +1141,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED DECREASE (INC DP)'
 	,'-'
-	,ABS(ISNULL(A.dblUnits,0) - ISNULL(B.dblUnits,0))
+	,ABS(A.dblUnits - ISNULL(B.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1156,6 +1157,7 @@ FROM (
 	FROM @InventoryData
 	WHERE (
 		strLabel IN ('SHIPPED','INTERNAL TRANSFERS SHIPPED')
+			OR (strLabel = 'NET ADJUSTMENTS' AND strSign = '-')
 	)
 	GROUP BY strCommodityCode
 		,intCommodityId

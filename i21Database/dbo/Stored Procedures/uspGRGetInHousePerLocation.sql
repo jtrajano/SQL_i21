@@ -71,8 +71,7 @@ BEGIN
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
-		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
-
+	
 	--=============================
 	-- Customer Owned
 	--=============================
@@ -352,7 +351,7 @@ BEGIN
 			,intCompanyLocationId
 			,strLocationName
 		FROM @tblResult
-		WHERE strTransactionType IN ('Inventory Shipment', 'Invoice')
+		WHERE strTransactionType IN ('Inventory Shipment')
 		GROUP BY dtmDate
 			,strDistribution 
 			,strTransactionType
