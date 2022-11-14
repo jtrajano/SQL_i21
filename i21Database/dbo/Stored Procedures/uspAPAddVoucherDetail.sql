@@ -527,7 +527,7 @@ INSERT
 	,intBookId							
 	,intSubBookId	
 	,dblPackageBreakups
-	,intNumOfPackagesUOM1
+	,intNumOfPackagesUOM
 	,dblNumberOfPackages
 	,intNumOfPackagesUOM2
 	,dblNumberOfPackages2
