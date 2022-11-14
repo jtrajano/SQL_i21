@@ -43,11 +43,11 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
                                                          ELSE CAST('Voucher' AS NVARCHAR(100))
                                                     END
      , strPreInvoiceDocumentNo				= B.strBillId
-     , dblNetWtPackages						= BD.dblNetWeightPerPackage
+     , dblNetWtPackages						= CAST(BD.intNumOfPackagesUOM AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage
      , dblNoPackages						= BD.dblNumberOfPackages
-     , dblNetWt2ndPackages					= BD.dblNetWeightPerPackage2
+     , dblNetWt2ndPackages					= CAST(BD.intNumOfPackagesUOM2 AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage2
      , dblNo2ndPackages						= BD.dblNumberOfPackages2
-     , dblNetWt3rdPackages					= BD.dblNetWeightPerPackage3
+     , dblNetWt3rdPackages					= CAST(BD.intNumOfPackagesUOM3 AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage3
      , dblNo3rdPackages						= BD.dblNumberOfPackages3
      , strWarehouseCode						= SL.strName
 FROM tblQMCatalogueReconciliationDetail CRD 
