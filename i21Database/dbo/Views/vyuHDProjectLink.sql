@@ -84,9 +84,11 @@
 			,intDataConversionLead = a.intDataConversionLead
 			,intCustomerSuccessManager = a.intCustomerSuccessManager
 			,intImplementationLead = a.intImplementationLead
+			,intExecutiveSponsor = a.intExecutiveSponsor
 			,strDataConversionLead = DataConversionLead.strName
 			,strCustomerSuccessManager = CustomerSuccessManager.strName
 			,strImplementationLead = ImplementationLead.strName
+			,strExecutiveSponsor = ExecutiveSponsor.strName
 			,strSmartSheetLink = a.strSmartSheetLink
 			,strDeploymentType = DeploymentType.strDeploymentType
 			,strEnvironmentLink = a.strEnvironmentLink
@@ -104,6 +106,7 @@
 			left join tblEMEntity DataConversionLead on DataConversionLead.intEntityId = a.intDataConversionLead
 			left join tblEMEntity CustomerSuccessManager on CustomerSuccessManager.intEntityId = a.intCustomerSuccessManager
 			left join tblEMEntity ImplementationLead on ImplementationLead.intEntityId = a.intImplementationLead
+			left join tblEMEntity ExecutiveSponsor on ExecutiveSponsor.intEntityId = a.intExecutiveSponsor
 			left join tblHDVersion n on n.intVersionId = a.intTargetVersionId
 			left join tblCRMOpportunityProject o on o.intProjectId = a.intProjectId
 			left join tblCRMOpportunity p on p.intOpportunityId = o.intOpportunityId

@@ -125,21 +125,21 @@ BEGIN TRY
 		SET @dblConfig_Line20	= CONVERT(NUMERIC(18,8), @strConfig_Line20) 
 		SET @line22				= CONVERT(NUMERIC(18,8), @strConfig_Line22)
 		
-		SELECT @line1_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '2'
+		SELECT @line1_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('2','2_TR')
 		SELECT @line2a_A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode LIKE '5D%'
 		SELECT @line2b_A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode LIKE '3%'
 
 		SET @line2c_B = @line2a_A + @line2b_A
 
-		SELECT @line3_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '2A'
-		SELECT @line4_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '2B'
+		SELECT @line3_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('2A','2A_TR')
+		SELECT @line4_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('2B','2B_TR')
 
 		SET @line5_C = @line1_B + @line2c_B + @line3_B + @line4_B
 
 		SELECT @line6_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode LIKE '7%'
-		SELECT @line7_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '6'	
-		SELECT @line9_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10Y'
-		SELECT @line10_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '8'
+		SELECT @line7_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('6','6_TR')
+		SELECT @line9_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('10Y','10Y_TR')
+		SELECT @line10_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('8','8_TR')
 
 		SET @line12_C = @line6_B + @line7_B + @line8_B + @line9_B + @line10_B + @line11_B
 		SET @line13_C = @line5_C - @line12_C
@@ -147,11 +147,11 @@ BEGIN TRY
 		SET @line15 = @dblConfig_Line15a * @line15b
 		SET @line16 = @line14 - @line15
 
-		SELECT @dblLine17a = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10I'
-		SELECT @dblLine17b = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10J'
-		SELECT @dblLine17c = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '9'
-		SELECT @dblLine17d = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10G'
-		SELECT @dblLine17e = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10A'
+		SELECT @dblLine17a = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('10I','10I_TR')
+		SELECT @dblLine17b = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('10J','10J_TR')
+		SELECT @dblLine17c = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('9'  ,'9_TR')
+		SELECT @dblLine17d = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('10G','10G_TR')
+		SELECT @dblLine17e = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('10A','10A_TR')
 
 		SET @line17a = @dblLine17a * @dblConfig_Line17
 		SET @line17b = @dblLine17b * @dblConfig_Line17
@@ -165,7 +165,7 @@ BEGIN TRY
 		SET @line21 = @line19 - @line20
 		SET @line23 = @line21 - @line22
 
-		SELECT @line24 = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '1'
+		SELECT @line24 = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode IN ('1', '1_TR')
 
 	END
 

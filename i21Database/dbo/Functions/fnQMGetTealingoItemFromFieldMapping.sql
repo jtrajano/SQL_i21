@@ -25,6 +25,7 @@ AS BEGIN
         + '-'
         + SUSTAINABILITY.strDescription -- Rain Forest / Sustainability
     WHERE S.intSampleId = @intSampleId
+    ORDER BY ITEM1.strItemNo ASC
     
     RETURN @intItemId    
 END

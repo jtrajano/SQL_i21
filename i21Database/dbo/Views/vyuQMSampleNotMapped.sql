@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuQMSampleNotMapped
+﻿CREATE VIEW [dbo].[vyuQMSampleNotMapped]
 AS
 SELECT S.intSampleId
 	,ST.intControlPointId
@@ -49,24 +49,44 @@ SELECT S.intSampleId
     ,CSD.intCuppingSessionDetailId
 	,CompanyLocation.strLocationName AS strCompanyLocationName
 	-- Auction
-	--, SaleYear.strSaleYear AS strSaleYear 
-	--, CatalogueType.strCatalogueType AS strCatalogueType 
-	--, BR.strName AS strBroker
-	--, Grade.strDescription AS strGrade
-	--, LeafCategory.strAttribute2 AS strLeafCategory
-	--, MLT.strDescription AS strManufacturingLeafType
-	--, Season.strDescription AS strSeason
-	--, GardenMark.strGardenMark AS strGardenMark
-	--, ProductLine.strDescription AS strProductLine
-	--, Producer.strName AS strProducer 
-	--, PG.strName AS strPurchaseGroup
-	--, Currency.strCurrency AS strCurrency
-	--, ECT.strName AS strEvaluatorsCodeAtTBO
-	--, City.strCity AS strFromLocationCode
-	--, Size.strBrandCode AS strBrandCode
-	--, VG.strName AS strValuationGroupName
-	--, MarketZone.strMarketZoneCode AS strMarketZoneCode
-	--, DSL.strName AS strDestinationStorageLocationName
+	, SaleYear.strSaleYear AS strSaleYear 
+	, CatalogueType.strCatalogueType AS strCatalogueType 
+	, BR.strName AS strBroker
+	, Grade.strDescription AS strGrade
+	, LeafCategory.strAttribute2 AS strLeafCategory
+	, MLT.strDescription AS strManufacturingLeafType
+	, Season.strDescription AS strSeason
+	, GardenMark.strGardenMark AS strGardenMark
+	, ProductLine.strDescription AS strProductLine
+	, Producer.strName AS strProducer 
+	, PG.strName AS strPurchaseGroup
+	, Currency.strCurrency AS strCurrency
+	, ECT.strName AS strEvaluatorsCodeAtTBO
+	, City.strCity AS strFromLocationCode
+	, Size.strBrandCode AS strBrandCode
+	, VG.strName AS strValuationGroupName
+	, MarketZone.strMarketZoneCode AS strMarketZoneCode
+	, DSL.strName AS strDestinationStorageLocationName
+	,strNetWtPerPackagesUOM = PWUOM1.strUnitMeasure
+	,strNetWtSecondPackageBreakUOM = PWUOM2.strUnitMeasure
+	,strNetWtThirdPackageBreakUOM = PWUOM2.strUnitMeasure
+	,S.intBatchId
+	,Batch.strBatchId
+	,B1.strName AS strBuyer1
+	,B2.strName AS strBuyer2
+	,B3.strName AS strBuyer3
+	,B4.strName AS strBuyer4
+	,B5.strName AS strBuyer5
+	,QB1.strUnitMeasure AS strB1QtyUOM
+	,QB2.strUnitMeasure AS strB2QtyUOM
+	,QB3.strUnitMeasure AS strB3QtyUOM
+	,QB4.strUnitMeasure AS strB4QtyUOM
+	,QB5.strUnitMeasure AS strB5QtyUOM
+	,PUOM1.strUnitMeasure AS strB1PriceUOM
+	,PUOM2.strUnitMeasure AS strB2PriceUOM
+	,PUOM3.strUnitMeasure AS strB3PriceUOM
+	,PUOM4.strUnitMeasure AS strB4PriceUOM
+	,PUOM5.strUnitMeasure AS strB5PriceUOM
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -100,26 +120,43 @@ LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
 LEFT JOIN tblQMCuppingSessionDetail CSD ON CSD.intCuppingSessionDetailId = S.intCuppingSessionDetailId
 LEFT JOIN tblQMCuppingSession CSH ON CSH.intCuppingSessionId = CSD.intCuppingSessionId
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId
---LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
---LEFT JOIN tblQMCatalogueType CatalogueType ON CatalogueType.intCatalogueTypeId = S.intCatalogueTypeId 
---LEFT JOIN vyuEMEntity BR ON BR.intEntityId = S.intBrokerId
---	AND BR.strType = 'Broker'
---LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = S.intGradeId
---	AND Grade.strType = 'Grade'
---LEFT JOIN tblICCommodityAttribute2 LeafCategory ON LeafCategory.intCommodityAttributeId2 = S.intLeafCategoryId
---LEFT JOIN tblICCommodityAttribute MLT ON MLT.intCommodityAttributeId = S.intManufacturingLeafTypeId
---LEFT JOIN tblQMGardenMark GardenMark ON GardenMark.intGardenMarkId = S.intGardenMarkId
---LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = S.intGradeId
---	AND Grade.strType = 'Season'
---LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = S.intProductLineId
---LEFT JOIN vyuEMEntity Producer ON Producer.intEntityId = S.intProducerId
---	AND BR.strType = 'Producer'
---LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = S.intPurchaseGroupId
---LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = S.intCurrencyId
---LEFT JOIN vyuEMEntity ECT ON ECT.intEntityId = S.intEvaluatorsCodeAtTBOId
---	AND BR.strType = 'User'
---LEFT JOIN tblSMCity City ON City.intCityId = S.intFromLocationCodeId
---LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
---LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
---LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
---LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
+LEFT JOIN tblICUnitMeasure PWUOM1 ON PWUOM1.intUnitMeasureId = S.intNetWtPerPackagesUOMId
+LEFT JOIN tblICUnitMeasure PWUOM2 ON PWUOM2.intUnitMeasureId = S.intNetWtSecondPackageBreakUOMId
+LEFT JOIN tblICUnitMeasure PWUOM3 ON PWUOM3.intUnitMeasureId = S.intNetWtThirdPackageBreakUOMId
+LEFT JOIN tblMFBatch AS Batch ON S.intBatchId = Batch.intBatchId
+LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
+LEFT JOIN tblQMCatalogueType CatalogueType ON CatalogueType.intCatalogueTypeId = S.intCatalogueTypeId 
+LEFT JOIN tblEMEntity BR ON BR.intEntityId = S.intBrokerId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = S.intGradeId
+LEFT JOIN tblICCommodityAttribute2 LeafCategory ON LeafCategory.intCommodityAttributeId2 = S.intLeafCategoryId
+LEFT JOIN tblICCommodityAttribute MLT ON MLT.intCommodityAttributeId = S.intManufacturingLeafTypeId
+LEFT JOIN tblQMGardenMark GardenMark ON GardenMark.intGardenMarkId = S.intGardenMarkId
+LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = S.intSeasonId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = S.intProductLineId
+LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = S.intProducerId
+LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = S.intPurchaseGroupId
+LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = S.intCurrencyId
+LEFT JOIN tblEMEntity ECT ON ECT.intEntityId = S.intEvaluatorsCodeAtTBOId
+LEFT JOIN tblSMCity City ON City.intCityId = S.intFromLocationCodeId
+LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
+LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
+LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
+LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
+LEFT JOIN tblEMEntity B1 ON B1.intEntityId = S.intBuyer1Id
+LEFT JOIN tblEMEntity B2 ON B2.intEntityId = S.intBuyer2Id
+LEFT JOIN tblEMEntity B3 ON B3.intEntityId = S.intBuyer3Id
+LEFT JOIN tblEMEntity B4 ON B4.intEntityId = S.intBuyer4Id
+LEFT JOIN tblEMEntity B5 ON B5.intEntityId = S.intBuyer5Id
+LEFT JOIN tblICUnitMeasure QB1 ON QB1.intUnitMeasureId = S.intB1QtyUOMId
+LEFT JOIN tblICUnitMeasure QB2 ON QB2.intUnitMeasureId = S.intB2QtyUOMId
+LEFT JOIN tblICUnitMeasure QB3 ON QB3.intUnitMeasureId = S.intB3QtyUOMId
+LEFT JOIN tblICUnitMeasure QB4 ON QB4.intUnitMeasureId = S.intB4QtyUOMId
+LEFT JOIN tblICUnitMeasure QB5 ON QB5.intUnitMeasureId = S.intB5QtyUOMId
+LEFT JOIN tblICUnitMeasure PUOM1 ON PUOM1.intUnitMeasureId = S.intB1PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM2 ON PUOM2.intUnitMeasureId = S.intB2PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM3 ON PUOM3.intUnitMeasureId = S.intB3PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM4 ON PUOM4.intUnitMeasureId = S.intB4PriceUOMId
+LEFT JOIN tblICUnitMeasure PUOM5 ON PUOM5.intUnitMeasureId = S.intB5PriceUOMId
+GO
+
+

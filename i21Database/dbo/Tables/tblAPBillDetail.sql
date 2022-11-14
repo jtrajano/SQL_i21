@@ -112,13 +112,14 @@
 	[intSubBookId] INT NULL,
 	[intCatalogueTypeId] INT NULL,
 	[dblPackageBreakups] DECIMAL(18,6),
-	[dblNetWeightPerPackage] DECIMAL(18,6),
+	[intNumOfPackagesUOM] INT NULL,
 	[dblNumberOfPackages] DECIMAL(18,6),
-	[dblNetWeightPerPackage2] DECIMAL(18,6),
+	[intNumOfPackagesUOM2] INT NULL,
 	[dblNumberOfPackages2] DECIMAL(18,6),
-	[dblNetWeightPerPackage3] DECIMAL(18,6),
+	[intNumOfPackagesUOM3] INT NULL,
 	[dblNumberOfPackages3] DECIMAL(18,6),
 	[intPurchasingGroupId] INT NULL,
+	[intMarketZoneId] INT NULL,
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
@@ -150,6 +151,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_tblCTBook] FOREIGN KEY ([intBookId]) REFERENCES tblCTBook([intBookId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblCTSubBook] FOREIGN KEY ([intSubBookId]) REFERENCES tblCTSubBook([intSubBookId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblSCTicketDistributionAllocation] FOREIGN KEY ([intTicketDistributionAllocationId]) REFERENCES tblSCTicketDistributionAllocation([intTicketDistributionAllocationId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES tblARMarketZone([intMarketZoneId]),
 ) ON [PRIMARY];
 
 

@@ -107,8 +107,16 @@ SELECT
 	B.[strPreInvoiceGardenNumber],
 	book.[strBook],
 	subBook.[strSubBook],
+	B.[dblPackageBreakups],
+	B.[dblNetWeightPerPackage],
+	B.[dblNumberOfPackages],
+	B.[dblNetWeightPerPackage2],
+	B.[dblNumberOfPackages2],
+	B.[dblNetWeightPerPackage3],
+	B.[dblNumberOfPackages3],
+	B.[intPurchasingGroupId],
 	cgt.strCatalogueType,
-	pg.strName AS strPurchasingGroup
+	pgrp.strName AS strPurchasingGroup
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -192,4 +200,4 @@ LEFT JOIN tblICLot lot
 LEFT JOIN tblQMCatalogueType cgt ON cgt.intCatalogueTypeId = B.intCatalogueTypeId
 LEFT JOIN tblCTBook book ON book.intBookId = B.intBookId
 LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = B.intSubBookId
-LEFT JOIN tblSMPurchasingGroup pg ON pg.intPurchasingGroupId = B.intPurchasingGroupId
+LEFT JOIN tblSMPurchasingGroup pgrp ON pgrp.intPurchasingGroupId = B.intPurchasingGroupId

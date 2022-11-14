@@ -16,6 +16,7 @@ BEGIN
 		  , @ysnSystemDefined		BIT
 		  , @ysnEmailOnly			BIT
 		  , @strLetterName			NVARCHAR(MAX)
+		  , @strSourceLetterName	NVARCHAR(MAX)
 		  , @strMessage				NVARCHAR(MAX)
 		  , @query					NVARCHAR(MAX)
 		  , @intEntityCustomerId	INT
@@ -99,6 +100,7 @@ BEGIN
 		RETURN
 
 	SELECT @intSourceLetterId = intSourceLetterId FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+
 	IF (@intSourceLetterId IS NULL OR @intSourceLetterId = '')
 	BEGIN
 		SELECT @strLetterName = strName, @ysnSystemDefined	= ysnSystemDefined FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
@@ -518,8 +520,10 @@ BEGIN
 	
 	WHILE EXISTS(SELECT NULL FROM @temp_SelectedCustomer)
 		BEGIN
-			DECLARE @CustomerId INT
-			DECLARE @ARBalance DECIMAL(18,6);
+			DECLARE @CustomerId 	INT
+			DECLARE @ARBalance 		DECIMAL(18,6)
+			DECLARE @CustomerName 	NVARCHAR(100)
+			DECLARE @CreditLimit	DECIMAL(18,6)
 
 			SELECT TOP 1 @CustomerId = intEntityCustomerId FROM @temp_SelectedCustomer ORDER BY intEntityCustomerId
 							
@@ -678,6 +682,35 @@ BEGIN
 						WHERE intEntityCustomerId = @CustomerId
 						GROUP BY intEntityCustomerId
 					END
+					ELSE
+					BEGIN
+						SELECT @ARBalance = ISNULL(dblARBalance, 0)
+						FROM tblARCustomer
+						WHERE intEntityId = @CustomerId
+					END
+
+					SELECT @CustomerName = E.strName
+					FROM tblEMEntity E
+					WHERE E.intEntityId = @CustomerId
+
+					SELECT @CreditLimit = ISNULL(dblCreditLimit, 0)
+					FROM tblARCustomer
+					WHERE intEntityId = @CustomerId
+
+					UPDATE #CustomerPlaceHolder 
+					SET strValue = @CustomerName
+					WHERE strPlaceHolder = '[EntityName]' 
+					  AND intEntityCustomerId = @CustomerId;
+
+					UPDATE #CustomerPlaceHolder 
+					SET strValue = CONVERT(VARCHAR, CAST(@ARBalance AS MONEY), 1)
+					WHERE strPlaceHolder = '[ARAmountPastDue]' 
+					  AND intEntityCustomerId = @CustomerId;
+					
+					UPDATE #CustomerPlaceHolder 
+					SET strValue = CONVERT(VARCHAR, CAST(@CreditLimit AS MONEY), 1)
+					WHERE strPlaceHolder = '[ARCreditLimit]' 
+					  AND intEntityCustomerId = @CustomerId;
 
 					IF(CHARINDEX('Sum', @SourceColumn) > 0)
 					BEGIN

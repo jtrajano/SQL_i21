@@ -561,8 +561,9 @@ BEGIN
 		,[strPostingError]		= 'Customer credit limit is either blank or COD! Only Cash Sale transaction is allowed.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I 
-	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId                      
-	WHERE I.[dblCustomerCreditLimit] IS NULL 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblARCustomer CUS ON I.intEntityCustomerId = CUS.intEntityId
+	WHERE CUS.strCreditCode = 'COD'
 	  AND I.[strTransactionType] NOT IN ('Cash', 'Cash Refund')
 	  AND I.[strType] != 'POS'	
 	  AND INV.[ysnValidCreditCode] <> 1
@@ -2794,6 +2795,40 @@ BEGIN
 	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
 	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	-- Check line of business segment of AR Account
+	SELECT
+		 [intInvoiceId]			= ARPIH.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPIH.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPIH.[strTransactionType]
+		,[intInvoiceDetailId]	= NULL 
+		,[intItemId]			= NULL 
+		,[strBatchId]			= ARPIH.[strBatchId]
+		,[strPostingError]		= 'Unable to find the AR account that matches the line of business. Please add ' + dbo.[fnGLGetOverrideAccountBySegment](ARPIH.[intAccountId], NULL, LOB.intSegmentCodeId, NULL) + ' to the chart of accounts.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	OUTER APPLY (
+		SELECT TOP 1 ysnOverrideARAccountLineOfBusinessSegment
+		FROM tblARCompanyPreference
+	) ARCP
+	OUTER APPLY (
+		SELECT TOP 1 intAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARPIH.[intAccountId], ISNULL(intSegmentCodeId, 0)), 0), intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
+	) LOB
+	WHERE ARCP.ysnOverrideARAccountLineOfBusinessSegment = 1
+	AND ISNULL(LOB.intAccountId, 0) = 0
+	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+	AND ARPIH.strSessionId = @strSessionId
 END
 
 IF @Post = @ZeroBit

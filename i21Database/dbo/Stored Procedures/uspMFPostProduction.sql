@@ -670,7 +670,9 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
-	DECLARE @strActualCost NVARCHAR(50) = NULL
+	DECLARE @strActualCost	 NVARCHAR(50)	= NULL
+		  , @strSourceNumber NVARCHAR(MAX)	= NULL
+		  , @strSourceType	 NVARCHAR(MAX)	= NULL
 
 	SELECT strActualCost = (
 			CASE 
@@ -703,9 +705,16 @@ BEGIN
 	WHERE DistItem.intLoadDistributionDetailId = @intLoadDistributionDetailId
 		AND ISNULL(DistItem.strReceiptLink, '') = ''
 
-	SELECT TOP 1 @strActualCost = strActualCost
+	SELECT TOP 1 @strActualCost		= strActualCost
 	FROM #tmpBlendIngredients
 	WHERE ISNULL(strActualCost, '') <> ''
+
+	SELECT TOP 1 @strSourceNumber	= strTransaction
+			   , @strSourceType		= (CASE WHEN strTransaction IS NOT NULL THEN 'Transport' ELSE NULL END)
+	FROM tblTRLoadDistributionDetail AS LDD
+	JOIN tblTRLoadDistributionHeader AS LDH ON LDD.intLoadDistributionHeaderId = LDH.intLoadDistributionHeaderId
+	JOIN tblTRLoadHeader AS LH ON LDH.intLoadHeaderId = LH.intLoadHeaderId
+	WHERE LDD.intLoadDistributionDetailId = @intLoadDistributionDetailId;
 
 	IF @strLotTracking = 'No'
 		INSERT INTO @ItemsForPost (
@@ -729,6 +738,8 @@ BEGIN
 			,intSourceTransactionId
 			,strSourceTransactionId
 			,strActualCostId
+			,strSourceNumber
+			,strSourceType
 			)
 		SELECT intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
@@ -767,6 +778,8 @@ BEGIN
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
 			,strActualCostId = @strActualCost
+			,strSourceNumber = @strSourceNumber
+			,strSourceType  = @strSourceType
 	ELSE
 		INSERT INTO @ItemsForPost (
 			intItemId
@@ -789,6 +802,8 @@ BEGIN
 			,intSourceTransactionId
 			,strSourceTransactionId
 			,strActualCostId
+			,strSourceNumber
+			,strSourceType
 			)
 		SELECT intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
@@ -827,6 +842,8 @@ BEGIN
 			,intSourceTransactionId = @INVENTORY_PRODUCE
 			,strSourceTransactionId = @strTransactionId
 			,strActualCostId = @strActualCost
+			,strSourceNumber = @strSourceNumber
+			,strSourceType  = @strSourceType
 
 	DELETE
 	FROM @GLEntries

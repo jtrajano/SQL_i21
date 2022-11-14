@@ -45,6 +45,7 @@ SELECT DISTINCT
     ,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
     ,CAP.intChargeAndPremiumId
 	,CAP.strChargeAndPremiumId
+    ,ysnDPLoadOut = [dbo].[fnGRCheckStorageIfFromLoadOut](CS.intCustomerStorageId)
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
@@ -121,4 +122,3 @@ LEFT JOIN tblGRTransferStorageReference TSR
 LEFT JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSR.intTransferStorageId
 WHERE CS.dblOpenBalance > 0
-    AND [dbo].[fnGRCheckStorageIfFromLoadOut](CS.intCustomerStorageId) = 0

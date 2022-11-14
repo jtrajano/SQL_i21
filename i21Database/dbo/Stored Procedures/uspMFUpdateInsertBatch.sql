@@ -41,6 +41,7 @@ BEGIN
 	BEGIN
 		--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult)
 		--SELECT @guidBatchLogId, 'Unique key(s) have no value(s).No action taken.'
+		SET @errorMessage = 'Insert/Update batch procedure error: ' + @errorMessage
 		RAISERROR(@errorMessage,16, 1)
 		RETURN -1
 	END

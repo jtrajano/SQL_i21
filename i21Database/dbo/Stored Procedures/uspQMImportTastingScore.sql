@@ -106,15 +106,15 @@ BEGIN TRY
             ,strTaste = IMP.strTaste
             ,strMouthFeel = IMP.strMouthfeel
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
+        INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
         LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
         LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
         INNER JOIN (
-            tblQMImportCatalogue IMP INNER JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
+            tblQMImportCatalogue IMP
             INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
             -- Colour
             LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season' AND COLOUR.strDescription = IMP.strColour
@@ -125,7 +125,7 @@ BEGIN TRY
             -- Tealingo Item
             LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
         )
-            ON S.strSaleYear = IMP.strSaleYear
+            ON SY.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.strSaleNumber = IMP.strSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType
@@ -169,7 +169,7 @@ BEGIN TRY
         FROM tblQMSample WHERE intSampleId = @intSampleId
         
         IF @intItemId IS NULL
-            SELECT @intItemId = ITEM.intItemId
+            SELECT TOP 1 @intItemId = ITEM.intItemId
             FROM tblQMSample S
             INNER JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
             INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
@@ -181,6 +181,8 @@ BEGIN TRY
                 + ORIGIN.strISOCode -- Origin
                 + '-'
                 + SUSTAINABILITY.strDescription -- Rain Forest / Sustainability
+            WHERE S.intSampleId = @intSampleId
+            ORDER BY ITEM.strItemNo
 
         -- If Tealingo Item is provided in the template but does not match the testing score, throw an error
         IF (@intItemId IS NOT NULL AND dbo.fnQMValidateTealingoItemTastingScore(
@@ -204,40 +206,20 @@ BEGIN TRY
                 @intItemId = @intDefaultItemId
                 ,@intCategoryId = @intDefaultCategoryId
 
-        SELECT @intItemId
-
         UPDATE S
         SET
             intConcurrencyId = S.intConcurrencyId + 1
             ,intSeasonId = @intColourId
-            ,strSeason = @strColour
             ,intBrandId = @intBrandId
-            ,strBrandCode = @strBrand
             ,intValuationGroupId = @intValuationGroupId
-            ,strValuationGroupName = @strValuationGroup
             ,strMusterLot = @strMusterLot
             ,strMissingLot = @strMissingLot
             ,strComments2 = @strComments2
             ,intItemId = @intItemId
             ,intLastModifiedUserId = @intEntityUserId
             ,dtmLastModified = @dtmDateCreated
+            ,intSampleStatusId = 3 -- Approved
         FROM tblQMSample S
-        WHERE S.intSampleId = @intSampleId
-
-        UPDATE A
-        SET
-            intConcurrencyId = A.intConcurrencyId + 1
-            ,intSeasonId = @intColourId
-            ,strSeason = @strColour
-            ,intBrandId = @intBrandId
-            ,strBrand = @strBrand
-            ,intValuationGroupId = @intValuationGroupId
-            ,strValuationGroupName = @strValuationGroup
-            ,strMusterLot = @strMusterLot
-            ,strMissingLot = @strMissingLot
-            ,strComments2 = @strComments2
-        FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         WHERE S.intSampleId = @intSampleId
 
         DECLARE @intProductId INT
@@ -266,110 +248,107 @@ BEGIN TRY
                         )
         END
 
-        -- Clear test properties of the default item
-        IF ISNULL(@intOriginalItemId, 0) <> ISNULL(@intItemId, 0)
-        BEGIN
-            DELETE FROM tblQMTestResult WHERE intSampleId = @intSampleId
-            -- Insert Test Result
-            INSERT INTO tblQMTestResult (
-                intConcurrencyId
-                ,intSampleId
-                ,intProductId
-                ,intProductTypeId
-                ,intProductValueId
-                ,intTestId
-                ,intPropertyId
-                ,strPanelList
-                ,strPropertyValue
-                ,dtmCreateDate
-                ,strResult
-                ,ysnFinal
-                ,strComment
-                ,intSequenceNo
-                ,dtmValidFrom
-                ,dtmValidTo
-                ,strPropertyRangeText
-                ,dblMinValue
-                ,dblPinpointValue
-                ,dblMaxValue
-                ,dblLowValue
-                ,dblHighValue
-                ,intUnitMeasureId
-                ,strFormulaParser
-                ,dblCrdrPrice
-                ,dblCrdrQty
-                ,intProductPropertyValidityPeriodId
-                ,intPropertyValidityPeriodId
-                ,intControlPointId
-                ,intParentPropertyId
-                ,intRepNo
-                ,strFormula
-                ,intListItemId
-                ,strIsMandatory
-                ,dtmPropertyValueCreated
-                ,intCreatedUserId
-                ,dtmCreated
-                ,intLastModifiedUserId
-                ,dtmLastModified
-                )
-            SELECT DISTINCT 1
-                ,@intSampleId
-                ,@intProductId
-                ,2 -- Item
-                ,@intItemId
-                ,PP.intTestId
-                ,PP.intPropertyId
-                ,''
-                ,''
-                ,@dtmDateCreated
-                ,''
-                ,0
-                ,''
-                ,PP.intSequenceNo
-                ,PPV.dtmValidFrom
-                ,PPV.dtmValidTo
-                ,PPV.strPropertyRangeText
-                ,PPV.dblMinValue
-                ,PPV.dblPinpointValue
-                ,PPV.dblMaxValue
-                ,PPV.dblLowValue
-                ,PPV.dblHighValue
-                ,PPV.intUnitMeasureId
-                ,PP.strFormulaParser
-                ,NULL
-                ,NULL
-                ,PPV.intProductPropertyValidityPeriodId
-                ,NULL
-                ,PC.intControlPointId
-                ,NULL
-                ,0
-                ,PP.strFormulaField
-                ,NULL
-                ,PP.strIsMandatory
-                ,NULL
-                ,@intEntityUserId
-                ,@dtmDateCreated
-                ,@intEntityUserId
-                ,@dtmDateCreated
-            FROM tblQMProduct AS PRD
-            JOIN tblQMProductControlPoint PC ON PC.intProductId = PRD.intProductId
-            JOIN tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
-            JOIN tblQMProductTest AS PT ON PT.intProductId = PP.intProductId
-                AND PT.intProductId = PRD.intProductId
-            JOIN tblQMTest AS T ON T.intTestId = PP.intTestId
-                AND T.intTestId = PT.intTestId
-            JOIN tblQMTestProperty AS TP ON TP.intPropertyId = PP.intPropertyId
-                AND TP.intTestId = PP.intTestId
-                AND TP.intTestId = T.intTestId
-                AND TP.intTestId = PT.intTestId
-            JOIN tblQMProperty AS PRT ON PRT.intPropertyId = PP.intPropertyId
-                AND PRT.intPropertyId = TP.intPropertyId
-            JOIN tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
-            WHERE PRD.intProductId = @intProductId
-                AND PC.intSampleTypeId = @intSampleTypeId
-                AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom) AND DATEPART(dy, PPV.dtmValidTo)
-            ORDER BY PP.intSequenceNo
-        END
+        -- Clear test properties of the previous item
+        DELETE FROM tblQMTestResult WHERE intSampleId = @intSampleId
+        -- Insert Test Result
+        INSERT INTO tblQMTestResult (
+            intConcurrencyId
+            ,intSampleId
+            ,intProductId
+            ,intProductTypeId
+            ,intProductValueId
+            ,intTestId
+            ,intPropertyId
+            ,strPanelList
+            ,strPropertyValue
+            ,dtmCreateDate
+            ,strResult
+            ,ysnFinal
+            ,strComment
+            ,intSequenceNo
+            ,dtmValidFrom
+            ,dtmValidTo
+            ,strPropertyRangeText
+            ,dblMinValue
+            ,dblPinpointValue
+            ,dblMaxValue
+            ,dblLowValue
+            ,dblHighValue
+            ,intUnitMeasureId
+            ,strFormulaParser
+            ,dblCrdrPrice
+            ,dblCrdrQty
+            ,intProductPropertyValidityPeriodId
+            ,intPropertyValidityPeriodId
+            ,intControlPointId
+            ,intParentPropertyId
+            ,intRepNo
+            ,strFormula
+            ,intListItemId
+            ,strIsMandatory
+            ,dtmPropertyValueCreated
+            ,intCreatedUserId
+            ,dtmCreated
+            ,intLastModifiedUserId
+            ,dtmLastModified
+            )
+        SELECT DISTINCT 1
+            ,@intSampleId
+            ,@intProductId
+            ,2 -- Item
+            ,@intItemId
+            ,PP.intTestId
+            ,PP.intPropertyId
+            ,''
+            ,''
+            ,@dtmDateCreated
+            ,''
+            ,0
+            ,''
+            ,PP.intSequenceNo
+            ,PPV.dtmValidFrom
+            ,PPV.dtmValidTo
+            ,PPV.strPropertyRangeText
+            ,PPV.dblMinValue
+            ,PPV.dblPinpointValue
+            ,PPV.dblMaxValue
+            ,PPV.dblLowValue
+            ,PPV.dblHighValue
+            ,PPV.intUnitMeasureId
+            ,PP.strFormulaParser
+            ,NULL
+            ,NULL
+            ,PPV.intProductPropertyValidityPeriodId
+            ,NULL
+            ,PC.intControlPointId
+            ,NULL
+            ,0
+            ,PP.strFormulaField
+            ,NULL
+            ,PP.strIsMandatory
+            ,NULL
+            ,@intEntityUserId
+            ,@dtmDateCreated
+            ,@intEntityUserId
+            ,@dtmDateCreated
+        FROM tblQMProduct AS PRD
+        JOIN tblQMProductControlPoint PC ON PC.intProductId = PRD.intProductId
+        JOIN tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
+        JOIN tblQMProductTest AS PT ON PT.intProductId = PP.intProductId
+            AND PT.intProductId = PRD.intProductId
+        JOIN tblQMTest AS T ON T.intTestId = PP.intTestId
+            AND T.intTestId = PT.intTestId
+        JOIN tblQMTestProperty AS TP ON TP.intPropertyId = PP.intPropertyId
+            AND TP.intTestId = PP.intTestId
+            AND TP.intTestId = T.intTestId
+            AND TP.intTestId = PT.intTestId
+        JOIN tblQMProperty AS PRT ON PRT.intPropertyId = PP.intPropertyId
+            AND PRT.intPropertyId = TP.intPropertyId
+        JOIN tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+        WHERE PRD.intProductId = @intProductId
+            AND PC.intSampleTypeId = @intSampleTypeId
+            AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom) AND DATEPART(dy, PPV.dtmValidTo)
+        ORDER BY PP.intSequenceNo
 
         -- Begin Update Actual Test Result
 

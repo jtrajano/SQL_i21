@@ -74,6 +74,7 @@ INSERT INTO tblLGLoad (
 	,strFVoyageNumber
 	,intForwardingAgentEntityId
 	,strForwardingAgentRef
+	,intShipperEntityId
 	,intInsurerEntityId
 	,dblInsuranceValue
 	,intInsuranceCurrencyId
@@ -194,6 +195,7 @@ SELECT @strNewLoadNumber
 	,strFVoyageNumber
 	,intForwardingAgentEntityId
 	,strForwardingAgentRef
+	,intShipperEntityId
 	,intInsurerEntityId
 	,dblInsuranceValue
 	,intInsuranceCurrencyId

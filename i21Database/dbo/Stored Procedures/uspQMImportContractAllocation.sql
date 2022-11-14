@@ -64,15 +64,13 @@ BEGIN TRY
             ,ysnSampleContractItemMatch = CASE WHEN CD.intItemId = S.intItemId THEN 1 ELSE 0 END
             ,strSampleNumber = S.strSampleNumber
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
+        INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
         INNER JOIN (
             tblQMImportCatalogue IMP
-            -- Sale Year
-            INNER JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
             -- Contract Number
             LEFT JOIN tblCTContractHeader CH ON CH.strContractNumber = IMP.strContractNumber
             -- Contract Sequence
@@ -81,7 +79,7 @@ BEGIN TRY
             LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
             -- Group Number
             LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
-        ) ON S.strSaleYear = IMP.strSaleYear
+        ) ON SY.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
             AND S.strSaleNumber = IMP.strSaleNumber
             AND CT.strCatalogueType = IMP.strCatalogueType

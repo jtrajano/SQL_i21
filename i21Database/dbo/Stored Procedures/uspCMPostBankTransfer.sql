@@ -542,8 +542,7 @@ END
   
       IF @ysnPost =1
         EXEC [uspCMInsertGainLossBankTransfer] 
-          @intDefaultCurrencyId, 
-          'Gain / Loss from Bank Transfer',
+          @intDefaultCurrencyId,
           @intBankTransferTypeId,
           @intGLAccountIdTo,
           @strTransactionId,

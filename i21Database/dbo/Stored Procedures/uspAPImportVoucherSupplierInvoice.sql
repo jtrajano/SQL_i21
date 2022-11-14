@@ -46,6 +46,9 @@ DECLARE @voucherTotal DECIMAL(18,2);
 SELECT
 	DENSE_RANK() OVER(ORDER BY A.strInvoiceNumber, C.intEntityId) AS intPartitionId,
 	intEntityVendorId					=	C.intEntityId,
+	strVendorId							=	A.strVendorId,
+	intAccountId						=	C.intGLAccountExpenseId,
+	ysnActive							=	C.ysnPymtCtrlActive,
 	dtmDate								=	CONVERT(DATETIME,REPLACE(A.dtmDate,'.','/'), 103),
 	dtmBillDate							=	CONVERT(DATETIME,REPLACE(A.dtmSaleDate,'.','/'), 103),
 	strVendorOrderNumber				=	A.strInvoiceNumber,
@@ -69,9 +72,11 @@ SELECT
 	/*Not exists in i21*/		
 	strCatalogueType					=	A.strCatalogueType,
 	strChannel							=	A.strChannel,
-	strPackageBreakups					=	CAST(A.strPackageBreakups AS DECIMAL(18,6)),
+	dblPackageBreakups					=	CAST(A.strPackageBreakups AS DECIMAL(18,6)),
 	strPurchaseType						=	A.strPurchaseType,
+	intTransactionType					=	CASE WHEN A.strPurchaseType = 'I' THEN 1 ELSE 3 END,
 	strDocumentNumber					=	A.strDocumentNumber,
+	strPurchasingGroup					=	A.strStorageLocation,
 	dblWeightBreakup1					=	CAST(A.dblWeightBreakup1 AS DECIMAL(18,6)),
 	dblWeightBreakup1Bags				=	CAST(A.dblWeightBreakup1Bags AS DECIMAL(18,6)),
 	dblWeightBreakup2					=	CAST(A.dblWeightBreakup2 AS DECIMAL(18,6)),
@@ -87,13 +92,17 @@ FROM tblAPImportVoucherSupplierInvoice A
 LEFT JOIN tblAPVendor C ON C.strVendorId = A.strVendorId
 LEFT JOIN tblICStorageLocation D ON A.strStorageLocation = D.strName
 LEFT JOIN tblICLot E ON A.strLotNumber = E.strLotNumber
+LEFT JOIN tblSMPurchasingGroup F ON F.strName = A.strStorageLocation
 
 DECLARE @voucherPayables AS VoucherPayable
 INSERT INTO @voucherPayables
 (
 	intPartitionId
     ,intEntityVendorId
+	,intAccountId
     ,intTransactionType
+	-- ,intPurchasingGroupId
+	-- ,strPurchasingGroup
 	,dtmDate
 	,dtmVoucherDate
 	,dblOrderQty
@@ -122,7 +131,10 @@ INSERT INTO @voucherPayables
 SELECT
 	intPartitionId
     ,intEntityVendorId
-    ,CASE WHEN A.strPurchaseType = 'I' THEN 1 ELSE 3 END
+	,A.intAccountId
+    ,A.intTransactionType
+	-- ,intPurchasingGroupId
+	-- ,strPurchasingGroup
 	,A.dtmDate
 	,A.dtmBillDate
 	,dblQuantityToBill
@@ -140,12 +152,12 @@ SELECT
 	,strBook							
 	,strSubBook		
 	,dblPackageBreakups
-	,dblNetWeightPerPackage
-	,dblNumberOfPackages
-	,dblNetWeightPerPackage2
-	,dblNumberOfPackages2
-	,dblNetWeightPerPackage3
-	,dblNumberOfPackages3
+	,dblNetWeightPerPackage = A.dblWeightBreakup1
+	,dblNumberOfPackages = A.dblWeightBreakup1Bags
+	,dblNetWeightPerPackage2 = A.dblWeightBreakup2
+	,dblNumberOfPackages2 = A.dblWeightBreakup2Bags
+	,dblNetWeightPerPackage3 = A.dblWeightBreakup3
+	,dblNumberOfPackages3 = A.dblWeightBreakup3Bags
 	,0
 FROM #tmpConvertedSupplierInvoiceData A
 
@@ -166,3 +178,153 @@ BEGIN
 	RAISERROR('No valid record to create the voucher.', 16, 1);
 	RETURN;
 END
+
+--COUNT VALID IMPORTS
+INSERT INTO @vouchers SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdVoucher) WHERE intID > 0
+SET @totalVoucherCreated = @@ROWCOUNT;
+
+--COUNT INVALID IMPORTS AND RECORD ALL ERRORS
+SELECT @totalIssues = COUNT(*)
+FROM #tmpConvertedSupplierInvoiceData A
+WHERE 
+	A.intEntityVendorId IS NULL
+OR A.intTransactionType IS NULL
+OR (A.dblQuantityToBill IS NULL)
+OR (A.intAccountId IS NULL)
+OR A.ysnActive = 0
+
+DECLARE @invalidPayables AS TABLE (strVendorOrderNumber NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS)
+INSERT INTO @invalidPayables
+SELECT strVendorOrderNumber, strError
+FROM (
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find vendor ' + strVendorId AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intEntityVendorId IS NULL AND strVendorId IS NOT NULL
+	UNION ALL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Vendor ' + strVendorId + ' is not an active vendor.' AS strError FROM #tmpConvertedSupplierInvoiceData WHERE ysnActive = 0
+	UNION ALL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find transaction type ' + strPurchaseType FROM #tmpConvertedSupplierInvoiceData WHERE intTransactionType IS NULL
+	-- UNION ALL
+	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find distribution type  ' + strDetailInfo FROM #tmpConvertedSupplierInvoiceData WHERE dblQuantityToBill IS NULL AND strDetailInfo IS NOT NULL
+	UNION ALL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': No default vendor expense account setup ' FROM #tmpConvertedSupplierInvoiceData WHERE intAccountId IS NULL --AND strDateOrAccount IS NOT NULL
+	UNION ALL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid vendor format ' + strVendorId AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intEntityVendorId IS NULL AND strVendorId IS NULL
+	UNION ALL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid transaction type ' + strPurchaseType FROM #tmpConvertedSupplierInvoiceData WHERE intTransactionType IS NULL --AND CAST(intVoucherType AS NVARCHAR) IS NULL
+	-- UNION ALL
+	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid distribution type  ' + strDetailInfo FROM #tmpConvertedSupplierInvoiceData WHERE dblQuantityToBill IS NULL AND strDetailInfo IS NULL
+	-- UNION ALL
+	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid account format ' FROM #tmpConvertedSupplierInvoiceData WHERE intAccountId IS NULL AND strDateOrAccount IS NULL
+) tblErrors
+ORDER BY intPartitionId
+
+--LOG ALL
+DECLARE @logId INT;
+IF @totalVoucherCreated > 0
+BEGIN
+	INSERT INTO tblAPImportLog
+	(
+		strEvent,
+		strIrelySuiteVersion,
+		intEntityId,
+		dtmDate,
+		intSuccessCount,
+		intErrorCount
+	)
+	SELECT
+		CASE 
+			WHEN @totalIssues > 0 THEN 'Some voucher(s) successfully imported from CSV'
+		ELSE
+			'Successfully imported voucher(s) from CSV'
+		END,
+		(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
+		@userId,
+		GETDATE(),
+		@totalVoucherCreated,
+		@totalIssues
+
+	SET @logId = SCOPE_IDENTITY();
+	SET @importLogId = @logId;
+
+	--SUCCESS
+	INSERT INTO tblAPImportLogDetail
+	(
+		intImportLogId,
+		strEventDescription
+	)
+	SELECT
+		@logId,
+		'Voucher ' + B.strBillId + ' successfully created'
+	FROM @vouchers A
+	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+
+	--FAILED
+	INSERT INTO tblAPImportLogDetail
+	(
+		intImportLogId,
+		strEventDescription
+	)
+	SELECT
+		@logId,
+		strError
+	FROM @invalidPayables A
+END
+
+
+--INSERT FAILED LOG HEADER ONLY IF THERE ARE NO CREATED VOUCHER
+--INSERT ERROR LOG
+IF @totalIssues > 0 AND @totalVoucherCreated <= 0
+BEGIN
+	INSERT INTO tblAPImportLog
+	(
+		strEvent,
+		strIrelySuiteVersion,
+		intEntityId,
+		dtmDate,
+		intSuccessCount,
+		intErrorCount
+	)
+	SELECT TOP 1
+		'Importing voucher Failed',
+		(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
+		@userId,
+		GETDATE(),
+		@totalVoucherCreated,
+		@totalIssues
+	FROM #tmpConvertedSupplierInvoiceData A
+	WHERE 
+		A.intEntityVendorId IS NULL
+	OR A.intTransactionType IS NULL
+	OR (A.dblQuantityToBill IS NULL)
+	OR (A.intAccountId IS NULL)
+
+	SET @logId = SCOPE_IDENTITY();
+
+	SET @importLogId = @logId;
+
+	INSERT INTO tblAPImportLogDetail
+	(
+		intImportLogId,
+		strEventDescription
+	)
+	SELECT
+		@logId,
+		strError
+	FROM @invalidPayables
+END
+
+--LOG THE FAILED POSTING
+-- IF @failedPostCount > 0
+-- BEGIN
+-- 	INSERT INTO tblAPImportLogDetail
+-- 	(
+-- 		intImportLogId,
+-- 		strEventDescription
+-- 	)
+-- 	SELECT 
+-- 		@logId,
+-- 		A.strDescription
+-- 	FROM tblGLPostResult A
+-- 	WHERE 
+-- 		A.strBatchId = @batchIdUsed
+-- 	AND A.strDescription NOT LIKE '%success%'
+-- END

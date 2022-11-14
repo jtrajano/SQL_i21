@@ -30,11 +30,15 @@ BEGIN TRY
     -- From Location Code
     LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
     -- Sub Book
-    LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel + IMP.strSubChannel
+    LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel
     -- Sample Type
     LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
     -- Net Weight Per Packages / Quantity UOM
-    LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
+    LEFT JOIN tblICUnitMeasure UOM ON IMP.strNoOfPackagesUOM IS NOT NULL AND UOM.strSymbol = IMP.strNoOfPackagesUOM
+    -- Net Weight 2nd Package-Break / Quantity UOM
+    LEFT JOIN tblICUnitMeasure UOM2 ON IMP.strNoOfPackagesSecondPackageBreakUOM IS NOT NULL AND UOM2.strSymbol = IMP.strNoOfPackagesSecondPackageBreakUOM
+    -- Net Weight 3rd Package-Break / Quantity UOM
+    LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
     -- Broker
     LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
     -- Format log message
@@ -49,9 +53,11 @@ BEGIN TRY
             + CASE WHEN (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '') THEN 'SUSTAINABILITY, ' ELSE '' END
             + CASE WHEN (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '') THEN 'EVALUATORS CODE AT TBO, ' ELSE '' END
             + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
-            + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '') THEN 'CHANNEL / SUB CHANNEL, ' ELSE '' END
+            + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') <> '') THEN 'CHANNEL, ' ELSE '' END
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
-            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0) THEN 'NET WEIGHT PER PACKAGES, ' ELSE '' END
+            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '') THEN 'NO OF PACKAGES UOM, ' ELSE '' END
+            + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
+            + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
@@ -66,9 +72,11 @@ BEGIN TRY
         OR (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '')
         OR (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '')
         OR (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '')
-        OR (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '') <> '')
+        OR (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') <> '')
         OR (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
-        OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.dblNetWtPerPackages, 0) <> 0)
+        OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '')
+        OR (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '')
+        OR (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '')
         OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
     )
     -- End Validation
@@ -100,12 +108,12 @@ BEGIN TRY
         ,@dtmManufacturingDate DATETIME
         ,@dblSampleQty NUMERIC(18, 6)
         ,@intTotalNumberOfPackageBreakups BIGINT
-        ,@dblNetWtPerPackages NUMERIC(18, 6)
+        ,@intNetWtPerPackagesUOMId INT
         ,@intRepresentingUOMId INT
         ,@intNoOfPackages BIGINT
-        ,@dblNetWtSecondPackageBreak NUMERIC(18, 6)
+        ,@intNetWtSecondPackageBreakUOMId INT
         ,@intNoOfPackagesSecondPackageBreak BIGINT
-        ,@dblNetWtThirdPackageBreak NUMERIC(18, 6)
+        ,@intNetWtThirdPackageBreakUOMId INT
         ,@intNoOfPackagesThirdPackageBreak BIGINT
         ,@intProductLineId INT
 	    ,@strProductLine NVARCHAR(50)
@@ -128,6 +136,7 @@ BEGIN TRY
         ,@strFromLocationCode NVARCHAR(50)
         ,@strSampleBoxNumber NVARCHAR(50)
         ,@strSubBook NVARCHAR(100)
+        ,@intSubBookId INT
         ,@intSampleTypeId INT
         ,@strBatchNo NVARCHAR(50)
         ,@intEntityUserId INT
@@ -179,12 +188,12 @@ BEGIN TRY
             ,dtmManufacturingDate = IMP.dtmManufacturingDate
             ,dblSampleQty = IMP.dblTotalQtyOffered
             ,intTotalNumberOfPackageBreakups = IMP.intTotalNumberOfPackageBreakups
-            ,dblNetWtPerPackages = IMP.dblNetWtPerPackages
+            ,intNetWtPerPackagesUOMId = UOM.intUnitMeasureId
             ,intRepresentingUOMId = UOM.intUnitMeasureId
             ,intNoOfPackages = IMP.intNoOfPackages
-            ,dblNetWtSecondPackageBreak = IMP.dblNetWtSecondPackageBreak
+            ,intNetWtSecondPackageBreakUOMId = UOM2.intUnitMeasureId
             ,intNoOfPackagesSecondPackageBreak = IMP.intNoOfPackagesSecondPackageBreak
-            ,dblNetWtThirdPackageBreak = IMP.dblNetWtThirdPackageBreak
+            ,intNetWtThirdPackageBreakUOMId = UOM3.intUnitMeasureId
             ,intNoOfPackagesThirdPackageBreak = IMP.intNoOfPackagesThirdPackageBreak
             ,intProductLineId = SUSTAINABILITY.intCommodityProductLineId
             ,strProductLine = SUSTAINABILITY.strDescription
@@ -206,7 +215,8 @@ BEGIN TRY
             ,intFromLocationCodeId = FROM_LOC_CODE.intCityId
             ,strFromLocationCode = FROM_LOC_CODE.strCity
             ,strSampleBoxNumber = IMP.strSampleBoxNumberTBO
-            ,strSubBook = ISNULL(IMP.strChannel, '') + ISNULL(IMP.strSubChannel, '')
+            ,strSubBook = SUBBOOK.strSubBook
+            ,intSubBookId = SUBBOOK.intSubBookId
             ,intSampleTypeId = SAMPLE_TYPE.intSampleTypeId
             ,strBatchNo = IMP.strBatchNo
             ,intEntityUserId = IL.intEntityId
@@ -242,11 +252,15 @@ BEGIN TRY
         -- From Location Code
         LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
         -- Sub Book
-        LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel + IMP.strSubChannel
+        LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel
         -- Sample Type
         LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
         -- Net Weight Per Packages / Quantity UOM
-        LEFT JOIN tblICUnitMeasure UOM ON IMP.dblNetWtPerPackages IS NOT NULL AND UOM.strSymbol LIKE CAST(FLOOR(IMP.dblNetWtPerPackages) AS NVARCHAR(50)) + '%'
+        LEFT JOIN tblICUnitMeasure UOM ON IMP.strNoOfPackagesUOM IS NOT NULL AND UOM.strSymbol = IMP.strNoOfPackagesUOM
+        -- Net Weight 2nd Package-Break / Quantity UOM
+        LEFT JOIN tblICUnitMeasure UOM2 ON IMP.strNoOfPackagesSecondPackageBreakUOM IS NOT NULL AND UOM2.strSymbol = IMP.strNoOfPackagesSecondPackageBreakUOM
+        -- Net Weight 3rd Package-Break / Quantity UOM
+        LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
         -- Broker
         LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
 
@@ -280,12 +294,12 @@ BEGIN TRY
         ,@dtmManufacturingDate
         ,@dblSampleQty
         ,@intTotalNumberOfPackageBreakups
-        ,@dblNetWtPerPackages
+        ,@intNetWtPerPackagesUOMId
         ,@intRepresentingUOMId
         ,@intNoOfPackages
-        ,@dblNetWtSecondPackageBreak
+        ,@intNetWtSecondPackageBreakUOMId
         ,@intNoOfPackagesSecondPackageBreak
-        ,@dblNetWtThirdPackageBreak
+        ,@intNetWtThirdPackageBreakUOMId
         ,@intNoOfPackagesThirdPackageBreak
         ,@intProductLineId
 	    ,@strProductLine
@@ -308,6 +322,7 @@ BEGIN TRY
         ,@strFromLocationCode
         ,@strSampleBoxNumber
         ,@strSubBook
+        ,@intSubBookId
         ,@intSampleTypeId
         ,@strBatchNo
         ,@intEntityUserId
@@ -320,12 +335,12 @@ BEGIN TRY
 
         SELECT @intSampleId = S.intSampleId
         FROM tblQMSample S
-        INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = A.intCatalogueTypeId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
         INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
             ON V.intEntityId = S.intEntityId
-        WHERE S.strSaleYear = @strSaleYear
+        LEFT JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+        WHERE SY.strSaleYear = @strSaleYear
         AND CL.intCompanyLocationId = @intCompanyLocationId
         AND S.strSaleNumber = @strSaleNumber
         AND CT.intCatalogueTypeId = @intCatalogueTypeId
@@ -382,34 +397,28 @@ BEGIN TRY
                 ,strComment
                 ,intCreatedUserId
                 ,dtmCreated
+                ,intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId
-                ,strSaleYear
                 ,strSaleNumber
                 ,dtmSaleDate
                 ,intCatalogueTypeId
-                ,strCatalogueType
                 ,dtmPromptDate
                 ,strChopNumber
                 ,intGradeId
-                ,strGrade
                 ,intManufacturingLeafTypeId
-                ,strManufacturingLeafType
                 ,intSeasonId
-                ,strSeason
                 ,intGardenMarkId
-                ,strGardenMark
                 ,dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages
+                ,intNetWtPerPackagesUOMId
                 ,intNoOfPackages
-                ,dblNetWtSecondPackageBreak
+                ,intNetWtSecondPackageBreakUOMId
                 ,intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak
+                ,intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak
                 ,intProductLineId
-                ,strProductLine
                 ,ysnOrganic
                 ,dblGrossWeight
                 ,strBatchNo
@@ -421,13 +430,10 @@ BEGIN TRY
                 ,ysnBoughtAsReserve
                 ,ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO
                 ,intFromLocationCodeId
-                ,strFromLocationCode
                 ,strSampleBoxNumber
                 ,strComments3
                 ,intBrokerId
-                ,strBroker
                 )
             SELECT
                 intConcurrencyId = 1
@@ -455,34 +461,28 @@ BEGIN TRY
                 ,strComment = @strComments
                 ,intCreatedUserId = @intEntityUserId
                 ,dtmCreated = @dtmDateCreated
+                ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
                 ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
                 ,dtmPromptDate = @dtmPromptDate
                 ,strChopNumber = @strChopNumber
                 ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
                 ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
                 ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
                 ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
                 ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNetWtSecondPackageBreakUOMId = @intNetWtSecondPackageBreakUOMId
                 ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNetWtThirdPackageBreakUOMId = @intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
                 ,strBatchNo = @strBatchNo
@@ -494,111 +494,12 @@ BEGIN TRY
                 ,ysnBoughtAsReserve = @ysnBoughtAsReserve
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
                 ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
             
             SET @intSampleId = SCOPE_IDENTITY()
-
-            INSERT INTO tblQMAuction (
-                intConcurrencyId
-                ,intSampleId
-                ,intSaleYearId
-                ,strSaleYear
-                ,strSaleNumber
-                ,dtmSaleDate
-                ,intCatalogueTypeId
-                ,strCatalogueType
-                ,dtmPromptDate
-                ,strChopNumber
-                ,intGradeId
-                ,strGrade
-                ,intManufacturingLeafTypeId
-                ,strManufacturingLeafType
-                ,intSeasonId
-                ,strSeason
-                ,intGardenMarkId
-                ,strGardenMark
-                ,dtmManufacturingDate
-                ,intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages
-                ,intNoOfPackages
-                ,dblNetWtSecondPackageBreak
-                ,intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak
-                ,intNoOfPackagesThirdPackageBreak
-                ,intProductLineId
-                ,strProductLine
-                ,ysnOrganic
-                ,dblGrossWeight
-                ,strBatchNo
-                ,str3PLStatus
-                ,strAdditionalSupplierReference
-                ,intAWBSampleReceived
-                ,strAWBSampleReference
-                ,dblBasePrice
-                ,ysnBoughtAsReserve
-                ,ysnEuropeanCompliantFlag
-                ,intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO
-                ,intFromLocationCodeId
-                ,strFromLocationCode
-                ,strSampleBoxNumber
-                ,strComments3
-                ,intBrokerId
-                ,strBroker
-            )
-            SELECT
-                intConcurrencyId = 1
-                ,intSampleId = @intSampleId
-                ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
-                ,strSaleNumber = @strSaleNumber
-                ,dtmSaleDate = @dtmSaleDate
-                ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
-                ,dtmPromptDate = @dtmPromptDate
-                ,strChopNumber = @strChopNumber
-                ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
-                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
-                ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
-                ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
-                ,dtmManufacturingDate = @dtmManufacturingDate
-                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
-                ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
-                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
-                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
-                ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
-                ,ysnOrganic = @ysnOrganic
-                ,dblGrossWeight = @dblGrossWeight
-                ,strBatchNo = @strBatchNo
-                ,str3PLStatus = @str3PLStatus
-                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
-                ,intAWBSampleReceived = @intAWBSampleReceived
-                ,strAWBSampleReference = @strAWBSampleReference
-                ,dblBasePrice = @dblBasePrice
-                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
-                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
-                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
-                ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
-                ,strSampleBoxNumber = @strSampleBoxNumber
-                ,strComments3 = @strComments3
-                ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
             
             -- Sample Detail
             INSERT INTO tblQMSampleDetail (
@@ -762,7 +663,8 @@ BEGIN TRY
         BEGIN
             UPDATE S
             SET
-                strRepresentLotNumber = @strRefNo
+                intConcurrencyId = S.intConcurrencyId + 1
+                ,strRepresentLotNumber = @strRefNo
                 ,intCountryID = @intOriginId
                 ,dblSampleQty = @dblSampleQty
                 ,dblRepresentingQty = CASE WHEN ISNULL(@intNoOfPackages, 0) IS NOT NULL THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE NULL END
@@ -772,34 +674,28 @@ BEGIN TRY
                 ,strComment = @strComments
                 ,intLastModifiedUserId = @intEntityUserId
                 ,dtmLastModified = @dtmDateCreated
+                ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
                 ,strSaleNumber = @strSaleNumber
                 ,dtmSaleDate = @dtmSaleDate
                 ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
                 ,dtmPromptDate = @dtmPromptDate
                 ,strChopNumber = @strChopNumber
                 ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
                 ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
                 ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
                 ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
                 ,dtmManufacturingDate = @dtmManufacturingDate
                 ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
+                ,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
                 ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
+                ,intNetWtSecondPackageBreakUOMId = @intNetWtSecondPackageBreakUOMId
                 ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
+                ,intNetWtThirdPackageBreakUOMId = @intNetWtThirdPackageBreakUOMId
                 ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
                 ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
                 ,strBatchNo = @strBatchNo
@@ -811,65 +707,11 @@ BEGIN TRY
                 ,ysnBoughtAsReserve = @ysnBoughtAsReserve
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
                 ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
             FROM tblQMSample S
-            WHERE S.intSampleId = @intSampleId
-
-            UPDATE A
-            SET
-                intConcurrencyId = A.intConcurrencyId + 1
-                ,intSaleYearId = @intSaleYearId
-                ,strSaleYear = @strSaleYear
-                ,strSaleNumber = @strSaleNumber
-                ,dtmSaleDate = @dtmSaleDate
-                ,intCatalogueTypeId = @intCatalogueTypeId
-                ,strCatalogueType = @strCatalogueType
-                ,dtmPromptDate = @dtmPromptDate
-                ,strChopNumber = @strChopNumber
-                ,intGradeId = @intGradeId
-                ,strGrade = @strGrade
-                ,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
-                ,strManufacturingLeafType = @strManufacturingLeafType
-                ,intSeasonId = @intSeasonId
-                ,strSeason = @strSeason
-                ,intGardenMarkId = @intGardenMarkId
-                ,strGardenMark = @strGardenMark
-                ,dtmManufacturingDate = @dtmManufacturingDate
-                ,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
-                ,dblNetWtPerPackages = @dblNetWtPerPackages
-                ,intNoOfPackages = @intNoOfPackages
-                ,dblNetWtSecondPackageBreak = @dblNetWtSecondPackageBreak
-                ,intNoOfPackagesSecondPackageBreak = @intNoOfPackagesSecondPackageBreak
-                ,dblNetWtThirdPackageBreak = @dblNetWtThirdPackageBreak
-                ,intNoOfPackagesThirdPackageBreak = @intNoOfPackagesThirdPackageBreak
-                ,intProductLineId = @intProductLineId
-                ,strProductLine = @strProductLine
-                ,ysnOrganic = @ysnOrganic
-                ,dblGrossWeight = @dblGrossWeight
-                ,strBatchNo = @strBatchNo
-                ,str3PLStatus = @str3PLStatus
-                ,strAdditionalSupplierReference = @strAdditionalSupplierReference
-                ,intAWBSampleReceived = @intAWBSampleReceived
-                ,strAWBSampleReference = @strAWBSampleReference
-                ,dblBasePrice = @dblBasePrice
-                ,ysnBoughtAsReserve = @ysnBoughtAsReserve
-                ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
-                ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
-                ,strEvaluatorsCodeAtTBO = @strEvaluatorsCodeAtTBO
-                ,intFromLocationCodeId = @intFromLocationCodeId
-                ,strFromLocationCode = @strFromLocationCode
-                ,strSampleBoxNumber = @strSampleBoxNumber
-                ,strComments3 = @strComments3
-                ,intBrokerId = @intBrokerId
-                ,strBroker = @strBroker
-            FROM tblQMSample S
-            INNER JOIN tblQMAuction A ON A.intSampleId = S.intSampleId
             WHERE S.intSampleId = @intSampleId
 
         END
@@ -904,12 +746,12 @@ BEGIN TRY
             ,@dtmManufacturingDate
             ,@dblSampleQty
             ,@intTotalNumberOfPackageBreakups
-            ,@dblNetWtPerPackages
+            ,@intNetWtPerPackagesUOMId
             ,@intRepresentingUOMId
             ,@intNoOfPackages
-            ,@dblNetWtSecondPackageBreak
+            ,@intNetWtSecondPackageBreakUOMId
             ,@intNoOfPackagesSecondPackageBreak
-            ,@dblNetWtThirdPackageBreak
+            ,@intNetWtThirdPackageBreakUOMId
             ,@intNoOfPackagesThirdPackageBreak
             ,@intProductLineId
             ,@strProductLine
@@ -932,6 +774,7 @@ BEGIN TRY
             ,@strFromLocationCode
             ,@strSampleBoxNumber
             ,@strSubBook
+            ,@intSubBookId
             ,@intSampleTypeId
             ,@strBatchNo
             ,@intEntityUserId

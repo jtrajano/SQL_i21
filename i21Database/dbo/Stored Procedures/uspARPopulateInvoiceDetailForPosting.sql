@@ -606,7 +606,7 @@ SELECT
     ,[intAllowNegativeInventory]        = ICIL.[intAllowNegativeInventory]
     ,[ysnStockTracking]					= @OneBit
     ,[intItemLocationId]                = ICIL.[intItemLocationId]
-    ,[dblLastCost]                      = ICIP.[dblLastCost]
+    ,[dblLastCost]                      = ISNULL(ICIP.[dblLastCost], 0)
     ,[intCategoryId]                    = ICI.[intCategoryId]
     ,[ysnRetailValuation]				= ICC.[ysnRetailValuation]
     ,[dblPrice]                         = ARID.[dblPrice]
@@ -936,7 +936,7 @@ SELECT
     ,[intAllowNegativeInventory]        = ICIL.[intAllowNegativeInventory]
     ,[ysnStockTracking]					= @ZeroBit
     ,[intItemLocationId]                = ICIL.[intItemLocationId]
-    ,[dblLastCost]                      = ICIP.[dblLastCost]
+    ,[dblLastCost]                      = ISNULL(ICIP.[dblLastCost], 0)
     ,[intCategoryId]                    = ICI.[intCategoryId]
     ,[ysnRetailValuation]				= ICC.[ysnRetailValuation]
     ,[dblPrice]                         = ARID.[dblPrice]

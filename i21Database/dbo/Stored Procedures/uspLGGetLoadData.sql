@@ -55,6 +55,7 @@ BEGIN
 				,SLSC.strOwner AS strServiceContractOwner
 				,Terminal.strName AS strTerminal
 				,ForwardingAgent.strName AS strForwardingAgent
+				,Shipper.strName AS strShipper
 				,Insurer.strName AS strInsurer
 				,Currency.strCurrency AS strInsuranceCurrency
 				,BLDraftToBeSent.strName AS strBLDraftToBeSent
@@ -80,6 +81,7 @@ BEGIN
 			LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 			LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 			LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+			LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = L.intShipperEntityId
 			LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 			LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 			LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
@@ -160,6 +162,7 @@ BEGIN
 			,SLSC.strOwner AS strServiceContractOwner	
 			,Terminal.strName AS strTerminal
 			,ForwardingAgent.strName AS strForwardingAgent
+			,Shipper.strName AS strShipper
 			,Insurer.strName AS strInsurer
 			,Currency.strCurrency AS strInsuranceCurrency
 			,BLDraftToBeSent.strName AS strBLDraftToBeSent
@@ -182,6 +185,7 @@ BEGIN
 		LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 		LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = L.intShipperEntityId
 		LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 		LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 		LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId

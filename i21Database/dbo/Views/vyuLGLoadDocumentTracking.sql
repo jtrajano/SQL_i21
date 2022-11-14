@@ -104,6 +104,8 @@ SELECT CH.strContractNumber
 	,[intForwardingAgentEntityId]
 	,[strForwardingAgent] = ForwardingAgent.strName
 	,[strForwardingAgentRef]
+	,[intShipperEntityId]
+	,[strShipper] = Shipper.strName
 	,[intInsurerEntityId]
 	,[strInsurer] = Insurer.strName
 	,[dblInsuranceValue]
@@ -191,6 +193,7 @@ LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = L.intShipperEntityId
 LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = L.intDocPresentationId

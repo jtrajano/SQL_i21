@@ -1280,11 +1280,9 @@
     <Build Include="dbo\vyuQMUserLocation.sql" />
     <Build Include="dbo\Tables\tblMFLocationLeadTime.sql" />
     <Build Include="dbo\Views\vyuMFLocationLeadTime.sql" />
-    <Build Include="dbo\Tables\tblQMAuction.sql" />
     <Build Include="dbo\Tables\tblQMCatalogueType.sql" />
     <Build Include="dbo\Tables\tblQMSaleYear.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromDirectFile.sql" />
-    <Build Include="dbo\Tables\tblQMSampleOtherBuyers.sql" />
     <Build Include="dbo\Views\vyuQMItemLocation.sql" />
     <Build Include="dbo\Views\vyuQMShipmentContainerContract.sql" />
     <Build Include="dbo\Tables\tblGLIntraCompanyAccountSegment.sql" />
@@ -1322,7 +1320,6 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherSupplierInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportInitialBuy.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportTastingScore.sql" />
-    <Build Include="dbo\Tables\tblQMSampleInitialBuy.sql" />
     <Build Include="dbo\Tables\tblQMSubBookSampleTypeMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportContractAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPO.sql" />
@@ -1341,6 +1338,21 @@
     <Build Include="dbo\Views\vyuSTCheckoutTankMonitorReportAndVarianceCalculation.sql" />
     <Build Include="dbo\Functions\fnGRCheckSettlementIfFromLoadOut.sql" />
     <Build Include="dbo\Functions\fnGRCheckStorageIfFromLoadOut.sql" />
+    <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
+    <Build Include="dbo\Views\vyuQMUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblIPRefreshTokenEntity.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailImport.sql" />
+    <Build Include="dbo\Tables\tblCTErrorImportLogs.sql" />
+    <Build Include="dbo\Functions\fnGRCheckBillIfFromAdjustSettlements.sql" />
+    <Build Include="dbo\Tables\tblIPAuctionStockPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPAuctionStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
+    <Build Include="dbo\Tables\tblAPVendorCompanyLocation.sql" />
+    <Build Include="dbo\Tables\tblIPContractHeaderStage.sql" />
+    <Build Include="dbo\Tables\tblIPContractHeaderError.sql" />
+    <Build Include="dbo\Tables\tblIPContractHeaderArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageContractHeader_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessContractHeader_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11176,6 +11188,7 @@
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

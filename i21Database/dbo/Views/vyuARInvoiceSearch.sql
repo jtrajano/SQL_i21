@@ -30,6 +30,7 @@ SELECT
 	,dblBaseInvoiceTotal			= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblBaseInvoiceTotal, 0)
 										   WHEN (I.strTransactionType  IN ('Customer Prepayment')) THEN CASE WHEN I.ysnRefundProcessed = 1 THEN ISNULL(I.dblBaseInvoiceTotal, 0) * -1 ELSE 0 END
 										   ELSE ISNULL(I.dblBaseInvoiceTotal, 0) * -1 END
+	,dblWriteOffAmount				= ISNULL(WRITEOFF.dblWriteOffAmount,0)
 	,dblDiscount					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblDiscount,0)  ELSE  ISNULL(I.dblDiscount,0) * -1 END
 	,dblDiscountAvailable			= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblDiscountAvailable,0)  ELSE  ISNULL(I.dblDiscountAvailable,0) * -1 END
 	,dblInterest					= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblInterest,0)  ELSE  ISNULL(I.dblInterest,0) * -1 END
@@ -252,4 +253,11 @@ LEFT JOIN (
 	  AND P.ysnInvoicePrepayment = 0
 	GROUP BY PD.intInvoiceId
 ) FULLPAY ON I.intInvoiceId = FULLPAY.intInvoiceId AND I.ysnPaid = 1
+LEFT JOIN (
+	SELECT dblWriteOffAmount = SUM(dblWriteOffAmount)
+		 , intInvoiceId		= PD.intInvoiceId
+	FROM tblARPaymentDetail PD
+	INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+	GROUP BY PD.intInvoiceId
+) WRITEOFF ON I.intInvoiceId = WRITEOFF.intInvoiceId
 GO

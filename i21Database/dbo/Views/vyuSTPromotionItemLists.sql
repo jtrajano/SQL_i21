@@ -49,4 +49,3 @@ JOIN vyuSTItemHierarchyPricing itemPricing
 	ON I.intItemId = itemPricing.intItemId
 	AND IL.intItemLocationId = itemPricing.intItemLocationId
 	AND UOM.intItemUOMId = itemPricing.intItemUOMId
-WHERE ISNULL(I.ysnFuelItem, 0) = 0

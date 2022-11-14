@@ -13,13 +13,22 @@ SELECT ItemStockDetail.intItemStockDetailId
 	   ,UnitMeasure.strUnitMeasure
 	   ,Item.strLotTracking
 	   ,ItemStockDetail.dblQty
-FROM tblICItemStockDetail AS ItemStockDetail
-LEFT JOIN tblICItemStockType AS ItemStockType ON ItemStockDetail.intItemStockTypeId = ItemStockType.intItemStockTypeId
-LEFT JOIN tblICItem AS Item ON ItemStockDetail.intItemId = Item.intItemId
-LEFT JOIN tblICCommodity AS ItemCommodity ON Item.intCommodityId = ItemCommodity.intCommodityId
-LEFT JOIN tblICCategory AS ItemCategory ON Item.intCategoryId = ItemCategory.intCategoryId
-LEFT JOIN tblICItemLocation AS ItemLocation ON ItemStockDetail.intItemLocationId = ItemLocation.intItemLocationId
-LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON ItemLocation.intLocationId = CompanyLocation.intCompanyLocationId
-LEFT JOIN tblICItemUOM AS ItemUnitOfMeasure ON ItemStockDetail.intItemUOMId = ItemUnitOfMeasure.intItemUOMId
-LEFT JOIN tblICUnitMeasure AS UnitMeasure ON ItemUnitOfMeasure.intUnitMeasureId = UnitMeasure.intUnitMeasureId
+FROM 
+	tblICItemStockDetail ItemStockDetail
+	LEFT JOIN tblICItemStockType ItemStockType 
+		ON ItemStockDetail.intItemStockTypeId = ItemStockType.intItemStockTypeId
+	LEFT JOIN tblICItem Item 
+		ON ItemStockDetail.intItemId = Item.intItemId
+	LEFT JOIN tblICCommodity ItemCommodity 
+		ON Item.intCommodityId = ItemCommodity.intCommodityId
+	LEFT JOIN tblICCategory ItemCategory 
+		ON Item.intCategoryId = ItemCategory.intCategoryId
+	LEFT JOIN tblICItemLocation ItemLocation 
+		ON ItemStockDetail.intItemLocationId = ItemLocation.intItemLocationId
+	LEFT JOIN tblSMCompanyLocation CompanyLocation 
+		ON ItemLocation.intLocationId = CompanyLocation.intCompanyLocationId
+	LEFT JOIN tblICItemUOM ItemUnitOfMeasure 
+		ON ItemStockDetail.intItemUOMId = ItemUnitOfMeasure.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UnitMeasure 
+		ON ItemUnitOfMeasure.intUnitMeasureId = UnitMeasure.intUnitMeasureId
 

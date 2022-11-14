@@ -4,57 +4,34 @@ SELECT intCompanyLocationId		= COMPANY.intCompanySetupID
 	, strCompanyName			= COMPANY.strCompanyName
 	, strCompanyAddress			= COMPANY.strCompanyAddress
 	, strCompanyPhone			= COMPANY.strPhone
-	, intEntityCustomerId		= Cus.[intEntityId]
-	, strCustomerNumber			= Cus.strCustomerNumber
- 	, strCustomerName			= Cus.strName
-	, strCustomerAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL) COLLATE Latin1_General_CI_AS
-	, strCustomerPhone			= EnPhoneNo.strPhone 
-	, strAccountNumber			= (SELECT strAccountNumber FROM tblARCustomer WHERE [intEntityId] = Cus.[intEntityId]) 
-	, strTerm					= Term.strTerm		
-	, dtmLetterDate				= GETDATE()	
+	, intEntityCustomerId		= C.intEntityId
+	, strCustomerNumber			= C.strCustomerNumber
+ 	, strCustomerName			= E.strName
+	, strCustomerAddress		= [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, E.strName, NULL) COLLATE Latin1_General_CI_AS
+	, strCustomerPhone			= PHONE.strPhone 
+	, strAccountNumber			= C.strAccountNumber
+	, strTerm					= TERM.strTerm		
+	, dtmLetterDate				= CAST(GETDATE() AS DATE)
 	, strCurrentUser			= CURRENTUSER.strName
-	, strContactName			= EC.strName		
-FROM (
-	SELECT [intEntityId]
-		, strCustomerNumber
-		, strName
-		, strBillToAddress
-		, strBillToCity
-		, strBillToCountry
-		, strBillToLocationName
-		, strBillToState
-		, strBillToZipCode
-		, intTermsId 
-	FROM vyuARCustomer
-) Cus 
+	, strContactName			= CON.strName
+	, dblARBalance				= C.dblARBalance
+FROM tblARCustomer C
+INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
+INNER JOIN tblEMEntityLocation EL ON C.intBillToId = EL.intEntityLocationId
 LEFT JOIN (
-	SELECT intEntityId
-	     , [intEntityContactId]
-	FROM [tblEMEntityToContact]
+	SELECT EC.intEntityId
+	     , EC.intEntityContactId
+		 , EEC.strName
+	FROM tblEMEntityToContact EC
+	INNER JOIN tblEMEntity EEC ON EC.intEntityId = EEC.intEntityId
 	WHERE ysnDefaultContact = 1
-) CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId
-LEFT JOIN (
-	SELECT intEntityId
-		 , strPhone 
-	FROM tblEMEntityPhoneNumber
-) EnPhoneNo ON CusToCon.[intEntityContactId] = EnPhoneNo.[intEntityId]
-LEFT JOIN (
-	SELECT intTermID 
-		 , strTerm  
-	FROM tblSMTerm
-) Term ON Cus.intTermsId = Term.intTermID
+) CON ON C.intEntityId = CON.intEntityId
+LEFT JOIN tblEMEntityPhoneNumber PHONE ON CON.intEntityContactId = PHONE.[intEntityId]
+LEFT JOIN tblSMTerm TERM ON C.intTermsId = TERM.intTermID
 OUTER APPLY (
-	SELECT TOP 1 strName
-			   , intEntityContactId 
-	FROM dbo.vyuEMEntityContact WITH (NOLOCK) 
-	WHERE CusToCon.intEntityContactId = intEntityContactId
-) EC
-OUTER APPLY (
-	SELECT CU.intEntityId, EE.strName
+	SELECT TOP 1 E.strName
 	FROM tblSMConnectedUser CU
-	LEFT JOIN (
-		SELECT intEntityId, strName FROM tblEMEntity
-	) EE ON EE.intEntityId = CU.intConcurrencyId
+	INNER JOIN tblEMEntity E ON CU.intEntityId = E.intEntityId
 ) CURRENTUSER
 OUTER APPLY (
 	SELECT TOP 1 intCompanySetupID

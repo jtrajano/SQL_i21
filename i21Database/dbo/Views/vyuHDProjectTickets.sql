@@ -38,6 +38,11 @@
 			,strResolutionTrainingManualLink	= t.strResolutionTrainingManualLink
 			,strResolutionTrainingAgendaLink	= t.strResolutionTrainingAgendaLink
 			,strResolutionSOPLink				= t.strResolutionSOPLink
+			,dtmStartDate						= t.dtmStartDate
+			,dtmCompleted						= t.dtmCompleted
+			,strNote							= t.strNote
+			,strCompletedDate = CONVERT(nvarchar(10),t.dtmCompleted,101) COLLATE Latin1_General_CI_AS
+			,strStartDate = CONVERT(nvarchar(10),t.dtmStartDate,101) COLLATE Latin1_General_CI_AS
 		from
 			tblHDTicket t
 			/*
@@ -53,3 +58,5 @@
 			left outer join tblHDProjectTask task on task.intTicketId = t.intTicketId
 			left outer join tblHDTicketPriority prio on prio.intTicketPriorityId = t.intTicketPriorityId
 		where t.intTicketTypeId not in (select top 1 intTicketTypeId from tblHDTicketType where strType = 'Template')
+
+GO

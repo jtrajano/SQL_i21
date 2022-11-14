@@ -1051,80 +1051,117 @@ SELECT @warningNotImported = COUNT(1)
 FROM tblICEdiPricebook 
 WHERE strUniqueId = @UniqueId AND ysnAddNewRecords = 0 AND ysnUpdateExistingRecords = 0 AND ysnAddOrderingUPC = 0 AND ysnUpdatePrice = 0;
 
+;
 -- Update or Insert Item UOM
-INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (intItemId 
-												 , intItemUOMId 
-												 , strAction 
-												 , intUnitMeasureId_Old 
-												 , intUnitMeasureId_New)
+INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (
+	intItemId 
+	, intItemUOMId 
+	, strAction 
+	, intUnitMeasureId_Old 
+	, intUnitMeasureId_New
+)
 SELECT [Changes].intItemId
 	 , [Changes].intItemUOMId
 	 , [Changes].strAction
 	 , [Changes].intUnitMeasureId_Old
 	 , [Changes].intUnitMeasureId_New
-FROM (MERGE	INTO dbo.tblICItemUOM WITH (HOLDLOCK) AS ItemUOM
-USING (
-	SELECT Item.intItemId 
-		 , ItemUOM.intItemUOMId
-		 , intUnitMeasureId = COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)			
-		 , ysnStockUnit = CASE WHEN StockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 			
-		 , Pricebook.* 
-	FROM tblICEdiPricebook AS Pricebook
-	INNER JOIN tblICItem AS Item ON Item.strItemNo = NULLIF(Pricebook.strItemNo, '') 		
-	LEFT JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.intModifier = NULLIF(Pricebook.strUpcModifierNumber,'') AND ItemUOM.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
-	OUTER APPLY (SELECT TOP 1 *
-				 FROM tblICUnitMeasure 
-				 WHERE strUnitMeasure = NULLIF(Pricebook.strItemUnitOfMeasure, '')
-				 ORDER BY intUnitMeasureId) AS UnitMeasure
-	OUTER APPLY (SELECT TOP 1 *
-				 FROM tblICUnitMeasure 
-				 WHERE strSymbol = NULLIF(Pricebook.strItemUnitOfMeasure, '')
-				 ORDER BY intUnitMeasureId) AS Symbol
-	OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
-				 FROM tblICItemUOM iu
-				 WHERE iu.intItemId = Item.intItemId AND iu.ysnStockUnit = 1) AS StockUnit
-	WHERE Pricebook.strUniqueId = @UniqueId
-) AS Source_Query ON ItemUOM.intItemUOMId = Source_Query.intItemUOMId AND ItemUOM.intItemId = Source_Query.intItemId 
+FROM (
+MERGE INTO dbo.tblICItemUOM 
+WITH (HOLDLOCK) AS ItemUOM
+	USING (
+		SELECT Item.intItemId 
+			 , ItemUOM.intItemUOMId
+			 , intUnitMeasureId = COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)			
+			 , ysnStockUnit = CASE WHEN StockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 
+			 , strLongUPCCode = dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(NULLIF(Pricebook.strSellingUpcNumber,'')))
+			 , Pricebook.* 
+		FROM 
+			tblICEdiPricebook AS Pricebook
+			INNER JOIN tblICItem AS Item 
+				ON Item.strItemNo = NULLIF(Pricebook.strItemNo, '') 		
+			LEFT JOIN tblICItemUOM AS ItemUOM 
+				ON ItemUOM.intItemId = Item.intItemId 				
+				AND dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(ItemUOM.strLongUPCCode))
+					= dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(NULLIF(Pricebook.strSellingUpcNumber,'')))
+				AND (
+					ItemUOM.intModifier = NULLIF(Pricebook.strUpcModifierNumber,'') 
+					OR (NULLIF(ItemUOM.intModifier, 0) IS NULL AND NULLIF(Pricebook.strUpcModifierNumber,'') IS NULL) 
+				)
+			OUTER APPLY (
+				SELECT TOP 1 *
+				FROM tblICUnitMeasure 
+				WHERE strUnitMeasure = NULLIF(Pricebook.strItemUnitOfMeasure, '')
+				ORDER BY intUnitMeasureId
+			) AS UnitMeasure
+			OUTER APPLY (
+				SELECT TOP 1 *
+				FROM tblICUnitMeasure 
+				WHERE strSymbol = NULLIF(Pricebook.strItemUnitOfMeasure, '')
+				ORDER BY intUnitMeasureId
+			) AS Symbol
+			OUTER APPLY (
+				SELECT TOP 1 iu.intItemUOMId 
+				FROM tblICItemUOM iu
+				WHERE iu.intItemId = Item.intItemId AND iu.ysnStockUnit = 1
+			) AS StockUnit
+		WHERE 
+			Pricebook.strUniqueId = @UniqueId
+	) AS Source_Query 
+		ON ItemUOM.intItemUOMId = Source_Query.intItemUOMId 
+		AND ItemUOM.intItemId = Source_Query.intItemId 
 			   
 /* If matched and it is allowed to update, update the item uom record. */
-WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
+WHEN 
+	MATCHED 
+	AND Source_Query.ysnUpdateExistingRecords = 1 
+THEN 
 	UPDATE SET intUnitMeasureId		= Source_Query.intUnitMeasureId
 		     , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
 		     , intModifiedByUserId  = @intUserId 
 		     , intConcurrencyId		= ItemUOM.intConcurrencyId + 1
 		     , intCheckDigit		= dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
 		     , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
+			 , strLongUPCCode		= Source_Query.strLongUPCCode
 
 /* If not found and it is allowed, insert a new item uom record. */
-WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intItemId IS NOT NULL AND Source_Query.intUnitMeasureId IS NOT NULL THEN 
-	INSERT (intItemId
-		  , intUnitMeasureId
-		  , dblUnitQty
-		  , strUpcCode
-		  , strLongUPCCode
-		  , intCheckDigit
-		  , intModifier
-		  , ysnStockUnit
-		  , ysnAllowPurchase
-		  , ysnAllowSale
-		  , intConcurrencyId
-		  , dtmDateCreated
-		  , intCreatedByUserId
-		  , intDataSourceId)
-	VALUES (Source_Query.intItemId							-- intItemId
-		  , Source_Query.intUnitMeasureId					-- intUnitMeasureId
-		  , 1												-- dblUnitQty
-		  , dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
-		  , Source_Query.strSellingUpcNumber -- strLongUPCCode
-		  , dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
-		  , CAST(Source_Query.strUpcModifierNumber AS INT)	-- intModifier
-		  , Source_Query.ysnStockUnit						-- ysnStockUnit
-		  , 1												-- ysnAllowPurchase
-		  , 1												-- ysnAllowSale
-		  , 1												-- intConcurrencyId
-		  , GETDATE()										-- dtmDateCreated
-		  , @intUserId										-- intCreatedByUserId
-		  , 2)												-- intDataSourceId
+WHEN 
+	NOT MATCHED 
+	AND Source_Query.ysnAddNewRecords = 1 
+	AND Source_Query.intItemId IS NOT NULL 
+	AND Source_Query.intUnitMeasureId IS NOT NULL 
+THEN 
+	INSERT (
+		intItemId
+		, intUnitMeasureId
+		, dblUnitQty
+		, strUpcCode
+		, strLongUPCCode
+		, intCheckDigit
+		, intModifier
+		, ysnStockUnit
+		, ysnAllowPurchase
+		, ysnAllowSale
+		, intConcurrencyId
+		, dtmDateCreated
+		, intCreatedByUserId
+		, intDataSourceId
+	)
+	VALUES (
+		Source_Query.intItemId							-- intItemId
+		, Source_Query.intUnitMeasureId					-- intUnitMeasureId
+		, 1												-- dblUnitQty
+		, dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
+		, Source_Query.strSellingUpcNumber -- strLongUPCCode
+		, dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
+		, CAST(Source_Query.strUpcModifierNumber AS INT)	-- intModifier
+		, Source_Query.ysnStockUnit						-- ysnStockUnit
+		, 1												-- ysnAllowPurchase
+		, 1												-- ysnAllowSale
+		, 1												-- intConcurrencyId
+		, GETDATE()										-- dtmDateCreated
+		, @intUserId									-- intCreatedByUserId
+		, 2												-- intDataSourceId
+	)
 OUTPUT $action
 	 , inserted.intItemId
 	 , inserted.intItemUOMId
@@ -1899,7 +1936,7 @@ VALUES (Source_Query.intItemId				-- intItemId
       , Source_Query.intMinimumAge			-- intMinimumAge
       , Source_Query.ysnApplyBlueLaw1		-- ysnApplyBlueLaw1
       , Source_Query.ysnApplyBlueLaw2		-- ysnApplyBlueLaw2
-      , DEFAULT								-- ysnCarWash
+     , DEFAULT								-- ysnCarWash
       , DEFAULT								-- intItemTypeCode
       , DEFAULT								-- intItemTypeSubCode
       , DEFAULT								-- ysnAutoCalculateFreight
@@ -1946,48 +1983,123 @@ FROM #tmpICEdiImportPricebook_tblICItemLocation
 WHERE strAction = 'INSERT';
 
 -- Upsert the Item Pricing
-INSERT INTO #tmpICEdiImportPricebook_tblICItemPricing (strAction
-													 , intItemId
-													 , intItemLocationId	
-													 , intItemPricingId)
-SELECT [Changes].strAction
-	 , [Changes].intItemId
-	 , [Changes].intItemLocationId 	
-	 , [Changes].intItemPricingId 	
-FROM (MERGE	INTO dbo.tblICItemPricing WITH (HOLDLOCK) AS ItemPricing
-USING (
+INSERT INTO #tmpICEdiImportPricebook_tblICItemPricing (
+	strAction
+	, intItemId
+	, intItemLocationId	
+	, intItemPricingId
+)
+SELECT 
+	[Changes].strAction
+	, [Changes].intItemId
+	, [Changes].intItemLocationId 	
+	, [Changes].intItemPricingId 	
+FROM (
+	MERGE	INTO dbo.tblICItemPricing WITH (HOLDLOCK) AS ItemPricing
+USING 
+	(
 	SELECT Item.intItemId
 		 , ItemLocation.intItemLocationId
 		 , Price.intItemPricingId
-		 , dblSalePrice			= CAST(CASE WHEN ISNUMERIC(Pricebook.strRetailPrice) = 1 THEN Pricebook.strRetailPrice ELSE Price.dblSalePrice END AS NUMERIC(38, 20))
-		 , dblStandardCost		= ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-											  ELSE NULL 
-										 END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-											   ELSE NULL
-											   END, Price.dblStandardCost)
-		 , dblLastCost			= ISNULL(NULLIF(Price.dblLastCost, 0), ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-																				   ELSE NULL 
-																			  END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-																						 ELSE NULL 
-																					END, Price.dblLastCost))
-		 , dblAverageCost = ISNULL(NULLIF(Price.dblAverageCost, 0), ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-																			    ELSE NULL 
-																		   END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-																					  ELSE NULL 
-																				 END, Price.dblAverageCost))
+		 , dblSalePrice	= 
+				CAST(
+						CASE 
+							WHEN ISNUMERIC(Pricebook.strRetailPrice) = 1 THEN 
+								Pricebook.strRetailPrice 
+							ELSE 
+								Price.dblSalePrice 
+						END 
+					AS NUMERIC(38, 20)
+				)
+		 , dblStandardCost = 
+				ISNULL(
+					CASE 
+						WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN 
+							CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+						ELSE NULL 
+					END 
+					/ 
+					CASE 
+						WHEN 
+							ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 
+							AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN 
+								CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
+						ELSE 
+							NULL
+					END
+					, Price.dblStandardCost
+				)
+		 , dblLastCost = 
+				ISNULL(
+					NULLIF(Price.dblLastCost, 0)
+					,ISNULL(
+						CASE 
+							WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN 
+								CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+							ELSE 
+								NULL 
+						END 
+						/ 
+						CASE 
+							WHEN 
+								ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 
+								AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 
+							THEN 
+								CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
+							ELSE 
+								NULL 
+						END
+						, Price.dblLastCost
+					)
+				)
+		 , dblAverageCost = 
+			ISNULL(
+				NULLIF(Price.dblAverageCost, 0)
+				,ISNULL(
+					CASE 
+						WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN 
+							CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+						ELSE 
+							NULL 
+					END 
+					/ 
+					CASE 
+						WHEN 
+							ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 
+							AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 
+						THEN 
+							CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
+						ELSE 
+							NULL 
+						END
+						, Price.dblAverageCost
+					)
+				)
 		 , Pricebook.ysnAddOrderingUPC
 		 , Pricebook.ysnUpdateExistingRecords
 		 , Pricebook.ysnAddNewRecords
 		 , Pricebook.ysnUpdatePrice
-	FROM tblICEdiPricebook Pricebook
-	INNER JOIN tblICItem Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	OUTER APPLY (SELECT loc.intCompanyLocationId 
-					  , l.*
-				FROM @ValidLocations loc INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId
-				INNER JOIN tblICItemLocation l ON l.intItemId = Item.intItemId AND l.intLocationId = loc.intCompanyLocationId) As ItemLocation
-	LEFT JOIN tblICItemPricing AS Price ON Price.intItemId = Item.intItemId AND Price.intItemLocationId = ItemLocation.intItemLocationId
-	WHERE Pricebook.strUniqueId = @UniqueId
-) AS Source_Query ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
+	FROM 
+		tblICEdiPricebook Pricebook	INNER JOIN tblICItem Item 
+			ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+		OUTER APPLY (
+			SELECT 
+				loc.intCompanyLocationId 
+				, l.*
+			FROM 
+				@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
+					ON loc.intCompanyLocationId = cl.intCompanyLocationId
+				INNER JOIN tblICItemLocation l 
+					ON l.intItemId = Item.intItemId 
+					AND l.intLocationId = loc.intCompanyLocationId
+		) As ItemLocation
+		LEFT JOIN tblICItemPricing AS Price 
+			ON Price.intItemId = Item.intItemId 
+			AND Price.intItemLocationId = ItemLocation.intItemLocationId
+	WHERE 
+		Pricebook.strUniqueId = @UniqueId
+) AS Source_Query 
+	ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
 	   
 /* If matched, update the existing item pricing. */
 WHEN MATCHED AND Source_Query.ysnUpdatePrice = 1 THEN 

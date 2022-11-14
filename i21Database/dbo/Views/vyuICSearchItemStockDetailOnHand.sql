@@ -11,12 +11,24 @@ SELECT  InventoryTransaction.intInventoryTransactionId
 	   ,UnitMeasure.strUnitMeasure
 	   ,Item.strLotTracking
 	   ,InventoryTransaction.dblQty
-FROM tblICInventoryTransaction AS InventoryTransaction
-LEFT JOIN tblICItem AS Item ON InventoryTransaction.intItemId = Item.intItemId
-LEFT JOIN tblICCommodity AS ItemCommodity ON Item.intCommodityId = ItemCommodity.intCommodityId
-LEFT JOIN tblICCategory AS ItemCategory ON Item.intCategoryId = ItemCategory.intCategoryId
-LEFT JOIN tblICItemLocation AS ItemLocation ON InventoryTransaction.intItemLocationId = ItemLocation.intItemLocationId
-LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON ItemLocation.intLocationId = CompanyLocation.intCompanyLocationId
-LEFT JOIN tblICItemUOM AS ItemUnitOfMeasure ON InventoryTransaction.intItemUOMId = ItemUnitOfMeasure.intItemUOMId
-LEFT JOIN tblICUnitMeasure AS UnitMeasure ON ItemUnitOfMeasure.intUnitMeasureId = UnitMeasure.intUnitMeasureId
-WHERE strUnitMeasure IS NOT NULL
+	   ,strTransactionType = TransType.strName
+FROM 
+	tblICInventoryTransaction InventoryTransaction
+	LEFT JOIN tblICItem Item 
+		ON InventoryTransaction.intItemId = Item.intItemId
+	LEFT JOIN tblICCommodity ItemCommodity 
+		ON Item.intCommodityId = ItemCommodity.intCommodityId
+	LEFT JOIN tblICCategory ItemCategory 
+		ON Item.intCategoryId = ItemCategory.intCategoryId
+	LEFT JOIN tblICItemLocation ItemLocation 
+		ON InventoryTransaction.intItemLocationId = ItemLocation.intItemLocationId
+	LEFT JOIN tblSMCompanyLocation CompanyLocation 
+		ON ItemLocation.intLocationId = CompanyLocation.intCompanyLocationId
+	LEFT JOIN tblICItemUOM ItemUnitOfMeasure 
+		ON InventoryTransaction.intItemUOMId = ItemUnitOfMeasure.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UnitMeasure 
+		ON ItemUnitOfMeasure.intUnitMeasureId = UnitMeasure.intUnitMeasureId
+	LEFT JOIN tblICInventoryTransactionType TransType 
+		ON TransType.intTransactionTypeId = InventoryTransaction.intTransactionTypeId
+WHERE 
+	strUnitMeasure IS NOT NULL

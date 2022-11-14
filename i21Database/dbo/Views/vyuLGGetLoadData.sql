@@ -59,6 +59,7 @@ SELECT
     ,L.strIMONumber
     ,L.intForwardingAgentEntityId
     ,L.strForwardingAgentRef
+	,L.intShipperEntityId
     ,L.intInsurerEntityId
 	,L.intInsuranceItemId
     ,L.strInsurancePolicyRefNo
@@ -194,6 +195,7 @@ SELECT
 	,strServiceContractOwner = SLSC.strOwner
 	,strTerminal = Terminal.strName
 	,strForwardingAgent = ForwardingAgent.strName
+	,strShipper = Shipper.strName
 	,strInsurer = Insurer.strName
 	,strInsuranceItem = INS.strItemNo
 	,strInsuranceCurrency = Currency.strCurrency
@@ -262,6 +264,7 @@ LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = L.intShipperEntityId
 LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId

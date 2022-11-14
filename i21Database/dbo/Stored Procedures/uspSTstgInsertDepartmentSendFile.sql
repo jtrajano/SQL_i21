@@ -129,12 +129,13 @@ BEGIN
 						  END AS dtmDate
 		FROM vyuSTCategoriesToRegister
 		WHERE 
-		(
-			dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
-			OR 
-			dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
-		)
-		AND intCompanyLocationId = (
+		--(
+		--	dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+		--	OR 
+		--	dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+		--)
+		--AND 
+		intCompanyLocationId = (
 										SELECT intCompanyLocationId 
 										FROM tblSTStore
 										WHERE intStoreId = @intStoreId

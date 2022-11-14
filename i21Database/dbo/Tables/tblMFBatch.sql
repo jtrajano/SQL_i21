@@ -6,7 +6,7 @@ CREATE  TABLE tblMFBatch
 	intSalesYear INT NOT NULL,
 	dtmSalesDate DATETIME NOT NULL,
 	strTeaType NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	intBrokerId INT NOT NULL,
+	intBrokerId INT NULL,
 	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intBuyingCenterLocationId INT NOT NULL, -- company location id
 	intParentBatchId INT NULL,

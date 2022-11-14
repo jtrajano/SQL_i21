@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspQMSampleCreate @strXml NVARCHAR(Max)
+﻿CREATE PROCEDURE [dbo].[uspQMSampleCreate] @strXml NVARCHAR(Max)
 	,@strSampleNumber NVARCHAR(30) OUTPUT
 	,@intSampleId INT OUTPUT
 AS
@@ -411,41 +411,30 @@ BEGIN TRY
 		,strSendSampleTo
 		,strRepresentLotNumber
 		, intSaleYearId 
-		, strSaleYear
   		, strSaleNumber 
 		, strChopNumber 
 		, dtmSaleDate   
 		, intCatalogueTypeId 
-		, strCatalogueType
 		, dtmPromptDate   
 		, intBrokerId 
-		, strBroker
 		, intGradeId 
-		, strGrade
 		, intLeafCategoryId 
-		, strLeafCategory
 		, intManufacturingLeafTypeId 
-		, strManufacturingLeafType
 		, intSeasonId 
-		, strSeason
 		, intGardenMarkId 
-		, strGardenMark
 		, dtmManufacturingDate   
 		, intTotalNumberOfPackageBreakups 
-		, dblNetWtPerPackages
+		, intNetWtPerPackagesUOMId
 		, intNoOfPackages 
-		, dblNetWtSecondPackageBreak 
+		, intNetWtSecondPackageBreakUOMId 
 		, intNoOfPackagesSecondPackageBreak 
-		, dblNetWtThirdPackageBreak 
+		, intNetWtThirdPackageBreakUOMId 
 		, intNoOfPackagesThirdPackageBreak 
 		, intProductLineId 
-		, strProductLine
 		, ysnOrganic 
 		, dblSupplierValuationPrice
 		, intProducerId 
-		, strProducer
 		, intPurchaseGroupId 
-		, strPurchaseGroup
 		, strERPRefNo 
 		, dblGrossWeight
 		, dblTareWeight 
@@ -458,29 +447,48 @@ BEGIN TRY
 		, dblBasePrice
 		, ysnBoughtAsReserve
 		, intCurrencyId 
-		, strCurrency
 		, ysnEuropeanCompliantFlag 
 		, intEvaluatorsCodeAtTBOId 
-		, strEvaluatorsCodeAtTBO
 		, intFromLocationCodeId
-		, strFromLocationCode
 		, strSampleBoxNumber 
 		, intBrandId 
-		, strBrandCode
 		, intValuationGroupId 
-		, strValuationGroupName
 		, strMusterLot  
 		, strMissingLot 
 		, intMarketZoneId 
-		, strMarketZoneCode
 		, intDestinationStorageLocationId 
-		, strDestinationStorageLocationName
 		, strComments2 
-		, strComments3  
+		, strComments3 
+		, intBuyer1Id
+		, dblB1QtyBought
+		, intB1QtyUOMId
+		, dblB1Price
+		, intB1PriceUOMId
+		, intBuyer2Id
+		, dblB2QtyBought
+		, intB2QtyUOMId
+		, dblB2Price
+		, intB2PriceUOMId
+		, intBuyer3Id
+		, dblB3QtyBought
+		, intB3QtyUOMId
+		, dblB3Price
+		, intB3PriceUOMId
+		, intBuyer4Id
+		, dblB4QtyBought
+		, intB4QtyUOMId
+		, dblB4Price
+		, intB4PriceUOMId
+		, intBuyer5Id
+		, dblB5QtyBought
+		, intB5QtyUOMId
+		, dblB5Price
+		, intB5PriceUOMId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,intBatchId
 		)
 	SELECT 1
 		,intSampleTypeId
@@ -555,41 +563,30 @@ BEGIN TRY
 		,strSendSampleTo
 		,strRepresentLotNumber
 		, intSaleYearId 
-		, strSaleYear
   		, strSaleNumber 
 		, strChopNumber 
 		, dtmSaleDate   
 		, intCatalogueTypeId 
-		, strCatalogueType
 		, dtmPromptDate   
 		, intBrokerId 
-		, strBroker
 		, intGradeId 
-		, strGrade
 		, intLeafCategoryId 
-		, strLeafCategory
 		, intManufacturingLeafTypeId 
-		, strManufacturingLeafType
 		, intSeasonId 
-		, strSeason
 		, intGardenMarkId 
-		, strGardenMark
 		, dtmManufacturingDate   
 		, intTotalNumberOfPackageBreakups 
-		, dblNetWtPerPackages
+		, intNetWtPerPackagesUOMId
 		, intNoOfPackages 
-		, dblNetWtSecondPackageBreak 
+		, intNetWtSecondPackageBreakUOMId 
 		, intNoOfPackagesSecondPackageBreak 
-		, dblNetWtThirdPackageBreak 
+		, intNetWtThirdPackageBreakUOMId 
 		, intNoOfPackagesThirdPackageBreak 
 		, intProductLineId 
-		, strProductLine
 		, ysnOrganic 
 		, dblSupplierValuationPrice
 		, intProducerId 
-		, strProducer
 		, intPurchaseGroupId 
-		, strPurchaseGroup
 		, strERPRefNo 
 		, dblGrossWeight
 		, dblTareWeight 
@@ -602,29 +599,48 @@ BEGIN TRY
 		, dblBasePrice
 		, ysnBoughtAsReserve
 		, intCurrencyId 
-		, strCurrency
 		, ysnEuropeanCompliantFlag 
 		, intEvaluatorsCodeAtTBOId 
-		, strEvaluatorsCodeAtTBO
 		, intFromLocationCodeId
-		, strFromLocationCode
 		, strSampleBoxNumber 
 		, intBrandId 
-		, strBrandCode
 		, intValuationGroupId 
-		, strValuationGroupName
 		, strMusterLot  
 		, strMissingLot 
 		, intMarketZoneId 
-		, strMarketZoneCode
 		, intDestinationStorageLocationId 
-		, strDestinationStorageLocationName
 		, strComments2 
 		, strComments3  
+		, intBuyer1Id
+		, dblB1QtyBought
+		, intB1QtyUOMId
+		, dblB1Price
+		, intB1PriceUOMId
+		, intBuyer2Id
+		, dblB2QtyBought
+		, intB2QtyUOMId
+		, dblB2Price
+		, intB2PriceUOMId
+		, intBuyer3Id
+		, dblB3QtyBought
+		, intB3QtyUOMId
+		, dblB3Price
+		, intB3PriceUOMId
+		, intBuyer4Id
+		, dblB4QtyBought
+		, intB4QtyUOMId
+		, dblB4Price
+		, intB4PriceUOMId
+		, intBuyer5Id
+		, dblB5QtyBought
+		, intB5QtyUOMId
+		, dblB5Price
+		, intB5PriceUOMId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,intBatchId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intParentSampleId INT
@@ -689,40 +705,29 @@ BEGIN TRY
 			,strRepresentLotNumber NVARCHAR(50)
 			, intSaleYearId INT
   		    , strSaleNumber NVARCHAR(50)
-			, strSaleYear NVARCHAR(50)
 		    , strChopNumber NVARCHAR(50)
 		    , dtmSaleDate DATETIME  
 		    , intCatalogueTypeId INT
-			, strCatalogueType NVARCHAR(50)
 		    , dtmPromptDate DATETIME  
 		    , intBrokerId INT
-			, strBroker NVARCHAR(50)
 		    , intGradeId INT
-			, strGrade NVARCHAR(50)
 		    , intLeafCategoryId INT
-			, strLeafCategory NVARCHAR(50)
 		    , intManufacturingLeafTypeId INT
-			, strManufacturingLeafType NVARCHAR(50)
 		    , intSeasonId INT
-			, strSeason NVARCHAR(50)
 		    , intGardenMarkId INT
-			, strGardenMark NVARCHAR(50)
 		    , dtmManufacturingDate DATETIME  
 		    , intTotalNumberOfPackageBreakups INT
-		    , dblNetWtPerPackages NUMERIC(18, 6)
+		    , intNetWtPerPackagesUOMId INT
 		    , intNoOfPackages INT
-		    , dblNetWtSecondPackageBreak NUMERIC(18, 6)
+		    , intNetWtSecondPackageBreakUOMId INT
 		    , intNoOfPackagesSecondPackageBreak INT
-		    , dblNetWtThirdPackageBreak NUMERIC(18, 6)
+		    , intNetWtThirdPackageBreakUOMId INT
 		    , intNoOfPackagesThirdPackageBreak INT
 		    , intProductLineId INT
-			, strProductLine NVARCHAR(50)
 		    , ysnOrganic BIT
 		    , dblSupplierValuationPrice NUMERIC(18, 6)
 		    , intProducerId INT
-			, strProducer NVARCHAR(50)
 		    , intPurchaseGroupId INT
-			, strPurchaseGroup NVARCHAR(50)
 		    , strERPRefNo NVARCHAR(50) 
 		    , dblGrossWeight NUMERIC(18, 6)
 		    , dblTareWeight NUMERIC(18, 6)
@@ -735,29 +740,48 @@ BEGIN TRY
 		    , dblBasePrice NUMERIC(18, 6)
 		    , ysnBoughtAsReserve BIT
 		    , intCurrencyId INT
-			, strCurrency NVARCHAR(50)
 		    , ysnEuropeanCompliantFlag BIT
 		    , intEvaluatorsCodeAtTBOId INT
-			, strEvaluatorsCodeAtTBO NVARCHAR(50)
 		    , intFromLocationCodeId INT
-			, strFromLocationCode NVARCHAR(50)
 		    , strSampleBoxNumber NVARCHAR(50) 
 		    , intBrandId INT
-			, strBrandCode NVARCHAR(50)
 		    , intValuationGroupId INT
-			, strValuationGroupName NVARCHAR(50)
 		    , strMusterLot NVARCHAR(50) 
 		    , strMissingLot NVARCHAR(50) 
 		    , intMarketZoneId INT
-			, strMarketZoneCode NVARCHAR(50)
 		    , intDestinationStorageLocationId INT
-			, strDestinationStorageLocationName NVARCHAR(50)
 		    , strComments2 NVARCHAR(MAX) 
 		    , strComments3 NVARCHAR(MAX)   
+			, intBuyer1Id INT
+			, dblB1QtyBought NUMERIC(18, 6)
+			, intB1QtyUOMId INT
+			, dblB1Price NUMERIC(18, 6)
+			, intB1PriceUOMId INT
+			, intBuyer2Id INT
+			, dblB2QtyBought NUMERIC(18, 6)
+			, intB2QtyUOMId INT
+			, dblB2Price NUMERIC(18, 6)
+			, intB2PriceUOMId INT
+			, intBuyer3Id INT
+			, dblB3QtyBought NUMERIC(18, 6)
+			, intB3QtyUOMId INT
+			, dblB3Price NUMERIC(18, 6)
+			, intB3PriceUOMId INT
+			, intBuyer4Id INT
+			, dblB4QtyBought NUMERIC(18, 6)
+			, intB4QtyUOMId INT
+			, dblB4Price NUMERIC(18, 6)
+			, intB4PriceUOMId INT
+			, intBuyer5Id INT
+			, dblB5QtyBought NUMERIC(18, 6)
+			, intB5QtyUOMId INT
+			, dblB5Price NUMERIC(18, 6)
+			, intB5PriceUOMId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
+			,intBatchId INT
 			)
 
 	SELECT @intSampleId = SCOPE_IDENTITY()
@@ -950,57 +974,6 @@ BEGIN TRY
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			)
-
-	--INSERT INTO dbo.tblQMSampleInitialBuy(
-	--	intConcurrencyId
-	--	,intSampleId
-	--	,intInitialBuyId
-	--	,intBuyerId
-	--	,strBuyerName
-	--	,dblQtyBought
-	--	,intQtyUOMId
-	--	,strQtyUOM
-	--	,dblPrice
-	--	,intPriceUOMId
-	--	,strPriceUOM
-	--  ,intSequenceNo
-	--	,intCreatedUserId
-	--	,dtmCreated
-	--	,intLastModifiedUserId
-	--	,dtmLastModified
-	--	)
-	--SELECT 1
-	--	,@intSampleId
-	--	,intInitialBuyId
-	--	,intBuyerId
-	--	,strBuyerName
-	--	,dblQtyBought
-	--	,intQtyUOMId
-	--	,strQtyUOM
-	--	,dblPrice
-	--	,intPriceUOMId
-	--	,strPriceUOM
-	--  ,intSequenceNo
-	--	,intCreatedUserId
-	--	,dtmCreated
-	--	,intLastModifiedUserId
-	--	,dtmLastModified
-	--FROM OPENXML(@idoc, 'root/InitialBuy', 2) WITH (
-	--		intInitialBuyId INT
-	--		,intBuyerId INT
-	--		,strBuyerName NVARCHAR(50)
-	--		,dblQtyBought NUMERIC(18, 6)
-	--		,intQtyUOMId INT
-	--		,strQtyUOM NVARCHAR(50)
-	--		,dblPrice NUMERIC(18, 6)
-	--		,intPriceUOMId INT
-	--		,strPriceUOM NVARCHAR(50)
-	--		,intSequenceNo INT
-	--		,intCreatedUserId INT
-	--		,dtmCreated DATETIME
-	--		,intLastModifiedUserId INT
-	--		,dtmLastModified DATETIME
-	--		)
 
 	SELECT @strSampleNumber AS strSampleNumber
 

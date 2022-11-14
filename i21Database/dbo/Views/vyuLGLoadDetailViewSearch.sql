@@ -268,16 +268,17 @@ SELECT   L.intLoadId
 		,strClass = Class.strDescription
 		,strProductLine = ProductLine.strDescription
 		,Item.strMarketValuation
+		,strOrderNumber = LD.strOrderNumber
 		,L.intUserLoc
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LD.intSCompanyLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LD.intPStorageLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LD.intSStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LD.intSSubLocationId
 LEFT JOIN tblICStorageLocation PSTL ON PSTL.intStorageLocationId = LD.intPStorageLocationId
-LEFT JOIN tblICStorageLocation SSTL ON SSTL.intStorageLocationId = LD.intSSubLocationId
+LEFT JOIN tblICStorageLocation SSTL ON SSTL.intStorageLocationId = LD.intSStorageLocationId
 LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LD.intVendorEntityId
 LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
