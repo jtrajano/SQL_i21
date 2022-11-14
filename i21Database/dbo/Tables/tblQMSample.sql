@@ -161,7 +161,8 @@
     [intB5QtyUOMId] INT NULL, 
     [dblB5Price] NUMERIC(18, 6) NULL, 
     [intB5PriceUOMId] INT NULL,
-	[intBatchId] INT NULL,
+	[strB5PriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+		
 	CONSTRAINT [PK_tblQMSample] PRIMARY KEY ([intSampleId]), 
 	CONSTRAINT [AK_tblQMSample_strSampleNumber] UNIQUE ([strSampleNumber]), 
 	CONSTRAINT [FK_tblQMSample_tblQMSample] FOREIGN KEY ([intParentSampleId]) REFERENCES [tblQMSample]([intSampleId]), 
@@ -214,8 +215,7 @@
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer2Id] FOREIGN KEY ([intBuyer2Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer3Id] FOREIGN KEY ([intBuyer3Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer4Id] FOREIGN KEY ([intBuyer4Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
-	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer5Id] FOREIGN KEY ([intBuyer5Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
-	CONSTRAINT [FK_tblQMSample_tblMFBatch_intBatchId] FOREIGN KEY ([intBatchId]) REFERENCES [dbo].[tblMFBatch]([intBatchId]),
+	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer5Id] FOREIGN KEY ([intBuyer5Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId])
 
 )
 GO
