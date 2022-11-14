@@ -169,10 +169,10 @@ SELECT
 	,dblUnitPrice				= ARGID.dblUnitPrice
 	,dtmRelatedDate				= ARIR.dtmDate
 	,dblRelatedPayment			= ARIR.dblPayment
-	,dblRelatedShipmentNetWt	= ARGIDR.dblShipmentNetWt
-	,dblRelatedQtyShipped		= ARGIDR.dblQtyShipped
-	,strRelatedUnitMeasure		= ARGIDR.strUnitMeasure
-	,dblRelatedUnitPrice		= ARGIDR.dblUnitPrice
+	,dblRelatedShipmentNetWt	= ARGIDP.dblShipmentNetWt
+	,dblRelatedQtyShipped		= ARGIDP.dblQtyShipped
+	,strRelatedUnitMeasure		= ARGIDP.strUnitMeasure
+	,dblRelatedUnitPrice		= ARGIDP.dblUnitPrice
 	,strRelatedType				= ARIR.strType
 	,strTransactionType			= ARI.strTransactionType
 	,strBuyer					= ISNULL(RTRIM(EMELB.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(ARI.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToState, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToCountry, ''), '')
