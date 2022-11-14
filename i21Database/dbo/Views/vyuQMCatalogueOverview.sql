@@ -28,7 +28,7 @@ SELECT S.intSampleId
 	, strSubCluster = SC.strDescription --
 	, S.ysnOrganic
 	, strSustainability = PL.strDescription 
-	, ysnCompanyBought = CASE WHEN ISNULL(S.dblB1QtyBought, 0) = 0 THEN 0 ELSE 1 END		
+	, ysnCompanyBought = CASE WHEN ISNULL(S.dblB1QtyBought, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END	
 	, strGroupNo = B.strBook --
 	, strCompanyCode = PG.strName
 	, dblB1QtyBought = S.dblB1QtyBought
@@ -41,7 +41,7 @@ SELECT S.intSampleId
 	, strLeafSize = Size.strBrandCode
 	, strCluster = SC.strDescription --
 	, strStyle = VG.strName
-	, S.strComment
+	, strTasterRemark = S.strComment
 	, S.dblSupplierValuationPrice
 	, strLastPrice = ''
 FROM tblQMSample S
