@@ -55,7 +55,7 @@ BEGIN
 
 	SELECT @intItemFactoryId = intItemFactoryId
 	FROM tblICItemFactory
-	WHERE intItemId = @intProducedItemId
+	WHERE intItemId = @intProducedItemId AND intFactoryId = @intLocationId;
 
 	SELECT @intManufacturingCellId = intManufacturingCellId
 	FROM tblICItemFactoryManufacturingCell
