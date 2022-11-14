@@ -18,14 +18,14 @@ SELECT intBillDetailItemId = BD.intBillDetailId
 	,intTypeId = CASE 
 		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NULL THEN 1 --SPOT
 		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN 2 --CONTRACT
-		WHEN BD.intCustomerStorageId IS NOT NULL THEN 3 --SETTLE STORAGE
+		--WHEN BD.intCustomerStorageId IS NOT NULL THEN 3 --SETTLE STORAGE
 		ELSE 4
 	END
 	,ysnShow = CASE 
 		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NULL THEN 0 --SPOT
 		--WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN 1 --CONTRACT
 		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN CASE WHEN BD2.ysnStage = 0 AND BD2.intSettleStorageId IS NULL THEN 0 ELSE 1 END --CONTRACT
-		WHEN BD.intCustomerStorageId IS NOT NULL THEN 1 --SETTLE STORAGE
+		--WHEN BD.intCustomerStorageId IS NOT NULL THEN 1 --SETTLE STORAGE
 		ELSE 1
 	END
 	,BD2.ysnStage
@@ -43,7 +43,50 @@ LEFT JOIN (
 		AND isnull(BD2.intInventoryReceiptItemId, isnull(BD.intInventoryReceiptItemId, 0)) = isnull(BD.intInventoryReceiptItemId, 0)
 		AND (ISNULL(BD2.intLinkingId, 0) = ISNULL(BD.intLinkingId, 0) OR ISNULL(BD2.intLinkingId,-90) = -90)
 WHERE BD.intBillId = @intBillId
+	AND BD.intCustomerStorageId IS NULL
 ) A
+
+--HANDLE SETTLE STORAGE
+DECLARE @tbl2 AS TABLE(
+	intBillDetailItemId INT
+	,intRowNum INT
+)
+DECLARE @intBillDetailItemId INT
+
+INSERT INTO @tbl2
+SELECT intBillDetailId
+	,ROW_NUMBER() OVER (PARTITION BY intBillId ORDER BY intBillId ASC)
+FROM tblAPBillDetail BD
+INNER JOIN tblICItem IC
+	ON IC.intItemId = BD.intItemId
+		AND IC.strType = 'Inventory'
+WHERE intBillId = @intBillId
+
+DECLARE @tbl3 AS TABLE(
+	intBillDetailOtherChargeItemId INT
+	,intRowNum INT
+)
+DECLARE @intBillDetailOtherChargeItemId INT
+
+INSERT INTO @tbl3
+SELECT intBillDetailId
+	,ROW_NUMBER() OVER (PARTITION BY intBillId ORDER BY intBillId ASC)
+FROM tblAPBillDetail BD
+INNER JOIN tblICItem IC
+	ON IC.intItemId = BD.intItemId
+		AND IC.strType <> 'Inventory'
+WHERE intBillId = @intBillId
+
+INSERT INTO @tbl
+SELECT 
+	A.intBillDetailItemId
+	,B.intBillDetailOtherChargeItemId
+	,3
+	,1
+	,0
+FROM @tbl2 A
+INNER JOIN @tbl3 B
+	ON B.intRowNum = A.intRowNum
 
 UPDATE A
 SET ysnShow = CASE 
@@ -62,7 +105,7 @@ LEFT JOIN (
 		,intBillDetailItemId
 		,rowNum = ROW_NUMBER() OVER (PARTITION BY intBillDetailOtherChargeItemId ORDER BY intBillDetailItemId ASC)
 	FROM @tbl
-	WHERE intTypeId = 2
+	WHERE intTypeId in (2,3)
 		AND ysnStage = 0
 		AND NOT EXISTS(SELECT 1 FROM @tbl WHERE intTypeId = 1)
 ) C ON C.intBillDetailOtherChargeItemId = A.intBillDetailOtherChargeItemId
