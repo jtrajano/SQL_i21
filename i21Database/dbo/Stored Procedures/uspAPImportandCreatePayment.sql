@@ -122,6 +122,7 @@ BEGIN TRY
 					SELECT COUNT(paySched.intId) intIdCount
 					FROM tblAPVoucherPaymentSchedule paySched
 					WHERE paySched.intBillId = payDetail.intBillId
+					AND paySched.ysnPaid = 0
 					GROUP BY paySched.dblPayment, paySched.strPaymentScheduleNumber
 					HAVING COUNT(paySched.intId) > 1
 				) dupPS
