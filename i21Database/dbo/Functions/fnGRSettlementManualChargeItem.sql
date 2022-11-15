@@ -70,7 +70,7 @@ DECLARE @intBillDetailOtherChargeItemId INT
 
 INSERT INTO @tbl3
 SELECT intBillDetailId
-	,ROW_NUMBER() OVER (PARTITION BY intBillId ORDER BY intBillId ASC)
+	,ROW_NUMBER() OVER (PARTITION BY intBillId,BD.intItemId ORDER BY intBillId ASC)
 FROM tblAPBillDetail BD
 INNER JOIN tblICItem IC
 	ON IC.intItemId = BD.intItemId

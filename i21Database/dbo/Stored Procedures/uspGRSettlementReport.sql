@@ -2275,20 +2275,51 @@ BEGIN
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
 			LEFT JOIN (
+					--SELECT 
+					--	--A.intBillId
+					--	A.intBillDetailId
+					--	,isnull(A.intLinkingId, -90) as intLinkingId
+					--	,SUM(dblTotal) AS dblTotal
+					--	,SUM(dblTax) AS dblTax
+					--FROM tblAPBillDetail A
+					--JOIN tblICItem B 
+					--	ON A.intItemId = B.intItemId 
+					--		AND B.strType = 'Other Charge'
+					--where A.intBillId = 97560
+					--GROUP BY A.intBillDetailId
+					--	,isnull(A.intLinkingId, -90)
 					SELECT 
-						A.intBillId
-						,isnull(A.intLinkingId, -90) as intLinkingId
+						ITEM.intBillDetailId
+						--,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
-					FROM tblAPBillDetail A
-					JOIN tblICItem B 
-						ON A.intItemId = B.intItemId 
-							AND B.strType = 'Other Charge'
-					GROUP BY A.intBillId
-							,isnull(A.intLinkingId, -90)
+					FROM (
+						SELECT intBillDetailId
+							,BD.intBillId
+							,intItemRowNum = ROW_NUMBER() OVER (PARTITION BY intBillId ORDER BY intBillId ASC)
+						FROM tblAPBillDetail BD
+						INNER JOIN tblICItem IC
+							ON IC.intItemId = BD.intItemId
+								AND IC.strType = 'Inventory'
+					) ITEM
+					INNER JOIN (
+						SELECT intBillDetailId
+							,intBillId
+							,intChargeRowNum = ROW_NUMBER() OVER (PARTITION BY intBillId ORDER BY intBillId ASC)
+						FROM tblAPBillDetail BD
+						INNER JOIN tblICItem IC
+							ON IC.intItemId = BD.intItemId
+								AND IC.strType <> 'Inventory'
+					) CHARGE
+						ON CHARGE.intBillId = ITEM.intBillId
+							AND CHARGE.intChargeRowNum = ITEM.intItemRowNum
+					INNER JOIN tblAPBillDetail A
+						ON A.intBillDetailId = CHARGE.intBillDetailId
+					GROUP BY ITEM.intBillDetailId
+						--,ISNULL(A.intLinkingId, -90)
 				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId				
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
+				ON tblOtherCharge.intBillDetailId = BillDtl.intBillDetailId
+					--and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
