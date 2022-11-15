@@ -83,6 +83,12 @@ FROM (
 		,strClass = Class.strDescription
 		,strProductLine = ProductLine.strDescription
 		,IM.strMarketValuation
+		,strLogisticsLead = LL.strName
+		,strSampleType = ST.strSampleTypeName
+		,strSampleStatus = SS.strStatus
+		,dtmUpdatedDate = S.dtmTestedOn
+		,strShipmentStatus = ISNULL(PSS.strShipmentStatus, SSS.strShipmentStatus)
+		,strFinancialStatus = CD.strFinancialStatus
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -122,6 +128,11 @@ FROM (
 	LEFT JOIN tblICUnitMeasure U6 ON U6.intUnitMeasureId = SAL.intSUnitMeasureId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
+	LEFT JOIN tblEMEntity LL ON LL.intEntityId = CD.intLogisticsLeadId
+	LEFT JOIN (tblQMSample S INNER JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId) ON S.intProductValueId = CD.intContractDetailId AND S.intProductTypeId = 8 -- Contract item
+	LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+	LEFT JOIN vyuCTShipmentStatus PSS ON PSS.intPContractDetailId = CD.intContractDetailId
+	LEFT JOIN vyuCTShipmentStatus SSS ON SSS.intPContractDetailId = CD.intContractDetailId
 	OUTER APPLY (SELECT TOP 1 ysnDisplaySalesContractAsNegative = ISNULL(ysnDisplaySalesContractAsNegative, 0) FROM tblLGCompanyPreference) CP
 	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0
 ) tbl
