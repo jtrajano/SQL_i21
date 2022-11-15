@@ -37,6 +37,73 @@ BEGIN TRY
 	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
 	WHERE CH.intContractHeaderId = @intContractHeaderId
 
+	DECLARE @strAmendedColumnsDetails	NVARCHAR(MAX)
+	DECLARE @fontBoldCashPrice NVARCHAR(MAX)
+	DECLARE @fontBoldBasis NVARCHAR(MAX)
+	DECLARE @fontBoldFutureMarket NVARCHAR(MAX)
+	DECLARE @fontBoldFutureMonth NVARCHAR(MAX)
+	DECLARE @fontBoldFutures NVARCHAR(MAX)
+	DECLARE @fontBoldCurrency NVARCHAR(MAX)
+
+	SELECT  @strAmendedColumnsDetails = STUFF((
+											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
+											FROM tblCTAmendmentApproval AAP
+											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId = @intContractHeaderId 
+											JOIN tblCTSequenceHistory SH  ON SH.intContractHeaderId = @intContractHeaderId
+											WHERE ISNULL(AAP.ysnAmendment,0) = 1
+											FOR XML PATH('')
+											), 1, 1, '')
+
+	IF CHARINDEX('dblCashPrice',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldCashPrice = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldCashPrice = '<span style="font-family:Arial;font-size:13px;">'
+		END
+	IF CHARINDEX('dblBasis',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldBasis = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldBasis = '<span style="font-family:Arial;font-size:13px;">'
+		END
+	IF CHARINDEX('intFutureMarketId',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldFutureMarket = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldFutureMarket = '<span style="font-family:Arial;font-size:13px;">'
+		END
+	IF CHARINDEX('dblFutures',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldFutures = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldFutures = '<span style="font-family:Arial;font-size:13px;">'
+		END
+	IF CHARINDEX('intCurrencyId',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldCurrency = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldCurrency = '<span style="font-family:Arial;font-size:13px;">'
+		END
+	IF CHARINDEX('intFutureMonthId',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldFutureMonth = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldFutureMonth = '<span style="font-family:Arial;font-size:13px;">'
+		END
+		
+
 	SET @space = '                      '
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -121,6 +188,7 @@ BEGIN TRY
 			strLots				    = dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots),
 			dblRatio			    = dbo.fnCTChangeNumericScale(CD.dblRatio,4),
 			strMarketMonth			= MA.strFutMarketName + ' ' + REPLACE(MO.strFutureMonth ,' ','-') ,
+			strAmendedColumnsDetails= @strAmendedColumnsDetails,
 			strAmendedColumns		= CASE WHEN ISNULL(@strDetailAmendedColumns,'') <>'' THEN @strDetailAmendedColumns ELSE  AM.strAmendedColumns END,
 			strCommodityCode		= CO.strCommodityCode,
 			strERPBatchNumber		= CD.strERPBatchNumber,
@@ -132,14 +200,14 @@ BEGIN TRY
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
 			strStraussPrice			= CASE WHEN CH.intPricingTypeId = 2
-											THEN 'PTBF basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+											THEN 'PTBF basis ' + @fontBoldFutureMarket + MA.strFutMarketName + '</span>' + ' ' + @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate)+ '</span>' + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
 			 									+ CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END
-			 									+ BCU.strCurrency + ' '
-			 									+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/' + BUM.strUnitMeasure
+			 									+ @fontBoldCurrency + BCU.strCurrency+  '</span>' + ' '
+			 									+ @fontBoldBasis + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)+'</span>' + '/' + BUM.strUnitMeasure
 			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
 			 									+ DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
 			 									+ ' or prior to presentation of documents,whichever is earlier.'
-			 								ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
+			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + ' per ' + PU.strUnitMeasure
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
 			strStraussShipment		= CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
