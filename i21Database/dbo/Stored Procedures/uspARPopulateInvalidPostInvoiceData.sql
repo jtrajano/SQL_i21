@@ -63,6 +63,7 @@ BEGIN
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
 				 , ICT.intLotId
+				 , ICT.intItemId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT 
 			LEFT JOIN tblICInventoryActualCost IAC ON ICT.strTransactionId = IAC.strTransactionId AND ICT.intTransactionId = IAC.intTransactionId AND ICT.intTransactionDetailId = IAC.intTransactionDetailId
@@ -71,11 +72,12 @@ BEGIN
 			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
 			  AND ICT.intInTransitSourceLocationId IS NOT NULL
-			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId
+			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId, ICT.intItemId
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
+			 AND ICT.intItemId = COSTING.intItemId
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
 	OUTER APPLY (
 		SELECT intLoadId
