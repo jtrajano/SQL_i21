@@ -39,7 +39,7 @@ SELECT S.intSampleId
 	, strBuyer2 = B2.strName
 	, strTealingoGroup = Size.strBrandCode + SC.strDescription + VG.strName
 	, strLeafSize = Size.strBrandCode
-	, strCluster = SC.strDescription --
+	, strCluster = certification.strCertificationName
 	, strStyle = VG.strName
 	, strTasterRemark = S.strComment
 	, S.dblSupplierValuationPrice
@@ -67,3 +67,4 @@ LEFT JOIN tblEMEntity B2 ON B2.intEntityId = S.intBuyer2Id
 LEFT JOIN tblICCommodityAttribute MLT ON MLT.intCommodityAttributeId = S.intManufacturingLeafTypeId
 LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
 LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
+LEFT JOIN tblICCertification certification ON certification.intCertificationId = ITEM.intCertificationId
