@@ -137,7 +137,44 @@ ELSE
 			END
 		
 		IF ISNULL(@NewInvoiceId, 0) > 0
-			EXEC dbo.uspARUpdateGrainOpenBalance @NewInvoiceId, 0, @UserId
+			BEGIN 
+				EXEC dbo.uspARUpdateGrainOpenBalance @NewInvoiceId, 0, @UserId
+
+				--INSERT TO TRANSACTION LINKS
+				DECLARE @tblTransactionLinks    udtICTransactionLinks
+
+				INSERT INTO @tblTransactionLinks (
+					  intSrcId
+					, strSrcTransactionNo
+					, strSrcTransactionType
+					, strSrcModuleName
+					, intDestId
+					, strDestTransactionNo
+					, strDestTransactionType
+					, strDestModuleName
+					, strOperation
+				)
+				SELECT intSrcId                 = SO.intSalesOrderId
+					, strSrcTransactionNo       = SO.strSalesOrderNumber
+					, strSrcTransactionType     = 'Sales Order'
+					, strSrcModuleName          = 'Accounts Receivable'
+					, intDestId                 = I.intInvoiceId
+					, strDestTransactionNo      = I.strInvoiceNumber
+					, strDestTransactionType    = 'Inventory Shipment'
+					, strDestModuleName         = 'Inventory'
+					, strOperation              = 'Process'
+				FROM tblSOSalesOrder SO
+				CROSS APPLY (
+					SELECT TOP 1 intInvoiceId
+						 	   , strInvoiceNumber
+					FROM tblARInvoice
+					WHERE intInvoiceId = @NewInvoiceId
+				) I
+				WHERE SO.intSalesOrderId = @SalesOrderId
+				  AND SO.strTransactionType = 'Order'
+
+				EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+			END
 	END
 
 END
