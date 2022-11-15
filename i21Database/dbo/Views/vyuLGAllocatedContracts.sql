@@ -1,4 +1,4 @@
-ALTER VIEW vyuLGAllocatedContracts
+CREATE VIEW vyuLGAllocatedContracts
 AS
 SELECT
 	 ALD.intAllocationDetailId
