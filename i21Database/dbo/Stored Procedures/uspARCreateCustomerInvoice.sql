@@ -671,6 +671,8 @@ BEGIN TRY
 		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
+		,[dblSurcharge]						= @Surcharge
+		,[intOpportunityId]					= @OpportunityId
 		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
 		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 	FROM	
