@@ -1,4 +1,4 @@
-CREATE VIEW vyuLGAllocatedContracts
+ALTER VIEW vyuLGAllocatedContracts
 AS
 SELECT
 	 ALD.intAllocationDetailId
@@ -64,7 +64,19 @@ SELECT
 	,strPOriginDest = PFR.strOrigin + ' - ' + PFR.strDest
 	,strPOrigin = PCO.strCountry
 	,dblPNoOfLots = PCT.dblNoOfLots
-	
+	,intPShippingInstructionId = PSIH.intLoadId
+	,strPShippingInstruction = PSIH.strLoadNumber
+	,intPShippingAdviceId = PLSH.intLoadId
+	,strPShippingAdvice = PLSH.strLoadNumber
+	,strPReceiptNumber = PIRH.strReceiptNumber
+	,intPInventoryReceiptId = PIRH.intInventoryReceiptId
+	,strPWarehouse = PLSWSL.strSubLocationName
+	,strPLogisticsLead = PLL.strName
+	,strPSampleType = PST.strSampleTypeName
+	,strPSampleStatus = PSS.strStatus
+	,dtmPUpdatedDate = PS.dtmTestedOn
+	,strPShipmentStatus = PLSSS.strShipmentStatus
+	,strPFinancialStatus = PCT.strFinancialStatus
 	---- Sales Contract Details
 	,intSContractDetailId = ALD.intSContractDetailId
 	,dblSAllocatedQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty)
@@ -106,6 +118,18 @@ SELECT
 	,strSOriginDest = SFR.strOrigin+' - '+SFR.strDest
 	,strSOrigin = SCO.strCountry
 	,dblSNoOfLots = SCT.dblNoOfLots
+	,strSLogisticsLead = SLL.strName
+	,strSSampleType = SST.strSampleTypeName
+	,strSSampleStatus = SSS.strStatus
+	,dtmSUpdatedDate = SS.dtmTestedOn
+	,strSShipmentStatus = SLSSS.strShipmentStatus
+	,strSFinancialStatus = SCT.strFinancialStatus
+	,intSShippedId = SLSH.intLoadId
+	,strSShipped = SLSH.strLoadNumber
+	,intSInvoiceId = ISNULL(SPFIH.intInvoiceId, SDIH.intInvoiceId)
+	,strSInvoiceNo = ISNULL(SPFIH.strInvoiceNumber, SDIH.strInvoiceNumber)
+	,intSInvoiceIdProvisional = SPIH.intInvoiceId
+	,strSInvoiceNoProvisional = SPIH.strInvoiceNumber
 	,ysnDelivered = CONVERT(BIT, 
 		CASE WHEN (ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty) > ISNULL(LS.dblQuantity, 0)) THEN 0 ELSE 1 END)
 	,dblSDeliveredQty = ISNULL(LS.dblQuantity, 0)
@@ -144,6 +168,17 @@ LEFT JOIN tblICItemUOM PPU ON PPU.intItemUOMId = PCT.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PPU.intUnitMeasureId
 LEFT JOIN tblCTPricingType PPT ON PPT.intPricingTypeId = PCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate PFR ON PFR.intFreightRateId = PCT.intFreightRateId
+LEFT JOIN (tblLGLoadDetail PSID INNER JOIN tblLGLoad PSIH ON PSIH.intLoadId = PSID.intLoadId)
+	ON PSID.intPContractDetailId = PCT.intContractDetailId AND PSIH.intShipmentType = 2
+LEFT JOIN (tblLGLoadDetail PLSD INNER JOIN tblLGLoad PLSH ON PLSH.intLoadId = PLSD.intLoadId)
+	ON PLSD.intPContractDetailId = PCT.intContractDetailId AND PLSH.intShipmentType = 1
+LEFT JOIN (tblICInventoryReceiptItem PIRD INNER JOIN tblICInventoryReceipt PIRH ON PIRH.intInventoryReceiptId = PIRD.intInventoryReceiptId)
+	ON PIRD.intLoadShipmentDetailId = PLSD.intLoadDetailId
+LEFT JOIN (tblLGLoadWarehouse PLSW INNER JOIN tblSMCompanyLocationSubLocation PLSWSL ON PLSWSL.intCompanyLocationSubLocationId = PLSW.intSubLocationId) ON PLSW.intLoadId = PLSH.intLoadId
+LEFT JOIN tblEMEntity PLL ON PLL.intEntityId = PCT.intLogisticsLeadId
+LEFT JOIN (tblQMSample PS INNER JOIN tblQMSampleType PST ON PST.intSampleTypeId = PS.intSampleTypeId) ON PS.intProductValueId = PCT.intContractDetailId AND PS.intProductTypeId = 8 -- Contract item
+LEFT JOIN tblQMSampleStatus PSS ON PSS.intSampleStatusId = PS.intSampleStatusId
+LEFT JOIN vyuCTShipmentStatus PLSSS ON PLSSS.intLoadDetailId = PLSD.intLoadDetailId
 LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = ALD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
 LEFT JOIN tblICItemUOM SIU ON SIU.intItemUOMId = SCT.intItemUOMId
@@ -166,6 +201,18 @@ LEFT JOIN tblICItemUOM SPU ON SPU.intItemUOMId = SCT.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure U4 ON U4.intUnitMeasureId = SPU.intUnitMeasureId
 LEFT JOIN tblCTPricingType SPT ON SPT.intPricingTypeId = SCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate SFR ON SFR.intFreightRateId = SCT.intFreightRateId
+LEFT JOIN (tblLGLoadDetail SLSD INNER JOIN tblLGLoad SLSH ON SLSH.intLoadId = SLSD.intLoadId)
+	ON SLSD.intSContractDetailId = SCT.intContractDetailId AND SLSH.intShipmentType = 1
+LEFT JOIN tblEMEntity SLL ON SLL.intEntityId = SCT.intLogisticsLeadId
+LEFT JOIN (tblQMSample SS INNER JOIN tblQMSampleType SST ON SST.intSampleTypeId = SS.intSampleTypeId) ON SS.intProductValueId = SCT.intContractDetailId AND SS.intProductTypeId = 8 -- Contract item
+LEFT JOIN tblQMSampleStatus SSS ON SSS.intSampleStatusId = SS.intSampleStatusId
+LEFT JOIN vyuCTShipmentStatus SLSSS ON SLSSS.intLoadDetailId = SLSD.intLoadDetailId
+LEFT JOIN (
+	tblARInvoiceDetail SPID
+	INNER JOIN tblARInvoice SPIH ON SPIH.intInvoiceId = SPID.intInvoiceId AND SPIH.strType = 'Provisional'
+	LEFT JOIN tblARInvoice SPFIH ON SPFIH.intInvoiceId = SPIH.intOriginalInvoiceId AND SPIH.ysnFromProvisional = 1
+) ON SPID.intLoadDetailId = SLSD.intLoadDetailId
+LEFT JOIN ( tblARInvoiceDetail SDID INNER JOIN tblARInvoice SDIH ON SDIH.intInvoiceId = SDID.intInvoiceId AND SDIH.ysnFromProvisional = 0) ON SDID.intLoadDetailId = SLSD.intLoadDetailId
 LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
 OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = IM.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) PToUOM
