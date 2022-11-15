@@ -88,7 +88,15 @@ FROM (
 		,strSampleStatus = SS.strStatus
 		,dtmUpdatedDate = S.dtmTestedOn
 		,strShipmentStatus = ISNULL(PSS.strShipmentStatus, SSS.strShipmentStatus)
-		,strFinancialStatus = CD.strFinancialStatus
+		,strFinancialStatus = CASE WHEN CH.intContractTypeId = 1
+								THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
+										WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
+										WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' 
+										WHEN CD.strFinancialStatus IS NOT NULL THEN CD.strFinancialStatus 
+										ELSE ''
+									END
+								ELSE SFS.strStatus
+							END
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -133,6 +141,8 @@ FROM (
 	LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 	LEFT JOIN vyuCTShipmentStatus PSS ON PSS.intPContractDetailId = CD.intContractDetailId
 	LEFT JOIN vyuCTShipmentStatus SSS ON SSS.intPContractDetailId = CD.intContractDetailId
+	LEFT JOIN vyuARContractFinancialStatus SFS ON SFS.intContractDetailId = CD.intContractDetailId AND CH.intContractTypeId = 2
+	OUTER APPLY (SELECT TOP 1 intContractDetailId FROM tblAPBillDetail bd WHERE bd.intContractDetailId = CD.intContractDetailId) BD
 	OUTER APPLY (SELECT TOP 1 ysnDisplaySalesContractAsNegative = ISNULL(ysnDisplaySalesContractAsNegative, 0) FROM tblLGCompanyPreference) CP
 	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0
 ) tbl
