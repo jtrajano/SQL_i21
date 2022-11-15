@@ -476,10 +476,10 @@ BEGIN TRY
 				,strWVLegalCustomerName
 				,intConcurrencyId)
 			SELECT Trans.intTransactionId
-				, tblEMEntity.str1099Name  AS strCustomerLegalName
+				, (CASE WHEN Trans.intCustomerId IS NULL THEN strCustomerName ELSE tblEMEntity.str1099Name END)  AS strCustomerLegalName
 				,1
 			FROM tblTFTransaction Trans
-			INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = Trans.intCustomerId
+			LEFT JOIN tblEMEntity ON tblEMEntity.intEntityId = Trans.intCustomerId
 			WHERE Trans.uniqTransactionGuid = @Guid
 			AND Trans.intTransactionId IS NOT NULL
 		END
