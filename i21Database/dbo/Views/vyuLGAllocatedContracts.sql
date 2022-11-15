@@ -76,7 +76,11 @@ SELECT
 	,strPSampleStatus = PSS.strStatus
 	,dtmPUpdatedDate = PS.dtmTestedOn
 	,strPShipmentStatus = PLSSS.strShipmentStatus
-	,strPFinancialStatus = PCT.strFinancialStatus
+	,strPFinancialStatus = CASE WHEN PCT.ysnFinalPNL = 1 THEN 'Final P&L Created'
+						WHEN PCT.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
+						WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' 
+						WHEN PCT.strFinancialStatus IS NOT NULL THEN PCT.strFinancialStatus 
+						ELSE '' END
 	---- Sales Contract Details
 	,intSContractDetailId = ALD.intSContractDetailId
 	,dblSAllocatedQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty)
@@ -123,7 +127,7 @@ SELECT
 	,strSSampleStatus = SSS.strStatus
 	,dtmSUpdatedDate = SS.dtmTestedOn
 	,strSShipmentStatus = SLSSS.strShipmentStatus
-	,strSFinancialStatus = SCT.strFinancialStatus
+	,strSFinancialStatus = SFS.strStatus
 	,intSShippedId = SLSH.intLoadId
 	,strSShipped = SLSH.strLoadNumber
 	,intSInvoiceId = ISNULL(SPFIH.intInvoiceId, SDIH.intInvoiceId)
@@ -179,6 +183,7 @@ LEFT JOIN tblEMEntity PLL ON PLL.intEntityId = PCT.intLogisticsLeadId
 LEFT JOIN (tblQMSample PS INNER JOIN tblQMSampleType PST ON PST.intSampleTypeId = PS.intSampleTypeId) ON PS.intProductValueId = PCT.intContractDetailId AND PS.intProductTypeId = 8 -- Contract item
 LEFT JOIN tblQMSampleStatus PSS ON PSS.intSampleStatusId = PS.intSampleStatusId
 LEFT JOIN vyuCTShipmentStatus PLSSS ON PLSSS.intLoadDetailId = PLSD.intLoadDetailId
+OUTER APPLY (SELECT TOP 1 intContractDetailId FROM tblAPBillDetail bd WHERE bd.intContractDetailId = PCT.intContractDetailId) BD
 LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = ALD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
 LEFT JOIN tblICItemUOM SIU ON SIU.intItemUOMId = SCT.intItemUOMId
@@ -213,6 +218,7 @@ LEFT JOIN (
 	LEFT JOIN tblARInvoice SPFIH ON SPFIH.intInvoiceId = SPIH.intOriginalInvoiceId AND SPIH.ysnFromProvisional = 1
 ) ON SPID.intLoadDetailId = SLSD.intLoadDetailId
 LEFT JOIN ( tblARInvoiceDetail SDID INNER JOIN tblARInvoice SDIH ON SDIH.intInvoiceId = SDID.intInvoiceId AND SDIH.ysnFromProvisional = 0) ON SDID.intLoadDetailId = SLSD.intLoadDetailId
+LEFT JOIN vyuARContractFinancialStatus SFS ON SFS.intContractDetailId = SCT.intContractDetailId
 LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
 OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = IM.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) PToUOM

@@ -15,7 +15,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 										CASE WHEN I.ysnFinalized = 0 THEN 'Provisionally Invoiced' 
 										ELSE 'Final Invoiced' END 
 									END
-								  ELSE NULL END
+								  ELSE NULL END COLLATE Latin1_General_CI_AS 
 FROM (
 	SELECT intInvoiceId				= I.intInvoiceId
 		 , intFinalInvoiceId		= NULL
