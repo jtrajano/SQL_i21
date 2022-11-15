@@ -135,6 +135,7 @@
 	[intDestinationStorageLocationId] INT NULL,
 	[strComments2] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strComments3] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strBuyingOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	-- Initial Buy
 	[intBuyer1Id] INT NULL, 
     [dblB1QtyBought] NUMERIC(18, 6) NULL, 

@@ -459,6 +459,7 @@ BEGIN TRY
 		, intDestinationStorageLocationId 
 		, strComments2 
 		, strComments3 
+		, strBuyingOrderNo
 		, intBuyer1Id
 		, dblB1QtyBought
 		, intB1QtyUOMId
@@ -610,6 +611,7 @@ BEGIN TRY
 		, intDestinationStorageLocationId 
 		, strComments2 
 		, strComments3  
+		, strBuyingOrderNo
 		, intBuyer1Id
 		, dblB1QtyBought
 		, intB1QtyUOMId
@@ -750,6 +752,7 @@ BEGIN TRY
 		    , intDestinationStorageLocationId INT
 		    , strComments2 NVARCHAR(MAX) 
 		    , strComments3 NVARCHAR(MAX)   
+			, strBuyingOrderNo NVARCHAR(50) 
 			, intBuyer1Id INT
 			, dblB1QtyBought NUMERIC(18, 6)
 			, intB1QtyUOMId INT

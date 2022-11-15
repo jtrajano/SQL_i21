@@ -393,6 +393,7 @@ BEGIN TRY
   , intDestinationStorageLocationId = x.intDestinationStorageLocationId
   , strComments2 = x.strComments2
   , strComments3 = x.strComments3
+  , strBuyingOrderNo = x.strBuyingOrderNo
   , intBuyer1Id = x.intBuyer1Id
   , dblB1QtyBought = x.dblB1QtyBought
   , intB1QtyUOMId = x.intB1QtyUOMId
@@ -534,6 +535,7 @@ BEGIN TRY
    , intDestinationStorageLocationId INT
    , strComments2 NVARCHAR(MAX) 
    , strComments3 NVARCHAR(MAX)   
+   , strBuyingOrderNo NVARCHAR(50) 
    , intBuyer1Id INT
    , dblB1QtyBought NUMERIC(18, 6)
    , intB1QtyUOMId INT
