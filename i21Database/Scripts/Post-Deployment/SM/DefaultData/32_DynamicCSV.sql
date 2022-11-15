@@ -2696,6 +2696,9 @@ UPDATE tblSMCSVDynamicImport SET
 		DECLARE	@item_category					NVARCHAR(MAX)
 		DECLARE	@customer_group					NVARCHAR(MAX)
 		DECLARE	@deviation						NVARCHAR(MAX)
+		DECLARE	@deviation2						NVARCHAR(MAX)
+		DECLARE	@deviation3						NVARCHAR(MAX)
+		DECLARE	@deviation4						NVARCHAR(MAX)
 		DECLARE	@line_note						NVARCHAR(MAX)
 		DECLARE	@begin_date						NVARCHAR(MAX)
 		DECLARE	@end_date						NVARCHAR(MAX)
@@ -2717,6 +2720,9 @@ UPDATE tblSMCSVDynamicImport SET
 			@item_category					= ''@item_category@'',
 			@customer_group					= ''@customer_group@'',
 			@deviation						= ''@deviation@'',
+			@deviation2						= ''@deviation2@'',
+			@deviation3						= ''@deviation3@'',
+			@deviation4						= ''@deviation4@'',
 			@line_note						= ''@line_note@'',
 			@begin_date						= ''@begin_date@'',
 			@end_date						= ''@end_date@'',
@@ -2737,6 +2743,9 @@ UPDATE tblSMCSVDynamicImport SET
 		DECLARE @intCategoryId				INT
 		DECLARE @strCustomerGroup			NVARCHAR(MAX)	
 		DECLARE @dblDeviation				NUMERIC(18,6)
+		DECLARE @dblDeviation2				NUMERIC(18,6)
+		DECLARE @dblDeviation3				NUMERIC(18,6)
+		DECLARE @dblDeviation4				NUMERIC(18,6)
 		DECLARE @strLineNote				NVARCHAR(MAX)
 		DECLARE @dtmBeginDate				DATETIME
 		DECLARE @dtmEndDate					DATETIME
@@ -2937,6 +2946,56 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 		END
 
+		IF(@deviation2 = '''')
+		BEGIN
+			SET @dblDeviation2 = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@deviation2 AS NUMERIC(18,6)) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''deviation 2 No should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @dblDeviation2 = CAST(@deviation2 AS NUMERIC(18,6))
+			END
+		END
+
+		IF(@deviation3 = '''')
+		BEGIN
+			SET @dblDeviation3 = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@deviation3 AS NUMERIC(18,6)) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''deviation 3 No should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @dblDeviation3 = CAST(@deviation3 AS NUMERIC(18,6))
+			END
+		END
+
+		IF(@deviation4 = '''')
+		BEGIN
+			SET @dblDeviation4 = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@deviation4 AS NUMERIC(18,6)) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''deviation 4 No should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @dblDeviation4 = CAST(@deviation4 AS NUMERIC(18,6))
+			END
+		END
 
 		IF(@begin_date = '''')
 		BEGIN
@@ -3064,6 +3123,9 @@ UPDATE tblSMCSVDynamicImport SET
 				[intCategoryId],
 				[strCustomerGroup],
 				[dblDeviation],
+				[dblDeviation2],
+				[dblDeviation3],
+				[dblDeviation4],
 				[strLineNote],
 				[dtmBeginDate],
 				[dtmEndDate],
@@ -3084,6 +3146,9 @@ UPDATE tblSMCSVDynamicImport SET
 				@intCategoryId,
 				@strCustomerGroup,
 				@dblDeviation,
+				@dblDeviation2,
+				@dblDeviation3,
+				@dblDeviation4,
 				@strLineNote,
 				@dtmBeginDate,
 				@dtmEndDate,
@@ -3123,6 +3188,12 @@ INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName,
 	SELECT @NewHeaderId, 'customer_group', 'customer_group', 0
 	Union All
 	SELECT @NewHeaderId, 'deviation', 'deviation', 0
+	Union All
+	SELECT @NewHeaderId, 'deviation2', 'deviation2', 0
+	Union All
+	SELECT @NewHeaderId, 'deviation3', 'deviation3', 0
+	Union All
+	SELECT @NewHeaderId, 'deviation4', 'deviation4', 0
 	Union All
 	SELECT @NewHeaderId, 'line_note', 'line_note', 0
 	Union All
