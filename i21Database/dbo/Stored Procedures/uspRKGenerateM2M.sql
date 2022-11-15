@@ -685,7 +685,7 @@ BEGIN TRY
 		SELECT intContractDetailId, intContractStatusId
 		INTO #ContractStatus
 		FROM (
-			SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreateDate DESC)
+			SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreateDate DESC, intContractBalanceLogId DESC)
 				, intContractDetailId
 				, intContractStatusId
 			FROM #CBBucket
