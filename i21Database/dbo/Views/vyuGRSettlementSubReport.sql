@@ -160,7 +160,7 @@ FROM
 	UNION ALL
 
 	--CONTRACT
-	SELECT 
+	SELECT DISTINCT
 		 t3.intBillDetailIdItem
 		,t3.strId
 		,t3.intBillId
