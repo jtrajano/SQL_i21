@@ -122,7 +122,7 @@ BEGIN
 		WHERE
 				currentSnapshot.intInventoryReceiptId = @ReceiptId
 				AND currentSnapshot.[intWarrantStatus] <> previousSnapshot.[intWarrantStatus] 
-				AND s.strWarrantStatus IN ('Released', 'Partially Released')
+				AND s.strWarrantStatus IN ('Released', 'Partially Released', 'Pledged')
 	END 
 	-- Create a new trade finance record. 
 	ELSE IF EXISTS (
@@ -172,6 +172,15 @@ BEGIN
 				AND @strTradeFinanceNumber IS NOT NULL 
 
 			SELECT @strAction = 'Created' WHERE @strAction IS NULL 
+
+			SELECT 
+				@strWarrantStatusAction = s.strWarrantStatus
+			FROM 
+				tblICInventoryReceipt currentSnapshot LEFT JOIN tblICWarrantStatus s
+					ON currentSnapshot.[intWarrantStatus] = s.intWarrantStatus 
+			WHERE
+					currentSnapshot.intInventoryReceiptId = @ReceiptId
+					AND s.strWarrantStatus IN ('Released', 'Partially Released', 'Pledged')
 		END 
 	END 
 	-- Create a new trade finance record. 
@@ -228,7 +237,7 @@ BEGIN
 					ON currentSnapshot.[intWarrantStatus] = s.intWarrantStatus 
 			WHERE
 				currentSnapshot.intInventoryReceiptId = @ReceiptId
-				AND s.strWarrantStatus IN ('Released', 'Partially Released')				
+				AND s.strWarrantStatus IN ('Released', 'Partially Released', 'Pledged')				
 		END 
 	END 
 
