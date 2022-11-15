@@ -22,7 +22,7 @@ SELECT S.intSampleId
 	, S.strChopNumber
 	, strPONo = S.strERPRefNo
 	, strParentBatch = Batch.strBatchId
-	, strBuyingOrderNo = S.strRefNo
+	, strBuyingOrderNo = S.strBuyingOrderNo
 	, CTT.strCatalogueType
 	, dblNetWeightPerPackage = ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0)
 	, strSubCluster = SC.strDescription --
@@ -43,7 +43,7 @@ SELECT S.intSampleId
 	, strStyle = VG.strName
 	, strTasterRemark = S.strComment
 	, S.dblSupplierValuationPrice
-	, strLastPrice = ''
+	, strLastPrice = '0.0'
 FROM tblQMSample S
 LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
 LEFT JOIN tblAPVendor VAN ON VAN.intEntityId = S.intEntityId
