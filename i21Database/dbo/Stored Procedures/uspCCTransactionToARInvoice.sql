@@ -82,6 +82,7 @@ BEGIN
         ,[ysnInventory]
 		,[intSalesAccountId]
 		,[strComments]
+		,[dtmDueDate]
 		--,[intInvoiceId]
     )
     SELECT [strTransactionType] =  CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN 'Debit Memo'
@@ -117,6 +118,7 @@ BEGIN
         ,[ysnInventory] = 1
 		,[intSalesAccountId] = ItemAcc.intAccountId
 		,[strComments] = ccSiteHeader.strCcdReference
+		, CASE WHEN ccSiteHeader.strApType = 'Credit On Account' THEN ccSiteHeader.dtmDate ELSE NULL END
 		--,[intInvoiceId] = ARInvoiceDetail.intInvoiceId
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
@@ -195,6 +197,7 @@ BEGIN
 			,[ysnInventory]
 			,[intSalesAccountId]
 			,[strComments]
+			,[dtmDueDate]
 		)
 		SELECT [strTransactionType]
 			,[strSourceTransaction]
@@ -220,6 +223,7 @@ BEGIN
 			,[ysnInventory]
 			,[intSalesAccountId]
 			,[strComments]
+			,[dtmDueDate]
 		FROM @EntriesForInvoice WHERE strSourceId = @strSourceId
 
 		IF(@Post = 1)
