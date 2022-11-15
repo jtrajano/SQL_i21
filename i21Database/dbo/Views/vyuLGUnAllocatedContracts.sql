@@ -95,7 +95,7 @@ FROM (
 										WHEN CD.strFinancialStatus IS NOT NULL THEN CD.strFinancialStatus 
 										ELSE ''
 									END
-								ELSE SFS.strStatus
+								ELSE SFS.strFinancialStatus
 							END
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
@@ -141,7 +141,7 @@ FROM (
 	LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 	LEFT JOIN vyuCTShipmentStatus PSS ON PSS.intPContractDetailId = CD.intContractDetailId
 	LEFT JOIN vyuCTShipmentStatus SSS ON SSS.intPContractDetailId = CD.intContractDetailId
-	LEFT JOIN vyuARContractFinancialStatus SFS ON SFS.intContractDetailId = CD.intContractDetailId AND CH.intContractTypeId = 2
+	OUTER APPLY dbo.fnCTGetFinancialStatus(CD.intContractDetailId) SFS
 	OUTER APPLY (SELECT TOP 1 intContractDetailId FROM tblAPBillDetail bd WHERE bd.intContractDetailId = CD.intContractDetailId) BD
 	OUTER APPLY (SELECT TOP 1 ysnDisplaySalesContractAsNegative = ISNULL(ysnDisplaySalesContractAsNegative, 0) FROM tblLGCompanyPreference) CP
 	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0

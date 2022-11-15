@@ -127,7 +127,7 @@ SELECT
 	,strSSampleStatus = SSS.strStatus
 	,dtmSUpdatedDate = SS.dtmTestedOn
 	,strSShipmentStatus = SLSSS.strShipmentStatus
-	,strSFinancialStatus = SFS.strStatus
+	,strSFinancialStatus = SFS.strFinancialStatus
 	,intSShippedId = SLSH.intLoadId
 	,strSShipped = SLSH.strLoadNumber
 	,intSInvoiceId = ISNULL(SPFIH.intInvoiceId, SDIH.intInvoiceId)
@@ -215,10 +215,10 @@ LEFT JOIN vyuCTShipmentStatus SLSSS ON SLSSS.intLoadDetailId = SLSD.intLoadDetai
 LEFT JOIN (
 	tblARInvoiceDetail SPID
 	INNER JOIN tblARInvoice SPIH ON SPIH.intInvoiceId = SPID.intInvoiceId AND SPIH.strType = 'Provisional'
-	LEFT JOIN tblARInvoice SPFIH ON SPFIH.intInvoiceId = SPIH.intOriginalInvoiceId AND SPIH.ysnFromProvisional = 1
+	LEFT JOIN tblARInvoice SPFIH ON SPFIH.intOriginalInvoiceId = SPIH.intInvoiceId AND SPFIH.ysnFromProvisional = 1
 ) ON SPID.intLoadDetailId = SLSD.intLoadDetailId
 LEFT JOIN ( tblARInvoiceDetail SDID INNER JOIN tblARInvoice SDIH ON SDIH.intInvoiceId = SDID.intInvoiceId AND SDIH.ysnFromProvisional = 0) ON SDID.intLoadDetailId = SLSD.intLoadDetailId
-LEFT JOIN vyuARContractFinancialStatus SFS ON SFS.intContractDetailId = SCT.intContractDetailId
+OUTER APPLY dbo.fnCTGetFinancialStatus(SCT.intContractDetailId) SFS
 LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
 OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = IM.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) PToUOM
