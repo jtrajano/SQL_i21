@@ -54,6 +54,7 @@ BEGIN
 		,@ysnLotNumberUniqueByItem BIT
 		,@ysnIRCorrection BIT
 		,@intLoadId INT
+		,@intBatchId int
 	DECLARE @tblICLot TABLE (intLotId INT)
 
 	SELECT @strParentLotNumber=LTRIM(RTRIM(@strParentLotNumber))
@@ -83,6 +84,18 @@ BEGIN
 		,@strLotReceiptNumber = strReceiptNumber
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
+	SELECT @intBatchId =NULL
+	SELECT @intBatchId =intBatchId 
+	FROM tblMFBatch 
+	WHERE strBatchId =@strLotNumber AND intBuyingCenterLocationId =@intLocationId
+
+	IF @intBatchId IS NULL
+	BEGIN
+		SELECT @intBatchId =intBatchId 
+		FROM tblMFBatch 
+		WHERE strBatchId =@strLotNumber AND intMixingUnitLocationId  =@intLocationId
+	END
 
 	IF @intSplitFromLotId IS NULL
 		AND @ysnLifeTimeByEndOfMonth = 1
@@ -398,6 +411,7 @@ BEGIN
 			,intWorkOrderId
 			,intManufacturingProcessId
 			,intLoadId
+			,intBatchId
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -412,6 +426,7 @@ BEGIN
 			,@intWorkOrderId
 			,@intManufacturingProcessId
 			,@intLoadId
+			,@intBatchId
 	END
 	ELSE
 	BEGIN
@@ -512,6 +527,7 @@ BEGIN
 								)
 					ELSE intBondStatusId
 					END
+				,intBatchId=@intBatchId
 			WHERE intLotId = @intLotId
 		END
 		ELSE
@@ -537,6 +553,7 @@ BEGIN
 								)
 					ELSE intBondStatusId
 					END
+				,intBatchId=@intBatchId
 			FROM tblMFLotInventory LI
 			JOIN @tblICLot L ON LI.intLotId = L.intLotId
 		END
