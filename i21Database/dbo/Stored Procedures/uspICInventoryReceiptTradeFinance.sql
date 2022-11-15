@@ -16,6 +16,7 @@ DECLARE @TRFTradeFinance AS TRFTradeFinance
 		,@intTradeFinanceId	INT = NULL 
 		,@dtmDate DATETIME				
 		,@strTradeFinanceNumber NVARCHAR(100)			
+		,@strWarrantStatusAction NVARCHAR(50) = NULL 
 
 SELECT 
 	@dtmDate = dtmReceiptDate 
@@ -110,6 +111,18 @@ BEGIN
 			, @dtmTransactionDate = @dtmDate 
 
 		SELECT @strAction = 'Updated' WHERE @strAction IS NULL 
+		
+		SELECT 
+			@strWarrantStatusAction = s.strWarrantStatus
+		FROM 
+			tblICInventoryReceipt currentSnapshot INNER JOIN tblICInventoryReceiptBeforeSave previousSnapshot
+				ON currentSnapshot.intInventoryReceiptId = previousSnapshot.intInventoryReceiptId
+			LEFT JOIN tblICWarrantStatus s
+				ON currentSnapshot.[intWarrantStatus] = s.intWarrantStatus 
+		WHERE
+				currentSnapshot.intInventoryReceiptId = @ReceiptId
+				AND currentSnapshot.[intWarrantStatus] <> previousSnapshot.[intWarrantStatus] 
+				AND s.strWarrantStatus IN ('Released', 'Partially Released')
 	END 
 	-- Create a new trade finance record. 
 	ELSE IF EXISTS (
@@ -207,10 +220,190 @@ BEGIN
 				AND @strTradeFinanceNumber IS NOT NULL 
 
 			SELECT @strAction = 'Created' WHERE @strAction IS NULL 
+
+			SELECT 
+				@strWarrantStatusAction = s.strWarrantStatus
+			FROM 
+				tblICInventoryReceipt currentSnapshot LEFT JOIN tblICWarrantStatus s
+					ON currentSnapshot.[intWarrantStatus] = s.intWarrantStatus 
+			WHERE
+				currentSnapshot.intInventoryReceiptId = @ReceiptId
+				AND s.strWarrantStatus IN ('Released', 'Partially Released')				
 		END 
 	END 
+
+	-- Create a trade finance log if the warrant status is changed. 
+	IF @strWarrantStatusAction IS NOT NULL 
+	BEGIN 
+		INSERT INTO @TRFLog (
+			strAction 
+			, strTransactionType 
+			, intTradeFinanceTransactionId 
+			, strTradeFinanceTransaction 
+			, intTransactionHeaderId 
+			, intTransactionDetailId 
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intBankTransactionId 
+			, strBankTransactionId 
+			, intBankId 
+			, strBank 
+			, intBankAccountId 
+			, strBankAccount 
+			, intBorrowingFacilityId 
+			, strBorrowingFacility 
+			, strBorrowingFacilityBankRefNo 
+			, dblTransactionAmountAllocated 
+			, dblTransactionAmountActual 
+			--, intLoanLimitId 
+			--, strLoanLimitNumber 
+			--, strLoanLimitType 
+			, intLimitId 
+			, strLimit 
+			, dblLimit 
+			, intSublimitId 
+			, strSublimit 
+			, dblSublimit 
+			, strBankTradeReference 
+			, dblFinanceQty 
+			, dblFinancedAmount 
+			, strBankApprovalStatus 
+			, dtmAppliedToTransactionDate 
+			, intStatusId 
+			, strWarrantId 
+			, intWarrantStatusId  
+			, intUserId 
+			, intConcurrencyId 
+			, intContractHeaderId 
+			, intContractDetailId 
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
+		)
+		SELECT 
+			strAction = 'Warrant Status ' + @strWarrantStatusAction 
+			, strTransactionType = 'Inventory' --CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END  -- <-- This is module
+			, intTradeFinanceTransactionId = tf.intTradeFinanceId
+			, strTradeFinanceTransaction = tf.strTradeFinanceNumber
+			, intTransactionHeaderId = r.intInventoryReceiptId
+			, intTransactionDetailId = NULL 
+			, strTransactionNumber = r.strReceiptNumber
+			, dtmTransactionDate = r.dtmReceiptDate
+			, intBankTransactionId = NULL 
+			, strBankTransactionId = NULL 
+			, intBankId = r.intBankId
+			, strBank = ba.strBankName
+			, intBankAccountId = ba.intBankAccountId
+			, strBankAccount  = ba.strBankAccountNo
+			, intBorrowingFacilityId = r.intBorrowingFacilityId
+			, strBorrowingFacility = fa.strBorrowingFacilityId
+			, strBorrowingFacilityBankRefNo = r.strBankReferenceNo
+			, dblTransactionAmountAllocated = r.dblGrandTotal 
+			, dblTransactionAmountActual = r.dblGrandTotal
+			--, intLoanLimitId 
+			--, strLoanLimitNumber 
+			--, strLoanLimitType 
+			, intLimitId = r.intLimitTypeId
+			, strLimit = fl.strBorrowingFacilityLimit
+			, dblLimit = fl.dblLimit
+			, intSublimitId = r.intSublimitTypeId
+			, strSublimit = fld.strLimitDescription
+			, dblSublimit = fld.dblLimit
+			, strBankTradeReference = r.strReferenceNo --r.strBankReferenceNo
+			, dblFinanceQty = ISNULL(contractIR.dblQty, directIR.dblQty)
+			, dblFinancedAmount = r.dblGrandTotal
+			, strBankApprovalStatus = r.strApprovalStatus
+			, dtmAppliedToTransactionDate = GETDATE()
+			, intStatusId = 1
+					--CASE 
+					--	WHEN tf.intStatusId = 1 THEN 'Active' 
+					--	WHEN tf.intStatusId = 2 THEN 'Completed'
+					--	WHEN tf.intStatusId = 0 THEN 'Cancelled'							
+					--END
+			, strWarrantId = r.strWarrantNo
+			, intWarrantStatusId = r.intWarrantStatus 
+			, intUserId = COALESCE(r.intModifiedByUserId, r.intCreatedUserId, r.intCreatedByUserId) 
+			, intConcurrencyId = 1
+			, intContractHeaderId = receiptContract.intContractHeaderId
+			, intContractDetailId = receiptContract.intContractDetailId
+			, intOverrideFacilityValuation = bvr.intBankValuationRuleId
+			, strOverrideFacilityValuation = bvr.strBankValuationRule
+		FROM 
+			tblICInventoryReceipt r LEFT JOIN tblTRFTradeFinance tf
+				ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
+				--  Added strTransactionType since each module has separate Trade Finance Record.
+				AND tf.strTransactionType = 'Inventory'
+			LEFT JOIN vyuCMBankAccount ba 
+				ON ba.intBankAccountId = r.intBankAccountId
+			LEFT JOIN tblCMBorrowingFacility fa
+				ON fa.intBorrowingFacilityId = r.intBorrowingFacilityId
+			LEFT JOIN tblCMBorrowingFacilityLimit fl 
+				ON fl.intBorrowingFacilityLimitId = r.intLimitTypeId
+			LEFT JOIN tblCMBorrowingFacilityLimitDetail fld
+				ON fld.intBorrowingFacilityLimitDetailId = r.intSublimitTypeId
+			LEFT JOIN tblCMBankValuationRule bvr
+				ON bvr.intBankValuationRuleId = r.intOverrideFacilityValuation				
+			OUTER APPLY (
+				SELECT 
+					dblQty = 
+						SUM(
+							CASE 
+								WHEN ri.intWeightUOMId IS NOT NULL THEN 
+									dbo.fnCalculateQtyBetweenUOM(
+										ri.intWeightUOMId
+										,stockUOM.intItemUOMId
+										,ri.dblNet
+									)
+								ELSE 
+									dbo.fnCalculateQtyBetweenUOM(
+										ri.intUnitMeasureId
+										,stockUOM.intItemUOMId
+										,ri.dblNet
+									)
+							END 							
+						)
+				FROM 
+					tblICInventoryReceiptItem ri 
+					LEFT JOIN tblICItemUOM stockUOM
+						ON stockUOM.intItemId = ri.intItemId
+						AND stockUOM.ysnStockUnit = 1
+				WHERE
+					ri.intInventoryReceiptId = r.intInventoryReceiptId
+					AND ISNULL(r.intSourceType, 0) = 0
+			) directIR
+		   OUTER APPLY (
+				SELECT 
+					dblQty = SUM(ri.dblOpenReceive)
+				FROM 
+					tblICInventoryReceiptItem ri 
+					LEFT JOIN tblICItemUOM stockUOM
+					ON stockUOM.intItemId = ri.intItemId
+					AND stockUOM.ysnStockUnit = 1
+				WHERE
+					ri.intInventoryReceiptId = r.intInventoryReceiptId
+					AND (r.intSourceType <> 0 OR r.intSourceType IS NULL) 
+		   ) contractIR
+			OUTER APPLY (
+				SELECT TOP 1 
+					ri.intContractHeaderId
+					,ri.intContractDetailId
+				FROM 
+					tblICInventoryReceiptItem ri 
+				WHERE
+					ri.intInventoryReceiptId = r.intInventoryReceiptId
+			) receiptContract
+			--OUTER APPLY (
+			--	SELECT TOP 1 
+			--		lg.strTradeFinanceReferenceNo
+			--	FROM 
+			--		tblLGLoad lg
+			--	WHERE
+			--		lg.strTradeFinanceNo = r.strTradeFinanceNumber
+			--) logistics
+		WHERE
+			r.intInventoryReceiptId = @ReceiptId
+	END 
 		
-	-- Create a trade finance log.
+	-- Create a trade finance log if data is changed. 
 	IF @strAction IS NOT NULL 
 	BEGIN 
 		INSERT INTO @TRFLog (
@@ -375,11 +568,11 @@ BEGIN
 			--) logistics
 		WHERE
 			r.intInventoryReceiptId = @ReceiptId
+	END 
 
-		IF EXISTS (SELECT TOP 1 1 FROM @TRFLog) 
-		BEGIN 
-			EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
-		END 
+	IF EXISTS (SELECT TOP 1 1 FROM @TRFLog) 
+	BEGIN 
+		EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
 	END 
 END 
 
