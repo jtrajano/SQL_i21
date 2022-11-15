@@ -739,6 +739,45 @@ BEGIN TRY
 			) x
 	WHERE dbo.tblQMSample.intSampleId = @intSampleId
 
+	/* Verify if the Sample Product Type is for Batch. */
+	IF (SELECT intProductTypeId FROM tblQMSample WHERE intSampleId = @intSampleId) = 13
+		BEGIN
+			DECLARE @dblTeaAppearance NUMERIC(18, 6)
+				  ,	@dblTeaTaste	  NUMERIC(18, 6)
+				  ,	@dblTeaMouthFeel  NUMERIC(18, 6)
+				  ,	@dblTeaHue		  NUMERIC(18, 6)
+				  ,	@dblTeaIntensity  NUMERIC(18, 6)
+				  ,	@dblTeaMoisture   NUMERIC(18, 6)
+
+			/* Get Test Result of Sample. */
+			SELECT @dblTeaAppearance = CASE WHEN QualityProperty.strPropertyName = 'Appearance' THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaAppearance END
+				 , @dblTeaTaste		 = CASE WHEN QualityProperty.strPropertyName = 'Taste'		THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaTaste		 END	
+				 , @dblTeaMouthFeel	 = CASE WHEN QualityProperty.strPropertyName = 'Mouth Feel' THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaMouthFeel  END	
+				 , @dblTeaHue		 = CASE WHEN QualityProperty.strPropertyName = 'Hue'		THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaHue		 END	
+				 , @dblTeaIntensity  = CASE WHEN QualityProperty.strPropertyName = 'Intensity'	THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaIntensity  END	
+				 , @dblTeaMoisture   = CASE WHEN QualityProperty.strPropertyName = 'Moisture'	THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaMoisture	 END	
+			FROM tblQMTestResult AS TestResult 
+			JOIN tblQMProperty AS QualityProperty ON TestResult.intPropertyId = QualityProperty.intPropertyId
+			JOIN tblQMTest AS Test ON Test.intTestId = TestResult.intTestId
+			JOIN tblQMSample AS QualitySample ON TestResult.intSampleId = QualitySample.intSampleId
+			WHERE QualitySample.intSampleId = @intSampleId AND Test.strTestName = 'Tea Tasting';
+
+			/* Update Batch Tea Characteristics. */
+			UPDATE Batch
+			SET dblTeaAppearance = @dblTeaAppearance
+			  , dblTeaTaste		 = @dblTeaTaste
+			  , dblTeaMouthFeel  = @dblTeaMouthFeel
+			  , dblTeaHue		 = @dblTeaHue
+			  , dblTeaIntensity  = @dblTeaIntensity
+			  , dblTeaMoisture	 = @dblTeaMoisture
+			FROM tblMFBatch AS Batch
+			WHERE intBatchId = (SELECT TOP 1 intProductValueId
+								FROM tblQMSample
+								WHERE intSampleId = @intSampleId);
+		END
+
+	
+
 	IF (@intSampleId > 0)
 	BEGIN
 		EXEC uspSMAuditLog @keyValue = @intSampleId
