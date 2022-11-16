@@ -48,7 +48,7 @@ SELECT
     A.intFromPortId,
     A.dblGrossWeight, -- = dblTotalQuantity + dblTareWeight,
     A.dtmInitialBuy,
-    dblWeightPerUnit = dblTotalQuantity / dblPackagesBought,
+    A.dblWeightPerUnit,
     A.dblLandedPrice,
     A.strLeafCategory,
     A.strLeafManufacturingType,
