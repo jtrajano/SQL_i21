@@ -18,13 +18,13 @@ SELECT
 	,strShipVia = shipVia.strShipVia
 	,A.intTermsId
 	,strTerm = term.strTerm
-	,B.dblQtyOrdered
+	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE B.dblQtyOrdered END AS dblQtyOrdered
 	,E.strUnitMeasure
-	,B.dblCost
-	,B.dblDiscount / 100 AS dblDiscount
-	,B.dblTotal AS dblDetailTotal
-	,A.dblTotal
-	,A.dblSubtotal
+	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE B.dblCost END AS dblCost
+	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE B.dblDiscount / 100 END AS dblDiscount
+	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE B.dblTotal END AS dblDetailTotal
+	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE A.dblTotal END  AS dblTotal
+	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE A.dblSubtotal END AS dblSubtotal
 	,A.dblTax
 	,A.dblShipping
 	,D.intItemId
