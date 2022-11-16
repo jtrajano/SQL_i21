@@ -33,12 +33,6 @@ DECLARE @EntriesForInvoice AS InvoiceStagingTable
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
 
-Declare @strTaxPoint nvarchar(50)
-Declare @intTaxLocationId INT
-Declare @ysnOverrideTaxGroup BIT
-
-SELECT  @strTaxPoint = strTaxPoint, @intTaxLocationId = intTaxLocationId, @ysnOverrideTaxGroup = ysnTaxOverride
-FROM tblCTContractDetail where intContractDetailId = @intContractDetailId
 
 INSERT INTO @EntriesForInvoice
     ([intId]
@@ -187,6 +181,9 @@ INSERT INTO @EntriesForInvoice
     ,[intDestinationGradeId]
     ,[intDestinationWeightId]
     ,[intPriceFixationDetailId]
+    ,[strTaxPoint]
+	,[intTaxLocationId]
+	,[ysnOverrideTaxGroup]
     --,[strAddonDetailKey]
     --,[ysnAddonParent]
     --,[dblAddOnQuantity]
@@ -342,6 +339,9 @@ SELECT
     ,[intDestinationGradeId]                = ARSI.[intDestinationGradeId]
     ,[intDestinationWeightId]               = ARSI.[intDestinationWeightId]
     ,[intPriceFixationDetailId]             = @intPriceFixationDetailId
+    ,strTaxPoint							= CD.strTaxPoint
+	,intTaxLocationId						= CD.intTaxLocationId
+	,[ysnOverrideTaxGroup]					= CD.ysnTaxOverride
     --,[strAddonDetailKey]                    = NULL
     --,[ysnAddonParent]                       = @ZeroBit
     --,[dblAddOnQuantity]                     = @ZeroDecimal
