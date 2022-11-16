@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspIPGenerateSAPLeadTime (@ysnUpdateFeedStatus BIT = 1)
+﻿CREATE PROCEDURE dbo.uspIPGenerateSAPLeadTime_EK (@ysnUpdateFeedStatus BIT = 1)
 AS
 BEGIN TRY
 	SET NOCOUNT ON

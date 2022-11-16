@@ -5,11 +5,11 @@ BEGIN TRY
 
 	IF @strType = 'PO'
 	BEGIN
-		EXEC dbo.uspIPGenerateSAPPO @ysnUpdateFeedStatus = 1
+		EXEC dbo.uspIPGenerateSAPPO_EK @ysnUpdateFeedStatus = 1
 	END
 	ELSE IF @strType = 'Lead Time'
 	BEGIN
-		EXEC dbo.uspIPGenerateSAPLeadTime @ysnUpdateFeedStatus = 1
+		EXEC dbo.uspIPGenerateSAPLeadTime_EK @ysnUpdateFeedStatus = 1
 	END
 END TRY
 

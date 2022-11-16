@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspIPGenerateSAPPO (@ysnUpdateFeedStatus BIT = 1)
+﻿CREATE PROCEDURE dbo.uspIPGenerateSAPPO_EK (@ysnUpdateFeedStatus BIT = 1)
 AS
 BEGIN TRY
 	SET NOCOUNT ON

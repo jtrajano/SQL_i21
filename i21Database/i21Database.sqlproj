@@ -1326,8 +1326,6 @@
     <Build Include="dbo\Stored Procedures\uspQMImportTastingScore.sql" />
     <Build Include="dbo\Tables\tblQMSubBookSampleTypeMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportContractAllocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPO.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTime.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateFeedXML_SAP.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageXML_SAP.sql" />
     <Build Include="dbo\Functions\fnQMGetTealingoItemFromFieldMapping.sql" />
@@ -1363,6 +1361,10 @@
     <Build Include="dbo\Stored Procedures\uspSCCreateVoucherForOnHoldTickets.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostTransferSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTime_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPO_EK.sql" />
+    <Build Include="dbo\Tables\tblIPContractFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessOrdersToFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
