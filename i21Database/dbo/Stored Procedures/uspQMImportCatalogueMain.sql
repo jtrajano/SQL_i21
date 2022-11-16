@@ -143,6 +143,7 @@ BEGIN TRY
         ,@dtmDateCreated DATETIME
         ,@intBrokerId INT
         ,@strBroker NVARCHAR(100)
+        ,@strBuyingOrderNumber NVARCHAR(50)
     
     DECLARE @intSampleId INT
     DECLARE @intItemId INT
@@ -223,6 +224,7 @@ BEGIN TRY
             ,dtmDateCreated = GETDATE()
             ,intBrokerId = BROKERS.intEntityId
             ,strBroker = BROKERS.strName
+            ,strBuyingOrderNumber = IMP.strBuyingOrderNumber
         FROM tblQMImportCatalogue IMP
         INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
         -- Sale Year
@@ -329,6 +331,7 @@ BEGIN TRY
         ,@dtmDateCreated
         ,@intBrokerId
         ,@strBroker
+        ,@strBuyingOrderNumber
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
         SET @intSampleId = NULL
@@ -421,7 +424,7 @@ BEGIN TRY
                 ,intProductLineId
                 ,ysnOrganic
                 ,dblGrossWeight
-                ,strBatchNo
+                -- ,strBatchNo
                 ,str3PLStatus
                 ,strAdditionalSupplierReference
                 ,intAWBSampleReceived
@@ -434,6 +437,7 @@ BEGIN TRY
                 ,strSampleBoxNumber
                 ,strComments3
                 ,intBrokerId
+                ,strBuyingOrderNo
                 )
             SELECT
                 intConcurrencyId = 1
@@ -457,7 +461,7 @@ BEGIN TRY
                 ,strCountry = @strCountry
                 ,intLocationId = @intCompanyLocationId
                 ,intCompanyLocationId = @intCompanyLocationId
-                ,intCompanyLocationId = @intCompanyLocationSubLocationId
+                ,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
                 ,strComment = @strComments
                 ,intCreatedUserId = @intEntityUserId
                 ,dtmCreated = @dtmDateCreated
@@ -485,7 +489,7 @@ BEGIN TRY
                 ,intProductLineId = @intProductLineId
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
-                ,strBatchNo = @strBatchNo
+                -- ,strBatchNo = @strBatchNo
                 ,str3PLStatus = @str3PLStatus
                 ,strAdditionalSupplierReference = @strAdditionalSupplierReference
                 ,intAWBSampleReceived = @intAWBSampleReceived
@@ -498,6 +502,7 @@ BEGIN TRY
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
+                ,strBuyingOrderNo = @strBuyingOrderNumber
             
             SET @intSampleId = SCOPE_IDENTITY()
             
@@ -698,7 +703,7 @@ BEGIN TRY
                 ,intProductLineId = @intProductLineId
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
-                ,strBatchNo = @strBatchNo
+                -- ,strBatchNo = @strBatchNo
                 ,str3PLStatus = @str3PLStatus
                 ,strAdditionalSupplierReference = @strAdditionalSupplierReference
                 ,intAWBSampleReceived = @intAWBSampleReceived
@@ -711,6 +716,7 @@ BEGIN TRY
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
+                ,strBuyingOrderNo = @strBuyingOrderNumber
             FROM tblQMSample S
             WHERE S.intSampleId = @intSampleId
 
@@ -781,6 +787,7 @@ BEGIN TRY
             ,@dtmDateCreated
             ,@intBrokerId
             ,@strBroker
+            ,@strBuyingOrderNumber
     END
     CLOSE @C
 	DEALLOCATE @C

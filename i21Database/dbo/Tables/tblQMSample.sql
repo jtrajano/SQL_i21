@@ -136,6 +136,7 @@
 	[strComments2] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strComments3] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strBuyingOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intTINClearanceId] INT NULL,
 	-- Initial Buy
 	[intBuyer1Id] INT NULL, 
     [dblB1QtyBought] NUMERIC(18, 6) NULL, 
@@ -216,7 +217,8 @@
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer2Id] FOREIGN KEY ([intBuyer2Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer3Id] FOREIGN KEY ([intBuyer3Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer4Id] FOREIGN KEY ([intBuyer4Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
-	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer5Id] FOREIGN KEY ([intBuyer5Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId])
+	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer5Id] FOREIGN KEY ([intBuyer5Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
+	CONSTRAINT [FK_tblQMSample_tblQMTINClearance_intTINClearanceId] FOREIGN KEY ([intTINClearanceId]) REFERENCES [dbo].[tblQMTINClearance]([intTINClearanceId])
 
 )
 GO
@@ -229,4 +231,6 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblQMSample_intRelatedSampleId] ON [dbo].[tblQMSample](intRelatedSampleId)
 GO
 CREATE NONCLUSTERED INDEX [IX_tblQMSample_intCuppingSessionDetailId] ON [dbo].[tblQMSample](intCuppingSessionDetailId)
+GO
+CREATE NONCLUSTERED INDEX [IX_tblQMSample_strBatchNo] ON [dbo].[tblQMSample](strBatchNo)
 GO
