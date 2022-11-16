@@ -2816,47 +2816,60 @@ END CATCH
 
 
 DECLARE @CreateIds VARCHAR(MAX)
+
 DELETE FROM @TempInvoiceIdTable
+
 INSERT INTO @TempInvoiceIdTable
-SELECT DISTINCT
-	[intInvoiceId]
+SELECT DISTINCT intInvoiceId
 FROM
 	#EntriesForProcessing
 WHERE
-	ISNULL([ysnForInsert],0) = 1
-	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceId],0) <> 0
+	ISNULL(ysnForInsert, 0) = 1
+	AND ISNULL(ysnProcessed, 0) = 1
+	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
 	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
-	
 SET @CreatedIvoices = @CreateIds
 
+IF EXISTS(SELECT 1 FROM tblARCompanyPreference WHERE ysnOverrideARAccountLineOfBusinessSegment = 1)
+BEGIN
+	UPDATE ARI
+	SET intLineOfBusinessId = LOB.intLineOfBusinessId
+	FROM tblARInvoice ARI
+	OUTER APPLY (
+		SELECT TOP 1 ICC.intLineOfBusinessId
+		FROM tblARInvoiceDetail ARID
+		INNER JOIN tblICItem ICI ON ARID.intItemId = ICI.intItemId AND ARID.intInvoiceId = ARI.intInvoiceId
+		INNER JOIN tblICCommodity ICC ON ICI.intCommodityId = ICC.intCommodityId
+		ORDER BY intInvoiceDetailId
+	) LOB
+	WHERE ARI.intInvoiceId IN (SELECT intInvoiceId FROM @TempInvoiceIdTable)
+	AND ISNULL(ARI.intLineOfBusinessId, 0) = 0
+END
 
 DECLARE @UpdatedIds VARCHAR(MAX)
+
 DELETE FROM @TempInvoiceIdTable
+
 INSERT INTO @TempInvoiceIdTable
-SELECT DISTINCT
-	[intInvoiceId]
+SELECT DISTINCT intInvoiceId
 FROM
 	#EntriesForProcessing
 WHERE
-	ISNULL([ysnForUpdate],0) = 1
-	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceId],0) <> 0
+	ISNULL(ysnForUpdate, 0) = 1
+	AND ISNULL(ysnProcessed, 0) = 1
+	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
 	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
-	
 SET @UpdatedIvoices = @UpdatedIds
-
-
 
 IF ISNULL(@RaiseError,0) = 0
 BEGIN
