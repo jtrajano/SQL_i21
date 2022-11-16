@@ -447,7 +447,7 @@ BEGIN
 				TOTAL = ISNULL(dblBeginningSalesInTransit,0)-- - CASE WHEN ISNULL(dblSalesInTransit,0) < 0 THEN 0 ELSE ISNULL(dblSalesInTransit,0) END
 			FROM #tblInTransit2
 			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) < @dtmReportDate
-				AND intCompanyLocationId = @intCompanyLocationId
+				AND intLocationId = ID.intCompanyLocationId
 		) I
 		WHERE ID.strLabel = 'PHYSICAL INVENTORY BEGINNING'
 			AND ID.intCompanyLocationId = @intCompanyLocationId
@@ -475,7 +475,7 @@ BEGIN
 				TOTAL = ISNULL(dblBeginningSalesInTransit,0)
 			FROM #tblInTransit2
 			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
-				AND intCompanyLocationId = @intCompanyLocationId
+				AND intLocationId = ID.intCompanyLocationId
 		) I
 		WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
 			AND ID.intCompanyLocationId = @intCompanyLocationId
@@ -503,7 +503,7 @@ BEGIN
 				TOTAL = ISNULL(dblSalesInTransit,0)
 			FROM #tblInTransit2
 			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
-				AND intCompanyLocationId = @intCompanyLocationId
+				AND intLocationId = ID.intCompanyLocationId
 		) I
 		WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
 			AND ID.intCompanyLocationId = @intCompanyLocationId

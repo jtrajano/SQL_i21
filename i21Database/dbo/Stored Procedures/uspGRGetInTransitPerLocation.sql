@@ -119,7 +119,9 @@ BEGIN
 		SELECT @intLocId = MIN(intCompanyLocationId) FROM #LicensedLocation
 
 		WHILE ISNULL(@intLocId,0) > 0
-		BEGIN			
+		BEGIN
+			SET @dblSalesInTransitAsOf = NULL
+
 			--TOTAL INVENTORY SHIPMENT FOR THE DAY
 			SELECT @dblSalesInTransitAsOf = SUM(ISNULL(InTran.dblInTransitQty, 0))
 			FROM #InTransitDateRange InTran
