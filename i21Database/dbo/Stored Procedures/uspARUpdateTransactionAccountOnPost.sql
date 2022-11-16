@@ -242,7 +242,7 @@ SET ANSI_WARNINGS OFF
 	INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
 	OUTER APPLY (
 		SELECT intOverrideAccount
-		FROM dbo.[fnARGetOverrideAccount](ARITD.intSalesTaxAccountId, ARID.[intAccountId], @OverrideCompanySegment, @OverrideLocationSegment, 0)
+		FROM dbo.[fnARGetOverrideAccount](ARID.[intAccountId], ARITD.intSalesTaxAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
 	) OVERRIDESEGMENT
 	WHERE ARID.strSessionId = @strSessionId
 	  AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
