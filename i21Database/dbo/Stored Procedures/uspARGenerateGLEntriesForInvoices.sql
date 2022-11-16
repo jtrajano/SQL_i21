@@ -174,13 +174,13 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[intAccountId]                 = I.[intAccountId]
     ,[dblDebit]                     = CASE 
                                         WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseInvoiceTotal] END
-                                        ELSE @ZeroDecimal 
+                                        THEN I.dblBaseInvoiceTotal
+                                        ELSE @ZeroDecimal
                                       END
     ,[dblCredit]                    = CASE 
                                         WHEN I.[strTransactionType] IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-                                        THEN CASE WHEN I.[strType] = 'Provisional' AND I.[dblPercentage] <> 100 THEN I.[dblBaseProvisionalTotal] ELSE I.[dblBaseInvoiceTotal] END
-                                        ELSE @ZeroDecimal 
+                                        THEN I.dblBaseInvoiceTotal
+                                        ELSE @ZeroDecimal
                                       END
     ,[dblDebitUnit]                 = CASE 
                                         WHEN I.[strTransactionType] NOT IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 

@@ -511,6 +511,7 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblPercentage]
     ,[dblProvisionalTotal]
     ,[dblBaseProvisionalTotal]
+    ,dblBaseProvisionalTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -667,6 +668,7 @@ SELECT
     ,[dblPercentage]                    = ARID.[dblPercentage]
     ,[dblProvisionalTotal]              = ARID.[dblProvisionalTotal]
     ,[dblBaseProvisionalTotal]          = ROUND(ARID.[dblProvisionalTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1406,12 +1408,18 @@ WHERE ID.strSessionId = @strSessionId
   AND DH.strDestination = 'Customer'
 
 UPDATE ARPIH
-SET dblBaseInvoiceTotal = ARPID.dblBaseTotal
+SET dblBaseInvoiceTotal = CASE WHEN ARPIH.dblPercentage <> 100 
+                            THEN ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax 
+                            ELSE ARPID.dblBaseTotal + ARPID.dblBaseTax
+                          END
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
     SELECT
-         intInvoiceId = intInvoiceId
-        ,dblBaseTotal = SUM(dblBaseTotal) + SUM(dblBaseTax)
+         intInvoiceId               = intInvoiceId
+        ,dblBaseTotal               = SUM(dblBaseTotal) 
+        ,dblBaseTax                 = SUM(dblBaseTax)
+        ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
+        ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
