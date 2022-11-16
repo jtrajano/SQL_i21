@@ -61,7 +61,7 @@ RETURNS @returntable TABLE (
 	,[dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
 	,[intAccountId]			    INT NULL
 	,[strLogoType]				NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL
-	-- ,[blbLogo]					VARBINARY (MAX) NULL
+	,[blbLogo]					VARBINARY (MAX) NULL
 	,[blbFooterLogo]			VARBINARY (MAX) NULL
 	,[intAge]                   INT NULL DEFAULT 0
 )
@@ -593,7 +593,7 @@ BEGIN
 		 , dblEndOfMonthAmount	= CASE WHEN AGING.dblCurrencyRevalueRate = 0 THEN ISNULL(AGING.dblBaseTotalAR, 0) ELSE AGING.dblCurrencyRevalueAmount END
 		 , intAccountId			= AGING.intAccountId
 		 , strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
-		--  , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
+		 , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
 		 , blbFooterLogo		= SMLPF.imgLogo
 		 , intAge				= ISNULL(AGING.intAge, 0)
 	FROM

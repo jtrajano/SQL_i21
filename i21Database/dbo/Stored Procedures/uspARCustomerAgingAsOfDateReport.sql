@@ -566,7 +566,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strAgingType
 	 , strReportLogId
 	 , strLogoType
-	--  , blbLogo
+	 , blbLogo
 )	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
@@ -596,7 +596,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strAgingType			= @strAgingType
 	 , strReportLogId		= @strReportLogId
 	 , strLogoType			= @strLogoType
-	--  , blbLogo				= @blbLogo
+	 , blbLogo				= @blbLogo
 FROM (
 SELECT intEntityCustomerId	= B.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
