@@ -131,7 +131,7 @@ BEGIN
 		AND intItemId = @intItemId
 		AND (intSubLocationId = @intSubLocationId OR (intSubLocationId IS NULL AND @intSubLocationId IS NULL))
 		AND (intStorageLocationId = @intStorageLocationId OR (intStorageLocationId IS NULL AND @intStorageLocationId IS NULL))
-		AND intTransactionTypeId = @TransactionType_InventoryReceipt 
+		AND intTransactionTypeId = @TransactionType_Invoice 
 		AND ysnIsUnposted <> 1
 	ORDER BY 
 		intInventoryTransactionId DESC
