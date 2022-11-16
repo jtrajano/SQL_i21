@@ -748,6 +748,7 @@ BEGIN TRY
 				  ,	@dblTeaHue		  NUMERIC(18, 6)
 				  ,	@dblTeaIntensity  NUMERIC(18, 6)
 				  ,	@dblTeaMoisture   NUMERIC(18, 6)
+				  ,	@dblTeaVolume     NUMERIC(18, 6)
 
 			/* Get Test Result of Sample. */
 			SELECT @dblTeaAppearance = CASE WHEN QualityProperty.strPropertyName = 'Appearance' THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaAppearance END
@@ -756,6 +757,7 @@ BEGIN TRY
 				 , @dblTeaHue		 = CASE WHEN QualityProperty.strPropertyName = 'Hue'		THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaHue		 END	
 				 , @dblTeaIntensity  = CASE WHEN QualityProperty.strPropertyName = 'Intensity'	THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaIntensity  END	
 				 , @dblTeaMoisture   = CASE WHEN QualityProperty.strPropertyName = 'Moisture'	THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaMoisture	 END	
+				 , @dblTeaVolume	 = CASE WHEN QualityProperty.strPropertyName = 'Volume'		THEN CAST(ISNULL(NULLIF(TestResult.strPropertyValue, ''), '0') AS NUMERIC(18, 6)) ELSE @dblTeaVolume	 END	
 			FROM tblQMTestResult AS TestResult 
 			JOIN tblQMProperty AS QualityProperty ON TestResult.intPropertyId = QualityProperty.intPropertyId
 			JOIN tblQMTest AS Test ON Test.intTestId = TestResult.intTestId
@@ -770,6 +772,7 @@ BEGIN TRY
 			  , dblTeaHue		 = @dblTeaHue
 			  , dblTeaIntensity  = @dblTeaIntensity
 			  , dblTeaMoisture	 = @dblTeaMoisture
+			  , dblTeaVolume	 = @dblTeaVolume
 			FROM tblMFBatch AS Batch
 			WHERE intBatchId = (SELECT TOP 1 intProductValueId
 								FROM tblQMSample
