@@ -2199,7 +2199,9 @@ BEGIN TRY
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
-        ,[dblAddOnQuantity])
+        ,[dblAddOnQuantity]
+		,ysnOverrideTaxGroup
+	)
 	SELECT
 		 [intId]								= IL.[intId]
 		,[strTransactionType]					= ITG.[strTransactionType]
@@ -2349,6 +2351,7 @@ BEGIN TRY
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
+		,ysnOverrideTaxGroup					= ITG.ysnOverrideTaxGroup
 	FROM
 		@InvoicesToGenerate ITG
 	INNER JOIN
