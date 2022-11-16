@@ -103,6 +103,7 @@ CREATE  TABLE tblMFBatch
 	dtmSplit DATETIME NULL,
 	strNotes NVARCHAR(max) COLLATE Latin1_General_CI_AS  NULL,
 	intConcurrencyId INT NULL,
+	intLocationId int,
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC

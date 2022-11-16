@@ -3,6 +3,7 @@ CREATE PROCEDURE uspQMImportInitialBuy
 AS
 
 BEGIN TRY
+	Declare @strBatchId nvarchar(50)
 	BEGIN TRANSACTION
 
     -- Validate Foreign Key Fields
@@ -405,6 +406,7 @@ BEGIN TRY
             ,strContainerType
             ,strVoyage
             ,strVessel
+			,intLocationId
         )
         SELECT
             strBatchId = S.strBatchNo
@@ -502,6 +504,7 @@ BEGIN TRY
             ,strContainerType = NULL
             ,strVoyage = NULL
             ,strVessel = NULL
+			,intLocationId = S.intCompanyLocationId
         FROM tblQMSample S
         INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
         INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -534,9 +537,17 @@ BEGIN TRY
 
         DECLARE @intInput INT, @intInputSuccess INT
 
-        EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess
+        EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess,@strBatchId OUTPUT,0
 
-        FETCH NEXT FROM @C INTO
+		Update B 
+		Set B.intLocationId=L.intCompanyLocationId,strBatchId=@strBatchId
+		from @MFBatchTableType B
+		JOIN tblCTBook Bk on Bk.intBookId=B.intBookId
+		JOIN tblSMCompanyLocation L on L.strLocationName=Bk.strBook
+
+		EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess,NULL,1
+
+		FETCH NEXT FROM @C INTO
             @intImportCatalogueId
             ,@intSampleId
             ,@intPurchasingGroupId

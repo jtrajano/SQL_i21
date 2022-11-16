@@ -3,6 +3,7 @@ CREATE PROCEDURE uspQMImportContractAllocation
 AS
 
 BEGIN TRY
+	Declare @strBatchId nvarchar(50)
 	BEGIN TRANSACTION
 
     -- Validate Foreign Key Fields
@@ -373,7 +374,15 @@ BEGIN TRY
 
         DECLARE @intInput INT, @intInputSuccess INT
 
-        EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess
+        EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess,@strBatchId OUTPUT,0
+
+		Update B 
+		Set B.intLocationId=L.intCompanyLocationId,strBatchId=@strBatchId
+		from @MFBatchTableType B
+		JOIN tblCTBook Bk on Bk.intBookId=B.intBookId
+		JOIN tblSMCompanyLocation L on L.strLocationName=Bk.strBook
+
+		EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess,NULL,1
 
         CONT:
         FETCH NEXT FROM @C INTO
