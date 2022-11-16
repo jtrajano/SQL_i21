@@ -1,15 +1,18 @@
 ﻿CREATE VIEW vyuMFMachinesByCell
 AS
-SELECT DISTINCT M.intMachineId
-			  , M.strName
-			  , C.intManufacturingCellId
-			  , M.intSubLocationId
-			  , CLSL.strSubLocationName
-			  , M.intLocationId
+SELECT DISTINCT Machine.intMachineId
+			  , Machine.strName
+			  , Machine.intSubLocationId
+			  , Machine.intLocationId
+			  , Machine.intIssuedUOMTypeId
+			  , MachineIssuedUOM.strName AS strIssuedUOMType
+			  , Cell.intManufacturingCellId
+			  , CompanySubLocation.strSubLocationName
 			  , CompanyLocation.strLocationName AS strCompanyLocationName
-FROM tblMFMachine M
-JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-JOIN tblMFManufacturingCellPackType CP ON CP.intPackTypeId = MP.intPackTypeId
-JOIN tblMFManufacturingCell C ON C.intManufacturingCellId = CP.intManufacturingCellId
-LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = M.intSubLocationId
-LEFT JOIN tblSMCompanyLocation CompanyLocation ON M.intLocationId = CompanyLocation.intCompanyLocationId
+FROM tblMFMachine AS Machine
+JOIN tblMFMachinePackType AS MachinePackType ON MachinePackType.intMachineId = Machine.intMachineId
+JOIN tblMFManufacturingCellPackType AS CellPackType ON CellPackType.intPackTypeId = MachinePackType.intPackTypeId
+JOIN tblMFManufacturingCell AS Cell ON Cell.intManufacturingCellId = CellPackType.intManufacturingCellId
+LEFT JOIN tblMFMachineIssuedUOMType AS MachineIssuedUOM ON Machine.intIssuedUOMTypeId = MachineIssuedUOM.intIssuedUOMTypeId
+LEFT JOIN tblSMCompanyLocationSubLocation AS CompanySubLocation ON CompanySubLocation.intCompanyLocationSubLocationId = Machine.intSubLocationId
+LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON Machine.intLocationId = CompanyLocation.intCompanyLocationId
