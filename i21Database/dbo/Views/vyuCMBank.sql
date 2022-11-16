@@ -27,4 +27,5 @@ intBankId
 ,strBICCode
 ,ysnInternational
 ,intConcurrencyId
+,ysnInvalidRTN
 FROM dbo.tblCMBank
