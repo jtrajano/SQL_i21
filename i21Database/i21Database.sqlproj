@@ -1186,6 +1186,7 @@
     <Build Include="dbo\Stored Procedures\uspSTInsertRequiredXMLFileConfigForConsignment.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByModuleAndLOB.sql" />
