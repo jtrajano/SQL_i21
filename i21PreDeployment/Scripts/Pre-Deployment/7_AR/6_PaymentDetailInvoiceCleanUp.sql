@@ -34,3 +34,20 @@ BEGIN
 
 	EXEC sp_executesql @strQuery	
 END
+
+PRINT '********************** BEGIN - FIX INVALID PAYMENT LOCATION **********************'
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'intLocationId' AND [object_id] = OBJECT_ID(N'tblARPayment'))
+  AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'intCompanyLocationId' AND [object_id] = OBJECT_ID(N'tblSMCompanyLocation'))
+  
+BEGIN
+	DELETE P
+	FROM tblARPayment P
+	LEFT JOIN tblSMCompanyLocation CL ON P.intLocationId = CL.intCompanyLocationId
+	WHERE (P.intLocationId = 0 OR ISNULL(CL.intCompanyLocationId, 0) = 0)
+	   AND P.intLocationId IS NOT NULL
+END
+
+PRINT '********************** END - FIX INVALID PAYMENT LOCATION **********************'
+GO
