@@ -36,7 +36,7 @@
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     [intRowNumber] INT NULL,
     [strDeviceManufacturer]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
-    [ysnEthernet]             BIT             DEFAULT 1 NOT NULL,
+    [ysnEthernet]             BIT             DEFAULT 0 NOT NULL,
     [ysnSerialPort]             BIT             DEFAULT 0 NOT NULL,
     [strIPAddress]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
