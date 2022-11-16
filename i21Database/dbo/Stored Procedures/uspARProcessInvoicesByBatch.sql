@@ -371,6 +371,7 @@ BEGIN
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
+		,ysnOverrideTaxGroup
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -523,6 +524,7 @@ BEGIN
 		,[strBinNumber]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strBinNumber] ELSE NULL END)
 		,[strGroupNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strGroupNumber] ELSE NULL END)
 		,[strFeedDiet]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strFeedDiet] ELSE NULL END)
+		,ysnOverrideTaxGroup				= (CASE WHEN @GroupingOption = 0 THEN IE.ysnOverrideTaxGroup ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -743,7 +745,9 @@ BEGIN
             ,[dblAddOnQuantity]
 			,[strBinNumber]
 			,[strGroupNumber]
-			,[strFeedDiet])
+			,[strFeedDiet]
+			,ysnOverrideTaxGroup
+		)
 		SELECT
 			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
@@ -895,6 +899,7 @@ BEGIN
 			,[strBinNumber]							= ITG.[strBinNumber]
 			,[strGroupNumber]						= ITG.[strGroupNumber]
 			,[strFeedDiet]							= ITG.[strFeedDiet]
+			,ysnOverrideTaxGroup					= ITG.ysnOverrideTaxGroup
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN
@@ -1372,6 +1377,7 @@ BEGIN
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
+		,ysnOverrideTaxGroup
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -1517,6 +1523,7 @@ BEGIN
 		,[strBinNumber]						= IE.[strBinNumber]
 		,[strGroupNumber]					= IE.[strGroupNumber]
 		,[strFeedDiet]						= IE.[strFeedDiet]
+		,ysnOverrideTaxGroup				= IE.ysnOverrideTaxGroup
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
