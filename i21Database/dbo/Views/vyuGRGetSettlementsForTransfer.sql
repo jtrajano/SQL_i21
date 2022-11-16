@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettlementsForTransfer]
 AS
+SELECT * FROM (
 SELECT AP.intBillId
 	,AP.strBillId
 	,AP.strVendorOrderNumber
@@ -17,6 +18,7 @@ SELECT AP.intBillId
 	--,TSR.dblTransferredAmount
 	--,TSR.dblTransferredUnits
 	,BD.intAccountId
+	,BD.intBillDetailId
 	--,dblQtyReceived2= ISNULL(BD.dblQtyReceived,0)
 	--,dblTransferredAmount =ISNULL(TSR.dblTransferredAmount,0)
 FROM vyuAPBill AP
@@ -41,11 +43,12 @@ OUTER APPLY (
 		,dblTransferredUnits = SUM(dblUnits)
 	FROM tblGRTransferSettlementReference
 	WHERE intBillFromId = AP.intBillId
+		AND intBillDetailFromId = BD.intBillDetailId
 	GROUP BY intBillFromId
 ) TSR
-WHERE intTransactionType = 1 
-	AND dblAmountDue > 0 
-	AND ysnPosted = 1
+WHERE AP.intTransactionType = 1 
+	AND AP.dblAmountDue > 0 
+	AND AP.ysnPosted = 1
 	AND (BD.intBillId IS NOT NULL OR Adjust_Settlements.intBillAdjId IS NOT NULL)
-
-GO 
+) A
+WHERE dblAmountDue > 0

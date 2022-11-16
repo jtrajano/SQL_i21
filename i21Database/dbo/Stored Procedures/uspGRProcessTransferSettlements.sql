@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessTransferSettlements]
 (
-	 @intTransferSettlementHeaderId INT
-	 ,@intUserId INT
+	 @intTransferSettlementHeaderId INT	 
 )
 AS
 BEGIN
@@ -16,18 +15,20 @@ BEGIN
 	DECLARE @dblTransferAmount NUMERIC(18,6)	
 	DECLARE @TransferFromSettlements AS TransferFromSettlementStagingTable
 	DECLARE @TransferToSettlements AS TransferToSettlementStagingTable
+	DECLARE @intUserId INT
 
 	INSERT INTO @TransferFromSettlements
 	SELECT intTransferFromSettlementId
 		,intTransferSettlementHeaderId
 		,intBillId
+		,intBillDetailId
 		,dblSettlementAmountTransferred
 		,intCurrencyId
 		,dblUnits
 		,intAccountId
 	FROM tblGRTransferFromSettlements
 	WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
-
+	
 	INSERT INTO @TransferToSettlements
 	SELECT intTransferToSettlementId
 		,intTransferSettlementHeaderId
@@ -38,15 +39,17 @@ BEGIN
 	FROM tblGRTransferToSettlements
 	WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
 
-	BEGIN TRANSACTION
+	SELECT @intUserId = intUserId FROM tblGRTransferSettlementsHeader WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
+
 	BEGIN TRY
 		DECLARE @intBillId INT
+		DECLARE @intBillDetailId INT
 		DECLARE @dblTotalTransferPercent DECIMAL(18,6)
 		DECLARE @dblTotalSettlementAmount DECIMAL(18,6)
 		DECLARE @dblTotalUnits DECIMAL(18,6)
 		DECLARE @intTransferFromSettlementId INT
 		DECLARE @intTransferToSettlementId INT
-
+		
 		DECLARE @dblSettlementAmountTransferred DECIMAL(18,6)
 		DECLARE @dblUnits DECIMAL(18,6)
 
@@ -68,6 +71,7 @@ BEGIN
 			BEGIN
 				SELECT
 					@intBillId							= intBillId
+					,@intBillDetailId					= intBillDetailId
 					,@dblSettlementAmountTransferred	= dblSettlementAmountTransferred
 					,@dblUnits							= dblUnits
 				FROM @TransferFromSettlements
@@ -75,13 +79,27 @@ BEGIN
 				ORDER BY intTransferFromSettlementId
 				
 				INSERT INTO tblGRTransferSettlementReference
+				(
+					[intTransferSettlementHeaderId]
+					,[intTransferToSettlementId]
+					,[intBillFromId]
+					,[intBillDetailFromId]
+					,[intBillToId]
+					,[dblTransferPercent]
+					,[dblSettlementAmount]
+					,[dblUnits]
+					,[intTransferToBillId]
+					,[intAccountId]
+				)
 				SELECT @intTransferSettlementHeaderId
 					,@intTransferToSettlementId
 					,@intBillId
+					,@intBillDetailId
 					,NULL
 					,@dblTotalTransferPercent
 					,ROUND((@dblSettlementAmountTransferred * @dblTotalTransferPercent) / 100, 2)
 					,ROUND((@dblUnits * @dblTotalTransferPercent) / 100, 4)
+					,NULL
 					,NULL
 
 				SELECT @intTransferFromSettlementId = MIN(intTransferFromSettlementId)
@@ -101,7 +119,30 @@ BEGIN
 		DECLARE @TransferSettlementReference TransferSettlementReferenceStagingTable
 		
 		INSERT INTO @TransferSettlementReference
-		SELECT *
+		(
+			[intTransferSettlementReferenceId]
+			,[intTransferSettlementHeaderId]
+			,[intTransferToSettlementId]
+			,[intBillFromId]
+			,[intBillDetailFromId]
+			,[intBillToId]
+			,[dblTransferPercent]
+			,[dblSettlementAmount]
+			,[dblUnits]
+			,[intTransferToBillId]
+			,[intAccountId]
+		)
+		SELECT [intTransferSettlementReferenceId]
+			,[intTransferSettlementHeaderId]
+			,[intTransferToSettlementId]
+			,[intBillFromId]
+			,[intBillDetailFromId]
+			,[intBillToId]
+			,[dblTransferPercent]
+			,[dblSettlementAmount]
+			,[dblUnits]
+			,[intTransferToBillId]
+			,[intAccountId]
 		FROM tblGRTransferSettlementReference
 		WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
 
@@ -141,8 +182,11 @@ BEGIN
 				ON TS.intTransferSettlementHeaderId = TSR.intTransferSettlementHeaderId
 			INNER JOIN tblGRTransferFromSettlements TSFROM
 				ON TSFROM.intBillId = TSR.intBillFromId
+					AND TSFROM.intTransferSettlementHeaderId = TS.intTransferSettlementHeaderId
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = TSR.intBillFromId
+			INNER JOIN tblAPBillDetail BD
+				ON BD.intBillDetailId = TSR.intBillDetailFromId
 
 			--VOUCHER
 			INSERT INTO @voucherPayable
@@ -178,10 +222,14 @@ BEGIN
 				ON TS.intTransferSettlementHeaderId = TSR.intTransferSettlementHeaderId
 			INNER JOIN tblGRTransferFromSettlements TSFROM
 				ON TSFROM.intBillId = TSR.intBillFromId
+					AND TSFROM.intTransferSettlementHeaderId = TS.intTransferSettlementHeaderId
 			INNER JOIN tblGRTransferToSettlements TSTO	
 				ON TSTO.intTransferToSettlementId = TSR.intTransferToSettlementId
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = TSR.intBillFromId
+			INNER JOIN tblAPBillDetail BD
+				ON BD.intBillDetailId = TSR.intBillDetailFromId
+
 		END
 
 		EXEC uspAPCreateVoucher
@@ -190,7 +238,7 @@ BEGIN
 			,@userId = @intUserId
 			,@throwError = 1
 			,@error = @ErrMsg
-			,@createdVouchersId = @createdVouchersId OUTPUT
+			,@createdVouchersId = @createdVouchersId OUTPUT		
 
 		IF @createdVouchersId IS NOT NULL
 		BEGIN
@@ -217,8 +265,6 @@ BEGIN
 		INSERT INTO @Bills
 		SELECT intBillId,intTransactionType,intEntityVendorId FROM tblAPBill WHERE intBillId IN (SELECT * FROM dbo.fnCommaSeparatedValueToTable(@createdVouchersId))
 
-		--SELECT '@Bills',* FROM @Bills
-
 		UPDATE TSR
 		SET intBillToId = B_DM.intBillId
 			,intTransferToBillId = B_BL.intBillId
@@ -233,13 +279,90 @@ BEGIN
 			ON (B_BL.intEntityId = TSS.intEntityId AND B_BL.intTransactionType = 1) --BL
 		WHERE TSR.intTransferSettlementHeaderId = @intTransferSettlementHeaderId
 
+		--Book AP clearing
+		BEGIN		
+			DECLARE @APClearing AS APClearing;
+			DELETE FROM @APClearing;
+			INSERT INTO @APClearing
+			(
+				[intTransactionId],
+				[strTransactionId],
+				[intTransactionType],
+				[strReferenceNumber],
+				[dtmDate],
+				[intEntityVendorId],
+				[intLocationId],
+				--DETAIL
+				[intTransactionDetailId],
+				[intAccountId],
+				[intItemId],
+				[intItemUOMId],
+				[dblQuantity],
+				[dblAmount],
+				--OTHER INFORMATION
+				[strCode]
+			)
+			--REDUCE AP CLEARING OF THE SOURCE TRANSACTION AND VENDOR
+			SELECT
+				-- HEADER
+				[intTransactionId]          = V.intTransferFromSettlementId
+				,[strTransactionId]         = V.strTransferSettlementNumber
+				,[intTransactionType]       = 6 -- GRAIN
+				,[strReferenceNumber]       = ''
+				,[dtmDate]                  = V.dtmDate
+				,[intEntityVendorId]        = V.intEntityId
+				,[intLocationId]            = V.intCompanyLocationId
+				-- DETAIL
+				,[intTransactionDetailId]   = V.intTransferSettlementReferenceId
+				,[intAccountId]             = BD.intAccountId
+				,[intItemId]                = V.intItemId
+				,[intItemUOMId]             = BD.intUnitOfMeasureId
+				,[dblQuantity]              = V.dblToUnits
+				,[dblAmount]                = V.dblSettlementAmount
+				,[strCode]                  = 'TSTR'
+			FROM vyuGRTransferSettlements V
+			INNER JOIN tblAPBillDetail BD
+				ON BD.intBillId = V.intSourceBillId
+					AND BD.intBillDetailId = V.intBillDetailFromId
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD.intItemId
+					AND IC.strType = 'Inventory'
+			WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
+			UNION ALL
+			--INCREASE AP CLEARING OF THE TRANSFER SETTLEMENT
+			SELECT
+				-- HEADER
+				[intTransactionId]          = V.intTransferFromSettlementId
+				,[strTransactionId]         = V.strTransferSettlementNumber
+				,[intTransactionType]       = 6 -- GRAIN
+				,[strReferenceNumber]       = ''
+				,[dtmDate]                  = V.dtmDate
+				,[intEntityVendorId]        = V.intEntityTransferId
+				,[intLocationId]            = V.intCompanyLocationId
+				-- DETAIL
+				,[intTransactionDetailId]   = V.intTransferSettlementReferenceId
+				,[intAccountId]             = BD.intAccountId
+				,[intItemId]                = NULL
+				,[intItemUOMId]             = NULL
+				,[dblQuantity]              = V.dblToUnits
+				,[dblAmount]                = V.dblSettlementAmount
+				,[strCode]                  = 'TSTR'
+			FROM vyuGRTransferSettlements V
+			INNER JOIN tblAPBillDetail BD
+				ON BD.intBillId = V.intTransferToBillId
+			--INNER JOIN tblICItem IC
+			--	ON IC.intItemId = BD.intItemId
+			--		AND IC.strType = 'Inventory'
+			WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
+			--SELECT '@APClearing',* FROM @APClearing
+			EXEC uspAPClearing @APClearing = @APClearing, @post = 1;
+		END
+
 
 		DONE:
-		COMMIT TRANSACTION
 
 	END TRY
 	BEGIN CATCH
-	ROLLBACK TRANSACTION
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 	END CATCH

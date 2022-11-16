@@ -1361,6 +1361,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateEmail_EK.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateVoucherForOnHoldTickets.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnpostTransferSettlements.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

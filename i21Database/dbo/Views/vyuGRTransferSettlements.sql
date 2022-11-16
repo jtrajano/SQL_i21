@@ -2,6 +2,7 @@
 AS
 SELECT TSH.intTransferSettlementHeaderId
 	,TSH.strTransferSettlementNumber
+	,TSR.intTransferSettlementReferenceId
 	,TSH.intEntityId
 	,EM_HEADER.strEntityNo
 	,EM_HEADER.strName
@@ -12,24 +13,30 @@ SELECT TSH.intTransferSettlementHeaderId
 	,TSH.dtmDateTransferred
 	,TSH.intUserId
 	,US.strUserName
+	,TSH.ysnPosted
+	,TSH.intConcurrencyId
 	--FROM
 	,TS_FROM.intTransferFromSettlementId
-	,intBillId 				= TS_FROM.intBillId
-	,strBillIdFrom 			= AP_FROM.strBillId	
+	,intSourceBillId		= TSR.intBillFromId
+	,strSourceBillId 		= AP_FROM.strBillId
+	,intBillId 				= TSR.intBillToId
+	,strBillIdFrom 			= AP_FROM_TR.strBillId	
 	,TS_FROM.dblSettlementAmountTransferred
-	,dblFromUnits 			= TS_FROM.dblUnits
-	,intTransferBillId 		= TSR.intBillToId
-	,strTransferBillId 		= AP_FROM_TR.strBillId
+	,TS_FROM.dblUnits	
+	,AP_FROM.strVendorOrderNumber
+	,AP_FROM.dtmDate
+	,ysnDMPaid				= AP_FROM.ysnPaid
 	--TO
 	,intTransferToSettlementId = TS_TO.intTransferToSettlementId
 	,intEntityTransferId 	= TS_TO.intEntityId
 	,strEntityTransferNo 	= EM_TO.strEntityNo
-	,strEntityTransferName 	= EM_TO.strName
+	,strEntityName 			= EM_TO.strName
 	,TSR.dblTransferPercent
 	,TSR.dblSettlementAmount
 	,dblToUnits 			= TSR.dblUnits
-	,intTransferToBillId 	= TSR.intBillToId
+	,intTransferToBillId 	= TSR.intTransferToBillId
 	,strTransferToBillId 	= AP_TO.strBillId
+	,ysnBLPaid				= AP_TO.ysnPaid
 FROM tblGRTransferSettlementsHeader TSH
 INNER JOIN tblEMEntity EM_HEADER
 	ON EM_HEADER.intEntityId = TSH.intEntityId
@@ -52,6 +59,5 @@ INNER JOIN tblAPBill AP_FROM_TR
 INNER JOIN tblEMEntity EM_TO
 	ON EM_TO.intEntityId = TS_TO.intEntityId
 INNER JOIN tblAPBill AP_TO
-	ON AP_TO.intBillId = TSR.intBillToId
-
+	ON AP_TO.intBillId = TSR.intTransferToBillId
 GO
