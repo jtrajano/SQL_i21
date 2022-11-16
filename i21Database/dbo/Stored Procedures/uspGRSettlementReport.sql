@@ -1082,7 +1082,7 @@ BEGIN
 					INNER JOIN (
 						SELECT intBillDetailId
 							,intBillId
-							,intChargeRowNum = ROW_NUMBER() OVER (PARTITION BY intBillId ORDER BY intBillId ASC)
+							,intChargeRowNum = ROW_NUMBER() OVER (PARTITION BY intBillId,BD.intItemId ORDER BY intBillId ASC)
 						FROM tblAPBillDetail BD
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = BD.intItemId
@@ -2305,7 +2305,7 @@ BEGIN
 					INNER JOIN (
 						SELECT intBillDetailId
 							,intBillId
-							,intChargeRowNum = ROW_NUMBER() OVER (PARTITION BY intBillId ORDER BY intBillId ASC)
+							,intChargeRowNum = ROW_NUMBER() OVER (PARTITION BY intBillId,BD.intItemId ORDER BY intBillId ASC)
 						FROM tblAPBillDetail BD
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = BD.intItemId
