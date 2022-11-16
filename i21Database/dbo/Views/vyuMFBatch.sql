@@ -46,9 +46,9 @@ SELECT
     A.strEvaluatorRemarks,
     A.dtmExpiration,
     A.intFromPortId,
-    A.dblGrossWeight,
+    A.dblGrossWeight, -- = dblTotalQuantity + dblTareWeight,
     A.dtmInitialBuy,
-    A.dblWeightPerUnit,
+    dblWeightPerUnit = dblTotalQuantity / dblPackagesBought,
     A.dblLandedPrice,
     A.strLeafCategory,
     A.strLeafManufacturingType,
@@ -95,7 +95,7 @@ SELECT
     A.intPackageUOMId,
     A.dblTareWeight,
     A.strTaster,
-    A.strFeedStock,
+    strFeedStock = Item.strShortName,
     A.strFlourideLimit,
     A.strLocalAuctionNumber,
     A.strPOStatus,
@@ -144,7 +144,7 @@ OUTER APPLY(
     WHERE A.intStorageUnitId = ICS.intStorageLocationId
 )E
 OUTER APPLY(
-    SELECT TOP 1 strItemNo,strDescription  FROM tblICItem WHERE intItemId = A.intTealingoItemId
+    SELECT TOP 1 strItemNo,strDescription, strShortName  FROM tblICItem WHERE intItemId = A.intTealingoItemId
 )Item
 OUTER APPLY(
 	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intItemUOMId
