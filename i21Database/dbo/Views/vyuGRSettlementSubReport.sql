@@ -262,8 +262,8 @@ FROM
 				ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 			WHERE QM.strSourceType = 'Storage'
 		) StorageDiscount 
-		ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId 
-			AND StorageDiscount.intItemId = BillDtl.intItemId
+		ON StorageDiscount.intTicketFileId = BillDtl2.intCustomerStorageId 
+			AND StorageDiscount.intItemId = BillDtl2.intItemId
 		WHERE Item2.strType = 'Other Charge'
 			--AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
 				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL))
