@@ -221,4 +221,6 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[dtmCalculated]						DATETIME										NULL
 	,[ysnImportedFromOrigin]				BIT												NULL
 	,[ysnImportedAsPosted] 				    BIT												NULL
+	,intTaxLocationId						INT												NULL
+	,strTaxPoint							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 )
