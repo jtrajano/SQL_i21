@@ -32,6 +32,14 @@ SELECT
 DECLARE @EntriesForInvoice AS InvoiceStagingTable
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
+
+Declare @strTaxPoint nvarchar(50)
+Declare @intTaxLocationId INT
+Declare @ysnOverrideTaxGroup BIT
+
+SELECT  @strTaxPoint = strTaxPoint, @intTaxLocationId = intTaxLocationId, @ysnOverrideTaxGroup = ysnTaxOverride
+FROM tblCTContractDetail where intContractDetailId = @intContractDetailId
+
 INSERT INTO @EntriesForInvoice
     ([intId]
     ,[strTransactionType]
