@@ -67,7 +67,7 @@ INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 	, dblEndOfMonthAmount
 	, intAccountId
 	, strLogoType
-	, blbLogo
+	-- , blbLogo
 	, blbFooterLogo
 	, strReportLogId
 )
