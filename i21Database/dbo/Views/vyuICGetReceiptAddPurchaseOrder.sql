@@ -100,5 +100,6 @@ FROM (
 		) ICPreference
 	WHERE ysnCompleted = 0
 		AND POView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
+		AND POView.ysnRecurring = 0
 		
 ) tblAddOrders
