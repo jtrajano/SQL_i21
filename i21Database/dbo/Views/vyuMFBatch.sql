@@ -118,7 +118,8 @@ SELECT
 	strPackageUOM = PUOM.strUnitMeasure,
     Reason.strReasonCode,
     LOT.strLotNumber,
-    LOT.intLotId
+    LOT.intLotId,
+    intLocationId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 OUTER APPLY(
@@ -129,7 +130,7 @@ OUTER APPLY(
 OUTER APPLY(
     SELECT TOP 1 strLocationName 
     FROM tblSMCompanyLocation 
-    WHERE intCompanyLocationId = A.intBuyingCenterLocationId    
+    WHERE intCompanyLocationId = A.intLocationId    
 )CL
 OUTER APPLY( 
     SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
