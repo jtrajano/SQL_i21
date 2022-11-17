@@ -1,5 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuSTPollingStatusReport] 
-AS
+﻿CREATE VIEW [dbo].[vyuSTPollingStatusReport]  
+AS  
+
 SELECT DISTINCT 
 stcp.intStoreId, 
 stcpew.intCheckoutProcessId, 
