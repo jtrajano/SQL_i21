@@ -1,11 +1,10 @@
-﻿CREATE VIEW [dbo].[vyuSTPollingStatusReport]  
-AS  
-
+﻿CREATE VIEW [dbo].[vyuSTPollingStatusReport] 
+AS
 SELECT DISTINCT 
 stcp.intStoreId, 
 stcpew.intCheckoutProcessId, 
 stcpew.intCheckoutProcessErrorWarningId, 
-stcp.intCheckoutId, 
+stcpew.intCheckoutId, 
 stcp.strGuid, 
 FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
 stcp.dtmCheckoutProcessDate, 
@@ -22,7 +21,7 @@ INNER JOIN dbo.tblSTCheckoutProcess AS stcp
 INNER JOIN dbo.tblSTStore AS sts 
 	ON stcp.intStoreId = sts.intStoreId
 LEFT OUTER JOIN dbo.tblSTCheckoutHeader CH
-	ON stcp.intCheckoutId = CH.intCheckoutId
-GROUP BY stcp.intStoreId, stcpew.intCheckoutProcessId, stcpew.intCheckoutProcessErrorWarningId, stcp.intCheckoutId, 
+	ON stcpew.intCheckoutId = CH.intCheckoutId
+GROUP BY stcp.intStoreId, stcpew.intCheckoutProcessId, stcpew.intCheckoutProcessErrorWarningId, stcpew.intCheckoutId, 
 stcp.strGuid, stcp.dtmCheckoutProcessDate, CH.dtmCheckoutDate, CH.dtmCountDate, sts.intStoreNo, sts.strDescription, stcpew.strMessageType, stcpew.strMessage, CH.strCheckoutCloseDate
 HAVING CH.dtmCheckoutDate IS NOT NULL
