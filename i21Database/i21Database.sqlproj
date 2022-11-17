@@ -1365,6 +1365,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPO_EK.sql" />
     <Build Include="dbo\Tables\tblIPContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessOrdersToFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
