@@ -4900,6 +4900,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantFGM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantMSM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantCSH.sql" />
     <Build Include="dbo\Views\vyuSCTicketView.sql" />
     <Build Include="dbo\Views\vyuSCTicketSealNumber.sql" />
     <Build Include="dbo\Functions\fnMultiply.sql" />
