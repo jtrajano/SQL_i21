@@ -11,7 +11,7 @@ AS BEGIN
                 @intCheckoutProcessId = intCheckoutProcessId
     FROM		tblSTCheckoutProcess
     WHERE		intStoreId = @intStoreId
-    ORDER BY    dtmCheckoutProcessDate  DESC
+    ORDER BY    intCheckoutProcessId  DESC
 
     RETURN @intCheckoutProcessId
 END
