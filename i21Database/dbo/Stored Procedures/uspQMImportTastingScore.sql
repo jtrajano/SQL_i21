@@ -445,6 +445,10 @@ BEGIN TRY
                         ,@intCompanyLocationId = @intCompanyLocationId
                         ,@intEntityId = @intEntityUserId
                         ,@ysnDelink = 0
+
+                    UPDATE tblQMSample
+                    SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intBatchId AND intCompanyLocationId = @intCompanyLocationId)
+                    WHERE intSampleId = @intSampleId
                 END
             END
         END
