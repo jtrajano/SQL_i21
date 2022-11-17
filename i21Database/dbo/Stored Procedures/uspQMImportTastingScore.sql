@@ -23,6 +23,8 @@ BEGIN TRY
     LEFT JOIN tblMFBatch BATCH ON BATCH.strBatchId = IMP.strBatchNo
     -- Template Sample Type
     LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
+    -- Buyer1 Group Number
+    LEFT JOIN tblSMCompanyLocation B1GN ON B1GN.strLocationName = IMP.strB1GroupNumber
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -32,6 +34,7 @@ BEGIN TRY
             + CASE WHEN (ITEM.intItemId IS NULL AND ISNULL(IMP.strTealingoItem, '') <> '') THEN 'TEALINGO ITEM, ' ELSE '' END
             + CASE WHEN (BATCH.intBatchId IS NULL AND ISNULL(IMP.strBatchNo, '') <> '') THEN 'BATCH NO, ' ELSE '' END
             + CASE WHEN (TEMPLATE_SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
+            + CASE WHEN (B1GN.intCompanyLocationId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '') THEN 'BUYER1 GROUP NUMBER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
@@ -41,6 +44,8 @@ BEGIN TRY
         OR (STYLE.intValuationGroupId IS NULL AND ISNULL(IMP.strStyle, '') <> '')
         OR (ITEM.intItemId IS NULL AND ISNULL(IMP.strTealingoItem, '') <> '')
         OR (BATCH.intBatchId IS NULL AND ISNULL(IMP.strBatchNo, '') <> '')
+        OR (TEMPLATE_SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
+        OR (B1GN.intCompanyLocationId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '')
     )
     -- End Validation
 
@@ -95,7 +100,7 @@ BEGIN TRY
             intImportCatalogueId = IMP.intImportCatalogueId
             ,intSampleTypeId = S.intSampleTypeId
             ,intTemplateSampleTypeId = TEMPLATE_SAMPLE_TYPE.intSampleTypeId
-            ,intCompanyLocationId = CL.intCompanyLocationId
+            ,intCompanyLocationId = B1GN.intCompanyLocationId
             ,intColourId = COLOUR.intCommodityAttributeId
             ,strColour = COLOUR.strDescription
             ,intBrandId = SIZE.intBrandId
@@ -145,6 +150,8 @@ BEGIN TRY
             LEFT JOIN tblMFBatch BATCH ON BATCH.strBatchId = IMP.strBatchNo
             -- Template Sample Type
             LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
+            -- Buyer1 Group Number
+            LEFT JOIN tblSMCompanyLocation B1GN ON B1GN.strLocationName = IMP.strB1GroupNumber
         )
             ON SY.strSaleYear = IMP.strSaleYear
             AND CL.strLocationName = IMP.strBuyingCenter
@@ -193,44 +200,25 @@ BEGIN TRY
         -- Check if Batch ID is supplied in the template
         IF @intBatchId IS NOT NULL
         BEGIN
-            DECLARE
-                @intBatchSampleId INT
-                ,@intTINClearanceId INT
-
-            SET @intBatchSampleId = NULL
-            SET @intTINClearanceId = NULL
-
-            SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intTemplateSampleTypeId
-            SELECT TOP 1 @intTINClearanceId = intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intCompanyLocationId = @intCompanyLocationId AND intBatchId = @intBatchId
-
-            -- Create new TIN clearance if it does not exist
-            IF @intTINClearanceId IS NULL
+            IF @intCompanyLocationId IS NULL
             BEGIN
-                INSERT INTO tblQMTINClearance (
-                    intConcurrencyId
-                    ,strTINNumber
-                    ,intCompanyLocationId
-                    ,intBatchId
-                    ,ysnEmpty
-                )
-                SELECT
-                    intConcurrencyId = 1
-                    ,strTINNumber = @strTINNumber
-                    ,intCompanyLocationId = @intCompanyLocationId
-                    ,intBatchId = @intBatchId
-                    ,ysnEmpty = 0
-
-                SET @intTINClearanceId = SCOPE_IDENTITY()
+                UPDATE tblQMImportCatalogue
+                SET
+                    strLogResult = 'BUYER1 GROUP NAME is required if the BATCH NO is supplied'
+                    ,ysnProcessed = 1
+                    ,ysnSuccess = 0
+                WHERE intImportCatalogueId = @intImportCatalogueId
+                GOTO CONT
             END
+
+            DECLARE @intBatchSampleId INT
+            SET @intBatchSampleId = NULL
+
+            SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intTemplateSampleTypeId AND intCompanyLocationId = @intCompanyLocationId
 
             -- Insert new sample with product type = 13
             IF @intBatchSampleId IS NULL BEGIN
                 DECLARE @strSampleNumber NVARCHAR(30)
-                
-                SELECT TOP 1 @intCompanyLocationId = S.intCompanyLocationId
-                FROM tblQMSample S
-                INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
-                WHERE B.intBatchId = @intBatchId
 
                 --New Sample Creation
                 EXEC uspMFGeneratePatternId @intCategoryId = NULL
@@ -308,7 +296,7 @@ BEGIN TRY
                     ,strSampleBoxNumber
                     ,strComments3
                     ,intBrokerId
-                    ,intTINClearanceId
+                    -- ,intTINClearanceId
                     )
                 SELECT
                     intConcurrencyId = 1
@@ -373,7 +361,7 @@ BEGIN TRY
                     ,strSampleBoxNumber = S.strSampleBoxNumber
                     ,strComments3 = S.strComments3
                     ,intBrokerId = S.intBrokerId
-                    ,intTINClearanceId = @intTINClearanceId
+                    -- ,intTINClearanceId = @intTINClearanceId
                 FROM tblQMSample S
                 INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
                 WHERE B.intBatchId = @intBatchId
@@ -415,11 +403,49 @@ BEGIN TRY
                     ,intLastModifiedUserId = @intEntityUserId
                     ,dtmLastModified = @dtmDateCreated
                     -- Auction Fields
-                    ,intTINClearanceId = @intTINClearanceId
+                    -- ,intTINClearanceId = @intTINClearanceId
                 FROM tblQMSample S
                 WHERE S.intSampleId = @intBatchSampleId
 
                 SET @intSampleId = @intBatchSampleId
+            END
+
+            IF @strTINNumber IS NOT NULL
+            BEGIN
+                DECLARE
+                    @strOldTINNumber NVARCHAR(100)
+                    ,@intOldCompanyLocationId INT
+                -- Insert / Update TIN number linked to the sample / batch
+                SELECT
+                    @strOldTINNumber = TIN.strTINNumber
+                    ,@intOldCompanyLocationId = B.intLocationId
+                FROM tblQMTINClearance TIN
+                INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
+                OUTER APPLY (SELECT intBatchId, intLocationId FROM tblMFBatch WHERE intBatchId = @intBatchId) B                
+                WHERE S.intSampleId = @intSampleId
+
+
+                IF ISNULL(@strOldTINNumber, '') <> @strTINNumber OR ISNULL(@intOldCompanyLocationId, 0) <> @intCompanyLocationId
+                BEGIN
+                    -- Delink old TIN number if there's an existing one and the TIN number has changed.
+                    IF @strOldTINNumber IS NOT NULL
+                    BEGIN
+                        EXEC uspQMUpdateTINBatchId
+                            @strTINNumber = @strOldTINNumber
+                            ,@intBatchId = @intBatchId
+                            ,@intCompanyLocationId = @intOldCompanyLocationId
+                            ,@intEntityId = @intEntityUserId
+                            ,@ysnDelink = 1
+                    END
+
+                    -- Link new TIN number with the pre-shipment sample / batch
+                    EXEC uspQMUpdateTINBatchId
+                        @strTINNumber = @strTINNumber
+                        ,@intBatchId = @intBatchId
+                        ,@intCompanyLocationId = @intCompanyLocationId
+                        ,@intEntityId = @intEntityUserId
+                        ,@ysnDelink = 0
+                END
             END
         END
 
