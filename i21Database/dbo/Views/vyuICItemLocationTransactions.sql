@@ -82,3 +82,39 @@ FROM tblICInventoryCount c
 	INNER JOIN tblICItemLocation il ON il.intItemId = cd.intItemId
 		AND il.intLocationId = c.intLocationId
 	INNER JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = il.intLocationId
+
+UNION
+
+-- Inventory Valuation
+SELECT DISTINCT 
+	strTransaction = 'Inventory Valuation' COLLATE Latin1_General_CI_AS,
+	strTransactionNo = t.strTransactionId,
+	intTransactionId = t.intTransactionId,
+	intItemLocationId = il.intItemLocationId,
+	strLocationName = loc.strLocationName,
+	intItemId = il.intItemId,
+	dtmTransactionDate = t.dtmDate
+FROM 
+	tblICInventoryTransaction t	INNER JOIN tblICItemLocation il 
+		ON il.intItemId = t.intItemId
+		AND il.intItemLocationId = t.intItemLocationId
+	INNER JOIN tblSMCompanyLocation loc 
+		ON loc.intCompanyLocationId = il.intLocationId
+
+UNION
+
+-- Customer Owned
+SELECT DISTINCT 
+	strTransaction = 'Stock Movement (Customer Owned)' COLLATE Latin1_General_CI_AS,
+	strTransactionNo = t.strTransactionId,
+	intTransactionId = t.intTransactionId,
+	intItemLocationId = il.intItemLocationId,
+	strLocationName = loc.strLocationName,
+	intItemId = il.intItemId,
+	dtmTransactionDate = t.dtmDate
+FROM 
+	tblICInventoryTransactionStorage t	INNER JOIN tblICItemLocation il 
+		ON il.intItemId = t.intItemId
+		AND il.intItemLocationId = t.intItemLocationId
+	INNER JOIN tblSMCompanyLocation loc 
+		ON loc.intCompanyLocationId = il.intLocationId
