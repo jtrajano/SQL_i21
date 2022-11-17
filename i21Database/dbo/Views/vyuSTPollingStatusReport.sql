@@ -16,6 +16,13 @@ FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
 ) AS intProcessedStore,
 
 (
+	SELECT COUNT('') FROM (SELECT DISTINCT intStoreId 
+	FROM tblSTCheckoutProcess
+	WHERE strGuid = stcp.strGuid
+	GROUP BY intStoreId) a
+) AS intProcessedStorePerGuid,
+
+(
 	SELECT COUNT('') FROM (SELECT DISTINCT chIn.dtmCheckoutDate  
 	FROM tblSTCheckoutProcess cpIn
 	JOIN tblSTCheckoutProcessErrorWarning spew
@@ -70,6 +77,16 @@ FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
 	AND (spew.strMessageType = 'F' OR spew.strMessageType = 'S')
 	GROUP BY intStoreId) a
 ) AS intStoreWithError,
+
+(
+	SELECT COUNT('') FROM (SELECT DISTINCT  intStoreId 
+	FROM tblSTCheckoutProcess cp
+	JOIN tblSTCheckoutProcessErrorWarning spew
+		ON cp.intCheckoutProcessId = spew.intCheckoutProcessId
+	WHERE cp.strGuid = stcp.strGuid 
+	AND (spew.strMessageType = 'F' OR spew.strMessageType = 'S')
+	GROUP BY intStoreId) a
+) AS intStoreWithErrorPerGuid,
 
 (
 	SELECT COUNT('') FROM (SELECT DISTINCT chIn.dtmCheckoutDate, cp.intStoreId 
