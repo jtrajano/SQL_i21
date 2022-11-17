@@ -11072,6 +11072,7 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadBasisCost.sql" />
     <Build Include="dbo\Views\vyuCTContractBasisCostView.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetOfferList.sql" />
+    <Build Include="dbo\Functions\fnCTGetFreightRateMatrixFromCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
