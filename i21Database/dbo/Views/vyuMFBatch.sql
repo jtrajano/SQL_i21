@@ -119,7 +119,7 @@ SELECT
     Reason.strReasonCode,
     LOT.strLotNumber,
     LOT.intLotId,
-    intLocationId
+    A.intLocationId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 OUTER APPLY(
