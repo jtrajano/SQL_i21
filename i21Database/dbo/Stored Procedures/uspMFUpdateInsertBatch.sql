@@ -78,6 +78,13 @@ BEGIN
 				AND ISNULL(intSubBookId, 0) = 0
 			)
 		SELECT @errorMessage = 'Channel (intSubBookId) is missing'
+	ELSE IF EXISTS (
+			SELECT 1
+			FROM @MFBatchTableType
+			WHERE @id = intId
+				AND ISNULL(intLocationId, 0) = 0
+			)
+		SELECT @errorMessage = 'Location (intLocationId) is missing'
 
 	IF @errorMessage <> ''
 	BEGIN
