@@ -118,7 +118,11 @@ BEGIN
         ,[ysnInventory] = 1
 		,[intSalesAccountId] = ItemAcc.intAccountId
 		,[strComments] = ccSiteHeader.strCcdReference
-		, CASE WHEN ccSiteHeader.strApType = 'Credit On Account' THEN ccSiteHeader.dtmDate ELSE NULL END
+		, CASE 
+			WHEN ccSiteHeader.strApType = 'Credit On Account' THEN ccSiteHeader.dtmDate 
+			WHEN ccSiteHeader.strApType = 'Cash Deposited' THEN ccSiteHeader.dtmDate 
+			ELSE NULL 
+		  END
 		--,[intInvoiceId] = ARInvoiceDetail.intInvoiceId
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
