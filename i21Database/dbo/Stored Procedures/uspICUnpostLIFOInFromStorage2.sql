@@ -10,9 +10,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
 -- Create the temp table if it does not exists. 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStorageToReverse')) 
 BEGIN 
-	CREATE TABLE #tmpInventoryTransactionStockToReverse (
+	CREATE TABLE #tmpInventoryTransactionStorageToReverse (
 		intInventoryTransactionStorageId INT NOT NULL 
 		,intTransactionId INT NULL 
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -65,7 +65,7 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
 -- Then grab the updated records and store it into the @InventoryToReverse variable
-INSERT INTO #tmpInventoryTransactionStockToReverse (
+INSERT INTO #tmpInventoryTransactionStorageToReverse (
 	intInventoryTransactionStorageId
 	,intTransactionId
 	,strTransactionId
@@ -143,7 +143,7 @@ UPDATE	lifoStorageBucket
 SET		lifoStorageBucket.dblStockIn = ISNULL(lifoStorageBucket.dblStockIn, 0) - LIFOOutGrouped.dblQty
 FROM	dbo.tblICInventoryLIFOStorage lifoStorageBucket INNER JOIN (
 			SELECT	LIFOOut.intRevalueLifoId, dblQty = SUM(LIFOOut.dblQty)
-			FROM	dbo.tblICInventoryLIFOStorageOut LIFOOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			FROM	dbo.tblICInventoryLIFOStorageOut LIFOOut INNER JOIN #tmpInventoryTransactionStorageToReverse Reversal
 						ON LIFOOut.intInventoryTransactionStorageId = Reversal.intInventoryTransactionStorageId
 					INNER JOIN dbo.tblICInventoryTransactionStorage OutTransactions
 						ON OutTransactions.intInventoryTransactionStorageId = LIFOOut.intInventoryTransactionStorageId
@@ -181,21 +181,32 @@ SELECT	intItemId = OutTransactions.intItemId
 		,dtmCreated = GETDATE()
 		,intCreatedUserId = OutTransactions.intCreatedUserId
 		,intConcurrencyId = 1
-FROM	dbo.tblICInventoryLIFOStorage LIFO INNER JOIN dbo.tblICInventoryLIFOStorageOut LIFOOut
+FROM	dbo.tblICInventoryLIFOStorage LIFO 
+		INNER JOIN dbo.tblICInventoryLIFOStorageOut LIFOOut
 			ON LIFO.intInventoryLIFOStorageId = LIFOOut.intInventoryLIFOStorageId
 		INNER JOIN dbo.tblICInventoryTransactionStorage OutTransactions
 			ON OutTransactions.intInventoryTransactionStorageId = LIFOOut.intInventoryTransactionStorageId
 			AND ISNULL(OutTransactions.dblQty, 0) < 0 
-WHERE	LIFO.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
-		AND LIFO.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
-		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
+			AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
+		INNER JOIN (
+			SELECT DISTINCT 
+				tmp.intTransactionId
+				,tmp.strTransactionId
+			FROM #tmpInventoryTransactionStorageToReverse tmp	
+		) tmp
+			ON tmp.intTransactionId = LIFO.intTransactionId
+			AND tmp.strTransactionId = LIFO.strTransactionId
+--WHERE	LIFO.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStorageToReverse)
+--		AND LIFO.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStorageToReverse)
+--		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 ;
+
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 -- Mark the record as unposted too. 
 UPDATE	lifoStorageBucket
 SET		dblStockOut = dblStockIn
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryLIFOStorage lifoStorageBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+FROM	dbo.tblICInventoryLIFOStorage lifoStorageBucket INNER JOIN #tmpInventoryTransactionStorageToReverse Reversal
 			ON lifoStorageBucket.intTransactionId = Reversal.intTransactionId
 			AND lifoStorageBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (

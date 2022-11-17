@@ -10,9 +10,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
 -- Create the temp table if it does not exists. 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStorageToReverse')) 
 BEGIN 
-	CREATE TABLE #tmpInventoryTransactionStockToReverse (
+	CREATE TABLE #tmpInventoryTransactionStorageToReverse (
 		intInventoryTransactionStorageId INT NOT NULL 
 		,intTransactionId INT NULL 
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -65,8 +65,8 @@ DECLARE @AVERAGECOST AS INT = 1
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
--- Then grab the updated records and store it into the #tmpInventoryTransactionStockToReverse temp table
-INSERT INTO #tmpInventoryTransactionStockToReverse (
+-- Then grab the updated records and store it into the #tmpInventoryTransactionStorageToReverse temp table
+INSERT INTO #tmpInventoryTransactionStorageToReverse (
 	intInventoryTransactionStorageId
 	,intTransactionId
 	,strTransactionId
@@ -145,7 +145,7 @@ SET		LotBucket.dblStockIn = ISNULL(LotBucket.dblStockIn, 0) - LotOutGrouped.dblQ
 FROM	dbo.tblICInventoryLotStorage LotBucket INNER JOIN (
 			SELECT	LotOut.intRevalueLotId
 					, dblQty = SUM(LotOut.dblQty)
-			FROM	dbo.tblICInventoryLotStorageOut LotOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			FROM	dbo.tblICInventoryLotStorageOut LotOut INNER JOIN #tmpInventoryTransactionStorageToReverse Reversal
 						ON LotOut.intInventoryTransactionStorageId = Reversal.intInventoryTransactionStorageId
 					INNER JOIN dbo.tblICInventoryTransactionStorage OutTransactions
 						ON OutTransactions.intInventoryTransactionStorageId = LotOut.intInventoryTransactionStorageId
@@ -204,7 +204,7 @@ WHERE	ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 UPDATE	LotBucket
 SET		dblStockOut = dblStockIn
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryLotStorage LotBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+FROM	dbo.tblICInventoryLotStorage LotBucket INNER JOIN #tmpInventoryTransactionStorageToReverse Reversal
 			ON LotBucket.intTransactionId = Reversal.intTransactionId
 			AND LotBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (

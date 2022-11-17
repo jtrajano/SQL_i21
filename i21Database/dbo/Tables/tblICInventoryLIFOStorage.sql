@@ -106,3 +106,7 @@ Tracks all non-company owned stocks in a LIFO manner. Records are physically arr
 		ON [dbo].[tblICInventoryLIFOStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [dtmDate] DESC, [dblStockAvailable] ASC)
 		INCLUDE (intTransactionId, strTransactionId, dblCost);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOStorage_Unpost]
+		ON [dbo].[tblICInventoryLIFOStorage]([strTransactionId] ASC, [intTransactionId] ASC);
+	GO
