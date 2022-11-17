@@ -193,8 +193,8 @@ BEGIN TRY
 				, NULL
 				, NULL
 				, 'Amount'
-				, dblRate = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
-				, dblAmount = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
+				, dblRate = ISNULL(((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)  ,0)
+				, dblAmount = ISNULL(((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100) ,0) 
 				, dblFX = NULL
 			FROM tblLGInsurancePremiumFactor ipf
 			JOIN tblLGInsurancePremiumFactorDetail detail ON detail.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId
