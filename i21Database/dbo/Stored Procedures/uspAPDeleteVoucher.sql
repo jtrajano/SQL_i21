@@ -44,7 +44,7 @@ BEGIN TRY
 	INSERT INTO @voucherBillDetailIds
 	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
 
-	IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
+	IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds) AND @callerModule != 0)
 	BEGIN
 		RAISERROR('Voucher details already deleted.',16,1)
 		RETURN;
