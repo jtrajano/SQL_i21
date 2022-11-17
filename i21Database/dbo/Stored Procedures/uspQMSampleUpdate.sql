@@ -394,6 +394,7 @@ BEGIN TRY
   , strComments2 = x.strComments2
   , strComments3 = x.strComments3
   , strBuyingOrderNo = x.strBuyingOrderNo
+  , intTINClearanceId = x.intTINClearanceId
   , intBuyer1Id = x.intBuyer1Id
   , dblB1QtyBought = x.dblB1QtyBought
   , intB1QtyUOMId = x.intB1QtyUOMId
@@ -536,6 +537,7 @@ BEGIN TRY
    , strComments2 NVARCHAR(MAX) 
    , strComments3 NVARCHAR(MAX)   
    , strBuyingOrderNo NVARCHAR(50) 
+   , intTINClearanceId INT
    , intBuyer1Id INT
    , dblB1QtyBought NUMERIC(18, 6)
    , intB1QtyUOMId INT

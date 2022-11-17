@@ -179,6 +179,8 @@ SELECT S.intSampleId
 	,DSL.strName AS strDestinationStorageLocationName
 	,S.strComments2
 	,S.strComments3
+	,S.strBuyingOrderNo
+	,TC.strTINNumber
 	-- Initial Buy
 	,S.intBuyer1Id
 	,B1.strName AS strBuyer1
@@ -302,6 +304,7 @@ LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
 LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
 LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
 LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
+LEFT JOIN tblQMTINClearance TC ON TC.intTINClearanceId = S.intTINClearanceId
 WHERE S.intTypeId = 1
 GO
 
