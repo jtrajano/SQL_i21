@@ -802,3 +802,97 @@ GO
 GO
 	PRINT N'END UPDATE'  
 GO 
+
+--=====================================================================================================================================
+-- INSERT CONTRACT DETAIL TRIGGER IF NOT EXISTS IN THE DATABASE
+---------------------------------------------------------------------------------------------------------------------------------------
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.triggers 
+           WHERE name = 'trgCTContractDetail')  
+BEGIN
+		EXEC ('
+CREATE TRIGGER [dbo].[trgCTContractDetail]
+    ON [dbo].[tblCTContractDetail]
+    FOR INSERT,UPDATE
+    AS 
+    
+	declare @ErrMsg nvarchar(max);
+
+	declare @intActiveContractDetailId int = 0;
+	declare @intActiveContractHeaderId int = 0;
+	declare @intPricingTypeId int = 0;
+	declare @dblSequenceQuantity numeric(18,6) = 0.00;
+	declare @intPricingStatus int = 0;
+	declare @dblPricedQuantity numeric(18,6) = 0.00;
+	declare @ysnMultiPrice bit = 0;
+	declare @dblBalance numeric(18,6);
+
+	begin try
+
+		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity, @dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then i.dblBalance else i.dblBalanceLoad end) 
+		from 
+			inserted i
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = i.intContractHeaderId;  
+
+		if (@intPricingTypeId = 1)
+		begin
+			set @intPricingStatus = 2;
+		end
+		else
+		begin
+			if exists (select top 1 1 from tblCTContractHeader ch inner join tblCTContractDetail cd on ch.intContractHeaderId = cd.intContractHeaderId where cd.intContractDetailId = @intActiveContractDetailId and ch.ysnMultiplePriceFixation is not null)
+			begin
+				set @ysnMultiPrice = 1
+				select top 1 @intActiveContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId
+			end
+
+			if @ysnMultiPrice = 1
+			begin
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractHeaderId = @intActiveContractHeaderId 
+			end
+			else
+			begin
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf 
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractDetailId = @intActiveContractDetailId 
+			end			
+			
+			if (@dblPricedQuantity = 0)
+			begin
+				set @intPricingStatus = 0;
+			end
+			else
+			begin
+				if (@dblSequenceQuantity > @dblPricedQuantity)
+				begin
+					set @intPricingStatus = 1;
+				end
+				else
+				begin
+					set @intPricingStatus = 2;
+				end
+			end
+		end
+
+
+		if not exists(select top 1 1 from tblCTContractDetail where intPricingStatus = @intPricingStatus and intContractDetailId = @intActiveContractDetailId)
+		begin
+			update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
+		end
+
+	end try
+	begin catch
+		SET @ErrMsg = ERROR_MESSAGE()  
+		RAISERROR (@ErrMsg,18,1,''WITH NOWAIT'') 
+	end catch
+	')
+END
+GO
+
+
