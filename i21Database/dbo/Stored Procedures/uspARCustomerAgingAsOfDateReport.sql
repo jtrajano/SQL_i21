@@ -767,6 +767,6 @@ FROM (
 
 ) AS B
 
-GROUP BY A.intEntityCustomerId) AS AGING
+GROUP BY B.intEntityCustomerId) AS AGING
 INNER JOIN @ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
 ORDER BY strCustomerName
