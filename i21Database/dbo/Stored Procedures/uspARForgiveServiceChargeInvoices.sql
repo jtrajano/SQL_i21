@@ -13,14 +13,16 @@ SET ANSI_WARNINGS OFF
 
 IF ISNULL(@strInvoiceIds, '') <> ''
 	BEGIN
-		DECLARE @tblCreditMemoEntries			InvoiceIntegrationStagingTable
-		DECLARE @tblInvoiceEntries				InvoiceIntegrationStagingTable
-		DECLARE @strServiceChargeHasPayments 	NVARCHAR(MAX)
-			  , @strErrorMsg					NVARCHAR(MAX)
-			  , @strCreatedCreditMemo			NVARCHAR(MAX)
-			  , @strCreatedInvoices				NVARCHAR(MAX)
-			  , @dtmDateToday 					DATETIME 
-			  , @strBatchId 					VARCHAR(16)
+		DECLARE @tblCreditMemoEntries						InvoiceIntegrationStagingTable
+		DECLARE @tblInvoiceEntries							InvoiceIntegrationStagingTable
+		DECLARE  @strServiceChargeHasPayments 				NVARCHAR(MAX)
+				,@strErrorMsg								NVARCHAR(MAX)
+				,@strCreatedCreditMemo						NVARCHAR(MAX)
+				,@strCreatedInvoices						NVARCHAR(MAX)
+				,@dtmDateToday 								DATETIME 
+				,@strBatchId 								VARCHAR(16)
+				,@strLocationWithoutSalesAccount			NVARCHAR(MAX) = ''
+				,@strLocationWithoutCustomerPrepaidAccount	NVARCHAR(MAX) = ''
 		
 		--GET BATCH NUMBER
 		EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL
@@ -33,14 +35,17 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 		SELECT  @dtmDateToday = DV.dtmToday FROM @ServiceChargeParam DV
 
 		--GET SERVICE CHARGES TO FORGIVE
-		SELECT intInvoiceId		= SCI.intInvoiceId
-			 , strInvoiceNumber	= SCI.strInvoiceNumber
-			 , dtmForgiveDate	= ISNULL(CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), DV.dtmForgiveDate))), @dtmDateToday)
+		SELECT intInvoiceId			= SCI.intInvoiceId
+			 , strInvoiceNumber		= SCI.strInvoiceNumber
+			 , dtmForgiveDate		= ISNULL(CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), DV.dtmForgiveDate))), @dtmDateToday)
+			 , intCompanyLocationId = SCI.intCompanyLocationId
 		INTO #SERVICECHARGETOFORGIVE
 		FROM @ServiceChargeParam DV
 		INNER JOIN (
-			SELECT intInvoiceId
-				 , strInvoiceNumber
+			SELECT 
+				 intInvoiceId
+				,strInvoiceNumber
+				,intCompanyLocationId
 			FROM dbo.tblARInvoice WITH (NOLOCK)
 			WHERE ysnPosted = 1
 			  AND ysnForgiven = (CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END)			  
@@ -66,28 +71,58 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 			   AND I.strInvoiceNumber <> ISNULL(P.strPaymentInfo, 0)
 
 			IF ISNULL(@strServiceChargeHasPayments, '') <> ''
-				BEGIN
-					SET @strServiceChargeHasPayments = 'These Service Charges Invoice has payments: ' + @strServiceChargeHasPayments
-					RAISERROR(@strServiceChargeHasPayments, 16, 1)
-					RETURN;
-				END
+			BEGIN
+				SET @strServiceChargeHasPayments = 'These Service Charges Invoice has payments: ' + @strServiceChargeHasPayments
+				RAISERROR(@strServiceChargeHasPayments, 16, 1)
+				RETURN;
+			END
+
+			SELECT TOP 1 @strLocationWithoutSalesAccount = strLocationName
+			FROM tblSMCompanyLocation
+			WHERE intCompanyLocationId IN (
+				SELECT intCompanyLocationId 
+				FROM #SERVICECHARGETOFORGIVE
+			)
+			AND ISNULL(intSalesAccount, 0) = 0
+
+			IF ISNULL(@strLocationWithoutSalesAccount, '') <> ''
+			BEGIN
+				SET @strLocationWithoutSalesAccount = 'The Sales Account of location ' + @strLocationWithoutSalesAccount + ' was not specified.'
+				RAISERROR(@strLocationWithoutSalesAccount, 16, 1)
+				RETURN;
+			END
+
+			SELECT TOP 1 @strLocationWithoutCustomerPrepaidAccount = strLocationName
+			FROM tblSMCompanyLocation
+			WHERE intCompanyLocationId IN (
+				SELECT intCompanyLocationId 
+				FROM #SERVICECHARGETOFORGIVE
+			)
+			AND ISNULL(intSalesAdvAcct, 0) = 0
+
+			IF ISNULL(@strLocationWithoutCustomerPrepaidAccount, '') <> ''
+			BEGIN
+				SET @strLocationWithoutCustomerPrepaidAccount = 'The Customer Prepaid Account of location ' + @strLocationWithoutSalesAccount + ' was not specified.'
+				RAISERROR(@strLocationWithoutCustomerPrepaidAccount, 16, 1)
+				RETURN;
+			END
 
 			--VALIDATE SERVICE CHARGES THAT HAS BEEN UNFORGIVEN ALREADY ONCE
 			IF (@ysnForgive = 0)
-				BEGIN
-					DECLARE @strUnforgivenServiceCharges  NVARCHAR(MAX)
+			BEGIN
+				DECLARE @strUnforgivenServiceCharges  NVARCHAR(MAX)
 
-					SELECT @strUnforgivenServiceCharges = I.strInvoiceNumber + ' has been already unforgiven once. Service Charge linked: (' + UNFORGIVEN.strInvoiceNumber + ')'
-					FROM #SERVICECHARGETOFORGIVE I
-					INNER JOIN tblARInvoice UNFORGIVEN ON UNFORGIVEN.strInvoiceOriginId = I.strInvoiceNumber AND UNFORGIVEN.strType = 'Service Charge'
-					WHERE I.dtmForgiveDate <> @dtmDateToday 
+				SELECT @strUnforgivenServiceCharges = I.strInvoiceNumber + ' has been already unforgiven once. Service Charge linked: (' + UNFORGIVEN.strInvoiceNumber + ')'
+				FROM #SERVICECHARGETOFORGIVE I
+				INNER JOIN tblARInvoice UNFORGIVEN ON UNFORGIVEN.strInvoiceOriginId = I.strInvoiceNumber AND UNFORGIVEN.strType = 'Service Charge'
+				WHERE I.dtmForgiveDate <> @dtmDateToday 
 
-					IF ISNULL(@strUnforgivenServiceCharges, '') <> ''
-						BEGIN
-							RAISERROR(@strUnforgivenServiceCharges, 16, 1)
-							RETURN;
-						END
-				END
+				IF ISNULL(@strUnforgivenServiceCharges, '') <> ''
+					BEGIN
+						RAISERROR(@strUnforgivenServiceCharges, 16, 1)
+						RETURN;
+					END
+			END
 
 			--UPDATE SERVICE CHARGES TO MARK AS FORGIVEN
 			UPDATE INV
@@ -181,10 +216,10 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 													, @CreatedIvoices	= @strCreatedCreditMemo OUT
 
 					IF ISNULL(@strErrorMsg, '') <> ''
-						BEGIN
-							RAISERROR(@strErrorMsg, 16, 1)
-							RETURN;
-						END
+					BEGIN
+						RAISERROR(@strErrorMsg, 16, 1)
+						RETURN;
+					END
 					ELSE IF ISNULL(@strCreatedCreditMemo, '') <> ''
 						BEGIN
 							--INSERT CM AND SC TO PAYMENT AND POST
@@ -329,10 +364,10 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 														, @ErrorMessage		= @ErrorMessage OUTPUT
 
 							IF ISNULL(@ErrorMessage, '') <> ''
-								BEGIN
-									RAISERROR(@strErrorMsg, 16, 1)
-									RETURN;
-								END
+							BEGIN
+								RAISERROR(@strErrorMsg, 16, 1)
+								RETURN;
+							END
 						END
 				END
 			ELSE
@@ -464,10 +499,10 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 													, @CreatedIvoices	= @strCreatedInvoices OUT
 
 					IF ISNULL(@strErrorMsg, '') <> ''
-						BEGIN
-							RAISERROR(@strErrorMsg, 16, 1)
-							RETURN;
-						END
+					BEGIN
+						RAISERROR(@strErrorMsg, 16, 1)
+						RETURN;
+					END
 				END
 
 			/****************** AUDIT LOG ******************/
