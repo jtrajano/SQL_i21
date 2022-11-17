@@ -61,6 +61,7 @@ SELECT
 	 , FreightTerms.intFreightTermId
 	 , FreightTerms.strFreightTerm
 	 , D.strBundleType 
+	 , A.ysnRecurring
 FROM tblPOPurchase A
 INNER JOIN  tblPOPurchaseDetail B 
 	ON A.intPurchaseId = B.intPurchaseId
