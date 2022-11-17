@@ -864,6 +864,7 @@
     <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
     <Build Include="dbo\Functions\fnFAMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspLGFetchExistingConditions.sql" />
+    <Build Include="dbo\Functions\fnCTGetFreightRateMatrixFromCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
