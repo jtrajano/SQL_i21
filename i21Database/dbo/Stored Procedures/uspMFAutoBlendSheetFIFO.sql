@@ -2,458 +2,474 @@
 	  @intLocationId			INT
 	, @intBlendRequirementId	INT
 	, @dblQtyToProduce			NUMERIC(38, 20)
-	, @strXml					NVARCHAR(MAX) = NULL
-	, @ysnFromPickList			BIT = 0
-	, @strExcludedLotXml		NVARCHAR(MAX) = NULL
-	, @strWorkOrderIds			NVARCHAR(max) = NULL
-	, @intItemId			    INT = NULL
+	, @strXml					NVARCHAR(MAX)	= NULL
+	, @ysnFromPickList			BIT				= 0
+	, @strExcludedLotXml		NVARCHAR(MAX)	= NULL
+	, @strWorkOrderIds			NVARCHAR(max)	= NULL
+	, @intItemId			    INT				= NULL
 AS
 BEGIN TRY
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
-	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
-	SET NOCOUNT ON
 
-	DECLARE @intBlendItemId							INT
-	DECLARE @strBlendItemNo							NVARCHAR(50)
-	DECLARE @dblRequiredQty							NUMERIC(38, 20)
-	DECLARE @intMinRowNo							INT
-	DECLARE @intRecipeItemId						INT
-	DECLARE @intRawItemId							INT
-	DECLARE @strErrMsg								NVARCHAR(MAX)
-	DECLARE @intIssuedUOMTypeId						INT
-	DECLARE @ysnMinorIngredient						BIT
-	DECLARE @dblPercentageIncrease					NUMERIC(38, 20) = 0
-	DECLARE @intNoOfSheets							INT = 1
-	DECLARE @intStorageLocationId					INT
-	DECLARE @intRecipeId							INT
-	DECLARE @strBlenderName							NVARCHAR(50)
-	DECLARE @strLotNumber							NVARCHAR(50)
-	DECLARE @dblAvailableQty						NUMERIC(38, 20)
-	DECLARE @intEstNoOfSheets						INT
-	DECLARE @dblWeightPerQty						NUMERIC(38, 20)
-	DECLARE @intMachineId							INT
-	DECLARE @strSQL									NVARCHAR(MAX)
-	DECLARE @ysnEnableParentLot						BIT = 0
-	DECLARE @ysnShowAvailableLotsByStorageLocation	BIT = 0
-	DECLARE @intManufacturingProcessId				INT
-	DECLARE @intParentLotId							INT
-	DECLARE @ysnRecipeItemValidityByDueDate			BIT = 0
-	DECLARE @intDayOfYear							INT
-	DECLARE @dtmDate								DATETIME
-	DECLARE @dtmDueDate								DATETIME
-	DECLARE @dblOriginalRequiredQty					NUMERIC(38, 20)
-	DECLARE @dblPartialQuantity						NUMERIC(38, 20)
-	DECLARE @dblRemainingRequiredQty NUMERIC(38, 20)
-	DECLARE @intPartialQuantitySubLocationId INT
-	DECLARE @intOriginalIssuedUOMTypeId INT
-	DECLARE @intKitStagingLocationId INT
-	DECLARE @intBlendStagingLocationId INT
-	DECLARE @intMinPartialQtyLotRowNo INT
-	DECLARE @dblAvailablePartialQty NUMERIC(38, 20)
-	DECLARE @idoc INT
-	DECLARE @idoc1 INT
-	DECLARE @intConsumptionMethodId INT
-	DECLARE @intConsumptionStoragelocationId INT
-	DECLARE @ysnIsSubstitute BIT
-	DECLARE @intWorkOrderId INT
-	DECLARE @dblBulkItemAvailableQty NUMERIC(38, 20)
-	DECLARE @dblRecipeQty NUMERIC(38, 20)
-	DECLARE @strLotTracking NVARCHAR(50)
-	DECLARE @intItemUOMId INT
-	DECLARE @index INT
-	DECLARE @id INT
-	DECLARE @ysnWOStagePick BIT = 0
-	DECLARE @ysnIncludeKitStagingLocation BIT = 0
-	DECLARE @dblDefaultResidueQty NUMERIC(38, 20)
-	DECLARE @strSourceLocationIds NVARCHAR(MAX)
-	DECLARE @intSequenceNo INT
-		,@intSequenceCount INT = 1
-		,@strRuleName NVARCHAR(100)
-		,@strValue NVARCHAR(50)
-		,@strOrderBy NVARCHAR(100) = ''
-		,@strOrderByFinal NVARCHAR(100) = ''
-		,@strPickByStorageLocation NVARCHAR(50)
-		,@intSubLocationId INT
-		,@dblUpperToleranceQty NUMERIC(38, 20)
-		,@dblLowerToleranceQty NUMERIC(38, 20)
-		,@ysnComplianceItem BIT
-		,@dblCompliancePercent NUMERIC(38, 20)
-		,@dblQuantity NUMERIC(38, 20)
-		,@dblIssuedQuantity NUMERIC(38, 20)
-		,@intItemIssuedUOMId INT
-		,@dblUnitCost NUMERIC(38, 20)
-		,@dblPickedQty NUMERIC(38, 20)
-		,@dblItemRequiredQty NUMERIC(38, 20)
-		,@intSeq INT
-		,@dblTotalPickedQty NUMERIC(38, 20)
-		,@dblSuggestedCeilingQty DECIMAL(38, 20)
-		,@dblSuggestedFloorQty DECIMAL(38, 20)
-		,@dblCeilingQtyDiff DECIMAL(38, 20)
-		,@dblFloorQtyDiff DECIMAL(38, 20)
-		,@dblOrgRequiredQty DECIMAL(38, 20)
-		,@dblAvailableQty1 DECIMAL(38, 20)
-	DECLARE @tblInputItemSeq TABLE (
-		intItemId INT
-		,intSeq INT
-		)
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+SET NOCOUNT ON
 
-	IF @ysnFromPickList = 0
+DECLARE @intBlendItemId							INT
+	  , @strBlendItemNo							NVARCHAR(50)
+	  , @dblRequiredQty							NUMERIC(38, 20)
+	  , @intMinRowNo							INT
+	  , @intRecipeItemId						INT
+	  , @intRawItemId							INT
+	  , @strErrMsg								NVARCHAR(MAX)
+	  , @intIssuedUOMTypeId						INT
+	  , @ysnMinorIngredient						BIT
+	  , @dblPercentageIncrease					NUMERIC(38, 20) = 0
+	  , @intNoOfSheets							INT = 1
+	  , @intStorageLocationId					INT
+	  , @intRecipeId							INT
+	  , @strBlenderName							NVARCHAR(50)
+	  , @strLotNumber							NVARCHAR(50)
+	  , @dblAvailableQty						NUMERIC(38, 20)
+	  , @intEstNoOfSheets						INT
+	  , @dblWeightPerQty						NUMERIC(38, 20)
+	  , @intMachineId							INT
+	  , @strSQL									NVARCHAR(MAX)
+	  , @ysnEnableParentLot						BIT = 0
+	  , @ysnShowAvailableLotsByStorageLocation	BIT = 0
+	  , @intManufacturingProcessId				INT
+	  , @intParentLotId							INT
+	  , @ysnRecipeItemValidityByDueDate			BIT = 0
+	  , @intDayOfYear							INT
+	  , @dtmDate								DATETIME
+	  , @dtmDueDate								DATETIME
+	  , @dblOriginalRequiredQty					NUMERIC(38, 20)
+	  , @dblPartialQuantity						NUMERIC(38, 20)
+	  , @dblRemainingRequiredQty				NUMERIC(38, 20)
+	  , @intPartialQuantitySubLocationId		INT
+	  , @intOriginalIssuedUOMTypeId				INT
+	  , @intKitStagingLocationId				INT
+	  , @intBlendStagingLocationId				INT
+	  , @intMinPartialQtyLotRowNo				INT
+	  , @dblAvailablePartialQty					NUMERIC(38, 20)
+	  , @idoc									INT
+	  , @idoc1									INT
+	  , @intConsumptionMethodId					INT
+	  , @intConsumptionStoragelocationId		INT
+	  , @ysnIsSubstitute						BIT
+	  , @intWorkOrderId							INT
+	  , @dblBulkItemAvailableQty				NUMERIC(38, 20)
+	  , @dblRecipeQty							NUMERIC(38, 20)
+	  , @strLotTracking							NVARCHAR(50)
+	  , @intItemUOMId							INT
+	  , @index									INT
+	  , @id										INT
+	  , @ysnWOStagePick							BIT = 0
+	  , @ysnIncludeKitStagingLocation			BIT = 0
+	  , @dblDefaultResidueQty					NUMERIC(38, 20)
+	  , @strSourceLocationIds					NVARCHAR(MAX)
+	  , @intSequenceNo							INT
+	  , @intSequenceCount						INT = 1
+	  , @strRuleName							NVARCHAR(100)
+	  , @strValue								NVARCHAR(50)
+	  , @strOrderBy								NVARCHAR(100) = ''
+	  , @strOrderByFinal						NVARCHAR(100) = ''
+	  , @strPickByStorageLocation				NVARCHAR(50)
+	  , @intSubLocationId						INT
+	  , @dblUpperToleranceQty					NUMERIC(38, 20)
+	  , @dblLowerToleranceQty					NUMERIC(38, 20)
+	  , @ysnComplianceItem						BIT
+	  , @dblCompliancePercent					NUMERIC(38, 20)
+	  , @dblQuantity							NUMERIC(38, 20)
+	  , @dblIssuedQuantity						NUMERIC(38, 20)
+	  , @intItemIssuedUOMId						INT
+	  , @dblUnitCost							NUMERIC(38, 20)
+	  , @dblPickedQty							NUMERIC(38, 20)
+	  , @dblItemRequiredQty						NUMERIC(38, 20)
+	  , @intSeq									INT
+	  , @dblTotalPickedQty						NUMERIC(38, 20)
+	  , @dblSuggestedCeilingQty					DECIMAL(38, 20)
+	  , @dblSuggestedFloorQty					DECIMAL(38, 20)
+	  , @dblCeilingQtyDiff						DECIMAL(38, 20)
+	  , @dblFloorQtyDiff						DECIMAL(38, 20)
+	  , @dblOrgRequiredQty						DECIMAL(38, 20)
+	  , @dblAvailableQty1						DECIMAL(38, 20)
+	  , @intLayerPerPallet						INT
+	  , @intUnitPerLayer						INT
+	  , @dblPalletQty							DECIMAL(38, 20)
+	  , @dblNoOfPallets							DECIMAL(18, 2)
+
+
+DECLARE @tblInputItemSeq TABLE 
+(
+	intItemId INT
+  , intSeq	  INT
+);
+
+DECLARE @tblInputItem TABLE 
+(
+	intRowNo						INT IDENTITY(1, 1)
+  , intRecipeId						INT
+  , intRecipeItemId					INT
+  , intItemId						INT
+  , dblRequiredQty					NUMERIC(38, 20)
+  , ysnIsSubstitute					BIT
+  , ysnMinorIngredient				BIT
+  , intConsumptionMethodId			INT
+  , intConsumptionStoragelocationId INT
+  , intParentItemId					INT
+  , dblSubstituteRatio				NUMERIC(38, 20)
+  , dblMaxSubstituteRatio			NUMERIC(38, 20)
+  , strLotTracking					NVARCHAR(50)
+  , intItemUOMId					INT
+  , dblUpperToleranceQty			NUMERIC(38, 20)
+  , dblLowerToleranceQty			NUMERIC(38, 20)
+  , ysnComplianceItem				BIT
+  , dblCompliancePercent			NUMERIC(38, 20)
+  , dblPickedQty					NUMERIC(38, 20)
+);
+
+/* To hold not available and less qty lots. */
+DECLARE @tblRemainingPickedLots AS TABLE 
+(
+	intWorkOrderInputLotId	INT
+  , intLotId				INT
+  , strLotNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , strItemNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , strDescription			NVARCHAR(200) COLLATE Latin1_General_CI_AS
+  , dblQuantity				NUMERIC(38, 20)
+  , intItemUOMId			INT
+  , strUOM					NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , dblIssuedQuantity		NUMERIC(38, 20)
+  , intItemIssuedUOMId		INT
+  , strIssuedUOM			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , intItemId				INT
+  , intRecipeItemId			INT
+  , dblUnitCost				NUMERIC(38, 20)
+  , dblDensity				NUMERIC(38, 20)
+  , dblRequiredQtyPerSheet  NUMERIC(38, 20)
+  , dblWeightPerUnit		NUMERIC(38, 20)
+  , dblRiskScore			NUMERIC(38, 20)
+  , intStorageLocationId	INT
+  , strStorageLocationName	NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , strLocationName			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , intLocationId			INT
+  , strSubLocationName		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , intSubLocationId		INT
+  , strLotAlias				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , ysnParentLot			BIT
+  , strRowState				NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , strSecondaryStatus		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+);
+
+DECLARE @tblPickedItem TABLE 
+(
+	intRowNo			 INT IDENTITY
+  , intItemStockUOMId	 INT
+  , intItemId			 INT
+  , dblQty				 NUMERIC(38, 20)
+  , intItemUOMId		 INT
+  , intLocationId		 INT
+  , intSubLocationId	 INT
+  , intStorageLocationId INT
+);
+
+DECLARE @tblLotStatus AS TABLE 
+(
+	strStatusName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+);
+
+DECLARE @tblSourceStorageLocation AS TABLE 
+(
+	intStorageLocationId INT
+);
+
+/* ======================== END OF VARIABLE DECLARATION ================================= */
+
+/* Get value of Enable Parent Lot from Manufacturing Configuration. */
+IF (@ysnFromPickList = 0)
+	BEGIN
 		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
-		FROM tblMFCompanyPreference
+		FROM tblMFCompanyPreference;
+	END
+		
+/* Get value of Default Residue Qty from Manufacturing Configuration. */
+SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
+FROM tblMFCompanyPreference;
 
-	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
-	FROM tblMFCompanyPreference
+SELECT @strBlendItemNo	 = Item.strItemNo
+	 , @intBlendItemId	 = Item.intItemId
+	 , @intMachineId	 = intMachineId
+	 , @intEstNoOfSheets = (CASE WHEN ISNULL(dblEstNoOfBlendSheet, 0) = 0 THEN 1 ELSE CEILING(dblEstNoOfBlendSheet) END)
+	 , @intNoOfSheets	 = (CASE WHEN ISNULL(dblEstNoOfBlendSheet, 0) = 0 THEN 1 ELSE CEILING(dblEstNoOfBlendSheet) END)
+	 , @dtmDueDate		 = dtmDueDate
+FROM tblMFBlendRequirement AS BlendRequirement
+JOIN tblICItem AS Item ON BlendRequirement.intItemId = Item.intItemId
+WHERE BlendRequirement.intBlendRequirementId = @intBlendRequirementId;
 
-	SELECT @strBlendItemNo = i.strItemNo
-		,@intBlendItemId = i.intItemId
-		,@intMachineId = intMachineId
-		,@intEstNoOfSheets = (
-			CASE 
-				WHEN ISNULL(dblEstNoOfBlendSheet, 0) = 0
-					THEN 1
-				ELSE CEILING(dblEstNoOfBlendSheet)
-				END
-			)
-		,@dtmDueDate = dtmDueDate
-	FROM tblMFBlendRequirement br
-	JOIN tblICItem i ON br.intItemId = i.intItemId
-	WHERE br.intBlendRequirementId = @intBlendRequirementId
-
-	SET @intNoOfSheets = @intEstNoOfSheets
-
-	IF ISNULL(@intBlendRequirementId, 0) = 0
+/* Set Sheet value if there's no Blend Requirement passed from parameter. */
+IF ISNULL(@intBlendRequirementId, 0) = 0
 	BEGIN
 		SELECT @intBlendItemId = intItemId
-			,@strBlendItemNo = strItemNo
+			 , @strBlendItemNo = strItemNo
 		FROM tblICItem
-		WHERE intItemId = @intItemId
+		WHERE intItemId = @intItemId;
 
-		SET @intEstNoOfSheets = 1
-		SET @intNoOfSheets = 1
-		SET @dtmDueDate = GETDATE()
+		SET @intEstNoOfSheets = 1;
+		SET @intNoOfSheets = 1;
+		SET @dtmDueDate = GETDATE();
 	END
 
-	SELECT @intRecipeId = intRecipeId
-		,@intManufacturingProcessId = intManufacturingProcessId
-	FROM tblMFRecipe
-	WHERE intItemId = @intBlendItemId
-		AND intLocationId = @intLocationId
-		AND ysnActive = 1
+/* Get Recipe and Manufacturing Process ID based on blend output, location and active status. */
+SELECT @intRecipeId = intRecipeId
+	 , @intManufacturingProcessId = intManufacturingProcessId
+FROM tblMFRecipe
+WHERE intItemId = @intBlendItemId AND intLocationId = @intLocationId AND ysnActive = 1;
 
-	SELECT @ysnRecipeItemValidityByDueDate = CASE 
-			WHEN UPPER(pa.strAttributeValue) = 'TRUE'
-				THEN 1
-			ELSE 0
-			END
-	FROM tblMFManufacturingProcessAttribute pa
-	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Recipe Item Validity By Due Date'
+/* Get Recipe Item Validity By Due Date value from Manufacturing Process based on location. */
+SELECT @ysnRecipeItemValidityByDueDate = (CASE WHEN UPPER(ProcessAttribute.strAttributeValue) = 'TRUE' THEN 1 ELSE 0 END)
+	 , @dtmDate						   = (CASE WHEN UPPER(ProcessAttribute.strAttributeValue) = 'TRUE' THEN CONVERT(DATE, @dtmDueDate) ELSE CONVERT(DATE, GETDATE()) END)
+	 , @intDayOfYear				   = (CASE WHEN UPPER(ProcessAttribute.strAttributeValue) = 'TRUE' THEN DATEPART(DY, CONVERT(DATE, @dtmDueDate)) ELSE DATEPART(DY, CONVERT(DATE, GETDATE())) END)
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND Attribute.strAttributeName = 'Recipe Item Validity By Due Date';
 
-	IF @ysnRecipeItemValidityByDueDate = 0
-		SET @dtmDate = Convert(DATE, GetDate())
-	ELSE
-		SET @dtmDate = Convert(DATE, @dtmDueDate)
+/* Get Available Lots By Storage Location value from Manufacturing Process based on location. */
+SELECT @ysnShowAvailableLotsByStorageLocation = (CASE WHEN UPPER(ProcessAttribute.strAttributeValue) = 'TRUE' THEN 1 ELSE 0 END)
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND Attribute.strAttributeName = 'Show Available Lots By Storage Location';
 
-	SELECT @intDayOfYear = DATEPART(dy, @dtmDate)
+/* Get Partial Quantity Sub Location value from Manufacturing Process based on location. */
+SELECT @intPartialQuantitySubLocationId = ISNULL(ProcessAttribute.strAttributeValue, 0)
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND Attribute.strAttributeName = 'Partial Quantity Sub Location';
 
-	SELECT @ysnShowAvailableLotsByStorageLocation = CASE 
-			WHEN UPPER(pa.strAttributeValue) = 'TRUE'
-				THEN 1
-			ELSE 0
-			END
-	FROM tblMFManufacturingProcessAttribute pa
-	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Show Available Lots By Storage Location'
+/* Get Kit Staging Location value from Manufacturing Process based on location. */
+SELECT @intKitStagingLocationId = ProcessAttribute.strAttributeValue
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId 
+WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND Attribute.strAttributeName = 'Kit Staging Location';
 
-	SELECT @intPartialQuantitySubLocationId = ISNULL(pa.strAttributeValue, 0)
-	FROM tblMFManufacturingProcessAttribute pa
-	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Partial Quantity Sub Location'
+/* Get Include Kit Staging Location in Pick List value from Manufacturing Process based on location. */
+SELECT @ysnIncludeKitStagingLocation = (CASE WHEN UPPER(ProcessAttribute.strAttributeValue) = 'TRUE' THEN 1 ELSE 0 END)
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND Attribute.strAttributeName = 'Include Kit Staging Location In Pick List';
 
-	SELECT @intKitStagingLocationId = pa.strAttributeValue
-	FROM tblMFManufacturingProcessAttribute pa
-	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Kit Staging Location'
+/* Get Source Location value from Manufacturing Process based on location. */
+SELECT @strSourceLocationIds = ISNULL(ProcessAttribute.strAttributeValue, '')
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND Attribute.strAttributeName = 'Source Location';
 
-	SELECT @ysnIncludeKitStagingLocation = CASE 
-			WHEN UPPER(pa.strAttributeValue) = 'TRUE'
-				THEN 1
-			ELSE 0
-			END
-	FROM tblMFManufacturingProcessAttribute pa
-	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Include Kit Staging Location In Pick List'
+/* Get Pick By Storage Location from Manufacturing Process based on location. */
+SELECT @strPickByStorageLocation = ISNULL(ProcessAttribute.strAttributeValue, '')
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND ProcessAttribute.intAttributeId = 123;
 
-	SELECT @strSourceLocationIds = ISNULL(pa.strAttributeValue, '')
-	FROM tblMFManufacturingProcessAttribute pa
-	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Source Location'
-
-	SELECT @strPickByStorageLocation = ISNULL(pa.strAttributeValue, '')
-	FROM tblMFManufacturingProcessAttribute pa
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND pa.intAttributeId = 123
-
-	IF ISNULL(@ysnIncludeKitStagingLocation, 0) = 1
-		SET @intKitStagingLocationId = 0
-
-	SELECT @intBlendStagingLocationId = ISNULL(intBlendProductionStagingUnitId, 0)
-	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId = @intLocationId
-
-	SELECT @intIssuedUOMTypeId = ISNULL(intIssuedUOMTypeId, 0)
-		,@strBlenderName = strName
-		,@intSubLocationId = intSubLocationId
-	FROM tblMFMachine
-	WHERE intMachineId = @intMachineId
-
-	IF ISNULL(@intIssuedUOMTypeId, 0) = 0
+IF ISNULL(@ysnIncludeKitStagingLocation, 0) = 1
 	BEGIN
-		SET @intIssuedUOMTypeId = 1
+		SET @intKitStagingLocationId = 0;
 	END
 
-	SET @intOriginalIssuedUOMTypeId = @intIssuedUOMTypeId
+SELECT @intBlendStagingLocationId = ISNULL(intBlendProductionStagingUnitId, 0)
+FROM tblSMCompanyLocation
+WHERE intCompanyLocationId = @intLocationId;
 
-	DECLARE @tblInputItem TABLE (
-		intRowNo INT IDENTITY(1, 1)
-		,intRecipeId INT
-		,intRecipeItemId INT
-		,intItemId INT
-		,dblRequiredQty NUMERIC(38, 20)
-		,ysnIsSubstitute BIT
-		,ysnMinorIngredient BIT
-		,intConsumptionMethodId INT
-		,intConsumptionStoragelocationId INT
-		,intParentItemId INT
-		,dblSubstituteRatio NUMERIC(38, 20)
-		,dblMaxSubstituteRatio NUMERIC(38, 20)
-		,strLotTracking NVARCHAR(50)
-		,intItemUOMId INT
-		,dblUpperToleranceQty NUMERIC(38, 20)
-		,dblLowerToleranceQty NUMERIC(38, 20)
-		,ysnComplianceItem BIT
-		,dblCompliancePercent NUMERIC(38, 20)
-		,dblPickedQty NUMERIC(38, 20)
-		)
+SELECT @intIssuedUOMTypeId = ISNULL(intIssuedUOMTypeId, 0)
+	 , @strBlenderName	   = strName
+	 , @intSubLocationId   = intSubLocationId
+FROM tblMFMachine
+WHERE intMachineId = @intMachineId;
 
-	IF OBJECT_ID('tempdb..#tblBlendSheetLot') IS NOT NULL
-		DROP TABLE #tblBlendSheetLot
+IF (ISNULL(@intIssuedUOMTypeId, 0) = 0)
+	BEGIN
+		SET @intIssuedUOMTypeId = 1;
+	END
 
-	CREATE TABLE #tblBlendSheetLot (
-		intParentLotId INT
-		,intItemId INT
-		,dblQuantity NUMERIC(38, 20)
-		,intItemUOMId INT
-		,dblIssuedQuantity NUMERIC(38, 20)
-		,intItemIssuedUOMId INT
-		,intRecipeItemId INT
-		,intStorageLocationId INT
-		,dblWeightPerQty NUMERIC(38, 20)
-		,dblUnitCost NUMERIC(38, 20)
-		,intNoOfSheet int
-		)
+SET @intOriginalIssuedUOMTypeId = @intIssuedUOMTypeId;
 
-	IF OBJECT_ID('tempdb..#tblBlendSheetLotFinal') IS NOT NULL
-		DROP TABLE #tblBlendSheetLotFinal
+/* Create temporary table tblBlendSheetLot. */
+IF (OBJECT_ID('tempdb..#tblBlendSheetLot') IS NOT NULL)
+	BEGIN
+		DROP TABLE #tblBlendSheetLot;
+	END
 
-	CREATE TABLE #tblBlendSheetLotFinal (
-		intParentLotId INT
-		,intItemId INT
-		,dblQuantity NUMERIC(38, 20)
-		,intItemUOMId INT
-		,dblIssuedQuantity NUMERIC(38, 20)
-		,intItemIssuedUOMId INT
-		,intRecipeItemId INT
-		,intStorageLocationId INT
-		,dblWeightPerQty NUMERIC(38, 20)
-		,dblUnitCost NUMERIC(38, 20)
-		)
+CREATE TABLE #tblBlendSheetLot 
+(
+	intParentLotId			INT
+  , intItemId				INT
+  , dblQuantity				NUMERIC(38, 20)
+  , intItemUOMId			INT
+  , dblIssuedQuantity		NUMERIC(38, 20)
+  , intItemIssuedUOMId		INT
+  , intRecipeItemId			INT
+  , intStorageLocationId	INT
+  , dblWeightPerQty			NUMERIC(38, 20)
+  , dblUnitCost				NUMERIC(38, 20)
+  , intNoOfSheet			INT
+  , dblNoOfPallets			NUMERIC(18, 2)
+);
 
-	--to hold not available and less qty lots
-	DECLARE @tblRemainingPickedLots AS TABLE (
-		intWorkOrderInputLotId INT
-		,intLotId INT
-		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblQuantity NUMERIC(38, 20)
-		,intItemUOMId INT
-		,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,dblIssuedQuantity NUMERIC(38, 20)
-		,intItemIssuedUOMId INT
-		,strIssuedUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,intItemId INT
-		,intRecipeItemId INT
-		,dblUnitCost NUMERIC(38, 20)
-		,dblDensity NUMERIC(38, 20)
-		,dblRequiredQtyPerSheet NUMERIC(38, 20)
-		,dblWeightPerUnit NUMERIC(38, 20)
-		,dblRiskScore NUMERIC(38, 20)
-		,intStorageLocationId INT
-		,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,intLocationId INT
-		,strSubLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,intSubLocationId INT
-		,strLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,ysnParentLot BIT
-		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,strSecondaryStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		)
-	DECLARE @tblPickedItem TABLE (
-		intRowNo INT IDENTITY
-		,intItemStockUOMId INT
-		,intItemId INT
-		,dblQty NUMERIC(38, 20)
-		,intItemUOMId INT
-		,intLocationId INT
-		,intSubLocationId INT
-		,intStorageLocationId INT
-		)
-	DECLARE @tblLotStatus AS TABLE (strStatusName NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+/* Create temporary table tblBlendSheetLotFinal. */
+IF (OBJECT_ID('tempdb..#tblBlendSheetLotFinal') IS NOT NULL)
+	BEGIN
+		DROP TABLE #tblBlendSheetLotFinal;		
+	END
 
-	INSERT INTO @tblLotStatus (strStatusName)
-	VALUES ('Active')
+CREATE TABLE #tblBlendSheetLotFinal 
+(
+	intParentLotId			INT
+  , intItemId				INT
+  , dblQuantity				NUMERIC(38, 20)
+  , intItemUOMId			INT
+  , dblIssuedQuantity		NUMERIC(38, 20)
+  , intItemIssuedUOMId		INT
+  , intRecipeItemId			INT
+  , intStorageLocationId	INT
+  , dblWeightPerQty			NUMERIC(38, 20)
+  , dblUnitCost				NUMERIC(38, 20)
+  , dblNoOfPallets			NUMERIC(18, 2)
+)
 
-	IF @ysnFromPickList = 0
-		INSERT INTO @tblLotStatus (strStatusName)
-		VALUES ('Quarantine')
+/* Set default value 'Active' for lot status. */
+INSERT INTO @tblLotStatus (strStatusName) VALUES ('Active');
 
-	DECLARE @tblSourceStorageLocation AS TABLE (intStorageLocationId INT)
+/* Set default value 'Active' for lot status. */
+IF @ysnFromPickList = 0
+	BEGIN
+		INSERT INTO @tblLotStatus (strStatusName) VALUES ('Quarantine');
+	END
 
-	IF ISNULL(@strSourceLocationIds, '') <> ''
+/* Condition for Null/Empty Source Locations ID. */
+IF ISNULL(@strSourceLocationIds, '') <> ''
 	BEGIN
 		INSERT INTO @tblSourceStorageLocation
 		SELECT *
-		FROM dbo.fnCommaSeparatedValueToTable(@strSourceLocationIds)
+		FROM dbo.fnCommaSeparatedValueToTable(@strSourceLocationIds);
 	END
-	ELSE
+ELSE
 	BEGIN
 		INSERT INTO @tblSourceStorageLocation
 		SELECT intStorageLocationId
 		FROM tblICStorageLocation
-		WHERE intLocationId = @intLocationId
-			AND ISNULL(ysnAllowConsume, 0) = 1
+		WHERE intLocationId = @intLocationId AND ISNULL(ysnAllowConsume, 0) = 1;
 	END
 
-	DECLARE @tblSourceSubLocation AS TABLE (intSubLocationId INT)
+	DECLARE @tblSourceSubLocation AS TABLE 
+	(
+		intSubLocationId INT
+	);
 
 	IF IsNULL(@strPickByStorageLocation, '') = 'True'
-	BEGIN
-		INSERT INTO @tblSourceSubLocation
-		SELECT @intSubLocationId
-	END
-	ELSE
-	BEGIN
-		INSERT INTO @tblSourceSubLocation
-		SELECT intCompanyLocationSubLocationId
-		FROM tblSMCompanyLocationSubLocation
-		WHERE intCompanyLocationId = @intLocationId
-	END
-
-	DECLARE @tblExcludedLot TABLE (
-		intItemId INT
-		,intLotId INT
-		)
-	DECLARE @tblWorkOrder AS TABLE (intWorkOrderId INT)
-	DECLARE @tblWOStagingLocation AS TABLE (intStagingLocationId INT)
-
-	--Get the Comma Separated Work Order Ids into a table
-	IF ISNULL(@strWorkOrderIds, '') <> ''
-	BEGIN
-		SET @index = CharIndex(',', @strWorkOrderIds)
-
-		WHILE @index > 0
 		BEGIN
-			SET @id = SUBSTRING(@strWorkOrderIds, 1, @index - 1)
-			SET @strWorkOrderIds = SUBSTRING(@strWorkOrderIds, @index + 1, LEN(@strWorkOrderIds) - @index)
-
-			INSERT INTO @tblWorkOrder
-			VALUES (@id)
-
-			SET @index = CharIndex(',', @strWorkOrderIds)
+			INSERT INTO @tblSourceSubLocation
+			SELECT @intSubLocationId;
+		END
+	ELSE
+		BEGIN
+			INSERT INTO @tblSourceSubLocation
+			SELECT intCompanyLocationSubLocationId
+			FROM tblSMCompanyLocationSubLocation
+			WHERE intCompanyLocationId = @intLocationId
 		END
 
-		SET @id = @strWorkOrderIds
+	DECLARE @tblExcludedLot TABLE 
+	(
+		intItemId INT
+	  , intLotId  INT
+	);
 
-		INSERT INTO @tblWorkOrder
-		VALUES (@id)
-	END
+	DECLARE @tblWorkOrder AS TABLE 
+	(
+		intWorkOrderId INT
+	);
 
-	IF (
-			SELECT Count(1)
-			FROM @tblWorkOrder
-			) = 0
-		SELECT TOP 1 @intWorkOrderId = intWorkOrderId
-		FROM tblMFWorkOrder
-		WHERE intBlendRequirementId = @intBlendRequirementId
-			AND ISNULL(intSalesOrderLineItemId, 0) > 0
+	DECLARE @tblWOStagingLocation AS TABLE 
+	(
+		intStagingLocationId INT
+	);
+
+	/* Get the Comma Separated Work Order Ids into a table. */
+	IF ISNULL(@strWorkOrderIds, '') <> ''
+		BEGIN
+			SET @index = CharIndex(',', @strWorkOrderIds);
+
+			WHILE @index > 0
+				BEGIN
+					SET @id = SUBSTRING(@strWorkOrderIds, 1, @index - 1);
+					SET @strWorkOrderIds = SUBSTRING(@strWorkOrderIds, @index + 1, LEN(@strWorkOrderIds) - @index);
+
+					INSERT INTO @tblWorkOrder VALUES (@id);
+
+					SET @index = CharIndex(',', @strWorkOrderIds);
+				END
+
+			SET @id = @strWorkOrderIds;
+
+			INSERT INTO @tblWorkOrder VALUES (@id);
+		END
+	/* End of Get the Comma Separated Work Order Ids into a table. */
+	
+	/* Get Work Order ID or Set Staging Location. */
+	IF (SELECT Count(1) FROM @tblWorkOrder) = 0
+		BEGIN
+			SELECT TOP 1 @intWorkOrderId = intWorkOrderId
+			FROM tblMFWorkOrder
+			WHERE intBlendRequirementId = @intBlendRequirementId AND ISNULL(intSalesOrderLineItemId, 0) > 0;
+		END
 	ELSE
-	BEGIN
-		SELECT TOP 1 @intWorkOrderId = intWorkOrderId
-		FROM @tblWorkOrder
+		BEGIN
+			SELECT TOP 1 @intWorkOrderId = intWorkOrderId 
+			FROM @tblWorkOrder;
 
-		INSERT INTO @tblWOStagingLocation
-		SELECT DISTINCT oh.intStagingLocationId
-		FROM tblMFStageWorkOrder sw
-		JOIN @tblWorkOrder w ON sw.intWorkOrderId = w.intWorkOrderId
-		JOIN tblMFOrderHeader oh ON sw.intOrderHeaderId = oh.intOrderHeaderId
-		WHERE ISNULL(oh.intStagingLocationId, 0) > 0
+			INSERT INTO @tblWOStagingLocation
+			SELECT DISTINCT OrderHeader.intStagingLocationId
+			FROM tblMFStageWorkOrder AS StageWorkOrder
+			JOIN @tblWorkOrder AS WorkOrder ON StageWorkOrder.intWorkOrderId = WorkOrder.intWorkOrderId
+			JOIN tblMFOrderHeader AS OrderHeader ON StageWorkOrder.intOrderHeaderId = OrderHeader.intOrderHeaderId
+			WHERE ISNULL(OrderHeader.intStagingLocationId, 0) > 0;
 
-		IF (
-				SELECT Count(1)
-				FROM @tblWOStagingLocation
-				) > 0
-			SET @ysnWOStagePick = 1
-	END
+			IF (SELECT Count(1) FROM @tblWOStagingLocation) > 0
+				BEGIN
+					SET @ysnWOStagePick = 1;
+				END
+		END
+	/* End of Get Work Order ID or Set Staging Location. */
+	
 
 	--Get Recipe Input Items
 	--@strXml (if it has value)- Used For Picking Specific Recipe Items with qty full or remaining qty
 	--Called From uspMFGetPickListDetails
 	IF ISNULL(@strXml, '') = ''
 	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM tblMFWorkOrderRecipe
-				WHERE intWorkOrderId = @intWorkOrderId
+		IF EXISTS (SELECT 1 FROM tblMFWorkOrderRecipe WHERE intWorkOrderId = @intWorkOrderId)
+			BEGIN
+				INSERT INTO @tblInputItem 
+				(
+					intRecipeId
+				  , intRecipeItemId
+				  , intItemId
+				  , dblRequiredQty
+				  , ysnIsSubstitute
+				  , ysnMinorIngredient
+				  , intConsumptionMethodId
+				  , intConsumptionStoragelocationId
+				  , intParentItemId
+				  , dblSubstituteRatio
+				  , dblMaxSubstituteRatio
+				  , strLotTracking
+				  , intItemUOMId
+				  , dblUpperToleranceQty
+				  , dblLowerToleranceQty
+				  , ysnComplianceItem
+				  , dblCompliancePercent
 				)
-		BEGIN
-			INSERT INTO @tblInputItem (
-				intRecipeId
-				,intRecipeItemId
-				,intItemId
-				,dblRequiredQty
-				,ysnIsSubstitute
-				,ysnMinorIngredient
-				,intConsumptionMethodId
-				,intConsumptionStoragelocationId
-				,intParentItemId
-				,dblSubstituteRatio
-				,dblMaxSubstituteRatio
-				,strLotTracking
-				,intItemUOMId
-				,dblUpperToleranceQty
-				,dblLowerToleranceQty
-				,ysnComplianceItem
-				,dblCompliancePercent
-				)
-			SELECT r.intRecipeId
+				SELECT r.intRecipeId
 				,ri.intRecipeItemId
 				,ri.intItemId
 				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
@@ -764,17 +780,17 @@ BEGIN TRY
 		IF @strRuleName = 'Pick Order'
 		BEGIN
 			IF @strValue = 'FIFO'
-				SET @strOrderBy = 'PL.dtmCreateDate ASC,'
+				SET @strOrderBy = 'AvailableInputLot.dtmCreateDate ASC,'
 			ELSE IF @strValue = 'LIFO'
-				SET @strOrderBy = 'PL.dtmCreateDate DESC,'
+				SET @strOrderBy = 'AvailableInputLot.dtmCreateDate DESC,'
 			ELSE IF @strValue = 'FEFO'
-				SET @strOrderBy = 'PL.dtmExpiryDate ASC,'
+				SET @strOrderBy = 'AvailableInputLot.dtmExpiryDate ASC,'
 		END
 
 		IF @strRuleName = 'Is Cost Applicable?'
 		BEGIN
 			IF @strValue = 'Yes'
-				SET @strOrderBy = 'PL.dblUnitCost ASC,'
+				SET @strOrderBy = 'AvailableInputLot.dblUnitCost ASC,'
 		END
 
 		SET @strOrderByFinal = @strOrderByFinal + @strOrderBy
@@ -786,7 +802,7 @@ BEGIN TRY
 		SET @strOrderByFinal = LEFT(@strOrderByFinal, LEN(@strOrderByFinal) - 1)
 
 	IF ISNULL(@strOrderByFinal, '') = ''
-		SET @strOrderByFinal = 'PL.dtmCreateDate ASC'
+		SET @strOrderByFinal = 'AvailableInputLot.dtmCreateDate ASC'
 
 	UPDATE @tblInputItem
 	SET dblPickedQty = dblRequiredQty
@@ -928,22 +944,25 @@ BEGIN TRY
 				,intItemIssuedUOMId INT
 				,intPreference INT
 				)
-
+		    /* Create Temporary tblInputLot. */
 			IF OBJECT_ID('tempdb..#tblInputLot') IS NOT NULL
-				DROP TABLE #tblInputLot
+				DROP TABLE #tblInputLot;					
 
-			CREATE TABLE #tblInputLot (
-				intRecordId INT identity(1, 1)
-				,intParentLotId INT
-				,--NVARCHAR(50) COLLATE Latin1_General_CI_AS, --Review
-				intItemId INT
-				,dblAvailableQty NUMERIC(38, 20)
-				,intStorageLocationId INT
-				,dblWeightPerQty NUMERIC(38, 20)
-				,intItemUOMId INT
-				,intItemIssuedUOMId INT
-				,intPreference INT
-				)
+			CREATE TABLE #tblInputLot 
+			(
+				  intRecordId			INT identity(1, 1)
+				, intParentLotId		INT
+				, intItemId				INT
+				, dblAvailableQty		NUMERIC(38, 20)
+				, intStorageLocationId  INT
+				, dblWeightPerQty		NUMERIC(38, 20)
+				, intItemUOMId			INT
+				, intItemIssuedUOMId	INT
+				, intPreference			INT
+				, intLayerPerPallet		INT
+				, intUnitPerLayer		INT
+			);
+			
 
 			IF OBJECT_ID('tempdb..#tblInputLotHandAdd') IS NOT NULL
 				DROP TABLE #tblInputLotHandAdd
@@ -957,6 +976,8 @@ BEGIN TRY
 				,dblWeightPerQty NUMERIC(38, 20)
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				, intLayerPerPallet		INT
+				, intUnitPerLayer		INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblPartialQtyLot') IS NOT NULL
@@ -1012,10 +1033,7 @@ BEGIN TRY
 				WHERE sd.intItemId = @intRawItemId
 					AND sd.dblAvailableQty > @dblDefaultResidueQty
 					AND sd.intLocationId = @intLocationId
-					AND ISNULL(sd.intStorageLocationId, - 1) NOT IN (
-						ISNULL(@intKitStagingLocationId, 0)
-						,ISNULL(@intBlendStagingLocationId, 0)
-						)
+					AND ISNULL(sd.intStorageLocationId, - 1) NOT IN (ISNULL(@intKitStagingLocationId, 0), ISNULL(@intBlendStagingLocationId, 0))
 					AND ISNULL(sd.ysnStockUnit, 0) = 1
 				ORDER BY sd.intItemStockUOMId
 
@@ -1465,69 +1483,87 @@ BEGIN TRY
 
 			--Apply Business Rules
 			IF ISNULL(@ysnWOStagePick, 0) = 0
-			BEGIN
-				SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId,intPreference) 
-									   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId,IsNULL(intPreference,1)  
-									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > ' + CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' ORDER BY IsNULL(intPreference,1), ' + @strOrderByFinal
+				BEGIN
+					SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId
+														  , intItemId
+														  , dblAvailableQty
+														  , intStorageLocationId
+														  , dblWeightPerQty
+														  , intItemUOMId
+														  , intItemIssuedUOMId
+														  , intPreference
+														  , intLayerPerPallet
+														  , intUnitPerLayer) 
+								   SELECT AvailableInputLot.intParentLotId
+										, AvailableInputLot.intItemId
+										, AvailableInputLot.dblAvailableQty
+										, AvailableInputLot.intStorageLocationId
+										, AvailableInputLot.dblWeightPerQty
+										, AvailableInputLot.intItemUOMId
+										, AvailableInputLot.intItemIssuedUOMId
+										, ISNULL(intPreference, 1)  
+										, Item.intLayerPerPallet
+										, Item.intUnitPerLayer
+								   FROM #tblAvailableInputLot AS AvailableInputLot
+								   JOIN tblICItem AS Item ON AvailableInputLot.intItemId = Item.intItemId
+								   WHERE AvailableInputLot.dblAvailableQty > ' + CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' 
+								   ORDER BY ISNULL(intPreference, 1), ' + @strOrderByFinal
 
-				EXEC (@strSQL)
-			END
+					EXEC (@strSQL)
+				END
 			ELSE
-			BEGIN
-				INSERT INTO #tblInputLot (
-					intParentLotId
-					,intItemId
-					,dblAvailableQty
-					,intStorageLocationId
-					,dblWeightPerQty
-					,intItemUOMId
-					,intItemIssuedUOMId
-					)
-				SELECT PL.intParentLotId
-					,PL.intItemId
-					,PL.dblAvailableQty
-					,PL.intStorageLocationId
-					,PL.dblWeightPerQty
-					,PL.intItemUOMId
-					,PL.intItemIssuedUOMId
-				FROM #tblAvailableInputLot PL
-				WHERE PL.dblAvailableQty > @dblDefaultResidueQty
-					AND PL.intStorageLocationId IN (
-						SELECT intStagingLocationId
-						FROM @tblWOStagingLocation
-						)
-				ORDER BY PL.dtmCreateDate
+				BEGIN
+					INSERT INTO #tblInputLot (intParentLotId
+										    , intItemId
+										    , dblAvailableQty
+										    , intStorageLocationId
+										    , dblWeightPerQty
+										    , intItemUOMId
+										    , intItemIssuedUOMId
+											, intLayerPerPallet
+											, intUnitPerLayer)
+					SELECT AvailableInputLot.intParentLotId
+						 , AvailableInputLot.intItemId
+						 , AvailableInputLot.dblAvailableQty
+						 , AvailableInputLot.intStorageLocationId
+						 , AvailableInputLot.dblWeightPerQty
+						 , AvailableInputLot.intItemUOMId
+						 , AvailableInputLot.intItemIssuedUOMId
+						 , Item.intLayerPerPallet
+						 , Item.intUnitPerLayer
+					FROM #tblAvailableInputLot AS AvailableInputLot
+					JOIN tblICItem AS Item ON AvailableInputLot.intItemId = Item.intItemId
+					WHERE AvailableInputLot.dblAvailableQty > @dblDefaultResidueQty AND AvailableInputLot.intStorageLocationId IN (SELECT intStagingLocationId
+																																   FROM @tblWOStagingLocation)
+					ORDER BY AvailableInputLot.dtmCreateDate;
 
-				INSERT INTO #tblInputLot (
-					intParentLotId
-					,intItemId
-					,dblAvailableQty
-					,intStorageLocationId
-					,dblWeightPerQty
-					,intItemUOMId
-					,intItemIssuedUOMId
-					)
-				SELECT PL.intParentLotId
-					,PL.intItemId
-					,PL.dblAvailableQty
-					,PL.intStorageLocationId
-					,PL.dblWeightPerQty
-					,PL.intItemUOMId
-					,PL.intItemIssuedUOMId
-				FROM #tblAvailableInputLot PL
-				WHERE PL.dblAvailableQty > @dblDefaultResidueQty
-					AND PL.intStorageLocationId NOT IN (
-						SELECT intStagingLocationId
-						FROM @tblWOStagingLocation
-						)
-				ORDER BY PL.dtmCreateDate
+					INSERT INTO #tblInputLot (intParentLotId
+											, intItemId
+											, dblAvailableQty
+											, intStorageLocationId
+											, dblWeightPerQty
+											, intItemUOMId
+											, intItemIssuedUOMId
+											, intLayerPerPallet
+											, intUnitPerLayer)
+					SELECT AvailableInputLot.intParentLotId
+						 , AvailableInputLot.intItemId
+						 , AvailableInputLot.dblAvailableQty
+						 , AvailableInputLot.intStorageLocationId
+						 , AvailableInputLot.dblWeightPerQty
+						 , AvailableInputLot.intItemUOMId
+						 , AvailableInputLot.intItemIssuedUOMId
+						 , Item.intLayerPerPallet
+						 , Item.intUnitPerLayer
+					FROM #tblAvailableInputLot AS AvailableInputLot
+					JOIN tblICItem AS Item ON AvailableInputLot.intItemId = Item.intItemId
+					WHERE AvailableInputLot.dblAvailableQty > @dblDefaultResidueQty AND AvailableInputLot.intStorageLocationId NOT IN (SELECT intStagingLocationId
+																																	   FROM @tblWOStagingLocation)
+					ORDER BY AvailableInputLot.dtmCreateDate;
 			END
 
 			--For Bulk Items Do not consider lot
-			IF @intConsumptionMethodId IN (
-					2
-					,3
-					) --By Location/FIFO
+			IF @intConsumptionMethodId IN (2, 3) --By Location/FIFO
 			BEGIN
 				SET @dblBulkItemAvailableQty = (
 						SELECT ISNULL(SUM(ISNULL(dblWeight, 0)), 0)
@@ -1575,27 +1611,28 @@ BEGIN TRY
 				FROM #tblInputLot
 
 				IF @dblBulkItemAvailableQty > 0
-					INSERT INTO #tblInputLot (
-						intParentLotId
-						,intItemId
-						,dblAvailableQty
-						,intStorageLocationId
-						,dblWeightPerQty
-						,intItemUOMId
-						,intItemIssuedUOMId
-						)
+					INSERT INTO #tblInputLot (intParentLotId
+											, intItemId
+											, dblAvailableQty
+											, intStorageLocationId
+											, dblWeightPerQty
+											, intItemUOMId
+											, intItemIssuedUOMId
+											, intLayerPerPallet
+											, intUnitPerLayer)
 					SELECT TOP 1 intLotId
-						,intItemId
-						,@dblBulkItemAvailableQty
-						,intStorageLocationId
-						,1
-						,intWeightUOMId
-						,intWeightUOMId
-					FROM tblICLot
-					WHERE intItemId = @intRawItemId
-						AND dblWeight > @dblDefaultResidueQty
-						AND ISNULL(intStorageLocationId, 0) > 0
-						AND intLocationId = @intLocationId
+							   , Lot.intItemId
+							   , @dblBulkItemAvailableQty
+							   , intStorageLocationId
+							   , 1
+							   , Lot.intWeightUOMId
+							   , Lot.intWeightUOMId
+							   , Item.intLayerPerPallet
+							   , Item.intUnitPerLayer
+					FROM tblICLot AS Lot
+					JOIN tblICItem AS Item ON Lot.intItemId = Item.intItemId
+					WHERE Lot.intItemId = @intRawItemId AND Lot.dblWeight > @dblDefaultResidueQty 
+					  AND ISNULL(intStorageLocationId, 0) > 0 AND intLocationId = @intLocationId
 			END
 
 			--Full Bag Pick
@@ -1611,102 +1648,138 @@ BEGIN TRY
 
 			--Hand Add Pick
 			--Pick From Hand Add, remaining pick from Full Bag 
+
 			--#tblInputLotHandAdd table used for ordering of hand add and full bag add location lots
-			IF ISNULL(@intPartialQuantitySubLocationId, 0) > 0
-				AND @intOriginalIssuedUOMTypeId <> @intIssuedUOMTypeId
-			BEGIN
-				DELETE
-				FROM #tblInputLotHandAdd
+			IF (ISNULL(@intPartialQuantitySubLocationId, 0) > 0 AND @intOriginalIssuedUOMTypeId <> @intIssuedUOMTypeId)
+				BEGIN
+					DELETE FROM #tblInputLotHandAdd;
 
-				INSERT INTO #tblInputLotHandAdd
-				SELECT *
+					INSERT INTO #tblInputLotHandAdd
+					SELECT *
+					FROM #tblInputLot;
+
+					DELETE FROM #tblInputLot;
+
+					INSERT INTO #tblInputLot
+					SELECT *
+					FROM #tblInputLotHandAdd
+					WHERE intStorageLocationId IN (SELECT intStorageLocationId 
+												   FROM tblICStorageLocation 
+												   WHERE intSubLocationId = ISNULL(@intPartialQuantitySubLocationId, 0));
+
+					INSERT INTO #tblInputLot
+					SELECT *
+					FROM #tblInputLotHandAdd
+					WHERE intStorageLocationId NOT IN (SELECT intStorageLocationId
+													   FROM tblICStorageLocation
+													   WHERE intSubLocationId = ISNULL(@intPartialQuantitySubLocationId, 0));
+				END
+				
+				/* If there's no Lot found for item then go to substitute. */
+				IF (SELECT COUNT(1) FROM #tblInputLot) = 0
+					BEGIN
+						GOTO NOLOT;
+					END
+
+				UPDATE @tblInputItem
+				SET dblPickedQty = 0
+				WHERE intItemId = @intRawItemId
+
+				DECLARE Cursor_FetchItem CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intParentLotId
+					 , intItemId
+					 , dblAvailableQty
+					 , intStorageLocationId
+					 , dblWeightPerQty
+					 , intLayerPerPallet
+					 , intUnitPerLayer
 				FROM #tblInputLot
+				ORDER BY intRecordId
 
-				DELETE
-				FROM #tblInputLot
+				OPEN Cursor_FetchItem
 
-				INSERT INTO #tblInputLot
-				SELECT *
-				FROM #tblInputLotHandAdd
-				WHERE intStorageLocationId IN (
-						SELECT intStorageLocationId
-						FROM tblICStorageLocation
-						WHERE intSubLocationId = ISNULL(@intPartialQuantitySubLocationId, 0)
-						)
+				FETCH NEXT 
+				FROM Cursor_FetchItem INTO @intParentLotId
+										 , @intRawItemId
+										 , @dblAvailableQty
+										 , @intStorageLocationId
+										 , @dblWeightPerQty
+										 , @intLayerPerPallet
+										 , @intUnitPerLayer
 
-				INSERT INTO #tblInputLot
-				SELECT *
-				FROM #tblInputLotHandAdd
-				WHERE intStorageLocationId NOT IN (
-						SELECT intStorageLocationId
-						FROM tblICStorageLocation
-						WHERE intSubLocationId = ISNULL(@intPartialQuantitySubLocationId, 0)
-						)
-			END
-
-			IF (
-					SELECT COUNT(1)
-					FROM #tblInputLot
-					) = 0
-				GOTO NOLOT
-
-			UPDATE @tblInputItem
-			SET dblPickedQty = 0
-			WHERE intItemId = @intRawItemId
-
-			DECLARE Cursor_FetchItem CURSOR LOCAL FAST_FORWARD
-			FOR
-			SELECT intParentLotId
-				,intItemId
-				,dblAvailableQty
-				,intStorageLocationId
-				,dblWeightPerQty
-			FROM #tblInputLot
-			ORDER BY intRecordId
-
-			OPEN Cursor_FetchItem
-
-			FETCH NEXT
-			FROM Cursor_FetchItem
-			INTO @intParentLotId
-				,@intRawItemId
-				,@dblAvailableQty
-				,@intStorageLocationId
-				,@dblWeightPerQty
-
-			WHILE (@@FETCH_STATUS <> - 1)
-			BEGIN
-				IF @intIssuedUOMTypeId = 2
-				BEGIN
-					IF @dblRequiredQty < @dblWeightPerQty
-						AND ISNULL(@intPartialQuantitySubLocationId, 0) > 0
+				WHILE (@@FETCH_STATUS <> - 1)
 					BEGIN
-						GOTO LOOP_END
-					END
-					ELSE IF @dblRequiredQty < @dblWeightPerQty
-						AND ISNULL(@intPartialQuantitySubLocationId, 0) = 0
-					BEGIN
-						SELECT @dblRequiredQty = @dblWeightPerQty
-					END
-				END
+						IF @intIssuedUOMTypeId = 2
+							BEGIN
+								IF @dblRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantitySubLocationId, 0) > 0
+									BEGIN
+										GOTO LOOP_END;
+									END
+								ELSE IF @dblRequiredQty < @dblWeightPerQty AND ISNULL(@intPartialQuantitySubLocationId, 0) = 0
+									BEGIN
+										SELECT @dblRequiredQty = @dblWeightPerQty;
+									END
+							END
 
-				IF @intIssuedUOMTypeId = 2
-				BEGIN
-					IF @dblWeightPerQty - (@dblAvailableQty % @dblWeightPerQty) < 0.01
-					BEGIN
-						SET @dblAvailableQty = @dblAvailableQty
-					END
-					ELSE
-					BEGIN
-						SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty)
-					END
-				END
+						/* Packed Issued UOM Type*/
+						IF @intIssuedUOMTypeId = 2
+							BEGIN
+								IF (@dblWeightPerQty - (@dblAvailableQty % @dblWeightPerQty) < 0.01)
+									BEGIN
+										SET @dblAvailableQty = @dblAvailableQty;
+									END
+								ELSE
+									BEGIN
+										SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty);
+									END
+							END
+						/* End of Packed Issued UOM Type*/
 
-				IF @intIssuedUOMTypeId = 3
-					AND @ysnMinorIngredient = 0 --Weight and Pack 
-				BEGIN
-					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty)
-				END
+						/* Hybrid Issued UOM Type (Weight and Pack). */
+						IF @intIssuedUOMTypeId = 3 AND @ysnMinorIngredient = 0
+							BEGIN
+								SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty);
+							END
+						
+						/* Pallet Issued UOM Type */
+						IF @intIssuedUOMTypeId = 4
+
+							SET @dblPalletQty = 0;
+
+							BEGIN
+								DECLARE @dblPallet			  NUMERIC(18, 2) = 0
+									  , @dblRequiredPallet	  NUMERIC(18, 2) = 0
+									  , @dblLotPallet		  NUMERIC(18, 2) = 0
+									  , @dblQtyPerPallet	  NUMERIC(18, 2) = 0;
+
+								SET @dblPallet = 0;
+								SET @dblNoOfPallets = 0;
+
+								/* Set Calculated Pallet. */
+								SET @dblPallet = @intUnitPerLayer * @intLayerPerPallet; 
+
+								BEGIN
+									IF (@dblAvailableQty >= @dblRequiredQty AND (@intUnitPerLayer <> 0 OR @intLayerPerPallet <> 0))
+										BEGIN
+											/* Set Lot pallet. */
+											SET @dblLotPallet = @dblAvailableQty / @dblPallet;
+
+											/* Set Required pallet. */
+											SET @dblRequiredPallet = (CASE WHEN @dblRequiredQty < @dblUpperToleranceQty THEN @dblUpperToleranceQty  ELSE @dblRequiredQty END) / @dblPallet;
+
+											SET @dblPalletQty = (@dblLotPallet / 100) * @dblRequiredPallet;
+
+											SET @dblPalletQty = @dblUpperToleranceQty;
+
+											/* Set No of Pallets on Picked Qty*/
+											SET @dblNoOfPallets = (@dblUpperToleranceQty / @dblLotPallet) * 100;
+										END
+										
+								END
+							END
+							/* End of Pallet Issued UOM Type */
+
 
 				IF @dblAvailableQty > 0
 				BEGIN
@@ -1724,6 +1797,7 @@ BEGIN TRY
 								,intStorageLocationId
 								,dblWeightPerQty
 								,dblUnitCost
+								,dblNoOfPallets
 								)
 							SELECT L.intLotId
 								,L.intItemId
@@ -1741,16 +1815,11 @@ BEGIN TRY
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
 									END AS dblQuantity
 								,ISNULL(L.intWeightUOMId, @intItemUOMId) AS intItemUOMId
-								,CASE 
-									WHEN @intIssuedUOMTypeId = 2
-										THEN Convert(NUMERIC(38, 20), (
-													CASE 
-														WHEN Round(@dblRequiredQty / L.dblWeightPerQty, 0) = 0
-															THEN 1
-														ELSE Convert(NUMERIC(38, 20), Round(@dblRequiredQty / L.dblWeightPerQty, 0))
-														END
-													))
-									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
+								,CASE WHEN @intIssuedUOMTypeId = 2 THEN CONVERT(NUMERIC(38, 20), (CASE WHEN ROUND(@dblRequiredQty / L.dblWeightPerQty, 0) = 0 THEN 1 
+																								       ELSE CONVERT(NUMERIC(38, 20), Round(@dblRequiredQty / L.dblWeightPerQty, 0))
+																								  END))
+									  WHEN @intIssuedUOMTypeId = 4 THEN @dblPalletQty
+									  ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
 									END AS dblIssuedQuantity
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
@@ -1761,15 +1830,17 @@ BEGIN TRY
 								,@intStorageLocationId AS intStorageLocationId
 								,L.dblWeightPerQty
 								,L.dblLastCost
+								,@dblNoOfPallets
 							FROM tblICLot L
+							JOIN tblICItem AS Item ON L.intItemId = Item.intItemId
 							WHERE L.intLotId = @intParentLotId
 								AND L.dblQty > @dblDefaultResidueQty
 						ELSE
 							SELECT TOP 1 @intParentLotId = L.intParentLotId
 								,@intItemId = L.intItemId
-								,@dblQuantity = @dblRequiredQty -- To Review ROUND(@dblRequiredQty,3) 
+								,@dblQuantity = @dblRequiredQty  -- To Review ROUND(@dblRequiredQty,3) 
 								,@intItemUOMId = L.intItemUOMId
-								,@dblIssuedQuantity = @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
+								,@dblIssuedQuantity = CASE WHEN @intIssuedUOMTypeId = 4 THEN @dblPalletQty ELSE @dblRequiredQty END  --To Review ROUND(@dblRequiredQty,3) 
 								,@intItemIssuedUOMId = (
 									CASE 
 										WHEN @intIssuedUOMTypeId IN (
@@ -1795,6 +1866,7 @@ BEGIN TRY
 										END
 									)
 								,@dblUnitCost = L.dblUnitCost
+								,@dblNoOfPallets = @dblNoOfPallets
 							FROM #tblParentLot L
 							WHERE L.intParentLotId = @intParentLotId
 
@@ -1996,6 +2068,7 @@ BEGIN TRY
 								,dblWeightPerQty
 								,dblUnitCost
 								,intNoOfSheet
+								,dblNoOfPallets
 								)
 							SELECT @intParentLotId
 								,@intItemId
@@ -2008,6 +2081,7 @@ BEGIN TRY
 								,@dblWeightPerQty
 								,@dblUnitCost
 								,@intNoOfSheets
+								,@dblNoOfPallets
 
 							IF ISNULL(@intPartialQuantitySubLocationId, 0) > 0
 								AND @intIssuedUOMTypeId = 2
@@ -2039,6 +2113,7 @@ BEGIN TRY
 								,intStorageLocationId
 								,dblWeightPerQty
 								,dblUnitCost
+								,dblNoOfPallets
 								)
 							SELECT L.intLotId
 								,L.intItemId
@@ -2076,6 +2151,7 @@ BEGIN TRY
 								,@intStorageLocationId AS intStorageLocationId
 								,L.dblWeightPerQty
 								,L.dblLastCost
+								,@dblNoOfPallets
 							FROM tblICLot L
 							WHERE L.intLotId = @intParentLotId
 								AND L.dblQty > @dblDefaultResidueQty
@@ -2099,6 +2175,7 @@ BEGIN TRY
 									END
 								,@dblWeightPerQty = L.dblWeightPerQty
 								,@dblUnitCost = L.dblUnitCost
+								,@dblNoOfPallets = @dblNoOfPallets
 							FROM #tblParentLot L
 							WHERE L.intParentLotId = @intParentLotId
 
@@ -2308,6 +2385,7 @@ BEGIN TRY
 								,dblWeightPerQty
 								,dblUnitCost
 								,intNoOfSheet
+								,dblNoOfPallets
 								)
 							SELECT @intParentLotId
 								,@intItemId
@@ -2320,6 +2398,7 @@ BEGIN TRY
 								,@dblWeightPerQty
 								,@dblUnitCost
 								,@intNoOfSheets
+								,@dblNoOfPallets
 
 							--UPDATE @tblInputItem
 							--SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -2339,13 +2418,15 @@ BEGIN TRY
 
 				SET @intStorageLocationId = NULL
 
-				FETCH NEXT
-				FROM Cursor_FetchItem
-				INTO @intParentLotId
-					,@intRawItemId
-					,@dblAvailableQty
-					,@intStorageLocationId
-					,@dblWeightPerQty
+				FETCH NEXT 
+				FROM Cursor_FetchItem INTO @intParentLotId
+										 , @intRawItemId
+										 , @dblAvailableQty
+										 , @intStorageLocationId
+										 , @dblWeightPerQty
+										 , @intLayerPerPallet
+										 , @intUnitPerLayer
+
 			END --Cursor End For Pick Lots
 
 			LOOP_END:
@@ -2667,6 +2748,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,dblWeightPerQty
 		,dblUnitCost
+		,dblNoOfPallets
 		)
 	SELECT intParentLotId
 		,intItemId
@@ -2678,6 +2760,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,AVG(dblWeightPerQty)
 		,MAX(dblUnitCost)
+		,dblNoOfPallets
 	FROM #tblBlendSheetLot
 	GROUP BY intParentLotId
 		,intItemId
@@ -2685,6 +2768,7 @@ BEGIN TRY
 		,intItemIssuedUOMId
 		,intRecipeItemId
 		,intStorageLocationId
+		,dblNoOfPallets
 
 	IF @ysnEnableParentLot = 0
 		SELECT L.intLotId AS intWorkOrderInputLotId
@@ -2732,6 +2816,7 @@ BEGIN TRY
 			,CAST(0 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
+			,dblNoOfPallets
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICLot L ON BS.intParentLotId = L.intLotId
 			AND L.dblQty > 0
@@ -2780,6 +2865,7 @@ BEGIN TRY
 			,''
 			,0
 			,'Added'
+			,''
 			,''
 		FROM @tblPickedItem pl
 		JOIN tblICItem i ON pl.intItemId = i.intItemId
@@ -2832,6 +2918,7 @@ BEGIN TRY
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
+			,dblNoOfPallets
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
 		INNER JOIN tblICLotStatus ls on PL.intLotStatusId=ls.intLotStatusId
@@ -2888,6 +2975,7 @@ BEGIN TRY
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
+			,dblNoOfPallets
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
 		INNER JOIN tblICLotStatus ls on PL.intLotStatusId=ls.intLotStatusId

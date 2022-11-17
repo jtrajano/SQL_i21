@@ -22,9 +22,11 @@ SELECT @intBlendItemId = intItemId
 FROM tblMFBlendRequirement 
 WHERE intBlendRequirementId=@intBlendRequirementId
 
-IF (SELECT ISNULL(COUNT(1), 0) 
-	FROM tblMFBlendRequirementRule 
-	WHERE intBlendRequirementId=@intBlendRequirementId) = 0 RAISERROR('Unable to create auto blend sheet as business rules are not added to the blend requirement.', 16, 1)
+/* Check if there's business rules from the selected Blend. */
+IF (SELECT ISNULL(COUNT(1), 0) FROM tblMFBlendRequirementRule WHERE intBlendRequirementId = @intBlendRequirementId) = 0
+	BEGIN
+		RAISERROR('Unable to create auto blend sheet as business rules are not added to the blend requirement.', 16, 1);
+	END
 
 IF EXISTS(SELECT * 
 		  FROM tblMFBlendRequirementRule a JOIN tblMFBlendSheetRule b ON a.intBlendSheetRuleId=b.intBlendSheetRuleId
@@ -60,6 +62,7 @@ IF EXISTS(SELECT *
 		  , ysnParentLot			BIT
 		  , strRowState				NVARCHAR(50)
 		  , strSecondaryStatus		NVARCHAR(50)
+		  , dblNoOfPallet			NUMERIC(18, 2)
 		)
 
 		INSERT INTO @tblPickedLots EXEC uspMFAutoBlendSheetFIFO @intLocationId         = @intLocationId
@@ -97,6 +100,7 @@ IF EXISTS(SELECT *
 		--Delete shortage of item records
 		DELETE FROM @tblPickedLots WHERE ISNULL(intLotId, 0) = 0
 
+		/* RETURNED DATA. */
 		SELECT p.*
 			 , i.intCategoryId 
 		FROM @tblPickedLots p 

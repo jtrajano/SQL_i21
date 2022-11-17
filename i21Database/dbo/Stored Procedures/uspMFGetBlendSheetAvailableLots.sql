@@ -99,7 +99,6 @@ FROM tblICStockReservation
 WHERE intItemId = @intItemId AND ISNULL(ysnPosted, 0) = 0
 GROUP BY CASE WHEN @ysnEnableParentLot = 0 THEN intLotId ELSE intParentLotId END;
 	
-
 /* Set Temporary lot data. */
 SELECT Lot.intLotId
 	 , Lot.strLotNumber
@@ -159,8 +158,6 @@ WHERE Lot.intItemId = @intItemId AND Lot.dblQty > 0 AND LotStatus.intLotStatusId
   And Lot.intLocationId = (CASE WHEN @ysnShowOtherFactoryLots = 1 THEN Lot.intLocationId ELSE @intLocationId END)
 ORDER BY Lot.dtmExpiryDate
 	   , Lot.dtmDateCreated;
-
-
 
 /* Enable Parent Lot Configure is true/checked from Configuration. */
 IF @ysnEnableParentLot = 0
