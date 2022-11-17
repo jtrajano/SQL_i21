@@ -48,8 +48,6 @@ BEGIN
 									ELSE ''
 								END)
 		FROM tblARInvoice A
-		--INNER JOIN tblARInvoiceDetail B
-		--	ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN @Invoices C
 			ON A.intInvoiceId = C.intInvoiceId
 		INNER JOIN tblTMSite D
@@ -67,13 +65,6 @@ BEGIN
 			ON A.intEntityCustomerId = L.intEntityId
 		LEFT JOIN tblEMEntityLocation M
 			ON A.intShipToLocationId = M.intEntityLocationId
-		-- LEFT JOIN tblTMSiteDevice I
-		-- 	ON D.intSiteID = I.intSiteID
-		-- LEFT JOIN tblTMDevice	J
-		-- 	ON I.intDeviceId = J.intDeviceId
-		-- LEFT JOIN tblTMDeviceType K
-		-- 	ON J.intDeviceTypeId = K.intDeviceTypeId
-		-- 		AND K.strDeviceType <> 'Flow Meter'
 		WHERE C.intSiteId IS NOT NULL	
 			AND ISNULL(C.ysnLeaseBilling,0) <> 1
 			AND D.strBillingBy <> 'Flow Meter'
@@ -91,8 +82,6 @@ BEGIN
 										'Site is a Flow Meter but dont have a flow meter type device record.'
 								END)
 		FROM tblARInvoice A
-		--INNER JOIN tblARInvoiceDetail B
-		--	ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN @Invoices C
 			ON A.intInvoiceId = C.intInvoiceId
 		INNER JOIN tblTMSite D
@@ -139,8 +128,6 @@ BEGIN
 			,C.[strBatchId]	
 			,[strPostingError] = 'Consumption Site record is locked.'
 		FROM tblARInvoice A
-		--INNER JOIN tblARInvoiceDetail B
-		--	ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN @Invoices C
 			ON A.intInvoiceId = C.intInvoiceId
 		INNER JOIN tblTMSite D
