@@ -49,3 +49,8 @@ This table is also used to map the negative Lot stock buckets it was able to rev
 		ON [dbo].[tblICInventoryLotStorageOut]([intInventoryTransactionStorageId] ASC)
 		INCLUDE(intInventoryLotStorageId);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotStorageOut_Unpost]
+		ON [dbo].[tblICInventoryLotStorageOut]([intInventoryLotStorageId] ASC)
+		INCLUDE(intInventoryTransactionStorageId);
+	GO
