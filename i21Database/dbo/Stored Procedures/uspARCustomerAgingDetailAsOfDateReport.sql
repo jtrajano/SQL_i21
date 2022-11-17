@@ -66,9 +66,6 @@ INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 	, dblEndOfMonthRate
 	, dblEndOfMonthAmount
 	, intAccountId
-	, strLogoType
-	, blbLogo
-	, blbFooterLogo
 	, strReportLogId
 )
 SELECT *, NULLIF(@strReportLogId, CAST(NEWID() AS NVARCHAR(100)))
