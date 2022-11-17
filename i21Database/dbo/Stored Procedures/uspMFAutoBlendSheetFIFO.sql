@@ -1768,12 +1768,21 @@ ELSE
 											/* Set Required pallet. */
 											SET @dblRequiredPallet = (CASE WHEN @dblRequiredQty < @dblUpperToleranceQty THEN @dblUpperToleranceQty  ELSE @dblRequiredQty END) / @dblPallet;
 
-											SET @dblPalletQty = (@dblLotPallet / 100) * @dblRequiredPallet;
 
-											SET @dblPalletQty = @dblUpperToleranceQty;
+											IF (@dblAvailableQty >= @dblUpperToleranceQty)
+												BEGIN
+													SET @dblPalletQty = @dblUpperToleranceQty;
 
-											/* Set No of Pallets on Picked Qty*/
-											SET @dblNoOfPallets = (@dblUpperToleranceQty / @dblLotPallet) * 100;
+													/* Set No of Pallets on Picked Qty*/
+													SET @dblNoOfPallets = (@dblUpperToleranceQty / @dblLotPallet) * 100;
+												END
+											ELSE
+												BEGIN
+													SET @dblPalletQty = @dblRequiredQty;
+
+													/* Set No of Pallets on Picked Qty*/
+													SET @dblNoOfPallets = (@dblRequiredQty / @dblLotPallet) * 100;
+												END
 										END
 										
 								END
