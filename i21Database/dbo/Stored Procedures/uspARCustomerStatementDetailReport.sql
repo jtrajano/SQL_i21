@@ -388,7 +388,7 @@ IF @ysnEmailOnly IS NOT NULL
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress		= EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry 
+SET strFullAddress		= ISNULL(LTRIM(RTRIM(EL.strAddress)), '') + CHAR(13) + char(10) + ISNULL(LTRIM(RTRIM(EL.strCity)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strState)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strZipCode)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strCountry)), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 
