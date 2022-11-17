@@ -15,11 +15,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
-	DROP TABLE #tmpInventoryTransactionStockToReverse
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStorageToReverse')) 
+	DROP TABLE #tmpInventoryTransactionStorageToReverse
 
 -- Create the temp table 
-CREATE TABLE #tmpInventoryTransactionStockToReverse (
+CREATE TABLE #tmpInventoryTransactionStorageToReverse (
 	intInventoryTransactionStorageId INT NOT NULL 
 	,intTransactionId INT NULL 
 	,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -221,7 +221,7 @@ BEGIN
 		,@intTransactionId
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
+IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStorageToReverse) 
 BEGIN 
 	-------------------------------------------------
 	-- Create reversal of the inventory transactions
@@ -301,7 +301,7 @@ BEGIN
 			,[strSourceNumber]						= ActualTransaction.strSourceNumber
 			,[strBOLNumber]							= ActualTransaction.strBOLNumber
 			,[intTicketId]							= ActualTransaction.intTicketId
-	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
+	FROM	#tmpInventoryTransactionStorageToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionStorageId = ActualTransaction.intInventoryTransactionStorageId
 	
 	----------------------------------------------------
@@ -365,7 +365,7 @@ BEGIN
 			,[strSourceNumber]			= ActualTransaction.strSourceNumber
 			,[strBOLNumber]				= ActualTransaction.strBOLNumber
 			,[intTicketId]				= ActualTransaction.intTicketId
-	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
+	FROM	#tmpInventoryTransactionStorageToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionStorageId = ActualTransaction.intInventoryTransactionStorageId
 				AND ActualTransaction.intLotId IS NOT NULL 
 				AND ActualTransaction.intItemUOMId IS NOT NULL
@@ -552,7 +552,7 @@ BEGIN
 		,t.intCommodityId
 		,t.intCategoryId
 		,t.intLocationId
-	FROM	#tmpInventoryTransactionStockToReverse tmp INNER JOIN dbo.tblICInventoryStockMovement t
+	FROM	#tmpInventoryTransactionStorageToReverse tmp INNER JOIN dbo.tblICInventoryStockMovement t
 				ON tmp.intInventoryTransactionStorageId = t.intInventoryTransactionStorageId 
 END 
 
@@ -576,7 +576,7 @@ BEGIN
 		,t.[dtmDate] 
 		,[dblQty] = SUM(ISNULL(-t.dblQty, 0)) 
 	FROM 
-		tblICInventoryTransactionStorage t INNER JOIN #tmpInventoryTransactionStockToReverse tmp
+		tblICInventoryTransactionStorage t INNER JOIN #tmpInventoryTransactionStorageToReverse tmp
 			ON t.intInventoryTransactionStorageId = tmp.intInventoryTransactionStorageId
 	WHERE
 		t.intItemUOMId IS NOT NULL 
