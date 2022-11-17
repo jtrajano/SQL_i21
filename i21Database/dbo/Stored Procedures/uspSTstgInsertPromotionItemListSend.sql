@@ -352,7 +352,7 @@ BEGIN
 					[strItemListDescription]			=	PIL.strPromoItemListDescription,
 
 					[strPOSCodeFormatFormat]			=	PCF.strPosCodeFormat,
-					[strPOSCode]						=	PCF.strUPCwthOrwthOutCheckDigit,
+					[strPOSCode]						=	IUOM.strLongUPCCode,
 					[strPOSCodeModifier]				=	CAST(ISNULL(IUOM.intModifier, '000') AS VARCHAR(100))
 				FROM tblSTPromotionItemListDetail ILT
 				INNER JOIN tblSTPromotionItemList PIL
