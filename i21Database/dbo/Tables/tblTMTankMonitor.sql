@@ -12,7 +12,8 @@ CREATE TABLE [dbo].[tblTMTankMonitor] (
 	[dblFuelHeight]				NUMERIC (18, 6) DEFAULT 0 NULL,
 	[dblWaterHeight]			NUMERIC (18, 6) DEFAULT 0 NULL,
 	[dblWaterVolume]			NUMERIC (18, 6) DEFAULT 0 NULL,
-	[dblUllage]					NUMERIC (18, 6) DEFAULT 0 NULL
+	[dblUllage]					NUMERIC (18, 6) DEFAULT 0 NULL,
+	CONSTRAINT [PK_tblTMTankMonitor_intTankMonitorId] PRIMARY KEY CLUSTERED ([intTankMonitorId] ASC)
 	)
 
 
