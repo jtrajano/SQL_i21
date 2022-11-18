@@ -315,6 +315,7 @@ BEGIN TRY
 	WHERE TMO.intContractDetailId IS NOT NULL
 	  AND P.intSiteId IS NOT NULL
 	  AND (ABS(P.dblQty) <> TMO.dblQuantity OR (ABS(P.dblQty) = TMO.dblQuantity AND TRD.intTransactionDetailId IS NOT NULL))
+	  AND ISNULL(@ForDelete, 0) = 0
 	  
 	DELETE P 
 	FROM @tblToProcess P
