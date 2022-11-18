@@ -33,6 +33,7 @@ intCurrencyIdAmountTo,
 dblAmountTo,
 dblAmountForeignTo,
 dblRateAmountTo,
+
 dblAmountForeignFrom,
 dblAmountFrom, 
 dblRateAmountFrom,
@@ -53,41 +54,43 @@ intConcurrencyId
 select 
 @strTransactionId, 
 5, 
-intBankAccountIdTo, 
-intBankAccountIdFrom, 
-intGLAccountIdTo, 
+intBankAccountIdFrom,
+intBankAccountIdTo,
 intGLAccountIdFrom,
-intCurrencyIdAmountTo,
+intGLAccountIdTo,
 intCurrencyIdAmountFrom,
-dblAmountTo = dblAmountFrom,
-dblAmountForeignTo = dblAmountForeignFrom,
-dblRateAmountFrom,
-dblPayableFx, --GLDetail.dblCreditForeign,
-dblPayableFn, --GLDetail.dblCredit,
-GLDetail.dblExchangeRate,
-intRateTypeIdAmountFrom = GLDetail.intCurrencyExchangeRateTypeId,
+intCurrencyIdAmountTo,
+dblAmountTo, --= dblAmountFrom,
+dblAmountForeignTo, --= dblAmountForeignFrom,
+dblRateAmountTo, -- CASE WHEN intCurrencyIdAmountFrom = @defaultCurrencyId THEN 1 ELSE dblPayableFn/dblPayableFx END,
+
+
+dblAmountForeignFrom, --GLDetail.dblCreditForeign,
+dblAmountFrom, --GLDetail.dblCredit,
+dblRateAmountFrom, --GLDetail.dblExchangeRate,
+NULL , --intRateTypeIdAmountFrom = GLDetail.intCurrencyExchangeRateTypeId,
 DATEADD(DAY, 1, dtmDate),
 DATEADD(DAY, 1, dtmDate), 
 4,
 ROUND(dblAmountFrom/dblAmountTo,6),
 ROUND(dblAmountTo/dblAmountFrom,6),
-dblAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN GLDetail.dblCreditForeign ELSE 0 END,
-dblRateAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN 1 ELSE 0 END,
-dblReceivableFn=dblPayableFn,
-dblReceivableFx=dblPayableFx,
-dblPayableFn=dblReceivableFn,
-dblPayableFx=dblReceivableFx,
+dblAmountSettlementFrom = dblAmountFrom,-- CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN GLDetail.dblCreditForeign ELSE 0 END,
+dblRateAmountSettlementFrom = dblRateAmountFrom,
+dblReceivableFn,
+dblReceivableFx,
+dblPayableFn,
+dblPayableFx,
 1
 from tblCMBankTransfer  A
-OUTER APPLY(
-	SELECT TOP 1 dblCreditForeign, dblExchangeRate, intCurrencyExchangeRateTypeId, dblCredit
-    FROM tblGLDetail 
-	WHERE 
-	strTransactionId =A.strTransactionId
-	AND ysnIsUnposted = 0
-	and strJournalLineDescription = 'Currency Payable'
-	ORDER by intGLDetailId DESC
-)GLDetail
+-- OUTER APPLY(
+-- 	SELECT TOP 1 dblCreditForeign, dblExchangeRate, intCurrencyExchangeRateTypeId, dblCredit
+--     FROM tblGLDetail 
+-- 	WHERE 
+-- 	strTransactionId =A.strTransactionId
+-- 	AND ysnIsUnposted = 0
+-- 	and strJournalLineDescription = 'Currency Payable'
+-- 	ORDER by intGLDetailId DESC
+-- )GLDetail
 where intTransactionId = @intSwapShortId
 
 SET @intSwapLongId = SCOPE_IDENTITY()
