@@ -261,7 +261,7 @@ BEGIN
 				WHEN Receipt.strOrigin = 'Location'
 					AND HeaderDistItem.strDestination = 'Location'
 					AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
-					THEN LoadHeader.strTransaction
+					THEN NULL
 				WHEN Receipt.strOrigin = 'Location'
 					AND HeaderDistItem.strDestination = 'Location'
 					AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
