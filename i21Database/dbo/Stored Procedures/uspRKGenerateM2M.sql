@@ -3817,7 +3817,7 @@ BEGIN TRY
 			, dblAdjustedContractPrice
 			, dblCashPrice
 			, dblMarketPrice
-			, dblResultBasis
+			, dblResultBasis = (dblMarketBasis - dblContractBasis) * dblOpenQty
 			, dblResultCash
 			, dblContractPrice
 			, intQuantityUOMId
