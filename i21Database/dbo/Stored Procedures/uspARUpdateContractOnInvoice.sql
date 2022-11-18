@@ -338,7 +338,7 @@ BEGIN TRY
 		, intTicketId					= P.intTicketId
 		, intInventoryShipmentItemId	= P.intInventoryShipmentItemId
 		, intItemUOMId					= P.intItemUOMId
-		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL AND @TransactionId IS NOT NULL
+		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL OR @TransactionId IS NOT NULL
 													THEN 
 														CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
 																THEN (ABS(P.dblQty) - TMO.dblQuantity)
@@ -369,6 +369,7 @@ BEGIN TRY
 	  AND P.intSiteId IS NOT NULL
 	  AND (ABS(P.dblQty) <> TMO.dblQuantity OR (ABS(P.dblQty) = TMO.dblQuantity AND TRD.intTransactionDetailId IS NOT NULL))
 	  AND P.ysnMobileBilling = 0
+	  AND ISNULL(@ForDelete, 0) = 0
 	  
 	DELETE P 
 	FROM @tblToProcess P
