@@ -98,7 +98,7 @@ SELECT [intItemId]			= ICGIS.[intComponentItemId]
 	,[intLotId]				= ARIDL.intLotId
 	,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
 	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
+	,[dblQty]               = ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIUOM_STOCK.intItemUOMId, ARID.[dblQtyShipped]),0) * isnull(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 	,[intTransactionId]		= @InvoiceId
 	,[strTransactionId]		= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]	= @TransactionTypeId
@@ -120,13 +120,19 @@ INNER JOIN (
 	SELECT [intItemUOMId] 
 	FROM tblICItemUOM WITH (NOLOCK)
 ) ICIUOM ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
+CROSS APPLY (
+	SELECT intItemUOMId 
+	FROM tblICItemUOM WITH (NOLOCK)
+	WHERE intItemId = ARID.intItemId
+      AND ysnStockUnit = 1
+) ICIUOM_STOCK
 LEFT OUTER JOIN (
 	SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor, intStockUOMId 
 	FROM vyuICGetBundleItemStock WITH (NOLOCK)
 ) ICGIS ON ARID.[intItemId] = ICGIS.[intBundleItemId] AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
 LEFT OUTER JOIN vyuSCTicketScreenView SC ON ARID.[intTicketId] = SC.[intTicketId]
 WHERE ISNULL(@FromPosting, 0 ) = 0
-  AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 0
+  AND ICI.strType <> 'Inventory'
   AND ARI.[intInvoiceId] = @InvoiceId
   AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
   AND ARI.strType NOT IN ('Transport Delivery', 'POS')
