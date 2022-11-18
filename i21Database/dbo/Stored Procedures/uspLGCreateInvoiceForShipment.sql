@@ -90,6 +90,7 @@ DECLARE
 	,@intContractDetailId		INT
 	,@intPricingTypeId			INT
 	,@dblQty					NUMERIC(18, 6)
+	,@DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	SELECT TOP 1 @intARAccountId = ISNULL(intARAccountId,0) FROM tblARCompanyPreference
 	IF @intARAccountId = 0
@@ -697,9 +698,18 @@ DECLARE
 			,[ysnVirtualMeterReading]				= 0
 			,[ysnClearDetailTaxes]					= 0
 			,[intTempDetailIdForTaxes]				= NULL
-			,[intCurrencyExchangeRateTypeId]		= ISNULL(CD.intHistoricalRateTypeId, ARSI.[intCurrencyExchangeRateTypeId])
-			,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId] 
-			,[dblCurrencyExchangeRate]				= ISNULL(CD.dblHistoricalRate, ARSI.[dblCurrencyExchangeRate])
+			,[intCurrencyExchangeRateTypeId]		= CASE WHEN ARSI.intCurrencyId <> @DefaultCurrencyId
+															THEN ISNULL(CD.intHistoricalRateTypeId, ARSI.[intCurrencyExchangeRateTypeId])
+															ELSE NULL
+														END
+			,[intCurrencyExchangeRateId]			= CASE WHEN ARSI.intCurrencyId <> @DefaultCurrencyId
+															THEN ARSI.[intCurrencyExchangeRateId] 
+															ELSE NULL
+														END
+			,[dblCurrencyExchangeRate]				= CASE WHEN ARSI.intCurrencyId <> @DefaultCurrencyId
+															THEN ISNULL(CD.dblHistoricalRate, ARSI.[dblCurrencyExchangeRate])
+															ELSE 1
+														END
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 			,[dblQualityPremium]					= LD.dblQualityPremium
