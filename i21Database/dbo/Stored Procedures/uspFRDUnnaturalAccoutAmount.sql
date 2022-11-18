@@ -214,8 +214,8 @@ BEGIN
 			UPDATE #tempAmount SET Amount = 0 WHERE strCriteria = @strCriteria      
 		END      
     
-		IF @dblAmount <> 0      
-		BEGIN           
+		--IF @dblAmount <> 0      
+		--BEGIN           
 			SET @strName  = (SELECT TOP 1       
 			CASE       
 			WHEN (strName = 'Primary Account' OR  strName = '[Primary Account]') THEN '[UnPrimary Account]'       
@@ -305,7 +305,7 @@ BEGIN
 
 			TRUNCATE TABLE #tempAmount2  
 			TRUNCATE TABLE #tempBalanceSide    
-			END      
+			--END      
 		DELETE #tempFormula2 WHERE intRowDetailId = @intRowDetailId and strCriteria = @strCriteria      
 	END    
       
