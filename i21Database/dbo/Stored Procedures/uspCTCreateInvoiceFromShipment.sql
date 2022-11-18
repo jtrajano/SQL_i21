@@ -32,8 +32,6 @@ SELECT
 DECLARE @EntriesForInvoice AS InvoiceStagingTable
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
-
-
 INSERT INTO @EntriesForInvoice
     ([intId]
     ,[strTransactionType]
@@ -181,9 +179,6 @@ INSERT INTO @EntriesForInvoice
     ,[intDestinationGradeId]
     ,[intDestinationWeightId]
     ,[intPriceFixationDetailId]
-    ,[strTaxPoint]
-	,[intTaxLocationId]
-	,[ysnOverrideTaxGroup]
     --,[strAddonDetailKey]
     --,[ysnAddonParent]
     --,[dblAddOnQuantity]
@@ -339,9 +334,6 @@ SELECT
     ,[intDestinationGradeId]                = ARSI.[intDestinationGradeId]
     ,[intDestinationWeightId]               = ARSI.[intDestinationWeightId]
     ,[intPriceFixationDetailId]             = @intPriceFixationDetailId
-    ,strTaxPoint							= CD.strTaxPoint
-	,intTaxLocationId						= CD.intTaxLocationId
-	,[ysnOverrideTaxGroup]					= CD.ysnTaxOverride
     --,[strAddonDetailKey]                    = NULL
     --,[ysnAddonParent]                       = @ZeroBit
     --,[dblAddOnQuantity]                     = @ZeroDecimal
