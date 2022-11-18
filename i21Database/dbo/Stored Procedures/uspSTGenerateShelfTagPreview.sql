@@ -123,7 +123,7 @@ BEGIN TRY
 							)
 					UNION
 					SELECT intItemId 
-					FROM tblICEffectiveItemPricing
+					FROM tblICEffectiveItemPrice
 					WHERE 
 							(
 								dtmDateModified BETWEEN @PriceChangeFrom AND @PriceChangeTill
