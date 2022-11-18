@@ -1748,10 +1748,10 @@ ELSE
 							SET @dblPalletQty = 0;
 
 							BEGIN
-								DECLARE @dblPallet			  NUMERIC(18, 2) = 0
-									  , @dblRequiredPallet	  NUMERIC(18, 2) = 0
-									  , @dblLotPallet		  NUMERIC(18, 2) = 0
-									  , @dblQtyPerPallet	  NUMERIC(18, 2) = 0;
+								DECLARE @dblPallet			   NUMERIC(18, 2) = 0
+									  , @dblRequiredPallet	   NUMERIC(18, 2) = 0
+									  , @dblLotPallet		   NUMERIC(18, 2) = 0
+									  , @dblPickedAvailableQty NUMERIC(18, 2) = 0;
 
 								SET @dblPallet = 0;
 								SET @dblNoOfPallets = 0;
@@ -1760,35 +1760,66 @@ ELSE
 								SET @dblPallet = @intUnitPerLayer * @intLayerPerPallet; 
 
 								BEGIN
+
 									IF (@dblAvailableQty >= @dblRequiredQty AND (@intUnitPerLayer <> 0 OR @intLayerPerPallet <> 0))
 										BEGIN
-											/* Set Lot pallet. */
+											/* Set Available Lot pallet. */
 											SET @dblLotPallet = @dblAvailableQty / @dblPallet;
 
-											/* Set Required pallet. */
-											SET @dblRequiredPallet = (CASE WHEN @dblRequiredQty < @dblUpperToleranceQty THEN @dblUpperToleranceQty  ELSE @dblRequiredQty END) / @dblPallet;
+											SET @dblPalletQty = (@dblLotPallet / 100) * @dblRequiredPallet;
 
-
-											IF (@dblAvailableQty >= @dblUpperToleranceQty)
-												BEGIN
-													SET @dblPalletQty = @dblUpperToleranceQty;
-
-													/* Set No of Pallets on Picked Qty*/
-													SET @dblNoOfPallets = (@dblUpperToleranceQty / @dblLotPallet) * 100;
-												END
-											ELSE
+											IF @ysnMinorIngredient = 0
 												BEGIN
 													SET @dblPalletQty = @dblRequiredQty;
-
+													
 													/* Set No of Pallets on Picked Qty*/
 													SET @dblNoOfPallets = (@dblRequiredQty / @dblLotPallet) * 100;
 												END
+											ELSE	
+												BEGIN
+													/* Set Required pallet. */
+													SET @dblRequiredPallet = (CASE WHEN @dblAvailableQty >= @dblUpperToleranceQty THEN @dblUpperToleranceQty  ELSE @dblRequiredQty END) / @dblPallet;
+
+													IF (ROUND(@dblRequiredPallet, 0) <> @dblRequiredPallet)
+														BEGIN
+															SET @dblRequiredPallet = CEILING(@dblRequiredPallet);
+														END
+
+													/* Set picked avalable qty */
+													SET @dblPickedAvailableQty = (@dblAvailableQty / @dblLotPallet) * @dblRequiredPallet;
+													
+													/* check wheter the picked available qty is within the tolerance. */
+													IF (@dblPickedAvailableQty >= @dblLowerToleranceQty AND @dblPickedAvailableQty <= @dblUpperToleranceQty)
+														BEGIN
+															SET @dblPalletQty = @dblPickedAvailableQty;
+
+															SET @dblNoOfPallets = (@dblPickedAvailableQty / @dblLotPallet) * 100;
+														END
+													ELSE
+														BEGIN
+															IF (@dblAvailableQty >= @dblUpperToleranceQty)
+																BEGIN
+																	SET @dblPalletQty = @dblUpperToleranceQty;
+
+																	SET @dblNoOfPallets = (@dblUpperToleranceQty / @dblLotPallet) * 100;
+																END
+															ELSE
+																BEGIN
+																	SET @dblPalletQty = @dblRequiredQty;
+
+																	SET @dblNoOfPallets = (@dblRequiredQty / @dblLotPallet) * 100;
+																END
+														END
+												END
+											
+										END										
+									ELSE
+										BEGIN
+											SET @dblPalletQty = @dblRequiredQty
 										END
-										
 								END
 							END
 							/* End of Pallet Issued UOM Type */
-
 
 				IF @dblAvailableQty > 0
 				BEGIN

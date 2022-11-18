@@ -110,6 +110,7 @@ BEGIN TRY
 		,intItemUOMId INT
 		,intUserId INT
 		,intPlannedShiftId INT
+		,dblNoOfPallet	NUMERIC(38, 20)
 		)
 	DECLARE @tblPreItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -156,6 +157,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,ysnParentLot BIT
 		,dtmDateCreated DATETIME
+		, dblNoOfPallet NUMERIC(18, 6)
 		)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
@@ -172,6 +174,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,ysnParentLot BIT
 		,dtmDateCreated DATETIME
+		,dblNoOfPallet NUMERIC(18, 6)
 		)
 	DECLARE @tblBSLot TABLE (
 		intLotId INT
@@ -184,6 +187,7 @@ BEGIN TRY
 		,intRecipeItemId INT
 		,intLocationId INT
 		,intStorageLocationId INT
+		,dblNoOfPallet NUMERIC(18, 6)
 		)
 
 	INSERT INTO @tblBlendSheet (
@@ -204,6 +208,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intUserId
 		,intPlannedShiftId
+		,dblNoOfPallet
 		)
 	SELECT intWorkOrderId
 		,intItemId
@@ -222,6 +227,7 @@ BEGIN TRY
 		,intItemUOMId
 		,intUserId
 		,intPlannedShiftId
+		,dblNoOfPallet
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -240,6 +246,7 @@ BEGIN TRY
 			,intItemUOMId INT
 			,intUserId INT
 			,intPlannedShiftId INT
+			,dblNoOfPallet NUMERIC(38, 20)
 			)
 
 	INSERT INTO @tblPreLot (
@@ -255,6 +262,7 @@ BEGIN TRY
 		,intLocationId
 		,intStorageLocationId
 		,ysnParentLot
+		,dblNoOfPallet
 		)
 	SELECT x.intLotId
 		,x.intItemId
@@ -268,6 +276,7 @@ BEGIN TRY
 		,x.intLocationId
 		,x.intStorageLocationId
 		,x.ysnParentLot
+		,x.dblNoOfPallet
 	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
@@ -282,6 +291,7 @@ BEGIN TRY
 			,intLocationId INT
 			,intStorageLocationId INT
 			,ysnParentLot BIT
+			,dblNoOfPallet NUMERIC(18, 6)
 			) x
 
 	UPDATE a
@@ -308,6 +318,7 @@ BEGIN TRY
 		,intLocationId
 		,intStorageLocationId
 		,ysnParentLot
+		,dblNoOfPallet
 		)
 	SELECT intLotId
 		,intItemId
@@ -321,6 +332,7 @@ BEGIN TRY
 		,intLocationId
 		,intStorageLocationId
 		,ysnParentLot
+		,dblNoOfPallet
 	FROM @tblPreLot
 	ORDER BY dtmDateCreated
 
@@ -916,6 +928,7 @@ BEGIN TRY
 				,intRecipeItemId
 				,intLocationId
 				,intStorageLocationId
+				,dblNoOfPallet
 				)
 			SELECT intLotId
 				,intItemId
@@ -927,6 +940,7 @@ BEGIN TRY
 				,intRecipeItemId
 				,intLocationId
 				,intStorageLocationId
+				,dblNoOfPallet
 			FROM @tblLot
 			WHERE dblQty > 0
 		END
@@ -1304,6 +1318,7 @@ BEGIN TRY
 							,intRecipeItemId
 							,intLocationId
 							,intStorageLocationId
+							,dblNoOfPallet
 							)
 						SELECT intLotId
 							,intItemId
@@ -1315,6 +1330,7 @@ BEGIN TRY
 							,intRecipeItemId
 							,intLocationId
 							,intStorageLocationId
+							,dblNoOfPallet
 						FROM @tblLot
 						WHERE intRowNo = @intLotCount
 
@@ -1548,6 +1564,7 @@ BEGIN TRY
 							,intRecipeItemId
 							,intLocationId
 							,intStorageLocationId
+							,dblNoOfPallet
 							)
 						SELECT intLotId
 							,intItemId
@@ -1559,6 +1576,7 @@ BEGIN TRY
 							,intRecipeItemId
 							,intLocationId
 							,intStorageLocationId
+							,dblNoOfPallet
 						FROM @tblLot
 						WHERE intRowNo = @intLotCount
 
@@ -1745,6 +1763,7 @@ BEGIN TRY
 					,dtmProductionDate
 					,dtmBusinessDate
 					,intBusinessShiftId
+					,dblNoOfPallet
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -1762,6 +1781,7 @@ BEGIN TRY
 					,@dtmProductionDate
 					,@dtmBusinessDate
 					,@intBusinessShiftId
+					,dblNoOfPallet
 				FROM @tblBSLot
 
 				INSERT INTO tblMFWorkOrderConsumedLot (
@@ -1778,6 +1798,7 @@ BEGIN TRY
 					,dtmLastModified
 					,intLastModifiedUserId
 					,intRecipeItemId
+					,dblNoOfPallet
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -1792,6 +1813,7 @@ BEGIN TRY
 					,GetDate()
 					,@intUserId
 					,intRecipeItemId
+					,dblNoOfPallet
 				FROM @tblBSLot
 			END
 			ELSE
@@ -1813,6 +1835,7 @@ BEGIN TRY
 					,dtmProductionDate
 					,dtmBusinessDate
 					,intBusinessShiftId
+					,dblNoOfPallet
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -1830,6 +1853,7 @@ BEGIN TRY
 					,@dtmProductionDate
 					,@dtmBusinessDate
 					,@intBusinessShiftId
+					,dblNoOfPallet
 				FROM @tblBSLot
 			END
 		END
@@ -1852,6 +1876,7 @@ BEGIN TRY
 				,dblWeightPerUnit
 				,intLocationId
 				,intStorageLocationId
+				,dblNoOfPallet
 				)
 			SELECT @intWorkOrderId
 				,intLotId
@@ -1869,6 +1894,7 @@ BEGIN TRY
 				,dblWeightPerUnit
 				,intLocationId
 				,intStorageLocationId
+				,dblNoOfPallet
 			FROM @tblBSLot
 		END
 

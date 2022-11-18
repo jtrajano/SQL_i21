@@ -17,6 +17,7 @@
     [intCreatedUserId] INT NULL,
 	[dtmLastModified] DATETIME NULL, 
     [intLastModifiedUserId] INT NULL,
+    [dblNoOfPallet] NUMERIC(38, 20) NULL, 
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderInputParentLot_intConcurrencyId] DEFAULT 0, 
 	CONSTRAINT [PK_tblMFWorkOrderInputParentLot_intWorkOrderInputParentLotId] PRIMARY KEY ([intWorkOrderInputParentLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderInputParentLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
