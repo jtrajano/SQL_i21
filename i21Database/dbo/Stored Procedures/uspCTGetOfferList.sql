@@ -554,7 +554,7 @@ BEGIN
 							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)												
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,CTD.intUnitMeasureId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)							
-		,dblCUMStorage = 0.00 --FOR CLARIFICATION TO IR IC-10764
+		,dblCUMStorage = ISNULL(ISC.dblStorageCharge,0.00) --FOR CLARIFICATION TO IR IC-10764
 		,dblCUMFinancing = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,CTD.intUnitMeasureId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),   ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0)) --IR Line value * (Current date - Payment Date) * Interest rate
 							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)							
 		,dblSwitchCost = 0.00--For Future Column N/A
@@ -608,6 +608,7 @@ BEGIN
 	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
 	LEFT JOIN tblCTContractFutures		CF	 WITH (NOLOCK)ON  CF.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblRKFuturesMonth			HM	 WITH (NOLOCK) ON HM.intFutureMonthId = CF.intHedgeFutureMonthId	
+	LEFT JOIN tblICStorageChargeDetail  ISC  WITH (NOLOCK) ON ISC.intTransactionDetailId = IRI.intInventoryReceiptItemId AND intTransactionTypeId = 4
 	OUTER APPLY(
 		SELECT DISTINCT CASE WHEN IRI.intInventoryReceiptId <> 0 THEN SUM(dblOrderQty) ELSE SUM(LGL.dblQuantity) END dblTotalQty
 		FROM tblLGLoadDetail LGL
