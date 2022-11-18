@@ -1236,6 +1236,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\UT_Utah.sql" />
+    <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
