@@ -19,6 +19,7 @@ SELECT TSH.intTransferSettlementHeaderId
 	,TS_FROM.intTransferFromSettlementId
 	,intSourceBillId		= TSR.intBillFromId
 	,strSourceBillId 		= AP_FROM.strBillId
+	,TSR.intBillDetailFromId
 	,intBillId 				= TSR.intBillToId
 	,strBillIdFrom 			= AP_FROM_TR.strBillId	
 	,TS_FROM.dblSettlementAmountTransferred
