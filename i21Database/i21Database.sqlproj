@@ -11648,6 +11648,7 @@
     <Build Include="dbo\Stored Procedures\uspQMPostCatalogueReconciliation.sql" />
     <Build Include="dbo\Views\vyuQMBuyingEfficiency.sql" />
     <Build Include="dbo\Views\vyuQMAuctionReport.sql" />
+    <Build Include="dbo\Views\vyuQMApprovedQualityOrders.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
