@@ -1366,6 +1366,7 @@
     <Build Include="dbo\Tables\tblIPContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessOrdersToFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
