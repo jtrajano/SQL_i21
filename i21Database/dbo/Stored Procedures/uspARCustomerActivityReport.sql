@@ -830,6 +830,8 @@ IF @ysnPrintRecap = 1 OR @strFormattingOptions = 'Product Recap Totals Only'
 											  , @strFormattingOptions = @strFormattingOptions
 											  , @intEntityUserId = @intEntityUserId
 											  , @ysnPrintDetail	= @ysnPrintDetail
+											  , @strCompanyName = @strCompanyName
+                                              , @strCompanyAddress = @strCompanyAddress
 	END
 
 IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Totals Only'
