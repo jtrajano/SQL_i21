@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deployment Type' AND strModuleName = 'Help Desk')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1026,6 +1026,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI 
 	VALUES (N'Power BI Reports', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Reports', N'Maintenance', N'Screen', N'i21.view.PowerBIReport?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 18, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIReport?showSearch=true', intSort = 18 WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Power BI Profile', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Profile', N'Maintenance', N'Screen', N'i21.view.PowerBIProfile', N'small-menu-maintenance', 0, 0, 0, 1, 19, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIProfile', intSort = 19 WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 
 /* Start Delete */
