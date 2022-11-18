@@ -49,7 +49,6 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@datatype						AS NVARCHAR(50)
 		,@intPerformanceLogId			AS INT = NULL
 		,@strReportLogId				AS NVARCHAR(MAX)
-		,@blbLogo						AS VARBINARY(MAX)
 		,@strCurrency					AS NVARCHAR(40)
 		,@strReportComment				AS NVARCHAR(MAX)
 		
@@ -217,26 +216,6 @@ BEGIN
 						  END
 
 	EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, @strStatementSP, @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
-
-	--SETUP LOGO
-	SELECT @blbLogo = CASE WHEN CP.ysnStretchLogo = 1 THEN S.blbFile ELSE A.blbFile END
-	FROM tblARCompanyPreference CP 	
-	OUTER APPLY (
-		SELECT TOP 1 U.blbFile
-		FROM tblSMUpload U
-		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-		WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
-		  AND A.strComment = 'Header'
-		ORDER BY A.intAttachmentId DESC
-	) A 
-	OUTER APPLY (
-		SELECT TOP 1 U.blbFile
-		FROM tblSMUpload U
-		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-		WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference')
-		  AND A.strComment IN ('Stretch Header', 'Stretched Header')
-		ORDER BY A.intAttachmentId DESC
-	) S
 	
 	IF @strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
 		BEGIN
@@ -378,12 +357,6 @@ BEGIN
 				, @intEntityUserId				= @intEntityUserId
 		END
 
-	--LOGO
-	UPDATE tblARCustomerStatementStagingTable
-	SET blbLogo = ISNULL(blbLogo, @blbLogo)
-	WHERE intEntityUserId = @intEntityUserId
-	  AND strStatementFormat = @strStatementFormat
-
 	DELETE FROM tblARCustomerStatementOfAccountStagingTable
 	WHERE intEntityUserId = @intEntityUserId
 	AND strReportLogId <> @strReportLogId
@@ -401,7 +374,6 @@ BEGIN
 		, dtmDateTo
 		, intEntityUserId
 		, strReportLogId
-		, blbLogo
 	)
 	SELECT strCustomerName			= @strCustomerName
 		 , strAccountStatusCode		= @strAccountStatusCode
@@ -415,7 +387,6 @@ BEGIN
 	 	 , dtmDateTo				= @dtmDateTo
 		 , intEntityUserId			= @intEntityUserId
 		 , strReportLogId			= @strReportLogId
-		 , blbLogo					= @blbLogo
 END
 
 SELECT * 
