@@ -176,6 +176,11 @@ BEGIN
 		,intAccountId				INT												NULL
 	)
 
+	DECLARE @UNPAIDINVOICES TABLE 
+	(
+		 intInvoiceId	INT	NOT NULL PRIMARY KEY
+	)
+
 	SET @dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 	SET	@dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
 	SET @strSourceTransactionLocal	= NULLIF(@strSourceTransaction, '')
@@ -822,14 +827,15 @@ BEGIN
 	WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 	INNER JOIN @ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 
+	INSERT INTO @UNPAIDINVOICES
+	SELECT DISTINCT intInvoiceId 
+	FROM @returntable 
+	GROUP BY intInvoiceId 
+	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+
 	DELETE AGING
 	FROM @returntable AGING
-	LEFT JOIN (
-		SELECT DISTINCT intInvoiceId 
-		FROM @returntable 
-		GROUP BY intInvoiceId 
-		HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
-	) UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
+	LEFT JOIN @UNPAIDINVOICES UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
 	WHERE ISNULL(UNPAID.intInvoiceId, 0) = 0
 	AND intEntityUserId = @intEntityUserId 
 	AND strAgingType = 'Detail'
