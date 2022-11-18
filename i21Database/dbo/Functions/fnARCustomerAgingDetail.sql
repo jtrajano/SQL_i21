@@ -180,6 +180,11 @@ BEGIN
 		,intAccountId				INT												NULL
 	)
 
+	DECLARE @UNPAIDINVOICES TABLE 
+	(
+		 intInvoiceId	INT	NOT NULL PRIMARY KEY
+	)
+
 	SET @dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 	SET	@dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
 	SET @strSourceTransactionLocal	= NULLIF(@strSourceTransaction, '')
@@ -833,14 +838,15 @@ BEGIN
 	LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
 	LEFT JOIN tblSMLogoPreferenceFooter SMLPF ON SMLPF.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLPF.ysnARInvoice = 1 OR SMLPF.ysnDefault = 1)
 
+	INSERT INTO @UNPAIDINVOICES
+	SELECT DISTINCT intInvoiceId 
+	FROM @returntable 
+	GROUP BY intInvoiceId 
+	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+
 	DELETE AGING
 	FROM @returntable AGING
-	LEFT JOIN (
-		SELECT DISTINCT intInvoiceId 
-		FROM @returntable 
-		GROUP BY intInvoiceId 
-		HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
-	) UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
+	LEFT JOIN @UNPAIDINVOICES UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
 	WHERE ISNULL(UNPAID.intInvoiceId, 0) = 0
 	AND intEntityUserId = @intEntityUserId 
 	AND strAgingType = 'Detail'
