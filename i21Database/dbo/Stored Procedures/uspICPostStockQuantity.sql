@@ -241,7 +241,7 @@ BEGIN
 		,intItemLocationId INT  
 		,intSubLocationId INT NULL
 		,intStorageLocationId INT NULL
-		,dblQty NUMERIC(30, 26) NULL 
+		,dblQty NUMERIC(30, 20) NULL 
 		,dtmPurchaseDate DATETIME 
 		,dtmSaleDate DATETIME 
 	)
