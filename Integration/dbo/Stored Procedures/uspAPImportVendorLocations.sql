@@ -47,9 +47,13 @@ INSERT [dbo].[tblEMEntityLocation]
 
 SELECT 
 	ENT.intEntityId, 
-	CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
-				 ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-				 END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR(100)) as NVARCHAR(200)),
+	-- CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+	-- 			 ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+	-- 			 END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR(100)) as NVARCHAR(200)),
+	 CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name  
+		ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))  
+		END,'')) as NVARCHAR(200)), 
+	dbo.fnTrim(ISNULL(ssvnd_addr_1,'')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'')),
 	dbo.fnTrim(ISNULL(ssvnd_addr_1,'')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'')),
 	ssvnd_city,
 	''United States'' as [strCountry],
@@ -75,7 +79,8 @@ and (
 RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
    ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
 + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation ))
+--END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation ))
+END,'''')) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation WHERE intEntityId = ENT.intEntityId)) 
 	
 SET @Total = @@ROWCOUNT
 
