@@ -10911,6 +10911,7 @@
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
 	<Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
+	<Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSubNoTaxClassReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReport.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportDashBoard.sql" />
