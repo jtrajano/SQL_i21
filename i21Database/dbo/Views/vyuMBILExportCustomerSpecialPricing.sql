@@ -22,7 +22,7 @@
 				AND ICItems.intLocationId = d.intWarehouseId 
 				AND a.intItemId IS NULL)   
 			OR (a.intItemId = ICItems.intItemId
-				--AND ICItems.intLocationId = d.intWarehouseId
+				AND ICItems.intLocationId = d.intWarehouseId
 				AND a.intItemId IS NOT NULL)   
 	INNER JOIN (SELECT DISTINCT intItemId FROM [vyuETExportItem]) ETItems ON ICItems.intItemId = ETItems.intItemId
 
