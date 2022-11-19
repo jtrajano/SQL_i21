@@ -11,6 +11,9 @@ SET ANSI_WARNINGS ON
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX) = NULL
 	DECLARE @derivativeTable TABLE (intFutOptTransactionId INT NULL)
+	DECLARE @intCashManagementRateTypeId INT = NULL
+
+	SELECT TOP 1 @intCashManagementRateTypeId = intCashManagementRateTypeId FROM tblSMMultiCurrency
 
 	DECLARE @sql_xml XML = Cast('<root><U>'+ Replace(@strFutOptTransactionIds, ',', '</U><U>')+ '</U></root>' AS XML)
 
@@ -61,7 +64,7 @@ BEGIN TRY
 		, intBankAccountIdTo = otc.intBuyBankAccountId
 		, intGLAccountIdFrom = sellBA.intGLAccountId
 		, intGLAccountIdTo = buyBA.intGLAccountId
-		, intCurrencyExchangeRateTypeId = otc.intCurrencyExchangeRateTypeId -- Currency Pair
+		, intCurrencyExchangeRateTypeId = @intCashManagementRateTypeId -- otc.intCurrencyExchangeRateTypeId -- Currency Pair
 		, dtmAccrual = otc.dtmTransactionDate
 		, dtmDate = otc.dtmMaturityDate
 		, dblAmountForeignFrom = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate

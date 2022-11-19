@@ -79,6 +79,7 @@ SELECT DE.intFutOptTransactionId
 	, strOTCSource = CASE WHEN DE.intSelectedInstrumentTypeId = 2 
 							THEN CASE WHEN ISNULL(DE.strSource, '') <> '' THEN DE.strSource ELSE 'Manual' END 
 							ELSE '' END COLLATE Latin1_General_CI_AS
+	, strCurrencyPair = CPS.strCurrencyPair
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -133,3 +134,5 @@ LEFT JOIN tblCTContractHeader contractH
 	ON contractH.intContractHeaderId = DE.intContractHeaderId
 LEFT JOIN tblCTContractDetail contractD
 	ON contractD.intContractDetailId = DE.intContractDetailId
+LEFT JOIN vyuRKCurrencyPairSetup CPS
+	ON CPS.intCurrencyPairId = DE.intCurrencyPairId
