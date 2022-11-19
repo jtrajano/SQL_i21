@@ -16,7 +16,8 @@ SELECT  intFutOptTransactionId
 	, strBuyBankAccountNo = buybankacct.strBankAccountNo
 	, der.strBuySell
 	, der.dtmMaturityDate
-	, strCurrencyPair = CurEx.strCurrencyExchangeRateType
+	--, strCurrencyPair = CurEx.strCurrencyExchangeRateType
+	, strCurrencyPair = CPS.strCurrencyPair
 	, strBaseCurrency = der.strFromCurrency COLLATE Latin1_General_CI_AS
 	, strMatchCurrency = der.strToCurrency COLLATE Latin1_General_CI_AS
 	, der.dblExchangeRate
@@ -56,7 +57,9 @@ LEFT JOIN tblCMBank buybank
 	ON der.intBuyBankId = buybank.intBankId
 LEFT JOIN vyuCMBankAccount AS buybankacct 
 	ON der.intBuyBankAccountId = buybankacct.intBankAccountId
-LEFT JOIN tblSMCurrencyExchangeRateType AS CurEx ON der.intCurrencyExchangeRateTypeId = CurEx.intCurrencyExchangeRateTypeId
+--LEFT JOIN tblSMCurrencyExchangeRateType AS CurEx ON der.intCurrencyExchangeRateTypeId = CurEx.intCurrencyExchangeRateTypeId
+LEFT JOIN vyuRKCurrencyPairSetup CPS 
+	ON CPS.intCurrencyPairId = der.intCurrencyPairId
 LEFT OUTER JOIN tblSMApproverConfigurationForApprovalGroup approvalGroup
 	ON smapprove.intApprovalId = approvalGroup.intApprovalId 
 LEFT JOIN tblCTContractHeader cth
