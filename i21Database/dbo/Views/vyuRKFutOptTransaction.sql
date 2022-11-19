@@ -104,6 +104,7 @@ FROM (
 		, ft.ysnCommissionExempt
 		, ft.ysnCommissionOverride
 		, ft.ysnPosted
+		, strCurrencyPair = CPS.strCurrencyPair
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblEMEntity sp ON sp.intEntityId = ft.intTraderId
@@ -134,5 +135,7 @@ LEFT JOIN tblSMTransaction approval
 	AND ft.intInstrumentTypeId = 4						-- OTC Forwards Only
 	AND approval.intScreenId = approvalScreen.intScreenId
 	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
+LEFT JOIN vyuRKCurrencyPairSetup CPS
+	ON CPS.intCurrencyPairId = ft.intCurrencyPairId
 )t 
 ORDER BY intFutOptTransactionId ASC

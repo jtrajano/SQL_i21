@@ -78,6 +78,7 @@
 	[ysnCommissionExempt] BIT NOT NULL DEFAULT (0),
 	[ysnCommissionOverride] BIT NOT NULL DEFAULT (0),
 	[ysnPosted] BIT NOT NULL DEFAULT (0),
+	[intCurrencyPairId] INT NULL,
     CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
@@ -97,7 +98,8 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFuturesMonth_intRollingMonthId] FOREIGN KEY ([intRollingMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBank_intBuyBankId] FOREIGN KEY ([intBuyBankId]) REFERENCES [tblCMBank] ([intBankId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankAccount_intBuyBankAccountId] FOREIGN KEY ([intBuyBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId]),
-	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankTransfer_intBankTransferId] FOREIGN KEY ([intBankTransferId]) REFERENCES [tblCMBankTransfer]([intTransactionId])
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankTransfer_intBankTransferId] FOREIGN KEY ([intBankTransferId]) REFERENCES [tblCMBankTransfer]([intTransactionId]),
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKCurrencyPair_intCurrencyPairId] FOREIGN KEY ([intCurrencyPairId]) REFERENCES [tblRKCurrencyPair]([intCurrencyPairId])
 );
 
 GO
