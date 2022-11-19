@@ -557,19 +557,21 @@ begin try
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
 					,dblExchangeRate = vp.dblExchangeRate
 					,intPurchaseTaxGroupId = 
-						CASE 
-							WHEN isnull(vp.intPurchaseTaxGroupId,0) = 0 THEN 
-								dbo.fnGetTaxGroupIdForVendor(
-									vp.intEntityVendorId
-									,@intCompanyLocationId
-									,vp.intItemId
-									,em.intEntityLocationId
-									,@intFreightTermId
-									,default
-								) 
-							ELSE 
-								vp.intPurchaseTaxGroupId 
-						END
+						CASE WHEN CD.ysnTaxOverride = CAST(0 as BIT) THEN
+						  CASE     
+						   WHEN isnull(vp.intPurchaseTaxGroupId,0) = 0 THEN     
+							dbo.fnGetTaxGroupIdForVendor(    
+							 vp.intEntityVendorId    
+							 ,@intCompanyLocationId    
+							 ,vp.intItemId    
+							 ,em.intEntityLocationId    
+							 ,@intFreightTermId    
+							 ,default    
+							)     
+						   ELSE     
+							vp.intPurchaseTaxGroupId     
+						  END 
+						ELSE CD.intTaxGroupId END
 					,dblTax = vp.dblTax
 					,dblDiscount = vp.dblDiscount
 					,dblDetailDiscountPercent = vp.dblDetailDiscountPercent
@@ -621,6 +623,7 @@ begin try
 					LEFT JOIN tblEMEntityLocation em 
 						ON em.intEntityId = vp.intEntityVendorId 
 						AND isnull(em.ysnDefaultLocation,0) = 1
+					LEFT JOIN tblCTContractDetail CD on vp.intContractDetailId  = CD.intContractDetailId
 					OUTER APPLY (
 						SELECT TOP 1 
 							ap.intVoucherPayableId
