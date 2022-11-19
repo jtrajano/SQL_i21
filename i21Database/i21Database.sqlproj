@@ -1234,6 +1234,7 @@
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
     <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
