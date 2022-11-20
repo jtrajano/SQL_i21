@@ -185,22 +185,11 @@ BEGIN
 				intContractDetailId
 			)
 			SELECT
-				strAction						= CASE WHEN @intAction = 1 THEN 'Created ' + 
-																				CASE B.intTransactionType
-																					WHEN 1 THEN 'Voucher' 
-																					WHEN 2 THEN 'Vendor Prepayment'
-																				END
-														WHEN @intAction = 2 THEN 'Updated ' + 
-																				CASE B.intTransactionType
-																					WHEN 1 THEN 'Voucher' 
-																					WHEN 2 THEN 'Vendor Prepayment'
-																				END
-														ELSE 'Deleted ' + 
-																				CASE B.intTransactionType
-																					WHEN 1 THEN 'Voucher' 
-																					WHEN 2 THEN 'Vendor Prepayment'
-																				END
-													END, 
+				strAction						= CASE 
+														WHEN @intAction = 1 THEN 'Created ' + dbo.fnAPGetVoucherTransactionType2(B.intTransactionType)
+														WHEN @intAction = 2 THEN 'Updated ' + dbo.fnAPGetVoucherTransactionType2(B.intTransactionType)
+														ELSE 'Deleted ' + dbo.fnAPGetVoucherTransactionType2(B.intTransactionType)
+												   END, 
 				strTransactionType				= 'Purchasing',
 				strTradeFinanceTransaction		= B.strFinanceTradeNo,
 				intTransactionHeaderId			= B.intBillId,
