@@ -1366,10 +1366,16 @@
     <Build Include="dbo\Tables\tblIPContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessOrdersToFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
-	<Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
     <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
     <Build Include="dbo\Views\vyuARTaxGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPRecipe_EK.sql" />
+    <Build Include="dbo\Tables\tblMFProductionOrderStage.sql" />
+    <Build Include="dbo\Tables\tblMFProductionOrderArchive.sql" />
+    <Build Include="dbo\Tables\tblMFProductionOrderError.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrder_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPProductionOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

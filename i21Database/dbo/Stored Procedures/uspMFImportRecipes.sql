@@ -33,14 +33,16 @@ DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@intSubLocationId INT
 	,@strUpdateTolerance NVARCHAR(50)
 	,@ysnVirtualRecipe BIT
-	,@dtmCurrentDate Datetime
+	,@dtmCurrentDate DATETIME
 	,@ysnRecipeBySite BIT
-	,@dtmValidFrom Datetime
-	,@dtmValidTo Datetime
+	,@dtmValidFrom DATETIME
+	,@dtmValidTo DATETIME
+	,@ysnRecipeHeaderValidation BIT
 
 SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
 SELECT @ysnRecipeBySite = IsNULL(ysnRecipeBySite, 0)
+	,@ysnRecipeHeaderValidation = IsNULL(ysnRecipeHeaderValidation, 0)
 FROM tblMFCompanyPreference
 
 --Recipe Delete
@@ -594,39 +596,50 @@ BEGIN
 			GOTO NEXT_RECIPE
 		END
 
-		IF IsNULL(@ysnVirtualRecipe, 0) = 1
+		IF @ysnRecipeHeaderValidation = 1
 		BEGIN
 			SELECT TOP 1 @intRecipeId = intRecipeId
 			FROM tblMFRecipe
 			WHERE intItemId = @intItemId
-				AND intVersionNo = @intVersionNo
+				AND dtmValidFrom = @dtmValidFrom
 				AND intLocationId = @intLocationId
-				AND ysnVirtualRecipe = @ysnVirtualRecipe
 		END
 		ELSE
 		BEGIN
-			IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+			IF IsNULL(@ysnVirtualRecipe, 0) = 1
 			BEGIN
-				IF @strERPRecipeNo IS NOT NULL
-				BEGIN
-					SELECT @intRecipeId = intRecipeId
-					FROM tblMFRecipe
-					WHERE strERPRecipeNo = @strERPRecipeNo
-						AND intLocationId = @intLocationId
-				END
-				ELSE
-				BEGIN
-					SELECT TOP 1 @intRecipeId = intRecipeId
-					FROM tblMFRecipe
-					WHERE intItemId = @intItemId
-						AND intVersionNo = @intVersionNo
-						AND intLocationId = @intLocationId
-				END
-			END
-			ELSE --Virtual Recipe
 				SELECT TOP 1 @intRecipeId = intRecipeId
 				FROM tblMFRecipe
-				WHERE strName = @strRecipeName
+				WHERE intItemId = @intItemId
+					AND intVersionNo = @intVersionNo
+					AND intLocationId = @intLocationId
+					AND ysnVirtualRecipe = @ysnVirtualRecipe
+			END
+			ELSE
+			BEGIN
+				IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+				BEGIN
+					IF @strERPRecipeNo IS NOT NULL
+					BEGIN
+						SELECT @intRecipeId = intRecipeId
+						FROM tblMFRecipe
+						WHERE strERPRecipeNo = @strERPRecipeNo
+							AND intLocationId = @intLocationId
+					END
+					ELSE
+					BEGIN
+						SELECT TOP 1 @intRecipeId = intRecipeId
+						FROM tblMFRecipe
+						WHERE intItemId = @intItemId
+							AND intVersionNo = @intVersionNo
+							AND intLocationId = @intLocationId
+					END
+				END
+				ELSE --Virtual Recipe
+					SELECT TOP 1 @intRecipeId = intRecipeId
+					FROM tblMFRecipe
+					WHERE strName = @strRecipeName
+			END
 		END
 
 		IF @intRecipeId IS NULL --insert
@@ -1355,8 +1368,8 @@ BEGIN
 			AND intRecipeItemStageId = @intMinId
 
 		SELECT @ysnVirtualRecipe = NULL
-				,@dtmValidFrom=NULL
-				,@dtmValidTo=NULL
+			,@dtmValidFrom = NULL
+			,@dtmValidTo = NULL
 
 		SELECT @strRecipeName = strRecipeName
 			,@strItemNo = strRecipeHeaderItemNo
@@ -1365,8 +1378,8 @@ BEGIN
 			,@strRecipeDetailItemNo = strRecipeItemNo
 			,@strRecipeItemType = strRecipeItemType
 			,@ysnVirtualRecipe = ysnVirtualRecipe
-			,@dtmValidFrom=strValidFrom
-			,@dtmValidTo=strValidTo
+			,@dtmValidFrom = strValidFrom
+			,@dtmValidTo = strValidTo
 		FROM tblMFRecipeItemStage
 		WHERE intRecipeItemStageId = @intMinId
 
@@ -1382,20 +1395,18 @@ BEGIN
 		FROM tblICItem
 		WHERE strItemNo = @strRecipeDetailItemNo
 
-		IF IsNULL(@ysnVirtualRecipe, 0) = 1
+		IF @ysnRecipeHeaderValidation = 1
 		BEGIN
 			SELECT TOP 1 @intRecipeId = intRecipeId
-				,@intRecipeTypeId = intRecipeTypeId
-				,@intLocationId = intLocationId
 			FROM tblMFRecipe
 			WHERE intItemId = @intItemId
-				AND intVersionNo = @intVersionNo
+				AND dtmValidFrom = @dtmValidFrom
 				AND intLocationId = @intLocationId
-				AND ysnVirtualRecipe = @ysnVirtualRecipe
 		END
 		ELSE
 		BEGIN
-			IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+			IF IsNULL(@ysnVirtualRecipe, 0) = 1
+			BEGIN
 				SELECT TOP 1 @intRecipeId = intRecipeId
 					,@intRecipeTypeId = intRecipeTypeId
 					,@intLocationId = intLocationId
@@ -1403,16 +1414,28 @@ BEGIN
 				WHERE intItemId = @intItemId
 					AND intVersionNo = @intVersionNo
 					AND intLocationId = @intLocationId
-					AND IsNULL(dtmValidFrom,@dtmValidFrom)=@dtmValidFrom 
-					AND IsNULL(dtmValidTo,@dtmValidTo)=@dtmValidTo 
-
-			ELSE --Virtual Recipe
-				SELECT TOP 1 @intRecipeId = intRecipeId
-					,@intRecipeTypeId = intRecipeTypeId
-					,@intLocationId = intLocationId
-				FROM tblMFRecipe
-				WHERE strName = @strRecipeName
-					AND intLocationId = @intLocationId
+					AND ysnVirtualRecipe = @ysnVirtualRecipe
+			END
+			ELSE
+			BEGIN
+				IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+					SELECT TOP 1 @intRecipeId = intRecipeId
+						,@intRecipeTypeId = intRecipeTypeId
+						,@intLocationId = intLocationId
+					FROM tblMFRecipe
+					WHERE intItemId = @intItemId
+						AND intVersionNo = @intVersionNo
+						AND intLocationId = @intLocationId
+						AND IsNULL(dtmValidFrom, @dtmValidFrom) = @dtmValidFrom
+						AND IsNULL(dtmValidTo, @dtmValidTo) = @dtmValidTo
+				ELSE --Virtual Recipe
+					SELECT TOP 1 @intRecipeId = intRecipeId
+						,@intRecipeTypeId = intRecipeTypeId
+						,@intLocationId = intLocationId
+					FROM tblMFRecipe
+					WHERE strName = @strRecipeName
+						AND intLocationId = @intLocationId
+			END
 		END
 
 		IF @intRecipeId IS NULL
@@ -1430,6 +1453,7 @@ BEGIN
 			DELETE RI
 			FROM tblMFRecipeItem RI
 			WHERE intRecipeId = @intRecipeId
+				AND intRecipeItemTypeId=1
 				AND NOT EXISTS (
 					SELECT *
 					FROM tblMFRecipeItemStage RIS
@@ -1714,21 +1738,23 @@ BEGIN
 				WHERE intItemId = @intItemId
 					AND ysnActive = 1
 					AND intLocationId = @intLocationId
-					AND @dtmCurrentDate BETWEEN IsNULL(dtmValidFrom,@dtmCurrentDate) AND IsNULL(dtmValidTo,@dtmCurrentDate) 
-					--AND IsNULL(intSubLocationId,0)=(Case When @ysnRecipeBySite =1 Then IsNULL(@intSubLocationId,0)else IsNULL(intSubLocationId,0) end)
+					AND @dtmCurrentDate BETWEEN IsNULL(dtmValidFrom, @dtmCurrentDate)
+						AND IsNULL(dtmValidTo, @dtmCurrentDate)
 				)
-			Begin
-				Update tblMFRecipe
-				Set ysnActive =0
-				WHERE intItemId = @intItemId
+			--AND IsNULL(intSubLocationId,0)=(Case When @ysnRecipeBySite =1 Then IsNULL(@intSubLocationId,0)else IsNULL(intSubLocationId,0) end)
+		BEGIN
+			UPDATE tblMFRecipe
+			SET ysnActive = 0
+			WHERE intItemId = @intItemId
 				AND ysnActive = 1
 				AND intLocationId = @intLocationId
-				--AND IsNULL(intSubLocationId,0)=(Case When @ysnRecipeBySite =1 Then IsNULL(@intSubLocationId,0)else IsNULL(intSubLocationId,0) end)
 
-				UPDATE tblMFRecipe
-				SET ysnActive = 1
-				WHERE intRecipeId = @intRecipeId
-			End
+			--AND IsNULL(intSubLocationId,0)=(Case When @ysnRecipeBySite =1 Then IsNULL(@intSubLocationId,0)else IsNULL(intSubLocationId,0) end)
+			UPDATE tblMFRecipe
+			SET ysnActive = 1
+			WHERE intRecipeId = @intRecipeId
+		END
+
 		NEXT_RECIPEITEM:
 
 		SELECT @intMinId = MIN(intRecipeItemStageId)
@@ -1745,8 +1771,7 @@ BEGIN
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 		AND ysnImport = 1
-
-	/*DELETE
+		/*DELETE
 	FROM @tblIPInitialAck
 
 	INSERT INTO dbo.tblIPInitialAck (
@@ -1780,7 +1805,6 @@ BEGIN
 	SET ysnInitialAckSent = 1
 	FROM tblMFRecipeItemStage RI
 	JOIN @tblIPInitialAck IA ON IA.intTrxSequenceNo = RI.intTrxSequenceNo*/
-	
 END
 
 --Recipe Substitute Item

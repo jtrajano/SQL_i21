@@ -382,7 +382,7 @@ BEGIN TRY
 		JOIN tblCTBook Bk on Bk.intBookId=B.intBookId
 		JOIN tblSMCompanyLocation L on L.strLocationName=Bk.strBook
 
-		EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess,NULL,1
+		--EXEC uspMFUpdateInsertBatch @MFBatchTableType, @intInput, @intInputSuccess,NULL,1
 
         CONT:
         FETCH NEXT FROM @C INTO
