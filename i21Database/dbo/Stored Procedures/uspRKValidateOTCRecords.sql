@@ -20,7 +20,8 @@ BEGIN TRY
 						, intBuyBankAccountId INT NULL
 						, dblExchangeRate NUMERIC(24, 10) NULL
 						, dblFinanceForwardRate NUMERIC(24, 10) NULL
-						, intCurrencyExchangeRateTypeId INT NULL
+						--, intCurrencyExchangeRateTypeId INT NULL
+						, intCurrencyPairId INT NULL
 						, intBankTransferId INT NULL
 						, dblBuyAmount NUMERIC(24, 10) NULL
 						, dblSellAmount NUMERIC(24, 10) NULL
@@ -41,7 +42,8 @@ BEGIN TRY
 		, intBuyBankAccountId
 		, dblExchangeRate
 		, dblFinanceForwardRate
-		, intCurrencyExchangeRateTypeId
+		--, intCurrencyExchangeRateTypeId
+		, intCurrencyPairId
 		, intBankTransferId
 		, intFromCurrencyId
 		, intToCurrencyId
@@ -55,7 +57,8 @@ BEGIN TRY
 		, intBuyBankAccountId
 		, dblExchangeRate
 		, dblFinanceForwardRate
-		, intCurrencyExchangeRateTypeId 
+		--, intCurrencyExchangeRateTypeId 
+		, intCurrencyPairId
 		, intBankTransferId
 		, intFromCurrencyId
 		, intToCurrencyId
@@ -164,7 +167,8 @@ BEGIN TRY
 			SET @intErrorCounter += 1
 		END
 
-		IF EXISTS (SELECT TOP 1 '' FROM @validateTable WHERE intFutOptTransactionId = @intFutOptTransactionId AND ISNULL(intCurrencyExchangeRateTypeId, 0) = 0)
+		--IF EXISTS (SELECT TOP 1 '' FROM @validateTable WHERE intFutOptTransactionId = @intFutOptTransactionId AND ISNULL(intCurrencyExchangeRateTypeId, 0) = 0)
+		IF EXISTS (SELECT TOP 1 '' FROM @validateTable WHERE intFutOptTransactionId = @intFutOptTransactionId AND ISNULL(intCurrencyPairId, 0) = 0)
 		BEGIN
 			SET @derivativeError += CASE WHEN @intErrorCounter > 0 THEN ', ' ELSE '' END
 			SET @derivativeError += 'Currency Pair'
