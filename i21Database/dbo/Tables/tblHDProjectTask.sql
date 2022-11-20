@@ -4,11 +4,13 @@
 	[intProjectId] [int] NOT NULL,
 	[intTicketId] [int] NOT NULL,
 	[ysnClosed] [bit] NOT NULL,
+	[intTemplateTicketId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDProjectTask] PRIMARY KEY CLUSTERED ([intProjectTaskId] ASC),
 	CONSTRAINT [UNQ_Project_Ticket] UNIQUE ([intProjectId],[intTicketId]),
     CONSTRAINT [FK_ProjectTask_Project] FOREIGN KEY ([intProjectId]) REFERENCES [dbo].[tblHDProject] ([intProjectId]) on delete cascade,
-    CONSTRAINT [FK_ProjectTask_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]) on delete cascade
+    CONSTRAINT [FK_ProjectTask_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]) on delete cascade,
+    CONSTRAINT [FK_ProjectTask_TemplateTicket] FOREIGN KEY ([intTemplateTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])
 )
 
 GO
