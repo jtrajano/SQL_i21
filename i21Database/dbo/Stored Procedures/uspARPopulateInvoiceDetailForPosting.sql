@@ -334,8 +334,8 @@ INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.[intCompanyLocationId]
 
 UPDATE tblARPostInvoiceHeader
 SET ysnIsInvoicePositive = CAST(0 AS BIT)  
-WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
-  AND strSessionId = @strSessionId
+WHERE (strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') OR strType = 'Tax Adjustment')
+AND strSessionId = @strSessionId
 
 IF EXISTS (SELECT TOP 1 1 FROM vyuARForApprovalTransction)
     BEGIN
