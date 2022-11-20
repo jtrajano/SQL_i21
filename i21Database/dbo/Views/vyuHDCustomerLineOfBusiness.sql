@@ -1,11 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuHDCustomerLineOfBusiness]
 	AS
-		select distinct
-			tblARCustomerLineOfBusiness.intCustomerLineOfBusinessId
-			,tblARCustomerLineOfBusiness.intEntityCustomerId
-			,[tblSMLineOfBusiness].*
-			,strSalesPerson = tblEMEntity.strName
-		from
-			tblARCustomerLineOfBusiness
-			inner join tblSMLineOfBusiness on tblSMLineOfBusiness.intLineOfBusinessId = tblARCustomerLineOfBusiness.intLineOfBusinessId
-			inner join tblEMEntity on tblEMEntity.intEntityId = tblSMLineOfBusiness.intEntityId
+		SELECT      intId				= intLineOfBusinessId
+				   ,intEntityId         = LineOfBusiness.intEntityId
+				   ,strEntityName       = Entity.strName
+				   ,intSalespersonId    = LineOfBusiness.intEntityId
+				   ,strSalespersonName  = Entity.strName
+				   ,intLineOfBusinessId = LineOfBusiness.intLineOfBusinessId
+				   ,strLineOfBusiness   = LineOfBusiness.strLineOfBusiness
+	FROM tblSMLineOfBusiness LineOfBusiness
+		INNER JOIN tblEMEntity Entity
+	ON Entity.intEntityId = LineOfBusiness.intEntityId
+GO
