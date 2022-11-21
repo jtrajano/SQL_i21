@@ -239,7 +239,7 @@ BEGIN
 			, @SourceType_InventoryReceipt
 			, 3 -- Delete
 			, 0.00
-		FROM #tmpTransactionLog
+		FROM #tmpPreviousSnapshot
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_InventoryReceipt
@@ -253,7 +253,7 @@ BEGIN
 			, @SourceType_InventoryTransfer 
 			, 3 -- Delete
 			, 0.00
-		FROM #tmpTransactionLog
+		FROM #tmpPreviousSnapshot
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_InventoryTransfer
@@ -266,7 +266,7 @@ BEGIN
 			, @SourceType_Invoice 
 			, 3 -- Delete
 			, 0.00
-		FROM #tmpTransactionLog
+		FROM #tmpPreviousSnapshot
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_Invoice
