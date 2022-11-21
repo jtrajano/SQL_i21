@@ -1,4 +1,6 @@
 ﻿CREATE PROCEDURE uspIPGenerateFeedXML_SAP @strType NVARCHAR(50)
+	,@limit INT = 0
+	,@offset INT = 0
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -10,6 +12,8 @@ BEGIN TRY
 	ELSE IF @strType = 'Lead Time'
 	BEGIN
 		EXEC dbo.uspIPGenerateSAPLeadTime_EK @ysnUpdateFeedStatus = 1
+			,@limit = @limit
+			,@offset = @offset
 	END
 END TRY
 
