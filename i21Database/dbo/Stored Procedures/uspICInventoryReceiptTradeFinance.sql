@@ -318,7 +318,7 @@ BEGIN
 			, strSublimit = fld.strLimitDescription
 			, dblSublimit = fld.dblLimit
 			, strBankTradeReference = r.strReferenceNo --r.strBankReferenceNo
-			, dblFinanceQty = ISNULL(contractIR.dblQty, directIR.dblQty)
+			, dblFinanceQty = openReceiveTotal.dblQty --ISNULL(contractIR.dblQty, directIR.dblQty)
 			, dblFinancedAmount = r.dblGrandTotal
 			, strBankApprovalStatus = r.strApprovalStatus
 			, dtmAppliedToTransactionDate = GETDATE()
@@ -351,46 +351,54 @@ BEGIN
 				ON fld.intBorrowingFacilityLimitDetailId = r.intSublimitTypeId
 			LEFT JOIN tblCMBankValuationRule bvr
 				ON bvr.intBankValuationRuleId = r.intOverrideFacilityValuation				
+			--OUTER APPLY (
+			--	SELECT 
+			--		dblQty = 
+			--			SUM(
+			--				CASE 
+			--					WHEN ri.intWeightUOMId IS NOT NULL THEN 
+			--						dbo.fnCalculateQtyBetweenUOM(
+			--							ri.intWeightUOMId
+			--							,stockUOM.intItemUOMId
+			--							,ri.dblNet
+			--						)
+			--					ELSE 
+			--						dbo.fnCalculateQtyBetweenUOM(
+			--							ri.intUnitMeasureId
+			--							,stockUOM.intItemUOMId
+			--							,ri.dblNet
+			--						)
+			--				END 							
+			--			)
+			--	FROM 
+			--		tblICInventoryReceiptItem ri 
+			--		LEFT JOIN tblICItemUOM stockUOM
+			--			ON stockUOM.intItemId = ri.intItemId
+			--			AND stockUOM.ysnStockUnit = 1
+			--	WHERE
+			--		ri.intInventoryReceiptId = r.intInventoryReceiptId
+			--		AND ISNULL(r.intSourceType, 0) = 0
+			--) directIR
+			--  OUTER APPLY (
+			--	SELECT 
+			--		dblQty = SUM(ri.dblOpenReceive)
+			--	FROM 
+			--		tblICInventoryReceiptItem ri 
+			--		LEFT JOIN tblICItemUOM stockUOM
+			--		ON stockUOM.intItemId = ri.intItemId
+			--		AND stockUOM.ysnStockUnit = 1
+			--	WHERE
+			--		ri.intInventoryReceiptId = r.intInventoryReceiptId
+			--		AND (r.intSourceType <> 0 OR r.intSourceType IS NULL) 
+			--  ) contractIR
 			OUTER APPLY (
-				SELECT 
-					dblQty = 
-						SUM(
-							CASE 
-								WHEN ri.intWeightUOMId IS NOT NULL THEN 
-									dbo.fnCalculateQtyBetweenUOM(
-										ri.intWeightUOMId
-										,stockUOM.intItemUOMId
-										,ri.dblNet
-									)
-								ELSE 
-									dbo.fnCalculateQtyBetweenUOM(
-										ri.intUnitMeasureId
-										,stockUOM.intItemUOMId
-										,ri.dblNet
-									)
-							END 							
-						)
-				FROM 
-					tblICInventoryReceiptItem ri 
-					LEFT JOIN tblICItemUOM stockUOM
-						ON stockUOM.intItemId = ri.intItemId
-						AND stockUOM.ysnStockUnit = 1
-				WHERE
-					ri.intInventoryReceiptId = r.intInventoryReceiptId
-					AND ISNULL(r.intSourceType, 0) = 0
-			) directIR
-		   OUTER APPLY (
 				SELECT 
 					dblQty = SUM(ri.dblOpenReceive)
 				FROM 
-					tblICInventoryReceiptItem ri 
-					LEFT JOIN tblICItemUOM stockUOM
-					ON stockUOM.intItemId = ri.intItemId
-					AND stockUOM.ysnStockUnit = 1
+					tblICInventoryReceiptItem ri 			
 				WHERE
 					ri.intInventoryReceiptId = r.intInventoryReceiptId
-					AND (r.intSourceType <> 0 OR r.intSourceType IS NULL) 
-		   ) contractIR
+		    ) openReceiveTotal
 			OUTER APPLY (
 				SELECT TOP 1 
 					ri.intContractHeaderId
@@ -487,7 +495,7 @@ BEGIN
 			, strSublimit = fld.strLimitDescription
 			, dblSublimit = fld.dblLimit
 			, strBankTradeReference = r.strReferenceNo --r.strBankReferenceNo
-			, dblFinanceQty = ISNULL(contractIR.dblQty, directIR.dblQty)
+			, dblFinanceQty = openReceiveTotal.dblQty --ISNULL(contractIR.dblQty, directIR.dblQty)
 			, dblFinancedAmount = r.dblGrandTotal
 			, strBankApprovalStatus = r.strApprovalStatus
 			, dtmAppliedToTransactionDate = GETDATE()
@@ -518,46 +526,54 @@ BEGIN
 				ON fld.intBorrowingFacilityLimitDetailId = r.intSublimitTypeId
 			LEFT JOIN tblCMBankValuationRule bvr
 				ON bvr.intBankValuationRuleId = r.intOverrideFacilityValuation				
+			--OUTER APPLY (
+			--	SELECT 
+			--		dblQty =
+			--			SUM(
+			--				CASE 
+			--					WHEN ri.intWeightUOMId IS NOT NULL THEN 
+			--						dbo.fnCalculateQtyBetweenUOM(
+			--							ri.intWeightUOMId
+			--							,stockUOM.intItemUOMId
+			--							,ri.dblNet
+			--						)
+			--					ELSE 
+			--						dbo.fnCalculateQtyBetweenUOM(
+			--							ri.intUnitMeasureId
+			--							,stockUOM.intItemUOMId
+			--							,ri.dblNet
+			--						)
+			--				END 							
+			--			)
+			--	FROM 
+			--		tblICInventoryReceiptItem ri 
+			--		LEFT JOIN tblICItemUOM stockUOM
+			--			ON stockUOM.intItemId = ri.intItemId
+			--			AND stockUOM.ysnStockUnit = 1
+			--	WHERE
+			--		ri.intInventoryReceiptId = r.intInventoryReceiptId
+			--		AND ISNULL(r.intSourceType, 0) = 0
+			--) directIR
+			 --  OUTER APPLY (
+			--	SELECT 
+			--		dblQty = SUM(ri.dblOpenReceive)
+			--	FROM 
+			--		tblICInventoryReceiptItem ri 
+			--		LEFT JOIN tblICItemUOM stockUOM
+			--		ON stockUOM.intItemId = ri.intItemId
+			--		AND stockUOM.ysnStockUnit = 1
+			--	WHERE
+			--		ri.intInventoryReceiptId = r.intInventoryReceiptId
+			--		AND (r.intSourceType <> 0 OR r.intSourceType IS NULL) 
+			--  ) contractIR
 			OUTER APPLY (
-				SELECT 
-					dblQty = 
-						SUM(
-							CASE 
-								WHEN ri.intWeightUOMId IS NOT NULL THEN 
-									dbo.fnCalculateQtyBetweenUOM(
-										ri.intWeightUOMId
-										,stockUOM.intItemUOMId
-										,ri.dblNet
-									)
-								ELSE 
-									dbo.fnCalculateQtyBetweenUOM(
-										ri.intUnitMeasureId
-										,stockUOM.intItemUOMId
-										,ri.dblNet
-									)
-							END 							
-						)
-				FROM 
-					tblICInventoryReceiptItem ri 
-					LEFT JOIN tblICItemUOM stockUOM
-						ON stockUOM.intItemId = ri.intItemId
-						AND stockUOM.ysnStockUnit = 1
-				WHERE
-					ri.intInventoryReceiptId = r.intInventoryReceiptId
-					AND ISNULL(r.intSourceType, 0) = 0
-			) directIR
-		   OUTER APPLY (
 				SELECT 
 					dblQty = SUM(ri.dblOpenReceive)
 				FROM 
-					tblICInventoryReceiptItem ri 
-					LEFT JOIN tblICItemUOM stockUOM
-					ON stockUOM.intItemId = ri.intItemId
-					AND stockUOM.ysnStockUnit = 1
+					tblICInventoryReceiptItem ri 			
 				WHERE
 					ri.intInventoryReceiptId = r.intInventoryReceiptId
-					AND (r.intSourceType <> 0 OR r.intSourceType IS NULL) 
-		   ) contractIR
+		    ) openReceiveTotal			
 			OUTER APPLY (
 				SELECT TOP 1 
 					ri.intContractHeaderId
