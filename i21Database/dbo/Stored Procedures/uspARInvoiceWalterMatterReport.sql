@@ -177,8 +177,8 @@ SELECT
 	,strRelatedType				= ARIR.strType
 	,strTransactionType			= ARI.strTransactionType
 	,strBuyer					= ISNULL(RTRIM(EMELB.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(ARI.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToState, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToCountry, ''), '')
-	,dblPercentage				= CASE WHEN ARI.ysnFromProvisional = 1 OR ARI.strType = 'Provisional' THEN ARGID.dblPercentage ELSE 0 END
-	,dblProvisionalTotal		= CASE WHEN ARI.ysnFromProvisional = 1 OR ARI.strType = 'Provisional' THEN ARGID.dblProvisionalTotal ELSE 0 END
+	,dblPercentage				= CASE WHEN ARI.ysnFromProvisional = 1 THEN ARGID.dblPercentage ELSE 0 END
+	,dblProvisionalTotal		= CASE WHEN ARI.ysnFromProvisional = 1 THEN ARGID.dblProvisionalTotal ELSE 0 END
 FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
