@@ -12,6 +12,8 @@ SELECT
     A.strVendorLotNumber,--unique
     A.intBuyingCenterLocationId, -- company id--unique
     strCompanyLocation = CL.strLocationName, -- company 
+    BC.strBuyingCenterLocation,
+    MU.strMixingUnitLocation,
     A.intStorageLocationId, --- sub location id
     strStorageLocation = D.strSubLocationName, -- sub location
     A.intStorageUnitId, --- ic location
@@ -132,6 +134,16 @@ OUTER APPLY(
     FROM tblSMCompanyLocation 
     WHERE intCompanyLocationId = A.intLocationId    
 )CL
+OUTER APPLY(
+    SELECT TOP 1 strLocationName strBuyingCenterLocation
+    FROM tblSMCompanyLocation 
+    WHERE intCompanyLocationId = A.intBuyingCenterLocationId    
+)BC
+OUTER APPLY(
+    SELECT TOP 1 strLocationName strMixingUnitLocation
+    FROM tblSMCompanyLocation 
+    WHERE intCompanyLocationId = A.intMixingUnitLocationId    
+)MU
 OUTER APPLY( 
     SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
     WHERE A.intBrokerWarehouseId = intCompanyLocationSubLocationId
