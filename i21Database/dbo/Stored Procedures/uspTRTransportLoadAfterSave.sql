@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRTransportLoadAfterSave]
 	@LoadHeaderId INT,
 	@ForDelete BIT = 0,
-	@UserId INT = NULL
+	@UserId INT = NULL,
+	@TransactionLog NVARCHAR(MAX)
 
 AS
 
@@ -179,20 +180,43 @@ BEGIN
 		[intContractDetailId] INT NULL
 	)
 
-	-- Create snapshot of Transport Loads before Save
-	SELECT strTransactionType
-		, intTransactionId
-		, intTransactionDetailId
-		, strSourceType
-		, intSourceId
-		, dblQuantity
-		, intItemId
-		, intItemUOMId
-		, intContractDetailId
+	DECLARE @hdoc int
+		, @XML XML
+
+	SET @XML = CAST(@TransactionLog AS XML)
+    
+	EXEC sp_xml_preparedocument @hdoc OUTPUT, @XML
+	SELECT *
 	INTO #tmpPreviousSnapshot
-	FROM tblTRTransactionDetailLog WITH (NOLOCK)
-	WHERE intTransactionId = @LoadHeaderId
-		AND strTransactionType = @TransactionType_TransportLoad
+	FROM OPENXML (@hdoc, '/Logs/Log' , 1)
+	WITH(
+		strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, intTransactionId INT
+		, intTransactionDetailId INT
+		, strSourceType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, intSourceId INT
+		, dblQuantity NUMERIC(18, 6)
+		, intItemId INT
+		, intItemUOMId INT
+		, intContractDetailId INT
+		)    
+    
+	EXEC sp_xml_removedocument @hdoc
+
+	---- Create snapshot of Transport Loads before Save
+	--SELECT strTransactionType
+	--	, intTransactionId
+	--	, intTransactionDetailId
+	--	, strSourceType
+	--	, intSourceId
+	--	, dblQuantity
+	--	, intItemId
+	--	, intItemUOMId
+	--	, intContractDetailId
+	--INTO #tmpPreviousSnapshot
+	--FROM #tmpTransactionLog
+	--WHERE intTransactionId = @LoadHeaderId
+	--	AND strTransactionType = @TransactionType_TransportLoad
 
 	IF (@ForDelete = 1)
 	BEGIN
@@ -215,7 +239,7 @@ BEGIN
 			, @SourceType_InventoryReceipt
 			, 3 -- Delete
 			, 0.00
-		FROM tblTRTransactionDetailLog WITH (NOLOCK)
+		FROM #tmpTransactionLog
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_InventoryReceipt
@@ -229,7 +253,7 @@ BEGIN
 			, @SourceType_InventoryTransfer 
 			, 3 -- Delete
 			, 0.00
-		FROM tblTRTransactionDetailLog WITH (NOLOCK)
+		FROM #tmpTransactionLog
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_InventoryTransfer
@@ -242,7 +266,7 @@ BEGIN
 			, @SourceType_Invoice 
 			, 3 -- Delete
 			, 0.00
-		FROM tblTRTransactionDetailLog WITH (NOLOCK)
+		FROM #tmpTransactionLog
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_Invoice
@@ -602,7 +626,9 @@ BEGIN
 		DELETE FROM @tblToProcess WHERE intKeyId = @Id
 	END
 
-	DELETE FROM tblTRTransactionDetailLog
-	WHERE intTransactionId = @LoadHeaderId
-		AND strTransactionType = @TransactionType_TransportLoad
+	--DELETE FROM #tmpTransactionLog
+	--WHERE intTransactionId = @LoadHeaderId
+	--	AND strTransactionType = @TransactionType_TransportLoad
+
+	--DROP TABLE #tmpTransactionLog
 END
