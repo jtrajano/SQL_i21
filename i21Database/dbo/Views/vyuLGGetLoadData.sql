@@ -183,7 +183,7 @@ SELECT
 	,strDispatcher = SE.strUserName
 	,strShippingInstructionNo = SI.strLoadNumber
 	,FT.strFreightTerm
-	,FT.strFobPoint
+	,strFobPoint = ISNULL(L.strFobPoint, FT.strFobPoint)
 	,CU.strCurrency
 	,CONT.strContainerType
 	,intLeadTime = ISNULL(DPort.intLeadTime, 0)

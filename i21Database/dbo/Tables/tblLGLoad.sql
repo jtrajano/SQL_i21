@@ -210,6 +210,7 @@
 [strLocationName] NVARCHAR(50) NULL,
 [intTaxLocationId] INT NULL,
 [ysnTaxLocationOverride] BIT NULL,
+[strFobPoint] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 
 [ysnProvisionalReleased] BIT NULL,
 [ysnFinalReleased] BIT NULL,
