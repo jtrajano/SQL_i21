@@ -9,7 +9,7 @@ RETURNS @tbl TABLE (
     ysnFiscalYearSetup BIT,
     strDefaultPostDate NVARCHAR(10),
     intCompanyId INT,
-    strMask NVARCHAR(20),
+    strMask NVARCHAR(40),
     strDivider NVARCHAR(5),
     intPrimaryLength INT,
     ysnAccountBuilt BIT
