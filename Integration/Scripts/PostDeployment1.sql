@@ -122,4 +122,9 @@ GO
 -- System Manager
 :r "..\dbo\Stored Procedures\uspSMImportTaxClass.sql"
 :r "..\dbo\Stored Procedures\uspSMImportTaxGroup.sql"
+
+-- Accounts Receivable
+:r "..\dbo\Stored Procedures\uspARImportPTTax.sql"
+:r "..\dbo\Stored Procedures\uspARImportPTTaxXref.sql"
+:r "..\dbo\Stored Procedures\uspARImportPTTaxExemption.sql"
 Go
