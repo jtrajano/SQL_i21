@@ -41,7 +41,7 @@ BEGIN
 	WHILE EXISTS (SELECT 1 FROM #Structure)
 	BEGIN
 		SELECT TOP 1 @strStructureName = strStructureName,@intLength = intLength , @intAccountStructureId = intAccountStructureId
-		FROM #Structure
+		FROM #Structure ORDER BY intSort
 		
 		SELECT @strCode = SUBSTRING(@strAccountId,@c, @intLength) 
 
