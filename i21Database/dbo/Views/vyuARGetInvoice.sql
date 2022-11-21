@@ -206,7 +206,7 @@ SELECT
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 	,intProfitCenter					= CLOC.intProfitCenter
-	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE.strType = 'Tax Adjustment' AND RELATEDINVOICE.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
+	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,strPrintFormat						= INV.strPrintFormat
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
@@ -336,6 +336,14 @@ LEFT JOIN
 		,ysnPosted
 	FROM tblARInvoice  WITH (NOLOCK) 
 ) RELATEDINVOICE ON RELATEDINVOICE.intInvoiceId = INV.intOriginalInvoiceId
+LEFT JOIN
+(
+	SELECT  
+		 intOriginalInvoiceId
+		,strType
+		,ysnPosted
+	FROM tblARInvoice  WITH (NOLOCK) 
+) RELATEDINVOICE2 ON RELATEDINVOICE2.intOriginalInvoiceId = INV.intInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
 LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId,0)
 LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId,0)
