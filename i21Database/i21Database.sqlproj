@@ -4789,7 +4789,6 @@
     <Build Include="dbo\User Defined Types\BankTransactionTable.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionDetailTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementPaymentActivityReport.sql" />
-    <Build Include="dbo\Tables\tblTRTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTRLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRTransportLoadAfterSave.sql" />
     <Build Include="dbo\Views\vyuCTContStsCustomerInvoice.sql" />
