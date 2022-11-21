@@ -440,11 +440,11 @@
     <None Include="dbo\Views\vyuPROriginEmployeeDeduction.sql" />
     <None Include="dbo\Views\vyuPROriginEmployeeChangeHistory.sql" />
     <None Include="dbo\Stored Procedures\uspGLSyncGLACTMST.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTaxExemption.sql" />
     <None Include="dbo\Stored Procedures\uspEMImportCustomerEFTInfo.sql" />
     <None Include="dbo\Stored Procedures\uspGLFlagOriginAccounts.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportPTTaxXref.sql" />
     <None Include="dbo\Stored Procedures\uspARImportAGTax.sql" />
     <None Include="dbo\Stored Procedures\uspARImportAGTaxXref.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportShipTo.sql" />
