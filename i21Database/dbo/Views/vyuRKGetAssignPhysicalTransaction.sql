@@ -38,8 +38,8 @@ FROM (
 			, CD.intContractStatusId
 			, CD.intPricingTypeId
 			, strPricingStatus = CASE WHEN CD.intPricingStatus = 0 THEN 'Unpriced' WHEN CD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CD.intPricingStatus = 2 THEN 'Priced' END
-			, dblLotsPriced = CASE WHEN CD.intPricingTypeId = 1 THEN (CD.dblQuantity / M.dblContractSize)  ELSE ISNULL(priceFixation.dblQuantity, 0) / M.dblContractSize END
-			, dblLotsUnpriced = CASE WHEN CD.intPricingTypeId = 1 THEN 0 ELSE ((CD.dblQuantity - ISNULL(priceFixation.dblQuantity, 0)) / M.dblContractSize) END
+			, dblLotsPriced = ISNULL(PF.dblLotsFixed, 0)
+			, dblLotsUnpriced = ISNULL(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed], 0), CD.dblNoOfLots), 0)
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
@@ -66,6 +66,7 @@ FROM (
 		) priceFixation
 		LEFT JOIN tblICItem item ON item.intItemId = CD.intItemId
 		LEFT JOIN vyuICGetCompactItem compactItem ON item.intItemId = compactItem.intItemId
+		LEFT JOIN tblCTPriceFixation PF ON CD.intContractDetailId = PF.intContractDetailId	
 		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 0
 		AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
@@ -103,8 +104,8 @@ FROM (
 			, CD.intContractStatusId
 			, CH.intPricingTypeId
 			, strPricingStatus = CASE WHEN CDD.intPricingStatus = 0 THEN 'Unpriced' WHEN CDD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CDD.intPricingStatus = 2 THEN 'Priced' END
-			, dblLotsPriced = CASE WHEN CDD.intPricingTypeId = 1 THEN (CDD.dblQuantity / M.dblContractSize)  ELSE ISNULL(priceFixation.dblQuantity, 0) / M.dblContractSize END
-			, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId = 1 THEN 0 ELSE ((CDD.dblQuantity - ISNULL(priceFixation.dblQuantity, 0)) / M.dblContractSize) END
+			, dblLotsPriced = ISNULL(PF.dblLotsFixed, 0)
+			, dblLotsUnpriced = ISNULL(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed], 0), CDD.dblNoOfLots), 0)
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
@@ -132,6 +133,7 @@ FROM (
 		) priceFixation
 		LEFT JOIN tblICItem item ON item.intItemId = CDD.intItemId
 		LEFT JOIN vyuICGetCompactItem compactItem ON item.intItemId = compactItem.intItemId
+		LEFT JOIN tblCTPriceFixation PF ON CDD.intContractDetailId = PF.intContractDetailId	
 		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 1
 			AND CH.intContractHeaderId <> (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail CCD WHERE CCD.intContractStatusId <> 3)
 			AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
