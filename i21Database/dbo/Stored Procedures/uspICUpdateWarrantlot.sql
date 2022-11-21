@@ -19,7 +19,7 @@ BEGIN
 	DECLARE @strTradeFinanceNumber NVARCHAR(100) = ''
 	DECLARE @intOldWarrantStatus INT
 	DECLARE @intOldTradeFinanceId INT
-
+	DECLARE @strTransactionId AS NVARCHAR(50) 
 
 	--GEt  Old data
 	SELECT TOP 1
@@ -28,6 +28,7 @@ BEGIN
 		,@strOldTradeFinanceNumber = C.strTradeFinanceNumber
 		,@intOldWarrantStatus = A.intWarrantStatus
 		,@intOldTradeFinanceId = A.intTradeFinanceId 
+		,@strTransactionId = A.strTransactionId
 	FROM tblICLot A
 	LEFT JOIN tblICWarrantStatus B
 		ON A.intWarrantStatus  = B.intWarrantStatus
@@ -286,6 +287,132 @@ BEGIN
 			,@toValue			= @strTradeFinanceNumber		-- New Value
 			,@details			= '';
 	END
+
+	--Trade FInance Logs for Warrant Status
+	IF(@strWarrantStatus <> @strOldWarrantStatus )
+	BEGIN
+		DECLARE @TRFLog AS TRFLog
+		DECLARE @strAction AS NVARCHAR(100) 
+
+		IF(@strClearField = 'Warrant Status' OR @strClearField = 'All')
+		BEGIN 
+			SET @strAction = 'Warrant Status is changed to blank.'
+		END 
+		ELSE
+		BEGIN 
+			SET @strAction = 'Warrant Status ' + @strWarrantStatus 
+		END
+
+		INSERT INTO @TRFLog (
+			strAction 
+			, strTransactionType 
+			, intTradeFinanceTransactionId 
+			, strTradeFinanceTransaction 
+			, intTransactionHeaderId 
+			, intTransactionDetailId 
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intBankTransactionId 
+			, strBankTransactionId 
+			, intBankId 
+			, strBank 
+			, intBankAccountId 
+			, strBankAccount 
+			, intBorrowingFacilityId 
+			, strBorrowingFacility 
+			, strBorrowingFacilityBankRefNo 
+			, dblTransactionAmountAllocated 
+			, dblTransactionAmountActual 
+			, intLimitId 
+			, strLimit 
+			, dblLimit 
+			, intSublimitId 
+			, strSublimit 
+			, dblSublimit 
+			, strBankTradeReference 
+			, dblFinanceQty 
+			, dblFinancedAmount 
+			, strBankApprovalStatus 
+			, dtmAppliedToTransactionDate 
+			, intStatusId 
+			, strWarrantId 
+			, intWarrantStatusId  
+			, intUserId 
+			, intConcurrencyId 
+			, intContractHeaderId 
+			, intContractDetailId 
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
+		)
+		SELECT 
+			strAction = @strAction
+			, strTransactionType = 'Search Warrant Details' 
+			, intTradeFinanceTransactionId = tf.intTradeFinanceId
+			, strTradeFinanceTransaction = tf.strTradeFinanceNumber
+			, intTransactionHeaderId = NULL 
+			, intTransactionDetailId = NULL 
+			, strTransactionNumber = l.strTransactionId
+			, dtmTransactionDate = NULL 
+			, intBankTransactionId = NULL 
+			, strBankTransactionId = NULL 
+			, intBankId = tf.intBankId
+			, strBank = ba.strBankName
+			, intBankAccountId = ba.intBankAccountId
+			, strBankAccount  = ba.strBankAccountNo
+			, intBorrowingFacilityId = tf.intBorrowingFacilityId
+			, strBorrowingFacility = fa.strBorrowingFacilityId
+			, strBorrowingFacilityBankRefNo = tf.strRefNo --r.strBankReferenceNo
+			, dblTransactionAmountAllocated = ROUND(dbo.fnMultiply(l.dblQty, l.dblLastCost), 2) --r.dblGrandTotal 
+			, dblTransactionAmountActual = ROUND(dbo.fnMultiply(l.dblQty, l.dblLastCost), 2) --r.dblGrandTotal
+			--, intLoanLimitId 
+			--, strLoanLimitNumber 
+			--, strLoanLimitType 
+			, intLimitId = tf.intLimitTypeId
+			, strLimit = fl.strBorrowingFacilityLimit
+			, dblLimit = fl.dblLimit
+			, intSublimitId = tf.intSublimitTypeId
+			, strSublimit = fld.strLimitDescription
+			, dblSublimit = fld.dblLimit
+			, strBankTradeReference = tf.strRefNo --r.strReferenceNo --r.strBankReferenceNo
+			, dblFinanceQty = l.dblQty --openReceiveTotal.dblQty --ISNULL(contractIR.dblQty, directIR.dblQty)
+			, dblFinancedAmount = ROUND(dbo.fnMultiply(l.dblQty, l.dblLastCost), 2) --r.dblGrandTotal
+			, strBankApprovalStatus = tf.strApprovalStatus
+			, dtmAppliedToTransactionDate = GETDATE()
+			, intStatusId = 1
+					--CASE 
+					--	WHEN tf.intStatusId = 1 THEN 'Active' 
+					--	WHEN tf.intStatusId = 2 THEN 'Completed'
+					--	WHEN tf.intStatusId = 0 THEN 'Cancelled'							
+					--END
+			, strWarrantId = @strWarrantStatus
+			, intWarrantStatusId = @intWarrantStatus
+			, intUserId = @intUserId 
+			, intConcurrencyId = 1
+			, intContractHeaderId = l.intContractHeaderId
+			, intContractDetailId = l.intContractDetailId
+			, intOverrideFacilityValuation = bvr.intBankValuationRuleId
+			, strOverrideFacilityValuation = bvr.strBankValuationRule
+		FROM 
+			tblICLot l INNER JOIN tblTRFTradeFinance tf
+				ON l.intTradeFinanceId = tf.intTradeFinanceId
+			LEFT JOIN vyuCMBankAccount ba 
+				ON ba.intBankAccountId = tf.intBankAccountId
+			LEFT JOIN tblCMBorrowingFacility fa
+				ON fa.intBorrowingFacilityId = tf.intBorrowingFacilityId
+			LEFT JOIN tblCMBorrowingFacilityLimit fl 
+				ON fl.intBorrowingFacilityLimitId = tf.intLimitTypeId
+			LEFT JOIN tblCMBorrowingFacilityLimitDetail fld
+				ON fld.intBorrowingFacilityLimitDetailId = tf.intSublimitTypeId
+			LEFT JOIN tblCMBankValuationRule bvr
+				ON bvr.intBankValuationRuleId = tf.intOverrideFacilityValuation
+		WHERE
+			l.intLotId = @intLotId
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM @TRFLog) 
+	BEGIN 
+		EXEC uspTRFLogTradeFinance @TradeFinanceLogs = @TRFLog;
+	END 
 
 	---- Update IR trade finance
 	-- IF OBJECT_ID('tempdb..#tmpReceiptList') IS NOT NULL  					
