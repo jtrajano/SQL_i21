@@ -639,13 +639,13 @@ BEGIN
 				, cv.intFutureMarketId
 				, dtmFutureMonthsDate
 				, ysnExpired
-				, dblFixedLots = ISNULL((SELECT dblNoOfLots = SUM(dblLotsFixed)
+				, dblFixedLots = (ISNULL((SELECT dblNoOfLots = SUM(dblLotsFixed)
 										FROM tblCTPriceFixation pf
-										WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId), 0)
-				, dblFixedQty = ISNULL((SELECT dblQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, SUM(pd.dblQuantity))
+										WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId), 0) * dblDeltaPercent) / 100
+				, dblFixedQty = (ISNULL((SELECT dblQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, SUM(pd.dblQuantity))
 										FROM tblCTPriceFixation pf
 										JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
-										WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId), 0)
+										WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = cv.intContractDetailId), 0) * dblDeltaPercent) / 100
 				, intCommodityUnitMeasureId
 				, dblRatioContractSize
 				, strProductType
