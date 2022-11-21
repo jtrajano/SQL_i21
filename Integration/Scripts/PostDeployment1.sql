@@ -124,7 +124,10 @@ GO
 :r "..\dbo\Stored Procedures\uspSMImportTaxGroup.sql"
 
 -- Accounts Receivable
+GO
 :r "..\dbo\Stored Procedures\uspARImportPTTax.sql"
+GO
 :r "..\dbo\Stored Procedures\uspARImportPTTaxXref.sql"
+GO
 :r "..\dbo\Stored Procedures\uspARImportPTTaxExemption.sql"
 Go
