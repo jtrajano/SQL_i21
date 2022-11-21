@@ -34,6 +34,11 @@
 				INSERT INTO tblEMEntityType (intEntityId, strType, intConcurrencyId)
 				SELECT @EntityId, 'Prospect', 0		
 			END
+
+			IF EXISTS (SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
+			BEGIN
+				UPDATE tblEMEntityLocation SET intFreightTermId = (SELECT TOP 1 intFreightTermId FROM tblCRMSetting) WHERE intEntityId = @EntityId
+			END
 		
 			SET @OutputMessage = 'success'
 		END
