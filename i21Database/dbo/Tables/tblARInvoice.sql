@@ -164,7 +164,7 @@
 	[strTaxPoint]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[strSourcedFrom]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
 	[strPrintFormat]					NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NOT NULL	DEFAULT (''),
-	[dblPercentage]						NUMERIC(18, 6)									NOT NULL	DEFAULT ((100)),
+	[dblPercentage]						NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
 	[dblProvisionalTotal]				NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
