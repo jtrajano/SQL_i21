@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspAPRpt1096]
+﻿CREATE PROCEDURE [dbo].[uspAPRpt1096]
 	@year INT
 	,@form1099 INT = 0
 	,@vendorFrom NVARCHAR(100)  = NULL
