@@ -1151,6 +1151,8 @@
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByModuleAndLOB.sql" />
     <Build Include="dbo\Views\vyuHDLineOfBusiness.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByProject.sql" />
+    <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
+    <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10944,6 +10946,7 @@
     <Build Include="dbo\Stored Procedures\uspRKFixDerivativeCommonIssues.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
 <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGetRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
