@@ -3901,7 +3901,7 @@ BEGIN TRY
 				, strPriOrNotPriOrParPriced
 				, intPricingTypeId
 				, strPricingType
-				, dblContractRatio = ISNULL(dblContractRatio, 0)
+				, dblContractRatio = ISNULL(dblCalculatedContractRatio, 0)
 				--Contract Basis
 				, dblContractBasis = (CASE WHEN strPricingType ! = 'HTA'
 											THEN (CASE WHEN @ysnCanadianCustomer = 1
@@ -3933,12 +3933,12 @@ BEGIN TRY
 				, dblAdjustedContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 
 													THEN (CASE WHEN intCurrencyId = @intCurrencyId
 															-- CONTRACT CURRENCY = M2M CURRENCY
-															THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0)
-															ELSE  (ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0))
+															THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0)
+															ELSE  (ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0))
 																			* dblFinalRate
 															END
 														)
-												ELSE (ISNULL(dblContractBasis, 0) * dblFinalRate) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0) END)
+												ELSE (ISNULL(dblContractBasis, 0) * dblFinalRate) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0) END)
 				, dblCashPrice
 				--Market Price
 				, dblMarketPrice = CASE WHEN @ysnCanadianCustomer = 1 
@@ -3957,12 +3957,12 @@ BEGIN TRY
 				, dblContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 
 											THEN (CASE WHEN intCurrencyId = @intCurrencyId
 													-- CONTRACT CURRENCY = M2M CURRENCY
-													THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0)
-													ELSE  (ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0))
+													THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0)
+													ELSE  (ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0))
 																	* dblFinalRate
 													END
 												)
-										ELSE (ISNULL(dblContractBasis, 0) * dblFinalRate) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblContractRatio, 1)) + ISNULL(dblCash, 0) END)
+										ELSE (ISNULL(dblContractBasis, 0) * dblFinalRate) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) END)
 				, intQuantityUOMId
 				, intCommodityUnitMeasureId
 				, intPriceUOMId
@@ -4014,6 +4014,7 @@ BEGIN TRY
 																			ELSE ISNULL(dblFutures, 0) * dblFinalRate END 
 																	ELSE  ISNULL(dblFutures, 0) * dblFinalRate END
 															END), 0)
+					, dblCalculatedContractRatio = CASE WHEN dblContractRatio IS NOT NULL THEN dblContractRatio * dblFinalRate ELSE 1 END
 				FROM (
 					SELECT #Temp.*
 						-- IF RATE TYPE IS CONTRACT = CHECK CONTRACT FOREX. IF NO VALUE, USE SYSTEM WIDE FOREX INSTEAD
