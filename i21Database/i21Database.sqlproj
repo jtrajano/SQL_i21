@@ -1376,6 +1376,8 @@
     <Build Include="dbo\Tables\tblMFProductionOrderError.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrder_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPProductionOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByModuleAndLOB.sql" />
+    <Build Include="dbo\Views\vyuHDLineOfBusiness.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
