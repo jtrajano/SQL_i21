@@ -58,14 +58,13 @@ RETURNS TABLE AS RETURN
 		,[strBillOfLading]					=	NULL
 		,[ysnReturn]						=	0
 		,[intFreightTermId]					=	A.intFreightTermId
-	FROM tblPOPurchase A
-	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+	FROM tblPOPurchaseDetail B
+	INNER JOIN tblPOPurchase A ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN @poDetailIds ids ON B.intPurchaseDetailId = ids.intId
 	INNER JOIN tblSMCurrency cur ON A.intCurrencyId = cur.intCurrencyID
 	LEFT JOIN dbo.tblSMCurrency subCurrency ON subCurrency.intMainCurrencyId = A.intCurrencyId AND subCurrency.ysnSubCurrency = 1
 	LEFT JOIN tblCTContractDetail ctd ON B.intContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblICItemLocation itemLoc ON B.intItemId = itemLoc.intItemId AND itemLoc.intLocationId = A.intShipToId
-	LEFT JOIN tblICItem itm ON B.intItemId = itm.intItemId
-	WHERE (dbo.fnIsStockTrackingItem(B.intItemId) = 0 OR B.intItemId IS NULL) AND itm.strType != 'Comment'
+	LEFT JOIN tblICItem itm ON B.intItemId = itm.intItemId AND (dbo.fnIsStockTrackingItem(B.intItemId) = 0 OR B.intItemId IS NULL) AND itm.strType != 'Comment'
 	
 )
