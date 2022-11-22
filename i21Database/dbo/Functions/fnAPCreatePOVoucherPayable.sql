@@ -58,8 +58,8 @@ RETURNS TABLE AS RETURN
 		,[strBillOfLading]					=	NULL
 		,[ysnReturn]						=	0
 		,[intFreightTermId]					=	A.intFreightTermId
-	FROM tblPOPurchase A
-	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+	FROM tblPOPurchaseDetail B
+	INNER JOIN tblPOPurchase A ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN @poDetailIds ids ON B.intPurchaseDetailId = ids.intId
 	INNER JOIN tblSMCurrency cur ON A.intCurrencyId = cur.intCurrencyID
 	LEFT JOIN dbo.tblSMCurrency subCurrency ON subCurrency.intMainCurrencyId = A.intCurrencyId AND subCurrency.ysnSubCurrency = 1
