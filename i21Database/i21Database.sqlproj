@@ -1179,6 +1179,8 @@
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDateF360.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByModuleAndLOB.sql" />
+    <Build Include="dbo\Views\vyuHDLineOfBusiness.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
