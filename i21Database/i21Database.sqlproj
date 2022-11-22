@@ -1236,6 +1236,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
+    <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
+    <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11076,6 +11078,7 @@
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGetRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
