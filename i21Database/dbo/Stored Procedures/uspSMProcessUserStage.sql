@@ -166,6 +166,8 @@ BEGIN TRY
 			SET @TransactionType = 'Updated'
 		END
 
+
+		--------------------------------------------------VALIDATIONS--------------------------------------------------
 		IF (ISNULL(@Username, '') = '')
 		BEGIN
 			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Name is required. '
@@ -227,6 +229,18 @@ BEGIN TRY
 		BEGIN
 			SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Active is required. '
 		END
+
+		IF OBJECT_ID('tempdb..#tmpUserLocationRolesForChecking') IS NOT NULL
+			DROP TABLE #tmpUserLocationRolesForChecking
+
+		IF OBJECT_ID('tempdb..#tmpUserLocationRolesForArchive') IS NOT NULL
+			DROP TABLE #tmpUserLocationRolesForArchive
+
+		IF OBJECT_ID('tempdb..#tmpUserLocationRolesForInsert') IS NOT NULL
+			DROP TABLE #tmpUserLocationRolesForInsert
+
+		IF OBJECT_ID('tempdb..#tmpUserLocationRolesForError') IS NOT NULL
+			DROP TABLE #tmpUserLocationRolesForError
 
 		CREATE TABLE #tmpUserLocationRolesForChecking (
 			intUserStageDetailId INT,
@@ -385,6 +399,7 @@ BEGIN TRY
 			DELETE FROM tblSMUserDetailStage WHERE intUserStageId = @UserStageId
 		END
 		ELSE
+		--------------------------------------------------START INSERT/UPDATE/DELETE--------------------------------------------------
 		BEGIN
 			DECLARE		@AuditLogEntityId INT = 0
 
@@ -399,6 +414,7 @@ BEGIN TRY
 				WHERE		ysnAdmin = 1
 			END
 			
+			-- CREATE ENTITY
 			IF (ISNULL(@ExistingUserEntityId, 0) = 0)
 			BEGIN
 				SET @newEntityNo = ''
@@ -762,6 +778,7 @@ BEGIN TRY
 					@AuditLogParam  = @SingleAuditLogParam  
 			END
 			ELSE
+			-- UPDATE ENTITY
 			BEGIN
 				SET		@ExistingContactEntityId = 0
 				SET		@ExistingEntityLocationId = 0
@@ -1200,6 +1217,7 @@ BEGIN TRY
 		END
 
 		DELETE TOP (1) FROM #tmpUsersStageList
+		SET @ErrorMessage = ''
 	END
 
 	BEGIN TRY

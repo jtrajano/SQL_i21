@@ -1592,16 +1592,15 @@ BEGIN
 	  AND I.strSessionId = @strSessionId
 
 	DECLARE @strItemBlankStorageLocation NVARCHAR(MAX) = NULL;
-
+ 
 	SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
-	FROM 					
-		#ARPostInvoiceDetail I
-	WHERE ISNULL(I.intStorageLocationId, 0) > 0
-	AND	ISNULL(I.intSubLocationId, 0) = 0
-
+	FROM tblARPostInvoiceDetail I
+	WHERE ISNULL(I.intStorageLocationId, 0) = 0
+	AND ISNULL(I.intSubLocationId, 0) > 0
+ 
 	IF (@strItemBlankStorageLocation IS NOT NULL)
 	BEGIN
-		INSERT INTO #ARInvalidInvoiceData
+		INSERT INTO tblARPostInvalidInvoiceData
 			([intInvoiceId]
 			,[strInvoiceNumber]
 			,[strTransactionType]
@@ -1609,19 +1608,17 @@ BEGIN
 			,[intItemId]
 			,[strBatchId]
 			,[strPostingError])
-		--CASH REFUND AMOUNT IS NOT EQUAL TO PREPAIDS
 		SELECT
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-			,[intItemId]			= I.[intItemId]
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
-		FROM 					
-			#ARPostInvoiceDetail I
+			 [intInvoiceId]   = I.[intInvoiceId]
+			,[strInvoiceNumber]  = I.[strInvoiceNumber]  
+			,[strTransactionType] = I.[strTransactionType]
+			,[intInvoiceDetailId] = I.[intInvoiceDetailId]
+			,[intItemId]   = I.[intItemId]
+			,[strBatchId]   = I.[strBatchId]
+			,[strPostingError]  = 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
+		FROM tblARPostInvoiceDetail I
 	END
-	
+
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]

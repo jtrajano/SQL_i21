@@ -121,9 +121,12 @@ BEGIN
 									UPDATE cashier
 										SET cashier.dblTotalPaymentOption = (	
 																SELECT SUM(CAST(ISNULL(dblMiscellaneousSummaryAmount, 0) AS DECIMAL(18, 6)))
-																   FROM @UDT_CSH
+																   FROM @UDT_CSH csh
 																	WHERE ISNULL(strMiscellaneousSummaryCode, '')  = '19' 
 																	AND ISNULL(strMiscellaneousSummarySubCode, '') = '1'
+																	AND strMiscellaneousSummarySubCodeModifier COLLATE Latin1_General_CI_AS IN (SELECT ISNULL(strRegisterMop, '') 
+																													FROM tblSTPaymentOption
+																													WHERE intStoreId = @intStoreId)
 																	AND strCashierId = @strCashierId
 															   )
 									FROM tblSTCheckoutCashiers cashier
