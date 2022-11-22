@@ -158,7 +158,7 @@ BEGIN
 					AND CAST(psh.dtmMatchDate AS DATE) >= @dtmFromDate 
 					AND CAST(psh.dtmMatchDate AS DATE) <= @dtmToDate
 					AND psh.strType = 'Realize'
-					AND ISNULL(ot.ysnExpired, 0) = ISNULL(@ysnExpired, ISNULL(ot.ysnExpired, 0))
+					AND ISNULL(ot.ysnExpired,0) = case when ISNULL(@ysnExpired,0)= 1 then ISNULL(ot.ysnExpired,0) else @ysnExpired end
 					AND ot.intInstrumentTypeId = 1
 					AND ISNULL(ot.intSelectedInstrumentTypeId, 0) = ISNULL(@intSelectedInstrumentTypeId, ISNULL(ot.intSelectedInstrumentTypeId, 0))
 			) t
