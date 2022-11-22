@@ -44,7 +44,8 @@ BEGIN
 	BEGIN 
 		INSERT INTO @AllocatedContracts (intContractHeaderId,strContractNumber)
 		SELECT DISTINCT B.intContractHeaderId,B.strContractNumber FROM vyuLGAllocationStatus A
-		INNER JOIN tblCTContractHeader B ON A.strPurchaseContractNumber = B.strContractNumber;
+		INNER JOIN tblCTContractHeader B ON A.strPurchaseContractNumber = B.strContractNumber
+		WHERE strAllocationStatus IN( 'Unallocated','Reserved', 'Partially Allocated','Allocated');
 	END
 	ELSE
 	BEGIN 
@@ -121,7 +122,7 @@ BEGIN
 		  ,intSortId 
 	FROM
 	(
-	SELECT
+	SELECT DISTINCT
 		 CTD.intContractDetailId
 		   ,CH.intCommodityId
 		   ,0 AS intLoadId
@@ -131,7 +132,7 @@ BEGIN
 		  ,strCategory = 'Sold'
 		  ,strStatus =  'Picked w/ Allocation'
 		  ,strShipmentStatus = ''--ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
-		  ,strReferencePrimary = PLH.strPickLotNumber
+		  ,strReferencePrimary = PLD2.strAllocationDetailRefNo
 		  ,strReference = PLH.strPickLotNumber
 		  ,dblQuantity = -ISNULL(PLD2.dblPAllocatedQty,PLD.dblLotPickedQty)
 		  ,strPacking = UM.strUnitMeasure
@@ -209,7 +210,7 @@ BEGIN
 	LEFT JOIN tblSMCompanyLocationSubLocation CSL  WITH (NOLOCK) ON CSL.intCompanyLocationSubLocationId = CTD.intSubLocationId
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CTD.intContractDetailId) LD
 	OUTER APPLY tblCTCompanyPreference	CP  
-	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.intAllocationHeaderId = AH.intAllocationHeaderId OR LGAS.strPurchaseContractNumber = CH.strContractNumber  
+	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.strPurchaseContractNumber = CH.strContractNumber  AND LGAS.intContractDetailId = CTD.intContractDetailId 
 	LEFT JOIN tblLGPickLotDetail		PLD  WITH (NOLOCK)ON PLD.intAllocationDetailId = AH.intAllocationHeaderId
 	LEFT JOIN tblLGPickLotHeader		PLH  WITH (NOLOCK)ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 	LEFT JOIN vyuLGShipmentOpenAllocationDetails PLD2  WITH (NOLOCK)ON PLD2.intPContractDetailId = CTD.intContractDetailId
@@ -696,7 +697,8 @@ BEGIN
 							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Shipping%' THEN 'In Transit' 
 							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Transit%' THEN  'In Transit' 
 							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Scheduled%' THEN  'In Transit' 
-						 ELSE '' END)
+							    WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Received%' THEN  'Sold' 
+						 ELSE 'Purchased' END)
 		  ,strStatus =  (CASE 		
 							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN 'Open' 
 							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Scheduled' AND ISNULL(LGS.strShipmentType,'Shipment') = 'Shipment' THEN 'Shipment'
@@ -900,7 +902,7 @@ BEGIN
 							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
 							  WHEN LGAS.strAllocationStatus = 'Allocated' THEN  LGAS.dblAllocatedQuantity - CTD.dblQuantity --ALLOCATED QTY
 							  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  TQ.dblTotalQty-- PARTIALLY ALLOCATED QTY
-							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN TQ.dblTotalQty 		--SHIPPED LS QTY=
+							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN CTD.dblQuantity - TAQ.dblTotalAllocatedQuantity --SHIPPED LS QTY AND IR QTY
 						 ELSE CTD.dblQuantity  END --OPEN CT QTY 
 		,strPacking = UM.strUnitMeasure
 		,dblOfferCost = NULL		
@@ -989,11 +991,10 @@ BEGIN
 		GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
 	) TQ
 	OUTER APPLY(
-		SELECT SUM(CTD2.dblQuantity) dblTotalQty
-		FROM tblCTContractDetail CTD2
-		WHERE CTD2.intContractHeaderId = CTD.intContractHeaderId
-		GROUP BY dblQuantity
-	) CTQ
+		SELECT SUM(dblAllocatedQuantity) + SUM(dblReservedQuantity) as dblTotalAllocatedQuantity 
+		from vyuLGAllocationStatus 
+		where strPurchaseContractNumber = CH.strContractNumber
+	) TAQ
 	WHERE
 	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
 	--AND CH.intPositionId = 1 --ALL SHIPMENT CONTRACT ONLY
