@@ -32,7 +32,7 @@ SELECT
 ,dblRateAmountFrom = BAF.dblRate
 ,dblRateAmountTo = BAT.dblRate
 ,dblCrossRate =ROUND(dblAmountForeignTo/dblAmountForeignFrom,6)
-,dblReverseRate= Round( 1/dblCrossRate, 6)
+,dblReverseRate= Round(dblAmountForeignFrom/dblAmountForeignTo, 6)
 ,dblAmountForeignFrom = ROUND(dblAmountForeignFrom, 2)
 ,dblAmountForeignTo = ROUND(dblAmountForeignTo, 2)
 ,dblAmountFrom = ROUND(dblAmountForeignFrom * BAF.dblRate, 2)
