@@ -1175,6 +1175,8 @@
     <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
     <Build Include="dbo\Stored Procedures\uspSTInsertRequiredXMLFileConfigForConsignment.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
+    <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
+    <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10970,6 +10972,7 @@
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateStartDate.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGetRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
