@@ -2024,7 +2024,8 @@ BEGIN TRY
 														THEN dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 														ELSE ISNULL(tmp.strPeriodTo, '')
 														END
-					AND tmp.strContractInventory = 'Contract' ) basisDetail
+					AND tmp.strContractInventory = 'Contract' 
+				) basisDetail
 			LEFT JOIN tblCTContractHeader cth
 				ON cd.intContractHeaderId = cth.intContractHeaderId
 			OUTER APPLY (
