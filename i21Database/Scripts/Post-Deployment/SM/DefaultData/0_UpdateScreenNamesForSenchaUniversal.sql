@@ -186,6 +186,50 @@ WHERE TSMM.strType = 'Screen'
 PRINT '*** End Updating strCommand on tblSMMasterMenu for GCE and SM ***'
 GO
 
+
+PRINT '*** Start Updating strCommand on tblSMScreen for GCE and SM ***'
+GO
+
+UPDATE
+     TSS
+SET
+     TSS.strNamespace = CASE WHEN (CHARINDEX('i21', TSS.strNamespace) > 0)
+                              THEN REPLACE(TSS.strNamespace, 'i21', 'SystemManager')
+                              ELSE REPLACE(TSS.strNamespace, 'GlobalComponentEngine', 'SystemManager') END
+FROM  dbo.tblSMScreen AS TSS
+WHERE TSS.strNamespace LIKE '%i21%'
+     OR TSS.strNamespace LIKE '%GlobalComponentEngine%'
+
+PRINT '*** End Updating strCommand on tblSMScreen for GCE and SM ***'
+GO
+
+PRINT '*** Start Updating strCommand on tblSMMasterMenu for Reports ***'
+GO
+
+UPDATE
+     TSMM
+SET
+     TSMM.strCommand = REPLACE(TSMM.strCommand, 'Reporting.view', 'Reports.view')
+FROM  dbo.tblSMMasterMenu AS TSMM
+WHERE TSMM.strType = 'Screen'
+     AND TSMM.strCommand LIKE '%Reporting.view%'
+
+PRINT '*** End Updating strCommand on tblSMMasterMenu for Reports ***'
+GO
+
+PRINT '*** Start Updating strCommand on tblSMScreen for Reports ***'
+GO
+
+UPDATE
+     TSS
+SET
+     TSS.strNamespace = REPLACE(TSS.strNamespace, 'Reporting.view', 'Reports.view')
+FROM  dbo.tblSMScreen AS TSS
+WHERE TSS.strNamespace LIKE '%Reporting.view%'
+
+PRINT '*** End Updating strCommand on tblSMScreen for Reports ***'
+GO
+
 PRINT '*** Start Updating strCommand on tblSMScreen for GCE and SM ***'
 GO
 
