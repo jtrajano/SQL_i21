@@ -57,7 +57,7 @@ BEGIN
 
 		-- ================================================================================================================== 
 		-- Get Error logs. Check Register XML that is not configured in i21
-		-- Compare <intFuelGradeID> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
+		-- Compare <strFuelGradeId> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
 		-- ------------------------------------------------------------------------------------------------------------------ 
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
@@ -72,21 +72,21 @@ BEGIN
 			'NO MATCHING TAG' as strErrorType
 			, 'No Matching Fuel Grade in Inventory' as strErrorMessage
 			, 'FuelGradeId' as strRegisterTag
-			, ISNULL(Chk.intFuelGradeID, '') AS strRegisterTagValue
+			, ISNULL(Chk.strFuelGradeId, '') AS strRegisterTagValue
 			, @intCheckoutId
 			, 1
 		FROM @UDT_FGM Chk
-		WHERE ISNULL(Chk.intFuelGradeID, '') NOT IN
+		WHERE ISNULL(Chk.strFuelGradeId, '') NOT IN
 		(
 			SELECT DISTINCT 
 				tbl.strXmlRegisterFuelGradeID
 			FROM
 			(
 				SELECT DISTINCT
-					Chk.intFuelGradeID AS strXmlRegisterFuelGradeID
+					Chk.strFuelGradeId AS strXmlRegisterFuelGradeID
 				FROM @UDT_FGM Chk
 				JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.intFuelGradeID, '')  IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT   IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 				JOIN dbo.tblICItem I 
 					ON I.intItemId = IL.intItemId
 				JOIN dbo.tblICItemUOM UOM 
@@ -96,10 +96,10 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-				AND ISNULL(Chk.intFuelGradeID, '') != ''
+				AND ISNULL(Chk.strFuelGradeId, '') != ''
 			) AS tbl
 		)
-		AND ISNULL(Chk.intFuelGradeID, '') != ''
+		AND ISNULL(Chk.strFuelGradeId, '') != ''
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
@@ -139,7 +139,7 @@ BEGIN
 					, [intConcurrencyId]			= 0
 				 FROM @UDT_FGM Chk
 				 JOIN dbo.tblICItemLocation IL 
-						ON ISNULL(Chk.intFuelGradeID, '') IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT  IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 					AND Chk.dblFuelGradeSalesAmount <> '0'
 				 --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
 					--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
@@ -181,7 +181,7 @@ BEGIN
 						ON Item.intItemId = IL.intItemId
 						AND ST.intCompanyLocationId = IL.intLocationId
 					INNER JOIN @UDT_FGM Chk
-						ON ISNULL(Chk.intFuelGradeID, '') IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT  IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 						AND Chk.dblFuelGradeSalesAmount <> '0'
 					WHERE CPT.intCheckoutId = @intCheckoutId
 
