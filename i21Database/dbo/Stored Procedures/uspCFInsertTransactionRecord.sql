@@ -1476,13 +1476,13 @@ BEGIN
 			BEGIN
 				SET @ysnInvalid = 1
 			END
-			ELSE
-			BEGIN
-				IF(@ysnIgnoreVehicleError = 0)
-				BEGIN
-					SET @ysnInvalid = 1
-				END
-			END
+			-- ELSE
+			-- BEGIN
+			-- 	IF(@ysnIgnoreVehicleError = 0)
+			-- 	BEGIN
+			-- 		SET @ysnInvalid = 1
+			-- 	END
+			-- END
 		END
 		ELSE
 		BEGIN

@@ -24,6 +24,7 @@
 	[intCommodityStockUomId] INT NULL,
 	[intCreatedUserId] INT NULL,
 	[intBillId] INT NULL,
+	[intInvoiceId] INT NULL,
 	[dtmCreated] DATETIME NULL,
 	[intParentSettleStorageId] INT NULL,
 	[intItemUOMId] INT NULL,
@@ -33,7 +34,8 @@
 	CONSTRAINT [FK_tblGRSettleStorage_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
 	CONSTRAINT [FK_tblGRSettleStorage_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
-	CONSTRAINT [FK_tblGRSettleStorage_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblGRSettleStorage_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblGRSettleStorage_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])
 )
 
 GO

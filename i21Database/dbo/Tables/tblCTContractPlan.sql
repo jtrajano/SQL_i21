@@ -32,6 +32,7 @@
 	[intContainerTypeId] INT NULL,
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strReference] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strContractBase] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 
 	CONSTRAINT [PK_tblCTContractPlan_intContractPlanId] PRIMARY KEY CLUSTERED ([intContractPlanId] ASC),
 	CONSTRAINT [FK_tblCTContractPlan_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

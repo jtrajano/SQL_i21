@@ -302,13 +302,24 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 		  
 SET @NewInvoiceId = @NewId		                 
       
-	--AUDIT LOG
-	DECLARE @strInvoiceId NVARCHAR(50) = ''
-	SELECT @strInvoiceId = strTransactionNumber   FROM tblARPayment  RCV
-	INNER JOIN tblARPaymentDetail RCVD
-	ON RCV.intPaymentId = RCVD.intPaymentId
-	WHERE RCV.intPaymentId =  @PaymentId
+--AUDIT LOG
+DECLARE @strInvoiceId NVARCHAR(50) = ''
+SELECT @strInvoiceId = strTransactionNumber   FROM tblARPayment  RCV
+INNER JOIN tblARPaymentDetail RCVD
+ON RCV.intPaymentId = RCVD.intPaymentId
+WHERE RCV.intPaymentId =  @PaymentId
 
+--UPDATE ACCOUNTING PERIOD
+UPDATE ARI
+SET intPeriodId = GL.intGLFiscalYearPeriodId
+FROM tblARInvoice ARI 
+CROSS APPLY (
+	SELECT TOP 1 P.intGLFiscalYearPeriodId 
+	FROM tblGLFiscalYearPeriod P
+	WHERE ARI.dtmPostDate BETWEEN dtmStartDate AND dtmEndDate
+	ORDER BY intGLFiscalYearPeriodId DESC
+) GL 
+WHERE ARI.intInvoiceId = @NewId
 
 DECLARE @details NVARCHAR(max) = '{"change": "tblARInvoice","iconCls": "small-tree-grid","changeDescription": "Cash Refund on" , "to":"'+@strInvoiceId+'"}';
 

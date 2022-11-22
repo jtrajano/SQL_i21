@@ -180,9 +180,10 @@ BEGIN TRY
             AND TD.dblDiscountAmount <> 0
             AND CO.intCommodityId = @intCommodityCode
             AND IR.intLocationId = @intLocationId
-            AND ((EXISTS(SELECT 1 FROM @tblEntityId) AND IR.intEntityVendorId IN (SELECT intId FROM @tblEntityId))
-                OR NOT EXISTS (SELECT 1 FROM @tblEntityId)
-            )
+            AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+                OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+            AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+                OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
         GROUP BY DT.intDiscountTypeId, DT.strDiscountType
     END
     ELSE
@@ -253,9 +254,10 @@ BEGIN TRY
             AND TD.dblDiscountAmount <> 0
             AND CO.intCommodityId = @intCommodityCode
             AND S.intShipFromLocationId = @intLocationId
-            AND ((EXISTS(SELECT 1 FROM @tblEntityId) AND S.intEntityCustomerId IN (SELECT intId FROM @tblEntityId))
-                OR NOT EXISTS (SELECT 1 FROM @tblEntityId)
-            )
+            AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
+                OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
+            AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
+                OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
         GROUP BY DT.intDiscountTypeId, DT.strDiscountType
     END
 

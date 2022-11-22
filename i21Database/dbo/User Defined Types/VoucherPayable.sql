@@ -162,5 +162,24 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
  	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0,
 	 /*Tax Override*/
 	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	[intTaxLocationId] INT NULL
+	[intTaxLocationId] INT NULL,
+	/*Supplier Invoice*/
+	[intSaleYear] INT NULL,
+	[strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dtmSaleDate] DATETIME NULL, 
+	[strVendorLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strPreInvoiceGarden] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strPreInvoiceGardenNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strBook] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strSubBook] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblPackageBreakups] DECIMAL(18,6),
+	[intNumOfPackagesUOM] INT NULL,
+	[dblNumberOfPackages] DECIMAL(18,6),
+	[intNumOfPackagesUOM2] INT NULL,
+	[dblNumberOfPackages2] DECIMAL(18,6),
+	[intNumOfPackagesUOM3] INT NULL,
+	[dblNumberOfPackages3] DECIMAL(18,6),
+	[strPurchaseGroup] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	/**/
+	dtmExpectedDate DATETIME NULL
 )

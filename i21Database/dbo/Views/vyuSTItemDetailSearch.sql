@@ -132,6 +132,6 @@ LEFT JOIN
 	ON it.intItemId = SplPrc.intItemId
 	AND loc.intItemLocationId = SplPrc.intItemLocationId
 LEFT JOIN tblSTSubcategory family
-	ON loc.intFamilyId = family.intSubcategoryId
+	ON it.intStoreFamilyId = family.intSubcategoryId
 LEFT JOIN tblSTSubcategory class
-	ON loc.intClassId = class.intSubcategoryId
+	ON it.intStoreClassId = class.intSubcategoryId

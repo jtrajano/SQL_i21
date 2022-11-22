@@ -45,7 +45,7 @@ BEGIN
 		and (isnull(w.strWhereFinalized,'') = 'Destination' or isnull(g.strWhereFinalized,'') = 'Destination')
 
 	select
-		@dblShipmentQuantity = dbo.fnCTConvertQtyToTargetItemUOM(si.intItemUOMId,isnull(@intSequenceItemUOMId,si.intItemUOMId),isnull(si.dblDestinationQuantity,si.dblQuantity))
+		@dblShipmentQuantity = sum(dbo.fnCTConvertQtyToTargetItemUOM(si.intItemUOMId,isnull(@intSequenceItemUOMId,si.intItemUOMId),isnull(si.dblDestinationQuantity,si.dblQuantity)))
 	from
 		tblICInventoryShipmentItem si
 		join tblICInventoryShipment s on s.intInventoryShipmentId = si.intInventoryShipmentId

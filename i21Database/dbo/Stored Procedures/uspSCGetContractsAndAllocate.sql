@@ -200,12 +200,12 @@ BEGIN TRY
 		IF(ISNULL((SELECT TOP 1 intAllowOtherLocationContracts FROM tblSCScaleSetup WHERE intScaleSetupId = @intTicketSclaeSetupId),0) = 2)
         BEGIN
             SELECT    TOP    1    @intContractDetailId    =    intContractDetailId
-            FROM fnSCGetDPContract(@locationId,@intEntityId,@intItemId,'I',@dtmTicketDate)
+            FROM fnSCGetDPContract(@locationId,@intEntityId,@intItemId, @strInOutFlag ,@dtmTicketDate)
         END
         ELSE
         BEGIN
             SELECT    TOP    1    @intContractDetailId    =    intContractDetailId
-            FROM fnSCGetDPContract(NULL,@intEntityId,@intItemId,'I',@dtmTicketDate)
+            FROM fnSCGetDPContract(NULL,@intEntityId,@intItemId, @strInOutFlag ,@dtmTicketDate)
         END
 
 		-- If there is still no existing DP contract selected, try to search for an existing DP contract with end date later than the ticket date and then adjust it's start date
@@ -214,7 +214,7 @@ BEGIN TRY
 			SELECT	TOP	1	
 				@intContractDetailId = CD.intContractDetailId
 			FROM	vyuCTContractDetailView CD
-			WHERE	CD.intContractTypeId	=	1
+			WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 			AND		CD.intEntityId			=	@intEntityId
 			AND		CD.intItemId			=	@intItemId
 			AND		CD.intPricingTypeId		=	5
@@ -521,7 +521,7 @@ BEGIN TRY
 							SET @dblInreaseSchBy  = (@dblNetUnits - @dblTicketScheduledQuantity)
 
 							---Check if contract available qty can accomodate the increase in schedule
-							IF(@_dblCurrentAvailable <  @dblInreaseSchBy AND @_dblCurrentAvailable > 0)
+							IF(@_dblCurrentAvailable <  @dblInreaseSchBy AND @_dblCurrentAvailable >= 0)
 							BEGIN
 								SET @dblInreaseSchBy = @_dblCurrentAvailable
 							END

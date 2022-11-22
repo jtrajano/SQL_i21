@@ -12,9 +12,15 @@ SELECT P.intPropertyId
 	,P.ysnNotify
 	,dbo.fnQMGetTestNames(P.intPropertyId) COLLATE Latin1_General_CI_AS AS strTestNames
 	,I.strItemNo
+	,PVP.dblMinValue
+	,PVP.dblPinpointValue
+	,PVP.dblMaxValue
 FROM tblQMProperty AS P
 JOIN tblQMAnalysisType AS AT ON AT.intAnalysisTypeId = P.intAnalysisTypeId
 JOIN tblQMDataType AS DT ON DT.intDataTypeId = P.intDataTypeId
 LEFT JOIN tblQMList AS L ON L.intListId = P.intListId
 LEFT JOIN tblICItem I ON I.intItemId = P.intItemId
+LEFT JOIN tblQMPropertyValidityPeriod PVP
+	ON P.intPropertyId = PVP.intPropertyId
+	AND DATEPART(dayofyear , GETDATE()) BETWEEN DATEPART(dayofyear , PVP.dtmValidFrom) AND DATEPART(dayofyear , PVP.dtmValidTo)
 WHERE ISNULL(strFormula, '') = ''

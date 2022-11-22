@@ -140,11 +140,6 @@ BEGIN
 			CS.dtmTankMonitorReading,
 			CS.strDeviceDescription
 		from tblApiSchemaTMEvent as CS
-			INNER JOIN tblTMSite US ON CS.intSiteNumber = US.intSiteNumber
-			INNER JOIN tblTMEvent E ON E.intSiteID = US.intSiteID
-			INNER JOIN tblTMCustomer TC  ON TC.intCustomerID = US.intCustomerID
-			INNER JOIN tblARCustomer AC ON AC.intEntityId = TC.intCustomerNumber
-			INNER JOIN tblEMEntity En ON En.intEntityId = AC.intEntityId
 		 WHERE CS.guiApiUniqueId = @guiApiUniqueId 
 
 

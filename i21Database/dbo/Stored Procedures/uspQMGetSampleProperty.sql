@@ -503,6 +503,7 @@ BEGIN
 																			END
 																		), '{Lot Code}', @strLotCode), '{Product}', @strItemNo), '{Raw Material}', @strRawMaterial), '{Packing Material - Pouch}', @strPackingMaterial), '{Packing Material - Case}', @strPackingMaterial1), '{Raw Material Lot Code 1}', @strPalletId1), '{Raw Material Lot Code 2}', @strPalletId1), '{Raw Material Lot Code 3}', @strPalletId1), '{Packing Material Lot Code 1}', @strPackagingLotCode1), '{Packing Material Lot Code 2}', @strPackagingLotCode2), '{Packing Material Lot Code 3}', @strPackagingLotCode3), '{Target Weight}', @strTargetWeight), '{Screen Size}', @strScreenSize) AS strPropertyRangeText
 			,PPV.dblMinValue
+			,PPV.dblPinpointValue
 			,PPV.dblMaxValue
 			,PPV.dblLowValue
 			,PPV.dblHighValue
@@ -569,6 +570,7 @@ BEGIN
 			,PPV.dtmValidTo
 			,PPV.strPropertyRangeText
 			,PPV.dblMinValue
+			,PPV.dblPinpointValue
 			,PPV.dblMaxValue
 			,PPV.dblLowValue
 			,PPV.dblHighValue

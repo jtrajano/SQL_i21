@@ -418,7 +418,7 @@ JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN vyuARCustomer c ON c.strCustomerNumber = vs.strCustomer
 JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
 	AND xc.intEntityId = c.intEntityId
-	--AND xc.strVendorCustomer = vs.strVendorCustomer
+	AND xc.strVendorCustomer = vs.strVendorCustomer
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 1
 
@@ -431,7 +431,7 @@ JOIN tblEMEntity en ON en.strName = vs.strCustomerName
 JOIN vyuARCustomer c ON c.intEntityId = en.intEntityId
 JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
 	AND xc.intEntityId = c.intEntityId
-	--AND xc.strVendorCustomer = vs.strVendorCustomer
+	AND xc.strVendorCustomer = vs.strVendorCustomer
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND NULLIF(vs.strCustomer, '') IS NULL
 	AND NULLIF(vs.strCustomerName, '') IS NOT NULL
@@ -446,7 +446,7 @@ SET
 FROM tblVRCustomerXref xc
 JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomer = c.strCustomerNumber
-	--AND vs.strVendorCustomer = xc.strVendorCustomer
+	AND vs.strVendorCustomer = xc.strVendorCustomer
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
@@ -462,7 +462,7 @@ FROM tblVRCustomerXref xc
 JOIN tblEMEntity en ON en.intEntityId = xc.intEntityId
 JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomerName = en.strName
-	--AND vs.strVendorCustomer = xc.strVendorCustomer
+	AND vs.strVendorCustomer = xc.strVendorCustomer
 JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
@@ -501,7 +501,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		FROM tblVRCustomerXref xx
 		WHERE xx.intVendorSetupId = vs.intVendorSetupId
 			AND xx.intEntityId = c.intEntityId 
-			--AND xx.strVendorCustomer = vts.strVendorCustomer
+			AND xx.strVendorCustomer = vts.strVendorCustomer
 	)
 	AND NULLIF(vts.strCustomer, '') IS NOT NULL
 
@@ -529,14 +529,14 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		FROM tblVRCustomerXref xx
 		WHERE xx.intVendorSetupId = vs.intVendorSetupId
 			AND xx.intEntityId = c.intEntityId
-			--AND xx.strVendorCustomer = vts.strVendorCustomer
+			AND xx.strVendorCustomer = vts.strVendorCustomer
 	)
 	AND NULLIF(vts.strCustomer, '') IS NULL
 	AND NULLIF(vts.strCustomerName, '') IS NOT NULL
 
 ;WITH cte AS
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intEntityId ORDER BY sr.intVendorSetupId, sr.intEntityId) AS RowNumber
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.intEntityId, sr.strVendorCustomer ORDER BY sr.intVendorSetupId, sr.intEntityId, sr.strVendorCustomer) AS RowNumber
    FROM @UniqueCustomers sr
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
 )
@@ -568,6 +568,7 @@ USING (
 ) AS Source
 ON Source.intVendorSetupId = Target.intVendorSetupId
 	AND Source.intEntityId = Target.intEntityId
+	AND Source.strVendorCustomer = Target.strVendorCustomer
     
 -- For Inserts
 WHEN NOT MATCHED BY Target THEN
@@ -1087,11 +1088,26 @@ JOIN @ForUpdates u ON u.strVendorNumber = v.strVendorId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 
 UPDATE log
-SET log.intTotalRowsImported = r.intCount
+SET log.intTotalRowsImported = ISNULL(rv.intCount, 0) + ISNULL(rc.intCount, 0) + ISNULL(rp.intCount, 0) + ISNULL(ru.intCount, 0)
 FROM tblApiImportLog log
-CROSS APPLY (
+OUTER APPLY (
 	SELECT COUNT(*) intCount
-	FROM tblICItem
+	FROM tblApiSchemaTransformVendorSetup
 	WHERE guiApiUniqueId = log.guiApiUniqueId
-) r
+) rv
+OUTER APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblVRCustomerXref
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) rc
+OUTER APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblICCategoryVendor
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) rp
+OUTER APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblVRUOMXref
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) ru
 WHERE log.guiApiImportLogId = @guiLogId

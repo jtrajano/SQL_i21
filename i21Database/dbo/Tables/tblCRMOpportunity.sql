@@ -63,8 +63,11 @@
     [intGrossRevenue] INT NULL,
     [strOpportunityDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [intBrandMaintenanceId] INT NULL,
+    [strRelatedOpportunityId] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+    [strRelatedOpportunity] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 
-	CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
+	[strOpportunityNumber] NVARCHAR(250) NULL, 
+    CONSTRAINT [PK_tblCRMOpportunity] PRIMARY KEY CLUSTERED ([intOpportunityId] ASC),
 	--CONSTRAINT [UQ_tblCRMOpportunity_strName] UNIQUE ([strName]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
     CONSTRAINT [FK_tblCRMOpportunity_tblEMEntity_intCustomerContactId] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),

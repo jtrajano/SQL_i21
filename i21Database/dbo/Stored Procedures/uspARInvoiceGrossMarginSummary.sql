@@ -6,7 +6,7 @@ IF ISNULL(@ysnRebuild, 0) = 1
 	BEGIN
 		TRUNCATE TABLE tblARInvoiceGrossMarginSummary
 		
-		INSERT INTO tblARInvoiceGrossMarginSummary WITH (TABLOCK) (
+		INSERT INTO tblARInvoiceGrossMarginSummary (
 			  strType
 			, intInvoiceId
 			, dblAmount
@@ -43,7 +43,7 @@ IF ISNULL(@ysnRebuild, 0) = 1
 	END
 ELSE
 BEGIN
-    INSERT INTO tblARInvoiceGrossMarginSummary WITH (TABLOCK) (
+    INSERT INTO tblARInvoiceGrossMarginSummary (
 		  strType
 		, intInvoiceId
 		, dblAmount

@@ -1104,7 +1104,8 @@ BEGIN
 		,[ysnAccrueLicense]
 		,[strTransactionType]
 		,[strSourceTransaction]
-		,[ysnProcessed])
+		,[ysnProcessed]
+		,[ysnRecap])
 	SELECT
 		 [intHeaderId]						= ARIILD.[intInvoiceId]
 		,[ysnUpdateAvailableDiscountOnly]	= IFI.[ysnUpdateAvailableDiscount]
@@ -1116,8 +1117,9 @@ BEGIN
 		,[strTransactionType]				= ARIILD.[strTransactionType]
 		,[strSourceTransaction]				= IFI.[strSourceTransaction]
 		,[ysnProcessed]						= 0
+		,[ysnRecap]							= ARIILD.[ysnRecap]
 		FROM
-		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [strTransactionType], [ysnPost], [ysnAccrueLicense] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) ARIILD
+		(SELECT [intInvoiceId], [ysnHeader], [ysnSuccess], [intId], [intIntegrationLogId], [strTransactionType], [ysnPost], [ysnAccrueLicense], [ysnRecap] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) ARIILD
 		INNER JOIN
 		(SELECT [intId], [ysnUpdateAvailableDiscount], [strSourceTransaction] FROM @InvoicesForInsert) IFI
 			ON IFI. [intId] = ARIILD.[intId] 

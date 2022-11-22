@@ -29,8 +29,8 @@ JOIN tblICCategory CAT
 LEFT JOIN tblICCategoryVendor CV
 	ON CAT.intCategoryId = CV.intCategoryId
 LEFT JOIN tblSTSubcategory family
-	ON IL.intFamilyId = family.intSubcategoryId
+	ON I.intStoreFamilyId = family.intSubcategoryId
 LEFT JOIN tblSTSubcategory class
-	ON IL.intClassId = class.intSubcategoryId
+	ON I.intStoreClassId = class.intSubcategoryId
 LEFT JOIN tblSTSubCategories subcategories
 	ON I.intSubcategoriesId = subcategories.intSubcategoriesId

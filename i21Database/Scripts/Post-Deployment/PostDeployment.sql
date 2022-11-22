@@ -112,7 +112,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2210_EncryptPasswords.sql
 :r .\SM\2210_EncryptPasswords2.sql
 :r .\SM\2220_MigrateLabels.sql
-:r .\SM\2210_RemoveOriginIntegration.sql
 :r .\SM\2210_AttachmentsFileTypesFix.sql
 :r .\SM\2210_ReadCommittedSnapshot.sql
 :r .\SM\2220_HideScreenLabel.sql
@@ -400,6 +399,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\24_PopulateTransactionUOM.sql 
 :r .\IC\25_TransactionTypeRename.sql 
 :r .\IC\26_LockAvgCost.sql 
+:r .\IC\26_ComputedValueField.sql 
 :r .\IC\27_ActivateItemLocations.sql 
 :r .\IC\28_PopulateICAPClearing.sql 
 :r .\IC\29_CleanupObjects.sql
@@ -407,6 +407,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\31_WarrantStatus.sql
 :r .\IC\32_Family_Class_Initial_Adjustment.sql
 :r .\IC\32_InventoryJournalLineDescription.sql
+:r .\IC\33_InventoryTally.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -423,6 +424,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
 :r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
 :r .\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql
+
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
@@ -571,6 +573,9 @@ print 'BEGIN POST DEPLOYMENT'
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 :r .\QM\2_SetDefaultData.sql
+:r .\QM\3_CreateOfferSampleOutbound.sql
+:r .\QM\4_UpdateSampleCompanyLocation.sql
+
 
 -- C-Store Module
 :r .\ST\01_FileFieldMapping_PricebookSale.sql
@@ -717,6 +722,8 @@ print 'BEGIN POST DEPLOYMENT'
 --CRM
 :R .\CRM\SplitCRMData.sql
 :R .\CRM\RenameCRMScreen.sql
+:R .\CRM\SetOpportunityNumber.sql
+:R .\CRM\CRMHubspotDefaults.sql
 
 -- Card Fueling
 :r .\CF\1_ImportMapping.sql

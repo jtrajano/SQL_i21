@@ -417,12 +417,13 @@ BEGIN TRY
 		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	SELECT @intRecipeId = intRecipeId
-		,@intManufacturingProcessId = a.intManufacturingProcessId
+	DECLARE @ysnRecipeHeaderValidation BIT = 0;
+
+	SELECT TOP 1 @intRecipeId = intRecipeId
+			   , @intManufacturingProcessId = a.intManufacturingProcessId
 	FROM tblMFRecipe a
-	JOIN @tblBlendSheet b ON a.intItemId = b.intItemId
-		AND a.intLocationId = b.intLocationId
-		AND ysnActive = 1
+	JOIN @tblBlendSheet b ON a.intItemId = b.intItemId AND a.intLocationId = b.intLocationId AND
+		 ((@ysnRecipeHeaderValidation = 0 AND ysnActive = 1) OR (@ysnRecipeHeaderValidation = 1 AND @dtmDueDate <= dtmValidTo AND @dtmDueDate >= dtmValidFrom))
 
 	SELECT @strPackagingCategoryId = ISNULL(pa.strAttributeValue, '')
 	FROM tblMFManufacturingProcessAttribute pa
@@ -1936,6 +1937,8 @@ BEGIN TRY
 			,9
 			,@intUserId
 			,'Added'
+
+		Exec dbo.uspMFDeleteTrialBlendSheetReservation @intWorkOrderId=@intWorkOrderId
 
 		SET @intNoOfSheet = @intNoOfSheet - 1
 	END

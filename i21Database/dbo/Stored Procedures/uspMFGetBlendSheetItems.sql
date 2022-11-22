@@ -5,7 +5,6 @@
 	@dtmDueDate DateTime,
 	@strHandAddIngredientXml nvarchar(max)='',
 	@intWorkOrderId int=NULL
-	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,16 +13,24 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-Declare @intRecipeId int
-Declare @ysnRecipeItemValidityByDueDate bit=0
-Declare @intManufacturingProcessId int
-Declare @intDayOfYear INT
-Declare @dtmDate DATETIME
-Declare @strPackagingCategoryId NVARCHAR(Max)
-Declare @strBlendItemLotTracking NVARCHAR(50)
+DECLARE @intRecipeId					INT
+	  , @ysnRecipeItemValidityByDueDate BIT = 0
+	  , @intManufacturingProcessId		INT
+	  , @intDayOfYear					INT
+	  , @dtmDate						DATETIME
+	  , @strPackagingCategoryId			NVARCHAR(MAX)
+	  , @strBlendItemLotTracking		NVARCHAR(50)
+	  , @ysnRecipeHeaderValidation      BIT = 0
 
-Select @intRecipeId = intRecipeId,@intManufacturingProcessId=intManufacturingProcessId 
-from tblMFRecipe where intItemId=@intItemId and intLocationId=@intLocationId and ysnActive=1
+SELECT @ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
+FROM tblMFCompanyPreference;
+
+SELECT TOP 1 @intRecipeId				= intRecipeId
+		   , @intManufacturingProcessId = intManufacturingProcessId 
+FROM tblMFRecipe 
+WHERE intItemId = @intItemId AND intLocationId = @intLocationId AND 
+	  ((@ysnRecipeHeaderValidation = 0 AND ysnActive = 1) OR (@ysnRecipeHeaderValidation = 1 AND @dtmDueDate <= dtmValidTo AND @dtmDueDate >= dtmValidFrom))
+ORDER BY dtmCreated DESC;
 
 Select @strBlendItemLotTracking=strLotTracking From tblICItem Where intItemId=@intItemId
 
@@ -39,7 +46,7 @@ WHERE intManufacturingProcessId = @intManufacturingProcessId
 	AND intLocationId = @intLocationId
 	AND at.strAttributeName = 'Packaging Category'
 
-If @ysnRecipeItemValidityByDueDate=0
+If @ysnRecipeItemValidityByDueDate = 0
 	Set @dtmDate=Convert(date,GetDate())
 Else
 	Set @dtmDate=Convert(date,@dtmDueDate)
@@ -212,6 +219,20 @@ Join tblICItem i on ri.intItemId=i.intItemId AND i.strType <> 'Other Charge'
 where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 AND ISNULL(sr.ysnPosted,0)=0
 group by ri.intItemId
 
+Declare @tblReservedQtyInTBS table
+(
+	intItemId int,
+	dblReservedQtyInTBS numeric(38,20)
+)
+
+Insert into @tblReservedQtyInTBS
+Select ri.intItemId,Sum(LI.dblReservedQtyInTBS) AS dblReservedQty 
+From tblICLot L
+JOIN tblMFLotInventory LI ON LI.intLotId=L.intLotId 
+Join tblMFRecipeItem ri on ri.intItemId=L.intItemId 
+where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
+group by ri.intItemId
+
 --Substitute
 Insert into @tblReservedQty
 Select rs.intSubstituteItemId,Sum(sr.dblQty) AS dblReservedQty 
@@ -233,18 +254,19 @@ Where intWorkOrderId=@intWorkOrderId and IsNULL(ysnStaged,0) =1
 Group by intItemId
 
 Select i.intItemId,i.strItemNo,i.strDescription,a.dblRequiredQty,ISNULL(b.dblPhysicalQty,0) AS dblPhysicalQty,
-ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty,
+ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)-IsNULL(tbs.dblReservedQtyInTBS,0)),0) AS dblAvailableQty,
 0.0 AS dblSelectedQty,
-ISNULL(ROUND((ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0))/ CASE WHEN ISNULL(b.dblWeightPerUnit,1)=0 THEN 1 ELSE ISNULL(b.dblWeightPerUnit,1) END,0),0.0) AS dblAvailableUnit,
+ISNULL(ROUND((ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)-IsNULL(tbs.dblReservedQtyInTBS,0)),0))/ CASE WHEN ISNULL(b.dblWeightPerUnit,1)=0 THEN 1 ELSE ISNULL(b.dblWeightPerUnit,1) END,0),0.0) AS dblAvailableUnit,
 a.ysnIsSubstitute,a.intParentItemId,a.ysnHasSubstitute,a.intRecipeItemId,a.intParentRecipeItemId,a.strGroupName,
 a.dblLowerToleranceQty,a.dblUpperToleranceQty,
 a.ysnMinorIngredient,a.ysnScaled,a.dblRecipeQty,
 a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId,ISNULL(i.ysnHandAddIngredient,0) AS ysnHandAddIngredient,@intRecipeId AS intRecipeId,a.intConsumptionStorageLocationId,
 @intManufacturingProcessId AS intManufacturingProcessId,@strBlendItemLotTracking AS strBlendItemLotTracking,IsNULL(cq.dblConfirmedQty,0) AS dblConfirmedQty
 ,a.dblRequiredQty AS dblOrgRequiredQty
+,IsNULL(tbs.dblReservedQtyInTBS,0) AS dblReservedQtyInTBS
 from @tblRequiredQty a 
 Left Join @tblPhysicalQty b on a.intItemId=b.intItemId
 Left Join @tblReservedQty c on a.intItemId=c.intItemId
 Join tblICItem i on a.intItemId=i.intItemId
 Left JOIN @tblConfirmedQty cq on cq.intItemId=i.intItemId
-
+Left Join @tblReservedQtyInTBS tbs on a.intItemId=tbs.intItemId

@@ -65,7 +65,7 @@ SELECT
 	,@ShipDate					= ICIS.[dtmShipDate]
 	,@PostDate					= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
 	,@CalculatedDate			= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
-	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
+	,@EntitySalespersonId		= ISNULL(ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId]), SO.intEntitySalespersonId)
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
 	,@PONumber					= SO.[strPONumber]
@@ -811,8 +811,6 @@ WHERE intTicketId = @intScaleTicketId
 
 IF @intScaleTicketId IS NOT NULL AND @intScaleInventoryItemId IS NOT NULL
 	BEGIN
-		DELETE FROM @EntriesForInvoice WHERE intTicketId = @intScaleTicketId AND intItemId = @intScaleItemInTransitId
-
 		INSERT INTO @EntriesForInvoice (
 			  strSourceTransaction
 			, intSourceId
@@ -906,7 +904,7 @@ IF @intScaleTicketId IS NOT NULL AND @intScaleInventoryItemId IS NOT NULL
 			, intItemWeightUOMId
 			, dblPrice						= INTRANSIT.dblPrice
 			, dblUnitPrice					= INTRANSIT.dblPrice
-			, strPricing
+			, strPricing					= 'Ticket In-Transit'
 			, ysnRefreshPrice
 			, ysnRecomputeTax
 			, intInventoryShipmentItemId	= @intScaleInventoryItemId
@@ -946,7 +944,12 @@ IF @intScaleTicketId IS NOT NULL AND @intScaleInventoryItemId IS NOT NULL
 		CROSS APPLY (
 			SELECT TOP 1 *
 			FROM @EntriesForInvoice
-		) E		
+		) E
+
+		DELETE FROM @EntriesForInvoice 
+		WHERE intTicketId = @intScaleTicketId 
+		  AND intItemId = @intScaleItemInTransitId
+		  AND strPricing <> 'Ticket In-Transit'
 	END
 
 --GET DISTINCT SHIP TO FROM CONTRACT DETAIL

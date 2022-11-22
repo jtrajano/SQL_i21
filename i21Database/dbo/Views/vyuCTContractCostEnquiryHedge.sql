@@ -57,8 +57,7 @@ AS
 						dbo.fnCTCalculateAmountBetweenCurrency(FT.intCurrencyId,null,1,1)									AS	dblDefaultCurrencyFactor,
 						ISNULL(CY.intCent,1) AS intCent
 				FROM	dbo.tblCTContractDetail CD
-				LEFT JOIN	dbo.tblRKAssignFuturesToContractSummary					SY	ON	SY.intContractHeaderId		=	CD.intContractHeaderId
-																	AND SY.intContractDetailId		=	CD.intContractDetailId
+				LEFT JOIN	dbo.tblRKAssignFuturesToContractSummary	SY ON SY.intContractDetailId		=	CD.intContractDetailId
 				left join (
 					select pf.intContractDetailId, pfd.intFutOptTransactionId
 					from tblCTPriceFixation pf

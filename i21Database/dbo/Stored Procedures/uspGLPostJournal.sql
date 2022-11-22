@@ -117,17 +117,17 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM @tmpValidJournals)
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Transaction:
 
-DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
-SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0, @ysnIntraCompanyEntries BIT = 0
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
+SELECT TOP 1 @ysnIntraCompanyEntries = ysnAllowIntraCompanyEntries FROM tblGLCompanyPreferenceOption
 
 DECLARE @dblDailyRate	NUMERIC (18,6)
+DECLARE @strCode NVARCHAR(20), @msg NVARCHAR(255)
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
 		
 		DECLARE @GLEntries RecapTableType
-		
-		
 		
 		DELETE FROM @GLEntries
 		INSERT INTO @GLEntries (
@@ -230,6 +230,46 @@ IF ISNULL(@ysnRecap, 0) = 0
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
+
+		-- Intra Company Entries
+		IF (ISNULL(@ysnIntraCompanyEntries, 0) = 1)
+		BEGIN
+			INSERT INTO @GLEntries (
+				 [strTransactionId]
+				,[intTransactionId]
+				,[intAccountId]
+				,[strDescription]
+				,[dtmTransactionDate]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitForeign]			
+				,[dblCreditForeign]
+				,[dblDebitReport]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[ysnIsUnposted]
+				,[intConcurrencyId]	
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intUserId]
+				,[intEntityId]			
+				,[dtmDateEntered]
+				,[strBatchId]
+				,[strCode]			
+				,[strJournalLineDescription]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intCompanyLocationId]
+				,[ysnIntraCompanyEntry]
+			)
+			EXEC [dbo].[uspGLCreateIntraCompanyEntries] @JournalIds = @tmpValidJournals, @strBatchId = @strBatchId, @intEntityId = @intEntityId, @ysnAudit = @ysnAudit
+		END
+
 		DECLARE @SkipICValidation BIT = 0
 
 		DECLARE @PostResult INT
@@ -242,8 +282,6 @@ ELSE
 		-- DELETE Results 1 DAYS OLDER	
 		DELETE FROM tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 		
-		
-	
 		INSERT INTO @GLEntries (
 			 [strTransactionId]
 			,[intTransactionId]
@@ -316,12 +354,50 @@ ELSE
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
+		-- Intra Company Entries
+		IF (ISNULL(@ysnIntraCompanyEntries, 0) = 1)
+		BEGIN
+			INSERT INTO @GLEntries (
+				 [strTransactionId]
+				,[intTransactionId]
+				,[intAccountId]
+				,[strDescription]
+				,[dtmTransactionDate]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitForeign]			
+				,[dblCreditForeign]
+				,[dblDebitReport]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[ysnIsUnposted]
+				,[intConcurrencyId]	
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intUserId]
+				,[intEntityId]			
+				,[dtmDateEntered]
+				,[strBatchId]
+				,[strCode]			
+				,[strJournalLineDescription]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intCompanyLocationId]
+				,[ysnIntraCompanyEntry]
+			)
+			EXEC [dbo].[uspGLCreateIntraCompanyEntries] @JournalIds = @tmpValidJournals, @strBatchId = @strBatchId, @intEntityId = @intEntityId, @ysnAudit = @ysnAudit
+		END
+		
 		EXEC dbo.uspGLPostRecap 
 			@GLEntries
 			,@intEntityId
 
 	
-
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
 		GOTO Post_Commit;

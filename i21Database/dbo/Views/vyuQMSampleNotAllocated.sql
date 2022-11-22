@@ -58,23 +58,15 @@ SELECT
    NULL strINCOLocationS,
    NULL intContractStatusIdS,
    NULL intContractHeaderIdS 
-FROM
-   vyuQMSampleList S1 
-   LEFT JOIN
-      vyuCTContractDetailView V1 
-      ON V1.intContractDetailId = S1.intContractDetailId 
-   LEFT JOIN
-      vyuLGAllocatedContracts A 
-      ON A.intPContractDetailId = S1.intContractDetailId 
-WHERE
-   V1.intContractStatusId NOT IN
-   (
-      3,
-      5,
-      6 
-   )
-   AND V1.intContractTypeId = 1 
-   AND A.intAllocationDetailId IS NULL 
+   FROM vyuQMSampleList S1 
+   LEFT JOIN vyuLGAllocatedContracts A ON A.intPContractDetailId = S1.intContractDetailId
+	OUTER APPLY(
+		SELECT strEntityName,dblNetWeight,strNetWeightUOM,strFreightTerm,strINCOLocation,intContractStatusId,dblAllocatedQty,
+      intContractHeaderId,intContractSeq,dtmStartDate,dtmEndDate,intContractDetailId,strContractNumber
+		FROM vyuCTContractDetailView WHERE intContractDetailId = S1.intContractDetailId 
+		AND intContractStatusId NOT in(3,5,6) AND intContractTypeId =1
+	)V1
+WHERE S1.strContractType='Purchase' AND A.intAllocationDetailId IS NULL 
 UNION
 SELECT
    ''  COLLATE Latin1_General_CI_AS strAllocationNumber,
@@ -135,20 +127,12 @@ SELECT
    V2.strINCOLocation strINCOLocationS,
    V2.intContractStatusId intContractStatusIdS,
    V2.intContractHeaderId intContractHeaderIdS 
-FROM
-   vyuQMSampleList S2 
-   LEFT JOIN
-      vyuCTContractDetailView V2 
-      ON V2.intContractDetailId = S2.intContractDetailId 
-   LEFT JOIN
-      vyuLGAllocatedContracts A 
-      ON A.intSContractDetailId = S2.intContractDetailId 
-WHERE
-   V2.intContractStatusId NOT IN
-   (
-      3,
-      5,
-      6 
-   )
-   AND V2.intContractTypeId = 2 
-   AND A.intAllocationDetailId IS NULL
+   FROM vyuQMSampleList S2 
+   LEFT JOIN vyuLGAllocatedContracts A ON A.intSContractDetailId = S2.intContractDetailId 
+	OUTER APPLY(
+		SELECT strEntityName,dblNetWeight,strNetWeightUOM,strFreightTerm,strINCOLocation,intContractStatusId,
+      intContractHeaderId,intContractSeq,dtmStartDate,dtmEndDate,intContractDetailId,strContractNumber
+		FROM vyuCTContractDetailView where intContractDetailId = S2.intContractDetailId 
+		AND intContractStatusId not in(3,5,6) AND intContainerTypeId =2
+	)V2
+WHERE S2.strContractType = 'Sale' AND A.intAllocationDetailId IS NULL

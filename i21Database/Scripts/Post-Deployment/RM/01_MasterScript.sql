@@ -231,3 +231,21 @@ BEGIN
 END
 
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.MarkToMarket' AND strScreenName = 'Mark To Market')
+BEGIN
+	UPDATE tblSMScreen
+	SET strScreenName = 'OldMarkToMarket'
+	WHERE strNamespace = 'RiskManagement.view.MarkToMarket' 
+	AND strScreenName = 'Mark To Market'
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket' AND strScreenName IN ('NewMarkToMarket','New Mark To Market'))
+BEGIN
+	UPDATE tblSMScreen
+	SET strScreenName = 'Mark To Market'
+	WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket' 
+	AND strScreenName IN ('NewMarkToMarket','New Mark To Market')
+END
+GO

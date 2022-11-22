@@ -37,7 +37,10 @@ BEGIN
 				@userID INT = NULL,
 				@is_wesroc BIT = 1,
 				@qty_in_tank  NUMERIC(18,6) = NULL,
-				@resultLog NVARCHAR(4000)= '''' OUTPUT
+				@resultLog NVARCHAR(4000)= '''' OUTPUT,
+				@intInterfaceTypeId INT = NULL,
+				@intImportTankReadingId INT = NULL,
+				@intRecord INT = NULL
 			AS  
 			BEGIN 
 

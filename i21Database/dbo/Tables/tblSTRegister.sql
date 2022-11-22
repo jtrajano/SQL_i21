@@ -90,7 +90,7 @@
     [ysnCreateCfnAtImport] BIT NULL, 
     [strFTPPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strFTPUserName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-    [strFTPPassword] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
+    [strFTPPassword] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	-- [strArchivePath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[intPurgeInterval] INT NULL,
 

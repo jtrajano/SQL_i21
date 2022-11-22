@@ -33,6 +33,7 @@ SELECT
 	,CheckAmount				    = CheckAmount				 			
 FROM 
 (
+	--Distribution Type: Contract, Spot
 	SELECT 
 		intPaymentId					= PYMT.intPaymentId
 		,strPaymentNo					= PYMT.strPaymentRecordNum
@@ -63,10 +64,10 @@ FROM
 												WHEN BillDtl.intInventoryReceiptChargeId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
 												ELSE ISNULL(BillByReceipt.dblTax, 0)
 											END
-		,InboundDiscount				= CASE 
+		,InboundDiscount				= (CASE 
 											WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
-											ELSE ISNULL(BillByReceipt.dblTotal, 0)
-										END
+											ELSE ISNULL(BillByReceipt.dblTotal, 0) 
+										END) - ISNULL(BillAdjustments.dblTotal,0)
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN Bill.intTransactionType = 2 then 0
@@ -75,10 +76,10 @@ FROM
 												END
 											) +											
 											( 
-												CASE 													
+												(CASE 													
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
-												END
+												END) - ISNULL(BillAdjustments.dblTotal,0)
 											) +
 											-- Include tax for discounts/other charges
 											CASE 
@@ -154,21 +155,37 @@ FROM
 		AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	-- MANUALLY ADDED LINE ITEMS IN THE MAIN VOUCHER FROM SCALE TICKET
 	LEFT JOIN (
-		SELECT 
+		SELECT
 			Bill.intBillId
+			--,BD.intBillDetailId
+			,B.intBillDetailId
 			,APD.intPaymentId
 			,SUM(BD.dblTotal) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
-			ON Bill.intBillId = APD.intBillId 				
+			ON Bill.intBillId = APD.intBillId
 				AND APD.dblPayment <> 0
 				AND Bill.intTransactionType NOT IN (2,3)
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
 			AND BD.intScaleTicketId IS NULL
-		GROUP BY Bill.intBillId, APD.intPaymentId
-	) BillAdjustments ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
-		AND BillAdjustments.intBillId = Bill.intBillId
+			and BD.intItemId IS NOT NULL
+		OUTER APPLY (
+			SELECT TOP 1 
+				BD_ITEM.intBillDetailId
+				,BD_ITEM.intContractDetailId
+			FROM tblAPBillDetail BD_ITEM
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD_ITEM.intItemId
+					AND IC.strType = 'Inventory'
+			WHERE (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL) 
+				AND BD_ITEM.intBillId = BD.intBillId
+		) B
+		GROUP BY Bill.intBillId,APD.intPaymentId,B.intBillDetailId--,BD.intBillDetailId
+	) BillAdjustments 
+		ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
+			AND BillAdjustments.intBillId = Bill.intBillId
+			AND BillAdjustments.intBillDetailId = tblOtherCharge.intBillDetailId
 	LEFT JOIN (
 		SELECT 
 			PYMT.intPaymentId
@@ -716,6 +733,7 @@ FROM
 	WHERE (BillDtl.intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
 		AND (intSettleStorageId IS NULL AND intCustomerStorageId IS NULL)
 		AND Item.strType <> 'Other Charge'
+		AND (SELECT dbo.fnGRCheckBillIfFromAdjustSettlements(Bill.intBillId)) = 0
 	GROUP BY 
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
@@ -850,3 +868,5 @@ GROUP BY
 	,CheckAmount
 	,ISNULL(AdditionalTax.dblTax, 0)
 GO
+
+

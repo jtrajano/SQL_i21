@@ -44,6 +44,7 @@
 					,intAge = DATEDIFF(day,dtmCreated,GETDATE())
 					,strRFPRFILink
 					,dtmWinLossDate
+					,strOpportunityNumber
 		from 
 				(
 				select
@@ -105,6 +106,7 @@
 					,strEntityLocation = enloc.strLocationName
 					,proj.strRFPRFILink
 					,proj.dtmWinLossDate
+					,proj.strOpportunityNumber
 				from
 					tblCRMOpportunity proj
 					left outer join tblEMEntity con on con.[intEntityId] = proj.intCustomerContactId
@@ -151,4 +153,5 @@
 					,enloc.strLocationName
 					,proj.strRFPRFILink
 					,proj.dtmWinLossDate
+					,proj.strOpportunityNumber
 				) as query1

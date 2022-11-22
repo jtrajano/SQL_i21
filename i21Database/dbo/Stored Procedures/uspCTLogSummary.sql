@@ -2136,7 +2136,11 @@ BEGIN TRY
 				FROM @cbLogTemp				
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0 AND strTransactionReference <> 'Transfer Storage' AND intPricingTypeId <> 5 AND @strProcess <> 'Update Sequence Balance - DWG')
-				OR EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0 AND intPricingTypeId = 5 AND strTransactionReference <> 'Settle Storage' AND @strProcess <> 'Update Sequence Balance - DWG')
+				OR (
+					EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0 AND intPricingTypeId = 5 AND strTransactionReference <> 'Settle Storage' AND @strProcess <> 'Update Sequence Balance - DWG')
+					AND
+					EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE intPricingTypeId = 5 AND strTransactionReference <> 'Inventory Receipt' AND @strProcess <> 'Update Sequence Quantity')
+					)
 			BEGIN
 				SET @ysnUnposted = 1
 				
@@ -3399,7 +3403,14 @@ BEGIN TRY
 			SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 			continue;
 		end
-		
+
+		--Don't log DP contract in unposting IR in Update Sequence Quantity process
+		if exists (select top 1 1 from @cbLogCurrent where intId = @intId and intPricingTypeId = 5 and strTransactionReference = 'Inventory Receipt' and @strProcess = 'Update Sequence Quantity')
+		begin
+			SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
+            continue;
+		end
+
 		DELETE FROM @cbLogPrev
 
 		/*CT-5532 - If unposting and the contract is DWG, check the @cbLogCurrent if it's contains a self negated records*/
@@ -3870,7 +3881,15 @@ BEGIN TRY
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = @_action
+						if exists (select top 1 1 from @cbLogSpecific where intPricingTypeId = 6)
+						begin
+							UPDATE @cbLogSpecific SET dblQty = abs(@dblCash) * - 1, intActionId = @_action
+						end
+						else
+						begin
+							UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = @_action
+						end
+						
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 				
@@ -3949,7 +3968,6 @@ BEGIN TRY
 					SELECT intPricingTypeId, strNotes FROM @cbLogSpecific
 				) tbl
 
-				select line=4194,ysnMatched=@ysnMatched,TotalBasis=@TotalBasis,TotalPriced=@TotalPriced,TotalHTA=@TotalHTA
 				IF @ysnMatched <> 1
 				BEGIN
 					IF (ISNULL(@TotalBasis, 0) <> 0)
@@ -4040,8 +4058,6 @@ BEGIN TRY
 								, intUserId = case when @strProcess = 'Save Contract' and lp.strTransactionReference in ('Inventory Receipt','Settle Storage') then curr.intUserId else lp.intUserId end
 							FROM @cbLogPrev lp
 							cross apply (SELECT * FROM @cbLogSpecific) curr
-
-							select line=4276,* from @cbLogPrev
 
 							IF (@strProcess = 'Do Roll')
 							BEGIN
@@ -5090,7 +5106,10 @@ BEGIN TRY
 							BEGIN
 								if exists (select top 1 1 from @cbLogSpecific where dblOrigQty > @TotalPriced and @intHeaderPricingTypeId = 2 and @intSequencePricingTypeId = 2)
 								begin
-									UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 2, intActionId =  18
+									UPDATE @cbLogSpecific SET
+										dblQty = dblQty * - 1
+										,intPricingTypeId = case when @ysnUnposted = 1 and @TotalPriced > 0 then 1 else 2 end
+										,intActionId =  case when intContractTypeId = 1 and @ysnUnposted = 1 and @TotalPriced > 0 then 47 else 18 end
 								end
 								else
 								begin

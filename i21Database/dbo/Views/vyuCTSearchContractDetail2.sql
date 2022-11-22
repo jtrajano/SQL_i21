@@ -162,9 +162,9 @@ SELECT a.intContractDetailId
 																	ELSE CASE WHEN s.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received'
 																			ELSE NULL END END
 								ELSE a.strFinancialStatus END
-	, dblPricedQty = CASE WHEN a.intPricingTypeId = 2 OR t.dblPricedQuantity IS NOT NULL THEN ISNULL(t.dblPricedQuantity, 0)
+	, dblPricedQty = CASE WHEN a.intPricingTypeId in (2,5) OR t.dblPricedQuantity IS NOT NULL THEN ISNULL(t.dblPricedQuantity, 0)
 						ELSE a.dblQuantity END
-	, dblUnPricedQty = CASE WHEN a.intPricingTypeId = 2 OR t.dblPricedQuantity IS NOT NULL THEN a.dblQuantity - ISNULL(t.dblPricedQuantity, 0)
+	, dblUnPricedQty = CASE WHEN a.intPricingTypeId in (2,5) OR t.dblPricedQuantity IS NOT NULL THEN a.dblQuantity - ISNULL(t.dblPricedQuantity, 0)
 							ELSE 0.00 END
 	, dblActualLots = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(w.dblUnitQty, 0) = 0 THEN NULL
 							WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(w.dblUnitQty, 0) THEN a.dblQuantity
@@ -284,6 +284,7 @@ SELECT a.intContractDetailId
 	, a.dblRate
 	, b.ysnReceivedSignedFixationLetter
 	, a.strReference
+	, a.strContractReference
 	, a.strRemark
 	, a.dblReservedQty
 	, strSalesperson = bw.strName
@@ -347,6 +348,12 @@ SELECT a.intContractDetailId
 	, ICC.strProductLine
 	, a.dblInterestRate
 	, strPrimeCustomer = (CASE WHEN ISNULL(b.ysnPrimeCustomer, 0) = 0 THEN 'N' ELSE 'Y' END) COLLATE Latin1_General_CI_AS
+	, a.dtmEtaPol
+	, a.dtmEtaPod
+	, a.intCompanyLocationId
+	, a.dblPurchasePrice
+	, a.dblLandedPrice
+	, a.dblSalesPrice
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId

@@ -91,6 +91,7 @@ BEGIN TRY
 		,[dblQty]
 		,[intGrossNetUOMId]
 		,[dblGross]
+		,[dblTare]
 		,[dblNet]
 		,[dblCost]
 		,[intCostUOMId]
@@ -127,6 +128,7 @@ BEGIN TRY
 		,[dblQty] = COALESCE(LDCL.dblQuantity, LD.dblQuantity, 0)
 		,[intGrossNetUOMId] = COALESCE(Lot.intWeightUOMId, LCUOM.intItemUOMId, LD.intWeightItemUOMId)
 		,[dblGross] = COALESCE(LD.dblGross, LDCL.dblLinkGrossWt, 0)
+		,[dblTare] = COALESCE(LD.dblTare, LDCL.dblLinkTareWt, 0)
 		,[dblNet] = COALESCE(LD.dblNet, LDCL.dblLinkNetWt, 0)
 		,[dblCost] = --COALESCE(Lot.dblLastCost, ItemPricing.dblLastCost)
 			dbo.fnCalculateCostBetweenUOM(

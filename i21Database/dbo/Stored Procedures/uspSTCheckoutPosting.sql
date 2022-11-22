@@ -138,7 +138,9 @@ BEGIN
 		DECLARE @dblInvoiceAndCheckoutDifference DECIMAL(18,6) = 0
 		DECLARE @dblConsTolerance DECIMAL(18,6) = 0.01
 		DECLARE @dblOutsideFuelDiscount DECIMAL(18,6) = 0
+		DECLARE @dblInsideFuelDiscount DECIMAL(18,6) = 0
 		DECLARE @ysnConsMeterReadingsForDollars BIT = 0
+		DECLARE @ysnConsIncludeInsideDiscount BIT = 0
 		DECLARE @ysnConsAddOutsideFuelDiscounts BIT = 0
 		DECLARE @ysnConsCashOverShort BIT = 0
 
@@ -219,6 +221,7 @@ BEGIN
 				, @dblCheckoutTotalCustomerPayments = dblCustomerPayments
 				, @strCheckoutType = strCheckoutType
 				, @dblOutsideFuelDiscount = dblEditableOutsideFuelDiscount
+				, @dblInsideFuelDiscount = dblEditableInsideFuelDiscount
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
@@ -485,6 +488,7 @@ BEGIN
 				BEGIN
 					DECLARE		@intPaymentMethod INT = 0
 					DECLARE		@intCustomerPaymentMethod INT = 0
+					DECLARE		@intVendorPaymentMethod INT = 0
 					DECLARE		@strCustomerName NVARCHAR(150) = ''
 
 					SELECT		@intPaymentMethod = intPaymentMethodID 
@@ -527,18 +531,43 @@ BEGIN
 						GOTO ExitWithRollback
 					END
 
+					--VENDOR VALIDATION
+					IF NOT EXISTS(SELECT '' FROM  tblAPVendor WHERE intEntityId = @intEntityCustomerId)
+						BEGIN
+							SET @ysnUpdateCheckoutStatus = 0
+							SET @strStatusMsg = 'Customer ' + @strCustomerName + ' was not configured as a vendor.'
+						
+							-- ROLLBACK
+							GOTO ExitWithRollback
+						END
+					ELSE
+						BEGIN
+							SELECT		@intVendorPaymentMethod = a.intPaymentMethodId
+							FROM		tblAPVendor a
+							WHERE		a.intEntityId = @intEntityCustomerId
+
+							IF @intPaymentMethod != @intVendorPaymentMethod OR @intVendorPaymentMethod IS NULL
+							BEGIN
+								SET @ysnUpdateCheckoutStatus = 0
+								SET @strStatusMsg = 'Missing or Incorrect Payment Method for the vendor ' + @strCustomerName + '.'
+
+								-- ROLLBACK
+								GOTO ExitWithRollback
+							END
+						END
+
 					IF NOT EXISTS(SELECT '' FROM tblEMEntityEFTInformation WHERE intEntityId = @intEntityCustomerId AND intBankId IS NOT NULL)
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Missing EFT/ACH setup for the customer ' + @strCustomerName + '.'
+						SET @strStatusMsg = 'Missing EFT/ACH setup for entity ' + @strCustomerName + '.'
 
 						-- ROLLBACK
 						GOTO ExitWithRollback
 					END
 
-					IF @ysnConsMeterReadingsForDollars = 1 AND @ysnConsAddOutsideFuelDiscounts = 1 BEGIN SELECT @ysnConsCashOverShort = 1 END
+					IF @ysnConsMeterReadingsForDollars = 1 AND @ysnConsAddOutsideFuelDiscounts = 1 BEGIN SELECT @ysnConsCashOverShort = 1, @ysnConsIncludeInsideDiscount = 0 END -- Add Outside Discount only
 					ELSE IF @ysnConsMeterReadingsForDollars = 1 AND @ysnConsAddOutsideFuelDiscounts = 0 BEGIN SELECT @ysnConsCashOverShort = 0 END
-					ELSE IF @ysnConsMeterReadingsForDollars = 0 AND @ysnConsAddOutsideFuelDiscounts = 1 BEGIN SELECT @ysnConsCashOverShort = 1 END
+					ELSE IF @ysnConsMeterReadingsForDollars = 0 AND @ysnConsAddOutsideFuelDiscounts = 1 BEGIN SELECT @ysnConsCashOverShort = 1, @ysnConsIncludeInsideDiscount = 1 END -- Add Outside and Inside Discount
 					ELSE BEGIN SELECT @ysnConsCashOverShort = 0 END
 				END
 			END
@@ -870,9 +899,9 @@ BEGIN
 																						
 
 										,[dblDiscount]				= 0
-										
-										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
-
+										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6)
+										--,[dblPrice]					= CASE WHEN @ysnConsignmentStore = 1 THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity																		
+										--								ELSE ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) END
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
 										,[strFrequency]				= NULL
@@ -933,6 +962,7 @@ BEGIN
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
 								AND CH.intStoreId = ST.intStoreId	
+								AND TPI.intStoreId = ST.intStoreId
 							JOIN vyuEMEntityCustomerSearch vC 
 								ON ST.intCheckoutCustomerId = vC.intEntityId
 							LEFT OUTER JOIN
@@ -1587,33 +1617,10 @@ BEGIN
 																			WHEN @strInvoiceTransactionTypeMain = @strCASH
 																				THEN ISNULL(DT.dblCalculatedInvoiceQty, 0)
 																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-																				THEN CASE
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) > 0)
-																							-- Refference:  http://jira.irelyserver.com/browse/ST-1558
-																							-- If Positive flip the sign to negative
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * -1)
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) < 0)
-																							-- If Negative flip the sign to positive
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * 1)
-																					END
-																		END
-
+																				THEN ISNULL(DT.dblCalculatedInvoiceQty, 0) * -1
+																				END
 											,[dblDiscount]				= 0
-											,[dblPrice]					=  
-																		CASE
-																			WHEN @strInvoiceTransactionTypeMain = @strCASH
-																				THEN DT.dblCalculatedInvoicePrice
-																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-																				THEN CASE
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) > 0)
-																							-- Refference:  http://jira.irelyserver.com/browse/ST-1558
-																							-- If Positive flip the sign to negative
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * -1) * DT.dblCalculatedInvoicePrice
-																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) < 0)
-																							-- If Negative flip the sign to positive
-																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * 1) * DT.dblCalculatedInvoicePrice
-																					END
-																		END
+											,[dblPrice]					=  DT.dblCalculatedInvoicePrice
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1653,7 +1660,7 @@ BEGIN
 											,[dblSubCurrencyRate]		= 1.000000
 											--,0
 											--,1
-								FROM vyuSTCheckoutDepartmentInvoiceEntries DT
+								FROM vyuSTConsCheckoutDepartmentInvoiceEntries DT
 								JOIN tblICItem I 
 									ON DT.intItemId = I.intItemId
 
@@ -3342,8 +3349,8 @@ BEGIN
 												--										THEN ISNULL(CH.dblCashOverShort, 0)
 												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
 												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
-												,[dblPrice]					= ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0))
-
+												,[dblPrice]					= CASE WHEN @ysnConsIncludeInsideDiscount = 1 THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0) + ISNULL(CH.dblEditableInsideFuelDiscount, 0))
+																				ELSE ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0)) END
 												,[ysnRefreshPrice]			= 0
 												,[strMaintenanceType]		= NULL
 												,[strFrequency]				= NULL
@@ -3394,7 +3401,7 @@ BEGIN
 									JOIN vyuEMEntityCustomerSearch vC 
 										ON ST.intCheckoutCustomerId = vC.intEntityId									
 									WHERE CH.intCheckoutId = @intCheckoutId
-										AND ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0
+										AND (ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0 OR ISNULL(CH.dblEditableInsideFuelDiscount,0) <> 0)
 						END
 				END
 				----------------------------------------------------------------------
@@ -5963,7 +5970,8 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 
 								DECLARE @ysnEqual AS BIT
-                                DECLARE @strRemark AS NVARCHAR(500)		--						
+                                DECLARE @strRemark AS NVARCHAR(500)
+
 								------------------------------------------------------------------------------------------------------
 								---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
 								------------------------------------------------------------------------------------------------------

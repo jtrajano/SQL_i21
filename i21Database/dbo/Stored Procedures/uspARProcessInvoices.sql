@@ -545,7 +545,7 @@ BEGIN
 		,@ItemPerformerId				= (CASE WHEN @GroupingOption = 0 THEN [intPerformerId] ELSE NULL END)
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
-		,@ItemCurrencyExchangeRateTypeId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateTypeId] ELSE NULL END)
+		,@ItemCurrencyExchangeRateTypeId= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateTypeId] ELSE NULL END)
 		,@ItemCurrencyExchangeRateId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateId] ELSE NULL END)
 		,@ItemCurrencyExchangeRate		= (CASE WHEN @GroupingOption = 0 THEN [dblCurrencyExchangeRate] ELSE 1 END)
 		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE NULL END)
@@ -1740,11 +1740,6 @@ BEGIN TRY
 		--RESET Invoice Details						
 		IF (ISNULL(@ExistingInvoiceId, 0) <> 0 AND ISNULL(@ResetDetails,0) = 1)
 		BEGIN
-			DELETE IDT
-			FROM tblARInvoiceDetailTax IDT
-			INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
-			WHERE [intInvoiceId]  = @ExistingInvoiceId
-			
 			DELETE FROM tblARInvoiceDetail
 			WHERE [intInvoiceId]  = @ExistingInvoiceId
 			
@@ -2419,7 +2414,7 @@ BEGIN TRY
 						AND @UpdateAvailableDiscount = 0
 						
 					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
-									@TaxDetails	= @TaxDetails
+								 @TaxDetails	= @TaxDetails
 								,@UserId		= @EntityId
 								,@ClearExisting	= @ClearDetailTaxes
 								,@RaiseError	= @RaiseError
@@ -2789,7 +2784,7 @@ SELECT EFP.* INTO #TempPrepaymentEntries FROM #EntriesForProcessing EFP JOIN tbl
 WHILE EXISTS(SELECT intInvoiceId  FROM #TempPrepaymentEntries)
 BEGIN 
 	DECLARE @PrePayInvoiceId INT , @PrepayPaymentId INT 
-		SELECT TOP 1 @PrePayInvoiceId =EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
+		SELECT TOP 1 @PrePayInvoiceId = EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
 
 		EXEC [dbo].[uspARProcessPaymentFromInvoice]
 			 @InvoiceId		= @PrePayInvoiceId 

@@ -129,11 +129,23 @@ SELECT reg.intRegisterId
 	, reg.ysnCreateCfnAtImport
 	, reg.strFTPPath
 	, reg.strFTPUserName
-	, reg.strFTPPassword
+	, strFTPPassword = CASE
+								WHEN (reg.strFTPPassword IS NOT NULL AND reg.strFTPPassword != '')
+									THEN dbo.fnAESDecryptASym(reg.strFTPPassword)
+								ELSE NULL
+							END COLLATE Latin1_General_CI_AS
 	, reg.intPurgeInterval
 	, reg.[strIrelyUsername]				
-	, reg.[strIrelyPassword]				
-	, reg.[strIrelyReEnterPassword]		
+	, [strIrelyPassword] = CASE
+								WHEN (reg.[strIrelyPassword] IS NOT NULL AND reg.[strIrelyPassword] != '')
+									THEN dbo.fnAESDecryptASym(reg.[strIrelyPassword])
+								ELSE NULL
+							END COLLATE Latin1_General_CI_AS		 		
+	, [strIrelyReEnterPassword]  = CASE
+								WHEN (reg.[strIrelyReEnterPassword] IS NOT NULL AND reg.[strIrelyReEnterPassword] != '')
+									THEN dbo.fnAESDecryptASym(reg.[strIrelyReEnterPassword])
+								ELSE NULL
+							END COLLATE Latin1_General_CI_AS		 			
 	, reg.[strIrelyCompanyNumber]			
 	, reg.[ysnDeleteRegisterFileInbound]	
 	, reg.[strRegisterFolderInbound]		

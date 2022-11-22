@@ -34,3 +34,6 @@ GO
 
 CREATE INDEX [IX_tblTRLoadDistributionHeader_intEntityCustomerId] ON [dbo].[tblTRLoadDistributionHeader] ([intEntityCustomerId] ASC)
 GO 
+
+CREATE INDEX [IX_tblTRLoadDistributionHeader_intInvoiceId] ON [dbo].[tblTRLoadDistributionHeader] ([intInvoiceId] ASC)
+GO

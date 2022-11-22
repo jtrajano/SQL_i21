@@ -5,6 +5,10 @@
 	,@ysnAddClaim BIT = 1
 AS
 BEGIN
+	DECLARE @ysnAllowPendingClaimsWoClaimableWt BIT
+	SELECT @ysnAllowPendingClaimsWoClaimableWt = ysnAllowPendingClaimsWoClaimableWt
+	FROM tblLGCompanyPreference
+
 	IF (@ysnAddClaim = 1)
 	BEGIN
 		IF (@intPurchaseSale IN (1, 3))
@@ -94,8 +98,8 @@ BEGIN
 						,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 						,dblFranchisePercent = WG.dblFranchise
 						,dblFranchise = WG.dblFranchise / 100
-						,dblFranchiseWt = CASE WHEN (CLNW.dblLinkNetWt * WG.dblFranchise / 100) <> 0.0
-										THEN (CLNW.dblLinkNetWt * WG.dblFranchise / 100)
+						,dblFranchiseWt = CASE WHEN ((CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100) <> 0.0
+										THEN ((CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
 									ELSE 0.0 END
 						,dblWeightLoss = CASE WHEN (RI.dblNet - CLNW.dblLinkNetWt) < 0.0
 											THEN (RI.dblNet - CLNW.dblLinkNetWt)
@@ -177,7 +181,7 @@ BEGIN
 							AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale
 											AND intLoadContainerId = CLNW.intLoadContainerId)
 						) LI
-					WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1
+					WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1 OR ISNULL(@ysnAllowPendingClaimsWoClaimableWt, 0) = 1
 				END
 				ELSE
 				BEGIN
@@ -256,8 +260,8 @@ BEGIN
 							,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 							,dblFranchisePercent = WG.dblFranchise
 							,dblFranchise = WG.dblFranchise / 100
-							,dblFranchiseWt = CASE WHEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100) <> 0.0
-													THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100)
+							,dblFranchiseWt = CASE WHEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) ELSE LD.dblNet END) * WG.dblFranchise / 100) <> 0.0
+													THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt - ISNULL(IRN.dblIRNet, 0)) ELSE LD.dblNet END) * WG.dblFranchise / 100)
 												ELSE 0.0 END
 							,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
 													THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
@@ -329,7 +333,7 @@ BEGIN
 								AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 								AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale)
 							) LI
-						WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1
+						WHERE ([ysnDropShip] = 0 AND [dblClaimableWt] <> 0) OR [ysnDropShip] = 1 OR ISNULL(@ysnAllowPendingClaimsWoClaimableWt, 0) = 1
 					END
 			END
 

@@ -91,7 +91,7 @@ BEGIN
 		WHEN @msgId = 80075 THEN 'Item %s is invalid. It must be lot tracked.'
 		WHEN @msgId = 80076 THEN 'Lot move of %s is not allowed because it will be moved to the same location, sub location, and storage location.'
 		WHEN @msgId = 80077 THEN 'Unable to update %s. It is posted. Please unpost it first.'
-		WHEN @msgId = 80078 THEN 'Inventory variance is created. The current item valuation is %c. The new valuation is (Qty x New Average Cost) %c x %c = %c.'
+		WHEN @msgId = 80078 THEN 'Inventory variance is created. Current valuation is %c. New valuation is (Qty x New Avg Cost) %c x %c = %c.'
 		WHEN @msgId = 80079 THEN 'Item UOM for %s is invalid or missing.'
 		WHEN @msgId = 80080 THEN 'Item UOM %s for %s is invalid or missing.'
 		WHEN @msgId = 80081 THEN 'Net quantity mismatch. It is %f on item %s but the total net from the lot(s) is %f.'
@@ -222,7 +222,7 @@ BEGIN
 		WHEN @msgId = 80206 THEN 'Price UOM Id is invalid or missing for item %s.'
 		WHEN @msgId = 80207 THEN 'Lot type of %s is different from %s. Items should have the same lot types.'
 		WHEN @msgId = 80208 THEN 'Unable to post lot %s. Only active lots are allowed to be shipped.'
-		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add %s inventory to it'
+		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add inventory on %s type.'
 		WHEN @msgId = 80210 THEN 'Invalid Producer. %s is not configured as a Producer type. Please check the Entity setup.'
 		WHEN @msgId = 80211 THEN 'Certificate %s is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
 		WHEN @msgId = 80212 THEN 'Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
@@ -285,6 +285,7 @@ BEGIN
 		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
 		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
 		WHEN @msgId = 80271 THEN '%s is currently in a Voucher. Please remove it in %s first before you can unpost the Destination Weight/Grade.'
+		WHEN @msgId = 80272 THEN 'Item Category %s does not exists on Storage %s.'
 	END 
 
 	RETURN @msg COLLATE Latin1_General_CI_AS

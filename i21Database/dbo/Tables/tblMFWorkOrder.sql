@@ -87,6 +87,7 @@
 	intLoadId int,
 	intWarehouseRateMatrixHeaderId int,
 	strERPServicePONumber nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intTrialBlendSheetStatusId int,
     CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

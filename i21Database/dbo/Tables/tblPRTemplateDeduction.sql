@@ -15,6 +15,8 @@
 	[ysnDefault] [bit] NOT NULL DEFAULT ((1)), 
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),
+    [ysnUseLocationDistribution] BIT         DEFAULT ((1)) NOT NULL,
+    [ysnUseLocationDistributionExpense] BIT      DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK_tblPRTemplateDeduction] PRIMARY KEY ([intTemplateDeductionId]), 
     CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId]), 
 	CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE,

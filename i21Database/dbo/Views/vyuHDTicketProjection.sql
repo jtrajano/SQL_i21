@@ -1,7 +1,83 @@
 ﻿CREATE VIEW [dbo].[vyuHDTicketProjection]
 	AS
 	select
-		a.*
+		 a.intTicketId
+		,a.strTicketNumber
+		,a.strSubject
+		,a.strSubjectOverride
+		,a.ysnSendLink
+		,a.strCustomerNumber
+		,a.intCustomerContactId
+		,a.intCustomerId
+		,a.intMilestoneId
+		,a.intTicketTypeId
+		,a.intTicketStatusId
+		,a.intLineOfBusinessId
+		,a.strLineOfBusinessId
+		,a.intOpportunityCampaignId
+		,a.intTicketPriorityId
+		,a.intTicketProductId
+		,a.intModuleId
+		,a.intVersionId
+		,a.intAssignedTo
+		,a.intAssignedToEntity
+		,a.intCreatedUserId
+		,a.intCreatedUserEntityId
+		,a.dtmCreated
+		,a.dtmDueDate
+		,a.dtmCompleted
+		,a.intLastModifiedUserId
+		,a.intLastModifiedUserEntityId
+		,a.intLastCommentedByEntityId
+		,a.dtmLastModified
+		,a.dtmLastCommented
+		,a.dblQuotedHours
+		,a.dblActualHours
+		,a.dblNonBillableHours
+		,a.strJiraKey
+		,a.strCompany
+		,a.strOperatingSystem
+		,a.strAcuVersion
+		,a.strDatabase
+		,a.strType
+		,a.strMultipleActivityId
+		,a.intCompanyLocationId
+		,a.intEntityLocationId
+		,a.intSequenceInProject
+		,a.intCurrencyId
+		,a.intCurrencyExchangeRateId
+		,a.intCurrencyExchangeRateTypeId
+		,a.dtmExchangeRateDate
+		,a.dblCurrencyRate
+		,a.intFeedbackWithSolutionId
+		,a.intFeedbackWithRepresentativeId
+		,a.strFeedbackComment
+		,a.strDescription
+		,a.strResolution
+		,a.strResolutionHelpManualLink
+		,a.strResolutionYoutubeLink
+		,a.strImageId
+		,a.intUpgradeTypeId
+		,a.strUpgradeEnvironmentId
+		,a.strUpgradeEnvironment
+		,a.intUpgradeTargetVersionId
+		,a.strUpgradeCompany
+		,a.strUpgradeCustomerContactId
+		,a.strUpgradeCustomerContact
+		,a.dtmUpgradeStartTime
+		,a.strUpgradeCustomerTimeZone
+		,a.dtmUpgradeEndTime
+		,a.intUpgradeTimeTook
+		,a.strUpgradeCopyDataFrom
+		,a.strUpgradeCopyDataTo
+		,a.strUpgradeSpecialInstruction
+		,a.intRootCauseId
+		,a.intSubcauseId
+		,a.strRootCauseReason
+		,a.strResolutionTrainingManualLink
+		,a.strResolutionTrainingAgendaLink
+		,a.strResolutionSOPLink
+		,a.intConcurrencyId
 		,strProjectionContactName = b.strName
 		,strProjectionCustomerName = c.strName
 		,strProjectionMileStone = d.strMileStone
@@ -45,6 +121,10 @@
 		,intCustomerCurrencyId = a2.intCurrencyId
 		,intCustomerShipToLocationId = a2.intShipToId
 		,intCustomerLocationId = (select top 1 intWarehouseId from tblEMEntityLocation where intEntityId = a.intCustomerId)
+		,a.dtmStartDate
+		,strDueDateTime = CONVERT(nvarchar(30),a.dtmDueDate,22) COLLATE Latin1_General_CI_AS
+	    ,strCompletedDate = CONVERT(nvarchar(10),a.dtmCompleted,101) COLLATE Latin1_General_CI_AS
+		,strStartDate = CONVERT(nvarchar(10),a.dtmStartDate,101) COLLATE Latin1_General_CI_AS
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -76,3 +156,5 @@
 		left join tblARCustomer a2 on a2.intEntityId = a.intCustomerId
 		left join tblHDTicketRootCause a3 on a3.intRootCauseId = a.intRootCauseId
 		left join tblHDTicketSubcause a4 on a4.intSubcauseId = a.intSubcauseId
+
+GO

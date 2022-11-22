@@ -18,21 +18,33 @@ SET ANSI_WARNINGS OFF
 		,[intLicenseAccountId]			INT
 		,[intMaintenanceAccountId]		INT
 	)
-	DECLARE  @AllowIntraCompanyEntries		BIT
-			,@AllowIntraLocationEntries		BIT
-			,@AllowSingleLocationEntries	BIT
-			,@OverrideCompanySegment		BIT
-			,@OverrideLocationSegment		BIT
-			,@OverrideLineOfBusinessSegment	BIT
+	DECLARE  @OverrideCompanySegment					BIT
+			,@OverrideLocationSegment					BIT
+			,@OverrideLineOfBusinessSegment				BIT
+			,@OverrideARAccountLineOfBusinessSegment	BIT
 
 	SELECT TOP 1
-		 @AllowIntraCompanyEntries		= ysnAllowIntraCompanyEntries
-		,@AllowIntraLocationEntries		= ysnAllowIntraLocationEntries
-		,@AllowSingleLocationEntries	= ysnAllowSingleLocationEntries
-		,@OverrideCompanySegment		= ysnOverrideCompanySegment
-		,@OverrideLocationSegment		= ysnOverrideLocationSegment
-		,@OverrideLineOfBusinessSegment	= ysnOverrideLineOfBusinessSegment
+		 @OverrideCompanySegment				= ysnOverrideCompanySegment
+		,@OverrideLocationSegment				= ysnOverrideLocationSegment
+		,@OverrideLineOfBusinessSegment			= ysnOverrideLineOfBusinessSegment
+		,@OverrideARAccountLineOfBusinessSegment= ysnOverrideARAccountLineOfBusinessSegment
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+	
+	--AR ACCOUNT	
+	UPDATE ARI
+	SET ARI.intAccountId = CASE WHEN @OverrideARAccountLineOfBusinessSegment = 1
+								THEN ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, ISNULL(LOB.intSegmentCodeId, 0)), ARI.intAccountId)
+								ELSE ARI.intAccountId
+							END
+	FROM tblARInvoice ARI WITH (NOLOCK)
+	INNER JOIN tblARPostInvoiceHeader PID ON ARI.[intInvoiceId] = PID.[intInvoiceId]
+	LEFT JOIN tblGLAccount GL ON GL.intAccountId = [dbo].[fnGetGLAccountIdFromProfitCenter](ARI.intAccountId, PID.intProfitCenter)
+	OUTER APPLY (
+		SELECT TOP 1 intSegmentCodeId
+		FROM tblSMLineOfBusiness
+		WHERE intLineOfBusinessId = ISNULL(ARI.intLineOfBusinessId, 0)
+	) LOB
+	WHERE PID.strSessionId = @strSessionId
 
 	INSERT INTO @LineItemAccounts (
 		  [intDetailId]
@@ -263,7 +275,7 @@ SET ANSI_WARNINGS OFF
 	UPDATE PIH
 	SET PIH.intAccountId = ARI.intAccountId
 	FROM tblARPostInvoiceHeader PIH
-	INNER JOIN tblARInvoice ARI ON PIH.intInvoiceId = ARI.intInvoiceId
+	INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PIH.intInvoiceId = ARI.intInvoiceId
 	WHERE PIH.strSessionId = @strSessionId
 
     UPDATE PID
@@ -274,6 +286,6 @@ SET ANSI_WARNINGS OFF
         ,PID.[intLicenseAccountId]          = ARID.[intLicenseAccountId]
         ,PID.[intMaintenanceAccountId]      = ARID.[intMaintenanceAccountId]
     FROM tblARPostInvoiceDetail PID
-    INNER JOIN tblARInvoiceDetail ARID ON PID.intInvoiceDetailId = ARID.intInvoiceDetailId
+    INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON PID.intInvoiceDetailId = ARID.intInvoiceDetailId
 	WHERE PID.strSessionId = @strSessionId
 RETURN 0

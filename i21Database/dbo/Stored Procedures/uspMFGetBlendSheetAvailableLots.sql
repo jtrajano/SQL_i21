@@ -107,6 +107,7 @@ sl.intStorageLocationId,
 u1.strUnitMeasure AS strPhysicalItemUOM,
 i.intCategoryId,
 ls.strSecondaryStatus
+,LI.dblReservedQtyInTBS AS dblReservedQtyInTBS
 into #tempLot
 from tblICLot l
 Join tblICItem i on l.intItemId=i.intItemId
@@ -123,6 +124,7 @@ Left Join tblICItemUOM iu2 on ri.intItemUOMId=iu2.intItemUOMId
 Left Join tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId 
 Left Join vyuQMGetLotQuality q on (CASE WHEN (Select TOP 1 ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference) = 1 THEN l.intParentLotId ELSE l.intLotId END)=q.intLotId
 Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
+Left JOIN tblMFLotInventory LI on LI.intLotId=l.intLotId
 Where l.intItemId=@intItemId and l.dblQty>0 and ls.intLotStatusId in (Select intLotStatusId From @tblLotStatus)
 And l.intLocationId = Case When @ysnShowOtherFactoryLots=1 Then l.intLocationId Else @intLocationId End 
 Order by l.dtmExpiryDate, l.dtmDateCreated
@@ -134,8 +136,9 @@ If @ysnEnableParentLot=0
 Begin
 		Select tl.intLotId, tl.strLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription, 
 		tl.strLotAlias, tl.dblPhysicalQty, 
-		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
-		ROUND((ISNULL((ISNULL(tl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0)/ case when ISNULL(tl.dblWeightPerUnit,0)=0 then 1 else tl.dblWeightPerUnit end ),0) AS dblAvailableUnit,
+		ISNULL(tl.dblReservedQtyInTBS,0) AS dblReservedQtyInTBS,
+		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)-IsNULL(tl.dblReservedQtyInTBS,0)),0) AS dblAvailableQty,
+		ROUND((ISNULL((ISNULL(tl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)-IsNULL(tl.dblReservedQtyInTBS,0)),0)/ case when ISNULL(tl.dblWeightPerUnit,0)=0 then 1 else tl.dblWeightPerUnit end ),0) AS dblAvailableUnit,
 		tl.intItemUOMId, tl.strUOM, tl.dblUnitCost, tl.dblWeightPerUnit, tl.strWeightPerUnitUOM, 
 		tl.intPhysicalItemUOMId, tl.dtmReceiveDate, tl.dtmExpiryDate, tl.strVendorId, tl.strVendorLotNo, 
 		tl.strGarden, tl.intLocationId, tl.strLocationName, tl.strSubLocationName, tl.strStorageLocationName,tl.intStorageLocationId, 
@@ -156,6 +159,7 @@ Begin
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId
 		,tl.strPhysicalItemUOM
 		,MAX(tl.strSecondaryStatus) strSecondaryStatus
+		,ISNULL(SUM(tl.dblReservedQtyInTBS),0) AS dblReservedQtyInTBS
 		into #tempParentLotByStorageLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,
@@ -164,8 +168,8 @@ Begin
 		,tl.strPhysicalItemUOM
 
 		Select tpl.*,
-		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
-		ROUND((ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0)/ case when ISNULL(tpl.dblWeightPerUnit,0)=0 then 1 else tpl.dblWeightPerUnit end ),0) AS dblAvailableUnit
+		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)-IsNULL(tpl.dblReservedQtyInTBS,0)),0) AS dblAvailableQty,
+		ROUND((ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)-IsNULL(tpl.dblReservedQtyInTBS,0)),0)/ case when ISNULL(tpl.dblWeightPerUnit,0)=0 then 1 else tpl.dblWeightPerUnit end ),0) AS dblAvailableUnit
 		from #tempParentLotByStorageLocation tpl Left Join @tblReservedQty r on tpl.intLotId=r.intLotId	
 	End
 	Else
@@ -179,6 +183,7 @@ Begin
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId 
 		,tl.strPhysicalItemUOM
 		,MAX(tl.strSecondaryStatus) strSecondaryStatus
+		,ISNULL(SUM(tl.dblReservedQtyInTBS),0) AS dblReservedQtyInTBS
 		into #tempParentLotByLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,tl.strLotAlias,
@@ -187,8 +192,8 @@ Begin
 		,tl.strPhysicalItemUOM
 
 		Select tpl.*,
-		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
-		ROUND((ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0)/ case when ISNULL(tpl.dblWeightPerUnit,0)=0 then 1 else tpl.dblWeightPerUnit end ),0) AS dblAvailableUnit
+		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)-ISNULL(tpl.dblReservedQtyInTBS,0)),0) AS dblAvailableQty,
+		ROUND((ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)-ISNULL(tpl.dblReservedQtyInTBS,0)),0)/ case when ISNULL(tpl.dblWeightPerUnit,0)=0 then 1 else tpl.dblWeightPerUnit end ),0) AS dblAvailableUnit
 		from #tempParentLotByLocation tpl Left Join @tblReservedQty r on tpl.intLotId=r.intLotId
 	End
 End

@@ -219,12 +219,12 @@ SELECT
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					=  CASE
-										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
-										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnMultiply( dbo.fnDivide(LI.dblQty,SC.dblNetUnits), (SC.dblGrossWeight - SC.dblTareWeight))
+										ELSE dbo.fnMultiply(dbo.fnDivide(LI.dblQty, SC.dblNetUnits), SC.dblGrossUnits)
 									END
 		,dblNet						= CASE
 										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN 
-											CASE WHEN SC.dblShrink > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty) ELSE (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight) END
+											CASE WHEN SC.dblShrink > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty) ELSE dbo.fnMultiply( dbo.fnDivide(LI.dblQty,SC.dblNetUnits), (SC.dblGrossWeight - SC.dblTareWeight)) END
 										ELSE LI.dblQty 
 									END
 		,intFreightTermId			= COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)
@@ -245,7 +245,7 @@ SELECT
 											ELSE NULL
 											END 
 										END
-		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
+		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 OR ISNULL(ConHeader.intPricingTypeId,0) = 5 
 										THEN 0
 										ELSE NULL
 										END
@@ -1677,9 +1677,11 @@ BEGIN
 		@_intStorageHistoryId = SH.intStorageHistoryId
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
-	JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
+	JOIN tblSCTicket Ticket 
+		ON CS.intTicketId = Ticket.intTicketId
+	--JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
 	WHERE SH.[strType] IN ('From Scale', 'From Delivery Sheet')
-	AND IR.intInventoryReceiptId=@InventoryReceiptId 
+	AND Ticket.intInventoryReceiptId = @InventoryReceiptId 
 	AND ISNULL(SH.intInventoryReceiptId,0) = 0
 
 	IF(ISNULL(@_intStorageHistoryId,0) > 0)

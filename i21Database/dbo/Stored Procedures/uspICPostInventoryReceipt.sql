@@ -646,13 +646,6 @@ END
 -- END Validate  
 --------------------------------------------------------------------------------------------  
 
--- Get the next batch number
-BEGIN 
-	SET @strBatchId = NULL 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
-	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
-END
-
 -- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
 	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
@@ -660,13 +653,23 @@ BEGIN
 	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
 END 
 
+-- Get the next batch number
+BEGIN 
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
+	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
+END
+
 -- Create and validate the lot numbers
 IF @ysnPost = 1
 BEGIN 	
 	DECLARE @intCreateUpdateLotError AS INT 
 
 	UPDATE lot
-	SET lot.strWarehouseRefNo = r.strWarehouseRefNo
+	SET 
+		lot.strWarehouseRefNo = r.strWarehouseRefNo
+		,lot.strWarrantNo = r.strWarrantNo -- Ensure the lot is using the same warrant number when posting the IR. 
+		,lot.intWarrantStatus = r.intWarrantStatus -- Ensture the lot is using the same warrant status when posting the IR.
 	FROM tblICInventoryReceiptItemLot lot 
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId

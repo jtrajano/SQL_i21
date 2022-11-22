@@ -30,6 +30,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblScheduleLoad	NUMERIC(18, 6) NULL, 
     dblShippingInstructionQty NUMERIC(18, 6) NULL, 
 	dblNetWeight NUMERIC(38, 20) NULL, 
+	dblConvertedNetWeight NUMERIC(38, 20) NULL, 
+	dblConvertedQuantity NUMERIC(38, 20) NULL, 
 	intNetWeightUOMId int NULL,	
 	intUnitMeasureId int NULL,
 	intCategoryUOMId INT NULL, 	
@@ -240,9 +242,15 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strTaxLocation] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] [int] NULL,
 	ysnRoll BIT NULL DEFAULT 0, 
+	dtmEtaPol datetime null,
+	dtmEtaPod datetime null,
+	strContractReference NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intGardenMarkId] [int] NULL,
+	[intReasonCodeId] [int] NULL,
 
-
-
+	dblPurchasePrice NUMERIC(18, 6) NULL DEFAULT(0),
+	dblLandedPrice NUMERIC(18, 6) NULL DEFAULT(0),
+	dblSalesPrice NUMERIC(18, 6) NULL DEFAULT(0),
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

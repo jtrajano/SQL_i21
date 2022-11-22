@@ -1,23 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuEMSearchEntityProducer]
 AS
-
-SELECT 
-		a.intEntityId,   
-		a.strEntityNo, 
-		a.strName,  
-		g.strPhone,  
-		e.strAddress,  
-		e.strCity,  
-		e.strState,  
-		e.strZipCode,
-		a.ysnActive
-	FROM 		
-			tblEMEntity a
-		join [tblEMEntityType] b
-			on b.intEntityId = a.intEntityId and b.strType = 'Producer'		
-		left join [tblEMEntityLocation] e  
-			on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
-		left join [tblEMEntityToContact] f  
-			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
-		left join tblEMEntity g  
-			on f.intEntityContactId = g.intEntityId  
+SELECT intEntityId		= E.intEntityId
+     , strEntityNo		= E.strEntityNo
+	 , strName			= E.strName
+     , strPhone			= CON.strPhone
+	 , strAddress		= EL.strAddress
+	 , strCity			= EL.strCity
+	 , strState			= EL.strState
+	 , strZipCode		= EL.strZipCode
+	 , ysnActive		= E.ysnActive
+FROM tblEMEntity E
+INNER JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId AND ET.strType = 'Producer'		
+LEFT JOIN tblEMEntityLocation EL ON E.intEntityId = EL.intEntityId AND EL.ysnDefaultLocation = 1 
+LEFT JOIN tblEMEntityToContact EC ON E.intEntityId = EC.intEntityId AND EC.ysnDefaultContact = 1  
+LEFT JOIN tblEMEntity CON ON EC.intEntityContactId = CON.intEntityId  

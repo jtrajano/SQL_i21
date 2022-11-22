@@ -7,9 +7,16 @@
 AS
 
 BEGIN
+	
 	SELECT intCompanyLocationId = intId
 	INTO #LicensedLocation
 	FROM @Locations
+
+	IF (SELECT COUNT(*) FROM #LicensedLocation) = 0
+	BEGIN
+		INSERT INTO #LicensedLocation
+		SELECT @intLocationId
+	END
 	
 	DECLARE @intCommodityUnitMeasureId AS INT
 		,@intCommodityStockUOMId INT
@@ -24,6 +31,7 @@ BEGIN
 		Id INT IDENTITY
 		,dtmDate DATETIME
 		,dblTotal NUMERIC(18,6)
+		,strTransactionNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strDistribution NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strOwnership NVARCHAR(20) COLLATE Latin1_General_CI_AS
@@ -37,6 +45,7 @@ BEGIN
 	INSERT INTO @tblResult (
 		dtmDate
 		,dblTotal
+		,strTransactionNo
 		,strTransactionType
 		,strDistribution
 		,strOwnership
@@ -46,6 +55,7 @@ BEGIN
 	SELECT
 		  dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
 		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
+		,CompOwn.strTransactionNumber
 		,strTransactionType
 		,CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
 			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
@@ -62,9 +72,10 @@ BEGIN
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmDate,@intCommodityId,NULL) CompOwn
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
-		AND CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
-		AND CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-	
+		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
+			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
+		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
+
 	--=============================
 	-- Customer Owned
 	--=============================
@@ -90,8 +101,8 @@ BEGIN
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CusOwn.strDistributionType
 	WHERE ISNULL(CusOwn.strStorageType,'') <> 'ITR' AND CusOwn.intTypeId IN (1,3,4,5,8,9)
 		AND CusOwn.intItemId = ISNULL(@intItemId,CusOwn.intItemId)
-		AND CusOwn.intLocationId = ISNULL(@intLocationId,CusOwn.intLocationId)
-		AND CusOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND (CusOwn.intLocationId = ISNULL(@intLocationId,CusOwn.intLocationId)
+			OR CusOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 		AND CusOwn.dblTotal <> 0
 
 	--=============================
@@ -116,8 +127,8 @@ BEGIN
 		,OnHold.strLocationName
 	FROM dbo.fnRKGetBucketOnHold(@dtmDate,@intCommodityId,NULL) OnHold
 	WHERE OnHold.intItemId = ISNULL(@intItemId,OnHold.intItemId)
-		AND OnHold.intLocationId = ISNULL(@intLocationId,OnHold.intLocationId)
-		AND OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND (OnHold.intLocationId = ISNULL(@intLocationId,OnHold.intLocationId)
+			OR OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 			
 	DECLARE @tblResultInventory TABLE 
 	(
@@ -199,8 +210,11 @@ BEGIN
 			,strOwnership
 			,intCompanyLocationId
 			,strLocationName
-		FROM @tblResult
+		FROM @tblResult A
+		JOIN tblICInventoryTransfer IT
+			ON IT.strTransferNo = A.strTransactionNo
 		WHERE strTransactionType IN ('Inventory Transfer')
+			--AND B.TOTAL <> 0
 		AND dblTotal > 0
 		GROUP BY dtmDate
 			,strDistribution 
@@ -235,8 +249,11 @@ BEGIN
 			,strOwnership
 			,intCompanyLocationId
 			,strLocationName
-		FROM @tblResult
+		FROM @tblResult A
+		JOIN tblICInventoryTransfer IT
+			ON IT.strTransferNo = A.strTransactionNo
 		WHERE strTransactionType IN ('Inventory Transfer')
+			--AND B.TOTAL <> 0
 		AND dblTotal < 0
 		GROUP BY dtmDate
 			,strDistribution 
@@ -344,7 +361,7 @@ BEGIN
 			,intCompanyLocationId
 			,strLocationName
 		FROM @tblResult
-		WHERE strTransactionType IN ('Inventory Shipment')
+		WHERE strTransactionType IN ('Inventory Shipment', 'Invoice')
 		GROUP BY dtmDate
 			,strDistribution 
 			,strTransactionType

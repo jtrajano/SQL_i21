@@ -218,7 +218,50 @@ BEGIN
 	JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = L.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = IU2.intUnitMeasureId
-	WHERE L.dblQty > 0
+	WHERE L.dblQty > 0 AND L.intLotStatusId=1
+	GROUP BY L.intContractDetailId
+		,L.intItemId
+		,L.intLocationId
+		,U1.strUnitMeasure
+		,U2.strUnitMeasure
+		,L.strContainerNo
+		,L.strMarkings
+		,L.intSubLocationId
+
+	INSERT INTO tblMFShortTermPlanningViewDetail (
+		intContractDetailId
+		,intItemId
+		,intLocationId
+		,dblQty
+		,strQtyUOM
+		,dblWeight
+		,strWeightUOM
+		,intAttributeId
+		,intUserId
+		,strContainerNumber
+		,strMarks
+		,intSubLocationId
+		)
+	SELECT L.intContractDetailId
+		,L.intItemId
+		,L.intLocationId AS intLocationId
+		,SUM(L.dblQty)
+		,U1.strUnitMeasure
+		,SUM(L.dblWeight)
+		,U2.strUnitMeasure
+		,15 AS intAttributeId -->NOT Available Inventory
+		,@intUserId
+		,L.strContainerNo
+		,L.strMarkings
+		,L.intSubLocationId
+	FROM tblICLot L
+	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
+	JOIN @tblMFItem I ON I.intItemId = L.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+	JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
+	LEFT JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = L.intWeightUOMId
+	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = IU2.intUnitMeasureId
+	WHERE L.dblQty > 0 AND L.intLotStatusId<>1
 	GROUP BY L.intContractDetailId
 		,L.intItemId
 		,L.intLocationId
@@ -255,6 +298,7 @@ BEGIN
 
 	IF @strColumnName NOT IN (
 			'Available Inventory'
+			,'Not Available Inventory'
 			,'All Item'
 			)
 	BEGIN
@@ -487,9 +531,10 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
-				,Sum(dblQuantity) dblQuantity
+			SELECT Sum(LD.dblNet) dblNet
+				,Sum(LD.dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
+			JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
 		WHERE SS.intContractStatusId IN (
@@ -526,16 +571,17 @@ BEGIN
 		JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 		JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 		OUTER APPLY (
-			SELECT Sum(dblNet) dblNet
-				,Sum(dblQuantity) dblQuantity
+			SELECT Sum(LD.dblNet) dblNet
+				,Sum(LD.dblQuantity) dblQuantity
 			FROM tblLGLoadDetail LD
+			JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
 			WHERE LD.intPContractDetailId = SS.intContractDetailId
 			) C2
 		WHERE SS.intContractStatusId IN (
 				1
 				,4
 				)
-			AND SS.dtmUpdatedAvailabilityDate BETWEEN @dtmCurrentDate
+			AND SS.dtmStartDate BETWEEN @dtmCurrentMonthStartDate
 				AND @dtmAfter80Days
 			AND SS.dblQuantity - IsNULL(C2.dblQuantity, 0) > 0
 	END

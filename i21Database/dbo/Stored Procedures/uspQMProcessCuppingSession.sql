@@ -221,6 +221,7 @@ INSERT INTO tblQMTestResult (
 	 , dtmValidTo
 	 , strPropertyRangeText
 	 , dblMinValue
+	 , dblPinpointValue
 	 , dblMaxValue
 	 , dblLowValue
 	 , dblHighValue
@@ -261,6 +262,7 @@ SELECT intConcurrencyId						= 1
 	 , dtmValidTo							= TR.dtmValidTo
 	 , strPropertyRangeText					= TR.strPropertyRangeText
 	 , dblMinValue							= TR.dblMinValue
+	 , dblPinpointValue							= TR.dblPinpointValue
 	 , dblMaxValue							= TR.dblMaxValue
 	 , dblLowValue							= TR.dblLowValue
 	 , dblHighValue							= TR.dblHighValue

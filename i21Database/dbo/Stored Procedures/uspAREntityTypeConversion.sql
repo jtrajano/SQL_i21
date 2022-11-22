@@ -5,6 +5,9 @@
 	AS
 	DECLARE @OutputMessage NVARCHAR(200)
 	DECLARE @Location INT
+	DECLARE @activeStatus bit
+	DECLARE @creditHoldStatus bit
+
 	SET @OutputMessage = 'Conversion is not applicable to this type of entity.'
 	SET @Location = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
 
@@ -16,12 +19,13 @@
 		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE intEntityId = @EntityId AND strType = 'Lead')
 		BEGIN
 			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'lead'
+			SELECT @activeStatus = ysnActive FROM tblARLead WHERE intEntityId = @EntityId
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomer WHERE intEntityId = @EntityId)
 			BEGIN
 
-				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance, intBillToId, intShipToId)
-				SELECT @EntityId,0,0,@Location,@Location
+				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance, intBillToId, intShipToId, ysnActive)
+				SELECT @EntityId,0,0,@Location,@Location, @activeStatus
 
 			END
 
@@ -38,15 +42,14 @@
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE intEntityId = @EntityId AND strType = 'Prospect' )
 		BEGIN
-			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'
-
-
+			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'	
+			SELECT @activeStatus = ysnActive, @creditHoldStatus = ysnCreditHold FROM tblARCustomer WHERE intEntityId = @EntityId
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomer WHERE intEntityId = @EntityId)
 			BEGIN
 
-				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance)
-				SELECT @EntityId,0,0
+				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance, ysnActive, ysnCreditHold)
+				SELECT @EntityId,0,0,@activeStatus, @creditHoldStatus
 
 			END
 
@@ -65,14 +68,13 @@
 		BEGIN
 			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'
 			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'customer'
-
-
+			SELECT @activeStatus = ysnActive FROM tblARCustomer WHERE intEntityId = @EntityId
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARLead WHERE intEntityId = @EntityId)
 			BEGIN
 
-				INSERT INTO tblARLead(intEntityId)
-				SELECT @EntityId
+				INSERT INTO tblARLead(intEntityId, ysnActive)
+				SELECT @EntityId, @activeStatus
 
 			END
 

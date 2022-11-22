@@ -181,7 +181,6 @@ SELECT @intTimeOffRequestId = @intTransactionId
 
 			EXEC uspSMAuditLog 'Payroll.view.TimeOffRequest', @intTransactionId, @intUserId, 'Posted to Calendar', '', '', ''
 
-			
 			DECLARE @intEntityId AS INT
 			DECLARE @intTypeTimeOffId AS INT
 			DECLARE @intPaycheckId AS INT

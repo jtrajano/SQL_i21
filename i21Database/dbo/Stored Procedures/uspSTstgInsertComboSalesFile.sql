@@ -615,7 +615,7 @@ BEGIN
 					, PSL.dblPromoPrice [ComboPrice]
 					, PIL.intPromoItemListNo [ItemListID]
 					, PSLD.intQuantity [ComboItemQuantity]
-					, IUM.strUnitMeasure [ComboItemQuantityUOM]
+					, NULL [ComboItemQuantityUOM]
 					, PSLD.dblPrice [ComboItemUnitPrice]
 					, CONVERT(nvarchar(10), CAST(PSL.dtmPromoBegPeriod AS DATE), 126) [StartDate]
 					, '0:00:01' [StartTime]

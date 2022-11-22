@@ -21,7 +21,15 @@ OUTER APPLY (
 ) x
 WHERE rs.guiUniqueId = @guiUniqueId
 AND v.ysnPymtCtrlActive = 1
-AND e.ysnActive = 1
+--AND e.ysnActive = 1
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The Payment Control of the vendor with an ''' + CAST(rs.intEntityId AS NVARCHAR(50)) + ''' is not active.', 'entityId', 'Error',  CAST(rs.intEntityId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging rs
+JOIN tblAPVendor v ON v.intEntityId = rs.intEntityId
+JOIN tblEMEntity e ON e.intEntityId = v.intEntityId
+WHERE rs.guiUniqueId = @guiUniqueId
+	AND (ISNULL(v.ysnPymtCtrlActive, 0) = 0)
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
@@ -97,6 +105,16 @@ WHERE i.intItemId IS NULL
 	AND r.guiUniqueId = @guiUniqueId
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The receiveUOMId ''' + CAST(ri.intReceiveUOMId AS NVARCHAR(50)) + ''' is not valid for the itemId ''' + CAST(ri.intItemId AS NVARCHAR(50)) + '''', 'receiveUOMId', 'Error',  CAST(ri.intReceiveUOMId AS NVARCHAR(50))
+FROM tblRestApiReceiptStaging r
+INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
+LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
+LEFT JOIN tblICItemUOM uom ON uom.intUnitMeasureId = ri.intReceiveUOMId
+    AND uom.intItemId = i.intItemId
+WHERE uom.intUnitMeasureId IS NULL 
+	AND r.guiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'The costUOMId ''' + CAST(ri.intCostUOMId AS NVARCHAR(50)) + ''' is not valid for the chargeId ''' + CAST(ri.intChargeId AS NVARCHAR(50)) + '''', 'costUOMId', 'Error',  CAST(ri.intChargeId AS NVARCHAR(50))
 FROM tblRestApiReceiptStaging r
 INNER JOIN tblRestApiReceiptChargeStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
@@ -162,7 +180,7 @@ SELECT
 
 	, il.intItemLocationId
 	, ri.intItemId
-	, ri.intReceiveUOMId
+	, um.intItemUOMId
 	, r.intCurrencyId
 	, r.intFreightTermId
 	, r.strVendorRefNo
@@ -186,6 +204,8 @@ FROM tblRestApiReceiptStaging r
 	INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
 	INNER JOIN tblICItemLocation il ON il.intItemId = ri.intItemId
 		AND il.intLocationId = r.intLocationId
+    LEFT JOIN tblICItemUOM um ON um.intItemId = ri.intItemId
+        AND um.intUnitMeasureId = ri.intReceiveUOMId
 WHERE r.guiUniqueId = @guiUniqueId
 
 INSERT INTO @OtherCharges(

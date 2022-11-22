@@ -17,7 +17,7 @@ SELECT LG.intLoadId
 	, dblInboundPrice = CASE WHEN (LG.strType != 'Outbound') THEN ISNULL(CASE WHEN LG.dblPCashPrice IS NOT NULL OR LG.dblPCashPrice != 0
 																			THEN LG.dblPCashPrice
 																		WHEN LG.dblPCashPrice IS NULL OR LG.dblPCashPrice = 0
-																			THEN [dbo].[fnTRGetRackPrice](LG.dtmScheduledDate, SP.intSupplyPointId, LG.intItemId)
+																			THEN [dbo].[fnTRGetRackPrice](LG.dtmScheduledDate, SP.intSupplyPointId, LG.intItemId,DEFAULT)
 																		END, 0)
 							WHEN LG.strType = 'Outbound' AND ISNULL(LG.dblSCashPrice, 0) = 0 THEN ItemS.dblReceiveLastCost 
 							ELSE ISNULL(LG.dblSCashPrice, 0) END
@@ -86,6 +86,9 @@ SELECT LG.intLoadId
 	, LG.intSalespersonId
 	, intSiteId = LG.intTMSiteId
 	, intSiteNumber = TS.intSiteNumber
+	, strSupplyPointGrossOrNet = SP.strGrossOrNet
+	, strSaleUnits = CEL.strSaleUnits
+	, strFreightSalesUnit = SP.strFreightSalesUnit
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
@@ -96,4 +99,5 @@ LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityI
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
 LEFT JOIN vyuICGetItemStock ItemS ON ItemS.intItemId = LG.intItemId AND ItemS.intLocationId = LG.intSCompanyLocationId
 LEFT JOIN tblTMSite TS ON LG.intTMSiteId = TS.intSiteID
+LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LG.intCustomerEntityLocationId
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

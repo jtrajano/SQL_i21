@@ -36,6 +36,8 @@ BEGIN TRY
 		, @ysnFreight BIT
 		, @ysnInsurance BIT
 		, @intOriginCountryId INT
+		, @intProductTypeId INT
+		, @intProductLineId INT
 
 	DECLARE @CostItems AS TABLE (intCostItemId INT
 		, strCostItem NVARCHAR(100)
@@ -61,6 +63,11 @@ BEGIN TRY
 
 	SELECT @intOriginCountryId = intCountryId FROM tblSMCity
 	WHERE intCityId = @intFromPortId
+
+	SELECT TOP 1 @intProductTypeId = intProductTypeId
+		, @intProductLineId = intProductLineId
+	FROM tblICItem
+	WHERE intItemId = @intItemId
 	
 	IF (@ysnFreightTermCost = 0)
 	BEGIN
@@ -74,6 +81,9 @@ BEGIN TRY
 		AND intLoadingTermId = @intFromTermId
 		AND intDestinationTermId = @intToTermId
 		AND intMarketZoneId = @intMarketZoneId
+		AND intCommodityId = @intCommodityId
+		AND ISNULL(intProductTypeId, ISNULL(@intProductTypeId, 0)) = ISNULL(@intProductTypeId, 0)
+		AND ISNULL(intProductLineId, ISNULL(@intProductLineId, 0)) = ISNULL(@intProductLineId, 0)
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCosts)
 	BEGIN

@@ -95,6 +95,7 @@ SELECT
 	, Adj.strShipmentNumber
 	, Adj.strReceiptNumber
 	, fiscal.strPeriod strAccountingPeriod
+	, Item.ysnLotWeightsRequired
 FROM tblICInventoryAdjustmentDetail AdjDetail
 LEFT JOIN vyuICGetInventoryAdjustment Adj ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation NewLocation ON NewLocation.intCompanyLocationId = AdjDetail.intNewLocationId

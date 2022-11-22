@@ -77,6 +77,27 @@ JOIN
 	 FROM tblICItemAccount
 	 WHERE dtmDateModified IS NOT NULL 
 	 OR dtmDateCreated IS NOT NULL
+	 
+	 UNION
+
+	 SELECT intItemId, dtmDateModified, dtmDateCreated 
+	 FROM tblICEffectiveItemCost
+	 WHERE dtmDateModified IS NOT NULL 
+	 OR dtmDateCreated IS NOT NULL
+	 
+	 UNION
+
+	 SELECT intItemId, dtmDateModified, dtmDateCreated 
+	 FROM tblICEffectiveItemPrice
+	 WHERE dtmDateModified IS NOT NULL 
+	 OR dtmDateCreated IS NOT NULL
+
+	 UNION
+
+	 SELECT intItemId, dtmDateModified, dtmDateCreated 
+	 FROM tblICItemUOM
+	 WHERE dtmDateModified IS NOT NULL 
+	 OR dtmDateCreated IS NOT NULL
 ) AS x 
 	ON x.intItemId = I.intItemId 
 INNER JOIN dbo.tblSMUserSecurityCompanyLocationRolePermission AS rolePerm 
@@ -85,7 +106,7 @@ INNER JOIN dbo.tblEMEntity AS EM
 	ON EM.intEntityId = rolePerm.intEntityId 
 LEFT OUTER JOIN dbo.tblSTUpdateRegisterNotification AS URN 
 	ON URN.intEntityId = EM.intEntityId
-WHERE (I.ysnFuelItem = 0)
+WHERE (ISNULL(I.ysnFuelItem,0) = 0)
 
 
 --AND 

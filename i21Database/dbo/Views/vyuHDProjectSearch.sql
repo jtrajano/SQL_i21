@@ -76,6 +76,10 @@
 					,dtmGoLive
 					,strStatusFontColor
 					,strStatusBackColor
+					,strDataConversionLead 
+					,strCustomerSuccessManager
+					,strImplementationLead 
+					,strExecutiveSponsor
 		from 
 				(
 				select
@@ -132,6 +136,10 @@
 					,proj.dtmGoLive
 					,strStatusFontColor = sta.strFontColor
 					,strStatusBackColor = sta.strBackColor
+					,strDataConversionLead = DataConversionLead.strName
+					,strCustomerSuccessManager = CustomerSuccessManager.strName
+					,strImplementationLead = ImplementationLead.strName
+					,strExecutiveSponsor = ExecutiveSponsor.strName
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
@@ -149,4 +157,9 @@
 					left join tblEMEntity salesrep on salesrep.intEntityId = proj.intInternalSalesPerson
 					left join tblHDVersion tv on tv.intVersionId = proj.intTargetVersionId
 					left join tblHDTicketStatus sta on sta.intTicketStatusId = proj.intTicketStatusId
+					left join tblEMEntity DataConversionLead on DataConversionLead.intEntityId = proj.intDataConversionLead
+					left join tblEMEntity CustomerSuccessManager on CustomerSuccessManager.intEntityId = proj.intCustomerSuccessManager
+					left join tblEMEntity ImplementationLead on ImplementationLead.intEntityId = proj.intImplementationLead
+					left join tblEMEntity ExecutiveSponsor on ExecutiveSponsor.intEntityId = proj.intExecutiveSponsor
 				) as query1
+GO

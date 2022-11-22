@@ -51,6 +51,8 @@ SELECT intSampleId			= S.intSampleId
 	 , intContractHeaderId	= S.intContractHeaderId
 	 , intContractDetailId	= S.intContractDetailId
 	 , intLotId				= L.intLotId
+	 , strSalesContracts	= fnQMGetAllocatedSalesContracts.strSalesContracts
+	 , strCustomers			= fnQMGetAllocatedSalesContracts.strCustomers
 INTO #SAMPLES
 FROM tblQMSample S
 INNER JOIN fnGetRowsFromDelimitedValues(@strSampleIds) V ON S.intSampleId = V.intID
@@ -67,6 +69,7 @@ LEFT JOIN tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId 
 LEFT JOIN tblEMEntity E ON S.intEntityId = E.intEntityId
 LEFT JOIN tblQMSamplingCriteria SC ON S.intSamplingCriteriaId = SC.intSamplingCriteriaId
 LEFT JOIN tblICUnitMeasure UM ON S.intRepresentingUOMId = UM.intUnitMeasureId
+OUTER APPLY dbo.fnQMGetAllocatedSalesContracts(CT.intContractTypeId, S.intContractDetailId) fnQMGetAllocatedSalesContracts
 
 --RANK ACCORDING TO SORT
 SELECT S.intItemId
@@ -103,6 +106,8 @@ SELECT intRank				= ROW_NUMBER() OVER (ORDER BY FR.intId ASC)
 	 , intContractDetailId	= S.intContractDetailId
 	 , intLotId				= S.intLotId
 	 , strStatus			= S.strStatus
+	 , strCustomers			= S.strCustomers
+	 , strSalesContracts	= S.strSalesContracts
 FROM (
 	SELECT intSampleId
 		 , intId		= MIN(intId)

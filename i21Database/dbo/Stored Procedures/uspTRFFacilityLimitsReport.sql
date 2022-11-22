@@ -1078,7 +1078,7 @@ AS
  		, dblCosts = SUM(dblCosts)
  	INTO #tempContractCost
  	FROM ( 
- 		SELECT dblCosts = dbo.fnRKGetCurrencyConvertion(CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = 1 THEN CU.intMainCurrencyId ELSE dc.intCurrencyId END, @intCurrencyId)
+ 		SELECT dblCosts = dbo.fnRKGetCurrencyConvertion(CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = 1 THEN CU.intMainCurrencyId ELSE dc.intCurrencyId END, @intCurrencyId, DEFAULT)
  							* (CASE WHEN (M2M.strContractType = 'Both') OR (M2M.strContractType = 'Purchase')
  										THEN (CASE WHEN strAdjustmentType = 'Add' THEN ABS(CASE WHEN dc.strCostMethod = 'Amount' THEN SUM(dc.dblRate)
  																								ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END)
@@ -1189,8 +1189,8 @@ AS
  		, strSaleHedgeMonth = sHedge.strFutureMonth
 
  		-- Financing columns
- 		, dblSInvoiceAmountInFacilityCurr = ISNULL(sInvoice.dblInvoiceTotal, @dblZero) * dbo.fnRKGetCurrencyConvertion(sInvoice.intCurrencyId, pContract.intFacilityCurrencyId) -- Convert to Facility Currency
- 		, dblPInvoiceAmountInFacilityCurr = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero) * dbo.fnRKGetCurrencyConvertion(pVoucher.intCurrencyId, pContract.intFacilityCurrencyId) -- Convert to Facility Currency
+ 		, dblSInvoiceAmountInFacilityCurr = ISNULL(sInvoice.dblInvoiceTotal, @dblZero) * dbo.fnRKGetCurrencyConvertion(sInvoice.intCurrencyId, pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
+ 		, dblPInvoiceAmountInFacilityCurr = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero) * dbo.fnRKGetCurrencyConvertion(pVoucher.intCurrencyId, pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
 
  		-- Valuation columns
  		, dblMarketPrice = CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero

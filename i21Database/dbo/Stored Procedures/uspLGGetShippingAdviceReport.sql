@@ -238,6 +238,7 @@ BEGIN
 				strTerminalState = TerminalLocation.strState,
 				strTerminalZipCode = TerminalLocation.strZipCode,
 
+				strShipper = ShipperEntity.strName,
 				strInsurer = InsurEntity.strName,
 				strInsurerEmail = InsurEntity.strEmail,
 				strInsurerFax = InsurEntity.strFax,
@@ -337,6 +338,7 @@ BEGIN
 		LEFT JOIN	[tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
 		LEFT JOIN	tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = L.intTerminalEntityId
 		LEFT JOIN	[tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
+		LEFT JOIN	tblEMEntity ShipperEntity ON ShipperEntity.intEntityId = ISNULL(L.intShipperEntityId, CD.intShipperId)
 		LEFT JOIN	tblEMEntity InsurEntity ON InsurEntity.intEntityId = L.intInsurerEntityId
 		LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
 		LEFT JOIN	tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId

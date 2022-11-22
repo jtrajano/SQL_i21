@@ -495,7 +495,7 @@ INNER JOIN(
 	where   strTransactionType='Cash Refund' and ysnPosted = 1
 )REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
 WHERE I.ysnPosted = 1 
-	AND I.ysnPaid = 1
+	AND (I.ysnPaid = 1 OR I.ysnRefundProcessed = 1)
 	AND I.strTransactionType <> 'Cash Refund'
 	AND I.strTransactionType = 'Credit Memo'
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	

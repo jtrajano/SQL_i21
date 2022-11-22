@@ -78,7 +78,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 			DECLARE @invalidCount INT
 			DECLARE @batchIdUsed NVARCHAR(MAX)
 			DECLARE @recapId BIT
-			DECLARE @RaiseError INT
+			DECLARE @RaiseError INT = 1
 
 			DECLARE @invoice NVARCHAR(MAX)
 			SELECT TOP 1 @invoice = inti21InvoiceId FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)

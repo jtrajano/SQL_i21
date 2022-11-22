@@ -28,7 +28,9 @@
 	CONSTRAINT [UK_tblARCustomerFreightXRef_reference_columns] UNIQUE NONCLUSTERED ([strZipCode] ASC, [intCategoryId] ASC,[intEntityLocationId] ASC, [intShipViaId] ASC, [intEntityTariffTypeId] ASC),	--THE NAME IS USED IN THE FRONT END, IF THERE ARE CHANGES PLEASE INFORM MON.GONZALES	
     CONSTRAINT [FK_tblARCustomerFreightXRef_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
 );
+GO
 
+CREATE INDEX [IX_tblARCustomerFreightXRef_Main] ON [dbo].[tblARCustomerFreightXRef] ([intEntityCustomerId] ASC, intEntityLocationId ASC, intCategoryId ASC, strZipCode ASC)
 GO
 
 CREATE TRIGGER [dbo].[trgARCustomerFreight]

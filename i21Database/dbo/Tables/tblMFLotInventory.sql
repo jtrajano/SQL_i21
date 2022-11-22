@@ -20,6 +20,8 @@
 	,ysnPrinted BIT NOT NULL CONSTRAINT [DF_tblMFLotInventory_ysnPrinted] DEFAULT 0
 	,dtmLastPrinted DATETIME
 	,intPrintedById INT
+	,dblReservedQtyInTBS numeric(18,6)
+	,intBatchId INT NULL
 	,CONSTRAINT [PK_tblMFLotInventory] PRIMARY KEY ([intLotInventoryId]), 
 	CONSTRAINT [AK_tblMFLotInventory_intLotId] UNIQUE ([intLotId]), 
 	CONSTRAINT [FK_tblMFLotInventory_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]) ON DELETE CASCADE,

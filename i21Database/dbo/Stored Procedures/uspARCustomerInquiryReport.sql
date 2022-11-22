@@ -164,7 +164,7 @@ SELECT intEntityCustomerId          = CUSTOMER.intEntityId
 	 , strPhone2					= CUSTOMER.strPhone2
 	 , strBusinessLocation			= CUSTOMER.strLocationName
 	 , strInternalNotes				= CUSTOMER.strInternalNotes
-	 , strBudgetStatus				= 'Past Due'
+	 , strBudgetStatus				= CASE WHEN ISNULL(BUDGETPASTDUE.dblAmountPastDue, CONVERT(NUMERIC(18,6), 0)) = 0 THEN 'Paid' ELSE 'Past Due' END
 	 , strBillToAddress				= CUSTOMER.strBillToAddress
 	 , strBillToCity				= CUSTOMER.strBillToCity
 	 , strBillToState				= CUSTOMER.strBillToState
@@ -193,7 +193,7 @@ SELECT intEntityCustomerId          = CUSTOMER.intEntityId
 	 , dbl31DaysAmountDue			= ISNULL(AGING.dbl60Days, CONVERT(NUMERIC(18,6), 0)) + ISNULL(AGING.dbl90Days, CONVERT(NUMERIC(18,6), 0)) + ISNULL(AGING.dbl91Days, CONVERT(NUMERIC(18,6), 0))
 	 , intRemainingBudgetPeriods	= ISNULL(BUDGETPERIODS.intRemainingBudgetPeriods, CONVERT(NUMERIC(18,6), 0))
 	 , intAveragePaymentDays		= 0
-	 , dtmNextPaymentDate			= BUDGETMONTH.dtmBudgetDate	 
+	 , dtmNextPaymentDate			= DATEADD(MONTH, 1, BUDGETMONTH.dtmBudgetDate)
 	 , dtmLastStatementDate			= SOA.dtmLastStatementDate
 	 , dtmBudgetMonth				= BUDGETMONTH.dtmBudgetDate
 	 , dblHighestAR					= ISNULL(CUSTOMER.dblHighestAR, 0)

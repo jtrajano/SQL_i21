@@ -26,8 +26,13 @@
 		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC),
 		intEntitySalespersonId = m.intEntityId,
 		strEntitySalespersonName = m.strName,
-		strPrimaryContactEmail = g.strEmail
-
+		strPrimaryContactEmail = g.strEmail,
+		strEntityTerritory = 
+			case when e.strState != '' and e.strZipCode != '' then e.strState + ' - ' + e.strZipCode
+				when e.strState != '' then e.strState 
+				when e.strZipCode != '' then e.strZipCode 
+				else '' end,
+		l.ysnActive
     FROM         
             tblEMEntity a
         join vyuEMEntityType b

@@ -12,6 +12,7 @@
     CONSTRAINT [PK_tblBBBuybackDetail] PRIMARY KEY ([intBuybackDetailId]), 
 	CONSTRAINT [FK_tblBBBuybackDetail_tblBBBuyback] FOREIGN KEY (intBuybackId) REFERENCES [tblBBBuyback](intBuybackId) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblBBBuybackDetail_tblARInvoiceDetail] FOREIGN KEY (intInvoiceDetailId) REFERENCES [tblARInvoiceDetail](intInvoiceDetailId), 
-	
-)
+);
+GO
+CREATE INDEX [idx_tblBBBuybackDetail_tblARInvoiceDetail] ON [dbo].[tblBBBuybackDetail] (intInvoiceDetailId, intBuybackDetailId) 
 GO

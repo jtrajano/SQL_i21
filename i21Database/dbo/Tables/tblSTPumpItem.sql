@@ -3,7 +3,7 @@
 	[intStorePumpItemId] INT NOT NULL IDENTITY, 
 	[intStoreId] INT NOT NULL, 
     [intItemUOMId] INT NOT NULL, 
-	[strUnitMeasure] VARCHAR(200) NULL,
+	[strUnitMeasure] VARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
     [dblPrice] NUMERIC(18, 6) NULL  DEFAULT 0, 
     [intTaxGroupId] int NULL,
 	[intCategoryId] int NULL,

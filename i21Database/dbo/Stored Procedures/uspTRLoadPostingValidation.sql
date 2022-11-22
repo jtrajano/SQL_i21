@@ -181,26 +181,26 @@ BEGIN TRY
 				, @strCostMethodFreight NVARCHAR(50) = NULL
 				, @strCostUOMFreight NVARCHAR(50) = NULL
 
+			SELECT TOP 1 @strCostTypeFreight = strCostType, @strCostMethodFreight = strCostMethod, @strCostUOMFreight = strCostUOM
+			FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId AND strCostType = 'Freight'
 			-- CHECK FREIGHT ITEM COST TYPE  
-			SELECT TOP 1 @strCostTypeFreight = strCostType FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId AND strCostType = 'Freight'
+			
 			IF(ISNULL(@strCostTypeFreight, '') = '')
 			BEGIN
 				RAISERROR('Incorrect Freight Item setup: Cost Type should be ''Freight''', 16, 1)
 			END
 
 			-- CHECK FREIGHT ITEM COST METHOD
-			SELECT TOP 1 @strCostMethodFreight = strCostMethod FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId AND strCostType = 'Freight'
 			IF(ISNULL(@strCostMethodFreight, '') NOT IN ('Per Unit','Gross Unit'))
 			BEGIN
 				RAISERROR('Incorrect Freight Item setup: Cost Method should be either Per Unit or Gross Unit', 16, 1)
 			END
 
 			-- CHECK FREIGHT ITEM COST UOM
-			SELECT TOP 1 @strCostUOMFreight = strCostUOM FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId AND strCostType = 'Freight'
-			IF(ISNULL(@strCostUOMFreight, '') = '')
-			BEGIN
-				RAISERROR('Incorrect Freight Item setup: Cost UOM should have a value.', 16, 1)
-			END
+			-- IF(ISNULL(@strCostUOMFreight, '') = '')
+			-- BEGIN
+			-- 	RAISERROR('Incorrect Freight Item setup: Cost UOM should have a value.', 16, 1)
+			-- END
 
 			-- CHECK SURCHARGE ITEM
 			SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
@@ -215,15 +215,14 @@ BEGIN TRY
 				DECLARE @strCostTypeSurcharge NVARCHAR(50) = NULL
 				, @strCostMethodSurcharge NVARCHAR(50) = NULL
 
+				SELECT TOP 1 @strCostTypeSurcharge = strCostType, @strCostMethodSurcharge = strCostMethod FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId AND strCostType = 'Other Charges'
 				-- CHECK SURCHARGE ITEM COST TYPE
-				SELECT TOP 1 @strCostTypeSurcharge = strCostType FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId AND strCostType = 'Other Charges'
 				IF(ISNULL(@strCostTypeSurcharge, '') = '')
 				BEGIN
 					RAISERROR('Incorrect Surcharge Item setup: Cost Type should be ''Other Charges''', 16, 1)
 				END
 
 				-- CHECK SURCHARGE ITEM COST METHOD
-				SELECT TOP 1 @strCostMethodSurcharge = strCostMethod FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId AND strCostType = 'Other Charges'
 				IF(ISNULL(@strCostMethodSurcharge, '') != 'Percentage')
 				BEGIN
 					RAISERROR('Incorrect Surcharge Item setup: Cost Method should be Percentage', 16, 1)

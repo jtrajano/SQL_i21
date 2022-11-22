@@ -44,50 +44,7 @@ SELECT L.intLoadId
 	,strPosition = P.strPosition
 	,strPositionType = P.strPositionType
 	,strWeightUnitMeasure = UM.strUnitMeasure
-	,strShipmentStatus = CASE L.intShipmentStatus
-		WHEN 1 THEN 
-			CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
-						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
-				THEN 'Expired'
-				ELSE 'Scheduled' END
-		WHEN 2 THEN 'Dispatched'
-		WHEN 3 THEN 
-			CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-				ELSE 'Inbound Transit' END
-		WHEN 4 THEN 'Received'
-		WHEN 5 THEN 
-			CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-				ELSE 'Outbound Transit' END
-		WHEN 6 THEN 
-			CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-				ELSE 'Delivered' END
-		WHEN 7 THEN 
-			CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
-					ELSE 'Shipping Instruction Created' END
-		WHEN 8 THEN 'Partial Shipment Created'
-		WHEN 9 THEN 'Full Shipment Created'
-		WHEN 10 THEN 'Cancelled'
-		WHEN 11 THEN 'Invoiced'
-		WHEN 12 THEN 'Rejected'
-		ELSE '' END COLLATE Latin1_General_CI_AS
+	,strShipmentStatus = LSS.strShipmentStatus
 	,strEquipmentType = EQ.strEquipmentType
     ,L.strTrailerNo1
     ,L.strTrailerNo2
@@ -122,6 +79,7 @@ SELECT L.intLoadId
 	,CT.strContainerType
 	,strForwardingAgent = ForwardingAgent.strName
 	,strShippingLine = ShippingLine.strName
+	,strShipper = Shipper.strName
 	,strInsurer = Insurer.strName
 	,strTerminal = Terminal.strName
 	,L.strCourierTrackingNumber
@@ -156,7 +114,9 @@ SELECT L.intLoadId
 	,SB.strSubBook
 	,L.ysnAllowReweighs
 	,L.ysnShowOptionality
+	,L.intUserLoc
 FROM tblLGLoad L
+JOIN vyuLGShipmentStatus LSS ON LSS.intLoadId = L.intLoadId
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
 			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
@@ -174,6 +134,10 @@ OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
 			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
 			WHERE strType = 'Forwarding Agent'
 			and ET.intEntityId = L.intForwardingAgentEntityId) ForwardingAgent
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Vendor'
+			and ET.intEntityId = L.intShipperEntityId) Shipper
 OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
 			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
 			WHERE strType = 'Insurer'

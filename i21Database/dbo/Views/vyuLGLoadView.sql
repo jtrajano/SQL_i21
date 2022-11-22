@@ -79,50 +79,7 @@ SELECT -- Load Header
 	,L.ysnDispatchMailSent
 	,L.dtmDispatchMailSent
 	,L.dtmCancelDispatchMailSent
-	,strShipmentStatus = CASE L.intShipmentStatus
-		WHEN 1 THEN 
-			CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
-						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
-				THEN 'Expired'
-				ELSE 'Scheduled' END
-		WHEN 2 THEN 'Dispatched'
-		WHEN 3 THEN 
-			CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-				ELSE 'Inbound Transit' END
-		WHEN 4 THEN 'Received'
-		WHEN 5 THEN 
-			CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-				ELSE 'Outbound Transit' END
-		WHEN 6 THEN 
-			CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-				ELSE 'Delivered' END
-		WHEN 7 THEN 
-			CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
-					ELSE 'Shipping Instruction Created' END
-		WHEN 8 THEN 'Partial Shipment Created'
-		WHEN 9 THEN 'Full Shipment Created'
-		WHEN 10 THEN 'Cancelled'
-		WHEN 11 THEN 'Invoiced'
-		WHEN 12 THEN 'Rejected'
-		ELSE '' END COLLATE Latin1_General_CI_AS
+	,strShipmentStatus = LSS.strShipmentStatus
 	,strCalenderInfo = L.strLoadNumber 
 		+ CASE L.intTransportationMode 
 			WHEN 1 THEN '(T)'
@@ -136,50 +93,7 @@ SELECT -- Load Header
 			WHEN 3 THEN 'Drop-Ship'
 			WHEN 4 THEN 'Transfer'
 			END + ' - ' 
-		+ CASE L.intShipmentStatus
-			WHEN 1 THEN 
-				CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
-						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
-				THEN 'Expired'
-				ELSE 'Scheduled' END
-			WHEN 2 THEN 'Dispatched'
-			WHEN 3 THEN 
-				CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-					ELSE 'Inbound Transit' END
-			WHEN 4 THEN 'Received'
-			WHEN 5 THEN 
-				CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-					ELSE 'Outbound Transit' END
-			WHEN 6 THEN 
-				CASE WHEN (L.ysnDocumentsApproved = 1 
-						AND L.dtmDocumentsApproved IS NOT NULL
-						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
-						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
-						THEN 'Documents Approved'
-					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-					ELSE 'Delivered' END
-			WHEN 7 THEN 
-				CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
-						ELSE 'Shipping Instruction Created' END
-			WHEN 8 THEN 'Partial Shipment Created'
-			WHEN 9 THEN 'Full Shipment Created'
-			WHEN 10 THEN 'Cancelled'
-			WHEN 11 THEN 'Invoiced'
-			WHEN 12 THEN 'Rejected'
-			ELSE '' END 
+		+ LSS.strShipmentStatus
 		+ CASE WHEN ISNULL(L.strExternalLoadNumber, '') <> '' THEN ' - ' + '(S) ' + L.strExternalLoadNumber ELSE '' END 
 		+ CASE WHEN ISNULL(L.strCustomerReference, '') <> '' THEN ' - ' + '(C) ' + L.strCustomerReference ELSE '' END COLLATE Latin1_General_CI_AS
 	,L.intPositionId
@@ -205,6 +119,8 @@ SELECT -- Load Header
 	,L.intForwardingAgentEntityId
 	,strForwardingAgent = ForwardingAgent.strName
 	,L.strForwardingAgentRef
+	,L.intShipperEntityId
+	,strShipper = Shipper.strName
 	,L.intInsurerEntityId
 	,strInsurer = Insurer.strName
 	,L.intInsuranceItemId
@@ -331,6 +247,7 @@ SELECT -- Load Header
 		WHEN 3 THEN 'Released'
 		END COLLATE Latin1_General_CI_AS
 FROM tblLGLoad L
+JOIN vyuLGShipmentStatus LSS ON LSS.intLoadId = L.intLoadId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -338,6 +255,7 @@ LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = L.intShipperEntityId
 LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = L.intDocPresentationId AND NP.strEntity = L.strDocPresentationType
