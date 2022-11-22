@@ -136,7 +136,6 @@ SELECT
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,dblTotalAmount				= INVOICE.dblInvoiceTotal
 	,dblTotalAmountFunctional	= ROUND(INVOICE.dblInvoiceTotal * INVOICE.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
-	,strRelatedInvoiceNumber	= CASE WHEN ISNULL(RelatedInvoice.strInvoiceNumber, '') = '' THEN INVOICE.strInvoiceOriginId ELSE RelatedInvoice.strInvoiceNumber END
 	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
