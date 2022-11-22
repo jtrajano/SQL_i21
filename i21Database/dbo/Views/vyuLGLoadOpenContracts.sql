@@ -120,6 +120,7 @@ SELECT CD.intContractDetailId
 	,CH.intTermId
 	,GCD.intTaxGroupId
 	,GCD.strTaxGroup
+	,FT.strFobPoint
 FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 CROSS JOIN tblCTContractHeader CH
 INNER JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
