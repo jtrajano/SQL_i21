@@ -47,7 +47,7 @@ BEGIN
 	INNER JOIN tblICItem Item ON Item.intItemId = OtherCharge.intItemId
 	LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = 
 		CASE 
-			WHEN @intPurchaseSale = 2 THEN LoadDetail.intSCompanyLocationId
+			WHEN @intPurchaseSale IN (2,3) THEN LoadDetail.intSCompanyLocationId
 			WHEN @intPurchaseSale = 1 THEN LoadDetail.intPCompanyLocationId
 		END
 		AND ItemLocation.intItemId = Item.intItemId
@@ -100,7 +100,7 @@ BEGIN
 	-- Initialize the module name
 	DECLARE @ModuleName AS NVARCHAR(50) = 'Logistics'
 		,@strTransactionForm AS NVARCHAR(50) =  
-			CASE WHEN @intPurchaseSale = 2 THEN 'Outbound Shipment'
+			CASE WHEN @intPurchaseSale IN (2,3) THEN 'Outbound Shipment'
 			WHEN @intPurchaseSale = 1 THEN 'Inbound Shipment' END
 		,@strCode AS NVARCHAR(10) = 'LG'
 	-- Get the GL Account ids to use for the other charges. 
@@ -129,7 +129,7 @@ BEGIN
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = OtherCharges.intItemId
 			AND ItemLocation.intLocationId = 		
 			CASE 
-				WHEN @intPurchaseSale = 2 THEN LoadDetail.intSCompanyLocationId
+				WHEN @intPurchaseSale IN (2,3) THEN LoadDetail.intSCompanyLocationId
 				WHEN @intPurchaseSale = 1 THEN LoadDetail.intPCompanyLocationId
 			END
 		WHERE OtherCharges.intLoadId = @intLoadId
@@ -304,7 +304,7 @@ BEGIN
 		INNER JOIN dbo.tblLGLoadDetail ShipmentItem ON Shipment.intLoadId = ShipmentItem.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = 
 				CASE 
-					WHEN @intPurchaseSale = 2 THEN ShipmentItem.intSContractDetailId
+					WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSContractDetailId
 					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPContractDetailId
 				END
 		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
@@ -314,13 +314,13 @@ BEGIN
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ShipmentItem.intItemId
 			AND ItemLocation.intLocationId = 
 				CASE 
-					WHEN @intPurchaseSale = 2 THEN ShipmentItem.intSCompanyLocationId
+					WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSCompanyLocationId
 					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
 				END
 		LEFT JOIN dbo.tblICItemLocation ChargeItemLocation ON ChargeItemLocation.intItemId = ShipmentCharges.intItemId
 			AND ChargeItemLocation.intLocationId = 
 				CASE 
-					WHEN @intPurchaseSale = 2 THEN ShipmentItem.intSCompanyLocationId
+					WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSCompanyLocationId
 					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
 				END
 		LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
