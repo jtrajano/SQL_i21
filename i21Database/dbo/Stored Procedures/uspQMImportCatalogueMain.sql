@@ -424,7 +424,7 @@ BEGIN TRY
                 ,intProductLineId
                 ,ysnOrganic
                 ,dblGrossWeight
-                -- ,strBatchNo
+                ,strBatchNo
                 ,str3PLStatus
                 ,strAdditionalSupplierReference
                 ,intAWBSampleReceived
@@ -489,7 +489,7 @@ BEGIN TRY
                 ,intProductLineId = @intProductLineId
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
-                -- ,strBatchNo = @strBatchNo
+                ,strBatchNo = @strBatchNo
                 ,str3PLStatus = @str3PLStatus
                 ,strAdditionalSupplierReference = @strAdditionalSupplierReference
                 ,intAWBSampleReceived = @intAWBSampleReceived
@@ -703,7 +703,7 @@ BEGIN TRY
                 ,intProductLineId = @intProductLineId
                 ,ysnOrganic = @ysnOrganic
                 ,dblGrossWeight = @dblGrossWeight
-                -- ,strBatchNo = @strBatchNo
+                ,strBatchNo = @strBatchNo
                 ,str3PLStatus = @str3PLStatus
                 ,strAdditionalSupplierReference = @strAdditionalSupplierReference
                 ,intAWBSampleReceived = @intAWBSampleReceived
