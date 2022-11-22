@@ -168,6 +168,7 @@
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
 	,@OpportunityId							INT 			= 0
+	,@DefaultPayToBankAccountId				INT				= NULL
 AS
 
 BEGIN
@@ -664,6 +665,9 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
+		,[dblFreightCharge]					= @FreightCharge
+		,[intFreightCompanySegment]			= @FreightCompanySegment
+		,[intFreightLocationSegment]		= @FreightLocationSegment
 		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
 		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
 												THEN @SourcedFrom 
