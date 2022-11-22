@@ -37,9 +37,14 @@ FROM (
 			, SB.strSubBook
 			, CD.intContractStatusId
 			, CD.intPricingTypeId
-			, strPricingStatus = CASE WHEN CD.intPricingStatus = 0 THEN 'Unpriced' WHEN CD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CD.intPricingStatus = 2 THEN 'Priced' END
+			, strPricingStatus = CASE WHEN CD.intPricingTypeId = 2
+									  THEN CASE WHEN ISNULL(PF.dblTotalLots, 0) = 0  THEN 'Unpriced'
+										ELSE CASE WHEN ISNULL(PF.dblTotalLots, 0)-ISNULL(dblLotsFixed, 0) = 0 THEN 'Fully Priced' 
+												  WHEN ISNULL(dblLotsFixed, 0) = 0  THEN 'Unpriced'
+												  ELSE 'Partially Priced' END END
+									  WHEN CD.intPricingTypeId = 1 THEN 'Priced' ELSE '' END	
 			, dblLotsPriced = ISNULL(PF.dblLotsFixed, 0)
-			, dblLotsUnpriced = ISNULL(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed], 0), CD.dblNoOfLots), 0)
+			, dblLotsUnpriced = ISNULL(ISNULL(PF.dblTotalLots - ISNULL(PF.dblLotsFixed, 0), CD.dblNoOfLots), 0)
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
@@ -103,9 +108,14 @@ FROM (
 			, SB.strSubBook
 			, CD.intContractStatusId
 			, CH.intPricingTypeId
-			, strPricingStatus = CASE WHEN CDD.intPricingStatus = 0 THEN 'Unpriced' WHEN CDD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CDD.intPricingStatus = 2 THEN 'Priced' END
+			, strPricingStatus = CASE WHEN CDD.intPricingTypeId = 2
+									  THEN CASE WHEN ISNULL(PF.dblTotalLots, 0) = 0  THEN 'Unpriced'
+										ELSE CASE WHEN ISNULL(PF.dblTotalLots, 0)-ISNULL(dblLotsFixed, 0) = 0 THEN 'Fully Priced' 
+												  WHEN ISNULL(dblLotsFixed, 0) = 0  THEN 'Unpriced'
+												  ELSE 'Partially Priced' END END
+									  WHEN CDD.intPricingTypeId = 1 THEN 'Priced' ELSE '' END	
 			, dblLotsPriced = ISNULL(PF.dblLotsFixed, 0)
-			, dblLotsUnpriced = ISNULL(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed], 0), CDD.dblNoOfLots), 0)
+			, dblLotsUnpriced = ISNULL(ISNULL(PF.dblTotalLots - ISNULL(PF.dblLotsFixed, 0), CH.dblNoOfLots), 0)
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
