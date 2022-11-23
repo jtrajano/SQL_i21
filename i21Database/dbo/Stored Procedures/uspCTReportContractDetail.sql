@@ -200,12 +200,12 @@ BEGIN TRY
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
 			strStraussPrice			= CASE WHEN CH.intPricingTypeId = 2
-											THEN 'PTBF basis ' + @fontBoldFutureMarket + MA.strFutMarketName + '</span>' + ' ' + @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate)+ '</span>' + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+											THEN 'PTBF basis ' + @fontBoldFutureMarket + MA.strFutMarketName + '</span>' + ' ' + @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + '</span>'
 			 									+ CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END
 			 									+ @fontBoldCurrency + BCU.strCurrency+  '</span>' + ' '
 			 									+ @fontBoldBasis + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)+'</span>' + '/' + BUM.strUnitMeasure
 			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
-			 									+ DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+			 									+  @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + '</span>'
 			 									+ ' or prior to presentation of documents,whichever is earlier.'
 			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + ' per ' + PU.strUnitMeasure
 			 						   END,
