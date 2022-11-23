@@ -12,7 +12,7 @@ BEGIN
 	IF @type = 'Confirm' 
 	BEGIN
 
-	IF ISNULL(@ysnKeep, '') <> ''
+	IF @ysnKeep IS NOT NULL
 		BEGIN
 
 		UPDATE tblMFWorkOrderInputLot SET ysnKeep = CASE WHEN @ysnKeep = 'true'  THEN 1 ELSE 0 END
