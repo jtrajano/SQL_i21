@@ -6,7 +6,7 @@ SELECT
 	,dblRate
 	,strRateType
 	,intEntityEmployeeId
-	,strSocialSecurity = dbo.[fnAESDecryptASym](strSocialSecurity)
+	,strSocialSecurity = strSocialSecurity
 	,strEmployeeId
 	,strName
 	,strDepartment
