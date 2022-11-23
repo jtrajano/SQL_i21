@@ -860,6 +860,7 @@
     <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
     <Build Include="dbo\Functions\fnAPGetOverrideLineOfBusinessAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspLGFetchExistingConditions.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetailWithCurrencies.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11017,7 +11018,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerHighestAR.sql" />
     <Build Include="dbo\Tables\tblARConstructLineItemTaxDetailResult.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_CompanyPreference.sql" />
-     <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
+    <Build Include="dbo\Tables\tblCMBankAccountAll.sql" />
     <Build Include="dbo\Functions\fnCTGetDefaultCurrencyExchangeRate.sql" />
     <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
     <Build Include="dbo\Views\vyuQMPurchaseSampleLinked.sql" />
