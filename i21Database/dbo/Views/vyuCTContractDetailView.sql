@@ -326,6 +326,6 @@ AS
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
-	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId and isnull(EFT.ysnDefaultAccount,0) = 1
+	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId and isnull(EFT.ysnDefaultAccount,0) = 1 and EFT.intCurrencyId = CD.intCurrencyId
  	LEFT JOIN tblSMCurrency INV ON INV.intCurrencyID = CD.intInvoiceCurrencyId
 	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
