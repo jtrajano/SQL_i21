@@ -270,6 +270,17 @@ SELECT   L.intLoadId
 		,Item.strMarketValuation
 		,strOrderNumber = LD.strOrderNumber
 		,L.intUserLoc
+		,intBatchId = QB.intBatchId
+		,strBatchId = QB.strBatchId
+		,strTeaGardenChopInvoiceNumber = QB.strTeaGardenChopInvoiceNumber
+		,strVendorLotNumber = QB.strVendorLotNumber
+		,intBrokerId = QB.intBrokerId
+		,strBroker = EB.strName
+		,strLeafGrade = QB.strLeafGrade
+		,intGardenMarkId = QB.intGardenMarkId
+		,strGardenMark = GM.strGardenMark
+		,strSustainability = QB.strSustainability
+		,ysnTeaOrganic = QB.ysnTeaOrganic
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -323,6 +334,11 @@ LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeade
 LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LD.intAllocationDetailId
 LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId	
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+LEFT JOIN tblMFBatch QB ON QB.intBatchId = LD.intBatchId
+LEFT JOIN tblQMSample QS ON QS.intSampleId = QB.intSampleId
+LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = QS.intMarketZoneId
+LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = QB.intBrokerId
+LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = QB.intGardenMarkId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND PDetail.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
