@@ -1378,6 +1378,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPProductionOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByModuleAndLOB.sql" />
     <Build Include="dbo\Views\vyuHDLineOfBusiness.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByProject.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
