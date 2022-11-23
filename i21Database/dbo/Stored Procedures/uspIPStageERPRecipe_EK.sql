@@ -225,10 +225,10 @@ BEGIN TRY
 			INSERT INTO tblMFProductionOrderStage (
 				strOrderNo
 				,strLocationCode
-				,OrderQuantity 
-				,OrderQuantityUOM 
-				,NoOfMixes 
-				,PlanDate
+				,dblOrderQuantity 
+				,strOrderQuantityUOM 
+				,dblNoOfMixes 
+				,dtmPlanDate
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
