@@ -433,7 +433,7 @@ BEGIN TRY
 							, ci.dblFX
 							, dblRate = CASE WHEN cc.intItemId = @intDefaultInsuranceId THEN 
 												CASE WHEN @intDetailPricingTypeId = 2 AND @ysnEnableBudgetForBasisPricing = 1 THEN @dblTotalBudget * ci.dblAmount
-													ELSE @dblTotalCost * ci.dblAmount END
+													ELSE CASE WHEN ci.dblAmount <> 0 THEN @dblTotalCost * ci.dblAmount ELSE cc.dblRate END END
 											ELSE ci.dblRate END
 							, dblRemainingPercent = 100
 							, dtmAccrualDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
