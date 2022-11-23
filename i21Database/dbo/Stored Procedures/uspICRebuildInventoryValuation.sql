@@ -1103,8 +1103,8 @@ BEGIN
 						WHEN 
 							t.dblQty > 0 
 							AND t.strTransactionForm NOT IN (
-								'Invoice
-								','Inventory Shipment'
+								'Invoice'
+								,'Inventory Shipment'
 								,'Inventory Count'
 								,'Credit Memo'
 								,'Outbound Shipment') 
