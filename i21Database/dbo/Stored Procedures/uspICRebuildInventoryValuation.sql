@@ -829,7 +829,7 @@ BEGIN
 						ELSE
 							CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 					END 
-				,id2 = intInventoryTransactionId
+				,id2 = t.intInventoryTransactionId
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
@@ -857,15 +857,24 @@ BEGIN
 							,19
 							,20
 						) THEN 4 
+						WHEN t.intTransactionTypeId = 10 AND t2.intInventoryTransactionId IS NOT NULL THEN 4 
 						WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
 						WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
-						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
-						WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
-						WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
-						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
-						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
+						WHEN 
+							t.dblQty > 0 
+							AND t.strTransactionForm NOT IN (
+								'Invoice
+								','Inventory Shipment'
+								,'Inventory Count'
+								,'Credit Memo'
+								,'Outbound Shipment') 
+							THEN 3 
+						WHEN t.dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
+						WHEN t.dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
+						WHEN t.dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
+						WHEN t.dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
 						WHEN t.strTransactionForm IN ('Inventory Count') THEN 11
-						WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
+						WHEN t.dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
 						ELSE 10
 					END
 				,intItemId
@@ -915,6 +924,22 @@ BEGIN
 				LEFT JOIN tblICInventoryReceipt r 
 					ON r.strReceiptNumber = t.strTransactionId
 					AND t.strTransactionForm = 'Inventory Receipt'
+				OUTER APPLY (
+					SELECT TOP 1 
+						t2.intInventoryTransactionId
+					FROM 
+						#tmpUnOrderedICTransaction t2
+					WHERE
+						t2.strTransactionId = t.strTransactionId
+						AND t2.strBatchId = t.strBatchId
+						AND t2.strTransactionForm = t.strTransactionForm
+						AND t.strTransactionForm = 'Inventory Adjustment'					
+						AND t2.intItemId <> t.intItemId
+						AND SIGN(t2.dblQty) <> SIGN(t.dblQty)
+						AND t2.dblQty <> 0 
+						AND t.dblQty <> 0 
+				) t2 
+
 		ORDER BY 
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
@@ -950,13 +975,14 @@ BEGIN
 					,19
 					,20
 				) THEN 4 
+				WHEN t.intTransactionTypeId = 10 AND t2.intInventoryTransactionId IS NOT NULL THEN 4 
 				WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
 				WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
-				WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
-				WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
-				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
-				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
+				--WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
+				--WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
+				--WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
+				--WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
 				WHEN t.strTransactionForm IN ('Inventory Count') THEN 11
 				WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
 				ELSE 10
@@ -967,7 +993,7 @@ BEGIN
 					CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				ELSE
 					1
-			END ASC 			
+			END ASC
 			
 		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
 			intItemId
