@@ -187,7 +187,9 @@ BEGIN
 				--JOIN tblEMEntity sp ON sp.intEntityId = ot.intTraderId
 				--JOIN tblEMEntity e ON e.intEntityId = ot.intEntityId
 				--JOIN tblRKFutureMarket fm ON ot.intFutureMarketId = fm.intFutureMarketId
-				JOIN tblSMCurrency c ON c.intCurrencyID = ot.intCurrencyId
+				--JOIN tblSMCurrency c ON c.intCurrencyID = ot.intCurrencyId
+				JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = ot.intFutureMarketId
+				JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
 				LEFT JOIN #UnrealizedSettlePrice t ON t.intFutureMarketId = ot.intFutureMarketId AND t.intFutureMonthId = ot.intFutureMonthId
 				LEFT JOIN tblCTBook cb ON cb.intBookId = ot.intBookId
 				LEFT JOIN tblCTSubBook csb ON csb.intSubBookId = ot.intSubBookId
