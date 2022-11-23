@@ -19,7 +19,7 @@
 	, @ysnReprintInvoice			AS BIT				= 1
 	, @intEntityUserId				AS INT				= NULL
 	, @dblTotalAR				    AS NUMERIC(18,6)    = 0.00
-	, @strStatementFormat			AS NVARCHAR(50)		= NULL
+	, @strStatementFormat			AS NVARCHAR(50)		= 'Balance Forward'
 AS
 
 SET ANSI_NULLS ON
