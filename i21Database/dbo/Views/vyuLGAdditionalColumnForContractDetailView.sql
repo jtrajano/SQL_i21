@@ -6,110 +6,106 @@
 CREATE VIEW [dbo].[vyuLGAdditionalColumnForContractDetailView]
 AS
 SELECT
-	intContractDetailId = AD.intContractDetailId,
-	intSeqCurrencyId	= CASE WHEN (AD.ysnValidFX = 1) THEN ISNULL(FFX.intCurrencyId, TFX.intCurrencyId) ELSE AD.intCurrencyId END,
-	ysnSeqSubCurrency	= CONVERT(BIT, CASE WHEN (AD.ysnValidFX = 1) THEN 0 ELSE AD.ysnSubCurrency END),
-	intSeqPriceUOMId	= CASE WHEN (AD.ysnValidFX = 1) THEN intFXPriceUOMId ELSE AD.intPriceItemUOMId END,
-	dblSeqPrice			= CONVERT(NUMERIC(18,6), 
-							CASE WHEN (AD.ysnValidFX = 1) THEN 
-							dbo.fnCTConvertQtyToTargetItemUOM(intFXPriceUOMId,AD.intPriceItemUOMId,AD.dblMainCashPrice) 
-							* CASE WHEN (FFX.intCurrencyId IS NOT NULL) THEN 1 / (CASE WHEN ISNULL(AD.dblRate,0) = 0 THEN 1 ELSE AD.dblRate END)
-							  ELSE AD.dblRate END
-						  ELSE AD.dblCashPrice END),
-	dblSeqPartialPrice	= CONVERT(NUMERIC(18,6), 
-							CASE WHEN (AD.ysnValidFX = 1) THEN 
-							dbo.fnCTConvertQtyToTargetItemUOM(intFXPriceUOMId,AD.intPriceItemUOMId,AD.dblMainPartialCashPrice) 
-							* CASE WHEN (FFX.intCurrencyId IS NOT NULL) THEN 1 / (CASE WHEN ISNULL(AD.dblRate,0) = 0 THEN 1 ELSE AD.dblRate END)
-							  ELSE AD.dblRate END
-						  ELSE AD.dblPartialCashPrice END),
-	strSeqCurrency		= CASE WHEN (AD.ysnValidFX = 1) THEN FXC.strCurrency ELSE AD.strCurrency END,
-	strSeqPriceUOM		= CASE WHEN (AD.ysnValidFX = 1) THEN AD.strFXPriceUOM ELSE AD.strPriceUOM END,
-	dblQtyToPriceUOMConvFactor = CONVERT(NUMERIC(18,6),
-									CASE WHEN (AD.ysnValidFX = 1) THEN dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,AD.intFXPriceUOMId,1) 
-									ELSE dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,AD.intPriceItemUOMId,1) END),
-	dblNetWtToPriceUOMConvFactor = CONVERT(NUMERIC(18,6),
-									CASE WHEN (AD.ysnValidFX = 1) THEN dbo.fnCTConvertQtyToTargetItemUOM(AD.intNetWeightUOMId,AD.intFXPriceUOMId,1) 
-									ELSE dbo.fnCTConvertQtyToTargetItemUOM(AD.intNetWeightUOMId,AD.intPriceItemUOMId,1) END),
-	dblCostUnitQty		= CONVERT(NUMERIC(38,20),
-							CASE WHEN (AD.ysnValidFX = 1) THEN AD.dblFXCostUnitQty ELSE AD.dblCostUnitQty END),
-	dblSeqBasis			= CONVERT(NUMERIC(18,6),
-							CASE WHEN (AD.ysnValidFX = 1) THEN 
-							dbo.fnCTConvertQtyToTargetItemUOM(intFXPriceUOMId,AD.intBasisUOMId,AD.dblMainBasis) 
-							* CASE WHEN (FFX.intCurrencyId IS NOT NULL) THEN 1 / (CASE WHEN ISNULL(AD.dblRate,0) = 0 THEN 1 ELSE AD.dblRate END)
-							  ELSE AD.dblRate END
-						  ELSE AD.dblBasis END),
-	intSeqBasisCurrencyId = CASE WHEN (AD.ysnValidFX = 1) THEN ISNULL(FFX.intCurrencyId, TFX.intCurrencyId) ELSE AD.intBasisCurrencyId END,
-	intSeqBasisUOMId	= CASE WHEN (AD.ysnValidFX = 1) THEN AD.intFXPriceUOMId ELSE AD.intBasisUOMId END,
-	ysnValidFX			= AD.ysnValidFX,
-	dblSeqFutures		= CONVERT(NUMERIC(18,6),
-							CASE WHEN (AD.ysnValidFX = 1) THEN 
-							dbo.fnCTConvertQtyToTargetItemUOM(intFXPriceUOMId,AD.intPriceItemUOMId,AD.dblMainFutures) 
-							* CASE WHEN (FFX.intCurrencyId IS NOT NULL) THEN 1 / (CASE WHEN ISNULL(AD.dblRate,0) = 0 THEN 1 ELSE AD.dblRate END)
-							  ELSE AD.dblRate END
-						  ELSE AD.dblFutures END)
-FROM
-	(SELECT
-		intContractDetailId =	CD.intContractDetailId,
-		dblCashPrice		=	CD.dblCashPrice,
-		dblPartialCashPrice	=	CASE WHEN CD.intPricingTypeId = 2 
-									THEN CASE WHEN (PF.intPriceFixationId IS NULL) THEN RKP.dblLastSettle
-										ELSE (((CD.dblNoOfLots - PF.dblLotsFixed) * RKP.dblLastSettle + PFD.dblWtdAvg) / CD.dblNoOfLots) END + CD.dblBasis
-									ELSE CD.dblCashPrice END,
-		dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END,
-		dblMainPartialCashPrice	= CASE WHEN CD.intPricingTypeId = 2 
-									THEN CASE WHEN (PF.intPriceFixationId IS NULL) THEN RKP.dblLastSettle
-										ELSE (((CD.dblNoOfLots - PF.dblLotsFixed) * RKP.dblLastSettle + PFD.dblWtdAvg) / CD.dblNoOfLots) END + CD.dblBasis
-									ELSE CD.dblCashPrice END 
-								/ CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END,
-		intCurrencyId		=	CD.intCurrencyId,
-		intMainCurrencyId	=	ISNULL(CY.intMainCurrencyId,CD.intCurrencyId),
-		ysnSubCurrency		=	CY.ysnSubCurrency,
-		intPriceItemUOMId	=	ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),
-		dblRate				=	CD.dblRate,
-		intFXPriceUOMId		=	CD.intFXPriceUOMId,
-		intExchangeRateId	=	CD.intCurrencyExchangeRateId,
-		intItemUOMId		=	CD.intItemUOMId,
-		strCurrency			=	CY.strCurrency,
-		strPriceUOM			=	UM.strUnitMeasure,
-		strFXPriceUOM		=	FM.strUnitMeasure,
-		ysnUseFXPrice		=	ysnUseFXPrice,
-		intNetWeightUOMId	=	CD.intNetWeightUOMId,
-		dblCostUnitQty		=	ISNULL(IU.dblUnitQty,1),
-		dblFXCostUnitQty	=	ISNULL(FU.dblUnitQty,1),
-		dblBasis			=	CD.dblBasis,
-		dblMainBasis		=	CD.dblBasis / CASE WHEN AY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(AY.intCent,0) = 0 THEN 1 ELSE AY.intCent END ELSE 1 END,
-		intBasisCurrencyId	=	CD.intBasisCurrencyId,
-		intBasisUOMId		=	CD.intBasisUOMId,
-		dblFutures			=	CD.dblFutures,
-		dblMainFutures		=	CD.dblFutures / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END,
-		ysnValidFX			=	CAST(CASE WHEN (ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL 
-												AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
-	FROM tblCTContractDetail CD
-		LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID	= CD.intCurrencyId
-		LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId		= CD.intPriceItemUOMId
-		LEFT JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId = IU.intUnitMeasureId
-		LEFT JOIN	tblICItemUOM		FU	ON	FU.intItemUOMId		= CD.intFXPriceUOMId
-		LEFT JOIN	tblICUnitMeasure	FM	ON	FM.intUnitMeasureId = FU.intUnitMeasureId
-		LEFT JOIN	tblSMCurrency		AY	ON	AY.intCurrencyID	= CD.intBasisCurrencyId
-		LEFT JOIN	tblCTPriceFixation  PF	ON	PF.intContractDetailId = CD.intContractDetailId
-		OUTER APPLY (SELECT PF.intContractDetailId, dblWtdAvg = SUM(dblNoOfLots * dblFutures)
-					FROM tblCTPriceFixation PF INNER JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationId = PF.intPriceFixationId
-					WHERE PF.intContractDetailId = CD.intContractDetailId GROUP BY PF.intContractDetailId) PFD
-		OUTER APPLY (SELECT TOP 1 dblLastSettle
-					FROM tblRKFuturesSettlementPrice FSP
-					INNER JOIN tblRKFutSettlementPriceMarketMap FSPM ON FSPM.intFutureSettlementPriceId = FSP.intFutureSettlementPriceId
-					WHERE FSP.intFutureMarketId = CD.intFutureMarketId
-						AND FSPM.intFutureMonthId = CD.intFutureMonthId
-						AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, GETDATE(), 111)
-					ORDER BY dtmPriceDate DESC) RKP
-	) AD
-	OUTER APPLY (SELECT TOP 1 intCurrencyId = intFromCurrencyId FROM tblSMCurrencyExchangeRate 
-					WHERE intCurrencyExchangeRateId = AD.intExchangeRateId 
-					AND intToCurrencyId = AD.intMainCurrencyId) FFX
-	OUTER APPLY (SELECT TOP 1 intCurrencyId = intToCurrencyId FROM tblSMCurrencyExchangeRate 
-					WHERE intCurrencyExchangeRateId = AD.intExchangeRateId
-					AND intFromCurrencyId = AD.intMainCurrencyId) TFX
-	OUTER APPLY (SELECT TOP 1 strCurrency FROM tblSMCurrency 
-				WHERE intCurrencyID = CASE WHEN (AD.ysnValidFX = 1) THEN ISNULL(FFX.intCurrencyId, TFX.intCurrencyId) ELSE AD.intCurrencyId END) FXC
-
+    CD.intContractDetailId
+    ,intSeqCurrencyId               =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN CASE WHEN ISNULL(CXR.ysnExists, 0) = 1
+                                                THEN FC.intFromCurrencyId
+                                                ELSE TC.intToCurrencyId
+                                            END
+                                            ELSE CD.intCurrencyId
+                                        END
+    ,ysnSeqSubCurrency              =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN 0
+                                            ELSE CY.ysnSubCurrency
+                                        END
+    ,intSeqPriceUOMId               =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN CD.intFXPriceUOMId
+                                            ELSE ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
+                                        END
+    ,dblSeqPrice                    =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END) * CD.dblRate
+                                            ELSE CD.dblCashPrice
+                                        END
+    ,dblSeqPartialPrice             =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),(case when CD.intPricingTypeId = 2 then PF.dblCashPrice else CD.dblCashPrice end) / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END) * CD.dblRate
+                                            ELSE (case when CD.intPricingTypeId = 2 then PF.dblCashPrice else CD.dblCashPrice end) -- CT-3677/CT-3681 get the average cash price from fixation details if the contract is partially priced.
+                                        END
+    ,strSeqCurrency                 =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN CASE WHEN ISNULL(CXR.ysnExists, 0) = 1
+                                                THEN (SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = FC.intFromCurrencyId)
+                                                ELSE (SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = TC.intToCurrencyId)
+                                            END
+                                            ELSE CY.strCurrency
+                                        END
+    ,strSeqPriceUOM                 =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN FM.strUnitMeasure
+                                            ELSE UM.strUnitMeasure
+                                        END
+    ,dblQtyToPriceUOMConvFactor     =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intFXPriceUOMId,1)
+                                            ELSE dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
+                                        END
+    ,dblNetWtToPriceUOMConvFactor   =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CD.intFXPriceUOMId,1)
+                                            ELSE dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
+                                        END
+    ,dblCostUnitQty                 =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN ISNULL(FU.dblUnitQty,1)
+                                            ELSE ISNULL(IU.dblUnitQty,1)
+                                        END
+    ,dblSeqBasis                    =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intBasisUOMId, CD.dblBasis / CASE WHEN AY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(AY.intCent,0) = 0 THEN 1 ELSE AY.intCent END ELSE 1 END) * CD.dblRate
+                                            ELSE CD.dblBasis
+                                        END
+    ,intSeqBasisCurrencyId          =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN CASE WHEN ISNULL(CXR.ysnExists, 0) = 1
+                                                THEN FC.intFromCurrencyId
+                                                ELSE TC.intToCurrencyId
+                                            END
+                                            ELSE CD.intBasisCurrencyId
+                                        END
+    ,intSeqBasisUOMId               =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN CD.intFXPriceUOMId
+                                            ELSE CD.intBasisUOMId
+                                        END
+    ,ysnValidFX                     =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN 1
+                                            ELSE 0
+                                        END
+    ,dblSeqFutures                  =   CAST(CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), CD.dblFutures / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END) * CD.dblRate
+                                            ELSE CD.dblFutures
+                                        END AS NUMERIC (18,6))
+FROM  tblCTContractDetail CD  
+LEFT JOIN tblSMCurrency  CY ON CY.intCurrencyID = CD.intCurrencyId  
+LEFT JOIN tblICItemUOM  IU ON IU.intItemUOMId  = CD.intPriceItemUOMId  
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId  
+LEFT JOIN tblICItemUOM  FU ON FU.intItemUOMId  = CD.intFXPriceUOMId  
+LEFT JOIN tblICUnitMeasure FM ON FM.intUnitMeasureId = FU.intUnitMeasureId  
+LEFT JOIN tblSMCurrency  AY ON AY.intCurrencyID = CD.intBasisCurrencyId  
+LEFT JOIN (
+    select
+        dblCashPrice = avg(PFD.dblCashPrice)
+        ,PF.intContractDetailId
+    from
+        tblCTPriceFixation PF
+    inner join tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+    group by
+        PF.intContractDetailId
+) PF on PF.intContractDetailId = CD.intContractDetailId
+OUTER APPLY (
+    SELECT ysnUseFXPrice = CASE WHEN ISNULL(ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL THEN 1 ELSE 0 END
+) FX
+OUTER APPLY (
+    SELECT ysnExists = 1
+    FROM tblSMCurrencyExchangeRate
+    WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId
+    AND intToCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId)
+) CXR
+OUTER APPLY (
+    SELECT TOP 1 intFromCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId AND intToCurrencyId = CD.intCurrencyId
+) FC
+OUTER APPLY (
+    SELECT TOP 1 intToCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId AND intFromCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId)
+) TC
 GO
