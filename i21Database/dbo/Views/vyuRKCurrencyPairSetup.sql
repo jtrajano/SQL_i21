@@ -6,7 +6,7 @@ SELECT
 	, strFromCurrency = FC.strCurrency
 	, intToCurrencyId = CP.intToCurrencyId
 	, strToCurrency = TC.strCurrency
-	, strCurrencyPair = FC.strCurrency + '/' + TC.strCurrency
+	, strCurrencyPair = TC.strCurrency + '/' + FC.strCurrency
 	, dtmCreateDateTime = CP.dtmCreateDateTime
 	, intConcurrencyId = CP.intConcurrencyId
 FROM tblRKCurrencyPair CP
