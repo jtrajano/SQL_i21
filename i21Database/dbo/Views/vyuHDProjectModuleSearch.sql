@@ -44,8 +44,13 @@ ON DataConversionExpert.intEntityId = ProjectModule.intDataConversionExpertId
 ON Trainer.intEntityId = ProjectModule.intTrainerId
 		LEFT JOIN tblEMEntity CustomerSuperUser
 ON CustomerSuperUser.intEntityId = ProjectModule.intCustomerSuperUserId
-		LEFT JOIN vyuHDProjectCustomerContact Contact
-ON Contact.intEntityId = ProjectModule.intContactId
+		OUTER APPLY
+		( 
+		  SELECT TOP 1 strName
+		  FROM vyuHDProjectCustomerContact
+		  WHERE intEntityId = ProjectModule.intContactId
+
+        ) Contact
 		OUTER APPLY(
 
 			SELECT     dblActualHours		= SUM(ISNULL(ProjectTicketsPerStatus.dblActualHours, 0))
