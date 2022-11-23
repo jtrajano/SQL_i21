@@ -145,7 +145,9 @@ BEGIN
 				FROM tblRKMatchFuturesPSHeader psh
 				JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId
 				JOIN fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', GETDATE(), 1) ot ON psd.intLFutOptTransactionId = ot.intFutOptTransactionId
-				JOIN tblSMCurrency c ON c.intCurrencyID = ot.intCurrencyId
+				--JOIN tblSMCurrency c ON c.intCurrencyID = ot.intCurrencyId
+				JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = ot.intFutureMarketId
+				JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
 				JOIN fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', GETDATE(), 1) ot1 ON psd.intSFutOptTransactionId = ot1.intFutOptTransactionId
 				WHERE ISNULL(ot.intCommodityId, 0) = ISNULL(@intCommodityId, ISNULL(ot.intCommodityId, 0))
 					AND ISNULL(ot.intFutureMarketId, 0) = ISNULL(@intFutureMarketId, ISNULL(ot.intFutureMarketId, 0))
