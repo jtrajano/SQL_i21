@@ -136,6 +136,31 @@ BEGIN TRY
 					ELSE
 						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
 				END
+
+				IF @ysnApproveQualitySourceType = 1 AND @ysnPost = 1
+				BEGIN
+					DECLARE
+						@intLoadDetailId INT
+						,@strRowState NVARCHAR(50)
+
+					DECLARE @C AS CURSOR;
+					SET @C = CURSOR FAST_FORWARD FOR
+						SELECT
+							intLoadDetailId
+							,[strRowState] = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
+						FROM tblLGLoadDetail WHERE intLoadId = @intLoadId
+					OPEN @C 
+					FETCH NEXT FROM @C INTO @intLoadDetailId, @strRowState
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						PRINT CAST(@intLoadDetailId AS NVARCHAR(50))
+						PRINT @strRowState
+						EXEC uspIPProcessOrdersToFeed @intLoadId, @intLoadDetailId, @intEntityUserSecurityId, @strRowState
+						FETCH NEXT FROM @C INTO @intLoadDetailId, @strRowState
+					END
+					CLOSE @C
+					DEALLOCATE @C
+				END
 			END
 
 		END

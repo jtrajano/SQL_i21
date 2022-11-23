@@ -26,11 +26,13 @@ BEGIN TRY
 								 ,intPContractDetailId INT
 								 ,intSContractDetailId INT
 								 ,dblLoadDetailQuantity NUMERIC(18, 6))
+	DECLARE @ysnApproveQualitySourceType BIT
 
 	SELECT @intPurchaseSale = intPurchaseSale,
 		   @intShipmentType = ISNULL(@intShipmentType,intShipmentType),
 		   @ysnPosted = ISNULL(ysnPosted, 0),
-		   @strLoadNumber = strLoadNumber
+		   @strLoadNumber = strLoadNumber,
+		   @ysnApproveQualitySourceType = CASE WHEN ISNULL(intSourceType, 0) = 9 THEN 1 ELSE 0 END
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -148,6 +150,25 @@ BEGIN TRY
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
 					,@strRowState = 'Added'
 					,@intShipmentType = 2
+			END
+
+			IF @ysnApproveQualitySourceType = 1
+			BEGIN
+				DECLARE @intLoadDetailId INT
+
+				DECLARE @C AS CURSOR;
+				SET @C = CURSOR FAST_FORWARD FOR
+					SELECT intLoadDetailId
+					FROM tblLGLoadDetail WHERE intLoadId = @intLoadId
+				OPEN @C 
+				FETCH NEXT FROM @C INTO @intLoadDetailId
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					EXEC uspIPProcessOrdersToFeed @intLoadId, @intLoadDetailId, @intEntityUserSecurityId, 'Cancelled'
+					FETCH NEXT FROM @C INTO @intLoadDetailId
+				END
+				CLOSE @C
+				DEALLOCATE @C
 			END
 		END
 		ELSE
