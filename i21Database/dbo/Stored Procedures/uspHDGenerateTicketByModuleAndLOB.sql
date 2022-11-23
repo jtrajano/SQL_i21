@@ -46,6 +46,9 @@ DECLARE  @intModuleId		  INT	  = @ModuleId
 		,@intNewTicketId		  INT 
 		,@intDefaultTicketType	  INT 
 		,@ysnHasGeneratedTickets bit = CONVERT(BIT, 0)
+		,@strCustomerNumber			NVARCHAR(250)
+		,@intCustomerContactId		INT	  
+		,@intCustomerId				INT	    
 
 
 SELECT TOP 1 @strModule = strSMModuleName
@@ -96,6 +99,14 @@ BEGIN
 		  strTransactionType = 'Ticket Number'
 
 	SET @ysnHasGeneratedTickets = CONVERT(BIT, 1)
+
+	SELECT TOP 1 @strCustomerNumber    = Customer.strCustomerNumber
+				,@intCustomerId		   = Project.intCustomerId
+				,@intCustomerContactId = Project.intCustomerContactId
+	FROM tblHDProject Project
+			INNER JOIN tblARCustomer Customer
+	ON Customer.intEntityId = Project.intCustomerId
+	WHERE Project.intProjectId = @intProjectId
 
 	INSERT INTO tblHDTicket
 	(
@@ -182,9 +193,9 @@ BEGIN
 
 	SELECT   strTicketNumber				    = @strStartingNumber
 			,strSubject						    = Ticket.strSubject
-			,strCustomerNumber				    = Ticket.strCustomerNumber
-			,intCustomerContactId			    = Ticket.intCustomerContactId
-			,intCustomerId					    = Ticket.intCustomerId				
+			,strCustomerNumber				    = @strCustomerNumber
+			,intCustomerContactId			    = @intCustomerContactId
+			,intCustomerId					    = @intCustomerId				
 			,intMilestoneId 				    = Ticket.intMilestoneId 
 			,intTicketTypeId 				    = @intDefaultTicketType 
 			,intTicketStatusId 				    = Ticket.intTicketStatusId 
