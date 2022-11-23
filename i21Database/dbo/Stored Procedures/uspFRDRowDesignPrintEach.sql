@@ -40,8 +40,7 @@ DECLARE @queryString NVARCHAR(MAX)
 DECLARE @intSubRowDetailId NVARCHAR(MAX)  
 DECLARE @strCurrency NVARCHAR(50)    
 DECLARE @strQuery NVARCHAR(max)        
-DECLARE @ysnUnnaturalAccount INT = 0  
-DECLARE @hasAccount BIT 
+DECLARE @ysnUnnaturalAccount INT = 0    
 
 CREATE TABLE #tempGLAccount (
 		[intAccountId]		INT,
@@ -181,8 +180,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 				SET @strAccountsType = 'IS'
 			END
 
-			SET @hasAccount = (SELECT ISNULL(ysnUnnaturalAccount,0) FROM tblFRRowDesign where intRowDetailId =  @intSubRowDetailId)
-
 			 SET @strQuery = '    
 			 INSERT INTO #TempGLUnnatural    
 			 SELECT SUM(CNT) FROM (    
@@ -191,16 +188,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 			 SELECT COUNT(0)CNT FROM vyuGLSummary WHERE strUnAccountId = '''+@strAccountId+'''    
 			 ) A    
 			  '    
-
-			EXEC(@strQuery)      
-			SET @ysnUnnaturalAccount = 0
-			
-			IF @hasAccount = 1
-			BEGIN
-				SET @ysnUnnaturalAccount = (
-					SELECT CASE WHEN intCnt <> 0 THEN 1 ELSE 0 END FROM #TempGLUnnatural
-				)  
-			END
+			 EXEC(@strQuery)    
+			 SET @ysnUnnaturalAccount = (SELECT CASE WHEN intCnt <> 0 THEN 1 ELSE 0 END FROM #TempGLUnnatural)    
   
 			 TRUNCATE TABLE #TempGLUnnatural      
 

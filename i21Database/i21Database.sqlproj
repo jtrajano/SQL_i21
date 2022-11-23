@@ -860,11 +860,6 @@
     <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
     <Build Include="dbo\Functions\fnAPGetOverrideLineOfBusinessAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspLGFetchExistingConditions.sql" />
-    <Build Include="dbo\Functions\fnCTGetFreightRateMatrixFromCommodity.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKValidateCurrencyPairSetupRecord.sql" />
-    <Build Include="dbo\Tables\tblRKCurrencyPair.sql" />
-    <Build Include="dbo\Views\vyuRKCurrencyPairSetup.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetailWithCurrencies.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
