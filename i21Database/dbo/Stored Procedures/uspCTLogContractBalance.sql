@@ -46,6 +46,7 @@ BEGIN
 		, @ysnDeleted BIT
 		, @intTransCtr INT = 0
 		, @intTotal INT
+		, @intSourceId int
 	
 	SELECT @intTotal = COUNT(*) FROM @ContractSequences
 	
@@ -99,7 +100,8 @@ BEGIN
 		, [intUserId] INT NULL
 		, [intActionId] INT NULL
 		, [strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-		, [ysnDeleted] BIT DEFAULT((0)) NULL)
+		, [ysnDeleted] BIT DEFAULT((0)) NULL
+		, [intSourceId] int null)
 
 	IF @Rebuild = 1 
 	BEGIN
@@ -145,6 +147,7 @@ BEGIN
 			, @intActionId = intActionId
 			, @strProcess = strProcess
 			, @ysnDeleted = ysnDeleted
+			, @intSourceId = intSourceId
 		FROM #tmpLogItems
 
 		DECLARE @intHeaderPricingTypeId INT = 0
@@ -187,7 +190,8 @@ BEGIN
 			, intUserId
 			, intActionId
 			, strProcess
-			, ysnDeleted)
+			, ysnDeleted
+			, intSourceId)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -226,6 +230,7 @@ BEGIN
 			, intActionId
 			, strProcess
 			, ysnDeleted
+			, intSourceId
 		FROM #tmpLogItems WHERE intId = @Id
 		AND NOT (@intHeaderPricingTypeId IN (1, 3, 4, 5, 6, 7, 8) AND strTransactionType LIKE '%Basis Deliveries%')
 
@@ -281,7 +286,8 @@ BEGIN
 			, intUserId
 			, intActionId
 			, strProcess
-			, ysnDeleted)
+			, ysnDeleted
+			, intSourceId)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -320,6 +326,7 @@ BEGIN
 			, intActionId
 			, strProcess
 			, ysnDeleted
+			, intSourceId
 		FROM #tmpLogItems
 
 	Logging:
@@ -368,7 +375,8 @@ BEGIN
 		, intRefContractBalanceId
 		, intUserId
 		, strProcess
-		, ysnDeleted)
+		, ysnDeleted
+		, intSourceId)
 	SELECT strBatchId
 		, intActionId
 		, strAction = A.strActionIn 
@@ -411,6 +419,7 @@ BEGIN
 		, intUserId
 		, strProcess
 		, ysnDeleted
+		, intSourceId
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 
