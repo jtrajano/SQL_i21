@@ -8,7 +8,7 @@ CREATE  TABLE tblMFBatch
 	strTeaType NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intBrokerId INT NULL,
 	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	intBuyingCenterLocationId INT NOT NULL, -- company location id
+	intBuyingCenterLocationId INT NULL,
 	intParentBatchId INT NULL,
 	intStorageLocationId  INT NULL, -- sub location
 	intStorageUnitId  INT NULL, -- ic location broker warehouse
@@ -49,7 +49,6 @@ CREATE  TABLE tblMFBatch
 	strLeafStyle NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intMixingUnitLocationId INT  NULL,
 	dblPackagesBought NUMERIC(18,6)  NULL,
-
 	strTeaOrigin NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intOriginalItemId INT NULL,
 	dblPackagesPerPallet NUMERIC(18,6)  NULL,
@@ -103,7 +102,7 @@ CREATE  TABLE tblMFBatch
 	dtmSplit DATETIME NULL,
 	strNotes NVARCHAR(max) COLLATE Latin1_General_CI_AS  NULL,
 	intConcurrencyId INT NULL,
-	intLocationId int,
+	intLocationId int, -- company location
     CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC
