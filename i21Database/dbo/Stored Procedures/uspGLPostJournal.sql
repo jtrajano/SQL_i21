@@ -269,7 +269,8 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]		
-			,[intCompanyLocationId]			
+			,[intCompanyLocationId]
+			,[intCurrencyId]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -306,6 +307,7 @@ ELSE
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger' 
 			,[intCompanyLocationId]	= B.[intCompanyLocationId]
+			,[intCurrencyId]		= ISNULL(A.intCurrencyId, B.intCurrencyId)
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 

@@ -69,6 +69,7 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
+			,[intCurrencyId]
 		)
 		SELECT 
 			 [strTransactionId]
@@ -96,6 +97,7 @@ ELSE
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
+			,[intCurrencyId]		= ISNULL(D.intCurrencyId, A.intCurrencyId)
 		FROM	tblGLDetail A
 		LEFT JOIN tblGLJournalDetail D ON D.intJournalDetailId = A.intJournalLineNo AND D.intJournalId = A.intTransactionId
 		WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0
