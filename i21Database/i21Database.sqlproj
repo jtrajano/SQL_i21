@@ -1383,6 +1383,7 @@
     <Build Include="dbo\Views\vyuMFTrialBlendSheetDetail.sql" />
     <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
+    <Build Include="dbo\Views\vyuMFApproveBlendSheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
