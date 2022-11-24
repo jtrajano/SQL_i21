@@ -719,7 +719,7 @@ SELECT I.intInvoiceId
 FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
 LEFT JOIN (
 	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) + SUM(ISNULL(dblWriteOffAmount, 0)) - SUM(ISNULL(dblInterest, 0))
+		 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) + SUM(ISNULL(dblWriteOffAmount, 0)) - SUM(ISNULL(dblInterest, 0)) - SUM(ISNULL(dblInterest, 0))
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId
