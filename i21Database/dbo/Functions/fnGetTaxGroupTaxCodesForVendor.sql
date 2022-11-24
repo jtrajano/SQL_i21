@@ -55,9 +55,6 @@ BEGIN
 	SELECT @ItemLocationId = [intItemLocationId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId
 	SELECT @ExpenseAccountId = dbo.fnGetItemGLAccount(@ItemId, @ItemLocationId, 'Other Charge Expense')
 
-	-- IF (ISNULL(@UOMId,0) = 0)
-	-- 	SET @UOMId = [dbo].[fnGetItemStockUOM](@ItemId) 
-	
 	INSERT INTO @returntable
 	SELECT
 		 [intTransactionDetailTaxId]	= 0
@@ -90,6 +87,9 @@ BEGIN
 	INNER JOIN
 		tblSMTaxGroup TG
 			ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+	INNER JOIN
+		tblSMTaxClass TCLASS
+			ON TC.[intTaxClassId] = TCLASS.[intTaxClassId]
 	CROSS APPLY
 		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
 	CROSS APPLY
@@ -102,5 +102,5 @@ BEGIN
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
 
-	RETURN				
+	RETURN
 END
