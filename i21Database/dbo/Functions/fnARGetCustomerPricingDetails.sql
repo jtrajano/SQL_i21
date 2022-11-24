@@ -150,76 +150,74 @@ BEGIN
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialPricing))
 	BEGIN
 
-		UPDATE
-			@CustomerSpecialPricing
-		SET
-			dblCustomerPrice = 
+		UPDATE @CustomerSpecialPricing
+		SET dblCustomerPrice = 
 				(CASE 
 					WHEN strPriceBasis = 'X'
-						THEN case when isnull(VI.dblSalePrice,0) < isnull(dblDeviation, 0) then VI.dblSalePrice
-								when isnull(VI.dblSalePrice,0) > isnull(dblDeviation, 0)  then isnull(dblDeviation, 0) 
+						THEN case when isnull(IPP.dblSalePrice,0) < isnull(dblDeviation, 0) then IPP.dblSalePrice
+								when isnull(IPP.dblSalePrice,0) > isnull(dblDeviation, 0)  then isnull(dblDeviation, 0) 
 								else 0 end
 					WHEN strPriceBasis = 'F'
 						THEN dblDeviation
 					WHEN strPriceBasis = 'C'
 						THEN	(CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(ISNULL(@LastCost, IPP.dblLastCost), 0.00)
 									WHEN strCostToUse = 'Standard'
-										THEN ISNULL(VI.dblStandardCost, 0.00)
+										THEN ISNULL(IPP.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
-										THEN ISNULL(VI.dblAverageCost, 0.00)
+										THEN ISNULL(IPP.dblAverageCost, 0.00)
 									WHEN strCostToUse = 'EOM'
-										THEN ISNULL(VI.dblEndMonthCost, 0.00)
+										THEN ISNULL(IPP.dblEndMonthCost, 0.00)
 									WHEN strCostToUse = 'Sale Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'MSRP'
-										THEN ISNULL(VI.dblMSRPPrice, 0.00)
+										THEN ISNULL(IPP.dblMSRPPrice, 0.00)
 								END)
 								 +
 								(	(CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(ISNULL(@LastCost, IPP.dblLastCost), 0.00)
 									WHEN strCostToUse = 'Standard'
-										THEN ISNULL(VI.dblStandardCost, 0.00)
+										THEN ISNULL(IPP.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
-										THEN ISNULL(VI.dblAverageCost, 0.00)
+										THEN ISNULL(IPP.dblAverageCost, 0.00)
 									WHEN strCostToUse = 'EOM'
-										THEN ISNULL(VI.dblEndMonthCost, 0.00)
+										THEN ISNULL(IPP.dblEndMonthCost, 0.00)
 									WHEN strCostToUse = 'Sale Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'MSRP'
-										THEN ISNULL(VI.dblMSRPPrice, 0.00)
+										THEN ISNULL(IPP.dblMSRPPrice, 0.00)
 									END)
 								* (dblDeviation/100.00))
 					WHEN strPriceBasis = 'A'
 						THEN	((CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(ISNULL(@LastCost, IPP.dblLastCost), 0.00)
 									WHEN strCostToUse = 'Standard'
-										THEN ISNULL(VI.dblStandardCost, 0.00)
+										THEN ISNULL(IPP.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
-										THEN ISNULL(VI.dblAverageCost, 0.00)
+										THEN ISNULL(IPP.dblAverageCost, 0.00)
 									WHEN strCostToUse = 'EOM'
-										THEN ISNULL(VI.dblEndMonthCost, 0.00)
+										THEN ISNULL(IPP.dblEndMonthCost, 0.00)
 									WHEN strCostToUse = 'Sale Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'Retail Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'Wholesale Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'Large Volume Pricing'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'MSRP'
-										THEN ISNULL(VI.dblMSRPPrice, 0.00)
+										THEN ISNULL(IPP.dblMSRPPrice, 0.00)
 									WHEN strCostToUse = 'Pricing Level'
 										THEN 0
 								END)								 
 								+ dblDeviation)
 					WHEN strPriceBasis = 'S'
-						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) - (ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) * (dblDeviation/100.00)) 
+						THEN ISNULL(CPL.dblUnitPrice, IPP.dblSalePrice) - (ISNULL(CPL.dblUnitPrice, IPP.dblSalePrice) * (dblDeviation/100.00)) 
 					WHEN strPriceBasis = 'M'
-						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) - dblDeviation
+						THEN ISNULL(CPL.dblUnitPrice, IPP.dblSalePrice) - dblDeviation
 					WHEN strPriceBasis = '1'
 						THEN PL1.dblUnitPrice + dblDeviation
 					WHEN strPriceBasis = '2'
@@ -261,51 +259,51 @@ BEGIN
 			,dblPriceBasis = 
 				(CASE 
 					WHEN strPriceBasis = 'X'
-						THEN ISNULL(VI.dblSalePrice, 0.00)
+						THEN ISNULL(IPP.dblSalePrice, 0.00)
 					WHEN strPriceBasis = 'F'
 						THEN dblDeviation
 					WHEN strPriceBasis = 'C'
 						THEN	(CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(ISNULL(@LastCost, IPP.dblLastCost), 0.00)
 									WHEN strCostToUse = 'Standard'
-										THEN ISNULL(VI.dblStandardCost, 0.00)
+										THEN ISNULL(IPP.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
-										THEN ISNULL(VI.dblAverageCost, 0.00)
+										THEN ISNULL(IPP.dblAverageCost, 0.00)
 									WHEN strCostToUse = 'EOM'
-										THEN ISNULL(VI.dblEndMonthCost, 0.00)
+										THEN ISNULL(IPP.dblEndMonthCost, 0.00)
 									WHEN strCostToUse = 'Sale Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'MSRP'
-										THEN ISNULL(VI.dblMSRPPrice, 0.00)
+										THEN ISNULL(IPP.dblMSRPPrice, 0.00)
 								END)
 					WHEN strPriceBasis = 'A'
 						THEN	(CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(ISNULL(@LastCost, IPP.dblLastCost), 0.00)
 									WHEN strCostToUse = 'Standard'
-										THEN ISNULL(VI.dblStandardCost, 0.00)
+										THEN ISNULL(IPP.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
-										THEN ISNULL(VI.dblAverageCost, 0.00)
+										THEN ISNULL(IPP.dblAverageCost, 0.00)
 									WHEN strCostToUse = 'EOM'
-										THEN ISNULL(VI.dblEndMonthCost, 0.00)
+										THEN ISNULL(IPP.dblEndMonthCost, 0.00)
 									WHEN strCostToUse = 'Sale Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'Retail Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'Wholesale Price'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'Large Volume Pricing'
-										THEN ISNULL(VI.dblSalePrice, 0.00)
+										THEN ISNULL(IPP.dblSalePrice, 0.00)
 									WHEN strCostToUse = 'MSRP'
-										THEN ISNULL(VI.dblMSRPPrice, 0.00)
+										THEN ISNULL(IPP.dblMSRPPrice, 0.00)
 									WHEN strCostToUse = 'Pricing Level'
 										THEN 0
 								END)
 					WHEN strPriceBasis = 'S'
-						THEN VI.dblSalePrice
+						THEN IPP.dblSalePrice
 					WHEN strPriceBasis = 'M'
-						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice)
+						THEN ISNULL(CPL.dblUnitPrice, IPP.dblSalePrice)
 					WHEN strPriceBasis = '1'
 						THEN PL1.dblUnitPrice
 					WHEN strPriceBasis = '2'
@@ -317,61 +315,61 @@ BEGIN
 					WHEN strPriceBasis = 'L'
 						THEN dblDeviation
 				END)
-		FROM
-			vyuICGetItemStock VI
+		FROM tblICItem ITEM
+		INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON ITEM.intItemId = IL.intItemId
+		INNER JOIN tblSMCompanyLocation CL WITH (NOLOCK) ON IL.intLocationId = CL.intCompanyLocationId
+		LEFT JOIN tblICItemPricing IPP WITH (NOLOCK) ON IL.intItemId = IPP.intItemId AND IL.intItemLocationId = IPP.intItemLocationId
+		CROSS APPLY (
+			SELECT TOP 1 intStockUOMId = UOM.intItemUOMId
+			FROM tblICItemUOM UOM WITH (NOLOCK)
+			WHERE UOM.intItemId = ITEM.intItemId 
+			  AND UOM.ysnStockUnit = 1
+		) STOCKUOM
 		LEFT OUTER JOIN (
 			SELECT TOP 1 IPL.intItemId, IPL.intItemUnitMeasureId AS intItemUOM, IPL.dblMin, IPL.dblMax, IPL.dblUnitPrice, ICL.intCompanyLocationId AS intLocationId 
 			FROM tblARCustomer C
-			INNER JOIN tblICItemPricingLevel IPL ON C.intCompanyLocationPricingLevelId = IPL.intCompanyLocationPricingLevelId
+			INNER JOIN tblICItemPricingLevel IPL WITH (NOLOCK) ON C.intCompanyLocationPricingLevelId = IPL.intCompanyLocationPricingLevelId
 			INNER JOIN tblSMCompanyLocationPricingLevel ICL ON IPL.strPriceLevel = ICL.strPricingLevelName
 			WHERE C.intEntityId = @CustomerId
 			  AND IPL.intItemId = @ItemId
 			  AND ICL.intCompanyLocationId = @LocationId
 			  AND ((@Quantity BETWEEN ISNULL(IPL.dblMin, 0) AND ISNULL(NULLIF(IPL.dblMax, 0), 999999999999)) OR ( ISNULL(IPL.dblMin, 0) = 0 AND ISNULL(IPL.dblMax, 0) = 0))
-		) AS CPL ON VI.intItemId = CPL.intItemId AND VI.intLocationId = CPL.intLocationId AND VI.intStockUOMId = CPL.intItemUOM
+		) AS CPL ON IL.intItemId = CPL.intItemId AND IL.intLocationId = CPL.intLocationId AND STOCKUOM.intStockUOMId = CPL.intItemUOM
 		LEFT OUTER JOIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
-				FROM tblICItemPricingLevel PL	
+				FROM tblICItemPricingLevel PL WITH (NOLOCK)	
 				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId --PL.strPriceLevel = CPL.strPricingLevelName 		
-				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
+				INNER JOIN tblICItemLocation ICL WITH (NOLOCK) ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 1
 					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
 				ORDER BY PL.dblMax 
 			) AS PL1
-				ON VI.intItemId = PL1.intItemId AND VI.intLocationId = PL1.intLocationId AND VI.intStockUOMId = PL1.intItemUOM AND @Quantity BETWEEN PL1.dblMin AND PL1.dblMax
+				ON IL.intItemId = PL1.intItemId AND IL.intLocationId = PL1.intLocationId AND STOCKUOM.intStockUOMId = PL1.intItemUOM AND @Quantity BETWEEN PL1.dblMin AND PL1.dblMax
 		LEFT OUTER JOIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
-				FROM tblICItemPricingLevel PL	
+				FROM tblICItemPricingLevel PL WITH (NOLOCK)
 				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId --PL.strPriceLevel = CPL.strPricingLevelName 		
-				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
+				INNER JOIN tblICItemLocation ICL WITH (NOLOCK) ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 2
 					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
 				ORDER BY PL.dblMax
 			) AS PL2 
-				ON VI.intItemId = PL2.intItemId AND VI.intLocationId = PL2.intLocationId AND VI.intStockUOMId = PL2.intItemUOM AND @Quantity BETWEEN PL2.dblMin AND PL2.dblMax				
+				ON IL.intItemId = PL2.intItemId AND IL.intLocationId = PL2.intLocationId AND STOCKUOM.intStockUOMId = PL2.intItemUOM AND @Quantity BETWEEN PL2.dblMin AND PL2.dblMax				
 		LEFT OUTER JOIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
-				FROM tblICItemPricingLevel PL	
+				FROM tblICItemPricingLevel PL WITH (NOLOCK)	
 				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId --PL.strPriceLevel = CPL.strPricingLevelName 		
-				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
+				INNER JOIN tblICItemLocation ICL WITH (NOLOCK) ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 3
 					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
 				ORDER BY PL.dblMax
 			) AS PL3 
-				ON VI.intItemId = PL3.intItemId AND VI.intLocationId = PL3.intLocationId AND VI.intStockUOMId = PL3.intItemUOM AND @Quantity BETWEEN PL3.dblMin AND PL3.dblMax				
-		--LEFT OUTER JOIN
-		--	tblICItemUOM UOM
-		--		ON (VI.intItemId = UOM.intItemId OR VI.intCategoryId = @ItemCategoryId)
-		--		AND VI.intStockUOMId = UOM.intItemUOMId
-		WHERE 
-			(VI.intItemId = @ItemId OR (VI.intCategoryId = @ItemCategoryId AND ISNULL(VI.intItemId,0) = 0))
-			AND VI.intLocationId = @LocationId 
-			--AND (@ItemUOMId IS NULL OR UOM.intItemUOMId = @ItemUOMId)
-			
-			
+				ON IL.intItemId = PL3.intItemId AND IL.intLocationId = PL3.intLocationId AND STOCKUOM.intStockUOMId = PL3.intItemUOM AND @Quantity BETWEEN PL3.dblMin AND PL3.dblMax				
+		WHERE (ITEM.intItemId = @ItemId OR (ITEM.intCategoryId = @ItemCategoryId AND ISNULL(ITEM.intItemId,0) = 0))
+			AND CL.intCompanyLocationId = @LocationId 
 
 		--(R)Fixed Rack			
 		UPDATE
