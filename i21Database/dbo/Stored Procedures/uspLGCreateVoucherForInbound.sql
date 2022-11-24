@@ -280,7 +280,7 @@ BEGIN TRY
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
 			,[intCostCurrencyId] = SC.intCurrencyID
-			,[intFreightTermId] = (CASE WHEN intPurchaseSale = 3 THEN CH.intFreightTermId ELSE L.intFreightTermId END)
+			,[intFreightTermId] = L.intFreightTermId
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
