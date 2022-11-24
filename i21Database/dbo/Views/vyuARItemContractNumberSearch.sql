@@ -50,7 +50,7 @@ INNER JOIN (
 	LEFT JOIN tblARInvoiceDetail ARID
 	ON CTICHC.intItemContractHeaderId = ARID.intItemContractHeaderId
 	AND ARID.ysnRestricted = 1
-	AND ISNULL(ARID.intItemId, 0) <> 0
+	AND ISNULL(ARID.intItemId, 0) = 0
 	LEFT JOIN tblARInvoice ARI
 	ON ARID.intInvoiceId = ARI.intInvoiceId
 	GROUP BY CTICHC.intItemContractHeaderId, CTICHC.intCategoryId, ICC.strCategoryCode, ARI.strInvoiceNumber
