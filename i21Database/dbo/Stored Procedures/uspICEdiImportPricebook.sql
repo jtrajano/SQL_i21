@@ -113,7 +113,7 @@ WHERE dblDuplicateCount > 1;
 -- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
 DELETE p
 FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS INT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''),1))
+LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS INT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''), 1))
 OUTER APPLY (SELECT TOP 1 i.intItemId 
 			 FROM tblICItem i 
 			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i		
@@ -868,6 +868,52 @@ FROM tblICEdiPricebook
 WHERE (strAltUPCUOM1 = strAltUPCUOM2)
 /* End of Log of Alt UPC UOM & Item Unit Measure */
 
+/* Log Existing UPC and Modifier */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId
+)
+SELECT @LogId
+	 , 'Error'
+	 , intRecordNumber
+	 , 'Selling UPC Number and Modifier already exists on Item'
+	 , DuplicateUPC.strSellingUpcNumber + ' - ' + strUpcModifierNumber
+	 , 'Duplicate UPC Number with the same Modifier found.'
+	 , 'Skipped'
+	 , 'Record not imported.'
+	 , 1
+FROM(SELECT strSellingUpcNumber, strUpcModifierNumber, intRecordNumber
+	 FROM tblICEdiPricebook AS Pricebook	
+	 JOIN tblICUnitMeasure AS UnitOfMeasure ON  Pricebook.strItemUnitOfMeasure = UnitOfMeasure.strUnitMeasure
+	 JOIN tblICItemUOM AS ItemUOM ON Pricebook.strSellingUpcNumber = ItemUOM.strLongUPCCode 
+								AND ISNULL(ItemUOM.intModifier, 0) = ISNULL(NULLIF(Pricebook.strUpcModifierNumber,''), 0)
+								AND UnitOfMeasure.intUnitMeasureId <> ItemUOM.intUnitMeasureId
+	AND strUniqueId = @UniqueId) AS DuplicateUPC
+	
+
+/* Remove the duplicate UPC Selling Number. */
+
+DELETE 
+FROM tblICEdiPricebook
+WHERE intEdiPricebookId IN  (SELECT intEdiPricebookId
+							 FROM tblICEdiPricebook AS Pricebook	
+							JOIN tblICUnitMeasure AS UnitOfMeasure ON  Pricebook.strItemUnitOfMeasure = UnitOfMeasure.strUnitMeasure
+							JOIN tblICItemUOM AS ItemUOM ON Pricebook.strSellingUpcNumber = ItemUOM.strLongUPCCode 
+								AND ISNULL(ItemUOM.intModifier, 0) = ISNULL(NULLIF(Pricebook.strUpcModifierNumber,''), 0)
+								AND UnitOfMeasure.intUnitMeasureId <> ItemUOM.intUnitMeasureId
+							AND strUniqueId = @UniqueId)
+
+/* End of Log duplicate UPC Selling Number.*/
+
+
+
 /* Log Duplicate UPC with modifier. */
 
 INSERT INTO tblICImportLogDetail(intImportLogId
@@ -980,7 +1026,6 @@ WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN
 		     , intConcurrencyId		= Item.intConcurrencyId + 1
 		     , intStoreFamilyId		= Source_Query.intStoreFamilyId
 		     , intStoreClassId		= Source_Query.intStoreClassId
-		     , strType				= ISNULL(NULLIF(LEFT(Source_Query.strInventoryType, 50), ''), 'Inventory')
 		     , intSubcategoriesId	= Source_Query.intSubcategoriesId
 
 /* If not found and it is allowed, insert a new item record. */
@@ -1070,23 +1115,17 @@ MERGE INTO dbo.tblICItemUOM
 WITH (HOLDLOCK) AS ItemUOM
 	USING (
 		SELECT Item.intItemId 
-			 , ItemUOM.intItemUOMId
+			 , ISNULL(ItemUOM.intItemUOMId, 0) AS intItemUOMId
 			 , intUnitMeasureId = COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)			
 			 , ysnStockUnit = CASE WHEN StockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 
-			 , strLongUPCCode = dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(NULLIF(Pricebook.strSellingUpcNumber,'')))
-			 , Pricebook.* 
+			 , strUpcModifierNumber = CASE WHEN NULLIF(Pricebook.strUpcModifierNumber, '') IS NULL THEN  ItemUOM.intModifier ELSE Pricebook.strUpcModifierNumber END
+			 , strSellingUpcNumber =  CASE WHEN NULLIF(Pricebook.strSellingUpcNumber, '') IS NULL THEN ItemUOM.strLongUPCCode ELSE Pricebook.strSellingUpcNumber END
+			 , Pricebook.ysnUpdateExistingRecords
+			 , Pricebook.ysnAddNewRecords
 		FROM 
 			tblICEdiPricebook AS Pricebook
 			INNER JOIN tblICItem AS Item 
-				ON Item.strItemNo = NULLIF(Pricebook.strItemNo, '') 		
-			LEFT JOIN tblICItemUOM AS ItemUOM 
-				ON ItemUOM.intItemId = Item.intItemId 				
-				AND dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(ItemUOM.strLongUPCCode))
-					= dbo.fnSTUPCRemoveLeadingZero(dbo.fnRemoveSpecialChars(NULLIF(Pricebook.strSellingUpcNumber,'')))
-				AND (
-					ItemUOM.intModifier = NULLIF(Pricebook.strUpcModifierNumber,'') 
-					OR (NULLIF(ItemUOM.intModifier, 0) IS NULL AND NULLIF(Pricebook.strUpcModifierNumber,'') IS NULL) 
-				)
+				ON Item.strItemNo = NULLIF(Pricebook.strItemNo, '')
 			OUTER APPLY (
 				SELECT TOP 1 *
 				FROM tblICUnitMeasure 
@@ -1104,11 +1143,13 @@ WITH (HOLDLOCK) AS ItemUOM
 				FROM tblICItemUOM iu
 				WHERE iu.intItemId = Item.intItemId AND iu.ysnStockUnit = 1
 			) AS StockUnit
+			LEFT JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)	= ItemUOM.intUnitMeasureId
 		WHERE 
 			Pricebook.strUniqueId = @UniqueId
 	) AS Source_Query 
 		ON ItemUOM.intItemUOMId = Source_Query.intItemUOMId 
 		AND ItemUOM.intItemId = Source_Query.intItemId 
+
 			   
 /* If matched and it is allowed to update, update the item uom record. */
 WHEN 
@@ -1121,7 +1162,7 @@ THEN
 		     , intConcurrencyId		= ItemUOM.intConcurrencyId + 1
 		     , intCheckDigit		= dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
 		     , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
-			 , strLongUPCCode		= Source_Query.strLongUPCCode
+			 , strLongUPCCode		= Source_Query.strSellingUpcNumber
 
 /* If not found and it is allowed, insert a new item uom record. */
 WHEN 
@@ -1999,19 +2040,19 @@ USING (
 		 , dblSalePrice			= CAST(CASE WHEN ISNUMERIC(Pricebook.strRetailPrice) = 1 THEN Pricebook.strRetailPrice ELSE Price.dblSalePrice END AS NUMERIC(38, 20))
 		 , dblStandardCost		= ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
 											  ELSE NULL 
-										 END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-											   ELSE NULL
+										 END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
+													ELSE 1
 											   END, Price.dblStandardCost)
-		 , dblLastCost			= ISNULL(NULLIF(Price.dblLastCost, 0), ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-																				   ELSE NULL 
-																			  END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-																						 ELSE NULL 
-																					END, Price.dblLastCost))
-		 , dblAverageCost = ISNULL(NULLIF(Price.dblAverageCost, 0), ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
-																			    ELSE NULL 
-																		   END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 AND CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) <> 0 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
-																					  ELSE NULL 
-																				 END, Price.dblAverageCost))
+		 , dblLastCost			= (CASE WHEN ISNULL(Price.dblLastCost, 0) = 0 THEN ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+																							  ELSE NULL 
+																						  END, Price.dblLastCost)
+									   ELSE Price.dblLastCost
+								  END)
+		 , dblAverageCost		= (CASE WHEN ISNULL(Price.dblAverageCost, 0) = 0 THEN ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+																							  ELSE NULL 
+																						  END, Price.dblAverageCost)
+									   ELSE Price.dblAverageCost
+								  END)
 		 , Pricebook.ysnAddOrderingUPC
 		 , Pricebook.ysnUpdateExistingRecords
 		 , Pricebook.ysnAddNewRecords
