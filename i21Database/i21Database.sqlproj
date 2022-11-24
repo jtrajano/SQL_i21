@@ -1397,6 +1397,7 @@
     <Build Include="dbo\Tables\tblIPLeadTimeSAPPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTimeBulk_EK.sql" />
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
