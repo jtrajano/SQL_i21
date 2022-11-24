@@ -964,7 +964,7 @@ BEGIN TRY
 			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 				-- Parameters for filtering:
 				@intItemId = @intInputItemId
-				,@dtmDate = @dtmPlannedDate
+				,@dtmDate = NULL
 				,@intLocationId = @intLocationId
 				,@intSubLocationId = @intSubLocationId
 				,@intStorageLocationId = @intStorageLocationId
