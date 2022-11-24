@@ -162,6 +162,7 @@ DECLARE @tblRemainingPickedLots AS TABLE
   , ysnParentLot			BIT
   , strRowState				NVARCHAR(50) COLLATE Latin1_General_CI_AS
   , strSecondaryStatus		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+  , dblNoOfPallets			NUMERIC(38, 20)
 );
 
 DECLARE @tblPickedItem TABLE 
@@ -2546,6 +2547,7 @@ ELSE
 								,ysnParentLot
 								,strRowState
 								,strSecondaryStatus
+								,dblNoOfPallets
 								)
 							SELECT TOP 1 0
 								,0
@@ -2576,6 +2578,7 @@ ELSE
 								,0
 								,'Added'
 								,ls.strSecondaryStatus
+								,@dblNoOfPallets
 							FROM tblICLot l
 							JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
 							JOIN tblICItem i ON l.intItemId = i.intItemId
@@ -2625,6 +2628,7 @@ ELSE
 								,ysnParentLot
 								,strRowState
 								,strSecondaryStatus
+								,dblNoOfPallets
 								)
 							SELECT TOP 1 0
 								,0
@@ -2655,6 +2659,7 @@ ELSE
 								,0
 								,'Added'
 								,'Active'
+								,@dblNoOfPallets
 							FROM tblMFRecipeItem ri
 							JOIN tblICItem i ON ri.intItemId = i.intItemId
 							JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
@@ -2719,6 +2724,7 @@ ELSE
 						,ysnParentLot
 						,strRowState
 						,strSecondaryStatus
+						,dblNoOfPallets
 						)
 					SELECT TOP 1 0
 						,0
@@ -2749,6 +2755,7 @@ ELSE
 						,0
 						,'Added'
 						,ls.strSecondaryStatus
+						,@dblNoOfPallets
 					FROM tblICLot l
 					JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
 					JOIN tblICItem i ON l.intItemId = i.intItemId
