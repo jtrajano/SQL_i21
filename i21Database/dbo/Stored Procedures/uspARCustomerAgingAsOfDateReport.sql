@@ -636,7 +636,7 @@ FROM (
 	SELECT intEntityCustomerId		= TBL.intEntityCustomerId
 		, intInvoiceId				= TBL.intInvoiceId
 		, dblAmountPaid				= TBL.dblAmountPaid
-		, dblTotalDue				= dblInvoiceTotal - dblAmountPaid
+		, dblTotalDue				= CASE WHEN strType = 'CF Tran' THEN 0 ELSE dblInvoiceTotal - dblAmountPaid END
 		, dblAvailableCredit		= TBL.dblAvailableCredit
 		, dblPrepayments			= TBL.dblPrepayments
 		, dblFuture					= CASE WHEN strType = 'CF Tran' 
