@@ -88,5 +88,7 @@ IF (@ysnRecipeHeaderValidation = 0)
 	END
 ELSE
 	BEGIN
+		SELECT @strVersionNo = ''
+		
 		SELECT @strVersionNo
 	END
