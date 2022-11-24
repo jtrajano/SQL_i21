@@ -170,6 +170,7 @@ SELECT
 		WHEN 6 THEN 'Pick Lots'
 		WHEN 7 THEN 'Pick Lots w/o Contract'
 		WHEN 8 THEN 'TM Orders'
+		WHEN 9 THEN 'Approved Quality'
 		END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType
 	,strPosition = P.strPosition
