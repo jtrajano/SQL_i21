@@ -39,6 +39,7 @@ OUTER APPLY (
 		 , dblMaxPrice  = MAX(ISNULL(dblB1Price, 0))
 	FROM tblQMSample A
 	WHERE A.strSaleNumber IS NOT NULL
-	  AND A.intSampleId < S.intSampleId
+	  AND A.strSaleNumber = S.strSaleNumber
+	GROUP BY A.strSaleNumber
 ) AUCPRICE
 WHERE S.strSaleNumber IS NOT NULL
