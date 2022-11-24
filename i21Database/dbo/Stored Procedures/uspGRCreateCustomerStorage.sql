@@ -118,7 +118,8 @@ BEGIN TRY
 				   ,[intItemUOMId]
 				   ,[dblGrossQuantity]
 				   ,[dblBasis]
-				   ,[dblSettlementPrice])
+				   ,[dblSettlementPrice]
+				   ,[intShipFromLocationId])
 		SELECT 	[intConcurrencyId]					= 1
 				,[intEntityId]						= CS.intEntityId
 				,[intCommodityId]					= CS.intCommodityId
@@ -156,6 +157,7 @@ BEGIN TRY
 				,[dblGrossQuantity]					= CASE WHEN CS.intDeliverySheetId > 0 THEN NULL ELSE CS.dblGrossQuantity END
 				,[dblBasis]							= CS.dblBasis
 				,[dblSettlementPrice]				= CS.dblSettlementPrice
+				,[intShipFromLocationId]			= CS.intShipFromLocationId
 		FROM	@CustomerStorageStagingTable CS
 
 		SELECT @intCustomerStorageId = SCOPE_IDENTITY()
