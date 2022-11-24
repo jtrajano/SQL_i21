@@ -284,8 +284,6 @@ BEGIN TRY
 		fd
 	set
 		fd.intNumber = t.intOrder	 
-		,fd.dblPreviousLoadAppliedAndPriced = null
-		,fd.dblPreviousQuantityAppliedAndPriced = null
 	from
 		(
 			select
