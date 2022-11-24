@@ -1,5 +1,6 @@
 CREATE TABLE tblARPostInvoiceGLEntries (
-	  [dtmDate]							DATETIME         NOT NULL
+	  [intId]							INT				 NOT NULL IDENTITY
+	, [dtmDate]							DATETIME         NOT NULL
 	, [strBatchId]						NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL
 	, [intAccountId]					INT              NULL
 	, [dblDebit]						NUMERIC (18, 6)  NULL DEFAULT 0
@@ -43,7 +44,18 @@ CREATE TABLE tblARPostInvoiceGLEntries (
 	, [intSourceEntityId]				INT NULL
 	, [ysnRebuild]						BIT				 NULL DEFAULT 0
     , [strSessionId]                    NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL
+	, CONSTRAINT [PK_tblARPostInvoiceGLEntries_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO
 CREATE INDEX [idx_tblARPostInvoiceGLEntries_strSessionId] ON [dbo].[tblARPostInvoiceGLEntries] (strSessionId)
+GO
+CREATE INDEX [idx_tblARPostInvoiceGLEntries_strBatchId] ON [dbo].[tblARPostInvoiceGLEntries] (strBatchId)
+GO
+CREATE INDEX [idx_tblARPostInvoiceGLEntries_strBatchId_strSessionId] ON [dbo].[tblARPostInvoiceGLEntries] (strBatchId, intId) INCLUDE (strSessionId)
+GO
+CREATE INDEX [idx_tblARPostInvoiceGLEntries_strTransactionId_strSessionId] ON [dbo].[tblARPostInvoiceGLEntries] (strSessionId, strTransactionId, intId)
+GO
+CREATE INDEX [idx_tblARPostInvoiceGLEntries_strSessionId_strBatchId] ON [dbo].[tblARPostInvoiceGLEntries] (strSessionId) INCLUDE (strBatchId)
+GO
+CREATE INDEX [idx_tblARPostInvoiceGLEntries_strSessionId_intSourceEntityId] ON [dbo].[tblARPostInvoiceGLEntries] (strSessionId, intSourceEntityId) INCLUDE (intTransactionId, strTransactionId)
 GO

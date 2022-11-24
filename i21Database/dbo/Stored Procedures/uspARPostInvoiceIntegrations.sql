@@ -53,7 +53,6 @@ WHERE strSessionId = @strSessionId
 IF @Post = 1
 BEGIN
 	--UPDATE INVOICE FIELDS
-	BEGIN 
     UPDATE ARI						
     SET ARI.ysnPosted					= 1
 	  , ARI.ysnProcessed				= CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ARI.strType = 'POS' THEN 1 ELSE 0 END
@@ -93,13 +92,8 @@ BEGIN
        , ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
        , ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
        , ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
-	   , ARI.intPeriodId       		    = ACCPERIOD.intGLFiscalYearPeriodId									  
     FROM tblARPostInvoiceHeader PID
     INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId
-	OUTER APPLY (
-		SELECT P.intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod P
-		WHERE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmEndDate) + 1, 0)) = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, ARI.dtmPostDate) + 1, 0))
-	) ACCPERIOD
 	LEFT JOIN (
 		SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
 		FROM tblARPaymentDetail PD
@@ -107,10 +101,20 @@ BEGIN
 		ON PD.intPaymentId = P.intPaymentId
 	) PROVISIONALPAYMENT ON PROVISIONALPAYMENT.intInvoiceId = ARI.intOriginalInvoiceId AND PROVISIONALPAYMENT.ysnPosted = 1
 	WHERE PID.strSessionId = @strSessionId
-	END
+
+	UPDATE ARI
+	SET intPeriodId = GL.intGLFiscalYearPeriodId
+	FROM tblARInvoice ARI 
+	INNER JOIN tblARPostInvoiceHeader PIH ON ARI.intInvoiceId = PIH.intInvoiceId
+	CROSS APPLY (
+		SELECT TOP 1 P.intGLFiscalYearPeriodId 
+		FROM tblGLFiscalYearPeriod P
+		WHERE ARI.dtmPostDate BETWEEN dtmStartDate AND dtmEndDate
+		ORDER BY intGLFiscalYearPeriodId DESC
+	) GL 
+	WHERE PIH.strSessionId = @strSessionId
 
 	--UPDATE INVOICE TOTALS
-	BEGIN
     UPDATE ARPD
     SET ARPD.dblInvoiceTotal		= ARI.dblInvoiceTotal * dbo.[fnARGetInvoiceAmountMultiplier](ARI.strTransactionType)
       , ARPD.dblBaseInvoiceTotal	= ARI.dblBaseInvoiceTotal * dbo.[fnARGetInvoiceAmountMultiplier](ARI.strTransactionType)
@@ -120,7 +124,6 @@ BEGIN
     INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId
     INNER JOIN tblARPaymentDetail ARPD WITH (NOLOCK) ON ARI.intInvoiceId = ARPD.intInvoiceId
 	WHERE PID.strSessionId = @strSessionId
-	END
 
 	--CREATE PAYMENT FOR PREPAIDS/CREDIT MEMO TAB
 	EXEC dbo.uspARCreateRCVForCreditMemo @intUserId = @UserId, @strSessionId = @strSessionId

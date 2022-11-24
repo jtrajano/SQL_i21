@@ -135,7 +135,7 @@ WHERE P.[intOriginalInvoiceId] IS NOT NULL
 ORDER BY GL.intGLDetailId	
 
 --NORMAL INVOICES
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries (
 	 [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -221,7 +221,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --DUE TO ACCOUNT CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
 	 [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -320,7 +320,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --PROVISIONAL INVOICES
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -402,7 +402,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --APPLIED CREDIT/PREPAIDS
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
     [dtmDate]
    ,[strBatchId]
    ,[intAccountId]
@@ -480,7 +480,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --CASH TRANSACTION TYPE
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
 	 [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -554,7 +554,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --SALES ACCOUNT 
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -645,7 +645,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
  AND I.strSessionId = @strSessionId
    
 --SOFTWARE LICENSE DEBIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
 	 [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -724,7 +724,7 @@ WHERE I.[dblLicenseAmount] <> @ZeroDecimal
   AND I.strSessionId = @strSessionId
 
 --SOFTWARE LICENSE CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -804,7 +804,7 @@ WHERE I.[intPeriodsToAccrue] > 1
   AND I.strSessionId = @strSessionId
 
 --SOFTWARE MAINTENANCE/SAAS DEBIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -884,7 +884,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --DUE FROM ACCOUNT DEBIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -971,7 +971,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --SOFTWARE MAINTENANCE/SAAS CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1052,7 +1052,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --FREIGHT REVENUE ACCOUNT CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1134,7 +1134,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --DUE FROM ACCOUNT DEBIT FOR FREIGHT CHARGE
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1216,7 +1216,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --FREIGHT EXPENSE ACCOUNT DEBIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1297,7 +1297,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --DUE TO ACCOUNT CREDIT FOR FREIGHT CHARGE
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1378,7 +1378,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --SURCHARGE REVENUE ACCOUNT CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1460,7 +1460,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --DUE FROM ACCOUNT DEBIT FOR SURCHARGE
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1542,7 +1542,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --SURCHARGE EXPENSE ACCOUNT DEBIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1623,7 +1623,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --DUE TO ACCOUNT CREDIT FOR SURCHARGE
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1704,7 +1704,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --FINAL INVOICE CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1784,7 +1784,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --FINAL INVOICES (DROP SHIP/ COGS)
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -1888,7 +1888,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --FINAL INVOICES (DROP SHIP / COGS)
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2012,7 +2012,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --CarQuest Import (Inventory)
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2094,7 +2094,7 @@ WHERE I.[strImportFormat] = 'CarQuest'
   AND ARID.strSessionId = @strSessionId
 
 --CarQuest Import (COGS)
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
 	 [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2176,7 +2176,7 @@ WHERE I.[strImportFormat] = 'CarQuest'
   AND ARID.strSessionId = @strSessionId
 
 --DEBIT MEMO DEBIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2254,7 +2254,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --dblShipping <> 0
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2327,7 +2327,7 @@ WHERE I.[dblShipping] <> @ZeroDecimal
   AND I.strSessionId = @strSessionId
 
 --TAX ADJUSTMENT DEBIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2457,7 +2457,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --TAX DETAIL DEBIT / TAX ADJUSTMENT CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2588,7 +2588,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --TAX DETAIL CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2704,7 +2704,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --TEXAS LOADING FEE CREDIT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2781,7 +2781,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --DUE FROM ACCOUNT DEBIT OF TAX DETAIL
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2916,7 +2916,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strSessionId = @strSessionId
 
 --SALES DISCOUNT
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -2993,7 +2993,7 @@ WHERE I.[dblBaseDiscountAmount] <> @ZeroDecimal
   AND I.strSessionId = @strSessionId
 
 --DIRECT OUT TICKET (COGS)
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]
@@ -3082,7 +3082,7 @@ INNER JOIN (
 WHERE I.strSessionId = @strSessionId  
 
 --DIRECT OUT TICKET (General)
-INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
+INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
     ,[intAccountId]

@@ -339,13 +339,16 @@ SET ysnIsInvoicePositive = CAST(0 AS BIT)
 WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
   AND strSessionId = @strSessionId
 
-UPDATE HEADER
-SET ysnForApproval = CAST(1 AS BIT)
-  , strDescription = FAT.strApprovalStatus
-FROM tblARPostInvoiceHeader HEADER WITH (NOLOCK)
-INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
-WHERE FAT.strScreenName = 'Invoice'
-  AND HEADER.strSessionId = @strSessionId
+IF EXISTS (SELECT TOP 1 1 FROM vyuARForApprovalTransction)
+    BEGIN
+        UPDATE HEADER
+        SET ysnForApproval = CAST(1 AS BIT)
+        , strDescription = FAT.strApprovalStatus
+        FROM tblARPostInvoiceHeader HEADER WITH (NOLOCK)
+        INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
+        WHERE FAT.strScreenName = 'Invoice'
+        AND HEADER.strSessionId = @strSessionId
+    END
 
 --DETAIL
 --INVENTORY
@@ -1390,16 +1393,12 @@ WHERE ID.strSessionId = @strSessionId
 
 UPDATE ID
 SET dblQtyUnitOrGross = CASE WHEN SP.strGrossOrNet = 'Net' THEN DI.dblDistributionNetSalesUnits ELSE DI.dblDistributionGrossSalesUnits END
-FROM tblARPostInvoiceHeader I WITH (NOLOCK)
-INNER JOIN tblARPostInvoiceDetail ID WITH (NOLOCK) ON I.intInvoiceId = ID.intInvoiceId
-INNER JOIN tblTRLoadDistributionHeader DH WITH (NOLOCK) ON DH.intLoadDistributionHeaderId = I.intLoadDistributionHeaderId
+FROM tblARPostInvoiceDetail ID
 INNER JOIN tblTRLoadDistributionDetail DI WITH (NOLOCK) ON ID.intLoadDistributionDetailId = DI.intLoadDistributionDetailId
+INNER JOIN tblTRLoadDistributionHeader DH WITH (NOLOCK) ON DH.intLoadDistributionHeaderId = DI.intLoadDistributionHeaderId
 INNER JOIN tblTRLoadReceipt LR WITH (NOLOCK) ON DH.intLoadHeaderId = LR.intLoadHeaderId
 INNER JOIN tblTRSupplyPoint SP WITH (NOLOCK) ON LR.intSupplyPointId = SP.intSupplyPointId
-WHERE I.intLoadDistributionHeaderId IS NOT NULL
-  AND ID.intLoadDistributionDetailId IS NOT NULL
-  AND I.strSessionId = @strSessionId
-  AND ID.strSessionId = @strSessionId
+WHERE ID.strSessionId = @strSessionId
   AND DH.strDestination = 'Customer'
 
 RETURN 1

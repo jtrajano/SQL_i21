@@ -1,5 +1,6 @@
 CREATE TABLE tblARPostInvoiceHeader (
-     [intInvoiceId]                         INT             NOT NULL
+     [intId]                                INT             IDENTITY (1, 1)                 NOT NULL
+    ,[intInvoiceId]                         INT             NOT NULL
     ,[strInvoiceNumber]                     NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strTransactionType]                   NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strType]                              NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
@@ -169,6 +170,7 @@ CREATE TABLE tblARPostInvoiceHeader (
 	,[intFreightLocationSegment]			INT												NULL
     ,[dblSurcharge]                         NUMERIC(18,6)   NULL DEFAULT 0
     ,[intCompanySegment]                    INT             NULL
+    ,CONSTRAINT [PK_tblARPostInvoiceHeader_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO
 CREATE INDEX [idx_tblARPostInvoiceHeader_intInvoiceId] ON [dbo].[tblARPostInvoiceHeader] (intInvoiceId)
@@ -176,3 +178,10 @@ GO
 CREATE INDEX [idx_tblARPostInvoiceHeader_strSessionId] ON [dbo].[tblARPostInvoiceHeader] (strSessionId)
 GO
 CREATE INDEX [idx_tblARPostInvoiceHeader_intEntityCustomerId] ON [dbo].[tblARPostInvoiceHeader] (intEntityCustomerId)
+GO
+CREATE INDEX [idx_tblARPostInvoiceHeader_strTransactionType_strSessionId] ON [dbo].[tblARPostInvoiceHeader] (strSessionId, strTransactionType)
+GO
+CREATE INDEX [idx_tblARPostInvoiceHeader_strInvoiceNumber_strSessionId] ON [dbo].[tblARPostInvoiceHeader] (strSessionId, strInvoiceNumber)
+GO
+CREATE INDEX [idx_tblARPostInvoiceHeader_strSessionId_intInvoiceId] ON [dbo].[tblARPostInvoiceHeader] (strSessionId) INCLUDE (intInvoiceId)
+GO

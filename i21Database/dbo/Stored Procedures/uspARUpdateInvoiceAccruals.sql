@@ -71,7 +71,7 @@ BEGIN
 	INNER JOIN #ACCRUALS A ON IA.intInvoiceId = A.intInvoiceId
 	WHERE A.dblDifference <> 0
 	
-	INSERT INTO tblARInvoiceAccrual WITH (TABLOCK) (
+	INSERT INTO tblARInvoiceAccrual (
 		  intInvoiceId
 		, intInvoiceDetailId
 		, dtmAccrualDate

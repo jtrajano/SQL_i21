@@ -52,12 +52,13 @@ DECLARE @InvoiceDetail AS TABLE  (
 	UNIQUE (intInvoiceDetailId)
 );
 
-DECLARE @AdjustedTaxCode AS TABLE  (
-	intTaxCodeId		INT,
-	dblAdjustedTax		NUMERIC(18,6)
+IF(OBJECT_ID('tempdb..#ADJUSTEDTAXCODE') IS NOT NULL) DROP TABLE #ADJUSTEDTAXCODE 
+CREATE TABLE #ADJUSTEDTAXCODE (
+	intInvoiceDetailTaxId	INT PRIMARY KEY,
+	intTaxCodeId			INT,
+	dblAdjustedTax			NUMERIC(18,6)
 );
-
-
+CREATE NONCLUSTERED INDEX [idx_#ADJUSTEDTAXCODE_intTaxCodeId] ON [#ADJUSTEDTAXCODE] (intTaxCodeId)
 
 INSERT INTO @InvoiceDetail (intInvoiceDetailId, intItemId)
 SELECT
@@ -124,8 +125,13 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		IF @TaxGroupId = 0
 			SET @TaxGroupId = NULL
 
-		DELETE FROM @AdjustedTaxCode
-		INSERT INTO @AdjustedTaxCode([intTaxCodeId], [dblAdjustedTax]) SELECT [intTaxCodeId], [dblAdjustedTax] FROM tblARInvoiceDetailTax WHERE [intInvoiceDetailId] = @InvoiceDetailId AND ysnTaxAdjusted = 1
+		DELETE FROM #ADJUSTEDTAXCODE
+		INSERT INTO #ADJUSTEDTAXCODE([intInvoiceDetailTaxId], [intTaxCodeId], [dblAdjustedTax]) 
+		SELECT [intInvoiceDetailTaxId], [intTaxCodeId], [dblAdjustedTax] 
+		FROM tblARInvoiceDetailTax 
+		WHERE [intInvoiceDetailId] = @InvoiceDetailId 
+		  AND ysnTaxAdjusted = 1
+
 		DELETE FROM tblARInvoiceDetailTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
 		IF (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemType,'') = 'Other Charge') OR (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemPrice,0) = 0)
@@ -191,17 +197,12 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		
 		
 		UPDATE IDT			
-		SET
-			 [ysnTaxAdjusted]		= 1
+		SET  [ysnTaxAdjusted]		= 1
 			,[dblAdjustedTax]		= ATC.[dblAdjustedTax]
 			,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ATC.[dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
-		FROM
-			[tblARInvoiceDetailTax] IDT
-		INNER JOIN
-			@AdjustedTaxCode ATC
-				ON IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
-		WHERE
-			IDT.[intInvoiceDetailId] = @InvoiceDetailId
+		FROM [tblARInvoiceDetailTax] IDT
+		INNER JOIN #ADJUSTEDTAXCODE ATC ON IDT.[intInvoiceDetailTaxId] = ATC.[intInvoiceDetailTaxId] AND IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
+		WHERE IDT.[intInvoiceDetailId] = @InvoiceDetailId
 				
 		SELECT
 			 @TotalItemTax		= SUM([dblAdjustedTax])

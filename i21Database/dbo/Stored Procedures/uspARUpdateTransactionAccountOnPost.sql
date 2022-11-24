@@ -259,12 +259,12 @@ SET ANSI_WARNINGS OFF
 		WHERE ARID.strSessionId = @strSessionId
 	END
 
-	--UPDATE FINAL
-	UPDATE PIH
-	SET PIH.intAccountId = ARI.intAccountId
-	FROM tblARPostInvoiceHeader PIH
-	INNER JOIN tblARInvoice ARI ON PIH.intInvoiceId = ARI.intInvoiceId
-	WHERE PIH.strSessionId = @strSessionId
+	-- --UPDATE FINAL
+	-- UPDATE PIH
+	-- SET PIH.intAccountId = ARI.intAccountId
+	-- FROM tblARPostInvoiceHeader PIH
+	-- INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PIH.intInvoiceId = ARI.intInvoiceId
+	-- WHERE PIH.strSessionId = @strSessionId
 
     UPDATE PID
     SET  
@@ -274,6 +274,6 @@ SET ANSI_WARNINGS OFF
         ,PID.[intLicenseAccountId]          = ARID.[intLicenseAccountId]
         ,PID.[intMaintenanceAccountId]      = ARID.[intMaintenanceAccountId]
     FROM tblARPostInvoiceDetail PID
-    INNER JOIN tblARInvoiceDetail ARID ON PID.intInvoiceDetailId = ARID.intInvoiceDetailId
+    INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON PID.intInvoiceDetailId = ARID.intInvoiceDetailId
 	WHERE PID.strSessionId = @strSessionId
 RETURN 0
