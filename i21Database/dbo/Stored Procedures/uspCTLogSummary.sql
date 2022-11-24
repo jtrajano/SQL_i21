@@ -193,7 +193,8 @@ BEGIN TRY
 		, intSubBookId
 		, strNotes
 		, intUserId
-		, intActionId)
+		, intActionId
+		, intSourceId)
 	SELECT strBatchId
 		, strProcess
 		, dtmTransactionDate
@@ -231,6 +232,7 @@ BEGIN TRY
 		, strNotes
 		, intUserId
 		, intActionId
+		, intSourceId
 	FROM tblCTContractBalanceLog
 	WHERE intContractHeaderId = @intContractHeaderId
 
@@ -1244,7 +1246,8 @@ BEGIN TRY
 				, strNotes
 				, intUserId
 				, intActionId
-				, strProcess)
+				, strProcess
+				, intSourceId)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Sales Basis Deliveries'
@@ -1283,6 +1286,7 @@ BEGIN TRY
 				, cbl.intUserId
 				, intActionId = 16
 				, strProcess = @strProcess
+				, intSourceId = id.intInvoiceDetailId
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
@@ -1331,7 +1335,8 @@ BEGIN TRY
 				, strNotes
 				, intUserId
 				, intActionId
-				, strProcess)
+				, strProcess
+				, intSourceId)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Sales Basis Deliveries'
@@ -1370,6 +1375,7 @@ BEGIN TRY
 				, cbl.intUserId
 				, intActionId = 63
 				, strProcess = @strProcess
+				, intSourceId = cbl.intSourceId
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Invoice' AND pLog.strProcess = 'Create Invoice' AND pLog.intTransactionReferenceDetailId = @intTransactionId
 			WHERE cbl.intPricingTypeId = 1			
@@ -1596,7 +1602,8 @@ BEGIN TRY
 					, strNotes
 					, intUserId
 					, intActionId
-					, strProcess)
+					, strProcess
+					, intSourceId)
 				SELECT TOP 1 NULL
 					, cbl.dtmTransactionDate
 					, strTransactionType = 'Purchase Basis Deliveries'
@@ -1635,6 +1642,7 @@ BEGIN TRY
 					, cbl.intUserId
 					, intActionId = 15
 					, strProcess = @strProcess
+					, intSourceId = bd.intInventoryReceiptItemId
 				FROM tblCTContractBalanceLog cbl
 				INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
 				INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
@@ -1687,7 +1695,8 @@ BEGIN TRY
 						, strNotes
 						, intUserId
 						, intActionId
-						, strProcess)
+						, strProcess
+						, intSourceId)
 					SELECT TOP 1 NULL
 						, cbl.dtmTransactionDate
 						, strTransactionType = 'Purchase Basis Deliveries'
@@ -1726,6 +1735,7 @@ BEGIN TRY
 						, cbl.intUserId
 						, intActionId = 15
 						, strProcess = @strProcess
+						, intSourceId = bd.intSettleStorageId
 					FROM tblCTContractBalanceLog cbl
 					INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
 					INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
@@ -1735,6 +1745,7 @@ BEGIN TRY
 						AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
 						and (select top 1 intHeaderPricingTypeId from @tmpContractDetail) <> 3
 					ORDER BY cbl.intContractBalanceLogId DESC
+
 				END
 			END
 		END
@@ -1777,7 +1788,8 @@ BEGIN TRY
 				, strNotes
 				, intUserId
 				, intActionId
-				, strProcess)
+				, strProcess
+				, intSourceId)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Purchase Basis Deliveries'
@@ -1816,6 +1828,7 @@ BEGIN TRY
 				, cbl.intUserId
 				, intActionId = 62
 				, strProcess = @strProcess
+				, intSourceId = cbl.intSourceId
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Voucher' AND pLog.strProcess = 'Create Voucher' AND pLog.intTransactionReferenceDetailId = @intTransactionId AND pLog.strTransactionType = 'Purchase Basis Deliveries'
 			WHERE cbl.intPricingTypeId = 1			
@@ -3525,7 +3538,8 @@ BEGIN TRY
 			, intUserId
 			, intActionId
 			, strProcess
-			, strInvoiceType)
+			, strInvoiceType
+			, intSourceId)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -3565,6 +3579,7 @@ BEGIN TRY
 			, intActionId
 			, strProcess
 			, strInvoiceType
+			, intSourceId
 		FROM @cbLogCurrent
 		WHERE intId = @intId and @ysnAddToLogSpecific = 1
 
@@ -3609,7 +3624,8 @@ BEGIN TRY
 			, intSubBookId
 			, strNotes
 			, intUserId
-			, intActionId)
+			, intActionId
+			, intSourceId)
 		SELECT strBatchId
 			, strProcess
 			, dtmTransactionDate
@@ -3647,6 +3663,7 @@ BEGIN TRY
 			, strNotes
 			, intUserId
 			, intActionId
+			, intSourceId
 		FROM tblCTContractBalanceLog
 		WHERE intContractHeaderId = @intContractHeaderId
 		AND intContractDetailId = @currentContractDetalId
@@ -4590,7 +4607,7 @@ BEGIN TRY
 		BEGIN
 			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo', 'Create Voucher', 'Delete Voucher')
 			BEGIN
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 				CONTINUE
@@ -5123,8 +5140,53 @@ BEGIN TRY
 					BEGIN
 						UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = (case when intActionId = 18 then 46 when intActionId = 46 and @TotalOrigPriced = 0 and (dblQty * - 1) < 0 and strTransactionType = 'Sales Basis Deliveries' then 18 else intActionId end)
 					END
-					
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+					if exists (
+						select top 1 1
+						from
+							@cbLogSpecific le
+							join @cbLogPrev lp on lp.intSourceId = le.intTransactionReferenceId
+						where
+							le.strTransactionReference = 'Settle Storage'
+							and le.strTransactionType = 'Contract Balance'
+							and lp.intActionId = 15
+					)
+					begin
+
+						declare @totalBill numeric(18,6), @Qty numeric(18,6);
+
+						select @Qty = le.dblQty, @totalBill = sum(abs(lp.dblQty))
+						from
+							@cbLogSpecific le
+							join @cbLogPrev lp on lp.intSourceId = le.intTransactionReferenceId
+						where
+							le.strTransactionReference = 'Settle Storage'
+							and le.strTransactionType = 'Contract Balance'
+							and lp.intActionId = 15
+							and le.dblQty > 0
+						group by
+							le.dblQty
+
+						if (@totalBill >= @Qty)
+						begin
+							update @cbLogSpecific set intPricingTypeId = 1;
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						end
+						else
+						begin
+							update @cbLogSpecific set intPricingTypeId = 1, dblQty = @totalBill;
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+							update @cbLogSpecific set intPricingTypeId = 2, dblQty = @Qty - @totalBill;
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+						end
+
+					end
+					else
+					begin
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					end
 				END
 			END
 
