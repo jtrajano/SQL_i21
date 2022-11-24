@@ -504,7 +504,7 @@ INNER JOIN (
         , dblTotalPayment = SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END)
     FROM dbo.#ARPostPaymentHeader P WITH (NOLOCK)
     LEFT JOIN (
-        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount) + SUM(PD.dblWriteOffAmount)) - SUM(PD.dblInterest)
+        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount) + SUM(PD.dblWriteOffAmount)) - SUM(PD.dblInterest) - SUM(PD.dblCreditCardFee)
             , [intTransactionId]
         FROM dbo.#ARPostPaymentDetail PD WITH (NOLOCK)
         GROUP BY [intTransactionId]
