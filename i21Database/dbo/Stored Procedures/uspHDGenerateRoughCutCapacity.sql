@@ -161,7 +161,7 @@ INSERT INTO tblHDRoughCountCapacity
      )
 
 	--FROM TIME ENTRY
-   select distinct   
+   select distinct
       intSourceEntityId = b.intAssignedToEntity  
       ,strSourceName = c.strName  
       ,intTicketId = b.intTicketId  
@@ -193,7 +193,7 @@ INSERT INTO tblHDRoughCountCapacity
       ,dblEstimateNinthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.ysnBillable = @ysnBillable AND booked.intAgentEntityId = a.intAgentEntityId and booked.intTicketId = b.intTicketId and booked.intDate between @intNinthWeekDateFrom and @intNinthWeekDateTo)  
       ,dblEstimateTenthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.ysnBillable = @ysnBillable AND booked.intAgentEntityId = a.intAgentEntityId and booked.intTicketId = b.intTicketId and booked.intDate between @intTenthWeekDateFrom and @intTenthWeekDateTo)  
       ,dblEstimateEleventhWeek = (select sum(booked.dblEstimatedHours) from booked where booked.ysnBillable = @ysnBillable AND booked.intAgentEntityId = a.intAgentEntityId and booked.intTicketId = b.intTicketId and booked.intDate between @intEleventhWeekDateFrom and @intEleventhWeekDateTo)
-      ,dblEstimateTwelfthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.ysnBillable = @ysnBillable AND booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)  
+      ,dblEstimateTwelfthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.ysnBillable = @ysnBillable AND booked.intAgentEntityId = a.intAgentEntityId and booked.intTicketId = b.intTicketId and booked.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)  
         
       ,dblFirstWeek = (select sum(booked.dblHours) from booked where booked.ysnBillable = @ysnBillable AND booked.intAgentEntityId = a.intAgentEntityId and booked.intTicketId = b.intTicketId and booked.intDate between @intFirstWeekDateFrom and @intFirstWeekDateTo)  
       ,dblSecondWeek = (select sum(booked.dblHours) from booked where booked.ysnBillable = @ysnBillable AND booked.intAgentEntityId = a.intAgentEntityId and booked.intTicketId = b.intTicketId and booked.intDate between @intSecondWeekDateFrom and @intSecondWeekDateTo)  

@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @strMsg NVARCHAR(MAX)
 	DECLARE @ysnCancel BIT
 	DECLARE @strAuditLogActionType NVARCHAR(200)
+	DECLARE @ysnApproveQualitySourceType BIT
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
@@ -25,6 +26,8 @@ BEGIN TRY
 		  ,@ysnCancel = ISNULL(ysnCancelled, 0)
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
+
+	SELECT @ysnApproveQualitySourceType = CASE WHEN ISNULL(@intSourceType,0) = 9 THEN 1 ELSE 0 END
 
 	SELECT @ysnValidateExternalShipmentNo = ISNULL(ysnValidateExternalShipmentNo,0)
 	FROM tblLGCompanyPreference 
@@ -81,6 +84,8 @@ BEGIN TRY
 			END
 		
 			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+				-- Skip in-transit posting for 'Approved Quality' source type
+				AND @ysnApproveQualitySourceType = 0
 			BEGIN		
 				EXEC uspLGPostInTransitCosting 
 					 @intLoadId = @intLoadId
@@ -123,11 +128,38 @@ BEGIN TRY
 				END
 
 				IF(ISNULL(@strFOBPoint,'') = 'Origin')
+					-- Skip payables posting for 'Approved Quality' source type
+					AND @ysnApproveQualitySourceType = 0
 				BEGIN	
 					IF (@ysnCancel = 1) 
 						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
 					ELSE
 						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				END
+
+				IF @ysnApproveQualitySourceType = 1 AND @ysnPost = 1
+				BEGIN
+					DECLARE
+						@intLoadDetailId INT
+						,@strRowState NVARCHAR(50)
+
+					DECLARE @C AS CURSOR;
+					SET @C = CURSOR FAST_FORWARD FOR
+						SELECT
+							intLoadDetailId
+							,[strRowState] = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
+						FROM tblLGLoadDetail WHERE intLoadId = @intLoadId
+					OPEN @C 
+					FETCH NEXT FROM @C INTO @intLoadDetailId, @strRowState
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						PRINT CAST(@intLoadDetailId AS NVARCHAR(50))
+						PRINT @strRowState
+						EXEC uspIPProcessOrdersToFeed @intLoadId, @intLoadDetailId, @intEntityUserSecurityId, @strRowState
+						FETCH NEXT FROM @C INTO @intLoadDetailId, @strRowState
+					END
+					CLOSE @C
+					DEALLOCATE @C
 				END
 			END
 

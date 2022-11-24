@@ -71,7 +71,8 @@
 	[intLoadDetailRefId] INT NULL,
 	[ysnTaxGroupOverride] BIT NULL,
 	[strTaxGroup] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[intTaxGroupId] INT NULL, 
+	[intTaxGroupId] INT NULL,
+	[intBatchId] INT NULL,
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 
@@ -96,7 +97,8 @@
 	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intPSubLocationId] FOREIGN KEY ([intPSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intSSubLocationId] FOREIGN KEY ([intSSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intPStorageLocationId] FOREIGN KEY ([intPStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
-	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intSStorageLocationId] FOREIGN KEY ([intSStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
+	CONSTRAINT [FK_tblLGLoadDetail_tblSMCompanyLocationSubLocation_intSStorageLocationId] FOREIGN KEY ([intSStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
+	CONSTRAINT [FK_tblLGLoadDetail_tblMFBatch_intBatchId] FOREIGN KEY ([intBatchId]) REFERENCES [tblMFBatch]([intBatchId])
 )
 GO
 --CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_11_2002822197__K9_K1_17_18] ON [dbo].[tblLGLoadDetail]

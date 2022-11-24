@@ -1324,7 +1324,7 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherSupplierInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportInitialBuy.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportTastingScore.sql" />
-    <Build Include="dbo\Tables\tblQMSubBookSampleTypeMapping.sql" />
+    <Build Include="dbo\Tables\tblQMMarketZoneSampleTypeMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportContractAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateFeedXML_SAP.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageXML_SAP.sql" />
@@ -1376,6 +1376,13 @@
     <Build Include="dbo\Tables\tblMFProductionOrderError.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrder_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPProductionOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByModuleAndLOB.sql" />
+    <Build Include="dbo\Views\vyuHDLineOfBusiness.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByProject.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTrialBlendSheet.sql" />
+    <Build Include="dbo\Views\vyuMFTrialBlendSheetDetail.sql" />
+    <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
+    <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1745,7 +1752,7 @@
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildMissingAccountsRevalueOverride.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLInsertSegmentMappingAfterAccountBuild.sql"/>
+    <Build Include="dbo\Stored Procedures\uspGLInsertSegmentMappingAfterAccountBuild.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql">
@@ -11216,6 +11223,7 @@
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGetRoughCutCapacity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -4161,3 +4161,52 @@ UPDATE tblMFCompanyPreference
 SET ysnSkipStorageUnitScreenInHandheld = 0
 WHERE ysnSkipStorageUnitScreenInHandheld IS NULL
 GO
+
+IF NOT EXISTS (
+        SELECT *
+        FROM tblMFWorkOrderStatus
+        WHERE strName = 'Confirmed'
+        )
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus (
+        intStatusId
+        ,strName
+        )
+    SELECT 15
+        ,'Confirmed'
+END
+GO
+
+
+
+IF NOT EXISTS (
+        SELECT *
+        FROM tblMFWorkOrderStatus
+        WHERE strName = 'Printed'
+        )
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus (
+        intStatusId
+        ,strName
+        )
+    SELECT 16
+        ,'Printed'
+END
+GO
+
+
+
+IF NOT EXISTS (
+        SELECT *
+        FROM tblMFWorkOrderStatus
+        WHERE strName = 'Approved'
+        )
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus (
+        intStatusId
+        ,strName
+        )
+    SELECT 17
+        ,'Approved'
+END
+GO

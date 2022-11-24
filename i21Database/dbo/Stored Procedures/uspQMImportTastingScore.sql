@@ -318,9 +318,9 @@ BEGIN TRY
                     ,dtmTestingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
                     ,dtmSamplingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
                     ,strCountry = S.strCountry
-                    ,intLocationId = S.intLocationId
-                    ,intCompanyLocationId = S.intCompanyLocationId
-                    ,intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+                    ,intLocationId = B.intMixingUnitLocationId
+                    ,intCompanyLocationId = B.intMixingUnitLocationId
+                    ,intCompanyLocationSubLocationId = NULL
                     ,strComment = S.strComment
                     ,intCreatedUserId = @intEntityUserId
                     ,dtmCreated = @dtmDateCreated
@@ -367,6 +367,8 @@ BEGIN TRY
                 WHERE B.intBatchId = @intBatchId
                 
                 SET @intSampleId = SCOPE_IDENTITY()
+
+				Update dbo.tblMFBatch Set intSampleId =@intSampleId Where intBatchId = @intBatchId
                 
                 -- Sample Detail
                 INSERT INTO tblQMSampleDetail (
@@ -404,6 +406,7 @@ BEGIN TRY
                     ,dtmLastModified = @dtmDateCreated
                     -- Auction Fields
                     -- ,intTINClearanceId = @intTINClearanceId
+					,intItemId=@intItemId
                 FROM tblQMSample S
                 WHERE S.intSampleId = @intBatchSampleId
 

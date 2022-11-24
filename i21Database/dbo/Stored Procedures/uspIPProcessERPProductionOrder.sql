@@ -30,6 +30,19 @@ BEGIN TRY
 		,@intPackItemUOMId INT
 		,@intPackUnitMeasureId INT
 		,@strCreatedBy NVARCHAR(50)
+		,@intLotId int
+		,@strWorkOrderNo NVARCHAR(50)
+		,@intManufacturingCellId int
+		,@intMachineId int
+		,@intBlendRequirementId int
+		,@intExecutionOrder int
+		,@dtmCurrentDate DateTime
+		,@dblOrderQuantity numeric(18,6)
+		,@strOrderQuantityUOM NVARCHAR(50) 
+		,@dblNoOfMixes numeric(18,6)
+		,@dtmPlanDate DateTime
+		,@intWokrOrderId int
+
 	DECLARE @tblMFProductionOrderStage TABLE (intProductionOrderStageId INT)
 
 	INSERT INTO @tblMFProductionOrderStage (intProductionOrderStageId)
@@ -56,6 +69,8 @@ BEGIN TRY
 
 	SELECT @strInfo2 = ''
 
+	Select @dtmCurrentDate=GETDATE()
+
 	WHILE @intProductionOrderStageId IS NOT NULL
 	BEGIN
 		BEGIN TRY
@@ -67,6 +82,10 @@ BEGIN TRY
 				,@strWeightUOM = NULL
 				,@intDocNo = NULL
 				,@strLocationNumber = NULL
+				,@dblOrderQuantity=NULL
+				,@strOrderQuantityUOM=NULL
+				,@dblNoOfMixes=NULL
+				,@dtmPlanDate=NULL
 
 			SELECT @strOrderNo = strOrderNo
 				,@strLocationNumber = strLocationCode
@@ -76,23 +95,27 @@ BEGIN TRY
 				,@dblWeight = dblWeight
 				,@strWeightUOM = strWeightUOM
 				,@intDocNo = intDocNo
+				,@dblOrderQuantity=dblOrderQuantity
+				,@strOrderQuantityUOM=strOrderQuantityUOM
+				,@dblNoOfMixes=dblNoOfMixes
+				,@dtmPlanDate=dtmPlanDate
 			FROM dbo.tblMFProductionOrderStage
 			WHERE intProductionOrderStageId = @intProductionOrderStageId
 
-			IF EXISTS (
-					SELECT 1
-					FROM dbo.tblMFProductionOrderArchive
-					WHERE intDocNo = @intDocNo
-					)
-			BEGIN
-				SELECT @strError = 'Document number ' + ltrim(@intDocNo) + ' is already processed in i21.'
+			--IF EXISTS (
+			--		SELECT 1
+			--		FROM dbo.tblMFProductionOrderArchive
+			--		WHERE intDocNo = @intDocNo
+			--		)
+			--BEGIN
+			--	SELECT @strError = 'Document number ' + ltrim(@intDocNo) + ' is already processed in i21.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intUserId = NULL
 
@@ -122,8 +145,8 @@ BEGIN TRY
 
 			IF NOT EXISTS (
 					SELECT *
-					FROM tblMFWorkOrder
-					WHERE strERPOrderNo = @strOrderNo
+					FROM tblMFBlendRequirement 
+					WHERE strReferenceNo = @strOrderNo
 					)
 			BEGIN
 				SELECT @strError = 'Production Order ' + @strOrderNo + ' is not available in i21'
@@ -135,11 +158,7 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intWorkOrderId = NULL
 
-			SELECT @intWorkOrderId = intWorkOrderId
-			FROM dbo.tblMFWorkOrder
-			WHERE strWorkOrderNo = @strOrderNo
 
 			IF NOT EXISTS (
 					SELECT *
@@ -155,12 +174,20 @@ BEGIN TRY
 						,1
 						)
 			END
-				 SELECT @intItemId = NULL
+				 SELECT @intItemId = NULL,@intLotId=NULL
 				
 			SELECT @intItemId = intItemId
+					,@intLotId=intLotId
 			FROM tblICLot
 			WHERE strLotNumber = @strBatchId
 				AND intLocationId = @intLocationId
+
+			Select @intManufacturingCellId=NULL, @intMachineId=NULL
+
+			Select @intManufacturingCellId=intManufacturingCellId, @intMachineId=intMachineId
+					,@intBlendRequirementId=intBlendRequirementId 
+			from tblMFBlendRequirement 
+			Where strReferenceNo =@strOrderNo 
 
 			IF @strWeightUOM  = ''
 			BEGIN
@@ -256,9 +283,105 @@ BEGIN TRY
 
 			BEGIN TRAN
 
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+				,@intItemId = @intItemId
+				,@intManufacturingId = @intManufacturingCellId
+				,@intSubLocationId = 0
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = @intBlendRequirementId
+				,@intPatternCode = 93
+				,@ysnProposed = 0
+				,@strPatternString = @strWorkOrderNo OUTPUT
+
+			SELECT @intExecutionOrder = Count(1)
+			FROM tblMFWorkOrder
+			WHERE intManufacturingCellId = @intManufacturingCellId
+				AND convert(DATE, dtmExpectedDate) = convert(DATE, @dtmPlanDate)
+				AND intBlendRequirementId IS NOT NULL
+				AND intStatusId NOT IN (
+					2
+					,13
+					)
+
+			SET @intExecutionOrder = @intExecutionOrder + 1
+
+			INSERT INTO tblMFWorkOrder (
+				strWorkOrderNo
+				,intItemId
+				,dblQuantity
+				,intItemUOMId
+				,intStatusId
+				,intManufacturingCellId
+				,intMachineId
+				,intLocationId
+				,dblBinSize
+				,dtmExpectedDate
+				,intExecutionOrder
+				,intProductionTypeId
+				,dblPlannedQuantity
+				,intBlendRequirementId
+				,ysnKittingEnabled
+				,intKitStatusId
+				,ysnUseTemplate
+				,strComment
+				,dtmCreated
+				,intCreatedUserId
+				,dtmLastModified
+				,intLastModifiedUserId
+				,dtmReleasedDate
+				,intManufacturingProcessId
+				,intSalesOrderLineItemId
+				,intSalesRepresentativeId
+				,intInvoiceDetailId
+				,intLoadDistributionDetailId
+				,dtmPlannedDate
+				,intPlannedShiftId
+				,intCustomerId
+				,intConcurrencyId
+				,intTransactionFrom
+				)
+			SELECT @strWorkOrderNo
+				,@intItemId
+				,@dblOrderQuantity
+				,@intItemUOMId
+				,2 AS intWorkOrderStatusId
+				,@intManufacturingCellId
+				,@intMachineId
+				,@intLocationId
+				,@dblOrderQuantity/@dblNoOfMixes 
+				,@dtmPlanDate
+				,@intExecutionOrder
+				,1
+				,@dblOrderQuantity
+				,@intBlendRequirementId
+
+				,0 AS ysnKittingEnabled
+				,NULL AS intKitStatusId
+				,0
+				,''
+				,@dtmCurrentDate
+				,@intUserId
+				,@dtmCurrentDate
+				,@intUserId
+				,@dtmCurrentDate
+				,1 AS intManufacturingProcessId
+				,NULL AS intSalesOrderDetailId
+				,NULL AS intSalesRepresentativeId
+				,NULL AS intInvoiceDetailId
+				,NULL AS intLoadDistributionDetailId
+				,@dtmPlanDate
+				,Null intPlannedShiftId
+				,NULL AS intCustomerId
+				,1
+				,NULL AS intTransactionFrom
+
+			SELECT @intWokrOrderId = SCOPE_IDENTITY()
+
 			INSERT INTO tblMFWorkOrderInputLot (
 				intWorkOrderId
 				,intItemId
+				,intLotId
 				,dblQuantity
 				,intItemUOMId
 				,dblIssuedQuantity
@@ -267,6 +390,7 @@ BEGIN TRY
 				)
 			SELECT @intWorkOrderId
 				,@intItemId
+				,@intLotId
 				,@dblWeight
 				,@intItemUOMId
 				,@dblNoOfPack
@@ -280,6 +404,10 @@ BEGIN TRY
 				intDocNo
 				,strOrderNo
 				,strLocationCode
+				,dblOrderQuantity 
+				,strOrderQuantityUOM 
+				,dblNoOfMixes 
+				,dtmPlanDate 
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
@@ -290,6 +418,10 @@ BEGIN TRY
 			SELECT intDocNo
 				,strOrderNo
 				,strLocationCode
+				,dblOrderQuantity 
+				,strOrderQuantityUOM 
+				,dblNoOfMixes 
+				,dtmPlanDate 
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
@@ -319,6 +451,10 @@ BEGIN TRY
 				intDocNo
 				,strOrderNo
 				,strLocationCode
+				,dblOrderQuantity 
+				,strOrderQuantityUOM 
+				,dblNoOfMixes 
+				,dtmPlanDate 
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
@@ -329,6 +465,10 @@ BEGIN TRY
 			SELECT intDocNo
 				,strOrderNo
 				,strLocationCode
+				,dblOrderQuantity 
+				,strOrderQuantityUOM 
+				,dblNoOfMixes 
+				,dtmPlanDate 
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM

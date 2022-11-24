@@ -205,6 +205,7 @@ BEGIN
 			,strVoyage = T.strVoyage
 			,strVessel = T.strVessel
 			,intConcurrencyId = intConcurrencyId + 1
+			,intMixingUnitLocationId=T.intMixingUnitLocationId
 		FROM tblMFBatch A
 		OUTER APPLY (
 			SELECT *
@@ -320,6 +321,7 @@ BEGIN
 			,strVessel
 			,intConcurrencyId
 			,intLocationId
+			,intMixingUnitLocationId
 			)
 		SELECT (
 				CASE 
@@ -425,6 +427,7 @@ BEGIN
 			,strVessel
 			,1
 			,intLocationId
+			,intMixingUnitLocationId
 		FROM @MFBatchTableType
 		WHERE intId = @id
 			--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult, intBatchId, dtmDate)

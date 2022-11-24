@@ -234,3 +234,5 @@ CREATE NONCLUSTERED INDEX [IX_tblQMSample_intCuppingSessionDetailId] ON [dbo].[t
 GO
 CREATE NONCLUSTERED INDEX [IX_tblQMSample_strBatchNo] ON [dbo].[tblQMSample](strBatchNo)
 GO
+CREATE NONCLUSTERED INDEX [IX_tblQMSample_intMarketZoneId] ON [dbo].[tblQMSample](intMarketZoneId)
+GO

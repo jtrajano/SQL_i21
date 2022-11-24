@@ -222,6 +222,48 @@ BEGIN TRY
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationNumber = x.LocationCode
 
+			INSERT INTO tblMFProductionOrderStage (
+				strOrderNo
+				,strLocationCode
+				,dblOrderQuantity 
+				,strOrderQuantityUOM 
+				,dblNoOfMixes 
+				,dtmPlanDate
+				,strBatchId
+				,dblNoOfPack
+				,strNoOfPackUOM
+				,dblWeight
+				,strWeightUOM
+				,intDocNo
+				)
+			SELECT OrderNo
+				,LocationCode
+				,OrderQuantity 
+				,OrderQuantityUOM 
+				,NoOfMixes 
+				,PlanDate
+				,BatchId
+				,NoOfPack
+				,NoOfPackUOM
+				,Weight
+				,WeightUOM
+				,DocNo
+			FROM OPENXML(@idoc, 'root/Header/Line/Batch', 2) WITH (
+					DocNo BIGINT '../../../CtrlPoint/DocNo'
+					,OrderNo NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderNo'
+					,LocationCode NVARCHAR(50) collate Latin1_General_CI_AS '../../LocationCode'
+					,OrderQuantity numeric(18,6)'../../OrderQuantity'
+					,OrderQuantityUOM NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderQuantityUOM'
+					,NoOfMixes numeric(18,6)'../../NoOfMixes'
+					,PlanDate DateTime'../../PlanDate'
+					,BatchId NVARCHAR(50) collate Latin1_General_CI_AS
+					,NoOfPack NUMERIC(18, 6)
+					,NoOfPackUOM NVARCHAR(50) collate Latin1_General_CI_AS
+					,Weight NUMERIC(18, 6)
+					,WeightUOM NVARCHAR(50) collate Latin1_General_CI_AS
+					) x
+			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationNumber = x.LocationCode
+
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
