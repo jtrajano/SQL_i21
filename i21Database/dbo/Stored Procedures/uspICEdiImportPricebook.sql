@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICEdiImportPricebook] 
-	  @intUserId INT
+	@intUserId INT
 	, @intVendorId INT = NULL 
 	, @Locations UdtCompanyLocations READONLY
 	, @UniqueId NVARCHAR(100)
@@ -113,7 +113,7 @@ WHERE dblDuplicateCount > 1;
 -- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
 DELETE p
 FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS INT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''),1))
+LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS INT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''), 1))
 OUTER APPLY (SELECT TOP 1 i.intItemId 
 			 FROM tblICItem i 
 			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i		
@@ -868,6 +868,52 @@ FROM tblICEdiPricebook
 WHERE (strAltUPCUOM1 = strAltUPCUOM2)
 /* End of Log of Alt UPC UOM & Item Unit Measure */
 
+/* Log Existing UPC and Modifier */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId
+)
+SELECT @LogId
+	 , 'Error'
+	 , ''
+	 , 'Selling UPC Number and Modifier already exists on Item'
+	 , DuplicateUPC.strSellingUpcNumber + ' - ' + strUpcModifierNumber
+	 , 'Duplicate UPC Number with the same Modifier found.'
+	 , 'Skipped'
+	 , 'Record not imported.'
+	 , 1
+FROM(SELECT strSellingUpcNumber, strUpcModifierNumber
+	 FROM tblICEdiPricebook AS Pricebook	
+	 JOIN tblICUnitMeasure AS UnitOfMeasure ON  Pricebook.strItemUnitOfMeasure = UnitOfMeasure.strUnitMeasure
+	 JOIN tblICItemUOM AS ItemUOM ON Pricebook.strSellingUpcNumber = ItemUOM.strLongUPCCode 
+								AND ISNULL(ItemUOM.intModifier, 0) = ISNULL(NULLIF(Pricebook.strUpcModifierNumber,''), 0)
+								AND UnitOfMeasure.intUnitMeasureId <> ItemUOM.intUnitMeasureId
+	AND strUniqueId = @UniqueId) AS DuplicateUPC
+	
+
+/* Remove the duplicate UPC Selling Number. */
+
+DELETE 
+FROM tblICEdiPricebook
+WHERE intEdiPricebookId IN  (SELECT intEdiPricebookId
+							 FROM tblICEdiPricebook AS Pricebook	
+							JOIN tblICUnitMeasure AS UnitOfMeasure ON  Pricebook.strItemUnitOfMeasure = UnitOfMeasure.strUnitMeasure
+							JOIN tblICItemUOM AS ItemUOM ON Pricebook.strSellingUpcNumber = ItemUOM.strLongUPCCode 
+								AND ISNULL(ItemUOM.intModifier, 0) = ISNULL(NULLIF(Pricebook.strUpcModifierNumber,''), 0)
+								AND UnitOfMeasure.intUnitMeasureId <> ItemUOM.intUnitMeasureId
+							AND strUniqueId = @UniqueId)
+
+/* End of Log duplicate UPC Selling Number.*/
+
+
+
 /* Log Duplicate UPC with modifier. */
 
 INSERT INTO tblICImportLogDetail(intImportLogId
@@ -980,7 +1026,6 @@ WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN
 		     , intConcurrencyId		= Item.intConcurrencyId + 1
 		     , intStoreFamilyId		= Source_Query.intStoreFamilyId
 		     , intStoreClassId		= Source_Query.intStoreClassId
-		     , strType				= ISNULL(NULLIF(LEFT(Source_Query.strInventoryType, 50), ''), 'Inventory')
 		     , intSubcategoriesId	= Source_Query.intSubcategoriesId
 
 /* If not found and it is allowed, insert a new item record. */
