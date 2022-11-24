@@ -42,7 +42,9 @@ BEGIN TRY
 			@intSeqHistoryPreviousFutMonth	INT,
 			@dblCurrentBasis				NUMERIC(24, 10),
 			@intHeaderPricingTypeId		INT,
-			@intSequencePricingTypeId INT;
+			@ysnInvoicePosted			BIT = 0,
+			@intSequencePricingTypeId INT,
+			@ysnUnlimitedQuantity bit;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -110,6 +112,7 @@ BEGIN TRY
 		, intSubBookId INT
   		, ysnWithPriceFix bit
 		, dblBalance NUMERIC(18, 6)
+		, ysnUnlimitedQuantity bit
 	)
 
 	-- Get Contract Details
@@ -146,6 +149,7 @@ BEGIN TRY
 		, cd.intSubBookId
 		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then (case when ch.intPricingTypeId = 2 and cd.intPricingTypeId = 1 then 1 else 0 end) else 1 end
 		, dblBalance = CASE WHEN ISNULL(ch.ysnLoad, 0) = 0 THEN cd.dblBalance ELSE ch.dblQuantityPerLoad * cd.dblBalanceLoad END
+		, ysnUnlimitedQuantity = isnull(ch.ysnUnlimitedQuantity,0)
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
@@ -413,6 +417,7 @@ BEGIN TRY
 		, @dblCurrentBasis = dblBasis
 		, @intHeaderPricingTypeId = intHeaderPricingTypeId
 		, @intSequencePricingTypeId = intPricingTypeId
+		, @ysnUnlimitedQuantity = ysnUnlimitedQuantity
 	FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
@@ -3937,7 +3942,7 @@ BEGIN TRY
 				begin
 					declare @intLastLogStatus int;
 					select top 1 @intLastLogStatus = intContractStatusId from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
-					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4 and isnull(@ysnQuantityChange,0) = 0)
+					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4 and (isnull(@ysnQuantityChange,0) = 0 or @ysnUnlimitedQuantity = 0))
 					begin
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					end
