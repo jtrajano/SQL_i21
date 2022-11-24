@@ -37,7 +37,7 @@ BEGIN
 	ELSE 
 		SET @TaxGroupId = @OriginalTaxGroupId
 
-	SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @NewTaxGroupId THEN 1 ELSE 0 END
+	SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @TaxGroupId THEN 1 ELSE 0 END
 END
 ELSE
 BEGIN
