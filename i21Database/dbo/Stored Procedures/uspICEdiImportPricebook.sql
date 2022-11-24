@@ -882,14 +882,14 @@ INSERT INTO tblICImportLogDetail(intImportLogId
 )
 SELECT @LogId
 	 , 'Error'
-	 , ''
+	 , intRecordNumber
 	 , 'Selling UPC Number and Modifier already exists on Item'
 	 , DuplicateUPC.strSellingUpcNumber + ' - ' + strUpcModifierNumber
 	 , 'Duplicate UPC Number with the same Modifier found.'
 	 , 'Skipped'
 	 , 'Record not imported.'
 	 , 1
-FROM(SELECT strSellingUpcNumber, strUpcModifierNumber
+FROM(SELECT strSellingUpcNumber, strUpcModifierNumber, intRecordNumber
 	 FROM tblICEdiPricebook AS Pricebook	
 	 JOIN tblICUnitMeasure AS UnitOfMeasure ON  Pricebook.strItemUnitOfMeasure = UnitOfMeasure.strUnitMeasure
 	 JOIN tblICItemUOM AS ItemUOM ON Pricebook.strSellingUpcNumber = ItemUOM.strLongUPCCode 
