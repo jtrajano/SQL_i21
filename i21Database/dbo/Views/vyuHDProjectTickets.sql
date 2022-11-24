@@ -43,6 +43,8 @@
 			,strNote							= t.strNote
 			,strCompletedDate = CONVERT(nvarchar(10),t.dtmCompleted,101) COLLATE Latin1_General_CI_AS
 			,strStartDate = CONVERT(nvarchar(10),t.dtmStartDate,101) COLLATE Latin1_General_CI_AS
+			,intTemplateTicketId = task.intTemplateTicketId
+			,strTemplateTicketNumber = TemplateTicket.strTicketNumber
 		from
 			tblHDTicket t
 			/*
@@ -57,6 +59,7 @@
 			left outer join tblHDTicketType tt on tt.intTicketTypeId = t.intTicketTypeId
 			left outer join tblHDProjectTask task on task.intTicketId = t.intTicketId
 			left outer join tblHDTicketPriority prio on prio.intTicketPriorityId = t.intTicketPriorityId
+			left join tblHDTicket TemplateTicket on TemplateTicket.intTicketId = task.intTemplateTicketId 
 		where t.intTicketTypeId not in (select top 1 intTicketTypeId from tblHDTicketType where strType = 'Template')
 
 GO
