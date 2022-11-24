@@ -101,7 +101,7 @@ FROM (
 		,strShipper = SHPR.strName
 		,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CDS.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 		,intShipmentType = ShipType.intShipmentType
-		,CHS.intFreightTermId
+		,CHP.intFreightTermId
 		,FT.strFreightTerm
 	FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 	CROSS JOIN tblLGAllocationDetail AD
@@ -164,7 +164,7 @@ FROM (
 	LEFT JOIN tblEMEntity SHPR ON SHPR.intEntityId = CDP.intShipperId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
-	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CHS.intFreightTermId
+	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CHP.intFreightTermId
 	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
 					FROM tblSMTransaction TRN INNER JOIN tblSMScreen SCR 
 					ON TRN.intScreenId = SCR.intScreenId AND SCR.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments' )
