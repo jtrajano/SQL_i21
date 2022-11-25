@@ -1241,7 +1241,6 @@
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByModuleAndLOB.sql" />
     <Build Include="dbo\Views\vyuHDLineOfBusiness.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByProject.sql" />
-    <Build Include="Scripts\Post-Deployment\AR\DefaultData\41_UpdateSourceTypeInInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
