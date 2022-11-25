@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspIPProcessOrdersToFeed @intLoadId INT
 	,@intLoadDetailId INT
 	,@intEntityId INT
-	,@strRowState NVARCHAR(50) = '' --Cancel / Delete Status Flag
+	,@strRowState NVARCHAR(50) = '' --Added / Modified / Cancelled / Deleted
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -19,7 +19,10 @@ BEGIN TRY
 		AND LLT.intBuyingCenterId = LD.intPCompanyLocationId
 		AND LLT.intOriginId = ISNULL(IM.intOriginId, LLT.intOriginId)
 
-	--DELETE FROM tblIPContractFeed WHERE intLoadDetailId = @intLoadDetailId AND intStatusId IS NULL
+	DELETE
+	FROM tblIPContractFeed
+	WHERE intLoadDetailId = @intLoadDetailId
+		AND intStatusId IS NULL
 
 	INSERT INTO tblIPContractFeed
 	(
