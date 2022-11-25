@@ -156,10 +156,10 @@ BEGIN
 		DECLARE @intCompanyLocationId INT
 		DECLARE @intTaxGroupId INT
 		DECLARE @intStoreId INT
-		DECLARE @strComments NVARCHAR(MAX) = 'Store Checkout' -- All comments should be same to create a single Invoice
-		DECLARE @strInvoiceTypeMain AS NVARCHAR(100) = 'Store Checkout' --'Standard' --'Store Checkout'
-		DECLARE @strInvoiceTransactionTypeMain AS NVARCHAR(100) --= 'Store Checkout'
-		DECLARE @strInvoiceTypeCustomerCharges AS NVARCHAR(100) --= 'Store Checkout'
+		DECLARE @strComments NVARCHAR(MAX) = 'Store End of Day' -- All comments should be same to create a single Invoice
+		DECLARE @strInvoiceTypeMain AS NVARCHAR(100) = 'Store End of Day' --'Standard' --'Store End of Day'
+		DECLARE @strInvoiceTransactionTypeMain AS NVARCHAR(100) --= 'Store End of Day'
+		DECLARE @strInvoiceTypeCustomerCharges AS NVARCHAR(100) --= 'Store End of Day'
 		DECLARE @strInvoicePaymentMethodMain AS NVARCHAR(100) = 'Cash'
 		DECLARE @intPaymentMethodIdMain AS INT = (
 													SELECT intPaymentMethodID 
