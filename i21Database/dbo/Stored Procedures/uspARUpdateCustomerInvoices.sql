@@ -359,7 +359,7 @@ SELECT
 FROM
 	@InvoicesToUpdate ITG --WITH (NOLOCK)
 WHERE
-	ISNULL(ITG.[strType],'') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout')
+	ISNULL(ITG.[strType],'') NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store End of Day')
 
 UNION ALL
 
