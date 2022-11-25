@@ -97,6 +97,8 @@ FROM (
 									END
 								ELSE SFS.strFinancialStatus
 							END
+		,[dblPricedLots] =  CASE WHEN CD.intPricingTypeId IN(1,6) THEN ISNULL(CD.dblNoOfLots, 0) ELSE PF.dblLotsFixed END
+		,[dblUnpricedLots] = CASE WHEN CD.intPricingTypeId IN(1,6) THEN NULL ELSE ISNULL(CD.dblNoOfLots, 0) - ISNULL(PF.dblLotsFixed, 0) END
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
