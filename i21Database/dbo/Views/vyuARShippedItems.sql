@@ -151,9 +151,9 @@ FROM (
 		 , dblQtyRemaining					= SHP.dblQuantity - ISNULL(INVOICEDETAIL.dblQtyShipped, 0)
 		 , dblPriceUOMQuantity				= SOD.dblUnitQuantity
 		 , dblDiscount						= SOD.dblDiscount 
-		 , dblPrice							= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
-		 , dblUnitPrice						= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
-		 , dblShipmentUnitPrice				= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CAST(SOD.dblPrice AS DECIMAL(18,6))
+		 , dblPrice							= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CASE WHEN  CAST(SHP.dblUnitPrice AS DECIMAL(18,6))  !=  CAST(SOD.dblPrice AS DECIMAL(18,6)) THEN CAST(SHP.dblUnitPrice AS DECIMAL(18,6))  ELSE CAST(SOD.dblPrice AS DECIMAL(18,6)) END
+		 , dblUnitPrice						= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CASE WHEN  CAST(SHP.dblUnitPrice AS DECIMAL(18,6))  !=  CAST(SOD.dblPrice AS DECIMAL(18,6)) THEN CAST(SHP.dblUnitPrice AS DECIMAL(18,6))  ELSE CAST(SOD.dblPrice AS DECIMAL(18,6)) END
+		 , dblShipmentUnitPrice				= (CASE WHEN SHP.intItemUOMId != SOD.intItemUOMId THEN dbo.fnCalculateQtyBetweenUOM(SHP.intItemUOMId, SOD.intItemUOMId, 1) ELSE 1 END) * CASE WHEN  CAST(SHP.dblUnitPrice AS DECIMAL(18,6))  !=  CAST(SOD.dblPrice AS DECIMAL(18,6)) THEN CAST(SHP.dblUnitPrice AS DECIMAL(18,6))  ELSE CAST(SOD.dblPrice AS DECIMAL(18,6)) END
 		 , strPricing						= SOD.strPricing
 		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
 		 , dblTotalTax						= SOD.dblTotalTax
