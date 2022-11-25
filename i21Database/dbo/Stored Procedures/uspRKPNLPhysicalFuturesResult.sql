@@ -169,14 +169,14 @@ BEGIN
 									ELSE dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, QU.intUnitMeasureId, @intUnitMeasureId, ID.dblQtyReceived) * AD.dblPAllocatedQty / ISNULL(TA.dblTotalAllocation, 1) * -1 END
 			, dblAccounting = CASE WHEN IV.intTransactionType IN (11, 3) -- CLAIM/DEBIT MEMO (RM-5034)
 								THEN IV.dblTotal 
-								ELSE CASE WHEN IM.strType <> 'Other Charge' THEN ID.dblTotal / (dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, QU.intUnitMeasureId, @intWeightUOMId, ID.dblQtyReceived) * AD.dblPAllocatedQty / ISNULL(TA.dblTotalAllocation, 1) * -1)
+								ELSE CASE WHEN IM.strType <> 'Other Charge' AND ISNULL(ID.dblQtyReceived, 0) <> 0 THEN ID.dblTotal / (dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, QU.intUnitMeasureId, @intWeightUOMId, ID.dblQtyReceived) * AD.dblPAllocatedQty / ISNULL(TA.dblTotalAllocation, 1) * -1)
 												* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intWeightUOMId, AD.dblPAllocatedQty) ELSE 0.0 END
 								END
 			, dtmDate = IV.dtmDate
 			, strType = '4 Supp. Invoice'
 			, dblTranValue = CASE WHEN IV.intTransactionType IN (11, 3) -- CLAIM/DEBIT MEMO (RM-5034)
 								THEN IV.dblTotal * -1
-								ELSE CASE WHEN IM.strType <> 'Other Charge' THEN ID.dblTotal / (dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, QU.intUnitMeasureId, @intWeightUOMId, ID.dblQtyReceived) * AD.dblPAllocatedQty / ISNULL(TA.dblTotalAllocation, 1) * -1)
+								ELSE CASE WHEN IM.strType <> 'Other Charge' AND ISNULL(ID.dblQtyReceived, 0) <> 0 THEN ID.dblTotal / (dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId, QU.intUnitMeasureId, @intWeightUOMId, ID.dblQtyReceived) * AD.dblPAllocatedQty / ISNULL(TA.dblTotalAllocation, 1) * -1)
 												* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intWeightUOMId, AD.dblPAllocatedQty) * -1 ELSE 0.0 END
 								END
 			, intSort = 9999999 + AD.intPContractDetailId
