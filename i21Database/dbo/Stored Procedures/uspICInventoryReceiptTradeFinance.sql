@@ -86,21 +86,37 @@ BEGIN
 				currentSnapshot.intInventoryReceiptId = @ReceiptId
 				AND (
 					currentSnapshot.[strTradeFinanceNumber] <> previousSnapshot.[strTradeFinanceNumber] 
+					OR (currentSnapshot.[strTradeFinanceNumber] IS NOT NULL AND previousSnapshot.[strTradeFinanceNumber] IS NULL)
 					OR currentSnapshot.[intBankId] <> previousSnapshot.[intBankId] 
+					OR (currentSnapshot.[intBankId] IS NOT NULL AND  previousSnapshot.[intBankId] IS NULL)
 					OR currentSnapshot.[intBankAccountId] <> previousSnapshot.[intBankAccountId] 
+					OR (currentSnapshot.[intBankAccountId] IS NOT NULL AND previousSnapshot.[intBankAccountId] IS NULL)
 					OR currentSnapshot.[intBorrowingFacilityId] <> previousSnapshot.[intBorrowingFacilityId] 
+					OR (currentSnapshot.[intBorrowingFacilityId] IS NOT NULL AND previousSnapshot.[intBorrowingFacilityId] IS NULL)
 					OR currentSnapshot.[strBankReferenceNo] <> previousSnapshot.[strBankReferenceNo] 
+					OR (currentSnapshot.[strBankReferenceNo] IS NOT NULL AND previousSnapshot.[strBankReferenceNo] IS NULL)
 					OR currentSnapshot.[intLimitTypeId] <> previousSnapshot.[intLimitTypeId] 
+					OR (currentSnapshot.[intLimitTypeId] IS NOT NULL AND previousSnapshot.[intLimitTypeId] IS NULL)
 					OR currentSnapshot.[intSublimitTypeId] <> previousSnapshot.[intSublimitTypeId] 
+					OR (currentSnapshot.[intSublimitTypeId] IS NOT NULL AND previousSnapshot.[intSublimitTypeId] IS NULL)
 					OR currentSnapshot.[ysnSubmittedToBank] <> previousSnapshot.[ysnSubmittedToBank]
+					OR (currentSnapshot.[ysnSubmittedToBank] IS NOT NULL AND previousSnapshot.[ysnSubmittedToBank] IS NULL)
 					OR currentSnapshot.[dtmDateSubmitted] <> previousSnapshot.[dtmDateSubmitted] 
+					OR (currentSnapshot.[dtmDateSubmitted] IS NOT NULL AND previousSnapshot.[dtmDateSubmitted] IS NULL)
 					OR currentSnapshot.[strApprovalStatus] <> previousSnapshot.[strApprovalStatus] 
+					OR (currentSnapshot.[strApprovalStatus] IS NOT NULL AND previousSnapshot.[strApprovalStatus] IS NULL)
 					OR currentSnapshot.[dtmDateApproved] <> previousSnapshot.[dtmDateApproved] 
+					OR (currentSnapshot.[dtmDateApproved] IS NOT NULL AND previousSnapshot.[dtmDateApproved] IS NULL) 
 					OR currentSnapshot.[strWarrantNo] <> previousSnapshot.[strWarrantNo] 
+					OR (currentSnapshot.[strWarrantNo] IS NOT NULL AND previousSnapshot.[strWarrantNo] IS NULL)
 					OR currentSnapshot.[intWarrantStatus] <> previousSnapshot.[intWarrantStatus] 
+					OR (currentSnapshot.[intWarrantStatus] IS NOT NULL AND previousSnapshot.[intWarrantStatus] IS NULL) 
 					OR currentSnapshot.[strReferenceNo] <> previousSnapshot.[strReferenceNo] 
+					OR (currentSnapshot.[strReferenceNo] IS NOT NULL AND previousSnapshot.[strReferenceNo] IS NULL)
 					OR currentSnapshot.[intOverrideFacilityValuation] <> previousSnapshot.[intOverrideFacilityValuation] 
+					OR (currentSnapshot.[intOverrideFacilityValuation] IS NOT NULL AND previousSnapshot.[intOverrideFacilityValuation] IS NULL)
 					OR currentSnapshot.[strComments] <> previousSnapshot.[strComments] 
+					OR (currentSnapshot.[strComments] IS NOT NULL AND previousSnapshot.[strComments] IS NULL) 
 				)
 	)
 	BEGIN 
@@ -121,7 +137,10 @@ BEGIN
 				ON currentSnapshot.[intWarrantStatus] = s.intWarrantStatus 
 		WHERE
 				currentSnapshot.intInventoryReceiptId = @ReceiptId
-				AND currentSnapshot.[intWarrantStatus] <> previousSnapshot.[intWarrantStatus] 
+				AND (
+					currentSnapshot.[intWarrantStatus] <> previousSnapshot.[intWarrantStatus] 
+					OR (currentSnapshot.[intWarrantStatus] IS NOT NULL AND previousSnapshot.[intWarrantStatus] IS NULL)
+				)
 				AND s.strWarrantStatus IN ('Released', 'Partially Released', 'Pledged')
 	END 
 	-- Create a new trade finance record. 
@@ -341,6 +360,7 @@ BEGIN
 				ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
 				--  Added strTransactionType since each module has separate Trade Finance Record.
 				AND tf.strTransactionType = 'Inventory'
+				AND tf.strTransactionNumber = r.strReceiptNumber
 			LEFT JOIN vyuCMBankAccount ba 
 				ON ba.intBankAccountId = r.intBankAccountId
 			LEFT JOIN tblCMBorrowingFacility fa
@@ -520,6 +540,7 @@ BEGIN
 				ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber
 				--  Added strTransactionType since each module has separate Trade Finance Record.
 				AND tf.strTransactionType = 'Inventory'
+				AND tf.strTransactionNumber = r.strReceiptNumber
 			LEFT JOIN vyuCMBankAccount ba 
 				ON ba.intBankAccountId = r.intBankAccountId
 			LEFT JOIN tblCMBorrowingFacility fa
