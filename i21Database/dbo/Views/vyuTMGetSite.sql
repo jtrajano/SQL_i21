@@ -111,6 +111,7 @@ SELECT dblBurnRate = site.dblBurnRate
 	, ysnLostCustomer = site.ysnLostCustomer
 	, dtmLostCustomerDate = site.dtmLostCustomerDate
 	, strFacilityNumber = site.strFacilityNumber
+	,ysnRequireClock = site.ysnRequireClock
 					
 	, strSiteCustomerLocation = EL.strCheckPayeeName
 	, intSiteCustomerLocationId = LCS.intEntityLocationId
@@ -136,7 +137,7 @@ SELECT dblBurnRate = site.dblBurnRate
 	, intOpenWorkOrder = ISNULL(openWorkOrder.intCount, 0)
 	, strLostCustomerReason = lostCustomerReason.strLostCustomerReason
 	, strFirstTankSerialNumber = device.strSerialNumber
-
+	
 FROM tblTMSite site
 LEFT JOIN (tblEMEntityLocationConsumptionSite LCS JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LCS.intEntityLocationId) ON LCS.intSiteID = site.intSiteID	
 JOIN (tblEMEntity driver JOIN tblEMEntityType et ON et.intEntityId = driver.intEntityId AND strType = 'Salesperson') ON driver.intEntityId = site.intDriverID
