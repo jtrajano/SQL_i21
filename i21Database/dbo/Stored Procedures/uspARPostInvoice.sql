@@ -75,7 +75,7 @@ SET @accrueLicense = ISNULL(@accrueLicense, 0)
 
 DECLARE @StartingNumberId INT
 SET @StartingNumberId = 3
-IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0) AND @recap = 0
+IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0)
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber @StartingNumberId, @batchId OUT
 END
