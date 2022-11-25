@@ -45,6 +45,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]),
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblGLAccount] FOREIGN KEY ([intTaxAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 	)
+	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItemTax]
 		ON [dbo].[tblICInventoryReceiptItemTax]([intInventoryReceiptItemId] ASC);
