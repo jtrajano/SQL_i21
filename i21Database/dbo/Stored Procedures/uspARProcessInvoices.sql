@@ -682,7 +682,11 @@ BEGIN
 
 	IF ISNULL(@NewSourceId, 0) = 16
 	BEGIN
-		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intLoadId = @LoadId
+		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber 
+		FROM tblARInvoice 
+		WHERE intLoadId = @LoadId
+		AND strTransactionType <> 'Proforma Invoice'
+
 		IF (@NewInvoiceNumber <> '')
 		BEGIN
 			SET @ErrorMessage = 'Invoice (' + @NewInvoiceNumber + ') was already created for ' + ISNULL(ISNULL(@SourceNumber, @ItemDocumentNumber), '')
