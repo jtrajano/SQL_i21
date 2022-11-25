@@ -1771,6 +1771,7 @@ IF @intLotType != 0
 			, strWarehouseCargoNumber	= SC.strTicketNumber
 			FROM @ShipmentStagingTable SE 
 			INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
+			left join  tblCTContractDetail CD on SC.intContractId = CD.intContractDetailId
 			INNER JOIN tblICItem IC ON IC.intItemId = SE.intItemId
 	END
 
