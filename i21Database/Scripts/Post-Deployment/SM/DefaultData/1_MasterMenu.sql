@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Sheet View' AND strModuleName = 'Manufacturing')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tin Number' AND strModuleName = 'Quality')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6754,6 +6754,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tin Numbe
 	VALUES (N'Tin Number', N'Quality', @QualityMaintenanceParentMenuId, N'Tin Number', N'Maintenance', N'Screen', N'Quality.view.TINClearance?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Quality.view.TINClearance?showSearch=true' WHERE strMenuName = 'Tin Number' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId
+
+UPDATE tblSMMasterMenu SET strMenuName = 'TIN Number' WHERE strMenuName = 'Tin Number' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId
 	
 	--BEGIN QUALITY REPORT
 DECLARE @QualityReportParentMenuId INT
