@@ -46,6 +46,9 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblGLAccount] FOREIGN KEY ([intTaxAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 	)
 
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItemTax]
+		ON [dbo].[tblICInventoryReceiptItemTax]([intInventoryReceiptItemId] ASC);
+
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
