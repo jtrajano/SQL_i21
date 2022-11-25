@@ -186,6 +186,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[intLotId]								INT												NULL		-- Key Value from tblICLot (Load/Shipment Schedules)
 	,[intOriginalInvoiceDetailId]			INT												NULL		-- Key Value from tblARInvoiceDetail (Provisional)
 	,[intSiteId]							INT												NULL		-- Key Value from tblTMSite (Tank MAnagement)
+	,[intLoadDistributionDetailId]   		INT            									NULL  		-- Key Value from tblTRLoadDistributionHeader (Transport Load-New Screen) 
 	,[strBillingBy]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- tblTMSite.[strBillingBy] (Tank MAnagement)
 	,[dblPercentFull]						NUMERIC(18, 6)									NULL
 	,[dblNewMeterReading]					NUMERIC(18, 6)									NULL		

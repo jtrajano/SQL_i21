@@ -561,6 +561,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intConversionAccountId]			INT												NULL
 	,[intEntitySalespersonId]			INT												NULL
 	,[intSiteId]						INT												NULL
+	,[intLoadDistributionDetailId]		INT 											NULL
 	,[strBillingBy]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[dblPercentFull]					NUMERIC(18, 6)									NULL
 	,[dblNewMeterReading]				NUMERIC(18, 6)									NULL
@@ -693,6 +694,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[intConversionAccountId]
 	,[intEntitySalespersonId]
 	,[intSiteId]
+	,[intLoadDistributionDetailId]
 	,[strBillingBy]
 	,[dblPercentFull]
 	,[dblNewMeterReading]
@@ -840,6 +842,7 @@ SELECT
 	,[intConversionAccountId]				= IE.[intConversionAccountId]
 	,[intEntitySalespersonId]				= IE.[intEntitySalespersonId]
 	,[intSiteId]							= IE.[intSiteId]
+	,[intLoadDistributionDetailId]			= IE.[intLoadDistributionDetailId]
 	,[strBillingBy]							= IE.[strBillingBy]
 	,[dblPercentFull]						= IE.[dblPercentFull]
 	,[dblNewMeterReading]					= IE.[dblNewMeterReading]
@@ -1045,6 +1048,7 @@ USING
 		,[intConversionAccountId]
 		,[intEntitySalespersonId]
 		,[intSiteId]
+		,[intLoadDistributionDetailId]
 		,[strBillingBy]
 		,[dblPercentFull]
 		,[dblNewMeterReading]
@@ -1181,6 +1185,7 @@ INSERT(
 	,[intConversionAccountId]
 	,[intEntitySalespersonId]
 	,[intSiteId]
+	,[intLoadDistributionDetailId]
 	,[strBillingBy]
 	,[dblPercentFull]
 	,[dblNewMeterReading]
@@ -1302,6 +1307,7 @@ VALUES(
 	,[intConversionAccountId]
 	,[intEntitySalespersonId]
 	,[intSiteId]
+	,[intLoadDistributionDetailId]
 	,[strBillingBy]
 	,[dblPercentFull]
 	,[dblNewMeterReading]
