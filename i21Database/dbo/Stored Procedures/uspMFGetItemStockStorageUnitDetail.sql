@@ -12,8 +12,8 @@ BEGIN
 	     , StockUOM.intStorageLocationId
 		 , ItemLocation.intLocationId
 	FROM tblICItem AS Item
-	JOIN tblICItemLocation AS ItemLocation ON Item.intItemId = ItemLocation.intItemId AND ItemLocation.intLocationId = @intLocationId
-	JOIN tblICItemStockUOM AS StockUOM ON ItemLocation.intItemLocationId = StockUOM.intItemLocationId 
+	LEFT JOIN tblICItemLocation AS ItemLocation ON Item.intItemId = ItemLocation.intItemId AND ItemLocation.intLocationId = @intLocationId
+	LEFT JOIN tblICItemStockUOM AS StockUOM ON ItemLocation.intItemLocationId = StockUOM.intItemLocationId 
 	LEFT JOIN tblICItemUOM AS ItemUOM ON  Item.intItemId = ItemUOM.intItemId
 	LEFT JOIN tblICStorageLocation AS StorageLocation ON StockUOM.intStorageLocationId = StorageLocation.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation AS SubLocation ON StockUOM.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
