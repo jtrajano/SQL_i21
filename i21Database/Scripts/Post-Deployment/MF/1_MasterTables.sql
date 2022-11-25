@@ -16,7 +16,7 @@ BEGIN
     VALUES(1,'By Lot')
 END
 GO
-IF NOT EXISTS(SELECT * FROM tblMFConsumptionMethod WHERE intConsumptionMethodId = 2)
+IF NOT EXISTS(SELECT * FROM tblMFConsumptionMethod WHERE intConsumptionMethodId = 2)I
 BEGIN
     INSERT INTO tblMFConsumptionMethod(intConsumptionMethodId,strName)
     VALUES(2,'By Location')
@@ -548,7 +548,7 @@ BEGIN
     VALUES(3,'Hybrid')
 END
 GO
-IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId = 3)
+IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId = 4)
 BEGIN
     INSERT INTO tblMFMachineIssuedUOMType(intIssuedUOMTypeId,strName)
     VALUES(4,'Pallet')
