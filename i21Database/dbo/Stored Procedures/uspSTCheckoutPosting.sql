@@ -4796,7 +4796,7 @@ BEGIN
 											,[strPONumber]				= NULL								-- not sure
 											,[strBOLNumber]				= NULL								-- not sure
 
-											,[strComments]				= @strComments + '[' + CAST(CC.intCustomerId AS NVARCHAR(100)) + '][' + CAST(CC.intInvoice AS NVARCHAR(100)) + ']' -- to be able to create reparate Invoices (intCustomerId + intInvoice)
+											,[strComments]				= @strComments + '[' + CAST(CC.intCustomerId AS NVARCHAR(100)) + ']' -- to be able to create reparate Invoices (intCustomerId + intInvoice)
 																															  -- if  row 1 = Customer 1, Invoice = 1234
 																															  -- and row 2 = Customer 2, Invoice = 1234
 																															  -- then create 1 invoice for both
