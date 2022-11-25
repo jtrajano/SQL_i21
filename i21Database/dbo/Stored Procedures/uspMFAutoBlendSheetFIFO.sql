@@ -162,7 +162,7 @@ DECLARE @tblRemainingPickedLots AS TABLE
   , ysnParentLot			BIT
   , strRowState				NVARCHAR(50) COLLATE Latin1_General_CI_AS
   , strSecondaryStatus		NVARCHAR(50) COLLATE Latin1_General_CI_AS
-  , dblNoOfPallets			NUMERIC(38, 20)
+  , dblNoOfPallets			NUMERIC(18, 2)
 );
 
 DECLARE @tblPickedItem TABLE 
@@ -2913,7 +2913,7 @@ ELSE
 			,0
 			,'Added'
 			,''
-			,''
+			,0
 		FROM @tblPickedItem pl
 		JOIN tblICItem i ON pl.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON pl.intItemUOMId = iu.intItemUOMId
