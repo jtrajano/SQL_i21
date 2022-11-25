@@ -16,7 +16,7 @@ BEGIN
     VALUES(1,'By Lot')
 END
 GO
-IF NOT EXISTS(SELECT * FROM tblMFConsumptionMethod WHERE intConsumptionMethodId = 2)I
+IF NOT EXISTS(SELECT * FROM tblMFConsumptionMethod WHERE intConsumptionMethodId = 2)
 BEGIN
     INSERT INTO tblMFConsumptionMethod(intConsumptionMethodId,strName)
     VALUES(2,'By Location')
