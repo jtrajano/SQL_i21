@@ -1178,6 +1178,7 @@
     <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
+    <Build Include="dbo\Functions\fnRKGetOpenFutureByDateF360.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
