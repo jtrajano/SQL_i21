@@ -426,8 +426,8 @@ BEGIN
 			,[intTaxClassId] = TC.intTaxClassId 
 			,[strTaxableByOtherTaxes] = TC.strTaxableByOtherTaxes
 			,[strCalculationMethod] = TCR.strCalculationMethod
-			,[dblTax] = dbo.[fnCalculateTexasFee](RI.intTaxCodeId, RI.dtmDate, RI.dblQty, CASE WHEN ysnGas = 1 THEN RI.dblQty ELSE 0 END)
-			,[dblAdjustedTax] = dbo.[fnCalculateTexasFee](RI.intTaxCodeId, RI.dtmDate, RI.dblQty, CASE WHEN ysnGas = 1 THEN RI.dblQty ELSE 0 END)
+			,[dblTax] = dbo.[fnCalculateTexasFee](RI.intTaxCodeId, RI.dtmDate, RI.dblQty, RI.dblQtyGas) --CASE WHEN ysnGas = 1 THEN RI.dblQty ELSE 0 END)
+			,[dblAdjustedTax] = dbo.[fnCalculateTexasFee](RI.intTaxCodeId, RI.dtmDate, RI.dblQty, RI.dblQtyGas) --CASE WHEN ysnGas = 1 THEN RI.dblQty ELSE 0 END)
 			,[intTaxAccountId] = TC.intPurchaseTaxAccountId
 			,[strTaxCode] = TC.strTaxCode
 			,[dblQty] = RI.dblQty
@@ -437,9 +437,10 @@ BEGIN
 					RI.intInventoryReceiptId
 					, RI.intTaxCodeId			
 					, RI.intTaxGroupId
-					, RI.dtmDate
-					, RI.ysnGas
+					, RI.dtmDate					
+					--, RI.ysnGas
 					, dblQty = SUM(ISNULL(RI.dblQty, 0)) 
+					, dblQtyGas = SUM(CASE WHEN RI.ysnGas = 1 THEN ISNULL(RI.dblQty, 0) ELSE 0 END) 					
 				FROM 
 					@ReceiptItems RI
 				GROUP BY
@@ -447,7 +448,7 @@ BEGIN
 					, RI.intTaxCodeId			
 					, RI.intTaxGroupId
 					, RI.dtmDate
-					, RI.ysnGas
+					--, RI.ysnGas
 			) RI
 			INNER JOIN tblICInventoryReceipt R 
 				ON R.intInventoryReceiptId = RI.intInventoryReceiptId			
