@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Sheet View' AND strModuleName = 'Manufacturing')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5066,6 +5066,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Ter
 	VALUES (N'Short Term Planning View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Short Term Planning View', N'View', N'Screen', N'Manufacturing.view.ShortTermPlanningView', N'small-menu-view', 0, 0, 0, 1, 9, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Manufacturing.view.ShortTermPlanningView' WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Sheet View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Blend Sheet View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Blend Sheet View', N'View', N'Screen', N'Manufacturing.view.ApproveBlendSheet?showSearch=true', N'small-menu-view', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Manufacturing.view.ApproveBlendSheet?showSearch=true' WHERE strMenuName = 'Blend Sheet View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
 
 -- Report
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ingredient Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId)
