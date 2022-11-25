@@ -50,9 +50,22 @@ SELECT
 	-- CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
 	-- 			 ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
 	-- 			 END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR(100)) as NVARCHAR(200)),
+	CASE 
+    WHEN ROW_NUMBER() OVER(PARTITION BY CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name  
+		ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))  
+		END,'''')) as NVARCHAR(200)) ORDER BY (SELECT 1)) = 1 AND loc.intEntityLocationId IS NULL
+	THEN CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name  
+		ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))  
+		END,'''')) as NVARCHAR(200))
+	WHEN loc.intEntityLocationId > 0
+	THEN
+		CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name  
+		ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))  
+		END,'''')) as NVARCHAR(200)) + ''_'' + CAST(A4GLIdentity AS NVARCHAR(100))
+    ELSE
 	 CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name  
 		ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))  
-		END,'''')) as NVARCHAR(200)), 
+		END,'''')) as NVARCHAR(200)) + ''_'' + CAST(A4GLIdentity AS NVARCHAR(100)) END,
 	dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
 	ssvnd_city,
 	''United States'' as [strCountry],
@@ -72,14 +85,19 @@ SELECT
 from ssvndmst  
 inner join tblEMEntity ENT on ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
+LEFT JOIN tblEMEntityLocation loc ON
+(CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name  
+		ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))  
+		END,'''')) as NVARCHAR(200))) = loc.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS
+	AND loc.intEntityId = ENT.intEntityId
 where   ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
 
-and (
-RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
-   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
---END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation ))
-END,'''')) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation WHERE intEntityId = ENT.intEntityId)) 
+-- and (
+-- RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+--    ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+-- + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+-- --END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation ))
+-- END,'''')) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation WHERE intEntityId = ENT.intEntityId)) 
 	
 SET @Total = @@ROWCOUNT
 
