@@ -28,7 +28,7 @@ BEGIN
     INSERT @returntable([strInvoiceSource])
     SELECT 'POS'
     INSERT @returntable([strInvoiceSource])
-    SELECT 'Store Checkout'
+    SELECT 'Store End of Day'
     RETURN
 END
 
