@@ -66,7 +66,7 @@ SELECT
 	,@PostDate					= @dtmShipmentDate
 	,@CalculatedDate			= @dtmShipmentDate
 	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
-	,@FreightTermId				= ICIS.[intFreightTermId]
+	,@FreightTermId				= case when isnull(CT.intFreightTermId, 0) <> 0 then CT.intFreightTermId else ICIS.[intFreightTermId] end
 	,@ShipViaId					= ICIS.[intShipViaId]
 	,@PONumber					= SO.[strPONumber]
 	,@BOLNumber					= ICIS.[strBOLNumber]
