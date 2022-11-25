@@ -184,20 +184,20 @@ DECLARE @Contacts TABLE
 
 					--exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
 			END
-			BEGIN --LOCATION
+			-- BEGIN --LOCATION
 
-				DECLARE @EntityLocationName NVARCHAR(50)
-				SET @EntityLocationName = @Name +'_'+@ContactNumber+ 'Loc'
-				DECLARE @LoopCounter INT
-				SET @LoopCounter = 1
-				WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation WHERE strLocationName = @EntityLocationName)
-				BEGIN
-					SET @EntityLocationName = CAST(@LoopCounter AS NVARCHAR) + @EntityLocationName
-					SET @LoopCounter = @LoopCounter + 1
-				END
-				INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, ysnDefaultLocation)
-				SELECT @intEntityId, @EntityLocationName, 0
-			END
+			-- 	DECLARE @EntityLocationName NVARCHAR(50)
+			-- 	SET @EntityLocationName = @Name +'_'+@ContactNumber+ 'Loc'
+			-- 	DECLARE @LoopCounter INT
+			-- 	SET @LoopCounter = 1
+			-- 	WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation WHERE strLocationName = @EntityLocationName)
+			-- 	BEGIN
+			-- 		SET @EntityLocationName = CAST(@LoopCounter AS NVARCHAR) + @EntityLocationName
+			-- 		SET @LoopCounter = @LoopCounter + 1
+			-- 	END
+			-- 	INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, ysnDefaultLocation)
+			-- 	SELECT @intEntityId, @EntityLocationName, 0
+			-- END
 			BEGIN -- Create Customer to Contact
 
 				DECLARE @CustomerNo NVARCHAR(max), @intEntityCustomerId INT
