@@ -63,10 +63,10 @@ SELECT
 	,@PeriodsToAccrue			= 1
 	,@Date						= @dtmShipmentDate
 	,@ShipDate					= ICIS.[dtmShipDate]
-	,@PostDate					= @dtmShipmentDate
-	,@CalculatedDate			= @dtmShipmentDate
-	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
-	,@FreightTermId				= ICIS.[intFreightTermId]
+	,@PostDate					= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
+	,@CalculatedDate			= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
+	,@EntitySalespersonId		= ISNULL(ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId]), SO.intEntitySalespersonId)	
+	,@FreightTermId				= case when isnull(CT.intFreightTermId, 0) <> 0 then CT.intFreightTermId else ICIS.[intFreightTermId] end
 	,@ShipViaId					= ICIS.[intShipViaId]
 	,@PONumber					= SO.[strPONumber]
 	,@BOLNumber					= ICIS.[strBOLNumber]
