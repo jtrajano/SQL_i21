@@ -24,7 +24,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Store"
 																											-- "Card Fueling"
 																											-- "POS"
-																											-- "Store End of Day"
+																											-- "Store Checkout"
 																											-- "Agronomy"
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
