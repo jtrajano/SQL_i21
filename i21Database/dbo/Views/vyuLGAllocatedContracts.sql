@@ -81,6 +81,8 @@ SELECT
 						WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' 
 						WHEN PCT.strFinancialStatus IS NOT NULL THEN PCT.strFinancialStatus 
 						ELSE '' END
+	,dblPPricedLots =  CASE WHEN PCT.intPricingTypeId IN(1,6) THEN ISNULL(PCT.dblNoOfLots, 0) ELSE PFI.dblLotsFixed END
+	,dblPUnpricedLots = CASE WHEN PCT.intPricingTypeId IN(1,6) THEN NULL ELSE ISNULL(PCT.dblNoOfLots, 0) - ISNULL(PFI.dblLotsFixed, 0) END
 	---- Sales Contract Details
 	,intSContractDetailId = ALD.intSContractDetailId
 	,dblSAllocatedQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty)
@@ -134,6 +136,8 @@ SELECT
 	,strSInvoiceNo = ISNULL(SPFIH.strInvoiceNumber, SDIH.strInvoiceNumber)
 	,intSInvoiceIdProvisional = SPIH.intInvoiceId
 	,strSInvoiceNoProvisional = SPIH.strInvoiceNumber
+	,dblSPricedLots =  CASE WHEN SCT.intPricingTypeId IN(1,6) THEN ISNULL(SCT.dblNoOfLots, 0) ELSE SFI.dblLotsFixed END
+	,dblSUnpricedLots = CASE WHEN SCT.intPricingTypeId IN(1,6) THEN NULL ELSE ISNULL(SCT.dblNoOfLots, 0) - ISNULL(SFI.dblLotsFixed, 0) END
 	,ysnDelivered = CONVERT(BIT, 
 		CASE WHEN (ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty) > ISNULL(LS.dblQuantity, 0)) THEN 0 ELSE 1 END)
 	,dblSDeliveredQty = ISNULL(LS.dblQuantity, 0)
@@ -221,6 +225,8 @@ LEFT JOIN ( tblARInvoiceDetail SDID INNER JOIN tblARInvoice SDIH ON SDIH.intInvo
 OUTER APPLY dbo.fnCTGetFinancialStatus(SCT.intContractDetailId) SFS
 LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
+LEFT JOIN tblCTPriceFixation PFI ON PFI.intContractDetailId = PCT.intContractDetailId
+LEFT JOIN tblCTPriceFixation SFI ON SFI.intContractDetailId = SCT.intContractDetailId
 OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = IM.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) PToUOM
 OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = SIM.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) SToUOM
 OUTER APPLY (SELECT L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity, dblQuantity = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, ToUOM.intItemUOMId, LD.dblQuantity), 0)) 
