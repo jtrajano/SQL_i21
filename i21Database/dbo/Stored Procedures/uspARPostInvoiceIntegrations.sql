@@ -120,6 +120,38 @@ BEGIN
 
 	--CREATE PAYMENT FOR PREPAIDS/CREDIT MEMO TAB
 	EXEC dbo.uspARCreateRCVForCreditMemo @intUserId = @UserId, @strSessionId = @strSessionId
+
+	--UPDATE PREPAIDS/CREDIT MEMO FOR CASH REFUND
+	UPDATE I
+	SET 
+		 dblAmountDue		= dblAmountDue - dblAppliedInvoiceAmount
+		,dblBaseAmountDue	= dblBaseAmountDue - dblAppliedInvoiceAmount
+		,dblPayment			= dblPayment + dblAppliedInvoiceAmount
+		,dblBasePayment		= dblBasePayment + dblAppliedInvoiceAmount
+		,ysnPaid			= CASE WHEN dblInvoiceTotal = dblPayment + dblAppliedInvoiceAmount THEN 1 ELSE 0 END
+		,ysnRefundProcessed	= CASE WHEN dblInvoiceTotal = dblPayment + dblAppliedInvoiceAmount THEN 1 ELSE 0 END
+	FROM tblARInvoice I
+	INNER JOIN (										
+		SELECT 
+			 intPrepaymentId		= PC.intPrepaymentId
+			,dblAppliedInvoiceAmount= PC.dblAppliedInvoiceDetailAmount
+		FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK)
+		INNER JOIN (
+			SELECT DISTINCT intInvoiceId 
+			FROM tblARPostInvoiceHeader I
+			CROSS APPLY (
+				SELECT TOP 1 intPrepaymentId
+				FROM tblARPrepaidAndCredit WITH (NOLOCK)
+				WHERE intInvoiceId = I.intInvoiceId 
+				  AND ysnApplied = 1
+				  AND dblAppliedInvoiceDetailAmount > 0
+			) PREPAIDS
+			WHERE I.strTransactionType = 'Cash Refund'
+			  AND I.strSessionId = @strSessionId
+		) CR ON PC.intInvoiceId = CR.intInvoiceId
+		WHERE PC.ysnApplied = 1
+		  AND PC.dblAppliedInvoiceDetailAmount > 0
+	) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
 	
 	--AUTO APPLY PREPAIDS
 	EXEC dbo.uspARAutoApplyPrepaids @intEntityUserId = @UserId, @strSessionId = @strSessionId
@@ -221,7 +253,6 @@ BEGIN
 	WHERE PD.intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM tblARPostInvoiceHeader WHERE [ysnPost] = 0 AND strSessionId = @strSessionId)
 								
 	--UPDATE PREPAIDS/CREDIT MEMO FOR CASH REFUND
-	BEGIN
 	UPDATE I
 	SET dblAmountDue		= dblAmountDue + dblAppliedInvoiceAmount
 	  , dblBaseAmountDue	= dblBaseAmountDue + dblAppliedInvoiceAmount
@@ -250,7 +281,6 @@ BEGIN
 		WHERE PC.ysnApplied = 1
 		  AND PC.dblAppliedInvoiceDetailAmount > 0
 	) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
-	END
 
 	--DELETE UNDEPOSITED FUND FOR CASH
 	DELETE CF 
