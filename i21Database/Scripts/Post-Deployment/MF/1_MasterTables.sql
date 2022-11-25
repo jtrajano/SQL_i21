@@ -454,6 +454,18 @@ BEGIN
     VALUES(1,'LEFO','LEFO',0)
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='FENA')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'FENA','FENA',0)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='NAFE')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'NAFE','NAFE',0)
+END
+GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 2 AND strValue='Yes')
 BEGIN
     INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)

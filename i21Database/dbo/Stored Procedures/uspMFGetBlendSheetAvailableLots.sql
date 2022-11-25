@@ -99,6 +99,7 @@ FROM tblICStockReservation
 WHERE intItemId = @intItemId AND ISNULL(ysnPosted, 0) = 0
 GROUP BY CASE WHEN @ysnEnableParentLot = 0 THEN intLotId ELSE intParentLotId END;
 	
+
 /* Set Temporary lot data. */
 SELECT Lot.intLotId
 	 , Lot.strLotNumber
@@ -137,6 +138,17 @@ SELECT Lot.intLotId
 			WHEN (CASE WHEN ISNULL(Lot.dblWeight,0) > 0 THEN Lot.dblWeight ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, RecipeItem.intItemUOMId, Lot.dblQty) END) = 0 THEN 0
 			ELSE CAST((CASE WHEN ISNULL(Lot.dblWeight,0) > 0 THEN Lot.dblWeight ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, RecipeItem.intItemUOMId, Lot.dblQty) END) / (Item.intUnitPerLayer * Item.intLayerPerPallet) AS NUMERIC(18, 2))
 	   END AS dblNoOfPallet
+	 , AuctionCenter.strLocationName AS strAuctionCenter
+	 , SaleYear.strSaleYear
+	 , Batch.intSales
+	 , Batch.dblTeaTaste
+	 , Batch.dblTeaHue
+	 , Batch.dblTeaIntensity
+	 , Batch.dblTeaMouthFeel
+	 , SubCluster.strDescription	 AS strSubCluster
+	 , Batch.dblTeaAppearance
+	 , Batch.dblTeaVolume
+	 , DATEDIFF(DAY, Lot.dtmDateCreated, GETDATE()) AS intAge
 INTO #tempLot
 FROM tblICLot AS Lot
 JOIN tblICItem AS Item ON Lot.intItemId = Item.intItemId
@@ -154,10 +166,17 @@ LEFT JOIN tblICItemUOM AS RecipeItemUOM ON RecipeItem.intItemUOMId = RecipeItemU
 LEFT JOIN tblICUnitMeasure AS RecipeItemUnitOfMeasure ON RecipeItemUOM.intUnitMeasureId = RecipeItemUnitOfMeasure.intUnitMeasureId 
 LEFT JOIN vyuQMGetLotQuality AS LotQuality ON (CASE WHEN (SELECT TOP 1 ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference) = 1 THEN Lot.intParentLotId ELSE Lot.intLotId END) = LotQuality.intLotId
 LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = Lot.intLotId
+LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
+LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
+LEFT JOIN tblQMSaleYear AS SaleYear ON Batch.intSalesYear = SaleYear.intSaleYearId
+LEFT JOIN tblICCommodityAttribute AS SubCluster ON Item.intRegionId = SubCluster.intCommodityAttributeId
+LEFT JOIN tblQMGardenMark AS GardenMark ON Batch.intGardenMarkId = GardenMark.intGardenMarkId
 WHERE Lot.intItemId = @intItemId AND Lot.dblQty > 0 AND LotStatus.intLotStatusId IN (SELECT intLotStatusId FROM @tblLotStatus)
   And Lot.intLocationId = (CASE WHEN @ysnShowOtherFactoryLots = 1 THEN Lot.intLocationId ELSE @intLocationId END)
 ORDER BY Lot.dtmExpiryDate
 	   , Lot.dtmDateCreated;
+
+
 
 /* Enable Parent Lot Configure is true/checked from Configuration. */
 IF @ysnEnableParentLot = 0
@@ -200,6 +219,17 @@ IF @ysnEnableParentLot = 0
 			 , TemporaryLot.intCategoryId
 			 , TemporaryLot.strSecondaryStatus 
 			 , TemporaryLot.dblNoOfPallet
+			 , TemporaryLot.strAuctionCenter
+			 , TemporaryLot.strSaleYear
+			 , TemporaryLot.intSales
+			 , TemporaryLot.dblTeaTaste
+			 , TemporaryLot.dblTeaHue
+			 , TemporaryLot.dblTeaIntensity
+			 , TemporaryLot.dblTeaMouthFeel
+			 , TemporaryLot.strSubCluster
+			 , TemporaryLot.dblTeaAppearance
+			 , TemporaryLot.dblTeaVolume
+			 , TemporaryLot.intAge
 		FROM #tempLot AS TemporaryLot 
 		LEFT JOIN @tblReservedQty AS ReservedQty ON TemporaryLot.intLotId = ReservedQty.intLotId
 	END
@@ -241,6 +271,17 @@ ELSE
 					 , MAX(TemporaryLot.strSecondaryStatus)	AS strSecondaryStatus
 					 , ISNULL(SUM(TemporaryLot.dblReservedQtyInTBS), 0) AS dblReservedQtyInTBS
 					 , TemporaryLot.dblNoOfPallet
+					 , TemporaryLot.strAuctionCenter
+					 , TemporaryLot.strSaleYear
+					 , TemporaryLot.intSales
+					 , TemporaryLot.dblTeaTaste
+					 , TemporaryLot.dblTeaHue
+					 , TemporaryLot.dblTeaIntensity
+					 , TemporaryLot.dblTeaMouthFeel
+					 , TemporaryLot.strSubCluster
+					 , TemporaryLot.dblTeaAppearance
+					 , TemporaryLot.dblTeaVolume
+					 , TemporaryLot.intAge
 				INTO #tempParentLotByStorageLocation
 				FROM #tempLot AS TemporaryLot 
 				JOIN tblICParentLot AS ParentLot on TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -259,6 +300,17 @@ ELSE
 					   , TemporaryLot.intStorageLocationId
 					   , TemporaryLot.strPhysicalItemUOM
 					   , TemporaryLot.dblNoOfPallet
+					   , TemporaryLot.strAuctionCenter
+					   , TemporaryLot.strSaleYear
+					   , TemporaryLot.intSales
+					   , TemporaryLot.dblTeaTaste
+					   , TemporaryLot.dblTeaHue
+					   , TemporaryLot.dblTeaIntensity
+					   , TemporaryLot.dblTeaMouthFeel
+					   , TemporaryLot.strSubCluster
+					   , TemporaryLot.dblTeaAppearance
+					   , TemporaryLot.dblTeaVolume
+					   , TemporaryLot.intAge
 
 				SELECT ParentLotStorageLocation.*
 					 , ISNULL(ReservedQty.dblReservedQty, 0) AS dblReservedQty
@@ -303,6 +355,17 @@ ELSE
 					 , MAX(TemporaryLot.strSecondaryStatus) strSecondaryStatus
 					 , ISNULL(SUM(TemporaryLot.dblReservedQtyInTBS),0) AS dblReservedQtyInTBS
 					 , TemporaryLot.dblNoOfPallet
+					 , TemporaryLot.strAuctionCenter
+					 , TemporaryLot.strSaleYear
+					 , TemporaryLot.intSales
+					 , TemporaryLot.dblTeaTaste
+					 , TemporaryLot.dblTeaHue
+					 , TemporaryLot.dblTeaIntensity
+					 , TemporaryLot.dblTeaMouthFeel
+					 , TemporaryLot.strSubCluster
+					 , TemporaryLot.dblTeaAppearance
+					 , TemporaryLot.dblTeaVolume
+					 , TemporaryLot.intAge
 				INTO #tempParentLotByLocation
 				FROM #tempLot AS TemporaryLot
 				JOIN tblICParentLot AS ParentLot ON TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -320,6 +383,17 @@ ELSE
 					   , TemporaryLot.strLocationName
 					   , TemporaryLot.strPhysicalItemUOM
 					   , TemporaryLot.dblNoOfPallet
+					   , TemporaryLot.strAuctionCenter
+					   , TemporaryLot.strSaleYear
+					   , TemporaryLot.intSales
+					   , TemporaryLot.dblTeaTaste
+					   , TemporaryLot.dblTeaHue
+					   , TemporaryLot.dblTeaIntensity
+					   , TemporaryLot.dblTeaMouthFeel
+					   , TemporaryLot.strSubCluster
+					   , TemporaryLot.dblTeaAppearance
+					   , TemporaryLot.dblTeaVolume
+					   , TemporaryLot.intAge
 
 				SELECT ParentLotLocation.*
 					 , ISNULL(ReservedQty.dblReservedQty,0) AS dblReservedQty
