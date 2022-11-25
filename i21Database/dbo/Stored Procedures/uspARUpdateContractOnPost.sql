@@ -27,6 +27,7 @@ BEGIN TRY
 				  , @dblQtyToReturn				NUMERIC(18, 6) = 0
 				  , @ysnFromReturn				BIT = 0
 				  , @strTransactionType			NVARCHAR(100) = NULL
+				  , @intId						INT = NULL
 
 		    --IF POST, DEDUCT SCHEDULED QTY FIRST BEFORE DEDUCTING BALANCE
 			IF @ysnPost = 1
@@ -42,6 +43,7 @@ BEGIN TRY
 							, @dblRemainingQty				= dblRemainingQty
 							, @ysnFromReturn				= ysnFromReturn
 							, @strTransactionType			= strTransactionType
+							, @intId						= intId
 					FROM tblARPostItemsForContracts
 					WHERE strSessionId = @strSessionId
 					ORDER BY ABS(dblBalanceQty) ASC
@@ -60,6 +62,7 @@ BEGIN TRY
 							, @dblRemainingQty				= dblRemainingQty
 							, @ysnFromReturn				= ysnFromReturn
 							, @strTransactionType			= strTransactionType
+							, @intId						= intId
 					FROM tblARPostItemsForContracts
 					WHERE strSessionId = @strSessionId
 					ORDER BY ABS(dblBalanceQty) DESC
@@ -96,10 +99,7 @@ BEGIN TRY
 				END
 
 			DELETE FROM tblARPostItemsForContracts 
-			WHERE intInvoiceDetailId = @intInvoiceDetailId 
-			  AND intContractDetailId = @intContractDetailId
-              AND strType = @strType
-			  AND strSessionId = @strSessionId
+			WHERE intId = @intId
 		END
 
 END TRY
