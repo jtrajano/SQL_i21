@@ -1384,6 +1384,7 @@
     <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuMFApproveBlendSheet.sql" />
+    <Build Include="dbo\Views\vyuCRMActivityAttendee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
