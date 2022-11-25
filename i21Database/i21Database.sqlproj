@@ -1387,6 +1387,7 @@
     <Build Include="dbo\Views\vyuCRMActivityAttendee.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDateF360.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequencePrice.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\41_UpdateSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
