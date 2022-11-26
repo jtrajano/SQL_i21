@@ -1386,6 +1386,7 @@
     <Build Include="dbo\Views\vyuMFApproveBlendSheet.sql" />
     <Build Include="dbo\Views\vyuCRMActivityAttendee.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDateF360.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequencePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
