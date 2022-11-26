@@ -173,7 +173,6 @@ BEGIN
 		,strCurrency				NVARCHAR(40)									NULL
 		,dblCurrencyExchangeRate	NUMERIC(18, 6)									NULL DEFAULT 0
 		,dblCurrencyRevalueRate		NUMERIC(18, 6)									NULL DEFAULT 0
-		,dblCurrencyRevalueAmount	NUMERIC(18, 6)									NULL DEFAULT 0
 		,intAccountId				INT												NULL
 	)
 
@@ -414,7 +413,6 @@ BEGIN
 		 , strCurrency
 		 , dblCurrencyExchangeRate
 		 , dblCurrencyRevalueRate
-		 , dblCurrencyRevalueAmount
 		 , intAccountId
 	)
 	SELECT intInvoiceId				= I.intInvoiceId
@@ -438,8 +436,7 @@ BEGIN
 		 , intCurrencyId			= I.intCurrencyId
 		 , strCurrency				= CUR.strCurrency
 		 , dblCurrencyExchangeRate	= I.dblCurrencyExchangeRate
-		 , dblCurrencyRevalueRate	= ISNULL(GLRD.dblNewForexRate, 0)
-		 , dblCurrencyRevalueAmount	= ISNULL(GLRD.dblNewAmount, 0)
+		 , dblCurrencyRevalueRate	= ISNULL(GLRD.dblNewForexRate, I.dblCurrencyExchangeRate)
 		 , intAccountId				= I.intAccountId
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -447,9 +444,14 @@ BEGIN
 	LEFT JOIN @FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 	INNER JOIN @GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 	LEFT JOIN (
-		SELECT strTransactionId, dblNewForexRate, dblNewAmount
+		SELECT
+			 strTransactionId
+			,dblNewForexRate
 		FROM vyuGLRevalueDetails
-		GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
+		WHERE strTransactionType = 'Invoice'
+		GROUP BY
+			 strTransactionId
+			,dblNewForexRate
 	) GLRD ON I.strInvoiceNumber = GLRD.strTransactionId 
 	LEFT JOIN (
 		SELECT intCurrencyID
@@ -587,9 +589,9 @@ BEGIN
 		 , intCurrencyId		= AGING.intCurrencyId
 		 , strCurrency			= AGING.strCurrency
 		 , dblHistoricRate		= AGING.dblCurrencyExchangeRate
-		 , dblHistoricAmount	= ISNULL(AGING.dblBaseTotalAR, 0)
-		 , dblEndOfMonthRate	= CASE WHEN AGING.dblCurrencyRevalueRate = 0 THEN AGING.dblCurrencyExchangeRate ELSE AGING.dblCurrencyRevalueRate END
-		 , dblEndOfMonthAmount	= CASE WHEN AGING.dblCurrencyRevalueRate = 0 THEN ISNULL(AGING.dblBaseTotalAR, 0) ELSE AGING.dblCurrencyRevalueAmount END
+		 , dblHistoricAmount	= ROUND(ISNULL(AGING.dblTotalAR, 0) * AGING.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+		 , dblEndOfMonthRate	= AGING.dblCurrencyRevalueRate
+		 , dblEndOfMonthAmount	= ROUND(ISNULL(AGING.dblTotalAR, 0) * AGING.dblCurrencyRevalueRate, dbo.fnARGetDefaultDecimal())
 		 , intAccountId			= AGING.intAccountId
 		 , intAge				= ISNULL(AGING.intAge, 0)
 	FROM
@@ -618,12 +620,10 @@ BEGIN
 		 , intCompanyLocationId
 		 , strType
 		 , strTransactionType
-		 , dblBaseTotalAR			= B.dblBaseTotalDue - B.dblBaseAvailableCredit - B.dblBasePrepayments
 		 , intCurrencyId			= A.intCurrencyId
 		 , strCurrency				= A.strCurrency
 		 , dblCurrencyExchangeRate	= A.dblCurrencyExchangeRate
 		 , dblCurrencyRevalueRate	= A.dblCurrencyRevalueRate
-		 , dblCurrencyRevalueAmount = A.dblCurrencyRevalueAmount
 		 , intAccountId				= A.intAccountId
 		 , intAge					= A.intAge
 	FROM
@@ -641,7 +641,6 @@ BEGIN
 		 , I.strCurrency
 		 , I.dblCurrencyExchangeRate
 		 , I.dblCurrencyRevalueRate
-		 , I.dblCurrencyRevalueAmount
 		 , I.intAccountId
 		 , intAge = DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal)
 		 , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
