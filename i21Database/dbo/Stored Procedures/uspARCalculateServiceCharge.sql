@@ -20,14 +20,15 @@
 AS
 SET NOCOUNT ON
 
-IF ISNULL(@arAccountId, 0) = 0
-BEGIN
-	RAISERROR('There is no setup for AR Account in the Company Configuration.', 16, 1) 
-	RETURN 0
-END
-
-DECLARE	 @tblCompanyLocation	Id
-		,@ZeroDecimal			NUMERIC(18, 6) = 0
+DECLARE @tblCompanyLocation TABLE (
+	 intCompanyLocationId	INT
+	,strLocationName		NVARCHAR(50)
+	,intARAccount			INT
+	,intServiceCharges		INT
+)
+DECLARE	 @ZeroDecimal					NUMERIC(18, 6) = 0
+		,@ysnChargeonCharge				BIT	= 1
+		,@strServiceChargeCalculation	NVARCHAR(50)
 
 SET @batchId = CONVERT(NVARCHAR(100), NEWID())
 SET @totalAmount = @ZeroDecimal
@@ -41,13 +42,24 @@ BEGIN
 	END
 
 	INSERT INTO @tblCompanyLocation
-	SELECT @locationId
+	SELECT 
+		 @locationId
+		,strLocationName
+		,ISNULL(intARAccount, @arAccountId)
+		,ISNULL(intServiceCharges, @scAccountId)
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = @locationId
 END
 ELSE IF @companyLocationIds = ''
 BEGIN
 	INSERT INTO @tblCompanyLocation
-	SELECT DISTINCT intCompanyLocationId
-	FROM tblARInvoice
+	SELECT DISTINCT 
+		 ARI.intCompanyLocationId
+		,SMCL.strLocationName
+		,ISNULL(SMCL.intARAccount, @arAccountId)
+		,ISNULL(SMCL.intServiceCharges, @scAccountId)
+	FROM tblARInvoice ARI
+	INNER JOIN tblSMCompanyLocation SMCL ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
 	WHERE dtmDueDate <= @asOfDate
 	AND ysnPosted = 1
 	AND (ysnPaid = 0 OR (ysnPaid = 1 AND @ysnIncludePaidInvoices = 1))
@@ -55,21 +67,59 @@ END
 ELSE
 BEGIN
 	INSERT INTO @tblCompanyLocation
-	SELECT DISTINCT intCompanyLocationId
-	FROM tblARInvoice
+	SELECT DISTINCT 
+		 ARI.intCompanyLocationId
+		,SMCL.strLocationName
+		,ISNULL(SMCL.intARAccount, @arAccountId)
+		,ISNULL(SMCL.intServiceCharges, @scAccountId)
+	FROM tblARInvoice ARI
+	INNER JOIN tblSMCompanyLocation SMCL ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
 	WHERE dtmDueDate <= @asOfDate
 	AND ysnPosted = 1
 	AND (ysnPaid = 0 OR (ysnPaid = 1 AND @ysnIncludePaidInvoices = 1))
-	AND intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@companyLocationIds))
+	AND ARI.intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@companyLocationIds))
+END
+
+SELECT TOP 1 
+	 @ysnChargeonCharge				= ISNULL(ysnChargeonCharge, 1)
+	,@strServiceChargeCalculation	= ISNULL(strServiceChargeCalculation, '')
+FROM tblARCompanyPreference
+
+IF @strServiceChargeCalculation = ''
+BEGIN
+	RAISERROR('There is no setup for Service Charge Calculation in the Company Configuration.', 16, 1) 
+	RETURN 0
 END
 
 WHILE EXISTS(SELECT TOP 1 1 FROM @tblCompanyLocation)
 BEGIN
 	DECLARE	 @tblCurrency 			Id
 			,@intCompanyLocationId	INT
+			,@strLocationName		NVARCHAR(50)
+			,@intARAccount			INT
+			,@intServiceCharges		INT
+			,@strError				NVARCHAR(MAX)
 
-	SELECT TOP 1 @intCompanyLocationId = intId
+	SELECT TOP 1 
+		 @intCompanyLocationId	= intCompanyLocationId
+		,@strLocationName		= strLocationName
+		,@intARAccount			= intARAccount
+		,@intServiceCharges		= intServiceCharges
 	FROM @tblCompanyLocation
+
+	IF ISNULL(@intARAccount, 0) = 0
+	BEGIN
+		SET @strError = 'There is no setup for AR Account in the Company Configuration and Company Location ' + @strLocationName + '.'
+		RAISERROR(@strError, 16, 1) 
+		RETURN 0
+	END
+
+	IF ISNULL(@intServiceCharges, 0) = 0
+	BEGIN
+		SET @strError = 'There is no setup for Service Charge Account in the Company Configuration and Company Location ' + @strLocationName + '.'
+		RAISERROR(@strError, 16, 1) 
+		RETURN 0
+	END
 
 	INSERT INTO @tblCurrency
 	SELECT DISTINCT intCurrencyId
@@ -120,17 +170,7 @@ BEGIN
 		DECLARE  @tblTypeServiceCharge	  	[dbo].[ServiceChargeTableType]
 				,@tempTblTypeServiceCharge	[dbo].[ServiceChargeTableType]
 				,@dblMinimumSC				NUMERIC(18, 6)	= 0
-				,@dblMinFinanceSC 			NUMERIC(18, 6)	= 0
-				,@ysnChargeonCharge			BIT				= 1		  
-
-		SELECT TOP 1 @ysnChargeonCharge = ISNULL(ysnChargeonCharge, 1) FROM dbo.tblARCompanyPreference WITH (NOLOCK)
-		SELECT TOP 1 @scAccountId = ISNULL(intServiceCharges, @scAccountId) FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
-
-		IF ISNULL(@scAccountId, 0) = 0
-		BEGIN
-			RAISERROR('There is no setup for Service Charge Account in the Company Configuration!', 16, 1) 
-			RETURN 0
-		END
+				,@dblMinFinanceSC 			NUMERIC(18, 6)	= 0		  
 
 		--GET SELECTED CUSTOMERS
 		IF (@customerIds = '')
@@ -618,8 +658,8 @@ BEGIN
 																,@intEntityUserId			= @intEntityUserId
 																,@intCompanyLocationId		= @intCompanyLocationId
 																,@intCurrencyId				= @intCurrencyId
-																,@intARAccountId			= @arAccountId
-																,@intSCAccountId			= @scAccountId
+																,@intARAccountId			= @intARAccount
+																,@intSCAccountId			= @intServiceCharges
 																,@dtmAsOfDate				= @asOfDate
 																,@strCalculation			= @calculation
 																,@dtmServiceChargeDate		= @serviceChargeDate
@@ -639,5 +679,5 @@ BEGIN
 		DELETE FROM @tblCurrency WHERE intId = @intCurrencyId
 	END
 
-	DELETE FROM @tblCompanyLocation WHERE intId = @intCompanyLocationId
+	DELETE FROM @tblCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
 END
