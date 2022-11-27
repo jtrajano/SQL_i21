@@ -519,6 +519,11 @@ BEGIN
 		[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1,
 		[intCompanyId] INT NULL, 
 		[intSourceEntityId] INT NULL,
+		[intTransactionItemUOMId] INT NULL,
+		[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intTicketId] INT NULL,
 	)
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransactionStorage_delete]
@@ -624,6 +629,11 @@ BEGIN
 				,t.[dblForexRate]
 				,t.[intCompanyId]
 				,t.[intSourceEntityId]
+				,t.[intTransactionItemUOMId]
+				,t.[strSourceType] 
+				,t.[strSourceNumber] 
+				,t.[strBOLNumber] 
+				,t.[intTicketId] 
 		FROM	#tmpUnOrderedICTransactionStorage t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 				LEFT JOIN tblICInventoryTransactionType  ty
@@ -752,6 +762,11 @@ BEGIN
 				,t.[dblForexRate]
 				,t.[intCompanyId]
 				,t.[intSourceEntityId]
+				,t.[intTransactionItemUOMId]
+				,t.[strSourceType] 
+				,t.[strSourceNumber] 
+				,t.[strBOLNumber] 
+				,t.[intTicketId] 
 		FROM	#tmpUnOrderedICTransactionStorage t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
@@ -1003,42 +1018,54 @@ BEGIN
 			DELETE FROM @StorageToPost
 			
 			INSERT INTO @StorageToPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate 
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
+				,intSourceEntityId
+				,strSourceType
+				,strSourceNumber
+				,strBOLNumber
+				,intTicketId
 			) 
 			SELECT 
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate 
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
+				,intSourceEntityId
+				,strSourceType
+				,strSourceNumber
+				,strBOLNumber
+				,intTicketId
 			FROM 
 				#tmpICInventoryTransactionStorage
 			WHERE
