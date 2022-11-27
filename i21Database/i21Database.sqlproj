@@ -8311,6 +8311,7 @@
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
