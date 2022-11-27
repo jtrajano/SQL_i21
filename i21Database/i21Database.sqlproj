@@ -8166,6 +8166,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDModuleAccess.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
