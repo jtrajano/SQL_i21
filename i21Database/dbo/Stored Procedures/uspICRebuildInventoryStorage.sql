@@ -1003,42 +1003,46 @@ BEGIN
 			DELETE FROM @StorageToPost
 			
 			INSERT INTO @StorageToPost (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate 
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
+				,intSourceEntityId
 			) 
 			SELECT 
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate 
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
 				,intSubLocationId
 				,intStorageLocationId
+				,intForexRateTypeId
+				,dblForexRate
+				,intSourceEntityId
 			FROM 
 				#tmpICInventoryTransactionStorage
 			WHERE
