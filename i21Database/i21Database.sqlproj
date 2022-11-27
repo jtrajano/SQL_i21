@@ -9224,6 +9224,7 @@
   	<Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
