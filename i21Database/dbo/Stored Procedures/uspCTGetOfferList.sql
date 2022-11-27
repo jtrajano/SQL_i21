@@ -36,8 +36,8 @@ BEGIN
 			@ysnSubCurrency			BIT = 0,
 			@intCent				INT = 1
 	
-	DECLARE @AllocatedContracts AS TABLE ( intContractHeaderId INT NOT NULL, strContractNumber  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL);
-	DECLARE @UnAllocatedContracts AS TABLE ( intContractHeaderId INT NOT NULL, strContractNumber  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL);
+	DECLARE @AllocatedContracts AS TABLE ( intContractHeaderId INT NOT NULL,intContractDetailId INT NULL, strContractNumber  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL);
+	--DECLARE @UnAllocatedContracts AS TABLE ( intContractHeaderId INT NOT NULL, strContractNumber  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL);
 
 	--SHOW ALL ALLOCATED
 	IF @YsnyAllocated = 1
@@ -53,7 +53,52 @@ BEGIN
 		SELECT DISTINCT B.intContractHeaderId,B.strContractNumber FROM vyuLGAllocationStatus A
 		INNER JOIN tblCTContractHeader B ON A.strPurchaseContractNumber = B.strContractNumber
 		WHERE strAllocationStatus IN( 'Unallocated','Reserved', 'Partially Allocated');
+
+		
+		--If Available = 0 shouldn't come up in the initial load when Include Fully Allocated is checked
+		INSERT INTO @AllocatedContracts (intContractHeaderId,intContractDetailId, strContractNumber)
+		SELECT intContractHeaderId 
+			  , intContractDetailId
+			  , strContractNumber
+		FROM(
+				SELECT DISTINCT
+				CH.intContractHeaderId 
+			  , CTD.intContractDetailId
+			  , CH.strContractNumber
+			  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN CTD.dblQuantity -  TQ.dblTotalQty --ALLOCATED QTY
+								  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
+								  WHEN LGAS.strAllocationStatus = 'Allocated' THEN  LGAS.dblAllocatedQuantity - CTD.dblQuantity --ALLOCATED QTY
+								  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  TQ.dblTotalQty-- PARTIALLY ALLOCATED QTY
+								  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN CTD.dblQuantity - TAQ.dblTotalAllocatedQuantity --SHIPPED LS QTY AND IR QTY
+							 ELSE CTD.dblQuantity  END --OPEN CT QTY 
+		FROM tblCTContractHeader CH
+		INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
+		LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
+		LEFT JOIN tblLGLoadStorageCost		LSC  WITH (NOLOCK) ON LSC.intLoadId = LGL.intLoadId
+		LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLoadShipmentId = LGL.intLoadId
+		LEFT JOIN tblICInventoryReceipt		IR   WITH (NOLOCK) ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		OUTER APPLY dbo.fnCTGetShipmentStatus(CTD.intContractDetailId) LD
+		OUTER APPLY tblCTCompanyPreference	CP  
+		LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.intContractDetailId = CTD.intContractDetailId
+		OUTER APPLY(
+			SELECT DISTINCT CASE WHEN IRI.intInventoryReceiptId <> 0 THEN SUM(dblOrderQty) ELSE SUM(LGL.dblQuantity) END dblTotalQty
+			FROM tblLGLoadDetail LGL
+			LEFT JOIN tblCTContractDetail CTD1  WITH (NOLOCK) ON LGL.intPContractDetailId = CTD1.intContractDetailId
+			LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLoadShipmentId = LGL.intLoadId
+			WHERE CTD1.intContractDetailId = CTD.intContractDetailId
+			GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
+		) TQ
+		OUTER APPLY(
+			SELECT SUM(dblAllocatedQuantity) + SUM(dblReservedQuantity) as dblTotalAllocatedQuantity 
+			from vyuLGAllocationStatus 
+			where strPurchaseContractNumber = CH.strContractNumber
+		) TAQ
+		WHERE
+		CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
+		) a WHERE dblQuantity < 1 OR dblQuantity = 0
 	END
+
+	
 
 	--GET CURRENCY RATE
 	SELECT @ysnSubCurrency = ysnSubCurrency, @intCent = intCent FROM tblSMCurrency where intCurrencyID = @IntCurrencyId and ysnSubCurrency = 1
@@ -69,7 +114,206 @@ BEGIN
 			left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
 	)
 
-	
+	--VIEW FOR CONTRACT 
+	SELECT 
+		   intContractDetailId
+		  ,intCompanyLocationId
+		  ,intCommodityId
+		  ,intLoadId
+	      ,strContractSequence
+		  ,dtmContractDate
+		  ,strEntityName	
+		  ,strCategory  
+		  ,strStatus 
+		  ,strShipmentStatus
+		  ,strReferencePrimary
+		  ,strReference
+		  ,dblQuantity 
+		  ,strPacking
+		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
+		  ,strPricingType
+		  ,strFutureMonth
+		  ,dblBasis	
+		  ,strPricingStatus
+		  ,dblCashPrice
+		  ,strHedgeMonth
+		  ,dblLastSettlementPrice
+		  ,strSalesContract
+		  ,strCustomer
+		  ,strOrigin
+		  ,strProductType
+		  ,strProductLine
+		  ,strCertificateName
+		  ,strQualityItem
+		  ,strCropYear
+		  ,strINCOTerm
+		  ,dtmStartDate
+		  ,dtmEndDate
+		  ,dtmETAPOL
+		  ,dtmETAPOD
+		  ,strLoadingPort
+		  ,strDestinationPort
+		  ,dtmShippedDate
+		  ,dtmReceiptDate
+		  ,strStorageLocation 
+		  ,dblBasisDiff     
+		  ,dblFreightOffer	
+		  ,dblCIFInStore 	
+		  ,dblCUMStorage	
+		  ,dblCUMFinancing 	
+		  ,dblSwitchCost 	
+		  ,dblTotalCost =   dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost
+		  ,intSortId
+	FROM(
+	SELECT DISTINCT
+		 CTD.intContractDetailId
+		   ,CH.intCommodityId
+		   ,LGL.intLoadId
+	      ,strContractSequence = CH.strContractNumber + ' - ' + CAST (CTD.intContractSeq AS VARCHAR(MAX)) 
+		  ,dtmContractDate = CONVERT(VARCHAR(20),CH.dtmContractDate, 101) 
+		  ,EY.strEntityName	
+		  ,strCategory = 'Purchased'/*(CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN 'Purchased' 
+							   WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN 'Sold' 
+							   WHEN LGAS.strAllocationStatus = 'Allocated' AND LGD.intLoadId IS NULL THEN 'Sold' 
+							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open'  THEN 'On Order' 
+							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Shipping%' THEN 'In Transit' 
+							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Transit%' THEN  'In Transit' 
+							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Scheduled%' THEN  'In Transit' 
+							    WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Received%' THEN  'Sold' 
+						 ELSE 'Purchased' END)*/
+		  ,strStatus =  (CASE 		
+							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN 'Open' 
+							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Scheduled' AND ISNULL(LGS.strShipmentType,'Shipment') = 'Shipment' THEN 'Shipment'
+							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Scheduled' AND LGS.strShipmentType = 'Shipping Instructions' THEN 'Shipping Instruction'
+							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Inbound Transit' AND LGS.strShipmentType = 'Shipment' THEN 'Shipped' 
+							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Inbound Transit' AND LGS.strShipmentType = 'Shipping Instructions' THEN 'Shipping Instruction' 
+							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Shipping Instructions Created' THEN 'Shipping Instruction'
+						 ELSE LGAS.strAllocationStatus  END)
+		  ,strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
+		  ,strReferencePrimary = 'Primary '+CH.strContractNumber + CAST (CTD.intContractSeq AS VARCHAR(MAX)) 
+		  ,strReference = CH.strContractNumber
+		  ,dblQuantity = CTD.dblQuantity
+		  ,strPacking = UM.strUnitMeasure
+		  ,dblOfferCost = CTD.dblCashPrice			
+		  ,PT.strPricingType
+		  ,FMO.strFutureMonth
+		  ,dblBasis =   dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00)) --(OfferlistFilter UOM to Sequence UOM) 
+						* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())
+		  ,strPricingStatus = VPC.strStatus
+		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
+							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
+							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
+							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
+							   ELSE CTD.dblCashPrice END )
+							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())
+							)
+		  ,strHedgeMonth = HM.strFutureMonth
+		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
+									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
+									* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)							
+									)
+		  ,strSalesContract = SCTH.strContractNumber
+		  ,strCustomer = CASE WHEN SCD.intContractDetailId IS NOT NULL THEN SE.strName ELSE LGR.strComments END
+		  ,strOrigin =  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')
+		  ,strProductType = IPT.strProductType
+		  ,strProductLine = IPT.strProductLine
+		  ,strCertificateName = (
+						select
+							STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
+						FROM
+							CTECert where intContractDetailId = CTD.intContractDetailId
+						FOR XML PATH('')),' #!',', '), 1, 2, '')
+					)
+		,strQualityItem = ISNULL(CQI.strItemNo,ICI.strItemNo)
+		,strCropYear = CY.strCropYear
+		,strINCOTerm = FT.strFreightTerm
+		,dtmStartDate  = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN  CONVERT(VARCHAR(20),CTD.dtmStartDate, 101)  ELSE CONVERT(VARCHAR(20),LGL.dtmStartDate, 101)  END
+		,dtmEndDate  = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN  CONVERT(VARCHAR(20),CTD.dtmEndDate, 101)  ELSE CONVERT(VARCHAR(20), LGL.dtmEndDate, 101) END
+		,dtmETAPOL = CONVERT(VARCHAR(20),LGL.dtmETAPOL, 101) 
+		,dtmETAPOD = CONVERT(VARCHAR(20),LGL.dtmETAPOD, 101) 
+		,strLoadingPort = CASE WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open'  THEN LP.strCity ELSE LGL.strOriginPort END
+		,strDestinationPort = CASE WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN DP.strCity ELSE LGL.strDestinationPort END
+		,dtmShippedDate = CONVERT(VARCHAR(20),LGL.dtmBLDate, 101)   
+		,dtmReceiptDate = CONVERT(VARCHAR(20),IR.dtmReceiptDate, 101)    
+		,strStorageLocation = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN CSL.strSubLocationName		
+								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
+								   ELSE  CLSL.strSubLocationName END
+		,dblBasisDiff =   dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00)) --(OfferlistFilter UOM to Sequence UOM) 
+						  * dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())
+		,dblFreightOffer = 0.00--ISNULL(CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00) --FreightCost of LS cost Tab
+		,dblCIFInStore = 0.00--ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount) --CIF Item setup in Company Config CIF Charge from IR
+		,dblCUMStorage = 0.00 --FOR CLARIFICATION TO IR IC-10764
+		,dblCUMFinancing = 0.00--ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0) --IR Line value * (Current date - Payment Date) * Interest rate
+		,dblSwitchCost = 0.00--For Future Column N/A
+		,ysnPostedIR = IR.ysnPosted
+		,intCompanyLocationId = CTD.intCompanyLocationId
+		,intSortId = 0
+	FROM tblCTContractHeader CH
+	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId 
+	LEFT JOIN tblSMCity					LP  WITH (NOLOCK) ON CTD.intLoadingPortId = LP.intCityId 
+	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
+	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
+	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
+	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
+	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
+	LEFT JOIN tblRKFuturesMonth			FMO	 WITH (NOLOCK) ON FMO.intFutureMonthId = CTD.intFutureMonthId	
+	LEFT JOIN vyuCTSearchPriceContract	VPC  WITH (NOLOCK) ON VPC.intContractHeaderId =	CH.intContractHeaderId	
+	LEFT JOIN tblLGAllocationDetail		AD	 WITH (NOLOCK) ON ISNULL(AD.intSContractDetailId,AD.intPContractDetailId) = CTD.intContractDetailId
+	LEFT JOIN tblLGAllocationHeader		AH	 WITH (NOLOCK) ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
+	LEFT JOIN tblCTContractDetail		SCTD WITH (NOLOCK) ON SCTD.intContractDetailId = AD.intSContractDetailId
+	LEFT JOIN tblCTContractHeader		SCTH WITH (NOLOCK) ON SCTH.intContractHeaderId = SCTD.intContractHeaderId
+	LEFT JOIN tblLGReservation			LGR  WITH (NOLOCK) ON LGR.intContractDetailId = CTD.intContractDetailId 
+	LEFT JOIN tblCTContractDetail		SCD  WITH (NOLOCK) ON SCD.intContractDetailId = AD.intSContractDetailId
+	LEFT JOIN tblCTContractHeader		SCH  WITH (NOLOCK) ON SCH.intContractHeaderId = SCD.intContractHeaderId
+	LEFT JOIN tblEMEntity				SE   WITH (NOLOCK) ON SE.intEntityId = SCH.intEntityId
+	LEFT JOIN tblICItem					ICI  WITH (NOLOCK) ON ICI.intItemId = CTD.intItemId
+	LEFT JOIN vyuICGetCompactItem		IPT  WITH (NOLOCK) ON IPT.intItemId	= CTD.intItemId
+	--LEFT JOIN tblICCommodityProductLine IPL  WITH (NOLOCK) ON IPL.intCommodityProductLineId = CTD.intItemId
+	LEFT JOIN tblCTContractQuality		CQ	 WITH (NOLOCK) ON CQ.intItemId = CTD.intItemId
+	LEFT JOIN tblICItem					CQI  WITH (NOLOCK) ON CQI.intItemId = CQ.intItemId
+	LEFT JOIN tblCTCropYear				CY   WITH (NOLOCK) ON CY.intCropYearId = CH.intCropYearId
+	LEFT JOIN tblSMFreightTerms			FT   WITH (NOLOCK) ON FT.intFreightTermId = CH.intFreightTermId
+	LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLineNo = CTD.intContractDetailId --IRI.intLoadShipmentId = LGL.intLoadId
+	LEFT JOIN tblICInventoryReceipt		IR   WITH (NOLOCK) ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+	LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = CASE WHEN IRI.intInventoryReceiptId <> 0 THEN NULL ELSE ISNULL(LGD.intPContractDetailId,LGD.intSContractDetailId) END
+	LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
+	LEFT JOIN tblLGLoadStorageCost		LSC  WITH (NOLOCK) ON LSC.intLoadId = LGL.intLoadId
+	LEFT JOIN tblSMCompanyLocationSubLocation IRSL ON IRSL.intCompanyLocationSubLocationId = IRI.intSubLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CSL  WITH (NOLOCK) ON CSL.intCompanyLocationSubLocationId = CTD.intSubLocationId
+	LEFT JOIN tblLGLoadDetailLot		LDL	 WITH (NOLOCK)ON LDL.intLoadDetailId = LGD.intLoadDetailId
+	LEFT JOIN tblICLot					LOT	 WITH (NOLOCK)ON LOT.intLotId = LDL.intLotId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LOT.intSubLocationId
+	LEFT JOIN vyuLGLoadViewSearch		LGS  WITH (NOLOCK)ON LGS.intLoadId = LGL.intLoadId
+	OUTER APPLY dbo.fnCTGetShipmentStatus(CTD.intContractDetailId) LD
+	--LEFT JOIN tblICInventoryReceiptCharge IRC WITH (NOLOCK)ON IRC.intLoadShipmentId = LGL.intLoadId AND IRC.intLoadShipmentCostId = LGCInStore.intLoadCostId
+	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.intContractDetailId  = CTD.intContractDetailId
+	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
+	LEFT JOIN tblCTContractFutures		CF	 WITH (NOLOCK)ON  CF.intContractDetailId = CTD.intContractDetailId
+	LEFT JOIN tblRKFuturesMonth			HM	 WITH (NOLOCK) ON HM.intFutureMonthId = CF.intHedgeFutureMonthId	
+	OUTER APPLY(
+		SELECT DISTINCT CASE WHEN IRI.intInventoryReceiptId <> 0 THEN SUM(dblOrderQty) ELSE SUM(LGL.dblQuantity) END dblTotalQty
+		FROM tblLGLoadDetail LGL
+		LEFT JOIN tblCTContractDetail CTD1  WITH (NOLOCK) ON LGL.intPContractDetailId = CTD1.intContractDetailId
+		LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLoadShipmentId = LGL.intLoadId
+		WHERE CTD1.intContractDetailId = CTD.intContractDetailId
+		GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
+	) TQ
+	OUTER APPLY (
+		SELECT SUM(dblAmount) AS dblAmount FROM tblICInventoryReceiptCharge IRC
+		WHERE  IRC.intLoadShipmentId = LGL.intLoadId
+	) IRC
+	WHERE
+	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
+	) a
+	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
+	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
+	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
+	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
+	--If Available = 0 shouldn't come up in the initial load when Include Fully Allocated is checked
+	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN NOT EXISTS (SELECT 1 FROM @AllocatedContracts where intContractDetailId = a.intContractDetailId) THEN 1 ELSE 0 END ) END)
+
+	UNION ALL
 	--VIEW FOR PICK LOTS
 	SELECT DISTINCT
 		   intContractDetailId
@@ -228,6 +472,8 @@ BEGIN
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
 	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
 	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
+	--If Available = 0 shouldn't come up in the initial load when Include Fully Allocated is checked
+	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN NOT EXISTS (SELECT 1 FROM @AllocatedContracts where intContractDetailId = a.intContractDetailId) THEN 1 ELSE 0 END ) END)
 
 	UNION ALL
 	--VIEW FOR ALLOCATION ROWS ('Allocated', 'Partially Allocated','Unallocated', 'Reserved')
@@ -417,6 +663,8 @@ BEGIN
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
 	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
 	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
+	--If Available = 0 shouldn't come up in the initial load when Include Fully Allocated is checked
+	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN NOT EXISTS (SELECT 1 FROM @AllocatedContracts where intContractDetailId = a.intContractDetailId) THEN 1 ELSE 0 END ) END)
 
 	UNION ALL
 	--VIEW FOR CT/LS/IR/SI 
@@ -623,218 +871,30 @@ BEGIN
 		WHERE CTD1.intContractDetailId = CTD.intContractDetailId
 		GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
 	) TQ
-	OUTER APPLY (
-		SELECT SUM(dblAmount) AS dblAmount FROM tblICInventoryReceiptCharge IRC
-		WHERE  IRC.intLoadShipmentId = LGL.intLoadId
+	OUTER APPLY ( 
+		SELECT DISTINCT ISNULL(SUM(IRC2.dblAmount),SUM(LGCInStore.dblAmount)) AS dblAmount FROM tblICInventoryReceiptCharge IRC2
+		LEFT JOIN tblLGLoadCost	LGCInStore  WITH (NOLOCK)ON LGCInStore.intItemId =  CP.intCIFInstoreId AND LGC.intLoadId = LGL.intLoadId 
+		WHERE (IR.intInventoryReceiptId = IRC2.intInventoryReceiptId)
 	) IRC
+	OUTER APPLY(
+		SELECT SUM(dblAllocatedQuantity) + SUM(dblReservedQuantity) as dblTotalAllocatedQuantity 
+		from vyuLGAllocationStatus 
+		where strPurchaseContractNumber = CH.strContractNumber
+	) TAQ
 	WHERE
 	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
 	AND LGAS.strAllocationStatus IN ('Allocated', 'Partially Allocated', 'Unallocated')
+	AND IR.ysnPosted = 1
+	AND LGL.ysnPosted = 1
 	) a
 	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
 	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
 	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
-	
-	UNION ALL
-	--VIEW FOR CONTRACT
-	SELECT 
-		   intContractDetailId
-		  ,intCompanyLocationId
-		  ,intCommodityId
-		  ,intLoadId
-	      ,strContractSequence
-		  ,dtmContractDate
-		  ,strEntityName	
-		  ,strCategory  
-		  ,strStatus 
-		  ,strShipmentStatus
-		  ,strReferencePrimary
-		  ,strReference
-		  ,dblQuantity 
-		  ,strPacking
-		  ,dblOfferCost = dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost 
-		  ,strPricingType
-		  ,strFutureMonth
-		  ,dblBasis	
-		  ,strPricingStatus
-		  ,dblCashPrice
-		  ,strHedgeMonth
-		  ,dblLastSettlementPrice
-		  ,strSalesContract
-		  ,strCustomer
-		  ,strOrigin
-		  ,strProductType
-		  ,strProductLine
-		  ,strCertificateName
-		  ,strQualityItem
-		  ,strCropYear
-		  ,strINCOTerm
-		  ,dtmStartDate
-		  ,dtmEndDate
-		  ,dtmETAPOL
-		  ,dtmETAPOD
-		  ,strLoadingPort
-		  ,strDestinationPort
-		  ,dtmShippedDate
-		  ,dtmReceiptDate
-		  ,strStorageLocation 
-		  ,dblBasisDiff     
-		  ,dblFreightOffer	
-		  ,dblCIFInStore 	
-		  ,dblCUMStorage	
-		  ,dblCUMFinancing 	
-		  ,dblSwitchCost 	
-		  ,dblTotalCost =   dblBasis + dblFreightOffer + dblCIFInStore + dblCUMStorage + dblCUMFinancing + dblSwitchCost
-		  ,intSortId
-	FROM(
-	SELECT DISTINCT
-		 CTD.intContractDetailId
-		   ,CH.intCommodityId
-		   ,LGL.intLoadId
-	      ,strContractSequence = CH.strContractNumber + ' - ' + CAST (CTD.intContractSeq AS VARCHAR(MAX)) 
-		  ,dtmContractDate = CONVERT(VARCHAR(20),CH.dtmContractDate, 101) 
-		  ,EY.strEntityName	
-		  ,strCategory = (CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN 'Purchased' 
-							   WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN 'Sold' 
-							   WHEN LGAS.strAllocationStatus = 'Allocated' AND LGD.intLoadId IS NULL THEN 'Sold' 
-							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open'  THEN 'On Order' 
-							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Shipping%' THEN 'In Transit' 
-							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Transit%' THEN  'In Transit' 
-							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Scheduled%' THEN  'In Transit' 
-							    WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Received%' THEN  'Sold' 
-						 ELSE 'Purchased' END)
-		  ,strStatus =  (CASE 		
-							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN 'Open' 
-							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Scheduled' AND ISNULL(LGS.strShipmentType,'Shipment') = 'Shipment' THEN 'Shipment'
-							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Scheduled' AND LGS.strShipmentType = 'Shipping Instructions' THEN 'Shipping Instruction'
-							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Inbound Transit' AND LGS.strShipmentType = 'Shipment' THEN 'Shipped' 
-							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Inbound Transit' AND LGS.strShipmentType = 'Shipping Instructions' THEN 'Shipping Instruction' 
-							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Shipping Instructions Created' THEN 'Shipping Instruction'
-						 ELSE LGAS.strAllocationStatus  END)
-		  ,strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
-		  ,strReferencePrimary = CH.strContractNumber + CAST (CTD.intContractSeq AS VARCHAR(MAX)) 
-		  ,strReference = CH.strContractNumber 
-		  ,dblQuantity = CTD.dblQuantity
-		  ,strPacking = UM.strUnitMeasure
-		  ,dblOfferCost = CTD.dblCashPrice			
-		  ,PT.strPricingType
-		  ,FMO.strFutureMonth
-		  ,dblBasis =   dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00)) --(OfferlistFilter UOM to Sequence UOM) 
-						* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		  ,strPricingStatus = VPC.strStatus
-		  ,dblCashPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
-							(CASE WHEN VPC.strStatus = 'Fully Price' THEN CTD.dblCashPrice
-							   WHEN VPC.strStatus = 'Unprice' 	THEN dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
-							   WHEN VPC.strStatus = 'Partially Price' THEN VPC.dblFinalPrice + dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) + CTD.dblBasis
-							   ELSE CTD.dblCashPrice END )
-							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())
-							)
-		  ,strHedgeMonth = HM.strFutureMonth
-		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
-									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
-									* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)							
-									)
-		  ,strSalesContract = SCTH.strContractNumber
-		  ,strCustomer = CASE WHEN SCD.intContractDetailId IS NOT NULL THEN SE.strName ELSE LGR.strComments END
-		  ,strOrigin =  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')
-		  ,strProductType = IPT.strProductType
-		  ,strProductLine = IPT.strProductLine
-		  ,strCertificateName = (
-						select
-							STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
-						FROM
-							CTECert where intContractDetailId = CTD.intContractDetailId
-						FOR XML PATH('')),' #!',', '), 1, 2, '')
-					)
-		,strQualityItem = ISNULL(CQI.strItemNo,ICI.strItemNo)
-		,strCropYear = CY.strCropYear
-		,strINCOTerm = FT.strFreightTerm
-		,dtmStartDate  = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN  CONVERT(VARCHAR(20),CTD.dtmStartDate, 101)  ELSE CONVERT(VARCHAR(20),LGL.dtmStartDate, 101)  END
-		,dtmEndDate  = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN  CONVERT(VARCHAR(20),CTD.dtmEndDate, 101)  ELSE CONVERT(VARCHAR(20), LGL.dtmEndDate, 101) END
-		,dtmETAPOL = CONVERT(VARCHAR(20),LGL.dtmETAPOL, 101) 
-		,dtmETAPOD = CONVERT(VARCHAR(20),LGL.dtmETAPOD, 101) 
-		,strLoadingPort = CASE WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open'  THEN LP.strCity ELSE LGL.strOriginPort END
-		,strDestinationPort = CASE WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN DP.strCity ELSE LGL.strDestinationPort END
-		,dtmShippedDate = CONVERT(VARCHAR(20),LGL.dtmBLDate, 101)   
-		,dtmReceiptDate = CONVERT(VARCHAR(20),IR.dtmReceiptDate, 101)    
-		,strStorageLocation = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN CSL.strSubLocationName		
-								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
-								   ELSE  CLSL.strSubLocationName END
-		,dblBasisDiff =   dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00)) --(OfferlistFilter UOM to Sequence UOM) 
-						  * dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		,dblFreightOffer = 0.00--ISNULL(CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00) --FreightCost of LS cost Tab
-		,dblCIFInStore = 0.00--ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount) --CIF Item setup in Company Config CIF Charge from IR
-		,dblCUMStorage = 0.00 --FOR CLARIFICATION TO IR IC-10764
-		,dblCUMFinancing = 0.00--ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0) --IR Line value * (Current date - Payment Date) * Interest rate
-		,dblSwitchCost = 0.00--For Future Column N/A
-		,ysnPostedIR = IR.ysnPosted
-		,intCompanyLocationId = CTD.intCompanyLocationId
-		,intSortId = 4
-	FROM tblCTContractHeader CH
-	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId 
-	LEFT JOIN tblSMCity					LP  WITH (NOLOCK) ON CTD.intLoadingPortId = LP.intCityId 
-	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
-	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
-	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
-	LEFT JOIN tblCTPricingType			PT   WITH (NOLOCK) ON PT.intPricingTypeId  = CTD.intPricingTypeId
-	LEFT JOIN tblRKFutureMarket			FMA	 WITH (NOLOCK) ON FMA.intFutureMarketId	=CTD.intFutureMarketId		
-	LEFT JOIN tblRKFuturesMonth			FMO	 WITH (NOLOCK) ON FMO.intFutureMonthId = CTD.intFutureMonthId	
-	LEFT JOIN vyuCTSearchPriceContract	VPC  WITH (NOLOCK) ON VPC.intContractHeaderId =	CH.intContractHeaderId	
-	LEFT JOIN tblLGAllocationDetail		AD	 WITH (NOLOCK) ON ISNULL(AD.intSContractDetailId,AD.intPContractDetailId) = CTD.intContractDetailId
-	LEFT JOIN tblLGAllocationHeader		AH	 WITH (NOLOCK) ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
-	LEFT JOIN tblCTContractDetail		SCTD WITH (NOLOCK) ON SCTD.intContractDetailId = AD.intSContractDetailId
-	LEFT JOIN tblCTContractHeader		SCTH WITH (NOLOCK) ON SCTH.intContractHeaderId = SCTD.intContractHeaderId
-	LEFT JOIN tblLGReservation			LGR  WITH (NOLOCK) ON LGR.intContractDetailId = CTD.intContractDetailId 
-	LEFT JOIN tblCTContractDetail		SCD  WITH (NOLOCK) ON SCD.intContractDetailId = AD.intSContractDetailId
-	LEFT JOIN tblCTContractHeader		SCH  WITH (NOLOCK) ON SCH.intContractHeaderId = SCD.intContractHeaderId
-	LEFT JOIN tblEMEntity				SE   WITH (NOLOCK) ON SE.intEntityId = SCH.intEntityId
-	LEFT JOIN tblICItem					ICI  WITH (NOLOCK) ON ICI.intItemId = CTD.intItemId
-	LEFT JOIN vyuICGetCompactItem		IPT  WITH (NOLOCK) ON IPT.intItemId	= CTD.intItemId
-	--LEFT JOIN tblICCommodityProductLine IPL  WITH (NOLOCK) ON IPL.intCommodityProductLineId = CTD.intItemId
-	LEFT JOIN tblCTContractQuality		CQ	 WITH (NOLOCK) ON CQ.intItemId = CTD.intItemId
-	LEFT JOIN tblICItem					CQI  WITH (NOLOCK) ON CQI.intItemId = CQ.intItemId
-	LEFT JOIN tblCTCropYear				CY   WITH (NOLOCK) ON CY.intCropYearId = CH.intCropYearId
-	LEFT JOIN tblSMFreightTerms			FT   WITH (NOLOCK) ON FT.intFreightTermId = CH.intFreightTermId
-	LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLineNo = CTD.intContractDetailId --IRI.intLoadShipmentId = LGL.intLoadId
-	LEFT JOIN tblICInventoryReceipt		IR   WITH (NOLOCK) ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-	LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = CASE WHEN IRI.intInventoryReceiptId <> 0 THEN NULL ELSE ISNULL(LGD.intPContractDetailId,LGD.intSContractDetailId) END
-	LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
-	LEFT JOIN tblLGLoadStorageCost		LSC  WITH (NOLOCK) ON LSC.intLoadId = LGL.intLoadId
-	LEFT JOIN tblSMCompanyLocationSubLocation IRSL ON IRSL.intCompanyLocationSubLocationId = IRI.intSubLocationId
-	LEFT JOIN tblSMCompanyLocationSubLocation CSL  WITH (NOLOCK) ON CSL.intCompanyLocationSubLocationId = CTD.intSubLocationId
-	LEFT JOIN tblLGLoadDetailLot		LDL	 WITH (NOLOCK)ON LDL.intLoadDetailId = LGD.intLoadDetailId
-	LEFT JOIN tblICLot					LOT	 WITH (NOLOCK)ON LOT.intLotId = LDL.intLotId
-	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LOT.intSubLocationId
-	LEFT JOIN vyuLGLoadViewSearch		LGS  WITH (NOLOCK)ON LGS.intLoadId = LGL.intLoadId
-	OUTER APPLY dbo.fnCTGetShipmentStatus(CTD.intContractDetailId) LD
-	--LEFT JOIN tblICInventoryReceiptCharge IRC WITH (NOLOCK)ON IRC.intLoadShipmentId = LGL.intLoadId AND IRC.intLoadShipmentCostId = LGCInStore.intLoadCostId
-	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.intContractDetailId  = CTD.intContractDetailId
-	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
-	LEFT JOIN tblCTContractFutures		CF	 WITH (NOLOCK)ON  CF.intContractDetailId = CTD.intContractDetailId
-	LEFT JOIN tblRKFuturesMonth			HM	 WITH (NOLOCK) ON HM.intFutureMonthId = CF.intHedgeFutureMonthId	
-	OUTER APPLY(
-		SELECT DISTINCT CASE WHEN IRI.intInventoryReceiptId <> 0 THEN SUM(dblOrderQty) ELSE SUM(LGL.dblQuantity) END dblTotalQty
-		FROM tblLGLoadDetail LGL
-		LEFT JOIN tblCTContractDetail CTD1  WITH (NOLOCK) ON LGL.intPContractDetailId = CTD1.intContractDetailId
-		LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLoadShipmentId = LGL.intLoadId
-		WHERE CTD1.intContractDetailId = CTD.intContractDetailId
-		GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
-	) TQ
-	OUTER APPLY (
-		SELECT SUM(dblAmount) AS dblAmount FROM tblICInventoryReceiptCharge IRC
-		WHERE  IRC.intLoadShipmentId = LGL.intLoadId
-	) IRC
-	WHERE
-	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
-	) a
-	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
-	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
-	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
-	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
+	--If Available = 0 shouldn't come up in the initial load when Include Fully Allocated is checked
+	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN NOT EXISTS (SELECT 1 FROM @AllocatedContracts where intContractDetailId = a.intContractDetailId) THEN 1 ELSE 0 END ) END)
 
-	--VIEW FOR AVAILABLE BALANCE
+	--VIEW FOR AVAILABLE BALANCE LINE 837
 	UNION ALL 
 	SELECT DISTINCT
 		    intContractDetailId
@@ -894,13 +954,13 @@ BEGIN
 		  ,dtmContractDate = ''
 		  ,EY.strEntityName	
 		  ,strCategory = 'Available'
-		  ,strStatus =  (CASE  WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Unsold%' THEN  'Unsold' 			
+		  ,strStatus = '' /*(CASE  WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') LIKE '%Unsold%' THEN  'Unsold' 			
 							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN 'Open' 
 							   WHEN LGAS.dblAllocatedQuantity = CTD.dblQuantity THEN 'Sold'
 							   WHEN ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Received' THEN 'Sold' 
-						 ELSE 'Unsold'  END)
+						 ELSE 'Unsold'  END)*/
 						
-		  ,strShipmentStatus = LD.strShipmentStatus
+		  ,strShipmentStatus = ''-- LD.strShipmentStatus
 		  ,strReferencePrimary ='Unsold- '+ CH.strContractNumber + CH.strContractNumber + CAST (CTD.intContractSeq AS VARCHAR(MAX)) 
 		  ,strReference = NULL
 		  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN   CTD.dblQuantity --ALLOCATED QTY
@@ -944,7 +1004,7 @@ BEGIN
 		,dblSwitchCost	 = NULL
 		,ysnPostedIR = IR.ysnPosted
 		,intCompanyLocationId = CTD.intCompanyLocationId
-		,intSortId = 5
+		,intSortId = 4
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
@@ -983,6 +1043,8 @@ BEGIN
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
 	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
 	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
+	--If Available = 0 shouldn't come up in the initial load when Include Fully Allocated is checked
+	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN dblQuantity > 1 THEN 1 ELSE 0 END ) END)
 	ORDER BY a.strContractSequence DESC ,a.intSortId
 	END
 	
