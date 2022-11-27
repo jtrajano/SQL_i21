@@ -249,3 +249,55 @@ BEGIN
 	AND strScreenName IN ('NewMarkToMarket','New Mark To Market')
 END
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket')
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMControl c 
+				INNER JOIN tblSMScreen screen
+					ON screen.intScreenId = c.intScreenId
+					AND screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+				WHERE strControlName = 'Customer Exposure' AND strControlType = 'Grid')
+BEGIN 
+	INSERT INTO tblSMControl (  
+	  strControlId,  
+	  strControlName,  
+	  strControlType,  
+	  strContainer,  
+	  intScreenId,  
+	  intConcurrencyId  
+	 )  
+	SELECT strControlId = 'grdCustomerExposure'
+	, strControlName = 'Customer Exposure'
+	, strControlType = 'Grid'
+	, strContainer = ''
+	, intScreenId = screen.intScreenId
+	, intConcurrencyId = 1
+	FROM tblSMScreen screen
+	WHERE screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket')
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMControl c 
+				INNER JOIN tblSMScreen screen
+					ON screen.intScreenId = c.intScreenId
+					AND screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+				WHERE strControlName = 'Customer Exposure' AND strControlType = 'Tab Page')
+BEGIN 
+	INSERT INTO tblSMControl (  
+	  strControlId,  
+	  strControlName,  
+	  strControlType,  
+	  strContainer,  
+	  intScreenId,  
+	  intConcurrencyId  
+	 )  
+	SELECT strControlId = 'pgeCustomerExposure'
+	, strControlName = 'Customer Exposure'
+	, strControlType = 'Tab Page'
+	, strContainer = ''
+	, intScreenId = screen.intScreenId
+	, intConcurrencyId = 1
+	FROM tblSMScreen screen
+	WHERE screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+END
+GO
