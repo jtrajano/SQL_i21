@@ -90,25 +90,25 @@ select
 ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
 ,  A.strSaleNumber--1
 , A.dtmSaleDate--2
-, A.AveragePriceCurrentWeekSale dblAvePriceCurrentWeekSale --3
-, A.AveragePricePrevWeekSale dblAvePricePrevWeekSale--4
-, A.AveragePriceCurrentWeekSale- A.AveragePricePrevWeekSale dblAveWeekPriceChange --5
-, A.TotalSales dblTotalSales --6
-, A.TotalSales_UL dblTotalSaleUL--7
-, A.AveragePrice_UL dblAveragePriceUL --8
+, ROUND(A.AveragePriceCurrentWeekSale,2) dblAvePriceCurrentWeekSale --3
+, ROUND(A.AveragePricePrevWeekSale,2) dblAvePricePrevWeekSale--4
+, ROUND(A.AveragePriceCurrentWeekSale- A.AveragePricePrevWeekSale,2) dblAveWeekPriceChange --5
+, ROUND(A.TotalSales,2) dblTotalSales --6
+, ROUND(A.TotalSales_UL,2) dblTotalSaleUL--7
+, ROUND(A.AveragePrice_UL,2) dblAveragePriceUL --8
 , B.strItemNo strItemNo --9
-, B.TotalSold dblItemSold --10
-, B.dblNetWeight dblItemWeight --11
-, B.AverageItemTaste dblItemAverageTaste --12
-, U.AveragePrice dblItemAverageCurrentWeekPrice--13
-, V.AveragePrice dblItemAveragePrevWeekPrice--14
-, U.AveragePrice-V.AveragePrice dblAveItemPriceChange --15
-, B.TotalSold_UL dblItemTotalSoldUL--16
+, ROUND(B.TotalSold,2) dblItemSold --10
+, ROUND(B.dblNetWeight,2) dblItemWeight --11
+, ROUND(B.AverageItemTaste,2) dblItemAverageTaste --12
+, ROUND(U.AveragePrice,2) dblItemAverageCurrentWeekPrice--13
+, ROUND(V.AveragePrice,2) dblItemAveragePrevWeekPrice--14
+, ROUND(U.AveragePrice-V.AveragePrice,2) dblAveItemPriceChange --15
+, ROUND(B.TotalSold_UL,2) dblItemTotalSoldUL--16
 , ROUND((B.TotalSold/B.TotalSold_UL) * 100, 2) dblItemPurchasePercentageUL --17
-, B.AveragePrice dblItemAveragePrice --18
-, B.AveragePrice -B.AverageSupplierValuationPrice dblItemAveragePriceChange --19
-, B.AverageItemTaste dblItemAverageTasteUL --20
-, B.AverageItemTaste - B.AverageItemTaste dblItemAverageTasteChange --21
+, ROUND(B.AveragePrice_UL,2) dblItemAveragePriceUL --18
+, ROUND(B.AveragePrice_UL -B.AverageSupplierValuationPrice,2) dblItemAveragePriceChange --19
+, ROUND(B.AverageItemTaste,2) dblItemAverageTasteUL --20
+, ROUND(B.AverageItemTaste - B.AverageItemTaste,2) dblItemAverageTasteChange --21
 , B.strCurrency 
 from HeaderData A join ItemSaleStat B on
 A.strSaleNumber = B.strSaleNumber
