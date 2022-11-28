@@ -133,29 +133,6 @@ BEGIN
 	OUTER APPLY vyuAPGuidGenerator 
 	WHERE guiApiUniqueId = @guiApiUniqueId AND (NULLIF(VL.str1099Type, '') IS NOT NULL AND C.int1099CategoryId IS NULL)
 
-	-- Remove duplicate location from file
-	;WITH cte AS
-	(
-		SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strEntityNo, sr.strLocationName ORDER BY sr.strEntityNo, sr.strLocationName) AS RowNumber
-		FROM tblApiSchemaVendorLocation sr
-		WHERE sr.guiApiUniqueId = @guiApiUniqueId
-	)
-	INSERT @returntable
-	SELECT
-		  g.strNewId
-		, @guiLogId
-		, 'Error'
-		, 'Failed'
-		, 'Skipped'
-		, sr.intRowNumber
-		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name')
-		, sr.strLocationName
-		, 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + sr.strLocationName + ' of the vendor ' + dbo.fnApiSchemaTransformMapField(g.strNewId, 'Entity No')  + ' has duplicates in the file.'
-	FROM cte sr
-	OUTER APPLY vyuAPGuidGenerator g
-	WHERE sr.guiApiUniqueId = @guiApiUniqueId
-	AND sr.RowNumber > 1
-
 	INSERT @returntable
 	SELECT
 		  g.strNewId
