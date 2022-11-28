@@ -35,7 +35,7 @@
 	[ysnProcessCreditCard]	BIT				CONSTRAINT [DF_tblARPayment_ysnProcessCreditCard] DEFAULT ((0)) NULL,
 	[ysnProcessedToNSF]		BIT				CONSTRAINT [DF_tblARPayment_ysnProcessedToNSF] DEFAULT ((0)) NULL,
 	[dblTotalAR]			NUMERIC (18, 6) NULL,
-	[strBatchId]			NVARCHAR (20)	COLLATE Latin1_General_CI_AS NULL,	
+	[strBatchId]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,	
 	[dtmBatchDate]			DATETIME		NULL,
 	[intPostedById]			INT				NULL,
 	[intCurrentStatus]		INT				NULL,
