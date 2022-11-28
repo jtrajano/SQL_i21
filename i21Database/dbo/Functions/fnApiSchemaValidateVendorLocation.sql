@@ -132,6 +132,69 @@ BEGIN
 	LEFT JOIN tblAP1099DIVCategory C ON C.strCategory = VL.str1099Type
 	OUTER APPLY vyuAPGuidGenerator 
 	WHERE guiApiUniqueId = @guiApiUniqueId AND (NULLIF(VL.str1099Type, '') IS NOT NULL AND C.int1099CategoryId IS NULL)
+
+	INSERT @returntable
+	SELECT
+		  g.strNewId
+		, @guiLogId
+		, 'Error'
+		, 'Failed'
+		, 'Skipped'
+		, vts.intRowNumber
+		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') 
+		, vts.strLocationName
+		, 'The vendor location with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + ' "' + vts.strLocationName + '" already exists.'
+	FROM tblApiSchemaVendorLocation vts
+	JOIN tblEMEntity e ON e.strEntityNo = vts.strEntityNo
+	JOIN tblEMEntityLocation el ON el.intEntityId = e.intEntityId
+		AND ISNULL(vts.strLocationName, '') = ISNULL(el.strLocationName, '')
+	OUTER APPLY vyuAPGuidGenerator g
+	WHERE vts.guiApiUniqueId = @guiApiUniqueId
+		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
 	
+	INSERT @returntable
+	SELECT
+		  g.strNewId
+		, @guiLogId
+		, 'Error'
+		, 'Failed'
+		, 'Skipped'
+		, vts.intRowNumber
+		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') 
+		, vts.strLocationName
+		, 'The vendor location with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + ' "' + vts.strLocationName + '" with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Farm Field Number')  + ' ' + vts.strFarmFieldNumber + ' already exists.'
+	FROM tblApiSchemaVendorLocation vts
+	JOIN tblEMEntity e ON e.strEntityNo = vts.strEntityNo
+	JOIN tblEMEntityLocation el ON el.intEntityId = e.intEntityId
+		AND vts.strLocationName = el.strLocationName
+		AND ISNULL(vts.strFarmFieldNumber, '') = ISNULL(el.strFarmFieldNumber, '')
+	OUTER APPLY vyuAPGuidGenerator g
+	WHERE vts.guiApiUniqueId = @guiApiUniqueId
+		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
+		AND NULLIF(vts.strLocationName, '') IS NOT NULL
+		AND ISNULL(vts.strFarmFieldNumber, '') != ''
+
+	INSERT @returntable
+	SELECT
+		  g.strNewId
+		, @guiLogId
+		, 'Error'
+		, 'Failed'
+		, 'Skipped'
+		, vts.intRowNumber
+		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') 
+		, vts.strEntityNo
+		, 'The vendor location with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + ' "' + vts.strLocationName + '" with a blank ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Farm Field Number')  + ' already exists.'
+	FROM tblApiSchemaVendorLocation vts
+	JOIN tblEMEntity e ON e.strEntityNo = vts.strEntityNo
+	JOIN tblEMEntityLocation el ON el.intEntityId = e.intEntityId
+		AND vts.strLocationName = el.strLocationName
+		AND ISNULL(vts.strFarmFieldNumber, '') = ISNULL(el.strFarmFieldNumber, '')
+	OUTER APPLY vyuAPGuidGenerator g
+	WHERE vts.guiApiUniqueId = @guiApiUniqueId
+		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
+		AND NULLIF(vts.strLocationName, '') IS NOT NULL
+		AND ISNULL(vts.strFarmFieldNumber, '') = ''
+
 	RETURN
 END
