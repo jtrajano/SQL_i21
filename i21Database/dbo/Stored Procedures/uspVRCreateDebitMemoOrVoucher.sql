@@ -16,29 +16,29 @@ BEGIN
 
     IF ISNULL(@IsPost, 0) = 1
     BEGIN
-        INSERT INTO tblVRRebate (
-              intInvoiceDetailId
-            , strSubmitted
-            , dblQuantity
-            , dblRebateAmount
-            , dblRebateRate
-            , intProgramId
-            , dtmDate
-        )
-        SELECT
-              invd.intInvoiceDetailId
-            , 'Y'
-            , vr.dblRebateQuantity
-            , ISNULL(vr.dblRebateAmount, 0)
-            , vr.dblRebateRate
-            , vr.intProgramId
-            , vr.dtmDate
-        FROM vyuVROpenRebate vr
-            JOIN tblARInvoice inv ON inv.intInvoiceId = vr.intInvoiceId
-        JOIN tblARInvoiceDetail invd ON invd.intInvoiceId = inv.intInvoiceId
-        LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
-            AND il.intLocationId = inv.intCompanyLocationId
-        WHERE vr.intInvoiceId = @InvoiceId
+        -- INSERT INTO tblVRRebate (
+        --       intInvoiceDetailId
+        --     , strSubmitted
+        --     , dblQuantity
+        --     , dblRebateAmount
+        --     , dblRebateRate
+        --     , intProgramId
+        --     , dtmDate
+        -- )
+        -- SELECT
+        --       invd.intInvoiceDetailId
+        --     , 'Y'
+        --     , vr.dblRebateQuantity
+        --     , ISNULL(vr.dblRebateAmount, 0)
+        --     , vr.dblRebateRate
+        --     , vr.intProgramId
+        --     , vr.dtmDate
+        -- FROM vyuVROpenRebate vr
+        --     JOIN tblARInvoice inv ON inv.intInvoiceId = vr.intInvoiceId
+        -- JOIN tblARInvoiceDetail invd ON invd.intInvoiceId = inv.intInvoiceId
+        -- LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
+        --     AND il.intLocationId = inv.intCompanyLocationId
+        -- WHERE vr.intInvoiceId = @InvoiceId
 
         IF @Type = 'Debit Memo' BEGIN
             INSERT INTO @voucherPayables (
@@ -80,8 +80,8 @@ BEGIN
                 , intTransactionType = @DebitMemo
                 , dtmDate = inv.dtmDate
                 , dtmVoucherDate = inv.dtmDate
-                , dblOrderQty = vr.dblQuantity
-                , dblQuantityToBill = vr.dblQuantity
+                , dblOrderQty = vr.dblRebateQuantity
+                , dblQuantityToBill = vr.dblRebateQuantity
                 , dblCost = vr.dblRebateRate
                 , intCostUOMId = invd.intItemUOMId
                 , intAccountId = dbo.fnGetItemGLAccount(invd.intItemId, il.intItemLocationId, 'Cost of Goods') 
@@ -106,7 +106,7 @@ BEGIN
                 , intInvoiceId = inv.intInvoiceId
                 , intShipViaId = inv.intShipViaId
                 , intFreightTermId = inv.intFreightTermId
-            FROM vyuVRRebate vr
+            FROM vyuVROpenRebate vr
             JOIN tblARInvoice inv ON inv.intInvoiceId = vr.intInvoiceId
             JOIN tblARInvoiceDetail invd ON invd.intInvoiceId = inv.intInvoiceId
             LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
@@ -161,8 +161,8 @@ BEGIN
                 , intTransactionType = @Voucher
                 , dtmDate = inv.dtmDate
                 , dtmVoucherDate = inv.dtmDate
-                , dblOrderQty = vr.dblQuantity
-                , dblQuantityToBill = vr.dblQuantity
+                , dblOrderQty = vr.dblRebateQuantity
+                , dblQuantityToBill = vr.dblRebateQuantity
                 , dblCost = vr.dblRebateRate
                 , intCostUOMId = invd.intItemUOMId
                 , intAccountId = invd.intAccountId
@@ -187,7 +187,7 @@ BEGIN
                 , intInvoiceId = inv.intInvoiceId
                 , intShipViaId = inv.intShipViaId
                 , intFreightTermId = inv.intFreightTermId
-            FROM vyuVRRebate vr
+            FROM vyuVROpenRebate vr
             JOIN tblARInvoice inv ON inv.intOriginalInvoiceId = vr.intInvoiceId
             JOIN tblARInvoiceDetail invd ON invd.intInvoiceId = inv.intInvoiceId
             LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
