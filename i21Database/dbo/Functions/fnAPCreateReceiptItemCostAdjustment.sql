@@ -250,19 +250,27 @@ BEGIN
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	C3.intSettleStorageId
 			,[intSourceTransactionDetailId] 	=	C2.intSettleStorageTicketId
-			,[strSourceTransactionId] 			=	C3.strStorageTicket
+			,[strSourceTransactionId] 			=	SS.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
+		--INNER JOIN tblGRStorageHistory sh 
+		--	ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
+		--		AND ISNULL(sh.intContractHeaderId,-1) = ISNULL(B.intContractHeaderId,-1)
+		--		AND sh.dblUnits = B.dblQtyReceived
 		INNER JOIN tblGRStorageHistory sh 
 			ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
 				AND ISNULL(sh.intContractHeaderId,-1) = ISNULL(B.intContractHeaderId,-1)
-				AND sh.dblUnits = B.dblQtyReceived
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
@@ -274,6 +282,7 @@ BEGIN
 				and B.intContractDetailId = SC.intContractDetailId
 		WHERE (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 			and SC.intSettleStorageId is null
+			AND B.dblQtyReceived > 0
 		UNION ALL
 		--SETTLE STORAGE
 		--ITEM
@@ -321,13 +330,19 @@ BEGIN
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	C3.intSettleStorageId
 			,[intSourceTransactionDetailId] 	=	case when OLDG.intId is not null then  C2.intSettleStorageTicketId else SC.intSettleContractId end
-			,[strSourceTransactionId] 			=	C3.strStorageTicket
+			,[strSourceTransactionId] 			=	SS.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		--INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN 
+			( tblGRSettleStorageBillDetail C3 
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = C3.intSettleStorageId
+			)
+			ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId		
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
