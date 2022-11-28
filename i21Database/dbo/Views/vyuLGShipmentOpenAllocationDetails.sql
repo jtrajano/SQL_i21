@@ -77,6 +77,25 @@ FROM (
 						ELSE ISNULL(LDSI.dblPShippedQuantity, 0) 
 						END 
 				END)
+		,dblAvailableInboundAllocationQty = ISNULL(AD.dblPAllocatedQty, 0) 
+			- (CASE WHEN ((CASE WHEN ISNULL(LDS.dblPShippedQuantity, 0) > ISNULL(LDSI.dblPShippedQuantity,0) 
+						THEN ISNULL(LDS.dblPShippedQuantity, 0) 
+						ELSE ISNULL(LDSI.dblPShippedQuantity, 0) END <=0)) THEN 0 
+					ELSE 
+						CASE WHEN (ISNULL(LDS.dblPShippedQuantity, 0) > ISNULL(LDSI.dblPShippedQuantity,0))
+						THEN ISNULL(LDS.dblPShippedQuantity, 0) 
+						ELSE ISNULL(LDSI.dblPShippedQuantity, 0) 
+						END 
+				END)
+			- (CASE WHEN ((CASE WHEN ISNULL(INS.dblPShippedQuantity, 0) > ISNULL(INSI.dblPShippedQuantity,0) 
+						THEN ISNULL(INS.dblPShippedQuantity, 0) 
+						ELSE ISNULL(INSI.dblPShippedQuantity, 0) END <=0)) THEN 0 
+					ELSE 
+						CASE WHEN (ISNULL(INS.dblPShippedQuantity, 0) > ISNULL(INSI.dblPShippedQuantity,0))
+						THEN ISNULL(INS.dblPShippedQuantity, 0) 
+						ELSE ISNULL(INSI.dblPShippedQuantity, 0) 
+						END 
+				END)
 		,dblQtyConversionFactor = dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId)
 		,dblAvailableContractQty = ISNULL(CDP.dblQuantity,0) 
 			- (CASE WHEN ((CASE WHEN ISNULL(CDP.dblScheduleQty, 0) > ISNULL(CDP.dblShippingInstructionQty,0) 
@@ -101,7 +120,7 @@ FROM (
 		,strShipper = SHPR.strName
 		,ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = CDS.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 		,intShipmentType = ShipType.intShipmentType
-		,CHS.intFreightTermId
+		,CHP.intFreightTermId
 		,FT.strFreightTerm
 	FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 	CROSS JOIN tblLGAllocationDetail AD
@@ -124,7 +143,7 @@ FROM (
 			,dblSShippedQuantity = SUM(SP.dblDeliveredQuantity)
 		FROM tblLGLoadDetail SP
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
-			AND L.intPurchaseSale IN (1, 3)
+			AND L.intPurchaseSale = 3
 			AND L.intShipmentType = 2
 			AND ISNULL(L.ysnCancelled, 0) = 0
 		WHERE SP.intPContractDetailId = AD.intPContractDetailId
@@ -134,11 +153,31 @@ FROM (
 			,dblSShippedQuantity = SUM(SP.dblDeliveredQuantity)
 		FROM tblLGLoadDetail SP
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
-			AND L.intPurchaseSale IN (1, 3)
+			AND L.intPurchaseSale = 3
 			AND L.intShipmentType = 1
 			AND ISNULL(L.ysnCancelled, 0) = 0
 		WHERE SP.intPContractDetailId = AD.intPContractDetailId
 		) LDS
+	OUTER APPLY (
+		SELECT dblPShippedQuantity = SUM(SP.dblQuantity)
+			,dblSShippedQuantity = SUM(SP.dblDeliveredQuantity)
+		FROM tblLGLoadDetail SP
+		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
+			AND L.intPurchaseSale = 1
+			AND L.intShipmentType = 2
+			AND ISNULL(L.ysnCancelled, 0) = 0
+		WHERE SP.intPContractDetailId = AD.intPContractDetailId
+		) INSI
+	OUTER APPLY (
+		SELECT dblPShippedQuantity = SUM(SP.dblQuantity)
+			,dblSShippedQuantity = SUM(SP.dblDeliveredQuantity)
+		FROM tblLGLoadDetail SP
+		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
+			AND L.intPurchaseSale = 1
+			AND L.intShipmentType = 1
+			AND ISNULL(L.ysnCancelled, 0) = 0
+		WHERE SP.intPContractDetailId = AD.intPContractDetailId
+		) INS
 	OUTER APPLY (
 		SELECT dblSalePickedQty = SUM(PL.dblSalePickedQty)
 			,dblLotPickedQty = SUM(PL.dblLotPickedQty)
@@ -164,7 +203,7 @@ FROM (
 	LEFT JOIN tblEMEntity SHPR ON SHPR.intEntityId = CDP.intShipperId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
-	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CHS.intFreightTermId
+	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CHP.intFreightTermId
 	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
 					FROM tblSMTransaction TRN INNER JOIN tblSMScreen SCR 
 					ON TRN.intScreenId = SCR.intScreenId AND SCR.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments' )
