@@ -204,12 +204,6 @@ BEGIN TRY
 
 	EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @Post, @FromPosting, @LogTradeFinanceInfo
 
-	--AUTO DEBIT MEMO VENDOR REBATE SALES
-	IF @strTransactionType = 'Invoice'
-	BEGIN
-		EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @InvoiceId, @Post, @UserId, 'Debit Memo'
-	END
-
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
 	IF @intTranCount = 0
