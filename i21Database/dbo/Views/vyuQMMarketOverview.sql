@@ -84,11 +84,11 @@ outer apply(
 outer apply(
 	select TotalSales,TotalSales_UL from OverallSalesData where strSaleNumber = A.strSaleNumber
 )U
-group by strSaleNumber, dtmSaleDate,U.TotalSales, U.TotalSales_UL,X.AveragePrice_UL,X.AveragePrice ,W.AveragePrice
-
+	group by strSaleNumber, dtmSaleDate,U.TotalSales, U.TotalSales_UL,X.AveragePrice_UL,X.AveragePrice ,W.AveragePrice
 )
 select 
-  A.strSaleNumber--1
+ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
+,  A.strSaleNumber--1
 , A.dtmSaleDate--2
 , A.AveragePriceCurrentWeekSale dblAvePriceCurrentWeekSale --3
 , A.AveragePricePrevWeekSale dblAvePricePrevWeekSale--4
@@ -113,11 +113,11 @@ select
 from HeaderData A join ItemSaleStat B on
 A.strSaleNumber = B.strSaleNumber
 outer apply(
-	Select AveragePrice from ItemWeeklySaleStat where intItemId = B.intItemId and DATEPART(ww, A.dtmSaleDate) = WeekNo
+	Select TOP 1 AveragePrice from ItemWeeklySaleStat where intItemId = B.intItemId and DATEPART(ww, A.dtmSaleDate) = WeekNo
 
 )U
 outer apply(
-	Select AveragePrice from ItemWeeklySaleStat 
+	Select TOP 1 AveragePrice from ItemWeeklySaleStat 
 	where intItemId = B.intItemId and DATEPART(ww, A.dtmSaleDate)-1 = WeekNo
 
 )V
