@@ -527,11 +527,11 @@ Begin --Sales Order Pick List
 			JOIN tblICItem i on pld.intItemId=i.intItemId
 			Left JOIN tblICLot l on l.intLotId=pld.intLotId
 			Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=pld.intStorageLocationId
-			Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
-			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-			Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
-			Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
-			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+			LEFT Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
+			LEFT Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+			LEFT Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
+			LEFT Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
+			LEFT Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
 			Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
@@ -649,9 +649,9 @@ Begin --Sales Order Pick List
 			JOIN tblICItem i on sd.intItemId=i.intItemId
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
 			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-			Join tblSOSalesOrder so on sd.intSalesOrderId=so.intSalesOrderId
-			Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
-			Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+			LEFT Join tblSOSalesOrder so on sd.intSalesOrderId=so.intSalesOrderId
+			LEFT Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
+			LEFT Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 			Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
 			Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
@@ -915,16 +915,16 @@ Begin --Sales Order Pick List
 						JOIN tblICItem i on pld.intItemId=i.intItemId
 						Left JOIN tblICLot l on l.intLotId=pld.intLotId
 						Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
-						Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
-						Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
-						Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
-						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+						LEFt Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
+						LEFt Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+						LEFt Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
+						LEFt Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
+						LEFt Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
 						Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
-						Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+						LEFT Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
 						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
 
 						Update @tblLot Set dblQty=@dblAvailableQty - @dblRequiredQty Where intRowNo=@intMinLot
@@ -1026,16 +1026,16 @@ Begin --Sales Order Pick List
 						JOIN tblICItem i on pld.intItemId=i.intItemId
 						Left JOIN tblICLot l on l.intLotId=pld.intLotId
 						Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
-						Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
-						Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-						Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
-						Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
-						Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
+						LEFT Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
+						LEFT Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+						LEFT Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
+						LEFT Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
+						LEFT Join tblSMCompanyLocation cl on so.intCompanyLocationId=cl.intCompanyLocationId
 						Left Join vyuEMSalesperson sp on so.intEntitySalespersonId=sp.[intEntityId]
 						Left Join tblSMShipVia sv on so.intShipViaId=sv.[intEntityId]
 						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
-						Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+						LEFT Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
 						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
 
 						Set @dblRequiredQty = @dblRequiredQty - @dblAvailableQty
