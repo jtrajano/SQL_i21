@@ -250,6 +250,7 @@ BEGIN TRY
 		,@strBook NVARCHAR(100)
 		,@intCurrencyId INT
 		,@strCurrency NVARCHAR(50)
+		,@ysnBought BIT
 		-- B1
 		,@dblB1QtyBought NUMERIC(18, 6)
 		,@intB1QtyUOMId INT
@@ -294,6 +295,7 @@ BEGIN TRY
 		,strBook = BOOK.strBook
 		,intCurrencyId = CURRENCY.intCurrencyID
 		,strCurrency = CURRENCY.strCurrency
+		,ysnBought = IMP.ysnBought
 		-- B1
 		,dblB1QtyBought = IMP.dblB1QtyBought
 		,intB1QtyUOMId = B1QUOM.intUnitMeasureId
@@ -387,6 +389,7 @@ BEGIN TRY
 		,@strBook
 		,@intCurrencyId
 		,@strCurrency
+		,@ysnBought
 		-- B1
 		,@dblB1QtyBought
 		,@intB1QtyUOMId
@@ -424,6 +427,7 @@ BEGIN TRY
 			,intCurrencyId = @intCurrencyId
 			,intPurchaseGroupId = @intPurchasingGroupId
 			,intBookId = @intBookId
+			,ysnBought = @ysnBought
 			-- Initial Buy
 			-- B1
 			,dblB1QtyBought = @dblB1QtyBought
@@ -783,6 +787,7 @@ BEGIN TRY
 			,@strBook
 			,@intCurrencyId
 			,@strCurrency
+			,@ysnBought
 			-- B1
 			,@dblB1QtyBought
 			,@intB1QtyUOMId

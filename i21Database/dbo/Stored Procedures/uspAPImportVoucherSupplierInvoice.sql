@@ -77,11 +77,11 @@ SELECT
 	intTransactionType					=	CASE WHEN A.strPurchaseType = 'I' THEN 1 ELSE 3 END,
 	strDocumentNumber					=	A.strDocumentNumber,
 	strPurchasingGroup					=	A.strStorageLocation,
-	dblWeightBreakup1					=	CAST(A.dblWeightBreakup1 AS DECIMAL(18,6)),
+	intNumOfPackagesUOM					=	CAST(A.dblWeightBreakup1 AS INT),
 	dblWeightBreakup1Bags				=	CAST(A.dblWeightBreakup1Bags AS DECIMAL(18,6)),
-	dblWeightBreakup2					=	CAST(A.dblWeightBreakup2 AS DECIMAL(18,6)),
+	intNumOfPackagesUOM2				=	CAST(A.dblWeightBreakup2 AS INT),
 	dblWeightBreakup2Bags				=	CAST(A.dblWeightBreakup2Bags AS DECIMAL(18,6)),
-	dblWeightBreakup3					=	CAST(A.dblWeightBreakup3 AS DECIMAL(18,6)),
+	intNumOfPackagesUOM3				=	CAST(A.dblWeightBreakup3 AS INT),
 	dblWeightBreakup3Bags				=	CAST(A.dblWeightBreakup3Bags AS DECIMAL(18,6)),
 	dblWeightBreakup4					=	A.dblWeightBreakup4,
 	dblWeightBreakup4Bags				=	A.dblWeightBreakup4Bags,
@@ -120,11 +120,11 @@ INSERT INTO @voucherPayables
 	,strBook							
 	,strSubBook			
 	,dblPackageBreakups
-	,dblNetWeightPerPackage
+	,intNumOfPackagesUOM
 	,dblNumberOfPackages
-	,dblNetWeightPerPackage2
+	,intNumOfPackagesUOM2
 	,dblNumberOfPackages2
-	,dblNetWeightPerPackage3
+	,intNumOfPackagesUOM3
 	,dblNumberOfPackages3
 	,ysnStage
 )
@@ -152,11 +152,11 @@ SELECT
 	,strBook							
 	,strSubBook		
 	,dblPackageBreakups
-	,dblNetWeightPerPackage = A.dblWeightBreakup1
+	,intNumOfPackagesUOM = A.intNumOfPackagesUOM
 	,dblNumberOfPackages = A.dblWeightBreakup1Bags
-	,dblNetWeightPerPackage2 = A.dblWeightBreakup2
+	,intNumOfPackagesUOM2 = A.intNumOfPackagesUOM2
 	,dblNumberOfPackages2 = A.dblWeightBreakup2Bags
-	,dblNetWeightPerPackage3 = A.dblWeightBreakup3
+	,intNumOfPackagesUOM3 = A.intNumOfPackagesUOM3
 	,dblNumberOfPackages3 = A.dblWeightBreakup3Bags
 	,0
 FROM #tmpConvertedSupplierInvoiceData A
