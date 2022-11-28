@@ -1177,6 +1177,7 @@
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
     <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
