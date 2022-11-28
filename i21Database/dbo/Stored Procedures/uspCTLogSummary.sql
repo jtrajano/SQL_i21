@@ -485,8 +485,9 @@ BEGIN TRY
 			, intSubBookId INT
 			, intOrderBy INT
 			, intUserId INT
-			, dblQuantity NUMERIC(38, 20))
-			, ysnQuantityChange bit);
+			, dblQuantity NUMERIC(38, 20)
+			, ysnQuantityChange bit
+			);
 
 		INSERT INTO @sequenceHistory (Row_Num
 			, intSequenceHistoryId
