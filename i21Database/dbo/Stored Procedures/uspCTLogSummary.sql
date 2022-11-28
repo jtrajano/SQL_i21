@@ -43,7 +43,8 @@ BEGIN TRY
 			@dblCurrentBasis				NUMERIC(24, 10),
 			@intHeaderPricingTypeId		INT,
 			@ysnInvoicePosted			BIT = 0,
-			@intSequencePricingTypeId INT;
+			@intSequencePricingTypeId INT,
+			@ysnUnlimitedQuantity bit;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -110,6 +111,7 @@ BEGIN TRY
 		, intSubBookId INT
   		, ysnWithPriceFix bit
 		, dblBalance NUMERIC(38, 20)
+		, ysnUnlimitedQuantity bit
 	)
 
 	-- Get Contract Details
@@ -146,6 +148,7 @@ BEGIN TRY
 		, cd.intSubBookId
 		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then (case when ch.intPricingTypeId = 2 and cd.intPricingTypeId = 1 then 1 else 0 end) else 1 end
 		, dblBalance = CASE WHEN ISNULL(ch.ysnLoad, 0) = 0 THEN cd.dblBalance ELSE ch.dblQuantityPerLoad * cd.dblBalanceLoad END
+		, ysnUnlimitedQuantity = isnull(ch.ysnUnlimitedQuantity,0)
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
@@ -413,6 +416,7 @@ BEGIN TRY
 		, @dblCurrentBasis = dblBasis
 		, @intHeaderPricingTypeId = intHeaderPricingTypeId
 		, @intSequencePricingTypeId = intPricingTypeId
+		, @ysnUnlimitedQuantity = ysnUnlimitedQuantity
 	FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
@@ -479,7 +483,8 @@ BEGIN TRY
 			, intSubBookId INT
 			, intOrderBy INT
 			, intUserId INT
-			, dblQuantity NUMERIC(38, 20));
+			, dblQuantity NUMERIC(38, 20))
+			, ysnQuantityChange bit);
 
 		INSERT INTO @sequenceHistory (Row_Num
 			, intSequenceHistoryId
@@ -518,7 +523,8 @@ BEGIN TRY
 			, intSubBookId
 			, intOrderBy
 			, intUserId
-			, dblQuantity)
+			, dblQuantity
+			, ysnQuantityChange)
 		SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.intSequenceHistoryId DESC) AS Row_Num
 			, sh.intSequenceHistoryId
 			, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
@@ -557,6 +563,7 @@ BEGIN TRY
 			, intOrderBy = 1
 			, sh.intUserId
 			, sh.dblQuantity
+			, ysnQuantityChange = sh.ysnQtyChange
 		FROM tblCTSequenceHistory sh
 		INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 		WHERE intSequenceUsageHistoryId IS NULL
@@ -733,6 +740,7 @@ BEGIN TRY
 				, @dblBalanceChange NUMERIC(18, 6) = 0
 				, @dblQtyPriced NUMERIC(18, 6)
 				, @dblQtyUnPriced NUMERIC(18, 6)
+				, @ysnQuantityChange bit
 
 			SELECT TOP 1 @prevStatus = intContractStatusId
 			FROM @cbLogPrev
@@ -743,6 +751,7 @@ BEGIN TRY
 			SELECT TOP 1 @dblBalanceChange = dblDynamicQty
 				, @dblQtyPriced = ISNULL(dblQtyPriced, 0)
 				, @dblQtyUnPriced = ISNULL(dblQtyUnpriced, 0)
+				, @ysnQuantityChange = ysnQuantityChange
 			FROM @sequenceHistory
 			WHERE Row_Num = 1
 
@@ -3925,7 +3934,9 @@ BEGIN TRY
 				end
 				else
 				begin
-					if (@strProcess <> 'Do Roll' and exists(select top 1 1 from @cbLogPrev where strTransactionType = 'Contract Balance' and intContractStatusId = 4 order by intId desc))
+					declare @intLastLogStatus int;
+					select top 1 @intLastLogStatus = intContractStatusId from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
+					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4 and (isnull(@ysnQuantityChange,0) = 0 or @ysnUnlimitedQuantity = 0))
 					begin
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					end
