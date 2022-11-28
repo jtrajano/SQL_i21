@@ -65,7 +65,7 @@ CREATE TABLE #CUSTOMERS (
 	, strFullAddress			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	, strStatementFooterComment	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	, strCheckPayeeName			NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
-	, strComment				NVARCHAR(500) COLLATE Latin1_General_CI_AS	NULL
+	, strComment				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	, dblCreditLimit			NUMERIC(18,6) NULL DEFAULT 0	
 	, dblARBalance				NUMERIC(18,6) NULL DEFAULT 0
 	, ysnStatementCreditLimit	BIT NULL

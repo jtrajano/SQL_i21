@@ -9508,7 +9508,6 @@
     <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
     <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
