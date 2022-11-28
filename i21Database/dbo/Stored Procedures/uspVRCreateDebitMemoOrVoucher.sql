@@ -16,6 +16,30 @@ BEGIN
 
     IF ISNULL(@IsPost, 0) = 1
     BEGIN
+        INSERT INTO tblVRRebate (
+              intInvoiceDetailId
+            , strSubmitted
+            , dblQuantity
+            , dblRebateAmount
+            , dblRebateRate
+            , intProgramId
+            , dtmDate
+        )
+        SELECT
+              invd.intInvoiceDetailId
+            , 'Y'
+            , vr.dblRebateQuantity
+            , ISNULL(vr.dblRebateAmount, 0)
+            , vr.dblRebateRate
+            , vr.intProgramId
+            , vr.dtmDate
+        FROM vyuVROpenRebate vr
+            JOIN tblARInvoice inv ON inv.intInvoiceId = vr.intInvoiceId
+        JOIN tblARInvoiceDetail invd ON invd.intInvoiceId = inv.intInvoiceId
+        LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
+            AND il.intLocationId = inv.intCompanyLocationId
+        WHERE vr.intInvoiceId = @InvoiceId
+
         IF @Type = 'Debit Memo' BEGIN
             INSERT INTO @voucherPayables (
                 intPartitionId
