@@ -164,6 +164,7 @@
     [dblB5Price] NUMERIC(18, 6) NULL, 
     [intB5PriceUOMId] INT NULL,
 	[strB5PriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[ysnBought] BIT NULL,
 		
 	CONSTRAINT [PK_tblQMSample] PRIMARY KEY ([intSampleId]), 
 	CONSTRAINT [AK_tblQMSample_strSampleNumber] UNIQUE ([strSampleNumber]), 
