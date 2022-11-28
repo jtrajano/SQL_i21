@@ -1760,6 +1760,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Catalogue Reconciliation' AND [strModule] = 'Quality')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 183
+			,[strTransactionType]	= N'PO Feed Id'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PO Feed Id' AND [strModule] = 'Manufacturing')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 

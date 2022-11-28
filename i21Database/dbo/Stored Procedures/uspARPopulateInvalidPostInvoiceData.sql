@@ -101,6 +101,7 @@ BEGIN
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
 				 , ICT.intLotId
+				 , ICT.intItemId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT WITH (NOLOCK)
 			LEFT JOIN tblICInventoryActualCost IAC WITH (NOLOCK) ON ICT.strTransactionId = IAC.strTransactionId AND ICT.intTransactionId = IAC.intTransactionId AND ICT.intTransactionDetailId = IAC.intTransactionDetailId
@@ -109,11 +110,12 @@ BEGIN
 			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
 			  AND ICT.intInTransitSourceLocationId IS NOT NULL
-			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId
+			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId, ICT.intItemId
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId	
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
+			 AND ICT.intItemId = COSTING.intItemId
 		WHERE COSTING.strSessionId = @strSessionId
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
 	OUTER APPLY (
@@ -730,6 +732,30 @@ BEGIN
 	FROM tblARPostInvoiceHeader I			 
 	WHERE I.[intTermId] IS NULL
 	  AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	--NOT BALANCE
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The debit and credit amounts are not balanced.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader I			 
+	WHERE ((I.strType <> 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM tblARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0)))
+	   OR (I.strType = 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ISNULL(I.[dblTax], 0.0)))
+	   AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
@@ -2828,6 +2854,30 @@ BEGIN
 	WHERE ARCP.ysnOverrideARAccountLineOfBusinessSegment = 1
 	AND ISNULL(LOB.intAccountId, 0) = 0
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+	AND strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	SELECT
+		 [intInvoiceId]			= ARPIH.[intInvoiceId]
+		,[strInvoiceNumber]		= ARPIH.[strInvoiceNumber]		
+		,[strTransactionType]	= ARPIH.[strTransactionType]
+		,[intInvoiceDetailId]	= ARPIH.[intInvoiceDetailId] 
+		,[intItemId]			= ARPIH.[intItemId] 
+		,[strBatchId]			= ARPIH.[strBatchId]
+		,[strPostingError]		= 'Invoice ' + ARPIH.strInvoiceOriginId + ' is not yet posted.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader ARPIH
+	INNER JOIN tblARInvoice ARI ON ARPIH.intOriginalInvoiceId = ARI.intInvoiceId
+	WHERE ARPIH.strType = 'Tax Adjustment'
+	AND ARI.ysnPosted = 0
 	AND ARPIH.strSessionId = @strSessionId
 END
 

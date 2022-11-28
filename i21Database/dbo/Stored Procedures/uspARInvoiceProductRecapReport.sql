@@ -7,6 +7,8 @@
 	, @strFormattingOptions	NVARCHAR(100) = NULL
 	, @intEntityUserId		INT = NULL
 	, @ysnPrintDetail		BIT = 0
+	, @strCompanyName       NVARCHAR(100) = NULL
+    , @strCompanyAddress    NVARCHAR(500)    = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,12 +34,18 @@ IF @strFormattingOptions = 'Product Recap Totals Only'
 			  intEntityCustomerId
 			, intEntityUserId
 			, strCustomerName
+			, strCustomerAddress
+            , strCompanyName
+            , strCompanyAddress
 			, strFormattingOptions
 			, ysnPrintRecap
 		)
 		SELECT intEntityCustomerId	= C.intEntityId
 			 , intEntityUserId		= @intEntityUserId
 			 , strCustomerName		= EC.strName
+			 , strCustomerAddress    = V.strCustomerAddress
+             , @strCompanyName
+             , @strCompanyAddress
 			 , strFormattingOptions	= @strFormattingOptions
 			 , ysnPrintRecap		= CAST(1 AS BIT)
 		FROM tblARCustomer C WITH (NOLOCK)
@@ -47,6 +55,14 @@ IF @strFormattingOptions = 'Product Recap Totals Only'
 			FROM dbo.tblEMEntity E WITH (NOLOCK)
 			INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCustomerIds) DV ON E.intEntityId = DV.intID
 		) EC ON C.intEntityId = EC.intEntityId
+		INNER JOIN (
+        SELECT intEntityCustomerId    = VC.intEntityId
+             , strCustomerName        = VC.strName
+             , strCustomerNumber    = VC.strCustomerNumber
+             , strCustomerAddress    = dbo.fnARFormatCustomerAddress(VC.strPhone, VC.strEmail, VC.strBillToLocationName, VC.strBillToAddress, VC.strBillToCity, VC.strBillToState, VC.strBillToZipCode, VC.strBillToCountry, NULL, 0)
+        FROM vyuARCustomerSearch VC
+        INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCustomerIds) DV ON VC.intEntityId = DV.intID
+        ) V ON C.intEntityId = V.intEntityCustomerId
 	END
 
 DELETE FROM tblARProductRecapStagingTable WHERE ISNULL(intEntityUserId, 0) = 0 OR intEntityUserId = @intEntityUserId

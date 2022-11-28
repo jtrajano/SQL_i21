@@ -454,6 +454,18 @@ BEGIN
     VALUES(1,'LEFO','LEFO',0)
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='FENA')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'FENA','FENA',0)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='NAFE')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'NAFE','NAFE',0)
+END
+GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 2 AND strValue='Yes')
 BEGIN
     INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
@@ -546,6 +558,12 @@ IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId =
 BEGIN
     INSERT INTO tblMFMachineIssuedUOMType(intIssuedUOMTypeId,strName)
     VALUES(3,'Hybrid')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId = 4)
+BEGIN
+    INSERT INTO tblMFMachineIssuedUOMType(intIssuedUOMTypeId,strName)
+    VALUES(4,'Pallet')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendValidationMessageType WHERE intMessageTypeId = 1)
@@ -4154,4 +4172,53 @@ GO
 UPDATE tblMFCompanyPreference
 SET ysnSkipStorageUnitScreenInHandheld = 0
 WHERE ysnSkipStorageUnitScreenInHandheld IS NULL
+GO
+
+IF NOT EXISTS (
+        SELECT *
+        FROM tblMFWorkOrderStatus
+        WHERE strName = 'Confirmed'
+        )
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus (
+        intStatusId
+        ,strName
+        )
+    SELECT 15
+        ,'Confirmed'
+END
+GO
+
+
+
+IF NOT EXISTS (
+        SELECT *
+        FROM tblMFWorkOrderStatus
+        WHERE strName = 'Printed'
+        )
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus (
+        intStatusId
+        ,strName
+        )
+    SELECT 16
+        ,'Printed'
+END
+GO
+
+
+
+IF NOT EXISTS (
+        SELECT *
+        FROM tblMFWorkOrderStatus
+        WHERE strName = 'Approved'
+        )
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus (
+        intStatusId
+        ,strName
+        )
+    SELECT 17
+        ,'Approved'
+END
 GO

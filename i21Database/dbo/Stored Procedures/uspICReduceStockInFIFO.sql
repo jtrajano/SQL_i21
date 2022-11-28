@@ -102,7 +102,7 @@ BEGIN
 				--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
 				AND cb.dblStockAvailable <> 0 
 		ORDER BY 
-			cb.dtmDate ASC, intInventoryFIFOId ASC  
+				cb.dtmDate ASC, intInventoryFIFOId ASC  
 
 		OPEN findBestDateToPost;
 		FETCH NEXT FROM findBestDateToPost INTO @dblCostBucketQty, @dtmCostBucketDate

@@ -23,7 +23,7 @@ BEGIN
  SET @intCnt  = (        
   SELECT COUNT(0) FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityId = @intEntityId and intCompanyLocationId = @intCompanyLocationId        
  )    
- SET @intControlId = (SELECT TOP 1 intControlId FROM tblSMControl WHERE strControlName LIKE '%Close Year%' AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strScreenName like '%FiscalYear%'))    
+ SET @intControlId = (SELECT TOP 1 intControlId FROM tblSMControl WHERE strControlName LIKE '%Close Year%' AND intScreenId = (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strScreenName LIKE '%Fiscal%' AND strNamespace = 'GeneralLedger.view.FiscalYear'))    
          
  IF @intCnt = 0        
   BEGIN         

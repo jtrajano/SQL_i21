@@ -80,6 +80,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
             LEFT JOIN dbo.tblICUnitMeasure GrossNetName 
                 ON GrossNetName.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 	WHERE ysnCompleted = 0
+	AND ysnRecurring = 0
 
 	UNION ALL 
 

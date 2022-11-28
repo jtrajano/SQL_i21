@@ -45,7 +45,22 @@ BEGIN TRY
 	DECLARE @intCommodityUOMId INT
 		,@intPricingTypeId INT
 		,@strOrgContractNo NVARCHAR(50)
+		,@strVendorName NVARCHAR(100)
+		,@strCountry NVARCHAR(100)
 	DECLARE @tblIPContractHeaderStage TABLE (intContractHeaderStageId INT)
+	DECLARE @dtmOldContractDate DATETIME
+		,@strOldVendorName NVARCHAR(100)
+		,@strOldLocation NVARCHAR(50)
+		,@strOldTermsCode NVARCHAR(50)
+		,@strOldIncoTerm NVARCHAR(100)
+		,@strOldIncoTermLocation NVARCHAR(100)
+		,@strOldCountry NVARCHAR(100)
+		,@strOldSalesPerson NVARCHAR(100)
+		,@dblOldContractValue NUMERIC(18, 6)
+		,@strOldCurrency NVARCHAR(40)
+		,@dtmOldPeriodFrom DATETIME
+		,@dtmOldPeriodTo DATETIME
+		,@strOldBuyingOrderNo NVARCHAR(50)
 
 	INSERT INTO @tblIPContractHeaderStage (intContractHeaderStageId)
 	SELECT intContractHeaderStageId
@@ -128,6 +143,22 @@ BEGIN TRY
 			SELECT @intCommodityUOMId = NULL
 				,@intPricingTypeId = NULL
 				,@strOrgContractNo = NULL
+				,@strVendorName = NULL
+				,@strCountry = NULL
+
+			SELECT @dtmOldContractDate = NULL
+				,@strOldVendorName = NULL
+				,@strOldLocation = NULL
+				,@strOldTermsCode = NULL
+				,@strOldIncoTerm = NULL
+				,@strOldIncoTermLocation = NULL
+				,@strOldCountry = NULL
+				,@strOldSalesPerson = NULL
+				,@dblOldContractValue = NULL
+				,@strOldCurrency = NULL
+				,@dtmOldPeriodFrom = NULL
+				,@dtmOldPeriodTo = NULL
+				,@strOldBuyingOrderNo = NULL
 
 			SELECT @strContractNo = strContractNo
 				,@dtmContractDate = dtmContractDate
@@ -192,6 +223,7 @@ BEGIN TRY
 			END
 
 			SELECT @intEntityId = t.intEntityId
+				,@strVendorName = t.strName
 			FROM dbo.tblEMEntity t WITH (NOLOCK)
 			JOIN dbo.tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
@@ -262,10 +294,12 @@ BEGIN TRY
 
 			IF ISNULL(@strIncoTermLocation, '') <> ''
 			BEGIN
-				SELECT @intINCOLocationTypeId = intCityId
-					,@intCountryId = intCountryId
-				FROM dbo.tblSMCity WITH (NOLOCK)
-				WHERE strCity = @strIncoTermLocation
+				SELECT @intINCOLocationTypeId = t.intCityId
+					,@intCountryId = t.intCountryId
+					,@strCountry = C.strCountry
+				FROM dbo.tblSMCity t WITH (NOLOCK)
+				LEFT JOIN dbo.tblSMCountry C WITH (NOLOCK) ON C.intCountryID = t.intCountryId
+				WHERE t.strCity = @strIncoTermLocation
 
 				IF ISNULL(@intINCOLocationTypeId, 0) = 0
 				BEGIN
@@ -363,6 +397,8 @@ BEGIN TRY
 			FROM dbo.tblCTPricingType WITH (NOLOCK)
 			WHERE strPricingType = 'Cash'
 
+			BEGIN TRAN
+
 			IF @intActionId = 1
 			BEGIN
 				EXEC dbo.uspCTGenerateContractNumber @intPatternCode = 25
@@ -423,25 +459,52 @@ BEGIN TRY
 				SELECT @intContractHeaderId = SCOPE_IDENTITY()
 
 				--Audit Log
-				DELETE
-				FROM @SingleAuditLogParam
+				IF @intContractHeaderId > 0
+				BEGIN
+					DELETE
+					FROM @SingleAuditLogParam
 
-				INSERT INTO @SingleAuditLogParam (
-					[Id]
-					,[Action]
-					,[Change]
-					)
-				SELECT 1
-					,'Created'
-					,''
+					INSERT INTO @SingleAuditLogParam (
+						[Id]
+						,[Action]
+						,[Change]
+						)
+					SELECT 1
+						,'Created'
+						,''
 
-				EXEC uspSMSingleAuditLog @screenName = 'ContractManagement.view.Contract'
-					,@recordId = @intContractHeaderId
-					,@entityId = @intUserId
-					,@AuditLogParam = @SingleAuditLogParam
+					EXEC uspSMSingleAuditLog @screenName = 'ContractManagement.view.Contract'
+						,@recordId = @intContractHeaderId
+						,@entityId = @intUserId
+						,@AuditLogParam = @SingleAuditLogParam
+				END
 			END
 			ELSE IF @intActionId = 2
 			BEGIN
+				SELECT @dtmOldContractDate = CH.dtmContractDate
+					,@strOldVendorName = E.strName
+					,@strOldLocation = CL.strLocationName
+					,@strOldTermsCode = T.strTerm
+					,@strOldIncoTerm = FT.strFreightTerm
+					,@strOldIncoTermLocation = CITY.strCity
+					,@strOldCountry = COUNTRY.strCountry
+					,@strOldSalesPerson = E1.strName
+					,@dblOldContractValue = CH.dblValue
+					,@strOldCurrency = CUR.strCurrency
+					,@dtmOldPeriodFrom = CH.dtmPeriodStartDate
+					,@dtmOldPeriodTo = CH.dtmPeriodEndDate
+					,@strOldBuyingOrderNo = CH.strExternalContractNumber
+				FROM dbo.tblCTContractHeader CH WITH (NOLOCK)
+				LEFT JOIN dbo.tblEMEntity E WITH (NOLOCK) ON E.intEntityId = CH.intEntityId
+				LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = CH.intCompanyLocationId
+				LEFT JOIN dbo.tblSMTerm T WITH (NOLOCK) ON T.intTermID = CH.intTermId
+				LEFT JOIN dbo.tblSMFreightTerms FT WITH (NOLOCK) ON FT.intFreightTermId = CH.intFreightTermId
+				LEFT JOIN dbo.tblSMCity CITY WITH (NOLOCK) ON CITY.intCityId = CH.intINCOLocationTypeId
+				LEFT JOIN dbo.tblSMCountry COUNTRY WITH (NOLOCK) ON COUNTRY.intCountryID = CH.intCountryId
+				LEFT JOIN dbo.tblEMEntity E1 WITH (NOLOCK) ON E1.intEntityId = CH.intSalespersonId
+				LEFT JOIN dbo.tblSMCurrency CUR WITH (NOLOCK) ON CUR.intCurrencyID = CH.intValueCurrencyId
+				WHERE CH.intContractHeaderId = @intContractHeaderId
+
 				UPDATE tblCTContractHeader
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intEntityId = @intEntityId
@@ -462,22 +525,302 @@ BEGIN TRY
 				WHERE intContractHeaderId = @intContractHeaderId
 
 				--Audit Log
-				DELETE
-				FROM @SingleAuditLogParam
+				IF @intContractHeaderId > 0
+				BEGIN
+					DECLARE @intId INT = 1
 
-				--	INSERT INTO @SingleAuditLogParam ([Id], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
-				--	SELECT 1, 'Updated', 'Updated - Record: ' + CAST(@intContractHeaderId AS VARCHAR(MAX)), NULL, NULL, NULL, NULL, NULL, NULL
-				
-				--	INSERT INTO @SingleAuditLogParam ([Id], [Change], [From], [To], [Alias], [ParentId])
-				--	SELECT 2, 'Vendor', 'Test 1', 'Test 2', NULL, 1
-				--	UNION ALL
-				--	SELECT 3, 'Country', 'Origin 1', 'Origin 2', NULL, 1
-				
-				--	EXEC uspSMSingleAuditLog
-				--		@screenName     = 'ContractManagement.view.Contract',
-				--		@recordId       = @intContractHeaderId,
-				--		@entityId       = @intUserId,
-				--		@AuditLogParam  = @SingleAuditLogParam
+					DELETE
+					FROM @SingleAuditLogParam
+
+					INSERT INTO @SingleAuditLogParam (
+						[Id]
+						,[Action]
+						,[Change]
+						,[From]
+						,[To]
+						,[Alias]
+						,[Field]
+						,[Hidden]
+						,[ParentId]
+						)
+					SELECT 1
+						,'Updated'
+						,'Updated - Record: ' + CAST(@intContractHeaderId AS VARCHAR(MAX))
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+
+					IF (ISNULL(@dtmOldContractDate, '') <> ISNULL(@dtmContractDate, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Contract Date'
+							,LTRIM(@dtmOldContractDate)
+							,LTRIM(@dtmContractDate)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldVendorName, '') <> ISNULL(@strVendorName, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Vendor'
+							,LTRIM(@strOldVendorName)
+							,LTRIM(@strVendorName)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldLocation, '') <> ISNULL(@strLocation, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Location'
+							,LTRIM(@strOldLocation)
+							,LTRIM(@strLocation)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldTermsCode, '') <> ISNULL(@strTermsCode, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Terms'
+							,LTRIM(@strOldTermsCode)
+							,LTRIM(@strTermsCode)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldIncoTerm, '') <> ISNULL(@strIncoTerm, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'INCO Term'
+							,LTRIM(@strOldIncoTerm)
+							,LTRIM(@strIncoTerm)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldIncoTermLocation, '') <> ISNULL(@strIncoTermLocation, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Port / City'
+							,LTRIM(@strOldIncoTermLocation)
+							,LTRIM(@strIncoTermLocation)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldCountry, '') <> ISNULL(@strCountry, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Country'
+							,LTRIM(@strOldCountry)
+							,LTRIM(@strCountry)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldSalesPerson, '') <> ISNULL(@strSalesPerson, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Sales Person'
+							,LTRIM(@strOldSalesPerson)
+							,LTRIM(@strSalesPerson)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@dblOldContractValue, '') <> ISNULL(@dblContractValue, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Value'
+							,LTRIM(@dblOldContractValue)
+							,LTRIM(@dblContractValue)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldCurrency, '') <> ISNULL(@strCurrency, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Value Currency'
+							,LTRIM(@strOldCurrency)
+							,LTRIM(@strCurrency)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@dtmOldPeriodFrom, '') <> ISNULL(@dtmPeriodFrom, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Period From'
+							,LTRIM(@dtmOldPeriodFrom)
+							,LTRIM(@dtmPeriodFrom)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@dtmOldPeriodTo, '') <> ISNULL(@dtmPeriodTo, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'Period To'
+							,LTRIM(@dtmOldPeriodTo)
+							,LTRIM(@dtmPeriodTo)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@strOldBuyingOrderNo, '') <> ISNULL(@strBuyingOrderNo, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,'External Contract No'
+							,LTRIM(@strOldBuyingOrderNo)
+							,LTRIM(@strBuyingOrderNo)
+							,NULL
+							,1
+					END
+
+					IF @intId > 1
+					BEGIN
+						EXEC uspSMSingleAuditLog @screenName = 'ContractManagement.view.Contract'
+							,@recordId = @intContractHeaderId
+							,@entityId = @intUserId
+							,@AuditLogParam = @SingleAuditLogParam
+					END
+				END
 			END
 			ELSE IF @intActionId = 3
 			BEGIN
@@ -503,7 +846,8 @@ BEGIN TRY
 			MOVE_TO_ARCHIVE:
 
 			INSERT INTO tblIPContractHeaderArchive (
-				strSender
+				intDocNo
+				,strSender
 				,strContractNo
 				,dtmContractDate
 				,strVendorAccountNo
@@ -520,7 +864,8 @@ BEGIN TRY
 				,strStatus
 				,strBuyingOrderNo
 				)
-			SELECT strSender
+			SELECT intDocNo
+				,strSender
 				,strContractNo
 				,dtmContractDate
 				,strVendorAccountNo
@@ -555,7 +900,8 @@ BEGIN TRY
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 			INSERT INTO tblIPContractHeaderError (
-				strSender
+				intDocNo
+				,strSender
 				,strContractNo
 				,dtmContractDate
 				,strVendorAccountNo
@@ -573,7 +919,8 @@ BEGIN TRY
 				,strBuyingOrderNo
 				,strErrorMessage
 				)
-			SELECT strSender
+			SELECT intDocNo
+				,strSender
 				,strContractNo
 				,dtmContractDate
 				,strVendorAccountNo

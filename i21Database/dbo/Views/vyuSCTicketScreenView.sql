@@ -262,6 +262,7 @@
 	,SCT.ysnFixRounding
 	,SCT.ysnTicketInTransit
 	,SCT.ysnTicketApplied
+	,SCT.ysnTicketOnHold
 FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId

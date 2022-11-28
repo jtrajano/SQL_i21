@@ -57,15 +57,15 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Vendor'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') 
 	, strValue = vts.strVendor
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The Vendor ID "' + vts.strVendor + '" does not exist.'
+	, strMessage = 'The vendor "' + vts.strVendor + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-LEFT JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+LEFT JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND v.intEntityId IS NULL
 
@@ -73,12 +73,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Customer No'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer No') 
 	, strValue = vts.strCustomer
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The Customer No. "' + vts.strCustomer + '" does not exist.'
+	, strMessage = 'The customer "' + vts.strCustomer + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
@@ -90,12 +90,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Customer Name'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Name') 
 	, strValue = vts.strCustomerName
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The Customer Name "' + vts.strCustomerName + '" does not exist.'
+	, strMessage = 'The customer "' + vts.strCustomerName + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN vyuARCustomer c ON c.strName = vts.strCustomerName
@@ -108,15 +108,15 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Vendor Customer'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Customer') 
 	, strValue = vts.strVendorCustomer
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The Vendor Customer "' + vts.strVendorCustomer + '" already exists.'
+	, strMessage = 'The vendor''s customer "' + vts.strVendorCustomer + '" already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -134,7 +134,7 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Category'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Category') 
 	, strValue = vts.strCategory
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
@@ -151,15 +151,15 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Vendor''s Category'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Category') 
 	, strValue = vts.strVendorCategory
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The vendor category mapping "' + vts.strVendorCategory + '" for "' + vts.strCategory + '"already exists.'
+	, strMessage = 'The vendor''s category "' + vts.strVendorCategory + '" for "' + vts.strCategory + '" already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICCategory c ON c.strCategoryCode = vts.strCategory
 	AND c.strDescription = vts.strCategory
@@ -179,12 +179,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'UOM'
+	, strField =  dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM') 
 	, strValue = vts.strUnitMeasure
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The UOM "' + vts.strUnitMeasure + '" does not exist.'
+	, strMessage = 'The unit of measure "' + vts.strUnitMeasure + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
@@ -196,15 +196,15 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'UOM'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM') 
 	, strValue = vts.strVendorUnitMeasure
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The UOM mapping "' + vts.strVendorUnitMeasure + '" for "' + vts.strUnitMeasure + '" already exists.'
+	, strMessage = 'The unit of measure "' + vts.strVendorUnitMeasure + '" for "' + vts.strUnitMeasure + '" already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -222,12 +222,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Item No'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item No') 
 	, strValue = vts.strItemNo
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The Item No "' + vts.strItemNo + '" does not exist.'
+	, strMessage = 'The item no. "' + vts.strItemNo + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN tblICItem i ON i.strItemNo = vts.strItemNo
@@ -240,12 +240,12 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Item Name'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item Name')
 	, strValue = vts.strItemName
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The Item "' + vts.strItemName + '" does not exist.'
+	, strMessage = 'The item name "' + vts.strItemName + '" does not exist.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 LEFT JOIN tblICItem i ON i.strDescription = vts.strItemName
@@ -258,7 +258,7 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = 'Vendor Item No'
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Item')
 	, strValue = vts.strVendorItemNo
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
@@ -266,7 +266,7 @@ SELECT
 	, strMessage = 'The Item mapping "' + vts.strVendorItemNo + '" for "' + vts.strItemNo + '" already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICItem i ON i.strItemNo = vts.strItemNo OR i.strDescription = i.strItemNo
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -281,24 +281,24 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 0
 
 -- Existing item
-INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Rebate Vendor Setup'
-    , strValue = vs.strVendor
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = vs.intRowNumber
-    , strMessage = ISNULL(vs.strVendor, '') + ' already exists.'
-FROM tblApiSchemaTransformVendorSetup vs
-CROSS APPLY (
-  SELECT TOP 1 1 intCount
-  FROM tblAPVendor v
-  WHERE v.strVendorId = vs.strVendor
-) ex
-WHERE vs.guiApiUniqueId = @guiApiUniqueId
-  AND @OverwriteExisting = 0
+-- INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+-- SELECT
+--       NEWID()
+--     , guiApiImportLogId = @guiLogId
+--     , strField = 'Rebate Vendor Setup'
+--     , strValue = vs.strVendor
+--     , strLogLevel = 'Error'
+--     , strStatus = 'Failed'
+--     , intRowNo = vs.intRowNumber
+--     , strMessage = ISNULL(vs.strVendor, '') + ' already exists.'
+-- FROM tblApiSchemaTransformVendorSetup vs
+-- CROSS APPLY (
+--   SELECT TOP 1 1 intCount
+--   FROM tblAPVendor v
+--   WHERE v.strVendorId = vs.strVendor
+-- ) ex
+-- WHERE vs.guiApiUniqueId = @guiApiUniqueId
+--   AND @OverwriteExisting = 0
 
 DECLARE @UniqueSetups TABLE (
 	  intEntityId INT
@@ -331,7 +331,7 @@ SELECT
 	, @guiApiUniqueId
 	, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
   AND NOT EXISTS (
     SELECT TOP 1 1
@@ -380,7 +380,7 @@ DECLARE @ForUpdates TABLE (strVendorNumber NVARCHAR(400) COLLATE Latin1_General_
 INSERT INTO @ForUpdates
 SELECT v.strVendorId, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId 
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 1
@@ -389,14 +389,14 @@ UPDATE vs
 SET 
 	  vs.guiApiUniqueId = @guiApiUniqueId
 	, vs.intRowNumber = sr.intRowNumber
-	, vs.strExportFilePath = sr.strExportFilePath
-	, vs.strExportFileType = sr.strExportFileType
-	, vs.strCompany1Id = sr.strCompany1Id
-	, vs.strCompany2Id = sr.strCompany2Id
+	, vs.strExportFilePath = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Export File Path') WHEN 1 THEN sr.strExportFilePath ELSE vs.strExportFilePath END
+	, vs.strExportFileType = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Export File Type') WHEN 1 THEN sr.strExportFileType ELSE vs.strExportFileType END
+	, vs.strCompany1Id = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Company ID1') WHEN 1 THEN sr.strCompany1Id ELSE vs.strCompany1Id END
+	, vs.strCompany2Id = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Company ID2') WHEN 1 THEN sr.strCompany2Id ELSE vs.strCompany2Id END
 	, vs.intConcurrencyId = ISNULL(vs.intConcurrencyId, 1) + 1
 FROM tblVRVendorSetup vs
-JOIN tblAPVendor v ON v.intEntityId = vs.intEntityId
-JOIN tblApiSchemaTransformVendorSetup sr ON sr.strVendor = v.strVendorId
+JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId
+JOIN tblApiSchemaTransformVendorSetup sr ON sr.strVendor = v.strVendorId OR sr.strVendor = v.strName
 WHERE sr.guiApiUniqueId = @guiApiUniqueId
 	AND NOT EXISTS (
 		SELECT TOP 1 1
@@ -413,7 +413,7 @@ DECLARE @CustomerForUpdates TABLE (intVendorSetupId INT, intEntityId INT, strVen
 INSERT INTO @CustomerForUpdates
 SELECT e.intVendorSetupId, xc.intEntityId, xc.strVendorCustomer, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN vyuARCustomer c ON c.strCustomerNumber = vs.strCustomer
 JOIN tblVRCustomerXref xc ON xc.intVendorSetupId = e.intVendorSetupId
@@ -425,7 +425,7 @@ WHERE vs.guiApiUniqueId = @guiApiUniqueId
 INSERT INTO @CustomerForUpdates
 SELECT e.intVendorSetupId, xc.intEntityId, xc.strVendorCustomer, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblEMEntity en ON en.strName = vs.strCustomerName
 JOIN vyuARCustomer c ON c.intEntityId = en.intEntityId
@@ -447,7 +447,7 @@ FROM tblVRCustomerXref xc
 JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomer = c.strCustomerNumber
 	AND vs.strVendorCustomer = xc.strVendorCustomer
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 1
@@ -463,7 +463,7 @@ JOIN tblEMEntity en ON en.intEntityId = xc.intEntityId
 JOIN vyuARCustomer c ON c.intEntityId = xc.intEntityId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCustomerName = en.strName
 	AND vs.strVendorCustomer = xc.strVendorCustomer
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND NULLIF(vs.strCustomer, '') IS NULL
@@ -492,7 +492,7 @@ SELECT
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblARCustomer c ON c.strCustomerNumber = vts.strCustomer
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -519,7 +519,7 @@ SELECT
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblEMEntity e ON e.strName = vts.strCustomerName
 JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
@@ -601,7 +601,7 @@ DECLARE @CategoryForUpdates TABLE (intVendorSetupId INT, intCategoryId INT, intR
 INSERT INTO @CategoryForUpdates
 SELECT e.intVendorSetupId, c.intCategoryId, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblICCategory c ON c.strCategoryCode = vs.strCategory
 	OR c.strDescription = vs.strCategory
@@ -620,7 +620,7 @@ FROM tblICCategoryVendor xc
 JOIN tblICCategory c ON c.intCategoryId = xc.intCategoryId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strCategory = c.strCategoryCode
 	OR c.strDescription = vs.strCategory
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND e.intVendorSetupId = xc.intVendorSetupId
@@ -655,7 +655,7 @@ SELECT
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICCategory c ON c.strCategoryCode = vts.strCategory
 	OR c.strDescription = vts.strCategory
@@ -701,7 +701,7 @@ DECLARE @UomForUpdates TABLE (intVendorSetupId INT, intUnitMeasureId INT, intRow
 INSERT INTO @UomForUpdates
 SELECT e.intVendorSetupId, u.intUnitMeasureId, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblICUnitMeasure u ON u.strUnitMeasure = vs.strUnitMeasure
 JOIN tblVRUOMXref uv ON uv.intUnitMeasureId = u.intUnitMeasureId
@@ -720,7 +720,7 @@ SET
 FROM tblVRUOMXref xc
 JOIN tblICUnitMeasure u ON u.intUnitMeasureId = xc.intUnitMeasureId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strUnitMeasure = u.strUnitMeasure
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND e.intVendorSetupId = xc.intVendorSetupId
@@ -760,7 +760,7 @@ SELECT
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -805,7 +805,7 @@ DECLARE @ItemForUpdates TABLE (intVendorSetupId INT, intItemId INT, intRowNumber
 INSERT INTO @ItemForUpdates
 SELECT e.intVendorSetupId, i.intItemId, vs.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vs
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblICItem i ON i.strItemNo = vs.strItemNo OR i.strDescription = vs.strItemNo
 JOIN tblICItemVendorXref xr ON xr.intItemId = i.intItemId
@@ -822,7 +822,7 @@ SET
 FROM tblICItemVendorXref xc
 JOIN tblICItem i ON i.intItemId = xc.intItemId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strItemNo = i.strItemNo
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND e.intVendorSetupId = xc.intVendorSetupId
@@ -845,7 +845,7 @@ SET
 FROM tblICItemVendorXref xc
 JOIN tblICItem i ON i.intItemId = xc.intItemId
 JOIN tblApiSchemaTransformVendorSetup vs ON vs.strItemName = i.strDescription
-JOIN tblAPVendor v ON v.strVendorId = vs.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vs.strVendor OR v.strName = vs.strVendor
 JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND e.intVendorSetupId = xc.intVendorSetupId
@@ -886,7 +886,7 @@ SELECT
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICItem i ON i.strItemNo = vts.strItemNo
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
@@ -914,7 +914,7 @@ SELECT
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
-JOIN tblAPVendor v ON v.strVendorId = vts.strVendor
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICItem i ON i.strDescription = vts.strItemName
 WHERE vts.guiApiUniqueId = @guiApiUniqueId

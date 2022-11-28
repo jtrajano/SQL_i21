@@ -121,7 +121,9 @@ BEGIN TRY
 
 	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
 	DECLARE @thisContractStatus NVARCHAR(100)
+	DECLARE @fontBold NVARCHAR(MAX)
 
+	
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
 	SELECT @intTransactionId=intTransactionId, @thisContractStatus = strApprovalStatus, @IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
@@ -191,10 +193,19 @@ BEGIN TRY
 											order by AL.dtmHistoryCreated DESC )
 		END
 
-		SELECT @strAmendedTerm = (SELECT strNewValue
+		SELECT @strAmendedTerm = (SELECT TOP 1 strNewValue
 									FROM tblCTAmendmentApproval AAP
 									JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId =  @intContractHeaderId  
 									WHERE ISNULL(AAP.ysnAmendment,0) = 1 and strItemChanged = 'Terms' )
+
+		IF CHARINDEX('intGradeId',@strAmendedColumns, 0) > 0 
+		BEGIN
+			SET @fontBold = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBold = '<span style="font-family:Arial;font-size:13px;">'
+		END
 
 	END
 
@@ -365,6 +376,7 @@ BEGIN TRY
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 	
 	SELECT intContractHeaderId					= CH.intContractHeaderId
+		,@fontBold
 		,intContractTypeId						= CH.intContractTypeId
 		,StraussContractSubmitByParentSignature	= @blbParentSubmitSignature
 		,InterCompApprovalSign					= @blbParentApproveSignature
@@ -406,15 +418,19 @@ BEGIN TRY
 		,strStraussShipmentLabel				= (CASE WHEN PO.strPositionType = 'Spot' THEN 'DELIVERY' ELSE 'SHIPMENT' END)
 		,strStraussShipment						= CONVERT(VARCHAR, @dtmStartDate, 101) + ' - ' + CONVERT(VARCHAR, @dtmEndDate, 101)
 		,strDestinationPointName				= (CASE WHEN PO.strPositionType = 'Spot' THEN CT.strCity ELSE @strDestinationPort END)
+		,strFreightTerm							= CB.strFreightTerm + ' (' + CB.strDescription + ')'
+		,strCity								= ISNULL(CT.strCity, '')
+		,strWeightGradeDesc						= ISNULL(W1.strWeightGradeDesc, '')
 		,strStraussCondition     				= CB.strFreightTerm + ' (' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'
-		,strStrussOtherCondition				= '<span style="font-family:Arial;font-size:13px;">' + ISNULL(W2.strWeightGradeDesc, '') +  ISNULL(@strGeneralCondition, '') + '</span>'
+		,strStrussOtherCondition				= @fontBold + ISNULL(W2.strWeightGradeDesc, '') + '</span>'+  ISNULL(@strGeneralCondition, '')  
 		,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
 		,ysnExternal							= @ysnExternal
 		,strArbitrationText						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN ARB.strCity ELSE NULL END)
 		,strReferenceNo							= CASE WHEN LTRIM(RTRIM(ISNULL(CH.strCustomerContract, ''))) <> '' THEN 'Your Ref. ' + ltrim(rtrim(CH.strCustomerContract)) ELSE NULL END
+		,strAmendedColumns 						= @strAmendedColumns
 
 	FROM tblCTContractHeader CH
 	LEFT JOIN vyuCTEntity EC WITH (NOLOCK) ON EC.intEntityId = CH.intCounterPartyId AND EC.strEntityType = 'Customer'

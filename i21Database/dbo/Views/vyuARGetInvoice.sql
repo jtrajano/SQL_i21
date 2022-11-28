@@ -161,7 +161,7 @@ SELECT
 	,ysnHasCreditApprover				= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 	,dblCreditStopDays					= ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
 	,intCreditStopDays					= CUS.intCreditStopDays
-	,ysnInvoiceReturned					= ISNULL(RELATEDINVOICE.ysnReturned,0)
+	,ysnInvoiceReturned					= ISNULL(RELATEDINVOICE.ysnReturned, 0)
 	,ysnInterCompany					= ISNULL(INV.ysnInterCompany,0)
 	,ysnImportFromCSV					= ISNULL(INV.ysnImportFromCSV,0)
 	,strInterCompanyName				= INTERCOMPANY.strCompanyName
@@ -206,11 +206,12 @@ SELECT
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 	,intProfitCenter					= CLOC.intProfitCenter
-	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE.strType = 'Tax Adjustment' AND RELATEDINVOICE.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
-	,strRelatedInvoiceNumber			= RELATEDINVOICE.strInvoiceNumber
+	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,strPrintFormat						= INV.strPrintFormat
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
+	,dblPercentage						= INV.dblPercentage
+	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -330,14 +331,21 @@ LEFT JOIN
 (
 	SELECT  
 		 intInvoiceId
-		,ysnPosted
-		,strType
-		,strInvoiceNumber
 		,dblPayment
 		,dblBasePayment
 		,ysnReturned
+		,strType
+		,ysnPosted
 	FROM tblARInvoice  WITH (NOLOCK) 
 ) RELATEDINVOICE ON RELATEDINVOICE.intInvoiceId = INV.intOriginalInvoiceId
+LEFT JOIN
+(
+	SELECT  
+		 intOriginalInvoiceId
+		,strType
+		,ysnPosted
+	FROM tblARInvoice  WITH (NOLOCK) 
+) RELATEDINVOICE2 ON RELATEDINVOICE2.intOriginalInvoiceId = INV.intInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
 LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId,0)
 LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId,0)

@@ -1,433 +1,1734 @@
 ﻿
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '20.1.2')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '22.1')
 BEGIN
 INSERT INTO tblSMEULA(strVersionNumber, strText)
-VALUES ('20.1.2', N'<!DOCTYPE html>
+VALUES ('22.1', N'<!DOCTYPE html>
 <html>
+
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=UTF-8">
-<meta name=Generator content="Microsoft Word 14 (filtered)">
+<meta http-equiv=Content-Type content="text/html;charset=utf-8">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 15">
+<meta name=Originator content="Microsoft Word 15">
+
 <style>
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-pitch:variable;
+	mso-font-signature:3 0 0 0 1 0;}
+@font-face
 	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
+	panose-1:2 15 5 2 2 2 4 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-469750017 -1073732485 9 0 511 0;}
 @font-face
-	{font-family:Tahoma;
-	panose-1:2 11 6 4 3 5 4 4 2 4;}
-@font-face
-	{font-family:Univers;
-	panose-1:0 0 0 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:"Univers Bold";
-	panose-1:0 0 0 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:"Arial Narrow";
-	panose-1:2 11 6 6 2 2 2 3 2 4;}
+	{font-family:"Segoe UI";
+	panose-1:2 11 5 2 4 2 4 2 2 3;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-469750017 -1073683329 9 0 511 0;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0in;
-	margin-bottom:.0001pt;
-	font-size:10.0pt;
-	font-family:"Times New Roman","serif";}
-h1
-	{mso-style-link:"Heading 1 Char";
-	margin-top:12.0pt;
-	margin-right:0in;
-	margin-bottom:6.0pt;
-	margin-left:.5in;
-	text-indent:-.5in;
-	page-break-after:avoid;
-	font-size:12.0pt;
-	font-family:"Univers Bold","serif";}
-h2
-	{mso-style-link:"Heading 2 Char";
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
 	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:6.0pt;
-	margin-left:1.0in;
+	margin-right:.2pt;
+	margin-bottom:6.95pt;
+	margin-left:27.5pt;
 	text-align:justify;
-	text-indent:-.5in;
-	font-size:11.0pt;
-	font-family:"Univers","sans-serif";
-	font-weight:normal;}
-h3
-	{mso-style-link:"Heading 3 Char";
+	text-justify:inter-ideograph;
+	text-indent:-27.5pt;
+	line-height:103%;
+	mso-pagination:widow-orphan;
+	font-size:10.5pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Segoe UI",sans-serif;
+	mso-fareast-font-family:"Segoe UI";
+	color:black;}
+h1
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	mso-style-link:"Heading 1 Char";
+	mso-style-next:Normal;
+	margin-top:0in;
+	margin-right:.3pt;
+	margin-bottom:6.9pt;
+	margin-left:.5pt;
+	text-align:justify;
+	text-justify:inter-ideograph;
+	text-indent:-.5pt;
+	line-height:103%;
+	mso-pagination:widow-orphan lines-together;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	mso-list:l0 level1 lfo2;
+	font-size:10.5pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Segoe UI",sans-serif;
+	mso-fareast-font-family:"Segoe UI";
+	color:black;
+	mso-font-kerning:0pt;
+	mso-bidi-font-weight:normal;}
+h2
+	{mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	mso-style-link:"Heading 2 Char";
+	mso-style-next:Normal;
 	margin-top:0in;
 	margin-right:0in;
-	margin-bottom:6.0pt;
-	margin-left:1.5in;
-	text-indent:-.5in;
-	font-size:11.0pt;
-	font-family:"Univers","sans-serif";
-	font-weight:normal;}
-h4
-	{mso-style-link:"Heading 4 Char";
-	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:1.75in;
-	margin-bottom:.0001pt;
-	text-indent:-.25in;
-	font-size:12.0pt;
-	font-family:"Univers","sans-serif";
-	font-weight:normal;}
-a:link, span.MsoHyperlink
-	{color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{color:purple;
-	text-decoration:underline;}
-p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
-	{mso-style-link:"Balloon Text Char";
-	margin:0in;
-	margin-bottom:.0001pt;
-	font-size:8.0pt;
-	font-family:"Tahoma","sans-serif";}
-p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
-	{margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:10.0pt;
-	font-family:"Times New Roman","serif";}
-p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
-	{margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:10.0pt;
-	font-family:"Times New Roman","serif";}
-p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
-	{margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:10.0pt;
-	font-family:"Times New Roman","serif";}
-p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
-	{margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:10.0pt;
-	font-family:"Times New Roman","serif";}
-span.Heading1Char
-	{mso-style-name:"Heading 1 Char";
-	mso-style-link:"Heading 1";
-	font-family:"Univers Bold","serif";
-	font-weight:bold;}
+	margin-bottom:6.25pt;
+	margin-left:122.1pt;
+	text-align:center;
+	text-indent:-.5pt;
+	line-height:107%;
+	mso-pagination:widow-orphan lines-together;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:10.5pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Segoe UI",sans-serif;
+	mso-fareast-font-family:"Segoe UI";
+	color:black;
+	font-weight:normal;
+	font-style:italic;
+	mso-bidi-font-style:normal;}
 span.Heading2Char
 	{mso-style-name:"Heading 2 Char";
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-parent:"";
 	mso-style-link:"Heading 2";
-	font-family:"Univers","sans-serif";}
-span.Heading3Char
-	{mso-style-name:"Heading 3 Char";
-	mso-style-link:"Heading 3";
-	font-family:"Univers","sans-serif";}
-span.Heading4Char
-	{mso-style-name:"Heading 4 Char";
-	mso-style-link:"Heading 4";
-	font-family:"Univers","sans-serif";}
-span.BalloonTextChar
-	{mso-style-name:"Balloon Text Char";
-	mso-style-link:"Balloon Text";
-	font-family:"Tahoma","sans-serif";}
-p.Legal2L3, li.Legal2L3, div.Legal2L3
-	{mso-style-name:Legal2_L3;
-	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:12.0pt;
-	margin-left:0in;
-	text-align:justify;
-	text-autospace:none;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-p.Legal2L1, li.Legal2L1, div.Legal2L1
-	{mso-style-name:Legal2_L1;
-	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:12.0pt;
-	margin-left:0in;
-	text-align:justify;
-	text-autospace:none;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-span.11
-	{mso-style-name:"1\.1";
+	mso-ansi-font-size:10.5pt;
+	font-family:"Segoe UI",sans-serif;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	font-style:italic;
+	mso-bidi-font-style:normal;}
+span.Heading1Char
+	{mso-style-name:"Heading 1 Char";
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-parent:"";
+	mso-style-link:"Heading 1";
+	mso-ansi-font-size:10.5pt;
+	font-family:"Segoe UI",sans-serif;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
 	font-weight:bold;
-	text-decoration:underline;}
+	mso-bidi-font-weight:normal;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
 .MsoChpDefault
-	{font-size:10.0pt;
-	font-family:"Calibri","sans-serif";}
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	mso-ascii-font-family:Calibri;
+	mso-ascii-theme-font:minor-latin;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:Calibri;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;}
+.MsoPapDefault
+	{mso-style-type:export-only;
+	margin-bottom:8.0pt;
+	line-height:107%;}
+ /* Page Definitions */
+ @page
+	{mso-footnote-separator:url("iRely%20Master%20Agreement%2011-5-2022_files/header.htm") fs;
+	mso-footnote-continuation-separator:url("iRely%20Master%20Agreement%2011-5-2022_files/header.htm") fcs;
+	mso-endnote-separator:url("iRely%20Master%20Agreement%2011-5-2022_files/header.htm") es;
+	mso-endnote-continuation-separator:url("iRely%20Master%20Agreement%2011-5-2022_files/header.htm") ecs;}
 @page WordSection1
-	{size:595.3pt 841.9pt;
-	margin:7.1pt 1.0in 1.0in 1.0in;}
+	{size:8.5in 11.0in;
+	margin:1.05in 71.5pt 73.35pt 1.0in;
+	mso-header-margin:.5in;
+	mso-footer-margin:35.9pt;
+	mso-even-footer:url("iRely%20Master%20Agreement%2011-5-2022_files/header.htm") ef1;
+	mso-footer:url("iRely%20Master%20Agreement%2011-5-2022_files/header.htm") f1;
+	mso-first-footer:url("iRely%20Master%20Agreement%2011-5-2022_files/header.htm") ff1;
+	mso-paper-source:0;}
 div.WordSection1
 	{page:WordSection1;}
  /* List Definitions */
- ol
+ @list l0
+	{mso-list-id:806121721;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1178562202 1720240126 -794121490 94289306 1891398236 -1744164246 2062846036 2146704322 1637386008 397029504;}
+@list l0:level1
+	{mso-level-style-link:"Heading 1";
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:0in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-text:%2;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-text:%3;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level4
+	{mso-level-text:%4;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-text:%5;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:2.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-text:%6;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:2.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level7
+	{mso-level-text:%7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-text:%8;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l0:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-text:%9;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:4.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1
+	{mso-list-id:1485123247;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1824322702 -1987050888 66772354 1537928094 -1855708806 -1064239886 -2131078222 1033011204 -1382387588 -666225568;}
+@list l1:level1
+	{mso-level-start-at:11;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-text:%2;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-text:%3;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level4
+	{mso-level-text:%4;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-text:%5;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:2.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-text:%6;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:2.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level7
+	{mso-level-text:%7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-text:%8;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.75in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+@list l1:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-text:%9;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:4.25in;
+	text-indent:0in;
+	mso-ansi-font-size:10.5pt;
+	mso-bidi-font-size:10.5pt;
+	mso-ascii-font-family:"Segoe UI";
+	mso-fareast-font-family:"Segoe UI";
+	mso-hansi-font-family:"Segoe UI";
+	mso-bidi-font-family:"Segoe UI";
+	color:black;
+	border:none;
+	mso-ansi-font-weight:bold;
+	mso-bidi-font-weight:bold;
+	mso-ansi-font-style:normal;
+	text-underline:black;
+	text-decoration:none;
+	text-underline:none;
+	text-decoration:none;
+	text-line-through:none;
+	vertical-align:baseline;}
+ol
 	{margin-bottom:0in;}
 ul
 	{margin-bottom:0in;}
 -->
 </style>
-
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin-top:0in;
+	mso-para-margin-right:0in;
+	mso-para-margin-bottom:8.0pt;
+	mso-para-margin-left:0in;
+	line-height:107%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;
+	mso-ascii-font-family:Calibri;
+	mso-ascii-theme-font:minor-latin;
+	mso-hansi-font-family:Calibri;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1026"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
 </head>
-<body lang=EN-US link=blue vlink=purple>
+
+<body lang=EN-PH style=''tab-interval:.5in;word-wrap:break-word''>
 
 <div class=WordSection1>
 
-<p class=MsoNormal>&nbsp;</p>
+<p class=MsoNormal align=left style=''margin:0in;text-align:left;text-indent:
+0in;line-height:107%''><a
+href="http://help.irelyserver.com/display/DOC/Schedule+2.2+-+iRely+SAAS+Agreement"><span
+style=''font-size:20.0pt;mso-bidi-font-size:11.0pt;line-height:107%;color:#3B73AF''>Master
+Agreement</span></a><a
+href="http://help.irelyserver.com/display/DOC/Schedule+2.2+-+iRely+SAAS+Agreement"><span
+style=''font-size:20.0pt;mso-bidi-font-size:11.0pt;line-height:107%;color:#172B4D;
+text-decoration:none;text-underline:none''> </span></a></p>
 
-<p class=MsoNormal>&nbsp;</p>
+<p class=MsoNormal align=left style=''margin:0in;text-align:left;text-indent:
+0in;line-height:107%''><span style=''font-size:20.0pt;mso-bidi-font-size:11.0pt;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></span></p>
 
-<p class=MsoNormal align=center style=''text-align:center;line-height:115%;
-text-autospace:none''><span style=''font-size:14.0pt;line-height:115%;font-family:
-"Arial","sans-serif";letter-spacing:1.0pt''>iRely Master Agreement</span></p>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;
+margin-left:-.25pt;text-indent:-.5pt''><b style=''mso-bidi-font-weight:normal''>YOU
+AGREE THAT, BY PLACING AN ORDER THROUGH A PROVIDER ORDERING DOCUMENT SUCH AS A
+PROPOSAL OR SOW FOR PROFESSIONAL SERVICES, SUCH ORDERING DOCUMENT INCORPORATES
+AND IS GOVERNED BY THE TERMS OF THIS MASTER AGREEMENT, AND THAT</b> <b
+style=''mso-bidi-font-weight:normal''>YOU AGREE TO BE BOUND BY THE TERMS AND
+CONDITIONS OF THE ORDERING DOCUMENT AND THIS MASTER AGREEMENT. </b><span
+style=''mso-spacerun:yes''> </span></p>
 
-<p>&nbsp;</p>
-    <p><strong>YOU AGREE THAT BY PLACING AN ORDER THROUGH AN ORDERING DOCUMENT, SUCH AS A PROPOSAL OR SOW FOR PROFESSIONAL SERVICES, THAT INCORPORATES THESE GENERAL TERMS,</strong> <strong>YOU AGREE TO FOLLOW AND BE BOUND BY THE TERMS AND CONDITIONS OF THE ORDERING DOCUMENT AND THESE GENERAL TERMS. IF YOU ARE PLACING SUCH AN ORDER ON BEHALF OF A COMPANY OR OTHER LEGAL ENTITY, YOU REPRESENT THAT YOU HAVE THE AUTHORITY TO BIND SUCH ENTITY TO THE TERMS AND CONDITIONS OF THE ORDERING DOCUMENT AND THIS MASTER AGREEMENT AND THE APPLICABLE SCHEDULES AS DEFINED HEREIN.&nbsp; IF YOU DO NOT HAVE SUCH AUTHORITY, OR IF YOU OR SUCH ENTITY DO NOT AGREE TO FOLLOW AND BE BOUND BY THE TERMS AND CONDITIONS OF THE ORDERING DOCUMENT AND THESE GENERAL TERMS, YOU SHALL NOT PLACE AN ORDER OR USE PRODUCTS OR SERVICES OFFERINGS.</strong></p>
-<p style="text-align: center;"><strong>PROVIDER</strong>&nbsp;<strong>MASTER AGREEMENT</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; THIS MASTER AGREEMENT (together with any applicable Ordering Document and all applicable Schedules, the "Agreement"), is effective as of the date (the "Effective Date") the Ordering Document(s) is executed by Provider LLC<strong>,</strong> a Delaware limited liability company with a principal place of business located at 4242 Flagstaff Cove, Ft. Wayne, Indiana, 46815 ("Provider") and the entity that has executed such Ordering Document(s) ("Customer") Provider</p>
-<p><br></p>
-<p><strong>1.&nbsp;SCOPE OF MASTER AGREEMENT AND SCHEDULES</strong></p>
-<p>This Agreement includes several Schedules appended hereto. Each applicable Schedule is incorporated herein by reference.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.1. Schedule 1 – Proposal, defines the scope of goods and services to be provided under this Master Agreement. Once executed by both parties, a Proposal becomes an Ordering Document hereunder.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.2. Schedule 2.1 – Software License, governs the license of the Software if the Customer has selected to use the Software installed on its own servers or as hosted by Provider</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.3. Schedule 2.2 – Software as a Service License, governs the purchase of the SaaS Services if the Customer has selected to use the SaaS Services.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.4. Schedule 3 – Implementation Process Schedule, describes the implementation process.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.5. Schedule 4 – Maintenance Schedule, describes the Maintenance Services Provider will provide to Customer.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.6. Schedule 5 – Invoicing and Payment Schedule, describes how Provider will invoice Customer and Customer''s payment obligations.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.7. Schedule 6 – Change Procedure Schedule, describes the process by which the parties shall may the scope of goods and services during the Term of this Master Agreement.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.8. Schedule 7 – Hosting Schedule, Provider governs Provider''s hosting of Customer data on its servers.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 1.9. Schedule 8 – Privacy Policy, describes Provider''s privacy policies.</p>
-<p><br></p>
-<p><strong>2. DEFINITIONS</strong></p>
-<p>The following definitions apply to this Master Agreement and the attached Schedules. Additional capitalize terms used in this Master Agreement or attached Schedules shall have the meaning described therein.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.1. "Affiliate" means any corporation or other entity controlled by, controlling, or under common control with any party, and "control" means the direct or indirect beneficial ownership of a majority interest in the voting stock, or other ownership interests, of such corporation or entity, or the power to elect at least a majority of the directors or trustees of such corporation or entity, or majority control of such corporation or entity, or such other relationship, which in fact constitutes actual control.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.2. "Application" means the modules, platform, user interfaces, on-line help, and associated Documentation of Provider to which Customer may have access pursuant to the Software as a Service License.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.3. "Customer Data" means any data, information, content, or material, which Customer or its Affiliates enter, load onto, or use in connection with the Application, and all results from processing the same while using the Application.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.4. "Documentation" means the user and technical information, provided to Customer by Provider, regarding the access and use of the Application by means of an on-line help system describing the operation of the Application under normal circumstances.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.5. "Fees" means the License Fee, Subscription Fee, Maintenance Fees, Hosting Fee and Professional Services Fees.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.6. "Hosting Fee" means the fee for Provider to host the Software and Customer''s related data on behalf of Customer.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.7. "Intellectual Property Rights" means, on a worldwide basis, any (i)&nbsp;copyrights and copyrightable works, whether registered or unregistered; (ii) trademarks, service marks, trade dress, logos, registered designs, trade and business names (including internet domain names, corporate names, and e-mail address names), whether registered or unregistered; (iii) patents, patent applications, patent disclosures, mask works and inventions (whether patentable or not); (iv) trade secrets, know-how, data privacy rights, database rights, know-how, and rights in designs; and (v) all other forms of intellectual property or proprietary rights, and derivative works thereof, in each case in every jurisdiction worldwide.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.8. "License Fee" means the one-time Software license fee.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.9. "Maintenance Fee" means the annual fee for Maintenance Services.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.10. "Ordering Document" means any executed Proposal or SOW, which upon execution represents a binding commitment to purchase Products or Services.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.11. "Professional Services Fees" means fees for Professional Services, paid at Provider''s then current standard rates.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.12. "Professional Services" means custom software development and other support services provided by Provider in connection with implementation or ongoing use of the Products, which are specifically quoted and billed at the Professional Service Fee Rates listed on Schedule 5 – Invoicing and Payments.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.13. "SOW" means a Statement of Work, which sets forth the deliverables, timelines and cost estimate for Professional Services as a result of the Change Procedure described in Schedule 6 – Change Procedure or for Professional Services.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.14. "Subscription" means the right to use and access the Application as described in Schedule 2.2, SaaS License, upon payment of the Subscription Fee.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.15. "Subscription Fee" means the fee for the Subscription, and to receive the Standard Support Services, during the corresponding Subscription period.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.16. "Update" means any patch, bug fix, correction, update, upgrade, enhancement, minor release, or other modification by Provider to an Application, that is generally small in scope, made generally available by Provider to its then-current customers.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 2.17. "User(s)" means Customer''s employees and Affiliates authorized to use the Application in accordance with this Agreement and supplied user identifications and/or passwords in accordance with this Agreement.</p>
-<p><br></p>
-<p><strong>3. INTELLECTUAL PROPERTY RIGHTS</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 3.1.&nbsp;<span style="text-decoration: underline;">Customer Intellectual Property</span>. "Customer IP" means Customer''s Confidential Information, materials, inventions, and data. The Customer IP shall be owned by Customer. Provider may not use, access, reproduce, publish, sell, license, display, or exploit (collectively, "Use") any Customer IP without Customer''s prior written consent. Provider shall have the right to Use Customer IP to perform the Services and Customer grants Provider a limited, royalty-free, non-exclusive, revocable, terminable license to Use the Customer IP as necessary for Provider to perform the Services.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 3.2.&nbsp;<u>Provider</u><span style="text-decoration: underline;"> Intellectual Property</span>. "Provider IP" means any item or material, and any modifications, enhancements or feedback thereon, including intellectual property (such as written materials, software, its configurations and standard reporting and interfaces, websites or patented inventions) or physical assets (such as equipment or other products), that is: (a) owned, leased or licensed by Provider or Provider''s Affiliates or subcontractors (other than licensed from Customer hereunder); or (b) furnished by Provider in connection with the Services. For the avoidance of doubt, Provider IP includes the Products, Software and Documentation. The Provider IP shall be owned by Provider. Customer shall not use Provider IP for any purpose not expressly permitted in this Agreement.</p>
-<p><br></p>
-<p><strong>4. PRODUCTS, SERVICES, AND DELIVERABLES</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 4.1. "Products" means hardware or software (the "Software") licensed by Provider as set forth in either Schedule 2.1 – Software License or Schedule 2.2 – Software as a Service License.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 4.2. "Services" means the services described in the Ordering Document.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 4.3. "Deliverables" means information and other materials prepared for Customer during the performance of the Services and pursuant to an Implementation Project Plan or in connection with other Professional Services.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 4.4. All Services shall be performed in a workmanlike and professional manner by qualified representatives of Provider who are fluent in written and spoken English.</p>
-<p><br></p>
-<p><strong>5. MAINTENANCE SERVICES</strong></p>
-<p>&nbsp; &nbsp; Please refer to Schedule 4 – Provider Maintenance Agreement.</p>
-<p><br></p>
-<p><strong>6. PAYMENT AND INVOICING</strong></p>
-<p>&nbsp; &nbsp; Please refer to Schedule 5 – Payment and Invoicing.</p>
-<p><br></p>
-<p><strong>7. CONFIDENTIAL INFORMATION</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.1. <span style="text-decoration: underline;">Confidential Information</span>. "Confidential Information" means all financial, technical, strategic, marketing, and other information relating to a disclosing party (the "Disclosing Party") or its actual or prospective business, products, or technology that may be, or has been, furnished or disclosed to the other party (the "Recipient") by, or acquired by Recipient directly or indirectly from the Disclosing Party, whether disclosed orally or in writing or electronically or some other form, and shall include the terms and conditions and pricing information of this Agreement, and the Application (including, without limitation, Documentation, source code, translations, compilations, implementation methodologies, partial copies, and derivative works).</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.2. <u>Limitations</u>. Confidential Information does not include that which was: (i) as of the Effective Date of this Agreement, generally known to the public without breach of this Agreement; (ii) is or became generally known to the public after the date of this Agreement other than as a result of the act or omission of Recipient or Recipient''s Affiliates; (iii) was already in the possession of the Recipient without any obligation of confidence; (iv) released by Disclosing Party with its written consent to third parties without restriction on use and disclosure; (v) lawfully received by Recipient from a third party without an obligation of confidence; (vi) independently developed by Recipient outside the scope of this relationship by personnel not having access to any Confidential Information; or (vii) is required to be disclosed in accordance with a judicial or governmental order or decree, provided that the Recipient provides prompt notice of the order or decree to the Disclosing Party and reasonably cooperates with the Disclosing Party to limit the disclosure and use of the applicable information.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.3. <span style="text-decoration: underline;">Non-Disclosure</span>. Recipient shall: (i)&nbsp;use at least the same degree of care that it uses with respect to its own confidential information, but in no event less than a reasonable degree of care to avoid disclosure, publication or dissemination of the other party''s Confidential Information; (ii) disclose Confidential Information only to its personnel, Affiliates and subcontractors who have a need to know such information and are bound by a confidentiality agreement with Recipient; and (iii) promptly report any loss of any Confidential Information to the Disclosing Party.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.4. <span style="text-decoration: underline;">Notices</span>. Recipient shall not: (i)&nbsp;alter or remove from any Confidential Information of the Disclosing Party any proprietary legend, or (ii) decompile, disassemble or reverse engineer the Confidential Information (and any information derived in violation of such covenant shall automatically be deemed Confidential Information owned exclusively by the Disclosing Party).</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.5.&nbsp;<span style="text-decoration: underline;">Return of Confidential Information</span>. Upon the written request of the Disclosing Party or termination or expiration of this Agreement, and regardless of whether a dispute may exist, Recipient shall return or destroy (as instructed by Disclosing Party) all Confidential Information of Disclosing Party in its possession or control and cease all further use thereof.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.6. <span style="text-decoration: underline;">Injunctive Relief</span>. Recipient acknowledges that violation of the provisions of this <span style="text-decoration: underline;">Section 7</span> would cause irreparable harm to Disclosing Party not adequately compensable by monetary damages. In addition to other relief, it is agreed that injunctive relief shall be available without the necessity of posting bond to prevent any actual or threatened violation of such provisions.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.7. <span style="text-decoration: underline;">PII</span>. "Personally Identifiable Information" or "PII" means information which can be used to distinguish or trace an individual''s identity, either alone or when combined with other personal or identifying information, which is linked or linkable to a specific individual. If Provider has access to PII (except for business contact information and e-mail addresses of the Customer), such access will likely be incidental. The intended purpose of the Application is not to accept or use PII. Customer shall retain control of its PII. To the extent Provider has incidental access to Customer PII, Provider shall use or disclose PII only: (i)&nbsp;in furtherance of or in performing the services pursuant to this Agreement and the relevant Ordering Document; (ii) pursuant to a lawful subpoena, service of process, or otherwise required or permitted by law; (iii) as directed or instructed by Customer; or (iv) with prior informed consent of the individual about whom the PII pertains.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.8 <span style="text-decoration: underline;">Non-Exclusive Agreement</span>. Provider may solicit and perform similar Services on behalf of companies that Customer may consider to be its direct or indirect competitors, provided that Customer''s Confidential Information shall be treated as set forth in this Section 7.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.9 <span style="text-decoration: underline;">Publicity</span>. Provider shall have the right, and Customer hereby consents, to 1) list Customer''s logo as a Provider client on Provider''s website and on marketing materials and include a link to Customer''s website and company introduction; and 2) mention Customer as a Provider Customer during sales pitches to Provider prospects. Provider will seek Customer''s consent prior to using Customer''s name in White Papers or other similar written material.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 7.10 <span style="text-decoration: underline;">Survival</span>. This Section shall survive termination of this Agreement for a period of 3 years.</p>
-<p><br></p>
-<p><strong>8. INDEMNIFICATION</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 8.1 <span style="text-decoration: underline;">Mutual Indemnity</span>.&nbsp;Each party ("Indemnifying Party") will indemnify, pay and reimburse for, defend and hold harmless the other party, its&nbsp;Affiliates, and their respective employees, directors, managers, officers, partners, shareholders, contractors, and agents&nbsp;(collectively, the "Indemnified Persons"), from and against any and all claims, liabilities, demands, suits, actions, or other proceedings brought by third parties (each a "Claim"), and all losses, damage, judgments, payments made in settlement, and costs and expense, including reasonable attorneys'' fees and disbursements and court costs as a result of such Claims ("Damages") arising out of: (a) willful misconduct or fraud by the Indemnifying Party, its personnel, subcontractors, or agents; (b)&nbsp;the breach or alleged breach of any representation, warranty, or covenant of this Agreement or the inaccuracy of any representation made by Indemnified Persons herein, or (c) a party''s failure to comply with any applicable law, including any Data Protection Law.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 8.2 <span style="text-decoration: underline;">Customer Indemnity</span>. Customer shall defend Provider against any Claims, and indemnify Provider for any Damages, arising out of a claim alleging: (i) that use of the Customer Data infringes the rights of, or has caused harm to, a third party; or (ii) infringement of third-party rights arising from the combination of the Application with any of Customer products, service, hardware or business process(s).</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 8.3 <span style="text-decoration: underline;">Indemnification Procedures</span>.&nbsp;An Indemnified Person must promptly give written notice to the Indemnifying Party of any Claim. The Indemnifying Party may elect to retain counsel of its choice to represent&nbsp;the&nbsp;Indemnified Person in connection with any&nbsp;Claim and will pay all fees and costs of such counsel.&nbsp;An Indemnified Person may participate at its own expense and through legal counsel of its choice in any such&nbsp;Claim. The Indemnifying Party will not settle any Claim without the prior written consent of&nbsp;the Indemnified Person, which shall not be unreasonably withheld. However, the Indemnified Person may assume control of the defense of the Claim and retain counsel reasonably acceptable to the Indemnifying Party, if (a) the Indemnifying Party does not to assume control of the defense; (b) conflicts of interest exist between the parties with respect to the Claim; or (c) the other party to the Claim is seeking relief which in an Indemnified Person''s reasonable judgment may adversely affect the Indemnified Person''s business. In this case, the fees, charges, and disbursements of no more than one counsel per jurisdiction selected by the Indemnified Person will be reimbursed by the Indemnifying Party.</p>
-<p><br></p>
-<p><strong>9. CHANGE CONTROL PROCEDURE</strong></p>
-<p>Please refer to Schedule 6 – Change Control&nbsp;Schedule.</p>
-<p><br></p>
-<p><strong>10. TERM; TERMINATION</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.1. <span style="text-decoration: underline;">Term</span>. The initial term of the Agreement shall commence on the Effective Date specified in the first executed Ordering Document and shall continue in full force and effect and unless extended or terminated earlier pursuant to this Agreement or stated in such Ordering Document (the "Initial Term"). Once the Agreement is commenced, its term will continue so long as the initial term</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.2. <span style="text-decoration: underline;">Renewal Term</span>. Certain Products or Services will automatically renew in accordance with the relevant Ordering Document (each a "Renewal Term"), unless a party delivers written notice of its intent to cancel at least 60 days before the expiration of the Initial Term or the then current Renewal Term. Unless otherwise set forth in an Ordering Document, SaaS Subscriptions and Software Maintenance will each automatically renew for additional one-year Renewal Terms at the end of the Initial Term and each Renewal Term.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.3.&nbsp;<span style="text-decoration: underline;">Termination</span>.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.3.1. Either&nbsp;party may terminate this Agreement, (i)&nbsp;upon thirty (30) days prior written notice, in the event that the other party materially breaches a provision of the Agreement and fails to cure such breach within the thirty (30) days after it receives such notice (or immediately, if such breach is not capable of being cured) or (ii)&nbsp;in accordance with Section&nbsp;9 (Force Majeure).</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.3.2. Either party may terminate this Agreement immediately upon written notice, if the other party becomes insolvent; or files, or has filed against it and not dismissed within sixty (60) days, a petition for bankruptcy.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.3.3.Provider may terminate this Agreement on thirty (30) days written notice if Customer fails to make timely payments hereunder.&nbsp;</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.4 <span style="text-decoration: underline;">Procedures Upon Termination</span>. When the Agreement terminates or expires:</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.4.1. Customer will pay Provider for all Services performed and expenses incurred by Provider prior to the date of termination. In the event the Agreement has been terminated early not due to Provider''s breach or insolvency, then Customer shall repay any discounts set forth in the Ordering Document governing the unfinished Term.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 10.4.2. Provider will: (i)&nbsp;deliver to Customer all Deliverables and Products for which Customer has fully paid; (ii) and immediately discontinue (and cause its contractors and personnel to immediately discontinue) all use of Customer Materials. Upon termination or expiration of Agreement, this clause does not permit Customer to retain Provider Materials for any purpose and Customer must return Provider Materials within 10 days.</p>
-<p><br></p>
-<p><strong>11. FORCE MAJEURE</strong></p>
-<p>Neither party will be liable under, or deemed to be in breach of, this Agreement for any delay or failure in performance under this Agreement or the applicable Order Document that is caused by any of the following events: acts of God, civil or military authority, war; fires; power outages; earthquakes; floods; unusually severe weather; strikes or labor disputes (excluding Provider''s subcontractors); delays in transportation or delivery as a result of a Force Majeure Event; epidemics; terrorism or threats of terrorism; and any similar event that is beyond the reasonable control of the non-performing party ("Force Majeure Event"). This section does not excuse either party''s obligation to take reasonable steps to follow its normal disaster recovery procedures or Customer''s obligations to pay for Products and Services ordered or delivered. The party affected by the Force Majeure Event must diligently attempt to perform (including through alternate means).&nbsp;During a Force Majeure Event, the parties will negotiate changes to this Agreement in good faith to address the Force Majeure Event in a fair and equitable manner. If a Force Majeure Event continues for ten (10) days or longer, and the non-performing party is delayed or unable to perform under this Agreement or any Order Document because of the Force Majeure Event, then the performing party will have the right to terminate this Agreement or the Order Document, in whole or in part, upon written notice to the non-performing party.</p>
-<p><br></p>
-<p><strong>12. DISCLAIMERS AND LIMITATIONS OF LIABILITIES</strong> <strong>&nbsp;</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 12.1. Except as expressly set forth in this Agreement, neither party makes, and each such party hereby specifically disclaims, all representations and warranties express or implied, arising by law or otherwise, arising under or relating to this Agreement.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 12.2. EXCEPT AS OTHERWISE STATED IN THE AGREEMENT, THE SOFTWARE, HOSTING SERVICES, SAAS SERVICES, PROFESSIONAL SERVICES AND OTHER GOODS AND SERVICES PROVIDED TO CUSTOMER HEREUNDER ARE "AS IS", AND PROVIDER MAKES NO REPRESENTATIONS OR WARRANTIES, ORAL OR WRITTEN, EXPRESS OR IMPLIED, ARISING FROM COURSE OF DEALING, COURSE OF PERFORMANCE, USAGE OF TRADE, QUALITY OF INFORMATION, QUIET ENJOYMENT OR OTHERWISE, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INTERFERENCE, OR NON-INFRINGEMENT WITH RESPECT TO THE SOFTWARE, HOSTING SERVICES, SAAS SERVICES, PROFESSIONAL SERVICES AND OTHER GOODS AND SERVICES PROVIDED TO CUSTOMER HEREUNDER OR WITH RESPECT TO ANY OTHER MATTER PERTAINING TO THIS AGREEMENT. CUSTOMER''S USE OF THE SOFTWARE, HOSTING SERVICES, SAAS SERVICES, PROFESSIONAL SERVICES AND OTHER GOODS AND SERVICES PROVIDED TO CUSTOMER HEREUNDER WILL NOT BE DEEMED LEGAL, TAX OR INVESTMENT ADVICE.&nbsp;</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 12.3. PROVIDER''S TOTAL LIABILITY UNDER THIS AGREEMENT WILL UNDER NO CIRCUMSTANCES EXCEED THE AMOUNT ACTUALLY PAID BY CUSTOMER TO PROVIDER UNDER THIS AGREEMENT DURING THE THREE (3) MONTHS PRIOR TO THE EVENT OF LIABILITY.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 12.4. UNDER NO CIRCUMSTANCES WILL PROVIDER (OR ANY PROVIDER AFFILIATES PROVIDING SOFTWARE, HOSTING SERVICES, SAAS SERVICES, PROFESSIONAL SERVICES AND OTHER GOODS AND SERVICES TO CUSTOMER HEREUNDER) BE LIABLE TO CUSTOMER, ANY AUTHORIZED USER OR ANY OTHER PERSON FOR LOST REVENUES, LOST PROFITS, LOSS OF BUSINESS, TRADING LOSSES, OR ANY INCIDENTAL, INDIRECT, EXEMPLARY, CONSEQUENTIAL, SPECIAL OR PUNITIVE DAMAGES OF ANY KIND, INCLUDING SUCH DAMAGES ARISING FROM ANY BREACH OF THIS AGREEMENT OR ANY TERMINATION OF THIS AGREEMENT, WHETHER SUCH LIABILITY IS ASSERTED ON THE BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE OR STRICT LIABILITY) OR OTHERWISE AND WHETHER OR NOT FORESEEABLE, EVEN IF PROVIDER HAS BEEN ADVISED OR WAS AWARE OF THE POSSIBILITY OF SUCH LOSS OR DAMAGES.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 12.5. Provider will have no liability to Customer under the following circumstances:&nbsp; Customer fails to follow Provider''s instructions relating to the Software, Hosting Services or SaaS Services; the Software, Hosting Services or SaaS Services are used in violation of this Agreement; the Software is configured, customized, installed or maintained by anyone other than Provider; Customer modifies any Software without the prior written consent of Provider; and/or the Software, Hosting Services or SaaS Services are used in conjunction with any hardware, software, products or interfaces not specified by Provider. &nbsp;The obligations of Provider under this Agreement run only to Customer and not to its Affiliates, Authorized Users or any other persons. Under no circumstances will any Affiliate, Authorized User or client of Customer or any other person be considered a third-party beneficiary of this Agreement or otherwise entitled to any rights or remedies under this Agreement, even if such Affiliates, Authorized Users, clients or other persons are provided access to any Hosting Services, SaaS Services or Professional Services.&nbsp; Customer will have no rights or remedies against Provider except as specifically provided in this Agreement. No action or claim of any type relating to this Agreement may be brought or made by Customer more than one (1) year after Customer first has knowledge of the basis for the action or claim.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 12.6. The exclusions, disclaimers and limitations provided in this Agreement have been considered by the parties in the pricing of the Goods and Services provided in this Agreement.</p>
-<p><br></p>
-<p><strong>13.1. NOTICES</strong></p>
-<p>All notices from one party to the other under this Agreement will be in writing and will be deemed given when (i) delivered personally with receipt signature; (ii) sent via certified mail with return receipt requested; or (iii) (iv) sent by commercially recognized air courier service with receipt signature required, to the following address:</p>
-<p><br></p>
-<p><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</strong>if to iRely, LLC:</p>
-<p><em>Provider, LLC</em></p>
-<p><em>4242 Flagstaff Cove</em></p>
-<p><em>Ft. Wayne, Indiana, 46815</em></p>
-<p><em>ATTENTION: Chris Pelz (<a href="mailto:chris.pelz@irely.com" class="external-link" rel="nofollow">chris.pelz@irely.com</a>)</em></p>
-<p><br></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; if to CUSTOMER:</p>
-<p><em>[NAME &amp; ADDRESS]&nbsp;</em></p>
-<p><em>ATTENTION: ____________________________________________</em></p>
-<p><em>and</em></p>
-<p><em>ATTENTION: ____________________________________________</em></p>
-<p><br></p>
-<p><strong>14. REPRESENTATIONS AND WARRANTIES OF CUSTOMER</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 14.1. <span style="text-decoration: underline;">Representations and Warranties</span>. Customer represents and warrants to Provider that:</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 14.1.1. Customer owns Customer Data or has all necessary rights to use and input Customer Data into the Application;</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 14.1.2. Customer Data shall not infringe upon any third-party Intellectual Property Rights or violate any rights against defamation or rights of privacy; and</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 14.1.3. Customer has not falsely identified itself nor provided any false information to gain access to the Application and that Customer''s billing information is correct.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 14.2. <span style="text-decoration: underline;">EU Data Transfer</span>. If Customer resides in the European Union (EU) or if any transfer of information between Customer and the Application is governed by the European Union Data Protection Directive or national laws implementing that Directive, then Customer expressly consents to the transfer of such information outside of the European Union to the United States and to such other countries as may be contemplated by the features and activities of the Application under this Agreement. Customer will indemnify Provider against all claims asserted against it under the GDRP.</p>
-<p><br></p>
-<p><strong>15. EXPORT CONTROL</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 15.1. <span style="text-decoration: underline;">Export Laws</span>. Export laws and regulations of the United States and any other relevant local export laws and regulations apply to the Products. Customer agrees that such export laws govern its use of the Products (including technical data) and Services provided under the Master Agreement, and Customer agrees to comply with all such export laws and regulations (including "deemed export" and "deemed re-export" regulations). Customer further agrees that no data, information, Product and/or Deliverables will be exported, directly or indirectly, in violation of these laws, or will be used for any purpose prohibited by these laws including, without limitation, nuclear, chemical, or biological weapons proliferation, or development of missile technology.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 15.2. <span style="text-decoration: underline;">No Representations</span>. Provider and its licensors make no representation that the Products and Services are appropriate or available for use in other locations. Customer is solely responsible for compliance with all applicable laws, including without limitation export and import regulations of other countries. Any diversion of the Customer Data contrary to U.S. and other relevant law is prohibited.</p>
-<p><br></p>
-<p><strong>16. INTEGRATION AND AMENDMENTS</strong></p>
-<p>This Agreement and the attached Schedules constitute a complete and exclusive final written expression of the terms of agreement between the Parties regarding the subject matter hereof. It supersedes all earlier and contemporaneous agreements, understandings and negotiations concerning the subject matter. The Parties may amend this Agreement only in writing, and no oral representation or course of dealing shall modify this Agreement.</p>
-<p><br></p>
-<p><strong>17. SECURITY, NO CONFLICTS</strong></p>
-<p>Each party shall inform the other of any information made available to the other party that is classified or restricted data, shall comply with the security requirements imposed by any state or local government, or by the United States Government, and shall return all such material upon request. Each party represents and warrants that its participation in this Agreement does not conflict with any contractual or other obligation of the party or create any conflict of interest and shall promptly notify the other party if any such conflict arises during the Term.</p>
-<p><br></p>
-<p><strong>18. INSURANCE</strong></p>
-<p>Each party shall maintain adequate insurance protection covering its respective activities hereunder, including coverage for statutory workers'' compensation, comprehensive general liability for bodily injury and tangible property damage, and shall provide Certificates of Insurance to the other party, upon reasonable request, evidencing such coverage and amounts.</p>
-<p><br></p>
-<p><strong>19. GOVERNING LAW AND DISPUTES</strong></p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 19.1. The construction and performance of this Agreement shall be governed by the substantive laws of the United States and the laws of the State of Delaware, without regard to its conflicts of law''s provisions. The United Nations Convention on Contracts for the International Sale of Goods shall not apply to this Agreement. Any claim by one party against the other party must be brought within one year after it arose.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 19.2. Any controversy or claim arising out of or relating to this Agreement, or the breach thereof, shall be settled by arbitration administered by the American Arbitration Association in accordance with its Commercial Arbitration Rules, and judgment on the award rendered by the arbitrator(s) may be entered in any court having jurisdiction thereof. The arbitration shall be conducted in Allen County, Indiana by a single arbitrator appointed by the AAA. Any appeal of the arbitration decision shall be brought exclusively in the federal or state courts situated in Delaware. Customer consents to personal jurisdiction and venue in Delaware.</p>
-<p>&nbsp; &nbsp; &nbsp; &nbsp; 19.3. Provider shall be entitled to its reasonable attorneys'' fees, costs and expenses if it prevails in any legal dispute with Customer.</p>
-<p><br></p>
-<p><strong>20. PRIVACY POLICY AND GDPR</strong></p>
-<p>Schedule 8 contains Provider''s Privacy Policy.</p>
-<p><br></p>
-<p><strong>21. ASSIGNMENT OR CHANGE IN CONTROL</strong></p>
-<p>This Agreement may not be assigned by either party without the prior written approval of the other party, but may be assigned without consent in the event of a merger or reorganization in which the surviving entity owns or controls more than 50% of the acquired party and agrees in writing to assume the obligations under this Agreement. Any purported assignment in violation of this section shall be void. Any actual or proposed change in control of Customer that results, or would result, in a direct competitor of Provider directly or indirectly owning or controlling 50% or more of Customer shall entitle Provider to terminate this Agreement for cause immediately upon written notice.</p>
-<p><br></p>
-<p><strong>22. SEVERABILITY</strong></p>
-<p>If any provision of this Agreement is held by a court of competent jurisdiction to be invalid or unenforceable, then such provision(s) shall be construed, as nearly as possible, to reflect the intentions of the invalid or unenforceable provision(s), with all other provisions remaining in full force and effect.</p>
-<p><br></p>
-<p><strong>23. NO AGENCY</strong></p>
-<p>The Parties acknowledge and agree that each is an independent contractor, and nothing herein constitutes a joint venture, partnership, employment, or agency between Customer and Provider because of this Agreement or use of the Application. Neither party shall have the right to bind the other party or cause it to incur liability.</p>
-<p><br></p>
-<p><strong>24. WAIVER</strong></p>
-<p>The failure of either party to enforce any right or provision in this Agreement shall not constitute a waiver of such right or provision unless acknowledged and agreed to by such party in writing.</p>
-<p><br></p>
-<p><strong>25. NON-SOLICITATION</strong></p>
-<p>During the Term of this Agreement and for a period of one year thereafter, neither party will, except with the other party''s prior written approval, solicit the employment of any employee, consultant or subcontractor of such other party that directly participated in the activities set forth in this Agreement. The foregoing shall specifically not apply to general solicitations of employment issued by either party to which an employee of the other may voluntarily respond.</p>
-<p><br></p>
-<p><strong>26. SURVIVABILITY</strong></p>
-<p>Provisions that survive termination or expiration are those relating to limitation of liability, infringement indemnity, payment and others which by their nature are intended to survive.</p>
-    <p>
-        <br />
-    </p>
-    <p>
-        <br />
-    </p>
-    <p>&nbsp;</p>
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.25pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
 
+<p class=MsoNormal style=''margin:0in;text-indent:0in''>THIS MASTER AGREEMENT
+(together with all applicable Ordering Documents, as defined below, and all
+applicable schedules thereto, the &quot;<u style=''text-underline:black''>Master
+Agreement</u>&quot;), is effective as of the date (the &quot;<u
+style=''text-underline:black''>Effective</u> <u style=''text-underline:black''>Date</u>&quot;)
+on which the initial Ordering Document is entered into by <span class=SpellE>iRely</span>
+LLC<b style=''mso-bidi-font-weight:normal''>,</b> a Delaware limited liability
+company, with a principal place of business located at 4242 Flagstaff Cove,
+Ft.<span style=''mso-spacerun:yes''>  </span>Wayne, Indiana, 46815 (&quot;<u
+style=''text-underline:black''>Provider</u>&quot;) and the other party to such
+initial Ordering Document (&quot;<u style=''text-underline:black''>Customer</u>&quot;),
+with a principal place of business as specified in such Ordering Document.<span
+style=''mso-spacerun:yes''>  </span>Customer and Provider are hereafter referred
+to collectively as the “<u style=''text-underline:black''>Parties</u>” and sometimes
+individually as a “<u style=''text-underline:black''>Party</u>”. </p>
 
+<p class=MsoNormal align=left style=''margin:0in;text-align:left;text-indent:
+0in;line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
 
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 2.1 - SOFTWARE LICENSE</h1>
-	<div id="main-content" class="wiki-content">         
-        <p>This SOFTWARE LICENSE SCHEDULE (this “Software License”) is a Schedule to the Master Services Agreement to which this Schedule is attached. The Master Services Agreement and this Software License, together with any other attached Schedules and Ordering Documents, together constitute the Agreement.</p><p><br/></p><p><strong>1.     SOFTWARE LICENSE</strong></p><p>        1.1. <u>Grant of License</u>. Provider hereby grants to Customer for the use and benefit of its permitted users (“Permitted Users”) a revocable, royalty-bearing, personal, non-transferable, non-sublicensable, limited-scope license to use Provider’s software (the “Software”) and documentation (“Documentation”) described in the Ordering Document, so long as Customer has made all payments due and solely for the Customer in the ordinary course of Customer’s own business operations. The Software and Documentation will be used only at Customer’s locations(s) and only by the number of users specified in the Ordering Document.</p><p>        1.2. <u>Product and Documentation</u>. The Software is a “Product” as defined in the Agreement. Provided the Maintenance Agreement remains in effect, the Software includes any updates, upgrades, patches, new versions, new releases, bug fixes, technological improvements and enhancements. The Documentation includes materials created by or on behalf of Provider that describe or relate to the functional, operational, or performance capabilities of the Software, regardless of whether such materials are printed or electronic, including but not limited to: all operator’s and user manuals, training materials, guides, commentary, technical, design or functional specifications, requirements documents, product descriptions, proposals, schedules, listings and other materials related to the Software.</p><p>        1.3. <u>Passwords</u>. Provider shall provide permanent passwords or license keys for all licensed Software that requires passwords or license keys for proper and complete operation thereof. Provider owns all rights, title and interest in and to the Software and Documentation and has the right to grant the licenses granted in this Software License.</p><p>        1.4. <u>Use Restrictions</u>.</p><p>              1.4.1. Customer shall not access, or allow access to, the Software if Customer is in direct competition with Provider, except with Provider’s prior written consent. Customer may not access the Software for purposes of monitoring its availability, performance, or functionality, or for any other benchmarking or competitive purposes. Customer shall not (i) license, sublicense, sell, resell, transfer, assign, distribute, or otherwise commercially exploit or make available to any third party the Software in any way; (ii) modify or make derivative works of the Software; (iii) create Internet “links” to the Software on any other server or wireless or Internet-based device; or (iv) reverse engineer or access the Software in order to (a) build a competitive product or service; (b) build a product using similar ideas, features, functions or graphics of the Software; or (c) copy any ideas, features, functions or graphics of the Software.</p><p>              1.4.2. Customer shall not: (i) send spam or otherwise duplicative or unsolicited messages in violation of applicable laws; (ii) send or store infringing, obscene, threatening, libelous, or otherwise unlawful or tortuous material, including material harmful to children or violative of third party privacy rights; (iii) send or store material containing software viruses, worms, Trojan horses, or other harmful computer code, files, scripts, agents, or programs; (iv) interfere with or disrupt the integrity or performance of the Software or the data contained therein; (v) attempt to gain unauthorized access to the Software or its related systems or networks; or (vi) input any data or information into the Software that is credit card or debit card information, personal banking, financial account information, social security numbers, HIPAA-protected data, or personal confidential information concerning individuals.</p><p>              1.4.3. Customer shall not permit Users to share User IDs with other employees or with third parties. Customer acknowledges that: (i) Provider shall rely on the validity of any User ID, instruction or information that meets the Software’s automated criteria or which is believed by Provider to be genuine; (ii) Provider may assume a person entering a User ID and password is, in fact, that User; and (iii) Provider may assume the latest email addresses and registration information for Users on file with Provider are accurate and current.</p><p><br/><strong>2.     INSTALLATION OF SOFTWARE</strong></p><p>        2.1. Upon execution of the Ordering Document, and payment of all amounts initially due, Provider shall install the Software within a commercially reasonable time at Customer’s designated location(s) and provide a link to the online help desk. If there is delay in signing the Agreement or receiving payment, the project plan and anticipated go live date will adjust to accommodate such delay.</p><p>        2.2. Customer shall designate a primary contact to assist with installation of software and ensure all technical requirements are met.</p><p><br/></p><p><strong>3.     COPIES</strong></p><p>        3.1. <u>License Copies</u>. Customer and Permitted Users shall have the right to make one operational copy and one backup copy for archival purposes.</p><p>        3.2. <u>Documentation Copies</u>. Customer may reproduce the Documentation as reasonably necessary to support internal use of the Software.</p><p>        3.3. <u>Software Rights to Use</u>. Copies of the Software created or transferred pursuant to this Agreement are licensed, not sold, and Customer receives no title to or ownership of any copy or of the Software itself. Furthermore, Customer receives no rights to the Software other than those specifically granted above. Customer shall not: (a) copy, modify, derivate, distribute, publicly display, publicly perform, or sublicense the Software; (b) use the Software for service bureau or time-sharing purposes or in any other way allow third parties to exploit the Software; or (c) reverse engineer, decompile, disassemble, or otherwise attempt to derive any of the Software’s source code.</p><p>        3.4. <u>Emergency Use of Software on Other Computer(s)</u>. Customer shall have the right to temporarily use the Software and Documentation on back-up computers at any location for disaster recovery and emergency purposes. As soon as practical after cessation of the disaster or emergency, Customer and its Affiliates shall remove the Software and Documentation from the back-up computers. Customer and its Affiliates shall also have the right to periodically activate and test the Software on such back-up computers for evaluating and verifying emergency and disaster recovery techniques and procedures. If license keys, passwords or other information from Provider are required to use the Software on such other computers, Provider shall provide to Customer.</p><p><br/></p><p><strong>4.     EXCESS USE</strong></p><p>Customer’s License is limited to the specific number of users stated in the Ordering Document. Customer may purchase additional Authorized User licenses. If Provider determines Customer has been allowing more Authorized Users to use the Software than set forth in the Ordering Document, Provider may (i) bill Customer for the additional Subscription Fees due, calculated on a pro rata basis based upon the agreed fees for the relevant Software, or (ii) consider such action a material breach of the Agreement. Provider may inspect and audit Customer’s servers and facilities to determine Customer’s compliance with the Software license and Authorized Users limitations.</p><p><br/></p><p><strong>5.     ACCEPTANCE</strong></p><p>Applicable Software deliverables under all Proposals will be accepted by Customer when the acceptance criteria, if any, specified in applicable Proposals have been met. Where no Software acceptance criteria are specified, such deliverables will be deemed accepted upon contract execution.</p><p><br/></p><p><strong>6.     INTELLECTUAL PROPERTY OWNERSHIP</strong></p><p>        6.1. <u>Provider IP</u>. This Agreement is not a sale and does not convey to Customer any rights of ownership in or related to the Software, Documentation, or to the Intellectual Property Rights therein owned by Provider. Provider’s name, Provider’s logo, and the product names associated with the Software and Documentation are trademarks of Provider or third parties, and no right or license is granted to use them. Provider (and its licensors) shall exclusively own all right, title, and interest in and to the Software and Documentation, copies, modifications, and derivative works thereof. Provider shall own any suggestions, ideas, enhancement requests, feedback, recommendations, or other information provided by Customer or any other party relating to the Software or Documentation, including all related Intellectual Property Rights thereto, specifically excluding Customer Data.</p><p>        6.2. <u>Customer Data</u>. Customer (and its licensors) shall exclusively own all right, title and interest in and to Customer Data and Intellectual Property Rights thereto.</p><p><br/></p><p><strong>7.     INTELLECTUAL PROPERTY INDEMNIFICATION</strong></p><p>        7.1. <u>Indemnified Claims</u>. Provider shall defend and indemnify Customer against any “<u>Indemnified Claim</u>,” meaning any third-party claim, suit, or proceeding arising out of direct infringement of any patent, copyright, trade secret, or other intellectual property right by the Software or the Documentation. Provider’s obligations set forth in this Section 7 do not apply to the extent that an Indemnified Claim arises out of: (a) Customer’s breach of this Agreement; (b) revisions to the Software made without Provider’s written consent; (c) Customer’s failure to incorporate Upgrades that would have avoided the alleged infringement, provided Provider offered such Upgrades without charges not otherwise required pursuant to this Agreement; (d) Provider’s modification of Software in compliance with specifications provided by Customer; or (e) use of the Software in combination with hardware or software not provided by Provider. In the event of an Indemnified Claim, Provider may exercise its right to terminate licenses and require return of the Software.</p><p>       7.2. <u>Litigation &amp; Additional Terms</u>. Provider’s obligations pursuant to Section 7 will only apply if Customer provides prompt written notice of and cooperates in the defense of the Indemnified Claim. Provider will control the defense of any Indemnified Claim, including appeals, negotiations, and any settlement or compromise thereof; provided Customer will have the right, not to be exercised unreasonably, to reject any settlement or compromise that requires that it admit wrongdoing or liability or subjects it to any ongoing affirmative obligations.</p><p><br/></p><p><strong>8.     FEES AND PAYMENT</strong></p><p>Subscription Fees associated with the Software are set forth in the Ordering Document. Invoicing and payment terms are set forth in Schedule 5 – Charging and Invoicing.</p>
-	</div>
-	
-	<p><br /></p>
-	<p><br /></p>
-	<p><br /></p>
-	
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 2.2 - SOFTWARE AS A SERVICE</h1>
-	<div id="main-content" class="wiki-content">
-        <p>This SOFTWARE AS A SERVICE LICENSE (this “SaaS License”) is a Schedule to the Master Services Agreement to which this Schedule is attached. The Master Services Agreement and this SaaS License, together with any other attached Schedules and Ordering Documents, together are the Agreement.</p><p><br/></p><p><strong>1.     THE APPLICATION AND SERVICES</strong></p><p>        1.1. <u>Subscribing to the Application</u>. Provider shall provide to Customer access and use of the Application described in the Order Document(s), for the Subscription Period specified therein, in consideration of payment of the applicable Subscription Fees, according to the terms and conditions of such Ordering Document and this Agreement.</p><p>        1.2. <u>Additional Proposals</u>. Additional Ordering Documents may be entered into by the parties to subscribe to additional or different features of the Application. Unless designated as replacing a specific in-effect Ordering Document, a new Ordering Document will be considered in addition to currently outstanding Ordering Documents.</p><p>        1.3. <u>Accessing User Accounts</u>. User IDs shall be required to access and use the Application. Customer will access and use the Application only through the User IDs and only in accordance with the Subscription terms and other restrictions in this Agreement. Customer shall be responsible for issuing User IDs to such employees and Affiliates as it determines in its sole discretion, in accordance with this Agreement. If Provider determines Customer has been allowing sharing of User IDs, Provider may (i) bill Customer for the additional Subscription Fees due, calculated on a pro rata basis based upon the agreed fees for the relevant Application, or (ii) consider such action a material breach of the Agreement. Provider may inspect and audit Customer’s servers and facilities to determine Customer’s compliance with this provision.</p><p>        1.4. <u>Standard Support Services</u>. Provider shall provide the Support Services as set forth in Schedule 4 – Maintenance Schedule, and for which payment shall be included in the Subscription Fee, unless otherwise specified in the Ordering Document.</p><p>        1.5. <u>Hosting and Subcontractors</u>. Provider may in its sole discretion engage, or has engaged, third-parties (“Subcontractors”) to perform Hosting of the Application or other Support Services under this Agreement.</p><p><br/></p><p><strong>2.     SUBSCRIPTION RIGHTS AND RESTRICTIONS</strong></p><p>        2.1. <u>Subscription Gran</u>t. For each Application feature referenced on a Proposal, and for which the applicable Subscription Fee is paid when due, Provider hereby grants to Customer a nonexclusive, non-transferrable, worldwide, limited Subscription to do the following: (i) access the Application through the User IDs; (ii) load Customer Data into the Application; (iii) use the Application for Customer’s own internal business purposes; and (iv) operate the features of the Application during the Subscription Period according to the Documentation, all subject to the terms and conditions of the Proposals and this Agreement. All rights not expressly granted to Customer herein are reserved to Provider and its licensors.</p><p>        2.2. <u>Type of Subscription</u>. The Subscription grant above is limited to the number of Users specified on the applicable Order Document. The minimum Subscription term is 3 years.</p><p>        2.3. <u>Subscription Restrictions</u>.</p><p>        2.3.1. Customer shall not access, or allow access to, the Application if Customer is in direct competition with Provider, except with Provider’s prior written consent. Customer may not access the Application for purposes of monitoring its availability, performance, or functionality, or for any other benchmarking or competitive purposes. Customer shall not (i) license, sublicense, sell, resell, transfer, assign, distribute, or otherwise commercially exploit or make available to any third party the Application in any way; (ii) modify or make derivative works of the Application; (iii) create Internet “links” to the Application on any other server or wireless or Internet-based device; or (iv) reverse engineer or access the Application in order to (a) build a competitive product or service; (b) build a product using similar ideas, features, functions or graphics of the Application; or (c) copy any ideas, features, functions or graphics of the Application.</p><p>        2.3.2. Customer shall not: (i) send spam or otherwise duplicative or unsolicited messages in violation of applicable laws; (ii) send or store infringing, obscene, threatening, libelous, or otherwise unlawful or tortuous material, including material harmful to children or violative of third party privacy rights; (iii) send or store material containing software viruses, worms, Trojan horses, or other harmful computer code, files, scripts, agents, or programs; (iv) interfere with or disrupt the integrity or performance of the Application or the data contained therein; or (v) attempt to gain unauthorized access to the Application or its related systems or networks; (vi) input any data or information into the Application that is: credit card or debit card information, personal banking, financial account information, social security numbers, HIPAA-protected data, or personal confidential information concerning individuals.</p><p>        2.3.3. Customer shall not permit Users to share User IDs with other employees or with third parties. Customer acknowledges that: (i) Provider shall rely on the validity of any User ID, instruction or information that meets the Application’s automated criteria or which is believed by Provider to be genuine; (ii) Provider may assume a person entering a User ID and password is, in fact, that User; and (iii) Provider may assume the latest email addresses and registration information for Users on file with Provider are accurate and current.</p><p><br/></p><p><strong>3.     CUSTOMER RESPONSIBILITIES</strong></p><p>        3.1. <u>User IDs</u>. Customer shall select its Users in its sole discretion and shall issue to each individual User a User ID to access the Application subject to the limitations and obligations herein, and provided, that Customer shall be responsible for all activity occurring under Customer’s User accounts. Customer shall: (i) notify Provider immediately of any unauthorized use of any password or account or any other known or suspected breach of security; (ii) report to Provider immediately and use reasonable efforts to stop immediately any unauthorized copying or distribution of Customer Data that is known or suspected by Customer or Users; and (iii) not impersonate another Provider customer or provide false identity information to gain access to or use the Application. Customer shall be responsible for its Users’ compliance with the terms of this Agreement and shall ensure that Users shall be obligated in writing to protect User IDs and the Application at least to the extent as provided in this Agreement.</p><p>        3.2. <u>Data Preparation and Configuration</u>. Customer will ensure that: (i) it maintains Customer Data in proper format as specified by the Documentation or the Statement of Work in a Professional Services Agreement and that its Customer Data does not include personal identifying information (“PII”); (ii) its Personnel are familiar with the use and operation of the Application; and (iii) it does not introduce other software, data, or equipment having an adverse impact on the Application. Following any initial implementation assistance by Provider, Customer shall load the Customer Data and configure the Application, any Updates, and its internal processes, as needed, to operate the Application and any Updates in Customer’s computing environment. Customer, not Provider, shall have sole responsibility for the accuracy, quality, integrity, legality, reliability, appropriateness and right to use of all Customer Data, and Provider shall not be responsible or liable for any deletion, correction, destruction, damage, loss, or failure to store any Customer Data that is caused by Customer or User or the use or misuse of User IDs by a third party.</p><p><br/></p><p><strong>4.     INTELLECTUAL PROPERTY OWNERSHIP</strong></p><p>        4.1. <u>Provider IP</u>. This Agreement is not a sale and does not convey to Customer any rights of ownership in or related to the Application, or to the Intellectual Property Rights therein owned by Provider. Provider’s name, Provider’s logo, and the product names associated with the Application are trademarks of Provider or third parties, and no right or license is granted to use them. Provider (and its licensors) shall exclusively own all right, title, and interest in and to the Application, copies, modifications, and derivative works thereof. Provider shall own any suggestions, ideas, enhancement requests, feedback, recommendations, or other information provided by Customer or any other party relating to the Application, including all related Intellectual Property Rights thereto, specifically excluding Customer Data.<br/>4.2. <u>Customer Data</u>. Customer (and its licensors) shall exclusively own all right, title and interest in and to Customer Data and Intellectual Property Rights thereto.</p><p><br/></p><p><strong>5.     INTELLECTUAL PROPERTY INDEMNIFICATION</strong></p><p>        5.1. <u>Indemnified Claims</u>. Provider shall defend and indemnify Customer against any “Indemnified Claim,” meaning any third-party claim, suit, or proceeding arising out of direct infringement of any patent, copyright, trade secret, or other intellectual property right by the Application. Provider’s obligations set forth in this Section 7 do not apply to the extent that an Indemnified Claim arises out of: (a) Customer’s breach of this Agreement; or (b) use of the Application in combination with hardware or software not provided by Provider. In the event of an Indemnified Claim, Provider may exercise its right to terminate licenses and require return of the Software.</p><p>        5.2. <u>Litigation &amp; Additional Terms</u>. Provider’s obligations pursuant to Section 7 will only apply if Customer provides prompt written notice of and cooperates in the defense of the Indemnified Claim. Provider will control the defense of any Indemnified Claim, including appeals, negotiations, and any settlement or compromise thereof; provided Customer will have the right, not to be exercised unreasonably, to reject any settlement or compromise that requires that it admit wrongdoing or liability or subjects it to any ongoing affirmative obligations.</p><p><br/></p><p><strong>6.     FEES AND PAYMENT</strong></p><p>        6.1. <u>Subscription Fees and Payment</u>. Customer shall pay the Subscription Fees, in advance, for the right to access and use the Application during the applicable Subscription Period, as set forth in the Ordering Document. Subscription Fees shall be invoiced annually before the corresponding Subscription Period, which dates may be specified in the Ordering Document. Invoices shall be due and payable within thirty (30) days of the invoice date, and in no event later than one day before the start of the applicable Subscription Period. Any future Proposals shall be at Provider’s then-published rates or as otherwise agreed by the parties in the Proposal. All payment obligations for Subscription Fees are non-cancelable and all amounts paid are nonrefundable. Please refer to Schedule 5 – Invoicing and Payment for additional details.</p><p>        6.2. <u>Data Storage and Backup Fees</u>. The Subscription Fees include the amounts of online data storage and hourly data backups as set forth in the Proposal. If the amount of disk storage required exceeds these limits, Customer will be charged the then-current storage fees at the time the Subscription Fee is due. Provider shall use reasonable efforts to notify Customer when its usage approaches ninety percent (90%) of the allotted storage space; however, any failure by Provider to notify Customer shall not affect Customer’s responsibility for such additional storage charges. Any additional data storage shall be at Provider’s then applicable rates or as otherwise agreed in a Proposal.</p><p>        6.3. <u>Other Terms</u>. Invoicing and payment terms are set forth in Schedule 5 – Charging and Invoicing.</p><p><br/></p><p><strong>7.     DATA PROTECTION AND INFORMATION SECURITY</strong></p><p>Provider shall maintain and enforce reasonable technical and organizational safeguards against accidental or unlawful destruction, loss, alteration or unauthorized disclosure or access of the Customer Data that are at least equal to industry standards for applications similar to the Application. However, because the success of this process depends on equipment, software, and services over which Provider has limited control, Customer agrees that Provider has no responsibility or liability for the deletion or failure to store any Customer Data or communications maintained or transmitted by the Application. Customer shall be responsible for backing up its own Customer Data. Customer has set no limit on the number of transmissions Customer may send or receive through the Application or the amount of storage space used, except as provided in the Proposal, and Customer’s volume of transmissions may affect its Subscription Fees.</p><p><br/></p><p><strong>8.     REPRESENTATIONS AND WARRANTIES</strong></p><p>        8.1. <u>Provider Representations and Warranties</u>. Provider represents and warrants that: (i) Standard Support Services shall be performed in a professional and workmanlike manner; and (ii) Provider shall, prior to making a new feature of the Application available, (a) scan it with commercially available anti-virus software and shall use reasonable efforts to remove viruses capable of being detected with such software, (b) not intentionally include in the Application any viruses, worms, trap doors, Trojan horses or other malicious code. Except as expressly set forth in this Section, Provider makes no representations and warranties and hereby specifically disclaims, all representations and warranties express or implied, arising by law or otherwise, arising under or relating to this Agreement.</p><p>        8.2. <u>Conditions</u>. The warranties above are contingent upon: (i) the Application is implemented and operated by Customer in accordance with the Documentation; (ii) Customer notifies Provider of any warranty defect as promptly as reasonably possible after becoming aware of such defect, but in no event more than ten (10) calendar days after becoming aware of such defect; (iii) Customer has properly used all Updates made available with respect to the Application, and any updates recommended by Provider with respect to any third-party software products that affect the performance of the Application; (iv) Customer has properly maintained all associated equipment and software and provided the environmental conditions in accordance with applicable written specifications provided by the applicable manufacturer of such equipment and software; (v) Customer has not introduced other equipment or software that causes an adverse impact on the Application; (vi) Customer has paid all amounts due hereunder and is not in default of any provision of this Agreement; (vii) any legacy software with respect to which the Application is to operate contains clearly defined interfaces and correct integration code, and (viii) Customer has made no changes (nor permitted any changes to be made other than by or with the express approval of Provider) to the Application, except as may be permitted herein.</p><p>        8.3. <u>Remedy</u>. The parties negotiated this Section and it reflects a fair allocation of risk. Customer’s exclusive remedies, and Provider’s sole liability, with respect to any breach of this Section 10 will be, at Provider’s option, for Provider to (i) promptly correct the applicable material defects that affect performance of and access to the Application (provided that, Customer notifies Provider in writing of such defect within the applicable warranty period); (ii) provide a workaround that is substantially similar in form and function reasonable acceptable to Customer; or (iii) if neither of the foregoing are reasonably practicable, accept termination of Customer’s access and use of the Application and refund to Customer a pro-rata portion of unused, pre-paid Subscription Fees.</p><p>        8.4. <u>Cooperation</u>. Provider shall cooperate with Customer, at Customer’s sole expense, with respect to any investigation, inquiry or audit by any regulatory authority that supervises, oversees or regulates Customer during the Term of this Agreement and for such time thereafter as may be required by applicable law.</p><p><br/></p>
-	</div>
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:.5pt;margin-left:-.25pt;
+text-indent:0in;mso-list:none''>BACKGROUND </h1>
 
-	<p><br /></p>
-	<p><br /></p>
-	<p><br /></p>
+<p class=MsoNormal align=left style=''margin:0in;text-align:left;text-indent:
+0in;line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
 
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 3 - IMPLEMENTATION PROCESS SCHEDULE</h1>
-	<div id="main-content" class="wiki-content">
-        <p>This IMPLEMENTATION PROCESS SCHEDULE (this “Implementation Schedule”) is a Schedule to the Master Services Agreement to which this Schedule is attached. The Master Services Agreement and this Implementation Schedule, together with any other attached Schedules and Ordering Documents, together are the Agreement.</p><p><br/></p><p><strong>1. PRIMARY OBJECTIVE</strong></p><p>Provider will provide project management and consulting Services to assist Customer with the implementation of the iRely i21 solution as defined in the sections below.</p><p><br/></p><p><strong>2. RESPONSIBILITY MATRIX</strong></p><p>This responsibility matrix covers realization, final preparation and go-live/support phases of the project and the following key activities/deliverables apply. The following legend is applicable to the deliverable lists in this section:</p><p><em>Responsible (R)</em>:       Having an obligation to execute or provide deliverable as part of a job or role on project. Those who do the work to achieve the task.</p><p><em>Consulted (C)</em>:         Provides required Advice/Information to execute or provide deliverable.  Those whose opinions are sought, typically subject matter experts; and with whom there is two-way communication.</p><p><em>Informed (I)</em>:            Being informed about the deliverable details and knowledgeable and aware about the deliverable in order to respond if required.  Those who are kept up-to-date on progress, often only on completion of the task or deliverable; and with                                 whom there is just one-way communication.</p><p><em>Accountable (A)</em>:     Role on project that should be able to explain or substantiate the logic or reason behind the deliverable</p><p>                               The one person to oversee the correct and thorough completion of the deliverable or task, and the one who delegates work to the Responsible. An Accountable must sign off (Approve) on the work that the Responsible provides. There                                     must be only one Accountable specified for each task or deliverable.</p><p><br/></p><div class="table-wrap"><table class="wrapped relative-table" style="width: 64.3083%;border-collapse:collapse;"><colgroup><col style="width: 25.8604%;"/><col style="width: 60.5703%;"/><col style="width: 8.35792%;"/><col style="width: 5.21141%;"/></colgroup><thead><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Activity</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Customer</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>iRely</strong></p></td></tr></thead><tbody><tr><td rowspan="9" style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><br/></p><p><strong>Stage 1</strong></p><p><strong> </strong></p><p>BPR –</p><p>Solution Blueprint and Functional Design<br/><br/></p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>The activities of the BPR (Business Process Review) are centered primarily on three aspects:</p><p><br/></p><p>    Create and establish:</p><p>            Project team</p><p>            Steering committee</p><p>            Project charter</p><p>                        Clear measurable goals and objectives</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>                        Project governance</p><p>                                    Roles and responsibilities</p><p>                                    Reporting requirements</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>I</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>                        Data conversion strategy</p><p>                                    Only open transactions (or full conversion)</p><p>                                    Cutover strategy</p><p>                                    Data will be provided in iRely formats for conversion</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>A</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    Business/Functional aspects of the project.  Areas of focus include:</p><p>           Software Orientation for Project Team</p><p>                        System Review (on demo system)</p><p>                        Base function and setup</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>A</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>                        Conducting Business Analysis Sessions</p><p>                        Review Customer’s business flows</p><p>                        Use Case Design - Using a series of customer specific scenarios, the project team                          will demonstrate the system inputs, processes and outputs to illustrate the way                            the system will be utilized at go-live.</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>                        Identifying Transaction Data, Reference Data and Security Profiles that will be                                required at Go-live (commence the compilation of such data)</p><p>                                      Master Data</p><p>                                      Open transactions</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>C</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>                        Determining modifications to system, if any</p><p>                        Determining the End User Training Strategy</p><p>                        Determining the User Acceptance and Parallel Test Strategies (commence the                                compilation of the required scenarios and test cases) Preparing and Approving                            the BPR Document</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    Determining the Deployment Strategy</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AC</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    Business process re-engineering, if any</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td rowspan="2" style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage 2</strong></p><p><strong> </strong></p><p>Planning<br/><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Integration planning - Definition, design, specification of any intended integrations</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>C</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Create Detailed project plan based upon results of BPR stage</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td rowspan="6" style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage 3</strong></p><p><br/></p><p>System Configuration and Build<br/><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>During this stage, our efforts are principally on two areas: Configure the standard solution and design/build new RICEFWs*. Specific steps are:</p><p>    a.    Configuring set up data</p><p>    b.    Loading and approving Reference Data &amp; Security Profiles</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>A</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    c.     Configuring views to meet reporting requirements</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>A</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    d.    Detailed design, Coding, Review and Approval of Integrations between i21 and other            systems</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    e.     Loading and Configuring Integrations </p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    f.     Detailed Design, Coding, Review and Approval of Modifications</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>    g.    Installing &amp; Configuring Test &amp; Production environments<br/><br/></p><p>*RICEFW - Reports, Interfaces, Conversions, Extensions, Forms and Workflow</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>A</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td rowspan="2" style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage 4</strong></p><p><strong> </strong></p><p>Testing</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>During this stage, we will have a detailed execution of test plans. iRely will assist Customer by recording and sharing results that are required for Customer audit needs.<br/><br/></p><p>           Execute standard Unit and Functional test scripts</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>           Execute Client Functional Test Plan &amp; Evaluate results</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td rowspan="2" style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage 5</strong></p><p><br/></p><p>Training &amp; UAT (User Acceptance Testing)</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>The UAT will provide validation to confirm and approve the production-ready environment:<br/><br/></p><p>           Execute Key User Training (“Train the Trainers”)</p><p>           Simulation of daily activities in i21</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>A</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Execute Client User Acceptance Test Plan &amp; evaluate results</p><p>There could be multiple rounds of UAT</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage 6</strong></p><p>Parallel Testing</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Execute Production Parallel Test Plan &amp; Evaluate results</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td rowspan="4" style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage 7</strong></p><p><br/></p><p>Go-live and Hypercare<br/><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Activities include:</p><p>             Go/No-Go Decision for Go-Live</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>             Cutover from Legacy Systems to i21 in Production Environment</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>A</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>             Post Go-Live Support</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>             Transition to Support</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Stage 8</strong></p><p>Ongoing Support</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Ongoing support</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>AR</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>R</p></td></tr></tbody></table></div><p> </p><p><strong>3.     CUSTOMER RESPONSIBILITIES</strong></p><p>        3.1 Customer will dedicate appropriate personnel to the project as and when required. Customer will assign a lead project manager that will serve as the primary point of contact for the project.</p><p>        3.2 Customer will have overall accountability for the project. Customer resources will have the overall responsibility for:</p><ul><li>Customer resource coordination &amp; deliverables;</li><li>Identifying and documenting business scenarios;</li><li>User Acceptance &amp; Parallel Test Cases;</li><li>Compilation and Cleansing of Reference Data;</li><li>Determination of Security Profiles;</li><li>Executing User Acceptance Testing;</li><li>Provide the final requirements documentation for all interfaces and modifications;</li><li>Reviewing and approving any design documentation produced for interfaces and modifications;</li><li>Serve as primary point of contact for any needed third-party communications;</li><li>Providing the necessary physical and computer access required to Customer assets;</li><li>Customer will provide necessary project work environment conducive to the accomplishment of the implementation project.</li></ul><p><br/></p><p><strong>4.     PROVIDER RESPONSIBILITIES</strong></p><p>        4.1 Provider will provide a Project Manager. The Project Manager will facilitate the implementation project. The Project Manager will work in conjunction with Customer’s Project Manager to ensure the project is progressing within the mutually agreed upon project timeline and budget.</p><p>        4.2 Provider will complete the Services as outlined in the eight-stage implementation process above.</p><p>        4.3 Provider execute its obligations under the terms of this Implementation Schedule and the Project Plan.</p><p>        4.4 Provider will utilize suitably qualified technical resources familiar with the Services.</p><p>        4.5 Provider will deliver the project’s final Services/Deliverables in a timely manner and obtain Customer sign-off.</p><p><br/></p><p><strong>5.     ASSUMPTIONS</strong></p><p>Services under agreement may include:</p><ul><li>Services for eight-stage implementation process as described above;</li><li>Project Management;</li><li>Any modifications to the requirements described in this Implementation Schedule or the Project Plan will require written permission from both Customer and iRely project management, following the Change Control Procedure;</li><li>The implementation services will be delivered by iRely and Customer will not have to interface with a third party relating to any of the activities;</li><li>Provider personnel assigned to the work on the implementation project are technically qualified to grant Customer access to the Software, train Customer personnel and support Customer through the completion of this implementation;</li><li>Customer personnel are available and have the time to receive appropriate training and move the project forward;</li><li>The project will be executed remotely or occasionally on customer site as mutually determined between the parties;</li><li>Provider will not store Customer confidential information and Customer will not use Provider confidential information;</li><li>Testing will be conducted in a production environment, or production-like and dedicated environment for testing purposes;</li><li>The success of the implementation project relies on the Customer.</li></ul><p><br/></p><p><strong>6.     OUT OF SCOPE – REQUIRES CHANGE PROCEDURE</strong></p><p>The following items are out of scope of the implementation and will require the change procedure set forth in Schedule 6 – Change Procedure:</p><ul><li><span style="letter-spacing: 0.0px;">Planning or engineering work to be performed by Provider. New enhancements or reports. </span></li><li>Functionality modifications and additions that need additional programming.</li><li>Reports/Documents modifications and additions that need additional programming.</li><li>Data Conversion.</li><li>Any additional integrations that are not included in this Implementation Schedule or the Project Plan.</li><li>Technical support.</li></ul><p><br/></p><p><strong>7.     TIMETABLE AND CHANGE PROCEDURES</strong></p><p>        7.1 <u>Timetable</u>. Provider will begin developing the Solution on the Effective Date hereof and shall continue providing services and support until the Software is successfully implemented.</p><p>        7.2 <u>Acceptance</u>. Service is deemed accepted and consumed as service is delivered.</p><p>        7.3 <u>Change Control Procedure</u>. In the event the parties determine that the scope of the Ordering Document or the Project Plan requires modification, they will use the Change Control Procedure. Please refer to Schedule 6 – Change Procedure.</p><p><br/></p><p><strong>8.     TIMING</strong></p><p>Upon execution of an Ordering Document requiring an implementation in accordance with this Implementation Schedule, Provider and Customer will begin collaborating on a “Business Process Review” to determine the scope, timeline and cost of the implementation. After completion of the Business Process Review, Provider and Customer will agree to a “Project Plan” for the implementation.</p><p>Given the significant Customer effort needed for an implementation, it is important that Customer evaluates the requirements on its own resources when approving the Project Plan. Project Plans assume the availability of needed resources from Customer and no change in the agreed upon scope. Should customer availability or scope change become an issue, the dates for Project Plan milestones will be adjusted accordingly.</p><p><br/></p><p><strong>9.     FEES</strong></p><p>        9.1 <u>Invoicing</u>. Implementation and customization services are billed based on time and materials. Please refer to Schedule 5 – Invoicing and Payment, for rates and further details. Invoicing for Services are issued on a weekly basis. If payment is not timely received, Provider reserves the right to suspend performance until invoices are current.</p><p>        9.2 <u>Customization</u>. Customizations identified during implementation will follow Schedule 6 – Control Procedure. Customization may impact the go-live date, and the parties will mutually agree to modify the go-live date accordingly.</p><p><br/></p><p><strong>10.    ISSUE ESCALATION PROCEDURE</strong></p><p>        10.1 In the event that either party determines it is not getting adequate resolution to a problem that may have a material impact upon its obligations under the Project Plan or the completion of the work intended hereunder, the following represents the escalation path to be followed:</p><ul><li>When a conflict arises, the parties will first strive to work out the problem internally. If the person immediately involved cannot resolve the conflict within 48 hours, the Customer Project Manager and Provider Project Manager will meet to resolve the issue.</li><li>If, after two business days, the issue remains unresolved, either party may insist the issue be raised to the highest level of management to both parties.</li><li>If the issue is resolved, the resolution will be addressed in accordance with the Change Procedure.</li><li>If the issue remains unresolved, the Change Procedure will be put on hold so that the project can continue to move forward. The issue will remain open until both parties agree to a resolution or for 90 days, whichever is sooner. After 90 days, the Change will be closed.</li></ul>
-	</div>
+<p class=MsoNormal style=''margin:0in;text-indent:0in''>Provider is in the
+business of providing licensed access to software applications for managing
+extended enterprise data and development, implementation and other services for
+such applications.<span style=''mso-spacerun:yes''>  </span>Customer wishes to
+obtain licensed access to such applications and certain project management,
+development, implementation, consulting and other services from Provider, on
+the terms and conditions of this Master Agreement and Schedules thereto. </p>
 
-	<p><br /></p>
-	<p><br /></p>
-	<p><br /></p>
+<p class=MsoNormal align=left style=''margin:0in;text-align:left;text-indent:
+0in;line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
 
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 4 - MAINTENANCE SCHEDULE</h1>
-	<div id="main-content" class="wiki-content">
-        <p>This MAINTENANCE SCHEDULE (this “Maintenance Schedule”) is a Schedule to the Master Services Agreement to which this Schedule is attached. The Master Services Agreement and this Maintenance Schedule, together with any other attached Schedules and Ordering Documents, together are the Agreement.</p><p><br/></p><p><strong>1.     MAINTENANCE SERVICES</strong></p><p>        1.1. <u>Maintenance Services</u>. In exchange for the Maintenance Fee, Provider will provide Software support and maintenance services (collectively, &quot;Maintenance Services&quot;) to Customer during the term set forth in the Ordering Document. Maintenance Services consist of three primary components:</p><p>              1.1.1. Software updates that relate to tax and other accounting and regulatory changes. These changes are monitored by Customer and Provider and built into the software release cycle. This also covers cost related to improving processes and simplifying system functions.</p><p>              1.1.2. Improvements to the Products such as new features and functionality based on collective discussion with Customers.</p><p>              1.1.3. Software support services consisting of tools used to assist with troubleshooting Software issues. This includes help manuals, help desk tools, help desk ticketing system, telephone support, error correction, and the knowledgeable support team Provider employs.</p><p>        1.2. <u>Additional Services</u>. Additional services will be provided by Provider upon Customer request at the Professional Service Fee Rates listed on Schedule 5 – Invoicing and Payments.</p><p><br/><strong>2.     ERROR CORRECTION SERVICES</strong></p><p>        2.1. <u>Errors</u>. An “Error” is an event in which the Software does not perform as intended. Provider will exercise reasonable efforts to investigate and correct all Errors reported to Provider by Customer as Errors in accordance with this Schedule. Customer will inform Provider of any Errors by submitting a help desk ticket in Provider’s help desk system (or by phone if help desk system is not functioning correctly). In order to ensure timely resolution to errors, Customer must report, at a minimum, the following information:</p><ul><li>Version of Software</li><li>Instructions on how to reproduce the reported Error</li><li>User impacted</li><li>Any other necessary and/or useful information relating to identifying and reproducing the reported error.</li></ul><p>        2.2. <u>Error Classification</u>. Provider has 3 severity levels for Error classification. Each level has its own service level as described further in this section.</p><ul><li><em>Severity 1- Blocker</em>. An Error that is consistently blocking any of Customer’s material daily production processes. Workaround may not be possible. The customer may or may not be at risk of losing money from idle users or that they cannot perform sales or service because of the issue.</li><li><em>Severity 2- Major</em>. An Error that is not consistently blocking Customer’s material daily production process but the function is critical for periodic execution (e.g. batch posting, printing reports, closing year, import/export process). Also includes Errors where a reasonable workaround has been implemented until resolution in a future version.</li><li><em>Severity 3 - Standard</em>. An Error that leads to minor or no loss of function (e.g., cosmetic issues) where a workaround is not even required. These issues should not impede execution of any material business functions.</li></ul><p>        2.3. <u>Solution Path</u>. The solution path for each level of Severity is defined in the following charts based on plan type. If Provider is unable to complete resolution within such timeframe, Provider will continue to work to resolve such Error on a continuous basis (i.e., 24x7) until resolved.</p><h2 id="SCHEDULE4MAINTENANCESCHEDULE-STANDARDSUPPORTPLAN"><strong><em>STANDARD SUPPORT PLAN</em></strong></h2><div class="table-wrap"><table class="wrapped" style="border-collapse:collapse"><colgroup><col/><col/><col/><col/><col/></colgroup><thead><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Severity Level</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Response Time</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Patch Required</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Resolution Time</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Version Update</strong></p></td></tr></thead><tbody><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Severity 1</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>4 Hours from creation of Help Desk Ticket</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Yes</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>12 Hours</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Current Version</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Severity 2</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>8 Hours from creation of Help Desk Ticket</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Possibly</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>3 Business Days</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Current or Next Maintenance Release</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Severity 3</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>48 Hours from creation of Help Desk Ticket</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>No</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>By next major release</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Next Major Version</p></td></tr></tbody></table></div><p><br/></p><h2 id="SCHEDULE4MAINTENANCESCHEDULE-PREMIUMSUPPORTPLAN"><strong><em>PREMIUM SUPPORT PLAN</em></strong></h2><div class="table-wrap"><table class="wrapped" style="border-collapse:collapse"><colgroup><col/><col/><col/><col/><col/></colgroup><thead><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Severity Level</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Response Time</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Patch Required</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Resolution Time</strong></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p><strong>Version Update</strong></p></td></tr></thead><tbody><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Severity 1</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>2 Hours from creation of Help Desk Ticket</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Yes</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>8 Hours</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Current Version</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Severity 2</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>4 Hours from creation of Help Desk Ticket</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Possibly</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>2 Business Days</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Current or Next Maintenance Release</p></td></tr><tr><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Severity 3</p><p><br/></p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>32 Hours from creation of Help Desk Ticket</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>No</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>By next major release</p></td><td style="border: 1px solid #C1C7D0;padding: 7px 10px;vertical-align: top;text-align: left;"><p>Next Major Version</p></td></tr></tbody></table></div><p>        2.4. <u>Support Hours</u>. Support hours are 8 am to 5 pm Eastern Time (UTC – 5:00).</p><p><br/><strong>3.     EXCLUSIONS</strong></p><p>Provider shall have no obligation to support Software in respect of Errors attributable to (i) Altered or damaged Software (unless modified by Provider); (ii) Software problems caused by Customer’s negligence, abuse or misapplication, use of Software other than as specified; (iii) Software installed on any computer hardware that is not supported by Provider; or (iv)Other causes beyond the control of Provider.</p><p><br/><strong>4.     RELEASES</strong></p><p>        4.1. <u>Major Releases</u>. Provider typically has one major, primary release each year. Provider defines this as the “.##” version and is the first major release of software in each new year. As Customers onboard into Provider’s release schedule, all efforts are made to schedule all customers to the newest .1 version. Thereafter, the goal is for customers to have yearly updates to the next .1 version of the software.</p><p>        4.2. <u>Minor Releases</u>. Provider typically has one additional, official release each year. Provider defines the additional release as the .3 version. The .3 version is dedicated to new customers in the process of onboarding to Provider. The .3 version is focused on new development primarily geared towards new customers requiring development effort.</p><p>        4.3. <u>Maintenance Releases</u>. Provider also has multiple maintenance releases within each version of the software. Maintenance releases typically occur at least every 60 days.</p><p>        4.4. <u>Past Version Support</u>. Provider will provide to Customer the Maintenance Services for the current version of the Software and the one (1) release immediately preceding such current release. Provider will use commercially reasonable efforts to support other older Software release at Provider’s then current time and materials rates and otherwise on the terms set forth in this Agreement.</p><p><br/><strong>5.     COVERED SUPPORT SERVICES</strong></p><p>The Maintenance Services include support to:</p><ul><li>Isolate, document, and find circumventions for reported Errors;</li><li>Answer questions about specific details of procedures (including but not limited to discussing available features, options and limitations);</li><li>Work with Provider software development staff to provide safe hot fixes for Errors;</li><li>Address concerns with printed or online documentation by providing additional examples or explanations for concepts that require clarification;</li><li>Address specific questions and concerns that are related to the maintenance of Provider software;</li><li>Unlimited help desk ticketing system and toll-free telephone consultation, regarding the use and trouble-shooting of the Software and Enhancements; or</li><li>Logging service calls received from Customer, along with the eventual solution and correction time within Provider Help Desk ticketing system.</li></ul><p><br/></p><p><strong>6.     ADDITIONAL SERVICES</strong></p><p>        6.1. <u>Process for Additional Services</u>. From time to time after completion of the initial Services, Customer may request that Provider perform various additional services. Provider may make such Professional Services available to Customer based on the rates schedule in Schedule 5 – Invoicing and Payment. Professional Services will be documented by a written SOW or Proposal and work will not begin until such Ordering Document has been executed. If the work estimate is for 8 hours or less work, Customer may approve via a help desk ticket.</p><p>        6.2. <u>Maintenance Fees for Additional Services</u>. Professional Services related to development or new feature/function will include an adjustment to the annual maintenance rate. Adjustment will be billed prorate in current year and will be included in future annual maintenance invoices.</p><p><br/><strong>7.     FEES AND PAYMENT</strong></p><p>Maintenance Fees associated with the Maintenance Services are set forth in the Ordering Document. Invoicing and payment terms are set forth in Schedule 5 – Charging and Invoicing.</p><p><br/></p><p><strong>8.     RECOMMENCE</strong></p><p>In the event Customer cancel the Maintenance Services by electing non-renewal in accordance with the Master Agreement and later desires to recommence receiving Maintenance Services, Customer may do so provided that Customer pays Provider the maintenance fees that would have been due during the period of lapse.</p>
-	</div>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:0in;text-indent:0in''>NOW, THEREFORE, in consideration of the mutual
+promises, covenants and conditions contained herein, and for other good and
+valuable consideration, the receipt and sufficiency thereof the Parties hereby
+acknowledge, the Parties hereby agree as follows, such agreement evidenced by
+the Parties’ execution of the initial Ordering Document between the Parties
+and/or electronic assent provided in connection with such Ordering Document
+(or, as applicable, by means of any other commercially reasonable method of
+indicating the Parties’ assent): </p>
 
-	<p><br /></p>
-	<p><br /></p>
-	<p><br /></p>
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
 
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 5 - INVOICING AND PAYMENT</h1>
-	<div id="main-content" class="wiki-content">
-        <p>This INVOICING AND PAYMENT SCHEDULE (this “Invoicing and Payment Schedule”) is a Schedule to the Master Services Agreement to which this Schedule is attached.  The Master Services Agreement and this Invoicing and Payment Schedule, together with any other attached Schedules and Ordering Documents, together constitute the Agreement.</p><p><br/></p><p><strong style="letter-spacing: 0.0px;">1.     ORDERING DOCUMENT</strong></p><p>The Ordering Document(s) describe the Products and Services purchased and the applicable Fees.</p><p><br/></p><p><strong>2.     FEES</strong></p><p>        2.1. <u>Software License Fee</u>. The entire License Fee will be invoiced upon execution of an applicable Ordering Document. Installation will begin once payment is received. Payment must be received within 10 days to avoid project delay.</p><p>        2.2. <u>Maintenance Fee</u>. Maintenance services begin upon execution of an applicable Ordering Document. The minimum Maintenance Term is 3 years. Maintenance Fees are invoiced on a calendar basis—the initial Maintenance Fee is due upon execution of an applicable Ordering Document and will be pro-rated to the beginning of the next calendar year. Subsequent invoices for Maintenance will be issued approximately 30 days prior to the end of the calendar year and is due before January 1. Maintenance Fees may increase at a rate of no more than 5% annually. Upon renewal, then current Maintenance Fee will apply. Maintenance Services will automatically renew annually after the Initial Term.</p><p>        2.3. <u>Subscription Fee</u>. The minimum Subscription Period is 3 years. The Subscription Fee is paid annually. Payment for the first year is due prior to the commencement of the initial Subscription Period. Subsequent annual invoices will be delivered approximately 30 days prior to the anniversary of the beginning of the Subscription Period. Installation of the Application will begin once the initial payment is received. Subscription Fees may increase at a rate of no more than 5% annually within the Subscription Period. Upon renewal, then current Subscription Fees will apply. SaaS Subscriptions will automatically renew annually after the Initial Term.</p><p>        2.4. <u>Professional Services Fees</u>. Professional Service Fees are invoiced weekly, as incurred. If Professional Services are requested, a Charge Order will be created and issued to customer for approval prior to the work being completed. Change Orders are merely estimates and not firm commitments—cost for any project will be based on the actual hours incurred.</p><p>        2.5. <u>Hosting</u>. Hosting Services begin upon execution of an applicable Ordering Document. Hosting Fees are invoiced on a calendar basis—the initial Hosting Fee is due upon execution of an applicable Ordering Document and will be pro-rated to the beginning of the next calendar year. Subsequent invoices for Hosing Services will be issued approximately 30 days prior to the end of the calendar year and is due before January 1. Hosting Fees may increase at a rate of no more than 5% annually. Upon renewal, then current Hosting Fee will apply. Hosting Services will automatically renew annually after the Initial Term.</p><p>        2.6 <u>Travel and Expenses</u>. Any travel and related expenses will be invoiced during the weekly invoicing process. Travel, lodging and related expenses are reimbursed at actual cost. For travel hours, iRely and Customer will split the cost of associated travel time/service hours.  Onsite training requests will be charged an additional $25/hour.</p><p><br/></p><p><strong>3.     CUSTOM MODIFICATION/ENHANCEMENTS</strong></p><p>Customer’s annual Maintenance Fee will be adjusted to include maintenance rates for any completed custom modifications. Annual Maintenance Fees for custom modifications will be equal to 20% of the total actual cost of development of the modification. Customer will receive initial Maintenance Fee invoice related to modification(s) once such modification(s) released into production.  Beginning with the next annual Maintenance Fee invoice, the Maintenance Fee will reflect the new higher amount.</p><p><br/></p><p><strong>4.     CURRENT SERVICE RATES </strong></p><p>Hourly rates for Professional Services are as follows:</p><p>              $275 - SME / Business Unit Leader</p><p>              $250 – Sr. Project Management</p><p>              $225 – Project Management</p><p>              $200 - Implementation Lead</p><p>              $175 – Implementation Specialist</p><p>              $200 - Product Manager</p><p>              $200 – Development</p><p>              $200 – Data Conversion         </p><p>              $75 – Quality Assurance Team</p><p><br/></p><p><strong>5.     OTHER CONSIDERATIONS</strong></p><p>        5.1. All invoices will be in United States Dollars (unless agreed otherwise).</p><p>        5.2. All invoices are due 30 calendar days from delivery.</p><p>        5.3. All payments shall be made by check, automated clearing house (ACH) or electronic funds transfer (wire), provided that any payments over $100,000 may only be made by electronic funds transfer.</p><p>        5.4. Customer agrees to pay any sales, value-added or other similar taxes imposed by applicable law that Customer or Provider must pay based on the Products and/or Services, except for taxes based on Provider’s income.</p><p><br/></p><p><strong>6.     REMEDIES FOR NONPAYMENT</strong></p><p>If Customer fails to pay to Provider within 30 days of the date of invoice  any amount payable under this Agreement (including interest thereon) that is not the subject of a good faith dispute, in addition to all other rights and remedies which Provider may have at law or in equity, Provider may, in its sole discretion and without further notice to Customer, immediately suspend all applicable Services and the performance of any or all of its other obligations under this Agreement, and Provider will have no liability with respect to Customer’s use of any Products or Services until all past due amounts are settled.  Past due payments will be assessed a finance charge at a rate of 18% per annum (1.5% per month).  Provider reserves the right to impose a reconnection fee in the event Customer’s access to the SaaS Services is suspended and thereafter Customer requests renewed access to the SaaS Services. For the purposes of this Agreement, a “good faith dispute” means a good faith dispute by Customer of certain amounts invoiced under this Agreement.  A good faith dispute will be deemed to exist only if (a) Customer has given written notice of the dispute to Provider within 15 days of the date of an invoice and (b) the notice explains Customer''s position in reasonable detail.  A good faith dispute will not exist as to an invoice in its entirety merely because certain amounts on the invoice have been disputed.</p>
-	</div>
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>1.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>SCOPE OF AGREEMENT AND SCHEDULES<span
+style=''font-weight:normal''> </span></h1>
 
-	<p><br /></p>
-	<p><br /></p>
-	<p><br /></p>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:35.25pt;text-indent:0in''>This Master Agreement includes applicable
+Schedules, described below, that specify the types of Products and Services
+ordered by Customer through applicable Ordering Documents.<span
+style=''mso-spacerun:yes''>  </span>Each applicable Schedule is incorporated
+herein by reference.<span style=''mso-spacerun:yes''>  </span>Provider’s current
+forms of the Schedules listed below are available at<span
+style=''mso-spacerun:yes''>  </span><a href="http://help.irelyserver.com/"><span
+style=''color:blue''>http://help.irelyserver.com/</span></a><a
+href="http://help.irelyserver.com/"><span style=''color:black;text-decoration:
+none;text-underline:none''>,</span></a> as such forms may be periodically
+updated by Provider. </p>
 
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 6 - CHANGE PROCEDURE</h1>
-	<div id="main-content" class="wiki-content">
-        <p>This CHANGE PROCEDURE SCHEDULE (this “Change Procedure Schedule”) is a Schedule to the Master Services Agreement to which this Schedule is attached. The Master Services Agreement and this Change Procedure Schedule, together with any other attached Schedules and Ordering Documents, together are the Agreement.</p><p><br/></p><p><strong>1.     CHANGE IN SERVICE</strong></p><p>There may be instances where a change in the agreed upon Services is required. The scope of the project plan may change for many reasons. You may also request additional Professional Services and those requirements may change after executing a Change Order.</p><p>        1.1. Some instances when change may occur include:</p><ul><li>Additional training is requested or needed.</li><li>Additional setup is required.</li><li>Additional process flows are identified than were originally scoped.</li><li>Additional testing is required due to nuances/complexities in customer’s process flows.</li><li>Additional reporting is required to fulfill reporting needs.</li><li>Additional re-work is needed due to changing customer staff.</li><li>Additional reconciliation work is needed due to out of balance previous system data.</li><li>Data conversion services</li><li>Additional staff training beyond what was originally scoped.</li><li>Additional request for on-site services beyond the original scope.</li><li>Many other instances not identified and not in the original scope.</li></ul><p>        1.2. If it is deemed necessary to make a change to the cost/scope of the implementation project and add Additional Services:</p><p>              1.2.1. Provider will notify Customer’s project manager of out-of-scope items.</p><p>              1.2.2. Additional services will be documented by a written Change Order and work will not begin until such Ordering Document has been executed. If the work estimate is for 8 hours or less work, Customer may approve via a “Project Change Request” form. Approval must be provided by customer for any work that falls outside of scope.</p><p>              1.2.3. The Change Order will define, among other things:</p><ul><li>Description of Work</li><li>Estimated Cost</li><li>Change in go live date or completion of implementation</li></ul><p><br/><strong>2.    CHANGE IN DEVELOPMENT</strong></p><p>There may be instances where a modification to the Product is requested. Development changes may impact the scope of the project.</p><p>        2.1. Some instances when change may occur include:</p><ul><li>Requested change in process design due to current process flow</li><li>New Feature</li><li>Modified/New setting</li><li>Report Creation/Modification</li><li>Any other instances not identified and not in the original scope.</li></ul><p>        2.2. If it is deemed necessary to make a change to the cost/scope of the implementation project due to development requests:</p><p>              2.2.1. Provider will notify Customer’s project manager of out-of-scope items.</p><p>              2.2.2. Additional Services will be documented by a written SOW and work will not begin until such Ordering Document has been executed. Approval must be provided by customer for any work that falls outside of scope.</p><p>              2.2.3. The SOW will define, among other things:</p><ul><li>Description of work</li><li>Estimated Cost</li><li>Release Version</li><li>Change in go live date or completion of implementation</li></ul><p><br/></p><p><strong>3.     CHANGE IN LICENSE</strong></p><p>There may be instances where Customer would like to add additional Products during the implementation. Adding additional Products will impact the scope of the implementation.</p><p>        3.1. If it is deemed necessary to make a change to the cost/scope of the implementation project due to additional Products:</p><p>              3.1.1. Provider will notify Customer’s project manager of out-of-scope items.</p><p>              3.1.2. Additional Products will be documented by a written Proposal. Such Proposal will include additional Professional Services required for implementation of the additional Product(s).</p><p>              3.1.3. The Proposal will define, among other things:</p><p>                        3.1.3.1. Name of Product</p><p>                        3.1.3.2. Cost of Product and Maintenance</p><p>                        3.1.3.3. Release Version of installation</p><p>                        3.1.3.4. Change in go live date or completion of implementation.</p><p><br/></p><p><strong>4.     BUDGET ADJUSTMENT</strong></p><p>Project Managers will periodically review budget vs actual based on the Project Plan and Change Orders, as applicable. If actual hours are more or less than budget, the Project Manager will notify Customer. If actual hours/costs vary from budget by more than 20%, Provider will require a new Change Order to be created by the Project Manager and approved by the customer.</p><p><br/></p><p><strong>5.     NON-APPROVED</strong></p><p>If a help desk ticket or an SOW, as applicable, is not approved, Provider will not deliver the Additional Service described in the ticket. If the non-approval of a help desk ticket or SOW puts the project at risk, Provider will escalate to the Steering Committee meeting and other meetings if needed. Provider’s priority is to ensure success and maintain transparency throughout the implementation. Regardless of non-approved items, Provider will work with customer to deliver services efficiently and in a manner that is approved by the customer.</p><p><br/></p>
-	</div>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.1. <b style=''mso-bidi-font-weight:normal''>Schedule 1 –
+Proposal</b>, defines the scope of products and services to be provided under
+this Master Agreement and applicable Schedules.<span style=''mso-spacerun:yes''> 
+</span>Once agreed to by both Parties, each Proposal and SOW become an “<u
+style=''text-underline:black''>Ordering Document</u>” hereunder. </p>
 
-	<p><br /></p>
-	<p><br /></p>
-	<p><br /></p>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.2.<span style=''mso-spacerun:yes''>   </span><b
+style=''mso-bidi-font-weight:normal''>Schedule 2.1 – Software License Agreement</b>,
+governs the licensing of Software, if Customer has elected to use the Software
+installed on its own servers or as hosted by Provider. </p>
 
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 7 - HOSTING SCHEDULE</h1>
-	<div id="main-content" class="wiki-content">
-        <p>This HOSTING SCHEDULE (this “Hosting Schedule”) is a Schedule to the Master Services Agreement to which this Schedule is attached. The Master Services Agreement and this Hosting Schedule, together with any other attached Schedules and Ordering Documents, together are the Agreement.</p><p><br/></p><p><strong>1.     THE HOSTING SERVICES</strong></p><p>        1.1. <u>Hosting the Software</u>. Customers that enter into a Software License may elect to host the Software on their own servers or elect to have the Software hosted by Provider (the “Hosting Services”), If Customer elects to purchase the Hosting Services, Provider shall provide to Customer access and use of the Software described in Schedule 1 - Proposal, for the period specified therein (the “Hosting Period”), in consideration of payment of the applicable Hosting Fees.</p><p>        1.2. <u>Service Level Agreement</u>. Provider will use commercially reasonable efforts to provide the Hosting Services 99.9% of the time, as measured each calendar quarter. If Provider is unable to meet this service level, Customer will be eligible to receive a credit to apply to future Hosting Fees based upon the prorated Unavailability for that calendar quarter. “Unavailability” means that the Software is inaccessible due to the Hosting Services, provided that Unavailability that is a result of scheduled maintenance will not be considered for service credit calculations. Any credit for Unavailability will be calculated by dividing the number of minutes of Unavailability by the total number of minutes in that calendar quarter.</p><p>        1.3. <u>Hosting Restrictions</u>. The Hosting Services may only be used to host the Software and may not be used for any other means. Provider will not exercise control over the content of the information passing through the network, provided that, Provider reserves the right to police its network to verify compliance with all agreed upon the Agreement.</p><p><br/></p><p><strong>2.     CUSTOMER DATA OWNERSHIP</strong></p><p>Customer (and its licensors) shall exclusively own all right, title and interest in and to Customer Data and Intellectual Property Rights thereto.</p><p><br/></p><p><strong>3.     FEES AND PAYMENT</strong></p><p>        3.1. <u>Hosting Fees and Payment</u>. Customer shall pay the Hosting Fees, in advance, for the hosting of the Software during the Term, as set forth in the Ordering Document. Hosting Fees shall be invoiced annually before each calendar year, which dates may be specified in the Ordering Document. Invoices shall be due and payable within thirty (30) days of the invoice date, and in no event later than one day before the start of the applicable Subscription Period. Any future Proposals shall be at Provider’s then-published rates or as otherwise agreed by the parties in the Proposal. All payment obligations for Subscription Fees are non-cancelable and all amounts paid are nonrefundable. Please refer to Schedule 5 – Invoicing and Payment for additional details.</p><p>        3.2. <u>Data Storage and Backup Fees</u>. The Subscription Fees include the amounts of online data storage and hourly data backups as set forth in the Proposal. If the amount of disk storage required exceeds these limits, Customer will be charged the then-current storage fees at the time the Subscription Fee is due. Provider shall use reasonable efforts to notify Customer when its usage approaches ninety percent (90%) of the allotted storage space; however, any failure by Provider to notify Customer shall not affect Customer’s responsibility for such additional storage charges. Any additional data storage shall be at Provider’s then applicable rates or as otherwise agreed in a Proposal.</p><p>        3.3. <u>Other Terms</u>. Invoicing and payment terms are set forth in Schedule 5 – Charging and Invoicing.</p><p><br/></p><p><strong>4.     DATA PROTECTION AND INFORMATION SECURITY</strong></p><p>Provider shall maintain and enforce reasonable technical and organizational safeguards against accidental or unlawful destruction, loss, alteration or unauthorized disclosure or access of the Customer Data that are at least equal to industry standards for applications similar to the Application. However, because the success of this process depends on equipment, software, and services over which Provider has limited control, Customer agrees that Provider has no responsibility or liability for the deletion or failure to store any Customer Data or communications maintained or transmitted by the Application. Customer shall be responsible for backing up its own Customer Data. Customer has set no limit on the number of transmissions Customer may send or receive through the Application or the amount of storage space used, except as provided in the Proposal, and Customer’s volume of transmissions may affect its Hosting Fees.</p><p><br/></p>
-	</div>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.3. <b style=''mso-bidi-font-weight:normal''>Schedule 2.2 –
+SaaS Agreement</b>, governs the provision of the SaaS Services, if Customer has
+elected to use the SaaS Services. </p>
 
-	<p><br /></p>
-	<p><br /></p>
-	<p><br /></p>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.4. <b style=''mso-bidi-font-weight:normal''>Schedule 3 –
+Statement of Work (SOW),</b> describes the implementation process and related
+services and processes for the Application. </p>
 
-	<h1 id="title-text" class="with-breadcrumbs">SCHEDULE 8 - iRely PRIVACY POLICY</h1>
-	<div id="main-content" class="wiki-content">
-        <p><strong>Effective Date: July 1, 2018</strong></p><p><strong>Last Revised: December 27, 2019</strong></p><p>Here at iRely, LLC. (<strong>“iRely” “we”</strong> and<strong> “us”</strong>), we understand and respect your concerns about the use of your personal data. This Privacy Policy (the “Policy”) explains what personal date we collect, how we use that information, and your privacy rights.</p><p><br/></p><p><strong>1.     DEFINITIONS</strong></p><p>For purposes of this Policy, the following definitions shall apply:</p><ul><li>“Data Subject” means an identified or identifiable natural person; an identifiable natural person is one who can be identified, directly or indirectly, in particular by reference to an identifier such as a name, an identification number, location data, an online identifier or to one or more factors specific to the physical, physiological, genetic, mental, economic, cultural or social identity of that natural person.</li><li>“GDPR” refers to the European General Data Protection Regulation (Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016).</li><li>“EU” (European Union) refers to those countries that are members of the European Union.</li><li>“EEA” (European Economic Area) refers to those countries that are members of the European Economic Area.</li><li>“Personal Data” means any information relating to a Data Subject.</li><li>“Privacy Shield Principles” mean the Privacy Shield Principles enumerated under the EU-U.S. Privacy Shield Framework and the Swiss-U.S. Privacy Shield Framework.</li><li>“Third Party” means any person that is not an employee or agent of iRely.</li></ul><p><br/></p><p><strong>2.     PRIVACY PRINCIPLES</strong></p><p>The privacy principles expressed in this Policy are based on the Privacy Shield Principles enumerated under the EU-U.S. Privacy Shield Framework and the Swiss-U.S. Privacy Shield Framework.</p><p><br/></p><p><strong>3.     COLLECTION AND USE OF PERSONAL DATA</strong></p><p>This Policy applies to all personal data received by iRely in any format including electronic, paper or verbal. iRely collects and processes personal data from current and former employees, as well as applicants for employment, clients, and prospective clients, through its Internet website, its Intranet site, carrier portals, electronic mail, and traditional mail.  All personal data collected by iRely will be used for legitimate business purposes consistent with this Policy.</p><ul><li><strong><u>Personal Data Collected</u></strong><ul><li>We only collect personal data that you provide to us.</li><li>If you register for certain Services on iRely’s website (the “Website”), you will be asked to provide certain personally identifiable information as part of the registration process, such as first and last name, e-mail address, telephone number.</li><li>In addition, in using the services provided by iRely (the “Services”), you may be asked to provide additional information about the hedge funds that you represent or manage (if applicable), investment parameters, personal financial and account information, information relating to services performed for or transactions entered into on behalf of a hedge fund or another registered user, and data or analyses derived from such non-public personal information.</li><li>You may visit our Website and choose not to provide some personal information, but that will limit our ability to communicate with you or fulfill your requests. By using our Website and providing personal information, you consent to our privacy policy.</li><li>We also may use personally identifiable information to develop, offer, and deliver products and services; respond to inquiries from you or your representative; or to fulfill legal and regulatory requirements.</li><li>iRely may collect non-public personal data about you from any of the following sources:<ul><li>From you or your representative on applications, registrations, or other forms (for example, your name, address, assets and income);</li><li>From you or your representative regarding your preferences (for example, based on your activity on our Website);</li><li>From other sources with your consent or with the consent of your representative (for example, from other institutions such as credit reporting agencies);</li><li>From investment activity (for example, your investments in private placements);</li><li>From information you have listed on any public area of your company’s website.</li><li>From other interactions with iRely (for example, discussions with our customer service staff or your entry of information into our interactive tools); and</li><li>From email correspondence from you or phone conversations with you (we may gather the information in a file specific to you).</li></ul></li></ul></li><li><strong><u>Non-Personal Information Collected</u></strong><ul><li>We also may collect certain non-personally identifiable information when you visit the Website.  This information includes the type of Internet browser and operating system you are using, the domain name of your Internet service provider, the URL that you visited before you came to our Website, the URL to which you next go, and your IP (Internet Protocol) address, pages visited, and average time spent on our Website. This information may be used, for example, to alert you to software compatibility issues, or it may be analyzed to improve our Website design and functionality. When you use the contact features of the Website, you consent to the review and internal use of your communication by iRely. We also may use non-personally identifiable information in the aggregate to analyze Website usage and to gather broad demographic information.</li></ul></li><li><strong><u>Cookies </u></strong><ul><li>We also receive information through cookies, clear GIFs, pixel tags, and other similar technologies. This information often does not reveal your identity directly, but in some countries, including the EEA, it is considered personal data.</li><li>We use cookies to improve and customize your browsing experience. For example, cookies permit the Website to remember that you have registered, which makes it possible for you to enter your log in ID and password less frequently and which allows us to speed up your activities on the Website.</li><li>Most web browsers are initially set to accept cookies. However, you can block, disable, or delete cookies, if desired. This often can be done by changing your internet software browsing settings. It also may be possible to configure your browser settings to enable acceptance of specific cookies or to notify you each time a new cookie is about to be stored on your computer enabling you to decide whether to accept or reject the cookie. To manage your use of cookies there are various resources available to you, for example the “Help” section on your browser may assist you. You also can disable or delete the stored data used by technology like cookies, such as Local Shared Objects or Flash cookies, by managing your browser’s “add-on settings” or visiting the website of the browser’s manufacturer.  To learn more about how cookies can be managed, blocked, disabled, or deleted, visit <a href="http://www.allaboutcookies.org" class="external-link" rel="nofollow">allaboutcookies.org</a>.  However, as our cookies allow you to access some of our Website’s features, we recommend that you leave cookies enabled, because, otherwise, if the cookies are disabled or deleted, it may mean that you experience reduced functionality or will be prevented from using the Website altogether. </li><li>By accessing or using our Website or online services, you consent to iRely using cookies. If you refuse to accept cookies by adjusting your browser setting or taking any of the other kinds of actions discussed above, some or all areas of our Website or online services may not function properly or may not be accessible.</li></ul></li><li><strong><u>Our Use of Personal Data</u></strong><ul><li>Generally, iRely will not share, rent, sell or otherwise disclose any of your personal information except with your permission.  However, iRely may disclose personal information in the following ways:<ul><li>If you are a qualified investor, as necessary to enable managers or representatives of private investment funds to make determinations with respect to the eligibility and suitability of you as a qualified investor, and to contact you for purposes of discussing investment opportunities in private investment funds;</li><li>If you are a manager or representative of a private investment fund, as necessary to enable qualified investors who are registered users to make determinations with respect to the eligibility and suitability of such investment fund, and to contact you for purposes of discussing such investment opportunities;</li><li>In using certain of the services, some of your personal information will be displayed either to other persons or entities whom you designate, or to the public;</li><li>Affiliates, including affiliated services providers;</li><li>We may disclose your personal information to our third-party contractors, service providers, and agents who perform services for iRely. These contractors and service providers are permitted to use the personal information only for the purposes of such services;</li><li>We may be legally obligated to disclose personally identifiable information to the government, law enforcement officials or third parties under certain circumstances, for example, in response to legal process, court order or a subpoena and tax reporting. We also may disclose such information where we believe it is necessary to investigate, prevent, or take action regarding illegal activities, suspected fraud, unauthorized access, situations involving potential threats to the physical safety of any person, violations of our Terms of Use, abuse of this Website, security breaches of this Website, or as necessary to protect our systems, business, users or others or as otherwise required by law;</li><li>We may disclose and transfer your information as part of a merger, acquisition or other sale or disposition of our assets or business;</li><li>Other organizations, with your consent or as directed by your representative; and</li><li>Other organizations, as permitted or required by the laws that protect your privacy (for example, for fraud prevention).</li><li>We require each of the above parties to adhere to our privacy standards or substantially similar standards for non-disclosure and protection of personal information and to use this information only for the limited purpose for which it was shared. Individuals interact with us in a variety of ways, and under some of these variations, we may exchange information with parties in addition to those described above.</li><li>We may also share all individual investor information, under joint marketing agreements with nonaffiliated financial services business partners, to offer discounts or other special access to products and services. In addition, we may disclose aggregated information to advertisers and for marketing or promotional purposes. In these situations, we do not disclose to these entities any information that could be used to personally identify you.</li><li>If you are a former customer, your personal data is treated in the same manner as the personal data of current customers.</li></ul></li></ul></li></ul><ul><li><strong><u>Our Retention of Personal Data</u></strong><ul><li>iRely will retain personal data while we have a justifiable business need to do so, unless a longer retention period is required or permitted by law (such as tax, legal, accounting, or other purposes). For example, if you are a customer, we will keep your personal data for the duration of the contractual relationship you or your company has with us and after the end of that relationship for as long as necessary to perform the functions set forth above or to comply with legal obligations. When we have no justifiable business need to process your personal data, we will either delete or anonymize it, or if this is not possible, we will securely store your personal data and isolate it from any further processing until deletion is possible.</li></ul></li></ul><p><br/></p><p><strong>4.     SECURITY</strong></p><p>iRely uses administrative, organizational, technical, and physical safeguards to protect your personal data.  We will take reasonable precautions to protect personal data in our possession from loss, misuse and unauthorized access, disclosure, alteration and destruction. With respect to information given on the Internet, iRely uses a variety of proven protections to maintain the security of your online session. This may include the use of firewall barriers, encryption techniques and authentication procedures.  We require our partners to use appropriate security measures.</p><p><br/></p><p><strong>5.     USER ACCESS AND CHOICE</strong></p><ul><li>You are entitled to ask us for a copy of your personal data, to correct it, erase or restrict its processing, or to ask us to transfer (parts of) this data to other organizations. You also have the right to object to certain processing activities, such as the profiling we may perform for the purposes of direct marketing as discussed above in this Policy. Where we have asked for your consent to process your personal data, you have the right to withdraw this consent, for example, by using the opt-out or unsubscribe functionalities in our communications with you.  These rights can be limited where we can demonstrate that we have a legal requirement or legitimate basis to process your personal data, and under such circumstances, we are able to retain your data even if you withdraw your consent.</li><li>If you wish to make use of any of these rights, please contact our Data Privacy Officer by e-mail or postal mail at the contact information provided below for the Data Privacy Officer or, as applicable, by using opt-out or unsubscribe functionalities in our communications with you. We will respond to your request within 30 days. If you are not satisfied with how we handle such requests or how we otherwise process your personal data, you can seek to have the matter addressed through the dispute resolution program administered by JAMS; for more information on how to initiate a matter with JAMS, please see <a href="https://www.jamsadr.com/file-an-eu-us-privacy-shield-or-safe-harbor-claim" class="external-link" rel="nofollow">https://www.jamsadr.com/file-an-eu-us-privacy-shield-or-safe-harbor-claim</a>.</li></ul><p><br/></p><p><strong>6.     LINKED WEBSITES AND OTHER THIRD PARTIES</strong></p><p>This Privacy Policy only addresses the use and disclosure of personal data that we collect from you.  The Website, or services on the Website, may contain links to other websites whose information, security, and privacy practices may be different than ours.  You should consult the other websites'' privacy policies and terms of use since we do not control information that is submitted to, or collected by, these third parties or the content of those linked websites. Once you access another website, you are subject to the privacy policy and terms of use of that website.</p><p><br/></p><p><strong>7.     CHILDREN’S PRIVACY</strong></p><p>The Website and its services are not directed toward children under the age of 14.  iRely will not knowingly request personally identifiable information from anyone under the age of 14, and if iRely becomes aware that any such information has been collected, iRely will delete it.</p><p><br/></p><p><strong>8.     CHANGES TO THIS POLICY</strong></p><p>This Policy was last revised on December 27, 2019.  iRely reserves the right to change, modify, or amend this Policy at any time. When the Policy is changed, modified, and/or amended, the revised Policy will be posted on our website. If required by applicable law, we will notify you of any material changes to the Policy, and we will provide such notification by means of posting a notice on our website prior to the changes becoming effective. Any revised privacy policy will only apply prospectively to personal data collected or modified after the effective date of the revised policy.</p><p><br/></p><p><strong>9.     CONTACT INFORMATION</strong></p><p>If you have any questions regarding this Policy, you can write to iRely’s Data Privacy Officer, who may be contacted by telephone at 1-800-433-5724, by e-mail at <a href="mailto:billing@irely.com" class="external-link" rel="nofollow">billing@iRely.com</a>, or by postal mail at:</p><p>iRely</p><p>Attn: Data Privacy Officer</p><p>iRely, LLC</p><p>4242 Flagstaff Cv.</p><p>Fort Wayne, IN  46815</p><p><br/></p>
-	</div>
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.5. <b style=''mso-bidi-font-weight:normal''>Schedule 4 –
+Maintenance Agreement</b>, describes the Maintenance Services that Provider may
+provide to Customer. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.6. <b style=''mso-bidi-font-weight:normal''>Schedule 5 –
+Invoicing and Payment</b>, describes Provider’s invoicing procedures and
+Customer''s payment obligations. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.7. <b style=''mso-bidi-font-weight:normal''>Schedule 6 –
+Change Procedure,</b> describes the process by which the Parties may make
+changes to the scope of products and services during the Term of this Master
+Agreement. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>1.8. <b style=''mso-bidi-font-weight:normal''>Schedule 7 –
+Hosting Agreement</b>, governs Provider''s hosting of the Application and
+Customer Data on its servers. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.05pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>2.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>DEFINITIONS<span style=''font-weight:normal''> </span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:35.25pt;text-indent:0in''>For the purposes of this Master Agreement
+and Schedules, the terms set forth below have the applicable meanings ascribed
+in this <u style=''text-underline:black''>Section 2</u>.<span
+style=''mso-spacerun:yes''>  </span>Additional capitalized terms defined
+elsewhere in this Master Agreement or Schedules have the respective meanings
+ascribed therein. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.1. &quot;<u style=''text-underline:black''>Affiliate</u>&quot;
+means, with respect to a specified Person, any Person which directly or
+indirectly controls, is controlled by, or is under common control with the
+specified Person as of the date of this Master Agreement, for as long as such
+relationship remains in effect; &quot;<u style=''text-underline:black''>control</u>&quot;
+and cognates means the direct or indirect beneficial ownership of a majority
+interest in the voting stock, or other ownership interests, of such Person, or
+the power to elect at least a majority of the directors or trustees of such
+Person, or majority control of such Person, or such other relationship that
+constitutes actual control. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.2. &quot;<u style=''text-underline:black''>Application</u>&quot;
+means, collectively, the Products, Deliverables, and Services to which Customer
+may have access pursuant to this Master Agreement and applicable Schedules. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.3. &quot;<u style=''text-underline:black''>Confidential
+Information</u>&quot; means all financial, technical, strategic, marketing, and
+other information relating to a disclosing Party or its actual or prospective
+business, products, or technology that may be, or has been, furnished or
+disclosed to the other Party by, or acquired by receiving Party, directly or
+indirectly from the disclosing Party, whether disclosed orally or in writing or
+electronically or some other form. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.4.<span style=''mso-spacerun:yes''>   </span>“<u
+style=''text-underline:black''>Customer Data</u>&quot; means any data,
+information, content or material which Customer or its Affiliates enter, load
+onto, or use in connection with the Application, and all results from
+processing such items through the Application. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.5. &quot;<u style=''text-underline:black''>Deliverables</u>&quot;
+means Software modifications and other items created by Provider for Customer
+during the performance of Professional Services and pursuant to an
+Implementation Project Plan. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.6. &quot;<u style=''text-underline:black''>Documentation</u>&quot;
+means the materials created by or on behalf of Provider that describe or relate
+to the functional, operational or performance capabilities of the Application,
+regardless of whether such materials are in written or digital form, including all
+operator’s and user manuals, training materials, guides, commentary, technical,
+design or functional specifications, requirements documents, product
+descriptions, proposals, schedules, listings and other materials related to the
+Software. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.7. &quot;<u style=''text-underline:black''>Fees</u>&quot;
+means, collectively, the applicable license, subscription, maintenance,
+hosting, professional services and other Provider fees described in the
+Ordering Documents and payable in accordance with <b style=''mso-bidi-font-weight:
+normal''>Schedule 5-Invoicing and Payment.</b> </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.8. &quot;<u style=''text-underline:black''>Intellectual
+Property Rights</u>&quot; means all (a) copyrights and copyrightable works,
+whether registered or unregistered; (b) trademarks, service marks, trade dress,
+logos, registered designs, trade and business names (including internet domain
+names, corporate names, and e-mail addresses), whether registered or
+unregistered; (c) patents, patent applications, patent disclosures, mask works
+and inventions (whether patentable or not); (d) trade secrets, know-how, data
+privacy rights, database rights, know-how, and rights in designs; and (e) all
+other forms of intellectual property or proprietary rights, and derivative
+works thereof; in each case in every jurisdiction worldwide. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:7.6pt;
+margin-left:62.75pt;line-height:98%''>2.9. &quot;<u style=''text-underline:black''>Ordering
+Document</u>&quot; means, collectively, <b style=''mso-bidi-font-weight:normal''>Schedule
+1 - Proposal</b> to this Master Agreement and all subsequent proposals and SOWs
+agreed to by the Parties in accordance with this Master Agreement. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.10. &quot;<u style=''text-underline:black''>Permitted
+Users</u>&quot; means employees of Customer and of Customer Affiliates who are
+expressly authorized to use the Application in accordance with this Master
+Agreement and who are specifically supplied user identifications and/or
+passwords in accordance with this Master Agreement. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:7.6pt;
+margin-left:62.75pt;line-height:98%''>2.11. “<u style=''text-underline:black''>Person</u>”
+means any individual, sole proprietorship, joint venture, partnership,
+corporation, company, firm, association, cooperative, trust, estate,
+government, governmental agency, regulatory authority or other entity of any
+nature. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.12. &quot;<u style=''text-underline:black''>Products</u>&quot;
+means, collectively, the Software and Documentation provided by Provider as set
+forth in either <b style=''mso-bidi-font-weight:normal''>Schedule 2.1 – Software
+License Agreement</b> or <b style=''mso-bidi-font-weight:normal''>Schedule 2.2 –
+SaaS Agreement</b>, as applicable. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.13. &quot;<u style=''text-underline:black''>Professional
+Services</u>&quot; means custom software development and other professional
+services provided by Provider in connection with implementation or ongoing use
+of the Application. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:7.6pt;
+margin-left:62.75pt;line-height:98%''>2.14. “<u style=''text-underline:black''>Proprietary
+Provider Items</u>” means, collectively, the Application, the object code and
+the source code for the Application, the visual expressions, screen formats,
+report formats and other design features of the Application, all development
+tools and methodologies used in connection with the Application and other
+Provider services, as applicable, all ideas, methods, algorithms, formulae and
+concepts used in developing and/or incorporated into the Application, all
+future modifications, revisions, updates, releases, refinements, improvements
+and enhancements of the Application, all Intellectual Property Rights in such
+foregoing items, and all copies of the foregoing. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.15. &quot;<u style=''text-underline:black''>Services</u>&quot;
+means, collectively, the Professional Services and all other services described
+in the Ordering Documents. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.16.<span style=''mso-spacerun:yes''>  </span>“<u
+style=''text-underline:black''>Software</u>” means the Provider software
+described in <b style=''mso-bidi-font-weight:normal''>Schedule 2.1 – Software
+License Agreement </b>or <b style=''mso-bidi-font-weight:normal''>Schedule 2.2 –
+SaaS Agreement</b>, as applicable, including all Updates to such software. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.17. &quot;<u style=''text-underline:black''>SOW</u>&quot;
+means a Statement of Work created as described in <u style=''text-underline:
+black''>Schedule 3 – Statement of</u> <u style=''text-underline:black''>Work</u>,
+which sets forth the Deliverables, timelines and cost estimates for
+Professional Services required as a result of the implementation process or
+otherwise as a result of a Change Procedure described in <b style=''mso-bidi-font-weight:
+normal''>Schedule 6 – Change Procedure</b>, such SOW constituting Customer’s
+acceptance of Provider’s costs and other terms and conditions for such
+Professional Services and Deliverables. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>2.18. &quot;<u style=''text-underline:black''>Subscription</u>&quot;
+means Customer’s right to use and access the Application as described in<b
+style=''mso-bidi-font-weight:normal''> <u style=''text-underline:black''>Schedule
+2.2 – SaaS Agreement</u></b>, upon payment of all applicable subscription Fees.
+</p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:.5in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>3.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>PERFORMANCE OF SERVICES<span style=''font-weight:
+normal''> </span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:35.25pt;text-indent:0in''>Provider will use commercially reasonable
+efforts to ensure that all Services will be performed in a workmanlike and
+professional manner by qualified representatives of Provider who are fluent in
+written and spoken English. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:.5in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>4.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>MAINTENANCE SERVICES<span style=''font-weight:
+normal''> </span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:35.25pt;text-indent:0in''>Maintenance Services available to Customer
+are as described in <b style=''mso-bidi-font-weight:normal''>Schedule 4 –
+Maintenance Agreement.</b> </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>5.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>PAYMENT AND INVOICING<span style=''font-weight:
+normal''> </span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:35.25pt;text-indent:0in''>Invoicing and payment terms for Products
+and Services is described in <b style=''mso-bidi-font-weight:normal''>Schedule 5
+– Payment and Invoicing</b>. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.5pt;margin-left:0in;text-align:left;text-indent:0in;line-height:
+107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:.5pt;margin-left:35.25pt;
+text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>6.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>CONFIDENTIALITY AND OWNERSHIP<span
+style=''font-weight:normal''> </span></h1>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.5pt;margin-left:.75in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>6.1.<span style=''font-family:"Arial",sans-serif;
+mso-fareast-font-family:Arial''> </span><u style=''text-underline:black''>Confidential
+Information</u>.<span style=''mso-spacerun:yes''>  </span>During the term of this
+Master Agreement and in perpetuity thereafter, each Party will keep in
+confidence all of the Confidential Information of the other <span class=GramE>party,
+and</span> will not use such Confidential Information of the other Party
+without such other Party’s prior written consent.<span
+style=''mso-spacerun:yes''>  </span>No Party will disclose the Confidential
+Information of any other party to any Person, except to its own employees,
+agents and independent contractors to whom it is necessary to disclose the
+Confidential Information </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:63.35pt;text-indent:0in''>for the sole purpose of performing their
+duties and/or exercising their rights under this Master Agreement, and who have
+agreed to receive the Confidential Information under terms at least as
+restrictive as those specified in this Master Agreement.<span
+style=''mso-spacerun:yes''>  </span>Each Party will maintain the confidentiality
+of the other Party’s Confidential Information using, at a minimum, the standard
+of care that an ordinarily prudent Person would exercise to maintain the
+secrecy of its own most confidential information.<span
+style=''mso-spacerun:yes''>  </span>Each Party will immediately give notice to
+the other Party of any unauthorized use or disclosure of the other Party’s Confidential
+Information.<span style=''mso-spacerun:yes''>  </span>Each Party agrees to assist
+the other Party in remedying such unauthorized use or disclosure of
+Confidential Information.<span style=''mso-spacerun:yes''>  </span>Each Party
+will return or destroy all copies of Confidential Information of the other
+Party, upon the other Party’s reasonable request, and will provide a
+certification in writing to such effect. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.65pt;margin-left:63.35pt;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:0in;
+margin-left:62.75pt;line-height:98%''>6.2.<span style=''font-family:"Arial",sans-serif;
+mso-fareast-font-family:Arial''> </span><u style=''text-underline:black''>Proprietary
+Provider Items and Ownership</u>.<span style=''mso-spacerun:yes''>  </span>The
+Proprietary Provider Items are trade secrets and proprietary property of
+Provider, having great commercial value to Provider.<span
+style=''mso-spacerun:yes''>  </span>All Proprietary Provider Items made available
+to Customer under this Master Agreement are being provided on a strictly
+confidential and limited-use basis.<span style=''mso-spacerun:yes''>  </span>Customer
+will not, directly or indirectly, communicate, publish, display, loan, give or
+otherwise disclose any Proprietary Provider Item to any Person, or permit any
+Person to have access to or possession of any Proprietary Provider Item.<span
+style=''mso-spacerun:yes''>  </span>Title to all Proprietary Provider Items and
+all related Intellectual Property Rights will be and remain exclusively with
+Provider, even with respect to such items that were created by Provider
+specifically for or on behalf of Customer and <span class=GramE>whether or not</span>
+such were created with reference to Customer IP (as defined below).<span
+style=''mso-spacerun:yes''>  </span>This Master Agreement is not an agreement of
+sale, and no Intellectual Property Rights to any Proprietary Provider Items are
+transferred to Customer by virtue of this Master Agreement.<span
+style=''mso-spacerun:yes''>  </span>All copies of Proprietary Provider Items in
+Customer''s possession will remain the exclusive property of Provider and will
+be deemed to be on loan to Customer during the term of this Master Agreement. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.65pt;margin-left:63.35pt;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:62.75pt''>6.3.<span style=''font-family:"Arial",sans-serif;
+mso-fareast-font-family:Arial''> </span><u style=''text-underline:black''>Customer
+Intellectual Property</u>.<span style=''mso-spacerun:yes''>  </span>For the
+purposes of this Master Agreement, &quot;<u style=''text-underline:black''>Customer</u>
+<u style=''text-underline:black''>IP</u>&quot; means all Customer Confidential
+Information, Customer Data and all Intellectual Property Rights in such
+items.<span style=''mso-spacerun:yes''>  </span>Customer IP will be <span
+class=GramE>owned<span style=''mso-spacerun:yes''>  </span>exclusively</span> by
+Customer.<span style=''mso-spacerun:yes''>  </span>Provider will have the right
+to use Customer IP as reasonably necessary for Provider to provide access to
+Customer of the Application and to perform the Services and Provider’s other
+obligations hereunder.<span style=''mso-spacerun:yes''>  </span>Customer
+represents and warrants to Provider that Customer owns all Customer IP or has
+all necessary rights to use and input Customer IP into the Application;
+Customer IP will not infringe upon any third-party Intellectual Property Rights
+or violate any rights against defamation or rights of privacy; and Customer has
+not falsely identified itself nor provided any false information to gain access
+to the Application, and that Customer''s billing information is correct.<span
+style=''mso-spacerun:yes''>  </span>If Customer resides or operates in the
+European Union (“<u style=''text-underline:black''>EU</u>”) or if any transfer of
+information between Customer and the Application is governed by the EU Data
+Protection Directive, EU General Data Protection Regulation (“<u
+style=''text-underline:black''>GDPR</u>”), or similar directives and regulations,
+and national laws implementing such directives and regulations, then Customer
+expressly consents to, except to the extent prohibited by applicable law, the
+transfer of such information outside of the EU to the United States and to such
+other countries as may be required by Provider for the proper operation of the
+Application under this Master Agreement.<span style=''mso-spacerun:yes''> 
+</span>Customer will indemnify Provider against all third-party liability
+arising from such transfer. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.5pt;margin-left:63.35pt;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:0in;
+margin-left:62.75pt;line-height:98%''>6.4.<span style=''font-family:"Arial",sans-serif;
+mso-fareast-font-family:Arial''> </span><u style=''text-underline:black''>Use
+Restrictions</u>.<span style=''mso-spacerun:yes''>  </span>Customer will not do,
+attempt to do, nor permit any other Person to do, any of the following:<span
+style=''mso-spacerun:yes''>  </span>(a) use any Proprietary Provider Items for
+any purpose, at any location or in any manner not specifically authorized by this
+Master Agreement; (b) make or retain any copy of any Proprietary Provider Items
+except as specifically authorized by this Master Agreement; (c) create or
+recreate the source code for the Application, or reengineer, reverse engineer,
+decompile or disassemble the Application; (d) modify, adapt, translate or
+create derivative works based upon the Application, or combine or merge any
+part of the Application with or into any other software or documentation; (e)
+refer to or otherwise use any Proprietary Provider Items as part of any effort
+either to develop a program having any functional attributes, visual
+expressions or other features similar to those of the Application or to compete
+with Provider or its Affiliates; (f) remove, erase or tamper with any copyright
+or other proprietary notice printed or stamped on, affixed to, or encoded or
+recorded in any Proprietary Provider Items, or fail to preserve all copyright
+and other proprietary notices in any copy of any Proprietary Provider Items
+made by Customer; or (g) sell, market, license, sublicense, distribute or
+otherwise grant to any Person, including any outsourcer, vendor, consultant or
+partner, any right to use any Proprietary Provider Items, whether on Customer''s
+behalf or otherwise, except as specifically and expressly authorized in this
+Master Agreement. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.5pt;margin-left:63.35pt;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:62.75pt''>6.5.<span style=''font-family:"Arial",sans-serif;
+mso-fareast-font-family:Arial''> </span><u style=''text-underline:black''>Provider
+Right to Develop</u>.<span style=''mso-spacerun:yes''>   </span>Customer
+acknowledges that Provider is engaged in the development of software for
+clients other than Customer, and that Provider can and will develop software
+and provide services for its other clients and will utilize and market
+software, services and other items, including Deliverables, Maintenance
+Services and all other Products and Services created under or in connection
+with this Master Agreement, without any restrictions hereunder or any
+obligations to Customer, and may solicit and provide similar Products and
+Services on behalf of Persons that Customer may consider to be its direct or
+indirect competitors, provided that Customer''s Confidential Information will
+remain subject to the confidentiality and nondisclosure restrictions set forth
+in <u style=''text-underline:black''>Section 6.1</u>. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.65pt;margin-left:0in;text-align:left;text-indent:0in;line-height:
+107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:0in;
+margin-left:62.75pt;line-height:98%''>6.6.<span style=''font-family:"Arial",sans-serif;
+mso-fareast-font-family:Arial''> </span><u style=''text-underline:black''>Notice
+and Remedy of Breaches</u>.<span style=''mso-spacerun:yes''>  </span>Each Party
+will promptly give written notice to the other of any actual or suspected
+breach by it of any of the provisions of this <u style=''text-underline:black''>Section
+6</u>, <span class=GramE>whether or not</span> intentional, and the breaching
+Party will, at its expense, take all steps reasonably requested by the other
+Party to prevent or remedy the breach. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:.65pt;margin-left:0in;text-align:left;text-indent:0in;line-height:
+107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:7.6pt;
+margin-left:62.75pt;line-height:98%''>6.7.<span style=''font-family:"Arial",sans-serif;
+mso-fareast-font-family:Arial''> </span><u style=''text-underline:black''>Enforcement</u>.<span
+style=''mso-spacerun:yes''>  </span>Each Party acknowledges that the restrictions
+in this Master Agreement are reasonable and necessary to protect the other''s
+legitimate business interests.<span style=''mso-spacerun:yes''>  </span>Each
+Party acknowledges that any breach of any of the provisions of this <u
+style=''text-underline:black''>Section 6 </u>will result in irreparable injury to
+the other for which money damages could not adequately compensate.<span
+style=''mso-spacerun:yes''>  </span>If there is a breach, then the injured Party
+will be entitled, in addition to all other rights and remedies which it may
+have at law or in equity and notwithstanding the provisions of <u
+style=''text-underline:black''>Section 11.5.2</u>, to have a decree of specific
+performance or an injunction issued by any competent court, requiring the
+breach to be cured or enjoining all Persons involved from continuing the
+breach.<span style=''mso-spacerun:yes''>  </span>The existence of any claim or
+cause of action that a Party or any other Person may have against the other
+Party will not constitute a defense or bar to the enforcement of any of the
+provisions of this <u style=''text-underline:black''>Section 6</u>. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>7.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>CHANGE CONTROL PROCEDURE<span style=''font-weight:
+normal''> </span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:7.6pt;
+margin-left:35.25pt;text-indent:0in;line-height:98%''>Provider’s current
+procedures for managing changes to the Application or Services are as set forth
+in <b style=''mso-bidi-font-weight:normal''>Schedule 6 – Change Control.</b> </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>8.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>TERM; TERMINATION<span style=''font-weight:normal''>
+</span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:57.8pt;text-indent:-22.55pt''>8.1.<span style=''mso-spacerun:yes''> 
+</span><u style=''text-underline:black''>Initial Term</u>.<span
+style=''mso-spacerun:yes''>  </span>The initial term of this Master Agreement
+begins on the Effective Date specified in the first executed Ordering Document
+and continues in full force and effect for the applicable term specified in
+such Ordering Document and, if longer, the applicable terms specified in
+subsequent Ordering Documents, unless such term is extended or terminated
+earlier pursuant to this Master Agreement or as stated in such Ordering
+Documents (the &quot;<u style=''text-underline:black''>Initial Term</u>&quot;). </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:57.8pt;text-indent:-22.55pt''><span class=GramE>8.2<span
+style=''mso-spacerun:yes''>  </span><u style=''text-underline:black''>Renewal</u></span><u
+style=''text-underline:black''> Terms</u>.<span style=''mso-spacerun:yes''> 
+</span>Certain Products and Services will automatically renew in accordance
+with the relevant Ordering Documents (each a &quot;<u style=''text-underline:
+black''>Renewal Term</u>&quot;; the Initial Term and Renewal Term are collectively
+referred to as the “<u style=''text-underline:black''>Term</u>”), unless a Party
+delivers written notice to the other Party of its intent to terminate at least
+sixty (60) days before the expiration of the then current Term, unless the
+applicable Ordering Document specifies a different period of notice.<span
+style=''mso-spacerun:yes''>  </span>Unless otherwise set forth in an Ordering
+Document, both SaaS Subscriptions and Maintenance Services will automatically
+renew for additional one (1) year Renewal Terms at the end of the then current
+Term. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.15pt;margin-left:35.75pt;text-align:left;text-indent:-.5pt;
+line-height:107%''>8.3. <u style=''text-underline:black''>Termination</u>. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:1.25in;text-indent:-31.45pt''>8.3.1. Either Party may terminate this
+Master Agreement and all applicable Schedules at any time during the Term:<span
+style=''mso-spacerun:yes''>  </span>(a) upon thirty (30) days’ prior written
+notice to the other Party, if the other Party breaches a material provision of
+this Master Agreement or applicable Schedules and fails to cure such breach
+within thirty (30) days after it receives such notice (or immediately, if such
+breach is not reasonably capable of being cured during such period) or (b) as
+provided in <u style=''text-underline:black''>Section 9</u> of this Master
+Agreement. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:1.25in;text-indent:-31.45pt''>8.3.2. Either Party may terminate this
+Master Agreement and all applicable Schedules immediately upon written notice
+if the other Party becomes insolvent or files, or has filed against it, a
+petition for bankruptcy, provided that such petition is not dismissed within
+sixty (60) days. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:1.25in;text-indent:-31.45pt''>8.3.3. Provider may terminate this
+Master Agreement and all applicable Schedules on thirty (30) days’ written
+notice if Customer fails to make timely payments hereunder. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:35.25pt;text-indent:0in''>8.4 <u style=''text-underline:black''>Effect
+of Termination</u>.<span style=''mso-spacerun:yes''>  </span>When this Master
+Agreement terminates or expires for any reason: </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:89.25pt;text-indent:-.75in''><span
+style=''mso-spacerun:yes''> </span>8.4.1.<span style=''mso-spacerun:yes''>  
+</span>Customer will pay Provider for all Products provided, Services <span
+class=GramE>performed</span> and expenses incurred by Provider on or before the
+date of termination.<span style=''mso-spacerun:yes''>  </span>If this Master
+Agreement was terminated before the end of the then current Term for reasons
+other than Provider''s breach or insolvency, then Customer will repay all
+discounts set forth in the Ordering Document with respect to the
+early-terminated Term. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:1.25in;text-indent:-31.45pt''>8.4.2.<span
+style=''mso-spacerun:yes''>   </span>Provider will discontinue (and cause its
+contractors and personnel to discontinue) all use of Customer IP.<span
+style=''mso-spacerun:yes''>   </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.4pt;margin-bottom:7.6pt;
+margin-left:1.25in;text-indent:-31.45pt;line-height:98%''>8.4.3. Customer will<span
+class=GramE>:<span style=''mso-spacerun:yes''>  </span>(</span>a) immediately
+discontinue all use of the Application, (b) promptly return to Provider all
+copies of the Software and Documentation and all other Proprietary Provider
+Items then in Customer''s possession and (c) give written notice to Provider
+certifying that all copies of the Products have been permanently deleted from
+its computers.<span style=''mso-spacerun:yes''>  </span>Customer will remain
+liable for all payments due to Provider with respect to the period ending on
+the date of termination.<span style=''mso-spacerun:yes''>  </span>The provisions
+of <u style=''text-underline:black''>Section 5</u> (with respect to payments due
+and payable upon termination), <u style=''text-underline:black''>Section 6</u>,
+this <u style=''text-underline:black''>Section 8</u>, <u style=''text-underline:
+black''>Section 10</u> and <u style=''text-underline:black''>Section 11</u> will
+survive any termination of this Master Agreement, whether under this <u
+style=''text-underline:black''>Section 8</u> or otherwise. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>9.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>FORCE MAJEURE<span style=''font-weight:normal''> </span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:35.25pt;text-indent:0in''>Neither Party will be liable under or
+deemed to be in breach of this Master Agreement for any delay or failure in
+performance under this Master Agreement or an applicable Ordering Document that
+is caused by any of the following events: <span
+style=''mso-spacerun:yes''> </span>acts of God, civil or military authority; act,
+order or requirement of any governmental or regulatory authority or body; war;
+fires; power outages; earthquakes; floods; unusually severe weather; strikes or
+labor disputes; disruptions of labor forces or supply chains; delays in
+transportation or delivery; epidemics, pandemics or viral or communicable
+disease outbreaks; quarantines; national emergencies; terrorism or threats of
+terrorism; and any similar event that is beyond the reasonable control of the non-performing
+Party (collectively, a &quot;<u style=''text-underline:black''>Force Majeure
+Event</u>&quot;).<span style=''mso-spacerun:yes''>  </span>This <u
+style=''text-underline:black''>Section 9</u> does not excuse either Party''s
+obligation to take reasonable steps to follow its normal disaster recovery
+procedures or Customer''s obligations to pay for Products and Services ordered
+or delivered.<span style=''mso-spacerun:yes''>  </span>The Party affected by the
+Force Majeure Event must diligently attempt to perform <span class=GramE>all of</span>
+its obligations hereunder.<span style=''mso-spacerun:yes''>  </span>During a
+Force Majeure Event, the Parties will use commercially reasonable efforts to
+negotiate changes to this Master Agreement in good faith to address the Force
+Majeure Event in a fair and equitable manner.<span style=''mso-spacerun:yes''> 
+</span>If a Force Majeure Event continues for ten (10) days or longer, and if
+the non-performing Party is delayed or unable to perform under this Master
+Agreement or any Ordering Document because of the Force Majeure Event, then the
+performing Party will have the right to terminate this Master Agreement and
+applicable Schedules, in whole or in part, immediately upon written notice to
+the non-performing Party. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.05pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;margin-left:
+35.25pt;text-indent:-.5in;mso-list:l0 level1 lfo2''><![if !supportLists]><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%;mso-bidi-font-weight:bold''><span
+style=''mso-list:Ignore''>10.<span style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>DISCLAIMERS AND LIMITATIONS OF LIABILITIES<span
+style=''font-weight:normal''> </span><span style=''mso-spacerun:yes''> </span><span
+style=''font-weight:normal''><span style=''mso-spacerun:yes''> </span></span></h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:63.0pt;text-indent:-27.0pt''><b style=''mso-bidi-font-weight:normal''>10.1.
+<u style=''text-underline:black''>NO WARRANTIES</u>.<span
+style=''mso-spacerun:yes''>  </span>THE APPLICATION, DELIVERABLES, HOSTING
+SERVICES, SAAS SERVICES, PROFESSIONAL SERVICES, MAINTENANCE SERVICES AND OTHER </b></p>
+
+<p class=MsoNormal align=right style=''margin-top:0in;margin-right:.5pt;
+margin-bottom:0in;margin-left:0in;text-align:right;text-indent:0in;line-height:
+107%''><b style=''mso-bidi-font-weight:normal''>PRODUCTS AND SERVICES PROVIDED TO
+CUSTOMER HEREUNDER ARE &quot;AS IS&quot;, </b></p>
+
+<h1 style=''margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:63.5pt;
+text-indent:0in;mso-list:none''>AND PROVIDER MAKES NO REPRESENTATIONS OR
+WARRANTIES, ORAL OR WRITTEN, EXPRESS OR IMPLIED, ARISING FROM COURSE OF
+DEALING, COURSE OF PERFORMANCE, USAGE OF TRADE, QUALITY OF INFORMATION, QUIET
+ENJOYMENT OR OTHERWISE, INCLUDING IMPLIED WARRANTIES OF </h1>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;
+margin-left:63.5pt;text-indent:-.5pt''><b style=''mso-bidi-font-weight:normal''>MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, NONINTERFERENCE, OR NON-INFRINGEMENT
+WITH RESPECT TO THE APPLICATION, DELIVERABLES, HOSTING SERVICES, SAAS SERVICES,
+PROFESSIONAL SERVICES, MAINTENANCE SERVICES AND OTHER PRODUCTS AND SERVICES
+PROVIDED TO CUSTOMER HEREUNDER OR WITH RESPECT TO ANY OTHER MATTER PERTAINING
+TO THIS MASTER AGREEMENT OR SCHEDULES HERETO.<span style=''mso-spacerun:yes''> 
+</span>CUSTOMER''S USE OF THE APPLICATION, DELIVERABLES, HOSTING SERVICES, SAAS
+SERVICES, PROFESSIONAL SERVICES, MAINTENANCE SERVICES AND OTHER PRODUCTS AND
+SERVICES PROVIDED TO CUSTOMER HEREUNDER WILL NOT BE DEEMED LEGAL, TAX OR
+INVESTMENT ADVICE. </b></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;
+margin-left:63.0pt;text-indent:-27.0pt''><b style=''mso-bidi-font-weight:normal''>10.2.
+<u style=''text-underline:black''>LIMITATION ON LIABILITY</u>.<span
+style=''mso-spacerun:yes''>  </span>PROVIDER''S TOTAL LIABILITY UNDER THIS MASTER
+AGREEMENT AND SCHEDULES HERETO WILL UNDER NO CIRCUMSTANCES EXCEED THE AMOUNT OF
+THE FEES ACTUALLY PAID BY CUSTOMER TO PROVIDER UNDER THIS MASTER AGREEMENT AND
+SCHEDULES HERETO DURING THE THREE (3) MONTHS PRIOR TO THE EVENT OF LIABILITY,
+LESS ALL AMOUNTS PAID BY PROVIDER TO CUSTOMER IN CONNECTION WITH ANY OTHER
+EVENTS OF LIABILITY HEREUNDER.</b> </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:63.0pt;text-indent:-27.0pt''><b style=''mso-bidi-font-weight:normal''>10.3.
+<u style=''text-underline:black''>EXCLUSION OF DAMAGES</u>.<span
+style=''mso-spacerun:yes''>  </span>UNDER NO CIRCUMSTANCES WILL PROVIDER (OR ANY
+PROVIDER AFFILIATES PROVIDING PRODUCTS, DELIVERABLES, HOSTING SERVICES, SAAS
+SERVICES, PROFESSIONAL SERVICES, MAINTENANCE SERVICES AND OTHER PRODUCTS AND
+SERVICES TO CUSTOMER HEREUNDER) BE LIABLE TO CUSTOMER, ANY PERMITTED USER, ANY
+CLIENT OR AFFILIATE OF CUSTOMER, OR </b></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;
+margin-left:63.5pt;text-indent:-.5pt''><b style=''mso-bidi-font-weight:normal''>ANY
+OTHER PERSON FOR LOST REVENUES, LOST PROFITS, LOSS OF BUSINESS, TRADING LOSSES,
+OR ANY INCIDENTAL, INDIRECT, EXEMPLARY, CONSEQUENTIAL, SPECIAL OR PUNITIVE
+DAMAGES OF ANY KIND, INCLUDING SUCH DAMAGES ARISING FROM ANY BREACH OF THIS MASTER
+AGREEMENT OR SCHEDULES HERETO, OR FROM ANY TERMINATION OF THIS MASTER AGREEMENT
+OR SCHEDULES HERETO, WHETHER SUCH LIABILITY IS ASSERTED ON THE BASIS OF
+CONTRACT, TORT (INCLUDING NEGLIGENCE OR STRICT LIABILITY) OR OTHERWISE AND
+WHETHER OR NOT FORESEEABLE, EVEN IF PROVIDER HAS BEEN ADVISED OR WAS AWARE OF
+THE POSSIBILITY OF SUCH LOSS OR DAMAGES.</b> </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:62.75pt''>10.4.<span style=''mso-spacerun:yes''>  </span><u
+style=''text-underline:black''>Additional Limitations and Exclusions</u>.<span
+style=''mso-spacerun:yes''>  </span>Provider will have no liability to Customer
+under the following circumstances:<span style=''mso-spacerun:yes''> 
+</span>Customer fails to fully observe Provider''s instructions relating to the
+Application, Hosting Services, Maintenance Services, SaaS Services,
+Professional Services or other Services provided by Provider; the Application,
+Hosting Services, Maintenance Services, SaaS Services, Professional Services or
+other Services provide by Provider are used in violation of this Master
+Agreement and applicable Schedules; the Application is configured, customized,
+installed or maintained by any Person other than Provider; Customer modifies
+any portion of the Application without the prior written consent of Provider;
+and/or the Application, Hosting Services, Maintenance Services, SaaS Services,
+Professional Services and other Services provided by Provider are used in
+conjunction with any hardware, software, products or interfaces not expressly
+specified by Provider.<span style=''mso-spacerun:yes''>  </span>The obligations
+of Provider under this Master Agreement run only to Customer and not to its
+Affiliates, Permitted Users, clients or any other Persons.<span
+style=''mso-spacerun:yes''>  </span>Under no circumstances will any Affiliate, Permitted
+User or client of Customer or any other Person be considered a third-party
+beneficiary of this Master Agreement or otherwise entitled to any rights or
+remedies under this Master Agreement, even if such Affiliates, Permitted Users,
+clients or other Persons are provided access to the Application or any Hosting
+Services, SaaS Services, Professional Services, Maintenance Services or other
+Services hereunder.<span style=''mso-spacerun:yes''>  </span>Customer will have
+no rights or remedies against Provider except as specifically provided in this
+Master Agreement.<span style=''mso-spacerun:yes''>  </span>No action or claim of
+any type relating to this Master Agreement or applicable Schedules may be
+brought or made by Customer more than one (1) year after Customer first has
+knowledge of the basis for the action or claim.<span style=''mso-spacerun:yes''> 
+</span>The exclusions, disclaimers and limitations set forth in this Master
+Agreement have been considered and accepted by the Parties in the pricing of
+the Application, Products and Services provided in this Master Agreement. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.15pt;margin-left:0in;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;
+margin-left:.5in;text-indent:-.5in;mso-list:l1 level1 lfo1''><![if !supportLists]><b><span
+style=''mso-bidi-font-size:10.5pt;line-height:103%''><span style=''mso-list:Ignore''>11.<span
+style=''font:7.0pt "Times New Roman"''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span></b><![endif]><b style=''mso-bidi-font-weight:normal''>OTHER
+PROVISIONS. </b></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.1. <u style=''text-underline:black''>Notices</u><b
+style=''mso-bidi-font-weight:normal''>.<span style=''mso-spacerun:yes''>  </span></b>All
+notices from a Party to the other Party under this Master Agreement will be in
+writing and will be deemed given when<span class=GramE>:<span
+style=''mso-spacerun:yes''>  </span>(</span>a) delivered personally with receipt
+signature; (b) sent via certified mail with return receipt requested; or (c)
+sent by commercially recognized air courier service with receipt signature
+required, to the following address: </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:94.55pt;text-indent:0in''>if to <span class=SpellE>iRely</span>,
+LLC: </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.7pt;margin-left:121.35pt;text-align:left;text-indent:-.5pt''><span
+class=SpellE><i style=''mso-bidi-font-style:normal''>iRely</i></span><i
+style=''mso-bidi-font-style:normal''>, LLC</i> </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.7pt;margin-left:121.35pt;text-align:left;text-indent:-.5pt''><i
+style=''mso-bidi-font-style:normal''>4242 Flagstaff Cove</i> </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.7pt;margin-left:121.35pt;text-align:left;text-indent:-.5pt''><i
+style=''mso-bidi-font-style:normal''>Ft.<span style=''mso-spacerun:yes''> 
+</span>Wayne, Indiana, 46815</i> </p>
+
+<h2 style=''margin-top:0in;margin-right:44.95pt;margin-bottom:6.25pt;margin-left:
+26.9pt''>ATTENTION: Chris <span class=SpellE>Pelz</span> (<u style=''text-underline:
+black''>chris.pelz@irely.com</u>)<span style=''font-style:normal''> </span></h2>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:7.05pt;margin-left:94.55pt;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.95pt;margin-left:0in;text-align:left;text-indent:0in;
+tab-stops:center 133.25pt''><span style=''mso-spacerun:yes''> </span><span
+style=''mso-tab-count:1''>                               </span>if to CUSTOMER: </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.7pt;margin-left:121.35pt;text-align:left;text-indent:-.5pt''><i
+style=''mso-bidi-font-style:normal''>[NAME &amp; ADDRESS] </i><span
+style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:74.75pt;
+margin-bottom:0in;margin-left:121.35pt;text-align:left;text-indent:-.5pt;
+line-height:152%''><i style=''mso-bidi-font-style:normal''>ATTENTION:
+____________________________________________</i> <i style=''mso-bidi-font-style:
+normal''>and</i> </p>
+
+<h2 style=''margin-left:26.9pt''>ATTENTION:
+____________________________________________<span style=''font-style:normal''> </span></h2>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.2pt;margin-left:94.55pt;text-align:left;text-indent:0in;
+line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.2. <u style=''text-underline:black''>Export
+Control</u>.<span style=''mso-spacerun:yes''>  </span>Export laws and regulations
+of the United States and any other relevant local export laws and regulations
+apply to the Application.<span style=''mso-spacerun:yes''>  </span>Customer
+acknowledges and </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:67.55pt;text-indent:0in''>agrees that such export laws govern its
+use of the Application (including technical data) and Services provided under
+this Master Agreement, and Customer will fully comply with all such export laws
+and regulations (including &quot;deemed export&quot; and &quot;deemed
+reexport&quot; regulations).<span style=''mso-spacerun:yes''>  </span>Customer
+further agrees that no Products will be exported, directly or indirectly, in
+whole or in part, in violation of these laws, or will be used for any purpose
+prohibited by these laws.<span style=''mso-spacerun:yes''>  </span>Provider makes
+no representation that the Application is appropriate or available for use in
+any <span class=GramE>particular locations</span>.<span
+style=''mso-spacerun:yes''>  </span>Customer is solely responsible for compliance
+with all applicable laws, including export and import regulations of other
+countries. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.3. <u style=''text-underline:black''>Publicity</u>.<span
+style=''mso-spacerun:yes''>  </span>Customer hereby grants Provider the right (a)
+to name Customer as a Provider client, to use Customer’s name and logo on
+Provider''s websites and on written and digital marketing materials and to
+include links to Customer''s website and company introduction; the foregoing in
+all modalities of Provider’s marketing efforts; and (b) to refer to Customer as
+a Provider Customer during sales pitches to Provider prospects.<span
+style=''mso-spacerun:yes''>  </span>Provider will seek Customer''s consent before
+using Customer''s name in white papers or other similar written materials. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.4. <u style=''text-underline:black''>Integration
+and Amendments</u>.<span style=''mso-spacerun:yes''>  </span>This Master
+Agreement and applicable Schedules constitute a complete and exclusive final
+written expression of the terms of agreement between the Parties regarding the
+subject matter hereof.<span style=''mso-spacerun:yes''>  </span>This Master
+Agreement supersedes all earlier and contemporaneous proposals, agreements,
+understandings and negotiations concerning the subject matter hereof.<span
+style=''mso-spacerun:yes''>  </span>In the event of a conflict or inconsistency
+between this Master Agreement and any Schedule, the terms of this Master
+Agreement will prevail, provided that if this Master Agreement is silent on or
+does not expressly provide for or address a right, limitation or obligation,
+then the applicable Schedule will govern and control this Master Agreement to
+the extent the Schedule expressly provides for or addresses a right, limitation
+or obligation hereunder.<span style=''mso-spacerun:yes''>  </span>The Parties may
+amend this Master Agreement only in writing, and no oral representation or
+course of dealing will modify this Master Agreement. </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.15pt;margin-left:35.75pt;text-align:left;text-indent:-.5pt;
+line-height:107%''>11.5. <u style=''text-underline:black''>Governing Law; Dispute
+Resolution</u>.<span style=''mso-spacerun:yes''>   </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.9pt;
+margin-left:99.0pt;text-indent:-31.45pt''>11.5.1. <b style=''mso-bidi-font-weight:
+normal''>THE CONSTRUCTION AND PERFORMANCE OF THIS MASTER AGREEMENT AND SCHEDULES
+HERETO WILL BE GOVERNED BY THE SUBSTANTIVE LAWS OF THE STATE OF DELAWARE,
+UNITED STATES OF AMERICA, WITHOUT REGARD TO CONFLICTS OF LAWS PROVISIONS.<span
+style=''mso-spacerun:yes''>  </span>THE UNITED NATIONS CONVENTION ON CONTRACTS
+FOR THE INTERNATIONAL SALE OF GOODS WILL NOT APPLY TO THIS MASTER AGREEMENT.</b><span
+style=''mso-spacerun:yes''>   </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:99.0pt;text-indent:-31.45pt''>11.5.2. Any controversy or claim
+arising out of or relating to this Master Agreement, or the breach thereof,
+will be settled by arbitration administered by the American Arbitration
+Association (AAA) in accordance with its Commercial Arbitration Rules, and
+judgment on the award rendered by the arbitrator(s) may be entered in any court
+having jurisdiction thereof.<span style=''mso-spacerun:yes''>  </span>The
+arbitration will be conducted in Allen County, Indiana by a single arbitrator
+appointed by the AAA.<span style=''mso-spacerun:yes''>  </span>Any appeal of the
+arbitration decision will be brought exclusively in the federal or state courts
+situated in the State of Delaware.<span style=''mso-spacerun:yes''> 
+</span>Customer hereby consents to exclusive personal jurisdiction and venue in
+Delaware. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.6. <u style=''text-underline:black''>Assignment</u>.<span
+style=''mso-spacerun:yes''>  </span>This Master Agreement will bind, benefit and
+be enforceable by and against Provider and Customer and, to the extent
+permitted hereby, their respective successors and assigns.<span
+style=''mso-spacerun:yes''>  </span>Customer will not assign this Master
+Agreement or any of its rights hereunder, nor delegate any of its obligations
+hereunder, without Provider’s prior written consent, except that such consent
+will not be required in the case of an assignment to (a) a purchaser of or
+successor to substantially all of Customer''s business (unless such purchaser or
+successor is a software, data processing or computer services vendor that is a
+competitor of Provider or any of its Affiliates), provided that the scope of
+the rights granted this Master Agreement and the number of Permitted Users,
+permitted locations and similar license or use conditions does not change and
+that the purchaser or successor pays Provider’s then current relicensing fees,
+or (b) an Affiliate of Customer, provided that the scope of the rights granted
+this Master Agreement and the number of Permitted Users, permitted locations and
+similar license or use conditions does not change and that Customer guarantees
+in writing the obligations of the assignee hereunder.<span
+style=''mso-spacerun:yes''>  </span>Any assignment by Customer in breach of this <u
+style=''text-underline:black''>Section 11.6</u> will be void.<span
+style=''mso-spacerun:yes''>  </span>Any express assignment of this Master
+Agreement, any change in control of Customer, any acquisition of additional
+business by Customer (by asset acquisition, merger or otherwise by operation of
+law) and any assignment by merger or otherwise by operation of law, will
+constitute an assignment of this Master Agreement by Customer for purposes of
+this <u style=''text-underline:black''>Section 11.6</u>. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.7. <u style=''text-underline:black''>Severability;
+Certain Terms</u>.<span style=''mso-spacerun:yes''>   </span>If any provision of
+this Master Agreement is held by a court of competent jurisdiction to be
+invalid or unenforceable, then such provision will be construed, as nearly as
+possible, to reflect the intentions of the original provision, with all other
+provisions remaining in full force and effect.<span
+style=''mso-spacerun:yes''>    </span>For the purposes of this Master Agreement, “<u
+style=''text-underline:black''>including</u>” and cognates thereof means
+“including but not limited to”. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:66.8pt;text-indent:-31.55pt''>11.8. <u style=''text-underline:black''>No
+Agency</u>.<span style=''mso-spacerun:yes''>  </span>The Parties acknowledge and
+agree that each is an independent contractor, and nothing herein constitutes a
+joint venture, partnership, employment, or agency between Customer and
+Provider.<span style=''mso-spacerun:yes''>  </span>Neither Party will have the
+right to bind the other Party or cause it to incur liability. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:5.5pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.9. <u style=''text-underline:black''>Waive</u>r.<span
+style=''mso-spacerun:yes''>  </span>The failure of either Party to enforce any
+right or provision in this Master Agreement will not constitute a waiver of
+such right or provision unless expressly acknowledged and agreed to by such Party
+in writing. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:5.6pt;
+margin-left:66.8pt;text-indent:-31.55pt''>11.10. <u style=''text-underline:black''>Non-Solicitation</u>.<span
+style=''mso-spacerun:yes''>  </span>During the Term and for a period of one (1)
+year thereafter, neither Party will, except with the other Party''s prior
+written approval, solicit the employment of any employee, consultant or
+subcontractor of such other Party that directly participated in the activities
+set forth in this Master Agreement.<span style=''mso-spacerun:yes''>  </span>The
+foregoing will specifically not apply to general solicitations of employment
+issued by either Party to which an employee of the other Party may voluntarily
+respond. </p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.3pt;margin-bottom:5.95pt;
+margin-left:67.3pt;text-indent:-32.05pt;line-height:98%''>11.11. <u
+style=''text-underline:black''>Counterparts; Electronic Signatures</u>.<span
+style=''mso-spacerun:yes''>  </span>This Master Agreement <span style=''color:
+#333333''>may be executed in multiple counterparts, each of which shall be
+deemed to be an original, but together they shall constitute one and the same
+instrument.<span style=''mso-spacerun:yes''>  </span>Facsimile and .pdf
+signatures shall </span></p>
+
+<p class=MsoNormal style=''margin-top:0in;margin-right:-.3pt;margin-bottom:5.95pt;
+margin-left:67.55pt;text-indent:0in;line-height:98%''><span style=''color:#333333''>be
+deemed valid and binding to the same extent as the original and the Parties
+affirmatively consent to the use thereof, with no such consent having been
+withdrawn. Each Party agrees that this Master Agreement and any Schedules and
+other documents to be delivered in connection with this Master Agreement may be
+executed by means of an electronic signature that complies with the federal
+Electronic Signatures in Global and National Commerce Act, state enactments of
+the Uniform Electronic Transactions Act, and/or any other relevant electronic
+signatures law, in each case to the extent applicable.<span
+style=''mso-spacerun:yes''>  </span>Any electronic signatures appearing on this
+Master Agreement and such other Schedules and documents are the same as
+handwritten signatures for the purposes of validity, enforceability, and
+admissibility.<span style=''mso-spacerun:yes''>  </span>Each Party hereto shall
+be entitled to conclusively rely upon, and shall have no liability with respect
+to, any electronic signature or faxed, scanned, or photocopied manual signature
+of any other Party and shall have no duty to investigate, confirm or otherwise
+verify the validity or authenticity thereof.</span> </p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.7pt;margin-left:0in;text-align:left;text-indent:0in;line-height:
+107%''><span style=''mso-spacerun:yes''> </span></p>
+
+<p class=MsoNormal align=left style=''margin-top:0in;margin-right:0in;
+margin-bottom:6.7pt;margin-left:.5pt;text-align:left;text-indent:-.5pt''><i
+style=''mso-bidi-font-style:normal''>By clicking the &quot;I agree&quot; box in
+connection with the initial Ordering Document between you and Provider or, as
+applicable, by means of another commercially reasonable method of indicating
+your assent, you acknowledge that you are entering into a legally binding
+agreement with Provider, and that you have read, understood, and agreed to the
+terms of this Master Agreement and the terms of all applicable Schedules.</i> </p>
+
+<p class=MsoNormal align=left style=''margin:0in;text-align:left;text-indent:
+0in;line-height:107%''><span style=''mso-spacerun:yes''> </span></p>
+
+</div>
 
 </body>
 
 </html>
+
 ')
 END
 

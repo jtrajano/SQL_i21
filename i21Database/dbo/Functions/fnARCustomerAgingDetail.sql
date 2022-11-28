@@ -60,9 +60,6 @@ RETURNS @returntable TABLE (
 	,[dblEndOfMonthRate]		NUMERIC(18, 6) NULL
 	,[dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
 	,[intAccountId]			    INT NULL
-	,[strLogoType]				NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL
-	,[blbLogo]					VARBINARY (MAX) NULL
-	,[blbFooterLogo]			VARBINARY (MAX) NULL
 	,[intAge]                   INT NULL DEFAULT 0
 )
 AS
@@ -80,8 +77,7 @@ BEGIN
 			@intEntityUserIdLocal		INT = NULL,
 			@intGracePeriodLocal		INT = 0,
 			@ysnOverrideCashFlowLocal  	BIT = 0,
-			@strCustomerAgingBy		    NVARCHAR(250) = NULL, 
-			@blbLogo     VARBINARY (MAX) = NULL
+			@strCustomerAgingBy		    NVARCHAR(250) = NULL
 
 	DECLARE  @DELCUSTOMERS		Id
 			,@ADLOCATION		Id
@@ -138,18 +134,18 @@ BEGIN
 		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
 	DECLARE @CREDITMEMOPAIDREFUNDED TABLE (
-		 intInvoiceId			INT												NOT NULL PRIMARY KEY
-		,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		 intInvoiceId		INT												NOT NULL PRIMARY KEY
+		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 		,strDocumentNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
 	DECLARE @CANCELLEDINVOICE TABLE (
-		intInvoiceId			INT												NOT NULL PRIMARY KEY
-		,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-		,ysnPaid				BIT												NULL
+		 intInvoiceId		INT												NOT NULL PRIMARY KEY
+		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		,ysnPaid			BIT												NULL
 	)
 	DECLARE @CANCELLEDCMINVOICE TABLE (
-		intInvoiceId			INT												NOT NULL PRIMARY KEY
-		,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+		 intInvoiceId		INT												NOT NULL PRIMARY KEY
+		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
 
 	DECLARE @POSTEDINVOICES TABLE (
@@ -177,8 +173,12 @@ BEGIN
 		,strCurrency				NVARCHAR(40)									NULL
 		,dblCurrencyExchangeRate	NUMERIC(18, 6)									NULL DEFAULT 0
 		,dblCurrencyRevalueRate		NUMERIC(18, 6)									NULL DEFAULT 0
-		,dblCurrencyRevalueAmount	NUMERIC(18, 6)									NULL DEFAULT 0
 		,intAccountId				INT												NULL
+	)
+
+	DECLARE @UNPAIDINVOICES TABLE 
+	(
+		 intInvoiceId	INT	NOT NULL PRIMARY KEY
 	)
 
 	SET @dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -193,8 +193,6 @@ BEGIN
 	SET @ysnOverrideCashFlowLocal  	= ISNULL(@ysnOverrideCashFlow, 0)
 	SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 	SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
-
-	SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 
 	SELECT TOP 1 @strCompanyName	= strCompanyName
 			   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
@@ -370,23 +368,23 @@ BEGIN
 		AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 		AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
-	--@CANCELLEDINVOICE
 	INSERT INTO @CANCELLEDINVOICE (
 		 intInvoiceId
 		,strInvoiceNumber
 		,ysnPaid
 	)
-	SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid from tblARInvoice INVCANCELLED
+	SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid 
+	FROM tblARInvoice INVCANCELLED
 	WHERE ysnCancelled =1 and ysnPosted =1
 	AND INVCANCELLED.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
-	--@CANCELLEDINVOICE
 	INSERT INTO @CANCELLEDCMINVOICE (
 		 intInvoiceId
 		,strInvoiceNumber
 	)
-	SELECT CM.intInvoiceId,CM.strInvoiceNumber from tblARInvoice CM
-	where CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
+	SELECT CM.intInvoiceId,CM.strInvoiceNumber 
+	FROM tblARInvoice CM
+	WHERE CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
 	AND CM.ysnPosted =1
 	AND CM.strTransactionType = 'Credit Memo'
 	AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -415,7 +413,6 @@ BEGIN
 		 , strCurrency
 		 , dblCurrencyExchangeRate
 		 , dblCurrencyRevalueRate
-		 , dblCurrencyRevalueAmount
 		 , intAccountId
 	)
 	SELECT intInvoiceId				= I.intInvoiceId
@@ -439,8 +436,7 @@ BEGIN
 		 , intCurrencyId			= I.intCurrencyId
 		 , strCurrency				= CUR.strCurrency
 		 , dblCurrencyExchangeRate	= I.dblCurrencyExchangeRate
-		 , dblCurrencyRevalueRate	= ISNULL(GLRD.dblNewForexRate, 0)
-		 , dblCurrencyRevalueAmount	= ISNULL(GLRD.dblNewAmount, 0)
+		 , dblCurrencyRevalueRate	= ISNULL(GLRD.dblNewForexRate, I.dblCurrencyExchangeRate)
 		 , intAccountId				= I.intAccountId
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -448,9 +444,14 @@ BEGIN
 	LEFT JOIN @FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 	INNER JOIN @GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 	LEFT JOIN (
-		SELECT strTransactionId, dblNewForexRate, dblNewAmount
+		SELECT
+			 strTransactionId
+			,dblNewForexRate
 		FROM vyuGLRevalueDetails
-		GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
+		WHERE strTransactionType = 'Invoice'
+		GROUP BY
+			 strTransactionId
+			,dblNewForexRate
 	) GLRD ON I.strInvoiceNumber = GLRD.strTransactionId 
 	LEFT JOIN (
 		SELECT intCurrencyID
@@ -494,13 +495,13 @@ BEGIN
 	  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 	GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
-	DELETE FROM  @POSTEDINVOICES
+	DELETE FROM @POSTEDINVOICES
 	WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM @CASHREFUNDS CF INNER  JOIN @CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber) 
 
-	DELETE FROM  @POSTEDINVOICES
+	DELETE FROM @POSTEDINVOICES
 	WHERE intInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE)
 
-	DELETE FROM  @POSTEDINVOICES
+	DELETE FROM @POSTEDINVOICES
 	WHERE intInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDCMINVOICE)
 
 	--@CASHRETURNS
@@ -588,13 +589,10 @@ BEGIN
 		 , intCurrencyId		= AGING.intCurrencyId
 		 , strCurrency			= AGING.strCurrency
 		 , dblHistoricRate		= AGING.dblCurrencyExchangeRate
-		 , dblHistoricAmount	= ISNULL(AGING.dblBaseTotalAR, 0)
-		 , dblEndOfMonthRate	= CASE WHEN AGING.dblCurrencyRevalueRate = 0 THEN AGING.dblCurrencyExchangeRate ELSE AGING.dblCurrencyRevalueRate END
-		 , dblEndOfMonthAmount	= CASE WHEN AGING.dblCurrencyRevalueRate = 0 THEN ISNULL(AGING.dblBaseTotalAR, 0) ELSE AGING.dblCurrencyRevalueAmount END
+		 , dblHistoricAmount	= ROUND(ISNULL(AGING.dblTotalAR, 0) * AGING.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+		 , dblEndOfMonthRate	= AGING.dblCurrencyRevalueRate
+		 , dblEndOfMonthAmount	= ROUND(ISNULL(AGING.dblTotalAR, 0) * AGING.dblCurrencyRevalueRate, dbo.fnARGetDefaultDecimal())
 		 , intAccountId			= AGING.intAccountId
-		 , strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
-		 , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
-		 , blbFooterLogo		= SMLPF.imgLogo
 		 , intAge				= ISNULL(AGING.intAge, 0)
 	FROM
 	(SELECT A.strInvoiceNumber
@@ -622,12 +620,10 @@ BEGIN
 		 , intCompanyLocationId
 		 , strType
 		 , strTransactionType
-		 , dblBaseTotalAR			= B.dblBaseTotalDue - B.dblBaseAvailableCredit - B.dblBasePrepayments
 		 , intCurrencyId			= A.intCurrencyId
 		 , strCurrency				= A.strCurrency
 		 , dblCurrencyExchangeRate	= A.dblCurrencyExchangeRate
 		 , dblCurrencyRevalueRate	= A.dblCurrencyRevalueRate
-		 , dblCurrencyRevalueAmount = A.dblCurrencyRevalueAmount
 		 , intAccountId				= A.intAccountId
 		 , intAge					= A.intAge
 	FROM
@@ -645,7 +641,6 @@ BEGIN
 		 , I.strCurrency
 		 , I.dblCurrencyExchangeRate
 		 , I.dblCurrencyRevalueRate
-		 , I.dblCurrencyRevalueAmount
 		 , I.intAccountId
 		 , intAge = DATEDIFF(DAYOFYEAR, ( CASE WHEN @strCustomerAgingBy = 'Invoice Create Date' THEN I.dtmDate ELSE I.dtmDueDate END ), @dtmDateToLocal)
 		 , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
@@ -834,17 +829,16 @@ BEGIN
 
 	WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 	INNER JOIN @ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-	LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
-	LEFT JOIN tblSMLogoPreferenceFooter SMLPF ON SMLPF.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLPF.ysnARInvoice = 1 OR SMLPF.ysnDefault = 1)
+
+	INSERT INTO @UNPAIDINVOICES
+	SELECT DISTINCT intInvoiceId 
+	FROM @returntable 
+	GROUP BY intInvoiceId 
+	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
 
 	DELETE AGING
 	FROM @returntable AGING
-	LEFT JOIN (
-		SELECT DISTINCT intInvoiceId 
-		FROM @returntable 
-		GROUP BY intInvoiceId 
-		HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
-	) UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
+	LEFT JOIN @UNPAIDINVOICES UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
 	WHERE ISNULL(UNPAID.intInvoiceId, 0) = 0
 	AND intEntityUserId = @intEntityUserId 
 	AND strAgingType = 'Detail'

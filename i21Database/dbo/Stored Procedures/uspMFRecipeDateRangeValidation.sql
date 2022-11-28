@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspMFRecipeDateRangeValidation @intItemId INT
+﻿CREATE PROCEDURE uspMFRecipeDateRangeValidation 
+	 @intItemId INT
 	,@intLocationId INT
 	,@intCustomerId INT
 	,@dtmFromDate DATETIME
@@ -12,25 +13,21 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @strVersionNo NVARCHAR(MAX)
+	  , @ysnRecipeHeaderValidation BIT = 0
+
+SELECT @ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
+FROM tblMFCompanyPreference;
 
 IF ISNULL(@intRecipeId, 0) = 0 -- New Mode
 BEGIN
 	SELECT @strVersionNo = COALESCE(@strVersionNo + ',', '') + CONVERT(NVARCHAR, intVersionNo)
 	FROM tblMFRecipe
-	WHERE intItemId = (
-			CASE 
-				WHEN @intItemId > 0
-					THEN @intItemId
-				ELSE intItemId
-				END
-			)
-		AND intCustomerId = (
-			CASE 
-				WHEN @intItemId > 0
-					THEN intCustomerId
-				ELSE @intCustomerId
-				END
-			)
+	WHERE intItemId = (CASE WHEN @intItemId > 0 THEN @intItemId
+							ELSE intItemId
+					   END)
+		AND ISNULL(intCustomerId, 0) = (CASE WHEN @intCustomerId > 0 THEN @intCustomerId
+								  ELSE 0
+							 END)
 		AND intLocationId = @intLocationId
 		AND (
 			(
@@ -55,20 +52,12 @@ ELSE -- Edit Mode
 BEGIN
 	SELECT @strVersionNo = COALESCE(@strVersionNo + ',', '') + CONVERT(NVARCHAR, intVersionNo)
 	FROM tblMFRecipe
-	WHERE intItemId = (
-			CASE 
-				WHEN @intItemId > 0
-					THEN @intItemId
-				ELSE intItemId
-				END
-			)
-		AND intCustomerId = (
-			CASE 
-				WHEN @intItemId > 0
-					THEN intCustomerId
-				ELSE @intCustomerId
-				END
-			)
+	WHERE intItemId = (CASE WHEN @intItemId > 0 THEN @intItemId
+							ELSE intItemId
+					   END)
+		AND ISNULL(intCustomerId, 0) = (CASE WHEN @intCustomerId > 0 THEN @intCustomerId
+								  ELSE 0
+							 END)
 		AND intLocationId = @intLocationId
 		AND (
 			(
@@ -91,6 +80,15 @@ BEGIN
 		AND intRecipeId <> @intRecipeId
 END
 
-SELECT @strVersionNo = ''
+IF (@ysnRecipeHeaderValidation = 0)
+	BEGIN
+		SELECT @strVersionNo = ''
 
-SELECT @strVersionNo
+		SELECT @strVersionNo
+	END
+ELSE
+	BEGIN
+		SELECT @strVersionNo = ''
+		
+		SELECT @strVersionNo
+	END

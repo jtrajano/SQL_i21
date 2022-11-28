@@ -46,7 +46,10 @@
     [strZipCode]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dblLongitude]					NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [dblLatitude]					NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
-	[intConcurrencyId]			[int] NOT NULL DEFAULT ((1)), 
+	[strO365EventId]				NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
+	[ysnO365OnlineMeeting]			[bit] NULL,
+	[strO365MeetingUrl]				NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[intConcurrencyId]				[int] NOT NULL DEFAULT ((1)), 
 
     CONSTRAINT [FK_tblSMActivity_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMActivity_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

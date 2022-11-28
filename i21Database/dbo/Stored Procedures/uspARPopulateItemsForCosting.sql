@@ -147,7 +147,7 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
 		)
 	AND ARID.[intItemId] IS NOT NULL
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
-	AND ARID.[strTransactionType] <> 'Debit Memo'							
+	AND ARID.[strTransactionType] NOT IN ('Debit Memo', 'Tax Adjustment')
 	AND ARID.[intStorageScheduleTypeId] IS NULL
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NULL)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NOT NULL))))
@@ -192,7 +192,7 @@ SELECT
 	,[intItemLocationId]		= ILOC.intItemLocationId
 	,[intItemUOMId]				= dbo.fnGetMatchingItemUOMId(ARIC.[intBundleItemId], ARIC.intItemUnitMeasureId)
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]					= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
+	,[dblQty]					= ((dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIUOM_STOCK.intItemUOMId, ARID.[dblQtyShipped]) * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ICIUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
@@ -229,8 +229,14 @@ SELECT
 	,[strSessionId]				= @strSessionId
 FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
-INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
-INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.[intBundleItemId] = ICI.[intItemId]
+INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intBundleItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
+INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.intBundleItemId = ICI.[intItemId]
+CROSS APPLY (
+     SELECT intItemUOMId 
+     FROM tblICItemUOM WITH (NOLOCK)
+     WHERE intItemId = ARID.intItemId
+     AND ysnStockUnit = 1
+ ) ICIUOM_STOCK
 LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
 LEFT JOIN tblICCategory CAT ON ICI.intCategoryId = CAT.intCategoryId
 LEFT JOIN tblICItemPricing IPP ON IPP.intItemId = ICI.intItemId AND IPP.intItemLocationId = ILOC.intItemLocationId
@@ -244,7 +250,7 @@ WHERE (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest')
     AND ARID.[ysnImpactInventory] = 1
 	AND ARID.[intItemId] IS NOT NULL
 	AND ARIC.[intBundleItemId] IS NOT NULL
-	AND ARID.[strTransactionType] <> 'Debit Memo'	
+	AND ARID.[strTransactionType] NOT IN ('Debit Memo', 'Tax Adjustment')
 	AND ARID.[strItemType] = 'Bundle'
 	AND ICI.[strType] <> 'Non-Inventory'
 	AND ARID.[intStorageScheduleTypeId] IS NULL

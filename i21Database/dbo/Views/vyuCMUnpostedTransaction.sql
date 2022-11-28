@@ -14,40 +14,61 @@ WITH BT AS(
 	FROM tblCMBankTransaction BT
 	WHERE ISNULL(ysnPosted,0) = 0 and  ISNULL(ysnCheckVoid,0) = 0
 ),
--- BTransferType AS(
--- 	SELECT intBankTransferTypeId = 1 , strType = 'Bank Transfer'  UNION
--- 	SELECT intBankTransferTypeId = 2 , strType = 'Bank Transfer With In transit' UNION
--- 	SELECT intBankTransferTypeId = 3 , strType = 'Bank Forward' UNION
--- 	SELECT intBankTransferTypeId = 4 , strType = 'Swap Short'  UNION
--- 	SELECT intBankTransferTypeId = 5 , strType = 'Swap Long'
--- ),
 BTransfer AS(
+	-- reg bank transfer
 	SELECT 
 		intTransactionId,
 		strTransactionId,
-		strTransactionType = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = BTransfer.intBankTransactionTypeId),
-		CASE WHEN intBankTransferTypeId = 3 THEN dtmAccrual ELSE dtmDate END dtmDate,
+		dtmInTransit dtmDate,
 		strDescription,
-		strUserName = (SELECT strName from tblEMEntity where intEntityId = BTransfer.intEntityId),
-		intEntityId,
-		intBankTransferTypeId,
-		dblAmountFrom dblAmount
-	FROM tblCMBankTransfer BTransfer
-	WHERE ISNULL( CASE WHEN intBankTransferTypeId = 1 THEN ysnPosted ELSE ysnPostedInTransit END, 0) = 0
-	UNION ALL
-	SELECT 
-		intTransactionId,
-		strTransactionId,
-		strTransactionType = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = BTransfer.intBankTransactionTypeId),
-		CASE WHEN intBankTransferTypeId = 3 THEN dtmDate ELSE dtmInTransit END dtmDate,
-		strDescription,
-		strUserName = (SELECT strName from tblEMEntity where intEntityId = BTransfer.intEntityId),
 		intEntityId,
 		intBankTransferTypeId,
 		dblAmountTo dblAmount
 	FROM tblCMBankTransfer BTransfer
-	WHERE ISNULL( ysnPosted, 0) = 0
-	AND intBankTransferTypeId > 1
+	WHERE ISNULL( ysnPosted, 0) = 0 and intBankTransferTypeId = 2 UNION
+	SELECT 
+		intTransactionId,
+		strTransactionId,
+		dtmDate,
+		strDescription,
+		intEntityId,
+		intBankTransferTypeId,
+		dblAmountTo dblAmount
+	FROM tblCMBankTransfer BTransfer
+	WHERE ISNULL( ysnPostedInTransit, 0) = 0
+	AND intBankTransferTypeId = 2 UNION
+	SELECT 
+		intTransactionId,
+		strTransactionId,
+		dtmDate,
+		strDescription,
+		intEntityId,
+		intBankTransferTypeId,
+		dblAmountTo dblAmount
+	FROM tblCMBankTransfer BTransfer
+	WHERE ISNULL( ysnPosted, 0) = 0 AND intBankTransferTypeId in( 1,3,4,5 ) UNION
+	-- bank intransit
+	SELECT 
+		intTransactionId,
+		strTransactionId,
+		dtmInTransit dtmDate,
+		strDescription,
+		intEntityId,
+		intBankTransferTypeId,
+		dblAmountTo dblAmount
+	FROM tblCMBankTransfer BTransfer
+	WHERE ISNULL( ysnPostedInTransit, 0) = 0 AND intBankTransferTypeId IN(4,5) UNION
+	SELECT 
+		intTransactionId,
+		strTransactionId,
+		dtmAccrual dtmDate,
+		strDescription,
+		intEntityId,
+		intBankTransferTypeId,
+		dblAmountTo dblAmount
+	FROM tblCMBankTransfer BTransfer
+	WHERE ISNULL( ysnPostedInTransit, 0) = 0
+	AND intBankTransferTypeId = 3
 )
 SELECT 
 intTransactionId,
@@ -66,10 +87,10 @@ strTransactionId,
 'Bank Transfer' strTransactionType,
 dtmDate,
 strDescription,
-strUserName,
+T.strName strUserName,
 intEntityId,
 dblAmount
 FROM BTransfer A 
--- ROSS APPLY(
--- 	SELECT strType FROM BTransferType WHERE intBankTransferTypeId = A.intBankTransferTypeId
--- )T
+OUTER  APPLY(
+ 	SELECT TOP 1 strName from tblEMEntity where intEntityId = A.intEntityId
+ )T

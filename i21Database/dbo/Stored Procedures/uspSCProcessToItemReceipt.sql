@@ -10,6 +10,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	,@InventoryReceiptId AS INT OUTPUT
 	,@intBillId AS INT OUTPUT
 	,@ysnSkipValidation as BIT = NULL
+	,@ysnProcessToOnHold AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -138,6 +139,7 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
 FROM dbo.tblSCTicket ST WHERE
 ST.intTicketId = @intTicketId
 
+SELECT @ysnProcessToOnHold = ISNULL(@ysnProcessToOnHold, 0)
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
 FROM dbo.tblGRStorageType ST WHERE 
 ST.strStorageTypeCode = @strDistributionOption
@@ -596,6 +598,15 @@ BEGIN TRY
 		END
 	END
 
+	IF(@ysnProcessToOnHold = 1)
+	BEGIN
+		UPDATE tblSCTicket
+		SET ysnTicketOnHold = 1
+			,dblOnHoldQuantity = dblNetUnits
+		WHERE intTicketId = @intTicketId
+	END
+
+
 	BEGIN 
 		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @strReceiptType, @InventoryReceiptId OUTPUT; 
 	END
@@ -706,11 +717,12 @@ BEGIN TRY
 		DEALLOCATE lotCursor;
 	END		
 
-	IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
+	IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))  AND @ysnProcessToOnHold <> 1
 	BEGIN
 		EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
 	END
 
+	
 	--EXEC uspSCModifyTicketDiscountItemInfo @intTicketId
 
 	EXEC dbo.uspSMAuditLog 

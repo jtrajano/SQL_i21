@@ -214,6 +214,8 @@
 
 [intUserLoc] INT NULL,
 
+[intMarketZoneId] INT NULL,
+
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -254,7 +256,8 @@ CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETSPOLReasonCodeId_intReasonCodeId] 
 CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPODReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPODReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
 CONSTRAINT [FK_tblLGLoad_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
 CONSTRAINT [FK_tblLGLoad_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
-CONSTRAINT [FK_tblLGLoad_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
+CONSTRAINT [FK_tblLGLoad_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
+CONSTRAINT [FK_tblLGLoad_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId])
 )
 
 go

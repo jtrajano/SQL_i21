@@ -312,6 +312,43 @@ BEGIN TRY
 
 			EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, 0, @UserId
 			EXEC dbo.[uspSOUpdateOrderIntegrationsPost] @NewSalesOrderId, 0, 0, @UserId
+
+			--INSERT TO TRANSACTION LINKS
+			DECLARE @tblTransactionLinks    udtICTransactionLinks
+
+			INSERT INTO @tblTransactionLinks (
+				  intSrcId
+				, strSrcTransactionNo
+				, strSrcTransactionType
+				, strSrcModuleName
+				, intDestId
+				, strDestTransactionNo
+				, strDestTransactionType
+				, strDestModuleName
+				, strOperation
+			)
+			SELECT intSrcId                 = QUOTE.intSalesOrderId
+				, strSrcTransactionNo       = QUOTE.strSalesOrderNumber
+				, strSrcTransactionType     = 'Quote'
+				, strSrcModuleName          = 'Accounts Receivable'
+				, intDestId                 = SO.intSalesOrderId
+				, strDestTransactionNo      = SO.strSalesOrderNumber
+				, strDestTransactionType    = 'Sales Order'
+				, strDestModuleName         = 'Accounts Receivable'
+				, strOperation              = 'Process'
+			FROM tblSOSalesOrder QUOTE
+			CROSS APPLY (
+				SELECT TOP 1 intSalesOrderId
+						   , strSalesOrderNumber
+				FROM tblSOSalesOrder
+				WHERE intSalesOrderId = @NewSalesOrderId
+				  AND strTransactionType = 'Order'
+			) SO
+			WHERE QUOTE.intSalesOrderId = @SalesOrderId
+			  AND QUOTE.strTransactionType = 'Quote'
+
+			EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+			
 	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH

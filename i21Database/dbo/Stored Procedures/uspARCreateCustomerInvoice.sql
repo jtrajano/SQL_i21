@@ -168,6 +168,7 @@
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
 	,@OpportunityId							INT 			= 0
+	,@DefaultPayToBankAccountId				INT				= NULL
 AS
 
 BEGIN
@@ -667,10 +668,19 @@ BEGIN TRY
 		,[dblFreightCharge]					= @FreightCharge
 		,[intFreightCompanySegment]			= @FreightCompanySegment
 		,[intFreightLocationSegment]		= @FreightLocationSegment
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
-		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @SourcedFrom ELSE NULL END
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
+		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
+												THEN @SourcedFrom 
+												ELSE 
+													CASE WHEN ISNULL(@BankAccountId, '') = '' AND ISNULL([dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId), '') <> '' 
+														THEN 'Customer'
+														ELSE NULL
+													END
+											  END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
+		,[dblSurcharge]						= @Surcharge
+		,[intOpportunityId]					= @OpportunityId
 		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
 		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 	FROM	

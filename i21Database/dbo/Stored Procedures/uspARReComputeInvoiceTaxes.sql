@@ -171,7 +171,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			 @InvoiceDetailId
 			,[intTaxGroupId]
 			,[intTaxCodeId]
-			,[intTaxClassId]
+			,GITCFC.intTaxClassId
 			,[strTaxableByOtherTaxes]
 			,[strCalculationMethod]
 			,[dblRate]
@@ -193,8 +193,9 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[intUnitMeasureId] 
 			,1
 		FROM
-			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1, 0, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate, @FOB)
-		
+			[dbo].[fnGetItemTaxComputationForCustomer](@ItemId, @CustomerId, @TransactionDate, @ItemPrice, @QtyShipped, @TaxGroupId, @LocationId, @CustomerLocationId, 1, 1, NULL, @SiteId, @FreightTermId, NULL, NULL, 0, 1, NULL, 1, 0, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate, @FOB) GITCFC
+		INNER JOIN tblICCategoryTax ICCT ON GITCFC.intTaxClassId = ICCT.intTaxClassId
+		INNER JOIN tblICItem ICIT ON ICIT.intCategoryId = ICCT.intCategoryId AND ICIT.intItemId = @ItemId
 		
 		UPDATE IDT			
 		SET  [ysnTaxAdjusted]		= 1

@@ -3,7 +3,7 @@
 AS  
 
 SELECT TOP 100 PERCENT *
-	, intRowNum = CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutOptTransactionId))
+	, intRowNum = intFutOptTransactionId --CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutOptTransactionId))
 	, dblHedgeQty = ISNULL(dblContractSize, 0.00) * dblOpenContract
 	, dblContractPrice = ISNULL(dblPrice, 0.00) * dblOpenContract
 FROM (
@@ -135,4 +135,4 @@ LEFT JOIN tblSMTransaction approval
 	AND approval.intScreenId = approvalScreen.intScreenId
 	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
 )t 
-ORDER BY intFutOptTransactionId ASC
+--ORDER BY intFutOptTransactionId ASC

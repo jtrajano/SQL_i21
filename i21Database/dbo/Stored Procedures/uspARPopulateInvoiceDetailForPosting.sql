@@ -236,6 +236,9 @@ INSERT INTO tblARPostInvoiceHeader
     ,[intFreightLocationSegment]
     ,[dblSurcharge]
     ,[intCompanySegment]
+    ,[dblPercentage]
+    ,[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -300,7 +303,7 @@ SELECT
     ,[intEntityId]                      = ARI.[intEntityId]
     ,[intUserId]                        = @UserId
     ,[ysnUserAllowedToPostOtherTrans]	= @AllowOtherUserToPost    
-    ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
+    ,[ysnProvisionalWithGL]             = CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END
     ,[ysnExcludeInvoiceFromPayment]     = @ExcludeInvoiceFromPayment
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnCancelled]                     = ARI.[ysnCancelled]
@@ -326,7 +329,10 @@ SELECT
     ,[intFreightLocationSegment]        = ARI.[intFreightLocationSegment]
     ,[dblSurcharge]                     = ARI.[dblSurcharge]
     ,[intCompanySegment]                = SMCL.[intCompanySegment]
-FROM tblARInvoice ARI WITH (NOLOCK)
+    ,[dblPercentage]                    = ARI.[dblPercentage]
+    ,[dblProvisionalTotal]              = ARI.[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]          = ROUND(ARI.[dblProvisionalTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+FROM tblARInvoice ARI
 INNER JOIN #tblInvoiceIds ID ON ARI.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 INNER JOIN tblEMEntity EM ON ARC.intEntityId = EM.intEntityId 
@@ -334,8 +340,8 @@ INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.[intCompanyLocationId]
 
 UPDATE tblARPostInvoiceHeader
 SET ysnIsInvoicePositive = CAST(0 AS BIT)  
-WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
-  AND strSessionId = @strSessionId
+WHERE (strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') OR strType = 'Tax Adjustment')
+AND strSessionId = @strSessionId
 
 IF EXISTS (SELECT TOP 1 1 FROM vyuARForApprovalTransction)
     BEGIN
@@ -502,6 +508,10 @@ INSERT INTO tblARPostInvoiceDetail
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[dblSurcharge]
+    ,[dblPercentage]
+    ,[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]
+    ,dblBaseProvisionalTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -614,7 +624,7 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -655,8 +665,12 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
-FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
-INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+    ,[dblPercentage]                    = ARID.[dblPercentage]
+    ,[dblProvisionalTotal]              = ARID.[dblProvisionalTotal]
+    ,[dblBaseProvisionalTotal]          = ROUND(ARID.[dblProvisionalTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
+FROM tblARPostInvoiceHeader ARI
+INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN tblICItem ICI WITH(NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
 LEFT OUTER JOIN tblICCategory ICC WITH(NOLOCK) ON ICI.[intCategoryId] = ICC.[intCategoryId]
@@ -941,7 +955,7 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -1316,7 +1330,7 @@ SELECT
     ,[dblTotal]                         = ARID.[dblTotal]
     ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = ISNULL(ARID.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
+    ,[dblBaseLineItemGLAmount]          = ISNULL(ROUND(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()), @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -1394,12 +1408,18 @@ WHERE ID.strSessionId = @strSessionId
   AND DH.strDestination = 'Customer'
 
 UPDATE ARPIH
-SET dblBaseInvoiceTotal = ARPID.dblBaseTotal
+SET dblBaseInvoiceTotal = CASE WHEN ARPIH.dblPercentage <> 100 
+                            THEN ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax 
+                            ELSE ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax
+                          END
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
     SELECT
-         intInvoiceId = intInvoiceId
-        ,dblBaseTotal = SUM(dblBaseTotal) + SUM(dblBaseTax)
+         intInvoiceId               = intInvoiceId
+        ,dblBaseLineItemGLAmount    = SUM(dblBaseLineItemGLAmount) 
+        ,dblBaseTax                 = SUM(dblBaseTax)
+        ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
+        ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId

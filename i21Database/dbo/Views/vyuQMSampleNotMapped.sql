@@ -85,6 +85,7 @@ SELECT S.intSampleId
 	,PUOM3.strUnitMeasure AS strB3PriceUOM
 	,PUOM4.strUnitMeasure AS strB4PriceUOM
 	,PUOM5.strUnitMeasure AS strB5PriceUOM
+	,TC.strTINNumber
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -154,6 +155,7 @@ LEFT JOIN tblICUnitMeasure PUOM2 ON PUOM2.intUnitMeasureId = S.intB2PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM3 ON PUOM3.intUnitMeasureId = S.intB3PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM4 ON PUOM4.intUnitMeasureId = S.intB4PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM5 ON PUOM5.intUnitMeasureId = S.intB5PriceUOMId
+LEFT JOIN tblQMTINClearance TC ON TC.intTINClearanceId = S.intTINClearanceId
 GO
 
 

@@ -4,7 +4,7 @@ SELECT intSampleId					= S.intSampleId
 	 , strSaleNumber				= S.strSaleNumber
 	 , strSampleNote				= S.strSampleNote
 	 , strBrokerName				= E.strName
-	 , strAuctionPrice				= CAST('0.00-0.00' AS NVARCHAR(100))
+	 , strAuctionPrice				= CAST(CAST(ISNULL(AUCPRICE.dblMinPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100)) + ' - ' + CAST(CAST(ISNULL(AUCPRICE.dblMaxPrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(100))
 	 , strWarehouse					= SL.strSubLocationName
 	 , dblSupplierValuationPrice	= ISNULL(S.dblSupplierValuationPrice, 0)
 	 , strLotNumber					= S.strRepresentLotNumber
@@ -34,4 +34,12 @@ OUTER APPLY (
 	FROM tblSMCompanySetup
 	ORDER BY intCompanySetupID ASC
 ) COMP
+OUTER APPLY (
+	SELECT dblMinPrice	= MIN(ISNULL(dblB1Price, 0))
+		 , dblMaxPrice  = MAX(ISNULL(dblB1Price, 0))
+	FROM tblQMSample A
+	WHERE A.strSaleNumber IS NOT NULL
+	  AND A.strSaleNumber = S.strSaleNumber
+	GROUP BY A.strSaleNumber
+) AUCPRICE
 WHERE S.strSaleNumber IS NOT NULL

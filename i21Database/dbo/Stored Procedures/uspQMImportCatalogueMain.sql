@@ -29,8 +29,8 @@ BEGIN TRY
     LEFT JOIN tblEMEntity ECTBO ON ECTBO.strName = IMP.strEvaluatorsCodeAtTBO
     -- From Location Code
     LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
-    -- Sub Book
-    LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel
+    -- Channel
+    LEFT JOIN tblARMarketZone MARKET_ZONE ON MARKET_ZONE.strMarketZoneCode = IMP.strChannel
     -- Sample Type
     LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
     -- Net Weight Per Packages / Quantity UOM
@@ -41,6 +41,8 @@ BEGIN TRY
     LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
     -- Broker
     LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
+    -- Strategy
+    LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -53,12 +55,13 @@ BEGIN TRY
             + CASE WHEN (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '') THEN 'SUSTAINABILITY, ' ELSE '' END
             + CASE WHEN (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '') THEN 'EVALUATORS CODE AT TBO, ' ELSE '' END
             + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
-            + CASE WHEN (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') <> '') THEN 'CHANNEL, ' ELSE '' END
+            + CASE WHEN (MARKET_ZONE.intMarketZoneId IS NULL AND ISNULL(IMP.strChannel, '') <> '') THEN 'CHANNEL, ' ELSE '' END
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
             + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '') THEN 'NO OF PACKAGES UOM, ' ELSE '' END
             + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
+            + CASE WHEN (STRATEGY.intSubBookId IS NULL AND ISNULL(IMP.strStrategy, '') <> '') THEN 'STRATEGY, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
@@ -72,7 +75,7 @@ BEGIN TRY
         OR (SUSTAINABILITY.intCommodityProductLineId IS NULL AND ISNULL(IMP.strSustainability, '') <> '')
         OR (ECTBO.intEntityId IS NULL AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> '')
         OR (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '')
-        OR (SUBBOOK.intSubBookId IS NULL AND ISNULL(IMP.strChannel, '') <> '')
+        OR (MARKET_ZONE.intMarketZoneId IS NULL AND ISNULL(IMP.strChannel, '') <> '')
         OR (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
         OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '')
         OR (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '')
@@ -135,14 +138,16 @@ BEGIN TRY
         ,@intFromLocationCodeId INT
         ,@strFromLocationCode NVARCHAR(50)
         ,@strSampleBoxNumber NVARCHAR(50)
-        ,@strSubBook NVARCHAR(100)
-        ,@intSubBookId INT
+        ,@strMarketZoneCode NVARCHAR(100)
+        ,@intMarketZoneId INT
         ,@intSampleTypeId INT
         ,@strBatchNo NVARCHAR(50)
         ,@intEntityUserId INT
         ,@dtmDateCreated DATETIME
         ,@intBrokerId INT
         ,@strBroker NVARCHAR(100)
+        ,@strBuyingOrderNumber NVARCHAR(50)
+        ,@intSubBookId INT
     
     DECLARE @intSampleId INT
     DECLARE @intItemId INT
@@ -215,14 +220,16 @@ BEGIN TRY
             ,intFromLocationCodeId = FROM_LOC_CODE.intCityId
             ,strFromLocationCode = FROM_LOC_CODE.strCity
             ,strSampleBoxNumber = IMP.strSampleBoxNumberTBO
-            ,strSubBook = SUBBOOK.strSubBook
-            ,intSubBookId = SUBBOOK.intSubBookId
+            ,strMarketZoneCode = MARKET_ZONE.strMarketZoneCode
+            ,intMarketZoneId = MARKET_ZONE.intMarketZoneId
             ,intSampleTypeId = SAMPLE_TYPE.intSampleTypeId
             ,strBatchNo = IMP.strBatchNo
             ,intEntityUserId = IL.intEntityId
             ,dtmDateCreated = GETDATE()
             ,intBrokerId = BROKERS.intEntityId
             ,strBroker = BROKERS.strName
+            ,strBuyingOrderNumber = IMP.strBuyingOrderNumber
+            ,intSubBookId = STRATEGY.intSubBookId
         FROM tblQMImportCatalogue IMP
         INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
         -- Sale Year
@@ -251,8 +258,8 @@ BEGIN TRY
         LEFT JOIN tblEMEntity ECTBO ON ECTBO.strName = IMP.strEvaluatorsCodeAtTBO
         -- From Location Code
         LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
-        -- Sub Book
-        LEFT JOIN tblCTSubBook SUBBOOK ON SUBBOOK.strSubBook = IMP.strChannel
+        -- Channel
+        LEFT JOIN tblARMarketZone MARKET_ZONE ON MARKET_ZONE.strMarketZoneCode = IMP.strChannel
         -- Sample Type
         LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
         -- Net Weight Per Packages / Quantity UOM
@@ -263,6 +270,8 @@ BEGIN TRY
         LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
         -- Broker
         LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
+        -- Strategy
+        LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy
 
         WHERE IMP.intImportLogId = @intImportLogId
         AND IMP.ysnSuccess = 1
@@ -321,14 +330,16 @@ BEGIN TRY
         ,@intFromLocationCodeId
         ,@strFromLocationCode
         ,@strSampleBoxNumber
-        ,@strSubBook
-        ,@intSubBookId
+        ,@strMarketZoneCode
+        ,@intMarketZoneId
         ,@intSampleTypeId
         ,@strBatchNo
         ,@intEntityUserId
         ,@dtmDateCreated
         ,@intBrokerId
         ,@strBroker
+        ,@strBuyingOrderNumber
+        ,@intSubBookId
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
         SET @intSampleId = NULL
@@ -352,11 +363,11 @@ BEGIN TRY
         BEGIN
 
             -- Assign sample type based on mapping table if it is not supplied in the template
-            IF @intSampleTypeId IS NULL AND @strSubBook IS NOT NULL
-                SELECT @intSampleTypeId = SBSTM.intSampleTypeId
-                FROM tblQMSubBookSampleTypeMapping SBSTM
-                INNER JOIN tblCTSubBook SB ON SB.intSubBookId = SBSTM.intSubBookId
-                WHERE SB.strSubBook = @strSubBook
+            IF @intSampleTypeId IS NULL AND @strMarketZoneCode IS NOT NULL
+                SELECT @intSampleTypeId = MZSTM.intSampleTypeId
+                FROM tblQMMarketZoneSampleTypeMapping MZSTM
+                INNER JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = MZSTM.intMarketZoneId
+                WHERE MZ.strMarketZoneCode = @strMarketZoneCode
 
             --New Sample Creation
             EXEC uspMFGeneratePatternId @intCategoryId = NULL
@@ -397,6 +408,7 @@ BEGIN TRY
                 ,strComment
                 ,intCreatedUserId
                 ,dtmCreated
+                ,intMarketZoneId
                 ,intSubBookId
 
                 -- Auction Fields
@@ -434,6 +446,7 @@ BEGIN TRY
                 ,strSampleBoxNumber
                 ,strComments3
                 ,intBrokerId
+                ,strBuyingOrderNo
                 )
             SELECT
                 intConcurrencyId = 1
@@ -457,10 +470,11 @@ BEGIN TRY
                 ,strCountry = @strCountry
                 ,intLocationId = @intCompanyLocationId
                 ,intCompanyLocationId = @intCompanyLocationId
-                ,intCompanyLocationId = @intCompanyLocationSubLocationId
+                ,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
                 ,strComment = @strComments
                 ,intCreatedUserId = @intEntityUserId
                 ,dtmCreated = @dtmDateCreated
+                ,intMarketZoneId = @intMarketZoneId
                 ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
@@ -498,6 +512,7 @@ BEGIN TRY
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
+                ,strBuyingOrderNo = @strBuyingOrderNumber
             
             SET @intSampleId = SCOPE_IDENTITY()
             
@@ -674,6 +689,7 @@ BEGIN TRY
                 ,strComment = @strComments
                 ,intLastModifiedUserId = @intEntityUserId
                 ,dtmLastModified = @dtmDateCreated
+                ,intMarketZoneId = @intMarketZoneId
                 ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
@@ -711,6 +727,7 @@ BEGIN TRY
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
+                ,strBuyingOrderNo = @strBuyingOrderNumber
             FROM tblQMSample S
             WHERE S.intSampleId = @intSampleId
 
@@ -773,14 +790,16 @@ BEGIN TRY
             ,@intFromLocationCodeId
             ,@strFromLocationCode
             ,@strSampleBoxNumber
-            ,@strSubBook
-            ,@intSubBookId
+            ,@strMarketZoneCode
+            ,@intMarketZoneId
             ,@intSampleTypeId
             ,@strBatchNo
             ,@intEntityUserId
             ,@dtmDateCreated
             ,@intBrokerId
             ,@strBroker
+            ,@strBuyingOrderNumber
+            ,@intSubBookId
     END
     CLOSE @C
 	DEALLOCATE @C

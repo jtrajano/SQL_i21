@@ -276,6 +276,7 @@ BEGIN
 		DECLARE @tblTempInvoiceIds TABLE
 		(
 			intInvoiceId INT,
+			intEntityId INT,
 			ysnPosted BIT,
 			strTransactionType NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CS_AS
 		)
@@ -4802,7 +4803,7 @@ BEGIN
 											,[strPONumber]				= NULL								-- not sure
 											,[strBOLNumber]				= NULL								-- not sure
 
-											,[strComments]				= @strComments + '[' + CAST(CC.intCustomerId AS NVARCHAR(100)) + '][' + CAST(CC.intInvoice AS NVARCHAR(100)) + ']' -- to be able to create reparate Invoices (intCustomerId + intInvoice)
+											,[strComments]				= @strComments + '[' + CAST(CC.intCustomerId AS NVARCHAR(100)) + ']' -- to be able to create reparate Invoices (intCustomerId + intInvoice)
 																															  -- if  row 1 = Customer 1, Invoice = 1234
 																															  -- and row 2 = Customer 2, Invoice = 1234
 																															  -- then create 1 invoice for both
@@ -4971,14 +4972,12 @@ BEGIN
 									SELECT SUM(cc.dblAmount) AS dblAmountSUM
 										   , cc.intCheckoutId
 										   , cc.strComment
-										   , cc.intInvoice
 										   , cc.intCustomerId
 									FROM tblSTCheckoutCustomerCharges cc
-									GROUP BY cc.intCheckoutId, cc.strComment, cc.intInvoice, cc.intCustomerId
+									GROUP BY cc.intCheckoutId, cc.strComment, cc.intCustomerId
 								) CCMerge
 									ON CC.intCheckoutId = CCMerge.intCheckoutId
 									AND CC.strComment = CCMerge.strComment
-									AND CC.intInvoice = CCMerge.intInvoice
 									AND CC.intCustomerId = CCMerge.intCustomerId
 
 								INNER JOIN tblSTCheckoutHeader CH 
@@ -5682,11 +5681,13 @@ IF(@ysnDebug = 1)
 															INSERT INTO @tblTempInvoiceIds
 															(
 																intInvoiceId,
+																intEntityId,
 																ysnPosted,
 																strTransactionType
 															)
 															SELECT DISTINCT 
 																LogDetail.intInvoiceId,
+																Inv.intEntityCustomerId,
 																Inv.ysnPosted,
 																LogDetail.strTransactionType
 															FROM tblARInvoiceIntegrationLogDetail LogDetail
@@ -6099,8 +6100,8 @@ IF(@ysnDebug = CAST(1 AS BIT))
 								--------------------------------------------------------------------------
 								IF (@ysnConsignmentStore = 1 AND @strCheckoutType = 'Automatic')
 								BEGIN
-									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-								VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'W', 'Done processing checkout for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
+									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
+									VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), @intCheckoutId, 'W', 'Done processing checkout for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
 								END
 								--------------------------------------------------------------------------
 								--- CS-72 - Record Successful Day Processing in Polling Status Report. ---
@@ -7226,11 +7227,13 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				INSERT INTO @tblTempInvoiceIds
 				(
 					intInvoiceId,
+					intEntityId,
 					ysnPosted,
 					strTransactionType
 				)
 				SELECT DISTINCT 
 					Inv.intInvoiceId,
+					Inv.intEntityCustomerId,
 					Inv.ysnPosted,
 					LogDetail.strTransactionType
 				FROM tblARInvoiceIntegrationLogDetail LogDetail
@@ -7732,26 +7735,9 @@ IF(@ysnDebug = CAST(1 AS BIT))
 										JOIN
 										(
 											SELECT 
-												ROW_NUMBER() OVER (ORDER BY intCustChargeId ASC) as intRowNumber
+												ROW_NUMBER() OVER (ORDER BY C.intCustomerId ASC) as intRowNumber
 												,intCustChargeId 
 											FROM tblSTCheckoutCustomerCharges C
-											LEFT JOIN tblICItemUOM UOM 
-												ON C.intProduct = UOM.intItemUOMId
-											JOIN tblICItem I 
-												ON UOM.intItemId = I.intItemId
-											JOIN tblSTCheckoutHeader CH 
-												ON C.intCheckoutId = CH.intCheckoutId
-											JOIN tblICItemLocation IL 
-												ON I.intItemId = IL.intItemId
-
-											-- http://jira.irelyserver.com/browse/ST-1316
-											--JOIN tblICItemPricing IP 
-											--	ON I.intItemId = IP.intItemId
-											--	AND IL.intItemLocationId = IP.intItemLocationId
-
-											JOIN tblSTStore ST 
-												ON IL.intLocationId = ST.intCompanyLocationId
-												AND CH.intStoreId = ST.intStoreId
 											WHERE C.intCheckoutId = @intCheckoutId
 												AND C.dblAmount > 0
 												-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
@@ -7760,7 +7746,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 										JOIN
 										(
 											SELECT
-												ROW_NUMBER() OVER (ORDER BY intInvoiceId ASC) as intRowNumber
+												ROW_NUMBER() OVER (ORDER BY intEntityId ASC) as intRowNumber
 												, intInvoiceId
 											FROM @tblTempInvoiceIds 
 											WHERE strTransactionType != @strInvoiceTransactionTypeMain

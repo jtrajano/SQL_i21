@@ -77,9 +77,9 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
 	SELECT * INTO #TempInvoiceEntries FROM @InvoiceEntries 
 	WHERE 
-		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
+		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct')) 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
 	CREATE TABLE #EntriesForProcessing(
@@ -589,64 +589,76 @@ BEGIN
 
 	BEGIN TRY
 		IF ISNULL(@SourceTransaction, '') <> 'Import'
+		BEGIN
+			IF ISNULL(@SourceTransaction,'') = 'Transport Load'
 			BEGIN
-				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
-					BEGIN
-						SET @SourceColumn = 'intLoadDistributionHeaderId'
-						SET @SourceTable = 'tblTRLoadDistributionHeader'
-					END
-				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
-					BEGIN
-						SET @SourceColumn = 'intShipmentId'
-						SET @SourceTable = 'tblLGShipment'
-						SET @SourcedFrom = 'Logistics'
-					END
-				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
-					BEGIN
-						SET @SourceColumn = 'intTransactionId'
-						SET @SourceTable = 'tblCFTransaction'
-					END
-				IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
-					BEGIN
-						SET @SourceColumn = 'intMeterReadingId'
-						SET @SourceTable = 'tblMBMeterReading' 
-					END
-				IF ISNULL(@SourceTransaction,'') = 'Provisional'
-					BEGIN
-						SET @SourceColumn = 'intInvoiceId'
-						SET @SourceTable = 'tblARInvoice'
-					END					
-				IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
-					BEGIN
-						SET @SourceColumn = 'intInventoryShipmentId'
-						SET @SourceTable = 'tblICInventoryShipment'
-						SET @SourcedFrom = 'Inventory Shipment'
-					END		
+				SET @SourceColumn = 'intLoadDistributionHeaderId'
+				SET @SourceTable = 'tblTRLoadDistributionHeader'
+			END
 
-				IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
-					BEGIN
-						SET @SourceColumn = 'intContractHeaderId'
-						SET @SourceTable = 'tblCTContractHeader'
-					END
+			IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
+			BEGIN
+				SET @SourceColumn = 'intShipmentId'
+				SET @SourceTable = 'tblLGShipment'
+				SET @SourcedFrom = 'Logistics'
+			END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Load Schedule')
-					BEGIN
-						SET @SourceColumn = 'intLoadId'
-						SET @SourceTable = 'tblLGLoad'
-						SET @SourcedFrom = 'Logistics'
-					END
+			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
+			BEGIN
+				SET @SourceColumn = 'intTransactionId'
+				SET @SourceTable = 'tblCFTransaction'
+			END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
-					BEGIN
-						SET @SourceColumn = 'intWeightClaimId'
-						SET @SourceTable = 'tblLGWeightClaim'
-					END
+			IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
+			BEGIN
+				SET @SourceColumn = 'intMeterReadingId'
+				SET @SourceTable = 'tblMBMeterReading' 
+			END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim')
-					BEGIN
-						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
-					END
+			IF ISNULL(@SourceTransaction,'') = 'Provisional'
+			BEGIN
+				SET @SourceColumn = 'intInvoiceId'
+				SET @SourceTable = 'tblARInvoice'
+			END
+
+			IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
+			BEGIN
+				SET @SourceColumn = 'intInventoryShipmentId'
+				SET @SourceTable = 'tblICInventoryShipment'
+				SET @SourcedFrom = 'Inventory Shipment'
 			END		
+
+			IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
+			BEGIN
+				SET @SourceColumn = 'intContractHeaderId'
+				SET @SourceTable = 'tblCTContractHeader'
+			END
+
+			IF ISNULL(@SourceTransaction,'') IN ('Load Schedule')
+			BEGIN
+				SET @SourceColumn = 'intLoadId'
+				SET @SourceTable = 'tblLGLoad'
+				SET @SourcedFrom = 'Logistics'
+			END
+
+			IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
+			BEGIN
+				SET @SourceColumn = 'intWeightClaimId'
+				SET @SourceTable = 'tblLGWeightClaim'
+			END
+
+			IF ISNULL(@SourceTransaction,'') IN ('Settle Storage')
+			BEGIN
+				SET @SourceColumn = 'intSettleStorageId'
+				SET @SourceTable = 'tblGRSettleStorage'
+				SET @SourcedFrom = 'Settle Storage'
+			END
+
+			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim', 'Settle Storage')
+			BEGIN
+				EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
+			END
+		END		
 	END TRY
 	BEGIN CATCH
 		IF ISNULL(@RaiseError,0) = 0
@@ -682,7 +694,11 @@ BEGIN
 
 	IF ISNULL(@NewSourceId, 0) = 16
 	BEGIN
-		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intLoadId = @LoadId
+		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber 
+		FROM tblARInvoice 
+		WHERE intLoadId = @LoadId
+		AND strTransactionType <> 'Proforma Invoice'
+		
 		IF (@NewInvoiceNumber <> '')
 		BEGIN
 			SET @ErrorMessage = 'Invoice (' + @NewInvoiceNumber + ') was already created for ' + ISNULL(ISNULL(@SourceNumber, @ItemDocumentNumber), '')
@@ -2414,7 +2430,7 @@ BEGIN TRY
 						AND @UpdateAvailableDiscount = 0
 						
 					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
-								 @TaxDetails	= @TaxDetails
+									@TaxDetails	= @TaxDetails
 								,@UserId		= @EntityId
 								,@ClearExisting	= @ClearDetailTaxes
 								,@RaiseError	= @RaiseError
@@ -2816,47 +2832,60 @@ END CATCH
 
 
 DECLARE @CreateIds VARCHAR(MAX)
+
 DELETE FROM @TempInvoiceIdTable
+
 INSERT INTO @TempInvoiceIdTable
-SELECT DISTINCT
-	[intInvoiceId]
+SELECT DISTINCT intInvoiceId
 FROM
 	#EntriesForProcessing
 WHERE
-	ISNULL([ysnForInsert],0) = 1
-	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceId],0) <> 0
+	ISNULL(ysnForInsert, 0) = 1
+	AND ISNULL(ysnProcessed, 0) = 1
+	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
 	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
-	
 SET @CreatedIvoices = @CreateIds
 
+IF EXISTS(SELECT 1 FROM tblARCompanyPreference WHERE ysnOverrideARAccountLineOfBusinessSegment = 1)
+BEGIN
+	UPDATE ARI
+	SET intLineOfBusinessId = LOB.intLineOfBusinessId
+	FROM tblARInvoice ARI
+	OUTER APPLY (
+		SELECT TOP 1 ICC.intLineOfBusinessId
+		FROM tblARInvoiceDetail ARID
+		INNER JOIN tblICItem ICI ON ARID.intItemId = ICI.intItemId AND ARID.intInvoiceId = ARI.intInvoiceId
+		INNER JOIN tblICCommodity ICC ON ICI.intCommodityId = ICC.intCommodityId
+		ORDER BY intInvoiceDetailId
+	) LOB
+	WHERE ARI.intInvoiceId IN (SELECT intInvoiceId FROM @TempInvoiceIdTable)
+	AND ISNULL(ARI.intLineOfBusinessId, 0) = 0
+END
 
 DECLARE @UpdatedIds VARCHAR(MAX)
+
 DELETE FROM @TempInvoiceIdTable
+
 INSERT INTO @TempInvoiceIdTable
-SELECT DISTINCT
-	[intInvoiceId]
+SELECT DISTINCT intInvoiceId
 FROM
 	#EntriesForProcessing
 WHERE
-	ISNULL([ysnForUpdate],0) = 1
-	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceId],0) <> 0
+	ISNULL(ysnForUpdate, 0) = 1
+	AND ISNULL(ysnProcessed, 0) = 1
+	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
 	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
-
 	
 SET @UpdatedIvoices = @UpdatedIds
-
-
 
 IF ISNULL(@RaiseError,0) = 0
 BEGIN

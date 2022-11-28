@@ -97,5 +97,7 @@ CREATE TYPE MFBatchTableType AS TABLE
 	strSealNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strVoyage NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
-	strVessel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL
+	strVessel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+	intLocationId INT,
+	intMixingUnitLocationId int
 )

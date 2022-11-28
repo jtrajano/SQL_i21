@@ -28,6 +28,7 @@ SELECT CD.intContractDetailImportId
 	   ,CD.strReference
 	   ,CD.dblQuantity
 	   ,CD.strQuantityUOM
+	   ,QUOM.intUnitMeasureId
 	   ,intItemUOMId = qIuom.intItemUOMId
 	   ,CD.dblNetWeight
 	   ,CD.strWeightUOM

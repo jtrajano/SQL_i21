@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Forward Contracts' AND strModuleName = 'Contract Management')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tin Number' AND strModuleName = 'Quality')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1032,6 +1032,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI 
 	VALUES (N'Power BI Reports', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Reports', N'Maintenance', N'Screen', N'SystemManager.view.PowerBIReport?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 18, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'SystemManager.view.PowerBIReport?showSearch=true', intSort = 18 WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Power BI Profile', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Power BI Profile', N'Maintenance', N'Screen', N'i21.view.PowerBIProfile', N'small-menu-maintenance', 0, 0, 0, 1, 19, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.PowerBIProfile', intSort = 19 WHERE strMenuName = 'Power BI Profile' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 
 /* Start Delete */
@@ -3953,6 +3959,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Li
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'RiskManagement.view.CreditLine?showSearch=true' WHERE strMenuName = 'Credit Line Configuration' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Currency Pair', N'Risk Management', @RiskManagementMaintenanceParentMenuId, N'Currency Pair', N'Maintenance', N'Screen', N'RiskManagement.view.CurrencyPairSetup', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'RiskManagement.view.CurrencyPairSetup' WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Assign Derivatives' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Assign Derivatives', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Assign Derivatives', N'Derivative', N'Screen', N'RiskManagement.view.AssignFuturesToContracts', N'small-menu-derivative', 0, 0, 0, 1, 0, 1)
@@ -5054,6 +5066,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Short Ter
 	VALUES (N'Short Term Planning View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Short Term Planning View', N'View', N'Screen', N'Manufacturing.view.ShortTermPlanningView', N'small-menu-view', 0, 0, 0, 1, 9, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Manufacturing.view.ShortTermPlanningView' WHERE strMenuName = 'Short Term Planning View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Sheet View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Blend Sheet View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Blend Sheet View', N'View', N'Screen', N'Manufacturing.view.ApproveBlendSheet?showSearch=true', N'small-menu-view', 0, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Manufacturing.view.ApproveBlendSheet?showSearch=true' WHERE strMenuName = 'Blend Sheet View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
 
 -- Report
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ingredient Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId)
@@ -6736,6 +6754,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tin Numbe
 	VALUES (N'Tin Number', N'Quality', @QualityMaintenanceParentMenuId, N'Tin Number', N'Maintenance', N'Screen', N'Quality.view.TINClearance?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Quality.view.TINClearance?showSearch=true' WHERE strMenuName = 'Tin Number' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId
+
+UPDATE tblSMMasterMenu SET strMenuName = 'TIN Number' WHERE strMenuName = 'Tin Number' AND strModuleName = 'Quality' AND intParentMenuID = @QualityMaintenanceParentMenuId
 	
 	--BEGIN QUALITY REPORT
 DECLARE @QualityReportParentMenuId INT

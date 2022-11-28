@@ -24,7 +24,7 @@ BEGIN TRY
 	--LINK TIN # TO BATCH
 	IF @ysnDelink = 0
 		BEGIN
-			IF @intTINClearanceId = NULL
+			IF @intTINClearanceId IS NULL
 				BEGIN 
 					INSERT INTO tblQMTINClearance (
 						  intCompanyLocationId

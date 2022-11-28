@@ -68,6 +68,17 @@ BEGIN
 		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
 		,strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 		,strSerialNumber = TMD.strSerialNumber
+		,intBatchId = QB.intBatchId
+		,strBatchId = QB.strBatchId
+		,strTeaGardenChopInvoiceNumber = QB.strTeaGardenChopInvoiceNumber
+		,strVendorLotNumber = QB.strVendorLotNumber
+		,intBrokerId = QB.intBrokerId
+		,strBroker = EB.strName
+		,strLeafGrade = QB.strLeafGrade
+		,intGardenMarkId = QB.intGardenMarkId
+		,strGardenMark = GM.strGardenMark
+		,strSustainability = QB.strSustainability
+		,ysnTeaOrganic = QB.ysnTeaOrganic
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -113,4 +124,9 @@ BEGIN
 	LEFT JOIN tblSMCountry						CO				ON		CO.intCountryID = (CASE WHEN ISNULL(ICI.intCountryId, 0) = 0 THEN ISNULL(CA.intCountryID, 0) ELSE ICI.intCountryId END)
 	LEFT JOIN tblTMSite							TMS				ON		TMS.intSiteID = LoadDetail.intTMSiteId
 	LEFT JOIN tblTMDevice						TMD				ON		TMD.intDeviceId = LoadDetail.intTMDeviceId
+	LEFT JOIN tblMFBatch						QB				ON		QB.intBatchId = LoadDetail.intBatchId
+	LEFT JOIN tblQMSample						QS				ON		QS.intSampleId = QB.intSampleId
+	LEFT JOIN tblARMarketZone					MZ				ON		MZ.intMarketZoneId = QS.intMarketZoneId
+	LEFT JOIN vyuEMSearchEntityBroker			EB				ON		EB.intEntityId = QB.intBrokerId
+	LEFT JOIN tblQMGardenMark					GM				ON		GM.intGardenMarkId = QB.intGardenMarkId
 END

@@ -1,7 +1,7 @@
 CREATE TYPE StagingPassportFGM AS TABLE
 (
 	[intRowCount] 									INT				NULL,
-	[intFuelGradeID]								INT				NULL,
+	[strFuelGradeId]								VARCHAR(MAX)	NULL,
 	
 	[dblFuelGradeNonResettableTotalVolume]			NUMERIC(18,6)     NULL,
 	[dblFuelGradeNonResettableTotalAmount]			NUMERIC(18,6)     NULL,

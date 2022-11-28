@@ -4,7 +4,7 @@ SELECT S.intSampleId
 	, strSaleYear = SaleYear.strSaleYear
 	, S.strSaleNumber 
 	, strProducer = Producer.strName
-	, strBuyingCenter = SL.strName
+	, strBuyingCenter = CompanyLocation.strLocationName
 	, strSupplierCode = E.strName
 	, strGardenMark = GardenMark.strGardenMark
 	, strGradeCode = Grade.strDescription
@@ -16,20 +16,20 @@ SELECT S.intSampleId
 	, I.strItemNo
 	, strMonth = DATENAME(MONTH, S.dtmSaleDate)
 	, S.dtmSaleDate
-	, strCustomerMixingUnit = B.strBookDescription --
+	, strCustomerMixingUnit = B.strBookDescription 
 	, strChannel = MZ.strMarketZoneCode
 	, strLotNo = S.strRepresentLotNumber
 	, S.strChopNumber
 	, strPONo = S.strERPRefNo
 	, strParentBatch = Batch.strBatchId
-	, strBuyingOrderNo = S.strRefNo
+	, strBuyingOrderNo = S.strBuyingOrderNo
 	, CTT.strCatalogueType
 	, dblNetWeightPerPackage = ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0)
-	, strSubCluster = SC.strDescription --
+	, strSubCluster = SC.strDescription 
 	, S.ysnOrganic
 	, strSustainability = PL.strDescription 
-	, ysnCompanyBought = CASE WHEN ISNULL(S.dblB1QtyBought, 0) = 0 THEN 0 ELSE 1 END		
-	, strGroupNo = B.strBook --
+	, ysnCompanyBought = CASE WHEN ISNULL(S.dblB1QtyBought, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END	
+	, strGroupNo = B.strBook 
 	, strCompanyCode = PG.strName
 	, dblB1QtyBought = S.dblB1QtyBought
 	, strBuyer1 = B1.strName
@@ -39,11 +39,11 @@ SELECT S.intSampleId
 	, strBuyer2 = B2.strName
 	, strTealingoGroup = Size.strBrandCode + SC.strDescription + VG.strName
 	, strLeafSize = Size.strBrandCode
-	, strCluster = SC.strDescription --
+	, strCluster = certification.strCertificationName
 	, strStyle = VG.strName
-	, S.strComment
+	, strTasterRemark = S.strComment
 	, S.dblSupplierValuationPrice
-	, strLastPrice = ''
+	, strLastPrice = '0.0'
 FROM tblQMSample S
 LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
 LEFT JOIN tblAPVendor VAN ON VAN.intEntityId = S.intEntityId
@@ -67,3 +67,5 @@ LEFT JOIN tblEMEntity B2 ON B2.intEntityId = S.intBuyer2Id
 LEFT JOIN tblICCommodityAttribute MLT ON MLT.intCommodityAttributeId = S.intManufacturingLeafTypeId
 LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
 LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
+LEFT JOIN tblICCertification certification ON certification.intCertificationId = ITEM.intCertificationId
+LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON S.intCompanyLocationId = CompanyLocation.intCompanyLocationId

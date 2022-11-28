@@ -54,7 +54,8 @@ BEGIN TRY
 			FROM @tblIPContractHeader
 
 			INSERT INTO tblIPContractHeaderStage (
-				strSender
+				intDocNo
+				,strSender
 				,strContractNo
 				,dtmContractDate
 				,strVendorAccountNo
@@ -73,7 +74,8 @@ BEGIN TRY
 				)
 			OUTPUT INSERTED.strContractNo
 			INTO @tblIPContractHeader
-			SELECT Sender
+			SELECT DocNo
+				,Sender
 				,ContractNo
 				,ContractDate
 				,VendorAccountNo
@@ -90,7 +92,8 @@ BEGIN TRY
 				,[Status]
 				,BuyingOrderNo
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
-					Sender NVARCHAR(50) '../Sender'
+					DocNo INT '../DocNo'
+					,Sender NVARCHAR(50) '../Sender'
 					,ContractNo NVARCHAR(50)
 					,ContractDate DATETIME
 					,VendorAccountNo NVARCHAR(100)

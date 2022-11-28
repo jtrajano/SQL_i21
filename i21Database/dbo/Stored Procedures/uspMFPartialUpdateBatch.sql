@@ -49,6 +49,7 @@ WHERE A.COLUMN_NAME NOT IN(
  'strVendorLotNumber',
  'intBuyingCenterLocationId',
  'intSubBookId',
+ 'intLocationId',
  'intConcurrencyId'
 )
 AND A.TABLE_NAME = N'tblMFBatch'

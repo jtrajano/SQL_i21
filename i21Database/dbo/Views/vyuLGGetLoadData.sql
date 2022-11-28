@@ -170,6 +170,7 @@ SELECT
 		WHEN 6 THEN 'Pick Lots'
 		WHEN 7 THEN 'Pick Lots w/o Contract'
 		WHEN 8 THEN 'TM Orders'
+		WHEN 9 THEN 'Approved Quality'
 		END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType
 	,strPosition = P.strPosition
@@ -257,6 +258,8 @@ SELECT
     ,ysnTaxPointOverride = L.ysnTaxPointOverride
     ,ysnTaxLocationOverride = L.ysnTaxLocationOverride
     ,L.intUserLoc
+    ,MZ.intMarketZoneId
+    ,MZ.strMarketZoneCode
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -300,6 +303,7 @@ LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = L.i
 LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = L.intBorrowingFacilityLimitDetailId
 LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = L.intBankValuationRuleId
 LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = L.intApprovalStatusId
+LEFT JOIN tblARMarketZone MZ on MZ.intMarketZoneId = L.intMarketZoneId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 				WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD

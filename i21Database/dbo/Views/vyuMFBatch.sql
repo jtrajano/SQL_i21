@@ -12,6 +12,8 @@ SELECT
     A.strVendorLotNumber,--unique
     A.intBuyingCenterLocationId, -- company id--unique
     strCompanyLocation = CL.strLocationName, -- company 
+    BC.strBuyingCenterLocation,
+    MU.strMixingUnitLocation,
     A.intStorageLocationId, --- sub location id
     strStorageLocation = D.strSubLocationName, -- sub location
     A.intStorageUnitId, --- ic location
@@ -46,7 +48,7 @@ SELECT
     A.strEvaluatorRemarks,
     A.dtmExpiration,
     A.intFromPortId,
-    A.dblGrossWeight,
+    A.dblGrossWeight, -- = dblTotalQuantity + dblTareWeight,
     A.dtmInitialBuy,
     A.dblWeightPerUnit,
     A.dblLandedPrice,
@@ -95,7 +97,7 @@ SELECT
     A.intPackageUOMId,
     A.dblTareWeight,
     A.strTaster,
-    A.strFeedStock,
+    strFeedStock = Item.strShortName,
     A.strFlourideLimit,
     A.strLocalAuctionNumber,
     A.strPOStatus,
@@ -118,7 +120,8 @@ SELECT
 	strPackageUOM = PUOM.strUnitMeasure,
     Reason.strReasonCode,
     LOT.strLotNumber,
-    LOT.intLotId
+    LOT.intLotId,
+    A.intLocationId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 OUTER APPLY(
@@ -129,8 +132,18 @@ OUTER APPLY(
 OUTER APPLY(
     SELECT TOP 1 strLocationName 
     FROM tblSMCompanyLocation 
-    WHERE intCompanyLocationId = A.intBuyingCenterLocationId    
+    WHERE intCompanyLocationId = A.intLocationId    
 )CL
+OUTER APPLY(
+    SELECT TOP 1 strLocationName strBuyingCenterLocation
+    FROM tblSMCompanyLocation 
+    WHERE intCompanyLocationId = A.intBuyingCenterLocationId    
+)BC
+OUTER APPLY(
+    SELECT TOP 1 strLocationName strMixingUnitLocation
+    FROM tblSMCompanyLocation 
+    WHERE intCompanyLocationId = A.intMixingUnitLocationId    
+)MU
 OUTER APPLY( 
     SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
     WHERE A.intBrokerWarehouseId = intCompanyLocationSubLocationId
@@ -144,7 +157,7 @@ OUTER APPLY(
     WHERE A.intStorageUnitId = ICS.intStorageLocationId
 )E
 OUTER APPLY(
-    SELECT TOP 1 strItemNo,strDescription  FROM tblICItem WHERE intItemId = A.intTealingoItemId
+    SELECT TOP 1 strItemNo,strDescription, strShortName  FROM tblICItem WHERE intItemId = A.intTealingoItemId
 )Item
 OUTER APPLY(
 	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intItemUOMId
