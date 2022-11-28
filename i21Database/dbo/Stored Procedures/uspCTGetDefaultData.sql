@@ -97,14 +97,16 @@ BEGIN
 			FROM		tblRKFutureMarket			M 
 			LEFT JOIN	tblICUnitMeasure			MU	ON	MU.intUnitMeasureId	=	M.intUnitMeasureId
 			LEFT JOIN	tblRKCommodityMarketMapping C	ON	C.intFutureMarketId =	M.intFutureMarketId 
+			left join	tblICCommodity	co on co.intCommodityId = C.intCommodityId
 			LEFT JOIN	tblICItemUOM				IU	ON	IU.intItemId		=	@intItemId 
 														AND IU.intUnitMeasureId =	M.intUnitMeasureId
 			LEFT JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
 			LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID	=	M.intCurrencyId
 			LEFT JOIN	tblSMCurrency				MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
-			LEFT JOIN	tblICCommodity				CC	ON CC.intCommodityId	=	C.intCommodityId AND CC.intFutureMarketId	= M.intFutureMarketId
-			WHERE C.intCommodityId = @intCommodityId 
-			ORDER BY ISNULL(CC.intFutureMarketId, 0) DESC, M.intFutureMarketId ASC
+			WHERE
+				C.intCommodityId = @intCommodityId
+				AND M.intFutureMarketId = (case when isnull(co.intFutureMarketId,0) = 0 then M.intFutureMarketId else co.intFutureMarketId end)
+			ORDER BY M.intFutureMarketId ASC
 		END
 	END
 
