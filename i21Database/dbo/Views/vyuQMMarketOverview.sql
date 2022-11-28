@@ -17,11 +17,8 @@ OverAllWeekStats as(
 	sum(dblB1Price) AveragePrice_UL
 	from tblQMSample group by DATEPART(ww, dtmSaleDate)
 ),
-
-
 ItemSaleStat as
 (
-	
 	SELECT  
 	strItemNo,A.intItemId, strSaleNumber, C.strCurrency,
 	SUM(dblB1QtyBought + dblB2QtyBought +dblB3QtyBought+dblB4QtyBought+dblB5QtyBought) TotalSold,
@@ -43,11 +40,9 @@ ItemSaleStat as
 		AND P.strPropertyName = 'Taste' AND T.intSampleId  = A.intSampleId
 	)Taste
 	group by A.intItemId, strSaleNumber,strCurrency, strItemNo,Taste.Val
-	
 ),
 ItemWeeklySaleStat as
 (
-	
 	SELECT  
 	DATEPART(ww, dtmSaleDate) WeekNo,
 	strItemNo,A.intItemId, strSaleNumber, C.strCurrency,
@@ -93,28 +88,28 @@ group by strSaleNumber, dtmSaleDate,U.TotalSales, U.TotalSales_UL,X.AveragePrice
 
 )
 select 
-  A.strSaleNumber SaleNo--1
-, A.dtmSaleDate SaleDate--2
-, A.AveragePriceCurrentWeekSale --3
-, A.AveragePricePrevWeekSale --4
-, A.AveragePriceCurrentWeekSale- A.AveragePricePrevWeekSale DiffAveWeekPrice --5
-, A.TotalSales --6
-, A.TotalSales_UL --7
-, A.AveragePrice_UL --8
-, B.strItemNo ItemNo --9
-, B.TotalSold ItemQtySold --10
-, B.dblNetWeight ItemWeight --11
-, B.AverageItemTaste ItemAverageTaste --12
-, U.AveragePrice ItemAverageCurrentWeekPrice--13
-, V.AveragePrice ItemAveragePrevWeekPrice--14
-, U.AveragePrice-V.AveragePrice DiffAveItemPrice --15
-, B.TotalSold_UL --16
-, ROUND((B.TotalSold/B.TotalSold_UL) * 100, 2) PurchasePercentage_UL --17
-, B.AveragePrice --18
-, B.AveragePrice -B.AverageSupplierValuationPrice DiffAvgPrice --19
-, B.AverageItemTaste --20
-, B.AverageItemTaste - B.AverageItemTaste DiffItemTaste --21
-, B.strCurrency Currency
+  A.strSaleNumber--1
+, A.dtmSaleDate--2
+, A.AveragePriceCurrentWeekSale dblAvePriceCurrentWeekSale --3
+, A.AveragePricePrevWeekSale dblAvePricePrevWeekSale--4
+, A.AveragePriceCurrentWeekSale- A.AveragePricePrevWeekSale dblAveWeekPriceChange --5
+, A.TotalSales dblTotalSales --6
+, A.TotalSales_UL dblTotalSaleUL--7
+, A.AveragePrice_UL dblAveragePriceUL --8
+, B.strItemNo strItemNo --9
+, B.TotalSold dblItemSold --10
+, B.dblNetWeight dblItemWeight --11
+, B.AverageItemTaste dblItemAverageTaste --12
+, U.AveragePrice dblItemAverageCurrentWeekPrice--13
+, V.AveragePrice dblItemAveragePrevWeekPrice--14
+, U.AveragePrice-V.AveragePrice dblAveItemPriceChange --15
+, B.TotalSold_UL dblItemTotalSoldUL--16
+, ROUND((B.TotalSold/B.TotalSold_UL) * 100, 2) dblItemPurchasePercentageUL --17
+, B.AveragePrice dblItemAveragePrice --18
+, B.AveragePrice -B.AverageSupplierValuationPrice dblItemAveragePriceChange --19
+, B.AverageItemTaste dblItemAverageTasteUL --20
+, B.AverageItemTaste - B.AverageItemTaste dblItemAverageTasteChange --21
+, B.strCurrency 
 from HeaderData A join ItemSaleStat B on
 A.strSaleNumber = B.strSaleNumber
 outer apply(
