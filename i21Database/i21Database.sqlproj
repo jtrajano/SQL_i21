@@ -3045,6 +3045,7 @@
     <Build Include="dbo\Tables\tblQMProductProperty.sql" />
     <Build Include="dbo\Tables\tblQMProductType.sql" />
     <Build Include="dbo\Views\vyuQMTemplateList.sql" />
+    <Build Include="dbo\Views\vyuQMMarketOverview.sql" />
     <Build Include="dbo\Stored Procedures\uspQMAddProductPropertyDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetProductValueDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTestProperty.sql" />
