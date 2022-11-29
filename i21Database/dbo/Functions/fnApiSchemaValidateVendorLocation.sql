@@ -195,29 +195,6 @@ BEGIN
 	WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
 		AND NULLIF(vts.strLocationName, '') IS NOT NULL
-		AND ISNULL(vts.strFarmFieldNumber, '') != ''
-
-	INSERT @returntable
-	SELECT
-		  g.strNewId
-		, @guiLogId
-		, 'Error'
-		, 'Failed'
-		, 'Skipped'
-		, vts.intRowNumber
-		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') 
-		, vts.strEntityNo
-		, 'The vendor location with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + ' "' + vts.strLocationName + '" with a blank ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Farm Field Number')  + ' already exists.'
-	FROM tblApiSchemaVendorLocation vts
-	JOIN tblEMEntity e ON e.strEntityNo = vts.strEntityNo
-	JOIN tblEMEntityLocation el ON el.intEntityId = e.intEntityId
-		AND vts.strLocationName = el.strLocationName
-		AND ISNULL(vts.strFarmFieldNumber, '') = ISNULL(el.strFarmFieldNumber, '')
-	OUTER APPLY vyuAPGuidGenerator g
-	WHERE vts.guiApiUniqueId = @guiApiUniqueId
-		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
-		AND NULLIF(vts.strLocationName, '') IS NOT NULL
-		AND ISNULL(vts.strFarmFieldNumber, '') = ''
 
 	RETURN
 END
