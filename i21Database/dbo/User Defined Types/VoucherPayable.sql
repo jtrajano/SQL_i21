@@ -168,7 +168,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmSaleDate] DATETIME NULL, 
 	[strVendorLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[strPreInvoiceGarden] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intGardenMarkId] INT NULL,
 	[strPreInvoiceGardenNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strBook] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strSubBook] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

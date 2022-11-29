@@ -61,6 +61,7 @@ SELECT
 	strVendorLotNumber					=	CAST(A.strLotNumber AS NVARCHAR(50)),
 	dtmSaleDate							=	CONVERT(DATETIME,REPLACE(A.dtmSaleDate,'.','/'), 103),
 	strPreInvoiceGarden					=	CAST(A.strPreInvoiceGarden AS NVARCHAR(50)),
+	intGardenMarkId						=	G.intGardenMarkId,
 	strPreInvoiceGardenNumber			=	CAST(A.strPreInvoiceGardenNumber AS NVARCHAR(50)),
 	strBook								=	CAST(A.strBook AS NVARCHAR(50)),
 	strSubBook							=	CAST(A.strSubBook AS NVARCHAR(50)),
@@ -93,6 +94,7 @@ LEFT JOIN tblAPVendor C ON C.strVendorId = A.strVendorId
 LEFT JOIN tblICStorageLocation D ON A.strStorageLocation = D.strName
 LEFT JOIN tblICLot E ON A.strLotNumber = E.strLotNumber
 LEFT JOIN tblSMPurchasingGroup F ON F.strName = A.strStorageLocation
+LEFT JOIN tblQMGardenMark G ON G.strGardenMark = A.strPreInvoiceGarden
 
 DECLARE @voucherPayables AS VoucherPayable
 INSERT INTO @voucherPayables
@@ -115,7 +117,7 @@ INSERT INTO @voucherPayables
 	,strSaleNumber						
 	,dtmSaleDate						
 	,strVendorLotNumber		
-	,strPreInvoiceGarden				
+	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook			
@@ -147,7 +149,7 @@ SELECT
 	,strSaleNumber						
 	,dtmSaleDate						
 	,strVendorLotNumber					
-	,strPreInvoiceGarden				
+	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook		

@@ -282,7 +282,7 @@ SELECT TOP 100 PERCENT
 	,strSaleNumber						=	A.strSaleNumber
 	,dtmSaleDate						=	A.dtmSaleDate
 	,strVendorLotNumber					=	A.strVendorLotNumber
-	,strPreInvoiceGarden				=	A.strPreInvoiceGarden
+	,intGardenMarkId					=	A.intGardenMarkId
 	,strPreInvoiceGardenNumber			=	A.strPreInvoiceGardenNumber
 	,intBookId							=	A.intBookId
 	,strBook							=	A.strBook
@@ -522,7 +522,7 @@ INSERT
 	,strSaleNumber						
 	,dtmSaleDate						
 	,strVendorLotNumber					
-	,strPreInvoiceGarden				
+	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,intBookId							
 	,intSubBookId	
@@ -643,7 +643,7 @@ VALUES
 	,strSaleNumber						
 	,dtmSaleDate						
 	,strVendorLotNumber					
-	,strPreInvoiceGarden				
+	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,intBookId							
 	,intSubBookId		

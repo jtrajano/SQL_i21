@@ -106,7 +106,7 @@
 	[strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmSaleDate] DATETIME NULL, 
 	[strVendorLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[strPreInvoiceGarden] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intGardenMarkId] INT NULL,
 	[strPreInvoiceGardenNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intBookId]	INT NULL,
 	[intSubBookId] INT NULL,
@@ -152,6 +152,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_tblCTSubBook] FOREIGN KEY ([intSubBookId]) REFERENCES tblCTSubBook([intSubBookId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblSCTicketDistributionAllocation] FOREIGN KEY ([intTicketDistributionAllocationId]) REFERENCES tblSCTicketDistributionAllocation([intTicketDistributionAllocationId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES tblARMarketZone([intMarketZoneId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblQMGardenMark] FOREIGN KEY ([intGardenMarkId]) REFERENCES tblQMGardenMark([intGardenMarkId]),
 ) ON [PRIMARY];
 
 
