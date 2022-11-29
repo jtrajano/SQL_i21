@@ -88,7 +88,7 @@ SELECT E.intEntityId,
 	VL.strTimezone,
 	VL.strCheckPayeeName,
 	C.intCurrencyID,
-	V.intEntityId,
+	v.intEntityId,
 	VL.strLocationDescription,
 	VL.strLocationType,
 	VL.strFarmFieldNumber,
@@ -115,13 +115,14 @@ LEFT JOIN tblSMTaxCode TC ON TC.strTaxCode = VL.strTaxCode
 LEFT JOIN tblSMTaxGroup TG ON TG.strTaxGroup = VL.strTaxGroup
 LEFT JOIN tblSMTaxClass TC2 ON TC2.strTaxClass = VL.strTaxClass
 LEFT JOIN tblSMCurrency C ON C.strCurrency = VL.strCurrency
-LEFT JOIN tblAPVendor V ON V.strVendorId = VL.strVendorLink
-WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblApiImportLogDetail xd WHERE xd.guiApiImportLogId = @guiLogId AND xd.intRowNo = VL.intRowNumber AND xd.strStatus = 'Failed')
+LEFT JOIN tblAPVendor v ON v.strVendorId = VL.strVendorLink
+WHERE VL.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS(SELECT TOP 1 1 FROM tblApiImportLogDetail xd WHERE xd.guiApiImportLogId = @guiLogId AND xd.intRowNo = VL.intRowNumber AND xd.strStatus = 'Failed')
 	AND NOT EXISTS(
 		SELECT TOP 1 1 
 		FROM tblEMEntityLocation xel
-		JOIN tblEMEntity xe ON xe.intEntityId = xel.intEntityId
-		WHERE xe.strEntityNo = VL.strEntityNo
+		JOIN vyuAPVendor xv ON xv.intEntityId = xel.intEntityId
+		WHERE xv.strVendorId = VL.strEntityNo
 			AND xel.strLocationName = VL.strLocationName
 	)
 
@@ -134,13 +135,13 @@ SELECT
     , strLogLevel = 'Info'
     , strStatus = 'Success'
     , intRowNo = vs.intRowNumber
-    , strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + ISNULL(vs.strLocationName, '') + ' was imported successfully.'
+    , strMessage = 'The "' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + '" ' + ISNULL(vs.strLocationName, '') + ' was imported successfully.'
     , strAction = 'Create'
 FROM tblApiSchemaVendorLocation vs
-JOIN tblEMEntity e ON e.strEntityNo = vs.strEntityNo
+JOIN vyuAPVendor v ON v.strVendorId = vs.strEntityNo
 JOIN tblEMEntityLocation el ON el.strLocationName = vs.strLocationName
-	AND el.intEntityId = e.intEntityId
-WHERE vs.guiApiUniqueId = @guiApiUniqueId
+	AND el.intEntityId = v.intEntityId
+WHERE el.guiApiUniqueId = @guiApiUniqueId
 
 UPDATE log
 SET log.intTotalRowsImported = r.intCount
