@@ -3,6 +3,7 @@ CREATE PROCEDURE uspQMImportTastingScore
 AS
 
 BEGIN TRY
+	Declare @intProductValueId int,@intOriginalItemId int
 	BEGIN TRANSACTION
 
     -- Validate Foreign Key Fields
@@ -146,8 +147,10 @@ BEGIN TRY
             LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
             -- Tealingo Item
             LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
+
+			 LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter 
             -- Batch ID
-            LEFT JOIN tblMFBatch BATCH ON BATCH.strBatchId = IMP.strBatchNo
+            LEFT JOIN tblMFBatch BATCH ON BATCH.strBatchId = IMP.strBatchNo and BATCH.intLocationId =TBO.intCompanyLocationId 
             -- Template Sample Type
             LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
             -- Buyer1 Group Number
@@ -215,9 +218,17 @@ BEGIN TRY
             SET @intBatchSampleId = NULL
 
             SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intTemplateSampleTypeId AND intCompanyLocationId = @intCompanyLocationId
+			SELECT @intProductValueId = NULL
+
+			SELECT @intProductValueId = intBatchId
+			FROM tblMFBatch
+			WHERE strBatchId = @strBatchNo
+				AND intLocationId = @intCompanyLocationId
+
 
             -- Insert new sample with product type = 13
-            IF @intBatchSampleId IS NULL BEGIN
+            IF @intBatchSampleId IS NULL AND @intProductValueId IS NOT NULL
+			 BEGIN
                 DECLARE @strSampleNumber NVARCHAR(30)
 
                 --New Sample Creation
@@ -303,7 +314,7 @@ BEGIN TRY
                     ,intSampleTypeId = @intTemplateSampleTypeId
                     ,strSampleNumber = @strSampleNumber
                     ,intProductTypeId = 13 -- Batch
-                    ,intProductValueId = @intBatchId
+                    ,intProductValueId = @intProductValueId
                     ,intSampleStatusId = 1 -- Received
                     ,intItemId = S.intItemId
                     ,intCountryID = S.intCountryID
@@ -368,7 +379,12 @@ BEGIN TRY
                 
                 SET @intSampleId = SCOPE_IDENTITY()
 
-				Update dbo.tblMFBatch Set intSampleId =@intSampleId Where intBatchId = @intBatchId
+				SELECT @intOriginalItemId=NULL
+				Select @intOriginalItemId=intTealingoItemId
+				from tblMFBatch 
+				Where intBatchId = @intProductValueId
+
+				Update dbo.tblMFBatch Set intSampleId =@intSampleId,intTealingoItemId =@intItemId,intOriginalItemId =@intOriginalItemId Where intBatchId = @intProductValueId
                 
                 -- Sample Detail
                 INSERT INTO tblQMSampleDetail (
@@ -399,6 +415,11 @@ BEGIN TRY
             END
             -- Update if existing sample exists
             ELSE BEGIN
+				SELECT @intOriginalItemId=NULL
+				Select @intOriginalItemId=intItemId
+				from tblQMSample 
+				Where intSampleId =@intBatchSampleId
+
                 UPDATE S
                 SET
                     intConcurrencyId = S.intConcurrencyId + 1
@@ -411,6 +432,10 @@ BEGIN TRY
                 WHERE S.intSampleId = @intBatchSampleId
 
                 SET @intSampleId = @intBatchSampleId
+
+				Update tblMFBatch
+				Set intTealingoItemId =@intItemId,intOriginalItemId =@intOriginalItemId
+				Where intBatchId =@intProductValueId
             END
 
             IF @strTINNumber IS NOT NULL
@@ -424,11 +449,11 @@ BEGIN TRY
                     ,@intOldCompanyLocationId = B.intLocationId
                 FROM tblQMTINClearance TIN
                 INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
-                OUTER APPLY (SELECT intBatchId, intLocationId FROM tblMFBatch WHERE intBatchId = @intBatchId) B                
+                OUTER APPLY (SELECT intBatchId, intLocationId FROM tblMFBatch WHERE intBatchId = @intProductValueId) B                
                 WHERE S.intSampleId = @intSampleId
 
 
-                IF ISNULL(@strOldTINNumber, '') <> @strTINNumber OR ISNULL(@intOldCompanyLocationId, 0) <> @intCompanyLocationId
+                IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber,'') OR ISNULL(@intOldCompanyLocationId, 0) <> @intCompanyLocationId
                 BEGIN
                     -- Delink old TIN number if there's an existing one and the TIN number has changed.
                     IF @strOldTINNumber IS NOT NULL
@@ -444,19 +469,19 @@ BEGIN TRY
                     -- Link new TIN number with the pre-shipment sample / batch
                     EXEC uspQMUpdateTINBatchId
                         @strTINNumber = @strTINNumber
-                        ,@intBatchId = @intBatchId
+                        ,@intBatchId = @intProductValueId
                         ,@intCompanyLocationId = @intCompanyLocationId
                         ,@intEntityId = @intEntityUserId
                         ,@ysnDelink = 0
 
                     UPDATE tblQMSample
-                    SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intBatchId AND intCompanyLocationId = @intCompanyLocationId)
+                    SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intProductValueId AND intCompanyLocationId = @intCompanyLocationId)
                     WHERE intSampleId = @intSampleId
                 END
             END
         END
 
-        DECLARE @intOriginalItemId INT
+        SELECT @intOriginalItemId = NULL
         SELECT @intOriginalItemId = intItemId
         FROM tblQMSample WHERE intSampleId = @intSampleId
         

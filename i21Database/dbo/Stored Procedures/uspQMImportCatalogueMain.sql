@@ -41,6 +41,8 @@ BEGIN TRY
     LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
     -- Broker
     LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
+    -- Strategy
+    LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -59,6 +61,7 @@ BEGIN TRY
             + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
+            + CASE WHEN (STRATEGY.intSubBookId IS NULL AND ISNULL(IMP.strStrategy, '') <> '') THEN 'STRATEGY, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
@@ -144,6 +147,7 @@ BEGIN TRY
         ,@intBrokerId INT
         ,@strBroker NVARCHAR(100)
         ,@strBuyingOrderNumber NVARCHAR(50)
+        ,@intSubBookId INT
     
     DECLARE @intSampleId INT
     DECLARE @intItemId INT
@@ -225,6 +229,7 @@ BEGIN TRY
             ,intBrokerId = BROKERS.intEntityId
             ,strBroker = BROKERS.strName
             ,strBuyingOrderNumber = IMP.strBuyingOrderNumber
+            ,intSubBookId = STRATEGY.intSubBookId
         FROM tblQMImportCatalogue IMP
         INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
         -- Sale Year
@@ -265,6 +270,8 @@ BEGIN TRY
         LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
         -- Broker
         LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
+        -- Strategy
+        LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy
 
         WHERE IMP.intImportLogId = @intImportLogId
         AND IMP.ysnSuccess = 1
@@ -332,6 +339,7 @@ BEGIN TRY
         ,@intBrokerId
         ,@strBroker
         ,@strBuyingOrderNumber
+        ,@intSubBookId
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
         SET @intSampleId = NULL
@@ -401,6 +409,7 @@ BEGIN TRY
                 ,intCreatedUserId
                 ,dtmCreated
                 ,intMarketZoneId
+                ,intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId
@@ -466,6 +475,7 @@ BEGIN TRY
                 ,intCreatedUserId = @intEntityUserId
                 ,dtmCreated = @dtmDateCreated
                 ,intMarketZoneId = @intMarketZoneId
+                ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
@@ -680,6 +690,7 @@ BEGIN TRY
                 ,intLastModifiedUserId = @intEntityUserId
                 ,dtmLastModified = @dtmDateCreated
                 ,intMarketZoneId = @intMarketZoneId
+                ,intSubBookId = @intSubBookId
 
                 -- Auction Fields
                 ,intSaleYearId = @intSaleYearId
@@ -788,6 +799,7 @@ BEGIN TRY
             ,@intBrokerId
             ,@strBroker
             ,@strBuyingOrderNumber
+            ,@intSubBookId
     END
     CLOSE @C
 	DEALLOCATE @C

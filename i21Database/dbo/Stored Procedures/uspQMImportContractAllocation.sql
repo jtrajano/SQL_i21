@@ -278,6 +278,7 @@ BEGIN TRY
 			,strVoyage
 			,strVessel
 			,intLocationId
+			,intMixingUnitLocationId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -395,11 +396,14 @@ BEGIN TRY
 			,strVoyage = NULL
 			,strVessel = NULL
 			,intLocationId = S.intCompanyLocationId
+			,intMixingUnitLocationId=MU.intCompanyLocationId
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
+		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
+		Left JOIN tblSMCompanyLocation MU on MU.strLocationName =B.strBook 
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
