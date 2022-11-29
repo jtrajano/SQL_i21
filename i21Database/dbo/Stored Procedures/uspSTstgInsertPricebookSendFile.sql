@@ -773,6 +773,7 @@ BEGIN
 									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
 							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
+							, CASE WHEN IL.ysnApplyBlueLaw2 = 1 THEN 210 ELSE NULL END [SalesRestrictionStrategyID2]
 							, 0 [PriceMethodCode]
 							, IL.strDescription [ReceiptDescription]
 							, IL.ysnFoodStampable [FoodStampableFlg]
@@ -908,6 +909,7 @@ BEGIN
 									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
 							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
+							, CASE WHEN IL.ysnApplyBlueLaw2 = 1 THEN 210 ELSE NULL END [SalesRestrictionStrategyID2]
 							, 0 [PriceMethodCode]
 							, IL.strDescription [ReceiptDescription]
 							, IL.ysnFoodStampable [FoodStampableFlg]
