@@ -4,7 +4,7 @@ SELECT
 A.intSampleId,
 intBatchId,  
 strBatchId,  
-dtmSaleDate,  
+REPLACE(CONVERT(VARCHAR, dtmSaleDate,101),'/','.') AS dtmSaleDate,  
 B.strBroker,  
 strTeaGardenChopInvoiceNumber,  
 strLeafGrade,  
