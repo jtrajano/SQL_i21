@@ -28,6 +28,7 @@
     [ProhibitSaleLocationType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [ProhibitSaleLocationValue] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [SalesRestrictionStrategyID] INT NULL, 
+    [SalesRestrictionStrategyID2] INT NULL, 
 	[PriceMethodCode] INT NULL,
 	[ReceiptDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
 	[FoodStampableFlg] BIT NULL ,
