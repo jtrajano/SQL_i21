@@ -1809,6 +1809,83 @@ WHERE	addResult.intInventoryShipmentId = @InventoryShipmentId
 
 exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
 
+
+IF @ysnDestinationWeightGrade = 1
+BEGIN
+	DELETE FROM tblSCSnapShotTicketDiscount WHERE intTicketId = @intTicketId
+	DELETE FROM tblSCSnapShotTicket WHERE intTicketId = @intTicketId
+
+	INSERT INTO [tblSCSnapShotTicketDiscount]
+	(
+		[intConcurrencyId]     
+       ,[dblGradeReading]
+       ,[strCalcMethod]
+       ,[strShrinkWhat]
+       ,[dblShrinkPercent]
+       ,[dblDiscountAmount]
+       ,[dblDiscountDue]
+       ,[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]
+       ,[intTicketId]
+       ,[intTicketFileId]
+       ,[strSourceType]
+	   ,[intSort]
+	   ,[strDiscountChargeType]
+	)
+	SELECT 
+		[intConcurrencyId]     
+       ,[dblGradeReading]
+       ,[strCalcMethod]
+       ,[strShrinkWhat]
+       ,[dblShrinkPercent]
+       ,[dblDiscountAmount]
+       ,[dblDiscountDue]
+       ,[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]
+       ,[intTicketId]
+       ,[intTicketFileId]
+       ,[strSourceType]
+	   ,[intSort]
+	   ,[strDiscountChargeType]
+	FROM tblQMTicketDiscount
+		WHERE intTicketId = @intTicketId
+			AND strSourceType = 'Scale'
+
+
+	INSERT INTO tblSCSnapShotTicket(		
+		intTicketId
+		,dblGrossWeight
+		,dblGrossWeight1
+		,dblGrossWeight2
+		,dblTareWeight
+		,dblTareWeight1
+		,dblTareWeight2
+		,dblGrossUnits
+		,dblShrink
+		,dblNetUnits
+		,strItemUOM
+	)
+	SELECT 
+		intTicketId
+		,dblGrossWeight
+		,dblGrossWeight1
+		,dblGrossWeight2
+		,dblTareWeight
+		,dblTareWeight1
+		,dblTareWeight2
+		,dblGrossUnits
+		,dblShrink
+		,dblNetUnits
+		,strItemUOM
+	FROM tblSCTicket 
+		WHERE intTicketId = @intTicketId
+
+
+END
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
        ([intConcurrencyId]     
