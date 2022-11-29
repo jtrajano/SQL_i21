@@ -10,7 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reprocess Vendor Invoice' AND strModuleName = 'Transports')
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference - BOL Import' AND strModuleName = 'Transports')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6405,9 +6406,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference - BOL Import' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Cross Reference - BOL Import', N'Transports', @TransportsMaintenanceParentMenuId, N'Cross Reference - BOL Import', N'Maintenance', N'Screen', N'Transports.view.CrossReferenceBol', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Cross Reference - BOL Import', N'Transports', @TransportsMaintenanceParentMenuId, N'Cross Reference - BOL Import', N'Maintenance', N'Screen', N'Transports.view.CrossReferenceBolImport?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.CrossReferenceBol', intSort = 1 WHERE strMenuName = 'Cross Reference - BOL Import' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.CrossReferenceBolImport?showSearch=true', intSort = 1 WHERE strMenuName = 'Cross Reference - BOL Import' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Group Override' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
