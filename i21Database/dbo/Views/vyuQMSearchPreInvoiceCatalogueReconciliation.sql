@@ -16,7 +16,7 @@ SELECT intBillDetailId					    = BD.intBillDetailId
     , dblSupplierPreInvoicePrice	  = BD.dblCost
     , dblPreInvoiceLotQty					  = BD.dblQtyReceived
     , dblTotalNoPackageBreakups		  = CAST(30 AS NUMERIC(18,6))
-    , strPreInvoiceGarden					  = BD.strPreInvoiceGarden
+    , strPreInvoiceGarden					  = GM.strGardenMark
     , strPreInvoiceGrade					  = BD.strComment
     , strPreInvoiceGardenInvoiceNo  = BD.strPreInvoiceGardenNumber
     , strPreInvoicePurchaseType			= CASE WHEN B.intTransactionType = 2 THEN CAST('Vendor Prepayment' AS NVARCHAR(100))
@@ -40,5 +40,6 @@ LEFT JOIN tblICStorageLocation SL ON BD.intStorageLocationId = SL.intStorageLoca
 LEFT JOIN tblCTSubBook SB ON BD.intSubBookId = SB.intSubBookId
 LEFT JOIN tblSMPurchasingGroup PG ON BD.intPurchasingGroupId = PG.intPurchasingGroupId
 LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
+LEFT JOIN tblQMGardenMark GM ON BD.intGardenMarkId = GM.intGardenMarkId
 WHERE B.ysnPosted = 0
   AND CRD.intCatalogueReconciliationDetailId IS NULL
