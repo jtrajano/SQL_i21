@@ -478,7 +478,7 @@ Begin --Sales Order Pick List
 					,@strCompanyAddress AS strCompanyAddress
 					,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 					,@strCountry AS strCompanyCountry
-					,c.strName AS strCustomerName
+					,CustomerName.strCustomerName
 					,cl.strLocationName
 					,so.strBOLNumber
 					,sp.strName AS strSalespersonName
@@ -537,6 +537,10 @@ Begin --Sales Order Pick List
 			Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 			Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 			Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+			OUTER APPLY (SELECT strName AS strCustomerName
+						 FROM tblEMEntity as Entity
+						 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
+						 WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
 			WHERE pl.intPickListId=@intPickListId 
 
 			--Delete duplicate item records
@@ -601,7 +605,7 @@ Begin --Sales Order Pick List
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 			,@strCountry AS strCompanyCountry
-			,c.strName AS strCustomerName
+			,CustomerName.strCustomerName
 			,cl.strLocationName
 			,so.strBOLNumber
 			,sp.strName AS strSalespersonName
@@ -663,6 +667,10 @@ Begin --Sales Order Pick List
 			Left Join vyuEMCustomerApplicator ca on so.intEntityApplicatorId=ca.intEntityId
 			Left Join tblMFMethodOfApp ma on rg.intMethodOfAppId=ma.intMethodOfAppId
 			Left Join tblICStorageLocation sl on sl.intStorageLocationId=sd.intStorageLocationId
+			OUTER APPLY (SELECT strName AS strCustomerName
+						FROM tblEMEntity as Entity
+						INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
+						WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
 			WHERE so.intSalesOrderId=@intSalesOrderId AND i.strType<>'Other Charge'
 		End
 
@@ -866,7 +874,7 @@ Begin --Sales Order Pick List
 								,@strCompanyAddress AS strCompanyAddress
 								,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 								,@strCountry AS strCompanyCountry
-								,c.strName AS strCustomerName
+								,CustomerName.strCustomerName
 								,cl.strLocationName
 								,so.strBOLNumber
 								,sp.strName AS strSalespersonName
@@ -925,6 +933,10 @@ Begin --Sales Order Pick List
 						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 						LEFT Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+						OUTER APPLY (SELECT strName AS strCustomerName
+									FROM tblEMEntity as Entity
+									INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
+									WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
 						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
 
 						Update @tblLot Set dblQty=@dblAvailableQty - @dblRequiredQty Where intRowNo=@intMinLot
@@ -977,7 +989,7 @@ Begin --Sales Order Pick List
 								,@strCompanyAddress AS strCompanyAddress
 								,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 								,@strCountry AS strCompanyCountry
-								,c.strName AS strCustomerName
+								,CustomerName.strCustomerName
 								,cl.strLocationName
 								,so.strBOLNumber
 								,sp.strName AS strSalespersonName
@@ -1036,6 +1048,10 @@ Begin --Sales Order Pick List
 						Left Join tblSMFreightTerms ft on so.intFreightTermId=ft.intFreightTermId
 						Left Join tblSMTerm tm on so.intTermId=tm.intTermID
 						LEFT Join tblSOSalesOrderDetail sd on sd.intSalesOrderId=so.intSalesOrderId AND sd.intItemId=pld.intItemId
+						OUTER APPLY (SELECT strName AS strCustomerName
+									FROM tblEMEntity as Entity
+									INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
+									WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
 						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
 
 						Set @dblRequiredQty = @dblRequiredQty - @dblAvailableQty
