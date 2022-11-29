@@ -3,6 +3,7 @@ AS
 BEGIN TRY
 	SET NOCOUNT ON
 
+	--Status Id: -1(Processing), 1(Internal Error), 2(Waiting Ack), 3(Failure Ack), 4 (Success Ack)
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strError NVARCHAR(MAX) = ''
 		,@strRowState NVARCHAR(50)
@@ -134,10 +135,11 @@ BEGIN TRY
 				SELECT 1
 				FROM tblIPContractFeed
 				WHERE intLoadId = @intLoadId
+					AND intLoadDetailId = @intLoadDetailId
 					AND intContractFeedId < @intContractFeedId
 					AND ISNULL(intStatusId, 0) IN (
 						2
-						,3
+						,4
 						)
 				)
 		BEGIN

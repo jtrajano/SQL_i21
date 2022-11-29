@@ -24,6 +24,7 @@ BEGIN TRY
 		,@POLineItemNo NVARCHAR(50)
 		,@intLoadId INT
 		,@intLoadDetailId INT
+		,@intContractFeedId INT
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,DocNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -135,6 +136,10 @@ BEGIN TRY
 					,@PONumber = NULL
 					,@POLineItemNo = NULL
 
+				SELECT @intLoadId = NULL
+					,@intLoadDetailId = NULL
+					,@intContractFeedId = NULL
+
 				SELECT @DocNo = DocNo
 					,@MsgType = MsgType
 					,@Sender = Sender
@@ -150,14 +155,12 @@ BEGIN TRY
 
 				IF @MsgType = 'Purchase_Order_Ack'
 				BEGIN
-					SELECT @intLoadId = NULL
-						,@intLoadDetailId = NULL
-
 					SELECT @intLoadId = L.intLoadId
 					FROM dbo.tblLGLoad L
 					WHERE L.strLoadNumber = @RefNo
 
 					SELECT @intLoadDetailId = CF.intLoadDetailId
+						,@intContractFeedId = CF.intContractFeedId
 					FROM dbo.tblIPContractFeed CF
 					WHERE CF.intLoadId = @intLoadId
 						AND CF.intContractFeedId = @TrackingNo
@@ -194,11 +197,9 @@ BEGIN TRY
 							,strMessage = 'Success'
 							,strERPPONumber = @PONumber
 							,strERPItemNumber = @POLineItemNo
-						WHERE intLoadDetailId = @intLoadDetailId
-							AND ISNULL(strFeedStatus, '') IN (
-								'Awt Ack'
-								--,'Ack Rcvd'
-								)
+							,intStatusId = 4
+						WHERE intContractFeedId = @intContractFeedId
+							AND ISNULL(strFeedStatus, '') = 'Awt Ack'
 
 						--Update the PO Details in modified sequences
 						UPDATE tblIPContractFeed
@@ -228,7 +229,8 @@ BEGIN TRY
 						UPDATE tblIPContractFeed
 						SET strFeedStatus = 'Ack Rcvd'
 							,strMessage = @strMessage
-						WHERE intLoadDetailId = @intLoadDetailId
+							,intStatusId = 3
+						WHERE intContractFeedId = @intContractFeedId
 							AND ISNULL(strFeedStatus, '') = 'Awt Ack'
 
 						INSERT INTO @tblMessage (
