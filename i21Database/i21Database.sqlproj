@@ -11647,6 +11647,7 @@
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
     <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
     <Build Include="dbo\Views\vyuQMPurchaseSampleLinked.sql" />
+    <Build Include="dbo\Views\vyuQMPurchaseLabelReport.sql" />
     <Build Include="dbo\Views\vyuQMSaleSampleNotLinked.sql" />
     <Build Include="dbo\User Defined Types\MFBatchTableType.sql" />
     <Build Include="dbo\Tables\tblMFBatch.sql" />
