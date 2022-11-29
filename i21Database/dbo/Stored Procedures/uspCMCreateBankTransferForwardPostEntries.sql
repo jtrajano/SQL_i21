@@ -86,7 +86,7 @@ BEGIN
         ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountFrom  END  
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Payable'
         ,[ysnIsUnposted]         = 0     
         ,[intConcurrencyId]      = 1    
         ,[intUserId]             = intLastModifiedUserId    
@@ -124,7 +124,7 @@ BEGIN
                                         ELSE dblRateAmountTo END  
         ,[dtmDateEntered]       = GETDATE()    
         ,[dtmTransactionDate]   = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Receivable'  
         ,[ysnIsUnposted]        = 0     
         ,[intConcurrencyId]     = 1    
         ,[intUserId]            = A.intLastModifiedUserId    
@@ -194,7 +194,7 @@ BEGIN
         ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountFrom  END  
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Payable'
         ,[ysnIsUnposted]         = 0     
         ,[intConcurrencyId]      = 1    
         ,[intUserId]             = intLastModifiedUserId    
@@ -232,7 +232,7 @@ BEGIN
                                         ELSE dblRateAmountTo END  
         ,[dtmDateEntered]       = GETDATE()    
         ,[dtmTransactionDate]   = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Receivable'    
         ,[ysnIsUnposted]        = 0     
         ,[intConcurrencyId]     = 1    
         ,[intUserId]            = A.intLastModifiedUserId    
