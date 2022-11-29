@@ -17,11 +17,12 @@ BEGIN TRY
 	DELETE
 	FROM tblIPContractFeed
 	WHERE intLoadDetailId = @intLoadDetailId
-		AND intStatusId IS NULL
+		AND ISNULL(strFeedStatus,'') = ''
+		AND ISNULL(intStatusId, 1) = 1
 
 	SELECT @strMarketZoneCode = strMarketZoneCode
-	FROM dbo.tblLGLoad L
-	JOIN dbo.tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId
+	FROM dbo.tblLGLoad L WITH (NOLOCK)
+	JOIN dbo.tblARMarketZone MZ WITH (NOLOCK) ON MZ.intMarketZoneId = L.intMarketZoneId
 	WHERE intLoadId = @intLoadId
 
 	IF ISNULL(@strMarketZoneCode, '') = 'AUC'

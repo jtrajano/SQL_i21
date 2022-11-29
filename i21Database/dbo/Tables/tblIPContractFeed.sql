@@ -45,6 +45,7 @@
 	,dtmFeedCreated DATETIME DEFAULT(GETDATE())
 	,ysnMailSent BIT DEFAULT 0
 	,intStatusId INT
+	,intDocNo INT
 
 	,CONSTRAINT [PK_tblIPContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC)
 	)

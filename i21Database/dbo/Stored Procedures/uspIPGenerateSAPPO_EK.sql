@@ -77,6 +77,9 @@ BEGIN TRY
 		SELECT @tmp = 50
 
 	DELETE
+	FROM @ContractFeedId
+
+	DELETE
 	FROM @tblIPContractFeed
 
 	INSERT INTO @tblIPContractFeed (intContractFeedId)
@@ -240,9 +243,6 @@ BEGIN TRY
 
 		DELETE
 		FROM @tblLGLoadDetail
-
-		DELETE
-		FROM @ContractFeedId
 
 		SELECT @strLineXML = ''
 
@@ -739,10 +739,7 @@ BEGIN TRY
 			WHERE intLoadDetailId > @intLoadDetailId
 		END
 
-		IF EXISTS (
-				SELECT 1
-				FROM @ContractFeedId
-				)
+		IF ISNULL(@strLineXML, '') <> ''
 		BEGIN
 			SELECT @strXML += @strHeaderXML + @strLineXML + '</Header>'
 		END
@@ -781,6 +778,17 @@ BEGIN TRY
 
 		SELECT @strFinalXML = '<root>' + @strRootXML + @strXML + '</root>'
 
+		IF EXISTS (
+				SELECT 1
+				FROM @ContractFeedId
+				)
+		BEGIN
+			UPDATE F
+			SET F.intDocNo = @intPOFeedId
+			FROM tblIPContractFeed F
+			JOIN @ContractFeedId FS ON FS.intContractFeedId = F.intContractFeedId
+		END
+		
 		DELETE
 		FROM @tblOutput
 
