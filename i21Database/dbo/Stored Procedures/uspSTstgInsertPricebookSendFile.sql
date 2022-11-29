@@ -746,7 +746,7 @@ BEGIN
 									ELSE  ISNULL(SubCat.strRegProdCode, '40') 
 								END [PaymentSystemsProductCode]
 							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 WHEN IL.ysnFoodStampable = 0 THEN 2048 
-									WHEN IL.ysnIdRequiredLiquor = 1 THEN 4 WHEN IL.ysnIdRequiredCigarette = 1 THEN 2 
+									WHEN CategoryLoc.ysnIdRequiredLiquor = 1 THEN 4 WHEN CategoryLoc.ysnIdRequiredCigarette = 1 THEN 2 
 									WHEN IL.ysnOpenPricePLU = 1 THEN 128
 									ELSE 2048
 								END [SalesRestrictCode]
@@ -763,8 +763,8 @@ BEGIN
 									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'yes' 
 									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
-							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
-							, CASE WHEN IL.ysnApplyBlueLaw2 = 1 THEN 210 ELSE NULL END [SalesRestrictionStrategyID2]
+							, CASE WHEN CategoryLoc.ysnBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
+							, CASE WHEN CategoryLoc.ysnBlueLaw2 = 1 THEN 210 ELSE NULL END [SalesRestrictionStrategyID2]
 							, 0 [PriceMethodCode]
 							, IL.strDescription [ReceiptDescription]
 							, IL.ysnFoodStampable [FoodStampableFlg]
@@ -791,8 +791,8 @@ BEGIN
 							, CASE WHEN IL.ysnTaxFlag2 = 1 THEN '2' ELSE NULL END [TaxRateSysId2]
 							, CASE WHEN IL.ysnTaxFlag3 = 1 THEN '3' ELSE NULL END [TaxRateSysId3]
 							, CASE WHEN IL.ysnTaxFlag4 = 1 THEN '4' ELSE NULL END [TaxRateSysId4]
-							, CASE WHEN IL.ysnIdRequiredLiquor = 1 THEN '1' ELSE NULL END [IdCheckSysId1]
-							, CASE WHEN IL.ysnIdRequiredCigarette = 1 THEN '2' ELSE NULL END [IdCheckSysId2]
+							, CASE WHEN CategoryLoc.ysnIdRequiredLiquor = 1 THEN '1' ELSE NULL END [IdCheckSysId1]
+							, CASE WHEN CategoryLoc.ysnIdRequiredCigarette = 1 THEN '2' ELSE NULL END [IdCheckSysId2]
 							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN '1' ELSE NULL END [BlueLawSysId1]
 							, CASE WHEN IL.ysnApplyBlueLaw2 = 1 THEN '2' ELSE NULL END [BlueLawSysId2]
 						FROM tblICItem I
@@ -880,7 +880,7 @@ BEGIN
 									ELSE  ISNULL(SubCat.strRegProdCode, '40') 
 								END [PaymentSystemsProductCode]
 							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 WHEN IL.ysnFoodStampable = 0 THEN 2048 
-									WHEN IL.ysnIdRequiredLiquor = 1 THEN 4 WHEN IL.ysnIdRequiredCigarette = 1 THEN 2 
+									WHEN CategoryLoc.ysnIdRequiredLiquor = 1 THEN 4 WHEN CategoryLoc.ysnIdRequiredCigarette = 1 THEN 2 
 									WHEN IL.ysnOpenPricePLU = 1 THEN 128
 									ELSE 2048
 								END [SalesRestrictCode]
