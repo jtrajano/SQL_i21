@@ -103,7 +103,7 @@ SELECT
 	B.[strSaleNumber],
 	B.[dtmSaleDate], 
 	B.[strVendorLotNumber],
-	B.[strPreInvoiceGarden],
+	strPreInvoiceGarden = gm.[strGardenMark],
 	B.[strPreInvoiceGardenNumber],
 	book.[strBook],
 	subBook.[strSubBook],
@@ -201,3 +201,4 @@ LEFT JOIN tblQMCatalogueType cgt ON cgt.intCatalogueTypeId = B.intCatalogueTypeI
 LEFT JOIN tblCTBook book ON book.intBookId = B.intBookId
 LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = B.intSubBookId
 LEFT JOIN tblSMPurchasingGroup pgrp ON pgrp.intPurchasingGroupId = B.intPurchasingGroupId
+LEFT JOIN tblQMGardenMark gm ON gm.intGardenMarkId = B.intGardenMarkId
