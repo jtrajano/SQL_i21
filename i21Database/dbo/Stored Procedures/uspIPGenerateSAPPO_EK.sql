@@ -529,7 +529,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<Line>'
 
-			SELECT @strItemXML += '<TrackingNo>' + LTRIM(@intLoadDetailId) + '</TrackingNo>'
+			SELECT @strItemXML += '<TrackingNo>' + LTRIM(@intContractFeedId) + '</TrackingNo>'
 
 			SELECT @strItemXML += '<RowState>' + LTRIM(@strDetailRowState) + '</RowState>'
 
