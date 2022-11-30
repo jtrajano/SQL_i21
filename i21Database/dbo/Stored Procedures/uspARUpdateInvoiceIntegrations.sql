@@ -56,24 +56,10 @@ BEGIN TRY
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
 
-	INSERT INTO @InvoiceIds(
-		  intHeaderId
-		, ysnForDelete
-		, strBatchId
-	) 
-	SELECT intHeaderId 	= @intInvoiceId
-		 , ysnForDelete = ISNULL(@ForDelete, 0)
-		 , strBatchId 	= @strBatchId
-
 	IF @strTransactionType = 'Proforma Invoice'
 		BEGIN
 			IF @intTranCount = 0
 				COMMIT TRANSACTION
-
-			IF @FromPosting = 0
-			BEGIN
-				EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete
-			END
 
 			RETURN
 		END
