@@ -147,14 +147,6 @@
 	,@PaidCPP								BIT				= 0
 	,@ItemQualityPremium					NUMERIC(18, 6)	= 0
 	,@ItemOptionalityPremium				NUMERIC(18, 6)	= 0
-	,@BankId								INT				= NULL
-	,@BankAccountId							INT				= NULL
-	,@BorrowingFacilityId					INT				= NULL
-	,@BankReferenceNo						NVARCHAR(100)	= NULL
-	,@BankTransactionId						NVARCHAR(100)	= NULL
-	,@LoanAmount							NUMERIC(18, 6)	= NULL
-	,@BankValuationRuleId					INT				= NULL
-	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 	,@FreightCharge							NUMERIC(18, 6)	= 0
 	,@FreightCompanySegment					INT				= NULL
@@ -526,15 +518,6 @@ BEGIN TRY
 		,[intLineOfBusinessId]
 		,[intICTId]
 		,[intSalesOrderId]
-		,[intBankId]
-		,[intBankAccountId]
-		,[intBorrowingFacilityId]
-		,[intBorrowingFacilityLimitId]
-		,[strBankReferenceNo]
-		,[strBankTransactionId]
-		,[dblLoanAmount]
-		,[intBankValuationRuleId]
-		,[strTradeFinanceComments]
 	)
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
@@ -621,14 +604,6 @@ BEGIN TRY
 		,[intLineOfBusinessId]				= @intLineOfBusinessId
 		,[intICTId]							= @intICTId
 		,[intSalespersonId]					= @intSalesOrderId
-		,[intBankId]						= @BankId
-		,[intBankAccountId]					= @BankAccountId
-		,[intBorrowingFacilityId]			= @BorrowingFacilityId
-		,[strBankReferenceNo]				= @BankReferenceNo
-		,[strBankTransactionId]				= @BankTransactionId
-		,[dblLoanAmount]					= @LoanAmount
-		,[intBankValuationRuleId]			= @BankValuationRuleId
-		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
 		,[dblFreightCharge]					= @FreightCharge
 		,[intFreightCompanySegment]			= @FreightCompanySegment
