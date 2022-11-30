@@ -365,7 +365,7 @@ BEGIN
 	--Insert Deduction Distribution to Temporary Table
 	INSERT INTO #tmpDeduction (intPaycheckId, intEmployeeDeductionId, intTypeDeductionId, strPaidBy, intAccountId, ysnIsExpense, ysnSplit,
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
-	SELECT A.intPaycheckId, A.intEmployeeDeductionId, A.intTypeDeductionId, A.strPaidBy, A.intAccountId, A.ysnIsExpense, ysnSplit = CASE WHEN (B.intEmployeeLocationDistributionId IS NULL) THEN 0 ELSE A.ysnSplit END,
+	SELECT DISTINCT A.intPaycheckId, A.intEmployeeDeductionId, A.intTypeDeductionId, A.strPaidBy, A.intAccountId, A.ysnIsExpense, ysnSplit = CASE WHEN (B.intEmployeeLocationDistributionId IS NULL) THEN 0 ELSE A.ysnSplit END,
 			dblTotal = ISNULL(A.dblTotal, 0), dblPercentage = ISNULL(ISNULL(B.dblPercentage, D.dblDepartmentPercent), 0), 
 			C.intDepartmentId, intProfitCenter = ISNULL(B.intProfitCenter, C.intProfitCenter), CASE WHEN (A.ysnSplit = 1 ) THEN  F.intLOB ELSE C.intLOB END
 	FROM (
@@ -523,7 +523,7 @@ BEGIN
 	--Insert Tax Distribution to Temporary Table
 	INSERT INTO #tmpTax (intPaycheckId, intTypeTaxId, strPaidBy, intAccountId, ysnIsExpense, ysnSplit,
 								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
-	SELECT A.intPaycheckId, A.intTypeTaxId, A.strPaidBy, A.intAccountId,  A.ysnIsExpense, ysnSplit = CASE WHEN (B.intEmployeeLocationDistributionId IS NULL) THEN 0 ELSE A.ysnSplit END,
+	SELECT DISTINCT A.intPaycheckId, A.intTypeTaxId, A.strPaidBy, A.intAccountId,  A.ysnIsExpense, ysnSplit = CASE WHEN (B.intEmployeeLocationDistributionId IS NULL) THEN 0 ELSE A.ysnSplit END,
 			dblTotal = ISNULL(A.dblTotal, 0), dblPercentage = ISNULL(ISNULL(B.dblPercentage, D.dblDepartmentPercent), 0), 
 			C.intDepartmentId, intProfitCenter = ISNULL(B.intProfitCenter, C.intProfitCenter)
 			,CASE WHEN (A.ysnSplit = 1 ) THEN  F.intLOB ELSE C.intLOB END
