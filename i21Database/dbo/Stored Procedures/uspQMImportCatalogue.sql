@@ -82,7 +82,7 @@ BEGIN TRY
             + CASE WHEN ST.intSampleTypeId IS NULL THEN 'SAMPLE TYPE, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
-    AND ISNULL(IMP.strBatchNo, '') = ''
+    AND ISNULL(IMP.strBatchNo, '') <> ''
     AND (
         B.intBatchId IS NULL
         OR CL.intCompanyLocationId IS NULL
@@ -112,7 +112,7 @@ BEGIN TRY
             + CASE WHEN E.intEntityId IS NULL THEN 'SUPPLIER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
-    AND ISNULL(IMP.strBatchNo, '') <> ''
+    AND ISNULL(IMP.strBatchNo, '') = ''
     AND (
         SY.intSaleYearId IS NULL
         OR CL.intCompanyLocationId IS NULL
