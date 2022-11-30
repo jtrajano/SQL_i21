@@ -3,6 +3,7 @@
 	 ,@UserId				INT
 	 ,@TransactionType		NVARCHAR(15)
 	 ,@ForDelete			BIT = 0
+	 ,@Post					BIT = 0
 	 ,@FromPosting			BIT = 0
 	 ,@LogTradeFinanceInfo	BIT = 0
 AS
@@ -11,9 +12,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
-
-IF @FromPosting = 1
-	RETURN
 
 DECLARE @intTranCount INT = @@trancount
 
@@ -27,6 +25,20 @@ BEGIN TRY
 			,@TradeFinanceLogs	TRFLog
 			,@strAction			NVARCHAR(30) = ''
 			,@intStatusId		INT = 0
+
+	IF @TransactionType = 'Payment'
+	BEGIN
+		IF @Post = 1
+			BEGIN
+				SET @strAction = 'Posted Payment'
+				SET @intStatusId = 2
+			END
+		ELSE
+		BEGIN
+			SET @strAction = 'Unposted Payment'
+			SET @intStatusId = 1
+		END
+	END
 
 	INSERT INTO @TradeFinanceLogs (
 		 strAction
@@ -123,7 +135,7 @@ BEGIN TRY
 	OUTER APPLY (
 		SELECT TOP 1 strActionType
 		FROM tblARAuditLog
-		WHERE strRecordNo COLLATE SQL_Latin1_General_CP1_CS_AS = CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
+		WHERE strRecordNo COLLATE SQL_Latin1_General_CP1_CS_AS = ARI.strInvoiceNumber
 		ORDER BY intAuditLogId DESC
 	) ARAL
 	OUTER APPLY (
@@ -134,11 +146,6 @@ BEGIN TRY
 		LEFT JOIN tblICInventoryReceipt ICIR ON ICIR.intInventoryReceiptId = ICIRI.intInventoryReceiptId
 		WHERE LGLD.intLoadDetailId = ARID.intLoadDetailId
 	) LS
-	OUTER APPLY (
-		SELECT TOP 1 intBankId
-		FROM tblCMBankAccount
-		WHERE intBankAccountId = ARP.intBankAccountId
-	) CMBP
 	WHERE ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds)
 	AND (
 		(ISNULL(ARPD.intPaymentDetailId, 0) <> 0 AND @TransactionType = 'Payment')
@@ -160,6 +167,7 @@ BEGIN TRY
 			)
 		)
 		OR @ForDelete = 1
+		OR @FromPosting = 1
 		OR @LogTradeFinanceInfo = 1
 	)
 
@@ -190,13 +198,16 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		DECLARE	 @intTradeFinanceId	INT = NULL
+		DECLARE	 @intTradeFinanceId			INT = NULL
+				,@strNewTradeFinanceNumber	NVARCHAR(100)
 
-		SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
-		FROM tblTRFTradeFinance TRTF
-		INNER JOIN @TradeFinanceLogs TRFL 
-		ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
-		WHERE strTradeFinanceNumber = @strTradeFinanceNumber
+		IF @FromPosting = 0
+		BEGIN
+			SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
+			FROM tblTRFTradeFinance TRTF
+			INNER JOIN @TradeFinanceLogs TRFL 
+			ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
+			WHERE strTradeFinanceNumber = @strTradeFinanceNumber
 
 			DELETE FROM @TRFTradeFinance
 
@@ -262,14 +273,17 @@ BEGIN CATCH
 	DECLARE @strErrorMsg varchar(4000) = ERROR_MESSAGE()
 	DECLARE @strThrow	 NVARCHAR(MAX) = 'RAISERROR(''' + @strErrorMsg + ''', 11, 1)'
 	
-	SET @strThrow = 'THROW 51000, ''' + @strErrorMsg + ''', 1'
+	IF (@@version NOT LIKE '%2008%')
+	BEGIN
+		SET @strThrow = 'THROW 51000, ''' + @strErrorMsg + ''', 1'
 		
-	IF XACT_STATE() = -1
-		ROLLBACK;
-	IF XACT_STATE() = 1 AND @intTranCount = 0
-		ROLLBACK
-	IF XACT_STATE() = 1 AND @intTranCount > 0
-		ROLLBACK TRANSACTION uspARProcessTradeFinanceLog;
+		IF XACT_STATE() = -1
+			ROLLBACK;
+		IF XACT_STATE() = 1 AND @intTranCount = 0
+			ROLLBACK
+		IF XACT_STATE() = 1 AND @intTranCount > 0
+			ROLLBACK TRANSACTION uspARProcessTradeFinanceLog;
+	END
 
 	EXEC sp_executesql @strThrow
 
