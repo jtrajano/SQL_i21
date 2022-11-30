@@ -636,7 +636,6 @@ BEGIN TRY
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
 			ON C.intBillToId = BL1.intEntityLocationId
-	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
