@@ -11,9 +11,20 @@ FROM (
 		, strType = 'Item'
 	FROM tblICItem I
 
-	UNION ALL SELECT intValueId = EL.intEntityId
+	UNION ALL 
+	
+	SELECT intValueId = EL.intEntityId
 		, strValue = EL.strName
 		, strType = 'Entity'
 	FROM tblEMEntity EL
 	JOIN tblEMEntityType ET ON ET.intEntityId = EL.intEntityId AND ET.strType IN ('Vendor', 'Customer')
+
+	UNION ALL
+
+	SELECT
+		intValueId = BF.intBorrowingFacilityId,
+		strValue = BF.strBorrowingFacilityId + ' / ' + B.strBankName + ' / ' + BF.strBankReferenceNo,
+		strType = 'Borrowing Facility'
+	FROM tblCMBorrowingFacility BF
+	JOIN tblCMBank B ON B.intBankId = BF.intBankId
 ) tbl
