@@ -112,6 +112,24 @@ BEGIN
 		from
 			tblCTContractCertification cr
 			left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+	), hedge as (
+		select top 1 with ties
+			s.intContractDetailId
+			,fm.strFutureMonth
+			,e.strName
+			,a.strAccountNumber
+		from
+			tblRKAssignFuturesToContractSummary s
+			join tblRKFutOptTransaction t on t.intFutOptTransactionId = s.intFutOptTransactionId
+			left join tblRKBrokerageAccount a on a.intBrokerageAccountId = t.intBrokerageAccountId
+			left join tblEMEntity e on e.intEntityId = t.intEntityId
+			left join tblRKFuturesMonth fm on fm.intFutureMonthId = t.intFutureMonthId
+		where
+			s.ysnIsHedged = 1
+		order by
+			row_number() over (
+				partition by s.intContractDetailId order by t.dtmCreateDateTime desc
+			)
 	)
 
 	--VIEW FOR CONTRACT 
@@ -136,6 +154,9 @@ BEGIN
 		  ,dblBasis	
 		  ,strPricingStatus
 		  ,dblCashPrice
+		  ,strCurrentHedge
+		  ,strBroker
+		  ,strBrokerAccount
 		  ,strHedgeMonth
 		  ,dblLastSettlementPrice
 		  ,strSalesContract
@@ -207,6 +228,9 @@ BEGIN
 							   ELSE CTD.dblCashPrice END )
 							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())
 							)
+		  ,strCurrentHedge = h.strFutureMonth
+		  ,strBroker = h.strName
+		  ,strBrokerAccount = h.strAccountNumber
 		  ,strHedgeMonth = HM.strFutureMonth
 		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
 									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
@@ -249,7 +273,8 @@ BEGIN
 		,intCompanyLocationId = CTD.intCompanyLocationId
 		,intSortId = 0
 	FROM tblCTContractHeader CH
-	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId 
+	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
+	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblSMCity					LP  WITH (NOLOCK) ON CTD.intLoadingPortId = LP.intCityId 
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
@@ -336,6 +361,9 @@ BEGIN
 		  ,dblBasis	
 		  ,strPricingStatus
 		  ,dblCashPrice
+		  ,strCurrentHedge
+		  ,strBroker
+		  ,strBrokerAccount
 		  ,strHedgeMonth
 		  ,dblLastSettlementPrice
 		  ,strSalesContract
@@ -394,6 +422,9 @@ BEGIN
 							   ELSE CTD.dblCashPrice  END)
 							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)
 						 )
+		  ,strCurrentHedge = h.strFutureMonth
+		  ,strBroker = h.strName
+		  ,strBrokerAccount = h.strAccountNumber
 		  ,dblLastSettlementPrice =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,
 									 dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE()) 
 									 * dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())	/ (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)
@@ -434,6 +465,7 @@ BEGIN
 		,intSortId  = 1
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
+	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
@@ -498,6 +530,9 @@ BEGIN
 		  ,dblBasis	
 		  ,strPricingStatus
 		  ,dblCashPrice
+		  ,strCurrentHedge
+		  ,strBroker
+		  ,strBrokerAccount
 		  ,strHedgeMonth
 		  ,dblLastSettlementPrice
 		  ,strSalesContract
@@ -571,6 +606,9 @@ BEGIN
 							   ELSE CTD.dblCashPrice  END )
 							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate())	/ (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)
 							)
+		  ,strCurrentHedge = h.strFutureMonth
+		  ,strBroker = h.strName
+		  ,strBrokerAccount = h.strAccountNumber
 		  ,strHedgeMonth= ''
 		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
 									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
@@ -614,6 +652,7 @@ BEGIN
 		,intSortId = 2
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
+	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
@@ -689,6 +728,9 @@ BEGIN
 		  ,dblBasis	
 		  ,strPricingStatus
 		  ,dblCashPrice
+		  ,strCurrentHedge
+		  ,strBroker
+		  ,strBrokerAccount
 		  ,strHedgeMonth
 		  ,dblLastSettlementPrice
 		  ,strSalesContract
@@ -770,6 +812,9 @@ BEGIN
 							   ELSE CTD.dblCashPrice END )
 						  * dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)							
 						  )
+		  ,strCurrentHedge = h.strFutureMonth
+		  ,strBroker = h.strName
+		  ,strBrokerAccount = h.strAccountNumber
 		  ,strHedgeMonth = HM.strFutureMonth
 		  ,dblLastSettlementPrice = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId, 
 									dbo.fnRKGetLatestClosingPrice(CTD.intFutureMarketId,CTD.intFutureMonthId,GETDATE())
@@ -817,6 +862,7 @@ BEGIN
 		,intSortId  = 3
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
+	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblSMCity					LP  WITH (NOLOCK) ON CTD.intLoadingPortId = LP.intCityId 
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
@@ -917,6 +963,9 @@ BEGIN
 		  ,dblBasis	
 		  ,strPricingStatus
 		  ,dblCashPrice
+		  ,strCurrentHedge
+		  ,strBroker
+		  ,strBrokerAccount
 		  ,strHedgeMonth
 		  ,dblLastSettlementPrice
 		  ,strSalesContract
@@ -976,6 +1025,9 @@ BEGIN
 		,dblBasis =  NULL
 		,strPricingStatus = ''
 		,dblCashPrice = NULL
+		  ,strCurrentHedge = h.strFutureMonth
+		  ,strBroker = h.strName
+		  ,strBrokerAccount = h.strAccountNumber
 		,strHedgeMonth = ''
 		,dblLastSettlementPrice = NULL
 		,strSalesContract = ''
@@ -1007,6 +1059,7 @@ BEGIN
 		,intSortId = 4
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
+	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
