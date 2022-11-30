@@ -602,15 +602,6 @@ BEGIN TRY
 		,[intLineOfBusinessId]				= @intLineOfBusinessId
 		,[intICTId]							= @intICTId
 		,[intSalespersonId]					= @intSalesOrderId
-		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[dblFreightCharge]					= @FreightCharge
-		,[intFreightCompanySegment]			= @FreightCompanySegment
-		,[intFreightLocationSegment]		= @FreightLocationSegment
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
-		,[intTaxLocationId]					= @TaxLocationId
-		,[strTaxPoint]						= @TaxPoint
-		,[dblSurcharge]						= @Surcharge
-		,[intOpportunityId]					= @OpportunityId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
