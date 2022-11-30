@@ -41,36 +41,33 @@ BEGIN TRY
 	END
 
 	INSERT INTO @TradeFinanceLogs (
-		 strAction
-		,strTransactionType
-		,intTransactionHeaderId
-		,intTransactionDetailId
-		,strTransactionNumber
-		,strTradeFinanceTransaction
-		,dtmTransactionDate
-		,intBankId
-		,intBankAccountId
-		,intBorrowingFacilityId
-		,dblTransactionAmountAllocated
-		,dblTransactionAmountActual
-		,intLimitId
-		,dblLimit
-		,strBankTradeReference
-		,strBankApprovalStatus
-		,dtmAppliedToTransactionDate
-		,intStatusId
-		,intUserId
-		,intConcurrencyId
-		,dblFinanceQty
-		,dblFinancedAmount
-		,intContractHeaderId
-		,intContractDetailId
-		,intSublimitId
-		,strSublimit
-		,dblSublimit
-		,ysnDeleted
-		,intWarrantStatusId
-		,strWarrantId
+		  strAction
+		, strTransactionType
+		, intTransactionHeaderId
+		, intTransactionDetailId
+		, strTransactionNumber
+		, strTradeFinanceTransaction
+		, dtmTransactionDate
+		, intBankId
+		, intBankAccountId
+		, intBorrowingFacilityId
+		, dblTransactionAmountAllocated
+		, dblTransactionAmountActual
+		, intLimitId
+		, dblLimit
+		, strBankTradeReference
+		, strBankApprovalStatus
+		, dtmAppliedToTransactionDate
+		, intStatusId
+		, intUserId
+		, intConcurrencyId
+		, dblFinanceQty
+		, dblFinancedAmount
+		, intContractHeaderId
+		, intContractDetailId
+		, intSublimitId
+		, strSublimit
+		, dblSublimit
 	)
 	SELECT
 		  strAction						= CASE WHEN @strAction = '' 
@@ -111,18 +108,15 @@ BEGIN TRY
 														 END
 											   ELSE @intStatusId 
 										  END
-		,intUserId						= @UserId
-		,intConcurrencyId				= 1 
-		,dblFinanceQty					= dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intOrderUOMId, ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped))
-		,dblFinancedAmount				= ARID.dblTotal + ARID.dblTotalTax
-		,intContractHeaderId			= LS.intContractHeaderId
-		,intContractDetailId			= LS.intContractDetailId
-		,intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
-		,strSublimit					= CMBFLD.strLimitDescription
-		,dblSublimit					= CMBFLD.dblLimit
-		,ysnDeleted						= @ForDelete
-		,intWarrantStatus				= LS.intWarrantStatus
-		,strWarrantNo					= LS.strWarrantNo
+		, intUserId						= @UserId
+		, intConcurrencyId				= 1 
+		, dblFinanceQty					= ARID.dblQtyShipped
+		, dblFinancedAmount				= ARID.dblTotal
+		, intContractHeaderId			= ARID.intContractHeaderId
+		, intContractDetailId			= ARID.intContractDetailId
+		, intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
+		, strSublimit					= CMBFLD.strLimitDescription
+		, dblSublimit					= CMBFLD.dblLimit
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 	ON ARI.intInvoiceId = ARID.intInvoiceId
@@ -264,7 +258,10 @@ BEGIN TRY
 	CLOSE TFLogCursor
 	DEALLOCATE TFLogCursor
 
-	EXEC uspTRFLogTradeFinance @TradeFinanceLogs
+	IF @ForDelete <> 1
+	BEGIN
+		EXEC uspTRFLogTradeFinance @TradeFinanceLogs
+	END
 
 	IF @intTranCount = 0
 		COMMIT;
