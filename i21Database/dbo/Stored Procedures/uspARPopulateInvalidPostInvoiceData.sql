@@ -1655,6 +1655,9 @@ BEGIN
 		, strBatchId
 		, intEntityId
 		, intUserId
+		, intSiteId
+		, intPerformerId
+		, ysnLeaseBilling
 	)
     SELECT intInvoiceId			= PID.intInvoiceId
 		, dtmDate				= PID.dtmDate
@@ -1665,6 +1668,9 @@ BEGIN
 		, strBatchId			= PID.strBatchId
 		, intEntityId			= PID.intEntityId
 		, intUserId				= PID.intUserId
+		, intSiteId				= PID.intSiteId
+		, intPerformerId		= PID.intPerformerId
+		, ysnLeaseBilling		= PID.ysnLeaseBilling
 	FROM tblARPostInvoiceDetail PID 
 	INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
 	WHERE PID.strSessionId = @strSessionId
