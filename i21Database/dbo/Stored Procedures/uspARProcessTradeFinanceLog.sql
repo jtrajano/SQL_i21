@@ -83,7 +83,7 @@ BEGIN TRY
 		, dblTransactionAmountActual	= CTCD.dblLoanAmount
 		, intLimitId					= ARI.intBorrowingFacilityLimitId
 		, dblLimit						= CMBFL.dblLimit
-		, strBankTradeReference			= ARI.strBankTradeReference
+		, strBankTradeReference			= ARI.strBankTransactionId
 		, strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
 		, dtmAppliedToTransactionDate	= GETDATE() 
 		, intStatusId					= CASE WHEN @intStatusId = 0
@@ -154,7 +154,7 @@ BEGIN TRY
 			   OR ISNULL(ARI.intBankAccountId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
 			   OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
-			   --OR ISNULL(ARI.strBankTradeReference, '') <> ''
+			   OR ISNULL(ARI.strBankTransactionId, '') <> ''
 			   OR ISNULL(ARI.dblLoanAmount, 0) <> 0
 			   OR ISNULL(ARI.strTransactionNo, '') <> ''
 			)
@@ -201,42 +201,42 @@ BEGIN TRY
 
 		DELETE FROM @TRFTradeFinance
 
-		INSERT INTO @TRFTradeFinance 
-		(
-			 intTradeFinanceId
-			,strTradeFinanceNumber
-			,strTransactionType
-			,strTransactionNumber
-			,intTransactionHeaderId
-			,intTransactionDetailId
-			,intBankId
-			,intBankAccountId
-			,intBorrowingFacilityId
-			,strRefNo
-			,intOverrideFacilityValuation
-			,strCommnents
-			,dtmCreatedDate
-			,intConcurrencyId
-		)
-		SELECT
-			 intTradeFinanceId				= @intTradeFinanceId
-			,strTradeFinanceNumber			= TFL.strTradeFinanceTransaction
-			,strTransactionType				= TFL.strTransactionType
-			,strTransactionNumber			= TFL.strTransactionNumber
-			,intTransactionHeaderId			= TFL.intTransactionHeaderId
-			,intTransactionDetailId			= TFL.intTransactionDetailId
-			,intBankId						= ARI.intBankId
-			,intBankAccountId				= ARI.intBankAccountId
-			,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
-			,strRefNo						= ARI.strBankTradeReference
-			,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
-			,strCommnents					= ARI.strTradeFinanceComments
-			,dtmCreatedDate					= GETDATE()
-			,intConcurrencyId				= 1
-		FROM @TradeFinanceLogs TFL
-		INNER JOIN tblARInvoice ARI WITH (NOLOCK)
-		ON ARI.intInvoiceId = TFL.intTransactionHeaderId
-		WHERE ARI.intInvoiceId = @intTransactionHeaderId
+			INSERT INTO @TRFTradeFinance 
+			(
+				 intTradeFinanceId
+				,strTradeFinanceNumber
+				,strTransactionType
+				,strTransactionNumber
+				,intTransactionHeaderId
+				,intTransactionDetailId
+				,intBankId
+				,intBankAccountId
+				,intBorrowingFacilityId
+				,strRefNo
+				,intOverrideFacilityValuation
+				,strCommnents
+				,dtmCreatedDate
+				,intConcurrencyId
+			)
+			SELECT
+				 intTradeFinanceId				= @intTradeFinanceId
+				,strTradeFinanceNumber			= TFL.strTradeFinanceTransaction
+				,strTransactionType				= TFL.strTransactionType
+				,strTransactionNumber			= TFL.strTransactionNumber
+				,intTransactionHeaderId			= TFL.intTransactionHeaderId
+				,intTransactionDetailId			= TFL.intTransactionDetailId
+				,intBankId						= ARI.intBankId
+				,intBankAccountId				= ARI.intBankAccountId
+				,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
+				,strRefNo						= ARI.strBankTransactionId
+				,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
+				,strCommnents					= ARI.strTradeFinanceComments
+				,dtmCreatedDate					= GETDATE()
+				,intConcurrencyId				= 1
+			FROM @TradeFinanceLogs TFL
+			INNER JOIN tblARInvoice ARI WITH (NOLOCK)
+			ON ARI.intInvoiceId = TFL.intTransactionHeaderId
+			WHERE ARI.intInvoiceId = @intTransactionHeaderId
 
 		IF ISNULL(@intTradeFinanceId, 0) <> 0
 		BEGIN
