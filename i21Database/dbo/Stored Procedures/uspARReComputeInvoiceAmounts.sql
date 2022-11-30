@@ -11,6 +11,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @InvoiceIds Id
 DECLARE  @ZeroDecimal			DECIMAL(18,6)
 		,@InvoiceIdLocal		INT
 		,@CurrencyId			INT
@@ -162,7 +163,6 @@ SET
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
-	,[dblLoanAmount]						= CASE WHEN ISNULL(strTransactionNo, '') <> '' THEN ISNULL([dblInvoiceSubtotal], @ZeroDecimal) ELSE NULL END
 WHERE [intInvoiceId] = @InvoiceIdLocal
 
 UPDATE I
