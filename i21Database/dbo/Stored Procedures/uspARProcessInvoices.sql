@@ -230,7 +230,7 @@ DECLARE  @Id									INT
 		,@BorrowingFacilityId					INT
 		,@BorrowingFacilityLimitId				INT
 		,@BankReferenceNo						NVARCHAR(100)
-		,@BankTradeReference					NVARCHAR(100)
+		,@BankTransactionId						NVARCHAR(100)
 		,@LoanAmount							NUMERIC(18, 6)
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
@@ -459,7 +459,7 @@ BEGIN
 		,@BorrowingFacilityId			= [intBorrowingFacilityId]
 		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
 		,@BankReferenceNo				= [strBankReferenceNo]
-		,@BankTradeReference			= [strBankTradeReference]
+		,@BankTransactionId				= [strBankTransactionId]
 		,@LoanAmount					= [dblLoanAmount]
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
@@ -769,7 +769,7 @@ BEGIN
 			,@BorrowingFacilityId			= @BorrowingFacilityId
 			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
 			,@BankReferenceNo				= @BankReferenceNo
-			,@BankTradeReference			= @BankTradeReference
+			,@BankTransactionId				= @BankTransactionId
 			,@LoanAmount					= @LoanAmount
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments

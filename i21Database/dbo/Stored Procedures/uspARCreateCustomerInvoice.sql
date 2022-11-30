@@ -153,7 +153,7 @@
 	,@BorrowingFacilityId					INT				= NULL
 	,@BorrowingFacilityLimitId				INT				= NULL
 	,@BankReferenceNo						NVARCHAR(100)	= NULL
-	,@BankTradeReference					NVARCHAR(100)	= NULL
+	,@BankTransactionId						NVARCHAR(100)	= NULL
 	,@LoanAmount							NUMERIC(18, 6)	= NULL
 	,@BankValuationRuleId					INT				= NULL
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
@@ -551,7 +551,7 @@ BEGIN TRY
 		,[intBorrowingFacilityId]
 		,[intBorrowingFacilityLimitId]
 		,[strBankReferenceNo]
-		,[strBankTradeReference]
+		,[strBankTransactionId]
 		,[dblLoanAmount]
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
@@ -659,8 +659,8 @@ BEGIN TRY
 		,[intBorrowingFacilityId]			= @BorrowingFacilityId
 		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
-		,[strBankTradeReference]			= @BankTradeReference
-		,[dblLoanAmount]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @LoanAmount ELSE NULL END
+		,[strBankTransactionId]				= @BankTransactionId
+		,[dblLoanAmount]					= @LoanAmount
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
