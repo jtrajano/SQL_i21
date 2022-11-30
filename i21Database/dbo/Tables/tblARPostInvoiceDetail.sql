@@ -171,7 +171,6 @@ CREATE TABLE tblARPostInvoiceDetail (
     ,[dblPercentage]                        NUMERIC(18,6)   NOT NULL DEFAULT 0
     ,[dblProvisionalTotal]                  NUMERIC(18,6)   NOT NULL DEFAULT 0
     ,[dblBaseProvisionalTotal]              NUMERIC(18,6)   NOT NULL DEFAULT 0
-    ,dblBaseProvisionalTotalTax             NUMERIC(18,6)   NOT NULL DEFAULT 0
     ,CONSTRAINT [PK_tblARPostInvoiceDetail_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO

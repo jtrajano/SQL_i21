@@ -149,7 +149,6 @@
     [dblPercentage]							NUMERIC(18, 6)									NOT NULL	DEFAULT ((100)),
 	[dblProvisionalTotal]					NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
 	[dblProvisionalTotalTax]				NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
-	[dblBaseProvisionalTotalTax]			NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),
 	CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
