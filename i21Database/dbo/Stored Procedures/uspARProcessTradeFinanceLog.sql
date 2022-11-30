@@ -12,8 +12,7 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF  
 
-DECLARE  @TRFTradeFinance	TRFTradeFinance
-		,@TradeFinanceLogs	TRFLog
+DECLARE  @TradeFinanceLogs	TRFLog
 		,@strAction			NVARCHAR(30) = ''
 		,@intStatusId		INT = 0
 
@@ -132,11 +131,6 @@ OUTER APPLY (
 	WHERE LGLD.intLoadDetailId = ARID.intLoadDetailId
 ) LS
 WHERE ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds)
-AND (
-	(ISNULL(ARPD.intPaymentDetailId, 0) <> 0 AND @TransactionType = 'Payment')
-	OR
-	@TransactionType <> 'Payment'
-)
 AND 
 (
 	(
@@ -155,6 +149,40 @@ AND
 	OR @FromPosting = 1
 	OR @LogTradeFinanceInfo = 1
 )
+
+DECLARE  @strTradeFinanceNumber NVARCHAR(100)
+		,@dtmTransactionDate DATETIME
+		,@strNegateAction NVARCHAR(100)
+DECLARE TFLogCursor CURSOR LOCAL FAST_FORWARD
+FOR
+SELECT 
+	 strTradeFinanceTransaction
+	,dtmTransactionDate
+	,strAction
+FROM @TradeFinanceLogs
+
+OPEN TFLogCursor
+FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @dtmTransactionDate, @strNegateAction
+WHILE @@FETCH_STATUS = 0
+BEGIN
+	DECLARE @strImpactedModule NVARCHAR(100) = 'Sales'
+
+	SELECT TOP 1 @strImpactedModule = strTransactionType
+	FROM tblTRFTradeFinanceLog
+	WHERE strTradeFinanceTransaction = @strTradeFinanceNumber
+	ORDER BY dtmTransactionDate DESC
+
+	EXEC uspTRFNegateTFLogFinancedQtyAndAmount
+		 @strTradeFinanceNumber = @strTradeFinanceNumber
+		,@strTransactionType	= @strImpactedModule
+		,@strLimitType			= NULL
+		,@dtmTransactionDate	= @dtmTransactionDate
+		,@strAction				= @strNegateAction
+
+	FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @dtmTransactionDate, @strNegateAction
+END
+CLOSE TFLogCursor
+DEALLOCATE TFLogCursor
 
 EXEC uspTRFLogTradeFinance @TradeFinanceLogs
 
