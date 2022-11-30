@@ -73,7 +73,10 @@ BEGIN TRY
 			IF @intTranCount = 0
 				COMMIT TRANSACTION
 
-			EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @Post, @FromPosting, @LogTradeFinanceInfo
+			IF @FromPosting = 0
+			BEGIN
+				EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @LogTradeFinanceInfo
+			END
 
 			RETURN
 		END
@@ -202,7 +205,10 @@ BEGIN TRY
 	--INSERT TO TRANSACTION LINKS
 	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
 
-	EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @Post, @FromPosting, @LogTradeFinanceInfo
+	IF @FromPosting = 0
+	BEGIN
+		EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @LogTradeFinanceInfo
+	END
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
