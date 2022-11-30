@@ -157,7 +157,6 @@
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
 	,@OpportunityId							INT 			= 0
-	,@DefaultPayToBankAccountId				INT				= NULL
 AS
 
 BEGIN
@@ -614,7 +613,6 @@ BEGIN TRY
 		,[strTaxPoint]						= @TaxPoint
 		,[dblSurcharge]						= @Surcharge
 		,[intOpportunityId]					= @OpportunityId
-		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
