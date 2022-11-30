@@ -195,7 +195,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
 	 , dblPercentage						= INV.dblPercentage
-	 , dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblTotal END
+	 , dblProvisionalTotal					= INV.dblProvisionalTotal
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
