@@ -433,43 +433,43 @@ AND CM.strTransactionType = 'Credit Memo'
 AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
-	BEGIN
-		INSERT INTO #ADSALESPERSON
-		SELECT SP.intEntityId
-		FROM dbo.tblARSalesperson SP WITH (NOLOCK) 
-		INNER JOIN (
-			SELECT intID
-			FROM dbo.fnGetRowsFromDelimitedValues(@strSalespersonIdsLocal)
-		) SALESPERSON ON SP.intEntityId = SALESPERSON.intID
+BEGIN
+	INSERT INTO #ADSALESPERSON
+	SELECT SP.intEntityId
+	FROM dbo.tblARSalesperson SP WITH (NOLOCK) 
+	INNER JOIN (
+		SELECT intID
+		FROM dbo.fnGetRowsFromDelimitedValues(@strSalespersonIdsLocal)
+	) SALESPERSON ON SP.intEntityId = SALESPERSON.intID
 
-		DELETE INVOICES
-		FROM #AGINGPOSTEDINVOICES INVOICES
-		LEFT JOIN #ADSALESPERSON SALESPERSON ON INVOICES.intEntitySalespersonId = SALESPERSON.intSalespersonId
-		WHERE SALESPERSON.intSalespersonId IS NULL 
-	END
+	DELETE INVOICES
+	FROM #AGINGPOSTEDINVOICES INVOICES
+	LEFT JOIN #ADSALESPERSON SALESPERSON ON INVOICES.intEntitySalespersonId = SALESPERSON.intSalespersonId
+	WHERE SALESPERSON.intSalespersonId IS NULL 
+END
 
 IF (@ysnPrintFromCFLocal = 1)
+BEGIN
+	DELETE I 
+	FROM #AGINGPOSTEDINVOICES I
+	LEFT JOIN tblCFInvoiceStagingTable IST ON I.intInvoiceId = IST.intInvoiceId
+											AND IST.strUserId = @strUserId
+											AND LOWER(IST.strStatementType) = 'invoice'
+	WHERE I.strType = 'CF Tran'
+		AND I.intInvoiceId IS NULL
+
+	DELETE I 
+	FROM #AGINGPOSTEDINVOICES I
+	INNER JOIN tblCFTransaction CF ON I.strInvoiceNumber = CF.strTransactionId
+	WHERE I.strType = 'CF Tran'
+		AND CF.ysnInvoiced = 1
+		AND I.dtmPostDate <= @dtmDateToLocal
+
+	IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
 	BEGIN
-		DELETE I 
-		FROM #AGINGPOSTEDINVOICES I
-		LEFT JOIN tblCFInvoiceStagingTable IST ON I.intInvoiceId = IST.intInvoiceId
-											   AND IST.strUserId = @strUserId
-											   AND LOWER(IST.strStatementType) = 'invoice'
-		WHERE I.strType = 'CF Tran'
-		  AND I.intInvoiceId IS NULL
-
-		DELETE I 
-		FROM #AGINGPOSTEDINVOICES I
-		INNER JOIN tblCFTransaction CF ON I.strInvoiceNumber = CF.strTransactionId
-		WHERE I.strType = 'CF Tran'
-		  AND CF.ysnInvoiced = 1
-		  AND I.dtmPostDate <= @dtmDateToLocal
-
-		IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
-		BEGIN
- 			DELETE FROM #AGINGPOSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND dtmForgiveDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-		END
+ 		DELETE FROM #AGINGPOSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND dtmForgiveDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	END
+END
 
 --#CASHREFUNDS
 INSERT INTO #CASHREFUNDS (
@@ -595,7 +595,7 @@ FROM (
 	SELECT intEntityCustomerId		= TBL.intEntityCustomerId
 		, intInvoiceId				= TBL.intInvoiceId
 		, dblAmountPaid				= TBL.dblAmountPaid
-		, dblTotalDue				= CASE WHEN strType = 'CF Tran' THEN 0 ELSE dblInvoiceTotal - dblAmountPaid END
+		, dblTotalDue				= CASE WHEN strType = 'CF Tran' AND @ysnPrintFromCFLocal = 0 THEN 0 ELSE dblInvoiceTotal - dblAmountPaid END
 		, dblAvailableCredit		= TBL.dblAvailableCredit
 		, dblPrepayments			= TBL.dblPrepayments
 		, dblFuture					= CASE WHEN strType = 'CF Tran' 
@@ -623,7 +623,7 @@ FROM (
 		--INVOICES
 		SELECT I.intInvoiceId
 			  , dblAmountPaid		= 0
-			  , dblInvoiceTotal		= ISNULL(dblInvoiceTotal,0)
+			  , dblInvoiceTotal		= ISNULL(dblInvoiceTotal, 0)
 			  , dblAmountDue		= 0    
 			  , I.dtmDueDate    
 			  , I.dtmDate  
