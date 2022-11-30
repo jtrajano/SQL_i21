@@ -112,7 +112,7 @@ BEGIN
 			, ysnPosted
 		FROM [dbo].[tblCMBankTransaction] v
 		JOIN tblCMBankTransactionType t ON v.intBankTransactionTypeId = t.intBankTransactionTypeId
-		WHERE intBankAccountId = @intBankAccountId AND v.intBankTransactionTypeId IN (5, 25, 26) AND @ysnPayment = 1 AND dblAmount < 0
+		WHERE intBankAccountId = @intBankAccountId AND v.intBankTransactionTypeId IN (5, 25) AND @ysnPayment = 1 AND dblAmount < 0
 		UNION
 				--DEPOSIT
 		SELECT
@@ -135,7 +135,7 @@ BEGIN
 			, ysnPosted
 		FROM [dbo].[tblCMBankTransaction] v
 		JOIN tblCMBankTransactionType t ON v.intBankTransactionTypeId = t.intBankTransactionTypeId
-		WHERE intBankAccountId = @intBankAccountId AND v.intBankTransactionTypeId IN (5, 25, 26)
+		WHERE intBankAccountId = @intBankAccountId AND v.intBankTransactionTypeId IN (5, 25)
 		AND ISNULL(@ysnPayment,0) = 0 AND dblAmount > 0
 		),
 
