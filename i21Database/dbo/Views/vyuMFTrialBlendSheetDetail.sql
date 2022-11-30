@@ -47,6 +47,9 @@ SELECT wo.strWorkOrderNo
 	,(woil.dblQuantity / dblTotalWeight.dblTotalWeight) * 100 [dblPercentage]
 	,DATEDIFF(DAY, lot.dtmDateCreated, GETDATE()) [intAge]
 	,wo.intTrialBlendSheetStatusId
+	,woil.strFW
+	,b.dblLandedPrice
+	,b.dblSellingPrice
 FROM tblMFWorkOrder wo
 INNER JOIN tblMFWorkOrderInputLot woil ON wo.intWorkOrderId = woil.intWorkOrderId
 INNER JOIN tblICLot lot ON lot.intLotId = woil.intLotId
