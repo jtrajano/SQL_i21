@@ -170,9 +170,6 @@ CREATE TABLE tblARPostInvoiceHeader (
 	,[intFreightLocationSegment]			INT												NULL
     ,[dblSurcharge]                         NUMERIC(18,6)   NULL DEFAULT 0
     ,[intCompanySegment]                    INT             NULL
-    ,[dblPercentage]                        NUMERIC(18,6)   NOT NULL DEFAULT 0
-    ,[dblProvisionalTotal]                  NUMERIC(18,6)   NOT NULL DEFAULT 0
-    ,[dblBaseProvisionalTotal]              NUMERIC(18,6)   NOT NULL DEFAULT 0
     ,CONSTRAINT [PK_tblARPostInvoiceHeader_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO
