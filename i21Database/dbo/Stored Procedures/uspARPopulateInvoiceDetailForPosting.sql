@@ -1399,7 +1399,7 @@ FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
     SELECT
          intInvoiceId = intInvoiceId
-        ,dblBaseTotal = SUM(dblBaseTotal) + SUM(dblBaseTax)
+        ,dblBaseTotal = SUM(dblBaseLineItemGLAmount ) + SUM(dblBaseTax)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
