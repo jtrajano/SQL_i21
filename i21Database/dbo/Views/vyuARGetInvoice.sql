@@ -208,8 +208,6 @@ SELECT
 	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
-	,dblPercentage						= INV.dblPercentage
-	,dblProvisionalTotal				= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblInvoiceTotal END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 

@@ -102,7 +102,6 @@ SELECT
     ,dtmCashFlowDate                = I.dtmCashFlowDate
 	,dblCurrencyExchangeRate		= I.dblCurrencyExchangeRate
 	,strCustomerPaymentMethod		= SMPM.strPaymentMethod
-	,strPrintFormat					= I.strPrintFormat
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId

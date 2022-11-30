@@ -154,7 +154,6 @@ SELECT
 	,strReportIdentifier		= CASE 
 									WHEN ARI.strType = 'Provisional' THEN 'Provisional ' 
 									WHEN ARIR.strType = 'Provisional' THEN 'Commercial ' 
-									WHEN ISNULL(ARI.strPrintFormat, '') <> '' THEN ARI.strPrintFormat + ' '
 									ELSE ''
 								  END + 'Invoice No: ' + ARI.strInvoiceNumber
 	,strRelatedInvoiceRemarks	= CASE 
