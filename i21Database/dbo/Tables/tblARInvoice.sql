@@ -145,7 +145,6 @@
 	[intBankAccountId]					INT												NULL,
 	[intBorrowingFacilityId]			INT												NULL,
 	[intBorrowingFacilityLimitId]		INT												NULL,
-	[intBorrowingFacilityLimitDetailId]	INT												NULL,
 	[strBankReferenceNo]				NVARCHAR(100)									NULL,
 	[strBankTransactionId]				NVARCHAR(100)									NULL,
 	[dblLoanAmount]						NUMERIC(18, 6)									NULL,

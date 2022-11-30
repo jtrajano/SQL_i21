@@ -1,14 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceIntegrations] 
-	 @InvoiceId				INT = NULL	
-	,@ForDelete				BIT = 0    
-	,@UserId				INT = NULL
-	,@InvoiceDetailId 		INT = NULL
-	,@ysnLogRisk			BIT = 1
-	,@Post					BIT	= 0
-	,@Recap					BIT	= 1
-	,@FromPosting			BIT = 0
-	,@LogTradeFinanceInfo	BIT = 0
-	,@strSessionId			NVARCHAR(50) = NULL
+	 @InvoiceId			INT = NULL	
+	,@ForDelete			BIT = 0    
+	,@UserId			INT = NULL
+	,@InvoiceDetailId 	INT = NULL
+	,@ysnLogRisk		BIT = 1
+	,@Post				BIT	= 0
+	,@Recap				BIT	= 1
+	,@FromPosting		BIT = 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -50,11 +48,10 @@ BEGIN TRY
 	SET @intInvoiceId = @InvoiceId
 	SET @intUserId = @UserId
 
-	SELECT TOP 1 
-			  @intOriginalInvoiceId = intOriginalInvoiceId
-			, @intSalesOrderId		= intSalesOrderId
-			, @strTransactionType	= strTransactionType
-			, @ysnFromItemContract	= ISNULL(ysnFromItemContract, 0)
+	SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
+			, @intSalesOrderId = intSalesOrderId
+			, @strTransactionType = strTransactionType
+			, @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
 			, @strBatchId			= strBatchId
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
@@ -75,7 +72,7 @@ BEGIN TRY
 
 			IF @FromPosting = 0
 			BEGIN
-				EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @LogTradeFinanceInfo
+				EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete
 			END
 
 			RETURN
@@ -207,7 +204,7 @@ BEGIN TRY
 
 	IF @FromPosting = 0
 	BEGIN
-		EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete, @LogTradeFinanceInfo
+		EXEC dbo.[uspARProcessTradeFinanceLog] @InvoiceIds, @intUserId, 'Invoice', @ForDelete
 	END
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
