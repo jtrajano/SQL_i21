@@ -108,16 +108,16 @@ BEGIN TRY
 				,PONumber
 				,POLineItemNo
 			FROM OPENXML(@idoc, 'root/Header/Line', 2) WITH (
-					DocNo INT '../../DocNo'
+					DocNo BIGINT '../../DocNo'
 					,MsgType NVARCHAR(50) '../../MsgType'
 					,Sender NVARCHAR(50) '../../Sender'
 					,Receiver NVARCHAR(50) '../../Receiver'
 					,RefNo NVARCHAR(50) '../RefNo'
 					,[Status] INT '../Status'
 					,StatusText NVARCHAR(MAX) '../StatusText'
-					,TrackingNo INT
+					,TrackingNo NVARCHAR(50)
 					,PONumber NVARCHAR(50)
-					,POLineItemNo INT
+					,POLineItemNo NVARCHAR(50)
 					)
 
 			SELECT @intMinRowNo = MIN(intRowNo)
