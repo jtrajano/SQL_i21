@@ -224,7 +224,6 @@ DECLARE  @Id									INT
 		,@UpdateAvailableDiscount				BIT
 		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
-		,@TransactionNo							NVARCHAR(50)
 		,@BankId								INT
 		,@BankAccountId							INT
 		,@BorrowingFacilityId					INT
@@ -452,7 +451,6 @@ BEGIN
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
 		,@ImportFormat					= [strImportFormat]
-		,@TransactionNo					= [strTradeFinanceNo]
 		,@BankId						= [intBankId]
 		,@BankAccountId					= [intBankAccountId]
 		,@BorrowingFacilityId			= [intBorrowingFacilityId]
@@ -760,7 +758,6 @@ BEGIN
 			,@ImportFormat					= @ImportFormat
 			,@TruckDriverId					= @TruckDriverId
 			,@TruckDriverReferenceId		= @TruckDriverReferenceId
-			,@TransactionNo					= @TransactionNo
 			,@BankId						= @BankId
 			,@BankAccountId					= @BankAccountId
 			,@BorrowingFacilityId			= @BorrowingFacilityId

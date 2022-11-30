@@ -147,7 +147,6 @@
 	,@PaidCPP								BIT				= 0
 	,@ItemQualityPremium					NUMERIC(18, 6)	= 0
 	,@ItemOptionalityPremium				NUMERIC(18, 6)	= 0
-	,@TransactionNo							NVARCHAR(50)	= NULL
 	,@BankId								INT				= NULL
 	,@BankAccountId							INT				= NULL
 	,@BorrowingFacilityId					INT				= NULL
@@ -527,7 +526,6 @@ BEGIN TRY
 		,[intLineOfBusinessId]
 		,[intICTId]
 		,[intSalesOrderId]
-		,[strTransactionNo]
 		,[intBankId]
 		,[intBankAccountId]
 		,[intBorrowingFacilityId]
@@ -623,7 +621,6 @@ BEGIN TRY
 		,[intLineOfBusinessId]				= @intLineOfBusinessId
 		,[intICTId]							= @intICTId
 		,[intSalespersonId]					= @intSalesOrderId
-		,[strTransactionNo]					= @TransactionNo
 		,[intBankId]						= @BankId
 		,[intBankAccountId]					= @BankAccountId
 		,[intBorrowingFacilityId]			= @BorrowingFacilityId
@@ -637,14 +634,7 @@ BEGIN TRY
 		,[intFreightCompanySegment]			= @FreightCompanySegment
 		,[intFreightLocationSegment]		= @FreightLocationSegment
 		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
-		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
-												THEN @SourcedFrom 
-												ELSE 
-													CASE WHEN ISNULL(@BankAccountId, '') = '' AND ISNULL([dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId), '') <> '' 
-														THEN 'Customer'
-														ELSE NULL
-													END
-											  END
+		,[strSourcedFrom]					= @SourcedFrom
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
 		,[dblSurcharge]						= @Surcharge
