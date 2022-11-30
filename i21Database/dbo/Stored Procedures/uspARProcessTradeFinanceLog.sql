@@ -29,70 +29,84 @@ BEGIN TRY
 			,@intStatusId		INT = 0
 
 	INSERT INTO @TradeFinanceLogs (
-		 strAction
-		,strTransactionType
-		,intTransactionHeaderId
-		,intTransactionDetailId
-		,strTransactionNumber
-		,strTradeFinanceTransaction
-		,dtmTransactionDate
-		,intBankId
-		,intBankAccountId
-		,intBorrowingFacilityId
-		,dblTransactionAmountAllocated
-		,dblTransactionAmountActual
-		,intLimitId
-		,dblLimit
-		--,strBankTradeReference
-		,strBankApprovalStatus
-		,dtmAppliedToTransactionDate
-		,intStatusId
-		,intUserId
-		,intConcurrencyId
-		,dblFinanceQty
-		,dblFinancedAmount
-		,intContractHeaderId
-		,intContractDetailId
-		,intSublimitId
-		,strSublimit
-		,dblSublimit
-		,ysnDeleted
-		,intWarrantStatusId
-		,strWarrantId
-		,intOverrideBankValuationId
+		  strAction
+		, strTransactionType
+		, intTransactionHeaderId
+		, intTransactionDetailId
+		, strTransactionNumber
+		, strTradeFinanceTransaction
+		, dtmTransactionDate
+		, intBankId
+		, intBankAccountId
+		, intBorrowingFacilityId
+		, dblTransactionAmountAllocated
+		, dblTransactionAmountActual
+		, intLimitId
+		, dblLimit
+		, strBankTradeReference
+		, strBankApprovalStatus
+		, dtmAppliedToTransactionDate
+		, intStatusId
+		, intUserId
+		, intConcurrencyId
+		, dblFinanceQty
+		, dblFinancedAmount
+		, intContractHeaderId
+		, intContractDetailId
+		, intSublimitId
+		, strSublimit
+		, dblSublimit
+		, ysnDeleted
 	)
 	SELECT
-		 strAction						= CASE WHEN @ForDelete = 1 THEN 'Deleted ' ELSE ISNULL(ARAL.strActionType, 'Created') END + ' ' + @TransactionType
-		,strTransactionType				= 'Sales'
-		,intTransactionHeaderId			= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
-		,intTransactionDetailId			= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
-		,strTransactionNumber			= CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
-		,strTradeFinanceTransaction		= ARI.strTransactionNo
-		,dtmTransactionDate				= GETDATE()
-		,intBankId						= CASE WHEN @TransactionType = 'Payment' THEN CMBP.intBankId ELSE ARI.intBankId END
-		,intBankAccountId				= CASE WHEN @TransactionType = 'Payment' THEN ARP.intBankAccountId ELSE ARI.intBankAccountId END
-		,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
-		,dblTransactionAmountAllocated	= CTCD.dblLoanAmount
-		,dblTransactionAmountActual		= CTCD.dblLoanAmount
-		,intLimitId						= ARI.intBorrowingFacilityLimitId
-		,dblLimit						= CMBFL.dblLimit
-		--,strBankTradeReference			= ARI.strBankTradeReference
-		,strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
-		,dtmAppliedToTransactionDate	= GETDATE() 
-		,intStatusId					= CASE WHEN @ForDelete = 1 THEN 3 ELSE 1 END
-		,intUserId						= @UserId
-		,intConcurrencyId				= 1 
-		,dblFinanceQty					= dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intOrderUOMId, ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped))
-		,dblFinancedAmount				= CASE WHEN @TransactionType = 'Payment' THEN ARPD.dblPayment ELSE ARID.dblTotal + ARID.dblTotalTax END
-		,intContractHeaderId			= LS.intContractHeaderId
-		,intContractDetailId			= LS.intContractDetailId
-		,intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
-		,strSublimit					= CMBFLD.strLimitDescription
-		,dblSublimit					= CMBFLD.dblLimit
-		,ysnDeleted						= @ForDelete
-		,intWarrantStatus				= LS.intWarrantStatus
-		,strWarrantNo					= LS.strWarrantNo
-		,intOverrideBankValuationId		= ARI.intBankValuationRuleId
+		  strAction						= CASE WHEN @strAction = '' 
+											   THEN CASE WHEN @FromPosting = 1 
+														 THEN CASE WHEN @Post = 1 THEN 'Posted ' ELSE ' Unposted ' END
+														 ELSE
+															CASE WHEN @ForDelete = 1 
+																 THEN 'Deleted ' 
+																 ELSE ISNULL(ARAL.strActionType, 'Created') 
+															END
+														 END   + ' ' + @TransactionType
+											   ELSE @strAction 
+										  END
+		, strTransactionType			= 'Sales'
+		, intTransactionHeaderId		= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
+		, intTransactionDetailId		= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
+		, strTransactionNumber			= CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
+		, strTradeFinanceTransaction	= ARI.strTransactionNo
+		, dtmTransactionDate			= GETDATE()
+		, intBankId						= ARI.intBankId
+		, intBankAccountId				= ARI.intBankAccountId
+		, intBorrowingFacilityId		= ARI.intBorrowingFacilityId
+		, dblTransactionAmountAllocated = CTCD.dblLoanAmount
+		, dblTransactionAmountActual	= CTCD.dblLoanAmount
+		, intLimitId					= ARI.intBorrowingFacilityLimitId
+		, dblLimit						= CMBFL.dblLimit
+		, strBankTradeReference			= ARI.strBankTradeReference
+		, strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
+		, dtmAppliedToTransactionDate	= GETDATE() 
+		, intStatusId					= CASE WHEN @intStatusId = 0
+											   THEN CASE WHEN @FromPosting = 1 
+														 THEN 1
+														 ELSE
+															CASE WHEN @ForDelete = 1 
+																 THEN 3
+																 ELSE 1
+															END
+														 END
+											   ELSE @intStatusId 
+										  END
+		, intUserId						= @UserId
+		, intConcurrencyId				= 1 
+		, dblFinanceQty					= ISNULL(LS.dblNet, ARID.dblShipmentNetWt)
+		, dblFinancedAmount				= ARID.dblTotal + ARID.dblTotalTax
+		, intContractHeaderId			= LS.intContractHeaderId
+		, intContractDetailId			= LS.intContractDetailId
+		, intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
+		, strSublimit					= CMBFLD.strLimitDescription
+		, dblSublimit					= CMBFLD.dblLimit
+		, ysnDeleted					= @ForDelete
 	FROM tblARInvoice ARI WITH (NOLOCK)
 	LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
 	ON ARI.intInvoiceId = ARID.intInvoiceId
@@ -113,8 +127,7 @@ BEGIN TRY
 			 ICIR.strApprovalStatus
 			,ICIRI.intContractHeaderId
 			,ICIRI.intContractDetailId
-			,ICIRIL.intWarrantStatus
-			,ICIRIL.strWarrantNo
+			,dblNet						= ISNULL(LGLD.dblNet, ICIRI.dblNet)
 		FROM tblLGLoadDetailLot LGLD
 		LEFT JOIN tblICInventoryReceiptItemLot ICIRIL ON ICIRIL.intLotId = LGLD.intLotId
 		LEFT JOIN tblICInventoryReceiptItem ICIRI ON ICIRI.intInventoryReceiptItemId = ICIRIL.intInventoryReceiptItemId
