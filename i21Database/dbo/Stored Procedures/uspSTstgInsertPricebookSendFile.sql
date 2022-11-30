@@ -745,7 +745,7 @@ BEGIN
 										END 
 									ELSE  ISNULL(SubCat.strRegProdCode, '40') 
 								END [PaymentSystemsProductCode]
-							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 WHEN IL.ysnFoodStampable = 0 THEN 2048 
+							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 --WHEN IL.ysnFoodStampable = 0 THEN 2048 
 									WHEN CategoryLoc.ysnIdRequiredLiquor = 1 THEN 4 WHEN CategoryLoc.ysnIdRequiredCigarette = 1 THEN 2 
 									WHEN IL.ysnOpenPricePLU = 1 THEN 128
 									ELSE 2048
@@ -879,7 +879,7 @@ BEGIN
 										END 
 									ELSE  ISNULL(SubCat.strRegProdCode, '40') 
 								END [PaymentSystemsProductCode]
-							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 WHEN IL.ysnFoodStampable = 0 THEN 2048 
+							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 --WHEN IL.ysnFoodStampable = 0 THEN 2048 
 									WHEN CategoryLoc.ysnIdRequiredLiquor = 1 THEN 4 WHEN CategoryLoc.ysnIdRequiredCigarette = 1 THEN 2 
 									WHEN IL.ysnOpenPricePLU = 1 THEN 128
 									ELSE 2048
@@ -897,8 +897,8 @@ BEGIN
 									WHEN (@XMLGatewayVersion = '3.4' AND IL.ysnCarWash = 0) THEN 'yes' 
 									ELSE 'yes'
 								END [ProhibitSaleLocationValue]	
-							, CASE WHEN IL.ysnApplyBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
-							, CASE WHEN IL.ysnApplyBlueLaw2 = 1 THEN 210 ELSE NULL END [SalesRestrictionStrategyID2]
+							, CASE WHEN CategoryLoc.ysnBlueLaw1 = 1 THEN 110 ELSE NULL END [SalesRestrictionStrategyID]
+							, CASE WHEN CategoryLoc.ysnBlueLaw2 = 1 THEN 210 ELSE NULL END [SalesRestrictionStrategyID2]
 							, 0 [PriceMethodCode]
 							, IL.strDescription [ReceiptDescription]
 							, IL.ysnFoodStampable [FoodStampableFlg]
