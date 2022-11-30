@@ -224,15 +224,6 @@ DECLARE  @Id									INT
 		,@UpdateAvailableDiscount				BIT
 		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
-		,@BankId								INT
-		,@BankAccountId							INT
-		,@BorrowingFacilityId					INT
-		,@BorrowingFacilityLimitId				INT
-		,@BankReferenceNo						NVARCHAR(100)
-		,@BankTransactionId						NVARCHAR(100)
-		,@LoanAmount							NUMERIC(18, 6)
-		,@BankValuationRuleId					INT
-		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@FreightCharge							NUMERIC(18, 6)
 		,@FreightCompanySegment					INT
 		,@FreightLocationSegment				INT
@@ -450,15 +441,6 @@ BEGIN
         ,@FromProvisional               = ISNULL([ysnFromProvisional], 0)
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
-		,@ImportFormat					= [strImportFormat]
-		,@BankId						= [intBankId]
-		,@BankAccountId					= [intBankAccountId]
-		,@BorrowingFacilityId			= [intBorrowingFacilityId]
-		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
-		,@BankReferenceNo				= [strBankReferenceNo]
-		,@LoanAmount					= [dblLoanAmount]
-		,@BankValuationRuleId			= [intBankValuationRuleId]
-		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@FreightCharge					= [dblFreightCharge]
 		,@FreightCompanySegment			= [intFreightCompanySegment]
 		,@FreightLocationSegment		= [intFreightLocationSegment]
@@ -757,16 +739,6 @@ BEGIN
 			,@SourceId						= @NewSourceId
 			,@ImportFormat					= @ImportFormat
 			,@TruckDriverId					= @TruckDriverId
-			,@TruckDriverReferenceId		= @TruckDriverReferenceId
-			,@BankId						= @BankId
-			,@BankAccountId					= @BankAccountId
-			,@BorrowingFacilityId			= @BorrowingFacilityId
-			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
-			,@BankReferenceNo				= @BankReferenceNo
-			,@BankTransactionId				= @BankTransactionId
-			,@LoanAmount					= @LoanAmount
-			,@BankValuationRuleId			= @BankValuationRuleId
-			,@TradeFinanceComments			= @TradeFinanceComments
 			,@FreightCharge					= @FreightCharge
 			,@FreightCompanySegment			= @FreightCompanySegment
 			,@FreightLocationSegment		= @FreightLocationSegment
