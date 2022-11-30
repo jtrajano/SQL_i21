@@ -227,7 +227,6 @@ DECLARE  @Id									INT
 		,@FreightCharge							NUMERIC(18, 6)
 		,@FreightCompanySegment					INT
 		,@FreightLocationSegment				INT
-		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
 		,@Surcharge								NUMERIC(18, 6)
@@ -577,7 +576,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intShipmentId'
 				SET @SourceTable = 'tblLGShipment'
-				SET @SourcedFrom = 'Logistics'
 			END
 
 			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
@@ -602,7 +600,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intInventoryShipmentId'
 				SET @SourceTable = 'tblICInventoryShipment'
-				SET @SourcedFrom = 'Inventory Shipment'
 			END		
 
 			IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
@@ -615,7 +612,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intLoadId'
 				SET @SourceTable = 'tblLGLoad'
-				SET @SourcedFrom = 'Logistics'
 			END
 
 			IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
@@ -628,7 +624,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intSettleStorageId'
 				SET @SourceTable = 'tblGRSettleStorage'
-				SET @SourcedFrom = 'Settle Storage'
 			END
 
 			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim', 'Settle Storage')
@@ -742,7 +737,6 @@ BEGIN
 			,@FreightCharge					= @FreightCharge
 			,@FreightCompanySegment			= @FreightCompanySegment
 			,@FreightLocationSegment		= @FreightLocationSegment
-			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
 			,@Surcharge						= @Surcharge

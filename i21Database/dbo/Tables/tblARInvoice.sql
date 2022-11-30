@@ -158,7 +158,6 @@
 	[intFreightLocationSegment]			INT												NULL,
 	[intTaxLocationId]					INT												NULL,
 	[strTaxPoint]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
-	[strSourcedFrom]					NVARCHAR (100)	COLLATE Latin1_General_CI_AS	NULL,
 	[dblSurcharge]						NUMERIC(18, 6)									NULL,
 	[intOpportunityId]					INT												NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
