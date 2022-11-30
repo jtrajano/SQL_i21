@@ -151,7 +151,6 @@
 	,@BankId								INT				= NULL
 	,@BankAccountId							INT				= NULL
 	,@BorrowingFacilityId					INT				= NULL
-	,@BorrowingFacilityLimitId				INT				= NULL
 	,@BankReferenceNo						NVARCHAR(100)	= NULL
 	,@BankTransactionId						NVARCHAR(100)	= NULL
 	,@LoanAmount							NUMERIC(18, 6)	= NULL
@@ -443,22 +442,6 @@ FROM tblSMTermPullPoint P
 WHERE P.strPullPoint = 'Company Location'
 ORDER BY P.intTermPullPointId ASC
 
-DECLARE @BorrowingFacilityLimitDetailId INT = NULL
-
-SELECT TOP 1
-	@BorrowingFacilityLimitId = intBorrowingFacilityLimitId
-FROM
-	tblCMBorrowingFacilityLimit
-WHERE intBorrowingFacilityId = @BorrowingFacilityId
-  AND strBorrowingFacilityLimit = 'Receivables'
-
-SELECT TOP 1
-	  @BorrowingFacilityLimitDetailId = intBorrowingFacilityLimitDetailId
-FROM
-	tblCMBorrowingFacilityLimitDetail
-WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
-  AND ysnDefault = 1
-
 DECLARE  @NewId INT
 		,@NewDetailId INT
 		,@AddDetailError NVARCHAR(MAX)
@@ -656,7 +639,6 @@ BEGIN TRY
 		,[intBankId]						= @BankId
 		,[intBankAccountId]					= @BankAccountId
 		,[intBorrowingFacilityId]			= @BorrowingFacilityId
-		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
 		,[strBankTransactionId]				= @BankTransactionId
 		,[dblLoanAmount]					= @LoanAmount
