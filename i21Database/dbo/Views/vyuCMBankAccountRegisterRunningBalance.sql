@@ -11,10 +11,10 @@ WITH cteSum as
 	AVG(CMD.dblExchangeRate) dblExchangeRate, 
 	dblPayment = 
 		CASE WHEN CM.intBankTransactionTypeId IN ( 3, 9, 12, 13, 14, 15, 16, 20, 21, 22, 23 ) THEN CM.dblAmount 
-		WHEN CM.intBankTransactionTypeId IN ( 2, 5,51,52) AND ISNULL(CM.dblAmount,0) < 0 THEN CM.dblAmount * -1 ELSE 0 END                        , 
+		WHEN CM.intBankTransactionTypeId IN ( 2, 5, 25, 26, 51,52) AND ISNULL(CM.dblAmount,0) < 0 THEN CM.dblAmount * -1 ELSE 0 END                        , 
 	dblDeposit = 
 		CASE WHEN CM.intBankTransactionTypeId IN ( 1, 10, 11, 18, 19, 103, 116, 121, 122, 123 ) THEN CM.dblAmount 
-		WHEN CM.intBankTransactionTypeId = 5 AND ISNULL(CM.dblAmount,0) > 0 THEN CM.dblAmount ELSE 0 END
+		WHEN CM.intBankTransactionTypeId IN (5, 25) AND ISNULL(CM.dblAmount,0) > 0 THEN CM.dblAmount ELSE 0 END
 	FROM
 	tblCMBankTransaction CM
 	LEFT JOIN tblCMBankTransactionDetail CMD ON CM.intTransactionId = CMD.intTransactionId
