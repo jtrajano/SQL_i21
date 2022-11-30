@@ -261,7 +261,7 @@ WHERE vs.guiApiUniqueId = @guiApiUniqueId
 
 UPDATE xc
 SET   xc.guiApiUniqueId = @guiApiUniqueId
-	, xc.intEntityLocationId = l.intEntityLocationId
+	-- , xc.intEntityLocationId = l.intEntityLocationId
 	, xc.strVendorCustomerLocation = vs.strVendorCustomerLocation
 	, xc.strVendorShipTo = vs.strVendorShipTo
 	, xc.strVendorSoldTo = vs.strVendorSoldTo
