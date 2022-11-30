@@ -28,7 +28,7 @@ BEGIN TRY
             + CASE WHEN ISNULL(IMP.strLotNumber, '') = '' THEN 'LOT NUMBER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
-    AND IMP.strBatchNo IS NULL -- Having no batch number indicates that the import is an Auction or Non-Action sample
+    AND ISNULL(IMP.strBatchNo, '') = '' -- Having no batch number indicates that the import is an Auction or Non-Action sample
     AND IMP.ysnSuccess = 1
     AND (
         ISNULL(IMP.strSaleYear, '') = ''
@@ -54,7 +54,7 @@ BEGIN TRY
             + CASE WHEN ISNULL(IMP.strSampleTypeName, '') = '' THEN 'SAMPLE TYPE, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
-    AND IMP.strBatchNo IS NOT NULL -- Having no batch number indicates that the import is an Auction or Non-Action sample
+    AND ISNULL(IMP.strBatchNo, '') <> '' -- Having no batch number indicates that the import is an Auction or Non-Action sample
     AND IMP.ysnSuccess = 1
     AND (
         ISNULL(IMP.strBatchNo, '') = ''
@@ -82,7 +82,7 @@ BEGIN TRY
             + CASE WHEN ST.intSampleTypeId IS NULL THEN 'SAMPLE TYPE, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
-    AND IMP.strBatchNo IS NULL
+    AND ISNULL(IMP.strBatchNo, '') = ''
     AND (
         B.intBatchId IS NULL
         OR CL.intCompanyLocationId IS NULL
@@ -112,7 +112,7 @@ BEGIN TRY
             + CASE WHEN E.intEntityId IS NULL THEN 'SUPPLIER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
-    AND IMP.strBatchNo IS NOT NULL
+    AND ISNULL(IMP.strBatchNo, '') <> ''
     AND (
         SY.intSaleYearId IS NULL
         OR CL.intCompanyLocationId IS NULL
