@@ -185,7 +185,6 @@ SELECT
 	,intBorrowingFacilityLimitDetailId	= INV.intBorrowingFacilityLimitDetailId
 	,strBorrowingFacilityLimitDetail	= BFLD.strLimitDescription
 	,strBankReferenceNo					= INV.strBankReferenceNo
-	,strBankTransactionId				= INV.strBankTransactionId
 	,dblLoanAmount						= INV.dblLoanAmount
 	,intBankValuationRuleId				= INV.intBankValuationRuleId
 	,strBankValuationRule				= BVR.strBankValuationRule
@@ -207,7 +206,6 @@ SELECT
 	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
 	,intProfitCenter					= CLOC.intProfitCenter
 	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
-	,strPrintFormat						= INV.strPrintFormat
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
 	,dblPercentage						= INV.dblPercentage

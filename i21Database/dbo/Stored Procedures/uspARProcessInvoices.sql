@@ -459,7 +459,6 @@ BEGIN
 		,@BorrowingFacilityId			= [intBorrowingFacilityId]
 		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
 		,@BankReferenceNo				= [strBankReferenceNo]
-		,@BankTransactionId				= [strBankTransactionId]
 		,@LoanAmount					= [dblLoanAmount]
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]

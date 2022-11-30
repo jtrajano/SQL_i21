@@ -59,17 +59,7 @@ BEGIN TRY
 		, ysnDeleted
 	)
 	SELECT
-		  strAction						= CASE WHEN @strAction = '' 
-											   THEN CASE WHEN @FromPosting = 1 
-														 THEN CASE WHEN @Post = 1 THEN 'Posted ' ELSE ' Unposted ' END
-														 ELSE
-															CASE WHEN @ForDelete = 1 
-																 THEN 'Deleted ' 
-																 ELSE ISNULL(ARAL.strActionType, 'Created') 
-															END
-														 END   + ' ' + @TransactionType
-											   ELSE @strAction 
-										  END
+		  strAction						= @strAction
 		, strTransactionType			= 'Sales'
 		, intTransactionHeaderId		= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
 		, intTransactionDetailId		= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
@@ -194,66 +184,48 @@ BEGIN TRY
 		ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
 		WHERE strTradeFinanceNumber = @strTradeFinanceNumber
 
-			IF (ISNULL(@strTradeFinanceNumber, '') = '')
-			BEGIN
-				EXEC uspSMGetStartingNumber 166, @strNewTradeFinanceNumber OUT
-			END	
+		DELETE FROM @TRFTradeFinance
+		-- This is for direct invoice.
+		INSERT INTO @TRFTradeFinance 
+		(
+			 intTradeFinanceId
+			,strTradeFinanceNumber
+			,strTransactionType
+			,strTransactionNumber
+			,intTransactionHeaderId
+			,intTransactionDetailId
+			,intBankId
+			,intBankAccountId
+			,intBorrowingFacilityId
+			,strRefNo
+			,intOverrideFacilityValuation
+			,strCommnents
+			,dtmCreatedDate
+			,intConcurrencyId
+		)
+		SELECT
+			 intTradeFinanceId				= @intTradeFinanceId
+			,strTradeFinanceNumber			= TFL.strTradeFinanceTransaction
+			,strTransactionType				= TFL.strTransactionType
+			,strTransactionNumber			= TFL.strTransactionNumber
+			,intTransactionHeaderId			= TFL.intTransactionHeaderId
+			,intTransactionDetailId			= TFL.intTransactionDetailId
+			,intBankId						= ARI.intBankId
+			,intBankAccountId				= ARI.intBankAccountId
+			,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
+			,strRefNo						= ARI.strBankReferenceNo
+			,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
+			,strCommnents					= ARI.strTradeFinanceComments
+			,dtmCreatedDate					= GETDATE()
+			,intConcurrencyId				= 1
+		FROM @TradeFinanceLogs TFL
+		INNER JOIN tblARInvoice ARI WITH (NOLOCK)
+		ON ARI.intInvoiceId = TFL.intTransactionHeaderId
+		WHERE ARI.intInvoiceId = @intTransactionHeaderId
 
-			DELETE FROM @TRFTradeFinance
-			-- This is for direct invoice.
-			INSERT INTO @TRFTradeFinance 
-			(
-				 intTradeFinanceId
-				,strTradeFinanceNumber
-				,strTransactionType
-				,strTransactionNumber
-				,intTransactionHeaderId
-				,intTransactionDetailId
-				,intBankId
-				,intBankAccountId
-				,intBorrowingFacilityId
-				,strRefNo
-				,intOverrideFacilityValuation
-				,strCommnents
-				,dtmCreatedDate
-				,intConcurrencyId
-			)
-			SELECT
-				 intTradeFinanceId				= @intTradeFinanceId
-				,strTradeFinanceNumber			= ISNULL(TFL.strTradeFinanceTransaction, @strNewTradeFinanceNumber)
-				,strTransactionType				= TFL.strTransactionType
-				,strTransactionNumber			= TFL.strTransactionNumber
-				,intTransactionHeaderId			= TFL.intTransactionHeaderId
-				,intTransactionDetailId			= TFL.intTransactionDetailId
-				,intBankId						= ARI.intBankId
-				,intBankAccountId				= ARI.intBankAccountId
-				,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
-				,strRefNo						= ARI.strBankReferenceNo
-				,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
-				,strCommnents					= ARI.strTradeFinanceComments
-				,dtmCreatedDate					= GETDATE()
-				,intConcurrencyId				= 1
-			FROM @TradeFinanceLogs TFL
-			INNER JOIN tblARInvoice ARI WITH (NOLOCK)
-			ON ARI.intInvoiceId = TFL.intTransactionHeaderId
-			WHERE ARI.intInvoiceId = @intTransactionHeaderId
-
-			IF (ISNULL(@strTradeFinanceNumber, '') = '')
-			BEGIN
-				UPDATE tblARInvoice 
-				SET strTransactionNo = @strNewTradeFinanceNumber
-				WHERE intInvoiceId = @intTransactionHeaderId
-
-				UPDATE @TradeFinanceLogs 
-				SET strTradeFinanceTransaction = @strNewTradeFinanceNumber
-				WHERE intTransactionHeaderId = @intTransactionHeaderId
-
-				EXEC [uspTRFCreateTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId
-			END	
-			ELSE IF ISNULL(@intTradeFinanceId, 0) <> 0
-			BEGIN
-				EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = 'UPDATE'
-			END
+		IF ISNULL(@intTradeFinanceId, 0) <> 0
+		BEGIN
+			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = 'UPDATE'
 		END
 
 		FETCH NEXT FROM TFLogCursor INTO 
