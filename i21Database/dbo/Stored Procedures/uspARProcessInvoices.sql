@@ -234,7 +234,6 @@ DECLARE  @Id									INT
 		,@LoanAmount							NUMERIC(18, 6)
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
-		,@GoodsStatus							NVARCHAR(100)
 		,@FreightCharge							NUMERIC(18, 6)
 		,@FreightCompanySegment					INT
 		,@FreightLocationSegment				INT
@@ -462,7 +461,6 @@ BEGIN
 		,@LoanAmount					= [dblLoanAmount]
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
-		,@GoodsStatus					= [strGoodsStatus]
 		,@FreightCharge					= [dblFreightCharge]
 		,@FreightCompanySegment			= [intFreightCompanySegment]
 		,@FreightLocationSegment		= [intFreightLocationSegment]
@@ -772,7 +770,6 @@ BEGIN
 			,@LoanAmount					= @LoanAmount
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
-			,@GoodsStatus					= @GoodsStatus
 			,@FreightCharge					= @FreightCharge
 			,@FreightCompanySegment			= @FreightCompanySegment
 			,@FreightLocationSegment		= @FreightLocationSegment

@@ -156,7 +156,6 @@
 	,@LoanAmount							NUMERIC(18, 6)	= NULL
 	,@BankValuationRuleId					INT				= NULL
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
-	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 	,@FreightCharge							NUMERIC(18, 6)	= 0
 	,@FreightCompanySegment					INT				= NULL
@@ -538,69 +537,58 @@ BEGIN TRY
 		,[dblLoanAmount]
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
-		,[strGoodsStatus]
-		,[intBorrowingFacilityLimitDetailId]
-		,[dblFreightCharge]
-		,[intFreightCompanySegment]
-		,[intFreightLocationSegment]
-		,[intDefaultPayToBankAccountId]
-		,[strSourcedFrom]
-		,[intTaxLocationId]
-		,[strTaxPoint]
-		,[dblSurcharge]
-		,[intOpportunityId]
-		,[strPaymentInstructions]
 	)
-	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
-		,[strTransactionType]				= @TransactionType
-		,[strType]							= @Type
-		,[intEntityCustomerId]				= C.[intEntityId]
-		,[intCompanyLocationId]				= @CompanyLocationId
-		,[intAccountId]						= @ARAccountId
-		,[intCurrencyId]					= @DefaultCurrency
-		,[intTermId]						= ISNULL(ISNULL(ISNULL(@TermId, EL.[intTermsId]), @intARTermId), C.[intTermsId])
-		,[intSourceId]						= @SourceId
-		,[intPeriodsToAccrue]				= ISNULL(@PeriodsToAccrue, 1)
-		,[dtmDate]							= CASE WHEN @Type = 'Transport Delivery' THEN ISNULL(@InvoiceDate, @DateOnly) ELSE ISNULL(CAST(@InvoiceDate AS DATE), @DateOnly) END
-		,[dtmDueDate]						= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(ISNULL(@TermId, EL.[intTermsId]), @intARTermId), C.[intTermsId])) AS DATE)))
-		,[dtmShipDate]						= ISNULL(@ShipDate, ISNULL(CAST(@PostDate AS DATE),@DateOnly))
-		,[dtmCalculated]					= CAST(@CalculatedDate AS DATE)
-		,[dtmPostDate]						= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
-		,[dblInvoiceSubtotal]				= @ZeroDecimal
-		,[dblShipping]						= @ZeroDecimal
-		,[dblTax]							= @ZeroDecimal
-		,[dblInvoiceTotal]					= @ZeroDecimal
-		,[dblDiscount]						= @ZeroDecimal
-		,[dblAmountDue]						= @ZeroDecimal
-		,[dblPayment]						= @ZeroDecimal
-		,[intEntitySalespersonId]			= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
-		,[intEntityContactId]				= @EntityContactId
-		,[intFreightTermId]					= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
-		,[intShipViaId]						= ISNULL(@ShipViaId, EL.[intShipViaId])
-		,[intPaymentMethodId]				= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
-		,[strInvoiceOriginId]				= @InvoiceOriginId
-		,[strMobileBillingShiftNo]			= @MobileBillingShiftNo
-		,[strPONumber]						= @PONumber
-		,[strBOLNumber]						= @BOLNumber
-		,[strPaymentInfo]					= @PaymentInfo
-		,[strComments]						= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
-		,[strFooterComments]				= CASE WHEN ISNULL(@FooterComment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0) ELSE @FooterComment END
-		,[intShipToLocationId]				= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
-		,[strShipToLocationName]			= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
-		,[strShipToAddress]					= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
-		,[strShipToCity]					= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
-		,[strShipToState]					= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
-		,[strShipToZipCode]					= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
-		,[strShipToCountry]					= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
-		,[intBillToLocationId]				= ISNULL(@BillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
-		,[strBillToLocationName]			= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
-		,[strBillToAddress]					= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
-		,[strBillToCity]					= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
-		,[strBillToState]					= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
-		,[strBillToZipCode]					= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
-		,[strBillToCountry]					= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
-		,[strImportFormat]					= @ImportFormat
-		,[ysnPosted]						= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') 
+	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
+		,[strTransactionType]			= @TransactionType
+		,[strType]						= @Type
+		,[intEntityCustomerId]			= C.[intEntityId]
+		,[intCompanyLocationId]			= @CompanyLocationId
+		,[intAccountId]					= @ARAccountId
+		,[intCurrencyId]				= @DefaultCurrency
+		,[intTermId]					= ISNULL(ISNULL(@TermId, C.[intTermsId]), EL.[intTermsId])
+		,[intSourceId]					= @SourceId
+		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
+		,[dtmDate]						= CASE WHEN @Type = 'Transport Delivery' THEN ISNULL(@InvoiceDate, @DateOnly) ELSE ISNULL(CAST(@InvoiceDate AS DATE), @DateOnly) END
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
+		,[dtmShipDate]					= ISNULL(@ShipDate, ISNULL(CAST(@PostDate AS DATE),@DateOnly))
+		,[dtmCalculated]				= CAST(@CalculatedDate AS DATE)
+		,[dtmPostDate]					= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
+		,[dblInvoiceSubtotal]			= @ZeroDecimal
+		,[dblShipping]					= @ZeroDecimal
+		,[dblTax]						= @ZeroDecimal
+		,[dblInvoiceTotal]				= @ZeroDecimal
+		,[dblDiscount]					= @ZeroDecimal
+		,[dblAmountDue]					= @ZeroDecimal
+		,[dblPayment]					= @ZeroDecimal
+		
+		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
+		,[intEntityContactId]			= @EntityContactId
+		,[intFreightTermId]				= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
+		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
+		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
+		,[strInvoiceOriginId]			= @InvoiceOriginId
+		,[strMobileBillingShiftNo]		= @MobileBillingShiftNo
+		,[strPONumber]					= @PONumber
+		,[strBOLNumber]					= @BOLNumber
+		,[strPaymentInfo]				= @PaymentInfo
+		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
+		,[strFooterComments]			= CASE WHEN ISNULL(@FooterComment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0) ELSE @FooterComment END
+		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
+		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
+		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
+		,[strShipToCity]				= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
+		,[strShipToState]				= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
+		,[strShipToZipCode]				= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
+		,[strShipToCountry]				= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
+		,[intBillToLocationId]			= ISNULL(@BillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
+		,[strBillToLocationName]		= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
+		,[strBillToAddress]				= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
+		,[strBillToCity]				= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
+		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
+		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
+		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
+		,[strImportFormat]				= @ImportFormat
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') 
 													THEN @Posted 
 												WHEN (@TransactionType IN ('Invoice') AND @ImportedFromOrigin = 1) 
 													THEN  1 
@@ -644,7 +632,6 @@ BEGIN TRY
 		,[dblLoanAmount]					= @LoanAmount
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments
-		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
 		,[dblFreightCharge]					= @FreightCharge
 		,[intFreightCompanySegment]			= @FreightCompanySegment
