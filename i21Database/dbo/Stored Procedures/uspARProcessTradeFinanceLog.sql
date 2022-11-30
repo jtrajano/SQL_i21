@@ -66,63 +66,16 @@ SELECT
 	, dblFinancedAmount				= ARID.dblTotal
 	, intContractHeaderId			= ARID.intContractHeaderId
 	, intContractDetailId			= ARID.intContractDetailId
-FROM tblARInvoice ARI WITH (NOLOCK)
-INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) 
-ON (ARI.intInvoiceId = ARID.intInvoiceId AND ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds))
-AND (
-	ISNULL(ARI.intBankId, 0) <> 0
-	OR ISNULL(ARI.intBankAccountId, 0) <> 0
-	OR ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
-	OR ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
-	OR ISNULL(ARI.strBankReferenceNo, '') <> ''
-	OR ISNULL(ARI.dblLoanAmount, 0) <> 0
-	OR ISNULL(ARI.strTransactionNo, '') <> ''
-)
-LEFT JOIN tblARPaymentDetail ARPD ON ARI.intInvoiceId = ARPD.intInvoiceId
-LEFT JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
+FROM tblARInvoiceDetail ARID WITH (NOLOCK)
+INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.intInvoiceId = ARI.intInvoiceId
+INNER JOIN @PaymentStaging PS ON PS.intInvoiceId = ARID.intInvoiceId
 LEFT JOIN tblCTContractDetail CTCD on CTCD.intContractDetailId = ARID.intContractDetailId
 LEFT JOIN tblCTContractHeader CTCH on CTCH.intContractHeaderId = CTCD.intContractHeaderId
 LEFT JOIN tblCMBorrowingFacilityLimit CMBFL ON ARI.intBorrowingFacilityLimitId = CMBFL.intBorrowingFacilityLimitId
-OUTER APPLY (
-	SELECT TOP 1 strActionType
-	FROM tblARAuditLog
-	WHERE strRecordNo COLLATE SQL_Latin1_General_CP1_CS_AS = ARI.strInvoiceNumber
-	ORDER BY intAuditLogId DESC
-) ARAL
-
-DECLARE  @strTradeFinanceNumber NVARCHAR(100)
-		,@dtmTransactionDate DATETIME
-		,@strNegateAction NVARCHAR(100)
-DECLARE TFLogCursor CURSOR LOCAL FAST_FORWARD
-FOR
-SELECT 
-	 strTradeFinanceTransaction
-	,dtmTransactionDate
-	,strAction
-FROM @TradeFinanceLogs
-
-OPEN TFLogCursor
-FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @dtmTransactionDate, @strNegateAction
-WHILE @@FETCH_STATUS = 0
-BEGIN
-	DECLARE @strImpactedModule NVARCHAR(100) = 'Sales'
-
-	SELECT TOP 1 @strImpactedModule = strTransactionType
-	FROM tblTRFTradeFinanceLog
-	WHERE strTradeFinanceTransaction = @strTradeFinanceNumber
-	ORDER BY dtmTransactionDate DESC
-
-	EXEC uspTRFNegateTFLogFinancedQtyAndAmount
-		 @strTradeFinanceNumber = @strTradeFinanceNumber
-		,@strTransactionType	= @strImpactedModule
-		,@strLimitType			= NULL
-		,@dtmTransactionDate	= @dtmTransactionDate
-		,@strAction				= @strNegateAction
-
-	FETCH NEXT FROM TFLogCursor INTO @strTradeFinanceNumber, @dtmTransactionDate, @strNegateAction
-END
-CLOSE TFLogCursor
-DEALLOCATE TFLogCursor
+WHERE ISNULL(ARI.intBankId, 0) <> 0
+  AND ISNULL(ARI.intBankAccountId, 0) <> 0
+  AND ISNULL(ARI.intBorrowingFacilityId, 0) <> 0
+  AND ISNULL(ARI.intBorrowingFacilityLimitId, 0) <> 0
 
 EXEC uspTRFLogTradeFinance @TradeFinanceLogs
 
