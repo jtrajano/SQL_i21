@@ -115,7 +115,7 @@ SELECT	i21.intBankAccountId
 		,i21.strPaymentInstructions
 		--Advanced Bank Recon
 		,i21.strNickname
-
+		,dtmLastReconciliationDate = BankRecon.dtmLastModified
 		-- The following fields are from the origin system		
 		,apcbk_comment = CAST(NULL AS NVARCHAR(30))	 COLLATE Latin1_General_CI_AS -- CHAR (30)
 		,apcbk_password = CAST(NULL AS NVARCHAR(16)) COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -148,6 +148,12 @@ FROM	dbo.tblCMBankAccount i21
 LEFT JOIN dbo.tblEMEntity E on E.intEntityId = i21.intResponsibleEntityId
 LEFT JOIN dbo.tblCMBankAccountType BankAccountType ON BankAccountType.intBankAccountTypeId = i21.intBankAccountTypeId
 LEFT JOIN dbo.tblRKBrokerageAccount Brokerage ON Brokerage.intBrokerageAccountId = i21.intBrokerageAccountId
+OUTER APPLY (
+	SELECT TOP 1 CMBR.dtmLastModified 
+	FROM dbo.tblCMBankReconciliation CMBR 
+	WHERE CMBR.intBankAccountId = i21.intBankAccountId 
+	ORDER BY dtmLastModified DESC
+) BankRecon
 GO
 --Create trigger that will insert on the main table
 
