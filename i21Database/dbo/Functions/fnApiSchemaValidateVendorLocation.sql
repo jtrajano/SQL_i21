@@ -195,6 +195,7 @@ BEGIN
 	WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
 		AND NULLIF(vts.strLocationName, '') IS NOT NULL
+		AND NULLIF(vts.strFarmFieldNumber, '') IS NOT NULL
 
 	RETURN
 END
