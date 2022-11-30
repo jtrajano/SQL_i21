@@ -806,7 +806,7 @@ BEGIN
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 29 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 28
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 29
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
@@ -833,7 +833,7 @@ BEGIN
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 30 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 28
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 30
   UPDATE [dbo].[tblSMImportFileColumnDetail]
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
