@@ -107,7 +107,7 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
 
 	CONSTRAINT [PK_tblQMImportCatalogue_intImportCatalogueId] PRIMARY KEY CLUSTERED ([intImportCatalogueId] ASC),
     CONSTRAINT [FK_tblQMImportCatalogue_tblQMImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblQMImportLog] ([intImportLogId]),
-    CONSTRAINT [FK_tblQMImportCatalogue_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId])
+    --CONSTRAINT [FK_tblQMImportCatalogue_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId])
 )
 GO
 

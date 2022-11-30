@@ -92,7 +92,7 @@ BEGIN TRY
 				,[Status]
 				,BuyingOrderNo
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
-					DocNo INT '../DocNo'
+					DocNo BIGINT '../DocNo'
 					,Sender NVARCHAR(50) '../Sender'
 					,ContractNo NVARCHAR(50)
 					,ContractDate DATETIME
