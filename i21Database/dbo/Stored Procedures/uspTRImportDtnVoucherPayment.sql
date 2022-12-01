@@ -1,8 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRImportDtnVoucherPayment]
 	@intBillId INT,
 	@intImportLoadId INT,
-	@intImportDtnDetailId INT
+	@intImportDtnDetailId INT,
+	@strErrMsg NVARCHAR(MAX) OUT
+
 AS
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS OFF
 SET NOCOUNT ON
@@ -338,27 +341,27 @@ BEGIN
 
 		IF EXISTS(SELECT TOP 1 1 FROM @PaymentSchedule)
 		BEGIN
-			DECLARE @error NVARCHAR(MAX)
-			EXEC [dbo].[uspAPAddPaymentSchedules]
-				@paySchedules = @PaymentSchedule
-				,@error = @error OUTPUT
-
-			IF(@error IS NOT NULL)
-			BEGIN
-				RAISERROR(@error, 16, 1)  
-			END
+			BEGIN TRY
+				DECLARE @error NVARCHAR(MAX)
+				EXEC [dbo].[uspAPAddPaymentSchedules]
+					@paySchedules = @PaymentSchedule
+					,@error = @error OUTPUT
+				
+				SET @strErrMsg = @error
+			END TRY
+			BEGIN CATCH
+				SELECT @ErrorMessage = ERROR_MESSAGE(),
+					@ErrorSeverity = ERROR_SEVERITY(),
+					@ErrorState = ERROR_STATE();
+				SET @strErrMsg = @ErrorMessage
+			END CATCH
 		END		
 	END TRY
 	BEGIN CATCH
-		SELECT 
-			@ErrorMessage = ERROR_MESSAGE(),
+		SELECT @ErrorMessage = ERROR_MESSAGE(),
 			@ErrorSeverity = ERROR_SEVERITY(),
 			@ErrorState = ERROR_STATE();
-		RAISERROR (
-			@ErrorMessage, -- Message text.
-			@ErrorSeverity, -- Severity.
-			@ErrorState -- State.
-		)
+		SET @strErrMsg = @ErrorMessage
 	END CATCH
 
 END	
