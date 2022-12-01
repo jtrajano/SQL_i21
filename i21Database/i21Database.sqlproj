@@ -395,6 +395,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
+    <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
