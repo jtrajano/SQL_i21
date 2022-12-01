@@ -32,6 +32,7 @@ BEGIN TRY
 	DECLARE @dblStoragePaid DECIMAL(30,20)
 	DECLARE @dblStoragePaid DECIMAL(30,20)
 	DECLARE @dblNewStorageDue DECIMAL(18,6)
+	DECLARE @dblNewStorageDue2 DECIMAL(18,6)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
@@ -90,6 +91,7 @@ BEGIN TRY
 			SET @intItemUOMId = NULL
 			SET @intHistoryStorageId = NULL
 			SET @dblStorageDue = NULL
+			SET @dblNewStorageDue2 = NULL
 
 			SELECT 
 				@intCustomerStorageId	= intCustomerStorageId
@@ -105,10 +107,12 @@ BEGIN TRY
 				,@intCurrencyId	= ISNULL(intCurrencyId, (SELECT intDefaultCurrencyId FROM tblSMCompanyPreference))
 				,@intItemUOMId	= ISNULL(intItemUOMId, (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = @intItemId AND ysnStockUnit = 1))
 				,@dblStorageDue	= dblStorageDue
+				,@dblStoragePaid= dblStoragePaid
 			FROM tblGRCustomerStorage 
 			WHERE intCustomerStorageId = @intCustomerStorageId
 
-			UPDATE @BillStorages SET dblNewStorageDue = @dblNewStorageDue - @dblStoragePaid WHERE intCustomerStorageId = @intCustomerStorageId
+			SET @dblNewStorageDue2 = @dblNewStorageDue
+			UPDATE @BillStorages SET dblNewStorageDue = @dblNewStorageDue - @dblStoragePaid WHERE intCustomerStorageId = @intCustomerStorageId			
 
 			SELECT TOP 1
 				@intStorageChargeItemId		= intItemId
@@ -228,7 +232,7 @@ BEGIN TRY
 							,[intInvoiceId]				= AR.intInvoiceId							
 							,[dblUnits]					= ARD.dblQtyOrdered
 							,[dtmHistoryDate]			= @dtmStorageChargeDate
-							,[dblPaidAmount]			= ARD.dblPrice
+							,[dblPaidAmount]			= @dblNewStorageDue2--ARD.dblPrice
 							,[ysnPost]					= 1
 							,[intTransactionTypeId]		= 6
 							,[strType]					= 'Invoice'
