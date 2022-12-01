@@ -121,9 +121,11 @@ SELECT
     Reason.strReasonCode,
     LOT.strLotNumber,
     LOT.intLotId,
-    A.intLocationId
+    A.intLocationId,
+    Garden.strGardenMark
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
+LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = B.intGardenMarkId
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  
