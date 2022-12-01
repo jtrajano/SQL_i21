@@ -106,6 +106,8 @@ BEGIN TRY
 			FROM tblGRCustomerStorage 
 			WHERE intCustomerStorageId = @intCustomerStorageId
 
+			UPDATE @BillStorages SET dblNewStorageDue = @dblNewStorageDue - @dblStoragePaid WHERE intCustomerStorageId = @intCustomerStorageId
+
 			SELECT TOP 1
 				@intStorageChargeItemId		= intItemId
 				,@strStorageChargeItemDesc	= strDescription
