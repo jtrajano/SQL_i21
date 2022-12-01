@@ -26,9 +26,9 @@ SELECT
     ,[intQtyItemUOMId] = QIUOM.intItemUOMId
     ,[intQtyUnitMeasureId] = QUM.intUnitMeasureId
     ,[strQtyUnitMeasure] = QUM.strSymbol
-    ,S.dblGrossWeight
-    ,S.dblTareWeight
-    ,S.dblNetWeight
+    ,[dblGrossWeight] = WQTY.dblWeight
+    ,[dblTareWeight] = CAST(0 AS DECIMAL(18, 6))
+    ,[dblNetWeight] = WQTY.dblWeight
     ,[intWeightItemUOMId] = WIUOM.intItemUOMId
     ,[strWeightUnitMeasure] = WUM.strSymbol
     ,[dblWeightPerUnit] = ISNULL(dbo.fnLGGetItemUnitConversion(I.intItemId, QIUOM.intItemUOMId, WUM.intUnitMeasureId), 0)
@@ -95,6 +95,9 @@ OUTER APPLY (
     FROM tblSMCompanyPreference CP
     INNER JOIN tblSMCurrency C ON C.intCurrencyID = CP.intDefaultCurrencyId
 ) DFC
+OUTER APPLY (
+    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, S.dblRepresentingQty)
+) WQTY
 
 GO
 
