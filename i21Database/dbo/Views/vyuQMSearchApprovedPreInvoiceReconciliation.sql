@@ -23,6 +23,9 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , strPreInvoiceGrade					= CRD.strPreInvoiceGrade
      , strChopNo							= CRD.strChopNo
      , strPreInvoiceChopNo					= CRD.strPreInvoiceChopNo
+     , intSampleId                                = CRD.intSampleId
+     , strSampleNumber                            = S.strSampleNumber
+
 	 --NOT MAPPED
      , intSaleYear							= BD.intSaleYear
      , strBuyingCenter						= CL.strLocationName
@@ -54,6 +57,7 @@ FROM tblQMCatalogueReconciliationDetail CRD
 INNER JOIN tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId
 INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = CRD.intBillDetailId
 INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
+INNER JOIN tblQMSample S ON CRD.intSampleId = S.intSampleId
 LEFT JOIN tblEMEntity E ON B.intEntityVendorId = E.intEntityId
 LEFT JOIN tblSMCompanyLocation CL ON B.intShipToId = CL.intCompanyLocationId
 LEFT JOIN tblICStorageLocation SL ON BD.intStorageLocationId = SL.intStorageLocationId
