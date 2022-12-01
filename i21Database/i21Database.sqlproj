@@ -1183,6 +1183,7 @@
     <Build Include="dbo\Views\vyuHDLineOfBusiness.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByProject.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\41_UpdateSourceType.sql" />
+    <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
