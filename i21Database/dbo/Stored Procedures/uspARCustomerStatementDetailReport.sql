@@ -450,6 +450,29 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , strBOLNumber			= I.strBOLNumber			
 FROM tblARInvoice I
 INNER JOIN #CUSTOMERS CUSTOMER ON I.intEntityCustomerId = CUSTOMER.intEntityCustomerId  
+LEFT JOIN (
+    SELECT PD.intInvoiceId
+         , PD.strTransactionNumber
+         , dblAmountPaid = ABS(SUM(PD.dblPayment + PD.dblDiscount + PD.dblWriteOffAmount))
+    FROM tblARPaymentDetail PD
+    INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId
+    WHERE P.ysnPosted = 1
+      AND P.ysnInvoicePrepayment = 0
+	  AND P.dtmDatePaid <= @dtmDateTo
+    GROUP BY PD.intInvoiceId, PD.strTransactionNumber
+
+   UNION ALL
+
+   SELECT PD.intInvoiceId         
+         , strTransactionNumber = I.strInvoiceNumber
+         , dblAmountPaid = ABS(SUM(PD.dblPayment + PD.dblDiscount))
+    FROM tblAPPaymentDetail PD
+    INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId
+    INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+    WHERE P.ysnPosted = 1    
+	AND P.dtmDatePaid <= @dtmDateTo
+    GROUP BY PD.intInvoiceId, I.strInvoiceNumber
+) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId AND I.strInvoiceNumber = PAYMENT.strTransactionNumber
 WHERE I.ysnPosted = 1   
 AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))   
 AND I.dtmPostDate <= @dtmDateTo  
