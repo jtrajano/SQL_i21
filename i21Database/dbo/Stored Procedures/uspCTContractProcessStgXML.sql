@@ -3170,7 +3170,7 @@ BEGIN TRY
 									WHEN CD.dblQuantity <> CD1.dblQuantity
 										AND CD.intItemUOMId = CD1.intItemUOMId
 										THEN ISNULL(CD.dblBalance, 0) + (CD1.dblQuantity - CD.dblQuantity)
-									ELSE CD1.dblQuantity
+									ELSE CD.dblBalance
 									END
 								)
 							,dblNetWeight = CD1.dblNetWeight
