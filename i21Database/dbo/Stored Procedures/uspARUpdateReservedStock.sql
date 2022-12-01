@@ -43,7 +43,7 @@ SELECT [intItemId]			= ARID.[intItemId]
 	,[intLotId]				= ARIDL.intLotId
 	,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
 	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
+	,[dblQty]				= ISNULL(ARIDL.dblQuantityShipped, ISNULL(ARID.[dblQtyShipped], 0)) * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 	,[intTransactionId]		= @InvoiceId
 	,[strTransactionId]		= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]	= @TransactionTypeId
@@ -97,7 +97,7 @@ SELECT [intItemId]			= ICGIS.[intComponentItemId]
 	,[intLotId]				= ARIDL.intLotId
 	,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
 	,[intStorageLocationId]	= ARID.[intStorageLocationId]
-	,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
+	,[dblQty]				= ISNULL(ARIDL.dblQuantityShipped, ISNULL(ARID.[dblQtyShipped], 0)) * ISNULL(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 	,[intTransactionId]		= @InvoiceId
 	,[strTransactionId]		= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]	= @TransactionTypeId
@@ -144,7 +144,7 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
 				
 		)
 			
-IF (ISNULL(@FromPosting, 0 ) = 0)
+IF (ISNULL(@FromPosting, 0) = 0) 
 	BEGIN		
 		DECLARE @strInvalidItemNo AS NVARCHAR(50) 		
 		DECLARE @intInvalidItemId AS INT
