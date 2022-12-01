@@ -99,5 +99,12 @@ CREATE TYPE MFBatchTableType AS TABLE
 	strVoyage NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strVessel NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intLocationId INT,
-	intMixingUnitLocationId int
+	intMixingUnitLocationId INT
+	,dblOriginalTeaTaste   NUMERIC(18,6)  NULL
+	,dblOriginalTeaHue   NUMERIC(18,6)  NULL
+	,dblOriginalTeaIntensity NUMERIC(18,6)  NULL
+	,dblOriginalTeaMouthfeel  NUMERIC(18,6)  NULL
+	,dblOriginalTeaAppearance  NUMERIC(18,6)  NULL
+	,dblOriginalTeaVolume  NUMERIC(18,6)  NULL
+	,dblOriginalTeaMoisture  NUMERIC(18,6)  NULL
 )

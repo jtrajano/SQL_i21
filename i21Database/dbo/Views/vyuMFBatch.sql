@@ -123,6 +123,13 @@ SELECT
     LOT.intLotId,
     A.intLocationId,
     Garden.strGardenMark
+    ,A.dblOriginalTeaTaste  
+	,A.dblOriginalTeaHue 
+	,A.dblOriginalTeaIntensity
+	,A.dblOriginalTeaMouthfeel
+	,A.dblOriginalTeaAppearance
+	,A.dblOriginalTeaVolume
+	,A.dblOriginalTeaMoisture
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = B.intGardenMarkId

@@ -206,6 +206,13 @@ BEGIN
 			,strVessel = T.strVessel
 			,intConcurrencyId = intConcurrencyId + 1
 			,intMixingUnitLocationId=T.intMixingUnitLocationId
+			,dblOriginalTeaTaste		= T.dblOriginalTeaTaste
+			,dblOriginalTeaHue			= T.dblOriginalTeaHue
+			,dblOriginalTeaIntensity	= T.dblOriginalTeaIntensity	
+			,dblOriginalTeaMouthfeel	= T.dblOriginalTeaMouthfeel	
+			,dblOriginalTeaAppearance	= T.dblOriginalTeaAppearance
+			,dblOriginalTeaVolume		= T.dblOriginalTeaVolume
+			,dblOriginalTeaMoisture		= T.dblOriginalTeaMoisture		
 		FROM tblMFBatch A
 		OUTER APPLY (
 			SELECT *
@@ -322,6 +329,13 @@ BEGIN
 			,intConcurrencyId
 			,intLocationId
 			,intMixingUnitLocationId
+			,dblOriginalTeaTaste
+			,dblOriginalTeaHue
+			,dblOriginalTeaIntensity
+			,dblOriginalTeaMouthfeel
+			,dblOriginalTeaAppearance
+			,dblOriginalTeaVolume
+			,dblOriginalTeaMoisture
 			)
 		SELECT (
 				CASE 
@@ -428,6 +442,13 @@ BEGIN
 			,1
 			,intLocationId
 			,intMixingUnitLocationId
+			,dblOriginalTeaTaste
+			,dblOriginalTeaHue
+			,dblOriginalTeaIntensity
+			,dblOriginalTeaMouthfeel
+			,dblOriginalTeaAppearance
+			,dblOriginalTeaVolume
+			,dblOriginalTeaMoisture
 		FROM @MFBatchTableType
 		WHERE intId = @id
 			--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult, intBatchId, dtmDate)
