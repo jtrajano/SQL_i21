@@ -54,8 +54,8 @@ INNER JOIN tblSOSalesOrderDetail SOD
 ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICItem I
 ON SOD.intItemId = I.intItemId
-WHERE ISNULL(SOD.intStorageLocationId, 0) = 0
-AND ISNULL(SOD.intSubLocationId, 0) > 0
+WHERE ISNULL(SOD.intStorageLocationId, 0) > 0
+AND ISNULL(SOD.intSubLocationId, 0) = 0
 AND SO.intSalesOrderId = @SalesOrderId
 
 IF (@strItemBlankStorageLocation IS NOT NULL)
