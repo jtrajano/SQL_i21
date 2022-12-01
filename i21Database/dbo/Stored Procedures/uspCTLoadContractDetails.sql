@@ -404,10 +404,29 @@ BEGIN TRY
 		, strIndex = dbo.[fnCTGetSeqDisplayField](CD.intIndexId, 'tblCTIndex')
 		, CS.strContractStatus
 		, strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open')
-		, strFinancialStatus = CASE WHEN CT.intContractTypeId = 1 THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
-														WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
-														ELSE CASE WHEN BDB.intBillId IS NOT NULL THEN 'Purchase Invoice Received' END END
-				ELSE CD.strFinancialStatus END
+		, strFinancialStatus = (
+			CASE
+			WHEN CT.intContractTypeId = 1
+			THEN
+				CASE
+				WHEN CD.ysnFinalPNL = 1
+				THEN 'Final P&L Created'
+				WHEN CD.ysnProvisionalPNL = 1
+				THEN 'Provisional P&L Created'
+				ELSE
+					CASE
+					WHEN BDB.intTransactionType IS NOT NULL
+					THEN
+						case
+						when BDB.intTransactionType = 1
+						then 'Purchase Invoice Received'
+						else 'Prepayment - Purchase Invoice Received'
+						end
+					END
+				END
+			ELSE CD.strFinancialStatus
+			END
+		)
 		, strFutureMarket = MA.strFutMarketName
 		, strFutureMonth = REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ')
 		, dblConversionFactor = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1)
@@ -562,8 +581,19 @@ BEGIN TRY
 		AND FRM.strDestinationCity = DestinationPort.strCity
 		AND FRM.intType = 2 -- General type
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId and BD.intItemId = CD.intItemId
-	LEFT JOIN tblAPBill BDB on BDB.intBillId = BD.intBillId and BDB.intTransactionType in (1,2)
+	outer apply (
+		select top 1
+			b.intTransactionType
+		from
+			tblAPBillDetail  bd
+			join tblAPBill b on b.intBillId = bd.intBillId
+		where
+			bd.intContractDetailId = CD.intContractDetailId
+			and bd.intItemId = CD.intItemId
+			and b.intTransactionType in (1,2)
+		order by
+			b.intTransactionType
+	) BDB
     outer apply (
         select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
     ) AD
