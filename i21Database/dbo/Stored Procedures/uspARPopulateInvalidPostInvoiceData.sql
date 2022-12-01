@@ -1451,8 +1451,8 @@ BEGIN
  
 	SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
 	FROM ##ARPostInvoiceDetail I
-	WHERE ISNULL(I.intStorageLocationId, 0) = 0
-	AND ISNULL(I.intSubLocationId, 0) > 0
+	WHERE ISNULL(I.intStorageLocationId, 0) > 0
+	AND ISNULL(I.intSubLocationId, 0) = 0
  
 	IF (@strItemBlankStorageLocation IS NOT NULL)
 	BEGIN
