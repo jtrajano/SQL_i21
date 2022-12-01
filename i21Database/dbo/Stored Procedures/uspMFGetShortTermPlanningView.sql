@@ -42,7 +42,7 @@ BEGIN
 		FROM tblICItem I
 		WHERE I.intCategoryId = @intCategoryId
 			AND I.strStatus = 'Active'
-			AND I.strItemNo <>'Futures Contract'
+			AND I.strItemNo <> 'Futures Contract'
 	END
 	ELSE
 	BEGIN
@@ -177,7 +177,8 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	JOIN @tblMFItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intWeightUOMId
-	WHERE L.dblQty > 0 AND L.intLotStatusId=1
+	WHERE L.dblQty > 0
+		AND L.intLotStatusId = 1
 	GROUP BY L.intItemId
 		,L.intLocationId
 
@@ -195,7 +196,8 @@ BEGIN
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = L.intLocationId
 	JOIN @tblMFItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intWeightUOMId
-	WHERE L.dblQty > 0 AND L.intLotStatusId<>1
+	WHERE L.dblQty > 0
+		AND L.intLotStatusId <> 1
 	GROUP BY L.intItemId
 		,L.intLocationId
 
@@ -241,6 +243,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
 		AND L.intShipmentType = 1
+		AND IsNULL(L.ysnCancelled, 0) <> 1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
@@ -294,8 +297,9 @@ BEGIN
 			CASE 
 				WHEN S.intLoadDetailContainerLinkId IS NOT NULL
 					THEN 6 -->Approved Qty
-				When LW1.intLoadWarehouseId is not null Then  7 -->Not Approved Qty
-				Else 0
+				WHEN LW1.intLoadWarehouseId IS NOT NULL
+					THEN 7 -->Not Approved Qty
+				ELSE 0
 				END
 			) AS intAttributeId
 		,LDCL.intLoadContainerId
@@ -303,6 +307,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
 		AND L.intShipmentType = 1
+		AND IsNULL(L.ysnCancelled, 0) <> 1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
@@ -315,6 +320,11 @@ BEGIN
 		SELECT TOP 1 LW.intLoadWarehouseId
 		FROM tblLGLoadWarehouse LW
 		WHERE LW.intLoadId = L.intLoadId
+			AND NOT EXISTS (
+				SELECT Top 1 1
+				FROM tblMFStorageLocationExclude SE
+				WHERE SE.intSubLocationId = LW.intSubLocationId
+				)
 		) LW1
 	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 		AND SS.intContractStatusId IN (
@@ -337,10 +347,12 @@ BEGIN
 			CASE 
 				WHEN S.intLoadDetailContainerLinkId IS NOT NULL
 					THEN 6 -->Approved Qty
-				When LW1.intLoadWarehouseId is not null Then  7 -->Not Approved Qty
-				Else 0
+				WHEN LW1.intLoadWarehouseId IS NOT NULL
+					THEN 7 -->Not Approved Qty
+				ELSE 0
 				END
-			)>0
+			) > 0
+
 	INSERT INTO #tblMFShortTermDemand (
 		intItemId
 		,intLocationId
@@ -382,6 +394,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
 		AND L.intShipmentType = 1
+		AND IsNULL(L.ysnCancelled, 0) <> 1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
@@ -394,7 +407,6 @@ BEGIN
 		FROM tblLGLoadWarehouse LW
 		WHERE LW.intLoadId = L.intLoadId
 		) LW1
-	
 	WHERE LDCL.dblQuantity - (ISNULL(LDCL.dblReceivedQty, 0)) > 0
 		AND SS.intContractStatusId IN (
 			1
@@ -450,6 +462,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
 		AND L.intShipmentType = 1
+		AND IsNULL(L.ysnCancelled, 0) <> 1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
@@ -459,7 +472,7 @@ BEGIN
 			1
 			,4
 			)
-		AND LDCL.dblQuantity-ISNULL(LDCL.dblReceivedQty, 0)>0
+		AND LDCL.dblQuantity - ISNULL(LDCL.dblReceivedQty, 0) > 0
 		AND NOT EXISTS (
 			SELECT *
 			FROM #tblMFPreShortTermDemand PS
@@ -499,7 +512,8 @@ BEGIN
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight - IsNULL(dblNet, 0))) AS dblQty
 		,12 AS intAttributeId -->Late Open Contracts
 	FROM tblCTContractDetail SS
-	JOIN tblCTContractHeader CH on CH.intContractHeaderId =SS.intContractHeaderId AND CH.intContractTypeId =1
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
+		AND CH.intContractTypeId = 1
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
@@ -507,7 +521,8 @@ BEGIN
 		SELECT Sum(LD.dblNet) dblNet
 			,Sum(LD.dblQuantity) dblQuantity
 		FROM tblLGLoadDetail LD
-		JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			AND IsNULL(L.ysnCancelled, 0) = 0
 		WHERE LD.intPContractDetailId = SS.intContractDetailId
 		) C2
 	WHERE SS.intContractStatusId IN (
@@ -530,7 +545,8 @@ BEGIN
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblNetWeight - IsNULL(C2.dblNet, 0))) AS dblQty
 		,13 AS intAttributeId -->Forward Open Contracts
 	FROM tblCTContractDetail SS
-	JOIN tblCTContractHeader CH on CH.intContractHeaderId =SS.intContractHeaderId AND CH.intContractTypeId =1
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
+		AND CH.intContractTypeId = 1
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intNetWeightUOMId
@@ -538,7 +554,8 @@ BEGIN
 		SELECT Sum(LD.dblNet) dblNet
 			,Sum(LD.dblQuantity) dblQuantity
 		FROM tblLGLoadDetail LD
-		JOIN tblLGLoad L on L.intLoadId=LD.intLoadId and IsNULL(L.ysnCancelled,0) =0
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			AND IsNULL(L.ysnCancelled, 0) = 0
 		WHERE LD.intPContractDetailId = SS.intContractDetailId
 		) C2
 	WHERE SS.intContractStatusId IN (
@@ -565,6 +582,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
 		AND L.intShipmentType = 1
+		AND IsNULL(L.ysnCancelled, 0) <> 1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItem I ON I.intItemId = SS.intItemId
 	JOIN @tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
