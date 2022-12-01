@@ -29,6 +29,8 @@ BEGIN TRY
 	DECLARE @intItemUOMId INT
 	DECLARE @intHistoryStorageId INT
 	DECLARE @dblStorageDue DECIMAL(30,20)
+	DECLARE @dblStoragePaid DECIMAL(30,20)
+	DECLARE @dblStoragePaid DECIMAL(30,20)
 	DECLARE @dblNewStorageDue DECIMAL(18,6)
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
