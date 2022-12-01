@@ -1193,6 +1193,7 @@
     <Build Include="dbo\Functions\fnGLGetJournalExportTimberline.sql" />
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
     <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
+    <Build Include="dbo\Views\vyuSTCSLatestCheckoutWithError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
