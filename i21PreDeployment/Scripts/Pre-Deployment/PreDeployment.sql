@@ -96,6 +96,7 @@
 :r .\7_AR\11_FixSalesOrderNullysnQuote.sql
 :r .\7_AR\12_MoveQuotePagesToLetters.sql
 :r .\7_AR\13_FixCustomerBillToShipTo.sql
+:r .\7_AR\16_FixCurrencyIdInPayments.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql

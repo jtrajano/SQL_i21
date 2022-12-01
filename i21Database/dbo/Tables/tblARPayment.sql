@@ -52,7 +52,9 @@
 	CONSTRAINT [FK_tblARPayment_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARPayment_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
 	CONSTRAINT [FK_tblARPayment_tblEMEntityCardInformation_intEntityCardInfoId] FOREIGN KEY ([intEntityCardInfoId]) REFERENCES [dbo].[tblEMEntityCardInformation] ([intEntityCardInfoId]),
-	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
+	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblARPayment_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblARPayment_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID])
 );
 --INDEXES
 GO

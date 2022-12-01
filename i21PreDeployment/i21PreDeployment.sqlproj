@@ -443,4 +443,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\RemoveUPCIndependentUniqueIndexes.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\16_FixCurrencyIdInPayments.sql" />
+  </ItemGroup>
 </Project>
