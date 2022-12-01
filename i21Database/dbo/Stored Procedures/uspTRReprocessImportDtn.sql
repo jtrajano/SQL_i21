@@ -31,22 +31,24 @@ BEGIN
 			DD.dblInvoiceAmount,
 			DD.intEntityVendorId,
 			DD.intImportDtnId,
-			ysnOverrideTolerance = CASE WHEN DD.strMessage LIKE '%Variance is greater than allowed%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			ysnOverrideTolerance = CASE WHEN DD.strMessage LIKE '%Variance is greater than allowed%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
+			DD.strBillOfLading
 		FROM tblTRImportDtnDetail DD
 		WHERE DD.intImportDtnDetailId IN (SELECT Item FROM #tmpIds)
 
 		DECLARE @intImportDtnDetailId INT = NULL,
 			@intInventoryReceiptId INT = NULL,
 			@intTermId INT = NULL,
-			@strInvoiceNo NVARCHAR(100) = NULL,
+			@strInvoiceNo NVARCHAR(50) = NULL,
 			@dtmDueDate DATETIME = NULL,
 			@dblInvoiceAmount DECIMAL(18,6) = NULL,
 			@intEntityVendorId INT = NULL,
 			@intImportLoadId INT = NULL,
+			@strBillOfLading NVARCHAR(50) = NULL,
 			@ysnOverrideTolerance BIT = NULL
 	
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance
+		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance, @strBillOfLading
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			
@@ -103,9 +105,10 @@ BEGIN
 				, @dblInvoiceAmount = @dblInvoiceAmount
 				, @intEntityVendorId = @intEntityVendorId
 				, @intUserId = @intUserId
+				, @strBillOfLading = @strBillOfLading
 				, @ysnOverrideTolerance = @ysnOverrideTolerance
 
-			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance
+			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance, @strBillOfLading
 		END
 		CLOSE @CursorTran  
 		DEALLOCATE @CursorTran

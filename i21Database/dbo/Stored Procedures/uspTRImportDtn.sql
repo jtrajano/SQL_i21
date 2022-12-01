@@ -38,13 +38,10 @@ BEGIN
 		INNER JOIN tblTRImportDtnDetail D ON D.intImportDtnId = L.intImportDtnId
 		WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
 
-		BEGIN TRANSACTION
-
 		OPEN @CursorTran
 		FETCH NEXT FROM @CursorTran INTO @intImportDtnId, @intImportDtnDetailId, @strSeller, @strTerm, @ysnValid, @strMessage
 		WHILE @@FETCH_STATUS = 0
 		BEGIN		
-
 			-- Vendor
 			DECLARE @intSellerId INT = NULL
 			SELECT @intSellerId = V.intVendorId
@@ -60,21 +57,6 @@ BEGIN
 			BEGIN
 				UPDATE tblTRImportDtnDetail SET intEntityVendorId = @intSellerId WHERE intImportDtnDetailId = @intImportDtnDetailId
 			END
-			
-			-- Terms
-			-- DECLARE @intTermId INT = NULL
-			-- SELECT @intTermId  = T.intTermID
-			-- FROM tblSMTerm T 
-			-- WHERE T.strTerm = @strTerm
-
-            -- IF (@intTermId IS NULL)
-			-- BEGIN
-			-- 	SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Terms')	
-			-- END
-			-- ELSE
-			-- BEGIN
-			-- 	UPDATE tblTRImportDtnDetail SET intTermId = @intTermId WHERE intImportDtnDetailId = @intImportDtnDetailId
-			-- END
 
 			IF(ISNULL(@strMessage, '') = '' AND @ysnValid = 1)
 			BEGIN
@@ -84,13 +66,10 @@ BEGIN
 				SELECT @intInventoryReceiptId = IR.intInventoryReceiptId, @ysnInventoryPosted = IR.ysnPosted
 				FROM tblTRImportDtnDetail DD
 				INNER JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId = DD.intEntityVendorId
-				--AND CONVERT(DATE, IR.dtmReceiptDate) = DD.dtmInvoiceDate 
-				AND IR.strBillOfLading = DD.strBillOfLading
-				--AND IR.dblGrandTotal = DD.dblInvoiceAmount
+					AND IR.strBillOfLading = DD.strBillOfLading
 				WHERE DD.intImportDtnDetailId = @intImportDtnDetailId
-				AND IR.intSourceType = 3
-				--AND IR.ysnPosted = 1
-				AND IR.strReceiptType = 'Direct'
+					AND IR.intSourceType = 3
+					AND IR.strReceiptType = 'Direct'
 
 				IF (@intInventoryReceiptId IS NULL)
 				BEGIN
@@ -124,23 +103,16 @@ BEGIN
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran
 
-		COMMIT TRANSACTION
-
 		-- Call Import Processing right after loading
 		EXEC uspTRProcessImportDtn @intImportLoadId = @intImportDtnId
 			, @intUserId = @intUserId
 
 		SELECT @return = intImportDtnId FROM tblTRImportDtn WHERE guidImportIdentifier = @guidImportIdentifier
-
-
-
 	END TRY
 	BEGIN CATCH
-		ROLLBACK TRANSACTION
-		SELECT 
-			@ErrorMessage = ERROR_MESSAGE(),
-			@ErrorSeverity = ERROR_SEVERITY(),
-			@ErrorState = ERROR_STATE();
+		SELECT @ErrorMessage = ERROR_MESSAGE()
+			, @ErrorSeverity = ERROR_SEVERITY()
+			, @ErrorState = ERROR_STATE();
 
 		-- Use RAISERROR inside the CATCH block to return error
 		-- information about the original error that caused
