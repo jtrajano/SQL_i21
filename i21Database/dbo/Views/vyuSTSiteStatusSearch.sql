@@ -5,7 +5,7 @@ SELECT		a.intStoreId,
 			a.strDescription,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
 			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity,
-			dbo.fnSTGetCurrentBusinessDay(a.intStoreId) as dtmCurrentBusinessDay
+			FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us')  as dtmCurrentBusinessDay
 FROM		tblSTStore a
 LEFT JOIN	(	SELECT		intStoreId,
 							ysnInternetConnectivity,
