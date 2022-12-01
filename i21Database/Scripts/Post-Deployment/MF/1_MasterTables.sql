@@ -434,22 +434,22 @@ END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 4)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(4,'Material',4)
+    VALUES(4,'Warehouse',4)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 5)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(5,'Material Group',5)
+    VALUES(5,'Tea Item',5)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 6)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(6,'Warehouse',6)
+    VALUES(6,'Batch Number',6)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 7)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(7,'Batch Number',7)
+    VALUES(7,'Pick By',7)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 8)
 BEGIN
@@ -499,32 +499,37 @@ END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 17)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(17,'Tea Item',17)
+    VALUES(17,'Tea Group',17)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 18)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(18,'Tea Group',18)
+    VALUES(18,'Origin',18)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 19)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(19,'Origin',19)
+    VALUES(19,'Garden',19)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 20)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(20,'Garden',20)
+    VALUES(20,'Volume',20)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 21)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(21,'Volume',21)
+    VALUES(21,'Age',21)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 22)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(22,'Age',22)
+    VALUES(22,'Material',22)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 22)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(23,'Material Group',23)
 END
 
 /* End of Insertion of Blend Sheet Rule Starts. */
