@@ -667,7 +667,7 @@ BEGIN TRY
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture = NULL
 			,strPackageSize = NULL
-			,intPackageUOMId = NULL
+			,intPackageUOMId = S.intNetWtPerPackagesUOMId
 			,dblTareWeight = S.dblTareWeight
 			,strTaster = IMP.strTaster
 			,strFeedStock = NULL
