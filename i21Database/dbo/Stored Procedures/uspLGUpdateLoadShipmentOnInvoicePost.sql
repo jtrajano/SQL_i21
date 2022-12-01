@@ -62,7 +62,7 @@ BEGIN TRY
 		FROM @tblInvoiceDetail
 		WHERE intRecordId = @intMinRecordId
 
-		SELECT @strInvoiceType = strType 
+		SELECT @strInvoiceType = strType
 			,@ysnFromReturn = CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN 1 ELSE 0 END
 		FROM tblARInvoice I
 		OUTER APPLY (
@@ -166,9 +166,13 @@ BEGIN TRY
 
 		IF ISNULL(@Post,0) = 1
 		BEGIN
-			IF(@strInvoiceType IN ('Provisional', 'Standard'))
+			IF(@strInvoiceType IN ('Provisional', 'Standard') AND ISNULL(@ysnFromReturn, 0) = 0)
 			BEGIN
 				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12, 10)
+			END
+			ELSE IF(ISNULL(@ysnFromReturn, 0) = 1)
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12, 10)
 			END
 		END
 		ELSE 
