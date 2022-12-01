@@ -1391,6 +1391,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPPOAck_EK.sql" />
     <Build Include="dbo\Views\vyuMFTrialBlendSheetComputedAmounts.sql" />
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
+    <Build Include="dbo\Views\vyuSTCSLatestCheckoutWithError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
