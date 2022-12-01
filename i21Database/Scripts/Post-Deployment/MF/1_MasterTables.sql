@@ -414,6 +414,12 @@ IF NOT EXISTS (
 GO
 
 /* Insertion of Blend Sheet Rule Starts. */
+ALTER TABLE [dbo].[tblMFBlendRequirementRule] NOCHECK CONSTRAINT [FK_tblMFBlendRequirementRule_tblMFBlendSheetRule_intBlendSheetRuleId]
+
+ALTER TABLE [dbo].[tblMFBlendSheetRuleValue] NOCHECK CONSTRAINT [FK_tblMFBlendSheetRuleValue_tblMFBlendSheetRule_intBlendSheetRuleId]
+
+DELETE FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId IN (4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22);
+
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 1)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
@@ -526,11 +532,15 @@ BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
     VALUES(22,'Material',22)
 END
-IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 22)
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 23)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
     VALUES(23,'Material Group',23)
 END
+
+ALTER TABLE [dbo].[tblMFBlendRequirementRule] CHECK CONSTRAINT [FK_tblMFBlendRequirementRule_tblMFBlendSheetRule_intBlendSheetRuleId]
+
+ALTER TABLE [dbo].[tblMFBlendSheetRuleValue] CHECK CONSTRAINT [FK_tblMFBlendSheetRuleValue_tblMFBlendSheetRule_intBlendSheetRuleId]
 
 /* End of Insertion of Blend Sheet Rule Starts. */
 
