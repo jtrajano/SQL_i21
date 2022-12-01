@@ -576,7 +576,7 @@ BEGIN TRY
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
-			,intStorageLocationId = S.intStorageLocationId
+			,intStorageLocationId = S.intDestinationStorageLocationId
 			,intStorageUnitId = NULL
 			,intBrokerWarehouseId = NULL
 			,intParentBatchId = NULL
