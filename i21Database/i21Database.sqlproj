@@ -1153,6 +1153,7 @@
     <Build Include="dbo\Stored Procedures\uspHDGenerateTicketByProject.sql" />
     <Build Include="dbo\Tables\tblHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
+    <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
