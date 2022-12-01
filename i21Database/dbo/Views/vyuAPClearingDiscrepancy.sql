@@ -3,7 +3,7 @@ AS
 
 SELECT ISNULL(AP.intTransactionId, GL.intTransactionId) intTransactionId,
 	   ISNULL(AP.strTransactionId, GL.strTransactionId) strTransactionId,
-	   GL.dtmTransactionDate,
+	   ISNULL(GL.dtmTransactionDate,ISNULL(GL.dtmDate,AP.dtmDate)) dtmTransactionDate,
 	   ISNULL(E.strName, 'Unknown') strVendorName,
 	   ISNULL(AP.dtmDate, GL.dtmDate) dtmDate,
 	   ISNULL(GL.dblAmount, 0) dblGLAmount,
