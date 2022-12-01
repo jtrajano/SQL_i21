@@ -449,4 +449,10 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\2010_TemporaryDecryptPasswords.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\25_ST\1_Encryption.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\16_FixCurrencyIdInPayments.sql" />
+  </ItemGroup>
 </Project>
