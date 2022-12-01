@@ -1187,6 +1187,7 @@
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
     <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
+    <Build Include="dbo\Views\vyuSTCSLatestCheckoutWithError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
