@@ -90,7 +90,7 @@ SELECT
 	dblWeightBreakup5Bags				=	A.dblWeightBreakup5Bags
 INTO #tmpConvertedSupplierInvoiceData
 FROM tblAPImportVoucherSupplierInvoice A
-LEFT JOIN tblAPVendor C ON C.strVendorId = A.strVendorId
+LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityId = C2.intEntityId) ON C2.strName = A.strVendorId
 LEFT JOIN tblICStorageLocation D ON A.strStorageLocation = D.strName
 LEFT JOIN tblICLot E ON A.strLotNumber = E.strLotNumber
 LEFT JOIN tblSMPurchasingGroup F ON F.strName = A.strStorageLocation
