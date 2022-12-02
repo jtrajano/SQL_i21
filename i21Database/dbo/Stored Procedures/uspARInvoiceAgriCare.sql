@@ -129,15 +129,15 @@ SELECT
 	,strItemDescription		= ARGID.strItemDescription
 	,strQtyShipped			= CONVERT(VARCHAR,CAST(ARGID.dblQtyShipped AS MONEY),1) + ' ' + ARGID.strUnitMeasure
 	,strFreightTerm         = FREIGHT.strFreightTerm
-	,strSalespersonName     = SP.strName
+	,strSalespersonName     = ISNULL(SP.strName, SOADD.strName)
 	,strPONumber			= ARI.strPONumber
 	,strComments			= dbo.fnEliminateHTMLTags(ISNULL(HEADER.strMessage, ARI.strComments), 0) 
 	,strFooterComments		= dbo.fnEliminateHTMLTags(ISNULL(FOOTER.strMessage, ARI.strFooterComments), 0)
 	,strTerm				= TERM.strTerm
 	,strBillTo				= ISNULL(RTRIM(ARI.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strBillToCity), '') + ISNULL(RTRIM(', ' + ARI.strBillToState), '') + ISNULL(RTRIM(', ' + ARI.strBillToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strBillToCountry), '')
 	,strShipTo				= ISNULL(RTRIM(ARI.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strShipToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(ARI.strShipToCity), '') + ISNULL(RTRIM(', ' + ARI.strShipToState), '') + ISNULL(RTRIM(', ' + ARI.strShipToZipCode), '') + ISNULL(RTRIM(', ' + ARI.strShipToCountry), '')	 
-	,strSalesOrderNumber	= ISNULL(SOI.strSalesOrderNumber ,SO.strSalesOrderNumber)
-	,dtmOrderDate			= ISNULL(SOI.dtmDate ,SO.dtmDate)
+	,strSalesOrderNumber	= ISNULL(ISNULL(SOI.strSalesOrderNumber ,SO.strSalesOrderNumber), SOADD.strSalesOrderNumber)
+	,dtmOrderDate			= ISNULL(ISNULL(SOI.dtmDate ,SO.dtmDate), SOADD.dtmDate)
 	,dtmDate				= ARI.dtmDate
 	,dtmShipDate			= ARI.dtmShipDate
 	,dtmDueDate				= ARI.dtmDueDate
@@ -171,6 +171,11 @@ OUTER APPLY (
 	INNER JOIN tblSOSalesOrder SO on SO.intSalesOrderId=ISI.intOrderId
 	WHERE ARID.intInvoiceId = ARI.intInvoiceId
 )SOI 
+OUTER APPLY(
+SELECT TOP 1 a.strSalesOrderNumber,a.dtmDate,b.strName FROM tblSOSalesOrder a
+inner join tblEMEntity b ON a.intEntitySalespersonId=b.intEntityId
+WHERE strSalesOrderNumber = ARGID.strSalesOrderNumber
+)SOADD
 LEFT JOIN (
 	SELECT intInvoiceId			= ID.intInvoiceId
 		 , dblSSTTax 			= SUM(CASE WHEN UPPER(strTaxClass) = 'STATE SALES TAX (SST)' OR ID.dblComputedGrossPrice = 0 THEN dblAdjustedTax ELSE 0 END)
