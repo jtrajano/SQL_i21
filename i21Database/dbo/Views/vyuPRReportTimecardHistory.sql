@@ -3,6 +3,7 @@ AS
 SELECT DISTINCT
 	TC.intTimecardId
 	,TC.dtmDate
+	,TC.intEntityEmployeeId
 	,EM.strEntityNo
 	,EM.strName
 	,TE.strEarning
@@ -56,6 +57,7 @@ SELECT DISTINCT
 						   * dblOvertimeHours)
 				AS NUMERIC (18, 6))
 	,PC.strPaycheckId
+	,TC.intConcurrencyId
 FROM 
 	tblPRTimecard TC
 	INNER JOIN tblPREmployee EMP ON TC.intEntityEmployeeId = EMP.intEntityId
