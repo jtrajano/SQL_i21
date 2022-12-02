@@ -1171,7 +1171,7 @@
     <Build Include="dbo\Views\vyuCMBSBankFileFormatDropDown.sql" />
     <Build Include="dbo\Views\vyuCMBSBankFileFormatStatus.sql" />
     <None Include="Scripts\Post-Deployment\CM\18_BankFileFormat.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />           
+    <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
     <Build Include="dbo\Tables\tblCMABRActivityMatched.sql" />
     <Build Include="dbo\Tables\tblCMABRActivity.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
@@ -1393,6 +1393,7 @@
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
     <Build Include="dbo\Views\vyuSTCSLatestCheckoutWithError.sql" />
     <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
+    <Build Include="dbo\Tables\tblIPLeadTimePreStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
