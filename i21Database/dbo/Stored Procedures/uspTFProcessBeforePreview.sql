@@ -366,7 +366,7 @@ BEGIN TRY
 
 			INSERT INTO tblTFTransactionDynamicVA 
 			(intTransactionId, strVALocalityCode, strVALocalityName, strVADestinationAddress, strVADestinationZipCode, intConcurrencyId)
-			SELECT Trans.intTransactionId, tblTFLocality.strLocalityCode, tblTFLocality.strLocalityName, tblEMEntityLocation.strAddress, tblEMEntityLocation.strZipCode, 1
+			SELECT Trans.intTransactionId, tblTFLocality.strLocalityCode, tblTFLocality.strLocalityName, REPLACE(REPLACE(tblEMEntityLocation.strAddress, CHAR(13), ' '), CHAR(10), ' ') , tblEMEntityLocation.strZipCode, 1
 			FROM tblTFTransaction Trans
 			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
 			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
