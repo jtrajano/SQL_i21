@@ -16,7 +16,7 @@ BEGIN TRY
 	IF @intTranCount = 0
 		BEGIN TRANSACTION
 	ELSE
-		SAVE TRANSACTION uspARUpdateInvoiceIntegrations
+		SAVE TRANSACTION uspQMUpdateReconIntegration
 			
     IF OBJECT_ID('tempdb..#VOUCHERS') IS NOT NULL DROP TABLE #VOUCHERS
 	IF OBJECT_ID('tempdb..#SAMPLES') IS NOT NULL DROP TABLE #SAMPLES
@@ -68,7 +68,7 @@ BEGIN TRY
 			INNER JOIN #VOUCHERS V ON V.intBillDetailId = BD.intBillDetailId
 
 			--AUDIT LOG FOR VOUCHERS
-			WHILE EXISTS (SELECT TOP 1 1 #VOUCHERS)
+			WHILE EXISTS (SELECT TOP 1 1 FROM #VOUCHERS)
 				BEGIN
 					DECLARE @BillSingleAuditLogParam	AS SingleAuditLogParam 
 					DECLARE @intBillId		INT = NULL
@@ -197,7 +197,7 @@ BEGIN TRY
     FROM tblQMCatalogueReconciliation CR
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
 	INNER JOIN tblQMSample S ON CRD.intSampleId = S.intSampleId
-	--INNER JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId	
+	INNER JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId	
 	LEFT JOIN tblQMGardenMark GM ON CRD.strPreInvoiceGarden = GM.strGardenMark
     LEFT JOIN tblICCommodityAttribute CA ON CRD.strPreInvoiceGrade = CA.strDescription AND CA.strType = 'Grade'	
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
@@ -220,7 +220,7 @@ BEGIN TRY
 			INNER JOIN #SAMPLES SS ON S.intSampleId = SS.intSampleId
 
 			--AUDIT LOG FOR SAMPLES
-			WHILE EXISTS (SELECT TOP 1 1 #SAMPLES)
+			WHILE EXISTS (SELECT TOP 1 1 FROM #SAMPLES)
 				BEGIN
 					DECLARE @SampleAuditLogParam	AS SingleAuditLogParam 
 					DECLARE @intSampleId			INT = NULL
@@ -332,7 +332,7 @@ BEGIN CATCH
 		IF XACT_STATE() = 1 AND @intTranCount = 0
 			ROLLBACK
 		IF XACT_STATE() = 1 AND @intTranCount > 0
-			ROLLBACK TRANSACTION uspARUpdateInvoiceIntegrations;
+			ROLLBACK TRANSACTION uspQMUpdateReconIntegration;
 	END
 
 	EXEC sp_executesql @strThrow
