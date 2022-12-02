@@ -51,10 +51,11 @@ BEGIN TRY
     -- End Validation
 
     DECLARE
-        @intImportCatalogueId INT
+        @intImportType INT
+        ,@intImportCatalogueId INT
         ,@intSampleTypeId INT
         ,@intTemplateSampleTypeId INT
-        ,@intCompanyLocationId INT
+        ,@intMixingUnitLocationId INT
         ,@intColourId INT
         ,@strColour NVARCHAR(50)
         ,@intBrandId INT -- Size
@@ -98,10 +99,11 @@ BEGIN TRY
     DECLARE @C AS CURSOR;
 	SET @C = CURSOR FAST_FORWARD FOR
         SELECT
-            intImportCatalogueId = IMP.intImportCatalogueId
+            intImportType = 1 -- Auction/Non-Action Sample Import
+            ,intImportCatalogueId = IMP.intImportCatalogueId
             ,intSampleTypeId = S.intSampleTypeId
-            ,intTemplateSampleTypeId = TEMPLATE_SAMPLE_TYPE.intSampleTypeId
-            ,intCompanyLocationId = B1GN.intCompanyLocationId
+            ,intTemplateSampleTypeId = NULL
+            ,intCompanyLocationId = NULL
             ,intColourId = COLOUR.intCommodityAttributeId
             ,strColour = COLOUR.strDescription
             ,intBrandId = SIZE.intBrandId
@@ -119,8 +121,74 @@ BEGIN TRY
             ,intCategoryId = ITEM.intCategoryId
             ,dtmDateCreated = IL.dtmImportDate
             ,intEntityUserId = IL.intEntityId
-            ,intBatchId = BATCH.intBatchId
-            ,strBatchNo = BATCH.strBatchId
+            ,intBatchId = NULL
+            ,strBatchNo = NULL
+            ,strTINNumber = NULL
+            -- Test Properties
+            ,strAppearance = IMP.strAppearance
+            ,strHue = IMP.strHue
+            ,strIntensity = IMP.strIntensity
+            ,strTaste = IMP.strTaste
+            ,strMouthFeel = IMP.strMouthfeel
+        FROM tblQMSample S
+        INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+        INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+        INNER JOIN (tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId)
+            ON V.intEntityId = S.intEntityId
+        INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+        LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+        LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+        INNER JOIN (
+            tblQMImportCatalogue IMP
+            INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
+            -- Colour
+            LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season' AND COLOUR.strDescription = IMP.strColour
+            -- Size
+            LEFT JOIN tblICBrand SIZE ON SIZE.strBrandCode = IMP.strSize
+            -- Style
+            LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
+            -- Tealingo Item
+            LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
+            -- TBO
+			LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
+        )
+            ON SY.strSaleYear = IMP.strSaleYear
+            AND CL.strLocationName = IMP.strBuyingCenter
+            AND S.strSaleNumber = IMP.strSaleNumber
+            AND CT.strCatalogueType = IMP.strCatalogueType
+            AND E.strName = IMP.strSupplier
+            AND S.strRepresentLotNumber = IMP.strLotNumber
+        WHERE IMP.intImportLogId = @intImportLogId
+            AND ISNULL(IMP.strBatchNo, '') = ''
+            AND IMP.ysnSuccess = 1
+        
+        UNION ALL
+
+        SELECT
+            intImportTypeId = 2 -- Pre-Shipment Sample Import
+            ,intImportCatalogueId = IMP.intImportCatalogueId
+            ,intSampleTypeId = S.intSampleTypeId
+            ,intTemplateSampleTypeId = TEMPLATE_SAMPLE_TYPE.intSampleTypeId
+            ,intCompanyLocationId = MU.intCompanyLocationId
+            ,intColourId = COLOUR.intCommodityAttributeId
+            ,strColour = COLOUR.strDescription
+            ,intBrandId = SIZE.intBrandId
+            ,strBrand = SIZE.strBrandCode
+            ,strComments = IMP.strRemarks
+            ,intSampleId = S.intSampleId
+            ,intValuationGroupId = STYLE.intValuationGroupId
+            ,strValuationGroup = STYLE.strName
+            ,strOrigin = ORIGIN.strISOCode
+            ,strSustainability = SUSTAINABILITY.strDescription
+            ,strMusterLot = IMP.strMusterLot
+            ,strMissingLot = IMP.strMissingLot
+            ,strComments2 = IMP.strTastersRemarks
+            ,intItemId = ITEM.intItemId
+            ,intCategoryId = ITEM.intCategoryId
+            ,dtmDateCreated = IL.dtmImportDate
+            ,intEntityUserId = IL.intEntityId
+            ,intBatchId = BATCH_TBO.intBatchId
+            ,strBatchNo = BATCH_TBO.strBatchId
             ,strTINNumber = IMP.strTINNumber
             -- Test Properties
             ,strAppearance = IMP.strAppearance
@@ -147,30 +215,29 @@ BEGIN TRY
             LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
             -- Tealingo Item
             LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
-
-			 LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter 
-            -- Batch ID
-            LEFT JOIN tblMFBatch BATCH ON BATCH.strBatchId = IMP.strBatchNo and BATCH.intLocationId =TBO.intCompanyLocationId 
             -- Template Sample Type
             LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
-            -- Buyer1 Group Number
-            LEFT JOIN tblSMCompanyLocation B1GN ON B1GN.strLocationName = IMP.strB1GroupNumber
+            -- Mixing Location
+            LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+            -- Batch MU
+            LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo AND BATCH_MU.intLocationId = MU.intCompanyLocationId
+            -- Company Location
+            LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = BATCH_MU.intBuyingCenterLocationId
+            -- Batch TBO
+            LEFT JOIN tblMFBatch BATCH_TBO ON BATCH_TBO.strBatchId = BATCH_MU.strBatchId AND BATCH_TBO.intLocationId = TBO.intCompanyLocationId
         )
-            ON SY.strSaleYear = IMP.strSaleYear
-            AND CL.strLocationName = IMP.strBuyingCenter
-            AND S.strSaleNumber = IMP.strSaleNumber
-            AND CT.strCatalogueType = IMP.strCatalogueType
-            AND E.strName = IMP.strSupplier
-            AND S.strRepresentLotNumber = IMP.strLotNumber
+            ON BATCH_TBO.intSampleId = S.intSampleId
         WHERE IMP.intImportLogId = @intImportLogId
+            AND ISNULL(IMP.strBatchNo, '') <> ''
             AND IMP.ysnSuccess = 1
 
     OPEN @C 
 	FETCH NEXT FROM @C INTO
-		@intImportCatalogueId
+		@intImportType
+        ,@intImportCatalogueId
         ,@intSampleTypeId
         ,@intTemplateSampleTypeId
-        ,@intCompanyLocationId
+        ,@intMixingUnitLocationId
         ,@intColourId
         ,@strColour
         ,@intBrandId
@@ -199,11 +266,11 @@ BEGIN TRY
         ,@strMouthFeel
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-
+        SELECT @intBatchId
         -- Check if Batch ID is supplied in the template
         IF @intBatchId IS NOT NULL
         BEGIN
-            IF @intCompanyLocationId IS NULL
+            IF @intMixingUnitLocationId IS NULL
             BEGIN
                 UPDATE tblQMImportCatalogue
                 SET
@@ -217,13 +284,13 @@ BEGIN TRY
             DECLARE @intBatchSampleId INT
             SET @intBatchSampleId = NULL
 
-            SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intTemplateSampleTypeId AND intCompanyLocationId = @intCompanyLocationId
+            SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intTemplateSampleTypeId AND intCompanyLocationId = @intMixingUnitLocationId
 			SELECT @intProductValueId = NULL
 
 			SELECT @intProductValueId = intBatchId
 			FROM tblMFBatch
 			WHERE strBatchId = @strBatchNo
-				AND intLocationId = @intCompanyLocationId
+				AND intLocationId = @intMixingUnitLocationId
 
 
             -- Insert new sample with product type = 13
@@ -236,7 +303,7 @@ BEGIN TRY
                     ,@intItemId = NULL
                     ,@intManufacturingId = NULL
                     ,@intSubLocationId = NULL
-                    ,@intLocationId = @intCompanyLocationId
+                    ,@intLocationId = @intMixingUnitLocationId
                     ,@intOrderTypeId = NULL
                     ,@intBlendRequirementId = NULL
                     ,@intPatternCode = 62
@@ -453,7 +520,7 @@ BEGIN TRY
                 WHERE S.intSampleId = @intSampleId
 
 
-                IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber,'') OR ISNULL(@intOldCompanyLocationId, 0) <> @intCompanyLocationId
+                IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber,'') OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
                 BEGIN
                     -- Delink old TIN number if there's an existing one and the TIN number has changed.
                     IF @strOldTINNumber IS NOT NULL
@@ -470,12 +537,12 @@ BEGIN TRY
                     EXEC uspQMUpdateTINBatchId
                         @strTINNumber = @strTINNumber
                         ,@intBatchId = @intProductValueId
-                        ,@intCompanyLocationId = @intCompanyLocationId
+                        ,@intCompanyLocationId = @intMixingUnitLocationId
                         ,@intEntityId = @intEntityUserId
                         ,@ysnDelink = 0
 
                     UPDATE tblQMSample
-                    SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intProductValueId AND intCompanyLocationId = @intCompanyLocationId)
+                    SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intProductValueId AND intCompanyLocationId = @intMixingUnitLocationId)
                     WHERE intSampleId = @intSampleId
                 END
             END
@@ -848,10 +915,11 @@ BEGIN TRY
 
         CONT:
         FETCH NEXT FROM @C INTO
-            @intImportCatalogueId
+            @intImportType
+            ,@intImportCatalogueId
             ,@intSampleTypeId
             ,@intTemplateSampleTypeId
-            ,@intCompanyLocationId
+            ,@intMixingUnitLocationId
             ,@intColourId
             ,@strColour
             ,@intBrandId
