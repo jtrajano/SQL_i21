@@ -1173,6 +1173,11 @@
     <None Include="Scripts\Post-Deployment\CM\18_BankFileFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
     <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
+    <Build Include="dbo\Functions\fnGRCheckBillIfFromAdjustSettlements.sql" />
+    <Build Include="dbo\Tables\tblGRAdjustSettlementsSplit.sql" />
+    <Build Include="dbo\Views\vyuGRDPStorageLoadOutSearchView.sql" />
+    <Build Include="dbo\Functions\fnGRCheckSettlementIfFromLoadOut.sql" />
+    <Build Include="dbo\Functions\fnGRCheckStorageIfFromLoadOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
