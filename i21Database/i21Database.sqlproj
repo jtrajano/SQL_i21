@@ -11683,6 +11683,7 @@
     <Build Include="dbo\Views\vyuQMApprovedQualityOrders.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleAmendment.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateReconciliationIntegration.sql" />
+    <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
