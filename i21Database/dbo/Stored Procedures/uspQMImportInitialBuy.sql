@@ -45,9 +45,11 @@ BEGIN TRY
 	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strB1GroupNumber
 	-- Currency
 	LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
+	-- Strategy
+    LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 	-- Format log message
 	OUTER APPLY (
-		SELECT strLogMessage = CASE 
+		SELECT strLogMessage = CASE
 				WHEN (
 						B1QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB1QtyUOM, '') <> ''
@@ -166,6 +168,13 @@ BEGIN TRY
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
+				END + CASE
+				WHEN (
+						STRATEGY.intSubBookId IS NULL
+						AND ISNULL(IMP.strStrategy, '') <> ''
+						)
+					THEN 'STRATEGY, '
+				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
@@ -239,6 +248,10 @@ BEGIN TRY
 				CURRENCY.intCurrencyID IS NULL
 				AND ISNULL(IMP.strCurrency, '') <> ''
 				)
+			OR (
+				STRATEGY.intSubBookId IS NULL
+				AND ISNULL(IMP.strStrategy, '') <> ''
+				)
 			)
 
 	-- End Validation   
@@ -251,6 +264,7 @@ BEGIN TRY
 		,@intCurrencyId INT
 		,@strCurrency NVARCHAR(50)
 		,@ysnBought BIT
+		,@intSubBookId INT
 		-- B1
 		,@dblB1QtyBought NUMERIC(18, 6)
 		,@intB1QtyUOMId INT
@@ -296,6 +310,7 @@ BEGIN TRY
 		,intCurrencyId = CURRENCY.intCurrencyID
 		,strCurrency = CURRENCY.strCurrency
 		,ysnBought = IMP.ysnBought
+		,intSubBookId = STRATEGY.intSubBookId
 		-- B1
 		,dblB1QtyBought = IMP.dblB1QtyBought
 		,intB1QtyUOMId = B1QUOM.intUnitMeasureId
@@ -368,6 +383,8 @@ BEGIN TRY
 		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strB1GroupNumber
 		-- Currency
 		LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
+		-- Strategy
+    	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -390,6 +407,7 @@ BEGIN TRY
 		,@intCurrencyId
 		,@strCurrency
 		,@ysnBought
+		,@intSubBookId
 		-- B1
 		,@dblB1QtyBought
 		,@intB1QtyUOMId
@@ -428,6 +446,7 @@ BEGIN TRY
 			,intPurchaseGroupId = @intPurchasingGroupId
 			,intBookId = @intBookId
 			,ysnBought = @ysnBought
+			,intSubBookId = @intSubBookId
 			-- Initial Buy
 			-- B1
 			,dblB1QtyBought = @dblB1QtyBought
@@ -788,6 +807,7 @@ BEGIN TRY
 			,@intCurrencyId
 			,@strCurrency
 			,@ysnBought
+			,@intSubBookId
 			-- B1
 			,@dblB1QtyBought
 			,@intB1QtyUOMId
