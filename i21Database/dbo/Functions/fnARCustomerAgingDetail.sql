@@ -416,8 +416,9 @@ BEGIN
 		SELECT
 			 strTransactionId
 			,dblNewForexRate
-		FROM vyuGLRevalueDetails
-		WHERE strTransactionType = 'Invoice'
+		FROM vyuGLRevalueDetails vGLR
+		INNER JOIN tblGLRevalue tGLR ON vGLR.intConsolidationId = tGLR.intConsolidationId
+		WHERE vGLR.strTransactionType = 'Invoice' and tGLR.ysnPosted = 1
 		GROUP BY
 			 strTransactionId
 			,dblNewForexRate
