@@ -7742,4 +7742,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTermCostDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0e209f82-dbd6-401e-a5d0-96faa9a78128" ChangeDateTime="12/02/2022 03:25:11">
+    <Property Name="ElementName" Value="[dbo].[tblARCompanyPreference].[intExpressAcceptorID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strExpressAcceptorID]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3a791c3b-ef97-46df-91ab-255a2540b5ba" ChangeDateTime="12/02/2022 03:34:56">
+    <Property Name="ElementName" Value="[dbo].[tblARCompanyPreference].[intExpressApplicationID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strExpressApplicationID]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7cc543ab-8a72-4e22-bcb9-eb62c7291566" ChangeDateTime="12/02/2022 03:46:37">
+    <Property Name="ElementName" Value="[dbo].[tblARCompanyPreference].[intExpressAccountID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strExpressAccountID]" />
+  </Operation>
 </Operations>
