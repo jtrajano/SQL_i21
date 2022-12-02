@@ -98,6 +98,7 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     [strEvaluatorsCodeAtTBO] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strEvaluatorsRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFromLocationCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strReceivingStorageLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSampleBoxNumberTBO] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strBatchNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSampleTypeName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,

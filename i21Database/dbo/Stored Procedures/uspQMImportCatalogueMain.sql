@@ -41,6 +41,9 @@ BEGIN TRY
     LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
     -- Broker
     LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
+    -- Receiving Storage Location
+    LEFT JOIN (tblICStorageLocation RSL INNER JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = RSL.intLocationId)
+        ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strName = IMP.strReceivingStorageLocation AND TBO.strLocationName = IMP.strBuyingCenter
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -59,6 +62,7 @@ BEGIN TRY
             + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
+            + CASE WHEN (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '') THEN 'RECEIVING STORAGE LOCATION, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
@@ -79,6 +83,7 @@ BEGIN TRY
         OR (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '')
         OR (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '')
         OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
+        OR (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '')
     )
     -- End Validation
 
@@ -137,6 +142,7 @@ BEGIN TRY
         ,@strComments3 NVARCHAR(MAX)
         ,@intFromLocationCodeId INT
         ,@strFromLocationCode NVARCHAR(50)
+        ,@intDestinationStorageLocationId INT
         ,@strSampleBoxNumber NVARCHAR(50)
         ,@strMarketZoneCode NVARCHAR(100)
         ,@intMarketZoneId INT
@@ -223,6 +229,7 @@ BEGIN TRY
             ,strComments3 = IMP.strEvaluatorsRemarks
             ,intFromLocationCodeId = FROM_LOC_CODE.intCityId
             ,strFromLocationCode = FROM_LOC_CODE.strCity
+            ,intStorageLocationId = RSL.intStorageLocationId
             ,strSampleBoxNumber = IMP.strSampleBoxNumberTBO
             ,strMarketZoneCode = MARKET_ZONE.strMarketZoneCode
             ,intMarketZoneId = MARKET_ZONE.intMarketZoneId
@@ -275,6 +282,8 @@ BEGIN TRY
         LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
         -- Broker
         LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
+        -- Receiving Storage Location
+        LEFT JOIN tblICStorageLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strName = IMP.strReceivingStorageLocation AND RSL.intLocationId = TBO.intCompanyLocationId
 
         WHERE IMP.intImportLogId = @intImportLogId
         AND ISNULL(IMP.strBatchNo, '') = ''
@@ -336,6 +345,7 @@ BEGIN TRY
             ,strComments3 = NULL
             ,intFromLocationCodeId = NULL
             ,strFromLocationCode = NULL
+            ,intStorageLocationId = NULL
             ,strSampleBoxNumber = NULL
             ,strMarketZoneCode = NULL
             ,intMarketZoneId = NULL
@@ -420,6 +430,7 @@ BEGIN TRY
         ,@strComments3
         ,@intFromLocationCodeId
         ,@strFromLocationCode
+        ,@intDestinationStorageLocationId
         ,@strSampleBoxNumber
         ,@strMarketZoneCode
         ,@intMarketZoneId
@@ -540,6 +551,7 @@ BEGIN TRY
                     ,ysnEuropeanCompliantFlag
                     ,intEvaluatorsCodeAtTBOId
                     ,intFromLocationCodeId
+                    ,intDestinationStorageLocationId
                     ,strSampleBoxNumber
                     ,strComments3
                     ,intBrokerId
@@ -605,6 +617,7 @@ BEGIN TRY
                     ,ysnEuropeanCompliantFlag = S.ysnEuropeanCompliantFlag
                     ,intEvaluatorsCodeAtTBOId = S.intEvaluatorsCodeAtTBOId
                     ,intFromLocationCodeId = S.intFromLocationCodeId
+                    ,intDestinationStorageLocationId = S.intDestinationStorageLocationId
                     ,strSampleBoxNumber = S.strSampleBoxNumber
                     ,strComments3 = S.strComments3
                     ,intBrokerId = S.intBrokerId
@@ -824,6 +837,7 @@ BEGIN TRY
                 ,ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId
                 ,intFromLocationCodeId
+                ,intDestinationStorageLocationId
                 ,strSampleBoxNumber
                 ,strComments3
                 ,intBrokerId
@@ -903,6 +917,7 @@ BEGIN TRY
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
                 ,intFromLocationCodeId = @intFromLocationCodeId
+                ,intDestinationStorageLocationId = @intDestinationStorageLocationId
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
@@ -1131,6 +1146,7 @@ BEGIN TRY
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
                 ,intFromLocationCodeId = @intFromLocationCodeId
+                ,intDestinationStorageLocationId = @intDestinationStorageLocationId
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
@@ -1199,6 +1215,7 @@ BEGIN TRY
             ,@strComments3
             ,@intFromLocationCodeId
             ,@strFromLocationCode
+            ,@intDestinationStorageLocationId
             ,@strSampleBoxNumber
             ,@strMarketZoneCode
             ,@intMarketZoneId
