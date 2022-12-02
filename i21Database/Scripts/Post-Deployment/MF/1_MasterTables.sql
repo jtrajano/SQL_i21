@@ -423,7 +423,7 @@ DELETE FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId IN (4,5,6,7,8,9,10,11,
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 1)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo,ysnQuery, strSQL)
-    VALUES(1,'Pick Order',1,1,'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''FIFO'', ''FIFO''), (''FEFO'',''FEFO''), (''LIFO','LIFO''), (''LEFO'',''LEFO''), (''FENA'',''FENA''), (''NAFE'',''NAFE'')  SELECT ValueMember, DisplayMember FROM @tempTable')
+    VALUES(1,'Pick Order',1,1,'DECLARE @tempTable TABLE (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''FIFO'', ''FIFO''), (''FEFO'',''FEFO''), (''LIFO'',''LIFO''), (''LEFO'',''LEFO''), (''FENA'',''FENA''), (''NAFE'',''NAFE'')  SELECT ValueMember, DisplayMember FROM @tempTable')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 2)
