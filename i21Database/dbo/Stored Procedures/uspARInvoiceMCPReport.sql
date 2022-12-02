@@ -76,9 +76,13 @@ WHERE intEntityUserId = @intEntityUserId
 
 --MAIN QUERY
 SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
-	 , strCompanyAddress		= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN CASE WHEN SELECTEDINV.strInvoiceFormat <> 'Format 9 - Berry Oil' THEN @strCompanyFullAddress ELSE @strBerryOilAddress END
-									   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
-									   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
+	 , strCompanyAddress		= CASE WHEN SELECTEDINV.strInvoiceFormat <> 'Format 9 - Berry Oil' 
+	 								   THEN 
+	 										CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+									   			 WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
+									   			 WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
+											END
+									   ELSE @strBerryOilAddress
 								  END
 	 , intInvoiceId				= INV.intInvoiceId
 	 , intEntityCustomerId		= INV.intEntityCustomerId
