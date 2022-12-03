@@ -1,7 +1,7 @@
 CREATE PROCEDURE uspCMCreateBankTransferSwapShortPostEntries  
 @strTransactionId NVARCHAR(20),  
 @strBatchId NVARCHAR(40),  
-@intDefaultCurrencyId INT = 3,  
+@intDefaultCurrencyId INT,  
 @ysnPostedInTransit BIT = 0  
 AS  
   
@@ -267,7 +267,7 @@ END
         ,[strDescription]        = A.strDescription      
         ,[strCode]               = @GL_DETAIL_CODE      
         ,[strReference]          = A.strReferenceTo  
-        ,[intCurrencyId]         = intCurrencyIdAmountFrom
+        ,[intCurrencyId]         = @intDefaultCurrencyId
         ,[intCurrencyExchangeRateTypeId] =  NULL
         ,[dblExchangeRate]       = 1
         ,[dtmDateEntered]        = GETDATE()      
