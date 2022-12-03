@@ -65,6 +65,7 @@ SELECT
 	strPreInvoiceGardenNumber			=	CAST(A.strPreInvoiceGardenNumber AS NVARCHAR(50)),
 	strBook								=	CAST(A.strBook AS NVARCHAR(50)),
 	strSubBook							=	CAST(A.strSubBook AS NVARCHAR(50)),
+	intMarketZoneId						=	H.intMarketZoneId,
 	/*Others*/		
 	strStorageLocation					=	CAST(A.strStorageLocation AS NVARCHAR(50)),
 	intStorageLocationId				=	D.intStorageLocationId,
@@ -95,6 +96,7 @@ LEFT JOIN tblICStorageLocation D ON A.strStorageLocation = D.strName
 LEFT JOIN tblICLot E ON A.strLotNumber = E.strLotNumber
 LEFT JOIN tblSMPurchasingGroup F ON F.strName = A.strStorageLocation
 LEFT JOIN tblQMGardenMark G ON G.strGardenMark = A.strPreInvoiceGarden
+LEFT JOIN tblARMarketZone H ON H.strMarketZoneCode = A.strChannel
 
 DECLARE @voucherPayables AS VoucherPayable
 INSERT INTO @voucherPayables
@@ -120,7 +122,8 @@ INSERT INTO @voucherPayables
 	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,strBook							
-	,strSubBook			
+	,strSubBook		
+	,intMarketZoneId	
 	,dblPackageBreakups
 	,intNumOfPackagesUOM
 	,dblNumberOfPackages
@@ -152,7 +155,8 @@ SELECT
 	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,strBook							
-	,strSubBook		
+	,strSubBook	
+	,intMarketZoneId	
 	,dblPackageBreakups
 	,intNumOfPackagesUOM = A.intNumOfPackagesUOM
 	,dblNumberOfPackages = A.dblWeightBreakup1Bags

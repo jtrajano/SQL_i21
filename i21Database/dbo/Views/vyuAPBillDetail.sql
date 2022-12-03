@@ -116,7 +116,9 @@ SELECT
 	B.[dblNumberOfPackages3],
 	B.[intPurchasingGroupId],
 	cgt.strCatalogueType,
-	pgrp.strName AS strPurchasingGroup
+	pgrp.strName AS strPurchasingGroup,
+	mz.intMarketZoneId,
+	strMarketZOne = mz.strMarketZoneCode
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -202,3 +204,4 @@ LEFT JOIN tblCTBook book ON book.intBookId = B.intBookId
 LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = B.intSubBookId
 LEFT JOIN tblSMPurchasingGroup pgrp ON pgrp.intPurchasingGroupId = B.intPurchasingGroupId
 LEFT JOIN tblQMGardenMark gm ON gm.intGardenMarkId = B.intGardenMarkId
+LEFT JOIN tblARMarketZone mz ON mz.intMarketZoneId = B.intMarketZoneId

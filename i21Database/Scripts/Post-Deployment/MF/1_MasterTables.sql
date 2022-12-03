@@ -422,20 +422,20 @@ DELETE FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId IN (4,5,6,7,8,9,10,11,
 
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 1)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(1,'Pick Order',1)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo,ysnQuery, strSQL)
+    VALUES(1,'Pick Order',1,1,'DECLARE @tempTable TABLE (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''FIFO'', ''FIFO''), (''FEFO'',''FEFO''), (''LIFO'',''LIFO''), (''LEFO'',''LEFO''), (''FENA'',''FENA''), (''NAFE'',''NAFE'')  SELECT ValueMember, DisplayMember FROM @tempTable')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 2)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(2,'Is Cost Applicable?',2)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery,strSQL)
+    VALUES(2,'Is Cost Applicable?',2,1,'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''Yes'', ''Yes''), (''No'',''No'') SELECT ValueMember, DisplayMember FROM @tempTable')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 3)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(3,'Is Quality Data Applicable?',3)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(3,'Is Quality Data Applicable?',3,1,'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''Yes'', ''Yes''), (''No'',''No'') SELECT ValueMember, DisplayMember FROM @tempTable')
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 4)
 BEGIN
@@ -495,32 +495,32 @@ END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 15)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(15,'Sub Cluster',15)
+    VALUES(15,'Appearance',15)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 16)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(16,'Appearance',16)
+    VALUES(16,'Volume',16)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 17)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(17,'Tea Group',17)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(17,'Sub Cluster',17,1 ,'SELECT CONVERT(VARCHAR,intCommodityAttributeId) AS ValueMember, strDescription AS DisplayMember FROM tblICCommodityAttribute WHERE strType = ''Region''')
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 18)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(18,'Origin',18)
+    VALUES(18,'Tea Group',18)
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 19)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(19,'Garden',19)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo,ysnQuery, strSQL)
+    VALUES(19,'Origin',19,1,'SELECT CONVERT(VARCHAR,intCommodityAttributeId) AS ValueMember, strDescription AS DisplayMember FROM tblICCommodityAttribute WHERE strType = ''Origin''')
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 20)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(20,'Volume',20)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(20,'Garden',20,1,'SELECT CONVERT(VARCHAR,intGardenMarkId) AS ValueMember, strGardenMark AS DisplayMember FROM tblQMGardenMark')
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 21)
 BEGIN
@@ -543,6 +543,19 @@ ALTER TABLE [dbo].[tblMFBlendRequirementRule] CHECK CONSTRAINT [FK_tblMFBlendReq
 ALTER TABLE [dbo].[tblMFBlendSheetRuleValue] CHECK CONSTRAINT [FK_tblMFBlendSheetRuleValue_tblMFBlendSheetRule_intBlendSheetRuleId]
 
 /* End of Insertion of Blend Sheet Rule Starts. */
+GO
+/* Update first 3 business sheet rule. */ 
+UPDATE tblMFBlendSheetRule
+SET strSQL = 'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''FIFO'', ''FIFO''), (''FEFO'',''FEFO''), (''LIFO'',''LIFO''), (''LEFO'',''LEFO''), (''FENA'',''FENA''), (''NAFE'',''NAFE'')  SELECT ValueMember, DisplayMember FROM @tempTable'
+  , ysnQuery = 1
+WHERE intBlendSheetRuleId = 1
+
+UPDATE tblMFBlendSheetRule
+SET strSQL = 'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''Yes'', ''Yes''), (''No'',''No'') SELECT ValueMember, DisplayMember FROM @tempTable'
+  , ysnQuery = 1
+WHERE intBlendSheetRuleId IN (2, 3);
+
+/* End of Update first 3 business sheet rule. */ 
 
 /* Insertion of Blend Sheet Rule Default Value. */
 GO

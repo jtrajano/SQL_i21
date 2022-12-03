@@ -41,8 +41,9 @@ BEGIN TRY
     LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
     -- Broker
     LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
-    -- Strategy
-    LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy
+    -- Receiving Storage Location
+    LEFT JOIN (tblICStorageLocation RSL INNER JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = RSL.intLocationId)
+        ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strName = IMP.strReceivingStorageLocation AND TBO.strLocationName = IMP.strBuyingCenter
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -61,10 +62,11 @@ BEGIN TRY
             + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
-            + CASE WHEN (STRATEGY.intSubBookId IS NULL AND ISNULL(IMP.strStrategy, '') <> '') THEN 'STRATEGY, ' ELSE '' END
+            + CASE WHEN (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '') THEN 'RECEIVING STORAGE LOCATION, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
+    AND ISNULL(IMP.strBatchNo, '') = '' -- Validation does not apply to pre-shipment sample
     AND (
         (GRADE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strGrade, '') <> '')
         OR (LEAF_TYPE.intCommodityAttributeId IS NULL AND ISNULL(IMP.strManufacturingLeafType, '') <> '')
@@ -81,15 +83,17 @@ BEGIN TRY
         OR (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '')
         OR (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '')
         OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
+        OR (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '')
     )
     -- End Validation
 
     DECLARE
-        @strSampleNumber NVARCHAR(30)
+        @intImportType INT
+        ,@strSampleNumber NVARCHAR(30)
         ,@intImportCatalogueId INT
         ,@intSaleYearId INT
         ,@strSaleYear NVARCHAR(50)
-        ,@intCompanyLocationId INT
+        ,@intMixingUnitLocationId INT
         ,@intTBOLocationId INT
         ,@strSaleNumber NVARCHAR(50)
         ,@intCatalogueTypeId INT
@@ -138,6 +142,7 @@ BEGIN TRY
         ,@strComments3 NVARCHAR(MAX)
         ,@intFromLocationCodeId INT
         ,@strFromLocationCode NVARCHAR(50)
+        ,@intDestinationStorageLocationId INT
         ,@strSampleBoxNumber NVARCHAR(50)
         ,@strMarketZoneCode NVARCHAR(100)
         ,@intMarketZoneId INT
@@ -171,11 +176,12 @@ BEGIN TRY
     DECLARE @C AS CURSOR;
 	SET @C = CURSOR FAST_FORWARD FOR
         SELECT
-            intImportCatalogueId = IMP.intImportCatalogueId
+            intImportType = 1 -- Auction/Non-Action Sample Import
+            ,intImportCatalogueId = IMP.intImportCatalogueId
             ,intSaleYearId = SY.intSaleYearId
             ,strSaleYear = SY.strSaleYear
-            ,intCompanyLocationId = ML.intCompanyLocationId
-            ,intTBOLocationId = CL.intCompanyLocationId
+            ,intMixingUnitLocationId = NULL
+            ,intTBOLocationId = TBO.intCompanyLocationId
             ,strSaleNumber = IMP.strSaleNumber
             ,intCatalogueTypeId = CT.intCatalogueTypeId
             ,strCatalogueType = CT.strCatalogueType
@@ -223,6 +229,7 @@ BEGIN TRY
             ,strComments3 = IMP.strEvaluatorsRemarks
             ,intFromLocationCodeId = FROM_LOC_CODE.intCityId
             ,strFromLocationCode = FROM_LOC_CODE.strCity
+            ,intStorageLocationId = RSL.intStorageLocationId
             ,strSampleBoxNumber = IMP.strSampleBoxNumberTBO
             ,strMarketZoneCode = MARKET_ZONE.strMarketZoneCode
             ,intMarketZoneId = MARKET_ZONE.intMarketZoneId
@@ -233,15 +240,14 @@ BEGIN TRY
             ,intBrokerId = BROKERS.intEntityId
             ,strBroker = BROKERS.strName
             ,strBuyingOrderNumber = IMP.strBuyingOrderNumber
-            ,intSubBookId = STRATEGY.intSubBookId
-            ,intBatchId = BATCH.intBatchId
-            ,strTINNumber = IMP.strTINNumber
+            ,intBatchId = NULL
+            ,strTINNumber = NULL
         FROM tblQMImportCatalogue IMP
         INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
         -- Sale Year
         LEFT JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
         -- Company Location
-        LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = IMP.strBuyingCenter
+        LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
         -- Catalogue Type
         LEFT JOIN tblQMCatalogueType CT ON CT.strCatalogueType = IMP.strCatalogueType
         -- Supplier
@@ -276,22 +282,106 @@ BEGIN TRY
         LEFT JOIN tblICUnitMeasure UOM3 ON IMP.strNoOfPackagesThirdPackageBreakUOM IS NOT NULL AND UOM3.strSymbol = IMP.strNoOfPackagesThirdPackageBreakUOM
         -- Broker
         LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
-        -- Strategy
-        LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy
-        -- Mixing Location
-        LEFT JOIN tblSMCompanyLocation ML ON ML.strLocationName = IMP.strB1GroupNumber
-        -- Batch
-        LEFT JOIN tblMFBatch BATCH ON BATCH.strBatchId = IMP.strBatchNo AND BATCH.intLocationId = CL.intCompanyLocationId
+        -- Receiving Storage Location
+        LEFT JOIN tblICStorageLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strName = IMP.strReceivingStorageLocation AND RSL.intLocationId = TBO.intCompanyLocationId
 
         WHERE IMP.intImportLogId = @intImportLogId
+        AND ISNULL(IMP.strBatchNo, '') = ''
+        AND IMP.ysnSuccess = 1
+
+        UNION ALL
+
+        SELECT
+            intImportType = 2 -- Pre-Shipment Sample Import
+            ,intImportCatalogueId = IMP.intImportCatalogueId
+            ,intSaleYearId = NULL
+            ,strSaleYear = NULL
+            ,intMixingUnitLocationId = MU.intCompanyLocationId
+            ,intTBOLocationId = TBO.intCompanyLocationId
+            ,strSaleNumber = NULL
+            ,intCatalogueTypeId = NULL
+            ,strCatalogueType = NULL
+            ,intSupplierEntityId = NULL
+            ,strRefNo = NULL
+            ,strChopNumber = NULL
+            ,intGradeId = NULL
+            ,strGrade = NULL
+            ,intManufacturingLeafTypeId = NULL
+            ,strManufacturingLeafType = NULL
+            ,intSeasonId = NULL
+            ,strSeason = NULL
+            ,dblGrossWeight = NULL
+            ,intGardenMarkId = NULL
+            ,strGardenMark = NULL
+            ,intOriginId = NULL
+            ,strCountry = NULL
+            ,intCompanyLocationSubLocationId = NULL
+            ,dtmManufacturingDate = NULL
+            ,dblSampleQty = NULL
+            ,intTotalNumberOfPackageBreakups = NULL
+            ,intNetWtPerPackagesUOMId = NULL
+            ,intRepresentingUOMId = NULL
+            ,intNoOfPackages = NULL
+            ,intNetWtSecondPackageBreakUOMId = NULL
+            ,intNoOfPackagesSecondPackageBreak = NULL
+            ,intNetWtThirdPackageBreakUOMId = NULL
+            ,intNoOfPackagesThirdPackageBreak = NULL
+            ,intProductLineId = NULL
+            ,strProductLine = NULL
+            ,ysnOrganic = NULL
+            ,dtmSaleDate = NULL
+            ,dtmPromptDate = NULL
+            ,strComments = NULL
+            ,str3PLStatus = NULL
+            ,strAdditionalSupplierReference = NULL
+            ,intAWBSampleReceived = NULL
+            ,strAWBSampleReference = NULL
+            ,strCourierRef = NULL
+            ,dblBasePrice = NULL
+            ,ysnBoughtAsReserve = NULL
+            ,ysnEuropeanCompliantFlag = NULL
+            ,intEvaluatorsCodeAtTBOId = NULL
+            ,strEvaluatorsCodeAtTBO = NULL
+            ,strComments3 = NULL
+            ,intFromLocationCodeId = NULL
+            ,strFromLocationCode = NULL
+            ,intStorageLocationId = NULL
+            ,strSampleBoxNumber = NULL
+            ,strMarketZoneCode = NULL
+            ,intMarketZoneId = NULL
+            ,intSampleTypeId = SAMPLE_TYPE.intSampleTypeId
+            ,strBatchNo = BATCH_TBO.strBatchId
+            ,intEntityUserId = IL.intEntityId
+            ,dtmDateCreated = GETDATE()
+            ,intBrokerId = NULL
+            ,strBroker = NULL
+            ,strBuyingOrderNumber = NULL
+            ,intBatchId = BATCH_TBO.intBatchId
+            ,strTINNumber = IMP.strTINNumber
+        FROM tblQMImportCatalogue IMP
+        INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
+        -- Sample Type
+        LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
+        -- Mixing Location
+        LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+        -- Batch MU
+        LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo AND BATCH_MU.intLocationId = MU.intCompanyLocationId
+        -- Company Location
+        LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = BATCH_MU.intBuyingCenterLocationId
+        -- Batch TBO
+        LEFT JOIN tblMFBatch BATCH_TBO ON BATCH_TBO.strBatchId = BATCH_MU.strBatchId AND BATCH_TBO.intLocationId = TBO.intCompanyLocationId
+        
+        WHERE IMP.intImportLogId = @intImportLogId
+        AND ISNULL(IMP.strBatchNo, '') <> ''
         AND IMP.ysnSuccess = 1
 
     OPEN @C 
 	FETCH NEXT FROM @C INTO
-		@intImportCatalogueId
+		@intImportType
+        ,@intImportCatalogueId
 		,@intSaleYearId
         ,@strSaleYear
-        ,@intCompanyLocationId
+        ,@intMixingUnitLocationId
         ,@intTBOLocationId
         ,@strSaleNumber
         ,@intCatalogueTypeId
@@ -340,6 +430,7 @@ BEGIN TRY
         ,@strComments3
         ,@intFromLocationCodeId
         ,@strFromLocationCode
+        ,@intDestinationStorageLocationId
         ,@strSampleBoxNumber
         ,@strMarketZoneCode
         ,@intMarketZoneId
@@ -350,7 +441,6 @@ BEGIN TRY
         ,@intBrokerId
         ,@strBroker
         ,@strBuyingOrderNumber
-        ,@intSubBookId
         ,@intBatchId
         ,@strTINNumber
 	WHILE @@FETCH_STATUS = 0
@@ -362,7 +452,7 @@ BEGIN TRY
         BEGIN
             DECLARE @intProductValueId INT, @intOriginalItemId INT
 
-            IF @intCompanyLocationId IS NULL
+            IF @intMixingUnitLocationId IS NULL
             BEGIN
                 UPDATE tblQMImportCatalogue
                 SET
@@ -376,13 +466,13 @@ BEGIN TRY
             DECLARE @intBatchSampleId INT
             SET @intBatchSampleId = NULL
 
-            SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intSampleTypeId AND intCompanyLocationId = @intCompanyLocationId
+            SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intSampleTypeId AND intCompanyLocationId = @intMixingUnitLocationId
 			SELECT @intProductValueId = NULL
 
 			SELECT @intProductValueId = intBatchId
 			FROM tblMFBatch
 			WHERE strBatchId = @strBatchNo
-				AND intLocationId = @intCompanyLocationId
+				AND intLocationId = @intMixingUnitLocationId
 
 
             -- Insert new sample with product type = 13
@@ -393,7 +483,7 @@ BEGIN TRY
                     ,@intItemId = NULL
                     ,@intManufacturingId = NULL
                     ,@intSubLocationId = NULL
-                    ,@intLocationId = @intCompanyLocationId
+                    ,@intLocationId = @intMixingUnitLocationId
                     ,@intOrderTypeId = NULL
                     ,@intBlendRequirementId = NULL
                     ,@intPatternCode = 62
@@ -461,6 +551,7 @@ BEGIN TRY
                     ,ysnEuropeanCompliantFlag
                     ,intEvaluatorsCodeAtTBOId
                     ,intFromLocationCodeId
+                    ,intDestinationStorageLocationId
                     ,strSampleBoxNumber
                     ,strComments3
                     ,intBrokerId
@@ -526,6 +617,7 @@ BEGIN TRY
                     ,ysnEuropeanCompliantFlag = S.ysnEuropeanCompliantFlag
                     ,intEvaluatorsCodeAtTBOId = S.intEvaluatorsCodeAtTBOId
                     ,intFromLocationCodeId = S.intFromLocationCodeId
+                    ,intDestinationStorageLocationId = S.intDestinationStorageLocationId
                     ,strSampleBoxNumber = S.strSampleBoxNumber
                     ,strComments3 = S.strComments3
                     ,intBrokerId = S.intBrokerId
@@ -535,6 +627,8 @@ BEGIN TRY
                 WHERE B.intBatchId = @intBatchId
                 
                 SET @intSampleId = SCOPE_IDENTITY()
+
+                SELECT @intSampleId
 
 				SELECT @intOriginalItemId=NULL
 				Select @intOriginalItemId=intTealingoItemId
@@ -610,7 +704,7 @@ BEGIN TRY
                 WHERE S.intSampleId = @intSampleId
 
 
-                IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber,'') OR ISNULL(@intOldCompanyLocationId, 0) <> @intCompanyLocationId
+                IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber,'') OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
                 BEGIN
                     -- Delink old TIN number if there's an existing one and the TIN number has changed.
                     IF @strOldTINNumber IS NOT NULL
@@ -627,12 +721,12 @@ BEGIN TRY
                     EXEC uspQMUpdateTINBatchId
                         @strTINNumber = @strTINNumber
                         ,@intBatchId = @intProductValueId
-                        ,@intCompanyLocationId = @intCompanyLocationId
+                        ,@intCompanyLocationId = @intMixingUnitLocationId
                         ,@intEntityId = @intEntityUserId
                         ,@ysnDelink = 0
 
                     UPDATE tblQMSample
-                    SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intProductValueId AND intCompanyLocationId = @intCompanyLocationId)
+                    SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intProductValueId AND intCompanyLocationId = @intMixingUnitLocationId)
                     WHERE intSampleId = @intSampleId
                 END
             END
@@ -743,6 +837,7 @@ BEGIN TRY
                 ,ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId
                 ,intFromLocationCodeId
+                ,intDestinationStorageLocationId
                 ,strSampleBoxNumber
                 ,strComments3
                 ,intBrokerId
@@ -822,6 +917,7 @@ BEGIN TRY
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
                 ,intFromLocationCodeId = @intFromLocationCodeId
+                ,intDestinationStorageLocationId = @intDestinationStorageLocationId
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
@@ -1050,6 +1146,7 @@ BEGIN TRY
                 ,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
                 ,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
                 ,intFromLocationCodeId = @intFromLocationCodeId
+                ,intDestinationStorageLocationId = @intDestinationStorageLocationId
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
@@ -1065,10 +1162,11 @@ BEGIN TRY
 
         CONT:
         FETCH NEXT FROM @C INTO
-            @intImportCatalogueId
+            @intImportType
+            ,@intImportCatalogueId
             ,@intSaleYearId
             ,@strSaleYear
-            ,@intCompanyLocationId
+            ,@intMixingUnitLocationId
             ,@intTBOLocationId
             ,@strSaleNumber
             ,@intCatalogueTypeId
@@ -1117,6 +1215,7 @@ BEGIN TRY
             ,@strComments3
             ,@intFromLocationCodeId
             ,@strFromLocationCode
+            ,@intDestinationStorageLocationId
             ,@strSampleBoxNumber
             ,@strMarketZoneCode
             ,@intMarketZoneId
@@ -1127,7 +1226,6 @@ BEGIN TRY
             ,@intBrokerId
             ,@strBroker
             ,@strBuyingOrderNumber
-            ,@intSubBookId
             ,@intBatchId
             ,@strTINNumber
     END
