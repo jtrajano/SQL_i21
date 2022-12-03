@@ -168,6 +168,12 @@ WHERE strTransactionId = @strTransactionId
   
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference      
 
+IF ISNULL(@intDefaultCurrencyId,0) = 0 
+BEGIN  
+    RAISERROR ('Default Currency was not set in Company Configuration screen.',11,1)  
+    GOTO Post_Rollback    
+END
+
 IF @ysnPost = 1 AND @ysnRecap = 0
 BEGIN
   EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,3, @intBankTransferTypeId -- location

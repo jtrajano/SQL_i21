@@ -1,8 +1,8 @@
 CREATE PROCEDURE uspCMCreateBankTransferSwapLongPostEntries  
 @strTransactionId NVARCHAR(20),  
 @strBatchId NVARCHAR(40),  
-@intDefaultCurrencyId INT = 3,  
-@ysnPostedInTransit BIT = 0  
+@intDefaultCurrencyId INT,  
+@ysnPostedInTransit BIT
 AS  
   
   
@@ -278,7 +278,7 @@ END
         ,[strDescription]        = A.strDescription      
         ,[strCode]               = @GL_DETAIL_CODE      
         ,[strReference]          = A.strReferenceTo
-        ,[intCurrencyId]         = intCurrencyIdAmountTo
+        ,[intCurrencyId]         = intCurrencyIdAmountFrom
         ,[intCurrencyExchangeRateTypeId] = NULL
         ,[dblExchangeRate]       = ROUND(dblReceivableFn/dblReceivableFx,6)
         ,[dtmDateEntered]        = GETDATE()      
@@ -308,7 +308,7 @@ END
         ,[strDescription]        = A.strDescription      
         ,[strCode]               = @GL_DETAIL_CODE      
         ,[strReference]          = A.strReferenceTo
-        ,[intCurrencyId]         = intCurrencyIdAmountFrom
+        ,[intCurrencyId]         = intCurrencyIdAmountTo
         ,[intCurrencyExchangeRateTypeId] =  NULL
         ,[dblExchangeRate]       = ROUND(dblPayableFn/dblPayableFx, 6)
         ,[dtmDateEntered]        = GETDATE()      
