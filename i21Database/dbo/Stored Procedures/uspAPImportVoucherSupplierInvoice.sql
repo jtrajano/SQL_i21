@@ -73,6 +73,7 @@ SELECT
 	intLotId							=	E.intLotId,
 	/*Not exists in i21*/		
 	strCatalogueType					=	A.strCatalogueType,
+	intCatalogueTypeId					=	I.intCatalogueTypeId,
 	strChannel							=	A.strChannel,
 	dblPackageBreakups					=	CAST(A.strPackageBreakups AS DECIMAL(18,6)),
 	strPurchaseType						=	A.strPurchaseType,
@@ -97,6 +98,7 @@ LEFT JOIN tblICLot E ON A.strLotNumber = E.strLotNumber
 LEFT JOIN tblSMPurchasingGroup F ON F.strName = A.strStorageLocation
 LEFT JOIN tblQMGardenMark G ON G.strGardenMark = A.strPreInvoiceGarden
 LEFT JOIN tblARMarketZone H ON H.strMarketZoneCode = A.strChannel
+LEFT JOIN tblQMCatalogueType I ON I.strCatalogueType = A.strCatalogueType
 
 DECLARE @voucherPayables AS VoucherPayable
 INSERT INTO @voucherPayables
