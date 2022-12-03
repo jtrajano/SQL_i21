@@ -123,7 +123,8 @@ INSERT INTO @voucherPayables
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook		
-	,intMarketZoneId	
+	,intMarketZoneId
+	,intCatalogueTypeId	
 	,dblPackageBreakups
 	,intNumOfPackagesUOM
 	,dblNumberOfPackages
@@ -156,7 +157,8 @@ SELECT
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook	
-	,intMarketZoneId	
+	,intMarketZoneId
+	,intCatalogueTypeId	
 	,dblPackageBreakups
 	,intNumOfPackagesUOM = A.intNumOfPackagesUOM
 	,dblNumberOfPackages = A.dblWeightBreakup1Bags
