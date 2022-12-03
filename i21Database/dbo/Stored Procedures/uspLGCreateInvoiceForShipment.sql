@@ -756,7 +756,7 @@ DECLARE
 					,[intLoanLimitId]						= PL.intLoanLimitId
 					,[strBankReferenceNo]					= IR.strBankReferenceNo
 					,[dblLoanAmount]						= PL.dblLoanAmount
-					,[intBankValuationRuleId]				= PL.intBankValuationRuleId		
+					,[intBankValuationRuleId]				= IR.intOverrideFacilityValuation	
 					,[strTradeFinanceComments]				= IR.strComments
 					,[strGoodsStatus]						= CASE (PL.intWarrantStatus) WHEN 1 THEN 'Pledged' WHEN 2 THEN 'Released' ELSE NULL END COLLATE Latin1_General_CI_AS 
 					,[strBankTradeReference]				= IR.strReferenceNo
