@@ -118,7 +118,7 @@ SELECT
 	cgt.strCatalogueType,
 	pgrp.strName AS strPurchasingGroup,
 	mz.intMarketZoneId,
-	strMarketZOne = mz.strMarketZoneCode
+	strMarketZone = mz.strMarketZoneCode
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
