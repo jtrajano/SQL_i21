@@ -89,6 +89,7 @@ SELECT
 	,L.intBookId
 	,L.intSubBookId
 	,L.intUserLoc
+	,MZ.strMarketZoneCode
 FROM tblLGLoadWarehouse LW
 	JOIN tblLGLoad L ON L.intLoadId = LW.intLoadId
 	JOIN vyuLGShipmentStatus LSS ON LSS.intLoadId = L.intLoadId
@@ -112,6 +113,7 @@ FROM tblLGLoadWarehouse LW
 	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
 	LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+	LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId
 	OUTER APPLY (SELECT TOP 1 BI.strBillId FROM tblLGLoadWarehouseServices LWS LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId
 				WHERE LWS.intLoadWarehouseId = LW.intLoadWarehouseId AND LWS.intBillId IS NOT NULL) BI
 	OUTER APPLY (SELECT TOP 1 ysnShowReceivedLoadsInWarehouseTab = ISNULL(ysnShowReceivedLoadsInWarehouseTab,0) FROM tblLGCompanyPreference) CP

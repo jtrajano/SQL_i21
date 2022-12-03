@@ -115,6 +115,7 @@ SELECT L.intLoadId
 	,L.ysnAllowReweighs
 	,L.ysnShowOptionality
 	,L.intUserLoc
+	,MZ.strMarketZoneCode
 FROM tblLGLoad L
 JOIN vyuLGShipmentStatus LSS ON LSS.intLoadId = L.intLoadId
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
@@ -174,3 +175,4 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId
