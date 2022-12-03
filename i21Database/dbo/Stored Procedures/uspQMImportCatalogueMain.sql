@@ -858,11 +858,11 @@ BEGIN TRY
                 ,dblRepresentingQty = (
                                         SELECT
                                             -- No of Packages
-                                            CASE WHEN ISNULL(@intNoOfPackages, 0) IS NOT NULL THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE 0 END
+                                            CASE WHEN ISNULL(@intNoOfPackages, 0) > 0 THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE 0 END
                                             -- No of Packages 2nd Break
-                                            + CASE WHEN ISNULL(@intNoOfPackagesSecondPackageBreak, 0) IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(IUOM2.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesSecondPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
+                                            + CASE WHEN ISNULL(@intNoOfPackagesSecondPackageBreak, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(IUOM2.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesSecondPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
                                             -- No of Packages 3nd Break
-                                            + CASE WHEN ISNULL(@intNoOfPackagesThirdPackageBreak, 0) IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(IUOM3.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesThirdPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
+                                            + CASE WHEN ISNULL(@intNoOfPackagesThirdPackageBreak, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(IUOM3.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesThirdPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
                                         FROM tblICItemUOM IUOM1
                                         LEFT JOIN tblICItemUOM IUOM2 ON IUOM1.intItemId = IUOM2.intItemId AND IUOM2.intUnitMeasureId = @intNetWtSecondPackageBreakUOMId
                                         LEFT JOIN tblICItemUOM IUOM3 ON IUOM1.intItemId = IUOM3.intItemId AND IUOM3.intUnitMeasureId = @intNetWtThirdPackageBreakUOMId
@@ -1094,11 +1094,11 @@ BEGIN TRY
                 ,dblRepresentingQty = (
                                         SELECT
                                             -- No of Packages
-                                            CASE WHEN ISNULL(@intNoOfPackages, 0) IS NOT NULL THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE 0 END
+                                            CASE WHEN ISNULL(@intNoOfPackages, 0) > 0 THEN CAST(@intNoOfPackages AS NUMERIC(18, 6)) ELSE 0 END
                                             -- No of Packages 2nd Break
-                                            + CASE WHEN ISNULL(@intNoOfPackagesSecondPackageBreak, 0) IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(IUOM2.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesSecondPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
+                                            + CASE WHEN ISNULL(@intNoOfPackagesSecondPackageBreak, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(IUOM2.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesSecondPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
                                             -- No of Packages 3nd Break
-                                            + CASE WHEN ISNULL(@intNoOfPackagesThirdPackageBreak, 0) IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(IUOM3.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesThirdPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
+                                            + CASE WHEN ISNULL(@intNoOfPackagesThirdPackageBreak, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(IUOM3.intItemUOMId, IUOM1.intItemUOMId, CAST(@intNoOfPackagesThirdPackageBreak AS NUMERIC(18, 6))) ELSE 0 END
                                         FROM tblICItemUOM IUOM1
                                         LEFT JOIN tblICItemUOM IUOM2 ON IUOM1.intItemId = IUOM2.intItemId AND IUOM2.intUnitMeasureId = @intNetWtSecondPackageBreakUOMId
                                         LEFT JOIN tblICItemUOM IUOM3 ON IUOM1.intItemId = IUOM3.intItemId AND IUOM3.intUnitMeasureId = @intNetWtThirdPackageBreakUOMId
