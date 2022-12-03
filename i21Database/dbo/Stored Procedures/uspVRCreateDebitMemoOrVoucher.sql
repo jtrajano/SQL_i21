@@ -76,7 +76,7 @@ BEGIN
             )
             SELECT 
                 intPartitionId = 1
-                , intEntityVendorId = inv.intEntityCustomerId
+                , intEntityVendorId =  vs.intEntityId
                 , intTransactionType = @DebitMemo
                 , dtmDate = inv.dtmDate
                 , dtmVoucherDate = inv.dtmDate
@@ -108,6 +108,7 @@ BEGIN
                 , intFreightTermId = inv.intFreightTermId
             FROM vyuVROpenRebate vr
             JOIN tblARInvoice inv ON inv.intInvoiceId = vr.intInvoiceId
+            JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = vr.intVendorSetupId
             JOIN tblARInvoiceDetail invd ON invd.intInvoiceId = inv.intInvoiceId
             LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
                 AND il.intLocationId = inv.intCompanyLocationId
@@ -157,7 +158,7 @@ BEGIN
             )
             SELECT 
                 intPartitionId = 1
-                , intEntityVendorId = inv.intEntityCustomerId
+                , intEntityVendorId = vs.intEntityId
                 , intTransactionType = @Voucher
                 , dtmDate = inv.dtmDate
                 , dtmVoucherDate = inv.dtmDate
@@ -189,6 +190,7 @@ BEGIN
                 , intFreightTermId = inv.intFreightTermId
             FROM vyuVROpenRebate vr
             JOIN tblARInvoice inv ON inv.intOriginalInvoiceId = vr.intInvoiceId
+            JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = vr.intVendorSetupId
             JOIN tblARInvoiceDetail invd ON invd.intInvoiceId = inv.intInvoiceId
             LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
                 AND il.intLocationId = inv.intCompanyLocationId
