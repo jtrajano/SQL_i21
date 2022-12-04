@@ -66,7 +66,17 @@ OUTER APPLY (
 	FROM tblARCustomerTaxingTaxException
 	WHERE intEntityCustomerId = I.intEntityCustomerId
 	AND ((I.dtmPostDate >= dtmStartDate AND dtmEndDate IS NULL) OR (I.dtmPostDate BETWEEN dtmStartDate AND dtmEndDate))
-	AND ((intTaxCodeId = SMT.intTaxCodeId AND intTaxClassId = TC.intTaxClassId) OR (ISNULL(intTaxCodeId, 0) = 0 AND intTaxClassId = TC.intTaxClassId) OR (intTaxCodeId = SMT.intTaxCodeId AND ISNULL(intTaxClassId, 0) = 0))
+	AND (
+		(intTaxCodeId = SMT.intTaxCodeId AND intTaxClassId = TC.intTaxClassId) 
+		OR
+		(ISNULL(intTaxCodeId, 0) = 0 AND intTaxClassId = TC.intTaxClassId)
+		OR
+		(intTaxCodeId = SMT.intTaxCodeId AND ISNULL(intTaxClassId, 0) = 0)
+		OR
+		(ISNULL(intTaxCodeId, 0) = 0 AND ISNULL(intTaxClassId, 0) = 0 AND ISNULL(intItemCategoryId, 0) = ID.intItemCategoryId)
+		OR
+		(ISNULL(intTaxCodeId, 0) = 0 AND ISNULL(intTaxClassId, 0) = 0 AND ISNULL(intItemCategoryId, 0) = 0 AND ISNULL(intItemId, 0) = ID.intItemId)
+	)
 	ORDER BY intTaxCodeId DESC, intTaxClassId DESC, dtmStartDate DESC, dtmEndDate DESC, intEntityCustomerLocationId DESC, intItemId DESC, intCategoryId DESC
 ) ARCTTE
 WHERE (
