@@ -107,4 +107,5 @@ CREATE TYPE MFBatchTableType AS TABLE
 	,dblOriginalTeaAppearance  NUMERIC(18,6)  NULL
 	,dblOriginalTeaVolume  NUMERIC(18,6)  NULL
 	,dblOriginalTeaMoisture  NUMERIC(18,6)  NULL
+	,intMarketZoneId INT NULL
 )
