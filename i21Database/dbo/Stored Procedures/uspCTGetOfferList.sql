@@ -177,21 +177,28 @@ BEGIN
 			,fm.strFutureMonth
 			,e.strName
 			,a.strAccountNumber
-			,rp.dblNetPL
 		from
 			tblRKAssignFuturesToContractSummary s
 			join tblRKFutOptTransaction t on t.intFutOptTransactionId = s.intFutOptTransactionId
 			left join tblRKBrokerageAccount a on a.intBrokerageAccountId = t.intBrokerageAccountId
 			left join tblEMEntity e on e.intEntityId = t.intEntityId
 			left join tblRKFuturesMonth fm on fm.intFutureMonthId = t.intFutureMonthId
-			left join @realized rp on rp.intFutOptTransactionId = s.intFutOptTransactionId
 		where
 			s.ysnIsHedged = 1
 		order by
 			row_number() over (
 				partition by s.intContractDetailId order by t.dtmCreateDateTime desc
 			)
-	)	
+	), realize as (
+		select
+			ftc.intContractDetailId
+			,dblNetPL = sum(isnull(rp.dblNetPL,0.00))
+		from
+			tblRKAssignFuturesToContractSummary ftc
+			join @realized rp on rp.intFutOptTransactionId = ftc.intFutOptTransactionId
+		group by
+			ftc.intContractDetailId
+	)
 
 	--VIEW FOR CONTRACT 
 	SELECT 
@@ -329,13 +336,14 @@ BEGIN
 		,dblCIFInStore = 0.00--ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount) --CIF Item setup in Company Config CIF Charge from IR
 		,dblCUMStorage = 0.00 --FOR CLARIFICATION TO IR IC-10764
 		,dblCUMFinancing = 0.00--ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0) --IR Line value * (Current date - Payment Date) * Interest rate
-		,dblSwitchCost = 0.00--For Future Column N/A
+		,dblSwitchCost = isnull(r.dblNetPL,0.00)--For Future Column N/A
 		,ysnPostedIR = IR.ysnPosted
 		,intCompanyLocationId = CTD.intCompanyLocationId
 		,intSortId = 0
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
 	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
+	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblSMCity					LP  WITH (NOLOCK) ON CTD.intLoadingPortId = LP.intCityId 
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
@@ -520,13 +528,14 @@ BEGIN
 		,dblCIFInStore =  0.00
 		,dblCUMStorage = 0.00
 		,dblCUMFinancing = 0.00
-		,dblSwitchCost = h.dblNetPL
+		,dblSwitchCost = isnull(r.dblNetPL,0.00)
 		,ysnPostedIR = 0
 		,intCompanyLocationId = CTD.intCompanyLocationId
 		,intSortId  = 1
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
 	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
+	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
@@ -707,13 +716,14 @@ BEGIN
 		,dblCIFInStore =  0.00
 		,dblCUMStorage = 0.00
 		,dblCUMFinancing = 0.00
-		,dblSwitchCost = h.dblNetPL
+		,dblSwitchCost = isnull(r.dblNetPL,0.00)
 		,ysnPostedIR = IR.ysnPosted
 		,intCompanyLocationId = CTD.intCompanyLocationId
 		,intSortId = 2
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
 	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
+	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
@@ -917,13 +927,14 @@ BEGIN
 		,dblCUMStorage =  dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(ISC.dblStorageCharge,0.00))  --FOR CLARIFICATION TO IR IC-10764
 		,dblCUMFinancing = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,   ISNULL(IR.dblGrandTotal * (DATEPART(DAY,GETDATE()) - DATEPART(DAY, IR.dtmReceiptDate)) *  CTD.dblInterestRate,0)) --IR Line value * (Current date - Payment Date) * Interest rate
 							* dbo.fnCMGetForexRateFromCurrency(CTD.intCurrencyId,@IntCurrencyId,CTD.intRateTypeId,getdate()) / (CASE WHEN @ysnSubCurrency = 1 THEN @intCent ELSE 1 END)							
-		,dblSwitchCost = h.dblNetPL
+		,dblSwitchCost = isnull(r.dblNetPL,0.00)
 		,ysnPostedIR = IR.ysnPosted
 		,intCompanyLocationId = CTD.intCompanyLocationId
 		,intSortId  = 3
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
 	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
+	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblSMCity					LP  WITH (NOLOCK) ON CTD.intLoadingPortId = LP.intCityId 
 	LEFT JOIN tblSMCity					DP  WITH (NOLOCK) ON CTD.intDestinationPortId = DP.intCityId 
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
@@ -1114,13 +1125,14 @@ BEGIN
 		,dblCIFInStore	 = NULL
 		,dblCUMStorage	 = NULL
 		,dblCUMFinancing = NULL
-		,dblSwitchCost	 = h.dblNetPL
+		,dblSwitchCost	 = isnull(r.dblNetPL,0.00)
 		,ysnPostedIR = IR.ysnPosted
 		,intCompanyLocationId = CTD.intCompanyLocationId
 		,intSortId = 4
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
 	left join hedge						h with (nolock)    on h.intContractDetailId = CTD.intContractDetailId
+	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
