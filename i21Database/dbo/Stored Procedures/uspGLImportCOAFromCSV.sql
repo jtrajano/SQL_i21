@@ -83,7 +83,7 @@ AS
 	WHILE EXISTS(SELECT TOP 1 1 FROM tblGLCOAImportStaging2 WHERE ysnProcessed = 0)
 	BEGIN
 		DECLARE @strGroup NVARCHAR(40)
-		SELECT TOP 1 @strGroup = strPartitionGroup FROM tblGLCOAImportStaging2 WHERE ysnProcessed = 0
+		SELECT TOP 1 @strGroup = strPartitionGroup FROM tblGLCOAImportStaging2 WHERE ysnProcessed = 0 ORDER BY intLineNumber
 
 		-- Validate each segment
 		UPDATE A
@@ -96,7 +96,6 @@ AS
 		WHERE A.strPartitionGroup = @strGroup
 			AND A.intPartitionType > 0
 
-			SELECT * FROM @tblImport WHERE strPartitionGroup = @strGroup AND strError IS NOT NULL
 		IF EXISTS(SELECT TOP 1 1 FROM @tblImport WHERE strPartitionGroup = @strGroup AND strError IS NOT NULL)
 		BEGIN
 			DECLARE @strSegmentError NVARCHAR(MAX)
@@ -111,7 +110,7 @@ AS
 		BEGIN
 			-- Build GL Account from partitioned segments
 			DECLARE @intPrimarySegmentId INT = NULL, @strPrimarySegment NVARCHAR(20) = NULL
-			SELECT @strAccount = COALESCE(@strAccount + @separator, '') + strAccountPartition FROM @tblImport WHERE strPartitionGroup = @strGroup AND intPartitionType > 0
+			SELECT @strAccount = COALESCE(@strAccount + @separator, '') + strAccountPartition FROM @tblImport WHERE strPartitionGroup = @strGroup AND intPartitionType > 0 ORDER BY intRowId
 			SELECT @intPrimarySegmentId = intAccountSegmentId, @strPrimarySegment = strAccountPartition FROM @tblImport WHERE strPartitionGroup = @strGroup AND intPartitionType = 1
 
 			-- Validate if built account already exists
@@ -350,3 +349,6 @@ AS
 		strAccountId,
 		CAST([intLineNumber] AS NVARCHAR(4))
 	FROM tblGLCOAImportStaging2 
+
+	DELETE tblGLCOAImportStaging WHERE strGUID = @strGUID
+	
