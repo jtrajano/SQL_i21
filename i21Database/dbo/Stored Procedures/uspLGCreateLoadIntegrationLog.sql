@@ -12,7 +12,7 @@ BEGIN TRY
 	DECLARE @intLeadTime INT
 	DECLARE @dtmCurrentPlannedAvailabilityDate DATETIME
 	DECLARE @dtmCurrentUpdatedAvailabilityDate DATETIME
-	DECLARE @dtmCalculatedAvailabilityDate DATETIME
+	DECLARE @dtmCalculatedUpdatedAvailabilityDate DATETIME
 	DECLARE @dtmMaxETAPOD DATETIME
 	DECLARE @dtmCurrentETSPOL DATETIME
 	DECLARE @dtmMaxETSPOL DATETIME
@@ -604,7 +604,7 @@ BEGIN TRY
 				@intContractSeq = intContractSeq
 				,@dtmCurrentPlannedAvailabilityDate = dtmPlannedAvailabilityDate
 				,@dtmCurrentUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
-				,@dtmCalculatedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
+				,@dtmCalculatedUpdatedAvailabilityDate = CASE WHEN @intTransportationMode = 1 THEN @dtmCurrentETAPOD ELSE DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) END
 			FROM tblCTContractDetail
 			WHERE intContractDetailId = @intContractDetailId
 
@@ -614,10 +614,10 @@ BEGIN TRY
 			BEGIN
 				IF ((@dtmCurrentETAPOD IS NOT NULL))
 				BEGIN
-					IF (ISNULL(@ysnPOETAFeedToERP,0) = 1 AND ISNULL(@dtmCalculatedAvailabilityDate, '') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,''))
+					IF (ISNULL(@ysnPOETAFeedToERP,0) = 1 AND ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,''))
 					BEGIN
 						UPDATE tblCTContractDetail 
-						SET dtmPlannedAvailabilityDate = @dtmCalculatedAvailabilityDate
+						SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
 							,intConcurrencyId = intConcurrencyId + 1
 						WHERE intContractDetailId = @intContractDetailId 
 
@@ -631,13 +631,13 @@ BEGIN TRY
 							,@actionIcon = 'small-tree-modified'
 							,@changeDescription = @strAuditDescription
 							,@fromValue = @dtmCurrentPlannedAvailabilityDate
-							,@toValue = @dtmCalculatedAvailabilityDate
+							,@toValue = @dtmCurrentETAPOD
 					END
 
-					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,'') AND @intTransportationMode = 2)
+					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedUpdatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
 					BEGIN
 						UPDATE tblCTContractDetail 
-						SET dtmUpdatedAvailabilityDate = @dtmCalculatedAvailabilityDate
+						SET dtmUpdatedAvailabilityDate = @dtmCalculatedUpdatedAvailabilityDate
 							,intConcurrencyId = intConcurrencyId + 1
 						WHERE intContractDetailId = @intContractDetailId 
 							OR (@intPurchaseSale = 3 AND intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId))
@@ -650,7 +650,7 @@ BEGIN TRY
 							,@actionIcon = 'small-tree-modified'
 							,@changeDescription = @strAuditDescription
 							,@fromValue = @dtmCurrentUpdatedAvailabilityDate
-							,@toValue = @dtmCalculatedAvailabilityDate
+							,@toValue = @dtmCalculatedUpdatedAvailabilityDate
 
 						IF (@intPurchaseSale = 3)
 						BEGIN
@@ -662,7 +662,7 @@ BEGIN TRY
 							WHERE intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId)
 							
 							UPDATE tblCTContractDetail 
-							SET dtmUpdatedAvailabilityDate = @dtmCalculatedAvailabilityDate
+							SET dtmUpdatedAvailabilityDate = @dtmCalculatedUpdatedAvailabilityDate
 								,intConcurrencyId = intConcurrencyId + 1
 							WHERE intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId)
 
@@ -674,7 +674,7 @@ BEGIN TRY
 								,@actionIcon = 'small-tree-modified'
 								,@changeDescription = @strAuditDescription
 								,@fromValue = @dtmCurrentUpdatedAvailabilityDate
-								,@toValue = @dtmCalculatedAvailabilityDate
+								,@toValue = @dtmCalculatedUpdatedAvailabilityDate
 						END
 
 						SELECT @ysnIsETAUpdated = 1
