@@ -28,7 +28,10 @@ SELECT dblGrossPL = ISNULL(dblGrossPL, 0.00)
 	, strMainCurrency
 	, intCent
 	, ysnSubCurrency
-	, dblNetPL = ISNULL(dblGrossPL, 0.00) -- ISNULL((dblGrossPL + dblFutCommission), 0.00)
+	, dblNetPL = CASE WHEN ISNULL(ysnEnableMatchPostToSAPStaging, 0) = 1 
+						THEN ISNULL((dblGrossPL + dblFutCommission), 0.00)
+						ELSE ISNULL(dblGrossPL, 0.00)
+						END
 	, dtmLFilledDate
 	, dtmSFilledDate
 	, intLFutureMonthId
@@ -70,6 +73,7 @@ FROM (
 			, c.intCent
 			, c.ysnSubCurrency
 			, psd.intConcurrencyId
+			, ysnEnableMatchPostToSAPStaging = companyConfig.ysnEnableMatchPostToSAPStaging
 		FROM tblRKMatchFuturesPSHeader psh
 		JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId
 		JOIN tblRKFutOptTransaction ot ON psd.intLFutOptTransactionId = ot.intFutOptTransactionId
@@ -80,5 +84,10 @@ FROM (
 		LEFT JOIN tblRKFuturesMonth LFM ON LFM.intFutureMonthId = ot.intFutureMonthId
 		LEFT JOIN tblRKFuturesMonth SFM ON SFM.intFutureMonthId = ot1.intFutureMonthId
 		LEFT JOIN tblRKBrokerageAccount ba ON ot.intBrokerageAccountId = ba.intBrokerageAccountId AND ot.intInstrumentTypeId IN (1)
+		OUTER APPLY (
+			SELECT TOP 1 
+				ysnEnableMatchPostToSAPStaging
+			FROM tblRKCompanyPreference
+		) companyConfig
 	)t
 )t1
