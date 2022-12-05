@@ -59,6 +59,7 @@ BEGIN
 				DECLARE @intClockReadingId INT
 				DECLARE @intLastClockReadingId INT
 				DECLARE @intLastMonitorReadingEvent INT
+				DECLARE @intCustomerId INT = NULL
 	
 				SET @rpt_date_ti = @str_rpt_date_ti
  
@@ -90,8 +91,8 @@ BEGIN
 				SET @resultLog = @resultLog +   ''Customer Number = '' + ISNULL(@ts_cat_1,'''') + char(10)
 				print ''Customer Number = '' + ISNULL(@ts_cat_1,'''')
 				--Check by customer and Tank monitor serial number
-				SET @siteId = (
-					SELECT TOP 1 A.intSiteID FROM tblTMSite A
+				--SET @siteId = (
+					SELECT TOP 1 @siteId = A.intSiteID, @intCustomerId = B.intCustomerNumber FROM tblTMSite A
 					INNER JOIN tblTMCustomer B
 						ON A.intCustomerID = B.intCustomerID
 					INNER JOIN vwcusmst C
@@ -105,12 +106,12 @@ BEGIN
 					WHERE B.intCustomerNumber = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE vwcus_key = @ts_cat_1)
 						AND F.strDeviceType = ''Tank Monitor''
 						AND E.strSerialNumber = @tx_serialnum
-				)
+				--)
 				--Check by customer and Tank device serial number
 				IF(@siteId IS NULL)
 				BEGIN
-					SET @siteId = (
-						SELECT TOP 1 A.intSiteID FROM tblTMSite A
+					--SET @siteId = (
+						SELECT TOP 1 @siteId = A.intSiteID, @intCustomerId = B.intCustomerNumber FROM tblTMSite A
 						INNER JOIN tblTMCustomer B
 							ON A.intCustomerID = B.intCustomerID
 						INNER JOIN vwcusmst C
@@ -124,7 +125,7 @@ BEGIN
 						WHERE B.intCustomerNumber = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE vwcus_key = @ts_cat_1)
 							AND F.strDeviceType = ''Tank''
 							AND E.strSerialNumber = @ts_tankserialnum
-					)
+					--)
 				END
 				IF(@siteId IS NULL)
 				BEGIN 
@@ -201,6 +202,9 @@ BEGIN
 										,0	
 										)		 
 	
+				INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
+				VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
+				
 				--Check if site is not on hold then update the site
 				IF ((SELECT TOP 1 ysnOnHold FROM tblTMSite WHERE intSiteID = @siteId) <> 1)
 				BEGIN
