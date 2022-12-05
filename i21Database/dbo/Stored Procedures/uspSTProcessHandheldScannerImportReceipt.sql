@@ -242,7 +242,7 @@ BEGIN TRY
 				,intItemId				= intItemId
 				,intItemLocationId		= intItemLocationId
 				,intItemUOMId			= intItemUOMId
-				, intCostUOMId			= intUnitMeasureId
+				, intCostUOMId			= intItemUOMId
 				,strBillOfLadding		= ''
 				,intContractHeaderId	= NULL
 				,intContractDetailId	= NULL
