@@ -2,7 +2,7 @@ CREATE FUNCTION [dbo].[fnBBGetItemCostByCostType] (
     @strCostType NVARCHAR(50), 
     @intItemId INT, 
     @intItemLocationId INT, 
-    @dtmAsOfDate DATETIME NULL)
+    @dtmAsOfDate DATETIME)
 RETURNS NUMERIC(18, 6)
 BEGIN
     DECLARE @dblCost NUMERIC(18, 6) = 0.0
