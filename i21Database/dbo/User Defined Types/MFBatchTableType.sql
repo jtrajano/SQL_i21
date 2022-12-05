@@ -108,4 +108,9 @@ CREATE TYPE MFBatchTableType AS TABLE
 	,dblOriginalTeaVolume  NUMERIC(18,6)  NULL
 	,dblOriginalTeaMoisture  NUMERIC(18,6)  NULL
 	,intMarketZoneId INT NULL
+	,dblTeaTastePinpoint   NUMERIC(18,6)  NULL
+	,dblTeaHuePinpoint   NUMERIC(18,6)  NULL
+	,dblTeaIntensityPinpoint NUMERIC(18,6)  NULL
+	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
+	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
 )

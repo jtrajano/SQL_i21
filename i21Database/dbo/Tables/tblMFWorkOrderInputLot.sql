@@ -34,6 +34,7 @@
 	dblTBSQuantity NUMERIC(38, 20) NULL,
 	strFW NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dblNoOfPallet NUMERIC(38, 20),
+	ysnTBSReserved BIT,
     CONSTRAINT [PK_tblMFWorkOrderInputLot_intWorkOrderInputLotId] PRIMARY KEY ([intWorkOrderInputLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderInputLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderInputLot_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

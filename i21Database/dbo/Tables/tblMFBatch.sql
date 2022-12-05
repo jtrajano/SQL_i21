@@ -111,8 +111,13 @@ CREATE  TABLE tblMFBatch
 	,dblOriginalTeaVolume  NUMERIC(18,6)  NULL
 	,dblOriginalTeaMoisture  NUMERIC(18,6)  NULL
 	,strBOLNo NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL
-	,intMarketZoneId INT NULL,
-    CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
+	,intMarketZoneId INT NULL
+	,dblTeaTastePinpoint   NUMERIC(18,6)  NULL
+	,dblTeaHuePinpoint   NUMERIC(18,6)  NULL
+	,dblTeaIntensityPinpoint NUMERIC(18,6)  NULL
+	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
+	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
+	,CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC
     )

@@ -7,6 +7,7 @@ DECLARE @idoc INT
 	,@intValidDate INT
 	,@ysnEnableParentLot BIT = 0
 	,@intProductTypeId INT
+	,@dblTotal NUMERIC(18, 6)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT
 	,@strXml
@@ -115,6 +116,9 @@ SELECT @strMethod = strName
 FROM tblMFWorkOrderRecipeComputationMethod
 WHERE intMethodId = 1
 
+SELECT @dblTotal = SUM(dblQty)
+FROM @tblLot
+
 --Blend Management/Production
 IF (@ysnEnableParentLot = 0)
 BEGIN
@@ -210,6 +214,118 @@ BEGIN
 			,PP.dblMinValue
 			,PP.dblMaxValue
 			,PP.dblPinpointValue
+
+		INSERT INTO @tblComputedValue (
+			intTestId
+			,strTestName
+			,intPropertyId
+			,strPropertyName
+			,dblComputedValue
+			,dblMinValue
+			,dblMaxValue
+			,strMethodName
+			,intMethodId
+			,intSequenceNo
+			,dblPinpointValue
+			)
+		SELECT PP.intTestId
+			,PP.strTestName
+			,PP.intPropertyId
+			,PP.strPropertyName
+			,CAST(IsNULL((Type1.dblQty / @dblTotal) * 100, 0) AS DECIMAL(18, 4)) AS dblComputedValue
+			,PP.dblMinValue
+			,PP.dblMaxValue
+			,@strMethod AS strMethodName
+			,1 AS intMethodId
+			,0 AS intSequenceNo
+			,PP.dblPinpointValue
+		FROM @tblProductProperty PP
+		OUTER APPLY (
+			SELECT CA.strDescription
+				,sum(L.dblQty) dblQty
+			FROM @tblLot L
+			JOIN tblICLot Lot ON Lot.intLotId = L.intLotId
+			JOIN tblICItem I ON I.intItemId = Lot.intItemId
+			JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intProductTypeId
+			WHERE CA.strDescription COLLATE Latin1_General_CI_AS = PP.strPropertyName
+			GROUP BY CA.strDescription
+			) Type1
+		WHERE PP.strTestName = 'Type'
+
+		INSERT INTO @tblComputedValue (
+			intTestId
+			,strTestName
+			,intPropertyId
+			,strPropertyName
+			,dblComputedValue
+			,dblMinValue
+			,dblMaxValue
+			,strMethodName
+			,intMethodId
+			,intSequenceNo
+			,dblPinpointValue
+			)
+		SELECT PP.intTestId
+			,PP.strTestName
+			,PP.intPropertyId
+			,PP.strPropertyName
+			,CAST(IsNULL((Type1.dblQty / @dblTotal) * 100, 0) AS DECIMAL(18, 4)) AS dblComputedValue
+			,PP.dblMinValue
+			,PP.dblMaxValue
+			,@strMethod AS strMethodName
+			,1 AS intMethodId
+			,0 AS intSequenceNo
+			,PP.dblPinpointValue
+		FROM @tblProductProperty PP
+		OUTER APPLY (
+			SELECT C.strISOCode
+				,sum(L.dblQty) dblQty
+			FROM @tblLot L
+			JOIN tblICLot Lot ON Lot.intLotId = L.intLotId
+			JOIN tblICItem I ON I.intItemId = Lot.intItemId
+			JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+			JOIN tblSMCountry C ON C.intCountryID = CA.intCountryID
+			WHERE C.strISOCode COLLATE Latin1_General_CI_AS = PP.strPropertyName
+			GROUP BY C.strISOCode
+			) Type1
+		WHERE PP.strTestName = 'Origin'
+
+		INSERT INTO @tblComputedValue (
+			intTestId
+			,strTestName
+			,intPropertyId
+			,strPropertyName
+			,dblComputedValue
+			,dblMinValue
+			,dblMaxValue
+			,strMethodName
+			,intMethodId
+			,intSequenceNo
+			,dblPinpointValue
+			)
+		SELECT PP.intTestId
+			,PP.strTestName
+			,PP.intPropertyId
+			,PP.strPropertyName
+			,CAST(IsNULL((Type1.dblQty / @dblTotal) * 100, 0) AS DECIMAL(18, 4)) AS dblComputedValue
+			,PP.dblMinValue
+			,PP.dblMaxValue
+			,@strMethod AS strMethodName
+			,1 AS intMethodId
+			,0 AS intSequenceNo
+			,PP.dblPinpointValue
+		FROM @tblProductProperty PP
+		OUTER APPLY (
+			SELECT B.strBrandCode
+				,sum(L.dblQty) dblQty
+			FROM @tblLot L
+			JOIN tblICLot Lot ON Lot.intLotId = L.intLotId
+			JOIN tblICItem I ON I.intItemId = Lot.intItemId
+			JOIN tblICBrand B ON B.intBrandId = I.intBrandId
+			WHERE B.strBrandCode COLLATE Latin1_General_CI_AS = PP.strPropertyName
+			GROUP BY B.strBrandCode
+			) Type1
+		WHERE PP.strTestName = 'Size'
 	END
 END
 ELSE

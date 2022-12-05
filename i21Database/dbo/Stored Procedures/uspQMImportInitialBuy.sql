@@ -586,6 +586,11 @@ BEGIN TRY
 			,strVessel
 			,intLocationId
 			,intMixingUnitLocationId
+			,dblTeaTastePinpoint
+			,dblTeaHuePinpoint
+			,dblTeaIntensityPinpoint
+			,dblTeaMouthFeelPinpoint
+			,dblTeaAppearancePinpoint
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -704,6 +709,11 @@ BEGIN TRY
 			,strVessel = NULL
 			,intLocationId = S.intCompanyLocationId
 			,intMixingUnitLocationId=MU.intCompanyLocationId 
+			,dblTeaTastePinpoint = TASTE.dblPinpointValue
+			,dblTeaHuePinpoint = HUE.dblPinpointValue
+			,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
+			,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
+			,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -713,7 +723,7 @@ BEGIN TRY
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		-- Appearance
 		OUTER APPLY (
-			SELECT TR.strPropertyValue
+			SELECT TR.strPropertyValue,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Appearance'
@@ -721,7 +731,7 @@ BEGIN TRY
 			) APPEARANCE
 		-- Hue
 		OUTER APPLY (
-			SELECT TR.strPropertyValue
+			SELECT TR.strPropertyValue,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Hue'
@@ -729,7 +739,7 @@ BEGIN TRY
 			) HUE
 		-- Intensity
 		OUTER APPLY (
-			SELECT TR.strPropertyValue
+			SELECT TR.strPropertyValue,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Intensity'
@@ -737,7 +747,7 @@ BEGIN TRY
 			) INTENSITY
 		-- Taste
 		OUTER APPLY (
-			SELECT TR.strPropertyValue
+			SELECT TR.strPropertyValue,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Taste'
@@ -745,7 +755,7 @@ BEGIN TRY
 			) TASTE
 		-- Mouth Feel
 		OUTER APPLY (
-			SELECT TR.strPropertyValue
+			SELECT TR.strPropertyValue,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Mouth Feel'

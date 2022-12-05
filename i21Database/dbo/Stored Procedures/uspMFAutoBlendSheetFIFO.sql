@@ -6,6 +6,7 @@
 	,@strExcludedLotXml NVARCHAR(MAX) = NULL
 	,@strWorkOrderIds NVARCHAR(max) = NULL
 	,@intItemId INT = NULL
+	,@ysnQuality BIT=1
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -99,6 +100,10 @@ BEGIN TRY
 		,@dblPalletQty DECIMAL(38, 20)
 		,@dblNoOfPallets DECIMAL(18, 2)
 		,@ysnRecipeHeaderValidation BIT
+		,@intManufacturingCellId INT
+		,@strWhere NVARCHAR(MAX)
+		,@intValidDate INT
+		,@ysnReleaseBlendsheetByNoOfMixes BIT
 	DECLARE @tblInputItemSeq TABLE (
 		intItemId INT
 		,intSeq INT
@@ -199,6 +204,7 @@ BEGIN TRY
 				END
 			)
 		,@dtmDueDate = dtmDueDate
+		,@intManufacturingCellId = intManufacturingCellId
 	FROM tblMFBlendRequirement AS BlendRequirement
 	JOIN tblICItem AS Item ON BlendRequirement.intItemId = Item.intItemId
 	WHERE BlendRequirement.intBlendRequirementId = @intBlendRequirementId;
@@ -325,6 +331,19 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND ProcessAttribute.intAttributeId = 123;
 
+	/* Get Pick By Storage Location from Manufacturing Process based on location. */
+	SELECT @ysnReleaseBlendsheetByNoOfMixes = (
+			CASE 
+				WHEN IsNULL(UPPER(ProcessAttribute.strAttributeValue),'TRUE') = 'FALSE'
+					THEN 0
+				ELSE 1
+				END
+			)
+	FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND ProcessAttribute.intAttributeId = 130;
+
 	IF ISNULL(@ysnIncludeKitStagingLocation, 0) = 1
 	BEGIN
 		SET @intKitStagingLocationId = 0;
@@ -415,19 +434,37 @@ BEGIN TRY
 			AND ISNULL(ysnAllowConsume, 0) = 1;
 	END
 
-	DECLARE @tblSourceSubLocation AS TABLE (intSubLocationId INT);
+	DECLARE @tblSourceSubLocation AS TABLE (
+		intRecordId INT identity(1, 1)
+		,intSubLocationId INT
+		);
 
-	IF IsNULL(@strPickByStorageLocation, '') = 'True'
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblMFManufacturingCellSubLocation
+			WHERE intManufacturingCellId = @intManufacturingCellId
+			)
 	BEGIN
-		INSERT INTO @tblSourceSubLocation
-		SELECT @intSubLocationId;
+		IF IsNULL(@strPickByStorageLocation, '') = 'True'
+		BEGIN
+			INSERT INTO @tblSourceSubLocation (intSubLocationId)
+			SELECT @intSubLocationId;
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblSourceSubLocation (intSubLocationId)
+			SELECT intCompanyLocationSubLocationId
+			FROM tblSMCompanyLocationSubLocation
+			WHERE intCompanyLocationId = @intLocationId
+		END
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @tblSourceSubLocation
-		SELECT intCompanyLocationSubLocationId
-		FROM tblSMCompanyLocationSubLocation
-		WHERE intCompanyLocationId = @intLocationId
+		INSERT INTO @tblSourceSubLocation (intSubLocationId)
+		SELECT SL.intCompanyLocationSubLocationId
+		FROM dbo.tblMFManufacturingCellSubLocation SL
+		WHERE intManufacturingCellId = @intManufacturingCellId
+		ORDER BY SL.intManufacturingCellSubLocationId
 	END
 
 	DECLARE @tblExcludedLot TABLE (
@@ -822,6 +859,8 @@ BEGIN TRY
 	FROM tblMFBlendRequirementRule
 	WHERE intBlendRequirementId = @intBlendRequirementId
 
+	SELECT @strWhere = ''
+
 	WHILE (@intSequenceCount < @intSequenceNo)
 	BEGIN
 		SELECT @strRuleName = b.strName
@@ -839,12 +878,101 @@ BEGIN TRY
 				SET @strOrderBy = 'AvailableInputLot.dtmCreateDate DESC,'
 			ELSE IF @strValue = 'FEFO'
 				SET @strOrderBy = 'AvailableInputLot.dtmExpiryDate ASC,'
+			ELSE IF @strValue = 'FENA'
+				SET @strOrderBy = 'AvailableInputLot.dtmExpiryDate ASC,AvailableInputLot.dblAvailableQty ASC,AvailableInputLot.strLotNumber ASC,AvailableInputLot.dtmManufacturedDate ASC,'
+			ELSE IF @strValue = 'NAFE'
+				SET @strOrderBy = 'AvailableInputLot.dblAvailableQty ASC,AvailableInputLot.dtmExpiryDate ASC,AvailableInputLot.strLotNumber ASC,AvailableInputLot.dtmManufacturedDate ASC,'
 		END
 
 		IF @strRuleName = 'Is Cost Applicable?'
 		BEGIN
 			IF @strValue = 'Yes'
 				SET @strOrderBy = 'AvailableInputLot.dblUnitCost ASC,'
+		END
+
+		IF @strRuleName = 'Warehouse'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And SL.strSubLocationName =''' + @strValue + ''''
+		END
+
+		IF @strRuleName = 'Garden'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And IsNULL(GM.strGardenMark,'''') =''' + @strValue + ''''
+		END
+
+		IF @strRuleName = 'Volume'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaVolume,0) =' + @strValue
+		END
+
+		IF @strRuleName = 'Age'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And intAge =' + @strValue
+		END
+
+		IF @strRuleName = 'Intensity'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaIntensity,0) =' + @strValue
+		END
+
+		IF @strRuleName = 'Mouth Feel'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaMouthFeel,0) =' + @strValue
+		END
+
+		IF @strRuleName = 'Sub Cluster'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And isNull(SC.strDescription,'''') =''' + @strValue + ''''
+		END
+
+		IF @strRuleName = 'Appearance'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaAppearance,0) =' + @strValue
+		END
+
+		--IF @strRuleName = 'Tea Group' and @strValue<>''
+		--BEGIN
+		--	IF len(@strWhere) > 0
+		--		SET @strWhere = @strWhere+' And strTeaGroup =''' + @strValue + ''','
+		--	ELSE
+		--		SET @strWhere = @strWhere+' strTeaGroup =''' + @strValue + ''','
+		--END
+		IF @strRuleName = 'Origin'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And IsNULL(Origin.strDescription,'''') =''' + @strValue + ''''
+		END
+
+		IF @strRuleName = 'Sale Year'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And B.intSaleYear =' + @strValue
+		END
+
+		IF @strRuleName = 'Sale No'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And B.intSales =' + @strValue
+		END
+
+		IF @strRuleName = 'Taste'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaTaste,0) =' + @strValue
+		END
+
+		IF @strRuleName = 'Hue'
+			AND @strValue <> ''
+		BEGIN
+			SET @strWhere = @strWhere + ' And isNULL(B.dblTeaHue,0) =' + @strValue
 		END
 
 		SET @strOrderByFinal = @strOrderByFinal + @strOrderBy
@@ -857,9 +985,18 @@ BEGIN TRY
 
 	IF ISNULL(@strOrderByFinal, '') = ''
 		SET @strOrderByFinal = 'AvailableInputLot.dtmCreateDate ASC'
-
+		SET @intValidDate = (
+		SELECT DATEPART(dy, GETDATE())
+		)
+		
 	UPDATE @tblInputItem
 	SET dblPickedQty = dblRequiredQty
+
+	if @ysnReleaseBlendsheetByNoOfMixes=0
+	Begin
+		Select @intNoOfSheets=1
+		Select @intEstNoOfSheets=1
+	End
 
 	WHILE @intNoOfSheets > 0
 	BEGIN
@@ -958,6 +1095,8 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				,intPreference INT
+				,dtmManufacturedDate DATETIME
+				,intAge INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblParentLot') IS NOT NULL
@@ -979,6 +1118,9 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				,intPreference INT
+				,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,dtmManufacturedDate DATETIME
+				,intAge INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblAvailableInputLot') IS NOT NULL
@@ -997,6 +1139,10 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				,intPreference INT
+				,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,dtmManufacturedDate DATETIME
+				,intAge INT
+				,intSubLocationId INT
 				)
 
 			/* Create Temporary tblInputLot. */
@@ -1182,79 +1328,184 @@ BEGIN TRY
 				GOTO NEXT_ITEM
 			END
 
-			--Get the Lots
-			INSERT INTO #tblLot (
-				intLotId
-				,strLotNumber
-				,intItemId
-				,dblQty
-				,intLocationId
-				,intSubLocationId
-				,intStorageLocationId
-				,dtmCreateDate
-				,dtmExpiryDate
-				,dblUnitCost
-				,dblWeightPerQty
-				,strCreatedBy
-				,intParentLotId
-				,intItemUOMId
-				,intItemIssuedUOMId
-				,intPreference
-				)
-			SELECT L.intLotId
-				,L.strLotNumber
-				,L.intItemId
-				,CASE 
-					WHEN isnull(L.dblWeight, 0) > 0
-						THEN L.dblWeight
-					ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)
-					END
-				,L.intLocationId
-				,L.intSubLocationId
-				,L.intStorageLocationId
-				,L.dtmDateCreated
-				,L.dtmExpiryDate
-				,L.dblLastCost
-				,L.dblWeightPerQty
-				,US.strUserName
-				,L.intParentLotId
-				,ISNULL(L.intWeightUOMId, L.intItemUOMId)
-				,L.intItemUOMId
-				,(
-					CASE 
-						WHEN SubLoc.intSubLocationId IS NOT NULL
-							THEN 1
-						ELSE 2
+			IF EXISTS (
+					SELECT *
+					FROM tblMFManufacturingCellSubLocation
+					WHERE intManufacturingCellId = @intManufacturingCellId
+					)
+			BEGIN
+				--Get the Lots
+				INSERT INTO #tblLot (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,dblQty
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,dtmCreateDate
+					,dtmExpiryDate
+					,dblUnitCost
+					,dblWeightPerQty
+					,strCreatedBy
+					,intParentLotId
+					,intItemUOMId
+					,intItemIssuedUOMId
+					,intPreference
+					,dtmManufacturedDate
+					,intAge
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,CASE 
+						WHEN isnull(L.dblWeight, 0) > 0
+							THEN L.dblWeight
+						ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)
 						END
-					) AS intPreference
-			FROM tblICLot L
-			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
-			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
-			JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
-			JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
-			LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
-			WHERE L.intItemId = @intRawItemId
-				AND L.intLocationId = @intLocationId
-				AND LS.strPrimaryStatus IN (
-					SELECT strStatusName
-					FROM @tblLotStatus
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.dtmDateCreated
+					,L.dtmExpiryDate
+					,L.dblLastCost
+					,L.dblWeightPerQty
+					,US.strUserName
+					,L.intParentLotId
+					,ISNULL(L.intWeightUOMId, L.intItemUOMId)
+					,L.intItemUOMId
+					--,(
+					--	CASE 
+					--		WHEN SubLoc.intSubLocationId IS NOT NULL
+					--			THEN 1
+					--		ELSE 2
+					--		END
+					--	) AS intPreference
+					,(
+						CASE 
+							WHEN SubLoc.intRecordId IS NOT NULL
+								THEN SubLoc.intRecordId
+							ELSE 99
+							END
+						) AS intPreference
+					,isNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+					,DateDiff(d, isNULL(L.dtmManufacturedDate, L.dtmDateCreated), GETDATE())
+				FROM tblICLot L
+				LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
+				JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+				JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
+				JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
+				JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+				WHERE L.intItemId = @intRawItemId
+					AND L.intLocationId = @intLocationId
+					AND LS.strPrimaryStatus IN (
+						SELECT strStatusName
+						FROM @tblLotStatus
+						)
+					AND (
+						L.dtmExpiryDate IS NULL
+						OR L.dtmExpiryDate >= GETDATE()
+						)
+					AND L.dblQty > @dblDefaultResidueQty
+					AND L.intStorageLocationId NOT IN (
+						@intKitStagingLocationId
+						,@intBlendStagingLocationId
+						--,@intPartialQuantitySubLocationId
+						) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
+					AND ISNULL(SL.ysnAllowConsume, 0) = 1
+					AND L.intLotId NOT IN (
+						SELECT intLotId
+						FROM @tblExcludedLot
+						WHERE intItemId = @intRawItemId
+						)
+			END
+			ELSE
+			BEGIN
+				--Get the Lots
+				INSERT INTO #tblLot (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,dblQty
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,dtmCreateDate
+					,dtmExpiryDate
+					,dblUnitCost
+					,dblWeightPerQty
+					,strCreatedBy
+					,intParentLotId
+					,intItemUOMId
+					,intItemIssuedUOMId
+					,intPreference
+					,dtmManufacturedDate
+					,intAge
 					)
-				AND (
-					L.dtmExpiryDate IS NULL
-					OR L.dtmExpiryDate >= GETDATE()
-					)
-				AND L.dblQty > @dblDefaultResidueQty
-				AND L.intStorageLocationId NOT IN (
-					@intKitStagingLocationId
-					,@intBlendStagingLocationId
-					--,@intPartialQuantitySubLocationId
-					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
-				AND ISNULL(SL.ysnAllowConsume, 0) = 1
-				AND L.intLotId NOT IN (
-					SELECT intLotId
-					FROM @tblExcludedLot
-					WHERE intItemId = @intRawItemId
-					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,CASE 
+						WHEN isnull(L.dblWeight, 0) > 0
+							THEN L.dblWeight
+						ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)
+						END
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.dtmDateCreated
+					,L.dtmExpiryDate
+					,L.dblLastCost
+					,L.dblWeightPerQty
+					,US.strUserName
+					,L.intParentLotId
+					,ISNULL(L.intWeightUOMId, L.intItemUOMId)
+					,L.intItemUOMId
+					--,(
+					--	CASE 
+					--		WHEN SubLoc.intSubLocationId IS NOT NULL
+					--			THEN 1
+					--		ELSE 2
+					--		END
+					--	) AS intPreference
+					,(
+						CASE 
+							WHEN SubLoc.intRecordId IS NOT NULL
+								THEN SubLoc.intRecordId
+							ELSE 99
+							END
+						) AS intPreference
+					,isNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+					,DateDiff(d, isNULL(L.dtmManufacturedDate, L.dtmDateCreated), GETDATE())
+				FROM tblICLot L
+				LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
+				JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+				JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
+				JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
+				LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+				WHERE L.intItemId = @intRawItemId
+					AND L.intLocationId = @intLocationId
+					AND LS.strPrimaryStatus IN (
+						SELECT strStatusName
+						FROM @tblLotStatus
+						)
+					AND (
+						L.dtmExpiryDate IS NULL
+						OR L.dtmExpiryDate >= GETDATE()
+						)
+					AND L.dblQty > @dblDefaultResidueQty
+					AND L.intStorageLocationId NOT IN (
+						@intKitStagingLocationId
+						,@intBlendStagingLocationId
+						--,@intPartialQuantitySubLocationId
+						) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
+					AND ISNULL(SL.ysnAllowConsume, 0) = 1
+					AND L.intLotId NOT IN (
+						SELECT intLotId
+						FROM @tblExcludedLot
+						WHERE intItemId = @intRawItemId
+						)
+			END
 
 			--Get Either Parent Lot OR Child Lot Based on Setting
 			IF @ysnEnableParentLot = 0
@@ -1280,6 +1531,8 @@ BEGIN TRY
 					,strCreatedBy
 					,intItemUOMId
 					,intItemIssuedUOMId
+					,dtmManufacturedDate
+					,intAge
 					)
 				SELECT TL.intLotId
 					,TL.strLotNumber
@@ -1295,6 +1548,8 @@ BEGIN TRY
 					,TL.strCreatedBy
 					,TL.intItemUOMId
 					,TL.intItemIssuedUOMId
+					,TL.dtmManufacturedDate
+					,TL.intAge
 				FROM #tblLot TL
 			END
 			ELSE
@@ -1509,6 +1764,10 @@ BEGIN TRY
 					,dblUnitCost
 					,intItemUOMId
 					,intItemIssuedUOMId
+					,strLotNumber
+					,dtmManufacturedDate
+					,intAge
+					,intSubLocationId
 					)
 				SELECT PL.intParentLotId
 					,PL.intItemId
@@ -1533,6 +1792,10 @@ BEGIN TRY
 					,PL.dblUnitCost
 					,PL.intItemUOMId
 					,PL.intItemIssuedUOMId
+					,PL.strLotNumber
+					,PL.dtmManufacturedDate
+					,PL.intAge
+					,PL.intSubLocationId
 				FROM #tblParentLot AS PL
 				WHERE PL.intItemId = @intRawItemId
 			END
@@ -1563,9 +1826,16 @@ BEGIN TRY
 										, Item.intUnitPerLayer
 								   FROM #tblAvailableInputLot AS AvailableInputLot
 								   JOIN tblICItem AS Item ON AvailableInputLot.intItemId = Item.intItemId
+								   LEFT JOIN vyuMFBatchDetail B on B.intBatchId=AvailableInputLot.intParentLotId
+								   LEFT JOIN tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId=AvailableInputLot.intSubLocationId
+								   LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId=B.intGardenMarkId
+								   LEFT JOIN tblICCommodityAttribute SC on SC.intCommodityAttributeId=Item.intRegionId
+								   LEFT JOIN tblICCommodityAttribute Origin on Origin.intCommodityAttributeId=Item.intOriginId
 								   WHERE AvailableInputLot.dblAvailableQty > ' 
-					+ CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' 
-								   ORDER BY ISNULL(intPreference, 1), ' + @strOrderByFinal
+					+ CONVERT(VARCHAR(50), @dblDefaultResidueQty) + @strWhere 
+								   + ' ORDER BY ISNULL(intPreference, 1), ' + @strOrderByFinal
+								   +(Case When @ysnQuality=1 then ' ,dblTeaTasteOrderBy,dblTeaHueOrderBy,dblTeaIntensityOrderBy,dblTeaMouthFeelOrderBy,dblTeaAppearanceOrderBy '
+								   Else '' End)
 
 				EXEC (@strSQL)
 			END
@@ -1835,24 +2105,21 @@ BEGIN TRY
 				IF @intIssuedUOMTypeId = 4
 					AND @ysnMinorIngredient = 0
 				BEGIN
-					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % (@dblWeightPerQty*@intUnitPerLayer * @intLayerPerPallet));
+					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % (@dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet));
 				END
 
 				--/* Pallet Issued UOM Type */
 				--IF @intIssuedUOMTypeId = 4
 				--	SET @dblPalletQty = 0;
-
 				--BEGIN
 				--	DECLARE @dblPallet NUMERIC(18, 2) = 0
 				--		,@dblRequiredPallet NUMERIC(18, 2) = 0
 				--		,@dblLotPallet NUMERIC(18, 2) = 0
 				--		,@dblPickedAvailableQty NUMERIC(18, 2) = 0;
-
 				--	SET @dblPallet = 0;
 				--	SET @dblNoOfPallets = 0;
 				--	/* Set Calculated Pallet. */
 				--	SET @dblPallet = @intUnitPerLayer * @intLayerPerPallet;
-
 				--	BEGIN
 				--		IF (
 				--				@dblAvailableQty >= @dblRequiredQty
@@ -1865,7 +2132,6 @@ BEGIN TRY
 				--			/* Set Available Lot pallet. */
 				--			SET @dblLotPallet = @dblAvailableQty / @dblPallet;
 				--			SET @dblPalletQty = (@dblLotPallet / 100) * @dblRequiredPallet;
-
 				--			IF @ysnMinorIngredient = 0
 				--			BEGIN
 				--				SET @dblPalletQty = @dblRequiredQty;
@@ -1882,15 +2148,12 @@ BEGIN TRY
 				--							ELSE @dblRequiredQty
 				--							END
 				--						) / @dblPallet;
-
 				--				IF (ROUND(@dblRequiredPallet, 0) <> @dblRequiredPallet)
 				--				BEGIN
 				--					SET @dblRequiredPallet = CEILING(@dblRequiredPallet);
 				--				END
-
 				--				/* Set picked avalable qty */
 				--				SET @dblPickedAvailableQty = (@dblAvailableQty / @dblLotPallet) * @dblRequiredPallet;
-
 				--				/* check wheter the picked available qty is within the tolerance. */
 				--				IF (
 				--						@dblPickedAvailableQty >= @dblLowerToleranceQty
@@ -1921,7 +2184,6 @@ BEGIN TRY
 				--		END
 				--	END
 				--END
-
 				--/* End of Pallet Issued UOM Type */
 				IF @dblAvailableQty > 0
 				BEGIN
@@ -1963,7 +2225,6 @@ BEGIN TRY
 														ELSE CONVERT(NUMERIC(38, 20), Round(@dblRequiredQty / L.dblWeightPerQty, 0))
 														END
 													))
-
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
 									END
 								,@intItemIssuedUOMId = L.intItemUOMId
@@ -2204,7 +2465,7 @@ BEGIN TRY
 							IF @ysnMinorIngredient = 0
 							BEGIN
 								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet), 0) * @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet)
-									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet), 0))* @intUnitPerLayer * @intLayerPerPallet
+									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet), 0)) * @intUnitPerLayer * @intLayerPerPallet
 							END
 							ELSE
 							BEGIN
@@ -2654,7 +2915,7 @@ BEGIN TRY
 							IF @ysnMinorIngredient = 0
 							BEGIN
 								SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet), 0) * @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet)
-									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet), 0))* @intUnitPerLayer * @intLayerPerPallet
+									,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(dbo.[fnDivide](@dblRequiredQty, @dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet), 0)) * @intUnitPerLayer * @intLayerPerPallet
 							END
 							ELSE
 							BEGIN

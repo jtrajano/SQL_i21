@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE uspMFDeleteTrialBlendSheetReservation (@intWorkOrderId INT)
+﻿CREATE PROCEDURE uspMFDeleteTrialBlendSheetReservation (
+	@intWorkOrderId INT
+	,@intWorkOrderInputLotId INT = NULL
+	)
 AS
 BEGIN
 	UPDATE LI
@@ -12,4 +15,5 @@ BEGIN
 	FROM dbo.tblMFLotInventory LI
 	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intLotId = LI.intLotId
 	WHERE WI.intWorkOrderId = @intWorkOrderId
+		AND intWorkOrderInputLotId = IsNULL(@intWorkOrderInputLotId, intWorkOrderInputLotId)
 END

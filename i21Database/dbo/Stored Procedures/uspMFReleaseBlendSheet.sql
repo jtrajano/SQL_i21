@@ -57,6 +57,7 @@ BEGIN TRY
 		,@dblOriginalRequiredQty DECIMAL(38, 20)
 		,@dblQty1 DECIMAL(38, 20)
 		,@intRowNo INT
+		,@ysnReleaseBlendsheetByNoOfMixes BIT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -443,6 +444,18 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Packaging Category'
+
+	SELECT @ysnReleaseBlendsheetByNoOfMixes = (
+			CASE 
+				WHEN IsNULL(UPPER(ProcessAttribute.strAttributeValue),'TRUE') = 'FALSE'
+					THEN 0
+				ELSE 1
+				END
+			)
+	FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND ProcessAttribute.intAttributeId = 130;
 
 	UPDATE @tblBlendSheet
 	SET dblQtyToProduce = (
@@ -882,6 +895,13 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
+
+	if @ysnReleaseBlendsheetByNoOfMixes=0
+	Begin
+		SET @intNoOfSheet = 1
+		SET @PerBlendSheetQty = @dblQtyToProduce
+		SET @intNoOfSheetOriginal = @intNoOfSheet
+	End
 
 	DECLARE @intItemCount INT
 		,@intLotCount INT
