@@ -5210,59 +5210,59 @@ where FP.intTaxAuthorityId = 22
 
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Gasoline/Gasohol',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600125
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Propane/CNG/LNG',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600126
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600127
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600128
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600129
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600130
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600127
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600128
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600129
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600130
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Kerosene',				ysnStatus = 1, intFrequency = 1, intMasterId = 4600131
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600132
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600132
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Cust', strType = 'Other',					ysnStatus = 1, intFrequency = 1, intMasterId = 4600133
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Gasoline/Gasohol',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600134
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Propane/CNG/LNG',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600135
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600136
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600137
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600138
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600139
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600136
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600137
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600138
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600139
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Kerosene',				ysnStatus = 1, intFrequency = 1, intMasterId = 4600140
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600141
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600141
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Cust', strType = 'Other',					ysnStatus = 1, intFrequency = 1, intMasterId = 4600142
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Gasoline/Gasohol',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600143
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Propane/CNG/LNG',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600144
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600145
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600146
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600147
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600148
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600145
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600146
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600147
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600148
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Kerosene',				ysnStatus = 1, intFrequency = 1, intMasterId = 4600149
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600150
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600150
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Cust', strType = 'Other',					ysnStatus = 1, intFrequency = 1, intMasterId = 4600151
-
-
+	
+	
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Gasoline/Gasohol',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600152
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Propane/CNG/LNG',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600153
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600154
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600155
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600156
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600157
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600154
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600155
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600156
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600157
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Kerosene',				ysnStatus = 1, intFrequency = 1, intMasterId = 4600158
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600159
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600159
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14A_Bulk', strType = 'Other',					ysnStatus = 1, intFrequency = 1, intMasterId = 4600160
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Gasoline/Gasohol',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600161
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Propane/CNG/LNG',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600162
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600163
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600164
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600165
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600166
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600163
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600164
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600165
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600166
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Kerosene',				ysnStatus = 1, intFrequency = 1, intMasterId = 4600167
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600168
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600168
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14B_Bulk', strType = 'Other',					ysnStatus = 1, intFrequency = 1, intMasterId = 4600169
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Gasoline/Gasohol',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600170
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Propane/CNG/LNG',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600171
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600172
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600173
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600174
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600175
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Undyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600172
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Aviation Jet Fuel',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600173
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Aviation Gasoline',		ysnStatus = 1, intFrequency = 1, intMasterId = 4600174
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Dyed Diesel',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600175
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Kerosene',				ysnStatus = 1, intFrequency = 1, intMasterId = 4600176
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600177
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Heating Oil',			ysnStatus = 1, intFrequency = 1, intMasterId = 4600177
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = '14C_Bulk', strType = 'Other',					ysnStatus = 1, intFrequency = 1, intMasterId = 4600178
 
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'VA_TR', strScheduleCode = 'TR_Efile', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 4600179
