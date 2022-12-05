@@ -11920,4 +11920,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />
+  </ItemGroup>
 </Project>
