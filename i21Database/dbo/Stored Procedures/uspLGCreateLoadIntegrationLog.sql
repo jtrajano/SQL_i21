@@ -601,7 +601,7 @@ BEGIN TRY
 				@intContractSeq = intContractSeq
 				,@dtmCurrentPlannedAvailabilityDate = dtmPlannedAvailabilityDate
 				,@dtmCurrentUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
-				,@dtmCalculatedUpdatedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
+				,@dtmCalculatedUpdatedAvailabilityDate = CASE WHEN @intTransportationMode = 1 THEN @dtmCurrentETAPOD ELSE DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) END
 			FROM tblCTContractDetail
 			WHERE intContractDetailId = @intContractDetailId
 
@@ -631,7 +631,7 @@ BEGIN TRY
 							,@toValue = @dtmCurrentETAPOD
 					END
 
-					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedUpdatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,'') AND @intTransportationMode = 2)
+					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedUpdatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
 					BEGIN
 						UPDATE tblCTContractDetail 
 						SET dtmUpdatedAvailabilityDate = @dtmCalculatedUpdatedAvailabilityDate
