@@ -198,7 +198,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.strOriginPort,
 			L.strDestinationPort,
 			L.strDestinationCity,
-			dtmBLDate = LW.dtmDeliveryDate,
+			L.dtmBLDate,
 			L.strBLNumber,
 			L.dtmScheduledDate,
 			L.dtmETAPOL,
@@ -579,13 +579,13 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				LEFT JOIN tblCTContractDetail ACD ON ACD.intContractDetailId = ALD.intSContractDetailId
 				LEFT JOIN tblCTContractHeader ACH ON ACH.intContractHeaderId = ACD.intContractHeaderId
 				WHERE PLD.intContainerId = LC.intLoadContainerId) PL
-		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN PL.intSContractDetailId ELSE LD.intSContractDetailId END
+		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN ISNULL(LD.intSContractDetailId, PL.intSContractDetailId) ELSE LD.intSContractDetailId END
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblSMFreightTerms SCB ON SCB.intFreightTermId = SCH.intFreightTermId
 		LEFT JOIN tblSMCity PCity ON PCity.intCityId = PCH.intINCOLocationTypeId
 		LEFT JOIN tblSMCountry PCountry ON PCountry.intCountryID = PCity.intCountryId
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
-		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
+		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.ysnDefaultLocation = 1
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = SCH.intEntityId
 		LEFT JOIN [tblEMEntityLocation] CLocation ON CLocation.intEntityId = SCH.intEntityId and CLocation.ysnDefaultLocation = 1
 		LEFT JOIN tblEMEntityToContact CustomerContact ON CustomerContact.intEntityId = Customer.intEntityId
