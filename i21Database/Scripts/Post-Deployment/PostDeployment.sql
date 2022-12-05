@@ -254,6 +254,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1x_RecurringTransaction.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 :r .\GL\03_UpdateForeignDebitCredit.sql
+:r .\GL\04_ClearImportCOAFromCSV.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
 
 -- Financial Report Designer

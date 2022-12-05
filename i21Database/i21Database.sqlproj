@@ -1181,6 +1181,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\41_UpdateSourceType.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDateF360.sql" />
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
+    <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
