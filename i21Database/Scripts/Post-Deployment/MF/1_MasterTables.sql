@@ -440,17 +440,17 @@ END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 4)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
-    VALUES(4,'Warehouse',4,1,'SELECT CONVERT(VARCHAR,A.intCompanyLocationSubLocationId) AS ValueMember, B.strSubLocationName AS DisplayMember FROM tblMFManufacturingCellSubLocation AS A JOIN tblSMCompanyLocationSubLocation AS B ON A.intCompanyLocationSubLocationId = B.intCompanyLocationSubLocationId WHERE A.intManufacturingCellId = @param')
+    VALUES(4,'Warehouse',4,1,'SELECT CONVERT(VARCHAR,A.intCompanyLocationSubLocationId) AS ValueMember, B.strSubLocationName AS DisplayMember FROM tblMFManufacturingCellSubLocation AS A JOIN tblSMCompanyLocationSubLocation AS B ON A.intCompanyLocationSubLocationId = B.intCompanyLocationSubLocationId WHERE (A.intManufacturingCellId = @param OR @param IS NULL OR @param = '''')')
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 5)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
-    VALUES(5,'Tea Item',5,1,'SELECT CONVERT(VARCHAR,B.intItemId) AS ValueMember, B.strItemNo AS DisplayMember FROM tblICLot AS A JOIN tblICItem AS B ON A.intItemId = B.intItemId WHERE (A.intLotId = @param OR @param IS NULL OR @param = '')')
+    VALUES(5,'Tea Item',5,1,'SELECT CONVERT(VARCHAR,B.intItemId) AS ValueMember, B.strItemNo AS DisplayMember FROM tblICItem AS B WHERE (A.intLotId = @param OR @param IS NULL OR @param = '''')')
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 6)
 BEGIN
     INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
-    VALUES(6,'Batch Number',6,1,'SELECT CONVERT(VARCHAR,A.intLotId) AS ValueMember, A.strLotNumber AS DisplayMember FROM tblICLot AS A JOIN tblICItem AS B ON A.intItemId = B.intItemId WHERE (A.intItemId = @param OR @param IS NULL OR @param = '')')
+    VALUES(6,'Batch Number',6,1,'SELECT CONVERT(VARCHAR,A.intLotId) AS ValueMember, A.strLotNumber AS DisplayMember FROM tblICLot AS A JOIN tblICItem AS B ON A.intItemId = B.intItemId WHERE (A.intItemId = @param OR @param IS NULL OR @param = '''')')
 END
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 7)
 BEGIN
