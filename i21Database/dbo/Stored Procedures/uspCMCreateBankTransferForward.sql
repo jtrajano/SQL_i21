@@ -41,6 +41,7 @@ SELECT
 ,intFutOptTransactionId
 ,intFutOptTransactionHeaderId
 ,dtmCreated = GETDATE()
+,DER.intSegmentCodeId intItemLOBSegmentId
 ,intConcurrencyId = 1
 FROM @BankTransfer BT
 OUTER APPLY (
@@ -53,6 +54,19 @@ OUTER APPLY (
 	OUTER APPLY dbo.fnSMGetForexRate(intCurrencyId, BT.intCurrencyExchangeRateTypeId, BT.dtmAccrual) B
     WHERE intBankAccountId = BT.intBankAccountIdTo
 ) BAT
+OUTER APPLY(
+    SELECT TOP 1 SM.intSegmentCodeId
+    FROM tblRKFutOptTransaction der
+    JOIN tblCTContractDetail CD
+        ON CD.intContractDetailId = der.intContractDetailId
+    JOIN tblCTContractHeader CH
+        ON CH.intContractHeaderId = CD.intContractDetailId
+    JOIN tblICCommodity C
+        ON C.intCommodityId = CH.intCommodityId
+    JOIN tblSMLineOfBusiness SM ON SM.intLineOfBusinessId = C.intLineOfBusinessId
+    WHERE der.strInternalTradeNo = BT.strDerivativeId
+
+)DER
 
 )
 INSERT INTO tblCMBankTransfer(
@@ -87,6 +101,7 @@ INSERT INTO tblCMBankTransfer(
 ,strDerivativeId
 ,intFutOptTransactionId
 ,intFutOptTransactionHeaderId
+,intItemLOBSegmentId
 ,intConcurrencyId
 )
 SELECT 
@@ -121,6 +136,7 @@ SELECT
 ,strDerivativeId
 ,intFutOptTransactionId
 ,intFutOptTransactionHeaderId
+,intItemLOBSegmentId
 ,intConcurrencyId
 FROM CTE BT
 

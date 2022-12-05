@@ -135,7 +135,7 @@ SELECT
 	strModule = 'CM Forwards' COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intItemLOBSegmentId
 FROM vyuCMForwardPayablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
@@ -148,7 +148,7 @@ SELECT
 	strModule = 'CM Forwards' COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intItemLOBSegmentId
 FROM vyuCMForwardReceivablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
