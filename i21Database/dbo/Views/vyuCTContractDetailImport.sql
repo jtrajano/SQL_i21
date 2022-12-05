@@ -1,4 +1,4 @@
-﻿    
+﻿ 
 Create VIEW [dbo].[vyuCTContractDetailImport]    
 AS    
     
@@ -67,7 +67,7 @@ SELECT CD.intContractDetailImportId
     ,II.strOrigin    
  ,CH.intContractHeaderId  
  ,dblConversionFactor = CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))    
- ,dblTotalCost = CD.dblCashPrice * CD.dblQuantity    
+ ,dblTotalCost = CD.dblCashPrice * CD.dblQuantity    * CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))    
  ,dblRealQuantity = CD.dblQuantity  * (CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10)) )
 FROM tblCTContractDetailImport    CD    
 LEFT JOIN tblCTContractHeader    CH  ON CH.strContractNumber   = CD.strContractNumber collate database_default    
@@ -96,3 +96,8 @@ LEFT JOIN vyuCTInventoryItem    II  ON II.intItemId     = IT.intItemId AND II.in
  LEFT JOIN tblICItemUOM ICF on qIuom.intUnitMeasureId   = ICF.intUnitMeasureId and IT.intItemId   = ICF.intItemId    
  LEFT JOIN tblICItemUOM ICT on CUM.intUnitMeasureId = ICT.intUnitMeasureId and IT.intItemId = ICT.intItemId    
   
+   
+  
+GO
+
+
