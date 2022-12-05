@@ -6,7 +6,7 @@
 	,@strExcludedLotXml NVARCHAR(MAX) = NULL
 	,@strWorkOrderIds NVARCHAR(max) = NULL
 	,@intItemId INT = NULL
-	,@ysnQuality BIT=1
+	,@ysnQuality BIT = 1
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -104,8 +104,12 @@ BEGIN TRY
 		,@strWhere NVARCHAR(MAX)
 		,@intValidDate INT
 		,@ysnReleaseBlendsheetByNoOfMixes BIT
+		,@strFW NVARCHAR(3)
+		,@strChar NVARCHAR(1)
+		,@intRecordId int
 	DECLARE @tblInputItemSeq TABLE (
-		intItemId INT
+		intRecordId INT
+		,intItemId INT
 		,intSeq INT
 		);
 	DECLARE @tblInputItem TABLE (
@@ -170,6 +174,92 @@ BEGIN TRY
 		,intSubLocationId INT
 		,intStorageLocationId INT
 		);
+	DECLARE @tblFW TABLE (
+		strChar CHAR(1)
+		,intItemId INT
+		,intSeq INT
+		,intRecordId int identity(1,1)
+		);
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'A'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'B'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'C'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'D'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'E'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'F'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'G'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'H'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'I'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'J'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'K'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'L'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'M'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'N'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'O'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'P'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'Q'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'R'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'S'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'T'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'U'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'V'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'W'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'X'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'Y'
+
+	INSERT INTO @tblFW(strChar)
+	SELECT 'Z'
+
+
 	DECLARE @tblLotStatus AS TABLE (strStatusName NVARCHAR(50) COLLATE Latin1_General_CI_AS);
 	DECLARE @tblSourceStorageLocation AS TABLE (intStorageLocationId INT);
 
@@ -334,7 +424,7 @@ BEGIN TRY
 	/* Get Pick By Storage Location from Manufacturing Process based on location. */
 	SELECT @ysnReleaseBlendsheetByNoOfMixes = (
 			CASE 
-				WHEN IsNULL(UPPER(ProcessAttribute.strAttributeValue),'TRUE') = 'FALSE'
+				WHEN IsNULL(UPPER(ProcessAttribute.strAttributeValue), 'TRUE') = 'FALSE'
 					THEN 0
 				ELSE 1
 				END
@@ -385,6 +475,7 @@ BEGIN TRY
 		,dblUnitCost NUMERIC(38, 20)
 		,intNoOfSheet INT
 		,dblNoOfPallets NUMERIC(18, 2)
+		,strFW nvarchar(3)
 		);
 
 	/* Create temporary table tblBlendSheetLotFinal. */
@@ -405,6 +496,7 @@ BEGIN TRY
 		,dblWeightPerQty NUMERIC(38, 20)
 		,dblUnitCost NUMERIC(38, 20)
 		,dblNoOfPallets NUMERIC(18, 2)
+		,strFW nvarchar(3)
 		)
 
 	/* Set default value 'Active' for lot status. */
@@ -985,18 +1077,19 @@ BEGIN TRY
 
 	IF ISNULL(@strOrderByFinal, '') = ''
 		SET @strOrderByFinal = 'AvailableInputLot.dtmCreateDate ASC'
-		SET @intValidDate = (
-		SELECT DATEPART(dy, GETDATE())
-		)
-		
+	SET @intValidDate = (
+			SELECT DATEPART(dy, GETDATE())
+			)
+
 	UPDATE @tblInputItem
 	SET dblPickedQty = dblRequiredQty
 
-	if @ysnReleaseBlendsheetByNoOfMixes=0
-	Begin
-		Select @intNoOfSheets=1
-		Select @intEstNoOfSheets=1
-	End
+	IF @ysnReleaseBlendsheetByNoOfMixes = 0
+	BEGIN
+		SELECT @intNoOfSheets = 1
+
+		SELECT @intEstNoOfSheets = 1
+	END
 
 	WHILE @intNoOfSheets > 0
 	BEGIN
@@ -1362,7 +1455,7 @@ BEGIN TRY
 						WHEN isnull(L.dblWeight, 0) > 0
 							THEN L.dblWeight
 						ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)
-						END
+						END - IsNULL(LI.dblReservedQtyInTBS, 0)
 					,L.intLocationId
 					,L.intSubLocationId
 					,L.intStorageLocationId
@@ -1396,6 +1489,7 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 				JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
 				JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+				JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				WHERE L.intItemId = @intRawItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus IN (
@@ -1407,6 +1501,13 @@ BEGIN TRY
 						OR L.dtmExpiryDate >= GETDATE()
 						)
 					AND L.dblQty > @dblDefaultResidueQty
+					AND (
+						CASE 
+							WHEN isnull(L.dblWeight, 0) > 0
+								THEN L.dblWeight
+							ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)
+							END - IsNULL(LI.dblReservedQtyInTBS, 0)
+						) > 0
 					AND L.intStorageLocationId NOT IN (
 						@intKitStagingLocationId
 						,@intBlendStagingLocationId
@@ -1449,7 +1550,7 @@ BEGIN TRY
 						WHEN isnull(L.dblWeight, 0) > 0
 							THEN L.dblWeight
 						ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)
-						END
+						END - IsNULL(LI.dblReservedQtyInTBS, 0)
 					,L.intLocationId
 					,L.intSubLocationId
 					,L.intStorageLocationId
@@ -1483,6 +1584,7 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 				JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
 				LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+				JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				WHERE L.intItemId = @intRawItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus IN (
@@ -1494,6 +1596,13 @@ BEGIN TRY
 						OR L.dtmExpiryDate >= GETDATE()
 						)
 					AND L.dblQty > @dblDefaultResidueQty
+					AND (
+						CASE 
+							WHEN isnull(L.dblWeight, 0) > 0
+								THEN L.dblWeight
+							ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty)
+							END - IsNULL(LI.dblReservedQtyInTBS, 0)
+						) > 0
 					AND L.intStorageLocationId NOT IN (
 						@intKitStagingLocationId
 						,@intBlendStagingLocationId
@@ -1832,10 +1941,13 @@ BEGIN TRY
 								   LEFT JOIN tblICCommodityAttribute SC on SC.intCommodityAttributeId=Item.intRegionId
 								   LEFT JOIN tblICCommodityAttribute Origin on Origin.intCommodityAttributeId=Item.intOriginId
 								   WHERE AvailableInputLot.dblAvailableQty > ' 
-					+ CONVERT(VARCHAR(50), @dblDefaultResidueQty) + @strWhere 
-								   + ' ORDER BY ISNULL(intPreference, 1), ' + @strOrderByFinal
-								   +(Case When @ysnQuality=1 then ' ,dblTeaTasteOrderBy,dblTeaHueOrderBy,dblTeaIntensityOrderBy,dblTeaMouthFeelOrderBy,dblTeaAppearanceOrderBy '
-								   Else '' End)
+					+ CONVERT(VARCHAR(50), @dblDefaultResidueQty) + @strWhere + ' ORDER BY ISNULL(intPreference, 1), ' + @strOrderByFinal + (
+						CASE 
+							WHEN @ysnQuality = 1
+								THEN ' ,dblTeaTasteOrderBy,dblTeaHueOrderBy,dblTeaIntensityOrderBy,dblTeaMouthFeelOrderBy,dblTeaAppearanceOrderBy '
+							ELSE ''
+							END
+						)
 
 				EXEC (@strSQL)
 			END
@@ -2107,6 +2219,8 @@ BEGIN TRY
 				BEGIN
 					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % (@dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet));
 				END
+
+				 Select @dblNoOfPallets = @intUnitPerLayer * @intLayerPerPallet
 
 				--/* Pallet Issued UOM Type */
 				--IF @intIssuedUOMTypeId = 4
@@ -2600,6 +2714,46 @@ BEGIN TRY
 
 						IF @dblQuantity > 0
 						BEGIN
+							IF (@dblIssuedQuantity % @intNoOfSheets) > 0
+							BEGIN
+								IF EXISTS (
+										SELECT *
+										FROM @tblFW
+										WHERE intItemId = @intItemId
+										)
+								BEGIN
+									SELECT @strChar = NULL
+										,@intSeq = NULL
+
+									SELECT @strChar = strChar
+										,@intSeq = intSeq + 1
+									FROM @tblFW
+									WHERE intItemId = @intItemId
+
+									Update @tblFW Set intSeq=@intSeq Where intItemId = @intItemId
+
+									SELECT @strFW = @strChar + ltrim(@intSeq)
+								END
+								ELSE
+								BEGIN
+									SELECT @intRecordId = NULL
+										,@strChar = NULL
+										,@intSeq = 1
+
+									SELECT TOP 1 @intRecordId= intRecordId
+										,@strChar = strChar
+									FROM @tblFW
+									WHERE intItemId IS NULL
+									ORDER BY intRecordId ASC
+
+									UPDATE @tblFW
+									SET intItemId = @intItemId,intSeq=1
+									WHERE intRecordId = @intRecordId
+
+									SELECT @strFW = @strChar + ltrim(@intSeq)
+								END
+							END
+
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId
 								,intItemId
@@ -2613,6 +2767,7 @@ BEGIN TRY
 								,dblUnitCost
 								,intNoOfSheet
 								,dblNoOfPallets
+								,strFW
 								)
 							SELECT @intParentLotId
 								,@intItemId
@@ -2626,6 +2781,7 @@ BEGIN TRY
 								,@dblUnitCost
 								,@intNoOfSheets
 								,@dblNoOfPallets
+								,@strFW
 
 							IF ISNULL(@intPartialQuantitySubLocationId, 0) > 0
 								AND @intIssuedUOMTypeId = 2
@@ -3050,6 +3206,45 @@ BEGIN TRY
 
 						IF @dblQuantity > 0
 						BEGIN
+							IF (@dblIssuedQuantity % @intNoOfSheets) > 0
+							BEGIN
+								IF EXISTS (
+										SELECT *
+										FROM @tblFW
+										WHERE intItemId = @intItemId
+										)
+								BEGIN
+									SELECT @strChar = NULL
+										,@intSeq = NULL
+
+									SELECT @strChar = strChar
+										,@intSeq = intSeq + 1
+									FROM @tblFW
+									WHERE intItemId = @intItemId
+
+									Update @tblFW Set intSeq=@intSeq Where intItemId = @intItemId
+
+									SELECT @strFW = @strChar + ltrim(@intSeq)
+								END
+								ELSE
+								BEGIN
+									SELECT @intRecordId = NULL
+										,@strChar = NULL
+										,@intSeq = 1
+
+									SELECT TOP 1 @intRecordId = intRecordId
+										,@strChar = strChar
+									FROM @tblFW
+									WHERE intItemId IS NULL
+									ORDER BY intRecordId ASC
+
+									UPDATE @tblFW
+									SET intItemId = @intItemId,intSeq=1
+									WHERE intRecordId = @intRecordId
+
+									SELECT @strFW = @strChar + ltrim(@intSeq)
+								END
+							END
 							INSERT INTO #tblBlendSheetLot (
 								intParentLotId
 								,intItemId
@@ -3063,6 +3258,7 @@ BEGIN TRY
 								,dblUnitCost
 								,intNoOfSheet
 								,dblNoOfPallets
+								,strFW
 								)
 							SELECT @intParentLotId
 								,@intItemId
@@ -3076,6 +3272,7 @@ BEGIN TRY
 								,@dblUnitCost
 								,@intNoOfSheets
 								,@dblNoOfPallets
+								,@strFW
 
 							--UPDATE @tblInputItem
 							--SET dblPickedQty = dblPickedQty + @dblQuantity
@@ -3426,6 +3623,7 @@ BEGIN TRY
 		,dblWeightPerQty
 		,dblUnitCost
 		,dblNoOfPallets
+		,strFW
 		)
 	SELECT intParentLotId
 		,intItemId
@@ -3438,6 +3636,7 @@ BEGIN TRY
 		,AVG(dblWeightPerQty)
 		,MAX(dblUnitCost)
 		,dblNoOfPallets
+		,strFW
 	FROM #tblBlendSheetLot
 	GROUP BY intParentLotId
 		,intItemId
@@ -3446,6 +3645,7 @@ BEGIN TRY
 		,intRecipeItemId
 		,intStorageLocationId
 		,dblNoOfPallets
+		,strFW
 
 	IF @ysnEnableParentLot = 0
 		SELECT L.intLotId AS intWorkOrderInputLotId
@@ -3494,6 +3694,7 @@ BEGIN TRY
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
 			,dblNoOfPallets
+			,BS.strFW
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICLot L ON BS.intParentLotId = L.intLotId
 			AND L.dblQty > 0
@@ -3511,6 +3712,7 @@ BEGIN TRY
 		UNION
 		
 		SELECT *
+			,NULL
 			,NULL
 		FROM @tblRemainingPickedLots
 		
@@ -3544,6 +3746,7 @@ BEGIN TRY
 			,0
 			,'Added'
 			,''
+			,NULL
 			,NULL
 		FROM @tblPickedItem pl
 		JOIN tblICItem i ON pl.intItemId = i.intItemId
@@ -3597,6 +3800,7 @@ BEGIN TRY
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
 			,dblNoOfPallets
+			,NULL
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
 		INNER JOIN tblICLotStatus ls ON PL.intLotStatusId = ls.intLotStatusId
@@ -3654,6 +3858,7 @@ BEGIN TRY
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
 			,dblNoOfPallets
+			,NULL
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
 		INNER JOIN tblICLotStatus ls ON PL.intLotStatusId = ls.intLotStatusId

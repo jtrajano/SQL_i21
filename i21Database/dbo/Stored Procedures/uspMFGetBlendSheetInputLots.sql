@@ -54,6 +54,8 @@ BEGIN
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
+			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+			 ,wi.strFW
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -107,6 +109,8 @@ BEGIN
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
+			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+			 ,'' As strFW
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -160,6 +164,8 @@ BEGIN
 	, i.intCategoryId
 	, wi.intStorageLocationId 
     , LS.strSecondaryStatus
+	 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+	 ,'' As strFW
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
