@@ -225,6 +225,8 @@ AS
 		, CD.dtmEtaPod
 		, CD.intGardenMarkId
 		, CD.intReasonCodeId
+		, CD.dblConvertedNetWeight
+		, CD.dblConvertedQuantity
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
