@@ -115,7 +115,6 @@
 	[ysnEnableFrontEndMonitoring]                   BIT NOT NULL DEFAULT 0,
 	[ysnO365Integration] 				    		BIT NOT NULL DEFAULT 0,
 	[strO365CalendarEmail] 				    		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[strO365CalendarId] 				    		NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[ysnO365OnlineMeeting] 				    		BIT NOT NULL DEFAULT 0,
 	[strO365OnlineMeetingProvider] 				    NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnO365AllowNewTimeProposal] 				    BIT NOT NULL DEFAULT 1,
