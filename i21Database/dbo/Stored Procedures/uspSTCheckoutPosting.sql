@@ -644,20 +644,20 @@ BEGIN
 									,[strCalculationMethod] = TAX.strCalculationMethod
 									,[dblRate] = TAX.dblRate
 									,[intTaxAccountId] = TAX.intTaxAccountId
-									,[dblTax] = TAX.dblTax
-									,[dblAdjustedTax] = TAX.dblAdjustedTax
-									--,[dblTax] = CASE
-									--				WHEN @strInvoiceTransactionTypeMain = @strCASH
-									--					THEN TAX.dblTax
-									--				WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-									--					THEN TAX.dblTax * -1
-									--			END
-									--,[dblAdjustedTax] = CASE
-									--						WHEN @strInvoiceTransactionTypeMain = @strCASH
-									--							THEN TAX.dblAdjustedTax
-									--						WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-									--							THEN TAX.dblAdjustedTax * -1
-									--					END
+									--,[dblTax] = TAX.dblTax
+									--,[dblAdjustedTax] = TAX.dblAdjustedTax
+									,[dblTax] = CASE
+													WHEN @strInvoiceTransactionTypeMain = @strCASH
+														THEN TAX.dblTax
+													WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+														THEN TAX.dblTax * -1
+												END
+									,[dblAdjustedTax] = CASE
+															WHEN @strInvoiceTransactionTypeMain = @strCASH
+																THEN TAX.dblAdjustedTax
+															WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																THEN TAX.dblAdjustedTax * -1
+														END
 
 									,[ysnTaxAdjusted] = 1
 									,[ysnSeparateOnInvoice] = 0
@@ -901,7 +901,12 @@ BEGIN
 																						
 
 										,[dblDiscount]				= 0
-										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6)
+										,[dblPrice]					= CASE
+																		WHEN @strInvoiceTransactionTypeMain = @strCASH
+																		THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6)
+																		WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																		THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) + Tax.[dblAdjustedTax])/ CPT.dblQuantity, 6)
+																		END
 										--,[dblPrice]					= CASE WHEN @ysnConsignmentStore = 1 THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity																		
 										--								ELSE ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) END
 										,[ysnRefreshPrice]			= 0
@@ -5967,13 +5972,13 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 								DECLARE @ysnEqual AS BIT
                                 DECLARE @strRemark AS NVARCHAR(500)
-
+								
 								------------------------------------------------------------------------------------------------------
 								---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
 								------------------------------------------------------------------------------------------------------
 								SELECT @ysnEqual = A.ysnEqual
 										, @strRemark = A.strRemark
-
+								
 								FROM
 								(
 									SELECT
@@ -5989,15 +5994,15 @@ IF(@ysnDebug = CAST(1 AS BIT))
 												END
 												WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
 													THEN CASE
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 																THEN CAST(1 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 																THEN CAST(0 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 																THEN CAST(0 AS BIT)
 												END
 											END AS ysnEqual
--- QQ
+-- QQ							
 										, CASE
 											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
 													THEN CASE
@@ -6016,16 +6021,16 @@ IF(@ysnDebug = CAST(1 AS BIT))
 												END
 												WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
 													THEN CASE
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														WHEN Inv.dblInvoiceTotal = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														WHEN Inv.dblInvoiceTotal > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														WHEN Inv.dblInvoiceTotal < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
 												END
@@ -6043,8 +6048,8 @@ IF(@ysnDebug = CAST(1 AS BIT))
 										SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
 										SET @ysnSuccess = CAST(0 AS BIT)
 										SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
-
-
+								
+								
 										-- ROLLBACK
 										GOTO ExitWithRollback
 								END
