@@ -101,3 +101,10 @@ FROM
 		ON B.intTermsId = J.intTermID
 	LEFT JOIN tblSMTerm K
 		ON C.intTermsId = K.intTermID
+	LEFT JOIN tblAPVendorCompanyLocation J
+		ON J.intEntityVendorId = B.intEntityVendorId
+WHERE J.intVendorCompanyLocationId IS NULL
+OR (
+	EXISTS(SELECT 1 FROM tblAPVendorCompanyLocation vcl WHERE vcl.intEntityVendorId	= A.intEntityVendorId) AND
+	J.intVendorCompanyLocationId IS NOT NULL
+)
