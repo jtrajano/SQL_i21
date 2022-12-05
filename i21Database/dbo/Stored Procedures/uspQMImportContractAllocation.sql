@@ -2,6 +2,11 @@ CREATE PROCEDURE uspQMImportContractAllocation @intImportLogId INT
 AS
 BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(50)
+	DECLARE @intEntityUserId INT
+
+	SELECT @intEntityUserId = intEntityId
+	FROM tblQMImportLog
+	WHERE intImportLogId = @intImportLogId
 
 	BEGIN TRANSACTION
 
@@ -159,14 +164,12 @@ BEGIN TRY
 		WHERE S.intSampleId = @intSampleId
 
 		-- Update Contract Cash Price
-		UPDATE CD
-		SET intConcurrencyId = CD.intConcurrencyId + 1
-			,dblCashPrice = @dblCashPrice
-		FROM tblCTContractDetail CD
-		INNER JOIN tblQMSample S ON S.intContractDetailId = CD.intContractDetailId
-			AND S.intItemId = CD.intItemId
-		WHERE CD.intContractHeaderId = @intContractHeaderId
-			AND CD.intContractDetailId = @intContractDetailId
+		IF ISNULL(@dblCashPrice, 0) <> 0
+			EXEC uspCTUpdateSequencePrice
+				@intContractDetailId = @intContractDetailId
+				,@dblNewPrice = @dblCashPrice
+				,@intUserId = @intEntityUserId
+				,@strScreen = 'Contract Line Allocation Import'
 
 		UPDATE tblQMTestResult
 		SET intProductTypeId = 8 --Contract Line Item
