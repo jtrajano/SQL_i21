@@ -144,65 +144,25 @@ BEGIN
 					, ot.intSelectedInstrumentTypeId
 				FROM tblRKMatchFuturesPSHeader psh
 				JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId
-				JOIN fnRKGetOpenFutureByDateF360 (@intCommodityId, '1/1/1900', GETDATE()) ot ON psd.intLFutOptTransactionId = ot.intFutOptTransactionId
+				JOIN fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', GETDATE(), 1) ot ON psd.intLFutOptTransactionId = ot.intFutOptTransactionId
 				--JOIN tblSMCurrency c ON c.intCurrencyID = ot.intCurrencyId
 				JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = ot.intFutureMarketId
 				JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
-				JOIN fnRKGetOpenFutureByDateF360 (@intCommodityId, '1/1/1900', GETDATE()) ot1 ON psd.intSFutOptTransactionId = ot1.intFutOptTransactionId
-				WHERE ( ot.intCommodityId IS NULL
-						OR  
-						(ot.intCommodityId = ISNULL(@intCommodityId, ot.intCommodityId))
-					  )
-					AND ( ot.intFutureMarketId IS NULL
-						OR  
-						(ot.intFutureMarketId = ISNULL(@intFutureMarketId, ot.intFutureMarketId))
-					  )
-					AND ( ot.intBookId IS NULL
-						OR  
-						(ot.intBookId = ISNULL(@intBookId, ot.intBookId))
-					  )
-					AND ( ot.intSubBookId IS NULL
-						OR  
-						(ot.intSubBookId = ISNULL(@intSubBookId, ot.intSubBookId))
-					  )
-					AND ( ot.intEntityId IS NULL
-						OR  
-						(ot.intEntityId = ISNULL(@intEntityId, ot.intEntityId))
-					  )
-					AND ( ot.intBrokerageAccountId IS NULL
-						OR  
-						(ot.intBrokerageAccountId = ISNULL(@intBrokerageAccountId, ot.intBrokerageAccountId))
-					  )
-					AND ( ot.intFutureMonthId IS NULL
-						OR  
-						(ot.intFutureMonthId = ISNULL(@intFutureMonthId, ot.intFutureMonthId))
-					  )
-					AND ( ot.strNewBuySell IS NULL
-						OR  
-						(ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell))
-					  )
-					AND ( ot.ysnExpired IS NULL
-						OR  
-						(ot.ysnExpired = ISNULL(@ysnExpired, ot.ysnExpired))
-					  )
-					AND ( ot.intSelectedInstrumentTypeId IS NULL
-						OR  
-						(ot.intSelectedInstrumentTypeId = ISNULL(@intSelectedInstrumentTypeId, ot.intSelectedInstrumentTypeId))
-					  )
-					--ISNULL(ot.intCommodityId, 0) = ISNULL(@intCommodityId, ISNULL(ot.intCommodityId, 0))
-					--AND ISNULL(ot.intFutureMarketId, 0) = ISNULL(@intFutureMarketId, ISNULL(ot.intFutureMarketId, 0))
-					--AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))
-					--AND ISNULL(ot.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ot.intSubBookId, 0))
-					--AND ISNULL(ot.intEntityId, 0) = ISNULL(@intEntityId, ISNULL(ot.intEntityId, 0))
-					--AND ISNULL(ot.intBrokerageAccountId, 0) = ISNULL(@intBrokerageAccountId, ISNULL(ot.intBrokerageAccountId, 0))
-					--AND ISNULL(ot.intFutureMonthId, 0) = ISNULL(@intFutureMonthId, ISNULL(ot.intFutureMonthId, 0))
-					--AND ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell)
+				JOIN fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', GETDATE(), 1) ot1 ON psd.intSFutOptTransactionId = ot1.intFutOptTransactionId
+				WHERE ISNULL(ot.intCommodityId, 0) = ISNULL(@intCommodityId, ISNULL(ot.intCommodityId, 0))
+					AND ISNULL(ot.intFutureMarketId, 0) = ISNULL(@intFutureMarketId, ISNULL(ot.intFutureMarketId, 0))
+					AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))
+					AND ISNULL(ot.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ot.intSubBookId, 0))
+					AND ISNULL(ot.intEntityId, 0) = ISNULL(@intEntityId, ISNULL(ot.intEntityId, 0))
+					AND ISNULL(ot.intBrokerageAccountId, 0) = ISNULL(@intBrokerageAccountId, ISNULL(ot.intBrokerageAccountId, 0))
+					AND ISNULL(ot.intFutureMonthId, 0) = ISNULL(@intFutureMonthId, ISNULL(ot.intFutureMonthId, 0))
+					AND ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell)
 					AND CAST(psh.dtmMatchDate AS DATE) >= @dtmFromDate 
 					AND CAST(psh.dtmMatchDate AS DATE) <= @dtmToDate
 					AND psh.strType = 'Realize'
-					--AND ISNULL(ot.ysnExpired,0) = case when ISNULL(@ysnExpired,0)= 1 then ISNULL(ot.ysnExpired,0) else @ysnExpired end
+					AND ISNULL(ot.ysnExpired,0) = case when ISNULL(@ysnExpired,0)= 1 then ISNULL(ot.ysnExpired,0) else @ysnExpired end
 					AND ot.intInstrumentTypeId = 1
-					--AND ISNULL(ot.intSelectedInstrumentTypeId, 0) = ISNULL(@intSelectedInstrumentTypeId, ISNULL(ot.intSelectedInstrumentTypeId, 0))
+					AND ISNULL(ot.intSelectedInstrumentTypeId, 0) = ISNULL(@intSelectedInstrumentTypeId, ISNULL(ot.intSelectedInstrumentTypeId, 0))
 			) t
 		)t1
 	)t ORDER BY RowNum ASC
