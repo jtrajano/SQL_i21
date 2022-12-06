@@ -15,6 +15,7 @@ BEGIN
 		,@intSubBookId INT
 		,@strContractNumber NVARCHAR(50)
 		,@strINCOLocation NVARCHAR(50)
+		,@ysnPriceApproved BIT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strContractFeedIds NVARCHAR(MAX)
@@ -43,7 +44,7 @@ BEGIN
 		,@ysnDestinationPortMandatoryInPOExport BIT
 	DECLARE @intContractDetailId INT
 		,@strCertificationName NVARCHAR(MAX)
-		--,@intPriceContractId INT
+		,@intPriceContractId INT
 	DECLARE @tblCTContractDetail TABLE (intContractDetailId INT)
 
 	SELECT @ysnDestinationPortMandatoryInPOExport = IsNULL(ysnDestinationPortMandatoryInPOExport, 0)
@@ -154,7 +155,7 @@ BEGIN
 			,@strSubBook = NULL
 			,@strContractNumber = NULL
 			,@strINCOLocation = NULL
-
+		SELECT @ysnPriceApproved=1
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
 			,@strERPPONumber = strERPPONumber
@@ -217,31 +218,27 @@ BEGIN
 			GOTO NextPO
 		END
 
-		--SELECT @intPriceContractId = NULL
+		SELECT @intPriceContractId = NULL
 
-		--SELECT @intPriceContractId = intPriceContractId
-		--FROM dbo.tblCTPriceFixation
-		--WHERE intContractHeaderId = @intContractHeaderId
+		SELECT @intPriceContractId = intPriceContractId
+		FROM dbo.tblCTPriceFixation
+		WHERE intContractHeaderId = @intContractHeaderId
 
-		----AND intContractDetailId = @intContractDetailId
-		--IF @intPriceContractId IS NOT NULL
-		--BEGIN
-		--	IF NOT EXISTS (
-		--			SELECT TOP 1 1
-		--			FROM tblSMTransaction
-		--			WHERE strApprovalStatus IN ('Approved', 'Approved with Modifications')
-		--				AND intRecordId = @intPriceContractId
-		--				AND intScreenId = 123
-		--			)
-		--	BEGIN
-		--		--UPDATE tblCTContractFeed
-		--		--SET strMessage = 'Price Contract Waiting for Approval'
-		--		--WHERE intContractHeaderId = @intContractHeaderId
-		--		--	AND IsNULL(strFeedStatus, '') = ''
-		--		--	AND strRowState = @strRowState
-		--		GOTO NextPO
-		--	END
-		--END
+		--AND intContractDetailId = @intContractDetailId
+		IF @intPriceContractId IS NOT NULL
+		BEGIN
+			IF NOT EXISTS (
+					SELECT TOP 1 1
+					FROM tblSMTransaction
+					WHERE strApprovalStatus IN ('Approved', 'Approved with Modifications')
+						AND intRecordId = @intPriceContractId
+						AND intScreenId = 123
+					)
+			BEGIN
+
+				Select @ysnPriceApproved=0
+			END
+		END
 
 		IF @strRowState IN (
 				'Modified'
@@ -344,7 +341,7 @@ BEGIN
 					THEN IsNULL(CF.strERPItemNumber, '')
 				ELSE ''
 				END + '</PO_LINE_ITEM_NO>' + '<ITEM_NO>' + IsNull(I.strItemNo, '') + '</ITEM_NO>' + '<SUB_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strSubLocation, '')) + '</SUB_LOCATION>' + '<STORAGE_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strStorageLocation, '')) + '</STORAGE_LOCATION>' + '<QUANTITY>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblQuantity)), '') + '</QUANTITY>' + '<QUANTITY_UOM>' + IsNULL(CF.strQuantityUOM, '') + '</QUANTITY_UOM>' + '<NET_WEIGHT>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblNetWeight)), '') + '</NET_WEIGHT>' + '<NET_WEIGHT_UOM>' + IsNULL(strNetWeightUOM, '') + '</NET_WEIGHT_UOM>' 
-				+ Case When PT.strPricingType='Priced' then  
+				+ Case When @ysnPriceApproved=1 then  
 				'<PRICE_TYPE>' + IsNULL(PT.strPricingType, 0) + '</PRICE_TYPE>' 
 				+ '<PRICE_MARKET>' + IsNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>' 
 				+ '<PRICE_MONTH>' + IsNULL(Left(Convert(NVARCHAR, Convert(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>' 

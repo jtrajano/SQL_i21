@@ -9,6 +9,7 @@ BEGIN TRY
 	DECLARE @strInsert NVARCHAR(100)
 	DECLARE @strUpdate NVARCHAR(100)
 		,@strDelete NVARCHAR(50)
+		,@intContractDetailId INT
 	DECLARE @strToTransactionType NVARCHAR(100)
 		,@intPriceContractPreStageId INT
 		,@intPriceContractId INT
@@ -96,9 +97,142 @@ BEGIN TRY
 			END
 		END
 
+		SELECT @intContractDetailId = NULL
+
 		SELECT @intContractHeaderId = intContractHeaderId
+			,@intContractDetailId = intContractDetailId
 		FROM tblCTPriceFixation
 		WHERE intPriceContractId = @intPriceContractId
+
+		IF @ysnApproval = 1
+		BEGIN
+			DELETE
+			FROM tblCTContractFeed
+			WHERE intContractDetailId = @intContractDetailId
+				AND IsNULL(strFeedStatus, '') IN (
+					''
+					,'IGNORE'
+					)
+
+			INSERT INTO tblCTContractFeed (
+				intContractHeaderId
+				,intContractDetailId
+				,strCommodityCode
+				,strCommodityDesc
+				,strContractBasis
+				,strContractBasisDesc
+				,strSubLocation
+				,strCreatedBy
+				,strCreatedByNo
+				,strEntityNo
+				,strTerm
+				,strPurchasingGroup
+				,strContractNumber
+				,strERPPONumber
+				,intContractSeq
+				,strItemNo
+				,strStorageLocation
+				,dblQuantity
+				,dblCashPrice
+				,strQuantityUOM
+				,dtmPlannedAvailabilityDate
+				,dblBasis
+				,strCurrency
+				,dblUnitCashPrice
+				,strPriceUOM
+				,strRowState
+				,dtmContractDate
+				,dtmStartDate
+				,dtmEndDate
+				,dtmFeedCreated
+				,strSubmittedBy
+				,strSubmittedByNo
+				,strOrigin
+				,dblNetWeight
+				,strNetWeightUOM
+				,strVendorAccountNum
+				,strTermCode
+				,strContractItemNo
+				,strContractItemName
+				,strERPItemNumber
+				,strERPBatchNumber
+				,strLoadingPoint
+				,strPackingDescription
+				,ysnMaxPrice
+				,ysnSubstituteItem
+				,strLocationName
+				,strSalesperson
+				,strSalespersonExternalERPId
+				,strProducer
+				,intItemId
+				)
+			SELECT intContractHeaderId
+				,intContractDetailId
+				,strCommodityCode
+				,strCommodityDesc
+				,strContractBasis
+				,strContractBasisDesc
+				,strSubLocation
+				,strCreatedBy
+				,strCreatedByNo
+				,strEntityNo
+				,strTerm
+				,strPurchasingGroup
+				,strContractNumber
+				,strERPPONumber
+				,intContractSeq
+				,strItemNo
+				,strStorageLocation
+				,dblQuantity
+				,dblCashPrice
+				,strQuantityUOM
+				,dtmPlannedAvailabilityDate
+				,dblBasis
+				,strCurrency
+				,dblUnitCashPrice
+				,strPriceUOM
+				,CASE 
+					WHEN intContractStatusId = 3
+						THEN 'Delete'
+					ELSE (
+							CASE 
+								WHEN EXISTS (
+										SELECT *
+										FROM tblCTContractFeed
+										WHERE intContractDetailId = @intContractDetailId
+										)
+									THEN 'Modified'
+								ELSE 'Added'
+								END
+							)
+					END
+				,dtmContractDate
+				,dtmStartDate
+				,dtmEndDate
+				,GETDATE()
+				,strSubmittedBy
+				,strSubmittedByNo
+				,strOrigin
+				,dblNetWeight
+				,strNetWeightUOM
+				,strVendorAccountNum
+				,strTermCode
+				,strContractItemNo
+				,strContractItemName
+				,strERPItemNumber
+				,strERPBatchNumber
+				,strLoadingPoint
+				,strPackingDescription
+				,ysnMaxPrice
+				,ysnSubstituteItem
+				,strLocationName
+				,strSalesperson
+				,strSalespersonExternalERPId
+				,strProducer
+				,intItemId
+			FROM vyuCTContractFeed
+			WHERE intContractDetailId = @intContractDetailId
+		END
 
 		SELECT @intToCompanyId = TC.intToCompanyId
 			,@intToEntityId = TC.intEntityId
