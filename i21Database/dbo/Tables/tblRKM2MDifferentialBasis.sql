@@ -24,6 +24,7 @@
 	[intCropYearId] INT NULL,
 	[intStorageLocationId] INT NULL,
 	[intStorageUnitId] INT NULL,
+	[intMTMPointId] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKM2MDifferentialBasis] PRIMARY KEY ([intM2MDifferentialBasisId]), 
     CONSTRAINT [FK_tblRKM2MDifferentialBasis_tblRKM2MHeader] FOREIGN KEY ([intM2MHeaderId]) REFERENCES [tblRKM2MHeader]([intM2MHeaderId]) ON DELETE CASCADE, 

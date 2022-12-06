@@ -16,6 +16,7 @@ SELECT
 	, ysnEvaluationByCropYear = ISNULL(companyConfig.ysnEvaluationByCropYear , CAST(0 AS BIT))
 	, ysnEvaluationByStorageLocation = ISNULL(companyConfig.ysnEvaluationByStorageLocation , CAST(0 AS BIT))
 	, ysnEvaluationByStorageUnit = ISNULL(companyConfig.ysnEvaluationByStorageUnit , CAST(0 AS BIT))
+	, ysnIncludeProductInformation = ISNULL(companyConfig.ysnIncludeProductInformation , CAST(0 AS BIT))
 FROM tblRKM2MBasis basis
 OUTER APPLY (
 	SELECT TOP 1 
@@ -26,5 +27,6 @@ OUTER APPLY (
 		, ysnEvaluationByCropYear 
 		, ysnEvaluationByStorageLocation 
 		, ysnEvaluationByStorageUnit 
+		, ysnIncludeProductInformation
 	FROM tblRKCompanyPreference
 ) companyConfig
