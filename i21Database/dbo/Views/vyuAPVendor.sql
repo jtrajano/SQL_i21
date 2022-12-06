@@ -71,7 +71,8 @@ SELECT
 	ysnTransportTerminal,
 	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId END as intTermsId,
 	CASE WHEN C.intTermsId > 0 THEN K.strTerm ELSE J.strTerm END as strTerm,
-	B.strVATNo
+	B.strVATNo,
+	L.intCompanyLocationId
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -101,10 +102,13 @@ FROM
 		ON B.intTermsId = J.intTermID
 	LEFT JOIN tblSMTerm K
 		ON C.intTermsId = K.intTermID
-	LEFT JOIN tblAPVendorCompanyLocation J
-		ON J.intEntityVendorId = B.intEntityVendorId
-WHERE J.intVendorCompanyLocationId IS NULL
+	LEFT JOIN tblAPVendorCompanyLocation L
+		ON L.intEntityVendorId = B.intEntityId
+WHERE (
+	L.intVendorCompanyLocationId IS NULL AND 
+	NOT EXISTS(SELECT 1 FROM tblAPVendorCompanyLocation vcl WHERE vcl.intEntityVendorId	= B.intEntityId)
+)
 OR (
-	EXISTS(SELECT 1 FROM tblAPVendorCompanyLocation vcl WHERE vcl.intEntityVendorId	= A.intEntityVendorId) AND
-	J.intVendorCompanyLocationId IS NOT NULL
+	EXISTS(SELECT 1 FROM tblAPVendorCompanyLocation vcl WHERE vcl.intEntityVendorId	= B.intEntityId) AND
+	L.intVendorCompanyLocationId IS NOT NULL
 )
