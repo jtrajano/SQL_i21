@@ -117,7 +117,7 @@ BEGIN TRY
 
 		SELECT @strRootXML += '<Sender>iRely</Sender>'
 
-		SELECT @strRootXML += '<Receiver>ICRON</Receiver>'
+		SELECT @strRootXML += '<Receiver>SAP</Receiver>'
 
 		SELECT @strFinalXML = '<root>' + @strRootXML + @strXML + '</root>'
 	END
