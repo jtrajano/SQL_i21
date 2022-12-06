@@ -4,7 +4,7 @@
 	,@ysnKeep NVARCHAR(10) = NULL
 	,@type NVARCHAR(50) = NULL
 	,@UserId INT = NULL
-	,@dblTBSQuantity NUMERIC(18, 6) = NULL
+	,@dblTBSQuantity NUMERIC(18, 6) = 0
 	)
 AS
 BEGIN
@@ -33,7 +33,7 @@ BEGIN
 				AND intWorkOrderInputLotId = @intWorkOrderInputLotId
 		END
 
-		IF @dblTBSQuantity IS NOT NULL
+		IF @dblTBSQuantity <> 0
 		BEGIN
 			UPDATE tblMFWorkOrderInputLot
 			SET dblTBSQuantity = @dblTBSQuantity
