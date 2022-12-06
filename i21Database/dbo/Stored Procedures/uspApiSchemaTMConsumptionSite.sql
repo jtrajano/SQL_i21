@@ -43,7 +43,7 @@ BEGIN
 	LEFT JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
 	LEFT JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
 	LEFT JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId
-	WHERE (C.intEntityId IS NULL OR T.intCustomerID IS NULL)
+	WHERE (C.intEntityId IS NULL OR E.intEntityId IS NULL)
 	AND CS.guiApiUniqueId = @guiApiUniqueId
 
 	-- VALIDATE SITE LOCATION
