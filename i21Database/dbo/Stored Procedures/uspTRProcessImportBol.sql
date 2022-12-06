@@ -36,10 +36,11 @@ BEGIN
    @intSellerId INT = NULL,  
    @intFreightItemId INT = NULL,  
    @intUserId INT = NULL,  
-   @ysnAllowDiffUnits BIT = 0  
+   @ysnAllowDiffUnits BIT = 0,
+   @ysnComboFreight BIT = NULL
   
   -- GET DEFAULT SELLER  
-  SELECT TOP 1 @intSellerId = intSellerId, @intFreightItemId = intItemForFreightId, @ysnAllowDiffUnits = ISNULL(ysnAllowDifferentUnits, 0) FROM tblTRCompanyPreference   
+  SELECT TOP 1 @intSellerId = intSellerId, @intFreightItemId = intItemForFreightId, @ysnAllowDiffUnits = ISNULL(ysnAllowDifferentUnits, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0) FROM tblTRCompanyPreference
   
   SELECT TOP 1 @intUserId = intUserId FROM tblTRImportLoad WHERE intImportLoadId = @intImportLoadId  
   
@@ -445,7 +446,6 @@ BEGIN
       UPDATE tblTRLoadDistributionDetail SET dblDistributionGrossSalesUnits = @dblSum, dblDistributionNetSalesUnits = @dblSum  
       WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId  
      END  
-       
   
      UPDATE tblTRLoadReceipt SET dblFreightRate = @dblBlendFreightRateReceipt, dblPurSurcharge = @dblBlendSurchargeReceipt   
      WHERE intLoadHeaderId = @intLoadHeaderId   
@@ -631,12 +631,19 @@ BEGIN
       1)  
   
      SET @intNonBlendLoadDistributionDetailId = @@identity  
-  
+
+	 IF(@ysnComboFreight = 0)  
+     BEGIN  
+      UPDATE tblTRLoadDistributionDetail SET ysnComboFreight = 0
+      WHERE intLoadDistributionDetailId = @intNonBlendLoadDistributionDetailId  
+     END  
+       
+
      UPDATE tblTRImportLoadDetail SET intLoadDistributionDetailId = @intNonBlendLoadDistributionDetailId  
      WHERE intImportLoadId = @intImportLoadId   
      AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId  
      AND intDropProductId = @intNonBlendDropProductId  
-     AND ysnValid = 1  
+     AND ysnValid = 1 
   
      FETCH NEXT FROM @CursorDistributionDetailNonBlendTran INTO @intNonBlendPullProductId, @intNonBlendDropProductId, @dblNonBlendDropGross, @dblNonBlendDropNet, @strNonBlendBillOfLading, @strNonBlendReceiptLink, @strNonBlendReceiptZipCode, @strNonBlendGrossNet  
     END  
