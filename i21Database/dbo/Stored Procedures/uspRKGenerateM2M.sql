@@ -133,6 +133,7 @@ BEGIN TRY
 		, @dtmCurrentDate DATETIME = GETDATE()
 		, @dtmCurrentDay DATETIME = DATEADD(DD, DATEDIFF(DD, 0, GETDATE()), 0)
 		, @intMarkToMarketRateTypeId INT
+		, @ysnEnableMTMPoint BIT
 
 	SELECT TOP 1 @strM2MView = strM2MView
 		, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
@@ -163,6 +164,7 @@ BEGIN TRY
 	SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 	SELECT TOP 1 @strM2MType = strType FROM tblRKM2MType WHERE intM2MTypeId = @intM2MTypeId
 	SELECT TOP 1 @intMarkToMarketRateTypeId = intMarkToMarketRateTypeId FROM tblSMMultiCurrency 
+	SELECT TOP 1 @ysnEnableMTMPoint = ysnEnableMTMPoint FROM tblCTCompanyPreference
 
 
 	SET @dtmEndDate = LEFT(CONVERT(VARCHAR, @dtmEndDate, 101), 10)
@@ -552,6 +554,8 @@ BEGIN TRY
 			, intSubBookId INT
 			, intFMMainCurrencyId INT
 			, ysnFMSubCurrency BIT
+			, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intMTMPointId INT
 		)
 
 		DECLARE @GetContractDetailView TABLE (intCommodityUnitMeasureId INT
@@ -640,6 +644,8 @@ BEGIN TRY
 			, intBookId INT
 			, strSubBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intSubBookId INT
+			, intMTMPointId INT
+			, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 			
 		--There is an error "An INSERT EXEC statement cannot be nested." that is why we cannot directly call the uspRKDPRContractDetail AND insert
@@ -1070,6 +1076,8 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, intMTMPointId
+			, strMTMPoint
 		)
 		SELECT DISTINCT intCommodityUnitMeasureId = CH.intCommodityUOMId
 			, strLocationName = CASE WHEN @ysnEvaluationByLocation = 0
@@ -1233,6 +1241,14 @@ BEGIN TRY
 			, intBookId = book.intBookId
 			, strSubBook = subBook.strSubBook
 			, intSubBookId = subBook.intSubBookId
+			, intMTMPointId = CASE WHEN @ysnEnableMTMPoint = 0
+									THEN NULL
+									ELSE CD.intMTMPointId
+									END 
+			, strMTMPoint  = CASE WHEN @ysnEnableMTMPoint = 0
+									THEN NULL
+									ELSE mtm.strMTMPoint
+									END 
 		FROM tblCTContractHeader CH
 		INNER JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 		INNER JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
@@ -1349,6 +1365,7 @@ BEGIN TRY
 			AND LEFT(CONVERT(VARCHAR, invShip.dtmShipDate, 101), 10) <= @dtmEndDate
 			AND shipment.ysnPosted = 1
 		) invShipWarehouse
+		LEFT JOIN tblCTMTMPoint mtm on mtm.intMTMPointId = CD.intMTMPointId
 		WHERE CH.intCommodityId = @intCommodityId
 			AND CL.intCompanyLocationId = ISNULL(@intLocationId, CL.intCompanyLocationId)
 			AND ISNULL(CD.intMarketZoneId, 0) = ISNULL(@intMarketZoneId, ISNULL(CD.intMarketZoneId, 0))
@@ -1576,6 +1593,8 @@ BEGIN TRY
 			, intSubBookId INT
 			, intFMMainCurrencyId INT
 			, ysnFMSubCurrency BIT
+			, intMTMPointId INT	
+			, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 
 		SELECT dblRatio
@@ -1598,6 +1617,7 @@ BEGIN TRY
 			, temp.intCropYearId
 			, temp.intStorageLocationId
 			, temp.intStorageUnitId
+			, temp.intMTMPointId
 		INTO #tmpM2MBasisDetail
 		FROM tblRKM2MBasisDetail temp
 		LEFT JOIN tblSMCurrency c ON temp.intCurrencyId=c.intCurrencyID
@@ -1757,6 +1777,8 @@ BEGIN TRY
 			, intSubBookId
 			, intFMMainCurrencyId
 			, ysnFMSubCurrency
+			, intMTMPointId
+			, strMTMPoint
 		)
 		SELECT intContractHeaderId
 			, intContractDetailId
@@ -1856,6 +1878,8 @@ BEGIN TRY
 			, intSubBookId
 			, intFMMainCurrencyId
 			, ysnFMSubCurrency
+			, intMTMPointId
+			, strMTMPoint
 		FROM (
 			SELECT DISTINCT cd.intContractHeaderId
 				, cd.intContractDetailId
@@ -1976,6 +2000,8 @@ BEGIN TRY
 				, cd.intSubBookId
 				, p.intFMMainCurrencyId
 				, p.ysnFMSubCurrency
+				, cd.intMTMPointId
+				, cd.strMTMPoint
 			FROM @GetContractDetailView cd
 			JOIN tblICCommodityUnitMeasure cuc ON cd.intCommodityId = cuc.intCommodityId AND cuc.intUnitMeasureId = cd.intUnitMeasureId AND cd.intCommodityId = @intCommodityId
 			JOIN tblICCommodityUnitMeasure cuc1 ON cd.intCommodityId = cuc1.intCommodityId AND cuc1.intUnitMeasureId = @intQuantityUOMId
@@ -2022,6 +2048,9 @@ BEGIN TRY
 														THEN dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 														ELSE ISNULL(tmp.strPeriodTo, '')
 														END
+					AND ISNULL(tmp.intMTMPointID, 0) = CASE WHEN @ysnEnableMTMPoint = 1 
+																					THEN ISNULL(cd.intMTMPointId, 0)
+																					ELSE ISNULL(tmp.intMTMPointId, 0) END
 					AND tmp.strContractInventory = 'Contract' ) basisDetail
 			LEFT JOIN tblCTContractHeader cth
 				ON cd.intContractHeaderId = cth.intContractHeaderId
@@ -2197,6 +2226,8 @@ BEGIN TRY
 			, intSubBookId
 			, intFMMainCurrencyId
 			, ysnFMSubCurrency
+			, strMTMPoint
+			, intMTMPointId
 		) 
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -2299,6 +2330,8 @@ BEGIN TRY
 			, intSubBookId
 			, intFMMainCurrencyId
 			, ysnFMSubCurrency
+			, strMTMPoint
+			, intMTMPointId
 		FROM (
 			SELECT *	
 				, dblResult = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0)))
@@ -2419,6 +2452,8 @@ BEGIN TRY
 						, cd.intSubBookId
 						, cd.intFMMainCurrencyId
 						, cd.ysnFMSubCurrency
+						, cd.intMTMPointId
+						, cd.strMTMPoint
 					FROM @tblOpenContractList cd
 					LEFT JOIN (
 						SELECT dblQuantity = SUM(LD.dblQuantity)
@@ -2895,6 +2930,8 @@ BEGIN TRY
 			, intSubBookId
 			, intFMMainCurrencyId
 			, ysnFMSubCurrency
+			, intMTMPointId
+			, strMTMPoint
 		)
 		SELECT DISTINCT intContractHeaderId
 			, intContractDetailId 
@@ -2999,6 +3036,8 @@ BEGIN TRY
 			, intSubBookId
 			, intFMMainCurrencyId
 			, ysnFMSubCurrency
+			, intMTMPointId
+			, strMTMPoint
 		FROM (
 			SELECT *
 				, dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN intCommodityUnitMeasureId ELSE intQuantityUOMId END, intCommodityUnitMeasureId, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, ISNULL(intPriceUOMId, intCommodityUnitMeasureId), ISNULL(dblOpenQty, 0))) as dblResult
@@ -3174,6 +3213,8 @@ BEGIN TRY
 						, intSubBookId
 						, cd.intFMMainCurrencyId
 						, cd.ysnFMSubCurrency
+						, cd.intMTMPointId
+						, cd.strMTMPoint
 					FROM @tblOpenContractList cd
 					LEFT JOIN (SELECT SUM(LD.dblQuantity)dblQuantity
 									, PCT.intContractDetailId
@@ -3332,6 +3373,8 @@ BEGIN TRY
 				, intBookId
 				, strSubBook
 				, intSubBookId
+				, strMTMPoint
+				, intMTMPointId
 			FROM @ListTransaction
 		) t
 		ORDER BY intCommodityId, strContractSeq DESC
@@ -3851,6 +3894,8 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, strMTMPoint
+			, intMTMPointId
 		INTO #tmpM2MTransaction
 		FROM (
 			SELECT intContractHeaderId
@@ -3976,6 +4021,8 @@ BEGIN TRY
 				, t.intBookId
 				, t.strSubBook
 				, t.intSubBookId
+				, t.strMTMPoint
+				, t.intMTMPointId
 			FROM (
 				SELECT t.*
 					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Unpriced' THEN dblConvertedFuturePrice
@@ -4163,6 +4210,8 @@ BEGIN TRY
 				, intBookId
 				, strSubBook
 				, intSubBookId
+				, strMTMPoint
+				, intMTMPointId
 			FROM #Temp 
 			WHERE dblOpenQty <> 0 AND intContractHeaderId IS NULL
 		)t 
@@ -4249,6 +4298,8 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
+			, strMTMPoint
+			, intMTMPointId
 		)
 		SELECT * FROM #tmpM2MTransaction
 
@@ -4396,6 +4447,7 @@ BEGIN TRY
 			, bd.intCropYearId 
 			, bd.intStorageLocationId 
 			, bd.intStorageUnitId
+			, bd.intMTMPointId
 		INTO #tmpM2MDifferentialBasis
 		FROM tblRKM2MBasis b
 		JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
@@ -4456,6 +4508,7 @@ BEGIN TRY
 			, intCropYearId 
 			, intStorageLocationId 
 			, intStorageUnitId
+			, intMTMPointId
 		)
 		SELECT intM2MHeaderId
 			, intM2MBasisDetailId
@@ -4480,6 +4533,7 @@ BEGIN TRY
 			, intCropYearId 
 			, intStorageLocationId 
 			, intStorageUnitId
+			, intMTMPointId
 		FROM #tmpM2MDifferentialBasis
 
 		-- Settlement Price

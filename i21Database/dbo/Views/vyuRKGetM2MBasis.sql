@@ -90,6 +90,16 @@ SELECT DISTINCT strCommodityCode
 								ELSE storageUnit.intStorageLocationId
 								END
 							END
+	, strProductType = ProductType.strDescription
+	, im.intProductTypeId
+	, strProductLine = ProductLine.strDescription
+	, im.intProductLineId
+	, strGrade  = Grade.strDescription
+	, im.intGradeId
+	, strCertification = Certification.strCertificationName
+	, im.intCertificationId
+	, MTMPoint.strMTMPoint
+	, cd.intMTMPointId
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -191,7 +201,11 @@ OUTER APPLY (
 	AND invShipment.intLineNo = cd.intContractDetailId
 	AND shipment.ysnPosted = 1
 ) invShipWarehouse
-
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityId = c.intCommodityId AND ProductType.strType = 'ProductType' AND ProductType.intCommodityAttributeId = im.intProductTypeId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityId = c.intCommodityId AND ProductLine.intCommodityProductLineId = im.intProductLineId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityId = c.intCommodityId AND Grade.strType = 'Grade' AND Grade.intCommodityAttributeId = im.intGradeId
+LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
+LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 WHERE dblBalance > 0 AND cd.intPricingTypeId NOT IN (5,6) AND cd.intContractStatusId <> 3	
 
 UNION SELECT DISTINCT strCommodityCode
@@ -276,6 +290,16 @@ UNION SELECT DISTINCT strCommodityCode
 								ELSE storageUnit.intStorageLocationId
 								END
 							END
+	, strProductType = ProductType.strDescription
+	, im.intProductTypeId
+	, strProductLine = ProductLine.strDescription
+	, im.intProductLineId
+	, strGrade  = Grade.strDescription
+	, im.intGradeId
+	, strCertification = Certification.strCertificationName
+	, im.intCertificationId
+	, MTMPoint.strMTMPoint
+	, cd.intMTMPointId
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail  cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -376,6 +400,11 @@ OUTER APPLY (
 	AND invShipment.intLineNo = cd.intContractDetailId
 	AND shipment.ysnPosted = 1
 ) invShipWarehouse
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityId = c.intCommodityId AND ProductType.strType = 'ProductType' AND ProductType.intCommodityAttributeId = im.intProductTypeId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityId = c.intCommodityId AND ProductLine.intCommodityProductLineId = im.intProductLineId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityId = c.intCommodityId AND Grade.strType = 'Grade' AND Grade.intCommodityAttributeId = im.intGradeId
+LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
+LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 WHERE cd.intPricingTypeId IN (5,6) AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
@@ -420,6 +449,16 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, intStorageLocationId
 	, strStorageUnit 
 	, intStorageUnitId
+	, strProductType 
+	, intProductTypeId 
+	, strProductLine 
+	, intProductLineId
+	, strGrade 
+	, intGradeId
+	, strCertification
+	, intCertificationId
+	, strMTMPoint
+	, intMTMPointId
 FROM (
 	SELECT it.intItemId
 		, it.strItemNo
@@ -475,6 +514,16 @@ OUTER APPLY (
 		, intStorageLocationId = NULL
 		, strStorageUnit = NULL
 		, intStorageUnitId = NULL
+		, strProductType = NULL
+		, intProductTypeId = NULL
+		, strProductLine = NULL
+		, intProductLineId = NULL
+		, strGrade  = NULL
+		, intGradeId = NULL
+		, strCertification = NULL
+		, intCertificationId = NULL
+		, strMTMPoint = NULL
+		, intMTMPointId = NULL
 	FROM tblCTContractDetail cd
 	JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 	JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
