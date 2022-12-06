@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspQMUpdateReconciliationIntegration] 
+CREATE PROCEDURE [dbo].[uspQMUpdateReconciliationIntegration] 
 	  @intCatalogueReconciliationId		INT = NULL	
 	, @intUserId						INT = NULL
 AS  
