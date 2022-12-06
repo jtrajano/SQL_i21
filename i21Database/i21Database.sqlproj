@@ -1395,6 +1395,8 @@
     <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
     <Build Include="dbo\Tables\tblIPLeadTimePreStage.sql" />
     <Build Include="dbo\Views\vyuMFBatchDetail.sql" />
+    <Build Include="dbo\Tables\tblIPLeadTimeSAPPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTimeBulk_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

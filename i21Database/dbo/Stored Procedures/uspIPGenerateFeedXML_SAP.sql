@@ -15,6 +15,12 @@ BEGIN TRY
 			,@limit = @limit
 			,@offset = @offset
 	END
+	ELSE IF @strType = 'Lead Time SAP'
+	BEGIN
+		EXEC dbo.uspIPGenerateSAPLeadTimeBulk_EK @ysnUpdateFeedStatus = 1
+			,@limit = @limit
+			,@offset = @offset
+	END
 END TRY
 
 BEGIN CATCH

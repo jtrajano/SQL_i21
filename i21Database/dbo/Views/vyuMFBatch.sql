@@ -132,6 +132,7 @@ SELECT
 	,A.dblOriginalTeaMoisture
     ,Channel.strMarketZoneCode
     ,OriginalItem.strItemNo strOriginalItem
+    ,SM.strCurrency
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = B.intGardenMarkId
@@ -148,6 +149,7 @@ LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId= A.intWeightUOMId
 LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId= A.intPackageUOMId
 LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = A.intBrokerId
 LEFT JOIN tblMFReasonCode Reason ON Reason.intReasonCodeId = A.intReasonCodeId
+LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID= A.intCurrencyId
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  

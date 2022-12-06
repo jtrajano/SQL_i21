@@ -186,7 +186,7 @@ BEGIN TRY
 		 , dblCatReconPrice						= CRD.dblPreInvoicePrice
 		 , dblSamplePrice						= S.dblB1Price
 		 , dblCatReconQty						= CRD.dblPreInvoiceQuantity
-		 , dblSampleQty							= S.dblB1QtyBought
+		 , dblSampleQty							= S.dblRepresentingQty
 		 , strCatReconChopNo					= CRD.strPreInvoiceChopNo
 		 , strSampleChopNo						= S.strChopNumber
 		 , intCatReconGardenMarkId				= GM.intGardenMarkId
@@ -202,7 +202,7 @@ BEGIN TRY
     LEFT JOIN tblICCommodityAttribute CA ON CRD.strPreInvoiceGrade = CA.strDescription AND CA.strType = 'Grade'	
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
       AND (S.dblB1Price <> CRD.dblPreInvoicePrice
-        OR S.dblB1QtyBought <> CRD.dblPreInvoiceQuantity
+        OR S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity
         OR S.strChopNumber <> CRD.strPreInvoiceChopNo
         OR S.intGardenMarkId <> GM.intGardenMarkId
         OR S.intGradeId <> CA.intCommodityAttributeId)
@@ -212,7 +212,7 @@ BEGIN TRY
 		BEGIN
 			UPDATE S
 			SET dblB1Price			= ISNULL(SS.dblCatReconPrice, 0)
-			  , dblB1QtyBought		= ISNULL(SS.dblCatReconQty, 0)
+			  , dblRepresentingQty	= ISNULL(SS.dblCatReconQty, 0)
 			  , strChopNumber		= SS.strCatReconChopNo
 			  , intGardenMarkId		= NULLIF(SS.intCatReconGardenMarkId, 0)
 			  , intGradeId			= NULLIF(SS.intCatReconGradeId, 0)
@@ -262,7 +262,7 @@ BEGIN TRY
 
 					SELECT [Id]			= 3
 						, [Action]		= NULL
-						, [Change]		= 'Update Initial Bought Qty'
+						, [Change]		= 'Update Representing Quantity'
 						, [From]		= CAST(dblSampleQty AS NVARCHAR(100))
 						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
 						, [ParentId]	= 1

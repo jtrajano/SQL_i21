@@ -444,14 +444,11 @@ BEGIN
 	LEFT JOIN @FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 	INNER JOIN @GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 	LEFT JOIN (
-		SELECT
-			 strTransactionId
-			,dblNewForexRate
+		SELECT strTransactionId		= strTransactionId
+			 , dblNewForexRate		= AVG(dblNewForexRate)
 		FROM vyuGLRevalueDetails
 		WHERE strTransactionType = 'Invoice'
-		GROUP BY
-			 strTransactionId
-			,dblNewForexRate
+		GROUP BY strTransactionId
 	) GLRD ON I.strInvoiceNumber = GLRD.strTransactionId 
 	LEFT JOIN (
 		SELECT intCurrencyID
