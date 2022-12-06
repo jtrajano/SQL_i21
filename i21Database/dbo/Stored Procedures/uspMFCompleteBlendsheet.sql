@@ -375,7 +375,7 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-				DECLARE @dblUpperToleranceQuantity NUMERIC(16, 8)
+				DECLARE @dblUpperToleranceQuantity NUMERIC(24, 12)
 			,@dblLowerToleranceQuantity NUMERIC(16, 8)
 			,@strQtyToProduce NVARCHAR(50)
 			,@strUpperToleranceQuantity NVARCHAR(50)
