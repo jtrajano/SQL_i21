@@ -21,13 +21,20 @@ BEGIN
 				,@intWorkOrderInputLotId
 		END
 
+		IF @ysnKeep IS NOT NULL
+		BEGIN
+			UPDATE tblMFWorkOrderInputLot
+			SET ysnKeep = CASE 
+					WHEN @ysnKeep = 'true'
+						THEN 1
+					ELSE 0
+					END
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intWorkOrderInputLotId = @intWorkOrderInputLotId
+		END
+
 		UPDATE tblMFWorkOrderInputLot
-		SET ysnKeep = CASE 
-				WHEN @ysnKeep = 'true'
-					THEN 1
-				ELSE 0
-				END
-			,dblTBSQuantity = @dblTBSQuantity
+		SET dblTBSQuantity = @dblTBSQuantity
 			,ysnTBSReserved = 1
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intWorkOrderInputLotId = @intWorkOrderInputLotId
