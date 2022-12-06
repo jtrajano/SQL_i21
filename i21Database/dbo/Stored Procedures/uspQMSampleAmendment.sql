@@ -7,10 +7,13 @@ DECLARE @intTranCount		    INT
 DECLARE @intLoadId			    INT = NULL
 DECLARE @intLoadDetailId	    INT = NULL
 DECLARE @intContractDetailId    INT = NULL
+DECLARE @intContractHeaderId    INT = NULL
 DECLARE @ysnSuccess			    BIT = 1
 DECLARE @strErrorMsg		    NVARCHAR(MAX) = NULL
 DECLARE @strCatalogueIds	    NVARCHAR(MAX) = NULL
 DECLARE @strMarketZone          NVARCHAR(50) = NULL
+DECLARE @dblSamplePrice			NUMERIC(18, 6) = 0
+DECLARE @dblSampleQty			NUMERIC(18, 6) = 0
 
 SET @intTranCount = @@trancount;
 
@@ -24,10 +27,14 @@ BEGIN TRY
 			   , @intLoadDetailId	    = LGD.intLoadDetailId
                , @strMarketZone         = MZ.strMarketZoneCode
                , @intContractDetailId   = S.intContractDetailId
+			   , @dblSamplePrice 		= S.dblB1Price
+			   , @dblSampleQty			= S.dblRepresentingQty
+			   , @intContractHeaderId	= CD.intContractHeaderId
 	FROM tblQMSample S
     INNER JOIN tblMFBatch B ON S.intSampleId = B.intSampleId
     INNER JOIN tblLGLoadDetail LGD ON B.intBatchId = LGD.intBatchId
     LEFT JOIN tblARMarketZone MZ ON S.intMarketZoneId = MZ.intMarketZoneId
+	LEFT JOIN tblCTContractDetail CD ON S.intContractDetailId = CD.intContractDetailId
 	WHERE S.intSampleId = @intSampleId
 	
     --CHECK IF HAS AMENDMENTS    
@@ -46,7 +53,7 @@ BEGIN TRY
 
 		 , dblSamplePrice						= S.dblB1Price
 		 , dblPreInvoicePrice					= CRD.dblPreInvoicePrice
-		 , dblSampleQty							= S.dblB1QtyBought
+		 , dblSampleQty							= S.dblRepresentingQty
 		 , dblPreInvoiceQuantity				= CRD.dblPreInvoiceQuantity
 		 , strSampleChopNumber					= S.strChopNumber
 		 , strPreInvoiceChopNo					= CRD.strPreInvoiceChopNo
@@ -65,7 +72,7 @@ BEGIN TRY
     LEFT JOIN tblICCommodityAttribute CA ON CRD.strPreInvoiceGrade = CA.strDescription AND CA.strType = 'Grade'
     WHERE S.intSampleId = @intSampleId
       AND (S.dblB1Price <> CRD.dblPreInvoicePrice
-        OR S.dblB1QtyBought <> CRD.dblPreInvoiceQuantity
+        OR S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity
         OR S.strChopNumber <> CRD.strPreInvoiceChopNo
         OR S.intGardenMarkId <> GM.intGardenMarkId
         OR S.intGradeId <> CA.intCommodityAttributeId)
@@ -90,7 +97,7 @@ BEGIN TRY
 		--UPDATE CAT RECON DETAILS
 		UPDATE CRD
 		SET dblPreInvoicePrice		= S.dblB1Price
-		  , dblPreInvoiceQuantity	= S.dblB1QtyBought
+		  , dblPreInvoiceQuantity	= S.dblRepresentingQty
 		  , strPreInvoiceChopNo		= S.strChopNumber
 		  , strPreInvoiceGarden		= GM.strGardenMark
 		  , strPreInvoiceGrade		= CA.strDescription
@@ -104,8 +111,8 @@ BEGIN TRY
         --UPDATE BILL DETAILS
 		UPDATE BD
 		SET dblCost							= ISNULL(S.dblB1Price, 0)
-		  , dblQtyReceived					= ISNULL(S.dblB1QtyBought, 0)
-		  , dblQtyOrdered					= ISNULL(S.dblB1QtyBought, 0)
+		  , dblQtyReceived					= ISNULL(S.dblRepresentingQty, 0)
+		  , dblQtyOrdered					= ISNULL(S.dblRepresentingQty, 0)
 		  , strPreInvoiceGardenNumber		= S.strChopNumber
 		  , intGardenMarkId					= NULLIF(GM.intGardenMarkId, 0)
 		  , strComment						= CA.strDescription
@@ -120,7 +127,7 @@ BEGIN TRY
 		--UPDATE BATCH
         UPDATE B
         SET dblBoughtPrice                  = ISNULL(S.dblB1Price, 0)
-          , dblTotalQuantity                = ISNULL(S.dblB1QtyBought, 0)
+          , dblTotalQuantity                = ISNULL(S.dblRepresentingQty, 0)
           , strTeaGardenChopInvoiceNumber   = S.strChopNumber
           , intGardenMarkId                 = S.intGardenMarkId
           , strLeafGrade                    = CA.strDescription
@@ -141,12 +148,141 @@ BEGIN TRY
 
                 IF ISNULL(@strMarketZone, '') <> 'AUC'
                     BEGIN
+						--UPDATE LOAD SHIPMENT
                         UPDATE tblLGLoadDetail
                         SET intPContractDetailId = @intContractDetailId
                         WHERE intLoadId = @intLoadId
                           AND intLoadDetailId = @intLoadDetailId
-                    END 
 
+						UPDATE tblLGLoadDetail
+                        SET dblUnitPrice = @dblSamplePrice
+                        WHERE intLoadId = @intLoadId
+                          AND intLoadDetailId = @intLoadDetailId
+						  AND dblUnitPrice <> @dblSamplePrice
+
+						UPDATE tblLGLoadDetail
+                        SET dblQuantity = @dblSampleQty
+                        WHERE intLoadId = @intLoadId
+                          AND intLoadDetailId = @intLoadDetailId
+						  AND dblQuantity <> @dblSampleQty
+
+						--AUDIT LOG FOR LOAD SHIPMENT
+						DECLARE @LoadShipmentSingleAuditLogParam		AS SingleAuditLogParam
+
+						INSERT INTO @LoadShipmentSingleAuditLogParam (
+							  [Id]
+							, [Action]
+							, [Change]
+							, [From]
+							, [To]
+							, [ParentId]
+						)
+						SELECT [Id]			= 1
+							, [Action]		= 'Update Amendments'
+							, [Change]		= 'Updated - Record: ' + CAST(intLoadId AS NVARCHAR(100))
+							, [From]		= NULL
+							, [To]			= NULL
+							, [ParentId]	= NULL
+						FROM tblLGLoad
+						WHERE intLoadId = @intLoadId
+
+						UNION ALL
+
+						SELECT [Id]			= 2
+							, [Action]		= NULL
+							, [Change]		= 'Update Price'
+							, [From]		= CAST(dblUnitPrice AS NVARCHAR(100))
+							, [To]			= CAST(@dblSamplePrice AS NVARCHAR(100))
+							, [ParentId]	= 1
+						FROM tblLGLoadDetail
+						WHERE intLoadId = @intLoadId
+                          AND intLoadDetailId = @intLoadDetailId
+						  AND dblUnitPrice <> @dblSamplePrice
+
+						UNION ALL
+
+						SELECT [Id]			= 3
+							, [Action]		= NULL
+							, [Change]		= 'Update Quantity'
+							, [From]		= CAST(dblQuantity AS NVARCHAR(100))
+							, [To]			= CAST(@dblSampleQty AS NVARCHAR(100))
+							, [ParentId]	= 1
+						FROM tblLGLoadDetail
+						WHERE intLoadId = @intLoadId
+                          AND intLoadDetailId = @intLoadDetailId
+						  AND dblQuantity <> @dblSampleQty
+
+						--AUDIT LOG FOR VOUCHER
+						EXEC uspSMSingleAuditLog @screenName		= 'Logistics.view.ShipmentSchedule'
+											   , @recordId			= @intLoadId
+											   , @entityId			= @intUserId
+											   , @AuditLogParam		= @LoadShipmentSingleAuditLogParam
+
+						--UPDATE CONTRACT DETAILS
+						UPDATE tblCTContractDetail
+						SET dblCashPrice = @dblSamplePrice
+						WHERE intContractHeaderId = @intContractHeaderId
+                          AND intContractDetailId = @intContractDetailId
+						  AND dblCashPrice <> @dblSamplePrice
+
+						UPDATE tblCTContractDetail
+						SET dblQuantity = @dblSampleQty
+						WHERE intContractHeaderId = @intContractHeaderId
+                          AND intContractDetailId = @intContractDetailId
+						  AND dblQuantity <> @dblSampleQty
+
+						--AUDIT LOG FOR CONTRACT
+						DECLARE @ContractSingleAuditLogParam		AS SingleAuditLogParam
+
+						INSERT INTO @ContractSingleAuditLogParam (
+							  [Id]
+							, [Action]
+							, [Change]
+							, [From]
+							, [To]
+							, [ParentId]
+						)
+						SELECT [Id]			= 1
+							, [Action]		= 'Update Amendments'
+							, [Change]		= 'Updated - Record: ' + CAST(intContractHeaderId AS NVARCHAR(100))
+							, [From]		= NULL
+							, [To]			= NULL
+							, [ParentId]	= NULL
+						FROM tblCTContractHeader
+						WHERE intContractHeaderId = @intContractHeaderId
+
+						UNION ALL
+
+						SELECT [Id]			= 2
+							, [Action]		= NULL
+							, [Change]		= 'Update Price'
+							, [From]		= CAST(dblCashPrice AS NVARCHAR(100))
+							, [To]			= CAST(@dblSamplePrice AS NVARCHAR(100))
+							, [ParentId]	= 1
+						FROM tblCTContractDetail
+						WHERE intContractHeaderId = @intContractHeaderId
+                          AND intContractDetailId = @intContractDetailId
+						  AND dblCashPrice <> @dblSamplePrice
+
+						UNION ALL
+
+						SELECT [Id]			= 3
+							, [Action]		= NULL
+							, [Change]		= 'Update Quantity'
+							, [From]		= CAST(dblQuantity AS NVARCHAR(100))
+							, [To]			= CAST(@dblSampleQty AS NVARCHAR(100))
+							, [ParentId]	= 1
+						FROM tblCTContractDetail
+						WHERE intContractHeaderId = @intContractHeaderId
+                          AND intContractDetailId = @intContractDetailId
+						  AND dblQuantity <> @dblSampleQty
+
+						--AUDIT LOG FOR VOUCHER
+						EXEC uspSMSingleAuditLog @screenName		= 'ContractManagement.view.ContractSequence'
+											   , @recordId			= @intContractHeaderId
+											   , @entityId			= @intUserId
+											   , @AuditLogParam		= @ContractSingleAuditLogParam
+                    END 
 
                 IF @intLoadDetailId IS NOT NULL
                     EXEC uspIPProcessOrdersToFeed @intLoadId, @intLoadDetailId, @intUserId, 'Modified'
