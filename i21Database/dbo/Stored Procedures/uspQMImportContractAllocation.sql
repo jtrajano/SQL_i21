@@ -25,6 +25,8 @@ BEGIN TRY
 	LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 	-- Group Number
 	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+	-- Strategy
+	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -49,6 +51,13 @@ BEGIN TRY
 						)
 					THEN 'GROUP NUMBER, '
 				ELSE ''
+				END + CASE 
+				WHEN (
+						STRATEGY.intSubBookId IS NULL
+						AND ISNULL(IMP.strStrategy, '') <> ''
+						)
+					THEN 'STRATEGY, '
+				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
@@ -64,6 +73,10 @@ BEGIN TRY
 				BOOK.intBookId IS NULL
 				AND ISNULL(IMP.strGroupNumber, '') <> ''
 				)
+			OR (
+				STRATEGY.intSubBookId IS NULL
+				AND ISNULL(IMP.strStrategy, '') <> ''
+				)
 			)
 
 	-- End Validation   
@@ -73,6 +86,7 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@intSampleStatusId INT
 		,@intBookId INT
+		,@intSubBookId INT
 		,@dblCashPrice NUMERIC(18, 6)
 		,@ysnSampleContractItemMatch BIT
 		,@strSampleNumber NVARCHAR(30)
@@ -89,6 +103,7 @@ BEGIN TRY
 		,intContractDetailId = CD.intContractDetailId
 		,intSampleStatusId = SAMPLE_STATUS.intSampleStatusId
 		,intBookId = BOOK.intBookId
+		,intSubBookId = STRATEGY.intSubBookId
 		,dblCashPrice = IMP.dblBoughtPrice
 		,ysnSampleContractItemMatch = CASE 
 			WHEN CD.intItemId = S.intItemId
@@ -114,6 +129,8 @@ BEGIN TRY
 		LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 		-- Group Number
 		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+		-- Strategy
+		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -133,6 +150,7 @@ BEGIN TRY
 		,@intContractDetailId
 		,@intSampleStatusId
 		,@intBookId
+		,@intSubBookId
 		,@dblCashPrice
 		,@ysnSampleContractItemMatch
 		,@strSampleNumber
@@ -160,6 +178,7 @@ BEGIN TRY
 			,intContractDetailId = @intContractDetailId
 			,intSampleStatusId = @intSampleStatusId
 			,intBookId = @intBookId
+			,intSubBookId = @intSubBookId
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
@@ -501,6 +520,7 @@ BEGIN TRY
 			,@intContractDetailId
 			,@intSampleStatusId
 			,@intBookId
+			,@intSubBookId
 			,@dblCashPrice
 			,@ysnSampleContractItemMatch
 			,@strSampleNumber
