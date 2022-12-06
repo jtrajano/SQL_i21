@@ -22,7 +22,7 @@ SELECT
     ,I.intCommodityId
     ,I.strItemNo
     ,I.strDescription
-    ,[dblQty] = S.dblRepresentingQty
+    ,[dblQty] = S.dblB1QtyBought
     ,[intQtyItemUOMId] = QIUOM.intItemUOMId
     ,[intQtyUnitMeasureId] = QUM.intUnitMeasureId
     ,[strQtyUnitMeasure] = QUM.strSymbol
@@ -96,7 +96,7 @@ OUTER APPLY (
     INNER JOIN tblSMCurrency C ON C.intCurrencyID = CP.intDefaultCurrencyId
 ) DFC
 OUTER APPLY (
-    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, S.dblRepresentingQty)
+    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, S.dblB1QtyBought)
 ) WQTY
 
 GO
