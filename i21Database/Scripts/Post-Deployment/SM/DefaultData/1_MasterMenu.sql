@@ -1258,7 +1258,7 @@ ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GeneralLedger.view.TrialBalanceReport?showSearch=true' WHERE strMenuName = N'Trial Balance' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
 
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trial Balance' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Groups' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Account Groups', N'General Ledger', @GeneralLedgerReportParentMenuId, N'Account Groups', N'Report', N'Screen', N'GeneralLedger.view.AccountGroup?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 1, 1)
 ELSE
