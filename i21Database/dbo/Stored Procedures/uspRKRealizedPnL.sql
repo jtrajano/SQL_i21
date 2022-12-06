@@ -183,7 +183,7 @@ BEGIN
 					  )
 					AND ( ot.ysnExpired IS NULL
 						OR  
-						(ot.ysnExpired = CASE WHEN ISNULL(@ysnExpired, 0) = 1 THEN ot.ysnExpired ELSE @ysnExpired END)
+						(ot.ysnExpired = ISNULL(@ysnExpired, ot.ysnExpired))
 					  )
 					AND ( ot.intSelectedInstrumentTypeId IS NULL
 						OR  
