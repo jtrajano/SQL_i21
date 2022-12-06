@@ -31,11 +31,7 @@
 		--update only if no eft bank is default
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityEFTInformation WHERE ysnDefaultAccount = 1 AND intEntityId = @intEntityId AND intEntityEFTInfoId <> @intEntityEFTInfoId)
 		BEGIN
-			UPDATE tblEMEntityEFTInformation 
-			SET 
-				ysnDefaultAccount = 1,
-				ysnActive = 1
-			WHERE intEntityEFTInfoId = @intEntityEFTInfoId
+			UPDATE tblEMEntityEFTInformation SET ysnDefaultAccount = 1 WHERE intEntityEFTInfoId = @intEntityEFTInfoId
 		END
 		
 		FETCH NEXT FROM temp_cursor into @intEntityId, @intEntityEFTInfoId
