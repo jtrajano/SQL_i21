@@ -504,18 +504,6 @@ SET @query = '
 			UNION ALL
 			SELECT 
 				intBillId
-				,SUM(tmpAPPayables.dblTotal) AS dblTotal
-				,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
-				,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
-				,SUM(tmpAPPayables.dblInterest) AS dblInterest
-				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
-			FROM ('
-					+ @payablesForeignQuery +
-				') tmpAPPayables 
-			GROUP BY intBillId
-			UNION ALL
-			SELECT 
-				intBillId
 				,SUM(tmpAPPrepaidPayables.dblTotal) AS dblTotal
 				,SUM(tmpAPPrepaidPayables.dblAmountPaid) AS dblAmountPaid
 				,SUM(tmpAPPrepaidPayables.dblDiscount)AS dblDiscount
@@ -593,19 +581,6 @@ SET @query = '
 				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 			FROM ('
 					+ @deletedQuery +
-				') tmpAPPayables 
-			GROUP BY intBillId
-			HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
-			UNION ALL
-			SELECT 
-				intBillId
-				,SUM(tmpAPPayables.dblTotal) AS dblTotal
-				,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
-				,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
-				,SUM(tmpAPPayables.dblInterest) AS dblInterest
-				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
-			FROM ('
-					+ @deletedForeignQuery +
 				') tmpAPPayables 
 			GROUP BY intBillId
 			HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
