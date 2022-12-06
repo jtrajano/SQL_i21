@@ -107,6 +107,10 @@ BEGIN
 	DECLARE @intEmployeeId INT
 	DECLARE @intYearsOfService INT
 
+	--Get payroll company preference settings
+	DECLARE @ysnPreventNegativeTimeOff AS INT
+	SELECT @ysnPreventNegativeTimeOff = ysnPreventNegativeTimeOff FROM tblPRCompanyPreference
+
 	--Step 1: Update each Employee Time Off
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEmployees)
 	BEGIN
@@ -162,16 +166,20 @@ BEGIN
 		--Reset Adjustments, Move Earned to Carryover
 		UPDATE EOT
 			SET dblHoursUsed = CASE WHEN (T.ysnForReset = 1) THEN 0 ELSE EOT.dblHoursUsed END
-				,dblHoursCarryover = CASE WHEN (T.ysnForReset = 1) THEN 
-											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < dblMaxCarryover) 
-												THEN 
-													CASE WHEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < 0 --check if negative if so  set to 0
-															THEN 0
-														ELSE
-															(dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))
-														END
-											ELSE dblMaxCarryover END
-									ELSE dblHoursCarryover END
+				,dblHoursCarryover = CASE WHEN (T.ysnForReset = 1) THEN   
+						CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < dblMaxCarryover)   
+							THEN   
+								CASE WHEN @ysnPreventNegativeTimeOff = 1 THEN
+									CASE WHEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < 0 --check if negative if so  set to 0  
+										THEN 0  
+									ELSE  
+										(dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))  
+									END 
+								ELSE
+									(dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))  
+								END
+						ELSE dblMaxCarryover END  
+					ELSE dblHoursCarryover END
 				,dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN 0
 									ELSE dblHoursEarned END
 		FROM 
