@@ -26,8 +26,8 @@ BEGIN TRY
 	SELECT @intLoadId = intLoadId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId
 	SELECT DISTINCT intLoadDetailId
 	INTO #LoadTable
-	FROM tblTRLoadReceipt
-	WHERE intLoadHeaderId = @intLoadHeaderId AND ISNULL(intLoadDetailId,'') <> ''
+	FROM tblLGLoadDetail
+	WHERE intLoadId = @intLoadId
 	
 	WHILE EXISTS (SELECT TOP 1 1 FROM #LoadTable)
 	BEGIN
