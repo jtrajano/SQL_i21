@@ -189,7 +189,7 @@ OUTER APPLY (
 )SOI 
 OUTER APPLY(
 SELECT TOP 1 a.strSalesOrderNumber,a.dtmDate,b.strName FROM tblSOSalesOrder a
-inner join tblEMEntity b ON a.intEntitySalespersonId=b.intEntityId
+LEFT JOIN tblEMEntity b ON a.intEntitySalespersonId=b.intEntityId
 WHERE strSalesOrderNumber = ARGID.strSalesOrderNumber
 )SOADD
 LEFT JOIN (
