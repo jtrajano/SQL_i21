@@ -95,7 +95,7 @@ BEGIN
         ,[strModuleName]         = @MODULE_NAME      
         ,[intEntityId]           = A.intEntityId      
     FROM [dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt      
-    ON A.intGLAccountIdTo = GLAccnt.intAccountId      
+    ON A.intGLAccountIdFrom = GLAccnt.intAccountId      
     WHERE A.strTransactionId = @strTransactionId      
     -- 2. DEBIT SIdE (TARGET OF THE FUND)      
     UNION ALL       
