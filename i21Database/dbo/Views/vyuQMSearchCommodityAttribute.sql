@@ -16,4 +16,4 @@ OUTER APPLY (
 	WHERE CA.strType = 'Origin'
 	  AND CA.strDescription = C.strCountry
 ) COUNTRY
-WHERE CA.strType IN ('Origin', 'ProductType')
+WHERE CA.strType IN ('Origin', 'ProductType', 'Grade')

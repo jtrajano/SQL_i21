@@ -17,10 +17,10 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , dblPreInvoicePrice					= CRD.dblPreInvoicePrice
      , dblQuantity							= CRD.dblQuantity
      , dblPreInvoiceQuantity				     = CRD.dblPreInvoiceQuantity
-     , strGarden							= CRD.strGarden
-     , strPreInvoiceGarden					= CRD.strPreInvoiceGarden
-     , strGrade							= CRD.strGrade
-     , strPreInvoiceGrade					= CRD.strPreInvoiceGrade
+     , intGardenMarkId						= CRD.intGardenMarkId	
+     , intPreInvoiceGardenMarkId			     = CRD.intPreInvoiceGardenMarkId
+     , intGradeId							= CRD.intGradeId
+     , intPreInvoiceGradeId					= CRD.intPreInvoiceGradeId
      , strChopNo							= CRD.strChopNo
      , strPreInvoiceChopNo					= CRD.strPreInvoiceChopNo
      , intSampleId                                = CRD.intSampleId
@@ -53,6 +53,10 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , dblNetWt3rdPackages					= CAST(BD.intNumOfPackagesUOM3 AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage3
      , dblNo3rdPackages						= BD.dblNumberOfPackages3
      , strWarehouseCode						= SL.strName
+	, strGarden							= GM.strGardenMark
+     , strPreInvoiceGarden					= PIGM.strGardenMark
+     , strGrade							= CA.strDescription
+     , strPreInvoiceGrade					= PGCA.strDescription
 FROM tblQMCatalogueReconciliationDetail CRD 
 INNER JOIN tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId
 INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = CRD.intBillDetailId
@@ -65,4 +69,8 @@ LEFT JOIN tblCTSubBook SB ON BD.intSubBookId = SB.intSubBookId
 LEFT JOIN tblSMPurchasingGroup PG ON BD.intPurchasingGroupId = PG.intPurchasingGroupId
 LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
 LEFT JOIN tblSMTransaction SMT ON SMT.intRecordId = CR.intCatalogueReconciliationId AND SMT.strTransactionNo = CR.strReconciliationNumber
+LEFT JOIN tblQMGardenMark GM ON CRD.intGardenMarkId = GM.intGardenMarkId
+LEFT JOIN tblQMGardenMark PIGM ON CRD.intPreInvoiceGardenMarkId = PIGM.intGardenMarkId
+LEFT JOIN tblICCommodityAttribute CA ON CRD.intGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
+LEFT JOIN tblICCommodityAttribute PGCA ON CRD.intPreInvoiceGradeId = PGCA.intCommodityAttributeId AND PGCA.strType = 'Grade'
 LEFT JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'CatalogueReconciliation'

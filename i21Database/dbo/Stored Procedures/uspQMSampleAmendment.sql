@@ -58,9 +58,9 @@ BEGIN TRY
 		 , strSampleChopNumber					= S.strChopNumber
 		 , strPreInvoiceChopNo					= CRD.strPreInvoiceChopNo
 		 , intSampleGardenMarkId				= S.intGardenMarkId
-		 , intPreInvoiceGardenMarkId			= GM.intGardenMarkId
+		 , intPreInvoiceGardenMarkId			= CRD.intPreInvoiceGardenMarkId
 		 , intSampleGradeId						= S.intGradeId
-		 , intPreInvoiceGradeId					= CA.intCommodityAttributeId
+		 , intPreInvoiceGradeId					= CRD.intPreInvoiceGradeId
     INTO #AMENDMENTS 
     FROM tblQMSample S
     INNER JOIN tblMFBatch BATCH ON S.intSampleId = BATCH.intSampleId
@@ -68,14 +68,12 @@ BEGIN TRY
     INNER JOIN tblQMCatalogueReconciliation CR ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
     INNER JOIN tblAPBillDetail BD ON CRD.intBillDetailId = BD.intBillDetailId
     INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
-    LEFT JOIN tblQMGardenMark GM ON CRD.strPreInvoiceGarden = GM.strGardenMark
-    LEFT JOIN tblICCommodityAttribute CA ON CRD.strPreInvoiceGrade = CA.strDescription AND CA.strType = 'Grade'
     WHERE S.intSampleId = @intSampleId
       AND (S.dblB1Price <> CRD.dblPreInvoicePrice
         OR S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity
         OR S.strChopNumber <> CRD.strPreInvoiceChopNo
-        OR S.intGardenMarkId <> GM.intGardenMarkId
-        OR S.intGradeId <> CA.intCommodityAttributeId)
+        OR S.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId
+        OR S.intGradeId <> CRD.intPreInvoiceGradeId)
 	
 	IF EXISTS (SELECT TOP 1 1 FROM #AMENDMENTS)
 	BEGIN
@@ -96,16 +94,14 @@ BEGIN TRY
 
 		--UPDATE CAT RECON DETAILS
 		UPDATE CRD
-		SET dblPreInvoicePrice		= S.dblB1Price
-		  , dblPreInvoiceQuantity	= S.dblRepresentingQty
-		  , strPreInvoiceChopNo		= S.strChopNumber
-		  , strPreInvoiceGarden		= GM.strGardenMark
-		  , strPreInvoiceGrade		= CA.strDescription
+		SET dblPreInvoicePrice			= S.dblB1Price
+		  , dblPreInvoiceQuantity		= S.dblRepresentingQty
+		  , strPreInvoiceChopNo			= S.strChopNumber
+		  , intPreInvoiceGardenMarkId	= S.intGardenMarkId
+		  , intPreInvoiceGradeId		= S.intGradeId
 		FROM tblQMCatalogueReconciliationDetail CRD
         INNER JOIN #AMENDMENTS A ON CRD.intCatalogueReconciliationId = A.intCatalogueReconciliationId
 		INNER JOIN tblQMSample S ON S.intSampleId = CRD.intSampleId
-		LEFT JOIN tblQMGardenMark GM ON S.intGardenMarkId = GM.intGardenMarkId
-		LEFT JOIN tblICCommodityAttribute CA ON S.intGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'		
 		WHERE S.intSampleId = @intSampleId
 
         --UPDATE BILL DETAILS
@@ -389,24 +385,28 @@ BEGIN TRY
 						SELECT [Id]			= 5
 							, [Action]		= NULL
 							, [Change]		= 'Update Pre-Invoice Garden Mark'
-							, [From]		= CAST(intPreInvoiceGardenMarkId AS NVARCHAR(100))
-							, [To]			= CAST(intSampleGardenMarkId AS NVARCHAR(100))
+							, [From]		= CAST(GM.strGardenMark AS NVARCHAR(100))
+							, [To]			= CAST(AGM.strGardenMark AS NVARCHAR(100))
 							, [ParentId]	= 1
-						FROM #AMENDMENTS 
-						WHERE intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
-						  AND intPreInvoiceGardenMarkId <> intSampleGardenMarkId
+						FROM #AMENDMENTS A
+						LEFT JOIN tblQMGardenMark GM ON A.intPreInvoiceGardenMarkId = GM.intGardenMarkId
+						LEFT JOIN tblQMGardenMark AGM ON A.intSampleGardenMarkId = AGM.intGardenMarkId
+						WHERE A.intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
+						  AND A.intPreInvoiceGardenMarkId <> A.intSampleGardenMarkId
 
 						UNION ALL
 
 						SELECT [Id]			= 6
 							, [Action]		= NULL
 							, [Change]		= 'Update Pre-Invoice Grade'
-							, [From]		= CAST(intPreInvoiceGradeId AS NVARCHAR(100))
-							, [To]			= CAST(intSampleGradeId AS NVARCHAR(100))
+							, [From]		= CAST(CA.strDescription AS NVARCHAR(100))
+							, [To]			= CAST(ACA.strDescription AS NVARCHAR(100))
 							, [ParentId]	= 1
-						FROM #AMENDMENTS 
-						WHERE intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
-						  AND intPreInvoiceGradeId <> intSampleGradeId
+						FROM #AMENDMENTS A
+						LEFT JOIN tblICCommodityAttribute CA ON A.intPreInvoiceGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
+						LEFT JOIN tblICCommodityAttribute ACA ON A.intSampleGradeId = ACA.intCommodityAttributeId AND ACA.strType = 'Grade'
+						WHERE A.intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
+						  AND A.intPreInvoiceGradeId <> A.intSampleGradeId
 						  
 						--AUDIT LOG FOR VOUCHER	HEADER AND DETAILS			
 						INSERT INTO @BillSingleAuditLogParam (
@@ -479,24 +479,28 @@ BEGIN TRY
 						SELECT [Id]			= 6
 							, [Action]		= NULL
 							, [Change]		= 'Update Garden Mark'
-							, [From]		= CAST(intPreInvoiceGardenMarkId AS NVARCHAR(100))
-							, [To]			= CAST(intSampleGardenMarkId AS NVARCHAR(100))
+							, [From]		= CAST(GM.strGardenMark AS NVARCHAR(100))
+							, [To]			= CAST(AGM.strGardenMark AS NVARCHAR(100))
 							, [ParentId]	= 1
-						FROM #AMENDMENTS 
-						WHERE intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
-						  AND intPreInvoiceGardenMarkId <> intSampleGardenMarkId
+						FROM #AMENDMENTS A
+						LEFT JOIN tblQMGardenMark GM ON A.intPreInvoiceGardenMarkId = GM.intGardenMarkId
+						LEFT JOIN tblQMGardenMark AGM ON A.intSampleGardenMarkId = AGM.intGardenMarkId
+						WHERE A.intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
+						  AND A.intPreInvoiceGardenMarkId <> A.intSampleGardenMarkId
 
 						UNION ALL
 
 						SELECT [Id]			= 7
 							, [Action]		= NULL
 							, [Change]		= 'Update Comment'
-							, [From]		= CAST(intPreInvoiceGradeId AS NVARCHAR(100))
-							, [To]			= CAST(intSampleGradeId AS NVARCHAR(100))
+							, [From]		= CAST(CA.strDescription AS NVARCHAR(100))
+							, [To]			= CAST(ACA.strDescription AS NVARCHAR(100))
 							, [ParentId]	= 1
-						FROM #AMENDMENTS 
-						WHERE intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
-						  AND intPreInvoiceGradeId <> intSampleGradeId
+						FROM #AMENDMENTS A
+						LEFT JOIN tblICCommodityAttribute CA ON A.intPreInvoiceGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
+						LEFT JOIN tblICCommodityAttribute ACA ON A.intSampleGradeId = ACA.intCommodityAttributeId AND ACA.strType = 'Grade'
+						WHERE A.intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
+						  AND A.intPreInvoiceGradeId <> A.intSampleGradeId
 						  
 						--AUDIT LOG FOR VOUCHER
 						EXEC uspSMSingleAuditLog @screenName		= 'AccountsPayable.view.Voucher'

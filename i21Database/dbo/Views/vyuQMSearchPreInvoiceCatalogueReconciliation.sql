@@ -16,8 +16,10 @@ SELECT intBillDetailId					    = BD.intBillDetailId
      , dblSupplierPreInvoicePrice			= BD.dblCost
      , dblPreInvoiceLotQty					= BD.dblQtyReceived
      , dblTotalNoPackageBreakups			= CAST(30 AS NUMERIC(18,6))
+	 , intPreInvoiceGardenMarkId			= GM.intGardenMarkId
      , strPreInvoiceGarden					= GM.strGardenMark
-     , strPreInvoiceGrade					= BD.strComment
+	 , intPreInvoiceGradeId					= CA.intCommodityAttributeId
+     , strPreInvoiceGrade					= CA.strDescription
      , strPreInvoiceGardenInvoiceNo			= BD.strPreInvoiceGardenNumber
      , strPreInvoicePurchaseType			= CASE WHEN B.intTransactionType = 2 THEN CAST('Vendor Prepayment' AS NVARCHAR(100))
 												   WHEN B.intTransactionType = 3 THEN CAST('Debit Memo' AS NVARCHAR(100))
@@ -51,5 +53,6 @@ LEFT JOIN tblARMarketZone MZ ON BD.intMarketZoneId = MZ.intMarketZoneId
 LEFT JOIN tblSMPurchasingGroup PG ON BD.intPurchasingGroupId = PG.intPurchasingGroupId
 LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
 LEFT JOIN tblQMGardenMark GM ON BD.intGardenMarkId = GM.intGardenMarkId
+LEFT JOIN tblICCommodityAttribute CA ON BD.strComment = CA.strDescription AND CA.strType = 'Grade'	 
 WHERE B.ysnPosted = 0
   AND CRD.intCatalogueReconciliationDetailId IS NULL

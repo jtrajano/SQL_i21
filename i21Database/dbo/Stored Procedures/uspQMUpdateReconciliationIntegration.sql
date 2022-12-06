@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspQMUpdateReconciliationIntegration] 
+ALTER PROCEDURE [dbo].[uspQMUpdateReconciliationIntegration] 
 	  @intCatalogueReconciliationId		INT = NULL	
 	, @intUserId						INT = NULL
 AS  
@@ -37,22 +37,22 @@ BEGIN TRY
 		 , dblPreInvoiceQuantity				= BD.dblQtyOrdered
 		 , strCatReconChopNo					= CRD.strPreInvoiceChopNo
 		 , strPreInvoiceChopNo					= BD.strPreInvoiceGardenNumber
-		 , intCatReconGardenMarkId				= GM.intGardenMarkId
+		 , intCatReconGardenMarkId				= CRD.intPreInvoiceGardenMarkId
 		 , intPreInvoiceGardenMarkId			= BD.intGardenMarkId
-		 , strCatReconGrade						= CRD.strPreInvoiceGrade
+		 , strCatReconGrade						= CRD.intPreInvoiceGradeId
 		 , strPreInvoiceGrade					= BD.strComment
     INTO #VOUCHERS 
     FROM tblQMCatalogueReconciliation CR
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
 	INNER JOIN tblAPBillDetail BD ON CRD.intBillDetailId = BD.intBillDetailId
     INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
-	LEFT JOIN tblQMGardenMark GM ON CRD.strPreInvoiceGarden = GM.strGardenMark
+	LEFT JOIN tblICCommodityAttribute CA ON CRD.intPreInvoiceGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
       AND (CRD.dblPreInvoicePrice <> BD.dblCost
         OR CRD.dblPreInvoiceQuantity <> BD.dblQtyOrdered
         OR CRD.strPreInvoiceChopNo <> BD.strPreInvoiceGardenNumber
-        OR GM.intGardenMarkId <> BD.intGardenMarkId
-        OR CRD.strPreInvoiceGrade <> BD.strComment)		
+        OR CRD.intPreInvoiceGardenMarkId <> BD.intGardenMarkId
+        OR CA.strDescription <> BD.strComment)		
 	
 	--UPDATE BILL DETAIL
 	IF EXISTS (SELECT TOP 1 1 FROM #VOUCHERS)
@@ -147,12 +147,14 @@ BEGIN TRY
 					SELECT [Id]			= 6
 						, [Action]		= NULL
 						, [Change]		= 'Update Garden Mark'
-						, [From]		= CAST(intPreInvoiceGardenMarkId AS NVARCHAR(100))
-						, [To]			= CAST(intCatReconGardenMarkId AS NVARCHAR(100))
+						, [From]		= CAST(VGM.strGardenMark AS NVARCHAR(100))
+						, [To]			= CAST(GM.strGardenMark AS NVARCHAR(100))
 						, [ParentId]	= 1
-					FROM #VOUCHERS 
-					WHERE intBillId = @intBillId
-					  AND intPreInvoiceGardenMarkId <> intCatReconGardenMarkId
+					FROM #VOUCHERS V
+					LEFT JOIN tblQMGardenMark GM ON V.intCatReconGardenMarkId = GM.intGardenMarkId
+					LEFT JOIN tblQMGardenMark VGM ON V.intPreInvoiceGardenMarkId = VGM.intGardenMarkId
+					WHERE V.intBillId = @intBillId
+					  AND V.intPreInvoiceGardenMarkId <> V.intCatReconGardenMarkId
 
 					UNION ALL
 
@@ -162,9 +164,9 @@ BEGIN TRY
 						, [From]		= CAST(strPreInvoiceGrade AS NVARCHAR(100))
 						, [To]			= CAST(strCatReconGrade AS NVARCHAR(100))
 						, [ParentId]	= 1
-					FROM #VOUCHERS 
-					WHERE intBillId = @intBillId
-					  AND strPreInvoiceGrade <> strCatReconGrade
+					FROM #VOUCHERS V
+					WHERE V.intBillId = @intBillId
+					  AND V.strPreInvoiceGrade <> V.strCatReconGrade
 						  
 					--AUDIT LOG FOR VOUCHER
 					EXEC uspSMSingleAuditLog @screenName		= 'AccountsPayable.view.Voucher'
@@ -189,23 +191,21 @@ BEGIN TRY
 		 , dblSampleQty							= S.dblRepresentingQty
 		 , strCatReconChopNo					= CRD.strPreInvoiceChopNo
 		 , strSampleChopNo						= S.strChopNumber
-		 , intCatReconGardenMarkId				= GM.intGardenMarkId
+		 , intCatReconGardenMarkId				= CRD.intPreInvoiceGardenMarkId
 		 , intSampleGardenMarkId				= S.intGardenMarkId
-		 , intCatReconGradeId					= CA.intCommodityAttributeId
+		 , intCatReconGradeId					= CRD.intPreInvoiceGradeId
 		 , intSampleGradeId						= S.intGradeId
     INTO #SAMPLES 
     FROM tblQMCatalogueReconciliation CR
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
 	INNER JOIN tblQMSample S ON CRD.intSampleId = S.intSampleId
-	INNER JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId	
-	LEFT JOIN tblQMGardenMark GM ON CRD.strPreInvoiceGarden = GM.strGardenMark
-    LEFT JOIN tblICCommodityAttribute CA ON CRD.strPreInvoiceGrade = CA.strDescription AND CA.strType = 'Grade'	
+	INNER JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
       AND (S.dblB1Price <> CRD.dblPreInvoicePrice
         OR S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity
         OR S.strChopNumber <> CRD.strPreInvoiceChopNo
-        OR S.intGardenMarkId <> GM.intGardenMarkId
-        OR S.intGradeId <> CA.intCommodityAttributeId)
+        OR S.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId
+        OR S.intGradeId <> CRD.intPreInvoiceGradeId)
 	
 	--UPDATE SAMPLE
 	IF EXISTS (SELECT TOP 1 1 FROM #SAMPLES)
@@ -275,8 +275,8 @@ BEGIN TRY
 					SELECT [Id]			= 4
 						, [Action]		= NULL
 						, [Change]		= 'Update Chop Number'
-						, [From]		= strSampleChopNo
-						, [To]			= strCatReconChopNo
+						, [From]		= CAST(strSampleChopNo AS NVARCHAR(100))
+						, [To]			= CAST(strCatReconChopNo AS NVARCHAR(100))
 						, [ParentId]	= 1
 					FROM #SAMPLES 
 					WHERE intSampleId = @intSampleId
@@ -287,24 +287,28 @@ BEGIN TRY
 					SELECT [Id]			= 5
 						, [Action]		= NULL
 						, [Change]		= 'Update Garden Mark'
-						, [From]		= CAST(intSampleGardenMarkId AS NVARCHAR(100))
-						, [To]			= CAST(intCatReconGardenMarkId AS NVARCHAR(100))
+						, [From]		= CAST(SGM.strGardenMark AS NVARCHAR(100))
+						, [To]			= CAST(GM.strGardenMark AS NVARCHAR(100))
 						, [ParentId]	= 1
-					FROM #SAMPLES 
-					WHERE intSampleId = @intSampleId
-					  AND intSampleGardenMarkId <> intCatReconGardenMarkId
+					FROM #SAMPLES S
+					LEFT JOIN tblQMGardenMark GM ON S.intCatReconGardenMarkId = GM.intGardenMarkId
+					LEFT JOIN tblQMGardenMark SGM ON S.intSampleGardenMarkId = SGM.intGardenMarkId
+					WHERE S.intSampleId = @intSampleId
+					  AND S.intSampleGardenMarkId <> S.intCatReconGardenMarkId
 
 					UNION ALL
 
 					SELECT [Id]			= 6
 						, [Action]		= NULL
 						, [Change]		= 'Update Grade'
-						, [From]		= CAST(intSampleGradeId AS NVARCHAR(100))
-						, [To]			= CAST(intCatReconGradeId AS NVARCHAR(100))
+						, [From]		= CAST(SCA.strDescription AS NVARCHAR(100))
+						, [To]			= CAST(CA.strDescription AS NVARCHAR(100))
 						, [ParentId]	= 1
-					FROM #SAMPLES 
-					WHERE intSampleId = @intSampleId
-					  AND intSampleGradeId <> intCatReconGradeId
+					FROM #SAMPLES S
+					LEFT JOIN tblICCommodityAttribute CA ON S.intCatReconGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
+					LEFT JOIN tblICCommodityAttribute SCA ON S.intSampleGradeId = SCA.intCommodityAttributeId AND SCA.strType = 'Grade'
+					WHERE S.intSampleId = @intSampleId
+					  AND S.intSampleGradeId <> S.intCatReconGradeId
 						  
 					--AUDIT LOG FOR VOUCHER
 					EXEC uspSMSingleAuditLog @screenName		= 'Quality.view.QualitySample'
