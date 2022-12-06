@@ -33,11 +33,14 @@ BEGIN
 				AND intWorkOrderInputLotId = @intWorkOrderInputLotId
 		END
 
-		UPDATE tblMFWorkOrderInputLot
-		SET dblTBSQuantity = @dblTBSQuantity
-			,ysnTBSReserved = 1
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intWorkOrderInputLotId = @intWorkOrderInputLotId
+		IF @dblTBSQuantity IS NOT NULL
+		BEGIN
+			UPDATE tblMFWorkOrderInputLot
+			SET dblTBSQuantity = @dblTBSQuantity
+				,ysnTBSReserved = 1
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intWorkOrderInputLotId = @intWorkOrderInputLotId
+		END
 
 		UPDATE tblMFWorkOrder
 		SET intTrialBlendSheetStatusId = 15
