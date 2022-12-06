@@ -14,9 +14,13 @@
 	
 	[intEntityVendorLocationId]				INT	NULL,
 	
-	[intTaxGroupId]	INT	NULL,
+	[intTaxGroupId]							INT	NULL,
 
-	[intConcurrencyId]	INT	DEFAULT(0) NOT NULL,
+	[intConcurrencyId]						INT	DEFAULT(0) NOT NULL,
+	
+	[guiApiUniqueId] 						UNIQUEIDENTIFIER NULL,
+	
+	[intRowNumber]							INT	NULL,
 	
 	CONSTRAINT [PK_dbo_tblAPVendorSpecialTax]					PRIMARY KEY CLUSTERED ([intAPVendorSpecialTaxId] ASC),
 	
