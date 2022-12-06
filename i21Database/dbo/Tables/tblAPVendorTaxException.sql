@@ -21,6 +21,10 @@
 	[dtmEndDate]						DATETIME		NULL,	
 	
 	[intEntityVendorLocationId]			INT				NULL,
+
+	[guiApiUniqueId] 					UNIQUEIDENTIFIER NULL,
+	
+	[intRowNumber]						INT	NULL,
     
 	[intConcurrencyId]					INT			CONSTRAINT [DF_tblAPVendorTaxException_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
