@@ -529,6 +529,12 @@ BEGIN
 		, @ysnPrintARBalance BIT = NULL
 		, @intNextDeliveryDegreeDay INT = NULL
 		, @ysnRequireClock BIT = NULL
+		, @ysnRoutingAlert bit = NULL
+		, @ysnRequirePump bit = NULL
+		, @dblLastDeliveredGal numeric(18, 6)  = NULL
+		, @dblEstimatedGallonsLeft numeric(18, 6)  = NULL
+		, @dblEstimatedPercentLeft numeric(18, 6)  = NULL
+
 
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
@@ -592,6 +598,11 @@ BEGIN
 		,CS.ysnPrintARBalance AS ysnPrintARBalance
 		,CS.intNextDeliveryDegreeDay AS intNextDeliveryDegreeDay
 		,CS.ysnRequireClock AS ysnRequireClock 
+		,CS.ysnRoutingAlert AS ysnRoutingAlert
+		,CS.ysnRequirePump AS ysnRequirePump
+		,CS.dblLastDeliveredGal AS dblLastDeliveredGal
+		,CS.dblEstimatedGallonsLeft AS dblEstimatedGallonsLeft
+		,CS.dblEstimatedPercentLeft AS dblEstimatedPercentLeft
 	FROM tblApiSchemaTMConsumptionSite CS
 	INNER JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
 	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
@@ -645,6 +656,7 @@ BEGIN
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
 		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
+		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
 	WHILE @@FETCH_STATUS = 0
     BEGIN
 
@@ -733,6 +745,11 @@ BEGIN
 						,ysnPrintARBalance
 						,intNextDeliveryDegreeDay
 						,ysnRequireClock
+						,ysnRoutingAlert
+						,ysnRequirePump
+						,dblLastDeliveredGal 
+						,dblEstimatedGallonsLeft 
+						,dblEstimatedPercentLeft
 
 						, guiApiUniqueId
 						, intRowNumber)
@@ -794,7 +811,11 @@ BEGIN
 						,@ysnPrintARBalance
 						,@intNextDeliveryDegreeDay
 						,@ysnRequireClock
-						
+						,@ysnRoutingAlert
+						,@ysnRequirePump
+						,@dblLastDeliveredGal
+						,@dblEstimatedGallonsLeft
+						,@dblEstimatedPercentLeft
 						, @guiLogId
 						, @intRowNumber)
 
@@ -879,7 +900,11 @@ BEGIN
 						, ysnPrintARBalance = @ysnPrintARBalance
 						, intNextDeliveryDegreeDay = @intNextDeliveryDegreeDay
 						, ysnRequireClock = @ysnRequireClock
-
+						,ysnRoutingAlert = @ysnRoutingAlert
+						,ysnRequirePump = @ysnRequirePump
+						,dblLastDeliveredGal = @dblLastDeliveredGal
+						,dblEstimatedGallonsLeft = @dblEstimatedGallonsLeft
+						,dblEstimatedPercentLeft = @dblEstimatedPercentLeft
 						, guiApiUniqueId = @guiLogId
 						, intRowNumber = @intRowNumber
 					WHERE intSiteID = @intSiteId
@@ -956,6 +981,7 @@ BEGIN
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
 		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
+		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
 	END
 	CLOSE DataCursor
 	DEALLOCATE DataCursor
