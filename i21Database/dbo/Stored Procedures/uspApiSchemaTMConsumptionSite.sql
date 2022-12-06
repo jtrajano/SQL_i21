@@ -535,6 +535,7 @@ BEGIN
 		, @dblEstimatedGallonsLeft numeric(18, 6)  = NULL
 		, @dblEstimatedPercentLeft numeric(18, 6)  = NULL
 
+		, @intCustomerNumber INT = NULL
 
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
@@ -603,10 +604,11 @@ BEGIN
 		,CS.dblLastDeliveredGal AS dblLastDeliveredGal
 		,CS.dblEstimatedGallonsLeft AS dblEstimatedGallonsLeft
 		,CS.dblEstimatedPercentLeft AS dblEstimatedPercentLeft
+		,E.intEntityId
 	FROM tblApiSchemaTMConsumptionSite CS
 	INNER JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
 	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
-	INNER JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId
+	LEFT JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId
 	INNER JOIN @tmpBillingType B ON B.strBillingType = CS.strBillingBy
 	INNER JOIN tblEMEntity D ON D.strEntityNo = CS.strDriverId
 	INNER JOIN [tblEMEntityType] DT ON DT.intEntityId = D.intEntityId AND DT.strType = 'Salesperson'
@@ -657,15 +659,30 @@ BEGIN
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
 		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
 		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
+		, @intCustomerNumber
 	WHILE @@FETCH_STATUS = 0
     BEGIN
 
 		BEGIN TRY
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblApiImportLogDetail WHERE guiApiImportLogId = @guiLogId AND strLogLevel = 'Error' AND intRowNo = @intRowNumber)
 			BEGIN
+				
+				--- Check for TM Customer Record
+				IF(@intCustomerId IS NULL)
+				BEGIN
+					INSERT INTO tblTMCustomer(
+						intCustomerNumber
+						,intCurrentSiteNumber
+					)
+					SELECT intCustomerNumber 	= @intCustomerNumber
+						,intCurrentSiteNumber	= CONVERT(int,@strSiteNumber)
+
+					SET @intCustomerId = SCOPE_IDENTITY()
+				END
 
 				DECLARE @intSiteId INT = NULL
 				SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
+				
 				
 				-- IF ONE OF THE REQUIRED FIELDS FOR ADDRESS IS NULL THEN IT WILL GET THE CUSTOMER ADDRESS
 				IF(@strAddress IS NULL OR @strZipCode IS NULL OR @strCity IS NULL OR @strState IS NULL OR @strCountry IS NULL)
@@ -685,7 +702,7 @@ BEGIN
 					-- ADD NEW SITE		
 					DECLARE @intSiteNumber INT = NULL
 
-					SELECT @intSiteNumber = MAX(intSiteNumber) FROM tblTMSite WHERE intCustomerID = @intCustomerId
+					SELECT @intSiteNumber = CONVERT(int,@strSiteNumber)
 
 					INSERT INTO tblTMSite (intCustomerID
 						, strBillingBy
@@ -950,6 +967,11 @@ BEGIN
 					-- DELETE
 					DELETE tblEMEntityLocationConsumptionSite WHERE intSiteID = @intSiteId
 				END
+
+				--- UPDATE the current site number of the TM Customer record to the MAX sitenumber
+				UPDATE tblTMCustomer
+				SET intCurrentSiteNumber = (SELECT ISNULL(MAX(intSiteNumber),0) FROM tblTMSite WHERE intCustomerID = @intCustomerId)
+				WHERE intCustomerID = @intCustomerId
 			END
 		END TRY
 		BEGIN CATCH
@@ -982,6 +1004,7 @@ BEGIN
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
 		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
 		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
+		, @intCustomerNumber
 	END
 	CLOSE DataCursor
 	DEALLOCATE DataCursor
