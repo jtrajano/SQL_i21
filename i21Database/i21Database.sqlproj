@@ -870,6 +870,7 @@
     <Build Include="dbo\Views\vyuRKCurrencyPairSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetailWithCurrencies.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAllocatedContractRiskReport.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentMethodBlank.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
