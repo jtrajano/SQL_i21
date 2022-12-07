@@ -668,8 +668,8 @@ BEGIN
 	UPDATE lot
 	SET 
 		lot.strWarehouseRefNo = r.strWarehouseRefNo
-		,lot.strWarrantNo = r.strWarrantNo -- Ensure the lot is using the same warrant number when posting the IR. 
-		,lot.intWarrantStatus = r.intWarrantStatus -- Ensture the lot is using the same warrant status when posting the IR.
+		,lot.strWarrantNo = ISNULL(NULLIF(RTRIM(LTRIM(lot.strWarrantNo)), ''), r.strWarrantNo) -- Ensure the lot is using the same warrant number when posting the IR. 
+		,lot.intWarrantStatus = ISNULL(lot.intWarrantStatus, r.intWarrantStatus) -- Ensure the lot is using the same warrant status when posting the IR.
 	FROM tblICInventoryReceiptItemLot lot 
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
