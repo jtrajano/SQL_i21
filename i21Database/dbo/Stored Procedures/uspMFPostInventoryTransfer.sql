@@ -102,7 +102,7 @@ BEGIN TRY
 	UPDATE ITD
 	SET dblQuantity = TOD.dblQuantity
 	FROM tblICInventoryTransferDetail ITD
-	JOIN @tblMFTODetail TOD ON ITD.intInventoryTransferId = TOD.intInventoryTransferId
+	JOIN @tblMFTODetail TOD ON ITD.intInventoryTransferId = TOD.intInventoryTransferId AND ITD.intInventoryTransferDetailId = TOD.intInventoryTransferDetailId
 
 	EXEC dbo.uspICPostInventoryTransfer @ysnPost = 1
 		,@ysnRecap = 0
