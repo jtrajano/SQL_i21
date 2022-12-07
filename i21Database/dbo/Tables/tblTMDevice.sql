@@ -36,10 +36,11 @@
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     [intRowNumber] INT NULL,
     [strDeviceManufacturer]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
-    [strCommunicationType]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    --[strCommunicationType]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strIPAddress]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
-    [strSerialPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    --[strSerialPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    [strTimeOut]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 
     [strBarcode]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strInternalId]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
