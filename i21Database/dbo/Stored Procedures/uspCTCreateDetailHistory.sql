@@ -433,7 +433,7 @@ BEGIN TRY
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1  ) --CT-7774 disabled for now
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1  AND 1=0  ) --CT-7774 disabled for now
 		BEGIN
 			DELETE
 			FROM tblCTSequenceHistory
