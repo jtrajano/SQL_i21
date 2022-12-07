@@ -73,8 +73,8 @@ BEGIN TRY
 		,@intSequenceCount INT = 1
 		,@strRuleName NVARCHAR(100)
 		,@strValue NVARCHAR(50)
-		,@strOrderBy NVARCHAR(100) = ''
-		,@strOrderByFinal NVARCHAR(100) = ''
+		,@strOrderBy NVARCHAR(500) = ''
+		,@strOrderByFinal NVARCHAR(500) = ''
 		,@strPickByStorageLocation NVARCHAR(50)
 		,@intSubLocationId INT
 		,@dblUpperToleranceQty NUMERIC(38, 20)
@@ -1046,7 +1046,7 @@ BEGIN TRY
 		IF @strRuleName = 'Sale Year'
 			AND @strValue <> ''
 		BEGIN
-			SET @strWhere = @strWhere + ' And B.intSaleYear =' + @strValue
+			SET @strWhere = @strWhere + ' And B.intSalesYear =' + @strValue
 		END
 
 		IF @strRuleName = 'Sale No'
@@ -3695,6 +3695,8 @@ BEGIN TRY
 			,ls.strSecondaryStatus
 			,dblNoOfPallets
 			,BS.strFW
+			,MT.strDescription AS strProductType
+			,B.strBrandCode
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICLot L ON BS.intParentLotId = L.intLotId
 			AND L.dblQty > 0
@@ -3707,13 +3709,17 @@ BEGIN TRY
 		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
 		INNER JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=I.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId=I.intBrandId
 		WHERE BS.dblQuantity > 0
 		
 		UNION
 		
 		SELECT *
-			,NULL
-			,NULL
+			,NULL AS dblNoOfPallets
+			,NULL AS strFW
+			,NULL AS strProductType
+			,NULL As strBrandCode
 		FROM @tblRemainingPickedLots
 		
 		UNION --Non Lot Tracked
@@ -3746,8 +3752,10 @@ BEGIN TRY
 			,0
 			,'Added'
 			,''
-			,NULL
-			,NULL
+			,NULL AS dblNoOfPallets
+			,NULL AS strFW
+			,NULL AS strProductType
+			,NULL As strBrandCode
 		FROM @tblPickedItem pl
 		JOIN tblICItem i ON pl.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON pl.intItemUOMId = iu.intItemUOMId
@@ -3800,7 +3808,9 @@ BEGIN TRY
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
 			,dblNoOfPallets
-			,NULL
+			,NULL AS strFW
+			,MT.strDescription AS strProductType
+			,B.strBrandCode
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
 		INNER JOIN tblICLotStatus ls ON PL.intLotStatusId = ls.intLotStatusId
@@ -3812,6 +3822,8 @@ BEGIN TRY
 		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 		INNER JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = SL.intSubLocationId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=I.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId=I.intBrandId
 		WHERE BS.dblQuantity > 0
 	ELSE
 		SELECT PL.intParentLotId AS intWorkOrderInputLotId
@@ -3858,7 +3870,9 @@ BEGIN TRY
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
 			,dblNoOfPallets
-			,NULL
+			,NULL AS strFW
+			,MT.strDescription AS strProductType
+			,B.strBrandCode
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
 		INNER JOIN tblICLotStatus ls ON PL.intLotStatusId = ls.intLotStatusId
@@ -3869,6 +3883,8 @@ BEGIN TRY
 		INNER JOIN tblICUnitMeasure UM2 ON IU2.intUnitMeasureId = UM2.intUnitMeasureId
 		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = @intLocationId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=I.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId=I.intBrandId
 		WHERE BS.dblQuantity > 0
 END TRY
 

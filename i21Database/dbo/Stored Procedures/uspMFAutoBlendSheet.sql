@@ -64,6 +64,8 @@ IF EXISTS(SELECT *
 		  , strSecondaryStatus		NVARCHAR(50)
 		  , dblNoOfPallet			NUMERIC(18, 2)
 		  ,strFW					NVARCHAR(3)
+		    ,strProductType					NVARCHAR(100)
+			  ,strBrandCode					NVARCHAR(100)
 		)
 
 		INSERT INTO @tblPickedLots EXEC uspMFAutoBlendSheetFIFO @intLocationId         = @intLocationId

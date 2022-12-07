@@ -56,6 +56,8 @@ BEGIN
 			 , wi.intStorageLocationId
 			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
 			 ,wi.strFW
+			  ,MT.strDescription AS strProductType
+			,B.strBrandCode
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -70,6 +72,8 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN vyuQMGetLotQuality q ON l.intLotId = q.intLotId
 		LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
 		WHERE wi.intWorkOrderId = @intWorkOrderId
 	END
 	ELSE /* When blend sheet created from Sales Order, directly produced in blend production screen, then only consumed lot table will have the values, to show in blend management screen from traceability */
@@ -111,6 +115,8 @@ BEGIN
 			 , wi.intStorageLocationId
 			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
 			 ,'' As strFW
+			  ,MT.strDescription AS strProductType
+				,B.strBrandCode
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -125,6 +131,8 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN vyuQMGetLotQuality q ON l.intLotId = q.intLotId
 		LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
 		WHERE wi.intWorkOrderId = @intWorkOrderId
 END
 ELSE
@@ -166,6 +174,8 @@ BEGIN
     , LS.strSecondaryStatus
 	 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
 	 ,'' As strFW
+	  ,MT.strDescription AS strProductType
+	,B.strBrandCode
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
@@ -181,6 +191,8 @@ BEGIN
 	LEFT JOIN tblSMCompanyLocationSubLocation sbl ON sbl.intCompanyLocationSubLocationId = sl.intSubLocationId
 	LEFT JOIN vyuQMGetLotQuality q ON pl.intParentLotId = q.intLotId
 	LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
+	LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
+	LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
 	WHERE wi.intWorkOrderId = @intWorkOrderId
 
 	--Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strGarden,''),wi.strRemarks=l.strNotes
