@@ -21,5 +21,5 @@
 	 [intFreightRateMatrixRefId] INT NULL,
 	 [intConcurrencyId] INT NOT NULL DEFAULT 0,
 	 [ysnOffer] BIT NULL,
-	 [intItemId] INT
+	 [intCommodityId] INT
 	)
