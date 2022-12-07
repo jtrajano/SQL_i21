@@ -265,6 +265,7 @@ BEGIN TRY
 		,@strCurrency NVARCHAR(50)
 		,@ysnBought BIT
 		,@intSubBookId INT
+		,@strBuyingOrderNumber NVARCHAR(50)
 		-- B1
 		,@dblB1QtyBought NUMERIC(18, 6)
 		,@intB1QtyUOMId INT
@@ -311,6 +312,7 @@ BEGIN TRY
 		,strCurrency = CURRENCY.strCurrency
 		,ysnBought = IMP.ysnBought
 		,intSubBookId = STRATEGY.intSubBookId
+		,strBuyingOrderNumber = IMP.strBuyingOrderNumber
 		-- B1
 		,dblB1QtyBought = IMP.dblB1QtyBought
 		,intB1QtyUOMId = B1QUOM.intUnitMeasureId
@@ -408,6 +410,7 @@ BEGIN TRY
 		,@strCurrency
 		,@ysnBought
 		,@intSubBookId
+		,@strBuyingOrderNumber
 		-- B1
 		,@dblB1QtyBought
 		,@intB1QtyUOMId
@@ -447,6 +450,7 @@ BEGIN TRY
 			,intBookId = @intBookId
 			,ysnBought = @ysnBought
 			,intSubBookId = @intSubBookId
+			,strBuyingOrderNo = @strBuyingOrderNumber
 			-- Initial Buy
 			-- B1
 			,dblB1QtyBought = @dblB1QtyBought
@@ -616,7 +620,7 @@ BEGIN TRY
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
 			,dblBoughtPrice = NULL
 			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = IMP.strBuyingOrderNumber
+			,strBuyingOrderNumber = S.strBuyingOrderNo
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
@@ -818,6 +822,7 @@ BEGIN TRY
 			,@strCurrency
 			,@ysnBought
 			,@intSubBookId
+			,@strBuyingOrderNumber
 			-- B1
 			,@dblB1QtyBought
 			,@intB1QtyUOMId
