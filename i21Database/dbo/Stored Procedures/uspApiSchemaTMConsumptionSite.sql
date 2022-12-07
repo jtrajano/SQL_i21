@@ -656,8 +656,10 @@ BEGIN
 			BEGIN
 				
 				--- Check for TM Customer Record
+				SET @intCustomerId  = (SELECT TOP 1 intCustomerID FROM tblTMCustomer WHERE intCustomerNumber = @intCustomerNumber)
 				IF(@intCustomerId IS NULL)
 				BEGIN
+					
 					INSERT INTO tblTMCustomer(
 						intCustomerNumber
 						,intCurrentSiteNumber
