@@ -2474,77 +2474,77 @@ AS
 	SELECT DISTINCT strFutureMonth INTO #MissingMonths FROM @MonthOrder
 	SELECT DISTINCT strFutureMonth INTO #MonthList FROM @ListFinal WHERE intRowNumber = @FirstRow
 	
-	IF	ISNULL(@ysnQueryWithTotals, 0) = 1
-		AND EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
-	BEGIN
-		INSERT INTO @MonthOrder (intRowNumber
-			, strGroup
-			, Selection
-			, PriceStatus
-			, strFutureMonth
-			, strAccountNumber
-			, dblNoOfContract
-			, strTradeNo
-			, TransactionDate
-			, TranType
-			, CustVendor
-			, dblNoOfLot
-			, dblQuantity
-			, intOrderByHeading
-			, intContractHeaderId
-			, intFutOptTransactionHeaderId
-			, strProductType
-			, strProductLine
-			, strShipmentPeriod
-			, strLocation
-			, strOrigin
-			, intItemId
-			, strItemNo
-			, strItemDescription
-			, intBookId
-			, strBook
-			, intSubBookId
-			, strSubBook
-			, strCertificationName
-			, strCropYear
-		)
-		SELECT DISTINCT intRowNumber
-			, strGroup 
-			, Selection
-			, PriceStatus = ''
-			, b.strFutureMonth
-			, strAccountNumber =''
-			, dblNoOfContract = NULL
-			, strTradeNo = ''
-			, TransactionDate = ''
-			, TranType
-			, CustVendor
-			, dblNoOfLot = NULL
-			, dblQuantity = NULL
-			, intOrderByHeading
-			, intContractHeaderId = NULL
-			, intFutOptTransactionHeaderId = NULL
-			, strProductType = NULL
-			, strProductLine = NULL
-			, strShipmentPeriod = ''
-			, strLocation = ''
-			, strOrigin = NULL
-			, intItemId = NULL
-			, strItemNo = ''
-			, strItemDescription = ''
-			, intBookId = intBookId
-			, strBook = strBook
-			, intSubBookId = intSubBookId
-			, strSubBook = strSubBook
-			, strCertificationName = NULL
-			, strCropYear = NULL
-		FROM @ListFinal a
-		CROSS APPLY (
-			SELECT DISTINCT strFutureMonth
-			FROM #MissingMonths
-		) b
-		WHERE intRowNumber = @FirstRow
-	END
+	--IF	ISNULL(@ysnQueryWithTotals, 0) = 1
+	--	AND EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
+	--BEGIN
+	--	INSERT INTO @MonthOrder (intRowNumber
+	--		, strGroup
+	--		, Selection
+	--		, PriceStatus
+	--		, strFutureMonth
+	--		, strAccountNumber
+	--		, dblNoOfContract
+	--		, strTradeNo
+	--		, TransactionDate
+	--		, TranType
+	--		, CustVendor
+	--		, dblNoOfLot
+	--		, dblQuantity
+	--		, intOrderByHeading
+	--		, intContractHeaderId
+	--		, intFutOptTransactionHeaderId
+	--		, strProductType
+	--		, strProductLine
+	--		, strShipmentPeriod
+	--		, strLocation
+	--		, strOrigin
+	--		, intItemId
+	--		, strItemNo
+	--		, strItemDescription
+	--		, intBookId
+	--		, strBook
+	--		, intSubBookId
+	--		, strSubBook
+	--		, strCertificationName
+	--		, strCropYear
+	--	)
+	--	SELECT DISTINCT intRowNumber
+	--		, strGroup 
+	--		, Selection
+	--		, PriceStatus = ''
+	--		, b.strFutureMonth
+	--		, strAccountNumber =''
+	--		, dblNoOfContract = NULL
+	--		, strTradeNo = ''
+	--		, TransactionDate = ''
+	--		, TranType
+	--		, CustVendor
+	--		, dblNoOfLot = NULL
+	--		, dblQuantity = NULL
+	--		, intOrderByHeading
+	--		, intContractHeaderId = NULL
+	--		, intFutOptTransactionHeaderId = NULL
+	--		, strProductType = NULL
+	--		, strProductLine = NULL
+	--		, strShipmentPeriod = ''
+	--		, strLocation = ''
+	--		, strOrigin = NULL
+	--		, intItemId = NULL
+	--		, strItemNo = ''
+	--		, strItemDescription = ''
+	--		, intBookId = intBookId
+	--		, strBook = strBook
+	--		, intSubBookId = intSubBookId
+	--		, strSubBook = strSubBook
+	--		, strCertificationName = NULL
+	--		, strCropYear = NULL
+	--	FROM @ListFinal a
+	--	CROSS APPLY (
+	--		SELECT DISTINCT strFutureMonth
+	--		FROM #MissingMonths
+	--	) b
+	--	WHERE intRowNumber = @FirstRow
+	--END
 
 	DROP TABLE #MissingMonths
 	DROP TABLE #MonthList
