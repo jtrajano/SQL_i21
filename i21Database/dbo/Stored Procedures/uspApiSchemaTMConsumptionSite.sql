@@ -669,7 +669,7 @@ BEGIN
 				END
 
 				DECLARE @intSiteId INT = NULL
-				SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
+				SELECT TOP 1 @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
 				
 				
 				-- IF ONE OF THE REQUIRED FIELDS FOR ADDRESS IS NULL THEN IT WILL GET THE CUSTOMER ADDRESS
@@ -690,7 +690,7 @@ BEGIN
 					-- ADD NEW SITE		
 					DECLARE @intSiteNumber INT = NULL
 
-					SELECT @intSiteNumber = CONVERT(int,@strSiteNumber)
+					SET @intSiteNumber = CONVERT(int,@strSiteNumber)
 
 					INSERT INTO tblTMSite (intCustomerID
 						, strBillingBy
@@ -768,7 +768,7 @@ BEGIN
 						, @strClassFill
 						, @intFillGroupId
 						, @intHoldReasonId
-						, ISNULL(@intSiteNumber, 0) + 1
+						, @intSiteNumber
 						
 						, @ysnActive
 						, @strSiteDescription
