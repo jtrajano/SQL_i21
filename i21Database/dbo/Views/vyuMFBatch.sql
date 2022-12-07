@@ -135,12 +135,12 @@ SELECT
     ,SM.strCurrency
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
-LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = B.intGardenMarkId
+LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
 LEFT JOIN tblARMarketZone Channel ON Channel.intMarketZoneId = A.intMarketZoneId
 LEFT JOIN tblICItem OriginalItem ON OriginalItem.intItemId = A.intOriginalItemId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intLocationId
 LEFT JOIN tblSMCompanyLocation BC ON BC.intCompanyLocationId = A.intBuyingCenterLocationId
-LEFT JOIN tblSMCompanyLocation MU ON BC.intCompanyLocationId = A.intMixingUnitLocationId
+LEFT JOIN tblSMCompanyLocation MU ON MU.intCompanyLocationId = A.intMixingUnitLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation BR ON BR.intCompanyLocationSubLocationId = A.intBrokerWarehouseId
 LEFT JOIN tblSMCompanyLocationSubLocation D ON D.intCompanyLocationSubLocationId = A.intStorageLocationId
 LEFT JOIN tblICStorageLocation E ON A.intStorageUnitId = E.intStorageLocationId
