@@ -23,8 +23,8 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , intPreInvoiceGradeId					= CRD.intPreInvoiceGradeId
      , strChopNo							= CRD.strChopNo
      , strPreInvoiceChopNo					= CRD.strPreInvoiceChopNo
-     , intSampleId                                = CRD.intSampleId
-     , strSampleNumber                            = S.strSampleNumber
+     , intSampleId                                = CRD.intSampleId    
+     , ysnMismatched                              = ISNULL(CRD.ysnMismatched, 0)
 
 	 --NOT MAPPED
      , intSaleYear							= BD.intSaleYear
@@ -53,6 +53,7 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , dblNetWt3rdPackages					= CAST(BD.intNumOfPackagesUOM3 AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage3
      , dblNo3rdPackages						= BD.dblNumberOfPackages3
      , strWarehouseCode						= SL.strName
+     , strSampleNumber                            = S.strSampleNumber
 	, strGarden							= GM.strGardenMark
      , strPreInvoiceGarden					= PIGM.strGardenMark
      , strGrade							= CA.strDescription

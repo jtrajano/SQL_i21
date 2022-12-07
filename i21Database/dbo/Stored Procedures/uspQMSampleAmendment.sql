@@ -99,6 +99,7 @@ BEGIN TRY
 		  , strPreInvoiceChopNo			= S.strChopNumber
 		  , intPreInvoiceGardenMarkId	= S.intGardenMarkId
 		  , intPreInvoiceGradeId		= S.intGradeId
+		  , ysnMismatched				= CAST(1 AS BIT)
 		FROM tblQMCatalogueReconciliationDetail CRD
         INNER JOIN #AMENDMENTS A ON CRD.intCatalogueReconciliationId = A.intCatalogueReconciliationId
 		INNER JOIN tblQMSample S ON S.intSampleId = CRD.intSampleId
