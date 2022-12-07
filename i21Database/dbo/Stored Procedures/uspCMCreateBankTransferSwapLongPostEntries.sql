@@ -71,11 +71,11 @@ BEGIN
         ,[dtmDate]               = @dtmDate      
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = GLAccnt.intAccountId      
-        ,[dblDebit]              = dblAmountFrom
-        ,[dblCredit]             = 0
-        ,[dblDebitForeign]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom    
+        ,[dblDebit]              = 0
+        ,[dblCredit]             = dblAmountFrom
+        ,[dblDebitForeign]       = 0
+        ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom    
                                     THEN dblAmountFrom ELSE  dblAmountForeignTo END          
-        ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -104,11 +104,11 @@ BEGIN
         ,[dtmDate]               = @dtmDate      
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTInTransitAccountId
-        ,[dblDebit]              = 0
-        ,[dblCredit]             = dblAmountFrom 
-        ,[dblDebitForeign]       = 0
-        ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom
-                                    THEN dblAmountFrom ELSE  dblAmountForeignFrom END          
+        ,[dblDebit]              = dblAmountFrom 
+        ,[dblCredit]             = 0
+        ,[dblDebitForeign]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom
+                                   THEN dblAmountFrom ELSE  dblAmountForeignFrom END   
+        ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
