@@ -150,7 +150,7 @@ FROM (
 		INNER JOIN tblEMEntity CE WITH (NOLOCK) ON ARC.[intEntityId] = CE.intEntityId 
 		LEFT OUTER JOIN tblSMPaymentMethod SMP WITH (NOLOCK) ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
 		LEFT OUTER JOIN tblCFTransaction CFT WITH (NOLOCK) ON ARI.[intInvoiceId] = CFT.[intInvoiceId]	
-		LEFT JOIN tblEMEntityEFTInformation EFT WITH (NOLOCK) ON CE.intEntityId = EFT.intEntityId
+		LEFT JOIN tblEMEntityEFTInformation EFT WITH (NOLOCK) ON CE.intEntityId = EFT.intEntityId AND ARI.intCurrencyId = EFT.intCurrencyId
 		LEFT JOIN (
 			SELECT intPaymentId
 				 , ysnInvoicePrepayment
