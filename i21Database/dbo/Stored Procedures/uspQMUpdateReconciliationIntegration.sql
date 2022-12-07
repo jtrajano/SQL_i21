@@ -186,9 +186,11 @@ BEGIN TRY
          , strReconciliationNumber				= CR.strReconciliationNumber
          , ysnPosted							= CR.ysnPosted
 		 , dblCatReconPrice						= CRD.dblPreInvoicePrice
-		 , dblSamplePrice						= S.dblB1Price
-		 , dblCatReconQty						= CRD.dblPreInvoiceQuantity
-		 , dblSampleQty							= S.dblRepresentingQty
+		 , dblSamplePrice						= S.dblB1Price		 
+		 , dblSampleQty							= ISNULL(S.dblSampleQty, 0)
+		 , dblRepresentingQty					= ISNULL(S.dblRepresentingQty, 0)
+		 , dblCatReconSampleQty					= ISNULL(CRD.dblPreInvoiceQuantity, 0)
+		 , dblCatReconRepQty					= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, RIUM.strUnitMeasure, CRD.dblPreInvoiceQuantity), 0)
 		 , strCatReconChopNo					= CRD.strPreInvoiceChopNo
 		 , strSampleChopNo						= S.strChopNumber
 		 , intCatReconGardenMarkId				= CRD.intPreInvoiceGardenMarkId
@@ -200,6 +202,9 @@ BEGIN TRY
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
 	INNER JOIN tblQMSample S ON CRD.intSampleId = S.intSampleId
 	INNER JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId
+	LEFT JOIN tblICItem ITEM ON ITEM.intItemId = S.intItemId
+	LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
+	LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
       AND (S.dblB1Price <> CRD.dblPreInvoicePrice
         OR S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity
@@ -212,7 +217,8 @@ BEGIN TRY
 		BEGIN
 			UPDATE S
 			SET dblB1Price			= ISNULL(SS.dblCatReconPrice, 0)
-			  , dblRepresentingQty	= ISNULL(SS.dblCatReconQty, 0)
+			  , dblSampleQty		= ISNULL(SS.dblCatReconSampleQty, 0)
+			  , dblRepresentingQty	= ISNULL(SS.dblCatReconRepQty, 0)
 			  , strChopNumber		= SS.strCatReconChopNo
 			  , intGardenMarkId		= NULLIF(SS.intCatReconGardenMarkId, 0)
 			  , intGradeId			= NULLIF(SS.intCatReconGradeId, 0)
@@ -262,17 +268,29 @@ BEGIN TRY
 
 					SELECT [Id]			= 3
 						, [Action]		= NULL
-						, [Change]		= 'Update Representing Quantity'
+						, [Change]		= 'Update Net Quantity'
 						, [From]		= CAST(dblSampleQty AS NVARCHAR(100))
-						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconSampleQty AS NVARCHAR(100))
 						, [ParentId]	= 1
 					FROM #SAMPLES 
 					WHERE intSampleId = @intSampleId
-					  AND dblSampleQty <> dblCatReconQty
+					  AND dblSampleQty <> dblCatReconSampleQty
+
+					UNION ALL
+
+					SELECT [Id]			= 4
+						, [Action]		= NULL
+						, [Change]		= 'Update Quantity'
+						, [From]		= CAST(dblRepresentingQty AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconRepQty AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #SAMPLES 
+					WHERE intSampleId = @intSampleId
+					  AND dblRepresentingQty <> dblCatReconRepQty
 
 					UNION ALL
 					
-					SELECT [Id]			= 4
+					SELECT [Id]			= 5
 						, [Action]		= NULL
 						, [Change]		= 'Update Chop Number'
 						, [From]		= CAST(strSampleChopNo AS NVARCHAR(100))
@@ -284,7 +302,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 5
+					SELECT [Id]			= 6
 						, [Action]		= NULL
 						, [Change]		= 'Update Garden Mark'
 						, [From]		= CAST(SGM.strGardenMark AS NVARCHAR(100))
@@ -298,7 +316,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 6
+					SELECT [Id]			= 7
 						, [Action]		= NULL
 						, [Change]		= 'Update Grade'
 						, [From]		= CAST(SCA.strDescription AS NVARCHAR(100))
