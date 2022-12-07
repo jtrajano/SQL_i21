@@ -690,7 +690,7 @@ BEGIN
 					-- ADD NEW SITE		
 					DECLARE @intSiteNumber INT = NULL
 
-					SELECT @intSiteNumber = ISNULL((SELECT TOP 1 intCurrentSiteNumber FROM tblTMCustomer WHERE intCustomerID = @intCustomerId),0) + 1
+					SELECT @intSiteNumber = CONVERT(int,@strSiteNumber)
 
 					INSERT INTO tblTMSite (intCustomerID
 						, strBillingBy
