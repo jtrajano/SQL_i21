@@ -25,8 +25,8 @@ SELECT
 	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE B.dblDiscount / 100 END AS dblDiscount
 	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE B.dblTotal END AS dblDetailTotal
 	,B.dblStandardWeight
-	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE A.dblTotal END  AS dblTotal
-	,CASE WHEN D.strType = 'Comment' THEN NULL ELSE A.dblSubtotal END AS dblSubtotal
+	,A.dblTotal
+ 	,A.dblSubtotal
 	,A.dblTax
 	,A.dblShipping
 	,D.intItemId
