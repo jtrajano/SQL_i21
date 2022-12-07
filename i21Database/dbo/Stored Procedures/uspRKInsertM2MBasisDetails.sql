@@ -65,6 +65,7 @@ DECLARE @tempBasis TABLE(intRowNumber INT
     , ysnEvaluationByStorageLocation BIT
     , ysnEvaluationByStorageUnit BIT
 	, ysnIncludeProductInformation BIT
+	, ysnEnableMTMPoint BIT
 )  
 
 INSERT INTO @tempBasis
