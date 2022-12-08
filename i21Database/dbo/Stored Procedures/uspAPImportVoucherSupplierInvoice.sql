@@ -110,6 +110,7 @@ INSERT INTO @voucherPayables
 	-- ,intPurchasingGroupId
 	-- ,strPurchasingGroup
 	,dtmDate
+	,dtmExpectedDate
 	,dtmVoucherDate
 	,dblOrderQty
     ,dblQuantityToBill
@@ -125,6 +126,7 @@ INSERT INTO @voucherPayables
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook		
+	,strBillOfLading
 	,intMarketZoneId
 	,intCatalogueTypeId	
 	,dblPackageBreakups
@@ -144,6 +146,7 @@ SELECT
 	-- ,intPurchasingGroupId
 	-- ,strPurchasingGroup
 	,A.dtmDate
+	,A.dtmExpectedDate
 	,A.dtmBillDate
 	,dblQuantityToBill
     ,dblQuantityToBill
@@ -159,6 +162,7 @@ SELECT
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook	
+	,A.strDocumentNumber
 	,intMarketZoneId
 	,intCatalogueTypeId	
 	,dblPackageBreakups
