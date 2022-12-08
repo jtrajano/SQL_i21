@@ -161,7 +161,7 @@ SELECT
 	,ysnHasCreditApprover				= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 	,dblCreditStopDays					= ISNULL(CUSTOMERAGING.dblCreditStopDays, 0)
 	,intCreditStopDays					= CUS.intCreditStopDays
-	,ysnInvoiceReturned					= ISNULL(RELATEDINVOICE.ysnReturned, 0)
+	,ysnInvoiceReturned					= ISNULL(RELATEDINVOICE.ysnReturned,0)
 	,ysnInterCompany					= ISNULL(INV.ysnInterCompany,0)
 	,ysnImportFromCSV					= ISNULL(INV.ysnImportFromCSV,0)
 	,strInterCompanyName				= INTERCOMPANY.strCompanyName
@@ -303,11 +303,12 @@ LEFT JOIN
 (
 	SELECT  
 		 intInvoiceId
+		,ysnPosted
+		,strType
+		,strInvoiceNumber
 		,dblPayment
 		,dblBasePayment
 		,ysnReturned
-		,strType
-		,ysnPosted
 	FROM tblARInvoice  WITH (NOLOCK) 
 ) RELATEDINVOICE ON RELATEDINVOICE.intInvoiceId = INV.intOriginalInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
