@@ -50,6 +50,29 @@ FROM (
 									END
 							ELSE ft.strStatus
 							END COLLATE Latin1_General_CI_AS
+		, strAssignedContracts  = CASE WHEN  ft.intSelectedInstrumentTypeId IN (1) THEN (
+									SELECT  STUFF((SELECT ',' + CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
+									FROM tblRKAssignFuturesToContractSummary A
+									INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+									INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+									WHERE ysnIsHedged = 0 AND A.intFutOptTransactionId = ft.intFutOptTransactionId
+									FOR XML PATH('')), 1, 1, ''))
+								ELSE '' END
+		, strHedgedContracts  = CASE WHEN  ft.intSelectedInstrumentTypeId IN (1) THEN 
+									(SELECT  STUFF((SELECT ',' + CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
+									FROM tblRKAssignFuturesToContractSummary A
+									INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+									INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+									WHERE ysnIsHedged = 1 AND A.intFutOptTransactionId = ft.intFutOptTransactionId
+									FOR XML PATH('')), 1, 1, ''))
+								ELSE 
+									(SELECT  STUFF((SELECT ',' + CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
+									FROM tblRKAssignFuturesToContractSummary A
+									INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+									INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+									WHERE  A.intFutOptTransactionId = ft.intFutOptTransactionId
+									FOR XML PATH('')), 1, 1, ''))
+								END
 		, ft.intBookId
 		, sb.strBook
 		, ft.intSubBookId
