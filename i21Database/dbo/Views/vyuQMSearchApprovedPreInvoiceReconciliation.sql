@@ -7,6 +7,7 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , dtmPostDate							= CR.dtmPostDate
      , ysnPosted							= CR.ysnPosted
      , ysnApproved							= CASE WHEN SMT.intTransactionId IS NULL OR SMT.strApprovalStatus NOT IN ('No Need for Approval', 'Approved') THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+     , strApprovalStatus                          = SMT.strApprovalStatus
      --DETAILS
      , intCatalogueReconciliationDetailId	     = CRD.intCatalogueReconciliationDetailId
      , intBillDetailId						= BD.intBillDetailId 
