@@ -5,7 +5,7 @@ AS
 SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strType, intLocationId) 
 	, *
 FROM (
-	SELECT intLocationId = IL.intItemLocationId
+	SELECT intLocationId = IL.intLocationId
 		, strLocation = CL.strLocationName
 		, intReferenceId = IL.intItemId
 		, strType = 'Item'
