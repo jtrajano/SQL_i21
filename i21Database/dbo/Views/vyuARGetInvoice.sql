@@ -181,7 +181,6 @@ SELECT
 	,ysnOverrideTaxPoint                = CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
 	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,intProfitCenter					= CLOC.intProfitCenter
-	,ysnTaxAdjusted						= CAST(CASE WHEN RELATEDINVOICE2.strType = 'Tax Adjustment' AND RELATEDINVOICE2.ysnPosted = 1 THEN 1 ELSE 0 END AS BIT)
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
 FROM tblARInvoice INV WITH (NOLOCK)
