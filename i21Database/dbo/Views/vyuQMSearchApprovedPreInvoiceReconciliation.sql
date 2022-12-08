@@ -33,7 +33,7 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , strSaleNumber						= BD.strSaleNumber
      , strTeaType							= CT.strCatalogueType
      , strSupplier							= E.strName
-     , strChannel							= SB.strSubBook
+     , strChannel							= MZ.strMarketZoneCode
      , strCompanyCode						= PG.strName
      , dtmPromptDate						= BD.dtmExpectedDate
      , dtmSaleDate							= BD.dtmSaleDate
@@ -67,7 +67,7 @@ INNER JOIN tblQMSample S ON CRD.intSampleId = S.intSampleId
 LEFT JOIN tblEMEntity E ON B.intEntityVendorId = E.intEntityId
 LEFT JOIN tblSMCompanyLocation CL ON B.intShipToId = CL.intCompanyLocationId
 LEFT JOIN tblICStorageLocation SL ON BD.intStorageLocationId = SL.intStorageLocationId
-LEFT JOIN tblCTSubBook SB ON BD.intSubBookId = SB.intSubBookId
+LEFT JOIN tblARMarketZone MZ ON BD.intMarketZoneId = MZ.intMarketZoneId
 LEFT JOIN tblSMPurchasingGroup PG ON BD.intPurchasingGroupId = PG.intPurchasingGroupId
 LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
 LEFT JOIN tblSMTransaction SMT ON SMT.intRecordId = CR.intCatalogueReconciliationId AND SMT.strTransactionNo = CR.strReconciliationNumber
