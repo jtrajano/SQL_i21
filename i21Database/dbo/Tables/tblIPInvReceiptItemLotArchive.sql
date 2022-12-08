@@ -15,6 +15,15 @@
 	strWeightUOM				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strLotPrimaryStatus			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
+	strStorageLocationName		NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strMarks					NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dtmManufacturedDate			DATETIME,
+	dtmExpiryDate				DATETIME,
+
+	strERPPONumber				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strERPItemNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	intStageReceiptItemId		INT,
+
 	CONSTRAINT [PK_tblIPInvReceiptItemLotArchive_intStageReceiptItemLotId] PRIMARY KEY (intStageReceiptItemLotId),
 	CONSTRAINT [FK_tblIPInvReceiptItemLotArchive_tblIPInvReceiptArchive_intStageReceiptId] FOREIGN KEY (intStageReceiptId) REFERENCES [tblIPInvReceiptArchive](intStageReceiptId) ON DELETE CASCADE
 )
