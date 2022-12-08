@@ -17,6 +17,6 @@ SELECT RR.intReportRemarkId
 FROM tblLGReportRemark RR
 LEFT JOIN tblICItem Item ON Item.intItemId = RR.intValueId AND RR.strType = 'Item'
 LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = RR.intValueId AND RR.strType = 'Entity'
-LEFT JOIN tblICItemLocation IL ON IL.intItemLocationId = RR.intLocationId AND RR.strType = 'Item'
+LEFT JOIN tblICItemLocation IL ON IL.intLocationId = RR.intLocationId AND RR.strType = 'Item' AND IL.intItemId = RR.intValueId
 LEFT JOIN tblSMCompanyLocation ItemLoc ON ItemLoc.intCompanyLocationId = IL.intLocationId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = RR.intLocationId AND RR.strType = 'Entity'
