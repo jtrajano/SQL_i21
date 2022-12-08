@@ -561,7 +561,10 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WHEN CLNP.strType = 'Bank' THEN ISNULL(ConsigneeNotifyBank.strZipCode, '')
 				WHEN CLNP.strType = 'Company' THEN ISNULL(CNCompanyLocation.strZipPostalCode, ConsigneeNotifyCompany.strZip)
 				WHEN CLNP.strType IN ('Vendor', 'Customer', 'Forwarding Agent') THEN ISNULL(CNLocation.strZipCode, '')
-				ELSE '' END
+				ELSE '' END,
+			strSeller = Seller.strLocationName,
+			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
+			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
@@ -640,6 +643,13 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation CNCompanyLocation ON CNCompanyLocation.intCompanyLocationId = CLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId
+
+		LEFT JOIN tblCTContractDetail PurchaseCD ON PurchaseCD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractHeader PurchaseCH ON PurchaseCH.intContractHeaderId = PurchaseCD.intContractHeaderId
+		LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = PurchaseCD.intProducerId
+		LEFT JOIN tblEMEntity ShipperVendor ON ShipperVendor.intEntityId = PurchaseCH.intEntityId
+		LEFT JOIN tblSMCompanyLocation Seller ON Seller.intCompanyLocationId = LD.intPCompanyLocationId
+
 		CROSS APPLY tblLGCompanyPreference CP		
 		OUTER APPLY (
 			SELECT TOP 1
@@ -833,7 +843,10 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo'),
 			ysnFullHeaderLogo = CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END,
 			intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0),
-			intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)	 
+			intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0),
+			strSeller = Seller.strLocationName,
+			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
+			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
@@ -869,6 +882,13 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		LEFT JOIN	tblSMFreightTerms Basis ON Basis.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN	tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+
+		LEFT JOIN tblCTContractDetail PurchaseCD ON PurchaseCD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractHeader PurchaseCH ON PurchaseCH.intContractHeaderId = PurchaseCD.intContractHeaderId
+		LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = PurchaseCD.intProducerId
+		LEFT JOIN tblEMEntity ShipperVendor ON ShipperVendor.intEntityId = PurchaseCH.intEntityId
+		LEFT JOIN tblSMCompanyLocation Seller ON Seller.intCompanyLocationId = LD.intPCompanyLocationId
+
 		CROSS APPLY tblLGCompanyPreference CP		
 		OUTER APPLY (
 			SELECT TOP 1

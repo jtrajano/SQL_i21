@@ -20,5 +20,6 @@
 	 [dblTotalCostPerContainer] NUMERIC(18, 6),
 	 [intFreightRateMatrixRefId] INT NULL,
 	 [intConcurrencyId] INT NOT NULL DEFAULT 0,
-	 [ysnOffer] BIT NULL
+	 [ysnOffer] BIT NULL,
+	 [intCommodityId] INT
 	)

@@ -42,6 +42,8 @@ SELECT be.intM2MDifferentialBasisId
 	, intStorageLocationId = storageLocation.intCompanyLocationSubLocationId
 	, strStorageUnit = storageUnit.strName
 	, intStorageUnitId = storageUnit.intStorageLocationId
+	, strMTMPoint  = mtm.strMTMPoint
+	, intMTMPointId = be.intMTMPointId
 FROM tblRKM2MDifferentialBasis be
 LEFT JOIN tblICCommodity c ON c.intCommodityId = be.intCommodityId
 LEFT JOIN tblICItem i ON i.intItemId = be.intItemId
@@ -64,3 +66,5 @@ LEFT JOIN tblSMCompanyLocationSubLocation storageLocation
 	ON storageLocation.intCompanyLocationSubLocationId = be.intStorageLocationId
 LEFT JOIN tblICStorageLocation storageUnit
 	ON storageUnit.intStorageLocationId = be.intStorageUnitId
+LEFT JOIN tblCTMTMPoint mtm
+	ON mtm.intMTMPointId = be.intMTMPointId

@@ -251,7 +251,7 @@ BEGIN
 		END
 
 		--GET DEFAULT COMPANY CONFIGURATIONS
-		SELECT @instructionCode = intInstructionCode FROM tblAPCompanyPreference
+		SELECT @instructionCode = intInstructionCode, @paymentMethod = CASE WHEN NULLIF(@paymentMethod, 0) IS NULL THEN intPaymentMethodID ELSE @paymentMethod END FROM tblAPCompanyPreference
 
 		MERGE INTO tblAPPayment AS destination
 		USING

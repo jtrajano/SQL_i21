@@ -269,6 +269,7 @@ DECLARE
           ,intLOBSegmentOverrideId  
           ,intCompanySegmentOverrideId
           ,A.strModule
+          ,OffSet
           INTO #iRelyPostGLEntries
           FROM cte1 A  
           OUTER APPLY (  
@@ -394,7 +395,7 @@ DECLARE
           ,[dtmDateEntered]  
           ,[strBatchId]  
           ,[strCode]     
-          ,[strJournalLineDescription] = 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod   
+          ,[strJournalLineDescription] = CASE WHEN Offset = 1 THEN  'Reverse Offset Revalue '+ @strTransactionType + ' '  + @strPeriod ELSE 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod END
           ,[intJournalLineNo]  
           ,[strTransactionType]  
           ,[strTransactionForm]  

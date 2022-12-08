@@ -413,11 +413,12 @@ BEGIN
 	LEFT JOIN @FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 	INNER JOIN @GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 	LEFT JOIN (
-		SELECT
+		SELECT TOP 1
 			 strTransactionId
 			,dblNewForexRate
-		FROM vyuGLRevalueDetails
-		WHERE strTransactionType = 'Invoice'
+		FROM vyuGLRevalueDetails vGLR
+		INNER JOIN tblGLRevalue tGLR ON vGLR.intConsolidationId = tGLR.intConsolidationId
+		WHERE vGLR.strTransactionType = 'Invoice' and tGLR.ysnPosted = 1
 		GROUP BY
 			 strTransactionId
 			,dblNewForexRate

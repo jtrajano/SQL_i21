@@ -370,6 +370,7 @@ BEGIN TRY
 					, @ysnEnableBudgetForBasisPricing BIT
 					, @dblTotalBudget NUMERIC(18, 6)
 					, @dblTotalCost NUMERIC(18, 6)
+					, @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost bit
 
 				DECLARE @CostItems AS TABLE (intCostItemId INT
 					, strCostItem NVARCHAR(100)
@@ -403,6 +404,7 @@ BEGIN TRY
 				SELECT @intDefaultFreightId = intDefaultFreightItemId
 					, @intDefaultInsuranceId = intDefaultInsuranceItemId
 					, @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing
+					, @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost = ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost
 				FROM tblCTCompanyPreference
 
 				INSERT INTO @CostItems
@@ -430,7 +432,7 @@ BEGIN TRY
 					FROM (
 						SELECT cc.intContractCostId
 							, ci.intItemUOMId
-							, ci.dblFX
+							, dblFX = case when @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost = 1 then cc.dblFX else ci.dblFX end
 							, dblRate = CASE WHEN cc.intItemId = @intDefaultInsuranceId THEN 
 												CASE WHEN @intDetailPricingTypeId = 2 AND @ysnEnableBudgetForBasisPricing = 1 THEN @dblTotalBudget * ci.dblAmount
 													ELSE CASE WHEN ci.dblAmount <> 0 THEN @dblTotalCost * ci.dblAmount ELSE cc.dblRate END END

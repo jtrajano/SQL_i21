@@ -643,6 +643,8 @@
     <Build Include="dbo\Tables\tblICCommodityAttribute3.sql" />
     <Build Include="dbo\Tables\tblICCommodityAttribute4.sql" />
     <Build Include="dbo\Views\vyuAPVendorStatement.sql" />
+    <Build Include="dbo\Views\vyuAPClearingDiscrepancy.sql" />
+    <Build Include="dbo\Views\vyuAPDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVendorStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectLoadSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
@@ -869,6 +871,8 @@
     <Build Include="dbo\Tables\tblRKCurrencyPair.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyPairSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetailWithCurrencies.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAllocatedContractRiskReport.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentMethodBlank.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
