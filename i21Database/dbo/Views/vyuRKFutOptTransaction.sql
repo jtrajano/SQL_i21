@@ -50,6 +50,18 @@ FROM (
 									END
 							ELSE ft.strStatus
 							END COLLATE Latin1_General_CI_AS
+		, strAssignedContracts  = (
+								SELECT STRING_AGG( ISNULL(CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10)), ' '), ', ')
+								FROM tblRKAssignFuturesToContractSummary A
+								INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+								INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+								WHERE ysnIsHedged = 0 AND A.intFutOptTransactionId = ft.intFutOptTransactionId)
+		, strHedgedContracts  = (
+								SELECT STRING_AGG( ISNULL(CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10)), ' '), ', ')
+								FROM tblRKAssignFuturesToContractSummary A
+								INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+								INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+								WHERE ysnIsHedged = 1 AND A.intFutOptTransactionId = ft.intFutOptTransactionId)
 		, ft.intBookId
 		, sb.strBook
 		, ft.intSubBookId
