@@ -699,7 +699,6 @@
     <Build Include="dbo\Views\vyuICGetWarrantLotAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRecordPostedMatchPnS.sql" />
     <Build Include="dbo\Stored Procedures\uspQMCuppingSessionUpdateParentSample.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceWalterMatterReport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingForm.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormResult.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormSaleInfromation.sql" />
