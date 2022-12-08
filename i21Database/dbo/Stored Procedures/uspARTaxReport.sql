@@ -323,7 +323,6 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 			, strStateTaxId
 			, blbCompanyLogo
 			, strLogoType
-			,strInvoiceOriginId
 		)
 		SELECT intEntityCustomerId			= TAX.intEntityCustomerId
 			, intEntitySalespersonId		= TAX.intEntitySalespersonId
@@ -384,7 +383,6 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 			, strStateTaxId					= TAX.strStateTaxId
 			, blbCompanyLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
 			, strLogoType					= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
-			,strInvoiceOriginId				= TAX.strInvoiceOriginId
 		FROM dbo.vyuARSalesTaxReport TAX WITH (NOLOCK)
 		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId

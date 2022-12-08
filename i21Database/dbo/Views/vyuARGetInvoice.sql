@@ -310,14 +310,6 @@ LEFT JOIN
 		,ysnPosted
 	FROM tblARInvoice  WITH (NOLOCK) 
 ) RELATEDINVOICE ON RELATEDINVOICE.intInvoiceId = INV.intOriginalInvoiceId
-LEFT JOIN
-(
-	SELECT  
-		 intOriginalInvoiceId
-		,strType
-		,ysnPosted
-	FROM tblARInvoice  WITH (NOLOCK) 
-) RELATEDINVOICE2 ON RELATEDINVOICE2.intOriginalInvoiceId = INV.intInvoiceId
 LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
 LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId,0)
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
