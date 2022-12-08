@@ -181,7 +181,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[dblNumberOfPackages2] DECIMAL(18,6),
 	[intNumOfPackagesUOM3] INT NULL,
 	[dblNumberOfPackages3] DECIMAL(18,6),
-	[strPurchaseGroup] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	[intPurchasingGroupId] INT NULL,
 	/**/
 	dtmExpectedDate DATETIME NULL
 )

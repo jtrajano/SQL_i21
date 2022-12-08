@@ -79,7 +79,8 @@ SELECT
 	strPurchaseType						=	A.strPurchaseType,
 	intTransactionType					=	CASE WHEN A.strPurchaseType = 'I' THEN 1 ELSE 3 END,
 	strDocumentNumber					=	A.strDocumentNumber,
-	strPurchasingGroup					=	A.strStorageLocation,
+	intPurchasingGroupId				=	F.intPurchasingGroupId,
+	strPurchasingGroup					=	A.strBook,
 	intNumOfPackagesUOM					=	CAST(A.dblWeightBreakup1 AS INT),
 	dblWeightBreakup1Bags				=	CAST(A.dblWeightBreakup1Bags AS DECIMAL(18,6)),
 	intNumOfPackagesUOM2				=	CAST(A.dblWeightBreakup2 AS INT),
@@ -95,7 +96,7 @@ FROM tblAPImportVoucherSupplierInvoice A
 LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityId = C2.intEntityId) ON C2.strName = A.strVendorId
 LEFT JOIN tblICStorageLocation D ON A.strStorageLocation = D.strName
 LEFT JOIN tblICLot E ON A.strLotNumber = E.strLotNumber
-LEFT JOIN tblSMPurchasingGroup F ON F.strName = A.strStorageLocation
+LEFT JOIN tblSMPurchasingGroup F ON F.strName = A.strBook
 LEFT JOIN tblQMGardenMark G ON G.strGardenMark = A.strPreInvoiceGarden
 LEFT JOIN tblARMarketZone H ON H.strMarketZoneCode = A.strChannel
 LEFT JOIN tblQMCatalogueType I ON I.strCatalogueType = A.strCatalogueType
@@ -107,8 +108,7 @@ INSERT INTO @voucherPayables
     ,intEntityVendorId
 	,intAccountId
     ,intTransactionType
-	-- ,intPurchasingGroupId
-	-- ,strPurchasingGroup
+	,intPurchasingGroupId
 	,dtmDate
 	,dtmExpectedDate
 	,dtmVoucherDate
@@ -143,8 +143,7 @@ SELECT
     ,intEntityVendorId
 	,A.intAccountId
     ,A.intTransactionType
-	-- ,intPurchasingGroupId
-	-- ,strPurchasingGroup
+	,A.intPurchasingGroupId
 	,A.dtmDate
 	,A.dtmExpectedDate
 	,A.dtmBillDate

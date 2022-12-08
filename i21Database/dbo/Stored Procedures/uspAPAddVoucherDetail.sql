@@ -290,6 +290,7 @@ SELECT TOP 100 PERCENT
 	,strSubBook							=	A.strSubBook
 	,intMarketZoneId					=	A.intMarketZoneId
 	,intCatalogueTypeId					=	A.intCatalogueTypeId
+	,intPurchasingGroupId				=	A.intPurchasingGroupId
 	,A.dblPackageBreakups
 	,A.intNumOfPackagesUOM
 	,A.dblNumberOfPackages
@@ -530,6 +531,7 @@ INSERT
 	,intSubBookId	
 	,intMarketZoneId
 	,intCatalogueTypeId
+	,intPurchasingGroupId
 	,dblPackageBreakups
 	,intNumOfPackagesUOM
 	,dblNumberOfPackages
@@ -653,6 +655,7 @@ VALUES
 	,intSubBookId		
 	,intMarketZoneId
 	,intCatalogueTypeId
+	,intPurchasingGroupId
 	,dblPackageBreakups
 	,intNumOfPackagesUOM
 	,dblNumberOfPackages
