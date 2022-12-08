@@ -499,6 +499,11 @@ BEGIN TRY
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
 				,intSampleId=NULL
+				,dblOriginalTeaTaste = dblTeaTaste
+				,dblOriginalTeaHue = dblTeaHue
+				,dblOriginalTeaIntensity = dblTeaIntensity
+				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+				,dblOriginalTeaAppearance = dblTeaAppearance
 			FROM @MFBatchTableType B
 			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
 			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook

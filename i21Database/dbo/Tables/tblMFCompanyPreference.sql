@@ -104,5 +104,6 @@
 	dblTrialBlendSheetSize NUMERIC(18,6) NULL,
 	intPositionByETAInDemandReport Integer,
 	intPositionByETADemandReport INT,
+	ysnEnabledPreShipmentSampleByBatch BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

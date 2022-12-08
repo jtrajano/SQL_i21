@@ -44,7 +44,7 @@ SELECT wo.strWorkOrderNo
 	,lot.dblWeightPerQty [dblKgBags]
 	,TC.strTINNumber [strTIN]
 	,woil.dblIssuedQuantity [dblBags]
-	,(woil.dblQuantity / dblTotalWeight.dblTotalWeight) * 100 [dblPercentage]
+	,CAST((woil.dblQuantity / dblTotalWeight.dblTotalWeight) * 100 AS NUMERIC(38,1)) [dblPercentage]
 	,DATEDIFF(DAY, lot.dtmDateCreated, GETDATE()) [intAge]
 	,wo.intTrialBlendSheetStatusId
 	,woil.strFW

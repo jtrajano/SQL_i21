@@ -74,7 +74,22 @@ BEGIN TRY
 		,@dblCeilingQtyDiff DECIMAL(38, 20)
 		,@dblFloorQtyDiff DECIMAL(38, 20)
 		,@strWhere NVARCHAR(MAX)
-		,@intTestId int
+		,@intTestId INT
+		,@intOrgNoOfSheets INT
+		,@strStorageLocation NVARCHAR(50)
+		,@strGardenMark NVARCHAR(50)
+		,@dblTeaVolume NUMERIC(38, 20)
+		,@intAge INT
+		,@dblTeaIntensity NUMERIC(38, 20)
+		,@dblTeaMouthFeel NUMERIC(38, 20)
+		,@strSubCluster NVARCHAR(50)
+		,@dblTeaAppearance NUMERIC(38, 20)
+		,@strOrigin NVARCHAR(50)
+		,@intSalesYear INT
+		,@intSales INT
+		,@strdblTeaTaste NUMERIC(38, 20)
+		,@strdblTeaHue NUMERIC(38, 20)
+		,@ysnEnabledPreShipmentSampleByBatch BIT
 	DECLARE @intPropertyId INT
 		,@strPropertyName NVARCHAR(100)
 		,@dblMinValue NUMERIC(38, 20)
@@ -120,8 +135,8 @@ BEGIN TRY
 		,@intItemId INT
 		,@intItemUOMId INT
 		,@dblLastCost INT
-		,@strOrderByFENA nvarchar(100)
-		,@strOrderByNAFE nvarchar(100)
+		,@strOrderByFENA NVARCHAR(100)
+		,@strOrderByNAFE NVARCHAR(100)
 	DECLARE @tblInputItemSeq TABLE (
 		intItemId INT
 		,intSeq INT
@@ -213,12 +228,20 @@ BEGIN TRY
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 		,@ysnRecipeHeaderValidation = IsNULL(ysnRecipeHeaderValidation, 0)
+		,@ysnEnabledPreShipmentSampleByBatch=IsNULL(ysnEnabledPreShipmentSampleByBatch,0)
 	FROM tblMFCompanyPreference
 
+	if @ysnEnabledPreShipmentSampleByBatch =1
+	Begin
+		SET @intProductTypeId = 13
+	End
+	Else
+	BEgin
 	IF @ysnEnableParentLot = 0
 		SET @intProductTypeId = 6
 	ELSE
 		SET @intProductTypeId = 11
+	End
 
 	SELECT @strBlendItemNo = i.strItemNo
 		,@intBlendItemId = i.intItemId
@@ -235,6 +258,122 @@ BEGIN TRY
 	FROM tblMFBlendRequirement br
 	JOIN tblICItem i ON br.intItemId = i.intItemId
 	WHERE br.intBlendRequirementId = @intBlendRequirementId
+
+	SELECT @intSequenceNo = MAX(intSequenceNo) + 1
+	FROM tblMFBlendRequirementRule
+	WHERE intBlendRequirementId = @intBlendRequirementId
+
+	SELECT @intSequenceCount = 1
+
+	WHILE (@intSequenceCount < @intSequenceNo)
+	BEGIN
+		SELECT @strRuleName = b.strName
+			,@strValue = a.strValue
+		FROM tblMFBlendRequirementRule a
+		JOIN tblMFBlendSheetRule b ON a.intBlendSheetRuleId = b.intBlendSheetRuleId
+		WHERE intBlendRequirementId = @intBlendRequirementId
+			AND a.intSequenceNo = @intSequenceCount
+
+		IF @strRuleName = 'Warehouse'
+			AND @strValue <> ''
+		BEGIN
+			SET @strStorageLocation = @strValue
+		END
+
+		IF @strRuleName = 'Garden'
+			AND @strValue <> ''
+		BEGIN
+			SET @strGardenMark = @strValue
+		END
+
+		IF @strRuleName = 'Volume'
+			AND @strValue <> ''
+		BEGIN
+			SET @dblTeaVolume = @strValue
+		END
+
+		IF @strRuleName = 'Age'
+			AND @strValue <> ''
+		BEGIN
+			SET @intAge = @strValue
+		END
+
+		IF @strRuleName = 'Intensity'
+			AND @strValue <> ''
+		BEGIN
+			SET @dblTeaIntensity = @strValue
+		END
+
+		IF @strRuleName = 'Mouth Feel'
+			AND @strValue <> ''
+		BEGIN
+			SET @dblTeaMouthFeel = @strValue
+		END
+
+		IF @strRuleName = 'Sub Cluster'
+			AND @strValue <> ''
+		BEGIN
+			SET @strSubCluster = @strValue
+		END
+
+		IF @strRuleName = 'Appearance'
+			AND @strValue <> ''
+		BEGIN
+			SET @dblTeaAppearance = @strValue
+		END
+
+		--IF @strRuleName = 'Tea Group' and @strValue<>''
+		--BEGIN
+		--	IF len(@strWhere) > 0
+		--		SET @strWhere = @strWhere+' And strTeaGroup =''' + @strValue + ''','
+		--	ELSE
+		--		SET @strWhere = @strWhere+' strTeaGroup =''' + @strValue + ''','
+		--END
+		IF @strRuleName = 'Origin'
+			AND @strValue <> ''
+		BEGIN
+			SET @strOrigin = @strValue
+		END
+
+		IF @strRuleName = 'Sale Year'
+			AND @strValue <> ''
+		BEGIN
+			SET @intSalesYear = @strValue
+		END
+
+		IF @strRuleName = 'Sale No'
+			AND @strValue <> ''
+		BEGIN
+			SET @intSales = @strValue
+		END
+
+		IF @strRuleName = 'Taste'
+			AND @strValue <> ''
+		BEGIN
+			SET @strdblTeaTaste = @strValue
+		END
+
+		IF @strRuleName = 'Hue'
+			AND @strValue <> ''
+		BEGIN
+			SET @strdblTeaHue = @strValue
+		END
+
+		IF @strRuleName = 'Pick By'
+			AND @strValue <> ''
+		BEGIN
+			SELECT @intIssuedUOMTypeId = intIssuedUOMTypeId
+			FROM tblMFMachineIssuedUOMType
+			WHERE strName = @strValue
+
+			IF @intIssuedUOMTypeId IS NULL
+				SELECT @intIssuedUOMTypeId = @intOriginalIssuedUOMTypeId
+		END
+
+		SET @intSequenceCount = @intSequenceCount + 1
+	END
+
+	SELECT @intSequenceCount = 1
 
 	SET @intNoOfSheets = @intEstNoOfSheets
 
@@ -331,8 +470,10 @@ BEGIN TRY
 	FROM tblMFMachine
 	WHERE intMachineId = @intMachineId
 
-	DECLARE @tblSourceSubLocation AS TABLE (intRecordId INT identity(1, 1)
-		,intSubLocationId INT)
+	DECLARE @tblSourceSubLocation AS TABLE (
+		intRecordId INT identity(1, 1)
+		,intSubLocationId INT
+		)
 
 	IF NOT EXISTS (
 			SELECT *
@@ -612,7 +753,7 @@ BEGIN TRY
 			)
 		AND c.intControlPointId = @intControlPointId
 		AND p.ysnActive = 1
-		AND pp.intTestId=IsNULL(@intTestId, pp.intTestId)
+		AND pp.intTestId = IsNULL(@intTestId, pp.intTestId)
 	ORDER BY pp.intSequenceNo
 
 	SELECT @intPropertyCount = COUNT(1)
@@ -667,6 +808,10 @@ BEGIN TRY
 	IF @ysnReleaseBlendsheetByNoOfMixes = 0
 	BEGIN
 		SELECT @intNoOfSheets = 1
+
+		SELECT @intOrgNoOfSheets = NULL
+
+		SELECT @intOrgNoOfSheets = @intNoOfSheets
 
 		SELECT @intEstNoOfSheets = 1
 	END
@@ -800,6 +945,7 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				,intPreference INT
+				,intBatchId int
 				)
 
 			IF OBJECT_ID('tempdb..#tblParentLot') IS NOT NULL
@@ -821,6 +967,7 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				,intPreference INT
+				,intBatchId int
 				)
 
 			IF EXISTS (
@@ -847,6 +994,7 @@ BEGIN TRY
 					,intItemUOMId
 					,intItemIssuedUOMId
 					,intPreference
+					,intBatchId
 					)
 				SELECT L.intLotId
 					,L.strLotNumber
@@ -870,10 +1018,18 @@ BEGIN TRY
 							ELSE 99
 							END
 						) AS intPreference
+						,B.intBatchId
 				FROM tblICLot L
 				LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 				JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 				JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+				JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+				JOIN tblICItem I on I.intItemId=L.intItemId
+				LEFT JOIN vyuMFBatchDetail B ON B.intBatchId = LI.intBatchId
+				LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = L.intSubLocationId
+				LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
+				LEFT JOIN tblICCommodityAttribute SC ON SC.intCommodityAttributeId = I.intRegionId
+				LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = I.intOriginId
 				WHERE L.intItemId = @intRawItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus IN (
@@ -889,6 +1045,71 @@ BEGIN TRY
 						ISNULL(@intKitStagingLocationId, 0)
 						,ISNULL(@intBlendStagingLocationId, 0)
 						) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
+					AND SL.strSubLocationName = CASE 
+						WHEN isNULL(@strStorageLocation, '') = ''
+							THEN SL.strSubLocationName
+						ELSE @strStorageLocation
+						END
+					AND IsNULL(GM.strGardenMark, '') = CASE 
+						WHEN isNULL(@strGardenMark, '') = ''
+							THEN IsNULL(GM.strGardenMark, '')
+						ELSE @strGardenMark
+						END
+					AND IsNULL(B.dblTeaVolume, 0) = CASE 
+						WHEN isNULL(@dblTeaVolume, 0) = 0
+							THEN IsNULL(B.dblTeaVolume, 0)
+						ELSE @dblTeaVolume
+						END
+					AND DateDiff(d, isNULL(L.dtmManufacturedDate, L.dtmDateCreated), GETDATE()) = CASE 
+						WHEN isNULL(@intAge, 0) = 0
+							THEN DateDiff(d, isNULL(L.dtmManufacturedDate, L.dtmDateCreated), GETDATE())
+						ELSE @intAge
+						END
+					AND IsNULL(B.dblTeaIntensity, 0) = CASE 
+						WHEN isNULL(@dblTeaIntensity, 0) = 0
+							THEN IsNULL(B.dblTeaIntensity, 0)
+						ELSE @dblTeaIntensity
+						END
+					AND IsNULL(B.dblTeaMouthFeel, 0) = CASE 
+						WHEN isNULL(@dblTeaMouthFeel, 0) = 0
+							THEN IsNULL(B.dblTeaMouthFeel, 0)
+						ELSE @dblTeaMouthFeel
+						END
+					AND isNull(SC.strDescription, '') = CASE 
+						WHEN isNULL(@strSubCluster, '') = ''
+							THEN SC.strDescription
+						ELSE @strSubCluster
+						END
+					AND IsNULL(B.dblTeaAppearance, 0) = CASE 
+						WHEN isNULL(@dblTeaAppearance, 0) = 0
+							THEN IsNULL(B.dblTeaAppearance, 0)
+						ELSE @dblTeaAppearance
+						END
+					AND IsNULL(Origin.strDescription, '') = CASE 
+						WHEN isNULL(@strOrigin, '') = ''
+							THEN IsNULL(Origin.strDescription, '')
+						ELSE @strOrigin
+						END
+					AND B.intSalesYear = CASE 
+						WHEN isNULL(@intSalesYear, 0) = 0
+							THEN B.intSalesYear
+						ELSE @intSalesYear
+						END
+					AND B.intSales = CASE 
+						WHEN isNULL(@intSales, 0) = 0
+							THEN B.intSales
+						ELSE @intSales
+						END
+					AND IsNULL(B.dblTeaTaste, 0) = CASE 
+						WHEN isNULL(@strdblTeaTaste, 0) = 0
+							THEN IsNULL(B.dblTeaTaste, 0)
+						ELSE @strdblTeaTaste
+						END
+					AND isNULL(B.dblTeaHue, 0) = CASE 
+						WHEN isNULL(@strdblTeaHue, 0) = 0
+							THEN IsNULL(B.dblTeaHue, 0)
+						ELSE @strdblTeaHue
+						END
 			END
 			ELSE
 			BEGIN
@@ -909,6 +1130,7 @@ BEGIN TRY
 					,intItemUOMId
 					,intItemIssuedUOMId
 					,intPreference
+					,intBatchId
 					)
 				SELECT L.intLotId
 					,L.strLotNumber
@@ -932,10 +1154,18 @@ BEGIN TRY
 							ELSE 99
 							END
 						) AS intPreference
+						,B.intBatchId
 				FROM tblICLot L
 				LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 				JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 				LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+				JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+				JOIN tblICItem I on I.intItemId=L.intItemId
+				LEFT JOIN vyuMFBatchDetail B ON B.intBatchId = LI.intBatchId
+				LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = L.intSubLocationId
+				LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
+				LEFT JOIN tblICCommodityAttribute SC ON SC.intCommodityAttributeId = I.intRegionId
+				LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = I.intOriginId
 				WHERE L.intItemId = @intRawItemId
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus IN (
@@ -951,6 +1181,71 @@ BEGIN TRY
 						ISNULL(@intKitStagingLocationId, 0)
 						,ISNULL(@intBlendStagingLocationId, 0)
 						) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
+						AND SL.strSubLocationName = CASE 
+						WHEN isNULL(@strStorageLocation, '') = ''
+							THEN SL.strSubLocationName
+						ELSE @strStorageLocation
+						END
+					AND IsNULL(GM.strGardenMark, '') = CASE 
+						WHEN isNULL(@strGardenMark, '') = ''
+							THEN IsNULL(GM.strGardenMark, '')
+						ELSE @strGardenMark
+						END
+					AND IsNULL(B.dblTeaVolume, 0) = CASE 
+						WHEN isNULL(@dblTeaVolume, 0) = 0
+							THEN IsNULL(B.dblTeaVolume, 0)
+						ELSE @dblTeaVolume
+						END
+					AND DateDiff(d, isNULL(L.dtmManufacturedDate, L.dtmDateCreated), GETDATE()) = CASE 
+						WHEN isNULL(@intAge, 0) = 0
+							THEN DateDiff(d, isNULL(L.dtmManufacturedDate, L.dtmDateCreated), GETDATE())
+						ELSE @intAge
+						END
+					AND IsNULL(B.dblTeaIntensity, 0) = CASE 
+						WHEN isNULL(@dblTeaIntensity, 0) = 0
+							THEN IsNULL(B.dblTeaIntensity, 0)
+						ELSE @dblTeaIntensity
+						END
+					AND IsNULL(B.dblTeaMouthFeel, 0) = CASE 
+						WHEN isNULL(@dblTeaMouthFeel, 0) = 0
+							THEN IsNULL(B.dblTeaMouthFeel, 0)
+						ELSE @dblTeaMouthFeel
+						END
+					AND isNull(SC.strDescription, '') = CASE 
+						WHEN isNULL(@strSubCluster, '') = ''
+							THEN SC.strDescription
+						ELSE @strSubCluster
+						END
+					AND IsNULL(B.dblTeaAppearance, 0) = CASE 
+						WHEN isNULL(@dblTeaAppearance, 0) = 0
+							THEN IsNULL(B.dblTeaAppearance, 0)
+						ELSE @dblTeaAppearance
+						END
+					AND IsNULL(Origin.strDescription, '') = CASE 
+						WHEN isNULL(@strOrigin, '') = ''
+							THEN IsNULL(Origin.strDescription, '')
+						ELSE @strOrigin
+						END
+					AND B.intSalesYear = CASE 
+						WHEN isNULL(@intSalesYear, 0) = 0
+							THEN B.intSalesYear
+						ELSE @intSalesYear
+						END
+					AND B.intSales = CASE 
+						WHEN isNULL(@intSales, 0) = 0
+							THEN B.intSales
+						ELSE @intSales
+						END
+					AND IsNULL(B.dblTeaTaste, 0) = CASE 
+						WHEN isNULL(@strdblTeaTaste, 0) = 0
+							THEN IsNULL(B.dblTeaTaste, 0)
+						ELSE @strdblTeaTaste
+						END
+					AND isNULL(B.dblTeaHue, 0) = CASE 
+						WHEN isNULL(@strdblTeaHue, 0) = 0
+							THEN IsNULL(B.dblTeaHue, 0)
+						ELSE @strdblTeaHue
+						END
 			END
 
 			--,@intPartialQuantityStorageLocationId
@@ -972,6 +1267,8 @@ BEGIN TRY
 					,strCreatedBy
 					,intItemUOMId
 					,intItemIssuedUOMId
+					,intPreference
+					,intBatchId
 					)
 				SELECT TL.intLotId
 					,TL.strLotNumber
@@ -987,6 +1284,8 @@ BEGIN TRY
 					,TL.strCreatedBy
 					,TL.intItemUOMId
 					,TL.intItemIssuedUOMId
+					,TL.intPreference
+					,TL.intBatchId
 				FROM #tblLot TL
 			END
 			ELSE
@@ -1009,6 +1308,7 @@ BEGIN TRY
 						,intItemUOMId
 						,intItemIssuedUOMId
 						,intPreference
+						,intBatchId
 						)
 					SELECT TL.intParentLotId
 						,PL.strParentLotNumber
@@ -1025,6 +1325,7 @@ BEGIN TRY
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
 						,TL.intPreference
+						,TL.intBatchId
 					FROM #tblLot TL
 					JOIN tblICParentLot PL ON TL.intParentLotId = PL.intParentLotId
 					GROUP BY TL.intParentLotId
@@ -1040,6 +1341,7 @@ BEGIN TRY
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
 						,TL.intPreference
+						,TL.intBatchId
 				END
 				ELSE
 				BEGIN
@@ -1058,6 +1360,8 @@ BEGIN TRY
 						,strCreatedBy
 						,intItemUOMId
 						,intItemIssuedUOMId
+						,intPreference
+						,intBatchId
 						)
 					SELECT TL.intParentLotId
 						,PL.strParentLotNumber
@@ -1073,6 +1377,8 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
+						,TL.intBatchId
 					FROM #tblLot TL
 					JOIN tblICParentLot PL ON TL.intParentLotId = PL.intParentLotId
 					GROUP BY TL.intParentLotId
@@ -1085,6 +1391,8 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
+						,TL.intBatchId
 				END
 			END
 
@@ -1145,14 +1453,14 @@ BEGIN TRY
 						FROM #tblProductProperty p
 						INNER JOIN tblQMTestResult AS r ON p.intPropertyId=r.intPropertyId
 							AND ISNUMERIC(r.strPropertyValue) = 1
-						INNER JOIN #tblParentLot pl ON r.intProductValueId=pl.intParentLotId
-							AND r.intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
+						INNER JOIN #tblParentLot pl ON r.intProductValueId='+Case When @ysnEnabledPreShipmentSampleByBatch =1 Then ' intBatchId ' Else ' pl.intParentLotId ' End
+							+'AND r.intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
 							AND (pl.dtmExpiryDate IS NULL OR pl.dtmExpiryDate >= getdate())
 							AND r.intSampleId = (
 								SELECT MAX(intSampleId)
 								FROM tblQMTestResult
-								WHERE intProductValueId = pl.intParentLotId
-									AND intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
+								WHERE intProductValueId = '+Case When @ysnEnabledPreShipmentSampleByBatch =1 Then ' intBatchId ' Else ' pl.intParentLotId ' End
+									+'AND intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
 								)
 						WHERE pl.intItemId = ' + CONVERT(VARCHAR, 
 					@intRawItemId) + '
@@ -1188,8 +1496,10 @@ BEGIN TRY
 		SET @strtblnameChk = ''
 
 		SELECT @strOrderByPreference = ''
-		SELECT @strOrderByFENA=''
-		Select @strOrderByNAFE=''
+
+		SELECT @strOrderByFENA = ''
+
+		SELECT @strOrderByNAFE = ''
 
 		--DECLARE @strPropertName NVARCHAR(50),
 		--DECLARE @Count decimal(38,0)
@@ -1252,7 +1562,7 @@ BEGIN TRY
 					SET @strOrderByFENA = @strOrderByFENA + @strTblName + 'EDate ASC, '
 
 				IF CHARINDEX(@strTblName, @strOrderByNAFE) = 0
-					SET @strOrderByNAFE = @strOrderByNAFE +  @strTblName + 'EDate ASC, '
+					SET @strOrderByNAFE = @strOrderByNAFE + @strTblName + 'EDate ASC, '
 
 				IF CHARINDEX(@strTblName, @strOrderByPreference) = 0
 					SELECT @strOrderByPreference = @strOrderByPreference + @strTblName + 'Preference ASC, '
@@ -1273,7 +1583,9 @@ BEGIN TRY
 			FROM #tblProductProperty
 			WHERE intRowNo > @intMinProductProperty
 		END
+
 		SELECT @strWhere = ''
+
 		--Get the Rules
 		SELECT @intSequenceNo = MAX(intSequenceNo) + 1
 		FROM tblMFBlendRequirementRule
@@ -1296,6 +1608,10 @@ BEGIN TRY
 					SET @strOrderBy = @strOrderByLIFO
 				ELSE IF @strValue = 'FEFO'
 					SET @strOrderBy = @strOrderByFEFO
+				ELSE IF @strValue = 'FENA'
+					SET @strOrderBy = @strOrderByFENA
+				ELSE IF @strValue = 'NAFE'
+					SET @strOrderBy = @strOrderByNAFE
 			END
 
 			IF @strRuleName = 'Is Cost Applicable?'
@@ -1310,83 +1626,6 @@ BEGIN TRY
 					SET @strOrderBy = @strOrderBydev
 			END
 
-			IF @strRuleName = 'Warehouse'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And SL.strSubLocationName =''' + @strValue + ''''
-		END
-
-		IF @strRuleName = 'Garden'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And IsNULL(GM.strGardenMark,'''') =''' + @strValue + ''''
-		END
-
-		IF @strRuleName = 'Volume'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaVolume,0) =' + @strValue
-		END
-
-		IF @strRuleName = 'Age'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And intAge =' + @strValue
-		END
-
-		IF @strRuleName = 'Intensity'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaIntensity,0) =' + @strValue
-		END
-
-		IF @strRuleName = 'Mouth Feel'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaMouthFeel,0) =' + @strValue
-		END
-
-		IF @strRuleName = 'Sub Cluster'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And isNull(SC.strDescription,'''') =''' + @strValue + ''''
-		END
-
-		IF @strRuleName = 'Appearance'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaAppearance,0) =' + @strValue
-		END
-
-		IF @strRuleName = 'Origin'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And IsNULL(Origin.strDescription,'''') =''' + @strValue + ''''
-		END
-
-		IF @strRuleName = 'Sale Year'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And B.intSaleYear =' + @strValue
-		END
-
-		IF @strRuleName = 'Sale No'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And B.intSales =' + @strValue
-		END
-
-		IF @strRuleName = 'Taste'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And IsNULL(B.dblTeaTaste,0) =' + @strValue
-		END
-
-		IF @strRuleName = 'Hue'
-			AND @strValue <> ''
-		BEGIN
-			SET @strWhere = @strWhere + ' And isNULL(B.dblTeaHue,0) =' + @strValue
-		END
 			SET @strOrderByFinal = @strOrderByFinal + @strOrderBy
 			SET @strOrderBy = ''
 			SET @intSequenceCount = @intSequenceCount + 1
@@ -1938,7 +2177,7 @@ BEGIN TRY
 					END
 				END
 
-				IF (@dblIssuedQuantity % @intNoOfSheets) > 0
+				IF (@dblIssuedQuantity % @intOrgNoOfSheets) > 0
 				BEGIN
 					IF EXISTS (
 							SELECT *
@@ -2523,7 +2762,7 @@ BEGIN TRY
 						END
 					END
 
-					IF (@dblIssuedQuantity % @intNoOfSheets) > 0
+					IF (@dblIssuedQuantity % @intOrgNoOfSheets) > 0
 					BEGIN
 						IF EXISTS (
 								SELECT *
@@ -2720,7 +2959,7 @@ BEGIN TRY
 						AND TR.intProductValueId = PL.intParentLotId
 					ORDER BY TR.intSampleId DESC
 					)) AS dblDensity
-			,(BS.dblQuantity / @intEstNoOfSheets) AS dblRequiredQtyPerSheet
+			,(BS.dblQuantity / @intOrgNoOfSheets) AS dblRequiredQtyPerSheet
 			,L.dblWeightPerQty AS dblWeightPerUnit
 			,ISNULL(I.dblRiskScore, 0) AS dblRiskScore
 			,BS.intStorageLocationId
@@ -2732,7 +2971,7 @@ BEGIN TRY
 			,CAST(0 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,LS.strSecondaryStatus
-			,'' As strFW
+			,'' AS strFW
 			,MT.strDescription AS strProductType
 			,B.strBrandCode
 		FROM #tblBlendSheetLotFinal BS
@@ -2747,14 +2986,14 @@ BEGIN TRY
 		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
 		INNER JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = L.intSubLocationId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
-		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=I.intProductTypeId
-		LEFT JOIN tblICBrand B on B.intBrandId=I.intBrandId
+		LEFT JOIN tblICCommodityAttribute MT ON MT.intCommodityAttributeId = I.intProductTypeId
+		LEFT JOIN tblICBrand B ON B.intBrandId = I.intBrandId
 		WHERE BS.dblQuantity > 0
 		
 		UNION
 		
 		SELECT *
-			,'' As strFW
+			,'' AS strFW
 			,'' AS strProductType
 			,'' AS strBrandCode
 		FROM @tblRemainingPickedLots
@@ -2800,7 +3039,7 @@ BEGIN TRY
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,LS.strSecondaryStatus
-			,'' As strFW
+			,'' AS strFW
 			,MT.strDescription AS strProductType
 			,B.strBrandCode
 		FROM #tblBlendSheetLotFinal BS
@@ -2814,8 +3053,8 @@ BEGIN TRY
 		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
 		INNER JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
-		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=I.intProductTypeId
-		LEFT JOIN tblICBrand B on B.intBrandId=I.intBrandId
+		LEFT JOIN tblICCommodityAttribute MT ON MT.intCommodityAttributeId = I.intProductTypeId
+		LEFT JOIN tblICBrand B ON B.intBrandId = I.intBrandId
 		WHERE BS.dblQuantity > 0
 	ELSE
 		SELECT PL.intParentLotId AS intWorkOrderInputLotId
@@ -2857,7 +3096,7 @@ BEGIN TRY
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,LS.strSecondaryStatus
-			,'' As strFW
+			,'' AS strFW
 			,MT.strDescription AS strProductType
 			,B.strBrandCode
 		FROM #tblBlendSheetLotFinal BS
@@ -2869,8 +3108,8 @@ BEGIN TRY
 		INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.intItemIssuedUOMId
 		INNER JOIN tblICUnitMeasure UM2 ON IU2.intUnitMeasureId = UM2.intUnitMeasureId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = @intLocationId
-		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=I.intProductTypeId
-		LEFT JOIN tblICBrand B on B.intBrandId=I.intBrandId
+		LEFT JOIN tblICCommodityAttribute MT ON MT.intCommodityAttributeId = I.intProductTypeId
+		LEFT JOIN tblICBrand B ON B.intBrandId = I.intBrandId
 		WHERE BS.dblQuantity > 0
 
 	--Clean Up Code

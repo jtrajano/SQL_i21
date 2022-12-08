@@ -46,10 +46,12 @@ BEGIN TRY
 	-- Currency
 	LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
 	-- Strategy
-    LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL
+		AND STRATEGY.strSubBook = IMP.strStrategy
+		AND STRATEGY.intBookId = BOOK.intBookId
 	-- Format log message
 	OUTER APPLY (
-		SELECT strLogMessage = CASE
+		SELECT strLogMessage = CASE 
 				WHEN (
 						B1QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB1QtyUOM, '') <> ''
@@ -168,7 +170,7 @@ BEGIN TRY
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
-				END + CASE
+				END + CASE 
 				WHEN (
 						STRATEGY.intSubBookId IS NULL
 						AND ISNULL(IMP.strStrategy, '') <> ''
@@ -386,7 +388,9 @@ BEGIN TRY
 		-- Currency
 		LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
 		-- Strategy
-    	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL
+			AND STRATEGY.strSubBook = IMP.strStrategy
+			AND STRATEGY.intBookId = BOOK.intBookId
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -648,7 +652,7 @@ BEGIN TRY
 			,intOriginalItemId = NULL
 			,dblPackagesPerPallet = NULL
 			,strPlant = NULL
-			,dblTotalQuantity = S.dblB1QtyBought 
+			,dblTotalQuantity = S.dblB1QtyBought
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
 			,dtmStock = NULL
@@ -712,7 +716,7 @@ BEGIN TRY
 			,strVoyage = NULL
 			,strVessel = NULL
 			,intLocationId = S.intCompanyLocationId
-			,intMixingUnitLocationId=MU.intCompanyLocationId 
+			,intMixingUnitLocationId = MU.intCompanyLocationId
 			,dblTeaTastePinpoint = TASTE.dblPinpointValue
 			,dblTeaHuePinpoint = HUE.dblPinpointValue
 			,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
@@ -721,13 +725,14 @@ BEGIN TRY
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
-		Left JOIN tblSMCompanyLocation MU on MU.strLocationName =B.strBook  
+		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		-- Appearance
 		OUTER APPLY (
-			SELECT TR.strPropertyValue,TR.dblPinpointValue
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Appearance'
@@ -735,7 +740,8 @@ BEGIN TRY
 			) APPEARANCE
 		-- Hue
 		OUTER APPLY (
-			SELECT TR.strPropertyValue,TR.dblPinpointValue
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Hue'
@@ -743,7 +749,8 @@ BEGIN TRY
 			) HUE
 		-- Intensity
 		OUTER APPLY (
-			SELECT TR.strPropertyValue,TR.dblPinpointValue
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Intensity'
@@ -751,7 +758,8 @@ BEGIN TRY
 			) INTENSITY
 		-- Taste
 		OUTER APPLY (
-			SELECT TR.strPropertyValue,TR.dblPinpointValue
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Taste'
@@ -759,7 +767,8 @@ BEGIN TRY
 			) TASTE
 		-- Mouth Feel
 		OUTER APPLY (
-			SELECT TR.strPropertyValue,TR.dblPinpointValue
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Mouth Feel'
@@ -798,7 +807,12 @@ BEGIN TRY
 			UPDATE B
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
-				,intSampleId=NULL
+				,intSampleId = NULL
+				,dblOriginalTeaTaste = dblTeaTaste
+				,dblOriginalTeaHue = dblTeaHue
+				,dblOriginalTeaIntensity = dblTeaIntensity
+				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+				,dblOriginalTeaAppearance = dblTeaAppearance
 			FROM @MFBatchTableType B
 			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
 			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
