@@ -5,6 +5,7 @@ BEGIN
 	DECLARE @intTrackingNumber			INT,
 			@strTrackingNumber			NVARCHAR(50),
 			@intLoadWarehouseId			INT,
+			@intCustomerEntityId		INT,
 			@xmlDocumentId				INT 
 	DECLARE @strCompanyName				NVARCHAR(100),
 			@strCompanyAddress			NVARCHAR(100),
@@ -83,6 +84,10 @@ BEGIN
 	SELECT	@strInstoreTo = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strInstoreTo' 
+
+	SELECT	@intCustomerEntityId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intCustomerEntityId' 
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 				,@strCompanyAddress = strAddress
@@ -566,7 +571,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END
 		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND (@intCustomerEntityId IS NULL OR (@intCustomerEntityId IS NOT NULL AND @intCustomerEntityId = LD.intCustomerEntityId))
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
