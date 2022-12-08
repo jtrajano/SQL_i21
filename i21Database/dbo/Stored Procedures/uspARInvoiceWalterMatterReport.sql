@@ -57,10 +57,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	,strMVessel
 	,strPaymentComments
 	,blbLogo
-	,strBankName
-	,strIBAN
-	,strSWIFT
-	,strBICCode
 )
 SELECT
 	 intInvoiceId			= ARI.intInvoiceId
@@ -93,10 +89,6 @@ SELECT
 	,strMVessel				= LGL.strMVessel
 	,strPaymentComments		= ARI.strTradeFinanceComments
 	,blbLogo                = @blbLogo
-	,strBankName			= CMB.strBankName
-	,strIBAN				= CMBA.strIBAN
-	,strSWIFT				= CMBA.strSWIFT
-	,strBICCode				= CMBA.strBICCode
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
@@ -105,5 +97,3 @@ LEFT JOIN vyuCTContractDetailView CTCDV WITH (NOLOCK) ON ARGID.intContractDetail
 LEFT JOIN tblICCommodity ICC WITH (NOLOCK) ON CTCDV.intCommodityId = ICC.intCommodityId
 LEFT JOIN tblLGLoad LGL WITH (NOLOCK) ON ARGID.strDocumentNumber = LGL.strLoadNumber AND ISNULL(ARGID.intLoadDetailId, 0) <> 0 AND ISNULL(LGL.strBLNumber,'') <> ''
 LEFT JOIN tblSMTerm SMT WITH (NOLOCK) ON ARI.intTermId = SMT.intTermID
-LEFT JOIN tblCMBankAccount CMBA WITH (NOLOCK) ON ISNULL(ISNULL(ARI.intPayToCashBankAccountId, ARI.intDefaultPayToBankAccountId), 0) = CMBA.intBankAccountId
-LEFT JOIN tblCMBank CMB WITH (NOLOCK) ON CMBA.intBankId = CMB.intBankId
