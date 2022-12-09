@@ -41,7 +41,7 @@ BEGIN
 																	WHERE ysnExpired = 0 AND dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId
 																	ORDER BY 1 DESC), @dtmFutureClosingDate) dblSettlementPrice
 			, [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId, DEFAULT)
-				* dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, um.intUnitMeasureId, fm.intUnitMeasureId, dblBasis) dblMarketPremium
+				* dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, um.intUnitMeasureId, fm.intUnitMeasureId, cd.dblBasis) dblMarketPremium
 			, l.dblQty
 		FROM tblCTContractHeader ch
 		JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
