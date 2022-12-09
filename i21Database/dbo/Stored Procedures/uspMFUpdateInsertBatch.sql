@@ -77,7 +77,7 @@ BEGIN
 			WHERE @id = intId
 				AND ISNULL(intSubBookId, 0) = 0
 			)
-		SELECT @errorMessage = 'Channel (intSubBookId) is missing'
+		SELECT @errorMessage = 'Strategy (intSubBookId) is missing'
 	ELSE IF EXISTS (
 			SELECT 1
 			FROM @MFBatchTableType
