@@ -1875,7 +1875,7 @@ AS
 	SELECT 10 intRowNumber
 		, '2.Futures Required' COLLATE Latin1_General_CI_AS
 		, 'Futures Required' COLLATE Latin1_General_CI_AS Selection
-		, '4.Net Position' COLLATE Latin1_General_CI_AS PriceStatus
+		, '4.Net Position' COLLATE Latin1_General_CI_AS PriceStatus 
 		, strFutureMonth
 		, 'Net Position' COLLATE Latin1_General_CI_AS
 		, SUM(dblNoOfContract1) - SUM(dblNoOfContract)
@@ -2115,7 +2115,7 @@ AS
 			, strCertificationName
 			, strCropYear
 		FROM @ListFinal
-		WHERE strAccountNumber <> 'Avg Long Price'
+		WHERE strAccountNumber NOT IN ('Avg Long Price', 'Net Position')
 		ORDER BY intRowNumber
 			, CASE WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
 			, intOrderByHeading
@@ -2202,6 +2202,76 @@ AS
 			, strSubBook
 			, strCertificationName
 			, strCropYear
+
+		-- NET POSITION TOTALS
+		INSERT INTO @ListFinal (intRowNumber
+			, strGroup
+			, Selection
+			, PriceStatus
+			, strFutureMonth
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intContractHeaderId
+			, intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		)
+		SELECT 12
+			, strGroup
+			, Selection
+			, PriceStatus
+			, 'Total' COLLATE Latin1_General_CI_AS
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intContractHeaderId
+			, intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		FROM @ListFinal
+		WHERE strAccountNumber = 'Net Position'
+		AND strFutureMonth <> 'Total'
+		ORDER BY intRowNumber
+			, CASE WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
+			, intOrderByHeading
+			, PriceStatus ASC
 	END
 
 	IF (ISNULL(@intBookId, 0) = 0)
