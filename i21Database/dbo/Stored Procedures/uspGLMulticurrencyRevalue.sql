@@ -241,7 +241,7 @@ WITH cte AS (
 	strModule = 'CM Forwards' COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intLOBSegmentCodeId
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMForwardPayablesMultiCurrencyRevalue
@@ -256,7 +256,7 @@ SELECT
 	strModule = 'CM Forwards' COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 	,intAccountId
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId = intLOBSegmentCodeId
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMForwardReceivablesMultiCurrencyRevalue
