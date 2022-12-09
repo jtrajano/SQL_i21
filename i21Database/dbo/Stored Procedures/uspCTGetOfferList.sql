@@ -196,7 +196,7 @@ BEGIN
 				dbo.fnCTConvertQtyToTargetCommodityUOM( @IntCommodityId,fm.intUnitMeasureId,@IntUnitMeasureId,isnull(rp.dblNetPL,0.00))
 				*
 				dbo.fnCMGetForexRateFromCurrency(fm.intCurrencyId,@IntCurrencyId,1,getdate())
-			) * sum(rp.dblMatchQty) * rp.dblContractSize
+			)
 		from
 			tblRKAssignFuturesToContractSummary ftc
 			join @realized rp on rp.intFutOptTransactionId = ftc.intFutOptTransactionId
