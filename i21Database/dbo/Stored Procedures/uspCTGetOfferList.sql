@@ -198,7 +198,7 @@ BEGIN
 				dbo.fnCMGetForexRateFromCurrency(fm.intCurrencyId,@IntCurrencyId,1,getdate())
 			)
 		from
-			tblRKAssignFuturesToContractSummary ftc
+			tblRKFutOptTransaction ftc
 			join @realized rp on rp.intFutOptTransactionId = ftc.intFutOptTransactionId
 			join tblRKFutureMarket fm on fm.intFutureMarketId = rp.intFutureMarketId
 		group by
