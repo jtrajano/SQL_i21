@@ -92,6 +92,8 @@
 	intApprovedBy INT NULL,
 	dtmConfirmedDate DATETIME NULL,
 	dtmApprovedDate DATETIME NULL,
+	dtmPrintedDate DATETIME NULL,
+	intPrintedBy INT NULL,
     CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
