@@ -39,6 +39,7 @@ SELECT intEntityId					= C.[intEntityId]
 													THEN 0.00 
 												ELSE HW.[intHours] * HW.[dblRate] * (CASE WHEN ISNULL(HW.[dblCurrencyRate], 0.00) = 0.00 THEN 1.00 ELSE HW.[dblCurrencyRate] END)
 									   END)
+	 , strFiscalYear				= BillingPeriod.strFiscalYear
 FROM dbo.tblHDTicketHoursWorked HW WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
@@ -87,6 +88,7 @@ OUTER APPLY (
 OUTER APPLY(
 	SELECT TOP 1	 BillingPeriod.strPeriodDisplay
 					,BillingPeriod.intTimeEntryPeriodDetailId
+					,BillingPeriod.strFiscalYear
 	FROM vyuHDTimeEntryBillingPeriod BillingPeriod
 	WHERE BillingPeriod.dtmBillingPeriodStart <= HW.dtmDate AND
 		  BillingPeriod.dtmBillingPeriodEnd >= HW.dtmDate
