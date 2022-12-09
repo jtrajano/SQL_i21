@@ -28,9 +28,10 @@ BEGIN
 		DECLARE @intShipTo INT = NULL
 		DECLARE @createdVouchersId NVARCHAR(1000) = NULL
 		DECLARE @created1099KVouchersId NVARCHAR(1000) = NULL
-
+		
 		DECLARE @Voucher VoucherPayable
 		DECLARE @Voucher1099K VoucherPayable
+		DECLARE @apType NVARCHAR(100) = NULL
 
 		INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Dealer Site Net')
 		INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Dealer Site Gross')
@@ -43,6 +44,7 @@ BEGIN
 			, @dtmDate = ccSiteHeader.dtmDate
 			, @intShipTo = ccSiteHeader.intCompanyLocationId
 			, @intVendorId = ccVendorDefault.intVendorId
+			, @apType  = ccSiteHeader.strApType
 		FROM tblCCSiteHeader ccSiteHeader
 		INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 		WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
@@ -97,7 +99,8 @@ BEGIN
 			LEFT JOIN tblCCSiteDetail ccSiteDetail ON ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
 			LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
 			LEFT JOIN @CCRItemToAPItem ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId 
-			WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId and ccSiteHeader.strApType <> 'Cash Deposited') A
+			WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId --and ccSiteHeader.strApType <> 'Cash Deposited'
+			) A  
 		WHERE intAccountId IS NOT NULL AND dblCost != 0
 		GROUP BY  intAccountId, intSiteDetailId, strItem 
 
@@ -218,6 +221,9 @@ BEGIN
 	
 		IF EXISTS(SELECT TOP 1 1 FROM @Voucher)
 		BEGIN
+			
+			IF(@apType <> 'Cash Deposited')  
+			BEGIN
 			EXEC [dbo].[uspAPCreateVoucher] 
 			@voucherPayables = @Voucher
 			,@userId = @userId
@@ -238,8 +244,9 @@ BEGIN
 			,@param = @createdVouchersId
 			,@userId = @userId
 			,@success = @success OUTPUT
+			END
 
-			IF(@success = 1)
+			IF(@success = 1 OR @apType = 'Cash Deposited')  
 			BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM @Voucher1099K)
 				BEGIN
@@ -250,14 +257,11 @@ BEGIN
 					,@createdVouchersId = @created1099KVouchersId OUTPUT
 				END
 
-				-- IF(ISNULL(@errorMessage, '') = '')
-				-- BEGIN
-				-- 	SET @errorMessage = @strNo1099Setup	
-				-- END
-				-- ELSE
-				-- BEGIN
-				-- 	SET @errorMessage = @errorMessage + ' ' + @strNo1099Setup	
-				-- END
+				IF(ISNULL(@errorMessage, '') = '')  
+				BEGIN  
+					SET @success = 1  
+				END  
+				
 			END
 			ELSE
 			BEGIN
@@ -414,22 +418,32 @@ BEGIN
 					,@success = @success OUTPUT
 			END
 
-			IF(@success = 1)
+			IF(@success = 1 OR @intTransactionType = 9)
 			BEGIN
+				BEGIN TRY
 				-- DELETE AP
 				EXEC [dbo].[uspAPDeleteVoucher]
 					@intBillId = @intBillId
 					,@UserId = @userId
 					,@callerModule = 9
+					SET @success = 1
+				END TRY  
+				BEGIN CATCH  
+					SET @success = 0
+					RAISERROR('Error deleting voucher!',16,1)
+				END CATCH  
 			END
 			ELSE
 			BEGIN
-				SELECT TOP 1 @errorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
-				RAISERROR(@errorMessage,16,1)
-			END
+				IF (@intTransactionType != 9)
+				BEGIN
+					SELECT TOP 1 @errorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
+					RAISERROR(@errorMessage,16,1)
+				END
+			END			
 			
 			FETCH NEXT FROM @CursorTran INTO @intBillId, @intTransactionType
-		END
+		END	
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran
 
