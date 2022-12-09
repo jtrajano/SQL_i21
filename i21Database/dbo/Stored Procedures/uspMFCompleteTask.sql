@@ -1,8 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCompleteTask] @intOrderHeaderId INT
-	,@intUserId INT
-	,@strTaskId NVARCHAR(MAX) = NULL
-	,@ysnLoad BIT = 0
-	,@ysnScannerClient BIT = 0
+﻿CREATE PROCEDURE [dbo].[uspMFCompleteTask]
+	@intOrderHeaderId INT
+  , @intUserId INT
+  , @strTaskId NVARCHAR(MAX) = NULL
+  , @ysnLoad BIT = 0
+  , @ysnScannerClient BIT=0
 AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
@@ -629,6 +630,47 @@ BEGIN TRY
 			WHERE intOrderHeaderId = @intOrderHeaderId
 				AND intOrderDetailId = @intOrderDetailId
 				AND intLotId = @intLotId
+
+			/* Clear Reservation of Task Lot.  */
+			DECLARE @ReservationToClear AS ItemReservationTableType
+
+			INSERT INTO @ReservationToClear (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,intLotId
+					,dblQty
+					,intTransactionId
+					,strTransactionId
+					,intTransactionTypeId
+					,intSubLocationId
+					,intStorageLocationId		
+			)
+			SELECT 
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,intLotId
+					,-dblQty -- Negate the qty to reduce the reserved qty. 
+					,intTransactionId
+					,strTransactionId
+					,intInventoryTransactionType
+					,intSubLocationId
+					,intStorageLocationId
+			FROM	dbo.tblICStockReservation Reservations 
+			WHERE	intTransactionId = @intOrderHeaderId
+					AND intLotId = @intNewLotId
+					AND intInventoryTransactionType = 34
+					AND ysnPosted = 0 
+
+			-- Call this SP to decrease the reserved qty. 
+			IF EXISTS (SELECT TOP 1 1 FROM @ReservationToClear) 
+			BEGIN 
+				EXEC dbo.uspICIncreaseReservedQty
+					 @ReservationToClear
+			END 
+
+
 		END
 
 		INSERT INTO tblMFPickForWOStaging (
@@ -873,6 +915,8 @@ BEGIN TRY
 		UPDATE tblMFOrderHeader
 		SET intOrderStatusId = 7
 		WHERE intOrderHeaderId = @intOrderHeaderId
+
+		/*Post Stock*/
 	END
 
 	IF (
