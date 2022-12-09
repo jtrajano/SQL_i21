@@ -14,9 +14,9 @@ DECLARE @ysnOverrideLocation BIT = 1, @ysnOverrideLOB BIT = 1, @ysnOverrideCompa
 
 SELECT @strAccountId = strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId
 
-IF @intLocationSegmentId IS NULL SET @ysnOverrideLocation = 0
-IF @intLOBSegmentId IS NULL SET @ysnOverrideLOB = 0
-IF @intCompanySegmentId IS NULL SET @ysnOverrideCompany = 0
+IF ISNULL(@intLocationSegmentId,0) = 0 SET @ysnOverrideLocation = 0
+IF ISNULL(@intLOBSegmentId,0) = 0 SET @ysnOverrideLOB = 0
+IF ISNULL(@intCompanySegmentId,0) = 0 SET @ysnOverrideCompany = 0
 
 WHILE @ysnOverrideLocation = 1
     OR @ysnOverrideLOB  =1 

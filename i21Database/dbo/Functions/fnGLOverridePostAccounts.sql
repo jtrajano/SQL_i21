@@ -130,6 +130,7 @@ WHERE ISNULL(intAccountIdOverride,0) <> 0
  )U  
  WHERE   
  ISNULL(strNewAccountIdOverride,'') <> '' AND ISNULL(intAccountIdOverride,0) <> 0  
+
   
 UPDATE A   
 SET strNewAccountIdOverride =   
@@ -143,7 +144,7 @@ WHERE (
 ISNULL(intLocationSegmentOverrideId,0)<> 0  
 OR ISNULL(intLOBSegmentOverrideId,0) <> 0  
 OR ISNULL(intCompanySegmentOverrideId,0) <> 0)  
-AND ISNULL(intAccountIdOverride,0) = 0  
+--AND ISNULL(intAccountIdOverride,0) = 0  
   
   
 UPDATE A   
@@ -159,7 +160,7 @@ WHERE
  ISNULL(intLocationSegmentOverrideId,0)<> 0  
 OR ISNULL(intLOBSegmentOverrideId,0) <> 0  
 OR ISNULL(intCompanySegmentOverrideId,0) <> 0)  
-AND ISNULL(intAccountIdOverride,0) = 0  
+--AND ISNULL(intAccountIdOverride,0) = 0  
 AND  
 ISNULL(strNewAccountIdOverride,'') <> ''  
   
