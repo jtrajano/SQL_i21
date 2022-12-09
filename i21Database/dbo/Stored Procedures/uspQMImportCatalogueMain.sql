@@ -841,7 +841,7 @@ BEGIN TRY
                 ,strSampleBoxNumber
                 ,strComments3
                 ,intBrokerId
-                ,strBuyingOrderNo
+                -- ,strBuyingOrderNo
                 )
             SELECT
                 intConcurrencyId = 1
@@ -921,7 +921,7 @@ BEGIN TRY
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
-                ,strBuyingOrderNo = @strBuyingOrderNumber
+                -- ,strBuyingOrderNo = @strBuyingOrderNumber
             
             SET @intSampleId = SCOPE_IDENTITY()
             
@@ -1150,7 +1150,7 @@ BEGIN TRY
                 ,strSampleBoxNumber = @strSampleBoxNumber
                 ,strComments3 = @strComments3
                 ,intBrokerId = @intBrokerId
-                ,strBuyingOrderNo = @strBuyingOrderNumber
+                -- ,strBuyingOrderNo = @strBuyingOrderNumber
             FROM tblQMSample S
             WHERE S.intSampleId = @intSampleId
 
