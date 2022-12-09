@@ -62,7 +62,7 @@
 	ysnDeliveryTicketPrinted BIT NULL,										--Delivery Ticket Printed?
 	ysnPrintARBalance BIT NULL,												--Print AR Balance?
 	intNextDeliveryDegreeDay INT NULL,										--Next Delivery Degree Day
-	ysnRequireClock			  BIT             DEFAULT 1 NOT NULL,
+	--ysnRequireClock			  BIT             DEFAULT 1 NOT NULL,
 	ysnRoutingAlert bit NOT NULL,
 	ysnRequirePump bit NOT NULL,
 	dblLastDeliveredGal numeric(18, 6) NULL,
