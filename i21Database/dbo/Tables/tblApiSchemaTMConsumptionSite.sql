@@ -61,8 +61,7 @@
 	dblLastGalsInTank NUMERIC(18,6) NULL,									--Last Gallon In Tank
 	ysnDeliveryTicketPrinted BIT NULL,										--Delivery Ticket Printed?
 	ysnPrintARBalance BIT NULL,												--Print AR Balance?
-	intNextDeliveryDegreeDay INT NULL,										--Next Delivery Degree Day
-	ysnRequireClock			  BIT             DEFAULT 1 NOT NULL
+	intNextDeliveryDegreeDay INT NULL										--Next Delivery Degree Day
 
 	-- DEVICE
 	--strDeviceType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,		-- Device Type
