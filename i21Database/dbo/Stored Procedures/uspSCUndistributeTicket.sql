@@ -1599,14 +1599,6 @@ BEGIN TRY
 								,intStorageScheduleTypeId = -3
 							WHERE intTicketId = @intTicketId
 						END
-						--Check for Ticket On-Hold and make sure to change it back to spot Distribution
-						ELSE IF (SELECT TOP 1 ysnTicketOnHold FROM tblSCTicket WHERE intTicketId = @intTicketId) = 1
-						BEGIN
-							UPDATE tblSCTicket
-							SET  strDistributionOption = 'SPT'
-								,intStorageScheduleTypeId = -3
-							WHERE intTicketId = @intTicketId
-						END
 
 						---- Update contract schedule based on ticket schedule qty
 
@@ -1897,8 +1889,6 @@ BEGIN TRY
 			,ysnTicketInTransit = 0
 			,ysnTicketApplied = 0
 			,dtmDateModifiedUtc = GETUTCDATE()
-			,ysnTicketOnHold = 0
-			,dblOnHoldQuantity = 0
 		WHERE intTicketId = @intTicketId
 
 		--Audit Log

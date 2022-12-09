@@ -14,17 +14,9 @@ BEGIN
 
 	
 	DECLARE @strTransactionId NVARCHAR(50)
-	DECLARE @strInOutFlag NVARCHAR(1)
-	
 	DECLARE @intInventoryShipmentId INT
 	DECLARE @dtmClientDate DATETIME
-	DECLARE @InventoryReceiptId INT = NULL
-	DECLARE @intBillId INT = NULL
-	
-	SELECT 
-		@strInOutFlag = strInOutFlag
-	FROM tblSCTicket
-		WHERE intTicketId = @intTicketId
+
 
 	SET @dtmClientDate = GETDATE()
 
@@ -74,10 +66,13 @@ BEGIN
 	FROM @UnitAllocation
 	WHERE intAllocationType = 4 
 
-
-
-
-	
+	SELECT TOP 1 
+		@intInventoryShipmentId = A.intInventoryShipmentId
+	FROM tblICInventoryShipment A
+	INNER JOIN tblICInventoryShipmentItem B
+		ON A.intInventoryShipmentId = B.intInventoryShipmentId
+	WHERE A.intSourceType = 1
+		AND B.intSourceId = @intTicketId
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
@@ -95,38 +90,8 @@ BEGIN
 	WHERE intTicketId = @intTicketId
 
 
-
-	
-	IF(@strInOutFlag = 'O')
-	BEGIN
-		SELECT TOP 1 
-			@intInventoryShipmentId = A.intInventoryShipmentId
-		FROM tblICInventoryShipment A
-		INNER JOIN tblICInventoryShipmentItem B
-			ON A.intInventoryShipmentId = B.intInventoryShipmentId
-		WHERE A.intSourceType = 1
-			AND B.intSourceId = @intTicketId
-
-		-- TODO add parameter for ticket in-transit
-		EXEC dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId OUT, 0, 1 ,@dtmShipmentDate = @dtmClientDate, @intScaleTicketId = @intTicketId;
-	END
-	ELSE
-	BEGIN
-		
-		-- SELECT TOP 1 
-		-- 	@InventoryReceiptId = Receipt.intInventoryReceiptId
-		-- FROM tblICInventoryReceipt Receipt
-		-- INNER JOIN tblICInventoryReceiptItem ReceiptItem
-		-- 	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		-- WHERE Receipt.intSourceType = 1
-		-- 	AND ReceiptItem.intSourceId = @intTicketId
-
-		-- EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
-		EXEC uspSCCreateVoucherForOnHoldTickets @intTicketId
-	END
-
-
-	
+	-- TODO add parameter for ticket in-transit
+	EXEC dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId OUT, 0, 1 ,@dtmShipmentDate = @dtmClientDate, @intScaleTicketId = @intTicketId;
 END
 
 

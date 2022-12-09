@@ -1358,7 +1358,7 @@
     <Build Include="dbo\Views\vyuQMCatalogueOverview.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateEmail_EK.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCCreateVoucherForOnHoldTickets.sql" />
+    
     <Build Include="dbo\Stored Procedures\uspGRUnpostTransferSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTime_EK.sql" />

@@ -229,17 +229,11 @@ SELECT
 									END
 		,intFreightTermId			= COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)
 		,intLoadReceive				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
-		,ysnAllowVoucher			= 
-									CASE WHEN SC.ysnTicketOnHold = 1 THEN									
-										1									
-									ELSE										
-										CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
-											CASE  
-												WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 
-												ELSE LI.ysnAllowVoucher 
-											END
+		,ysnAllowVoucher			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
+										CASE  
+											WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 
+											ELSE LI.ysnAllowVoucher 
 										END
-										
 									END
 		,intShipFromEntityId		= SC.intEntityId
 		,[intLoadShipmentId] 		= NULL
@@ -251,10 +245,7 @@ SELECT
 											ELSE NULL
 											END 
 										END
-		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 
-											OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
-											OR ISNULL(ConHeader.intPricingTypeId,0) = 5 
-											OR ISNULL(SC.ysnTicketOnHold, 0) = 1 
+		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 OR ISNULL(ConHeader.intPricingTypeId,0) = 5 
 										THEN 0
 										ELSE NULL
 										END
