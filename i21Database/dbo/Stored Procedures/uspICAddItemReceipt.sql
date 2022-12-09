@@ -987,6 +987,9 @@ BEGIN
 				,ysnAddPayable
 				,strImportDescription
 				,intComputeItemTotalOption
+				,dblBasis
+				,dblFutures
+				,strFuturesMonth
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -1091,6 +1094,9 @@ BEGIN
 				,ysnAddPayable					= RawData.ysnAddPayable
 				,strImportDescription			= RawData.strImportDescription
 				,intComputeItemTotalOption		= Item.intComputeItemTotalOption
+				,dblBasis						= RawData.dblBasis
+				,dblFutures						= RawData.dblFutures
+				,strFuturesMonth				= RawData.strFuturesMonth
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

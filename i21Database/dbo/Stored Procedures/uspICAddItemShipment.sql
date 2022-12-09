@@ -520,6 +520,9 @@ INSERT INTO @ShipmentEntries(
 		, ysnAllowInvoice
 		, intItemContractHeaderId
 		, intItemContractDetailId
+		, dblBasis
+		, dblFutures
+		, strFuturesMonth
 )
 SELECT 
 		intOrderType
@@ -581,6 +584,9 @@ SELECT
 		, ysnAllowInvoice
 		, intItemContractHeaderId
 		, intItemContractDetailId
+		, dblBasis
+		, dblFutures
+		, strFuturesMonth
 
 FROM @Items
 
@@ -950,6 +956,9 @@ INSERT INTO tblICInventoryShipmentItem(
 	, ysnAllowInvoice
 	, intItemContractHeaderId
 	, intItemContractDetailId
+	, dblBasis
+	, dblFutures
+	, strFuturesMonth
 )
 SELECT 
 	se.intShipmentId
@@ -996,6 +1005,9 @@ SELECT
 	, se.ysnAllowInvoice
 	, se.intItemContractHeaderId
 	, se.intItemContractDetailId
+	, se.dblBasis
+	, se.dblFutures
+	, se.strFuturesMonth
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
 	-- Get the SM forex rate. 
