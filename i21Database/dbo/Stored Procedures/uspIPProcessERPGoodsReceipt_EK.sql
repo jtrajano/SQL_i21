@@ -63,6 +63,7 @@ BEGIN TRY
 		,@intContractHeaderId INT
 		,@intContractDetailId INT
 		,@intBatchId INT
+		,@dblDeliveredQuantity NUMERIC(18, 6)
 	DECLARE @strLotNo NVARCHAR(50)
 		,@dblLotQuantity NUMERIC(18, 6)
 		,@strLotQuantityUOM NVARCHAR(50)
@@ -75,7 +76,6 @@ BEGIN TRY
 		,@dtmLotManufacturedDate DATETIME
 		,@dtmLotExpiryDate DATETIME
 	DECLARE @intStageReceiptItemLotId INT
-		,@intLotBatchId INT
 		,@intLotQtyUnitMeasureId INT
 		,@intLotQtyItemUOMId INT
 		,@intLotNetWeightUnitMeasureId INT
@@ -119,17 +119,6 @@ BEGIN TRY
 	BEGIN
 		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
 	END
-
-	--SELECT @strInfo2 = @strInfo2 + ISNULL(strTransferOrderNo, '') + ', '
-	--FROM (
-	--	SELECT DISTINCT b.strTransferOrderNo
-	--	FROM @tblIPInvReceiptStage a
-	--	JOIN tblIPInvReceiptStage b ON a.intStageReceiptId = b.intStageReceiptId
-	--	) AS DT
-	--IF Len(@strInfo2) > 0
-	--BEGIN
-	--	SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
-	--END
 
 	WHILE (@intStageReceiptId IS NOT NULL)
 	BEGIN
@@ -291,6 +280,7 @@ BEGIN TRY
 					,@intContractHeaderId = NULL
 					,@intContractDetailId = NULL
 					,@intBatchId = NULL
+					,@dblDeliveredQuantity = NULL
 
 				SELECT @strERPPONumber = RIS.strERPPONumber
 					,@strERPItemNumber = RIS.strERPItemNumber
@@ -367,11 +357,9 @@ BEGIN TRY
 
 				IF ISNULL(@intStorageLocationId, 0) = 0
 				BEGIN
-					RAISERROR (
-							'Invalid Storage Location. '
-							,16
-							,1
-							)
+					SELECT TOP 1 @intStorageLocationId = t.intStorageLocationId
+					FROM tblICStorageLocation t WITH (NOLOCK)
+					WHERE t.intSubLocationId = @intSubLocationId
 				END
 
 				IF @dblQuantity <= 0
@@ -481,6 +469,15 @@ BEGIN TRY
 							)
 				END
 
+				IF ISNULL(@strCostCurrency, '') = ''
+				BEGIN
+					RAISERROR (
+							'Invalid Cost Currency. '
+							,16
+							,1
+							)
+				END
+
 				IF @dblCost >= 0
 					AND ISNULL(@strCostUOM, '') <> ''
 					AND ISNULL(@strCostCurrency, '') <> ''
@@ -525,15 +522,15 @@ BEGIN TRY
 
 					IF @ysnSubCurrency = 1
 						SELECT @intCostCurrencyId = @intMainCurrencyId
-
-					-- Cost UOM Conversion
-					--SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
+							-- Cost UOM Conversion
+							--SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
 				END
 
 				SELECT @intLoadId = L.intLoadId
 					,@intLoadDetailId = LD.intLoadDetailId
 					,@ysnPosted = L.ysnPosted
 					,@intBatchId = LD.intBatchId
+					,@dblDeliveredQuantity = LD.dblDeliveredQuantity
 				FROM tblLGLoad L WITH (NOLOCK)
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intShipmentType = 1
@@ -568,7 +565,14 @@ BEGIN TRY
 							)
 				END
 
-				-- How to check Receipt already received for the PO Line Item
+				IF ISNULL(@dblDeliveredQuantity, 0) > 0
+				BEGIN
+					RAISERROR (
+							'Load Item is already received. '
+							,16
+							,1
+							)
+				END
 
 				SELECT @intContractDetailId = LD.intPContractDetailId
 					,@intContractHeaderId = CD.intContractHeaderId
@@ -595,19 +599,18 @@ BEGIN TRY
 						,@dtmLotManufacturedDate = NULL
 						,@dtmLotExpiryDate = NULL
 
-					SELECT @intLotBatchId = NULL
-						,@intLotQtyUnitMeasureId = NULL
+					SELECT @intLotQtyUnitMeasureId = NULL
 						,@intLotQtyItemUOMId = NULL
 						,@intLotNetWeightUnitMeasureId = NULL
 						,@intLotNetWeightItemUOMId = NULL
 						,@intLotStorageLocationId = NULL
 
 					SELECT @strLotNo = strLotNo
-						,@dblLotQuantity = dblQuantity
+						,@dblLotQuantity = ISNULL(dblQuantity, 0)
 						,@strLotQuantityUOM = strQuantityUOM
-						,@dblLotGrossWeight = dblGrossWeight
-						,@dblLotTareWeight = dblTareWeight
-						,@dblLotNetWeight = dblNetWeight
+						,@dblLotGrossWeight = ISNULL(dblGrossWeight, 0)
+						,@dblLotTareWeight = ISNULL(dblTareWeight, 0)
+						,@dblLotNetWeight = ISNULL(dblNetWeight, 0)
 						,@strLotWeightUOM = strWeightUOM
 						,@strLotStorageLocationName = strStorageLocationName
 						,@strLotMarks = strMarks
@@ -620,19 +623,6 @@ BEGIN TRY
 					BEGIN
 						RAISERROR (
 								'Batch Id cannot be empty. '
-								,16
-								,1
-								)
-					END
-
-					SELECT @intLotBatchId = t.intBatchId
-					FROM tblMFBatch t WITH (NOLOCK)
-					WHERE t.strBatchId = @strLotNo
-
-					IF ISNULL(@intLotBatchId, 0) = 0
-					BEGIN
-						RAISERROR (
-								'Invalid Batch Id. '
 								,16
 								,1
 								)
@@ -732,11 +722,7 @@ BEGIN TRY
 
 						IF ISNULL(@intLotStorageLocationId, 0) = 0
 						BEGIN
-							RAISERROR (
-									'Invalid Detail Storage Location. '
-									,16
-									,1
-									)
+							SELECT @intLotStorageLocationId = @intStorageLocationId
 						END
 					END
 
@@ -751,117 +737,112 @@ BEGIN TRY
 								)
 					END
 
-					--INSERT INTO @ReceiptStagingTable (
-					--	strReceiptType
-					--	,intEntityVendorId
-					--	,intShipFromId
-					--	,intTransferorId
-					--	,intLocationId
-					--	,strBillOfLadding
-					--	,intItemId
-					--	,intItemLocationId
-					--	,intItemUOMId
-					--	,intContractHeaderId
-					--	,intContractDetailId
-					--	,dtmDate
-					--	,intShipViaId
-					--	,dblQty
-					--	,intGrossNetUOMId
-					--	,dblGross
-					--	,dblNet
-					--	,dblCost
-					--	,intCostUOMId
-					--	,intCurrencyId
-					--	,intSubCurrencyCents
-					--	,dblExchangeRate
-					--	,intLotId
-					--	,intSubLocationId
-					--	,intStorageLocationId
-					--	,ysnIsStorage
-					--	,intSourceId
-					--	,intSourceType
-					--	,strSourceId
-					--	,strSourceScreenName
-					--	,ysnSubCurrency
-					--	,intForexRateTypeId
-					--	,dblForexRate
-					--	,intContainerId
-					--	,intFreightTermId
-					--	,intBookId
-					--	,intSubBookId
-					--	,intSort
-					--	,intLoadShipmentId
-					--	,intLoadShipmentDetailId
-					--	,strVendorRefNo
-					--	,dblUnitRetail
-					--	,intShipFromEntityId
-					--	,strWarehouseRefNo
-					--	,intInventoryTransferId
-					--	,intInventoryTransferDetailId
-					--	)
-					--SELECT TOP 1 strReceiptType = 'Transfer Order'
-					--	,intEntityVendorId = -1
-					--	,intShipFromId = -1
-					--	,intTransferorId = IT.intFromLocationId
-					--	,intLocationId = IT.intToLocationId
-					--	,strBillOfLadding = ISNULL(@strBLNumber, IT.strBolNumber)
-					--	,intItemId = @intItemId
-					--	,intItemLocationId = @intCompanyLocationId
-					--	,intItemUOMId = @intQtyItemUOMId
-					--	,intContractHeaderId = @intContractHeaderId
-					--	,intContractDetailId = @intContractDetailId
-					--	,dtmDate = @dtmReceiptDate
-					--	,intShipViaId = IT.intShipViaId
-					--	,dblQty = @dblQuantity
-					--	,intGrossNetUOMId = @intNetWeightItemUOMId
-					--	,dblGross = @dblGrossWeight
-					--	,dblNet = @dblNetWeight
-					--	,dblCost = @dblCost
-					--	,intCostUOMId = @intCostItemUOMId
-					--	,intCurrencyId = @intCostCurrencyId
-					--	,intSubCurrencyCents = (
-					--		CASE 
-					--			WHEN ISNULL(@ysnSubCurrency, 0) = 1
-					--				THEN 100
-					--			ELSE 1
-					--			END
-					--		)
-					--	,dblExchangeRate = ISNULL(@dblForexRate, 1)
-					--	,intLotId = NULL
-					--	,intSubLocationId = @intSubLocationId
-					--	,intStorageLocationId = @intStorageLocationId
-					--	,ysnIsStorage = 0
-					--	,intSourceId = NULL
-					--	,intSourceType = 0 -- Transfer Order
-					--	,strSourceId = @strTransferOrderNo
-					--	,strSourceScreenName = 'External System'
-					--	,ysnSubCurrency = (
-					--		CASE 
-					--			WHEN ISNULL(@ysnSubCurrency, 0) = 1
-					--				THEN 1
-					--			ELSE 0
-					--			END
-					--		)
-					--	,intForexRateTypeId = @intDefaultForexRateTypeId
-					--	,dblForexRate = @dblForexRate
-					--	,intContainerId = NULL
-					--	,intFreightTermId = @intFreightTermId
-					--	,intBookId = NULL
-					--	,intSubBookId = NULL
-					--	,intSort = @intInventoryTransferDetailId
-					--	,intLoadShipmentId = NULL
-					--	,intLoadShipmentDetailId = NULL
-					--	,strVendorRefNo = @strVendorRefNo
-					--	,dblUnitRetail = @dblCost
-					--	,intShipFromEntityId = NULL
-					--	,strWarehouseRefNo = @strWarehouseRefNo
-					--	,intInventoryTransferId = @intInventoryTransferId
-					--	,intInventoryTransferDetailId = @intInventoryTransferDetailId
-					--FROM tblICInventoryTransfer IT
-					--JOIN tblICInventoryTransferDetail ITD ON ITD.intInventoryTransferId = IT.intInventoryTransferId
-					--	AND ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
-					--WHERE IT.intInventoryTransferId = @intInventoryTransferId
-					
+					INSERT INTO @ReceiptStagingTable (
+						strReceiptType
+						,intEntityVendorId
+						,intShipFromId
+						,intLocationId
+						,strBillOfLadding
+						,intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,intContractHeaderId
+						,intContractDetailId
+						,dtmDate
+						,intShipViaId
+						,dblQty
+						,intGrossNetUOMId
+						,dblGross
+						,dblTare
+						,dblNet
+						,dblCost
+						,intCostUOMId
+						,intCurrencyId
+						,intSubCurrencyCents
+						,dblExchangeRate
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId
+						,ysnIsStorage
+						,intSourceId
+						,intSourceType
+						,strSourceId
+						,strSourceScreenName
+						,ysnSubCurrency
+						,intForexRateTypeId
+						,dblForexRate
+						,intContainerId
+						,intFreightTermId
+						,intBookId
+						,intSubBookId
+						,intSort
+						,intLoadShipmentId
+						,intLoadShipmentDetailId
+						,strVendorRefNo
+						,strWarehouseRefNo
+						)
+					SELECT strReceiptType = 'Approved Quality'
+						,intEntityVendorId = LD.intVendorEntityId
+						,intShipFromId = LD.intVendorEntityLocationId
+						,intLocationId = LD.intPCompanyLocationId
+						,strBillOfLadding = @strBLNumber
+						,intItemId = @intItemId
+						,intItemLocationId = IL.intItemLocationId
+						,intItemUOMId = @intQtyItemUOMId
+						,intContractHeaderId = @intContractHeaderId
+						,intContractDetailId = @intContractDetailId
+						,dtmDate = @dtmReceiptDate
+						,intShipViaId = CD.intShipViaId
+						,dblQty = @dblQuantity
+						,intGrossNetUOMId = @intNetWeightItemUOMId
+						,dblGross = @dblGrossWeight
+						,dblTare = @dblTareWeight
+						,dblNet = @dblNetWeight
+						,dblCost = @dblCost
+						,intCostUOMId = @intCostItemUOMId
+						,intCurrencyId = @intCostCurrencyId
+						,intSubCurrencyCents = (
+							CASE 
+								WHEN ISNULL(@ysnSubCurrency, 0) = 1
+									THEN 100
+								ELSE 1
+								END
+							)
+						,dblExchangeRate = 1
+						,intLotId = NULL
+						,intSubLocationId = ISNULL(@intSubLocationId, LD.intPSubLocationId)
+						,intStorageLocationId = @intStorageLocationId
+						,ysnIsStorage = 0
+						,intSourceId = LD.intLoadDetailId
+						,intSourceType = 2
+						,strSourceId = L.strLoadNumber
+						,strSourceScreenName = 'External System'
+						,ysnSubCurrency = (
+							CASE 
+								WHEN ISNULL(@ysnSubCurrency, 0) = 1
+									THEN 1
+								ELSE 0
+								END
+							)
+						,intForexRateTypeId = NULL
+						,dblForexRate = NULL
+						,intContainerId = - 1
+						,intFreightTermId = L.intFreightTermId
+						,intBookId = L.intBookId
+						,intSubBookId = L.intSubBookId
+						,intSort = LD.intLoadDetailId
+						,intLoadShipmentId = LD.intLoadId
+						,intLoadShipmentDetailId = LD.intLoadDetailId
+						,strVendorRefNo = @strERPReceiptNo
+						,strWarehouseRefNo = @strWarehouseRefNo
+					FROM tblLGLoadDetail LD WITH (NOLOCK)
+					JOIN tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LD.intLoadId
+						AND LD.intLoadDetailId = @intLoadDetailId
+					JOIN tblMFBatch B WITH (NOLOCK) ON B.intBatchId = LD.intBatchId
+					JOIN tblICItemLocation IL WITH (NOLOCK) ON IL.intItemId = LD.intItemId
+						AND IL.intLocationId = LD.intPCompanyLocationId
+					LEFT JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
+
 					IF NOT EXISTS (
 							SELECT 1
 							FROM @ReceiptStagingTable
@@ -874,70 +855,71 @@ BEGIN TRY
 								)
 					END
 
-					--INSERT INTO @LotEntries (
-					--	intLotId
-					--	,strLotNumber
-					--	,strLotAlias
-					--	,intSubLocationId
-					--	,intStorageLocationId
-					--	,intContractHeaderId
-					--	,intContractDetailId
-					--	,intItemUnitMeasureId
-					--	,intItemId
-					--	,dblQuantity
-					--	,dblGrossWeight
-					--	,dblTareWeight
-					--	,dblCost
-					--	,strContainerNo
-					--	,intSort
-					--	,strMarkings
-					--	,strCondition
-					--	,intEntityVendorId
-					--	,strReceiptType
-					--	,intLocationId
-					--	,intShipViaId
-					--	,intShipFromId
-					--	,intCurrencyId
-					--	,intSourceType
-					--	,strBillOfLadding
-					--	,dtmExpiryDate
-					--	,intParentLotId
-					--	,strParentLotNumber
-					--	,intLotStatusId
-					--	)
-					--SELECT intLotId = NULL
-					--	,strLotNumber = @strLotNo
-					--	,strLotAlias = NULL
-					--	,intSubLocationId = RI.intSubLocationId
-					--	,intStorageLocationId = RI.intStorageLocationId
-					--	,intContractHeaderId = RI.intContractHeaderId
-					--	,intContractDetailId = RI.intContractDetailId
-					--	,intItemUnitMeasureId = RI.intItemUOMId
-					--	,intItemId = RI.intItemId
-					--	,dblQuantity = RI.dblQty
-					--	,dblGrossWeight = @dblGrossWeight
-					--	,dblTareWeight = @dblTareWeight
-					--	,dblCost = 0
-					--	,strContainerNo = @strContainerNumber
-					--	,intSort = RI.intSort
-					--	,strMarkings = @strMarks
-					--	,strCondition = @strLotCondition
-					--	,intEntityVendorId = RI.intEntityVendorId
-					--	,strReceiptType = RI.strReceiptType
-					--	,intLocationId = RI.intLocationId
-					--	,intShipViaId = RI.intShipViaId
-					--	,intShipFromId = RI.intShipFromId
-					--	,intCurrencyId = RI.intCurrencyId
-					--	,intSourceType = RI.intSourceType
-					--	,strBillOfLadding = RI.strBillOfLadding
-					--	,dtmExpiryDate = @dtmExpiryDate
-					--	,intParentLotId = @intParentLotId
-					--	,strParentLotNumber = @strParentLotNumber
-					--	,intLotStatusId = @intLotStatusId
-					--FROM @ReceiptStagingTable RI
-					--WHERE RI.intInventoryTransferId = @intInventoryTransferId
-					--	AND RI.intInventoryTransferDetailId = @intInventoryTransferDetailId
-					
+					INSERT INTO @LotEntries (
+						intLotId
+						,strLotNumber
+						,strLotAlias
+						,intSubLocationId
+						,intStorageLocationId
+						,intContractHeaderId
+						,intContractDetailId
+						,intItemUnitMeasureId
+						,intItemId
+						,dblQuantity
+						,dblGrossWeight
+						,dblTareWeight
+						,dblCost
+						,strContainerNo
+						,intSort
+						,strMarkings
+						,strCondition
+						,intEntityVendorId
+						,strReceiptType
+						,intLocationId
+						,intShipViaId
+						,intShipFromId
+						,intCurrencyId
+						,intSourceType
+						,strBillOfLadding
+						,dtmExpiryDate
+						,intParentLotId
+						,strParentLotNumber
+						,intLotStatusId
+						,dtmManufacturedDate
+						)
+					SELECT intLotId = NULL
+						,strLotNumber = @strLotNo
+						,strLotAlias = NULL
+						,intSubLocationId = RI.intSubLocationId
+						,intStorageLocationId = ISNULL(@intLotStorageLocationId, RI.intStorageLocationId)
+						,intContractHeaderId = RI.intContractHeaderId
+						,intContractDetailId = RI.intContractDetailId
+						,intItemUnitMeasureId = @intLotQtyItemUOMId
+						,intItemId = RI.intItemId
+						,dblQuantity = @dblLotQuantity
+						,dblGrossWeight = @dblLotGrossWeight
+						,dblTareWeight = @dblLotTareWeight
+						,dblCost = RI.dblCost
+						,strContainerNo = @strContainerNumber
+						,intSort = RI.intSort
+						,strMarkings = @strLotMarks
+						,strCondition = 'Sound/Full'
+						,intEntityVendorId = RI.intEntityVendorId
+						,strReceiptType = RI.strReceiptType
+						,intLocationId = RI.intLocationId
+						,intShipViaId = RI.intShipViaId
+						,intShipFromId = RI.intShipFromId
+						,intCurrencyId = RI.intCurrencyId
+						,intSourceType = RI.intSourceType
+						,strBillOfLadding = RI.strBillOfLadding
+						,dtmExpiryDate = @dtmLotExpiryDate
+						,intParentLotId = NULL
+						,strParentLotNumber = NULL
+						,intLotStatusId = NULL
+						,dtmManufacturedDate = @dtmLotManufacturedDate
+					FROM @ReceiptStagingTable RI
+					WHERE RI.intLoadShipmentDetailId = @intLoadDetailId
+
 					SELECT @intStageReceiptItemLotId = MIN(intStageReceiptItemLotId)
 					FROM tblIPInvReceiptItemLotStage WITH (NOLOCK)
 					WHERE intStageReceiptId = @intStageReceiptId
