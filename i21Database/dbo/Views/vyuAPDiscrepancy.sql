@@ -3,9 +3,9 @@ AS
 
 SELECT ISNULL(AP.intBillId, GL.intTransactionId) intTransactionId,
 	   ISNULL(AP.strBillId, GL.strTransactionId) strTransactionId,
-	   ISNULL(GL.dtmTransactionDate, AP.dtmBillDate) dtmTransactionDate,
+	   ISNULL(GL.dtmTransactionDate, ISNULL(AP.dtmBillDate, GETDATE())) dtmTransactionDate,
 	   ISNULL(E.strName, 'Unknown') strVendorName,
-	   ISNULL(AP.dtmDate, GL.dtmDate) dtmDate,
+	   ISNULL(AP.dtmDate, ISNULL(GL.dtmDate, GETDATE())) dtmDate,
 	   ISNULL(GL.dblAmountDue, 0) dblGLAmount,
 	   ISNULL(AP.dblAmountDue, 0) dblAPAmount,
 	   (ISNULL(GL.dblAmountDue, 0) - ISNULL(AP.dblAmountDue, 0)) dblDifference,
