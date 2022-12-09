@@ -505,6 +505,7 @@ BEGIN
 		, @ysnDeliveryTicketPrinted BIT = NULL
 		, @ysnPrintARBalance BIT = NULL
 		, @intNextDeliveryDegreeDay INT = NULL
+		, @intCustomerNumber INT = NULL
 
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
@@ -567,6 +568,7 @@ BEGIN
 		,CS.ysnDeliveryTicketPrinted AS ysnDeliveryTicketPrinted   
 		,CS.ysnPrintARBalance AS ysnPrintARBalance
 		,CS.intNextDeliveryDegreeDay AS intNextDeliveryDegreeDay
+		,E.intEntityId
 	FROM tblApiSchemaTMConsumptionSite CS
 	INNER JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
 	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
@@ -619,7 +621,7 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@intCustomerNumber
 	WHILE @@FETCH_STATUS = 0
     BEGIN
 
@@ -948,7 +950,7 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay, @intCustomerNumber
 	END
 	CLOSE DataCursor
 	DEALLOCATE DataCursor
