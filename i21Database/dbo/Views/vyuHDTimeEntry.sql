@@ -47,6 +47,7 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 										   END 
 	   ,[strSelectedDate]				= TimeEntry.[strSelectedDate]
 	   ,[ysnFromApproval]				= CONVERT(BIT, 0)	
+	   ,strFiscalYear					= TimeEntryPeriodDetail.[strFiscalYear]
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
