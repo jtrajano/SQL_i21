@@ -495,7 +495,7 @@ SELECT
 	--[dblBalance]			=	A.dblAmountDue,
 	--[dblAmountApplied]		=	0,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
-	[dblBillAmount]			=	CurrentBill.dblTotal + ISNULL(CurrentBill.dblDiscountTotal,0),
+	[dblBillAmount]			=	CurrentBill.dblTotal + ISNULL(CurrentBill.dblDiscountTotalPerItem,0),
 	[dblBalance]			=	ROUND(
 								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION
@@ -549,6 +549,7 @@ CROSS APPLY
 		,Total.dblTotalQtyReceived
 		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
 		,ISNULL(DiscountTotal.dblDetailTotal,0) AS dblDiscountTotal
+		,ROUND(ISNULL(DiscountTotal.dblDetailTotal,0) * ((C.dblTotal + C.dblTax) / Total.dblDetailTotal),2) AS dblDiscountTotalPerItem
 	FROM tblAPBillDetail C
 	CROSS APPLY (
 		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal, SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived FROM dbo.tblAPBillDetail C2
