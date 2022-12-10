@@ -46,7 +46,7 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
                                                          WHEN B.intTransactionType = 3 THEN CAST('Debit Memo' AS NVARCHAR(100))
                                                          ELSE CAST('Voucher' AS NVARCHAR(100))
                                                     END
-     , strPreInvoiceDocumentNo				= B.strBillId
+     , strPreInvoiceDocumentNo				= BD.strBillOfLading
      , dblNetWtPackages						= CAST(BD.intNumOfPackagesUOM AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage
      , dblNoPackages						= BD.dblNumberOfPackages
      , dblNetWt2ndPackages					= CAST(BD.intNumOfPackagesUOM2 AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage2
