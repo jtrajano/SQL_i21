@@ -39,7 +39,7 @@ BEGIN TRY
 		 , strPreInvoiceChopNo					= BD.strPreInvoiceGardenNumber
 		 , intCatReconGardenMarkId				= CRD.intPreInvoiceGardenMarkId
 		 , intPreInvoiceGardenMarkId			= BD.intGardenMarkId
-		 , strCatReconGrade						= CRD.intPreInvoiceGradeId
+		 , strCatReconGrade						= CA.strDescription
 		 , strPreInvoiceGrade					= BD.strComment
     INTO #VOUCHERS 
     FROM tblQMCatalogueReconciliation CR
@@ -61,9 +61,9 @@ BEGIN TRY
 			SET dblCost						= ISNULL(V.dblCatReconPrice, 0)
 			  , dblQtyReceived				= ISNULL(V.dblCatReconQty, 0)
 			  , dblQtyOrdered				= ISNULL(V.dblCatReconQty, 0)
-			  , strPreInvoiceGardenNumber	= V.strCatReconChopNo
+			  , strPreInvoiceGardenNumber	= CAST(V.strCatReconChopNo AS NVARCHAR(100))
 			  , intGardenMarkId				= NULLIF(V.intCatReconGardenMarkId, 0)
-			  , strComment					= V.strCatReconGrade
+			  , strComment					= CAST(V.strCatReconGrade AS NVARCHAR(100))
 			FROM tblAPBillDetail BD
 			INNER JOIN #VOUCHERS V ON V.intBillDetailId = BD.intBillDetailId
 
@@ -135,8 +135,8 @@ BEGIN TRY
 					SELECT [Id]			= 5
 						, [Action]		= NULL
 						, [Change]		= 'Update Pre-Invoice Garden Number'
-						, [From]		= strPreInvoiceChopNo
-						, [To]			= strCatReconChopNo
+						, [From]		= CAST(strPreInvoiceChopNo AS NVARCHAR(100))
+						, [To]			= CAST(strCatReconChopNo AS NVARCHAR(100))
 						, [ParentId]	= 1
 					FROM #VOUCHERS 
 					WHERE intBillId = @intBillId
