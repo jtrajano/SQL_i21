@@ -1358,7 +1358,6 @@
     <Build Include="dbo\Views\vyuQMCatalogueOverview.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateEmail_EK.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
-    
     <Build Include="dbo\Stored Procedures\uspGRUnpostTransferSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTime_EK.sql" />
@@ -1403,6 +1402,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceipt_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPProductionOrder_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

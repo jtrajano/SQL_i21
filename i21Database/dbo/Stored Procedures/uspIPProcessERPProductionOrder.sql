@@ -30,19 +30,21 @@ BEGIN TRY
 		,@intPackItemUOMId INT
 		,@intPackUnitMeasureId INT
 		,@strCreatedBy NVARCHAR(50)
-		,@intLotId int
+		,@intLotId INT
 		,@strWorkOrderNo NVARCHAR(50)
-		,@intManufacturingCellId int
-		,@intMachineId int
-		,@intBlendRequirementId int
-		,@intExecutionOrder int
-		,@dtmCurrentDate DateTime
-		,@dblOrderQuantity numeric(18,6)
-		,@strOrderQuantityUOM NVARCHAR(50) 
-		,@dblNoOfMixes numeric(18,6)
-		,@dtmPlanDate DateTime
-		,@intWokrOrderId int
-
+		,@intManufacturingCellId INT
+		,@intMachineId INT
+		,@intBlendRequirementId INT
+		,@intExecutionOrder INT
+		,@dtmCurrentDate DATETIME
+		,@dblOrderQuantity NUMERIC(18, 6)
+		,@strOrderQuantityUOM NVARCHAR(50)
+		,@dblNoOfMixes NUMERIC(18, 6)
+		,@dtmPlanDate DATETIME
+		,@intWokrOrderId INT
+		,@intBlendItemId INT
+		,@intBlendUOMId int
+		,@intBlendItemUOMId INT
 	DECLARE @tblMFProductionOrderStage TABLE (intProductionOrderStageId INT)
 
 	INSERT INTO @tblMFProductionOrderStage (intProductionOrderStageId)
@@ -69,7 +71,7 @@ BEGIN TRY
 
 	SELECT @strInfo2 = ''
 
-	Select @dtmCurrentDate=GETDATE()
+	SELECT @dtmCurrentDate = GETDATE()
 
 	WHILE @intProductionOrderStageId IS NOT NULL
 	BEGIN
@@ -82,10 +84,10 @@ BEGIN TRY
 				,@strWeightUOM = NULL
 				,@intDocNo = NULL
 				,@strLocationNumber = NULL
-				,@dblOrderQuantity=NULL
-				,@strOrderQuantityUOM=NULL
-				,@dblNoOfMixes=NULL
-				,@dtmPlanDate=NULL
+				,@dblOrderQuantity = NULL
+				,@strOrderQuantityUOM = NULL
+				,@dblNoOfMixes = NULL
+				,@dtmPlanDate = NULL
 
 			SELECT @strOrderNo = strOrderNo
 				,@strLocationNumber = strLocationCode
@@ -95,10 +97,10 @@ BEGIN TRY
 				,@dblWeight = dblWeight
 				,@strWeightUOM = strWeightUOM
 				,@intDocNo = intDocNo
-				,@dblOrderQuantity=dblOrderQuantity
-				,@strOrderQuantityUOM=strOrderQuantityUOM
-				,@dblNoOfMixes=dblNoOfMixes
-				,@dtmPlanDate=dtmPlanDate
+				,@dblOrderQuantity = dblOrderQuantity
+				,@strOrderQuantityUOM = strOrderQuantityUOM
+				,@dblNoOfMixes = dblNoOfMixes
+				,@dtmPlanDate = dtmPlanDate
 			FROM dbo.tblMFProductionOrderStage
 			WHERE intProductionOrderStageId = @intProductionOrderStageId
 
@@ -109,14 +111,12 @@ BEGIN TRY
 			--		)
 			--BEGIN
 			--	SELECT @strError = 'Document number ' + ltrim(@intDocNo) + ' is already processed in i21.'
-
 			--	RAISERROR (
 			--			@strError
 			--			,16
 			--			,1
 			--			)
 			--END
-
 			SELECT @intUserId = NULL
 
 			SELECT @intUserId = intEntityId
@@ -145,8 +145,8 @@ BEGIN TRY
 
 			IF NOT EXISTS (
 					SELECT *
-					FROM tblMFBlendRequirement 
-					WHERE strReferenceNo = @strOrderNo
+					FROM tblMFBlendRequirement
+					WHERE strReferenceNo = @strOrderNo and intLocationId =@intLocationId
 					)
 			BEGIN
 				SELECT @strError = 'Production Order ' + @strOrderNo + ' is not available in i21'
@@ -158,12 +158,10 @@ BEGIN TRY
 						)
 			END
 
-
-
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblICLot
-					WHERE strLotNumber = @strBatchId
+					WHERE strLotNumber = @strBatchId and intLocationId =@intLocationId
 					)
 			BEGIN
 				SELECT @strError = 'Batch No ' + @strBatchId + ' is not availble in i21.'
@@ -174,22 +172,31 @@ BEGIN TRY
 						,1
 						)
 			END
-				 SELECT @intItemId = NULL,@intLotId=NULL
-				
+
+			SELECT @intItemId = NULL
+				,@intLotId = NULL
+
 			SELECT @intItemId = intItemId
-					,@intLotId=intLotId
+				,@intLotId = intLotId
 			FROM tblICLot
 			WHERE strLotNumber = @strBatchId
 				AND intLocationId = @intLocationId
 
-			Select @intManufacturingCellId=NULL, @intMachineId=NULL
+			SELECT @intManufacturingCellId = NULL
+				,@intMachineId = NULL
+				,@intBlendItemId = NULL
+				,@intBlendUOMId = NULL
 
-			Select @intManufacturingCellId=intManufacturingCellId, @intMachineId=intMachineId
-					,@intBlendRequirementId=intBlendRequirementId 
-			from tblMFBlendRequirement 
-			Where strReferenceNo =@strOrderNo 
+			SELECT @intManufacturingCellId = intManufacturingCellId
+				,@intMachineId = intMachineId
+				,@intBlendRequirementId = intBlendRequirementId
+				,@intBlendItemId = intItemId
+				,@intBlendUOMId = intUOMId
+			FROM tblMFBlendRequirement
+			WHERE strReferenceNo = @strOrderNo
+			and intLocationId =@intLocationId
 
-			IF @strWeightUOM  = ''
+			IF @strWeightUOM = ''
 			BEGIN
 				SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' cannot be blank.'
 
@@ -281,102 +288,117 @@ BEGIN TRY
 						)
 			END
 
+			SELECT @intWorkOrderId = NULL
+
+			SELECT @intWorkOrderId = intWorkOrderId
+			FROM tblMFWorkOrder
+			WHERE intBlendRequirementId = @intBlendRequirementId
+
 			BEGIN TRAN
 
-			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-				,@intItemId = @intItemId
-				,@intManufacturingId = @intManufacturingCellId
-				,@intSubLocationId = 0
-				,@intLocationId = @intLocationId
-				,@intOrderTypeId = NULL
-				,@intBlendRequirementId = @intBlendRequirementId
-				,@intPatternCode = 93
-				,@ysnProposed = 0
-				,@strPatternString = @strWorkOrderNo OUTPUT
+			IF @intWorkOrderId IS NULL
+			BEGIN
+				EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+					,@intItemId = @intBlendItemId
+					,@intManufacturingId = @intManufacturingCellId
+					,@intSubLocationId = 0
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = @intBlendRequirementId
+					,@intPatternCode = 93
+					,@ysnProposed = 0
+					,@strPatternString = @strWorkOrderNo OUTPUT
 
-			SELECT @intExecutionOrder = Count(1)
-			FROM tblMFWorkOrder
-			WHERE intManufacturingCellId = @intManufacturingCellId
-				AND convert(DATE, dtmExpectedDate) = convert(DATE, @dtmPlanDate)
-				AND intBlendRequirementId IS NOT NULL
-				AND intStatusId NOT IN (
-					2
-					,13
+				SELECT @intExecutionOrder = Count(1)
+				FROM tblMFWorkOrder
+				WHERE intManufacturingCellId = @intManufacturingCellId
+					AND convert(DATE, dtmExpectedDate) = convert(DATE, @dtmPlanDate)
+					AND intBlendRequirementId IS NOT NULL
+					AND intStatusId NOT IN (
+						2
+						,13
+						)
+
+				SET @intExecutionOrder = @intExecutionOrder + 1
+
+				SELECT @intBlendItemUOMId = NULL
+
+				SELECT @intBlendItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intBlendItemId
+					AND intUnitMeasureId = @intBlendUOMId
+
+				INSERT INTO tblMFWorkOrder (
+					strWorkOrderNo
+					,intItemId
+					,dblQuantity
+					,intItemUOMId
+					,intStatusId
+					,intManufacturingCellId
+					,intMachineId
+					,intLocationId
+					,dblBinSize
+					,dtmExpectedDate
+					,intExecutionOrder
+					,intProductionTypeId
+					,dblPlannedQuantity
+					,intBlendRequirementId
+					,ysnKittingEnabled
+					,intKitStatusId
+					,ysnUseTemplate
+					,strComment
+					,dtmCreated
+					,intCreatedUserId
+					,dtmLastModified
+					,intLastModifiedUserId
+					,dtmReleasedDate
+					,intManufacturingProcessId
+					,intSalesOrderLineItemId
+					,intSalesRepresentativeId
+					,intInvoiceDetailId
+					,intLoadDistributionDetailId
+					,dtmPlannedDate
+					,intPlannedShiftId
+					,intCustomerId
+					,intConcurrencyId
+					,intTransactionFrom
 					)
+				SELECT @strWorkOrderNo
+					,@intBlendItemId
+					,@dblOrderQuantity
+					,@intBlendItemUOMId
+					,2 AS intWorkOrderStatusId
+					,@intManufacturingCellId
+					,@intMachineId
+					,@intLocationId
+					,@dblOrderQuantity / @dblNoOfMixes
+					,@dtmPlanDate
+					,@intExecutionOrder
+					,1
+					,@dblOrderQuantity
+					,@intBlendRequirementId
+					,0 AS ysnKittingEnabled
+					,NULL AS intKitStatusId
+					,0
+					,''
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+					,1 AS intManufacturingProcessId
+					,NULL AS intSalesOrderDetailId
+					,NULL AS intSalesRepresentativeId
+					,NULL AS intInvoiceDetailId
+					,NULL AS intLoadDistributionDetailId
+					,@dtmPlanDate
+					,NULL intPlannedShiftId
+					,NULL AS intCustomerId
+					,1
+					,NULL AS intTransactionFrom
 
-			SET @intExecutionOrder = @intExecutionOrder + 1
-
-			INSERT INTO tblMFWorkOrder (
-				strWorkOrderNo
-				,intItemId
-				,dblQuantity
-				,intItemUOMId
-				,intStatusId
-				,intManufacturingCellId
-				,intMachineId
-				,intLocationId
-				,dblBinSize
-				,dtmExpectedDate
-				,intExecutionOrder
-				,intProductionTypeId
-				,dblPlannedQuantity
-				,intBlendRequirementId
-				,ysnKittingEnabled
-				,intKitStatusId
-				,ysnUseTemplate
-				,strComment
-				,dtmCreated
-				,intCreatedUserId
-				,dtmLastModified
-				,intLastModifiedUserId
-				,dtmReleasedDate
-				,intManufacturingProcessId
-				,intSalesOrderLineItemId
-				,intSalesRepresentativeId
-				,intInvoiceDetailId
-				,intLoadDistributionDetailId
-				,dtmPlannedDate
-				,intPlannedShiftId
-				,intCustomerId
-				,intConcurrencyId
-				,intTransactionFrom
-				)
-			SELECT @strWorkOrderNo
-				,@intItemId
-				,@dblOrderQuantity
-				,@intItemUOMId
-				,2 AS intWorkOrderStatusId
-				,@intManufacturingCellId
-				,@intMachineId
-				,@intLocationId
-				,@dblOrderQuantity/@dblNoOfMixes 
-				,@dtmPlanDate
-				,@intExecutionOrder
-				,1
-				,@dblOrderQuantity
-				,@intBlendRequirementId
-
-				,0 AS ysnKittingEnabled
-				,NULL AS intKitStatusId
-				,0
-				,''
-				,@dtmCurrentDate
-				,@intUserId
-				,@dtmCurrentDate
-				,@intUserId
-				,@dtmCurrentDate
-				,1 AS intManufacturingProcessId
-				,NULL AS intSalesOrderDetailId
-				,NULL AS intSalesRepresentativeId
-				,NULL AS intInvoiceDetailId
-				,NULL AS intLoadDistributionDetailId
-				,@dtmPlanDate
-				,Null intPlannedShiftId
-				,NULL AS intCustomerId
-				,1
-				,NULL AS intTransactionFrom
-
-			SELECT @intWokrOrderId = SCOPE_IDENTITY()
+				SELECT @intWorkOrderId = SCOPE_IDENTITY()
+			END
 
 			INSERT INTO tblMFWorkOrderInputLot (
 				intWorkOrderId
@@ -404,10 +426,10 @@ BEGIN TRY
 				intDocNo
 				,strOrderNo
 				,strLocationCode
-				,dblOrderQuantity 
-				,strOrderQuantityUOM 
-				,dblNoOfMixes 
-				,dtmPlanDate 
+				,dblOrderQuantity
+				,strOrderQuantityUOM
+				,dblNoOfMixes
+				,dtmPlanDate
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
@@ -418,10 +440,10 @@ BEGIN TRY
 			SELECT intDocNo
 				,strOrderNo
 				,strLocationCode
-				,dblOrderQuantity 
-				,strOrderQuantityUOM 
-				,dblNoOfMixes 
-				,dtmPlanDate 
+				,dblOrderQuantity
+				,strOrderQuantityUOM
+				,dblNoOfMixes
+				,dtmPlanDate
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
@@ -451,10 +473,10 @@ BEGIN TRY
 				intDocNo
 				,strOrderNo
 				,strLocationCode
-				,dblOrderQuantity 
-				,strOrderQuantityUOM 
-				,dblNoOfMixes 
-				,dtmPlanDate 
+				,dblOrderQuantity
+				,strOrderQuantityUOM
+				,dblNoOfMixes
+				,dtmPlanDate
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
@@ -465,10 +487,10 @@ BEGIN TRY
 			SELECT intDocNo
 				,strOrderNo
 				,strLocationCode
-				,dblOrderQuantity 
-				,strOrderQuantityUOM 
-				,dblNoOfMixes 
-				,dtmPlanDate 
+				,dblOrderQuantity
+				,strOrderQuantityUOM
+				,dblNoOfMixes
+				,dtmPlanDate
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM

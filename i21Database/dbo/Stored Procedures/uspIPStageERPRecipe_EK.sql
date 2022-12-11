@@ -135,7 +135,7 @@ BEGIN TRY
 				,OrderQuantityUOM
 				,1 AS [Version]
 				,WeekCommencing
-				,WeekCommencing+7 ValidTo
+				,WeekCommencing+6 ValidTo
 				,MP.strProcessName
 				,@dtmCurrentDate AS CreatedDate
 				,NULL CreatedBy
@@ -202,7 +202,7 @@ BEGIN TRY
 					ELSE @strInputItemUpperTolerance
 					END AS UpperTolerance
 				,WeekCommencing AS ValidFrom
-				,WeekCommencing+7 AS ValidTo
+				,WeekCommencing+6 AS ValidTo
 				,1 AS YearValidation
 				,NULL AS ConsumptionMethod
 				,NULL AS StorageLocation
@@ -255,7 +255,7 @@ BEGIN TRY
 					,OrderQuantity numeric(18,6)'../../OrderQuantity'
 					,OrderQuantityUOM NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderQuantityUOM'
 					,NoOfMixes numeric(18,6)'../../NoOfMixes'
-					,PlanDate DateTime'../../PlanDate'
+					,PlanDate DateTime'../PlanDate'
 					,BatchId NVARCHAR(50) collate Latin1_General_CI_AS
 					,NoOfPack NUMERIC(18, 6)
 					,NoOfPackUOM NVARCHAR(50) collate Latin1_General_CI_AS

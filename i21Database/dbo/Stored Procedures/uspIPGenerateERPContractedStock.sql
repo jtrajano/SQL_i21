@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE dbo.uspIPGenerateERPContractedStock (
-	@intPageNumber INT = 1
-	,@intPageSize INT = 50
-	,@ysnUpdateFeedStatus BIT = 1
+	@ysnUpdateFeedStatus BIT = 1
+	,@limit INT = 1
+	,@offset INT = 50
+
 	)
 AS
 BEGIN TRY
@@ -57,14 +58,15 @@ BEGIN TRY
 			WHERE LD.intPContractDetailId = CD.intContractDetailId
 			) LD2
 		WHERE CD.intContractStatusId = 1 --Open
+		ORDER BY CH.intContractHeaderId
 	END
 
 	IF NOT EXISTS (
 			SELECT *
 			FROM dbo.tblIPContractedStockPreStage
 			WHERE intStatusId IS NULL
-				AND intContractedStockPreStageId BETWEEN (@intPageNumber - 1) * @intPageSize + 1
-					AND @intPageNumber * @intPageSize
+				AND intContractedStockPreStageId BETWEEN (@limit - 1) * @offset + 1
+					AND @limit * @offset
 			)
 	BEGIN
 		RETURN
@@ -80,17 +82,17 @@ BEGIN TRY
 	IF ISNULL(@tmp, 0) = 0
 		SELECT @tmp = 50
 
-	IF @intPageSize > @tmp
+	IF @offset > @tmp
 	BEGIN
-		SELECT @intPageSize = @tmp
+		SELECT @offset = @tmp
 	END
 
 	INSERT INTO @tblIPContractedStockPreStage (intContractedStockPreStageId)
 	SELECT PS.intContractedStockPreStageId
 	FROM dbo.tblIPContractedStockPreStage PS
 	WHERE intStatusId IS NULL
-		AND intContractedStockPreStageId BETWEEN (@intPageNumber - 1) * @intPageSize + 1
-			AND @intPageNumber * @intPageSize
+		AND intContractedStockPreStageId BETWEEN (@limit - 1) * @offset + 1
+			AND @limit * @offset
 
 	UPDATE dbo.tblIPContractedStockPreStage
 	SET intStatusId = - 1
@@ -99,16 +101,19 @@ BEGIN TRY
 			FROM @tblIPContractedStockPreStage PS
 			)
 
-	SELECT @strXML = IsNULL(@strXML,'') + '<DocNo>' + IsNULL(ltrim(CS.intContractedStockPreStageId), '') + '</DocNo>'
+	Select @strXML= '<root><DocNo>' + IsNULL(ltrim(MIN(CS.intContractedStockPreStageId)), '') + '</DocNo>'
 	+ '<MsgType>Contracted_Stock</MsgType>' 
 	+ '<Sender>iRely</Sender>' 
 	+ '<Receiver>ICRON</Receiver>' 
-	+ '<StockCode></StockCode>' 
+	FROM @tblIPContractedStockPreStage CS
+
+	SELECT @strXML = IsNULL(@strXML,'') 
+	+ '<Header><StockCode></StockCode>' 
 	+ '<BatchNumber>' + Case When B.strBatchId is not null Then B.strBatchId Else CH.strContractNumber + '/' + ltrim(CD.intContractSeq) End + '</BatchNumber>' 
 	+ '<Plant>' + IsNULL(ltrim(MU.strLocationNumber),'')  + '</Plant>' 
 	+ '<ItemCode>' + I.strItemNo + '</ItemCode>' 
 	+ '<StockDate>' + IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),'') + '</StockDate>' 
-	+ '<Quantity>' + ltrim(CD.dblQuantity) + '</Quantity>' 
+	+ '<Quantity>' + [dbo].[fnRemoveTrailingZeroes](CD.dblQuantity) + '</Quantity>' 
 	+ '<MixingUnit>' + IsNULL(ltrim(MU.strLocationName) , '') + '</MixingUnit>' 
 	+ '<Taste>' + IsNULL(ltrim(B.dblTeaTaste),'') + '</Taste>' 
 	+ '<Hue>' + IsNULL(ltrim(B.dblTeaHue),'') + '</Hue>' 
@@ -119,7 +124,7 @@ BEGIN TRY
 	+ '<PONumber>' +  Case When B.strBatchId is not null Then B.strBatchId Else CH.strContractNumber + '/' + ltrim(CD.intContractSeq) End + '</PONumber>' 
 	+ '<POStatus></POStatus>' 
 	+ '<ShippingDate>' + IsNULL(CONVERT(VARCHAR(33), CD.dtmStartDate, 126),'') + '</ShippingDate>' 
-	+ '<UnitCost>' +  IsNULL(ltrim(CD.dblCashPrice),'') + '</UnitCost>' 
+	+ '<UnitCost>' +  IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),'') + '</UnitCost>' 
 	+ '<Vessel></Vessel>' 
 	+ '<StockType>C</StockType>' 
 	+ '<Channel>' + IsNULL(SB.strSubBook, '') + '</Channel>' 
@@ -128,8 +133,8 @@ BEGIN TRY
 	+ '<Volume>' + IsNULL(ltrim(B.dblTeaVolume), '') + '</Volume>' 
 	+ '<Appearance>' + IsNULL(ltrim(B.dblTeaAppearance), '') + '</Appearance>' 
 	+ '<ExpiryDate>' + IsNULL(CONVERT(VARCHAR(33), DateAdd(mm, I.intLifeTime, B.dtmProductionBatch), 126),'') + '</ExpiryDate>' 
-	+ '<NoOfBags>' + IsNULL(ltrim(CS1.dblBalanceQty ),'') + '</NoOfBags>' 
-	+ '<UnitWeight>' + IsNULL(ltrim(CS1.dblBalanceQty*IU.dblUnitQty),'') + '</UnitWeight>' 
+	+ '<NoOfBags>' + IsNULL([dbo].[fnRemoveTrailingZeroes](CS1.dblBalanceQty) ,'') + '</NoOfBags>' 
+	+ '<UnitWeight>' + IsNULL([dbo].[fnRemoveTrailingZeroes](CS1.dblBalanceQty*IU.dblUnitQty),'') + '</UnitWeight>' 
 	+ '<NoOfBagsPerPallet>' + IsNULL(ltrim(I.intUnitPerLayer * I.intLayerPerPallet), '') + '</NoOfBagsPerPallet>' 
 	+ '<ReceiptDate></ReceiptDate>' 
 	+ '<BuyingOrderNo>' + IsNULL(B.strBuyingOrderNumber, '') + '</BuyingOrderNo>' 
@@ -158,7 +163,7 @@ BEGIN TRY
 	+ '<SaleDate>' + IsNULL(CONVERT(VARCHAR (33), B.dtmSalesDate , 126),'') + '</SaleDate>' 
 	+ '<InitialBuyDate>' + IsNULL(CONVERT(VARCHAR(33), B.dtmInitialBuy, 126),'') + '</InitialBuyDate>' 
 	+ '<BulkDensity>' + IsNULL(ltrim(B.dblBulkDensity), '') + '</BulkDensity>' 
-	+ '<BasePrice>' + IsNULL(ltrim(B.dblBasePrice), '') + '</BasePrice>'
+	+ '<BasePrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblBasePrice), '') + '</BasePrice></Header>'
 	FROM @tblIPContractedStockPreStage CS
 	JOIN tblIPContractedStockPreStage CS1 on CS1.intContractedStockPreStageId =CS.intContractedStockPreStageId 
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CS1.intContractDetailId
@@ -186,6 +191,8 @@ BEGIN TRY
 			FROM @tblIPContractedStockPreStage PS
 			)
 		AND intStatusId = - 1
+
+	Select @strXML=@strXML+'</root>'
 
 	SELECT IsNULL(1, '0') AS id
 		,IsNULL(@strXML, '') AS strXml

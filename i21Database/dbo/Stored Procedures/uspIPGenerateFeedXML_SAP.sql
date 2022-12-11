@@ -21,6 +21,18 @@ BEGIN TRY
 			,@limit = @limit
 			,@offset = @offset
 	END
+	ELSE IF @strType = 'Contracted Stock'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPContractedStock @ysnUpdateFeedStatus = 1
+			,@limit = @limit
+			,@offset = @offset
+	END
+	ELSE IF @strType = 'Auction Stock'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPAuctionStock @ysnUpdateFeedStatus = 1
+			,@limit = @limit
+			,@offset = @offset
+	END
 END TRY
 
 BEGIN CATCH
