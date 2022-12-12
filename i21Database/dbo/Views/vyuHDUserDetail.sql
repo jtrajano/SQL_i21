@@ -25,6 +25,7 @@
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
 			,intCustomerCount = NULL
+			,strUAPLabel = '' COLLATE Latin1_General_CI_AS
 		from
 			tblSMUserSecurity us
 			inner join tblSMUserRole ur on ur.intUserRoleID = us.intUserRoleID
@@ -56,6 +57,10 @@
 			,strFullName2 = ec.strName
 			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cus.[intEntityId] and et.strType in ('Customer','Prospect'))
 			,intCustomerCount = (select count(*)  from tblEMEntityToContact where intEntityContactId = ec.intEntityId)
+			,strUAPLabel = CASE WHEN cus.ysnUAP = CONVERT(BIT, 1) 
+									THEN 'YES'
+								ELSE 'NO'
+						   END  COLLATE Latin1_General_CI_AS
 		from
 			tblEMEntity ec
 			inner join tblARCustomer cus on cus.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
@@ -87,6 +92,8 @@
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
 			,intCustomerCount = NULL
+			,strUAPLabel = '' COLLATE Latin1_General_CI_AS
 		from
 			tblEMEntity ec
 			inner join tblARSalesperson sp on sp.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
+GO
