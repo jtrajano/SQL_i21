@@ -12,8 +12,7 @@ SELECT (CASE WHEN ysnKeep = 1 THEN 'KEEP'
 		END) AS ysnKeep																		-- KEEP 
 	 , WorkOrderInputLot.intLotId
 	 , Lot.strLotNumber																		-- Batch
-	 , dblTBSQuantity		= CAST(IsNULL(WorkOrderInputLot.dblTBSQuantity,(WorkOrderInputLot.dblQuantity/WorkOrderInputLotQty.dblSumQuantity)*(SELECT dblTrialBlendSheetSize
-				FROM tblMFCompanyPreference)) AS NUMERIC(38,2))		-- Weigh Up (Grams)
+	 , dblTBSQuantity		= CAST(ISNULL(WorkOrderInputLot.dblTBSQuantity, (WorkOrderInputLot.dblQuantity / WorkOrderInputLotQty.dblSumQuantity) * (SELECT dblTrialBlendSheetSize FROM tblMFCompanyPreference)) AS NUMERIC(38,2))		-- Weigh Up (Grams)
      , Batch.strERPPONumber																	-- Purchase Order
 	 , Batch.strTeaGardenChopInvoiceNumber													-- Chop
 	 , GardenMark.strGardenMark																-- Mark
@@ -30,15 +29,15 @@ SELECT (CASE WHEN ysnKeep = 1 THEN 'KEEP'
 	 , dblQuantity			= CAST(WorkOrderInputLot.dblQuantity AS NUMERIC(38,2))			-- Wght
 	 , dblIssuedQuantity	= CAST(WorkOrderInputLot.dblIssuedQuantity AS NUMERIC(38,2))
 	 , WorkOrderInputLot.intWorkOrderId
-	 , dblSellingPrice		= CAST(Batch.dblSellingPrice AS NUMERIC(38,0)) 					-- Sell
-	 , dblLandedPrice		= CAST(Batch.dblLandedPrice AS NUMERIC(38,0)) 					-- Land
+	 , dblSellingPrice		= CAST(Batch.dblSellingPrice AS NUMERIC(38,2)) 					-- Sell
+	 , dblLandedPrice		= CAST(Batch.dblLandedPrice AS NUMERIC(38,2)) 					-- Land
 	 , dblEstNoOfBlendSheet = CAST(BlendRequirementSheet.dblEstNoOfBlendSheet AS NUMERIC(38,0)) 	
-	 , dblWeightPerQty		= CAST(Lot.dblWeightPerQty AS NUMERIC(38,0))					-- Weight Per Qty
+	 , dblWeightPerQty		= CAST(Lot.dblWeightPerQty AS NUMERIC(38,2))					-- Kgs./Bags / Weight Per Qty
 	 , strFW				= ISNULL(strFW, '')												-- FW
 	 , dblSumQuantity		= CAST(WorkOrderInputLotQty.dblSumQuantity AS NUMERIC(38,0))	-- Sum Qty ***
 	 , TinClearance.strTINNumber															-- TIN Number
 	 , dblWorkOrderQty		= CAST(WorkOrder.dblQuantity AS NUMERIC(38,0))					-- Work Order Quantity
-	 , intAge				=DateDiff(d, isNULL(Lot.dtmManufacturedDate, Lot.dtmDateCreated), GETDATE())			-- Age
+	 , intAge				= DATEDIFF(D, ISNULL(Lot.dtmManufacturedDate, Lot.dtmDateCreated), GETDATE()) -- Age
 	 , strLeaf				= Batch.strLeafSize + ' - ' + Batch.strLeafStyle				-- Leaf 
 FROM tblMFWorkOrderInputLot AS WorkOrderInputLot
 JOIN tblICLot AS Lot ON WorkOrderInputLot.intLotId = Lot.intLotId
