@@ -49,5 +49,7 @@
     [str1099Form]               NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,						--1099 FORM * (DATA.forms1099)
     [str1099Type]               NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,						--1099 TYPE * (tblAP1099DIVCategory)
     [strFederalTaxId]           NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,						--FEDERAL TAX ID
-    [dtmW9Signed]               DATETIME NULL															--W9 SIGNED
+    [dtmW9Signed]               DATETIME NULL,															--W9 SIGNED
+    [ysnDefaultPayTo]           BIT NULL,																--DEFAULT PAY TO
+    [ysnDefaultShipFrom]        BIT NULL																--DEFAULT SHIP FROM
 )
