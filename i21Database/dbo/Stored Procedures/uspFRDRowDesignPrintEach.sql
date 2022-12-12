@@ -178,7 +178,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 		DELETE #tempRowDesignPrintEach WHERE [intRowDetailId] = @intRowDetailId
 	END
 	
-	INSERT INTO tblFRRowDesignPrintEach
+	INSERT INTO tblFRRowDesignPrintEach (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,dtmEntered,intConcurrencyId)  
 	SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,
 			strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,
 			strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,GETDATE() as dtmEntered,@ConcurrencyId as intConcurrencyId 
