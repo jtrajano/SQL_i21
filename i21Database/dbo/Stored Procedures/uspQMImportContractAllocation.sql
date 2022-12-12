@@ -340,7 +340,7 @@ BEGIN TRY
 			,intFromPortId = NULL
 			,dblGrossWeight = S.dblGrossWeight
 			,dtmInitialBuy = NULL
-			,dblWeightPerUnit = NULL
+			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
@@ -478,6 +478,10 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
 		-- Grade
 		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
+		-- Weight Item UOM
+		LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
+		-- Qty Item UOM
+		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intRepresentingUOMId
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
 			
