@@ -110,18 +110,18 @@ CREATE TABLE #tblInOut
 	strLocationName VARCHAR(200) COLLATE Latin1_General_CI_AS
 )
 
---CREATE TABLE #tblInOut2
---(
---	dtmDate DATETIME,
---	dblInvIn DECIMAL(18,6),
---	dblInvOut DECIMAL(18,6),
---	dblAdjustments DECIMAL(18,6),
---	strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
---	intCommodityId INT,
---	strOwnership VARCHAR(50) COLLATE Latin1_General_CI_AS,
---	intCompanyLocationId INT,
---	strLocationName VARCHAR(200) COLLATE Latin1_General_CI_AS
---)
+CREATE TABLE #tblInOut2
+(
+	dtmDate DATETIME,
+	dblInvIn DECIMAL(18,6),
+	dblInvOut DECIMAL(18,6),
+	dblAdjustments DECIMAL(18,6),
+	strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intCommodityId INT,
+	strOwnership VARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intCompanyLocationId INT,
+	strLocationName VARCHAR(200) COLLATE Latin1_General_CI_AS
+)
 
 CREATE TABLE #tblInTransit
 (
@@ -392,7 +392,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut 
+		FROM #tblInOut
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
@@ -407,7 +407,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut 
+		FROM #tblInOut
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
@@ -606,6 +606,7 @@ GROUP BY strCommodityCode
 	,intCompanyLocationId
 	,strLocationName
 	,strUOM
+/* END TOTAL INVENTORY */
 
 DECLARE @StorageTypes TABLE
 (
@@ -1014,6 +1015,11 @@ GROUP BY strCommodityCode
 /*==END==STORAGE OBLIGATION==*/
 
 SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @StorageObligationData)
+
+IF ISNULL(@intTotalRowCnt,0) = 0
+BEGIN
+	SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @InventoryData) 
+END
 
 /* ADD INVENTORY BALANCE IF IT DOES NOT EXIST */
 INSERT INTO @InventoryData
@@ -1733,24 +1739,12 @@ SET intRowNum = @intTotalRowCnt + 23
 FROM @InventoryData ID
 WHERE ID.strLabel = 'TOTAL COMPANY OWNED DECREASE (INC DP)'
 
-INSERT INTO @InventoryData
-SELECT 
-	@intTotalRowCnt + 24
-	,'TOTAL COMPANY OWNED ENDING (INC DP)'
-	,''
-	,SUM(CASE WHEN strSign = '-' THEN -ID.dblUnits ELSE ID.dblUnits END)
-	,ID.strCommodityCode
-	,ID.intCommodityId
-	,ID.intCompanyLocationId
-	,ID.strLocationName
-	,ID.strUOM
+UPDATE ID
+SET intRowNum = @intTotalRowCnt + 24
 FROM @InventoryData ID
-WHERE ID.strLabel LIKE '% (INC DP)'
-GROUP BY ID.strCommodityCode
-	,ID.intCommodityId
-	,ID.intCompanyLocationId
-	,ID.strLocationName
-	,ID.strUOM
+WHERE ID.strLabel = 'TOTAL COMPANY OWNED ENDING (INC DP)'
+
+
 /*==END==DP STORAGE==*/
 
 /*==START==REPORT DATA==*/
