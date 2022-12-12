@@ -133,9 +133,7 @@ ISNULL(CH.dtmCheckoutDate, CH.dtmCountDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription, 
 stcpew.strMessageType, 
-stcpew.strMessage,
-0 AS rn, 
-'' COLLATE Latin1_General_CI_AS AS strReportFilter
+stcpew.strMessage
 FROM dbo.tblSTCheckoutProcessErrorWarning AS stcpew 
 INNER JOIN dbo.tblSTCheckoutProcess AS stcp 
 	ON stcpew.intCheckoutProcessId = stcp.intCheckoutProcessId 
@@ -145,4 +143,4 @@ LEFT OUTER JOIN dbo.tblSTCheckoutHeader CH
 	ON stcpew.intCheckoutId = CH.intCheckoutId
 GROUP BY stcp.intStoreId, stcpew.intCheckoutProcessId, stcpew.intCheckoutProcessErrorWarningId, stcpew.intCheckoutId, 
 stcp.strGuid, stcp.dtmCheckoutProcessDate, CH.dtmCheckoutDate, CH.dtmCountDate, sts.intStoreNo, sts.strDescription, stcpew.strMessageType, stcpew.strMessage, CH.strCheckoutCloseDate
-HAVING CH.dtmCheckoutDate IS NOT NULL
+HAVING CH.dtmCheckoutDate IS NOT NULL 

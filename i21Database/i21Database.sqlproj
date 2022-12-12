@@ -1216,6 +1216,7 @@
     <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
+    <Build Include="dbo\Views\vyuSTPollingStatusReportScheduled.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
