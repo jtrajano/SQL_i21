@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspMFGenerateERPProductionOrder_EK (
-	@limit INT = 1
-	,@offset INT = 50
+	@limit INT = 0
+	,@offset INT = 0
 	,@ysnUpdateFeedStatus BIT = 1
 	)
 AS

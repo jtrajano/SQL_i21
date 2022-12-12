@@ -511,6 +511,7 @@ BEGIN TRY
 				@ysnRecipeHeaderValidation = 1
 				AND @dtmDueDate <= dtmValidTo
 				AND @dtmDueDate >= dtmValidFrom
+				AND ysnActive = 1
 				)
 			)
 

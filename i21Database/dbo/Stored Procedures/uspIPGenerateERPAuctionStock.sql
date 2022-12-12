@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE dbo.uspIPGenerateERPAuctionStock (
-	@limit INT = 1
-	,@offset INT = 50
+	@limit INT = 0
+	,@offset INT = 0
 	,@ysnUpdateFeedStatus BIT = 1
 	)
 AS
@@ -81,8 +81,8 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblIPAuctionStockPreStage
 			WHERE intStatusId IS NULL
-				AND intAuctionStockPreStageId BETWEEN (@limit - 1) * @offset + 1
-					AND @limit * @offset
+				AND intAuctionStockPreStageId between @offset + 1
+					AND @limit + @offset
 			)
 	BEGIN
 		RETURN
@@ -107,8 +107,8 @@ BEGIN TRY
 	SELECT PS.intItemId
 	FROM dbo.tblIPAuctionStockPreStage PS
 	WHERE PS.intStatusId IS NULL
-		AND intAuctionStockPreStageId BETWEEN (@limit - 1) * @offset + 1
-			AND @limit * @offset
+		AND intAuctionStockPreStageId BETWEEN @offset + 1
+					AND @limit + @offset
 
 	UPDATE dbo.tblIPAuctionStockPreStage
 	SET intStatusId = - 1

@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE dbo.uspIPGenerateERPContractedStock (
 	@ysnUpdateFeedStatus BIT = 1
-	,@limit INT = 1
-	,@offset INT = 50
+	,@limit INT = 0
+	,@offset INT = 0
 
 	)
 AS
@@ -65,8 +65,8 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblIPContractedStockPreStage
 			WHERE intStatusId IS NULL
-				AND intContractedStockPreStageId BETWEEN (@limit - 1) * @offset + 1
-					AND @limit * @offset
+				AND intContractedStockPreStageId BETWEEN @offset + 1
+					AND @limit + @offset
 			)
 	BEGIN
 		RETURN
@@ -91,8 +91,8 @@ BEGIN TRY
 	SELECT PS.intContractedStockPreStageId
 	FROM dbo.tblIPContractedStockPreStage PS
 	WHERE intStatusId IS NULL
-		AND intContractedStockPreStageId BETWEEN (@limit - 1) * @offset + 1
-			AND @limit * @offset
+		AND intContractedStockPreStageId BETWEEN @offset + 1
+					AND @limit + @offset
 
 	UPDATE dbo.tblIPContractedStockPreStage
 	SET intStatusId = - 1
