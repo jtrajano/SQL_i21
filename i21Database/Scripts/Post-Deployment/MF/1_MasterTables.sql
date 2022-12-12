@@ -4469,3 +4469,15 @@ BEGIN
         ,'Approved'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFWorkOrderStatus
+		WHERE strName = 'Partially Consumed'
+		)
+BEGIN
+	INSERT INTO tblMFWorkOrderStatus
+	SELECT 18
+		,'Partially Consumed'
+		,NULL
+		,NULL
+END

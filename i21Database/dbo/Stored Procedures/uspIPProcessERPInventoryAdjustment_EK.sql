@@ -943,7 +943,10 @@ BEGIN TRY
 								,@intWorkOrderId
 								,8
 						END
-
+						ELSE
+						BEGIN
+							Update tblMFWorkOrder Set intStatusId =13,dtmCompletedDate =GETDATE() Where intWorkOrderId =@intWorkOrderId 
+						END
 						DELETE
 						FROM @ItemsForPost
 					END
@@ -1090,6 +1093,10 @@ BEGIN TRY
 							EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 								,@intWorkOrderId
 								,8
+						END
+						ELSE
+						BEGIN
+							Update tblMFWorkOrder Set intStatusId =13,dtmCompletedDate =GETDATE() Where intWorkOrderId =@intWorkOrderId 
 						END
 
 						DELETE
