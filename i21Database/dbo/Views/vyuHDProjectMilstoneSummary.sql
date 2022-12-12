@@ -22,6 +22,15 @@
 				inner join tblHDTicketHoursWorked c on c.intTicketId = b.intTicketId
 				inner join tblHDProjectTask d on d.intTicketId = b.intTicketId
 			group by a.intMilestoneId,d.intProjectId
+		),
+		actualHours as (
+			select a.intMilestoneId, d.intProjectId, dblActualHours = sum(isnull(c.intHours, 0.00))
+			from 
+				tblHDMilestone a
+				inner join tblHDTicket b on b.intMilestoneId = a.intMilestoneId
+				inner join tblHDTicketHoursWorked c on c.intTicketId = b.intTicketId
+				inner join tblHDProjectTask d on d.intTicketId = b.intTicketId
+			group by a.intMilestoneId,d.intProjectId
 		)
 
 		select
@@ -36,8 +45,8 @@
 			,dblPercentComplete = ((select convert(numeric(18,6),count(*)) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority and e.strStatus = 'Closed')/(select convert(numeric(18,6),count(*)) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority)) * 100.00
 			--,dblQuotedHours = isnull(sum(b.dblQuotedHours),0.00)
 			,dblQuotedHours = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
-			,dblActualHours = isnull(sum(b.dblActualHours),0.00)
-			,dblOverShort = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00) - isnull(sum(b.dblActualHours),0.00)
+			,dblActualHours = isnull((select actualHours.dblActualHours from actualHours where actualHours.intMilestoneId = a.intMilestoneId and actualHours.intProjectId = d.intProjectId), 0.00)
+			,dblOverShort = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00) - isnull((select actualHours.dblActualHours from actualHours where actualHours.intMilestoneId = a.intMilestoneId and actualHours.intProjectId = d.intProjectId), 0.00)
 			,dtmStartDate				= ProjectTicketStartDate.dtmStartDate
 			,dtmDueDate					= ProjectTicketDueDate.dtmDueDate
 			,dtmCompleted				= CASE WHEN ProjectTicketStatus.intTicketStatusId IS NOT NULL	
