@@ -1403,6 +1403,8 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceipt_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPProductionOrder_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPInventoryAdjustment_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -18,5 +18,7 @@
 	,strNewStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strNewStorageUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,intStatusId int
+	,strOrderNo nvarchar(50)
+	,intOrderCompleted integer
 	,CONSTRAINT PK_tblIPInventoryAdjustmentStage PRIMARY KEY (intInventoryAdjustmentStageId)
 	)
