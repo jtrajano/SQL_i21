@@ -13,5 +13,7 @@
 	intFreightCostItemId int,
 	intMiscItemId int,
 	intWeightAdjItemId int,
+	strExternalToken NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+
 	CONSTRAINT [PK_tblIPCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
