@@ -41,6 +41,10 @@ with arhd as
 		  ,intTicketGroupId = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.intTicketGroupId from arhd where arhd.intCustomerId = c.intEntityId) else null end)
 		  ,intOwnerEntityId = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.intEntityId from arhd where arhd.intCustomerId = c.intEntityId) else null end)
 		  ,strOwnerEntityName = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.strName from arhd where arhd.intCustomerId = c.intEntityId) else null end)
+		  ,strUAPLabel = CASE WHEN c.ysnUAP = CONVERT(BIT, 1) 
+									THEN 'YES'
+								ELSE 'NO'
+						   END  COLLATE Latin1_General_CI_AS
 		from
 			tblARCustomer c
 		  inner join tblEMEntityToContact etc on etc.intEntityId = c.[intEntityId]
@@ -50,3 +54,4 @@ with arhd as
 		  left outer join tblEMEntityLocation elc on elc.intEntityLocationId = etc.intEntityLocationId
 		  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
 		  left join tblEMEntityMobileNumber mob on ec.intEntityId = mob.intEntityId
+GO
