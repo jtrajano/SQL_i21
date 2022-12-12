@@ -101,6 +101,11 @@ SELECT CP.intCompanyPreferenceId
 	,C.strControlPointName AS strPreProductionControlPointName
 	,CT.strContainerType
 	,CP.ysnRecipeBySite
+	,CP.intPositionByETADemandReport
+	,CASE WHEN intPositionByETADemandReport = 1 THEN 'UAD'
+		  WHEN intPositionByETADemandReport = 2 THEN 'UAD with Saved LS'
+		  WHEN intPositionByETADemandReport = 3 THEN 'UAD with Posted LS'
+	 END AS strPositionByETADemandReportName
 FROM tblMFCompanyPreference CP
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CP.intDefaultShipmentStagingLocation
 LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = CP.intDefaultShipmentDockDoorLocation

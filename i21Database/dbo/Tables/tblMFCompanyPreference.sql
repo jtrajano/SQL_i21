@@ -100,5 +100,6 @@
 	ysnWOAutoSelectBOMServiceItems BIT,
 	ysnRecipeBySite Bit,
 	ysnConsiderBookInDemandView BIT,
+	intPositionByETADemandReport INT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

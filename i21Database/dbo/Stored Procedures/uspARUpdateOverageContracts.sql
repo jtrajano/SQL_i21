@@ -427,7 +427,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						 , CU.dblTransactionQuantity
 					FROM tblTMSite S
 					INNER JOIN tblTMOrder TMO ON S.intSiteID = TMO.intSiteId
-					INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId
+					INNER JOIN tblTMDispatch DD ON DD.intDispatchID = TMO.intDispatchId AND DD.intSiteID = TMO.intSiteId
+					INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId AND TMO.dblQuantity = CU.dblTransactionQuantity
 					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId
 					WHERE CU.strFieldName = 'Scheduled Quantity'
 					  AND CU.strScreenName = 'TM - Create Order'

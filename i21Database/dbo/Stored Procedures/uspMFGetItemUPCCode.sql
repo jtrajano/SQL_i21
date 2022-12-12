@@ -10,7 +10,7 @@ BEGIN
 		 , ItemUOM.intUnitMeasureId
 		 , ItemUOM.strLongUPCCode
 		 , ItemUOM.strUpcCode
-		 , CONVERT(BIT, (CASE WHEN ItemLocation.ysnStorageUnitRequired IS NULL THEN 0 ELSE 1 END)) AS ysnStorageUnitRequired
+		 ,ItemLocation.ysnStorageUnitRequired
 	FROM tblICItemUOM AS ItemUOM
 	LEFT JOIN tblICItemLocation AS ItemLocation ON ItemUOM.intItemId = ItemLocation.intItemId
 	WHERE ItemUOM.strLongUPCCode = @strUPCCode AND ItemLocation.intLocationId = @intLocationId;

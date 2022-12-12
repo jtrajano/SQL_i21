@@ -53,6 +53,7 @@ select
 			,ysnTimeOff
 			,strName 
 			,ysnOverride
+			,strSubject
 from
 (
 		select
@@ -111,6 +112,7 @@ from
 			,ysnTimeOff = convert(bit,0)
 			,strName = ISNULL(m.strName, n.strName)
 			,ysnOverride = a.ysnOverride
+			,strSubject = i.strSubject
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
@@ -183,6 +185,7 @@ union all
 			,ysnTimeOff = convert(bit,1)
 			,strName = ''
 			,ysnOverride = convert(bit,0)
+			,strSubject = ''
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId

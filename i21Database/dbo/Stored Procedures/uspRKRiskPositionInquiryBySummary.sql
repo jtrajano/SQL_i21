@@ -12,6 +12,7 @@
 	, @strPositionBy NVARCHAR(100)
 	, @dtmPositionAsOf DATETIME
 	, @strUomType NVARCHAR(100)
+	, @ysnQueryWithTotals BIT = 0
 
 AS
 
@@ -1874,7 +1875,7 @@ AS
 	SELECT 10 intRowNumber
 		, '2.Futures Required' COLLATE Latin1_General_CI_AS
 		, 'Futures Required' COLLATE Latin1_General_CI_AS Selection
-		, '4.Net Position' COLLATE Latin1_General_CI_AS PriceStatus
+		, '4.Net Position' COLLATE Latin1_General_CI_AS PriceStatus 
 		, strFutureMonth
 		, 'Net Position' COLLATE Latin1_General_CI_AS
 		, SUM(dblNoOfContract1) - SUM(dblNoOfContract)
@@ -2050,155 +2051,228 @@ AS
 			AND CONVERT(DATETIME, '01 ' + ft.strFutureMonth) >= CONVERT(DATETIME, '01 ' + @strParamFutureMonth)
 	) t
 
-	--INSERT INTO @ListFinal (intRowNumber
-	--	, strGroup
-	--	, Selection
-	--	, PriceStatus
-	--	, strFutureMonth
-	--	, strAccountNumber
-	--	, dblNoOfContract
-	--	, strTradeNo
-	--	, TransactionDate
-	--	, TranType
-	--	, CustVendor
-	--	, dblNoOfLot
-	--	, dblQuantity
-	--	, intOrderByHeading
-	--	, intContractHeaderId
-	--	, intFutOptTransactionHeaderId
-	--	, strProductType
-	--	, strProductLine
-	--	, strShipmentPeriod
-	--	, strLocation
-	--	, strOrigin
-	--	, intItemId
-	--	, strItemNo
-	--	, strItemDescription
-	--	, intBookId
-	--	, strBook
-	--	, intSubBookId
-	--	, strSubBook
-	--	, strCertificationName
-	--	, strCropYear
-	--)
-	--SELECT 12
-	--	, strGroup
-	--	, Selection
-	--	, PriceStatus
-	--	, 'Total' COLLATE Latin1_General_CI_AS
-	--	, strAccountNumber
-	--	, dblNoOfContract
-	--	, strTradeNo
-	--	, TransactionDate
-	--	, TranType
-	--	, CustVendor
-	--	, dblNoOfLot
-	--	, dblQuantity
-	--	, intOrderByHeading
-	--	, intContractHeaderId
-	--	, intFutOptTransactionHeaderId
-	--	, strProductType
-	--	, strProductLine
-	--	, strShipmentPeriod
-	--	, strLocation
-	--	, strOrigin
-	--	, intItemId
-	--	, strItemNo
-	--	, strItemDescription
-	--	, intBookId
-	--	, strBook
-	--	, intSubBookId
-	--	, strSubBook
-	--	, strCertificationName
-	--	, strCropYear
-	--FROM @ListFinal
-	--WHERE strAccountNumber <> 'Avg Long Price'
-	--ORDER BY intRowNumber
-	--	, CASE WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
-	--	, intOrderByHeading
-	--	, PriceStatus ASC
+	IF ISNULL(@ysnQueryWithTotals, 0) = 1
+	BEGIN 
+		INSERT INTO @ListFinal (intRowNumber
+			, strGroup
+			, Selection
+			, PriceStatus
+			, strFutureMonth
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intContractHeaderId
+			, intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		)
+		SELECT 12
+			, strGroup
+			, Selection
+			, PriceStatus
+			, 'Total' COLLATE Latin1_General_CI_AS
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intContractHeaderId
+			, intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		FROM @ListFinal
+		WHERE strAccountNumber NOT IN ('Avg Long Price', 'Net Position')
+		ORDER BY intRowNumber
+			, CASE WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
+			, intOrderByHeading
+			, PriceStatus ASC
 
-	--INSERT INTO @ListFinal (intRowNumber
-	--	, strGroup
-	--	, Selection
-	--	, PriceStatus
-	--	, strFutureMonth
-	--	, strAccountNumber
-	--	, dblNoOfContract
-	--	, strTradeNo
-	--	, TransactionDate
-	--	, TranType
-	--	, CustVendor
-	--	, dblNoOfLot
-	--	, dblQuantity
-	--	, intOrderByHeading
-	--	, intContractHeaderId
-	--	, intFutOptTransactionHeaderId
-	--	, strProductType
-	--	, strProductLine
-	--	, strShipmentPeriod
-	--	, strLocation
-	--	, strOrigin
-	--	, intItemId
-	--	, strItemNo
-	--	, strItemDescription
-	--	, intBookId
-	--	, strBook
-	--	, intSubBookId
-	--	, strSubBook
-	--	, strCertificationName
-	--	, strCropYear
-	--)
-	--SELECT 12 intRowNumber
-	--	, strGroup
-	--	, Selection
-	--	, PriceStatus
-	--	, strFutureMonth = 'Total' COLLATE Latin1_General_CI_AS
-	--	, strAccountNumber
-	--	, dblNoOfContract = CASE WHEN ISNULL(SUM(dblNoOfLot), 0) <> 0 THEN SUM(dblQuantity) / SUM(dblNoOfLot) ELSE 0 END
-	--	, '' strTradeNo
-	--	, '' TransactionDate
-	--	, '' TranType
-	--	, '' CustVendor
-	--	, dblNoOfLot = SUM(dblNoOfLot)
-	--	, dblQuantity = SUM(dblQuantity)
-	--	, NULL intOrderByHeading
-	--	, NULL intContractHeaderId
-	--	, NULL intFutOptTransactionHeaderId
-	--	, strProductType
-	--	, strProductLine
-	--	, strShipmentPeriod
-	--	, strLocation
-	--	, strOrigin
-	--	, intItemId
-	--	, strItemNo
-	--	, strItemDescription
-	--	, intBookId
-	--	, strBook
-	--	, intSubBookId
-	--	, strSubBook
-	--	, strCertificationName
-	--	, strCropYear
-	--FROM @ListFinal
-	--WHERE strAccountNumber = 'Avg Long Price'
-	--GROUP BY strGroup
-	--	, Selection
-	--	, PriceStatus
-	--	, strAccountNumber
-	--	, strProductType
-	--	, strProductLine
-	--	, strShipmentPeriod
-	--	, strLocation
-	--	, strOrigin
-	--	, intItemId
-	--	, strItemNo
-	--	, strItemDescription
-	--	, intBookId
-	--	, strBook
-	--	, intSubBookId
-	--	, strSubBook
-	--	, strCertificationName
-	--	, strCropYear
+		INSERT INTO @ListFinal (intRowNumber
+			, strGroup
+			, Selection
+			, PriceStatus
+			, strFutureMonth
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intContractHeaderId
+			, intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		)
+		SELECT 12 intRowNumber
+			, strGroup
+			, Selection
+			, PriceStatus
+			, strFutureMonth = 'Total' COLLATE Latin1_General_CI_AS
+			, strAccountNumber
+			, dblNoOfContract = CASE WHEN ISNULL(SUM(dblNoOfLot), 0) <> 0 THEN SUM(dblQuantity) / SUM(dblNoOfLot) ELSE 0 END
+			, '' strTradeNo
+			, '' TransactionDate
+			, '' TranType
+			, '' CustVendor
+			, dblNoOfLot = SUM(dblNoOfLot)
+			, dblQuantity = SUM(dblQuantity)
+			, NULL intOrderByHeading
+			, NULL intContractHeaderId
+			, NULL intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName 
+			, strCropYear
+		FROM @ListFinal
+		WHERE strAccountNumber = 'Avg Long Price'
+		GROUP BY strGroup
+			, Selection
+			, PriceStatus
+			, strAccountNumber
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+
+		-- NET POSITION TOTALS
+		INSERT INTO @ListFinal (intRowNumber
+			, strGroup
+			, Selection
+			, PriceStatus
+			, strFutureMonth
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intContractHeaderId
+			, intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		)
+		SELECT 12
+			, strGroup
+			, Selection
+			, PriceStatus
+			, 'Total' COLLATE Latin1_General_CI_AS
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intContractHeaderId
+			, intFutOptTransactionHeaderId
+			, strProductType
+			, strProductLine
+			, strShipmentPeriod
+			, strLocation
+			, strOrigin
+			, intItemId
+			, strItemNo
+			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, strCertificationName
+			, strCropYear
+		FROM @ListFinal
+		WHERE strAccountNumber = 'Net Position'
+		AND strFutureMonth <> 'Total'
+		ORDER BY intRowNumber
+			, CASE WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, '01 ' + strFutureMonth) END
+			, intOrderByHeading
+			, PriceStatus ASC
+	END
 
 	IF (ISNULL(@intBookId, 0) = 0)
 	BEGIN
@@ -2469,8 +2543,9 @@ AS
 
 	SELECT DISTINCT strFutureMonth INTO #MissingMonths FROM @MonthOrder
 	SELECT DISTINCT strFutureMonth INTO #MonthList FROM @ListFinal WHERE intRowNumber = @FirstRow
-
-	--IF EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
+	
+	--IF	ISNULL(@ysnQueryWithTotals, 0) = 1
+	--	AND EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
 	--BEGIN
 	--	INSERT INTO @MonthOrder (intRowNumber
 	--		, strGroup
@@ -2540,6 +2615,7 @@ AS
 	--	) b
 	--	WHERE intRowNumber = @FirstRow
 	--END
+
 	DROP TABLE #MissingMonths
 	DROP TABLE #MonthList
 
@@ -2568,7 +2644,7 @@ AS
 		, strOrigin
 		, intItemId
 		, strItemNo
-		, strItemDescription
+		, strItemDescription 
 		, intBookId
 		, strBook
 		, intSubBookId

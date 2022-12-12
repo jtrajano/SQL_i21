@@ -78,7 +78,6 @@
 	[ysnRoutingAlert]			  BIT             DEFAULT 0 NOT NULL,
 	[ysnLostCustomer]			  BIT             DEFAULT 0 NOT NULL,
     [ysnRequirePump]			  BIT             DEFAULT 0 NOT NULL,
-    [ysnRequireClock]			  BIT             DEFAULT 1 NOT NULL,
 	[intLostCustomerReasonId]     INT             NULL,
 	[dtmLostCustomerDate]        DATETIME        NULL,
 	[strFacilityNumber]         NVARCHAR (30)   COLLATE Latin1_General_CI_AS NULL,
