@@ -5,7 +5,7 @@ SELECT 0 intPaymentMethodID,
 	   'N/A' strDescription,
 	   NULL strPaymentMethodCode,
 	   CAST(1 AS BIT) ysnActive,
-	   '' strPrefix,
+	   NULL strPrefix,
 	   1 intNumber,
 	   1 intConcurrencyId
 
