@@ -24,6 +24,22 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') 
+	, strValue = vts.strVendor
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The payment control of ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') + ' "' + vts.strVendor + '" is inactive.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(v.ysnPymtCtrlActive, 0) = 0
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
 	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') 
 	, strValue = vts.strCustomerLocation
 	, strLogLevel = 'Error'
@@ -134,6 +150,7 @@ FROM tblApiSchemaTransformBuybackProgram vts
 JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND v.ysnPymtCtrlActive = 1
 GROUP BY v.intEntityId, vts.strVendor, vs.intVendorSetupId, vts.strProgramName
 
 INSERT INTO tblBBProgram (
@@ -174,6 +191,7 @@ FROM tblBBProgram xp
 JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
 JOIN vyuAPVendor v ON v.intEntityId = xvs.intEntityId
 JOIN tblApiSchemaTransformBuybackProgram vts ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+JOIN @UniqueVendors uv ON uv.intEntityId = v.intEntityId
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND ((NULLIF(vts.strVendorProgram, '') IS NOT NULL AND vts.strVendorProgram = xp.strVendorProgramId)
 	OR (NULLIF(vts.strVendorProgram, '') IS NULL AND vts.strProgramName = xp.strProgramName))
@@ -414,12 +432,12 @@ CROSS APPLY (
 	JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
 	WHERE xr.intCustomerLocationId = cpr.intEntityLocationId
 		AND ((xr.intItemId = cpr.intItemId AND cpr.intItemId IS NOT NULL)
-			OR (xr.intUnitMeasureId = cpr.intUnitMeasureId AND cpr.intUnitMeasureId IS NOT NULL))
-		AND xr.dtmBeginDate <= cpr.dtmEndDate AND cpr.dtmBeginDate <= xr.dtmEndDate
+			OR (xr.intUnitMeasureId = cpr.intUnitMeasureId AND cpr.intUnitMeasureId IS NOT NULL AND cpr.intItemId IS NULL))
+		AND cpr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= cpr.dtmEndDate
 		AND NOT (
 			xr.intCustomerLocationId = cpr.intEntityLocationId
 			AND ((xr.intUnitMeasureId = cpr.intUnitMeasureId) OR (xr.intItemId = cpr.intItemId))
-			AND xr.dtmBeginDate = cpr.dtmBeginDate AND xr.dtmEndDate = cpr.dtmEndDate
+			AND cpr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= cpr.dtmEndDate
 		)
 ) r
 
@@ -462,44 +480,66 @@ SELECT
 	, strStatus = 'Failed'
 	, intRowNo = pr.intRowNumber
 	, strMessage = 'The date range from ' + CONVERT(NVARCHAR(100), pr.dtmBeginDate, 101) + ' to ' + CONVERT(NVARCHAR(100), pr.dtmEndDate, 101)
-		+ ' overlaps with existing rates for the customer location ' + el.strLocationName + ' of the vendor ' + v.strName + ' in this file.'
+		+ ' overlaps with existing rates for the customer location ' + el.strLocationName + ' of the vendor ' + v.strName + ' at line #' + CAST(f.intRowNumber AS NVARCHAR(50)) + ' in this file.'
 	, strAction = 'Skipped'
 FROM @CreatedProgramRates pr
 JOIN vyuAPVendor v ON v.intEntityId = pr.intEntityId
 JOIN tblEMEntityLocation el ON el.intEntityLocationId = pr.intEntityLocationId
 	AND el.intEntityId = pr.intEntityId
-WHERE EXISTS (
-	SELECT *
+OUTER APPLY (
+	SELECT TOP 1 xpr.intRowNumber
 	FROM @CreatedProgramRates xpr
-	WHERE xpr.intRowNumber > pr.intRowNumber
+	WHERE xpr.intRowNumber < pr.intRowNumber
 		AND xpr.intEntityId = pr.intEntityId
-		AND ((xpr.intUnitMeasureId = pr.intUnitMeasureId AND xpr.intUnitMeasureId IS NOT NULL)
+		AND xpr.intEntityLocationId = pr.intEntityLocationId
+		AND ((xpr.intUnitMeasureId = pr.intUnitMeasureId AND xpr.intUnitMeasureId IS NOT NULL AND xpr.intItemId IS NULL)
 			OR (xpr.intItemId = pr.intItemId AND xpr.intItemId IS NOT NULL))
-		AND xpr.dtmBeginDate <= pr.dtmEndDate AND pr.dtmBeginDate <= xpr.dtmEndDate
+		AND (pr.dtmBeginDate <= xpr.dtmEndDate AND xpr.dtmBeginDate <= pr.dtmEndDate)
+) f
+WHERE NOT EXISTS (
+	SELECT TOP 1 1
+	FROM tblBBRate xr
+	JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
+	JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
+	JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+	JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
+	JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
+	WHERE xr.intCustomerLocationId = pr.intEntityLocationId
+		AND ((xr.intUnitMeasureId = pr.intUnitMeasureId) OR (xr.intItemId = pr.intItemId))
+		AND pr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= pr.dtmEndDate
+		AND xr.guiApiUniqueId = @guiApiUniqueId
+) AND f.intRowNumber IS NOT NULL
+
+DECLARE @CreatedProgramRatesOriginal TABLE(
+	intProgramChargeId INT,
+	strCharge NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+	intVendorSetupId INT,
+	intEntityId INT,
+	intProgramId INT,
+	intEntityLocationId INT NULL,
+	intItemId INT NULL,
+	intUnitMeasureId INT NULL,
+	dtmBeginDate DATETIME NULL,
+	dtmEndDate DATETIME NULL,
+	dblRate NUMERIC(38, 20),
+	intRowNumber INT
 )
-	AND NOT EXISTS (
-		SELECT TOP 1 1
-		FROM tblBBRate xr
-		JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
-		JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
-		JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
-		JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
-		JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
-		WHERE xr.intCustomerLocationId = pr.intEntityLocationId
-			AND ((xr.intUnitMeasureId = pr.intUnitMeasureId) OR (xr.intItemId = pr.intItemId))
-			AND xr.dtmBeginDate = pr.dtmBeginDate AND xr.dtmEndDate = pr.dtmEndDate
-	)
+
+INSERT INTO @CreatedProgramRatesOriginal
+SELECT * FROM @CreatedProgramRates
+ORDER BY intRowNumber DESC
 
 DELETE pr
 FROM @CreatedProgramRates pr
 WHERE EXISTS (
 	SELECT *
-	FROM @CreatedProgramRates xpr
-	WHERE xpr.intRowNumber > pr.intRowNumber
+	FROM @CreatedProgramRatesOriginal xpr
+	WHERE xpr.intRowNumber < pr.intRowNumber
 		AND xpr.intEntityId = pr.intEntityId
-		AND ((xpr.intUnitMeasureId = pr.intUnitMeasureId AND xpr.intUnitMeasureId IS NOT NULL)
+		AND xpr.intEntityLocationId = pr.intEntityLocationId
+		AND ((xpr.intUnitMeasureId = pr.intUnitMeasureId AND xpr.intUnitMeasureId IS NOT NULL AND xpr.intItemId IS NULL)
 			OR (xpr.intItemId = pr.intItemId AND xpr.intItemId IS NOT NULL))
-		AND xpr.dtmBeginDate <= pr.dtmEndDate AND pr.dtmBeginDate <= xpr.dtmEndDate
+		AND pr.dtmBeginDate <= xpr.dtmEndDate AND xpr.dtmBeginDate <= pr.dtmEndDate
 )
 
 INSERT INTO tblBBRate (
@@ -536,8 +576,8 @@ WHERE NOT (r.intEntityLocationId IS NULL AND r.intItemId IS NULL AND r.intUnitMe
 		JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
 		JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
 		WHERE xr.intCustomerLocationId = r.intEntityLocationId
-			AND ((xr.intUnitMeasureId = r.intUnitMeasureId AND r.intUnitMeasureId IS NOT NULL) OR (xr.intItemId = r.intItemId AND r.intItemId IS NOT NULL))
-			AND xr.dtmBeginDate <= r.dtmEndDate AND r.dtmBeginDate <= xr.dtmEndDate
+			AND ((xr.intUnitMeasureId = r.intUnitMeasureId AND r.intUnitMeasureId IS NOT NULL AND r.intItemId IS NULL) OR (xr.intItemId = r.intItemId AND r.intItemId IS NOT NULL))
+			AND r.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= r.dtmEndDate
 	)
 
 UPDATE r
