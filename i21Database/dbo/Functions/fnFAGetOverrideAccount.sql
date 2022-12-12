@@ -34,22 +34,40 @@ BEGIN
 	SELECT @intCompanyLocationId = intCompanyLocationId FROM tblFAFixedAsset WHERE intAssetId = @intAssetId
 	SELECT @intLocationSegmentId = intProfitCenter, @intCompanySegmentId = intCompanySegment FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
 
-	SELECT @strNewAccountId = dbo.fnGLGetOverrideAccountBySegment(@intAccountId, @intLocationSegmentId, NULL, @intCompanySegmentId)
-	SELECT @intNewAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewAccountId
+	IF (@intLocationSegmentId IS NULL)
+		SELECT @intLocationSegmentId = intLocationSegmentId FROM tblGLAccount WHERE intAccountId = @intAccountId
 
-	IF (@intNewAccountId IS NULL)
+	IF(@intCompanySegmentId IS NULL)
 	BEGIN
-		SET @strError =  @strNewAccountId + ' is not an existing override account for ' +
-			CASE
-				WHEN @intTransactionType = 1 THEN 'Asset Account' COLLATE Latin1_General_CI_AS
-				WHEN @intTransactionType = 2 THEN 'Offset Account' COLLATE Latin1_General_CI_AS
-				WHEN @intTransactionType = 3 THEN 'Depreciation Expense Account' COLLATE Latin1_General_CI_AS
-				WHEN @intTransactionType = 4 THEN 'Accumulated Deperciation Account' COLLATE Latin1_General_CI_AS
-				WHEN @intTransactionType = 5 THEN 'Gain/Loss Account' COLLATE Latin1_General_CI_AS
-				WHEN @intTransactionType = 6 THEN 'Sales Offset Account' COLLATE Latin1_General_CI_AS
-				WHEN @intTransactionType = 7 THEN 'Realized Gain/Loss Account' COLLATE Latin1_General_CI_AS
-			END
+		SELECT TOP 1 @intCompanySegmentId = C.intAccountSegmentId
+		FROM tblGLAccount A
+		JOIN tblGLAccountSegmentMapping B ON B.intAccountId = A.intAccountId
+		JOIN tblGLAccountSegment C ON C.intAccountSegmentId = B.intAccountSegmentId
+		JOIN tblGLAccountStructure D ON D.intAccountStructureId = C.intAccountStructureId
+		WHERE A.intAccountId = @intAccountId AND D.intStructureType = 6
 	END
+
+	SELECT @strNewAccountId = dbo.fnGLGetOverrideAccountBySegment(@intAccountId, @intLocationSegmentId, NULL, @intCompanySegmentId)
+	IF (@strNewAccountId IS NOT NULL)
+	BEGIN
+		SELECT @intNewAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewAccountId
+
+		IF (@intNewAccountId IS NULL)
+		BEGIN
+			SET @strError =  @strNewAccountId + ' is not an existing override account for ' +
+				CASE
+					WHEN @intTransactionType = 1 THEN 'Asset Account' COLLATE Latin1_General_CI_AS
+					WHEN @intTransactionType = 2 THEN 'Offset Account' COLLATE Latin1_General_CI_AS
+					WHEN @intTransactionType = 3 THEN 'Depreciation Expense Account' COLLATE Latin1_General_CI_AS
+					WHEN @intTransactionType = 4 THEN 'Accumulated Depreciation Account' COLLATE Latin1_General_CI_AS
+					WHEN @intTransactionType = 5 THEN 'Gain/Loss Account' COLLATE Latin1_General_CI_AS
+					WHEN @intTransactionType = 6 THEN 'Sales Offset Account' COLLATE Latin1_General_CI_AS
+					WHEN @intTransactionType = 7 THEN 'Realized Gain/Loss Account' COLLATE Latin1_General_CI_AS
+				END
+		END
+	END
+	ELSE
+		SET @intNewAccountId = @intAccountId
 
 	INSERT INTO @tbl (
 		 intAssetId
