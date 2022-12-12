@@ -873,6 +873,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetailWithCurrencies.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAllocatedContractRiskReport.sql" />
     <Build Include="dbo\Views\vyuAPPaymentMethodBlank.sql" />
+    <Build Include="dbo\Views\vyuLGLoadOpenContractsWithAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
