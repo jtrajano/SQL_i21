@@ -123,6 +123,25 @@ BEGIN
 		LEFT JOIN tblSMCurrency C ON C.strCurrency = VL.strCurrency
 		LEFT JOIN tblAPVendor V ON V.strVendorId = VL.strVendorLink
 
+		DECLARE @ysnDefaultPayTo AS BIT = 0, @ysnDefaultShipFrom AS BIT = 0
+
+		SELECT @ysnDefaultPayTo = ysnDefaultPayTo   
+		,@ysnDefaultShipFrom = ysnDefaultShipFrom     
+		FROM #tmpApiSchemaVendorLocationTop  
+		
+		IF (@ysnDefaultPayTo = 1 OR @ysnDefaultShipFrom = 1)
+			BEGIN  
+			UPDATE tblAPVendor SET intBillToId = intDefaultPayTo, intShipFromId = intDefaultShipFrom  
+			FROM tblAPVendor v INNER JOIN (  
+				SELECT el.intEntityId, vl.strEntityNo  
+				,CASE WHEN ISNULL(@ysnDefaultPayTo, 0) = 1 THEN el.intEntityLocationId ELSE v.intBillToId END [intDefaultPayTo]  
+				,CASE WHEN ISNULL(@ysnDefaultShipFrom, 0) = 1 THEN el.intEntityLocationId ELSE v.intShipFromId END [intDefaultShipFrom]  
+				FROM tblEMEntityLocation el  
+				INNER JOIN #tmpApiSchemaVendorLocationTop vl ON el.strLocationName = vl.strLocationName  
+				INNER JOIN tblAPVendor v ON vl.strEntityNo = v.strVendorId) loc   
+			ON v.intEntityId = loc.intEntityId WHERE v.strVendorId = loc.strEntityNo  
+		END
+
 		DELETE FROM #tmpApiSchemaVendorLocation WHERE intKey IN (SELECT intKey FROM #tmpApiSchemaVendorLocationTop)
 	END
 END
