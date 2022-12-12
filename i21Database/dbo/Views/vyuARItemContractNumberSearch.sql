@@ -33,7 +33,7 @@ INNER JOIN (
 	AND ISNULL(ARID.intItemId, 0) <> 0
 	LEFT JOIN tblARInvoice ARI
 	ON ARID.intInvoiceId = ARI.intInvoiceId
-	WHERE CTICD.intContractStatusId IN (1, 4)
+	WHERE CTICD.intContractStatusId IN (1, 4, 5)
 	GROUP BY CTICD.intItemContractHeaderId, CTICD.intItemId, ICC.intCategoryId, ICC.strCategoryCode, ARI.strInvoiceNumber
 
 	UNION ALL
