@@ -67,8 +67,8 @@ SELECT
 	strSubBook							=	CAST(A.strSubBook AS NVARCHAR(50)),
 	intMarketZoneId						=	H.intMarketZoneId,
 	/*Others*/		
-	strStorageLocation					=	CAST(A.strStorageLocation AS NVARCHAR(50)),
-	intStorageLocationId				=	D.intStorageLocationId,
+	strSubLocationName					=	CAST(A.strStorageLocation AS NVARCHAR(50)),
+	intSubLocationId					=	D.intCompanyLocationSubLocationId,
 	strLotNumber						=	CAST(A.strLotNumber AS NVARCHAR(50)),
 	intLotId							=	E.intLotId,
 	/*Not exists in i21*/		
@@ -100,7 +100,7 @@ LEFT JOIN tblQMGardenMark G ON G.strGardenMark = A.strPreInvoiceGarden
 LEFT JOIN tblARMarketZone H ON H.strMarketZoneCode = A.strChannel
 LEFT JOIN tblQMCatalogueType I ON I.strCatalogueType = A.strCatalogueType
 OUTER APPLY (
-	SELECT TOP 1 intStorageLocationId FROM tblICStorageLocation sl WHERE A.strStorageLocation = sl.strName
+	SELECT TOP 1 intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation sl WHERE A.strStorageLocation = strSubLocationName
 ) D
 
 DECLARE @voucherPayables AS VoucherPayable
@@ -118,7 +118,7 @@ INSERT INTO @voucherPayables
     ,dblQuantityToBill
     ,dblCost
 	,strVendorOrderNumber
-	,intStorageLocationId	
+	,intSubLocationId	
 	,intLotId
 	,intSaleYear						
 	,strSaleNumber						
@@ -153,7 +153,7 @@ SELECT
     ,dblQuantityToBill
     ,dblCost
 	,strVendorOrderNumber
-	,intStorageLocationId
+	,intSubLocationId
 	,intLotId
 	,intSaleYear						
 	,strSaleNumber						
