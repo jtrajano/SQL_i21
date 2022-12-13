@@ -81,8 +81,8 @@ BEGIN
 							WHERE intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetail
 						) TimeEntryPeriodDetail
 						OUTER APPLY(
-								SELECT	 TOP 1 intEntityId			  = CoworkerGoals.intEntityId
-											  ,ysnActive				  = CoworkerGoals.ysnActive 
+								SELECT	 TOP 1 intEntityId				  = CoworkerGoals.intEntityId
+											  ,ysnActive				  = CoworkerGoalDetail.ysnActive 
 								FROM tblHDCoworkerGoal CoworkerGoals
 										INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
 								ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalId
