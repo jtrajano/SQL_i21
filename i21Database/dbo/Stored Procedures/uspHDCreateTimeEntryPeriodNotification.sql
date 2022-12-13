@@ -69,12 +69,20 @@ FROM vyuHDAgentDetail a
 ON a.intEntityId = b.intEntityId
 	 INNER JOIN tblHDCoworkerGoal c
 ON c.intEntityId = a.intEntityId 
+	 CROSS APPLY
+	 (
+		SELECT TOP 1 ysnActive = CoworkerGoalDetail.ysnActive
+		FROM tblHDCoworkerGoalDetail CoworkerGoalDetail
+		WHERE CoworkerGoalDetail.intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId AND
+			  CoworkerGoalDetail.intCoworkerGoalId = c.intCoworkerGoalId
+	 ) CoworkerGoalDetail
 WHERE ISNULL(a.strEmail, '') <> '' AND 
 	  a.ysnVendor = CONVERT(BIT, 0) AND
 	  a.ysnTimeEntryExempt = CONVERT(BIT, 0) AND
       c.strFiscalYear = DATEPART(YEAR, GETDATE()) AND
-	  c.ysnActive = CONVERT(bit, 1) AND
-	  a.ysnDisabled = CONVERT(BIT, 0)
+	  --c.ysnActive = CONVERT(bit, 1) AND
+	  a.ysnDisabled = CONVERT(BIT, 0) AND
+	  CoworkerGoalDetail.ysnActive = CONVERT(BIT, 1)
 
 OPEN EmployeeLoop
 FETCH NEXT FROM EmployeeLoop INTO @EntityId

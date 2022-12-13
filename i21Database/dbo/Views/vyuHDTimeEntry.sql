@@ -78,7 +78,7 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 	OUTER APPLY
 	(
 		SELECT	 TOP 1 intEntityId	= CoworkerGoals.intEntityId
-					  ,ysnActive	= CoworkerGoals.ysnActive 
+					  ,ysnActive	= CoworkerGoalDetail.ysnActive 
 		FROM tblHDCoworkerGoal CoworkerGoals
 				INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
 		ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalId
