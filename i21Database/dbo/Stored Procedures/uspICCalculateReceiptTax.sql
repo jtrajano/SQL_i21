@@ -353,10 +353,15 @@ BEGIN
 						ReceiptItem.dblOpenReceive 
 				END 
 		 , ysnGas = 
-				CASE 
-					WHEN Item.intCategoryId = TCR.intGasolineItemCategoryId THEN CAST(1 AS BIT) 
-					ELSE CAST(0 AS BIT) 
-				END
+				CASE WHEN Item.intCategoryId IN 
+				(SELECT intGasolineItemCategoryId 
+				FROM tblSMTaxCodeRate 
+				WHERE intTaxCodeId = TC.intTaxCodeId 
+						AND dtmEffectiveDate = (SELECT TOP 1 dtmEffectiveDate
+							FROM tblSMTaxCodeRate 
+							WHERE intTaxCodeId = TC.intTaxCodeId
+								AND dtmEffectiveDate <= Receipt.dtmReceiptDate)) 
+				THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 		, dtmDate = Receipt.dtmReceiptDate
 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
