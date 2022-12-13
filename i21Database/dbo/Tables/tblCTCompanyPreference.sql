@@ -129,6 +129,7 @@
 	ysnEnableMTMPoint BIT NOT NULL DEFAULT 0,
 	ysnEnableHedgingInAssignDerivatives BIT NOT NULL DEFAULT 0,
 	ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost BIT NOT NULL DEFAULT 0,
+	intTransactionForexId int null default 1,
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblICUnitMeasure_intCleanCostUOMId_intUnitMeasureId] FOREIGN KEY ([intCleanCostUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
