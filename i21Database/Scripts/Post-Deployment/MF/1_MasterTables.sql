@@ -189,6 +189,24 @@ BEGIN
     VALUES(14,'Cancel')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 18)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(18,'Recall Requested')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 19)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(19,'Recall Confirmed')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 20)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(20,'Recall Rejected')
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFReleaseStatus
