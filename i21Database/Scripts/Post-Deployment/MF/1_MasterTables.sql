@@ -4490,11 +4490,13 @@ GO
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFWorkOrderStatus
-		WHERE strName = 'Partially Consumed'
+		WHERE intStatusId=21
 		)
 BEGIN
+	DELETE FROM  tblMFWorkOrderStatus WHERE strName=	'Partially Consumed'
+
 	INSERT INTO tblMFWorkOrderStatus
-	SELECT 18
+	SELECT 21
 		,'Partially Consumed'
 		,NULL
 		,NULL
