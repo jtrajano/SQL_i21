@@ -18,6 +18,7 @@ CREATE TABLE [dbo].[tblMBILDeliveryDetail]
 	[intInvoiceId] [int] NULL,
 	[dblPrice] [numeric](18, 6) NULL,
 	[dblPercentFull] DECIMAL(18, 6) NULL,
+	[intDispatchOrderDetailId] int NULL,
 	[intConcurrencyId] [int] DEFAULT(1) NULL,
  CONSTRAINT [PK_tblMBILLoadDeliveryDetail] PRIMARY KEY CLUSTERED ([intDeliveryDetailId]),
  CONSTRAINT [FK_tblMBILLoadDeliveryDetail_tblMBILDeliveryHeader] FOREIGN KEY ([intDeliveryHeaderId]) REFERENCES [tblMBILDeliveryHeader]([intDeliveryHeaderId])
