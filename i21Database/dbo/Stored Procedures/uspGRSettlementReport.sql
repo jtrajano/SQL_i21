@@ -17,6 +17,7 @@ DECLARE @intBankAccountId AS INT
 	,@strTransactionId AS NVARCHAR(MAX)
 	,@intPaymentKey INT
 	,@strPaymentNo AS NVARCHAR(40)
+	,@strReportLogId AS NVARCHAR(100)
 
 DECLARE @xmlDocumentId AS INT
 
@@ -153,6 +154,20 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH
 	,[datatype] NVARCHAR(50)
 )
 
+INSERT INTO @temp_xml_table
+SELECT *
+FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2) WITH 
+(
+	[fieldname] NVARCHAR(50)
+	,condition NVARCHAR(20)
+	,[from] NVARCHAR(4000)
+	,[to] NVARCHAR(4000)
+	,[join] NVARCHAR(10)
+	,[begingroup] NVARCHAR(50)
+	,[endgroup] NVARCHAR(50)
+	,[datatype] NVARCHAR(50)
+)
+
 SELECT @intBankAccountId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'intBankAccountId'
@@ -160,6 +175,22 @@ WHERE [fieldname] = 'intBankAccountId'
 SELECT @strTransactionId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strTransactionId'
+
+SELECT @strReportLogId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strReportLogId'
+
+IF @strReportLogId IS NOT NULL
+BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	BEGIN
+		RETURN
+	END
+	ELSE
+	BEGIN
+		INSERT INTO tblSRReportLog (strReportLogId, dtmDate) VALUES (@strReportLogId, GETUTCDATE())
+	END
+END
 
 SET @strTransactionId = CASE 
 							 WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL
