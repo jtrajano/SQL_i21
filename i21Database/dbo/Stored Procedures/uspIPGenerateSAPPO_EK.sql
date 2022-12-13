@@ -65,6 +65,12 @@ BEGIN TRY
 		,@intBatchId INT
 	DECLARE @strDetailRowState NVARCHAR(50)
 		,@strMarketZoneCode NVARCHAR(50)
+		,@strTeaOrigin NVARCHAR(50)
+		,@strISOCode NVARCHAR(3)
+		,@strTeaLingoItem NVARCHAR(50)
+		,@strPlant NVARCHAR(50)
+		,@dtmProductionBatch DATETIME
+		,@dtmExpiration DATETIME
 	DECLARE @intPOFeedId INT
 	DECLARE @ContractFeedId TABLE (intContractFeedId INT)
 	DECLARE @tmp INT
@@ -291,6 +297,12 @@ BEGIN TRY
 
 			SELECT @strDetailRowState = NULL
 				,@strMarketZoneCode = NULL
+				,@strTeaOrigin = NULL
+				,@strISOCode = NULL
+				,@strTeaLingoItem = NULL
+				,@strPlant = NULL
+				,@dtmProductionBatch = NULL
+				,@dtmExpiration = NULL
 
 			SELECT @strContractNumber = strContractNumber
 				,@intContractSeq = intContractSeq
@@ -439,11 +451,11 @@ BEGIN TRY
 				BEGIN
 					SELECT @strError = @strError + 'Lead Time cannot be blank. '
 				END
-			END
 
-			IF ISNULL(@strContractNumber, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'Contract No. cannot be blank. '
+				IF ISNULL(@strContractNumber, '') = ''
+				BEGIN
+					SELECT @strError = @strError + 'Contract No. cannot be blank. '
+				END
 			END
 
 			IF @strDetailRowState <> 'C'
@@ -537,7 +549,10 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<ERPContractNo>' + ISNULL(@strERPContractNumber, '') + '</ERPContractNo>'
 
-			SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNumber, '') + '</ContractNo>'
+			IF ISNULL(@strMarketZoneCode, '') = 'AUC'
+				SELECT @strItemXML += '<ContractNo>' + '' + '</ContractNo>'
+			ELSE
+				SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNumber, '') + '</ContractNo>'
 
 			SELECT @strItemXML += '<SequenceNo>' + ISNULL(LTRIM(@intContractSeq), '') + '</SequenceNo>'
 
@@ -593,6 +608,39 @@ BEGIN TRY
 			IF ISNULL(@strBatchId, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Batch Id cannot be blank. '
+			END
+
+			SELECT @strTeaOrigin = B.strTeaOrigin
+				,@strTeaLingoItem = B.strItemNo
+				,@strPlant = CL.strVendorRefNoPrefix
+				,@dtmProductionBatch = B.dtmProductionBatch
+				,@dtmExpiration = B.dtmExpiration
+			FROM vyuMFBatch B WITH (NOLOCK)
+			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
+			WHERE B.intBatchId = @intBatchId
+
+			SELECT @strISOCode = strISOCode
+			FROM dbo.tblSMCountry C WITH (NOLOCK)
+			WHERE C.strCountry = @strTeaOrigin
+
+			IF ISNULL(@strTeaLingoItem, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Batch - Item cannot be blank. '
+			END
+
+			IF ISNULL(@strPlant, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Batch - MU Location cannot be blank. '
+			END
+
+			IF @dtmProductionBatch IS NULL
+			BEGIN
+				SELECT @strError = @strError + 'Batch - Production Date cannot be blank. '
+			END
+
+			IF @dtmExpiration IS NULL
+			BEGIN
+				SELECT @strError = @strError + 'Batch - Expiration Date cannot be blank. '
 			END
 
 			IF @strError <> ''
@@ -655,10 +703,10 @@ BEGIN TRY
 				+ '<LeafStyle>' + ISNULL(B.strLeafStyle, '') + '</LeafStyle>'
 				+ '<MixingUnit>' + ISNULL(B.strMixingUnitLocation, '') + '</MixingUnit>'
 				+ '<NumberOfPackagesBought>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblPackagesBought, 0))) + '</NumberOfPackagesBought>'
-				+ '<OriginOfTea>' + ISNULL(B.strTeaOrigin, '') + '</OriginOfTea>'
+				+ '<OriginOfTea>' + ISNULL(@strISOCode, '') + '</OriginOfTea>'
 				+ '<OriginalTeaLingoItem>' + ISNULL(I.strItemNo, '') + '</OriginalTeaLingoItem>'
 				+ '<PackagesPerPallet>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblPackagesPerPallet, 0))) + '</PackagesPerPallet>'
-				+ '<Plant>' + ISNULL(B.strPlant, '') + '</Plant>'
+				+ '<Plant>' + ISNULL(CL.strVendorRefNoPrefix, '') + '</Plant>'
 				+ '<TotalQuantity>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTotalQuantity, 0))) + '</TotalQuantity>'
 				+ '<SampleBoxNo>' + ISNULL(B.strSampleBoxNumber, '') + '</SampleBoxNo>'
 				+ '<SellingPrice>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblSellingPrice, 0))) + '</SellingPrice>'
@@ -715,6 +763,7 @@ BEGIN TRY
 			LEFT JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = B.intOriginalItemId
 			LEFT JOIN dbo.tblQMGardenMark GM WITH (NOLOCK) ON GM.intGardenMarkId = B.intGardenMarkId
 			LEFT JOIN dbo.tblICItem I1 WITH (NOLOCK) ON I1.intItemId = B.intTealingoItemId
+			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
 			WHERE B.intBatchId = @intBatchId
 
 			IF ISNULL(@strBatchXML, '') = ''

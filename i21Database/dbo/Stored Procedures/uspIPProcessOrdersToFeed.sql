@@ -47,7 +47,7 @@ BEGIN TRY
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	'Cash',						LD.dblUnitPrice,			PUOM.strUnitMeasure,
 				CU.strCurrency,			NULL,						NULL,						NULL,
-				NULL,					PG.strName,					NULL,						CL.strOregonFacilityNumber,
+				NULL,					CL.strLocationNumber,		NULL,						CL1.strOregonFacilityNumber,
 				NULL,					NULL,						NULL,						B.strBatchId,
 				@intEntityId,			@strRowState
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
@@ -64,9 +64,10 @@ BEGIN TRY
 		LEFT JOIN dbo.tblSMCurrency CU WITH (NOLOCK) ON CU.intCurrencyID = LD.intPriceCurrencyId
 		JOIN dbo.tblMFBatch B WITH (NOLOCK) ON B.intBatchId = LD.intBatchId
 		LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intBuyingCenterLocationId
+		LEFT JOIN dbo.tblSMCompanyLocation CL1 WITH (NOLOCK) ON CL1.intCompanyLocationId = B.intMixingUnitLocationId
 		JOIN dbo.tblQMSample S WITH (NOLOCK) ON S.intSampleId = B.intSampleId
 		LEFT JOIN dbo.tblAPVendor VE WITH (NOLOCK) ON VE.intEntityId = S.intEntityId
-		LEFT JOIN dbo.tblSMPurchasingGroup PG WITH (NOLOCK) ON PG.intPurchasingGroupId = S.intPurchaseGroupId
+		--LEFT JOIN dbo.tblSMPurchasingGroup PG WITH (NOLOCK) ON PG.intPurchasingGroupId = S.intPurchaseGroupId
 		WHERE LD.intLoadDetailId = @intLoadDetailId
 	END
 	ELSE
@@ -101,7 +102,7 @@ BEGIN TRY
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	ISNULL(PT.strPricingType, 'Cash'),LD.dblUnitPrice,		PUOM.strUnitMeasure,
 				CU.strCurrency,			CD.dtmStartDate,			CD.dtmEndDate,				CD.dtmPlannedAvailabilityDate,
-				CD.dtmUpdatedAvailabilityDate,PG.strName,			CD.strPackingDescription,	CL.strOregonFacilityNumber,
+				CD.dtmUpdatedAvailabilityDate,CL.strLocationNumber,	CD.strPackingDescription,	CL1.strOregonFacilityNumber,
 				LP.strCity,				DP.strCity,					@dblLeadTime,				B.strBatchId,
 				@intEntityId,			@strRowState
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
@@ -118,11 +119,12 @@ BEGIN TRY
 		LEFT JOIN dbo.tblSMCurrency CU WITH (NOLOCK) ON CU.intCurrencyID = LD.intPriceCurrencyId
 		JOIN dbo.tblMFBatch B WITH (NOLOCK) ON B.intBatchId = LD.intBatchId
 		LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intBuyingCenterLocationId
+		LEFT JOIN dbo.tblSMCompanyLocation CL1 WITH (NOLOCK) ON CL1.intCompanyLocationId = B.intMixingUnitLocationId
 		JOIN dbo.tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN dbo.tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN dbo.tblAPVendor VE WITH (NOLOCK) ON VE.intEntityId = CH.intEntityId
 		LEFT JOIN dbo.tblCTPricingType PT WITH (NOLOCK) ON PT.intPricingTypeId = CD.intPricingTypeId
-		LEFT JOIN dbo.tblSMPurchasingGroup PG WITH (NOLOCK) ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+		--LEFT JOIN dbo.tblSMPurchasingGroup PG WITH (NOLOCK) ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 		LEFT JOIN dbo.tblSMCity LP WITH (NOLOCK) ON LP.intCityId = CD.intLoadingPortId
 		LEFT JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = CD.intDestinationPortId
 		WHERE LD.intLoadDetailId = @intLoadDetailId
