@@ -26,6 +26,8 @@ SELECT	t.intInventoryShipmentId
 		,t.dtmLastInvoiceDate
 		,t.strAllVouchers
 		,t.dtmCreated
+		,t.strTicketNumber
+		,t.strContractNumber
 FROM	[tblICSearchShipmentInvoice] t
 	LEFT OUTER JOIN tblICInventoryShipment ship ON ship.intInventoryShipmentId = t.intInventoryShipmentId
 	INNER JOIN tblICItem i ON i.strItemNo = t.strItemNo

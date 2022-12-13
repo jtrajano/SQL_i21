@@ -26,6 +26,8 @@ SELECT	Shipment.intInventoryShipmentId
 		,dtmLastInvoiceDate = topInvoice.dtmDate
 		,strAllVouchers = CAST( ISNULL(allLinkedInvoiceId.strInvoiceIds, 'New Invoice') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
 		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
+		,SI_SOURCE.strTicketNumber
+		,SI_SOURCE.strContractNumber
 FROM	tblICInventoryShipment Shipment 
 		INNER JOIN tblICInventoryShipmentItem ShipmentItem
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
@@ -46,6 +48,48 @@ FROM	tblICInventoryShipment Shipment
 
 		LEFT JOIN tblEMEntityLocation toLocation
 			ON toLocation.intEntityLocationId = Shipment.intShipToLocationId
+
+		LEFT JOIN (
+			SELECT
+				ShipmentItem.intInventoryShipmentItemId,
+				strContractNumber = 
+					(
+						CASE 
+							WHEN Shipment.intOrderType = 1 THEN -- Sales Contract
+								CH.strContractNumber
+								--ContractView.strContractNumber
+							WHEN Shipment.intOrderType = 5 THEN -- Item Contract
+								ItemContract.strContractNumber
+						END
+					),
+				strTicketNumber = ScaleView.strTicketNumber
+			FROM	
+				tblICInventoryShipmentItem ShipmentItem
+
+				LEFT JOIN tblICInventoryShipment Shipment 
+					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+
+				LEFT JOIN (tblCTContractDetail ContractView 
+							INNER JOIN tblCTContractHeader CH
+								ON CH.intContractHeaderId = ContractView.intContractHeaderId
+						)
+					ON ContractView.intContractDetailId = ShipmentItem.intLineNo
+					AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
+					AND Shipment.intOrderType = 1
+				--LEFT JOIN vyuCTCompactContractDetailView ContractView 
+				--	ON ContractView.intContractDetailId = ShipmentItem.intLineNo
+				--	AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
+				--	AND Shipment.intOrderType = 1
+
+				LEFT JOIN tblCTItemContractHeader ItemContract 
+					ON ItemContract.intItemContractHeaderId = ShipmentItem.intItemContractHeaderId
+
+				LEFT JOIN tblSCTicket ScaleView
+					ON ScaleView.intTicketId = ShipmentItem.intSourceId
+					AND Shipment.intSourceType = 1
+
+			) SI_SOURCE
+		ON SI_SOURCE.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 
 		OUTER APPLY (
 			SELECT	QtyShipped = 						

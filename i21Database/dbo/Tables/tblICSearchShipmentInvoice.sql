@@ -47,6 +47,8 @@ Data here is used in the Voucher tab/grid.
 		[strCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		
 		[strItemUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intItemUOMId] INT NULL,
+		[strTicketNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		
 
 		CONSTRAINT [PK_tblICSearchShipmentInvoice] PRIMARY KEY NONCLUSTERED ([intId])
 
