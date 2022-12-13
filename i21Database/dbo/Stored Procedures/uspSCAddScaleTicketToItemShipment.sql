@@ -58,7 +58,9 @@ SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intContractCostId = SC.intContractCostId
 , @strWhereFinalizedWeight = SC.strWeightFinalized
 , @strWhereFinalizedGrade = SC.strGradeFinalized
+,@intFreightTermId = isnull(CD.intFreightTermId,0)
 FROM vyuSCTicketScreenView SC
+left join tblCTContractDetail CD on CD.intContractDetailId = SC.intContractId
 WHERE SC.intTicketId = @intTicketId
 
 IF(LOWER(ISNULL(@strWhereFinalizedWeight,'origin')) = 'destination' OR LOWER(ISNULL(@strWhereFinalizedGrade,'origin')) = 'destination' )
@@ -74,7 +76,7 @@ BEGIN
     RETURN;
 END
 
-SELECT @intFreightTermId = intFreightTermId, @intShipToId = intShipToId 
+SELECT @intFreightTermId = case when @intFreightTermId <> 0 then @intFreightTermId else intFreightTermId end, @intShipToId = intShipToId 
 FROM tblARCustomer AR
 LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 WHERE AR.intEntityId = @intEntityId
@@ -1759,7 +1761,7 @@ IF @intLotType != 0
 			, dtmShipDate				= SE.dtmShipDate
 			, intShipFromLocationId		= SE.intShipFromLocationId
 			, intShipToLocationId		= SE.intShipToLocationId
-			, intFreightTermId			= SE.intFreightTermId
+			, intFreightTermId			= case when isnull(CD.intFreightTermId, 0) <> 0 then CD.intFreightTermId else SE.intFreightTermId end
 			, intItemLotGroup			= SE.intItemLotGroup
 			, intLotId					= SC.intLotId
 			, dblQuantity				= SE.dblQuantity
@@ -1809,83 +1811,6 @@ WHERE	addResult.intInventoryShipmentId = @InventoryShipmentId
 
 exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
 
-
-IF @ysnDestinationWeightGrade = 1
-BEGIN
-	DELETE FROM tblSCSnapShotTicketDiscount WHERE intTicketId = @intTicketId
-	DELETE FROM tblSCSnapShotTicket WHERE intTicketId = @intTicketId
-
-	INSERT INTO [tblSCSnapShotTicketDiscount]
-	(
-		[intConcurrencyId]     
-       ,[dblGradeReading]
-       ,[strCalcMethod]
-       ,[strShrinkWhat]
-       ,[dblShrinkPercent]
-       ,[dblDiscountAmount]
-       ,[dblDiscountDue]
-       ,[dblDiscountPaid]
-       ,[ysnGraderAutoEntry]
-       ,[intDiscountScheduleCodeId]
-       ,[dtmDiscountPaidDate]
-       ,[intTicketId]
-       ,[intTicketFileId]
-       ,[strSourceType]
-	   ,[intSort]
-	   ,[strDiscountChargeType]
-	)
-	SELECT 
-		[intConcurrencyId]     
-       ,[dblGradeReading]
-       ,[strCalcMethod]
-       ,[strShrinkWhat]
-       ,[dblShrinkPercent]
-       ,[dblDiscountAmount]
-       ,[dblDiscountDue]
-       ,[dblDiscountPaid]
-       ,[ysnGraderAutoEntry]
-       ,[intDiscountScheduleCodeId]
-       ,[dtmDiscountPaidDate]
-       ,[intTicketId]
-       ,[intTicketFileId]
-       ,[strSourceType]
-	   ,[intSort]
-	   ,[strDiscountChargeType]
-	FROM tblQMTicketDiscount
-		WHERE intTicketId = @intTicketId
-			AND strSourceType = 'Scale'
-
-
-	INSERT INTO tblSCSnapShotTicket(		
-		intTicketId
-		,dblGrossWeight
-		,dblGrossWeight1
-		,dblGrossWeight2
-		,dblTareWeight
-		,dblTareWeight1
-		,dblTareWeight2
-		,dblGrossUnits
-		,dblShrink
-		,dblNetUnits
-		,strItemUOM
-	)
-	SELECT 
-		intTicketId
-		,dblGrossWeight
-		,dblGrossWeight1
-		,dblGrossWeight2
-		,dblTareWeight
-		,dblTareWeight1
-		,dblTareWeight2
-		,dblGrossUnits
-		,dblShrink
-		,dblNetUnits
-		,strItemUOM
-	FROM tblSCTicket 
-		WHERE intTicketId = @intTicketId
-
-
-END
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
        ([intConcurrencyId]     

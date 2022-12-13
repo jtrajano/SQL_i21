@@ -5,21 +5,21 @@ AS
 	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
 	-- any modification here should be applied to vyuGRSettlementSubNoTaxReport as well
 
--- SELECT 
--- 	intBillDetailId
--- 	,strId
--- 	,intItemId
--- 	,strDiscountCode
--- 	,strDiscountCodeDescription
--- 	,strTaxClass
--- 	,(dblDiscountAmount) dblDiscountAmount
--- 	,(dblShrinkPercent) dblShrinkPercent
--- 	,ISNULL(dblGradeReading,'N/A') dblGradeReading
--- 	,dblAmount dblAmount
--- 	,(dblTax) dblTax
--- 	,(dblNetTotal) dblNetTotal
--- FROM
--- (
+SELECT 
+	intBillDetailId
+	,strId
+	,intItemId
+	,strDiscountCode
+	,strDiscountCodeDescription
+	,strTaxClass
+	,(dblDiscountAmount) dblDiscountAmount
+	,(dblShrinkPercent) dblShrinkPercent
+	,ISNULL(dblGradeReading,'N/A') dblGradeReading
+	,dblAmount dblAmount
+	,(dblTax) dblTax
+	,(dblNetTotal) dblNetTotal
+FROM
+(
 	--SCALE
 	 SELECT 
 		 t1.intBillDetailId
@@ -88,10 +88,10 @@ AS
 											END
 			
 				,CASE 
-												WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN ScaleDiscount.dblGradeReading
-												WHEN StrgHstry.intBillId IS NOT NULL THEN StorageDiscount.dblGradeReading
-												ELSE 0
-											END AS dblGradeReading
+												WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading)
+												WHEN StrgHstry.intBillId IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading)
+												ELSE 'N/A'
+											END COLLATE Latin1_General_CI_AS as dblGradeReading
 
 				,dblAmount					= BillDtl.dblTotal
 				,intContractDetailId		= ISNULL(BillDtl.intContractDetailId, 0)
@@ -169,28 +169,28 @@ AS
 	UNION ALL
 
 	--CONTRACT
-	-- SELECT
-	-- 	 t3.intBillDetailIdItem
-	-- 	,t3.strId
-	-- 	,t3.intBillId
-	-- 	,t3.intItemId
-	-- 	,t3.strDiscountCode
-	-- 	,t3.strDiscountCodeDescription
-	-- 	,t3.dblDiscountAmount --* (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
-	-- 	,t3.dblShrinkPercent --* (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
-	-- 	,t3.dblGradeReading
-	-- 	,t3.dblAmount --* (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount	
-	-- 	,t3.intContractDetailId
-	-- 	,t3.dblTax --* (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
-	-- 	,t3.dblNetTotal --* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
-	-- 	,t3.strTaxClass
-	-- FROM (
+	SELECT DISTINCT
+		 t3.intBillDetailIdItem
+		,t3.strId
+		,t3.intBillId
+		,t3.intItemId
+		,t3.strDiscountCode
+		,t3.strDiscountCodeDescription
+		,t3.dblDiscountAmount --* (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
+		,t3.dblShrinkPercent --* (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
+		,t3.dblGradeReading
+		,t3.dblAmount --* (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount	
+		,t3.intContractDetailId
+		,t3.dblTax --* (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
+		,t3.dblNetTotal --* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
+		,t3.strTaxClass
+	FROM (
 			 SELECT 
-				intBillDetailId			= BillDtl.intBillDetailId
-				,strId						= Bill.strBillId
+				 strId						= Bill.strBillId
 				,intBillId					= BillDtl2.intBillId
+				,intBillDetailId			= BillDtl2.intBillDetailId
 				,intItemId					= BillDtl2.intItemId
-				-- ,intBillDetailId			= BillDtl2.intBillDetailId
+				,intBillDetailIdItem		= BillDtl.intBillDetailId
 				,strDiscountCode			= Item2.strShortName
 				,strDiscountCodeDescription	= Item2.strItemNo
 				,dblDiscountAmount			= CASE 
@@ -206,20 +206,19 @@ AS
 												WHEN StrgHstry.intBillId	  IS NOT NULL THEN ISNULL(StorageDiscount.dblShrinkPercent, 0)
 												ELSE 0
 											END		
-				,dblGradeReading = 
-				CASE 
-												WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN ScaleDiscount.dblGradeReading
-												WHEN StrgHstry.intBillId	  IS NOT NULL THEN StorageDiscount.dblGradeReading
-												ELSE 0
-											END 
+				,CASE 
+												WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(ScaleDiscount.dblGradeReading)
+												WHEN StrgHstry.intBillId	  IS NOT NULL THEN dbo.fnRemoveTrailingZeroes(StorageDiscount.dblGradeReading)
+												ELSE 'N/A'
+											END  COLLATE Latin1_General_CI_AS as dblGradeReading
 
 				,dblAmount					= BillDtl2.dblTotal
 				,intContractDetailId		= ISNULL(BillDtl2.intContractDetailId, 0)
 				,dblTax						= BillDtl2.dblTax
 				,dblNetTotal				= BillDtl2.dblTotal + BillDtl2.dblTax
 				,strTaxClass = TaxClass.strTaxClass
-				-- ,BillDtl2.intInventoryReceiptItemId
-				-- ,BillDtl2.intLinkingId
+				,BillDtl2.intInventoryReceiptItemId
+				,BillDtl2.intLinkingId
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId
@@ -233,6 +232,7 @@ AS
 			AND (ISNULL(BillDtl2.intLinkingId, 0) = ISNULL(BillDtl.intLinkingId, 0) OR ISNULL(BillDtl2.intLinkingId,-90) = -90)
 		LEFT JOIN tblAPBill Bill2 
 			ON BillDtl2.intBillId = Bill2.intBillId --and Bill.intTransactionType = 1
+		OUTER APPLY dbo.fnGRSettlementManualChargeItem(BillDtl.intBillId) MC
 		LEFT JOIN tblICItem Item2 
 			ON BillDtl2.intItemId = Item2.intItemId
 		LEFT JOIN vyuAPBillDetailTax Tax 
@@ -245,7 +245,7 @@ AS
 			ON INVRCPT.intInventoryReceiptId = INVRCPTCHR.intInventoryReceiptId
 		LEFT JOIN tblGRStorageHistory StrgHstry 
 			ON StrgHstry.intBillId = Bill.intBillId	
-				and (BillDtl.intContractHeaderId is null or (BillDtl.intContractHeaderId = StrgHstry.intContractHeaderId ))
+				and (BillDtl.intContractHeaderId is null or (BillDtl.intContractHeaderId = isnull(StrgHstry.intContractHeaderId, 0) ) )
 		LEFT JOIN (
 					SELECT 
 						QM.intTicketId
@@ -277,19 +277,17 @@ AS
 			  ) StorageDiscount 
 				ON StorageDiscount.intTicketFileId = BillDtl2.intCustomerStorageId 
 					AND StorageDiscount.intItemId = BillDtl2.intItemId
-		OUTER APPLY dbo.fnGRSettlementManualChargeItem(BillDtl.intBillId, BillDtl.intBillDetailId, BillDtl2.intBillDetailId) MC
 		WHERE Item2.strType = 'Other Charge'
-		AND BillDtl2.intItemId IS NOT NULL
 			--AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
 				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL))
-			-- AND (MC.intBillDetailItemId = BillDtl.intBillDetailId AND MC.intBillDetailOtherChargeItemId = BillDtl2.intBillDetailId AND MC.ysnShow = 1)
---    )t3 
--- 	WHERE t3.intItemId IS NOT NULL
+			AND (MC.intBillDetailItemId = BillDtl.intBillDetailId AND MC.intBillDetailOtherChargeItemId = BillDtl2.intBillDetailId AND MC.ysnShow = 1)
+   )t3 
+	WHERE t3.intItemId IS NOT NULL
 
 	UNION ALL
 	--manually added item in the voucher but as a misc field only
 	SELECT
-		intBillDetailIdItem				= BD_ITEM.intBillDetailId
+		intBillDetailIdItem				= B.intBillDetailId
 		,strId							= AP.strBillId
 		,intBillId						= AP.intBillId
 		,intItemId						= NULL
@@ -297,27 +295,33 @@ AS
 		,strDiscountCodeDescription		= BD.strMiscDescription
 		,dblDiscountAmount				= BD.dblCost
 		,dblShrinkPercent				= 0
-		,dblGradeReading				= 0
+		,dblGradeReading				= NULL
 		,dblAmount						= BD.dblTotal
-		,intContractDetailId			= BD_ITEM.intContractDetailId
+		,intContractDetailId			= B.intContractDetailId
 		,dblTax							= BD.dblTax
 		,dblNetTotal					= BD.dblTotal + ISNULL(BD.dblTax,0)
 		,strTaxClass					= TaxClass.strTaxClass
 	FROM tblAPBillDetail BD
+	OUTER APPLY (
+		SELECT TOP 1 
+			BD_ITEM.intBillDetailId
+			,BD_ITEM.intContractDetailId
+		FROM tblAPBillDetail BD_ITEM
+		INNER JOIN tblICItem IC
+			ON IC.intItemId = BD_ITEM.intItemId
+				AND IC.strType = 'Inventory'
+		WHERE (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL) 
+			AND BD_ITEM.intBillId = BD.intBillId
+	) B
 	--) BON BD.intBillId = B.intBillId
 	INNER JOIN tblAPBill AP
 		ON AP.intBillId = BD.intBillId
-	LEFT JOIN (
-		tblAPBillDetail BD_ITEM
-		INNER JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND IC.strType = 'Inventory'	
-	) ON (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL)
-		AND BD_ITEM.intBillId = BD.intBillId
-	LEFT JOIN vyuAPBillDetailTax Tax
-		ON BD.intBillDetailId = Tax.intBillDetailId
-	LEFT JOIN tblSMTaxClass TaxClass
+	LEFT JOIN vyuAPBillDetailTax Tax 
+			ON BD.intBillDetailId = Tax.intBillDetailId
+	LEFT JOIN tblSMTaxClass TaxClass 
 		ON Tax.intTaxClassId = TaxClass.intTaxClassId
 	WHERE BD.intItemId IS NULL AND BD.ysnStage = 0	
--- )t
+)t
 GO
 
 

@@ -53,7 +53,7 @@ BEGIN
 			, dblBasis = CASE WHEN CD.dblBasis IS NOT NULL THEN CD.dblBasis ELSE CASE WHEN strNotes LIKE '%Priced Quantity is%' OR strNotes LIKE '%Priced Load is%' THEN NULL ELSE CBL.dblBasis END END
 		FROM tblCTContractBalanceLog CBL
 		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = CBL.intContractDetailId
-		WHERE CBL.dtmTransactionDate < dateadd(day,1,convert(datetime,@dtmEndDate))
+		WHERE dbo.fnRemoveTimeOnDate((case when @IntLocalTimeOffset is not null then dateadd(minute,@IntLocalTimeOffset,DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @IntLocalTimeOffset)) else CBL.dtmTransactionDate end)) <= @dtmEndDate
 	) tbl
 	WHERE intRowNumber = 1
 

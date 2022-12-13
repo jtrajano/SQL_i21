@@ -1,11 +1,18 @@
 ﻿CREATE FUNCTION [dbo].[fnGRSettlementManualChargeItem]
 (
-	@intBillId INT,
-	@intBillDetailId INT,
-	@intBillDetailOtherChargeItemId INT
+	@intBillId INT
 )
-RETURNS TABLE
-AS RETURN
+RETURNS @tbl TABLE (
+	intBillDetailItemId INT
+	,intBillDetailOtherChargeItemId INT
+	,intTypeId INT
+	,ysnShow BIT
+	,ysnStage BIT
+)
+AS
+BEGIN
+INSERT INTO @tbl
+SELECT * FROM (
 SELECT intBillDetailItemId = BD.intBillDetailId
 	,intBillDetailOtherChargeItemId = BD2.intBillDetailId
 	,intTypeId = CASE 
@@ -36,41 +43,32 @@ LEFT JOIN (
 		AND isnull(BD2.intInventoryReceiptItemId, isnull(BD.intInventoryReceiptItemId, 0)) = isnull(BD.intInventoryReceiptItemId, 0)
 		AND (ISNULL(BD2.intLinkingId, 0) = ISNULL(BD.intLinkingId, 0) OR ISNULL(BD2.intLinkingId,-90) = -90)
 WHERE BD.intBillId = @intBillId
-AND BD.intBillDetailId = @intBillDetailId
-AND BD2.intBillDetailId = @intBillDetailOtherChargeItemId
-AND (CASE 
-		WHEN BD2.ysnStage = 1 AND BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN 1
-		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NULL THEN 0 --SPOT
-		--WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN 1 --CONTRACT
-		WHEN BD.intInventoryReceiptItemId IS NOT NULL AND BD.intContractDetailId IS NOT NULL THEN CASE WHEN BD2.ysnStage = 0 AND BD2.intSettleStorageId IS NULL THEN 0 ELSE 1 END --CONTRACT
-		WHEN BD.intCustomerStorageId IS NOT NULL THEN 1 --SETTLE STORAGE
-		ELSE 1 END) = 1
--- ) A
+) A
 
--- UPDATE A
--- SET ysnShow = CASE 
--- 				WHEN B.ysnStage = 1 AND B.intTypeId = 2 THEN 1
--- 				WHEN C.rowNum = 1 THEN 1
--- 				ELSE A.ysnShow
--- 			END
+UPDATE A
+SET ysnShow = CASE 
+				WHEN B.ysnStage = 1 AND B.intTypeId = 2 THEN 1
+				WHEN C.rowNum = 1 THEN 1
+				ELSE A.ysnShow
+			END
 
--- --SELECT A.*,B.*,C.*
--- FROM @tbl A
--- INNER JOIN (
--- 	SELECT * FROM @tbl
--- ) B ON B.intBillDetailOtherChargeItemId = A.intBillDetailOtherChargeItemId
--- LEFT JOIN (
--- 	SELECT intBillDetailOtherChargeItemId
--- 		,intBillDetailItemId
--- 		,rowNum = ROW_NUMBER() OVER (PARTITION BY intBillDetailOtherChargeItemId ORDER BY intBillDetailItemId ASC)
--- 	FROM @tbl
--- 	WHERE intTypeId = 2
--- 		AND ysnStage = 0
--- 		AND NOT EXISTS(SELECT 1 FROM @tbl WHERE intTypeId = 1)
--- ) C ON C.intBillDetailOtherChargeItemId = A.intBillDetailOtherChargeItemId
--- 	AND C.intBillDetailItemId = A.intBillDetailItemId
+--SELECT A.*,B.*,C.*
+FROM @tbl A
+INNER JOIN (
+	SELECT * FROM @tbl
+) B ON B.intBillDetailOtherChargeItemId = A.intBillDetailOtherChargeItemId
+LEFT JOIN (
+	SELECT intBillDetailOtherChargeItemId
+		,intBillDetailItemId
+		,rowNum = ROW_NUMBER() OVER (PARTITION BY intBillDetailOtherChargeItemId ORDER BY intBillDetailItemId ASC)
+	FROM @tbl
+	WHERE intTypeId = 2
+		AND ysnStage = 0
+		AND NOT EXISTS(SELECT 1 FROM @tbl WHERE intTypeId = 1)
+) C ON C.intBillDetailOtherChargeItemId = A.intBillDetailOtherChargeItemId
+	AND C.intBillDetailItemId = A.intBillDetailItemId
 
--- --SELECT * FROM @tbl
+--SELECT * FROM @tbl
 
--- RETURN;
--- END
+RETURN;
+END
