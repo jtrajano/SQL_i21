@@ -152,27 +152,27 @@ BEGIN
 				) MonthlyVacationHolidaySick
 				CROSS APPLY
 				(
-					SELECT  [totalHours]			= SUM([totalHours])
-						   ,[totalBillableHours]	= SUM([totalBillableHours])
-						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
-						   ,[totalBaseAmount]		= SUM([totalBaseAmount])
-						   ,[totalHolidayHours]		= SUM([totalHolidayHours])
+					SELECT  [totalHours]			= SUM(ISNULL([totalHours],0))
+						   ,[totalBillableHours]	= SUM(ISNULL([totalBillableHours],0))
+						   ,[totalNonBillableHours]	= SUM(ISNULL([totalNonBillableHours],0))
+						   ,[totalBaseAmount]		= SUM(ISNULL([totalBaseAmount],0))
+						   ,[totalHolidayHours]		= SUM(ISNULL([totalHolidayHours],0))
 					FROM (		
-								SELECT  [totalHours]			= SUM(TicketHoursWorked.dblHours)
+								SELECT  [totalHours]			= SUM(ISNULL(TicketHoursWorked.dblHours,0))
 									   ,[totalBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 									   ,[totalNonBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 0 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 									   ,[totalHolidayHours] = CASE WHEN LOWER(Item.strItemNo) = 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 									   ,[totalBaseAmount] = CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblBaseAmount)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblBaseAmount,0))
 																		ELSE 0
 																  END
 								FROM vyuHDTicketHoursWorked TicketHoursWorked
@@ -186,28 +186,28 @@ BEGIN
 				) AgentInfoWeekly
 				CROSS APPLY
 				(
-					SELECT  [totalHours]			= SUM([totalHours])
-						   ,[totalBillableHours]	= SUM([totalBillableHours])
-						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
-						   ,[totalBaseAmount]		= SUM([totalBaseAmount])
-						   ,[totalHolidayHours]		= SUM([totalHolidayHours])
+					SELECT  [totalHours]			= SUM(ISNULL([totalHours],0))
+						   ,[totalBillableHours]	= SUM(ISNULL([totalBillableHours],0))
+						   ,[totalNonBillableHours]	= SUM(ISNULL([totalNonBillableHours],0))
+						   ,[totalBaseAmount]		= SUM(ISNULL([totalBaseAmount],0))
+						   ,[totalHolidayHours]		= SUM(ISNULL([totalHolidayHours],0))
 					FROM (		
-								SELECT  [totalHours]			= SUM(TicketHoursWorked.dblHours)
+								SELECT  [totalHours]			= SUM(ISNULL(TicketHoursWorked.dblHours,0))
 									   ,[totalBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 									   ,[totalNonBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 0 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END	
 
 										,[totalHolidayHours] = CASE WHEN LOWER(Item.strItemNo) = 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 										,[totalBaseAmount]      = CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblBaseAmount)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblBaseAmount,0))
 																		ELSE 0
 																  END
 								FROM vyuHDTicketHoursWorked TicketHoursWorked
@@ -220,22 +220,22 @@ BEGIN
 				) AgentInfoAnnually
 				CROSS APPLY
 				(
-					SELECT  [totalHours]			= SUM([totalHours])
-						   ,[totalBillableHours]	= SUM([totalBillableHours])
-						   ,[totalNonBillableHours]	= SUM([totalNonBillableHours])
-						   ,[totalHolidayHours]		= SUM([totalHolidayHours])
+					SELECT  [totalHours]			= SUM(ISNULL([totalHours],0))
+						   ,[totalBillableHours]	= SUM(ISNULL([totalBillableHours],0))
+						   ,[totalNonBillableHours]	= SUM(ISNULL([totalNonBillableHours],0))
+						   ,[totalHolidayHours]		= SUM(ISNULL([totalHolidayHours],0))
 					FROM (		
 								SELECT  [totalHours]			= SUM(TicketHoursWorked.dblHours)
 									   ,[totalBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 1 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 									   ,[totalNonBillableHours]	= CASE WHEN TicketHoursWorked.ysnBillable = 0 AND LOWER(Item.strItemNo) <> 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 									   ,[totalHolidayHours] = CASE WHEN LOWER(Item.strItemNo) = 'holiday'
-																			THEN SUM(TicketHoursWorked.dblHours)
+																			THEN SUM(ISNULL(TicketHoursWorked.dblHours,0))
 																		ELSE 0
 																  END
 								FROM vyuHDTicketHoursWorked TicketHoursWorked
@@ -250,14 +250,14 @@ BEGIN
 				CROSS APPLY
 				(
 					SELECT  intTimeEntryPeriodDetailId
-						   ,[totalHours]			= SUM(intRequiredHours)							
+						   ,[totalHours]			= SUM(ISNULL(intRequiredHours,0))							
 					FROM tblHDTimeEntryPeriodDetail a
 					WHERE a.intTimeEntryPeriodDetailId = TimeEntryPeriodDetail.intTimeEntryPeriodDetailId 
 					GROUP BY intTimeEntryPeriodDetailId
 				) TotalWeeklyRequiredHours
 				CROSS APPLY
 				(
-					SELECT  [totalHours]			= SUM(intRequiredHours)							
+					SELECT  [totalHours]			= SUM(ISNULL(intRequiredHours,0))							
 					FROM tblHDTimeEntryPeriodDetail a
 							INNER JOIN tblHDTimeEntryPeriod b
 					ON a.intTimeEntryPeriodId = b.intTimeEntryPeriodId
@@ -265,7 +265,7 @@ BEGIN
 				) TotalAnnualRequiredHours
 				CROSS APPLY
 				(
-					SELECT  [totalHours]			= SUM(intRequiredHours)							
+					SELECT  [totalHours]			= SUM(ISNULL(intRequiredHours, 0))							
 					FROM tblHDTimeEntryPeriodDetail a
 							INNER JOIN tblHDTimeEntryPeriod b
 					ON a.intTimeEntryPeriodId = b.intTimeEntryPeriodId
