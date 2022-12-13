@@ -29,6 +29,7 @@ CREATE TABLE [dbo].[tblMBILPickupDetail]
 	[strRack] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[intShiftId] [int] NULL,
 	[ysnPickup] bit default 0 NULL,
+	[intDispatchOrderRouteId] int NULL,
 	[intConcurrencyId] [int] DEFAULT(1) NULL
  CONSTRAINT [PK_tblMBILPickupDetail] PRIMARY KEY CLUSTERED (intPickupDetailId),
  CONSTRAINT [FK_tblMBILPickupDetail_tblMBILLoadHeader] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [tblMBILLoadHeader]([intLoadHeaderId])
