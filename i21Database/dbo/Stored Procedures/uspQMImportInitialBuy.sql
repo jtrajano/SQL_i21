@@ -56,12 +56,20 @@ BEGIN TRY
 						B1QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB1QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB1QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB1QtyUOM, '') = ''
+						)
 					THEN 'BUYER1 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B1PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB1PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB1Price, 0) <> 0
+						AND ISNULL(IMP.strB1PriceUOM, '') = ''
 						)
 					THEN 'BUYER1 PRICE UOM, '
 				ELSE ''
@@ -77,12 +85,20 @@ BEGIN TRY
 						B2QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB2QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB2QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB2QtyUOM, '') = ''
+						)
 					THEN 'BUYER2 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B2PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB2PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB2Price, 0) <> 0
+						AND ISNULL(IMP.strB2PriceUOM, '') = ''
 						)
 					THEN 'BUYER2 PRICE UOM, '
 				ELSE ''
@@ -98,12 +114,20 @@ BEGIN TRY
 						B3QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB3QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB3QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB3QtyUOM, '') = ''
+						)
 					THEN 'BUYER3 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B3PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB3PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB3Price, 0) <> 0
+						AND ISNULL(IMP.strB3PriceUOM, '') = ''
 						)
 					THEN 'BUYER3 PRICE UOM, '
 				ELSE ''
@@ -119,12 +143,20 @@ BEGIN TRY
 						B4QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB4QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB4QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB4QtyUOM, '') = ''
+						)
 					THEN 'BUYER4 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B4PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB4PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB4Price, 0) <> 0
+						AND ISNULL(IMP.strB4PriceUOM, '') = ''
 						)
 					THEN 'BUYER4 PRICE UOM, '
 				ELSE ''
@@ -140,12 +172,20 @@ BEGIN TRY
 						B5QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB5QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB5QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB5QtyUOM, '') = ''
+						)
 					THEN 'BUYER5 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B5PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB5PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB5Price, 0) <> 0
+						AND ISNULL(IMP.strB5PriceUOM, '') = ''
 						)
 					THEN 'BUYER5 PRICE UOM, '
 				ELSE ''
@@ -182,62 +222,102 @@ BEGIN TRY
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
 		AND (
-			(
+			((
 				B1QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB1QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB1QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB1QtyUOM, '') = ''
+				))
+			OR ((
 				B1PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB1PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB1Price, 0) <> 0
+					AND ISNULL(IMP.strB1PriceUOM, '') = ''
+				))
 			OR (
 				B2CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB2Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B2QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB2QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB2QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB2QtyUOM, '') = ''
+				))
+			OR ((
 				B2PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB2PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB2Price, 0) <> 0
+					AND ISNULL(IMP.strB2PriceUOM, '') = ''
+				))
 			OR (
 				B3CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB3Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B3QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB3QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB3QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB3QtyUOM, '') = ''
+				))
+			OR ((
 				B3PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB3PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB3Price, 0) <> 0
+					AND ISNULL(IMP.strB3PriceUOM, '') = ''
+				))
 			OR (
 				B4CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB4Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B4QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB4QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB4QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB4QtyUOM, '') = ''
+				))
+			OR ((
 				B4PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB4PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB4Price, 0) <> 0
+					AND ISNULL(IMP.strB4PriceUOM, '') = ''
+				))
 			OR (
 				B5CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB5Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B5QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB5QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB5QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB5QtyUOM, '') = ''
+				))
+			OR ((
 				B5PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB5PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB5Price, 0) <> 0
+					AND ISNULL(IMP.strB5PriceUOM, '') = ''
+				))
 			OR (
 				COMPANY_CODE.intPurchasingGroupId IS NULL
 				AND ISNULL(IMP.strB1CompanyCode, '') <> ''
