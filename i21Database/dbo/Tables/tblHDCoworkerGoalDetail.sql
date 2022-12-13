@@ -7,6 +7,7 @@
 	[dblBudget]					 NUMERIC(18, 6) NULL DEFAULT 0,
 	[intUtilization]			 INT			   NULL,
 	[intTimeEntryPeriodDetailId] INT			   NULL,
+	[ysnActive]					 BIT	 NOT NULL	CONSTRAINT [DF_tblHDCoworkerGoalDetail_ysnActive] DEFAULT ((1)),
 	[intConcurrencyId] [int]	NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDCoworkerGoalDetail_intCoworkerGoalDetailId] PRIMARY KEY CLUSTERED ([intCoworkerGoalDetailId] ASC),
 	CONSTRAINT [FK_tblHDCoworkerGoalDetail_tblHDCoworkerGoal_intCoworkerGoalId] FOREIGN KEY ([intCoworkerGoalId]) REFERENCES [dbo].[tblHDCoworkerGoal] ([intCoworkerGoalId]) ON DELETE CASCADE,
