@@ -58,9 +58,9 @@ BEGIN TRY
             + CASE WHEN (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '') THEN 'FROM LOCATION CODE, ' ELSE '' END
             + CASE WHEN (MARKET_ZONE.intMarketZoneId IS NULL AND ISNULL(IMP.strChannel, '') <> '') THEN 'CHANNEL, ' ELSE '' END
             + CASE WHEN (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, ' ELSE '' END
-            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '') THEN 'NO OF PACKAGES UOM, ' ELSE '' END
-            + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
-            + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
+            + CASE WHEN (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '') OR (ISNULL(IMP.intNoOfPackages, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesUOM, '') = '') THEN 'NO OF PACKAGES UOM, ' ELSE '' END
+            + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') OR (ISNULL(IMP.intNoOfPackagesSecondPackageBreak, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') = '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
+            + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') OR (ISNULL(IMP.intNoOfPackagesThirdPackageBreak, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') = '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
             + CASE WHEN (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '') THEN 'RECEIVING STORAGE LOCATION, ' ELSE '' END
     ) MSG
@@ -79,9 +79,12 @@ BEGIN TRY
         OR (FROM_LOC_CODE.intCityId IS NULL AND ISNULL(IMP.strFromLocationCode, '') <> '')
         OR (MARKET_ZONE.intMarketZoneId IS NULL AND ISNULL(IMP.strChannel, '') <> '')
         OR (SAMPLE_TYPE.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
-        OR (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '')
-        OR (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '')
-        OR (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '')
+        OR ( (UOM.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesUOM, '') <> '')
+            OR (ISNULL(IMP.intNoOfPackages, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesUOM, '') = '') )
+        OR ( (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '')
+            OR (ISNULL(IMP.intNoOfPackagesSecondPackageBreak, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') = '') )
+        OR ( (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '')
+            OR (ISNULL(IMP.intNoOfPackagesThirdPackageBreak, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') = '') )
         OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
         OR (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '')
     )
