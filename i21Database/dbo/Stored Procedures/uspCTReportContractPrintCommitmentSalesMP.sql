@@ -354,7 +354,7 @@ BEGIN TRY
 		,MPContractSubmitSignature						= @blbChildSubmitSignature
 		,MPContractApproverSignature					= @blbChildApproveSignature
 		,strExchangeRate								= '( ' + @strFromCurrency + ' to ' + @strToCurrency +' )' 
-		,dblForexRate									= ROUND(@dblForexRate,@intPriceDec)
+		,dblForexRate									= dbo.fnRemoveTrailingZeroes(ROUND(@dblForexRate,5))
 		,strCompanyName									= (case when @ysnIsParent = convert(bit,0) then LTRIM(RTRIM(EY.strEntityName)) else @strCompanyName end)
 		,intEntityId									= CH.intEntityId
 		,strCustomerName								= (case when @ysnIsParent = convert(bit,0) then @strCompanyName else LTRIM(RTRIM(EL.strCheckPayeeName)) end)
