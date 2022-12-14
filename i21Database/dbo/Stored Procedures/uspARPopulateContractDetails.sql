@@ -287,9 +287,15 @@ SELECT intInvoiceId					= intInvoiceId
 	, intEntityId					= intEntityId
 	, intUserId						= intEntityId
 	, dtmDate						= dtmDate
-	, dblQuantity					= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
+	, dblQuantity					= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) 
+										THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) 
+										ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) 
+									  END
 	, dblBalanceQty					= 0
-	, dblSheduledQty				= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
+	, dblSheduledQty				= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) 
+										THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) 
+										ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) 
+									  END * CASE WHEN ISNULL(TBL.intSiteId, 0) <> 0 AND ISNULL(TMOrder.ysnDeleted, 0) = 1 THEN 0 ELSE 1 END
 	, dblRemainingQty				= 0
 	, strType						= 'Contract Scheduled'
 	, strTransactionType			= strTransactionType
@@ -297,7 +303,14 @@ SELECT intInvoiceId					= intInvoiceId
 	, strItemNo						= strItemNo
 	, strBatchId					= strBatchId
 	, strSessionId					= @strSessionId
-FROM #TBLTOPROCESS
+FROM #TBLTOPROCESS TBL
+OUTER APPLY (
+	SELECT TOP 1 ysnDeleted
+	FROM tblTMOrder TMO
+	INNER JOIN vyuCTSequenceUsageHistory CTSUH ON TMO.intContractDetailId = CTSUH.intContractDetailId AND TMO.intSiteId = CTSUH.intExternalId
+	WHERE intSiteId = TBL.intSiteId
+	ORDER BY intSequenceUsageHistoryId DESC
+) TMOrder
 WHERE (
 	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
    OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
