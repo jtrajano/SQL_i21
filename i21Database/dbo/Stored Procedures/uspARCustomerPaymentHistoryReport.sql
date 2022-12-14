@@ -110,198 +110,221 @@ ELSE
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
 
-IF OBJECT_ID('tempdb..#TmpPayments') IS NOT NULL DROP TABLE #TmpPayments
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
+IF(OBJECT_ID('tempdb..#PAYMENTS') IS NOT NULL) DROP TABLE #PAYMENTS
+IF(OBJECT_ID('tempdb..#PAYMENTMETHODS') IS NOT NULL) DROP TABLE #PAYMENTMETHODS
+IF(OBJECT_ID('tempdb..#TEMPHISTORY') IS NOT NULL) DROP TABLE #TEMPHISTORY
+IF(OBJECT_ID('tempdb..#FINALPAYMENTHISTORY') IS NOT NULL) DROP TABLE #FINALPAYMENTHISTORY
 
+CREATE TABLE #CUSTOMERS (
+	  intEntityCustomerId		INT	NOT NULL PRIMARY KEY
+	, strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	, strCustomerName			NVARCHAR(500) COLLATE Latin1_General_CI_AS
+	, strContact				NVARCHAR(500) COLLATE Latin1_General_CI_AS
+)
+CREATE TABLE #PAYMENTS (
+	   intPaymentId					INT												NOT NULL
+	 , strRecordNumber				NVARCHAR (25) COLLATE Latin1_General_CI_AS		NULL
+	 , strPaymentMethod				NVARCHAR (100) COLLATE Latin1_General_CI_AS		NULL
+	 , strReferenceNumber			NVARCHAR (50) COLLATE Latin1_General_CI_AS		NULL
+	 , dtmDatePaid					DATETIME										NULL
+	 , dblAmountPaid				NUMERIC(18, 6)									NULL DEFAULT 0
+	 , dblUnappliedAmount			NUMERIC(18, 6)									NULL DEFAULT 0
 
-SELECT 
-	rownm = ROW_NUMBER() OVER(PARTITION BY strInvoiceNumber ORDER BY strRecordNumber ASC)
-	 , strCustomerName		= CUSTOMER.strName
-	 , strCompanyName		= COMPANY.strCompanyName
-     , strCompanyAddress	= COMPANY.strCompanyAddress
-	 , strContact			= CUSTOMER.strFullAddress
-	 , strPaid				= CASE WHEN PAYMENTS.dblAmountDue = 0 THEN 'Yes' ELSE 'No' END
-	 --CASE WHEN PAYMENTS.dblInvoiceTotal - (dbo.fnARGetInvoiceAmountMultiplier(PAYMENTS.strTransactionType) * TOTALPAYMENTS.dblTotalPayments) = 0 THEN 'Yes' ELSE 'No' END
-	 , PAYMENTS.*
-	 , dblBareInvoiceTotal = cast(0 as numeric(18, 6))
-	 , rownum = 0
-	 , dblBareInvoiceTotalPayment = dbo.fnARGetInvoiceAmountMultiplier(PAYMENTS.strTransactionType) * TOTALPAYMENTS.dblTotalPayments
-INTO #TmpPayments
+	 , intInvoiceId					INT												NULL
+	 , strInvoiceNumber				NVARCHAR(50) COLLATE Latin1_General_CI_AS		NULL
+	 , dblInvoiceTotal				NUMERIC(18, 6)									NULL DEFAULT 0
+	 , dblAmountApplied				NUMERIC(18, 6)									NULL DEFAULT 0
+	 , dblAmountDue					NUMERIC(18, 6)									NULL DEFAULT 0
+	 , strPaid						NVARCHAR (5) COLLATE Latin1_General_CI_AS		NULL
 
-FROM ( 
-	SELECT I.strInvoiceNumber
-		 , I.intEntityCustomerId
-		 , I.intInvoiceId	 
-		 , strRecordNumber		= PAYMENTS.strRecordNumber	 
-		 , dtmDatePaid			= PAYMENTS.dtmDatePaid
-		 , dblAmountPaid		= ISNULL(PAYMENTS.dblAmountPaid, 0)
-		 , dblAmountApplied		= ISNULL(PAYMENTS.dblAmountApplied, 0)
-		 , dblInvoiceTotal		= dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal
-		 , dblAmountDue			= (dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal) - (ISNULL(PAYMENTS.dblAmountApplied, 0) + ISNULL(PAYMENTS.dblDiscount, 0) - ISNULL(PAYMENTS.dblInterest, 0)) -- CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(PAYMENTS.dblAmountDue, 0) * -1 ELSE ISNULL(PAYMENTS.dblAmountDue, 0) END
-		 , intPaymentId			= PAYMENTS.intPaymentId	 
-		 , strReferenceNumber	= PAYMENTS.strPaymentInfo
-		 , strPaymentMethod		= PAYMENTS.strPaymentMethod
-		 , dblUnappliedAmount	= ISNULL(PAYMENTS.dblUnappliedAmount, 0)
-		 , strTransactionType	= I.strTransactionType
-	FROM dbo.tblARInvoice I	WITH (NOLOCK)
-	INNER JOIN (
-		SELECT strRecordNumber	= P.strRecordNumber
-			 , P.dtmDatePaid
-			 , P.dblAmountPaid			 
-			 , dblAmountApplied	= PD.dblPayment
-			 , PD.dblDiscount
-			 , PD.dblInterest
-			 , P.intPaymentId
-			 , P.intPaymentMethodId
-			 , P.strPaymentInfo
-			 , P.strPaymentMethod
-			 , P.dblUnappliedAmount
-			 , PD.intInvoiceId
-			 , PD.dblAmountDue
-		FROM dbo.tblARPayment P WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intPaymentId
-				 , intInvoiceId
-				 , dblPayment
-				 , dblDiscount
-				 , dblInterest
-				 , dblAmountDue
-			FROM dbo.tblARPaymentDetail 
-		) PD ON P.intPaymentId = PD.intPaymentId
-			AND P.strPaymentMethod <> 'CF Invoice'
-		WHERE P.ysnPosted = 1
-		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-		  AND (@strPaymentMethod IS NULL OR strPaymentMethod LIKE '%'+@strPaymentMethod+'%' OR (@strPaymentMethod LIKE '%Credit Card%' AND P.intEntityCardInfoId IS NOT NULL))
-		  AND (@strRecordNumberFrom IS NULL OR strRecordNumber LIKE '%'+@strRecordNumberFrom+'%')
-
-		UNION ALL
-
-		SELECT strRecordNumber		= APP.strPaymentRecordNum
-			 , APP.dtmDatePaid
-			 , APP.dblAmountPaid
-			 , dblAmountApplied		= APPD.dblPayment
-			 , APPD.dblDiscount
-			 , APPD.dblInterest
-			 , APP.intPaymentId
-			 , APP.intPaymentMethodId
-			 , APP.strPaymentInfo
-			 , strPaymentMethod		= NULL
-			 , dblUnappliedAmount	= APP.dblUnapplied
-			 , APPD.intInvoiceId
-			 , APPD.dblAmountDue
-		FROM dbo.tblAPPayment APP WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intPaymentId
-				 , intInvoiceId
-				 , dblPayment
-				 , dblDiscount
-				 , dblInterest
-				 , dblAmountDue
-			FROM tblAPPaymentDetail WITH (NOLOCK)
-		) APPD ON APP.intPaymentId = APPD.intPaymentId 
-		WHERE APP.ysnPosted = 1
-		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo	
-		  AND (@strRecordNumberFrom IS NULL OR strPaymentRecordNum LIKE '%'+@strRecordNumberFrom+'%')
-	) AS PAYMENTS ON I.intInvoiceId = PAYMENTS.intInvoiceId	
-	WHERE I.ysnPosted = 1
-	  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-	  AND (@strInvoiceNumberFrom IS NULL OR strInvoiceNumber LIKE '%'+@strInvoiceNumberFrom+'%')
-
-	UNION ALL
-
-	SELECT I.strInvoiceNumber
-		 , I.intEntityCustomerId
-		 , I.intInvoiceId	 
-		 , strRecordNumber		= PREPAYMENT.strRecordNumber	 
-		 , dtmDatePaid			= PREPAYMENT.dtmDatePaid
-		 , dblAmountPaid		= ISNULL(PREPAYMENT.dblAmountPaid, 0)
-		 , dblAmountApplied		= 0
-		 , dblInvoiceTotal		= 0
-		 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END	 
-		 , intPaymentId			= PREPAYMENT.intPaymentId	 
-		 , strReferenceNumber	= PREPAYMENT.strPaymentInfo
-		 , strPaymentMethod		= PREPAYMENT.strPaymentMethod
-		 , dblUnappliedAmount	= ISNULL(PREPAYMENT.dblUnappliedAmount, 0)
-		 , strTransactionType	= I.strTransactionType
-	FROM dbo.tblARInvoice I WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intPaymentId
-			 , intEntityCustomerId
-		     , strRecordNumber
-			 , strPaymentInfo
-			 , strPaymentMethod
-			 , dtmDatePaid
-			 , dblUnappliedAmount
-			 , dblAmountPaid
-		FROM dbo.tblARPayment WITH (NOLOCK)
-		WHERE ysnPosted = 1
-		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-		  AND (@strPaymentMethod IS NULL OR strPaymentMethod LIKE '%'+@strPaymentMethod+'%' OR (@strPaymentMethod LIKE '%Credit Card%' AND intEntityCardInfoId IS NOT NULL))
-		  AND (@strRecordNumberFrom IS NULL OR strRecordNumber LIKE '%'+@strRecordNumberFrom+'%')
-	) PREPAYMENT ON I.intEntityCustomerId = PREPAYMENT.intEntityCustomerId 
-				AND I.intPaymentId = PREPAYMENT.intPaymentId
-	WHERE I.ysnPosted = 1 
-	  AND I.strTransactionType = 'Customer Prepayment'
-	  AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
-	  AND (@strInvoiceNumberFrom IS NULL OR strInvoiceNumber LIKE '%'+@strInvoiceNumberFrom+'%')
-) PAYMENTS
-INNER JOIN (
-	SELECT E.intEntityId
-		 , strName
-		 , strFullAddress = dbo.fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, E.strBillToLocationName, E.strBillToAddress, E.strBillToCity, E.strBillToState, E.strBillToZipCode, E.strBillToCountry, NULL, 0)
-	FROM dbo.vyuARCustomer E WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intEntityId
-			 , strPhone
-			 , strEmail
-		FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
-		WHERE ysnDefaultContact = 1
-	) CC ON E.intEntityId = CC.intEntityId
-	WHERE  (( @customerId IS NULL AND (@strCustomerName IS NULL OR E.strName LIKE '%'+@strCustomerName+'%'))OR E.intEntityId = @customerId)
-) CUSTOMER ON PAYMENTS.intEntityCustomerId = CUSTOMER.intEntityId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY
-OUTER APPLY (
-	SELECT intInvoiceId
-		 , dblTotalPayments = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
-	FROM dbo.tblARPaymentDetail PD
-	INNER JOIN (
-		SELECT intPaymentId
-		FROM dbo.tblARPayment WITH (NOLOCK)
-		WHERE ysnPosted = 1
-		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-	) P ON PD.intPaymentId = P.intPaymentId
-	WHERE intInvoiceId = PAYMENTS.intInvoiceId	  
-	GROUP BY intInvoiceId
-) TOTALPAYMENTS
-
-UPDATE #TmpPayments SET dblBareInvoiceTotal = dblInvoiceTotal, dblBareInvoiceTotalPayment = CASE WHEN strPaid = 'Yes' THEN dblInvoiceTotal ELSE 0 END WHERE rownm = 1
-
-DECLARE @Tmp TABLE
-(
-	rownm INT,
-	intInvoiceId INT,
-	dblAmount NUMERIC(18,6)
+	 , intEntityCustomerId			INT												NOT NULL
+	 , strCustomerName				NVARCHAR(200) COLLATE Latin1_General_CI_AS		NULL
+	 , strContact					NVARCHAR(500) COLLATE Latin1_General_CI_AS		NULL
+	 , strCompanyName				NVARCHAR(200) COLLATE Latin1_General_CI_AS		NULL
+	 , strCompanyAddress			NVARCHAR(500) COLLATE Latin1_General_CI_AS		NULL
+)
+CREATE TABLE #PAYMENTMETHODS (
+	  intPaymentMethodId		INT	NOT NULL PRIMARY KEY
+	, strPaymentMethod			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 )
 
-INSERT INTO @Tmp
-SELECT rownm, intInvoiceId, dblAmountApplied FROM #TmpPayments --WHERE rownm > 1
+DECLARE @strCompanyName			NVARCHAR(100)	= NULL
+	  , @strCompanyAddress		NVARCHAR(500)	= NULL
+	  , @intRecordNumberFrom	INT = NULL
+	  , @intRecordNumberTo		INT = NULL
+	  , @intInvoiceNumberFrom	INT = NULL
+	  , @intInvoiceNumberTo		INT = NULL
 
-UPDATE A 
-	SET dblAmountDue = dblAmountDue - D.dblAmount
-	,strPaid = CASE WHEN dblAmountDue - D.dblAmount = 0 THEN 'Yes' ELSE 'No' END	
-	FROM #TmpPayments A
-		OUTER APPLY(
-			select 
-				intInvoiceId, 
-				dblAmount = SUM(dblAmount) 
-				from @Tmp C 
-					where C.rownm < A.rownm and C.intInvoiceId = A.intInvoiceId
-			GROUP BY intInvoiceId
-		) D 
-	WHERE A.rownm > 1
+SELECT TOP 1 @strCompanyName	= strCompanyName
+		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+ORDER BY intCompanySetupID DESC
 
-SELECT * FROM #TmpPayments
+--CUSTOMER FILTERS	
+INSERT INTO #CUSTOMERS (
+	  intEntityCustomerId
+	, strCustomerNumber
+	, strCustomerName
+	, strContact
+)
+SELECT intEntityCustomerId	= C.intEntityId 
+	, strCustomerNumber		= C.strCustomerNumber
+	, strCustomerName		= EC.strName
+	, strContact			= ISNULL(NULLIF(LTRIM(RTRIM(EL.strAddress)), ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(LTRIM(RTRIM(EL.strCity)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strState)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strZipCode)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strCountry)), ''), '')
+FROM tblARCustomer C WITH (NOLOCK)
+INNER JOIN tblEMEntity EC ON C.intEntityId = EC.intEntityId
+INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityId AND EL.ysnDefaultLocation = 1
+WHERE @strCustomerName IS NULL 
+   OR (@strCustomerName IS NOT NULL AND EC.strName = @strCustomerName)
 
+--RECORD NUMBER FILTERS
+IF @strRecordNumberFrom IS NOT NULL
+	BEGIN
+		SELECT TOP 1 @intRecordNumberFrom = P.intPaymentId
+		FROM tblARPayment P
+		INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+		WHERE P.strRecordNumber = @strRecordNumberFrom
+	END
+ELSE 
+	BEGIN
+		SELECT @intRecordNumberFrom = MIN(P.intPaymentId)
+		FROM tblARPayment P
+		INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+	END
+
+IF @strRecordNumberTo IS NOT NULL
+	BEGIN
+		SELECT TOP 1 @intRecordNumberTo = intPaymentId
+		FROM tblARPayment P
+		INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+		WHERE P.strRecordNumber = @strRecordNumberTo
+	END
+ELSE
+	BEGIN
+		SELECT @intRecordNumberTo = MAX(intPaymentId)
+		FROM tblARPayment P
+		INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+	END
+
+--INVOICE NUMBER FILTERS
+IF @strInvoiceNumberFrom IS NOT NULL
+	BEGIN
+		SELECT TOP 1 @intInvoiceNumberFrom = intInvoiceId
+		FROM tblARInvoice I
+		INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+		WHERE strInvoiceNumber = @strInvoiceNumberFrom
+	END
+ELSE 
+	BEGIN
+		SELECT @intInvoiceNumberFrom = MIN(intInvoiceId)
+		FROM tblARInvoice I
+		INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+	END
+
+IF @strInvoiceNumberTo IS NOT NULL
+	BEGIN
+		SELECT TOP 1 @intInvoiceNumberTo = intInvoiceId
+		FROM tblARInvoice I
+		INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+		WHERE strInvoiceNumber = @strInvoiceNumberTo
+	END
+ELSE
+	BEGIN
+		SELECT @intInvoiceNumberTo = MAX(intInvoiceId)
+		FROM tblARInvoice I
+		INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+	END
+
+--PAYMENT METHOD FILTERS
+INSERT INTO #PAYMENTMETHODS (
+	  intPaymentMethodId
+	, strPaymentMethod
+)
+SELECT intPaymentMethodID
+   , strPaymentMethod
+FROM tblSMPaymentMethod
+WHERE @strPaymentMethod IS NULL
+  OR (@strPaymentMethod IS NOT NULL AND strPaymentMethod = @strPaymentMethod)
+
+INSERT INTO #PAYMENTS (
+	   intPaymentId
+	 , strRecordNumber
+	 , strPaymentMethod
+	 , strReferenceNumber
+	 , dtmDatePaid
+	 , dblAmountPaid
+	 , dblUnappliedAmount
+
+	 , intInvoiceId
+	 , strInvoiceNumber
+	 , dblInvoiceTotal
+	 , dblAmountApplied
+	 , dblAmountDue
+	 , strPaid
+
+	 , intEntityCustomerId
+	 , strCustomerName
+	 , strContact
+	 , strCompanyName
+	 , strCompanyAddress
+)
+SELECT intPaymentId					= P.intPaymentId
+	 , strRecordNumber				= P.strRecordNumber
+	 , strPaymentMethod				= PM.strPaymentMethod
+	 , strReferenceNumber			= P.strPaymentInfo
+	 , dtmDatePaid					= P.dtmDatePaid
+	 , dblAmountPaid				= P.dblAmountPaid
+	 , dblUnappliedAmount			= P.dblUnappliedAmount
+
+	 , intInvoiceId					= I.intInvoiceId
+	 , strInvoiceNumber				= I.strInvoiceNumber
+	 , dblInvoiceTotal				= PD.dblInvoiceTotal
+	 , dblAmountApplied				= PD.dblPayment
+	 , dblAmountDue					= PD.dblAmountDue
+	 , strPaid						= CASE WHEN PD.dblAmountDue = 0 THEN 'Yes' ELSE 'No' END
+
+	 , intEntityCustomerId			= C.intEntityCustomerId
+	 , strCustomerName				= C.strCustomerName
+	 , strContact					= C.strContact
+	 , strCompanyName				= @strCompanyName
+	 , strCompanyAddress			= @strCompanyAddress
+FROM tblARPayment P
+INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN #PAYMENTMETHODS PM ON P.intPaymentMethodId = PM.intPaymentMethodID
+LEFT JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
+LEFT JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+WHERE P.intPaymentId BETWEEN @intRecordNumberFrom AND @intRecordNumberTo
+  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
+
+SELECT rownm						= ROW_NUMBER() OVER(PARTITION BY strInvoiceNumber ORDER BY strRecordNumber ASC) 
+     , strCustomerName				= strCustomerName 
+	 , strCompanyName				= strCompanyName
+	 , strCompanyAddress			= strCompanyAddress
+	 , strContact					= strContact
+	 , strPaid						= strPaid
+	 , dblBareInvoiceTotal			= CAST(0 AS NUMERIC(18, 6))
+	 , rownum						= CAST(0 AS INT)
+	 , dblBareInvoiceTotalPayment	= dblAmountApplied
+	 , strRecordNumber				= P.strRecordNumber
+	 , strPaymentMethod				= P.strPaymentMethod
+	 , strReferenceNumber			= P.strReferenceNumber
+	 , dtmDatePaid					= P.dtmDatePaid
+	 , dblAmountPaid				= P.dblAmountPaid
+	 , dblUnappliedAmount			= P.dblUnappliedAmount
+	 , strInvoiceNumber				= P.strInvoiceNumber
+	 , dblInvoiceTotal				= P.dblInvoiceTotal
+	 , dblAmountApplied				= P.dblAmountApplied
+	 , dblAmountDue					= P.dblAmountDue
+INTO #TEMPHISTORY
+FROM #PAYMENTS P
+
+UPDATE #TEMPHISTORY
+SET dblBareInvoiceTotal	= dblInvoiceTotal
+WHERE rownm = 1
+
+SELECT *
+INTO #FINALPAYMENTHISTORY
+FROM #TEMPHISTORY
+
+SELECT * FROM #FINALPAYMENTHISTORY
