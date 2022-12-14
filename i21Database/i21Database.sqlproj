@@ -1409,6 +1409,8 @@
     <Build Include="dbo\Stored Procedures\uspMFRecallPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPRecallProductionOrder_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPRecallAck_EK.sql" />
+    <Build Include="dbo\Tables\tblIPItemPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPItem_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

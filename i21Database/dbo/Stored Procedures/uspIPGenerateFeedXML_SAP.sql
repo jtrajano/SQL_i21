@@ -21,6 +21,12 @@ BEGIN TRY
 			,@limit = @limit
 			,@offset = @offset
 	END
+	ELSE IF @strType = 'Tea Lingo Item'
+	BEGIN
+		EXEC dbo.uspIPGenerateSAPItem_EK @ysnUpdateFeedStatus = 1
+			,@limit = @limit
+			,@offset = @offset
+	END
 	ELSE IF @strType = 'Contracted Stock'
 	BEGIN
 		EXEC dbo.uspIPGenerateERPContractedStock @ysnUpdateFeedStatus = 1
