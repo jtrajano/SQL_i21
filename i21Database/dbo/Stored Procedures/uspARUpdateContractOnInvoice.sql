@@ -329,13 +329,6 @@ BEGIN TRY
 	  
 	DELETE P 
 	FROM @tblToProcess P
-	CROSS APPLY ( 
-		SELECT TOP 1 TMO.*
-		FROM tblTMOrder TMO 
-		WHERE TMO.intSiteId = P.intSiteId
-		  AND TMO.intContractDetailId = P.intContractDetailId
-		ORDER BY TMO.dtmTransactionDate DESC
-	) TMO 
 	WHERE P.intSiteId IS NOT NULL
 	AND P.ysnMobileBilling = 0
 	
