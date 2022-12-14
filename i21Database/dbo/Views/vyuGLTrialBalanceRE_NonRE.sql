@@ -2,8 +2,8 @@
 AS
 WITH BeginningBalance AS(
 	SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId FROM vyuGLTrialBalance_NonRE 
-	UNION ALL
-	SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId FROM vyuGLTrialBalance_RE 
+	-- UNION ALL
+	-- SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId FROM vyuGLTrialBalance_RE 
 )
 SELECT 
 ISNULL(B.MTD,0)MTDBalance,
