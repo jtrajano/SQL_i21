@@ -1,9 +1,10 @@
 CREATE VIEW vyuPRReportEmployeeDetail AS
 
-SELECT
+SELECT DISTINCT
 	 EMP.intEntityId
 	,EMP.strEmployeeId
-	,CASE WHEN dbo.fnAESDecryptASym(EMP.strSocialSecurity) = '' OR dbo.fnAESDecryptASym(EMP.strSocialSecurity) IS NULL  THEN 'No SSN Setup'
+	,CASE WHEN (dbo.fnAESDecryptASym(EMP.strSocialSecurity) = '' OR dbo.fnAESDecryptASym(EMP.strSocialSecurity) IS NULL)  THEN 'No SSN Setup'
+		WHEN (LEN(dbo.fnAESDecryptASym(EMP.strSocialSecurity)) >= 100)  THEN '' 
 		ELSE dbo.fnAESDecryptASym(EMP.strSocialSecurity) END AS strSocialSecurity
 	,EMP.strFirstName
 	,CASE WHEN EMP.strMiddleName = '' OR EMP.strMiddleName IS NULL THEN '' ELSE UPPER(LEFT(EMP.strMiddleName,1)) + '.' END AS strMiddleName
@@ -24,9 +25,12 @@ SELECT
 	,SM.strCompanyName
 	,dbo.fnConvertToFullAddress(SM.strAddress,SM.strCity, SM.strState,SM.strZip) AS strCompanyAddress
 FROM tblPREmployee EMP
-LEFT JOIN tblEMEntity E
-on EMP.intEntityId = E.intEntityId + 1
 LEFT JOIN tblEMEntityLocation EL
-on EMP.intEntityId = EL.intEntityId
-CROSS JOIN tblSMCompanySetup 
-SM
+ON EMP.intEntityId = EL.intEntityId
+and EL.ysnDefaultLocation = 1
+LEFT JOIN tblEMEntityToContact ETC
+ON EMP.intEntityId = ETC.intEntityId
+and ETC.ysnDefaultContact = 1
+LEFT JOIN tblEMEntity E
+ON ETC.intEntityContactId = E.intEntityId
+CROSS JOIN tblSMCompanySetup SM
