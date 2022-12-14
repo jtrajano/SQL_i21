@@ -7,4 +7,5 @@
 	,dtmFeedDate DATETIME CONSTRAINT DF_tblMFRecallPreStage_dtmFeedDate DEFAULT GETDATE()
 	,strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,ysnMailSent BIT
+	,ysnRecallAllowed BIT
 	)

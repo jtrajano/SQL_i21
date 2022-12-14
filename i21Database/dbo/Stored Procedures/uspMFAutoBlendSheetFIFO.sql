@@ -3704,8 +3704,8 @@ BEGIN TRY
 			END
 
 			--Hand Add 
-			IF (@intIssuedUOMTypeId <> @intOriginalIssuedUOMTypeId)
-				SET @intIssuedUOMTypeId = @intOriginalIssuedUOMTypeId
+			--IF (@intIssuedUOMTypeId <> @intOriginalIssuedUOMTypeId)
+			--	SET @intIssuedUOMTypeId = @intOriginalIssuedUOMTypeId
 
 			NEXT_ITEM:
 
