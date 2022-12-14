@@ -65,10 +65,10 @@ BEGIN
 				CH.intContractHeaderId 
 			  , CTD.intContractDetailId
 			  , CH.strContractNumber
-			  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN CTD.dblQuantity -  TQ.dblTotalQty --ALLOCATED QTY
-								  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
+			  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN CTD.dblQuantity --ALLOCATED QTY
+								  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  LGAS.dblAllocatedQuantity-- PARTIALLY ALLOCATED QTY
 								  WHEN LGAS.strAllocationStatus = 'Allocated' THEN  LGAS.dblAllocatedQuantity - CTD.dblQuantity --ALLOCATED QTY
-								  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  TQ.dblTotalQty-- PARTIALLY ALLOCATED QTY
+								  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
 								  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN CTD.dblQuantity - TAQ.dblTotalAllocatedQuantity --SHIPPED LS QTY AND IR QTY
 							 ELSE CTD.dblQuantity  END --OPEN CT QTY 
 		FROM tblCTContractHeader CH
@@ -459,7 +459,7 @@ BEGIN
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CTD.intContractDetailId) LD
 	OUTER APPLY tblCTCompanyPreference	CP  
 	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.strPurchaseContractNumber = CH.strContractNumber  AND LGAS.intContractDetailId = CTD.intContractDetailId 
-	LEFT JOIN tblLGPickLotDetail		PLD  WITH (NOLOCK)ON PLD.intAllocationDetailId = AH.intAllocationHeaderId
+	LEFT JOIN tblLGPickLotDetail		PLD  WITH (NOLOCK)ON PLD.intAllocationDetailId = AD.intAllocationDetailId
 	LEFT JOIN tblLGPickLotHeader		PLH  WITH (NOLOCK)ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 	LEFT JOIN vyuLGShipmentOpenAllocationDetails PLD2  WITH (NOLOCK)ON PLD2.intPContractDetailId = CTD.intContractDetailId
 	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
@@ -747,7 +747,7 @@ BEGIN
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
 						  ELSE CH.strContractNumber + CAST (CTD.intContractSeq AS VARCHAR(MAX))  END
 		  ,strReference = --ALWAYS GET THE LAST LATEST TRANSACTION CT> SI > LS > IR
-						  CASE WHEN IRI.intLoadShipmentId <> 0 THEN IR.strReceiptNumber 
+						  CASE WHEN IRI.intLoadShipmentId <> 0 AND IR.ysnPosted = 1 THEN IR.strReceiptNumber 
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
 						  ELSE '' END
 		  ,dblQuantity = CASE WHEN IR.ysnPosted = 1 THEN TQ.dblTotalQty ELSE ( --UNSOLD QTY 
@@ -842,9 +842,9 @@ BEGIN
 	LEFT JOIN tblCTCropYear				CY   WITH (NOLOCK) ON CY.intCropYearId = CH.intCropYearId
 	LEFT JOIN tblSMFreightTerms			FT   WITH (NOLOCK) ON FT.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblICInventoryReceiptItem IRI  WITH (NOLOCK) ON IRI.intLineNo = CTD.intContractDetailId --IRI.intLoadShipmentId = LGL.intLoadId
-	LEFT JOIN tblICInventoryReceipt		IR   WITH (NOLOCK) ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceipt		IR   WITH (NOLOCK) ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.ysnPosted = 1
 	LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = CASE WHEN IRI.intInventoryReceiptId <> 0 THEN NULL ELSE ISNULL(LGD.intPContractDetailId,LGD.intSContractDetailId) END
-	LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
+	LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId AND LGL.ysnPosted = 1
 	LEFT JOIN tblLGLoadStorageCost		LSC  WITH (NOLOCK) ON LSC.intLoadId = LGL.intLoadId
 	LEFT JOIN tblSMCompanyLocationSubLocation IRSL ON IRSL.intCompanyLocationSubLocationId = IRI.intSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation CSL  WITH (NOLOCK) ON CSL.intCompanyLocationSubLocationId = CTD.intSubLocationId
@@ -964,9 +964,9 @@ BEGIN
 		  ,strReferencePrimary ='Unsold- '+ CH.strContractNumber + CH.strContractNumber + CAST (CTD.intContractSeq AS VARCHAR(MAX)) 
 		  ,strReference = NULL
 		  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN   CTD.dblQuantity --ALLOCATED QTY
-							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
+							  --WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
 							  WHEN LGAS.strAllocationStatus = 'Allocated' THEN  LGAS.dblAllocatedQuantity - CTD.dblQuantity --ALLOCATED QTY
-							  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  TQ.dblTotalQty-- PARTIALLY ALLOCATED QTY
+							  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  LGAS.dblAllocatedQuantity-- PARTIALLY ALLOCATED QTY
 							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN CTD.dblQuantity - TAQ.dblTotalAllocatedQuantity --SHIPPED LS QTY AND IR QTY
 						 ELSE CTD.dblQuantity  END --OPEN CT QTY 
 		,strPacking = UM.strUnitMeasure
@@ -1043,7 +1043,6 @@ BEGIN
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
 	AND a.strOrigin = CASE WHEN @StrOrigin = '' THEN a.strOrigin ELSE @StrOrigin END
 	AND a.intCompanyLocationId = CASE WHEN @intCompanyLocationId = '' THEN a.intCompanyLocationId ELSE @intCompanyLocationId END
-	--If Available = 0 shouldn't come up in the initial load when Include Fully Allocated is checked
 	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN dblQuantity > 1 THEN 1 ELSE 0 END ) END)
 	ORDER BY a.strContractSequence DESC ,a.intSortId
 	END
