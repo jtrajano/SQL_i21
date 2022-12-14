@@ -112,8 +112,6 @@ BEGIN
 	INNER JOIN @ids ids ON ids.intId = B.intBillId
 	INNER JOIN tblCMBankAccount BA ON BA.intBankAccountId = ISNULL(NULLIF(@bankAccount, 0), B.intPayFromBankAccountId)
 
-	SELECT * FROM  #tmpBankAccountInfo
-
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpBankAccountInfo WHERE ysnForeignCurrency = 1)
 	BEGIN
 		IF @rateType IS NULL 
@@ -140,8 +138,6 @@ BEGIN
 			RETURN;
 		END
 	END
-
-	SELECT * FROM  #tmpBankAccountInfo
 
 	IF @currentUser IS NULL
 	BEGIN
