@@ -21,7 +21,9 @@ SELECT intSampleId					= S.intSampleId
 	 , strCompanyAddress			= COMP.strAddress
 	 , strCityStateZip				= COMP.strCity + ', ' + COMP.strState + ', ' + COMP.strZip
 	 , strCompanyCountry			= COMP.strCountry
-	 , blbHeaderLogo				= dbo.fnSMGetCompanyLogo('Header')
+	 , strTest						= 'TEST' + CAST(S.intSampleId AS NVARCHAR(10))
+	 , strGardenMark				= GM.strGardenMark
+	 , strMarketZoneCode			= MZ.strMarketZoneCode
 FROM tblQMSample S
 LEFT JOIN tblEMEntity SUP ON S.intEntityId = SUP.intEntityId
 LEFT JOIN tblEMEntity E ON S.intBrokerId = E.intEntityId
@@ -30,6 +32,8 @@ LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
 LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
+LEFT JOIN tblQMGardenMark GM ON S.intGardenMarkId = GM.intGardenMarkId
+LEFT JOIN tblARMarketZone MZ ON S.intMarketZoneId = MZ.intMarketZoneId
 OUTER APPLY (
 	SELECT TOP 1 *
 	FROM tblSMCompanySetup
