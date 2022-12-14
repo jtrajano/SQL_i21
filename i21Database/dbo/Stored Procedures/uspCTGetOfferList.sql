@@ -874,14 +874,16 @@ BEGIN
 							   WHEN LGL.intLoadId <> 0 AND ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') =  'Shipping Instructions Created' THEN 'Shipping Instruction'
 						 ELSE LGAS.strAllocationStatus  END)
 		  ,strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') 
-		  ,strReferencePrimary = CASE WHEN IRI.intLoadShipmentId <> 0 THEN IR.strReceiptNumber 
+		  ,strReferencePrimary = CASE WHEN  IR.intInventoryReceiptId <> 0 AND IR.ysnPosted = 1 THEN IR.strReceiptNumber
+							   WHEN IRI.intLoadShipmentId <> 0 THEN IR.strReceiptNumber 
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
 						  ELSE CH.strContractNumber + CAST (CTD.intContractSeq AS VARCHAR(MAX))  END
 		  ,strReference = --ALWAYS GET THE LAST LATEST TRANSACTION CT> SI > LS > IR
-						  CASE WHEN IRI.intLoadShipmentId <> 0 AND IR.ysnPosted = 1 THEN IR.strReceiptNumber 
+						  CASE  WHEN IR.intInventoryReceiptId <> 0 AND IR.ysnPosted = 1 THEN IR.strReceiptNumber
+							   WHEN IRI.intLoadShipmentId <> 0 AND IR.ysnPosted = 1 THEN IR.strReceiptNumber 
 							   WHEN LGL.intLoadId <> 0 THEN LGL.strLoadNumber
 						  ELSE '' END
-		  ,dblQuantity = CASE WHEN IR.ysnPosted = 1 THEN TQ.dblTotalQty ELSE ( --UNSOLD QTY 
+		  ,dblQuantity = CASE WHEN IR.ysnPosted = 1 THEN TQIR.dblTotalQty ELSE ( --UNSOLD QTY 
 						 CASE WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  LGAS.dblAllocatedQuantity --ALLOCATED QTY
 							  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN LGD.dblQuantity	--SHIPPED LS QTY
 							  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN TQ.dblTotalQty --IN STORE IR QTY
@@ -1016,6 +1018,12 @@ BEGIN
 		WHERE CTD1.intContractDetailId = CTD.intContractDetailId
 		GROUP BY intInventoryReceiptId,dblOrderQty,LGL.dblQuantity
 	) TQ
+	OUTER APPLY(
+		SELECT DISTINCT SUM(IRI.dblOrderQty)  dblTotalQty
+		FROM tblICInventoryReceiptItem IRI
+		LEFT JOIN tblCTContractDetail CTD1  WITH (NOLOCK) ON IRI.intLineNo = CTD1.intContractDetailId
+		WHERE CTD1.intContractDetailId = CTD.intContractDetailId
+	) TQIR
 	OUTER APPLY ( 
 		SELECT DISTINCT ISNULL(SUM(IRC2.dblAmount),SUM(LGCInStore.dblAmount)) AS dblAmount FROM tblICInventoryReceiptCharge IRC2
 		LEFT JOIN tblLGLoadCost	LGCInStore  WITH (NOLOCK)ON LGCInStore.intItemId =  CP.intCIFInstoreId AND LGC.intLoadId = LGL.intLoadId 
@@ -1029,7 +1037,8 @@ BEGIN
 	WHERE
 	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY
 	AND LGAS.strAllocationStatus IN ('Allocated', 'Partially Allocated', 'Unallocated')
-	AND (IR.ysnPosted = 1 OR  LGL.ysnPosted = 1)
+	AND IR.ysnPosted = 1 
+	OR LGL.ysnPosted = 1
 	) a
 	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
