@@ -175,11 +175,6 @@ SELECT
 	,dblFreightCharge					= INV.dblFreightCharge
 	,strFreightCompanySegment			= CAST(GLCAI.strCode AS NVARCHAR(50)) + ' - ' + GLCAI.strDescription
 	,strFreightLocationSegment			= CAST(GLLAI.strCode AS NVARCHAR(50)) + ' - ' + GLLAI.strDescription
-	,intTaxLocationId                  	= INV.intTaxLocationId
-	,strTaxLocation						= TAXLOCATION.strLocationName
-	,strTaxPoint                        = INV.strTaxPoint
-	,ysnOverrideTaxPoint                = CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
-	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,intProfitCenter					= CLOC.intProfitCenter
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
@@ -310,9 +305,6 @@ LEFT JOIN
 		,ysnReturned
 	FROM tblARInvoice  WITH (NOLOCK) 
 ) RELATEDINVOICE ON RELATEDINVOICE.intInvoiceId = INV.intOriginalInvoiceId
-LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
-LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId,0)
-LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 OUTER APPLY(
 	SELECT TOP 1 intLocationAccountSegmentId
 		       , intCompanyAccountSegmentId
