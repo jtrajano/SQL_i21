@@ -594,6 +594,7 @@ BEGIN TRY
 			,strVessel
 			,intLocationId
 			,intMixingUnitLocationId
+			,intMarketZoneId
 			,dblTeaTastePinpoint
 			,dblTeaHuePinpoint
 			,dblTeaIntensityPinpoint
@@ -717,6 +718,7 @@ BEGIN TRY
 			,strVessel = NULL
 			,intLocationId = S.intCompanyLocationId
 			,intMixingUnitLocationId = MU.intCompanyLocationId
+			,intMarketZoneId = S.intMarketZoneId
 			,dblTeaTastePinpoint = TASTE.dblPinpointValue
 			,dblTeaHuePinpoint = HUE.dblPinpointValue
 			,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
