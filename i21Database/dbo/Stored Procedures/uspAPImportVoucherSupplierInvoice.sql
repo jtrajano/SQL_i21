@@ -66,6 +66,7 @@ SELECT
 	strPreInvoiceGarden					=	CAST(A.strPreInvoiceGarden AS NVARCHAR(50)),
 	intGardenMarkId						=	G.intGardenMarkId,
 	strPreInvoiceGardenNumber			=	CAST(A.strPreInvoiceGardenNumber AS NVARCHAR(50)),
+	strPreInvoiceGrade					=	A.strPreInvoiceGrade,
 	strBook								=	CAST(A.strBook AS NVARCHAR(50)),
 	strSubBook							=	CAST(A.strSubBook AS NVARCHAR(50)),
 	intMarketZoneId						=	H.intMarketZoneId,
@@ -134,6 +135,7 @@ INSERT INTO @voucherPayables
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook		
+	,strComments
 	,strBillOfLading
 	,intMarketZoneId
 	,intCatalogueTypeId	
@@ -170,6 +172,7 @@ SELECT
 	,strPreInvoiceGardenNumber			
 	,strBook							
 	,strSubBook	
+	,A.strPreInvoiceGrade
 	,A.strDocumentNumber
 	,intMarketZoneId
 	,intCatalogueTypeId	
