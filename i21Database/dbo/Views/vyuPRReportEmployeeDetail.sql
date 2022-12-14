@@ -13,8 +13,8 @@ SELECT
 	,EL.strCity
 	,EL.strState
 	,EL.strZipCode
-	,FORMAT(EMP.dtmDateHired,'dd-MM-yyyy') AS dtmDateHired
-	,FORMAT(EMP.dtmTerminated,'dd-MM-yyyy') AS dtmTerminated
+	,FORMAT(CAST(EMP.dtmDateHired AS DATE), 'MM/dd/yyyy') AS dtmDateHired
+	,FORMAT(CAST(EMP.dtmTerminated AS DATE), 'MM/dd/yyyy') AS dtmTerminated
 	,strDepartment = SUBSTRING((SELECT ', '+ D.strDepartment AS [text()] FROM tblPREmployeeDepartment ED
 							INNER JOIN tblPRDepartment D ON ED.intDepartmentId = D.intDepartmentId
 							WHERE EMP.intEntityId = ED.intEntityEmployeeId
@@ -28,4 +28,5 @@ LEFT JOIN tblEMEntity E
 on EMP.intEntityId = E.intEntityId + 1
 LEFT JOIN tblEMEntityLocation EL
 on EMP.intEntityId = EL.intEntityId
-CROSS JOIN tblSMCompanySetup SM
+CROSS JOIN tblSMCompanySetup 
+SM
