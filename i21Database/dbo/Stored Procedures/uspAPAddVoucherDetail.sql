@@ -291,6 +291,7 @@ SELECT TOP 100 PERCENT
 	,intMarketZoneId					=	A.intMarketZoneId
 	,intCatalogueTypeId					=	A.intCatalogueTypeId
 	,intPurchasingGroupId				=	A.intPurchasingGroupId
+	,strComment							=	A.strComments
 	,A.dblPackageBreakups
 	,A.intNumOfPackagesUOM
 	,A.dblNumberOfPackages
@@ -520,6 +521,7 @@ INSERT
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	,strComment
 	/*Supplier Invoice*/
 	,intSaleYear						
 	,strSaleNumber						
@@ -644,6 +646,7 @@ VALUES
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	,strComment
 	/*Supplier Invoice*/
 	,intSaleYear						
 	,strSaleNumber						
