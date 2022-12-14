@@ -46,7 +46,7 @@ SELECT
     A.ysnEUCompliant,
     A.strTBOEvaluatorCode,
     A.strEvaluatorRemarks,
-    A.dtmExpiration,
+    Item.dtmExpiration,
     A.intFromPortId,
     A.dblGrossWeight, -- = dblTotalQuantity + dblTareWeight,
     A.dtmInitialBuy,
@@ -156,7 +156,20 @@ OUTER APPLY(
     WHERE intBatchId = A.intBatchId 
 )TIN
 OUTER APPLY(
-    SELECT TOP 1 strItemNo,strDescription, strShortName  FROM tblICItem WHERE intItemId = A.intTealingoItemId
+    SELECT TOP 1 strItemNo,strDescription, strShortName,
+    CASE WHEN ISNULL(intLifeTime,0) > 0 AND A.dtmProductionBatch IS NOT NULL
+    THEN
+    CASE 
+        WHEN  strLifeTimeType = 'Year' THEN DATEADD( YEAR, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Months' THEN DATEADD( MONTH, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Days' THEN DATEADD( DAY, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Hours' THEN DATEADD( HOUR, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Minutes' THEN DATEADD( MINUTE, intLifeTime, A.dtmProductionBatch)
+        ELSE NULL END
+    ELSE 
+    NULL 
+    END dtmExpiration
+    FROM tblICItem WHERE intItemId = A.intTealingoItemId
 )Item
 OUTER APPLY(
     SELECT TOP 1 MF.intLotId, IC.strLotNumber
