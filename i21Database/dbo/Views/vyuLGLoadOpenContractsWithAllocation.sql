@@ -1,7 +1,8 @@
-﻿CREATE VIEW [dbo].[vyuLGLoadOpenContractsWithAllocation]
+﻿CREATE VIEW vyuLGLoadOpenContractsWithAllocation
 AS
 SELECT
- OC.intContractDetailId
+intKeyColumn = Convert(INT, ROW_NUMBER() OVER (ORDER BY (Select 1)))
+,OC.intContractDetailId
 ,OC.intContractHeaderId
 ,OC.intContractSeq
 ,OC.intItemId
