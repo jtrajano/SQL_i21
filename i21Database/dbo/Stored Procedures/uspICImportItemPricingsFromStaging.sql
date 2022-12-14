@@ -175,7 +175,7 @@ SELECT @LogId
      , 0
 	 , 'Import finished'
 	 , ItemPricingStaging.strItemNo
-	 , 'Item does not exists.'
+	 , 'Item does not exist.'
 	 , 'Success'
 	 , 'Warning'
 	 , 1
