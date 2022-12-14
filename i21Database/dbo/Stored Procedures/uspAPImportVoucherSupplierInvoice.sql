@@ -52,7 +52,7 @@ SELECT
 	intAccountId						=	C.intGLAccountExpenseId,
 	ysnActive							=	C.ysnPymtCtrlActive,
 	dtmDate								=	CONVERT(DATETIME,REPLACE(A.dtmDate,'.','/'), 103),
-	dtmBillDate							=	CONVERT(DATETIME,REPLACE(A.dtmSaleDate,'.','/'), 103),
+	dtmBillDate							=	CONVERT(DATETIME,REPLACE(A.dtmDate,'.','/'), 103),
 	strVendorOrderNumber				=	A.strInvoiceNumber,
 	dtmExpectedDate						=	CONVERT(DATETIME,REPLACE(A.dtmExpectedDate,'.','/'), 103),
     dblQuantityToBill					=	CAST(A.dblQtyReceived AS DECIMAL(38,20)),
