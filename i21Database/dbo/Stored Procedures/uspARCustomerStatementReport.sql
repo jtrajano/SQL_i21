@@ -295,7 +295,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom				= @dtmDateFromLocal
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 
 UPDATE C
-SET strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> 'Running Balance' THEN CS.strBillToLocationName ELSE NULL END, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
+SET strFullAddress				= CASE WHEN C.strStatementFormat <> 'Running Balance' THEN ISNULL(NULLIF(LTRIM(RTRIM(CS.strBillToLocationName)), ''), '') + CHAR(13) + CHAR(10) ELSE '' END + ISNULL(NULLIF(LTRIM(RTRIM(CS.strBillToAddress)), ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(LTRIM(RTRIM(CS.strBillToCity)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(CS.strBillToState)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(CS.strBillToZipCode)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(CS.strBillToCountry)), ''), '')
   , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
 FROM #CUSTOMERS C
 INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
