@@ -31,7 +31,7 @@ sts.strDescription,
 stcpew.strMessage
 HAVING CH.dtmCheckoutDate IS NOT NULL
 UNION
-SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, FORMAT(GETDATE(), 'd','us') as strReportDate, GETDATE() AS dtmCheckoutProcessDate, GETDATE() AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 'Store did not automatically run Today.'
+SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, FORMAT(GETDATE(), 'd','us') as strReportDate, GETDATE() AS dtmCheckoutProcessDate, GETDATE() - 1 AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 'Store did not automatically run Today.'
 FROM tblSTStore a
 WHERE 
 a.intStoreId NOT IN (SELECT intStoreId FROM tblSTCheckoutProcess WHERE FORMAT(dtmCheckoutProcessDate, 'd','us') = FORMAT(GETDATE(), 'd','us')) 
