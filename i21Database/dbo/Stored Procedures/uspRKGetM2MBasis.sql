@@ -97,6 +97,8 @@ BEGIN TRY
 		, intCertificationId INT
 		, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intMTMPointId INT
+		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	)
 	
 	IF (@strEvaluationBy = 'Commodity')
@@ -157,6 +159,8 @@ BEGIN TRY
 				, intCertificationId = NULL
 				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
 				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass  = NULL
+				, strRegion  = NULL
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -215,6 +219,8 @@ BEGIN TRY
 				, intCertificationId = NULL
 				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
 				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass  = NULL
+				, strRegion  = NULL
 			FROM vyuRKGetM2MBasis
 		END
 		
@@ -302,6 +308,8 @@ BEGIN TRY
 				, intCertificationId
 				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
 				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass
+				, strRegion
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -360,6 +368,8 @@ BEGIN TRY
 				, intCertificationId
 				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
 				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass
+				, strRegion
 			FROM vyuRKGetM2MBasis
 		END
 		

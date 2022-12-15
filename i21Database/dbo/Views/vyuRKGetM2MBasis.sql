@@ -100,6 +100,8 @@ SELECT DISTINCT strCommodityCode
 	, im.intCertificationId
 	, MTMPoint.strMTMPoint
 	, cd.intMTMPointId
+	, strClass = CLASS.strDescription
+	, strRegion = REGION.strDescription
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -201,11 +203,15 @@ OUTER APPLY (
 	AND invShipment.intLineNo = cd.intContractDetailId
 	AND shipment.ysnPosted = 1
 ) invShipWarehouse
-LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityId = c.intCommodityId AND ProductType.strType = 'ProductType' AND ProductType.intCommodityAttributeId = im.intProductTypeId
-LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityId = c.intCommodityId AND ProductLine.intCommodityProductLineId = im.intProductLineId
-LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityId = c.intCommodityId AND Grade.strType = 'Grade' AND Grade.intCommodityAttributeId = im.intGradeId
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = im.intProductTypeId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = im.intProductLineId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = im.intGradeId
 LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
+LEFT JOIN tblICCommodityAttribute CLASS
+	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
+LEFT JOIN tblICCommodityAttribute REGION
+	ON REGION.intCommodityAttributeId = im.intRegionId
 WHERE dblBalance > 0 AND cd.intPricingTypeId NOT IN (5,6) AND cd.intContractStatusId <> 3	
 
 UNION SELECT DISTINCT strCommodityCode
@@ -300,6 +306,8 @@ UNION SELECT DISTINCT strCommodityCode
 	, im.intCertificationId
 	, MTMPoint.strMTMPoint
 	, cd.intMTMPointId
+	, strClass = CLASS.strDescription
+	, strRegion = REGION.strDescription
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail  cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -400,11 +408,15 @@ OUTER APPLY (
 	AND invShipment.intLineNo = cd.intContractDetailId
 	AND shipment.ysnPosted = 1
 ) invShipWarehouse
-LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityId = c.intCommodityId AND ProductType.strType = 'ProductType' AND ProductType.intCommodityAttributeId = im.intProductTypeId
-LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityId = c.intCommodityId AND ProductLine.intCommodityProductLineId = im.intProductLineId
-LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityId = c.intCommodityId AND Grade.strType = 'Grade' AND Grade.intCommodityAttributeId = im.intGradeId
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = im.intProductTypeId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = im.intProductLineId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = im.intGradeId
 LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
+LEFT JOIN tblICCommodityAttribute CLASS
+	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
+LEFT JOIN tblICCommodityAttribute REGION
+	ON REGION.intCommodityAttributeId = im.intRegionId
 WHERE cd.intPricingTypeId IN (5,6) AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
@@ -459,6 +471,8 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, intCertificationId
 	, strMTMPoint
 	, intMTMPointId
+	, strClass
+	, strRegion
 FROM (
 	SELECT it.intItemId
 		, it.strItemNo
@@ -473,12 +487,18 @@ FROM (
 		, c.strCommodityCode
 		, intStockUOMId = UOM.intUnitMeasureId
 		, strStockUOM = UOM.strUnitMeasure
+		, strClass = CLASS.strDescription
+		, strRegion = REGION.strDescription
 	FROM vyuRKGetInventoryTransaction it
 	INNER JOIN tblICItem i ON it.intItemId = i.intItemId
 	INNER JOIN tblICCommodity c on i.intCommodityId =  c.intCommodityId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = i.intItemId AND ItemUOM.ysnStockUnit = 1
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = it.intLocationId
+	LEFT JOIN tblICCommodityAttribute CLASS
+		ON CLASS.intCommodityAttributeId = i.intClassVarietyId
+	LEFT JOIN tblICCommodityAttribute REGION
+		ON REGION.intCommodityAttributeId = i.intRegionId
 	WHERE dblQuantity > 0
 		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 intRiskViewId FROM tblRKCompanyPreference) = 2 THEN it.strLotTracking ELSE 'No' END)) iis
 OUTER APPLY (

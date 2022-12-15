@@ -29,11 +29,11 @@ FROM (
 		,dblAllocatedQty = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
 								THEN ISNULL(PLD.dblLotPickedQty, 0)
 								ELSE ISNULL(CD.dblAllocatedQty, 0) END
-		,dblPledgedQty = CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
+		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
 		,dblAllocatedPledgedQty = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
 									THEN ISNULL(PLD.dblLotPickedQty, 0)
 								ELSE ISNULL(CD.dblAllocatedQty, 0) END
-						+ CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
+						+ ISNULL(ICL.dblQty, 0)
 
 		,strShippingLine = Shipment.strShippingLine
 		,strVessel = Shipment.strMVessel
@@ -105,6 +105,14 @@ FROM (
 		,LWC.strID1
 		,LWC.strID2
 		,LWC.strID3
+
+		,dblBalToPick = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
+							THEN ISNULL(PLD.dblLotPickedQty, 0)
+							ELSE ISNULL(CD.dblAllocatedQty, 0) END -
+						CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
+							THEN ISNULL(PLD.dblLotPickedQty, 0)
+							ELSE ISNULL(CD.dblAllocatedQty, 0) END
+							+ ISNULL(ICL.dblQty, 0)
 	FROM vyuLGInboundShipmentView Shipment
 		LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
@@ -115,6 +123,7 @@ FROM (
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblEMEntity Cus ON Cus.intEntityId = SCH.intEntityId
 		LEFT JOIN tblLGPickLotDetail PLD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId AND PLD.intContainerId = Shipment.intLoadContainerId
+		LEFT JOIN tblICLot ICL ON ICL.intLotId = PLD.intLotId AND ICL.intWarrantStatus = 1
 		OUTER APPLY 
 			(SELECT TOP 1 ysnHasPickContainers = CAST(1 AS BIT) 
 				FROM tblLGPickLotDetail PLD1 INNER JOIN tblLGPickLotHeader PLD2 ON PLD2.intPickLotHeaderId = PLD1.intPickLotHeaderId
@@ -147,9 +156,8 @@ FROM (
 		,dblContainerQty = IRI.dblOpenReceive
 		,dblOpenQuantity = Spot.dblQty - ISNULL(PLD.dblLotPickedQty, 0)
 		,dblAllocatedQty = ISNULL(PLD.dblLotPickedQty, 0)
-		,dblPledgedQty = CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
-		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0)
-						+ CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
+		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
+		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0) + ISNULL(ICL.dblQty, 0)
 		,strShippingLine = SL.strName
 		,strVessel = L.strMVessel
 		,strIMONumber = L.strIMONumber
@@ -220,6 +228,8 @@ FROM (
 		,LWC.strID1
 		,LWC.strID2
 		,LWC.strID3
+
+		,dblBalToPick = ISNULL(PLD.dblLotPickedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0) + ISNULL(ICL.dblQty, 0)
 	FROM vyuLGPickOpenInventoryLots Spot
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = Spot.intLotId
 		LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = Spot.intLotId
@@ -236,6 +246,7 @@ FROM (
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblEMEntity Cus ON Cus.intEntityId = SCH.intEntityId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
+		LEFT JOIN tblICLot ICL ON ICL.intLotId = PLD.intLotId AND ICL.intWarrantStatus = 1
 		OUTER APPLY 
 			(SELECT TOP 1
 				strSampleNumber,
@@ -338,6 +349,7 @@ FROM (
 		,LWC.strID1
 		,LWC.strID2
 		,LWC.strID3
+		,dblBalToPick = CAST(0 AS NUMERIC(18, 6))
 	FROM tblLGLoadDetail LD
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId

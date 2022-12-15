@@ -42,6 +42,7 @@ SELECT H.intM2MHeaderId
 	, ysnEvaluationByStorageLocation = ISNULL(companyConfig.ysnEvaluationByStorageLocation, CAST(0 AS BIT))
 	, ysnEvaluationByStorageUnit = ISNULL(companyConfig.ysnEvaluationByStorageUnit, CAST(0 AS BIT))
 	, ysnEnableMTMPoint = ISNULL(CTcompanyConfig.ysnEnableMTMPoint, CAST(0 AS BIT))
+	, ysnIncludeProductInformation = ISNULL(companyConfig.ysnIncludeProductInformation, CAST(0 AS BIT))
 FROM tblRKM2MHeader H
 LEFT JOIN tblICCommodity c ON c.intCommodityId = H.intCommodityId
 LEFT JOIN tblRKM2MType t ON t.intM2MTypeId = H.intM2MTypeId
@@ -61,6 +62,7 @@ OUTER APPLY (
 	, ysnEvaluationByCropYear
 	, ysnEvaluationByStorageLocation
 	, ysnEvaluationByStorageUnit
+	, ysnIncludeProductInformation
 	FROM tblRKCompanyPreference
 ) companyConfig
 OUTER APPLY (
