@@ -152,3 +152,31 @@ CROSS APPLY (
 	WHERE guiApiUniqueId = log.guiApiUniqueId
 ) r
 WHERE log.guiApiImportLogId = @guiLogId
+
+IF OBJECT_ID('tempdb..#tmpApiSchemaVendorLocation') IS NOT NULL DROP TABLE #tmpApiSchemaVendorLocation
+	SELECT * INTO #tmpApiSchemaVendorLocation FROM tblApiSchemaVendorLocation WHERE guiApiUniqueId = @guiApiUniqueId
+
+WHILE EXISTS(SELECT TOP 1 1 FROM #tmpApiSchemaVendorLocation)
+BEGIN
+	IF OBJECT_ID('tempdb..#tmpApiSchemaVendorLocationTop') IS NOT NULL DROP TABLE #tmpApiSchemaVendorLocationTop
+		SELECT TOP 1 * INTO #tmpApiSchemaVendorLocationTop FROM #tmpApiSchemaVendorLocation
+	
+	DECLARE @ysnDefaultPayTo AS BIT = 0, @ysnDefaultShipFrom AS BIT = 0
+
+	SELECT @ysnDefaultPayTo = ysnDefaultPayTo ,@ysnDefaultShipFrom = ysnDefaultShipFrom FROM #tmpApiSchemaVendorLocationTop
+	
+	IF (@ysnDefaultPayTo = 1 OR @ysnDefaultShipFrom = 1)
+	BEGIN  
+		UPDATE tblAPVendor SET intBillToId = intDefaultPayTo, intShipFromId = intDefaultShipFrom  
+		FROM tblAPVendor v INNER JOIN (  
+			SELECT el.intEntityId, vl.strEntityNo  
+			,CASE WHEN ISNULL(@ysnDefaultPayTo, 0) = 1 THEN el.intEntityLocationId ELSE v.intBillToId END [intDefaultPayTo]  
+			,CASE WHEN ISNULL(@ysnDefaultShipFrom, 0) = 1 THEN el.intEntityLocationId ELSE v.intShipFromId END [intDefaultShipFrom]  
+			FROM tblEMEntityLocation el  
+			INNER JOIN #tmpApiSchemaVendorLocationTop vl ON el.strLocationName = vl.strLocationName
+			INNER JOIN tblAPVendor v ON vl.strEntityNo = v.strVendorId) loc   
+		ON v.intEntityId = loc.intEntityId WHERE v.strVendorId = loc.strEntityNo  
+	END
+
+	DELETE FROM #tmpApiSchemaVendorLocation WHERE intKey IN (SELECT intKey FROM #tmpApiSchemaVendorLocationTop)   
+END

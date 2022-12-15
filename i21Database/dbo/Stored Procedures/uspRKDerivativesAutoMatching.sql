@@ -10,91 +10,93 @@ AS
 --declare @strCondition nvarchar(50) = 'Between'
 --, @dtmFromFilledDate DATE = '03-01-2022'
 --, @dtmToFilledDate DATE = '03-02-2022'
---, @dtmMatchDate DATE = GETDATE()
+--, @dtmMatchDate DATE = GETDATE() 
 --, @intUserId INT  = 1
 
 
 DECLARE @tempOpenDerivativesForAutoMatching AS TABLE(
-	dblBalanceLot NUMERIC(18,6)
-	,dblBalanceLotRoll NUMERIC(18,6)
-	,dblSelectedLot NUMERIC(18,6)
-	,intSelectedInstrumentTypeId INT
-	,intInstrumentTypeId INT
-	,strTransactionNo NVARCHAR(100)
-	,dtmTransactionDate DATETIME
-	,dblTotalLot NUMERIC(18,6)
-	,dblFuturesMatchedLotBuy NUMERIC(18,6)
-	,dblFuturesMatchedLotSell NUMERIC(18,6)
-	,dblSelectedLotRoll NUMERIC(18,6)
-	,dblOptionsMatchedLotBuy NUMERIC(18,6)
-	,dblOptionsMatchedLotSell NUMERIC(18,6)
-	,strBS NVARCHAR(1)
-	,strBuySell NVARCHAR(10)
-	,dblPrice NUMERIC(18,6)
-	,dtmCreateDateTime DATETIME
-	,strBook NVARCHAR(100)
-	,strSubBook NVARCHAR(100)
-	,intFutureMarketId INT
-	,intBrokerageAccountId INT
-	,intLocationId INT
-	,intFutureMonthId INT
-	,intCommodityId INT
-	,intEntityId INT
-	,intBookId INT
-	,intSubBookId INT
-	,intFutOptTransactionId INT
-	,dblContractSize NUMERIC(18,6)
-	,dblFutCommission NUMERIC(18,6)
-	,intBrokerageCommissionId INT
-	,dtmFilledDate DATETIME
-	,intFutOptTransactionHeaderId INT
-	,intCurrencyId INT
-	,strCurrency NVARCHAR(40)
-	,intMainCurrencyId INT
-	,strMainCurrency NVARCHAR(40)
-	,intCent INT
-	,ysnSubCurrency BIT
-	,intBankId INT
-	,intBankAccountId INT
-	,intCurrencyExchangeRateTypeId INT
-	,strBrokerTradeNo NVARCHAR(50)
-	,strFutureMonth NVARCHAR(20)
-	,strOptionType NVARCHAR(20)
-	,dblStrike NUMERIC(18,6)
+	  dblBalanceLot NUMERIC(18,6)
+	, dblBalanceLotRoll NUMERIC(18,6)
+	, dblSelectedLot NUMERIC(18,6)
+	, intSelectedInstrumentTypeId INT
+	, intInstrumentTypeId INT
+	, strTransactionNo NVARCHAR(100)
+	, dtmTransactionDate DATETIME
+	, dblTotalLot NUMERIC(18,6)
+	, dblFuturesMatchedLotBuy NUMERIC(18,6)
+	, dblFuturesMatchedLotSell NUMERIC(18,6)
+	, dblSelectedLotRoll NUMERIC(18,6)
+	, dblOptionsMatchedLotBuy NUMERIC(18,6)
+	, dblOptionsMatchedLotSell NUMERIC(18,6)
+	, strBS NVARCHAR(1)
+	, strBuySell NVARCHAR(10)
+	, dblPrice NUMERIC(18,6)
+	, dtmCreateDateTime DATETIME
+	, strBook NVARCHAR(100)
+	, strSubBook NVARCHAR(100)
+	, intFutureMarketId INT
+	, intBrokerageAccountId INT
+	, intLocationId INT
+	, intFutureMonthId INT
+	, intCommodityId INT
+	, intEntityId INT
+	, intBookId INT
+	, intSubBookId INT
+	, intFutOptTransactionId INT
+	, dblContractSize NUMERIC(18,6)
+	, dblFutCommission NUMERIC(18,6)
+	, intBrokerageCommissionId INT
+	, dtmFilledDate DATETIME
+	, intFutOptTransactionHeaderId INT
+	, intCurrencyId INT
+	, strCurrency NVARCHAR(40)
+	, intMainCurrencyId INT
+	, strMainCurrency NVARCHAR(40)
+	, intCent INT
+	, ysnSubCurrency BIT
+	, intBankId INT
+	, intBankAccountId INT
+	, intCurrencyExchangeRateTypeId INT
+	, strBrokerTradeNo NVARCHAR(50)
+	, strFutureMonth NVARCHAR(20)
+	, strOptionType NVARCHAR(20)
+	, dblStrike NUMERIC(18,6)
+	, intOptionMonthId INT
+	, strOptionMonth NVARCHAR(20)
 )
 
 DECLARE @tempMatchDerivativeHeader AS TABLE (
-	intMatchNo INT
-	,dtmMatchDate DATETIME
-	,intCompanyLocationId INT
-	,intCommodityId INT
-	,intFutureMarketId INT
-	,intFutureMonthId INT
-	,intEntityId INT
-	,intBrokerageAccountId INT
-	,intBookId INT
-	,intSubBookId INT
-	,intSelectedInstrumentTypeId INT
-	,strType NVARCHAR(10)
-	,strMatchingType NVARCHAR(10)
-	--,intCurrencyExchangeRateTypeId INT
-	--,intBankId INT
-	--,intBankAccountId INT
-	--,ysnPosted BIT
-	--,intCompanyId INT
-	--,strRollNo NVARCHAR(50)
+	  intMatchNo INT
+	, dtmMatchDate DATETIME
+	, intCompanyLocationId INT
+	, intCommodityId INT
+	, intFutureMarketId INT
+	, intFutureMonthId INT
+	, intEntityId INT
+	, intBrokerageAccountId INT
+	, intBookId INT
+	, intSubBookId INT
+	, intSelectedInstrumentTypeId INT
+	, strType NVARCHAR(10)
+	, strMatchingType NVARCHAR(10)
+	--, intCurrencyExchangeRateTypeId INT
+	--, intBankId INT
+	--, intBankAccountId INT
+	--, ysnPosted BIT
+	--, intCompanyId INT
+	--, strRollNo NVARCHAR(50)
 
 )
 
 DECLARE @tempMatchDerivativesDetail AS TABLE (
-	intId INT NOT NULL IDENTITY(1,1)
-	,dblMatchQty NUMERIC(18,6)
-	,dblFutCommission NUMERIC(18,6)
-	,intLFutOptTransactionId INT
-	,intSFutOptTransactionId INT
-	,dtmMatchedDate DATETIME
-	,intLFutOptTransactionHeaderId INT
-	,intSFutOptTransactionHeaderId INT
+	  intId INT NOT NULL IDENTITY(1,1)
+	, dblMatchQty NUMERIC(18,6)
+	, dblFutCommission NUMERIC(18,6)
+	, intLFutOptTransactionId INT
+	, intSFutOptTransactionId INT
+	, dtmMatchedDate DATETIME
+	, intLFutOptTransactionHeaderId INT
+	, intSFutOptTransactionHeaderId INT
 
 )
 
@@ -134,10 +136,10 @@ END
 
 
 
-DECLARE @intCommodityId INT
-		,@intCompanyLocationId INT
-		,@intFutureMarketId INT
-		,@intSelectedInstrumentTypeId INT = 1 --Exchange Traded
+DECLARE   @intCommodityId INT
+		, @intCompanyLocationId INT
+		, @intFutureMarketId INT
+		, @intSelectedInstrumentTypeId INT = 1 --Exchange Traded
 
 --Get the availale Market
 SELECT DISTINCT intFutureMarketId INTO #tempMarkets FROM @tempOpenDerivativesForAutoMatching
@@ -173,7 +175,7 @@ BEGIN
 
 			
 			--Broker 
-			SELECT DISTINCT intEntityId INTO #tempBroker FROM #tempBuy 
+			SELECT DISTINCT intEntityId INTO #tempBroker FROM #tempBuy  
 			DECLARE @intBrokerageId INT
 
 			WHILE EXISTS(SELECT TOP 1 * FROM #tempBroker)
@@ -192,8 +194,8 @@ BEGIN
 					SELECT @intBrokerageAccountId = intBrokerageAccountId FROM #tempBrokerAccounts ORDER BY intBrokerageAccountId DESC
 
 
-					--Month
-					SELECT DISTINCT intFutureMonthId INTO #tempMonths FROM #tempBuy WHERE intBrokerageAccountId = @intBrokerageAccountId AND intEntityId = @intBrokerageId
+					-- Futures Month
+					SELECT DISTINCT intFutureMonthId INTO #tempMonths FROM #tempBuy WHERE intBrokerageAccountId = @intBrokerageAccountId AND intEntityId = @intBrokerageId AND intInstrumentTypeId = 1
 					DECLARE @intFutureMonthId INT
 
 					WHILE EXISTS(SELECT TOP 1 * FROM #tempMonths)
@@ -460,13 +462,23 @@ BEGIN
 
 						END
 
+						DELETE FROM #tempMonths WHERE intFutureMonthId = @intFutureMonthId
+
+					END
+
+					-- Option Month
+					SELECT DISTINCT intOptionMonthId INTO #tempOptionMonths FROM #tempBuy WHERE intBrokerageAccountId = @intBrokerageAccountId AND intEntityId = @intBrokerageId AND intInstrumentTypeId = 2
+					DECLARE @intOptionMonthId INT
+
+					WHILE EXISTS(SELECT TOP 1 * FROM #tempOptionMonths)
+					BEGIN
+						SELECT @intOptionMonthId = intOptionMonthId FROM #tempOptionMonths ORDER BY intOptionMonthId DESC
 		
 						--Both Exists for Options
-						IF EXISTS (SELECT * FROM #tempBuy WHERE intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2)
-							AND EXISTS (SELECT * FROM #tempSell WHERE  intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2)
+						IF EXISTS (SELECT * FROM #tempBuy WHERE intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intOptionMonthId = @intOptionMonthId AND intInstrumentTypeId = 2)
+							AND EXISTS (SELECT * FROM #tempSell WHERE  intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intOptionMonthId = @intOptionMonthId AND intInstrumentTypeId = 2)
 						BEGIN
-				
-							SELECT DISTINCT strOptionType INTO #tempOptionType FROM #tempBuy WHERE intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2
+							SELECT DISTINCT strOptionType INTO #tempOptionType FROM #tempBuy WHERE intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intOptionMonthId = @intOptionMonthId AND intInstrumentTypeId = 2
 							DECLARE @strOptionType NVARCHAR(20)
 
 							--Loop thru Option Type
@@ -474,9 +486,8 @@ BEGIN
 							BEGIN
 								SELECT TOP 1 @strOptionType = strOptionType FROM #tempOptionType
 
-
 								SELECT DISTINCT dblStrike INTO #tempStrike FROM #tempBuy
-								WHERE intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType
+								WHERE intEntityId = @intBrokerageId AND intBrokerageAccountId = @intBrokerageAccountId AND intOptionMonthId = @intOptionMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType
 								DECLARE @dblStrike NUMERIC(18,6)
 
 								--Loop thru Strike
@@ -485,17 +496,17 @@ BEGIN
 									SELECT TOP 1 @dblStrike = dblStrike FROM #tempStrike
 
 									--Get Buy and Sell ready for matching options
-									SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId 
+									SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strOptionMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId 
 									INTO #tempBuyForMatchingOptions
 									FROM #tempBuy 
-									WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType AND dblStrike = @dblStrike
+									WHERE intBrokerageAccountId = @intBrokerageAccountId AND intOptionMonthId = @intOptionMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType AND dblStrike = @dblStrike
 									ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 
-									SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strFutureMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId 
+									SELECT strTransactionNo, dtmFilledDate, strBuySell, dblBalanceLot, strOptionMonth, dblPrice, intFutOptTransactionId, intFutOptTransactionHeaderId 
 									INTO #tempSellForMatchingOptions
 									FROM #tempSell 
-									WHERE intBrokerageAccountId = @intBrokerageAccountId AND intFutureMonthId = @intFutureMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType AND dblStrike = @dblStrike
+									WHERE intBrokerageAccountId = @intBrokerageAccountId AND intOptionMonthId = @intOptionMonthId AND intInstrumentTypeId = 2 AND strOptionType = @strOptionType AND dblStrike = @dblStrike
 									ORDER BY dtmFilledDate ASC, dblPrice ASC, strTransactionNo ASC
 
 
@@ -567,10 +578,6 @@ BEGIN
 											END
 
 											DELETE FROM #tempBuyForMatchingOptions WHERE intFutOptTransactionId = @intLFutOptTranactionIdOptions 
-
-						
-
-						
 										END
 
 										--========================================================
@@ -607,9 +614,6 @@ BEGIN
 											, 1 as intConcurrencyId
 										FROM @tempMatchDerivativesDetail
 
-
-							
-
 										DECLARE @strTranNoLast NVARCHAR(50)
 
 										SELECT TOP 1 @strTranNoLast = ISNULL(strTranNo, 0) FROM tblRKOptionsMatchPnS ORDER BY intMatchOptionsPnSId DESC
@@ -628,10 +632,6 @@ BEGIN
 										--SELECT * FROM @tempMatchDerivativesDetail
 
 										DELETE FROM @tempMatchDerivativesDetail
-
-
-									
-								
 									END
 
 									DELETE FROM #tempStrike WHERE dblStrike = @dblStrike
@@ -642,27 +642,20 @@ BEGIN
 
 								DROP TABLE #tempStrike
 
-
 								DELETE FROM #tempOptionType WHERE strOptionType = @strOptionType
 							END
 
 							DROP TABLE #tempOptionType
-							
-
-
 						END
 
-		
-
-
-						DELETE FROM #tempMonths WHERE intFutureMonthId = @intFutureMonthId
+						DELETE FROM #tempOptionMonths WHERE intOptionMonthId = @intOptionMonthId
 
 					END
-
 		
 					DELETE FROM #tempBrokerAccounts WHERE intBrokerageAccountId = @intBrokerageAccountId
 
 					DROP TABLE #tempMonths
+					DROP TABLE #tempOptionMonths
 				END
 			
 				
@@ -700,5 +693,3 @@ END
 
 
 DROP TABLE #tempMarkets
-
-
