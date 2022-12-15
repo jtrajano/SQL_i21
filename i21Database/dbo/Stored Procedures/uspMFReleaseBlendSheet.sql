@@ -59,6 +59,14 @@ BEGIN TRY
 		,@dblQty1 DECIMAL(38, 20)
 		,@intRowNo INT
 		,@ysnReleaseBlendsheetByNoOfMixes BIT
+		,@intTrialBlendSheetStatusId int
+		,@intConfirmedBy INT 
+		,@intApprovedBy INT 
+		,@dtmConfirmedDate DATETIME 
+		,@dtmApprovedDate DATETIME 
+		,@dtmPrintedDate DATETIME 
+		,@intPrintedBy INT 
+		,@strERPComment NVARCHAR(max)
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -916,7 +924,15 @@ BEGIN TRY
 			WHERE intWorkOrderId = @intWorkOrderId
 			)
 	BEGIN
-		SELECT @strSavedWONo = strWorkOrderNo
+		SELECT @strSavedWONo = strWorkOrderNo,
+			@intTrialBlendSheetStatusId =intTrialBlendSheetStatusId,
+			@intConfirmedBy =intConfirmedBy,
+			@intApprovedBy =intApprovedBy,
+			@dtmConfirmedDate= dtmConfirmedDate,
+			@dtmApprovedDate =dtmApprovedDate,
+			@dtmPrintedDate =dtmPrintedDate,
+			@intPrintedBy =intPrintedBy,
+			@strERPComment=strERPComment
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -1719,6 +1735,14 @@ BEGIN TRY
 			,intSubLocationId
 			,dtmOrderDate
 			,intSupervisorId
+			,intTrialBlendSheetStatusId 
+			,intConfirmedBy 
+			,intApprovedBy 
+			,dtmConfirmedDate 
+			,dtmApprovedDate 
+			,dtmPrintedDate 
+			,intPrintedBy 
+			,strERPComment
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -1756,6 +1780,14 @@ BEGIN TRY
 			,@intSubLocationId
 			,GetDate()
 			,intUserId
+			,@intTrialBlendSheetStatusId 
+			,@intConfirmedBy 
+			,@intApprovedBy 
+			,@dtmConfirmedDate 
+			,@dtmApprovedDate 
+			,@dtmPrintedDate 
+			,@intPrintedBy 
+			,@strERPComment
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
