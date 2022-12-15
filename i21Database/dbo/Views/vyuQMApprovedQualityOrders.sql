@@ -22,7 +22,7 @@ SELECT
     ,I.intCommodityId
     ,I.strItemNo
     ,I.strDescription
-    ,[dblQty] = S.dblB1QtyBought
+    ,[dblQty] = B.dblTotalQuantity
     ,[intQtyItemUOMId] = QIUOM.intItemUOMId
     ,[intQtyUnitMeasureId] = QUM.intUnitMeasureId
     ,[strQtyUnitMeasure] = QUM.strSymbol
@@ -67,12 +67,14 @@ INNER JOIN tblQMSample S ON S.intSampleId = B.intSampleId -- Auction or Non-Auct
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = B.intBrokerId
 LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
-LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intDestinationStorageLocationId
-LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
-LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = S.intB1QtyUOMId AND QIUOM.intItemId = I.intItemId
+LEFT JOIN tblICItem I ON I.intItemId = B.intTealingoItemId
+-- Qty UOM Auction
+LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = B.intItemUOMId AND QIUOM.intItemId = I.intItemId
 LEFT JOIN tblICUnitMeasure QUM ON QUM.intUnitMeasureId = QIUOM.intUnitMeasureId
-LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = S.intSampleUOMId
+-- Weight UOM
+LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
 LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = I.intItemId
 LEFT JOIN vyuAPVendor SV ON SV.intEntityId = S.intEntityId
 LEFT JOIN tblEMEntityLocation SVL ON SVL.intEntityLocationId = SV.intDefaultLocationId
@@ -96,7 +98,7 @@ OUTER APPLY (
     INNER JOIN tblSMCurrency C ON C.intCurrencyID = CP.intDefaultCurrencyId
 ) DFC
 OUTER APPLY (
-    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, S.dblB1QtyBought)
+    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblTotalQuantity)
 ) WQTY
 
 GO
