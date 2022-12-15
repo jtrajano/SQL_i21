@@ -614,6 +614,7 @@ WHERE NOT (r.intEntityLocationId IS NULL AND r.intItemId IS NULL AND r.intUnitMe
 UPDATE r
 SET   r.guiApiUniqueId = @guiApiUniqueId
 	, r.dblRatePerUnit = cr.dblRate
+	, r.intRowNumber = cr.intRowNumber
 FROM tblBBRate r
 JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = r.intProgramChargeId
 JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
