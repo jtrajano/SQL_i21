@@ -22,6 +22,12 @@ BEGIN
 				)
 	END
 
+	UPDATE tblMFWorkOrder
+	SET intStatusId = 18
+		,dtmLastModified = GETDATE()
+		,intLastModifiedUserId = @intUserId
+	WHERE intWorkOrderId = @intWorkOrderId
+
 	INSERT INTO tblMFRecallPreStage (
 		intWorkOrderId
 		,intUserId
