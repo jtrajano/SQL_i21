@@ -194,14 +194,14 @@ BEGIN TRY
 						BOOK.intBookId IS NULL
 						AND ISNULL(IMP.strB1GroupNumber, '') <> ''
 						)
-					THEN 'BUYER1 COMPANY CODE, '
+					THEN 'BUYER1 GROUP NUMBER, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						COMPANY_CODE.intPurchasingGroupId IS NULL
 						AND ISNULL(IMP.strB1CompanyCode, '') <> ''
 						)
-					THEN 'BUYER1 GROUP NUMBER, '
+					THEN 'BUYER1 COMPANY CODE, '
 				ELSE ''
 				END + CASE 
 				WHEN (
