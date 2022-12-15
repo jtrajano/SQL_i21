@@ -69,6 +69,7 @@ BEGIN
       ('Radiant - CSH','XML',NULL,'Inbound','<?xml version="1.0" encoding="UTF-8"?>',1,1)
 END
 
+SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader WHERE strLayoutTitle = @strLayoutTitle
 --LEVEL 1
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 1 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
