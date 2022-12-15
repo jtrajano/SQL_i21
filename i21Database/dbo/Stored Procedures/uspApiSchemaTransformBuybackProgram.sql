@@ -152,7 +152,7 @@ JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND v.ysnPymtCtrlActive = 1
 GROUP BY v.intEntityId, vts.strVendor, vs.intVendorSetupId, vts.strProgramName
-
+	
 INSERT INTO tblBBProgram (
 	  intVendorSetupId
 	, strProgramName
@@ -178,7 +178,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		FROM tblBBProgram xp
 		JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
 		WHERE xp.intVendorSetupId = v.intVendorSetupId
-			AND ISNULL(xp.strVendorProgramId, '') = ISNULL(vts.strVendorProgram, '')
+			AND ((xp.strProgramName = vts.strProgramName) OR (xp.strVendorProgramId = vts.strVendorProgram AND NULLIF(xp.strVendorProgramId, '') IS NOT NULL AND NULLIF(vts.strVendorProgram, '') IS NOT NULL))
 			AND xvs.intEntityId = v.intEntityId
 	)
 
@@ -230,6 +230,7 @@ BEGIN
 	UPDATE tblBBProgram
 	SET strProgramId = @strProgramId
 	WHERE intProgramId = @intProgramId
+		AND intConcurrencyId = 1
 
 	INSERT INTO @CreatedPrograms(intProgramId, intVendorSetupId, strProgramId, strProgramName, strVendorProgram)
 	VALUES (@intProgramId, @intVendorSetupId, @strProgramId, @strProgramName, @strVendorProgram)
@@ -375,12 +376,14 @@ OUTER APPLY (
 	LEFT JOIN tblEMEntityLocation el ON el.intEntityLocationId = c.intEntityLocationId
 	WHERE c.intVendorSetupId = p.intVendorSetupId
 		AND el.strLocationName = vts.strCustomerLocation
+		AND vts.strCustomerLocation IS NOT NULL
 ) cl
 OUTER APPLY (
 	SElECT TOP 1 c.intEntityLocationId
 	FROM tblBBCustomerLocationXref c
 	WHERE c.intVendorSetupId = p.intVendorSetupId
 		AND c.strVendorCustomerLocation = vts.strVendorCustomerLocation
+		AND vts.strVendorCustomerLocation IS NOT NULL
 ) vcl
 LEFT JOIN tblICItem i ON (i.strItemNo = vts.strItemNo AND NULLIF(vts.strItemNo, '') IS NOT NULL)
 	OR (NULLIF(vts.strItemNo, '') IS NULL AND vts.strItemName = i.strDescription)
@@ -422,7 +425,7 @@ FROM @CreatedProgramRates cpr
 JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = cpr.intVendorSetupId
 JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId
 JOIN tblEMEntityLocation el ON el.intEntityLocationId = cpr.intEntityLocationId
-CROSS APPLY (
+OUTER APPLY (
 	SELECT TOP 1 xr.dblRatePerUnit
 	FROM tblBBRate xr
 	JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
@@ -431,15 +434,20 @@ CROSS APPLY (
 	JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
 	JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
 	WHERE xr.intCustomerLocationId = cpr.intEntityLocationId
-		AND ((xr.intItemId = cpr.intItemId AND cpr.intItemId IS NOT NULL)
-			OR (xr.intUnitMeasureId = cpr.intUnitMeasureId AND cpr.intUnitMeasureId IS NOT NULL AND cpr.intItemId IS NULL))
-		AND cpr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= cpr.dtmEndDate
+		AND xr.intCustomerLocationId = cpr.intEntityLocationId
+		AND ((xr.intUnitMeasureId = cpr.intUnitMeasureId AND xr.intUnitMeasureId IS NOT NULL AND xr.intItemId IS NULL)
+			OR (xr.intItemId = cpr.intItemId AND xr.intItemId IS NOT NULL))
+		AND (cpr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= cpr.dtmEndDate)
 		AND NOT (
-			xr.intCustomerLocationId = cpr.intEntityLocationId
-			AND ((xr.intUnitMeasureId = cpr.intUnitMeasureId) OR (xr.intItemId = cpr.intItemId))
-			AND cpr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= cpr.dtmEndDate
+			ISNULL(cpr.intEntityLocationId, 0) = ISNULL(xr.intCustomerLocationId, 0)
+			AND ISNULL(cpr.intItemId, 0) = ISNULL(xr.intItemId, 0)
+			AND ISNULL(cpr.intUnitMeasureId, 0) = ISNULL(xr.intUnitMeasureId, 0)
+			AND cpr.intProgramChargeId = xr.intProgramChargeId
+			AND cpr.dtmBeginDate = xr.dtmBeginDate
+			AND cpr.dtmEndDate = xr.dtmEndDate
 		)
 ) r
+WHERE r.dblRatePerUnit IS NOT NULL
 
 -- INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 -- SELECT
@@ -536,7 +544,7 @@ WHERE EXISTS (
 	FROM @CreatedProgramRatesOriginal xpr
 	WHERE xpr.intRowNumber < pr.intRowNumber
 		AND xpr.intEntityId = pr.intEntityId
-		AND xpr.intEntityLocationId = pr.intEntityLocationId
+		AND NULLIF(xpr.intEntityLocationId, 0) = NULLIF(pr.intEntityLocationId, 0)
 		AND ((xpr.intUnitMeasureId = pr.intUnitMeasureId AND xpr.intUnitMeasureId IS NOT NULL AND xpr.intItemId IS NULL)
 			OR (xpr.intItemId = pr.intItemId AND xpr.intItemId IS NOT NULL))
 		AND pr.dtmBeginDate <= xpr.dtmEndDate AND xpr.dtmBeginDate <= pr.dtmEndDate
@@ -566,18 +574,41 @@ SELECT
 	, @guiApiUniqueId
 	, r.intRowNumber
 FROM @CreatedProgramRates r
+OUTER APPLY (
+	SELECT TOP 1 xr.*
+	FROM tblBBRate xr
+	JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
+	JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
+	JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+	JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
+	WHERE (xr.intCustomerLocationId = r.intEntityLocationId
+		AND ((xr.intItemId = r.intItemId AND r.intItemId IS NOT NULL)
+			OR (xr.intUnitMeasureId = r.intUnitMeasureId AND r.intUnitMeasureId IS NOT NULL AND r.intItemId IS NULL))
+		AND r.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= r.dtmEndDate
+		AND NOT (
+			xr.intCustomerLocationId = r.intEntityLocationId
+			AND ((xr.intUnitMeasureId = r.intUnitMeasureId) OR (xr.intItemId = r.intItemId))
+			AND r.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= r.dtmEndDate
+		))
+		-- This line is to fix duplicate rate when location is null
+		OR (
+			ISNULL(xr.intCustomerLocationId, 0) = ISNULL(r.intEntityLocationId, 0)
+			AND ISNULL(xr.intItemId, 0) = ISNULL(r.intItemId, 0)
+			AND ISNULL(xr.intUnitMeasureId, 0) = ISNULL(r.intUnitMeasureId, 0)
+			AND xr.intProgramChargeId = r.intProgramChargeId
+			AND xr.dtmBeginDate = r.dtmBeginDate
+			AND xr.dtmEndDate = r.dtmEndDate
+		)
+) x
 WHERE NOT (r.intEntityLocationId IS NULL AND r.intItemId IS NULL AND r.intUnitMeasureId IS NULL)
+	AND x.intRateId IS NULL
 	AND NOT EXISTS (
 		SELECT TOP 1 1
-		FROM tblBBRate xr
-		JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
-		JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
-		JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
-		JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
-		JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
-		WHERE xr.intCustomerLocationId = r.intEntityLocationId
-			AND ((xr.intUnitMeasureId = r.intUnitMeasureId AND r.intUnitMeasureId IS NOT NULL AND r.intItemId IS NULL) OR (xr.intItemId = r.intItemId AND r.intItemId IS NOT NULL))
-			AND r.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= r.dtmEndDate
+		FROM tblApiImportLogDetail xd
+		WHERE xd.guiApiImportLogId = @guiLogId
+			AND xd.intRowNo = r.intRowNumber
+			AND xd.strLogLevel = 'Error'
+			AND xd.strStatus = 'Failed'
 	)
 
 UPDATE r
@@ -588,14 +619,23 @@ JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = r.intProgramChargeId
 JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
 JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
 JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
-JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = r.intCustomerLocationId
+LEFT JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = r.intCustomerLocationId
 JOIN @CreatedProgramRates cr ON cr.intEntityId = xv.intEntityId
-	AND (cr.intItemId = r.intItemId OR cr.intUnitMeasureId = r.intUnitMeasureId)
 	AND cr.intProgramId = xp.intProgramId
-	AND cr.intEntityLocationId = r.intCustomerLocationId
+	AND ISNULL(cr.intEntityLocationId, 0) = ISNULL(r.intCustomerLocationId, 0)
+	AND ISNULL(cr.intItemId, 0) = ISNULL(r.intItemId, 0)
+	AND ISNULL(cr.intUnitMeasureId, 0) = ISNULL(r.intUnitMeasureId, 0)
 	AND cr.intProgramChargeId = r.intProgramChargeId
 	AND cr.dtmBeginDate = r.dtmBeginDate
 	AND cr.dtmEndDate = r.dtmEndDate
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail xd
+		WHERE xd.guiApiImportLogId = @guiLogId
+			AND xd.intRowNo = r.intRowNumber
+			AND xd.strLogLevel = 'Error'
+			AND xd.strStatus = 'Failed'
+	)
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
@@ -627,8 +667,8 @@ JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
 JOIN vyuAPVendor v ON v.intEntityId = xvs.intEntityId
 JOIN tblApiSchemaTransformBuybackProgram vts ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
-	AND (NULLIF(vts.strVendorProgram, '') IS NOT NULL AND vts.strVendorProgram = xp.strVendorProgramId)
-	OR (NULLIF(vts.strVendorProgram, '') IS NULL AND vts.strProgramName = xp.strProgramName)
+	AND ((NULLIF(vts.strVendorProgram, '') IS NOT NULL AND vts.strVendorProgram = xp.strVendorProgramId)
+	OR (NULLIF(vts.strVendorProgram, '') IS NULL AND vts.strProgramName = xp.strProgramName))
 GROUP BY xp.strProgramName
 
 UPDATE log
