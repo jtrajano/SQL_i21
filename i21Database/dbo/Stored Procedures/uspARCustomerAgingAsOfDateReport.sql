@@ -347,6 +347,29 @@ WHERE I.ysnPosted = 1
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
+--@CANCELLEDINVOICE
+INSERT INTO #CANCELLEDINVOICE (
+	 intInvoiceId
+	,strInvoiceNumber
+	,ysnPaid
+)
+SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid from tblARInvoice INVCANCELLED
+WHERE ysnCancelled =1 
+AND ysnPosted =1
+AND INVCANCELLED.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+--@CANCELLEDCMINVOICE
+INSERT INTO #CANCELLEDCMINVOICE (
+	 intInvoiceId
+	,strInvoiceNumber
+)
+SELECT CM.intInvoiceId,CM.strInvoiceNumber from tblARInvoice CM
+where CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM #CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
+AND CM.ysnPosted =1  
+AND CM.strTransactionType = 'Credit Memo'
+AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+
 --#AGINGPOSTEDINVOICES
 INSERT INTO #AGINGPOSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId
@@ -460,6 +483,12 @@ GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
 DELETE FROM  #AGINGPOSTEDINVOICES
 WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM #CASHREFUNDS CF INNER  JOIN #CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber)
+
+DELETE FROM  #AGINGPOSTEDINVOICES
+WHERE intInvoiceId IN (SELECT intInvoiceId FROM #CANCELLEDINVOICE)
+
+DELETE FROM  #AGINGPOSTEDINVOICES
+WHERE intInvoiceId IN (SELECT intInvoiceId FROM #CANCELLEDCMINVOICE)
 
 --#CASHRETURNS
 INSERT INTO #CASHRETURNS (
