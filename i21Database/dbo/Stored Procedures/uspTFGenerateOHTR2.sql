@@ -17,6 +17,8 @@ BEGIN TRY
 	DECLARE @Name NVARCHAR(100)
 		, @TIN NVARCHAR(50)
 		, @OhioAccountNo NVARCHAR(50)
+		, @FilerFein NVARCHAR(50)
+		
 		, @dtmFrom DATE
 		, @dtmTo DATE
 	
@@ -104,7 +106,8 @@ BEGIN TRY
 		
 		-- Configuration
 		SELECT @OhioAccountNo = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'TR2' AND strTemplateItemId = 'TR2-OHTR2AcctNumber'	
-
+		SELECT @FilerFein = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strFormCode = 'TR2' AND strTemplateItemId = 'TR2-OHTR2FilerFein'	
+		
 		-- Transaction
 		INSERT INTO @transaction (strFormCode, strScheduleCode, strType, dblReceived)
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
@@ -113,7 +116,7 @@ BEGIN TRY
 		GROUP BY strFormCode, strScheduleCode, strType
 
 		-- Transaction Info
-		SELECT TOP 1  @Name = strTaxPayerName, @TIN = strTaxPayerFEIN FROM vyuTFGetTransaction Trans WHERE Trans.uniqTransactionGuid = @Guid
+		SELECT TOP 1  @Name = strTaxPayerName, @TIN = ISNULL(NULLIF(@FilerFein,''),strTaxPayerFEIN) FROM vyuTFGetTransaction Trans WHERE Trans.uniqTransactionGuid = @Guid
 		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
