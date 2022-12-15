@@ -21,6 +21,7 @@ SELECT w.intWorkOrderId
 	 ,w.dtmReleasedDate
 	 ,ReleasedBy.strName As strReleasedBy
 	 ,w.strERPOrderNo AS strERPOrderNo
+	 ,w.strERPComment AS strERPComment
 from tblMFWorkOrder w 
 Join tblICItem i on w.intItemId=i.intItemId 
 Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId 
