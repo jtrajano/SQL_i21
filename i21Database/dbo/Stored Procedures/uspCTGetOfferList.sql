@@ -1022,7 +1022,7 @@ BEGIN
 		SELECT DISTINCT SUM(IRI.dblOrderQty)  dblTotalQty
 		FROM tblICInventoryReceiptItem IRI
 		LEFT JOIN tblCTContractDetail CTD1  WITH (NOLOCK) ON IRI.intLineNo = CTD1.intContractDetailId
-		WHERE CTD1.intContractDetailId = CTD.intContractDetailId
+		WHERE CTD1.intContractDetailId = CTD.intContractDetailId AND IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 	) TQIR
 	OUTER APPLY ( 
 		SELECT DISTINCT ISNULL(SUM(IRC2.dblAmount),SUM(LGCInStore.dblAmount)) AS dblAmount FROM tblICInventoryReceiptCharge IRC2
