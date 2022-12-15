@@ -331,7 +331,7 @@ BEGIN TRY
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
-			,dtmProductionBatch = NULL
+			,dtmProductionBatch = S.dtmManufacturingDate
 			,dtmTeaAvailableFrom = NULL
 			,strDustContent = NULL
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
