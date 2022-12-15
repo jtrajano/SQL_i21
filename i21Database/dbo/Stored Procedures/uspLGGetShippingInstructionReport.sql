@@ -25,7 +25,9 @@ BEGIN
 			@strUserEmailId				NVARCHAR(100),
 			@strContainerQtyUOM			NVARCHAR(100),
 			@strPackingUOM				NVARCHAR(100),
-			@Condition					VARCHAR(8000) 
+			@Condition					VARCHAR(8000) ,
+			@intVendorCustomerLocId		INT,
+			@intPSCompanyLocId			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -115,6 +117,21 @@ BEGIN
 	BEGIN
 		SET @Condition = NULL
 	END
+
+	SELECT
+		@intVendorCustomerLocId = 
+			CASE WHEN intPurchaseSale = 1 
+				THEN LD.intVendorEntityLocationId ELSE
+				intCustomerEntityLocationId
+			END,
+		@intPSCompanyLocId =
+			CASE WHEN intPurchaseSale = 1 
+				THEN LD.intPCompanyLocationId ELSE
+				intSCompanyLocationId
+			END
+	FROM tblLGLoad L
+	INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	WHERE L.intLoadId = @intLoadId
 
 SELECT *
 	,strConsigneeInfo = LTRIM(RTRIM(
@@ -625,12 +642,12 @@ FROM (
 	
 	LEFT JOIN tblLGReportRemark strItemRemarks ON 
 		strItemRemarks.intValueId = LD.intItemId 
-		AND ISNULL(strItemRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND ISNULL(strItemRemarks.intLocationId, 1) = ISNULL(@intPSCompanyLocId,1)
 		AND strItemRemarks.strType = 'Item'
 
 	LEFT JOIN tblLGReportRemark strEntityRemarks ON 
 		strEntityRemarks.intValueId = LD.intVendorEntityId
-		AND ISNULL(strEntityRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND ISNULL(strEntityRemarks.intLocationId, 1) = ISNULL(@intVendorCustomerLocId,1)
 		AND strEntityRemarks.strType = 'Entity'
 
 	CROSS APPLY tblLGCompanyPreference CP

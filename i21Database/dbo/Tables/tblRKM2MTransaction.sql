@@ -74,6 +74,7 @@
 	[intStorageUnitId] INT NULL,
 	[strProductType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
 	[strGrade] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
+	[strCertification] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
 	[strRegion] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSeason] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strClass] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

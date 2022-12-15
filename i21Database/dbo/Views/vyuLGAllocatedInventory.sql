@@ -34,6 +34,14 @@ SELECT SCH.intContractHeaderId
               END COLLATE Latin1_General_CI_AS
        ,S.strSampleStatus
        ,S.dtmSampleReceivedDate
+       ,S.dtmSampleSentDate
+       ,S.strSampleNumber
+       ,dtmSampleApprovalDate = CASE WHEN S.intSampleStatusId = 3 THEN S.dtmTestedOn ELSE NULL END
+       ,dblQtyToPick = ISNULL(ALD.dblSAllocatedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0)
+       ,IRIL.strLotAlias
+       ,IRIL.strWarrantNo
+       ,IRIL.strMarkings
+       ,IWS.strWarrantStatus
 FROM tblLGAllocationDetail ALD 
 JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = ALD.intPContractDetailId
 JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
@@ -74,6 +82,9 @@ LEFT JOIN (
                      ,CLSL.strSubLocationName
                      ,S.dblRepresentingQty
                      ,S.dtmSampleReceivedDate
+                     ,S.dtmSampleSentDate
+                     ,S.dtmTestedOn
+                     ,S.intSampleStatusId
               FROM tblQMSample S
               JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
               JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -85,6 +96,7 @@ LEFT JOIN (
        ) S ON S.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblLGLoadDetail DOD ON DOD.intPickLotDetailId = PLD.intPickLotDetailId
 LEFT JOIN tblLGLoad DO ON DO.intLoadId = DOD.intLoadId 
+LEFT JOIN tblICWarrantStatus IWS ON IWS.intWarrantStatus = IRIL.intWarrantStatus
 WHERE ISNULL(DO.intShipmentStatus,0) NOT IN (6, 11) AND L.intShipmentStatus <> 3 
 
 UNION ALL
@@ -120,6 +132,14 @@ SELECT
        ,strStatus = 'In-Transit' COLLATE Latin1_General_CI_AS
        ,S.strSampleStatus
        ,S.dtmSampleReceivedDate
+       ,S.dtmSampleSentDate
+       ,S.strSampleNumber
+       ,dtmSampleApprovalDate = CASE WHEN S.intSampleStatusId = 3 THEN S.dtmTestedOn ELSE NULL END
+       ,dblQtyToPick = ISNULL(ALD.dblSAllocatedQty, 0)
+       ,strLotAlias = NULL
+       ,strWarrantNo = NULL
+       ,strMarkings = NULL
+       ,strWarrantStatus = NULL
 FROM tblLGAllocationDetail ALD 
 JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = ALD.intPContractDetailId
 JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
@@ -153,6 +173,9 @@ LEFT JOIN (
                      ,CLSL.strSubLocationName
                      ,S.dblRepresentingQty
                      ,S.dtmSampleReceivedDate
+                     ,S.dtmSampleSentDate
+                     ,S.dtmTestedOn
+                     ,S.intSampleStatusId
               FROM tblQMSample S
               JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
               JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -196,6 +219,14 @@ SELECT SCH.intContractHeaderId
        ,'In-Transit' strStatus
        ,S.strSampleStatus
        ,S.dtmSampleReceivedDate
+       ,S.dtmSampleSentDate
+       ,S.strSampleNumber
+       ,dtmSampleApprovalDate = CASE WHEN S.intSampleStatusId = 3 THEN S.dtmTestedOn ELSE NULL END
+       ,dblQtyToPick = ISNULL(ALD.dblSAllocatedQty, 0)
+       ,strLotAlias = NULL
+       ,strWarrantNo = NULL
+       ,strMarkings = NULL
+       ,strWarrantStatus = NULL
 FROM tblLGAllocationDetail ALD 
 JOIN tblLGLoadDetail LD ON LD.intAllocationDetailId = ALD.intAllocationDetailId
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 3
@@ -231,6 +262,9 @@ LEFT JOIN (
                      ,CLSL.strSubLocationName
                      ,S.dblRepresentingQty
                      ,S.dtmSampleReceivedDate
+                     ,S.dtmSampleSentDate
+                     ,S.dtmTestedOn
+                     ,S.intSampleStatusId
               FROM tblQMSample S
               JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
               JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId

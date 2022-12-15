@@ -72,10 +72,10 @@ BEGIN
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = GLAccnt.intAccountId      
         ,[dblDebit]              = 0
-        ,[dblCredit]             = dblAmountFrom
+        ,[dblCredit]             = dblAmountSettlementFrom
         ,[dblDebitForeign]       = 0
         ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom    
-                                    THEN dblAmountFrom ELSE  dblAmountForeignTo END          
+                                    THEN dblAmountFrom ELSE  dblAmountForeignFrom END          
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -83,7 +83,7 @@ BEGIN
         ,[strReference]          = A.strReferenceTo      
         ,[intCurrencyId]         = intCurrencyIdAmountFrom    
         ,[intCurrencyExchangeRateTypeId] =  CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN NULL ELSE  intRateTypeIdAmountFrom  END    
-        ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountFrom  END    
+        ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountSettlementFrom  END    
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = GLAccnt.strDescription      
@@ -104,7 +104,7 @@ BEGIN
         ,[dtmDate]               = @dtmDate      
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTInTransitAccountId
-        ,[dblDebit]              = dblAmountFrom 
+        ,[dblDebit]              = dblAmountSettlementFrom 
         ,[dblCredit]             = 0
         ,[dblDebitForeign]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom
                                    THEN dblAmountFrom ELSE  dblAmountForeignFrom END   
@@ -116,7 +116,7 @@ BEGIN
         ,[strReference]          = A.strReferenceTo
         ,[intCurrencyId]         = intCurrencyIdAmountFrom
         ,[intCurrencyExchangeRateTypeId] =  CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN NULL ELSE  intRateTypeIdAmountFrom  END    
-        ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountFrom END    
+        ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountSettlementFrom END    
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = 'In-Transit Entry'

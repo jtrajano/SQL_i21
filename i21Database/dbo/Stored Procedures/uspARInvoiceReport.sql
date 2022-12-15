@@ -117,6 +117,7 @@ CREATE TABLE #INVOICES (
 	 , intOriginalInvoiceId			INT				NULL
 	 , dblServiceChargeAPR			NUMERIC(18, 6)	NULL DEFAULT 0
 	 , strLogoType					NVARCHAR(10)
+	 , dtmDueDateSC					DATETIME		NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -291,6 +292,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	, intOriginalInvoiceId
 	, dblServiceChargeAPR
 	, strLogoType
+	, dtmDueDateSC
 )
 SELECT 
 	 intInvoiceId					= INV.intInvoiceId
@@ -407,7 +409,7 @@ SELECT
 	, strSubFormula					= INVOICEDETAIL.strSubFormula	
 	, dtmCreated					= GETDATE()
 	, strServiceChargeItem			= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-										THEN 'Service Charge on Past Due ' + CHAR(13) + 'Balance as of: ' +  CONVERT(VARCHAR(10), INV.dtmDate, 101)
+										THEN 'Service Charge'
 										ELSE ''
 									END
 	, intDaysOld               		= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
@@ -422,6 +424,7 @@ SELECT
 	, intOriginalInvoiceId			= INV.intOriginalInvoiceId
 	, dblServiceChargeAPR			= ISNULL(INVOICEDETAIL.dblServiceChargeAPR, 0.00)
 	, strLogoType					= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	, dtmDueDateSC					= INVOICEDETAIL.dtmDueDateSC
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -477,6 +480,7 @@ LEFT JOIN (
 		,dtmDueDate					= INVSC.dtmDueDate
 		,ysnPaid					= INVSC.ysnPaid
 		,intSCInvoiceId				= ID.intSCInvoiceId
+		,dtmDueDateSC				= INVSC.dtmDueDate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblARInvoice INVSC ON INVSC.intInvoiceId = ID.intSCInvoiceId
@@ -805,6 +809,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	, dtmDateSC
 	, dblServiceChargeAPR
 	, strLogoType
+	, dtmDueDateSC
 )
 SELECT 
 	 intInvoiceId
@@ -907,6 +912,7 @@ SELECT
 	, dtmDateSC
 	, dblServiceChargeAPR
 	, strLogoType
+	, dtmDueDateSC
 FROM #INVOICES
 
 --UPDATE STAGING

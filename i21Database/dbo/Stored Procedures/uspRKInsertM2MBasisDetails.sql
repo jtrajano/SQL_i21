@@ -57,6 +57,8 @@ DECLARE @tempBasis TABLE(intRowNumber INT
 	, intCertificationId INT
 	, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intMTMPointId INT
+	, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, ysnEvaluationByLocation BIT
     , ysnEvaluationByMarketZone BIT
     , ysnEvaluationByOriginPort BIT

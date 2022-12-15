@@ -282,6 +282,10 @@ OUTER APPLY(
 )DER
 WHERE strDerivativeId IS NOT NULL AND intItemLOBSegmentId IS NULL
 
+GO
+--update MT101 Bank File Format
+update tblCMBankFileFormatDetail set strFieldName = 'Tag 20 (Record Number)' where strFieldName = 'Tag 20 (EFT Number)'
+update tblCMBankFileFormatDetail set strFieldName = 'Tag 21 (Record Number)' where strFieldName = 'Tag 21 (EFT Number)'
 
-PRINT('/*******************  END Cash Management Data Fixess *******************/')
+PRINT('/*******************  END Cash Management Data Fixes *******************/')
 GO

@@ -55,6 +55,8 @@ SELECT
 		, i.intCertificationId
 		, MTMPoint.strMTMPoint
 		, bd.intMTMPointId
+		, strClass = CLASS.strDescription
+		, strRegion = REGION.strDescription
 FROM tblRKM2MBasisDetail bd
 JOIN tblRKM2MBasis mb on mb.intM2MBasisId=bd.intM2MBasisId
 JOIN tblICCommodity c on c.intCommodityId=bd.intCommodityId
@@ -84,3 +86,7 @@ LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityId = 
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityId = c.intCommodityId AND Grade.strType = 'Grade' AND Grade.intCommodityAttributeId = bd.intGradeId
 LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = bd.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = bd.intMTMPointId
+LEFT JOIN tblICCommodityAttribute CLASS
+	ON CLASS.intCommodityAttributeId = i.intClassVarietyId
+LEFT JOIN tblICCommodityAttribute REGION
+	ON REGION.intCommodityAttributeId = i.intRegionId

@@ -60,7 +60,7 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Payable'
 DECLARE @TRAN_TYPE NVARCHAR(25) = 'Payable'
-DECLARE @paymentIds NVARCHAR(MAX) = @param
+DECLARE @paymentIds NVARCHAR(MAX)
 DECLARE @validPaymentIds NVARCHAR(MAX)
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @count INT = 0;

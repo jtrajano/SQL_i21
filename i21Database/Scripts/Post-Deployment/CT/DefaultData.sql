@@ -11,6 +11,7 @@ MERGE INTO tblCTBasisCost AS destination
 			 SELECT 
 				 ICI.strItemNo ,
 				 ICI.intItemId,
+				 CASE WHEN ICI.strCostMethod = '' THEN 'Amount' ELSE ICI.strCostMethod END strCostMethod,
 				 ROW_NUMBER() OVER (ORDER BY CC.intPriority DESC) as [intPriority] ,
 				 ROW_NUMBER() OVER (ORDER BY CC.intPriority DESC) as [intSort],
 				 ISNULL(CC.[intConcurrencyId],1) as [intConcurrencyId]
@@ -25,6 +26,7 @@ MERGE INTO tblCTBasisCost AS destination
 		(
 				[strItemNo]
 				,[intItemId]
+				,[strCostMethod]
 				,[intPriority]
 				,[intSort]
 				,[intConcurrencyId]
@@ -33,6 +35,7 @@ MERGE INTO tblCTBasisCost AS destination
 		(
 			SourceData.strItemNo
 			,SourceData.intItemId
+			,SourceData.strCostMethod
 			,SourceData.[intPriority]
 			,SourceData.[intSort]
 			,SourceData.[intConcurrencyId]
