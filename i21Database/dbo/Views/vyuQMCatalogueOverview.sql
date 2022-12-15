@@ -24,7 +24,7 @@ SELECT S.intSampleId
 	, strParentBatch = Batch.strBatchId
 	, strBuyingOrderNo = S.strBuyingOrderNo
 	, CTT.strCatalogueType
-	, dblNetWeightPerPackage = ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0)
+	, dblNetWeightPerPackage = CASE WHEN ISNULL(S.dblRepresentingQty, 0) = 0 THEN 0 ELSE ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0) END
 	, strSubCluster = SC.strDescription 
 	, S.ysnOrganic
 	, strSustainability = PL.strDescription 
@@ -34,7 +34,7 @@ SELECT S.intSampleId
 	, dblB1QtyBought = S.dblB1QtyBought
 	, strBuyer1 = B1.strName
 	, strManufacturingLeafType = MLT.strDescription
-	, dblCompanyCompetitor1TotalWt = ISNULL(S.dblB1QtyBought, 0) * ISNULL((ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0)), 0)  
+	, dblCompanyCompetitor1TotalWt = CASE WHEN ISNULL(S.dblRepresentingQty, 0) = 0 THEN 0 ELSE ISNULL(S.dblB1QtyBought, 0) * ISNULL((ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0)), 0) END
 	, dblValue = ISNULL(S.dblSampleQty, 0) * ISNULL(S.dblBasePrice, 0)
 	, strBuyer2 = B2.strName
 	, strTealingoGroup = Size.strBrandCode + SC.strDescription + VG.strName
