@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
 	@intCurrentUserId					INT,
 	@intCheckoutId						INT,
+	@intCheckoutProcessId				INT,
 	@strDirection						NVARCHAR(50),
 	@ysnRecap							BIT,
 	@strStatusMsg						NVARCHAR(1000)	OUTPUT,
@@ -6106,7 +6107,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 								IF (@ysnConsignmentStore = 1 AND @strCheckoutType = 'Automatic')
 								BEGIN
 									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
-									VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), @intCheckoutId, 'W', 'Done processing checkout for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
+									VALUES (@intCheckoutProcessId, @intCheckoutId, 'W', 'Done processing checkout for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
 								END
 								--------------------------------------------------------------------------
 								--- CS-72 - Record Successful Day Processing in Polling Status Report. ---
