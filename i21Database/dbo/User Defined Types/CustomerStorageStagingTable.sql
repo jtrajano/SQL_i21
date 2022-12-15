@@ -49,4 +49,7 @@
 	[intSourceCustomerStorageId] [int] NULL,
 	[dblUnitQty] [numeric](38, 20) NOT NULL DEFAULT ((0)),
 	[dblSplitPercent] [numeric](38, 20) NOT NULL DEFAULT ((0))
+	-------------*******Basis and Settlement Price**************------------------------
+	[dblBasis] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+    [dblSettlementPrice] DECIMAL(18, 6) NOT NULL DEFAULT 0
 )
