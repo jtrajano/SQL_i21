@@ -46,6 +46,13 @@ DECLARE @ysnIsStorage AS INT
 DECLARE @strLotTracking NVARCHAR(4000)
 DECLARE @dblAvailableGrainOpenBalance DECIMAL(38, 20)
 
+DECLARE @dblBasis NUMERIC(18,6)
+DECLARE @dblFutures NUMERIC(18,6)
+DECLARE @intTicketItemUOMIdTo INT
+DECLARE @intTicketCurrencyId INT
+DECLARE @intTicketProcessingLocationId INT
+DECLARE @dtmContractEndDate DATETIME
+
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
@@ -71,6 +78,9 @@ BEGIN TRY
 	, @intCommodityId = SC.intCommodityId
 	, @intScaleStationId = SC.intScaleSetupId
 	, @intItemId = SC.intItemId 
+	, @intTicketItemUOMIdTo = intItemUOMIdTo
+	, @intTicketCurrencyId = intCurrencyId
+	, @intTicketProcessingLocationId = intProcessingLocationId
 	FROM tblSCTicket SC
 	WHERE SC.intTicketId = @intTicketId
 
@@ -453,6 +463,42 @@ BEGIN TRY
 	BEGIN
 		SELECT @strDistributionOption = GR.strStorageTypeCode FROM tblGRStorageType GR WHERE intStorageScheduleTypeId = @intGRStorageId
 	END
+
+	SELECT	
+		@dtmContractEndDate = dtmEndDate
+	FROM tblCTContractDetail 
+	WHERE intContractDetailId = ISNULL(@intDPContractId,0)
+
+	SELECT TOP 1
+		@dblFutures = dbo.fnCTConvertQtyToTargetItemUOM(@intTicketItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) 
+		,@dblBasis = dbo.fnCTConvertQtyToTargetItemUOM(@intTicketItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
+	FROM dbo.fnRKGetFutureAndBasisPrice (1,@intCommodityId,right(convert(varchar, @dtmContractEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,@intTicketProcessingLocationId,NULL,0,@intItemId,@intTicketCurrencyId)
+	LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = @intItemId
+	LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = @intItemId
+
+
+	--IF(ISNULL(@intTicketDeliverySheetId,0) > 0)
+	BEGIN
+		IF EXISTS (SELECT TOP 1 1 FROM tblGRCustomerStorage 
+					WHERE intCustomerStorageId = @intHoldCustomerStorageId 
+						AND ISNULL(dblBasis,0) = 0 
+						AND ISNULL(dblSettlementPrice,0) = 0)
+			AND ISNULL(@intDPContractId,0) > 0
+		BEGIN
+			UPDATE tblGRCustomerStorage
+			SET dblBasis = ISNULL(@dblBasis,0)
+				,dblSettlementPrice = ISNULL(@dblFutures,0)
+			WHERE intCustomerStorageId = @intHoldCustomerStorageId
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 
+				@dblBasis = dblBasis
+				,@dblFutures = dblSettlementPrice
+			FROM tblGRCustomerStorage
+			WHERE intCustomerStorageId = @intHoldCustomerStorageId
+		END
+	END
 	
 	SELECT intItemId = ScaleTicket.intItemId
 			,intLocationId = ItemLocation.intItemLocationId 
@@ -464,10 +510,7 @@ BEGIN TRY
 			CASE 
 				WHEN ISNULL(@intDPContractId,0) > 0 THEN 
 				ISNULL(
-					(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
-					FROM dbo.fnRKGetFutureAndBasisPrice (1,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,ScaleTicket.intProcessingLocationId,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
-					LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
-					LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
+					(ISNULL(@dblFutures,0) + ISNULL(@dblBasis,0)),0
 				)
 				WHEN ISNULL(@intDPContractId,0) = 0 THEN 0
 			END

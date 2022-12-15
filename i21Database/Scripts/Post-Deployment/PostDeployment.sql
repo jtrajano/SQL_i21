@@ -390,6 +390,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
+:R .\GR\StorageInventoryReceipt.sql
+:R .\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
 
