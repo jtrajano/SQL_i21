@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPClearVoucherTempData]
-	@voucherIds NVARCHAR(MAX)
+	@voucherIds NVARCHAR(MAX),
+	@invoiceIds NVARCHAR(MAX)
 AS
 BEGIN
 
@@ -12,6 +13,7 @@ BEGIN
 	BEGIN TRY
 
 	DECLARE @cntVoucher INT;
+	DECLARE @cntInvoice INT;
 	DECLARE @cntPaySched INT;
 	DECLARE @vouchersUpdated INT;
 	DECLARE @paySchedUpdated INT;
@@ -22,6 +24,7 @@ BEGIN
 
 	DECLARE @ids AS Id;
 	DECLARE @schedIds AS Id;
+	DECLARE @invoices AS Id;
 
 	INSERT INTO @ids
 	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds) WHERE intID > 0
@@ -62,6 +65,18 @@ BEGIN
 			RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);
 			RETURN;
 		END
+	END
+
+	INSERT INTO @invoices
+	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@invoiceIds) WHERE intID > 0
+
+	SET @cntInvoice = (SELECT COUNT(*) FROM @invoices);
+
+	IF @cntInvoice > 0
+	BEGIN
+		DELETE A
+		FROM tblAPPaymentIntegrationTransaction A
+		INNER JOIN @invoices B ON A.intInvoiceId = B.intId
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateVendorRefund]
 	@voucherIds NVARCHAR(MAX),
+	@invoiceIds NVARCHAR(MAX),
 	@paymentDate DATETIME,
 	@userId INT,
 	@bankAccountId INT,
@@ -18,7 +19,7 @@ DECLARE @transCount INT = @@TRANCOUNT;
 DECLARE @defaultCurrency INT;
 DECLARE @rateType INT;
 DECLARE @ids AS Id;
-DECLARE @invoiceIds AS Id;
+DECLARE @invoices AS Id;
 DECLARE @error NVARCHAR(250);
 DECLARE @paymentCreated NVARCHAR(MAX);
 DECLARE @batchIdUsed NVARCHAR(50);
@@ -35,6 +36,9 @@ DECLARE @postingError NVARCHAR(200);
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvoicesId')) DROP TABLE #tmpInvoicesId
+SELECT [intID] INTO #tmpInvoicesId FROM [dbo].fnGetRowsFromDelimitedValues(@invoiceIds)
+
 IF OBJECT_ID('tempdb..#tmpVouchersForPay') IS NOT NULL DROP TABLE #tmpVouchersForPay
 CREATE TABLE #tmpVouchersForPay
 (
@@ -44,13 +48,16 @@ CREATE TABLE #tmpVouchersForPay
 INSERT INTO @ids
 SELECT intID FROM #tmpBillsId
 
+INSERT INTO @invoices
+SELECT intID FROM #tmpInvoicesId
+
 INSERT INTO #tmpVouchersForPay
 SELECT
 	payVouchers.intBillId
 	,payVouchers.intPaymentId
 	,payVouchers.intEntityVendorId
 	,ABS(payVouchers.dblTempPayment) 
-FROM dbo.fnAPPartitonPaymentOfVouchers(@ids, @invoiceIds) payVouchers
+FROM dbo.fnAPPartitonPaymentOfVouchers(@ids, @invoices) payVouchers
 WHERE payVouchers.dblTempPayment < 0
 
 IF NOT EXISTS(SELECT 1 FROM #tmpVouchersForPay)
