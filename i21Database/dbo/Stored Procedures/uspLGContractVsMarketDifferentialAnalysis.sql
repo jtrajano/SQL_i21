@@ -157,6 +157,7 @@ FROM
 						AND SCD.intFutureMarketId = MTMBD.intFutureMarketId
 						AND (MTMBD.intContractTypeId IS NULL OR MTMBD.intContractTypeId = 2)
 						AND MTMB.strPricingType = 'Mark to Market'
+						AND DATEADD(DD, -60, FSCD.dtmStartDate) >= MTMB.dtmM2MBasisDate
 					 ORDER BY 
 						ABS(DATEDIFF(HH, DATEADD(DD, -60, FSCD.dtmStartDate), MTMB.dtmM2MBasisDate)) ASC
 					 ) MB
