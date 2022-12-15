@@ -160,7 +160,7 @@ OUTER APPLY(
     CASE WHEN ISNULL(intLifeTime,0) > 0 AND A.dtmProductionBatch IS NOT NULL
     THEN
     CASE 
-        WHEN  strLifeTimeType = 'Year' THEN DATEADD( YEAR, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Years' THEN DATEADD( YEAR, intLifeTime, A.dtmProductionBatch)
         WHEN  strLifeTimeType = 'Months' THEN DATEADD( MONTH, intLifeTime, A.dtmProductionBatch)
         WHEN  strLifeTimeType = 'Days' THEN DATEADD( DAY, intLifeTime, A.dtmProductionBatch)
         WHEN  strLifeTimeType = 'Hours' THEN DATEADD( HOUR, intLifeTime, A.dtmProductionBatch)
