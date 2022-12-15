@@ -93,6 +93,7 @@ CREATE  TABLE tblMFBatch
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS  NULL,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strERPPONumber NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL,
+	strERPPOLineNo NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL,
 	strFreightAgent NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strSealNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,

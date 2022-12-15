@@ -1415,6 +1415,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateBasisAndFutures.sql" />
     <Build Include="dbo\Tables\tblMFBatchPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBatchPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPBatchRecategorization_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
