@@ -330,8 +330,9 @@ BEGIN TRY
 	DELETE P 
 	FROM @tblToProcess P
 	WHERE P.intSiteId IS NOT NULL
+	AND P.intSiteId IN (SELECT TOP 1 intSiteID FROM tblTMDispatch)
 	AND P.ysnMobileBilling = 0
-	
+
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0
