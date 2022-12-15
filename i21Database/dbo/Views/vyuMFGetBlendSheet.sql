@@ -30,7 +30,7 @@ JOIN tblSMCompanyLocation AS CompanyLocation ON ISNULL(w.intCompanyId, intLocati
 LEFT JOIN tblMFWorkOrderStatus s on s.intStatusId = w.intTrialBlendSheetStatusId
 LEFT JOIN tblEMEntity em on em.intEntityId=w.intCreatedUserId
 LEFT JOIN tblEMEntity em2 on em2.intEntityId=w.intApprovedBy
-LEFT JOIN tblEMEntity ReleasedBy on em2.intEntityId=w.intSupervisorId
+LEFT JOIN tblEMEntity ReleasedBy on ReleasedBy.intEntityId=w.intSupervisorId
 LEFT JOIN tblMFWorkOrderStatus ws on w.intStatusId = ws.intStatusId
 OUTER APPLY (SELECT strName
 			 FROM tblEMEntity
