@@ -197,7 +197,7 @@ FROM (
 		,dblTempInterest   = 0  
 		,dblAmountDue    = A.dblAmountDue * (CASE WHEN A.strTransactionType IN ('Cash Refund','Credit Memo') THEN 1 ELSE -1 END)  
 		,dblPayment  
-		,dblTempPayment    = 0  
+		,dblTempPayment    = ISNULL(invoicesPay.dblNewPayment, 0)
 		,dblWithheld    = 0  
 		,dblTempWithheld   = 0  
 		,strTempPaymentInfo   = NULL  
