@@ -3,6 +3,7 @@
 AS
 BEGIN
 	DECLARE @intTrackingNumber			INT,
+			@intCustomerEntityId		INT,
 			@strTrackingNumber			NVARCHAR(50),
 			@intLoadWarehouseId			INT,
 			@intCustomerEntityId		INT,
@@ -68,6 +69,10 @@ BEGIN
 	SELECT	@strTrackingNumber = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strTrackingNumber' 
+
+	SELECT	@intCustomerEntityId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intCustomerEntityId' 
 
 	SELECT	@intLoadWarehouseId = [from]
 	FROM	@temp_xml_table   
@@ -569,7 +574,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				ELSE '' END,
 			strSeller = Seller.strLocationName,
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
-			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END
+			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
+			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0)
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND (@intCustomerEntityId IS NULL OR (@intCustomerEntityId IS NOT NULL AND @intCustomerEntityId = LD.intCustomerEntityId))
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
@@ -678,7 +684,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		) LOGO
-		WHERE L.strLoadNumber = @strTrackingNumber) tbl
+		WHERE L.strLoadNumber = @strTrackingNumber
+		AND (ISNULL(@intCustomerEntityId, 0) = 0 OR (ISNULL(@intCustomerEntityId, 0) > 0 AND @intCustomerEntityId = LD.intCustomerEntityId))) tbl
 	END
 	ELSE
 	BEGIN
@@ -851,7 +858,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0),
 			strSeller = Seller.strLocationName,
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
-			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END
+			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
+			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0)
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
