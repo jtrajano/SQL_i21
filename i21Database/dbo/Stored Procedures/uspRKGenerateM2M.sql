@@ -543,6 +543,7 @@ BEGIN TRY
 			, intClassVarietyId INT	
 			, intProductLineId INT	
 			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -635,6 +636,7 @@ BEGIN TRY
 			, intClassVarietyId INT	
 			, intProductLineId INT	
 			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -1067,6 +1069,7 @@ BEGIN TRY
 			, intClassVarietyId 
 			, intProductLineId 
 			, strProductType 
+			, strCertification 
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -1232,6 +1235,7 @@ BEGIN TRY
 			, IM.intClassVarietyId		
 			, IM.intProductLineId			
 			, strProductType = PTC.strDescription
+			, strCertification = CERTI.strCertificationName
 			, strGrade = GRADE.strDescription
 			, strRegion = REGION.strDescription
 			, strSeason = SEASON.strDescription
@@ -1286,6 +1290,8 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = IM.intRegionId
 		LEFT JOIN tblICCommodityAttribute SEASON ON SEASON.intCommodityAttributeId = IM.intSeasonId
 		LEFT JOIN tblICCommodityAttribute CLASS ON CLASS.intCommodityAttributeId = IM.intClassVarietyId
+		LEFT JOIN tblICCommodityAttribute C ON GRADE.intCommodityAttributeId = IM.intGradeId
+		LEFT JOIN tblICCertification CERTI ON CERTI.intCertificationId = IM.intCertificationId
 		OUTER APPLY (
 				SELECT strShipmentStatus = ISNULL(NULLIF(ctShipStatus.strShipmentStatus, ''), 'Open')  
 				FROM  dbo.fnCTGetShipmentStatus(CD.intContractDetailId) ctShipStatus 
@@ -1581,6 +1587,7 @@ BEGIN TRY
 			, intClassVarietyId INT	
 			, intProductLineId INT	
 			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -1765,6 +1772,7 @@ BEGIN TRY
 			, intClassVarietyId
 			, intProductLineId 	
 			, strProductType 
+			, strCertification 
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -1866,6 +1874,7 @@ BEGIN TRY
 			, intClassVarietyId 
 			, intProductLineId 
 			, strProductType 
+			, strCertification 
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -1988,6 +1997,7 @@ BEGIN TRY
 				, cd.intClassVarietyId 
 				, cd.intProductLineId 	
 				, cd.strProductType
+				, cd.strCertification 
 				, cd.strGrade
 				, cd.strRegion
 				, cd.strSeason
@@ -2048,7 +2058,7 @@ BEGIN TRY
 														THEN dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 														ELSE ISNULL(tmp.strPeriodTo, '')
 														END
-					AND ISNULL(tmp.intMTMPointID, 0) = CASE WHEN @ysnEnableMTMPoint = 1 
+					AND ISNULL(tmp.intMTMPointId, 0) = CASE WHEN @ysnEnableMTMPoint = 1 
 																					THEN ISNULL(cd.intMTMPointId, 0)
 																					ELSE ISNULL(tmp.intMTMPointId, 0) END
 					AND tmp.strContractInventory = 'Contract' ) basisDetail
@@ -2215,6 +2225,7 @@ BEGIN TRY
 			, intClassVarietyId 
 			, intProductLineId 	
 			, strProductType 
+			, strCertification
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -2319,6 +2330,7 @@ BEGIN TRY
 			, intClassVarietyId 
 			, intProductLineId 
 			, strProductType 
+			, strCertification
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -2441,6 +2453,7 @@ BEGIN TRY
 						, cd.intClassVarietyId 
 						, cd.intProductLineId 	
 						, cd.strProductType
+						, cd.strCertification
 						, cd.strGrade
 						, cd.strRegion
 						, cd.strSeason
@@ -2567,6 +2580,7 @@ BEGIN TRY
 				, intClassVarietyId 	
 				, intProductLineId 	
 				, strProductType 
+				, strCertification
 				, strGrade 
 				, strRegion 
 				, strSeason 
@@ -2669,6 +2683,7 @@ BEGIN TRY
 				, intClassVarietyId 
 				, intProductLineId 	
 				, strProductType 
+				, strCertification
 				, strGrade 
 				, strRegion 
 				, strSeason 
@@ -2791,6 +2806,7 @@ BEGIN TRY
 							, cd.intClassVarietyId 	
 							, cd.intProductLineId 
 							, cd.strProductType
+							, cd.strCertification
 							, cd.strGrade
 							, cd.strRegion
 							, cd.strSeason
@@ -2919,6 +2935,7 @@ BEGIN TRY
 			, intClassVarietyId 	
 			, intProductLineId 
 			, strProductType 
+			, strCertification
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -3025,6 +3042,7 @@ BEGIN TRY
 			, intClassVarietyId 	
 			, intProductLineId 
 			, strProductType 
+			, strCertification
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -3159,6 +3177,7 @@ BEGIN TRY
 						, cd.intClassVarietyId 	
 						, cd.intProductLineId 
 						, cd.strProductType
+						, cd.strCertification
 						, cd.strGrade
 						, cd.strRegion
 						, cd.strSeason
@@ -3364,6 +3383,7 @@ BEGIN TRY
 				, intClassVarietyId 	
 				, intProductLineId 
 				, strProductType
+				, strCertification
 				, strGrade
 				, strRegion
 				, strSeason
@@ -3936,6 +3956,7 @@ BEGIN TRY
 			, t.strStorageUnit 
 			, t.intStorageUnitId
 			, strProductType 
+			, strCertification
 			, strGrade 
 			, strRegion 
 			, strSeason 
@@ -4063,6 +4084,7 @@ BEGIN TRY
 				, t.strStorageUnit 
 				, t.intStorageUnitId
 				, strProductType 
+				, strCertification
 				, strGrade 
 				, strRegion 
 				, strSeason 
@@ -4252,6 +4274,7 @@ BEGIN TRY
 				, strStorageUnit 
 				, intStorageUnitId
 				, strProductType 
+				, strCertification
 				, strGrade 
 				, strRegion 
 				, strSeason 
@@ -4340,6 +4363,7 @@ BEGIN TRY
 			, strStorageUnit 
 			, intStorageUnitId
 			, strProductType 
+			, strCertification
 			, strGrade 
 			, strRegion 
 			, strSeason 
