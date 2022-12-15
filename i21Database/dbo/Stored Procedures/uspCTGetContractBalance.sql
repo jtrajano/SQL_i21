@@ -56,7 +56,7 @@ BEGIN
 			, dblBasis = CASE WHEN cd.intPricingTypeId = 3 THEN NULL WHEN cb.intPricingTypeId IN (1, 2, 8) THEN ISNULL(cb.dblBasis, cd.dblBasis) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblBasis END) END
 		FROM tblCTContractBalanceLog cb
 		join tblCTContractDetail cd on cd.intContractDetailId = cb.intContractDetailId
-		WHERE CBL.dtmTransactionDate < dateadd(day,1,convert(datetime,@dtmEndDate))
+		WHERE cb.dtmTransactionDate < dateadd(day,1,convert(datetime,@dtmEndDate))
 	) tbl
 	WHERE intRowNumber = 1
 
