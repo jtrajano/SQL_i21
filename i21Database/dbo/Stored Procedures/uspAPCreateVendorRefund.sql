@@ -42,7 +42,7 @@ SELECT [intID] INTO #tmpInvoicesId FROM [dbo].fnGetRowsFromDelimitedValues(@invo
 IF OBJECT_ID('tempdb..#tmpVouchersForPay') IS NOT NULL DROP TABLE #tmpVouchersForPay
 CREATE TABLE #tmpVouchersForPay
 (
-	intBillId INT, intPaymentId INT, intEntityVendorId INT, dblAmountPaid DECIMAL(18,2)
+	intBillId INT, intInvoiceId INT, intPaymentId INT, intEntityVendorId INT, dblAmountPaid DECIMAL(18,2)
 );
 
 INSERT INTO @ids
@@ -54,6 +54,7 @@ SELECT intID FROM #tmpInvoicesId
 INSERT INTO #tmpVouchersForPay
 SELECT
 	payVouchers.intBillId
+	,payVouchers.intInvoiceId
 	,payVouchers.intPaymentId
 	,payVouchers.intEntityVendorId
 	,ABS(payVouchers.dblTempPayment) 
@@ -121,67 +122,131 @@ INSERT INTO @paymentDetail(
 	,[ysnAllowOverpayment]
 	,[ysnFromAP]
 )
-SELECT
-	[intId]								=	RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId)
-	,[strSourceTransaction]				=	'Voucher'
-	,[strReceivePaymentType]			=	'Vendor Refund'
-	,[intSourceId]						=	A.intBillId
-	,[strSourceId]						=	A.strBillId
-	,[intPaymentId]						=	NULL
-	,[intEntityCustomerId]				=	A.intEntityVendorId
-	,[intCompanyLocationId]				=	A.intShipToId
-	,[intCurrencyId]					=	A.intCurrencyId
-	,[dtmDatePaid]						=	@paymentDate
-	,[intPaymentMethodId]				=	2
-	,[strPaymentMethod]					=	'ACH'
-	,[strPaymentInfo]					=	NULL
-	,[strNotes]							=	NULL
-	,[intAccountId]						=	@bankGLAccount
-	,[intBankAccountId]					=	@bankAccountId
-	,[intWriteOffAccountId]				=	NULL
-	,[dblAmountPaid]					=	payVouchers.dblAmountPaid
-	,[dblAmountDue]						=	(A.dblTotal - A.dblTempDiscount + A.dblTempInterest)
-											- (A.dblTempPayment)
-	,[strPaymentOriginalId]				=	'Payment Origin Id ' + CAST(RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId) AS NVARCHAR(100))
-	,[ysnUseOriginalIdAsPaymentNumber]	=	0
-	,[ysnApplytoBudget]					=	0
-	,[ysnApplyOnAccount]				=	0
-	,[ysnInvoicePrepayment]				=	0
-	,[ysnImportedFromOrigin]			=	0
-	,[ysnImportedAsPosted]				=	0
-	,[ysnAllowPrepayment]				=	0
-	,[ysnPost]							=	0
-	,[ysnRecap]							=	0
-	,[intEntityId]						=	@userId
-	,[intPaymentDetailId]				=	NULL
-	,[intInvoiceId]						=	NULL
-	,[intBillId]						=	A.intBillId
-	,[strTransactionNumber]				=	A.strBillId
-	,[intTermId]						=	A.intTermsId
-	,[ysnApplyTermDiscount]				=	0
-	,[dblDiscount]						=	A.dblTempDiscount
-	,[dblDiscountAvailable]				=	0
-	,[dblInterest]						=	A.dblTempInterest
-	,[dblPayment]						=	A.dblTempPayment
-	,[strInvoiceReportNumber]			=	NULL
-	,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
-	,[intCurrencyExchangeRateId]		=	NULL
-	,[dblCurrencyExchangeRate]			=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN rateInfo.dblRate ELSE 1 END
-	,[ysnAllowOverpayment]				=	0
-	,[ysnFromAP]						=	1
-FROM tblAPBill A
-INNER JOIN #tmpVouchersForPay payVouchers ON A.intBillId = payVouchers.intBillId
-INNER JOIN tblSMCompanyLocation B ON A.intShipToId = B.intCompanyLocationId
-OUTER APPLY (
-	SELECT TOP 1
-		exchangeRateDetail.dblRate
-	FROM tblSMCurrencyExchangeRate exchangeRate
-	INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
-	WHERE exchangeRateDetail.intRateTypeId = @rateType
-	AND exchangeRate.intFromCurrencyId = A.intCurrencyId AND exchangeRate.intToCurrencyId = @defaultCurrency
-	AND exchangeRateDetail.dtmValidFromDate <= @paymentDate
-	ORDER BY exchangeRateDetail.dtmValidFromDate DESC
-) rateInfo
+SELECT 
+	[intId]									=	RANK() OVER(ORDER BY intPaymentId, intEntityCustomerId)
+	,trans.*
+FROM (
+	SELECT
+		[strSourceTransaction]				=	'Voucher'
+		,[strReceivePaymentType]			=	'Vendor Refund'
+		,[intSourceId]						=	A.intBillId
+		,[strSourceId]						=	A.strBillId
+		,[intPaymentId]						=	NULL
+		,[intEntityCustomerId]				=	A.intEntityVendorId
+		,[intCompanyLocationId]				=	A.intShipToId
+		,[intCurrencyId]					=	A.intCurrencyId
+		,[dtmDatePaid]						=	@paymentDate
+		,[intPaymentMethodId]				=	2
+		,[strPaymentMethod]					=	'ACH'
+		,[strPaymentInfo]					=	NULL
+		,[strNotes]							=	NULL
+		,[intAccountId]						=	@bankGLAccount
+		,[intBankAccountId]					=	@bankAccountId
+		,[intWriteOffAccountId]				=	NULL
+		,[dblAmountPaid]					=	payVouchers.dblAmountPaid
+		,[dblAmountDue]						=	(A.dblTotal - A.dblTempDiscount + A.dblTempInterest)
+												- (A.dblTempPayment)
+		,[strPaymentOriginalId]				=	'Payment Origin Id ' + CAST(RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId) AS NVARCHAR(100))
+		,[ysnUseOriginalIdAsPaymentNumber]	=	0
+		,[ysnApplytoBudget]					=	0
+		,[ysnApplyOnAccount]				=	0
+		,[ysnInvoicePrepayment]				=	0
+		,[ysnImportedFromOrigin]			=	0
+		,[ysnImportedAsPosted]				=	0
+		,[ysnAllowPrepayment]				=	0
+		,[ysnPost]							=	0
+		,[ysnRecap]							=	0
+		,[intEntityId]						=	@userId
+		,[intPaymentDetailId]				=	NULL
+		,[intInvoiceId]						=	NULL
+		,[intBillId]						=	A.intBillId
+		,[strTransactionNumber]				=	A.strBillId
+		,[intTermId]						=	A.intTermsId
+		,[ysnApplyTermDiscount]				=	0
+		,[dblDiscount]						=	A.dblTempDiscount
+		,[dblDiscountAvailable]				=	0
+		,[dblInterest]						=	A.dblTempInterest
+		,[dblPayment]						=	A.dblTempPayment
+		,[strInvoiceReportNumber]			=	NULL
+		,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
+		,[intCurrencyExchangeRateId]		=	NULL
+		,[dblCurrencyExchangeRate]			=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN rateInfo.dblRate ELSE 1 END
+		,[ysnAllowOverpayment]				=	0
+		,[ysnFromAP]						=	1
+	FROM tblAPBill A
+	INNER JOIN #tmpVouchersForPay payVouchers ON A.intBillId = payVouchers.intBillId
+	INNER JOIN tblSMCompanyLocation B ON A.intShipToId = B.intCompanyLocationId
+	OUTER APPLY (
+		SELECT TOP 1
+			exchangeRateDetail.dblRate
+		FROM tblSMCurrencyExchangeRate exchangeRate
+		INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
+		WHERE exchangeRateDetail.intRateTypeId = @rateType
+		AND exchangeRate.intFromCurrencyId = A.intCurrencyId AND exchangeRate.intToCurrencyId = @defaultCurrency
+		AND exchangeRateDetail.dtmValidFromDate <= @paymentDate
+		ORDER BY exchangeRateDetail.dtmValidFromDate DESC
+	) rateInfo
+	UNION ALL
+	SELECT
+		[strSourceTransaction]				=	'Invoice'
+		,[strReceivePaymentType]			=	'Vendor Refund'
+		,[intSourceId]						=	A.intInvoiceId
+		,[strSourceId]						=	A.strInvoiceNumber
+		,[intPaymentId]						=	NULL
+		,[intEntityCustomerId]				=	A.intEntityCustomerId
+		,[intCompanyLocationId]				=	A.intShipToLocationId
+		,[intCurrencyId]					=	A.intCurrencyId
+		,[dtmDatePaid]						=	@paymentDate
+		,[intPaymentMethodId]				=	2
+		,[strPaymentMethod]					=	'ACH'
+		,[strPaymentInfo]					=	NULL
+		,[strNotes]							=	NULL
+		,[intAccountId]						=	@bankGLAccount
+		,[intBankAccountId]					=	@bankAccountId
+		,[intWriteOffAccountId]				=	NULL
+		,[dblAmountPaid]					=	payVouchers.dblAmountPaid
+		,[dblAmountDue]						=	A.dblAmountDue --(A.dblTotal - A.dblTempDiscount + A.dblTempInterest) - (A.dblTempPayment)
+		,[strPaymentOriginalId]				=	'Payment Origin Id ' + CAST(RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId) AS NVARCHAR(100))
+		,[ysnUseOriginalIdAsPaymentNumber]	=	0
+		,[ysnApplytoBudget]					=	0
+		,[ysnApplyOnAccount]				=	0
+		,[ysnInvoicePrepayment]				=	0
+		,[ysnImportedFromOrigin]			=	0
+		,[ysnImportedAsPosted]				=	0
+		,[ysnAllowPrepayment]				=	0
+		,[ysnPost]							=	0
+		,[ysnRecap]							=	0
+		,[intEntityId]						=	@userId
+		,[intPaymentDetailId]				=	NULL
+		,[intInvoiceId]						=	NULL
+		,[intBillId]						=	A.intInvoiceId
+		,[strTransactionNumber]				=	A.strInvoiceNumber
+		,[intTermId]						=	A.intTermId
+		,[ysnApplyTermDiscount]				=	0
+		,[dblDiscount]						=	0 --A.dblTempDiscount
+		,[dblDiscountAvailable]				=	0
+		,[dblInterest]						=	0 --A.dblTempInterest
+		,[dblPayment]						=	A.dblAmountDue --A.dblTempPayment
+		,[strInvoiceReportNumber]			=	NULL
+		,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
+		,[intCurrencyExchangeRateId]		=	NULL
+		,[dblCurrencyExchangeRate]			=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN rateInfo.dblRate ELSE 1 END
+		,[ysnAllowOverpayment]				=	0
+		,[ysnFromAP]						=	1
+	FROM tblARInvoice A
+	INNER JOIN #tmpVouchersForPay payVouchers ON A.intInvoiceId = payVouchers.intInvoiceId
+	INNER JOIN tblSMCompanyLocation B ON A.intShipToLocationId = B.intCompanyLocationId
+	OUTER APPLY (
+		SELECT TOP 1
+			exchangeRateDetail.dblRate
+		FROM tblSMCurrencyExchangeRate exchangeRate
+		INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
+		WHERE exchangeRateDetail.intRateTypeId = @rateType
+		AND exchangeRate.intFromCurrencyId = A.intCurrencyId AND exchangeRate.intToCurrencyId = @defaultCurrency
+		AND exchangeRateDetail.dtmValidFromDate <= @paymentDate
+		ORDER BY exchangeRateDetail.dtmValidFromDate DESC
+	) rateInfo
+) trans
 
 IF @transCount = 0 BEGIN TRANSACTION
 
