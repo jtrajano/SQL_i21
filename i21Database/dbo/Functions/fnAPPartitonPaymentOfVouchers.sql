@@ -27,7 +27,7 @@ RETURNS TABLE AS RETURN
 							ELSE voucher.dblTempWithheld 
 							END), 0))
 					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId, voucher.intPayFromBankAccountId, voucher.intPayToBankAccountId, voucher.intShipToId) AS dblTempWithheld
-			,voucher.strTempPaymentInfo
+			,NULLIF(voucher.strTempPaymentInfo, '') strTempPaymentInfo
 		FROM tblAPBill voucher
 		INNER JOIN @voucherIds ids 
 			ON voucher.intBillId = ids.intId
