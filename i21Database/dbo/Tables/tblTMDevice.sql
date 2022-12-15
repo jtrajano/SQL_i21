@@ -41,6 +41,7 @@
     [strPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     --[strSerialPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strTimeOut]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    [intPollingIntervalMinute] INT NULL, 
    
 
 
