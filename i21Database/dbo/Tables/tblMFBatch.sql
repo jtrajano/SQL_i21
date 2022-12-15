@@ -123,3 +123,6 @@ CREATE  TABLE tblMFBatch
     )
 ) ON [PRIMARY]
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblMFBatch_intSampleId] ON [dbo].[tblMFBatch](intSampleId)
+GO
