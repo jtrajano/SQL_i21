@@ -59,13 +59,13 @@ BEGIN TRY
 		,@dblQty1 DECIMAL(38, 20)
 		,@intRowNo INT
 		,@ysnReleaseBlendsheetByNoOfMixes BIT
-		,@intTrialBlendSheetStatusId int
-		,@intConfirmedBy INT 
-		,@intApprovedBy INT 
-		,@dtmConfirmedDate DATETIME 
-		,@dtmApprovedDate DATETIME 
-		,@dtmPrintedDate DATETIME 
-		,@intPrintedBy INT 
+		,@intTrialBlendSheetStatusId INT
+		,@intConfirmedBy INT
+		,@intApprovedBy INT
+		,@dtmConfirmedDate DATETIME
+		,@dtmApprovedDate DATETIME
+		,@dtmPrintedDate DATETIME
+		,@intPrintedBy INT
 		,@strERPComment NVARCHAR(max)
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
@@ -379,7 +379,8 @@ BEGIN TRY
 	SELECT @intLocationId = intLocationId
 	FROM @tblBlendSheet
 
-	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0),@ysnRecipeHeaderValidation=ysnRecipeHeaderValidation
+	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+		,@ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
 	FROM tblMFCompanyPreference
 
 	INSERT INTO @tblLotSummary (
@@ -462,18 +463,6 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Packaging Category'
 
-	SELECT @ysnReleaseBlendsheetByNoOfMixes = (
-			CASE 
-				WHEN IsNULL(UPPER(ProcessAttribute.strAttributeValue), 'TRUE') = 'FALSE'
-					THEN 0
-				ELSE 1
-				END
-			)
-	FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND ProcessAttribute.intAttributeId = 130;
-
 	UPDATE @tblBlendSheet
 	SET dblQtyToProduce = (
 			SELECT sum(dblQty)
@@ -502,8 +491,6 @@ BEGIN TRY
 		,@dblPlannedQuantity = dblPlannedQuantity
 		,@intMachineId = intMachineId
 	FROM @tblBlendSheet
-
-
 
 	SELECT TOP 1 @intRecipeId = intRecipeId
 		,@intManufacturingProcessId = a.intManufacturingProcessId
@@ -924,15 +911,15 @@ BEGIN TRY
 			WHERE intWorkOrderId = @intWorkOrderId
 			)
 	BEGIN
-		SELECT @strSavedWONo = strWorkOrderNo,
-			@intTrialBlendSheetStatusId =intTrialBlendSheetStatusId,
-			@intConfirmedBy =intConfirmedBy,
-			@intApprovedBy =intApprovedBy,
-			@dtmConfirmedDate= dtmConfirmedDate,
-			@dtmApprovedDate =dtmApprovedDate,
-			@dtmPrintedDate =dtmPrintedDate,
-			@intPrintedBy =intPrintedBy,
-			@strERPComment=strERPComment
+		SELECT @strSavedWONo = strWorkOrderNo
+			,@intTrialBlendSheetStatusId = intTrialBlendSheetStatusId
+			,@intConfirmedBy = intConfirmedBy
+			,@intApprovedBy = intApprovedBy
+			,@dtmConfirmedDate = dtmConfirmedDate
+			,@dtmApprovedDate = dtmApprovedDate
+			,@dtmPrintedDate = dtmPrintedDate
+			,@intPrintedBy = intPrintedBy
+			,@strERPComment = strERPComment
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -940,6 +927,18 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
+
+	SELECT @ysnReleaseBlendsheetByNoOfMixes = (
+			CASE 
+				WHEN IsNULL(UPPER(ProcessAttribute.strAttributeValue), 'TRUE') = 'FALSE'
+					THEN 0
+				ELSE 1
+				END
+			)
+	FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND ProcessAttribute.intAttributeId = 130;
 
 	IF @ysnReleaseBlendsheetByNoOfMixes = 0
 	BEGIN
@@ -1735,13 +1734,13 @@ BEGIN TRY
 			,intSubLocationId
 			,dtmOrderDate
 			,intSupervisorId
-			,intTrialBlendSheetStatusId 
-			,intConfirmedBy 
-			,intApprovedBy 
-			,dtmConfirmedDate 
-			,dtmApprovedDate 
-			,dtmPrintedDate 
-			,intPrintedBy 
+			,intTrialBlendSheetStatusId
+			,intConfirmedBy
+			,intApprovedBy
+			,dtmConfirmedDate
+			,dtmApprovedDate
+			,dtmPrintedDate
+			,intPrintedBy
 			,strERPComment
 			)
 		SELECT @strNextWONo
@@ -1780,13 +1779,13 @@ BEGIN TRY
 			,@intSubLocationId
 			,GetDate()
 			,intUserId
-			,@intTrialBlendSheetStatusId 
-			,@intConfirmedBy 
-			,@intApprovedBy 
-			,@dtmConfirmedDate 
-			,@dtmApprovedDate 
-			,@dtmPrintedDate 
-			,@intPrintedBy 
+			,@intTrialBlendSheetStatusId
+			,@intConfirmedBy
+			,@intApprovedBy
+			,@dtmConfirmedDate
+			,@dtmApprovedDate
+			,@dtmPrintedDate
+			,@intPrintedBy
 			,@strERPComment
 		FROM @tblBlendSheet
 

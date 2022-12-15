@@ -453,6 +453,14 @@ BEGIN TRY
 
 				Update dbo.tblMFBatch Set intSampleId =@intSampleId,intTealingoItemId =@intItemId,intOriginalItemId =@intOriginalItemId Where intBatchId = @intProductValueId
                 
+				IF @intItemId<>@intOriginalItemId
+				BEGIN
+					EXEC dbo.uspMFBatchPreStage 
+						@intBatchId = @intProductValueId
+						,@intUserId = @intEntityUserId
+						,@intOriginalItemId = @intOriginalItemId
+						,@intItemId = @intItemId
+				END
                 -- Sample Detail
                 INSERT INTO tblQMSampleDetail (
                     intConcurrencyId
