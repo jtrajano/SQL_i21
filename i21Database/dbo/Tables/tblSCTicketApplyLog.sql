@@ -1,13 +1,14 @@
-﻿CREATE TABLE [dbo].[tblSCTicketApplyLoad]
+﻿CREATE TABLE [dbo].[tblSCTicketApplyContract]
 (
-	intTicketApplyLoadId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	intTicketApplyContractId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
 	intTicketApplyId INT NOT NULL,
-	intLoadShipmentDetailId INT NOT NULL,
+	intContractDetailId INT NOT NULL,
 	dblUnit NUMERIC(38, 20) NULL,
 	intConcurrencyId INT NOT NULL DEFAULT(1),
 
 
-	CONSTRAINT [FK_TicketApplyLoad_TicketApply_TicketApplyId] 
+	CONSTRAINT [FK_TicketApplyContract_TicketApply_TicketApplyId] 
 		FOREIGN KEY (intTicketApplyId) 
 		REFERENCES dbo.tblSCTicketApply(intTicketApplyId) ON DELETE CASCADE,
+
 )
