@@ -10,5 +10,5 @@
 
 	CONSTRAINT [FK_TicketApplySpot_TicketApply_TicketApplyId] 
 		FOREIGN KEY (intTicketApplyId) 
-		REFERENCES dbo.tblSCTicketApply(intTicketApplyId),
+		REFERENCES dbo.tblSCTicketApply(intTicketApplyId) ON DELETE CASCADE,
 )
