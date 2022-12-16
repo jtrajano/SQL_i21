@@ -867,6 +867,7 @@
     <Build Include="dbo\Tables\tblRKCurrencyPair.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyPairSetup.sql" />
     <Build Include="dbo\Views\vyuAPPaymentMethodBlank.sql" />
+    <Build Include="dbo\Views\vyuAPBankAccountAllBank.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
