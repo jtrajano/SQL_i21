@@ -14,10 +14,8 @@ BEGIN TRY
 		,@dtmDateCreated DATETIME = GETDATE()
 		,@strError NVARCHAR(MAX)
 	DECLARE @intTrxSequenceNo BIGINT
-		,@strCompanyLocation NVARCHAR(6)
 		,@intActionId INT
 		,@dtmCreatedDate DATETIME
-		,@strCreatedBy NVARCHAR(50)
 	DECLARE @intStageEntityId INT
 		,@strStatus NVARCHAR(50)
 		,@strAccountNo NVARCHAR(50)
@@ -26,18 +24,17 @@ BEGIN TRY
 		,@strEntityType NVARCHAR(50)
 		,@strCurrency NVARCHAR(50)
 		,@strDefaultLocation NVARCHAR(100)
-		,@strTaxNo NVARCHAR(50)
-	DECLARE @intCompanyLocationId INT
-		,@intEntityId INT
+		,@strDefaultContactName NVARCHAR(100)
+	DECLARE @intEntityId INT
 		,@ysnActive BIT
 		,@intTermsId INT
 		,@intCurrencyId INT
 		,@intDefaultLocationId INT
+		,@intDefaultContactId INT
 		,@intNewStageEntityId INT
 		,@strEntityNo NVARCHAR(50)
 	DECLARE @intStageEntityTermId INT
-		,@intDetailActionId INT
-		,@intDetailLineType INT
+		,@strDetailLineType NVARCHAR(50)
 		,@strDetailLocation NVARCHAR(200)
 		,@strDetailAddress NVARCHAR(MAX)
 		,@strDetailCity NVARCHAR(100)
@@ -45,10 +42,9 @@ BEGIN TRY
 		,@strDetailZip NVARCHAR(100)
 		,@strDetailCountry NVARCHAR(100)
 		,@strDetailTerm NVARCHAR(100)
+		,@strDetailContactName NVARCHAR(100)
 	DECLARE @intDetailCountryId INT
 		,@intDetailTermId INT
-		,@intEntityContactId INT
-		,@intEntityLocationId INT
 	DECLARE @tblEMEntity TABLE (
 		strOldName NVARCHAR(100)
 		,ysnOldActive BIT
@@ -87,7 +83,6 @@ BEGIN TRY
 		,strOldState NVARCHAR(MAX)
 		,strOldCheckPayeeName NVARCHAR(MAX)
 		,strOldPhone NVARCHAR(MAX)
-		,strOldFax NVARCHAR(MAX)
 		,intOldTermsId INT
 		,ysnOldDefaultLocation BIT
 		,strNewAddress NVARCHAR(MAX)
@@ -97,10 +92,10 @@ BEGIN TRY
 		,strNewState NVARCHAR(MAX)
 		,strNewCheckPayeeName NVARCHAR(MAX)
 		,strNewPhone NVARCHAR(MAX)
-		,strNewFax NVARCHAR(MAX)
 		,intNewTermsId INT
 		,ysnNewDefaultLocation BIT
 		)
+	DECLARE @tblEntityContactIdOutput TABLE (intEntityId INT)
 	DECLARE @intAuditDetailId INT
 	DECLARE @tblIPEntityStage TABLE (intStageEntityId INT)
 
@@ -151,10 +146,8 @@ BEGIN TRY
 	BEGIN
 		BEGIN TRY
 			SELECT @intTrxSequenceNo = NULL
-				,@strCompanyLocation = NULL
 				,@intActionId = NULL
 				,@dtmCreatedDate = NULL
-				,@strCreatedBy = NULL
 
 			SELECT @strStatus = NULL
 				,@strAccountNo = NULL
@@ -163,26 +156,21 @@ BEGIN TRY
 				,@strEntityType = NULL
 				,@strCurrency = NULL
 				,@strDefaultLocation = NULL
-				,@strTaxNo = NULL
+				,@strDefaultContactName = NULL
 
-			SELECT @intCompanyLocationId = NULL
-				,@intEntityId = NULL
+			SELECT @intEntityId = NULL
 				,@ysnActive = NULL
 				,@intTermsId = NULL
 				,@intCurrencyId = NULL
 				,@intDefaultLocationId = NULL
+				,@intDefaultContactId = NULL
 				,@intNewStageEntityId = NULL
 				,@strEntityNo = NULL
 				,@intAuditDetailId = NULL
 				,@intStageEntityTermId = NULL
-				,@intEntityContactId = NULL
-				,@intEntityLocationId = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
-				,@strCompanyLocation = strCompanyLocation
-				,@intActionId = intActionId
 				,@dtmCreatedDate = dtmCreated
-				,@strCreatedBy = strCreatedUserName
 				,@strStatus = strStatus
 				,@strAccountNo = strAccountNo
 				,@strName = strName
@@ -190,13 +178,9 @@ BEGIN TRY
 				,@strEntityType = strEntityType
 				,@strCurrency = strCurrency
 				,@strDefaultLocation = strDefaultLocation
-				,@strTaxNo = strTaxNo
+				,@strDefaultContactName = strContactName
 			FROM tblIPEntityStage
 			WHERE intStageEntityId = @intStageEntityId
-
-			SELECT @intCompanyLocationId = intCompanyLocationId
-			FROM dbo.tblSMCompanyLocation
-			WHERE strLotOrigin = @strCompanyLocation
 
 			SELECT @intEntityId = intEntityId
 			FROM dbo.tblAPVendor WITH (NOLOCK)
@@ -209,17 +193,6 @@ BEGIN TRY
 			SELECT @intCurrencyId = intCurrencyID
 			FROM dbo.tblSMCurrency WITH (NOLOCK)
 			WHERE strCurrency = @strCurrency
-
-			IF @intCompanyLocationId IS NULL
-			BEGIN
-				SELECT @strError = 'Company Location not found.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
 
 			IF ISNULL(@strStatus, '') NOT IN (
 					'Active'
@@ -306,17 +279,25 @@ BEGIN TRY
 						)
 			END
 
-			IF @intActionId <> 4
+			IF ISNULL(@strDefaultContactName, '') = ''
 			BEGIN
-				IF EXISTS (
-						SELECT 1
-						FROM tblAPVendor V
-						WHERE V.strVendorAccountNum = @strAccountNo
+				SELECT @strError = 'Default Contact Name cannot be blank.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
 						)
-					SELECT @intActionId = 2
-				ELSE
-					SELECT @intActionId = 1
 			END
+
+			IF EXISTS (
+					SELECT 1
+					FROM tblAPVendor V
+					WHERE V.strVendorAccountNum = @strAccountNo
+					)
+				SELECT @intActionId = 2 --Update
+			ELSE
+				SELECT @intActionId = 1 --Create
 
 			IF @intActionId = 1
 			BEGIN
@@ -349,6 +330,105 @@ BEGIN TRY
 				END
 			END
 
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPEntityTermStage
+					WHERE intStageEntityId = @intStageEntityId
+						AND strLineType = 'L'
+					)
+			BEGIN
+				SELECT @strError = 'Line - Location is required.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPEntityTermStage
+					WHERE intStageEntityId = @intStageEntityId
+						AND strLineType = 'L'
+						AND strLocation = @strDefaultLocation
+					)
+			BEGIN
+				SELECT @strError = 'Line - Default Location is required.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPEntityTermStage
+					WHERE intStageEntityId = @intStageEntityId
+						AND strLineType = 'C'
+					)
+			BEGIN
+				SELECT @strError = 'Line - Contact is required.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPEntityTermStage
+					WHERE intStageEntityId = @intStageEntityId
+						AND strLineType = 'C'
+						AND strContactName = @strDefaultContactName
+					)
+			BEGIN
+				SELECT @strError = 'Line - Default Contact is required.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPEntityTermStage
+					WHERE intStageEntityId = @intStageEntityId
+						AND strLineType = 'T'
+					)
+			BEGIN
+				SELECT @strError = 'Line - Term is required.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPEntityTermStage
+					WHERE intStageEntityId = @intStageEntityId
+						AND strLineType = 'T'
+						AND strTerm = @strTerm
+					)
+			BEGIN
+				SELECT @strError = 'Line - Default Term is required.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
 			-- Entity Location and Term validation
 			SELECT @intStageEntityTermId = MIN(intStageEntityTermId)
 			FROM tblIPEntityTermStage
@@ -356,8 +436,7 @@ BEGIN TRY
 
 			WHILE (@intStageEntityTermId IS NOT NULL)
 			BEGIN
-				SELECT @intDetailActionId = NULL
-					,@intDetailLineType = NULL
+				SELECT @strDetailLineType = NULL
 					,@strDetailLocation = NULL
 					,@strDetailAddress = NULL
 					,@strDetailCity = NULL
@@ -365,14 +444,12 @@ BEGIN TRY
 					,@strDetailZip = NULL
 					,@strDetailCountry = NULL
 					,@strDetailTerm = NULL
+					,@strDetailContactName = NULL
 
 				SELECT @intDetailCountryId = NULL
 					,@intDetailTermId = NULL
-					,@intEntityContactId = NULL
-					,@intEntityLocationId = NULL
 
-				SELECT @intDetailActionId = intActionId
-					,@intDetailLineType = intLineType
+				SELECT @strDetailLineType = strLineType
 					,@strDetailLocation = strLocation
 					,@strDetailAddress = strAddress
 					,@strDetailCity = strCity
@@ -380,28 +457,14 @@ BEGIN TRY
 					,@strDetailZip = strZip
 					,@strDetailCountry = strCountry
 					,@strDetailTerm = strTerm
+					,@strDetailContactName = strContactName
 				FROM tblIPEntityTermStage
 				WHERE intStageEntityTermId = @intStageEntityTermId
 
-				IF ISNULL(@intDetailActionId, 0) NOT IN (
-						1
-						,2
-						,4
-						)
-				BEGIN
-					SELECT @strError = 'Detail - Action Id not found.'
-
-					RAISERROR (
-							@strError
-							,16
-							,1
-							)
-				END
-
-				IF ISNULL(@intDetailLineType, 0) NOT IN (
-						1
-						,2
-						,3
+				IF ISNULL(@strDetailLineType, 0) NOT IN (
+						'L'
+						,'C'
+						,'T'
 						)
 				BEGIN
 					SELECT @strError = 'Detail - Line Type not found.'
@@ -413,7 +476,7 @@ BEGIN TRY
 							)
 				END
 
-				IF @intDetailLineType = 1
+				IF @strDetailLineType = 'L'
 				BEGIN
 					IF ISNULL(@strDetailLocation, '') = ''
 					BEGIN
@@ -440,8 +503,43 @@ BEGIN TRY
 					SELECT @intDetailCountryId = intCountryID
 					FROM dbo.tblSMCountry WITH (NOLOCK)
 					WHERE strCountry = @strDetailCountry
+
+					IF @intDetailCountryId IS NULL
+					BEGIN
+						SELECT @strError = 'Detail - Country is invalid.'
+
+						RAISERROR (
+								@strError
+								,16
+								,1
+								)
+					END
 				END
-				ELSE IF @intDetailLineType = 3
+				ELSE IF @strDetailLineType = 'C'
+				BEGIN
+					IF ISNULL(@strDetailLocation, '') = ''
+					BEGIN
+						SELECT @strError = 'Detail - Location Name cannot be blank.'
+
+						RAISERROR (
+								@strError
+								,16
+								,1
+								)
+					END
+
+					IF ISNULL(@strDetailContactName, '') = ''
+					BEGIN
+						SELECT @strError = 'Detail - Contact Name cannot be blank.'
+
+						RAISERROR (
+								@strError
+								,16
+								,1
+								)
+					END
+				END
+				ELSE IF @strDetailLineType = 'T'
 				BEGIN
 					SELECT @intDetailTermId = intTermID
 					FROM dbo.tblSMTerm WITH (NOLOCK)
@@ -485,12 +583,14 @@ BEGIN TRY
 						,ysnActive
 						,strContactNumber
 						,intConcurrencyId
+						,strExternalERPId
 						)
 					SELECT @strName
 						,@strEntityNo
 						,1
 						,''
 						,1
+						,@strAccountNo
 
 					SELECT @intEntityId = SCOPE_IDENTITY()
 
@@ -546,7 +646,6 @@ BEGIN TRY
 						,strState
 						,strCheckPayeeName
 						,strPhone
-						,strFax
 						,intTermsId
 						,ysnDefaultLocation
 						,ysnActive
@@ -561,7 +660,6 @@ BEGIN TRY
 						,strState
 						,LEFT(strCity, 50)
 						,strPhone
-						,strFax
 						,T.intTermID
 						,(
 							CASE 
@@ -575,7 +673,7 @@ BEGIN TRY
 					FROM tblIPEntityTermStage ETS
 					LEFT JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
 					WHERE ETS.intStageEntityId = @intStageEntityId
-						AND ETS.intLineType = 1
+						AND ETS.strLineType = 'L'
 						AND strLocation NOT IN (
 							SELECT strLocationName
 							FROM tblEMEntityLocation
@@ -606,7 +704,6 @@ BEGIN TRY
 							,intCurrencyId
 							,strVendorId
 							,ysnPymtCtrlActive
-							,strTaxNumber
 							,intBillToId
 							,intShipFromId
 							,intVendorType
@@ -620,7 +717,6 @@ BEGIN TRY
 							,@intCurrencyId
 							,@strEntityNo
 							,1
-							,@strTaxNo
 							,@intDefaultLocationId
 							,@intDefaultLocationId
 							,0
@@ -663,12 +759,15 @@ BEGIN TRY
 					FROM tblIPEntityTermStage S
 					JOIN tblSMTerm T ON S.strTerm = T.strTermCode
 					WHERE S.intStageEntityId = @intStageEntityId
-						AND S.intLineType = 3
+						AND S.strLineType = 'T'
 						AND T.intTermID NOT IN (
 							SELECT intTermId
 							FROM tblAPVendorTerm VT
 							WHERE VT.intEntityVendorId = @intEntityId
 							)
+
+					DELETE
+					FROM @tblEntityContactIdOutput
 
 					--Add Contacts to Entity table
 					INSERT INTO tblEMEntity (
@@ -678,18 +777,21 @@ BEGIN TRY
 						,strEmail
 						,intConcurrencyId
 						)
-					SELECT @strName
+					OUTPUT inserted.intEntityId
+					INTO @tblEntityContactIdOutput
+					SELECT ETS.strContactName
 						,1
 						,''
-						,''
+						,ETS.strEmail
 						,1
-
-					SELECT @intEntityContactId = SCOPE_IDENTITY()
-
-					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
-					FROM tblEMEntityLocation
-					WHERE intEntityId = @intEntityId
-						AND ysnDefaultLocation = 1
+					FROM tblIPEntityTermStage ETS
+					WHERE ETS.intStageEntityId = @intStageEntityId
+						AND ETS.strLineType = 'C'
+						AND strContactName NOT IN (
+							SELECT E.strName
+							FROM tblEMEntity E
+							WHERE ISNULL(E.strEntityNo, '') = ''
+							)
 
 					--Map Contacts to Vendor
 					INSERT INTO tblEMEntityToContact (
@@ -697,15 +799,67 @@ BEGIN TRY
 						,intEntityContactId
 						,intEntityLocationId
 						,ysnPortalAccess
-						,ysnDefaultContact
 						,intConcurrencyId
 						)
 					SELECT @intEntityId
-						,@intEntityContactId
-						,@intEntityLocationId
+						,intEntityId
+						,@intDefaultLocationId
 						,0
 						,1
+					FROM @tblEntityContactIdOutput
+
+					--Set default contact
+					SELECT @intDefaultContactId = intEntityId
+					FROM dbo.tblEMEntity
+					WHERE strName = @strDefaultContactName
+						AND ISNULL(strEntityNo, '') = ''
+
+					IF ISNULL(@intDefaultContactId, 0) > 0
+					BEGIN
+						UPDATE tblEMEntityToContact
+						SET ysnDefaultContact = 1
+						WHERE intEntityId = @intEntityId
+							AND intEntityContactId = @intDefaultContactId
+							AND intEntityLocationId = @intDefaultLocationId
+					END
+
+					--Add Phone
+					INSERT INTO tblEMEntityPhoneNumber (
+						intEntityId
+						,strPhone
+						,intCountryId
+						,intConcurrencyId
+						)
+					SELECT EC.intEntityId
+						,ETS.strPhone
+						,C.intCountryID
 						,1
+					FROM @tblEntityContactIdOutput EC
+					JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
+					JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+					LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
+					WHERE ETS.intStageEntityId = @intStageEntityId
+						AND ETS.strLineType = 'C'
+						AND ISNULL(ETS.strPhone, '') <> ''
+
+					--Add Mobile
+					INSERT INTO tblEMEntityMobileNumber (
+						intEntityId
+						,strPhone
+						,intCountryId
+						,intConcurrencyId
+						)
+					SELECT EC.intEntityId
+						,ETS.strMobile
+						,C.intCountryID
+						,1
+					FROM @tblEntityContactIdOutput EC
+					JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
+					JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+					LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
+					WHERE ETS.intStageEntityId = @intStageEntityId
+						AND ETS.strLineType = 'C'
+						AND ISNULL(ETS.strMobile, '') <> ''
 
 					EXEC uspSMAuditLog @keyValue = @intEntityId
 						,@screenName = 'EntityManagement.view.Entity'
@@ -769,7 +923,6 @@ BEGIN TRY
 					,strState
 					,strCheckPayeeName
 					,strPhone
-					,strFax
 					,intTermsId
 					,ysnDefaultLocation
 					,ysnActive
@@ -788,7 +941,6 @@ BEGIN TRY
 					,strState
 					,LEFT(strCity, 50)
 					,strPhone
-					,strFax
 					,T.intTermID
 					,(
 						CASE 
@@ -802,25 +954,12 @@ BEGIN TRY
 				FROM tblIPEntityTermStage ETS
 				LEFT JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
 				WHERE ETS.intStageEntityId = @intStageEntityId
-					AND ETS.intLineType = 1
-					AND ETS.intActionId = 1
+					AND ETS.strLineType = 'L'
 					AND strLocation NOT IN (
 						SELECT strLocationName
 						FROM tblEMEntityLocation
 						WHERE intEntityId = @intEntityId
 						)
-
-				DELETE EL
-				OUTPUT deleted.intEntityLocationId
-					,deleted.strLocationName
-					,'Deleted'
-				INTO @tblEMEntityNewLocation
-				FROM tblEMEntityLocation EL
-				JOIN tblIPEntityTermStage ETS ON ETS.strLocation = EL.strLocationName
-					AND EL.intEntityId = @intEntityId
-					AND ETS.intStageEntityId = @intStageEntityId
-					AND ETS.intLineType = 1
-					AND ETS.intActionId = 4
 
 				DELETE
 				FROM @tblEMEntityLocation
@@ -833,7 +972,6 @@ BEGIN TRY
 					,strState = ETS.strState
 					,strCheckPayeeName = LEFT(ETS.strCity, 50)
 					,strPhone = ETS.strPhone
-					,strFax = ETS.strFax
 					,intTermsId = T.intTermID
 					,ysnDefaultLocation = (
 						CASE 
@@ -842,6 +980,7 @@ BEGIN TRY
 							ELSE 0
 							END
 						)
+					,intConcurrencyId = EL.intConcurrencyId + 1
 				OUTPUT inserted.intEntityLocationId
 					,'Modified'
 					,deleted.strAddress
@@ -851,7 +990,6 @@ BEGIN TRY
 					,deleted.strState
 					,deleted.strCheckPayeeName
 					,deleted.strPhone
-					,deleted.strFax
 					,deleted.intTermsId
 					,deleted.ysnDefaultLocation
 					,inserted.strAddress
@@ -861,7 +999,6 @@ BEGIN TRY
 					,inserted.strState
 					,inserted.strCheckPayeeName
 					,inserted.strPhone
-					,inserted.strFax
 					,inserted.intTermsId
 					,inserted.ysnDefaultLocation
 				INTO @tblEMEntityLocation
@@ -869,9 +1006,24 @@ BEGIN TRY
 				JOIN tblIPEntityTermStage ETS ON ETS.strLocation = EL.strLocationName
 					AND EL.intEntityId = @intEntityId
 					AND ETS.intStageEntityId = @intStageEntityId
-					AND ETS.intLineType = 1
-					AND ETS.intActionId = 2
+					AND ETS.strLineType = 'L'
 				LEFT JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
+
+				SELECT @intDefaultLocationId = intEntityLocationId
+				FROM dbo.tblEMEntityLocation
+				WHERE strLocationName = @strDefaultLocation
+					AND intEntityId = @intEntityId
+
+				IF ISNULL(@intDefaultLocationId, 0) > 0
+				BEGIN
+					UPDATE tblEMEntity
+					SET intDefaultLocationId = @intDefaultLocationId
+					WHERE intEntityId = @intEntityId
+
+					UPDATE tblEMEntityToContact
+					SET intEntityLocationId = @intDefaultLocationId
+					WHERE intEntityId = @intEntityId
+				END
 
 				DELETE
 				FROM @tblAPVendor
@@ -881,7 +1033,8 @@ BEGIN TRY
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intCurrencyId = @intCurrencyId
 					,intTermsId = @intTermsId
-					,strTaxNumber = @strTaxNo
+					,intBillToId = @intDefaultLocationId
+					,intShipFromId = @intDefaultLocationId
 				OUTPUT deleted.intCurrencyId
 					,deleted.intTermsId
 					,deleted.strTaxNumber
@@ -932,8 +1085,7 @@ BEGIN TRY
 				FROM tblIPEntityTermStage ETS
 				JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
 				WHERE ETS.intStageEntityId = @intStageEntityId
-					AND ETS.intLineType = 3
-					AND ETS.intActionId = 1
+					AND ETS.strLineType = 'T'
 					AND T.intTermID NOT IN (
 						SELECT intTermId
 						FROM tblAPVendorTerm
@@ -948,53 +1100,135 @@ BEGIN TRY
 				FROM tblAPVendorTerm VT
 				JOIN tblSMTerm T ON T.intTermID = VT.intTermId
 					AND VT.intEntityVendorId = @intEntityId
-				JOIN tblIPEntityTermStage ETS ON ETS.strTerm = T.strTermCode
-					AND ETS.intStageEntityId = @intStageEntityId
-					AND ETS.intLineType = 3
-					AND ETS.intActionId = 4
+				WHERE T.strTermCode NOT IN (
+						SELECT ETS.strTerm
+						FROM tblIPEntityTermStage ETS
+						WHERE ETS.intStageEntityId = @intStageEntityId
+							AND ETS.strLineType = 'T'
+						)
 
-				IF NOT EXISTS (
-						SELECT TOP 1 1
-						FROM tblEMEntityToContact EC
-						WHERE EC.intEntityId = @intEntityId
+				DELETE EL
+				OUTPUT deleted.intEntityLocationId
+					,deleted.strLocationName
+					,'Deleted'
+				INTO @tblEMEntityNewLocation
+				FROM tblEMEntityLocation EL
+				WHERE EL.intEntityId = @intEntityId
+					AND EL.strLocationName NOT IN (
+						SELECT ETS.strLocation
+						FROM tblIPEntityTermStage ETS
+						WHERE ETS.intStageEntityId = @intStageEntityId
+							AND ETS.strLineType = 'L'
+						)
+
+				DELETE
+				FROM @tblEntityContactIdOutput
+
+				--Add Contacts to Entity table
+				INSERT INTO tblEMEntity (
+					strName
+					,ysnActive
+					,strContactNumber
+					,strEmail
+					,intConcurrencyId
+					)
+				OUTPUT inserted.intEntityId
+				INTO @tblEntityContactIdOutput
+				SELECT ETS.strContactName
+					,1
+					,''
+					,ETS.strEmail
+					,1
+				FROM tblIPEntityTermStage ETS
+				WHERE ETS.intStageEntityId = @intStageEntityId
+					AND ETS.strLineType = 'C'
+					AND strContactName NOT IN (
+						SELECT E.strName
+						FROM tblEMEntity E
+						WHERE ISNULL(E.strEntityNo, '') = ''
+						)
+
+				--Map Contacts to Vendor
+				INSERT INTO tblEMEntityToContact (
+					intEntityId
+					,intEntityContactId
+					,intEntityLocationId
+					,ysnPortalAccess
+					,intConcurrencyId
+					)
+				SELECT @intEntityId
+					,intEntityId
+					,@intDefaultLocationId
+					,0
+					,1
+				FROM @tblEntityContactIdOutput
+
+				--Set default contact
+				SELECT @intDefaultContactId = intEntityId
+				FROM dbo.tblEMEntity
+				WHERE strName = @strDefaultContactName
+					AND ISNULL(strEntityNo, '') = ''
+
+				IF ISNULL(@intDefaultContactId, 0) > 0
+				BEGIN
+					UPDATE tblEMEntityToContact
+					SET ysnDefaultContact = 1
+					WHERE intEntityId = @intEntityId
+						AND intEntityContactId = @intDefaultContactId
+						AND intEntityLocationId = @intDefaultLocationId
+				END
+
+				--Add Phone
+				INSERT INTO tblEMEntityPhoneNumber (
+					intEntityId
+					,strPhone
+					,intCountryId
+					,intConcurrencyId
+					)
+				SELECT EC.intEntityId
+					,ETS.strPhone
+					,C.intCountryID
+					,1
+				FROM @tblEntityContactIdOutput EC
+				JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
+				JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+				LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
+				WHERE ETS.intStageEntityId = @intStageEntityId
+					AND ETS.strLineType = 'C'
+					AND ISNULL(ETS.strPhone, '') <> ''
+
+				--Add Mobile
+				INSERT INTO tblEMEntityMobileNumber (
+					intEntityId
+					,strPhone
+					,intCountryId
+					,intConcurrencyId
+					)
+				SELECT EC.intEntityId
+					,ETS.strMobile
+					,C.intCountryID
+					,1
+				FROM @tblEntityContactIdOutput EC
+				JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
+				JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+				LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
+				WHERE ETS.intStageEntityId = @intStageEntityId
+					AND ETS.strLineType = 'C'
+					AND ISNULL(ETS.strMobile, '') <> ''
+
+				-- Deletes tblEMEntity, tblEMEntityToContact, tblEMEntityPhoneNumber, tblEMEntityMobileNumber
+				IF EXISTS (
+						SELECT 1
+						FROM @tblEntityContactIdOutput
 						)
 				BEGIN
-					--Add Contacts to Entity table
-					INSERT INTO tblEMEntity (
-						strName
-						,ysnActive
-						,strContactNumber
-						,strEmail
-						,intConcurrencyId
-						)
-					SELECT @strName
-						,1
-						,''
-						,''
-						,1
-
-					SELECT @intEntityContactId = SCOPE_IDENTITY()
-
-					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
-					FROM tblEMEntityLocation
-					WHERE intEntityId = @intEntityId
-						AND ysnDefaultLocation = 1
-
-					--Map Contacts to Vendor
-					INSERT INTO tblEMEntityToContact (
-						intEntityId
-						,intEntityContactId
-						,intEntityLocationId
-						,ysnPortalAccess
-						,ysnDefaultContact
-						,intConcurrencyId
-						)
-					SELECT @intEntityId
-						,@intEntityContactId
-						,@intEntityLocationId
-						,0
-						,1
-						,1
+					DELETE EC
+					FROM tblEMEntityToContact EC
+					WHERE EC.intEntityId = @intEntityId
+						AND EC.intEntityContactId NOT IN (
+							SELECT intEntityId
+							FROM @tblEntityContactIdOutput
+							)
 				END
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
@@ -1163,11 +1397,6 @@ BEGIN TRY
 					WHERE intEntityLocationId = @intAuditDetailId
 						AND IsNULL(strOldPhone, '') <> IsNULL(strNewPhone, '')
 
-					SELECT @strLocationDetails += '{"change":"strFax","iconCls":"small-gear","from":"' + IsNULL(strOldFax, '') + '","to":"' + IsNULL(strNewFax, '') + '","leaf":true,"changeDescription":"Fax"},'
-					FROM @tblEMEntityLocation
-					WHERE intEntityLocationId = @intAuditDetailId
-						AND IsNULL(strOldFax, '') <> IsNULL(strNewFax, '')
-
 					SELECT @strLocationDetails += '{"change":"strTerms","iconCls":"small-gear","from":"' + IsNULL(T.strTerm, '') + '","to":"' + IsNULL(T1.strTerm, '') + '","leaf":true,"changeDescription":"Terms"},'
 					FROM @tblEMEntityLocation EL
 					LEFT JOIN tblSMTerm T ON T.intTermID = EL.intOldTermsId
@@ -1195,20 +1424,6 @@ BEGIN TRY
 					DELETE
 					FROM @tblEMEntityLocation
 					WHERE intEntityLocationId = @intAuditDetailId
-				END
-			END
-			ELSE IF @intActionId = 4
-			BEGIN
-				IF @intEntityId > 0
-				BEGIN
-					DELETE
-					FROM tblEMEntity
-					WHERE intEntityId = @intEntityId
-
-					EXEC uspSMAuditLog @keyValue = @intEntityId
-						,@screenName = 'EntityManagement.view.Entity'
-						,@entityId = @intUserId
-						,@actionType = 'Deleted'
 				END
 			END
 
