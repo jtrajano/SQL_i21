@@ -3534,7 +3534,7 @@ BEGIN TRY
 
 						--short-close the contract if there is a microbalance left in the sequence
 						--check first if the auto-short close config is enabled
-						IF (SELECT ysnAutoShortCloseContractInSettlement FROM tblGRCompanyPreference) = 1 
+						IF EXISTS(SELECT 1 ysnAutoShortCloseContractInSettlement FROM tblGRCompanyPreference WHERE ysnAutoShortCloseContractInSettlement = 1)
 							AND @intPricingTypeHeader <> 2 --DO NOT HANDLE BASIS CONTRACTS FOR NOW 
 						BEGIN
 							SET @strUnitMeasure = NULL
