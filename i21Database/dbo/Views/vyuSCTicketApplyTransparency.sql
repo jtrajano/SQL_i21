@@ -106,9 +106,3 @@ JOIN tblSCTicketApplyTicket TICKET_APPLY_TICKET
 
 
 GO
-
-SELECT * FROM vyuSCTicketApplyTransparency WHERE intTicketApplyId = 35
-
---SELECT * FROM tblSCTicketApplyStorage WHERE intTicketApplyId = 35
---SELECT * FROM tblSCTicketApplySpot WHERE intTicketApplyId = 35
-SELECT * FROM tblSCTicketApplyStorageAllocation
