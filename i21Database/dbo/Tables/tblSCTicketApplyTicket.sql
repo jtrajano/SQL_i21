@@ -8,9 +8,9 @@
 
 	CONSTRAINT [FK_TicketApplyTicket_TicketApply_TicketApplyId] 
 		FOREIGN KEY (intTicketApplyId) 
-		REFERENCES dbo.tblSCTicketApply(intTicketApplyId),
+		REFERENCES dbo.tblSCTicketApply(intTicketApplyId) ON DELETE CASCADE,
 
 	CONSTRAINT FK_TicketApplyTicket_Ticket_TicketId
 		FOREIGN KEY (intTicketId)
-		REFERENCES dbo.tblSCTicket(intTicketId)
+		REFERENCES dbo.tblSCTicket(intTicketId)	  ON DELETE CASCADE
 )

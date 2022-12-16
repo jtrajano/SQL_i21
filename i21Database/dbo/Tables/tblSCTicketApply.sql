@@ -8,11 +8,19 @@
 	[intTicketPoolId] INT NULL,
 	[intCompanyLocationId] INT NULL,
 
+	[ysnPosted] BIT NULL DEFAULT(0),
+	[dtmPosted] DATETIME NULL,
+	[intEntityUserId] INT NULL,
+
 	intConcurrencyId INT NOT NULL DEFAULT(1)
 
 		
-	CONSTRAINT FK_TicketApply_Entity_EntiyId
+	CONSTRAINT FK_TicketApply_Entity_EntityId
 		FOREIGN KEY (intEntityId)
+		REFERENCES dbo.tblEMEntity(intEntityId),
+
+	CONSTRAINT FK_TicketApply_EntityUser_EntityId
+		FOREIGN KEY (intEntityUserId)
 		REFERENCES dbo.tblEMEntity(intEntityId),
 
 	CONSTRAINT FK_TicketApply_Item_ItemId
