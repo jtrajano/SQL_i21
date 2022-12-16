@@ -339,6 +339,7 @@ BEGIN TRY
 	WHERE D.intContractDetailId IS NOT NULL
 	  AND D.intSiteId IS NOT NULL
 	  AND CASE WHEN  ISNULL(MBIL.strInvoiceNo, '') = '' THEN 0 ELSE 1 END = 0
+	  AND ISNULL(@ForDelete, 0) = 0
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
