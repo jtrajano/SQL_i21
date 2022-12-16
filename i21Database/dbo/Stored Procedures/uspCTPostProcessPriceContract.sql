@@ -46,6 +46,11 @@ BEGIN
 			,@ysnEnableArbitrageDerivative bit = 0
 			,@intSpreadArbitrageId int
 			,@ysnDerivative bit
+			,@intContractTypeId int
+			,@intItemId int
+			,@intId int
+			,@dblBasisAverage numeric(38,20)
+			,@dblFuturesAverage numeric(38,20)
 			;
 
 		DECLARE @PFTable TABLE(
@@ -102,6 +107,27 @@ BEGIN
 		WHILE ISNULL(@intPriceFixationId,0) > 0
 		BEGIN
 
+			SELECT
+				@intContractHeaderId	=	PF.intContractHeaderId,
+				@intContractDetailId	= isnull(PF.intContractDetailId,TS1.intContractDetailId), 
+				@intCommodityId			=	CH.intCommodityId,					
+				@intTraderId			=	CH.intSalespersonId,
+				@strBuySell				=	CASE WHEN CH.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,
+				@intCurrencyId			= (case when PF.intContractDetailId is null then TS1.intCurrencyId else TS.intCurrencyId end),
+				@intBookId				= (case when PF.intContractDetailId is null then TS1.intBookId else TS.intBookId end),
+				@intSubBookId			= (case when PF.intContractDetailId is null then TS1.intSubBookId else TS.intSubBookId end),
+				@intLocationId			= (case when PF.intContractDetailId is null then TS1.intCompanyLocationId else TS.intCompanyLocationId end),
+				@ysnSplit				= PF.ysnSplit,
+				@intContractTypeId		= CH.intContractTypeId,
+				@intItemId				= (case when PF.intContractDetailId is null then TS1.intItemId else TS.intItemId end)
+			FROM
+				tblCTPriceFixation PF WITH (UPDLOCK)
+				JOIN tblCTContractHeader CH WITH (UPDLOCK) ON CH.intContractHeaderId = PF.intContractHeaderId 
+				left join tblCTContractDetail TS WITH (UPDLOCK) on TS.intContractDetailId = PF.intContractDetailId  
+				CROSS APPLY fnCTGetTopOneSequence(PF.intContractHeaderId,isnull(PF.intContractDetailId,0)) TS1 
+			WHERE
+				PF.intPriceFixationId = @intPriceFixationId
+
 
 			 --> Start Price Fixation Detail loop
 			SELECT	@intPriceFixationDetailId = 0		
@@ -126,23 +152,10 @@ BEGIN
 					@dblHedgePrice			=	FD.dblHedgePrice,
 					@ysnHedge				=	FD.ysnHedge,
 					@dtmFixationDate		=	FD.dtmFixationDate,
-					@intContractHeaderId	=	PF.intContractHeaderId,
-					@intContractDetailId	= isnull(PF.intContractDetailId,TS1.intContractDetailId), 
-					@intCommodityId			=	CH.intCommodityId,					
-					@intTraderId			=	CH.intSalespersonId,
-					@strBuySell				=	CASE WHEN CH.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,
-					@intCurrencyId			= (case when PF.intContractDetailId is null then TS1.intCurrencyId else TS.intCurrencyId end),
-					@intBookId				= (case when PF.intContractDetailId is null then TS1.intBookId else TS.intBookId end),
-					@intSubBookId			= (case when PF.intContractDetailId is null then TS1.intSubBookId else TS.intSubBookId end),
-					@intLocationId			= (case when PF.intContractDetailId is null then TS1.intCompanyLocationId else TS.intCompanyLocationId end),
 					@ysnAA					=	FD.ysnAA,
 					@dblHedgeNoOfLots		= 	FD.dblHedgeNoOfLots
 				FROM
 					tblCTPriceFixationDetail FD WITH (UPDLOCK)
-					JOIN tblCTPriceFixation PF WITH (UPDLOCK) ON PF.intPriceFixationId = FD.intPriceFixationId
-					JOIN tblCTContractHeader CH WITH (UPDLOCK) ON CH.intContractHeaderId = PF.intContractHeaderId 
-					left join tblCTContractDetail TS WITH (UPDLOCK) on TS.intContractDetailId = PF.intContractDetailId  
-					CROSS APPLY fnCTGetTopOneSequence(PF.intContractHeaderId,isnull(PF.intContractDetailId,0)) TS1 
 				WHERE
 					FD.intPriceFixationDetailId = @intPriceFixationDetailId
 
@@ -252,24 +265,14 @@ BEGIN
 						,@intBrokerId = a.intBrokerId
 						,@intBrokerageAccountId = a.intBrokerAccountId
 						,@intFutureMarketId = a.intNewFutureMarketId
-						,@intCommodityId = c.intCommodityId
-						,@intLocationId = (case when b.intContractDetailId is null then TS1.intCompanyLocationId else TS.intCompanyLocationId end)
-						,@intTraderId = c.intSalespersonId
 						,@intCurrencyId = a.intCurrencyId
 						,@strBuySell = a.strBuySell
 						,@intHedgeFutureMonthId = a.intNewFutureMonthId
 						,@dblHedgePrice = a.dblSpreadPrice
 						,@dtmFixationDate = a.dtmSpreadArbitrageDate
 						,@ysnAA = 0
-						,@intBookId				= (case when b.intContractDetailId is null then TS1.intBookId else TS.intBookId end)
-						,@intSubBookId			= (case when b.intContractDetailId is null then TS1.intSubBookId else TS.intSubBookId end)
 					from
 						tblCTSpreadArbitrage a
-						join tblCTPriceFixation b on b.intPriceFixationId = a.intPriceFixationId
-						join tblCTContractHeader c on c.intContractHeaderId = b.intContractHeaderId
-						left join tblCTContractDetail TS WITH (UPDLOCK) on TS.intContractDetailId = b.intContractDetailId  
-						CROSS APPLY fnCTGetTopOneSequence(b.intContractHeaderId,isnull(b.intContractDetailId,0)) TS1 
-						--left join tblCTSpreadArbitrage aa on aa.intSpreadArbitrageId = a.intSpreadArbitrageId and aa.ysnDerivative = 1 and isnull(aa.intInternalTradeNumberId,0) > 0
 					where
 						a.intSpreadArbitrageId = @intSpreadArbitrageId;
 
@@ -372,8 +375,6 @@ BEGIN
 				,@intUserId			= @intUserId
 				,@dtmLocalDate		= @dtmLocalDate
 
-			set @ysnSplit = (select ysnSplit from tblCTPriceFixation WITH (UPDLOCK) where intPriceFixationId = @intPriceFixationId);
-
 			if (isnull(@ysnSplit,convert(bit,0)) = convert(bit,1))
 			begin
 				update
@@ -459,6 +460,63 @@ BEGIN
 				,tblCTPriceFixationDetail fd
 			where
 				fd.intPriceFixationDetailId = t.intPriceFixationDetailId
+
+			declare @BasisFuturesWeightedAverage table (
+				intId int
+				,dblBasisAverage numeric(38,20)
+				,dblFuturesAverage numeric(38,20)
+			);
+
+			if (@intContractTypeId = 1)
+			begin
+				insert into @BasisFuturesWeightedAverage (intId,dblBasisAverage,dblFuturesAverage)
+				select
+					intId = bdi.intInventoryReceiptItemId
+					,dblBasisAverage = sum(bdi.dblQtyReceived * fd.dblBasis) / sum(bdi.dblQtyReceived)
+					,dblFuturesAverage = sum(bdi.dblQtyReceived * fd.dblFutures) / sum(bdi.dblQtyReceived)
+				from
+					tblCTPriceFixationDetail fd
+					join tblCTPriceFixationDetailAPAR apar on apar.intPriceFixationDetailId = fd.intPriceFixationDetailId
+					join tblAPBillDetail bd on bd.intBillDetailId = apar.intBillDetailId
+					join tblAPBillDetail bdi on bdi.intInventoryReceiptItemId = bd.intInventoryReceiptItemId
+				where
+					fd.intPriceFixationId = @intPriceFixationId
+					and bdi.intItemId = @intItemId
+				group by
+					bdi.intInventoryReceiptItemId
+			end
+			else
+			begin
+				insert into @BasisFuturesWeightedAverage (intId,dblBasisAverage,dblFuturesAverage)
+				select
+					intId = dii.intInventoryShipmentItemId
+					,dblBasisAverage = sum(dii.dblQtyShipped * fd.dblBasis) / sum(dii.dblQtyShipped)
+					,dblFuturesAverage = sum(dii.dblQtyShipped * fd.dblFutures) / sum(dii.dblQtyShipped)
+				from
+					tblCTPriceFixationDetail fd
+					join tblCTPriceFixationDetailAPAR apar on apar.intPriceFixationDetailId = fd.intPriceFixationDetailId
+					join tblARInvoiceDetail di on di.intInvoiceDetailId = apar.intInvoiceDetailId
+					join tblARInvoiceDetail dii on dii.intInventoryShipmentItemId = di.intInventoryShipmentItemId
+				where
+					fd.intPriceFixationId = @intPriceFixationId
+					and dii.intItemId = @intItemId
+				group by
+					dii.intInventoryShipmentItemId
+			end
+
+			while exists (select top 1 1 from @BasisFuturesWeightedAverage)
+			begin
+				select top 1 @intId = intId, @dblBasisAverage = dblBasisAverage, @dblFuturesAverage = dblFuturesAverage from @BasisFuturesWeightedAverage;
+
+				exec uspICUpdateBasisAndFutures
+					@intTransactionTypeId = @intContractTypeId
+					,@dblBasis = @dblBasisAverage
+					,@dblFutures = @dblFuturesAverage
+					,@intTransactionId = @intId;
+
+
+				delete from @BasisFuturesWeightedAverage where intId = @intId;
+			end
 
 			--LOOP - Fetch next Fixation
 			SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM @PFTable WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
