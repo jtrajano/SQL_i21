@@ -343,7 +343,7 @@ BEGIN
 	SELECT @OriginalAverageCost = dbo.fnICGetMovingAverageCost (
 				@intItemId
 				,@intItemLocationId
-				,@InventoryTransactionStartId
+				,(@InventoryTransactionStartId - 1)
 			)
 				
 		--CASE	WHEN @RunningQty > 0 AND ISNULL(@OriginalRunningValue, 0) / @RunningQty > 0 THEN 
