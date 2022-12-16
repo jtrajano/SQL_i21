@@ -322,7 +322,12 @@ BEGIN TRY
 		AND TD.intId IS NULL
 		AND T.strDistributionOption = 'SO'
 		AND I.strTransactionType IN ('Cash', 'Invoice')
-			
+
+	DELETE P 
+	FROM @tblToProcess P
+	WHERE P.intSiteId IS NOT NULL
+	AND P.ysnMobileBilling = 0
+
 	--UPDATE TM QTY
 	INSERT INTO @tblToProcess (
 		  intInvoiceDetailId
@@ -332,50 +337,52 @@ BEGIN TRY
 		, intItemUOMId
 		, dblQty
 		, intLoadDetailId
+		, intSiteId
+		, ysnMobileBilling
 	)
-	SELECT intInvoiceDetailId			= P.intInvoiceDetailId
-		, intContractDetailId			= P.intContractDetailId
-		, intTicketId					= P.intTicketId
-		, intInventoryShipmentItemId	= P.intInventoryShipmentItemId
-		, intItemUOMId					= P.intItemUOMId
-		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL OR @TransactionId IS NOT NULL
+	SELECT intInvoiceDetailId			= D.intInvoiceDetailId
+		, intContractDetailId			= D.intContractDetailId
+		, intTicketId					= D.intTicketId
+		, intInventoryShipmentItemId	= D.intInventoryShipmentItemId
+		, intItemUOMId					= D.intItemUOMId
+		, dblQty						= (CASE WHEN TMO.ysnOrderDeleted <> 0
 													THEN 
-														CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
-																THEN (ABS(P.dblQty) - TMO.dblQuantity)
-															 WHEN ABS(P.dblQty) < TMO.dblQuantity
-																THEN -(TMO.dblQuantity - ABS(P.dblQty))
+														CASE WHEN ABS(dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])) < TMO.dblQuantity
+																THEN (ABS(dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])) - TMO.dblQuantity)
+															 WHEN ABS(dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])) > TMO.dblQuantity
+																THEN -(TMO.dblQuantity - ABS(dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])))
 														END 
 												ELSE 
-													P.dblQty * CASE WHEN ID.dblQtyShipped < TMO.dblQuantity AND P.dblQty > TMO.dblQuantity THEN -1 ELSE 1 END
+													dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped]) * CASE WHEN D.dblQtyShipped < TMO.dblQuantity AND dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped]) > TMO.dblQuantity THEN -1 ELSE 1 END
 											END)
-		, intLoadDetailId				= P.intLoadDetailId
-	FROM @tblToProcess P
-	LEFT JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId AND ID.intSiteId IS NOT NULL
-	CROSS APPLY ( 
-		SELECT TOP 1 TMO.dblQuantity
-			       , TMO.intContractDetailId
+		, intLoadDetailId				= D.intLoadDetailId
+		, intSiteId						= D.intSiteId
+		, ysnMobileBilling				= CASE WHEN  ISNULL(MBIL.strInvoiceNo, '') = ''   THEN 0 ELSE 1 END
+	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoiceDetail D ON	I.intInvoiceDetailId = D.intInvoiceDetailId
+	INNER JOIN tblARInvoice Header ON D.intInvoiceId = Header.intInvoiceId 
+	INNER JOIN tblCTContractDetail CD ON D.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblMBILInvoice MBIL ON Header.strInvoiceNumber = MBIL.strInvoiceNo
+	OUTER APPLY ( 
+		SELECT TOP 1 
+			 TMO.dblQuantity
+			,TMO.intContractDetailId
+			,ysnOrderDeleted		= ISNULL(TMD.intDispatchID, 0)
 		FROM tblTMOrder TMO 
-		WHERE TMO.intSiteId = P.intSiteId
-		  AND TMO.intContractDetailId = P.intContractDetailId
+		LEFT JOIN tblTMDispatch TMD ON TMO.intSiteId = TMD.intSiteID
+		WHERE TMO.intSiteId = D.intSiteId
 		ORDER BY TMO.dtmTransactionDate DESC
 	) TMO
 	OUTER APPLY (
 		SELECT TOP 1 TD.intTransactionDetailId
 		FROM tblARTransactionDetail TD 
-		WHERE P.intInvoiceDetailId = TD.intTransactionDetailId 
+		WHERE D.intInvoiceDetailId = TD.intTransactionDetailId 
 	      AND TD.strTransactionType IN ('Cash', 'Invoice')
 	) TRD
-	WHERE TMO.intContractDetailId IS NOT NULL
-	  AND P.intSiteId IS NOT NULL
-	  AND (ABS(P.dblQty) <> TMO.dblQuantity OR (ABS(P.dblQty) = TMO.dblQuantity AND TRD.intTransactionDetailId IS NOT NULL))
-	  AND P.ysnMobileBilling = 0
+	WHERE D.intContractDetailId IS NOT NULL
+	  AND D.intSiteId IS NOT NULL
+	  AND CASE WHEN  ISNULL(MBIL.strInvoiceNo, '') = '' THEN 0 ELSE 1 END = 0
 	  AND ISNULL(@ForDelete, 0) = 0
-	  
-	DELETE P 
-	FROM @tblToProcess P
-	WHERE P.intSiteId IS NOT NULL
-	AND P.intSiteId IN (SELECT TOP 1 intSiteID FROM tblTMDispatch)
-	AND P.ysnMobileBilling = 0
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
