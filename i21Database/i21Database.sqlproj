@@ -1428,6 +1428,7 @@
   <Build Include="dbo\Views\vyuHDTicketLink.sql" />
   <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
+    <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
     <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
     <Build Include="dbo\Views\vyuSCHoldTicketApplyAllowedStorageTypePerTicketPool.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcess.sql" />
