@@ -1,16 +1,13 @@
-﻿CREATE TABLE [dbo].[tblSCTicketApplyLog]
+﻿CREATE TABLE [dbo].[tblSCTicketApplyContract]
 (
-	intTicketApplyLogId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	intTicketApplyContractId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
 	intTicketApplyId INT NOT NULL,
-	strLogCase1 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
-	strLogCase2 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
-	strLogCase3 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
-	strEntityName NVARCHAR(100) NULL,
-	intEntityId INT NULL,
+	intContractDetailId INT NOT NULL,
+	dblUnit NUMERIC(38, 20) NULL,
 	intConcurrencyId INT NOT NULL DEFAULT(1),
 
 
-	CONSTRAINT [FK_TicketApplyLog_TicketApply_TicketApplyId] 
+	CONSTRAINT [FK_TicketApplyContract_TicketApply_TicketApplyId] 
 		FOREIGN KEY (intTicketApplyId) 
 		REFERENCES dbo.tblSCTicketApply(intTicketApplyId) ON DELETE CASCADE,
 
