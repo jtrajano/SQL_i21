@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCMMultiCurrencyRevalue]
+﻿CREATE VIEW vyuCMMultiCurrencyRevalue
 AS
 SELECT DISTINCT
 	strTransactionType		=	'Cash Balances' COLLATE Latin1_General_CI_AS,
@@ -50,7 +50,7 @@ FROM
 		SELECT [dbo].fnGLGetCMGLDetailBalance(EOP.Value, BA.intGLAccountId) Value -- this is in us / functional currency
   )GLBalance
   OUTER APPLY(
-		SELECT case when BankBalance.Value = 0 then NULL else GLBalance.Value / BankBalance.Value  END  Value
+		SELECT case when BankBalance.Value = 0 or  GLBalance.Value = 0 then NULL else GLBalance.Value / BankBalance.Value  END  Value
   )Rate
 	
 WHERE
