@@ -42,7 +42,7 @@
     --[strSerialPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strTimeOut]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [intPollingIntervalMinute] INT NULL, 
-    --[intTankMonitorId]          INT NULL,
+   [intTankMonitorId]          INT NULL,
    
 
 
@@ -55,8 +55,8 @@
     CONSTRAINT [FK_tblTMDevice_tblTMLease] FOREIGN KEY ([intLeaseId]) REFERENCES [dbo].[tblTMLease] ([intLeaseId]) ON DELETE SET NULL,
     CONSTRAINT [FK_tblTMDevice_tblTMMeterType] FOREIGN KEY ([intMeterTypeId]) REFERENCES [dbo].[tblTMMeterType] ([intMeterTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMRegulatorType] FOREIGN KEY ([intRegulatorTypeId]) REFERENCES [dbo].[tblTMRegulatorType] ([intRegulatorTypeId]),
-    CONSTRAINT [FK_tblTMDevice_tblTMTankType] FOREIGN KEY ([intTankTypeId]) REFERENCES [dbo].[tblTMTankType] ([intTankTypeId])
-    --CONSTRAINT [FK_tblTMDevice_tblTMTankMonitor] FOREIGN KEY ([intTankMonitorId]) REFERENCES [dbo].[tblTMTankMonitor] ([intTankMonitorId])
+    CONSTRAINT [FK_tblTMDevice_tblTMTankType] FOREIGN KEY ([intTankTypeId]) REFERENCES [dbo].[tblTMTankType] ([intTankTypeId]),
+    CONSTRAINT [FK_tblTMDevice_tblTMTankMonitor] FOREIGN KEY ([intTankMonitorId]) REFERENCES [dbo].[tblTMTankMonitor] ([intTankMonitorId])
 );
 
 
