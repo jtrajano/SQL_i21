@@ -1418,6 +1418,9 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPBatchRecategorization_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPVendor_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPVendor_EK.sql" />
+    <Build Include="dbo\Views\vyuCTFWCOverview.sql" />
+    <Build Include="dbo\Views\vyuCTFWCOverviewCompleted.sql" />
+    <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
