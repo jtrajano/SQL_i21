@@ -615,14 +615,26 @@ BEGIN TRY
 			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1, 1
 		END
 
-		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND
-			NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractCost WHERE ysnBasis = 1 AND intContractDetailId = @intContractDetailId) -- ADD missing Basis components
+		IF	@ysnBasisComponent = 1
 		BEGIN
-			INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis, ysnAccrue)
-			SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis, 0 AS ysnAccrue
-			FROM	tblICItem		IM
-			JOIN	tblICItemUOM	IU ON IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
-			WHERE	ysnBasisContract = 1
+			if (@dblBasis = 0 AND NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractCost WHERE ysnBasis = 1 AND intContractDetailId = @intContractDetailId))
+			BEGIN
+				INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis, ysnAccrue)
+				SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis, 0 AS ysnAccrue
+				FROM	tblICItem		IM
+				JOIN	tblICItemUOM	IU ON IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
+				WHERE	ysnBasisContract = 1
+			END
+			else if (isnull(@dblBasis,0) <> 0)
+			begin
+				declare @dblCostsDifferential numeric(18,6);
+				select @dblCostsDifferential = sum(dblRate) from tblCTContractCost where intContractDetailId = @intContractDetailId and ysnBasis = 1;
+				if (@dblCostsDifferential <> @dblBasis)
+				begin
+					select @ErrMsg = 'The sum of Amount('+convert(nvarchar(20),@dblCostsDifferential)+') does not match with the sequence Basis('+convert(nvarchar(20),@dblBasis)+').';
+					RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
+				end
+			end
 		END;
 
 		IF @intContractStatusId IN (3,6)
