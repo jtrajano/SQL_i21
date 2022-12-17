@@ -80,6 +80,12 @@ BEGIN TRY
 		,@intPrevOrderCompleted INT
 		,@intWorkOrderId INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intLotStatusId INT
+		,@strNetWeightUOM NVARCHAR(50)
+		,@strStatus NVARCHAR(50)
+		,@dtmExpiryDate DATETIME
+
+	SELECT @dtmDate = GETDATE()
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -138,6 +144,9 @@ BEGIN TRY
 				,@dblWeightPerQty = NULL
 				,@strOrderNo = NULL
 				,@intOrderCompleted = NULL
+				,@strNetWeightUOM = NULL
+				,@strStatus = NULL
+				,@dtmExpiryDate = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -152,12 +161,18 @@ BEGIN TRY
 				,@strStorageUnit = strStorageUnit
 				,@dblQuantity = dblQuantity
 				,@strQuantityUOM = strQuantityUOM
+				,@dblQuantity = dblQuantity
+				,@strQuantityUOM = strQuantityUOM
+				,@dblNetWeight = dblNetWeight
+				,@strNetWeightUOM = strNetWeightUOM
+				,@strStatus = strStatus
 				,@strReasonCode = strReasonCode
 				,@strNotes = strNotes
 				,@strNewStorageLocation = strNewStorageLocation
 				,@strNewStorageUnit = strNewStorageUnit
 				,@strOrderNo = strOrderNo
 				,@intOrderCompleted = intOrderCompleted
+				,@dtmExpiryDate = dtmExpiryDate
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
 
@@ -168,14 +183,12 @@ BEGIN TRY
 			--		)
 			--BEGIN
 			--	SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processed in i21.'
-
 			--	RAISERROR (
 			--			@strError
 			--			,16
 			--			,1
 			--			)
 			--END
-
 			--IF EXISTS (
 			--		SELECT 1
 			--		FROM tblIPInventoryAdjustmentAck
@@ -183,19 +196,17 @@ BEGIN TRY
 			--		)
 			--BEGIN
 			--	SELECT @strError = 'TrxSequenceNo ' + Ltrim(@intTrxSequenceNo) + ' is exists in i21.'
-
 			--	RAISERROR (
 			--			@strError
 			--			,16
 			--			,1
 			--			)
 			--END
-
 			SELECT @intCompanyLocationId = NULL
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
-			WHERE strLocationNumber  = @strCompanyLocation
+			WHERE strLocationNumber = @strCompanyLocation
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -460,234 +471,46 @@ BEGIN TRY
 				FROM dbo.tblICInventoryAdjustment
 				WHERE intInventoryAdjustmentId = @intAdjustmentId
 			END
-			ELSE IF @intTransactionTypeId = 10
+			ELSE IF @intTransactionTypeId = 10 --Quantity Change
 			BEGIN
-				IF @intLotId IS NULL
-				BEGIN
-					EXEC uspMFGeneratePatternId @intCategoryId = NULL
-						,@intItemId = NULL
-						,@intManufacturingId = NULL
-						,@intSubLocationId = NULL
-						,@intLocationId = @intCompanyLocationId
-						,@intOrderTypeId = NULL
-						,@intBlendRequirementId = NULL
-						,@intPatternCode = 33 -- Transaction Batch Id
-						,@ysnProposed = 0
-						,@strPatternString = @intBatchId OUTPUT
+				EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
+					,@dblNewLotQty = @dblQuantity
+					,@intAdjustItemUOMId = @intItemUOMId
+					,@intUserId = @intUserId
+					,@strReasonCode = @strReasonCode
+					,@blnValidateLotReservation = 0
+					,@strNotes = @strNotes
+					,@dtmDate = NULL
+					,@ysnBulkChange = 0
+					,@strReferenceNo = NULL
+					,@intAdjustmentId = @intAdjustmentId OUTPUT
+					,@ysnDifferenceQty = @ysnDifferenceQty
+			END
+			ELSE IF @intTransactionTypeId = 16 --Status Change
+			BEGIN
+				SELECT @intLotStatusId = NULL
 
-					SELECT @intItemLocationId = NULL
+				SELECT @intLotStatusId = intLotStatusId
+				FROM tblICLotStatus
+				WHERE strPrimaryStatus = @strStatus
 
-					SELECT @intItemLocationId = intItemLocationId
-					FROM tblICItemLocation
-					WHERE intItemId = @intItemId
-						AND intLocationId = @intCompanyLocationId
-
-					SELECT @dblStandardCost = NULL
-
-					SELECT @dblStandardCost = t.dblStandardCost
-					FROM tblICItemPricing t WITH (NOLOCK)
-					WHERE t.intItemId = @intItemId
-						AND t.intItemLocationId = @intItemLocationId
-
-					SELECT @intParentLotId = NULL
-						,@dblWeightPerQty = NULL
-						,@intLotItemUOMId = NULL
-						,@strParentLotNumber = NULL
-						,@strContainerNo = NULL
-						,@strMarkings = NULL
-						,@intEntityVendorId = NULL
-						,@strCondition = NULL
-						,@intInventoryReceiptId = NULL
-
-					SELECT TOP 1 @intParentLotId = intParentLotId
-						,@dblWeightPerQty = dblWeightPerQty
-						,@intLotItemUOMId = intItemUOMId
-						,@strContainerNo = strContainerNo
-						,@strMarkings = strMarkings
-						,@intEntityVendorId = intEntityVendorId
-						,@strCondition = strCondition
-					FROM tblICLot
-					WHERE intItemId = @intItemId
-						AND strLotNumber = @strLotNo
-					ORDER BY intLotId
-
-					IF @intParentLotId IS NULL
-					BEGIN
-						SELECT @dblWeightPerQty = 1
-
-						SELECT @dblNoOfPack = @dblQuantity
-
-						SELECT @intLotItemUOMId = @intItemUOMId
-					END
-					ELSE
-					BEGIN
-						SELECT @dblNoOfPack = NULL
-
-						SELECT @dblNoOfPack = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
-					END
-
-					SELECT @strParentLotNumber = strParentLotNumber
-					FROM tblICParentLot
-					WHERE intParentLotId = @intParentLotId
-
-					EXEC uspMFPostProduction 1
-						,0
-						,NULL
-						,@intItemId
-						,@intUserId
-						,NULL
-						,@intStorageLocationId
-						,@dblQuantity
-						,@intItemUOMId
-						,@dblWeightPerQty
-						,@dblNoOfPack
-						,@intLotItemUOMId
-						,@strLotNo
-						,@strLotNo
-						,@intBatchId
-						,@intLotId OUTPUT
-						,NULL
-						,NULL
-						,@strParentLotNumber --Parent Lot Number
-						,NULL
-						,NULL
-						,NULL
-						,NULL
-						,NULL
-						,NULL
-						,@dblStandardCost
-						,'Created from external system'
-						,1
-						,NULL
-						,NULL
-						,NULL
-						,@strContainerNo
-						,@strMarkings
-						,@intEntityVendorId
-						,@strCondition
-				END
-				ELSE
-				BEGIN
-					EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
-						,@dblNewLotQty = @dblQuantity
-						,@intAdjustItemUOMId = @intItemUOMId
-						,@intUserId = @intUserId
-						,@strReasonCode = @strReasonCode
-						,@blnValidateLotReservation = 0
-						,@strNotes = @strNotes
-						,@dtmDate = NULL
-						,@ysnBulkChange = 0
-						,@strReferenceNo = NULL
-						,@intAdjustmentId = @intAdjustmentId OUTPUT
-						,@ysnDifferenceQty = @ysnDifferenceQty
-
-					SELECT @strAdjustmentNo = NULL
-
-					SELECT @strAdjustmentNo = strAdjustmentNo
-					FROM dbo.tblICInventoryAdjustment
-					WHERE intInventoryAdjustmentId = @intAdjustmentId
-				END
-
-				IF @strReasonCode = 30
-				BEGIN
-					IF NOT EXISTS (
-							SELECT *
-							FROM tblIPInventoryAdjustment
-							WHERE strLotNumber = @strLotNo
-							)
-					BEGIN
-						SELECT @intInventoryReceiptItemId = NULL
-
-						SELECT TOP 1 @intInventoryReceiptItemId = intInventoryReceiptItemId
-						FROM tblICInventoryReceiptItemLot
-						WHERE strLotNumber = @strLotNo
-						ORDER BY intInventoryReceiptItemLotId ASC
-
-						SELECT @intInventoryReceiptId = NULL
-							,@intLoadContainerId = NULL
-							,@intContractHeaderId = NULL
-							,@intContractDetailId = NULL
-							,@intLoadDetailId = NULL
-							,@dblNetWeight = NULL
-
-						SELECT @intInventoryReceiptId = intInventoryReceiptId
-							,@intLoadContainerId = intContainerId
-							,@intContractHeaderId = intOrderId
-							,@intContractDetailId = intLineNo
-							,@intLoadDetailId = intSourceId
-							,@dblNetWeight = dblNet
-						FROM tblICInventoryReceiptItem
-						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
-
-						SELECT @intLoadId = NULL
-
-						SELECT @intLoadId = intLoadId
-						FROM tblLGLoadContainer
-						WHERE intLoadContainerId = @intLoadContainerId
-
-						INSERT INTO tblIPInventoryAdjustment (
-							dtmCreatedDate
-							,intContractHeaderId
-							,intContractDetailId
-							,intLoadId
-							,intLoadDetailId
-							,intLoadContainerId
-							,intInventoryReceiptId
-							,strLotNumber
-							,dblNet
-							,dblGross
-							)
-						SELECT GETDATE() AS dtmCreatedDate
-							,@intContractHeaderId
-							,@intContractDetailId
-							,@intLoadId
-							,@intLoadDetailId
-							,@intLoadContainerId
-							,@intInventoryReceiptId
-							,@strLotNo
-							,@dblNetWeight + @dblQuantity AS dblNet
-							,@dblNetWeight + @dblQuantity AS dblGrossWeight
-
-						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
-							,@intPurchaseSale = 1
-							,@intLoadContainerId = @intLoadContainerId
-							,@ysnAddClaim = 1
-					END
-					ELSE
-					BEGIN
-						SELECT @intInventoryReceiptItemId = NULL
-
-						SELECT TOP 1 @intInventoryReceiptItemId = intInventoryReceiptItemId
-						FROM tblICInventoryReceiptItemLot
-						WHERE strLotNumber = @strLotNo
-						ORDER BY intInventoryReceiptItemLotId ASC
-
-						SELECT @intInventoryReceiptId = NULL
-							,@intLoadContainerId = NULL
-
-						SELECT @intInventoryReceiptId = intInventoryReceiptId
-							,@intLoadContainerId = intContainerId
-						FROM tblICInventoryReceiptItem
-						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
-
-						UPDATE tblIPInventoryAdjustment
-						SET dblNet = dblNet + @dblQuantity
-							,dblGross = dblGross + @dblQuantity
-						WHERE intInventoryReceiptId = @intInventoryReceiptId
-							AND strLotNumber = @strLotNo
-
-						SELECT @intLoadId = NULL
-
-						SELECT @intLoadId = intLoadId
-						FROM tblLGLoadContainer
-						WHERE intLoadContainerId = @intLoadContainerId
-
-						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
-							,@intPurchaseSale = 1
-							,@intLoadContainerId = @intLoadContainerId
-							,@ysnAddClaim = 1
-					END
-				END
+				EXEC uspMFSetLotStatus @intLotId
+					,@intLotStatusId
+					,@intUserId
+					,@strNotes
+					,@strReasonCode
+					,@dtmDate
+					,@ysnBulkChange = 0
+			END
+			ELSE IF @intTransactionTypeId = 18 --Expiry Date Change
+			BEGIN
+				EXEC uspMFSetLotExpiryDate @intLotId = @intLotId
+					,@dtmNewExpiryDate = @dtmExpiryDate
+					,@intUserId = @intUserId
+					,@strReasonCode = @strReasonCode
+					,@strNotes = @strNotes
+					,@dtmDate = @dtmDate
+					,@ysnBulkChange = 0
 			END
 			ELSE IF @intTransactionTypeId = 8
 			BEGIN
@@ -945,8 +768,12 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							Update tblMFWorkOrder Set intStatusId =13,dtmCompletedDate =GETDATE() Where intWorkOrderId =@intWorkOrderId 
+							UPDATE tblMFWorkOrder
+							SET intStatusId = 13
+								,dtmCompletedDate = GETDATE()
+							WHERE intWorkOrderId = @intWorkOrderId
 						END
+
 						DELETE
 						FROM @ItemsForPost
 					END
@@ -1096,7 +923,10 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							Update tblMFWorkOrder Set intStatusId =13,dtmCompletedDate =GETDATE() Where intWorkOrderId =@intWorkOrderId 
+							UPDATE tblMFWorkOrder
+							SET intStatusId = 13
+								,dtmCompletedDate = GETDATE()
+							WHERE intWorkOrderId = @intWorkOrderId
 						END
 
 						DELETE

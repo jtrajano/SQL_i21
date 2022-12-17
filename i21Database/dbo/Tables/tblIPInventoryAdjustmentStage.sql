@@ -13,6 +13,9 @@
 	,strStorageUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblQuantity NUMERIC(18, 6)
 	,strQuantityUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,dblNetWeight NUMERIC(18, 6)
+	,strNetWeightUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strReasonCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strNotes NVARCHAR(2048) COLLATE Latin1_General_CI_AS
 	,strNewStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -20,5 +23,6 @@
 	,intStatusId int
 	,strOrderNo nvarchar(50)
 	,intOrderCompleted integer
+	,dtmExpiryDate DATETIME
 	,CONSTRAINT PK_tblIPInventoryAdjustmentStage PRIMARY KEY (intInventoryAdjustmentStageId)
 	)

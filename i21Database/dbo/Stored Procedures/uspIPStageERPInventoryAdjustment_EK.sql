@@ -76,23 +76,27 @@ BEGIN TRY
 				,strStorageUnit
 				,dblQuantity
 				,strQuantityUOM
+				,dblNetWeight 
+				,strNetWeightUOM 
+				,strStatus
 				,strReasonCode
 				,strNotes
 				,strNewStorageLocation
 				,strNewStorageUnit
 				,strOrderNo
 				,intOrderCompleted
+				,dtmExpiryDate 
 				)
 			OUTPUT INSERTED.strLotNo
 			INTO @tblIPLot
 			SELECT DocNo
-				,CompanyLocation
+				,Location
 				,ActionId
 				,IsNULL(CreatedDate,GETDATE())
 				,CreatedBy
-				,TransactionTypeId
+				,TransactionType
 				,CASE 
-					WHEN TransactionTypeId = 20
+					WHEN TransactionType = 20
 						THEN SourceStorageLocation
 					ELSE StorageLocation
 					END
@@ -100,25 +104,29 @@ BEGIN TRY
 				,MotherLotNo
 				,LotNo
 				,CASE 
-					WHEN TransactionTypeId = 20
+					WHEN TransactionType = 20
 						THEN SourceStorageUnit
 					ELSE StorageUnit
 					END
 				,Quantity
 				,QuantityUOM
+				,NetWeight 
+				,NetWeightUOM 
+				,Status
 				,ReasonCode
 				,Notes
 				,NewStorageLocation
 				,NewStorageUnit
 				,OrderNo
 				,OrderCompleted
+				,ExpiryDate 
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../CtrlPoint/DocNo'
-					,CompanyLocation NVARCHAR(6)
+					,Location NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
-					,TransactionTypeId INT
+					,TransactionType INT
 					,StorageLocation NVARCHAR(50)
 					,ItemNo NVARCHAR(50)
 					,MotherLotNo NVARCHAR(50)
@@ -126,6 +134,9 @@ BEGIN TRY
 					,StorageUnit NVARCHAR(50)
 					,Quantity NUMERIC(18, 6)
 					,QuantityUOM NVARCHAR(50)
+					,NetWeight NUMERIC(18, 6)
+					,NetWeightUOM NVARCHAR(50)
+					,Status NVARCHAR(50)
 					,ReasonCode NVARCHAR(50)
 					,Notes NVARCHAR(2048)
 					,SourceStorageLocation NVARCHAR(50)
@@ -134,6 +145,7 @@ BEGIN TRY
 					,NewStorageUnit NVARCHAR(50)
 					,OrderNo nvarchar(50)
 					,OrderCompleted integer
+					,ExpiryDate Datetime
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ','
