@@ -91,7 +91,7 @@ BEGIN TRY
 			INTO @tblIPLot
 			SELECT DocNo
 				,CASE 
-					WHEN TransactionType = 20
+					WHEN TransactionType IN (12,20)
 						THEN SourceLocation
 					ELSE Location
 					END
@@ -100,7 +100,7 @@ BEGIN TRY
 				,CreatedBy
 				,TransactionType
 				,CASE 
-					WHEN TransactionType = 20
+					WHEN TransactionType IN (12,20)
 						THEN SourceStorageLocation
 					ELSE StorageLocation
 					END
@@ -108,7 +108,7 @@ BEGIN TRY
 				,MotherLotNo
 				,LotNo
 				,CASE 
-					WHEN TransactionType = 20
+					WHEN TransactionType IN (12,20)
 						THEN SourceStorageUnit
 					ELSE StorageUnit
 					END

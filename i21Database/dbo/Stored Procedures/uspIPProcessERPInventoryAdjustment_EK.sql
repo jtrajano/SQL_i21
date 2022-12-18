@@ -279,7 +279,7 @@ BEGIN TRY
 						)
 			END
 
-			IF @intTransactionTypeId = 20
+			IF @intTransactionTypeId in (12, 20)
 			BEGIN
 				IF @strNewStorageLocation IS NULL
 					OR @strNewStorageLocation = ''
@@ -437,7 +437,7 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			IF @intTransactionTypeId = 20
+			IF @intTransactionTypeId IN (12,20)
 			BEGIN
 				IF @dblWeightPerQty > 0
 				BEGIN
