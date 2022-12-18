@@ -109,11 +109,11 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@strFobPoint AS NVARCHAR(50)
 		,@receiptLocationId AS INT
 
--- Create a snapshot of the gl values
-BEGIN
-	EXEC uspICCreateGLSnapshotOnRebuildInventoryValuation	
-		@dtmRebuildDate
-END
+---- Create a snapshot of the gl values
+--BEGIN
+--	EXEC uspICCreateGLSnapshotOnRebuildInventoryValuation	
+--		@dtmRebuildDate
+--END
 
 -- Create the temp table for the specific items/categories to rebuild
 IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
@@ -254,14 +254,14 @@ BEGIN
 	END 
 END 
 
--- Backup Inventory transactions 
-BEGIN 
-	EXEC dbo.uspICBackupInventory 
-		@intUserId = @intUserId
-		, @strOperation = 'Rebuild Inventory'
-		, @strRemarks = @strRemarks
-		, @intBackupId = @intBackupId OUTPUT 
-END 
+---- Backup Inventory transactions 
+--BEGIN 
+--	EXEC dbo.uspICBackupInventory 
+--		@intUserId = @intUserId
+--		, @strOperation = 'Rebuild Inventory'
+--		, @strRemarks = @strRemarks
+--		, @intBackupId = @intBackupId OUTPUT 
+--END 
 
 -- Return all the "Out" stock qty back to the cost buckets. 
 BEGIN 
