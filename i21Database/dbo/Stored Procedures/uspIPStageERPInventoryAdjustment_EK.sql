@@ -90,7 +90,11 @@ BEGIN TRY
 			OUTPUT INSERTED.strLotNo
 			INTO @tblIPLot
 			SELECT DocNo
-				,Location
+				,CASE 
+					WHEN TransactionType = 20
+						THEN SourceLocation
+					ELSE Location
+					END
 				,ActionId
 				,IsNULL(CreatedDate,GETDATE())
 				,CreatedBy
@@ -139,6 +143,7 @@ BEGIN TRY
 					,Status NVARCHAR(50)
 					,ReasonCode NVARCHAR(50)
 					,Notes NVARCHAR(2048)
+					,SourceLocation NVARCHAR(50)
 					,SourceStorageLocation NVARCHAR(50)
 					,SourceStorageUnit NVARCHAR(50)
 					,NewStorageLocation NVARCHAR(50)
