@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].uspAPPostVoucherIntegration (@strBillIds NVARCHAR(MAX), @ysnPost BIT, @intUserId INT)
+CREATE PROCEDURE [dbo].uspVRVoucherIntegration (@strBillIds NVARCHAR(MAX), @ysnPost BIT, @intUserId INT)
 AS
 BEGIN
     DECLARE @Ids TABLE (intId INT)
