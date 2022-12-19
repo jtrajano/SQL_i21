@@ -540,49 +540,49 @@ SET @cteQuery = N';WITH forClearing
      FROM vyuAPGrainClearing    
      ' + @innerQueryFilter + '    
     ),    
-  --   grainTransferClearing    
-  --   AS    
-  --   (    
-  -- SELECT    
-  --       dtmDate            ,strTransactionNumber    
-  --       ,intEntityVendorId    
-  --       ,intInventoryReceiptId    
-  --       ,intInventoryReceiptItemId    
-  --       ,intItemId    
-  --       ,intTransferStorageId    
-  --       ,strTransferStorageTicket    
-  --       ,intTransferStorageReferenceId    
-  --       ,dblTransferTotal    
-  --       ,dblTransferQty    
-  --       ,dblReceiptTotal    
-  --       ,dblReceiptQty    
-  --       ,intLocationId    
-  --       ,strLocationName    
-  --    FROM vyuGRTransferClearing    
-  --    ' + @innerQueryFilter + '    
-  --   ),    
-  --   grainTransferChargeClearing    
-  --   AS    
-  --   (    
-  -- SELECT    
-  --       dtmDate    
-  --       ,strTransactionNumber    
-  --       ,intEntityVendorId    
-  --       ,intInventoryReceiptId    
-  --       ,intInventoryReceiptChargeId    
-  --       ,intItemId    
-  --       ,intTransferStorageId    
-  --       ,strTransferStorageTicket    
-  --       ,intTransferStorageReferenceId    
-  --       ,dblTransferTotal    
-  --       ,dblTransferQty    
-  --       ,dblReceiptChargeTotal    
-  --       ,dblReceiptChargeQty    
-  --       ,intLocationId    
-  --       ,strLocationName    
-  --    FROM vyuGRTransferChargesClearing     
-  --    ' + @innerQueryFilter + '    
-  --   ),    
+    grainTransferClearing    
+    AS    
+    (    
+  SELECT    
+        dtmDate            ,strTransactionNumber    
+        ,intEntityVendorId    
+        ,intInventoryReceiptId    
+        ,intInventoryReceiptItemId    
+        ,intItemId    
+        ,intTransferStorageId    
+        ,strTransferStorageTicket    
+        ,intTransferStorageReferenceId    
+        ,dblTransferTotal    
+        ,dblTransferQty    
+        ,dblReceiptTotal    
+        ,dblReceiptQty    
+        ,intLocationId    
+        ,strLocationName    
+     FROM vyuGRTransferClearing    
+     ' + @innerQueryFilter + '    
+    ),    
+    grainTransferChargeClearing    
+    AS    
+    (    
+  SELECT    
+        dtmDate    
+        ,strTransactionNumber    
+        ,intEntityVendorId    
+        ,intInventoryReceiptId    
+        ,intInventoryReceiptChargeId    
+        ,intItemId    
+        ,intTransferStorageId    
+        ,strTransferStorageTicket    
+        ,intTransferStorageReferenceId    
+        ,dblTransferTotal    
+        ,dblTransferQty    
+        ,dblReceiptChargeTotal    
+        ,dblReceiptChargeQty    
+        ,intLocationId    
+        ,strLocationName    
+     FROM vyuGRTransferChargesClearing     
+     ' + @innerQueryFilter + '    
+    ),    
     patClearing    
     AS    
     (    
@@ -734,48 +734,48 @@ BEGIN
       ,strLocationName    
      FROM vyuAPGrainClearing    
     ),  
-    -- grainTransferClearing  
-    -- AS  
-    -- (  
-    --   SELECT    
-    --     dtmDate    
-    --     ,strTransactionNumber    
-    --     ,intEntityVendorId    
-    --     ,intInventoryReceiptId    
-    --     ,intInventoryReceiptItemId    
-    --     ,intItemId    
-    --     ,intTransferStorageId    
-    --     ,strTransferStorageTicket    
-    --     ,intTransferStorageReferenceId    
-    --     ,dblTransferTotal    
-    --     ,dblTransferQty    
-    --     ,dblReceiptTotal    
-    --     ,dblReceiptQty    
-    --     ,intLocationId    
-    --     ,strLocationName    
-    --  FROM vyuGRTransferClearing    
-    -- ),  
-    -- grainTransferChargeClearing  
-    -- AS  
-    -- (  
-    --   SELECT    
-    --     dtmDate    
-    --     ,strTransactionNumber    
-    --     ,intEntityVendorId    
-    --     ,intInventoryReceiptId    
-    --     ,intInventoryReceiptChargeId    
-    --     ,intItemId    
-    --     ,intTransferStorageId    
-    --     ,strTransferStorageTicket    
-    --     ,intTransferStorageReferenceId    
-    --     ,dblTransferTotal    
-    --     ,dblTransferQty    
-    --     ,dblReceiptChargeTotal    
-    --     ,dblReceiptChargeQty    
-    --     ,intLocationId    
-    --     ,strLocationName    
-    --  FROM vyuGRTransferChargesClearing    
-    -- ),  
+    grainTransferClearing  
+    AS  
+    (  
+      SELECT    
+        dtmDate    
+        ,strTransactionNumber    
+        ,intEntityVendorId    
+        ,intInventoryReceiptId    
+        ,intInventoryReceiptItemId    
+        ,intItemId    
+        ,intTransferStorageId    
+        ,strTransferStorageTicket    
+        ,intTransferStorageReferenceId    
+        ,dblTransferTotal    
+        ,dblTransferQty    
+        ,dblReceiptTotal    
+        ,dblReceiptQty    
+        ,intLocationId    
+        ,strLocationName    
+     FROM vyuGRTransferClearing    
+    ),  
+    grainTransferChargeClearing  
+    AS  
+    (  
+      SELECT    
+        dtmDate    
+        ,strTransactionNumber    
+        ,intEntityVendorId    
+        ,intInventoryReceiptId    
+        ,intInventoryReceiptChargeId    
+        ,intItemId    
+        ,intTransferStorageId    
+        ,strTransferStorageTicket    
+        ,intTransferStorageReferenceId    
+        ,dblTransferTotal    
+        ,dblTransferQty    
+        ,dblReceiptChargeTotal    
+        ,dblReceiptChargeQty    
+        ,intLocationId    
+        ,strLocationName    
+     FROM vyuGRTransferChargesClearing    
+    ),  
     patClearing    
     AS    
     (    
