@@ -373,7 +373,7 @@ BEGIN TRY
 			,strTeaColour = COLOUR.strDescription
 			,strTeaGardenChopInvoiceNumber = S.strChopNumber
 			,intGardenMarkId = S.intGardenMarkId
-			,strTeaGroup = NULL
+			,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
 			,dblTeaHue = CASE 
 				WHEN ISNULL(HUE.strPropertyValue, '') = ''
 					THEN NULL
@@ -424,6 +424,8 @@ BEGIN TRY
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
