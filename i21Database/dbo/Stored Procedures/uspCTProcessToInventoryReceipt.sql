@@ -247,6 +247,7 @@ AS
 				,[intSourceType]
 				,[intContractHeaderId]
 				,[intContractDetailId]
+				,intSeasonCropYear
 			)
 
 			SELECT	 [strReceiptType]		=   'Purchase Contract'
@@ -285,6 +286,7 @@ AS
 					,[intSourceType]		=   0
 					,[intContractHeaderId]	=   CD.intContractHeaderId
 					,[intContractDetailId]	=   CD.intContractDetailId
+					,intSeasonCropYear		=	CH.intCropYearId
 
 			FROM	tblCTContractDetail			CD 
 			JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
