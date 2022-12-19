@@ -263,26 +263,6 @@ EXEC (@s);
 end
 
 GO
-
---UPDATE LOB SEGMENT ID FOR OVERRIDE (BANK FORWARD) IN GL REVALUE
-
-UPDATE BT SET intItemLOBSegmentId = DER.intSegmentCodeId
-FROM tblCMBankTransfer BT 
-OUTER APPLY(
-    SELECT TOP 1 SM.intSegmentCodeId
-    FROM tblRKFutOptTransaction der
-    JOIN tblCTContractDetail CD
-        ON CD.intContractDetailId = der.intContractDetailId
-    JOIN tblCTContractHeader CH
-        ON CH.intContractHeaderId = CD.intContractDetailId
-    JOIN tblICCommodity C
-        ON C.intCommodityId = CH.intCommodityId
-    JOIN tblSMLineOfBusiness SM ON SM.intLineOfBusinessId = C.intLineOfBusinessId
-    WHERE der.strInternalTradeNo = BT.strDerivativeId
-)DER
-WHERE strDerivativeId IS NOT NULL AND intItemLOBSegmentId IS NULL
-
-
 --update MT101 Bank File Format
 update tblCMBankFileFormatDetail set strFieldName = 'Tag 20 (Record Number)' where strFieldName = 'Tag 20 (EFT Number)'
 update tblCMBankFileFormatDetail set strFieldName = 'Tag 21 (Record Number)' where strFieldName = 'Tag 21 (EFT Number)'
