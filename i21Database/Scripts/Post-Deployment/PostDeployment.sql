@@ -271,6 +271,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\15_CompanyPreferenceOptions.sql
 :r .\CM\16_UpdateNextEFTNo.sql
 :r .\CM\17_InsertResponsiblePartyOption.sql
+:r .\CM\18_BankDepositForeignDebitCredit.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 

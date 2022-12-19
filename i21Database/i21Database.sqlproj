@@ -869,6 +869,7 @@
     <Build Include="dbo\Views\vyuAPPaymentMethodBlank.sql" />
     <Build Include="dbo\Views\vyuAPBankAccountAllBank.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAllocatedContractRiskReport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\18_BankDepositForeignDebitCredit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
