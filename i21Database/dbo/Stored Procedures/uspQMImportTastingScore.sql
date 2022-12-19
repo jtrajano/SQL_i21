@@ -556,7 +556,7 @@ BEGIN TRY
             SELECT TOP 1 @intItemId = ITEM.intItemId
             FROM tblQMSample S
             INNER JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
-            INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+            INNER JOIN (tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID) ON CA.intCommodityAttributeId = S.intCountryID
             INNER JOIN tblICItem ITEM ON ITEM.strItemNo LIKE 
                 @strBrand -- Leaf Size
                 -- TODO: To update filter once Sub Cluster is provided

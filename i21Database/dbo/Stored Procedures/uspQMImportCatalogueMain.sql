@@ -20,7 +20,7 @@ BEGIN TRY
     -- Garden Mark
     LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
     -- Garden Geo Origin
-    LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
+    LEFT JOIN (tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID) ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
     -- Warehouse Code
     LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode
     -- Sustainability
@@ -200,8 +200,8 @@ BEGIN TRY
             ,dblGrossWeight = IMP.dblGrossWeight
             ,intGardenMarkId = GARDEN.intGardenMarkId
             ,strGardenMark = GARDEN.strGardenMark
-            ,intOriginId = ORIGIN.intCountryID
-            ,strCountry = ORIGIN.strCountry
+            ,intOriginId = CA.intCommodityAttributeId
+            ,strCountry = CA.strDescription
             ,intCompanyLocationSubLocationId = WAREHOUSE_CODE.intCompanyLocationSubLocationId
             ,dtmManufacturingDate = IMP.dtmManufacturingDate
             ,dblSampleQty = IMP.dblTotalQtyOffered
@@ -264,7 +264,7 @@ BEGIN TRY
         -- Garden Mark
         LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
         -- Garden Geo Origin
-        LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
+        LEFT JOIN (tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID) ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
         -- Warehouse Code
         LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode
         -- Sustainability
