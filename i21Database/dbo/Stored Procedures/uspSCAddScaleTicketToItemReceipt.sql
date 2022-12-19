@@ -128,6 +128,9 @@ INSERT INTO @ReceiptStagingTable(
 		,[intLoadShipmentDetailId] 
 		,intTaxGroupId
 		,ysnAddPayable
+		,dblBasis
+		,dblFutures
+		,strFuturesMonth
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -249,6 +252,9 @@ SELECT
 										THEN 0
 										ELSE NULL
 										END
+		,dblBasis					= CNT.dblBasis
+		,dblFutures					= CNT.dblFutures
+		,strFuturesMonth			= CNT.strFuturesMonth
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
 	SELECT CTD.intContractHeaderId
@@ -274,8 +280,13 @@ LEFT JOIN (
 	,CU.intCent
 	,CU.ysnSubCurrency
 	,CTH.ysnLoad
+	,CTD.dblBasis
+	,CTD.dblFutures
+	,FUTURES_MONTH.strFutureMonth as strFuturesMonth
 	FROM tblCTContractDetail CTD 
 	INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+	LEFT JOIN tblRKFuturesMonth FUTURES_MONTH
+		ON CTD.intFutureMonthId = FUTURES_MONTH.intFutureMonthId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 ) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId

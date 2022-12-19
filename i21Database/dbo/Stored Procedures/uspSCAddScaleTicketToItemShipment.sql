@@ -163,6 +163,9 @@ BEGIN
 		,intItemContractHeaderId 
 		,intItemContractDetailId
 
+		,dblBasis
+		,dblFutures
+		,strFuturesMonth
 		
 	)
 
@@ -308,6 +311,9 @@ BEGIN
 									END
 		,intItemContractHeaderId = ICT.intItemContractHeaderId
 		,intItemContractDetailId = ICT.intItemContractDetailId
+		,dblBasis					= CNT.dblBasis
+		,dblFutures					= CNT.dblFutures
+		,strFuturesMonth			= CNT.strFuturesMonth
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -333,9 +339,14 @@ BEGIN
 			,CU.ysnSubCurrency
 			,CTH.ysnLoad
 			,ISNULL(PCD.dblQuantity,0) - ISNULL(PCDInvoice.dblQtyShipped,0) dblAvailablePriceContractQty
+			,CTD.dblBasis
+			,CTD.dblFutures
+			,FUTURES_MONTH.strFutureMonth as strFuturesMonth
 			FROM tblCTContractDetail CTD 
 			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+			LEFT JOIN tblRKFuturesMonth FUTURES_MONTH
+				ON CTD.intFutureMonthId = FUTURES_MONTH.intFutureMonthId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 			CROSS APPLY (
 				SELECT  SUM(PFD.dblQuantity) dblQuantity FROM tblCTPriceFixation PF
