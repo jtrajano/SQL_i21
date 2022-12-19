@@ -10,7 +10,7 @@ AS BEGIN
     -- Sustainability / Rain Forest
     LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
     -- Origin
-    LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+    LEFT JOIN (tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID) ON CA.intCommodityAttributeId = S.intCountryID
     -- Size
     LEFT JOIN tblICBrand SIZE ON SIZE.intBrandId = S.intBrandId
     -- Style
