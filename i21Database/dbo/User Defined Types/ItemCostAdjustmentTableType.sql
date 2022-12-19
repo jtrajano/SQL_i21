@@ -33,4 +33,6 @@ CREATE TYPE [dbo].[ItemCostAdjustmentTableType] AS TABLE
 	,[intOtherChargeItemId] INT NULL
 	,[dblNewAverageCost] NUMERIC(38, 20) NULL
 	,[intSourceEntityId] INT NULL
+	,[intForexRateTypeId] INT NULL
+	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1
 )
