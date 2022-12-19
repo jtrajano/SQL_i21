@@ -1,14 +1,14 @@
 ﻿CREATE VIEW [dbo].[vyuCTFWCOverview]
 
-AS
+AS 
 
-		SELECT	
+			SELECT	
 				CH.intContractHeaderId,
 				CTD.intContractDetailId,
 				strPONumber = LGL.strCustomerReference,	
 				dtmOriginalETD = LGL.dtmETAPOD,
 				dtmCurrentETD = CTD.dtmEtaPod,
-				dtmOriginalStockDate = LGL.dtmBLDate, --TBD 
+				dtmOriginalStockDate = LGL.dtmPlannedAvailabilityDate,
 				dtmRevisedStockDate = LGL.dtmPlannedAvailabilityDate, 
 				strContractNumber = CH.strContractNumber,
 				strItemNo = CAST (CTD.intContractSeq AS VARCHAR(MAX)),
@@ -19,7 +19,7 @@ AS
 				dblReleaseValue = 0.00, --Release value
 				dtmStartValidityDate = CTD.dtmStartDate,
 				dtmEndValidityDate = CTD.dtmEndDate,
-				strBuyingOrder = MFB.strBuyingOrderNumber, --TBD Part of Batch Characteristics
+				strBuyingOrder = MFB.strBuyingOrderNumber, 
 				strBuyingCenter = CL.strLocationName,
 				strSAPSupplierNo = APV.strVendorAccountNum,
 				strSAPSupplierDescription = EV.strName,
@@ -27,7 +27,7 @@ AS
 				strContractOwner = EC.strName,
 				strPaymentTerm = CT.strTermCode,
 				strPaymentTermDesc = CT.strTerm,
-				strPurchaseGroup = '', --TBD Purchase Group from Contract
+				strPurchaseGroup = PG.strName,
 				strPurchaseIncoTerm = IT.strFreightTerm,
 				strPurchaseIncoTermLocation = SC.strCity,
 				strFCItem = ICI.strItemNo,
@@ -49,7 +49,7 @@ AS
 				strPortOfArrival = DP.strCity,
 				dtmETA = CTD.dtmEtaPod,
 				dtmMTA = CTD.dtmEtaPod + MFL.dblMUToAvailableForBlending,
-				dtmDaysLate = MFB.dtmProductionBatch,
+				dtmDaysLate = LGL.dtmPlannedAvailabilityDate +  CTD.dtmEtaPod + MFL.dblMUToAvailableForBlending,
 				dtmReportRunOn = getdate(),
 				strFCPackageType = ICQM.strUnitMeasure,
 				strLineItemStatus = CTS.strContractStatus,
@@ -58,8 +58,8 @@ AS
 				intSalesNo = MFB.intSales,
 				strCatalogueType = MFB.strTeaType,
 				strSAPSupplierCode = APV.strVendorAccountNum,
-				strSampleType = MFB.strSampleBoxNumber,
-				strLotNo = '', --TBA
+				strSampleType = MZ.strMarketZoneCode,
+				strLotNo = CTD.strVendorLotID, 
 				strTimeStamp =  CONVERT(VARCHAR(20),getdate(), 100),
 				dtmManufacturingDate = MFB.dtmProductionBatch,
 				dblNetWeight = CTD.dblNetWeight 
@@ -91,6 +91,8 @@ AS
 			LEFT JOIN tblSMCity					DP	 WITH (NOLOCK) ON DP.intCityId			  =	CTD.intDestinationPortId
 			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId
 			LEFT JOIN tblQMSaleYear				SY	 WITH (NOLOCK) ON SY.intSaleYearId		  = MFB.intSalesYear
+			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
+			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
 			WHERE CTD.intContractStatusId IN ( 1,2,4) --Open, Unconfirmed,Re-Open
 
 			
