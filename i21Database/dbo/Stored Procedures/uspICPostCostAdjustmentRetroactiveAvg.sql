@@ -442,7 +442,11 @@ BEGIN
 			AND t.intInventoryTransactionId >= @InventoryTransactionStartId
 			--AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
 			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
-			AND (t.dblQty <> 0 OR negativeStock.dblQty <> 0) 
+			AND (
+				t.dblQty <> 0 
+				OR negativeStock.dblQty <> 0
+				OR (t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment)
+			) 
 
 	ORDER BY t.intInventoryTransactionId ASC 
 
@@ -516,7 +520,7 @@ BEGIN
 						@t_dblQty < 0 
 						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 							
 							@t_dblQty * @NewAverageCost
-							+ (-@t_dblQty * @t_NegativeStockQty) 
+							+ (-@t_dblQty * @t_NegativeStockCost) 
 
 					WHEN @t_dblQty < 0 THEN 
 						@t_dblQty * @NewAverageCost 
