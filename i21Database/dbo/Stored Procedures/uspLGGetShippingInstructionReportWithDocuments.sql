@@ -250,8 +250,8 @@ BEGIN
 			,strDestinationPortVatNo = (SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = ISNULL(L.strDestinationPort, DestinationPort.strCity))
 			,strShippingLine = CASE WHEN (ISNULL(SLEL.strCheckPayeeName, '') <> '') THEN SLEL.strCheckPayeeName ELSE SLEntity.strName END
 			,L.strServiceContractNumber
-			,strServiceContractOwner = SLSC.strOwner
-			,SLSC.strFreightClause
+			,strServiceContractOwner = ISNULL(SLSD.strOwner, SLSC.strOwner)
+			,strFreightClause = ISNULL(SLSD.strFreightClause, SLSC.strFreightClause)
 			,strShipper = Shipper.strName
 			,L.strPackingDescription
 			,intNumberOfContainers = ISNULL(L.intNumberOfContainers, 0)
@@ -542,6 +542,7 @@ BEGIN
 		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId AND LoadingPort.ysnPort = 1
 		LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId AND DestinationPort.ysnPort = 1
+		LEFT JOIN tblLGShippingLineServiceContractDetail SLSD ON SLSD.intShippingLineServiceContractDetailId = L.intShippingLineServiceContractDetailId
 		CROSS APPLY tblLGCompanyPreference CP
 		OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 				 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
