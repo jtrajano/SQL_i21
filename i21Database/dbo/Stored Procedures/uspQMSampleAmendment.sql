@@ -28,13 +28,16 @@ BEGIN TRY
                , @strMarketZone         = MZ.strMarketZoneCode
                , @intContractDetailId   = S.intContractDetailId
 			   , @dblSamplePrice 		= S.dblB1Price
-			   , @dblSampleQty			= S.dblRepresentingQty
+			   , @dblSampleQty			= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, RIUM.strUnitMeasure, SIUM.strUnitMeasure, S.dblRepresentingQty), 0)
 			   , @intContractHeaderId	= CD.intContractHeaderId
 	FROM tblQMSample S
     INNER JOIN tblMFBatch B ON S.intSampleId = B.intSampleId
-    INNER JOIN tblLGLoadDetail LGD ON B.intBatchId = LGD.intBatchId
+    LEFT JOIN tblLGLoadDetail LGD ON B.intBatchId = LGD.intBatchId
     LEFT JOIN tblARMarketZone MZ ON S.intMarketZoneId = MZ.intMarketZoneId
 	LEFT JOIN tblCTContractDetail CD ON S.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblICItem ITEM ON ITEM.intItemId = S.intItemId
+	LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
+	LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
 	WHERE S.intSampleId = @intSampleId
 	
     --CHECK IF HAS AMENDMENTS    
@@ -53,7 +56,7 @@ BEGIN TRY
 
 		 , dblSamplePrice						= S.dblB1Price
 		 , dblPreInvoicePrice					= CRD.dblPreInvoicePrice
-		 , dblSampleQty							= S.dblRepresentingQty
+		 , dblSampleQty							= ISNULL(@dblSampleQty, 0)
 		 , dblPreInvoiceQuantity				= CRD.dblPreInvoiceQuantity
 		 , strSampleChopNumber					= S.strChopNumber
 		 , strPreInvoiceChopNo					= CRD.strPreInvoiceChopNo
@@ -70,7 +73,7 @@ BEGIN TRY
     INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
     WHERE S.intSampleId = @intSampleId
       AND (S.dblB1Price <> CRD.dblPreInvoicePrice
-        OR S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity
+        OR ISNULL(@dblSampleQty, 0) <> CRD.dblPreInvoiceQuantity
         OR S.strChopNumber <> CRD.strPreInvoiceChopNo
         OR S.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId
         OR S.intGradeId <> CRD.intPreInvoiceGradeId)
@@ -95,7 +98,7 @@ BEGIN TRY
 		--UPDATE CAT RECON DETAILS
 		UPDATE CRD
 		SET dblPreInvoicePrice			= S.dblB1Price
-		  , dblPreInvoiceQuantity		= S.dblRepresentingQty
+		  , dblPreInvoiceQuantity		= ISNULL(A.dblSampleQty, 0)
 		  , strPreInvoiceChopNo			= S.strChopNumber
 		  , intPreInvoiceGardenMarkId	= S.intGardenMarkId
 		  , intPreInvoiceGradeId		= S.intGradeId
@@ -108,8 +111,8 @@ BEGIN TRY
         --UPDATE BILL DETAILS
 		UPDATE BD
 		SET dblCost							= ISNULL(S.dblB1Price, 0)
-		  , dblQtyReceived					= ISNULL(S.dblRepresentingQty, 0)
-		  , dblQtyOrdered					= ISNULL(S.dblRepresentingQty, 0)
+		  , dblQtyReceived					= ISNULL(A.dblSampleQty, 0)
+		  , dblQtyOrdered					= ISNULL(A.dblSampleQty, 0)
 		  , strPreInvoiceGardenNumber		= S.strChopNumber
 		  , intGardenMarkId					= NULLIF(GM.intGardenMarkId, 0)
 		  , strComment						= CA.strDescription
@@ -124,7 +127,7 @@ BEGIN TRY
 		--UPDATE BATCH
         UPDATE B
         SET dblBoughtPrice                  = ISNULL(S.dblB1Price, 0)
-          , dblTotalQuantity                = ISNULL(S.dblRepresentingQty, 0)
+          , dblTotalQuantity                = ISNULL(@dblSampleQty, 0)
           , strTeaGardenChopInvoiceNumber   = S.strChopNumber
           , intGardenMarkId                 = S.intGardenMarkId
           , strLeafGrade                    = CA.strDescription
@@ -158,10 +161,10 @@ BEGIN TRY
 						  AND dblUnitPrice <> @dblSamplePrice
 
 						UPDATE tblLGLoadDetail
-                        SET dblQuantity = @dblSampleQty
+                        SET dblQuantity = ISNULL(@dblSampleQty, 0)
                         WHERE intLoadId = @intLoadId
                           AND intLoadDetailId = @intLoadDetailId
-						  AND dblQuantity <> @dblSampleQty
+						  AND dblQuantity <> ISNULL(@dblSampleQty, 0)
 
 						--AUDIT LOG FOR LOAD SHIPMENT
 						DECLARE @LoadShipmentSingleAuditLogParam		AS SingleAuditLogParam
