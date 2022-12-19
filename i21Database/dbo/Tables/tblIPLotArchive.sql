@@ -27,6 +27,7 @@
 	strSessionId				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmTransactionDate			DATETIME DEFAULT(GETDATE()),
 	ysnMailSent					BIT DEFAULT 0,
+	dblAllocatedQty				NUMERIC(38,20),
 
 	CONSTRAINT [PK_tblIPLotArchive_intStageLotId] PRIMARY KEY ([intStageLotId])
 )
