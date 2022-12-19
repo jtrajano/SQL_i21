@@ -1,29 +1,22 @@
-﻿CREATE PROCEDURE uspMFProcessInventoryShipment (
-	@intSalesOrderId INT
-	,@intUserId INT
-	,@strShipmentNumber NVARCHAR(50) OUTPUT
-	)
+﻿CREATE PROCEDURE [dbo].[uspMFProcessInventoryShipment] 
+(
+	@intSalesOrderId   INT
+  , @intUserId		   INT
+  , @strShipmentNumber NVARCHAR(50) OUTPUT
+)
 AS
 BEGIN TRY
-	DECLARE @intTransactionCount INT
-		,@intInventoryShipmentId INT
-		,@strErrorMessage NVARCHAR(MAX)
-	DECLARE @ShipmentStagingTable ShipmentStagingTable
-	DECLARE @OtherCharges ShipmentChargeStagingTable
+	DECLARE @intTransactionCount	INT
+		  , @intInventoryShipmentId INT
+		  , @strErrorMessage		NVARCHAR(MAX)
+		  , @intSalesOrderDetailId	INT = NULL
+		  , @dblQuantity			NUMERIC(18, 6) = 0
+		  , @ShipmentStagingTable ShipmentStagingTable
+		  , @OtherCharges ShipmentChargeStagingTable
 
-	IF NOT EXISTS (
-			SELECT *
-			FROM dbo.tblMFSODetail
-			WHERE intSalesOrderId = @intSalesOrderId
-				AND ysnProcessed = 0
-			)
+	IF NOT EXISTS (SELECT * FROM dbo.tblMFSODetail WHERE intSalesOrderId = @intSalesOrderId AND ysnProcessed = 0)
 	BEGIN
-		RAISERROR (
-				'There is no record to process for the selected SO.'
-				,16
-				,1
-				)
-
+		RAISERROR ('There is no record to process for the selected SO.', 16, 1)
 		RETURN
 	END
 
@@ -36,16 +29,10 @@ BEGIN TRY
 
 	SELECT @strErrorMessage = ''
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM tempdb..sysobjects
-			WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')
-			)
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult'))
 	BEGIN
-		CREATE TABLE #tmpAddItemShipmentResult (
-			intSourceId INT
-			,intInventoryShipmentId INT
-			)
+		CREATE TABLE #tmpAddItemShipmentResult (intSourceId				INT
+											  , intInventoryShipmentId  INT)
 	END
 
 	INSERT INTO @ShipmentStagingTable (
@@ -115,10 +102,7 @@ BEGIN TRY
 			)
 	ORDER BY I.intItemId
 
-	IF EXISTS (
-			SELECT *
-			FROM @ShipmentStagingTable
-			)
+	IF EXISTS (SELECT * FROM @ShipmentStagingTable)
 	BEGIN
 		EXEC dbo.uspICAddItemShipment @Items = @ShipmentStagingTable
 			,@Charges = @OtherCharges
@@ -134,6 +118,36 @@ BEGIN TRY
 		UPDATE tblMFSODetail
 		SET ysnProcessed = 1
 		WHERE intSalesOrderId = @intSalesOrderId
+
+		DECLARE loopMFSalesOrderDetail CURSOR LOCAL FAST_FORWARD FOR 
+		SELECT intSalesOrderDetailId
+			 , dblQuantity 
+		FROM tblMFSODetail
+		WHERE ISNULL(dblQuantity, 0) <> 0 AND intSalesOrderId = @intSalesOrderId
+
+		OPEN loopMFSalesOrderDetail;
+		
+		-- Initial fetch attempt
+		FETCH NEXT FROM loopMFSalesOrderDetail INTO @intSalesOrderDetailId
+																, @dblQuantity;
+
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- Start of the loop for the integration sp. 
+		-----------------------------------------------------------------------------------------------------------------------------
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 		
+			EXEC [dbo].[uspSOUpdateOrderShipmentStatus]
+				  @intTransactionId			= NULL
+				, @strTransactionType		= 'Inventory'
+				, @ysnForDelete				= 0
+				, @intSalesOrderDetailId	= @intSalesOrderDetailId
+				, @dblQuantity				= @dblQuantity
+				, @intItemUOMId				= NULL 
+
+			-- Attempt to fetch the next row from cursor. 
+			FETCH NEXT FROM loopMFSalesOrderDetail INTO @intSalesOrderDetailId
+													  , @dblQuantity
+		END;
 
 		DELETE
 		FROM #tmpAddItemShipmentResult
