@@ -14,12 +14,17 @@ BEGIN
 */
 		
 	DECLARE @TICKET_APPLY_ID INT = @intTicketApplyId
+	DECLARE @ENTITY_USER_NAME NVARCHAR(100)
+	-- user invoked the process
+	DECLARE @USER_ID INT = @intUserId
+
+	SELECT @ENTITY_USER_NAME = strName FROM tblEMEntity WHERE intEntityId = @intUserId
 	-- temporary table to hold the ticket for manual distribution
-	DECLARE @TICKET_IDS TABLE ( ID INT, [ENTITY_ID] INT, NET_UNIT NUMERIC(38, 18) )
+	DECLARE @TICKET_IDS TABLE ( ID INT, [ENTITY_ID] INT, NET_UNIT NUMERIC(38, 18), TICKET_NUMBER NVARCHAR(50) COLLATE Latin1_General_CI_AS )
 
 	-- get ticket for manual distribution
-	INSERT INTO @TICKET_IDS (ID, [ENTITY_ID], NET_UNIT)
-	SELECT APPLY_TICKET.intTicketId, TICKET.intEntityId, TICKET.dblNetUnits
+	INSERT INTO @TICKET_IDS (ID, [ENTITY_ID], NET_UNIT, TICKET_NUMBER)
+	SELECT APPLY_TICKET.intTicketId, TICKET.intEntityId, TICKET.dblNetUnits, TICKET.strTicketNumber
 	FROM tblSCTicketApplyTicket APPLY_TICKET
 		JOIN tblSCTicket TICKET
 			ON APPLY_TICKET.intTicketId = TICKET.intTicketId
@@ -29,9 +34,9 @@ BEGIN
 	DECLARE @CURRENT_TICKET_ID INT
 	DECLARE @CURRENT_ENTITY_ID INT 
 	DECLARE @CURRENT_NET_UNITS NUMERIC(38, 20) 
+	DECLARE @CURRENT_TICKET_NUMBER NVARCHAR(50)
 
-	-- user invoked the process
-	DECLARE @USER_ID INT = @intUserId
+	DECLARE @MANUAL_DISTRIBUTION_LOG NVARCHAR(500)
 
 	-- temporary variables to hold the IR and Voucher id outputs
 	DECLARE @InventoryReceiptId INT 
@@ -45,15 +50,53 @@ BEGIN
 	-- user table to hold the manual distribution allocation
 	DECLARE @MANUAL_DISTRIBUTION AS ScaleManualCostingTableType
 
+	-- log information
+	INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+	SELECT @TICKET_APPLY_ID, 'Ticket apply process started', @ENTITY_USER_NAME, @USER_ID
+
 	WHILE @CURRENT_TICKET_ID IS NOT NULL
 	BEGIN
-		 -- set loop variable
+		-- clear the vaiables
+		SELECT @CURRENT_ENTITY_ID = NULL
+			, @CURRENT_NET_UNITS = NULL
+			, @CURRENT_TICKET_NUMBER = NULL
+			, @MANUAL_DISTRIBUTION_LOG = ''
+		-- set loop variable
 		SELECT 
 			@CURRENT_ENTITY_ID = [ENTITY_ID]
 			, @CURRENT_NET_UNITS = NET_UNIT
+			, @CURRENT_TICKET_NUMBER = TICKET_NUMBER
 		FROM @TICKET_IDS 
 			WHERE ID = @CURRENT_TICKET_ID
+		
 
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Process started for ticket ' + ISNULL(@CURRENT_TICKET_NUMBER, 'ticket id - ' + CAST(@CURRENT_TICKET_ID AS NVARCHAR)) 				
+			, @ENTITY_USER_NAME
+			, @USER_ID
+
+
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Locking the ticket for processing'
+			, @ENTITY_USER_NAME
+			, @USER_ID
+
+		-- mark the ticket for processing
+		EXEC uspSCCheckUpdateTicketProcessed 
+			@intTicketId = @CURRENT_TICKET_ID
+			, @intUserId = @USER_ID
+			, @ysnStartProcess = 1
+
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Unhold the ticket'
+			, @ENTITY_USER_NAME
+			, @USER_ID
 
 		-- invoke the unhold procedure		
 		EXEC [dbo].[uspSCProcessHoldTicket] 
@@ -69,6 +112,14 @@ BEGIN
 			SET strTicketStatus = 'R'
 			WHERE intTicketId = @CURRENT_TICKET_ID
 		
+
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Started allocating the units for manual distribution'
+			, @ENTITY_USER_NAME
+			, @USER_ID
+
 		-- clear the manual distribution
 		-- to make sure that in each iteration, the distribution is focused on the current ticket 
 		DELETE FROM @MANUAL_DISTRIBUTION
@@ -215,7 +266,18 @@ BEGIN
 				AND TRANSPARENCY.intTicketApplyId = @TICKET_APPLY_ID		
 				AND TRANSPARENCY.intType = 10
 		) FINAL_LIST                        
+		
+		
+		-- insert manual distribution data to physical table
+		INSERT INTO tblSCTicketManualDistribution(intTicketId, intEntityUserId, intId, intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, intTransactionDetailId, strTransactionId, intTransactionTypeId, intLotId, intSubLocationId, intStorageLocationId, strDistributionOption, intStorageScheduleId, intSourceTransactionId, strSourceTransactionId, ysnIsStorage, intStorageScheduleTypeId, ysnAllowVoucher, intLoadDetailId, intItemContractDetailId, intItemContractHeaderId)
+		SELECT @CURRENT_TICKET_ID, @USER_ID, intId, intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, intTransactionDetailId, strTransactionId, intTransactionTypeId, intLotId, intSubLocationId, intStorageLocationId, strDistributionOption, intStorageScheduleId, intSourceTransactionId, strSourceTransactionId, ysnIsStorage, intStorageScheduleTypeId, ysnAllowVoucher, intLoadDetailId, intItemContractDetailId, intItemContractHeaderId FROM @MANUAL_DISTRIBUTION
 
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Manual distribution started - ' + CAST(GETDATE() AS NVARCHAR)
+			, @ENTITY_USER_NAME
+			, @USER_ID
 
 		-- invoke the manual distribution process
 		EXEC [dbo].[uspSCManualDistribution] 
@@ -226,20 +288,65 @@ BEGIN
 			, @ysnSkipValidation = 1
 			, @InventoryReceiptId = @InventoryReceiptId OUTPUT 
 			, @intBillId = @intBillId OUTPUT
+		
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Manual distribution completed - ' + CAST(GETDATE() AS NVARCHAR)
+			, @ENTITY_USER_NAME
+			, @USER_ID
 
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Closing the ticket and release the ticket from processing lock'
+			, @ENTITY_USER_NAME
+			, @USER_ID
+		
 		-- close the ticket	
 		UPDATE tblSCTicket 
 			SET strTicketStatus = 'C'
 			WHERE intTicketId = @CURRENT_TICKET_ID
-	
+
+		-- release the ticket from processing
+		EXEC uspSCCheckUpdateTicketProcessed 
+			@intTicketId = @CURRENT_TICKET_ID
+			, @intUserId = @USER_ID
+			, @ysnStartProcess = 0
+
+		
 		-- onto the next tickets
 		SELECT 
 			@CURRENT_TICKET_ID  = MIN(ID) 
 		FROM @TICKET_IDS 
 		WHERE ID > @CURRENT_TICKET_ID
+		
 
+		-- log information
+		INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+		SELECT @TICKET_APPLY_ID
+			, 'Process completed for ticket ' + ISNULL(@CURRENT_TICKET_NUMBER, 'ticket id - ' + CAST(@CURRENT_TICKET_ID AS NVARCHAR)) 				
+			, @ENTITY_USER_NAME
+			, @USER_ID
+
+
+		-- clear the vaiables
+		SELECT @CURRENT_ENTITY_ID = NULL
+			, @CURRENT_NET_UNITS = NULL
+			, @CURRENT_TICKET_NUMBER = NULL
+
+
+		
 	END
 
-
+	-- update the post value of the ticket apply
+	UPDATE tblSCTicketApply
+		SET ysnPosted = 1
+			, dtmPosted = GETDATE()
+			, intEntityUserId = @USER_ID
+	WHERE intTicketApplyId = @TICKET_APPLY_ID
 	
+	-- log information
+	INSERT INTO tblSCTicketApplyLog(intTicketApplyId, strLogCase1, strEntityName, intEntityId)
+	SELECT @TICKET_APPLY_ID, 'Ticket apply process completed', @ENTITY_USER_NAME, @USER_ID
 END
