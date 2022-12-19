@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostInTransitCosting]
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
+	,@ValueToPost AS ItemInTransitValueOnlyTableType READONLY
 	
 AS
 
