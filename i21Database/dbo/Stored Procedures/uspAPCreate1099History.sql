@@ -129,6 +129,39 @@ BEGIN
 				WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
 				ELSE 0 END)
 END
+ELSE IF @form1099 = 7  
+BEGIN  
+ INSERT INTO #tmp1099History  
+ SELECT  
+  [intEntityVendorId] = A.intEntityVendorId,   
+  [intYear]   = A.intYear,   
+  [int1099Form]  = @form1099,  
+  [ysnPrinted]  = CAST(1 AS BIT),   
+  [ysnFiled]   = CAST(0 AS BIT),   
+  [strComment]  = NULL,   
+  [dblAmount]   = A.dblTotalPayment,   
+  [strVendorName]  = A.strVendorCompanyName,   
+  [strVendorId]  = A.strVendorId,  
+  [intConcurrencyId] = 0,   
+  [dtmDatePrinted] = GETDATE(),   
+  [dtmDateFiled]  = NULL  
+ FROM vyuAP1099NEC A  
+ OUTER APPLY   
+ (  
+  SELECT TOP 1 * FROM tblAP1099History B  
+  WHERE A.intYear = B.intYear AND B.int1099Form = 7  
+  AND B.intEntityVendorId = A.intEntityVendorId  
+  ORDER BY B.dtmDatePrinted DESC  
+ ) History  
+ WHERE   
+ 1 = (CASE WHEN ISNULL(@vendorFrom,'') = '' THEN 1  
+    WHEN ISNULL(@vendorFrom,'') <> '' AND A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)  
+   AND A.intYear = @year  
+   AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1   
+    WHEN History.ysnPrinted IS NULL THEN 1  
+    WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1  
+    ELSE 0 END)  
+END
 
 INSERT INTO tblAP1099History(
 	[intEntityVendorId]	
