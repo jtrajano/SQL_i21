@@ -29,8 +29,10 @@ begin try
         ,@voucherPayableTax = @voucherPayableTax    
         ,@userId = @userId    
         ,@throwError = @throwError  
-        ,@error = @error    
+        ,@error = @error OUT
         ,@createdVouchersId  = @createdVouchersId out  
+
+
 
         goto _return;
 
@@ -982,7 +984,7 @@ begin try
 				,@voucherPayableTax = @voucherPayableTaxFinal  
 				,@userId = @userId  
 				,@throwError = @throwError
-				,@error = @error  
+				,@error = @error  OUT
 				,@createdVouchersId  = @createdVouchersId out
 
 			insert into @CreatedVoucher
