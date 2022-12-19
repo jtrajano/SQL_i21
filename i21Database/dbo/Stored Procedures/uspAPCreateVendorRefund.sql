@@ -292,6 +292,12 @@ BEGIN
 	IF @successPostingPayment = 1 AND @totalPostedPayment = @totalPaymentCreated
 	BEGIN
 		EXEC uspARProcessACHPayments @strPaymentIds = @paymentCreated, @intBankAccountId = @bankAccountId, @intUserId = @userId, @strNewTransactionId = @bankDepositCreated OUTPUT
+		IF @bankDepositCreated IS NOT NULL
+		BEGIN
+			DELETE A
+			FROM tblAPPaymentIntegrationTransaction A
+			INNER JOIN #tmpInvoicesId B ON A.intInvoiceId = B.intId
+		END
 	END
 	ELSE
 	BEGIN
