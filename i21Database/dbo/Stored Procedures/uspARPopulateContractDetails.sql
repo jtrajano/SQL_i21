@@ -328,6 +328,7 @@ SELECT intInvoiceId					= TBL.intInvoiceId
 	, strSessionId					= @strSessionId
 FROM #TBLTOPROCESS TBL
 INNER JOIN tblTMOrder TMO ON TBL.intSiteId = TMO.intSiteId
+INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
 INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId 
 INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId AND CD.intItemId = TBL.intItemId
 INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
