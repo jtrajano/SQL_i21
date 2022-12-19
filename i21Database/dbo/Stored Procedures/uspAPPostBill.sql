@@ -1537,8 +1537,8 @@ BEGIN
 		-- 	END
 		-- END
 
-		-- Other Integrations
-		EXEC uspAPPostVoucherIntegration @validBillIds, @post, @userId
+		-- Vendor Rebate Integrations
+		EXEC uspVRVoucherIntegration @validBillIds, @post, @userId
 	END TRY
 	BEGIN CATCH
 		DECLARE @integrationError NVARCHAR(200) = ERROR_MESSAGE()
