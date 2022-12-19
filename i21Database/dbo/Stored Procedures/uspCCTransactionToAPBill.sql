@@ -175,7 +175,8 @@ BEGIN
 					, strMiscDescription
 					, dblCost
 					, dblQuantityToBill
-					, ysnStage)
+					, ysnStage
+					, dbl1099)
 				VALUES(
 					9
 					, @dtmDate1099K
@@ -190,6 +191,7 @@ BEGIN
 					, @dblCost1099K
 					, @dblQuantityToBill1099K
 					, 0
+					, @dblCost1099K
 				)
 			END
 
