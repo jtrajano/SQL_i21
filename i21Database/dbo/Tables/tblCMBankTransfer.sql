@@ -70,7 +70,6 @@
     [dblPayableFn]              DECIMAL(18,6) NULL,
     [dblReceivableFx]           DECIMAL(18,6) NULL,
     [dblPayableFx]              DECIMAL(18,6) NULL,
-    [intItemLOBSegmentId]       INT NULL,
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_From] FOREIGN KEY ([intBankAccountIdFrom]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_To] FOREIGN KEY ([intBankAccountIdTo]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
