@@ -319,8 +319,6 @@ BEGIN TRY
 								 AND A.intInvoiceId = B.intInvoiceId
 								 AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
 
-
-	EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @InvoiceId, 1, @UserId, 'Voucher'
 END TRY
 BEGIN CATCH	
 	SET @intErrorSeverity = ERROR_SEVERITY()

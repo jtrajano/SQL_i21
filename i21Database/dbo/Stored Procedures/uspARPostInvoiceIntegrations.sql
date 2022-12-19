@@ -801,9 +801,9 @@ BEGIN
 	WHERE intInvoiceId = @intInvoiceForIntegration
 
 	IF @strTransactionType = 'Invoice'
-	BEGIN
 		EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @intInvoiceForIntegration, @Post, @UserId, 'Debit Memo'
-	END
+	ELSE IF @strTransactionType = 'Credit Memo'
+		EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @intInvoiceForIntegration, @Post, @UserId, 'Voucher'
 
 	DELETE FROM @InvoicesForIntegration WHERE intId = @intInvoiceForIntegration
 END
