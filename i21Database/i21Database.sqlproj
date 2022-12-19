@@ -1434,6 +1434,8 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyCreateTransparency.sql" />
     <Build Include="dbo\Tables\tblSCTicketApplyLog.sql" />
+    <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
+    <Build Include="dbo\Views\vyuSCHoldTicketApplyTicketInfo.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDropshipInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspSCBasisContractValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateDirectInGLEntriesForAPAdjustment.sql" />

@@ -7,6 +7,7 @@
 	strLogCase3 NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	strEntityName NVARCHAR(100) NULL,
 	intEntityId INT NULL,
+	dtmLogDate DATETIME NULL DEFAULT(GETDATE())
 	intConcurrencyId INT NOT NULL DEFAULT(1),
 
 
