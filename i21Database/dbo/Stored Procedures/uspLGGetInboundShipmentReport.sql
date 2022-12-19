@@ -3,7 +3,6 @@
 AS
 BEGIN
 	DECLARE @intTrackingNumber			INT,
-			@intCustomerEntityId		INT,
 			@strTrackingNumber			NVARCHAR(50),
 			@intLoadWarehouseId			INT,
 			@intCustomerEntityId		INT,
