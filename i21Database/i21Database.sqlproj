@@ -1426,6 +1426,9 @@
     <Build Include="dbo\Tables\tblIPInboundDeliveryError.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPInboundDelivery_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInboundDelivery_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountCurrency.sql" />
+    <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
+    <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
