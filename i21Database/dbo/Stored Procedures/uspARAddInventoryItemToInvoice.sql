@@ -188,13 +188,13 @@ IF NOT EXISTS(	SELECT NULL
 		end
 	END
 
-IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND NOT EXISTS (SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @ItemSiteId)
-	BEGIN		
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('Tank Delivery has no available Order!', 16, 1);
-		SET @ErrorMessage = 'Tank Delivery has no available Order!'
-		RETURN 0;
-	END
+-- IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND NOT EXISTS (SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @ItemSiteId)
+-- 	BEGIN		
+-- 		IF ISNULL(@RaiseError,0) = 1
+-- 			RAISERROR('Tank Delivery has no available Order!', 16, 1);
+-- 		SET @ErrorMessage = 'Tank Delivery has no available Order!'
+-- 		RETURN 0;
+-- 	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 BEGIN
@@ -281,6 +281,7 @@ IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDi
 				   , @ItemPrice			= ISNULL(CD.dblCashPrice, 0)
 		FROM tblTMSite S
 		INNER JOIN tblTMOrder TMO ON S.intSiteID = TMO.intSiteId
+		INNER JOIN tblTMDispatch TMD ON TMD.intSiteID = S.intSiteID
 		INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId
 		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId
 		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
