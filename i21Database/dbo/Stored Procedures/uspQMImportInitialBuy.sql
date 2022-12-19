@@ -751,7 +751,7 @@ BEGIN TRY
 			,strTeaColour = COLOUR.strDescription
 			,strTeaGardenChopInvoiceNumber = S.strChopNumber
 			,intGardenMarkId = S.intGardenMarkId
-			,strTeaGroup = NULL
+			,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
 			,dblTeaHue = CASE 
 				WHEN ISNULL(HUE.strPropertyValue, '') = ''
 					THEN NULL
