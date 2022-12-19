@@ -16,6 +16,7 @@ BEGIN
 		EXEC uspSMGetStartingNumber 181 , @strBatchId OUT
 		INSERT INTO [dbo].[tblMFBatch]
 				([strBatchId]
+				,intLocationId
 				,[intSales]
 				,[intSalesYear]
 				,[dtmSalesDate]
@@ -116,7 +117,8 @@ BEGIN
 				,[dtmSplit]
 				,[strNotes])
 		SELECT TOP 1
-					[strBatchId] = @strBatchId
+				 [strBatchId] = @strBatchId
+				,intLocationId = B.intLocationId
 				,[intSales]
 				,[intSalesYear]
 				,[dtmSalesDate]
