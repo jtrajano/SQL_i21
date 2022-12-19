@@ -624,9 +624,9 @@ BEGIN TRY
 			begin
 				declare @dblCostsDifferential numeric(18,6);
 				select @dblCostsDifferential = sum(dblRate) from tblCTContractCost where intContractDetailId = @intContractDetailId and ysnBasis = 1;
-				if (@dblCostsDifferential <> @dblBasis)
+				if (isnull(@dblCostsDifferential,0) <> isnull(@dblBasis,0))
 				begin
-					select @ErrMsg = 'The sum of Amount('+convert(nvarchar(20),@dblCostsDifferential)+') does not match with the sequence Basis('+convert(nvarchar(20),@dblBasis)+').';
+					select @ErrMsg = 'The sum of Amount('+convert(nvarchar(20),isnull(@dblCostsDifferential,0.00))+') does not match with the sequence Basis('+convert(nvarchar(20),isnull(@dblBasis,0.00))+').';
 					RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 				end
 			end
