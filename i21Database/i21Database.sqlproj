@@ -870,6 +870,9 @@
     <Build Include="dbo\Views\vyuAPBankAccountAllBank.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAllocatedContractRiskReport.sql" />
     <None Include="Scripts\Post-Deployment\CM\18_BankDepositForeignDebitCredit.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountCurrency.sql" />
+    <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
+    <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
