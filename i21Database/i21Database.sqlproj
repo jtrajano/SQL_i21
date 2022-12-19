@@ -1421,6 +1421,11 @@
     <Build Include="dbo\Views\vyuCTFWCOverview.sql" />
     <Build Include="dbo\Views\vyuCTFWCOverviewCompleted.sql" />
     <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
+    <Build Include="dbo\Tables\tblIPInboundDeliveryStage.sql" />
+    <Build Include="dbo\Tables\tblIPInboundDeliveryArchive.sql" />
+    <Build Include="dbo\Tables\tblIPInboundDeliveryError.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPInboundDelivery_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPInboundDelivery_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
