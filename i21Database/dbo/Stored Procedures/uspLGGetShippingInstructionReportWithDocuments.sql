@@ -545,7 +545,8 @@ BEGIN
 		CROSS APPLY tblLGCompanyPreference CP
 		OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 				 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
-				 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
+				 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber
+					AND L.dtmScheduledDate BETWEEN SLSCD.dtmValidFrom AND SLSCD.dtmValidTo) SLSC
 		WHERE L.intLoadId = @intLoadId
 		) tbl
 	LEFT JOIN tblLGLoadDocuments LDOC ON LDOC.intLoadId = tbl.intLoadId
