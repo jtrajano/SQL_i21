@@ -879,6 +879,7 @@
     <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\User Defined Types\ItemInTransitValueOnlyTableType.sql" />
+    <None Include="Scripts\Post-Deployment\CM\18_BankDepositForeignDebitCredit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
