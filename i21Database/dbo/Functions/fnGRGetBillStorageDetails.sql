@@ -92,7 +92,8 @@ BEGIN
 		,0
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
-		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
+		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+		else 1 end)) as dblOpenBalance
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
@@ -194,7 +195,8 @@ BEGIN
 		,SSVW.strTransaction
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
-		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
+		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+		else 1 end)) as dblOpenBalance
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
