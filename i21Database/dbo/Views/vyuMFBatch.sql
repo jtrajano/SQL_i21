@@ -134,8 +134,10 @@ SELECT
     ,OriginalItem.strItemNo strOriginalItem
     ,SM.strCurrency
 	,A.strERPPOLineNo
+    ,C.intBatchId intChildBatchId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
+LEFT JOIN tblMFBatch C ON B.intParentBatchId = C.intBatchId 
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
 LEFT JOIN tblARMarketZone Channel ON Channel.intMarketZoneId = A.intMarketZoneId
 LEFT JOIN tblICItem OriginalItem ON OriginalItem.intItemId = A.intOriginalItemId
