@@ -1,3 +1,9 @@
+GO
+
+PRINT('/*******************  BEGIN Insert/Update Payroll School Districts *******************/')
+
+GO
+
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Ada EVSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Ada EVSD')
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Amanda-Clearcreek LSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Amanda-Clearcreek LSD')
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Anna LSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Anna LSD')
@@ -183,5 +189,9 @@ INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELEC
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Wyoming CSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Wyoming CSD')
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Xenia Community CSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Xenia Community CSD')
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Yellow Springs EVSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Yellow Springs EVSD')
+
+GO
+
+PRINT('/*******************  END Insert/Update Payroll School Districts *******************/')
 
 GO
