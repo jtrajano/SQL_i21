@@ -1,12 +1,19 @@
 ﻿/*
-	This is a user-defined table type used in the manual scale ticket distribution for inventory costing stored procedures. 
-	There is a physical table as well tblSCTicketManualDistribution
-	if there is an update here please update the table as well 
-	Reason - Just to make the scale table expensive
+
+THERE IS A USER DEFINED TABLE FOR THIS TABLE - ScaleManualCostingTableType
+Any update here please update the user defined table as well
+
 */
-CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
+CREATE TABLE [dbo].[tblSCTicketManualDistribution]
 (
-	[intId]	INT NOT NULL									-- record counter
+	-- table specific columns
+	[intTicketManualDistributionId] INT NOT NULL PRIMARY KEY IDENTITY(1,1)
+	,[intTicketId] INT NOT NULL
+	,[dtmTransactionDate] DATETIME DEFAULT(GETDATE())
+	,intEntityUserId INT
+
+	-- user defined table specific column
+	,[intId]	INT NOT NULL									-- record counter
 	,[intItemId] INT NOT NULL								-- The item. 
 	,[intItemLocationId] INT NULL							-- The location where the item is stored.
 	,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
@@ -35,4 +42,8 @@ CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
 	,[intLoadDetailId] INT NULL								-- Load detail Id 
 	,intItemContractDetailId INT NULL
 	,intItemContractHeaderId INT NULL
+
+	, CONSTRAINT FK_TicketManualDistribution_Ticket_intTicketId 
+		FOREIGN KEY (intTicketId)
+		REFERENCES dbo.tblSCTicket(intTicketId) ON DELETE CASCADE
 )
