@@ -103,6 +103,12 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnRecipeBySite
 	,CP.ysnRecipeHeaderValidation
 	,CP.dblTrialBlendSheetSize
+	,CP.intPositionByETADemandReport
+	,CASE WHEN intPositionByETADemandReport = 1 THEN 'UAD'
+		  WHEN intPositionByETADemandReport = 2 THEN 'UAD with Saved LS'
+		  WHEN intPositionByETADemandReport = 3 THEN 'UAD with Posted LS'
+	 END AS strPositionByETADemandReportName
+	,CP.ysnBlendRecall
 FROM tblMFCompanyPreference CP
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CP.intDefaultShipmentStagingLocation
 LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = CP.intDefaultShipmentDockDoorLocation

@@ -537,7 +537,7 @@ IF @IsCancel = 0
 				,[dblShipmentNetWt]						= ARID.[dblShipmentNetWt]
 				,[intTicketId]							= NULL
 				,[intTicketHoursWorkedId]				= NULL
-				,[intOriginalInvoiceDetailId]			= ARID.[intInvoiceDetailId]
+				,[intOriginalInvoiceDetailId]			= NULL
 				,[intEntitySalespersonId]				= ARID.[intEntitySalespersonId]
 				,[intSiteId]							= NULL
 				,[strBillingBy]							= ''
@@ -596,7 +596,7 @@ IF @IsCancel = 0
 				BEGIN
 					--UPDATE tblARInvoiceDetail SET intTaxGroupId = NULL WHERE intInvoiceId = @CreatedInvoiceId
 					EXEC [dbo].[uspARReComputeInvoiceTaxes]
-						 @InvoiceId	= @CreatedInvoiceId
+						@InvoiceId	= @CreatedInvoiceId
 						,@DetailId	= NULL
 				END
 			ELSE	
@@ -668,10 +668,10 @@ IF @IsCancel = 0
 				
 				
 			EXEC [dbo].[uspARReComputeInvoiceAmounts]
-				 @InvoiceId = @CreatedInvoiceId
+				@InvoiceId = @CreatedInvoiceId
 				
 			EXEC [dbo].uspARUpdateInvoiceIntegrations 
-				 @InvoiceId	= @CreatedInvoiceId
+				@InvoiceId	= @CreatedInvoiceId
 				,@ForDelete	= 0
 				,@UserId	= @UserId
 						
@@ -695,21 +695,15 @@ IF @IsCancel = 0
 
 		BEGIN TRY
 			UPDATE ARI 
-			SET 
-				 ysnRecurring			=  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END
-				,intOriginalInvoiceId	= @InvoiceId 
-				,ysnImpactInventory		= @IsImpactInventory
-				,dblTotalWeight			= @TotalWeight
-				,dblTotalStandardWeight = T.dblTotalStandardWeight 
-				,strInvoiceOriginId		= T.strInvoiceNumber
+			SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END
+			, intOriginalInvoiceId = @InvoiceId 
+			, ysnImpactInventory = @IsImpactInventory
+			, dblTotalWeight = @TotalWeight
+			, dblTotalStandardWeight = T.dblTotalStandardWeight 
 			FROM tblARInvoice ARI
 			OUTER APPLY(
-				SELECT 
-					 strInvoiceNumber
-					,dblTotalStandardWeight 
-				FROM tblARInvoice 
-				WHERE intInvoiceId = @InvoiceId
-			) T
+				SELECT dblTotalStandardWeight FROM tblARInvoice WHERE intInvoiceId=@InvoiceId
+			)T
 			WHERE intInvoiceId = @NewInvoiceId
 		END TRY
 		BEGIN CATCH

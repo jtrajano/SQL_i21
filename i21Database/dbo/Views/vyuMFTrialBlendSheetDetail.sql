@@ -4,28 +4,28 @@ SELECT wo.strWorkOrderNo
 	,wo.intWorkOrderId
 	,woil.intWorkOrderInputLotId
 	,CAST(CASE 
-		WHEN wo.intTrialBlendSheetStatusId IS NULL
-			AND (
-				CASE 
-					WHEN lot.intWeightUOMId IS NOT NULL
-						THEN lot.dblWeight
-					ELSE lot.dblQty
-					END
-				) - ISNULL((
-					SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
-					FROM tblICStockReservation SR
-					JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
-					WHERE SR.intLotId = lot.intLotId
-						AND ISNULL(ysnPosted, 0) = 0
-					), 0) > 0
-			THEN 1
-		ELSE ISNULL(woil.ysnKeep, 0)
-		END AS BIT) [ysnKeep]
+			WHEN wo.intTrialBlendSheetStatusId IS NULL
+				AND (
+					CASE 
+						WHEN lot.intWeightUOMId IS NOT NULL
+							THEN lot.dblWeight
+						ELSE lot.dblQty
+						END
+					) - ISNULL((
+						SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, ISNULL(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+						FROM tblICStockReservation SR
+						JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
+						WHERE SR.intLotId = lot.intLotId
+							AND ISNULL(ysnPosted, 0) = 0
+						), 0) > 0
+				THEN 1
+			ELSE ISNULL(woil.ysnKeep, 0)
+			END AS BIT) [ysnKeep]
 	,lot.strLotNumber [strLotNumber]
-	,(woil.dblQuantity / dblTotalWeight.dblTotalWeight) * IsNULL((
-			SELECT dblTrialBlendSheetSize
-			FROM tblMFCompanyPreference
-			), 0) [dblWeight]
+	,ISNULL(woil.dblTBSQuantity, (woil.dblQuantity / dblTotalWeight.dblTotalWeight) * IsNULL((
+				SELECT dblTrialBlendSheetSize
+				FROM tblMFCompanyPreference
+				), 0)) [dblWeight]
 	,br.strReferenceNo [strPurchaseOrder]
 	,b.strTeaGardenChopInvoiceNumber [strChop]
 	,mark.strGardenMark [strMark]
@@ -44,9 +44,12 @@ SELECT wo.strWorkOrderNo
 	,lot.dblWeightPerQty [dblKgBags]
 	,TC.strTINNumber [strTIN]
 	,woil.dblIssuedQuantity [dblBags]
-	,(woil.dblQuantity / dblTotalWeight.dblTotalWeight) * 100 [dblPercentage]
+	,CAST((woil.dblQuantity / dblTotalWeight.dblTotalWeight) * 100 AS NUMERIC(38,1)) [dblPercentage]
 	,DATEDIFF(DAY, lot.dtmDateCreated, GETDATE()) [intAge]
 	,wo.intTrialBlendSheetStatusId
+	,woil.strFW
+	,b.dblLandedPrice
+	,b.dblSellingPrice
 FROM tblMFWorkOrder wo
 INNER JOIN tblMFWorkOrderInputLot woil ON wo.intWorkOrderId = woil.intWorkOrderId
 INNER JOIN tblICLot lot ON lot.intLotId = woil.intLotId
@@ -60,6 +63,4 @@ OUTER APPLY (
 	SELECT SUM(dblQuantity) dblTotalWeight
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderId = wo.intWorkOrderId
-) dblTotalWeight
-
-
+	) dblTotalWeight

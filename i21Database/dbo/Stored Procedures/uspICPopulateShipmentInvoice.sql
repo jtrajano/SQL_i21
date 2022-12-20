@@ -38,6 +38,8 @@ BEGIN
 		,dtmLastInvoiceDate
 		,strAllVouchers
 		,dtmCreated
+		,strTicketNumber
+		,strContractNumber
 	)
 	-- Insert the items: 
 	SELECT	
@@ -61,7 +63,9 @@ BEGIN
 			,dblOpenQty = SUM(ISNULL(shipmentItem.dblShipmentQty, 0)) - SUM(ISNULL(shipmentItem.dblInvoiceQty, 0)) --shipmentItem.dblInTransitQty
 			,MAX(shipmentItem.dtmLastInvoiceDate) dtmLastInvoiceDate
 			,strAllVouchers = invoices.strInvoiceNumbers
-			,dtmCreated = @dtmCreated	
+			,dtmCreated = @dtmCreated
+			,shipmentItem.strTicketNumber
+			,shipmentItem.strContractNumber
 	FROM	tblARCustomer customer INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = customer.intEntityId
 			CROSS APPLY (
@@ -84,6 +88,8 @@ BEGIN
 			,customer.strCustomerNumber
 			,entity.strName
 			,invoices.strInvoiceNumbers
+			,shipmentItem.strTicketNumber
+			,shipmentItem.strContractNumber
 
 	UNION ALL 
 	SELECT	
@@ -108,6 +114,8 @@ BEGIN
 			,shipmentCharge.dtmLastInvoiceDate
 			,shipmentCharge.strAllVouchers
 			,dtmCreated = @dtmCreated
+			,NULL
+			,shipmentCharge.strContractNumber
 	FROM	tblARCustomer customer INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = customer.intEntityId
 			CROSS APPLY (

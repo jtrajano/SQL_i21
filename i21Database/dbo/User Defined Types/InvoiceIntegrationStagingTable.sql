@@ -24,7 +24,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Store"
 																											-- "Card Fueling"
 																											-- "POS"
-																											-- "Store Checkout"
+																											-- "Store End of Day"
 																											-- "Agronomy"
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
@@ -213,19 +213,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intPriceFixationDetailId]				INT												NULL
 	,[dblQualityPremium]					NUMERIC(18, 6)									NULL		-- tblLGLoadDetail.[dblQualityPremium] Logistics
 	,[dblOptionalityPremium]				NUMERIC(18, 6)									NULL		-- tblLGLoadDetail.[dblOptionalityPremium] Logistics
-	,[intBankId]							INT												NULL		-- Key Value from tblCMBank (Bank)
-	,[intBankAccountId]						INT												NULL		-- Key Value from tblCMBankAccount (Bank Account)
-	,[intBorrowingFacilityId]				INT												NULL		-- Key Value from tblCMBorrowingFacility
-	,[intBorrowingFacilityLimitId]			INT												NULL		-- Key Value from tblCMBorrowingFacilityLimit
-	,[strTradeFinanceNo]					NVARCHAR(50)									NULL
-	,[intFacilityId]						INT												NULL
-	,[intLoanLimitId]						INT												NULL
-	,[strBankReferenceNo]					NVARCHAR(100)									NULL
-	,[strBankTradeReference]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[dblLoanAmount]						NUMERIC(18, 6)									NULL
-	,[intBankValuationRuleId]				INT												NULL
-	,[strTradeFinanceComments]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
-	,[strGoodsStatus]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[dblComputedGrossPrice]				NUMERIC(18, 6)									NULL
 	,[dblFreightCharge]						NUMERIC(18, 6)									NULL
 	,[intFreightCompanySegment]				INT												NULL

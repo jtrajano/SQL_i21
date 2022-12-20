@@ -1,107 +1,107 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCreateCustomerInvoice]
-	 @EntityCustomerId						INT
-	,@CompanyLocationId						INT
-	,@CurrencyId							INT				= NULL
-	,@TermId								INT				= NULL
-	,@AccountId								INT				= NULL
-	,@EntityId								INT
-	,@InvoiceDate							DATETIME	
-	,@DueDate								DATETIME		= NULL
-	,@ShipDate								DATETIME		= NULL	
-	,@CalculatedDate						DATETIME		= NULL
-	,@PostDate								DATETIME		= NULL
-	,@TransactionType						NVARCHAR(50)	= 'Invoice'
-	,@Type									NVARCHAR(200)	= 'Standard'
-	,@NewInvoiceId							INT				= NULL			OUTPUT 
-	,@ErrorMessage							NVARCHAR(250)	= NULL			OUTPUT
-	,@RaiseError							BIT				= 0			
-	,@EntitySalespersonId					INT				= NULL
-	,@EntityContactId						INT				= NULL				
-	,@FreightTermId							INT				= NULL
-	,@ShipViaId								INT				= NULL
-	,@PaymentMethodId						INT				= NULL
-	,@InvoiceOriginId						NVARCHAR(25)	= NULL
-	,@MobileBillingShiftNo					NVARCHAR(50)	= NULL
-	,@PONumber								NVARCHAR(50)	= ''
-	,@BOLNumber								NVARCHAR(50)	= ''
-	,@PaymentInfo							NVARCHAR(50)	= ''
-	,@Comment								NVARCHAR(MAX)	= ''
-	,@FooterComment							NVARCHAR(MAX)	= ''
-	,@ShipToLocationId						INT				= NULL
-	,@BillToLocationId						INT				= NULL
-	,@Posted								BIT				= 0	
-	,@ImportedFromOrigin 					BIT				= 0
-	,@ImportedAsPosted						BIT				= 0
-	,@FromProvisional						BIT				= 0
-	,@ServiceChargeCredit					BIT				= 0
-	,@Template								BIT				= 0			
-	,@Forgiven								BIT				= 0			
-	,@Calculated							BIT				= 0			
-	,@Splitted								BIT				= 0			
-	,@ImpactInventory						BIT				= 1			
-	,@PaymentId								INT				= NULL
-	,@SplitId								INT				= NULL
-	,@LoadDistributionHeaderId				INT				= NULL
-	,@ActualCostId							NVARCHAR(50)	= NULL			
-	,@ShipmentId							INT				= NULL
-	,@TransactionId							INT				= NULL
-	,@MeterReadingId						INT				= NULL
-	,@OriginalInvoiceId						INT				= NULL
-	,@LoadId								INT             = NULL
-	,@PeriodsToAccrue						INT				= 1
-	,@SourceId								INT				= 0
-	,@ImportFormat							NVARCHAR(50)    = NULL		
-	,@TruckDriverId							INT				= NULL
-	,@TruckDriverReferenceId				INT				= NULL
-	,@ItemId								INT				= NULL
-	,@ItemPrepayTypeId						INT				= 0
-	,@ItemPrepayRate						NUMERIC(18,6)	= 0.000000
-	,@ItemIsInventory						BIT				= 0
-	,@ItemDocumentNumber					NVARCHAR(100)	= NULL			
-	,@ItemDescription						NVARCHAR(500)	= NULL
-	,@ItemOrderUOMId						INT				= NULL
-	,@ItemQtyOrdered						NUMERIC(38,20)	= 0.000000
-	,@ItemUOMId								INT				= NULL
-	,@ItemPriceUOMId						INT				= NULL
-	,@ItemQtyShipped						NUMERIC(38,20)	= 0.000000
-	,@ItemUnitQuantity						NUMERIC(38,20)	= 1.000000
-	,@ItemDiscount							NUMERIC(18,6)	= 0.000000
-	,@ItemTermDiscount						NUMERIC(18,6)	= 0.000000
-	,@ItemTermDiscountBy					NVARCHAR(50)	= NULL
-	,@ItemPrice								NUMERIC(18,6)	= 0.000000	
-	,@ItemUnitPrice							NUMERIC(18,6)	= 0.000000	
-	,@RefreshPrice							BIT				= 0
-	,@AllowRePrice							BIT				= 0
-	,@ItemMaintenanceType					NVARCHAR(50)	= NULL
-	,@ItemFrequency							NVARCHAR(50)	= NULL
-	,@ItemMaintenanceDate					DATETIME		= NULL
-	,@ItemMaintenanceAmount					NUMERIC(18,6)	= 0.000000
-	,@ItemLicenseAmount						NUMERIC(18,6)	= 0.000000
-	,@ItemTaxGroupId						INT				= NULL
-	,@ItemStorageLocationId					INT				= NULL
-	,@ItemCompanyLocationSubLocationId		INT				= NULL
-	,@RecomputeTax							BIT				= 1
-	,@ItemSCInvoiceId						INT				= NULL
-	,@ItemSCInvoiceNumber					NVARCHAR(50)	= NULL
-	,@ItemInventoryShipmentItemId			INT				= NULL
-	,@ItemInventoryShipmentChargeId			INT				= NULL
-	,@ItemShipmentNumber					NVARCHAR(50)	= NULL
-	,@ItemSubFormula						NVARCHAR(50)	= NULL
-	,@ItemRecipeItemId						INT				= NULL
-	,@ItemRecipeId							INT				= NULL
-	,@ItemSublocationId						INT				= NULL
-	,@ItemPriceFixationDetailId				INT				= NULL
-	,@ItemCostTypeId						INT				= NULL
-	,@ItemMarginById						INT				= NULL
-	,@ItemCommentTypeId						INT				= NULL
-	,@ItemMargin							NUMERIC(18,6)	= NULL
-	,@ItemRecipeQty							NUMERIC(18,6)	= NULL
-	,@ItemSalesOrderDetailId				INT				= NULL												
-	,@ItemSalesOrderNumber					NVARCHAR(50)	= NULL
-	,@ContractHeaderId						INT				= NULL
-	,@ContractDetailId						INT				= NULL
-	,@ItemContractHeaderId					INT				= NULL
-	,@ItemContractDetailId					INT				= NULL
+	 @EntityCustomerId				INT
+	,@CompanyLocationId				INT
+	,@CurrencyId					INT				= NULL
+	,@TermId						INT				= NULL
+	,@AccountId						INT				= NULL
+	,@EntityId						INT
+	,@InvoiceDate					DATETIME	
+	,@DueDate						DATETIME		= NULL
+	,@ShipDate						DATETIME		= NULL	
+	,@CalculatedDate				DATETIME		= NULL
+	,@PostDate						DATETIME		= NULL
+	,@TransactionType				NVARCHAR(50)	= 'Invoice'
+	,@Type							NVARCHAR(200)	= 'Standard'
+	,@NewInvoiceId					INT				= NULL			OUTPUT 
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
+	,@RaiseError					BIT				= 0			
+	,@EntitySalespersonId			INT				= NULL
+	,@EntityContactId				INT				= NULL				
+	,@FreightTermId					INT				= NULL
+	,@ShipViaId						INT				= NULL
+	,@PaymentMethodId				INT				= NULL
+	,@InvoiceOriginId				NVARCHAR(25)	= NULL
+	,@MobileBillingShiftNo			NVARCHAR(50)	= NULL
+	,@PONumber						NVARCHAR(50)	= ''
+	,@BOLNumber						NVARCHAR(50)	= ''
+	,@PaymentInfo					NVARCHAR(50)	= ''
+	,@Comment						NVARCHAR(MAX)	= ''
+	,@FooterComment					NVARCHAR(MAX)	= ''
+	,@ShipToLocationId				INT				= NULL
+	,@BillToLocationId				INT				= NULL
+	,@Posted						BIT				= 0	
+	,@ImportedFromOrigin 			BIT				= 0
+	,@ImportedAsPosted				BIT				= 0
+	,@FromProvisional				BIT				= 0
+	,@ServiceChargeCredit			BIT				= 0
+	,@Template						BIT				= 0			
+	,@Forgiven						BIT				= 0			
+	,@Calculated					BIT				= 0			
+	,@Splitted						BIT				= 0			
+	,@ImpactInventory				BIT				= 1			
+	,@PaymentId						INT				= NULL
+	,@SplitId						INT				= NULL
+	,@LoadDistributionHeaderId		INT				= NULL
+	,@ActualCostId					NVARCHAR(50)	= NULL			
+	,@ShipmentId					INT				= NULL
+	,@TransactionId					INT				= NULL
+	,@MeterReadingId				INT				= NULL
+	,@OriginalInvoiceId				INT				= NULL
+	,@LoadId                        INT             = NULL
+	,@PeriodsToAccrue				INT				= 1
+	,@SourceId						INT				= 0
+	,@ImportFormat                  NVARCHAR(50)    = NULL		
+	,@TruckDriverId					INT				= NULL
+	,@TruckDriverReferenceId		INT				= NULL
+	,@ItemId						INT				= NULL
+	,@ItemPrepayTypeId				INT				= 0
+	,@ItemPrepayRate				NUMERIC(18,6)	= 0.000000
+	,@ItemIsInventory				BIT				= 0
+	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
+	,@ItemDescription				NVARCHAR(500)	= NULL
+	,@ItemOrderUOMId				INT				= NULL
+	,@ItemQtyOrdered				NUMERIC(38,20)	= 0.000000
+	,@ItemUOMId						INT				= NULL
+	,@ItemPriceUOMId				INT				= NULL
+	,@ItemQtyShipped				NUMERIC(38,20)	= 0.000000
+	,@ItemUnitQuantity				NUMERIC(38,20)	= 1.000000
+	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
+	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
+	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
+	,@RefreshPrice					BIT				= 0
+	,@AllowRePrice					BIT				= 0
+	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
+	,@ItemFrequency					NVARCHAR(50)	= NULL
+	,@ItemMaintenanceDate			DATETIME		= NULL
+	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
+	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
+	,@ItemTaxGroupId				INT				= NULL
+	,@ItemStorageLocationId			INT				= NULL
+	,@ItemCompanyLocationSubLocationId	INT				= NULL
+	,@RecomputeTax					BIT				= 1
+	,@ItemSCInvoiceId				INT				= NULL
+	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
+	,@ItemInventoryShipmentItemId	INT				= NULL
+	,@ItemInventoryShipmentChargeId	INT				= NULL
+	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemSubFormula				NVARCHAR(50)	= NULL
+	,@ItemRecipeItemId				INT				= NULL
+	,@ItemRecipeId					INT				= NULL
+	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT				= NULL
+	,@ItemCostTypeId				INT				= NULL
+	,@ItemMarginById				INT				= NULL
+	,@ItemCommentTypeId				INT				= NULL
+	,@ItemMargin					NUMERIC(18,6)	= NULL
+	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
+	,@ItemSalesOrderDetailId		INT				= NULL												
+	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
+	,@ItemContractHeaderId			INT				= NULL
+	,@ItemContractDetailId			INT				= NULL
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId						INT				= NULL	
 	,@ItemWeight							NUMERIC(38,20)	= 0.000000		
@@ -147,28 +147,15 @@
 	,@PaidCPP								BIT				= 0
 	,@ItemQualityPremium					NUMERIC(18, 6)	= 0
 	,@ItemOptionalityPremium				NUMERIC(18, 6)	= 0
-	,@TransactionNo							NVARCHAR(50)	= NULL
-	,@BankId								INT				= NULL
-	,@BankAccountId							INT				= NULL
-	,@BorrowingFacilityId					INT				= NULL
-	,@BorrowingFacilityLimitId				INT				= NULL
-	,@BankReferenceNo						NVARCHAR(100)	= NULL
-	,@BankTradeReference					NVARCHAR(100)	= NULL
-	,@LoanAmount							NUMERIC(18, 6)	= NULL
-	,@BankValuationRuleId					INT				= NULL
-	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
-	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
 	,@FreightCharge							NUMERIC(18, 6)	= 0
 	,@FreightCompanySegment					INT				= NULL
 	,@FreightLocationSegment				INT				= NULL
-	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
 	,@OpportunityId							INT 			= 0
-	,@DefaultPayToBankAccountId				INT				= NULL
 AS
 
 BEGIN
@@ -410,7 +397,7 @@ IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Ca
 		RETURN 0;
 	END
 
-IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund', 'Agronomy', 'Dealer Credit Card'))
+IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store End of Day', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund', 'Agronomy', 'Dealer Credit Card'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('%s is not a valid invoice type!', 16, 1, @TransactionType);
@@ -442,22 +429,6 @@ SELECT TOP 1 @intARTermId = CASE WHEN strPullPoint = 'Company Location' THEN int
 FROM tblSMTermPullPoint P 
 WHERE P.strPullPoint = 'Company Location'
 ORDER BY P.intTermPullPointId ASC
-
-DECLARE @BorrowingFacilityLimitDetailId INT = NULL
-
-SELECT TOP 1
-	@BorrowingFacilityLimitId = intBorrowingFacilityLimitId
-FROM
-	tblCMBorrowingFacilityLimit
-WHERE intBorrowingFacilityId = @BorrowingFacilityId
-  AND strBorrowingFacilityLimit = 'Receivables'
-
-SELECT TOP 1
-	  @BorrowingFacilityLimitDetailId = intBorrowingFacilityLimitDetailId
-FROM
-	tblCMBorrowingFacilityLimitDetail
-WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
-  AND ysnDefault = 1
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -545,80 +516,58 @@ BEGIN TRY
 		,[intLineOfBusinessId]
 		,[intICTId]
 		,[intSalesOrderId]
-		,[strTransactionNo]
-		,[intBankId]
-		,[intBankAccountId]
-		,[intBorrowingFacilityId]
-		,[intBorrowingFacilityLimitId]
-		,[strBankReferenceNo]
-		,[strBankTradeReference]
-		,[dblLoanAmount]
-		,[intBankValuationRuleId]
-		,[strTradeFinanceComments]
-		,[strGoodsStatus]
-		,[intBorrowingFacilityLimitDetailId]
-		,[dblFreightCharge]
-		,[intFreightCompanySegment]
-		,[intFreightLocationSegment]
-		,[intDefaultPayToBankAccountId]
-		,[strSourcedFrom]
-		,[intTaxLocationId]
-		,[strTaxPoint]
-		,[dblSurcharge]
-		,[intOpportunityId]
-		,[strPaymentInstructions]
-		,strPrintFormat
 	)
-	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
-		,[strTransactionType]				= @TransactionType
-		,[strType]							= @Type
-		,[intEntityCustomerId]				= C.[intEntityId]
-		,[intCompanyLocationId]				= @CompanyLocationId
-		,[intAccountId]						= @ARAccountId
-		,[intCurrencyId]					= @DefaultCurrency
-		,[intTermId]						= ISNULL(ISNULL(ISNULL(@TermId, EL.[intTermsId]), @intARTermId), C.[intTermsId])
-		,[intSourceId]						= @SourceId
-		,[intPeriodsToAccrue]				= ISNULL(@PeriodsToAccrue, 1)
-		,[dtmDate]							= CASE WHEN @Type = 'Transport Delivery' THEN ISNULL(@InvoiceDate, @DateOnly) ELSE ISNULL(CAST(@InvoiceDate AS DATE), @DateOnly) END
-		,[dtmDueDate]						= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(ISNULL(@TermId, EL.[intTermsId]), @intARTermId), C.[intTermsId])) AS DATE)))
-		,[dtmShipDate]						= ISNULL(@ShipDate, ISNULL(CAST(@PostDate AS DATE),@DateOnly))
-		,[dtmCalculated]					= CAST(@CalculatedDate AS DATE)
-		,[dtmPostDate]						= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
-		,[dblInvoiceSubtotal]				= @ZeroDecimal
-		,[dblShipping]						= @ZeroDecimal
-		,[dblTax]							= @ZeroDecimal
-		,[dblInvoiceTotal]					= @ZeroDecimal
-		,[dblDiscount]						= @ZeroDecimal
-		,[dblAmountDue]						= @ZeroDecimal
-		,[dblPayment]						= @ZeroDecimal
-		,[intEntitySalespersonId]			= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
-		,[intEntityContactId]				= @EntityContactId
-		,[intFreightTermId]					= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
-		,[intShipViaId]						= ISNULL(@ShipViaId, EL.[intShipViaId])
-		,[intPaymentMethodId]				= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
-		,[strInvoiceOriginId]				= @InvoiceOriginId
-		,[strMobileBillingShiftNo]			= @MobileBillingShiftNo
-		,[strPONumber]						= @PONumber
-		,[strBOLNumber]						= @BOLNumber
-		,[strPaymentInfo]					= @PaymentInfo
-		,[strComments]						= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
-		,[strFooterComments]				= CASE WHEN ISNULL(@FooterComment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0) ELSE @FooterComment END
-		,[intShipToLocationId]				= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
-		,[strShipToLocationName]			= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
-		,[strShipToAddress]					= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
-		,[strShipToCity]					= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
-		,[strShipToState]					= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
-		,[strShipToZipCode]					= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
-		,[strShipToCountry]					= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
-		,[intBillToLocationId]				= ISNULL(@BillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
-		,[strBillToLocationName]			= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
-		,[strBillToAddress]					= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
-		,[strBillToCity]					= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
-		,[strBillToState]					= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
-		,[strBillToZipCode]					= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
-		,[strBillToCountry]					= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
-		,[strImportFormat]					= @ImportFormat
-		,[ysnPosted]						= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') 
+	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
+		,[strTransactionType]			= @TransactionType
+		,[strType]						= @Type
+		,[intEntityCustomerId]			= C.[intEntityId]
+		,[intCompanyLocationId]			= @CompanyLocationId
+		,[intAccountId]					= @ARAccountId
+		,[intCurrencyId]				= @DefaultCurrency
+		,[intTermId]					= ISNULL(ISNULL(@TermId, C.[intTermsId]), EL.[intTermsId])
+		,[intSourceId]					= @SourceId
+		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
+		,[dtmDate]						= CASE WHEN @Type = 'Transport Delivery' THEN ISNULL(@InvoiceDate, @DateOnly) ELSE ISNULL(CAST(@InvoiceDate AS DATE), @DateOnly) END
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly), ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
+		,[dtmShipDate]					= ISNULL(@ShipDate, ISNULL(CAST(@PostDate AS DATE),@DateOnly))
+		,[dtmCalculated]				= CAST(@CalculatedDate AS DATE)
+		,[dtmPostDate]					= ISNULL(CAST(@PostDate AS DATE),ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly))
+		,[dblInvoiceSubtotal]			= @ZeroDecimal
+		,[dblShipping]					= @ZeroDecimal
+		,[dblTax]						= @ZeroDecimal
+		,[dblInvoiceTotal]				= @ZeroDecimal
+		,[dblDiscount]					= @ZeroDecimal
+		,[dblAmountDue]					= @ZeroDecimal
+		,[dblPayment]					= @ZeroDecimal
+		
+		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
+		,[intEntityContactId]			= @EntityContactId
+		,[intFreightTermId]				= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
+		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
+		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
+		,[strInvoiceOriginId]			= @InvoiceOriginId
+		,[strMobileBillingShiftNo]		= @MobileBillingShiftNo
+		,[strPONumber]					= @PONumber
+		,[strBOLNumber]					= @BOLNumber
+		,[strPaymentInfo]				= @PaymentInfo
+		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
+		,[strFooterComments]			= CASE WHEN ISNULL(@FooterComment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0) ELSE @FooterComment END
+		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
+		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
+		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
+		,[strShipToCity]				= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
+		,[strShipToState]				= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
+		,[strShipToZipCode]				= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
+		,[strShipToCountry]				= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
+		,[intBillToLocationId]			= ISNULL(@BillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
+		,[strBillToLocationName]		= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
+		,[strBillToAddress]				= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
+		,[strBillToCity]				= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
+		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
+		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
+		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
+		,[strImportFormat]				= @ImportFormat
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') 
 													THEN @Posted 
 												WHEN (@TransactionType IN ('Invoice') AND @ImportedFromOrigin = 1) 
 													THEN  1 
@@ -653,36 +602,6 @@ BEGIN TRY
 		,[intLineOfBusinessId]				= @intLineOfBusinessId
 		,[intICTId]							= @intICTId
 		,[intSalespersonId]					= @intSalesOrderId
-		,[strTransactionNo]					= @TransactionNo
-		,[intBankId]						= @BankId
-		,[intBankAccountId]					= @BankAccountId
-		,[intBorrowingFacilityId]			= @BorrowingFacilityId
-		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
-		,[strBankReferenceNo]				= @BankReferenceNo
-		,[strBankTradeReference]			= @BankTradeReference
-		,[dblLoanAmount]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @LoanAmount ELSE NULL END
-		,[intBankValuationRuleId]			= @BankValuationRuleId
-		,[strTradeFinanceComments]			= @TradeFinanceComments
-		,[strGoodsStatus]					= @GoodsStatus
-		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[dblFreightCharge]					= @FreightCharge
-		,[intFreightCompanySegment]			= @FreightCompanySegment
-		,[intFreightLocationSegment]		= @FreightLocationSegment
-		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
-		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
-												THEN @SourcedFrom 
-												ELSE 
-													CASE WHEN ISNULL(@BankAccountId, '') = '' AND ISNULL([dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId), '') <> '' 
-														THEN 'Customer'
-														ELSE NULL
-													END
-											  END
-		,[intTaxLocationId]					= @TaxLocationId
-		,[strTaxPoint]						= @TaxPoint
-		,[dblSurcharge]						= @Surcharge
-		,[intOpportunityId]					= @OpportunityId
-		,[strPaymentInstructions]			= CMBA.strPaymentInstructions
-		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
@@ -717,7 +636,6 @@ BEGIN TRY
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
 			ON C.intBillToId = BL1.intEntityLocationId
-	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()

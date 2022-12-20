@@ -105,7 +105,8 @@ BEGIN TRY
 				, strTransactionSource
 				, strTransportNumber
 				, intAccountStatusId
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, intCustomerId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 				FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 						, tblTFReportingComponent.intTaxAuthorityId
@@ -120,7 +121,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -139,7 +140,7 @@ BEGIN TRY
 						, Seller.strFederalTaxId AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strEin END AS strVendorFederalTaxId
 						, tblTFCompanyPreference.strCompanyName
 						, tblTFCompanyPreference.strTaxAddress
 						, tblTFCompanyPreference.strCity
@@ -168,6 +169,7 @@ BEGIN TRY
 						, tblTRLoadHeader.strTransaction
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
 						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+						, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -328,7 +330,9 @@ BEGIN TRY
 				, strTransactionSource
 				, strTransportNumber
 				, intAccountStatusId
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, intCustomerId
+				)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 						, tblTFReportingComponent.intTaxAuthorityId
@@ -343,7 +347,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber )  ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -362,7 +366,7 @@ BEGIN TRY
 						, Seller.strFederalTaxId AS strConsignorFederalTaxId
 						, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
 						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strFederalTaxID END AS strVendorFederalTaxId
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strEin END AS strVendorFederalTaxId
 						, tblTFCompanyPreference.strCompanyName
 						, tblTFCompanyPreference.strTaxAddress
 						, tblTFCompanyPreference.strCity
@@ -391,6 +395,7 @@ BEGIN TRY
 						, strTransportNumber = tblTRLoadHeader.strTransaction
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
 						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+						, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -658,7 +663,9 @@ BEGIN TRY
 				, strEmail
 				, strTransactionSource
 				, strTransportNumber
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, intCustomerId
+				)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -725,6 +732,7 @@ BEGIN TRY
 				, strTransactionSource
 				, strTransportNumber
 				, strImportVerificationNumber
+				, intCustomerId
 			FROM @tmpTransaction Trans
 		END
 		

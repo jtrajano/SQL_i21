@@ -168,6 +168,12 @@ WHERE strTransactionId = @strTransactionId
   
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference      
 
+IF ISNULL(@intDefaultCurrencyId,0) = 0 
+BEGIN  
+    RAISERROR ('Default Currency was not set in Company Configuration screen.',11,1)  
+    GOTO Post_Rollback    
+END
+
 IF @ysnPost = 1 AND @ysnRecap = 0
 BEGIN
   EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,3, @intBankTransferTypeId -- location
@@ -337,30 +343,30 @@ BEGIN -- VALIDATION
   IF  @ysnRecap = 0    
   BEGIN    
   -- Validate the date against the FY Periods    
-  IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0    
-  BEGIN     
-    -- Unable to find an open fiscal year period to match the transaction date.    
-    RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)    
-    GOTO Post_Rollback    
-  END    
+  -- IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0    
+  -- BEGIN     
+  --   -- Unable to find an open fiscal year period to match the transaction date.    
+  --   RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)    
+  --   GOTO Post_Rollback    
+  -- END    
       
   -- Validate the date against the FY Periods per module    
-  IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0) AND @ysnRecap = 0    
-  BEGIN     
-    -- Unable to find an open fiscal year period to match the transaction date and the given module.    
-    IF @ysnPost = 1    
-    BEGIN    
-    --You cannot %s transaction under a closed module.    
-    RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')    
-    GOTO Post_Rollback    
-    END    
-    ELSE    
-    BEGIN    
-    --You cannot %s transaction under a closed module.    
-    RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')    
-    GOTO Post_Rollback    
-    END    
-  END    
+  -- IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0) AND @ysnRecap = 0    
+  -- BEGIN     
+  --   -- Unable to find an open fiscal year period to match the transaction date and the given module.    
+  --   IF @ysnPost = 1    
+  --   BEGIN    
+  --   --You cannot %s transaction under a closed module.    
+  --   RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')    
+  --   GOTO Post_Rollback    
+  --   END    
+  --   ELSE    
+  --   BEGIN    
+  --   --You cannot %s transaction under a closed module.    
+  --   RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')    
+  --   GOTO Post_Rollback    
+  --   END    
+  -- END    
   -- Check if the transaction is already cleared or reconciled    
   IF @ysnPost = 0 AND @ysnRecap = 0    
   BEGIN    

@@ -63,6 +63,7 @@ BEGIN TRY
 		,intLocationId INT
 		,intStorageLocationId INT
 		,ysnParentLot BIT
+		,strFW nvarchar(3)
 		)
 
 	Declare @tblPackagingCategoryId Table 
@@ -147,6 +148,7 @@ BEGIN TRY
 		,intLocationId
 		,intStorageLocationId
 		,ysnParentLot
+		,strFW
 		)
 	SELECT intWorkOrderInputLotId
 		,intLotId
@@ -162,6 +164,7 @@ BEGIN TRY
 		,intLocationId
 		,intStorageLocationId
 		,ysnParentLot
+		,strFW
 	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
 			intWorkOrderInputLotId INT
 			,intLotId INT
@@ -177,6 +180,7 @@ BEGIN TRY
 			,intLocationId INT
 			,intStorageLocationId INT
 			,ysnParentLot BIT
+			,strFW nvarchar(3)
 			)
 
 	UPDATE @tblLot
@@ -407,6 +411,7 @@ BEGIN TRY
 					,dtmProductionDate
 					,dtmBusinessDate
 					,intBusinessShiftId
+					,strFW
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -424,6 +429,7 @@ BEGIN TRY
 					,@dtmProductionDate
 					,@dtmBusinessDate
 					,@intBusinessShiftId
+					,strFW
 				FROM @tblLot
 				WHERE intRowNo = @intMinRowNo
 			ELSE
@@ -482,6 +488,11 @@ BEGIN TRY
 					,dtmProductionDate = @dtmProductionDate
 					,dtmBusinessDate = @dtmBusinessDate
 					,intBusinessShiftId = @intBusinessShiftId
+					,strFW=(
+						SELECT strFW
+						FROM @tblLot
+						WHERE intRowNo = @intMinRowNo
+						)
 				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 			ELSE
 				UPDATE tblMFWorkOrderInputParentLot

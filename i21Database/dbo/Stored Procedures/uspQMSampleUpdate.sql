@@ -1107,6 +1107,8 @@ BEGIN TRY
    @intCuppingSampleId = @intSampleId,  
    @intUserEntityId = @intLastModifiedUserId  
  END  
+
+ EXEC dbo.uspQMSampleAmendment @intSampleId = @intSampleId, @intUserId = @intLastModifiedUserId
   
  COMMIT TRAN  
 END TRY  

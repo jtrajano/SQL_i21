@@ -8,6 +8,7 @@ a.dblBinSize,a.intBlendRequirementId,a.ysnUseTemplate,
 a.ysnKittingEnabled,a.ysnDietarySupplements,a.strComment,a.intLocationId, 
 Case When (e.dblQuantity - ISNULL(e.dblIssuedQty ,0)) <=0 Then a.dblQuantity Else (e.dblQuantity - ISNULL(e.dblIssuedQty ,0)) End AS dblBalancedQtyToProduce,
 mc.strCellName,m.strName AS strMachineName,a.intManufacturingProcessId,a.intPlannedShiftId,s.strShiftName AS strPlannedShiftName,a.intTrialBlendSheetStatusId
+,a.strERPOrderNo AS strERPOrderNo
 From tblMFWorkOrder a Join tblICItem b on a.intItemId=b.intItemId
 Join tblICItemUOM c on a.intItemUOMId=c.intItemUOMId
 Join tblICUnitMeasure d on c.intUnitMeasureId=d.intUnitMeasureId

@@ -59,11 +59,11 @@ AND ISNULL(SOD.intSubLocationId, 0) = 0
 AND SO.intSalesOrderId = @SalesOrderId
 
 IF (@strItemBlankStorageLocation IS NOT NULL)
-	BEGIN
-		SET @strErrorMessage = 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
-		RAISERROR(@strErrorMessage, 16, 1)
-		RETURN;
-	END
+BEGIN
+	SET @strErrorMessage = 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
+	RAISERROR(@strErrorMessage, 16, 1)
+	RETURN;
+END
 
 --VALIDATE IF HAS NON-STOCK ITEMS
 IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId AND SO.intSalesOrderId = @SalesOrderId AND SI.dblQtyRemaining > 0)

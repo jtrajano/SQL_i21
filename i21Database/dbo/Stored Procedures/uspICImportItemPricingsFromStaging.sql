@@ -294,6 +294,51 @@ WHEN NOT MATCHED THEN
 
 EXEC dbo.uspICUpdateItemImportedPricingLevel
 
+UPDATE l
+SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
+FROM tblICImportLog l
+WHERE l.strUniqueId = @strIdentifier
+
+
+
+DECLARE @TotalImported INT
+DECLARE @LogId INT
+
+SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
+FROM tblICImportLog 
+WHERE strUniqueId = @strIdentifier
+
+/* Log items that does not exists. */
+INSERT INTO tblICImportLogDetail (intImportLogId
+								, intRecordNo
+								, strAction
+								, strValue
+								, strMessage
+								, strStatus
+								, strType
+								, intConcurrencyId)
+SELECT @LogId
+     , 0
+	 , 'Import finished'
+	 , ItemPricingStaging.strItemNo
+	 , 'Item does not exist.'
+	 , 'Success'
+	 , 'Warning'
+	 , 1
+FROM tblICImportStagingItemPricing AS ItemPricingStaging
+WHERE NOT EXISTS (SELECT *
+				  FROM tblICItem AS Item
+				  WHERE LOWER(Item.strItemNo) =  LTRIM(RTRIM(LOWER(ItemPricingStaging.strItemNo))))
+
+/* End of Log items does are not exists. */
+
+IF @TotalImported = 0 AND @LogId IS NOT NULL
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
+END
+
 -- Sync Pricing to Location to make sure all locations have corresponding price
 DECLARE @intItemId INT
 DECLARE @intUserId INT

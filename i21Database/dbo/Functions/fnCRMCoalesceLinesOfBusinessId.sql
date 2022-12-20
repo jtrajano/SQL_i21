@@ -5,7 +5,7 @@ BEGIN
 
 	declare @strLinesOfBusinessId nvarchar(max);
 	select
-		@strLinesOfBusinessId = COALESCE(@strLinesOfBusinessId COLLATE Latin1_General_CI_AS + ', ', '') + convert(nvarchar(20),b.intLineOfBusinessId) COLLATE Latin1_General_CI_AS
+		@strLinesOfBusinessId = COALESCE(@strLinesOfBusinessId COLLATE Latin1_General_CI_AS + ',','') + convert(nvarchar(20),b.intLineOfBusinessId) COLLATE Latin1_General_CI_AS
 	--from 
 	--	tblEMEntityLineOfBusiness a, tblSMLineOfBusiness b
 	--where

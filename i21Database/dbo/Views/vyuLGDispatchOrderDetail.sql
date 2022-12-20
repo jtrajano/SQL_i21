@@ -22,6 +22,7 @@ SELECT
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOD.strOrderNumber
 	,DOD.strOrderType
+	,DOD.strPONumber
 	,strTerminalName = TCN.strName
 	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strFromSupplier = V.strName
@@ -72,6 +73,9 @@ SELECT
 	,SVTC.strCompartmentNumber
 	,I.intCategoryId
 	,SVTC.dblCapacity
+	,DOD.intSalespersonId
+	,strSalesperson = SP.strName
+	,DOD.strLoadRef
 	,DOD.intConcurrencyId
 FROM tblLGDispatchOrderDetail DOD 
 LEFT JOIN tblICItem I ON I.intItemId = DOD.intItemId
@@ -84,3 +88,4 @@ LEFT JOIN tblEMEntityLocation VL ON VL.intEntityLocationId = DOD.intVendorLocati
 LEFT JOIN tblSMShipViaTrailerCompartment SVTC ON SVTC.intEntityShipViaTrailerCompartmentId = DOD.intEntityShipViaCompartmentId
 LEFT JOIN tblTMSite TMS ON TMS.intSiteID = DOD.intTMSiteId
 LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = DOD.intTerminalControlNumberId
+LEFT JOIN tblEMEntity SP ON SP.intEntityId = DOD.intSalespersonId

@@ -45,6 +45,8 @@ CREATE TABLE #TBLTOPROCESS (
 	  , intTicketType				INT NULL
 	  , strInOutFlag				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	  , ysnLoad						BIT NULL DEFAULT 0
+	  , intSiteId					INT NULL
+	  , intLoadDistributionDetailId	INT NULL
 )
 
 DELETE FROM tblARPostItemsForContracts WHERE strSessionId = @strSessionId
@@ -81,6 +83,8 @@ INSERT INTO #TBLTOPROCESS (
 	, strInOutFlag
 	, ysnLoad
 	, dblScheduledQty
+	, intSiteId
+	, intLoadDistributionDetailId
 )
 SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
 	, intInvoiceId					= ID.intInvoiceId
@@ -120,6 +124,8 @@ SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
 	, strInOutFlag					= T.strInOutFlag
 	, ysnLoad						= CH.ysnLoad
 	, dblScheduledQty				= CD.dblScheduleQty
+	, intSiteId						= ID.intSiteId
+	, intLoadDistributionDetailId	= ID.intLoadDistributionDetailId
 FROM tblARPostInvoiceDetail ID
 INNER JOIN tblARInvoiceDetail IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
@@ -300,6 +306,40 @@ WHERE (
 AND ysnFromReturn = 0
 AND (intLoadDetailId IS NULL OR (intLoadDetailId IS NOT NULL AND intPurchaseSale = 3))
 
+UNION ALL
+
+SELECT intInvoiceId					= TBL.intInvoiceId
+	, intInvoiceDetailId			= TBL.intInvoiceDetailId
+	, intItemId						= TBL.intItemId
+	, intContractDetailId			= TBL.intContractDetailId
+	, intContractHeaderId			= TBL.intContractHeaderId
+	, intEntityId					= TBL.intEntityId
+	, intUserId						= TBL.intEntityId
+	, dtmDate						= TBL.dtmDate
+	, dblQuantity					= CASE WHEN TBL.dblQty > 0 THEN (TMO.dblQuantity - TBL.dblQty) * -1 ELSE (TMO.dblQuantity + TBL.dblQty) END
+	, dblBalanceQty					= 0
+	, dblSheduledQty				= CASE WHEN TBL.dblQty > 0 THEN (TMO.dblQuantity - TBL.dblQty) * -1 ELSE (TMO.dblQuantity + TBL.dblQty) END
+	, dblRemainingQty				= 0
+	, strType						= 'Contract Scheduled'
+	, strTransactionType			= TBL.strTransactionType
+	, strInvoiceNumber				= TBL.strInvoiceNumber
+	, strItemNo						= TBL.strItemNo
+	, strBatchId					= TBL.strBatchId
+	, strSessionId					= @strSessionId
+FROM #TBLTOPROCESS TBL
+INNER JOIN tblTMOrder TMO ON TBL.intSiteId = TMO.intSiteId
+INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
+INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId 
+INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId AND CD.intItemId = TBL.intItemId
+INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+WHERE CU.strFieldName = 'Scheduled Quantity'
+  AND CU.strScreenName = 'TM - Create Order'
+  AND TBL.intLoadDistributionDetailId IS NOT NULL 
+  AND TBL.intSiteId IS NOT NULL
+  AND TMO.dblQuantity > ABS(TBL.dblQty)
+  AND TBL.strPricing = 'Subsystem - Transport Load'
+  AND @Post = 1
+  
 --CONTRACT BALANCE
 INSERT INTO tblARPostItemsForContracts (
 	  intInvoiceId

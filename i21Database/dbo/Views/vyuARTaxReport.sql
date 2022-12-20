@@ -129,14 +129,8 @@ SELECT
 	,dblPayment					= INVOICE.dblPayment
 	,dblPaymentFunctional		= INVOICE.dblBasePayment
 	,strCheckNumbers			= PAYMENT.strCheckNumbers
-	,strTaxPointOverride		= INVOICE.strTaxPoint
-	,strTaxLocationOverride		= TAXLOCATION.strLocationName
-	,ysnOverrideTaxPoint        = CAST(CASE WHEN ISNULL(INVOICE.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
-	,ysnOverrideTaxLocation     = CAST(CASE WHEN ISNULL(INVOICE.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
-	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,dtmDateCreated				= CAST(INVOICE.dtmDateCreated AS DATE)
 	,dtmUpdatedDate				= CAST(AUDITLOG.dtmUpdatedDate AS DATE)
-	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -466,7 +460,6 @@ OUTER APPLY (
 	FROM tblARPaymentDetail ARPD
 	WHERE intInvoiceId = INVOICE.intInvoiceId
 ) PAYMENT
-LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INVOICE.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INVOICE.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 OUTER APPLY (
 	SELECT TOP 1
         [SMT].[intRecordId]	AS [intInvoiceId], 

@@ -742,30 +742,6 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
-	--NOT BALANCE
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The debit and credit amounts are not balanced.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceHeader I			 
-	WHERE ((I.strType <> 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM tblARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0)))
-	   OR (I.strType = 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ISNULL(I.[dblTax], 0.0)))
-	   AND I.strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
 	--Header Account ID
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
@@ -1614,6 +1590,34 @@ BEGIN
 	WHERE I.strTransactionType = 'Cash Refund'
 	  AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
 	  AND I.strSessionId = @strSessionId
+
+	DECLARE @strItemBlankStorageLocation NVARCHAR(MAX) = NULL;
+ 
+	SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
+	FROM tblARPostInvoiceDetail I
+	WHERE ISNULL(I.intStorageLocationId, 0) > 0
+	AND ISNULL(I.intSubLocationId, 0) = 0
+ 
+	IF (@strItemBlankStorageLocation IS NOT NULL)
+	BEGIN
+		INSERT INTO tblARPostInvalidInvoiceData
+			([intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError])
+		SELECT
+			 [intInvoiceId]   = I.[intInvoiceId]
+			,[strInvoiceNumber]  = I.[strInvoiceNumber]  
+			,[strTransactionType] = I.[strTransactionType]
+			,[intInvoiceDetailId] = I.[intInvoiceDetailId]
+			,[intItemId]   = I.[intItemId]
+			,[strBatchId]   = I.[strBatchId]
+			,[strPostingError]  = 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
+		FROM tblARPostInvoiceDetail I
+	END
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
@@ -2854,30 +2858,6 @@ BEGIN
 	WHERE ARCP.ysnOverrideARAccountLineOfBusinessSegment = 1
 	AND ISNULL(LOB.intAccountId, 0) = 0
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
-	AND strSessionId = @strSessionId
-
-	INSERT INTO tblARPostInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError]
-		,[strSessionId])
-	SELECT
-		 [intInvoiceId]			= ARPIH.[intInvoiceId]
-		,[strInvoiceNumber]		= ARPIH.[strInvoiceNumber]		
-		,[strTransactionType]	= ARPIH.[strTransactionType]
-		,[intInvoiceDetailId]	= ARPIH.[intInvoiceDetailId] 
-		,[intItemId]			= ARPIH.[intItemId] 
-		,[strBatchId]			= ARPIH.[strBatchId]
-		,[strPostingError]		= 'Invoice ' + ARPIH.strInvoiceOriginId + ' is not yet posted.'
-		,[strSessionId]			= @strSessionId
-	FROM tblARPostInvoiceHeader ARPIH
-	INNER JOIN tblARInvoice ARI ON ARPIH.intOriginalInvoiceId = ARI.intInvoiceId
-	WHERE ARPIH.strType = 'Tax Adjustment'
-	AND ARI.ysnPosted = 0
 	AND ARPIH.strSessionId = @strSessionId
 END
 

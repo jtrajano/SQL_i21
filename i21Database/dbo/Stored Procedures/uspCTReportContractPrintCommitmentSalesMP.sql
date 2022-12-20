@@ -354,7 +354,7 @@ BEGIN TRY
 		,MPContractSubmitSignature						= @blbChildSubmitSignature
 		,MPContractApproverSignature					= @blbChildApproveSignature
 		,strExchangeRate								= '( ' + @strFromCurrency + ' to ' + @strToCurrency +' )' 
-		,dblForexRate									= ROUND(@dblForexRate,6)
+		,dblForexRate									= dbo.fnRemoveTrailingZeroes(ROUND(@dblForexRate,5))
 		,strCompanyName									= (case when @ysnIsParent = convert(bit,0) then LTRIM(RTRIM(EY.strEntityName)) else @strCompanyName end)
 		,intEntityId									= CH.intEntityId
 		,strCustomerName								= (case when @ysnIsParent = convert(bit,0) then @strCompanyName else LTRIM(RTRIM(EL.strCheckPayeeName)) end)
@@ -365,9 +365,9 @@ BEGIN TRY
 		,strFutureMonth									= @strFutureMonthYear
 		,strFutureMarket								= @strFutMarketName
 		,strFutureMarketMonth							= @strFutureMonthYear +','+ @strFutMarketName
-		,dblSequencePrice								= dbo.fnCTChangeNumericScale( ROUND(dblFutures,@intPriceDec), @intPriceDec)
+		,dblSequencePrice								= dbo.fnCTChangeNumericScale( ROUND(ISNULL(CH.dblFutures,CD.dblFutures),@intPriceDec), @intPriceDec)
 		,strPriceCurrencyAndUOMForPriced				= @strPriceCurrencyAndUOMForPriced2
-		,dblQuantity									= dblQuantity
+		,dblQuantity									= CH.dblQuantity
 		,strContractNumberMP							= CH.strContractNumber
 		,strTodaysDate									= CONVERT (VARCHAR, getdate(), 107)
 		,strSequenceStartEndDate						= DATENAME (MONTH, @dtmStartDate) + ' / ' +   DATENAME (YEAR, @dtmStartDate)  + ' - ' + DATENAME (MONTH, @dtmEndDate) + ' / ' +   DATENAME (YEAR, @dtmEndDate)
@@ -396,6 +396,8 @@ BEGIN TRY
 		tblCTContractHeader CH
 		LEFT JOIN vyuCTEntity	EC 
 			WITH (NOLOCK) ON	EC.intEntityId = CH.intCounterPartyId   AND EC.strEntityType = 'Customer'
+		LEFT JOIN tblCTContractDetail CD
+			WITH (NOLOCK) ON	CD.intContractHeaderId = CH.intContractHeaderId
 		LEFT JOIN tblSMCountry rtc12
 			on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
 		LEFT JOIN tblAPVendor VR 

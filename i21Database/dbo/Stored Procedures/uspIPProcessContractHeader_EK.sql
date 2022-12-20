@@ -241,7 +241,7 @@ BEGIN TRY
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-			WHERE strLocationName = @strLocation
+			WHERE strLocationNumber = @strLocation
 
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 			BEGIN
@@ -269,7 +269,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intTermId = intTermID
 				FROM dbo.tblSMTerm WITH (NOLOCK)
-				WHERE strTerm = @strTermsCode
+				WHERE strTermCode = @strTermsCode
 
 				IF ISNULL(@intTermId, 0) = 0
 				BEGIN
@@ -375,14 +375,14 @@ BEGIN TRY
 						)
 			END
 
-			IF ISNULL(@strBuyingOrderNo, '') = ''
-			BEGIN
-				RAISERROR (
-						'Invalid Buying Order No. '
-						,16
-						,1
-						)
-			END
+			--IF ISNULL(@strBuyingOrderNo, '') = ''
+			--BEGIN
+			--	RAISERROR (
+			--			'Invalid Buying Order No. '
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			-- Default Values
 			SELECT @intCommodityUOMId = intCommodityUnitMeasureId
@@ -483,8 +483,8 @@ BEGIN TRY
 			BEGIN
 				SELECT @dtmOldContractDate = CH.dtmContractDate
 					,@strOldVendorName = E.strName
-					,@strOldLocation = CL.strLocationName
-					,@strOldTermsCode = T.strTerm
+					,@strOldLocation = CL.strLocationNumber
+					,@strOldTermsCode = T.strTermCode
 					,@strOldIncoTerm = FT.strFreightTerm
 					,@strOldIncoTermLocation = CITY.strCity
 					,@strOldCountry = COUNTRY.strCountry

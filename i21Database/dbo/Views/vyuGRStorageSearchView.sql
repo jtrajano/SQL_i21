@@ -158,6 +158,7 @@ LEFT JOIN (
 LEFT JOIN tblSCTicketSplit SCTicketSplit	
 	ON SCTicketSplit.intTicketId = CS.intTicketId 
 		AND SCTicketSplit.intCustomerId = CS.intEntityId
+		AND SCTicketSplit.intStorageScheduleTypeId > 0
 LEFT JOIN tblEMEntitySplit EMSplit
 	ON EMSplit.intSplitId = SC.intSplitId 
 		OR EMSplit.intSplitId = DeliverySheet.intSplitId

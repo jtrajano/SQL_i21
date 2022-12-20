@@ -77,7 +77,7 @@ BEGIN
 			WHERE @id = intId
 				AND ISNULL(intSubBookId, 0) = 0
 			)
-		SELECT @errorMessage = 'Channel (intSubBookId) is missing'
+		SELECT @errorMessage = 'Strategy (intSubBookId) is missing'
 	ELSE IF EXISTS (
 			SELECT 1
 			FROM @MFBatchTableType
@@ -206,6 +206,19 @@ BEGIN
 			,strVessel = T.strVessel
 			,intConcurrencyId = intConcurrencyId + 1
 			,intMixingUnitLocationId=T.intMixingUnitLocationId
+			,dblOriginalTeaTaste		= T.dblOriginalTeaTaste
+			,dblOriginalTeaHue			= T.dblOriginalTeaHue
+			,dblOriginalTeaIntensity	= T.dblOriginalTeaIntensity	
+			,dblOriginalTeaMouthfeel	= T.dblOriginalTeaMouthfeel	
+			,dblOriginalTeaAppearance	= T.dblOriginalTeaAppearance
+			,dblOriginalTeaVolume		= T.dblOriginalTeaVolume
+			,dblOriginalTeaMoisture		= T.dblOriginalTeaMoisture	
+			,intMarketZoneId			= T.intMarketZoneId	
+			,dblTeaTastePinpoint		= T.dblTeaTastePinpoint
+			,dblTeaHuePinpoint			= T.dblTeaHuePinpoint
+			,dblTeaIntensityPinpoint	= T.dblTeaIntensityPinpoint	
+			,dblTeaMouthFeelPinpoint	= T.dblTeaMouthFeelPinpoint	
+			,dblTeaAppearancePinpoint	= T.dblTeaAppearancePinpoint	
 		FROM tblMFBatch A
 		OUTER APPLY (
 			SELECT *
@@ -322,6 +335,19 @@ BEGIN
 			,intConcurrencyId
 			,intLocationId
 			,intMixingUnitLocationId
+			,dblOriginalTeaTaste
+			,dblOriginalTeaHue
+			,dblOriginalTeaIntensity
+			,dblOriginalTeaMouthfeel
+			,dblOriginalTeaAppearance
+			,dblOriginalTeaVolume
+			,dblOriginalTeaMoisture
+			,intMarketZoneId
+			,dblTeaTastePinpoint
+			,dblTeaHuePinpoint
+			,dblTeaIntensityPinpoint
+			,dblTeaMouthFeelPinpoint
+			,dblTeaAppearancePinpoint
 			)
 		SELECT (
 				CASE 
@@ -428,6 +454,19 @@ BEGIN
 			,1
 			,intLocationId
 			,intMixingUnitLocationId
+			,dblOriginalTeaTaste
+			,dblOriginalTeaHue
+			,dblOriginalTeaIntensity
+			,dblOriginalTeaMouthfeel
+			,dblOriginalTeaAppearance
+			,dblOriginalTeaVolume
+			,dblOriginalTeaMoisture
+			,intMarketZoneId
+			,dblTeaTastePinpoint
+			,dblTeaHuePinpoint
+			,dblTeaIntensityPinpoint
+			,dblTeaMouthFeelPinpoint
+			,dblTeaAppearancePinpoint
 		FROM @MFBatchTableType
 		WHERE intId = @id
 			--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult, intBatchId, dtmDate)

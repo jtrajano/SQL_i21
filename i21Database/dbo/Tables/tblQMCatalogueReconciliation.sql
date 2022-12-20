@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[tblQMCatalogueReconciliation]
     [dtmReconciliationDate] 			DATETIME NULL,
 	[ysnPosted]							BIT NULL DEFAULT(0),
 	[dtmPostDate]						DATETIME NULL,
+	[ysnReadOnly]						BIT NULL DEFAULT(0),
 	CONSTRAINT [PK_tblQMCatalogueReconciliation_intCatalogueReconciliationId] PRIMARY KEY CLUSTERED ([intCatalogueReconciliationId] ASC)
 );
 GO

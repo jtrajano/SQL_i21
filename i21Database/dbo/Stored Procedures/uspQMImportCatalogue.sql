@@ -11,6 +11,7 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
     -- Check for missing key fields
+    -- Validation for Auction/Non-Auction Sample
     UPDATE IMP
     SET strLogResult = 'Missing Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage),charindex(',',reverse(MSG.strLogMessage))+1,len(MSG.strLogMessage)))
         ,ysnSuccess = 0
@@ -27,6 +28,7 @@ BEGIN TRY
             + CASE WHEN ISNULL(IMP.strLotNumber, '') = '' THEN 'LOT NUMBER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
+    AND ISNULL(IMP.strBatchNo, '') = '' -- Having no batch number indicates that the import is an Auction or Non-Action sample
     AND IMP.ysnSuccess = 1
     AND (
         ISNULL(IMP.strSaleYear, '') = ''
@@ -36,8 +38,59 @@ BEGIN TRY
         OR ISNULL(IMP.strSupplier, '') = ''
         OR ISNULL(IMP.strLotNumber, '') = ''
     )
+    -- End Validation for Auction/Non-Auction Sample
 
-	-- Validate Key Fields
+    -- Validation for Pre-Shipment Sample
+    UPDATE IMP
+    SET strLogResult = 'Missing Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage),charindex(',',reverse(MSG.strLogMessage))+1,len(MSG.strLogMessage)))
+        ,ysnSuccess = 0
+        ,ysnProcessed = 1
+    FROM tblQMImportCatalogue IMP
+    -- Format log message
+    OUTER APPLY (
+        SELECT strLogMessage =
+            CASE WHEN ISNULL(IMP.strBatchNo, '') = '' THEN 'BATCH NO, ' ELSE '' END
+            + CASE WHEN ISNULL(IMP.strB1GroupNumber, '') = '' THEN 'BUYER1 GROUP NUMBER, ' ELSE '' END
+            + CASE WHEN ISNULL(IMP.strSampleTypeName, '') = '' THEN 'SAMPLE TYPE, ' ELSE '' END
+    ) MSG
+    WHERE IMP.intImportLogId = @intImportLogId
+    AND ISNULL(IMP.strBatchNo, '') <> '' -- Having no batch number indicates that the import is an Auction or Non-Action sample
+    AND IMP.ysnSuccess = 1
+    AND (
+        ISNULL(IMP.strBatchNo, '') = ''
+        OR ISNULL(IMP.strB1GroupNumber, '') = ''
+        OR ISNULL(IMP.strSampleTypeName, '') = ''
+    )
+    -- End Validation for Pre-Shipment Sample
+
+	-- Validate Key Fields for Auction/Non-Auction Sample
+    UPDATE IMP
+    SET strLogResult = 'Incorrect Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage),charindex(',',reverse(MSG.strLogMessage))+1,len(MSG.strLogMessage)))
+        ,ysnSuccess = 0
+        ,ysnProcessed = 1
+    FROM tblQMImportCatalogue IMP
+    LEFT JOIN tblSMCompanyLocation CL
+        ON CL.strLocationName = IMP.strB1GroupNumber
+    LEFT JOIN tblQMSampleType ST
+        ON ST.strSampleTypeName = IMP.strSampleTypeName
+    LEFT JOIN tblMFBatch B ON B.strBatchId = IMP.strBatchNo
+    -- Format log message
+    OUTER APPLY (
+        SELECT strLogMessage =
+            CASE WHEN B.intBatchId IS NULL THEN 'BATCH NO, ' ELSE '' END
+            + CASE WHEN CL.strLocationName IS NULL THEN 'BUYER1 GROUP NAME, ' ELSE '' END
+            + CASE WHEN ST.intSampleTypeId IS NULL THEN 'SAMPLE TYPE, ' ELSE '' END
+    ) MSG
+    WHERE IMP.intImportLogId = @intImportLogId
+    AND ISNULL(IMP.strBatchNo, '') <> ''
+    AND (
+        B.intBatchId IS NULL
+        OR CL.intCompanyLocationId IS NULL
+        OR ST.intSampleTypeId IS NULL
+    )
+    -- End Validate Key Fields for Auction/Non-Auction Sample
+
+    -- Validate Key Fields for Auction/Non-Auction Sample
     UPDATE IMP
     SET strLogResult = 'Incorrect Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage),charindex(',',reverse(MSG.strLogMessage))+1,len(MSG.strLogMessage)))
         ,ysnSuccess = 0
@@ -59,12 +112,14 @@ BEGIN TRY
             + CASE WHEN E.intEntityId IS NULL THEN 'SUPPLIER, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
+    AND ISNULL(IMP.strBatchNo, '') = ''
     AND (
         SY.intSaleYearId IS NULL
         OR CL.intCompanyLocationId IS NULL
         OR CT.intCatalogueTypeId IS NULL
         OR E.intEntityId IS NULL
     )
+    -- End Validate Key Fields for Pre-Shipment Sample
 
     -- Catalogue Import
     IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Catalogue')
@@ -74,8 +129,8 @@ BEGIN TRY
     IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Tasting Score')
         EXEC uspQMImportTastingScore @intImportLogId
 
-    -- Supplier Evaluation Import
-    IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Supplier Evaluation')
+    -- Supplier Valuation Import
+    IF EXISTS(SELECT 1 FROM tblQMImportLog WHERE intImportLogId = @intImportLogId AND strImportType = 'Supplier Valuation')
         EXEC uspQMImportSupplierEvaluation @intImportLogId
 
     -- Initial Buy Import

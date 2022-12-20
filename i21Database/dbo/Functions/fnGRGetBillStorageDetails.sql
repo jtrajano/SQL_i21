@@ -92,7 +92,8 @@ BEGIN
 		,0
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
-		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
+		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+		else 1 end)) as dblOpenBalance
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
@@ -188,13 +189,14 @@ BEGIN
 		,dblNewStorageDue = SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit --New Storage Due (unpaid + additional)
 		,dblOldStorageBilled = ISNULL(CS.dblStoragePaid,0) --Old Storage Billed (storage due paid)
 		,dblNewStorageBilled = ISNULL(CS.dblStoragePaid,0) + SV.dblStorageDuePerUnit --New Storage Billed (storage paid + additional charge)
-		,dblStorageDueAmount = ((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) * MagicalOpenBalance.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
+		,dblStorageDueAmount = (((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) - CS.dblStoragePaid) * MagicalOpenBalance.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
 		,SV.dblFlatFeeTotal
 		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
 		,SSVW.strTransaction
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
-		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
+		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+		else 1 end)) as dblOpenBalance
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate

@@ -256,7 +256,7 @@ BEGIN
 		FROM @DataForReceiptHeader RawHeaderData
 		WHERE RawHeaderData.intId = @intId
 
-		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order')
+		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order', 'approved quality')
 			BEGIN
 				--Receipt Type is invalid or missing.				
 				EXEC uspICRaiseError 80134;
@@ -987,6 +987,9 @@ BEGIN
 				,ysnAddPayable
 				,strImportDescription
 				,intComputeItemTotalOption
+				,dblBasis
+				,dblFutures
+				,strFuturesMonth
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -1091,6 +1094,9 @@ BEGIN
 				,ysnAddPayable					= RawData.ysnAddPayable
 				,strImportDescription			= RawData.strImportDescription
 				,intComputeItemTotalOption		= Item.intComputeItemTotalOption
+				,dblBasis						= RawData.dblBasis
+				,dblFutures						= RawData.dblFutures
+				,strFuturesMonth				= RawData.strFuturesMonth
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1231,7 +1237,7 @@ BEGIN
 
 		SELECT TOP 1 @valueChargeId = RawData.intChargeId
 		FROM	@OtherCharges RawData
-		WHERE	RawData.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(RawData.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order'))
+		WHERE	RawData.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(RawData.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order', 'approved quality'))
 
 		IF @valueChargeId IS NOT NULL
 		BEGIN
@@ -1651,7 +1657,7 @@ BEGIN
 
 			SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
 			FROM @LotEntries ItemLot
-			WHERE ItemLot.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(ItemLot.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order'))
+			WHERE ItemLot.strReceiptType IS NULL OR (RTRIM(LTRIM(LOWER(ItemLot.strReceiptType))) NOT IN ('direct', 'purchase contract', 'purchase order', 'transfer order', 'approved quality'))
 
 			IF @valueLotRecordNo IS NOT NULL
 			BEGIN
@@ -1713,7 +1719,7 @@ BEGIN
 					@valueLotRecordNo = ItemLot.strLotNumber
 			FROM	@LotEntries ItemLot
 			WHERE	ItemLot.intSourceType IS NULL 
-					OR ItemLot.intSourceType > 9 
+					OR ItemLot.intSourceType > 9
 					OR ItemLot.intSourceType < 0
 
 			IF @valueLotRecordNo IS NOT NULL
@@ -1753,8 +1759,8 @@ BEGIN
 
 			IF @valueLotRecordNo IS NOT NULL
 			BEGIN
-				-- Sub Location is invalid or missing for {Lot Number}.
-				EXEC uspICRaiseError 80155, @valueLotRecordNo;
+				-- Storage Location is invalid or missing for {Lot Number}.
+				EXEC uspICRaiseError 80154, @valueLotRecordNo;
 				GOTO _Exit_With_Rollback;
 			END
 

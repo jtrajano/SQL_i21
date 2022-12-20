@@ -19,9 +19,9 @@
 			,ysnCompleted = Convert(bit,(case when t.intTicketStatusId = 2 then 1 else 0 end))
 			--,dblQuotedHours = isnull(t.dblQuotedHours,0)
 			,dblQuotedHours = isnull((select sum(nb.dblEstimatedHours) from tblHDTicketHoursWorked nb where nb.intTicketId = t.intTicketId),0)
-			,dblActualHours = isnull(t.dblActualHours,0)
+			,dblActualHours = isnull((select sum(nb.intHours) from tblHDTicketHoursWorked nb where nb.intTicketId = t.intTicketId and nb.ysnBillable = convert(bit, 1)),0)
 			--,dblOverShort = (isnull(t.dblQuotedHours,0)-isnull(t.dblActualHours,0))
-			,dblOverShort = (isnull((select sum(nb.dblEstimatedHours) from tblHDTicketHoursWorked nb where nb.intTicketId = t.intTicketId),0)-isnull(t.dblActualHours,0))
+			,dblOverShort = (isnull((select sum(nb.dblEstimatedHours) from tblHDTicketHoursWorked nb where nb.intTicketId = t.intTicketId),0)-isnull((select sum(nb.intHours) from tblHDTicketHoursWorked nb where nb.intTicketId = t.intTicketId and nb.ysnBillable = convert(bit, 1)),0))
 			,strMilestone = ms.strDescription
 			,ms.intPriority
 			,ts.strBackColor

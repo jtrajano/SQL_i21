@@ -54,6 +54,7 @@ select
 			,strName 
 			,ysnOverride
 			,intAgentTimeEntryPeriodDetailSummaryId
+			,strSubject
 from
 (
 		select
@@ -113,6 +114,7 @@ from
 			,strName = ISNULL(m.strName, n.strName)
 			,ysnOverride = a.ysnOverride
 			,intAgentTimeEntryPeriodDetailSummaryId = a.intAgentTimeEntryPeriodDetailSummaryId
+			,strSubject = i.strSubject
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
@@ -186,6 +188,7 @@ union all
 			,strName = ''
 			,ysnOverride = convert(bit,0)
 			,intAgentTimeEntryPeriodDetailSummaryId = a.intAgentTimeEntryPeriodDetailSummaryId
+			,strSubject = ''
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId

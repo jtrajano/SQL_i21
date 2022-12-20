@@ -2,6 +2,11 @@ CREATE PROCEDURE uspQMImportContractAllocation @intImportLogId INT
 AS
 BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(50)
+	DECLARE @intEntityUserId INT
+
+	SELECT @intEntityUserId = intEntityId
+	FROM tblQMImportLog
+	WHERE intImportLogId = @intImportLogId
 
 	BEGIN TRANSACTION
 
@@ -20,6 +25,8 @@ BEGIN TRY
 	LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 	-- Group Number
 	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+	-- Strategy
+	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -44,6 +51,13 @@ BEGIN TRY
 						)
 					THEN 'GROUP NUMBER, '
 				ELSE ''
+				END + CASE 
+				WHEN (
+						STRATEGY.intSubBookId IS NULL
+						AND ISNULL(IMP.strStrategy, '') <> ''
+						)
+					THEN 'STRATEGY, '
+				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
@@ -59,6 +73,10 @@ BEGIN TRY
 				BOOK.intBookId IS NULL
 				AND ISNULL(IMP.strGroupNumber, '') <> ''
 				)
+			OR (
+				STRATEGY.intSubBookId IS NULL
+				AND ISNULL(IMP.strStrategy, '') <> ''
+				)
 			)
 
 	-- End Validation   
@@ -68,6 +86,7 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@intSampleStatusId INT
 		,@intBookId INT
+		,@intSubBookId INT
 		,@dblCashPrice NUMERIC(18, 6)
 		,@ysnSampleContractItemMatch BIT
 		,@strSampleNumber NVARCHAR(30)
@@ -84,6 +103,7 @@ BEGIN TRY
 		,intContractDetailId = CD.intContractDetailId
 		,intSampleStatusId = SAMPLE_STATUS.intSampleStatusId
 		,intBookId = BOOK.intBookId
+		,intSubBookId = STRATEGY.intSubBookId
 		,dblCashPrice = IMP.dblBoughtPrice
 		,ysnSampleContractItemMatch = CASE 
 			WHEN CD.intItemId = S.intItemId
@@ -109,6 +129,8 @@ BEGIN TRY
 		LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 		-- Group Number
 		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+		-- Strategy
+		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -128,6 +150,7 @@ BEGIN TRY
 		,@intContractDetailId
 		,@intSampleStatusId
 		,@intBookId
+		,@intSubBookId
 		,@dblCashPrice
 		,@ysnSampleContractItemMatch
 		,@strSampleNumber
@@ -155,18 +178,17 @@ BEGIN TRY
 			,intContractDetailId = @intContractDetailId
 			,intSampleStatusId = @intSampleStatusId
 			,intBookId = @intBookId
+			,intSubBookId = @intSubBookId
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
 		-- Update Contract Cash Price
-		UPDATE CD
-		SET intConcurrencyId = CD.intConcurrencyId + 1
-			,dblCashPrice = @dblCashPrice
-		FROM tblCTContractDetail CD
-		INNER JOIN tblQMSample S ON S.intContractDetailId = CD.intContractDetailId
-			AND S.intItemId = CD.intItemId
-		WHERE CD.intContractHeaderId = @intContractHeaderId
-			AND CD.intContractDetailId = @intContractDetailId
+		IF ISNULL(@dblCashPrice, 0) <> 0
+			EXEC uspCTUpdateSequencePrice
+				@intContractDetailId = @intContractDetailId
+				,@dblNewPrice = @dblCashPrice
+				,@intUserId = @intEntityUserId
+				,@strScreen = 'Contract Line Allocation Import'
 
 		UPDATE tblQMTestResult
 		SET intProductTypeId = 8 --Contract Line Item
@@ -278,6 +300,8 @@ BEGIN TRY
 			,strVoyage
 			,strVessel
 			,intLocationId
+			,intMixingUnitLocationId
+			,intMarketZoneId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -307,7 +331,7 @@ BEGIN TRY
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
-			,dtmProductionBatch = NULL
+			,dtmProductionBatch = S.dtmManufacturingDate
 			,dtmTeaAvailableFrom = NULL
 			,strDustContent = NULL
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
@@ -317,7 +341,7 @@ BEGIN TRY
 			,intFromPortId = NULL
 			,dblGrossWeight = S.dblGrossWeight
 			,dtmInitialBuy = NULL
-			,dblWeightPerUnit = NULL
+			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
@@ -349,7 +373,7 @@ BEGIN TRY
 			,strTeaColour = COLOUR.strDescription
 			,strTeaGardenChopInvoiceNumber = S.strChopNumber
 			,intGardenMarkId = S.intGardenMarkId
-			,strTeaGroup = NULL
+			,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
 			,dblTeaHue = CASE 
 				WHEN ISNULL(HUE.strPropertyValue, '') = ''
 					THEN NULL
@@ -395,11 +419,17 @@ BEGIN TRY
 			,strVoyage = NULL
 			,strVessel = NULL
 			,intLocationId = S.intCompanyLocationId
+			,intMixingUnitLocationId=MU.intCompanyLocationId
+			,intMarketZoneId = S.intMarketZoneId
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
+		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
+		Left JOIN tblSMCompanyLocation MU on MU.strLocationName =B.strBook 
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
@@ -452,6 +482,10 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
 		-- Grade
 		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
+		-- Weight Item UOM
+		LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
+		-- Qty Item UOM
+		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intRepresentingUOMId
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
 			
@@ -473,6 +507,11 @@ BEGIN TRY
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
 				,intSampleId=NULL
+				,dblOriginalTeaTaste = dblTeaTaste
+				,dblOriginalTeaHue = dblTeaHue
+				,dblOriginalTeaIntensity = dblTeaIntensity
+				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+				,dblOriginalTeaAppearance = dblTeaAppearance
 			FROM @MFBatchTableType B
 			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
 			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
@@ -494,6 +533,7 @@ BEGIN TRY
 			,@intContractDetailId
 			,@intSampleStatusId
 			,@intBookId
+			,@intSubBookId
 			,@dblCashPrice
 			,@ysnSampleContractItemMatch
 			,@strSampleNumber

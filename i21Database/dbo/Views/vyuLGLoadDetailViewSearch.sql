@@ -281,6 +281,7 @@ SELECT   L.intLoadId
 		,strGardenMark = GM.strGardenMark
 		,strSustainability = QB.strSustainability
 		,ysnTeaOrganic = QB.ysnTeaOrganic
+		,MZ.strMarketZoneCode
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -336,7 +337,6 @@ LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAlloca
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblMFBatch QB ON QB.intBatchId = LD.intBatchId
 LEFT JOIN tblQMSample QS ON QS.intSampleId = QB.intSampleId
-LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = QS.intMarketZoneId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = QB.intBrokerId
 LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = QB.intGardenMarkId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -366,3 +366,4 @@ OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved'
 					AND SS.strStatus <> 'Rejected'
 					AND S.intTypeId = 1
 				ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSS
+LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId

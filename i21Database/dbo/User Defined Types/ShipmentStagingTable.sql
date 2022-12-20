@@ -77,6 +77,11 @@
 	intHeaderId INT NULL,
 	intShipmentId INT NULL,
 	intLoadShipmentId INT NULL,
-	intLoadShipmentDetailId INT NULL
+	intLoadShipmentDetailId INT NULL,
 	--UNIQUE (intItemLotGroup, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId)
+
+	--To be used in Grain Flow report
+	dblBasis NUMERIC(38,20) NULL,
+	dblFutures NUMERIC(38,20) NULL,
+	strFuturesMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 )

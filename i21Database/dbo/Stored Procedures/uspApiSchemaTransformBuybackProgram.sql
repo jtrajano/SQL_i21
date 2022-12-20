@@ -3,900 +3,681 @@ CREATE PROCEDURE uspApiSchemaTransformBuybackProgram
 	@guiLogId UNIQUEIDENTIFIER
 AS
 
---Check overwrite settings
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') 
+	, strValue = vts.strVendor
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') + ' "' + vts.strVendor + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+LEFT JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND v.intEntityId IS NULL
+	OR v.ysnPymtCtrlActive != 1
 
-DECLARE @ysnAllowOverwrite BIT = 0
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') 
+	, strValue = vts.strVendor
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The payment control of ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor') + ' "' + vts.strVendor + '" is inactive.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(v.ysnPymtCtrlActive, 0) = 0
 
-SELECT @ysnAllowOverwrite = CAST(varPropertyValue AS BIT)
-FROM tblApiSchemaTransformProperty
-WHERE 
-guiApiUniqueId = @guiApiUniqueId
-AND
-strPropertyName = 'Overwrite'
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') 
+	, strValue = vts.strCustomerLocation
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') + ' "' + vts.strCustomerLocation + '" does not exist in the buyback vendor setup.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+LEFT JOIN tblEMEntityLocation l ON l.intEntityId = v.intEntityId
+	AND l.strLocationName = vts.strCustomerLocation
+LEFT JOIN tblBBCustomerLocationXref xc ON xc.intVendorSetupId = e.intVendorSetupId
+	AND xc.intEntityLocationId = l.intEntityLocationId
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND xc.intEntityLocationId IS NULL
+	AND NULLIF(vts.strCustomerLocation, '') IS NOT NULL
 
---Filter Buyback Program imported
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Customer Location') 
+	, strValue = vts.strVendorCustomerLocation
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Customer Location') + ' "' + vts.strVendorCustomerLocation + '" does not exist in the buyback vendor setup.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 xxc.strVendorCustomerLocation, xxc.intEntityLocationId
+	FROM tblBBCustomerLocationXref xxc 
+	WHERE xxc.intVendorSetupId = e.intVendorSetupId
+	AND xxc.strVendorCustomerLocation = vts.strVendorCustomerLocation
+) xc
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND xc.intEntityLocationId IS NULL
+	AND NULLIF(vts.strCustomerLocation, '') IS NULL
+	AND NULLIF(vts.strVendorCustomerLocation, '') IS NOT NULL
 
-DECLARE @tblFilteredBuybackProgram TABLE(
-	intKey INT NOT NULL,
-    intRowNumber INT NULL,
-	strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
-	strProgramName NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
-	strVendorProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCharge NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
-	strCustomerLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorCustomerLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strItemName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	dtmBeginDate DATETIME NOT NULL,
-	dtmEndDate DATETIME NULL,
-	dblRatePerUnit NUMERIC(38, 20) NOT NULL
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM') 
+	, strValue = vts.strUnitMeasure
+	, strLogLevel = 'Warning'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM') + ' "' + vts.strUnitMeasure + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND u.intUnitMeasureId IS NULL
+	AND NULLIF(vts.strUnitMeasure, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item No') 
+	, strValue = vts.strItemNo
+	, strLogLevel = 'Warning'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item No') + ' "' + vts.strItemNo + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+LEFT JOIN tblICItem i ON i.strItemNo = vts.strItemNo
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND i.intItemId IS NULL
+	AND NULLIF(vts.strItemNo, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item Name')
+	, strValue = vts.strItemName
+	, strLogLevel = 'Warning'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item Name') + ' "' + vts.strItemName + '" does not exist.'
+	, strAction = 'Skipped'
+FROM tblApiSchemaTransformBuybackProgram vts
+LEFT JOIN tblICItem i ON i.strDescription = vts.strItemName
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND i.intItemId IS NULL
+	AND NULLIF(vts.strItemName, '') IS NOT NULL
+	AND NULLIF(vts.strItemNo, '') IS NULL
+
+DECLARE @UniqueVendors TABLE (
+	  intEntityId INT
+	, strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, intVendorSetupId INT
+	, strProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, guiApiUniqueId UNIQUEIDENTIFIER
+	, intRowNumber INT
 )
-INSERT INTO @tblFilteredBuybackProgram
-(
-	intKey,
-    intRowNumber,
-	strVendor,
-	strProgramName,
-	strVendorProgram,
-	strDescription,
-	strCharge,
-	strCustomerLocation,
-	strVendorCustomerLocation,
-	strItemNo,
-	strVendorItemNo,
-	strItemName,
-	strUnitMeasure,
-	strVendorUnitMeasure,
-	dtmBeginDate,
-	dtmEndDate,
-	dblRatePerUnit
+
+INSERT INTO @UniqueVendors
+SELECT v.intEntityId, vts.strVendor, vs.intVendorSetupId, vts.strProgramName, @guiApiUniqueId, MAX(vts.intRowNumber)
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND v.ysnPymtCtrlActive = 1
+GROUP BY v.intEntityId, vts.strVendor, vs.intVendorSetupId, vts.strProgramName
+	
+INSERT INTO tblBBProgram (
+	  intVendorSetupId
+	, strProgramName
+	, strProgramDescription
+	, strVendorProgramId
+	, intConcurrencyId
+	, guiApiUniqueId
+	, intRowNumber
 )
 SELECT 
-	intKey,
-    intRowNumber,
-	strVendor,
-	strProgramName,
-	strVendorProgram,
-	strDescription,
-	strCharge,
-	strCustomerLocation,
-	strVendorCustomerLocation,
-	strItemNo,
-	strVendorItemNo,
-	strItemName,
-	strUnitMeasure,
-	strVendorUnitMeasure,
-	dtmBeginDate,
-	dtmEndDate,
-	dblRatePerUnit
-FROM
-tblApiSchemaTransformBuybackProgram
-WHERE guiApiUniqueId = @guiApiUniqueId;
-
--- Error Types
--- Buyback Program Logs
--- 1 - Invalid Vendor
--- Buyback Rate Logs
--- 2 - Duplicate imported buyback program rate
--- 3 - Buyback program rate already exist and overwrite is not enabled
--- 4 - Invalid Customer Location
--- 5 - Invalid Customer Location Xref
--- 6 - Invalid Item
--- 7 - Invalid Item Xref
--- 8 - Invalid Unit of Measure
--- 9 - Invalid Unit of Measure Xref
--- 10 - Location Required
--- 11 - Item Required
--- 12 - UOM Required
-
-DECLARE @tblLogBuybackProgram TABLE(
-	strFieldValue NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-	intRowNumber INT NULL,
-	intLogType INT NULL
-)
-
-INSERT INTO @tblLogBuybackProgram
-(
-	strFieldValue,
-	strMessage,
-	intRowNumber,
-	intLogType
-)
-------------------------- Buyback Program Logs -------------------------
-SELECT -- Invalid Vendor
-	FilteredBuybackProgram.strVendor,
-	'Vendor: ' + FilteredBuybackProgram.strVendor + ' does not exist.',
-	FilteredBuybackProgram.intRowNumber,
-	1
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-(
-	tblEMEntity Vendor
-	INNER JOIN
-	(
-		tblAPVendor VendorRecord
-		INNER JOIN
-			tblVRVendorSetup VendorSetup
-			ON
-				VendorRecord.intEntityId = VendorSetup.intEntityId
+	  v.intVendorSetupId
+	, vts.strProgramName
+	, vts.strDescription
+	, vts.strVendorProgram
+	, 1
+	, @guiApiUniqueId
+	, vts.intRowNumber
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN @UniqueVendors v ON v.intRowNumber = vts.intRowNumber
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblBBProgram xp
+		JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+		WHERE xp.intVendorSetupId = v.intVendorSetupId
+			AND ((xp.strProgramName = vts.strProgramName) OR (xp.strVendorProgramId = vts.strVendorProgram AND NULLIF(xp.strVendorProgramId, '') IS NOT NULL AND NULLIF(vts.strVendorProgram, '') IS NOT NULL))
+			AND xvs.intEntityId = v.intEntityId
 	)
-		ON
-			Vendor.intEntityId = VendorRecord.intEntityId
-			AND
-			VendorRecord.ysnPymtCtrlActive = 1
 
-)
-	ON
-		Vendor.strName = FilteredBuybackProgram.strVendor
-WHERE
-Vendor.intEntityId IS NULL
-UNION
--------------------------- Buyback Rate Logs --------------------------
-SELECT -- Duplicate imported buyback program rate
-	DuplicateBuybackProgram.strVendor,
-	'Duplicate imported buyback referenced customer location and UOM of item: ' + DuplicateBuybackProgram.strItemNo + ' on vendor: ' + DuplicateBuybackProgram.strVendor + ' and charges: ' + DuplicateBuybackProgram.strCharge + '.',
-	DuplicateBuybackProgram.intRowNumber,
-	2
-FROM
-(
-	SELECT 
-		strItemNo = ISNULL(MIN(FilteredItem.strItemNo), MIN(FilteredBuybackProgram.strItemNo)),
-		strVendorItemNo = MIN(FilteredBuybackProgram.strVendorItemNo),
-		strVendor = MIN(FilteredBuybackProgram.strVendor),
-		strCharge = MIN(FilteredBuybackProgram.strCharge),
-		FilteredBuybackProgram.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY 
-						MIN(FilteredBuybackProgram.strVendor), 
-						MIN(FilteredBuybackProgram.strCharge),
-						ISNULL(MIN(FilteredLocation.strLocationName), MIN(FilteredBuybackProgram.strCustomerLocation)),
-						ISNULL(MIN(FilteredItem.strItemNo), MIN(FilteredBuybackProgram.strItemNo)),
-						ISNULL(MIN(FilteredUnitMeasure.strUnitMeasure), MIN(FilteredBuybackProgram.strUnitMeasure)) ORDER BY FilteredBuybackProgram.intRowNumber)
-		
-	FROM 
-		@tblFilteredBuybackProgram FilteredBuybackProgram
-	LEFT JOIN
-	(
-		tblEMEntity Vendor
-		INNER JOIN
-		(
-			tblAPVendor VendorRecord
-			INNER JOIN
-				tblVRVendorSetup VendorSetup
-				ON
-					VendorRecord.intEntityId = VendorSetup.intEntityId
-		)
-			ON
-				Vendor.intEntityId = VendorRecord.intEntityId
-				AND
-				VendorRecord.ysnPymtCtrlActive = 1
+UPDATE xp
+SET   xp.strProgramName = vts.strProgramName
+	, xp.guiApiUniqueId = @guiApiUniqueId
+	, xp.strProgramDescription = vts.strDescription
+	, xp.intConcurrencyId = xp.intConcurrencyId + 1
+FROM tblBBProgram xp
+JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+JOIN vyuAPVendor v ON v.intEntityId = xvs.intEntityId
+JOIN tblApiSchemaTransformBuybackProgram vts ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+JOIN @UniqueVendors uv ON uv.intEntityId = v.intEntityId
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND ((NULLIF(vts.strVendorProgram, '') IS NOT NULL AND vts.strVendorProgram = xp.strVendorProgramId)
+	OR (NULLIF(vts.strVendorProgram, '') IS NULL AND vts.strProgramName = xp.strProgramName))
+	AND NULLIF(xp.strProgramId, '') IS NOT NULL
 
-	)
-		ON
-			Vendor.strName = FilteredBuybackProgram.strVendor
-	LEFT JOIN
-		tblBBCustomerLocationXref FilteredLocationXref
-		ON
-			FilteredLocationXref.intVendorSetupId = VendorSetup.intVendorSetupId
-			AND
-			FilteredLocationXref.strVendorCustomerLocation = FilteredBuybackProgram.strVendorCustomerLocation
-	LEFT JOIN
-		tblEMEntityLocation FilteredLocation
-		ON
-			FilteredLocationXref.intEntityLocationId = FilteredLocation.intEntityLocationId
-	LEFT JOIN 
-		tblICItemVendorXref FilteredItemXref
-		ON
-			FilteredItemXref.intVendorSetupId = VendorSetup.intVendorSetupId
-			AND
-			FilteredItemXref.strVendorProduct = FilteredBuybackProgram.strVendorItemNo
-	LEFT JOIN
-		tblICItem FilteredItem
-		ON
-			FilteredItemXref.intItemId = FilteredItem.intItemId
-	LEFT JOIN
-		tblVRUOMXref FilteredUnitMeasureXref
-		ON
-			FilteredUnitMeasureXref.intVendorSetupId = VendorSetup.intVendorSetupId
-			AND
-			FilteredUnitMeasureXref.strVendorUOM = FilteredBuybackProgram.strVendorUnitMeasure
-	LEFT JOIN
-		tblICUnitMeasure FilteredUnitMeasure
-		ON
-			FilteredUnitMeasureXref.intUnitMeasureId = FilteredUnitMeasure.intUnitMeasureId
-	INNER JOIN
-	(
-		@tblFilteredBuybackProgram ComparedBuybackProgram
-		LEFT JOIN
-		(
-			tblEMEntity ComparedVendor
-			INNER JOIN
-			(
-				tblAPVendor ComparedVendorRecord
-				INNER JOIN
-					tblVRVendorSetup ComparedVendorSetup
-					ON
-						ComparedVendorRecord.intEntityId = ComparedVendorSetup.intEntityId
-			)
-				ON
-					ComparedVendor.intEntityId = ComparedVendorRecord.intEntityId
-					AND
-					ComparedVendorRecord.ysnPymtCtrlActive = 1
-
-		)
-			ON
-				ComparedVendor.strName = ComparedBuybackProgram.strVendor
-		LEFT JOIN
-			tblBBCustomerLocationXref ComparedLocationXref
-			ON
-				ComparedLocationXref.intVendorSetupId = ComparedVendorSetup.intVendorSetupId
-				AND
-				ComparedLocationXref.strVendorCustomerLocation = ComparedBuybackProgram.strVendorCustomerLocation
-		LEFT JOIN
-			tblEMEntityLocation ComparedLocation
-			ON
-				ComparedLocationXref.intEntityLocationId = ComparedLocation.intEntityLocationId
-		LEFT JOIN 
-			tblICItemVendorXref ComparedItemXref
-			ON
-				ComparedItemXref.intVendorSetupId = ComparedVendorSetup.intVendorSetupId
-				AND
-				ComparedItemXref.strVendorProduct = ComparedBuybackProgram.strVendorItemNo
-		LEFT JOIN
-			tblICItem ComparedItem
-			ON
-				ComparedItemXref.intItemId = ComparedItem.intItemId	
-		LEFT JOIN
-			tblVRUOMXref ComparedUnitMeasureXref
-			ON
-				ComparedUnitMeasureXref.intVendorSetupId = ComparedVendorSetup.intVendorSetupId
-				AND
-				ComparedUnitMeasureXref.strVendorUOM = ComparedBuybackProgram.strVendorUnitMeasure
-		LEFT JOIN
-			tblICUnitMeasure ComparedUnitMeasure
-			ON
-				ComparedUnitMeasureXref.intUnitMeasureId = ComparedUnitMeasure.intUnitMeasureId		
-	)
-		ON
-			FilteredBuybackProgram.strVendor = ComparedBuybackProgram.strVendor
-			AND
-			ISNULL(FilteredLocation.strLocationName, FilteredBuybackProgram.strCustomerLocation) = ISNULL(ComparedLocation.strLocationName, ComparedBuybackProgram.strCustomerLocation)
-			AND
-			ISNULL(FilteredItem.strItemNo, FilteredBuybackProgram.strItemNo) = ISNULL(ComparedItem.strItemNo, ComparedBuybackProgram.strItemNo)
-			AND
-			ISNULL(FilteredUnitMeasure.strUnitMeasure, FilteredBuybackProgram.strUnitMeasure) = ISNULL(ComparedUnitMeasure.strUnitMeasure, ComparedBuybackProgram.strUnitMeasure)
-			AND
-			FilteredBuybackProgram.intRowNumber <> ComparedBuybackProgram.intRowNumber
-	GROUP BY FilteredBuybackProgram.intRowNumber
-) AS DuplicateBuybackProgram
-WHERE DuplicateBuybackProgram.RowNumber > 1
-UNION
-SELECT -- Buyback program rate already exist and overwrite is not enabled
-	FilteredBuybackProgram.strVendor,
-	'Imported buyback referenced customer location and UOM of item: ' + ISNULL(VendorItem.strItemNo, FilteredBuybackProgram.strItemNo) + ' on vendor: ' + FilteredBuybackProgram.strVendor + ' and charges: ' + FilteredBuybackProgram.strCharge + '.',
-	FilteredBuybackProgram.intRowNumber,
-	3
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-INNER JOIN
-(
-	tblEMEntity Vendor
-	INNER JOIN
-	(
-		tblAPVendor VendorRecord
-		INNER JOIN
-			tblVRVendorSetup VendorSetup
-			ON
-				VendorRecord.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.intEntityId = VendorRecord.intEntityId
-			AND
-			VendorRecord.ysnPymtCtrlActive = 1
-
-)
-	ON
-		Vendor.strName = FilteredBuybackProgram.strVendor
-LEFT JOIN 
-	tblBBCustomerLocationXref CustomerLocationXref
-	ON
-		FilteredBuybackProgram.strVendorCustomerLocation IS NOT NULL
-		AND
-		CustomerLocationXref.strVendorCustomerLocation = FilteredBuybackProgram.strVendorCustomerLocation
-LEFT JOIN
-	tblEMEntityLocation VendorCustomerLocation
-	ON
-		VendorCustomerLocation.intEntityLocationId = CustomerLocationXref.intEntityLocationId
-LEFT JOIN
-	tblEMEntityLocation CustomerLocation
-	ON
-		CustomerLocation.strLocationName = FilteredBuybackProgram.strCustomerLocation
-LEFT JOIN
-	tblICItemVendorXref ItemXref
-	ON
-		FilteredBuybackProgram.strVendorItemNo IS NOT NULL
-		AND
-		ItemXref.strVendorProduct = FilteredBuybackProgram.strVendorItemNo
-LEFT JOIN 
-	tblICItem VendorItem
-	ON
-		VendorItem.intItemId = ItemXref.intItemId
-LEFT JOIN
-	tblICItem Item
-	ON
-		Item.strItemNo = FilteredBuybackProgram.strItemNo
-LEFT JOIN
-	tblVRUOMXref UOMXref
-	ON
-		FilteredBuybackProgram.strVendorUnitMeasure IS NOT NULL
-		AND
-		UOMXref.strVendorUOM = FilteredBuybackProgram.strVendorUnitMeasure
-LEFT JOIN
-	tblICUnitMeasure VendorUOM
-	ON
-		VendorUOM.intUnitMeasureId = UOMXref.intUnitMeasureId
-LEFT JOIN
-	tblICUnitMeasure UOM
-	ON
-		UOM.strUnitMeasure = FilteredBuybackProgram.strUnitMeasure
-CROSS APPLY
-(
-	SELECT TOP 1 * FROM tblBBProgram WHERE intVendorSetupId = VendorSetup.intVendorSetupId ORDER BY intProgramId DESC
-) Program
-CROSS APPLY
-(
-	SELECT TOP 1 * FROM tblBBProgramCharge WHERE intProgramId = Program.intProgramId AND strCharge = FilteredBuybackProgram.strCharge ORDER BY intProgramChargeId DESC
-) Charge
-INNER JOIN
-	tblBBRate Rate
-	ON
-		Rate.intProgramChargeId = Charge.intProgramChargeId
-		AND
-		Rate.intItemId = ISNULL(VendorItem.intItemId, Item.intItemId)
-		AND
-		Rate.intCustomerLocationId = ISNULL(VendorCustomerLocation.intEntityLocationId, CustomerLocation.intEntityLocationId)
-		AND
-		Rate.intUnitMeasureId = ISNULL(VendorUOM.intUnitMeasureId, UOM.intUnitMeasureId)
-WHERE
-@ysnAllowOverwrite = 0
-UNION
-SELECT -- Invalid Customer Location
-	FilteredBuybackProgram.strCustomerLocation,
-	'Customer location: ' + FilteredBuybackProgram.strCustomerLocation + ' does not exist.',
-	FilteredBuybackProgram.intRowNumber,
-	4
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-	vyuARCustomer Customer
-	ON
-		Customer.strName = FilteredBuybackProgram.strVendor
-LEFT JOIN
-	tblEMEntityLocation EntityLocation 
-	ON
-		Customer.intEntityId = EntityLocation.intEntityId
-		AND
-		FilteredBuybackProgram.strCustomerLocation = EntityLocation.strLocationName
-WHERE
-EntityLocation.intEntityLocationId IS NULL
-AND
-FilteredBuybackProgram.strCustomerLocation IS NOT NULL
-UNION
-SELECT -- Invalid Customer Location Xref
-	FilteredBuybackProgram.strVendorCustomerLocation,
-	'Buyback customer location: ' + FilteredBuybackProgram.strVendorCustomerLocation + ' cross reference does not exist.',
-	FilteredBuybackProgram.intRowNumber,
-	5
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-(
-	tblEMEntity Vendor
-	INNER JOIN
-	(
-		tblAPVendor VendorRecord
-		INNER JOIN
-			tblVRVendorSetup VendorSetup
-			ON
-				VendorRecord.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.intEntityId = VendorRecord.intEntityId
-			AND
-			VendorRecord.ysnPymtCtrlActive = 1
-
-)
-	ON
-		Vendor.strName = FilteredBuybackProgram.strVendor
-LEFT JOIN 
-	tblBBCustomerLocationXref CustomerLocationXref
-	ON
-		VendorSetup.intVendorSetupId = CustomerLocationXref.intVendorSetupId
-		AND
-		FilteredBuybackProgram.strVendorCustomerLocation = CustomerLocationXref.strVendorCustomerLocation
-WHERE
-CustomerLocationXref.intCustomerLocationXrefId IS NULL
-AND
-FilteredBuybackProgram.strVendorItemNo IS NOT NULL
-UNION
-SELECT -- Invalid Item
-	FilteredBuybackProgram.strItemNo,
-	'Buyback rate item: ' + FilteredBuybackProgram.strItemNo + ' does not exist.', 
-	FilteredBuybackProgram.intRowNumber,
-	6
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-	tblICItem Item
-	ON
-		FilteredBuybackProgram.strItemNo = Item.strItemNo
-WHERE
-Item.intItemId IS NULL
-AND
-FilteredBuybackProgram.strItemNo IS NOT NULL
-UNION
-SELECT -- Invalid Item No Xref
-	FilteredBuybackProgram.strVendorItemNo,
-	'Buyback vendor item no: ' + FilteredBuybackProgram.strVendorItemNo + ' cross reference does not exist.', 
-	FilteredBuybackProgram.intRowNumber,
-	7
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-(
-	tblEMEntity Vendor
-	INNER JOIN
-	(
-		tblAPVendor VendorRecord
-		INNER JOIN
-			tblVRVendorSetup VendorSetup
-			ON
-				VendorRecord.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.intEntityId = VendorRecord.intEntityId
-			AND
-			VendorRecord.ysnPymtCtrlActive = 1
-
-)
-	ON
-		Vendor.strName = FilteredBuybackProgram.strVendor
-LEFT JOIN 
-	tblICItemVendorXref ItemXref
-	ON
-		VendorSetup.intVendorSetupId = ItemXref.intVendorSetupId
-		AND
-		FilteredBuybackProgram.strVendorItemNo = ItemXref.strVendorProduct
-WHERE
-ItemXref.intItemVendorXrefId IS NULL
-AND
-FilteredBuybackProgram.strVendorItemNo IS NOT NULL
-UNION
-SELECT -- Invalid Unit of Measure
-	FilteredBuybackProgram.strUnitMeasure,
-	'Buyback rate unit of measure: ' + FilteredBuybackProgram.strUnitMeasure + ' does not exist.', 
-	FilteredBuybackProgram.intRowNumber,
-	8
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-	tblICUnitMeasure UnitMeasure
-	ON
-		FilteredBuybackProgram.strUnitMeasure = UnitMeasure.strUnitMeasure
-WHERE
-UnitMeasure.intUnitMeasureId IS NULL
-AND
-FilteredBuybackProgram.strUnitMeasure IS NOT NULL
-UNION
-SELECT -- Invalid Unit of Measure Xref
-	FilteredBuybackProgram.strVendorUnitMeasure,
-	'Buyback vendor unit of measure: ' + FilteredBuybackProgram.strVendorUnitMeasure + ' cross reference does not exist.', 
-	FilteredBuybackProgram.intRowNumber,
-	9
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-(
-	tblEMEntity Vendor
-	INNER JOIN
-	(
-		tblAPVendor VendorRecord
-		INNER JOIN
-			tblVRVendorSetup VendorSetup
-			ON
-				VendorRecord.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.intEntityId = VendorRecord.intEntityId
-			AND
-			VendorRecord.ysnPymtCtrlActive = 1
-
-)
-	ON
-		Vendor.strName = FilteredBuybackProgram.strVendor
-LEFT JOIN 
-	tblVRUOMXref UOMXref
-	ON
-		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
-		AND
-		FilteredBuybackProgram.strVendorUnitMeasure = UOMXref.strVendorUOM
-WHERE
-UOMXref.intUOMXrefId IS NULL
-AND
-FilteredBuybackProgram.strVendorUnitMeasure IS NOT NULL
-UNION
-SELECT -- Location Required
-	FilteredBuybackProgram.strVendor,
-	'Customer Location is required if Vendor''s Customer Location is blank',
-	FilteredBuybackProgram.intRowNumber,
-	10
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-WHERE
-	ISNULL(FilteredBuybackProgram.strVendorCustomerLocation, FilteredBuybackProgram.strCustomerLocation) IS NULL
-UNION
-SELECT -- Item Required
-	FilteredBuybackProgram.strVendor,
-	'Item Name is required if Vendor''s Item and Item No is blank',
-	FilteredBuybackProgram.intRowNumber,
-	11
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-WHERE
-	COALESCE(FilteredBuybackProgram.strVendorItemNo, FilteredBuybackProgram.strItemNo, FilteredBuybackProgram.strItemName) IS NULL
-UNION
-SELECT -- UOM Required
-	FilteredBuybackProgram.strVendor,
-	'UOM is required if Vendor''s UOM is blank',
-	FilteredBuybackProgram.intRowNumber,
-	12
-FROM
-	@tblFilteredBuybackProgram FilteredBuybackProgram
-WHERE
-	ISNULL(FilteredBuybackProgram.strVendorUnitMeasure, FilteredBuybackProgram.strUnitMeasure) IS NULL
---Validate Records
-
-INSERT INTO tblApiImportLogDetail 
-(
-	guiApiImportLogDetailId,
-	guiApiImportLogId,
-	strField,
-	strValue,
-	strLogLevel,
-	strStatus,
-	intRowNo,
-	strMessage
-)
-SELECT
-	guiApiImportLogDetailId = NEWID(),
-	guiApiImportLogId = @guiLogId,
-	strField = CASE
-		WHEN LogBuybackProgram.intLogType IN (1,2,3,10,11,12)
-		THEN 'Vendor'
-		WHEN LogBuybackProgram.intLogType = 4
-		THEN 'Customer Location'
-		WHEN LogBuybackProgram.intLogType = 5
-		THEN 'Vendor Customer Location'
-		WHEN LogBuybackProgram.intLogType = 6
-		THEN 'Item Name'
-		WHEN LogBuybackProgram.intLogType = 7
-		THEN 'Vendor''s Item'
-		WHEN LogBuybackProgram.intLogType = 8
-		THEN 'Unit of Measure'
-		ELSE 'Vendor''s UOM'
-	END,
-	strValue = LogBuybackProgram.strFieldValue,
-	strLogLevel =  CASE
-		WHEN LogBuybackProgram.intLogType IN(2,3)
-		THEN 'Warning'
-		ELSE 'Error'
-	END,
-	strStatus = CASE
-		WHEN LogBuybackProgram.intLogType IN(2,3)
-		THEN 'Skipped'
-		ELSE 'Failed'
-	END,
-	intRowNo = LogBuybackProgram.intRowNumber,
-	strMessage = LogBuybackProgram.strMessage
-FROM @tblLogBuybackProgram LogBuybackProgram
-WHERE LogBuybackProgram.intLogType BETWEEN 1 AND 12
-
---Buyback Program Transform logic
-
-;MERGE INTO tblBBProgram AS TARGET
-USING
-(
-	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intVendorSetupId = MAX(VendorSetup.intVendorSetupId),
-		strVendorProgramId = MAX(FilteredBuybackProgram.strVendorProgram),
-		strProgramName = MAX(FilteredBuybackProgram.strProgramName),
-		strProgramDescription = MAX(FilteredBuybackProgram.strDescription)
-	FROM @tblFilteredBuybackProgram FilteredBuybackProgram
-	LEFT JOIN
-		@tblLogBuybackProgram LogBuybackProgram
-		ON
-			FilteredBuybackProgram.intRowNumber = LogBuybackProgram.intRowNumber
-			AND
-			LogBuybackProgram.intLogType = 1
-	INNER JOIN
-	(
-		tblEMEntity Vendor
-		INNER JOIN
-		(
-			tblAPVendor VendorRecord
-			INNER JOIN
-				tblVRVendorSetup VendorSetup
-				ON
-					VendorRecord.intEntityId = VendorSetup.intEntityId
-		)
-			ON
-				Vendor.intEntityId = VendorRecord.intEntityId
-				AND
-				VendorRecord.ysnPymtCtrlActive = 1
-
-	)
-		ON
-			Vendor.strName = FilteredBuybackProgram.strVendor
-	WHERE
-	LogBuybackProgram.intLogType <> 1 OR LogBuybackProgram.intLogType IS NULL
-	GROUP BY
-	FilteredBuybackProgram.strVendor
-) AS SOURCE
-ON TARGET.intVendorSetupId = SOURCE.intVendorSetupId
-WHEN MATCHED AND @ysnAllowOverwrite = 1
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intVendorSetupId = SOURCE.intVendorSetupId,
-		strVendorProgramId = SOURCE.strVendorProgramId,
-		strProgramName = SOURCE.strProgramName,
-		strProgramDescription = SOURCE.strProgramDescription
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intVendorSetupId,
-		strVendorProgramId,
-		strProgramName,
-		strProgramDescription,
-		intConcurrencyId
-	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intVendorSetupId,
-		strVendorProgramId,
-		strProgramName,
-		strProgramDescription,
-		1
-	);
-
---Add Transaction No to inserted Buyback Program
+DECLARE @CreatedPrograms TABLE (intProgramId INT, intVendorSetupId INT, strProgramId NVARCHAR(20) COLLATE Latin1_General_CI_AS, strProgramName NVARCHAR(200) COLLATE Latin1_General_CI_AS, strVendorProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS)
 
 DECLARE @intProgramId INT
+DECLARE @intVendorSetupId INT
+DECLARE @strProgramId NVARCHAR(20)
+DECLARE @strProgramName NVARCHAR(200)
+DECLARE @strVendorProgram NVARCHAR(200)
 
-DECLARE program_cursor CURSOR FOR 
-SELECT
-	intProgramId
-FROM 
-	tblBBProgram 
-WHERE
-	strProgramId IS NULL
-	
-OPEN program_cursor  
-FETCH NEXT FROM program_cursor INTO 
-	@intProgramId
+DECLARE cur CURSOR LOCAL FAST_FORWARD
+FOR
+-- SELECT xp.intProgramId, xp.intVendorSetupId, xp.strProgramId, xp.strProgramName,  xp.strVendorProgramId
+-- FROM tblBBProgram xp
+-- JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+-- JOIN vyuAPVendor v ON v.intEntityId = xvs.intEntityId
+-- JOIN tblApiSchemaTransformBuybackProgram vts ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+-- WHERE xvs.guiApiUniqueId = @guiApiUniqueId
+-- 	AND NOT ((NULLIF(vts.strVendorProgram, '') IS NOT NULL AND vts.strVendorProgram = xp.strVendorProgramId)
+-- 	OR (NULLIF(vts.strVendorProgram, '') IS NULL AND vts.strProgramName = xp.strProgramName))
+-- GROUP BY xp.intProgramId, xp.intVendorSetupId, xp.strProgramId, xp.strProgramName,  xp.strVendorProgramId
+SELECT xp.intProgramId, xp.intVendorSetupId, xp.strProgramId, xp.strProgramName,  xp.strVendorProgramId
+FROM tblBBProgram xp
+WHERE xp.guiApiUniqueId = @guiApiUniqueId
 
-WHILE @@FETCH_STATUS = 0  
-BEGIN  
+OPEN cur
 
-	DECLARE @strProgramId NVARCHAR(MAX)
+FETCH NEXT FROM cur INTO @intProgramId, @intVendorSetupId, @strProgramId, @strProgramName, @strVendorProgram
 
-	EXEC dbo.uspSMGetStartingNumber 129, @strProgramId OUTPUT, NULL
+WHILE @@FETCH_STATUS = 0
+BEGIN
+	EXEC dbo.uspSMGetStartingNumber 129, @strProgramId OUTPUT
+	UPDATE tblBBProgram
+	SET strProgramId = @strProgramId
+	WHERE intProgramId = @intProgramId
+		AND intConcurrencyId = 1
 
-	UPDATE 
-		tblBBProgram 
-	SET 
-		strProgramId = @strProgramId
-	WHERE 
-		intProgramId = @intProgramId
-	
-	FETCH NEXT FROM program_cursor INTO 
-		@intProgramId
-END 
+	INSERT INTO @CreatedPrograms(intProgramId, intVendorSetupId, strProgramId, strProgramName, strVendorProgram)
+	VALUES (@intProgramId, @intVendorSetupId, @strProgramId, @strProgramName, @strVendorProgram)
 
-CLOSE program_cursor  
-DEALLOCATE program_cursor
+	FETCH NEXT FROM cur INTO @intProgramId, @intVendorSetupId, @strProgramId, @strProgramName, @strVendorProgram
+END
 
---Buyback Program Charge Transform Logic
+CLOSE cur
+DEALLOCATE cur
 
-INSERT INTO tblBBProgramCharge
-(
-	guiApiUniqueId,
-	intProgramId,
-	strCharge,
-	intConcurrencyId
-)
-SELECT
-	@guiApiUniqueId,
-	Program.intProgramId,
-	FilteredBuybackProgram.strCharge,
-	1
-FROM @tblFilteredBuybackProgram FilteredBuybackProgram
-LEFT JOIN
-	@tblLogBuybackProgram LogBuybackProgram
-	ON
-		FilteredBuybackProgram.intRowNumber = LogBuybackProgram.intRowNumber
-		AND
-		LogBuybackProgram.intLogType = 1
-INNER JOIN
-(
-	tblEMEntity Vendor
-	INNER JOIN
-	(
-		tblAPVendor VendorRecord
-		INNER JOIN
-			tblVRVendorSetup VendorSetup
-			ON
-				VendorRecord.intEntityId = VendorSetup.intEntityId
-	)
-		ON
-			Vendor.intEntityId = VendorRecord.intEntityId
-			AND
-			VendorRecord.ysnPymtCtrlActive = 1
-
-)
-	ON
-		Vendor.strName = FilteredBuybackProgram.strVendor
-OUTER APPLY
-(
-	SELECT TOP 1 intProgramId FROM tblBBProgram WHERE intVendorSetupId = VendorSetup.intVendorSetupId ORDER BY intProgramId DESC	
-) Program
-LEFT JOIN 
-	tblBBProgramCharge Charge
-	ON
-		FilteredBuybackProgram.strCharge = Charge.strCharge
-		AND
-		Program.intProgramId = Charge.intProgramId
-WHERE 
-	(
-		LogBuybackProgram.intLogType <> 1 
-		OR 
-		LogBuybackProgram.intLogType IS NULL
-	)
-	AND
-	Charge.intProgramChargeId IS NULL
-GROUP BY
-Program.intProgramId, FilteredBuybackProgram.strCharge
-
---Buyback Program Rate Transform logic
-
-;MERGE INTO tblBBRate AS TARGET
-USING
-(
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblBBProgram WHERE guiApiUniqueId = @guiApiUniqueId)
+BEGIN
+	INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 	SELECT
-		guiApiUniqueId = @guiApiUniqueId,
-		intItemId = ISNULL(ItemXref.intItemId, Item.intItemId),
-		intProgramChargeId = Charge.intProgramChargeId,
-		intCustomerLocationId = ISNULL(CustomerLocationXref.intEntityLocationId, CustomerLocation.intEntityLocationId),
-		intUnitMeasureId = ISNULL(UOMXref.intUnitMeasureId, UnitMeasure.intUnitMeasureId),
-		dtmBeginDate = FilteredBuybackProgram.dtmBeginDate,
-		dtmEndDate = FilteredBuybackProgram.dtmEndDate,
-		dblRatePerUnit = FilteredBuybackProgram.dblRatePerUnit
-	FROM @tblFilteredBuybackProgram FilteredBuybackProgram
-	LEFT JOIN
-		@tblLogBuybackProgram LogBuybackProgram
-		ON
-			FilteredBuybackProgram.intRowNumber = LogBuybackProgram.intRowNumber
-			AND
-			LogBuybackProgram.intLogType IN (1,2,3,4,5,6,7,8,9,10,11,12)
-	INNER JOIN
-	(
-		tblEMEntity Vendor
-		INNER JOIN
-		(
-			tblAPVendor VendorRecord
-			INNER JOIN
-				tblVRVendorSetup VendorSetup
-				ON
-					VendorRecord.intEntityId = VendorSetup.intEntityId
-		)
-			ON
-				Vendor.intEntityId = VendorRecord.intEntityId
-				AND
-				VendorRecord.ysnPymtCtrlActive = 1
+		NEWID()
+		, guiApiImportLogId = @guiLogId
+		, strField = 'Buyback Program'
+		, strValue = ''
+		, strLogLevel = 'Error'
+		, strStatus = 'Failed'
+		, intRowNo = 1
+		, strMessage = 'There''s nothing to import.'
+		, strAction = 'Skipped'
 
+	UPDATE log
+	SET log.intTotalRowsImported = ISNULL(rv.intCount, 0)
+	FROM tblApiImportLog log
+	OUTER APPLY (
+		SELECT COUNT(*) intCount
+		FROM tblBBRate
+		WHERE guiApiUniqueId = log.guiApiUniqueId
+	) rv
+	WHERE log.guiApiImportLogId = @guiLogId
+
+	RETURN
+END
+
+INSERT INTO tblBBProgramCharge (
+	  intProgramId
+	, strCharge
+	, guiApiUniqueId
+	, intRowNumber
+	, intConcurrencyId
+)
+SELECT DISTINCT
+	  p.intProgramId
+	, vts.strCharge
+	, @guiApiUniqueId
+	, MAX(vts.intRowNumber)
+	, 1
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
+	AND vts.strProgramName = p.strProgramName
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblBBProgramCharge xpc
+		WHERE xpc.intProgramId = p.intProgramId
+			AND xpc.strCharge = vts.strCharge
 	)
-		ON
-			Vendor.strName = FilteredBuybackProgram.strVendor
-	CROSS APPLY
-	(
-		SELECT TOP 1 intProgramId FROM tblBBProgram WHERE intVendorSetupId = VendorSetup.intVendorSetupId ORDER BY intProgramId DESC	
-	) Program
-	CROSS APPLY
-	(
-		SELECT TOP 1 intProgramChargeId FROM tblBBProgramCharge WHERE intProgramId = Program.intProgramId AND strCharge = FilteredBuybackProgram.strCharge
-	) Charge
-	LEFT JOIN
-		tblEMEntityLocation CustomerLocation
-		ON
-			FilteredBuybackProgram.strCustomerLocation = CustomerLocation.strLocationName
-	LEFT JOIN 
-		tblICItem Item
-		ON
-			ISNULL(FilteredBuybackProgram.strItemNo, FilteredBuybackProgram.strItemName) = Item.strItemNo
-	LEFT JOIN
-		tblICUnitMeasure UnitMeasure
-		ON
-			FilteredBuybackProgram.strUnitMeasure = UnitMeasure.strUnitMeasure
-	LEFT JOIN
-		tblBBCustomerLocationXref CustomerLocationXref
-		ON
-			FilteredBuybackProgram.strVendorCustomerLocation IS NOT NULL
-			AND
-			FilteredBuybackProgram.strVendorCustomerLocation = CustomerLocationXref.strVendorCustomerLocation
-	LEFT JOIN
-		tblICItemVendorXref ItemXref
-		ON
-			FilteredBuybackProgram.strVendorItemNo IS NOT NULL
-			AND
-			FilteredBuybackProgram.strVendorItemNo = ItemXref.strVendorProduct
-	LEFT JOIN
-		tblVRUOMXref UOMXref
-		ON
-			FilteredBuybackProgram.strVendorUnitMeasure IS NOT NULL
-			AND
-			FilteredBuybackProgram.strVendorUnitMeasure = UOMXref.strVendorUOM
-	WHERE 
-	LogBuybackProgram.intLogType NOT IN (1,2,3,4,5,6,7,8,9,10,11,12) OR LogBuybackProgram.intLogType IS NULL
-) AS SOURCE
-ON 
-TARGET.intProgramChargeId = SOURCE.intProgramChargeId
-AND
-TARGET.intCustomerLocationId = SOURCE.intCustomerLocationId
-AND
-TARGET.intItemId = SOURCE.intItemId
-AND
-TARGET.intUnitMeasureId = SOURCE.intUnitMeasureId
-WHEN MATCHED AND @ysnAllowOverwrite = 1 
-THEN
-	UPDATE SET
-		guiApiUniqueId = SOURCE.guiApiUniqueId,
-		intItemId = SOURCE.intItemId,
-		intProgramChargeId = SOURCE.intProgramChargeId,
-		intCustomerLocationId = SOURCE.intCustomerLocationId,
-		intUnitMeasureId = SOURCE.intUnitMeasureId,
-		dtmBeginDate = ISNULL(SOURCE.dtmBeginDate, TARGET.dtmBeginDate),
-		dtmEndDate = ISNULL(SOURCE.dtmEndDate, TARGET.dtmEndDate),
-		dblRatePerUnit = ISNULL(SOURCE.dblRatePerUnit, TARGET.dblRatePerUnit)
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		guiApiUniqueId,
-		intItemId,
-		intProgramChargeId,
-		intCustomerLocationId,
-		intUnitMeasureId,
-		dtmBeginDate,
-		dtmEndDate,
-		dblRatePerUnit,
-		intConcurrencyId
+GROUP BY v.intEntityId, vts.strCharge, p.intProgramId
+ORDER BY MAX(vts.intRowNumber)
+
+INSERT INTO tblBBProgramCharge (
+	  intProgramId
+	, strCharge
+	, guiApiUniqueId
+	, intRowNumber
+	, intConcurrencyId
+)
+SELECT DISTINCT
+	  p.intProgramId
+	, vts.strCharge
+	, @guiApiUniqueId
+	, MAX(vts.intRowNumber)
+	, 1
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN tblBBProgram p ON p.intVendorSetupId = vs.intVendorSetupId
+	AND vts.strProgramName = p.strProgramName
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblBBProgramCharge xpc
+		WHERE xpc.intProgramId = p.intProgramId
+			AND xpc.strCharge = vts.strCharge
 	)
-	VALUES
-	(
-		guiApiUniqueId,
-		intItemId,
-		intProgramChargeId,
-		intCustomerLocationId,
-		intUnitMeasureId,
-		dtmBeginDate,
-		dtmEndDate,
-		dblRatePerUnit,
-		1
-	);
+GROUP BY v.intEntityId, vts.strCharge, p.intProgramId
+ORDER BY MAX(vts.intRowNumber)
+
+UPDATE pc
+SET pc.guiApiUniqueId = @guiApiUniqueId
+FROM tblBBProgramCharge pc
+JOIN tblBBProgram p ON p.intProgramId = pc.intProgramId
+JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = p.intVendorSetupId
+JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId
+JOIN tblApiSchemaTransformBuybackProgram bp ON bp.strCharge = pc.strCharge
+	AND bp.strVendor = v.strVendorId OR bp.strVendor = v.strName
+WHERE bp.guiApiUniqueId = @guiApiUniqueId
+
+DECLARE @CreatedProgramRates TABLE(
+	intProgramChargeId INT,
+	strCharge NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+	intVendorSetupId INT,
+	intEntityId INT,
+	intProgramId INT,
+	intEntityLocationId INT NULL,
+	intItemId INT NULL,
+	intUnitMeasureId INT NULL,
+	dtmBeginDate DATETIME NULL,
+	dtmEndDate DATETIME NULL,
+	dblRate NUMERIC(38, 20),
+	intRowNumber INT
+)
+
+INSERT INTO @CreatedProgramRates
+SELECT
+	  cp.intProgramChargeId
+	, vts.strCharge
+	, vr.intVendorSetupId
+	, v.intEntityId
+	, p.intProgramId
+	, COALESCE(cl.intEntityLocationId, vcl.intEntityLocationId) intEntityLocationId
+	, i.intItemId
+	, u.intUnitMeasureId
+	, vts.dtmBeginDate
+	, vts.dtmEndDate
+	, vts.dblRatePerUnit
+	, vts.intRowNumber
+FROM tblApiSchemaTransformBuybackProgram vts
+JOIN tblBBProgramCharge cp ON cp.strCharge = vts.strCharge
+	AND cp.guiApiUniqueId = @guiApiUniqueId
+JOIN tblBBProgram p ON p.intProgramId = cp.intProgramId
+	AND p.strProgramName = vts.strProgramName
+JOIN tblVRVendorSetup vr ON vr.intVendorSetupId = p.intVendorSetupId
+JOIN vyuAPVendor v ON v.intEntityId = vr.intEntityId
+OUTER APPLY (
+	SElECT TOP 1 c.intEntityLocationId
+	FROM tblBBCustomerLocationXref c
+	LEFT JOIN tblEMEntityLocation el ON el.intEntityLocationId = c.intEntityLocationId
+	WHERE c.intVendorSetupId = p.intVendorSetupId
+		AND el.strLocationName = vts.strCustomerLocation
+		AND vts.strCustomerLocation IS NOT NULL
+) cl
+OUTER APPLY (
+	SElECT TOP 1 c.intEntityLocationId
+	FROM tblBBCustomerLocationXref c
+	WHERE c.intVendorSetupId = p.intVendorSetupId
+		AND c.strVendorCustomerLocation = vts.strVendorCustomerLocation
+		AND vts.strVendorCustomerLocation IS NOT NULL
+) vcl
+LEFT JOIN tblICItem i ON (i.strItemNo = vts.strItemNo AND NULLIF(vts.strItemNo, '') IS NOT NULL)
+	OR (NULLIF(vts.strItemNo, '') IS NULL AND vts.strItemName = i.strDescription)
+LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') + ', ' +
+		dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item No') + ', and/or ' +
+		dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM')
+	, strValue = ''
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = vts.intRowNumber
+	, strMessage = 'A program rate must at least specify any of the following fields: ' + 
+		dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') + ' and ' +
+		dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Item No') + ' and ' +
+		dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'UOM') + '.' 
+	, strAction = 'Skipped'
+FROM @CreatedProgramRates vts
+WHERE vts.intEntityLocationId IS NULL AND vts.intItemId IS NULL AND vts.intUnitMeasureId IS NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Begin Date') + ' and/or ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'End Date')
+	, strValue = CONVERT(NVARCHAR(100), cpr.dtmBeginDate, 101) + ' - ' + CONVERT(NVARCHAR(100), cpr.dtmEndDate, 101)
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = cpr.intRowNumber
+	, strMessage = 'The date range from ' + CONVERT(NVARCHAR(100), cpr.dtmBeginDate, 101) + ' to ' + CONVERT(NVARCHAR(100), cpr.dtmEndDate, 101)
+		+ ' overlaps with existing rates for the customer location ' + el.strLocationName + ' of the vendor ' + v.strName + '.'
+	, strAction = 'Skipped'
+FROM @CreatedProgramRates cpr
+JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = cpr.intVendorSetupId
+JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId
+JOIN tblEMEntityLocation el ON el.intEntityLocationId = cpr.intEntityLocationId
+OUTER APPLY (
+	SELECT TOP 1 xr.dblRatePerUnit
+	FROM tblBBRate xr
+	JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
+	JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
+	JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+	JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
+	JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
+	WHERE xr.intCustomerLocationId = cpr.intEntityLocationId
+		AND xr.intCustomerLocationId = cpr.intEntityLocationId
+		AND ((xr.intUnitMeasureId = cpr.intUnitMeasureId AND xr.intUnitMeasureId IS NOT NULL AND xr.intItemId IS NULL)
+			OR (xr.intItemId = cpr.intItemId AND xr.intItemId IS NOT NULL))
+		AND (cpr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= cpr.dtmEndDate)
+		AND NOT (
+			ISNULL(cpr.intEntityLocationId, 0) = ISNULL(xr.intCustomerLocationId, 0)
+			AND ISNULL(cpr.intItemId, 0) = ISNULL(xr.intItemId, 0)
+			AND ISNULL(cpr.intUnitMeasureId, 0) = ISNULL(xr.intUnitMeasureId, 0)
+			AND cpr.intProgramChargeId = xr.intProgramChargeId
+			AND cpr.dtmBeginDate = xr.dtmBeginDate
+			AND cpr.dtmEndDate = xr.dtmEndDate
+		)
+) r
+WHERE r.dblRatePerUnit IS NOT NULL
+
+-- INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+-- SELECT
+-- 	  NEWID()
+-- 	, guiApiImportLogId = @guiLogId
+-- 	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Begin Date') + ' and/or ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'End Date')
+-- 	, strValue = CONVERT(NVARCHAR(100), cpr.dtmBeginDate, 101) + ' - ' + CONVERT(NVARCHAR(100), cpr.dtmEndDate, 101)
+-- 	, strLogLevel = 'Error'
+-- 	, strStatus = 'Failed'
+-- 	, intRowNo = cpr.intRowNumber
+-- 	, strMessage = 'The date range from ' + CONVERT(NVARCHAR(100), cpr.dtmBeginDate, 101) + ' to ' + CONVERT(NVARCHAR(100), cpr.dtmEndDate, 101)
+-- 		+ ' overlaps with existing UOM rates for the customer location ' + el.strLocationName + ' of the vendor ' + v.strName + '.'
+-- 	, strAction = 'Skipped'
+-- FROM @CreatedProgramRates cpr
+-- JOIN tblVRVendorSetup vs ON vs.intVendorSetupId = cpr.intVendorSetupId
+-- JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId
+-- JOIN tblEMEntityLocation el ON el.intEntityLocationId = cpr.intEntityLocationId
+-- CROSS APPLY (
+-- 	SELECT TOP 1 xr.dblRatePerUnit
+-- 	FROM tblBBRate xr
+-- 	JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
+-- 	JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
+-- 	JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+-- 	JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
+-- 	JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
+-- 	WHERE xr.intCustomerLocationId = cpr.intEntityLocationId
+-- 		AND xr.intUnitMeasureId = cpr.intUnitMeasureId
+-- 		AND cpr.intUnitMeasureId IS NOT NULL
+-- 		AND xr.dtmBeginDate <= cpr.dtmEndDate AND cpr.dtmBeginDate <= xr.dtmEndDate
+-- ) r
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+	  NEWID()
+	, guiApiImportLogId = @guiLogId
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Begin Date') + ' and/or ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'End Date')
+	, strValue = CONVERT(NVARCHAR(100), pr.dtmBeginDate, 101) + ' - ' + CONVERT(NVARCHAR(100), pr.dtmEndDate, 101)
+	, strLogLevel = 'Error'
+	, strStatus = 'Failed'
+	, intRowNo = pr.intRowNumber
+	, strMessage = 'The date range from ' + CONVERT(NVARCHAR(100), pr.dtmBeginDate, 101) + ' to ' + CONVERT(NVARCHAR(100), pr.dtmEndDate, 101)
+		+ ' overlaps with existing rates for the customer location ' + el.strLocationName + ' of the vendor ' + v.strName + ' at line #' + CAST(f.intRowNumber AS NVARCHAR(50)) + ' in this file.'
+	, strAction = 'Skipped'
+FROM @CreatedProgramRates pr
+JOIN vyuAPVendor v ON v.intEntityId = pr.intEntityId
+JOIN tblEMEntityLocation el ON el.intEntityLocationId = pr.intEntityLocationId
+	AND el.intEntityId = pr.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 xpr.intRowNumber
+	FROM @CreatedProgramRates xpr
+	WHERE xpr.intRowNumber < pr.intRowNumber
+		AND xpr.intEntityId = pr.intEntityId
+		AND xpr.intEntityLocationId = pr.intEntityLocationId
+		AND ((xpr.intUnitMeasureId = pr.intUnitMeasureId AND xpr.intUnitMeasureId IS NOT NULL AND xpr.intItemId IS NULL)
+			OR (xpr.intItemId = pr.intItemId AND xpr.intItemId IS NOT NULL))
+		AND (pr.dtmBeginDate <= xpr.dtmEndDate AND xpr.dtmBeginDate <= pr.dtmEndDate)
+) f
+WHERE NOT EXISTS (
+	SELECT TOP 1 1
+	FROM tblBBRate xr
+	JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
+	JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
+	JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+	JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
+	JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = xr.intCustomerLocationId
+	WHERE xr.intCustomerLocationId = pr.intEntityLocationId
+		AND ((xr.intUnitMeasureId = pr.intUnitMeasureId) OR (xr.intItemId = pr.intItemId))
+		AND pr.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= pr.dtmEndDate
+		AND xr.guiApiUniqueId = @guiApiUniqueId
+) AND f.intRowNumber IS NOT NULL
+
+DECLARE @CreatedProgramRatesOriginal TABLE(
+	intProgramChargeId INT,
+	strCharge NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+	intVendorSetupId INT,
+	intEntityId INT,
+	intProgramId INT,
+	intEntityLocationId INT NULL,
+	intItemId INT NULL,
+	intUnitMeasureId INT NULL,
+	dtmBeginDate DATETIME NULL,
+	dtmEndDate DATETIME NULL,
+	dblRate NUMERIC(38, 20),
+	intRowNumber INT
+)
+
+INSERT INTO @CreatedProgramRatesOriginal
+SELECT * FROM @CreatedProgramRates
+ORDER BY intRowNumber DESC
+
+DELETE pr
+FROM @CreatedProgramRates pr
+WHERE EXISTS (
+	SELECT *
+	FROM @CreatedProgramRatesOriginal xpr
+	WHERE xpr.intRowNumber < pr.intRowNumber
+		AND xpr.intEntityId = pr.intEntityId
+		AND NULLIF(xpr.intEntityLocationId, 0) = NULLIF(pr.intEntityLocationId, 0)
+		AND ((xpr.intUnitMeasureId = pr.intUnitMeasureId AND xpr.intUnitMeasureId IS NOT NULL AND xpr.intItemId IS NULL)
+			OR (xpr.intItemId = pr.intItemId AND xpr.intItemId IS NOT NULL))
+		AND pr.dtmBeginDate <= xpr.dtmEndDate AND xpr.dtmBeginDate <= pr.dtmEndDate
+)
+
+INSERT INTO tblBBRate (
+	  intProgramChargeId
+	, intCustomerLocationId
+	, intItemId
+	, intUnitMeasureId
+	, dtmBeginDate
+	, dtmEndDate
+	, dblRatePerUnit
+	, intConcurrencyId
+	, guiApiUniqueId
+	, intRowNumber
+)
+SELECT
+	  r.intProgramChargeId
+	, r.intEntityLocationId
+	, r.intItemId
+	, r.intUnitMeasureId
+	, r.dtmBeginDate
+	, r.dtmEndDate
+	, r.dblRate
+	, 1
+	, @guiApiUniqueId
+	, r.intRowNumber
+FROM @CreatedProgramRates r
+OUTER APPLY (
+	SELECT TOP 1 xr.*
+	FROM tblBBRate xr
+	JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = xr.intProgramChargeId
+	JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
+	JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+	JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
+	WHERE (xr.intCustomerLocationId = r.intEntityLocationId
+		AND ((xr.intItemId = r.intItemId AND r.intItemId IS NOT NULL)
+			OR (xr.intUnitMeasureId = r.intUnitMeasureId AND r.intUnitMeasureId IS NOT NULL AND r.intItemId IS NULL))
+		AND r.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= r.dtmEndDate
+		AND NOT (
+			xr.intCustomerLocationId = r.intEntityLocationId
+			AND ((xr.intUnitMeasureId = r.intUnitMeasureId) OR (xr.intItemId = r.intItemId))
+			AND r.dtmBeginDate <= xr.dtmEndDate AND xr.dtmBeginDate <= r.dtmEndDate
+		))
+		-- This line is to fix duplicate rate when location is null
+		OR (
+			ISNULL(xr.intCustomerLocationId, 0) = ISNULL(r.intEntityLocationId, 0)
+			AND ISNULL(xr.intItemId, 0) = ISNULL(r.intItemId, 0)
+			AND ISNULL(xr.intUnitMeasureId, 0) = ISNULL(r.intUnitMeasureId, 0)
+			AND xr.intProgramChargeId = r.intProgramChargeId
+			AND xr.dtmBeginDate = r.dtmBeginDate
+			AND xr.dtmEndDate = r.dtmEndDate
+		)
+) x
+WHERE NOT (r.intEntityLocationId IS NULL AND r.intItemId IS NULL AND r.intUnitMeasureId IS NULL)
+	AND x.intRateId IS NULL
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail xd
+		WHERE xd.guiApiImportLogId = @guiLogId
+			AND xd.intRowNo = r.intRowNumber
+			AND xd.strLogLevel = 'Error'
+			AND xd.strStatus = 'Failed'
+	)
+
+UPDATE r
+SET   r.guiApiUniqueId = @guiApiUniqueId
+	, r.dblRatePerUnit = cr.dblRate
+	, r.intRowNumber = cr.intRowNumber
+FROM tblBBRate r
+JOIN tblBBProgramCharge xpc ON xpc.intProgramChargeId = r.intProgramChargeId
+JOIN tblBBProgram xp ON xp.intProgramId = xpc.intProgramId
+JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+JOIN vyuAPVendor xv ON xv.intEntityId = xvs.intEntityId
+LEFT JOIN tblEMEntityLocation xel ON xel.intEntityLocationId = r.intCustomerLocationId
+JOIN @CreatedProgramRates cr ON cr.intEntityId = xv.intEntityId
+	AND cr.intProgramId = xp.intProgramId
+	AND ISNULL(cr.intEntityLocationId, 0) = ISNULL(r.intCustomerLocationId, 0)
+	AND ISNULL(cr.intItemId, 0) = ISNULL(r.intItemId, 0)
+	AND ISNULL(cr.intUnitMeasureId, 0) = ISNULL(r.intUnitMeasureId, 0)
+	AND cr.intProgramChargeId = r.intProgramChargeId
+	AND cr.dtmBeginDate = r.dtmBeginDate
+	AND cr.dtmEndDate = r.dtmEndDate
+	AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblApiImportLogDetail xd
+		WHERE xd.guiApiImportLogId = @guiLogId
+			AND xd.intRowNo = r.intRowNumber
+			AND xd.strLogLevel = 'Error'
+			AND xd.strStatus = 'Failed'
+	)
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Buyback Program'
+    , strValue = CAST(r.dblRatePerUnit AS NVARCHAR(200))
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = r.intRowNumber
+    , strMessage = 'The buyback program with rate ' + ISNULL(CAST(r.dblRatePerUnit AS NVARCHAR(200)), '') + ' was imported successfully.'
+    , strAction = 'Create'
+FROM tblBBRate r
+WHERE r.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Buyback Program'
+    , strValue = xp.strProgramName
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = MAX(vts.intRowNumber)
+    , strMessage = 'The buyback program was updated successfully.'
+    , strAction = 'Update'
+FROM tblBBProgram xp
+JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+JOIN vyuAPVendor v ON v.intEntityId = xvs.intEntityId
+JOIN tblApiSchemaTransformBuybackProgram vts ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+	AND ((NULLIF(vts.strVendorProgram, '') IS NOT NULL AND vts.strVendorProgram = xp.strVendorProgramId)
+	OR (NULLIF(vts.strVendorProgram, '') IS NULL AND vts.strProgramName = xp.strProgramName))
+GROUP BY xp.strProgramName
+
+UPDATE log
+SET log.intTotalRowsImported = ISNULL(rv.intCount, 0)
+FROM tblApiImportLog log
+OUTER APPLY (
+	SELECT COUNT(*) intCount
+	FROM tblBBRate
+	WHERE guiApiUniqueId = log.guiApiUniqueId
+) rv
+WHERE log.guiApiImportLogId = @guiLogId

@@ -348,10 +348,14 @@ SELECT Item.intItemId
 	 , ISNULL(ConfirmedQty.dblConfirmedQty, 0)			AS dblConfirmedQty
 	 , RequiredQty.dblRequiredQty						AS dblOrgRequiredQty
 	 , ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS,0)	AS dblReservedQtyInTBS
-	 , CAST(ISNULL(PhysicalQty.dblPhysicalQty, 0) / (Item.intLayerPerPallet * Item.intUnitPerLayer) AS NUMERIC(18, 2)) AS dblNoOfPallet
+	 , CAST(ISNULL(ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0 THEN 1 ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1) END, 0), 0.0), 0) / (Item.intLayerPerPallet * Item.intUnitPerLayer) AS NUMERIC(18, 2)) AS dblNoOfPallet
+	 ,MT.strDescription AS strProductType
+	,B.strBrandCode
 FROM @tblRequiredQty AS RequiredQty 
 JOIN tblICItem AS Item ON RequiredQty.intItemId = Item.intItemId
 LEFT JOIN @tblPhysicalQty AS PhysicalQty ON RequiredQty.intItemId = PhysicalQty.intItemId
 LEFT JOIN @tblReservedQty AS ReservedQty  ON RequiredQty.intItemId = ReservedQty.intItemId
 LEFT JOIN @tblConfirmedQty AS ConfirmedQty ON ConfirmedQty.intItemId = Item.intItemId
-LEFT JOIN @tblReservedQtyInTBS AS ReservedQtyInTBS on RequiredQty.intItemId=ReservedQtyInTBS.intItemId;
+LEFT JOIN @tblReservedQtyInTBS AS ReservedQtyInTBS on RequiredQty.intItemId=ReservedQtyInTBS.intItemId
+LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=Item.intProductTypeId
+LEFT JOIN tblICBrand B on B.intBrandId=Item.intBrandId;

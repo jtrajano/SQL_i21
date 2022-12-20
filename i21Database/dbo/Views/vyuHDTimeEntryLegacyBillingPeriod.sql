@@ -13,7 +13,7 @@ AS
 	UNION ALL
 
 	SELECT [intTimeEntryPeriodDetailId]		= 0
-		  ,[strFiscalYear]					= ''
+		  ,[strFiscalYear]					= '2022'
 		  ,[strBillingPeriodName]			= 'Legacy Week'
 		  ,[dtmBillingPeriodStart]			= NULL
 		  ,[dtmBillingPeriodEnd]			= NULL

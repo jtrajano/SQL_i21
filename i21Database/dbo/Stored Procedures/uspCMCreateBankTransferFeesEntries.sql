@@ -4,12 +4,11 @@ CREATE PROCEDURE uspCMCreateBankTransferFeesEntries
 @strDir NVARCHAR(5),
 @dtmDate DATETIME,
 @strBatchId NVARCHAR(40),
-
-@intDefaultCurrencyId INT = 3
+@intDefaultCurrencyId INT
 
 AS
 
-declare @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Detail table.     
+DECLARE @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Detail table.     
  ,@MODULE_NAME AS NVARCHAR(100)    = 'Cash Management' -- Module where this posting code belongs.    
  ,@TRANSACTION_FORM AS NVARCHAR(100)   = 'Bank Transfer'    
  ,@dblFees DECIMAL(18,6)

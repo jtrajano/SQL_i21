@@ -45,6 +45,10 @@ BEGIN TRY
 	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strB1GroupNumber
 	-- Currency
 	LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
+	-- Strategy
+	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL
+		AND STRATEGY.strSubBook = IMP.strStrategy
+		AND STRATEGY.intBookId = BOOK.intBookId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -52,12 +56,20 @@ BEGIN TRY
 						B1QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB1QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB1QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB1QtyUOM, '') = ''
+						)
 					THEN 'BUYER1 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B1PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB1PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB1Price, 0) <> 0
+						AND ISNULL(IMP.strB1PriceUOM, '') = ''
 						)
 					THEN 'BUYER1 PRICE UOM, '
 				ELSE ''
@@ -73,12 +85,20 @@ BEGIN TRY
 						B2QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB2QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB2QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB2QtyUOM, '') = ''
+						)
 					THEN 'BUYER2 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B2PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB2PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB2Price, 0) <> 0
+						AND ISNULL(IMP.strB2PriceUOM, '') = ''
 						)
 					THEN 'BUYER2 PRICE UOM, '
 				ELSE ''
@@ -94,12 +114,20 @@ BEGIN TRY
 						B3QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB3QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB3QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB3QtyUOM, '') = ''
+						)
 					THEN 'BUYER3 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B3PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB3PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB3Price, 0) <> 0
+						AND ISNULL(IMP.strB3PriceUOM, '') = ''
 						)
 					THEN 'BUYER3 PRICE UOM, '
 				ELSE ''
@@ -115,12 +143,20 @@ BEGIN TRY
 						B4QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB4QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB4QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB4QtyUOM, '') = ''
+						)
 					THEN 'BUYER4 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B4PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB4PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB4Price, 0) <> 0
+						AND ISNULL(IMP.strB4PriceUOM, '') = ''
 						)
 					THEN 'BUYER4 PRICE UOM, '
 				ELSE ''
@@ -136,12 +172,20 @@ BEGIN TRY
 						B5QUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB5QtyUOM, '') <> ''
 						)
+					OR (
+						ISNULL(IMP.dblB5QtyBought, 0) <> 0
+						AND ISNULL(IMP.strB5QtyUOM, '') = ''
+						)
 					THEN 'BUYER5 QTY UOM, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						B5PUOM.intUnitMeasureId IS NULL
 						AND ISNULL(IMP.strB5PriceUOM, '') <> ''
+						)
+					OR (
+						ISNULL(IMP.dblB5Price, 0) <> 0
+						AND ISNULL(IMP.strB5PriceUOM, '') = ''
 						)
 					THEN 'BUYER5 PRICE UOM, '
 				ELSE ''
@@ -150,14 +194,14 @@ BEGIN TRY
 						BOOK.intBookId IS NULL
 						AND ISNULL(IMP.strB1GroupNumber, '') <> ''
 						)
-					THEN 'BUYER1 COMPANY CODE, '
+					THEN 'BUYER1 GROUP NUMBER, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						COMPANY_CODE.intPurchasingGroupId IS NULL
 						AND ISNULL(IMP.strB1CompanyCode, '') <> ''
 						)
-					THEN 'BUYER1 GROUP NUMBER, '
+					THEN 'BUYER1 COMPANY CODE, '
 				ELSE ''
 				END + CASE 
 				WHEN (
@@ -166,67 +210,114 @@ BEGIN TRY
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
+				END + CASE 
+				WHEN (
+						STRATEGY.intSubBookId IS NULL
+						AND ISNULL(IMP.strStrategy, '') <> ''
+						)
+					THEN 'STRATEGY, '
+				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
 		AND (
-			(
+			((
 				B1QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB1QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB1QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB1QtyUOM, '') = ''
+				))
+			OR ((
 				B1PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB1PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB1Price, 0) <> 0
+					AND ISNULL(IMP.strB1PriceUOM, '') = ''
+				))
 			OR (
 				B2CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB2Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B2QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB2QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB2QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB2QtyUOM, '') = ''
+				))
+			OR ((
 				B2PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB2PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB2Price, 0) <> 0
+					AND ISNULL(IMP.strB2PriceUOM, '') = ''
+				))
 			OR (
 				B3CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB3Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B3QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB3QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB3QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB3QtyUOM, '') = ''
+				))
+			OR ((
 				B3PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB3PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB3Price, 0) <> 0
+					AND ISNULL(IMP.strB3PriceUOM, '') = ''
+				))
 			OR (
 				B4CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB4Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B4QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB4QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB4QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB4QtyUOM, '') = ''
+				))
+			OR ((
 				B4PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB4PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB4Price, 0) <> 0
+					AND ISNULL(IMP.strB4PriceUOM, '') = ''
+				))
 			OR (
 				B5CODE.intEntityId IS NULL
 				AND ISNULL(IMP.strB5Code, '') <> ''
 				)
-			OR (
+			OR ((
 				B5QUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB5QtyUOM, '') <> ''
 				)
-			OR (
+				OR (
+				ISNULL(IMP.dblB5QtyBought, 0) <> 0
+				AND ISNULL(IMP.strB5QtyUOM, '') = ''
+				))
+			OR ((
 				B5PUOM.intUnitMeasureId IS NULL
 				AND ISNULL(IMP.strB5PriceUOM, '') <> ''
 				)
+				OR (
+					ISNULL(IMP.dblB5Price, 0) <> 0
+					AND ISNULL(IMP.strB5PriceUOM, '') = ''
+				))
 			OR (
 				COMPANY_CODE.intPurchasingGroupId IS NULL
 				AND ISNULL(IMP.strB1CompanyCode, '') <> ''
@@ -239,6 +330,10 @@ BEGIN TRY
 				CURRENCY.intCurrencyID IS NULL
 				AND ISNULL(IMP.strCurrency, '') <> ''
 				)
+			OR (
+				STRATEGY.intSubBookId IS NULL
+				AND ISNULL(IMP.strStrategy, '') <> ''
+				)
 			)
 
 	-- End Validation   
@@ -250,6 +345,9 @@ BEGIN TRY
 		,@strBook NVARCHAR(100)
 		,@intCurrencyId INT
 		,@strCurrency NVARCHAR(50)
+		,@ysnBought BIT
+		,@intSubBookId INT
+		,@strBuyingOrderNumber NVARCHAR(50)
 		-- B1
 		,@dblB1QtyBought NUMERIC(18, 6)
 		,@intB1QtyUOMId INT
@@ -294,6 +392,9 @@ BEGIN TRY
 		,strBook = BOOK.strBook
 		,intCurrencyId = CURRENCY.intCurrencyID
 		,strCurrency = CURRENCY.strCurrency
+		,ysnBought = IMP.ysnBought
+		,intSubBookId = STRATEGY.intSubBookId
+		,strBuyingOrderNumber = IMP.strBuyingOrderNumber
 		-- B1
 		,dblB1QtyBought = IMP.dblB1QtyBought
 		,intB1QtyUOMId = B1QUOM.intUnitMeasureId
@@ -366,6 +467,10 @@ BEGIN TRY
 		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strB1GroupNumber
 		-- Currency
 		LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
+		-- Strategy
+		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL
+			AND STRATEGY.strSubBook = IMP.strStrategy
+			AND STRATEGY.intBookId = BOOK.intBookId
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -387,6 +492,9 @@ BEGIN TRY
 		,@strBook
 		,@intCurrencyId
 		,@strCurrency
+		,@ysnBought
+		,@intSubBookId
+		,@strBuyingOrderNumber
 		-- B1
 		,@dblB1QtyBought
 		,@intB1QtyUOMId
@@ -424,6 +532,9 @@ BEGIN TRY
 			,intCurrencyId = @intCurrencyId
 			,intPurchaseGroupId = @intPurchasingGroupId
 			,intBookId = @intBookId
+			,ysnBought = @ysnBought
+			,intSubBookId = @intSubBookId
+			,strBuyingOrderNo = @strBuyingOrderNumber
 			-- Initial Buy
 			-- B1
 			,dblB1QtyBought = @dblB1QtyBought
@@ -563,6 +674,12 @@ BEGIN TRY
 			,strVessel
 			,intLocationId
 			,intMixingUnitLocationId
+			,intMarketZoneId
+			,dblTeaTastePinpoint
+			,dblTeaHuePinpoint
+			,dblTeaIntensityPinpoint
+			,dblTeaMouthFeelPinpoint
+			,dblTeaAppearancePinpoint
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -572,7 +689,7 @@ BEGIN TRY
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
-			,intStorageLocationId = S.intStorageLocationId
+			,intStorageLocationId = S.intDestinationStorageLocationId
 			,intStorageUnitId = NULL
 			,intBrokerWarehouseId = NULL
 			,intParentBatchId = NULL
@@ -588,11 +705,11 @@ BEGIN TRY
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
 			,dblBoughtPrice = NULL
 			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = IMP.strBuyingOrderNumber
+			,strBuyingOrderNumber = S.strBuyingOrderNo
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
-			,dtmProductionBatch = NULL
+			,dtmProductionBatch = S.dtmManufacturingDate
 			,dtmTeaAvailableFrom = NULL
 			,strDustContent = NULL
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
@@ -602,7 +719,7 @@ BEGIN TRY
 			,intFromPortId = NULL
 			,dblGrossWeight = S.dblGrossWeight
 			,dtmInitialBuy = NULL
-			,dblWeightPerUnit = NULL
+			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
@@ -616,7 +733,7 @@ BEGIN TRY
 			,intOriginalItemId = NULL
 			,dblPackagesPerPallet = NULL
 			,strPlant = NULL
-			,dblTotalQuantity = S.dblB1QtyBought 
+			,dblTotalQuantity = S.dblB1QtyBought
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
 			,dtmStock = NULL
@@ -634,7 +751,7 @@ BEGIN TRY
 			,strTeaColour = COLOUR.strDescription
 			,strTeaGardenChopInvoiceNumber = S.strChopNumber
 			,intGardenMarkId = S.intGardenMarkId
-			,strTeaGroup = NULL
+			,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
 			,dblTeaHue = CASE 
 				WHEN ISNULL(HUE.strPropertyValue, '') = ''
 					THEN NULL
@@ -663,7 +780,7 @@ BEGIN TRY
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture = NULL
 			,strPackageSize = NULL
-			,intPackageUOMId = NULL
+			,intPackageUOMId = S.intNetWtPerPackagesUOMId
 			,dblTareWeight = S.dblTareWeight
 			,strTaster = IMP.strTaster
 			,strFeedStock = NULL
@@ -680,17 +797,26 @@ BEGIN TRY
 			,strVoyage = NULL
 			,strVessel = NULL
 			,intLocationId = S.intCompanyLocationId
-			,intMixingUnitLocationId=MU.intCompanyLocationId 
+			,intMixingUnitLocationId = MU.intCompanyLocationId
+			,intMarketZoneId = S.intMarketZoneId
+			,dblTeaTastePinpoint = TASTE.dblPinpointValue
+			,dblTeaHuePinpoint = HUE.dblPinpointValue
+			,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
+			,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
+			,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
-		Left JOIN tblSMCompanyLocation MU on MU.strLocationName =B.strBook  
+		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
+		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Appearance'
@@ -699,6 +825,7 @@ BEGIN TRY
 		-- Hue
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Hue'
@@ -707,6 +834,7 @@ BEGIN TRY
 		-- Intensity
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Intensity'
@@ -715,6 +843,7 @@ BEGIN TRY
 		-- Taste
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Taste'
@@ -723,6 +852,7 @@ BEGIN TRY
 		-- Mouth Feel
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 				AND P.strPropertyName = 'Mouth Feel'
@@ -740,6 +870,10 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
 		-- Grade
 		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
+		-- Weight Item UOM
+		LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
+		-- Qty Item UOM
+		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
 			AND IsNULL(S.dblB1QtyBought, 0) > 0
@@ -761,7 +895,12 @@ BEGIN TRY
 			UPDATE B
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
-				,intSampleId=NULL
+				,intSampleId = NULL
+				,dblOriginalTeaTaste = dblTeaTaste
+				,dblOriginalTeaHue = dblTeaHue
+				,dblOriginalTeaIntensity = dblTeaIntensity
+				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+				,dblOriginalTeaAppearance = dblTeaAppearance
 			FROM @MFBatchTableType B
 			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
 			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
@@ -783,6 +922,9 @@ BEGIN TRY
 			,@strBook
 			,@intCurrencyId
 			,@strCurrency
+			,@ysnBought
+			,@intSubBookId
+			,@strBuyingOrderNumber
 			-- B1
 			,@dblB1QtyBought
 			,@intB1QtyUOMId

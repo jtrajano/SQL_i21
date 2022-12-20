@@ -83,6 +83,9 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItemSource.strFieldNo
 	, intItemId = ShipmentItem.intItemId
 	, ItemUOM.intItemUOMId
+	, ShipmentItem.dblBasis
+	, ShipmentItem.dblFutures
+	, ShipmentItem.strFuturesMonth
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId

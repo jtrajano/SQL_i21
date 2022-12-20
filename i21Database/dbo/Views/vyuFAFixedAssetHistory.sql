@@ -222,14 +222,24 @@ OUTER APPLY (
 	SELECT TOP 1 FAD.dblDepreciationToDate, FAD.intAssetDepreciationId, FAD.dblFunctionalDepreciationToDate, FAD.dtmDepreciationToDate
 	FROM tblFAFixedAssetDepreciation FAD
 	JOIN tblFABookDepreciation BD ON BD.intAssetId = FAD.intAssetId AND BD.intBookId = FAD.intBookId
-	WHERE FAD.intAssetId = G.intAssetId AND FAD.intBookId = 2 AND BD.intBookId = 2 AND FAD.strTransaction = 'Depreciation' AND BD.ysnFullyDepreciated = 1 AND FAD.intLedgerId = G.intLedgerId
+	WHERE FAD.intAssetId = G.intAssetId AND FAD.intBookId = 2 AND BD.intBookId = 2 AND FAD.strTransaction = 'Depreciation' AND BD.ysnFullyDepreciated = 1
+	AND (
+			CASE WHEN G.intLedgerId IS NOT NULL 
+			THEN CASE WHEN (FAD.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+			ELSE 1 END
+        ) = 1
 	ORDER BY FAD.dtmDepreciationToDate DESC
 ) FullyDepreciatedTax
 
 OUTER APPLY (
 	SELECT TOP 1 BD.dblSection179, BD.dblFunctionalSection179, BD.dblBonusDepreciation, BD.dblFunctionalBonusDepreciation, dtmDepreciationToDate
 	FROM tblFABookDepreciation BD 
-	LEFT JOIN tblFAFixedAssetDepreciation A on A.intAssetId = BD.intAssetId AND A.intBookId = 2 AND BD.intLedgerId = A.intLedgerId
+	LEFT JOIN tblFAFixedAssetDepreciation A on A.intAssetId = BD.intAssetId AND A.intBookId = 2
+	AND (
+			CASE WHEN G.intLedgerId IS NOT NULL 
+			THEN CASE WHEN (BD.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
+			ELSE 1 END
+        ) = 1
 	WHERE BD.intAssetId = G.intAssetId
 	AND BD.intBookId = 2
 	AND A.strTransaction = G.strTransaction

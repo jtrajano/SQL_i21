@@ -28,7 +28,8 @@ SELECT DISTINCT
     dblDebit                =   0, -- Calcuate By GL
     dblCredit               =   0, -- Calcuate By GL
 	intCompanyLocationId	=	NULL,
-	intAccountId			=	BT.intGLAccountIdFrom
+	intAccountId			=	BT.intGLAccountIdFrom,
+	intLOBSegmentCodeId		= 	BT.intItemLOBSegmentId
 FROM tblCMBankTransfer BT
 LEFT JOIN tblSMCurrencyExchangeRateType RateType
 	ON RateType.intCurrencyExchangeRateTypeId = BT.intRateTypeIdAmountFrom

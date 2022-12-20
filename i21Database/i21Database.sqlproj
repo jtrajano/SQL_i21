@@ -560,7 +560,6 @@
     <Build Include="dbo\Tables\tblFRReportHierarchySchedule.sql" />
     <Build Include="dbo\Views\vyuFRDHierarcySchedule.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
     <Build Include="dbo\Views\vyuARAccountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCMClearCashFlowReportRates.sql" />
@@ -659,6 +658,8 @@
     <Build Include="dbo\Tables\tblICCommodityAttribute3.sql" />
     <Build Include="dbo\Tables\tblICCommodityAttribute4.sql" />
     <Build Include="dbo\Views\vyuAPVendorStatement.sql" />
+    <Build Include="dbo\Views\vyuAPClearingDiscrepancy.sql" />
+    <Build Include="dbo\Views\vyuAPDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVendorStatement.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectLoadSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSingleAuditLog.sql" />
@@ -698,7 +699,6 @@
     <Build Include="dbo\Views\vyuICGetWarrantLotAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRecordPostedMatchPnS.sql" />
     <Build Include="dbo\Stored Procedures\uspQMCuppingSessionUpdateParentSample.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceWalterMatterReport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingForm.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormResult.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportCuppingFormSaleInfromation.sql" />
@@ -1358,7 +1358,6 @@
     <Build Include="dbo\Views\vyuQMCatalogueOverview.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateEmail_EK.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCCreateVoucherForOnHoldTickets.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostTransferSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTime_EK.sql" />
@@ -1385,8 +1384,53 @@
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuMFApproveBlendSheet.sql" />
     <Build Include="dbo\Views\vyuCRMActivityAttendee.sql" />
-    <Build Include="dbo\Functions\fnRKGetOpenFutureByDateF360.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequencePrice.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\41_UpdateSourceType.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingCellSubLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPPOAck_EK.sql" />
+    <Build Include="dbo\Views\vyuMFTrialBlendSheetComputedAmounts.sql" />
+    <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
+    <Build Include="dbo\Views\vyuSTCSLatestCheckoutWithError.sql" />
+    <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
+    <Build Include="dbo\Tables\tblIPLeadTimePreStage.sql" />
+    <Build Include="dbo\Views\vyuMFBatchDetail.sql" />
+    <Build Include="dbo\Tables\tblIPLeadTimeSAPPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPLeadTimeBulk_EK.sql" />
+    <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WY_Wyoming.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceipt_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPProductionOrder_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPInventoryAdjustment_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment_EK.sql" />
+    <Build Include="dbo\Tables\tblMFRecallPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRecallPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPRecallProductionOrder_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPRecallAck_EK.sql" />
+    <Build Include="dbo\Tables\tblIPItemPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPItem_EK.sql" />
+    <Build Include="dbo\Views\vyuSTPollingStatusReportScheduled.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateBasisAndFutures.sql" />
+    <Build Include="dbo\Tables\tblMFBatchPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBatchPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPBatchRecategorization_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPVendor_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPVendor_EK.sql" />
+    <Build Include="dbo\Views\vyuCTFWCOverview.sql" />
+    <Build Include="dbo\Views\vyuCTFWCOverviewCompleted.sql" />
+    <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
+    <Build Include="dbo\Tables\tblIPInboundDeliveryStage.sql" />
+    <Build Include="dbo\Tables\tblIPInboundDeliveryArchive.sql" />
+    <Build Include="dbo\Tables\tblIPInboundDeliveryError.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPInboundDelivery_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPInboundDelivery_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountCurrency.sql" />
+    <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
+    <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPStock_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPStock_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3045,6 +3089,7 @@
     <Build Include="dbo\Tables\tblQMProductProperty.sql" />
     <Build Include="dbo\Tables\tblQMProductType.sql" />
     <Build Include="dbo\Views\vyuQMTemplateList.sql" />
+    <Build Include="dbo\Views\vyuQMMarketOverview.sql" />
     <Build Include="dbo\Stored Procedures\uspQMAddProductPropertyDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetProductValueDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTestProperty.sql" />
@@ -11229,6 +11274,8 @@
     <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGetRoughCutCapacity.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
+    <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
+    <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11644,6 +11691,7 @@
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
     <Build Include="dbo\Functions\fnQMGetAllocatedSalesContracts.sql" />
     <Build Include="dbo\Views\vyuQMPurchaseSampleLinked.sql" />
+    <Build Include="dbo\Views\vyuQMPurchaseLabelReport.sql" />
     <Build Include="dbo\Views\vyuQMSaleSampleNotLinked.sql" />
     <Build Include="dbo\User Defined Types\MFBatchTableType.sql" />
     <Build Include="dbo\Tables\tblMFBatch.sql" />
@@ -11672,6 +11720,10 @@
     <Build Include="dbo\Views\vyuQMBuyingEfficiency.sql" />
     <Build Include="dbo\Views\vyuQMAuctionReport.sql" />
     <Build Include="dbo\Views\vyuQMApprovedQualityOrders.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleAmendment.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateReconciliationIntegration.sql" />
+    <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
+    <Build Include="dbo\Views\vyuQMAuctionAvailabilityReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -11905,5 +11957,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />
   </ItemGroup>
 </Project>

@@ -189,6 +189,24 @@ BEGIN
     VALUES(14,'Cancel')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 18)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(18,'Recall Requested')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 19)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(19,'Recall Confirmed')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 20)
+BEGIN
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
+    VALUES(20,'Recall Rejected')
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFReleaseStatus
@@ -412,23 +430,152 @@ IF NOT EXISTS (
 	SELECT 4
 		,'By Week'
 GO
+
+/* Insertion of Blend Sheet Rule Starts. */
+ALTER TABLE [dbo].[tblMFBlendRequirementRule] NOCHECK CONSTRAINT [FK_tblMFBlendRequirementRule_tblMFBlendSheetRule_intBlendSheetRuleId]
+
+ALTER TABLE [dbo].[tblMFBlendSheetRuleValue] NOCHECK CONSTRAINT [FK_tblMFBlendSheetRuleValue_tblMFBlendSheetRule_intBlendSheetRuleId]
+
+DELETE FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId IN (4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22);
+
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 1)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(1,'Pick Order',1)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo,ysnQuery, strSQL)
+    VALUES(1,'Pick Order',1,1,'DECLARE @tempTable TABLE (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''FIFO'', ''FIFO''), (''FEFO'',''FEFO''), (''LIFO'',''LIFO''), (''LEFO'',''LEFO''), (''FENA'',''FENA''), (''NAFE'',''NAFE'')  SELECT ValueMember, DisplayMember FROM @tempTable')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 2)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(2,'Is Cost Applicable?',2)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery,strSQL)
+    VALUES(2,'Is Cost Applicable?',2,1,'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''Yes'', ''Yes''), (''No'',''No'') SELECT ValueMember, DisplayMember FROM @tempTable')
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 3)
 BEGIN
-    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
-    VALUES(3,'Is Quality Data Applicable?',3)
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(3,'Is Quality Data Applicable?',3,1,'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''Yes'', ''Yes''), (''No'',''No'') SELECT ValueMember, DisplayMember FROM @tempTable')
 END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 4)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(4,'Warehouse',4,1,'SELECT CONVERT(VARCHAR,A.intCompanyLocationSubLocationId) AS ValueMember, B.strSubLocationName AS DisplayMember FROM tblMFManufacturingCellSubLocation AS A JOIN tblSMCompanyLocationSubLocation AS B ON A.intCompanyLocationSubLocationId = B.intCompanyLocationSubLocationId WHERE (A.intManufacturingCellId = @param OR @param IS NULL OR @param = '''')')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 5)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(5,'Tea Item',5,1,'SELECT CONVERT(VARCHAR,B.intItemId) AS ValueMember, B.strItemNo AS DisplayMember FROM tblICItem AS B WHERE (A.intLotId = @param OR @param IS NULL OR @param = '''')')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 6)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(6,'Batch Number',6,1,'SELECT CONVERT(VARCHAR,A.intLotId) AS ValueMember, A.strLotNumber AS DisplayMember FROM tblICLot AS A JOIN tblICItem AS B ON A.intItemId = B.intItemId WHERE (A.intItemId = @param OR @param IS NULL OR @param = '''')')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 7)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(7,'Pick By',7,1,'SELECT CONVERT(VARCHAR,intIssuedUOMTypeId) AS ValueMember, strName AS DisplayMember FROM tblMFMachineIssuedUOMType')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 8)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(8,'Auction Center',8)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 9)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(9,'Sale Year',9, 1, 'SELECT CONVERT(VARCHAR,intSaleYearId) AS ValueMember, strSaleYear AS DisplayMember FROM tblQMSaleYear')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 10)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(10,'Sale No',10)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 11)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(11,'Taste',11)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 12)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(12,'Hue',12)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 13)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(13,'Intensity',13)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 14)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(14,'Mouth Feel',14)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 15)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(15,'Appearance',15)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 16)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(16,'Volume',16)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 17)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(17,'Sub Cluster',17,1 ,'SELECT CONVERT(VARCHAR,intCommodityAttributeId) AS ValueMember, strDescription AS DisplayMember FROM tblICCommodityAttribute WHERE strType = ''Region''')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 18)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(18,'Tea Group',18)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 19)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo,ysnQuery, strSQL)
+    VALUES(19,'Origin',19,1,'SELECT CONVERT(VARCHAR,intCommodityAttributeId) AS ValueMember, strDescription AS DisplayMember FROM tblICCommodityAttribute WHERE strType = ''Origin''')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 20)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo, ysnQuery, strSQL)
+    VALUES(20,'Garden',20,1,'SELECT CONVERT(VARCHAR,intGardenMarkId) AS ValueMember, strGardenMark AS DisplayMember FROM tblQMGardenMark')
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 21)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(21,'Age',21)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 22)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(22,'Material',22)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 23)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(23,'Material Group',23)
+END
+
+ALTER TABLE [dbo].[tblMFBlendRequirementRule] CHECK CONSTRAINT [FK_tblMFBlendRequirementRule_tblMFBlendSheetRule_intBlendSheetRuleId]
+
+ALTER TABLE [dbo].[tblMFBlendSheetRuleValue] CHECK CONSTRAINT [FK_tblMFBlendSheetRuleValue_tblMFBlendSheetRule_intBlendSheetRuleId]
+
+/* End of Insertion of Blend Sheet Rule Starts. */
+GO
+/* Update first 3 business sheet rule. */ 
+UPDATE tblMFBlendSheetRule
+SET strSQL = 'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''FIFO'', ''FIFO''), (''FEFO'',''FEFO''), (''LIFO'',''LIFO''), (''LEFO'',''LEFO''), (''FENA'',''FENA''), (''NAFE'',''NAFE'')  SELECT ValueMember, DisplayMember FROM @tempTable'
+  , ysnQuery = 1
+WHERE intBlendSheetRuleId = 1
+
+UPDATE tblMFBlendSheetRule
+SET strSQL = 'DECLARE @tempTable TABLE  (ValueMember VARCHAR(250),DisplayMember VARCHAR(250)) INSERT INTO @tempTable VALUES (''Yes'', ''Yes''), (''No'',''No'') SELECT ValueMember, DisplayMember FROM @tempTable'
+  , ysnQuery = 1
+WHERE intBlendSheetRuleId IN (2, 3);
+
+/* End of Update first 3 business sheet rule. */ 
+
+/* Insertion of Blend Sheet Rule Default Value. */
 GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='FIFO')
 BEGIN
@@ -489,6 +636,124 @@ BEGIN
     INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
     VALUES(3,'No','No',1)
 END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 4)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(4,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 5)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(5,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 6)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(6,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 7)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(7,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 8)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(8,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 9)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(9,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 10)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(10,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 11)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(11,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 12)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(12,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 13)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(13,'','',1)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 14)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(14,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 15)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(15,'','',1)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 15)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(15,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 16)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(16,'','',1)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 17)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(17,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 18)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(18,'','',1)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 19)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(19,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 20)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(20,'','',1)
+END
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 21)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(21,'','',1)
+END
+
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 22)
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(22,'','',1)
+END
+
+/* End of Insertion of Blend Sheet Rule Default Value. */
+
 GO
 IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 1)
 BEGIN
@@ -4222,3 +4487,17 @@ BEGIN
         ,'Approved'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFWorkOrderStatus
+		WHERE intStatusId=21
+		)
+BEGIN
+	DELETE FROM  tblMFWorkOrderStatus WHERE strName=	'Partially Consumed'
+
+	INSERT INTO tblMFWorkOrderStatus
+	SELECT 21
+		,'Partially Consumed'
+		,NULL
+		,NULL
+END

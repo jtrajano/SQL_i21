@@ -486,6 +486,220 @@ BEGIN TRY
 			  AND intInventoryReceiptItemId > @intMinInvRecItemId
 		END
 	END
+	ELSE IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND intSourceType = 9)
+	BEGIN /* Source Type: Approved Quality */
+		DELETE FROM @ReceiptStagingTable
+		INSERT INTO @ReceiptStagingTable (
+			[strReceiptType]
+			,[intEntityVendorId]
+			,[intShipFromId]
+			,[intLocationId]
+			,[strBillOfLadding]
+			,[intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[dtmDate]
+			,[intShipViaId]
+			,[dblQty]
+			,[intGrossNetUOMId]
+			,[dblGross]
+			,[dblTare]
+			,[dblNet]
+			,[dblCost]
+			,[intCostUOMId]
+			,[intCurrencyId]
+			,[intSubCurrencyCents]
+			,[dblExchangeRate]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[ysnIsStorage]
+			,[intSourceId]
+			,[intSourceType]
+			,[strSourceId]
+			,[strSourceScreenName]
+			,[ysnSubCurrency]
+			,[intForexRateTypeId]
+			,[dblForexRate]
+			,[intContainerId]
+			,[intFreightTermId]
+			,[intBookId]
+			,[intSubBookId]
+			,[intSort]
+			,[intLoadShipmentId]
+			,[intLoadShipmentDetailId]
+			)
+		SELECT
+			[strReceiptType] = 'Approved Quality' -- New Source Type in LS
+			,[intEntityVendorId] = LD.intVendorEntityId
+			,[intShipFromId] = EL.intEntityLocationId
+			,[intLocationId] = LD.intPCompanyLocationId
+			,[strBillOfLadding] = L.strBLNumber
+			,[intItemId] = LD.intItemId
+			,[intItemLocationId] = IL.intItemLocationId
+			,[intItemUOMId] = LD.intItemUOMId
+			,[intContractHeaderId] = CD.intContractHeaderId
+			,[intContractDetailId] = LD.intPContractDetailId
+			,[dtmDate] = GETDATE()
+			,[intShipViaId] = CD.intShipViaId
+			,[dblQty] = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0)
+			,[intGrossNetUOMId] = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId)
+			,[dblGross] = LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
+			,[dblTare] = LD.dblTare - ISNULL(LD.dblDeliveredTare,0)
+			,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
+			,[dblCost] = ISNULL(LD.dblUnitPrice,0)
+			,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, LD.intPriceUOMId)
+			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
+			,[intSubCurrencyCents] = CASE WHEN (CD.ysnUseFXPrice = 1) THEN SC.intCent ELSE COALESCE(SC.intCent, SC.intCent, 1) END
+			,[dblExchangeRate] = 1
+			,[intLotId] = NULL
+			,[intSubLocationId] = ISNULL(ISNULL(CD.intSubLocationId, LD.intPSubLocationId), IL.intSubLocationId)
+			,[intStorageLocationId] = ISNULL(ISNULL(CD.intStorageLocationId, LD.intPStorageLocationId), IL.intStorageLocationId)
+			,[ysnIsStorage] = 0
+			,[intSourceId] = LD.intLoadDetailId
+			,[intSourceType] = 2 -- Inbound Shipment -- ID for new Approved Quality Source Type
+			,[strSourceId] = L.strLoadNumber
+			,[strSourceScreenName] = 'Load Shipment/Schedule'
+			,[ysnSubCurrency] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.ysnSeqSubCurrency ELSE SC.ysnSubCurrency END
+			,[intForexRateTypeId] = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN NULL --foreign price to functional FX, use null
+										WHEN (ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
+										ELSE LD.intForexRateTypeId END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID, 0))) 
+										THEN FX.intForexRateTypeId
+										ELSE LD.intForexRateTypeId END
+									END
+			,[dblForexRate] = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN dbo.fnDivide(1, CD.dblRate) --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN 1 --foreign price to functional FX, use 1
+										WHEN (ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+										ELSE ISNULL(LD.dblForexRate,1) END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID,''))) 
+										THEN ISNULL(FX.dblFXRate, 1)
+										ELSE ISNULL(LD.dblForexRate,1) END
+									END
+			,[intContainerId] = -1
+			,[intFreightTermId] = L.intFreightTermId
+			,[intBookId] = L.intBookId
+			,[intSubBookId] = L.intSubBookId
+			,[intSort] = LD.intLoadDetailId -- Use SORT field to link a load detail to a specific lot record. 
+			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentDetailId] = LD.intLoadDetailId
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblMFBatch B ON B.intBatchId = LD.intBatchId
+		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
+		JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intVendorEntityLocationId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = LD.intPriceCurrencyId
+		OUTER APPLY (SELECT	TOP 1  
+					intForexRateTypeId = RD.intRateTypeId
+					,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+								THEN 1/RD.[dblRate] 
+								ELSE RD.[dblRate] END 
+					FROM tblSMCurrencyExchangeRate ER
+					JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+					WHERE @DefaultCurrencyId <> CD.intInvoiceCurrencyId
+						AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+							OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
+					ORDER BY RD.dtmValidFromDate DESC) FX
+		WHERE L.intLoadId = @intLoadId
+			AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
+
+		INSERT INTO @LotEntries (
+			[intEntityVendorId] 
+			,[strReceiptType] 
+			,[intLocationId] 
+			,[intShipViaId] 
+			,[intShipFromId] 
+			,[intCurrencyId] 
+			,[intSourceType] 
+			,[strBillOfLadding] 
+			--,[strVendorRefNo] 
+			--,[intShipFromEntityId] 
+			
+			,[intLotId]
+			,[strLotNumber]
+			,[strLotAlias]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[intContractHeaderId] 
+			,[intContractDetailId]
+			,[intItemUnitMeasureId]
+			,[intItemId]
+			,[dblQuantity]
+			,[dblGrossWeight]
+			,[dblTareWeight]
+			,[strContainerNo]
+			,[intSort]
+			,[strMarkings]
+			,[strCondition]
+			)
+		SELECT
+			[intEntityVendorId] = LD.intVendorEntityId
+			,[strReceiptType] = 'Approved Quality'
+			,[intLocationId] = LD.intPCompanyLocationId
+			,[intShipViaId] = NULL
+			,[intShipFromId] = EL.intEntityLocationId
+			,[intCurrencyId] = LD.intPriceCurrencyId
+			,[intSourceType] = 2 -- Inbound Shipment -- ID for new Approved Quality Source Type
+			,[strBillOfLadding]  = L.strBLNumber
+			--,[strVendorRefNo] 
+			--,[intShipFromEntityId] 
+			
+			,[intLotId] = NULL
+			,[strLotNumber] = B.strBatchId
+			,[strLotAlias] = NULL
+			,[intSubLocationId] = ISNULL(ISNULL(CD.intSubLocationId, LD.intPSubLocationId), IL.intSubLocationId) -- IMPORTANT NOTE: Storage Location is required for Lotted items. 
+			,[intStorageLocationId] = ISNULL(ISNULL(CD.intStorageLocationId, LD.intPStorageLocationId), IL.intStorageLocationId) -- IMPORTANT NOTE: Storage Unit is required for Lotted items. 
+			,[intContractHeaderId] = CD.intContractHeaderId
+			,[intContractDetailId] = CD.intContractDetailId
+			,[intItemUnitMeasureId] = LD.intItemUOMId
+			,[intItemId] = LD.intItemId
+			,[dblQuantity] = LD.dblQuantity
+			,[dblGrossWeight] = LD.dblGross
+			,[dblTareWeight] = LD.dblTare
+			,[strContainerNo] = NULL
+			,[intSort] = LD.intLoadDetailId -- Use SORT field to link a load detail to a specific lot record. 
+			,[strMarkings] = NULL
+			,[strCondition] = @strLotCondition
+		FROM tblLGLoad L 
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
+		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		JOIN tblMFBatch B ON B.intBatchId = LD.intBatchId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+		WHERE LD.intLoadId = @intLoadId
+
+		EXEC dbo.uspICAddItemReceipt
+			@ReceiptEntries = @ReceiptStagingTable
+			,@OtherCharges = DEFAULT
+			,@intUserId = @intEntityUserSecurityId
+			,@LotEntries = @LotEntries
+			,@ReceiptTradeFinance = DEFAULT
+
+		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
+		FROM #tmpAddItemReceiptResult
+	END
 	ELSE 
 	BEGIN /* Source Type: Not None */
 		IF EXISTS (

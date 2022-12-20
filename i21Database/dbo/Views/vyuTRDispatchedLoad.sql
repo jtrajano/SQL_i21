@@ -35,7 +35,7 @@ SELECT LG.intLoadId
 	, intEntitySalespersonId = Customer.intSalespersonId
 	, strCustomerNumber = Customer.strName
 	, strOutboundLocationName = ISNULL(LG.strSLocationName, LG.strPLocationName)
-	, strOutboundSalespersonId = Salesperson.strName
+	, strOutboundSalespersonId = ISNULL(LGSalesperson.strName, ISNULL(CLSalesperson.strName, CSalesperson.strName))
 	, LG.strShipTo
 	, intOutboundItemId = LG.intItemId
 	, dblOutboundQuantity = ISNULL(LG.dblQuantity, 0.000000)
@@ -89,6 +89,8 @@ SELECT LG.intLoadId
 	, strSupplyPointGrossOrNet = SP.strGrossOrNet
 	, strSaleUnits = CEL.strSaleUnits
 	, strFreightSalesUnit = SP.strFreightSalesUnit
+	, LG.intTMDispatchId  
+	, LG.strOrderNumber  
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
@@ -96,8 +98,10 @@ LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId
 LEFT JOIN tblEMEntity ShipVia ON ShipVia.intEntityId = Config.intShipViaId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLocationId AND SP.intEntityVendorId = LG.intVendorEntityId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityId
-LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
+LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LG.intCustomerEntityLocationId
+LEFT JOIN vyuEMEntity LGSalesperson ON LGSalesperson.intEntityId = LG.intSalespersonId AND LGSalesperson.strType = 'Salesperson'
+LEFT JOIN vyuEMEntity CSalesperson ON CSalesperson.intEntityId = Customer.intSalespersonId AND CSalesperson.strType = 'Salesperson'
+LEFT JOIN vyuEMEntity CLSalesperson ON CLSalesperson.intEntityId = CEL.intSalespersonId AND CLSalesperson.strType = 'Salesperson'
 LEFT JOIN vyuICGetItemStock ItemS ON ItemS.intItemId = LG.intItemId AND ItemS.intLocationId = LG.intSCompanyLocationId
 LEFT JOIN tblTMSite TS ON LG.intTMSiteId = TS.intSiteID
-LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LG.intCustomerEntityLocationId
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

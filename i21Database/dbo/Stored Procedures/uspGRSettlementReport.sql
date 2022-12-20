@@ -1778,8 +1778,9 @@ BEGIN
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
 				AND (
 					intInventoryReceiptChargeId IS NOT NULL
-					OR BillDtl.intInventoryReceiptItemId IS NOT NULL
+					OR BillDtl.intInventoryReceiptItemId IS NOT NULL					
 					)
+				AND BillDtl.intSettleStorageId IS NULL
 
 			UNION ALL
 			/*-------------------------------------------------------
@@ -2228,7 +2229,9 @@ BEGIN
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
 				ON Bill.intBillId = BillDtl.intBillId 
-					AND BillDtl.intInventoryReceiptChargeId IS NULL			
+					AND BillDtl.intInventoryReceiptChargeId IS NULL	
+			JOIN tblGRSettleStorageBillDetail SBD
+				ON SBD.intBillId = Bill.intBillId
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'	

@@ -47,6 +47,7 @@ SELECT [intTimeEntryId]					= TimeEntry.[intTimeEntryId]
 										   END 
 	   ,[strSelectedDate]				= TimeEntry.[strSelectedDate]
 	   ,[ysnFromApproval]				= CONVERT(BIT, 0)	
+	   ,strFiscalYear					= TimeEntryPeriodDetail.[strFiscalYear]
 FROM tblHDTimeEntry TimeEntry
 		LEFT JOIN tblEMEntity Entity
 ON Entity.intEntityId = TimeEntry.intEntityId
@@ -77,7 +78,7 @@ ON Entity.intEntityId = TimeEntry.intEntityId
 	OUTER APPLY
 	(
 		SELECT	 TOP 1 intEntityId	= CoworkerGoals.intEntityId
-					  ,ysnActive	= CoworkerGoals.ysnActive 
+					  ,ysnActive	= CoworkerGoalDetail.ysnActive 
 		FROM tblHDCoworkerGoal CoworkerGoals
 				INNER JOIN tblHDCoworkerGoalDetail CoworkerGoalDetail
 		ON CoworkerGoals.intCoworkerGoalId = CoworkerGoalDetail.intCoworkerGoalId

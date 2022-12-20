@@ -207,6 +207,7 @@ BEGIN
 			,ysnLessThanLastDeliveryDate = (CASE WHEN(DATEADD(DAY, DATEDIFF(DAY, 0, C.dtmInvoiceDate), 0)  < DATEADD(DAY, DATEDIFF(DAY, 0, I.dtmInvoiceDate), 0) ) THEN 1 ELSE 0 END)
 			,dblCalculatedBurnRate = J.dblCalculatedBurnRate
 			,dtmLatestDeliveryHistory = I.dtmInvoiceDate
+			,ysnMultipleInvoiceHeader = ISNULL(K.ysnMultipleInvoiceHeader,0)
 		INTO #tmpFinalNonServiceInvoiceDetail
 		FROM #tmpNonServiceInvoiceDetail A
 		INNER JOIN #tmpFinalInvoiceHeader C
@@ -219,9 +220,10 @@ BEGIN
 					dblPercentFull = ISNULL(AA.dblPercentFull,0.0)
 					,dblTotalQuantity = ISNULL(AA.dblQtyShipped,0.0)
 					,AA.intInvoiceDetailId
+					,AA.intInvoiceId
 			FROM #tmpNonServiceInvoiceDetail AA
-			WHERE AA.intInvoiceId = A.intInvoiceId
-				AND AA.intSiteId = A.intSiteId
+			WHERE --AA.intInvoiceId = A.intInvoiceId
+				AA.intSiteId = A.intSiteId
 			ORDER BY AA.dblPercentFull DESC
 		)B
 		---Get the Clock Reading information on Delivery Date
@@ -267,6 +269,14 @@ BEGIN
 		OUTER APPLY (
 			SELECT dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](E.intSiteID,B.intInvoiceDetailId,D.intDegreeDayReadingID,0,null)
 		)J
+		---Determine if the Multiple Invoice
+		OUTER APPLY (
+			SELECT TOP 1 ysnMultipleInvoiceHeader = 1
+			FROM #tmpNonServiceInvoiceDetail AA
+			WHERE AA.intInvoiceId = B.intInvoiceId
+				AND AA.intSiteId = A.intSiteId
+				AND AA.intInvoiceDetailId = A.intInvoiceDetailId
+		)K
 
 		--	print '1234'
 		--SELECT * FROM #tmpFinalNonServiceInvoiceDetail
@@ -571,7 +581,7 @@ BEGIN
 							,strBulkPlantNumber = D.strLocationName
 							,dtmInvoiceDate = C.dtmDate
 							,strProductDelivered = E.strItemNo
-							,dblQuantityDelivered = B.dblInvoiceTotalQuantity
+							,dblQuantityDelivered = K.dblTotalDelivered
 							,intDegreeDayOnDeliveryDate = B.dblClockAccumulatedDegreeDay
 							,intDegreeDayOnLastDeliveryDate = B.dblLastDelClockAccumulatedDegreeDay
 							,dblBurnRateAfterDelivery = ISNULL(B.dblNewBurnRate,0.0)
@@ -655,10 +665,17 @@ BEGIN
 								dblTotal = SUM(ISNULL(dblTotal,0.0))
 								,dblTotalTax = SUM(ISNULL(dblTotalTax,0.0))
 							FROM #tmpInvoiceDateGreaterThanLastDelivery 
-							WHERE intInvoiceId = C.intInvoiceId
+							WHERE intSiteId = A.intSiteID
 							
 						)J
+						--Get the total Quantity of the invoice/multiple Invoices
+						OUTER APPLY (
+							SELECT  dblTotalDelivered = SUM(ISNULL(AA.dblQtyShipped,0.0))
+							FROM #tmpInvoiceDateGreaterThanLastDelivery AA
+							WHERE AA.intSiteId = A.intSiteID
+						)K
 						WHERE B.ysnLessThanLastDeliveryDate = 0
+							AND B.ysnMultipleInvoiceHeader = 1
 
 						------------------------------------------------------------------
 						---Insert into out of range table
@@ -710,8 +727,9 @@ BEGIN
 						INNER JOIN tblICItem C
 							ON A.intItemId = C.intItemId
 						INNER JOIN tblTMDeliveryHistory D
-							ON A.intInvoiceId = D.intInvoiceId
-								AND A.intSiteId = D.intSiteID
+							ON --A.intInvoiceId = D.intInvoiceId
+								A.intSiteId = D.intSiteID
+								AND DATEADD(dd, DATEDIFF(dd, 0, D.dtmInvoiceDate),0) = @dtmDateToProcess
 						WHERE A.ysnLessThanLastDeliveryDate = 0
 
 					
@@ -734,7 +752,7 @@ BEGIN
 						UPDATE tblTMSite
 						SET intLastDeliveryDegreeDay = A.dblClockAccumulatedDegreeDay
 							,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(A.dblHighestPercentFull,0)/100
-							,dblLastDeliveredGal = A.dblInvoiceTotalQuantity
+							,dblLastDeliveredGal = C.dblTotalQuantityDelivered
 							,dtmLastDeliveryDate = B.dtmInvoiceDate
 							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,ysnDeliveryTicketPrinted = 0
@@ -752,6 +770,17 @@ BEGIN
 						FROM #tmpSiteUpdateList A
 						INNER JOIN #tmpFinalInvoiceHeader B
 							ON A.intInvoiceId = B.intInvoiceId
+						OUTER APPLY(
+							SELECT TOP 1 
+								dblTotalQuantityDelivered = SUM(BB.dblQuantityDelivered)
+							FROM tblTMDeliveryHistory AA
+							INNER JOIN tblTMDeliveryHistoryDetail BB
+								ON AA.intDeliveryHistoryID = BB.intDeliveryHistoryID
+							WHERE AA.intSiteID = A.intSiteId
+								AND DATEADD(dd, DATEDIFF(dd, 0, AA.dtmInvoiceDate),0) = DATEADD(dd, DATEDIFF(dd, 0, @dtmDateToProcess),0)
+							GROUP BY AA.dtmInvoiceDate,AA.intSiteID
+							ORDER BY AA.dtmInvoiceDate DESC
+						)C
 						WHERE  tblTMSite.intSiteID = A.intSiteId
 						
 					

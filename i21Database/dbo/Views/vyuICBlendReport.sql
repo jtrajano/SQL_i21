@@ -1,18 +1,19 @@
 ﻿CREATE VIEW [dbo].[vyuICBlendReport]
 AS
 SELECT it.intTransactionId
-	,lh.intLoadHeaderId
-	,lh.strTransaction
-	,IsNULL(lh.dtmLoadDateTime, it.dtmDate) AS dtmLoadDateTime
-	,cl.strLocationNumber
-	,cl.strLocationName
-	,i.strItemNo
-	,i.strDescription
-	,it.strTransactionId
-	,itt.strName
-	,it.dblQty
-	,it.dblCost
-	,i1.strItemNo strProduce
+	 , lh.intLoadHeaderId
+	 , lh.strTransaction
+	 , IsNULL(lh.dtmLoadDateTime, it.dtmDate) AS dtmLoadDateTime
+	 , cl.strLocationNumber
+	 , cl.strLocationName
+	 , i.strItemNo
+	 , i.strDescription
+	 , it.strTransactionId
+	 , itt.strName
+	 , it.dblQty
+	 , it.dblCost
+	 , i1.strItemNo strProduce
+	 , wo.dblQuantity AS dblWorkOrderQty
 FROM tblICInventoryTransaction it
 JOIN tblICItem i ON i.intItemId = it.intItemId
 JOIN tblICItemLocation il ON it.intItemLocationId = il.intItemLocationId

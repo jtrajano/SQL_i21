@@ -173,8 +173,6 @@
     [ysnTicketInTransit] BIT NOT NULL DEFAULT 0, 
     [ysnTicketApplied] BIT NOT NULL DEFAULT 0, 
     [dblInTransitQuantity] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
-    [ysnTicketOnHold] BIT NOT NULL DEFAULT 0, 
-    [dblOnHoldQuantity] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

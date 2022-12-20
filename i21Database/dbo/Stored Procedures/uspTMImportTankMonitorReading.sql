@@ -320,7 +320,7 @@
 								)		 
 	
 		--Check if site is not on hold then update the site
-		IF ((SELECT TOP 1 ysnOnHold FROM tblTMSite WHERE intSiteID = @siteId) <> 1)
+		IF ((SELECT TOP 1 ISNULL(ysnOnHold,0) FROM tblTMSite WHERE intSiteID = @siteId) <> 1)
 		BEGIN
 			--PRINT 'Update Site'
 			SELECT TOP 1 
@@ -404,7 +404,7 @@
 			WHERE intSiteID = @siteId
 
 			-- Prevent Anova from creating order
-			IF(@intInterfaceTypeId != 3)
+			IF(@intInterfaceTypeId != 3)	
 			BEGIN
 				--prevent eco green from creating order since @ta_ltankcrit is not supplied from API and run out date is not calculated due to lack of requirement to calculate
 				if (@is_wesroc = 0)

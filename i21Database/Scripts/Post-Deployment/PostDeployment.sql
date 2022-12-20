@@ -258,6 +258,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1x_RecurringTransaction.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 :r .\GL\03_UpdateForeignDebitCredit.sql
+:r .\GL\04_ClearImportCOAFromCSV.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
 
 -- Financial Report Designer
@@ -316,6 +317,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\38_UpdateDefaultData.sql
 :r .\AR\DefaultData\39_UpdateCreditCardCompanyPreference.sql
+:r .\AR\DefaultData\41_UpdateSourceType.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
@@ -668,6 +670,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\FL_Florida.sql
 :r .\TF\DefaultData\AL_Alabama.sql
 :r .\TF\DefaultData\WV_WestVirginia.sql
+:r .\TF\DefaultData\WY_Wyoming.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
@@ -724,6 +727,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CRM\RenameCRMScreen.sql
 :R .\CRM\SetOpportunityNumber.sql
 :R .\CRM\CRMHubspotDefaults.sql
+:R .\CRM\O365IntegrationDefaults.sql
 
 -- Card Fueling
 :r .\CF\1_ImportMapping.sql

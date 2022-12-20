@@ -93,6 +93,7 @@ CREATE  TABLE tblMFBatch
 	strQualityComments NVARCHAR(2048) COLLATE Latin1_General_CI_AS  NULL,
 	strRareEarth NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strERPPONumber NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL,
+	strERPPOLineNo NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL,
 	strFreightAgent NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strSealNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
@@ -102,10 +103,27 @@ CREATE  TABLE tblMFBatch
 	dtmSplit DATETIME NULL,
 	strNotes NVARCHAR(max) COLLATE Latin1_General_CI_AS  NULL,
 	intConcurrencyId INT NULL,
-	intLocationId int, -- company location
-    CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
+	intLocationId int -- company location
+	,dblOriginalTeaTaste   NUMERIC(18,6)  NULL
+	,dblOriginalTeaHue   NUMERIC(18,6)  NULL
+	,dblOriginalTeaIntensity NUMERIC(18,6)  NULL
+	,dblOriginalTeaMouthfeel  NUMERIC(18,6)  NULL
+	,dblOriginalTeaAppearance  NUMERIC(18,6)  NULL
+	,dblOriginalTeaVolume  NUMERIC(18,6)  NULL
+	,dblOriginalTeaMoisture  NUMERIC(18,6)  NULL
+	,strBOLNo NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL
+	,intMarketZoneId INT NULL
+	,dblTeaTastePinpoint   NUMERIC(18,6)  NULL
+	,dblTeaHuePinpoint   NUMERIC(18,6)  NULL
+	,dblTeaIntensityPinpoint NUMERIC(18,6)  NULL
+	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
+	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
+	,CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC
     )
 ) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblMFBatch_intSampleId] ON [dbo].[tblMFBatch](intSampleId)
 GO

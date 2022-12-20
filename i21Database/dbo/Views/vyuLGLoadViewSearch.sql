@@ -20,6 +20,7 @@ SELECT L.intLoadId
 		WHEN 6 THEN 'Pick Lots'
 		WHEN 7 THEN 'Pick Lots w/o Contract'
 		WHEN 8 THEN 'TM Orders'
+		WHEN 9 THEN 'Approved Quality'
 		END COLLATE Latin1_General_CI_AS
 	,strType = CASE L.intPurchaseSale 
 		WHEN 1 THEN 'Inbound'
@@ -115,6 +116,7 @@ SELECT L.intLoadId
 	,L.ysnAllowReweighs
 	,L.ysnShowOptionality
 	,L.intUserLoc
+	,MZ.strMarketZoneCode
 FROM tblLGLoad L
 JOIN vyuLGShipmentStatus LSS ON LSS.intLoadId = L.intLoadId
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
@@ -174,3 +176,4 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = L.intTruckId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId

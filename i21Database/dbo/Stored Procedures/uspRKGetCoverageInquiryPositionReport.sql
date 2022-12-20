@@ -192,6 +192,7 @@ EXEC uspRKRiskPositionInquiryBySummary
 	, @strPositionBy 
 	, @dtmPositionAsOf 
 	, @strUomType
+	, @ysnQueryWithTotals = 1
 
 
 select distinct strFutureMonth, dblQuantity = 0.00 
@@ -214,7 +215,7 @@ where strFutureMonth not in ('Total')
 SELECT
 	 [Description]
 	 , [Position]
-	 , [Type] 
+	 , [Type]  
 	 , [Month]
 	 , 'Value' = SUM([Value])
 FROM (
@@ -239,7 +240,7 @@ FROM @tmpRawData RD
 CROSS APPLY #tempFutureMonth FM
 WHERE PriceStatus NOT IN ('Total')
 
-) t
+) t 
 GROUP BY [Description], [Position], [Type], [Month]
 ORDER BY  [Description], [Position], [Type], CASE WHEN [Month] = 'Previous' THEN '01/01/1900' WHEN [Month] = 'Total' THEN '01/01/9999' ELSE CONVERT(DATETIME, '01 ' + [Month]) END
 

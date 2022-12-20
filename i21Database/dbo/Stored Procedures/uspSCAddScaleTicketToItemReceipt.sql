@@ -128,6 +128,9 @@ INSERT INTO @ReceiptStagingTable(
 		,[intLoadShipmentDetailId] 
 		,intTaxGroupId
 		,ysnAddPayable
+		,dblBasis
+		,dblFutures
+		,strFuturesMonth
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -229,17 +232,11 @@ SELECT
 									END
 		,intFreightTermId			= COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)
 		,intLoadReceive				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
-		,ysnAllowVoucher			= 
-									CASE WHEN SC.ysnTicketOnHold = 1 THEN									
-										1									
-									ELSE										
-										CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
-											CASE  
-												WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 
-												ELSE LI.ysnAllowVoucher 
-											END
+		,ysnAllowVoucher			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
+										CASE  
+											WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 
+											ELSE LI.ysnAllowVoucher 
 										END
-										
 									END
 		,intShipFromEntityId		= SC.intEntityId
 		,[intLoadShipmentId] 		= NULL
@@ -251,13 +248,13 @@ SELECT
 											ELSE NULL
 											END 
 										END
-		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 
-											OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
-											OR ISNULL(ConHeader.intPricingTypeId,0) = 5 
-											OR ISNULL(SC.ysnTicketOnHold, 0) = 1 
+		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 OR ISNULL(ConHeader.intPricingTypeId,0) = 5 
 										THEN 0
 										ELSE NULL
 										END
+		,dblBasis					= CNT.dblBasis
+		,dblFutures					= CNT.dblFutures
+		,strFuturesMonth			= CNT.strFuturesMonth
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
 	SELECT CTD.intContractHeaderId
@@ -283,8 +280,13 @@ LEFT JOIN (
 	,CU.intCent
 	,CU.ysnSubCurrency
 	,CTH.ysnLoad
+	,CTD.dblBasis
+	,CTD.dblFutures
+	,FUTURES_MONTH.strFutureMonth as strFuturesMonth
 	FROM tblCTContractDetail CTD 
 	INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+	LEFT JOIN tblRKFuturesMonth FUTURES_MONTH
+		ON CTD.intFutureMonthId = FUTURES_MONTH.intFutureMonthId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 ) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId

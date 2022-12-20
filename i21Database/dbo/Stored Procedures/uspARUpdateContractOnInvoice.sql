@@ -338,7 +338,7 @@ BEGIN TRY
 		, intTicketId					= P.intTicketId
 		, intInventoryShipmentItemId	= P.intInventoryShipmentItemId
 		, intItemUOMId					= P.intItemUOMId
-		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL OR @TransactionId IS NOT NULL
+		, dblQty						= (CASE WHEN TRD.intTransactionDetailId IS NULL
 													THEN 
 														CASE WHEN ABS(P.dblQty) > TMO.dblQuantity
 																THEN (ABS(P.dblQty) - TMO.dblQuantity)
@@ -355,6 +355,7 @@ BEGIN TRY
 		SELECT TOP 1 TMO.dblQuantity
 			       , TMO.intContractDetailId
 		FROM tblTMOrder TMO 
+		INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
@@ -369,21 +370,23 @@ BEGIN TRY
 	  AND P.intSiteId IS NOT NULL
 	  AND (ABS(P.dblQty) <> TMO.dblQuantity OR (ABS(P.dblQty) = TMO.dblQuantity AND TRD.intTransactionDetailId IS NOT NULL))
 	  AND P.ysnMobileBilling = 0
-	  AND ISNULL(@ForDelete, 0) = 0
 	  
 	DELETE P 
 	FROM @tblToProcess P
 	CROSS APPLY ( 
 		SELECT TOP 1 TMO.*
 		FROM tblTMOrder TMO 
+		INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
 	) TMO 
 	WHERE P.intSiteId IS NOT NULL
-	AND P.ysnMobileBilling = 0
+	  AND P.ysnMobileBilling = 0
 	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
+
+	SELECT '@tblToProcess', * FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0
 	BEGIN

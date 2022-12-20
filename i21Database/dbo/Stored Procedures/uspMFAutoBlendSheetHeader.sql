@@ -2,7 +2,8 @@
 	@intLocationId		   INT
   , @intBlendRequirementId INT
   , @dblQtyToProduce	   NUMERIC(18, 6)
-  , @strXml NVARCHAR(MAX)=NULL  
+  , @strXml				   NVARCHAR(MAX) = NULL  
+  , @ysnUpdateRule		   BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -42,12 +43,17 @@ IF (ISNULL(@strXml, '') <> '')
 												, intSequenceNo INT)
 
 		/* Update Blend Requirement Rule. */
-		UPDATE BlendRequirementRule 
-		SET BlendRequirementRule.strValue		= DeclaredRule.strValue
-		  , BlendRequirementRule.intSequenceNo	= DeclaredRule.intSequenceNo 
-		From tblMFBlendRequirementRule AS BlendRequirementRule 
-		JOIN @tblRule AS DeclaredRule ON BlendRequirementRule.intBlendRequirementRuleId = DeclaredRule.intBlendRequirementRuleId 
-									  AND BlendRequirementRule.intBlendSheetRuleId = DeclaredRule.intBlendSheetRuleId;
+		IF (@ysnUpdateRule = 1)
+			BEGIN
+				UPDATE BlendRequirementRule 
+				SET BlendRequirementRule.strValue		= DeclaredRule.strValue
+				  , BlendRequirementRule.intSequenceNo	= DeclaredRule.intSequenceNo 
+				FROM tblMFBlendRequirementRule AS BlendRequirementRule 
+				JOIN @tblRule AS DeclaredRule ON BlendRequirementRule.intBlendRequirementRuleId = DeclaredRule.intBlendRequirementRuleId 
+											 AND BlendRequirementRule.intBlendSheetRuleId = DeclaredRule.intBlendSheetRuleId;
+			END
+		/* End of Update Blend Requirement Rule. */
+		
 
 		IF @idoc <> 0 
 			BEGIN

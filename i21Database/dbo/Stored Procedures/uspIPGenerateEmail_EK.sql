@@ -86,6 +86,70 @@ BEGIN TRY
 		END
 	END
 
+	IF @strMessageType = 'Goods Receipt'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Doc No</th>
+							<th>&nbsp;Receipt No.</th>
+							<th>&nbsp;BL Number</th>
+							<th>&nbsp;Location</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+				SELECT 1
+				FROM tblIPInvReceiptError t WITH (NOLOCK)
+				WHERE t.ysnMailSent = 0
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+					'<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, t.intTrxSequenceNo), '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strERPReceiptNo, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strBLNumber, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strLocationName, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' +
+				'</tr>'
+			FROM tblIPInvReceiptError t WITH (NOLOCK)
+			WHERE t.ysnMailSent = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPInvReceiptError t
+			WHERE t.ysnMailSent = 0
+		END
+	END
+
+	IF @strMessageType = 'Vendor'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Doc No</th>
+							<th>&nbsp;Name</th>
+							<th>&nbsp;Account No</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+				SELECT 1
+				FROM tblIPEntityError t WITH (NOLOCK)
+				WHERE t.ysnMailSent = 0
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+					'<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, t.intTrxSequenceNo), '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strName, '') + '</td>' + 
+					'<td>&nbsp;' + ISNULL(t.strAccountNo, '') + '</td>' + 
+					'<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' + 
+				'</tr>'
+			FROM tblIPEntityError t WITH (NOLOCK)
+			WHERE t.ysnMailSent = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPEntityError t
+			WHERE t.ysnMailSent = 0
+		END
+	END
+
 	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
 	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
 	SET @strMessage = @strStyle + @strHtml

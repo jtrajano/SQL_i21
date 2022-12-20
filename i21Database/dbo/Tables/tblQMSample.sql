@@ -164,6 +164,7 @@
     [dblB5Price] NUMERIC(18, 6) NULL, 
     [intB5PriceUOMId] INT NULL,
 	[strB5PriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[ysnBought] BIT NULL,
 		
 	CONSTRAINT [PK_tblQMSample] PRIMARY KEY ([intSampleId]), 
 	CONSTRAINT [AK_tblQMSample_strSampleNumber] UNIQUE ([strSampleNumber]), 
@@ -178,8 +179,7 @@
 	CONSTRAINT [FK_tblQMSample_tblLGShipmentBLContainer] FOREIGN KEY ([intShipmentBLContainerId]) REFERENCES [tblLGShipmentBLContainer]([intShipmentBLContainerId]), 
 	CONSTRAINT [FK_tblQMSample_tblLGShipmentBLContainerContract] FOREIGN KEY ([intShipmentBLContainerContractId]) REFERENCES [tblLGShipmentBLContainerContract]([intShipmentBLContainerContractId]), 
 	CONSTRAINT [FK_tblQMSample_tblLGShipment] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]), 
-	CONSTRAINT [FK_tblQMSample_tblLGShipmentContractQty] FOREIGN KEY ([intShipmentContractQtyId]) REFERENCES [tblLGShipmentContractQty]([intShipmentContractQtyId]), 
-	CONSTRAINT [FK_tblQMSample_tblSMCountry] FOREIGN KEY ([intCountryID]) REFERENCES [tblSMCountry]([intCountryID]), 
+	CONSTRAINT [FK_tblQMSample_tblLGShipmentContractQty] FOREIGN KEY ([intShipmentContractQtyId]) REFERENCES [tblLGShipmentContractQty]([intShipmentContractQtyId]),	
 	CONSTRAINT [FK_tblQMSample_tblICUnitMeasure_intSampleUOMId] FOREIGN KEY ([intSampleUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [FK_tblQMSample_tblICUnitMeasure_intRepresentingUOMId] FOREIGN KEY ([intRepresentingUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [FK_tblQMSample_tblICLotStatus] FOREIGN KEY ([intLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]), 

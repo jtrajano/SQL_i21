@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTCreateDetailHistory]
+﻿Create PROCEDURE [dbo].[uspCTCreateDetailHistory]
 	@intContractHeaderId INT
 	, @intContractDetailId INT = NULL
 	, @strComment NVARCHAR(100) = NULL
@@ -433,7 +433,7 @@ BEGIN TRY
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1  and 1=0) --CT-7774 disabled for now
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1  AND 1=0  ) --CT-7774 disabled for now
 		BEGIN
 			DELETE
 			FROM tblCTSequenceHistory
@@ -735,7 +735,8 @@ BEGIN TRY
 			JOIN @tblDetail				PreviousRow			ON PreviousRow.intContractStatusId       <>  CurrentRow.intContractStatusId
 			JOIN tblCTContractStatus	CurrentType			ON	CurrentType.intContractStatusId	      =	 CurrentRow.intContractStatusId
 			JOIN tblCTContractStatus	PreviousType		ON	PreviousType.intContractStatusId	  =	 PreviousRow.intContractStatusId
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intContractStatusId')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 			
 			--dtmStartDate
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -751,7 +752,10 @@ BEGIN TRY
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId				 =  CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail				PreviousRow			ON Convert(Nvarchar,PreviousRow.dtmStartDate,101) <> Convert(Nvarchar,CurrentRow.dtmStartDate,101)
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'dtmStartDate')	CurrentType
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and CurrentType.ysnAmendment = 1
+
+			
 			
 			--dtmEndDate
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -767,7 +771,8 @@ BEGIN TRY
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId			    =  CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON  Convert(Nvarchar,PreviousRow.dtmEndDate,101) <> Convert(Nvarchar,CurrentRow.dtmEndDate,101)
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'dtmEndDate')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 			
 			--Item
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -785,7 +790,8 @@ BEGIN TRY
 			JOIN @tblDetail				PreviousRow			ON   PreviousRow.intItemId         <> CurrentRow.intItemId
 			JOIN tblICItem				CurrentType			ON	CurrentType.intItemId	      =	 CurrentRow.intItemId
 			JOIN tblICItem				PreviousType		ON	PreviousType.intItemId		  =	 PreviousRow.intItemId
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intItemId')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 
 			--dblQuantity
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -801,7 +807,9 @@ BEGIN TRY
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords			ON  NewRecords.intSequenceHistoryId     =  CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail				PreviousRow			ON   PreviousRow.dblQuantity		    <> CurrentRow.dblQuantity
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'dblQuantity')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
+			
 			
 			--Quantity UOM
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -821,8 +829,9 @@ BEGIN TRY
 			JOIN	tblICUnitMeasure	U2					ON	U2.intUnitMeasureId			    = PU.intUnitMeasureId
 			JOIN	tblICItemUOM		PU1					ON	PU1.intItemUOMId			    = PreviousRow.intItemUOMId		
 			JOIN	tblICUnitMeasure	U21					ON	U21.intUnitMeasureId		    = PU1.intUnitMeasureId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intItemUOMId')	tblAmendment
 			WHERE  U2.intUnitMeasureId <> U21.intUnitMeasureId 
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 			
 			--Futures Market
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -840,7 +849,9 @@ BEGIN TRY
 			JOIN @tblDetail				 PreviousRow		ON   ISNULL(CurrentRow.intFutureMarketId,0)     <>  ISNULL(PreviousRow.intFutureMarketId,0)
 			LEFT JOIN tblRKFutureMarket	 CurrentType		ON	 ISNULL(CurrentType.intFutureMarketId,0)    =	ISNULL(CurrentRow.intFutureMarketId	,0)
 			LEFT JOIN tblRKFutureMarket	 PreviousType		ON	 ISNULL(PreviousType.intFutureMarketId,0) 	=	ISNULL(PreviousRow.intFutureMarketId,0)
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '3.Pricing' and strDataIndex = 'intFutureMarketId')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
+			
 			
 			--Currency
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -858,7 +869,8 @@ BEGIN TRY
 			JOIN @tblDetail				PreviousRow			ON   CurrentRow.intCurrencyId        <> PreviousRow.intCurrencyId
 			JOIN tblSMCurrency			CurrentType			ON	  CurrentType.intCurrencyID		  =	CurrentRow.intCurrencyId
 			JOIN tblSMCurrency			PreviousType		ON	  PreviousType.intCurrencyID	  =	PreviousRow.intCurrencyId
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '3.Pricing' and strDataIndex = 'intCurrencyId')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 			
 			--FutureMonth
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -876,7 +888,8 @@ BEGIN TRY
 			JOIN @tblDetail				 PreviousRow		ON	ISNULL(CurrentRow.intFutureMonthId  ,0)   <>  ISNULL(PreviousRow.intFutureMonthId ,0)
 			LEFT JOIN tblRKFuturesMonth	 CurrentType		ON	ISNULL(CurrentType.intFutureMonthId ,0)    =	ISNULL(CurrentRow.intFutureMonthId	,0)
 			LEFT JOIN tblRKFuturesMonth	 PreviousType		ON	ISNULL(PreviousType.intFutureMonthId,0)	 =	ISNULL(PreviousRow.intFutureMonthId	,0)
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '3.Pricing' and strDataIndex = 'intFutureMonthId')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 				and PreviousType.strFutureMonth <> CurrentType.strFutureMonth
 			
 			--Futures
@@ -893,7 +906,8 @@ BEGIN TRY
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0)
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '3.Pricing' and strDataIndex = 'dblFutures')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 			and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 			
 			--Basis
@@ -910,7 +924,8 @@ BEGIN TRY
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords          ON   NewRecords.intSequenceHistoryId  = CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.dblBasis,0)    <> ISNULL(PreviousRow.dblBasis,0)
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '3.Pricing' and strDataIndex = 'dblBasis')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 
 			--CashPrice
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -926,7 +941,8 @@ BEGIN TRY
 			FROM tblCTSequenceHistory	CurrentRow
 			JOIN @SCOPE_IDENTITY		NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.dblCashPrice,0)  <> ISNULL(PreviousRow.dblCashPrice,0)
-			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '3.Pricing' and strDataIndex = 'dblCashPrice')	tblAmendment
+			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 			and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 			
 			--Cash Price UOM
@@ -947,8 +963,9 @@ BEGIN TRY
 			JOIN	tblICUnitMeasure	U2					ON	  U2.intUnitMeasureId		      =	PU.intUnitMeasureId
 			JOIN	tblICItemUOM		PU1					ON	  PU1.intItemUOMId				  =	PreviousRow.intPriceItemUOMId	
 			JOIN	tblICUnitMeasure	U21					ON	  U21.intUnitMeasureId			  =	PU1.intUnitMeasureId
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '3.Pricing' and strDataIndex = 'intPriceItemUOMId')	tblAmendment
 			WHERE U2.intUnitMeasureId <> U21.intUnitMeasureId
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 
 			--Book
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -966,8 +983,9 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			LEFT JOIN tblCTBook newBook on ISNULL(newBook.intBookId,0) = ISNULL(CurrentRow.intBookId,0)
 			LEFT JOIN tblCTBook oldBook on ISNULL(oldBook.intBookId,0) = ISNULL(PreviousRow.intBookId,0)
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intBookId')	tblAmendment
 			WHERE ISNULL(oldBook.intBookId,0) <> ISNULL(newBook.intBookId,0)
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
 			
 			--Sub Book
 			UNION SELECT intSequenceHistoryId    = NewRecords.intSequenceHistoryId
@@ -985,8 +1003,9 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			LEFT JOIN tblCTSubBook newSubBook on ISNULL(newSubBook.intSubBookId,0) = ISNULL(CurrentRow.intSubBookId,0)
 			LEFT JOIN tblCTSubBook oldSubBook on ISNULL(oldSubBook.intSubBookId,0) = ISNULL(PreviousRow.intSubBookId,0)
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intSubBookId')	tblAmendment
 			WHERE ISNULL(oldSubBook.intSubBookId,0) <> ISNULL(newSubBook.intSubBookId,0)
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	 and tblAmendment.ysnAmendment = 1
 
 
 			--Garden
@@ -1005,8 +1024,9 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY		NewRecords			ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
 			LEFT JOIN tblQMGardenMark newGarden on ISNULL(newGarden.intGardenMarkId,0) = ISNULL(CurrentRow.intGardenMarkId,0)
 			LEFT JOIN tblQMGardenMark oldGarden on ISNULL(oldGarden.intGardenMarkId,0) = ISNULL(PreviousRow.intGardenMarkId,0)
+			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intGardenMarkId')	tblAmendment
 			WHERE ISNULL(oldGarden.intGardenMarkId,0) <> ISNULL(newGarden.intGardenMarkId,0)
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	  and tblAmendment.ysnAmendment = 1
 				
 			--intINCOLocationTypeId
 			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId

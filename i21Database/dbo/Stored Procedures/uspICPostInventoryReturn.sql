@@ -354,27 +354,46 @@ BEGIN
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = ReceiptItem.intItemId
-			LEFT JOIN (
-				SELECT  AggregrateLot.intInventoryReceiptItemId
-						,TotalLotQtyInItemUOM = SUM(
-							dbo.fnCalculateQtyBetweenUOM(
-								ISNULL(AggregrateLot.intItemUnitMeasureId, tblICInventoryReceiptItem.intUnitMeasureId)
-								,tblICInventoryReceiptItem.intUnitMeasureId
-								,AggregrateLot.dblQuantity
-							)
+			--LEFT JOIN (
+			--	SELECT  AggregrateLot.intInventoryReceiptItemId
+			--			,TotalLotQtyInItemUOM = SUM(
+			--				dbo.fnCalculateQtyBetweenUOM(
+			--					ISNULL(AggregrateLot.intItemUnitMeasureId, tblICInventoryReceiptItem.intUnitMeasureId)
+			--					,tblICInventoryReceiptItem.intUnitMeasureId
+			--					,AggregrateLot.dblQuantity
+			--				)
+			--			)
+			--			,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
+			--	FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
+			--				ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+			--			INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
+			--				ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
+			--	WHERE	
+			--		tblICInventoryReceipt.strReceiptNumber = @strTransactionId
+			--		AND AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed')
+			--	GROUP BY 
+			--		AggregrateLot.intInventoryReceiptItemId
+			--) ItemLot
+			--	ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			OUTER APPLY (
+				SELECT 
+					TotalLotQtyInItemUOM = SUM(
+						dbo.fnCalculateQtyBetweenUOM(
+							ISNULL(AggregrateLot.intItemUnitMeasureId, RI.intUnitMeasureId)
+							,RI.intUnitMeasureId
+							,AggregrateLot.dblQuantity
 						)
-						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
-				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
-							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
-						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
-							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
-				WHERE	
-					tblICInventoryReceipt.strReceiptNumber = @strTransactionId
-					AND AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed')
+					)
+					,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
+				FROM 
+					tblICInventoryReceiptItemLot AggregrateLot INNER JOIN tblICInventoryReceiptItem RI
+						ON AggregrateLot.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+				WHERE
+					AggregrateLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+					AND (AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed') OR AggregrateLot.strCondition IS NULL)
 				GROUP BY 
 					AggregrateLot.intInventoryReceiptItemId
 			) ItemLot
-				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
 			AND Receipt.strReceiptNumber = @strTransactionId
 			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
@@ -453,6 +472,13 @@ BEGIN
 		GOTO With_Rollback_Exit; 
 	END 
 END
+
+-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+BEGIN
+	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+	EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
+END 
 
 -- Get the next batch number
 BEGIN	

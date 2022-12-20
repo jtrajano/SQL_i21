@@ -56,6 +56,8 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        ,B.intSubledgerId
        ,L.strLedgerName COLLATE Latin1_General_CI_AS strLedgerName
        ,LD.strLedgerName COLLATE Latin1_General_CI_AS strSubledgerName
+       ,A.intCompanyLocationId
+       ,A.intCompanySegmentId
 
        FROM tblGLJournal A
        INNER JOIN tblGLJournalDetail B

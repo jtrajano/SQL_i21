@@ -2855,3 +2855,46 @@ BEGIN
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 130
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+		,ysnMultiSelect
+		,strSQL
+        )
+    SELECT 130
+        ,'Release Blendsheet by No of Mixes'
+        ,5
+        ,2
+		,0
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 131
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 131
+		,'Test Name'
+		,5
+		,1
+		,'Select convert(varchar,intTestId) as ValueMember,strTestName as DisplayMember from tblQMTest Order by intTestId'
+END
+GO

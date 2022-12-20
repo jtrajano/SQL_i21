@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetInventoryShipmentInvoicePriceCharges]
+﻿ CREATE VIEW [dbo].[vyuICGetInventoryShipmentInvoicePriceCharges]
 AS 
 
 SELECT	Shipment.intInventoryShipmentId
@@ -24,7 +24,7 @@ SELECT	Shipment.intInventoryShipmentId
 		,dtmLastInvoiceDate = topInvoice.dtmDate
 		,strAllVouchers = CAST( ISNULL(allLinkedInvoiceId.strInvoiceIds, 'New Invoice') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
 		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
-		
+		,strContractNumber = ContractHeader.strContractNumber
 FROM	tblICInventoryShipment Shipment 
 		INNER JOIN tblICInventoryShipmentCharge ShipmentCharge
 			ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
@@ -36,6 +36,9 @@ FROM	tblICInventoryShipment Shipment
 
 		LEFT JOIN tblEMEntityLocation toLocation
 			ON toLocation.intEntityLocationId = Shipment.intShipToLocationId
+
+		LEFT JOIN tblCTContractHeader ContractHeader 
+			ON ContractHeader.intContractHeaderId = ShipmentCharge.intContractId
 
 		OUTER APPLY (
 			SELECT	QtyShipped = 1

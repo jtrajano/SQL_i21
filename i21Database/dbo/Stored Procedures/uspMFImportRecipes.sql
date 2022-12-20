@@ -39,6 +39,7 @@ DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@dtmValidTo DATETIME
 	,@ysnRecipeHeaderValidation BIT
 
+
 SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
 SELECT @ysnRecipeBySite = IsNULL(ysnRecipeBySite, 0)
@@ -542,6 +543,7 @@ BEGIN
 		SELECT @intSubLocationId = NULL
 
 		SELECT @ysnVirtualRecipe = NULL
+				,@dtmValidFrom=NULL
 
 		--Margin By
 		UPDATE tblMFRecipeStage
@@ -561,6 +563,7 @@ BEGIN
 			,@strERPRecipeNo = strERPRecipeNo
 			,@strSubLocationName = strSubLocationName
 			,@ysnVirtualRecipe = ysnVirtualRecipe
+			,@dtmValidFrom=strValidFrom
 		FROM tblMFRecipeStage
 		WHERE intRecipeStageId = @intMinId
 
@@ -695,7 +698,7 @@ BEGIN
 				,IsNULL(s.[strVersionNo], @intVersionNo)
 				,rt.intRecipeTypeId
 				,mp.intManufacturingProcessId
-				,0
+				,(Case When @ysnRecipeHeaderValidation =1 Then s.intActive Else 0 End)
 				,@intCustomerId
 				,@intFarmFieldId
 				,ct.intCostTypeId
@@ -1740,7 +1743,7 @@ BEGIN
 					AND intLocationId = @intLocationId
 					AND @dtmCurrentDate BETWEEN IsNULL(dtmValidFrom, @dtmCurrentDate)
 						AND IsNULL(dtmValidTo, @dtmCurrentDate)
-				)
+				) and @ysnRecipeHeaderValidation =0
 			--AND IsNULL(intSubLocationId,0)=(Case When @ysnRecipeBySite =1 Then IsNULL(@intSubLocationId,0)else IsNULL(intSubLocationId,0) end)
 		BEGIN
 			UPDATE tblMFRecipe

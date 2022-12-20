@@ -82,6 +82,8 @@ FROM (
 			, m.strFutureMonth
 			, ot.strOptionType
 			, ot.dblStrike
+			, intOptionMonthId = ot.intOptionMonthId
+			, strOptionMonth = om.strOptionMonth
 		FROM tblRKFutOptTransaction ot
 		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId  and ot.strStatus='Filled'
 		JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
@@ -90,6 +92,7 @@ FROM (
 		LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId  
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId 
+		LEFT JOIN tblRKOptionsMonth om on om.intOptionMonthId = ot.intOptionMonthId
 		where intSelectedInstrumentTypeId in(1,3) and  ot.intInstrumentTypeId IN(1,2)
 	) t
 ) t1  where dblBalanceLot > 0

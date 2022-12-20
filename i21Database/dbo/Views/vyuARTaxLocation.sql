@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuARTaxLocation]
+﻿CREATE VIEW dbo.vyuARTaxLocation
 AS 
 SELECT 
 	 intTaxLocationId	= intCompanyLocationId

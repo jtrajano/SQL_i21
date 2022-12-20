@@ -63,7 +63,7 @@ SELECT
 	,[dblQty]					= (CASE WHEN ARID.[intInventoryShipmentItemId] IS NOT NULL AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ARID.[intLoadDetailId] IS NOT NULL AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
 										WHEN ARID.[intLoadDistributionDetailId] IS NOT NULL THEN ISNULL(NULLIF(ARID.[dblQtyUnitOrGross], 0), ISNULL(ARIDL.[dblQuantityShipped], ARID.[dblQtyShipped]))
-										WHEN ARIDL.[intLotId] IS NULL OR LOT.[intItemUOMId] = ARID.[intItemUOMId] OR LOT.[intWeightUOMId] IS NULL THEN CASE WHEN ysnSeparateStockForUOMs = 0 THEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIUOM_STOCK.intItemUOMId, ARID.[dblQtyShipped]) ELSE ARID.[dblQtyShipped] END
+										WHEN ARIDL.[intLotId] IS NULL OR LOT.[intItemUOMId] = ARID.[intItemUOMId] OR LOT.[intWeightUOMId] IS NULL THEN CASE WHEN ysnSeparateStockForUOMs = 0 THEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIUOM_STOCK.intItemUOMId, ISNULL(ARIDL.[dblQuantityShipped], ARID.[dblQtyShipped])) ELSE ISNULL(ARIDL.[dblQuantityShipped], ARID.[dblQtyShipped]) END
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ISNULL(NULLIF(ARIDL.[dblWeightPerQty], 0), 1))
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
@@ -147,7 +147,7 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
 		)
 	AND ARID.[intItemId] IS NOT NULL
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
-	AND ARID.[strTransactionType] NOT IN ('Debit Memo', 'Tax Adjustment')
+	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND ARID.[intStorageScheduleTypeId] IS NULL
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NULL)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NOT NULL))))
@@ -250,7 +250,7 @@ WHERE (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest')
     AND ARID.[ysnImpactInventory] = 1
 	AND ARID.[intItemId] IS NOT NULL
 	AND ARIC.[intBundleItemId] IS NOT NULL
-	AND ARID.[strTransactionType] NOT IN ('Debit Memo', 'Tax Adjustment')
+	AND ARID.[strTransactionType] <> 'Debit Memo'	
 	AND ARID.[strItemType] = 'Bundle'
 	AND ICI.[strType] <> 'Non-Inventory'
 	AND ARID.[intStorageScheduleTypeId] IS NULL

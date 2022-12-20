@@ -47,7 +47,8 @@ RETURNS @returntable	TABLE
 	intNoOfLoad				INT,
 	dblQuantityPerLoad		NUMERIC(18,6),
 	intInvoiceCurrencyId	INT,
-	strInvoiceCurrency		NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	strInvoiceCurrency		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	intItemId				INT
 )
 AS
 BEGIN
@@ -64,7 +65,7 @@ BEGIN
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
 				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
 				dblRatio,						dblBalance,					dblAppliedQty,					intNoOfLoad,
-				dblQuantityPerLoad,				intInvoiceCurrencyId,		strInvoiceCurrency
+				dblQuantityPerLoad,				intInvoiceCurrencyId,		strInvoiceCurrency,				intItemId
 
 		FROM	vyuCTContractSequence WHERE intContractDetailId = @intContractDetailId
 	ELSE
@@ -79,7 +80,7 @@ BEGIN
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
 				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
 				dblRatio,						dblBalance,					dblAppliedQty,					intNoOfLoad,
-				dblQuantityPerLoad,				intInvoiceCurrencyId,		strInvoiceCurrency
+				dblQuantityPerLoad,				intInvoiceCurrencyId,		strInvoiceCurrency,				intItemId
 				
 		FROM	vyuCTContractSequence WHERE intContractHeaderId = @intContractHeaderId
 	RETURN;

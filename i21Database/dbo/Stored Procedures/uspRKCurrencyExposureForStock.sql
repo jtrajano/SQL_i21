@@ -29,7 +29,7 @@ BEGIN
 																							WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId
 																							ORDER BY 1 DESC), @dtmClosingPrice)
 			, dblMarketPremium = [dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId, @intCurrencyId, DEFAULT)
-								* dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, um.intUnitMeasureId, fm.intUnitMeasureId, dblBasis)
+								* dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, um.intUnitMeasureId, fm.intUnitMeasureId, cd.dblBasis)
 			, strMarketPremiumUOM = (c.strCurrency + '/' + um.strUnitMeasure) COLLATE Latin1_General_CI_AS
 			, strMarketPriceUOM = cur.strCurrency
 			, l.dblQty

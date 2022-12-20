@@ -15,7 +15,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-SELECT @intSourceLetterId = intSourceLetterId FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+SELECT @intSourceLetterId 	= intSourceLetterId
+	 , @ysnSystemDefined	= ysnSystemDefined
+FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+
 	IF (@intSourceLetterId IS NULL OR @intSourceLetterId = '')
 	BEGIN
 		SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId

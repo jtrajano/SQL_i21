@@ -12,8 +12,8 @@ SELECT
     A.strVendorLotNumber,--unique
     A.intBuyingCenterLocationId, -- company id--unique
     strCompanyLocation = CL.strLocationName, -- company 
-    BC.strBuyingCenterLocation,
-    MU.strMixingUnitLocation,
+    BC.strLocationName strBuyingCenterLocation,
+    MU.strLocationName strMixingUnitLocation,
     A.intStorageLocationId, --- sub location id
     strStorageLocation = D.strSubLocationName, -- sub location
     A.intStorageUnitId, --- ic location
@@ -46,7 +46,7 @@ SELECT
     A.ysnEUCompliant,
     A.strTBOEvaluatorCode,
     A.strEvaluatorRemarks,
-    A.dtmExpiration,
+    Item.dtmExpiration,
     A.intFromPortId,
     A.dblGrossWeight, -- = dblTotalQuantity + dblTareWeight,
     A.dtmInitialBuy,
@@ -121,61 +121,59 @@ SELECT
     Reason.strReasonCode,
     LOT.strLotNumber,
     LOT.intLotId,
-    A.intLocationId
+    A.intLocationId,
+    Garden.strGardenMark
+    ,A.dblOriginalTeaTaste  
+	,A.dblOriginalTeaHue 
+	,A.dblOriginalTeaIntensity
+	,A.dblOriginalTeaMouthfeel
+	,A.dblOriginalTeaAppearance
+	,A.dblOriginalTeaVolume
+	,A.dblOriginalTeaMoisture
+    ,Channel.strMarketZoneCode
+    ,OriginalItem.strItemNo strOriginalItem
+    ,SM.strCurrency
+	,A.strERPPOLineNo
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
+LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
+LEFT JOIN tblARMarketZone Channel ON Channel.intMarketZoneId = A.intMarketZoneId
+LEFT JOIN tblICItem OriginalItem ON OriginalItem.intItemId = A.intOriginalItemId
+LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intLocationId
+LEFT JOIN tblSMCompanyLocation BC ON BC.intCompanyLocationId = A.intBuyingCenterLocationId
+LEFT JOIN tblSMCompanyLocation MU ON MU.intCompanyLocationId = A.intMixingUnitLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation BR ON BR.intCompanyLocationSubLocationId = A.intBrokerWarehouseId
+LEFT JOIN tblSMCompanyLocationSubLocation D ON D.intCompanyLocationSubLocationId = A.intStorageLocationId
+LEFT JOIN tblICStorageLocation E ON A.intStorageUnitId = E.intStorageLocationId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId= A.intItemUOMId
+LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId= A.intWeightUOMId
+LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId= A.intPackageUOMId
+LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = A.intBrokerId
+LEFT JOIN tblMFReasonCode Reason ON Reason.intReasonCodeId = A.intReasonCodeId
+LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID= A.intCurrencyId
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  
     WHERE intBatchId = A.intBatchId 
 )TIN
 OUTER APPLY(
-    SELECT TOP 1 strLocationName 
-    FROM tblSMCompanyLocation 
-    WHERE intCompanyLocationId = A.intLocationId    
-)CL
-OUTER APPLY(
-    SELECT TOP 1 strLocationName strBuyingCenterLocation
-    FROM tblSMCompanyLocation 
-    WHERE intCompanyLocationId = A.intBuyingCenterLocationId    
-)BC
-OUTER APPLY(
-    SELECT TOP 1 strLocationName strMixingUnitLocation
-    FROM tblSMCompanyLocation 
-    WHERE intCompanyLocationId = A.intMixingUnitLocationId    
-)MU
-OUTER APPLY( 
-    SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
-    WHERE A.intBrokerWarehouseId = intCompanyLocationSubLocationId
-)BR
-OUTER APPLY( 
-    SELECT TOP 1 strSubLocationName FROM tblSMCompanyLocationSubLocation 
-    WHERE A.intStorageLocationId = intCompanyLocationSubLocationId
-)D
-OUTER APPLY( 
-    SELECT TOP 1 strName FROM tblICStorageLocation ICS
-    WHERE A.intStorageUnitId = ICS.intStorageLocationId
-)E
-OUTER APPLY(
-    SELECT TOP 1 strItemNo,strDescription, strShortName  FROM tblICItem WHERE intItemId = A.intTealingoItemId
+    SELECT TOP 1 strItemNo,strDescription, strShortName,
+    CASE WHEN ISNULL(intLifeTime,0) > 0 AND A.dtmProductionBatch IS NOT NULL
+    THEN
+    CASE 
+        WHEN  strLifeTimeType = 'Years' THEN DATEADD( YEAR, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Months' THEN DATEADD( MONTH, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Days' THEN DATEADD( DAY, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Hours' THEN DATEADD( HOUR, intLifeTime, A.dtmProductionBatch)
+        WHEN  strLifeTimeType = 'Minutes' THEN DATEADD( MINUTE, intLifeTime, A.dtmProductionBatch)
+        ELSE NULL END
+    ELSE 
+    NULL 
+    END dtmExpiration
+    FROM tblICItem WHERE intItemId = A.intTealingoItemId
 )Item
-OUTER APPLY(
-	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intItemUOMId
-)UOM
-OUTER APPLY(
-	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intWeightUOMId
-)WUOM
-OUTER APPLY(
-	SELECT top 1 strUnitMeasure  FROM tblICUnitMeasure WHERE intUnitMeasureId= A.intPackageUOMId
-)PUOM
-OUTER APPLY(
-    SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = A.intBrokerId
-)Broker
 OUTER APPLY(
     SELECT TOP 1 MF.intLotId, IC.strLotNumber
     FROM tblMFLotInventory MF JOIN tblICLot IC ON MF.intLotId = IC.intLotId 
     WHERE MF.intBatchId = A.intBatchId
 )LOT
-OUTER APPLY (
-    SELECT TOP 1  strReasonCode FROM tblMFReasonCode WHERE intReasonCodeId = A.intReasonCodeId
-)Reason

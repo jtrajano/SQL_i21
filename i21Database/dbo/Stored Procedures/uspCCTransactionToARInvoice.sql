@@ -82,6 +82,7 @@ BEGIN
         ,[ysnInventory]
 		,[intSalesAccountId]
 		,[strComments]
+		,[dtmDueDate]
 		--,[intInvoiceId]
     )
     SELECT [strTransactionType] =  CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN 'Debit Memo'
@@ -117,6 +118,11 @@ BEGIN
         ,[ysnInventory] = 1
 		,[intSalesAccountId] = ItemAcc.intAccountId
 		,[strComments] = ccSiteHeader.strCcdReference
+		, CASE 
+			WHEN ccSiteHeader.strApType = 'Credit On Account' THEN ccSiteHeader.dtmDate 
+			WHEN ccSiteHeader.strApType = 'Cash Deposited' THEN ccSiteHeader.dtmDate 
+			ELSE NULL 
+		  END
 		--,[intInvoiceId] = ARInvoiceDetail.intInvoiceId
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
@@ -135,6 +141,23 @@ BEGIN
 	--and those sites that does not have customer
     DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null OR dblPrice = 0
 	
+	
+	--CHECK Inactive users
+	IF(@Post = 1)
+		BEGIN
+		DECLARE @InvalidCustomerName AS NVARCHAR(100)
+		DECLARE @InvalidCustomerID AS INT
+		SELECT TOP 1 @InvalidCustomerName = C.strCustomerName , @InvalidCustomerID = intCustomerId  FROM @EntriesForInvoice A INNER JOIN vyuCCCustomer C ON A.intEntityCustomerId = C.intCustomerId WHERE C.ysnActive = 0 
+		IF NOT @InvalidCustomerID IS NULL
+		BEGIN
+			SET @success = 0
+		
+			SET @ErrorMessage = 'Customer: ' + @InvalidCustomerName  + ' is not active!'
+			SET @success = 0;
+			RAISERROR(@ErrorMessage, 16, 1);
+		END
+	END
+
 	DECLARE @strSourceId NVARCHAR(200) = NULL
 
 	DECLARE @CursorTran AS CURSOR
@@ -178,6 +201,7 @@ BEGIN
 			,[ysnInventory]
 			,[intSalesAccountId]
 			,[strComments]
+			,[dtmDueDate]
 		)
 		SELECT [strTransactionType]
 			,[strSourceTransaction]
@@ -203,6 +227,7 @@ BEGIN
 			,[ysnInventory]
 			,[intSalesAccountId]
 			,[strComments]
+			,[dtmDueDate]
 		FROM @EntriesForInvoice WHERE strSourceId = @strSourceId
 
 		IF(@Post = 1)

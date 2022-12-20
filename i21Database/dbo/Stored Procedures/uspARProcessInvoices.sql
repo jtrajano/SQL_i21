@@ -224,21 +224,9 @@ DECLARE  @Id									INT
 		,@UpdateAvailableDiscount				BIT
 		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
-		,@TransactionNo							NVARCHAR(50)
-		,@BankId								INT
-		,@BankAccountId							INT
-		,@BorrowingFacilityId					INT
-		,@BorrowingFacilityLimitId				INT
-		,@BankReferenceNo						NVARCHAR(100)
-		,@BankTradeReference					NVARCHAR(100)
-		,@LoanAmount							NUMERIC(18, 6)
-		,@BankValuationRuleId					INT
-		,@TradeFinanceComments					NVARCHAR(MAX)
-		,@GoodsStatus							NVARCHAR(100)
 		,@FreightCharge							NUMERIC(18, 6)
 		,@FreightCompanySegment					INT
 		,@FreightLocationSegment				INT
-		,@SourcedFrom							NVARCHAR(100)
 		,@TaxLocationId							INT
 		,@TaxPoint								NVARCHAR(50)
 		,@Surcharge								NUMERIC(18, 6)
@@ -452,18 +440,6 @@ BEGIN
         ,@FromProvisional               = ISNULL([ysnFromProvisional], 0)
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
-		,@ImportFormat					= [strImportFormat]
-		,@TransactionNo					= [strTradeFinanceNo]
-		,@BankId						= [intBankId]
-		,@BankAccountId					= [intBankAccountId]
-		,@BorrowingFacilityId			= [intBorrowingFacilityId]
-		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
-		,@BankReferenceNo				= [strBankReferenceNo]
-		,@BankTradeReference			= [strBankTradeReference]
-		,@LoanAmount					= [dblLoanAmount]
-		,@BankValuationRuleId			= [intBankValuationRuleId]
-		,@TradeFinanceComments			= [strTradeFinanceComments]
-		,@GoodsStatus					= [strGoodsStatus]
 		,@FreightCharge					= [dblFreightCharge]
 		,@FreightCompanySegment			= [intFreightCompanySegment]
 		,@FreightLocationSegment		= [intFreightLocationSegment]
@@ -600,7 +576,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intShipmentId'
 				SET @SourceTable = 'tblLGShipment'
-				SET @SourcedFrom = 'Logistics'
 			END
 
 			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
@@ -625,7 +600,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intInventoryShipmentId'
 				SET @SourceTable = 'tblICInventoryShipment'
-				SET @SourcedFrom = 'Inventory Shipment'
 			END		
 
 			IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
@@ -638,7 +612,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intLoadId'
 				SET @SourceTable = 'tblLGLoad'
-				SET @SourcedFrom = 'Logistics'
 			END
 
 			IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
@@ -651,7 +624,6 @@ BEGIN
 			BEGIN
 				SET @SourceColumn = 'intSettleStorageId'
 				SET @SourceTable = 'tblGRSettleStorage'
-				SET @SourcedFrom = 'Settle Storage'
 			END
 
 			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim', 'Settle Storage')
@@ -762,22 +734,9 @@ BEGIN
 			,@SourceId						= @NewSourceId
 			,@ImportFormat					= @ImportFormat
 			,@TruckDriverId					= @TruckDriverId
-			,@TruckDriverReferenceId		= @TruckDriverReferenceId
-			,@TransactionNo					= @TransactionNo
-			,@BankId						= @BankId
-			,@BankAccountId					= @BankAccountId
-			,@BorrowingFacilityId			= @BorrowingFacilityId
-			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
-			,@BankReferenceNo				= @BankReferenceNo
-			,@BankTradeReference			= @BankTradeReference
-			,@LoanAmount					= @LoanAmount
-			,@BankValuationRuleId			= @BankValuationRuleId
-			,@TradeFinanceComments			= @TradeFinanceComments
-			,@GoodsStatus					= @GoodsStatus
 			,@FreightCharge					= @FreightCharge
 			,@FreightCompanySegment			= @FreightCompanySegment
 			,@FreightLocationSegment		= @FreightLocationSegment
-			,@SourcedFrom					= @SourcedFrom
 			,@TaxLocationId					= @TaxLocationId
 			,@TaxPoint						= @TaxPoint
 			,@Surcharge						= @Surcharge
@@ -1637,7 +1596,7 @@ BEGIN TRY
 			[tblARInvoice]
 		SET 
 			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment', 'Proforma Invoice') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
-			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'Agronomy') THEN [tblARInvoice].[strType] ELSE @Type END
+			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store End of Day', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'Agronomy') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
 			--,[intAccountId]				= @AccountId 

@@ -64,6 +64,7 @@ INSERT INTO tblGLPostRecap (
 		,strOverrideAccountError
 		,strNewAccountIdOverride
 		,ysnIntraCompanyEntry
+		,intLOBSegmentOverrideId
 		,[intConcurrencyId]
 )
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
@@ -109,6 +110,7 @@ SELECT	[dtmDate]
 		,strOverrideAccountError
 		,strNewAccountIdOverride
 		,ysnIntraCompanyEntry
+		,intLOBSegmentOverrideId
 		,[intConcurrencyId] = 1
 FROM	@RecapTable udtRecap LEFT JOIN tblGLAccount gl
 			ON udtRecap.intAccountId = gl.intAccountId

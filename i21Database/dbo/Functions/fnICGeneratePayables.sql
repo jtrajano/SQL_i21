@@ -613,7 +613,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 
 WHERE 
 	A.intInventoryReceiptId = @intReceiptId
-	AND A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
+	AND A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order','Approved Quality') 
 	AND A.ysnPosted = @ysnPosted 
 	AND (
 		Billed.dblQty IS NULL

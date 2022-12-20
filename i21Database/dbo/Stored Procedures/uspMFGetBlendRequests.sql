@@ -17,6 +17,7 @@ If @intWorkOrderId=0
 			WHEN 7 THEN bg.dblJul WHEN 8 THEN bg.dblAug WHEN 9 THEN bg.dblSep WHEN 10 THEN bg.dblOct WHEN 11 THEN bg.dblNov WHEN 12 THEN bg.dblDec 
 		END AS dblAffordabilityCost,
 	CompanyLocation.strLocationName AS strCompanyLocationName
+	,a.strReferenceNo AS strERPOrderNo
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
@@ -37,6 +38,7 @@ If @intWorkOrderId>0
 	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,a.intManufacturingCellId,
 	h.dblStandardCost,f.intManufacturingProcessId,
 	CompanyLocation.strLocationName AS strCompanyLocationName
+	,f.strERPOrderNo AS strERPOrderNo
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
@@ -55,6 +57,7 @@ If @intWorkOrderId<0
 	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,a.intManufacturingCellId,
 	h.dblStandardCost,
 	CompanyLocation.strLocationName AS strCompanyLocationName
+	,a.strReferenceNo AS strERPOrderNo
 	from tblMFBlendRequirement a 
 	Join tblICItem b on a.intItemId=b.intItemId 
 	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 

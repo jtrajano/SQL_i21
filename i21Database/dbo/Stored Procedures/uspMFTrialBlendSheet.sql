@@ -1,61 +1,71 @@
-﻿CREATE PROCEDURE [dbo].[uspMFTrialBlendSheet] 
-(
-	@intWorkOrderId INT,
-	@intWorkOrderInputLotId INT,
-	@ysnKeep nvarchar(10) = NULL,
-	@type nvarchar(50) = NULL,
-	@UserId int = NULL	
-)
+﻿CREATE PROCEDURE [dbo].[uspMFTrialBlendSheet] (
+	@intWorkOrderId INT
+	,@intWorkOrderInputLotId INT
+	,@ysnKeep NVARCHAR(10) = NULL
+	,@type NVARCHAR(50) = NULL
+	,@UserId INT = NULL
+	,@dblTBSQuantity NUMERIC(18, 6) = 0
+	)
 AS
 BEGIN
-
-	IF @type = 'Confirm' 
+	IF @type = 'Confirm'
 	BEGIN
-
-	IF @ysnKeep IS NOT NULL
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderInputLot
+				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+					AND IsNULL(ysnTBSReserved, 0) = 0
+				)
 		BEGIN
-
-		UPDATE tblMFWorkOrderInputLot SET ysnKeep = CASE WHEN @ysnKeep = 'true'  THEN 1 ELSE 0 END
-		WHERE intWorkOrderId = @intWorkOrderId 
-		AND intWorkOrderInputLotId = @intWorkOrderInputLotId  
-			
+			EXEC [dbo].[uspMFUpdateTrialBlendSheetReservation] @intWorkOrderId
+				,@intWorkOrderInputLotId
 		END
-	
-		UPDATE tblMFWorkOrder 
-		SET  
-		intTrialBlendSheetStatusId  = 15,
-		intConfirmedBy = @UserId,
-		dtmConfirmedDate = GETDATE()
-		WHERE intWorkOrderId = @intWorkOrderId 
-		EXEC [dbo].[uspMFUpdateTrialBlendSheetReservation] @intWorkOrderId
 
+		IF @ysnKeep IS NOT NULL
+		BEGIN
+			UPDATE tblMFWorkOrderInputLot
+			SET ysnKeep = CASE 
+					WHEN @ysnKeep = 'true'
+						THEN 1
+					ELSE 0
+					END
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intWorkOrderInputLotId = @intWorkOrderInputLotId
+		END
+
+		IF @dblTBSQuantity <> 0
+		BEGIN
+			UPDATE tblMFWorkOrderInputLot
+			SET dblTBSQuantity = @dblTBSQuantity
+				,ysnTBSReserved = 1
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intWorkOrderInputLotId = @intWorkOrderInputLotId
+		END
+
+		UPDATE tblMFWorkOrder
+		SET intTrialBlendSheetStatusId = 15
+			,intConfirmedBy = @UserId
+			,dtmConfirmedDate = GETDATE()
+		WHERE intWorkOrderId = @intWorkOrderId
 	END
 
-
-	IF @type = 'Delete' 
+	IF @type = 'Delete'
 	BEGIN
-
-		DELETE FROM  tblMFWorkOrderInputLot
-		WHERE intWorkOrderId = @intWorkOrderId 
-		AND intWorkOrderInputLotId = @intWorkOrderInputLotId 
-		AND ysnKeep = 0
+		UPDATE tblMFWorkOrderInputLot
+		SET ysnKeep = 0
+			,ysnTBSReserved = 0
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 		EXEC [dbo].[uspMFDeleteTrialBlendSheetReservation] @intWorkOrderId
-
+			,@intWorkOrderInputLotId
 	END
 
-	IF @type = 'Approve' 
+	IF @type = 'Approve'
 	BEGIN
-
-		UPDATE tblMFWorkOrder 
-		SET  
-		intTrialBlendSheetStatusId  = 17,
-		intApprovedBy = @UserId,
-		dtmApprovedDate = GETDATE()
-		WHERE intWorkOrderId = @intWorkOrderId 
-		EXEC [dbo].[uspMFUpdateTrialBlendSheetReservation] @intWorkOrderId
-
+		UPDATE tblMFWorkOrder
+		SET intTrialBlendSheetStatusId = 17
+			,intApprovedBy = @UserId
+			,dtmApprovedDate = GETDATE()
+		WHERE intWorkOrderId = @intWorkOrderId
 	END
-
 END
-

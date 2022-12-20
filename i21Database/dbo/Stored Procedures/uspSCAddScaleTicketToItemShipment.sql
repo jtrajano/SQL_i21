@@ -163,6 +163,9 @@ BEGIN
 		,intItemContractHeaderId 
 		,intItemContractDetailId
 
+		,dblBasis
+		,dblFutures
+		,strFuturesMonth
 		
 	)
 
@@ -308,6 +311,9 @@ BEGIN
 									END
 		,intItemContractHeaderId = ICT.intItemContractHeaderId
 		,intItemContractDetailId = ICT.intItemContractDetailId
+		,dblBasis					= CNT.dblBasis
+		,dblFutures					= CNT.dblFutures
+		,strFuturesMonth			= CNT.strFuturesMonth
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -333,9 +339,14 @@ BEGIN
 			,CU.ysnSubCurrency
 			,CTH.ysnLoad
 			,ISNULL(PCD.dblQuantity,0) - ISNULL(PCDInvoice.dblQtyShipped,0) dblAvailablePriceContractQty
+			,CTD.dblBasis
+			,CTD.dblFutures
+			,FUTURES_MONTH.strFutureMonth as strFuturesMonth
 			FROM tblCTContractDetail CTD 
 			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+			LEFT JOIN tblRKFuturesMonth FUTURES_MONTH
+				ON CTD.intFutureMonthId = FUTURES_MONTH.intFutureMonthId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 			CROSS APPLY (
 				SELECT  SUM(PFD.dblQuantity) dblQuantity FROM tblCTPriceFixation PF
@@ -1853,6 +1864,83 @@ END
 
 exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
 
+
+IF @ysnDestinationWeightGrade = 1
+BEGIN
+	DELETE FROM tblSCSnapShotTicketDiscount WHERE intTicketId = @intTicketId
+	DELETE FROM tblSCSnapShotTicket WHERE intTicketId = @intTicketId
+
+	INSERT INTO [tblSCSnapShotTicketDiscount]
+	(
+		[intConcurrencyId]     
+       ,[dblGradeReading]
+       ,[strCalcMethod]
+       ,[strShrinkWhat]
+       ,[dblShrinkPercent]
+       ,[dblDiscountAmount]
+       ,[dblDiscountDue]
+       ,[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]
+       ,[intTicketId]
+       ,[intTicketFileId]
+       ,[strSourceType]
+	   ,[intSort]
+	   ,[strDiscountChargeType]
+	)
+	SELECT 
+		[intConcurrencyId]     
+       ,[dblGradeReading]
+       ,[strCalcMethod]
+       ,[strShrinkWhat]
+       ,[dblShrinkPercent]
+       ,[dblDiscountAmount]
+       ,[dblDiscountDue]
+       ,[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]
+       ,[intTicketId]
+       ,[intTicketFileId]
+       ,[strSourceType]
+	   ,[intSort]
+	   ,[strDiscountChargeType]
+	FROM tblQMTicketDiscount
+		WHERE intTicketId = @intTicketId
+			AND strSourceType = 'Scale'
+
+
+	INSERT INTO tblSCSnapShotTicket(		
+		intTicketId
+		,dblGrossWeight
+		,dblGrossWeight1
+		,dblGrossWeight2
+		,dblTareWeight
+		,dblTareWeight1
+		,dblTareWeight2
+		,dblGrossUnits
+		,dblShrink
+		,dblNetUnits
+		,strItemUOM
+	)
+	SELECT 
+		intTicketId
+		,dblGrossWeight
+		,dblGrossWeight1
+		,dblGrossWeight2
+		,dblTareWeight
+		,dblTareWeight1
+		,dblTareWeight2
+		,dblGrossUnits
+		,dblShrink
+		,dblNetUnits
+		,strItemUOM
+	FROM tblSCTicket 
+		WHERE intTicketId = @intTicketId
+
+
+END
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
        ([intConcurrencyId]     

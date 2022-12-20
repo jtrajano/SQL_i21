@@ -181,7 +181,7 @@ BEGIN
 					, ComSubCurrency = c.ysnSubCurrency
 					, dblClosing = ISNULL(dblLastSettle, 0)
 					, intSelectedInstrumentTypeId
-				FROM fnRKGetOpenFutureByDateF360 (@intCommodityId, @dtmFromDate, @dtmToDate) ot
+				FROM fnRKGetOpenFutureByDate (@intCommodityId, @dtmFromDate, @dtmToDate, 1) ot
 				--JOIN tblRKFuturesMonth om ON om.intFutureMonthId = ot.intFutureMonthId AND ot.intInstrumentTypeId = 1
 				--JOIN tblRKBrokerageAccount acc ON acc.intBrokerageAccountId = ot.intBrokerageAccountId
 				--JOIN tblICCommodity icc ON icc.intCommodityId = ot.intCommodityId
@@ -195,64 +195,21 @@ BEGIN
 				LEFT JOIN #UnrealizedSettlePrice t ON t.intFutureMarketId = ot.intFutureMarketId AND t.intFutureMonthId = ot.intFutureMonthId
 				LEFT JOIN tblCTBook cb ON cb.intBookId = ot.intBookId
 				LEFT JOIN tblCTSubBook csb ON csb.intSubBookId = ot.intSubBookId
-				WHERE ( ot.intCommodityId IS NULL
-						OR  
-						(ot.intCommodityId = ISNULL(@intCommodityId, ot.intCommodityId))
-					  )
-					AND ( ot.intFutureMarketId IS NULL
-						OR  
-						(ot.intFutureMarketId = ISNULL(@intFutureMarketId, ot.intFutureMarketId))
-					  )
-					AND ( ot.intBookId IS NULL
-						OR  
-						(ot.intBookId = ISNULL(@intBookId, ot.intBookId))
-					  )
-					AND ( ot.intSubBookId IS NULL
-						OR  
-						(ot.intSubBookId = ISNULL(@intSubBookId, ot.intSubBookId))
-					  )
-					AND ( ot.intEntityId IS NULL
-						OR  
-						(ot.intEntityId = ISNULL(@intEntityId, ot.intEntityId))
-					  )
-					AND ( ot.intBrokerageAccountId IS NULL
-						OR  
-						(ot.intBrokerageAccountId = ISNULL(@intBrokerageAccountId, ot.intBrokerageAccountId))
-					  )
-					AND ( ot.intFutureMonthId IS NULL
-						OR  
-						(ot.intFutureMonthId = ISNULL(@intFutureMonthId, ot.intFutureMonthId))
-					  )
-					AND ( ot.strNewBuySell IS NULL
-						OR  
-						(ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell))
-					  )
-					AND ( ot.ysnExpired IS NULL
-						OR  
-						(ot.ysnExpired = ISNULL(@ysnExpired, ot.ysnExpired))
-					  )
-					AND ( ot.intSelectedInstrumentTypeId IS NULL
-						OR  
-						(ot.intSelectedInstrumentTypeId = ISNULL(@intSelectedInstrumentTypeId, ot.intSelectedInstrumentTypeId))
-					  ) 
-					--ot.intSelectedInstrumentTypeId = @intSelectedInstrumentTypeId
-					--AND ISNULL(ot.intCommodityId, 0) = ISNULL(@intCommodityId, ISNULL(ot.intCommodityId, 0))
-					--AND ISNULL(ot.intFutureMarketId, 0) = ISNULL(@intFutureMarketId, ISNULL(ot.intFutureMarketId, 0))
-					--AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))
-					--AND ISNULL(ot.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ot.intSubBookId, 0))
-					--AND ISNULL(ot.intEntityId, 0) = ISNULL(@intEntityId, ISNULL(ot.intEntityId, 0))
-					--AND ISNULL(ot.intBrokerageAccountId, 0) = ISNULL(@intBrokerageAccountId, ISNULL(ot.intBrokerageAccountId, 0))
-					--AND ISNULL(ot.intFutureMonthId, 0) = ISNULL(@intFutureMonthId, ISNULL(ot.intFutureMonthId, 0))
-					--AND ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell)
+				WHERE ot.intSelectedInstrumentTypeId = @intSelectedInstrumentTypeId
+					AND ISNULL(ot.intCommodityId, 0) = ISNULL(@intCommodityId, ISNULL(ot.intCommodityId, 0))
+					AND ISNULL(ot.intFutureMarketId, 0) = ISNULL(@intFutureMarketId, ISNULL(ot.intFutureMarketId, 0))
+					AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))
+					AND ISNULL(ot.intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(ot.intSubBookId, 0))
+					AND ISNULL(ot.intEntityId, 0) = ISNULL(@intEntityId, ISNULL(ot.intEntityId, 0))
+					AND ISNULL(ot.intBrokerageAccountId, 0) = ISNULL(@intBrokerageAccountId, ISNULL(ot.intBrokerageAccountId, 0))
+					AND ISNULL(ot.intFutureMonthId, 0) = ISNULL(@intFutureMonthId, ISNULL(ot.intFutureMonthId, 0))
+					AND ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell)
 					AND ot.intInstrumentTypeId = 1
 			) t1
 		) t1
 	) t1
 	WHERE (dblLong <> 0 OR dblShort <> 0)
 	ORDER BY RowNum ASC
-	
-	CREATE NONCLUSTERED INDEX IX_UnrealizedData_ysnExpired
-	ON #UnrealizedData (ysnExpired);
 	
 	SELECT dblLastSettle = count(dblLastSettle)
 		, p.intFutureMarketId
@@ -314,9 +271,6 @@ BEGIN
 		FROM #tmpLastSettleCount
 		WHERE dblLastSettle <= 1
 	) t
-	
-	CREATE NONCLUSTERED INDEX IX_tmpMarginVariation_intFutureMarketId_intFutureMonthId
-	ON #tmpMarginVariation (intFutureMarketId, intFutureMonthId);
 
 	SELECT RowNum
 		, strMonthOrder = CASE WHEN ISNULL(RowNum, 0) <= 9 THEN '0' ELSE '' END + CONVERT(NVARCHAR, RowNum) + '-' + strMonthOrder

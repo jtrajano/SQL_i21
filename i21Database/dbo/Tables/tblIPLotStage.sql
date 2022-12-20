@@ -28,6 +28,7 @@
 	dtmTransactionDate			DATETIME DEFAULT(GETDATE()),
 	ysnMailSent					BIT DEFAULT 0,
 	intStatusId					INT,
+	dblAllocatedQty				NUMERIC(38,20),
 
 	CONSTRAINT [PK_tblIPLotStage_intStageLotId] PRIMARY KEY ([intStageLotId])
 )

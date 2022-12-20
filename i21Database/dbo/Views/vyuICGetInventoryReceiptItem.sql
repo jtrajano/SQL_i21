@@ -101,7 +101,9 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.dblTare
 	, ReceiptItem.dblTarePerQuantity
 	, ReceiptItem.ysnOverrideTaxGroup
-
+	, ReceiptItem.dblBasis
+	, ReceiptItem.dblFutures
+	, ReceiptItem.strFuturesMonth
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId

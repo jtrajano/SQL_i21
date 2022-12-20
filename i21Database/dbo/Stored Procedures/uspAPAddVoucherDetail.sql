@@ -282,12 +282,16 @@ SELECT TOP 100 PERCENT
 	,strSaleNumber						=	A.strSaleNumber
 	,dtmSaleDate						=	A.dtmSaleDate
 	,strVendorLotNumber					=	A.strVendorLotNumber
-	,strPreInvoiceGarden				=	A.strPreInvoiceGarden
+	,intGardenMarkId					=	A.intGardenMarkId
 	,strPreInvoiceGardenNumber			=	A.strPreInvoiceGardenNumber
 	,intBookId							=	A.intBookId
 	,strBook							=	A.strBook
 	,intSubBookId						=	A.intSubBookId
 	,strSubBook							=	A.strSubBook
+	,intMarketZoneId					=	A.intMarketZoneId
+	,intCatalogueTypeId					=	A.intCatalogueTypeId
+	,intPurchasingGroupId				=	A.intPurchasingGroupId
+	,strComment							=	A.strComments
 	,A.dblPackageBreakups
 	,A.intNumOfPackagesUOM
 	,A.dblNumberOfPackages
@@ -517,15 +521,19 @@ INSERT
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	,strComment
 	/*Supplier Invoice*/
 	,intSaleYear						
 	,strSaleNumber						
 	,dtmSaleDate						
 	,strVendorLotNumber					
-	,strPreInvoiceGarden				
+	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,intBookId							
 	,intSubBookId	
+	,intMarketZoneId
+	,intCatalogueTypeId
+	,intPurchasingGroupId
 	,dblPackageBreakups
 	,intNumOfPackagesUOM
 	,dblNumberOfPackages
@@ -638,15 +646,19 @@ VALUES
 	,dblCashPrice
 	,dblQualityPremium
 	,dblOptionalityPremium
+	,strComment
 	/*Supplier Invoice*/
 	,intSaleYear						
 	,strSaleNumber						
 	,dtmSaleDate						
 	,strVendorLotNumber					
-	,strPreInvoiceGarden				
+	,intGardenMarkId				
 	,strPreInvoiceGardenNumber			
 	,intBookId							
 	,intSubBookId		
+	,intMarketZoneId
+	,intCatalogueTypeId
+	,intPurchasingGroupId
 	,dblPackageBreakups
 	,intNumOfPackagesUOM
 	,dblNumberOfPackages

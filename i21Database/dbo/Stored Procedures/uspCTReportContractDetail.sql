@@ -44,6 +44,10 @@ BEGIN TRY
 	DECLARE @fontBoldFutureMonth NVARCHAR(MAX)
 	DECLARE @fontBoldFutures NVARCHAR(MAX)
 	DECLARE @fontBoldCurrency NVARCHAR(MAX)
+	DECLARE @fontBoldQuantity NVARCHAR(MAX)
+	DECLARE @fontBoldQuantityUOM NVARCHAR(MAX)
+	DECLARE @fontBoldStartDate NVARCHAR(MAX)
+	DECLARE @fontBoldEndDate NVARCHAR(MAX)
 
 	SELECT  @strAmendedColumnsDetails = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
@@ -102,6 +106,38 @@ BEGIN TRY
 		BEGIN 
 			SET @fontBoldFutureMonth = '<span style="font-family:Arial;font-size:13px;">'
 		END
+	IF CHARINDEX('dblQuantity',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldQuantity = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldQuantity = '<span style="font-family:Arial;font-size:13px;">'
+		END	
+	IF CHARINDEX('intItemUOMId',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldQuantityUOM = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldQuantityUOM = '<span style="font-family:Arial;font-size:13px;">'
+		END	
+	IF CHARINDEX('dtmStartDate',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldStartDate = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldStartDate = '<span style="font-family:Arial;font-size:13px;">'
+		END
+	IF CHARINDEX('dtmEndDate',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldEndDate = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldEndDate = '<span style="font-family:Arial;font-size:13px;">'
+		END		
 		
 
 	SET @space = '                      '
@@ -195,7 +231,7 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 
-			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END),
+			strStraussQuantity		= @fontBoldQuantity + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + '</span>' + ' ' + @fontBoldQuantityUOM +UM.strUnitMeasure + '</span>' +(CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END),
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
@@ -210,10 +246,10 @@ BEGIN TRY
 			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + ' per ' + PU.strUnitMeasure
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		= CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
-										   WHEN SM.strReportDateFormat = 'M/d/yy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
-										   WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
-									  ELSE  CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101))
+			strStraussShipment		= CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
+										   WHEN SM.strReportDateFormat = 'M/d/yy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
+										   WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
+									  ELSE @fontBoldStartDate + CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + '</span>' + ' - ' + @fontBoldEndDate + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) + '</span>'
 									  END,
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end),
 			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',

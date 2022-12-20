@@ -42,6 +42,7 @@ BEGIN TRY
 	DECLARE @intKitStatusId INT = NULL
 	DECLARE @dblBulkReqQuantity NUMERIC(38, 20)
 	DECLARE @dblPlannedQuantity NUMERIC(38, 20)
+	DECLARE @ysnRecipeHeaderValidation BIT = 0;
 	DECLARE @ysnAllInputItemsMandatory BIT
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
@@ -57,6 +58,15 @@ BEGIN TRY
 		,@dblOriginalRequiredQty DECIMAL(38, 20)
 		,@dblQty1 DECIMAL(38, 20)
 		,@intRowNo INT
+		,@ysnReleaseBlendsheetByNoOfMixes BIT
+		,@intTrialBlendSheetStatusId INT
+		,@intConfirmedBy INT
+		,@intApprovedBy INT
+		,@dtmConfirmedDate DATETIME
+		,@dtmApprovedDate DATETIME
+		,@dtmPrintedDate DATETIME
+		,@intPrintedBy INT
+		,@strERPComment NVARCHAR(max)
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -110,7 +120,8 @@ BEGIN TRY
 		,intItemUOMId INT
 		,intUserId INT
 		,intPlannedShiftId INT
-		,dblNoOfPallet	NUMERIC(38, 20)
+		,dblNoOfPallet NUMERIC(38, 20)
+		,strFW NVARCHAR(3)
 		)
 	DECLARE @tblPreItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -157,7 +168,8 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,ysnParentLot BIT
 		,dtmDateCreated DATETIME
-		, dblNoOfPallet NUMERIC(18, 6)
+		,dblNoOfPallet NUMERIC(18, 6)
+		,strFW NVARCHAR(3)
 		)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
@@ -175,6 +187,7 @@ BEGIN TRY
 		,ysnParentLot BIT
 		,dtmDateCreated DATETIME
 		,dblNoOfPallet NUMERIC(18, 6)
+		,strFW NVARCHAR(3)
 		)
 	DECLARE @tblBSLot TABLE (
 		intLotId INT
@@ -188,6 +201,7 @@ BEGIN TRY
 		,intLocationId INT
 		,intStorageLocationId INT
 		,dblNoOfPallet NUMERIC(18, 6)
+		,strFW NVARCHAR(3)
 		)
 
 	INSERT INTO @tblBlendSheet (
@@ -209,6 +223,7 @@ BEGIN TRY
 		,intUserId
 		,intPlannedShiftId
 		,dblNoOfPallet
+		,strFW
 		)
 	SELECT intWorkOrderId
 		,intItemId
@@ -228,6 +243,7 @@ BEGIN TRY
 		,intUserId
 		,intPlannedShiftId
 		,dblNoOfPallet
+		,strFW
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -247,6 +263,7 @@ BEGIN TRY
 			,intUserId INT
 			,intPlannedShiftId INT
 			,dblNoOfPallet NUMERIC(38, 20)
+			,strFW NVARCHAR(50)
 			)
 
 	INSERT INTO @tblPreLot (
@@ -263,6 +280,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,ysnParentLot
 		,dblNoOfPallet
+		,strFW
 		)
 	SELECT x.intLotId
 		,x.intItemId
@@ -276,7 +294,12 @@ BEGIN TRY
 		,x.intLocationId
 		,x.intStorageLocationId
 		,x.ysnParentLot
-		,x.dblNoOfPallet
+		,CASE 
+			WHEN IsNUMERIC(x.dblNoOfPallet) = 1
+				THEN x.dblNoOfPallet
+			ELSE NULL
+			END
+		,x.strFW
 	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
@@ -291,7 +314,8 @@ BEGIN TRY
 			,intLocationId INT
 			,intStorageLocationId INT
 			,ysnParentLot BIT
-			,dblNoOfPallet NUMERIC(18, 6)
+			,dblNoOfPallet NVARCHAR(50)
+			,strFW NVARCHAR(3)
 			) x
 
 	UPDATE a
@@ -319,6 +343,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,ysnParentLot
 		,dblNoOfPallet
+		,strFW
 		)
 	SELECT intLotId
 		,intItemId
@@ -333,6 +358,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,ysnParentLot
 		,dblNoOfPallet
+		,strFW
 	FROM @tblPreLot
 	ORDER BY dtmDateCreated
 
@@ -354,6 +380,7 @@ BEGIN TRY
 	FROM @tblBlendSheet
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+		,@ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
 	FROM tblMFCompanyPreference
 
 	INSERT INTO @tblLotSummary (
@@ -429,14 +456,6 @@ BEGIN TRY
 		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	DECLARE @ysnRecipeHeaderValidation BIT = 0;
-
-	SELECT TOP 1 @intRecipeId = intRecipeId
-			   , @intManufacturingProcessId = a.intManufacturingProcessId
-	FROM tblMFRecipe a
-	JOIN @tblBlendSheet b ON a.intItemId = b.intItemId AND a.intLocationId = b.intLocationId AND
-		 ((@ysnRecipeHeaderValidation = 0 AND ysnActive = 1) OR (@ysnRecipeHeaderValidation = 1 AND @dtmDueDate <= dtmValidTo AND @dtmDueDate >= dtmValidFrom))
-
 	SELECT @strPackagingCategoryId = ISNULL(pa.strAttributeValue, '')
 	FROM tblMFManufacturingProcessAttribute pa
 	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
@@ -472,6 +491,24 @@ BEGIN TRY
 		,@dblPlannedQuantity = dblPlannedQuantity
 		,@intMachineId = intMachineId
 	FROM @tblBlendSheet
+
+	SELECT TOP 1 @intRecipeId = intRecipeId
+		,@intManufacturingProcessId = a.intManufacturingProcessId
+	FROM tblMFRecipe a
+	JOIN @tblBlendSheet b ON a.intItemId = b.intItemId
+		AND a.intLocationId = b.intLocationId
+		AND (
+			(
+				@ysnRecipeHeaderValidation = 0
+				AND ysnActive = 1
+				)
+			OR (
+				@ysnRecipeHeaderValidation = 1
+				AND @dtmDueDate <= dtmValidTo
+				AND @dtmDueDate >= dtmValidFrom
+				AND ysnActive = 1
+				)
+			)
 
 	SELECT @strDemandNo = strDemandNo
 	FROM tblMFBlendRequirement
@@ -875,12 +912,39 @@ BEGIN TRY
 			)
 	BEGIN
 		SELECT @strSavedWONo = strWorkOrderNo
+			,@intTrialBlendSheetStatusId = intTrialBlendSheetStatusId
+			,@intConfirmedBy = intConfirmedBy
+			,@intApprovedBy = intApprovedBy
+			,@dtmConfirmedDate = dtmConfirmedDate
+			,@dtmApprovedDate = dtmApprovedDate
+			,@dtmPrintedDate = dtmPrintedDate
+			,@intPrintedBy = intPrintedBy
+			,@strERPComment = strERPComment
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
 		DELETE
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+	END
+
+	SELECT @ysnReleaseBlendsheetByNoOfMixes = (
+			CASE 
+				WHEN IsNULL(UPPER(ProcessAttribute.strAttributeValue), 'TRUE') = 'FALSE'
+					THEN 0
+				ELSE 1
+				END
+			)
+	FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND ProcessAttribute.intAttributeId = 130;
+
+	IF @ysnReleaseBlendsheetByNoOfMixes = 0
+	BEGIN
+		SET @intNoOfSheet = 1
+		SET @PerBlendSheetQty = @dblQtyToProduce
+		SET @intNoOfSheetOriginal = @intNoOfSheet
 	END
 
 	DECLARE @intItemCount INT
@@ -906,6 +970,7 @@ BEGIN TRY
 			)
 	BEGIN
 		SET @intWorkOrderId = NULL
+
 		SELECT @ysnPercResetRequired = 0
 
 		--Calculate Required Quantity by Item
@@ -929,6 +994,7 @@ BEGIN TRY
 				,intLocationId
 				,intStorageLocationId
 				,dblNoOfPallet
+				,strFW
 				)
 			SELECT intLotId
 				,intItemId
@@ -941,6 +1007,7 @@ BEGIN TRY
 				,intLocationId
 				,intStorageLocationId
 				,dblNoOfPallet
+				,strFW
 			FROM @tblLot
 			WHERE dblQty > 0
 		END
@@ -1319,6 +1386,7 @@ BEGIN TRY
 							,intLocationId
 							,intStorageLocationId
 							,dblNoOfPallet
+							,strFW
 							)
 						SELECT intLotId
 							,intItemId
@@ -1331,6 +1399,7 @@ BEGIN TRY
 							,intLocationId
 							,intStorageLocationId
 							,dblNoOfPallet
+							,strFW
 						FROM @tblLot
 						WHERE intRowNo = @intLotCount
 
@@ -1565,6 +1634,7 @@ BEGIN TRY
 							,intLocationId
 							,intStorageLocationId
 							,dblNoOfPallet
+							,strFW
 							)
 						SELECT intLotId
 							,intItemId
@@ -1577,6 +1647,7 @@ BEGIN TRY
 							,intLocationId
 							,intStorageLocationId
 							,dblNoOfPallet
+							,strFW
 						FROM @tblLot
 						WHERE intRowNo = @intLotCount
 
@@ -1663,6 +1734,14 @@ BEGIN TRY
 			,intSubLocationId
 			,dtmOrderDate
 			,intSupervisorId
+			,intTrialBlendSheetStatusId
+			,intConfirmedBy
+			,intApprovedBy
+			,dtmConfirmedDate
+			,dtmApprovedDate
+			,dtmPrintedDate
+			,intPrintedBy
+			,strERPComment
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -1700,6 +1779,14 @@ BEGIN TRY
 			,@intSubLocationId
 			,GetDate()
 			,intUserId
+			,@intTrialBlendSheetStatusId
+			,@intConfirmedBy
+			,@intApprovedBy
+			,@dtmConfirmedDate
+			,@dtmApprovedDate
+			,@dtmPrintedDate
+			,@intPrintedBy
+			,@strERPComment
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -1764,6 +1851,7 @@ BEGIN TRY
 					,dtmBusinessDate
 					,intBusinessShiftId
 					,dblNoOfPallet
+					,strFW
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -1782,6 +1870,7 @@ BEGIN TRY
 					,@dtmBusinessDate
 					,@intBusinessShiftId
 					,dblNoOfPallet
+					,strFW
 				FROM @tblBSLot
 
 				INSERT INTO tblMFWorkOrderConsumedLot (
@@ -1836,6 +1925,7 @@ BEGIN TRY
 					,dtmBusinessDate
 					,intBusinessShiftId
 					,dblNoOfPallet
+					,strFW
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -1854,6 +1944,7 @@ BEGIN TRY
 					,@dtmBusinessDate
 					,@intBusinessShiftId
 					,dblNoOfPallet
+					,strFW
 				FROM @tblBSLot
 			END
 		END
@@ -1964,7 +2055,7 @@ BEGIN TRY
 			,@intUserId
 			,'Added'
 
-		Exec dbo.uspMFDeleteTrialBlendSheetReservation @intWorkOrderId=@intWorkOrderId
+		EXEC dbo.uspMFDeleteTrialBlendSheetReservation @intWorkOrderId = @intWorkOrderId
 
 		SET @intNoOfSheet = @intNoOfSheet - 1
 	END
