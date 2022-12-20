@@ -121,8 +121,16 @@ BEGIN TRY
 		,[strItemDescription]					= Item.strItemDescription
 		,[intOrderUOMId]						= Item.intIssueUOMId
 		,[intItemUOMId]							= Item.intIssueUOMId
-		,[dblQtyOrdered]						= DD.dblUnits
-		,[dblQtyShipped]						= DD.dblFreightUnit
+		,[dblQtyOrdered]						= CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+														WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
+														WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
+														WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+														ELSE DD.dblUnits END
+		,[dblQtyShipped]						= CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+														WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
+														WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
+														WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+														ELSE DD.dblUnits END
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
