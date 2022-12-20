@@ -50,6 +50,8 @@ dblReceivableFn,
 dblReceivableFx,
 dblPayableFn,
 dblPayableFx,
+dblGainLossTo,
+dblGainLossFrom,
 intConcurrencyId
 )
 select 
@@ -81,6 +83,8 @@ dblReceivableFn=dblPayableFn,
 dblReceivableFx=dblPayableFx,
 dblPayableFn=dblReceivableFn,
 dblPayableFx=dblReceivableFx,
+dblGainLossTo=  CASE WHEN intCurrencyIdAmountFrom = @defaultCurrencyId THEN 0 else dblAmountForeignFrom -dblPayableFn  END,
+dblGainLossFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN 0 ELSE 0 END,
 1
 from tblCMBankTransfer  A
 OUTER APPLY(
