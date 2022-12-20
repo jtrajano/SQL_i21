@@ -1213,6 +1213,7 @@
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
