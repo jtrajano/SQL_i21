@@ -1440,7 +1440,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountCurrency.sql" />
     <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
-    <Build Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
