@@ -1184,7 +1184,7 @@
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
-    <Build Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
