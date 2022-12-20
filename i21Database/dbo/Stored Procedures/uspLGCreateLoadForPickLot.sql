@@ -261,6 +261,41 @@ BEGIN TRY
 		SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
 		FROM @tblAllocationInfo
 		WHERE intAllocationRecordId > @intMinAllocationRecordId
+
+		INSERT INTO tblLGLoadCost (
+			intConcurrencyId,
+			intLoadId,
+			intItemId,
+			intVendorId,
+			strEntityType,
+			strCostMethod,
+			intCurrencyId,
+			dblRate,
+			dblAmount,
+			dblFX,
+			intItemUOMId,
+			ysnAccrue,
+			ysnMTM,
+			ysnPrice
+			)
+		SELECT
+			intConcurrencyId,
+			@intLoadId,
+			intItemId,
+			intVendorId,
+			strEntityType,
+			strCostMethod,
+			intCurrencyId,
+			dblRate,
+			dblAmount,
+			dblFX,
+			intItemUOMId,
+			ysnAccrue,
+			ysnMTM,
+			ysnPrice
+		FROM vyuLGContractCostView
+		WHERE intContractDetailId = @intSContractDetailId
+
 	END
 
 	EXEC uspLGReserveStockForInventoryShipment @intLoadId = @intLoadId
