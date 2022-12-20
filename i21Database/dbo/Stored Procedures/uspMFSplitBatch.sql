@@ -165,12 +165,12 @@ BEGIN
 				,[strLeafSize]
 				,[strLeafStyle]
 				,[intMixingUnitLocationId]
-				,[dblPackagesBought]= B.dblSplitPackages
+				,[dblPackagesBought]--= B.dblSplitPackages
 				,[strTeaOrigin]
 				,[intOriginalItemId]
 				,[dblPackagesPerPallet]
 				,[strPlant]
-				,[dblTotalQuantity] = B.dblSplitQuantity
+				,[dblTotalQuantity] = B.dblSplitPackages
 				,[strSampleBoxNumber]
 				,[dblSellingPrice]
 				,[dtmStock]
@@ -223,16 +223,16 @@ BEGIN
 				WHERE @intBatchId = B.intBatchId
 
 		UPDATE A 
-		SET dblTotalQuantity = dblTotalQuantity-B.dblSplitQuantity,
-		dblPackagesBought = (dblTotalQuantity-B.dblSplitQuantity)/ dblWeightPerUnit
+		SET dblTotalQuantity = dblTotalQuantity-B.dblSplitPackages
+		--,dblPackagesBought = (dblTotalQuantity-B.dblSplitQuantity)/ dblWeightPerUnit
 		FROM tblMFBatch A JOIN @MFBatchSplitTable B ON A.intBatchId = B.intBatchId
 		WHERE B.intBatchId =@intBatchId
 	END
 	ELSE
 	BEGIN
 		UPDATE A 
-		SET dblTotalQuantity = A.dblTotalQuantity + C.dblTotalQuantity,
-		dblPackagesBought = (A.dblTotalQuantity+C.dblTotalQuantity)/ dblWeightPerUnit
+		SET dblTotalQuantity = A.dblTotalQuantity + C.dblTotalQuantity
+		--dblPackagesBought = (A.dblTotalQuantity+C.dblTotalQuantity)/ dblWeightPerUnit
 		FROM tblMFBatch A JOIN @MFBatchSplitTable B ON A.intBatchId = B.intParentBatchId
 		outer apply(
 			SELECT dblTotalQuantity FROM tblMFBatch WHERE intBatchId =B.intBatchId 
