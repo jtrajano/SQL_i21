@@ -24,6 +24,7 @@ DECLARE  @dtmDateTo				DATETIME
 		,@ysnPrintInvoicePaymentDetail	BIT		= 0
 		,@dtmDateNow			DATETIME		= NULL
 		,@ysnStretchLogo		BIT				= 0
+		,@strRequestId			AS NVARCHAR(MAX)
 		,@intFreightItemId		INT				= 0
 		,@intSurchargeItemId	INT				= 0
 
@@ -34,7 +35,7 @@ BEGIN
 END
 
 DECLARE @temp_INVOICES TABLE (
-		  strCompanyName				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	      strCompanyName				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 		, strCompanyAddress             NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 		, intInvoiceId                  INT				NOT NULL
 		, intEntityCustomerId           INT				NOT NULL
@@ -190,9 +191,13 @@ SELECT @strReportLogId = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strReportLogId'
 
+SELECT @strRequestId = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strRequestId'
+
 IF EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId) RETURN
 
-EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceDandDEnergyTDReport', @strReportLogId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
+EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceDandDEnergyTDReport', @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 
 --LOGO
 SELECT TOP 1 @blbLogo = U.blbFile 
@@ -377,7 +382,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strOrigin				= CAST(REPLACE(INV.strComments, 'Origin:', '') AS NVARCHAR(MAX))
 	 , blbLogo					= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(@ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END)
 	 , intEntityUserId			= @intEntityUserId
-	 , strRequestId				= @strReportLogId
+	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= 'Format 2 - With Laid in Cost'
 	 , intTicketId				= CAST(0 AS INT)
 	 , strTicketNumbers			= CAST('' AS NVARCHAR(MAX))
@@ -544,50 +549,6 @@ FROM @temp_INVOICES I
 WHERE strComments <> '' 
    OR strOrigin <> ''
 
---UPDATE LAID IN COST
-UPDATE I
-SET dblLaidInCost = LIC.LaidInCost
-FROM @temp_INVOICES I
-LEFT JOIN (
-	SELECT 
-		  ID.intInvoiceDetailId
-		, (ID.dblPrice
-			+ (Freight.dblPrice * Freight.dblQtyShipped / ID.dblQtyShipped)
-			+ ((Freight.dblPrice * Freight.dblQtyShipped / ID.dblQtyShipped) * Surgecharge.dblPrice)
-			+ Taxes.taxRate
-		) [LaidInCost]
-	FROM tblARInvoiceDetail ID WITH (NOLOCK)
-	INNER JOIN tblICItem I WITH (NOLOCK) ON ID.intItemId = I.intItemId
-	LEFT JOIN (
-		SELECT 
-			intLoadDistributionDetailId
-			, intInvoiceId
-			, dblQtyShipped
-			, dblPrice
-		FROM tblARInvoiceDetail LD WITH (NOLOCK)
-		WHERE intItemId = @intFreightItemId
-	) Freight ON Freight.intLoadDistributionDetailId = ID.intLoadDistributionDetailId AND Freight.intInvoiceId = ID.intInvoiceId
-	LEFT JOIN (
-		SELECT 
-			intLoadDistributionDetailId
-			, intInvoiceId
-			, dblQtyShipped
-			, dblPrice
-		FROM tblARInvoiceDetail LD WITH (NOLOCK)
-		WHERE intItemId = @intSurchargeItemId
-	) Surgecharge ON Surgecharge.intLoadDistributionDetailId = ID.intLoadDistributionDetailId AND Surgecharge.intInvoiceId = ID.intInvoiceId
-	LEFT JOIN (
-		SELECT 
-			SUM(dblRate) [taxRate]
-			, intInvoiceId
-		FROM vyuARTaxDetailMCPReport
-		GROUP BY intInvoiceId
-	) Taxes ON ID.intInvoiceId = Taxes.intInvoiceId
-	WHERE ID.intInvoiceId = 15694
-		AND (ID.intItemId <> 18 AND ID.intItemId <> 17)
-		AND I.strType IN ('Bundle','Inventory')
-) LIC ON I.intInvoiceDetailId = LIC.intInvoiceDetailId
-
 INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	   strCompanyName
 	 , strCompanyAddress
@@ -716,6 +677,51 @@ SELECT strCompanyName
 	 , strLogoType
 FROM @temp_INVOICES
 
+
+--UPDATE LAID IN COST
+UPDATE I
+SET dblLaidInCost = LIC.LaidInCost
+FROM @temp_INVOICES I
+LEFT JOIN (
+	SELECT 
+		  ID.intInvoiceDetailId
+		, (ID.dblPrice
+			+ (Freight.dblPrice * Freight.dblQtyShipped / ID.dblQtyShipped)
+			+ ((Freight.dblPrice * Freight.dblQtyShipped / ID.dblQtyShipped) * Surgecharge.dblPrice)
+			+ Taxes.taxRate
+		) [LaidInCost]
+	FROM tblARInvoiceDetail ID WITH (NOLOCK)
+	INNER JOIN tblICItem I WITH (NOLOCK) ON ID.intItemId = I.intItemId
+	LEFT JOIN (
+		SELECT 
+			intLoadDistributionDetailId
+			, intInvoiceId
+			, dblQtyShipped
+			, dblPrice
+		FROM tblARInvoiceDetail LD WITH (NOLOCK)
+		WHERE intItemId = @intFreightItemId
+	) Freight ON Freight.intLoadDistributionDetailId = ID.intLoadDistributionDetailId AND Freight.intInvoiceId = ID.intInvoiceId
+	LEFT JOIN (
+		SELECT 
+			intLoadDistributionDetailId
+			, intInvoiceId
+			, dblQtyShipped
+			, dblPrice
+		FROM tblARInvoiceDetail LD WITH (NOLOCK)
+		WHERE intItemId = @intSurchargeItemId
+	) Surgecharge ON Surgecharge.intLoadDistributionDetailId = ID.intLoadDistributionDetailId AND Surgecharge.intInvoiceId = ID.intInvoiceId
+	LEFT JOIN (
+		SELECT 
+			SUM(dblRate) [taxRate]
+			, intInvoiceId
+		FROM vyuARTaxDetailMCPReport
+		GROUP BY intInvoiceId
+	) Taxes ON ID.intInvoiceId = Taxes.intInvoiceId
+	WHERE ID.intInvoiceId = 15694
+		AND (ID.intItemId <> 18 AND ID.intItemId <> 17)
+		AND I.strType IN ('Bundle','Inventory')
+) LIC ON I.intInvoiceDetailId = LIC.intInvoiceDetailId
+
 SELECT strCompanyName
 	 , strCompanyAddress
 	 , intInvoiceId
@@ -783,4 +789,4 @@ SELECT strCompanyName
 FROM @temp_INVOICES
 
 
-EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceDandDEnergyTDReport', @strReportLogId, 0, @intEntityUserId, @intPerformanceLogId, NULL
+EXEC dbo.uspARLogPerformanceRuntime 'Invoice Report', 'uspARInvoiceDandDEnergyTDReport', @strRequestId, 0, @intEntityUserId, @intPerformanceLogId, NULL
