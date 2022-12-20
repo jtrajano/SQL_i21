@@ -80,7 +80,7 @@ BEGIN TRY
 		AND strTag = 'Count'
 
 	IF ISNULL(@tmp, 0) = 0
-		SELECT @tmp = 50
+		SELECT @tmp = 100
 
 	IF @limit > @tmp
 	BEGIN
