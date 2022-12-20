@@ -11,11 +11,11 @@ sts.intStoreNo,
 sts.strDescription, 
 stcpew.strMessage
 FROM dbo.tblSTStore AS sts 
-JOIN dbo.tblSTCheckoutProcess AS stcp 
+FULL OUTER JOIN dbo.tblSTCheckoutProcess AS stcp 
 	ON stcp.intStoreId = sts.intStoreId
-JOIN dbo.tblSTCheckoutProcessErrorWarning AS stcpew 
+FULL OUTER  JOIN dbo.tblSTCheckoutProcessErrorWarning AS stcpew 
 	ON stcp.intCheckoutProcessId = stcpew.intCheckoutProcessId 
-JOIN dbo.tblSTCheckoutHeader CH
+FULL OUTER  JOIN dbo.tblSTCheckoutHeader CH
 	ON stcpew.intCheckoutId = CH.intCheckoutId
 WHERE 
 FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') = FORMAT(GETDATE(), 'd','us')
