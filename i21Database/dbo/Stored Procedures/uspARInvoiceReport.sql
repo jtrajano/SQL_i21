@@ -20,7 +20,7 @@ CREATE TABLE #INVOICES (
 	 , strCompanyInfo				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	 , strCompanyPhoneNumber		NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , strCompanyEmail				NVARCHAR(75)	COLLATE Latin1_General_CI_AS NULL
-	 , strType						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL DEFAULT 'Standard'
+	 , strType						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL DEFAULT 'Standard'
      , strCustomerName				NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
 	 , strCustomerNumber			NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL
 	 , strLocationName				NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
@@ -413,7 +413,7 @@ SELECT
 										ELSE ''
 									END
 	, intDaysOld               		= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST((CASE WHEN INVOICEDETAIL.ysnPaid = 1 THEN PAYMENT.dtmDatePaid ELSE INV.dtmDate END) AS DATE))
+										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST((CASE WHEN INVOICEDETAIL.ysnPaid = 1 THEN PAYMENT.dtmDatePaid ELSE INV.dtmShipDate END) AS DATE))
 										ELSE 0
 									END
 	, strServiceChareInvoiceNumber 	= INVOICEDETAIL.strSCInvoiceNumber
