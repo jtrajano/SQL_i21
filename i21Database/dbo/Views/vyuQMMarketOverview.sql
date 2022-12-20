@@ -20,7 +20,7 @@ OverAllWeekStats as(
 ItemSaleStat as
 (
 	SELECT  
-	strItemNo,A.intItemId, strSaleNumber, C.strCurrency,
+	strTeaGroup, strSaleNumber, C.strCurrency,
 	SUM(dblB1QtyBought + dblB2QtyBought +dblB3QtyBought+dblB4QtyBought+dblB5QtyBought) TotalSold,
 	SUM(dblB1QtyBought) TotalSold_UL,
 	SUM((dblB1QtyBought*dblB1Price +dblB2QtyBought* dblB2Price +dblB3QtyBought*dblB3Price+dblB4QtyBought* dblB4Price +dblB5QtyBought*dblB5Price))/
@@ -29,9 +29,9 @@ ItemSaleStat as
 	sum(A.dblNetWeight)dblNetWeight,
 	Taste.Val AverageItemTaste,
 	AVG(dblSupplierValuationPrice)AverageSupplierValuationPrice
-	FROM tblQMSample A LEFT JOIN
+	FROM tblQMSample A JOIN tblMFBatch B ON A.intSampleId = B.intSampleId
+	LEFT JOIN
 	tblSMCurrency C on A.intCurrencyId= C.intCurrencyID
-	left join tblICItem IC on IC.intItemId = A.intItemId
 	OUTER APPLY(
 		select avg(cast( T.strPropertyValue as decimal(18,2)) )Val 
 		from tblQMProperty P 
@@ -39,13 +39,13 @@ ItemSaleStat as
 		where A.intItemId = P.intItemId
 		AND P.strPropertyName = 'Taste' AND T.intSampleId  = A.intSampleId
 	)Taste
-	group by A.intItemId, strSaleNumber,strCurrency, strItemNo,Taste.Val
+	group by  strSaleNumber,strCurrency,Taste.Val, strTeaGroup
 ),
 ItemWeeklySaleStat as
 (
 	SELECT  
 	DATEPART(ww, dtmSaleDate) WeekNo,
-	strItemNo,A.intItemId, strSaleNumber, C.strCurrency,
+	strTeaGroup,strSaleNumber, C.strCurrency,
 	SUM(dblB1QtyBought + dblB2QtyBought +dblB3QtyBought+dblB4QtyBought+dblB5QtyBought) TotalSold,
 	SUM(dblB1QtyBought) TotalSold_UL,
 	SUM((dblB1QtyBought*dblB1Price +dblB2QtyBought* dblB2Price +dblB3QtyBought*dblB3Price+dblB4QtyBought* dblB4Price +dblB5QtyBought*dblB5Price))/
@@ -53,16 +53,17 @@ ItemWeeklySaleStat as
 	SUM(dblB1QtyBought  * dblB1Price)/SUM(dblB1Price) AveragePrice_UL,
 	sum(A.dblNetWeight)dblNetWeight,
 	Taste.Val AverageItemTaste
-	FROM tblQMSample A LEFT JOIN
+	FROM tblQMSample A 
+	JOIN tblMFBatch B ON A.intSampleId = B.intSampleId
+	LEFT JOIN
 	tblSMCurrency C on A.intCurrencyId= C.intCurrencyID
-	left join tblICItem IC on IC.intItemId = A.intItemId
 	OUTER APPLY(
 		select avg(cast( T.strPropertyValue as decimal(18,2)) )Val from tblQMProperty P 
 		left JOIN tblQMTestResult T ON T.intPropertyId = P.intPropertyId
 		where A.intItemId = P.intItemId
 		AND P.strPropertyName = 'Taste' and T.intSampleId = A.intSampleId
 	)Taste
-	group by A.intItemId, strSaleNumber,strCurrency, strItemNo,Taste.Val, DATEPART(ww, dtmSaleDate)
+	group by strTeaGroup, strSaleNumber,strCurrency,Taste.Val, DATEPART(ww, dtmSaleDate)
 	
 ),
 HeaderData as(
@@ -96,7 +97,7 @@ ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
 , ROUND(A.TotalSales,2) dblTotalSales --6
 , ROUND(A.TotalSales_UL,2) dblTotalSaleUL--7
 , ROUND(A.AveragePrice_UL,2) dblAveragePriceUL --8
-, B.strItemNo strItemNo --9
+, B.strTeaGroup strTeaGroup --9
 , ROUND(B.TotalSold,2) dblItemSold --10
 , ROUND(B.dblNetWeight,2) dblItemWeight --11
 , ROUND(B.AverageItemTaste,2) dblItemAverageTaste --12
@@ -113,12 +114,12 @@ ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
 from HeaderData A join ItemSaleStat B on
 A.strSaleNumber = B.strSaleNumber
 outer apply(
-	Select TOP 1 AveragePrice from ItemWeeklySaleStat where intItemId = B.intItemId and DATEPART(ww, A.dtmSaleDate) = WeekNo
+	Select TOP 1 AveragePrice from ItemWeeklySaleStat where strTeaGroup = B.strTeaGroup and DATEPART(ww, A.dtmSaleDate) = WeekNo
 
 )U
 outer apply(
 	Select TOP 1 AveragePrice from ItemWeeklySaleStat 
-	where intItemId = B.intItemId and DATEPART(ww, A.dtmSaleDate)-1 = WeekNo
+	where strTeaGroup = B.strTeaGroup and DATEPART(ww, A.dtmSaleDate)-1 = WeekNo
 
 )V
 --where A.strSaleNumber = '00001'
