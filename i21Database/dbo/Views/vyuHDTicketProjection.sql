@@ -126,6 +126,8 @@
 	    ,strCompletedDate = CONVERT(nvarchar(10),a.dtmCompleted,101) COLLATE Latin1_General_CI_AS
 		,strStartDate = CONVERT(nvarchar(10),a.dtmStartDate,101) COLLATE Latin1_General_CI_AS
 		,strLineOfBusiness = SMLineOfBusiness.strLineOfBusiness
+		,intDefaultCurrencyExchangeRateTypeId = DefaultHelpDeskRateType.intHelpdeskRateTypeId
+		,strDefaultCurrencyExchangeRateType = DefaultHelpDeskRateType.strCurrencyExchangeRateType
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -158,5 +160,13 @@
 		left join tblHDTicketRootCause a3 on a3.intRootCauseId = a.intRootCauseId
 		left join tblHDTicketSubcause a4 on a4.intSubcauseId = a.intSubcauseId
 		left join tblSMLineOfBusiness SMLineOfBusiness on SMLineOfBusiness.intLineOfBusinessId = a.intLineOfBusinessId
+		outer apply (
+					select top 1  a.intHelpdeskRateTypeId
+								 ,b.strCurrencyExchangeRateType
+					from tblSMMultiCurrency a
+							inner join
+						 tblSMCurrencyExchangeRateType b 
+					on b.intCurrencyExchangeRateTypeId = a.intHelpdeskRateTypeId
+			) DefaultHelpDeskRateType
 
 GO
