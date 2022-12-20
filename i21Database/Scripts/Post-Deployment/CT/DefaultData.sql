@@ -2,6 +2,8 @@
 SET ysnFreightTermCost = ISNULL(ysnFreightTermCost, 0)
 	, ysnAutoCalculateFreightTermCost = ISNULL(ysnAutoCalculateFreightTermCost, 0)
 
+
+	TRUNCATE TABLE tblCTBasisCost
 --INSERT BASIS COST DEFAULTS IF NO ROWS
 IF NOT EXISTS(SELECT 1 FROM  tblCTBasisCost)
 BEGIN
