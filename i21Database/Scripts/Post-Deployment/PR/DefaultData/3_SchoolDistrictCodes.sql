@@ -1,6 +1,6 @@
 GO
 
-PRINT('/*******************  BEGIN Insert/Update Payroll School Districts *******************/')
+PRINT('/*******************  BEGIN Insert/Update Payroll School Districts and code *******************/')
 
 GO
 
@@ -192,6 +192,6 @@ INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELEC
 
 GO
 
-PRINT('/*******************  END Insert/Update Payroll School Districts *******************/')
+PRINT('/*******************  END Insert/Update Payroll School Districts and code *******************/')
 
 GO
