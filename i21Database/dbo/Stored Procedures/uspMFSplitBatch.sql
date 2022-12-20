@@ -239,9 +239,10 @@ BEGIN
 		)C
 		where B.intBatchId =@intBatchId
 
-		UPDATE A 
-		SET dblTotalQuantity = 0,
-		dblPackagesBought = 0
+		-- UPDATE A 
+		-- SET dblTotalQuantity = 0,
+		-- dblPackagesBought = 0
+		DELETE A
 		FROM tblMFBatch A JOIN @MFBatchSplitTable B ON A.intBatchId = B.intBatchId
 		where B.intBatchId =@intBatchId
 	END
