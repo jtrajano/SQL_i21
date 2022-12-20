@@ -1,6 +1,3 @@
-
-GO
-
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Ada EVSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Ada EVSD')
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Amanda-Clearcreek LSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Amanda-Clearcreek LSD')
 INSERT INTO tblPRSchoolDistricts (strSchoolDistrict,strSchoolDistrictCode) SELECT 'Anna LSD', '' WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPRSchoolDistricts WHERE strSchoolDistrict = 'Anna LSD')
