@@ -162,8 +162,8 @@ BEGIN
 									a.dblFuelMoney > b.dblFuelMoney)
 			BEGIN
 				--true
-				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'W', 'Fuel Dispencer Rollover Encountered and Compensated for', 1)
+				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
+				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), @intCheckoutId, 'W', 'Fuel Dispencer Rollover Encountered and Compensated for', 1)
 
 				--LOGIC OF ADDING 1M TO THE METERS THAT ROLLEDBACK
 				--FOR FUEL VOLUME
@@ -305,8 +305,8 @@ BEGIN
 		ELSE
 		BEGIN
 			--false
-			INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-			VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing Dispenser Data', 1)
+			INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
+			VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), @intCheckoutId, 'S', 'Missing Dispenser Data', 1)
 		END
 
 		--CS-105 - First Day Setup for a Consignment Store does not show any values for Summary Totals or Aggregate Meter Readings by Fuel Grade
