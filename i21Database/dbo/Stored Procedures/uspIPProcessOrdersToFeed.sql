@@ -77,10 +77,11 @@ BEGIN TRY
 		JOIN dbo.tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 			AND LD.intLoadDetailId = @intLoadDetailId
 		JOIN tblICItem IM WITH (NOLOCK) ON IM.intItemId = LD.intItemId
+		LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
 		JOIN dbo.tblMFLocationLeadTime LLT WITH (NOLOCK) ON LLT.intPortOfDispatchId = CD.intLoadingPortId
 			AND LLT.intPortOfArrivalId = CD.intDestinationPortId
 			AND LLT.intBuyingCenterId = LD.intPCompanyLocationId
-			AND LLT.intOriginId = ISNULL(IM.intOriginId, LLT.intOriginId)
+			AND LLT.intOriginId = ISNULL(CA.intCountryID, LLT.intOriginId)
 
 		INSERT INTO tblIPContractFeed
 		(

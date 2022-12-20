@@ -373,6 +373,24 @@ BEGIN TRY
 				AND L.intSubLocationId = @intSubLocationId
 				AND L.intStorageLocationId = @intStorageLocationId
 
+			IF ISNULL(@strLotNumber, '') = ''
+			BEGIN
+				RAISERROR (
+						'Invalid Batch Id. '
+						,16
+						,1
+						)
+			END
+
+			IF ISNULL(@intLotId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Batch. '
+						,16
+						,1
+						)
+			END
+
 			BEGIN TRAN
 
 			-- Lot Create / Update
