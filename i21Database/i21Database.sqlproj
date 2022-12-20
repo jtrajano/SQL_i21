@@ -1255,6 +1255,7 @@
     <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
