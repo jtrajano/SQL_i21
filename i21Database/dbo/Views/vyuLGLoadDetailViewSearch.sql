@@ -100,6 +100,7 @@ SELECT   L.intLoadId
 		,LD.dblForexAmount
 		,strForeignCurrency = FXC.strCurrency
 		,strForexRateType = FXRT.strCurrencyExchangeRateType
+		,LD.strVendorReference
 
 -- Inbound Company Location
         ,strPLocationName = PCL.strLocationName
