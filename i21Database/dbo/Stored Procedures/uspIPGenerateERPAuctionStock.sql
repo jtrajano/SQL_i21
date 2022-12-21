@@ -8,6 +8,7 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @strXML NVARCHAR(MAX)
+		,@strDetailXML NVARCHAR(MAX)
 		,@ErrMsg NVARCHAR(MAX)
 		,@intAuctionStockPreStageId INT
 		,@dtmCurrentDate DATETIME
@@ -63,18 +64,17 @@ BEGIN TRY
 			,dtmProcessedDate
 			)
 		SELECT ROW_NUMBER() OVER (
-				ORDER BY (
-						SELECT NULL
-						)
+				ORDER BY intItemId
 				)
 			,intItemId
 			,@dtmCurrentDate
 		FROM (
 			SELECT DISTINCT S.intItemId
 			FROM tblQMSample S
-			WHERE S.dtmSaleDate BETWEEN GetDATE() - 28
-					AND GETDATE()
+			WHERE S.dtmSaleDate BETWEEN @dtmCurrentDate - 28
+					AND @dtmCurrentDate
 			) AS DT
+		Order by intItemId
 	END
 
 	IF NOT EXISTS (
@@ -96,11 +96,11 @@ BEGIN TRY
 		AND strTag = 'Count'
 
 	IF ISNULL(@tmp, 0) = 0
-		SELECT @tmp = 50
+		SELECT @tmp = 100
 
-	IF @offset > @tmp
+	IF @limit > @tmp
 	BEGIN
-		SELECT @offset = @tmp
+		SELECT @limit = @tmp
 	END
 
 	INSERT INTO @tblIPAuctionStockPreStage (intItemId)
@@ -130,12 +130,12 @@ BEGIN TRY
 	SELECT S.intItemId
 		,S.intLocationId
 		,IsNULL(S.intCurrencyId, @intDefaultCurrencyId) AS intCurrencyId
-		,Sum(S.dblB1QtyBought) LastWeekBought
-		,SUM(S.dblB1QtyBought * S.dblB1Price) / Sum(S.dblB1QtyBought) dblLastPrice
+		,Sum(S.dblSampleQty) LastWeekBought
+		,SUM(S.dblSampleQty * S.dblB1Price) / Sum(S.dblSampleQty) dblLastPrice
 	FROM tblQMSample S
 	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId
-	WHERE S.dtmSaleDate BETWEEN GetDATE() - 7
-			AND GETDATE()
+	WHERE S.dtmSaleDate BETWEEN @dtmCurrentDate - 7
+			AND @dtmCurrentDate
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
@@ -150,12 +150,12 @@ BEGIN TRY
 	SELECT S.intItemId
 		,S.intLocationId
 		,IsNULL(S.intCurrencyId, @intDefaultCurrencyId) AS intCurrencyId
-		,Sum(S.dblB1QtyBought)
-		,SUM(S.dblB1QtyBought * S.dblB1Price) / Sum(S.dblB1QtyBought) dblLastPrice
+		,Sum(S.dblSampleQty)
+		,SUM(S.dblSampleQty * S.dblB1Price) / Sum(S.dblSampleQty) dblLastPrice
 	FROM tblQMSample S
 	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId
-	WHERE S.dtmSaleDate BETWEEN GetDATE() - 28
-			AND GETDATE()
+	WHERE S.dtmSaleDate BETWEEN @dtmCurrentDate - 28
+			AND @dtmCurrentDate
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
@@ -167,7 +167,7 @@ BEGIN TRY
 		)
 	SELECT L.intItemId
 		,L.intLocationId
-		,SUM(L.dblGrossWeight) AS dblGrossWeight
+		,SUM(L.dblWeight) AS dblGrossWeight
 	FROM dbo.tblICLot L
 	JOIN @tblIPAuctionStock28 AS28 ON AS28.intItemId = L.intItemId
 		AND AS28.intLocationId = L.intLocationId
@@ -204,9 +204,9 @@ BEGIN TRY
 	SELECT @strXML = '<root><DocNo>' + IsNULL(ltrim(MIN(AS7.intItemId)), '') + '</DocNo>' + '<MsgType>Auction_Stock</MsgType>' + '<Sender>iRely</Sender>' + '<Receiver>ICRON</Receiver>'
 	FROM @tblIPAuctionStock7 AS7
 
-	SELECT @strXML = @strXML + '<Header><ItemCode>' + IsNULL(I.strItemNo, '') + '</ItemCode>' 
-							+ '<BuyingCenter>' + IsNULL(CL.strLocationName, '') + '</BuyingCenter>' 
-							+ '<LastWeekDate>' + IsNULL(CONVERT(VARCHAR(33), GETDATE() - 7, 126), '') + '</LastWeekDate>' 
+	SELECT @strDetailXML = IsNULL(@strDetailXML,'') + '<Header><ItemCode>' + IsNULL(I.strItemNo, '') + '</ItemCode>' 
+							+ '<BuyingCenter>' + IsNULL(CL.strLocationNumber, '') + '</BuyingCenter>' 
+							+ '<LastWeekDate>' + IsNULL(CONVERT(VARCHAR(33), @dtmCurrentDate - 7, 126), '') + '</LastWeekDate>' 
 							+ '<Currency>' + IsNULL(ltrim(C.strCurrency), '') + '</Currency>' 
 							+ '<LastWeekPrice>' + IsNULL(ltrim(AS7.dblLastWeekPrice), '') + '</LastWeekPrice>' 
 							+ '<LastWeekBought>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS7.dblLastWeekBought), '') + '</LastWeekBought>' 
@@ -223,13 +223,32 @@ BEGIN TRY
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = AS7.intLocationId
 	JOIN tblSMCurrency C ON C.intCurrencyID = AS7.intCurrencyId
 
-	SELECT @strXML = @strXML + '</root>'
+	UPDATE dbo.tblIPAuctionStockPreStage
+	SET intStatusId = NULL
+	WHERE intItemId IN (
+			SELECT PS.intItemId
+			FROM @tblIPAuctionStockPreStage PS
+			)
+		AND intStatusId = - 1
 
-	SELECT IsNULL(1, '0') AS id
-		,IsNULL(@strXML, '') AS strXml
-		,'' AS strInfo1
-		,'' AS strInfo2
-		,'' AS strOnFailureCallbackSql
+	IF LEN(@strDetailXML)>0
+	BEGIN
+		SELECT @strXML = @strXML +@strDetailXML+ '</root>'
+
+		SELECT IsNULL(1, '0') AS id
+			,IsNULL(@strXML, '') AS strXml
+			,'' AS strInfo1
+			,'' AS strInfo2
+			,'' AS strOnFailureCallbackSql
+	END
+	ELSE
+	BEGIN
+		SELECT IsNULL(1, '0') AS id
+			,'' AS strXml
+			,'' AS strInfo1
+			,'' AS strInfo2
+			,'' AS strOnFailureCallbackSql
+	END
 END TRY
 
 BEGIN CATCH

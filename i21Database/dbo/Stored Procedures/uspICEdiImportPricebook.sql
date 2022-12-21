@@ -2508,8 +2508,23 @@ SELECT [Changes].strAction
 FROM (MERGE	INTO dbo.tblICEffectiveItemCost WITH (HOLDLOCK) AS EffectiveItemCost
 USING (
 	SELECT Item.intItemId
+		 , ItemLocation.intItemLocationId
+		 , intCompanyLocationId = ValidLocation.intCompanyLocationId 
+		 , dblCost			    = CAST(NULLIF(Pricebook.strCaseCost, '') AS NUMERIC(38, 20)) 
+		 , dtmEffectiveDate	    = CAST(GETUTCDATE() AS DATE)
+		 , dtmDateCreated	    = GETUTCDATE()		
+		 , intCreatedByUserId   = @intUserId
+		 , ysnUpdatePrice	    = Pricebook.ysnUpdatePrice
+	FROM tblICEdiPricebook AS Pricebook
+	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+	OUTER APPLY (SELECT loc.intCompanyLocationId 					
+				 FROM @ValidLocations loc 
+				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strCaseCost, '') AS NUMERIC(38, 20)) <> 0 
+	UNION
+	SELECT Item.intItemId
 		, ItemLocation.intItemLocationId
-		, ItemUOM.intItemUOMId
 		, intCompanyLocationId = ValidLocation.intCompanyLocationId 
 		, dblCost			   = CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) 
 		, dtmEffectiveDate	   = CAST(GETUTCDATE() AS DATE)
@@ -2522,12 +2537,10 @@ USING (
 				 FROM @ValidLocations loc 
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1)))
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber1) IS NOT NULL
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0
 	UNION
 	SELECT Item.intItemId
 		 , ItemLocation.intItemLocationId
-		 , ItemUOM.intItemUOMId
 		 , intCompanyLocationId = ValidLocation.intCompanyLocationId 
 		 , dblCost				= CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) 
 		 , dtmEffectiveDate		= CAST(GETUTCDATE() AS DATE)
@@ -2540,11 +2553,7 @@ USING (
 				 FROM @ValidLocations loc 
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId 
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2)))
-	WHERE 
-		Pricebook.strUniqueId = @UniqueId 
-		AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 
-		--AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 
 ) AS Source_Query ON EffectiveItemCost.intItemId = Source_Query.intItemId 
 			     AND EffectiveItemCost.intItemLocationId = Source_Query.intItemLocationId
 			     AND CONVERT(DATE, EffectiveItemCost.dtmEffectiveCostDate, 101) = CONVERT(DATE, Source_Query.dtmEffectiveDate, 101) 

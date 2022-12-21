@@ -79,6 +79,10 @@ BEGIN
 		,strGardenMark = GM.strGardenMark
 		,strSustainability = QB.strSustainability
 		,ysnTeaOrganic = QB.ysnTeaOrganic
+		,intSales = QB.intSales
+		,intSalesYear = QB.intSalesYear
+		,strCatalogueType = QCT.strCatalogueType
+		,strManufacturingLeafType = QB.strLeafManufacturingType
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -126,6 +130,7 @@ BEGIN
 	LEFT JOIN tblTMDevice						TMD				ON		TMD.intDeviceId = LoadDetail.intTMDeviceId
 	LEFT JOIN tblMFBatch						QB				ON		QB.intBatchId = LoadDetail.intBatchId
 	LEFT JOIN tblQMSample						QS				ON		QS.intSampleId = QB.intSampleId
+	LEFT JOIN tblQMCatalogueType				QCT				ON		QCT.intCatalogueTypeId = QS.intCatalogueTypeId
 	LEFT JOIN tblARMarketZone					MZ				ON		MZ.intMarketZoneId = QS.intMarketZoneId
 	LEFT JOIN vyuEMSearchEntityBroker			EB				ON		EB.intEntityId = QB.intBrokerId
 	LEFT JOIN tblQMGardenMark					GM				ON		GM.intGardenMarkId = QB.intGardenMarkId

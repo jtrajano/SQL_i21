@@ -122,6 +122,9 @@ BEGIN TRY
 	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
 	DECLARE @thisContractStatus NVARCHAR(100)
 	DECLARE @fontBold NVARCHAR(MAX)
+	DECLARE @fontBoldFreightTerm NVARCHAR(MAX)
+	DECLARE @fontBoldCity NVARCHAR(MAX)
+	DECLARE @fontBoldWeightGradeDesc NVARCHAR(MAX)
 
 	
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
@@ -205,6 +208,30 @@ BEGIN TRY
 		ELSE
 		BEGIN 
 			SET @fontBold = '<span style="font-family:Arial;font-size:13px;">'
+		END
+		IF CHARINDEX('intFreightTermId',@strAmendedColumns, 0) > 0 
+		BEGIN
+			SET @fontBoldFreightTerm = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldFreightTerm  = '<span style="font-family:Arial;font-size:13px;">'
+		END
+		IF CHARINDEX('intINCOLocationTypeId',@strAmendedColumns, 0) > 0 
+		BEGIN
+			SET @fontBoldCity = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldCity  = '<span style="font-family:Arial;font-size:13px;">'
+		END
+		IF CHARINDEX('intWeightId',@strAmendedColumns, 0) > 0 
+		BEGIN
+			SET @fontBoldWeightGradeDesc = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldWeightGradeDesc  = '<span style="font-family:Arial;font-size:13px;">'
 		END
 
 	END
@@ -421,7 +448,9 @@ BEGIN TRY
 		,strFreightTerm							= CB.strFreightTerm + ' (' + CB.strDescription + ')'
 		,strCity								= ISNULL(CT.strCity, '')
 		,strWeightGradeDesc						= ISNULL(W1.strWeightGradeDesc, '')
-		,strStraussCondition     				= CB.strFreightTerm + ' (' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
+		,strStraussCondition     				= @fontBoldFreightTerm + CB.strFreightTerm + ' (' + CB.strDescription + ')' + '</span>' + ' '
+												+ @fontBoldCity +  ISNULL(CT.strCity, '') + '</span>' + ' ' 
+												+ @fontBoldWeightGradeDesc + ISNULL(W1.strWeightGradeDesc, '') + '</span>'
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'

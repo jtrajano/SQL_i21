@@ -134,6 +134,8 @@ SELECT
     ,OriginalItem.strItemNo strOriginalItem
     ,SM.strCurrency
 	,A.strERPPOLineNo
+    ,C.intBatchId intChildBatchId
+	,C.strBatchId strChildBatchId
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
@@ -177,3 +179,7 @@ OUTER APPLY(
     FROM tblMFLotInventory MF JOIN tblICLot IC ON MF.intLotId = IC.intLotId 
     WHERE MF.intBatchId = A.intBatchId
 )LOT
+OUTER APPLY(
+    SELECT TOP 1 intBatchId, strBatchId FROM
+    tblMFBatch WHERE intParentBatchId  = A.intBatchId 
+)C

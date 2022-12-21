@@ -39,6 +39,27 @@ BEGIN TRY
 			,@limit = @limit
 			,@offset = @offset
 	END
+	Else if @strType = 'Confirmed Blendsheet'
+	Begin
+		EXEC dbo.uspMFGenerateERPProductionOrder_EK 
+			@limit = @limit
+			,@offset = @offset
+			,@ysnUpdateFeedStatus = 1
+	End
+	Else if @strType = 'Recall Blendsheet'
+	Begin
+		EXEC dbo.uspMFGenerateERPRecallProductionOrder_EK  
+			@limit = @limit
+			,@offset = @offset
+			,@ysnUpdateFeedStatus = 1
+	End
+	Else if @strType = 'Stock Recategorization'
+	Begin
+		EXEC dbo.uspIPGenerateERPBatchRecategorization_EK  
+			@limit = @limit
+			,@offset = @offset
+			,@ysnUpdateFeedStatus = 1
+	End
 END TRY
 
 BEGIN CATCH
