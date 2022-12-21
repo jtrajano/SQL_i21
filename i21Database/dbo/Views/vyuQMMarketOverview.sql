@@ -10,12 +10,22 @@ With OverallSalesData as(
 ),
 OverAllWeekStats as(
 	select DATEPART(ww, dtmSaleDate) WeekNo,
-	SUM((dblB1QtyBought*dblB1Price +dblB2QtyBought* dblB2Price +dblB3QtyBought*dblB3Price
-	+dblB4QtyBought* dblB4Price +dblB5QtyBought*dblB5Price))/
-	sum(dblB1Price + dblB2Price + dblB3Price+ dblB4Price+ dblB5Price) AveragePrice,
-	SUM(dblB1QtyBought  * dblB1Price)/
-	sum(dblB1Price) AveragePrice_UL
-	from tblQMSample group by DATEPART(ww, dtmSaleDate)
+	SUM(
+		ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) +
+		ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) +
+		ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) +
+		ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) +
+		ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0)
+		)/
+	sum(
+		dblB1Price * ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) + 
+		dblB2Price * ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) + 
+		dblB3Price * ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) + 
+		dblB4Price * ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) + 
+		dblB4Price * ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0) 
+	) AveragePrice, 
+	SUM(ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0))/SUM(dblB1Price * ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0)) AveragePrice_UL
+	from vyuQMSampleList group by DATEPART(ww, dtmSaleDate)
 ),
 ItemSaleStat as
 (
@@ -23,15 +33,35 @@ ItemSaleStat as
 	strTeaGroup, strSaleNumber, C.strCurrency,
 	SUM(dblB1QtyBought + dblB2QtyBought +dblB3QtyBought+dblB4QtyBought+dblB5QtyBought) TotalSold,
 	SUM(dblB1QtyBought) TotalSold_UL,
-	SUM((dblB1QtyBought*dblB1Price +dblB2QtyBought* dblB2Price +dblB3QtyBought*dblB3Price+dblB4QtyBought* dblB4Price +dblB5QtyBought*dblB5Price))/
-		SUM(dblB1Price + dblB2Price + dblB3Price+ dblB4Price+ dblB5Price) AveragePrice,
-	SUM(dblB1QtyBought  * dblB1Price)/SUM(dblB1Price) AveragePrice_UL,
-	sum(A.dblNetWeight)dblNetWeight,
+	SUM(
+		ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) +
+		ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) +
+		ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) +
+		ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) +
+		ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0)
+		)/
+	sum(
+		dblB1Price * ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) + 
+		dblB2Price * ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) + 
+		dblB3Price * ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) + 
+		dblB4Price * ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) + 
+		dblB4Price * ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0) 
+	) AveragePrice,
+	SUM(ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0))/SUM(dblB1Price * ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0)) AveragePrice_UL,
+	SUM(
+		ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) +
+		ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) +
+		ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) +
+		ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) +
+		ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0)
+	) dblNetWeight,
 	Taste.Val AverageItemTaste,
 	AVG(dblSupplierValuationPrice)AverageSupplierValuationPrice
-	FROM tblQMSample A JOIN tblMFBatch B ON A.intSampleId = B.intSampleId
+	FROM vyuQMSampleList A JOIN tblMFBatch B ON A.intSampleId = B.intSampleId
+
 	LEFT JOIN
 	tblSMCurrency C on A.intCurrencyId= C.intCurrencyID
+	LEFT JOIN tblICItemUOM IU ON IU.intItemId = A.intItemId AND IU.intUnitMeasureId  = A.intB1QtyUOMId 
 	OUTER APPLY(
 		select avg(cast( T.strPropertyValue as decimal(18,2)) )Val 
 		from tblQMProperty P 
@@ -39,7 +69,7 @@ ItemSaleStat as
 		where A.intItemId = P.intItemId
 		AND P.strPropertyName = 'Taste' AND T.intSampleId  = A.intSampleId
 	)Taste
-	group by  strSaleNumber,strCurrency,Taste.Val, strTeaGroup
+	group by  strSaleNumber,C.strCurrency,Taste.Val, strTeaGroup
 ),
 ItemWeeklySaleStat as
 (
@@ -48,22 +78,41 @@ ItemWeeklySaleStat as
 	strTeaGroup,strSaleNumber, C.strCurrency,
 	SUM(dblB1QtyBought + dblB2QtyBought +dblB3QtyBought+dblB4QtyBought+dblB5QtyBought) TotalSold,
 	SUM(dblB1QtyBought) TotalSold_UL,
-	SUM((dblB1QtyBought*dblB1Price +dblB2QtyBought* dblB2Price +dblB3QtyBought*dblB3Price+dblB4QtyBought* dblB4Price +dblB5QtyBought*dblB5Price))/
-		SUM(dblB1Price + dblB2Price + dblB3Price+ dblB4Price+ dblB5Price) AveragePrice,
-	SUM(dblB1QtyBought  * dblB1Price)/SUM(dblB1Price) AveragePrice_UL,
-	sum(A.dblNetWeight)dblNetWeight,
+	SUM(
+		ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) +
+		ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) +
+		ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) +
+		ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) +
+		ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0)
+		)/
+	SUM(
+		dblB1Price * ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) + 
+		dblB2Price * ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) + 
+		dblB3Price * ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) + 
+		dblB4Price * ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) + 
+		dblB4Price * ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0) 
+	) AveragePrice, 
+	SUM(ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0))/SUM(dblB1Price * ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0)) AveragePrice_UL,
+	SUM(
+		ISNULL(dblB1QtyBought * CAST(strB1QtyUOM AS INT), 0) +
+		ISNULL(dblB2QtyBought * CAST(strB2QtyUOM AS INT), 0) +
+		ISNULL(dblB3QtyBought * CAST(strB3QtyUOM AS INT), 0) +
+		ISNULL(dblB4QtyBought * CAST(strB4QtyUOM AS INT), 0) +
+		ISNULL(dblB5QtyBought * CAST(strB5QtyUOM AS INT), 0)
+	) dblNetWeight,
 	Taste.Val AverageItemTaste
-	FROM tblQMSample A 
+	FROM vyuQMSampleList A 
 	JOIN tblMFBatch B ON A.intSampleId = B.intSampleId
 	LEFT JOIN
 	tblSMCurrency C on A.intCurrencyId= C.intCurrencyID
+	LEFT JOIN tblICItemUOM IU ON IU.intItemId = A.intItemId AND IU.intUnitMeasureId  = A.intB1QtyUOMId 
 	OUTER APPLY(
 		select avg(cast( T.strPropertyValue as decimal(18,2)) )Val from tblQMProperty P 
 		left JOIN tblQMTestResult T ON T.intPropertyId = P.intPropertyId
 		where A.intItemId = P.intItemId
 		AND P.strPropertyName = 'Taste' and T.intSampleId = A.intSampleId
 	)Taste
-	group by strTeaGroup, strSaleNumber,strCurrency,Taste.Val, DATEPART(ww, dtmSaleDate)
+	group by strTeaGroup, strSaleNumber,C.strCurrency,Taste.Val, DATEPART(ww, dtmSaleDate)
 	
 ),
 HeaderData as(
@@ -93,7 +142,7 @@ ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
 , A.dtmSaleDate--2
 , ROUND(A.AveragePriceCurrentWeekSale,2) dblAvePriceCurrentWeekSale --3
 , ROUND(A.AveragePricePrevWeekSale,2) dblAvePricePrevWeekSale--4
-, ROUND(A.AveragePriceCurrentWeekSale- A.AveragePricePrevWeekSale,2) dblAveWeekPriceChange --5
+, ROUND(ISNULL(A.AveragePriceCurrentWeekSale,0)- ISNULL(A.AveragePricePrevWeekSale,0),2) dblAveWeekPriceChange --5
 , ROUND(A.TotalSales,2) dblTotalSales --6
 , ROUND(A.TotalSales_UL,2) dblTotalSaleUL--7
 , ROUND(A.AveragePrice_UL,2) dblAveragePriceUL --8
@@ -123,5 +172,3 @@ outer apply(
 
 )V
 --where A.strSaleNumber = '00001'
-
-
