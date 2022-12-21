@@ -98,10 +98,15 @@ BEGIN TRY
 		--UPDATE CAT RECON DETAILS
 		UPDATE CRD
 		SET dblPreInvoicePrice			= S.dblB1Price
+		  , dblBasePrice				= S.dblB1Price
 		  , dblPreInvoiceQuantity		= ISNULL(A.dblSampleQty, 0)
+		  , dblQuantity					= ISNULL(A.dblSampleQty, 0)
 		  , strPreInvoiceChopNo			= S.strChopNumber
+		  , strChopNo					= S.strChopNumber
 		  , intPreInvoiceGardenMarkId	= S.intGardenMarkId
+		  , intGardenMarkId				= S.intGardenMarkId
 		  , intPreInvoiceGradeId		= S.intGradeId
+		  , intGradeId					= S.intGradeId
 		  , ysnMismatched				= CAST(1 AS BIT)
 		FROM tblQMCatalogueReconciliationDetail CRD
         INNER JOIN #AMENDMENTS A ON CRD.intCatalogueReconciliationId = A.intCatalogueReconciliationId
