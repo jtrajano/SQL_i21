@@ -473,7 +473,7 @@ WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit
 
 LEFT JOIN
           
-(SELECT DISTINCT 
+(SELECT  
       intEntityCustomerId
     , intInvoiceId  
 	, dblAmountPaid
@@ -596,4 +596,3 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 GROUP BY A.intEntityCustomerId) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
-ORDER BY strCustomerName
