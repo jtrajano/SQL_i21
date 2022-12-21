@@ -17,6 +17,7 @@ SELECT
 	, ysnEvaluationByStorageLocation = ISNULL(companyConfig.ysnEvaluationByStorageLocation , CAST(0 AS BIT))
 	, ysnEvaluationByStorageUnit = ISNULL(companyConfig.ysnEvaluationByStorageUnit , CAST(0 AS BIT))
 	, ysnIncludeProductInformation = ISNULL(companyConfig.ysnIncludeProductInformation , CAST(0 AS BIT))
+	, ysnEnableMTMPoint = ISNULL(companyConfigCT.ysnEnableMTMPoint, CAST(0 AS BIT))
 FROM tblRKM2MBasis basis
 OUTER APPLY (
 	SELECT TOP 1 
@@ -30,3 +31,8 @@ OUTER APPLY (
 		, ysnIncludeProductInformation
 	FROM tblRKCompanyPreference
 ) companyConfig
+OUTER APPLY (
+	SELECT TOP 1 
+		  ysnEnableMTMPoint
+	FROM tblCTCompanyPreference
+) companyConfigCT
