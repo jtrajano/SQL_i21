@@ -1431,6 +1431,9 @@
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStock_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStock_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPriceToFeed.sql" />
+    <Build Include="dbo\Tables\tblIPPriceFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPrice_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
