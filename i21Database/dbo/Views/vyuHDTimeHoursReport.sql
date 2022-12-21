@@ -39,6 +39,7 @@
 			,n.strStatus
 			,o.intMilestoneId
 			,o.strMileStone
+			,strDepartment = dbo.fnEMGetEmployeeDepartment(g.intEntityId) COLLATE Latin1_General_CI_AS
 		from
 			tblHDTicketHoursWorked a
 			join tblHDTicket b on b.intTicketId = a.intTicketId
@@ -97,6 +98,7 @@
 			,strStatus = null
 			,intMilestoneId = null
 			,strMileStone = null
+			,strDepartment = dbo.fnEMGetEmployeeDepartment(a.intPREntityEmployeeId) COLLATE Latin1_General_CI_AS
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
