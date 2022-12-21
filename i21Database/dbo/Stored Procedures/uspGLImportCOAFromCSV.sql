@@ -217,6 +217,7 @@ AS
 					ON G.strPartitionGroup = I.strPartitionGroup
 				WHERE  G.strPartitionGroup = @strGroup
 					AND I.intPartitionType > 0
+					AND ysnInvalid = 0
 
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType > 3)
 				BEGIN
