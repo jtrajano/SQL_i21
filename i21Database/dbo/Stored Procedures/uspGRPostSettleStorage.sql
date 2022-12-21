@@ -997,6 +997,13 @@ BEGIN TRY
 							  )
 							  AND @dblTicketStorageDue > 0
 				BEGIN
+
+					IF @intStorageChargeItemId IS NULL
+					BEGIN
+						RAISERROR('Item is missing for Storage Charge.',16,1,1)
+						GOTO SettleStorage_Exit
+					END
+					
 					INSERT INTO @SettleVoucherCreate 
 					(
 						 intCustomerStorageId
