@@ -2741,7 +2741,7 @@ BEGIN TRY
 														END																							
 					,[dblWeightUnitQty]				= 1 
 					,[intWeightUOMId]				= CASE
-														WHEN a.[intContractHeaderId] IS NOT NULL OR (ISNULL(@origdblSpotUnits,0) > 0 AND a.intItemType = 1) 
+														WHEN a.[intContractHeaderId] IS NOT NULL OR (ISNULL(@origdblSpotUnits,0) > 0 AND a.intItemType = 1) THEN b.intItemUOMId
 														ELSE NULL
 													END
 					,[intPurchaseTaxGroupId]		= 
