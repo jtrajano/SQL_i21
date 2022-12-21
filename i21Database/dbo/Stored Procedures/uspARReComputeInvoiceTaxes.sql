@@ -201,7 +201,8 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[dblAdjustedTax]		= ATC.[dblAdjustedTax]
 			,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ATC.[dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 		FROM [tblARInvoiceDetailTax] IDT
-		INNER JOIN #ADJUSTEDTAXCODE ATC ON IDT.[intInvoiceDetailTaxId] = ATC.[intInvoiceDetailTaxId] AND IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
+		--INNER JOIN #ADJUSTEDTAXCODE ATC ON IDT.[intInvoiceDetailTaxId] = ATC.[intInvoiceDetailTaxId] AND IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
+		INNER JOIN #ADJUSTEDTAXCODE ATC ON IDT.[intTaxCodeId] = ATC.[intTaxCodeId] 
 		WHERE IDT.[intInvoiceDetailId] = @InvoiceDetailId
 				
 		SELECT
