@@ -188,7 +188,7 @@ BEGIN TRY
 							AND intStatusId = 2
 
 						UPDATE tblMFWorkOrder
-						SET intStatusId = 20
+						SET intStatusId = 20,strERPComment =@StatusText
 						WHERE intWorkOrderId = @intWorkOrderId
 
 						INSERT INTO @tblMessage (
