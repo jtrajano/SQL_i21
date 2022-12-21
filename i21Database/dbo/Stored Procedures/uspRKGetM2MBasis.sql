@@ -188,7 +188,7 @@ BEGIN TRY
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
 				, a.intUnitMeasureId = b.intUnitMeasureId
 				, a.strUnitMeasure = UOM.strUnitMeasure
-				, a.dblRatio = b.dblRatio
+				, a.dblRatio = ISNULL(b.dblRatio, 0)
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
 				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)				
@@ -332,7 +332,9 @@ BEGIN TRY
 		END
 	END
 	
-	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strItemNo)) AS intRowNumber
+	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strItemNo, intFutureMarketId, intCurrencyId, strPeriodTo, intContractTypeId
+												, intCompanyLocationId, intMarketZoneId, intOriginPortId, intDestinationPortId
+												, intCropYearId, intStorageLocationId, intStorageUnitId, intMTMPointId, intCertificationId)) AS intRowNumber
 		, *
 		, ysnEvaluationByLocation = @ysnEvaluationByLocation 
 		, ysnEvaluationByMarketZone = @ysnEvaluationByMarketZone 
