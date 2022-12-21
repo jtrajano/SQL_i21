@@ -253,6 +253,63 @@ begin try
 				select @strInvoiceDiscountsChargesIds = @strInvoiceDiscountsChargesIds + convert(nvarchar(20),@NewInvoiceDetailId) + ',';
 			end
 
+			SELECT
+				@ItemShipmentId                         = null
+				,@ItemShipmentNumber                    = null
+				,@InvoiceId								= null
+				,@EntitySalespersonId					= null
+				,@ItemContractHeaderId                  = null
+				,@ItemId								= null
+				,@ItemPrepayRate                        = null
+				,@ItemDocumentNumber                    = null
+				,@ItemDescription						= null
+				,@ItemOrderUOMId                        = null
+				,@ItemQtyOrdered                        = null
+				,@ItemUOMId								= null
+				,@ItemPriceUOMId                        = null
+				,@ItemQtyShipped                        = null
+				,@ItemDiscount                          = null
+				,@ItemTermDiscount						= null
+				,@ItemTermDiscountBy					= null
+				,@ItemWeight							= null
+				,@ItemWeightUOMId						= null
+				,@ItemPrice                             = null
+				,@ItemUnitPrice                         = null
+				,@ItemPricing                           = null
+				,@ItemMaintenanceAmount                 = null
+				,@ItemLicenseAmount                     = null
+				,@ItemTaxGroupId                        = null
+				,@ItemStorageLocationId                 = null
+				,@ItemCompanyLocationSubLocationId      = null
+				,@ItemInventoryShipmentItemId           = null
+				,@ItemInventoryShipmentChargeId         = null
+				,@ItemRecipeItemId                      = null
+				,@ItemRecipeId                          = null
+				,@ItemSublocationId                     = null
+				,@ItemCostTypeId                        = null
+				,@ItemMarginById                        = null
+				,@ItemCommentTypeId                     = null
+				,@ItemMargin                            = null
+				,@ItemRecipeQty							= null
+				,@ItemSalesOrderDetailId                = null
+				,@ItemSalesOrderNumber                  = null
+				,@ItemContractDetailId                  = null
+				,@ItemShipmentGrossWt                   = null
+				,@ItemShipmentTareWt                    = null
+				,@ItemShipmentNetWt                     = null
+				,@ItemTicketId                          = null
+				,@ItemConversionFactor                  = null
+				,@ItemLeaseBilling                      = null
+				,@ItemCurrencyExchangeRateTypeId        = null
+				,@ItemCurrencyExchangeRateId            = null
+				,@ItemCurrencyExchangeRate              = null
+				,@ItemSubCurrencyId                     = null
+				,@ItemSubCurrencyRate                   = null
+				,@ItemIsBlended                         = null
+				,@ItemStorageScheduleTypeId             = null
+				,@ItemDestinationGradeId                = null
+				,@ItemDestinationWeightId               = null
+
 			select @intActiveInventoryShipmentChargeId = min(intInventoryShipmentChargeId) from @ChargesDiscounts where intInventoryShipmentChargeId > @intActiveInventoryShipmentChargeId;
 		end
 
