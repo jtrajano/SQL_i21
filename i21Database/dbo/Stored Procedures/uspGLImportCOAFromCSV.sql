@@ -93,8 +93,11 @@ AS
 		FROM @tblImport A
 		LEFT JOIN tblGLAccountSegment AcctSeg
 			ON AcctSeg.strCode = A.strAccountPartition
+		LEFT JOIN tblGLAccountStructure ST
+			ON ST.intStructureType = A.intPartitionType
 		WHERE A.strPartitionGroup = @strGroup
 			AND A.intPartitionType > 0
+			AND AcctSeg.intAccountStructureId = ST.intAccountStructureId
 
 		IF EXISTS(SELECT TOP 1 1 FROM @tblImport WHERE strPartitionGroup = @strGroup AND strError IS NOT NULL)
 		BEGIN
