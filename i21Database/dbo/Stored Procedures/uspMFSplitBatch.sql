@@ -164,7 +164,7 @@ BEGIN
 				,[strLeafManufacturingType]
 				,[strLeafSize]
 				,[strLeafStyle]
-				,[intMixingUnitLocationId]
+				,[intMixingUnitLocationId]=B.intLocationId
 				,[dblPackagesBought]--= B.dblSplitPackages
 				,[strTeaOrigin]
 				,[intOriginalItemId]
