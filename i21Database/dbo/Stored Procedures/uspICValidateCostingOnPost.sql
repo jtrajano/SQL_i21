@@ -339,6 +339,6 @@ WHERE Item.intCategoryId NOT IN (SELECT intCategoryId
 IF @intItemId IS NOT NUll AND @ysnStorageCategorize = 1
 	BEGIN
 		-- '{Item Category} does not exists on Storage Unit Categories'
-		EXEC uspICRaiseError 80266, @strCategory, @strStorageLocationName
-		RETURN -80266
+		EXEC uspICRaiseError 80272, @strCategory, @strStorageLocationName
+		RETURN -80272
 	END
