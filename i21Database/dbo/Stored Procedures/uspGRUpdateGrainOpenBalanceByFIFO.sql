@@ -378,6 +378,7 @@ BEGIN TRY
 		FROM @StorageTicketInfoByFIFO
 		CROSS APPLY (
 			SELECT ShipmentItem.intSourceId
+				,Shipment.dtmShipDate
 			FROM tblICInventoryShipment Shipment
 			JOIN tblICInventoryShipmentItem ShipmentItem
 				ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
