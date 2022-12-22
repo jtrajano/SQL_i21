@@ -1194,6 +1194,8 @@
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
     <Build Include="dbo\Functions\fnSTGetCurrentBusinessDay.sql" />
     <Build Include="dbo\Views\vyuSTCSLatestCheckoutWithError.sql" />
+    <Build Include="dbo\Tables\tblFABook.sql" />
+    <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetBooks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
