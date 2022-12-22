@@ -44,6 +44,8 @@ BEGIN
 SELECT SH.*
 FROM vyuLGDropShipmentDetailsView SH 
 WHERE SH.strLoadNumber = @xmlParam
-AND (ISNULL(@xmlParam2, 0) = 0 OR (ISNULL(@xmlParam2, 0) > 0 AND @xmlParam2 = SH.intCustomerEntityId))
+AND (ISNULL(@xmlParam2, 0) = 0 
+	OR (ISNULL(@xmlParam2, 0) > 0 AND @xmlParam2 = SH.intCustomerEntityId)
+	OR (ISNULL(@xmlParam2, 0) < 0 AND SH.intCustomerEntityId IS NULL))
 
 END
