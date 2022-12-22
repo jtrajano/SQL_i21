@@ -138,6 +138,12 @@ BEGIN
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
 	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
 
+	DECLARE @intCustomerCount INT = 1
+	SELECT @intCustomerCount = COUNT(DISTINCT intCustomerEntityId) 
+	FROM tblLGLoadDetail LD INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+	WHERE L.strLoadNumber = @strTrackingNumber
+	HAVING COUNT(DISTINCT intCustomerEntityId) > 1
+
 IF ISNULL(@intLoadWarehouseId,0) = 0 
 	BEGIN
 	SELECT *	
@@ -186,7 +192,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			+ CASE WHEN ISNULL(strThirdNotifyFax, '') = '' THEN '' ELSE 'Fax: ' + strThirdNotifyFax + CHAR(13) END 
 			+ CASE WHEN ISNULL(strThirdNotifyMail, '') = '' THEN '' ELSE 'E-mail: ' + strThirdNotifyMail END))
 	FROM (
-		SELECT TOP 1
+		SELECT TOP (@intCustomerCount)
 			strTrackingNumber = L.strLoadNumber,
 			L.intPurchaseSale,
 			LW.strDeliveryNoticeNumber, 
@@ -574,14 +580,22 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strSeller = Seller.strLocationName,
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
-			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0)
+			intCustomerEntityId = CASE WHEN (@intCustomerEntityId = 0) THEN 0 ELSE ISNULL(LD.intCustomerEntityId, -1) END
 		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND (@intCustomerEntityId IS NULL OR (@intCustomerEntityId IS NOT NULL AND @intCustomerEntityId = LD.intCustomerEntityId))
+		CROSS APPLY (SELECT intLoadId, intCustomerEntityId, intSContractDetailId, ysnPrintShipper, intVendorEntityId, intPContractDetailId, intPCompanyLocationId 
+				FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId 
+				AND (ISNULL(@intCustomerEntityId, 0) = 0 
+					OR (ISNULL(@intCustomerEntityId, 0) > 0 AND @intCustomerEntityId = intCustomerEntityId)
+					OR (ISNULL(@intCustomerEntityId, 0) < 0 AND intCustomerEntityId IS NULL))) LD
+		OUTER APPLY (SELECT TOP 1 LWC.intLoadWarehouseId, LDCL.intLoadContainerId FROM tblLGLoadDetail ld
+				LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = ld.intLoadDetailId
+				LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LDCL.intLoadContainerId
+				WHERE ld.intLoadId = L.intLoadId 
+				AND (ISNULL(@intCustomerEntityId, 0) = 0 
+					OR (ISNULL(@intCustomerEntityId, 0) > 0 AND @intCustomerEntityId = intCustomerEntityId)
+					OR (ISNULL(@intCustomerEntityId, 0) < 0 AND intCustomerEntityId IS NULL))) LWC
+		OUTER APPLY (SELECT TOP 1 LW.* FROM tblLGLoadWarehouse LW WHERE LW.intLoadId = L.intLoadId AND LW.intLoadWarehouseId = ISNULL(LWC.intLoadWarehouseId, LW.intLoadWarehouseId)) LW
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId AND LW.intLoadWarehouseId = ISNULL(LWC.intLoadWarehouseId, LW.intLoadWarehouseId)
 		LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		OUTER APPLY 
@@ -591,7 +605,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId
 				LEFT JOIN tblCTContractDetail ACD ON ACD.intContractDetailId = ALD.intSContractDetailId
 				LEFT JOIN tblCTContractHeader ACH ON ACH.intContractHeaderId = ACD.intContractHeaderId
-				WHERE PLD.intContainerId = LC.intLoadContainerId) PL
+				WHERE PLD.intContainerId = LWC.intLoadContainerId) PL
 		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN ISNULL(LD.intSContractDetailId, PL.intSContractDetailId) ELSE LD.intSContractDetailId END
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblSMFreightTerms SCB ON SCB.intFreightTermId = SCH.intFreightTermId
@@ -599,9 +613,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblSMCountry PCountry ON PCountry.intCountryID = PCity.intCountryId
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.ysnDefaultLocation = 1
-		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = SCH.intEntityId
-		LEFT JOIN [tblEMEntityLocation] CLocation ON CLocation.intEntityId = SCH.intEntityId and CLocation.ysnDefaultLocation = 1
-		LEFT JOIN tblEMEntityToContact CustomerContact ON CustomerContact.intEntityId = Customer.intEntityId
+		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = ISNULL(LD.intCustomerEntityId, SCH.intEntityId)
+		LEFT JOIN [tblEMEntityLocation] CLocation ON CLocation.intEntityId = ISNULL(LD.intCustomerEntityId, SCH.intEntityId) and CLocation.ysnDefaultLocation = 1
+		LEFT JOIN tblEMEntityToContact CustomerContact ON CustomerContact.intEntityId = Customer.intEntityId AND CustomerContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity CustomerContactEntity ON CustomerContactEntity.intEntityId = CustomerContact.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN [tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.ysnDefaultLocation = 1
@@ -615,9 +629,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		
 		LEFT JOIN tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
-		LEFT JOIN tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
+		LEFT JOIN tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId AND WEC.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
-		LEFT JOIN tblEMEntityToContact SLEC ON SLEC.intEntityId = SLEntity.intEntityId
+		LEFT JOIN tblEMEntityToContact SLEC ON SLEC.intEntityId = SLEntity.intEntityId AND SLEC.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
@@ -626,28 +640,28 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblLGLoadNotifyParties TLNP ON L.intLoadId = TLNP.intLoadId AND TLNP.strNotifyOrConsignee = 'Third Notify'
 		LEFT JOIN tblLGLoadNotifyParties CLNP ON L.intLoadId = CLNP.intLoadId AND CLNP.strNotifyOrConsignee = 'Consignee'
 		LEFT JOIN tblEMEntity FirstNotify ON FirstNotify.intEntityId = FLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact FirstNotifyContact ON FirstNotifyContact.intEntityId = FirstNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact FirstNotifyContact ON FirstNotifyContact.intEntityId = FirstNotify.intEntityId AND FirstNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity FirstNotifyContactEntity ON FirstNotifyContactEntity.intEntityId = FirstNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank FirstNotifyBank ON FirstNotifyBank.intBankId = FLNP.intBankId
 		LEFT JOIN tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = FLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation FNCompanyLocation ON FNCompanyLocation.intCompanyLocationId = FLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation FNLocation ON FNLocation.intEntityLocationId = FLNP.intEntityLocationId
 		LEFT JOIN tblEMEntity SecondNotify ON SecondNotify.intEntityId = SLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact SecondNotifyContact ON SecondNotifyContact.intEntityId = SecondNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact SecondNotifyContact ON SecondNotifyContact.intEntityId = SecondNotify.intEntityId AND SecondNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity SecondNotifyContactEntity ON SecondNotifyContactEntity.intEntityId = SecondNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank SecondNotifyBank ON SecondNotifyBank.intBankId = SLNP.intBankId
 		LEFT JOIN tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation SNCompanyLocation ON SNCompanyLocation.intCompanyLocationId = SLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation SNLocation ON SNLocation.intEntityLocationId = SLNP.intEntityLocationId
 		LEFT JOIN tblEMEntity ThirdNotify ON ThirdNotify.intEntityId = TLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact ThirdNotifyContact ON ThirdNotifyContact.intEntityId = ThirdNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact ThirdNotifyContact ON ThirdNotifyContact.intEntityId = ThirdNotify.intEntityId AND ThirdNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity ThirdNotifyContactEntity ON ThirdNotifyContactEntity.intEntityId = ThirdNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank ThirdNotifyBank ON ThirdNotifyBank.intBankId = TLNP.intBankId
 		LEFT JOIN tblSMCompanySetup ThirdNotifyCompany ON ThirdNotifyCompany.intCompanySetupID = TLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation TNCompanyLocation ON TNCompanyLocation.intCompanyLocationId = TLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation TNLocation ON TNLocation.intEntityLocationId = TLNP.intEntityLocationId	
 		LEFT JOIN tblEMEntity ConsigneeNotify ON ConsigneeNotify.intEntityId = CLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId AND ConsigneeNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity ConsigneeNotifyContactEntity ON ConsigneeNotifyContactEntity.intEntityId = ConsigneeNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank ConsigneeNotifyBank ON ConsigneeNotifyBank.intBankId = CLNP.intBankId
 		LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
@@ -684,7 +698,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		) LOGO
 		WHERE L.strLoadNumber = @strTrackingNumber
-		AND (ISNULL(@intCustomerEntityId, 0) = 0 OR (ISNULL(@intCustomerEntityId, 0) > 0 AND @intCustomerEntityId = LD.intCustomerEntityId))) tbl
+		AND (ISNULL(@intCustomerEntityId, 0) = 0 
+			OR (ISNULL(@intCustomerEntityId, 0) > 0 AND @intCustomerEntityId = LD.intCustomerEntityId)
+			OR (ISNULL(@intCustomerEntityId, 0) < 0 AND LD.intCustomerEntityId IS NULL))) tbl
 	END
 	ELSE
 	BEGIN
