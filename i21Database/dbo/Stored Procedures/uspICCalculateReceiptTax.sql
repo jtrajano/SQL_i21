@@ -342,6 +342,10 @@ BEGIN
 		, dtmDate DATETIME
 	)
 	
+	DELETE ReceiptTax
+		FROM tblICInventoryReceiptTax ReceiptTax
+		WHERE ReceiptTax.intInventoryReceiptId = @inventoryReceiptId
+
 	INSERT INTO @ReceiptItems (
 		  intInventoryReceiptId
 		, intTaxGroupId
@@ -406,9 +410,6 @@ BEGIN
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ReceiptItems)
 	BEGIN
-		DELETE ReceiptTax
-		FROM tblICInventoryReceiptTax ReceiptTax
-		WHERE ReceiptTax.intInventoryReceiptId = @inventoryReceiptId
 
 		INSERT INTO tblICInventoryReceiptTax (
 			[intInventoryReceiptId]
