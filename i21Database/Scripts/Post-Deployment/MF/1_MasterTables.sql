@@ -189,6 +189,9 @@ BEGIN
     VALUES(14,'Cancel')
 END
 GO
+
+DELETE FROM tblMFWorkOrderStatus WHERE intStatusId = 18;
+
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 18)
 BEGIN
     INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
