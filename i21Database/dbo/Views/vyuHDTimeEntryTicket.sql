@@ -44,5 +44,5 @@
 			left join tblHDTicketStatus j on a.intTicketStatusId = j.intTicketStatusId
 			
 		where
-			a.strType <> 'CRM'
+			a.strType <> 'CRM' and a.intCustomerId IS NOT NULL
 GO
