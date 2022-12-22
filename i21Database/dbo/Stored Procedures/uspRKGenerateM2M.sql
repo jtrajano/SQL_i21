@@ -3466,7 +3466,7 @@ BEGIN TRY
 					, dblCosts = 0
 					, SUM(dblOpenQty) dblOpenQty
 					, SUM(dblOpenQty) dblResult
-					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, intMarketBasisUOM, dblCashOrFuture)
+					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(intMarketBasisUOM, intToPriceUOM, dblCashOrFuture)
 					, intCurrencyId
 				FROM (
 					SELECT strContractOrInventoryType = 'Inventory'
@@ -3477,10 +3477,10 @@ BEGIN TRY
 						, i.strItemNo
 						, i.intItemId
 						, dblOpenQty = SUM(dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0)))) 
-						, PriceSourceUOMId = ISNULL(bd.intUnitMeasureId, 0)
+						, PriceSourceUOMId = ISNULL(bdcu.intCommodityUnitMeasureId, 0)
 						, dblInvMarketBasis = 0
 						, dblCashOrFuture = ROUND(ISNULL(bd.dblCashOrFuture, 0), 4)
-						, intMarketBasisUOM = ISNULL(bd.intUnitMeasureId, 0)
+						, intMarketBasisUOM = ISNULL(bdcu.intCommodityUnitMeasureId, 0)
 						, intCurrencyId = ISNULL(bd.intCurrencyId, 0)
 						, (SELECT TOP 1 strFutureMonth strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND dtmSpotDate < = @dtmCurrentDate AND intFutureMarketId = c.intFutureMarketId ORDER BY 1 DESC) strFutureMonth
 						, (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND dtmSpotDate < = @dtmCurrentDate AND intFutureMarketId = c.intFutureMarketId ORDER BY 1 DESC) intFutureMonthId
@@ -3504,6 +3504,7 @@ BEGIN TRY
 								WHERE ISNULL(temp.intItemId, 0) = CASE WHEN ISNULL(temp.intItemId, 0) = 0 THEN 0 ELSE i.intItemId END
 									AND ISNULL(temp.intCompanyLocationId, 0) = CASE WHEN ISNULL(temp.intCompanyLocationId, 0) = 0 THEN 0 ELSE ISNULL(s.intLocationId, 0) END
 									AND temp.strContractInventory = 'Inventory') bd
+					LEFT JOIN tblICCommodityUnitMeasure bdcu ON bdcu.intCommodityId = c.intCommodityId AND bdcu.intUnitMeasureId = bd.intUnitMeasureId
 					WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <>0 
 						AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId) 
 						AND ISNULL(strTicketStatus, '') <> 'V'
@@ -3524,6 +3525,7 @@ BEGIN TRY
 							, bd.intUnitMeasureId
 							, bd.dblCashOrFuture
 							, bd.intCurrencyId
+							, bdcu.intCommodityUnitMeasureId
 					
 				) t1
 				GROUP BY strContractOrInventoryType
@@ -3543,6 +3545,7 @@ BEGIN TRY
 					, PriceSourceUOMId
 					, intCurrencyId
 					, dblCashOrFuture
+					, intToPriceUOM
 			)t2 WHERE ISNULL(dblOpenQty, 0) <> 0
 
 			--Collateral
@@ -3717,7 +3720,7 @@ BEGIN TRY
 					, dblCosts = 0
 					, dblOpenQty
 					, dblResult = dblOpenQty
-					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, intMarketBasisUOM, dblCashOrFuture)
+					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(intMarketBasisUOM, intToPriceUOM, dblCashOrFuture)
 					, intCurrencyId
 				FROM (
 					SELECT strContractOrInventoryType = 'In-transit(I)'
@@ -3725,19 +3728,20 @@ BEGIN TRY
 						, strLocationName
 						, intLocationId
 						, strCommodityCode
-						, intCommodityId
+						, t.intCommodityId
 						, strItemNo
 						, intItemId
 						, dblOpenQty = ABS(dblOpenQty)
-						, PriceSourceUOMId = ISNULL(bd.intUnitMeasureId, 0)
+						, PriceSourceUOMId = ISNULL(bdcu.intCommodityUnitMeasureId, 0)
 						, dblInvMarketBasis = 0
 						, dblCashOrFuture = ROUND(ISNULL(bd.dblCashOrFuture, 0), 4)
-						, intMarketBasisUOM = ISNULL(bd.intUnitMeasureId, 0)
+						, intMarketBasisUOM = ISNULL(bdcu.intCommodityUnitMeasureId, 0)
 						, intCurrencyId = ISNULL(bd.intCurrencyId, 0)
 						, strFutureMonth = (SELECT TOP 1 strFutureMonth strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND dtmSpotDate < = @dtmCurrentDate AND intFutureMarketId = intFutureMarketId ORDER BY 1 DESC)
 						, intFutureMonthId = (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND dtmSpotDate < = @dtmCurrentDate AND intFutureMarketId = intFutureMarketId ORDER BY 1 DESC) 
 						, intFutureMarketId
 						, dblNotLotTrackedPrice = ISNULL(dbo.fnCalculateValuationAverageCost(intItemId, intItemLocationId, @dtmEndDate), 0)
+						, cu2.intCommodityUnitMeasureId intToPriceUOM
 					FROM @ListTransaction t
 					OUTER APPLY (SELECT TOP 1 intUnitMeasureId
 									, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
@@ -3746,6 +3750,8 @@ BEGIN TRY
 								WHERE ISNULL(temp.intItemId, 0) = CASE WHEN ISNULL(temp.intItemId, 0) = 0 THEN 0 ELSE t.intItemId END
 									AND ISNULL(temp.intCompanyLocationId, 0) = CASE WHEN ISNULL(temp.intCompanyLocationId, 0) = 0 THEN 0 ELSE ISNULL(t.intLocationId, 0) END
 									AND temp.strContractInventory = 'Inventory') bd
+					LEFT JOIN tblICCommodityUnitMeasure bdcu ON bdcu.intCommodityId = t.intCommodityId AND bdcu.intUnitMeasureId = bd.intUnitMeasureId
+					LEFT JOIN tblICCommodityUnitMeasure cu2 ON cu2.intCommodityId = t.intCommodityId AND cu2.intUnitMeasureId = @intPriceUOMId
 					WHERE strContractOrInventoryType = 'In-transit(S)'
 					
 					
