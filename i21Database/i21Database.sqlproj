@@ -1194,6 +1194,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorTaxException.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExportTimberline.sql" />
+    <Build Include="dbo\Tables\tblFABook.sql" />
+    <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetBooks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
