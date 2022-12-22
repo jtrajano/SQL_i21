@@ -911,6 +911,10 @@ BEGIN TRY
 				,@intInputSuccess
 				,NULL
 				,1
+
+			UPDATE tblQMSample
+			SET strBatchNo = @strBatchId
+			WHERE intSampleId = @intSampleId
 		END
 
 		FETCH NEXT
