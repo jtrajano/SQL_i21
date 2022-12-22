@@ -85,6 +85,8 @@ SELECT Trans.intTransactionId
 	, strTransactionSource = Trans.strTransactionSource
 	, strImportVerificationNumber = Trans.strImportVerificationNumber
 	, strTransportNumber = Trans.strTransportNumber
+	, strOriginFacilityNumber = Trans.strOriginFacilityNumber
+	, strDestinationFacilityNumber = Trans.strDestinationFacilityNumber
 FROM tblTFTransaction Trans
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Trans.intProductCodeId
@@ -188,6 +190,8 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, strTransactionSource = NULL
 	, strImportVerificationNumber = NULL
 	, strTransportNumber = Exception.strTransportNumber
+	, strOriginFacilityNumber = Exception.strOriginFacilityNumber
+	, strDestinationFacilityNumber = Exception.strDestinationFacilityNumber
 FROM tblTFException Exception
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Exception.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Exception.intProductCodeId

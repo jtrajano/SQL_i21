@@ -64,7 +64,9 @@
     [intTransporterId] INT NULL,
 	[strTransactionSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
 	[strTransportNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    CONSTRAINT [PK_tblTFException] PRIMARY KEY ([intExceptionId]),
+	[strOriginFacilityNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strDestinationFacilityNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	CONSTRAINT [PK_tblTFException] PRIMARY KEY ([intExceptionId]),
 	CONSTRAINT [FK_tblTFException_tblEMEntity] FOREIGN KEY ([intUserEntityId]) REFERENCES [tblEMEntity]([intEntityId])
 )
 GO
