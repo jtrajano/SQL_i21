@@ -17,6 +17,11 @@ SELECT w.intWorkOrderId
 	 , w.dtmApprovedDate
 	 , Printed.strName AS strPrintedBy
 	 , w.dtmPrintedDate AS dtmPrintDate
+	 , ws.strName AS strWorkOrderStatus
+	 ,w.dtmReleasedDate
+	 ,ReleasedBy.strName As strReleasedBy
+	 ,w.strERPOrderNo AS strERPOrderNo
+	 ,w.strERPComment AS strERPComment
 from tblMFWorkOrder w 
 Join tblICItem i on w.intItemId=i.intItemId 
 Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId 
@@ -25,6 +30,8 @@ JOIN tblSMCompanyLocation AS CompanyLocation ON ISNULL(w.intCompanyId, intLocati
 LEFT JOIN tblMFWorkOrderStatus s on s.intStatusId = w.intTrialBlendSheetStatusId
 LEFT JOIN tblEMEntity em on em.intEntityId=w.intCreatedUserId
 LEFT JOIN tblEMEntity em2 on em2.intEntityId=w.intApprovedBy
+LEFT JOIN tblEMEntity ReleasedBy on ReleasedBy.intEntityId=w.intSupervisorId
+LEFT JOIN tblMFWorkOrderStatus ws on w.intStatusId = ws.intStatusId
 OUTER APPLY (SELECT strName
 			 FROM tblEMEntity
 			 WHERE intEntityId = w.intPrintedBy) AS Printed

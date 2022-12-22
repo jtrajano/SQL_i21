@@ -151,6 +151,7 @@ SELECT Lot.intLotId
 	 , DATEDIFF(DAY, Lot.dtmDateCreated, GETDATE()) AS intAge
 	 ,MT.strDescription AS strProductType
 	,B.strBrandCode
+	,Batch.strTasterComments
 INTO #tempLot
 FROM tblICLot AS Lot
 JOIN tblICItem AS Item ON Lot.intItemId = Item.intItemId
@@ -236,6 +237,7 @@ IF @ysnEnableParentLot = 0
 			 , TemporaryLot.intAge
 			  , TemporaryLot.strProductType
 			 , TemporaryLot.strBrandCode
+			 ,TemporaryLot.strTasterComments
 		FROM #tempLot AS TemporaryLot 
 		LEFT JOIN @tblReservedQty AS ReservedQty ON TemporaryLot.intLotId = ReservedQty.intLotId
 	END
@@ -290,6 +292,7 @@ ELSE
 					 , TemporaryLot.intAge
 					  , TemporaryLot.strProductType
 					 , TemporaryLot.strBrandCode
+					  ,TemporaryLot.strTasterComments
 				INTO #tempParentLotByStorageLocation
 				FROM #tempLot AS TemporaryLot 
 				JOIN tblICParentLot AS ParentLot on TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -376,6 +379,7 @@ ELSE
 					 , TemporaryLot.intAge
 					 , TemporaryLot.strProductType
 					, TemporaryLot.strBrandCode
+					 ,TemporaryLot.strTasterComments
 				INTO #tempParentLotByLocation
 				FROM #tempLot AS TemporaryLot
 				JOIN tblICParentLot AS ParentLot ON TemporaryLot.intParentLotId = ParentLot.intParentLotId 
