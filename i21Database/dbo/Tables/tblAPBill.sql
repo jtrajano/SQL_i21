@@ -77,6 +77,7 @@
     [intStoreLocationId] INT NULL , 
     [intContactId] INT NULL , 
     [intOrderById] INT NULL , 
+	[intRequestedBy] INT NULL , 
     [intCurrencyId] INT NOT NULL,
 	[intSubCurrencyCents] INT NOT NULL DEFAULT 1,
 	[ysnApproved] BIT NOT NULL DEFAULT 0,
