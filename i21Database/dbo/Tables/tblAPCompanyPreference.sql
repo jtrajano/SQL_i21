@@ -8,6 +8,7 @@
 	[intCheckPrintId]               INT NULL,
     [intCheckStubTemplateId]        INT NULL,
     [ysnEnforceControlTotal]        BIT NOT NULL DEFAULT(0),
+    [ysnAllowRequestedBy]           BIT NOT NULL DEFAULT(0),
     [dblWithholdPercent]            DECIMAL (18, 6) NULL,
     [strReportGroupName]            NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [strSetPostDate]                NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
