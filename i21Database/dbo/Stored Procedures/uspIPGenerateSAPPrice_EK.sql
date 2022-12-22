@@ -4,19 +4,40 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
+		,@strError NVARCHAR(MAX) = ''
 	DECLARE @strXML NVARCHAR(MAX) = ''
 		,@strItemXML NVARCHAR(MAX) = ''
 		,@strRootXML NVARCHAR(MAX) = ''
 		,@strFinalXML NVARCHAR(MAX) = ''
 		,@dtmCurrentDate DATETIME
 		,@intDocID INT
-		,@intItemPreStageId INT
-	DECLARE @tblIPItemPreStage TABLE (intItemPreStageId INT)
-	DECLARE @intItemId INT
-		,@intProductId INT
-
-	SELECT @dtmCurrentDate = CONVERT(CHAR, GETDATE(), 101)
-
+		,@intPriceFeedId INT
+	DECLARE @tblIPPriceFeed TABLE (intPriceFeedId INT)
+	DECLARE @strPurchGroup NVARCHAR(50)
+		,@strChannel NVARCHAR(50)
+		,@strIncoTerms NVARCHAR(50)
+		,@strOrigin NVARCHAR(50)
+		,@strAuctionCenter NVARCHAR(50)
+		,@strSupplier NVARCHAR(50)
+		,@strPlant NVARCHAR(50)
+		,@strStorageLocation NVARCHAR(50)
+		,@strLoadingPort NVARCHAR(50)
+		,@strDestinationPort NVARCHAR(50)
+		,@dblCashPrice NUMERIC(18, 6)
+		,@strCurrency NVARCHAR(50)
+		,@dblQuantity NUMERIC(18, 6)
+		,@strContainerType NVARCHAR(50)
+		,@strShippingLine NVARCHAR(50)
+		,@dtmPricingDate DATETIME
+	DECLARE @PriceFeedId TABLE (intPriceFeedId INT)
+	DECLARE @tblOutput AS TABLE (
+		intRowNo INT IDENTITY(1, 1)
+		,intPriceFeedId INT
+		,strRowState NVARCHAR(50)
+		,strXML NVARCHAR(MAX)
+		,strInfo1 NVARCHAR(100)
+		,strInfo2 NVARCHAR(100)
+		)
 	DECLARE @tmp INT
 
 	SELECT @tmp = strValue
@@ -28,98 +49,227 @@ BEGIN TRY
 		SELECT @tmp = 100
 
 	DELETE
-	FROM @tblIPItemPreStage
+	FROM @PriceFeedId
+
+	DELETE
+	FROM @tblIPPriceFeed
 
 	SELECT @intDocID = NULL
 
-	INSERT INTO @tblIPItemPreStage (intItemPreStageId)
-	SELECT DISTINCT TOP (@tmp) I.intItemPreStageId
-	FROM dbo.tblIPItemPreStage I WITH (NOLOCK)
-	WHERE I.intStatusId IS NULL
+	INSERT INTO @tblIPPriceFeed (intPriceFeedId)
+	SELECT DISTINCT TOP (@tmp) PF.intPriceFeedId
+	FROM dbo.tblIPPriceFeed PF WITH (NOLOCK)
+	WHERE PF.intStatusId IS NULL
 
-	SELECT @intItemPreStageId = MIN(intItemPreStageId)
-	FROM @tblIPItemPreStage
+	SELECT @intPriceFeedId = MIN(intPriceFeedId)
+	FROM @tblIPPriceFeed
 
-	IF @intItemPreStageId IS NULL
+	IF @intPriceFeedId IS NULL
 	BEGIN
 		RETURN
 	END
 
-	WHILE @intItemPreStageId IS NOT NULL
+	UPDATE tblIPPriceFeed
+	SET intStatusId = - 1
+	WHERE intPriceFeedId IN (
+			SELECT intPriceFeedId
+			FROM @tblIPPriceFeed
+			)
+
+	WHILE @intPriceFeedId IS NOT NULL
 	BEGIN
+		SELECT @strError = ''
+
+		SELECT @strPurchGroup = NULL
+			,@strChannel = NULL
+			,@strIncoTerms = NULL
+			,@strOrigin = NULL
+			,@strAuctionCenter = NULL
+			,@strSupplier = NULL
+			,@strPlant = NULL
+			,@strStorageLocation = NULL
+			,@strLoadingPort = NULL
+			,@strDestinationPort = NULL
+			,@dblCashPrice = NULL
+			,@strCurrency = NULL
+			,@dblQuantity = NULL
+			,@strContainerType = NULL
+			,@strShippingLine = NULL
+			,@dtmPricingDate = NULL
+
+		SELECT @strPurchGroup = strPurchGroup
+			,@strChannel = strChannel
+			,@strIncoTerms = strIncoTerms
+			,@strOrigin = strOrigin
+			,@strAuctionCenter = strAuctionCenter
+			,@strSupplier = strSupplier
+			,@strPlant = strPlant
+			,@strStorageLocation = strStorageLocation
+			,@strLoadingPort = strLoadingPort
+			,@strDestinationPort = strDestinationPort
+			,@dblCashPrice = dblCashPrice
+			,@strCurrency = strCurrency
+			,@dblQuantity = dblQuantity
+			,@strContainerType = strContainerType
+			,@strShippingLine = strShippingLine
+			,@dtmPricingDate = dtmPricingDate
+		FROM dbo.tblIPPriceFeed WITH (NOLOCK)
+		WHERE intPriceFeedId = @intPriceFeedId
+
+		IF ISNULL(@strPurchGroup, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Purchasing Group cannot be blank. '
+		END
+
+		IF ISNULL(@strChannel, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Channel cannot be blank. '
+		END
+
+		IF ISNULL(@strOrigin, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Origin cannot be blank. '
+		END
+
+		IF ISNULL(@strSupplier, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Supplier cannot be blank. '
+		END
+
+		IF ISNULL(@strPlant, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Book cannot be blank. '
+		END
+
+		IF ISNULL(@strStorageLocation, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Storage Location cannot be blank. '
+		END
+
+		IF ISNULL(@strLoadingPort, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Loading Port cannot be blank. '
+		END
+
+		IF ISNULL(@strCurrency, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Currency cannot be blank. '
+		END
+
+		IF ISNULL(@dblQuantity, 0) = 0
+		BEGIN
+			SELECT @strError = @strError + 'Quantity cannot be blank. '
+		END
+
+		IF ISNULL(@strChannel, '') <> 'AUC'
+		BEGIN
+			IF ISNULL(@strIncoTerms, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Inco Terms cannot be blank. '
+			END
+
+			IF ISNULL(@strDestinationPort, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Destination Port cannot be blank. '
+			END
+
+			IF ISNULL(@strContainerType, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Container Type cannot be blank. '
+			END
+
+			IF ISNULL(@strShippingLine, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Shipping Line cannot be blank. '
+			END
+		END
+
+		IF @strError <> ''
+		BEGIN
+			UPDATE dbo.tblIPPriceFeed
+			SET strMessage = @strError
+				,intStatusId = 1
+			WHERE intPriceFeedId = @intPriceFeedId
+
+			GOTO NextRec
+		END
+
 		SELECT @strXML = ''
 
-		SELECT @intItemId = NULL
-			,@intProductId = NULL
+		SELECT @strXML += '<Header>'
 
-		SELECT @intItemId = S.intItemId
-		FROM dbo.tblIPItemPreStage S WITH (NOLOCK)
-		WHERE S.intItemPreStageId = @intItemPreStageId
+		SELECT @strXML += '<ReferenceNo>' + LTRIM(@intPriceFeedId) + '</ReferenceNo>'
 
-		SELECT TOP 1 @intProductId = P.intProductId
-		FROM dbo.tblQMProduct P
-		JOIN dbo.tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
-		WHERE P.intProductTypeId = 2 -- Item
-			AND P.intProductValueId = @intItemId
-			--AND PC.intSampleTypeId = @intSampleTypeId
-			AND P.ysnActive = 1
-		ORDER BY P.intProductId DESC
+		SELECT @strXML += '<PurchGroup>' + ISNULL(@strPurchGroup, '') + '</PurchGroup>'
 
-		SELECT @strXML = @strXML
-			+ '<Header>'
-			+ '<Revision>' + ISNULL(I.strGTIN, '') + '</Revision>'
-			+ '<Origin>' + ISNULL(C.strISOCode, '') + '</Origin>'
-			+ '<SubCluster>' + ISNULL(Region.strDescription, '') + '</SubCluster>'
-			+ '<TeaClusterCode>' + ISNULL(Certification.strCertificationName, '') + '</TeaClusterCode>'
-			+ '<ManufactureType>' + ISNULL(ProductType.strDescription, '') + '</ManufactureType>'
-			+ '<TeaColourCode>' + ISNULL(LEFT(Season.strDescription, 1), '') + '</TeaColourCode>'
-			+ '<LeafSizeCode>' + ISNULL(Brand.strBrandCode, '') + '</LeafSizeCode>'
-			+ '<ModellingLeafStyle>' + ISNULL(VG.strName, '') + '</ModellingLeafStyle>'
-			+ '<DesignerItem>' + LTRIM(ISNULL(I.ysnProducePartialPacking, '')) + '</DesignerItem>'
-			+ '<TeaItem>' + ISNULL(I.strItemNo, '') + '</TeaItem>'
-			+ '<TeaItemName>' + ISNULL(I.strDescription, '') + '</TeaItemName>'
-			+ '<ColourName>' + ISNULL(Season.strDescription, '') + '</ColourName>'
-			+ '<TeaGroup>' + ISNULL(Brand.strBrandCode, '') + ISNULL(Region.strDescription, '') + ISNULL(VG.strName, '') + '</TeaGroup>'
-			+ '<CreateDate>' + ISNULL(CONVERT(VARCHAR(33), @dtmCurrentDate, 126), '') + '</CreateDate>'
-			+ '<ManufactureTypeName>' + ISNULL(Certification.strCertificationCode, '') + '</ManufactureTypeName>'
-			+ '<ClusterName>' + ISNULL(Certification.strIssuingOrganization, '') + '</ClusterName>'
-			+ '<ClusterType>' + ISNULL(Certification.strCertificationIdName, '') + '</ClusterType>'
-			+ '<QualityGroup>' + ISNULL(attribute3.strAttribute3, '') + '</QualityGroup>'
-			+ '<MaterialCode>' + ISNULL(I.strModelNo, '') + '</MaterialCode>'
-			+ '<LeafSizeDescription>' + ISNULL(Brand.strBrandName, '') + '</LeafSizeDescription>'
-			+ '<AllocationCode>' + ISNULL(attribute1.strAttribute1, '') + '</AllocationCode>'
-			+ '<LeafStyleDescription>' + ISNULL(VG.strDescription, '') + '</LeafStyleDescription>'
-		FROM dbo.tblICItem I WITH (NOLOCK)
-		JOIN dbo.tblIPItemPreStage S WITH (NOLOCK) ON S.intItemId = I.intItemId
-			AND I.intItemId = @intItemId
-		LEFT JOIN dbo.tblICCommodityAttribute Origin WITH (NOLOCK) ON Origin.intCommodityAttributeId = I.intOriginId
-		LEFT JOIN dbo.tblSMCountry C WITH (NOLOCK) ON C.intCountryID = Origin.intCountryID
-		LEFT JOIN dbo.tblICCommodityAttribute Region WITH (NOLOCK) ON Region.intCommodityAttributeId = I.intRegionId
-		LEFT JOIN dbo.tblICCertification Certification WITH (NOLOCK) ON Certification.intCertificationId = I.intCertificationId
-		LEFT JOIN dbo.tblICCommodityAttribute ProductType WITH (NOLOCK) ON ProductType.intCommodityAttributeId = I.intProductTypeId
-		LEFT JOIN dbo.tblICCommodityAttribute Season WITH (NOLOCK) ON Season.intCommodityAttributeId = I.intSeasonId
-		LEFT JOIN dbo.tblICBrand Brand WITH (NOLOCK) ON Brand.intBrandId = I.intBrandId
-		LEFT JOIN dbo.tblCTValuationGroup VG WITH (NOLOCK) ON VG.intValuationGroupId = I.intValuationGroupId
-		LEFT JOIN dbo.tblICCommodityProductLine ProductLine WITH (NOLOCK) ON ProductLine.intCommodityProductLineId = I.intProductLineId
-		LEFT JOIN dbo.tblICCommodityAttribute Class WITH (NOLOCK) ON Class.intCommodityAttributeId = I.intClassVarietyId
-		LEFT JOIN dbo.tblICManufacturer Manufacturer WITH (NOLOCK) ON Manufacturer.intManufacturerId = I.intManufacturerId
-		LEFT JOIN dbo.tblICCommodityAttribute3 attribute3 WITH (NOLOCK) ON attribute3.intCommodityAttributeId3 = I.intCommodityAttributeId3
-		LEFT JOIN dbo.tblICCommodityAttribute1 attribute1 WITH (NOLOCK) ON attribute1.intCommodityAttributeId1 = I.intCommodityAttributeId1
+		SELECT @strXML += '<Channel>' + ISNULL(@strChannel, '') + '</Channel>'
+
+		SELECT @strXML += '<IncoTerms>' + ISNULL(@strIncoTerms, '') + '</IncoTerms>'
+
+		SELECT @strXML += '<Origin>' + ISNULL(@strOrigin, '') + '</Origin>'
+
+		SELECT @strXML += '<AuctionCenter>' + ISNULL(@strAuctionCenter, '') + '</AuctionCenter>'
+
+		SELECT @strXML += '<Supplier>' + ISNULL(@strSupplier, '') + '</Supplier>'
+
+		SELECT @strXML += '<Plant>' + ISNULL(@strPlant, '') + '</Plant>'
+
+		SELECT @strXML += '<StorageLocation>' + LTRIM(SUBSTRING(ISNULL(@strStorageLocation, ''), CHARINDEX('/', @strStorageLocation) + 1, LEN(@strStorageLocation))) + '</StorageLocation>'
+
+		SELECT @strXML += '<LoadingPort>' + ISNULL(@strLoadingPort, '') + '</LoadingPort>'
+
+		SELECT @strXML += '<DestinationPort>' + ISNULL(@strDestinationPort, '') + '</DestinationPort>'
+
+		SELECT @strXML += '<CashPrice>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(@dblCashPrice, 0))) + '</CashPrice>'
+
+		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
+
+		SELECT @strXML += '<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(@dblQuantity, 0))) + '</Quantity>'
+
+		SELECT @strXML += '<ContainerType>' + ISNULL(@strContainerType, '') + '</ContainerType>'
+
+		SELECT @strXML += '<ShippingLine>' + ISNULL(@strShippingLine, '') + '</ShippingLine>'
+
+		SELECT @strXML += '<PricingDate>' + ISNULL(CONVERT(VARCHAR(33), @dtmPricingDate, 126), '') + '</PricingDate>'
+
+		IF ISNULL(@strXML, '') = ''
+		BEGIN
+			UPDATE tblIPPriceFeed
+			SET strMessage = 'XML is not available. '
+				,intStatusId = 1
+			WHERE intPriceFeedId = @intPriceFeedId
+
+			GOTO NextRec
+		END
 
 		IF ISNULL(@strXML, '') <> ''
 		BEGIN
 			SELECT @strItemXML += @strXML + '</Header>'
 		END
 
-		SELECT @intItemPreStageId = MIN(intItemPreStageId)
-		FROM @tblIPItemPreStage
-		WHERE intItemPreStageId > @intItemPreStageId
+		INSERT INTO @PriceFeedId (intPriceFeedId)
+		SELECT @intPriceFeedId
+
+		IF @ysnUpdateFeedStatus = 1
+		BEGIN
+			UPDATE tblIPPriceFeed
+			SET intStatusId = 2
+				,strMessage = NULL
+				,strFeedStatus = 'Awt Ack'
+			WHERE intPriceFeedId = @intPriceFeedId
+		END
+
+		NextRec:
+
+		SELECT @intPriceFeedId = MIN(intPriceFeedId)
+		FROM @tblIPPriceFeed
+		WHERE intPriceFeedId > @intPriceFeedId
 	END
 
 	IF @strItemXML <> ''
 	BEGIN
-		SELECT @intDocID = ISNULL(MAX(intItemPreStageId), 1)
-		FROM @tblIPItemPreStage
+		SELECT @intDocID = ISNULL(MAX(intPriceFeedId), 1)
+		FROM @tblIPPriceFeed
 
 		SELECT @strRootXML = '<DocNo>' + LTRIM(@intDocID) + '</DocNo>'
 
@@ -130,13 +280,53 @@ BEGIN TRY
 		SELECT @strRootXML += '<Receiver>SAP</Receiver>'
 
 		SELECT @strFinalXML = '<root>' + @strRootXML + @strItemXML + '</root>'
+
+		IF EXISTS (
+				SELECT 1
+				FROM @PriceFeedId
+				)
+		BEGIN
+			UPDATE F
+			SET F.intDocNo = @intDocID
+				,F.intReferenceNo = FS.intPriceFeedId
+			FROM tblIPPriceFeed F
+			JOIN @PriceFeedId FS ON FS.intPriceFeedId = F.intPriceFeedId
+		END
+
+		DELETE
+		FROM @tblOutput
+
+		INSERT INTO @tblOutput (
+			intPriceFeedId
+			,strRowState
+			,strXML
+			,strInfo1
+			,strInfo2
+			)
+		VALUES (
+			@intPriceFeedId
+			,'Modified'
+			,@strFinalXML
+			,ISNULL(@strPurchGroup, '')
+			,ISNULL(@strChannel, '')
+			)
 	END
 
-	SELECT ISNULL(1, '0') AS id
-		,ISNULL(@strFinalXML, '') AS strXml
-		,'' AS strInfo1
-		,'' AS strInfo2
+	UPDATE tblIPPriceFeed
+	SET intStatusId = NULL
+	WHERE intPriceFeedId IN (
+			SELECT intPriceFeedId
+			FROM @tblIPPriceFeed
+			)
+		AND intStatusId = - 1
+
+	SELECT ISNULL(intPriceFeedId, '0') AS id
+		,ISNULL(strXML, '') AS strXml
+		,ISNULL(strInfo1, '') AS strInfo1
+		,ISNULL(strInfo2, '') AS strInfo2
 		,'' AS strOnFailureCallbackSql
+	FROM @tblOutput
+	ORDER BY intRowNo
 END TRY
 
 BEGIN CATCH

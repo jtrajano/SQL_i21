@@ -9,6 +9,10 @@ BEGIN TRY
 	BEGIN
 		EXEC dbo.uspIPGenerateSAPPO_EK @ysnUpdateFeedStatus = 1
 	END
+	ELSE IF @strType = 'Price Simulation'
+	BEGIN
+		EXEC dbo.uspIPGenerateSAPPrice_EK @ysnUpdateFeedStatus = 1
+	END
 	ELSE IF @strType = 'Lead Time'
 	BEGIN
 		EXEC dbo.uspIPGenerateSAPLeadTime_EK @ysnUpdateFeedStatus = 1

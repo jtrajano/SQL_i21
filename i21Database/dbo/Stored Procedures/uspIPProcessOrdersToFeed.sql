@@ -42,12 +42,12 @@ BEGIN TRY
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			NULL,						NULL,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
-				VE.strVendorAccountNum,	CL.strLocationNumber,		CO.strCommodityCode,		S.strSampleNumber,
+				VE.strVendorAccountNum,	CL.strOregonFacilityNumber,	CO.strCommodityCode,		S.strSampleNumber,
 				NULL,					NULL,						L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	'Cash',						LD.dblUnitPrice,			PUOM.strUnitMeasure,
 				CU.strCurrency,			NULL,						NULL,						NULL,
-				NULL,					CL.strLocationNumber,		NULL,						CL1.strOregonFacilityNumber,
+				NULL,					CL.strOregonFacilityNumber,	NULL,						CL1.strOregonFacilityNumber,
 				NULL,					NULL,						NULL,						B.strBatchId,
 				@intEntityId,			@strRowState
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
@@ -98,12 +98,12 @@ BEGIN TRY
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			CD.intContractHeaderId,		CD.intContractDetailId,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
-				VE.strVendorAccountNum,	CL.strLocationNumber,		CO.strCommodityCode,		CH.strContractNumber,
+				VE.strVendorAccountNum,	CL.strOregonFacilityNumber,	CO.strCommodityCode,		CH.strContractNumber,
 				CD.intContractSeq,		CH.strCustomerContract,		L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	ISNULL(PT.strPricingType, 'Cash'),LD.dblUnitPrice,		PUOM.strUnitMeasure,
 				CU.strCurrency,			CD.dtmStartDate,			CD.dtmEndDate,				CD.dtmPlannedAvailabilityDate,
-				CD.dtmUpdatedAvailabilityDate,CL.strLocationNumber,	CD.strPackingDescription,	CL1.strOregonFacilityNumber,
+				CD.dtmUpdatedAvailabilityDate,CL.strOregonFacilityNumber,CD.strPackingDescription,	CL1.strOregonFacilityNumber,
 				LP.strCity,				DP.strCity,					@dblLeadTime,				B.strBatchId,
 				@intEntityId,			@strRowState
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)

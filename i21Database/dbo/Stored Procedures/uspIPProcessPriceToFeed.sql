@@ -5,7 +5,7 @@
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @dtmCurrentDate DATETIME = GETDATE()
+	DECLARE @dtmCurrentDate DATETIME
 		,@dblCashPrice NUMERIC(18, 6)
 		,@ysnSendPriceFeed BIT = 0
 		,@intContractDetailId INT
@@ -27,6 +27,8 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
+
+	SELECT @dtmCurrentDate = CONVERT(CHAR, GETDATE(), 101)
 
 	IF ISNULL(@strSource, '') = 'Contract'
 	BEGIN
@@ -63,8 +65,8 @@ BEGIN TRY
 				dtmPricingDate,			intEntityId,				strRowState
 		)
 		SELECT CD.intContractHeaderId,	CD.intContractDetailId,		NULL,					CD.intCompanyLocationId,
-				NULL,					CL.strLocationNumber,		MZ.strMarketZoneCode,	FT.strFreightTerm,
-				C.strISOCode,			CL.strLocationNumber,		VE.strVendorAccountNum,	@strPlant,
+				NULL,					CL.strOregonFacilityNumber,	MZ.strMarketZoneCode,	FT.strFreightTerm,
+				C.strISOCode,			CL.strOregonFacilityNumber,	VE.strVendorAccountNum,	@strPlant,
 				CLSL.strSubLocationName,LP.strCity,					DP.strCity,				CD.dblCashPrice,
 				CU.strCurrency,			CD.dblNetWeight,			CT.strContainerType,	SL.strName,
 				@dtmCurrentDate,		@intEntityId,				@strRowState
@@ -78,7 +80,6 @@ BEGIN TRY
 		LEFT JOIN dbo.tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 		LEFT JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId
 		LEFT JOIN dbo.tblSMCountry C WITH (NOLOCK) ON C.intCountryID = CA.intCountryID
-		--LEFT JOIN dbo.tblSMCompanyLocation CL1 WITH (NOLOCK) ON CL1.intCompanyLocationId = CD.intBookId
 		LEFT JOIN dbo.tblSMCompanyLocationSubLocation CLSL WITH (NOLOCK) ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 		LEFT JOIN dbo.tblSMCity LP WITH (NOLOCK) ON LP.intCityId = CD.intLoadingPortId
 		LEFT JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = CD.intDestinationPortId
@@ -122,8 +123,8 @@ BEGIN TRY
 				dtmPricingDate,			intEntityId,				strRowState
 		)
 		SELECT	NULL,					NULL,						S.intSampleId,			S.intCompanyLocationId,
-				NULL,					CL.strLocationNumber,		MZ.strMarketZoneCode,	NULL,
-				C.strISOCode,			CL.strLocationNumber,		VE.strVendorAccountNum,	@strPlant,
+				NULL,					CL.strOregonFacilityNumber,	MZ.strMarketZoneCode,	NULL,
+				C.strISOCode,			CL.strOregonFacilityNumber,	VE.strVendorAccountNum,	@strPlant,
 				CLSL.strSubLocationName,LP.strCity,					NULL,					S.dblB1Price,
 				CU.strCurrency,			S.dblSampleQty,				NULL,					NULL,
 				@dtmCurrentDate,		@intEntityId,				@strRowState
@@ -135,7 +136,6 @@ BEGIN TRY
 		LEFT JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId
 		LEFT JOIN dbo.tblSMCountry C WITH (NOLOCK) ON C.intCountryID = CA.intCountryID
 		LEFT JOIN dbo.tblAPVendor VE WITH (NOLOCK) ON VE.intEntityId = S.intEntityId
-		--LEFT JOIN dbo.tblSMCompanyLocation CL1 WITH (NOLOCK) ON CL1.intCompanyLocationId = S.intBookId
 		LEFT JOIN dbo.tblSMCompanyLocationSubLocation CLSL WITH (NOLOCK) ON CLSL.intCompanyLocationSubLocationId = S.intDestinationStorageLocationId
 		LEFT JOIN dbo.tblSMCity LP WITH (NOLOCK) ON LP.intCityId = S.intFromLocationCodeId
 		LEFT JOIN dbo.tblSMCurrency CU WITH (NOLOCK) ON CU.intCurrencyID = S.intCurrencyId

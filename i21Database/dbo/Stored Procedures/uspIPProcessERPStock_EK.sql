@@ -177,7 +177,7 @@ BEGIN TRY
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-			WHERE strLocationNumber = @strLocationName
+			WHERE strOregonFacilityNumber = @strLocationName
 
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 			BEGIN
