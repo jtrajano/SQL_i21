@@ -241,8 +241,8 @@ BEGIN TRY
 			 									+ @fontBoldCurrency + BCU.strCurrency+  '</span>' + ' '
 			 									+ @fontBoldBasis + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)+'</span>' + '/' + BUM.strUnitMeasure
 			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
-			 									+  @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + '</span>'
-			 									+ ' or prior to presentation of documents,whichever is earlier.'
+			 									+  @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)  + '</span>'
+			 									+  '<span style="font-family:Arial;font-size:13px;">'+ ' or prior to presentation of documents,whichever is earlier.' 
 			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + ' per ' + PU.strUnitMeasure
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
