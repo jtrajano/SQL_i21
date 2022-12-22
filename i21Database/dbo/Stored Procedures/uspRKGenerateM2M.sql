@@ -3443,7 +3443,7 @@ BEGIN TRY
 					, dblInvFuturePrice = 0
 					, dblInvMarketBasis = 0
 					, dblMarketRatio = 0
-					, dblCosts = 0
+					, dblCosts
 					, SUM(dblOpenQty) dblOpenQty
 					, SUM(dblOpenQty) dblResult
 					, dblCashOrFuture = dbo.fnCTConvertQuantityToTargetCommodityUOM(intMarketBasisUOM, intToPriceUOM, dblCashOrFuture)
@@ -3467,6 +3467,9 @@ BEGIN TRY
 						, c.intFutureMarketId
 						, dblNotLotTrackedPrice = dbo.fnCalculateQtyBetweenUOM(iuomTo.intItemUOMId, iuomStck.intItemUOMId, ISNULL(dbo.fnCalculateValuationAverageCost(i.intItemId, s.intItemLocationId, @dtmEndDate), 0))
 						, cu2.intCommodityUnitMeasureId intToPriceUOM
+						, dblCosts  = SUM(CASE WHEN s.strTransactionType = 'Inventory Receipt' THEN IRCost.dblTotalCost 
+										WHEN s.strTransactionType = 'Inventory Shipment' THEN ISCost.dblTotalCost
+										ELSE 0 END)
 					FROM vyuRKGetInventoryValuation s
 					JOIN tblICItem i ON i.intItemId = s.intItemId
 					JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
@@ -3485,6 +3488,47 @@ BEGIN TRY
 									AND ISNULL(temp.intCompanyLocationId, 0) = CASE WHEN ISNULL(temp.intCompanyLocationId, 0) = 0 THEN 0 ELSE ISNULL(s.intLocationId, 0) END
 									AND temp.strContractInventory = 'Inventory') bd
 					LEFT JOIN tblICCommodityUnitMeasure bdcu ON bdcu.intCommodityId = c.intCommodityId AND bdcu.intUnitMeasureId = bd.intUnitMeasureId
+					OUTER APPLY(
+						SELECT
+							 dblTotalCost = SUM(CASE WHEN CC.ysnAccrue = 1 THEN ISNULL(CC.dblAmount, 0) 
+																			* (CASE WHEN M2M.strAdjustmentType = 'Add' THEN 1 ELSE -1 END) 
+												WHEN CC.ysnAccrue = 0 AND CC.strCostMethod = 'Per Unit' THEN ISNULL(CC.dblRate, 0) * ISNULL(CC.dblForexRate , 1)
+																						* CC.dblQuantity
+																						* CASE WHEN M2M.strAdjustmentType = 'Add' THEN 1
+																							WHEN M2M.strAdjustmentType = 'Reduce' THEN -1 END
+																						/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+												WHEN CC.ysnAccrue = 0 AND CC.strCostMethod <> 'Per Unit' THEN 0 
+												ELSE 0 END)
+						FROM tblICInventoryReceiptCharge CC
+						JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = CC.intInventoryReceiptId
+						JOIN tblICItem Item ON Item.intItemId = CC.intChargeId 
+						LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intCostUOMId
+						LEFT JOIN tblSMCurrency	FCY ON FCY.intCurrencyID = CC.intCurrencyId
+						LEFT JOIN tblRKM2MConfiguration M2M ON M2M.intItemId = CC.intChargeId AND M2M.intFreightTermId = IR.intFreightTermId
+						WHERE Item.strCostType <> 'Commission'
+						AND IR.intInventoryReceiptId = s.intTransactionId and s.strTransactionType = 'Inventory Receipt'
+					
+					) IRCost
+					OUTER APPLY (
+						SELECT
+							 dblTotalCost = SUM(CASE WHEN CC.ysnAccrue = 1 THEN ISNULL(CC.dblAmount, 0) 
+																			* (CASE WHEN M2M.strAdjustmentType = 'Add' THEN 1 ELSE -1 END) 
+												WHEN CC.ysnAccrue = 0 AND CC.strCostMethod = 'Per Unit' THEN ISNULL(CC.dblRate, 0) * ISNULL(CC.dblForexRate , 1)
+																						* CC.dblQuantity
+																						* CASE WHEN M2M.strAdjustmentType = 'Add' THEN 1
+																							WHEN M2M.strAdjustmentType = 'Reduce' THEN -1 END
+																						/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+												WHEN CC.ysnAccrue = 0 AND CC.strCostMethod <> 'Per Unit' THEN 0 
+												ELSE 0 END)
+						FROM tblICInventoryShipmentCharge CC
+						JOIN tblICInventoryShipment InvS ON InvS.intInventoryShipmentId = CC.intInventoryShipmentId
+						JOIN tblICItem Item ON Item.intItemId = CC.intChargeId 
+						LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intCostUOMId
+						LEFT JOIN tblSMCurrency	FCY ON FCY.intCurrencyID = CC.intCurrencyId
+						LEFT JOIN tblRKM2MConfiguration M2M ON M2M.intItemId = CC.intChargeId AND M2M.intFreightTermId = InvS.intFreightTermId
+						WHERE Item.strCostType <> 'Commission'
+						AND InvS.intInventoryShipmentId = s.intTransactionId and s.strTransactionType = 'Inventory Shipment'
+					) ISCost
 					WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <>0 
 						AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId) 
 						AND ISNULL(strTicketStatus, '') <> 'V'
@@ -3526,6 +3570,7 @@ BEGIN TRY
 					, intCurrencyId
 					, dblCashOrFuture
 					, intToPriceUOM
+					, dblCosts
 			)t2 WHERE ISNULL(dblOpenQty, 0) <> 0
 
 			--Collateral
@@ -4168,12 +4213,12 @@ BEGIN TRY
 				, dblFutures = (CASE WHEN strPricingType = 'Basis' THEN 0
 									ELSE dblFutures END)
 				, dblCash = ISNULL(dblCash, 0)
-				, dblCosts = ABS(ISNULL(dblCosts, 0))
+				, dblCosts = ISNULL(dblCosts, 0)
 				, dblMarketBasis = ISNULL(dblInvMarketBasis, 0)
 				, dblMarketRatio = ISNULL(dblMarketRatio, 0)
 				, dblFuturePrice = ISNULL(dblInvFuturePrice, 0)
 				, intContractTypeId
-				, dblAdjustedContractPrice = CASE WHEN strContractOrInventoryType like 'Futures%' THEN dblFutures ELSE ISNULL(dblCash, 0) END
+				, dblAdjustedContractPrice = CASE WHEN strContractOrInventoryType like 'Futures%' THEN dblFutures ELSE ISNULL(dblCash, 0) + ISNULL(dblCosts, 0) END
 				, dblCashPrice = ISNULL(dblCashPrice, 0)
 				, dblMarketPrice = ISNULL(dblInvMarketBasis, 0) + ISNULL(dblInvFuturePrice, 0) + ISNULL(dblCashPrice, 0)
 				, dblResultBasis = 0
