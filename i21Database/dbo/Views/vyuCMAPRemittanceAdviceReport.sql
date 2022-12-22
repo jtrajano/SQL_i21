@@ -28,7 +28,7 @@ SELECT CHK.dtmDate
 		  END
 		, dblDetailAmount = PYMTDTL.dblTotal-- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 		, dblDiscount = PYMTDTL.dblDiscount
-		, dblNet = PYMTDTL.dblPayment-- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
+		, dblNet = PYMTDTL.dblTotal - ISNULL(PYMTDTL.dblDiscount,0)-- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 		, strBankAccountNo = STUFF(ACCT.strBankAccountNo, 1, LEN (ACCT.strBankAccountNo) - 4
 		, REPLICATE ('x', LEN (ACCT.strBankAccountNo) - 4))
 		, strMessage = 'The following items(s) will be presented to ' + 
@@ -48,7 +48,17 @@ SELECT CHK.dtmDate
 		, CASE WHEN O.intUTCOffset IS NULL THEN GETDATE() ELSE DATEADD(MINUTE, O.intUTCOffset * -1, GETUTCDATE()) END dtmCurrent
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
-INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
+JOIN
+(
+	SELECT A.intPaymentId, intBillId, dblTotal ,dblDiscount, intInvoiceId,intPaymentDetailId
+	FROM tblAPPayment A JOIN tblAPPaymentDetail B on A.intPaymentId = B.intPaymentId
+	UNION
+	SELECT intPaymentId, B.intTransactionId, B.dblTotal * -1 ,dblDiscount = 0,  PD.intInvoiceId,intPaymentDetailId 
+	FROM tblAPAppliedPrepaidAndDebit B JOIN tblAPBill A ON A.intBillId = B.intBillId
+	JOIN tblAPBill C ON C.intBillId = B.intTransactionId
+	JOIN tblAPBillDetail BD ON BD.intBillId = A.intBillId
+	JOIN tblAPPaymentDetail PD ON PD.intBillId = A.intBillId where B.ysnApplied = 1
+) PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
 LEFT JOIN tblAPBill BILL ON PYMTDTL.intBillId = BILL.intBillId 
 LEFT JOIN tblARInvoice INVOICE on INVOICE.intInvoiceId = PYMTDTL.intInvoiceId  
 INNER JOIN tblCMBankAccount BA ON BA.intBankAccountId = CHK.intBankAccountId 
