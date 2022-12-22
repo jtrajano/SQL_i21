@@ -106,7 +106,9 @@ BEGIN TRY
 				, strTransportNumber
 				, intAccountStatusId
 				, strImportVerificationNumber
-				, intCustomerId)
+				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 				FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 						, tblTFReportingComponent.intTaxAuthorityId
@@ -170,6 +172,8 @@ BEGIN TRY
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
 						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 						, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
+						, strOriginFacilityNumber = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
+						, strDestinationFacilityNumber = tblEMEntityLocation.strOregonFacilityNumber
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -332,6 +336,8 @@ BEGIN TRY
 				, intAccountStatusId
 				, strImportVerificationNumber
 				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
 				)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
@@ -396,6 +402,8 @@ BEGIN TRY
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
 						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 						, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
+						, strOriginFacilityNumber = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
+						, strDestinationFacilityNumber = tblEMEntityLocation.strOregonFacilityNumber
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -665,6 +673,8 @@ BEGIN TRY
 				, strTransportNumber
 				, strImportVerificationNumber
 				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
 				)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
@@ -733,6 +743,8 @@ BEGIN TRY
 				, strTransportNumber
 				, strImportVerificationNumber
 				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
 			FROM @tmpTransaction Trans
 		END
 		
