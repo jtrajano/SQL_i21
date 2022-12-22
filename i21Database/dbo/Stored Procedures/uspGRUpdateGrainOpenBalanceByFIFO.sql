@@ -354,7 +354,7 @@ BEGIN TRY
 			,[intInvoiceId] 			= CASE WHEN @strSourceType = 'Invoice' THEN @IntSourceKey ELSE NULL END
 			,[intInventoryShipmentId] 	= CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
 			,[dblUnits] 				= dblOpenBalance
-			,[dtmHistoryDate] 			= dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
+			,[dtmHistoryDate] 			= A.dtmShipDate--dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
 			,[dblPaidAmount] 			= [dblCharge] * dblOpenBalance + ISNULL(dblFlatFee,0)
 			,[intTransactionTypeId] 	= CASE
 											WHEN @strSourceType = 'Invoice' THEN 6
