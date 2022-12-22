@@ -40,5 +40,6 @@
 	[ysnOverrideLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0), 
     intBudgetCode int, 
     [ysnOverrideAPLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0),
+    [ysnAllowRequestedBy]    BIT NOT NULL DEFAULT(0),
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
