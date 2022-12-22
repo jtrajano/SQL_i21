@@ -166,13 +166,13 @@ from tblQMSample A
 JOIN tblQMSampleType ST on ST.intSampleTypeId =A.intSampleTypeId 
 	AND ST.intControlPointId =1
 outer apply(
-	select AveragePrice,AveragePrice_UL from OverAllWeekStats where WeekNo = DATEPART(ww, A.dtmSaleDate)
+	select ISNULL(AveragePrice,0)AveragePrice ,ISNULL(AveragePrice_UL,0)AveragePrice_UL from OverAllWeekStats where WeekNo = DATEPART(ww, A.dtmSaleDate)
 )X
 outer apply(
-	select AveragePrice from OverAllWeekStats where WeekNo = DATEPART(ww, A.dtmSaleDate) -1
+	select ISNULL(AveragePrice,0)AveragePrice from OverAllWeekStats where WeekNo = DATEPART(ww, A.dtmSaleDate) -1
 )W
 outer apply(
-	select TotalSales,TotalSales_UL from OverallSalesData where strSaleNumber = A.strSaleNumber
+	select ISNULL(TotalSales,0)TotalSales ,ISNULL(TotalSales_UL,0)TotalSales_UL from OverallSalesData where strSaleNumber = A.strSaleNumber
 )U
 	group by strSaleNumber, dtmSaleDate,U.TotalSales, U.TotalSales_UL,X.AveragePrice_UL,X.AveragePrice ,W.AveragePrice
 )
@@ -192,7 +192,7 @@ ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
 , ROUND(B.AverageItemTaste,2) dblItemAverageTaste --12
 , ROUND(U.AveragePrice,2) dblItemAverageCurrentWeekPrice--13
 , ROUND(V.AveragePrice,2) dblItemAveragePrevWeekPrice--14
-, ROUND(U.AveragePrice-V.AveragePrice,2) dblAveItemPriceChange --15
+, ROUND(U.AveragePrice-ISNULL(V.AveragePrice,0),2) dblAveItemPriceChange --15
 , ROUND(B.TotalSold_UL,2) dblItemTotalSoldUL--16
 , ROUND((B.TotalSold/B.TotalSold_UL) * 100, 2) dblItemPurchasePercentageUL --17
 , ROUND(B.AveragePrice_UL,2) dblItemAveragePriceUL --18
@@ -203,11 +203,11 @@ ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
 from HeaderData A join ItemSaleStat B on
 A.strSaleNumber = B.strSaleNumber
 outer apply(
-	Select TOP 1 AveragePrice from ItemWeeklySaleStat where strTeaGroup = B.strTeaGroup and DATEPART(ww, A.dtmSaleDate) = WeekNo
+	Select TOP 1 ISNULL(AveragePrice,0) AveragePrice from ItemWeeklySaleStat where strTeaGroup = B.strTeaGroup and DATEPART(ww, A.dtmSaleDate) = WeekNo
 
 )U
 outer apply(
-	Select TOP 1 AveragePrice from ItemWeeklySaleStat 
+	Select TOP 1 ISNULL(AveragePrice,0) AveragePrice from ItemWeeklySaleStat 
 	where strTeaGroup = B.strTeaGroup and DATEPART(ww, A.dtmSaleDate) = WeekNo-1
 
 )V
