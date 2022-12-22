@@ -21,6 +21,7 @@ BEGIN TRY
     IF OBJECT_ID('tempdb..#VOUCHERS') IS NOT NULL DROP TABLE #VOUCHERS
 	IF OBJECT_ID('tempdb..#SAMPLES') IS NOT NULL DROP TABLE #SAMPLES
 	IF OBJECT_ID('tempdb..#LOADSHIPMENTS') IS NOT NULL DROP TABLE #LOADSHIPMENTS
+	IF OBJECT_ID('tempdb..#MFBATCH') IS NOT NULL DROP TABLE #MFBATCH
 
 	--CHECK IF HAS CHANGES FOR VOUCHERS
     SELECT intCatalogueReconciliationId			= CRD.intCatalogueReconciliationId
@@ -78,6 +79,7 @@ BEGIN TRY
 					FROM #VOUCHERS
 
 					--AUDIT LOG FOR VOUCHER	HEADER AND DETAILS			
+					DELETE FROM @BillSingleAuditLogParam
 					INSERT INTO @BillSingleAuditLogParam (
 						  [Id]
 						, [Action]
@@ -235,7 +237,8 @@ BEGIN TRY
 					SELECT TOP 1 @intSampleId = intSampleId
 					FROM #SAMPLES
 
-					--AUDIT LOG FOR VOUCHER	HEADER AND DETAILS			
+					--AUDIT LOG FOR VOUCHER	HEADER AND DETAILS	
+					DELETE FROM @SampleAuditLogParam
 					INSERT INTO @SampleAuditLogParam (
 						  [Id]
 						, [Action]
@@ -348,7 +351,7 @@ BEGIN TRY
          , strReconciliationNumber				= CR.strReconciliationNumber
          , ysnPosted							= CR.ysnPosted
 		 , dblCatReconPrice						= CRD.dblPreInvoicePrice
-		 , dblCatReconQty						= ISNULL(CRD.dblPreInvoiceQuantity, 0)
+		 , dblCatReconQty						= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, LIUM.strUnitMeasure, CRD.dblPreInvoiceQuantity), 0)
 		 , dblLoadPrice							= ISNULL(LD.dblUnitPrice, 0)
 		 , dblLoadQty							= ISNULL(LD.dblQuantity, 0)		 
 	INTO #LOADSHIPMENTS
@@ -358,6 +361,10 @@ BEGIN TRY
 	INNER JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId
 	INNER JOIN tblLGLoadDetail LD ON LD.intBatchId = MFB.intBatchId
 	INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+	LEFT JOIN tblICItem ITEM ON ITEM.intItemId = S.intItemId
+	LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
+	LEFT JOIN tblICItemUOM IUOM ON LD.intItemUOMId = IUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure LIUM ON LIUM.intUnitMeasureId = IUOM.intUnitMeasureId
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
       AND ((LD.dblUnitPrice <> CRD.dblPreInvoicePrice AND CRD.dblPreInvoicePrice = CRD.dblBasePrice)
         OR (LD.dblQuantity <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity))
@@ -382,7 +389,8 @@ BEGIN TRY
 							   , @intLoadDetailId	= intLoadDetailId
 					FROM #LOADSHIPMENTS
 
-					--AUDIT LOG FOR LOAD SHIPMENT DETAILS			
+					--AUDIT LOG FOR LOAD SHIPMENT DETAILS
+					DELETE FROM @LoadShipmentAuditLogParam			
 					INSERT INTO @LoadShipmentAuditLogParam (
 						  [Id]
 						, [Action]
@@ -391,7 +399,7 @@ BEGIN TRY
 						, [To]
 						, [ParentId]
 					)
-					SELECT [Id]			= @intLoadId
+					SELECT [Id]			= 1
 						, [Action]		= 'Update Amendments'
 						, [Change]		= 'Updated - Record: ' + CAST(intLoadId AS NVARCHAR(100))
 						, [From]		= NULL
@@ -408,7 +416,7 @@ BEGIN TRY
 						, [Change]		= 'Update Unit Price'
 						, [From]		= CAST(dblLoadPrice AS NVARCHAR(100))
 						, [To]			= CAST(dblCatReconPrice AS NVARCHAR(100))
-						, [ParentId]	= @intLoadId
+						, [ParentId]	= 1
 					FROM #LOADSHIPMENTS 
 					WHERE intLoadId = @intLoadId
 					  AND intLoadDetailId = @intLoadDetailId
@@ -421,7 +429,7 @@ BEGIN TRY
 						, [Change]		= 'Update Quantity'
 						, [From]		= CAST(dblLoadQty AS NVARCHAR(100))
 						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
-						, [ParentId]	= @intLoadId
+						, [ParentId]	= 1
 					FROM #LOADSHIPMENTS 
 					WHERE intLoadId = @intLoadId
 					  AND intLoadDetailId = @intLoadDetailId
