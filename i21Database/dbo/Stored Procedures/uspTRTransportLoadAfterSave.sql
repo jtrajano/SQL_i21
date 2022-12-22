@@ -154,6 +154,7 @@ BEGIN
 	DECLARE @SourceType_InventoryReceipt NVARCHAR(50) = 'Inventory Receipt'
 	DECLARE @SourceType_InventoryTransfer NVARCHAR(50) = 'Inventory Transfer'
 	DECLARE @SourceType_Invoice NVARCHAR(50) = 'Invoice'
+	DECLARE @intLoadId INT = NULL
 
 	DECLARE @tblToProcess TABLE
 			(
@@ -553,6 +554,10 @@ BEGIN
 		, @intContractDetailId	INT
 		, @strScreenName		NVARCHAR(50)
 
+	SELECT @intLoadId = intLoadId
+	FROM tblTRLoadHeader LH
+	WHERE LH.intLoadHeaderId = @LoadHeaderId
+
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblToProcess)
 	BEGIN
 		SELECT TOP 1  @Id		=	intKeyId
@@ -571,7 +576,7 @@ BEGIN
 			ELSE IF (@strTransactionType = @SourceType_Invoice)
 				SET @strScreenName = 'Transport Sale'
 
-			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer))
+			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer) AND (ISNULL(@intLoadId, 0) = 0))
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
 					, @dblQuantityToUpdate = @dblQuantity 
@@ -613,7 +618,7 @@ BEGIN
 				SET @strScreenName = 'Transport Sale'
 			END
 
-			IF (ISNULL(@intContractDetailId, '') <> '')
+			IF (ISNULL(@intContractDetailId, '') <> '' AND (ISNULL(@intLoadId, 0) = 0))
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
 					, @dblQuantityToUpdate = @dblQuantity
