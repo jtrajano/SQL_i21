@@ -1257,6 +1257,8 @@
     <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
     <Build Include="dbo\Tables\tblTMInventoryHistory.sql" />
+    <Build Include="dbo\Tables\tblFABook.sql" />
+    <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetBooks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
