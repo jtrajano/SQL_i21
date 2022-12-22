@@ -133,6 +133,7 @@ BEGIN TRY
 					FROM dbo.tblIPBendDemandArchive
 					WHERE intLineTrxSequenceNo = @intLineTrxSequenceNo
 					)
+				AND @strProductionOrder = 'False'
 			BEGIN
 				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intLineTrxSequenceNo) + ' is already processed in i21.'
 
@@ -158,7 +159,13 @@ BEGIN TRY
 
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
-			WHERE strLotOrigin = @strCompanyLocation
+			WHERE (
+					CASE 
+						WHEN @strProductionOrder = 'True'
+							THEN strLocationNumber
+						ELSE strLotOrigin
+						END
+					) = @strCompanyLocation
 
 			SELECT @intCompanyLocationSubLocationId = NULL
 

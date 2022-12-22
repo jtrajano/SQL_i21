@@ -13,6 +13,7 @@ BEGIN TRY
 		,@intContractedStockPreStageId INT
 		,@dtmCurrentDate DATETIME
 		,@ErrMsg   NVARCHAR(MAX)
+		,@intTotalRows int
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
@@ -101,10 +102,14 @@ BEGIN TRY
 			FROM @tblIPContractedStockPreStage PS
 			)
 
+	Select @intTotalRows=Count(*)
+	from tblIPContractedStockPreStage
+
 	Select @strXML= '<root><DocNo>' + IsNULL(ltrim(MIN(CS.intContractedStockPreStageId)), '') + '</DocNo>'
 	+ '<MsgType>Contracted_Stock</MsgType>' 
 	+ '<Sender>iRely</Sender>' 
 	+ '<Receiver>ICRON</Receiver>' 
+	+ '<TotalRows>'+IsNULL(ltrim(@intTotalRows),'')+'</TotalRows>'
 	FROM @tblIPContractedStockPreStage CS
 
 	SELECT @strDetailXML = IsNULL(@strDetailXML,'') 

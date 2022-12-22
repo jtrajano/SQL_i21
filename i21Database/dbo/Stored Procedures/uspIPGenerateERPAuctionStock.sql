@@ -13,6 +13,7 @@ BEGIN TRY
 		,@intAuctionStockPreStageId INT
 		,@dtmCurrentDate DATETIME
 		,@intDefaultCurrencyId INT
+		,@intTotalRows int
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
@@ -201,7 +202,12 @@ BEGIN TRY
 	JOIN @tblIPAvailableStock S ON S.intItemId = AS28.intItemId
 		AND S.intLocationId = AS28.intLocationId
 
-	SELECT @strXML = '<root><DocNo>' + IsNULL(ltrim(MIN(AS7.intItemId)), '') + '</DocNo>' + '<MsgType>Auction_Stock</MsgType>' + '<Sender>iRely</Sender>' + '<Receiver>ICRON</Receiver>'
+	Select @intTotalRows=Count(*)
+	from tblIPAuctionStockPreStage
+
+	SELECT @strXML = '<root><DocNo>' + IsNULL(ltrim(MIN(AS7.intItemId)), '') + '</DocNo>' + '<MsgType>Auction_Stock</MsgType>' + '<Sender>iRely</Sender>' 
+						+ '<Receiver>ICRON</Receiver>'
+						+ '<TotalRows>'+IsNULL(ltrim(@intTotalRows),'')+'</TotalRows>'
 	FROM @tblIPAuctionStock7 AS7
 
 	SELECT @strDetailXML = IsNULL(@strDetailXML,'') + '<Header><ItemCode>' + IsNULL(I.strItemNo, '') + '</ItemCode>' 

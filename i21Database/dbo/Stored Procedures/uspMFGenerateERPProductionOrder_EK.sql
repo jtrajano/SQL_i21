@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFGenerateERPProductionOrder_EK (
-	@limit INT = 0
+	@limit INT = 100
 	,@offset INT = 0
 	,@ysnUpdateFeedStatus BIT = 1
 	)
@@ -53,15 +53,15 @@ BEGIN TRY
 		AND strTag = 'Count'
 
 	IF ISNULL(@tmp, 0) = 0
-		SELECT @tmp = 50
+		SELECT @tmp = 100
 
-	IF @offset > @tmp
+	IF @limit > @tmp
 	BEGIN
-		SELECT @offset = @tmp
+		SELECT @limit = @tmp
 	END
 
 	INSERT INTO @tblMFWorkOrderPreStage (intWorkOrderPreStageId)
-	SELECT TOP (@offset) PS.intWorkOrderPreStageId
+	SELECT TOP (@limit) PS.intWorkOrderPreStageId
 	FROM dbo.tblMFWorkOrderPreStage PS
 	WHERE PS.intStatusId IS NULL
 	ORDER BY intWorkOrderPreStageId
@@ -147,7 +147,7 @@ BEGIN TRY
 
 		SELECT @strXML = @strXML + '<Header>'
 		+ '<Status>'+Case When @strRowState = 'Modified' then 'U' Else 'C' End	  + '</Status>'
-		+ '<Plant>' + CL.strLocationNumber  + '</Plant>'
+		+ '<Plant>' + IsNULL(CL.strOregonFacilityNumber,'')   + '</Plant>'
 		+ '<OrderNo>' + IsNULL(BR.strReferenceNo,'')   + '</OrderNo>' 
 			+ '<BlendCode>' + I.strItemNo + '</BlendCode>' 
 				+ '<BlendDescription>' + I.strDescription  + '</BlendDescription>' 
@@ -183,10 +183,10 @@ BEGIN TRY
 		+ '<TeaItem>' +  I.strItemNo + '</TeaItem>' 
 		+ '<Material>' + IsNULL(I.strShortName,'' ) + '</Material>' 
 		+ '<MaterialDescription>' + I.strDescription  + '</MaterialDescription>' 
-		+ '<Location>' + CS.strSubLocationName  + '</Location>' 
+		+ '<Location>' + IsNULL(LTRIM(SUBSTRING(ISNULL(CS.strSubLocationName, ''), CHARINDEX('/', CS.strSubLocationName) + 1, LEN(CS.strSubLocationName))) , '')  + '</Location>' 
 		+ '<Parts>' +  [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet  ) + '</Parts>' 
 		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](L.dblWeightPerQty ) + '</WeightPerPack>' 
-		+ '<WeightPerMix>' + ltrim(WI.dblQuantity/BR.dblEstNoOfBlendSheet) + '</WeightPerMix>' 
+		+ '<WeightPerMix>' + [dbo].[fnRemoveTrailingZeroes](WI.dblQuantity/BR.dblEstNoOfBlendSheet) + '</WeightPerMix>' 
 		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](L.dblWeight ) + '</WeightPerBatch>' 
 		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity ) + '</Bags>' 
 		+ '<FW>' + IsNULL(WI.strFW,'')  + '</FW>' 
