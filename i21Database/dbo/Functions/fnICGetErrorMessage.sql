@@ -285,6 +285,8 @@ BEGIN
 		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
 		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
 		WHEN @msgId = 80271 THEN '%s is currently in a Voucher. Please remove it in %s first before you can unpost the Destination Weight/Grade.'
+		WHEN @msgId = 80272 THEN 'Item Category %s does not exists on Storage %s.'
+		WHEN @msgId = 80273 THEN 'Quantity in lot number %s is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
 	END 
 
 	RETURN @msg COLLATE Latin1_General_CI_AS
