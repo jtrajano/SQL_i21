@@ -8,14 +8,14 @@ AS
 	Date: 10/26/2022
 *****************************************************************/
 SELECT WorkOrder.intWorkOrderId
-	 , CompanyLocation.strLocationName										   -- Plant
+	 , CompanyLocation.strLocationName							 -- Plant
 	 , COALESCE(WorkOrder.strReferenceNo, BlendRequirement.strReferenceNo) AS strReferenceNo -- Order Nbr
-	 , Item.strItemNo														   -- Blend Code
-	 , FORMAT(WorkOrder.dtmCreated, 'dd,MM,yyyy') AS  dtmCreated			   -- Date Created
-	 , FLOOR(BlendRequirement.dblEstNoOfBlendSheet) AS dblEstNoOfBlendSheet    -- Mixes
-	 , FLOOR(WorkOrderInputLotQuantity.dblIssuedQuantity) AS dblIssuedQuantity -- Parts
-	 , BlendRequirement.dblBlenderSize										   -- Net Wt per mix
-	 , FLOOR(WorkOrder.dblQuantity) AS dblQuantity							   -- Total Blend Wt
+	 , Item.strItemNo											 -- Blend Code
+	 , FORMAT(WorkOrder.dtmCreated, 'dd,MM,yyyy') AS  dtmCreated -- Date Created
+	 , BlendRequirement.dblEstNoOfBlendSheet					 -- Mixes
+	 , WorkOrderInputLotQuantity.dblIssuedQuantity				 -- Parts
+	 , BlendRequirement.dblBlenderSize							 -- Net Wt per mix
+	 , WorkOrder.dblQuantity									 -- Total Blend Wt
 FROM tblMFWorkOrder AS WorkOrder
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON WorkOrder.intLocationId = CompanyLocation.intCompanyLocationId
 LEFT JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId
