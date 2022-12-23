@@ -99,10 +99,17 @@ BEGIN TRY
     INNER JOIN vyuAPVendor E ON E.strName = IMP.strSupplier
     WHERE IMP.intImportLogId = @intImportLogId
     AND ISNULL(IMP.strBatchNo, '') = ''
-    AND NOT EXISTS (
-        SELECT 1 FROM vyuAPVendor V
-        WHERE V.intEntityId = E.intEntityId
-        AND (V.intCompanyLocationId = CL.intCompanyLocationId OR V.intCompanyLocationId IS NULL)
+    AND (
+        NOT EXISTS (
+            SELECT 1 FROM tblAPVendorCompanyLocation V
+            WHERE V.intEntityVendorId = E.intEntityId
+            AND V.intCompanyLocationId = CL.intCompanyLocationId
+        ) OR NOT EXISTS (
+            SELECT 1
+            FROM tblEMEntity E2
+            LEFT JOIN tblAPVendorCompanyLocation V2 ON E2.intEntityId = V2.intEntityVendorId
+            WHERE V2.intVendorCompanyLocationId IS NULL
+        )
     )
 
     -- End Validation
