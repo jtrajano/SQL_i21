@@ -49,12 +49,12 @@ BEGIN
 	FROM @InvoiceLineItems ILI
 	INNER JOIN tblARInvoice I ON ILI.intInvoiceId = I.intInvoiceId
 
+	DELETE IDF 
+	FROM tblARInvoiceDeliveryFee IDF 
+	INNER JOIN @InvoiceIds IDS ON IDF.intInvoiceId = IDS.intId
+
 	IF EXISTS (SELECT TOP 1 1 FROM @InvoiceLineItems)
 	BEGIN
-		DELETE IDF 
-		FROM tblARInvoiceDeliveryFee IDF 
-		INNER JOIN @InvoiceIds IDS ON IDF.intInvoiceId = IDS.intId
-
 		INSERT INTO tblARInvoiceDeliveryFee (
 			  intInvoiceId
 			, intTaxGroupId
