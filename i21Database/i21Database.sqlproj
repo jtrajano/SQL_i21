@@ -1435,6 +1435,7 @@
     <Build Include="dbo\Tables\tblIPPriceFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPrice_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrder.sql" />
+    <Build Include="dbo\Tables\tblAPCurrentCompanyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
