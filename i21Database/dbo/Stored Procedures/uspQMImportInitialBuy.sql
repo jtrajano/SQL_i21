@@ -339,6 +339,7 @@ BEGIN TRY
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT
 		,@intSampleId INT
+		,@intEntityUserId INT
 		,@intPurchasingGroupId INT
 		,@strPurchasingGroup NVARCHAR(150)
 		,@intBookId INT
@@ -386,6 +387,7 @@ BEGIN TRY
 
 	SELECT intImportCatalogueId = IMP.intImportCatalogueId
 		,intSampleId = S.intSampleId
+		,intEntityUserId = IL.intEntityId
 		,intPurchasingGroupId = COMPANY_CODE.intPurchasingGroupId
 		,strPurchasingGroup = COMPANY_CODE.strName
 		,intBookId = BOOK.intBookId
@@ -433,6 +435,7 @@ BEGIN TRY
 	INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
 	INNER JOIN (
 		tblQMImportCatalogue IMP
+		INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 		-- Buyer1 Quantity UOM
 		LEFT JOIN tblICUnitMeasure B1QUOM ON B1QUOM.strSymbol = IMP.strB1QtyUOM
 		-- Buyer1 Price UOM
@@ -915,12 +918,24 @@ BEGIN TRY
 			UPDATE tblQMSample
 			SET strBatchNo = @strBatchId
 			WHERE intSampleId = @intSampleId
+
+			DECLARE @strRowState NVARCHAR(50)
+			SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
+			FROM tblQMSample
+			WHERE intSampleId = @intSampleId
+
+			EXEC uspIPProcessPriceToFeed
+				@intEntityUserId
+				,@intSampleId
+				,'Sample'
+				,@strRowState
 		END
 
 		FETCH NEXT
 		FROM @C
 		INTO @intImportCatalogueId
 			,@intSampleId
+			,@intEntityUserId
 			,@intPurchasingGroupId
 			,@strPurchasingGroup
 			,@intBookId
