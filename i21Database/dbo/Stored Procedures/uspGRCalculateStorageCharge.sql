@@ -5381,7 +5381,7 @@ BEGIN TRY
 	
 	SET @dblStorageDuePerUnit=ISNULL(@dblStorageDuePerUnit,0)
 
-	SELECT @dblStorageDueTotalPerUnit = ISNULL(dblStorageDue)
+	SELECT @dblStorageDueTotalPerUnit = ISNULL(dblStorageDue,0)
 		  ,@dblStorageBilledPerUnit   = dblStoragePaid - @dblOldStoragePaid
 	FROM tblGRCustomerStorage
 	WHERE intCustomerStorageId = @intCustomerStorageId
