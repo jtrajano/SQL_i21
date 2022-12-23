@@ -489,6 +489,7 @@ BEGIN TRY
 	FROM @C
 	INTO @intImportCatalogueId
 		,@intSampleId
+		,@intEntityUserId
 		,@intPurchasingGroupId
 		,@strPurchasingGroup
 		,@intBookId
