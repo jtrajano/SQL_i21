@@ -93,11 +93,20 @@ BEGIN
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
 		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
-		else 1 end)) as dblOpenBalance
-			from tblGRStorageHistory 
-				where intCustomerStorageId = CS.intCustomerStorageId 
-					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
-					and intTransactionTypeId in ( 1, 4, 3, 5, 9)
+			else 1 end)) as dblOpenBalance
+		from tblGRStorageHistory sh
+		left join (tblGRTransferStorageReference tsr inner join tblGRCustomerStorage c on c.intCustomerStorageId = tsr.intToCustomerStorageId)
+			on tsr.intTransferStorageId = sh.intTransferStorageId
+				and tsr.intToCustomerStorageId = sh.intCustomerStorageId
+		where sh.intCustomerStorageId = CS.intCustomerStorageId 
+			and (
+				(dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+					and intTransactionTypeId in (1, 4, 5, 9)
+					or (intTransactionTypeId = 3 and strType = 'Transfer') --include the units transfer regardless of the date
+				)
+				or dbo.fnRemoveTimeOnDate(c.dtmDeliveryDate) <= @dtmStorageChargeDate
+					and (intTransactionTypeId = 3 and strType = 'From Transfer' )
+			)
 	) as MagicalOpenBalance
 	INNER JOIN tblGRStorageType ST
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -194,13 +203,31 @@ BEGIN
 		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
 		,SSVW.strTransaction
 	FROM tblGRCustomerStorage CS
+	--OUTER APPLY (
+	--	select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+	--	else 1 end)) as dblOpenBalance
+	--		from tblGRStorageHistory 
+	--			where intCustomerStorageId = CS.intCustomerStorageId 
+	--				and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+	--				and (intTransactionTypeId in ( 1, 4, 3, 5, 9) or (intTransactionTypeId = 2 and strPaidDescription = 'Open Balance Adj'))
+	--) as MagicalOpenBalance
 	OUTER APPLY (
 		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
-		else 1 end)) as dblOpenBalance
-			from tblGRStorageHistory 
-				where intCustomerStorageId = CS.intCustomerStorageId 
-					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
-					and (intTransactionTypeId in ( 1, 4, 3, 5, 9) or (intTransactionTypeId = 2 and strPaidDescription = 'Open Balance Adj'))
+			else 1 end)) as dblOpenBalance
+		from tblGRStorageHistory sh
+		left join (tblGRTransferStorageReference tsr inner join tblGRCustomerStorage c on c.intCustomerStorageId = tsr.intToCustomerStorageId)
+			on tsr.intTransferStorageId = sh.intTransferStorageId
+				and tsr.intToCustomerStorageId = sh.intCustomerStorageId
+		where sh.intCustomerStorageId = CS.intCustomerStorageId 
+			and (
+				(dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+					and intTransactionTypeId in (1, 4, 5, 9)
+					or (intTransactionTypeId = 3 and strType = 'Transfer') --include the units transfer regardless of the date
+				)
+				or dbo.fnRemoveTimeOnDate(c.dtmDeliveryDate) <= @dtmStorageChargeDate
+					and (intTransactionTypeId = 3 and strType = 'From Transfer' )
+				or (intTransactionTypeId = 2 and strPaidDescription = 'Open Balance Adj')
+			)
 	) as MagicalOpenBalance
 	INNER JOIN @BillStorageValues SV
 		ON SV.intCustomerStorageId = CS.intCustomerStorageId

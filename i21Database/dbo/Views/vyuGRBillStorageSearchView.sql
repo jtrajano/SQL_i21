@@ -18,6 +18,7 @@ SELECT
 	,Item.strItemNo	
 	,dblUnits = CAST(dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, IU.intItemUOMId,SH.dblUnits) AS DECIMAL(18,6))
 	,SH.dblPaidAmount
+	,dblStorageChargeAmount = ROUND(CAST(dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, IU.intItemUOMId,SH.dblUnits) AS DECIMAL(18,6)) * SH.dblPaidAmount,2)
 	,CASE 
 							WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN 'Bill Storage'
 							ELSE 'Accrue'
