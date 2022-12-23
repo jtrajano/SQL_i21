@@ -1,5 +1,5 @@
 ﻿Create PROCEDURE uspIPGenerateERPBatchRecategorization_EK (
-	@limit INT = 0
+	@limit INT = 100
 	,@offset INT = 0
 	,@ysnUpdateFeedStatus BIT = 1
 	)

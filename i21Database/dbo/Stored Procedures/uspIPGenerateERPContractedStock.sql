@@ -57,8 +57,10 @@ BEGIN TRY
 			FROM tblLGLoadDetail LD
 			WHERE LD.intPContractDetailId = CD.intContractDetailId
 			) LD2
+		LEFT JOIN tblMFBatch B ON B.intContractDetailId = CD.intContractDetailId
 		WHERE CD.intContractStatusId = 1 --Open
 		AND CD.dblQuantity - IsNULL(LD2.dblQuantity, 0)>0
+		AND B.intLocationId<>B.intMixingUnitLocationId  
 		ORDER BY CH.intContractHeaderId
 	END
 
