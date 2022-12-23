@@ -554,10 +554,6 @@ BEGIN
 		, @intContractDetailId	INT
 		, @strScreenName		NVARCHAR(50)
 
-	SELECT @intLoadId = intLoadId
-	FROM tblTRLoadHeader LH
-	WHERE LH.intLoadHeaderId = @LoadHeaderId
-
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblToProcess)
 	BEGIN
 		SELECT TOP 1  @Id		=	intKeyId
@@ -568,6 +564,17 @@ BEGIN
 			, @dblQuantity = dblQuantity
 			, @intContractDetailId = intContractDetailId
 		FROM	@tblToProcess 
+
+		SELECT TOP 1 @intLoadId = LG.intLoadId
+		FROM tblLGLoad LG
+		JOIN tblTRLoadHeader LH ON LH.intLoadId = LG.intLoadId
+		JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+		JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND DD.intLoadDistributionDetailId = @intTransactionId
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = LD.intLoadId
+			AND LD.intLoadDetailId = DD.intLoadDetailId		
+		WHERE LH.intLoadHeaderId = @intLoadHeaderId
+			AND LG.intSourceType NOT IN (2, 4, 5)
+			AND ISNULL(LD.intTMDispatchId, 0) <> 0
 
 		IF (@intActivity = 1 OR @intActivity = 2)
 		BEGIN
@@ -620,10 +627,10 @@ BEGIN
 
 			IF (ISNULL(@intContractDetailId, '') <> '' AND (ISNULL(@intLoadId, 0) = 0))
 			BEGIN
-				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-					, @dblQuantityToUpdate = @dblQuantity
-					, @intUserId = @UserId
-					, @intExternalId = @intTransactionId
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
+					, @dblQuantityToUpdate = @dblQuantity 
+					, @intUserId = @UserId 
+					, @intExternalId = @intTransactionId 
 					, @strScreenName = @strScreenName
 			END
 		END		
