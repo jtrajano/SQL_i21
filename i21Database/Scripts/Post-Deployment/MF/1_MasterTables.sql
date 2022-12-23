@@ -190,12 +190,14 @@ BEGIN
 END
 GO
 
-DELETE FROM tblMFWorkOrderStatus WHERE intStatusId = 18;
-
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 18)
 BEGIN
     INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
     VALUES(18,'Recall Requested')
+END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderStatus SET strName='Recall Requested' WHERE intStatusId = 18
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 19)
