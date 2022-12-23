@@ -101,7 +101,8 @@ BEGIN TRY
 
 			SELECT @intFreightTerm = CH.intFreightTermId
 			FROM tblCTContractHeader CH
-			INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = @intSContractDetailId
+			INNER JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+			WHERE CD.intContractDetailId = @intSContractDetailId
 		END
 		ELSE
 		BEGIN
