@@ -1072,59 +1072,80 @@ BEGIN
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-
-
-				--TODO: Get In-Transit off-setting entry
-				IF @strBucketType = 'Sales In-Transit' AND @strTransactionType IN ('Invoice')
+				
+				-- GET intTransactionReferenceId for DPR In Transit Helper Log
+				IF (@strBucketType = 'Sales In-Transit' AND @strTransactionType IN ('Invoice'))
+					OR 
+				   (@strBucketType = 'Purchase In-Transit' AND @strTransactionType IN ('Inventory Receipt'))
 				BEGIN
+					DECLARE @intTransactionReferenceId INT
+					SELECT @intTransactionReferenceId = NULL
+
+					SELECT @intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId 
+														from tblARInvoiceDetail ID 
+														inner join tblICInventoryShipmentItem SI 
+															ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId 
+														where ID.intInvoiceDetailId = @intTransactionRecordId)
 					
-					INSERT INTO @DPRInTransitHelperLog (
-							  dtmDate
-							, intCommodityId
-							, intTransactionReferenceId
-							, intInvoiceId
-							, intInventoryReceiptId
-							, strBucketType
-							, dblQty
-							, intContractDetailId
-					)
-					SELECT 
-						  @dtmTransactionDate
-						, @intCommodityId
-						, intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
-						, intInvoiceId = @intTransactionRecordHeaderId
-						, intInventoryReceiptId = NULL
-						, @strBucketType
-						, @dblQty
-						, @intContractDetailId
+					-- SCENARIO FOR RM-5080, RM-5115, RM-5133 (LOAD SHIPMENT THEN POST INVOICE. NO INVENTORY SHIPMENT)
+					-- WILL USE LOAD SHIPMENT ID INSTEAD FOR @intTransactionReferenceId ON DPR IN TRANSIT HELPER TABLE.
+					IF @intTransactionReferenceId IS NULL
+					BEGIN
+						SELECT @intTransactionReferenceId = (SELECT TOP 1 intLoadId
+															FROM tblARInvoice
+															WHERE intInvoiceId = @intTransactionRecordHeaderId)
+					END
+				
+					--TODO: Get In-Transit off-setting entry
+					IF @strBucketType = 'Sales In-Transit' AND @strTransactionType IN ('Invoice')
+					BEGIN
+						INSERT INTO @DPRInTransitHelperLog (
+								  dtmDate
+								, intCommodityId
+								, intTransactionReferenceId
+								, intInvoiceId
+								, intInventoryReceiptId
+								, strBucketType
+								, dblQty
+								, intContractDetailId
+						)
+						SELECT 
+							  @dtmTransactionDate
+							, @intCommodityId
+							, intTransactionReferenceId = @intTransactionReferenceId --(select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
+							, intInvoiceId = @intTransactionRecordHeaderId
+							, intInventoryReceiptId = NULL
+							, @strBucketType
+							, @dblQty
+							, @intContractDetailId
 						
 
+					END
+
+					IF @strBucketType = 'Purchase In-Transit' AND @strTransactionType IN ('Inventory Receipt')
+					BEGIN
+						INSERT INTO @DPRInTransitHelperLog (
+								  dtmDate
+								, intCommodityId
+								, intTransactionReferenceId
+								, intInvoiceId
+								, intInventoryReceiptId
+								, strBucketType
+								, dblQty
+								, intContractDetailId
+						)
+						SELECT 
+							  @dtmTransactionDate
+							, @intCommodityId
+							, intTransactionReferenceId = @intTransactionReferenceId --(select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
+							, intInvoiceId = NULL
+							, intInventoryReceiptId = @intTransactionRecordHeaderId
+							, @strBucketType
+							, @dblQty
+							, @intContractDetailId
+
+					END
 				END
-
-				IF @strBucketType = 'Purchase In-Transit' AND @strTransactionType IN ('Inventory Receipt')
-				BEGIN
-					INSERT INTO @DPRInTransitHelperLog (
-							  dtmDate
-							, intCommodityId
-							, intTransactionReferenceId
-							, intInvoiceId
-							, intInventoryReceiptId
-							, strBucketType
-							, dblQty
-							, intContractDetailId
-					)
-					SELECT 
-						  @dtmTransactionDate
-						, @intCommodityId
-						, intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId from tblARInvoiceDetail ID inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId where ID.intInvoiceDetailId = @intTransactionRecordId)
-						, intInvoiceId = NULL
-						, intInventoryReceiptId = @intTransactionRecordHeaderId
-						, @strBucketType
-						, @dblQty
-						, @intContractDetailId
-
-				END
-
 		END
 
 		--------------------------------------
