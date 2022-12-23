@@ -17,6 +17,7 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@intDocID INT
 		,@intItemPreStageId INT
+		,@intTotalRows INT
 	DECLARE @tblIPItemPreStage TABLE (intItemPreStageId INT)
 	DECLARE @intItemId INT
 		,@intProductId INT
@@ -291,6 +292,9 @@ BEGIN TRY
 		SELECT @intDocID = ISNULL(MAX(intItemPreStageId), 1)
 		FROM @tblIPItemPreStage
 
+		SELECT @intTotalRows = COUNT(1)
+		FROM tblIPItemPreStage
+
 		SELECT @strRootXML = '<DocNo>' + LTRIM(@intDocID) + '</DocNo>'
 
 		SELECT @strRootXML += '<MsgType>Tea_Lingo</MsgType>'
@@ -298,6 +302,8 @@ BEGIN TRY
 		SELECT @strRootXML += '<Sender>iRely</Sender>'
 
 		SELECT @strRootXML += '<Receiver>ICRON</Receiver>'
+
+		SELECT @strRootXML += '<TotalRows>' + LTRIM(@intTotalRows) + '</TotalRows>'
 
 		SELECT @strFinalXML = '<root>' + @strRootXML + @strItemXML + '</root>'
 	END

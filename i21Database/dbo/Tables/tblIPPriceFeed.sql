@@ -23,6 +23,10 @@
 	,strShippingLine NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmPricingDate DATETIME
 
+	,dblLandedPrice NUMERIC(18, 6)
+	,dblPurchasePrice NUMERIC(18, 6)
+	,dblSalePrice NUMERIC(18, 6)
+
 	,intEntityId INT
 	,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
