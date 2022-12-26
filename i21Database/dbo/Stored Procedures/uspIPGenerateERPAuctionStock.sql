@@ -17,7 +17,7 @@ BEGIN TRY
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
-	DECLARE @tblIPAuctionStockPreStage TABLE (intItemId INT)
+	DECLARE @tblIPAuctionStockPreStage TABLE (intItemId INT,intLocationId INT)
 	DECLARE @tblIPAuctionStock7 AS TABLE (
 		intItemId INT
 		,intLocationId INT
@@ -63,14 +63,16 @@ BEGIN TRY
 			intAuctionStockPreStageId
 			,intItemId
 			,dtmProcessedDate
+			,intLocationId
 			)
 		SELECT ROW_NUMBER() OVER (
 				ORDER BY intItemId
 				)
 			,intItemId
 			,@dtmCurrentDate
+			,intLocationId
 		FROM (
-			SELECT DISTINCT S.intItemId
+			SELECT DISTINCT S.intItemId,S.intLocationId
 			FROM tblQMSample S
 			WHERE S.dtmSaleDate BETWEEN @dtmCurrentDate - 28
 					AND @dtmCurrentDate
@@ -104,8 +106,8 @@ BEGIN TRY
 		SELECT @limit = @tmp
 	END
 
-	INSERT INTO @tblIPAuctionStockPreStage (intItemId)
-	SELECT PS.intItemId
+	INSERT INTO @tblIPAuctionStockPreStage (intItemId,intLocationId)
+	SELECT PS.intItemId,PS.intLocationId
 	FROM dbo.tblIPAuctionStockPreStage PS
 	WHERE PS.intStatusId IS NULL
 		AND intAuctionStockPreStageId BETWEEN @offset + 1
@@ -113,9 +115,10 @@ BEGIN TRY
 
 	UPDATE dbo.tblIPAuctionStockPreStage
 	SET intStatusId = - 1
-	WHERE intItemId IN (
-			SELECT PS.intItemId
+	WHERE Exists (
+			SELECT 1
 			FROM @tblIPAuctionStockPreStage PS
+			Where PS.intItemId=tblIPAuctionStockPreStage.intItemId and PS.intLocationId=tblIPAuctionStockPreStage.intLocationId
 			)
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
@@ -222,18 +225,20 @@ BEGIN TRY
 							+ '<Last4WeekBought>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS28.dblLastWeekBought), '') + '</Last4WeekBought>' 
 							+ '<Last4WeekAvailable>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS28.dblLastWeekAvailable), '') + '</Last4WeekAvailable>' 
 							+ '<Last4WeekPressure>' + IsNULL(ltrim(AS28.dblLastWeekPressure), '') + '</Last4WeekPressure></Header>'
-	FROM @tblIPAuctionStock7 AS7
-	JOIN @tblIPAuctionStock28 AS28 ON AS28.intItemId = AS7.intItemId
+	FROM @tblIPAuctionStock28 AS28
+	FULL JOIN @tblIPAuctionStock7 AS7 ON AS28.intItemId = AS7.intItemId
 		AND AS28.intLocationId = AS7.intLocationId
-	JOIN tblICItem I ON I.intItemId = AS7.intItemId
-	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = AS7.intLocationId
-	JOIN tblSMCurrency C ON C.intCurrencyID = AS7.intCurrencyId
+	JOIN tblICItem I ON I.intItemId = IsNULL(AS28.intItemId,AS7.intItemId)
+	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IsNULL(AS28.intLocationId,AS7.intLocationId)
+	JOIN tblSMCurrency C ON C.intCurrencyID = IsNULL(AS28.intCurrencyId,AS7.intCurrencyId)
 
 	UPDATE dbo.tblIPAuctionStockPreStage
 	SET intStatusId = NULL
-	WHERE intItemId IN (
-			SELECT PS.intItemId
+	WHERE Exists (
+			SELECT 1
 			FROM @tblIPAuctionStockPreStage PS
+			Where PS.intItemId =tblIPAuctionStockPreStage.intItemId 
+			and PS.intLocationId =tblIPAuctionStockPreStage.intLocationId
 			)
 		AND intStatusId = - 1
 

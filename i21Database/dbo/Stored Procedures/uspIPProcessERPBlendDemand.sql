@@ -162,7 +162,7 @@ BEGIN TRY
 			WHERE (
 					CASE 
 						WHEN @strProductionOrder = 'True'
-							THEN strLocationNumber
+							THEN strVendorRefNoPrefix 
 						ELSE strLotOrigin
 						END
 					) = @strCompanyLocation
@@ -174,7 +174,7 @@ BEGIN TRY
 			WHERE strSubLocationName = @strStorageLocation
 				AND intCompanyLocationId = @intLocationId
 
-			IF @intCompanyLocationSubLocationId IS NULL
+			IF @intCompanyLocationSubLocationId IS NULL AND @strProductionOrder = 'False'
 			BEGIN
 				SELECT @strError = 'Storage Location cannot be blank.'
 
@@ -264,12 +264,21 @@ BEGIN TRY
 			END
 
 			SELECT @intManufacturingCellId = NULL
-
-			SELECT @intManufacturingCellId = intManufacturingCellId
-			FROM dbo.tblMFManufacturingCell
-			WHERE strCellName = @strWorkCenter
-				AND intSubLocationId = @intCompanyLocationSubLocationId
-				AND intLocationId = @intLocationId
+			If  @strProductionOrder = 'False'
+			Begin
+				SELECT @intManufacturingCellId = intManufacturingCellId
+				FROM dbo.tblMFManufacturingCell
+				WHERE strCellName = @strWorkCenter
+					AND intSubLocationId = @intCompanyLocationSubLocationId
+					AND intLocationId = @intLocationId
+			End
+			Else
+			BEGIN
+				SELECT @intManufacturingCellId = intManufacturingCellId
+				FROM dbo.tblMFManufacturingCell
+				WHERE strCellName = @strWorkCenter
+					AND intLocationId = @intLocationId
+			End
 
 			IF @intManufacturingCellId IS NULL
 			BEGIN

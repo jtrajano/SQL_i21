@@ -3,4 +3,5 @@
 	,intItemId INT
 	,intStatusId INT
 	,dtmProcessedDate DATETIME
+	,intLocationId int
 	)
