@@ -90,15 +90,37 @@ BEGIN TRY
 								AND (SH.strType = 'Generated Storage Invoice' OR SH.strPaidDescription = 'Generated Storage Invoice')
 					   )
 			BEGIN
+				DECLARE @strInvoice NVARCHAR(50)
+
+				
+				SELECT @strInvoice = AR.strInvoiceNumber
+				FROM tblGRCustomerStorage CS
+				JOIN tblGRStorageHistory SH 
+					ON SH.intCustomerStorageId = CS.intCustomerStorageId
+				JOIN tblARInvoice AR
+					ON AR.intInvoiceId = SH.intInvoiceId
+				OUTER APPLY (
+					SELECT TOP 1 AA = MIN(intInvoiceId) 
+					FROM tblGRStorageHistory 
+					WHERE intInvoiceId > @IntSourceKey 
+						AND (strType = 'Generated Storage Invoice' OR strPaidDescription = 'Generated Storage Invoice') 
+						AND intCustomerStorageId = CS.intCustomerStorageId
+				) A
+				WHERE SH.intInvoiceId = @IntSourceKey 
+					AND (SH.strType = 'Generated Storage Invoice' OR SH.strPaidDescription = 'Generated Storage Invoice')
+					AND A.AA IS NOT NULL
+
+				IF @strInvoice IS NOT NULL
+				BEGIN
+					SET @ErrMsg = 'Unable to delete Invoice. <br/> Latest invoice needs to be deleted first.'
+					RAISERROR(@ErrMsg,16,1, 'WITH NOWAIT');
+					RETURN;
+				END
 
 				UPDATE CS
 				SET 
 					CS.dblStoragePaid				= CASE 
 														WHEN A.AA IS NOT NULL OR C.CC IS NOT NULL THEN CS.dblStoragePaid - SH.dblPaidAmount
-														ELSE 0
-													END
-					,CS.dblStorageDue				= CASE 
-														WHEN A.AA IS NOT NULL OR C.CC IS NOT NULL THEN ISNULL(CS.dblStorageDue,0) + SH.dblPaidAmount
 														ELSE 0
 													END
 					,dtmLastStorageAccrueDate	= CASE
