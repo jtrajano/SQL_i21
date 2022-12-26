@@ -244,11 +244,11 @@ BEGIN
 	LEFT JOIN tblSCDeliverySheet DS
     	ON DS.intDeliverySheetId = CS.intDeliverySheetId --AND (@ysnExcludeNotPostedDS IS NULL OR (@ysnExcludeNotPostedDS = 1 and DS.ysnPost = 1))
 	outer apply
-		( select top 1 (dblPaidAmount) as dblPaidAmount from tblGRStorageHistory 
+		( select SUM(dblPaidAmount) as dblPaidAmount from tblGRStorageHistory 
 			where intCustomerStorageId = CS.intCustomerStorageId 
 				and dtmHistoryDate <=  @dtmStorageChargeDate 				
 				and intTransactionTypeId = 6
-			order by intStorageHistoryId desc 
+			--order by intStorageHistoryId desc 
 		) SH
 	left join  vyuGRStorageSearchView SSVW 
 			on CS.intCustomerStorageId = SSVW.intCustomerStorageId
