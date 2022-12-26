@@ -18,6 +18,7 @@
 
 CREATE PROCEDURE [dbo].[uspICValidateCostingOnPostInTransit]
 	@ItemsToValidate ItemInTransitCostingTableType READONLY
+	,@ValueToPost AS ItemInTransitValueOnlyTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -63,6 +64,21 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors
 			, Item.dblQty
 			, Item.intLotId
 			, Item.dblCost
+		) Errors
+
+-- Cross-check each items against the function that does the validation. 
+-- Store the result in a temporary table. 
+INSERT INTO #FoundErrors
+SELECT	Errors.intItemId
+		,Errors.intItemLocationId
+		,intSubLocationId = NULL --Item.intSubLocationId
+		,intStorageLocationId = NULL -- Item.intStorageLocationId
+		,Errors.strText
+		,Errors.intErrorCode
+		,Item.intTransactionTypeId
+FROM	@ValueToPost Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitAdjustmentErrors(
+			Item.intItemId
+			, ISNULL(Item.intInTransitSourceLocationId, Item.intItemLocationId) 
 		) Errors
 
 -- Check for invalid items in the temp table. 
