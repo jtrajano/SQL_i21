@@ -75,6 +75,8 @@ END
 
 -- Check if it has an existing inventory trnsaction. If yes, update it instead of creating a new record. 
 BEGIN 
+	SET @dblQty = ISNULL(@dblQty, 0) 
+
 	SELECT TOP 1 
 		@InventoryTransactionIdentityId = t.intInventoryTransactionId
 	FROM 
@@ -228,7 +230,10 @@ BEGIN
 	WHERE	i.intItemId = @intItemId
 			AND @intItemId IS NOT NULL
 			AND @intItemLocationId IS NOT NULL
-			AND @intItemUOMId IS NOT NULL 
+			AND (
+				ISNULL(@dblQty, 0) <> 0 
+				AND @intItemUOMId IS NOT NULL 
+			)
 
 	SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 END 

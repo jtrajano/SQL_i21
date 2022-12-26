@@ -4,6 +4,7 @@
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
+	,@ValueToPost AS ItemInTransitValueOnlyTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -47,6 +48,7 @@ DECLARE @intId AS INT
 		,@strSourceNumber AS NVARCHAR(100)
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
+		,@dblValue AS NUMERIC(38, 20)
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -340,6 +342,205 @@ IF @intReturnValue < 0
 BEGIN 
 	RETURN @intReturnValue;
 END 
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- LOOP for the In-Transit "value" Adjustments. 
+-----------------------------------------------------------------------------------------------------------------------------
+-- Create the cursor
+-- Make sure the following options are used: 
+-- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
+-- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
+-----------------------------------------------------------------------------------------------------------------------------
+DECLARE loopAdjustValue CURSOR LOCAL FAST_FORWARD
+FOR 
+SELECT  intId
+		,[intItemId] 
+		,[intItemUOMId]
+		,[intItemLocationId] 
+		,[dtmDate] = dbo.fnRemoveTimeOnDate(dtmDate) 
+		,[dblValue] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intSourceTransactionDetailId] 
+		,[intFobPointId] 
+		,[intInTransitSourceLocationId] 
+		,[intCurrencyId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intSourceEntityId] 
+		,[strSourceType] 
+		,[strSourceNumber] 
+		,[strBOLNumber] 
+		,[intTicketId] 
+FROM	@ValueToPost
+
+OPEN loopAdjustValue;
+
+-- Initial fetch attempt
+FETCH NEXT FROM loopAdjustValue INTO 
+	@intId
+	,@intItemId
+	,@intItemUOMId
+	,@intItemLocationId
+	,@dtmDate
+	,@dblValue
+	,@intTransactionId
+	,@intTransactionDetailId
+	,@strTransactionId
+	,@intTransactionTypeId
+	,@intLotId
+	,@intSourceTransactionId
+	,@strSourceTransactionId
+	,@intSourceTransactionDetailId
+	,@intFobPointId
+	,@intInTransitSourceLocationId
+	,@intCurrencyId
+	,@intForexRateTypeId
+	,@dblForexRate
+	,@intSourceEntityId
+	,@strSourceType
+	,@strSourceNumber
+	,@strBOLNumber
+	,@intTicketId 
+;
+	
+-----------------------------------------------------------------------------------------------------------------------------
+-- Start of the loop
+-----------------------------------------------------------------------------------------------------------------------------
+WHILE @@FETCH_STATUS = 0
+BEGIN 
+
+	-- Initialize the transaction form
+	SELECT	@strTransactionForm = strTransactionForm
+	FROM	dbo.tblICInventoryTransactionType
+	WHERE	intTransactionTypeId = @intTransactionTypeId
+			AND strTransactionForm IS NOT NULL 
+
+	-- Get the correct item location 
+	EXEC uspICGetItemInTransitLocation @intItemId, NULL, @intItemLocationId OUTPUT 
+
+	--------------------------------------------------------------------------------
+	-- Call the SP that can process the In-Transit Costing 
+	--------------------------------------------------------------------------------
+	-- LOT 
+	IF @intLotId IS NOT NULL 
+	BEGIN 
+		EXEC @intReturnValue = dbo.uspICPostLotInTransit
+			@strSourceTransactionId -- @strActualCostId 
+			,@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@dtmDate
+			,@intLotId
+			,@dblQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			--,@dblExchangeRate
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@strTransactionForm
+			,@intEntityUserSecurityId
+			,@intFobPointId
+			,@intInTransitSourceLocationId
+			,@intForexRateTypeId
+			,@dblForexRate
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId
+			,@dblValue
+			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop2;
+	END
+
+	-- ACTUAL COST 
+	ELSE 
+	BEGIN 
+		EXEC @intReturnValue = dbo.uspICPostActualCostInTransit
+			@strSourceTransactionId -- @strActualCostId 
+			,@intItemId 
+			,@intItemLocationId 
+			,@intItemUOMId 
+			,@dtmDate 
+			,@dblQty 
+			,@dblUOMQty 
+			,@dblCost 
+			,@dblSalesPrice 
+			,@intCurrencyId 
+			--,@dblExchangeRate 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@strTransactionForm 
+			,@intEntityUserSecurityId 
+			,@intFobPointId
+			,@intInTransitSourceLocationId
+			,@intForexRateTypeId
+			,@dblForexRate
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId
+			,@dblValue
+			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop2;
+	END 
+
+	-- Attempt to fetch the next row from cursor. 
+	FETCH NEXT FROM loopAdjustValue INTO 
+		@intId
+		,@intItemId
+		,@intItemUOMId
+		,@intItemLocationId
+		,@dtmDate
+		,@dblValue
+		,@intTransactionId
+		,@intTransactionDetailId
+		,@strTransactionId
+		,@intTransactionTypeId
+		,@intLotId
+		,@intSourceTransactionId
+		,@strSourceTransactionId
+		,@intSourceTransactionDetailId
+		,@intFobPointId
+		,@intInTransitSourceLocationId
+		,@intCurrencyId
+		,@intForexRateTypeId
+		,@dblForexRate
+		,@intSourceEntityId
+		,@strSourceType
+		,@strSourceNumber
+		,@strBOLNumber
+		,@intTicketId 
+END;
+-----------------------------------------------------------------------------------------------------------------------------
+-- End of the loop
+-----------------------------------------------------------------------------------------------------------------------------
+
+_TerminateLoop2:
+
+CLOSE loopAdjustValue;
+DEALLOCATE loopAdjustValue;
+
+IF @intReturnValue < 0 RETURN @intReturnValue; 
+
 
 ---------------------------------------------------------------------------------------
 -- Make sure valuation is zero if stock is going to be zero. 

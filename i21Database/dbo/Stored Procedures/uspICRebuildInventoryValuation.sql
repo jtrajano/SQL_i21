@@ -954,6 +954,7 @@ BEGIN
 			LEFT JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId
 	WHERE	1 = CASE	WHEN ty.strName = 'Cost Adjustment' THEN 1 
+						WHEN ty.strName = 'In-Transit Adjustment' THEN 1 
 						WHEN ISNULL(dblQty, 0) <> 0 THEN 1
 						ELSE 0
 				END 	
@@ -1748,6 +1749,7 @@ BEGIN
 			,@dblCategoryRetailValue NUMERIC(38, 20)
 			,@strReceiptType AS NVARCHAR(50)
 			,@intReceiptSourceType AS INT
+			,@ValueToPost AS ItemInTransitValueOnlyTableType 
 
 	DECLARE @AVERAGECOST AS INT = 1
 			,@FIFO AS INT = 2
@@ -1859,6 +1861,152 @@ BEGIN
 			DELETE FROM @ItemsToPost
 			DELETE FROM @ItemsForInTransitCosting
 			DELETE FROM @MissingLotsForPost
+			DELETE FROM @ValueToPost
+
+			-- Repost 'In-Transit Adjustment'. Call this always because a transaction like Voucher cna have both "Cost Adjustment" and "In-Transit Adjustment" in the same batch id. 
+			BEGIN 
+					INSERT INTO @ValueToPost (
+						[intItemId] 
+						,[intItemUOMId]
+						,[intItemLocationId] 
+						,[dtmDate] 
+						,[dblValue] 
+						,[intTransactionId] 
+						,[intTransactionDetailId] 
+						,[strTransactionId] 
+						,[intTransactionTypeId] 
+						,[intLotId] 
+						,[intSourceTransactionId] 
+						,[strSourceTransactionId] 
+						,[intSourceTransactionDetailId] 
+						,[intFobPointId] 
+						,[intInTransitSourceLocationId] 
+						,[intCurrencyId] 
+						,[intForexRateTypeId] 
+						,[dblForexRate] 
+						,[intSourceEntityId] 
+						,[strSourceType] 
+						,[strSourceNumber] 
+						,[strBOLNumber] 
+						,[intTicketId] 					
+					)
+					SELECT 	
+						[intItemId] = t.intItemId
+						,[intItemUOMId] = t.intItemUOMId 
+						,[intItemLocationId] = t.intItemLocationId
+						,[dtmDate] = t.dtmDate
+						,[dblValue] = t.dblValue
+						,[intTransactionId] = t.intTransactionId
+						,[intTransactionDetailId] = t.intTransactionDetailId
+						,[strTransactionId] = t.strTransactionId
+						,[intTransactionTypeId] = t.intTransactionTypeId
+						,[intLotId] = t.intLotId
+						,[intSourceTransactionId] = NULL 
+						,[strSourceTransactionId] = t.strActualCostId 
+						,[intSourceTransactionDetailId] = NULL 
+						,[intFobPointId] = t.intFobPointId
+						,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+						,[intCurrencyId] = t.intCurrencyId
+						,[intForexRateTypeId] = t.intForexRateTypeId
+						,[dblForexRate] = t.dblForexRate
+						,[intSourceEntityId] = t.intSourceEntityId
+						,[strSourceType] = t.strSourceType
+						,[strSourceNumber] = t.strSourceNumber
+						,[strBOLNumber] = t.strBOLNumber
+						,[intTicketId] = t.intTicketId
+					FROM	
+						#tmpICInventoryTransaction t INNER JOIN tblICItem i 
+							ON i.intItemId = t.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+						INNER JOIN tblICInventoryTransactionType typ
+							ON typ.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	
+						t.strTransactionId = @strTransactionId
+						AND t.strBatchId = @strBatchId
+						AND typ.strName = 'In-Transit Adjustment'
+
+					IF EXISTS (SELECT TOP 1 1 FROM @ValueToPost)					
+					BEGIN 
+						EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
+							@ItemsForInTransitCosting
+							,@strBatchId
+							,NULL -- @strAccountToCounterInventory
+							,@intEntityUserSecurityId
+							,@strGLDescription
+							,@ValueToPost
+
+						IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+						-- If the transaction is posted only for "In-Transit Adjustment", then generate its GL entries now. 
+						IF NOT EXISTS (
+						SELECT TOP 1 1 
+						FROM
+							#tmpICInventoryTransaction t INNER JOIN tblICInventoryTransactionType typ
+								ON typ.intTransactionTypeId = t.intTransactionTypeId
+						WHERE 
+							t.strTransactionId = @strTransactionId
+							AND t.strBatchId = @strBatchId
+							AND typ.strName <> 'In-Transit Adjustment'
+						)
+						BEGIN 
+							SET @intReturnValue = NULL 
+							INSERT INTO @GLEntries (
+									[dtmDate] 
+									,[strBatchId]
+									,[intAccountId]
+									,[dblDebit]
+									,[dblCredit]
+									,[dblDebitUnit]
+									,[dblCreditUnit]
+									,[strDescription]
+									,[strCode]
+									,[strReference]
+									,[intCurrencyId]
+									,[dblExchangeRate]
+									,[dtmDateEntered]
+									,[dtmTransactionDate]
+									,[strJournalLineDescription]
+									,[intJournalLineNo]
+									,[ysnIsUnposted]
+									,[intUserId]
+									,[intEntityId]
+									,[strTransactionId]					
+									,[intTransactionId]
+									,[strTransactionType]
+									,[strTransactionForm] 
+									,[strModuleName]
+									,[intConcurrencyId]
+									,[dblDebitForeign]
+									,[dblDebitReport]
+									,[dblCreditForeign]
+									,[dblCreditReport]
+									,[dblReportingRate]
+									,[dblForeignRate]
+									,[strRateType]
+									,[intSourceEntityId]
+									,[intCommodityId]
+							)			
+							EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
+								@strBatchId = @strBatchId
+								,@strTransactionId = @strTransactionId
+								,@intEntityUserSecurityId = @intEntityUserSecurityId
+								,@strGLDescription = @strGLDescription
+								,@AccountCategory_Cost_Adjustment = DEFAULT 
+								,@intRebuildItemId = @intItemId
+								,@strRebuildTransactionId = @strTransactionId
+								,@intRebuildCategoryId = @intCategoryId
+								,@dtmRebuildDate = DEFAULT 
+
+							IF @intReturnValue <> 0 
+							BEGIN 
+								--PRINT 'Error found in uspICCreateGLEntries'
+								GOTO _EXIT_WITH_ERROR
+							END 
+						END
+					END 
+			END 
 
 			-- Repost the Bill cost adjustments
 			IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND ISNULL(@strTransactionForm, 'Bill') IN ('Bill'))
@@ -6059,7 +6207,7 @@ BEGIN
 						,@strGLDescription
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-			END 
+			END 			
 
 			-- Settle Storage 
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionForm IN ('Settle Storage', 'Storage Settlement')) 
@@ -6919,7 +7067,7 @@ BEGIN
 					,@ItemsToPost
 					,@strTransactionId
 
-				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR				
 			END 
 
 			/*	Re-create the Post g/l entries 
@@ -6936,7 +7084,8 @@ BEGIN
 					, 'Inventory Adjustment - Opening Inventory'
 					, 'Storage Settlement'
 					, 'Consume'
-					, 'Produce'					
+					, 'Produce'
+					, 'In-Transit Adjustment'
 			*/
 			IF EXISTS (
 				SELECT	TOP 1 1 
@@ -6954,6 +7103,7 @@ BEGIN
 							, 'Storage Settlement'
 							, 'Consume'
 							, 'Produce'
+							, 'In-Transit Adjustment'
 						)
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
