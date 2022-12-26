@@ -1437,6 +1437,15 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrder.sql" />
     <Build Include="dbo\Tables\tblAPCurrentCompanyLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPPriceAck_EK.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSStage.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSError.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSArchive.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSDetailStage.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSDetailError.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSDetailArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStagePBBSDetail_EK.sql" />
+    <Build Include="dbo\Tables\tblIPSAPProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPBBSDetail_EK.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
