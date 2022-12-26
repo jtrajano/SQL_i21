@@ -28,7 +28,7 @@ BEGIN TRY
 	DECLARE @intCurrencyId INT
 	DECLARE @intItemUOMId INT
 	DECLARE @intHistoryStorageId INT
-	DECLARE @dblStorageDue DECIMAL(30,20)
+	DECLARE @dblStorageDue DECIMAL(30,20)	
 	DECLARE @dblStoragePaid DECIMAL(30,20)
 	DECLARE @dblNewStorageDue DECIMAL(18,6)
 	DECLARE @dblNewStorageDue2 DECIMAL(18,6)
@@ -231,7 +231,7 @@ BEGIN TRY
 							,[intInvoiceId]				= AR.intInvoiceId							
 							,[dblUnits]					= ARD.dblQtyOrdered
 							,[dtmHistoryDate]			= @dtmStorageChargeDate
-							,[dblPaidAmount]			= @dblNewStorageDue2--ARD.dblPrice
+							,[dblPaidAmount]			= ARD.dblPrice
 							,[ysnPost]					= 1
 							,[intTransactionTypeId]		= 6
 							,[strType]					= 'Invoice'
@@ -246,8 +246,11 @@ BEGIN TRY
 
 						UPDATE CS
 						SET CS.dtmLastStorageAccrueDate		= @dtmStorageChargeDate
-							,CS.dblStoragePaid				= @dblNewStorageDue
-							,CS.dblStorageDue				= 0
+							,CS.dblStoragePaid				= ISNULL(CS.dblStoragePaid,0) + (@dblNewStorageDue - @dblStoragePaid)
+							,CS.dblStorageDue				= CASE 
+																WHEN ISNULL(CS.dblStorageDue,0) = 0 THEN 0
+																ELSE ABS(CS.dblStorageDue - @dblStoragePaid)
+															END
 						FROM tblGRCustomerStorage CS
 						WHERE intCustomerStorageId = @intCustomerStorageId
 				END
@@ -296,7 +299,7 @@ BEGIN TRY
 				[intCustomerStorageId]		= SD.intCustomerStorageId
 				,[dblUnits]					= SD.dblOpenBalance
 				,[dtmHistoryDate]			= @dtmStorageChargeDate
-				,[dblPaidAmount]			= SD.dblNewStorageDue
+				,[dblPaidAmount]			= SD.dblNewStorageDue - CS.dblStoragePaid
 				,[ysnPost]					= 1
 				,[intTransactionTypeId]		= 2
 				,[strType]					= 'Accrue Storage'
@@ -311,7 +314,7 @@ BEGIN TRY
 
 			UPDATE CS
 			SET CS.dtmLastStorageAccrueDate	= @dtmStorageChargeDate
-				,CS.dblStorageDue			= @dblNewStorageDue
+				,CS.dblStorageDue			= @dblNewStorageDue - CS.dblStoragePaid
 			FROM tblGRCustomerStorage CS
 			WHERE intCustomerStorageId = @intCustomerStorageId
 
