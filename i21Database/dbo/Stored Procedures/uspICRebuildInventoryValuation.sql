@@ -862,7 +862,7 @@ BEGIN
 				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE
-		GLDetail.strCode IN ('IC', 'ICA', 'IAN', 'IAV', 'ICA')
+		GLDetail.strCode IN ('IC', 'ICA', 'IAN', 'IAV', 'ICA', 'ITA')
 		AND (
 			GLDetail.strJournalLineDescription = '' 
 			OR GLDetail.strJournalLineDescription IS NULL
@@ -1982,7 +1982,6 @@ BEGIN
 									,[dblCreditReport]
 									,[dblReportingRate]
 									,[dblForeignRate]
-									,[strRateType]
 									,[intSourceEntityId]
 									,[intCommodityId]
 									,[strRateType]
