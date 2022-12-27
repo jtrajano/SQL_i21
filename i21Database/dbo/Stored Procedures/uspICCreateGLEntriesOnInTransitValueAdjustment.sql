@@ -269,6 +269,7 @@ WITH ForGLEntries_CTE (
 	,dblForexRate
 	,intSourceEntityId
 	,intCommodityId
+	,strRateType
 )
 AS
 (	
@@ -294,6 +295,7 @@ AS
 			,t.dblForexRate
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -302,6 +304,8 @@ AS
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2) <> 0 
@@ -343,6 +347,7 @@ INSERT INTO @GLEntries (
 	,dblForeignRate
 	,intSourceEntityId
 	,intCommodityId
+	,strRateType
 )
 
 /*-----------------------------------------------------------------------------------
@@ -389,6 +394,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId 
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -440,6 +446,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -488,5 +495,6 @@ SELECT
 		,dblForeignRate 
 		,intSourceEntityId
 		,intCommodityId
+		,strRateType
 FROM	@GLEntries
 

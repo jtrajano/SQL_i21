@@ -1985,6 +1985,7 @@ BEGIN
 									,[strRateType]
 									,[intSourceEntityId]
 									,[intCommodityId]
+									,[strRateType]
 							)			
 							EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
 								@strBatchId = @strBatchId
