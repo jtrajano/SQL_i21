@@ -553,7 +553,7 @@ BEGIN TRY
 		BEGIN
 
 			-- TRANSACTION WITHOUT TAX CODE
-			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
+			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND LTRIM(RTRIM(strCriteria)) = '<> 0'))
 			BEGIN	
 				DELETE @tmpTransaction WHERE intTransactionDetailId IN (
 					SELECT DISTINCT InvTran.intTransactionDetailId 
@@ -579,7 +579,7 @@ BEGIN TRY
 
 				SELECT TOP 1 @InvoiceDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax
 
-				IF(@strCriteria = '<> 0' AND @dblTax = 0)	
+				IF(LTRIM(RTRIM(strCriteria)) = '<> 0' AND @dblTax = 0)	
 				BEGIN
 					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId										 
 				END
@@ -595,7 +595,7 @@ BEGIN TRY
 			DELETE @tmpDetailTax
 
 			-- TRANSACTION NOT MAPPED ON MFT TAX CATEGORY
-			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
+			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND LTRIM(RTRIM(strCriteria)) = '<> 0'))
 			BEGIN 	
 				DELETE @tmpTransaction WHERE intTransactionDetailId NOT IN (
 					SELECT DISTINCT InvTran.intTransactionDetailId
