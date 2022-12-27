@@ -42,25 +42,15 @@ BEGIN
  left join tblSMCurrency cu on cu.intCurrencyID = cd.intFeedPriceCurrencyId
  WHERE ch.strContractNumber = @strContractNumber AND cd.intContractSeq = @intContractSeq    
     
- IF (ISNULL(@intContractDetailId, 0) = 0)    
- BEGIN    
-  SET @Message = 'Contract ' + @strContractNumber + ' with sequence ' + CAST(@intContractSeq AS NVARCHAR) + ' does not exist.'    
-  RAISERROR(@Message, 16, 1)    
- END    
- ELSE IF (    
-  ISNULL(@prevPurchasePrice, 0) = ISNULL(@dblPurchasePrice, 0)    
-  AND ISNULL(@prevLandedPrice, 0) = ISNULL(@dblLandedPrice, 0)    
-  AND ISNULL(@prevSalesPrice, 0) = ISNULL(@dblSalesPrice, 0)      
-  AND ISNULL(@prevFeedPriceItemUOMId, 0) = ISNULL(@intFeedPriceItemUOMId, 0)      
-  AND ISNULL(@prevFeedPriceCurrencyId, 0) = ISNULL(@intFeedPriceCurrencyId, 0)    
- )    
- BEGIN    
-  SET @Message = 'No price change detected.'    
-  RAISERROR(@Message, 16, 1)    
- END    
- ELSE    
- BEGIN    
-      
+ 
+ IF ((ISNULL(@intContractDetailId, 0) > 0) and (
+   ISNULL(@prevPurchasePrice, 0) <> ISNULL(@dblPurchasePrice, 0)    
+   OR ISNULL(@prevLandedPrice, 0) <> ISNULL(@dblLandedPrice, 0)    
+   OR ISNULL(@prevSalesPrice, 0) <> ISNULL(@dblSalesPrice, 0)      
+   OR ISNULL(@prevFeedPriceItemUOMId, 0) <> ISNULL(@intFeedPriceItemUOMId, 0)      
+   OR ISNULL(@prevFeedPriceCurrencyId, 0) <> ISNULL(@intFeedPriceCurrencyId, 0)   
+ ))
+ BEGIN
     
   UPDATE tblCTContractDetail    
   SET dblPurchasePrice = @dblPurchasePrice    
