@@ -373,7 +373,7 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = P.[intDiscountAccount]
-		,[dblDebit]                     = P.[dblBaseDiscount]
+		,[dblDebit]                     = P.[dblAdjustedBaseDiscount]
 		,[dblCredit]                    = @ZeroDecimal
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
@@ -381,7 +381,7 @@ BEGIN
 		,[strCode]                      = @CODE
 		,[strReference]                 = P.[strCustomerNumber]
 		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+		,[dblExchangeRate]              = ISNULL(P.dblExchangeRate, 1)
 		,[dtmDateEntered]               = P.[dtmPostDate]
 		,[dtmTransactionDate]           = P.[dtmDatePaid]
 		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -400,7 +400,7 @@ BEGIN
 		,[dblCreditForeign]             = @ZeroDecimal
 		,[dblCreditReport]              = @ZeroDecimal
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
-		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
+		,[dblForeignRate]               = P.dblExchangeRate
 		,[strRateType]                  = P.[strRateType]
 		,[strDocument]                  = NULL
 		,[strComments]                  = NULL
@@ -469,15 +469,15 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = WRITEOFFDETAIL.[intAccountId]
-		,[dblDebit]                     = CASE WHEN P.[dblAdjustedBaseWriteOffAmount] > 0 THEN P.[dblAdjustedBaseWriteOffAmount] ELSE 0 END
-		,[dblCredit]                    = CASE WHEN P.[dblAdjustedBaseWriteOffAmount] < 0 THEN ABS(P.[dblAdjustedBaseWriteOffAmount]) ELSE 0 END
+		,[dblDebit]                     = CASE WHEN P.[dblBaseWriteOffAmount] > 0 THEN P.[dblBaseWriteOffAmount] ELSE 0 END
+		,[dblCredit]                    = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblBaseWriteOffAmount]) ELSE 0 END
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
 		,[strDescription]               = 'Write Off for ' + P.strTransactionNumber
 		,[strCode]                      = @CODE
 		,[strReference]                 = P.[strCustomerNumber]
 		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+		,[dblExchangeRate]              = ISNULL(P.dblExchangeRate, 1)
 		,[dtmDateEntered]               = P.[dtmPostDate]
 		,[dtmTransactionDate]           = P.[dtmDatePaid]
 		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -496,7 +496,7 @@ BEGIN
 		,[dblCreditForeign]             = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblWriteOffAmount]) ELSE 0 END
 		,[dblCreditReport]              = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblBaseWriteOffAmount]) ELSE 0 END
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
-		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
+		,[dblForeignRate]               = P.dblExchangeRate
 		,[strRateType]                  = P.[strRateType]
 		,[strDocument]                  = NULL
 		,[strComments]                  = NULL
@@ -567,7 +567,7 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = P.[intARAccountId]
-		,[dblDebit]                     = P.[dblBaseInterest]
+		,[dblDebit]                     = P.[dblAdjustedBaseInterest]
 		,[dblCredit]                    = @ZeroDecimal
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
@@ -575,7 +575,7 @@ BEGIN
 		,[strCode]                      = @CODE
 		,[strReference]                 = P.[strCustomerNumber]
 		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+		,[dblExchangeRate]              = ISNULL(P.dblExchangeRate, 1)
 		,[dtmDateEntered]               = P.[dtmPostDate]
 		,[dtmTransactionDate]           = P.[dtmDatePaid]
 		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -594,7 +594,7 @@ BEGIN
 		,[dblCreditForeign]             = @ZeroDecimal
 		,[dblCreditReport]              = @ZeroDecimal
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
-		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
+		,[dblForeignRate]               = P.dblExchangeRate
 		,[strRateType]                  = P.[strRateType]
 		,[strDocument]                  = NULL
 		,[strComments]                  = NULL
@@ -1392,7 +1392,6 @@ BEGIN
     ORDER BY
         GLD.[intGLDetailId]
 END
-
 
 UPDATE #ARPaymentGLEntries
 SET
