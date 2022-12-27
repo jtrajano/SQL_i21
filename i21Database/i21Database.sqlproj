@@ -11738,6 +11738,7 @@
     <Build Include="dbo\Stored Procedures\uspQMUpdateReconciliationIntegration.sql" />
     <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
     <Build Include="dbo\Views\vyuQMAuctionAvailabilityReport.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
