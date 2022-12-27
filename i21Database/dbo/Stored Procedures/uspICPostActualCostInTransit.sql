@@ -426,7 +426,7 @@ BEGIN
 		-- Log the Value changes for the in-transit
 		IF @InventoryTransactionIdentityId IS NOT NULL 
 		BEGIN 
-			INSERT INTO tblICInventoryLotValueAdjustmentLog (
+			INSERT INTO tblICInventoryValueAdjustmentLog (
 				[intInventoryTransactionId]
 				,[intItemId]
 				,[intItemLocationId]

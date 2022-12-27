@@ -881,7 +881,7 @@
     <Build Include="dbo\User Defined Types\ItemInTransitValueOnlyTableType.sql" />
     <None Include="Scripts\Post-Deployment\CM\18_BankDepositForeignDebitCredit.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostInTransitAdjustmentErrors.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLotValueAdjustmentLog.sql" />
+    <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnInTransitValueAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>

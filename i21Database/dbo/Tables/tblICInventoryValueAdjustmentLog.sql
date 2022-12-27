@@ -10,7 +10,7 @@
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblICInventoryLotValueAdjustmentLog]
+	CREATE TABLE [dbo].[tblICInventoryValueAdjustmentLog]
 	(
 		[intId] INT NOT NULL IDENTITY, 
 		[intInventoryTransactionId] INT NOT NULL, 
@@ -30,8 +30,8 @@
 	)
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotValueAdjustmentLog]
-		ON [dbo].[tblICInventoryLotValueAdjustmentLog](
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryValueAdjustmentLog]
+		ON [dbo].[tblICInventoryValueAdjustmentLog](
 			[intItemId] ASC
 			, [intItemLocationId] ASC
 			, [intLotId] ASC

@@ -1867,7 +1867,6 @@ BEGIN
 			BEGIN 
 					INSERT INTO @ValueToPost (
 						[intItemId] 
-						,[intItemUOMId]
 						,[intItemLocationId] 
 						,[dtmDate] 
 						,[dblValue] 
@@ -1892,7 +1891,6 @@ BEGIN
 					)
 					SELECT 	
 						[intItemId] = t.intItemId
-						,[intItemUOMId] = t.intItemUOMId 
 						,[intItemLocationId] = t.intItemLocationId
 						,[dtmDate] = t.dtmDate
 						,[dblValue] = t.dblValue

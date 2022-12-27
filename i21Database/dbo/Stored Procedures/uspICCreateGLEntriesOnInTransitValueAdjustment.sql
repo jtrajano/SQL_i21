@@ -100,9 +100,9 @@ BEGIN
 			,intTransactionTypeId
 	FROM	(
 				SELECT	DISTINCT 
-						intItemId
-						, intItemLocationId = ISNULL(intInTransitSourceLocationId, intItemLocationId)
-						, intTransactionTypeId
+						t.intItemId
+						, intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+						, t.intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t 
 						INNER JOIN tblICItem i
 							ON t.intItemId = i.intItemId 
@@ -130,9 +130,9 @@ BEGIN
 			,intTransactionTypeId
 	FROM	(
 				SELECT	DISTINCT 
-						intItemId
+						t.intItemId
 						, intItemLocationId = t.intItemLocationId
-						, intTransactionTypeId
+						, t.intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t
 						INNER JOIN tblICItem i
 							ON t.intItemId = i.intItemId 
@@ -286,13 +286,12 @@ AS
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
-			,cbLog.intRelatedTransactionId  -- t.intRelatedTransactionId
-			,cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,t.intRelatedTransactionId
+			,t.strRelatedTransactionId
 			,t.strBatchId
 			,t.intLotId 
 			,t.intFobPointId
 			,t.dblForexRate
-			,charge.intItemId
 			,t.intSourceEntityId
 			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t 
@@ -490,3 +489,4 @@ SELECT
 		,intSourceEntityId
 		,intCommodityId
 FROM	@GLEntries
+

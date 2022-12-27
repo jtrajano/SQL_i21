@@ -5,7 +5,6 @@ CREATE TYPE [dbo].[ItemInTransitValueOnlyTableType] AS TABLE
 (
 	[intId] INT IDENTITY PRIMARY KEY CLUSTERED	
 	,[intItemId] INT NOT NULL								-- The item. 
-	,[intItemUOMId] INT NOT NULL							-- The item uom id of the item. 
 	,[intItemLocationId] INT NULL							-- The location where the item is stored.	
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
 	,[dblValue] NUMERIC(38, 20) NOT NULL DEFAULT 0 	

@@ -524,7 +524,7 @@ BEGIN
 	END 
 
 	-- Adjust Value
-	ELSE IF (ISNULL(@dblValue, 0) <> 0) AND ISNULL(@dblQty, 0) = 0 
+	ELSE IF (ISNULL(@dblValue, 0) <> 0)
 	BEGIN 
 		-- Insert the inventory transaction record
 		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
@@ -570,7 +570,7 @@ BEGIN
 		-- Log the Value changes for the in-transit
 		IF @InventoryTransactionIdentityId IS NOT NULL 
 		BEGIN 
-			INSERT INTO tblICInventoryLotValueAdjustmentLog (
+			INSERT INTO tblICInventoryValueAdjustmentLog (
 				[intInventoryTransactionId]
 				,[intItemId]
 				,[intItemLocationId]
@@ -601,4 +601,4 @@ BEGIN
 				,[intConcurrencyId] = 1
 		END 
 	END 
-END 
+END

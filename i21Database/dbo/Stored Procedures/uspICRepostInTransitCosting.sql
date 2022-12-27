@@ -356,7 +356,6 @@ DECLARE loopAdjustValue CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intId
 		,[intItemId] 
-		,[intItemUOMId]
 		,[intItemLocationId] 
 		,[dtmDate] = dbo.fnRemoveTimeOnDate(dtmDate) 
 		,[dblValue] 
@@ -386,7 +385,6 @@ OPEN loopAdjustValue;
 FETCH NEXT FROM loopAdjustValue INTO 
 	@intId
 	,@intItemId
-	,@intItemUOMId
 	,@intItemLocationId
 	,@dtmDate
 	,@dblValue
@@ -507,7 +505,6 @@ BEGIN
 	FETCH NEXT FROM loopAdjustValue INTO 
 		@intId
 		,@intItemId
-		,@intItemUOMId
 		,@intItemLocationId
 		,@dtmDate
 		,@dblValue

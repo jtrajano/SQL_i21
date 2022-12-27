@@ -166,7 +166,6 @@ ORDER BY
 
 INSERT INTO @ValueToPostValidated (
 	[intItemId] 
-	,[intItemUOMId]
 	,[intItemLocationId] 
 	,[dtmDate] 
 	,[dblValue] 
@@ -190,7 +189,6 @@ INSERT INTO @ValueToPostValidated (
 )
 SELECT 
 	[intItemId] = p.intItemId
-	,[intItemUOMId] = p.intItemUOMId
 	,[intItemLocationId] = p.intItemLocationId
 	,[dtmDate] = p.dtmDate
 	,[dblValue] = p.dblValue
@@ -458,14 +456,13 @@ SELECT
 	,@dblCost = NULL 
 	,@dblSalesPrice = NULL 
 	,@intCurrencyId = NULL 
-	--,@dblExchangeRate
 	,@intTransactionId = NULL 
 	,@intTransactionDetailId = NULL 
 	,@strTransactionId = NULL 
-	,@strBatchId = NULL 
-	,@intTransactionTypeId = NULL 
-	,@strTransactionForm = NULL 
-	,@intEntityUserSecurityId = NULL 
+	--,@strBatchId = NULL 
+	--,@intTransactionTypeId = NULL 
+	--,@strTransactionForm = NULL 
+	--,@intEntityUserSecurityId = NULL 
 	,@intFobPointId = NULL 
 	,@intInTransitSourceLocationId = NULL 
 	,@intForexRateTypeId = NULL 
@@ -481,7 +478,6 @@ DECLARE loopAdjustValue CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intId
 		,[intItemId] 
-		,[intItemUOMId]
 		,[intItemLocationId] 
 		,[dtmDate] = dbo.fnRemoveTimeOnDate(dtmDate) 
 		,[dblValue] 
@@ -511,7 +507,6 @@ OPEN loopAdjustValue;
 FETCH NEXT FROM loopAdjustValue INTO 
 	@intId
 	,@intItemId
-	,@intItemUOMId 
 	,@intItemLocationId
 	,@dtmDate
 	,@dblValue
@@ -632,7 +627,6 @@ BEGIN
 	FETCH NEXT FROM loopAdjustValue INTO 
 		@intId
 		,@intItemId
-		,@intItemUOMId 
 		,@intItemLocationId
 		,@dtmDate
 		,@dblValue
