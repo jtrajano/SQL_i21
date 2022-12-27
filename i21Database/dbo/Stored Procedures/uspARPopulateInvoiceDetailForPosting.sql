@@ -1394,8 +1394,8 @@ WHERE ID.strSessionId = @strSessionId
 
 UPDATE ARPIH
 SET dblBaseInvoiceTotal = CASE WHEN ARPIH.dblPercentage <> 100 
-                            THEN ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax 
-                            ELSE ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax
+                            THEN (ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax) - ARPID.dblBaseDiscountAmount
+                            ELSE (ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax) - ARPID.dblBaseDiscountAmount
                           END
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
@@ -1403,6 +1403,7 @@ INNER JOIN (
          intInvoiceId               = intInvoiceId
         ,dblBaseLineItemGLAmount    = SUM(dblBaseLineItemGLAmount) 
         ,dblBaseTax                 = SUM(dblBaseTax)
+        ,dblBaseDiscountAmount      = SUM(dblBaseDiscountAmount)
         ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
         ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
     FROM tblARPostInvoiceDetail
