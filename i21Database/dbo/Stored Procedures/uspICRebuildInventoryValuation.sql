@@ -2004,6 +2004,12 @@ BEGIN
 							END 
 						END
 					END 
+
+					-- After processing it, remove the "In-Transit Adjustment" from #tmpICInventoryTransaction. 
+					DELETE	FROM #tmpICInventoryTransaction
+					WHERE	strBatchId = @strBatchId
+							AND strTransactionId = @strTransactionId 
+							AND intTransactionTypeId IN (63) 
 			END 
 
 			-- Repost the Bill cost adjustments
@@ -4645,6 +4651,7 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 
+						AND RebuildInvTrans.dblQty <> 0 
 				ORDER BY
 					ReceiptItem.intInventoryReceiptItemId ASC 
 
@@ -7329,6 +7336,7 @@ BEGIN
 		DELETE	FROM #tmpICInventoryTransaction
 		WHERE	strBatchId = @strBatchId
 				AND strTransactionId = @strTransactionId 
+				AND intTransactionTypeId NOT IN (63) -- Do not remove "In-Transit Adjustment" from the list. It will have its own special delete process. 
 	END 
 END 
 
