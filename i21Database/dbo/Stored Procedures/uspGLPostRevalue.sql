@@ -128,7 +128,7 @@ DECLARE
           SELECT   
             [strTransactionId]  = B.strConsolidationNumber  
           ,[intTransactionId]  = B.intConsolidationId  
-          --,[strDescription]  = A.strTransactionId   
+          ,[strDescription]  = A.strTransactionId   
           ,[dtmTransactionDate] = B.dtmDate  
           ,[dblDebit]    = ISNULL(CASE WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)  
                   WHEN dblUnrealizedLoss < 0 THEN 0  
@@ -171,7 +171,7 @@ DECLARE
           SELECT   
             [strTransactionId]    
             ,[intTransactionId]    
-            --,[strDescription]    
+            ,[strDescription]    
             ,[dtmTransactionDate]   
             ,[dblDebit]   
             ,[dblCredit]
@@ -204,7 +204,7 @@ DECLARE
           SELECT   
             [strTransactionId]    
             ,[intTransactionId]    
-            --,[strDescription]    
+            ,[strDescription]    
             ,[dtmTransactionDate]   
             ,[dblDebit]    = dblCredit      
             ,[dblCredit]   = dblDebit     
@@ -238,7 +238,7 @@ DECLARE
             [strTransactionId]    
           ,[intTransactionId]    
           ,[intAccountId] = CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit', 'CM Swaps') THEN BankTransferAccount.AccountId ELSE G.AccountId END  
-          --,[strDescription]    
+          ,[strDescription]    
           ,[dtmTransactionDate]   
           ,[dblDebit]      
           ,[dblCredit]
@@ -290,7 +290,7 @@ DECLARE
            [strTransactionId]  
           ,[intTransactionId]  
           ,[intAccountId]  
-          --,[strDescription]  
+          ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblDebit]  
           ,[dblCredit]
@@ -319,7 +319,7 @@ DECLARE
            [strTransactionId]  
           ,[intTransactionId]  
           ,[intAccountId]  
-          --,[strDescription]  
+          ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblDebit]  
           ,[dblCredit]
@@ -351,7 +351,7 @@ DECLARE
             [strTransactionId]  
           ,[intTransactionId]  
           ,[intAccountId]  
-          --,[strDescription]  
+          ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblDebit]  
           ,[dblCredit]
@@ -380,7 +380,7 @@ DECLARE
             [strTransactionId]  
           ,[intTransactionId]  
           ,[intAccountId]  
-          --,[strDescription]  
+          ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblCredit]  
           ,[dblDebit]
@@ -426,7 +426,7 @@ DECLARE
    [strTransactionId]  
    ,[intTransactionId]  
    ,[intAccountId]
-   --,[strDescription]  
+   ,[strDescription]  
    ,[dtmTransactionDate]  
    ,[dblDebit]  
    ,[dblCredit]
@@ -451,7 +451,7 @@ DECLARE
    [strTransactionId]    
    ,[intTransactionId]    
    ,[intAccountId]
-   --,[strDescription]  
+   ,[strDescription]  
    ,[dtmTransactionDate]  
    ,[dblCredit]   
    ,[dblDebit]
@@ -483,7 +483,7 @@ DECLARE
     dtmDate,  
     strBatchId,  
     intAccountId,
-    --strDescription, 
+    strDescription, 
     dtmTransactionDate,   
     dblDebit,  
     dblCredit,
@@ -493,7 +493,7 @@ DECLARE
     intCurrencyId,  
     dtmDateEntered,  
     strJournalLineDescription,  
-   -- intJournalLineNo,  
+    intJournalLineNo,  
     ysnIsUnposted,  
     intUserId,  
     intEntityId,  
@@ -515,17 +515,17 @@ DECLARE
     dtmDate,  
     strBatchId,  
     intAccountId,  
-    --strDescription, 
-    MIN(dtmTransactionDate),
-    SUM(dblDebit),  
-    SUM(dblCredit), 
-    SUM(dblDebitForeign),
-    SUM(dblCreditForeign),
-    strCode,
+    strDescription, 
+    dtmTransactionDate,
+    dblDebit,  
+    dblCredit, 
+    dblDebitForeign,
+    dblCreditForeign,
+    strCode, 
     intCurrencyId,  
     dtmDateEntered,  
     strJournalLineDescription,  
-    --intJournalLineNo,  
+    intJournalLineNo,  
     ysnIsUnposted,  
     intUserId,  
     intEntityId,  
@@ -543,37 +543,6 @@ DECLARE
     intNewAccountIdOverride,  
     strOverrideAccountError 
     from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
-    GROUP BY 
-    dtmDate,  
-    strBatchId,  
-    intAccountId,  
-    --strDescription, 
-    --dtmTransactionDate,
-    --dblDebit,  
-    --dblCredit, 
-    --dblDebitForeign,
-    --dblCreditForeign,
-    strCode, 
-    intCurrencyId,  
-    dtmDateEntered,  
-    strJournalLineDescription,  
-    --intJournalLineNo,  
-    ysnIsUnposted,  
-    intUserId,  
-    intEntityId,  
-    strTransactionId,  
-    intTransactionId,  
-    strTransactionType,  
-    strTransactionForm,  
-    strModuleName,  
-    intConcurrencyId,  
-    intAccountIdOverride,  
-    intLocationSegmentOverrideId,  
-    intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
      
       
     IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
@@ -600,7 +569,7 @@ DECLARE
     dtmDate,  
     strBatchId,  
     intAccountId, 
-    --strDescription, 
+    strDescription, 
     dtmTransactionDate,   
     dblDebit,  
     dblCredit, 
@@ -610,7 +579,7 @@ DECLARE
     intCurrencyId,  
     dtmDateEntered,  
     strJournalLineDescription,  
-    --intJournalLineNo,  
+    intJournalLineNo,  
     ysnIsUnposted,  
     intUserId,  
     intEntityId,  
@@ -633,17 +602,17 @@ DECLARE
     dtmDate,  
     strBatchId,  
     intAccountId,  
-    --strDescription, 
-     MIN(dtmTransactionDate),
-    SUM(dblDebit),  
-    SUM(dblCredit), 
-    SUM(dblDebitForeign),
-    SUM(dblCreditForeign),
+    strDescription, 
+    dtmTransactionDate,  
+    dblDebit,  
+    dblCredit, 
+    dblDebitForeign,
+    dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
     strJournalLineDescription,  
-    --intJournalLineNo,  
+    intJournalLineNo,  
     ysnIsUnposted,  
     intUserId,  
     intEntityId,  
@@ -661,37 +630,6 @@ DECLARE
     intNewAccountIdOverride,  
     strOverrideAccountError 
    from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A  
-    GROUP BY 
-    dtmDate,  
-    strBatchId,  
-    intAccountId,  
-    --strDescription, 
-    --dtmTransactionDate,
-    --dblDebit,  
-    --dblCredit, 
-    --dblDebitForeign,
-    --dblCreditForeign,
-    strCode, 
-    intCurrencyId,  
-    dtmDateEntered,  
-    strJournalLineDescription,  
-    --intJournalLineNo,  
-    ysnIsUnposted,  
-    intUserId,  
-    intEntityId,  
-    strTransactionId,  
-    intTransactionId,  
-    strTransactionType,  
-    strTransactionForm,  
-    strModuleName,  
-    intConcurrencyId,  
-    intAccountIdOverride,  
-    intLocationSegmentOverrideId,  
-    intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
   
    EXEC uspGLPostRecap @RecapTable, @intEntityId  
   
