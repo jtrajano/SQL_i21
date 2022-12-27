@@ -1934,6 +1934,7 @@ BEGIN
 							,@intEntityUserSecurityId
 							,@strGLDescription
 							,@ValueToPost
+							,@strTransactionForm
 
 						IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 

@@ -5,6 +5,7 @@
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@ValueToPost AS ItemInTransitValueOnlyTableType READONLY
+	,@strTransactionForm AS NVARCHAR(255) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -39,7 +40,7 @@ DECLARE @intId AS INT
 		,@dblForexRate NUMERIC(38, 20)
 		
 		,@intInventoryTransactionId INT 
-		,@strTransactionForm AS NVARCHAR(255)
+		--,@strTransactionForm AS NVARCHAR(255)
 
 		,@intReturnValue AS INT 
 		,@intSourceEntityId AS INT
