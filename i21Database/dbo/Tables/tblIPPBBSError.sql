@@ -12,6 +12,7 @@
 	,dblSieve1T2 NUMERIC(18, 6)
 	,strPDFFileName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,blbPDFContent VARBINARY (MAX)
+	,strFileContent NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	
 	,strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,dtmTransactionDate DATETIME DEFAULT(GETDATE())

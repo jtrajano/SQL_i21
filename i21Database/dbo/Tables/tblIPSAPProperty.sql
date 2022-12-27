@@ -4,6 +4,7 @@
 	strSAPPropertyName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	stri21PropertyName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	stri21TestName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	intSequenceNo INT,
 
 	CONSTRAINT PK_tblIPSAPProperty_intSAPPropertyId PRIMARY KEY (intSAPPropertyId) 
 )
