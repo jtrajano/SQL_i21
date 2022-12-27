@@ -13,6 +13,8 @@ SELECT
 	, UOM.strLongUPCCode
 	, I.strDescription AS strPumpItemDescription
 	, TG.strTaxGroup
+	, PU.strRegisterFuelId1
+	, PU.strRegisterFuelId2
 	, PU.intConcurrencyId
 FROM tblSTPumpItem PU
 JOIN tblICItemUOM UOM 
