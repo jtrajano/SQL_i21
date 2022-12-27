@@ -1,12 +1,11 @@
-CREATE PROCEDURE uspGLRecalcRetainedEarnings    
+  CREATE PROCEDURE uspGLRecalcRetainedEarnings    
     @intFiscalYearId INT,    
     @intGLFiscalYearPeriodId INT ,
 	@ysnAllFiscalYear BIT,
     @intOpen SMALLINT,    
     @intEntityId INT,    
     @result NVARCHAR(100) OUTPUT      
-AS      
-      
+AS 
 DECLARE @dtmStartDate DATETIME        
 DECLARE @dtmEndDate DATETIME        
 DECLARE @intRetainAccount INT        
@@ -238,15 +237,15 @@ INSERT INTO @RecapTableType(
     intTransactionId,      
     strTransactionType,      
     strTransactionForm,      
-    strModuleName,      
+    strModuleName   
     --intConcurrencyId,      
-    intAccountIdOverride,      
-    intLocationSegmentOverrideId,      
-    intLOBSegmentOverrideId,      
-    intCompanySegmentOverrideId,      
-    strNewAccountIdOverride,      
-    intNewAccountIdOverride,      
-    strOverrideAccountError    
+    --intAccountIdOverride,      
+    --intLocationSegmentOverrideId,      
+    --intLOBSegmentOverrideId,      
+    --intCompanySegmentOverrideId,      
+    --strNewAccountIdOverride,      
+    --intNewAccountIdOverride,      
+    --strOverrideAccountError    
 )    
     
 SELECT     
@@ -269,15 +268,15 @@ SELECT
     intTransactionId=REPLACE( CONVERT(date, dtmDate,100),'-', ''),      
     strTransactionType='Fiscal Year RE',      
     strTransactionForm ='Fiscal year',      
-    strModuleName='General Ledger',      
+    strModuleName='General Ledger'      
     --intConcurrencyId,      
-    intAccountIdOverride,      
-    intLocationSegmentOverrideId,      
-    intLOBSegmentOverrideId,      
-    intCompanySegmentOverrideId,      
-    strNewAccountIdOverride,      
-    intNewAccountIdOverride,      
-    strOverrideAccountError    
+    --intAccountIdOverride,      
+    --intLocationSegmentOverrideId,      
+    --intLOBSegmentOverrideId,      
+    --intCompanySegmentOverrideId,      
+    --strNewAccountIdOverride,      
+    ---intNewAccountIdOverride,      
+    --strOverrideAccountError    
 FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A         
 group by dtmDate,      
     strBatchId,      
@@ -298,15 +297,15 @@ group by dtmDate,
     --intTransactionId,      
     --strTransactionType,      
     --strTransactionForm,      
-    strModuleName,      
+    strModuleName     
     --intConcurrencyId,      
-    intAccountIdOverride,      
-    intLocationSegmentOverrideId,      
-    intLOBSegmentOverrideId,      
-    intCompanySegmentOverrideId,      
-    strNewAccountIdOverride,      
-    intNewAccountIdOverride,      
-    strOverrideAccountError 
+    --intAccountIdOverride,      
+    --intLocationSegmentOverrideId,      
+    --intLOBSegmentOverrideId,      
+    --intCompanySegmentOverrideId,      
+    --strNewAccountIdOverride,      
+    --intNewAccountIdOverride,      
+    --strOverrideAccountError 
         
 IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 BEGIN
@@ -316,8 +315,8 @@ BEGIN
     GOTO _end      
 END        
 
+
 EXEC uspGLBookEntries @RecapTableType, 1, 1 ,1         
-      
-                
+       
 SET @result = 'Posted'      
  _end: 
