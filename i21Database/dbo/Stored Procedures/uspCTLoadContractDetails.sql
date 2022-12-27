@@ -662,6 +662,10 @@ BEGIN TRY
 		, CD.dblPurchasePrice
 		, CD.dblLandedPrice
 		, CD.dblSalesPrice
+		, CD.intFeedPriceItemUOMId
+		, CD.intFeedPriceCurrencyId
+		, strFeedPriceItemUOM = FUM.strUnitMeasure
+		, strFeedPriceCurrency = FCU.strCurrency
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -680,6 +684,9 @@ BEGIN TRY
 	LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
+	LEFT JOIN tblICItemUOM FUOM on FUOM.intItemUOMId = CD.intFeedPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure FUM on FUM.intUnitMeasureId = FUOM.intUnitMeasureId
+	LEFT JOIN tblSMCurrency FCU on FCU.intCurrencyID = CD.intFeedPriceCurrencyId
 	-- Trade Finance
 	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
 	LEFT JOIN tblCMBank BK ON BK.intBankId = CD.intBankId
