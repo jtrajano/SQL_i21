@@ -100,6 +100,8 @@
 	[strPowerBIProfilePipelineId]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIProfilePipelineName]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIProfilePipelineDesc]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIProfileGatewayId]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIProfileGatewayName]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPDefaultModel]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPDefaultModelId]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPSasURI]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
