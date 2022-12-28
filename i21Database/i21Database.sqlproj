@@ -1185,6 +1185,10 @@
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendorTaxException.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendorSpecialTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorSpecialTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorTaxException.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
