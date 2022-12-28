@@ -136,6 +136,7 @@ SELECT
 	,A.strERPPOLineNo
     ,C.intBatchId intChildBatchId
 	,C.strBatchId strChildBatchId
+    ,A.strBOLNo
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
