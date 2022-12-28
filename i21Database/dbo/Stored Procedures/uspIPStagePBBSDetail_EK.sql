@@ -72,7 +72,8 @@ BEGIN TRY
 				,dblSieve1T1
 				,dblSieve1T2
 				,strPDFFileName
-				,blbPDFContent
+				--,blbPDFContent
+				,strFileContent
 				)
 			OUTPUT INSERTED.strBlendCode
 			INTO @tblIPPBBS
@@ -87,6 +88,7 @@ BEGIN TRY
 				,Sieve1T1
 				,Sieve1T2
 				,PDFFileName
+				--,PDFContent
 				,PDFContent
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../DocNo'
@@ -100,7 +102,8 @@ BEGIN TRY
 					,Sieve1T1 NUMERIC(18, 6)
 					,Sieve1T2 NUMERIC(18, 6)
 					,PDFFileName NVARCHAR(100)
-					,PDFContent VARBINARY(MAX)
+					--,PDFContent VARBINARY(MAX)
+					,PDFContent NVARCHAR(MAX)
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strBlendCode, '') + ','
@@ -118,7 +121,7 @@ BEGIN TRY
 			SELECT (
 					SELECT TOP 1 intPBBSStageId
 					FROM tblIPPBBSStage
-					WHERE strBlendCode = x.BlendCode
+					WHERE intPBBSID = x.PBBSID
 					)
 				,BlendCode
 				,PBBSID

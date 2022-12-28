@@ -124,26 +124,31 @@ BEGIN TRY
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Taste'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblHue = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Hue'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblIntensity = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Intensity'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblMouthfeel = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Mouth feel'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblAppearance = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Appearance'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @strXML = @strXML + '<Header>'
 		+ '<Status>'+Case When @strRowState = 'Modified' then 'U' Else 'C' End	  + '</Status>'
