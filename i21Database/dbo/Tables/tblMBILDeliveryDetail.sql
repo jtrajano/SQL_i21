@@ -19,6 +19,8 @@ CREATE TABLE [dbo].[tblMBILDeliveryDetail]
 	[dblPrice] [numeric](18, 6) NULL,
 	[dblPercentFull] DECIMAL(18, 6) NULL,
 	[intConcurrencyId] [int] DEFAULT(1) NULL,
- CONSTRAINT [PK_tblMBILLoadDeliveryDetail] PRIMARY KEY CLUSTERED ([intDeliveryDetailId]),
- CONSTRAINT [FK_tblMBILLoadDeliveryDetail_tblMBILDeliveryHeader] FOREIGN KEY ([intDeliveryHeaderId]) REFERENCES [tblMBILDeliveryHeader]([intDeliveryHeaderId])
+	[intContractDetailId] INT NULL, 
+    CONSTRAINT [PK_tblMBILLoadDeliveryDetail] PRIMARY KEY CLUSTERED ([intDeliveryDetailId]),
+ CONSTRAINT [FK_tblMBILLoadDeliveryDetail_tblMBILDeliveryHeader] FOREIGN KEY ([intDeliveryHeaderId]) REFERENCES [tblMBILDeliveryHeader]([intDeliveryHeaderId]),
+ CONSTRAINT [FK_tblMBILDeliveryDetail_tblCTContractDetail] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE SET NULL
 )
