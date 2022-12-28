@@ -9253,6 +9253,7 @@
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRImportStorageTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
