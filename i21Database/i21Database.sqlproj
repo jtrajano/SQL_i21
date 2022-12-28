@@ -1259,6 +1259,7 @@
     <Build Include="dbo\Tables\tblTMInventoryHistory.sql" />
     <Build Include="dbo\Tables\tblFABook.sql" />
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetBooks.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalExportTimberline.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
