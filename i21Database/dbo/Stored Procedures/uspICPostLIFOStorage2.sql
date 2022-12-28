@@ -270,6 +270,7 @@ BEGIN
 				,@intForexRateTypeId 
 				,@dblForexRate 
 				,@dblForexCost 
+				,@ForexCostUsed OUTPUT
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 

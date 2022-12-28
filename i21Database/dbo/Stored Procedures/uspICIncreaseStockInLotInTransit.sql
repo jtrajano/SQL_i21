@@ -33,6 +33,7 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLotInTransit
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20) 
 	,@dblForexCost AS NUMERIC(38, 20) 
+	,@ForexCostUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -90,6 +91,7 @@ WHEN MATCHED THEN
 					END
 		-- retrieve the cost from the cost bucket. 
 		,@CostUsed = Lot_bucket.dblCost
+		,@ForexCostUsed = Lot_bucket.dblForexCost
 
 		-- retrieve the negative qty that was offset by the incoming stock 
 		,@QtyOffset = 
@@ -119,6 +121,10 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
+		,[intCurrencyId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[dblForexCost] 
 		,[intConcurrencyId]
 	)
 	VALUES (
@@ -137,6 +143,10 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
+		,@intCurrencyId 
+		,@intForexRateTypeId 
+		,@dblForexRate 
+		,@dblForexCost
 		,1	
 	)
 ;
@@ -165,6 +175,10 @@ BEGIN
 		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
+		,[intCurrencyId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[dblForexCost] 
 		,[intConcurrencyId]
 	)
 	VALUES (
@@ -183,6 +197,10 @@ BEGIN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
+		,@intCurrencyId 
+		,@intForexRateTypeId 
+		,@dblForexRate 
+		,@dblForexCost
 		,1	
 	)
 

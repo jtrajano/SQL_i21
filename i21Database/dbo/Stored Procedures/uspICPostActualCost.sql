@@ -309,6 +309,7 @@ BEGIN
 				,@intForexRateTypeId
 				,@dblForexRate 
 				,@dblForexCost 
+				,@ForexCostUsed OUTPUT
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
