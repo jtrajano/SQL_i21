@@ -42,8 +42,8 @@ BEGIN TRY
     -- Broker
     LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
     -- Receiving Storage Location
-    LEFT JOIN (tblICStorageLocation RSL INNER JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = RSL.intLocationId)
-        ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strName = IMP.strReceivingStorageLocation AND TBO.strLocationName = IMP.strBuyingCenter
+    LEFT JOIN (tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = RSL.intCompanyLocationId)
+        ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strSubLocationName = IMP.strReceivingStorageLocation AND TBO.strLocationName = IMP.strBuyingCenter
     -- Format log message
     OUTER APPLY (
         SELECT strLogMessage = 
@@ -62,7 +62,7 @@ BEGIN TRY
             + CASE WHEN (UOM2.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') <> '') OR (ISNULL(IMP.intNoOfPackagesSecondPackageBreak, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesSecondPackageBreakUOM, '') = '') THEN 'NO OF PACKAGES UOM (2ND PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '') OR (ISNULL(IMP.intNoOfPackagesThirdPackageBreak, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') = '') THEN 'NO OF PACKAGES UOM (3RD PACKAGE-BREAK), ' ELSE '' END
             + CASE WHEN (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '') THEN 'BROKER, ' ELSE '' END
-            + CASE WHEN (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '') THEN 'RECEIVING STORAGE LOCATION, ' ELSE '' END
+            + CASE WHEN (RSL.intCompanyLocationSubLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '') THEN 'RECEIVING STORAGE LOCATION, ' ELSE '' END
     ) MSG
     WHERE IMP.intImportLogId = @intImportLogId
     AND IMP.ysnSuccess = 1
@@ -86,7 +86,7 @@ BEGIN TRY
         OR ( (UOM3.intUnitMeasureId IS NULL AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') <> '')
             OR (ISNULL(IMP.intNoOfPackagesThirdPackageBreak, 0) <> 0 AND ISNULL(IMP.strNoOfPackagesThirdPackageBreakUOM, '') = '') )
         OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
-        OR (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '')
+        OR (RSL.intCompanyLocationSubLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '')
     )
 
     -- Check if vendor is mapped to the TBO
@@ -256,7 +256,7 @@ BEGIN TRY
             ,strComments3 = IMP.strEvaluatorsRemarks
             ,intFromLocationCodeId = FROM_LOC_CODE.intCityId
             ,strFromLocationCode = FROM_LOC_CODE.strCity
-            ,intStorageLocationId = RSL.intStorageLocationId
+            ,intStorageLocationId = RSL.intCompanyLocationSubLocationId
             ,strSampleBoxNumber = IMP.strSampleBoxNumberTBO
             ,strMarketZoneCode = MARKET_ZONE.strMarketZoneCode
             ,intMarketZoneId = MARKET_ZONE.intMarketZoneId
@@ -310,7 +310,7 @@ BEGIN TRY
         -- Broker
         LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL AND BROKERS.strName = IMP.strBroker
         -- Receiving Storage Location
-        LEFT JOIN tblICStorageLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strName = IMP.strReceivingStorageLocation AND RSL.intLocationId = TBO.intCompanyLocationId
+        LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL AND RSL.strSubLocationName = IMP.strReceivingStorageLocation AND RSL.intCompanyLocationId = TBO.intCompanyLocationId
 
         WHERE IMP.intImportLogId = @intImportLogId
         AND ISNULL(IMP.strBatchNo, '') = ''
