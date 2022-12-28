@@ -74,6 +74,7 @@
 	[intCustomerId] INT NULL,
 	[strOriginFacilityNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationFacilityNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strTransportationModeDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	PRIMARY KEY CLUSTERED ([intId] ASC) WITH (IGNORE_DUP_KEY = OFF),
 	UNIQUE NONCLUSTERED ([intId] ASC, [intTransactionDetailId] ASC)
 )
