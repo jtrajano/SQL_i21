@@ -23,6 +23,10 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLotInTransit]
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@QtyOffset AS NUMERIC(38,20) OUTPUT 
 	,@InventoryLotId AS INT OUTPUT 
+	,@intCurrencyId AS INT 
+	,@intForexRateTypeId AS INT
+	,@dblForexRate AS NUMERIC(38, 20) 
+	,@dblForexCost AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF

@@ -27,6 +27,10 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInActualCost
 	,@UpdatedActualCostId AS INT OUTPUT 
 	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
 	,@intRelatedTransactionId AS INT OUTPUT
+	,@intCurrencyId AS INT 
+	,@intForexRateTypeId AS INT
+	,@dblForexRate AS NUMERIC(38, 20) 
+	,@dblForexCost AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF

@@ -79,7 +79,7 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[dtmDate] DATETIME NOT NULL, 
 		[dblStockIn] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblStockOut] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
-		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
+		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0,
 		[dblNewCost] NUMERIC(38, 20) NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,		
@@ -91,6 +91,10 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		[dblStockAvailable] AS (ROUND(ISNULL(dblStockIn, 0) - ISNULL(dblStockOut, 0), 6)) PERSISTED,
+		[intCurrencyId] INT NULL,
+		[intForexRateTypeId] INT NULL,
+		[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1,
+		[dblForexCost] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryFIFO] PRIMARY KEY NONCLUSTERED ([intInventoryFIFOId]) 
 	)
 	GO
