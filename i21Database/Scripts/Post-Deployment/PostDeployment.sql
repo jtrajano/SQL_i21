@@ -416,6 +416,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql
 :R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
 
+:r "..\..\..\Integration\dbo\Stored Procedures\uspGRImportStorageTicket.sql"
+
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
