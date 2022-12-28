@@ -1190,6 +1190,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorSpecialTax.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorTaxException.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalExportTimberline.sql" />
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
   </ItemGroup>
   <ItemGroup>
