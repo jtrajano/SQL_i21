@@ -74,6 +74,7 @@
 	[intCustomerId] INT NULL,
 	[strOriginFacilityNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationFacilityNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strTransportationModeDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTFTransaction] PRIMARY KEY ([intTransactionId]), 
     CONSTRAINT [FK_tblTFTransaction_tblTFReportingComponent] FOREIGN KEY ([intReportingComponentId]) REFERENCES [tblTFReportingComponent]([intReportingComponentId]), 
     CONSTRAINT [FK_tblTFTransaction_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId]),
