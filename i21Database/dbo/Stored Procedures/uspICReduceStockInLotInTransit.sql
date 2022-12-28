@@ -27,6 +27,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLotInTransit]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20) 
 	,@dblForexCost AS NUMERIC(38, 20) 
+	,@ForexCostUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -225,6 +226,7 @@ WHEN MATCHED THEN
 
 		-- retrieve the cost from the Lot bucket. 
 		,@CostUsed = cb.dblCost
+		,@ForexCostUsed = cb.dblForexCost
 
 		-- retrieve the	qty reduced from a Lot bucket 
 		,@QtyOffset = 

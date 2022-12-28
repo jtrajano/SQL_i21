@@ -12,6 +12,7 @@ CREATE PROCEDURE [dbo].[uspICPostFIFO]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)
+	,@dblForexCost AS NUMERIC(38,20)	
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	--,@dblExchangeRate AS NUMERIC(38,20)
@@ -66,6 +67,7 @@ DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
 DECLARE @CategoryCostValue AS NUMERIC(38,20);
 DECLARE @CategoryRetailValue AS NUMERIC(38,20);
+DECLARE @ForexCostUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -90,6 +92,7 @@ BEGIN
 	SELECT 
 		@dblQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty)
 		,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblCost)
+		,@dblForexCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblForexCost)
 		,@dblSalesPrice = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblSalesPrice)
 		,@intItemUOMId = iu.intItemUOMId
 		,@dblUOMQty = iu.dblUnitQty
@@ -134,6 +137,7 @@ BEGIN
 
 		-- Make sure the cost is not null. 
 		SET @dblCost = ISNULL(@dblCost, 0) 
+		SET @dblForexCost = ISNULL(@dblForexCost, 0) 
 
 		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
@@ -153,12 +157,18 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
-				
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT 
+
 			IF @intReturnValue < 0 RETURN @intReturnValue;			
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblForexCostToUse AS NUMERIC(38,20) = ISNULL(@ForexCostUsed, @dblForexCost)
 
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
@@ -170,6 +180,7 @@ BEGIN
 					,@dblQty = @dblComputedQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
+					,@dblForexCost = @dblForexCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
@@ -238,6 +249,7 @@ BEGIN
 				,@dtmDate = @dtmDate
 				,@dblQty = @FullQty
 				,@dblCost = @dblCost
+				,@dblForexCost = @dblForexCost
 				,@dblUOMQty = @dblUOMQty
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
@@ -292,6 +304,10 @@ BEGIN
 				,@UpdatedFifoId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -335,6 +351,7 @@ BEGIN
 							,@dblQty = 0
 							,@dblUOMQty = 0
 							,@dblCost = 0
+							,@dblForexCost = 0
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice
 							,@intCurrencyId = @intCurrencyId
@@ -417,6 +434,7 @@ BEGIN
 					,@dblQty = @dblComputedQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
+					,@dblForexCost = @dblForexCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId

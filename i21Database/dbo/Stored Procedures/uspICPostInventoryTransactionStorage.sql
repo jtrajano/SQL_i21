@@ -8,6 +8,7 @@
 	,@dblQty NUMERIC(38,20)
 	,@dblUOMQty NUMERIC(38,20)
 	,@dblCost NUMERIC(38,20)
+	,@dblForexCost NUMERIC(38,20)
 	,@dblValue NUMERIC(38,20)
 	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
@@ -96,6 +97,7 @@ SELECT	[intItemId]								= @intItemId
 		,[dblQty]								= ISNULL(@dblQty, 0)
 		,[dblUOMQty]							= ISNULL(@dblUOMQty, 0)
 		,[dblCost]								= ISNULL(@dblCost, 0)
+		,[dblForexCost]							= ISNULL(@dblForexCost, 0)
 		,[dblValue]								= ISNULL(@dblValue, 0)
 		,[dblSalesPrice]						= ISNULL(@dblSalesPrice, 0)
 		,[intCurrencyId]						= @intCurrencyId

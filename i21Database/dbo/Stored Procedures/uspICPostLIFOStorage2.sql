@@ -12,6 +12,7 @@ CREATE PROCEDURE [dbo].[uspICPostLIFOStorage]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)
+	,@dblForexCost AS NUMERIC(38,20)	
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	--,@dblExchangeRate AS NUMERIC(38,20)
@@ -59,6 +60,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @ForexCostUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 		,@intTransactionItemUOMId AS INT = @intItemUOMId 
@@ -80,6 +82,7 @@ BEGIN
 	SELECT 
 		@dblQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty) 
 		,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblCost) 
+		,@dblForexCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblForexCost) 
 		,@dblSalesPrice = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblSalesPrice)
 		,@intItemUOMId = iu.intItemUOMId
 		,@dblUOMQty = iu.dblUnitQty
@@ -118,12 +121,18 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedLIFOStorageId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
 			---- Insert the inventory transaction record
 			DECLARE @dblComputedUnitQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblForexCostToUse AS NUMERIC(38,20) = ISNULL(@ForexCostUsed, @dblForexCost)
 
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransactionStorage]
 					@intItemId = @intItemId
@@ -135,6 +144,7 @@ BEGIN
 					,@dblQty = @dblComputedUnitQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
+					,@dblForexCost = @dblForexCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
@@ -203,6 +213,7 @@ BEGIN
 				,@dblQty = @FullQty
 				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
+				,@dblForexCost = @dblForexCost 
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
@@ -255,6 +266,10 @@ BEGIN
 				,@UpdatedLIFOStorageId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -297,6 +312,7 @@ BEGIN
 							,@dtmDate = @dtmDate
 							,@dblQty = 0
 							,@dblCost = 0
+							,@dblForexCost = 0
 							,@dblUOMQty = 0
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice

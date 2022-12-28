@@ -23,6 +23,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLIFO]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20) 
 	,@dblForexCost AS NUMERIC(38, 20) 
+	,@ForexCostUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -196,6 +197,7 @@ WHEN MATCHED THEN
 
 		-- retrieve the cost from the LIFO bucket. 
 		,@CostUsed = cb.dblCost
+		,@ForexCostUsed = cb.dblForexCost
 
 		-- retrieve the	qty reduced from a LIFO bucket 
 		,@QtyOffset = 

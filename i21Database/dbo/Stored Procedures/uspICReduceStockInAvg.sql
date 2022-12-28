@@ -23,6 +23,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInAvg]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20) 
 	,@dblForexCost AS NUMERIC(38, 20) 
+	,@ForexCostUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -39,6 +40,7 @@ SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @FifoId = NULL;
+SET @ForexCostUsed = NULL;
 
 -- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
 BEGIN 
@@ -195,6 +197,7 @@ WHEN MATCHED THEN
 
 		-- retrieve the cost from the fifo bucket. 
 		,@CostUsed = cb.dblCost
+		,@ForexCostUsed = cb.dblForexCost 
 
 		-- retrieve the	qty reduced from a fifo bucket 
 		,@QtyOffset = 

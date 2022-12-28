@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspICPostLot]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)
+	,@dblForexCost AS NUMERIC(38,20)	
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	--,@dblExchangeRate AS NUMERIC(38,20)
@@ -66,6 +67,8 @@ DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
 DECLARE @CategoryCostValue AS NUMERIC(38,20);
 DECLARE @CategoryRetailValue AS NUMERIC(38,20);
+DECLARE @ForexCostUsed AS NUMERIC(38,20);
+DECLARE @intCostUOMId AS INT = @intItemUOMId; 
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -169,8 +172,11 @@ BEGIN
 						AND StockUOM.ysnStockUnit = 1
 						AND @dblLastCost IS NOT NULL 
 
+				SELECT	@dblForexCost = dbo.fnCalculateCostBetweenUOM(@intCostUOMId, @intItemUOMId, @dblForexCost) 
+
 				-- Make sure the cost is not null. 
 				SET @dblCost = ISNULL(@dblCost, 0) 
+				SET @dblForexCost = ISNULL(@dblForexCost, 0) 
 			END 
 		END 
 
@@ -195,6 +201,11 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -202,6 +213,7 @@ BEGIN
 			-- Get the cost used. It is usually the cost from the cost bucket or the last cost. 
 			DECLARE @dblReduceStockQty AS NUMERIC(38,20) = ISNULL(-@QtyOffset, @dblReduceQty - ISNULL(@RemainingQty, 0))
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblForexCostToUse AS NUMERIC(38,20) = ISNULL(@ForexCostUsed, @dblForexCost)
 
 			-- Insert the inventory transaction record
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
@@ -214,6 +226,7 @@ BEGIN
 					,@dblQty = @dblReduceStockQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
+					,@dblForexCost = @dblForexCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
@@ -325,6 +338,7 @@ BEGIN
 				-- and recompute the unit retail. Convert it to the Lot's Weight UOM. 
 				SELECT	@dblAddQty = dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
 						,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intWeightUOMId, @dblCost)
+						,@dblForexCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intWeightUOMId, @dblForexCost)
 						,@intItemUOMId = Lot.intWeightUOMId
 						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, Lot.intItemUOMId, @dblUnitRetail)
 				FROM	dbo.tblICLot Lot
@@ -353,6 +367,7 @@ BEGIN
 				,@dblQty = @FullQty
 				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
+				,@dblForexCost = @dblForexCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
@@ -408,6 +423,10 @@ BEGIN
 				,@UpdatedInventoryLotId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -452,6 +471,7 @@ BEGIN
 							,@dblQty = 0
 							,@dblUOMQty = 0
 							,@dblCost = 0
+							,@dblForexCost = 0 
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice
 							,@intCurrencyId = @intCurrencyId
@@ -539,6 +559,7 @@ BEGIN
 							, Lot.dblWeightPerQty
 						)
 					,Lot.dblLastCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)  --dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
+					,Lot.dblLastForexCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblForexCost)  --dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
 			FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
 						ON StockUOM.intItemId = Lot.intItemId
 						AND StockUOM.ysnStockUnit = 1
@@ -571,6 +592,7 @@ BEGIN
 					,@dblQty = 0
 					,@dblUOMQty = 0
 					,@dblCost = 0
+					,@dblForexCost = 0
 					,@dblValue = NULL
 					,@dblSalesPrice = 0
 					,@intCurrencyId = @intCurrencyId
