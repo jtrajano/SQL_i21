@@ -64,7 +64,7 @@ SELECT
     A.intOriginalItemId,
     A.dblPackagesPerPallet,
     A.strPlant,
-    dblTotalQuantity =ROUND( A.dblTotalQuantity * cast(UOM.strUnitMeasure as int),2) ,
+    A.dblTotalQuantity,
     A.strSampleBoxNumber,
     A.dblSellingPrice,
     A.dtmStock,
