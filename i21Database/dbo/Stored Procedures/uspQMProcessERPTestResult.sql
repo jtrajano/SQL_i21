@@ -207,19 +207,11 @@ BEGIN TRY
 			END
 
 			IF ISNULL(@intCuppedUserId, 0) = 0
-			BEGIN
-				IF EXISTS (
-						SELECT 1
-						FROM tblSMUserSecurity WITH (NOLOCK)
-						WHERE strUserName = 'irelyadmin'
-						)
+				BEGIN
 					SELECT TOP 1 @intCuppedUserId = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-					WHERE strUserName = 'irelyadmin'
-				ELSE
-					SELECT TOP 1 @intCuppedUserId = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-			END
+					FROM tblEMEntityCredential
+					ORDER BY intEntityId ASC;
+				END
 
 			IF ISNULL(@strUpdatedBy, '') <> ''
 			BEGIN
@@ -234,9 +226,9 @@ BEGIN TRY
 			SET @strInfo1 = ISNULL(@strSampleNumber, '')
 			SET @strInfo2 = ISNULL(@strSampleStatus, '')
 
-			SELECT @intUserId = intEntityId
-			FROM tblSMUserSecurity WITH (NOLOCK)
-			WHERE strUserName = 'IRELYADMIN'
+			SELECT TOP 1 @intUserId = intEntityId
+			FROM tblEMEntityCredential
+			ORDER BY intEntityId ASC;
 
 			SELECT @strCuppingPropertyName = strCuppingPropertyName
 				,@strGradingPropertyName = strGradingPropertyName

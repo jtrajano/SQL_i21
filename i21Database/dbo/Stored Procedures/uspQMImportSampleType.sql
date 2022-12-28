@@ -32,11 +32,11 @@ BEGIN TRY
 		,@intAttributeId INT
 
 	IF ISNULL(@intUserId, 0) = 0
-	BEGIN
-		SELECT TOP 1 @intUserId = intEntityId
-		FROM tblSMUserSecurity
-		WHERE LOWER(strUserName) = 'irelyadmin'
-	END
+		BEGIN
+			SELECT TOP 1 @intUserId = intEntityId
+			FROM tblEMEntityCredential
+			ORDER BY intEntityId ASC;
+		END
 
 	SELECT @intRowId = MIN(intImportId)
 	FROM tblQMSampleTypeImport
