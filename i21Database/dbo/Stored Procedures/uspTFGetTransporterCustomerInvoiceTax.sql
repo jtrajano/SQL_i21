@@ -579,7 +579,7 @@ BEGIN TRY
 
 				SELECT TOP 1 @InvoiceDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax
 
-				IF(LTRIM(RTRIM(strCriteria)) = '<> 0' AND @dblTax = 0)	
+				IF(LTRIM(RTRIM(@strCriteria)) = '<> 0' AND @dblTax = 0)	
 				BEGIN
 					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId										 
 				END
