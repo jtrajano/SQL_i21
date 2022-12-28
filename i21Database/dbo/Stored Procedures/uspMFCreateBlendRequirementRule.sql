@@ -14,7 +14,7 @@ INSERT INTO tblMFBlendRequirementRule (intBlendRequirementId
 									 , intSequenceNo)
 SELECT @intBlendRequirementId
      , SheetRule.intBlendSheetRuleId
-	 , CASE WHEN SheetRule.intBlendSheetRuleId = 7 THEN IssuedUOM.strName
+	 , CASE WHEN SheetRule.intBlendSheetRuleId = 7 THEN ISNULL(IssuedUOM.strName,'')
 			ELSE RuleValue.strValue
 	   END
 	 , SheetRule.intBlendSheetRuleId 
