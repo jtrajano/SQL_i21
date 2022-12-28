@@ -1,10 +1,10 @@
-﻿CREATE PROCEDURE [dbo].[uspAESEncryptBatchASym]  
+﻿CREATE PROCEDURE [dbo].[uspAESBatchDecryptASym]  
   @aesParam AESParam READONLY
 AS  
 BEGIN  
   
  SELECT [Id], 
-		dbo.fnAESEncryptASym([Text]) 
+		dbo.fnAESDecryptASym([Text]) 
  FROM @aesParam 
  ORDER BY [Id] ASC
       

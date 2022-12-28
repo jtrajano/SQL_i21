@@ -1432,8 +1432,8 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPStock_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStock_EK.sql" />
     <Build Include="dbo\User Defined Types\AESParam.sql" />
-    <Build Include="dbo\Stored Procedures\uspAESEncryptBatchASym.sql" />
-    <Build Include="dbo\Stored Procedures\uspAESDecryptBatchASym.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESBatchEncryptASym.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESBatchDecryptASym.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
