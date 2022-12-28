@@ -85,6 +85,9 @@ SELECT Trans.intTransactionId
 	, strTransactionSource = Trans.strTransactionSource
 	, strImportVerificationNumber = Trans.strImportVerificationNumber
 	, strTransportNumber = Trans.strTransportNumber
+	, strOriginFacilityNumber = Trans.strOriginFacilityNumber
+	, strDestinationFacilityNumber = Trans.strDestinationFacilityNumber
+	, strTransportationModeDescription = tblSMTransportationMode.strDescription
 FROM tblTFTransaction Trans
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Trans.intProductCodeId
@@ -92,6 +95,7 @@ LEFT JOIN tblICItem Item ON Item.intItemId = Trans.intItemId
 LEFT JOIN tblTFException Exception ON Exception.intReportingComponentId = Trans.intReportingComponentId
 	AND Exception.strTransactionType = Trans.strTransactionType
 	AND Exception.intTransactionNumberId = Trans.intTransactionNumberId
+LEFT JOIN tblSMTransportationMode ON Trans.strTransportationMode = tblSMTransportationMode.strCode
 WHERE ISNULL(Exception.ysnDeleted, 0) != 1
 	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include') = 0
 		OR Exception.strOriginState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include'))
@@ -188,6 +192,9 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, strTransactionSource = NULL
 	, strImportVerificationNumber = NULL
 	, strTransportNumber = Exception.strTransportNumber
+	, strOriginFacilityNumber = Exception.strOriginFacilityNumber
+	, strDestinationFacilityNumber = Exception.strDestinationFacilityNumber
+	, strTransportationModeDescription = NULL
 FROM tblTFException Exception
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Exception.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Exception.intProductCodeId
