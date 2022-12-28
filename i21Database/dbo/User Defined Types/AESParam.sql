@@ -1,0 +1,4 @@
+﻿CREATE TYPE AESParam AS TABLE ( 
+  [Id]		INT, 
+  [Text]	NVARCHAR(MAX)
+)

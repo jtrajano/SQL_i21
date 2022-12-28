@@ -1431,6 +1431,9 @@
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStock_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStock_EK.sql" />
+    <Build Include="dbo\User Defined Types\AESParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESEncryptBatchASym.sql" />
+    <Build Include="dbo\Stored Procedures\uspAESDecryptBatchASym.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
