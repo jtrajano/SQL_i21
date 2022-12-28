@@ -92,11 +92,21 @@ BEGIN
 		,0
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
-		select sum((dblUnits * case when strType = 'Settlement' AND intSettleStorageId IS NOT NULL then -1 else 1 end )) as dblOpenBalance
-			from tblGRStorageHistory 
-				where intCustomerStorageId = CS.intCustomerStorageId 
-					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
-					and intTransactionTypeId in ( 1, 4, 3, 5, 9)
+		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+			else 1 end)) as dblOpenBalance
+		from tblGRStorageHistory sh
+		left join (tblGRTransferStorageReference tsr inner join tblGRCustomerStorage c on c.intCustomerStorageId = tsr.intToCustomerStorageId)
+			on tsr.intTransferStorageId = sh.intTransferStorageId
+				and tsr.intToCustomerStorageId = sh.intCustomerStorageId
+		where sh.intCustomerStorageId = CS.intCustomerStorageId 
+			and (
+				(dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+					and intTransactionTypeId in (1, 4, 5, 9)
+					or (intTransactionTypeId = 3 and strType = 'Transfer') --include the units transfer regardless of the date
+				)
+				or dbo.fnRemoveTimeOnDate(c.dtmDeliveryDate) <= @dtmStorageChargeDate
+					and (intTransactionTypeId = 3 and strType = 'From Transfer' )
+			)
 	) as MagicalOpenBalance
 	INNER JOIN tblGRStorageType ST
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -193,12 +203,31 @@ BEGIN
 		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
 		,SSVW.strTransaction
 	FROM tblGRCustomerStorage CS
+	--OUTER APPLY (
+	--	select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+	--	else 1 end)) as dblOpenBalance
+	--		from tblGRStorageHistory 
+	--			where intCustomerStorageId = CS.intCustomerStorageId 
+	--				and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+	--				and (intTransactionTypeId in ( 1, 4, 3, 5, 9) or (intTransactionTypeId = 2 and strPaidDescription = 'Open Balance Adj'))
+	--) as MagicalOpenBalance
 	OUTER APPLY (
-		select sum((dblUnits * case when strType = 'Settlement' AND intSettleStorageId IS NOT NULL then -1 else 1 end )) as dblOpenBalance
-			from tblGRStorageHistory 
-				where intCustomerStorageId = CS.intCustomerStorageId 
-					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
-					and (intTransactionTypeId in ( 1, 4, 3, 5, 9) or (intTransactionTypeId = 2 and strPaidDescription = 'Open Balance Adj'))
+		select sum((dblUnits * case when intTransactionTypeId = 4 THEN CASE WHEN intSettleStorageId IS NOT NULL then -1 ELSE 0 END
+			else 1 end)) as dblOpenBalance
+		from tblGRStorageHistory sh
+		left join (tblGRTransferStorageReference tsr inner join tblGRCustomerStorage c on c.intCustomerStorageId = tsr.intToCustomerStorageId)
+			on tsr.intTransferStorageId = sh.intTransferStorageId
+				and tsr.intToCustomerStorageId = sh.intCustomerStorageId
+		where sh.intCustomerStorageId = CS.intCustomerStorageId 
+			and (
+				(dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+					and intTransactionTypeId in (1, 4, 5, 9)
+					or (intTransactionTypeId = 3 and strType = 'Transfer') --include the units transfer regardless of the date
+				)
+				or dbo.fnRemoveTimeOnDate(c.dtmDeliveryDate) <= @dtmStorageChargeDate
+					and (intTransactionTypeId = 3 and strType = 'From Transfer' )
+				or (intTransactionTypeId = 2 and strPaidDescription = 'Open Balance Adj')
+			)
 	) as MagicalOpenBalance
 	INNER JOIN @BillStorageValues SV
 		ON SV.intCustomerStorageId = CS.intCustomerStorageId
@@ -215,11 +244,11 @@ BEGIN
 	LEFT JOIN tblSCDeliverySheet DS
     	ON DS.intDeliverySheetId = CS.intDeliverySheetId --AND (@ysnExcludeNotPostedDS IS NULL OR (@ysnExcludeNotPostedDS = 1 and DS.ysnPost = 1))
 	outer apply
-		( select top 1 (dblPaidAmount) as dblPaidAmount from tblGRStorageHistory 
+		( select SUM(dblPaidAmount) as dblPaidAmount from tblGRStorageHistory 
 			where intCustomerStorageId = CS.intCustomerStorageId 
 				and dtmHistoryDate <=  @dtmStorageChargeDate 				
 				and intTransactionTypeId = 6
-			order by intStorageHistoryId desc 
+			--order by intStorageHistoryId desc 
 		) SH
 	left join  vyuGRStorageSearchView SSVW 
 			on CS.intCustomerStorageId = SSVW.intCustomerStorageId

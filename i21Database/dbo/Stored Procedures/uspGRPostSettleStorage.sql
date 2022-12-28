@@ -997,6 +997,13 @@ BEGIN TRY
 							  )
 							  AND @dblTicketStorageDue > 0
 				BEGIN
+
+					IF @intStorageChargeItemId IS NULL
+					BEGIN
+						RAISERROR('Item is missing for Storage Charge.',16,1,1)
+						GOTO SettleStorage_Exit
+					END
+					
 					INSERT INTO @SettleVoucherCreate 
 					(
 						 intCustomerStorageId
@@ -2740,7 +2747,7 @@ BEGIN TRY
 														END																							
 					,[dblWeightUnitQty]				= 1 
 					,[intWeightUOMId]				= CASE
-														WHEN a.[intContractHeaderId] IS NOT NULL  or @origdblSpotUnits > 0 THEN b.intItemUOMId
+														WHEN a.[intContractHeaderId] IS NOT NULL OR (ISNULL(@origdblSpotUnits,0) > 0 AND a.intItemType = 1) THEN b.intItemUOMId
 														ELSE NULL
 													END
 					,[intPurchaseTaxGroupId]		= 
@@ -3540,7 +3547,7 @@ BEGIN TRY
 
 						--short-close the contract if there is a microbalance left in the sequence
 						--check first if the auto-short close config is enabled
-						IF (SELECT ysnAutoShortCloseContractInSettlement FROM tblGRCompanyPreference) = 1 
+						IF EXISTS(SELECT 1 ysnAutoShortCloseContractInSettlement FROM tblGRCompanyPreference WHERE ysnAutoShortCloseContractInSettlement = 1)
 							AND @intPricingTypeHeader <> 2 --DO NOT HANDLE BASIS CONTRACTS FOR NOW 
 						BEGIN
 							SET @strUnitMeasure = NULL

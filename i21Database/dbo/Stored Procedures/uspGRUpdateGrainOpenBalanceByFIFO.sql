@@ -354,7 +354,10 @@ BEGIN TRY
 			,[intInvoiceId] 			= CASE WHEN @strSourceType = 'Invoice' THEN @IntSourceKey ELSE NULL END
 			,[intInventoryShipmentId] 	= CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
 			,[dblUnits] 				= dblOpenBalance
-			,[dtmHistoryDate] 			= dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
+			,[dtmHistoryDate] 			= CASE 
+											WHEN @strSourceType = 'InventoryShipment' THEN A.dtmShipDate--dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
+											ELSE dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
+										END										
 			,[dblPaidAmount] 			= [dblCharge] * dblOpenBalance + ISNULL(dblFlatFee,0)
 			,[intTransactionTypeId] 	= CASE
 											WHEN @strSourceType = 'Invoice' THEN 6
@@ -375,6 +378,7 @@ BEGIN TRY
 		FROM @StorageTicketInfoByFIFO
 		CROSS APPLY (
 			SELECT ShipmentItem.intSourceId
+				,Shipment.dtmShipDate
 			FROM tblICInventoryShipment Shipment
 			JOIN tblICInventoryShipmentItem ShipmentItem
 				ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
