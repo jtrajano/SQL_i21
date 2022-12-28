@@ -96,7 +96,7 @@ BEGIN
 		AND (t.intRelatedTransactionId = @intRelatedTransactionId OR (t.intRelatedTransactionId IS NULL AND @intRelatedTransactionId IS NULL))
 		AND (t.strRelatedTransactionId = @strRelatedTransactionId OR (t.strRelatedTransactionId IS NULL AND @strRelatedTransactionId IS NULL))
 		AND (t.strActualCostId = @strActualCostId OR (t.strActualCostId IS NULL AND @strActualCostId IS NULL))
-		AND @dblQty < 0 
+		AND ISNULL(@dblQty, 0) < 0 
 		AND t.dblQty < 0 
 
 	UPDATE tblICInventoryTransaction 
@@ -228,7 +228,10 @@ BEGIN
 	WHERE	i.intItemId = @intItemId
 			AND @intItemId IS NOT NULL
 			AND @intItemLocationId IS NOT NULL
-			AND @intItemUOMId IS NOT NULL 
+			AND (
+				(ISNULL(@dblQty, 0) <> 0 AND @intItemUOMId IS NOT NULL)
+				OR (ISNULL(@dblQty, 0) = 0 AND ISNULL(@dblValue, 0) <> 0)
+			)
 
 	SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 END 

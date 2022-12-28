@@ -14,7 +14,6 @@ CREATE PROCEDURE [dbo].[uspICPostLotInTransit]
 	,@dblCost AS NUMERIC(38,20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
-	--,@dblExchangeRate AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT 
 	,@strTransactionId AS NVARCHAR(40)
@@ -31,6 +30,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotInTransit]
 	,@strSourceNumber NVARCHAR(100) = NULL 
 	,@strBOLNumber NVARCHAR(100) = NULL 
 	,@intTicketId INT = NULL 
+	,@dblValue AS NUMERIC(38,20) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -68,11 +68,13 @@ DECLARE @NewInventoryLotId AS INT
 DECLARE @UpdatedInventoryLotId AS INT 
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
-DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
 DECLARE @intReturnValue AS INT 
 		,@dtmCreated DATETIME 
+
+DECLARE @InTransitAdjustmentTypeId AS INT 
+SELECT TOP 1 @InTransitAdjustmentTypeId = intTransactionTypeId FROM tblICInventoryTransactionType typ WHERE typ.strName = 'In-Transit Adjustment'
 
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
@@ -520,4 +522,83 @@ BEGIN
 					AND ISNULL(Lot.dblTarePerQty, 0) <> 0 
 		END
 	END 
-END 
+
+	-- Adjust Value
+	ELSE IF (ISNULL(@dblValue, 0) <> 0)
+	BEGIN 
+		-- Insert the inventory transaction record
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
+				@intItemId = @intItemId
+				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = @intItemUOMId
+				,@intSubLocationId = NULL -- @intSubLocationId
+				,@intStorageLocationId = NULL -- @intStorageLocationId
+				,@dtmDate = @dtmDate
+				,@dblQty = NULL 
+				,@dblUOMQty = NULL 
+				,@dblCost = NULL 
+				,@dblValue = @dblValue
+				,@dblSalesPrice = @dblSalesPrice
+				,@intCurrencyId = @intCurrencyId
+				,@intTransactionId = @intTransactionId
+				,@intTransactionDetailId = @intTransactionDetailId
+				,@strTransactionId = @strTransactionId
+				,@strBatchId = @strBatchId
+				,@intTransactionTypeId = @InTransitAdjustmentTypeId -- In-Transit Adjustment Type Id
+				,@intLotId = @intLotId 
+				,@intRelatedInventoryTransactionId = NULL 
+				,@intRelatedTransactionId = NULL 
+				,@strRelatedTransactionId = NULL 
+				,@strTransactionForm = @strTransactionForm
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@intCostingMethod = @LOTCOST
+				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 	
+				,@intFobPointId = @intFobPointId	
+				,@intInTransitSourceLocationId = @intInTransitSourceLocationId	
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = @dblForexRate
+				,@strActualCostId = @strActualCostId
+				,@intSourceEntityId = @intSourceEntityId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
+				,@dtmCreated = @dtmCreated OUTPUT 
+
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+
+		-- Log the Value changes for the in-transit
+		IF @InventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			INSERT INTO tblICInventoryValueAdjustmentLog (
+				[intInventoryTransactionId]
+				,[intItemId]
+				,[intItemLocationId]
+				,[intLotId]
+				,[strActualCostId]
+				,[dblValue]
+				,[ysnIsUnposted]
+				,[dtmCreated]
+				,[strRelatedTransactionId]
+				,[intRelatedTransactionId]
+				,[intRelatedTransactionDetailId]
+				,[intCreatedUserId]
+				,[intConcurrencyId]
+			)
+			SELECT 
+				[intInventoryTransactionId] = @InventoryTransactionIdentityId
+				,[intItemId] = @intItemId
+				,[intItemLocationId] = @intItemLocationId
+				,[intLotId] = @intLotId
+				,[strActualCostId] = @strActualCostId
+				,[dblValue] = @dblValue
+				,[ysnIsUnposted] = 0 
+				,[dtmCreated] = GETDATE()
+				,[strRelatedTransactionId] = @strTransactionId
+				,[intRelatedTransactionId] = @intTransactionId
+				,[intRelatedTransactionDetailId] = @intTransactionDetailId 
+				,[intCreatedUserId] = @intEntityUserSecurityId
+				,[intConcurrencyId] = 1
+		END 
+	END 
+END

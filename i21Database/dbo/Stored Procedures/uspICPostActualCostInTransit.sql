@@ -30,6 +30,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@strSourceNumber NVARCHAR(100) = NULL 
 	,@strBOLNumber NVARCHAR(100) = NULL 
 	,@intTicketId INT = NULL 
+	,@dblValue AS NUMERIC(38,20) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -68,11 +69,13 @@ DECLARE @NewActualCostId AS INT
 DECLARE @UpdatedActualCostId AS INT 
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
-DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
 DECLARE @intReturnValue AS INT 
 DECLARE @dtmCreated DATETIME 
+
+DECLARE @InTransitAdjustmentTypeId AS INT 
+SELECT TOP 1 @InTransitAdjustmentTypeId = intTransactionTypeId FROM tblICInventoryTransactionType typ WHERE typ.strName = 'In-Transit Adjustment'
 
 IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
 BEGIN 	
@@ -374,5 +377,84 @@ BEGIN
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 		WHERE	@NewActualCostId IS NOT NULL 
+	END 
+
+	-- Adjust Value
+	ELSE IF (ISNULL(@dblValue, 0) <> 0)
+	BEGIN 
+		-- Insert the inventory transaction record
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
+				@intItemId = @intItemId
+				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = @intItemUOMId
+				,@intSubLocationId = NULL -- @intSubLocationId
+				,@intStorageLocationId = NULL -- @intStorageLocationId
+				,@dtmDate = @dtmDate
+				,@dblQty = NULL 
+				,@dblUOMQty = NULL 
+				,@dblCost = NULL 
+				,@dblValue = @dblValue
+				,@dblSalesPrice = @dblSalesPrice
+				,@intCurrencyId = @intCurrencyId
+				,@intTransactionId = @intTransactionId
+				,@intTransactionDetailId = @intTransactionDetailId
+				,@strTransactionId = @strTransactionId
+				,@strBatchId = @strBatchId
+				,@intTransactionTypeId = @InTransitAdjustmentTypeId -- In-Transit Adjustment Type Id
+				,@intLotId = NULL  
+				,@intRelatedInventoryTransactionId = NULL 
+				,@intRelatedTransactionId = NULL 
+				,@strRelatedTransactionId = NULL 
+				,@strTransactionForm = @strTransactionForm
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@intCostingMethod = @LOTCOST
+				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 	
+				,@intFobPointId = @intFobPointId	
+				,@intInTransitSourceLocationId = @intInTransitSourceLocationId	
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = @dblForexRate
+				,@strActualCostId = @strActualCostId
+				,@intSourceEntityId = @intSourceEntityId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
+				,@dtmCreated = @dtmCreated OUTPUT 
+
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+
+		-- Log the Value changes for the in-transit
+		IF @InventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			INSERT INTO tblICInventoryValueAdjustmentLog (
+				[intInventoryTransactionId]
+				,[intItemId]
+				,[intItemLocationId]
+				,[intLotId]
+				,[strActualCostId]
+				,[dblValue]
+				,[ysnIsUnposted]
+				,[dtmCreated]
+				,[strRelatedTransactionId]
+				,[intRelatedTransactionId]
+				,[intRelatedTransactionDetailId]
+				,[intCreatedUserId]
+				,[intConcurrencyId]
+			)
+			SELECT 
+				[intInventoryTransactionId] = @InventoryTransactionIdentityId
+				,[intItemId] = @intItemId
+				,[intItemLocationId] = @intItemLocationId
+				,[intLotId] = NULL 
+				,[strActualCostId] = @strActualCostId
+				,[dblValue] = @dblValue
+				,[ysnIsUnposted] = 0 
+				,[dtmCreated] = GETDATE()
+				,[strRelatedTransactionId] = @strTransactionId
+				,[intRelatedTransactionId] = @intTransactionId
+				,[intRelatedTransactionDetailId] = @intTransactionDetailId 
+				,[intCreatedUserId] = @intEntityUserSecurityId
+				,[intConcurrencyId] = 1
+		END 
 	END 
 END 
