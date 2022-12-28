@@ -86,7 +86,7 @@ SELECT
 																	)
 																	ELSE
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.intItemUOMId) 
+																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], CASE WHEN ITEM.ysnSeparateStockForUOMs = 0 THEN ICIUOM_STOCK.[intItemUOMId] ELSE ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) END) 
 																				ELSE 
 																					ARID.[dblLastCost]  
 																		END 
