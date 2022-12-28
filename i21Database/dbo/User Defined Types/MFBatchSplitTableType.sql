@@ -2,6 +2,7 @@ CREATE TYPE MFBatchSplitTableType AS TABLE
 (
 	intBatchId INT,
     intParentBatchId INT,
+    intLocationId INT,
     intSplitStorageLocationId INT,
     intSplitStorageUnitId INT,
     dblSplitQuantity DECIMAL(18,6),
@@ -12,4 +13,3 @@ CREATE TYPE MFBatchSplitTableType AS TABLE
 	dtmSplit DATETIME NULL,
 	ysnSplit BIT
 )
-
