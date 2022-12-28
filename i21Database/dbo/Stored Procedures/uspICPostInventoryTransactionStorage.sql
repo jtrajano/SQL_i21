@@ -59,6 +59,7 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[dblQty]
 		,[dblUOMQty]
 		,[dblCost]
+		,[dblForexCost]
 		,[dblValue]
 		,[dblSalesPrice]
 		,[intCurrencyId]
