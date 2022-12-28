@@ -67,18 +67,10 @@ BEGIN TRY
 	INSERT INTO @tblMFOrderNo (strOrderNo)
 	SELECT DISTINCT strDepositorOrderNumber
 	FROM tblMFEDI940
-
-	IF EXISTS (
-			SELECT 1
-			FROM tblSMUserSecurity
-			WHERE strUserName = 'irelyadmin'
-			)
-		SELECT TOP 1 @intUserId = intEntityId
-		FROM tblSMUserSecurity
-		WHERE strUserName = 'irelyadmin'
-	ELSE
-		SELECT TOP 1 @intUserId = intEntityId
-		FROM tblSMUserSecurity
+	
+    SELECT TOP 1 @intUserId = intEntityId
+    FROM tblEMEntityCredential
+    ORDER BY intEntityId ASC;
 
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen
