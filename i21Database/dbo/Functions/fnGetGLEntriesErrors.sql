@@ -22,22 +22,6 @@ RETURNS  @tbl TABLE (
 AS
 BEGIN 
 	;WITH BatchError AS (
-				SELECT  strTransactionId
-					    ,'' strText
-						,60018 intErrorCode
-						,strModuleName		
-				FROM @GLEntriesToValidate GLEntries
-				WHERE ISNULL(dblExchangeRate,0) NOT IN(1, 0)
-				AND dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2))
-				UNION ALL
-				SELECT  strTransactionId
-					    ,'' strText
-						,60018 intErrorCode
-						,strModuleName		
-				FROM @GLEntriesToValidate GLEntries
-				WHERE ISNULL(dblExchangeRate,0) NOT IN(1, 0)
-				AND dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2))
-				UNION ALL
 				SELECT	strTransactionId
 						,'' strText
 						,60001 intErrorCode
