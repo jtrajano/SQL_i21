@@ -1407,6 +1407,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment_EK.sql" />
     <Build Include="dbo\Tables\tblMFRecallPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecallPreStage.sql" />
+  <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
