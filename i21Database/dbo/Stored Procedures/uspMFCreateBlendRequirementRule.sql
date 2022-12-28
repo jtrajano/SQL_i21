@@ -17,7 +17,7 @@ SELECT @intBlendRequirementId
 	 , CASE WHEN SheetRule.intBlendSheetRuleId = 7 THEN IssuedUOM.strName
 			ELSE RuleValue.strValue
 	   END
-	 , SheetRule.intSequenceNo 
+	 , SheetRule.intBlendSheetRuleId 
 FROM tblMFBlendSheetRule AS SheetRule 
 JOIN tblMFBlendSheetRuleValue AS RuleValue on SheetRule.intBlendSheetRuleId = RuleValue.intBlendSheetRuleId AND RuleValue.ysnDefault=1
 OUTER APPLY (SELECT AD.strName
