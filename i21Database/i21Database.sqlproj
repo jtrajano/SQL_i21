@@ -1186,6 +1186,7 @@
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalExportTimberline.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
