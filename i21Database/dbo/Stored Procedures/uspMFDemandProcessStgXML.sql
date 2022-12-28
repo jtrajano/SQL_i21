@@ -348,17 +348,9 @@ BEGIN TRY
 
 			IF @intUserId IS NULL
 			BEGIN
-				IF EXISTS (
-						SELECT 1
-						FROM tblSMUserSecurity
-						WHERE strUserName = 'irelyadmin'
-						)
-					SELECT TOP 1 @intUserId = intEntityId
-					FROM tblSMUserSecurity
-					WHERE strUserName = 'irelyadmin'
-				ELSE
-					SELECT TOP 1 @intUserId = intEntityId
-					FROM tblSMUserSecurity
+				SELECT TOP 1 @intUserId = intEntityId
+				FROM tblEMEntityCredential
+				ORDER BY intEntityId ASC;
 			END
 
 			IF EXISTS (

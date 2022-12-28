@@ -63,17 +63,9 @@ BEGIN TRY
 	SELECT DISTINCT strDepositorOrderNumber
 	FROM tblMFEDI943
 
-	IF EXISTS (
-			SELECT 1
-			FROM tblSMUserSecurity
-			WHERE strUserName = 'irelyadmin'
-			)
-		SELECT TOP 1 @intUserId = intEntityId
-		FROM tblSMUserSecurity
-		WHERE strUserName = 'irelyadmin'
-	ELSE
-		SELECT TOP 1 @intUserId = intEntityId
-		FROM tblSMUserSecurity
+	SELECT TOP 1 @intUserId = intEntityId
+    FROM tblEMEntityCredential
+    ORDER BY intEntityId ASC;
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition

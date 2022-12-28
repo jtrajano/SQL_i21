@@ -27,17 +27,9 @@ DECLARE @tblInventoryShipmentItemLot TABLE (
 	,dblQuantityShipped NUMERIC(38, 20)
 	)
 
-IF EXISTS (
-		SELECT 1
-		FROM tblSMUserSecurity
-		WHERE strUserName = 'irelyadmin'
-		)
-	SELECT TOP 1 @intUserId = intEntityId
-	FROM tblSMUserSecurity
-	WHERE strUserName = 'irelyadmin'
-ELSE
-	SELECT TOP 1 @intUserId = intEntityId
-	FROM tblSMUserSecurity
+SELECT TOP 1 @intUserId = intEntityId
+FROM tblEMEntityCredential
+ORDER BY intEntityId ASC;
 
 INSERT INTO @tblInventoryShipmentItem (
 	intInventoryShipmentItemId
