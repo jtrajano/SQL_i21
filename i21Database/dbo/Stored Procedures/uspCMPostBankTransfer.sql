@@ -168,6 +168,12 @@ WHERE strTransactionId = @strTransactionId
   
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference      
 
+IF ISNULL(@intDefaultCurrencyId,0) = 0 
+BEGIN  
+    RAISERROR ('Default Currency was not set in Company Configuration screen.',11,1)  
+    GOTO Post_Rollback    
+END
+
 IF @ysnPost = 1 AND @ysnRecap = 0
 BEGIN
   EXEC uspCMValidateSegmentPosting @intGLAccountIdFrom, @intGLAccountIdTo,3, @intBankTransferTypeId -- location
@@ -772,8 +778,8 @@ IF @ysnPost = 1
               ,strCity            = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = CASE WHEN @intBankTransferTypeId = 5 THEN dblDebitForeign ELSE dblCreditForeign END    
-              ,strAmountInWords     = dbo.fnConvertNumberToWord(CASE WHEN @intBankTransferTypeId = 5 THEN dblDebitForeign ELSE dblCreditForeign END)    
+              ,dblAmount          = dblCreditForeign 
+              ,strAmountInWords     = dbo.fnConvertNumberToWord( dblCreditForeign )    
               ,strMemo            = CASE WHEN ISNULL(strReference,'') = '' THEN strDescription     
                                         WHEN ISNULL(strDescription,'') = '' THEN strReference    
                                         ELSE strDescription + ' / ' + strReference END    
@@ -867,14 +873,7 @@ IF @ysnPost = 1
         END
         ELSE
         BEGIN
-          IF @intBankTransferTypeId = 5
-          BEGIN
-              DELETE FROM tblCMBankTransaction    
-              WHERE strLink = @strTransactionId    
-              AND ysnClr = 0    
-              AND intBankTransactionTypeId  = CASE WHEN @ysnPosted = 1 THEN @BANK_TRANSFER_WD ELSE  @BANK_TRANSFER_DEP  END  
-          END
-          ELSE
+            
               DELETE FROM tblCMBankTransaction    
               WHERE strLink = @strTransactionId    
               AND ysnClr = 0    
@@ -883,6 +882,7 @@ IF @ysnPost = 1
         END
      
       END  
+      
     END    
     IF @@ERROR <> 0 GOTO Post_Rollback    
 END    
