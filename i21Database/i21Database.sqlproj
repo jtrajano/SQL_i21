@@ -1185,6 +1185,7 @@
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
