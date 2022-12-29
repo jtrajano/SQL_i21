@@ -1264,6 +1264,7 @@
     <Build Include="dbo\Tables\tblApiSchemaVendorSpecialTax.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorSpecialTax.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorTaxException.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
