@@ -1447,6 +1447,7 @@
     <Build Include="dbo\Tables\tblIPSAPProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessPBBSDetail_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
