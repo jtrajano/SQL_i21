@@ -1409,6 +1409,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRecallPreStage.sql" />
   <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
   <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
+  <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
