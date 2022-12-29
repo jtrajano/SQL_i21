@@ -65,6 +65,7 @@ BEGIN TRY
 		FROM dbo.tblICItem I WITH (NOLOCK)
 		JOIN dbo.tblICCategory C WITH (NOLOCK) ON C.intCategoryId = I.intCategoryId
 			AND C.strCategoryCode = 'Raw Tea'
+			AND ISNULL(I.strShortName, '') <> ''
 	END
 
 	IF NOT EXISTS (
