@@ -13,14 +13,14 @@
 			,intJiraKeyId
 			,strJiraKey
 			,strJiraUrl
-			,REPLACE(strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
+			,strTypeIconUrl				= strJiraTypeIconUrl
 			,strSummary
 			,strDescription
 			,strReporter
 			,strAssignee
 			,strFixedBy
-			,REPLACE(strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
-			,REPLACE(strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
+			,strPriorityIconUrl			= strJiraPriorityIconUrl
+			,strStatusIconUrl			= strJiraStatusIconUrl
 			,strResolution
 			,dtmJiraCreated
 			,dtmJiraUpdated
@@ -51,6 +51,9 @@
 				,d.dtmJiraCreated
 				,d.dtmJiraUpdated
 				,d.strFixedVersion
+				,d.strJiraPriorityIconUrl
+				,d.strJiraStatusIconUrl
+				,d.strJiraTypeIconUrl
 			from
 				tblHDProject a
 				inner join tblHDTicket b on 1=1
