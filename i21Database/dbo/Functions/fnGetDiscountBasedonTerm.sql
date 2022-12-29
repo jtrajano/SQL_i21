@@ -28,7 +28,7 @@ WHERE
 
 IF (@Type = 'Standard')
 	BEGIN
-		IF (@DiscountDate >= @PaymentDate) AND (@DiscountDate >= @CurrentDate)
+		IF (@DiscountDate >= @PaymentDate) --AND (@DiscountDate >= @CurrentDate)
 			BEGIN
 				RETURN @InvoiceTotal * (@DiscountEP / 100.000000)
 			END
@@ -39,7 +39,7 @@ IF (@Type = 'Standard')
 	END	
 ELSE IF (@Type = 'Date Driven')
 	BEGIN						
-		IF ((@DiscountDate >= @PaymentDate) AND (@DiscountDate >= @CurrentDate))
+		IF ((@DiscountDate >= @PaymentDate)) --AND (@DiscountDate >= @CurrentDate))
 			BEGIN
 				RETURN @InvoiceTotal * (@DiscountEP / 100.000000)
 			END
