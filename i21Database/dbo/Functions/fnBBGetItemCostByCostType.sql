@@ -2,6 +2,7 @@ CREATE FUNCTION [dbo].[fnBBGetItemCostByCostType] (
     @strCostType NVARCHAR(50), 
     @intItemId INT, 
     @intItemLocationId INT, 
+    @intItemUOMId INT,
     @dtmAsOfDate DATETIME)
 RETURNS NUMERIC(18, 6)
 BEGIN
@@ -23,10 +24,10 @@ BEGIN
         WHERE fifo.intItemId = @intItemId
             AND fifo.dtmDate <= @dtmAsOfDate
             AND fifo.intItemLocationId = @intItemLocationId
-            AND cm.strCostingMethod IN ('AVG', 'FIFO')
+            AND cm.strCostingMethod = 'FIFO'
         ORDER BY intInventoryFIFOId DESC
 
-        SELECT @dblCost = lifo.dblCost
+        SELECT TOP 1 @dblCost = lifo.dblCost
         FROM tblICInventoryLIFO lifo
         JOIN tblICItemLocation il ON il.intItemLocationId = lifo.intItemLocationId
         JOIN tblICCostingMethod cm ON cm.intCostingMethodId = il.intCostingMethod
@@ -34,6 +35,13 @@ BEGIN
             AND lifo.dtmDate <= @dtmAsOfDate
             AND lifo.intItemLocationId = @intItemLocationId
             AND cm.strCostingMethod = 'LIFO'
+
+        SELECT TOP 1 @dblCost = dbo.fnGetItemAverageCost(il.intItemId, il.intItemLocationId, @intItemUOMId)
+        FROM tblICItemLocation il
+        JOIN tblICCostingMethod cm ON cm.intCostingMethodId = il.intCostingMethod
+        WHERE il.intItemId = @intItemId
+            AND il.intItemLocationId = @intItemLocationId
+            AND cm.strCostingMethod = 'AVG'
     END
     ELSE
     BEGIN
