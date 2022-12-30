@@ -1007,6 +1007,7 @@ BEGIN
 		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblForexCost] NUMERIC(38, 20) NULL, 
 		[dblValue] NUMERIC(38, 20) NULL, 
 		[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intCurrencyId] INT NULL,
@@ -1135,6 +1136,7 @@ BEGIN
 				,dblQty
 				,dblUOMQty
 				,dblCost
+				,dblForexCost
 				,dblValue
 				,dblSalesPrice
 				,t.intCurrencyId
@@ -2371,7 +2373,8 @@ BEGIN
 						,dtmDate  
 						,dblQty  
 						,dblUOMQty  
-						,dblCost  
+						,dblCost
+						,dblForexCost
 						,dblSalesPrice  
 						,intCurrencyId  
 						,dblExchangeRate  
@@ -2404,6 +2407,7 @@ BEGIN
 									,ICTrans.intItemUOMId
 									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
 								)
+						,ICTrans.dblForexCost
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -2476,6 +2480,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -2494,7 +2499,9 @@ BEGIN
 						,[strSourceType]
 						,[strSourceNumber]
 						,[strBOLNumber]
-						,[intTicketId]						
+						,[intTicketId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
 					)
 					SELECT 	
 							[intItemId] = t.intItemId
@@ -2504,6 +2511,7 @@ BEGIN
 							,[dblQty] = -t.dblQty
 							,[dblUOMQty] = t.dblUOMQty
 							,[dblCost] = t.dblCost
+							,[dblForexCost] = t.dblForexCost
 							,[dblValue] = t.dblValue
 							,[dblSalesPrice] = t.dblSalesPrice
 							,[intCurrencyId] = t.intCurrencyId
@@ -2523,6 +2531,8 @@ BEGIN
 							,[strSourceNumber] = t.strSourceNumber
 							,[strBOLNumber] = t.strBOLNumber
 							,[intTicketId] = t.intTicketId
+							,[intForexRateTypeId] = t.intForexRateTypeId
+							,[dblForexRate] = t.dblForexRate
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN tblICItem i 
@@ -2563,6 +2573,7 @@ BEGIN
 							,dblQty  
 							,dblUOMQty  
 							,dblCost  
+							,dblForexCost
 							,dblSalesPrice  
 							,intCurrencyId  
 							,dblExchangeRate  
@@ -2590,6 +2601,7 @@ BEGIN
 							,-TransferSource.dblQty
 							,ISNULL(ItemUOM.dblUnitQty, TransferSource.dblUOMQty)
 							,TransferSource.dblCost 
+							,TransferSource.dblForexCost  
 							,0
 							,NULL
 							,1
@@ -3786,7 +3798,8 @@ BEGIN
 						,dtmDate  
 						,dblQty  
 						,dblUOMQty  
-						,dblCost  
+						,dblCost
+						,dblForexCost
 						,dblSalesPrice  
 						,intCurrencyId  
 						,dblExchangeRate  
@@ -3819,6 +3832,7 @@ BEGIN
 									,ICTrans.intItemUOMId
 									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
 								)
+						,ICTrans.dblForexCost 
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -3943,6 +3957,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -3962,6 +3977,8 @@ BEGIN
 						,[strSourceNumber] 
 						,[strBOLNumber] 
 						,[intTicketId] 
+						,[intForexRateTypeId]
+						,[dblForexRate]
 					)
 					SELECT 	
 							t.[intItemId] 
@@ -3971,6 +3988,7 @@ BEGIN
 							,-t.[dblQty] 
 							,t.[dblUOMQty] 
 							,t.[dblCost] 
+							,t.[dblForexCost]
 							,t.[dblValue] 
 							,t.[dblSalesPrice] 
 							,t.[intCurrencyId] 
@@ -3990,6 +4008,8 @@ BEGIN
 							,t.strSourceNumber
 							,t.strBOLNumber
 							,t.intTicketId
+							,t.intForexRateTypeId
+							,t.dblForexRate
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON t.intItemId = i.intItemId 
 							INNER JOIN #tmpRebuildList list
@@ -4078,6 +4098,7 @@ BEGIN
 						,dblQty  
 						,dblUOMQty  
 						,dblCost  
+						,dblForexCost
 						,dblSalesPrice  
 						,intCurrencyId  
 						,dblExchangeRate  
@@ -4119,6 +4140,7 @@ BEGIN
 									)
 									,RebuildInvTrans.dblCost
 								)
+						,dblForexCost = RebuildInvTrans.dblForexCost 
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
@@ -4269,6 +4291,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -4287,7 +4310,9 @@ BEGIN
 						,[strSourceType] 
 						,[strSourceNumber] 
 						,[strBOLNumber] 
-						,[intTicketId] 
+						,[intTicketId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
 				)
 				SELECT
 						[intItemId]					= t.intItemId
@@ -4297,6 +4322,7 @@ BEGIN
 						,[dblQty]					= t.dblQty
 						,[dblUOMQty]				= t.dblUOMQty
 						,[dblCost]					= t.dblCost
+						,[dblForexCost]				= t.dblForexCost
 						,[dblValue]					= 0
 						,[dblSalesPrice]			= id.dblPrice
 						,[intCurrencyId]			= i.intCurrencyId
@@ -4322,6 +4348,8 @@ BEGIN
 						,[strSourceNumber] = t.strSourceNumber
 						,[strBOLNumber] = t.strBOLNumber
 						,[intTicketId] = t.intTicketId
+						,[intForexRateTypeId] = t.intForexRateTypeId
+						,[dblForexRate] = t.dblForexRate
 				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
@@ -5004,7 +5032,6 @@ BEGIN
 							,[strSourceNumber] = tp.strSourceNumber
 							,[strBOLNumber] = tp.strBOLNumber
 							,[intTicketId] = tp.intTicketId
-
 					FROM	(
 								SELECT DISTINCT 
 									dtp.strTransactionId
@@ -5132,6 +5159,7 @@ BEGIN
 							,[dblQty] 
 							,[dblUOMQty] 
 							,[dblCost] 
+							,[dblForexCost]
 							,[dblSalesPrice] 
 							,[intCurrencyId] 
 							,[dblExchangeRate] 
@@ -5150,7 +5178,7 @@ BEGIN
 							,[strSourceType] 
 							,[strSourceNumber] 
 							,[strBOLNumber] 
-							,[intTicketId] 
+							,[intTicketId]
 					)
 					SELECT 
 							[intItemId]				= t.intItemId  
@@ -5160,6 +5188,7 @@ BEGIN
 							,[dblQty]				= dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, -ri.dblOpenReceive)
 							,[dblUOMQty]			= t.dblUOMQty
 							,[dblCost]				= t.dblCost
+							,[dblForexCost]			= t.dblForexCost
 							,[dblSalesPrice]		= tp.dblSalesPrice
 							,[intCurrencyId]		= tp.intCurrencyId
 							,[dblExchangeRate]		= tp.dblExchangeRate
@@ -6015,6 +6044,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -6033,7 +6063,9 @@ BEGIN
 					,[strSourceType] 
 					,[strSourceNumber] 
 					,[strBOLNumber] 
-					,[intTicketId] 
+					,[intTicketId]
+					,[intForexRateId]
+					,[dblForexRate]
 				)
 				SELECT 	
 						t.[intItemId] 
@@ -6043,6 +6075,7 @@ BEGIN
 						,-t.[dblQty] 
 						,t.[dblUOMQty] 
 						,t.[dblCost] 
+						,t.[dblForexCost] 
 						,t.[dblValue] 
 						,t.[dblSalesPrice] 
 						,t.[intCurrencyId] 
@@ -6062,6 +6095,8 @@ BEGIN
 						,[strSourceNumber] = t.strSourceNumber
 						,[strBOLNumber] = t.strBOLNumber
 						,[intTicketId] = t.intTicketId
+						,[intForexRateId] = t.intForexRateId
+						,[dblForexRate] = t.dblForexRate
 				FROM	tblICInventoryTransaction t INNER JOIN tblICItem  i
 							ON t.intItemId = i.intItemId 					
 						INNER JOIN #tmpRebuildList list
@@ -6146,6 +6181,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -6176,6 +6212,7 @@ BEGIN
 						,[dblQty] = t.dblQty
 						,[dblUOMQty] = t.dblUOMQty
 						,[dblCost] = t.dblCost
+						,[dblForexCost] = t.dblForexCost 
 						,[dblValue] = t.dblValue
 						,[dblSalesPrice] = t.dblSalesPrice
 						,[intCurrencyId] = t.intCurrencyId
