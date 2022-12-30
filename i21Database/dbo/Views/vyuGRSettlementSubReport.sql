@@ -287,7 +287,7 @@ FROM
 	UNION ALL
 	--manually added item in the voucher but as a misc field only
 	SELECT
-		intBillDetailIdItem				= B.intBillDetailId
+		intBillDetailIdItem				= BD_ITEM.intBillDetailId
 		,strId							= AP.strBillId
 		,intBillId						= AP.intBillId
 		,intItemId						= NULL
@@ -297,28 +297,22 @@ FROM
 		,dblShrinkPercent				= 0
 		,dblGradeReading				= NULL
 		,dblAmount						= BD.dblTotal
-		,intContractDetailId			= B.intContractDetailId
+		,intContractDetailId			= BD_ITEM.intContractDetailId
 		,dblTax							= BD.dblTax
 		,dblNetTotal					= BD.dblTotal + ISNULL(BD.dblTax,0)
 		,strTaxClass					= TaxClass.strTaxClass
 	FROM tblAPBillDetail BD
-	OUTER APPLY (
-		SELECT TOP 1 
-			BD_ITEM.intBillDetailId
-			,BD_ITEM.intContractDetailId
-		FROM tblAPBillDetail BD_ITEM
-		INNER JOIN tblICItem IC
-			ON IC.intItemId = BD_ITEM.intItemId
-				AND IC.strType = 'Inventory'
-		WHERE (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL) 
-			AND BD_ITEM.intBillId = BD.intBillId
-	) B
 	--) BON BD.intBillId = B.intBillId
 	INNER JOIN tblAPBill AP
 		ON AP.intBillId = BD.intBillId
-	LEFT JOIN vyuAPBillDetailTax Tax 
-			ON BD.intBillDetailId = Tax.intBillDetailId
-	LEFT JOIN tblSMTaxClass TaxClass 
+	LEFT JOIN (
+		tblAPBillDetail BD_ITEM
+		INNER JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND IC.strType = 'Inventory'	
+	) ON (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL)
+		AND BD_ITEM.intBillId = BD.intBillId
+	LEFT JOIN vyuAPBillDetailTax Tax
+		ON BD.intBillDetailId = Tax.intBillDetailId
+	LEFT JOIN tblSMTaxClass TaxClass
 		ON Tax.intTaxClassId = TaxClass.intTaxClassId
 	WHERE BD.intItemId IS NULL AND BD.ysnStage = 0	
 )t
