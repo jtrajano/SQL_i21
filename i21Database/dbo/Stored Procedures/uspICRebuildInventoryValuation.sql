@@ -4505,17 +4505,18 @@ BEGIN
 
 												-- (B) Other Charge
 												+ 
-												CASE 
-													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-														-- Convert the other charge to the currency used by the detail item. 
-														dbo.fnDivide(
-															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-															,ReceiptItem.dblForexRate
-														)
-													ELSE 
-														-- No conversion. Detail item is already in functional currency. 
-														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-												END 									
+												dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+												--CASE 
+												--	WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+												--		-- Convert the other charge to the currency used by the detail item. 
+												--		dbo.fnDivide(
+												--			dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+												--			,ReceiptItem.dblForexRate
+												--		)
+												--	ELSE 
+												--		-- No conversion. Detail item is already in functional currency. 
+												--		dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												--END 									
 												+
 												CASE 
 													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
@@ -4548,17 +4549,18 @@ BEGIN
 												)
 												-- (B) Other Charge
 												+ 
-												CASE 
-													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-														-- Convert the other charge to the currency used by the detail item. 
-														dbo.fnDivide(
-															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-															,ReceiptItem.dblForexRate
-														)
-													ELSE 
-														-- No conversion. Detail item is already in functional currency. 
-														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-												END	 									
+												dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												--CASE 
+												--	WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+												--		-- Convert the other charge to the currency used by the detail item. 
+												--		dbo.fnDivide(
+												--			dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+												--			,ReceiptItem.dblForexRate
+												--		)
+												--	ELSE 
+												--		-- No conversion. Detail item is already in functional currency. 
+												--		dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												--END	 									
 												+
 												CASE 
 													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
@@ -4676,6 +4678,7 @@ BEGIN
 					SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
 							,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
 							,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+							,dblForexCost = dblCost 
 					FROM	@ItemsToPost itemCost
 					WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
 				END

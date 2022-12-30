@@ -100,6 +100,7 @@ INSERT INTO @StockToPost (
     ,[dblQty]
 	,[dblUOMQty]
     ,[dblCost]
+	,[dblForexCost]
 	,[dblValue]
 	,[dblSalesPrice]
 	,[intCurrencyId]
@@ -129,7 +130,7 @@ INSERT INTO @StockToPost (
 	,[strSourceType] 
 	,[strSourceNumber]
 	,[strBOLNumber]
-	,[intTicketId] 
+	,[intTicketId] 	
 )
 SELECT
 	[intItemId] = p.intItemId 
@@ -147,6 +148,7 @@ SELECT
     ,[dblQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateQtyBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblQty) ELSE p.dblQty END 
 	,[dblUOMQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN iu.dblUnitQty ELSE p.dblUOMQty END 
     ,[dblCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblCost) ELSE p.dblCost END 
+	,[dblForexCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblForexCost) ELSE p.dblForexCost END 
 	,[dblValue] = p.dblValue 
 	,[dblSalesPrice] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblSalesPrice) ELSE p.dblSalesPrice END 
 	,[intCurrencyId] = p.intCurrencyId
@@ -176,7 +178,7 @@ SELECT
 	,[strSourceType] = p.strSourceType 
 	,[strSourceNumber] = p.strSourceNumber 
 	,[strBOLNumber] = p.strBOLNumber 
-	,[intTicketId] = p.intTicketId
+	,[intTicketId] = p.intTicketId	
 FROM 
 	@ItemsToPost p 
 	INNER JOIN tblICItem i 
@@ -278,7 +280,6 @@ FETCH NEXT FROM loopItems INTO
 	,@strSourceNumber 
 	,@strBOLNumber 
 	,@intTicketId
-
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
