@@ -546,6 +546,10 @@ BEGIN
 	-- Adjust Value
 	ELSE IF (ISNULL(@dblValue, 0) <> 0)
 	BEGIN 
+		-- Convert the @dblValue (in foreign) to functional currency. 
+		DECLARE @dblValueInFunctionalCurrency AS NUMERIC(38, 20) 
+		SET @dblValueInFunctionalCurrency = dbo.fnMultiply(@dblValue, ISNULL(@dblForexRate, 1)) 
+
 		-- Insert the inventory transaction record
 		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -558,7 +562,7 @@ BEGIN
 				,@dblUOMQty = NULL 
 				,@dblCost = NULL 
 				,@dblForexCost = NULL 
-				,@dblValue = @dblValue
+				,@dblValue = @dblValueInFunctionalCurrency
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
 				,@intTransactionId = @intTransactionId
@@ -585,6 +589,7 @@ BEGIN
 				,@strBOLNumber = @strBOLNumber
 				,@intTicketId = @intTicketId
 				,@dtmCreated = @dtmCreated OUTPUT 
+				,@dblForexValue = @dblValue 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -598,6 +603,9 @@ BEGIN
 				,[intLotId]
 				,[strActualCostId]
 				,[dblValue]
+				,[dblForexValue]
+				,[intCurrencyId]
+				,[dblForexRate]
 				,[ysnIsUnposted]
 				,[dtmCreated]
 				,[strRelatedTransactionId]
@@ -612,7 +620,10 @@ BEGIN
 				,[intItemLocationId] = @intItemLocationId
 				,[intLotId] = @intLotId
 				,[strActualCostId] = @strActualCostId
-				,[dblValue] = @dblValue
+				,[dblValue] = @dblValueInFunctionalCurrency
+				,[dblForexValue] = @dblValue 
+				,[intCurrencyId] = @intCurrencyId
+				,[dblForexRate] = @dblForexRate
 				,[ysnIsUnposted] = 0 
 				,[dtmCreated] = GETDATE()
 				,[strRelatedTransactionId] = @strTransactionId

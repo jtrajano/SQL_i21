@@ -42,6 +42,7 @@
 	,@strBOLNumber NVARCHAR(100) = NULL 
 	,@intTicketId INT = NULL 
 	,@dtmCreated DATETIME = NULL OUTPUT 
+	,@dblForexValue NUMERIC(38,20) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -162,6 +163,7 @@ BEGIN
 			,[intTicketId]
 			,[strAccountIdInventory]
 			,[strAccountIdInTransit]
+			,[dblForexValue]
 	)
 	SELECT	[intItemId]							= @intItemId
 			,[intItemLocationId]				= @intItemLocationId
@@ -212,6 +214,7 @@ BEGIN
 			,[intTicketId]						= @intTicketId
 			,[strAccountIdInventory]			= glAccountIdInventory.strAccountId
 			,[strAccountIdInTransit]			= glAccountIdInTransit.strAccountId
+			,[dblForexValue]					= ISNULL(@dblForexValue, 0)
 	FROM	tblICItem i 
 			CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable(

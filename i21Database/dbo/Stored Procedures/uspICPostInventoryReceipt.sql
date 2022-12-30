@@ -779,7 +779,7 @@ BEGIN
 				,dtmDate  
 				,dblQty  
 				,dblUOMQty  
-				,dblCost  
+				,dblCost
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -975,7 +975,6 @@ BEGIN
 										END
 									)							
 							END
-
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
 				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1)   
@@ -1079,6 +1078,7 @@ BEGIN
 			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
 					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
 					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+					,dblForexCost = dblCost
 			FROM	@ItemsForPost itemCost
 			WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
 		END
@@ -1094,6 +1094,7 @@ BEGIN
 			,[dblQty] 
 			,[dblUOMQty] 
 			,[dblCost] 
+			,[dblForexCost]
 			,[dblValue]
 			,[dblSalesPrice] 
 			,[intCurrencyId] 
@@ -1132,6 +1133,7 @@ BEGIN
 			,dblQty = -itemsToPost.dblQty
 			,itemsToPost.dblUOMQty
 			,itemsToPost.dblCost
+			,itemsToPost.dblForexCost 
 			,itemsToPost.dblValue
 			,itemsToPost.dblSalesPrice
 			,itemsToPost.intCurrencyId
@@ -1179,6 +1181,7 @@ BEGIN
 			,[dblQty] 
 			,[dblUOMQty] 
 			,[dblCost] 
+			,[dblForexCost]
 			,[dblValue]
 			,[dblSalesPrice] 
 			,[intCurrencyId] 
@@ -1217,6 +1220,7 @@ BEGIN
 			,itemsToPost.dblQty
 			,itemsToPost.dblUOMQty
 			,itemsToPost.dblCost
+			,itemsToPost.dblForexCost 
 			,itemsToPost.dblValue
 			,itemsToPost.dblSalesPrice
 			,itemsToPost.intCurrencyId
@@ -1308,6 +1312,7 @@ BEGIN
 					,dblQty  
 					,dblUOMQty  
 					,dblCost  
+					,dblForexCost 
 					,dblSalesPrice  
 					,intCurrencyId  
 					,dblExchangeRate  
@@ -1338,6 +1343,7 @@ BEGIN
 					,dblQty  
 					,dblUOMQty  
 					,dblCost  
+					,dblForexCost 
 					,dblSalesPrice  
 					,intCurrencyId  
 					,dblExchangeRate  
@@ -1634,6 +1640,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -1664,6 +1671,7 @@ BEGIN
 					,dblQty = -ri.dblOpenReceive
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
+					,t.[dblForexCost]
 					,t.[dblValue] 
 					,t.[dblSalesPrice] 
 					,t.[intCurrencyId] 
@@ -1866,7 +1874,7 @@ BEGIN
 								dbo.fnDivide(
 									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
 									,SUM(ISNULL(t.dblQty, 0))
-								)
+								)							
 						FROM 				
 							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
 								ON th.intInventoryTransferId = td.intInventoryTransferId
@@ -2032,6 +2040,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[intCurrencyId] 
 					,[dblExchangeRate] 
 					,[intTransactionId] 
@@ -2075,6 +2084,7 @@ BEGIN
 									
 					,[dblUOMQty]			= t.dblUOMQty
 					,[dblCost]				= valuationCost.dblCost 							
+					,[dblForexCost]			= valuationCost.dblForexCost 
 					,[intCurrencyId]		= t.intCurrencyId
 					,[dblExchangeRate]		= t.dblExchangeRate
 					,[intTransactionId]		= r.intInventoryReceiptId
@@ -2108,6 +2118,11 @@ BEGIN
 							dblCost = 
 								dbo.fnDivide(
 									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+									,SUM(ISNULL(t.dblQty, 0))
+								)
+							,dblForexCost = 
+								dbo.fnDivide(
+									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblForexCost, 0)))
 									,SUM(ISNULL(t.dblQty, 0))
 								)
 						FROM 				
@@ -2483,6 +2498,7 @@ BEGIN
 			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
 					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
 					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+					,dblForexCost = dblCost 
 			FROM	@StorageItemsForPost storageCost
 			WHERE	storageCost.intCurrencyId <> @intFunctionalCurrencyId 
 		END
