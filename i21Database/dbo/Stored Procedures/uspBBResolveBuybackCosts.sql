@@ -9,8 +9,8 @@ BEGIN
 
     UPDATE bbd
     SET 
-        bbd.dblBuybackRate = dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, iv.dtmDate),
-        bbd.dblReimbursementAmount = dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, iv.dtmDate) * bbd.dblBuybackQuantity
+        bbd.dblBuybackRate = CASE WHEN bc.intBuybackChargeId IS NOT NULL THEN bbd.dblBuybackRate ELSE dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, ivd.intItemUOMId, iv.dtmDate) END,
+        bbd.dblReimbursementAmount = CASE WHEN bc.intBuybackChargeId IS NOT NULL THEN bbd.dblBuybackRate ELSE dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, ivd.intItemUOMId, iv.dtmDate) END * bbd.dblBuybackQuantity
     FROM tblBBBuybackDetail bbd
     JOIN tblBBBuyback bb ON bb.intBuybackId = bbd.intBuybackId
     JOIN @Ids id ON id.intBuybackId = bb.intBuybackId
@@ -24,5 +24,7 @@ BEGIN
     JOIN tblICItem i ON i.intItemId = ivd.intItemId
     JOIN tblICItemLocation il ON il.intLocationId = iv.intCompanyLocationId
         AND il.intItemId = i.intItemId
+    LEFT JOIN tblBBBuybackCharge bc ON bc.intBuybackId = bb.intBuybackId
+        AND bc.strCharge = bbd.strCharge
 
 END
