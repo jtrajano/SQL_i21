@@ -460,41 +460,40 @@ FROM	ForGLEntries_CTE
 ;
 
 -- Return the GL entries back to the caller. 
-DECLARE @debug AS BIT = 0
-SELECT		
-		dtmDate
-		,strBatchId
-		,intAccountId
-		,dblDebit
-		,dblCredit
-		,dblDebitUnit
-		,dblCreditUnit
-		,strDescription
-		,strCode
-		,strReference = CASE WHEN @debug = 0 THEN '' ELSE strReference END 
-		,intCurrencyId
-		,dblExchangeRate
-		,dtmDateEntered
-		,dtmTransactionDate
-		,strJournalLineDescription
-		,intJournalLineNo
-		,ysnIsUnposted
-		,intUserId
-		,intEntityId
-		,strTransactionId
-		,intTransactionId
-		,strTransactionType
-		,strTransactionForm
-		,strModuleName
-		,intConcurrencyId
-		,dblDebitForeign
-		,dblDebitReport
-		,dblCreditForeign
-		,dblCreditReport
-		,dblReportingRate
-		,dblForeignRate 
-		,intSourceEntityId
-		,intCommodityId
-		,strRateType
-FROM	@GLEntries
-
+SELECT 
+	[dtmDate] 
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]					
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm] 
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
+	,[strRateType]
+	,[intSourceEntityId]
+	,[intCommodityId]
+FROM 
+	@GLEntries
