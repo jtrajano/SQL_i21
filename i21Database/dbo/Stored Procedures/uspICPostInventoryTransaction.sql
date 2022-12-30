@@ -8,6 +8,7 @@
 	,@dblQty NUMERIC(38,20)
 	,@dblUOMQty NUMERIC(38,20)
 	,@dblCost NUMERIC(38,20)
+	,@dblForexCost NUMERIC(38,20)	
 	,@dblValue NUMERIC(38,20)
 	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
@@ -41,6 +42,7 @@
 	,@strBOLNumber NVARCHAR(100) = NULL 
 	,@intTicketId INT = NULL 
 	,@dtmCreated DATETIME = NULL OUTPUT 
+	,@dblForexValue NUMERIC(38,20) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -92,6 +94,7 @@ BEGIN
 		AND (t.intSubLocationId = @intSubLocationId OR (t.intSubLocationId IS NULL AND @intSubLocationId IS NULL))
 		AND (t.intStorageLocationId = @intStorageLocationId OR (t.intStorageLocationId IS NULL AND intStorageLocationId IS NULL))
 		AND (t.dblCost = @dblCost OR (t.dblCost IS NULL AND @dblCost IS NULL))
+		AND (t.dblForexCost = @dblForexCost OR (t.dblForexCost IS NULL AND @dblForexCost IS NULL))
 		AND (t.dblSalesPrice = @dblSalesPrice OR (t.dblSalesPrice IS NULL AND @dblSalesPrice IS NULL))
 		AND (t.intRelatedTransactionId = @intRelatedTransactionId OR (t.intRelatedTransactionId IS NULL AND @intRelatedTransactionId IS NULL))
 		AND (t.strRelatedTransactionId = @strRelatedTransactionId OR (t.strRelatedTransactionId IS NULL AND @strRelatedTransactionId IS NULL))
@@ -119,6 +122,7 @@ BEGIN
 			,[dblQty] 
 			,[dblUOMQty]
 			,[dblCost] 
+			,[dblForexCost]
 			,[dblValue]
 			,[dblSalesPrice] 		
 			,[intCurrencyId] 
@@ -159,6 +163,7 @@ BEGIN
 			,[intTicketId]
 			,[strAccountIdInventory]
 			,[strAccountIdInTransit]
+			,[dblForexValue]
 	)
 	SELECT	[intItemId]							= @intItemId
 			,[intItemLocationId]				= @intItemLocationId
@@ -168,6 +173,7 @@ BEGIN
 			,[dblQty]							= ISNULL(@dblQty, 0)
 			,[dblUOMQty]						= ISNULL(@dblUOMQty, 0)
 			,[dblCost]							= ISNULL(@dblCost, 0)
+			,[dblForexCost]						= ISNULL(@dblForexCost, 0)
 			,[dblValue]							= ISNULL(@dblValue, 0)
 			,[dblSalesPrice]					= ISNULL(@dblSalesPrice, 0)
 			,[intCurrencyId]					= ISNULL(@intCurrencyId, @intFunctionalCurrencyId) 
@@ -208,6 +214,7 @@ BEGIN
 			,[intTicketId]						= @intTicketId
 			,[strAccountIdInventory]			= glAccountIdInventory.strAccountId
 			,[strAccountIdInTransit]			= glAccountIdInTransit.strAccountId
+			,[dblForexValue]					= ISNULL(@dblForexValue, 0)
 	FROM	tblICItem i 
 			CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
@@ -249,6 +256,7 @@ BEGIN
 		,@dtmDate 
 		,@dblQty 
 		,@dblCost
+		,@dblForexCost
 		,@intTransactionId 
 		,@strTransactionId 
 		,@strBatchId 

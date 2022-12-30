@@ -11,6 +11,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)
+	,@dblForexCost AS NUMERIC(38,20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	--,@dblExchangeRate AS NUMERIC(38,20)
@@ -62,6 +63,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @ForexCostUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -123,12 +125,18 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedActualCostId OUTPUT 
+				,@intCurrencyId OUTPUT  
+				,@intForexRateTypeId OUTPUT 
+				,@dblForexRate OUTPUT 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblForexCostToUse AS NUMERIC(38,20) = ISNULL(@ForexCostUsed, @dblForexCost)
 
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
@@ -140,6 +148,7 @@ BEGIN
 					,@dblQty = @dblComputedQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
+					,@dblForexCost = @dblForexCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
@@ -210,6 +219,7 @@ BEGIN
 				,@dtmDate = @dtmDate
 				,@dblQty = @FullQty
 				,@dblCost = @dblCost
+				,@dblForexCost = @dblForexCost
 				,@dblUOMQty = @dblUOMQty
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
@@ -267,6 +277,11 @@ BEGIN
 				,@UpdatedActualCostId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -310,6 +325,7 @@ BEGIN
 							,@dblQty = 0
 							,@dblUOMQty = 0
 							,@dblCost = 0
+							,@dblForexCost = 0 
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice
 							,@intCurrencyId = @intCurrencyId
@@ -382,6 +398,10 @@ BEGIN
 	-- Adjust Value
 	ELSE IF (ISNULL(@dblValue, 0) <> 0)
 	BEGIN 
+		-- Convert the @dblValue (in foreign) to functional currency. 
+		DECLARE @dblValueInFunctionalCurrency AS NUMERIC(38, 20) 
+		SET @dblValueInFunctionalCurrency = dbo.fnMultiply(@dblValue, ISNULL(@dblForexRate, 1)) 	
+
 		-- Insert the inventory transaction record
 		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -393,7 +413,8 @@ BEGIN
 				,@dblQty = NULL 
 				,@dblUOMQty = NULL 
 				,@dblCost = NULL 
-				,@dblValue = @dblValue
+				,@dblForexCost = NULL 
+				,@dblValue = @dblValueInFunctionalCurrency
 				,@dblSalesPrice = @dblSalesPrice
 				,@intCurrencyId = @intCurrencyId
 				,@intTransactionId = @intTransactionId
@@ -420,6 +441,7 @@ BEGIN
 				,@strBOLNumber = @strBOLNumber
 				,@intTicketId = @intTicketId
 				,@dtmCreated = @dtmCreated OUTPUT 
+				,@dblForexValue = @dblValue 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -433,6 +455,9 @@ BEGIN
 				,[intLotId]
 				,[strActualCostId]
 				,[dblValue]
+				,[dblForexValue]
+				,[intCurrencyId]
+				,[dblForexRate]
 				,[ysnIsUnposted]
 				,[dtmCreated]
 				,[strRelatedTransactionId]
@@ -445,9 +470,12 @@ BEGIN
 				[intInventoryTransactionId] = @InventoryTransactionIdentityId
 				,[intItemId] = @intItemId
 				,[intItemLocationId] = @intItemLocationId
-				,[intLotId] = NULL 
+				,[intLotId] = NULL
 				,[strActualCostId] = @strActualCostId
-				,[dblValue] = @dblValue
+				,[dblValue] = @dblValueInFunctionalCurrency
+				,[dblForexValue] = @dblValue 
+				,[intCurrencyId] = @intCurrencyId
+				,[dblForexRate] = @dblForexRate
 				,[ysnIsUnposted] = 0 
 				,[dtmCreated] = GETDATE()
 				,[strRelatedTransactionId] = @strTransactionId

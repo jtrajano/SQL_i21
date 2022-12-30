@@ -91,6 +91,10 @@ Records must be maintained in this table even if the costing method for an item 
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		[dblStockAvailable] AS (ROUND(ISNULL(dblStockIn, 0) - ISNULL(dblStockOut, 0), 6)) PERSISTED,
+		[intCurrencyId] INT NULL,
+		[intForexRateTypeId] INT NULL,
+		[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1,
+		[dblForexCost] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryFIFOStorage] PRIMARY KEY NONCLUSTERED ([intInventoryFIFOStorageId]) 
 	)
 	GO

@@ -20,6 +20,11 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInActualCost]
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@QtyOffset AS NUMERIC(38,20) OUTPUT 
 	,@ActualCostId AS INT OUTPUT
+	,@intCurrencyId AS INT OUTPUT  
+	,@intForexRateTypeId AS INT OUTPUT
+	,@dblForexRate AS NUMERIC(38, 20) OUTPUT
+	,@dblForexCost AS NUMERIC(38, 20)  
+	,@ForexCostUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -36,6 +41,7 @@ SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @ActualCostId = NULL;
+SET @ForexCostUsed = NULL; 
 
 -- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
 BEGIN 
@@ -166,6 +172,7 @@ WHEN MATCHED THEN
 
 		-- retrieve the cost from the ActualCost bucket. 
 		,@CostUsed = cb.dblCost
+		,@ForexCostUsed = cb.dblForexCost 
 
 		-- retrieve the	qty reduced from a ActualCost bucket 
 		,@QtyOffset = 
@@ -175,6 +182,11 @@ WHEN MATCHED THEN
 
 		-- retrieve the id of the matching ActualCost bucket 
 		,@ActualCostId = cb.intInventoryActualCostId
+
+		-- retrieve the forex fields from the lot cost bucket. 
+		,@intCurrencyId = cb.intCurrencyId 
+		,@intForexRateTypeId = cb.intForexRateTypeId
+		,@dblForexRate = cb.dblForexRate 
 
 -- Insert a new ActualCost bucket
 WHEN NOT MATCHED THEN

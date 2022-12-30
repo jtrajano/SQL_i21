@@ -321,6 +321,7 @@ BEGIN
 			,[dblQty]
 			,[dblUOMQty]
 			,[dblCost]
+			,[dblForexCost]
 			,[dblValue]
 			,[dblUnitRetail]
 			,[dblSalesPrice]
@@ -371,6 +372,7 @@ BEGIN
 			,[dblQty]								= -ActualTransaction.dblQty
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
+			,[dblForexCost]							= ActualTransaction.dblForexCost
 			,[dblValue]								= -ActualTransaction.dblValue
 			,[dblUnitRetail]						= ActualTransaction.dblUnitRetail 
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice

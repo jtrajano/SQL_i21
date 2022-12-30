@@ -344,7 +344,6 @@ AS
 							,ri.dblOpenReceive
 						)	
 					)
-			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,intReference = CAST(1 AS TINYINT)
