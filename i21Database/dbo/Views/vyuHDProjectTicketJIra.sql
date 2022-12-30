@@ -10,14 +10,14 @@
 							THEN d.strKey
 						ELSE d.strJiraKey
 				  END
-		,REPLACE(d.strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
+		,strTypeIconUrl				= d.strJiraTypeIconUrl
 		,d.strSummary
 		,strOriginalEstimate
 		,d.strReporter
 		,d.strAssignee
 		,d.strFixedBy
-		,REPLACE(d.strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
-		,REPLACE(d.strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
+		,strPriorityIconUrl			= d.strJiraPriorityIconUrl
+		,strStatusIconUrl			= d.strJiraStatusIconUrl
 		,d.dtmJiraCreated
 		,d.dtmJiraUpdated
 		,d.strFixedVersion

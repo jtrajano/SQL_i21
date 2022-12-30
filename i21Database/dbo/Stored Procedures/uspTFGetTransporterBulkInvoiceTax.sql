@@ -44,7 +44,7 @@ BEGIN TRY
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
-		IF  NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0')
+		IF  NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND LTRIM(RTRIM(strCriteria)) = '<> 0')
 		BEGIN
 			INSERT INTO @tmpTransaction(intId
 				, intTransactionDetailId

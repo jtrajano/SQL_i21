@@ -20,6 +20,9 @@
 	[strFixedVersion] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strOriginalEstimate] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intOriginalEstimateSeconds] [int] NULL,
+    [strJiraPriorityIconUrl] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+    [strJiraTypeIconUrl] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strJiraStatusIconUrl] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketJIRAIssue] PRIMARY KEY CLUSTERED ([intTicketJIRAIssueId] ASC),
     CONSTRAINT [FK_Ticket_icketJIRAIssue] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])
