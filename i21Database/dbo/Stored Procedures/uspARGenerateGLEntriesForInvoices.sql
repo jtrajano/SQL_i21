@@ -296,6 +296,9 @@ LEFT OUTER JOIN (
         ,[intSalesAccountId]
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
+	    AND strItemType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+	    AND intItemId IS NOT NULL
+	    AND strType <> 'Tax Adjustment'
     GROUP BY 
          [intInvoiceId]
         ,[intSalesAccountId]
