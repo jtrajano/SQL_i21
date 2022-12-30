@@ -103,7 +103,7 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblQty, 0) 
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets or added a new negative bucket. 
+		-- Repeat call on uspICReduceStockInFIFOStorage until @dblReduceQty is completely distributed to all available fifo buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
 			EXEC @intReturnValue = dbo.uspICReduceStockInFIFOStorage
@@ -121,9 +121,9 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedFIFOStorageId OUTPUT 
-				,@intCurrencyId 
-				,@intForexRateTypeId 
-				,@dblForexRate 
+				,@intCurrencyId OUTPUT
+				,@intForexRateTypeId OUTPUT
+				,@dblForexRate OUTPUT
 				,@dblForexCost 
 				,@ForexCostUsed OUTPUT 
 

@@ -158,9 +158,9 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedLIFOId OUTPUT 
-				,@intCurrencyId 
-				,@intForexRateTypeId 
-				,@dblForexRate 
+				,@intCurrencyId OUTPUT
+				,@intForexRateTypeId OUTPUT
+				,@dblForexRate OUTPUT
 				,@dblForexCost 
 				,@ForexCostUsed OUTPUT 
 

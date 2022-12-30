@@ -127,7 +127,7 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblQty, 0)
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
+		-- Repeat call on uspICReturnStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
 		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 

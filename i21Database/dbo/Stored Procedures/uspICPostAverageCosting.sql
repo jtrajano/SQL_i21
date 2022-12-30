@@ -178,7 +178,7 @@ BEGIN
 		SET @dblCost = ISNULL(@dblCost, 0) 		
 		SET @dblForexCost = ISNULL(@dblForexCost, 0) 
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
+		-- Repeat call on uspICReduceStockInAvg until @dblReduceQty is completely distributed to all available fifo buckets 
 		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
@@ -197,9 +197,9 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
-				,@intCurrencyId 
-				,@intForexRateTypeId 
-				,@dblForexRate 
+				,@intCurrencyId OUTPUT 
+				,@intForexRateTypeId OUTPUT
+				,@dblForexRate OUTPUT
 				,@dblForexCost 
 				,@ForexCostUsed OUTPUT 
 	

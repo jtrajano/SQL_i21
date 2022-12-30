@@ -121,9 +121,9 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedLIFOStorageId OUTPUT 
-				,@intCurrencyId 
-				,@intForexRateTypeId 
-				,@dblForexRate 
+				,@intCurrencyId OUTPUT 
+				,@intForexRateTypeId OUTPUT
+				,@dblForexRate OUTPUT
 				,@dblForexCost 
 				,@ForexCostUsed OUTPUT 
 

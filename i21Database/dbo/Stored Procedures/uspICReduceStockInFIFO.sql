@@ -19,9 +19,9 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFO]
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@QtyOffset AS NUMERIC(38,20) OUTPUT 
 	,@FifoId AS INT OUTPUT
-	,@intCurrencyId AS INT 
-	,@intForexRateTypeId AS INT
-	,@dblForexRate AS NUMERIC(38, 20) 
+	,@intCurrencyId AS INT OUTPUT 
+	,@intForexRateTypeId AS INT OUTPUT
+	,@dblForexRate AS NUMERIC(38, 20) OUTPUT
 	,@dblForexCost AS NUMERIC(38, 20) 
 	,@ForexCostUsed AS NUMERIC(38,20) OUTPUT 
 AS
@@ -194,6 +194,11 @@ WHEN MATCHED THEN
 
 		-- retrieve the id of the matching fifo bucket 
 		,@FifoId = cb.intInventoryFIFOId
+
+		-- retrieve the forex fields from the lot cost bucket. 
+		,@intCurrencyId = cb.intCurrencyId 
+		,@intForexRateTypeId = cb.intForexRateTypeId
+		,@dblForexRate = cb.dblForexRate 
 
 -- Insert a new fifo bucket
 WHEN NOT MATCHED THEN

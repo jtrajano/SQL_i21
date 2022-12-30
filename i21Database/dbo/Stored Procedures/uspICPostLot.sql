@@ -113,12 +113,6 @@ BEGIN
 						AND Lot.intWeightUOMId IS NOT NULL 
 						AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 						AND (ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) > 0 
-						--AND (
-						--	Lot.intLotId = @intLotId
-						--	AND Lot.intItemLocationId = @intItemLocationId
-						--	AND Lot.intItemUOMId = @intItemUOMId
-						--	AND ROUND((@dblQty % 1), 6) <> 0 -- Check if bagged qty is a whole number. If fractional, convert qty to wgt. 							
-						--)
 			)
 
 			BEGIN 
@@ -201,9 +195,9 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
-				,@intCurrencyId 
-				,@intForexRateTypeId 
-				,@dblForexRate 
+				,@intCurrencyId OUTPUT 
+				,@intForexRateTypeId OUTPUT 
+				,@dblForexRate OUTPUT 
 				,@dblForexCost 
 				,@ForexCostUsed OUTPUT 
 
