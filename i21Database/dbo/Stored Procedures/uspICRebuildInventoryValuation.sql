@@ -1040,7 +1040,8 @@ BEGIN
 		[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-		[intTicketId] INT NULL		
+		[intTicketId] INT NULL,
+		[dblForexValue] NUMERIC(38, 20) NULL
 	)
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_delete]
@@ -1168,6 +1169,7 @@ BEGIN
 				,strSourceNumber
 				,strBOLNumber
 				,intTicketId
+				,t.dblForexValue
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 				LEFT JOIN tblICInventoryTransactionType  ty
@@ -1893,7 +1895,7 @@ BEGIN
 						[intItemId] = t.intItemId
 						,[intItemLocationId] = t.intItemLocationId
 						,[dtmDate] = t.dtmDate
-						,[dblValue] = t.dblValue
+						,[dblValue] = t.dblForexValue 
 						,[intTransactionId] = t.intTransactionId
 						,[intTransactionDetailId] = t.intTransactionDetailId
 						,[strTransactionId] = t.strTransactionId

@@ -492,8 +492,8 @@ SELECT
 	,[dblCreditReport]
 	,[dblReportingRate]
 	,[dblForeignRate]
-	,[strRateType]
 	,[intSourceEntityId]
 	,[intCommodityId]
+	,[strRateType]
 FROM 
 	@GLEntries

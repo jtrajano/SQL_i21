@@ -50,6 +50,7 @@ DECLARE @intId AS INT
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
 		,@dblValue AS NUMERIC(38, 20)
+		,@dblForexCost AS NUMERIC(38, 20)
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -92,6 +93,7 @@ SELECT  intId
 		,dblQty
 		,dblUOMQty
 		,dblCost
+		,dblForexCost
 		,dblSalesPrice
 		,intCurrencyId
 		--,dblExchangeRate
@@ -126,6 +128,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblQty
 	,@dblUOMQty
 	,@dblCost
+	,@dblForexCost
 	,@dblSalesPrice 
 	,@intCurrencyId
 	--,@dblExchangeRate
@@ -179,6 +182,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -215,6 +219,7 @@ BEGIN
 			,@dblQty 
 			,@dblUOMQty 
 			,@dblCost 
+			,@dblForexCost
 			,@dblSalesPrice 
 			,@intCurrencyId 
 			--,@dblExchangeRate 
@@ -249,6 +254,7 @@ BEGIN
 		,@dblQty
 		,@dblUOMQty
 		,@dblCost
+		,@dblForexCost
 		,@dblSalesPrice 
 		,@intCurrencyId
 		--,@dblExchangeRate
@@ -353,6 +359,38 @@ END
 -- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
 -- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
 -----------------------------------------------------------------------------------------------------------------------------
+
+SELECT 
+	@strSourceTransactionId = NULL 
+	,@intItemId = NULL 
+	,@intItemLocationId = NULL 
+	,@intItemUOMId = NULL 
+	,@dtmDate = NULL 
+	,@intLotId = NULL 
+	,@dblQty = NULL 
+	,@dblUOMQty = NULL 
+	,@dblCost = NULL 
+	,@dblForexCost = NULL 
+	,@dblSalesPrice = NULL 
+	,@intCurrencyId = NULL 
+	,@intTransactionId = NULL 
+	,@intTransactionDetailId = NULL 
+	,@strTransactionId = NULL 
+	--,@strBatchId = NULL 
+	--,@intTransactionTypeId = NULL 
+	--,@strTransactionForm = NULL 
+	--,@intEntityUserSecurityId = NULL 
+	,@intFobPointId = NULL 
+	,@intInTransitSourceLocationId = NULL 
+	,@intForexRateTypeId = NULL 
+	,@dblForexRate = NULL 
+	,@intSourceEntityId = NULL 
+	,@strSourceType = NULL 
+	,@strSourceNumber = NULL 
+	,@strBOLNumber = NULL 
+	,@intTicketId = NULL 
+	,@dblValue = NULL 
+
 DECLARE loopAdjustValue CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intId
@@ -440,6 +478,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -477,6 +516,7 @@ BEGIN
 			,@dblQty 
 			,@dblUOMQty 
 			,@dblCost 
+			,@dblForexCost
 			,@dblSalesPrice 
 			,@intCurrencyId 
 			--,@dblExchangeRate 
