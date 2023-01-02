@@ -28,7 +28,7 @@ BEGIN
 	SELECT 
 		A.*
 		,strItemType = B.strType
-	INTO #tmpInvoiceDetail 
+	INTO #tmpTMValidInvoiceDetail 
 	FROM tblARInvoiceDetail A
 	INNER JOIN tblICItem B
 		ON A.intItemId = B.intItemId	
@@ -37,12 +37,12 @@ BEGIN
 	
 	SET @intRowCount = 0
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceDetail WHERE intSiteId IS NOT NULL AND ISNULL(ysnLeaseBilling ,0) <> 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpTMValidInvoiceDetail WHERE intSiteId IS NOT NULL AND ISNULL(ysnLeaseBilling ,0) <> 1)
 	BEGIN
 		SET @ResultLog = @ResultLog + 'Exception:No Consumption Site invoice to process.'
 	END
 	
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInvoiceDetail)
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTMValidInvoiceDetail)
 	BEGIN
 		SET @intRowCount = @intRowCount + 1
 		
@@ -53,7 +53,7 @@ BEGIN
 			,@intInvoiceDetailId = intInvoiceDetailId
 			,@intPerformerId = intPerformerId
 			,@strItemType = strItemType
-		FROM #tmpInvoiceDetail
+		FROM #tmpTMValidInvoiceDetail
 		
 		SELECT 
 			@intClockId = intClockID
@@ -188,7 +188,7 @@ BEGIN
 		END
 		
 		CONTINUELOOP:
-		DELETE FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
+		DELETE FROM #tmpTMValidInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 	END
 		
 DONEVALIDATING:
