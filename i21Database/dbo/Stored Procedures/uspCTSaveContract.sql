@@ -450,6 +450,16 @@ BEGIN TRY
 			END
 		END
 
+		--CT-8256
+		IF @intConcurrencyId = 1
+		BEGIN
+			EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Added'
+		END
+		ELSE 
+		BEGIN
+			EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Modified'
+		END
+
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
 			declare
