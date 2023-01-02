@@ -92,32 +92,33 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@SiteId						INT
 				,@ItemUOMId						INT
 
-		SELECT TOP 1 @InvoiceDetailId		= [intInvoiceDetailId]
-		FROM @InvoiceDetail
-		ORDER BY [intInvoiceDetailId]
+		SELECT TOP 1
+			 @InvoiceDetailId		= [intInvoiceDetailId]
+		FROM
+			@InvoiceDetail
+		ORDER BY
+			[intInvoiceDetailId]
 			
-		SELECT @ItemId						= [intItemId]
-			, @ItemPrice					= (CASE WHEN ISNULL([intLoadDetailId],0) = 0 
+		SELECT
+			 @ItemId						= tblARInvoiceDetail.[intItemId]
+			,@ItemPrice						= 
+												(CASE WHEN ISNULL(tblARInvoiceDetail.[intLoadDetailId],0) = 0 
 													THEN 
-														[dblPrice] - ([dblPrice] * ([dblDiscount] / 100.00))
+														tblARInvoiceDetail.[dblPrice] - (tblARInvoiceDetail.[dblPrice] * (tblARInvoiceDetail.[dblDiscount] / 100.00))
 													ELSE 
-														ISNULL([dblUnitPrice], @ZeroDecimal) 
-												END) / ISNULL([dblSubCurrencyRate], 1)
-			, @QtyShipped					= (CASE WHEN ISNULL([intLoadDetailId],0) = 0 
-													THEN CASE WHEN intPriceUOMId IS NOT NULL AND intPriceUOMId <> intItemUOMId 
-															  THEN dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, dblQtyShipped)
-															  ELSE [dblQtyShipped] 
-														  END
-													ELSE ISNULL([dblShipmentNetWt], @ZeroDecimal) 
-											   END)
-			, @TaxGroupId					= [intTaxGroupId]
-			, @SiteId						= [intSiteId]
-			, @SubCurrencyRate				= ISNULL([dblSubCurrencyRate], 1)
-			, @CurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
-			, @CurrencyExchangeRate			= ISNULL([dblCurrencyExchangeRate], 1)
-			, @ItemUOMId					= intItemUOMId 
-		FROM tblARInvoiceDetail
-		WHERE [intInvoiceDetailId] = @InvoiceDetailId
+														ISNULL(tblARInvoiceDetail.[dblUnitPrice], @ZeroDecimal) 
+												END) / ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
+			,@QtyShipped					= (CASE WHEN ISNULL(tblARInvoiceDetail.[intLoadDetailId],0) = 0 THEN tblARInvoiceDetail.[dblQtyShipped] ELSE ISNULL(tblARInvoiceDetail.[dblShipmentNetWt], @ZeroDecimal) END)
+			,@TaxGroupId					= tblARInvoiceDetail.[intTaxGroupId]
+			,@SiteId						= tblARInvoiceDetail.[intSiteId]
+			,@SubCurrencyRate				= ISNULL(tblARInvoiceDetail.[dblSubCurrencyRate], 1)
+			,@CurrencyExchangeRateTypeId	= tblARInvoiceDetail.[intCurrencyExchangeRateTypeId]
+			,@CurrencyExchangeRate			= ISNULL(tblARInvoiceDetail.[dblCurrencyExchangeRate], 1)
+			,@ItemUOMId						= tblARInvoiceDetail.intItemUOMId 
+		FROM
+			tblARInvoiceDetail
+		WHERE
+			[intInvoiceDetailId] = @InvoiceDetailId
 			
 		SELECT @ItemType = [strType] FROM tblICItem WHERE intItemId = @ItemId
 			

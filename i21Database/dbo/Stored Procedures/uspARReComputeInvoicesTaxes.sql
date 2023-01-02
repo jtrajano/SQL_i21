@@ -76,13 +76,7 @@ BEGIN
 		,[dblSubCurrencyRate]				= ISNULL(ARID.[dblSubCurrencyRate], 1)
 		,[intFreightTermId]					= ARI.[intFreightTermId]
 		,[dblPrice]							= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblPrice] ELSE ISNULL(ARID.[dblUnitPrice], @ZeroDecimal) END) / ISNULL(ARID.[dblSubCurrencyRate], 1)
-		,[dblQtyShipped]					= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 
-												    THEN CASE WHEN ARID.intPriceUOMId IS NOT NULL AND ARID.intPriceUOMId <> ARID.intItemUOMId 
-															  THEN dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intPriceUOMId, ARID.dblQtyShipped)
-															  ELSE ARID.[dblQtyShipped] 
-														  END
-													ELSE ISNULL(ARID.[dblShipmentNetWt], @ZeroDecimal) 
-											   END)
+		,[dblQtyShipped]					= (CASE WHEN ISNULL(ARID.[intLoadDetailId],0) = 0 THEN ARID.[dblQtyShipped] ELSE ISNULL(ARID.[dblShipmentNetWt], @ZeroDecimal) END)
 		,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
 		,[dblCurrencyExchangeRate]			= ISNULL(ARID.[dblCurrencyExchangeRate], 1)
 		,[intTaxGroupId]					= CASE WHEN ISNULL(ARID.[intTaxGroupId],0) = 0 THEN NULL ELSE ARID.[intTaxGroupId] END
