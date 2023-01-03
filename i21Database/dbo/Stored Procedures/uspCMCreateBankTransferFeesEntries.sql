@@ -174,24 +174,18 @@ BEGIN
             = GLAccnt.intAccountId    
             WHERE A.strTransactionId = @strTransactionId    
 
-            SELECT 
-            @dblExchangeRate =ROUND((((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblDebitForeign)) / (dblDebitForeign + @dblFeesForeign)),6)
+            UPDATE A
+			SET dblDebit = dblDebit - @dblFees ,
+		    dblDebitForeign = dblDebitForeign - @dblFeesForeign
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
-            UPDATE A   
-            SET dblDebit = dblDebit - @dblFees ,
-            dblExchangeRate = @dblExchangeRate,
-            dblDebitForeign = dblDebitForeign - @dblFeesForeign
+			UPDATE A
+			SET dblExchangeRate = dblDebit/dblDebitForeign
             from #tmpGLDetail A  
-            WHERE intAccountId = @intBankGLAccountId  
-
-
+            WHERE intAccountId = @intBankGLAccountId
     END
         
 END
 
 END
-
-    
-
