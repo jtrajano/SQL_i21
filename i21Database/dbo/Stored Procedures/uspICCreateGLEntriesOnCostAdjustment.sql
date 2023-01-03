@@ -647,7 +647,8 @@ WITH ForGLEntries_CTE (
 	,dblForexValue 
 	,intTransactionTypeId
 	,intCurrencyId
-	,dblExchangeRate
+	,dblExchangeRate	
+	,intForexRateTypeId
 	,intInventoryTransactionId
 	,strInventoryTransactionTypeName
 	,strTransactionForm
@@ -678,6 +679,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -719,6 +721,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -773,6 +776,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -814,6 +818,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -868,6 +873,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -909,6 +915,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -963,6 +970,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -1004,6 +1012,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -1058,6 +1067,7 @@ AS
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -1095,6 +1105,7 @@ INSERT INTO @GLEntries (
 	,strReference
 	,intCurrencyId
 	,dblExchangeRate
+	,intCurrencyExchangeRateTypeId
 	,dtmDateEntered
 	,dtmTransactionDate
 	,strJournalLineDescription
@@ -1143,6 +1154,7 @@ SELECT
 		,strReference				= '1' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1197,6 +1209,7 @@ SELECT
 		,strReference				= '2' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1252,6 +1265,7 @@ SELECT
 		,strReference				= '3' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1317,6 +1331,7 @@ SELECT
 		,strReference				= '4' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1370,6 +1385,7 @@ SELECT
 		,strReference				= '5' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1428,6 +1444,7 @@ SELECT
 		,strReference				= '6' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1480,6 +1497,7 @@ SELECT
 		,strReference				= '7' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1538,6 +1556,7 @@ SELECT
 		,strReference				= '9' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1590,6 +1609,7 @@ SELECT
 		,strReference				= '8' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1648,6 +1668,7 @@ SELECT
 		,strReference				= '10' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1700,6 +1721,7 @@ SELECT
 		,strReference				= '11' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1764,6 +1786,7 @@ SELECT
 		,strReference				= '12' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1822,6 +1845,7 @@ SELECT
 		,strReference				= '13' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1875,6 +1899,7 @@ SELECT
 		,strReference				= '14' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1933,6 +1958,7 @@ SELECT
 		,strReference				= '15' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1987,6 +2013,7 @@ SELECT
 		,strReference				= '16' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -2626,6 +2653,7 @@ SELECT
 		,dblForeignRate 
 		,intSourceEntityId
 		,intCommodityId
+		,intCurrencyExchangeRateTypeId
 FROM	@GLEntries
 
 --IF @ysnPost = 0 
