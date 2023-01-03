@@ -185,6 +185,39 @@ BEGIN TRY
 		END
 	END
 
+	IF @strMessageType = 'PBBS'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Doc No</th>
+							<th>&nbsp;PBBS ID</th>
+							<th>&nbsp;Blend Code</th>
+							<th>&nbsp;PDF File Name</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+				SELECT 1
+				FROM tblIPPBBSError t WITH (NOLOCK)
+				WHERE t.ysnMailSent = 0
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+					'<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, t.intDocNo), '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, t.intPBBSID), '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strBlendCode, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strPDFFileName, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' +
+				'</tr>'
+			FROM tblIPPBBSError t WITH (NOLOCK)
+			WHERE t.ysnMailSent = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPPBBSError t
+			WHERE t.ysnMailSent = 0
+		END
+	END
+
 	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
 	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
 	SET @strMessage = @strStyle + @strHtml

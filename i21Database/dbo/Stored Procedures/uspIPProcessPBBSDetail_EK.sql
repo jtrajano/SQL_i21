@@ -45,6 +45,26 @@ BEGIN TRY
 		,stri21TestName NVARCHAR(100)
 		)
 	DECLARE @SingleAuditLogParam SingleAuditLogParam
+	DECLARE @PropertyValues TABLE (
+		intProductPropertyValidityPeriodId INT
+		,intPropertyId INT
+		,strPropertyName NVARCHAR(50)
+		,dblOldMinValue NUMERIC(18, 6)
+		,dblOldMaxValue NUMERIC(18, 6)
+		,dblOldPinpointValue NUMERIC(18, 6)
+		,dblNewMinValue NUMERIC(18, 6)
+		,dblNewMaxValue NUMERIC(18, 6)
+		,dblNewPinpointValue NUMERIC(18, 6)
+		)
+	DECLARE @intAuditDetailId INT
+		,@intId INT
+		,@strPropertyName NVARCHAR(50)
+		,@dblOldMinValue NUMERIC(18, 6)
+		,@dblOldMaxValue NUMERIC(18, 6)
+		,@dblOldPinpointValue NUMERIC(18, 6)
+		,@dblNewMinValue NUMERIC(18, 6)
+		,@dblNewMaxValue NUMERIC(18, 6)
+		,@dblNewPinpointValue NUMERIC(18, 6)
 	DECLARE @tblIPPBBSStage TABLE (intPBBSStageId INT)
 
 	INSERT INTO @tblIPPBBSStage (intPBBSStageId)
@@ -484,22 +504,164 @@ BEGIN TRY
 			END
 			ELSE IF @intActionId = 2
 			BEGIN
+				DELETE
+				FROM @PropertyValues
+
 				UPDATE PPV
 				SET intConcurrencyId = PPV.intConcurrencyId + 1
 					,dblMinValue = PD.dblMinValue
 					,dblMaxValue = PD.dblMaxValue
 					,dblPinpointValue = PD.dblPinPoint
+				OUTPUT inserted.intProductPropertyValidityPeriodId
+					,P.intPropertyId
+					,P.strPropertyName
+					,deleted.dblMinValue
+					,deleted.dblMaxValue
+					,deleted.dblPinpointValue
+					,inserted.dblMinValue
+					,inserted.dblMaxValue
+					,inserted.dblPinpointValue
+				INTO @PropertyValues
 				FROM tblQMProductPropertyValidityPeriod PPV
 				JOIN tblQMProductProperty PP ON PP.intProductPropertyId = PPV.intProductPropertyId
 					AND PP.intProductId = @intProductId
 				--AND PP.intTestId = @intTestId
 				JOIN tblQMProperty P ON P.intPropertyId = PP.intPropertyId
 				JOIN tblIPSAPProperty SP ON SP.stri21PropertyName = P.strPropertyName
-				JOIN tblIPPBBSDetailStage PD ON PD.intPBBSStageId = @intPBBSStageId
-					AND PD.strSpecificationCode = SP.strSAPPropertyName
+				JOIN tblIPPBBSDetailStage PD ON PD.strSpecificationCode = SP.strSAPPropertyName
+					AND PD.intPBBSStageId = @intPBBSStageId
 				WHERE ISNULL(PPV.dblMinValue, 0) <> ISNULL(PD.dblMinValue, 0)
 					OR ISNULL(PPV.dblMaxValue, 0) <> ISNULL(PD.dblMaxValue, 0)
 					OR ISNULL(PPV.dblPinpointValue, 0) <> ISNULL(PD.dblPinPoint, 0)
+
+				SELECT @intAuditDetailId = NULL
+					,@intId = 1
+
+				DELETE
+				FROM @SingleAuditLogParam
+
+				WHILE EXISTS (
+						SELECT TOP 1 NULL
+						FROM @PropertyValues
+						)
+				BEGIN
+					SELECT @strPropertyName = NULL
+						,@dblOldMinValue = NULL
+						,@dblOldMaxValue = NULL
+						,@dblOldPinpointValue = NULL
+						,@dblNewMinValue = NULL
+						,@dblNewMaxValue = NULL
+						,@dblNewPinpointValue = NULL
+
+					SELECT TOP 1 @intAuditDetailId = intProductPropertyValidityPeriodId
+						,@strPropertyName = strPropertyName
+						,@dblOldMinValue = dblOldMinValue
+						,@dblOldMaxValue = dblOldMaxValue
+						,@dblOldPinpointValue = dblOldPinpointValue
+						,@dblNewMinValue = dblNewMinValue
+						,@dblNewMaxValue = dblNewMaxValue
+						,@dblNewPinpointValue = dblNewPinpointValue
+					FROM @PropertyValues
+
+					IF NOT EXISTS (
+							SELECT TOP 1 1
+							FROM @SingleAuditLogParam
+							)
+					BEGIN
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Action]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[Field]
+							,[Hidden]
+							,[ParentId]
+							)
+						SELECT 1
+							,'Updated'
+							,'Updated - Record: ' + CAST(@intProductId AS VARCHAR(MAX))
+							,NULL
+							,NULL
+							,NULL
+							,NULL
+							,NULL
+							,NULL
+					END
+
+					IF (ISNULL(@dblOldMinValue, '') <> ISNULL(@dblNewMinValue, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,ISNULL(@strPropertyName, '') + ' - Min'
+							,LTRIM(@dblOldMinValue)
+							,LTRIM(@dblNewMinValue)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@dblOldMaxValue, '') <> ISNULL(@dblNewMaxValue, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,ISNULL(@strPropertyName, '') + ' - Max'
+							,LTRIM(@dblOldMaxValue)
+							,LTRIM(@dblNewMaxValue)
+							,NULL
+							,1
+					END
+
+					IF (ISNULL(@dblOldPinpointValue, '') <> ISNULL(@dblNewPinpointValue, ''))
+					BEGIN
+						SET @intId += 1
+
+						INSERT INTO @SingleAuditLogParam (
+							[Id]
+							,[Change]
+							,[From]
+							,[To]
+							,[Alias]
+							,[ParentId]
+							)
+						SELECT @intId
+							,ISNULL(@strPropertyName, '') + ' - Pinpoint'
+							,LTRIM(@dblOldPinpointValue)
+							,LTRIM(@dblNewPinpointValue)
+							,NULL
+							,1
+					END
+
+					DELETE
+					FROM @PropertyValues
+					WHERE intProductPropertyValidityPeriodId = @intAuditDetailId
+				END
+
+				IF @intId > 1
+				BEGIN
+					EXEC uspSMSingleAuditLog @screenName = 'Quality.view.QualityTemplate'
+						,@recordId = @intProductId
+						,@entityId = @intUserId
+						,@AuditLogParam = @SingleAuditLogParam
+				END
 			END
 
 			IF ISNULL(@strFileContent, '') <> ''
@@ -603,7 +765,7 @@ BEGIN TRY
 			DELETE
 			FROM tblIPPBBSStage
 			WHERE intPBBSStageId = @intPBBSStageId
-
+			
 			--COMMIT TRAN
 		END TRY
 
