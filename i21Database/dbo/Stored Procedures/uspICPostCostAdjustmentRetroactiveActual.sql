@@ -751,6 +751,7 @@ BEGIN
 			,@dblQty								= 0
 			,@dblUOMQty								= 0
 			,@dblCost								= 0
+			,@dblForexCost							= 0 
 			,@dblValue								= @CurrentCostAdjustment
 			,@dblSalesPrice							= 0
 			,@intCurrencyId							= NULL 
