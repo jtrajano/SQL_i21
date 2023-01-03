@@ -230,6 +230,7 @@
     <Build Include="dbo\Functions\fnFAGetNextMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetPreviousMonthPeriodEndDateFromDate.sql" />
     <None Include="Scripts\Post-Deployment\FA\02_UpdateMonthlyAssetDepreciation.sql" />
+    <None Include="Scripts\Post-Deployment\QM\5_DefaultConfigurationData.sql" />
     <Build Include="dbo\Views\vyuFAMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
