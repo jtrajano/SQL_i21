@@ -30,6 +30,9 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
 	,@IsEscalate AS BIT = 0 
 	,@intSourceEntityId AS INT = NULL 
+	,@intCurrencyId AS INT = NULL 
+	,@intForexRateTypeId AS INT = NULL
+	,@dblForexRate AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -115,7 +118,8 @@ BEGIN
 			,@OriginalRunningValue AS NUMERIC(38, 20)
 			,@CurrentValue AS NUMERIC(38, 20)
 
-			,@CostAdjustment AS NUMERIC(38, 20)			
+			,@CostAdjustment AS NUMERIC(38, 20)	
+			,@ForexCostAdjustment AS NUMERIC(38, 20)
 			,@OriginalAverageCost AS NUMERIC(38, 20)
 			,@NewAverageCost AS NUMERIC(38, 20)
 
@@ -167,11 +171,21 @@ END
 
 -- Compute the cost adjustment
 BEGIN 
-	SET @CostAdjustment = 
+	SET @ForexCostAdjustment = 
 		CASE	WHEN @dblNewValue IS NOT NULL THEN @dblNewValue
 				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
 				ELSE NULL 
-		END 
+		END 	
+	
+	IF ISNULL(NULLIF(@dblForexRate, 0), 1) = 1 
+	BEGIN 
+		SET @CostAdjustment = @ForexCostAdjustment 
+		SET @ForexCostAdjustment = NULL 
+	END 
+	ELSE IF NULLIF(@dblForexRate, 0) <> 1 
+	BEGIN 
+		SET @CostAdjustment = @ForexCostAdjustment * @dblForexRate	
+	END 
 
 	-- If there is no cost adjustment, exit immediately. 
 	IF @CostAdjustment IS NULL 
@@ -762,6 +776,10 @@ BEGIN
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
 				,[intOtherChargeItemId] 
+				,[dblForexValue]
+				,[intCurrencyId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 			)
 			SELECT
 				[intInventoryFIFOId] = @CostBucketId
@@ -898,6 +916,19 @@ BEGIN
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
 				,[intOtherChargeItemId] = @intOtherChargeItemId 
+				,[dblForexValue] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@ForexCostAdjustment
+							--WHEN @t_dblQty < 0 THEN 
+							--	(@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
+							--WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN
+							--	(-@t_NegativeStockQty * @NewAverageCost) - (-@t_NegativeStockQty * @t_NegativeStockCost) - @CurrentValue - @AccumulatedCostAdjustment
+							ELSE 
+								0
+					END 
+				,[intCurrencyId] = @intCurrencyId
+				,[intForexRateTypeId] = @intForexRateTypeId
+				,[dblForexRate] = @dblForexRate
 			WHERE		
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostAdjustment
@@ -971,7 +1002,7 @@ BEGIN
 			,@dblForexCost							= 0 
 			,@dblValue								= @CurrentValue
 			,@dblSalesPrice							= 0
-			,@intCurrencyId							= NULL 
+			,@intCurrencyId							= @intCurrencyId
 			,@intTransactionId						= @intTransactionId
 			,@intTransactionDetailId				= @intTransactionDetailId
 			,@strTransactionId						= @strTransactionId
@@ -987,8 +1018,8 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-			,@intForexRateTypeId					= NULL
-			,@dblForexRate							= 1
+			,@intForexRateTypeId					= @intForexRateTypeId
+			,@dblForexRate							= @dblForexRate
 			,@strDescription						= @strDescription
 			,@intSourceEntityId						= @intSourceEntityId
 
@@ -1048,7 +1079,7 @@ BEGIN
 			,@dblCost								= 0
 			,@dblValue								= @CurrentValue
 			,@dblSalesPrice							= 0
-			,@intCurrencyId							= NULL 
+			,@intCurrencyId							= @intCurrencyId
 			,@intTransactionId						= @intTransactionId
 			,@intTransactionDetailId				= @intTransactionDetailId
 			,@strTransactionId						= @strTransactionId
@@ -1064,8 +1095,8 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-			,@intForexRateTypeId					= NULL
-			,@dblForexRate							= 1
+			,@intForexRateTypeId					= @intForexRateTypeId
+			,@dblForexRate							= @dblForexRate
 			,@strDescription						= @strDescription
 			,@intSourceEntityId						= @intSourceEntityId
 
@@ -1225,7 +1256,7 @@ BEGIN
 			,@dblCost = 0
 			,@dblValue = @dblAutoVariance
 			,@dblSalesPrice = 0
-			,@intCurrencyId = NULL 
+			,@intCurrencyId = @intCurrencyId 
 			,@intTransactionId = @intTransactionId
 			,@intTransactionDetailId = @intTransactionDetailId
 			,@strTransactionId = @strTransactionId
@@ -1239,8 +1270,8 @@ BEGIN
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
 			,@intCostingMethod = @AVERAGECOST
 			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
-			,@intForexRateTypeId = NULL
-			,@dblForexRate = 1
+			,@intForexRateTypeId = @intForexRateTypeId
+			,@dblForexRate = @dblForexRate
 			,@strDescription = @strAutoVarianceDescription 
 			,@intSourceEntityId = @intSourceEntityId
 			
