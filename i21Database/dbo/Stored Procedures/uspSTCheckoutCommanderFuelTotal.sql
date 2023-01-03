@@ -246,17 +246,14 @@ BEGIN
 					, [dblAmount]					= ISNULL(CAST(Chk.dblDollarsSold as decimal(18,6)),0) --just based the readings on the meter readings
 					, [intConcurrencyId]			= 0
 				 FROM tblSTCheckoutFuelTotalSold Chk
-				 JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(CAST(Chk.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-					AND Chk.intCheckoutId = @intCheckoutId
-				 JOIN dbo.tblICItem I 
-					ON I.intItemId = IL.intItemId
+				 JOIN dbo.tblSTPumpItem SPI 
+					ON ISNULL(CAST(Chk.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, '')) AND Chk.intCheckoutId = @intCheckoutId
 				 JOIN dbo.tblICItemUOM UOM 
-					ON UOM.intItemId = I.intItemId
-				 JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
+					ON UOM.intItemUOMId = SPI.intItemUOMId
+				 JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
 				 JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
+					ON S.intStoreId = SPI.intStoreId
 				 WHERE S.intStoreId = @intStoreId
 			END
 			ELSE
@@ -278,11 +275,11 @@ BEGIN
 						ON CPT.intPumpCardCouponId = UOM.intItemUOMId
 					INNER JOIN tblICItem Item
 						ON UOM.intItemId = Item.intItemId
-					INNER JOIN dbo.tblICItemLocation IL 
-						ON Item.intItemId = IL.intItemId
-						AND ST.intCompanyLocationId = IL.intLocationId
+					INNER JOIN dbo.tblSTPumpItem SPI 
+						ON ST.intStoreId = SPI.intStoreId AND
+						UOM.intItemUOMId = SPI.intItemUOMId
 					INNER JOIN tblSTCheckoutFuelTotalSold Chk
-						ON ISNULL(CAST(Chk.intProductNumber AS NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						ON ISNULL(CAST(Chk.intProductNumber AS NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, ''))
 						AND Chk.intCheckoutId = @intCheckoutId
 					WHERE CPT.intCheckoutId = @intCheckoutId
 			END

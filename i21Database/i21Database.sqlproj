@@ -1217,6 +1217,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
+    <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
