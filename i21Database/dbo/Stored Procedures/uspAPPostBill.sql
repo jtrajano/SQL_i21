@@ -381,6 +381,8 @@ INSERT INTO @adjustedEntries (
 	,[strSourceTransactionId] 
 	,[intFobPointId]
 	,[intInTransitSourceLocationId]
+	,[intForexRateTypeId] 
+	,[dblForexRate] 
 )
 SELECT 
 	[intItemId] 
@@ -408,6 +410,8 @@ SELECT
 	,[strSourceTransactionId] 
 	,[intFobPointId]
 	,[intInTransitSourceLocationId]
+	,[intForexRateTypeId] 
+	,[dblForexRate] 
 FROM dbo.fnAPCreateReceiptItemCostAdjustment(@voucherIds, @intFunctionalCurrencyId)
 
 -- Remove zero cost adjustments. 
@@ -683,6 +687,7 @@ BEGIN
 			,dblForeignRate
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
@@ -1055,6 +1060,7 @@ BEGIN
 			,dblForeignRate
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
