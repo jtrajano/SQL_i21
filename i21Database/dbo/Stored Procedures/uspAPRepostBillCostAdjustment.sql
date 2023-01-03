@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICRepostBillCostAdjustment]
+﻿CREATE PROCEDURE [dbo].[uspAPRepostBillCostAdjustment]
 	@strBillId AS NVARCHAR(50)
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
@@ -317,6 +317,8 @@ BEGIN
 		,[strSourceTransactionId] 
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
 	)
 	SELECT 
 		[intItemId] 
@@ -326,10 +328,8 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[intCostUOMId] 
-		--,[dblVoucherCost] 
 		,[dblNewValue]
 		,[intCurrencyId] 
-		--,[dblExchangeRate] 
 		,[intTransactionId] 
 		,[intTransactionDetailId] 
 		,[strTransactionId] 
@@ -344,6 +344,8 @@ BEGIN
 		,[strSourceTransactionId] 
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
 	FROM dbo.fnAPCreateReceiptItemCostAdjustment(
 			@voucherIds
 			, @intFunctionalCurrencyId
@@ -485,37 +487,37 @@ BEGIN
 	-- Create the GL entries for the cost adjustment. 
 	BEGIN 
 		INSERT INTO @billGLEntries (
-			dtmDate						
-			,strBatchId					
-			,intAccountId				
-			,dblDebit					
-			,dblCredit					
-			,dblDebitUnit				
-			,dblCreditUnit				
-			,strDescription				
-			,strCode					
-			,strReference				
-			,intCurrencyId				
-			,dblExchangeRate			
-			,dtmDateEntered				
-			,dtmTransactionDate			
-			,strJournalLineDescription  
-			,intJournalLineNo			
-			,ysnIsUnposted				
-			,intUserId					
-			,intEntityId				
-			,strTransactionId			
-			,intTransactionId			
-			,strTransactionType			
-			,strTransactionForm			
-			,strModuleName				
-			,intConcurrencyId			
-			,dblDebitForeign			
-			,dblDebitReport				
-			,dblCreditForeign			
-			,dblCreditReport			
-			,dblReportingRate			
-			,dblForeignRate				
+			dtmDate
+			,strBatchId
+			,intAccountId
+			,dblDebit
+			,dblCredit
+			,dblDebitUnit
+			,dblCreditUnit
+			,strDescription
+			,strCode
+			,strReference
+			,intCurrencyId
+			,dblExchangeRate
+			,dtmDateEntered
+			,dtmTransactionDate
+			,strJournalLineDescription
+			,intJournalLineNo
+			,ysnIsUnposted
+			,intUserId
+			,intEntityId
+			,strTransactionId
+			,intTransactionId
+			,strTransactionType
+			,strTransactionForm
+			,strModuleName
+			,intConcurrencyId
+			,dblDebitForeign
+			,dblDebitReport
+			,dblCreditForeign
+			,dblCreditReport
+			,dblReportingRate
+			,dblForeignRate 
 			,intSourceEntityId
 			,intCommodityId
 		)
