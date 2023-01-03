@@ -236,3 +236,6 @@ CREATE NONCLUSTERED INDEX [IX_tblQMSample_strBatchNo] ON [dbo].[tblQMSample](str
 GO
 CREATE NONCLUSTERED INDEX [IX_tblQMSample_intMarketZoneId] ON [dbo].[tblQMSample](intMarketZoneId)
 GO
+CREATE NONCLUSTERED INDEX [IX_tblQMSample_CatalogueImport]
+ON [dbo].[tblQMSample] ([intEntityId],[intLocationId],[strRepresentLotNumber],[strSaleNumber],[intCatalogueTypeId])
+GO
