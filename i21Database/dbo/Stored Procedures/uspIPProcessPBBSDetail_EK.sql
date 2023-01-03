@@ -302,7 +302,7 @@ BEGIN TRY
 						)
 			END
 
-			BEGIN TRAN
+			--BEGIN TRAN
 
 			IF @intActionId = 1
 			BEGIN
@@ -604,13 +604,13 @@ BEGIN TRY
 			FROM tblIPPBBSStage
 			WHERE intPBBSStageId = @intPBBSStageId
 
-			COMMIT TRAN
+			--COMMIT TRAN
 		END TRY
 
 		BEGIN CATCH
-			IF XACT_STATE() != 0
-				AND @@TRANCOUNT > 0
-				ROLLBACK TRANSACTION
+			--IF XACT_STATE() != 0
+			--	AND @@TRANCOUNT > 0
+			--	ROLLBACK TRANSACTION
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg

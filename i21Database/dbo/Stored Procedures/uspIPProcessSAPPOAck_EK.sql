@@ -25,6 +25,7 @@ BEGIN TRY
 		,@intLoadId INT
 		,@intLoadDetailId INT
 		,@intContractFeedId INT
+		,@strBatchId NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,DocNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -139,6 +140,7 @@ BEGIN TRY
 				SELECT @intLoadId = NULL
 					,@intLoadDetailId = NULL
 					,@intContractFeedId = NULL
+					,@strBatchId = NULL
 
 				SELECT @DocNo = DocNo
 					,@MsgType = MsgType
@@ -161,6 +163,7 @@ BEGIN TRY
 
 					SELECT @intLoadDetailId = CF.intLoadDetailId
 						,@intContractFeedId = CF.intContractFeedId
+						,@strBatchId = CF.strBatchId
 					FROM dbo.tblIPContractFeed CF
 					WHERE CF.intLoadId = @intLoadId
 						AND CF.intContractFeedId = @TrackingNo
@@ -190,6 +193,12 @@ BEGIN TRY
 								,intConcurrencyId = intConcurrencyId + 1
 							WHERE intLoadDetailId = @intLoadDetailId
 						END
+						
+						--Add PO details in Batch
+						UPDATE tblMFBatch
+						SET strERPPONumber = @PONumber
+							,strERPPOLineNo = @POLineItemNo
+						WHERE strBatchId = @strBatchId
 
 						--For Added PO
 						UPDATE tblIPContractFeed
