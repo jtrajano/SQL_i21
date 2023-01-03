@@ -1416,6 +1416,8 @@
   <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
   <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
   <Build Include="dbo\Views\vyuHDTicketLink.sql" />
+  <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
