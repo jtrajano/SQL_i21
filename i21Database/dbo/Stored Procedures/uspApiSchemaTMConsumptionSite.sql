@@ -444,6 +444,29 @@ BEGIN
 	AND CS.guiApiUniqueId = @guiApiUniqueId
 	AND ISNULL(CS.strJulianCalendar, '') != ''
 
+	-- VALIDATE RequireClock
+	INSERT INTO tblApiImportLogDetail (
+		guiApiImportLogDetailId
+		, guiApiImportLogId
+		, strField
+		, strValue
+		, strLogLevel
+		, strStatus
+		, intRowNo
+		, strMessage
+	)
+	SELECT guiApiImportLogDetailId = NEWID()
+		, guiApiImportLogId = @guiLogId
+		, strField = 'Require Clock'
+		, strValue = CS.ysnRequireClock
+		, strLogLevel = 'Error'
+		, strStatus = 'Failed'
+		, intRowNo = CS.intRowNumber
+		, strMessage = 'Clock is required'
+	FROM tblApiSchemaTMConsumptionSite CS
+	WHERE CS.ysnRequireClock = 1 
+	AND CS.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(CS.strClock, '') = ''
 
 	-- CHECK IF ALREADY EXISTS IN CONSUMPTION SITE
 
@@ -505,7 +528,7 @@ BEGIN
 		, @ysnDeliveryTicketPrinted BIT = NULL
 		, @ysnPrintARBalance BIT = NULL
 		, @intNextDeliveryDegreeDay INT = NULL
-		--, @ysnRequireClock BIT = NULL
+		, @ysnRequireClock BIT = NULL
 		, @ysnRoutingAlert bit = NULL
 		, @ysnRequirePump bit = NULL
 		, @dblLastDeliveredGal numeric(18, 6)  = NULL
@@ -575,7 +598,7 @@ BEGIN
 		,CS.ysnDeliveryTicketPrinted AS ysnDeliveryTicketPrinted   
 		,CS.ysnPrintARBalance AS ysnPrintARBalance
 		,CS.intNextDeliveryDegreeDay AS intNextDeliveryDegreeDay
-		--,CS.ysnRequireClock AS ysnRequireClock 
+		,CS.ysnRequireClock AS ysnRequireClock 
 		,CS.ysnRoutingAlert AS ysnRoutingAlert
 		,CS.ysnRequirePump AS ysnRequirePump
 		,CS.dblLastDeliveredGal AS dblLastDeliveredGal
@@ -585,13 +608,13 @@ BEGIN
 	FROM tblApiSchemaTMConsumptionSite CS
 	INNER JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
 	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
-	INNER JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId
+	LEFT JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId
 	INNER JOIN @tmpBillingType B ON B.strBillingType = CS.strBillingBy
 	INNER JOIN tblEMEntity D ON D.strEntityNo = CS.strDriverId
 	INNER JOIN [tblEMEntityType] DT ON DT.intEntityId = D.intEntityId AND DT.strType = 'Salesperson'
 	INNER JOIN tblTMRoute R ON R.strRouteId = CS.strRoute
 	INNER JOIN tblSMCompanyLocation CL ON CL.strLocationName = CS.strLocationName
-	INNER JOIN tblTMClock CK ON CK.strClockNumber = CS.strClock
+	LEFT JOIN tblTMClock CK ON CK.strClockNumber = CS.strClock
 	INNER JOIN tblARAccountStatus A ON A.strAccountStatusCode = CS.strAccountStatus
 	INNER JOIN tblICItem I ON I.strItemNo = CS.strItemNo
 	INNER JOIN tblTMFillMethod FM ON FM.strFillMethod = CS.strFillMethod
@@ -634,7 +657,7 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay--,@ysnRequireClock
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
 		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
 		, @intCustomerNumber
 	WHILE @@FETCH_STATUS = 0
@@ -738,7 +761,7 @@ BEGIN
 						,ysnPrintDeliveryTicket 
 						,ysnPrintARBalance
 						,intNextDeliveryDegreeDay
-						--,ysnRequireClock
+						,ysnRequireClock
 						,ysnRoutingAlert
 						,ysnRequirePump
 						,dblLastDeliveredGal 
@@ -804,7 +827,7 @@ BEGIN
 						,@ysnDeliveryTicketPrinted
 						,@ysnPrintARBalance
 						,@intNextDeliveryDegreeDay
-						--,@ysnRequireClock
+						,@ysnRequireClock
 						,@ysnRoutingAlert
 						,@ysnRequirePump
 						,@dblLastDeliveredGal
@@ -893,7 +916,7 @@ BEGIN
 						, ysnPrintDeliveryTicket = @ysnDeliveryTicketPrinted
 						, ysnPrintARBalance = @ysnPrintARBalance
 						, intNextDeliveryDegreeDay = @intNextDeliveryDegreeDay
-						--, ysnRequireClock = @ysnRequireClock
+						, ysnRequireClock = @ysnRequireClock
 						,ysnRoutingAlert = @ysnRoutingAlert
 						,ysnRequirePump = @ysnRequirePump
 						,dblLastDeliveredGal = @dblLastDeliveredGal
@@ -979,7 +1002,7 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay--,@ysnRequireClock
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
 		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
 		, @intCustomerNumber
 	END
