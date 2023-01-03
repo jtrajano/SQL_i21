@@ -11272,6 +11272,11 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspGREndOfMonthProcedureReport.sql" />
+    <Build Include="dbo\Functions\fnGRGetitemAverageCostAsOfDate.sql" />
+    <Build Include="dbo\Functions\fnGREndOfMonthProcedureSalesContracts.sql" />
+    <Build Include="dbo\Functions\fnGREndOfMonthProcedurePurchaseContracts.sql" />
+    <Build Include="dbo\Functions\fnGREndOfMonthProcedureInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
