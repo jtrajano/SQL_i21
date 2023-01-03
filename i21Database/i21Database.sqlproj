@@ -9209,6 +9209,7 @@
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_SettleStorage_Basis.sql" />
+    <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
