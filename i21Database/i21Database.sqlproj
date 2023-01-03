@@ -1449,6 +1449,8 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessPBBSDetail_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
+    <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
