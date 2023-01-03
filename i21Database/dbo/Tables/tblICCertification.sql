@@ -25,6 +25,7 @@ Type the overview for the table here.
 		[dtmDateModified] DATETIME NULL,
 		[intCreatedByUserId] INT NULL,
 		[intModifiedByUserId] INT NULL,
+		[ysnMultiple] BIT NOT NULL DEFAULT 0,
 		CONSTRAINT [PK_tblICCertification] PRIMARY KEY ([intCertificationId]), 
 		CONSTRAINT [AK_tblICCertification_strCertificationName] UNIQUE ([strCertificationName]), 
 		CONSTRAINT [FK_tblICCertification_tblSMCountry] FOREIGN KEY ([intCountryId]) REFERENCES [tblSMCountry]([intCountryID])
@@ -93,3 +94,12 @@ Type the overview for the table here.
 		@level1name = N'tblICCertification',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+	GO
+	EXEC sp_addextendedproperty @name = N'MS_Description',
+		@value = N'Multiple',
+		@level0type = N'SCHEMA',
+		@level0name = N'dbo',
+		@level1type = N'TABLE',
+		@level1name = N'tblICCertification',
+		@level2type = N'COLUMN',
+		@level2name = N'ysnMultiple'
