@@ -75,7 +75,7 @@ BEGIN
 
 		-- ================================================================================================================== 
 		-- Get Error logs. Check Register XML that is not configured in i21
-		-- Compare <strFuelProdBaseNAXMLFuelGradeID> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
+		-- Compare <strFuelProdBaseNAXMLFuelGradeID> tag of (RegisterXML) and (Store->Pump Items->->strRegisterFuelId1 ir strRegisterFuelId2)
 		-- ------------------------------------------------------------------------------------------------------------------ 
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
@@ -103,16 +103,14 @@ BEGIN
 				SELECT DISTINCT
 					Chk.strFuelProdBaseNAXMLFuelGradeID AS strXmlRegisterFuelGradeID
 				FROM @UDT_TranFPHose2 Chk
-				JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-				JOIN dbo.tblICItem I 
-					ON I.intItemId = IL.intItemId
+				JOIN dbo.tblSTPumpItem SPI 
+					ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, ''))
 				JOIN dbo.tblICItemUOM UOM 
-					ON UOM.intItemId = I.intItemId
-				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
+					ON UOM.intItemUOMId = SPI.intItemUOMId
+				JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
 				JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
+					ON S.intStoreId = SPI.intStoreId
 				WHERE S.intStoreId = @intStoreId
 				AND ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') != ''
 			) AS tbl
@@ -169,21 +167,12 @@ BEGIN
 					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.dblFuelInfoAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.dblFuelInfoVolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.dblFuelInfoVolume as decimal(18,6)), 0))) AS DECIMAL(18,6))
 					, [intConcurrencyId]			= 0
 				 FROM @UDT_TranFPHose2 Chk
-				 JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-					AND Chk.dblFuelInfoAmount <> '0'
-				 --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
-					--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
-					--																								THEN IL.strPassportFuelId1
-					--																							WHEN ISNULL(IL.strPassportFuelId2, '') <> '' 
-					--																								THEN IL.strPassportFuelId2
-					--																							WHEN ISNULL(IL.strPassportFuelId3, '') <> '' 
-					--																								THEN IL.strPassportFuelId3
-					--																						 END
-				 JOIN dbo.tblICItem I 
-					ON I.intItemId = IL.intItemId
+				 JOIN dbo.tblSTPumpItem SPI 
+					ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, '')) AND Chk.dblFuelInfoAmount <> '0'
 				 JOIN dbo.tblICItemUOM UOM 
-					ON UOM.intItemId = I.intItemId
+					ON UOM.intItemUOMId = I.intItemUOMId
+				 JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
 				 JOIN dbo.tblSMCompanyLocation CL 
 					ON CL.intCompanyLocationId = IL.intLocationId
 				 JOIN dbo.tblSTStore S 
@@ -192,9 +181,6 @@ BEGIN
 			END
 		ELSE
 			BEGIN
-
-
-					--SELECT ISNULL(Chk.FuelGradeSalesAmount, 0), ISNULL(Chk.FuelGradeSalesVolume, 0), ISNULL(Chk.FuelGradeSalesAmount, 0), CPT.* 
 					UPDATE CPT
 					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.dblFuelInfoAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblFuelInfoVolume AS DECIMAL(18,6)),0),0)
 						, CPT.[dblQuantity] = CAST(ISNULL(Chk.dblFuelInfoVolume, 0) AS DECIMAL(18,6))
@@ -206,13 +192,11 @@ BEGIN
 						ON CH.intStoreId = ST.intStoreId
 					INNER JOIN tblICItemUOM UOM
 						ON CPT.intPumpCardCouponId = UOM.intItemUOMId
-					INNER JOIN tblICItem Item
-						ON UOM.intItemId = Item.intItemId
-					INNER JOIN dbo.tblICItemLocation IL 
-						ON Item.intItemId = IL.intItemId
-						AND ST.intCompanyLocationId = IL.intLocationId
+					INNER JOIN dbo.tblSTPumpItem SPI 
+						ON ST.intStoreId = SPI.intStoreId AND
+							UOM.intItemUOMId = SPI.intItemUOMId
 					INNER JOIN @UDT_TranFPHose2 Chk
-						ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, ''))
 						AND Chk.dblFuelInfoAmount <> '0'
 					WHERE CPT.intCheckoutId = @intCheckoutId
 			END
