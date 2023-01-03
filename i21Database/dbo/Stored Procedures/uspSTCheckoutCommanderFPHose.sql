@@ -170,13 +170,11 @@ BEGIN
 				 JOIN dbo.tblSTPumpItem SPI 
 					ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, '')) AND Chk.dblFuelInfoAmount <> '0'
 				 JOIN dbo.tblICItemUOM UOM 
-					ON UOM.intItemUOMId = I.intItemUOMId
+					ON UOM.intItemUOMId = SPI.intItemUOMId
 				 JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
-				 JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
 				 JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
+					ON S.intStoreId = SPI.intStoreId
 				 WHERE S.intStoreId = @intStoreId
 			END
 		ELSE
