@@ -40,7 +40,8 @@ SELECT
 	bill.ysnPrepayHasPayment,
 	bill.intShipToId,
 	shipTo.strLocationName strShipToLocation,
-	COALESCE(updated.dtmDate, created.dtmDate, CASE WHEN bill.dtmDateCreated IS NULL THEN bill.dtmDate ELSE DATEADD(dd, DATEDIFF(dd, 0,bill.dtmDateCreated), 0) END) dtmDateLastUpdated
+	COALESCE(updated.dtmDate, created.dtmDate, CASE WHEN bill.dtmDateCreated IS NULL THEN bill.dtmDate ELSE DATEADD(dd, DATEDIFF(dd, 0,bill.dtmDateCreated), 0) END) dtmDateLastUpdated,
+	bill.intRequestedBy
 FROM
 	dbo.tblAPBill bill
 	INNER JOIN (dbo.tblAPVendor vendor INNER JOIN dbo.tblEMEntity entity ON vendor.[intEntityId] = entity.intEntityId)
