@@ -125,7 +125,7 @@ FROM
 				, intInvoiceDetailId
 				, intItemId
 				, strItemDescription	= CASE WHEN ISNULL(strItemDescription,'') = '' THEN 'MISC' ELSE strItemDescription END
-				, dblLineItemTotal		= (dblQtyShipped * dblPrice) * dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType)
+				, dblLineItemTotal		= (dblTotal + dblTotalTax) * dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType)
 				, dblQtyShipped			= dblQtyShipped  * dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType)
 				, intTaxGroupId
 			FROM dbo.tblARInvoiceDetail ID
