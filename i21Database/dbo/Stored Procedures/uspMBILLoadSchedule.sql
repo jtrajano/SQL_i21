@@ -463,5 +463,5 @@ DELETE FROM tblMBILDeliveryDetail WHERE intDispatchOrderDetailId NOT IN(SELECT i
         Select intDeliveryHeaderId from tblMBILDeliveryHeader d   
         join tblMBILLoadHeader l on d.intLoadHeaderId = d.intLoadHeaderId where l.intDriverId = @intDriverId)  
 DELETE FROM tblMBILDeliveryHeader WHERE NOT EXISTS(SELECT intDeliveryHeaderId FROM tblMBILDeliveryDetail WHERE tblMBILDeliveryDetail.intDeliveryHeaderId = tblMBILDeliveryHeader.intDeliveryHeaderId) and intLoadHeaderId IN(SELECT intLoadHeaderId FROM tblMBILLoadHeader where intDriverId = @intDriverId)  
-DELETE FROM tblMBILLoadHeader WHERE intDispatchOrderId NOT IN(SELECT intDispatchOrderId FROM tblLGDispatchOrder) AND intDriverId = intDriverId  
+DELETE FROM tblMBILLoadHeader WHERE intDispatchOrderId NOT IN(SELECT intDispatchOrderId FROM tblLGDispatchOrder) AND intDriverId = @intDriverId  
 END
