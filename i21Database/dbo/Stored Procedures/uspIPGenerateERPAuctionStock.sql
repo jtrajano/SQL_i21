@@ -207,7 +207,7 @@ BEGIN TRY
 	FROM @tblIPAuctionStock7 AS7
 
 	SELECT @strDetailXML = IsNULL(@strDetailXML,'') + '<Header><ItemCode>' + IsNULL(I.strItemNo, '') + '</ItemCode>' 
-							+ '<BuyingCenter>' + IsNULL(CL.strLocationNumber, '') + '</BuyingCenter>' 
+							+ '<BuyingCenter>' + IsNULL(CL.strLocationName, '') + '</BuyingCenter>' 
 							+ '<LastWeekDate>' + IsNULL(CONVERT(VARCHAR(33), @dtmStartDayOfLast7Days, 126), '') + '</LastWeekDate>' 
 							+ '<Currency>' + IsNULL(ltrim(C.strCurrency), '') + '</Currency>' 
 							+ '<LastWeekPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS7.dblLastWeekPrice), '') + '</LastWeekPrice>' 
