@@ -21,22 +21,28 @@ RETURNS  @tbl TABLE (
 	)
 AS
 BEGIN 
+	DECLARE @intDefaultCurrencyId INT
+	SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 	;WITH BatchError AS (
 				SELECT  strTransactionId
 					    ,'' strText
 						,60018 intErrorCode
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
-				WHERE ISNULL(dblExchangeRate,0) NOT IN(1, 0)
-				AND dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2))
+				WHERE (dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2)))
+				AND dblCredit <> 0
+				AND intCurrencyId <> @intDefaultCurrencyId
+				AND intCurrencyId IS NOT NULL
 				UNION ALL
 				SELECT  strTransactionId
 					    ,'' strText
 						,60018 intErrorCode
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
-				WHERE ISNULL(dblExchangeRate,0) NOT IN(1, 0)
-				AND dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2))
+				WHERE (dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2)))
+				AND dblDebit <> 0
+				AND intCurrencyId <> @intDefaultCurrencyId
+				AND intCurrencyId IS NOT NULL
 				UNION ALL
 				SELECT	strTransactionId
 						,'' strText
@@ -62,25 +68,6 @@ BEGIN
 						) SubQuery
 				
 				WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
-		
-				-- UNION ALL
-				-- SELECT	SubQuery.strTransactionId
-				-- 		,'' strText
-				-- 		,60016 intErrorCode
-				-- 		,strModuleName
-				-- FROM	(
-				-- 			SELECT	ToValidate.strTransactionId
-				-- 					,SUM(ISNULL(ToValidate.dblDebitForeign, 0)) dblDebit
-				-- 					,SUM(ISNULL(ToValidate.dblCreditForeign, 0)) dblCredit
-				-- 					,ToValidate.strModuleName
-				-- 			FROM	@GLEntriesToValidate ToValidate INNER JOIN dbo.tblGLAccount Account
-				-- 						ON ToValidate.intAccountId = Account.intAccountId
-				-- 			GROUP BY ToValidate.strTransactionId,ToValidate.strModuleName
-				-- 		) SubQuery
-				-- WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
-
-				-- Unable to find an open fiscal year period to match the transaction date.
-				-- Allow audit adjustment transactions to be posted to a closed fiscal year period
 				UNION ALL 
 				SELECT	strTransactionId
 						,'' strText
@@ -148,6 +135,7 @@ BEGIN
 					REPLACE(PostError.strMessage,'{0}',a.strText) END strText
 		,a.intErrorCode, strModuleName FROM BatchError a
 		CROSS APPLY (SELECT strMessage from dbo.fnGLGetGLEntriesErrorMessage() where intErrorCode = a.intErrorCode)AS  PostError
+		GROUP BY strTransactionId,PostError.strMessage,a.strText,a.intErrorCode,strModuleName
 		ORDER BY strTransactionId
 
 		RETURN

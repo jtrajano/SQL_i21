@@ -557,7 +557,7 @@ LEFT JOIN (
 		 , intItemId				= ARID.intItemId
 		 , strItemDescription		= ARID.strItemDescription
 		 , dblQtyShipped			= ARID.dblQtyShipped
-		 , dblInvoiceLineTotal		= dbo.fnRoundBanker(ARID.dblQtyShipped * ARID.dblPrice, dbo.fnARGetDefaultDecimal())
+		 , dblInvoiceLineTotal		= dbo.fnRoundBanker(ARID.dblTotal + ARID.dblTotalTax, dbo.fnARGetDefaultDecimal())
 		 , strUnitMeasure			= ICUM.strUnitMeasure
 		 , dblTotalTax				= ARID.dblTotalTax
 		 , strTaxGroup				= SMTG.strTaxGroup

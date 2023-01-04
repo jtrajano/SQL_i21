@@ -883,6 +883,7 @@
     <Build Include="dbo\Functions\fnGetItemCostingOnPostInTransitAdjustmentErrors.sql" />
     <Build Include="dbo\Tables\tblICInventoryValueAdjustmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnInTransitValueAdjustment.sql" />
+    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessClaimPayables.sql" />
   </ItemGroup>
   <ItemGroup>
