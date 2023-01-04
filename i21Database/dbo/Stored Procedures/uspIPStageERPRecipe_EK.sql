@@ -235,6 +235,12 @@ BEGIN TRY
 				,dblWeight
 				,strWeightUOM
 				,intDocNo
+				,dblTeaTaste
+				,dblTeaHue
+				,dblTeaIntensity
+				,dblTeaMouthFeel
+				,dblTeaAppearance
+				,dblTeaVolume
 				)
 			SELECT OrderNo
 				,LocationCode
@@ -248,6 +254,12 @@ BEGIN TRY
 				,Weight
 				,WeightUOM
 				,DocNo
+				,TAverage
+				,HAverage
+				,IAverage
+				,MAverage
+				,AAverage
+				,VAverage
 			FROM OPENXML(@idoc, 'root/Header/Line/Batch', 2) WITH (
 					DocNo BIGINT '../../../DocNo'
 					,OrderNo NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderNo'
@@ -261,6 +273,12 @@ BEGIN TRY
 					,NoOfPackUOM NVARCHAR(50) collate Latin1_General_CI_AS
 					,Weight NUMERIC(18, 6)
 					,WeightUOM NVARCHAR(50) collate Latin1_General_CI_AS
+					,TAverage  NUMERIC(18, 6)'../../TAverage'
+					,HAverage NUMERIC(18, 6)'../../HAverage'
+					,IAverage NUMERIC(18, 6)'../../IAverage'
+					,MAverage NUMERIC(18, 6)'../../MAverage'
+					,AAverage NUMERIC(18, 6)'../../AAverage'
+					,VAverage NUMERIC(18, 6)'../../VAverage'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
 			WHERE x.BatchId<>'NoN'

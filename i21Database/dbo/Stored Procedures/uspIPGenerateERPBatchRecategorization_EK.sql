@@ -173,7 +173,7 @@ BEGIN TRY
 				+ '<DateOfProductionOfBatch>' + ISNULL(CONVERT(VARCHAR(33), B.dtmProductionBatch, 23), '') + '</DateOfProductionOfBatch>'
 				+ '<DateTeaAvailableFrom>' + ISNULL(CONVERT(VARCHAR(33), B.dtmTeaAvailableFrom, 23), '') + '</DateTeaAvailableFrom>'
 				+ '<DustContent>' + ISNULL(B.strDustContent, '') + '</DustContent>'
-				+ '<EuropeanCompliantFlag>' + LTRIM(ISNULL(B.ysnEUCompliant, '')) + '</EuropeanCompliantFlag>'
+				+ '<EuropeanCompliantFlag></EuropeanCompliantFlag>'
 				+ '<EvaluatorsCodeAtTBO>' + ISNULL(B.strTBOEvaluatorCode, '') + '</EvaluatorsCodeAtTBO>'
 				+ '<EvaluatorsRemarks>' + ISNULL(B.strEvaluatorRemarks, '') + '</EvaluatorsRemarks>'
 				+ '<ExpirationDateShelfLife>' + ISNULL(CONVERT(VARCHAR(33), B.dtmExpiration, 23), '') + '</ExpirationDateShelfLife>'

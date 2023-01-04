@@ -229,7 +229,7 @@ SELECT @strDetailXML = IsNULL(@strDetailXML,'')
 	+ '<ShippingDate>' + IsNULL(IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),CONVERT(VARCHAR(33), B.dtmStock, 126)),'') + '</ShippingDate>' 
 	+ '<UnitCost>' +  IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),[dbo].[fnRemoveTrailingZeroes](B.dblBoughtPrice)),'') + '</UnitCost>' 
 	+ '<Vessel></Vessel>' 
-	+ '<StockType>'+(Case When B.intMarketZoneId =1 Then 'A'When B.intMarketZoneId =4 Then 'C'When B.intMarketZoneId =7 Then 'C1'When B.intMarketZoneId =3 Then 'C2'When B.intMarketZoneId =8 Then 'SPT' Else 'Others'End)+'</StockType>' 
+	+ '<StockType>'+IsNULL((Case When B.intMarketZoneId =1 Then 'A'When B.intMarketZoneId =4 Then 'C'When B.intMarketZoneId =7 Then 'C1'When B.intMarketZoneId =3 Then 'C2'When B.intMarketZoneId =8 Then 'SPT' Else 'Others'End),'')+'</StockType>' 
 	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
 	+ '<StorageLocation></StorageLocation>' 
 	+ '<Size>' + IsNULL(B.strLeafSize, '') + '</Size>' 
