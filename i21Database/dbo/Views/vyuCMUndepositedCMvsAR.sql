@@ -43,7 +43,7 @@ CMPosting AS(
       GL.strAccountId,   
       GL.intAccountId,  
       CMUF.intUndepositedFundId,      
-      (CMD.dblCredit- CMD.dblDebit) * ISNULL(CMD.dblExchangeRate,1)  *  CASE WHEN CM.intBankTransactionTypeId = 2 THEN -1 ELSE 1 END  CMAmount,      
+      ROUND((CMD.dblCredit- CMD.dblDebit) * ISNULL(CMD.dblExchangeRate,1)  *  CASE WHEN CM.intBankTransactionTypeId = 2 THEN -1 ELSE 1 END,2)  CMAmount,      
       ysnPosted = CM.ysnPosted,  
       GL.dtmDate,
       GL.intGLDetailId,
@@ -69,7 +69,7 @@ CMPosting AS(
 		  intTransactionId
 	  
 	  FROM vyuGLDetail WHERE strTransactionId = CM.strTransactionId   
-      AND (dblCredit-dblDebit) = ((CMD.dblCredit-CMD.dblDebit) * ISNULL(CMD.dblExchangeRate,1)) 
+      AND (dblCredit-dblDebit) = ROUND( ((CMD.dblCredit-CMD.dblDebit) * ISNULL(CMD.dblExchangeRate,1)) ,2)
       AND ysnIsUnposted = 0      
       AND intAccountId = CMD.intGLAccountId
     ) GL
