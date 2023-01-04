@@ -206,7 +206,7 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= BD.dblTotal + BD.dblTax,
-				strBankApprovalStatus			= ap.strApprovalStatus,
+				strBankApprovalStatus			= ISNULL(ap.strApprovalStatus, 'Approved'),
 				dtmAppliedToTransactionDate		= B.dtmBillDate,
 				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
@@ -219,7 +219,8 @@ BEGIN
 			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
 			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
 			LEFT JOIN tblCTContractDetail ctd ON BD.intContractDetailId = ctd.intContractDetailId
-			LEFT JOIN tblCTApprovalStatusTF ap ON ap.intApprovalStatusId = ctd.intApprovalStatusId
+			LEFT JOIN tblLGLoad l ON l.intLoadId = BD.intLoadId
+			LEFT JOIN tblCTApprovalStatusTF ap ON ap.intApprovalStatusId = ISNULL(l.intApprovalStatusId, ctd.intApprovalStatusId)
 			WHERE NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
 				  OR NULLIF(B.intBankId, 0) IS NOT NULL
 				  OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
@@ -279,7 +280,7 @@ BEGIN
 				strBankTradeReference			= B.strReferenceNo,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= PD.dblPayment,
-				strBankApprovalStatus			= ap.strApprovalStatus,
+				strBankApprovalStatus			= ISNULL(ap.strApprovalStatus, 'Approved'),
 				dtmAppliedToTransactionDate		= P.dtmDatePaid,
 				intStatusId						= 1, --Active
 				intUserId						= @intUserId,
@@ -294,7 +295,8 @@ BEGIN
 			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
 			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
 			LEFT JOIN tblCTContractDetail ctd ON BD.intContractDetailId = ctd.intContractDetailId
-			LEFT JOIN tblCTApprovalStatusTF ap ON ap.intApprovalStatusId = ctd.intApprovalStatusId
+			LEFT JOIN tblLGLoad l ON l.intLoadId = BD.intLoadId
+			LEFT JOIN tblCTApprovalStatusTF ap ON ap.intApprovalStatusId = ISNULL(l.intApprovalStatusId, ctd.intApprovalStatusId)
 			WHERE (NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
 				  OR NULLIF(B.intBankId, 0) IS NOT NULL
 				  OR NULLIF(B.intBankAccountId, 0) IS NOT NULL
