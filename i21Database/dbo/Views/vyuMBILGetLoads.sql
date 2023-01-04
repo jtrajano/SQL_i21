@@ -24,7 +24,7 @@ SELECT lh.intLoadHeaderId
 	, ISNULL(pd.intSellerId, trc.intSellerId) intSellerId
 	, intTaxGroupId = el.intTaxGroupId
 	, pd.intContractDetailId as intReceiptContractDetailId
-	, intContractDetailId = NULL 
+	, dd.intContractDetailId
 	, pd.intItemId
 	, pd.intCompanyLocationId as intReceiptCompanyLocationId
 	, el.strZipCode as strZipPostalCode
