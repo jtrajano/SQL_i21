@@ -25,6 +25,7 @@ BEGIN
             AND fifo.dtmDate <= @dtmAsOfDate
             AND fifo.intItemLocationId = @intItemLocationId
             AND cm.strCostingMethod = 'FIFO'
+            AND fifo.dblStockIn- fifo.dblStockOut > 0
         ORDER BY intInventoryFIFOId DESC
 
         SELECT TOP 1 @dblCost = lifo.dblCost
@@ -34,8 +35,9 @@ BEGIN
         WHERE lifo.intItemId = @intItemId
             AND lifo.dtmDate <= @dtmAsOfDate
             AND lifo.intItemLocationId = @intItemLocationId
+            AND lifo.dblStockIn- lifo.dblStockOut > 0
             AND cm.strCostingMethod = 'LIFO'
-
+        
         SELECT TOP 1 @dblCost = dbo.fnGetItemAverageCost(il.intItemId, il.intItemLocationId, @intItemUOMId)
         FROM tblICItemLocation il
         JOIN tblICCostingMethod cm ON cm.intCostingMethodId = il.intCostingMethod
