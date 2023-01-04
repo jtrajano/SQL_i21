@@ -189,6 +189,8 @@ BEGIN TRY
 									,@dblLandedPrice = @dblLandedPrice
 									,@dblSalesPrice = @dblSalePrice
 									,@intUserId = @intUserId
+									,@intFeedPriceItemUOMId = @intPriceItemUOMId
+									,@intFeedPriceCurrencyId = @intCurrencyId
 							END TRY
 
 							BEGIN CATCH

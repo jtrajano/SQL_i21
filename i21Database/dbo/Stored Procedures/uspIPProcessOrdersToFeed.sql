@@ -42,7 +42,7 @@ BEGIN TRY
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			NULL,						NULL,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
-				VE.strVendorAccountNum,	CL.strOregonFacilityNumber,	CO.strCommodityCode,		S.strSampleNumber,
+				VE.strVendorAccountNum,	CL.strLocationName,			CO.strCommodityCode,		S.strSampleNumber,
 				NULL,					NULL,						L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	'Cash',						LD.dblUnitPrice,			PUOM.strUnitMeasure,
@@ -98,7 +98,7 @@ BEGIN TRY
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			CD.intContractHeaderId,		CD.intContractDetailId,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
-				VE.strVendorAccountNum,	CL.strOregonFacilityNumber,	CO.strCommodityCode,		CH.strContractNumber,
+				VE.strVendorAccountNum,	CL.strLocationName,			CO.strCommodityCode,		CH.strContractNumber,
 				CD.intContractSeq,		CH.strCustomerContract,		L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	ISNULL(PT.strPricingType, 'Cash'),LD.dblUnitPrice,		PUOM.strUnitMeasure,
