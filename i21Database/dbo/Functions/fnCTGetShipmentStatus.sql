@@ -2,14 +2,8 @@
 (
 	@intContractDetailId	INT
 )
-RETURNS @returntable	TABLE
-(
-	strShipmentStatus	NVARCHAR(100)  COLLATE Latin1_General_CI_AS
-)
-AS
-BEGIN
-	INSERT INTO @returntable	
-	SELECT TOP 1 strShipmentStatus
+RETURNS table as return
+	SELECT TOP 1 strShipmentStatus = strShipmentStatus COLLATE Latin1_General_CI_AS
 	FROM
 	(
 		SELECT
@@ -38,5 +32,3 @@ BEGIN
 	) tbl
 	WHERE intNumberId = 1
 	ORDER BY intPriorityId ASC
-	RETURN;
-END
