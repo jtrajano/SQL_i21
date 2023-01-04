@@ -18,7 +18,7 @@ BEGIN
 		,A.strSourceId
 		,CONVERT(VARCHAR(20), A.dtmDate,101) dtmDate
 		,D.dblDebit
-		,D.dblCredit
+		,D.dblCredit * -1
 		,D.strComments
 		,D.strReference 
 	FROM tblGLJournal A
