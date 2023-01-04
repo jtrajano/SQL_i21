@@ -439,7 +439,7 @@ INNER JOIN tblLGDispatchOrderDetail DOD ON DO.intDispatchOrderId = DOD.intDispat
 INNER JOIN tblMBILLoadHeader MBH ON MBH.strLoadNumber = DO.strDispatchOrderNumber
 INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,DO.intCompanyLocationId) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId)
 LEFT JOIN tblMBILDeliveryDetail MBDL ON MBDL.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and MBDL.intDeliveryHeaderId = MBDH.intDeliveryHeaderId 
-LEFT JOIN tblTMOrder t on a.intTMDispatchId = t.intDispatchId
+LEFT JOIN tblTMOrder t on DOD.intTMDispatchId = t.intDispatchId
 WHERE intStopType = 2 AND intDispatchStatus = 3 and MBDL.intDispatchOrderDetailId is null
 
 UPDATE MBDL
