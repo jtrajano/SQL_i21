@@ -140,7 +140,10 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			-- GL Revalue Accounts
 			SELECT id = 162, name = 'General Ledger Unrealized Gain or Loss' UNION ALL--GL-8450
 			SELECT id = 163, name = 'General Ledger Unrealized Gain or Loss Offset' UNION ALL --GL-8450
-			SELECT id = 164, name = 'In-Transit Direct'
+			SELECT id = 164, name = 'In-Transit Direct' UNION ALL
+			
+			-- Realized Foreign Exchange Gain/Loss on Inventory
+			SELECT id = 165, name = 'Realized Foreign Exchange Gain/Loss on Inventory' --IC-11030
 
 
 	) AS CategoryHardCodedValues
@@ -432,7 +435,12 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
 	END	
 
-
+	SET @strAccountCategory  = 'Realized Foreign Exchange Gain/Loss on Inventory'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
 END
 GO
 	PRINT 'Start updating account group category ids'
