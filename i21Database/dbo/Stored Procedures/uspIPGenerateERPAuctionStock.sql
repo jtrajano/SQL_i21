@@ -14,8 +14,15 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@intDefaultCurrencyId INT
 		,@intTotalRows int
+		,@dtmStartDayOfWeek Datetime
+		,@dtmStartDayOfLast7Days Datetime 
+		,@dtmStartDayOfLast28Days Datetime
 
-	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
+	Select @dtmCurrentDate=Convert(char,GETDATE(),101)
+
+	SELECT @dtmStartDayOfWeek= DATEADD(DD, 1 - DATEPART(DW, @dtmCurrentDate), @dtmCurrentDate)
+	SELECT @dtmStartDayOfLast7Days=DATEADD(DD, 1 - DATEPART(DW, @dtmCurrentDate), @dtmCurrentDate)-6
+	SELECT @dtmStartDayOfLast28Days=DATEADD(DD, 1 - DATEPART(DW, @dtmCurrentDate), @dtmCurrentDate)-27
 
 	DECLARE @tblIPAuctionStockPreStage TABLE (intItemId INT,intLocationId INT)
 	DECLARE @tblIPAuctionStock7 AS TABLE (
@@ -53,7 +60,7 @@ BEGIN TRY
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblIPAuctionStockPreStage
-			WHERE dtmProcessedDate = @dtmCurrentDate
+			WHERE dtmProcessedDate = @dtmStartDayOfWeek
 			)
 	BEGIN
 		DELETE
@@ -69,13 +76,14 @@ BEGIN TRY
 				ORDER BY intItemId
 				)
 			,intItemId
-			,@dtmCurrentDate
+			,@dtmStartDayOfWeek
 			,intLocationId
 		FROM (
 			SELECT DISTINCT S.intItemId,S.intLocationId
 			FROM tblQMSample S
-			WHERE S.dtmSaleDate BETWEEN @dtmCurrentDate - 28
-					AND @dtmCurrentDate
+			WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast28Days
+					AND @dtmStartDayOfWeek
+					AND S.intMarketZoneId  =1
 			) AS DT
 		Order by intItemId
 	END
@@ -130,16 +138,20 @@ BEGIN TRY
 		,intCurrencyId
 		,dblLastWeekBought
 		,dblLastWeekPrice
+		,dblLastWeekAvailable
 		)
 	SELECT S.intItemId
 		,S.intLocationId
 		,IsNULL(S.intCurrencyId, @intDefaultCurrencyId) AS intCurrencyId
-		,Sum(S.dblSampleQty) LastWeekBought
-		,SUM(S.dblSampleQty * S.dblB1Price) / Sum(S.dblSampleQty) dblLastPrice
+		,Sum(isNULL(S.dblB1QtyBought*UC.dblConversionToStock,0)  )
+		,SUM(isNULL(S.dblB1QtyBought * S.dblB1Price,0)) / Sum(isNULL(S.dblB1QtyBought,0)) dblLastPrice
+		,Sum(isNULL(S.dblB1QtyBought*UC.dblConversionToStock,0) +isNULL(S.dblB2QtyBought*UC.dblConversionToStock,0) +isNULL(S.dblB3QtyBought*UC.dblConversionToStock,0)+isNULL(S.dblB4QtyBought*UC.dblConversionToStock,0)+isNULL(S.dblB5QtyBought *UC.dblConversionToStock,0))
 	FROM tblQMSample S
-	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId
-	WHERE S.dtmSaleDate BETWEEN @dtmCurrentDate - 7
-			AND @dtmCurrentDate
+	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId AND S.intLocationId=AI.intLocationId
+	LEFT JOIN tblICUnitMeasureConversion UC on UC.intUnitMeasureId =S.intB1QtyUOMId and UC.intStockUnitMeasureId =4 
+	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast7Days
+			AND @dtmStartDayOfWeek
+			AND S.intMarketZoneId  =1
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
@@ -150,60 +162,41 @@ BEGIN TRY
 		,intCurrencyId
 		,dblLastWeekBought
 		,dblLastWeekPrice
+		,dblLastWeekAvailable
 		)
 	SELECT S.intItemId
 		,S.intLocationId
 		,IsNULL(S.intCurrencyId, @intDefaultCurrencyId) AS intCurrencyId
-		,Sum(S.dblSampleQty)
-		,SUM(S.dblSampleQty * S.dblB1Price) / Sum(S.dblSampleQty) dblLastPrice
+		,Sum(isNULL(S.dblB1QtyBought*UC.dblConversionToStock,0)  )
+		,SUM(isNULL(S.dblB1QtyBought * S.dblB1Price,0)) / Sum(isNULL(S.dblB1QtyBought,0)) dblLastPrice
+		,Sum(isNULL(S.dblB1QtyBought*UC.dblConversionToStock,0) +isNULL(S.dblB2QtyBought*UC.dblConversionToStock,0) +isNULL(S.dblB3QtyBought*UC.dblConversionToStock,0)+isNULL(S.dblB4QtyBought*UC.dblConversionToStock,0)+isNULL(S.dblB5QtyBought *UC.dblConversionToStock,0))
 	FROM tblQMSample S
-	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId
-	WHERE S.dtmSaleDate BETWEEN @dtmCurrentDate - 28
-			AND @dtmCurrentDate
+	JOIN @tblIPAuctionStockPreStage AI ON S.intItemId = AI.intItemId AND S.intLocationId=AI.intLocationId
+	LEFT JOIN tblICUnitMeasureConversion UC on UC.intUnitMeasureId =S.intB1QtyUOMId and UC.intStockUnitMeasureId =4 
+	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast28Days
+			AND @dtmStartDayOfWeek
+			AND S.intMarketZoneId  =1
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
 
-	INSERT INTO @tblIPAvailableStock (
-		intItemId
-		,intLocationId
-		,dblAvailable
-		)
-	SELECT L.intItemId
-		,L.intLocationId
-		,SUM(L.dblWeight) AS dblGrossWeight
-	FROM dbo.tblICLot L
-	JOIN @tblIPAuctionStock28 AS28 ON AS28.intItemId = L.intItemId
-		AND AS28.intLocationId = L.intLocationId
-	WHERE L.dblGrossWeight > 0
-	GROUP BY L.intItemId
-		,L.intLocationId
-
-	UPDATE AS7
-	SET dblLastWeekAvailable = S.dblAvailable
-		,dblLastWeekPressure = (
+	UPDATE @tblIPAuctionStock7
+	SET dblLastWeekPressure = (
 			CASE 
-				WHEN S.dblAvailable > 0
-					THEN Round((AS7.dblLastWeekBought / S.dblAvailable) * 100, 2)
-				ELSE Round(AS7.dblLastWeekBought, 2)
+				WHEN dblLastWeekAvailable > 0
+					THEN Round((dblLastWeekBought / dblLastWeekAvailable) * 100, 2)
+				ELSE Round(dblLastWeekBought, 2)
 				END
 			)
-	FROM @tblIPAuctionStock7 AS7
-	JOIN @tblIPAvailableStock S ON S.intItemId = AS7.intItemId
-		AND S.intLocationId = AS7.intLocationId
 
-	UPDATE AS28
-	SET dblLastWeekAvailable = S.dblAvailable
-		,dblLastWeekPressure = (
+	UPDATE @tblIPAuctionStock28
+	SET dblLastWeekPressure = (
 			CASE 
-				WHEN S.dblAvailable > 0
-					THEN Round((AS28.dblLastWeekBought / S.dblAvailable) * 100, 2)
-				ELSE Round(AS28.dblLastWeekBought, 2)
+				WHEN dblLastWeekAvailable > 0
+					THEN Round((dblLastWeekBought / dblLastWeekAvailable) * 100, 2)
+				ELSE Round(dblLastWeekBought, 2)
 				END
 			)
-	FROM @tblIPAuctionStock28 AS28
-	JOIN @tblIPAvailableStock S ON S.intItemId = AS28.intItemId
-		AND S.intLocationId = AS28.intLocationId
 
 	Select @intTotalRows=Count(*)
 	from tblIPAuctionStockPreStage
@@ -215,16 +208,16 @@ BEGIN TRY
 
 	SELECT @strDetailXML = IsNULL(@strDetailXML,'') + '<Header><ItemCode>' + IsNULL(I.strItemNo, '') + '</ItemCode>' 
 							+ '<BuyingCenter>' + IsNULL(CL.strLocationNumber, '') + '</BuyingCenter>' 
-							+ '<LastWeekDate>' + IsNULL(CONVERT(VARCHAR(33), @dtmCurrentDate - 7, 126), '') + '</LastWeekDate>' 
+							+ '<LastWeekDate>' + IsNULL(CONVERT(VARCHAR(33), @dtmStartDayOfLast7Days, 126), '') + '</LastWeekDate>' 
 							+ '<Currency>' + IsNULL(ltrim(C.strCurrency), '') + '</Currency>' 
-							+ '<LastWeekPrice>' + IsNULL(ltrim(AS7.dblLastWeekPrice), '') + '</LastWeekPrice>' 
+							+ '<LastWeekPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS7.dblLastWeekPrice), '') + '</LastWeekPrice>' 
 							+ '<LastWeekBought>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS7.dblLastWeekBought), '') + '</LastWeekBought>' 
 							+ '<LastWeekAvailable>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS7.dblLastWeekAvailable), '') + '</LastWeekAvailable>' 
-							+ '<LastWeekPressure>' + IsNULL(ltrim(AS7.dblLastWeekPressure), '') + '</LastWeekPressure>' 
-							+ '<Last4WeekPrice>' + IsNULL(ltrim(AS28.dblLastWeekPrice), '') + '</Last4WeekPrice>' 
+							+ '<LastWeekPressure>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS7.dblLastWeekPressure), '') + '</LastWeekPressure>' 
+							+ '<Last4WeekPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS28.dblLastWeekPrice), '') + '</Last4WeekPrice>' 
 							+ '<Last4WeekBought>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS28.dblLastWeekBought), '') + '</Last4WeekBought>' 
 							+ '<Last4WeekAvailable>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS28.dblLastWeekAvailable), '') + '</Last4WeekAvailable>' 
-							+ '<Last4WeekPressure>' + IsNULL(ltrim(AS28.dblLastWeekPressure), '') + '</Last4WeekPressure></Header>'
+							+ '<Last4WeekPressure>' + IsNULL([dbo].[fnRemoveTrailingZeroes](AS28.dblLastWeekPressure), '') + '</Last4WeekPressure></Header>'
 	FROM @tblIPAuctionStock28 AS28
 	FULL JOIN @tblIPAuctionStock7 AS7 ON AS28.intItemId = AS7.intItemId
 		AND AS28.intLocationId = AS7.intLocationId

@@ -152,18 +152,18 @@ BEGIN TRY
 
 		SELECT @strXML = @strXML + '<Header>'
 		+ '<Status>'+Case When @strRowState = 'Modified' then 'U' Else 'C' End	  + '</Status>'
-		+ '<Plant>' + IsNULL(CL.strOregonFacilityNumber,'')   + '</Plant>'
+		+ '<Plant>' + IsNULL(CL.strVendorRefNoPrefix,'')   + '</Plant>'
 		+ '<OrderNo>' + IsNULL(BR.strReferenceNo,'')   + '</OrderNo>' 
 			+ '<BlendCode>' + I.strItemNo + '</BlendCode>' 
 				+ '<BlendDescription>' + I.strDescription  + '</BlendDescription>' 
 				+ '<DateApproved>' + IsNULL(CONVERT(VARCHAR(33), W.dtmApprovedDate , 126),'') + '</DateApproved>' 
 				+ '<Mixes>' + [dbo].[fnRemoveTrailingZeroes]( BR.dblEstNoOfBlendSheet) + '</Mixes>'
-				--+ '<Parts>' + CONVERT(VARCHAR(33), BR.dblEstNoOfBlendSheet , 126) + '</Parts>'
+				+ '<Parts>' + [dbo].[fnRemoveTrailingZeroes](P.dblTotalPart) + '</Parts>'
 				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](W.dblQuantity/BR.dblEstNoOfBlendSheet ) + '</NetWtPerMix>'
 				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](W.dblQuantity ) + '</TotalBlendWt>'
-				+ '<Volume></Volume>'
-				+ '<DustLevel></DustLevel>'
-				+ '<Moisture></Moisture>'
+				+ '<Volume>0</Volume>'
+				+ '<DustLevel>0</DustLevel>'
+				+ '<Moisture>0</Moisture>'
 				+ '<T>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblTaste ),0) + '</T>'
 				+ '<H>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblHue ),0) + '</H>'
 				+ '<I>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblIntensity ),0) + '</I>'
@@ -175,6 +175,10 @@ BEGIN TRY
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 		JOIN tblMFBlendRequirement BR ON BR.intBlendRequirementId = W.intBlendRequirementId
+		OUTER APPLY(SELECT SUM(WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet) dblTotalPart
+					FROM dbo.tblMFWorkOrderInputLot WI
+					JOIN tblMFBlendRequirement BR ON BR.intBlendRequirementId = W.intBlendRequirementId
+					WHERE WI.intWorkOrderId = W.intWorkOrderId) P
 		WHERE W.intWorkOrderId = @intWorkOrderId
 
 		SELECT @strDetailXML = ''
@@ -184,15 +188,16 @@ BEGIN TRY
 		+ '<Batch>' + L.strLotNumber   + '</Batch>' 
 		+ '<Chop>' + IsNULL(B.strTeaGardenChopInvoiceNumber,'') + '</Chop>' 
 		+ '<Mark>' + IsNULL(GM.strGardenMark ,'' ) + '</Mark>' 
-		+ '<Grade></Grade>' 
+		+ '<Grade>'+IsNULL(B.strLeafGrade,'')+'</Grade>' 
 		+ '<TeaItem>' +  I.strItemNo + '</TeaItem>' 
 		+ '<Material>' + IsNULL(I.strShortName,'' ) + '</Material>' 
 		+ '<MaterialDescription>' + I.strDescription  + '</MaterialDescription>' 
+		+ '<Origin>'+IsNULL(B.strTeaOrigin,'')+'</Origin>' 
 		+ '<Location>' + IsNULL(LTRIM(SUBSTRING(ISNULL(CS.strSubLocationName, ''), CHARINDEX('/', CS.strSubLocationName) + 1, LEN(CS.strSubLocationName))) , '')  + '</Location>' 
 		+ '<Parts>' +  [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet  ) + '</Parts>' 
 		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](L.dblWeightPerQty ) + '</WeightPerPack>' 
 		+ '<WeightPerMix>' + [dbo].[fnRemoveTrailingZeroes](WI.dblQuantity/BR.dblEstNoOfBlendSheet) + '</WeightPerMix>' 
-		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](L.dblWeight ) + '</WeightPerBatch>' 
+		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](WI.dblQuantity ) + '</WeightPerBatch>' 
 		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity ) + '</Bags>' 
 		+ '<FW>' + IsNULL(WI.strFW,'')  + '</FW>' 
 		+ '<UserID>' + US.strUserName  + '</UserID>' 

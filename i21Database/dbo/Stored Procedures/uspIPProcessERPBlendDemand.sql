@@ -162,7 +162,7 @@ BEGIN TRY
 			WHERE (
 					CASE 
 						WHEN @strProductionOrder = 'True'
-							THEN strVendorRefNoPrefix 
+							THEN strVendorRefNoPrefix
 						ELSE strLotOrigin
 						END
 					) = @strCompanyLocation
@@ -174,7 +174,8 @@ BEGIN TRY
 			WHERE strSubLocationName = @strStorageLocation
 				AND intCompanyLocationId = @intLocationId
 
-			IF @intCompanyLocationSubLocationId IS NULL AND @strProductionOrder = 'False'
+			IF @intCompanyLocationSubLocationId IS NULL
+				AND @strProductionOrder = 'False'
 			BEGIN
 				SELECT @strError = 'Storage Location cannot be blank.'
 
@@ -264,21 +265,22 @@ BEGIN TRY
 			END
 
 			SELECT @intManufacturingCellId = NULL
-			If  @strProductionOrder = 'False'
-			Begin
+
+			IF @strProductionOrder = 'False'
+			BEGIN
 				SELECT @intManufacturingCellId = intManufacturingCellId
 				FROM dbo.tblMFManufacturingCell
 				WHERE strCellName = @strWorkCenter
 					AND intSubLocationId = @intCompanyLocationSubLocationId
 					AND intLocationId = @intLocationId
-			End
-			Else
+			END
+			ELSE
 			BEGIN
 				SELECT @intManufacturingCellId = intManufacturingCellId
 				FROM dbo.tblMFManufacturingCell
 				WHERE strCellName = @strWorkCenter
 					AND intLocationId = @intLocationId
-			End
+			END
 
 			IF @intManufacturingCellId IS NULL
 			BEGIN
@@ -315,11 +317,21 @@ BEGIN TRY
 
 			SELECT @intMachineId = NULL
 
-			SELECT @intMachineId = intMachineId
-			FROM dbo.tblMFMachine M
-			WHERE strName = @strMachine
-				AND intSubLocationId = @intCompanyLocationSubLocationId
-				AND intLocationId = @intLocationId
+			IF @strProductionOrder = 'False'
+			BEGIN
+				SELECT @intMachineId = intMachineId
+				FROM dbo.tblMFMachine M
+				WHERE strName = @strMachine
+					AND intSubLocationId = @intCompanyLocationSubLocationId
+					AND intLocationId = @intLocationId
+			END
+			ELSE
+			BEGIN
+				SELECT @intMachineId = intMachineId
+				FROM dbo.tblMFMachine M
+				WHERE strName = @strMachine
+					AND intLocationId = @intLocationId
+			END
 
 			IF @intMachineId IS NULL
 			BEGIN

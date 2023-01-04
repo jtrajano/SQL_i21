@@ -45,6 +45,9 @@ BEGIN TRY
 		,@intBlendItemId INT
 		,@intBlendUOMId int
 		,@intBlendItemUOMId INT
+		,@strReferenceNo nvarchar(50)
+		,@intWeightUOMId INT
+
 	DECLARE @tblMFProductionOrderStage TABLE (intProductionOrderStageId INT)
 
 	INSERT INTO @tblMFProductionOrderStage (intProductionOrderStageId)
@@ -87,7 +90,6 @@ BEGIN TRY
 				,@dblOrderQuantity = NULL
 				,@strOrderQuantityUOM = NULL
 				,@dblNoOfMixes = NULL
-				,@dtmPlanDate = NULL
 
 			SELECT @strOrderNo = strOrderNo
 				,@strLocationNumber = strLocationCode
@@ -100,7 +102,6 @@ BEGIN TRY
 				,@dblOrderQuantity = dblOrderQuantity
 				,@strOrderQuantityUOM = strOrderQuantityUOM
 				,@dblNoOfMixes = dblNoOfMixes
-				,@dtmPlanDate = dtmPlanDate
 			FROM dbo.tblMFProductionOrderStage
 			WHERE intProductionOrderStageId = @intProductionOrderStageId
 
@@ -130,7 +131,7 @@ BEGIN TRY
 
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
-			WHERE strLocationNumber = @strLocationNumber
+			WHERE strVendorRefNoPrefix = @strLocationNumber
 
 			IF @intLocationId IS NULL
 			BEGIN
@@ -175,9 +176,13 @@ BEGIN TRY
 
 			SELECT @intItemId = NULL
 				,@intLotId = NULL
+				,@intWeightUOMId=NULL 
+				,@intItemUOMId=NULL
 
 			SELECT @intItemId = intItemId
 				,@intLotId = intLotId
+				,@intWeightUOMId=intWeightUOMId 
+				,@intItemUOMId=intItemUOMId
 			FROM tblICLot
 			WHERE strLotNumber = @strBatchId
 				AND intLocationId = @intLocationId
@@ -186,110 +191,113 @@ BEGIN TRY
 				,@intMachineId = NULL
 				,@intBlendItemId = NULL
 				,@intBlendUOMId = NULL
+				,@strReferenceNo=NULL
+				,@dtmPlanDate =NULL
 
 			SELECT @intManufacturingCellId = intManufacturingCellId
 				,@intMachineId = intMachineId
 				,@intBlendRequirementId = intBlendRequirementId
 				,@intBlendItemId = intItemId
 				,@intBlendUOMId = intUOMId
+				,@strReferenceNo=strReferenceNo
+				,@dtmPlanDate =dtmDueDate 
 			FROM tblMFBlendRequirement
 			WHERE strReferenceNo = @strOrderNo
 			and intLocationId =@intLocationId
 
-			IF @strWeightUOM = ''
-			BEGIN
-				SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' cannot be blank.'
+			--IF @strWeightUOM = ''
+			--BEGIN
+			--	SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' cannot be blank.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
-			SELECT @intUnitMeasureId = NULL
+			--SELECT @intUnitMeasureId = NULL
 
-			SELECT @intUnitMeasureId = intUnitMeasureId
-			FROM dbo.tblICUnitMeasure
-			WHERE strUnitMeasure = @strWeightUOM
+			--SELECT @intUnitMeasureId = intUnitMeasureId
+			--FROM dbo.tblICUnitMeasure
+			--WHERE strUnitMeasure = @strWeightUOM
 
-			IF @intUnitMeasureId IS NULL
-			BEGIN
-				SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' is not availble in i21.'
+			--IF @intUnitMeasureId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' is not availble in i21.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
-			SELECT @intItemUOMId = NULL
+			--SELECT @intItemUOMId = NULL
 
-			SELECT @intItemUOMId = intItemUOMId
-			FROM tblICItemUOM IU
-			WHERE intItemId = @intItemId
-				AND intUnitMeasureId = @intUnitMeasureId
+			--SELECT @intItemUOMId = intItemUOMId
+			--FROM tblICItemUOM IU
+			--WHERE intItemId = @intItemId
+			--	AND intUnitMeasureId = @intUnitMeasureId
 
-			IF @intItemUOMId IS NULL
-			BEGIN
-				SELECT @strError = 'UOM ' + @strWeightUOM + ' is not configured in the item level in i21.'
+			--IF @intItemUOMId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'UOM ' + @strWeightUOM + ' is not configured in the item level in i21.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
-			IF @strNoOfPackUOM = ''
-			BEGIN
-				SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' cannot be blank.'
+			--IF @strNoOfPackUOM = ''
+			--BEGIN
+			--	SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' cannot be blank.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
-			SELECT @intPackUnitMeasureId = NULL
+			--SELECT @intPackUnitMeasureId = NULL
 
-			SELECT @intPackUnitMeasureId = intUnitMeasureId
-			FROM dbo.tblICUnitMeasure
-			WHERE strUnitMeasure = @strNoOfPackUOM
+			--SELECT @intPackUnitMeasureId = intUnitMeasureId
+			--FROM dbo.tblICUnitMeasure
+			--WHERE strUnitMeasure = @strNoOfPackUOM
 
-			IF @intPackUnitMeasureId IS NULL
-			BEGIN
-				SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' is not availble in i21.'
+			--IF @intPackUnitMeasureId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' is not availble in i21.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
-			SELECT @intPackItemUOMId = NULL
+			--SELECT @intPackItemUOMId = NULL
 
-			SELECT @intPackItemUOMId = intItemUOMId
-			FROM tblICItemUOM IU
-			WHERE intItemId = @intItemId
-				AND intUnitMeasureId = @intPackUnitMeasureId
+			--SELECT @intPackItemUOMId = intItemUOMId
+			--FROM tblICItemUOM IU
+			--WHERE intItemId = @intItemId
+			--	AND intUnitMeasureId = @intPackUnitMeasureId
 
-			IF @intPackItemUOMId IS NULL
-			BEGIN
-				SELECT @strError = 'UOM ' + @strNoOfPackUOM + ' is not configured in the item level in i21.'
+			--IF @intPackItemUOMId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'UOM ' + @strNoOfPackUOM + ' is not configured in the item level in i21.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intWorkOrderId = NULL
-
 			SELECT @intWorkOrderId = intWorkOrderId
 			FROM tblMFWorkOrder
 			WHERE intBlendRequirementId = @intBlendRequirementId
@@ -362,6 +370,7 @@ BEGIN TRY
 					,intCustomerId
 					,intConcurrencyId
 					,intTransactionFrom
+					,strERPOrderNo 
 					)
 				SELECT @strWorkOrderNo
 					,@intBlendItemId
@@ -396,6 +405,7 @@ BEGIN TRY
 					,NULL AS intCustomerId
 					,1
 					,NULL AS intTransactionFrom
+					,@strReferenceNo
 
 				SELECT @intWorkOrderId = SCOPE_IDENTITY()
 			END
@@ -414,9 +424,9 @@ BEGIN TRY
 				,@intItemId
 				,@intLotId
 				,@dblWeight
-				,@intItemUOMId
+				,@intWeightUOMId 
 				,@dblNoOfPack
-				,@intPackItemUOMId
+				,@intItemUOMId 
 				,1
 
 			MOVE_TO_ARCHIVE:

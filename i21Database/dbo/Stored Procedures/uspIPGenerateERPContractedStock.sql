@@ -47,22 +47,39 @@ BEGIN TRY
 				ORDER BY CH.intContractHeaderId
 				)
 			,intContractDetailId = CD.intContractDetailId
-			,dblBalanceQty = CD.dblQuantity - IsNULL(LD2.dblQuantity, 0)
+			,dblBalanceQty = CD.dblQuantity - IsNULL(B2.dblQuantity, 0)
 			,intStatusId = NULL
 			,dtmProcessedDate = @dtmCurrentDate
 		FROM tblCTContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		OUTER APPLY (
-			SELECT Sum(dblQuantity) dblQuantity
-			FROM tblLGLoadDetail LD
-			WHERE LD.intPContractDetailId = CD.intContractDetailId
-			) LD2
-		LEFT JOIN tblMFBatch B ON B.intContractDetailId = CD.intContractDetailId
+			SELECT Sum(B.dblTotalQuantity*B.dblWeightPerUnit ) dblQuantity
+			FROM tblMFBatch B
+			WHERE B.intContractDetailId = CD.intContractDetailId
+			) B2
 		WHERE CD.intContractStatusId = 1 --Open
-		AND CD.dblQuantity - IsNULL(LD2.dblQuantity, 0)>0
-		AND B.intLocationId<>B.intMixingUnitLocationId  
+		AND CD.dblQuantity - IsNULL(B2.dblQuantity, 0)>0
 		ORDER BY CH.intContractHeaderId
-	END
+
+		Select @intContractedStockPreStageId=MAX(intContractedStockPreStageId) from tblIPContractedStockPreStage
+
+		INSERT INTO tblIPContractedStockPreStage (
+			intContractedStockPreStageId
+			,intBatchId
+			,intStatusId
+			,dtmProcessedDate
+			)
+		SELECT intContractedStockPreStageId = IsNULL(@intContractedStockPreStageId,0)+ROW_NUMBER() OVER (
+				ORDER BY B.intBatchId
+				)
+			,intBatchId=B.intBatchId 
+			,intStatusId = NULL
+			,dtmProcessedDate = @dtmCurrentDate
+		FROM dbo.tblMFBatch B
+		WHERE NOT EXISTS(SELECT *FROM dbo.tblLGLoadDetail LD WHERE LD.intBatchId=B.intBatchId )
+		AND B.intLocationId<>B.intMixingUnitLocationId
+		ORDER BY B.intBatchId 	
+		END
 
 	IF NOT EXISTS (
 			SELECT *
@@ -121,7 +138,7 @@ BEGIN TRY
 	+ '<ItemCode>' + I.strItemNo + '</ItemCode>' 
 	+ '<StockDate>' + IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),'') + '</StockDate>' 
 	+ '<Quantity>' + [dbo].[fnRemoveTrailingZeroes](CD.dblQuantity) + '</Quantity>' 
-	+ '<MixingUnit>' + IsNULL(ltrim(MU.strLocationNumber) , '') + '</MixingUnit>' 
+	+ '<MixingUnit>' + IsNULL(ltrim(MU.strLocationName) , '') + '</MixingUnit>' 
 	+ '<Taste>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaTaste),'') + '</Taste>' 
 	+ '<Hue>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaHue),'') + '</Hue>' 
 	+ '<Intensity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaIntensity),'') + '</Intensity>' 
@@ -133,7 +150,7 @@ BEGIN TRY
 	+ '<ShippingDate>' + IsNULL(CONVERT(VARCHAR(33), CD.dtmStartDate, 126),'') + '</ShippingDate>' 
 	+ '<UnitCost>' +  IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),'') + '</UnitCost>' 
 	+ '<Vessel></Vessel>' 
-	+ '<StockType>C</StockType>' 
+	+ '<StockType>'+(Case When B.intMarketZoneId =1 Then 'A'When B.intMarketZoneId =4 Then 'C'When B.intMarketZoneId =7 Then 'C1'When B.intMarketZoneId =3 Then 'C2'When B.intMarketZoneId =8 Then 'SPT' Else 'Others'End)+'</StockType>' 
 	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
 	+ '<StorageLocation>' + IsNULL(LTRIM(SUBSTRING(ISNULL(MUSL.strSubLocationName, ''), CHARINDEX('/', MUSL.strSubLocationName) + 1, LEN(MUSL.strSubLocationName))) , '') + '</StorageLocation>' 
 	+ '<Size>' + IsNULL(B.strLeafSize, '') + '</Size>' 
@@ -152,7 +169,7 @@ BEGIN TRY
 	+ '<Currency>' + IsNULL(C.strCurrency, '') + '</Currency>' 
 	+ '<MaterialCode>' + IsNULL(I.strShortName, '') + '</MaterialCode>' 
 	+ '<ReservedMixingUnit>'+IsNULL(B.strReserveMU, '')+'</ReservedMixingUnit>' 
-	+ '<SAPSystem></SAPSystem>' 
+	+ '<SAPSystem>iRely</SAPSystem>' 
 	+ '<InvoiceNo>' + IsNULL(B.strTeaGardenChopInvoiceNumber, '') + '</InvoiceNo>' 
 	+ '<Garden>' + IsNULL(GM.strGardenMark, '') + '</Garden>'
 	+ '<Grade>' + IsNULL(B.strLeafGrade, '') + '</Grade>' 
@@ -160,7 +177,7 @@ BEGIN TRY
 	+ '<SaleYear>' + IsNULL(ltrim(B.intSalesYear), '') + '</SaleYear>' 
 	+ '<SaleNumber>' + IsNULL(ltrim(B.intSales), '') + '</SaleNumber>' 
 	+ '<BrokerCode>' + IsNULL(BK.strName, '') + '</BrokerCode>' 
-	+ '<AuctionCenter>' + IsNULL(SM.strLocationNumber , '') + '</AuctionCenter>' 
+	+ '<AuctionCenter>' + IsNULL(SM.strLocationName , '') + '</AuctionCenter>' 
 	+ '<BoughtPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice), '') + '</BoughtPrice>' 
 	+ '<LandedPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblLandedPrice), '') + '</LandedPrice>' 
 	+ '<TinNo>' + IsNULL(T.strTINNumber , '') + '</TinNo>' 
@@ -194,6 +211,82 @@ BEGIN TRY
 	Left JOIN tblARMarketZone MZ on MZ.intMarketZoneId =CD.intMarketZoneId
 	Where B.intLocationId<>B.intMixingUnitLocationId  
 	
+SELECT @strDetailXML = IsNULL(@strDetailXML,'') 
+	+ '<Header><StockCode></StockCode>' 
+	+ '<BatchNumber>' + IsNULL(B.strBatchId,'') + '</BatchNumber>' 
+	+ '<Plant>' + IsNULL(ltrim(MU.strVendorRefNoPrefix),'')  + '</Plant>' 
+	+ '<ItemCode>' + IsNULL(I.strItemNo,'') + '</ItemCode>' 
+	+ '<StockDate>' + IsNULL(IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),CONVERT(VARCHAR(33), B.dtmStock , 126)),'') + '</StockDate>' 
+	+ '<Quantity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTotalQuantity),'') + '</Quantity>' 
+	+ '<MixingUnit>' + IsNULL(ltrim(MU.strLocationName) , '') + '</MixingUnit>' 
+	+ '<Taste>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaTaste),'') + '</Taste>' 
+	+ '<Hue>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaHue),'') + '</Hue>' 
+	+ '<Intensity>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaIntensity),'') + '</Intensity>' 
+	+ '<MouthFeel>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaMouthFeel),'') + '</MouthFeel>'
+	+ '<ContainerNo></ContainerNo>' 
+	+ '<FromLocationCode>' + IsNULL(C1.strCity, '') + '</FromLocationCode>' 
+	+ '<PONumber>' +  IsNULL(B.strBatchId, '') + '</PONumber>' 
+	+ '<POStatus></POStatus>' 
+	+ '<ShippingDate>' + IsNULL(IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),CONVERT(VARCHAR(33), B.dtmStock, 126)),'') + '</ShippingDate>' 
+	+ '<UnitCost>' +  IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),[dbo].[fnRemoveTrailingZeroes](B.dblBoughtPrice)),'') + '</UnitCost>' 
+	+ '<Vessel></Vessel>' 
+	+ '<StockType>'+(Case When B.intMarketZoneId =1 Then 'A'When B.intMarketZoneId =4 Then 'C'When B.intMarketZoneId =7 Then 'C1'When B.intMarketZoneId =3 Then 'C2'When B.intMarketZoneId =8 Then 'SPT' Else 'Others'End)+'</StockType>' 
+	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
+	+ '<StorageLocation></StorageLocation>' 
+	+ '<Size>' + IsNULL(B.strLeafSize, '') + '</Size>' 
+	+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaVolume), '') + '</Volume>' 
+	+ '<Appearance>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaAppearance), '') + '</Appearance>' 
+	+ '<ExpiryDate>' + IsNULL(CONVERT(VARCHAR(33), DateAdd(mm, I.intLifeTime, B.dtmProductionBatch), 126),'') + '</ExpiryDate>' 
+	+ '<NoOfBags>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTotalQuantity ) ,'') + '</NoOfBags>' 
+	+ '<UnitWeight>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTotalQuantity *B.dblWeightPerUnit ),'') + '</UnitWeight>' 
+	+ '<NoOfBagsPerPallet>' + IsNULL(ltrim(I.intUnitPerLayer * I.intLayerPerPallet), '') + '</NoOfBagsPerPallet>' 
+	+ '<ReceiptDate></ReceiptDate>' 
+	+ '<BuyingOrderNo>' + IsNULL(B.strBuyingOrderNumber, '') + '</BuyingOrderNo>' 
+	+ '<StrategicFlag>' + IsNULL(ltrim(SB.strSubBook ), '') + '</StrategicFlag>' 
+	+ '<Origin>' + IsNULL(Country.strISOCode, '') + '</Origin>' 
+	+ '<IncoTerms></IncoTerms>' 
+	+ '<IncoTermsDesc></IncoTermsDesc>' 
+	+ '<Currency>' + IsNULL(C.strCurrency, '') + '</Currency>' 
+	+ '<MaterialCode>' + IsNULL(I.strShortName, '') + '</MaterialCode>' 
+	+ '<ReservedMixingUnit>'+IsNULL(B.strReserveMU, '')+'</ReservedMixingUnit>' 
+	+ '<SAPSystem>iRely</SAPSystem>' 
+	+ '<InvoiceNo>' + IsNULL(B.strTeaGardenChopInvoiceNumber, '') + '</InvoiceNo>' 
+	+ '<Garden>' + IsNULL(GM.strGardenMark, '') + '</Garden>'
+	+ '<Grade>' + IsNULL(B.strLeafGrade, '') + '</Grade>' 
+	+ '<ItemCodeOriginal>' + IsNULL(OI.strItemNo , '') + '</ItemCodeOriginal>' 
+	+ '<SaleYear>' + IsNULL(ltrim(B.intSalesYear), '') + '</SaleYear>' 
+	+ '<SaleNumber>' + IsNULL(ltrim(B.intSales), '') + '</SaleNumber>' 
+	+ '<BrokerCode>' + IsNULL(BK.strName, '') + '</BrokerCode>' 
+	+ '<AuctionCenter>' + IsNULL(SM.strLocationName , '') + '</AuctionCenter>' 
+	+ '<BoughtPrice>' + IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),[dbo].[fnRemoveTrailingZeroes](B.dblBoughtPrice)),'') + '</BoughtPrice>' 
+	+ '<LandedPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblLandedPrice), '') + '</LandedPrice>' 
+	+ '<TinNo>' + IsNULL(T.strTINNumber , '') + '</TinNo>' 
+	+ '<TBO>' + IsNULL(SM.strLocationNumber, '') + '</TBO>' 
+	+ '<AvailableFrom>' + IsNULL(CONVERT(VARCHAR(33), B.dtmTeaAvailableFrom, 126),'') + '</AvailableFrom>' 
+	+ '<TeaType>' + IsNULL(B.strTeaType, '') + '</TeaType>' 
+	+ '<SaleDate>' + IsNULL(CONVERT(VARCHAR (33), B.dtmSalesDate , 126),'') + '</SaleDate>' 
+	+ '<InitialBuyDate>' + IsNULL(CONVERT(VARCHAR(33), B.dtmInitialBuy, 126),'') + '</InitialBuyDate>' 
+	+ '<BulkDensity>' + IsNULL(ltrim(B.dblBulkDensity), '') + '</BulkDensity>' 
+	+ '<BasePrice>' + IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),[dbo].[fnRemoveTrailingZeroes](B.dblBasePrice )),'') + '</BasePrice></Header>'
+	FROM @tblIPContractedStockPreStage CS
+	JOIN tblIPContractedStockPreStage CS1 on CS1.intContractedStockPreStageId =CS.intContractedStockPreStageId 
+	JOIN tblMFBatch B ON B.intBatchId = CS1.intBatchId 
+	Left JOIN tblCTContractDetail CD ON CD.intContractDetailId = B.intContractDetailId
+	JOIN tblICItem I ON I.intItemId = B.intTealingoItemId 
+	Left JOIN tblICCommodityAttribute CA on CA.intCommodityAttributeId =I.intOriginId 
+	Left JOIN tblSMCountry Country on Country.intCountryID =CA.intCountryID 
+	Left JOIN tblCTSubBook SB ON SB.intSubBookId = B.intSubBookId
+	Left JOIN tblSMCurrency C ON C.intCurrencyID = B.intCurrencyId
+	LEFT JOIN tblSMCity C1 ON C1.intCityId = B.intFromPortId
+	LEFT JOIN tblEMEntity BK ON BK.intEntityId = B.intBrokerId
+	LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = B.intBuyingCenterLocationId
+	LEFT JOIN tblSMCompanyLocation MU ON MU.intCompanyLocationId = B.intMixingUnitLocationId  
+	LEFT JOIN tblQMGardenMark  GM ON GM.intGardenMarkId = B.intGardenMarkId  
+	LEFT JOIN tblICItem OI on OI.intItemId=B.intOriginalItemId
+	LEFT JOIN tblQMTINClearance T on T.intBatchId =B.intBatchId 
+	Left JOIN tblARMarketZone MZ on MZ.intMarketZoneId =B.intMarketZoneId
+	Where B.intLocationId<>B.intMixingUnitLocationId  
+
 	UPDATE dbo.tblIPContractedStockPreStage
 	SET intStatusId = NULL
 	WHERE intContractedStockPreStageId IN (
