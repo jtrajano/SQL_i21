@@ -218,8 +218,8 @@ FROM (
 		,[ysnRecap]							=	0
 		,[intEntityId]						=	@userId
 		,[intPaymentDetailId]				=	NULL
-		,[intInvoiceId]						=	NULL
-		,[intBillId]						=	A.intInvoiceId
+		,[intInvoiceId]						=	A.intInvoiceId
+		,[intBillId]						=	NULL
 		,[strTransactionNumber]				=	A.strInvoiceNumber
 		,[intTermId]						=	A.intTermId
 		,[ysnApplyTermDiscount]				=	0
@@ -232,7 +232,7 @@ FROM (
 		,[intCurrencyExchangeRateId]		=	NULL
 		,[dblCurrencyExchangeRate]			=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN rateInfo.dblRate ELSE 1 END
 		,[ysnAllowOverpayment]				=	0
-		,[ysnFromAP]						=	1
+		,[ysnFromAP]						=	0
 	FROM tblARInvoice A
 	INNER JOIN #tmpVouchersForPay payVouchers ON A.intInvoiceId = payVouchers.intInvoiceId
 	INNER JOIN tblSMCompanyLocation B ON A.intShipToLocationId = B.intCompanyLocationId
@@ -263,6 +263,7 @@ SELECT
 	DISTINCT intPaymentId
 FROM tblARPaymentIntegrationLogDetail
 WHERE intIntegrationLogId = @log
+AND intPaymentId IS NOT NULL
 
 SELECT @totalPaymentCreated = COUNT(*) FROM @paymentIds
 
