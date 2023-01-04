@@ -28,6 +28,11 @@ WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
 							+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 						) COLLATE Latin1_General_CI_AS
 		)
+
+-- set intBankDepositId to null if Bank Deposit is non-existing/ deleted.
+UPDATE A SET intBankDepositId = NULL FROM tblCMUndepositedFund A LEFT JOIN tblCMBankTransaction B on A.intBankDepositId = B.intTransactionId
+WHERE B.intTransactionId IS NULL AND A.intBankDepositId IS NOT NULL
+
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 IF @intBankAccountId IS NOT NULL
