@@ -7763,4 +7763,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strExpressAccountID]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b51fef14-20c4-42cf-87dd-93b3d38cc60b" ChangeDateTime="12/20/2022 03:10:42">
+    <Property Name="ElementName" Value="[dbo].[tblMBILPickupDetail].[intDispatchOrderRouteId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMBILPickupDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDispatchOrderDetailId" />
+  </Operation>
 </Operations>
