@@ -25,7 +25,7 @@ WHERE intTransactionId IN (
     FROM tblSMTransaction 
     WHERE strApprovalStatus = 'Approved'
 ) 
-and ysnCurrent = 1  and strStatus = 'Approved' 
+and ysnCurrent = 1  and strStatus = 'Approved' and ISNULL(intApproverId, 0) <> 0
 
 --APPROVED SUBMITTER ENTRIES
 INSERT INTO #TempApprovalHistory(intApprovalId, intEntityId, ysnApproved)
@@ -36,7 +36,7 @@ WHERE intTransactionId IN (
     FROM tblSMTransaction 
     WHERE strApprovalStatus = 'Approved'
 ) 
-and ysnCurrent = 1  and strStatus = 'Approved' 
+and ysnCurrent = 1  and strStatus = 'Approved' and ISNULL(intSubmittedById, 0) <> 0
 
 --ALL POSSIBLE USERS
 DECLARE users_cursor CURSOR FOR
@@ -52,7 +52,7 @@ BEGIN
 	INSERT INTO #TempApprovalHistory(intApprovalId, intEntityId, ysnRejected)
 	SELECT intApprovalId, @userId, 1
 	FROM tblSMApproval
-	WHERE    ysnCurrent = 1 AND strStatus = 'Rejected'
+	WHERE    ysnCurrent = 1 AND strStatus = 'Rejected' 
 
 	--CLOSED REJECTED TRANSACTIONS
 	INSERT INTO #TempApprovalHistory(intApprovalId, intEntityId, ysnClosed)
