@@ -2,7 +2,7 @@ CREATE TABLE tblFADepreciateLogDetail
 (
     intLogId INT,
     intLogDetailId INT IDENTITY(1,1) NOT NULL,
-    strTransactionId NVARCHAR(20) COLLATE Latin1_General_CI_AS  NULL,
+    strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS  NULL,
     strAssetId NVARCHAR(20) COLLATE Latin1_General_CI_AS  NULL,
     strBook NVARCHAR(20) COLLATE Latin1_General_CI_AS  NULL,
     dtmDate DATETIME NULL,
