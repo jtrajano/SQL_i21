@@ -63,6 +63,28 @@ BEGIN TRY
 			@intCostTermId				INT,
 			@ysnCancelledLoad			bit = 0;
 
+	DECLARE @xmlDocumentId INT
+		DECLARE @ModifiedSequence TABLE(
+			intContractDetailId INT
+		) 
+
+
+		IF (isnull(@strXML,'') <> '')
+		BEGIN
+			EXEC sp_xml_preparedocument @xmlDocumentId output, @strXML
+			INSERT INTO @ModifiedSequence
+			(
+				intContractDetailId
+			)
+			SELECT
+				intContractDetailId
+			FROM OPENXML(@xmlDocumentId, 'rows/row', 2)
+			WITH (
+				intContractDetailId INT
+			)
+		END
+
+
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
 	from tblCTContractDetail cd
@@ -453,11 +475,17 @@ BEGIN TRY
 		--CT-8256
 		IF @intConcurrencyId = 1
 		BEGIN
-			EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Added'
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblIPPriceFeed where intContractDetailId = @intContractDetailId)
+			BEGIN
+				EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Added'
+			END
 		END
 		ELSE 
 		BEGIN
-			EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Modified'
+			IF EXISTS(SELECT TOP 1 1 FROM @ModifiedSequence where intContractDetailId = @intContractDetailId)
+			BEGIN
+				EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Modified'
+			END
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
