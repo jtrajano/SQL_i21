@@ -25,6 +25,9 @@
 -- Delete Objects
 :r .\DeleteScripts.sql
 
+-- AR This should be executed before 1_TM\4_1420_to_1430.sql
+:r .\7_AR\15_FixtblARCustomer_MissingColumn.sql
+
 -- TM
 :r .\1_TM\1_1320_to_1340.sql
 :r .\1_TM\2_DropUniqueConstraints.sql
