@@ -575,7 +575,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\QM\2_SetDefaultData.sql
 :r .\QM\3_CreateOfferSampleOutbound.sql
 :r .\QM\4_UpdateSampleCompanyLocation.sql
-
+:r .\QM\5_DefaultConfigurationData.sql
 
 -- C-Store Module
 :r .\ST\01_FileFieldMapping_PricebookSale.sql
@@ -627,6 +627,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
+:r .\ST\50_TransferMappingFromIcToSt.sql
 
 
 

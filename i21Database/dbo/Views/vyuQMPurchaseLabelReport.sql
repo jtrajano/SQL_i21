@@ -2,22 +2,23 @@ CREATE VIEW vyuQMPurchaseLabelReport
 AS  
 SELECT   
 A.intSampleId,
-intBatchId,  
-strBatchId,  
-REPLACE(CONVERT(VARCHAR, dtmSaleDate,101),'/','.') AS dtmSaleDate,  
+B.intBatchId,  
+B.strBatchId,  
+dtmSaleDate,  
+CASE WHEN A.strMarketZoneCode= 'AUC' THEN B.strTeaGardenChopInvoiceNumber ELSE CT.strTeaGardenChopInvoiceNumber END strTeaGardenChopInvoiceNumber,  
 B.strBroker,  
-strTeaGardenChopInvoiceNumber,  
-strLeafGrade,  
-CASE WHEN intSampleTypeId =2 THEN dblB1QtyBought ELSE dblRepresentingQty END  dblPackagesBought,  
+CASE WHEN A.strMarketZoneCode= 'AUC' THEN B.strLeafGrade ELSE CT.strLeafGrade END strLeafGrade,  
+CASE WHEN intSampleTypeId =2 THEN A.dblB1QtyBought ELSE A.dblRepresentingQty END  dblPackagesBought,  
 A.strGardenMark,  
-strTeaType,  
-dblWeightPerUnit,  
-dblWeightPerUnit* dblTotalQuantity dblTotalWeight,
-strRepresentLotNumber,
-strSaleNumber,
-dblB1Price,
-strMixingUnitLocation,
-replace(strLeafStyle +  ' ' + strLeafSize  + ' ' + Taste.Val, '  ', ' ') strTestResult,
+CASE WHEN A.strMarketZoneCode = 'AUC' THEN B.strTeaType ELSE CT.strTeaType END strTeaType,  
+CASE WHEN A.strMarketZoneCode = 'AUC' THEN B.dblWeightPerUnit ELSE CT.dblWeightPerUnit END dblWeightPerUnit,
+CASE WHEN A.strMarketZoneCode = 'AUC' THEN B.dblWeightPerUnit * B.dblTotalQuantity ELSE CT.dblWeightPerUnit* CT.dblTotalQuantity END dblTotalWeight,
+A.strRepresentLotNumber,
+A.strSaleNumber,
+A.dblB1Price, 
+CASE WHEN A.strMarketZoneCode = 'AUC'  THEN B.strMixingUnitLocation ELSE CT.strMixingUnitLocation END strMixingUnitLocation,
+CASE WHEN A.strMarketZoneCode = 'AUC'  THEN REPLACE(B.strLeafStyle +  ' ' + B.strLeafSize  + ' ' + Taste.Val, '  ', ' ') ELSE replace(CT.strLeafStyle +  ' ' + CT.strLeafSize  + ' ' + Taste.Val, '  ', ' ') END
+strTestResult,
 IC.strItemNo
 FROM vyuQMSampleList A JOIN vyuMFBatch B ON A.intSampleId = B.intSampleId
 LEFT JOIN tblICItem IC on IC.intItemId = A.intItemId
@@ -27,3 +28,8 @@ OUTER APPLY(
 	WHERE T.intSampleId = A.intSampleId
 	AND P.strPropertyName = 'Taste'
 )Taste
+OUTER APPLY(
+	SELECT TOP 1 	
+	strTeaType, dblWeightPerUnit,dblTotalQuantity,strMixingUnitLocation,strLeafStyle, strLeafSize, strLeafGrade, strTeaGardenChopInvoiceNumber
+	FROM tblCTContractDetail C  WHERE intContractDetailId = A.intContractDetailId
+) CT

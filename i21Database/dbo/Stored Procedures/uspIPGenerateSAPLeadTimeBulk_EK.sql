@@ -13,6 +13,7 @@ BEGIN TRY
 		,@strFinalXML NVARCHAR(MAX) = ''
 		,@dtmCurrentDate DATETIME
 		,@intDocID INT
+		,@intTotalRows INT
 	DECLARE @tblIPLeadTimeSAPPreStage TABLE (intLeadTimePreStageId INT)
 
 	SELECT @dtmCurrentDate = CONVERT(CHAR, GETDATE(), 101)
@@ -79,11 +80,11 @@ BEGIN TRY
 
 	SELECT @strXML = @strXML
 		+ '<Header>'
-		+ '<Origin>' + ISNULL(C.strCountry, '') + '</Origin>'
-		+ '<BuyingCenter>' + ISNULL(CL.strLocationNumber, '') + '</BuyingCenter>'
+		+ '<Origin>' + ISNULL(C.strISOCode, '') + '</Origin>'
+		+ '<BuyingCenter>' + ISNULL(CL.strLocationName, '') + '</BuyingCenter>'
 		+ '<StorageLocation>' + LTRIM(SUBSTRING(ISNULL(SL.strSubLocationName, ''), CHARINDEX('/', SL.strSubLocationName) + 1, LEN(SL.strSubLocationName))) + '</StorageLocation>'
 		+ '<Channel>' + ISNULL(MZ.strMarketZoneCode, '') + '</Channel>'
-		+ '<PlantCode>' + ISNULL(CL1.strLocationNumber, '') + '</PlantCode>'
+		+ '<PlantCode>' + ISNULL(CL1.strOregonFacilityNumber, '') + '</PlantCode>'
 		+ '<PlantDescription>' + ISNULL(CL1.strLocationName, '') + '</PlantDescription>'
 		+ '<FromShippingUnit>' + ISNULL(DC.strCity, '') + '</FromShippingUnit>'
 		+ '<FromShipUnitDesc>' + ISNULL(DC.strVAT, '') + '</FromShipUnitDesc>'
@@ -111,6 +112,9 @@ BEGIN TRY
 		SELECT @intDocID = ISNULL(MAX(intLeadTimePreStageId), 1)
 		FROM @tblIPLeadTimeSAPPreStage
 
+		SELECT @intTotalRows = COUNT(1)
+		FROM tblIPLeadTimeSAPPreStage
+
 		SELECT @strRootXML = '<DocNo>' + LTRIM(@intDocID) + '</DocNo>'
 
 		SELECT @strRootXML += '<MsgType>Lead_Time</MsgType>'
@@ -118,6 +122,8 @@ BEGIN TRY
 		SELECT @strRootXML += '<Sender>iRely</Sender>'
 
 		SELECT @strRootXML += '<Receiver>SAP</Receiver>'
+
+		SELECT @strRootXML += '<TotalRows>' + LTRIM(@intTotalRows) + '</TotalRows>'
 
 		SELECT @strFinalXML = '<root>' + @strRootXML + @strXML + '</root>'
 	END

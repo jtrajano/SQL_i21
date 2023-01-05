@@ -511,6 +511,16 @@ BEGIN TRY
 				Update tblMFBatch
 				Set intTealingoItemId =@intItemId,intOriginalItemId =@intOriginalItemId
 				Where intBatchId =@intProductValueId
+
+				IF @intItemId<>@intOriginalItemId
+				BEGIN
+					EXEC dbo.uspMFBatchPreStage 
+						@intBatchId = @intProductValueId
+						,@intUserId = @intEntityUserId
+						,@intOriginalItemId = @intOriginalItemId
+						,@intItemId = @intItemId
+				END
+
             END
 
             IF @strTINNumber IS NOT NULL

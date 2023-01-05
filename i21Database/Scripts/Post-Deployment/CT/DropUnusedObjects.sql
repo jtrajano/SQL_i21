@@ -23,3 +23,9 @@ BEGIN
 	EXEC('ALTER TABLE tblCTContractHeader DROP COLUMN intLastEntityId')
 END
 GO
+
+IF (OBJECT_ID(N'[dbo].[trgCTContractCostInstedOfDelete]') IS NOT NULL)
+BEGIN
+      DROP TRIGGER [dbo].[trgCTContractCostInstedOfDelete];
+END
+GO

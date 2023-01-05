@@ -1063,6 +1063,17 @@ BEGIN TRY
 	IF ISNULL(@intRelatedSampleId, 0) <> 0
 		UPDATE tblQMSample SET intRelatedSampleId = @intSampleId WHERE intSampleId = @intRelatedSampleId
 
+	DECLARE @strRowState NVARCHAR(50)
+	SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
+	FROM tblQMSample
+	WHERE intSampleId = @intSampleId
+
+	EXEC uspIPProcessPriceToFeed
+		@intCreatedUserId
+		,@intSampleId
+		,'Sample'
+		,@strRowState
+
 	COMMIT TRAN
 END TRY
 

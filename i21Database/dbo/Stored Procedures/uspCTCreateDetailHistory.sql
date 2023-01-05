@@ -1033,7 +1033,7 @@ BEGIN TRY
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId	    = @intContractHeaderId
 				, intContractDetailId		= CurrentRow.intContractDetailId
-				, intAmendmentApprovalId	= 22
+				, intAmendmentApprovalId	= 23
 				, strItemChanged			= 'Port / City'
 				, strOldValue			    =  PreviousType.strCity
 				, strNewValue		        =  CurrentType.strCity

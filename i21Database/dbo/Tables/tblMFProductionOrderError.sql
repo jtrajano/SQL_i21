@@ -14,4 +14,5 @@ CREATE TABLE tblMFProductionOrderError (
 	,dblWeight NUMERIC(18, 6)
 	,strWeightUOM NVARCHAR(50) collate Latin1_General_CI_AS
 	,dtmFeedDate DateTime 
+	,strMessage nvarchar(MAX) collate Latin1_General_CI_AS
 	)

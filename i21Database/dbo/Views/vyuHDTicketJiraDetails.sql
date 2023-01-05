@@ -20,14 +20,14 @@
 			,d.intJiraKeyId
 			,d.strJiraKey
 			,d.strJiraUrl
-			,REPLACE(d.strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
+			,strTypeIconUrl				= d.strJiraTypeIconUrl
 			,d.strSummary
 			,d.strDescription
 			,d.strReporter
 			,d.strAssignee
 			,d.strFixedBy
-			,REPLACE(d.strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
-			,REPLACE(d.strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
+			,strPriorityIconUrl			= d.strJiraPriorityIconUrl
+			,strStatusIconUrl			= d.strJiraStatusIconUrl
 			,d.strResolution
 			,d.dtmJiraCreated
 			,d.dtmJiraUpdated

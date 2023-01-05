@@ -43,8 +43,35 @@ BEGIN TRY
 		,@dtmPlanDate DATETIME
 		,@intWokrOrderId INT
 		,@intBlendItemId INT
-		,@intBlendUOMId int
+		,@intBlendUOMId INT
 		,@intBlendItemUOMId INT
+		,@strReferenceNo NVARCHAR(50)
+		,@intWeightUOMId INT
+		,@dblTeaTaste NUMERIC(18, 6)
+		,@dblTeaHue NUMERIC(18, 6)
+		,@dblTeaIntensity NUMERIC(18, 6)
+		,@dblTeaMouthFeel NUMERIC(18, 6)
+		,@dblTeaAppearance NUMERIC(18, 6)
+		,@dblTeaVolume NUMERIC(18, 6)
+		,@intValidDate INT
+		,@intPrevWorkOrderId INT = 0
+	DECLARE @tblProductProperty AS TABLE (
+		intRowNo INT IDENTITY(1, 1)
+		,intPropertyId INT
+		,strPropertyName NVARCHAR(100)
+		,dblMinValue NUMERIC(18, 6)
+		,dblMaxValue NUMERIC(18, 6)
+		,intTestId INT
+		,strTestName NVARCHAR(100)
+		,intSequenceNo INT
+		)
+	DECLARE @intTestId INT
+		,@dblTotal NUMERIC(18, 6)
+
+	SET @intValidDate = (
+			SELECT DATEPART(dy, GETDATE())
+			)
+
 	DECLARE @tblMFProductionOrderStage TABLE (intProductionOrderStageId INT)
 
 	INSERT INTO @tblMFProductionOrderStage (intProductionOrderStageId)
@@ -87,7 +114,12 @@ BEGIN TRY
 				,@dblOrderQuantity = NULL
 				,@strOrderQuantityUOM = NULL
 				,@dblNoOfMixes = NULL
-				,@dtmPlanDate = NULL
+				,@dblTeaTaste = NULL
+				,@dblTeaHue = NULL
+				,@dblTeaIntensity = NULL
+				,@dblTeaMouthFeel = NULL
+				,@dblTeaAppearance = NULL
+				,@dblTeaVolume = NULL
 
 			SELECT @strOrderNo = strOrderNo
 				,@strLocationNumber = strLocationCode
@@ -100,7 +132,12 @@ BEGIN TRY
 				,@dblOrderQuantity = dblOrderQuantity
 				,@strOrderQuantityUOM = strOrderQuantityUOM
 				,@dblNoOfMixes = dblNoOfMixes
-				,@dtmPlanDate = dtmPlanDate
+				,@dblTeaTaste = dblTeaTaste
+				,@dblTeaHue = dblTeaHue
+				,@dblTeaIntensity = dblTeaIntensity
+				,@dblTeaMouthFeel = dblTeaMouthFeel
+				,@dblTeaAppearance = dblTeaAppearance
+				,@dblTeaVolume = dblTeaVolume
 			FROM dbo.tblMFProductionOrderStage
 			WHERE intProductionOrderStageId = @intProductionOrderStageId
 
@@ -130,7 +167,7 @@ BEGIN TRY
 
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
-			WHERE strLocationNumber = @strLocationNumber
+			WHERE strVendorRefNoPrefix = @strLocationNumber
 
 			IF @intLocationId IS NULL
 			BEGIN
@@ -146,7 +183,8 @@ BEGIN TRY
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblMFBlendRequirement
-					WHERE strReferenceNo = @strOrderNo and intLocationId =@intLocationId
+					WHERE strReferenceNo = @strOrderNo
+						AND intLocationId = @intLocationId
 					)
 			BEGIN
 				SELECT @strError = 'Production Order ' + @strOrderNo + ' is not available in i21'
@@ -161,7 +199,8 @@ BEGIN TRY
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblICLot
-					WHERE strLotNumber = @strBatchId and intLocationId =@intLocationId
+					WHERE strLotNumber = @strBatchId
+						AND intLocationId = @intLocationId
 					)
 			BEGIN
 				SELECT @strError = 'Batch No ' + @strBatchId + ' is not availble in i21.'
@@ -175,9 +214,13 @@ BEGIN TRY
 
 			SELECT @intItemId = NULL
 				,@intLotId = NULL
+				,@intWeightUOMId = NULL
+				,@intItemUOMId = NULL
 
 			SELECT @intItemId = intItemId
 				,@intLotId = intLotId
+				,@intWeightUOMId = intWeightUOMId
+				,@intItemUOMId = intItemUOMId
 			FROM tblICLot
 			WHERE strLotNumber = @strBatchId
 				AND intLocationId = @intLocationId
@@ -186,108 +229,92 @@ BEGIN TRY
 				,@intMachineId = NULL
 				,@intBlendItemId = NULL
 				,@intBlendUOMId = NULL
+				,@strReferenceNo = NULL
+				,@dtmPlanDate = NULL
 
 			SELECT @intManufacturingCellId = intManufacturingCellId
 				,@intMachineId = intMachineId
 				,@intBlendRequirementId = intBlendRequirementId
 				,@intBlendItemId = intItemId
 				,@intBlendUOMId = intUOMId
+				,@strReferenceNo = strReferenceNo
+				,@dtmPlanDate = dtmDueDate
 			FROM tblMFBlendRequirement
 			WHERE strReferenceNo = @strOrderNo
-			and intLocationId =@intLocationId
+				AND intLocationId = @intLocationId
 
-			IF @strWeightUOM = ''
-			BEGIN
-				SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' cannot be blank.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			SELECT @intUnitMeasureId = NULL
-
-			SELECT @intUnitMeasureId = intUnitMeasureId
-			FROM dbo.tblICUnitMeasure
-			WHERE strUnitMeasure = @strWeightUOM
-
-			IF @intUnitMeasureId IS NULL
-			BEGIN
-				SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' is not availble in i21.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			SELECT @intItemUOMId = NULL
-
-			SELECT @intItemUOMId = intItemUOMId
-			FROM tblICItemUOM IU
-			WHERE intItemId = @intItemId
-				AND intUnitMeasureId = @intUnitMeasureId
-
-			IF @intItemUOMId IS NULL
-			BEGIN
-				SELECT @strError = 'UOM ' + @strWeightUOM + ' is not configured in the item level in i21.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			IF @strNoOfPackUOM = ''
-			BEGIN
-				SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' cannot be blank.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			SELECT @intPackUnitMeasureId = NULL
-
-			SELECT @intPackUnitMeasureId = intUnitMeasureId
-			FROM dbo.tblICUnitMeasure
-			WHERE strUnitMeasure = @strNoOfPackUOM
-
-			IF @intPackUnitMeasureId IS NULL
-			BEGIN
-				SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' is not availble in i21.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			SELECT @intPackItemUOMId = NULL
-
-			SELECT @intPackItemUOMId = intItemUOMId
-			FROM tblICItemUOM IU
-			WHERE intItemId = @intItemId
-				AND intUnitMeasureId = @intPackUnitMeasureId
-
-			IF @intPackItemUOMId IS NULL
-			BEGIN
-				SELECT @strError = 'UOM ' + @strNoOfPackUOM + ' is not configured in the item level in i21.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
+			--IF @strWeightUOM = ''
+			--BEGIN
+			--	SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' cannot be blank.'
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
+			--SELECT @intUnitMeasureId = NULL
+			--SELECT @intUnitMeasureId = intUnitMeasureId
+			--FROM dbo.tblICUnitMeasure
+			--WHERE strUnitMeasure = @strWeightUOM
+			--IF @intUnitMeasureId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'Weight UOM ' + @strWeightUOM + ' is not availble in i21.'
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
+			--SELECT @intItemUOMId = NULL
+			--SELECT @intItemUOMId = intItemUOMId
+			--FROM tblICItemUOM IU
+			--WHERE intItemId = @intItemId
+			--	AND intUnitMeasureId = @intUnitMeasureId
+			--IF @intItemUOMId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'UOM ' + @strWeightUOM + ' is not configured in the item level in i21.'
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
+			--IF @strNoOfPackUOM = ''
+			--BEGIN
+			--	SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' cannot be blank.'
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
+			--SELECT @intPackUnitMeasureId = NULL
+			--SELECT @intPackUnitMeasureId = intUnitMeasureId
+			--FROM dbo.tblICUnitMeasure
+			--WHERE strUnitMeasure = @strNoOfPackUOM
+			--IF @intPackUnitMeasureId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'Pack UOM ' + @strNoOfPackUOM + ' is not availble in i21.'
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
+			--SELECT @intPackItemUOMId = NULL
+			--SELECT @intPackItemUOMId = intItemUOMId
+			--FROM tblICItemUOM IU
+			--WHERE intItemId = @intItemId
+			--	AND intUnitMeasureId = @intPackUnitMeasureId
+			--IF @intPackItemUOMId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'UOM ' + @strNoOfPackUOM + ' is not configured in the item level in i21.'
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 			SELECT @intWorkOrderId = NULL
 
 			SELECT @intWorkOrderId = intWorkOrderId
@@ -328,6 +355,10 @@ BEGIN TRY
 				WHERE intItemId = @intBlendItemId
 					AND intUnitMeasureId = @intBlendUOMId
 
+				IF @dblNoOfMixes = 0
+					OR @dblNoOfMixes IS NULL
+					SELECT @dblNoOfMixes = 1
+
 				INSERT INTO tblMFWorkOrder (
 					strWorkOrderNo
 					,intItemId
@@ -362,6 +393,7 @@ BEGIN TRY
 					,intCustomerId
 					,intConcurrencyId
 					,intTransactionFrom
+					,strERPOrderNo
 					)
 				SELECT @strWorkOrderNo
 					,@intBlendItemId
@@ -396,8 +428,80 @@ BEGIN TRY
 					,NULL AS intCustomerId
 					,1
 					,NULL AS intTransactionFrom
+					,@strReferenceNo
 
 				SELECT @intWorkOrderId = SCOPE_IDENTITY()
+
+				SELECT @intTestId = strAttributeValue
+				FROM tblMFManufacturingProcessAttribute pa
+				JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+				WHERE pa.intManufacturingProcessId = 1
+					AND pa.intLocationId = @intLocationId
+					AND at.strAttributeName = 'Test Name'
+
+				DELETE
+				FROM @tblProductProperty
+
+				INSERT INTO @tblProductProperty
+				SELECT DISTINCT PRT.intPropertyId
+					,PRT.strPropertyName
+					,MIN(PPV.dblMinValue)
+					,MAX(PPV.dblMaxValue)
+					,TST.intTestId
+					,TST.strTestName
+					,PP.intSequenceNo
+				FROM tblQMProduct PRD
+				JOIN tblQMProductProperty PP ON PP.intProductId = PRD.intProductId
+				JOIN tblQMProductPropertyValidityPeriod PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+				JOIN tblQMProperty PRT ON PRT.intPropertyId = PP.intPropertyId
+				JOIN tblQMTestProperty TP ON TP.intPropertyId = PRT.intPropertyId
+					AND PP.intTestId = TP.intTestId
+				JOIN tblQMTest TST ON TST.intTestId = TP.intTestId
+				WHERE PRD.intProductValueId = @intBlendItemId
+					AND PRD.intProductTypeId = 2
+					AND PRD.ysnActive = 1
+					AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
+						AND DATEPART(dy, PPV.dtmValidTo)
+				GROUP BY PRT.intPropertyId
+					,PRT.strPropertyName
+					,TST.intTestId
+					,TST.strTestName
+					,PP.intSequenceNo
+				ORDER BY PP.intSequenceNo
+
+				INSERT INTO tblMFWorkOrderRecipeComputation (
+					intWorkOrderId
+					,intTestId
+					,intPropertyId
+					,dblComputedValue
+					,dblMinValue
+					,dblMaxValue
+					,intTypeId
+					,intMethodId
+					)
+				SELECT DISTINCT @intWorkOrderId
+					,intTestId
+					,intPropertyId
+					,CASE 
+						WHEN strPropertyName = 'Taste'
+							THEN @dblTeaTaste
+						WHEN strPropertyName = 'Hue '
+							THEN @dblTeaHue
+						WHEN strPropertyName = 'Intensity'
+							THEN @dblTeaIntensity
+						WHEN strPropertyName = 'Mouth feel'
+							THEN @dblTeaMouthFeel
+						WHEN strPropertyName = 'Appearance'
+							THEN @dblTeaAppearance
+						WHEN strPropertyName = 'Volumne'
+							THEN @dblTeaVolume
+						END
+					,dblMinValue
+					,dblMaxValue
+					,1
+					,1
+				FROM @tblProductProperty
+				WHERE intTestId = @intTestId
 			END
 
 			INSERT INTO tblMFWorkOrderInputLot (
@@ -414,9 +518,9 @@ BEGIN TRY
 				,@intItemId
 				,@intLotId
 				,@dblWeight
-				,@intItemUOMId
+				,@intWeightUOMId
 				,@dblNoOfPack
-				,@intPackItemUOMId
+				,@intItemUOMId
 				,1
 
 			MOVE_TO_ARCHIVE:
@@ -457,6 +561,144 @@ BEGIN TRY
 			FROM dbo.tblMFProductionOrderStage
 			WHERE intProductionOrderStageId = @intProductionOrderStageId
 
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblMFProductionOrderStage
+					WHERE strOrderNo = @strOrderNo
+					)
+			BEGIN
+				DELETE
+				FROM @tblProductProperty
+
+				INSERT INTO @tblProductProperty
+				SELECT DISTINCT PRT.intPropertyId
+					,PRT.strPropertyName
+					,MIN(PPV.dblMinValue)
+					,MAX(PPV.dblMaxValue)
+					,TST.intTestId
+					,TST.strTestName
+					,PP.intSequenceNo
+				FROM tblQMProduct PRD
+				JOIN tblQMProductProperty PP ON PP.intProductId = PRD.intProductId
+				JOIN tblQMProductPropertyValidityPeriod PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+				JOIN tblQMProperty PRT ON PRT.intPropertyId = PP.intPropertyId
+				JOIN tblQMTestProperty TP ON TP.intPropertyId = PRT.intPropertyId
+					AND PP.intTestId = TP.intTestId
+				JOIN tblQMTest TST ON TST.intTestId = TP.intTestId
+				WHERE PRD.intProductValueId = @intBlendItemId
+					AND PRD.intProductTypeId = 2
+					AND PRD.ysnActive = 1
+					AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
+						AND DATEPART(dy, PPV.dtmValidTo)
+				GROUP BY PRT.intPropertyId
+					,PRT.strPropertyName
+					,TST.intTestId
+					,TST.strTestName
+					,PP.intSequenceNo
+				ORDER BY PP.intSequenceNo
+
+				SELECT @dblTotal = SuM(dblQuantity)
+				FROM tblMFWorkOrderInputLot
+				WHERE intWorkOrderId = @intWorkOrderId
+
+				INSERT INTO tblMFWorkOrderRecipeComputation (
+					intWorkOrderId
+					,intTestId
+					,intPropertyId
+					,dblComputedValue
+					,dblMinValue
+					,dblMaxValue
+					,intTypeId
+					,intMethodId
+					)
+				SELECT @intWorkOrderId
+					,PP.intTestId
+					,PP.intPropertyId
+					,CAST(IsNULL((Type1.dblQty / @dblTotal) * 100, 0) AS DECIMAL(18, 4)) AS dblComputedValue
+					,PP.dblMinValue
+					,PP.dblMaxValue
+					,1
+					,1
+				FROM @tblProductProperty PP
+				OUTER APPLY (
+					SELECT CA.strDescription
+						,sum(L.dblQuantity) dblQty
+					FROM tblMFWorkOrderInputLot L
+					JOIN tblICLot Lot ON Lot.intLotId = L.intLotId
+						AND L.intWorkOrderId = @intWorkOrderId
+					JOIN tblICItem I ON I.intItemId = Lot.intItemId
+					JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intProductTypeId
+					WHERE CA.strDescription COLLATE Latin1_General_CI_AS = PP.strPropertyName
+					GROUP BY CA.strDescription
+					) Type1
+				WHERE PP.strTestName = 'Type'
+
+				INSERT INTO tblMFWorkOrderRecipeComputation (
+					intWorkOrderId
+					,intTestId
+					,intPropertyId
+					,dblComputedValue
+					,dblMinValue
+					,dblMaxValue
+					,intTypeId
+					,intMethodId
+					)
+				SELECT @intWorkOrderId
+					,PP.intTestId
+					,PP.intPropertyId
+					,CAST(IsNULL((Type1.dblQty / @dblTotal) * 100, 0) AS DECIMAL(18, 4)) AS dblComputedValue
+					,PP.dblMinValue
+					,PP.dblMaxValue
+					,1
+					,1
+				FROM @tblProductProperty PP
+				OUTER APPLY (
+					SELECT C.strISOCode
+						,sum(L.dblQuantity) dblQty
+					FROM tblMFWorkOrderInputLot L
+					JOIN tblICLot Lot ON Lot.intLotId = L.intLotId
+						AND L.intWorkOrderId = @intWorkOrderId
+					JOIN tblICItem I ON I.intItemId = Lot.intItemId
+					JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+					JOIN tblSMCountry C ON C.intCountryID = CA.intCountryID
+					WHERE C.strISOCode COLLATE Latin1_General_CI_AS = PP.strPropertyName
+					GROUP BY C.strISOCode
+					) Type1
+				WHERE PP.strTestName = 'Origin'
+
+				INSERT INTO tblMFWorkOrderRecipeComputation (
+					intWorkOrderId
+					,intTestId
+					,intPropertyId
+					,dblComputedValue
+					,dblMinValue
+					,dblMaxValue
+					,intTypeId
+					,intMethodId
+					)
+				SELECT @intWorkOrderId
+					,PP.intTestId
+					,PP.intPropertyId
+					,CAST(IsNULL((Type1.dblQty / @dblTotal) * 100, 0) AS DECIMAL(18, 4)) AS dblComputedValue
+					,PP.dblMinValue
+					,PP.dblMaxValue
+					,1
+					,1
+				FROM @tblProductProperty PP
+				OUTER APPLY (
+					SELECT B.strBrandCode
+						,sum(L.dblQuantity ) dblQty
+					FROM tblMFWorkOrderInputLot L
+					JOIN tblICLot Lot ON Lot.intLotId = L.intLotId
+						AND L.intWorkOrderId = @intWorkOrderId
+					JOIN tblICItem I ON I.intItemId = Lot.intItemId
+					JOIN tblICBrand B ON B.intBrandId = I.intBrandId
+					WHERE B.strBrandCode COLLATE Latin1_General_CI_AS = PP.strPropertyName
+					GROUP BY B.strBrandCode
+					) Type1
+				WHERE PP.strTestName = 'Size'
+			END
+
 			COMMIT TRAN
 		END TRY
 
@@ -483,6 +725,7 @@ BEGIN TRY
 				,dblWeight
 				,strWeightUOM
 				,dtmFeedDate
+				,strMessage
 				)
 			SELECT intDocNo
 				,strOrderNo
@@ -497,6 +740,7 @@ BEGIN TRY
 				,dblWeight
 				,strWeightUOM
 				,dtmFeedDate
+				,@ErrMsg
 			FROM dbo.tblMFProductionOrderStage
 			WHERE intProductionOrderStageId = @intProductionOrderStageId
 

@@ -131,7 +131,7 @@ BEGIN TRY
 			SELECT BlendCode
 				,strLocationName
 				,BlendCode
-				,1 AS Quantity
+				,100 AS Quantity
 				,OrderQuantityUOM
 				,1 AS [Version]
 				,WeekCommencing
@@ -147,13 +147,13 @@ BEGIN TRY
 				,1 Active
 				,NULL StorageLocation
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
-					DocNo BIGINT '../CtrlPoint/DocNo'
+					DocNo BIGINT '../DocNo'
 					,LocationCode NVARCHAR(6) collate Latin1_General_CI_AS
 					,BlendCode NVARCHAR(50)	  collate Latin1_General_CI_AS
 					,OrderQuantityUOM NVARCHAR(50)	  collate Latin1_General_CI_AS
 					,WeekCommencing DATETIME
 					) x
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationNumber = x.LocationCode
+			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
 			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = 1
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strBlendCode, '') + ','
@@ -184,7 +184,7 @@ BEGIN TRY
 				,CL.strLocationName
 				,1 AS [Version]
 				,ItemCode AS ItemNo
-				,ItemQuantity AS Quantity
+				,ItemPercentage AS Quantity
 				,ItemQuantityUOM AS UOM
 				,CASE 
 					WHEN BlendCode = ItemCode
@@ -212,15 +212,15 @@ BEGIN TRY
 				,DocNo
 				,BlendCode
 			FROM OPENXML(@idoc, 'root/Header/Line', 2) WITH (
-					DocNo BIGINT '../../CtrlPoint/DocNo'
+					DocNo BIGINT '../../DocNo'
 					,ItemCode NVARCHAR(50) Collate Latin1_General_CI_AS
-					,ItemQuantity NUMERIC(18, 6)
+					,ItemPercentage NUMERIC(18, 6)
 					,ItemQuantityUOM NVARCHAR(50)
 					,WeekCommencing DATETIME '../WeekCommencing'
 					,BlendCode NVARCHAR(50) Collate Latin1_General_CI_AS '../BlendCode'
 					,LocationCode NVARCHAR(6) Collate Latin1_General_CI_AS '../LocationCode'
 					) x
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationNumber = x.LocationCode
+			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
 
 			INSERT INTO tblMFProductionOrderStage (
 				strOrderNo
@@ -228,41 +228,60 @@ BEGIN TRY
 				,dblOrderQuantity 
 				,strOrderQuantityUOM 
 				,dblNoOfMixes 
-				,dtmPlanDate
+				--,dtmPlanDate
 				,strBatchId
 				,dblNoOfPack
 				,strNoOfPackUOM
 				,dblWeight
 				,strWeightUOM
 				,intDocNo
+				,dblTeaTaste
+				,dblTeaHue
+				,dblTeaIntensity
+				,dblTeaMouthFeel
+				,dblTeaAppearance
+				,dblTeaVolume
 				)
 			SELECT OrderNo
 				,LocationCode
 				,OrderQuantity 
 				,OrderQuantityUOM 
 				,NoOfMixes 
-				,PlanDate
+				--,PlanDate
 				,BatchId
 				,NoOfPack
 				,NoOfPackUOM
 				,Weight
 				,WeightUOM
 				,DocNo
+				,TAverage
+				,HAverage
+				,IAverage
+				,MAverage
+				,AAverage
+				,VAverage
 			FROM OPENXML(@idoc, 'root/Header/Line/Batch', 2) WITH (
-					DocNo BIGINT '../../../CtrlPoint/DocNo'
+					DocNo BIGINT '../../../DocNo'
 					,OrderNo NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderNo'
 					,LocationCode NVARCHAR(50) collate Latin1_General_CI_AS '../../LocationCode'
 					,OrderQuantity numeric(18,6)'../../OrderQuantity'
 					,OrderQuantityUOM NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderQuantityUOM'
 					,NoOfMixes numeric(18,6)'../../NoOfMixes'
-					,PlanDate DateTime'../PlanDate'
+					--,PlanDate DateTime'../PlanDate'
 					,BatchId NVARCHAR(50) collate Latin1_General_CI_AS
 					,NoOfPack NUMERIC(18, 6)
 					,NoOfPackUOM NVARCHAR(50) collate Latin1_General_CI_AS
 					,Weight NUMERIC(18, 6)
 					,WeightUOM NVARCHAR(50) collate Latin1_General_CI_AS
+					,TAverage  NUMERIC(18, 6)'../../TAverage'
+					,HAverage NUMERIC(18, 6)'../../HAverage'
+					,IAverage NUMERIC(18, 6)'../../IAverage'
+					,MAverage NUMERIC(18, 6)'../../MAverage'
+					,AAverage NUMERIC(18, 6)'../../AAverage'
+					,VAverage NUMERIC(18, 6)'../../VAverage'
 					) x
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationNumber = x.LocationCode
+			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
+			WHERE x.BatchId<>'NoN'
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (

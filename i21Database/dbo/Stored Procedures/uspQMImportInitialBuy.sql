@@ -339,6 +339,7 @@ BEGIN TRY
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT
 		,@intSampleId INT
+		,@intEntityUserId INT
 		,@intPurchasingGroupId INT
 		,@strPurchasingGroup NVARCHAR(150)
 		,@intBookId INT
@@ -386,6 +387,7 @@ BEGIN TRY
 
 	SELECT intImportCatalogueId = IMP.intImportCatalogueId
 		,intSampleId = S.intSampleId
+		,intEntityUserId = IL.intEntityId
 		,intPurchasingGroupId = COMPANY_CODE.intPurchasingGroupId
 		,strPurchasingGroup = COMPANY_CODE.strName
 		,intBookId = BOOK.intBookId
@@ -433,6 +435,7 @@ BEGIN TRY
 	INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
 	INNER JOIN (
 		tblQMImportCatalogue IMP
+		INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 		-- Buyer1 Quantity UOM
 		LEFT JOIN tblICUnitMeasure B1QUOM ON B1QUOM.strSymbol = IMP.strB1QtyUOM
 		-- Buyer1 Price UOM
@@ -486,6 +489,7 @@ BEGIN TRY
 	FROM @C
 	INTO @intImportCatalogueId
 		,@intSampleId
+		,@intEntityUserId
 		,@intPurchasingGroupId
 		,@strPurchasingGroup
 		,@intBookId
@@ -685,7 +689,7 @@ BEGIN TRY
 			,intSales = CAST(S.strSaleNumber AS INT)
 			,intSalesYear = CAST(SY.strSaleYear AS INT)
 			,dtmSalesDate = S.dtmSaleDate
-			,strTeaType = LEAF_TYPE.strDescription
+			,strTeaType = CT.strCatalogueType
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
@@ -807,6 +811,7 @@ BEGIN TRY
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
@@ -895,7 +900,7 @@ BEGIN TRY
 			UPDATE B
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
-				,intSampleId = NULL
+				--,intSampleId = NULL
 				,dblOriginalTeaTaste = dblTeaTaste
 				,dblOriginalTeaHue = dblTeaHue
 				,dblOriginalTeaIntensity = dblTeaIntensity
@@ -910,12 +915,28 @@ BEGIN TRY
 				,@intInputSuccess
 				,NULL
 				,1
+
+			UPDATE tblQMSample
+			SET strBatchNo = @strBatchId
+			WHERE intSampleId = @intSampleId
+
+			DECLARE @strRowState NVARCHAR(50)
+			SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
+			FROM tblQMSample
+			WHERE intSampleId = @intSampleId
+
+			EXEC uspIPProcessPriceToFeed
+				@intEntityUserId
+				,@intSampleId
+				,'Sample'
+				,@strRowState
 		END
 
 		FETCH NEXT
 		FROM @C
 		INTO @intImportCatalogueId
 			,@intSampleId
+			,@intEntityUserId
 			,@intPurchasingGroupId
 			,@strPurchasingGroup
 			,@intBookId

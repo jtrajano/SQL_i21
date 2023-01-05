@@ -37,6 +37,8 @@ BEGIN TRY
 		,@strCostUOM NVARCHAR(50)
 		,@strCostCurrency NVARCHAR(50)
 		,@dblAllocatedQty NUMERIC(38, 20)
+		,@stri21SubLocationName NVARCHAR(100)
+		,@strLocation NVARCHAR(50)
 	DECLARE @intCompanyLocationId INT
 		,@intItemId INT
 		,@intLotId INT
@@ -133,6 +135,8 @@ BEGIN TRY
 				,@strCostUOM = NULL
 				,@strCostCurrency = NULL
 				,@dblAllocatedQty = NULL
+				,@stri21SubLocationName = NULL
+				,@strLocation = NULL
 
 			SELECT @intCompanyLocationId = NULL
 				,@intItemId = NULL
@@ -176,8 +180,9 @@ BEGIN TRY
 			WHERE intStageLotId = @intStageLotId
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
+				,@strLocation = strLocationName
 			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-			WHERE strLocationNumber = @strLocationName
+			WHERE strVendorRefNoPrefix = @strLocationName
 
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 			BEGIN
@@ -221,9 +226,11 @@ BEGIN TRY
 						)
 			END
 
+			SELECT @stri21SubLocationName = @strLocation + ' / ' + @strSubLocationName
+
 			SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
 			FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
-			WHERE t.strSubLocationName = @strSubLocationName
+			WHERE t.strSubLocationName = @stri21SubLocationName
 				AND t.intCompanyLocationId = @intCompanyLocationId
 
 			IF ISNULL(@intSubLocationId, 0) = 0
@@ -372,6 +379,24 @@ BEGIN TRY
 				AND L.intItemId = @intItemId
 				AND L.intSubLocationId = @intSubLocationId
 				AND L.intStorageLocationId = @intStorageLocationId
+
+			IF ISNULL(@strLotNumber, '') = ''
+			BEGIN
+				RAISERROR (
+						'Invalid Batch Id. '
+						,16
+						,1
+						)
+			END
+
+			IF ISNULL(@intLotId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Batch. '
+						,16
+						,1
+						)
+			END
 
 			BEGIN TRAN
 

@@ -333,7 +333,7 @@ BEGIN TRY
 				,@intContractDetailId = intContractDetailId
 				,@intSampleId = intSampleId
 				,@intBatchId = intBatchId
-				,@strDetailRowState = @strRowState
+				,@strDetailRowState = strRowState
 			FROM dbo.tblIPContractFeed
 			WHERE intContractFeedId = @intContractFeedId
 
@@ -545,7 +545,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<TrackingNo>' + LTRIM(@intContractFeedId) + '</TrackingNo>'
 
-			SELECT @strItemXML += '<RowState>' + LTRIM(@strDetailRowState) + '</RowState>'
+			SELECT @strItemXML += '<RowState>' + ISNULL(@strDetailRowState, '') + '</RowState>'
 
 			SELECT @strItemXML += '<ERPContractNo>' + ISNULL(@strERPContractNumber, '') + '</ERPContractNo>'
 
@@ -701,7 +701,7 @@ BEGIN TRY
 				+ '<LeafManufacturingType>' + ISNULL(B.strLeafManufacturingType, '') + '</LeafManufacturingType>'
 				+ '<LeafSize>' + ISNULL(B.strLeafSize, '') + '</LeafSize>'
 				+ '<LeafStyle>' + ISNULL(B.strLeafStyle, '') + '</LeafStyle>'
-				+ '<MixingUnit>' + ISNULL(B.strMixingUnitLocation, '') + '</MixingUnit>'
+				+ '<MixingUnit>' + ISNULL(CL.strLocationName, '') + '</MixingUnit>'
 				+ '<NumberOfPackagesBought>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblPackagesBought, 0))) + '</NumberOfPackagesBought>'
 				+ '<OriginOfTea>' + ISNULL(@strISOCode, '') + '</OriginOfTea>'
 				+ '<OriginalTeaLingoItem>' + ISNULL(I.strItemNo, '') + '</OriginalTeaLingoItem>'

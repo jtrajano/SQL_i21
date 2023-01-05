@@ -14,6 +14,17 @@ BEGIN TRY
 		,@intToBookId INT
 		,@ysnApproval BIT
 		,@intCompanyId INT
+		,@intSContractDetailId INT
+		,@intPContractDetailId INT
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblARInvoicePreStage
+			WHERE strFeedStatus IS NULL
+			)
+	BEGIN
+		RETURN
+	END
 
 	SELECT @intCompanyId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -22,6 +33,15 @@ BEGIN TRY
 	UPDATE dbo.tblARInvoice
 	SET intCompanyId = @intCompanyId
 	WHERE intCompanyId IS NULL
+
+	UPDATE CD
+	SET ysnProvisionalPNL = 0
+	FROM tblARInvoicePreStage PS
+	JOIN tblARInvoiceDetail ID ON ID.intInvoiceId = PS.intInvoiceId
+	JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = ID.intContractDetailId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId
+	WHERE strFeedStatus IS NULL
+		AND strRowState <> 'Posted'
 
 	UPDATE tblARInvoicePreStage
 	SET strFeedStatus = 'IGNORE'
@@ -38,7 +58,6 @@ BEGIN TRY
 	--		WHERE strFeedStatus IS NOT NULL
 	--			AND strRowState = 'Posted'
 	--		)
-
 	UPDATE tblARInvoicePreStage
 	SET strFeedStatus = 'IGNORE'
 	WHERE strFeedStatus IS NULL
@@ -126,6 +145,22 @@ BEGIN TRY
 			,@intToCompanyId
 			,@strRowState
 			,@intToBookId
+
+		SELECT @intSContractDetailId = NULL
+
+		SELECT @intSContractDetailId = intContractDetailId
+		FROM tblARInvoiceDetail
+		WHERE intInvoiceId = @intInvoiceId
+
+		SELECT @intPContractDetailId = NULL
+
+		SELECT @intPContractDetailId = intPContractDetailId
+		FROM tblLGAllocationDetail
+		WHERE intSContractDetailId = @intSContractDetailId
+
+		UPDATE tblCTContractDetail
+		SET ysnProvisionalPNL = 1
+		WHERE intContractDetailId = @intPContractDetailId
 
 		UPDATE tblARInvoicePreStage
 		SET strFeedStatus = 'Processed'

@@ -9,16 +9,16 @@ SELECT intTeaTypeId				= S.intSampleTypeId
 	 , strYear					= DATENAME(YEAR, S.dtmSaleDate)
 	 , strSaleNumber			= S.strSaleNumber
 	 , strMonth					= DATENAME(MONTH, S.dtmSaleDate)
-	 , strTeaType				= ST.strSampleTypeName
-	 , strTeaGroup				= IC.strDescription
+	 , strTeaType				= CT.strCatalogueType 
+	 , strTeaGroup				= ISNULL(Brand.strBrandCode, '') + ISNULL(Region.strDescription, '') + ISNULL(VG.strName, '')
 	 , strTeaItem				= ITEM.strItemNo
 	 , strCustomerMixingUnit	= B.strBook
 	 , dtmSaleDate				= S.dtmSaleDate
 	 , strBrokerName			= E.strName
 	 , strBrokerNo				= E.strEntityNo
 	 
-	 , dblPackages				= ISNULL(S.dblSampleQty, 0)
-	 , dblWeight				= ISNULL(S.dblRepresentingQty, 0)
+	 , dblPackages				= ISNULL(S.dblRepresentingQty, 0)
+	 , dblWeight				= ISNULL(S.dblSampleQty, 0)
 	 , dblBoughtPrice			= ISNULL(S.dblB1Price, 0)
 	 , dblBoughtKgs				= CS.dblB1Weight
 	 , dblBoughtPackage			= ISNULL(S.dblB1QtyBought, 0)
@@ -60,7 +60,12 @@ INNER JOIN (
 	LEFT JOIN tblICItemUOM IUM5 ON SS.intB5QtyUOMId = IUM5.intUnitMeasureId AND SS.intItemId = IUM5.intItemId
 ) CS ON S.intSampleId = CS.intSampleId
 INNER JOIN tblQMSampleType ST ON S.intSampleTypeId = ST.intSampleTypeId
+Left JOIN tblQMCatalogueType CT on CT.intCatalogueTypeId =S.intCatalogueTypeId 
 LEFT JOIN tblEMEntity E ON S.intBrokerId = E.intEntityId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
+LEFT JOIN dbo.tblICCommodityAttribute Region WITH (NOLOCK) ON Region.intCommodityAttributeId = ITEM.intRegionId
+LEFT JOIN dbo.tblICBrand Brand WITH (NOLOCK) ON Brand.intBrandId = ITEM.intBrandId
+LEFT JOIN dbo.tblCTValuationGroup VG WITH (NOLOCK) ON VG.intValuationGroupId = ITEM.intValuationGroupId
+		
 LEFT JOIN tblICCommodity IC ON ITEM.intCommodityId = IC.intCommodityId
 LEFT JOIN tblCTBook B ON S.intBookId = B.intBookId

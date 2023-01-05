@@ -193,7 +193,7 @@ BEGIN TRY
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
-			WHERE strLocationNumber = @strLocationName
+			WHERE strOregonFacilityNumber = @strLocationName
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN

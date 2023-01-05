@@ -81,7 +81,7 @@ SELECT
 	strChannel							=	A.strChannel,
 	dblPackageBreakups					=	CAST(A.strPackageBreakups AS DECIMAL(18,6)),
 	strPurchaseType						=	A.strPurchaseType,
-	intTransactionType					=	CASE WHEN A.strPurchaseType = 'I' THEN 1 ELSE 3 END,
+	intTransactionType					=	1, --CASE WHEN A.strPurchaseType = 'I' THEN 1 ELSE 3 END,
 	strDocumentNumber					=	A.strDocumentNumber,
 	intPurchasingGroupId				=	F.intPurchasingGroupId,
 	strPurchasingGroup					=	A.strBook,

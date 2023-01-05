@@ -42,12 +42,12 @@ BEGIN TRY
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			NULL,						NULL,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
-				VE.strVendorAccountNum,	CL.strLocationNumber,		CO.strCommodityCode,		S.strSampleNumber,
+				VE.strVendorAccountNum,	CL.strLocationName,			CO.strCommodityCode,		S.strSampleNumber,
 				NULL,					NULL,						L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	'Cash',						LD.dblUnitPrice,			PUOM.strUnitMeasure,
 				CU.strCurrency,			NULL,						NULL,						NULL,
-				NULL,					CL.strLocationNumber,		NULL,						CL1.strOregonFacilityNumber,
+				NULL,					CL.strOregonFacilityNumber,	NULL,						CL1.strOregonFacilityNumber,
 				NULL,					NULL,						NULL,						B.strBatchId,
 				@intEntityId,			@strRowState
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
@@ -77,10 +77,11 @@ BEGIN TRY
 		JOIN dbo.tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 			AND LD.intLoadDetailId = @intLoadDetailId
 		JOIN tblICItem IM WITH (NOLOCK) ON IM.intItemId = LD.intItemId
+		LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
 		JOIN dbo.tblMFLocationLeadTime LLT WITH (NOLOCK) ON LLT.intPortOfDispatchId = CD.intLoadingPortId
 			AND LLT.intPortOfArrivalId = CD.intDestinationPortId
 			AND LLT.intBuyingCenterId = LD.intPCompanyLocationId
-			AND LLT.intOriginId = ISNULL(IM.intOriginId, LLT.intOriginId)
+			AND LLT.intOriginId = ISNULL(CA.intCountryID, LLT.intOriginId)
 
 		INSERT INTO tblIPContractFeed
 		(
@@ -97,12 +98,12 @@ BEGIN TRY
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			CD.intContractHeaderId,		CD.intContractDetailId,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
-				VE.strVendorAccountNum,	CL.strLocationNumber,		CO.strCommodityCode,		CH.strContractNumber,
+				VE.strVendorAccountNum,	CL.strLocationName,			CO.strCommodityCode,		CH.strContractNumber,
 				CD.intContractSeq,		CH.strCustomerContract,		L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
 				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
 				WUOM.strUnitMeasure,	ISNULL(PT.strPricingType, 'Cash'),LD.dblUnitPrice,		PUOM.strUnitMeasure,
 				CU.strCurrency,			CD.dtmStartDate,			CD.dtmEndDate,				CD.dtmPlannedAvailabilityDate,
-				CD.dtmUpdatedAvailabilityDate,CL.strLocationNumber,	CD.strPackingDescription,	CL1.strOregonFacilityNumber,
+				CD.dtmUpdatedAvailabilityDate,CL.strOregonFacilityNumber,CD.strPackingDescription,	CL1.strOregonFacilityNumber,
 				LP.strCity,				DP.strCity,					@dblLeadTime,				B.strBatchId,
 				@intEntityId,			@strRowState
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)

@@ -1,12 +1,11 @@
-CREATE PROCEDURE uspGLRecalcRetainedEarnings    
+  CREATE PROCEDURE uspGLRecalcRetainedEarnings    
     @intFiscalYearId INT,    
     @intGLFiscalYearPeriodId INT ,
 	@ysnAllFiscalYear BIT,
     @intOpen SMALLINT,    
     @intEntityId INT,    
     @result NVARCHAR(100) OUTPUT      
-AS      
-      
+AS 
 DECLARE @dtmStartDate DATETIME        
 DECLARE @dtmEndDate DATETIME        
 DECLARE @intRetainAccount INT        
@@ -15,6 +14,7 @@ DECLARE @RevalTableType RevalTableType
 DECLARE @RecapTableType  RecapTableType        
 DECLARE @strPeriod NVARCHAR(30)        
 DECLARE @dtmNow DATETIME  = GETDATE()        
+DECLARE @intDefaultCurrencyId INT
         
 DECLARE @tblPeriod TABLE (     
 intGLFiscalYearPeriodId INT,      
@@ -25,6 +25,8 @@ guidPostId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 dtmStartDate DATETIME ,      
 dtmEndDate  DATETIME)        
     
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+
 DECLARE @strGUID NVARCHAR(40)        
 
 IF @ysnAllFiscalYear = 1
@@ -78,6 +80,8 @@ BEGIN
 	SET @result = 'Fiscal year has missing Retain Earnings GL Account'   
 	GOTO _end
 END
+
+--select * from @tblPeriod
     
 WHILE EXISTS (SELECT 1 FROM  @tblPeriod)        
 BEGIN        
@@ -110,14 +114,14 @@ BEGIN
             ,[strTransactionType]          
             ,[strTransactionForm]          
             ,strModuleName          
-    ,intAccountIdOverride          
+			,intAccountIdOverride          
         )        
         SELECT         
             [strTransactionId]          
             ,[intTransactionId]         
             ,@intRetainAccount        
             ,A.[strDescription]          
-            ,[dtmTransactionDate]    
+            ,[dtmTransactionDate]=@dtmEndDate  
             ,[dblDebit]          
             ,[dblCredit]          
             ,@dtmEndDate          
@@ -136,7 +140,8 @@ BEGIN
             ,'General Ledger'          
             ,A.intAccountId        
          FROM tblGLDetail A         
-  JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId        
+  JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId     
+  
   WHERE         
         B.strAccountType in ('Expense','Revenue')         
         AND ISNULL(ysnIsUnposted,0) = 0        
@@ -145,6 +150,10 @@ BEGIN
     DELETE FROM @tblPeriod WHERE @intGLFiscalYearPeriodId = intGLFiscalYearPeriodId        
         
 END
+
+--select * from @RevalTableType
+
+
 
 --REVERSED BY INCOME SUMMARY ACCOUNT        
 INSERT INTO @RevalTableType(          
@@ -220,7 +229,7 @@ INSERT INTO @RecapTableType(
     intCurrencyId,      
     dtmDateEntered,      
     strJournalLineDescription,      
-    intJournalLineNo,      
+    --intJournalLineNo,      
     ysnIsUnposted,      
     intUserId,      
     intEntityId,      
@@ -228,47 +237,75 @@ INSERT INTO @RecapTableType(
     intTransactionId,      
     strTransactionType,      
     strTransactionForm,      
-    strModuleName,      
-    intConcurrencyId,      
-    intAccountIdOverride,      
-   intLocationSegmentOverrideId,      
-    intLOBSegmentOverrideId,      
-    intCompanySegmentOverrideId,      
-    strNewAccountIdOverride,      
-    intNewAccountIdOverride,      
-    strOverrideAccountError    
+    strModuleName   
+    --intConcurrencyId,      
+    --intAccountIdOverride,      
+    --intLocationSegmentOverrideId,      
+    --intLOBSegmentOverrideId,      
+    --intCompanySegmentOverrideId,      
+    --strNewAccountIdOverride,      
+    --intNewAccountIdOverride,      
+    --strOverrideAccountError    
 )    
     
 SELECT     
     dtmDate,      
     strBatchId,      
     intAccountId,     
-    strDescription,        
+    strDescription = '',        
     dtmTransactionDate,     
-    dblDebit,      
-    dblCredit,     
-    strCode,     
-    intCurrencyId,      
+    SUM(dblDebit),      
+    SUM(dblCredit),     
+    strCode = 'GL',     
+    intCurrencyId = @intDefaultCurrencyId,      
     dtmDateEntered,      
     strJournalLineDescription,      
-    intJournalLineNo,      
+    --intJournalLineNo,      
+    0 ysnIsUnposted,      
+    intUserId,      
+    intEntityId,      
+    strTransactionId='RE-'+ REPLACE( CONVERT(date, dtmDate,100),'-', ''),     
+    intTransactionId=REPLACE( CONVERT(date, dtmDate,100),'-', ''),      
+    strTransactionType='Fiscal Year RE',      
+    strTransactionForm ='Fiscal year',      
+    strModuleName='General Ledger'      
+    --intConcurrencyId,      
+    --intAccountIdOverride,      
+    --intLocationSegmentOverrideId,      
+    --intLOBSegmentOverrideId,      
+    --intCompanySegmentOverrideId,      
+    --strNewAccountIdOverride,      
+    ---intNewAccountIdOverride,      
+    --strOverrideAccountError    
+FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A         
+group by dtmDate,      
+    strBatchId,      
+    intAccountId,     
+    --strDescription,        
+    dtmTransactionDate,     
+    --dblDebit,      
+    --dblCredit,     
+    strCode,     
+    --intCurrencyId,      
+    dtmDateEntered,      
+    strJournalLineDescription,      
+    --intJournalLineNo,      
     ysnIsUnposted,      
     intUserId,      
     intEntityId,      
-    strTransactionId,      
-    intTransactionId,      
-    strTransactionType,      
-    strTransactionForm,      
-    strModuleName,      
-    intConcurrencyId,      
-    intAccountIdOverride,      
-    intLocationSegmentOverrideId,      
-    intLOBSegmentOverrideId,      
-    intCompanySegmentOverrideId,      
-    strNewAccountIdOverride,      
-    intNewAccountIdOverride,      
-    strOverrideAccountError    
-FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A           
+    --strTransactionId,      
+    --intTransactionId,      
+    --strTransactionType,      
+    --strTransactionForm,      
+    strModuleName     
+    --intConcurrencyId,      
+    --intAccountIdOverride,      
+    --intLocationSegmentOverrideId,      
+    --intLOBSegmentOverrideId,      
+    --intCompanySegmentOverrideId,      
+    --strNewAccountIdOverride,      
+    --intNewAccountIdOverride,      
+    --strOverrideAccountError 
         
 IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 BEGIN
@@ -277,9 +314,9 @@ BEGIN
     SET @result = 'Error overriding accounts.'  
     GOTO _end      
 END        
-        
+
+
 EXEC uspGLBookEntries @RecapTableType, 1, 1 ,1         
-      
-                
+       
 SET @result = 'Posted'      
  _end: 

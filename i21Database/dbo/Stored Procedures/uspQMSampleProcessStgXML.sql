@@ -1191,19 +1191,11 @@ BEGIN TRY
 				--AND t.strEntityNo <> ''
 
 			IF @intTestedById IS NULL
-			BEGIN
-				IF EXISTS (
-						SELECT 1
-						FROM tblSMUserSecurity WITH (NOLOCK)
-						WHERE strUserName = 'irelyadmin'
-						)
+				BEGIN
 					SELECT TOP 1 @intTestedById = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-					WHERE strUserName = 'irelyadmin'
-				ELSE
-					SELECT TOP 1 @intTestedById = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-			END
+					FROM tblEMEntityCredential
+					ORDER BY intEntityId ASC;
+				END
 
 			SELECT @intSampleUOMId = t.intUnitMeasureId
 			FROM tblICUnitMeasure t WITH (NOLOCK)
@@ -1419,19 +1411,11 @@ BEGIN TRY
 				--AND t.strEntityNo <> ''
 
 			IF @intCreatedUserId IS NULL
-			BEGIN
-				IF EXISTS (
-						SELECT 1
-						FROM tblSMUserSecurity WITH (NOLOCK)
-						WHERE strUserName = 'irelyadmin'
-						)
+				BEGIN
 					SELECT TOP 1 @intCreatedUserId = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-					WHERE strUserName = 'irelyadmin'
-				ELSE
-					SELECT TOP 1 @intCreatedUserId = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-			END
+					FROM tblEMEntityCredential
+					ORDER BY intEntityId ASC;
+				END
 
 			SELECT @intLastModifiedUserId = t.intEntityId
 			FROM tblEMEntity t WITH (NOLOCK)
@@ -1441,19 +1425,11 @@ BEGIN TRY
 				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
-			BEGIN
-				IF EXISTS (
-						SELECT 1
-						FROM tblSMUserSecurity WITH (NOLOCK)
-						WHERE strUserName = 'irelyadmin'
-						)
+				BEGIN
 					SELECT TOP 1 @intLastModifiedUserId = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-					WHERE strUserName = 'irelyadmin'
-				ELSE
-					SELECT TOP 1 @intLastModifiedUserId = intEntityId
-					FROM tblSMUserSecurity WITH (NOLOCK)
-			END
+					FROM tblEMEntityCredential
+					ORDER BY intEntityId ASC;
+				END
 
 			IF @strRowState <> 'Delete'
 			BEGIN
@@ -2523,11 +2499,11 @@ BEGIN TRY
 				--AND CE.strEntityNo <> ''
 
 			IF @intAuditLogUserId IS NULL
-			BEGIN
-				SELECT TOP 1 @intAuditLogUserId = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = 'irelyadmin'
-			END
+				BEGIN
+					SELECT TOP 1 @intAuditLogUserId = intEntityId
+					FROM tblEMEntityCredential
+					ORDER BY intEntityId ASC;
+				END
 
 			INSERT INTO tblSMLog (
 				dtmDate

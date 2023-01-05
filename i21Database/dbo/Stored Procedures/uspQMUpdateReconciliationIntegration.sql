@@ -20,6 +20,8 @@ BEGIN TRY
 			
     IF OBJECT_ID('tempdb..#VOUCHERS') IS NOT NULL DROP TABLE #VOUCHERS
 	IF OBJECT_ID('tempdb..#SAMPLES') IS NOT NULL DROP TABLE #SAMPLES
+	IF OBJECT_ID('tempdb..#LOADSHIPMENTS') IS NOT NULL DROP TABLE #LOADSHIPMENTS
+	IF OBJECT_ID('tempdb..#MFBATCH') IS NOT NULL DROP TABLE #MFBATCH
 
 	--CHECK IF HAS CHANGES FOR VOUCHERS
     SELECT intCatalogueReconciliationId			= CRD.intCatalogueReconciliationId
@@ -48,11 +50,11 @@ BEGIN TRY
     INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
 	LEFT JOIN tblICCommodityAttribute CA ON CRD.intPreInvoiceGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
-      AND (CRD.dblPreInvoicePrice <> BD.dblCost
-        OR CRD.dblPreInvoiceQuantity <> BD.dblQtyOrdered
-        OR CRD.strPreInvoiceChopNo <> BD.strPreInvoiceGardenNumber
-        OR CRD.intPreInvoiceGardenMarkId <> BD.intGardenMarkId
-        OR CA.strDescription <> BD.strComment)		
+      AND ((CRD.dblPreInvoicePrice <> BD.dblCost AND CRD.dblPreInvoicePrice = CRD.dblBasePrice)
+        OR (CRD.dblPreInvoiceQuantity <> BD.dblQtyOrdered AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity)
+        OR (CRD.strPreInvoiceChopNo <> BD.strPreInvoiceGardenNumber AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
+        OR (CRD.intPreInvoiceGardenMarkId <> BD.intGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
+        OR (CA.strDescription <> BD.strComment AND CRD.intPreInvoiceGradeId = CRD.intGradeId))
 	
 	--UPDATE BILL DETAIL
 	IF EXISTS (SELECT TOP 1 1 FROM #VOUCHERS)
@@ -77,6 +79,7 @@ BEGIN TRY
 					FROM #VOUCHERS
 
 					--AUDIT LOG FOR VOUCHER	HEADER AND DETAILS			
+					DELETE FROM @BillSingleAuditLogParam
 					INSERT INTO @BillSingleAuditLogParam (
 						  [Id]
 						, [Action]
@@ -206,11 +209,11 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
 	LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
     WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
-      AND (S.dblB1Price <> CRD.dblPreInvoicePrice
-        OR S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity
-        OR S.strChopNumber <> CRD.strPreInvoiceChopNo
-        OR S.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId
-        OR S.intGradeId <> CRD.intPreInvoiceGradeId)
+      AND ((S.dblB1Price <> CRD.dblPreInvoicePrice AND CRD.dblPreInvoicePrice = CRD.dblBasePrice)
+        OR (S.dblRepresentingQty <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity)
+        OR (S.strChopNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
+        OR (S.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
+        OR (S.intGradeId <> CRD.intPreInvoiceGradeId AND CRD.intPreInvoiceGradeId = CRD.intGradeId))
 	
 	--UPDATE SAMPLE
 	IF EXISTS (SELECT TOP 1 1 FROM #SAMPLES)
@@ -234,7 +237,8 @@ BEGIN TRY
 					SELECT TOP 1 @intSampleId = intSampleId
 					FROM #SAMPLES
 
-					--AUDIT LOG FOR VOUCHER	HEADER AND DETAILS			
+					--AUDIT LOG FOR VOUCHER	HEADER AND DETAILS	
+					DELETE FROM @SampleAuditLogParam
 					INSERT INTO @SampleAuditLogParam (
 						  [Id]
 						, [Action]
@@ -338,6 +342,116 @@ BEGIN TRY
 				END
 		END
 	
+	--CHECK IF HAS CHANGES FOR LOAD SHIPMENT
+	SELECT intCatalogueReconciliationId			= CRD.intCatalogueReconciliationId
+		 , intCatalogueReconciliationDetailId	= CRD.intCatalogueReconciliationDetailId
+         , intCatalogueCreatedById				= CR.intEntityId
+		 , intLoadDetailId						= LD.intLoadDetailId
+		 , intLoadId							= L.intLoadId		 
+         , strReconciliationNumber				= CR.strReconciliationNumber
+         , ysnPosted							= CR.ysnPosted
+		 , dblCatReconPrice						= CRD.dblPreInvoicePrice
+		 , dblCatReconQty						= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, LIUM.strUnitMeasure, CRD.dblPreInvoiceQuantity), 0)
+		 , dblLoadPrice							= ISNULL(LD.dblUnitPrice, 0)
+		 , dblLoadQty							= ISNULL(LD.dblQuantity, 0)		 
+	INTO #LOADSHIPMENTS
+	FROM tblQMCatalogueReconciliation CR
+	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
+	INNER JOIN tblQMSample S ON CRD.intSampleId = S.intSampleId
+	INNER JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId
+	INNER JOIN tblLGLoadDetail LD ON LD.intBatchId = MFB.intBatchId
+	INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+	LEFT JOIN tblICItem ITEM ON ITEM.intItemId = S.intItemId
+	LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
+	LEFT JOIN tblICItemUOM IUOM ON LD.intItemUOMId = IUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure LIUM ON LIUM.intUnitMeasureId = IUOM.intUnitMeasureId
+    WHERE CR.intCatalogueReconciliationId = @intCatalogueReconciliationId
+      AND ((LD.dblUnitPrice <> CRD.dblPreInvoicePrice AND CRD.dblPreInvoicePrice = CRD.dblBasePrice)
+        OR (LD.dblQuantity <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity))
+
+	--UPDATE LOAD SHIPMENT
+	IF EXISTS (SELECT TOP 1 1 FROM #LOADSHIPMENTS)
+		BEGIN
+			UPDATE LG
+			SET dblUnitPrice	= LS.dblCatReconPrice
+			  , dblQuantity		= LS.dblCatReconQty
+			FROM tblLGLoadDetail LG
+			INNER JOIN #LOADSHIPMENTS LS ON LG.intLoadDetailId = LS.intLoadDetailId
+
+			--AUDIT LOG FOR LOAD SHIPMENT
+			WHILE EXISTS (SELECT TOP 1 1 FROM #LOADSHIPMENTS)
+				BEGIN
+					DECLARE @LoadShipmentAuditLogParam	AS SingleAuditLogParam 
+					DECLARE @intLoadDetailId			INT = NULL
+					DECLARE @intLoadId					INT = NULL
+
+					SELECT TOP 1 @intLoadId			= intLoadId
+							   , @intLoadDetailId	= intLoadDetailId
+					FROM #LOADSHIPMENTS
+
+					--AUDIT LOG FOR LOAD SHIPMENT DETAILS
+					DELETE FROM @LoadShipmentAuditLogParam			
+					INSERT INTO @LoadShipmentAuditLogParam (
+						  [Id]
+						, [Action]
+						, [Change]
+						, [From]
+						, [To]
+						, [ParentId]
+					)
+					SELECT [Id]			= 1
+						, [Action]		= 'Update Amendments'
+						, [Change]		= 'Updated - Record: ' + CAST(intLoadId AS NVARCHAR(100))
+						, [From]		= NULL
+						, [To]			= NULL
+						, [ParentId]	= NULL
+					FROM #LOADSHIPMENTS 
+					WHERE intLoadId = @intLoadId
+					  AND intLoadDetailId = @intLoadDetailId
+
+					UNION ALL
+
+					SELECT [Id]			= 2
+						, [Action]		= NULL
+						, [Change]		= 'Update Unit Price'
+						, [From]		= CAST(dblLoadPrice AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconPrice AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #LOADSHIPMENTS 
+					WHERE intLoadId = @intLoadId
+					  AND intLoadDetailId = @intLoadDetailId
+					  AND dblLoadPrice <> dblCatReconPrice
+
+					UNION ALL
+
+					SELECT [Id]			= 3
+						, [Action]		= NULL
+						, [Change]		= 'Update Quantity'
+						, [From]		= CAST(dblLoadQty AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #LOADSHIPMENTS 
+					WHERE intLoadId = @intLoadId
+					  AND intLoadDetailId = @intLoadDetailId
+					  AND dblLoadQty <> dblCatReconQty
+					  					
+					--AUDIT LOG FOR LOAD SHIPMENT
+					EXEC uspSMSingleAuditLog @screenName		= 'Logistics.view.ShipmentSchedule'
+											, @recordId			= @intLoadId
+											, @entityId			= @intUserId
+											, @AuditLogParam	= @LoadShipmentAuditLogParam
+
+					--PO FEED
+					EXEC uspIPProcessOrdersToFeed @intLoadId		= @intLoadId
+											    , @intLoadDetailId	= @intLoadDetailId
+												, @intEntityId		= @intUserId
+												, @strRowState		= 'Modified'
+
+					DELETE FROM #LOADSHIPMENTS WHERE intLoadDetailId = @intLoadDetailId
+				END
+		END
+
+
 	IF @intTranCount = 0
 		COMMIT;
 END TRY

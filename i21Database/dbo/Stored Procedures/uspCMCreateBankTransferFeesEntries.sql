@@ -90,19 +90,17 @@ BEGIN
             A.intGLAccountIdFeesFrom 
             = GLAccnt.intAccountId    
             WHERE A.strTransactionId = @strTransactionId  
-
-            SELECT 
-            @dblExchangeRate = ROUND((((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblCreditForeign)) / (dblCreditForeign + @dblFeesForeign)),6)
+            
+            UPDATE A
+			SET dblCredit = dblCredit + @dblFees ,
+		    dblCreditForeign = dblCreditForeign + @dblFeesForeign
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
-            UPDATE A   
-            SET 
-            dblCredit = dblCredit + @dblFees ,
-            dblExchangeRate = @dblExchangeRate,
-            dblCreditForeign = ROUND(((dblCredit + @dblFees) / @dblExchangeRate),2)
+			UPDATE A
+			SET dblExchangeRate = dblCredit/dblCreditForeign
             from #tmpGLDetail A  
-            WHERE intAccountId = @intBankGLAccountId  
+            WHERE intAccountId = @intBankGLAccountId
 
     END
     
@@ -174,24 +172,18 @@ BEGIN
             = GLAccnt.intAccountId    
             WHERE A.strTransactionId = @strTransactionId    
 
-            SELECT 
-            @dblExchangeRate =ROUND((((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblDebitForeign)) / (dblDebitForeign + @dblFeesForeign)),6)
+            UPDATE A
+			SET dblDebit = dblDebit - @dblFees ,
+		    dblDebitForeign = dblDebitForeign - @dblFeesForeign
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
-            UPDATE A   
-            SET dblDebit = dblDebit - @dblFees ,
-            dblExchangeRate = @dblExchangeRate,
-            dblDebitForeign = ROUND(((dblDebit - @dblFees) / @dblExchangeRate),2)
+			UPDATE A
+			SET dblExchangeRate = dblDebit/dblDebitForeign
             from #tmpGLDetail A  
-            WHERE intAccountId = @intBankGLAccountId  
-
-
+            WHERE intAccountId = @intBankGLAccountId
     END
         
 END
 
 END
-
-    
-

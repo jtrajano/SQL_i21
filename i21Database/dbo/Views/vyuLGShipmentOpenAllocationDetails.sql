@@ -124,20 +124,20 @@ FROM (
 			,dblSShippedQuantity = SUM(SP.dblDeliveredQuantity)
 		FROM tblLGLoadDetail SP
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
-			AND L.intPurchaseSale IN (1, 3)
+			AND L.intPurchaseSale IN (3)
 			AND L.intShipmentType = 2
 			AND ISNULL(L.ysnCancelled, 0) = 0
-		WHERE SP.intPContractDetailId = AD.intPContractDetailId
+		WHERE SP.intAllocationDetailId = AD.intAllocationDetailId
 		) LDSI
 	OUTER APPLY (
 		SELECT dblPShippedQuantity = SUM(SP.dblQuantity)
 			,dblSShippedQuantity = SUM(SP.dblDeliveredQuantity)
 		FROM tblLGLoadDetail SP
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
-			AND L.intPurchaseSale IN (1, 3)
+			AND L.intPurchaseSale IN (3)
 			AND L.intShipmentType = 1
 			AND ISNULL(L.ysnCancelled, 0) = 0
-		WHERE SP.intPContractDetailId = AD.intPContractDetailId
+		WHERE SP.intAllocationDetailId = AD.intAllocationDetailId
 		) LDS
 	OUTER APPLY (
 		SELECT dblSalePickedQty = SUM(PL.dblSalePickedQty)

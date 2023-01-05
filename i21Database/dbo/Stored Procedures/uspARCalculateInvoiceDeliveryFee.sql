@@ -29,13 +29,19 @@ BEGIN
 		 , intTaxGroupId	= TG.intTaxGroupId
 		 , intTaxCodeId		= TC.intTaxCodeId
 		 , dblQtyShipped	= ID.dblQtyShipped
-		 , ysnGas			= CASE WHEN ISNULL(I.intCategoryId, -1) = ISNULL(TCR.intGasolineItemCategoryId, -2) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+		 , ysnGas			= CASE WHEN ISNULL(I.intCategoryId, -1) IN 
+								(SELECT intGasolineItemCategoryId 
+								FROM tblSMTaxCodeRate 
+								WHERE intTaxCodeId = TC.intTaxCodeId AND
+									  dtmEffectiveDate = (SELECT MAX(dtmEffectiveDate) 
+										FROM tblSMTaxCodeRate 
+										WHERE intTaxCodeId = TC.intTaxCodeId)) 
+							  THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblICItem I ON I.intItemId = ID.intItemId
 	LEFT JOIN tblSMTaxGroup TG ON ID.intTaxGroupId = TG.intTaxGroupId
 	INNER JOIN tblSMTaxGroupCode TGC ON TG.intTaxGroupId = TGC.intTaxGroupId
 	INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId AND TC.ysnTexasLoadingFee = 1
-	INNER JOIN (SELECT TOP 1 * FROM tblSMTaxCodeRate ORDER BY dtmEffectiveDate DESC) TCR ON TCR.intTaxCodeId = TC.intTaxCodeId
 	INNER JOIN @InvoiceIds IDS ON ID.intInvoiceId = IDS.intId
 
 	UPDATE ILI
@@ -43,12 +49,12 @@ BEGIN
 	FROM @InvoiceLineItems ILI
 	INNER JOIN tblARInvoice I ON ILI.intInvoiceId = I.intInvoiceId
 
+	DELETE IDF 
+	FROM tblARInvoiceDeliveryFee IDF 
+	INNER JOIN @InvoiceIds IDS ON IDF.intInvoiceId = IDS.intId
+
 	IF EXISTS (SELECT TOP 1 1 FROM @InvoiceLineItems)
 	BEGIN
-		DELETE IDF 
-		FROM tblARInvoiceDeliveryFee IDF 
-		INNER JOIN @InvoiceIds IDS ON IDF.intInvoiceId = IDS.intId
-
 		INSERT INTO tblARInvoiceDeliveryFee (
 			  intInvoiceId
 			, intTaxGroupId

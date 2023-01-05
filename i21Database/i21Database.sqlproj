@@ -230,6 +230,7 @@
     <Build Include="dbo\Functions\fnFAGetNextMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetPreviousMonthPeriodEndDateFromDate.sql" />
     <None Include="Scripts\Post-Deployment\FA\02_UpdateMonthlyAssetDepreciation.sql" />
+    <None Include="Scripts\Post-Deployment\QM\5_DefaultConfigurationData.sql" />
     <Build Include="dbo\Views\vyuFAMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
@@ -1448,6 +1449,26 @@
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStock_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStock_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPriceToFeed.sql" />
+    <Build Include="dbo\Tables\tblIPPriceFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPrice_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrder.sql" />
+    <Build Include="dbo\Tables\tblAPCurrentCompanyLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPPriceAck_EK.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSStage.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSError.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSArchive.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSDetailStage.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSDetailError.sql" />
+    <Build Include="dbo\Tables\tblIPPBBSDetailArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStagePBBSDetail_EK.sql" />
+    <Build Include="dbo\Tables\tblIPSAPProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPBBSDetail_EK.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
+    <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
+    <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11293,6 +11314,11 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspGREndOfMonthProcedureReport.sql" />
+    <Build Include="dbo\Functions\fnGRGetitemAverageCostAsOfDate.sql" />
+    <Build Include="dbo\Functions\fnGREndOfMonthProcedureSalesContracts.sql" />
+    <Build Include="dbo\Functions\fnGREndOfMonthProcedurePurchaseContracts.sql" />
+    <Build Include="dbo\Functions\fnGREndOfMonthProcedureInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11740,6 +11766,7 @@
     <Build Include="dbo\Stored Procedures\uspQMUpdateReconciliationIntegration.sql" />
     <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
     <Build Include="dbo\Views\vyuQMAuctionAvailabilityReport.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
