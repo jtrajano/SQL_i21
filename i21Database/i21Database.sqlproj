@@ -1482,16 +1482,16 @@
     <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
     <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
-    <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
-    <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
-    <Build Include="dbo\Views\vyuSCHoldTicketApplyAllowedStorageTypePerTicketPool.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcess.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCTicketApplyCreateTransparency.sql" />
-    <Build Include="dbo\Tables\tblSCTicketApplyLog.sql" />
-    <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
-    <Build Include="dbo\Views\vyuSCHoldTicketApplyTicketInfo.sql" />
-    <Build Include="dbo\Functions\fnGLGetJournalExportTimberline.sql" />
-    <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADepreciateMultipleBooks.sql" />
+    <Build Include="dbo\Functions\fnFAValidateMultipleBooks.sql" />
+    <Build Include="dbo\Functions\fnFAComputeMultipleBookDepreciation.sql" />
+    <Build Include="dbo\User Defined Types\FABookDepreciationTypeTable.sql" />
+    <Build Include="dbo\Functions\fnFAGetNextBookDepreciationDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADisposeMultipleBooks.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADepreciateSingleBook.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleBook.sql" />
+    <None Include="Scripts\Post-Deployment\FA\05_AssetBookDepreciation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFABookDepreciation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6754,7 +6754,7 @@
     <Build Include="dbo\Tables\tblFAImportLogDetail.sql" />
     <Build Include="dbo\Tables\tblFABookDepreciation.sql" />
     <Build Include="dbo\Tables\tblFAFiscalAsset.sql" />
-    <None Include="Scripts\Post-Deployment\FA\FiscalAsset.sql" />
+    <None Include="Scripts\Post-Deployment\FA\04_FiscalAsset.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
