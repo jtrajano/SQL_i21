@@ -283,6 +283,10 @@ SELECT   L.intLoadId
 		,strSustainability = QB.strSustainability
 		,ysnTeaOrganic = QB.ysnTeaOrganic
 		,MZ.strMarketZoneCode
+		,QB.intSales
+		,QB.intSalesYear
+		,QCT.strCatalogueType
+		,[strManufacturingLeafType] = QB.strLeafManufacturingType
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -338,6 +342,7 @@ LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAlloca
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblMFBatch QB ON QB.intBatchId = LD.intBatchId
 LEFT JOIN tblQMSample QS ON QS.intSampleId = QB.intSampleId
+LEFT JOIN tblQMCatalogueType QCT ON QCT.intCatalogueTypeId = QS.intCatalogueTypeId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = QB.intBrokerId
 LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = QB.intGardenMarkId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId

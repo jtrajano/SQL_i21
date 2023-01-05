@@ -88,6 +88,30 @@ BEGIN TRY
         OR (BROKERS.intEntityId IS NULL AND ISNULL(IMP.strBroker, '') <> '')
         OR (RSL.intStorageLocationId IS NULL AND ISNULL(IMP.strReceivingStorageLocation, '') <> '')
     )
+
+    -- Check if vendor is mapped to the TBO
+    UPDATE IMP
+    SET strLogResult = 'Supplier ' + E.strName + ' is not maintained in location ' + CL.strLocationName
+        ,ysnSuccess = 0
+        ,ysnProcessed = 1
+    FROM tblQMImportCatalogue IMP
+    INNER JOIN tblSMCompanyLocation CL ON CL.strLocationName = IMP.strBuyingCenter
+    INNER JOIN vyuAPVendor E ON E.strName = IMP.strSupplier
+    WHERE IMP.intImportLogId = @intImportLogId
+    AND ISNULL(IMP.strBatchNo, '') = ''
+    AND (
+        NOT EXISTS (
+            SELECT 1 FROM tblAPVendorCompanyLocation V
+            WHERE V.intEntityVendorId = E.intEntityId
+            AND V.intCompanyLocationId = CL.intCompanyLocationId
+        ) OR NOT EXISTS (
+            SELECT 1
+            FROM tblEMEntity E2
+            LEFT JOIN tblAPVendorCompanyLocation V2 ON E2.intEntityId = V2.intEntityVendorId
+            WHERE V2.intVendorCompanyLocationId IS NULL
+        )
+    )
+
     -- End Validation
 
     DECLARE

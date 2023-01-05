@@ -194,14 +194,14 @@ BEGIN TRY
 						BOOK.intBookId IS NULL
 						AND ISNULL(IMP.strB1GroupNumber, '') <> ''
 						)
-					THEN 'BUYER1 COMPANY CODE, '
+					THEN 'BUYER1 GROUP NUMBER, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						COMPANY_CODE.intPurchasingGroupId IS NULL
 						AND ISNULL(IMP.strB1CompanyCode, '') <> ''
 						)
-					THEN 'BUYER1 GROUP NUMBER, '
+					THEN 'BUYER1 COMPANY CODE, '
 				ELSE ''
 				END + CASE 
 				WHEN (
@@ -685,7 +685,7 @@ BEGIN TRY
 			,intSales = CAST(S.strSaleNumber AS INT)
 			,intSalesYear = CAST(SY.strSaleYear AS INT)
 			,dtmSalesDate = S.dtmSaleDate
-			,strTeaType = LEAF_TYPE.strDescription
+			,strTeaType = CT.strCatalogueType
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
@@ -751,7 +751,7 @@ BEGIN TRY
 			,strTeaColour = COLOUR.strDescription
 			,strTeaGardenChopInvoiceNumber = S.strChopNumber
 			,intGardenMarkId = S.intGardenMarkId
-			,strTeaGroup = NULL
+			,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
 			,dblTeaHue = CASE 
 				WHEN ISNULL(HUE.strPropertyValue, '') = ''
 					THEN NULL
@@ -807,6 +807,9 @@ BEGIN TRY
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
@@ -908,6 +911,10 @@ BEGIN TRY
 				,@intInputSuccess
 				,NULL
 				,1
+
+			UPDATE tblQMSample
+			SET strBatchNo = @strBatchId
+			WHERE intSampleId = @intSampleId
 		END
 
 		FETCH NEXT

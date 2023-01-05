@@ -35,7 +35,7 @@ SELECT S.intSampleId
 	, strBuyer1 = B1.strName
 	, strManufacturingLeafType = MLT.strDescription
 	, dblCompanyCompetitor1TotalWt = CASE WHEN ISNULL(S.dblRepresentingQty, 0) = 0 THEN 0 ELSE ISNULL(S.dblB1QtyBought, 0) * ISNULL((ISNULL(S.dblSampleQty, 0) / ISNULL(S.dblRepresentingQty, 0)), 0) END
-	, dblValue = ISNULL(S.dblSampleQty, 0) * ISNULL(S.dblBasePrice, 0)
+	, dblValue = ISNULL(S.dblSampleQty, 0) * ISNULL(S.dblB1Price, 0)
 	, strBuyer2 = B2.strName
 	, strTealingoGroup = Size.strBrandCode + SC.strDescription + VG.strName
 	, strLeafSize = Size.strBrandCode

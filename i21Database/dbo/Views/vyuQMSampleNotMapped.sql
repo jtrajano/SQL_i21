@@ -66,7 +66,7 @@ SELECT S.intSampleId
 	, Size.strBrandCode AS strBrandCode
 	, VG.strName AS strValuationGroupName
 	, MarketZone.strMarketZoneCode AS strMarketZoneCode
-	, DSL.strName AS strDestinationStorageLocationName
+	, CLSL.strSubLocationName AS strDestinationStorageLocationName
 	,strNetWtPerPackagesUOM = PWUOM1.strUnitMeasure
 	,strNetWtSecondPackageBreakUOM = PWUOM2.strUnitMeasure
 	,strNetWtThirdPackageBreakUOM = PWUOM2.strUnitMeasure	
@@ -139,6 +139,7 @@ LEFT JOIN tblSMCity City ON City.intCityId = S.intFromLocationCodeId
 LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
 LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
 LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON S.intDestinationStorageLocationId = CLSL.intCompanyLocationSubLocationId
 LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
 LEFT JOIN tblEMEntity B1 ON B1.intEntityId = S.intBuyer1Id
 LEFT JOIN tblEMEntity B2 ON B2.intEntityId = S.intBuyer2Id

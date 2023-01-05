@@ -212,7 +212,7 @@
 	CONSTRAINT [FK_tblQMSample_tblICCommodityAttribute_intSeasonId] FOREIGN KEY ([intSeasonId]) REFERENCES [dbo].[tblICCommodityAttribute]([intCommodityAttributeId]), 
 	CONSTRAINT [FK_tblQMSample_tblCTValuationGroup_intValuationGroupId] FOREIGN KEY ([intValuationGroupId]) REFERENCES [dbo].[tblCTValuationGroup]([intValuationGroupId]), 
 	CONSTRAINT [FK_tblQMSample_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone]([intMarketZoneId]),
-	CONSTRAINT [FK_tblQMSample_tblICStorageLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation]([intStorageLocationId]),
+	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocationSubLocation_intDestinationStorageLocationId] FOREIGN KEY ([intDestinationStorageLocationId]) REFERENCES [dbo].[tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer1Id] FOREIGN KEY ([intBuyer1Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer2Id] FOREIGN KEY ([intBuyer2Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblQMSample_tblEMEntity_intBuyer3Id] FOREIGN KEY ([intBuyer3Id]) REFERENCES [dbo].[tblEMEntity]([intEntityId]),

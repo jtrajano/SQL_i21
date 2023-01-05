@@ -307,7 +307,7 @@ BEGIN TRY
 			,intSales = CAST(S.strSaleNumber AS INT)
 			,intSalesYear = CAST(SY.strSaleYear AS INT)
 			,dtmSalesDate = S.dtmSaleDate
-			,strTeaType = LEAF_TYPE.strDescription
+			,strTeaType = CT.strCatalogueType
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
@@ -331,7 +331,7 @@ BEGIN TRY
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
-			,dtmProductionBatch = NULL
+			,dtmProductionBatch = S.dtmManufacturingDate
 			,dtmTeaAvailableFrom = NULL
 			,strDustContent = NULL
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
@@ -373,7 +373,7 @@ BEGIN TRY
 			,strTeaColour = COLOUR.strDescription
 			,strTeaGardenChopInvoiceNumber = S.strChopNumber
 			,intGardenMarkId = S.intGardenMarkId
-			,strTeaGroup = NULL
+			,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
 			,dblTeaHue = CASE 
 				WHEN ISNULL(HUE.strPropertyValue, '') = ''
 					THEN NULL
@@ -424,6 +424,9 @@ BEGIN TRY
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
@@ -504,7 +507,7 @@ BEGIN TRY
 			UPDATE B
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
-				,intSampleId=NULL
+				--,intSampleId=NULL
 				,dblOriginalTeaTaste = dblTeaTaste
 				,dblOriginalTeaHue = dblTeaHue
 				,dblOriginalTeaIntensity = dblTeaIntensity
@@ -519,6 +522,10 @@ BEGIN TRY
 				,@intInputSuccess
 				,NULL
 				,1
+
+			UPDATE tblQMSample
+			SET strBatchNo = @strBatchId
+			WHERE intSampleId = @intSampleId
 		END
 
 		CONT:

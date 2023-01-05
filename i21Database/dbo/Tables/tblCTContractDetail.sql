@@ -251,6 +251,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblPurchasePrice NUMERIC(18, 6) NULL DEFAULT(0),
 	dblLandedPrice NUMERIC(18, 6) NULL DEFAULT(0),
 	dblSalesPrice NUMERIC(18, 6) NULL DEFAULT(0),
+	[intFeedPriceItemUOMId] [int] NULL,
+	[intFeedPriceCurrencyId] [int] NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

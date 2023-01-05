@@ -288,7 +288,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblForeignRate]               = I.[dblAverageExchangeRate]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceHeader I
+FROM tblARPostInvoiceDetail I
 LEFT OUTER JOIN (
     SELECT 
          [dblUnitQtyShipped]    = SUM([dblUnitQtyShipped])
@@ -317,6 +317,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueToAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0)
+  AND I.intItemId IS NOT NULL
   AND I.strSessionId = @strSessionId
 
 --PROVISIONAL INVOICES
@@ -968,6 +969,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
+  AND I.intItemId IS NOT NULL
   AND I.strSessionId = @strSessionId
 
 --SOFTWARE MAINTENANCE/SAAS CREDIT
@@ -2913,6 +2915,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
+  AND I.intItemId IS NOT NULL
   AND I.strSessionId = @strSessionId
 
 --SALES DISCOUNT
