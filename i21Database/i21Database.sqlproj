@@ -1408,6 +1408,7 @@
     <Build Include="dbo\Tables\tblMFRecallPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecallPreStage.sql" />
   <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
+  <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
