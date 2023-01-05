@@ -9,8 +9,8 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference - BOL Import' AND strModuleName = 'Transports')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'End of Month Procedure' AND strModuleName = 'Ticket Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -4423,6 +4423,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchases
 	VALUES (N'Purchases/Sales Summary Report', N'Ticket Management', @TicketManagementReportParentMenuId, N'Purchases/Sales Summary Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=PurchaseSalesSummaryReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 8, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=PurchaseSalesSummaryReport&direct=true' WHERE strMenuName = 'Purchases/Sales Summary Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'End of Month Procedure' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'End of Month Procedure', N'Ticket Management', @TicketManagementReportParentMenuId, N'End of Month Procedure', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=EndOfMonthProcedureReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 9, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=EndOfMonthProcedureReport&direct=true' WHERE strMenuName = 'End of Month Procedure' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Ticket' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementCreateParentMenuId)
