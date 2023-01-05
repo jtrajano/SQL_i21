@@ -366,7 +366,7 @@ BEGIN TRY
 		,strFutureMarket								= @strFutMarketName
 		,strFutureMarketMonth							= @strFutureMonthYear +','+ @strFutMarketName
 		,dblSequencePrice								= dbo.fnCTChangeNumericScale( ROUND(ISNULL(CH.dblFutures,CD.dblFutures),@intPriceDec), @intPriceDec)
-		,strPriceCurrencyAndUOMForPriced				= @strPriceCurrencyAndUOMForPriced2
+		,strPriceCurrencyAndUOMForPriced				= dbo.fnCTChangeNumericScale( ROUND(ISNULL(CH.dblFutures,CD.dblFutures),@intPriceDec), @intPriceDec) +' ' + @strPriceCurrencyAndUOMForPriced2
 		,dblQuantity									= CH.dblQuantity
 		,strContractNumberMP							= CH.strContractNumber
 		,strTodaysDate									= CONVERT (VARCHAR, getdate(), 107)
