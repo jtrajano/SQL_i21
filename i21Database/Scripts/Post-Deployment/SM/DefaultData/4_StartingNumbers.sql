@@ -1769,13 +1769,9 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PO Feed Id' AND [strModule] = 'Manufacturing')
-
-
-
-
-
+	
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 330033
+	SELECT	[intStartingNumberId]	= 184
 		,[strTransactionType]	= N'On-Hold ticket apply'
 		,[strPrefix]			=  N'OHTA-'
 		,[intNumber]			= 1
