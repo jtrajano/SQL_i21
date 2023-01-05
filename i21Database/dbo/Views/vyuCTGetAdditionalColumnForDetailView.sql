@@ -10,7 +10,7 @@ SELECT
                                             ELSE CD.intCurrencyId
                                         END
     ,ysnSeqSubCurrency              =   CASE WHEN FX.ysnUseFXPrice = 1
-                                            THEN 0
+                                            THEN convert(bit,0)
                                             ELSE CY.ysnSubCurrency
                                         END
     ,intSeqPriceUOMId               =   CASE WHEN FX.ysnUseFXPrice = 1
@@ -64,8 +64,8 @@ SELECT
                                             ELSE CD.intBasisUOMId
                                         END
     ,ysnValidFX                     =   CASE WHEN FX.ysnUseFXPrice = 1
-                                            THEN 1
-                                            ELSE 0
+                                            THEN convert(bit,1)
+                                            ELSE convert(bit,0)
                                         END
     ,dblSeqFutures                  =   CAST(CASE WHEN FX.ysnUseFXPrice = 1
                                             THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), CD.dblFutures / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END) * CD.dblRate
