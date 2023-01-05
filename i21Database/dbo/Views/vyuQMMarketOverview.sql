@@ -177,12 +177,12 @@ outer apply(
 	group by strSaleNumber, dtmSaleDate,U.TotalSales, U.TotalSales_UL,X.AveragePrice_UL,X.AveragePrice ,W.AveragePrice
 )
 select 
-ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
-,  A.strSaleNumber--1
+ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId,
+ A.strSaleNumber--1
 , A.dtmSaleDate--2
 , ROUND(A.AveragePriceCurrentWeekSale,2) dblAvePriceCurrentWeekSale --3
 , ROUND(A.AveragePricePrevWeekSale,2) dblAvePricePrevWeekSale--4
-, ROUND(ISNULL(A.AveragePriceCurrentWeekSale,0)- ISNULL(A.AveragePricePrevWeekSale,0),2) dblAveWeekPriceChange --5
+, ROUND(ISNULL(A.AveragePriceCurrentWeekSale,0),2)- ROUND(ISNULL(A.AveragePricePrevWeekSale,0),2) dblAveWeekPriceChange --5
 , ROUND(A.TotalSales,2) dblTotalSales --6
 , ROUND(A.TotalSales_UL,2) dblTotalSaleUL--7
 , ROUND(A.AveragePrice_UL,2) dblAveragePriceUL --8
@@ -192,13 +192,13 @@ ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId
 , ROUND(B.AverageItemTaste,2) dblItemAverageTaste --12
 , ROUND(U.AveragePrice,2) dblItemAverageCurrentWeekPrice--13
 , ROUND(V.AveragePrice,2) dblItemAveragePrevWeekPrice--14
-, ROUND(U.AveragePrice-ISNULL(V.AveragePrice,0),2) dblAveItemPriceChange --15
+, ROUND(U.AveragePrice,2)-ROUND(ISNULL(V.AveragePrice,0),2) dblAveItemPriceChange --15
 , ROUND(B.TotalSold_UL,2) dblItemTotalSoldUL--16
 , ROUND((B.TotalSold/B.TotalSold_UL) * 100, 2) dblItemPurchasePercentageUL --17
 , ROUND(B.AveragePrice_UL,2) dblItemAveragePriceUL --18
-, ROUND(B.AveragePrice_UL -B.AverageSupplierValuationPrice,2) dblItemAveragePriceChange --19
+, ROUND(B.AveragePrice_UL,2) - ROUND(B.AverageSupplierValuationPrice,2) dblItemAveragePriceChange --19
 , ROUND(B.AverageItemTaste,2) dblItemAverageTasteUL --20
-, ROUND((B.dblTeaActualTaste-B.AverageItemTaste) ,2) dblItemAverageTasteChange --21
+, ROUND(B.dblTeaActualTaste,2) - ROUND(B.AverageItemTaste ,2) dblItemAverageTasteChange --21
 , B.strCurrency 
 from HeaderData A join ItemSaleStat B on
 A.strSaleNumber = B.strSaleNumber
@@ -208,7 +208,7 @@ outer apply(
 )U
 outer apply(
 	Select TOP 1 ISNULL(AveragePrice,0) AveragePrice from ItemWeeklySaleStat 
-	where strTeaGroup = B.strTeaGroup and DATEPART(ww, A.dtmSaleDate) = WeekNo-1
+	where strTeaGroup = B.strTeaGroup and DATEPART(ww, A.dtmSaleDate) = WeekNo+1
 
 )V
 --where A.strSaleNumber = '00001'
